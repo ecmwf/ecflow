@@ -152,7 +152,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             }
             s+="</font>";
         }
-        else
+        else if(reply->status() == VReply::TaskDone)
         {
             QString dt=QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
             //s+="<b><font color=" + col.name() + "> Fetched: </font></b>";
@@ -169,6 +169,11 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
                 s+=" (<i>text truncated to last " + QString::number(rowLimit) + " lines</i>)";
             }
             s+="</font>";
+        }
+        else
+        {
+            QString dt=QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+            s+="<br>Fetch attempted from server<font color=" + col.name() + "> <b>at</b> </font>" +  dt;
         }
 	}
 
@@ -218,7 +223,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	}
 
 	setText(labelText);
-	setToolTip(ttText);
+    //setToolTip(ttText);
 }
 
 QColor FileInfoLabel::fileSizeColour(qint64 size) const

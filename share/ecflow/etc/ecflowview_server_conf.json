@@ -48,8 +48,8 @@
 				"tooltip" : "files", 
 				
 				"readFilesFromDisk": {
-            		"label": "Read files from disk when possible",
-                    "tooltip": "When enabled the viewer first always tries to read the files from disk. Having failed to do it it tries the server. It is <b>highly recommended</b> to enable this option to avoid overloading the server.",
+                    "label": "Read files from disk when appropriate",
+                    "tooltip": "The following steps are tried to fetch the files: <ol><li>fetch the files from the logserver (if defined)</li><li>read from disk (if option is <b>enabled</b> and file is accessible)</li><li>fetch from the ecflow server</li></ul>",
             		"default": "true"
                 	},
             

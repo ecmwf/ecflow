@@ -175,15 +175,32 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     else
        reply_->addLog("REMARK>This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
 
+#if 0
+    if(server->readFromDisk())
+    {
+        if(server->isLocalHost())
+        {
+        //We try to read the file directly from the disk
+        if(server->readFromDisk())
+        {
+            if(fetchLocalFile(fileName))
+                return;
+        }
+    }
+#endif
+
+#if 0
     //if(server->isLocalHost())
     // {
     	//We try to read the file directly from the disk
-    	if(!isJobout || server->readFromDisk())
+        if(server->readFromDisk())
     	{
     		if(fetchLocalFile(fileName))
     			return;
     	}
     //}
+
+#endif
 
     //----------------------------------------------------
     // Not the loacalhost or we could not read the file
@@ -201,16 +218,13 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
 
     //If there is no output client and it is not the localhost we try
-    //to read it again from the disk!!!
-    /*if(!server->isLocalHost())
+    //to read it again from the disk!!!  
+    if(server->readFromDisk())
     {
-    	if(!isJobout || server->readFromDisk())
-    	{
-    		//Get the fileName
-    		if(fetchLocalFile(fileName))
-    	    	return;
-    	}
-    }*/
+        //Get the fileName
+        if(fetchLocalFile(fileName))
+            return;
+    }
 
     //If we are here no output client is defined and we could not read the file from
     //the local disk.
@@ -350,11 +364,11 @@ void OutputFileProvider::slotOutputClientError(QString msg)
             bool isJobout=(outClient_->remoteFile() == jobout);
 
             //We try to read the file directly from the disk
-            /* if(!isJobout || server->readFromDisk())
+            if(server->readFromDisk())
             {
                 if(fetchLocalFile(outClient_->remoteFile()))
                     return;
-            }*/
+            }
 
             //Then we try the server
             if(isJobout)

@@ -26,7 +26,10 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 	if(!editor_)
 		return false;
 
-	bool doSearch=true;
+    if(editor_->document()->documentSize() ==0)
+        return false;
+
+    bool doSearch=true;
 	if(str.simplified().isEmpty())
 	{
 		doSearch=false;
@@ -125,8 +128,10 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 
 void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload)
 {
-	bool found = false;
+    if(editor_->document()->documentSize() ==0)
+        return;
 
+    bool found = false;
 	TextPagerDocument::FindMode findMode = TextPagerDocument::FindBackward;
 	TextPagerCursor cursor(editor_->textCursor());
 	cursor.movePosition(TextPagerCursor::End);

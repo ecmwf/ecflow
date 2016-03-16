@@ -53,6 +53,7 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
     QStringList msg;
     QStringList tries;
     QStringList other;
+    QString alg;
 
     QString html;
 
@@ -96,19 +97,23 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
         ServerHandler* server=info->server();
         bool rfd=server->readFromDisk();
         QString t;
+
+        t="The following are tried in order:<ul>";
+
         if(rfd)
         {
-            t="With the current settings the viewer tries to read the output files <b>from disk</b>; if \
-               it fails, it tries the <b>logserver</b> (if defined) and finally the <b>ecflow server</b>";
+            t+="<li>Try to read the output files from the logserver \
+               (if defined)</li><li>from disk (if the file is accessible) </li><li>\
+               through the ecflow server</li>";
         }
         else
         {
-            t="With the current settings the viewer tries to read the ouput files from the <b>log server</b>\
-               (if defined), then from the <b>ecflow server</b>. Reading the file from disk is not tried at all!";
+            t+="<li>Try to read the output files from the logserver \
+               (if defined)</li><li>from the ecflow server </li>";
         }
-        t+=" (To change this behaviour go Edit -> Preferences -> Server options -> Files)";
+        t+="</ul> (To change this behaviour go Edit -> Preferences -> Server options -> Files)";
 
-        remarks << t;
+        alg=t;
 
         if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&
             !server->isLocalHost())
@@ -137,6 +142,11 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
     {
         html+="<p><u>How was this file fetched?</u></p>";
         html+=buildList(tries,true);
+    }
+
+    if(!alg.isEmpty())
+    {
+       html+="<p><u>Algorithm:</u></p>"+alg;
     }
 
     if(!remarks.isEmpty())

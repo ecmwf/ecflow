@@ -19,6 +19,9 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 	if(!editor_)
 		return false;
 
+    if(editor_->document()->isEmpty())
+        return false;
+
 	QTextCursor cursor(editor_->textCursor());
 
 	if (highlightAll)  // if highlighting all matches, start from the start of the document
@@ -134,7 +137,10 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 
 void PlainTextSearchInterface::automaticSearchForKeywords(bool userClickedReload)
 {
-	bool found = false;
+    if(editor_->document()->isEmpty())
+        return;
+
+    bool found = false;
 
 	QTextDocument::FindFlags findFlags = QTextDocument::FindBackward;
 	QTextCursor cursor(editor_->textCursor());

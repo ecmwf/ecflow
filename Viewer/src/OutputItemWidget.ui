@@ -35,7 +35,7 @@
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
        <property name="spacing">
         <number>1</number>
        </property>
@@ -178,6 +178,9 @@
        </item>
        <item>
         <widget class="MessageLabel" name="messageLabel_" native="true"/>
+       </item>
+       <item>
+        <widget class="MessageLabel" name="warnLabel_" native="true"/>
        </item>
        <item>
         <widget class="OutputBrowser" name="browser_" native="true"/>
