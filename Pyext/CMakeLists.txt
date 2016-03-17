@@ -1,4 +1,8 @@
 ### ecflow python bindings
+#
+# To see the python link line: Do python-config  --ldflags, i.e
+#   > /usr/local/apps/python/2.7.8-01/bin/python-config  --ldflags
+#
 
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
 
