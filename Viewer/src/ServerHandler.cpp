@@ -178,7 +178,11 @@ int ServerHandler::secsSinceLastRefresh() const
 int ServerHandler::secsTillNextRefresh() const
 {
      if(refreshTimer_->isActive())
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
          return refreshTimer_->remainingTime()/1000;
+#else
+         return 0;
+#endif
      return -1;
 }
 
