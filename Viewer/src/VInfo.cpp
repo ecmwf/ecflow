@@ -10,16 +10,17 @@
 
 #include "VInfo.hpp"
 
-#include "VNode.hpp"
-#include "Suite.hpp"
-
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 #include "VAttribute.hpp"
-#include "VNState.hpp"
-#include "VSState.hpp"
+#include "VAttributeType.hpp"
+#include "VNode.hpp"
+//#include "VNState.hpp"
+//#include "VSState.hpp"
 
 #include <boost/lexical_cast.hpp>
+
+#if 0
 
 static std::map<std::string,VInfoAttributeFactory*>* makers = 0;
 
@@ -46,7 +47,7 @@ VInfoAttributeFactory::~VInfoAttributeFactory()
 	// Not called
 }
 
-VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,VNode* node,ServerHandler* server)
+VInfoAttribute* VInfoAttributeFactory::create(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server)
 {
 	std::string name=att->name().toStdString();
 
@@ -60,6 +61,7 @@ VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,VNode
 	return 0;
 }
 
+#endif
 
 //========================================
 //
@@ -263,12 +265,17 @@ std::string VInfoNode::path()
 //=========================================
 
 
-VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att,int attIndex) :
+VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* attr) :
 		VInfo(server,node),
-		att_(att),
-		attIndex_(attIndex)
+        attr_(attr)
 {
 
+}
+
+VInfoAttribute::~VInfoAttribute()
+{
+    if(attr_)
+        delete attr_;
 }
 
 void VInfoAttribute::accept(VInfoVisitor* v)
@@ -276,11 +283,18 @@ void VInfoAttribute::accept(VInfoVisitor* v)
 	v->visit(this);
 }
 
-VInfo_ptr VInfoAttribute::create(ServerHandler* server,VNode* node,VAttribute* att,int attIndex)
+VInfo_ptr VInfoAttribute::create(VNode* node,int attIndex)
 {
-	return VInfo_ptr(new VInfoAttribute(server,node,att,attIndex));
-}
+    ServerHandler* server=NULL;
+    VAttribute* att=NULL;
+    if(node)
+    {
+        server=node->server();
+        att=new VAttribute(node,attIndex);
+    }
 
+    return VInfo_ptr(new VInfoAttribute(server,node,att));
+}
 
 
 /*

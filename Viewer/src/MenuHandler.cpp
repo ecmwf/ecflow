@@ -31,6 +31,7 @@
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
 #include "VConfig.hpp"
+#include "VNode.hpp"
 #include "CustomCommandHandler.hpp"
 
 int MenuItem::idCnt_=0;
@@ -145,7 +146,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setCommand(command);
 
 
-                BaseNodeCondition *enabledCond = NodeExpressionParser::parseWholeExpression(enabled);
+                BaseNodeCondition *enabledCond = NodeExpressionParser::instance()->parseWholeExpression(enabled);
                 if (enabledCond == NULL)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
@@ -154,7 +155,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setEnabledCondition(enabledCond);
 
 
-                BaseNodeCondition *visibleCond = NodeExpressionParser::parseWholeExpression(visible);
+                BaseNodeCondition *visibleCond = NodeExpressionParser::instance()->parseWholeExpression(visible);
                 if (visibleCond == NULL)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));
@@ -162,7 +163,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
                 item->setVisibleCondition(visibleCond);
 
-                BaseNodeCondition *questionCond = NodeExpressionParser::parseWholeExpression(questFor);
+                BaseNodeCondition *questionCond = NodeExpressionParser::instance()->parseWholeExpression(questFor);
                 if (questionCond == NULL)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse question condition: " + questFor));

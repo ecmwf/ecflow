@@ -8,44 +8,29 @@
 //
 //============================================================================
 
-#ifndef VATTRIBUTE_HPP_
-#define VATTRIBUTE_HPP_
+#ifndef VATTRIBUTE_HPP
+#define VATTRIBUTE_HPP
 
-#include <set>
-#include <vector>
-#include <string>
+#include "VItem.hpp"
 
-#include "VParam.hpp"
+#include <QStringList>
 
+class VAttributeType;
 class VNode;
 
-class VAttribute : public VParam
+class VAttribute : public VItem
 {
 public:
-	explicit VAttribute(const std::string& name);
-	virtual ~VAttribute() {};
-    
-	static std::vector<VParam*> filterItems();
-	
-	static VAttribute* getType(const VNode *vnode,int row);
-	static bool getData(VNode* vnode,int row,VAttribute* &type,QStringList& data);
-	static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data);
-	static int totalNum(const VNode *vnode);
-	static void init(const std::string& parFile);
-	static int getLineNum(const VNode *vnode,int row);
-	
-	static VAttribute* find(const std::string& name);
+    VAttribute(VNode* parent,int index);
 
-    //Called from VConfigLoader
-    static void load(VProperty*);
+    VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
 
 protected:
-	virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
-	virtual int num(const VNode* vnode)=0;
-	virtual int lineNum(const VNode* vnode,int row) {return 1;}
-
-private:
-	static std::map<std::string,VAttribute*> items_;
+    VAttributeType* type_;
+    QStringList data_;
+    int index_;
 };
 
-#endif
+
+#endif // VATTRIBUTE_HPP
+

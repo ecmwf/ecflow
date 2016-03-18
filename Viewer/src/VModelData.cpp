@@ -14,7 +14,7 @@
 #include "VFilter.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VNode.hpp"
 
 #include <QDebug>

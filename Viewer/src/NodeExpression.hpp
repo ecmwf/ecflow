@@ -12,12 +12,13 @@
 
 #include "DState.hpp"
 
+#include "VInfo.hpp"
+#include "VItem.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
-#include "VNode.hpp"
-#include "VInfo.hpp"
 #include "StringMatchMode.hpp"
 
+class VItem;
 
 // ----------------------
 // Node condition classes
@@ -28,27 +29,42 @@ class BaseNodeCondition;  // forward declaration
 class NodeExpressionParser
 {
 public:
-    NodeExpressionParser()  {};
-    ~NodeExpressionParser() {};
-
     enum NodeType {SERVER, SUITE, FAMILY, TASK, ALIAS, NODE, BAD};
 
+    enum AttributeType {ATTRIBUTE, METER, EVENT, REPEAT, TRIGGER, LABEL, TIME, DATE,
+                   LATE, LIMIT, LIMITER, VAR, GENVAR, BADATTRIBUTE};
 
-    static BaseNodeCondition *parseWholeExpression(std::string, bool caseSensitiveStringMatch=true);
-    static BaseNodeCondition *parseExpression(bool caseSensitiveStringMatch);
-    static void               setTokens(std::vector<std::string> &tokens) {tokens_ = tokens; i_ = tokens_.begin();};
+    static NodeExpressionParser* instance();
 
-    static NodeType    nodeType(const std::string &name);
-    static std::string typeName(const NodeType);
-    static bool        isUserLevel(const std::string &str);
-    static bool        isNodeAttribute(const std::string &str);
-    static bool        isNodeFlag(const std::string &str);
-    static bool        isWhatToSearchIn(const std::string &str, bool &isAttribute);
-    static bool        isAttribute(const std::string &str);
-private:
-    static std::vector<BaseNodeCondition *> popLastNOperands(std::vector<BaseNodeCondition *> &inOperands, int n);
-    static std::vector<std::string> tokens_;
-    static std::vector<std::string>::const_iterator i_;
+    BaseNodeCondition *parseWholeExpression(std::string, bool caseSensitiveStringMatch=true);
+
+    NodeType  nodeType(const std::string &name) const;
+    const std::string& typeName(const NodeType&) const;
+    AttributeType toAttrType(const std::string &name) const;
+    const std::string& toAttrName(const AttributeType&) const;
+
+protected:
+    NodeExpressionParser();
+
+    bool isUserLevel(const std::string &str) const;
+    bool isNodeHasAttribute(const std::string &str) const;
+    bool isNodeFlag(const std::string &str) const;
+    bool isWhatToSearchIn(const std::string &str, bool &isAttribute) const;
+    bool isAttribute(const std::string &str) const;
+
+    BaseNodeCondition *parseExpression(bool caseSensitiveStringMatch);
+    void setTokens(std::vector<std::string> &tokens) {tokens_ = tokens; i_ = tokens_.begin();}
+    std::vector<BaseNodeCondition *> popLastNOperands(std::vector<BaseNodeCondition *> &inOperands, int n);
+
+    static NodeExpressionParser* instance_;
+    std::vector<std::string> tokens_;
+    std::vector<std::string>::const_iterator i_;
+    std::map<std::string,NodeType> nameToNodeType_;
+    std::map<NodeType,std::string> nodeTypeToName_;
+    std::map<std::string,AttributeType> nameToAttrType_;
+    std::map<AttributeType,std::string> attrTypeToName_;
+    std::string badTypeStr_;
+    std::string badAttributeStr_;
 };
 
 
@@ -66,24 +82,25 @@ private:
 class BaseNodeCondition
 {
 public:
-    BaseNodeCondition() {delayUnwinding_ = false;};
-    virtual ~BaseNodeCondition() {};
+    BaseNodeCondition() {delayUnwinding_ = false;}
+    virtual ~BaseNodeCondition() {}
 
     bool execute(VInfo_ptr nodeInfo);
-    virtual bool execute(VNode* node) = 0;
-    virtual int  numOperands() {return 0;};
+    virtual bool execute(VItem* item)=0;
+
+    virtual int  numOperands() {return 0;}
     virtual std::string print() = 0;
-    virtual bool operand2IsArbitraryString() {return false;};
+    virtual bool operand2IsArbitraryString() {return false;}
 
-    void setOperands(std::vector<BaseNodeCondition *> ops) {operands_ = ops;};
+    void setOperands(std::vector<BaseNodeCondition *> ops) {operands_ = ops;}
     bool containsAttributeSearch();
-    bool delayUnwinding() {return delayUnwinding_;};
-
+    bool delayUnwinding() {return delayUnwinding_;}
 
 protected:
+    virtual bool searchInAttributes() {return false;}
+
     std::vector<BaseNodeCondition *> operands_;
     bool delayUnwinding_;
-    virtual bool searchInAttributes() {return false;};
 };
 
 // -----------------------------------------------------------------
@@ -91,12 +108,12 @@ protected:
 class AndNodeCondition : public BaseNodeCondition
 {
 public:
-    AndNodeCondition() {delayUnwinding_ = true;};
-    ~AndNodeCondition() {};
+    AndNodeCondition() {delayUnwinding_ = true;}
+    ~AndNodeCondition() {}
 
-    bool execute(VNode* node);
-    int  numOperands() {return 2;};
-    std::string print() {return std::string("and") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";};
+    bool execute(VItem* node);
+    int  numOperands() {return 2;}
+    std::string print() {return std::string("and") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";}
 };
 
 // -----------------------------------------------------------------
@@ -104,12 +121,12 @@ public:
 class OrNodeCondition : public BaseNodeCondition
 {
 public:
-    OrNodeCondition()  {delayUnwinding_ = true;};
-    ~OrNodeCondition() {};
+    OrNodeCondition()  {delayUnwinding_ = true;}
+    ~OrNodeCondition() {}
 
-    bool execute(VNode* node);
-    int  numOperands() {return 2;};
-    std::string print() {return std::string("or") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";};
+    bool execute(VItem* node);
+    int  numOperands() {return 2;}
+    std::string print() {return std::string("or") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";}
 };
 
 // -----------------------------------------------------------------
@@ -117,12 +134,12 @@ public:
 class NotNodeCondition : public BaseNodeCondition
 {
 public:
-    NotNodeCondition()  {};
-    ~NotNodeCondition() {};
+    NotNodeCondition()  {}
+    ~NotNodeCondition() {}
 
-    bool execute(VNode* node);
-    int  numOperands() {return 1;};
-    std::string print() {return std::string("not") + "(" + operands_[0]->print() + ")";};
+    bool execute(VItem* node);
+    int  numOperands() {return 1;}
+    std::string print() {return std::string("not") + "(" + operands_[0]->print() + ")";}
 };
 
 
@@ -137,8 +154,8 @@ public:
 class StringMatchBase
 {
 public:
-    StringMatchBase(bool caseSensitive)  {caseSensitive_ = caseSensitive;};
-    virtual ~StringMatchBase() {};
+    StringMatchBase(bool caseSensitive)  {caseSensitive_ = caseSensitive;}
+    virtual ~StringMatchBase() {}
 
     virtual bool match(std::string searchFor, std::string searchIn) = 0;
 
@@ -149,8 +166,8 @@ protected:
 class StringMatchExact : public StringMatchBase
 {
 public:
-    StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {};
-    ~StringMatchExact() {};
+    StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    ~StringMatchExact() {}
 
     bool match(std::string searchFor, std::string searchIn);
 };
@@ -158,8 +175,8 @@ public:
 class StringMatchContains : public StringMatchBase
 {
 public:
-    StringMatchContains(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
-    ~StringMatchContains() {};
+    StringMatchContains(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
+    ~StringMatchContains() {}
 
     bool match(std::string searchFor, std::string searchIn);
 };
@@ -167,8 +184,8 @@ public:
 class StringMatchWildcard : public StringMatchBase
 {
 public:
-    StringMatchWildcard(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
-    ~StringMatchWildcard() {};
+    StringMatchWildcard(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
+    ~StringMatchWildcard() {}
 
     bool match(std::string searchFor, std::string searchIn);
 };
@@ -176,8 +193,8 @@ public:
 class StringMatchRegexp : public StringMatchBase
 {
 public:
-    StringMatchRegexp(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
-    ~StringMatchRegexp() {};
+    StringMatchRegexp(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
+    ~StringMatchRegexp() {}
 
     bool match(std::string searchFor, std::string searchIn);
 };
@@ -192,12 +209,12 @@ class StringMatchCondition : public BaseNodeCondition
 {
 public:
     StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive);
-    ~StringMatchCondition() {if (matcher_) delete matcher_;};
+    ~StringMatchCondition() {if (matcher_) delete matcher_;}
 
-    bool execute(VNode *node);
-    int  numOperands() {return 2;};
-    std::string print() {return operands_[0]->print() + " = " + operands_[1]->print();};
-    bool operand2IsArbitraryString() {return true;};
+    bool execute(VItem *node);
+    int  numOperands() {return 2;}
+    std::string print() {return operands_[0]->print() + " = " + operands_[1]->print();}
+    bool operand2IsArbitraryString() {return true;}
 private:
     StringMatchBase *matcher_;
 };
@@ -211,21 +228,21 @@ private:
 class TrueNodeCondition : public BaseNodeCondition
 {
 public:
-    TrueNodeCondition()  {};
-    ~TrueNodeCondition() {};
+    TrueNodeCondition()  {}
+    ~TrueNodeCondition() {}
 
-    bool execute(VNode*) {return true;};
-    std::string print() {return std::string("true");};
+    bool execute(VItem*) {return true;}
+    std::string print() {return std::string("true");}
 };
 
 class FalseNodeCondition : public BaseNodeCondition
 {
 public:
-    FalseNodeCondition()  {};
-    ~FalseNodeCondition() {};
+    FalseNodeCondition()  {}
+    ~FalseNodeCondition() {}
 
-    bool execute(VNode*) {return false;};
-    std::string print() {return std::string("false");};
+    bool execute(VItem*) {return false;}
+    std::string print() {return std::string("false");}
 };
 
 // -----------------------------------------------------------------
@@ -237,11 +254,11 @@ public:
 class TypeNodeCondition : public BaseNodeCondition
 {
 public:
-    explicit TypeNodeCondition(NodeExpressionParser::NodeType type) {type_ = type;};
-    ~TypeNodeCondition() {};
+    explicit TypeNodeCondition(NodeExpressionParser::NodeType type) {type_ = type;}
+    ~TypeNodeCondition() {}
 
-    bool execute(VNode* node);
-    std::string print() {return NodeExpressionParser::typeName(type_);};
+    bool execute(VItem* node);
+    std::string print() {return NodeExpressionParser::instance()->typeName(type_);}
 
 private:
     NodeExpressionParser::NodeType type_;
@@ -256,11 +273,11 @@ private:
 class StateNodeCondition : public BaseNodeCondition
 {
 public:
-    explicit StateNodeCondition(QString stateName) {stateName_ = stateName;};
-    ~StateNodeCondition() {};
+    explicit StateNodeCondition(QString stateName) {stateName_ = stateName;}
+    ~StateNodeCondition() {}
 
-    bool execute(VNode* node);
-    std::string print() {return stateName_.toStdString();};
+    bool execute(VItem* node);
+    std::string print() {return stateName_.toStdString();}
 
 private:
     QString stateName_;
@@ -275,11 +292,11 @@ private:
 class UserLevelCondition : public BaseNodeCondition
 {
 public:
-    explicit UserLevelCondition(QString userLevelName) {userLevelName_ = userLevelName;};
-    ~UserLevelCondition() {};
+    explicit UserLevelCondition(QString userLevelName) {userLevelName_ = userLevelName;}
+    ~UserLevelCondition() {}
 
-    bool execute(VNode*);
-    std::string print() {return userLevelName_.toStdString();};
+    bool execute(VItem*);
+    std::string print() {return userLevelName_.toStdString();}
 
 private:
     QString userLevelName_;
@@ -294,11 +311,11 @@ private:
 class NodeAttributeCondition : public BaseNodeCondition
 {
 public:
-    explicit NodeAttributeCondition(QString nodeAttrName) {nodeAttrName_ = nodeAttrName;};
-    ~NodeAttributeCondition() {};
+    explicit NodeAttributeCondition(QString nodeAttrName) {nodeAttrName_ = nodeAttrName;}
+    ~NodeAttributeCondition() {}
 
-    bool execute(VNode*);
-    std::string print() {return nodeAttrName_.toStdString();};
+    bool execute(VItem*);
+    std::string print() {return nodeAttrName_.toStdString();}
 
 private:
     QString nodeAttrName_;
@@ -313,11 +330,11 @@ private:
 class NodeFlagCondition : public BaseNodeCondition
 {
 public:
-    explicit NodeFlagCondition(QString nodeFlagName) {nodeFlagName_ = nodeFlagName;};
-    ~NodeFlagCondition() {};
+    explicit NodeFlagCondition(QString nodeFlagName) {nodeFlagName_ = nodeFlagName;}
+    ~NodeFlagCondition() {}
 
-    bool execute(VNode*);
-    std::string print() {return nodeFlagName_.toStdString();};
+    bool execute(VItem*);
+    std::string print() {return nodeFlagName_.toStdString();}
 
 private:
     QString nodeFlagName_;
@@ -334,17 +351,17 @@ public:
     explicit WhatToSearchInOperand(std::string what, bool &attr);
     ~WhatToSearchInOperand();
 
-    std::string name() {return what_;};
-    bool execute(VNode* node) {return false;}; // not called
-    std::string print() {return what_;};
-    std::string what() {return what_;};
+    std::string name() {return what_;}
+    bool execute(VItem* node) {return false;} // not called
+    std::string print() {return what_;}
+    std::string what() {return what_;}
 
 private:
     std::string what_;  // TODO XXX: optimise - we should store an enum here
     bool searchInAttributes_;
 
-    void searchInAttributes(bool attr) {searchInAttributes_ = attr;};
-    bool searchInAttributes() {return searchInAttributes_;};
+    void searchInAttributes(bool attr) {searchInAttributes_ = attr;}
+    bool searchInAttributes() {return searchInAttributes_;}
 };
 
 // -----------------------------------------------------------------
@@ -352,18 +369,34 @@ private:
 class WhatToSearchForOperand : public BaseNodeCondition
 {
 public:
-    explicit WhatToSearchForOperand(std::string what) {what_ = what;};
+    explicit WhatToSearchForOperand(std::string what) {what_ = what;}
     ~WhatToSearchForOperand();
 
-    std::string name() {return what_;};
-    bool execute(VNode* node) {return false;}; // not called
-    std::string print() {return what_;};
-    std::string what() {return what_;};
+    std::string name() {return what_;}
+    bool execute(VItem* node) {return false;} // not called
+    std::string print() {return what_;}
+    std::string what() {return what_;}
 
 private:
     std::string what_;
 };
 
+// ------------------------
+// Attribute condition
+// ------------------------
+
+class AttributeCondition : public BaseNodeCondition
+{
+public:
+    explicit AttributeCondition(QString attrName) {attrName_ = attrName;}
+    ~AttributeCondition() {}
+
+    bool execute(VItem*);
+    std::string print() {return attrName_.toStdString();}
+
+private:
+    QString attrName_;
+};
 
 
 

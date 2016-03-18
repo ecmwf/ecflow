@@ -11,8 +11,17 @@
 #ifndef VITEM_HPP_
 #define VITEM_HPP_
 
+#include <cstdlib>
+
 class ServerHandler;
 class VNode;
+class VServer;
+class VSuiteNode;
+class VFamilyNode;
+class VAliasNode;
+class VTaskNode;
+class VAttribute;
+class VItemVisitor;
 
 class VItem
 {
@@ -22,18 +31,38 @@ public:
     VNode* parent() const {return parent_;}
     //virtual ServerHandler* server() const;
     //node_ptr node() const {return node_;}
-    virtual bool isNode() const {return false;}
+    virtual VServer* isServer() const {return NULL;}
+    virtual VNode* isNode() const {return NULL;}
+    virtual VSuiteNode* isSuite() const {return NULL;}
+    virtual VFamilyNode* isFamily() const {return NULL;}
+    virtual VTaskNode* isTask() const {return NULL;}
+    virtual VAliasNode* isAlias() const {return NULL;}
+    virtual VAttribute* isAttribute() const {return NULL;}
+
     virtual bool isTopLevel() const {false;}
-    virtual bool isServer() const {return false;}
-    virtual bool isSuite() const {return false;}
-    virtual bool isFamily() const {return false;}
-    virtual bool isTask() const {return false;}
-    virtual bool isAlias() const {return false;}
-    virtual bool isAttribute() const {return false;}
+    //virtual bool isServer() const {return false;}
+    //virtual bool isSuite() const {return false;}
+    //virtual bool isFamily() const {return false;}
+    //virtual bool isTask() const {return false;}
+    //virtual bool isAlias() const {return false;}
+    //virtual bool isAttribute() const {return false;}
 
 protected:
     VNode* parent_;
 };
+
+#if 0
+class VItemVisitor
+{
+public:
+    VItemVisitor() {}
+    virtual ~VItemVisitor() {}
+
+    virtual void visit(VServer*) {}
+    virtual void visit(VNode*) {}
+    virtual void visit(VAttribute*) {}
+};
+#endif
 
 
 #endif // VITEM_HPP_

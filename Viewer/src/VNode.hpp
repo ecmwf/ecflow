@@ -24,7 +24,7 @@
 
 class IconFilter;
 class ServerHandler;
-class VAttribute;
+class VAttributeType;
 class VServer;
 class VServerSettings;
 
@@ -91,21 +91,24 @@ public:
 
 	virtual ServerHandler* server() const;
     node_ptr node() const {return node_;}
+
+    VNode* isNode() const {return const_cast<VNode*>(this);}
     bool isTopLevel() const;
-    bool isServer() const {return false;}
-    bool isSuite() const {return isTopLevel();}
+    //bool isServer() const {return false;}
+
+    /*bool isSuite() const {return isTopLevel();}
     bool isFamily() const;
     bool isTask() const {return false;}
-    bool isAlias() const;
+    bool isAlias() const;*/
 
     void beginUpdateAttrNum();
     void endUpdateAttrNum();
     short cachedAttrNum() const;
     short attrNum() const;
 
-    QStringList getAttributeData(int,VAttribute*&);
+    QStringList getAttributeData(int,VAttributeType*&);
     bool getAttributeData(const std::string& type,int row, QStringList&);
-    VAttribute* getAttributeType(int);
+    VAttributeType* getAttributeType(int);
     int getAttributeLineNum(int row);
 
     //VNode* parent() const {return parent_;}
@@ -166,7 +169,6 @@ public:
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
 
-
 protected:
     void clear();
     void addChild(VNode*);
@@ -187,6 +189,27 @@ protected:
     int index_;
 };
 
+class VSuiteNode : public VNode
+{
+public:
+    VSuiteNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
+    VSuiteNode* isSuite() const {return const_cast<VSuiteNode*>(this);}
+};
+
+class VFamilyNode : public VNode
+{
+public:
+    VFamilyNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
+    VFamilyNode* isFamily() const {return const_cast<VFamilyNode*>(this);}
+};
+
+class VAliasNode : public VNode
+{
+public:
+    VAliasNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
+    VAliasNode* isAlias() const {return const_cast<VAliasNode*>(this);}
+};
+
 //This is the root node representing the Server.
 class VServer : public VNode
 {
@@ -200,7 +223,8 @@ public:
 
 	bool isEmpty() const { return numOfChildren() == 0;}
 	bool isTopLevel() const {return false;}
-	bool isServer() const {return true;}
+    VServer* isServer() const {return const_cast<VServer*>(this);}
+    VNode* isNode() const {return NULL;}
 
 	int totalNum() const {return totalNum_;}
 	int totalNumOfTopLevel(int) const;

@@ -76,7 +76,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 
 	UserMessage::message(UserMessage::DBG,false, std::string("Query: " + query_->query().toStdString()));
 
-	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString(), query->caseSensitive());
+    parser_=NodeExpressionParser::instance()->parseWholeExpression(query_->query().toStdString(), query->caseSensitive());
 	if(parser_ == NULL)
 	{
 		UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
@@ -248,7 +248,7 @@ void NodeFilterEngine::setQuery(NodeQuery* query)
 	if(parser_)
 		delete parser_;
 
-	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString());
+    parser_=NodeExpressionParser::instance()->parseWholeExpression(query_->query().toStdString());
 	if(parser_ == NULL)
 	{
 		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));

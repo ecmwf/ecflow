@@ -21,7 +21,7 @@
 #include <QWidgetAction>
 
 #include "VNState.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VFilter.hpp"

@@ -17,91 +17,165 @@
 #include "Submittable.hpp"
 
 #include "NodeExpression.hpp"
+#include "ServerHandler.hpp"
 #include "UserMessage.hpp"
+#include "VAttribute.hpp"
+#include "VNode.hpp"
 
+#include <QDebug>
+
+#define _UI_NODEXPRESSIONPARSEER_DEBUG
 
 
 // -------------------------
 // Expression parser classes
 // -------------------------
 
-std::vector<std::string>                 NodeExpressionParser::tokens_;
+NodeExpressionParser* NodeExpressionParser::instance_=NULL;
+
+
+#if 0
+std::vector<std::string> NodeExpressionParser::tokens_;
 std::vector<std::string>::const_iterator NodeExpressionParser::i_;
 
+std::map<std::string,NodeExpressionParser::NodeType>  NodeExpressionParser::nameToNodeType_;
+std::map<NodeExpressionParser::NodeType,std::string>  NodeExpressionParser::nodeTypeToName_;
+std::map<std::string,NodeExpressionParser::AttributeType> NodeExpressionParser::nameToAttrType_;
+std::map<NodeExpressionParser::AttributeType,std::string> NodeExpressionParser::attrTypeToName_;
+#endif
 
-NodeExpressionParser::NodeType NodeExpressionParser::nodeType(const std::string &name)
+NodeExpressionParser* NodeExpressionParser::instance()
 {
-    if      (name == "server") return SERVER;
-    else if (name == "suite")  return SUITE;
-    else if (name == "family") return FAMILY;
-    else if (name == "task")   return TASK;
-    else if (name == "alias")  return ALIAS;
-    else if (name == "node")   return NODE;
-    else return BAD;
+    if(!instance_)
+        instance_=new NodeExpressionParser;
+
+    return instance_;
 }
 
-std::string NodeExpressionParser::typeName(const NodeType type)
+NodeExpressionParser::NodeExpressionParser()
 {
-         if (type == SERVER) return std::string("server");
-    else if (type == SUITE)  return std::string("suite");
-    else if (type == FAMILY) return std::string("family");
-    else if (type == TASK)   return std::string("task");
-    else if (type == ALIAS)  return std::string("alias");
-    else if (type == NODE)   return std::string("node");
-    else return std::string("BAD");
+    nameToNodeType_["server"]=SERVER;
+    nameToNodeType_["suite"]=SUITE;
+    nameToNodeType_["family"]=FAMILY;
+    nameToNodeType_["task"]=TASK;
+    nameToNodeType_["alias"]=ALIAS;
+    nameToNodeType_["node"]=NODE;
+
+    for(std::map<std::string,NodeType>::const_iterator it=nameToNodeType_.begin();  it != nameToNodeType_.end(); ++it)
+    {
+        nodeTypeToName_[it->second]=it->first;
+    }
+
+    nameToAttrType_["attribute"]=ATTRIBUTE;
+    nameToAttrType_["meter"]=METER;
+    nameToAttrType_["event"]=EVENT;
+    nameToAttrType_["repeat"]=REPEAT;
+    nameToAttrType_["trigger"]=TRIGGER;
+    nameToAttrType_["label"]=LABEL;
+    nameToAttrType_["time"]=TIME;
+    nameToAttrType_["date"]=DATE;
+    nameToAttrType_["late"]=LATE;
+    nameToAttrType_["limit"]=LIMIT;
+    nameToAttrType_["limiter"]=LIMITER;
+    nameToAttrType_["var"]=VAR;
+    nameToAttrType_["genvar"]=GENVAR;
+
+    for(std::map<std::string,AttributeType>::const_iterator it=nameToAttrType_.begin();  it != nameToAttrType_.end(); ++it)
+    {
+            attrTypeToName_[it->second]=it->first;
+    }
+
+    badTypeStr_="BAD";
+    badAttributeStr_="BAD";
 }
 
-bool NodeExpressionParser::isUserLevel(const std::string &str)
+NodeExpressionParser::NodeType NodeExpressionParser::nodeType(const std::string &name) const
+{
+    std::map<std::string,NodeType>::const_iterator it=nameToNodeType_.find(name);
+    if(it != nameToNodeType_.end())
+        return it->second;
+
+    return BAD;
+}
+
+const std::string& NodeExpressionParser::typeName(const NodeType& type) const
+{
+    std::map<NodeType,std::string>::const_iterator it=nodeTypeToName_.find(type);
+    if(it != nodeTypeToName_.end())
+        return it->second;
+
+    return badTypeStr_;
+}
+
+NodeExpressionParser::AttributeType NodeExpressionParser::toAttrType(const std::string &name) const
+{
+    std::map<std::string,AttributeType>::const_iterator it=nameToAttrType_.find(name);
+    if(it != nameToAttrType_.end())
+        return it->second;
+
+    return BADATTRIBUTE;
+}
+
+const std::string& NodeExpressionParser::toAttrName(const AttributeType& type) const
+{
+    std::map<AttributeType,std::string>::const_iterator it=attrTypeToName_.find(type);
+    if(it != attrTypeToName_.end())
+        return it->second;
+
+    return badAttributeStr_;
+}
+
+bool NodeExpressionParser::isUserLevel(const std::string &str) const
 {
     if (str == "oper" || str == "admin")
         return true;
-    else
-        return false;
+
+    return false;
 }
 
-bool NodeExpressionParser::isNodeAttribute(const std::string &str)
+bool NodeExpressionParser::isNodeHasAttribute(const std::string &str) const
 {
     if (str == "has_triggers" || str == "has_time" || str == "has_date" || str == "locked")
         return true;
-    else
-        return false;
+
+    return false;
 }
 
-bool NodeExpressionParser::isNodeFlag(const std::string &str)
+bool NodeExpressionParser::isNodeFlag(const std::string &str) const
 {
     if (str == "is_late" || str == "has_message" ||
     	str == "is_rerun" || str == "is_waiting" || str == "is_zombie")
         return true;
-    else
-        return false;
+
+    return false;
 }
 
 
-bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttribute)
+bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttr) const
 {
     // list of non-attribute items that we can search in
     if (str == "node_name" || str == "node_path")
     {
-        isAttribute = false;
+        isAttr = false;
         return true;
     }
 
     // list of attributes that we can search in
     else if (str == "label_name" || str == "label_value")
     {
-        isAttribute = true;
+        isAttr = true;
         return true;
     }
 
     return false;
 }
 
-bool NodeExpressionParser::isAttribute(const std::string &str)
+bool NodeExpressionParser::isAttribute(const std::string &str) const
 {
-    if (str == "attribute" || "label")
+    if (str == "attribute" || str ==  "label")
         return true;
-    else
-        return false;
+
+    return false;
 }
 
 // NodeExpressionParser::popLastNOperands
@@ -216,7 +290,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 bool attr = false;
 
                 // node types
-                NodeExpressionParser::NodeType type = NodeExpressionParser::nodeType(*i_);
+                NodeExpressionParser::NodeType type = nodeType(*i_);
                 if (type != BAD)
                 {
                     TypeNodeCondition *typeCond = new TypeNodeCondition(type);
@@ -244,7 +318,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 }
 
                 // node attribute
-                else if (isNodeAttribute(*i_))
+                else if (isNodeHasAttribute(*i_))
                 {
                     NodeAttributeCondition *attrCond = new NodeAttributeCondition(QString::fromStdString(*i_));
                     operandStack.push_back(attrCond);
@@ -259,7 +333,14 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     result = flagCond;
                     updatedOperands = true;
                 }
-
+                // node attribute
+                else if (isAttribute(*i_))
+                {
+                    AttributeCondition *attrCond = new AttributeCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(attrCond);
+                    result = attrCond;
+                    updatedOperands = true;
+                }
                 else if (isWhatToSearchIn(*i_, attr))
                 {
                     WhatToSearchInOperand *searchCond = new WhatToSearchInOperand(*i_, attr);
@@ -300,7 +381,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 else if (*i_ == "(")
                 {
                     ++i_;
-                    result = NodeExpressionParser::parseExpression(caseSensitiveStringMatch);
+                    result = parseExpression(caseSensitiveStringMatch);
                     operandStack.push_back(result);
                 }
                 else if (*i_ == ")")
@@ -376,14 +457,19 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
 
 bool BaseNodeCondition::execute(VInfo_ptr nodeInfo)
 {
-	if(!nodeInfo || !nodeInfo.get())
+    if(!nodeInfo)
 		return true;
 
-	if(!nodeInfo->isServer() && !nodeInfo->isNode())
-			return false;
+    if(nodeInfo->isServer())
+        return execute(nodeInfo->server()->vRoot());
+    else if(nodeInfo->isNode())
+        return execute(nodeInfo->node());
+    else if(nodeInfo->isAttribute())
+        return execute(nodeInfo->attribute());
 
-	return execute(nodeInfo->node());
+    return false;
 }
+
 // -----------------------------------------------------------------
 
 bool BaseNodeCondition::containsAttributeSearch()
@@ -408,7 +494,7 @@ bool BaseNodeCondition::containsAttributeSearch()
 //
 //=========================================================================
 
-bool AndNodeCondition::execute(VNode* node)
+bool AndNodeCondition::execute(VItem* node)
 {
 	return operands_[0]->execute(node) && operands_[1]->execute(node);
 }
@@ -419,9 +505,13 @@ bool AndNodeCondition::execute(VNode* node)
 //
 //=========================================================================
 
-bool OrNodeCondition::execute(VNode* node)
+bool OrNodeCondition::execute(VItem* node)
 {
-	return operands_[0]->execute(node) || operands_[1]->execute(node);
+#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+    UserMessage::debug("OrNodeCondition::execute --->");
+    qDebug() <<  operands_[0]->execute(node) << operands_[1]->execute(node);
+#endif
+    return operands_[0]->execute(node) || operands_[1]->execute(node);
 }
 
 
@@ -431,7 +521,7 @@ bool OrNodeCondition::execute(VNode* node)
 //
 //=========================================================================
 
-bool NotNodeCondition::execute(VNode* node)
+bool NotNodeCondition::execute(VItem* node)
 {
 	return !(operands_[0]->execute(node));
 }
@@ -442,30 +532,56 @@ bool NotNodeCondition::execute(VNode* node)
 //
 //=========================================================================
 
-bool TypeNodeCondition::execute(VNode* vnode)
+bool TypeNodeCondition::execute(VItem* item)
 {
-    if (type_ == NodeExpressionParser::SERVER && vnode->isServer())
-        return true;
-
-    if(!vnode->isServer())
+    if (type_ == NodeExpressionParser::SERVER)
     {
-        node_ptr node = vnode->node();
-
-        if (type_ == NodeExpressionParser::SUITE && node->isSuite())
-            return true;
-
-        if (type_ == NodeExpressionParser::TASK && node->isTask())
-            return true;
-
-        if (type_ == NodeExpressionParser::ALIAS && node->isAlias())
-            return true;
-
-        if (type_ == NodeExpressionParser::FAMILY && node->isFamily())
-            return true;
-
-        if (type_ == NodeExpressionParser::NODE)
-            return true;
+        return (item->isServer() != NULL);
     }
+
+    else if(item->isNode())
+    {
+#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+        UserMessage::debug("TypeNodeCondition::execute --> " + NodeExpressionParser::instance()->typeName(type_));
+#endif
+        qDebug() << item->isNode() << item->isSuite() << item->isFamily() << item->isTask() << item->isAlias();
+
+        switch(type_)
+        {
+        case NodeExpressionParser::NODE:
+#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+            UserMessage::debug("   NODE");
+#endif
+            return true;
+            break;
+        case NodeExpressionParser::SUITE:
+#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+            UserMessage::debug("   SUITE");
+#endif
+            return (item->isSuite() != NULL);
+            break;
+        case NodeExpressionParser::TASK:
+#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+            UserMessage::debug("   TASK");
+#endif
+            return (item->isTask() != NULL);
+            break;
+        case NodeExpressionParser::FAMILY:
+#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+            UserMessage::debug("   FAMILY");
+#endif
+            return (item->isFamily() != NULL);
+            break;
+        case NodeExpressionParser::ALIAS:
+#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+            UserMessage::debug("   ALIAS");
+#endif
+            return (item->isAlias() != NULL);
+            break;
+        default:
+            break;
+        }
+     }
 
     return false;
 }
@@ -476,25 +592,21 @@ bool TypeNodeCondition::execute(VNode* vnode)
 //
 //=========================================================================
 
-bool StateNodeCondition::execute(VNode* vnode)
+bool StateNodeCondition::execute(VItem* item)
 {
-	if (vnode->isServer())
-		return (vnode->serverStateName() == stateName_);
-	else
-		return (vnode->stateName() == stateName_);
-
-    /*
-	if (vnode->isServer())
+    if(item->isServer())
     {
-        return (VSState::toName(nodeInfo->server()) == stateName_);
+        VServer* s=static_cast<VServer*>(item);
+        assert(s);
+        return (s->serverStateName() == stateName_);
     }
-
-    if(nodeInfo->isNode())
+    else
     {
-        return (VNState::toName(nodeInfo->node()) == stateName_);
+        VNode* n=static_cast<VNode*>(item);
+        assert(n);
+        return (n->stateName() == stateName_);
     }
-
-    return false;*/
+    return false;
 }
 
 //=========================================================================
@@ -503,7 +615,7 @@ bool StateNodeCondition::execute(VNode* vnode)
 //
 //=========================================================================
 
-bool UserLevelCondition::execute(VNode* vnode)
+bool UserLevelCondition::execute(VItem*)
 {
     // since we don't currently have the concept of user levels, we just 
     // return true for now
@@ -574,44 +686,47 @@ StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode, bool
 
 
 
-bool StringMatchCondition::execute(VNode *node)
+bool StringMatchCondition::execute(VItem *item)
 {
     WhatToSearchForOperand *searchForOperand = static_cast<WhatToSearchForOperand*> (operands_[0]);
     WhatToSearchInOperand  *searchInOperand  = static_cast<WhatToSearchInOperand*>  (operands_[1]);
 
     std::string searchIn = searchInOperand->what();
 
-    //TODO  XXXX check - name, label, variable, etc
-    if (searchIn == "node_name")
+    if(item->isNode())
     {
-        bool ok = matcher_->match(searchForOperand->what(), node->strName());
-        return (ok);
+        VNode* n=static_cast<VNode*>(item);
+        //TODO  XXXX check - name, label, variable, etc
+        if(searchIn == "node_name")
+        {
+            return matcher_->match(searchForOperand->what(), n->strName());
+        }
+
+        else if (searchIn == "node_path")
+        {
+            return matcher_->match(searchForOperand->what(), n->absNodePath());
+        }
     }
 
-    else if (searchIn == "node_path")
-    {
-        bool ok = matcher_->match(searchForOperand->what(), node->absNodePath());
-        return (ok);
-    }
-    else
-        return false;
+    return false;
 }
 
 // -----------------------------------------------------------------
 
-bool NodeAttributeCondition::execute(VNode* vnode)
+bool NodeAttributeCondition::execute(VItem* item)
 {
-    if (vnode->isServer())
+    if (item->isServer())
     {
-        if (nodeAttrName_ == "locked")  
+        if(nodeAttrName_ == "locked")
         {
             return false;   //  XXX temporary for now
         }
     }
 
-    else //if(nodeInfo->isNode())
+    else if(item->isNode())
     {
-        node_ptr node = vnode->node();
+         VNode* n=static_cast<VNode*>(item);
+         node_ptr node = n->node();
 
         if (nodeAttrName_ == "has_time")
         {
@@ -633,18 +748,19 @@ bool NodeAttributeCondition::execute(VNode* vnode)
 
     return false;
 }
-
 // -----------------------------------------------------------------
 
-bool NodeFlagCondition::execute(VNode* vnode)
+bool NodeFlagCondition::execute(VItem* item)
 {
-	if (vnode->isServer())
+    if(item->isServer())
 	{
 		return false;
 	}
-	else //if(nodeInfo->isNode())
+    else if(item->isNode())
 	{
-		if(nodeFlagName_ == "is_zombie")
+         VNode* vnode=static_cast<VNode*>(item);
+
+        if(nodeFlagName_ == "is_zombie")
 			return vnode->isFlagSet(ecf::Flag::ZOMBIE);
 
 		if(nodeFlagName_ == "has_message")
@@ -668,6 +784,7 @@ bool NodeFlagCondition::execute(VNode* vnode)
 			return vnode->isFlagSet(ecf::Flag::WAIT);
 
 	}
+
 	return false;
 }
 
@@ -682,39 +799,15 @@ WhatToSearchInOperand::~WhatToSearchInOperand() {}
 WhatToSearchForOperand::~WhatToSearchForOperand() {}
 
 // -----------------------------------------------------------------
-#if 0
-bool AttributeCondition::execute(VNode* vnode)
-{
-    if (vnode->isServer())
-    {
-        if (nodeAttrName_ == "locked")
-        {
-            return false;   //  XXX temporary for now
-        }
-    }
 
-    else //if(nodeInfo->isNode())
+bool AttributeCondition::execute(VItem* item)
+{   
+    if(item->isAttribute())
     {
-        node_ptr node = vnode->node();
-
-        if (nodeAttrName_ == "label")
-        {
-            return (node->timeVec().size()  > 0 ||
-                    node->todayVec().size() > 0 ||
-                    node->crons().size()    > 0);
-        }
-        else if (nodeAttrName_ == "has_date")
-        {
-            return (node->days().size()  > 0 ||
-                    node->dates().size() > 0);
-        }
-        else if (nodeAttrName_ == "has_triggers")
-        {
-            return (node->triggerAst() ||
-                    node->completeAst());
-        }
+        //if(attrName_ == "attribute")
+            return true;
     }
 
     return false;
 }
-#endif
+

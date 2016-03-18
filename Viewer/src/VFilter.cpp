@@ -12,7 +12,7 @@
 #include "NodeQuery.hpp"
 #include "NodeQueryEngine.hpp"
 #include "VNState.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VIcon.hpp"
 #include "VNode.hpp"
 #include "VParam.hpp"
@@ -161,7 +161,7 @@ NodeStateFilter::NodeStateFilter() : VParamSet()
 AttributeFilter::AttributeFilter() : VParamSet()
 {
 	settingsId_="attribute";
-	std::vector<VParam*> v=VAttribute::filterItems();
+	std::vector<VParam*> v=VAttributeType::filterItems();
 	init(v);
 
 	/*for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)

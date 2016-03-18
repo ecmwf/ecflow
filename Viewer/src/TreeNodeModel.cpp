@@ -19,7 +19,7 @@
 #include "VFilter.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "VIcon.hpp"
 #include "VFileInfo.hpp"
@@ -409,7 +409,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 
 	if(role == FilterRole)
 	{
-		VAttribute* type=node->getAttributeType(index.row());
+        VAttributeType* type=node->getAttributeType(index.row());
 		if(atts_->isSet(type))
 		{
 			return QVariant(true);
@@ -424,7 +424,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 
 	else if(role == Qt::DisplayRole)
 	{
-		VAttribute* type=0;
+        VAttributeType* type=0;
 		return node->getAttributeData(index.row(),type);
 	}
 	else if(role ==  AttributeLineRole)
@@ -756,7 +756,9 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 	else if(VNode *parentNode=static_cast<VNode*>(index.internalPointer()))
 	{
 		int attNum=parentNode->attrNum();
-		if(index.row() >= attNum)
+
+        //It is a node
+        if(index.row() >= attNum)
 		{
 			VNode *n=parentNode->childAt(index.row()-attNum);
 			return VInfoNode::create(n);
@@ -764,7 +766,9 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		//It is an attribute
 		else
 		{
-
+            VInfo_ptr p=VInfoAttribute::create(parentNode,index.row());
+            qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
+            return p;
 		}
 	}
 
