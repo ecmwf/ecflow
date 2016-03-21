@@ -176,15 +176,6 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 
             return s;
         }
-        else if(role == Qt::FontRole)
-        {
-            if(d->isGenVar(row))
-            {
-                QFont f;
-                f.setBold(true);
-                return f;
-            }
-        }
 		else if(role == ReadOnlyRole)
         {
 			return (d->isReadOnly(row))?true:false;
@@ -597,7 +588,7 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
         //qDebug() << idx << idx2;
         
         if(matchLst_.contains(idx) || matchLst_.contains(idx2))
-            return QColor(83,187,109);
+            return QColor(169,210,176);
     }
     
     return QSortFilterProxyModel::data(idx,role);
