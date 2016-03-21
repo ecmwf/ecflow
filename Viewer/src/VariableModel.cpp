@@ -15,7 +15,7 @@
 #include "ServerHandler.hpp"
 #include "VariableModelData.hpp"
 
-QColor VariableModel::varCol_=QColor(60,61,62);
+QColor VariableModel::varCol_=QColor(40,41,42);
 //QColor VariableModel::genVarCol_=QColor(34,51,136);
 QColor VariableModel::genVarCol_=QColor(0,115,48);
 QColor VariableModel::blockBgCol_=QColor(122,122,122);

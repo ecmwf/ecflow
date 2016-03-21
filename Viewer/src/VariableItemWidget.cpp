@@ -9,6 +9,7 @@
 
 #include "VariableItemWidget.hpp"
 
+#include <QClipboard>
 #include <QDebug>
 #include <QItemSelectionModel>
 #include <QMessageBox>
@@ -290,9 +291,10 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 	//Build context menu
 	varView->addAction(actionAdd);
 	varView->addAction(sep1);
-    //varView->addAction(actionCopy);
+    varView->addAction(actionCopy);
+    varView->addAction(actionCopyFull);
     //varView->addAction(actionPaste);
-    //varView->addAction(sep2);
+    varView->addAction(sep2);
 	varView->addAction(actionDelete);
 	varView->addAction(sep3);
 	varView->addAction(actionProp);
@@ -364,6 +366,8 @@ void VariableItemWidget::checkActionState()
          actionAdd->setEnabled(false);
          actionProp->setEnabled(false);
          actionDelete->setEnabled(false);
+         actionCopy->setEnabled(false);
+         actionCopyFull->setEnabled(false);
          return;
     }
 
@@ -372,7 +376,9 @@ void VariableItemWidget::checkActionState()
 	{
 		actionAdd->setEnabled(false);
 		actionProp->setEnabled(false);
-		actionDelete->setEnabled(false);
+        actionDelete->setEnabled(false);
+        actionCopy->setEnabled(false);
+        actionCopyFull->setEnabled(false);
 	}
 	else
 	{
@@ -389,7 +395,9 @@ void VariableItemWidget::checkActionState()
 				actionAdd->setEnabled(true);
 				actionDelete->setEnabled(true);
 			}
-			actionProp->setEnabled(true);
+            actionProp->setEnabled(true);
+            actionCopy->setEnabled(true);
+            actionCopyFull->setEnabled(true);
 		}
 		//Server or nodes
 		else
@@ -404,7 +412,9 @@ void VariableItemWidget::checkActionState()
 				actionAdd->setEnabled(true);
 				actionDelete->setEnabled(false);
 			}
-			actionProp->setEnabled(false);
+            actionProp->setEnabled(false);
+            actionCopy->setEnabled(false);
+            actionCopyFull->setEnabled(false);
 		}
 	}
 }
@@ -580,6 +590,48 @@ void VariableItemWidget::on_actionSearch_triggered()
 	stackedWidget->setCurrentIndex(1);
 
 }
+
+void VariableItemWidget::on_actionCopy_triggered()
+{
+   QModelIndex idx=sortModel_->mapToSource(varView->currentIndex());
+   QString name, val;
+   bool gen;
+
+   if(model_->variable(idx,name,val,gen))
+   {
+        QString txt;
+        if(idx.column() == 0)
+            toClipboard(name);
+        else if(idx.column() == 1)
+            toClipboard(val);
+    }
+}
+
+void VariableItemWidget::on_actionCopyFull_triggered()
+{
+   QModelIndex idx=sortModel_->mapToSource(varView->currentIndex());
+   QString name, val;
+   bool gen;
+
+   if(model_->variable(idx,name,val,gen))
+   {
+        toClipboard(name + "=" + val);
+   }
+}
+
+void VariableItemWidget::toClipboard(QString txt) const
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QClipboard* cb=QGuiApplication::clipboard();
+    cb->setText(txt, QClipboard::Clipboard);
+    cb->setText(txt, QClipboard::Selection);
+#else
+    QClipboard* cb=QApplication::clipboard();
+    cb->setText(txt, QClipboard::Clipboard);
+    cb->setText(txt, QClipboard::Selection);
+#endif
+}
+
 
 void VariableItemWidget::slotFilterTextChanged(QString text)
 {
