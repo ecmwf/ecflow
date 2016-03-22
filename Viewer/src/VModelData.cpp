@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QMetaMethod>
 
-//#define _UI_VMODELDATA_DEBUG
+#define _UI_VMODELDATA_DEBUG
 
 //==========================================
 //
@@ -163,7 +163,10 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
 {
 	if(nodeStateChangeCnt_ >0)
 	{
-		nodeStateChangeCnt_=0;
+#ifdef _UI_VMODELDATA_DEBUG
+        UserMessage::debug("VTreeServer::notifyEndServerSync --> number of state changes: " + QString::number(nodeStateChangeCnt_).toStdString());
+#endif
+        nodeStateChangeCnt_=0;
 
 		if(!filter_->isNull())
 		{
@@ -185,6 +188,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 	bool runFilter=false;
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+    std::set<VNode*> stateChangeSuites;
 
 	//-----------------------------------------------------------------------
 	// The number of attributes changed but the number of nodes is the same!
@@ -229,6 +233,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 			   *it == ecf::Aspect::SUSPENDED)
 			{
 				Q_EMIT nodeChanged(this,node);
+                stateChangeSuites.insert(n);
 				runFilter=true;
 			}
 
@@ -718,7 +723,7 @@ VNode* VTreeModelData::topLevelNode(void* ptrToServer,int row)
 {
 	for(unsigned int i=0; i < servers_.size(); i++)
 	{
-		if(servers_.at(i) == ptrToServer)
+        if(servers_[i] == ptrToServer)
 		{
 			return servers_.at(i)->topLevelNode(row);
 		}
@@ -730,7 +735,7 @@ bool VTreeModelData::identifyTopLevelNode(const VNode* node,VModelServer** serve
 {
 	for(unsigned int i=0; i < servers_.size(); i++)
 	{
-		row=servers_.at(i)->indexOfTopLevelNode(node);
+        row=servers_[i]->indexOfTopLevelNode(node);
 		if(row != -1)
 		{
 			*server=servers_.at(i);
@@ -747,7 +752,7 @@ bool VTreeModelData::isFiltered(VNode *node) const
 	int id=indexOfServer(node->server());
 	if(id != -1)
 	{
-		return servers_.at(id)->filter_->isFiltered(node);
+        return servers_[id]->filter_->isFiltered(node);
 	}
 
 	return true;

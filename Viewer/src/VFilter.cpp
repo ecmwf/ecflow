@@ -11,6 +11,7 @@
 
 #include "NodeQuery.hpp"
 #include "NodeQueryEngine.hpp"
+#include "UserMessage.hpp"
 #include "VNState.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
@@ -22,8 +23,11 @@
 #include "ServerHandler.hpp"
 
 #include <QDebug>
+#include <QTime>
 
 #include <algorithm>
+
+#define _UI_VFILTER_DEBUG
 
 //==============================================
 //
@@ -270,7 +274,14 @@ bool TreeNodeFilter::isNull()
 
 bool TreeNodeFilter::isFiltered(VNode* node)
 {
-	if(resultMode_==StoreNonMatched)
+    if(nodes_.empty())
+        return true;
+
+    return nodes_[node->index()];
+
+#if 0
+
+    if(resultMode_==StoreNonMatched)
 	{
 		if(result_.empty())
 			return true;
@@ -284,6 +295,7 @@ bool TreeNodeFilter::isFiltered(VNode* node)
 
 		return (std::find(result_.begin(), result_.end(), node) != result_.end());
 	}
+#endif
 
 	return false;
 }
@@ -296,17 +308,34 @@ bool TreeNodeFilter::update(const VNode *node)
 }
 
 
-void TreeNodeFilter::beginReset(ServerHandler* server)
+void TreeNodeFilter::beginReset(ServerHandler* server,std::set<VNode*> changes)
 {
-	beingReset_=true;
+#ifdef _UI_VFILTER_DEBUG
+    UserMessage::debug("TreeNodeFilter::beginReset --> " + server->name());
+#endif
 
+    beingReset_=true;
+
+#if 0
 	result_.clear();
+#endif
+
 	resultMode_=StoreNonMatched;
+
+
+
+    nodes_.clear();
 
 	//If all states are visible
 	if(def_->nodeState_->isComplete() || def_->nodeState_->isEmpty())
 	{
-		return;
+        nodes_.reserve(0);
+        assert(nodes_.capacity() == 0);
+#ifdef _UI_VFILTER_DEBUG
+        UserMessage::debug("  no filter is defined!");
+#endif
+
+        return;
 	}
 
 	else //if(def_->nodeState_->isEmpty())
@@ -314,11 +343,30 @@ void TreeNodeFilter::beginReset(ServerHandler* server)
 		resultMode_=StoreMatched;
 	}
 
+
+#ifdef _UI_VFILTER_DEBUG
+    QTime timer;
+    timer.start();
+#endif
+
 	VServer* root=server->vRoot();
-	for(unsigned int j=0; j < root->numOfChildren();j++)
-	{
-		filterState(root->childAt(j),def_->nodeState_);
-	}
+    if(root->totalNum() > 0)
+    {
+        //nodes_.reserve(root->totalNum());
+        nodes_.resize(root->totalNum());
+        std::fill(nodes_.begin(), nodes_.end(), 0);
+
+        for(unsigned int j=0; j < root->numOfChildren();j++)
+        {
+            filterState(root->childAt(j),def_->nodeState_);
+        }
+    }
+
+#ifdef _UI_VFILTER_DEBUG
+    UserMessage::debug("  elapsed time: " + QString::number(timer.elapsed()).toStdString() + " ms");
+    UserMessage::debug("  filter size:" + QString::number(nodes_.size()).toStdString());
+#endif
+
 }
 
 void TreeNodeFilter::endReset()
@@ -344,7 +392,12 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 
 
 	if(ok)
-		result_.insert(node);
+    {
+        nodes_[node->index()]=1;
+#if 0
+        result_.insert(node);
+#endif
+    }
 
 	return ok;
 }

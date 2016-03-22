@@ -157,6 +157,7 @@ protected:
     std::set<std::string> type_;
     ResultMode resultMode_;
 	std::set<VNode*> result_;
+    std::vector<int> nodes_;
 	bool beingReset_;
 	NodeFilterEngine* queryEngine_;
 	MatchMode matchMode_;
@@ -167,7 +168,7 @@ class TreeNodeFilter : public NodeFilter
 public:
 	explicit TreeNodeFilter(NodeFilterDef* def);
 
-	void clear() {};
+    void clear() {}
 	void beginReset(ServerHandler* server);
 	void endReset();
 	bool update(const VNode*);

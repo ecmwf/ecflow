@@ -145,14 +145,15 @@ void VNode::removeChild(VNode* vn)
 
 VNode* VNode::childAt(int index) const
 {
-	return (index>=0 && index < children_.size())?children_.at(index):0;
+    assert(index>=0 && index < children_.size());
+    return children_[index];
 }
 
 int VNode::indexOfChild(const VNode* vn) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i) == vn)
+        if(children_[i] == vn)
 			return i;
 	}
 
@@ -163,7 +164,7 @@ int VNode::indexOfChild(node_ptr n) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i)->node() == n)
+        if(children_[i]->node() == n)
 			return i;
 	}
 
@@ -174,7 +175,7 @@ VNode *VNode::findChild(const std::string& name) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i)->sameName(name))
+        if(children_[i]->sameName(name))
 			return children_.at(i);
 	}
 	return 0;
@@ -185,7 +186,7 @@ void VNode::collect(std::vector<VNode*>& vec) const
 	for(int i=0; i < numOfChildren(); i++)
 	{
 		vec.push_back(children_.at(i));
-		children_.at(i)->collect(vec);
+        children_[i]->collect(vec);
 	}
 }
 

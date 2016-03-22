@@ -97,7 +97,7 @@ public:
 
 protected:
 	 int nodeStateChangeCnt_;
-
+     std::set<VNode*> nodeStateChange_;
 };
 
 class VTableServer : public VModelServer
