@@ -232,8 +232,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 			if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::DEFSTATUS ||
 			   *it == ecf::Aspect::SUSPENDED)
 			{
-				Q_EMIT nodeChanged(this,node);
-                stateChangeSuites.insert(n);
+				Q_EMIT nodeChanged(this,node);               
 				runFilter=true;
 			}
 

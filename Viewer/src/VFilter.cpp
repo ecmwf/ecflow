@@ -308,7 +308,7 @@ bool TreeNodeFilter::update(const VNode *node)
 }
 
 
-void TreeNodeFilter::beginReset(ServerHandler* server,std::set<VNode*> changes)
+void TreeNodeFilter::beginReset(ServerHandler* server)
 {
 #ifdef _UI_VFILTER_DEBUG
     UserMessage::debug("TreeNodeFilter::beginReset --> " + server->name());
