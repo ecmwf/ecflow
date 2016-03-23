@@ -171,9 +171,10 @@ public:
     void clear();
 	void beginReset(ServerHandler* server);
 	void endReset();
-	bool update(const VNode*);
+    //bool update(const VNode*);
+    bool update(ServerHandler* server,const std::vector<VNode>&stateChangeSuites);
 
-	bool isNull();
+    bool isNull();
 	bool isFiltered(VNode* node);
 	int  matchCount();
 	//int  nonMatchCount();
@@ -195,9 +196,9 @@ public:
 	explicit TableNodeFilter(NodeFilterDef* def);
 
 	void clear();
-	void beginReset(ServerHandler* server);
-	void endReset();
-	bool update(const VNode*);
+    //void beginReset(ServerHandler* server);
+    //void endReset();
+    //bool update(const VNode*);
     bool update(ServerHandler* server,const std::vector<VNode>&stateChangeSuites);
 
 	bool isNull();
