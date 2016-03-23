@@ -32,7 +32,7 @@ class TreeNodeView : public QTreeView, public NodeViewBase, public VPropertyObse
 Q_OBJECT
 
 public:
-	explicit TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
+    explicit TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
 	~TreeNodeView();
 
 	void reload();
@@ -41,8 +41,9 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
-	void setModel(NodeFilterModel* model);
-
+#if 0
+    void setModel(NodeFilterModel* model);
+#endif
 	void notifyChange(VProperty* p);
 
     void readSettings(VSettings* vs) {}
@@ -74,6 +75,7 @@ protected:
 	void expandAll(const QModelIndex& idx);
 	void collapseAll(const QModelIndex& idx);
 
+    TreeNodeModel* model_;
 	ActionHandler* actionHandler_;
 	ExpandState *expandState_;
 	bool needItemsLayout_;

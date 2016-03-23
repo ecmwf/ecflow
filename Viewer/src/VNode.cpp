@@ -47,6 +47,23 @@ ServerHandler* VNode::server() const
 	return (parent_)?(parent_->server()):NULL;
 }
 
+VNode* VNode::suite() const
+{
+    if(isTopLevel())
+        return const_cast<VNode*>(this);
+
+    VNode* p=parent();
+    while(p)
+    {
+        if(p->isTopLevel())
+            return p;
+    }
+
+    assert(0);
+
+    return NULL;
+}
+
 bool VNode::isTopLevel() const
 {
 	return (parent_ && parent_->isServer());

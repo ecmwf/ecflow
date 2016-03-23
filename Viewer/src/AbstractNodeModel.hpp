@@ -67,10 +67,12 @@ public Q_SLOTS:
 	virtual void slotServerRemoveEnd()=0;
 
 	virtual void slotDataChanged(VModelServer*)=0;
-	virtual void slotNodeChanged(VModelServer*,const VNode*)=0;
+#if 0
+    virtual void slotNodeChanged(VModelServer*,const VNode*)=0;
 	virtual void slotAttributesChanged(VModelServer*,const VNode*)=0;
 	virtual void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int)=0;
 	virtual void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int)=0;
+#endif
 
 	virtual void slotBeginServerScan(VModelServer* server,int)=0;
 	virtual void slotEndServerScan(VModelServer* server,int)=0;
@@ -82,7 +84,7 @@ protected:
 	void clean();
 	bool hasData() const;
 
-	virtual void resetStateFilter(bool broadcast) {};
+    virtual void resetStateFilter(bool broadcast) {}
 	virtual QModelIndex serverToIndex(ServerHandler*) const=0;
 
 	bool active_;

@@ -24,12 +24,14 @@
 #include "ExpandState.hpp"
 #include "NodeFilterModel.hpp"
 #include "PropertyMapper.hpp"
+#include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
 #include "VNode.hpp"
 
-TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
 	QTreeView(parent),
-	NodeViewBase(model,filterDef),
+    NodeViewBase(filterDef),
+    model_(model),
     needItemsLayout_(false),
 	defaultIndentation_(indentation()),
 	prop_(NULL)
@@ -101,6 +103,7 @@ TreeNodeView::~TreeNodeView()
 	delete prop_;
 }
 
+#if 0
 void TreeNodeView::setModel(NodeFilterModel *model)
 {
 	model_= model;
@@ -108,7 +111,7 @@ void TreeNodeView::setModel(NodeFilterModel *model)
 	//Set the model.
 	QTreeView::setModel(model_);
 }
-
+#endif
 
 QWidget* TreeNodeView::realWidget()
 {

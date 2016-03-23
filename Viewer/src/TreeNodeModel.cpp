@@ -41,7 +41,48 @@ TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef
 	//Create the data handler for the tree model.
 	data_=new VTreeModelData(filterDef,this);
 
+#if 0
+    //Connect singnals from data handler
+    connect(data_,SIGNAL(beginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)),
+        this,SLOT(slotBeginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)));
+
+    connect(data_,SIGNAL(endAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)),
+        this,SLOT(slotEndAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)));
+
+    connect(data_,SIGNAL(nodeChanged(VTreeServer*,const VTreeNode*)),
+        this,SLOT(slotNodeChanged(VTreeServer*,const VTreeNode*)));
+
+    connect(data_,SIGNAL(attributesChanged(VTreeServer*,const VTreeNode*)),
+        this,SLOT(slotAttributesChanged(VTreeServer*,const VTreeNode*)));
+
+
+    connect(data_,SIGNAL(dataChanged(VModelServer*)),
+        this,SLOT(slotDataChanged(VModelServer*)));
+
+    connect(data_,SIGNAL(beginServerScan(VModelServer*,int)),
+        this,SLOT(slotBeginServerScan(VModelServer*,int)));
+
+    connect(data_,SIGNAL(endServerScan(VModelServer*,int)),
+        this,SLOT(slotEndServerScan(VModelServer*,int)));
+
+    connect(data_,SIGNAL(beginServerClear(VModelServer*,int)),
+        this,SLOT(slotBeginServerClear(VModelServer*,int)));
+
+    connect(data_,SIGNAL(endServerClear(VModelServer*,int)),
+        this,SLOT(slotEndServerClear(VModelServer*,int)));
+
+    //The model relays this signal
+    connect(data_,SIGNAL(filterChanged()),
+        this,SIGNAL(filterChanged()));
+
+    //The model relays this signal
+    connect(data_,SIGNAL(rerender()),
+        this,SIGNAL(rerender()));
+
+#endif
+    //Reset the data handler
 	data_->reset(serverFilter);
+
 
 	//---------------------------------------
 	// Handle change in the filters' state
@@ -103,13 +144,16 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	//"parent" is a server
 	else if(isServer(parent))
 	{
-		if(VModelServer *md=indexToServer(parent))
+        if(VTreeServer *server=indexToServer(parent))
 		{
-			return md->attrNum()+md->topLevelNodeNum();
+            if(server->inScan())
+                return 0;
+            else
+                return server->attrNum()+server->topLevelNodeNum();
 		}
 	}
 	//"parent" is a node
-	else if(VNode* parentNode=indexToNode(parent))
+    else if(VTreeNode* parentNode=indexToNode(parent))
 	{
 		return parentNode->attrNum()+parentNode->numOfChildren();
 	}
@@ -196,7 +240,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(role == FilterRole)
 		return true;
 
-	ServerHandler *server=indexToRealServer(index);
+    ServerHandler *server=indexToServerHandler(index);
 	if(!server)
 		return QVariant();
 
@@ -282,7 +326,11 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
 QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 {
-	VNode* vnode=indexToNode(index);
+    VTreeNode* tnode=indexToNode(index);
+    if(!tnode)
+        return QVariant();
+
+    VNode* vnode=tnode->vnode();
 	if(!vnode || !vnode->node())
 		return QVariant();
 
@@ -439,19 +487,6 @@ QVariant TreeNodeModel::headerData( const int section, const Qt::Orientation ori
 {
 	//No header!!!
 	return QVariant();
-
-	if ( orient != Qt::Horizontal || role != Qt::DisplayRole )
-      		  return QAbstractItemModel::headerData( section, orient, role );
-
-   	switch ( section )
-	{
-   	case 0: return tr("Node");
-   	case 1: return tr("Status");
-   	case 2: return tr("Path");
-   	default: return QVariant();
-   	}
-
-    return QVariant();
 }
 
 QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & parent ) const
@@ -477,14 +512,14 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 	{
 		//If "parent" is a server this index refers to a topLevel node (suite).
 		//We set the server as an internal pointer
-		if(VModelServer* server=indexToServer(parent))
+        if(VTreeServer* server=indexToServer(parent))
 		{
 			//qDebug() << "NODE1" << parent << server->realServer()->name().c_str();
 			return createIndex(row,column,server);
 		}
 
-		//If "parent" is not a server it must be a node.
-		else if(VNode* parentNode=indexToNode(parent))
+        //If "parent" is not a server it must be a tree node. The internal pointer is the parent tree node.
+        else if(VTreeNode* parentNode=indexToNode(parent))
 		{
 			//qDebug() << "NODE2" << parent << parentNode->name().c_str() << VAttribute::totalNum(parentNode);
 			//qDebug() << "NODE2" << parent << parentNode->node()->name().c_str();
@@ -516,12 +551,21 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 
 	//The "child" cannot be a server attribute or a topLevel node so it must be a node or an attribute.
 	//Its internal pointer must point to the parent node.
-	else if(VNode *parentNode=static_cast<VNode*>(child.internalPointer()))
+    else if(VTreeNode *parentNode=static_cast<VTreeNode*>(child.internalPointer()))
 	{
 		//The parent is a topLevel node (suite): its internal pointer is the server
 		if(parentNode->isTopLevel())
 		{
-			VModelServer *server=NULL;
+            VTreeNode* root=parentNode->parent();
+            Q_ASSERT(root);
+            row=root->indexOfChild(parentNode);
+            Q_ASSERT(row >=0);
+
+            int serverAttrNum=root->attrNum();
+            return createIndex(serverAttrNum+row,0,root);
+
+#if 0
+            VModelServer *server=NULL;
 			row=-1;
 		    if(data_->identifyTopLevelNode(parentNode,&server,row))
 			{
@@ -530,10 +574,11 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 		    	//qDebug() << "PARENT 1" << child << server->realServer()->name().c_str();
 		    	return createIndex(serverAttrNum+row,0,server);
 			}
+#endif
 		}
 		//The parent is a non topLevel node (non-suite): its internal pointer
 		//is its parent (i.e.. the grandparent)
-		else if(VNode *grandParentNode=parentNode->parent())
+        else if(VTreeNode *grandParentNode=parentNode->parent())
 		{
 			int num=grandParentNode->attrNum()+grandParentNode->indexOfChild(parentNode);
 
@@ -559,7 +604,7 @@ bool TreeNodeModel::isServer(const QModelIndex & index) const
 
 bool TreeNodeModel::isNode(const QModelIndex & index) const
 {
-	return (indexToNode(index) != NULL);
+    return (indexToNode(index) != NULL);
 }
 
 bool TreeNodeModel::isAttribute(const QModelIndex & index) const
@@ -567,25 +612,25 @@ bool TreeNodeModel::isAttribute(const QModelIndex & index) const
 	return (index.isValid() && !isServer(index) && !isNode(index));
 }
 
-ServerHandler* TreeNodeModel::indexToRealServer(const QModelIndex & index) const
+ServerHandler* TreeNodeModel::indexToServerHandler(const QModelIndex & index) const
 {
 	//For servers the internal id is a null pointer
 	if(index.isValid())
 	{
 		if(index.internalPointer() == NULL)
-			return data_->realServer(index.row());
+            return data_->serverHandler(index.row());
 	}
 
 	return NULL;
 }
 
-VModelServer* TreeNodeModel::indexToServer(const QModelIndex & index) const
+VTreeServer* TreeNodeModel::indexToServer(const QModelIndex & index) const
 {
 	//For servers the internal id is a null pointer
 	if(index.isValid())
 	{
 		if(index.internalPointer() == NULL)
-			return data_->server(index.row());
+            return data_->server(index.row())->treeServer();
 	}
 
 	return NULL;
@@ -611,17 +656,26 @@ QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const
 	return QModelIndex();
 }
 
+//----------------------------------------------
+//
+// Node to index mapping and lookup
+//
+//----------------------------------------------
 
-VNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
+VTreeNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 {
 	//If it is not a sever ...
 	if(index.isValid() && !isServer(index))
 	{
 		//If the internal pointer is a server it is either a server attribute or a
 		//top level node (suite)
-		if(VModelServer *server=data_->server(index.internalPointer()))
+
+        if(VModelServer *mserver=data_->server(index.internalPointer()))
 		{
-			int serverAttNum=server->attrNum();
+            VTreeServer* server=mserver->treeServer();
+            Q_ASSERT(server);
+
+            int serverAttNum=server->attrNum();
 
 			//It is an attribute
 			if(index.row() < serverAttNum)
@@ -631,17 +685,17 @@ VNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 			//It is a top level node
 			else
 			{
-				return server->topLevelNode(index.row()-serverAttNum);
+                return server->childAt(index.row()-serverAttNum);
 			}
 		}
 
 		//Otherwise the internal pointer points to the parent node.
-		else if(VNode *parentNode=static_cast<VNode*>(index.internalPointer()))
+        else if(VTreeNode *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
 		{
 			int attNum=parentNode->attrNum();
 			if(index.row() >= attNum)
 			{
-				return parentNode->childAt(index.row()-attNum);
+                return parentNode->childAt(index.row()-attNum);
 			}
 		}
 	}
@@ -649,11 +703,10 @@ VNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 	return NULL;
 }
 
-
 //Find the index for the node! The VNode can be a server as well!!!
 QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
 {
-	if(!node)
+    if(!node)
 		return QModelIndex();
 
 	//This is a server!!!
@@ -664,46 +717,63 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
 	//If the node is toplevel node (suite).
 	else if(node->isTopLevel())
 	{
-		VModelServer* server=NULL;
-		int row=-1;
-		data_->identifyTopLevelNode(node,&server,row);
-		{
-			row+=server->attrNum();
-			return createIndex(row,column,server);
-		}
+        if(VModelServer *mserver=data_->server(node))
+        {
+            VTreeServer* server=mserver->treeServer();
+            Q_ASSERT(server);
+
+            if(VTreeNode* tn=server->find(node))
+            {
+                int row=tn->indexInParent();
+                Q_ASSERT(tn->parent() == server);
+                Q_ASSERT(row >=0);
+                row+=server->attrNum();
+                return createIndex(row,column,server);
+            }
+        }
 	}
-	//Other nodes
-	else if(VNode *parentNode=node->parent())
+
+    //Other nodes
+    else if(VNode *parentNode=node->parent())
 	{
-		int row=parentNode->indexOfChild(node);
-		if(row != -1)
-		{
-			row+=parentNode->attrNum();
-			return createIndex(row,column,parentNode);
-		}
+        if(VModelServer *mserver=data_->server(node))
+        {
+            VTreeServer* server=mserver->treeServer();
+            Q_ASSERT(server);
+
+            if(VTreeNode* tn=server->find(node))
+            {
+                VTreeNode* tnParent=tn->parent();
+                Q_ASSERT(tnParent);
+                Q_ASSERT(tnParent->vnode() == parentNode);
+                int row=tnParent->indexOfChild(tn);
+                row+=tnParent->attrNum();
+                return createIndex(row,column,tnParent);
+            }
+        }
 	}
 
 	return QModelIndex();
 }
 
 //Find the index for the node when we know what the server is!
-QModelIndex TreeNodeModel::nodeToIndex(VModelServer* server,const VNode* node, int column) const
+QModelIndex TreeNodeModel::nodeToIndex(VTreeServer* server,const VTreeNode* node, int column) const
 {
-	if(!node)
+    if(!node)
 		return QModelIndex();
 
 	//If the node is toplevel node (suite).
 	if(node->isTopLevel())
 	{
-		int row=server->indexOfTopLevelNode(node);
-		if(row != -1)
-		{
-			row+=server->attrNum();
-			return createIndex(row,column,server);
-		}
+        Q_ASSERT(node->parent() == server);
+        int row=server->indexOfChild(node);
+        Q_ASSERT(row >=0);
+
+        row+=server->attrNum();
+        return createIndex(row,column,server);
 	}
 	//Other nodes
-	else if(VNode *parentNode=node->parent())
+    else if(VTreeNode *parentNode=node->parent())
 	{
 		int row=parentNode->indexOfChild(node);
 		if(row != -1)
@@ -732,7 +802,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 	}
 
 	//Check if the node is a server
-	if(ServerHandler *s=indexToRealServer(index))
+    if(ServerHandler *s=indexToServerHandler(index))
 	{
 		return VInfoServer::create(s);
 	}
@@ -740,25 +810,32 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 
 	//If the internal pointer is a server it is either a server attribute or a
 	//top level node (suite)
-	if(VModelServer *server=data_->server(index.internalPointer()))
+    if(VModelServer *mserver=data_->server(index.internalPointer()))
 	{
-		int serverAttNum=server->attrNum();
+        VTreeServer *server=mserver->treeServer();
+        Q_ASSERT(server);
+
+        int serverAttNum=server->attrNum();
 
 		//It is a top level node
 		if(index.row() >= serverAttNum)
 		{
-			VNode *n=server->topLevelNode(index.row()-serverAttNum);
+            VNode *n=server->topLevelNode(index.row()-serverAttNum)->vnode();
 			return VInfoNode::create(n);
 		}
+        else
+        {
+            //TODO: serverattribute
+        }
 	}
 
 	//Otherwise the internal pointer points to the parent node
-	else if(VNode *parentNode=static_cast<VNode*>(index.internalPointer()))
+    else if(VTreeNode *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
 	{
 		int attNum=parentNode->attrNum();
 		if(index.row() >= attNum)
 		{
-			VNode *n=parentNode->childAt(index.row()-attNum);
+            VNode *n=parentNode->childAt(index.row()-attNum)->vnode();
 			return VInfoNode::create(n);
 		}
 		//It is an attribute
@@ -807,7 +884,7 @@ void TreeNodeModel::slotDataChanged(VModelServer* server)
 }
 
 //The node changed (it status etc)
-void TreeNodeModel::slotNodeChanged(VModelServer* server,const VNode* node)
+void TreeNodeModel::slotNodeChanged(VTreeServer* server,const VTreeNode* node)
 {
 	if(!node)
 		return;
@@ -822,7 +899,7 @@ void TreeNodeModel::slotNodeChanged(VModelServer* server,const VNode* node)
 
 //One of the attributes of the node changed. The total number of the
 //attributes is the same.
-void TreeNodeModel::slotAttributesChanged(VModelServer* server,const VNode* node)
+void TreeNodeModel::slotAttributesChanged(VTreeServer* server,const VTreeNode* node)
 {
 	if(!node)
 		return;
@@ -841,7 +918,7 @@ void TreeNodeModel::slotAttributesChanged(VModelServer* server,const VNode* node
 }
 
 //Attributes were added or removed
-void TreeNodeModel::slotBeginAddRemoveAttributes(VModelServer* server,const VNode* node,int currentNum,int cachedNum)
+void TreeNodeModel::slotBeginAddRemoveAttributes(VTreeServer* server,const VTreeNode* node,int currentNum,int cachedNum)
 {
 	int diff=currentNum-cachedNum;
 	if(diff==0)
@@ -874,7 +951,7 @@ void TreeNodeModel::slotBeginAddRemoveAttributes(VModelServer* server,const VNod
 }
 
 //Attributes were added or removed
-void TreeNodeModel::slotEndAddRemoveAttributes(VModelServer* server,const VNode* node,int currentNum,int cachedNum)
+void TreeNodeModel::slotEndAddRemoveAttributes(VTreeServer* server,const VTreeNode* node,int currentNum,int cachedNum)
 {
 	int diff=currentNum-cachedNum;
 	if(diff==0)
@@ -915,7 +992,7 @@ void TreeNodeModel::slotBeginServerScan(VModelServer* server,int num)
 	QModelIndex idx=serverToIndex(server);
 
 	//At this point the server node does not have any rows in the model!!!
-	if(idx.isValid() && num >0)
+    if(idx.isValid() && num >0)
 	{
 		beginInsertRows(idx,0,num-1);
 	}
@@ -929,7 +1006,8 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server,int num)
 	QModelIndex idx=serverToIndex(server);
 	if(idx.isValid() && num >0)
 	{
-		endInsertRows();
+        beginInsertRows(idx,0,num-1);
+        endInsertRows();
 	}
 	Q_EMIT scanEnded(server->realServer()->vRoot());
 }

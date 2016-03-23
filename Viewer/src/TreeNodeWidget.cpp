@@ -48,13 +48,14 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	//data_->reset(servers);
 
 	//Create a filter model for the tree.
-	filterModel_=new NodeFilterModel(model_,this);
+    //filterModel_=new NodeFilterModel(model_,this);
 
 	//Create the view
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
-	TreeNodeView *tv=new TreeNodeView(filterModel_,filterDef_,this);
+    TreeNodeView *tv=new TreeNodeView((TreeNodeModel*)model_,filterDef_,this);
+    //TreeNodeView *tv=new TreeNodeView(filterModel_,filterDef_,this);
 	hb->addWidget(tv);
 
 	//Store the pointer to the (non-QObject) base class of the view!!!

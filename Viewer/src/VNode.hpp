@@ -87,7 +87,8 @@ public:
 
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
-	virtual ServerHandler* server() const;
+    virtual ServerHandler* server() const;
+    virtual VNode* suite() const;
     node_ptr node() const {return node_;}
     virtual bool isTopLevel() const;
     virtual bool isServer() const {return false;}
@@ -195,6 +196,7 @@ public:
 	~VServer();
 
 	ServerHandler* server() const {return server_;}
+    VNode* suite() const {return NULL;}
 
 	bool isEmpty() const { return numOfChildren() == 0;}
 	bool isTopLevel() const {return false;}

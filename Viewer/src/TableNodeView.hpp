@@ -66,6 +66,7 @@ protected:
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void adjustBackground(QColor col);
 
+    NodeFilterModel* model_;
 	ActionHandler* actionHandler_;
 	TableNodeHeader* header_;
 	bool needItemsLayout_;

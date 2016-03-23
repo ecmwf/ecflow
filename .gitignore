@@ -8,14 +8,14 @@
 nbproject/
 
 #Qt creator
-ecflow.config
 *.creator
 *.creator.*
+ecflow.config
 ecflow.includes
 ecflow.files
-ecflow_attr.config
-ecflow_attr.files
-ecflow_attr.includes
+ecflow_*.config
+ecflow_*.files
+ecflow_*.includes
  
 # cmake
 ecbuild/

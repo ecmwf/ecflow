@@ -24,6 +24,8 @@ class ServerFilter;
 class ServerHandler;
 class VModelServer;
 class VTreeModelData;
+class VTreeNode;
+class VTreeServer;
 
 class TreeNodeModel : public AbstractNodeModel
 {
@@ -43,6 +45,7 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
+    QModelIndex nodeToIndex(const VNode*,int column=0) const;
    	VInfo_ptr nodeInfo(const QModelIndex& index);
 
    	VModelData* data() const;
@@ -53,14 +56,14 @@ public Q_SLOTS:
 	void slotServerRemoveBegin(int row);
 	void slotServerRemoveEnd();
 
-	void slotDataChanged(VModelServer*);
-	void slotNodeChanged(VModelServer*,const VNode*);
-	void slotAttributesChanged(VModelServer*,const VNode*);
-	void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
-	void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int);
+    void slotNodeChanged(VTreeServer*,const VTreeNode*);
+    void slotAttributesChanged(VTreeServer*,const VTreeNode*);
+    void slotBeginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
+    void slotEndAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
 
 	//void slotResetBranch(VModelServer*,const VNode*);
-	void slotBeginServerScan(VModelServer* server,int);
+    void slotDataChanged(VModelServer*);
+    void slotBeginServerScan(VModelServer* server,int);
 	void slotEndServerScan(VModelServer* server,int);
 	void slotBeginServerClear(VModelServer* server,int);
 	void slotEndServerClear(VModelServer* server,int);
@@ -75,14 +78,13 @@ private:
 	bool isNode(const QModelIndex & index) const;
 	bool isAttribute(const QModelIndex & index) const;
 
-	ServerHandler* indexToRealServer(const QModelIndex & index) const;
-	VModelServer* indexToServer(const QModelIndex & index) const;
-	QModelIndex serverToIndex(VModelServer* server) const;
+    ServerHandler* indexToServerHandler(const QModelIndex & index) const;
+    VTreeServer* indexToServer(const QModelIndex & index) const;
+    QModelIndex serverToIndex(VModelServer* server) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 
-	QModelIndex nodeToIndex(const VNode*,int column=0) const;
-	QModelIndex nodeToIndex(VModelServer*,const VNode*,int column=0) const;
-	VNode* indexToNode( const QModelIndex & index) const;
+    QModelIndex nodeToIndex(VTreeServer*,const VTreeNode*,int column=0) const;
+    VTreeNode* indexToNode( const QModelIndex & index) const;
 
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;

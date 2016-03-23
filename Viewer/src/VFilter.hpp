@@ -134,12 +134,12 @@ public:
 	virtual ~NodeFilter();
 
 	virtual void clear()=0;
-	virtual void beginReset(ServerHandler* server)=0;
-	virtual void endReset()=0;
-	virtual bool update(const VNode*)=0;
+    //virtual void beginReset(ServerHandler* server)=0;
+    //virtual void endReset()=0;
+    //virtual bool update(const VNode*)=0;
 
 	virtual bool isNull()=0;
-	virtual bool isFiltered(VNode* node)=0;
+    //virtual bool isFiltered(VNode* node)=0;
     virtual int  matchCount()=0;
     //virtual int  nonMatchCount()=0;
     //virtual VNode* matchAt(int i)=0;
@@ -151,13 +151,13 @@ public:
     std::set<VNode*> match_;
     std::set<VNode*> nonMatch_;
     std::vector<bool> res_;
+    std::vector<VNode*> nodes_;
 
 protected:
     NodeFilterDef* def_;
     std::set<std::string> type_;
     ResultMode resultMode_;
 	std::set<VNode*> result_;
-    std::vector<int> nodes_;
 	bool beingReset_;
 	NodeFilterEngine* queryEngine_;
 	MatchMode matchMode_;
@@ -168,7 +168,7 @@ class TreeNodeFilter : public NodeFilter
 public:
 	explicit TreeNodeFilter(NodeFilterDef* def);
 
-    void clear() {}
+    void clear();
 	void beginReset(ServerHandler* server);
 	void endReset();
 	bool update(const VNode*);
@@ -198,6 +198,7 @@ public:
 	void beginReset(ServerHandler* server);
 	void endReset();
 	bool update(const VNode*);
+    bool update(ServerHandler* server,const std::vector<VNode>&stateChangeSuites);
 
 	bool isNull();
 	bool isFiltered(VNode* node);

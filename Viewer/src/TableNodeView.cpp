@@ -33,7 +33,8 @@
 
 TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
      QTreeView(parent),
-	 NodeViewBase(model,filterDef),
+     NodeViewBase(filterDef),
+     model_(model),
 	 needItemsLayout_(false),
 	 prop_(NULL)
 {
@@ -95,7 +96,6 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 
 	/*connect(header(),SIGNAL(sectionMoved(int,int,int)),
                 this, SLOT(slotMessageTreeColumnMoved(int,int,int)));*/
-
 
 	QTreeView::setModel(model_);
 

@@ -22,6 +22,45 @@
 
 #define _UI_VMODELDATA_DEBUG
 
+void VTreeChangeInfo::addStateChange(const VNode* n)
+{
+    VNode* s=n->suite();
+    if(!stateSuites_.contains(s))
+        stateSuites_ << s;
+}
+
+
+VTreeNode::VTreeNode(VNode* n,VTreeNode* parent) : vnode_(n), parent_(parent), attrNum_(0)
+{
+    if(parent_)
+        parent_->addChild(this);
+}
+
+void VTreeNode::addChild(VTreeNode* ch)
+{
+    children_.push_back(ch);
+}
+
+int VTreeNode::indexOfChild(const VTreeNode* vn) const
+{
+    for(unsigned int i=0; i < children_.size(); i++)
+    {
+        if(children_[i] == vn)
+            return i;
+    }
+
+    return -1;
+}
+
+int VTreeNode::indexInParent() const
+{
+    if(parent_)
+    {
+        return parent_->indexOfChild(this);
+    }
+    return -1;
+}
+
 //==========================================
 //
 // VModelServer
@@ -32,12 +71,13 @@
 
 VModelServer::VModelServer(ServerHandler *server) :
    server_(server),
-   filter_(0)
+   filter_(0),
+   inScan_(0)
 {
 	//We has to observe the nodes of the server.
 	server_->addNodeObserver(this);
 
-	//We has to observe the nodes of the server.
+    //We has to observe the server.
 	server_->addServerObserver(this);
 
 }
@@ -51,37 +91,17 @@ VModelServer::~VModelServer()
 		delete filter_;
 }
 
-VNode* VModelServer::topLevelNode(int row) const
-{
-	return server_->vRoot()->childAt(row);
-}
-
-int VModelServer::indexOfTopLevelNode(const VNode* node) const
-{
-	return server_->vRoot()->indexOfChild(node);
-}
-
-int VModelServer::topLevelNodeNum() const
-{
-	return server_->vRoot()->numOfChildren();
-}
-
 int VModelServer::totalNodeNum() const
 {
 	return server_->vRoot()->totalNum();
-}
-
-int VModelServer::attrNum() const
-{
-	return server_->vRoot()->attrNum();
 }
 
 void VModelServer::runFilter()
 {
 	if(filter_)
 	{
-		filter_->beginReset(server_);
-		filter_->endReset();
+        //filter_->beginReset(server_);
+        //filter_->endReset();
 	}
 }
 
@@ -95,16 +115,19 @@ void VModelServer::runFilter()
 
 VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef) :
    VModelServer(server),
-   nodeStateChangeCnt_(0)
+   VTreeNode(server->vRoot(),0),
+   nodeStateChangeCnt_(0),
+   changeInfo_(new VTreeChangeInfo())
 {
 	filter_=new TreeNodeFilter(filterDef);
-
 	//We has to observe the nodes of the server.
 	//server_->addNodeObserver(this);
 }
 
 VTreeServer::~VTreeServer()
 {
+    clearTree();
+    delete changeInfo_;
 }
 
 int VTreeServer::checkAttributeUpdateDiff(VNode *node)
@@ -114,6 +137,8 @@ int VTreeServer::checkAttributeUpdateDiff(VNode *node)
 	//return current-last;
 	return 0;
 }
+
+
 
 //--------------------------------------------------
 // ServerObserver methods
@@ -126,24 +151,39 @@ void VTreeServer::notifyDefsChanged(ServerHandler* server, const std::vector<ecf
 
 void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
 {
-	Q_EMIT beginServerScan(this,change.attrNum_+change.suiteNum_);
+    Q_ASSERT(numOfChildren() == 0 && attrNum() == 0);
+    //Q_EMIT beginServerScan(this,change.attrNum_+change.suiteNum_);
+    //clearTree();
 }
 
-void VTreeServer::notifyEndServerScan(ServerHandler* server)
+void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
 {
-	runFilter();
-	Q_EMIT endServerScan(this,
-			server->vRoot()->attrNum()+server->vRoot()->numOfChildren());
+    inScan_=true;
+
+    if(filter_->isNull())
+    {
+        buildTree();
+    }
+    else
+    {
+        runFilter();
+        buildTree(filter_->nodes_);
+    }
+
+    Q_EMIT beginServerScan(this, attrNum()+numOfChildren());
+    inScan_=false;
+    Q_EMIT endServerScan(this, attrNum()+numOfChildren());
 }
 
 void VTreeServer::notifyBeginServerClear(ServerHandler* server)
 {
-	Q_EMIT beginServerClear(this,-1);
+    Q_EMIT beginServerClear(this,-1);
+    clearTree();
 }
 
 void VTreeServer::notifyEndServerClear(ServerHandler* server)
 {
-	runFilter();
+    //runFilter();  ??why we need it?
 	Q_EMIT endServerClear(this,-1);
 }
 
@@ -161,12 +201,13 @@ void VTreeServer::notifyServerActivityChanged(ServerHandler* server)
 //filter to this point but now we need to do it.
 void VTreeServer::notifyEndServerSync(ServerHandler* server)
 {
-	if(nodeStateChangeCnt_ >0)
+    if(changeInfo_->stateChangeSuites().count() >0)
 	{
 #ifdef _UI_VMODELDATA_DEBUG
         UserMessage::debug("VTreeServer::notifyEndServerSync --> number of state changes: " + QString::number(nodeStateChangeCnt_).toStdString());
 #endif
-        nodeStateChangeCnt_=0;
+        //nodeStateChangeCnt_=0;
+        changeInfo_->clear();
 
 		if(!filter_->isNull())
 		{
@@ -180,15 +221,17 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
 // NodeObserver methods
 //--------------------------------------------------
 
-void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
+void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
 {
-	if(node==NULL)
+    if(vnode==NULL)
 		return;
 
-	bool runFilter=false;
+    VTreeNode* node=find(vnode);
+    Q_ASSERT(node);
+
+    //bool runFilter=false;
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
-    std::set<VNode*> stateChangeSuites;
 
 	//-----------------------------------------------------------------------
 	// The number of attributes changed but the number of nodes is the same!
@@ -233,7 +276,9 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 			   *it == ecf::Aspect::SUSPENDED)
 			{
 				Q_EMIT nodeChanged(this,node);               
-				runFilter=true;
+                changeInfo_->addStateChange(vnode);
+
+                //runFilter=true;
 			}
 
 			//Changes might affect the icons
@@ -257,19 +302,24 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 		}
 	}
 
+#if 0
 	//We do not run the filter now but wait until the sync is finished!
 	if(runFilter)
 	{
 		nodeStateChangeCnt_++;
 	}
+#endif
 }
 
-void VTreeServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
+void VTreeServer::notifyEndNodeChange(const VNode* vnode, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
 {
-	if(node==NULL)
+    if(vnode==NULL)
 		return;
 
-	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+    VTreeNode* node=find(vnode);
+    Q_ASSERT(node);
+
+    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 	//-----------------------------------------------------------------------
@@ -291,8 +341,84 @@ void VTreeServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::
 	{
 		assert(0);
 	}
-
 }
+
+void VTreeServer::runFilter()
+{
+    if(filter_)
+    {
+        filter_->update(server_,changeInfo_->suites());
+    }
+}
+
+VTreeNode* VTreeServer::find(const VNode* vn) const
+{
+    Q_ASSERT(vn->index()  < nodeVec_.size());
+    return nodeVec_[vn->index()];
+}
+
+VTreeNode* VTreeServer::topLevelNode(int row) const
+{
+    return children_[row];
+}
+
+int VTreeServer::indexOfTopLevelNode(const VTreeNode* node) const
+{
+    return indexOfChild(node);
+}
+
+int VTreeServer::topLevelNodeNum() const
+{
+    return numOfChildren();
+}
+
+void VTreeServer::buildTree(const std::vector<VNode*>& filter)
+{
+    nodeVec_.resize(server_->vRoot()->totalNum());
+    VTreeNode *nptr=0;
+    std::fill(nodeVec_.begin(), nodeVec_.end(), nptr);
+
+    for(unsigned int j=0; j < server_->vRoot()->numOfChildren();j++)
+    {
+        buildTree(this,server_->vRoot()->childAt(j),filter);
+    }
+}
+
+void VTreeServer::buildTree(VTreeNode* parent,VNode* node,const std::vector<VNode*>& filter)
+{
+     if(filter[node->index()])
+     {
+         VTreeNode *n=new VTreeNode(node,parent);
+         nodeVec_[node->index()]=n;
+         for(unsigned int j=0; j < node->numOfChildren();j++)
+         {
+             buildTree(n,node->childAt(j),filter);
+         }
+     }
+}
+
+void VTreeServer::buildTree()
+{
+    nodeVec_.resize(server_->vRoot()->totalNum());
+    VTreeNode *nptr=0;
+    std::fill(nodeVec_.begin(), nodeVec_.end(), nptr);
+
+    for(unsigned int j=0; j < server_->vRoot()->numOfChildren();j++)
+    {
+        buildTree(this,server_->vRoot()->childAt(j));
+    }
+}
+
+void VTreeServer::buildTree(VTreeNode* parent,VNode* vnode)
+{
+    VTreeNode *n=new VTreeNode(vnode,parent);
+    nodeVec_[vnode->index()]=n;
+    for(unsigned int j=0; j < vnode->numOfChildren();j++)
+    {
+        buildTree(n,vnode->childAt(j));
+    }
+}
+
 
 //==========================================
 //
@@ -463,20 +589,22 @@ VModelData::~VModelData()
 
 void VModelData::connectToModel(VModelServer* d)
 {
-	connect(d,SIGNAL(beginAddRemoveAttributes(VModelServer*,const VNode*,int,int)),
+#if 0
+    connect(d,SIGNAL(beginAddRemoveAttributes(VModelServer*,const VNode*,int,int)),
 		model_,SLOT(slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int)));
 
 	connect(d,SIGNAL(endAddRemoveAttributes(VModelServer*,const VNode*,int,int)),
 		model_,SLOT(slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int)));
-
-	connect(d,SIGNAL(dataChanged(VModelServer*)),
-		model_,SLOT(slotDataChanged(VModelServer*)));
 
 	connect(d,SIGNAL(nodeChanged(VModelServer*,const VNode*)),
 		model_,SLOT(slotNodeChanged(VModelServer*,const VNode*)));
 
 	connect(d,SIGNAL(attributesChanged(VModelServer*,const VNode*)),
 		model_,SLOT(slotAttributesChanged(VModelServer*,const VNode*)));
+#endif
+
+    connect(d,SIGNAL(dataChanged(VModelServer*)),
+        model_,SLOT(slotDataChanged(VModelServer*)));
 
 	connect(d,SIGNAL(beginServerScan(VModelServer*,int)),
 		model_,SLOT(slotBeginServerScan(VModelServer*,int)));
@@ -498,8 +626,6 @@ void VModelData::connectToModel(VModelServer* d)
 	connect(d,SIGNAL(rerender()),
 		model_,SIGNAL(rerender()));
 }
-
-
 
 //Completely clear the data and rebuild everything with a new
 //ServerFilter.
@@ -553,7 +679,7 @@ VModelServer* VModelData::server(int n) const
 	return (n >=0 && n < servers_.size())?servers_.at(n):0;
 }
 
-ServerHandler* VModelData::realServer(int n) const
+ServerHandler* VModelData::serverHandler(int n) const
 {
 	return (n >=0 && n < servers_.size())?servers_.at(n)->server_:0;
 }
@@ -567,7 +693,7 @@ int VModelData::indexOfServer(void* idPointer) const
 	return -1;
 }
 
-ServerHandler* VModelData::realServer(void* idPointer) const
+ServerHandler* VModelData::serverHandler(void* idPointer) const
 {
 	for(unsigned int i=0; i < servers_.size(); i++)
 		if(servers_.at(i) == idPointer)
@@ -576,7 +702,7 @@ ServerHandler* VModelData::realServer(void* idPointer) const
 	return NULL;
 }
 
-VModelServer* VModelData::server(void* idPointer) const
+VModelServer* VModelData::server(const void* idPointer) const
 {
 	for(unsigned int i=0; i < servers_.size(); i++)
 		if(servers_.at(i) == idPointer)
@@ -707,42 +833,35 @@ VTreeModelData::VTreeModelData(NodeFilterDef* filterDef,AbstractNodeModel* model
 
 }
 
+void VTreeModelData::connectToModel(VModelServer* s)
+{
+    VModelData::connectToModel(s);
+
+    VTreeServer* ts=s->treeServer();
+    Q_ASSERT(ts);
+
+    connect(ts,SIGNAL(beginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)),
+        model_,SLOT(slotBeginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)));
+
+    connect(ts,SIGNAL(endAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)),
+        model_,SLOT(slotEndAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)));
+
+    connect(ts,SIGNAL(nodeChanged(VTreeServer*,const VTreeNode*)),
+        model_,SLOT(slotNodeChanged(VTreeServer*,const VTreeNode*)));
+
+    connect(ts,SIGNAL(attributesChanged(VTreeServer*,const VTreeNode*)),
+        model_,SLOT(slotAttributesChanged(VTreeServer*,const VTreeNode*)));
+
+}
 void VTreeModelData::add(ServerHandler *server)
 {
 	VModelServer* d=NULL;
 
 	d=new VTreeServer(server,filterDef_);
 
-	VModelData::connectToModel(d);
+    connectToModel(d);
 
 	servers_.push_back(d);
-}
-
-VNode* VTreeModelData::topLevelNode(void* ptrToServer,int row)
-{
-	for(unsigned int i=0; i < servers_.size(); i++)
-	{
-        if(servers_[i] == ptrToServer)
-		{
-			return servers_.at(i)->topLevelNode(row);
-		}
-	}
-	return NULL;
-}
-
-bool VTreeModelData::identifyTopLevelNode(const VNode* node,VModelServer** server,int& row)
-{
-	for(unsigned int i=0; i < servers_.size(); i++)
-	{
-        row=servers_[i]->indexOfTopLevelNode(node);
-		if(row != -1)
-		{
-			*server=servers_.at(i);
-			return true;
-		}
-	}
-
-	return false;
 }
 
 //This has to be very fast!!!
@@ -775,7 +894,7 @@ void VTableModelData::add(ServerHandler *server)
 
 	d=new VTableServer(server,filterDef_);
 
-	VModelData::connectToModel(d);
+    connectToModel(d);
 
 	servers_.push_back(d);
 }
