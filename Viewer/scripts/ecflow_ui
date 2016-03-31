@@ -16,12 +16,28 @@ cleanup(){
     status=$?
     trap "" EXIT ERR
 
+    # restore stdout/stderr
+    if [ x$ECFUI_SLOG != xyes ]
+    then
+        exec 1>&5
+        exec 2>&6
+    fi
+
+
     if [ "$status" = "0" ]
     then
         echo "$(basename $0): $1 (OK) (line $2), exit status $status, starting 'cleanup'"
     else
         echo "$(basename $0): $1 on ERROR (line $2), exit status $status, starting 'cleanup'"
+
+        if [ -e $ECFLOWUI_LOGFILE ] ; then
+            echo "Last 50 lines of log file:"
+            tail -50 $ECFLOWUI_LOGFILE
+        fi
     fi
+
+
+
 
     if [ $(echo $ECFLOWUI_TMPDIR | grep -c "/ecflow_ui.") -ge 1 ] ; then
         rm -Rf $ECFLOWUI_TMPDIR
@@ -29,6 +45,63 @@ cleanup(){
 
     exit $status
 }
+
+
+
+#-----------------------------------------------------------
+# checkoption()
+# Checks the command-line options
+#-----------------------------------------------------------
+
+checkoption() {
+
+while [ "$1" != "" ]
+do
+	case "$1" in
+
+		-log)
+			ECFUI_SLOG=yes
+			;;
+
+		-slog)
+			ECFUI_SLOG=yes
+			;;
+
+        -h)
+            ECFUI_HELP=yes
+            ;;
+
+	esac
+	shift
+done
+}
+
+
+
+checkoption "$@"
+
+
+
+#-----------------------------------------------------------
+# Help message
+#-----------------------------------------------------------
+
+if [ "x$ECFUI_HELP" != x ]
+then
+
+    cat <<HEND
+EcflowUI
+  Command-line flags:
+    -log : write log messages to standard output
+    -h   : print this help message
+HEND
+
+    exit 0
+fi
+
+
+
+
 
 #Define tmp root dir
 TMPDIR_ROOT=${TMPDIR:=/tmp}
@@ -56,6 +129,26 @@ then
     echo "  variable \$TMPDIR is set to a valid directory and try again."
     exit 1
 fi
+
+
+# Where to write the log file to
+ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
+
+
+#-----------------------------------------------------------
+# Close tty and redirect stdout to a file?
+#-----------------------------------------------------------
+
+if [ x$ECFUI_SLOG != xyes ]
+then
+    exec  < /dev/null
+    exec 5>&1                 # store for later
+    exec 6>&2                 # store for later 
+    exec 1> $ECFLOWUI_LOGFILE # (restored in cleanup())
+    exec 2> $ECFLOWUI_LOGFILE # (restored in cleanup())
+fi
+
+
 
 # =============================================================
 # tmp directory cleaned automatically at end or at error.
