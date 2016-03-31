@@ -75,16 +75,28 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
 
-    connect(model_,SIGNAL(clearBegun(const VNode*)),
-			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
+    connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
+            view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
 
-	connect(model_,SIGNAL(scanEnded(const VNode*)),
-            view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
+    connect(model_,SIGNAL(scanEnded(const VTreeNode*)),
+            view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
 
 	connect(model_,SIGNAL(rerender()),
 	        view_->realWidget(),SLOT(slotRerender()));
 
-	connect(atts_,SIGNAL(changed()),
+    connect(model_,SIGNAL(filterChangeBegun()),
+            view_->realWidget(),SLOT(slotSaveExpand()));
+
+    connect(model_,SIGNAL(filterChangeEnded()),
+            view_->realWidget(),SLOT(slotRestoreExpand()));
+
+    connect(model_,SIGNAL(filterUpdateRemoveBegun(const VTreeNode*)),
+            view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+
+    connect(model_,SIGNAL(filterUpdateAddEnded(const VTreeNode*)),
+            view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+
+    connect(atts_,SIGNAL(changed()),
 		   this,SLOT(slotAttsChanged()));
 
 	//This will not emit the trigered signal of the action!!

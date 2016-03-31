@@ -134,7 +134,8 @@ public:
 	virtual ~NodeFilter();
 
 	virtual void clear()=0;
-    //virtual void beginReset(ServerHandler* server)=0;
+    virtual bool update(ServerHandler* server)=0;
+                //virtual void beginReset(ServerHandler* server)=0;
     //virtual void endReset()=0;
     //virtual bool update(const VNode*)=0;
 
@@ -171,8 +172,9 @@ public:
     void clear();
 	void beginReset(ServerHandler* server);
 	void endReset();
-    //bool update(const VNode*);
-    bool update(ServerHandler* server,const std::vector<VNode>&stateChangeSuites);
+    bool update(ServerHandler* server);
+    bool update(ServerHandler* server,const std::vector<VNode*>& topChange,
+                std::vector<VNode*>& topFilterChange);
 
     bool isNull();
 	bool isFiltered(VNode* node);
@@ -186,7 +188,9 @@ public:
 
 private:
 	bool filterState(VNode* node,VParamSet* stateFilter);
-	//std::vector<VNode*> match_;
+    bool checkState(VNode* n,const std::vector<VNode*>& prevNodes,std::vector<VNode*>& topFilterChange);
+
+    //std::vector<VNode*> match_;
 	//std::set<VNode*> nonMatch_;
 };
 
@@ -196,10 +200,10 @@ public:
 	explicit TableNodeFilter(NodeFilterDef* def);
 
 	void clear();
-    //void beginReset(ServerHandler* server);
-    //void endReset();
+    void beginReset(ServerHandler* server);
+    void endReset();
     //bool update(const VNode*);
-    bool update(ServerHandler* server,const std::vector<VNode>&stateChangeSuites);
+    bool update(ServerHandler* server) {return true;}
 
 	bool isNull();
 	bool isFiltered(VNode* node);

@@ -26,6 +26,7 @@ class NodeFilterModel;
 class PropertyMapper;
 class TreeNodeModel;
 class TreeNodeViewDelegate;
+class VTreeNode;
 
 class TreeNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver
 {
@@ -54,8 +55,10 @@ public Q_SLOTS:
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(VInfo_ptr,QString);
 	void slotSetCurrent(VInfo_ptr);
-	void slotSaveExpand(const VNode* node);
-	void slotRestoreExpand(const VNode* node);
+    void slotSaveExpand();
+    void slotRestoreExpand();
+    void slotSaveExpand(const VTreeNode* node);
+    void slotRestoreExpand(const VTreeNode* node);
 	void slotRepaint(Animation*);
 	void slotRerender();
 	void slotSizeHintChangedGlobal();
@@ -77,7 +80,7 @@ protected:
 
     TreeNodeModel* model_;
 	ActionHandler* actionHandler_;
-	ExpandState *expandState_;
+    ExpandState *expandState_;
 	bool needItemsLayout_;
 	int defaultIndentation_;
 	TreeNodeViewDelegate* delegate_;

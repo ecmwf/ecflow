@@ -18,21 +18,22 @@
 #include "VParam.hpp"
 
 class VNode;
+class AttributeFilter;
 
 class VAttribute : public VParam
 {
 public:
 	explicit VAttribute(const std::string& name);
-	virtual ~VAttribute() {};
+    virtual ~VAttribute() {}
     
 	static std::vector<VParam*> filterItems();
 	
-	static VAttribute* getType(const VNode *vnode,int row);
-	static bool getData(VNode* vnode,int row,VAttribute* &type,QStringList& data);
-	static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data);
-	static int totalNum(const VNode *vnode);
+    static VAttribute* getType(const VNode *vnode,int row,AttributeFilter *filter=0);
+    static bool getData(VNode* vnode,int row,VAttribute* &type,QStringList& data,AttributeFilter *filter=0);
+    static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter=0);
+    static int totalNum(const VNode *vnode,AttributeFilter *filter=0);
 	static void init(const std::string& parFile);
-	static int getLineNum(const VNode *vnode,int row);
+    static int getLineNum(const VNode *vnode,int row,AttributeFilter *filter=0);
 	
 	static VAttribute* find(const std::string& name);
 

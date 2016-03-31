@@ -726,7 +726,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 
 		if(hasNum)
 		{
-			numTxt="(" + QString::number(va.toInt()) + ")";
+            numTxt="(" + va.toString() + ")";
 			QFontMetrics fmNum(suiteNumFont_);
 
 			int numWidth=fmNum.width(numTxt);

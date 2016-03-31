@@ -27,6 +27,8 @@
 #include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
 #include "VNode.hpp"
+#include "VModelData.hpp"
+#include "VTree.hpp"
 
 TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
 	QTreeView(parent),
@@ -39,7 +41,7 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 	setProperty("style","nodeView");
 	setProperty("view","tree");
 
-	expandState_=new ExpandState();
+    expandState_=new ExpandState(this,model_);
 	actionHandler_=new ActionHandler(this);
 
 	//Set the model.
@@ -352,6 +354,84 @@ void TreeNodeView::collapseAll(const QModelIndex& idx)
 	}
 }
 
+//Save all
+void TreeNodeView::slotSaveExpand()
+{
+    for(int i=0; i < model_->rowCount(); i++)
+    {
+        QModelIndex serverIdx=model_->index(i, 0);
+        VTreeServer* ts=model_->indexToServer(serverIdx);
+        Q_ASSERT(ts);
+        ExpandStateTree* es=expandState_->add();
+        es->save(ts->tree());
+    }
+
+    VInfo_ptr s=currentSelection();
+    if(s)
+    {
+       expandState_->selection_=s;
+    }
+
+}
+
+void TreeNodeView::slotRestoreExpand()
+{
+    Q_FOREACH(ExpandStateTree* es,expandState_->items())
+    {
+        if(es->root())
+        {
+            VTreeServer* ts=model_->nameToServer(es->root()->name_);
+            if(ts)
+            {
+                es->restore(ts->tree());
+            }
+        }
+    }
+
+    if(expandState_->selection_)
+    {
+        VInfo_ptr s=currentSelection();
+        if(!s)
+        {
+            expandState_->selection_->regainData();
+            currentSelection(expandState_->selection_);
+        }
+    }
+
+    expandState_->clear();
+}
+
+//Save the expand state for the given node (it can be a server as well)
+void TreeNodeView::slotSaveExpand(const VTreeNode* node)
+{
+    VInfo_ptr s=currentSelection();
+    if(s)
+    {
+        if(node->server()->realServer() == s->server())
+            expandState_->selection_=s;
+    }
+
+
+    ExpandStateTree* es=expandState_->add();
+    es->save(node);
+}
+
+//Save the expand state for the given node (it can be a server as well)
+void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
+{
+    Q_FOREACH(ExpandStateTree* es,expandState_->items())
+    {
+        if(es->rootSameAs(node->vnode()->strName()))
+        {
+            es->restore(node);
+            expandState_->remove(es);
+        }
+    }
+}
+
+
+#if 0
+
 //Save the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotSaveExpand(const VNode* node)
 {
@@ -446,3 +526,5 @@ void TreeNodeView::restoreExpand(ExpandNode *expand,const VNode* node)
 		}
 	}
 }
+
+#endif

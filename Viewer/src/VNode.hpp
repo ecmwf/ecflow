@@ -20,6 +20,7 @@
 #include "LogServer.hpp"
 #include "Node.hpp"
 
+class AttributeFilter;
 class IconFilter;
 class ServerHandler;
 class VAttribute;
@@ -57,10 +58,10 @@ public:
 class VServerChange
 {
 public:
-	VServerChange() : suiteNum_(0), attrNum_(0), totalNum_(0) {}
+    VServerChange() : suiteNum_(0), attrNum_(0) {} //, totalNum_(0) {}
 	int suiteNum_;
 	int attrNum_;
-	int totalNum_;
+    //int totalNum_;
 };
 
 class VServerCache
@@ -97,10 +98,13 @@ public:
     virtual bool isTask() const {return false;}
     virtual bool isAlias() const;
 
+#if 0
     void beginUpdateAttrNum();
     void endUpdateAttrNum();
     short cachedAttrNum() const;
-    short attrNum() const;
+#endif
+
+    int attrNum(AttributeFilter* filter=0) const;
 
     QStringList getAttributeData(int,VAttribute*&);
     bool getAttributeData(const std::string& type,int row, QStringList&);
@@ -170,8 +174,10 @@ protected:
     void clear();
     void addChild(VNode*);
     void removeChild(VNode*);
+#if 0
     short currentAttrNum() const;
     bool isAttrNumInitialised() const {return attrNum_!=-1;}
+#endif
     VNode* find(const std::vector<std::string>& pathVec);
     virtual void check(VServerSettings* conf,bool) {}
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
@@ -181,8 +187,10 @@ protected:
     node_ptr node_;
     VNode* parent_;
     std::vector<VNode*> children_;
+#if 0
     mutable short attrNum_;
     mutable short cachedAttrNum_;
+#endif
     int index_;
 };
 

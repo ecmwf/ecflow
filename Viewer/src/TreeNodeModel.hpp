@@ -45,8 +45,11 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
+    QModelIndex nodeToIndex(const VTreeNode*,int column=0) const;
     QModelIndex nodeToIndex(const VNode*,int column=0) const;
-   	VInfo_ptr nodeInfo(const QModelIndex& index);
+    VTreeServer* indexToServer(const QModelIndex & index) const;
+    VTreeServer* nameToServer(const std::string&) const;
+    VInfo_ptr nodeInfo(const QModelIndex& index);
 
    	VModelData* data() const;
 
@@ -60,6 +63,10 @@ public Q_SLOTS:
     void slotAttributesChanged(VTreeServer*,const VTreeNode*);
     void slotBeginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
     void slotEndAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
+    void slotBeginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
+    void slotEndFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
+    void slotBeginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
+    void slotEndFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
 
 	//void slotResetBranch(VModelServer*,const VNode*);
     void slotDataChanged(VModelServer*);
@@ -69,9 +76,12 @@ public Q_SLOTS:
 	void slotEndServerClear(VModelServer* server,int);
 
 Q_SIGNALS:
-	void filterChanged();
-	void clearBegun(const VNode*);
-	void scanEnded(const VNode*);
+    void clearBegun(const VTreeNode*);
+    void scanEnded(const VTreeNode*);
+    void filterUpdateRemoveBegun(const VTreeNode*);
+    void filterUpdateAddEnded(const VTreeNode*);
+    void filterChangeBegun();
+    void filterChangeEnded();
 
 private:
 	bool isServer(const QModelIndex & index) const;
@@ -79,7 +89,6 @@ private:
 	bool isAttribute(const QModelIndex & index) const;
 
     ServerHandler* indexToServerHandler(const QModelIndex & index) const;
-    VTreeServer* indexToServer(const QModelIndex & index) const;
     QModelIndex serverToIndex(VModelServer* server) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 

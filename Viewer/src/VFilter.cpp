@@ -306,15 +306,17 @@ bool TreeNodeFilter::isFiltered(VNode* node)
 	return false;
 }
 
+#if 0
 bool TreeNodeFilter::update(const VNode *node)
 {
 	beginReset(node->server());
 	endReset();
 	return true;
 }
+#endif
 
-
-void TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& stateChangeSuites)
+//
+bool TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& topChange,std::vector<VNode*>& topFilterChange)
 {
 #ifdef _UI_VFILTER_DEBUG
     UserMessage::debug("TreeNodeFilter::update --> " + server->name());
@@ -330,7 +332,7 @@ void TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& sta
 #ifdef _UI_VFILTER_DEBUG
         UserMessage::debug("  no filter is defined!");
 #endif
-        return;
+        return false;
     }
 
 #ifdef _UI_VFILTER_DEBUG
@@ -342,6 +344,7 @@ void TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& sta
     if(root->totalNum() > 0)
     {
         bool fullRun=false;
+        //The number of nodes changed: we need to rerun everything
         if(nodes_.size() != root->totalNum())
         {
             nodes_.clear();
@@ -350,7 +353,8 @@ void TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& sta
             std::fill(nodes_.begin(), nodes_.end(), n);
             fullRun=true;
         }
-        else if(stateChangeSuites.empty())
+        //The topchange vector is empty: it can only happen when we need to rerun everything
+        else if(topChange.empty())
         {
             VNode *n=0;
             nodes_.clear();
@@ -358,6 +362,7 @@ void TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& sta
             fullRun=true;
         }
 
+        //We rerun everything
         if(fullRun)
         {
             for(size_t i=0; i < server->vRoot()->numOfChildren(); i++)
@@ -365,12 +370,34 @@ void TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& sta
                 filterState(root->childAt(i),def_->nodeState_);
             }
         }
-        //We still have the previous state
+
+        //We only check the branches defined by the nodes in topChange
         else
-        {
-            for(size_t i=0; i < stateChangeSuites.size(); i++)
+        {           
+            //save the latest results
+            std::vector<VNode*> prevNodes=nodes_;
+
+            //Update the filter results
+            for(size_t i=0; i < topChange.size(); i++)
             {
-                filterState(stateChangeSuites[i],def_->nodeState_);
+                filterState(topChange[i],def_->nodeState_);
+            }
+
+            int diffCnt=0;
+            for(size_t i=0; i < nodes_.size(); i++)
+            {
+                if(prevNodes[i] != nodes_[i])
+                    diffCnt++;
+            }
+#ifdef _UI_VFILTER_DEBUG
+            UserMessage::debug("  number of differences in filter: " + QString::number(diffCnt).toStdString());
+#endif
+
+            //We collect the topmost nodes with changes. It could be different to
+            //topChange so we need this step!
+            for(size_t i=0; i < topChange.size(); i++)
+            {
+                checkState(topChange[i],prevNodes,topFilterChange);
             }
         }
     }
@@ -384,13 +411,35 @@ void TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& sta
     UserMessage::debug("  filter size:" + QString::number(nodes_.size()).toStdString());
 #endif
 
+    return true;
 }
 
+bool TreeNodeFilter::update(ServerHandler* server)
+{
+    std::vector<VNode*> topChange;
+    std::vector<VNode*> topFilterChange;
+    return update(server,topChange,topFilterChange);
+}
 
+bool TreeNodeFilter::checkState(VNode* n,const std::vector<VNode*>& prevNodes,std::vector<VNode*>& topFilterChange)
+{
+    int idx=n->index();
+    if(prevNodes[idx] != nodes_[idx])
+    {
+        topFilterChange.push_back(n->parent());
+        return true;
+    }
+    else
+    {
+         for(unsigned int i=0; i < n->numOfChildren(); i++)
+         {
+             return checkState(n->childAt(i),prevNodes,topFilterChange);
+         }
+    }
 
+    return false;
 
-
-
+}
 
 void TreeNodeFilter::beginReset(ServerHandler* server)
 {
@@ -463,7 +512,7 @@ void TreeNodeFilter::endReset()
 bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 {
     bool ok=false;
-    if(stateFilter->isSet(VNState::toState(node)))
+    if(node->isSuite() || stateFilter->isSet(VNState::toState(node)))
     {
         ok=true;
     }
@@ -529,12 +578,14 @@ void TableNodeFilter::clear()
 	match_.clear();
 }
 
+#if 0
 bool TableNodeFilter::update(const VNode *node)
 {
 	beginReset(node->server());
 	endReset();
 	return true;
 }
+#endif
 
 void TableNodeFilter::beginReset(ServerHandler* server)
 {

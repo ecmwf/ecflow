@@ -152,6 +152,7 @@ set(viewer_srcs
     VSState.cpp
     VTask.cpp
     VTaskNode.cpp
+    VTree.cpp
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp
