@@ -9,6 +9,13 @@
 # nor does it submit to any jurisdiction.
 #============================================================================
 
+
+# Environment variables from the configuration step
+ECFLOWUI_BT=@UI_BACKTRACE@
+ECFLOWUI_BT_EMAIL_ADDRESSES=@UI_BACKTRACE_EMAIL_ADDRESSES@
+ECFLOWUI_VERSION=@ECFLOW_VERSION_STR@
+ECFLOWUI_INSTALLDIR=@CMAKE_INSTALL_PREFIX@
+
 # ----------------------------------------------------------
 # Clean up the tmp directory at the end or on error
 #-----------------------------------------------------------
@@ -31,14 +38,50 @@ cleanup(){
         echo "$(basename $0): $1 on ERROR (line $2), exit status $status, starting 'cleanup'"
 
         if [ -e $ECFLOWUI_LOGFILE ] ; then
-            echo "Last 50 lines of log file:"
-            tail -50 $ECFLOWUI_LOGFILE
+
+            TAILNUM=50
+
+            if [ $ECFLOWUI_BT != "no" ] ; then
+                # find the backtrace tag if there
+                btline=$(grep -n "Backtrace:" $ECFLOWUI_LOGFILE | cut -f1 --delimiter=':')
+                gret=$?
+                if [ "$gret" = "0" ] ; then
+                    nlines=$(wc -l $ECFLOWUI_LOGFILE | cut -f1 --delimiter=' ')
+                    TAILNUM=$(expr $nlines - $btline + 100)
+                fi
+            fi
+
+            # Logic: ECFLOWUI_BT_EMAIL_ADDRESSES is not set, then the log/backtrace
+            # will go to stdout; otherwise it will be e-mailed to the
+            # addresses instead (the user will not see the backtrace).
+
+            if [ $ECFLOWUI_BT_EMAIL_ADDRESSES != "x" ] ; then
+                EFLOWUI_LOGTAIL="${ECFLOWUI_LOGFILE}.tail"
+                ecfuimsg="ecFlowUI backtrace from user $USER"
+                echo "Sending crash report by e-mail..."
+                echo "user/host          : $USER/$HOST"          >  $EFLOWUI_LOGTAIL
+                echo "ecflow version     : $ECFLOWUI_VERSION"    >> $EFLOWUI_LOGTAIL
+                echo "ecflow install dir : $ECFLOWUI_INSTALLDIR" >> $EFLOWUI_LOGTAIL
+                echo "start time         : $ECFLOWUI_STARTTIME"  >> $EFLOWUI_LOGTAIL
+                echo "stop time          : $(date)"              >> $EFLOWUI_LOGTAIL
+                echo ""                                          >> $EFLOWUI_LOGTAIL
+                tail -$TAILNUM $ECFLOWUI_LOGFILE                 >> $EFLOWUI_LOGTAIL
+
+                addr=$(echo $ECFLOWUI_BT_EMAIL_ADDRESSES | sed 's/,/ /g')
+                mail -s "$ecfuimsg"  $addr < $EFLOWUI_LOGTAIL
+                rm -f $EFLOWUI_LOGTAIL
+                echo "Report sent"
+            else
+                echo "Last $TAILNUM lines of log file:"
+                tail -$TAILNUM $ECFLOWUI_LOGFILE
+            fi
+
         fi
     fi
 
 
 
-
+    # remove temporary directory
     if [ $(echo $ECFLOWUI_TMPDIR | grep -c "/ecflow_ui.") -ge 1 ] ; then
         rm -Rf $ECFLOWUI_TMPDIR
     fi
@@ -163,5 +206,43 @@ trap 'cleanup "SIGNAL trap" $LINENO' $ECFLOWUI_SIGLIST
 #Figure out the directory of the exe
 EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-#Start the viewer
-${EXE_DIR}/ecflow_ui.x
+
+# note when we started it up
+ECFLOWUI_STARTTIME=$(date)
+
+
+#-----------------------------------------------------------
+# Run the executable
+#-----------------------------------------------------------
+
+exe=${EXE_DIR}/ecflow_ui.x
+
+
+#-----------------------------------------------------------
+# Backtrace report?
+#-----------------------------------------------------------
+
+if [ $ECFLOWUI_BT != "no" ]
+then
+
+    catchsegv $exe
+
+#    segv_output=`mktemp ${TMPDIR:-/tmp}/segv_output.XXXXXX` || exit
+#
+#    (exec
+#    LD_PRELOAD=${LD_PRELOAD:+${LD_PRELOAD}:}/lib64/libSegFault.so \
+#      SEGFAULT_SIGNALS="all" \
+#      SEGFAULT_USE_ALTSTACK=1 \
+#      SEGFAULT_OUTPUT_NAME=$segv_output \
+#      "$exe" ${1+"$@"})
+#    exval=$?
+#    echo "exval: $exval"
+#
+#
+#    exit $exval
+
+else
+    ${exe}
+fi
+
+
