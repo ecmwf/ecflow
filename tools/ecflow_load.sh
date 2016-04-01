@@ -42,11 +42,5 @@ $VIEWER ${ECF_NODE}.${ECF_PORT}.png
 
 echoxx() {
 echo """
-  ./ecflow_load.sh -l /tmp/emos/sms/vsms1.ecf.3.log -p 43333 -n vsms2 
-  ./ecflow_load.sh -l /home/mo/moy/ecflow_server/ligarius.3320.ecf.log -p 3320 -n ligarius
-./ecflow_load.sh -l /tmp/emos/sms/vsms1.ecf.1.log -p 32112 -n vsms1
-./ecflow_load.sh -l /tmp/emos/sms/vsms1.ecf.2.log -p 32222 -n vsms2
-./ecflow_load.sh -l /var/tmp/emos/ecflow/vali.21801.log -p 21801 -n vali
-./ecflow_load.sh -l /tmp/emos/sms/vsms1.ecf.3.log -p 31415 -n vsms2
 """
 }
