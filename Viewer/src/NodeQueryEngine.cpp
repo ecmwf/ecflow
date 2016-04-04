@@ -276,7 +276,8 @@ void NodeFilterEngine::runRecursively(VNode *node)
 	if(!node->isServer() && parser_->execute(node))
 	{
 		//UserMessage::message(UserMessage::DBG,false,"FOUND: " + node->absNodePath());
-		owner_->res_[node->index()]=1;
+        //owner_->res_[node->index()]=node;
+        owner_->match_.push_back(node);
 	}
 
 	for(int i=0; i < node->numOfChildren(); i++)

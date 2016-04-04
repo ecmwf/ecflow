@@ -145,7 +145,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	if( !index.isValid() ||
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
 	    role != Qt::ForegroundRole &&
-	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
+        role != IconRole && role != ServerRole && role != NodeNumRole &&
 	    role != InfoRole && role != LoadRole && role != ConnectionRole && role != AttributeRole && role != AttributeLineRole &&
         role != AbortedReasonRole && role != NodeTypeRole && role != NodeTypeForegroundRole && role != ServerPointerRole))
     {
@@ -312,9 +312,6 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 
 		else if(role == Qt::DisplayRole)
 			return vnode->name();
-
-		else if(role == FilterRole)
-			return QVariant(data_->isFiltered(vnode));
 
 		else if(role == Qt::BackgroundRole)
 		{
@@ -1069,7 +1066,8 @@ void TreeNodeModel::slotBeginServerClear(VModelServer* server,int)
         Q_ASSERT(ts);
         Q_EMIT clearBegun(ts->tree());
 
-		int num=rowCount(idx);
+        //We removes the attributes as well!!!
+        int num=rowCount(idx);
 		beginRemoveRows(idx,0,num-1);
 	}
 }

@@ -12,7 +12,6 @@
 #include <QDebug>
 #include <QMetaMethod>
 
-
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
 #include "VFilter.hpp"
@@ -74,7 +73,8 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 		int cnt=0;
 		for(int i=0; i < data_->count(); i++)
 		{
-			cnt+=data_->numOfNodes(i);//data_->numOfFiltered(i);
+            if(!data_->server(i)->inScan())
+                cnt+=data_->numOfNodes(i);
 		}
 		//qDebug() << "table count" << cnt;
 
@@ -90,7 +90,7 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if( !index.isValid() ||
-	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole && role != FilterRole && role != IconRole))
+       (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole && role != IconRole))
     {
 		return QVariant();
 	}
@@ -133,9 +133,6 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	{
 		return vnode->stateColour();
 	}
-	else if(role == FilterRole)
-		return data_->isFiltered(vnode);
-
 	else if(role == IconRole)
 	{
 		if(columns_->id(index.column()) =="path")
@@ -173,7 +170,7 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 
 	//qDebug() << "index" << row << column << parent;
 
-	if(VNode *node=data_->getNodeFromFilter(row))
+    if(VNode *node=data_->getNodeFromFilter(row))
 	{
 		return createIndex(row,column,node);
 	}
@@ -217,7 +214,7 @@ QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const
 
 
 //Find the index for the node when we know what the server is!
-QModelIndex TableNodeModel::nodeToIndex(VModelServer* server,const VNode* node, int column) const
+QModelIndex TableNodeModel::nodeToIndex(VTableServer* server,const VNode* node, int column) const
 {
 	if(!node)
 		return QModelIndex();
@@ -272,7 +269,7 @@ void TableNodeModel::slotServerRemoveEnd()
 }
 
 //The node changed (it status etc)
-void TableNodeModel::slotNodeChanged(VModelServer* server,const VNode* node)
+void TableNodeModel::slotNodeChanged(VTableServer* server,const VNode* node)
 {
 	if(!node)
 		return;
@@ -287,14 +284,15 @@ void TableNodeModel::slotNodeChanged(VModelServer* server,const VNode* node)
 
 void TableNodeModel::slotBeginServerScan(VModelServer* server,int num)
 {
-	assert(active_ == true);
+    Q_ASSERT(active_ == true);
+    Q_ASSERT(server);
 
 	if(num >0)
 	{
 		int count=num;
 
 		VNode* afterNode=NULL;
-		int start=data_->pos(server,&afterNode);
+        int start=data_->pos(server->tableServer(),&afterNode);
 
 		QModelIndex idx;
 
@@ -320,7 +318,8 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 
 void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
 {
-	assert(active_ == true);
+    Q_ASSERT(active_ == true);
+    Q_ASSERT(server);
 
 	if(num >0)
 	{
@@ -328,7 +327,7 @@ void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
 		int count=-1;
 
 		VNode* firstNode=NULL;
-		data_->identifyInFilter(server,start,count,&firstNode);
+        data_->identifyInFilter(server->tableServer(),start,count,&firstNode);
 		assert(firstNode);
 
 		QModelIndex idx=createIndex(start,0,firstNode);

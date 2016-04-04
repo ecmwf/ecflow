@@ -42,6 +42,7 @@ public:
     void updateAttrNum(AttributeFilter* filter=0);
     QStringList getAttributeData(int row,VAttribute*& type,AttributeFilter *filter=0);
     int getAttributeLineNum(int row,AttributeFilter *filter=0);
+    void resetAttrNum();
 
     virtual bool isTopLevel() const {if(parent_) return (parent_->parent())?false:true; return false;}
     virtual bool isRoot() const {return false;}

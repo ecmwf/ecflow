@@ -247,14 +247,14 @@ void NodeFilterDef::readSettings(VSettings *vs)
 	Q_EMIT changed();
 }
 
-NodeFilter::NodeFilter(NodeFilterDef* def,ResultMode resultMode) :
+NodeFilter::NodeFilter(NodeFilterDef* def,ServerHandler* server) :
 	def_(def),
-	resultMode_(resultMode),
-	beingReset_(false),
-	res_(0),
-	matchMode_(VectorMatch)
+    matchMode_(VectorMatch),
+    server_(server)
 {
-	queryEngine_=new NodeFilterEngine(this);
+    assert(server_);
+
+    queryEngine_=new NodeFilterEngine(this);
 }
 
 NodeFilter::~NodeFilter()
@@ -262,15 +262,19 @@ NodeFilter::~NodeFilter()
 	delete queryEngine_;
 }
 
-TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreNonMatched)
-{
+//============================================
+//
+// TreeNodeFilter
+//
+//============================================
 
+TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def,ServerHandler* server) : NodeFilter(def,server)
+{
 }
 
 void TreeNodeFilter::clear()
 {
-    nodes_.clear();
-    nodes_.resize(0);
+    match_=std::vector<VNode*>();
 }
 
 bool TreeNodeFilter::isNull()
@@ -278,48 +282,11 @@ bool TreeNodeFilter::isNull()
     return def_->nodeState_->isComplete() || def_->nodeState_->isEmpty();
 }
 
-bool TreeNodeFilter::isFiltered(VNode* node)
-{
-    if(nodes_.empty())
-        return true;
-
-    return nodes_[node->index()];
-
-#if 0
-
-    if(resultMode_==StoreNonMatched)
-	{
-		if(result_.empty())
-			return true;
-
-		return (std::find(result_.begin(), result_.end(), node) == result_.end());
-	}
-	else if(resultMode_==StoreMatched)
-	{
-		if(result_.empty())
-			return false;
-
-		return (std::find(result_.begin(), result_.end(), node) != result_.end());
-	}
-#endif
-
-	return false;
-}
-
-#if 0
-bool TreeNodeFilter::update(const VNode *node)
-{
-	beginReset(node->server());
-	endReset();
-	return true;
-}
-#endif
-
 //
-bool TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& topChange,std::vector<VNode*>& topFilterChange)
+bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNode*>& topFilterChange)
 {
 #ifdef _UI_VFILTER_DEBUG
-    UserMessage::debug("TreeNodeFilter::update --> " + server->name());
+    UserMessage::debug("TreeNodeFilter::update --> " + server_->name());
 #endif
 
     //nodes_.clear();
@@ -327,8 +294,9 @@ bool TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& top
     //If all states are visible
     if(def_->nodeState_->isComplete() || def_->nodeState_->isEmpty())
     {
-        nodes_.reserve(0);
-        assert(nodes_.capacity() == 0);
+        //deallocate the match vector
+        match_=std::vector<VNode*>();
+        //assert(match_.capacity() == 0);
 #ifdef _UI_VFILTER_DEBUG
         UserMessage::debug("  no filter is defined!");
 #endif
@@ -340,32 +308,36 @@ bool TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& top
     timer.start();
 #endif
 
-    VServer* root=server->vRoot();
+    VServer* root=server_->vRoot();
     if(root->totalNum() > 0)
     {
         bool fullRun=false;
+
         //The number of nodes changed: we need to rerun everything
-        if(nodes_.size() != root->totalNum())
+        if(match_.size() != root->totalNum())
         {
-            nodes_.clear();
-            nodes_.resize(root->totalNum());
+            //Deallocates the match vector
+            match_=std::vector<VNode*>();
+            //match_.reserve(root->totalNum());
             VNode *n=0;
-            std::fill(nodes_.begin(), nodes_.end(), n);
+            match_.resize(root->totalNum(),n);
+            //td::fill(match_.begin(), match_.end(), n);
             fullRun=true;
         }
+
         //The topchange vector is empty: it can only happen when we need to rerun everything
         else if(topChange.empty())
         {
             VNode *n=0;
-            nodes_.clear();
-            std::fill(nodes_.begin(), nodes_.end(), n);
+            //match_.clear();
+            std::fill(match_.begin(), match_.end(), n);
             fullRun=true;
         }
 
         //We rerun everything
         if(fullRun)
         {
-            for(size_t i=0; i < server->vRoot()->numOfChildren(); i++)
+            for(size_t i=0; i < root->numOfChildren(); i++)
             {
                 filterState(root->childAt(i),def_->nodeState_);
             }
@@ -375,7 +347,7 @@ bool TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& top
         else
         {           
             //save the latest results
-            std::vector<VNode*> prevNodes=nodes_;
+            std::vector<VNode*> prevNodes=match_;
 
             //Update the filter results
             for(size_t i=0; i < topChange.size(); i++)
@@ -384,9 +356,9 @@ bool TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& top
             }
 
             int diffCnt=0;
-            for(size_t i=0; i < nodes_.size(); i++)
+            for(size_t i=0; i < match_.size(); i++)
             {
-                if(prevNodes[i] != nodes_[i])
+                if(prevNodes[i] != match_[i])
                     diffCnt++;
             }
 #ifdef _UI_VFILTER_DEBUG
@@ -403,28 +375,29 @@ bool TreeNodeFilter::update(ServerHandler* server,const std::vector<VNode*>& top
     }
     else
     {
-       nodes_.clear();
+       match_.clear();
     }
 
 #ifdef _UI_VFILTER_DEBUG
     UserMessage::debug("  elapsed time: " + QString::number(timer.elapsed()).toStdString() + " ms");
-    UserMessage::debug("  filter size:" + QString::number(nodes_.size()).toStdString());
+    UserMessage::debug("  filter size:" + QString::number(match_.size()).toStdString());
+    UserMessage::debug("  capacity:" + QString::number(match_.capacity()).toStdString());
 #endif
 
     return true;
 }
 
-bool TreeNodeFilter::update(ServerHandler* server)
+bool TreeNodeFilter::update()
 {
     std::vector<VNode*> topChange;
     std::vector<VNode*> topFilterChange;
-    return update(server,topChange,topFilterChange);
+    return update(topChange,topFilterChange);
 }
 
 bool TreeNodeFilter::checkState(VNode* n,const std::vector<VNode*>& prevNodes,std::vector<VNode*>& topFilterChange)
 {
     int idx=n->index();
-    if(prevNodes[idx] != nodes_[idx])
+    if(prevNodes[idx] != match_[idx])
     {
         topFilterChange.push_back(n->parent());
         return true;
@@ -438,80 +411,12 @@ bool TreeNodeFilter::checkState(VNode* n,const std::vector<VNode*>& prevNodes,st
     }
 
     return false;
-
 }
-
-void TreeNodeFilter::beginReset(ServerHandler* server)
-{
-#ifdef _UI_VFILTER_DEBUG
-    UserMessage::debug("TreeNodeFilter::beginReset --> " + server->name());
-#endif
-
-    beingReset_=true;
-
-#if 0
-	result_.clear();
-#endif
-
-	resultMode_=StoreNonMatched;
-
-
-
-    nodes_.clear();
-
-	//If all states are visible
-	if(def_->nodeState_->isComplete() || def_->nodeState_->isEmpty())
-	{
-        nodes_.reserve(0);
-        assert(nodes_.capacity() == 0);
-#ifdef _UI_VFILTER_DEBUG
-        UserMessage::debug("  no filter is defined!");
-#endif
-
-        return;
-	}
-
-	else //if(def_->nodeState_->isEmpty())
-	{
-		resultMode_=StoreMatched;
-	}
-
-
-#ifdef _UI_VFILTER_DEBUG
-    QTime timer;
-    timer.start();
-#endif
-
-	VServer* root=server->vRoot();
-    if(root->totalNum() > 0)
-    {
-        //nodes_.reserve(root->totalNum());
-        nodes_.resize(root->totalNum());
-        VNode *n=0;
-        std::fill(nodes_.begin(), nodes_.end(), n);
-
-        for(unsigned int j=0; j < root->numOfChildren();j++)
-        {
-            filterState(root->childAt(j),def_->nodeState_);
-        }
-    }
-
-#ifdef _UI_VFILTER_DEBUG
-    UserMessage::debug("  elapsed time: " + QString::number(timer.elapsed()).toStdString() + " ms");
-    UserMessage::debug("  filter size:" + QString::number(nodes_.size()).toStdString());
-#endif
-
-}
-
-void TreeNodeFilter::endReset()
-{
-	beingReset_=false;
-}
-
 
 bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 {
     bool ok=false;
+    //Suites always match!!
     if(node->isSuite() || stateFilter->isSet(VNState::toState(node)))
     {
         ok=true;
@@ -525,35 +430,27 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
         }
     }
 
-
     if(ok)
     {
-        nodes_[node->index()]=node;
-#if 0
-        result_.insert(node);
-#endif
+        match_[node->index()]=node;
+    }
+    else
+    {
+        match_[node->index()]=NULL;
     }
 
     return ok;
 }
 
-int TreeNodeFilter::matchCount()
-{
-	if(beingReset_)
-		return 0;
-
-	if(resultMode_==StoreMatched)
-	{
-		return static_cast<int>(result_.size());
-	}
-	return 0;
-};
-
 //===========================================================
+//
 // TableNodeFilter
+//
 //===========================================================
 
-TableNodeFilter::TableNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreMatched)
+TableNodeFilter::TableNodeFilter(NodeFilterDef* def,ServerHandler* server) :
+    NodeFilter(def,server),
+    matchCount_(0)
 {
 }
 
@@ -562,87 +459,97 @@ bool TableNodeFilter::isNull()
 	return def_->nodeState_->isComplete();
 }
 
-bool TableNodeFilter::isFiltered(VNode* node)
-{
-	if(beingReset_ || matchMode_ == NoneMatch)
-		return false;
-
-	else if(matchMode_ == AllMatch)
-		return true;
-
-	return res_[node->index()];
-}
-
 void TableNodeFilter::clear()
 {
 	match_.clear();
+    index_.clear();
+    matchCount_=0;
 }
 
-#if 0
-bool TableNodeFilter::update(const VNode *node)
+int TableNodeFilter::indexOf(const VNode* node) const
 {
-	beginReset(node->server());
-	endReset();
-	return true;
-}
-#endif
+    switch(matchMode_)
+    {
+    case VectorMatch:
+         return index_[node->index()];
+    case AllMatch:
+        return node->index();
+    case NoneMatch:
+        return -1;
+    default:
+        assert(0);
+        return -1;
+    }
 
-void TableNodeFilter::beginReset(ServerHandler* server)
+    return -1;
+}
+
+VNode* TableNodeFilter::nodeAt(int index) const
 {
-	beingReset_=true;
+    switch(matchMode_)
+    {
+    case VectorMatch:
+         return match_[index];
+    case AllMatch:
+        return server_->vRoot()->nodeAt(index);
+    case NoneMatch:
+        return NULL;
+    default:
+        assert(0);
+        return NULL;
+    }
 
-	matchMode_=NoneMatch;
-
-	NodeQuery* q=def_->query_;
-
-	if(!q->hasServer(server->name()))
-	{
-		matchMode_=NoneMatch;
-		//Deallocates
-		res_=std::vector<bool>();
-	}
-	else
-	{
-		if(q->query().isEmpty() && q->rootNode().empty())
-		{
-			matchMode_=AllMatch;
-			//Deallocates
-			res_=std::vector<bool>();
-		}
-		else
-		{
-			matchMode_=VectorMatch;
-			int num=server->vRoot()->totalNum();
-			if(num != res_.size())
-			{
-				//Reallocates
-				res_=std::vector<bool>();
-				res_.reserve(num);
-				for(size_t i=0; i < num; i++)
-				{
-					res_.push_back(false);
-				}
-			}
-			else
-			{
-				std::fill(res_.begin(),res_.end(),false);
-			}
-
-			queryEngine_->setQuery(def_->query_);
-			queryEngine_->runQuery(server);
-		}
-	}
+    return NULL;
 }
 
-void TableNodeFilter::endReset()
+bool TableNodeFilter::update()
 {
-	beingReset_=false;
+    NodeQuery* q=def_->query_;
+
+    if(!q->hasServer(server_->name()) || server_->vRoot()->totalNum() ==0)
+    {
+        matchMode_=NoneMatch;
+        //Deallocates
+        match_=std::vector<VNode*>();
+        index_=std::vector<int>();
+        matchCount_=0;
+    }
+    else
+    {
+        if(q->query().isEmpty() && q->rootNode().empty())
+        {
+            matchMode_=AllMatch;
+            //Deallocates
+            match_=std::vector<VNode*>();
+            index_=std::vector<int>();
+            matchCount_=server_->vRoot()->totalNum();
+        }
+        else
+        {
+            matchMode_=VectorMatch;
+            match_.clear();
+            int num=server_->vRoot()->totalNum();           
+            if(num != index_.size())
+            {
+                //Reallocates
+                index_=std::vector<int>();
+                index_.resize(num,-1);
+            }
+            else
+            {
+                std::fill(index_.begin(), index_.end(), -1);
+            }
+
+            queryEngine_->setQuery(def_->query_);
+            queryEngine_->runQuery(server_);
+
+            matchCount_=match_.size();
+            for(size_t i=0; i < match_.size(); i++)
+            {
+                index_[match_[i]->index()]=i;
+            }
+
+        }
+    }
 }
-
-
-int TableNodeFilter:: matchCount()
-{
-	return 0;
-}
-
 

@@ -115,6 +115,15 @@ int VTreeNode::getAttributeLineNum(int row,AttributeFilter *filter)
     return VAttribute::getLineNum(vnode_,row,filter);
 }
 
+void VTreeNode::resetAttrNum()
+{
+    attrNum_=-1;
+    for(unsigned int i=0; i < children_.size(); i++)
+    {
+        children_[i]->resetAttrNum();
+    }
+}
+
 //========================================================
 //
 // VTree
@@ -179,6 +188,8 @@ int VTree::totalNumOfTopLevel(int idx) const
 
     return -1;
 }
+
+
 
 #if 0
 VTreeNode* VTree::topLevelNode(int row) const

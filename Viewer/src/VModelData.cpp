@@ -41,7 +41,6 @@ void VTreeChangeInfo::addStateChange(const VNode* n)
 
 VModelServer::VModelServer(ServerHandler *server) :
    server_(server),
-   filter_(0),
    inScan_(0)
 {
 	//We has to observe the nodes of the server.
@@ -56,9 +55,6 @@ VModelServer::~VModelServer()
 {
 	server_->removeNodeObserver(this);
 	server_->removeServerObserver(this);
-
-	if(filter_)
-		delete filter_;
 }
 
 int VModelServer::totalNodeNum() const
@@ -66,6 +62,8 @@ int VModelServer::totalNodeNum() const
 	return server_->vRoot()->totalNum();
 }
 
+
+#if 0
 void VModelServer::runFilter()
 {
 	if(filter_)
@@ -74,7 +72,7 @@ void VModelServer::runFilter()
         //filter_->endReset();
 	}
 }
-
+#endif
 //==========================================
 //
 // VTreeServer
@@ -89,7 +87,7 @@ VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,Attribut
    attrFilter_(attrFilter)
 {
     tree_=new VTree(this);
-	filter_=new TreeNodeFilter(filterDef);
+    filter_=new TreeNodeFilter(filterDef,server_);
 	//We has to observe the nodes of the server.
 	//server_->addNodeObserver(this);
 }
@@ -98,6 +96,17 @@ VTreeServer::~VTreeServer()
 {
     delete tree_;
     delete changeInfo_;
+    delete filter_;
+}
+
+NodeFilter* VTreeServer::filter() const
+{
+    return const_cast<TreeNodeFilter*>(filter_);
+}
+
+int VTreeServer::nodeNum() const
+{
+    return tree_->totalNum();
 }
 
 //--------------------------------------------------
@@ -126,8 +135,6 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
     //that this server tree is empty.
     inScan_=true;
 
-    Q_ASSERT(filter_);
-
     //When the server scan ends we need to rebuild the tree.
     if(filter_->isNull())
     {
@@ -135,8 +142,8 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
     }
     else
     {
-        filter_->update(server_);
-        tree_->build(filter_->nodes_);
+        filter_->update();
+        tree_->build(filter_->match_);
     }
 
     //Notifies the model of the number of children nodes to be added to the server node.
@@ -192,8 +199,7 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
         //suite. Suites are always visible (part of the tree) so a branch cannot be a server (root)
         //but at most a suite.
         std::vector<VNode*> topFilterChange;
-        TreeNodeFilter *tf=static_cast<TreeNodeFilter*>(filter_);
-        tf->update(server_,changeInfo_->stateChangeSuites(),topFilterChange);
+        filter_->update(changeInfo_->stateChangeSuites(),topFilterChange);
 
 #ifdef _UI_VMODELDATA_DEBUG
         UserMessage::debug("  Top level nodes that changed in filter:");
@@ -239,8 +245,8 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
             }
 
             //Second, we add the new contents
-            VTreeNode *branch=new VTreeNode(tn->vnode(),tn);
-            tree_->buildBranch(filter_->nodes_,tn,branch);
+            VTreeNode *branch=new VTreeNode(tn->vnode(),0);
+            tree_->buildBranch(filter_->match_,tn,branch);
             int chNum=branch->numOfChildren();
 
             Q_EMIT beginFilterUpdateAdd(this,tn,chNum);
@@ -444,13 +450,33 @@ void VTreeServer::runFilter()
 
     else
     {
-        filter_->update(server_);
-        tree_->build(filter_->nodes_);
+        filter_->update();
+        tree_->build(filter_->match_);
     }
 
     Q_EMIT beginServerScan(this, tree_->attrNum(attrFilter_)+tree_->numOfChildren());
     inScan_=false;
     Q_EMIT endServerScan(this, tree_->attrNum(attrFilter_)+tree_->numOfChildren());
+}
+
+
+void VTreeServer::attrFilterChanged()
+{
+    //In the tree root the attrNum must be cached/initialised
+    Q_ASSERT(tree_->isAttrInitialised());
+    int oriNum=tree_->attrNum(attrFilter_)+tree_->numOfChildren();
+    Q_EMIT beginServerClear(this,oriNum);
+    inScan_=true;
+    Q_EMIT endServerClear(this,oriNum);
+
+    //We reset the attrNum to the uninitailsed value in the whole tree
+    tree_->resetAttrNum();
+
+    //Get the current num of attr and children
+    int num=tree_->attrNum(attrFilter_)+tree_->numOfChildren();
+    Q_EMIT beginServerScan(this,num);
+    inScan_=false;
+    Q_EMIT endServerScan(this,num);
 }
 
 //==========================================
@@ -462,69 +488,71 @@ void VTreeServer::runFilter()
 //It takes ownership of the filter
 
 VTableServer::VTableServer(ServerHandler *server,NodeFilterDef* filterDef) :
-	VModelServer(server),
-	totalNumBeforeClear_(0)
-
+    VModelServer(server)
 {
-	filter_=new TableNodeFilter(filterDef);
+    filter_=new TableNodeFilter(filterDef,server);
 
-	//We has to observe the nodes of the server.
+    //We have to observe the nodes of the server.
 	//server_->addNodeObserver(this);
 }
 
 VTableServer::~VTableServer()
 {
+    delete filter_;
+}
+
+NodeFilter* VTableServer::filter() const
+{
+    return const_cast<TableNodeFilter*>(filter_);
+}
+
+int VTableServer::nodeNum() const
+{
+    return filter_->matchCount();
+}
+
+//Node at the position in the list of filtered nodes
+VNode* VTableServer::nodeAt(int index) const
+{
+    return filter_->nodeAt(index);
+}
+
+//Position oin the list of filtered nodes
+int VTableServer::indexOf(const VNode* node) const
+{
+    return filter_->indexOf(node);
 }
 
 //--------------------------------------------------
 // ServerObserver methods
 //--------------------------------------------------
 
-
 void VTableServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
 {
-    //Q_EMIT beginServerScan(this,change.totalNum_);
-
+    inScan_=true;
+    Q_ASSERT(nodeNum() == 0);
 	//At this point we do not know how many nodes we will have in the filter!
 }
 
 void VTableServer::notifyEndServerScan(ServerHandler* server)
 {
-	runFilter();
-	Q_EMIT endServerScan(this,server->vRoot()->totalNum());
-
-	/*
-
-	//Update the filter using the current server state
-	filter_->beginReset(server);
-
-	int realCount=filter_->realMatchCount();
-
-	//The filter pretends it is empty
-	//Tell the model to add realCount number of rows!!
-	Q_EMIT beginServerScan(this,realCount);
-
-	filter_->endReset();
-
-	Q_EMIT endServerScan(this,realCount);*/
+    Q_ASSERT(inScan_);
+    filter_->update();
+    Q_EMIT endServerScan(this,nodeNum());
+    inScan_=false;
+    Q_EMIT endServerScan(this,nodeNum());
 }
 
 void VTableServer::notifyBeginServerClear(ServerHandler* server)
 {
-	//int n=filter_->matchCount();
-	size_t n=server->vRoot()->totalNum();
-	totalNumBeforeClear_=n;
-	Q_EMIT beginServerClear(this,n);
+    Q_EMIT beginServerClear(this,nodeNum());
 }
 
 void VTableServer::notifyEndServerClear(ServerHandler* server)
 {
-	runFilter();
-
-	//int n=filter_->matchCount();
-	//filter_->clear();
-	Q_EMIT endServerClear(this,totalNumBeforeClear_);
-	totalNumBeforeClear_=0;
+    int oriNodeNum=nodeNum();
+    filter_->clear();
+    Q_EMIT endServerClear(this,oriNodeNum);
 }
 
 void VTableServer::notifyServerConnectState(ServerHandler* server)
@@ -539,42 +567,32 @@ void VTableServer::notifyServerActivityChanged(ServerHandler* server)
 
 //This is called when a normal sync (no reset or rescan) is finished. We have delayed the update of the
 //filter to this point but now we need to do it.
-void VTableServer::notifyEndServerSync(ServerHandler* server)
+void VTableServer::notifyEndServerSync(ServerHandler*)
 {
-	//if(nodeStateChangeCnt_ >0)
-	//{
-	//	nodeStateChangeCnt_=0;
-
-		if(!filter_->isNull())
-		{
-			runFilter();
-            //Q_EMIT filterChanged();
-		}
-	//}
+    runFilter();
 }
-
 
 void VTableServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
 {
-	/*int n=filter_->matchCount();
-	Q_EMIT beginServerClear(this,n);
-	filter_->clear();
-	Q_EMIT endServerClear(this,n);*/
 }
 
 void VTableServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
 {
-	//Update the filter using the current server state
-	/*filter_->beginReset(server_);
-	int realCount=filter_->matchCount();
+}
 
-	//Tell the model to add realCount number of rows!!
-	Q_EMIT beginServerScan(this,realCount);
+void VTableServer::runFilter()
+{
+    int oriNodeNum=nodeNum();
+    Q_EMIT beginServerClear(this,oriNodeNum);
+    filter_->clear();
+    inScan_=true;
+    Q_EMIT endServerClear(this,oriNodeNum);
 
-	filter_->endReset();
+    filter_->update();
 
-	Q_EMIT endServerScan(this,realCount);*/
-
+    Q_EMIT beginServerScan(this, nodeNum());
+    inScan_=false;
+    Q_EMIT endServerScan(this, nodeNum());
 }
 
 //==========================================
@@ -772,7 +790,7 @@ int VModelData::numOfNodes(int index) const
 {
 	if(VModelServer *d=server(index))
 	{
-		return d->totalNodeNum();
+        return d->nodeNum();
 	}
 	return 0;
 }
@@ -877,9 +895,8 @@ void VModelData::slotFilterDefChanged()
 bool VModelData::isFilterNull() const
 {
     for(unsigned int i=0; i < servers_.size(); i++)
-    {
-        if(servers_.at(i)->filter_)
-            return servers_.at(i)->filter_->isNull();
+    {      
+        return servers_.at(i)->filter()->isNull();
     }
 
     return true;
@@ -895,7 +912,9 @@ VTreeModelData::VTreeModelData(NodeFilterDef* filterDef,AttributeFilter* attrFil
         VModelData(filterDef,model),
         attrFilter_(attrFilter)
 {
-
+    //Attribute filter changes
+    connect(attrFilter_,SIGNAL(changed()),
+            this,SLOT(slotAttrFilterChanged()));
 }
 
 void VTreeModelData::connectToModel(VModelServer* s)
@@ -929,11 +948,9 @@ void VTreeModelData::connectToModel(VModelServer* s)
     connect(ts,SIGNAL(endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)),
             model_,SLOT(slotEndFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)));
 
-
-
    // void endFilterUpdate(VTreeServer*,const std::vector<VNode*>);
-
 }
+
 void VTreeModelData::add(ServerHandler *server)
 {
 	VModelServer* d=NULL;
@@ -945,19 +962,18 @@ void VTreeModelData::add(ServerHandler *server)
 	servers_.push_back(d);
 }
 
-//This has to be very fast!!!
-bool VTreeModelData::isFiltered(VNode *node) const
+void VTreeModelData::slotAttrFilterChanged()
 {
-#if 0
-    int id=indexOfServer(node->server());
-	if(id != -1)
-	{
-        return servers_[id]->filter_->isFiltered(node);
-	}
-#endif
-	return true;
-}
+    Q_EMIT filterChangeBegun();
 
+    for(unsigned int i=0; i < servers_.size(); i++)
+    {
+        servers_.at(i)->treeServer()->attrFilterChanged();
+    }
+
+    Q_EMIT filterChangeEnded();
+
+}
 
 //==============================================================
 //
@@ -969,7 +985,43 @@ VTableModelData::VTableModelData(NodeFilterDef* filterDef,AbstractNodeModel* mod
 		VModelData(filterDef,model)
 {
 }
+void VTableModelData::connectToModel(VModelServer* s)
+{
+    VModelData::connectToModel(s);
 
+    VTableServer* ts=s->tableServer();
+    Q_ASSERT(ts);
+
+#if 0
+    connect(ts,SIGNAL(beginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)),
+        model_,SLOT(slotBeginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)));
+
+    connect(ts,SIGNAL(endAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)),
+        model_,SLOT(slotEndAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)));
+#endif
+
+    connect(ts,SIGNAL(nodeChanged(VTableServer*,const VNode*)),
+        model_,SLOT(slotNodeChanged(VTableServer*,const VNode*)));
+
+#if  0
+    connect(ts,SIGNAL(attributesChanged(VTreeServer*,const VTreeNode*)),
+        model_,SLOT(slotAttributesChanged(VTreeServer*,const VTreeNode*)));
+
+    connect(ts,SIGNAL(beginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int)),
+            model_,SLOT(slotBeginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int)));
+
+    connect(ts,SIGNAL(endFilterUpdateRemove(VTreeServer*,const VTreeNode*,int)),
+            model_,SLOT(slotEndFilterUpdateRemove(VTreeServer*,const VTreeNode*,int)));
+
+    connect(ts,SIGNAL(beginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)),
+            model_,SLOT(slotBeginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)));
+
+    connect(ts,SIGNAL(endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)),
+            model_,SLOT(slotEndFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)));
+#endif
+
+    // void endFilterUpdate(VTreeServer*,const std::vector<VNode*>);
+}
 void VTableModelData::add(ServerHandler *server)
 {
 	VModelServer* d=NULL;
@@ -981,29 +1033,28 @@ void VTableModelData::add(ServerHandler *server)
 	servers_.push_back(d);
 }
 
-
-int VTableModelData::pos(VModelServer* server,VNode** afterNode)
+//Gives the position of this server in the full table (including all the filtered nodes).
+//afterNode defines the last filtered node of the previous server (if exists).
+int VTableModelData::pos(VTableServer* server,VNode** afterNode)
 {
 	int start=-1;
 	*afterNode=NULL;
 
 	if(server)
 	{
-		ServerHandler *s=server->realServer();
-		//*node=s->vRoot()->nodeAt(0);
 		start=0;
 		for(unsigned int i=0; i < servers_.size(); i++)
 		{
 			if(servers_.at(i) == server)
 			{
-				return true;
+                return start;
 			}
-			size_t n=servers_.at(i)->totalNodeNum();
+            size_t n=servers_[i]->nodeNum();
 
 			start+=n;
 			if(n > 0)
 			{
-				*afterNode=servers_.at(i)->realServer()->vRoot()->nodeAt(n-1);
+                *afterNode=servers_[i]->tableServer()->nodeAt(n-1);
 			}
 		}
 	}
@@ -1011,8 +1062,8 @@ int VTableModelData::pos(VModelServer* server,VNode** afterNode)
 	return start;
 }
 
-
-bool VTableModelData::identifyInFilter(VModelServer* server,int& start,int& count,VNode** node)
+//Identifies the range of nodes belonging to this server in the full list of filtered nodes.
+bool VTableModelData::identifyInFilter(VTableServer* server,int& start,int& count,VNode** node)
 {
 	start=-1;
 	count=-1;
@@ -1020,12 +1071,10 @@ bool VTableModelData::identifyInFilter(VModelServer* server,int& start,int& coun
 
 	if(server)
 	{
-		ServerHandler *s=server->realServer();
-
-		if(s->vRoot()->totalNum() > 0)
+        if(server->nodeNum() > 0)
 		{
-			*node=s->vRoot()->nodeAt(0);
-			count=s->vRoot()->totalNum();
+            *node=server->nodeAt(0);
+            count=server->nodeNum();
 			start=0;
 			for(unsigned int i=0; i < servers_.size(); i++)
 			{
@@ -1033,50 +1082,26 @@ bool VTableModelData::identifyInFilter(VModelServer* server,int& start,int& coun
 				{
 					return true;
 				}
-				start+=servers_.at(i)->totalNodeNum();
+                start+=servers_.at(i)->nodeNum();
 			}
 		}
 	}
 
 	return false;
-
-	/*start=-1;
-	count=-1;
-	*node=NULL;
-
-	if(server)
-	{
-		*node=server->filter_->realMatchAt(0);
-		if(*node)
-		{
-			count=server->filter_->realMatchCount();
-			start=0;
-			for(unsigned int i=0; i < servers_.size(); i++)
-			{
-				if(servers_.at(i) == server)
-				{
-					return true;
-				}
-				start+=servers_.at(i)->filter_->matchCount();
-			}
-		}
-	}
-
-	return false;*/
 }
 
+//Gets the position of the given node in the full list of filtered nodes.
 //This has to be very fast!!!
-int VTableModelData::posInFilter(VModelServer* server,const VNode *node) const
+int VTableModelData::posInFilter(VTableServer* server,const VNode *node) const
 {
 	if(server)
 	{
 		int totalRow=0;
 		for(unsigned int i=0; i < servers_.size(); i++)
 		{
-			ServerHandler *s=servers_.at(i)->realServer();
 			if(servers_.at(i) == server)
-			{
-				int pos=node->index();
+			{				
+                int pos=server->tableServer()->indexOf(node);
 				if(pos != -1)
 				{
 					totalRow+=pos;
@@ -1087,7 +1112,7 @@ int VTableModelData::posInFilter(VModelServer* server,const VNode *node) const
 			}
 			else
 			{
-				totalRow+=s->vRoot()->totalNum();
+                totalRow+=server->nodeNum();
 			}
 		}
 	}
@@ -1101,7 +1126,7 @@ int VTableModelData::posInFilter(const VNode *node) const
 	int serverIdx=indexOfServer(node->server());
 	if(serverIdx != -1)
 	{
-		return posInFilter(servers_.at(serverIdx),node);
+        return posInFilter(servers_[serverIdx]->tableServer(),node);
 	}
 
 	return -1;
@@ -1116,36 +1141,18 @@ VNode* VTableModelData::getNodeFromFilter(int totalRow)
 
 	for(unsigned int i=0; i < servers_.size(); i++)
 	{
-		ServerHandler *s=servers_.at(i)->realServer();
-
 		int pos=totalRow-cnt;
-		if(pos < s->vRoot()->totalNum())
+        if(pos < servers_[i]->nodeNum())
 		{
-			return s->vRoot()->nodeAt(pos);
+            return servers_[i]->tableServer()->nodeAt(pos);
 		}
-		cnt+= s->vRoot()->totalNum();
+        cnt+= servers_[i]->nodeNum();
 	}
 
 	return NULL;
-
-	/*int cnt=0;
-
-	if(totalRow < 0)
-		return NULL;
-
-	for(unsigned int i=0; i < servers_.size(); i++)
-	{
-		NodeFilter *filter=servers_.at(i)->filter_;
-		int pos=totalRow-cnt;
-		if(pos < filter->matchCount())
-		{
-			return filter->matchAt(pos);
-		}
-		cnt+=filter->matchCount();
-	}
-
-	return NULL;*/
 }
+
+#if 0
 
 //Return the number of filtered nodes for the given server
 int VTableModelData::numOfFiltered(int index) const
@@ -1161,12 +1168,11 @@ int VTableModelData::numOfFiltered(int index) const
 //This has to be very fast!!!
 bool VTableModelData::isFiltered(VNode *node) const
 {
-#if 0
     int id=indexOfServer(node->server());
 	if(id != -1)
 	{
 		return servers_.at(id)->filter_->isFiltered(node);
 	}
-#endif
 	return true;
 }
+#endif

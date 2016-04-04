@@ -21,6 +21,7 @@ class NodeFilterDef;
 class ServerFilter;
 class ServerHandler;
 class VTableModelData;
+class VTableServer;
 
 class TableNodeModel : public AbstractNodeModel
 {
@@ -49,7 +50,7 @@ public Q_SLOTS:
    	void slotServerRemoveEnd();
 
    	void slotDataChanged(VModelServer*) {}
-   	void slotNodeChanged(VModelServer*,const VNode*);
+    void slotNodeChanged(VTableServer*,const VNode*);
    	void slotAttributesChanged(VModelServer*,const VNode*) {};
    	void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int) {};
    	void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int) {};
@@ -65,7 +66,7 @@ protected:
 	VModelServer* indexToServer(const QModelIndex & index) const {return NULL;}
 	QModelIndex serverToIndex(ServerHandler*) const {return QModelIndex();}
 
-   	QModelIndex nodeToIndex(VModelServer* server,const VNode* node, int column) const;
+    QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;
    	QModelIndex nodeToIndex(const VNode*,int column=0) const;
 	VNode* indexToNode( const QModelIndex & index) const;
 
