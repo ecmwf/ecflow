@@ -22,7 +22,7 @@ class ActionHandler;
 class Animation;
 class ExpandNode;
 class ExpandState;
-class NodeFilterModel;
+class TableNodeSortModel;
 class PropertyMapper;
 class TreeNodeModel;
 class TreeNodeViewDelegate;

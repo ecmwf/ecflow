@@ -7,8 +7,8 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef NODEFILTERMODEL_H
-#define NODEFILTERMODEL_H
+#ifndef TABLENODEFILTERMODEL_H
+#define TABLENODEFILTERMODEL_H
 
 #include <QSortFilterProxyModel>
 
@@ -17,15 +17,13 @@
 class AbstractNodeModel;
 class NodeFilterDef;
 
-class NodeFilterModel : public QSortFilterProxyModel
+class TableNodeSortModel : public QSortFilterProxyModel
 {
-Q_OBJECT
-
 public:
-	NodeFilterModel(AbstractNodeModel*,QObject *parent=0);
-	~NodeFilterModel();
+    TableNodeSortModel(AbstractNodeModel*,QObject *parent=0);
+    ~TableNodeSortModel();
 
-	bool filterAcceptsRow(int,const QModelIndex &) const;
+    //bool filterAcceptsRow(int,const QModelIndex &) const;
 
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
@@ -34,9 +32,6 @@ public:
 	VInfo_ptr nodeInfo(const QModelIndex&);
 	QModelIndex infoToIndex(VInfo_ptr);
 	QModelIndex nodeToIndex(const VNode *node);
-
-public Q_SLOTS:
-	void slotFilterChanged();
 
 protected:
 	AbstractNodeModel* nodeModel_;

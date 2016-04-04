@@ -15,7 +15,7 @@
 
 class QWidget;
 
-class NodeFilterModel;
+class TableNodeSortModel;
 class NodeFilterDef;
 class VSettings;
 

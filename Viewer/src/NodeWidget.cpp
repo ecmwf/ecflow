@@ -12,7 +12,6 @@
 
 #include "AbstractNodeModel.hpp"
 #include "InfoPanelHandler.hpp"
-#include "NodeFilterModel.hpp"
 #include "VFilter.hpp"
 #include "VModelData.hpp"
 
@@ -23,7 +22,6 @@ NodeWidget::NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidge
    DashboardWidget(type,parent),
    serverFilter_(serverFilter),
    model_(0),
-   filterModel_(0),
    view_(0),
    icons_(0),
    atts_(0),

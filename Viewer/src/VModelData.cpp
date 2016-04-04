@@ -538,7 +538,7 @@ void VTableServer::notifyEndServerScan(ServerHandler* server)
 {
     Q_ASSERT(inScan_);
     filter_->update();
-    Q_EMIT endServerScan(this,nodeNum());
+    Q_EMIT beginServerScan(this,nodeNum());
     inScan_=false;
     Q_EMIT endServerScan(this,nodeNum());
 }
@@ -582,7 +582,16 @@ void VTableServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf:
 
 void VTableServer::runFilter()
 {
+
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("VTableServer::runFilter --> " + server_->name());
+#endif
+
     int oriNodeNum=nodeNum();
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("    oriNodeNum: " + QString::number(oriNodeNum).toStdString());
+#endif
+
     Q_EMIT beginServerClear(this,oriNodeNum);
     filter_->clear();
     inScan_=true;
@@ -593,6 +602,13 @@ void VTableServer::runFilter()
     Q_EMIT beginServerScan(this, nodeNum());
     inScan_=false;
     Q_EMIT endServerScan(this, nodeNum());
+
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("    nodeNum: " + QString::number(oriNodeNum).toStdString());
+    UserMessage::debug("<-- VTableServer::runFilter");
+#endif
+
+
 }
 
 //==========================================
@@ -605,7 +621,8 @@ VModelData::VModelData(NodeFilterDef *filterDef,AbstractNodeModel* model) :
 		QObject(model),
 		serverFilter_(0),
 		filterDef_(filterDef),
-		model_(model)
+        model_(model),
+        active_(false)
 {
 	connect(filterDef_,SIGNAL(changed()),
 			this,SLOT(slotFilterDefChanged()));
@@ -648,7 +665,7 @@ VModelData::~VModelData()
 void VModelData::connectToModel(VModelServer* d)
 {
 #if 0
-    connect(d,SIGNAL(beginAddRemoveAttributes(VModelServer*,const VNode*,int,int)),
+    connect(d,SIGNAL(beginAddRemoveAttributes(VModelServer*,constDashboard::readSettings,     FP=7ffca6afa930 VNode*,int,int)),
 		model_,SLOT(slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int)));
 
 	connect(d,SIGNAL(endAddRemoveAttributes(VModelServer*,const VNode*,int,int)),
@@ -778,6 +795,16 @@ VModelServer* VModelData::server(const std::string& name) const
     return NULL;
 }
 
+VModelServer* VModelData::server(ServerHandler* s) const
+{
+    for(unsigned int i=0; i < servers_.size(); i++)
+        if(servers_.at(i)->server_ == s)
+            return servers_.at(i);
+
+    return NULL;
+}
+
+
 int VModelData::indexOfServer(ServerHandler* s) const
 {
 	for(unsigned int i=0; i < servers_.size(); i++)
@@ -887,9 +914,22 @@ void VModelData::notifyServerFilterDelete()
 
 }
 
+void VModelData::setActive(bool active)
+{
+    if(active != active_)
+    {
+        active_=active;
+        if(active_)
+            runFilter(false);
+        else
+            clear();
+    }
+}
+
 void VModelData::slotFilterDefChanged()
 {
-	runFilter(true);
+    if(active_)
+        runFilter(true);
 }
 
 bool VModelData::isFilterNull() const

@@ -23,7 +23,7 @@ class QComboBox;
 
 class ActionHandler;
 class TableNodeModel;
-class NodeFilterModel;
+class TableNodeSortModel;
 class NodeFilterDef;
 class PropertyMapper;
 class TableNodeHeader;
@@ -33,14 +33,14 @@ class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObs
 Q_OBJECT
 
 public:
-	explicit TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
-	void reload() {};
+	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
+    void reload() {}
 	void rerender();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
-	void currentSelection(VInfo_ptr n) {};
+    void currentSelection(VInfo_ptr n) {}
 	void selectFirstServer() {}
-	void setModel(NodeFilterModel *model);
+	void setModel(TableNodeSortModel *model);
 
 	void notifyChange(VProperty* p);
 
@@ -66,7 +66,7 @@ protected:
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void adjustBackground(QColor col);
 
-    NodeFilterModel* model_;
+    TableNodeSortModel* model_;
 	ActionHandler* actionHandler_;
 	TableNodeHeader* header_;
 	bool needItemsLayout_;

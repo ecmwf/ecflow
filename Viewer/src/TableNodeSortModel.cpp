@@ -7,50 +7,45 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "NodeFilterModel.hpp"
+#include "TableNodeSortModel.hpp"
 
 #include "AbstractNodeModel.hpp"
 
-NodeFilterModel::NodeFilterModel(AbstractNodeModel* nodeModel,QObject *parent) :
+TableNodeSortModel::TableNodeSortModel(AbstractNodeModel* nodeModel,QObject *parent) :
 		QSortFilterProxyModel(parent),
 		nodeModel_(nodeModel)
 {
-	connect(nodeModel_,SIGNAL(filterChanged()),
-			this,SLOT(slotFilterChanged()));
+    //connect(nodeModel_,SIGNAL(filterChanged()),
+    //		this,SLOT(slotFilterChanged()));
 
 	QSortFilterProxyModel::setSourceModel(nodeModel_);
 
 	setDynamicSortFilter(true);
 }
 
-NodeFilterModel::~NodeFilterModel()
+TableNodeSortModel::~TableNodeSortModel()
 {
 }
 
-bool NodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
+#if 0
+bool TableNodeSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
 {
 	QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
 	return sourceModel()->data(index,AbstractNodeModel::FilterRole).toBool();
 }
+#endif
 
-void NodeFilterModel::slotFilterChanged()
-{
-	//invalidateFilter();
-	invalidate();
-
-}
-
-VInfo_ptr NodeFilterModel::nodeInfo(const QModelIndex& index)
+VInfo_ptr TableNodeSortModel::nodeInfo(const QModelIndex& index)
 {
 	return nodeModel_->nodeInfo(mapToSource(index));
 }
 
-QModelIndex NodeFilterModel::infoToIndex(VInfo_ptr info)
+QModelIndex TableNodeSortModel::infoToIndex(VInfo_ptr info)
 {
 	return mapFromSource(nodeModel_->infoToIndex(info));
 }
 
-QModelIndex NodeFilterModel::nodeToIndex(const VNode *node)
+QModelIndex TableNodeSortModel::nodeToIndex(const VNode *node)
 {
 	return mapFromSource(nodeModel_->nodeToIndex(node));
 }

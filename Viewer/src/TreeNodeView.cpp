@@ -22,7 +22,7 @@
 #include "ActionHandler.hpp"
 #include "Animation.hpp"
 #include "ExpandState.hpp"
-#include "NodeFilterModel.hpp"
+#include "TableNodeSortModel.hpp"
 #include "PropertyMapper.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
@@ -245,10 +245,8 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 		if(idx.isValid())
 		{
 				collapseAll(idx);
-
 		}
 	}
-
 
 	/*if(cmd == "set_as_root")
 	{

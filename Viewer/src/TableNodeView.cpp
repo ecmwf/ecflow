@@ -24,14 +24,14 @@
 #include "ActionHandler.hpp"
 #include "FilterWidget.hpp"
 #include "IconProvider.hpp"
-#include "NodeFilterModel.hpp"
+#include "TableNodeSortModel.hpp"
 #include "PropertyMapper.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeViewDelegate.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
-TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget* parent) :
      QTreeView(parent),
      NodeViewBase(filterDef),
      model_(model),
@@ -115,7 +115,7 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 	adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
 }
 
-void TableNodeView::setModel(NodeFilterModel *model)
+void TableNodeView::setModel(TableNodeSortModel *model)
 {
 	model_= model;
 

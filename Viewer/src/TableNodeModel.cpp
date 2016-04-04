@@ -14,11 +14,14 @@
 
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VFilter.hpp"
 #include "VIcon.hpp"
 #include "VModelData.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
+
+#define _UI_TABLENODEMODEL_DEBUG
 
 //=======================================================
 //
@@ -54,7 +57,9 @@ int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 
 int TableNodeModel::rowCount( const QModelIndex& parent) const
 {
-	//qDebug() << "rowCount" << parent;
+#ifdef _UI_TABLENODEMODEL_DEBUG
+    //qDebug() << "rowCount" << parent;
+#endif
 
 	//There are no servers
 	if(!hasData())
@@ -76,8 +81,9 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
             if(!data_->server(i)->inScan())
                 cnt+=data_->numOfNodes(i);
 		}
-		//qDebug() << "table count" << cnt;
-
+#ifdef _UI_TABLENODEMODEL_DEBUG
+        //qDebug() << "table count" << cnt;
+#endif
 		return cnt;
 	}
 
@@ -287,21 +293,30 @@ void TableNodeModel::slotBeginServerScan(VModelServer* server,int num)
     Q_ASSERT(active_ == true);
     Q_ASSERT(server);
 
+#ifdef _UI_TABLENODEMODEL_DEBUG
+     UserMessage::debug("TableNodeModel::slotBeginServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+#endif
+
 	if(num >0)
 	{
 		int count=num;
 
 		VNode* afterNode=NULL;
         int start=data_->pos(server->tableServer(),&afterNode);
-
 		QModelIndex idx;
 
-		if(afterNode)
+#ifdef _UI_TABLENODEMODEL_DEBUG
+        qDebug() << "  " << afterNode << start;
+#endif
+
+#if 0
+        if(afterNode)
 		{
 			idx=createIndex(start,0,afterNode);
 		}
+#endif
 
-		beginInsertRows(idx,0,count-1);
+        beginInsertRows(QModelIndex(),start,start+count-1);
 	}
 }
 
@@ -309,11 +324,12 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 {
 	assert(active_ == true);
 
+#ifdef _UI_TABLENODEMODEL_DEBUG
+     UserMessage::debug("TableNodeModel::slotEndServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+#endif
+
 	if(num >0)
 		endInsertRows();
-
-
-	Q_EMIT filterChanged();
 }
 
 void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
@@ -329,9 +345,11 @@ void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
 		VNode* firstNode=NULL;
         data_->identifyInFilter(server->tableServer(),start,count,&firstNode);
 		assert(firstNode);
+        Q_ASSERT(count == num);
 
-		QModelIndex idx=createIndex(start,0,firstNode);
-		beginRemoveRows(idx,0,count-1);
+
+        //QModelIndex idx=createIndex(start,0,firstNode);
+        beginRemoveRows(QModelIndex(),start,start+count-1);
 	}
 }
 

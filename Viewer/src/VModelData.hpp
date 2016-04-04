@@ -205,7 +205,8 @@ public:
 	VModelData(NodeFilterDef* filterDef,AbstractNodeModel* model);
 	~VModelData();
 
-	void clear();
+    void setActive(bool);
+    void clear();
 	void reset(ServerFilter* servers);
 
 	void runFilter(bool broadcast);
@@ -217,6 +218,7 @@ public:
 	VModelServer* server(int) const;
     VModelServer* server(const void*) const;
     VModelServer* server(const std::string&) const;
+    VModelServer* server(ServerHandler*) const;
 	int indexOfServer(ServerHandler* s) const;
 	int numOfNodes(int) const;
     //virtual bool isFiltered(VNode *node) const=0;
@@ -251,6 +253,7 @@ protected:
 	ServerFilter *serverFilter_;
 	NodeFilterDef* filterDef_;
 	AbstractNodeModel* model_;
+    bool active_;
 };
 
 class VTreeModelData : public VModelData

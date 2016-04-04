@@ -40,10 +40,13 @@ void AbstractNodeModel::active(bool active)
 
 		beginResetModel();
 
+        data()->setActive(active_);
+
+#if 0
 		//When the model becomes active we reload everything
 		if(active_)
 		{
-			data()->runFilter(false);
+            data()->runFilter(false);
 			//init();
 
 			//Initialises the filter
@@ -56,7 +59,7 @@ void AbstractNodeModel::active(bool active)
 		{
 			data()->clear(); //clean();
 		}
-
+#endif
 		endResetModel();
 
 		//After finishing reset the view will automatically be notified about

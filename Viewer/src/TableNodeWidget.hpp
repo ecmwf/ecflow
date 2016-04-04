@@ -15,6 +15,7 @@
 #include "NodeWidget.hpp"
 
 class NodeStateFilter;
+class TableNodeSortModel;
 class VParamFilterMenu;
 class VSettings;
 
@@ -37,7 +38,8 @@ protected Q_SLOTS:
     void slotSelectionChangedInView(VInfo_ptr info);
 
 private:
-	VParamFilterMenu *stateFilterMenu_;
+    TableNodeSortModel *sortModel_;
+    VParamFilterMenu *stateFilterMenu_;
 };
 
 #endif

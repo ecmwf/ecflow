@@ -714,7 +714,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
 	//If the node is toplevel node (suite).
 	else if(node->isTopLevel())
 	{
-        if(VModelServer *mserver=data_->server(node))
+        if(VModelServer *mserver=data_->server(node->server()))
         {
             VTreeServer* server=mserver->treeServer();
             Q_ASSERT(server);
@@ -733,7 +733,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
     //Other nodes
     else if(VNode *parentNode=node->parent())
 	{
-        if(VModelServer *mserver=data_->server(node))
+        if(VModelServer *mserver=data_->server(node->server()))
         {
             VTreeServer* server=mserver->treeServer();
             Q_ASSERT(server);
