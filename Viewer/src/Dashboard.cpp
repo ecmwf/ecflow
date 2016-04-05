@@ -388,7 +388,10 @@ void Dashboard::readSettings(VComboSettings* vs)
 {
 	settingsAreRead_=true;
 
+    //This will create the ServerHandler objects
 	serverFilter_->readSettings(vs);
+
+    //At this point each ServerHandler is running its reset()!
 
 	Q_FOREACH(QWidget* w,findChildren<QDockWidget*>())
 	{
@@ -409,7 +412,8 @@ void Dashboard::readSettings(VComboSettings* vs)
 			//Create a dashboard widget
 			if(DashboardWidget *dw=addWidget(type,dockId))
 			{
-				//This will make the widgets active!!!
+                //This will make the widgets active!!! The ServerHandler reset() can
+                //be still running at this point!
 				dw->readSettings(vs);
 			}
 			vs->endGroup();

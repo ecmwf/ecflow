@@ -355,13 +355,13 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
                 filterState(topChange[i],def_->nodeState_);
             }
 
+#ifdef _UI_VFILTER_DEBUG
             int diffCnt=0;
             for(size_t i=0; i < match_.size(); i++)
             {
                 if(prevNodes[i] != match_[i])
                     diffCnt++;
             }
-#ifdef _UI_VFILTER_DEBUG
             UserMessage::debug("  number of differences in filter: " + QString::number(diffCnt).toStdString());
 #endif
 
@@ -371,7 +371,20 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
             {
                 checkState(topChange[i],prevNodes,topFilterChange);
             }
+
+#ifdef _UI_VFILTER_DEBUG
+            assert(topFilterChange.size() <= diffCnt);
+            if(diffCnt > 0)
+                assert(topFilterChange.size() >0);
+#endif
         }
+
+#ifdef _UI_VFILTER_DEBUG
+        UserMessage::debug("  Top level nodes that changed in filter:");
+        for(size_t i= 0; i < topFilterChange.size(); i++)
+            UserMessage::debug("     " +  topFilterChange.at(i)->strName());
+#endif
+
     }
     else
     {
@@ -399,14 +412,19 @@ bool TreeNodeFilter::checkState(VNode* n,const std::vector<VNode*>& prevNodes,st
     int idx=n->index();
     if(prevNodes[idx] != match_[idx])
     {
-        topFilterChange.push_back(n->parent());
+        VNode *pn=n->parent();
+        if(!pn) pn=n;
+
+        if(std::find(topFilterChange.begin(),topFilterChange.end(),pn) == topFilterChange.end())
+            topFilterChange.push_back(pn);
+
         return true;
     }
     else
     {
          for(unsigned int i=0; i < n->numOfChildren(); i++)
          {
-             return checkState(n->childAt(i),prevNodes,topFilterChange);
+            checkState(n->childAt(i),prevNodes,topFilterChange);
          }
     }
 
@@ -504,6 +522,10 @@ VNode* TableNodeFilter::nodeAt(int index) const
 
 bool TableNodeFilter::update()
 {
+#ifdef _UI_VFILTER_DEBUG
+    UserMessage::debug("TableNodeFilter::update --> " + server_->name());
+#endif
+
     NodeQuery* q=def_->query_;
 
     if(!q->hasServer(server_->name()) || server_->vRoot()->totalNum() ==0)
@@ -513,43 +535,60 @@ bool TableNodeFilter::update()
         match_=std::vector<VNode*>();
         index_=std::vector<int>();
         matchCount_=0;
+#ifdef _UI_VFILTER_DEBUG
+        UserMessage::debug("  no nodes are filtered!");
+#endif
+        return true;
     }
-    else
+
+    if(q->query().isEmpty() && q->rootNode().empty())
     {
-        if(q->query().isEmpty() && q->rootNode().empty())
-        {
-            matchMode_=AllMatch;
-            //Deallocates
-            match_=std::vector<VNode*>();
-            index_=std::vector<int>();
-            matchCount_=server_->vRoot()->totalNum();
-        }
-        else
-        {
-            matchMode_=VectorMatch;
-            match_.clear();
-            int num=server_->vRoot()->totalNum();           
-            if(num != index_.size())
-            {
-                //Reallocates
-                index_=std::vector<int>();
-                index_.resize(num,-1);
-            }
-            else
-            {
-                std::fill(index_.begin(), index_.end(), -1);
-            }
-
-            queryEngine_->setQuery(def_->query_);
-            queryEngine_->runQuery(server_);
-
-            matchCount_=match_.size();
-            for(size_t i=0; i < match_.size(); i++)
-            {
-                index_[match_[i]->index()]=i;
-            }
-
-        }
+        matchMode_=AllMatch;
+        //Deallocates
+        match_=std::vector<VNode*>();
+        index_=std::vector<int>();
+        matchCount_=server_->vRoot()->totalNum();
+#ifdef _UI_VFILTER_DEBUG
+        UserMessage::debug("  all the nodes are filtered!");
+#endif
+        return true;
     }
+
+#ifdef _UI_VFILTER_DEBUG
+     QTime timer;
+     timer.start();
+#endif
+
+     matchMode_=VectorMatch;
+     match_.clear();
+     int num=server_->vRoot()->totalNum();
+     if(num != index_.size())
+     {
+        //Reallocates
+        index_=std::vector<int>();
+        index_.resize(num,-1);
+     }
+     else
+     {
+        std::fill(index_.begin(), index_.end(), -1);
+     }
+
+     queryEngine_->setQuery(def_->query_);
+     queryEngine_->runQuery(server_);
+
+     matchCount_=match_.size();
+     for(size_t i=0; i < match_.size(); i++)
+     {
+        index_[match_[i]->index()]=i;
+     }
+
+#ifdef _UI_VFILTER_DEBUG
+    UserMessage::debug("  elapsed time: " + QString::number(timer.elapsed()).toStdString() + " ms");
+    UserMessage::debug("  filter size:" + QString::number(match_.size()).toStdString());
+    UserMessage::debug("  capacity:" + QString::number(match_.capacity()).toStdString());
+#endif
+
+    return true;
+
 }
 

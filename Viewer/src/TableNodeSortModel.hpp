@@ -23,8 +23,6 @@ public:
     TableNodeSortModel(AbstractNodeModel*,QObject *parent=0);
     ~TableNodeSortModel();
 
-    //bool filterAcceptsRow(int,const QModelIndex &) const;
-
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
     void setSourceModel(QAbstractItemModel*) {}

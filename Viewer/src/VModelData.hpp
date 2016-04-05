@@ -263,11 +263,6 @@ class VTreeModelData : public VModelData
 public:
     VTreeModelData(NodeFilterDef* filterDef,AttributeFilter* attrFilter,AbstractNodeModel* model);
 
-    //bool identifyTopLevelNode(const VNode* node,VModelServer**,int& index);
-    //bool identifyTopLevelNode(const VTreeNode* node,VModelServer**,int& index);
-    //VNode* topLevelNode(void*,int);
-    //bool isFiltered(VNode *node) const;
-
 protected Q_SLOTS:
     void slotAttrFilterChanged();
 
@@ -284,12 +279,11 @@ public:
 	VTableModelData(NodeFilterDef* filterDef,AbstractNodeModel* model);
 
 	int numOfFiltered(int index) const;
-	VNode* getNodeFromFilter(int totalRow);
-	int posInFilter(const VNode *node) const;
-    int posInFilter(VTableServer*,const VNode *node) const;
-    int pos(VTableServer* server,VNode**);
-    bool identifyInFilter(VTableServer* server,int& start,int& count,VNode**);
-    //bool isFiltered(VNode *node) const;
+    VNode* nodeAt(int totalRow);
+    int position(const VNode *node) const;
+    int position(VTableServer*,const VNode *node) const;
+    int position(VTableServer* server);
+    bool position(VTableServer* server,int& start,int& count);
 
 protected:
     void add(ServerHandler *server);

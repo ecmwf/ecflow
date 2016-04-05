@@ -217,13 +217,13 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
         for(size_t i=0; i < topFilterChange.size(); i++)
         {
 #ifdef _UI_VMODELDATA_DEBUG
-            UserMessage::debug("  Branch: " + topFilterChange[i]->strName());
+            UserMessage::debug("  Branch: " + topFilterChange[i]->absNodePath());
 #endif
             //This is the branch where there is a change in the filter
             VTreeNode* tn=tree_->find(topFilterChange[i]);
 
             //If the branch is not in tree (not yet filtered) we need to
-            //find it nearest ancestor up in the tree. This must exsit because
+            //find it nearest ancestor up in the tree. This must exist because
             //the suites are always part of the tree.
             if(!tn)
             {
@@ -233,7 +233,7 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
             }
 
 #ifdef _UI_VMODELDATA_DEBUG
-            UserMessage::debug("  Branch treeNode: " + tn->vnode()->strName());
+            UserMessage::debug("  Branch treeNode: " + tn->vnode()->absNodePath());
 #endif
             //First, we remove the branch contents
             if(tn->numOfChildren())
@@ -517,7 +517,7 @@ VNode* VTableServer::nodeAt(int index) const
     return filter_->nodeAt(index);
 }
 
-//Position oin the list of filtered nodes
+//Position in the list of filtered nodes
 int VTableServer::indexOf(const VNode* node) const
 {
     return filter_->indexOf(node);
@@ -574,6 +574,7 @@ void VTableServer::notifyEndServerSync(ServerHandler*)
 
 void VTableServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
 {
+    Q_EMIT nodeChanged(this,node);
 }
 
 void VTableServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
@@ -582,7 +583,6 @@ void VTableServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf:
 
 void VTableServer::runFilter()
 {
-
 #ifdef _UI_VMODELDATA_DEBUG
     UserMessage::debug("VTableServer::runFilter --> " + server_->name());
 #endif
@@ -1073,12 +1073,10 @@ void VTableModelData::add(ServerHandler *server)
 	servers_.push_back(d);
 }
 
-//Gives the position of this server in the full table (including all the filtered nodes).
-//afterNode defines the last filtered node of the previous server (if exists).
-int VTableModelData::pos(VTableServer* server,VNode** afterNode)
+//Gives the position of this server in the full list of filtered nodes.
+int VTableModelData::position(VTableServer* server)
 {
 	int start=-1;
-	*afterNode=NULL;
 
 	if(server)
 	{
@@ -1088,14 +1086,8 @@ int VTableModelData::pos(VTableServer* server,VNode** afterNode)
 			if(servers_.at(i) == server)
 			{
                 return start;
-			}
-            size_t n=servers_[i]->nodeNum();
-
-			start+=n;
-			if(n > 0)
-			{
-                *afterNode=servers_[i]->tableServer()->nodeAt(n-1);
-			}
+			}          
+            start+=servers_[i]->nodeNum();
 		}
 	}
 
@@ -1103,17 +1095,15 @@ int VTableModelData::pos(VTableServer* server,VNode** afterNode)
 }
 
 //Identifies the range of nodes belonging to this server in the full list of filtered nodes.
-bool VTableModelData::identifyInFilter(VTableServer* server,int& start,int& count,VNode** node)
+bool VTableModelData::position(VTableServer* server,int& start,int& count)
 {
 	start=-1;
 	count=-1;
-	*node=NULL;
 
 	if(server)
 	{
         if(server->nodeNum() > 0)
-		{
-            *node=server->nodeAt(0);
+		{          
             count=server->nodeNum();
 			start=0;
 			for(unsigned int i=0; i < servers_.size(); i++)
@@ -1132,7 +1122,7 @@ bool VTableModelData::identifyInFilter(VTableServer* server,int& start,int& coun
 
 //Gets the position of the given node in the full list of filtered nodes.
 //This has to be very fast!!!
-int VTableModelData::posInFilter(VTableServer* server,const VNode *node) const
+int VTableModelData::position(VTableServer* server,const VNode *node) const
 {
 	if(server)
 	{
@@ -1161,18 +1151,18 @@ int VTableModelData::posInFilter(VTableServer* server,const VNode *node) const
 }
 
 //This has to be very fast!!!
-int VTableModelData::posInFilter(const VNode *node) const
+int VTableModelData::position(const VNode *node) const
 {
 	int serverIdx=indexOfServer(node->server());
 	if(serverIdx != -1)
 	{
-        return posInFilter(servers_[serverIdx]->tableServer(),node);
+        return position(servers_[serverIdx]->tableServer(),node);
 	}
 
 	return -1;
 }
 
-VNode* VTableModelData::getNodeFromFilter(int totalRow)
+VNode* VTableModelData::nodeAt(int totalRow)
 {
 	int cnt=0;
 
@@ -1191,28 +1181,3 @@ VNode* VTableModelData::getNodeFromFilter(int totalRow)
 
 	return NULL;
 }
-
-#if 0
-
-//Return the number of filtered nodes for the given server
-int VTableModelData::numOfFiltered(int index) const
-{
-	/*if(VModelServer *d=server(index))
-	{
-		return d->filter_->matchCount();
-
-	}*/
-	return 0;
-}
-
-//This has to be very fast!!!
-bool VTableModelData::isFiltered(VNode *node) const
-{
-    int id=indexOfServer(node->server());
-	if(id != -1)
-	{
-		return servers_.at(id)->filter_->isFiltered(node);
-	}
-	return true;
-}
-#endif

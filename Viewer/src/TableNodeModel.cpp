@@ -37,7 +37,7 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
 {
 	columns_=ModelColumn::def("table_columns");
 
-	assert(columns_);
+    Q_ASSERT(columns_);
 
 	//Create the data handler for the model.
 	data_=new VTableModelData(filterDef,this);
@@ -96,7 +96,8 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if( !index.isValid() ||
-       (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole && role != IconRole))
+       (role != Qt::DisplayRole && role != Qt::ToolTipRole &&
+        role != Qt::BackgroundRole && role != IconRole))
     {
 		return QVariant();
 	}
@@ -169,14 +170,12 @@ QVariant TableNodeModel::headerData( const int section, const Qt::Orientation or
 
 QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & parent ) const
 {
-	if(!hasData() || row < 0 || column < 0)
+    if(!hasData() || row < 0 || column < 0 || parent.isValid())
 	{
 		return QModelIndex();
 	}
 
-	//qDebug() << "index" << row << column << parent;
-
-    if(VNode *node=data_->getNodeFromFilter(row))
+    if(VNode *node=data_->nodeAt(row))
 	{
 		return createIndex(row,column,node);
 	}
@@ -184,7 +183,7 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 	return QModelIndex();
 }
 
-QModelIndex TableNodeModel::parent(const QModelIndex &child) const
+QModelIndex TableNodeModel::parent(const QModelIndex& /*child*/) const
 {
 	//Parent is always the root!!!
 	return QModelIndex();
@@ -211,7 +210,7 @@ QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const
 		return QModelIndex();
 
 	int row=0;
-	if((row=data_->posInFilter(node)) != -1)
+    if((row=data_->position(node)) != -1)
 	{
 		return createIndex(row,column,const_cast<VNode*>(node));
 	}
@@ -226,7 +225,7 @@ QModelIndex TableNodeModel::nodeToIndex(VTableServer* server,const VNode* node, 
 		return QModelIndex();
 
 	int row=0;
-	if((row=data_->posInFilter(server,node)) != -1)
+    if((row=data_->position(server,node)) != -1)
 	{
 		return createIndex(row,column,const_cast<VNode*>(node));
 	}
@@ -249,14 +248,14 @@ VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 //Server is about to be added
 void TableNodeModel::slotServerAddBegin(int row)
 {
-    beginResetModel();
+    //beginResetModel();
     //beginInsertRows(QModelIndex(),row,row);
 }
 
 //Addition of the new server has finished
 void TableNodeModel::slotServerAddEnd()
 {
-    endResetModel();
+    //endResetModel();
     //endInsertRows();
 }
 
@@ -300,22 +299,7 @@ void TableNodeModel::slotBeginServerScan(VModelServer* server,int num)
 	if(num >0)
 	{
 		int count=num;
-
-		VNode* afterNode=NULL;
-        int start=data_->pos(server->tableServer(),&afterNode);
-		QModelIndex idx;
-
-#ifdef _UI_TABLENODEMODEL_DEBUG
-        qDebug() << "  " << afterNode << start;
-#endif
-
-#if 0
-        if(afterNode)
-		{
-			idx=createIndex(start,0,afterNode);
-		}
-#endif
-
+        int start=data_->position(server->tableServer());
         beginInsertRows(QModelIndex(),start,start+count-1);
 	}
 }
@@ -341,12 +325,10 @@ void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
 	{
 		int start=-1;
 		int count=-1;
+        data_->position(server->tableServer(),start,count);
 
-		VNode* firstNode=NULL;
-        data_->identifyInFilter(server->tableServer(),start,count,&firstNode);
-		assert(firstNode);
+        Q_ASSERT(start >=0);
         Q_ASSERT(count == num);
-
 
         //QModelIndex idx=createIndex(start,0,firstNode);
         beginRemoveRows(QModelIndex(),start,start+count-1);

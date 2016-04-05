@@ -20,20 +20,12 @@ TableNodeSortModel::TableNodeSortModel(AbstractNodeModel* nodeModel,QObject *par
 
 	QSortFilterProxyModel::setSourceModel(nodeModel_);
 
-	setDynamicSortFilter(true);
+    //setDynamicSortFilter(true);
 }
 
 TableNodeSortModel::~TableNodeSortModel()
 {
 }
-
-#if 0
-bool TableNodeSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
-{
-	QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-	return sourceModel()->data(index,AbstractNodeModel::FilterRole).toBool();
-}
-#endif
 
 VInfo_ptr TableNodeSortModel::nodeInfo(const QModelIndex& index)
 {
