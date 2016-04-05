@@ -70,8 +70,10 @@ protected:
 	void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
 	void restoreExpand(ExpandNode *expand,const VNode* node);
 	void adjustIndentation(int);
-	void adjustBackground(QColor col);
-	void expandAll(const QModelIndex& idx);
+    void adjustBackground(QColor col,bool asjustStyleSheet=true);
+    void adjustBranchLines(bool,bool asjustStyleSheet=true);
+    void adjustStyleSheet();
+    void expandAll(const QModelIndex& idx);
 	void collapseAll(const QModelIndex& idx);
 
 	ActionHandler* actionHandler_;
@@ -80,6 +82,7 @@ protected:
 	int defaultIndentation_;
 	TreeNodeViewDelegate* delegate_;
 	PropertyMapper* prop_;
+    QMap<QString,QString> styleSheet_;
 };
 
 #endif

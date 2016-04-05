@@ -53,6 +53,10 @@
                     "min" : "0",
                     "max" : "100"  
                  },
+                 "drawBranchLine" : {
+                     "label" : "Draw branch lines",
+                     "default": "false"
+                  },
                  "defaultAttributes" : {
                     "label" : "Default visible attributes",
                     "default" : "meter/event/repeat/trigger/label/time/date/limit/limiter/late",
