@@ -101,7 +101,6 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 TreeNodeViewDelegate::~TreeNodeViewDelegate()
 {
 	delete animation_;
-    //delete prop_;
 }
 
 /*void TreeNodeViewDelegate::notifyChange(VProperty* p)

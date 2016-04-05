@@ -33,12 +33,14 @@ class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObs
 Q_OBJECT
 
 public:
-	explicit TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
-	void reload() {};
+    TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
+    ~TableNodeView();
+
+    void reload() {}
 	void rerender();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
-	void currentSelection(VInfo_ptr n) {};
+    void currentSelection(VInfo_ptr n) {}
 	void selectFirstServer() {}
 	void setModel(NodeFilterModel *model);
 

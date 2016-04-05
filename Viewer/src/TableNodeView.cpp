@@ -115,6 +115,11 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 	adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
 }
 
+TableNodeView::~TableNodeView()
+{
+    delete prop_;
+}
+
 void TableNodeView::setModel(NodeFilterModel *model)
 {
 	model_= model;
