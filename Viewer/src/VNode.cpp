@@ -995,6 +995,10 @@ void VServer::scan(VNode *node,bool hasNotifications)
 
 	//totalNum_+=nodes.size();
 
+    //Preallocates the children vector to the reqiuired size to save memory.
+    if(nodes.size() > 0)
+        node->children_.reserve(nodes.size());
+
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
 		VNode* vn=NULL;

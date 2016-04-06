@@ -72,6 +72,9 @@ public:
      int totalNum() const {return totalNum_;}
      int totalNumOfTopLevel(VTreeNode*) const;
      int totalNumOfTopLevel(int i) const;
+     VNode* vnodeAt(int index) const;
+
+     const std::vector<VTreeNode*>& nodeVec() const {return nodeVec_;}
 
 protected:
      void clear();

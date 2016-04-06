@@ -183,7 +183,6 @@ protected:
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
-    //Node* node_;
     node_ptr node_;
     VNode* parent_;
     std::vector<VNode*> children_;

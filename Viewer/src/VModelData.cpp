@@ -87,7 +87,7 @@ VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,Attribut
    attrFilter_(attrFilter)
 {
     tree_=new VTree(this);
-    filter_=new TreeNodeFilter(filterDef,server_);
+    filter_=new TreeNodeFilter(filterDef,server_,tree_);
 	//We has to observe the nodes of the server.
 	//server_->addNodeObserver(this);
 }
@@ -349,17 +349,16 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 			if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::DEFSTATUS ||
 			   *it == ecf::Aspect::SUSPENDED)
 			{
-                if(node)
+                if(node && node->isAttrInitialised())
                 {
-                    Q_EMIT nodeChanged(this,node);
+                        Q_EMIT nodeChanged(this,node);
                 }
 
                 changeInfo_->addStateChange(vnode);
 
 #ifdef _UI_VMODELDATA_DEBUG
                 UserMessage::debug("   node status changed: " + vnode->strName());
-#endif
-                //runFilter=true;
+#endif               
 			}
 
 			//Changes might affect the icons
@@ -367,7 +366,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 					*it == ecf::Aspect::TODAY || *it == ecf::Aspect::TIME ||
 					*it == ecf::Aspect::DAY || *it == ecf::Aspect::CRON || *it == ecf::Aspect::DATE)
 			{
-                if(node)
+                if(node && node->isAttrInitialised())
                 {
                     Q_EMIT nodeChanged(this,node);
                 }
@@ -381,21 +380,13 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 			   *it == ecf::Aspect::LATE || *it == ecf::Aspect::TODAY || *it == ecf::Aspect::TIME ||
 			   *it == ecf::Aspect::DAY || *it == ecf::Aspect::CRON || *it == ecf::Aspect::DATE )
 			{
-                if(node)
+                if(node && node->isAttrInitialised())
                 {
                     Q_EMIT attributesChanged(this,node);
                 }
 			}
 		}
 	}
-
-#if 0
-	//We do not run the filter now but wait until the sync is finished!
-	if(runFilter)
-	{
-		nodeStateChangeCnt_++;
-	}
-#endif
 }
 
 void VTreeServer::notifyEndNodeChange(const VNode* vnode, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
@@ -434,7 +425,7 @@ void VTreeServer::notifyEndNodeChange(const VNode* vnode, const std::vector<ecf:
 
 }
 
-void VTreeServer::runFilter()
+void VTreeServer::reload()
 {
     Q_EMIT beginServerClear(this,-1);
     tree_->clear();
@@ -569,7 +560,7 @@ void VTableServer::notifyServerActivityChanged(ServerHandler* server)
 //filter to this point but now we need to do it.
 void VTableServer::notifyEndServerSync(ServerHandler*)
 {
-    runFilter();
+    reload();
 }
 
 void VTableServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
@@ -581,10 +572,10 @@ void VTableServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf:
 {
 }
 
-void VTableServer::runFilter()
+void VTableServer::reload()
 {
 #ifdef _UI_VMODELDATA_DEBUG
-    UserMessage::debug("VTableServer::runFilter --> " + server_->name());
+    UserMessage::debug("VTableServer::reload --> " + server_->name());
 #endif
 
     int oriNodeNum=nodeNum();
@@ -605,7 +596,7 @@ void VTableServer::runFilter()
 
 #ifdef _UI_VMODELDATA_DEBUG
     UserMessage::debug("    nodeNum: " + QString::number(oriNodeNum).toStdString());
-    UserMessage::debug("<-- VTableServer::runFilter");
+    UserMessage::debug("<-- VTableServer::reload");
 #endif
 
 
@@ -822,23 +813,6 @@ int VModelData::numOfNodes(int index) const
 	return 0;
 }
 
-void VModelData::runFilter(bool broadcast)
-{
-    Q_EMIT filterChangeBegun();
-
-    for(unsigned int i=0; i < servers_.size(); i++)
-	{
-        servers_.at(i)->runFilter();
-	}
-
-    Q_EMIT filterChangeEnded();
-
-    /*if(broadcast)
-	{
-		Q_EMIT filterChanged();
-    }*/
-}
-
 //ServerFilter observer methods
 
 void VModelData::notifyServerFilterAdded(ServerItem* item)
@@ -914,22 +888,57 @@ void VModelData::notifyServerFilterDelete()
 
 }
 
+//Should only be called once at the beginning
 void VModelData::setActive(bool active)
 {
     if(active != active_)
     {
         active_=active;
         if(active_)
-            runFilter(false);
+            reload(false);
         else
             clear();
     }
 }
 
+void VModelData::reload(bool broadcast)
+{
+    Q_ASSERT(active_);
+
+    if(broadcast)
+        Q_EMIT filterChangeBegun();
+
+    for(unsigned int i=0; i < servers_.size(); i++)
+    {
+        servers_.at(i)->reload();
+    }
+
+    if(broadcast)
+         Q_EMIT filterChangeEnded();
+}
+
+#if 0
+void VModelData::runFilter(bool broadcast)
+{
+    Q_ASSERT(active_);
+
+    if(broadcast)
+        Q_EMIT filterChangeBegun();
+
+    for(unsigned int i=0; i < servers_.size(); i++)
+    {
+        servers_.at(i)->runFilter();
+    }
+
+    if(broadcast)
+        Q_EMIT filterChangeEnded();
+}
+#endif
+
 void VModelData::slotFilterDefChanged()
 {
     if(active_)
-        runFilter(true);
+        reload(true);
 }
 
 bool VModelData::isFilterNull() const
@@ -987,8 +996,6 @@ void VTreeModelData::connectToModel(VModelServer* s)
 
     connect(ts,SIGNAL(endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)),
             model_,SLOT(slotEndFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)));
-
-   // void endFilterUpdate(VTreeServer*,const std::vector<VNode*>);
 }
 
 void VTreeModelData::add(ServerHandler *server)
@@ -1000,6 +1007,9 @@ void VTreeModelData::add(ServerHandler *server)
     connectToModel(d);
 
 	servers_.push_back(d);
+
+    if(active_)
+        reload(true);
 }
 
 void VTreeModelData::slotAttrFilterChanged()
@@ -1071,6 +1081,9 @@ void VTableModelData::add(ServerHandler *server)
     connectToModel(d);
 
 	servers_.push_back(d);
+
+    if(active_)
+        reload(false);
 }
 
 //Gives the position of this server in the full list of filtered nodes.

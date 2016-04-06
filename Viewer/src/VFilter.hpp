@@ -26,6 +26,7 @@ class ServerFilter;
 class ServerHandler;
 class VNode;
 class VSettings;
+class VTree;
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -151,7 +152,7 @@ protected:
 class TreeNodeFilter : public NodeFilter
 {
 public:
-    explicit TreeNodeFilter(NodeFilterDef* def,ServerHandler*);
+    explicit TreeNodeFilter(NodeFilterDef* def,ServerHandler*,VTree*);
 
     void clear();
     bool isNull();
@@ -159,9 +160,12 @@ public:
     bool update();
     bool update(const std::vector<VNode*>& topChange,
                 std::vector<VNode*>& topFilterChange);
+
 private:
 	bool filterState(VNode* node,VParamSet* stateFilter);
-    bool checkState(VNode* n,const std::vector<VNode*>& prevNodes,std::vector<VNode*>& topFilterChange);
+    bool checkState(VNode* n,std::vector<VNode*>& topFilterChange);
+
+    VTree* tree_;
 };
 
 class TableNodeFilter : public NodeFilter

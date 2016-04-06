@@ -178,22 +178,6 @@ VAttribute* VAttribute::find(const std::string& name)
 	return NULL;*/
 }
 
-#if 0
-int VAttribute::totalNum(const VNode *vnode)
-{
-	if(!vnode)
-		return 0;
-
-	int total=0;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		int n=it->second->num(vnode);
-		total+=n;
-	}
-
-	return total;
-}
-#endif
 
 int VAttribute::totalNum(const VNode *vnode, AttributeFilter *filter)
 {
@@ -211,27 +195,6 @@ int VAttribute::totalNum(const VNode *vnode, AttributeFilter *filter)
 
     return total;
 }
-
-#if 0
-VAttribute* VAttribute::getType(const VNode *vnode,int row)
-{
-	if(!vnode)
-		return NULL;
-
-	int totalRow=0;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		int size=it->second->num(vnode);
-		if(row-totalRow >=0 && row-totalRow < size)
-		{
-			return it->second;
-		}
-		totalRow+=size;
-	}
-
-	return NULL;
-}
-#endif
 
 VAttribute* VAttribute::getType(const VNode *vnode,int row,AttributeFilter *filter)
 {
@@ -254,29 +217,6 @@ VAttribute* VAttribute::getType(const VNode *vnode,int row,AttributeFilter *filt
 
     return NULL;
 }
-#if 0
-bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& data)
-{
-	type=0;
-
-	if(!vnode)
-		return false;
-
-	int totalRow=0;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		int size=0;
-		if(it->second->getData(vnode,row-totalRow,size,data))
-		{
-			type=it->second;        
-            return true;
-		}
-		totalRow+=size;
-	}
-
-	return false;
-}
-#endif
 
 bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& data,AttributeFilter *filter)
 {
@@ -303,18 +243,6 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& dat
     return false;
 }
 
-#if 0
-bool VAttribute::getData(const std::string& type,VNode* vnode,int row,QStringList& data)
-{
-	if(VAttribute* va=find(type))
-	{
-		int size=0;
-		return va->getData(vnode,row,size,data);
-	}
-	return false;
-}
-#endif
-
 bool VAttribute::getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter)
 {
     if(VAttribute* va=find(type))
@@ -327,27 +255,6 @@ bool VAttribute::getData(const std::string& type,VNode* vnode,int row,QStringLis
     }
     return false;
 }
-
-#if 0
-int VAttribute::getLineNum(const VNode *vnode,int row)
-{
-	if(!vnode)
-		return 1;
-
-	int totalRow=0;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		int size=it->second->num(vnode);
-		if(row-totalRow >=0 && row-totalRow < size)
-		{
-			return it->second->lineNum(vnode,row-totalRow);
-		}
-		totalRow+=size;
-	}
-
-	return 1;
-}
-#endif
 
 int VAttribute::getLineNum(const VNode *vnode,int row,AttributeFilter *filter)
 {

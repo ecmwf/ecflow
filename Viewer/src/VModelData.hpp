@@ -67,10 +67,9 @@ public:
 
     int totalNodeNum() const;
     virtual int nodeNum() const = 0;
-    virtual void runFilter()=0;
+    virtual void reload()=0;
     //virtual void filterChanged()=0;
     bool inScan() const {return inScan_;}
-    //virtual VNode* nodeAt(int) const=0;
     virtual NodeFilter* filter() const=0;
 
     //Performance hack to avoid casts
@@ -107,7 +106,7 @@ public:
      VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,AttributeFilter *attrFilter);
 	 ~VTreeServer();
 
-     void runFilter();
+     void reload();
      void filterChanged();
      int nodeNum() const;
      NodeFilter* filter() const;
@@ -154,7 +153,7 @@ public:
 	 VTableServer(ServerHandler *server,NodeFilterDef* filterDef);
 	 ~VTableServer();
 
-     void runFilter();
+     void reload();
      void filterChanged() {}
      int nodeNum() const;
      VNode* nodeAt(int) const;
@@ -209,7 +208,7 @@ public:
     void clear();
 	void reset(ServerFilter* servers);
 
-	void runFilter(bool broadcast);
+    void reload(bool broadcast);
 
 	int count() const {return static_cast<int>(servers_.size());}
 	int  indexOfServer(void*) const;
@@ -221,7 +220,6 @@ public:
     VModelServer* server(ServerHandler*) const;
 	int indexOfServer(ServerHandler* s) const;
 	int numOfNodes(int) const;
-    //virtual bool isFiltered(VNode *node) const=0;
     bool isFilterNull() const;
 
 	//From ServerFilterObserver

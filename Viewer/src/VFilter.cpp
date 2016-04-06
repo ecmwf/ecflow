@@ -18,6 +18,7 @@
 #include "VNode.hpp"
 #include "VParam.hpp"
 #include "VSettings.hpp"
+#include "VTree.hpp"
 
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
@@ -268,7 +269,9 @@ NodeFilter::~NodeFilter()
 //
 //============================================
 
-TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def,ServerHandler* server) : NodeFilter(def,server)
+TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def,ServerHandler* server,VTree* tree) :
+    NodeFilter(def,server),
+    tree_(tree)
 {
 }
 
@@ -314,7 +317,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
         bool fullRun=false;
 
         //The number of nodes changed: we need to rerun everything
-        if(match_.size() != root->totalNum())
+        if(match_.size() != root->totalNum() || match_.size() != tree_->nodeVec().size())
         {
             //Deallocates the match vector
             match_=std::vector<VNode*>();
@@ -346,8 +349,8 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
         //We only check the branches defined by the nodes in topChange
         else
         {           
-            //save the latest results
-            std::vector<VNode*> prevNodes=match_;
+            //At this point the tree_->nodeVec() and match must have the same content
+            assert(tree_->nodeVec().size() == match_.size());
 
             //Update the filter results
             for(size_t i=0; i < topChange.size(); i++)
@@ -359,7 +362,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
             int diffCnt=0;
             for(size_t i=0; i < match_.size(); i++)
             {
-                if(prevNodes[i] != match_[i])
+                if(tree_->vnodeAt(i) != match_[i])
                     diffCnt++;
             }
             UserMessage::debug("  number of differences in filter: " + QString::number(diffCnt).toStdString());
@@ -369,7 +372,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
             //topChange so we need this step!
             for(size_t i=0; i < topChange.size(); i++)
             {
-                checkState(topChange[i],prevNodes,topFilterChange);
+                checkState(topChange[i],topFilterChange);
             }
 
 #ifdef _UI_VFILTER_DEBUG
@@ -407,10 +410,10 @@ bool TreeNodeFilter::update()
     return update(topChange,topFilterChange);
 }
 
-bool TreeNodeFilter::checkState(VNode* n,const std::vector<VNode*>& prevNodes,std::vector<VNode*>& topFilterChange)
+bool TreeNodeFilter::checkState(VNode* n,std::vector<VNode*>& topFilterChange)
 {
     int idx=n->index();
-    if(prevNodes[idx] != match_[idx])
+    if(tree_->vnodeAt(idx) != match_[idx])
     {
         VNode *pn=n->parent();
         if(!pn) pn=n;
@@ -424,7 +427,7 @@ bool TreeNodeFilter::checkState(VNode* n,const std::vector<VNode*>& prevNodes,st
     {
          for(unsigned int i=0; i < n->numOfChildren(); i++)
          {
-            checkState(n->childAt(i),prevNodes,topFilterChange);
+            checkState(n->childAt(i),topFilterChange);
          }
     }
 

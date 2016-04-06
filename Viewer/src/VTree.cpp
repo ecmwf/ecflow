@@ -145,6 +145,11 @@ VTree* VTree::root() const
     return const_cast<VTree*>(this);
 }
 
+VNode* VTree::vnodeAt(int index) const
+{
+    return (nodeVec_[index])?(nodeVec_[index]->vnode()):NULL;
+}
+
 VTreeNode* VTree::find(const VNode* vn) const
 {
     Q_ASSERT(vn->index()  < nodeVec_.size());
@@ -281,6 +286,7 @@ void VTree::build(VTreeNode* parent,VNode* node,const std::vector<VNode*>& filte
          VTreeNode *n=new VTreeNode(node,parent);
          totalNum_++;
          nodeVec_[node->index()]=n;
+
          for(unsigned int j=0; j < node->numOfChildren();j++)
          {
              build(n,node->childAt(j),filter);
@@ -298,7 +304,7 @@ void VTree::build()
 
     int prevTotalNum=0;
     for(unsigned int j=0; j < s->numOfChildren();j++)
-    {
+    {     
         build(this,s->childAt(j));
         totalNumInChild_.push_back(totalNum_-prevTotalNum-1);
         prevTotalNum=totalNum_;
@@ -310,22 +316,14 @@ void VTree::build(VTreeNode* parent,VNode* vnode)
     VTreeNode *n=new VTreeNode(vnode,parent);
     nodeVec_[vnode->index()]=n;
     totalNum_++;
+
+    //Preallocates the children. With this we will only use the memory we really need.
+    if(vnode->numOfChildren() > 0)
+        n->children_.reserve(vnode->numOfChildren());
+
     for(unsigned int j=0; j < vnode->numOfChildren();j++)
     {
         build(n,vnode->childAt(j));
     }
 }
 
-#if 0
-void VTree::reBuild(const std::vector<VNode*>& filter, std::vector<VNode*> topFilterChange)
-{
-    for(size_t i=0; i < topFilterChange.size(); i++)
-    {
-        if(VTreeNode* n=find(topFilterChange[i]))
-        {
-
-        }
-
-    }
-}
-#endif
