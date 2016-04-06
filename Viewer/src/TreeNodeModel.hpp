@@ -56,8 +56,8 @@ public:
 public Q_SLOTS:
 	void slotServerAddBegin(int row);
 	void slotServerAddEnd();
-	void slotServerRemoveBegin(int row);
-	void slotServerRemoveEnd();
+    void slotServerRemoveBegin(VModelServer*,int);
+    void slotServerRemoveEnd(int);
 
     void slotNodeChanged(VTreeServer*,const VTreeNode*);
     void slotAttributesChanged(VTreeServer*,const VTreeNode*);

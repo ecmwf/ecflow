@@ -246,31 +246,41 @@ VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 
 
 //Server is about to be added
-void TableNodeModel::slotServerAddBegin(int row)
+void TableNodeModel::slotServerAddBegin(int /*row*/)
 {
-    //beginResetModel();
-    //beginInsertRows(QModelIndex(),row,row);
 }
 
 //Addition of the new server has finished
 void TableNodeModel::slotServerAddEnd()
 {
-    //endResetModel();
-    //endInsertRows();
 }
 
 //Server is about to be removed
-void TableNodeModel::slotServerRemoveBegin(int row)
+void TableNodeModel::slotServerRemoveBegin(VModelServer* server,int num)
 {
-     beginResetModel();
-     //beginRemoveRows(QModelIndex(),row,row);
+    Q_ASSERT(active_ == true);
+    Q_ASSERT(server);
+
+    if(num >0)
+    {
+        int start=-1;
+        int count=-1;
+        data_->position(server->tableServer(),start,count);
+
+        Q_ASSERT(start >=0);
+        Q_ASSERT(count == num);
+
+        beginRemoveRows(QModelIndex(),start,start+count-1);
+    }
 }
 
 //Removal of the server has finished
-void TableNodeModel::slotServerRemoveEnd()
+void TableNodeModel::slotServerRemoveEnd(int num)
 {
-    endResetModel();
-    //endRemoveRows();
+    assert(active_ == true);
+
+    if(num >0)
+        endRemoveRows();
 }
 
 //The node changed (it status etc)
@@ -310,10 +320,17 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
      UserMessage::debug("TableNodeModel::slotEndServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+     QTime t;
+     t.start();
 #endif
 
 	if(num >0)
 		endInsertRows();
+
+#ifdef _UI_TABLENODEMODEL_DEBUG
+     UserMessage::debug("  elapsed: " + QString::number(t.elapsed()).toStdString() + " ms");
+     UserMessage::debug("<-- TableNodeModel::slotEndServerScan");
+#endif
 }
 
 void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
@@ -330,7 +347,6 @@ void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
         Q_ASSERT(start >=0);
         Q_ASSERT(count == num);
 
-        //QModelIndex idx=createIndex(start,0,firstNode);
         beginRemoveRows(QModelIndex(),start,start+count-1);
 	}
 }

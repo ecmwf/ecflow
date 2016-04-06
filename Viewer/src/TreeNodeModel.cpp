@@ -16,6 +16,7 @@
 #include "VFilter.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VFilter.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
@@ -25,6 +26,8 @@
 #include "VFileInfo.hpp"
 #include "VModelData.hpp"
 #include "VTree.hpp"
+
+#define _UI_TREENODEMODEL_DEBUG
 
 //=======================================
 //
@@ -903,15 +906,29 @@ void TreeNodeModel::slotServerAddEnd()
 }
 
 //Server is about to be removed
-void TreeNodeModel::slotServerRemoveBegin(int row)
+void TreeNodeModel::slotServerRemoveBegin(VModelServer* server,int /*nodeNum*/)
 {
+#ifdef _UI_TREENODEMODEL_DEBUG
+    UserMessage::debug("TreeNodeModel::slotServerRemoveBegin -->");
+#endif
+
+    int row=data_->indexOfServer(server);
+    Q_ASSERT(row >= 0);
+
+#ifdef _UI_TREENODEMODEL_DEBUG
+    UserMessage::debug("  row: " + QString::number(row).toStdString());
+#endif
 	beginRemoveRows(QModelIndex(),row,row);
 }
 
 //Removal of the server has finished
-void TreeNodeModel::slotServerRemoveEnd()
+void TreeNodeModel::slotServerRemoveEnd(int /*nodeNum*/)
 {
-	endRemoveRows();
+#ifdef _UI_TREENODEMODEL_DEBUG
+    UserMessage::debug("TreeNodeModel::slotServerRemoveEnd -->");
+#endif
+
+    endRemoveRows();
 }
 
 void TreeNodeModel::slotDataChanged(VModelServer* server)

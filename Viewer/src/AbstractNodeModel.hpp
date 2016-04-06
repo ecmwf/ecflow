@@ -63,17 +63,10 @@ public Q_SLOTS:
 
 	virtual void slotServerAddBegin(int row)=0;
 	virtual void slotServerAddEnd()=0;
-	virtual void slotServerRemoveBegin(int row)=0;
-	virtual void slotServerRemoveEnd()=0;
+    virtual void slotServerRemoveBegin(VModelServer*,int)=0;
+    virtual void slotServerRemoveEnd(int)=0;
 
 	virtual void slotDataChanged(VModelServer*)=0;
-#if 0
-    virtual void slotNodeChanged(VModelServer*,const VNode*)=0;
-	virtual void slotAttributesChanged(VModelServer*,const VNode*)=0;
-	virtual void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int)=0;
-	virtual void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int)=0;
-#endif
-
 	virtual void slotBeginServerScan(VModelServer* server,int)=0;
 	virtual void slotEndServerScan(VModelServer* server,int)=0;
 	virtual void slotBeginServerClear(VModelServer* server,int)=0;

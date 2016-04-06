@@ -72,11 +72,13 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
     connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
     		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
 
+#if 0
 	connect(model_,SIGNAL(clearBegun(const VNode*)),
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
 
 	connect(model_,SIGNAL(scanEnded(const VNode*)),
 				view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
+#endif
 
 	connect(model_,SIGNAL(rerender()),
 				view_->realWidget(),SLOT(slotRerender()));

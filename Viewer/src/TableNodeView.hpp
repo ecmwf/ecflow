@@ -53,7 +53,9 @@ public Q_SLOTS:
 	void slotViewCommand(std::vector<VInfo_ptr>,QString);
 	void slotHeaderContextMenu(const QPoint &position);
 	void slotSizeHintChangedGlobal();
-	void slotRerender();
+    void slotRerender();
+    void slotViewCommand(VInfo_ptr,QString) {}
+    void slotSetCurrent(VInfo_ptr) {}
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

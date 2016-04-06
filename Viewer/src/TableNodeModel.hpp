@@ -44,10 +44,10 @@ public:
    	VModelData* data() const;
 
 public Q_SLOTS:
-   	void slotServerAddBegin(int row);
+    void slotServerAddBegin(int);
    	void slotServerAddEnd();
-   	void slotServerRemoveBegin(int row);
-   	void slotServerRemoveEnd();
+    void slotServerRemoveBegin(VModelServer* server,int);
+    void slotServerRemoveEnd(int);
 
    	void slotDataChanged(VModelServer*) {}
     void slotNodeChanged(VTableServer*,const VNode*);
@@ -59,6 +59,10 @@ public Q_SLOTS:
    	void slotEndServerScan(VModelServer* server,int);
    	void slotBeginServerClear(VModelServer* server,int);
    	void slotEndServerClear(VModelServer* server,int);
+
+Q_SIGNALS:
+    void filterChangeBegun();
+    void filterChangeEnded();
 
 protected:
    	bool isServer(const QModelIndex & index) const {return false;}

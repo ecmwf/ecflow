@@ -77,20 +77,12 @@ public:
     virtual VTableServer* tableServer() const {return NULL;}
 
 Q_SIGNALS:
-#if 0
-    void beginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
-	void endAddRemoveAttributes(VModelServer*,const VNode*,int,int);
-    void nodeChanged(VModelServer*,const VNode*);
-    void attributesChanged(VModelServer*,const VNode*);
-#endif
-
     void dataChanged(VModelServer*);
 	void beginServerScan(VModelServer*,int);
 	void endServerScan(VModelServer*,int);
 	void beginServerClear(VModelServer*,int);
 	void endServerClear(VModelServer*,int);
 
-    //void filterChanged();
 	void rerender();
 
 protected:
@@ -177,14 +169,7 @@ public:
 	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 
 Q_SIGNALS:
-     //void beginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
-     //void endAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
      void nodeChanged(VTableServer*,const VNode*);
-     //void attributesChanged(VTreeServer*,const VTreeNode*);
-     //void beginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
-     //void endFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
-     //void beginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
-     //void endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
 
 private:
      TableNodeFilter* filter_;
@@ -237,10 +222,10 @@ Q_SIGNALS:
 	void filterDeleteEnd();
     void filterChangeBegun();
     void filterChangeEnded();
-	void serverAddBegin(int);
+    void serverAddBegin(int);
 	void serverAddEnd();
-	void serverRemoveBegin(int);
-	void serverRemoveEnd();
+    void serverRemoveBegin(VModelServer*,int);
+    void serverRemoveEnd(int);
 
 protected:
 	void init();

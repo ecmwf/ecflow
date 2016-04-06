@@ -62,17 +62,6 @@ int VModelServer::totalNodeNum() const
 	return server_->vRoot()->totalNum();
 }
 
-
-#if 0
-void VModelServer::runFilter()
-{
-	if(filter_)
-	{
-        //filter_->beginReset(server_);
-        //filter_->endReset();
-	}
-}
-#endif
 //==========================================
 //
 // VTreeServer
@@ -117,7 +106,7 @@ void VTreeServer::notifyDefsChanged(ServerHandler* server, const std::vector<ecf
 {
     //When the defs changed we need to update the server node in the model/view
     Q_EMIT dataChanged(this);
-    //TODO: what about node aor attr num changes!
+    //TODO: what about node or attr num changes!
 }
 
 void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
@@ -126,7 +115,6 @@ void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChang
     //this server tree is empty.
     inScan_=true;
     Q_ASSERT(tree_->numOfChildren() == 0);
-    //Q_EMIT beginServerScan(this,tree_->numOfChildren() + tree_->attrNum(attrFilter_));
 }
 
 void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
@@ -148,7 +136,7 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
 
     //Notifies the model of the number of children nodes to be added to the server node.
     Q_EMIT beginServerScan(this, tree_->attrNum(attrFilter_)+tree_->numOfChildren());
-    //We leave the inScan mode. From this moment the model can see the whole tree in the server.
+    //We leave the inScan mode. From this moment on the model can see the whole tree in the server.
     inScan_=false;
     //Notifies the model that the scan finished. The model can now relayout its new contents.
     Q_EMIT endServerScan(this, tree_->attrNum(attrFilter_)+tree_->numOfChildren());
@@ -256,6 +244,7 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
             }
             Q_EMIT endFilterUpdateAdd(this,tn,chNum);
 
+            //branch must be empty now
             Q_ASSERT(branch->numOfChildren() == 0);
 
             delete branch;
@@ -310,13 +299,6 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
                 Q_EMIT endAddRemoveAttributes(this,node,currentNum,cachedNum);
             }
         }
-#if 0
-        if(change.cachedAttrNum_ != change.attrNum_)
-		{
-			Q_EMIT beginAddRemoveAttributes(this,node,
-					change.attrNum_,change.cachedAttrNum_);
-		}
-#endif
 	}
 
 	//----------------------------------------------------------------------
@@ -391,38 +373,6 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 
 void VTreeServer::notifyEndNodeChange(const VNode* vnode, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
 {
-    return;
-#if 0
-    if(vnode==NULL)
-		return;
-
-    VTreeNode* node=tree_->find(vnode);
-    //Q_ASSERT(node);
-
-    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
-
-	//-----------------------------------------------------------------------
-	// The number of attributes changed but the number of nodes is the same!
-	//-----------------------------------------------------------------------
-    if(node && attrNumCh && !nodeNumCh)
-	{
-		if(change.cachedAttrNum_ != change.attrNum_)
-		{
-			Q_EMIT endAddRemoveAttributes(this,node,
-					change.attrNum_,change.cachedAttrNum_);
-		}
-	}
-
-	//----------------------------------------------------------------------
-	// The number of nodes changed but number of attributes is the same!
-	//----------------------------------------------------------------------
-	else if(!attrNumCh && nodeNumCh)
-	{
-		assert(0);
-	}
-#endif
-
 }
 
 void VTreeServer::reload()
@@ -624,21 +574,17 @@ VModelData::VModelData(NodeFilterDef *filterDef,AbstractNodeModel* model) :
 	connect(this,SIGNAL(filterDeleteEnd()),
 			model_,SLOT(slotFilterDeleteEnd()));
 
-	//The model relays this signal
-    //connect(this,SIGNAL(filterChanged()),
-    //		model_,SIGNAL(filterChanged()));
-
-	connect(this,SIGNAL(serverAddBegin(int)),
+    connect(this,SIGNAL(serverAddBegin(int)),
 			model_,SLOT(slotServerAddBegin(int)));
 
 	connect(this,SIGNAL(serverAddEnd()),
 			model_,SLOT(slotServerAddEnd()));
 
-	connect(this,SIGNAL(serverRemoveBegin(int)),
-			model_,SLOT(slotServerRemoveBegin(int)));
+    connect(this,SIGNAL(serverRemoveBegin(VModelServer*,int)),
+            model_,SLOT(slotServerRemoveBegin(VModelServer*,int)));
 
-	connect(this,SIGNAL(serverRemoveEnd()),
-            model_,SLOT(slotServerRemoveEnd()));
+    connect(this,SIGNAL(serverRemoveEnd(int)),
+            model_,SLOT(slotServerRemoveEnd(int)));
 
     connect(this,SIGNAL(filterChangeBegun()),
             model_,SIGNAL(filterChangeBegun()));
@@ -655,20 +601,6 @@ VModelData::~VModelData()
 
 void VModelData::connectToModel(VModelServer* d)
 {
-#if 0
-    connect(d,SIGNAL(beginAddRemoveAttributes(VModelServer*,constDashboard::readSettings,     FP=7ffca6afa930 VNode*,int,int)),
-		model_,SLOT(slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int)));
-
-	connect(d,SIGNAL(endAddRemoveAttributes(VModelServer*,const VNode*,int,int)),
-		model_,SLOT(slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int)));
-
-	connect(d,SIGNAL(nodeChanged(VModelServer*,const VNode*)),
-		model_,SLOT(slotNodeChanged(VModelServer*,const VNode*)));
-
-	connect(d,SIGNAL(attributesChanged(VModelServer*,const VNode*)),
-		model_,SLOT(slotAttributesChanged(VModelServer*,const VNode*)));
-#endif
-
     connect(d,SIGNAL(dataChanged(VModelServer*)),
         model_,SLOT(slotDataChanged(VModelServer*)));
 
@@ -683,10 +615,6 @@ void VModelData::connectToModel(VModelServer* d)
 
 	connect(d,SIGNAL(endServerClear(VModelServer*,int)),
 		model_,SLOT(slotEndServerClear(VModelServer*,int)));
-
-	//The model relays this signal
-    //connect(d,SIGNAL(filterChanged()),
-    //	model_,SIGNAL(filterChanged()));
 
 	//The model relays this signal
 	connect(d,SIGNAL(rerender()),
@@ -843,14 +771,16 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
 	{
 		if((*it)->server_ == item->serverHandler())
 		{
-			//Notifies the model that a change will happen
-			Q_EMIT serverRemoveBegin(i);
+            int nodeNum=(*it)->nodeNum();
+
+            //Notifies the model that a change will happen
+            Q_EMIT serverRemoveBegin(*it,nodeNum);
 
 			delete *it;
 			servers_.erase(it);
 
 			//Notifies the model that the change has finished
-			Q_EMIT serverRemoveEnd();
+            Q_EMIT serverRemoveEnd(nodeNum);
 			return;
 		}
 		i++;
@@ -916,24 +846,6 @@ void VModelData::reload(bool broadcast)
     if(broadcast)
          Q_EMIT filterChangeEnded();
 }
-
-#if 0
-void VModelData::runFilter(bool broadcast)
-{
-    Q_ASSERT(active_);
-
-    if(broadcast)
-        Q_EMIT filterChangeBegun();
-
-    for(unsigned int i=0; i < servers_.size(); i++)
-    {
-        servers_.at(i)->runFilter();
-    }
-
-    if(broadcast)
-        Q_EMIT filterChangeEnded();
-}
-#endif
 
 void VModelData::slotFilterDefChanged()
 {
@@ -1042,35 +954,9 @@ void VTableModelData::connectToModel(VModelServer* s)
     VTableServer* ts=s->tableServer();
     Q_ASSERT(ts);
 
-#if 0
-    connect(ts,SIGNAL(beginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)),
-        model_,SLOT(slotBeginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)));
-
-    connect(ts,SIGNAL(endAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)),
-        model_,SLOT(slotEndAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int)));
-#endif
-
     connect(ts,SIGNAL(nodeChanged(VTableServer*,const VNode*)),
         model_,SLOT(slotNodeChanged(VTableServer*,const VNode*)));
 
-#if  0
-    connect(ts,SIGNAL(attributesChanged(VTreeServer*,const VTreeNode*)),
-        model_,SLOT(slotAttributesChanged(VTreeServer*,const VTreeNode*)));
-
-    connect(ts,SIGNAL(beginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int)),
-            model_,SLOT(slotBeginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int)));
-
-    connect(ts,SIGNAL(endFilterUpdateRemove(VTreeServer*,const VTreeNode*,int)),
-            model_,SLOT(slotEndFilterUpdateRemove(VTreeServer*,const VTreeNode*,int)));
-
-    connect(ts,SIGNAL(beginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)),
-            model_,SLOT(slotBeginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)));
-
-    connect(ts,SIGNAL(endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)),
-            model_,SLOT(slotEndFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)));
-#endif
-
-    // void endFilterUpdate(VTreeServer*,const std::vector<VNode*>);
 }
 void VTableModelData::add(ServerHandler *server)
 {
