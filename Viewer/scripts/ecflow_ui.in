@@ -31,7 +31,7 @@ cleanup(){
     fi
 
 
-    if [ "$status" = "0" ]
+    if [ "$status" -eq "0" ]
     then
         echo "$(basename $0): $1 (OK) (line $2), exit status $status, starting 'cleanup'"
     else
@@ -45,7 +45,7 @@ cleanup(){
                 # find the backtrace tag if there
                 btline=$(grep -n "Backtrace:" $ECFLOWUI_LOGFILE | cut -f1 --delimiter=':')
                 gret=$?
-                if [ "$gret" = "0" ] ; then
+                if [ "$gret" = "0" -a "x$btline" != "x" ] ; then
                     nlines=$(wc -l $ECFLOWUI_LOGFILE | cut -f1 --delimiter=' ')
                     TAILNUM=$(expr $nlines - $btline + 100)
                 fi
@@ -188,7 +188,13 @@ then
     exec 5>&1                 # store for later
     exec 6>&2                 # store for later 
     exec 1> $ECFLOWUI_LOGFILE # (restored in cleanup())
-    exec 2> $ECFLOWUI_LOGFILE # (restored in cleanup())
+    exec 2>&1                 # redirect stderr to stdout, (restored in cleanup())
+    # note that it seems to be better to do
+    #   exec 2>&1
+    # rather than 
+    #   exec 2> $ECFLOWUI_LOGFILE
+    # because this way we get the stderr at the end rather than the start
+    # due to the difference in flushing behaviours
 fi
 
 
@@ -244,5 +250,4 @@ then
 else
     ${exe}
 fi
-
 
