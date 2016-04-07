@@ -37,10 +37,11 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
 	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::GeneralScope);
 
 	//Create the table model. It uses the datahandler to access the data.
-	model_=new TableNodeModel(serverFilter_,filterDef_,this);
+    TableNodeModel* tModel=new TableNodeModel(serverFilter_,filterDef_,this);
+    model_=tModel;
 
 	//Create a filter model for the tree.
-    sortModel_=new TableNodeSortModel(model_,this);
+    sortModel_=new TableNodeSortModel(tModel,this);
 
 	//Build the filter widget
 	filterW_->build(filterDef_,serverFilter_);

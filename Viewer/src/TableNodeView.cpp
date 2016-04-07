@@ -43,8 +43,8 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 
 	setRootIsDecorated(false);
 
-	setSortingEnabled(true);
-	sortByColumn(0,Qt::AscendingOrder);
+    setSortingEnabled(true);
+    //sortByColumn(0,Qt::AscendingOrder);
 
 	setAllColumnsShowFocus(true);
 	setUniformRowHeights(true);
@@ -55,7 +55,7 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 	//The background colour between the views left border and the nodes cannot be
 	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
 	//colour from the palette. Here we set this to transparent so that Qt could leave
-	//this are empty and we will fill it appropriately in our delegate.
+    //this area empty and we fill it appropriately in our delegate.
 	QPalette pal=palette();
 	pal.setColor(QPalette::Highlight,QColor(128,128,128,0));
 	setPalette(pal);

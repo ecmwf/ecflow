@@ -14,13 +14,13 @@
 
 #include "VInfo.hpp"
 
-class AbstractNodeModel;
+class TableNodeModel;
 class NodeFilterDef;
 
 class TableNodeSortModel : public QSortFilterProxyModel
 {
 public:
-    TableNodeSortModel(AbstractNodeModel*,QObject *parent=0);
+    TableNodeSortModel(TableNodeModel*,QObject *parent=0);
     ~TableNodeSortModel();
 
 	//From QSortFilterProxyModel:
@@ -32,7 +32,10 @@ public:
 	QModelIndex nodeToIndex(const VNode *node);
 
 protected:
-	AbstractNodeModel* nodeModel_;
+    bool lessThan(const QModelIndex &left,
+                                      const QModelIndex &right) const;
+
+    TableNodeModel* nodeModel_;
 };
 
 #endif

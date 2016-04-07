@@ -9,9 +9,9 @@
 
 #include "TableNodeSortModel.hpp"
 
-#include "AbstractNodeModel.hpp"
+#include "TableNodeModel.hpp"
 
-TableNodeSortModel::TableNodeSortModel(AbstractNodeModel* nodeModel,QObject *parent) :
+TableNodeSortModel::TableNodeSortModel(TableNodeModel* nodeModel,QObject *parent) :
 		QSortFilterProxyModel(parent),
 		nodeModel_(nodeModel)
 {
@@ -20,7 +20,7 @@ TableNodeSortModel::TableNodeSortModel(AbstractNodeModel* nodeModel,QObject *par
 
 	QSortFilterProxyModel::setSourceModel(nodeModel_);
 
-    //setDynamicSortFilter(true);
+    setDynamicSortFilter(false);
 }
 
 TableNodeSortModel::~TableNodeSortModel()
@@ -40,4 +40,13 @@ QModelIndex TableNodeSortModel::infoToIndex(VInfo_ptr info)
 QModelIndex TableNodeSortModel::nodeToIndex(const VNode *node)
 {
 	return mapFromSource(nodeModel_->nodeToIndex(node));
+}
+
+bool TableNodeSortModel::lessThan(const QModelIndex &left,
+                                  const QModelIndex &right) const
+{
+    QVariant leftData = nodeModel_->data(left);
+    QVariant rightData = nodeModel_->data(right);
+
+    return leftData.toString() < rightData.toString();
 }

@@ -27,6 +27,8 @@ class TableNodeModel : public AbstractNodeModel
 {
 Q_OBJECT
 
+    friend class TableNodeSortModel;
+
 public:
    	TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,QObject *parent=0);
 

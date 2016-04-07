@@ -23,6 +23,8 @@
 
 #define _UI_TABLENODEMODEL_DEBUG
 
+//static int hitCount=0;
+
 //=======================================================
 //
 // TableNodeModel
@@ -114,11 +116,12 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 
 	if(role == Qt::DisplayRole)
 	{
-		QString id=columns_->id(index.column());
+        QString id=columns_->id(index.column());
 
 		if(id == "path")
-			return QString::fromStdString(vnode->absNodePath());
-		else if(id == "status")
+        {   return QString::fromStdString(vnode->absNodePath());
+        }
+        else if(id == "status")
 			return vnode->stateName();
 		else if(id == "type")
 			return QString::fromStdString(vnode->nodeType());
@@ -330,6 +333,8 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 #ifdef _UI_TABLENODEMODEL_DEBUG
      UserMessage::debug("  elapsed: " + QString::number(t.elapsed()).toStdString() + " ms");
      UserMessage::debug("<-- TableNodeModel::slotEndServerScan");
+
+     //qDebug() << "hit" << hitCount;
 #endif
 }
 
