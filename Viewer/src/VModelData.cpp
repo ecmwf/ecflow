@@ -21,7 +21,7 @@
 #include <QDebug>
 #include <QMetaMethod>
 
-#define _UI_VMODELDATA_DEBUG
+//#define _UI_VMODELDATA_DEBUG
 
 void VTreeChangeInfo::addStateChange(const VNode* n)
 {
