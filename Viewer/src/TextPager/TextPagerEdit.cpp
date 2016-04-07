@@ -170,6 +170,9 @@ TextPagerEdit::~TextPagerEdit()
         // to make sure we don't do anything drastic on shutdown
     }
     delete d;
+
+    if(fontProp_)
+        fontProp_->removeObserver(this);
 }
 
 /*!

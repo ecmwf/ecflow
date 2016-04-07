@@ -33,7 +33,10 @@ class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObs
 Q_OBJECT
 
 public:
+
 	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
+    ~TableNodeView();
+
     void reload() {}
 	void rerender();
 	QWidget* realWidget();

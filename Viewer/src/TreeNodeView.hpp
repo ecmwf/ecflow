@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -74,8 +74,10 @@ protected:
 	void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
 	void restoreExpand(ExpandNode *expand,const VNode* node);
 	void adjustIndentation(int);
-	void adjustBackground(QColor col);
-	void expandAll(const QModelIndex& idx);
+    void adjustBackground(QColor col,bool asjustStyleSheet=true);
+    void adjustBranchLines(bool,bool asjustStyleSheet=true);
+    void adjustStyleSheet();
+    void expandAll(const QModelIndex& idx);
 	void collapseAll(const QModelIndex& idx);
 
     TreeNodeModel* model_;
@@ -85,6 +87,7 @@ protected:
 	int defaultIndentation_;
 	TreeNodeViewDelegate* delegate_;
 	PropertyMapper* prop_;
+    QMap<QString,QString> styleSheet_;
 };
 
 #endif

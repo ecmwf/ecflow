@@ -90,12 +90,20 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 	//Properties
 	std::vector<std::string> propVec;
 	propVec.push_back("view.tree.indentation");
-	propVec.push_back("view.tree.background");
+    propVec.push_back("view.tree.background");
+    propVec.push_back("view.tree.drawBranchLine");
 	prop_=new PropertyMapper(propVec,this);
 
 	//Initialise indentation
-	adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
-	adjustBackground(prop_->find("view.tree.background")->value().value<QColor>());
+    Q_ASSERT(prop_->find("view.tree.indentation"));
+    adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
+
+    //Init stylesheet related properties
+    Q_ASSERT(prop_->find("view.tree.background"));
+    adjustBackground(prop_->find("view.tree.background")->value().value<QColor>(),false);
+    Q_ASSERT(prop_->find("view.tree.drawBranchLine"));
+    adjustBranchLines(prop_->find("view.tree.drawBranchLine")->value().toBool(),false);
+    adjustStyleSheet();
 }
 
 TreeNodeView::~TreeNodeView()
@@ -296,6 +304,19 @@ void TreeNodeView::slotSizeHintChangedGlobal()
 	needItemsLayout_=true;
 }
 
+void TreeNodeView::adjustStyleSheet()
+{
+    QString sh;
+    if(styleSheet_.contains("bg"))
+       sh+=styleSheet_["bg"];
+    if(styleSheet_.contains("branch"))
+       sh+=styleSheet_["branch"];
+
+    qDebug() << "stylesheet" << sh;
+
+    setStyleSheet(sh);
+}
+
 void TreeNodeView::adjustIndentation(int offset)
 {
 	if(offset >=0)
@@ -305,13 +326,36 @@ void TreeNodeView::adjustIndentation(int offset)
 	}
 }
 
-void TreeNodeView::adjustBackground(QColor col)
+void TreeNodeView::adjustBackground(QColor col,bool adjust)
 {
 	if(col.isValid())
-	{
-		QString sh="QTreeView { background : " + col.name() + ";}";
-		setStyleSheet(sh);
+	{       
+        styleSheet_["bg"]="QTreeView { background : " + col.name() + ";}";
+
+        if(adjust)
+            adjustStyleSheet();
 	}
+}
+
+void TreeNodeView::adjustBranchLines(bool st,bool adjust)
+{
+    if(styleSheet_.contains("branch"))
+    {
+        bool oriSt=styleSheet_["branch"].contains("url(:");
+        if(oriSt == st)
+            return;
+    }
+
+    QString vline((st)?"url(:/viewer/tree_vline.png) 0":"none");
+    QString bmore((st)?"url(:/viewer/tree_branch_more.png) 0":"none");
+    QString bend((st)?"url(:/viewer/tree_branch_end.png) 0":"none");
+
+    styleSheet_["branch"]="QTreeView::branch:has-siblings:!adjoins-item { border-image: " + vline + ";}" \
+     "QTreeView::branch:!has-children:has-siblings:adjoins-item {border-image: " +  bmore + ";}" \
+     "QTreeView::branch:!has-children:!has-siblings:adjoins-item {border-image: " + bend + ";}";
+
+    if(adjust)
+        adjustStyleSheet();
 }
 
 void TreeNodeView::notifyChange(VProperty* p)
@@ -323,7 +367,11 @@ void TreeNodeView::notifyChange(VProperty* p)
 	else if(p->path() == "view.tree.background")
 	{
 		adjustBackground(p->value().value<QColor>());
-	}
+    }
+    else if(p->path() == "view.tree.drawBranchLine")
+    {
+        adjustBranchLines(p->value().toBool());
+    }
 }
 
 //====================================================

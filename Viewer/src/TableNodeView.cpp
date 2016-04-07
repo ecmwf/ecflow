@@ -115,6 +115,11 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 	adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
 }
 
+TableNodeView::~TableNodeView()
+{
+    delete prop_;
+}
+
 void TableNodeView::setModel(TableNodeSortModel *model)
 {
 	model_= model;

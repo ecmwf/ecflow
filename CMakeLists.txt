@@ -65,7 +65,7 @@ option( ENABLE_PYTHON         "enable python interface"   ON  )
 option( ENABLE_GUI            "Build ecflowview"          ON  )
 option( ENABLE_QT5            "enable Qt5"                OFF )
 option( ENABLE_ALL_TESTS      "This includes performance/migration/regression tests" OFF )
-
+option( ENABLE_UI_BACKTRACE   "Print a UI debug backtrace" OFF ) 
 
 # Qt4 and Qt5 require different packages to be found, so we need to know
 # in advance which version to search for (user-specified so that it
@@ -85,11 +85,31 @@ ecbuild_add_option( FEATURE VIEWER
                     REQUIRED_PACKAGES "${QT_DEPS}" )
 
 
+# sanity check - cannot set ENABLE_UI_BACKTRACE if VIEWER is OFF
+if(ENABLE_UI_BACKTRACE AND (NOT ENABLE_VIEWER))
+    message(WARNING "Cannot ENABLE_UI_BACKTRACE if VIEWER is not enabled")
+    set(ENABLE_UI_BACKTRACE OFF)
+endif()
+
+# sanity check - cannot set UI_BACKTRACE_EMAIL_ADDRESSES if VIEWER and ENABLE_UI_BACKTRACE are OFF
+if(UI_BACKTRACE_EMAIL_ADDRESSES AND (NOT ENABLE_VIEWER))
+    message(WARNING "Cannot set UI_BACKTRACE_EMAIL_ADDRESSES if VIEWER is not enabled")
+    set(UI_BACKTRACE_EMAIL_ADDRESSES)
+endif()
+
+
 message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
 message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
 message( STATUS "ENABLE_VIEWER         : ${ENABLE_VIEWER}" )
 message( STATUS "ENABLE_QT5            : ${ENABLE_QT5}" )
 message( STATUS "ENABLE_ALL_TESTS      : ${ENABLE_ALL_TESTS}" )
+
+if (ENABLE_VIEWER)
+    message( STATUS "ENABLE_UI_BACKTRACE   : ${ENABLE_UI_BACKTRACE}" )
+    if(UI_BACKTRACE_EMAIL_ADDRESSES)
+        message( STATUS "UI_BACKTRACE_EMAIL_ADDRESSES : ${UI_BACKTRACE_EMAIL_ADDRESSES}" )
+    endif()
+endif()
 
 # ======================================================================================
 # GUI requires X11 and Motif
