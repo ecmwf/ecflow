@@ -1,10 +1,19 @@
 
 JIRA ISSUES:
+==============================================================================================
 ECFLOW-136 Label, event. meter child commands persisting if node not found in server
-  -> excessive label commands appear to cause client to hang/suspend
-  -> top suggested show that most of process are in state 'D' UN-interable sleep (This is typically I/O related)
-  -> it was a gpfs/file which causes page faulting > 500 simulataneos client
+    -> excessive label commands appear to cause client to hang/suspend
+    -> top suggested show that most of process are in state 'D' UN-interable sleep (This is typically I/O related)
+    -> it was a gpfs/file which causes page faulting > 500 simulataneos client
   
+ECFLOW-534 log hostname for ecflow_client users commands
+    -> This really needs an IPC change since we need log the hostname where the command. is sent from
+    -> At the moment only the user name is sent.
+    -> Could combine string with <user>@<hostname>
+    -> But then every user command will need to split out the user, needed in the log, AND for authentication.
+ 
+ECFLOW-608 zombie handling.
+    -> may need change in IPC, however should be ok, restricted child commands and server.
  
 Client 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
@@ -18,17 +27,9 @@ Client
     o (optional) structure logging of commands such that its allows commands 
                  to be replayed on client side 
                                               
-Server  
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-                 
-    o autorestore
-    o automigrate
-  
  
 Others 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-
-o Test case for portable binary archive bug on AIX: Michael Wong, Robert Ramey:
 
 o Parser expression:
 //    exprMap["../obs:YMD ge  ( (19720101 + 6576) - (12 + 1) )"] = std::make_pair(AstGreaterEqual::stype(),true);
@@ -38,10 +39,3 @@ o Size of full defs, returned to client keeps on growing ????
   This is partly accounted for by:
    - Task process id:
    - Task password
-  
-o deployment plan
-    - testing with operations( client, server, xcdp, python ), Automake
-    - migration
-      ( ? )
-   
-           

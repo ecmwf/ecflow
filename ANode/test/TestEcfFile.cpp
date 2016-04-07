@@ -208,9 +208,9 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_495 )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD )
+BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
 {
-   cout << "ANode:: ...test_ECF_SCRIPT_CMD";
+   cout << "ANode:: ...test_ECF_SCRIPT_CMD_ECFLOW_427";
    if (getenv("ECFLOW_CRAY_BATCH")) {
       cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
       return;
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "test_ecf_simple_include_file_ECF_SCRIPT_CMD"  );
+   suite_ptr suite = Suite::create( "test_ECF_SCRIPT_CMD_ECFLOW_427"  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );
@@ -250,6 +250,17 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD )
    ecf_file += body;
    ecf_file += tail;
 
+   // Create the generated variables
+   task_t1->update_generated_variables();
+   std::string cmd = "cat %ECF_HOME%/%ECF_NAME%.ecf" ;
+   task_t1->add_variable("ECF_SCRIPT_CMD",cmd);
+
+   /// Now finally the test, use this as this will perform variable expansion on ECF_SCRIPT_CMD
+   EcfFile ecfFile = task_t1->locatedEcfFile();
+
+   // *******************************************************************************************************
+   // CREATE the file after locatedEcfFile() otherwise it will just use script as is, and NOT ECF_SCRIPT_CMD
+   // *******************************************************************************************************
    string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
    // cout << "file_location = " << ecf_file_location << "\n";
    BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
@@ -257,14 +268,6 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD )
    string errormsg;
    BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
    BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
-
-   // Create the generated variables
-   task_t1->update_generated_variables();
-   std::string cmd = "cat " + ecf_file_location;
-   task_t1->add_variable("ECF_SCRIPT_CMD",cmd);
-
-   /// Now finally the test
-   EcfFile ecfFile(task_t1.get(),cmd,EcfFile::ECF_SCRIPT_CMD);
 
    /// Check generation of job files
    JobsParam jobsParam(true); // spawn_jobs = false
@@ -303,6 +306,7 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD )
    /// Remove all the generated files
    boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
 }
+
 
 BOOST_AUTO_TEST_CASE( test_ecf_include_file )
 {

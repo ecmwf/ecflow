@@ -260,8 +260,16 @@ EcfFile Submittable::locatedEcfFile() const
    // o/ ECF_FETCH (user variable)
    //    if this variable exist, we need to flag it,
    //    So that that file is obtained from running the command. (Output of popen)
-   // o/ ECF_FILES (Typically in the definition file, defines a directory)
-   // o/ ECF_HOME
+   // o/ ECF_SCRIPT_CMD (user variable)
+   //    if this variable exist, we need to flag it,
+   //    So that that file is obtained from running the command. (Output of popen)
+   // o/ ECF_FILES (Typically in the definition file, defines a directory) (backward search)
+   // o/ ECF_HOME (backward search)
+   //    where: backward search is root_path = (ECF_FILES | ECF_HOME)
+   //           <root-path>/suite/family/family2/task.ecf
+   //           <root-path>/family/family2/task.ecf
+   //           <root-path>/family2/task.ecf
+   //           <root-path>/task.ecf
    std::string reasonEcfFileNotFound;
    std::string theAbsNodePath = absNodePath();
    std::string ecf_home;
@@ -304,7 +312,7 @@ EcfFile Submittable::locatedEcfFile() const
       reasonEcfFileNotFound += "   Variable ECF_FETCH not defined:\n";
    }
 
-   std::string ecf_script_cmd;
+   std::string ecf_script_cmd; // ECFLOW-427
    findParentVariableValue( "ECF_SCRIPT_CMD", ecf_script_cmd );
    if ( !ecf_script_cmd.empty() ) {
 #ifdef DEBUG_TASK_LOCATION
