@@ -20,6 +20,7 @@
 #include "LogServer.hpp"
 #include "Node.hpp"
 
+class AttributeFilter;
 #include "VItem.hpp"
 
 class IconFilter;
@@ -59,10 +60,10 @@ public:
 class VServerChange
 {
 public:
-	VServerChange() : suiteNum_(0), attrNum_(0), totalNum_(0) {}
+    VServerChange() : suiteNum_(0), attrNum_(0) {} //, totalNum_(0) {}
 	int suiteNum_;
 	int attrNum_;
-	int totalNum_;
+    //int totalNum_;
 };
 
 class VServerCache
@@ -89,10 +90,18 @@ public:
 
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
-	virtual ServerHandler* server() const;
+    virtual ServerHandler* server() const;
+    virtual VNode* suite() const;
     node_ptr node() const {return node_;}
 
+    //VServer* isServer() const {return NULL;}
     VNode* isNode() const {return const_cast<VNode*>(this);}
+    //VSuiteNode* isSuite() const {return NULL;}
+    //VFamilyNode* isFamily() const {return NULL;}
+    //VTaskNode* isTask() const {return NULL;}
+    //VAliasNode* isAlias() const {return NULL;}
+    //virtual VAttribute* isAttribute() const {return NULL;}
+
     bool isTopLevel() const;
     //bool isServer() const {return false;}
 
@@ -101,10 +110,13 @@ public:
     bool isTask() const {return false;}
     bool isAlias() const;*/
 
+#if 0
     void beginUpdateAttrNum();
     void endUpdateAttrNum();
     short cachedAttrNum() const;
-    short attrNum() const;
+#endif
+
+    int attrNum(AttributeFilter* filter=0) const;
 
     QStringList getAttributeData(int,VAttributeType*&);
     bool getAttributeData(const std::string& type,int row, QStringList&);
@@ -173,19 +185,22 @@ protected:
     void clear();
     void addChild(VNode*);
     void removeChild(VNode*);
+#if 0
     short currentAttrNum() const;
     bool isAttrNumInitialised() const {return attrNum_!=-1;}
+#endif
     VNode* find(const std::vector<std::string>& pathVec);
     virtual void check(VServerSettings* conf,bool) {}
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
-    //Node* node_;
     node_ptr node_;
     //VNode* parent_;
     std::vector<VNode*> children_;
+#if 0
     mutable short attrNum_;
     mutable short cachedAttrNum_;
+#endif
     int index_;
 };
 
@@ -220,6 +235,7 @@ public:
 	~VServer();
 
 	ServerHandler* server() const {return server_;}
+    VNode* suite() const {return NULL;}
 
 	bool isEmpty() const { return numOfChildren() == 0;}
 	bool isTopLevel() const {return false;}

@@ -110,6 +110,7 @@
                         "line" : "tree.displayNodeType",
                         "line" : "tree.display_child_count",                        
                         "line" : "tree.indentation",
+                        "line" : "tree.drawBranchLine",
                         "line" : "tree.background"                        
                     },
                              

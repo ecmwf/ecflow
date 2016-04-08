@@ -15,7 +15,7 @@
 #include "ServerHandler.hpp"
 #include "VariableModelData.hpp"
 
-QColor VariableModel::varCol_=QColor(60,61,62);
+QColor VariableModel::varCol_=QColor(40,41,42);
 //QColor VariableModel::genVarCol_=QColor(34,51,136);
 QColor VariableModel::genVarCol_=QColor(0,115,48);
 QColor VariableModel::blockBgCol_=QColor(122,122,122);
@@ -175,15 +175,6 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
                 s+= " (read only)";
 
             return s;
-        }
-        else if(role == Qt::FontRole)
-        {
-            if(d->isGenVar(row))
-            {
-                QFont f;
-                f.setBold(true);
-                return f;
-            }
         }
 		else if(role == ReadOnlyRole)
         {
@@ -597,7 +588,7 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
         //qDebug() << idx << idx2;
         
         if(matchLst_.contains(idx) || matchLst_.contains(idx2))
-            return QColor(83,187,109);
+            return QColor(169,210,176);
     }
     
     return QSortFilterProxyModel::data(idx,role);

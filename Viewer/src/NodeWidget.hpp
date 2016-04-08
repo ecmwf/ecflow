@@ -24,7 +24,6 @@ class AbstractNodeModel;
 class AttributeFilter;
 class IconFilter;
 class NodeFilterDef;
-class NodeFilterModel;
 class NodeStateFilter;
 class VModelData;
 class NodePathWidget;
@@ -43,7 +42,7 @@ public:
 	VInfo_ptr currentSelection();
 	//void currentSelection(VInfo_ptr info);
 	void reload();
-    void populateDialog() {};
+    void populateDialog() {}
     QList<QAction*> dockTitleActions() {return dockActions_;}
 
 public Q_SLOTS:
@@ -65,8 +64,7 @@ protected:
 
 	ServerFilter* serverFilter_;
 
-	AbstractNodeModel* model_;
-	NodeFilterModel* filterModel_;
+	AbstractNodeModel* model_;	
 	NodeViewBase* view_;
 
 	IconFilter* icons_;

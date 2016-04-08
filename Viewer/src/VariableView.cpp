@@ -12,6 +12,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QImageReader>
+#include <QItemSelectionModel>
 #include <QPainter>
 
 #include "IconProvider.hpp"
@@ -27,20 +28,10 @@
 VariableDelegate::VariableDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
 	selectPen_=QPen(QColor(8,117,182));
-    selectBrush_=QBrush(QColor(200,222,250));
+    selectBrush_=QBrush(QColor(65,139,212));
+    selectBrushBlock_=QBrush(QColor(48,102,178));
     borderPen_=QPen(QColor(230,230,230));
     genVarPixId_=IconProvider::add(":/viewer/genvar.svg","genvar");
-
-    /*QImageReader imgR(":/viewer/padlock.svg");
-    if(imgR.canRead())
-    {
-    	QFont font;
-    	QFontMetrics fm(font);
-    	int size=fm.height()+2;
-    	imgR.setScaledSize(QSize(size,size));
-    	QImage img=imgR.read();
-    	lockPix_=QPixmap(QPixmap::fromImage(img));
-    }*/
 }
 
 void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -56,6 +47,8 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     // hence it has branch controls.
     bool hasChild=!index.parent().isValid();
 
+    bool selected=option.state & QStyle::State_Selected;
+
     //Save painter state
     painter->save();
 
@@ -69,14 +62,14 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     	bgRect.setX(0);
     }
 
-    //Paint item highlight!! It is taken from the UserRole
+    //Paint item highlight!! It is taken from the UserRole   
     QColor highCol=index.data(Qt::UserRole).value<QColor>();
     if(highCol.isValid())
     {
     	painter->fillRect(bgRect.adjusted(1,1,-1,-1),highCol);
     }
     //otherwise paint item background!!
-    else
+    else if(!selected)
     {
     	//Paint the item background
     	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
@@ -87,25 +80,32 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     }
 
     //Paint selection. This should be transparent.
-    if(!hasChild && (option.state & QStyle::State_Selected))
+    if(selected)
     {
     	//The selection rect
-    	QRect selectRect=option.rect.adjusted(0,1,0,-1);
+        QRect selectRect;
+        if(hasChild)
+        {
+            selectRect=option.rect.adjusted(0,1,0,-1);
+            painter->fillRect(selectRect,selectBrushBlock_);
+        }
+        else
+        {
+            selectRect=option.rect.adjusted(0,1,0,-1);
 
-    	//For the first column we extend the selection
-    	//rect to left edge.
-    	if(index.column()==0)
-    	{
-    		selectRect.setX(0);
-    	}
+            //For the first column we extend the selection
+            //rect to left edge.
+            if(index.column()==0)
+            {
+                selectRect.setX(0);
+            }
+            painter->fillRect(selectRect,selectBrush_);
 
-    	//QRect fillRect=option.rect.adjusted(0,1,-1,-textRect.height()-1);
-        painter->fillRect(selectRect,selectBrush_);
+        }
     }
 
     //Render the horizontal border for rows. We only render the top border line.
     //With this technique we miss the bottom border line of the last row!!!
-    QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
     painter->setPen(borderPen_);
     painter->drawLine(bgRect.topLeft(),bgRect.topRight());
 
@@ -159,10 +159,18 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         {
             painter->setClipRect(option.rect.adjusted(-option.rect.left(),0,0,0));
         }
+        QColor fg;
+        if(option.state & QStyle::State_Selected)
+        {
+            fg=Qt::white;
+        }
+        else
+        {
+            fg=index.data(Qt::ForegroundRole).value<QColor>();
+            if(!fg.isValid())
+                fg=Qt::black;
+        }
 
-        QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
-        if(!fg.isValid())
-            fg=Qt::black;
         painter->setPen(fg);
 
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
@@ -194,9 +202,18 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     {
         textRect.adjust(2,0,2,0);
 
-        QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
-        if(!fg.isValid())
-            fg=Qt::black;
+        QColor fg;
+        if(selected)
+        {
+            fg=Qt::white;
+        }
+        else
+        {
+            fg=index.data(Qt::ForegroundRole).value<QColor>();
+            if(!fg.isValid())
+              fg=Qt::black;
+        }
+
         painter->setPen(fg);
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
     }    
@@ -224,8 +241,8 @@ VariableView::VariableView(QWidget* parent) : TreeView(parent)
 {
 	setProperty("var","1");
 
-	VariableDelegate *delegate=new VariableDelegate(this);
-	setItemDelegate(delegate);
+    delegate_=new VariableDelegate(this);
+    setItemDelegate(delegate_);
 
 	setRootIsDecorated(true);
 	setAllColumnsShowFocus(true);
@@ -243,10 +260,18 @@ void VariableView::drawBranches(QPainter* painter,const QRect& rect,const QModel
 {   
     if(!index.parent().isValid() && index.column()==0)
 	{ 
-		//We need to fill the branch area here. We cannot do it in the delegate
-		//because when the delegate is called the branch control is already
-		//rendered, so the delegate would just overpaint it!!!
-        painter->fillRect(rect.adjusted(0,1,0,0),index.data(Qt::BackgroundRole).value<QColor>());
+        //We need to fill the branch area here. We cannot do it in the delegate
+        //because when the delegate is called the branch control is already
+        //rendered, so the delegate would just overpaint it!!!
+
+        if(selectionModel()->rowIntersectsSelection(index.row(),QModelIndex()))
+        {
+            painter->fillRect(rect.adjusted(0,1,0,-1),delegate_->selectBrushBlock_);
+        }
+        else
+        {
+            painter->fillRect(rect.adjusted(0,1,0,0),index.data(Qt::BackgroundRole).value<QColor>());
+        }
 
 		//Draw the branch with the default method
 		QTreeView::drawBranches(painter,rect,index);

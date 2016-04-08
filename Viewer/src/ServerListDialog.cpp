@@ -347,7 +347,7 @@ void ServerListDialog::duplicateItem(const QModelIndex& index)
 
 		ServerEditDialog d(QString::fromStdString(dname),
 						   QString::fromStdString(item->host()),
-						   QString::fromStdString(item->port()),this);
+                           QString::fromStdString(item->port()),item->isFavourite(),this);
 
 		//The dialog checks the name, host and port!
 		if(d.exec() == QDialog::Accepted)

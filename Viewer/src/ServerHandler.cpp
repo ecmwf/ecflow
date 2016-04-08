@@ -1207,7 +1207,7 @@ void ServerHandler::resetFinished()
 	//Finish full scan
 	vRoot_->endScan();
 
-	assert(change.suiteNum_ == vRoot_->numOfChildren());
+    //assert(change.suiteNum_ == vRoot_->numOfChildren());
 
 	//Notify the observers that scan has ended
     broadcast(&ServerObserver::notifyEndServerScan);

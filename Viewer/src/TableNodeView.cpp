@@ -24,16 +24,17 @@
 #include "ActionHandler.hpp"
 #include "FilterWidget.hpp"
 #include "IconProvider.hpp"
-#include "NodeFilterModel.hpp"
+#include "TableNodeSortModel.hpp"
 #include "PropertyMapper.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeViewDelegate.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
-TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget* parent) :
      QTreeView(parent),
-	 NodeViewBase(model,filterDef),
+     NodeViewBase(filterDef),
+     model_(model),
 	 needItemsLayout_(false),
 	 prop_(NULL)
 {
@@ -42,8 +43,8 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 
 	setRootIsDecorated(false);
 
-	setSortingEnabled(true);
-	sortByColumn(0,Qt::AscendingOrder);
+    setSortingEnabled(true);
+    //sortByColumn(0,Qt::AscendingOrder);
 
 	setAllColumnsShowFocus(true);
 	setUniformRowHeights(true);
@@ -54,7 +55,7 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 	//The background colour between the views left border and the nodes cannot be
 	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
 	//colour from the palette. Here we set this to transparent so that Qt could leave
-	//this are empty and we will fill it appropriately in our delegate.
+    //this area empty and we fill it appropriately in our delegate.
 	QPalette pal=palette();
 	pal.setColor(QPalette::Highlight,QColor(128,128,128,0));
 	setPalette(pal);
@@ -96,7 +97,6 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 	/*connect(header(),SIGNAL(sectionMoved(int,int,int)),
                 this, SLOT(slotMessageTreeColumnMoved(int,int,int)));*/
 
-
 	QTreeView::setModel(model_);
 
     //Create delegate to the view
@@ -115,7 +115,12 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 	adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
 }
 
-void TableNodeView::setModel(NodeFilterModel *model)
+TableNodeView::~TableNodeView()
+{
+    delete prop_;
+}
+
+void TableNodeView::setModel(TableNodeSortModel *model)
 {
 	model_= model;
 

@@ -17,6 +17,7 @@
 
 #include "VParam.hpp"
 
+class AttributeFilter;
 class VNode;
 
 class VAttributeType : public VParam
@@ -27,12 +28,12 @@ public:
     
 	static std::vector<VParam*> filterItems();
 	
-    static VAttributeType* getType(const VNode *vnode,int row);
-    static bool getData(VNode* vnode,int row,VAttributeType* &type,QStringList& data);
-	static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data);
-	static int totalNum(const VNode *vnode);
-	static void init(const std::string& parFile);
-	static int getLineNum(const VNode *vnode,int row);
+    static VAttributeType* getType(const VNode *vnode,int row,AttributeFilter *filter=0);
+    static bool getData(VNode* vnode,int row,VAttributeType* &type,QStringList& data,AttributeFilter *filter=0);
+    static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter=0);
+    static int totalNum(const VNode *vnode,AttributeFilter *filter=0);
+    static void init(const std::string& parFile);
+    static int getLineNum(const VNode *vnode,int row,AttributeFilter *filter=0);
 	
     static VAttributeType* find(const std::string& name);
 
@@ -49,4 +50,3 @@ private:
 };
 
 #endif
-

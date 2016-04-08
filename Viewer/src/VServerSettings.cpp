@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -100,11 +100,7 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 VServerSettings::~VServerSettings()
 {
 	delete prop_;
-
-	//for(std::map<Param,VProperty*>::iterator it=parToProp_.begin(); it != parToProp_.end(); it++)
-	//{
-	//	it->second->removeObserver(this);
-	//}
+    delete guiProp_;
 }
 
 

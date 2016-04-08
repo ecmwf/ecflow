@@ -55,8 +55,8 @@ int main(int argc, char **argv)
     {
     	style="Fusion";
     	if(styleLst.contains(style))
-        {
-    		app.setStyle(style);
+        {    		
+            app.setStyle(style);
         }
     }
 

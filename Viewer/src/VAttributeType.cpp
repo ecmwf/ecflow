@@ -24,6 +24,7 @@
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "VFilter.hpp"
 
 std::map<std::string,VAttributeType*> VAttributeType::items_;
 
@@ -177,93 +178,103 @@ VAttributeType* VAttributeType::find(const std::string& name)
 	return NULL;*/
 }
 
-int VAttributeType::totalNum(const VNode *vnode)
+int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
 {
-	if(!vnode)
-		return 0;
+    if(!vnode)
+        return 0;
 
-	int total=0;
-	for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		int n=it->second->num(vnode);
-		total+=n;
-	}
+    int total=0;
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if(!filter || filter->isSet(it->second))
+        {
+            total+=it->second->num(vnode);
+        }
+    }
 
-	return total;
+    return total;
 }
 
-VAttributeType* VAttributeType::getType(const VNode *vnode,int row)
+VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilter *filter)
 {
-	if(!vnode)
-		return NULL;
+    if(!vnode)
+        return NULL;
 
-	int totalRow=0;
-	for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		int size=it->second->num(vnode);
-		if(row-totalRow >=0 && row-totalRow < size)
-		{
-			return it->second;
-		}
-		totalRow+=size;
-	}
+    int totalRow=0;
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if(!filter || filter->isSet(it->second))
+        {
+            int size=it->second->num(vnode);
+            if(row-totalRow >=0 && row-totalRow < size)
+            {
+                return it->second;
+            }
+            totalRow+=size;
+        }
+    }
 
-	return NULL;
+    return NULL;
 }
 
-
-bool VAttributeType::getData(VNode *vnode,int row,VAttributeType* &type,QStringList& data)
+bool VAttributeType::getData(VNode *vnode,int row,VAttributeType* &type,QStringList& data,AttributeFilter *filter)
 {
-	type=0;
+    type=0;
 
-	if(!vnode)
-		return false;
+    if(!vnode)
+        return false;
 
-    if(vnode->name() == "main")
-        qDebug() << "main";
+    int totalRow=0;
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if(!filter || filter->isSet(it->second))
+        {
+            int size=0;
+            if(it->second->getData(vnode,row-totalRow,size,data))
+            {
+                type=it->second;
+                return true;
+            }
+            totalRow+=size;
+        }
+    }
 
-	int totalRow=0;
-	for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		int size=0;
-		if(it->second->getData(vnode,row-totalRow,size,data))
-		{
-			type=it->second;        
-            return true;
-		}
-		totalRow+=size;
-	}
-
-	return false;
+    return false;
 }
 
-bool VAttributeType::getData(const std::string& type,VNode* vnode,int row,QStringList& data)
+bool VAttributeType::getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter)
 {
-	if(VAttributeType* va=find(type))
-	{
-		int size=0;
-		return va->getData(vnode,row,size,data);
-	}
-	return false;
+    if(VAttributeType* va=find(type))
+    {
+        if(!filter || filter->isSet(va))
+        {
+            int size=0;
+            return va->getData(vnode,row,size,data);
+        }
+    }
+    return false;
 }
 
-int VAttributeType::getLineNum(const VNode *vnode,int row)
+int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filter)
 {
-	if(!vnode)
-		return 1;
+    if(!vnode)
+        return 1;
 
-	int totalRow=0;
-	for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		int size=it->second->num(vnode);
-		if(row-totalRow >=0 && row-totalRow < size)
-		{
-			return it->second->lineNum(vnode,row-totalRow);
-		}
-		totalRow+=size;
-	}
+    int totalRow=0;
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if(!filter || filter->isSet(it->second))
+        {
+            int size=it->second->num(vnode);
+            if(row-totalRow >=0 && row-totalRow < size)
+            {
+                return it->second->lineNum(vnode,row-totalRow);
+            }
+            totalRow+=size;
+        }
+    }
 
-	return 1;
+    return 1;
 }
 
 void VAttributeType::load(VProperty* group)

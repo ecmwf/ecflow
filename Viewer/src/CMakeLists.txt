@@ -58,8 +58,7 @@ set(viewer_srcs
     MessageItemWidget.cpp
     ModelColumn.cpp
     NodeExpression.cpp
-    NodeFilterDialog.cpp
-    NodeFilterModel.cpp
+    NodeFilterDialog.cpp    
     NodePanel.cpp
     NodePathWidget.cpp
     NodeQuery.cpp
@@ -118,6 +117,7 @@ set(viewer_srcs
     TabWidget.cpp 
     TableFilterWidget.cpp
     TableNodeModel.cpp
+    TableNodeSortModel.cpp
     TableNodeView.cpp
     TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
@@ -153,6 +153,7 @@ set(viewer_srcs
     VSState.cpp
     VTask.cpp
     VTaskNode.cpp
+    VTree.cpp
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp
@@ -210,8 +211,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LogProvider.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
-    NodeFilterDialog.hpp
-    NodeFilterModel.hpp            
+    NodeFilterDialog.hpp       
     NodePanel.hpp
     NodePathWidget.hpp
     NodeQueryCombo.hpp           

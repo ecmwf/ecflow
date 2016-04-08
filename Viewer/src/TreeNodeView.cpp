@@ -22,14 +22,18 @@
 #include "ActionHandler.hpp"
 #include "Animation.hpp"
 #include "ExpandState.hpp"
-#include "NodeFilterModel.hpp"
+#include "TableNodeSortModel.hpp"
 #include "PropertyMapper.hpp"
+#include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
 #include "VNode.hpp"
+#include "VModelData.hpp"
+#include "VTree.hpp"
 
-TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
 	QTreeView(parent),
-	NodeViewBase(model,filterDef),
+    NodeViewBase(filterDef),
+    model_(model),
     needItemsLayout_(false),
 	defaultIndentation_(indentation()),
 	prop_(NULL)
@@ -37,7 +41,7 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 	setProperty("style","nodeView");
 	setProperty("view","tree");
 
-	expandState_=new ExpandState();
+    expandState_=new ExpandState(this,model_);
 	actionHandler_=new ActionHandler(this);
 
 	//Set the model.
@@ -86,12 +90,20 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 	//Properties
 	std::vector<std::string> propVec;
 	propVec.push_back("view.tree.indentation");
-	propVec.push_back("view.tree.background");
+    propVec.push_back("view.tree.background");
+    propVec.push_back("view.tree.drawBranchLine");
 	prop_=new PropertyMapper(propVec,this);
 
 	//Initialise indentation
-	adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
-	adjustBackground(prop_->find("view.tree.background")->value().value<QColor>());
+    Q_ASSERT(prop_->find("view.tree.indentation"));
+    adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
+
+    //Init stylesheet related properties
+    Q_ASSERT(prop_->find("view.tree.background"));
+    adjustBackground(prop_->find("view.tree.background")->value().value<QColor>(),false);
+    Q_ASSERT(prop_->find("view.tree.drawBranchLine"));
+    adjustBranchLines(prop_->find("view.tree.drawBranchLine")->value().toBool(),false);
+    adjustStyleSheet();
 }
 
 TreeNodeView::~TreeNodeView()
@@ -101,6 +113,7 @@ TreeNodeView::~TreeNodeView()
 	delete prop_;
 }
 
+#if 0
 void TreeNodeView::setModel(NodeFilterModel *model)
 {
 	model_= model;
@@ -108,7 +121,7 @@ void TreeNodeView::setModel(NodeFilterModel *model)
 	//Set the model.
 	QTreeView::setModel(model_);
 }
-
+#endif
 
 QWidget* TreeNodeView::realWidget()
 {
@@ -240,10 +253,8 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 		if(idx.isValid())
 		{
 				collapseAll(idx);
-
 		}
 	}
-
 
 	/*if(cmd == "set_as_root")
 	{
@@ -293,6 +304,19 @@ void TreeNodeView::slotSizeHintChangedGlobal()
 	needItemsLayout_=true;
 }
 
+void TreeNodeView::adjustStyleSheet()
+{
+    QString sh;
+    if(styleSheet_.contains("bg"))
+       sh+=styleSheet_["bg"];
+    if(styleSheet_.contains("branch"))
+       sh+=styleSheet_["branch"];
+
+    qDebug() << "stylesheet" << sh;
+
+    setStyleSheet(sh);
+}
+
 void TreeNodeView::adjustIndentation(int offset)
 {
 	if(offset >=0)
@@ -302,13 +326,36 @@ void TreeNodeView::adjustIndentation(int offset)
 	}
 }
 
-void TreeNodeView::adjustBackground(QColor col)
+void TreeNodeView::adjustBackground(QColor col,bool adjust)
 {
 	if(col.isValid())
-	{
-		QString sh="QTreeView { background : " + col.name() + ";}";
-		setStyleSheet(sh);
+	{       
+        styleSheet_["bg"]="QTreeView { background : " + col.name() + ";}";
+
+        if(adjust)
+            adjustStyleSheet();
 	}
+}
+
+void TreeNodeView::adjustBranchLines(bool st,bool adjust)
+{
+    if(styleSheet_.contains("branch"))
+    {
+        bool oriSt=styleSheet_["branch"].contains("url(:");
+        if(oriSt == st)
+            return;
+    }
+
+    QString vline((st)?"url(:/viewer/tree_vline.png) 0":"none");
+    QString bmore((st)?"url(:/viewer/tree_branch_more.png) 0":"none");
+    QString bend((st)?"url(:/viewer/tree_branch_end.png) 0":"none");
+
+    styleSheet_["branch"]="QTreeView::branch:has-siblings:!adjoins-item { border-image: " + vline + ";}" \
+     "QTreeView::branch:!has-children:has-siblings:adjoins-item {border-image: " +  bmore + ";}" \
+     "QTreeView::branch:!has-children:!has-siblings:adjoins-item {border-image: " + bend + ";}";
+
+    if(adjust)
+        adjustStyleSheet();
 }
 
 void TreeNodeView::notifyChange(VProperty* p)
@@ -320,7 +367,11 @@ void TreeNodeView::notifyChange(VProperty* p)
 	else if(p->path() == "view.tree.background")
 	{
 		adjustBackground(p->value().value<QColor>());
-	}
+    }
+    else if(p->path() == "view.tree.drawBranchLine")
+    {
+        adjustBranchLines(p->value().toBool());
+    }
 }
 
 //====================================================
@@ -348,6 +399,84 @@ void TreeNodeView::collapseAll(const QModelIndex& idx)
 		collapseAll(chIdx);
 	}
 }
+
+//Save all
+void TreeNodeView::slotSaveExpand()
+{
+    for(int i=0; i < model_->rowCount(); i++)
+    {
+        QModelIndex serverIdx=model_->index(i, 0);
+        VTreeServer* ts=model_->indexToServer(serverIdx);
+        Q_ASSERT(ts);
+        ExpandStateTree* es=expandState_->add();
+        es->save(ts->tree());
+    }
+
+    VInfo_ptr s=currentSelection();
+    if(s)
+    {
+       expandState_->selection_=s;
+    }
+
+}
+
+void TreeNodeView::slotRestoreExpand()
+{
+    Q_FOREACH(ExpandStateTree* es,expandState_->items())
+    {
+        if(es->root())
+        {
+            VTreeServer* ts=model_->nameToServer(es->root()->name_);
+            if(ts)
+            {
+                es->restore(ts->tree());
+            }
+        }
+    }
+
+    if(expandState_->selection_)
+    {
+        VInfo_ptr s=currentSelection();
+        if(!s)
+        {
+            expandState_->selection_->regainData();
+            currentSelection(expandState_->selection_);
+        }
+    }
+
+    expandState_->clear();
+}
+
+//Save the expand state for the given node (it can be a server as well)
+void TreeNodeView::slotSaveExpand(const VTreeNode* node)
+{
+    VInfo_ptr s=currentSelection();
+    if(s)
+    {
+        if(node->server()->realServer() == s->server())
+            expandState_->selection_=s;
+    }
+
+
+    ExpandStateTree* es=expandState_->add();
+    es->save(node);
+}
+
+//Save the expand state for the given node (it can be a server as well)
+void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
+{
+    Q_FOREACH(ExpandStateTree* es,expandState_->items())
+    {
+        if(es->rootSameAs(node->vnode()->strName()))
+        {
+            es->restore(node);
+            expandState_->remove(es);
+        }
+    }
+}
+
+
+#if 0
 
 //Save the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotSaveExpand(const VNode* node)
@@ -443,3 +572,5 @@ void TreeNodeView::restoreExpand(ExpandNode *expand,const VNode* node)
 		}
 	}
 }
+
+#endif

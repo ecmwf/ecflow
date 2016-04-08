@@ -15,18 +15,20 @@
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
 #include "FilterWidget.hpp"
-#include "NodeFilterModel.hpp"
 #include "NodePathWidget.hpp"
 #include "NodeViewBase.hpp"
 #include "TableFilterWidget.hpp"
 #include "TableNodeModel.hpp"
+#include "TableNodeSortModel.hpp"
 #include "TableNodeView.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
 #include <QHBoxLayout>
 
-TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) : NodeWidget("table",serverFilter,parent)
+TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
+    NodeWidget("table",serverFilter,parent),
+    sortModel_(0)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -35,10 +37,11 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) : 
 	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::GeneralScope);
 
 	//Create the table model. It uses the datahandler to access the data.
-	model_=new TableNodeModel(serverFilter_,filterDef_,this);
+    TableNodeModel* tModel=new TableNodeModel(serverFilter_,filterDef_,this);
+    model_=tModel;
 
 	//Create a filter model for the tree.
-	filterModel_=new NodeFilterModel(model_,this);
+    sortModel_=new TableNodeSortModel(tModel,this);
 
 	//Build the filter widget
 	filterW_->build(filterDef_,serverFilter_);
@@ -47,7 +50,7 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) : 
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
-	TableNodeView *tv=new TableNodeView(filterModel_,filterDef_,this);
+    TableNodeView *tv=new TableNodeView(sortModel_,filterDef_,this);
 	hb->addWidget(tv);
 
 	//Store the pointer to the (non-QObject) base class of the view!!!
@@ -70,11 +73,13 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) : 
     connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
     		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
 
+#if 0
 	connect(model_,SIGNAL(clearBegun(const VNode*)),
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
 
 	connect(model_,SIGNAL(scanEnded(const VNode*)),
 				view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
+#endif
 
 	connect(model_,SIGNAL(rerender()),
 				view_->realWidget(),SLOT(slotRerender()));

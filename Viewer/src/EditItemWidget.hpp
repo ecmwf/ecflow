@@ -18,8 +18,6 @@
 
 #include "ui_EditItemWidget.h"
 
-class PropertyMapper;
-
 class EditItemWidget : public QWidget, public InfoPanelItem, protected Ui::EditItemWidget
 {
 Q_OBJECT

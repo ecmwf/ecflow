@@ -7,25 +7,21 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef NODEFILTERMODEL_H
-#define NODEFILTERMODEL_H
+#ifndef TABLENODEFILTERMODEL_H
+#define TABLENODEFILTERMODEL_H
 
 #include <QSortFilterProxyModel>
 
 #include "VInfo.hpp"
 
-class AbstractNodeModel;
+class TableNodeModel;
 class NodeFilterDef;
 
-class NodeFilterModel : public QSortFilterProxyModel
+class TableNodeSortModel : public QSortFilterProxyModel
 {
-Q_OBJECT
-
 public:
-	NodeFilterModel(AbstractNodeModel*,QObject *parent=0);
-	~NodeFilterModel();
-
-	bool filterAcceptsRow(int,const QModelIndex &) const;
+    TableNodeSortModel(TableNodeModel*,QObject *parent=0);
+    ~TableNodeSortModel();
 
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
@@ -35,11 +31,11 @@ public:
 	QModelIndex infoToIndex(VInfo_ptr);
 	QModelIndex nodeToIndex(const VNode *node);
 
-public Q_SLOTS:
-	void slotFilterChanged();
-
 protected:
-	AbstractNodeModel* nodeModel_;
+    bool lessThan(const QModelIndex &left,
+                                      const QModelIndex &right) const;
+
+    TableNodeModel* nodeModel_;
 };
 
 #endif

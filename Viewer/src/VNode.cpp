@@ -32,8 +32,10 @@ VNode::VNode(VNode* parent,node_ptr node) :
     VItem(parent),
     node_(node),
     //parent_(parent),
+#if 0
     attrNum_(-1),
     cachedAttrNum_(-1),
+#endif
 	index_(-1)
 {
 	if(parent_)
@@ -48,6 +50,24 @@ ServerHandler* VNode::server() const
 	return (parent_)?(parent_->server()):NULL;
 }
 
+VNode* VNode::suite() const
+{
+    if(isTopLevel())
+        return const_cast<VNode*>(this);
+
+    VNode* p=parent();
+    while(p)
+    {
+        if(p->isTopLevel())
+            return p;
+        p=p->parent();
+    }
+
+    assert(0);
+
+    return NULL;
+}
+
 bool VNode::isTopLevel() const
 {
     return isSuite();
@@ -58,8 +78,10 @@ bool VNode::isTopLevel() const
 void VNode::clear()
 {
 	children_.clear();
-	attrNum_=-1,
+#if 0
+    attrNum_=-1,
 	cachedAttrNum_=-1;
+#endif
 }
 
 bool VNode::hasAccessed() const
@@ -67,6 +89,7 @@ bool VNode::hasAccessed() const
 	return true; //!name_.empty();
 }
 
+#if 0
 //At the beginning of the update we get the current number of attributes
 void VNode::beginUpdateAttrNum()
 {
@@ -89,10 +112,14 @@ short VNode::cachedAttrNum() const
 {
 	return cachedAttrNum_;
 }
+#endif
 
-short VNode::attrNum() const
-{
-	//If if was not initialised we get its value
+int VNode::attrNum(AttributeFilter *filter) const
+{     
+    return VAttributeType::totalNum(this,filter);
+
+#if 0
+    //If if was not initialised we get its value
 	if(attrNum_==-1)
 	{
         attrNum_=VAttributeType::totalNum(this);
@@ -102,12 +129,16 @@ short VNode::attrNum() const
 	}
 
 	return attrNum_;
+#endif
+
 }
 
+#if 0
 short VNode::currentAttrNum() const
 {
     return VAttributeType::totalNum(this);
 }
+#endif
 
 QStringList VNode::getAttributeData(int row,VAttributeType*& type)
 {
@@ -147,14 +178,15 @@ void VNode::removeChild(VNode* vn)
 
 VNode* VNode::childAt(int index) const
 {
-	return (index>=0 && index < children_.size())?children_.at(index):0;
+    assert(index>=0 && index < children_.size());
+    return children_[index];
 }
 
 int VNode::indexOfChild(const VNode* vn) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i) == vn)
+        if(children_[i] == vn)
 			return i;
 	}
 
@@ -165,9 +197,9 @@ int VNode::indexOfChild(node_ptr n) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i)->node() == n)
+        if(children_[i]->node() == n)
 			return i;
-	}
+    }
 
 	return -1;
 }
@@ -176,7 +208,7 @@ VNode *VNode::findChild(const std::string& name) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i)->sameName(name))
+        if(children_[i]->sameName(name))
 			return children_.at(i);
 	}
 	return 0;
@@ -187,7 +219,7 @@ void VNode::collect(std::vector<VNode*>& vec) const
 	for(int i=0; i < numOfChildren(); i++)
 	{
 		vec.push_back(children_.at(i));
-		children_.at(i)->collect(vec);
+        children_[i]->collect(vec);
 	}
 }
 
@@ -882,7 +914,7 @@ void VServer::beginScan(VServerChange& change)
 {
 	//Clear the contents
 	clear();
-
+#if 0
 	//Get the Defs.
 	{
 		ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
@@ -904,6 +936,17 @@ void VServer::beginScan(VServerChange& change)
 	//This will use ServerDefsAccess as well. So we have to be sure that t=the mutex is
 	//released at this point.
 	change.attrNum_=currentAttrNum();
+#endif
+    //Get the Defs.
+    {
+        ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+        defs_ptr defs = defsAccess.defs();
+        if (!defs)
+            return;
+
+        //We need to update the cache server variables
+        updateCache(defs);
+    }
 }
 
 //Build the whole tree.
@@ -925,15 +968,17 @@ void VServer::endScan()
 
 		for(unsigned int i=0; i < suites.size();i++)
 		{
-			VNode* vn=new VNode(this,suites.at(i));
+            VNode* vn=new VSuiteNode(this,suites.at(i));
 			totalNum_++;
 			scan(vn,hasNotifications);
 		}
 	}
 
+#if 0
 	//This will use ServerDefsAccess as well. So we have to be sure that the mutex is
 	//released at this point.
 	endUpdateAttrNum();
+#endif
 
 	if(totalNum_ > 0)
 	{
@@ -953,6 +998,10 @@ void VServer::scan(VNode *node,bool hasNotifications)
 
 	//totalNum_+=nodes.size();
 
+    //Preallocates the children vector to the reqiuired size to save memory.
+    if(nodes.size() > 0)
+        node->children_.reserve(nodes.size());
+
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
 		VNode* vn=NULL;
@@ -967,12 +1016,8 @@ void VServer::scan(VNode *node,bool hasNotifications)
 				std::map<std::string,VNodeInternalState>::const_iterator itP=prevNodeState_.find(path);
 				if(itP != prevNodeState_.end())
 					vn->check(server_->conf(),itP->second);
-			}
+            }
 		}
-        else if((*it)->isSuite())
-        {
-            vn=new VSuiteNode(node,*it);
-        }
         else if((*it)->isFamily())
 		{
             vn=new VFamilyNode(node,*it);
@@ -1034,17 +1079,19 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 			node->check(server_->conf(),stateCh);
 		}
 	}
-
+#if 0
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+#endif
+    bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 	//----------------------------------------------------------------------
 	// The number of attributes changed but the number of nodes did not
 	//----------------------------------------------------------------------
 
+#if 0
 	if(attrNumCh && !nodeNumCh)
 	{
-		//The attributes were never used. None of the views have ever
+        //The attributes were never used. None of the views have ever
 		//wanted to display/access these attributes so far, so we can
 		//just ignore this update!!
 		if(!node->isAttrNumInitialised())
@@ -1066,11 +1113,11 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 
 		return;
 	}
-
+#endif
 	//---------------------------------------------------------------------------------
 	// The number of nodes changed.
 	//---------------------------------------------------------------------------------
-	else if(nodeNumCh)
+    if(nodeNumCh)
 	{
 		change.rescan_=true;
 	}
@@ -1085,7 +1132,8 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 
 void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
 {
-	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+#if 0
+    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 	//--------------------------------------------------------------
@@ -1097,6 +1145,7 @@ void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect
 		//This call updates the number of attributes stored in the VNode
 		node->endUpdateAttrNum();
 	}
+#endif
 }
 
 void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect)

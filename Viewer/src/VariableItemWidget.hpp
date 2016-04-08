@@ -28,7 +28,7 @@ class VariableSearchLine;
 class VariableDialogChecker
 {
 protected:
-	explicit VariableDialogChecker(QString txt) : errorText_(txt) {};
+    explicit VariableDialogChecker(QString txt) : errorText_(txt) {}
 
 	bool checkName(QString name);
 	bool checkValue(QString value);
@@ -95,7 +95,9 @@ public Q_SLOTS:
 	void on_varView_doubleClicked(const QModelIndex& index);
 	void on_actionFilter_triggered();
 	void on_actionSearch_triggered();
-	void slotFilterTextChanged(QString text);
+    void on_actionCopy_triggered();
+    void on_actionCopyFull_triggered();
+    void slotFilterTextChanged(QString text);
 	void slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx);
 
 protected:
@@ -105,8 +107,9 @@ protected:
 	void addItem(const QModelIndex& index);
 	void removeItem(const QModelIndex& index);
     void updateState(const ChangeFlags&);
+    void toClipboard(QString txt) const;
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
 
 	VariableModelDataHandler* data_;

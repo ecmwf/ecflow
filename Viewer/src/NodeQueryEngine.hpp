@@ -71,7 +71,6 @@ private:
 
 class NodeFilterEngine
 {
-
 public:
 	explicit NodeFilterEngine(NodeFilter*);
 	~NodeFilterEngine();
