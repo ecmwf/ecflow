@@ -51,9 +51,9 @@ public:
     virtual bool isAttribute()  {return false;}
 	virtual bool isEmpty()  {return true;}
 
-    ServerHandler* server() {return server_;}
-	VNode* node()  {return node_;}
-    virtual VAttribute* attribute() {return NULL;}
+    ServerHandler* server() const {return server_;}
+    VNode* node() const {return node_;}
+    virtual VAttribute* attribute() const {return NULL;}
 
 	virtual std::string name()=0;
     virtual std::string path()=0;
