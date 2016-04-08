@@ -279,26 +279,49 @@ void Node::miss_next_time_slot()
 
 void Node::calendarChanged(
          const ecf::Calendar& c,
-         std::vector<node_ptr>& auto_cancelled_nodes)
+         std::vector<node_ptr>& auto_cancelled_nodes,
+         const ecf::LateAttr*)
 {
    if (time_dep_attrs_) {
       time_dep_attrs_->calendarChanged(c);
    }
-
-   checkForLateness(c);
 
    if (checkForAutoCancel(c)) {
       auto_cancelled_nodes.push_back(shared_from_this());
    }
 }
 
-void Node::checkForLateness(const ecf::Calendar& c)
+void Node::check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr* inherited_late)
 {
+   // Late flag should ONLY be set on Submittable
    if (lateAttr_) {
-      lateAttr_->checkForLateness(state_, c);
-      if (lateAttr_->isLate()) {
+      // Only check for lateness if we are not late.
+      if (!lateAttr_->isLate()) {
+         if (!inherited_late || inherited_late->isNull())  checkForLateness(c);
+         else {
+            LateAttr overidden_late = *inherited_late;
+            overidden_late.override_with(lateAttr_);
+            if (overidden_late.check_for_lateness( state_, c)) {
+               lateAttr_->setLate(true);
+               flag().set(ecf::Flag::LATE);
+            }
+         }
+      }
+   }
+   else {
+      // inherited late, we can only set late flag.
+      if (inherited_late && !flag().is_set(ecf::Flag::LATE) && inherited_late->check_for_lateness(state_, c)) {
          flag().set(ecf::Flag::LATE);
       }
+   }
+}
+
+void Node::checkForLateness(const ecf::Calendar& c)
+{
+   if (lateAttr_ && lateAttr_->check_for_lateness(state_,c)) {
+      lateAttr_->setLate(true);
+      flag().set(ecf::Flag::LATE);
+      cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
    }
 }
 
@@ -463,7 +486,7 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
 #endif
 
    // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
-   if (lateAttr_) {
+   if (lateAttr_ && isSubmittable()) {
       // since the suite() traverse up the tree, only call when have a late attribute
       checkForLateness(suite()->calendar());
    }

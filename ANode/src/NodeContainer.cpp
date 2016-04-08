@@ -308,12 +308,26 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 
 void NodeContainer::calendarChanged(
          const ecf::Calendar& c,
-         std::vector<node_ptr>& auto_cancelled_nodes)
+         std::vector<node_ptr>& auto_cancelled_nodes,
+         const ecf::LateAttr* inherited_late)
 {
-	Node::calendarChanged(c,auto_cancelled_nodes);
+   // The late attribute is inherited, we only set late on the task/alias
+	Node::calendarChanged(c,auto_cancelled_nodes,NULL);
+
+
+	LateAttr overridden_late;
+   if (inherited_late && !inherited_late->isNull()) {
+      overridden_late = *inherited_late;
+   }
+	if (lateAttr_ != inherited_late) {
+	   overridden_late.override_with(lateAttr_);
+	}
+
 
  	size_t node_vec_size = nodeVec_.size();
-	for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->calendarChanged(c,auto_cancelled_nodes); }
+	for(size_t t = 0; t < node_vec_size; t++) {
+	   nodeVec_[t]->calendarChanged(c,auto_cancelled_nodes,&overridden_late);
+	}
 }
 
 bool NodeContainer::hasAutoCancel() const

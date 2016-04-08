@@ -192,7 +192,7 @@ void Suite::updateCalendar( const ecf::CalendarUpdateParams & calParams, std::ve
 
 		update_generated_variables();
 
- 		calendarChanged(calendar_,auto_cancelled_nodes);
+ 		calendarChanged(calendar_,auto_cancelled_nodes,get_late());
 	}
 }
 

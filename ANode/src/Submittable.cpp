@@ -136,6 +136,15 @@ void Submittable::requeue(bool resetRepeats, int clear_suspended_in_child_nodes,
 #endif
 }
 
+
+void Submittable::calendarChanged(const ecf::Calendar& c, std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late)
+{
+   Node::calendarChanged(c,auto_cancelled_nodes,NULL);
+
+   // Late flag should ONLY be set on Submittable
+   check_for_lateness(c,inherited_late);
+}
+
 std::string Submittable::write_state() const
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have

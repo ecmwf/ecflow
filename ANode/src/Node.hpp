@@ -74,7 +74,7 @@ public:
 
    // Server called functions:
    /// Required when we have time attributes, when time related attribute are free they stay free
-   virtual void calendarChanged(const ecf::Calendar&, std::vector<node_ptr>& auto_cancelled_nodes);
+   virtual void calendarChanged(const ecf::Calendar&, std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late);
 
    /// resolving dependencies means we look at day,date,time and triggers and check to
    /// to see if a node is free or still holding. When a node if free of its dependencies and limits
@@ -405,6 +405,7 @@ public:
    void delete_limit_path(const std::string& limit_name, const std::string& limit_path);
    void deleteInlimit(const std::string& name);
    void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
+   void deleteLate();
 
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors
@@ -422,6 +423,7 @@ public:
    void changeLimitValue(const std::string& name,const std::string& value);
    void changeLimitValue(const std::string& name,int value);
    void changeDefstatus(const std::string& state);
+   void changeLate(const ecf::LateAttr&);
 
    bool set_meter(const std::string& name,int value); // does not throw if meter not found
    bool set_event(const std::string& name,bool value);  // does not throw if event not found
@@ -600,6 +602,9 @@ protected:
 protected:
    std::vector<AbstractObserver*> observers_;
    void notify_delete();
+   void checkForLateness( const ecf::Calendar& );
+   void check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr*);
+
 public:
    void notify(const std::vector<ecf::Aspect::Type>& aspects);
    void attach(AbstractObserver*);
@@ -625,7 +630,6 @@ private:
    const Event& findEventByName( const std::string& name) const;
    bool set_meter_used_in_trigger(const std::string& name);
    bool set_event_used_in_trigger(const std::string& name);
-
 
    /// When the begin/re-queue is called this function will initialise the state
    /// on the node. If node has a default state this is applied to the node, and
@@ -653,8 +657,6 @@ private: // alow simulator access
 
    AstTop* completeAst(std::string& errorMsg) const;   // Will create AST on demand
    AstTop* triggerAst(std::string& errorMsg) const;    // Will create AST on demand
-
-   void checkForLateness( const ecf::Calendar& );
 
 private: // All mementos access
    friend class CompoundMemento;

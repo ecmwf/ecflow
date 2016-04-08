@@ -186,3 +186,10 @@ void Node::changeDefstatus(const std::string& theState)
 	// Updates state_change_no on the defStatus
 	defStatus_.setState( DState::toState(theState) );
 }
+
+void Node::changeLate(const ecf::LateAttr& late)
+{
+   if (lateAttr_) delete lateAttr_;
+   lateAttr_ = new ecf::LateAttr(late);
+   state_change_no_ = Ecf::incr_state_change_no();
+}
