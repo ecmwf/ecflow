@@ -20,7 +20,7 @@ import shutil   # used to remove directory tree
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow_test_util as Test
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
-                   JobCreationCtrl, CheckPt, Cron, debug_build
+                   JobCreationCtrl, CheckPt, Cron, Late, debug_build
 #from __builtin__ import None
 
 def ecf_includes() :  return os.getcwd() + "/test/data/includes"
@@ -762,6 +762,7 @@ def test_client_alter_add(ci):
     ci.alter(t1,"add","day","thursday")
     ci.alter(t1,"add","day","friday")
     ci.alter(t1,"add","day","saturday")
+    ci.alter(t1,"add","late","late -s +00:15 -a 20:00 -c +02:00")
 
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
@@ -770,12 +771,14 @@ def test_client_alter_add(ci):
     assert( len(list(task_t1.todays))) == 3 ,"Expected 3 today's :\n" + str(ci.get_defs())
     assert( len(list(task_t1.dates))) == 4 ,"Expected 4 dates :\n" + str(ci.get_defs())
     assert( len(list(task_t1.days))) == 7 ,"Expected 7 days :\n" + str(ci.get_defs())
+    assert( str(task_t1.get_late()) == "late -s +00:15 -a 20:00 -c +02:00", "Expected late 'late -s +00:15 -a 20:00 -c +02:00'" + str(ci.get_defs()))
            
 
 def test_client_alter_delete(ci):
     print "test_client_alter_delete"
     ci.delete_all() 
-    defs =create_defs("test_client_alter_delete")   
+    defs =create_defs("test_client_alter_delete")  
+     
     t1 = "/test_client_alter_delete/f1/t1"
     task_t1 = defs.find_abs_node(t1)
     task_t1.add_variable("var","value")
@@ -805,6 +808,15 @@ def test_client_alter_delete(ci):
     task_t1.add_inlimit( "limit1",t1,2)
     task_t1.add_trigger( "t2 == active" )
     task_t1.add_complete( "t2 == complete" )
+    
+    assert( len(str(task_t1.get_late())) == 0, "expected no late" )
+    late = Late()
+    late.submitted(20, 10)
+    late.active(20, 10)
+    late.complete(20, 10, True)
+    task_t1.add_late(late)
+    assert( len(str(task_t1.get_late())) != 0, "expected late" )
+    
             
     t2 = "/test_client_alter_delete/f1/t2"
     task_t2 = defs.find_abs_node(t2)
@@ -907,6 +919,11 @@ def test_client_alter_delete(ci):
     task_t1 = ci.get_defs().find_abs_node(t1)
     assert( len(list(task_t1.crons))) == 0 ,"Expected 0 crons :\n" + str(ci.get_defs())
 
+    ci.alter(t1,"delete","late")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    assert( len(str(task_t1.get_late())) == 0, "expected no late after delete" )
+
 
     task_t1 = ci.get_defs().find_abs_node(t1)
     assert task_t1.get_trigger() != None, "Expected trigger:\n" + str(ci.get_defs())
@@ -934,6 +951,7 @@ def test_client_alter_change(ci):
     defs =create_defs("test_client_alter_change")   
     t1 = "/test_client_alter_change/f1/t1"
     repeat_date_path = "/test_client_alter_change/f1/repeat_date"
+    
     task_t1 = defs.find_abs_node(t1)
     task_t1.add_variable("var","value")
     task_t1.add_variable("var1","value")
@@ -949,12 +967,25 @@ def test_client_alter_change(ci):
     task_t1.add_inlimit( "limit1",t1,2)
     task_t1.add_trigger( "t2 == active" )
     task_t1.add_complete( "t2 == complete" )
+    late = Late()
+    late.submitted(20, 10)
+    late.active(20, 10)
+    late.complete(20, 10, True)
+    task_t1.add_late(late)
+
             
     f1 = defs.find_abs_node("/test_client_alter_change/f1")
     repeat_date = f1.add_task("repeat_date")
     repeat_date.add_repeat( RepeatDate("date",20100111,20100115,2) )  # can't add cron and repeat at the same level
            
     ci.load(defs)   
+
+    ci.alter(t1,"change","late","-s +10:00")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    variable = task_t1.get_late()
+    assert str(task_t1.get_late()) == "late -s +10:00", "Expected alter of late to be 'late -s +10:00' but found " + str(task_t1.get_late())
+
 
     ci.alter(t1,"change","variable","var","changed_var")   
     ci.sync_local()
