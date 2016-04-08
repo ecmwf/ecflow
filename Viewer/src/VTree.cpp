@@ -87,6 +87,11 @@ bool VTreeNode::isAttrInitialised() const
     return (attrNum_ != -1);
 }
 
+int VTreeNode::attrRow(int row,AttributeFilter *filter) const
+{
+    return VAttributeType::getRow(vnode_,row,filter);
+}
+
 int VTreeNode::attrNum(AttributeFilter *filter) const
 {
     if(!filter)

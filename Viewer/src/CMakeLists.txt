@@ -45,6 +45,7 @@ set(viewer_srcs
     InfoPanelHandler.cpp
     InfoProvider.cpp
     JobItemWidget.cpp
+    LabelEditDialog.cpp
     LineEdit.cpp
     LogEvent.cpp
     LogModel.cpp
@@ -207,6 +208,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     InfoPanel.hpp
+    LabelEditDialog.hpp
     LineEdit.hpp
     LogProvider.hpp
     MainWindow.hpp
@@ -287,7 +289,8 @@ set(viewer_wrap_ui_files
     GotoLineDialog.ui
     HistoryItemWidget.ui
     InfoPanel.ui    
-    MainWindow.ui 
+    LabelEditDialog.ui
+    MainWindow.ui
     MessageItemWidget.ui
     MenuConfigDialog.ui
     NodeFilterDialog.ui

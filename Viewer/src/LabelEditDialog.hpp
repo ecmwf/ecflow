@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -8,12 +8,33 @@
 //
 //============================================================================
 
-#include "VAttribute.hpp"
+#ifndef LABELEDITDIALOG_HPP
+#define LABELEDITDIALOG_HPP
 
-#include "VNode.hpp"
+#include <QDialog>
 
-VAttribute::VAttribute(VNode* parent,int index) : VItem(parent), type_(0), index_(index)
+#include "ui_LabelEditDialog.h"
+
+#include "VInfo.hpp"
+
+class LabelEditDialog : public QDialog, private Ui::LabelEditDialog
 {
-    data_=parent_->getAttributeData(index_,type_) ;
-}
+Q_OBJECT
+
+public:
+    LabelEditDialog(VInfo_ptr,QWidget* parent=0);
+
+    //QString name() const;
+    //QString value() const;
+
+//public Q_SLOTS:
+//    void accept();
+
+protected:
+
+    VInfo_ptr info_;
+
+};
+
+#endif // LABELEDITDIALOG_HPP
 

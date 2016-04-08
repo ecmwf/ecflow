@@ -883,7 +883,10 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		//It is an attribute
 		else
 		{
-            VInfo_ptr p=VInfoAttribute::create(parentNode->vnode(),index.row());
+            int realAttrRow=parentNode->attrRow(index.row(),atts_);
+            Q_ASSERT(realAttrRow >= 0);
+
+            VInfo_ptr p=VInfoAttribute::create(parentNode->vnode(),realAttrRow);
             qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
             return p;
 		}

@@ -34,7 +34,8 @@ public:
     static int totalNum(const VNode *vnode,AttributeFilter *filter=0);
     static void init(const std::string& parFile);
     static int getLineNum(const VNode *vnode,int row,AttributeFilter *filter=0);
-	
+    static int getRow(const VNode *vnode,int row,AttributeFilter *filter=0);
+
     static VAttributeType* find(const std::string& name);
 
     //Called from VConfigLoader

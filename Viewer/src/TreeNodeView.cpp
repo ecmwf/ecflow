@@ -30,6 +30,8 @@
 #include "VModelData.hpp"
 #include "VTree.hpp"
 
+#include "LabelEditDialog.hpp"
+
 TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
 	QTreeView(parent),
     NodeViewBase(filterDef),
@@ -192,8 +194,13 @@ void TreeNodeView::selectFirstServer()
 }
 
 
-void TreeNodeView::slotDoubleClickItem(const QModelIndex&)
+void TreeNodeView::slotDoubleClickItem(const QModelIndex& idx)
 {
+    VInfo_ptr info=model_->nodeInfo(idx);
+    if(info && info->isAttribute())
+    {
+        slotViewCommand(info,"edit");
+    }
 }
 
 void TreeNodeView::slotContextMenu(const QPoint &position)
@@ -255,6 +262,20 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 				collapseAll(idx);
 		}
 	}
+
+    if(cmd ==  "edit")
+    {
+        if(info && info->isAttribute())
+        {
+            LabelEditDialog d(info,this);
+            if(d.exec() == QDialog::Accepted)
+            {
+
+
+            }
+        }
+    }
+
 
 	/*if(cmd == "set_as_root")
 	{

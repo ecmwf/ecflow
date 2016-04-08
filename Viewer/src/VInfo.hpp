@@ -79,6 +79,8 @@ public:
     // Overload + operator to add two Box objects.
     bool operator ==(const VInfo&);
 
+    static VInfo_ptr createParent(VInfo_ptr);
+
 protected:
 	VInfo(ServerHandler* server,VNode* node);
 	void dataLost();
@@ -133,7 +135,7 @@ public:
 	bool isEmpty() {return false;}
 	void accept(VInfoVisitor*);   
     std::string name() {return std::string();}
-    std::string path() {return std::string();}
+    std::string path();
 
     static VInfo_ptr create(VNode*,int);
 

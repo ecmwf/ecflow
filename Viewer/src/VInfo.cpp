@@ -172,6 +172,26 @@ bool VInfo::operator ==(const VInfo& other)
             nodePath_ == other.nodePath_);
 }
 
+VInfo_ptr VInfo::createParent(VInfo_ptr info)
+{
+    if(!info)
+        return VInfo_ptr();
+
+    if(info->isServer())
+        return info;
+    else if(info->isNode())
+    {
+        return VInfoServer::create(info->server());
+    }
+    else if(info->isAttribute())
+    {
+        return VInfoNode::create(info->node());
+    }
+
+    return VInfo_ptr();
+}
+
+
 //=========================================
 //
 // VInfoServer
@@ -295,6 +315,19 @@ VInfo_ptr VInfoAttribute::create(VNode* node,int attIndex)
 
     return VInfo_ptr(new VInfoAttribute(server,node,att));
 }
+
+std::string VInfoAttribute::path()
+{
+    std::string p;
+    if(server_)
+       p=server_->name();
+
+    if(node_ && node_->node())
+        p+=":/" + node_->absNodePath();
+
+    return p;
+}
+
 
 
 /*

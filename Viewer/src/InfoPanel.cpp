@@ -224,12 +224,19 @@ void InfoPanel::reset(VInfo_ptr info)
 //This slot is called when the info object is selected
 void InfoPanel::slotReload(VInfo_ptr info)
 {
-	//When the mode is detached it cannot receive
+    //When the mode is detached it cannot receive
 	//the reload request
     if(info_ && info_ && detached())
 		return;
 
-	reset(info);
+    if(info && info->isAttribute())
+    {
+        reset(VInfo::createParent(info));
+    }
+    else
+    {
+        reset(info);
+    }
 }
 
 //This slot is called when the info object is selected

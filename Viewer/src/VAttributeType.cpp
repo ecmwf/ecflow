@@ -277,6 +277,37 @@ int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filte
     return 1;
 }
 
+int VAttributeType::getRow(const VNode *vnode,int row,AttributeFilter *filter)
+{
+    if(!vnode)
+        return -1;
+
+    if(!filter)
+        return row;
+
+    int totalRow=0;
+    int realRow=0;
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if(!filter || filter->isSet(it->second))
+        {
+            int size=it->second->num(vnode);
+            if(row-totalRow >=0 && row-totalRow < size)
+            {
+                return realRow+row-totalRow;
+            }
+            totalRow+=size;
+            realRow+=size;
+        }
+        else
+        {
+            realRow+=it->second->num(vnode);
+        }
+    }
+
+    return -1;
+}
+
 void VAttributeType::load(VProperty* group)
 {
     Q_FOREACH(VProperty* p,group->children())

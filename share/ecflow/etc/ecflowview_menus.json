@@ -360,7 +360,8 @@
             "name"           : "Custom",
             "type"           : "Submenu",
             "menu"           : "Node",
-            "command"        : "None"
+            "command"        : "None",
+            "visible_for"    : "server or node"
         },
 
 

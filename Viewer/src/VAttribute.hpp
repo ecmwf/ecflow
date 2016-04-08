@@ -24,6 +24,8 @@ public:
     VAttribute(VNode* parent,int index);
 
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
+    VAttributeType* type() const {return type_;}
+    QStringList data() const {return data_;}
 
 protected:
     VAttributeType* type_;
