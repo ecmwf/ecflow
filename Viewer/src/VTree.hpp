@@ -15,7 +15,7 @@
 #include <QStringList>
 
 class VNode;
-class VAttribute;
+class VAttributeType;
 class AttributeFilter;
 class VTreeServer;
 class VTree;
@@ -40,7 +40,7 @@ public:
     int attrNum(AttributeFilter* filter=0) const;
     bool isAttrInitialised() const;
     void updateAttrNum(AttributeFilter* filter=0);
-    QStringList getAttributeData(int row,VAttribute*& type,AttributeFilter *filter=0);
+    QStringList getAttributeData(int row,VAttributeType*& type,AttributeFilter *filter=0);
     int getAttributeLineNum(int row,AttributeFilter *filter=0);
     void resetAttrNum();
 

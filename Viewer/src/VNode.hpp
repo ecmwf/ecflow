@@ -23,7 +23,7 @@
 class AttributeFilter;
 class IconFilter;
 class ServerHandler;
-class VAttribute;
+class VAttributeType;
 class VServer;
 class VServerSettings;
 
@@ -106,9 +106,9 @@ public:
 
     int attrNum(AttributeFilter* filter=0) const;
 
-    QStringList getAttributeData(int,VAttribute*&);
+    QStringList getAttributeData(int,VAttributeType*&);
     bool getAttributeData(const std::string& type,int row, QStringList&);
-    VAttribute* getAttributeType(int);
+    VAttributeType* getAttributeType(int);
     int getAttributeLineNum(int row);
 
     VNode* parent() const {return parent_;}

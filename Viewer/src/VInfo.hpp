@@ -22,7 +22,7 @@
 #include "Variable.hpp"
 
 class ServerHandler;
-class VAttribute;
+class VAttributeType;
 class VNode;
 
 class VInfoObserver;
@@ -53,7 +53,7 @@ public:
 
     ServerHandler* server() {return server_;}
 	VNode* node()  {return node_;}
-	virtual VAttribute* attribute() {return NULL;}
+	virtual VAttributeType* attribute() {return NULL;}
 
 	virtual std::string name()=0;
     virtual std::string path()=0;
@@ -147,12 +147,12 @@ public:
 	std::string name() {return std::string();}
     std::string path() {return std::string();}
 
-	static VInfo_ptr create(ServerHandler*,VNode*,VAttribute*,int);
+	static VInfo_ptr create(ServerHandler*,VNode*,VAttributeType*,int);
 
 protected:
-	VInfoAttribute(ServerHandler*,VNode*,VAttribute*,int);
+	VInfoAttribute(ServerHandler*,VNode*,VAttributeType*,int);
 
-	mutable VAttribute* att_;
+	mutable VAttributeType* att_;
 	mutable int attIndex_;
 };
 
@@ -286,8 +286,8 @@ public:
 	explicit VInfoAttributeFactory(const std::string&);
 	virtual ~VInfoAttributeFactory();
 
-	virtual VInfoAttribute* make(VAttribute*,int,VNode*,ServerHandler* server=0) = 0;
-	static VInfoAttribute* create(VAttribute* att,int attIndex,VNode* node,ServerHandler* server=0);
+	virtual VInfoAttribute* make(VAttributeType*,int,VNode*,ServerHandler* server=0) = 0;
+	static VInfoAttribute* create(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server=0);
 
 private:
 	explicit VInfoAttributeFactory(const VInfoAttributeFactory&);
@@ -298,7 +298,7 @@ private:
 template<class T>
 class  VInfoAttributeMaker : public VInfoAttributeFactory
 {
-	VInfoAttribute* make(VAttribute* att,int attIndex,VNode* node,ServerHandler* server=0)
+	VInfoAttribute* make(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server=0)
 	       { return new T(att,attIndex,node,server); }
 public:
 	 explicit VInfoAttributeMaker(const std::string& name) : VInfoAttributeFactory(name) {}

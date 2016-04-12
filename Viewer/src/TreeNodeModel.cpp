@@ -20,7 +20,7 @@
 #include "VFilter.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "VIcon.hpp"
 #include "VFileInfo.hpp"
@@ -465,7 +465,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 
 	else if(role == Qt::DisplayRole)
 	{
-		VAttribute* type=0;
+		VAttributeType* type=0;
         return node->getAttributeData(index.row(),type,atts_);
 	}
 	else if(role ==  AttributeLineRole)

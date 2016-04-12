@@ -16,7 +16,7 @@
 #include "ConnectState.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VFileInfo.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
@@ -114,7 +114,7 @@ short VNode::cachedAttrNum() const
 
 int VNode::attrNum(AttributeFilter *filter) const
 {     
-    return VAttribute::totalNum(this,filter);
+    return VAttributeType::totalNum(this,filter);
 
 #if 0
     //If if was not initialised we get its value
@@ -139,26 +139,26 @@ short VNode::currentAttrNum() const
 #endif
 
 
-QStringList VNode::getAttributeData(int row,VAttribute*& type)
+QStringList VNode::getAttributeData(int row,VAttributeType*& type)
 {
 	QStringList lst;
-	VAttribute::getData(this,row,type,lst);
+	VAttributeType::getData(this,row,type,lst);
 	return lst;
 }
 
-VAttribute* VNode::getAttributeType(int row)
+VAttributeType* VNode::getAttributeType(int row)
 {
-	return VAttribute::getType(this,row);
+	return VAttributeType::getType(this,row);
 }
 
 bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
 {
-	return VAttribute::getData(type,this,row,data);
+	return VAttributeType::getData(type,this,row,data);
 }
 
 int VNode::getAttributeLineNum(int row)
 {
-	return VAttribute::getLineNum(this,row);
+	return VAttributeType::getLineNum(this,row);
 }
 
 void VNode::addChild(VNode* vn)
