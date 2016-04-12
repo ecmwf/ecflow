@@ -226,12 +226,14 @@ bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString
 
     if(block >=0 && block < data_->count())
     {
+
+#if 0
         //double check
         if(data_->data(block)->name(row) != name.toStdString())
         {
-            assert(0);
             return false;
         }
+#endif
 
         //This will call the ServerComThread  so we
         //do not know if it was successful or not. The model will be

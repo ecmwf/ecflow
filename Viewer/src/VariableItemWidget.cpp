@@ -437,7 +437,7 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 
 		if(d.exec()== QDialog::Accepted && !frozen_)
 		{
-            //data might have deleted while the dialog was open
+            //data might have been deleted while the dialog was open
             //so we alter it via the model that can properly lookup the
             //data object
             model_->alterVariable(vIndex,d.name(),d.value());
