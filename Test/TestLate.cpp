@@ -86,6 +86,11 @@ BOOST_AUTO_TEST_CASE( test_late_hierarchically )
 {
    DurationTimer timer;
    cout << "Test:: ...test_late_hierarchically " << flush;
+   char* the_env = getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS");
+   if (the_env) {
+      std::cout << "\n    Disable test_late_hierarchically for old server *************************************************************\n";
+      return;
+   }
    TestClean clean_at_start_and_end;
 
    /// This test will sleep longer than the job submission interval
