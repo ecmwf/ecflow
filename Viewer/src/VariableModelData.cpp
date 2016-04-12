@@ -447,7 +447,7 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 	return 0;
 }
 
-//It is called when a node was changed.
+//It is called when a node changed.
 void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
 	int dataIndex=-1;
@@ -471,7 +471,7 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 	{
 		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
 		{
-			//If the number of the variables not the same we reset the whole model           
+            //If the number of the variables not the same we reset the given block in the model
             int cntDiff=data_.at(dataIndex)->checkUpdateDiff(v,vg);
 			if(cntDiff != 0)
 			{
