@@ -181,8 +181,8 @@ void LateAttr::parse(LateAttr& lateAttr, const std::string& line, const std::vec
 
       if ( lineTokens[i] == "-s") {
          if ( !lateAttr.submitted().isNULL() ) throw std::runtime_error( "LateParser::doParse: Invalid late, submitted specified twice :" + line );
-         int hour = -1; int min = -1;
          if (i + 1 < line_token_size) {
+            int hour = -1; int min = -1;
             TimeSeries::getTime(lineTokens[i+1],hour,min);
             lateAttr.addSubmitted( TimeSlot(hour,min) );
             i++;
@@ -191,8 +191,8 @@ void LateAttr::parse(LateAttr& lateAttr, const std::string& line, const std::vec
       }
       else if ( lineTokens[i] == "-a") {
          if ( !lateAttr.active().isNULL() ) throw std::runtime_error( "LateParser::doParse: Invalid late, active specified twice :" + line );
-         int hour = -1; int min = -1;
          if (i + 1 < line_token_size) {
+            int hour = -1; int min = -1;
             TimeSeries::getTime(lineTokens[i+1],hour,min);
             lateAttr.addActive( TimeSlot(hour,min) );
             i++;
@@ -201,8 +201,8 @@ void LateAttr::parse(LateAttr& lateAttr, const std::string& line, const std::vec
       }
       else if ( lineTokens[i] == "-c") {
          if ( !lateAttr.complete().isNULL() ) throw std::runtime_error( "LateParser::doParse: Invalid late, complete specified twice :" + line );
-         int hour = -1; int min = -1;
          if (i + 1 < line_token_size) {
+            int hour = -1; int min = -1;
             bool relative = TimeSeries::getTime(lineTokens[i+1],hour,min);
             lateAttr.addComplete( TimeSlot(hour,min), relative );
             i++;
