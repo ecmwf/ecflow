@@ -51,6 +51,9 @@ public Q_SLOTS:
 	void slotAddRemoveEnd(int diff);
 	void slotDataChanged(int);
 
+Q_SIGNALS:
+    void filterChanged();
+
 protected:
 	bool hasData() const;
 
@@ -69,11 +72,13 @@ protected:
 
 class VariableSortModel : public QSortFilterProxyModel
 {
+    Q_OBJECT
+
 public:
 	enum MatchMode {FilterMode,SearchMode};
 
 	VariableSortModel(VariableModel*,QObject *parent=0);
-	~VariableSortModel() {};
+    ~VariableSortModel() {}
 
 	MatchMode matchMode() const {return matchMode_;}
 	void setMatchMode(MatchMode mode);
@@ -84,10 +89,13 @@ public:
 
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
-	void setSourceModel(QAbstractItemModel*) {};
+    void setSourceModel(QAbstractItemModel*) {}
     QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
 	
     QModelIndexList match(const QModelIndex& start,int role,const QVariant& value,int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap )) const;
+
+protected Q_SLOTS:
+    void slotFilterChanged();
 
 protected:
     void match(QString text);

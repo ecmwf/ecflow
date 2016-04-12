@@ -481,11 +481,15 @@ void VariableModel::slotAddRemoveEnd(int diff)
 	}
 }
 
+//It must be called after any data change
 void VariableModel::slotDataChanged(int block)
 {
 	QModelIndex blockIndex0=index(block,0);
 	QModelIndex blockIndex1=index(block,1);
 	Q_EMIT dataChanged(blockIndex0,blockIndex1);
+
+    //We need to rerun the filter in the proxy model!
+    Q_EMIT filterChanged();
 }
 
 //=======================================================================
@@ -502,8 +506,10 @@ VariableSortModel::VariableSortModel(VariableModel *varModel,QObject* parent) :
 {
 	QSortFilterProxyModel::setSourceModel(varModel_);
 	setDynamicSortFilter(true);
-}
 
+    connect(varModel_,SIGNAL(filterChanged()),
+            this,SLOT(slotFilterChanged()));
+}
 
 void VariableSortModel::setMatchMode(MatchMode mode)
 {
@@ -530,6 +536,11 @@ void VariableSortModel::setMatchText(QString txt)
 	}
 }
 
+void VariableSortModel::slotFilterChanged()
+{
+    if(matchMode_ == FilterMode)
+        invalidate();
+}
 
 bool VariableSortModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const
 {
