@@ -8,7 +8,7 @@
 //
 //============================================================================
 
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QDebug>
 
@@ -26,104 +26,104 @@
 #include "VFilter.hpp"
 #include "VProperty.hpp"
 
-std::map<std::string,VAttribute*> VAttribute::items_;
+std::map<std::string,VAttributeType*> VAttributeType::items_;
 
 //#define _UI_ATTR_DEBUG
 
-class VMeterAttribute : public VAttribute
+class VMeterAttribute : public VAttributeType
 {
 public:
-    explicit VMeterAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VMeterAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VEventAttribute : public VAttribute
+class VEventAttribute : public VAttributeType
 {
 public:
-    explicit  VEventAttribute(const std::string& n) : VAttribute(n) {}
+    explicit  VEventAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 
-class VRepeatAttribute : public VAttribute
+class VRepeatAttribute : public VAttributeType
 {
 public:
-    explicit VRepeatAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VRepeatAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VTriggerAttribute : public VAttribute
+class VTriggerAttribute : public VAttributeType
 {
 public:
-    explicit VTriggerAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VTriggerAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VLabelAttribute : public VAttribute
+class VLabelAttribute : public VAttributeType
 {
 public:
-    explicit VLabelAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VLabelAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 	int lineNum(const VNode* vnode,int row);
 };
 
-class VDateAttribute : public VAttribute
+class VDateAttribute : public VAttributeType
 {
 public:
-    explicit VDateAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VDateAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VTimeAttribute : public VAttribute
+class VTimeAttribute : public VAttributeType
 {
 public:
-    explicit VTimeAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VTimeAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VLimitAttribute : public VAttribute
+class VLimitAttribute : public VAttributeType
 {
 public:
-    explicit VLimitAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VLimitAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VLimiterAttribute : public VAttribute
+class VLimiterAttribute : public VAttributeType
 {
 public:
-    explicit VLimiterAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VLimiterAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VLateAttribute : public VAttribute
+class VLateAttribute : public VAttributeType
 {
 public:
-    explicit VLateAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VLateAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VVarAttribute : public VAttribute
+class VVarAttribute : public VAttributeType
 {
 public:
-    explicit VVarAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VVarAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
-class VGenvarAttribute : public VAttribute
+class VGenvarAttribute : public VAttributeType
 {
 public:
-    explicit VGenvarAttribute(const std::string& n) : VAttribute(n) {}
+    explicit VGenvarAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -142,17 +142,17 @@ static VVarAttribute varAttr("var");
 static VGenvarAttribute genvarAttr("genvar");
 
 
-VAttribute::VAttribute(const std::string& name) :
+VAttributeType::VAttributeType(const std::string& name) :
 		VParam(name)
 {
 	//items_.push_back(this);
 	items_[name]=this;
 }
 
-std::vector<VParam*> VAttribute::filterItems()
+std::vector<VParam*> VAttributeType::filterItems()
 {
 	std::vector<VParam*> v;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		v.push_back(it->second);
 	}
@@ -161,9 +161,9 @@ std::vector<VParam*> VAttribute::filterItems()
 }
 
 
-VAttribute* VAttribute::find(const std::string& name)
+VAttributeType* VAttributeType::find(const std::string& name)
 {
-	std::map<std::string,VAttribute*>::const_iterator it=items_.find(name);
+	std::map<std::string,VAttributeType*>::const_iterator it=items_.find(name);
 	if(it != items_.end())
 			return it->second;
 
@@ -179,13 +179,13 @@ VAttribute* VAttribute::find(const std::string& name)
 }
 
 
-int VAttribute::totalNum(const VNode *vnode, AttributeFilter *filter)
+int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
 {
     if(!vnode)
         return 0;
 
     int total=0;
-    for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -196,13 +196,13 @@ int VAttribute::totalNum(const VNode *vnode, AttributeFilter *filter)
     return total;
 }
 
-VAttribute* VAttribute::getType(const VNode *vnode,int row,AttributeFilter *filter)
+VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilter *filter)
 {
     if(!vnode)
         return NULL;
 
     int totalRow=0;
-    for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -218,7 +218,7 @@ VAttribute* VAttribute::getType(const VNode *vnode,int row,AttributeFilter *filt
     return NULL;
 }
 
-bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& data,AttributeFilter *filter)
+bool VAttributeType::getData(VNode *vnode,int row,VAttributeType* &type,QStringList& data,AttributeFilter *filter)
 {
     type=0;
 
@@ -226,7 +226,7 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& dat
         return false;
 
     int totalRow=0;
-    for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -243,9 +243,9 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& dat
     return false;
 }
 
-bool VAttribute::getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter)
+bool VAttributeType::getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter)
 {
-    if(VAttribute* va=find(type))
+    if(VAttributeType* va=find(type))
     {
         if(!filter || filter->isSet(va))
         {
@@ -256,13 +256,13 @@ bool VAttribute::getData(const std::string& type,VNode* vnode,int row,QStringLis
     return false;
 }
 
-int VAttribute::getLineNum(const VNode *vnode,int row,AttributeFilter *filter)
+int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filter)
 {
     if(!vnode)
         return 1;
 
     int totalRow=0;
-    for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -278,11 +278,11 @@ int VAttribute::getLineNum(const VNode *vnode,int row,AttributeFilter *filter)
     return 1;
 }
 
-void VAttribute::load(VProperty* group)
+void VAttributeType::load(VProperty* group)
 {
     Q_FOREACH(VProperty* p,group->children())
     {
-         if(VAttribute* obj=VAttribute::find(p->strName())) 
+         if(VAttributeType* obj=VAttributeType::find(p->strName())) 
          {
             obj->setProperty(p);
          }   
@@ -895,5 +895,5 @@ bool VLateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     return false;
 }
 
-static SimpleLoader<VAttribute> loader("attribute");
+static SimpleLoader<VAttributeType> loader("attribute");
 

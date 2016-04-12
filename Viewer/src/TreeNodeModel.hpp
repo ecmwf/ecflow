@@ -14,7 +14,7 @@
 
 #include "AbstractNodeModel.hpp"
 #include "Node.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "Viewer.hpp"
 #include "VInfo.hpp"
 

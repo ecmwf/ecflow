@@ -15,7 +15,7 @@
 
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 
@@ -46,7 +46,7 @@ VInfoAttributeFactory::~VInfoAttributeFactory()
 	// Not called
 }
 
-VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,VNode* node,ServerHandler* server)
+VInfoAttribute* VInfoAttributeFactory::create(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server)
 {
 	std::string name=att->name().toStdString();
 
@@ -263,7 +263,7 @@ std::string VInfoNode::path()
 //=========================================
 
 
-VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att,int attIndex) :
+VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttributeType* att,int attIndex) :
 		VInfo(server,node),
 		att_(att),
 		attIndex_(attIndex)
@@ -276,7 +276,7 @@ void VInfoAttribute::accept(VInfoVisitor* v)
 	v->visit(this);
 }
 
-VInfo_ptr VInfoAttribute::create(ServerHandler* server,VNode* node,VAttribute* att,int attIndex)
+VInfo_ptr VInfoAttribute::create(ServerHandler* server,VNode* node,VAttributeType* att,int attIndex)
 {
 	return VInfo_ptr(new VInfoAttribute(server,node,att,attIndex));
 }

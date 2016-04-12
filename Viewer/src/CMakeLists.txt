@@ -132,7 +132,7 @@ set(viewer_srcs
     TriggerView.cpp
     UpdateTimer.cpp
     UserMessage.cpp
-    VAttribute.cpp
+    VAttributeType.cpp
     VConfig.cpp   
     VDir.cpp
     VFilter.cpp
