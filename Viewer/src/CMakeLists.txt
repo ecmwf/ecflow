@@ -7,6 +7,7 @@ set(viewer_srcs
     AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
     Animation.cpp
+    AttributeEditor.cpp
     AttributeSearchPanel.cpp
     CaseSensitiveButton.cpp
     ChangeNotify.cpp

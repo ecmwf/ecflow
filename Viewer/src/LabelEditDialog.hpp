@@ -11,16 +11,13 @@
 #ifndef LABELEDITDIALOG_HPP
 #define LABELEDITDIALOG_HPP
 
-#include <QDialog>
-
 #include "ui_LabelEditDialog.h"
 
+#include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
-class LabelEditDialog : public QDialog, private Ui::LabelEditDialog
+class LabelEditDialog : private Ui::LabelEditDialog, public AttributeEditor
 {
-Q_OBJECT
-
 public:
     LabelEditDialog(VInfo_ptr,QWidget* parent=0);
 
@@ -32,7 +29,6 @@ public:
 
 protected:
 
-    VInfo_ptr info_;
 
 };
 

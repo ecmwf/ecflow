@@ -21,6 +21,7 @@
 
 #include "ActionHandler.hpp"
 #include "Animation.hpp"
+#include "AttributeEditor.hpp"
 #include "ExpandState.hpp"
 #include "TableNodeSortModel.hpp"
 #include "PropertyMapper.hpp"
@@ -267,12 +268,7 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
     {
         if(info && info->isAttribute())
         {
-            LabelEditDialog d(info,this);
-            if(d.exec() == QDialog::Accepted)
-            {
-
-
-            }
+            AttributeEditor::edit(info,this);
         }
     }
 

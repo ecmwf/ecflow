@@ -15,7 +15,7 @@
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 
-LabelEditDialog::LabelEditDialog(VInfo_ptr info,QWidget* parent) : QDialog(parent), info_(info)
+LabelEditDialog::LabelEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
 {
     setupUi(this);
 
@@ -23,7 +23,7 @@ LabelEditDialog::LabelEditDialog(VInfo_ptr info,QWidget* parent) : QDialog(paren
     valueLe_->setClearButtonEnabled(true);
 #endif
 
-    Q_ASSERT(info && info->isAttribute() && info->attribute());
+    //Q_ASSERT(info && info->isAttribute() && info->attribute());
 
     VAttribute* a=info_->attribute();
 
@@ -43,3 +43,5 @@ LabelEditDialog::LabelEditDialog(VInfo_ptr info,QWidget* parent) : QDialog(paren
     nameLe_->setText(name);
     valueLe_->setText(val);
 }
+
+static AttributeEditorMaker<LabelEditDialog> makerStr("label");
