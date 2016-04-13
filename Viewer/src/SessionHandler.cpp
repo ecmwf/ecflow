@@ -50,6 +50,11 @@ std::string SessionItem::recentCustomCommandsFile() const
     return DirectoryHandler::concatenate(dirPath_, "recent_custom_commands.json");
 }
 
+std::string SessionItem::savedCustomCommandsFile() const
+{
+    return DirectoryHandler::concatenate(dirPath_, "saved_custom_commands.json");
+}
+
 std::string SessionItem::serverFile(const std::string& serverName) const
 {
 	return DirectoryHandler::concatenate(dirPath_, serverName + ".conf.json");

@@ -37,6 +37,7 @@ void CustomCommand::save(VSettings *vs)
 {
     vs->put("name",    name());
     vs->put("command", command());
+    vs->put("context", contextString());
 }
 
 
@@ -83,6 +84,9 @@ void CustomCommandHandler::init(const std::string& configFilePath)
 
 CustomCommand* CustomCommandHandler::replace(int index, const std::string& name, const std::string& command, bool context)
 {
+    assert(index >= 0);
+    assert(index < items_.size());
+
     CustomCommand *item;
 
     // already in the list - just update it
@@ -93,6 +97,54 @@ CustomCommand* CustomCommandHandler::replace(int index, const std::string& name,
 
     return item;
 }
+
+CustomCommand* CustomCommandHandler::replace(int index, const CustomCommand &cmd)
+{
+    replace(index, cmd.name(), cmd.command(), cmd.inContextMenu());
+}
+
+
+
+void CustomCommandHandler::remove(int index)
+{
+    assert(index >= 0);
+    assert(index < items_.size());
+
+    items_.erase(items_.begin()+index);
+
+    writeSettings();
+}
+
+CustomCommand* CustomCommandHandler::duplicate(int index)
+{
+    assert(index >= 0);
+    assert(index < items_.size());
+
+    CustomCommand *item = items_[index];
+    std::string postfix("_1");
+    std::string newName = item->name() + postfix;
+
+    // ensure we are creating a unique new name - if we find an existing item with the same name, add another postfix
+    while(find(newName) != NULL)
+        newName += postfix;
+
+    CustomCommand*newCmd = add(newName, item->command(), item->inContextMenu(), false);
+
+    writeSettings();
+}
+
+void CustomCommandHandler::swapCommandsByIndex(int i1, int i2)
+{
+    assert(i1 >= 0);
+    assert(i1 < items_.size());
+    assert(i2 >= 0);
+    assert(i2 < items_.size());
+
+    CustomCommand *temp = items_[i2];
+    items_[i2] = items_[i1];
+    items_[i1] = temp;
+}
+
 
 CustomCommand* CustomCommandHandler::find(const std::string& name) const
 {
@@ -157,9 +209,16 @@ void CustomCommandHandler::readSettings()
             std::string emptyDefault="";
             std::string name    = vsCommand->get("name",    emptyDefault);
             std::string command = vsCommand->get("command", emptyDefault);
-            CustomCommandHistoryHandler::instance()->add(name, command, true, false);  // add it to our in-memory list
+            std::string context = vsCommand->get("context", emptyDefault);
+            add(name, command, stringToBool(context), false);  // add it to our in-memory list
         }
     }
+}
+
+bool CustomCommandHandler::stringToBool(std::string &str)
+{
+    bool result = (!str.empty() && str == "yes");
+    return result;
 }
 
 
