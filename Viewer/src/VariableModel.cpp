@@ -13,6 +13,7 @@
 #include <QDebug>
 
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VariableModelData.hpp"
 
 QColor VariableModel::varCol_=QColor(40,41,42);
@@ -20,6 +21,8 @@ QColor VariableModel::varCol_=QColor(40,41,42);
 QColor VariableModel::genVarCol_=QColor(0,115,48);
 QColor VariableModel::blockBgCol_=QColor(122,122,122);
 QColor VariableModel::blockFgCol_=QColor(255,255,255);
+
+#define _UI_VARIABLEMODEL_DEBUG
 
 //=======================================================================
 //
@@ -216,25 +219,25 @@ bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& valu
 
 bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString value)
 {
+#ifdef _UI_VARIABLEMODEL_DEBUG
+   qDebug() << "DEBUG :" << "VariableModel::alterVariable --> index" <<  index  << " name=" <<
+                     name << " value=" <<  value;
+#endif
+
     int block;
     int row;
 
     identify(index,block,row);
+
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    qDebug() << "   block=" <<  block << " row=" << row;
+#endif
 
     if(block == -1 || row == -1)
         return false;
 
     if(block >=0 && block < data_->count())
     {
-
-#if 0
-        //double check
-        if(data_->data(block)->name(row) != name.toStdString())
-        {
-            return false;
-        }
-#endif
-
         //This will call the ServerComThread  so we
         //do not know if it was successful or not. The model will be
         //updated through the observer when the value will actually
@@ -242,6 +245,9 @@ bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString
         data_->data(block)->alter(name.toStdString(),value.toStdString());
     }
 
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UserMessage::debug("<-- VariableModel::alterVariable");
+#endif
     return false;
 }
 
@@ -484,12 +490,23 @@ void VariableModel::slotAddRemoveEnd(int diff)
 //It must be called after any data change
 void VariableModel::slotDataChanged(int block)
 {
-	QModelIndex blockIndex0=index(block,0);
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UserMessage::debug("VariableModel::slotDataChanged -->");
+#endif
+    QModelIndex blockIndex0=index(block,0);
 	QModelIndex blockIndex1=index(block,1);
+
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    qDebug() << "   emit dataChanged:" << blockIndex0 << blockIndex1;
+#endif
 	Q_EMIT dataChanged(blockIndex0,blockIndex1);
 
     //We need to rerun the filter in the proxy model!
     Q_EMIT filterChanged();
+
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UserMessage::debug("<-- VariableModel::slotDataChanged");
+#endif
 }
 
 //=======================================================================
@@ -531,9 +548,32 @@ void VariableSortModel::setMatchText(QString txt)
 
 	if(matchMode_ == FilterMode)
 	{
+#ifdef _UI_VARIABLEMODEL_DEBUG
+        //qDebug() << "before";
+        //print(QModelIndex());
+#endif
 		//reload the filter model
 		invalidate();
+#ifdef _UI_VARIABLEMODEL_DEBUG
+        //qDebug() << "after";
+        //print(QModelIndex());
+#endif
+
 	}
+}
+
+void VariableSortModel::print(const QModelIndex idx)
+{
+    if(rowCount(idx) > 0)
+        qDebug() << "-->" << idx << mapToSource(idx) << data(idx);
+    else
+        qDebug() << idx << mapToSource(idx) << data(idx);
+
+    if(rowCount(idx) > 0) qDebug() << "children:";
+    for(int i=0; i < rowCount(idx); i++)
+    {
+        print(index(i,0,idx));
+    }
 }
 
 void VariableSortModel::slotFilterChanged()

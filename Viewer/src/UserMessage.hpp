@@ -1,8 +1,5 @@
-#ifndef USER_MESSAGE_HPP_
-#define USER_MESSAGE_HPP_
-
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,10 +7,13 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <QObject>
+#ifndef USER_MESSAGE_HPP_
+#define USER_MESSAGE_HPP_
+
+#include <QDebug>
+#include <QString>
 
 #include <string>
-
 
 class UserMessage
 {
@@ -27,6 +27,8 @@ public:
     static void message(MessageType type, bool popup, const std::string& message);
 
     static void debug(const std::string& message);
+    static void qdebug(QString message);
+    static std::string toString(int);
 
 private:
     static bool echoToCout_;

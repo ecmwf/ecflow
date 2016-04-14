@@ -81,7 +81,7 @@ public:
 	int count() const {return static_cast<int>(data_.size());}
 	int varNum(int index) const;
 	VariableModelData* data(int index) const;
-	void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
+    bool nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
 
 Q_SIGNALS:

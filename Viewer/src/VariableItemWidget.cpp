@@ -18,9 +18,12 @@
 
 #include "IconProvider.hpp"
 #include "LineEdit.hpp"
+#include "UserMessage.hpp"
 #include "VariableModel.hpp"
 #include "VariableModelData.hpp"
 #include "VariableSearchLine.hpp"
+
+#define _UI_VARIABLEITEMWIDGET_DEBUG
 
 //======================================
 //
@@ -84,6 +87,7 @@ VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QSt
    data_(data)
 {
 	setupUi(this);
+
     typeIconLabel_->hide();
     valueEdit_->setProperty("form","1");
 
@@ -125,7 +129,7 @@ VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QSt
 
 void VariablePropDialog::accept()
 {
-	QString name=nameEdit_->text();
+    QString name=nameEdit_->text();
 	QString value=valueEdit_->toPlainText();
 
 	if(!data_->hasName(name.toStdString()))
@@ -246,6 +250,8 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
     //Set the model on the view
     varView->setModel(sortModel_);
 
+    varView->setSelectionBehavior(QAbstractItemView::SelectRows);
+
     //Search and filter interface: we have a menu attached to a toolbutton and a
     //stackedwidget connected up.
 
@@ -346,9 +352,15 @@ void VariableItemWidget::clearContents()
 }
 
 
-void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelIndex& /*prevIdx*/)
+void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx)
 {
-	checkActionState();
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    qDebug() << "VariableItemWidget::slotItemSelected";
+    qDebug() << "  current:" << idx << "prev:" << prevIdx;
+    qDebug() << "  in view:" << varView->currentIndex();
+#endif
+
+    checkActionState();
 }
 
 void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
@@ -425,47 +437,52 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 	QString value;
 	bool genVar;
 
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    UserMessage::debug("VariableItemWidget::editItem -->");
+    qDebug() << "   index:" << index;
+#endif
+
 	QModelIndex vIndex=sortModel_->mapToSource(index);
+
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    qDebug() << "   vIndex:" << vIndex;
+#endif
 
 	VariableModelData* data=model_->indexToData(vIndex);
 
-	//Get the data from the model
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    qDebug() << "  data:" << data;
+#endif
+
+    //Get the data from the model
 	if(data && model_->variable(vIndex,name,value,genVar))
 	{
-		//Start edit dialog
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+        qDebug() << "selected before:" <<   varView->currentIndex();
+#endif
+        //Start edit dialog
 		VariablePropDialog d(data,name,value,genVar,frozen_,this);
 
 		if(d.exec()== QDialog::Accepted && !frozen_)
 		{
             //data might have been deleted while the dialog was open
             //so we alter it via the model that can properly lookup the
-            //data object
+            //data object            
             model_->alterVariable(vIndex,d.name(),d.value());
-            //data->alter(d.name().toStdString(),d.value().toStdString());
-#if 0
-                //We assign new value to a variable
-			if(data->hasName(d.name().toStdString()))
-			{
-                //Add as a user variable with the given name. That is the only way to change a
-                //gen var.
-                if(data->isGenVar(d.name().toStdString()))
-                {
-                    data->add(d.name().toStdString(),d.value().toStdString());
-                }
-                //alter an existing user variable
-                else
-                {
-                    model_->setVariable(vIndex,name,d.value());
-                }
-			}
-			//A new variable is added
-			else
-			{
-				data->add(d.name().toStdString(),d.value().toStdString());
-			}
-#endif
         }
+
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+        qDebug() << "selected after:" <<   varView->currentIndex();
+#endif
 	}
+
+    //Having finished editing we need to reselect the current row. See issue ECFLOW-613.
+    varView->setCurrentIndex(varView->currentIndex());
+
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    UserMessage::debug("<-- VariableItemWidget::editItem");
+#endif
+
 }
 
 void VariableItemWidget::duplicateItem(const QModelIndex& index)
@@ -635,13 +652,34 @@ void VariableItemWidget::toClipboard(QString txt) const
 
 void VariableItemWidget::slotFilterTextChanged(QString text)
 {
-	sortModel_->setMatchText(text);
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    UserMessage::debug("VariableItemWidget::slotFilterTextChanged -->");
+    qDebug() << "selected before:" <<   varView->currentIndex();
+#endif
+    sortModel_->setMatchText(text);
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    qDebug() << "selected after:" <<   varView->currentIndex();
+    qDebug() << sortModel_->data(varView->currentIndex());
+    //UserMessage::debug("<-- VariableItemWidget::slotFilterTextChanged");
+#endif
 }
 
 
 void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
-	data_->nodeChanged(node,aspect);
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    UserMessage::debug("VariableItemWidget::nodeChanged -->");
+    qDebug() << "selected before:" <<   varView->currentIndex();
+#endif
+    if(data_->nodeChanged(node,aspect))
+    {
+        //After any change we need to reselect the current row. See issue ECFLOW-613.
+        varView->setCurrentIndex(varView->currentIndex());
+    }
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    qDebug() << "selected after:" <<   varView->currentIndex();
+    UserMessage::debug("<-- VariableItemWidget::nodeChanged");
+#endif
 }
 
 void VariableItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
