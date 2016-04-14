@@ -99,8 +99,9 @@ protected Q_SLOTS:
 
 protected:
     void match(QString text);
+    void print(const QModelIndex idx);
 
-	VariableModel* varModel_;
+    VariableModel* varModel_;
 
 	MatchMode matchMode_;
 	mutable QString matchText_;

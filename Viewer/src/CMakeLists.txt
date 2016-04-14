@@ -253,7 +253,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeView.hpp           
     TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
-    UserMessage.hpp
     VariableItemWidget.hpp
     VariableModel.hpp
     VariableModelData.hpp
