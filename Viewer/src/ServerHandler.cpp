@@ -1190,7 +1190,6 @@ void ServerHandler::resetFinished()
 		{
 			ServerState& st=defs->set_server();
 			st.hostPort(std::make_pair(host_,port_));
-			st.add_or_update_user_variables("nameInViewer",name_);
 		}
 	}
 
