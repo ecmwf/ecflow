@@ -84,6 +84,7 @@ BOOST_AUTO_TEST_CASE( test_late )
 
 BOOST_AUTO_TEST_CASE( test_late_hierarchically )
 {
+   // ECFLOW-610
    DurationTimer timer;
    cout << "Test:: ...test_late_hierarchically " << flush;
    char* the_env = getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS");
