@@ -776,7 +776,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
       // test change late
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LATE,"-s 10:10 -a 12:00")));
-      BOOST_CHECK_MESSAGE( s->get_late() && s->get_late()->toString() == "late -s +10:10", "expected 'late -s 10:10' but found " <<  s->get_late()->toString());
+      BOOST_CHECK_MESSAGE( s->get_late() && s->get_late()->toString() == "late -s +10:10 -a 12:00", "expected 'late -s +10:10 -a 12:00' but found " <<  s->get_late()->toString());
 
       // test delete variable
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LATE)));
