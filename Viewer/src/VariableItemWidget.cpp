@@ -251,6 +251,7 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
     varView->setModel(sortModel_);
 
     varView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    varView->setSelectionMode(QAbstractItemView::SingleSelection);
 
     //Search and filter interface: we have a menu attached to a toolbutton and a
     //stackedwidget connected up.
@@ -270,7 +271,7 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
     
     //The filter editor changes
     connect(filterLine_,SIGNAL(textChanged(QString)),
-        		this,SLOT(slotFilterTextChanged(QString)));
+        this,SLOT(slotFilterTextChanged(QString)));
 
     //The selection changes in the view
 	connect(varView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
@@ -477,7 +478,7 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 	}
 
     //Having finished editing we need to reselect the current row. See issue ECFLOW-613.
-    varView->setCurrentIndex(varView->currentIndex());
+    reselectCurrent();
 
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     UserMessage::debug("<-- VariableItemWidget::editItem");
@@ -666,15 +667,21 @@ void VariableItemWidget::slotFilterTextChanged(QString text)
 
 
 void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
-{
+{                
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     UserMessage::debug("VariableItemWidget::nodeChanged -->");
     qDebug() << "selected before:" <<   varView->currentIndex();
 #endif
+
+    QModelIndex cIdx=sortModel_->mapToSource(varView->currentIndex());
+
     if(data_->nodeChanged(node,aspect))
     {
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+        UserMessage::debug("   reselect currentIndex!");
+#endif
         //After any change we need to reselect the current row. See issue ECFLOW-613.
-        varView->setCurrentIndex(varView->currentIndex());
+        reselectCurrent();
     }
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     qDebug() << "selected after:" <<   varView->currentIndex();
@@ -684,7 +691,37 @@ void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 
 void VariableItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
 {
-	data_->defsChanged(aspect);
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    UserMessage::debug("VariableItemWidget::defsChanged -->");
+    qDebug() << "selected before:" <<   varView->currentIndex();
+#endif
+    if(data_->defsChanged(aspect))
+    {
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+        UserMessage::debug("   reselect currentIndex!");
+#endif
+        //After any change we need to reselect the current row. See issue ECFLOW-613.
+        reselectCurrent();
+    }
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    qDebug() << "selected after:" <<   varView->currentIndex();
+    UserMessage::debug("<-- VariableItemWidget::defsChanged");
+#endif
+}
+
+//This is a fairly complicated solution but reselection does not work otherwise
+//if the second column is selected initially!!!
+void  VariableItemWidget::reselectCurrent()
+{
+    QModelIndex idx=sortModel_->mapToSource(varView->currentIndex());
+    if(idx.column() == 1)
+    {
+        idx=model_->index(idx.row(),0,idx.parent());
+    }
+    varView->selectionModel()->clear();
+    QModelIndex sortIdx=sortModel_->mapFromSource(idx);
+    varView->selectionModel()->setCurrentIndex(sortIdx,QItemSelectionModel::Rows|
+                                   QItemSelectionModel::Select);
 }
 
 //Register at the factory
