@@ -22,7 +22,6 @@ class OutputFileClient : public OutputClient
 public:
     OutputFileClient(const std::string& host,const std::string& port,QObject *parent);
 
-    const std::string& remoteFile() const {return remoteFile_;}
     VFile_ptr result() const;
     void clearResult();
     void getFile(const std::string& name);
@@ -40,7 +39,6 @@ private:
 	OutputFileClient& operator=(const OutputClient&);
     void estimateExpectedSize();
 
-	std::string remoteFile_;
 	qint64 total_;
     qint64 expected_;
 	VFile_ptr out_;

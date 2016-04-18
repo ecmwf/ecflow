@@ -74,25 +74,21 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
     case QAbstractSocket::UnknownSocketError:
         if(soc_->state() != QAbstractSocket::ConnectedState)
         {
-            soc_->abort();
-            if(out_)
-            {
-                out_->close();
-                out_.reset();
-            }
-            Q_EMIT error(soc_->errorString());
+            break;
         }
         break;
-	default:
-		soc_->abort();
-		if(out_)
-		{
-			out_->close();
-			out_.reset();
-		}
-		Q_EMIT error(soc_->errorString());
+	default:		
 		break;
 	}
+
+    soc_->abort();
+    if(out_)
+    {
+        out_->close();
+        out_.reset();
+    }
+    Q_EMIT error(soc_->errorString());
+
 }
 
 void OutputFileClient::getFile(const std::string& name)
