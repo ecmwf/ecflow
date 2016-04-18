@@ -38,7 +38,6 @@ private:
 
 	void parseData();
 
-	std::string remoteFile_;
 	VDir_ptr  dir_;
 	QByteArray data_;
 };
