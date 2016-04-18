@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LabelEditDialog</class>
- <widget class="QDialog" name="LabelEditDialog">
+ <class>MeterEditDialog</class>
+ <widget class="QDialog" name="MeterEditDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>275</width>
-    <height>171</height>
+    <height>188</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,16 +17,10 @@
    <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0">
-   <property name="topMargin">
-    <number>4</number>
-   </property>
    <item>
     <widget class="EditorInfoLabel" name="header_">
      <property name="text">
       <string>TextLabel</string>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::NoTextInteraction</set>
      </property>
     </widget>
    </item>
@@ -51,10 +45,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Name:</string>
-       </property>
-       <property name="textInteractionFlags">
-        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+        <string>&amp;Name:</string>
        </property>
        <property name="buddy">
         <cstring>label</cstring>
@@ -71,14 +62,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
+     <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>&amp;Value:</string>
@@ -88,8 +72,36 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="1" column="1">
       <widget class="QLineEdit" name="valueLe_"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Minimum:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="minLabel_">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>Maximum:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLabel" name="maxLabel_">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -117,7 +129,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>LabelEditDialog</receiver>
+   <receiver>MeterEditDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -133,7 +145,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>LabelEditDialog</receiver>
+   <receiver>MeterEditDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

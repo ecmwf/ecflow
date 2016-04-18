@@ -14,6 +14,8 @@
 #include "VItem.hpp"
 
 #include <QStringList>
+#include <string>
+#include <vector>
 
 class VAttributeType;
 class VNode;
@@ -26,7 +28,11 @@ public:
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
     VAttributeType* type() const {return type_;}
     QStringList data() const {return data_;}
+    QString toolTip() const;
 
+    static void buildAlterCommand(std::vector<std::string>& cmd,
+                         const std::string& action, const std::string& type,
+                         const std::string& name,const std::string& value);
 protected:
     VAttributeType* type_;
     QStringList data_;

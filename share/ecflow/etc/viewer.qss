@@ -206,6 +206,17 @@ QLabel[fileInfo="1"] {
 }
   
 /*----------------------------
+  Editor info label
+------------------------------*/
+
+QLabel[editorInfo="1"] {
+     border: 1px solid rgb(216,210,200);
+     /*background: rgb(252, 241, 219);  */
+     background: rgb(234, 234, 235);
+}
+
+
+/*----------------------------
   Property editor
 ------------------------------*/
  

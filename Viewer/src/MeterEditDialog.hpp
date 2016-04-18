@@ -8,23 +8,24 @@
 //
 //============================================================================
 
-#ifndef LABELEDITDIALOG_HPP
-#define LABELEDITDIALOG_HPP
+#ifndef METEREDITDIALOG_HPP
+#define METEREDITDIALOG_HPP
 
-#include "ui_LabelEditDialog.h"
+#include "ui_MeterEditDialog.h"
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
-class LabelEditDialog : private Ui::LabelEditDialog, public AttributeEditor
+class MeterEditDialog : private Ui::MeterEditDialog, public AttributeEditor
 {
 public:
-    LabelEditDialog(VInfo_ptr,QWidget* parent=0);
+    MeterEditDialog(VInfo_ptr,QWidget* parent=0);
 
 protected:
     void apply();
 
 };
 
-#endif // LABELEDITDIALOG_HPP
+#endif // METEREDITDIALOG_HPP
+
 

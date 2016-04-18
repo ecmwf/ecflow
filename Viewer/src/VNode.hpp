@@ -119,9 +119,13 @@ public:
     int attrNum(AttributeFilter* filter=0) const;
 
     QStringList getAttributeData(int,VAttributeType*&);
+    QStringList getAttributeData(int,AttributeFilter *filter=0);
     bool getAttributeData(const std::string& type,int row, QStringList&);
+#if 0
     VAttributeType* getAttributeType(int);
-    int getAttributeLineNum(int row);
+#endif
+    int getAttributeLineNum(int row,AttributeFilter *filter=0);
+    QString attributeToolTip(int row,AttributeFilter *filter=0);
 
     //VNode* parent() const {return parent_;}
     int numOfChildren() const { return static_cast<int>(children_.size());}

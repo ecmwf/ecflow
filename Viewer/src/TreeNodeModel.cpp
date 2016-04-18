@@ -52,35 +52,7 @@ TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef
     connect(icons_,SIGNAL(changed()),
             this,SIGNAL(rerender()));
 
-#if 0
-	//---------------------------------------
-	// Handle change in the filters' state
-	//---------------------------------------
-
-	//TODO
-	//We could use this
-	//
-	//  Q_EMIT dataChanged(QModelIndex(), QModelIndex());
-	//
-	//because this should trigger the re-rendering of the whole view according to
-	//some blogs. However, this does not work!!!!! So we emit the filterChanged() signal that
-	//will finally call invalidate() in the filter model.
-	//
-	//However it is very expensive!! There should be a better way!!!
-
-	//Attribute filter changes
-	connect(atts_,SIGNAL(changed()),
-				this,SIGNAL(filterChanged()));
-
-	//Icon filter changes
-	connect(icons_,SIGNAL(changed()),
-			this,SIGNAL(filterChanged()));
-#endif
-
-
-	//State filter changes (handled in data_)!!!
 }
-
 
 VModelData* TreeNodeModel::data() const
 {
@@ -395,19 +367,11 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	if(index.column()!=0)
 		return QVariant();
 
-	if(role != Qt::BackgroundRole && role != FilterRole && role != Qt::DisplayRole && role != ConnectionRole && role != AttributeLineRole )
+    if(role != Qt::BackgroundRole && role != Qt::DisplayRole && role != Qt::ToolTipRole && role != ConnectionRole && role != AttributeLineRole )
 		return QVariant();
 
 	if(role == Qt::BackgroundRole)
 		return QColor(220,220,220);
-
-#if 0
-	if(role == FilterRole)
-	{
-		if(atts_->isEmpty())
-			return QVariant(false);
-	}
-#endif
 
     VTreeNode* node=0;
 	//Here we have to be sure this is an attribute!
@@ -429,35 +393,6 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
     Q_ASSERT(vnode);
 
 
-#if 0
-	//Server attribute
-	VModelServer *server=data_->server(index.internalPointer());
-	if(server)
-	{
-		node=server->realServer()->vRoot();
-	}
-	//Node attribute
-	else
-	{
-		node=static_cast<VNode*>(index.internalPointer());
-	}
-
-	if(!node)
-		return QVariant();
-#endif
-
-#if 0
-	if(role == FilterRole)
-	{
-        VAttributeType* type=node->getAttributeType(index.row());
-		if(atts_->isSet(type))
-		{
-			return QVariant(true);
-		}
-		return QVariant(false);
-	}
-#endif
-
     if(role == ConnectionRole)
 	{
         return (vnode->server()->connectState()->state() == ConnectState::Lost)?0:1;
@@ -465,13 +400,16 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 
 	else if(role == Qt::DisplayRole)
 	{
-        VAttributeType* type=0;
-        return node->getAttributeData(index.row(),type,atts_);
+        return vnode->getAttributeData(index.row(),atts_);
 	}
 	else if(role ==  AttributeLineRole)
 	{
-        return node->getAttributeLineNum(index.row(),atts_);
+        return vnode->getAttributeLineNum(index.row(),atts_);
 	}
+    else if(role ==  Qt::ToolTipRole)
+    {
+        return vnode->attributeToolTip(index.row(),atts_);
+    }
 
 	return QVariant();
 }

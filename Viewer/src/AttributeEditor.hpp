@@ -42,11 +42,17 @@ public:
 
 class AttributeEditor : public QDialog
 {
+    Q_OBJECT
 public:
     AttributeEditor(VInfo_ptr,QWidget* parent=0);
     static void edit(VInfo_ptr,QWidget* parent=0);
 
+public Q_SLOTS:
+    void accept();
+
 protected:
+    virtual void apply()=0;
+
     VInfo_ptr info_;
 };
 

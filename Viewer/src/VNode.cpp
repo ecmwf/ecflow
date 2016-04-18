@@ -147,19 +147,37 @@ QStringList VNode::getAttributeData(int row,VAttributeType*& type)
 	return lst;
 }
 
+QStringList VNode::getAttributeData(int row,AttributeFilter *filter)
+{
+    VAttributeType* type;
+    QStringList lst;
+    VAttributeType::getData(this,row,type,lst,filter);
+    return lst;
+}
+
+#if 0
 VAttributeType* VNode::getAttributeType(int row)
 {
     return VAttributeType::getType(this,row);
 }
+#endif
 
 bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
 {
     return VAttributeType::getData(type,this,row,data);
 }
 
-int VNode::getAttributeLineNum(int row)
+int VNode::getAttributeLineNum(int row,AttributeFilter *filter)
 {
-    return VAttributeType::getLineNum(this,row);
+    return VAttributeType::getLineNum(this,row,filter);
+}
+
+QString VNode::attributeToolTip(int row,AttributeFilter *filter)
+{
+    VAttributeType* type;
+    QStringList lst;
+    VAttributeType::getData(this,row,type,lst,filter);
+    return (type)?(type->toolTip(lst)):QString();
 }
 
 void VNode::addChild(VNode* vn)

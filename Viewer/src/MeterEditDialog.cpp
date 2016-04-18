@@ -8,7 +8,7 @@
 //
 //============================================================================
 
-#include "LabelEditDialog.hpp"
+#include "MeterEditDialog.hpp"
 
 #include <QtGlobal>
 
@@ -16,7 +16,7 @@
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
 
-LabelEditDialog::LabelEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
+MeterEditDialog::MeterEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
 {
     setupUi(this);
 
@@ -28,30 +28,30 @@ LabelEditDialog::LabelEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEdit
 
     Q_ASSERT(a);
     Q_ASSERT(a->type());
-    Q_ASSERT(a->type()->name() == "label");
+    Q_ASSERT(a->type()->name() == "meter");
 
-    if(a->data().count() < 2)
+    if(a->data().count() < 5)
             return;
 
     QString name=a->data().at(1);
-    QString val;
-    if(a->data().count() > 2)
-        val=a->data().at(2);
 
     nameLabel_->setText(name);
-    valueLe_->setText(val);
+    valueLe_->setText(a->data().at(2));
+    minLabel_->setText(a->data().at(3));
+    maxLabel_->setText(a->data().at(4));
 
-    header_->setInfo(QString::fromStdString(info_->path()),"Label");
+    header_->setInfo(QString::fromStdString(info_->path()),"Meter");
 }
 
-void LabelEditDialog::apply()
+void MeterEditDialog::apply()
 {
     std::string val=valueLe_->text().toStdString();
     std::string name=nameLabel_->text().toStdString();
 
     std::vector<std::string> cmd;
-    VAttribute::buildAlterCommand(cmd,"change","label",name,val);
+    VAttribute::buildAlterCommand(cmd,"change","meter",name,val);
     ServerHandler::command(info_,cmd);
 }
 
-static AttributeEditorMaker<LabelEditDialog> makerStr("label");
+static AttributeEditorMaker<MeterEditDialog> makerStr("meter");
+

@@ -32,6 +32,7 @@ set(viewer_srcs
     DirectoryHandler.cpp
     EditItemWidget.cpp
     EditProvider.cpp
+    EditorInfoLabel.cpp
     ExpandState.cpp
     FlagSet.hpp
     FileInfoLabel.cpp
@@ -58,6 +59,7 @@ set(viewer_srcs
     MenuHandler.cpp
     MessageLabel.cpp
     MessageItemWidget.cpp
+    MeterEditDialog.cpp
     ModelColumn.cpp
     NodeExpression.cpp
     NodeFilterDialog.cpp    
@@ -187,6 +189,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     AbstractSearchLine.hpp
     ActionHandler.hpp
     Animation.hpp
+    AttributeEditor.hpp
     AttributeSearchPanel.hpp
     CaseSensitiveButton.hpp
     ChangeNotifyDialog.hpp
@@ -209,7 +212,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     InfoPanel.hpp
-    LabelEditDialog.hpp
     LineEdit.hpp
     LogProvider.hpp
     MainWindow.hpp
@@ -294,6 +296,7 @@ set(viewer_wrap_ui_files
     MainWindow.ui
     MessageItemWidget.ui
     MenuConfigDialog.ui
+    MeterEditDialog.ui
     NodeFilterDialog.ui
     NodeQueryEditor.ui
     NodeQuerySaveDialog.ui

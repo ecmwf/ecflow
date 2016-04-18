@@ -70,3 +70,9 @@ void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
     e->exec();
     e->deleteLater();
 }
+
+void AttributeEditor::accept()
+{
+    apply();
+    QDialog::accept();
+}

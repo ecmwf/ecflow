@@ -8,23 +8,16 @@
 //
 //============================================================================
 
-#ifndef LABELEDITDIALOG_HPP
-#define LABELEDITDIALOG_HPP
+#ifndef EDITORINFOLABEL_HPP
+#define EDITORINFOLABEL_HPP
 
-#include "ui_LabelEditDialog.h"
+#include <QLabel>
 
-#include "AttributeEditor.hpp"
-#include "VInfo.hpp"
-
-class LabelEditDialog : private Ui::LabelEditDialog, public AttributeEditor
+class EditorInfoLabel : public QLabel
 {
 public:
-    LabelEditDialog(VInfo_ptr,QWidget* parent=0);
-
-protected:
-    void apply();
-
+    explicit EditorInfoLabel(QWidget* parent=0);
+    void setInfo(QString parent,QString type);
 };
 
-#endif // LABELEDITDIALOG_HPP
-
+#endif // EDITORINFOLABEL_HPP

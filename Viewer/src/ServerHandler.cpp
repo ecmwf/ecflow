@@ -526,7 +526,7 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd)
 		std::string nodeName;
 		ServerHandler* serverHandler = info->server();
 
-		if(info->isNode())
+        if(info->isNode() || info->isAttribute())
 		{
 			nodeFullName = info->node()->node()->absNodePath();
 			nodeName = info->node()->node()->name();

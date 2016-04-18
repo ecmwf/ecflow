@@ -108,18 +108,6 @@ void VTreeNode::updateAttrNum(AttributeFilter *filter)
     attrNum_=vnode_->attrNum(filter);
 }
 
-QStringList VTreeNode::getAttributeData(int row,VAttributeType*& type,AttributeFilter *filter)
-{
-    QStringList lst;
-    VAttributeType::getData(vnode_,row,type,lst,filter);
-    return lst;
-}
-
-int VTreeNode::getAttributeLineNum(int row,AttributeFilter *filter)
-{
-    return VAttributeType::getLineNum(vnode_,row,filter);
-}
-
 void VTreeNode::resetAttrNum()
 {
     attrNum_=-1;

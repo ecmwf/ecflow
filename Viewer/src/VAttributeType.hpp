@@ -41,10 +41,12 @@ public:
     //Called from VConfigLoader
     static void load(VProperty*);
 
+    virtual QString toolTip(QStringList d) const {return QString();}
+
 protected:
 	virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
 	virtual int num(const VNode* vnode)=0;
-	virtual int lineNum(const VNode* vnode,int row) {return 1;}
+    virtual int lineNum(const VNode* vnode,int row) {return 1;}
 
 private:
     static std::map<std::string,VAttributeType*> items_;

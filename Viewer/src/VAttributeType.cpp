@@ -35,7 +35,8 @@ class VMeterAttribute : public VAttributeType
 public:
     explicit VMeterAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 class VEventAttribute : public VAttributeType
@@ -69,7 +70,8 @@ public:
     explicit VLabelAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
-	int lineNum(const VNode* vnode,int row);
+    int lineNum(const VNode* vnode,int row);
+    QString toolTip(QStringList d) const;
 };
 
 class VDateAttribute : public VAttributeType
@@ -364,6 +366,20 @@ bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     return false;
 }
 
+QString VMeterAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Meter<br>";
+    if(d.count() >=5)
+    {
+        t+="<b>Name:</b> " + d[1] + "<br>";
+        t+="<b>Value:</b> " + d[2]+ "<br>";
+        t+="<b>Minimum:</b> " + d[3] + "<br>";
+        t+="<b>Maximum:</b> " + d[4];
+    }
+    return t;
+}
+
+
 //================================
 // Labels
 //================================
@@ -437,6 +453,17 @@ int VLabelAttribute::lineNum(const VNode* vnode,int row)
 	}
 
 	return 1;
+}
+
+QString VLabelAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Label<br>";
+    if(d.count() >= 3)
+    {
+        t+="<b>Name:</b> " + d[1] + "<br>";
+        t+="<b>Value:</b> " + d[2];
+    }
+    return t;
 }
 
 //================================

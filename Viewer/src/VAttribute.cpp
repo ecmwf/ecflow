@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include "VNode.hpp"
 
@@ -17,3 +18,26 @@ VAttribute::VAttribute(VNode* parent,int index) : VItem(parent), type_(0), index
     data_=parent_->getAttributeData(index_,type_) ;
 }
 
+QString VAttribute::toolTip() const
+{
+    return (type_)?(type_->toolTip(data_)):QString();
+}
+
+void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
+                                    const std::string& action, const std::string& type,
+                                    const std::string& name,const std::string& value)
+{
+    cmd.push_back("ecflow_client");
+    cmd.push_back("--alter");
+    cmd.push_back(action);
+    cmd.push_back(type);
+
+    if(!name.empty())
+    {
+        cmd.push_back(name);
+        cmd.push_back(value);
+    }
+
+    cmd.push_back("<full_name>");
+
+}
