@@ -333,17 +333,11 @@ void OutputItemWidget::infoReady(VReply* reply)
             reply->fileReadMode() == VReply::LogServerReadMode))
         {
             updateDirTimer_->start();
-        }
-
-        //If we got a local file or a file via the logserver we set the selection
-        //int the dir list according to the file
-        if(reply->fileReadMode() == VReply::LocalReadMode ||
-           reply->fileReadMode() == VReply::LogServerReadMode)
-        {
-            //if(f)
-                setCurrentInDir(f->sourcePath());
-            /*else
-                setCurrentInDir(reply->fileName());*/
+        }        
+        //Update the selection in the dir list according to the file
+        if(f)
+        {          
+            setCurrentInDir(f->sourcePath());
         }
 #if 0
         if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&

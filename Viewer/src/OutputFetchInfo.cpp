@@ -103,13 +103,14 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
         if(rfd)
         {
             t+="<li>Try to read the output files from the logserver \
-               (if defined)</li><li>from disk (if the file is accessible) </li><li>\
+               (if defined)</li><li>from disk</li><li>\
                through the ecflow server</li>";
         }
         else
         {
             t+="<li>Try to read the output files from the logserver \
-               (if defined)</li><li>from the ecflow server </li>";
+               (if defined)</li><li>from disk (if <b>not</b> the <b>current</b> job output)</li>\
+               <li>from the ecflow server </li>";
         }
         t+="</ul> (To change this behaviour go Edit -> Preferences -> Server options -> Files)";
 
