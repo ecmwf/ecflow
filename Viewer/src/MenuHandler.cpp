@@ -276,6 +276,7 @@ void MenuHandler::refreshCustomMenuCommands()
         item1->setEnabledCondition(trueCond);
         item1->setVisibleCondition(trueCond);
         item1->setQuestionCondition(falseCond);
+        item1->setIcon("configure.svg");
 
 		// Saved commands
 		MenuItem *item2 = new MenuItem("-");
