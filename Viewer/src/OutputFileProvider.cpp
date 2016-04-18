@@ -217,9 +217,9 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 
     reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
 
-    //If there is no output client and it is not the localhost we try
+    //If there is no output client we try
     //to read it again from the disk!!!  
-    if(server->readFromDisk())
+    if(server->readFromDisk() || !isJobout)
     {
         //Get the fileName
         if(fetchLocalFile(fileName))
@@ -235,7 +235,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
         return;
     }
 
-    //If we are we coud not get the file
+    //If we are here we coud not get the file
     owner_->infoFailed(reply_);
 }
 
