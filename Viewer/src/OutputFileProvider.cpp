@@ -218,7 +218,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
 
     //If there is no output client we try
-    //to read it again from the disk!!!  
+    //to read it from the disk
     if(server->readFromDisk() || !isJobout)
     {
         //Get the fileName
@@ -227,8 +227,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     }
 
     //If we are here no output client is defined and we could not read the file from
-    //the local disk.
-    //We try the server if it is the jobout file
+    //the local disk we try the server if it is the jobout file.
     if(isJobout)
     {
     	fetchJoboutViaServer(server,n,fileName);
