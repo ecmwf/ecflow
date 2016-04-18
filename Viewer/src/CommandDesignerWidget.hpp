@@ -78,6 +78,7 @@ private:
 	void selectRow(int row);
 	void selectLastSavedCommand();
 	void swapSavedCommands(int i1, int i2);
+	void setSaveOptionsState(bool optionsVisible, bool saveOptionsButtonEnabled);
 
 	//bool eventFilter(QObject* object, QEvent* event);
 
@@ -85,6 +86,7 @@ private:
 	bool haveSetUpDefaultCommandLine_;
 	bool inCommandEditMode_;
 	bool saveCommandsOnExit_;
+	bool saveOptionsVisible_;
 
 	std::vector<VInfo_ptr> nodes_;
 	NodeQueryResultModel nodeModel_; 

@@ -46,6 +46,10 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	currentCommandSaved_ = false;
 	refreshSavedCommandList();
 
+
+	setSaveOptionsState(false, true);
+
+
 	// ensure we start on the command-builder tab
 	changeToTab(TAB_BUILD);
 	on_tabWidget__currentChanged(TAB_BUILD);  // trigger the callback to ensure the correct visibility of the save buttons
@@ -243,9 +247,9 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem *item, bool showFull
 
 void CommandDesignerWidget::on_tabWidget__currentChanged(int index)
 {
-	bool onSaveTab = (index == TAB_SAVE);
-	saveCommandGroupBox_->setVisible(onSaveTab);
-	saveOptionsButton_->setVisible(!onSaveTab);
+	//bool onSaveTab = (index == TAB_SAVE);
+	//saveCommandGroupBox_->setVisible(onSaveTab);
+	//saveOptionsButton_->setVisible(!onSaveTab);
 }
 
 
@@ -420,6 +424,7 @@ void CommandDesignerWidget::on_saveAsNewButton__clicked()
 		changeToTab(TAB_SAVE);
 		selectLastSavedCommand();
 		setSavedCommandsButtonStatus();
+		setSaveOptionsState(true, true);
 	}
 }
 
@@ -440,6 +445,7 @@ void CommandDesignerWidget::on_overwriteButton__clicked()
 		refreshSavedCommandList();
 		currentCommandSaved_ = true;
 		updateSaveButtonStatus();
+		setSaveOptionsState(true, true);
 	}
 }
 
@@ -457,11 +463,25 @@ void CommandDesignerWidget::on_runButton__clicked()
 	//accept();
 }
 
+void CommandDesignerWidget::setSaveOptionsState(bool optionsVisible, bool saveOptionsButtonEnabled)
+{
+	// we just switch to the Saved Commands tab
+	//changeToTab(TAB_SAVE);
+
+    saveCommandGroupBox_->setVisible(optionsVisible);
+    QString buttonText = (optionsVisible) ? "Save Options <<" :  "Save Options >>";
+    saveOptionsButton_->setText(buttonText);
+    saveOptionsVisible_ = optionsVisible;
+    saveOptionsButton_->setEnabled(saveOptionsButtonEnabled);
+}
+
 
 void CommandDesignerWidget::on_saveOptionsButton__clicked()
 {
+	setSaveOptionsState(!saveOptionsVisible_, true);
+
 	// we just switch to the Saved Commands tab
-	changeToTab(TAB_SAVE);
+	//changeToTab(TAB_SAVE);
 }
 
 
@@ -500,6 +520,10 @@ void CommandDesignerWidget::on_editCommandButton__clicked()
 	upButton_              ->setEnabled(false);  // to show that we are busy editing an entry
 	downButton_            ->setEnabled(false);  // to show that we are busy editing an entry
 
+	updateSaveButtonStatus();
+
+	// users should have the Save Options visible
+	setSaveOptionsState(true, false);
 }
 
 
@@ -540,6 +564,7 @@ void CommandDesignerWidget::on_cancelSaveButton__clicked()
 	inCommandEditMode_ = false;
 	updateSaveButtonStatus();
 	refreshSavedCommandList();
+	setSaveOptionsState(true, true);
 }
 
 
