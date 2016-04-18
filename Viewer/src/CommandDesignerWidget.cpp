@@ -58,6 +58,11 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	addClientCommandsToComponentList();
 
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+	commandLineEdit_->setClearButtonEnabled(true);
+#endif
+
+
 	infoLabel_->setShowTypeTitle(false);
 	infoLabel_->showInfo(tr("Click command for help, double-click to insert"));
 
