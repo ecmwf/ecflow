@@ -14,7 +14,6 @@
 //============================================================================
 
 #include "LateParser.hpp"
-#include "TimeSeries.hpp"
 #include "LateAttr.hpp"
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
@@ -32,39 +31,11 @@ bool LateParser::doParse( const std::string& line, std::vector<std::string >& li
 	//  0    1   2      3   4                   5
 
 	LateAttr lateAttr; // lateAttr.isNull() will return true;
-	assert(lateAttr.isNull());
-
-	size_t line_token_size = lineTokens.size();
-	for(size_t i = 1; i+1 < line_token_size; i += 2) {
-	   if (lineTokens[i][0] == '#') break;
-
-	   if ( lineTokens[i] == "-s") {
-	      if ( !lateAttr.submitted().isNULL() ) throw std::runtime_error( "LateParser::doParse:2: Invalid late :" + line );
-	      int hour = -1; int min = -1;
-	      TimeSeries::getTime(lineTokens[i+1],hour,min);
-	      lateAttr.addSubmitted( TimeSlot(hour,min) );
-	   }
-	   else if ( lineTokens[i] == "-a") {
-	      if ( !lateAttr.active().isNULL() ) throw std::runtime_error( "LateParser::doParse:3: Invalid late :" + line );
-	      int hour = -1; int min = -1;
-	      TimeSeries::getTime(lineTokens[i+1],hour,min);
-	      lateAttr.addActive( TimeSlot(hour,min) );
-	   }
-	   else if ( lineTokens[i] == "-c") {
-	      if ( !lateAttr.complete().isNULL() ) throw std::runtime_error( "LateParser::doParse:4: Invalid late :" + line );
-	      int hour = -1; int min = -1;
-	      bool relative = TimeSeries::getTime(lineTokens[i+1],hour,min);
-	      lateAttr.addComplete( TimeSlot(hour,min), relative );
-	   }
-	   else throw std::runtime_error( "LateParser::doParse:5: Invalid late :" + line );
-	}
-
-	if (lateAttr.isNull()) {
-	   throw std::runtime_error( "LateParser::doParse:6: Invalid late :" + line );
-	}
+	size_t start_index = 1;
+	LateAttr::parse(lateAttr,line,lineTokens,start_index);
 
 	// state
-	if (rootParser()->get_file_type() != PrintStyle::DEFS && lineTokens[line_token_size-1] == "late") {
+	if (rootParser()->get_file_type() != PrintStyle::DEFS && lineTokens[lineTokens.size()-1] == "late") {
 	   lateAttr.setLate(true);
 	}
 

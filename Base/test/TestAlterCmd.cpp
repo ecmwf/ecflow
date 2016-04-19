@@ -754,6 +754,34 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       // reset back to suspended
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEFSTATUS,"suspended")));
    }
+
+   // ================================ LATE ==================================================================
+   {   // test add late
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LATE,"late -s 10:10 -a 23:10 -c +23:10")));
+      BOOST_CHECK_MESSAGE( s->get_late(), "expected late to be added");
+
+      // test change late
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LATE,"late -s 10:10")));
+      BOOST_CHECK_MESSAGE( s->get_late() && s->get_late()->toString() == "late -s +10:10", "expected 'late -s 10:10' but found " <<  s->get_late()->toString());
+
+      // test delete variable
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LATE)));
+      BOOST_CHECK_MESSAGE( !s->get_late(), "expected late to be deleted");
+   }
+   {
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LATE,"-s 10:10 -a 23:10 -c +23:10")));
+      BOOST_CHECK_MESSAGE( s->get_late(), "expected late to be added");
+
+      // test change late
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LATE,"-s 10:10 -a 12:00")));
+      BOOST_CHECK_MESSAGE( s->get_late() && s->get_late()->toString() == "late -s +10:10 -a 12:00", "expected 'late -s +10:10 -a 12:00' but found " <<  s->get_late()->toString());
+
+      // test delete variable
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LATE)));
+      BOOST_CHECK_MESSAGE( !s->get_late(), "expected late to be deleted");
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )

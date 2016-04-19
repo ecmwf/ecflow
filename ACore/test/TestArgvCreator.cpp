@@ -38,7 +38,7 @@ static void doCheck(const std::vector<std::string>& theArgs)
 
 BOOST_AUTO_TEST_CASE( test_ArgvCreator )
 {
-	cout << "ACore:: ...test_ArgvCreator\n";
+	cout << "ACore:: ...test_ArgvCreator" << flush ;
 
 	// O args
 	std::vector<std::string> theArgs;

@@ -250,8 +250,6 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
    ecf_file += body;
    ecf_file += tail;
 
-   // Create the generated variables
-   task_t1->update_generated_variables();
    std::string cmd = "cat %ECF_HOME%/%ECF_NAME%.ecf" ;
    task_t1->add_variable("ECF_SCRIPT_CMD",cmd);
 
@@ -272,6 +270,8 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
    /// Check generation of job files
    JobsParam jobsParam(true); // spawn_jobs = false
    {
+      task_t1->update_generated_variables();
+
       try { ecfFile.create_job(jobsParam); }
       catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected job creation to succeed " << e.what());}
 
