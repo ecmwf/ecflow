@@ -41,3 +41,16 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
     cmd.push_back("<full_name>");
 
 }
+
+QString VAttribute::name() const
+{
+    if(data_.count() >= 2)
+       return data_[1];
+
+    return QString();
+}
+
+std::string VAttribute::strName() const
+{
+    return name().toStdString();
+}

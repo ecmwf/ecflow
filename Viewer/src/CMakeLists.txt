@@ -48,6 +48,7 @@ set(viewer_srcs
     InfoProvider.cpp
     JobItemWidget.cpp
     LabelEditDialog.cpp
+    LimitEditDialog.cpp
     LineEdit.cpp
     LogEvent.cpp
     LogModel.cpp
@@ -293,6 +294,7 @@ set(viewer_wrap_ui_files
     HistoryItemWidget.ui
     InfoPanel.ui    
     LabelEditDialog.ui
+    LimitEditDialog.ui
     MainWindow.ui
     MessageItemWidget.ui
     MenuConfigDialog.ui

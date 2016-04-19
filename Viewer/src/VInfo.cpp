@@ -328,6 +328,10 @@ std::string VInfoAttribute::path()
     return p;
 }
 
+std::string VInfoAttribute::name()
+{
+    return (attr_)?attr_->strName():std::string();
+}
 
 
 /*

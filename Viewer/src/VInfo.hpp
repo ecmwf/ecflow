@@ -134,7 +134,7 @@ public:
     bool isAttribute() {return true;}
 	bool isEmpty() {return false;}
 	void accept(VInfoVisitor*);   
-    std::string name() {return std::string();}
+    std::string name();
     std::string path();
 
     static VInfo_ptr create(VNode*,int);

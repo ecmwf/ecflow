@@ -12,6 +12,7 @@
 
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "ServerHandler.hpp"
 
 #include <map>
 
@@ -62,13 +63,13 @@ void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
 {
     Q_ASSERT(info && info->isAttribute() && info->attribute());
     VAttribute* a=info->attribute();
-
     Q_ASSERT(a->type());
-    //Q_ASSERT(a->type()->name() == "label");
 
-    AttributeEditor* e=AttributeEditorFactory::create(a->type()->strName(),info,parent);
-    e->exec();
-    e->deleteLater();
+    if(AttributeEditor* e=AttributeEditorFactory::create(a->type()->strName(),info,parent))
+    {
+        e->exec();
+        e->deleteLater();
+    }
 }
 
 void AttributeEditor::accept()

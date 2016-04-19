@@ -584,8 +584,8 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	nameFont.setBold(true);
 	fm=QFontMetrics(nameFont);
 	int nameWidth=fm.width(name);
-	QRect nameRect = fillRect.adjusted(0,2,0,-2);
-    nameRect.setLeft(fillRect.left());
+    QRect nameRect = fillRect.adjusted(offset,2,0,-2);
+    //nameRect.setLeft(fillRect.left());
 	nameRect.setWidth(nameWidth+offset);
 
 	//The value rectangle

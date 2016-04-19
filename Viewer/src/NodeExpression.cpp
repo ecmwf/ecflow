@@ -20,6 +20,7 @@
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VNode.hpp"
 
 #include <QDebug>
@@ -172,10 +173,12 @@ bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttr
 
 bool NodeExpressionParser::isAttribute(const std::string &str) const
 {
-    if (str == "attribute" || str ==  "label")
-        return true;
+    return (nameToAttrType_.find(str) != nameToAttrType_.end());
+}
 
-    return false;
+bool NodeExpressionParser::isAttributeState(const std::string &str) const
+{
+    return (str == "event_set" || str == "event_clear");
 }
 
 // NodeExpressionParser::popLastNOperands
@@ -288,6 +291,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             else
             {
                 bool attr = false;
+                NodeExpressionParser::AttributeType attrType=NodeExpressionParser::BADATTRIBUTE;
 
                 // node types
                 NodeExpressionParser::NodeType type = nodeType(*i_);
@@ -333,14 +337,25 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     result = flagCond;
                     updatedOperands = true;
                 }
+
                 // node attribute
-                else if (isAttribute(*i_))
+                else if ((attrType = toAttrType(*i_)) != NodeExpressionParser::BADATTRIBUTE)
                 {
-                    AttributeCondition *attrCond = new AttributeCondition(QString::fromStdString(*i_));
+                    AttributeCondition *attrCond = new AttributeCondition(attrType);
                     operandStack.push_back(attrCond);
                     result = attrCond;
                     updatedOperands = true;
                 }
+
+                // node attribute state
+                else if (isAttributeState(*i_))
+                {
+                    AttributeStateCondition *attrStateCond = new AttributeStateCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(attrStateCond);
+                    result = attrStateCond;
+                    updatedOperands = true;
+                }
+
                 else if (isWhatToSearchIn(*i_, attr))
                 {
                     WhatToSearchInOperand *searchCond = new WhatToSearchInOperand(*i_, attr);
@@ -798,16 +813,70 @@ WhatToSearchInOperand::WhatToSearchInOperand(std::string what, bool &attr)
 WhatToSearchInOperand::~WhatToSearchInOperand() {}
 WhatToSearchForOperand::~WhatToSearchForOperand() {}
 
-// -----------------------------------------------------------------
+//====================================================
+//
+// Attribute condition
+//
+//====================================================
 
 bool AttributeCondition::execute(VItem* item)
 {   
-    if(item->isAttribute())
+    if(!item)
+        return false;
+
+    VAttribute* a=item->isAttribute();
+    if(!a)
+        return false;
+
+    assert(a->type());
+
+    switch(type_)
     {
-        //if(attrName_ == "attribute")
+        case NodeExpressionParser::ATTRIBUTE:
             return true;
+        case NodeExpressionParser::LABEL:
+            return a->type()->name() == "label";
+        case NodeExpressionParser::METER:
+            return a->type()->name() == "meter";
+        case NodeExpressionParser::EVENT:
+            return a->type()->name() == "event";
+        case NodeExpressionParser::LIMIT:
+            return a->type()->name() == "limit";
+        default:
+            break;
     }
 
     return false;
 }
 
+//====================================================
+//
+// Attribute state condition
+//
+//====================================================
+
+bool AttributeStateCondition::execute(VItem* item)
+{
+    if(!item)
+        return false;
+
+    VAttribute* a=item->isAttribute();
+    if(!a)
+        return false;
+
+    assert(a->type());
+
+    if(attrState_.startsWith("event_"))
+    {
+        if(a->type()->name() == "event" && a->data().count() >= 3)
+        {
+            QString v=a->data()[2];
+            if(attrState_ == "event_set")
+                return v == "1";
+            else if(attrState_ == "event_clear")
+                return v == "0";
+         }
+    }
+
+    return false;
+}

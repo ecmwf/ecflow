@@ -44,7 +44,8 @@ class VEventAttribute : public VAttributeType
 public:
     explicit  VEventAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 
@@ -95,7 +96,8 @@ class VLimitAttribute : public VAttributeType
 public:
     explicit VLimitAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 class VLimiterAttribute : public VAttributeType
@@ -510,6 +512,20 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     return false;
 }
 
+QString VEventAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Event<br>";
+    if(d.count() >=3)
+    {
+        t+="<b>Name:</b> " + d[1] + "<br>";
+        t+="<b>Status:</b> ";
+        t+=(d[2] == "1")?"set (true)":"clear (false)";
+
+    }
+    return t;
+}
+
+
 //================================
 //Generated Variables
 //================================
@@ -671,6 +687,18 @@ bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 #endif
 
 	return false;
+}
+
+QString VLimitAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Limit<br>";
+    if(d.count() >=4)
+    {
+        t+="<b>Name:</b> " + d[1] + "<br>";
+        t+="<b>Value:</b> " + d[2] + "<br>";
+        t+="<b>Maximum:</b> " + d[3];
+    }
+    return t;
 }
 
 //================================

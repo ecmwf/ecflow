@@ -29,6 +29,8 @@ public:
     VAttributeType* type() const {return type_;}
     QStringList data() const {return data_;}
     QString toolTip() const;
+    QString name() const;
+    std::string strName() const;
 
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,

@@ -150,8 +150,8 @@ public:
 
     virtual std::string absNodePath() const;
     bool sameName(const std::string& name) const;
-    virtual std::string strName() const;
-    virtual QString name() const;
+    std::string strName() const;
+    QString name() const;
     std::string serverName() const;
     virtual QString stateName();
     virtual QString serverStateName();

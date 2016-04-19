@@ -118,41 +118,43 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
         	bool ok=true;
         	if(item && !item->question().empty() && item->shouldAskQuestion(nodesLst))
         	{
+                std::string fullNames("<ul>");
                 std::string nodeNames("<ul>");
                 if (nodesLst.size() == 1)
                 {
-                    nodeNames = nodesLst[0]->path();
+                    fullNames = nodesLst[0]->path();
+                    nodeNames = "<b>" + nodesLst[0]->name() + "</b>";
                 }
                 else
-                {
-                    const int maxItems = 5;  // list no more than this number of nodes
+                {                    
                     int numNodes = nodesLst.size();
                     int numItemsToList = std::min(numNodes, 5);
 
                     for(int i=0; i < numItemsToList; i++)
                     {
+                        fullNames += "<li><b>";
+                        fullNames += nodesLst[i]->path();
+                        fullNames += "</b></li>";
+
                         nodeNames += "<li><b>";
-                        nodeNames += nodesLst[i]->path();
-                        nodeNames += "</b></li>";
-                        //if (i < nodesLst.size()-1)
-                        //    nodeNames += "<br>";
+                        nodeNames += nodesLst[i]->name();
+                        nodeNames += "</b></li>";                    
                     }
                     if(numItemsToList < nodesLst.size())
-                    {
-                        std::string numExtra;  // to convert from int to string
-                        std::ostringstream ss;
-                        ss << (numNodes-numItemsToList);
-                        numExtra = ss.str();
+                    {                  
+                        std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
 
+                        fullNames += "<b>...and " + numExtra + " more </b></li>";
                         nodeNames += "<b>...and " + numExtra + " more </b></li>";
                     }
+                    fullNames += "</ul>";
                     nodeNames += "</ul>";
                 }
 
                 std::string question(item->question());
 
 			    std::string placeholder("<full_name>");
-			    ecf::Str::replace_all(question, placeholder, nodeNames);
+                ecf::Str::replace_all(question, placeholder, fullNames);
                 placeholder = "<node_name>";
 			    ecf::Str::replace_all(question, placeholder, nodeNames);
 

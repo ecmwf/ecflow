@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,6 +12,7 @@
 #define VITEM_HPP_
 
 #include <cstdlib>
+#include <QString>
 
 class ServerHandler;
 class VNode;
@@ -40,12 +41,8 @@ public:
     virtual VAttribute* isAttribute() const {return NULL;}
 
     virtual bool isTopLevel() const {false;}
-    //virtual bool isServer() const {return false;}
-    //virtual bool isSuite() const {return false;}
-    //virtual bool isFamily() const {return false;}
-    //virtual bool isTask() const {return false;}
-    //virtual bool isAlias() const {return false;}
-    //virtual bool isAttribute() const {return false;}
+    virtual std::string strName() const=0;
+    virtual QString name() const=0;
 
 protected:
     VNode* parent_;

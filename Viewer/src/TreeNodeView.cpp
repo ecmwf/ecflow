@@ -264,14 +264,13 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 		}
 	}
 
-    if(cmd ==  "edit")
+    else if(cmd ==  "edit")
     {
         if(info && info->isAttribute())
         {
             AttributeEditor::edit(info,this);
         }
     }
-
 
 	/*if(cmd == "set_as_root")
 	{

@@ -51,6 +51,7 @@ protected:
     bool isNodeFlag(const std::string &str) const;
     bool isWhatToSearchIn(const std::string &str, bool &isAttribute) const;
     bool isAttribute(const std::string &str) const;
+    bool isAttributeState(const std::string &str) const;
 
     BaseNodeCondition *parseExpression(bool caseSensitiveStringMatch);
     void setTokens(std::vector<std::string> &tokens) {tokens_ = tokens; i_ = tokens_.begin();}
@@ -324,7 +325,7 @@ private:
 // -----------------------------------------------------------------
 
 // ------------------------
-// Node attribute condition
+// Node flag condition
 // ------------------------
 
 class NodeFlagCondition : public BaseNodeCondition
@@ -388,16 +389,32 @@ private:
 class AttributeCondition : public BaseNodeCondition
 {
 public:
-    explicit AttributeCondition(QString attrName) {attrName_ = attrName;}
+    explicit AttributeCondition(NodeExpressionParser::AttributeType type) {type_ = type;}
     ~AttributeCondition() {}
 
     bool execute(VItem*);
-    std::string print() {return attrName_.toStdString();}
+    std::string print() {return NodeExpressionParser::instance()->toAttrName(type_);}
 
 private:
-    QString attrName_;
+    NodeExpressionParser::AttributeType type_;
 };
 
+//---------------------------------
+// Node attribute state condition
+// ----------------------------
+
+class AttributeStateCondition : public BaseNodeCondition
+{
+public:
+    explicit AttributeStateCondition(QString attrState) {attrState_ = attrState;}
+    ~AttributeStateCondition() {}
+
+    bool execute(VItem*);
+    std::string print() {return attrState_.toStdString();}
+
+private:
+    QString attrState_;
+};
 
 
 

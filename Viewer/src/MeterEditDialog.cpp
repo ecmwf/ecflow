@@ -11,6 +11,7 @@
 #include "MeterEditDialog.hpp"
 
 #include <QtGlobal>
+#include <QIntValidator>
 
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
@@ -39,6 +40,14 @@ MeterEditDialog::MeterEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEdit
     valueLe_->setText(a->data().at(2));
     minLabel_->setText(a->data().at(3));
     maxLabel_->setText(a->data().at(4));
+
+    QIntValidator *validator=new QIntValidator(this);
+    if(!a->data().at(3).isEmpty() && !a->data().at(4).isEmpty())
+    {
+        validator->setRange(a->data().at(3).toInt(),
+                            a->data().at(4).toInt());
+    }
+    valueLe_->setValidator(validator);
 
     header_->setInfo(QString::fromStdString(info_->path()),"Meter");
 }
