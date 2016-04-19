@@ -307,50 +307,20 @@ void CommandDesignerWidget::on_addToContextMenuCb__stateChanged()
 
 void CommandDesignerWidget::updateSaveButtonStatus()
 {
-	// logic:
-	// - if in editing mode and current name is unique (or unchanged) then enable 'overwrite'
-	// - otherwise, disable 'overwrite'
-	// - if in editing mode, disable 'save as new'
-	// - otherwise, if name is unique then enable 'save as new'
-	// - if in editing mode, enable 'add to context menu'
-	// - otherwise, use the same logic as 'save as new'
-
-	bool enoughInfo =  (!commandLineEdit_->text().isEmpty() && !saveNameLineEdit_->text().isEmpty());
-	int commandWithThisName = CustomSavedCommandHandler::instance()->findIndexFromName(saveNameLineEdit_->text().toStdString());
-
+	// inCommandEditMode_ means we're editing a command from the saved list
 	if (inCommandEditMode_)
 	{
-		bool nameUnique =  (commandWithThisName == -1 || commandWithThisName == savedCommandsTable_->currentRow());
-		bool okToOverwrite =  (enoughInfo && nameUnique);
-		overwriteButton_->setEnabled(okToOverwrite);
+		overwriteButton_->setEnabled(true);
 		saveAsNewButton_->setEnabled(false);
-		addToContextMenuCb_->setEnabled(true);
 	}
 	else
 	{
 		overwriteButton_->setEnabled(false);
-
-		bool nameUnique =  (commandWithThisName == -1);
-		bool okToOverwrite =  (enoughInfo && nameUnique);
-		saveAsNewButton_->setEnabled(okToOverwrite);
-		addToContextMenuCb_->setEnabled(okToOverwrite);
+		saveAsNewButton_->setEnabled(true);
 	}
 
 	// the cancel button is only available if we're in edit mode
 	cancelSaveButton_->setEnabled(inCommandEditMode_);
-
-
-	if (!saveAsNewButton_->isEnabled() && !overwriteButton_->isEnabled())
-	{
-		nameInfoLabel_->setShowTypeTitle(false);
-		nameInfoLabel_->showWarning(tr("Command must have a unique name"));
-		nameInfoLabel_->setVisible(true);
-	}
-	else
-	{
-		nameInfoLabel_->setVisible(false);
-	}
-
 }
 
 
@@ -368,11 +338,25 @@ void CommandDesignerWidget::setSavedCommandsButtonStatus()
 }
 
 
-bool CommandDesignerWidget::validSaveName(const std::string &name, int indexToIgnore)
+bool CommandDesignerWidget::validSaveName(const std::string &name)
 {
+	// name empty?
+	if (name.empty())
+	{
+		QMessageBox::critical(0,QObject::tr("Custom command"), tr("Please enter a name for the command"));
+		return false;
+	}
+
+
 	// is there already a command with this name?
-	int foundIndex = CustomSavedCommandHandler::instance()->findIndexFromName(name);
-	if (foundIndex != -1 and foundIndex !=indexToIgnore)
+	int commandWithThisName = CustomSavedCommandHandler::instance()->findIndexFromName(name);
+	bool nameUnique;
+	if (inCommandEditMode_)
+		nameUnique =  (commandWithThisName == -1 || commandWithThisName == savedCommandsTable_->currentRow());
+	else
+		nameUnique =  (commandWithThisName == -1);
+
+	if (!nameUnique)
 	{
 		QMessageBox::critical(0,QObject::tr("Custom command"), tr("A command with that name already exists - please choose another name"));
 		return false;
@@ -415,7 +399,7 @@ void CommandDesignerWidget::on_saveAsNewButton__clicked()
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
 
-	//if (validSaveName(name, -1))
+	if (validSaveName(name))
 	{
 		CustomCommand *cmd = CustomSavedCommandHandler::instance()->add(name, command, context, true);
 		refreshSavedCommandList();
@@ -437,7 +421,7 @@ void CommandDesignerWidget::on_overwriteButton__clicked()
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
 
-	//if (validSaveName(name, -1))
+	if (validSaveName(name))
 	{
 		CustomCommand *cmd = CustomSavedCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
 		savedCommandsTable_->setEnabled(true);  // to show that we are no longer busy editing an entry
