@@ -73,7 +73,7 @@ private:
 	void initialiseCommandLine();
 	void setNodeNumberLinkText(int numNodes);
 	void setSavedCommandsButtonStatus();
-	bool validSaveName(const std::string &name, int indexToIgnore);
+	bool validSaveName(const std::string &name);
 	void changeToTab(TabIndexes i);
 	void selectRow(int row);
 	void selectLastSavedCommand();
