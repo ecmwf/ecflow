@@ -81,7 +81,8 @@ static boost::shared_ptr<RepeatString> create_RepeatString(const std::string& na
    return boost::make_shared<RepeatString>( name,vec );
 }
 
-static boost::shared_ptr<ZombieAttr> create_ZombieAttr(Child::ZombieType zt,const boost::python::list& list,User::Action uc,int life_time_in_server)
+static boost::shared_ptr<ZombieAttr> create_ZombieAttr(
+      Child::ZombieType zt,const boost::python::list& list,User::Action uc,int life_time_in_server)
 {
    std::vector<Child::CmdType> vec;
    int the_list_size = len(list);
@@ -89,8 +90,19 @@ static boost::shared_ptr<ZombieAttr> create_ZombieAttr(Child::ZombieType zt,cons
    for (int i = 0; i < the_list_size; ++i) {
       vec.push_back(boost::python::extract<Child::CmdType>(list[i]));
    }
-
    return boost::make_shared<ZombieAttr>(zt,vec,uc,life_time_in_server );
+}
+
+static boost::shared_ptr<ZombieAttr> create_ZombieAttr1(
+      Child::ZombieType zt,const boost::python::list& list,User::Action uc)
+{
+   std::vector<Child::CmdType> vec;
+   int the_list_size = len(list);
+   vec.reserve(the_list_size);
+   for (int i = 0; i < the_list_size; ++i) {
+      vec.push_back(boost::python::extract<Child::CmdType>(list[i]));
+   }
+   return boost::make_shared<ZombieAttr>(zt,vec,uc);
 }
 
 
@@ -134,6 +146,7 @@ void export_NodeAttr()
 	// 	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime);
  	class_<ZombieAttr>("ZombieAttr",NodeAttrDoc::zombie_doc())
    .def("__init__",make_constructor(&create_ZombieAttr) )
+   .def("__init__",make_constructor(&create_ZombieAttr1) )
  	.def("__str__",    &ZombieAttr::toString)              // __str__
  	.def(self == self )                                    // __eq__
  	.def("empty",          &ZombieAttr::empty,          "Return true if the attribute is empty")
