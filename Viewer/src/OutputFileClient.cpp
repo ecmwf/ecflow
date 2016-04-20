@@ -69,6 +69,8 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 			if(out_)
 				out_.reset();
 
+            return;
+
 		}
 		break;
     case QAbstractSocket::UnknownSocketError:

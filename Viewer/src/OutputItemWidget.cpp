@@ -458,7 +458,6 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
         dirWidget_->show();
 
         UserMessage::qdebug("  dir item count=" + QString::number(dirModel_->rowCount()));
-        qDebug() << dirWidget_->isEnabled();
 
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;

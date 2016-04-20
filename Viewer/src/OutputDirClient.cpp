@@ -89,6 +89,8 @@ void OutputDirClient::slotError(QAbstractSocket::SocketError err)
 
             if(dir_)
                 dir_.reset();
+
+            return;
         }
 
 		break;
