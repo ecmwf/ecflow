@@ -439,7 +439,9 @@ void OutputItemWidget::setCurrentInDir(const std::string& fullName)
 
 void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 {
-	if(restartTimer)
+    UserMessage::debug("OutputItemWidget::updateDir -->");
+
+    if(restartTimer)
 		updateDirTimer_->stop();
 
     bool status=(dir && dir->count() >0);
@@ -454,6 +456,9 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 		dirView_->selectionModel()->clearSelection();
         dirModel_->setData(dir,op->joboutFileName());
         dirWidget_->show();
+
+        UserMessage::qdebug("  dir item count=" + QString::number(dirModel_->rowCount()));
+        qDebug() << dirWidget_->isEnabled();
 
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;
