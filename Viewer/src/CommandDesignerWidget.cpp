@@ -57,6 +57,7 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	// set up and populate our list of options to the ecflow client
 	// - this would be more efficient if we did it only once, in a singleton, but
 	//   it seems pretty fast so we'll leave it like this for now
+	initialiseComponentListDetails();
 	clientOptionsDescriptions_ = new po::options_description("help" , po::options_description::m_default_line_length + 80);
 	cmdRegistry_.addAllOptions(*clientOptionsDescriptions_);
 	addClientCommandsToComponentList();
@@ -97,6 +98,44 @@ CommandDesignerWidget::~CommandDesignerWidget()
 		CustomSavedCommandHandler::instance()->writeSettings();
 
 	MenuHandler::refreshCustomMenuCommands();
+}
+
+
+void CommandDesignerWidget::initialiseComponentListDetails()
+{
+
+	// we don't want all the available commands to appear in the component list because they
+	// are not all relevant for one reason or another
+
+	componentBlacklist_.clear();
+
+	// The following rely on standard out:
+	componentBlacklist_.push_back("help");
+	componentBlacklist_.push_back("get");
+	componentBlacklist_.push_back("get_state");
+	componentBlacklist_.push_back("ch_suites");
+	componentBlacklist_.push_back("migrate");
+	componentBlacklist_.push_back("ping");
+	componentBlacklist_.push_back("server_version");
+	componentBlacklist_.push_back("stats");
+	componentBlacklist_.push_back("status");
+	componentBlacklist_.push_back("suites");
+	componentBlacklist_.push_back("version");
+	componentBlacklist_.push_back("zombie_get");
+
+	// The following only make sense for a persistent client. (like GUI, python):
+	componentBlacklist_.push_back("news");
+	componentBlacklist_.push_back("sync");
+	componentBlacklist_.push_back("sync_full");
+
+	// The following require a prompt:
+	componentBlacklist_.push_back("delete");
+	componentBlacklist_.push_back("terminate");
+	componentBlacklist_.push_back("halt");
+
+	// The following only make sense in a group:
+	componentBlacklist_.push_back("show");
+	componentBlacklist_.push_back("why");
 }
 
 
@@ -190,11 +229,15 @@ void CommandDesignerWidget::addClientCommandsToComponentList()
 
 	for(size_t i = 0; i < numOptions; i++)
 	{
-		if (!ecf::Child::valid_child_cmd(options[i]->long_name()))  // do not show the 'child' options
+		std::string longName(options[i]->long_name());
+		if (!ecf::Child::valid_child_cmd(longName))  // do not show the 'child' options
 		{
-			componentsList_->addItem(QString("--") + QString::fromStdString(options[i]->long_name()));
-			QString statusTip(QString::fromStdString(options[i]->long_name()));
-			componentsList_->item(componentsList_->count()-1)->setStatusTip(statusTip);
+			if (std::find(componentBlacklist_.begin(), componentBlacklist_.end(), longName) == componentBlacklist_.end())  // not in blacklist?
+			{
+				componentsList_->addItem(QString("--") + QString::fromStdString(longName));
+				QString statusTip(QString::fromStdString(longName));
+				componentsList_->item(componentsList_->count()-1)->setStatusTip(statusTip);
+			}
 		}
 	}
 

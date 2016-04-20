@@ -65,6 +65,7 @@ public Q_SLOTS:
 private:
 	enum TabIndexes {TAB_BUILD, TAB_NODES, TAB_SAVE};
 
+	void initialiseComponentListDetails();
 	void updateSaveButtonStatus();
 	void addCommandToSavedList(CustomCommand *command, int row);
 	void refreshSavedCommandList();
@@ -87,6 +88,7 @@ private:
 	bool inCommandEditMode_;
 	bool saveCommandsOnExit_;
 	bool saveOptionsVisible_;
+	std::vector<std::string> componentBlacklist_;
 
 	std::vector<VInfo_ptr> nodes_;
 	NodeQueryResultModel nodeModel_; 
