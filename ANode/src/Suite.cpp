@@ -493,13 +493,13 @@ void Suite::collateChanges(DefsDelta& changes) const
 	//   Use:
 	//      calendar_change_no_ = Ecf::incr_state_change_no();
 	//
-	//   plus only create SuiteCalendarMemento, where are suite changes *AND*
+	//   plus only create SuiteCalendarMemento, where the suite changes *AND*
 	//   calendar has actually changed.
 	//   - This fixes the problem, at the expense of *always* creating a SuiteCalendarMemento
 	//     every 60 seconds. Thus adding to network traffic.
 	//   - The regression tests will fail, since a change is made in the server,
 	//     for which the sync does nothing. *************************************
-	//     This could be fixed only creating a SuiteCalendarMemento when calendar changes
+	//     This could be fixed by creating a SuiteCalendarMemento when calendar changes
 	//     However we then go back always creating SuiteCalendarMemento every 60 seconds
 	//     even when there are **no other** changes
 	//
