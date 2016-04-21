@@ -6,6 +6,8 @@ ECFLOW-136 Label, event. meter child commands persisting if node not found in se
     -> top suggested show that most of process are in state 'D' UN-interable sleep (This is typically I/O related)
     -> it was a gpfs/file which causes page faulting > 500 simulataneos client
   
+IPC Changes required
+==============================================================================================
 ECFLOW-534 log hostname for ecflow_client users commands
     -> This really needs an IPC change since we need log the hostname where the command. is sent from
     -> At the moment only the user name is sent.
@@ -15,8 +17,7 @@ ECFLOW-534 log hostname for ecflow_client users commands
 ECFLOW-608 zombie handling.
     -> may need change in IPC, however should be ok, restricted child commands and server.
  
-
-????? Why.
+ECFLOW-631 why command should force calendar to sync.
     -> the Why command can be out of sync since the suite calendar. See: Suite::collateChanges
        The suite calendar is only correctly sync'ed if there was a change in the server.
        We really need an equivalent to sync_clock(aka, sync_local), this should be called
@@ -26,6 +27,8 @@ ECFLOW-608 zombie handling.
        class CSyncCmd : public UserCmd {
         public:
           enum Api { NEWS, SYNC , SYNC_FULL, CLOCK};
+          
+       The work around is suspend/resume to force a change change, and then call why command.
        
     
 Client 
