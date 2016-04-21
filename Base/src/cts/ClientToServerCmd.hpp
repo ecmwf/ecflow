@@ -1417,12 +1417,12 @@ public:
    enum Delete_attr_type  { DEL_VARIABLE, DEL_TIME, DEL_TODAY, DEL_DATE, DEL_DAY,
       DEL_CRON, DEL_EVENT, DEL_METER, DEL_LABEL,
       DEL_TRIGGER, DEL_COMPLETE, DEL_REPEAT, DEL_LIMIT, DEL_LIMIT_PATH,
-      DEL_INLIMIT, DEL_ZOMBIE, DELETE_ATTR_ND };
+      DEL_INLIMIT, DEL_ZOMBIE, DELETE_ATTR_ND, DEL_LATE };
 
    enum Change_attr_type  { VARIABLE, CLOCK_TYPE, CLOCK_DATE, CLOCK_GAIN,  EVENT, METER, LABEL,
-      TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC };
+      TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC, LATE };
 
-   enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND };
+   enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND, ADD_LATE };
 
    AlterCmd(const std::string& path, Add_attr_type  attr,  const std::string& name, const std::string& value = "" )
    : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(attr),

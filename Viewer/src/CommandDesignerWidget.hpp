@@ -39,19 +39,33 @@ public Q_SLOTS:
 	void insertComponent(QListWidgetItem *);
 	void on_commandLineEdit__textChanged();
 	void on_saveNameLineEdit__textChanged();
+	void on_addToContextMenuCb__stateChanged();
 	void on_overwriteButton__clicked();
 	void on_saveAsNewButton__clicked();
 	void on_runButton__clicked();
+	void on_saveOptionsButton__clicked();
+	void on_editCommandButton__clicked();
+	void on_useCommandButton__clicked();
+	void on_duplicateCommandButton__clicked();
+	void on_deleteCommandButton__clicked();
+	void on_upButton__clicked();
+	void on_downButton__clicked();
+	void on_cancelSaveButton__clicked();
 	void on_savedCommandsTable__cellClicked(int row, int column);
+	void on_savedCommandsTable__cellDoubleClicked(int row, int column);
 	void on_componentsList__itemEntered(QListWidgetItem *item);
 	void on_componentsList__itemClicked(QListWidgetItem *item);
 	void on_componentsList__itemDoubleClicked(QListWidgetItem *item);
 	void on_nodeListLinkLabel__linkActivated(const QString &link);
 	void on_nodeSelectionChanged();
+	void on_tabWidget__currentChanged(int index);
 	QPushButton *runButton() {return runButton_;};
 
 
 private:
+	enum TabIndexes {TAB_BUILD, TAB_NODES, TAB_SAVE};
+
+	void initialiseComponentListDetails();
 	void updateSaveButtonStatus();
 	void addCommandToSavedList(CustomCommand *command, int row);
 	void refreshSavedCommandList();
@@ -59,10 +73,22 @@ private:
 	void showCommandHelp(QListWidgetItem *item, bool showFullHelp);
 	void initialiseCommandLine();
 	void setNodeNumberLinkText(int numNodes);
+	void setSavedCommandsButtonStatus();
+	bool validSaveName(const std::string &name);
+	void changeToTab(TabIndexes i);
+	void selectRow(int row);
+	void selectLastSavedCommand();
+	void swapSavedCommands(int i1, int i2);
+	void setSaveOptionsState(bool optionsVisible, bool saveOptionsButtonEnabled);
+
 	//bool eventFilter(QObject* object, QEvent* event);
 
 	bool currentCommandSaved_;
 	bool haveSetUpDefaultCommandLine_;
+	bool inCommandEditMode_;
+	bool saveCommandsOnExit_;
+	bool saveOptionsVisible_;
+	std::vector<std::string> componentBlacklist_;
 
 	std::vector<VInfo_ptr> nodes_;
 	NodeQueryResultModel nodeModel_; 

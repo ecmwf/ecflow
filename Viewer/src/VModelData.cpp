@@ -26,7 +26,8 @@
 void VTreeChangeInfo::addStateChange(const VNode* n)
 {
     VNode* s=n->suite();
-    assert(s);
+    Q_ASSERT(s->isTopLevel());
+    Q_ASSERT(s);
     if(std::find(stateSuites_.begin(),stateSuites_.end(),s) == stateSuites_.end())
         stateSuites_.push_back(s);
 }
@@ -115,6 +116,7 @@ void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChang
     //this server tree is empty.
     inScan_=true;
     Q_ASSERT(tree_->numOfChildren() == 0);
+    changeInfo_->clear();
 }
 
 void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
@@ -145,6 +147,7 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
 void VTreeServer::notifyBeginServerClear(ServerHandler* server)
 {
     Q_EMIT beginServerClear(this,-1);
+    changeInfo_->clear();
     tree_->clear();
     filter_->clear();
     inScan_=true;
@@ -336,7 +339,8 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
                         Q_EMIT nodeChanged(this,node);
                 }
 
-                changeInfo_->addStateChange(vnode);
+                if(!vnode->isServer())
+                    changeInfo_->addStateChange(vnode);
 
 #ifdef _UI_VMODELDATA_DEBUG
                 UserMessage::debug("   node status changed: " + vnode->strName());
@@ -377,6 +381,8 @@ void VTreeServer::notifyEndNodeChange(const VNode* vnode, const std::vector<ecf:
 
 void VTreeServer::reload()
 {
+    changeInfo_->clear();
+
     Q_EMIT beginServerClear(this,-1);
     tree_->clear();
     inScan_=true;
@@ -402,7 +408,7 @@ void VTreeServer::reload()
 
 
 void VTreeServer::attrFilterChanged()
-{
+{   
     //In the tree root the attrNum must be cached/initialised
     Q_ASSERT(tree_->isAttrInitialised());
     int oriNum=tree_->attrNum(attrFilter_)+tree_->numOfChildren();

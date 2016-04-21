@@ -10,6 +10,7 @@
 #include "VariableModelData.hpp"
 
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
 
@@ -19,6 +20,8 @@
 static std::string defaultStr("");
 
 QStringList VariableModelData::readOnlyVars_;
+
+#define _UI_VARIABLEMODELDATA_DEBBUG
 
 //==========================================
 //
@@ -304,10 +307,28 @@ int VariableModelData::checkUpdateDiff(std::vector<Variable>& v,std::vector<Vari
 //variables are the same but some of their names or values have been changed.
 bool VariableModelData::update(std::vector<Variable>& v,std::vector<Variable>& vg)
 {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelData::update -->");
+#endif
+
     if(info_ && info_->node() && v.empty() && vg.empty())
 	{
         latestVars(v,vg);
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   call latestVars");
+#endif
+
 	}
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   variables:");
+    for(size_t i=0; i < v.size(); i++)
+        UserMessage::debug("     " + v[i].name() + "=" + v[i].theValue());
+    UserMessage::debug("   generated variables:");
+    for(size_t i=0; i < vg.size(); i++)
+        UserMessage::debug("     " + vg[i].name() + "=" + vg[i].theValue());
+#endif
 
 	//We must have the same numbe rof variables
     assert(v.size() + vg.size() == vars_.size() + genVars_.size());
@@ -316,13 +337,22 @@ bool VariableModelData::update(std::vector<Variable>& v,std::vector<Variable>& v
     if(v.size() != vars_.size() || vg.size() != genVars_.size())
     {
         changed=true;
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::qdebug("   variables size changed! var: " + QString::number(vars_.size()) +
+                            " -> " +  QString::number(v.size()) + "gen var: " +
+                            QString::number(genVars_.size()) + " -> " +  QString::number(vg.size()));
+#endif
     }
     else
     {
         for(unsigned int i=0; i < vars_.size(); i++)
         {
             if(vars_[i].name() != v[i].name() || vars_[i].theValue() != v[i].theValue())
-            {
+            {                
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                UserMessage::debug("   variable changed! name: " + vars_[i].name() + " -> " +
+                           v[i].name()  + " value: " +   vars_[i].theValue() + " -> " +   v[i].theValue());
+#endif
                 changed=true;
                 break;
             }
@@ -334,6 +364,11 @@ bool VariableModelData::update(std::vector<Variable>& v,std::vector<Variable>& v
             {
                 if(genVars_[i].name() != vg[i].name() || genVars_[i].theValue() != vg[i].theValue())
                 {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                    UserMessage::debug("   generated variable changed! name: " + genVars_[i].name() + " -> " +
+                           vg[i].name()  + " value: " +   genVars_[i].theValue() + " -> " +   vg[i].theValue());
+#endif
+
                     changed=true;
                     break;
                 }
@@ -344,8 +379,15 @@ bool VariableModelData::update(std::vector<Variable>& v,std::vector<Variable>& v
 	if(changed)
 	{
 		vars_=v;
-		genVars_=vg;
+		genVars_=vg;        
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   updated vars and genvars");
+#endif
 	}
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("<-- VariableModelData::update");
+#endif
 
 	return changed;
 
@@ -447,10 +489,13 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 	return 0;
 }
 
-//It is called when a node was changed.
-void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+//It is called when a node changed.
+bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
-	int dataIndex=-1;
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelDataHandler::nodeChanged -->");
+#endif
+    int dataIndex=-1;
 	for(unsigned int i=0; i < data_.size(); i++)
 	{
 		if(data_.at(i)->node() == node)
@@ -460,6 +505,9 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 		}
 	}
 
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::qdebug("   dataIndex=" + QString::number(dataIndex));
+#endif
 	if(dataIndex == -1)
 		assert(0);
 
@@ -468,14 +516,20 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 
     //Check if some variables were added or removed.
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-	{
-		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
-		{
-			//If the number of the variables not the same we reset the whole model           
+	{        
+        if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
+		{            
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::debug("   Change: ADD_REMOVE_ATTR");
+#endif
+            //If the number of the variables is not the same we reset the given block in the model
             int cntDiff=data_.at(dataIndex)->checkUpdateDiff(v,vg);
 			if(cntDiff != 0)
 			{
-				//Notifies the model that rows will be added or removed for this data item
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                UserMessage::qdebug("    cntDiff=" + QString::number(dataIndex));
+#endif
+                //Notifies the model that rows will be added or removed for this data item
 				Q_EMIT addRemoveBegin(dataIndex,cntDiff);
 				data_.at(dataIndex)->reload();
 				Q_EMIT addRemoveEnd(cntDiff);
@@ -483,8 +537,12 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 				//Update the data item in the model
 				Q_EMIT dataChanged(dataIndex);
 
-				return;
-			}
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                UserMessage::debug("<-- VariableModelDataHandler::nodeChanged");
+#endif
+                return true;
+			}          
+            break;
 		}
 	}
 
@@ -494,13 +552,19 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 		//A variable's value changed
 		if(*it == ecf::Aspect::NODE_VARIABLE)
 		{           
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+            UserMessage::debug("   Change: NODE_VARIABLE");
+#endif
             //Update the names/values
             if(data_.at(dataIndex)->update(v,vg))
 			{
 				//Update the data item in the model
 				Q_EMIT dataChanged(dataIndex);
 			}
-			return;
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+            UserMessage::debug("<-- VariableModelDataHandler::nodeChanged");
+#endif
+            return true;
 		}
 	}
 
@@ -508,56 +572,123 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 	//variables because there is no notification (aspect) to indicate their change. So as a safety
 	//measure we try to update them within each update call!!
 
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   Change: no relevant ascpects were found");
+#endif
+
     if(data_.at(dataIndex)->update(v,vg))
 	{
 		//Update the data item in the model
 		Q_EMIT dataChanged(dataIndex);
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+            UserMessage::debug("<-- VariableModelDataHandler::nodeChanged");
+#endif
+        return true;
 	}
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("<-- VariableModelDataHandler::nodeChanged");
+#endif
+
+    return false;
 }
 
 //ADD_REMOVE_ATTR?????
 
 //It is called when the server defs was changed
-void VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
+bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
 {
-	if(data_.size() == 0)
-		return;
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelDataHandler::defsChanged -->");
+#endif
 
-	VariableModelData* d=data_.at(data_.size()-1);
-	if(d->type() != "server")
-	{
-		return;
-	}
+    if(data_.size() == 0)
+    {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::debug("<-- VariableModelDataHandler::defsChanged");
+#endif
+        return false;
+    }
 
-	int dIndex=data_.size()-1;
+    int dIndex=data_.size()-1;
+    Q_ASSERT(dIndex >=0 && dIndex < data_.size());
+    VariableModelData* d=data_.at(data_.size()-1);
+    Q_ASSERT(d);
+    Q_ASSERT(d->type() == "server");
 
     std::vector<Variable> v;
     std::vector<Variable> vg;
 
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-	{
-		if(*it == ecf::Aspect::SERVER_VARIABLE)
-		{
-			//Check if some variables were added or removed
+    //When server variables added/removed/changed SERVER_VARIABLE can set, although it
+    //is not clear if it is always set.
+    //For addition/removal ADD_REMOVE_ATTR is always set.
+
+    //Check if some variables were added or removed.
+    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    {
+        if(*it == ecf::Aspect::SERVER_VARIABLE || *it == ecf::Aspect::ADD_REMOVE_ATTR)
+        {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::debug("   Change: SERVER_VARIABLE or ADD_REMOVE_ATTR");
+#endif
+            //If the number of the variables is not the same we reset the given block in the model
             int cntDiff=d->checkUpdateDiff(v,vg);
-			if(cntDiff != 0)
-			{
-				//Notifies the model that rows will be added or removed for this data item
-				Q_EMIT addRemoveBegin(dIndex,cntDiff);
-				d->reload();
-				Q_EMIT addRemoveEnd(cntDiff);
+            if(cntDiff != 0)
+            {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                UserMessage::qdebug("    cntDiff=" + QString::number(dIndex));
+#endif
+                //Notifies the model that rows will be added or removed for this data item
+                Q_EMIT addRemoveBegin(dIndex,cntDiff);
+                d->reload();
+                Q_EMIT addRemoveEnd(cntDiff);
 
-				//Update the data item in the model
-				Q_EMIT dataChanged(dIndex);
-			}
-			//Otherwise Update the names/values
+                //Update the data item in the model
+                Q_EMIT dataChanged(dIndex);
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                UserMessage::debug("<-- VariableModelDataHandler::defsChanged");
+#endif
+                return true;
+            }
+            //Otherwise update the names/values
             else if(d->update(v,vg))
-			{
-				//Update the data item in the model
-				Q_EMIT dataChanged(dIndex);
-			}
+            {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                UserMessage::debug("   Update names/values");
+#endif
+                //Update the data item in the model
+                Q_EMIT dataChanged(dIndex);
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                UserMessage::debug("<-- VariableModelDataHandler::defsChanged");
+#endif
+                return true;
+            }
+            break;
+        }
+    }
 
-			break;
-		}
-	}
+    //If we are here no update happened. However, here we need to update the generated
+    //variables because there is no notification (aspect) to indicate their change. So as a safety
+    //measure we try to update them within each update call!!
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   Change: no relevant ascpects were found");
+#endif
+
+    if(d->update(v,vg))
+    {
+        //Update the data item in the model
+        Q_EMIT dataChanged(dIndex);
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::debug("<-- VariableModelDataHandler::defsChanged");
+#endif
+        return true;
+    }
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("<-- VariableModelDataHandler::defsChanged");
+#endif
+
+    return false;
 }

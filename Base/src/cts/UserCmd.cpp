@@ -20,6 +20,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>      /* tolower */
+#include <string.h>     // for strerror()
+#include <errno.h>      // for errno()
 
 #include "ClientToServerCmd.hpp"
 
@@ -74,9 +76,27 @@ void UserCmd::setup_user_authentification()
    // Minimise system calls by using static.
    static std::string the_user_name;
    if (the_user_name.empty()) {
+
       // Get the uid of the running process and use it to get a record from /etc/passwd */
-      struct passwd * thePassWord = getpwuid ( getuid() );
+      // getuid() can not fail, but getpwuid can fail.
+      errno = 0;
+      uid_t real_user_id_of_process = getuid();
+      struct passwd * thePassWord = getpwuid ( real_user_id_of_process );
+      if (thePassWord == 0 ) {
+         if ( errno != 0) {
+            std::string theError = strerror(errno);
+            throw std::runtime_error("UserCmd::setup_user_authentification: could not determine user name. Because: " + theError);
+         }
+
+         std::stringstream ss;
+         ss << "UserCmd::setup_user_authentification: could not determine user name for uid " << real_user_id_of_process;
+         throw std::runtime_error(ss.str());
+      }
+
       the_user_name = thePassWord->pw_name;  // equivalent to the login name
+      if ( the_user_name.empty() ) {
+         throw std::runtime_error("UserCmd::setup_user_authentification: could not determine user name. Because: thePassWord->pw_name is empty");
+      }
    }
 
    user_ = the_user_name;

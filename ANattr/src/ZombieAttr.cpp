@@ -40,7 +40,7 @@ ZombieAttr::ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::C
 {
    /// Server typically checks every 60 seconds, hence this is lowest valid value for
    /// zombie_lifetime_ is 60 seconds
-	if ( zombie_lifetime_ == -1) {
+	if (zombie_lifetime_ <= 59) {
  		switch (zombie_type_) {
 			case Child::USER: zombie_lifetime_ = user_zombie_life_time; break;
 			case Child::PATH: zombie_lifetime_ = path_zombie_life_time; break;

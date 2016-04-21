@@ -333,17 +333,11 @@ void OutputItemWidget::infoReady(VReply* reply)
             reply->fileReadMode() == VReply::LogServerReadMode))
         {
             updateDirTimer_->start();
-        }
-
-        //If we got a local file or a file via the logserver we set the selection
-        //int the dir list according to the file
-        if(reply->fileReadMode() == VReply::LocalReadMode ||
-           reply->fileReadMode() == VReply::LogServerReadMode)
-        {
-            //if(f)
-                setCurrentInDir(f->sourcePath());
-            /*else
-                setCurrentInDir(reply->fileName());*/
+        }        
+        //Update the selection in the dir list according to the file
+        if(f)
+        {          
+            setCurrentInDir(f->sourcePath());
         }
 #if 0
         if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&
@@ -445,7 +439,9 @@ void OutputItemWidget::setCurrentInDir(const std::string& fullName)
 
 void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 {
-	if(restartTimer)
+    UserMessage::debug("OutputItemWidget::updateDir -->");
+
+    if(restartTimer)
 		updateDirTimer_->stop();
 
     bool status=(dir && dir->count() >0);
@@ -460,6 +456,8 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 		dirView_->selectionModel()->clearSelection();
         dirModel_->setData(dir,op->joboutFileName());
         dirWidget_->show();
+
+        UserMessage::qdebug("  dir item count=" + QString::number(dirModel_->rowCount()));
 
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;

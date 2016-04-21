@@ -488,10 +488,18 @@ if __name__ == "__main__":
     for zombie_type in zombie_type_list:
         zombie_attr = ecflow.ZombieAttr(zombie_type, child_list, ecflow.ZombieUserActionType.block, zombie_life_time_in_server)
         s1.add_zombie(zombie_attr)
-        
     assert len(list(s1.zombies)) == 3, "Expected 3 zombie attributes but found " + str(len(list(s1.zombies)))
     
     # delete all the zombies
+    s1.delete_zombie("")
+    assert len(list(s1.zombies)) == 0, "Expected zero zombie attributes but found " + str(len(list(s1.zombies)))
+    
+    # add with zombie_life_time_in_server not set, this is optional
+    for zombie_type in zombie_type_list:
+        zombie_attr = ecflow.ZombieAttr(zombie_type, child_list, ecflow.ZombieUserActionType.block)
+        s1.add_zombie(zombie_attr)
+    assert len(list(s1.zombies)) == 3, "Expected 3 zombie attributes but found " + str(len(list(s1.zombies)))
+
     s1.delete_zombie("")
     assert len(list(s1.zombies)) == 0, "Expected zero zombie attributes but found " + str(len(list(s1.zombies)))
 
@@ -506,6 +514,7 @@ if __name__ == "__main__":
         assert len(list(s1.zombies)) == 1, "Expected 1 zombie attributes but found " + str(len(list(s1.zombies)))
         s1.delete_zombie(zombie_type)
         assert len(list(s1.zombies)) == 0, "Expected 0 zombie attributes but found " + str(len(list(s1.zombies)))
+
 
     print "All Tests pass"
     

@@ -108,6 +108,7 @@ protected:
 	void removeItem(const QModelIndex& index);
     void updateState(const ChangeFlags&);
     void toClipboard(QString txt) const;
+    void reselectCurrent();
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);

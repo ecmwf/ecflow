@@ -194,4 +194,92 @@ BOOST_AUTO_TEST_CASE( test_late_attr_complete_real )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_late_parsing )
+{
+   cout << "ANattr:: ...test_late_parsing\n";
+   TimeSlot start(10,10);
+   TimeSlot finish(23,10);
+   {
+      LateAttr late;
+      LateAttr parsedlate;
+      BOOST_CHECK_MESSAGE(late == parsedlate ,"Expected " << late.toString() << " but found " << parsedlate.toString());
+   }
+   {
+      LateAttr late; late.addSubmitted(start);
+      LateAttr parsedLate = LateAttr::create("late -s 10:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+      parsedLate = LateAttr::create("-s 10:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+   }
+   {
+      LateAttr late; late.addActive(finish);
+      LateAttr parsedLate = LateAttr::create("late -a 23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+      parsedLate = LateAttr::create("-a 23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+   }
+   {
+      LateAttr late; late.addComplete(finish,false);
+      LateAttr parsedLate = LateAttr::create("late -c 23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+      parsedLate = LateAttr::create("-c 23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+   }
+   {
+      LateAttr late; late.addComplete(finish,true);
+      LateAttr parsedLate = LateAttr::create("late -c +23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+      parsedLate = LateAttr::create("-c +23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+   }
+   {
+      LateAttr late; late.addComplete(finish,true);
+      LateAttr parsedLate = LateAttr::create("late -c +23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+      parsedLate = LateAttr::create("-c +23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+   }
+   {
+      LateAttr late; late.addSubmitted(start); late.addActive(finish);late.addComplete(finish,true);
+      LateAttr parsedLate = LateAttr::create("late -s 10:10 -a 23:10 -c +23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+      parsedLate = LateAttr::create("-s 10:10 -a 23:10 -c +23:10");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+   }
+   {
+      LateAttr late; late.addSubmitted(start); late.addActive(finish);late.addComplete(finish,true);
+      LateAttr parsedLate = LateAttr::create("late -c +23:10 -s 10:10 -a 23:10 ");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+      parsedLate = LateAttr::create("-c +23:10 -s 10:10 -a 23:10 ");
+      BOOST_CHECK_MESSAGE(late == parsedLate,"Expected " << late.toString() << " but found " << parsedLate.toString());
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_late_parsing_errors )
+{
+   cout << "ANattr:: ...test_late_parsing_errors\n";
+   BOOST_REQUIRE_THROW( (void)LateAttr::create(""),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late 10:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -s 100:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -s 10:107"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("10:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -a"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("-a"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("-c"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("-s"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -c -s 10:10 -a 23:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -c +23:10 -s -a 23:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -c +23:105 -s 10:10 -a 23:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -c +23:10 -c +23:10 -s 10:10 -a 23:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -c +23:10 -s 10:10 -a 23:10 -a 23:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -c +23:10 -s 10:10  -s 10:10 -a 23:10"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late -c -s -a"),std::runtime_error);
+   BOOST_REQUIRE_THROW( (void)LateAttr::create("late +23:10 10:10 23:10"),std::runtime_error);
+
+   BOOST_CHECK_THROW( (void)LateAttr::create("late  -a 23:11 -c"),std::runtime_error);
+   BOOST_CHECK_THROW( (void)LateAttr::create("late -c +23:10 -s 10:10 -a"),std::runtime_error);
+   BOOST_CHECK_THROW( (void)LateAttr::create("late -c +23:10 -s 10:10 -a 11:11 -s"),std::runtime_error);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

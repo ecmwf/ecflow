@@ -262,7 +262,8 @@ void MenuHandler::refreshCustomMenuCommands()
 {
     BaseNodeCondition *trueCond  = new TrueNodeCondition();
     BaseNodeCondition *falseCond = new FalseNodeCondition();
-    CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
+	CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
+	CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
 
     Menu *menu = findMenu("Custom");
     if (menu)
@@ -270,28 +271,55 @@ void MenuHandler::refreshCustomMenuCommands()
         menu->clearFixedList();
 
         // create the 'compulsary' menu items
-        MenuItem *item1 = new MenuItem("New command...");
+        MenuItem *item1 = new MenuItem("Manage commands...");
         item1->setCommand("custom");
         addItemToMenu(item1, "Custom");
         item1->setEnabledCondition(trueCond);
         item1->setVisibleCondition(trueCond);
         item1->setQuestionCondition(falseCond);
+        item1->setIcon("configure.svg");
 
-        MenuItem *item2 = new MenuItem("-");
-        addItemToMenu(item2, "Custom");
-        item2->setEnabledCondition(trueCond);
-        item2->setVisibleCondition(trueCond);
-        item2->setQuestionCondition(falseCond);
+		// Saved commands
+		MenuItem *item2 = new MenuItem("-");
+		addItemToMenu(item2, "Custom");
+		item2->setEnabledCondition(trueCond);
+		item2->setVisibleCondition(trueCond);
+		item2->setQuestionCondition(falseCond);
 
-        MenuItem *item3 = new MenuItem("Recent");
-        addItemToMenu(item3, "Custom");
-        item3->setEnabledCondition(falseCond);
-        item3->setVisibleCondition(trueCond);
-        item3->setQuestionCondition(falseCond);
+		int numSavedCommands = customSavedCmds->numCommands();
 
-        int numCommands = customRecentCmds->numCommands();
+		for (int i = 0; i < numSavedCommands; i++)
+		{
+			CustomCommand *cmd = customSavedCmds->commandFromIndex(i);
+			if (cmd->inContextMenu())
+			{
+				MenuItem *item = new MenuItem(cmd->name());
+				item->setCommand(cmd->command());
+				item->setEnabledCondition(trueCond);
+				item->setVisibleCondition(trueCond);
+				item->setQuestionCondition(trueCond);
+				item->setStatustip("__cmd__");
+				addItemToMenu(item, "Custom");
+			}
+		}
 
-        for (int i = 0; i < numCommands; i++)
+
+		// Recently executed commands
+		MenuItem *item3 = new MenuItem("-");
+		addItemToMenu(item3, "Custom");
+		item3->setEnabledCondition(trueCond);
+		item3->setVisibleCondition(trueCond);
+		item3->setQuestionCondition(falseCond);
+
+		MenuItem *item4 = new MenuItem("Recent");
+		addItemToMenu(item4, "Custom");
+		item4->setEnabledCondition(falseCond);
+		item4->setVisibleCondition(trueCond);
+		item4->setQuestionCondition(falseCond);
+
+		int numRecentCommands = customRecentCmds->numCommands();
+
+		for (int i = 0; i < numRecentCommands; i++)
         {
             CustomCommand *cmd = customRecentCmds->commandFromIndex(i);
 

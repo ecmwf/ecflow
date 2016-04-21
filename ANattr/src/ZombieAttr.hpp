@@ -25,7 +25,7 @@
 // ZombieAttr does *not* have any changeable state
 class ZombieAttr {
 public:
-	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime);
+	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime = 0);
 	ZombieAttr() : zombie_type_(ecf::Child::NOT_SET), action_(ecf::User::BLOCK), zombie_lifetime_(0)  {}
 
  	bool operator==(const ZombieAttr& rhs) const;

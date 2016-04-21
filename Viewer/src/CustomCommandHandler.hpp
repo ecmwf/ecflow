@@ -23,6 +23,7 @@ public:
 	std::string name()    const {return name_;};
 	std::string command() const {return command_;};
 	bool inContextMenu()  const {return inContextMenu_;};
+	std::string contextString() const {return (inContextMenu_ ? "yes" : "no");};
 	void set(const std::string &name, const std::string &command, bool context);
 	void save(VSettings *vs);
 
@@ -41,6 +42,9 @@ public:
 
 	virtual CustomCommand* add(const std::string& name, const std::string& command, bool context, bool WriteSettings) = 0;
 	CustomCommand* replace(int index, const std::string& name, const std::string& command, bool context);
+	CustomCommand* replace(int index, const CustomCommand &cmd);
+	CustomCommand* duplicate(int index);
+	void remove(int index);
 	//void remove(const std::string& name);
 	//void remove(CustomCommand*);
 	//CustomCommand* find(const std::string& name) const;
@@ -53,9 +57,11 @@ public:
 	int findIndexFromName(const std::string& name) const;
 	int numCommands() {return items_.size();};
 	CustomCommand *commandFromIndex(int i) {return items_[i];};
+	bool stringToBool(std::string &str);
+	void swapCommandsByIndex(int i1, int i2);
+	void writeSettings();
 
 protected:
-	void writeSettings();
 	void readSettings();
 
 	std::string dirPath_;

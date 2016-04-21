@@ -26,6 +26,7 @@ public:
 	std::string windowFile() const;
 	std::string settingsFile() const ;
 	std::string recentCustomCommandsFile() const ;
+	std::string savedCustomCommandsFile() const ;
 	std::string serverFile(const std::string& serverName) const;
 
 protected:

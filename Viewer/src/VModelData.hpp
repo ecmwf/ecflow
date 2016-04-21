@@ -31,7 +31,7 @@ class ServerHandler;
 class TableNodeFilter;
 class TreeNodeFilter;
 class VParamSet;
-class VAttribute;
+class VAttributeType;
 class VTreeServer;
 class VTableServer;
 class VTree;

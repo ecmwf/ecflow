@@ -261,3 +261,12 @@ void Node::delete_zombie(Child::ZombieType zt)
 {
    if (misc_attrs_) misc_attrs_->delete_zombie(zt);
 }
+
+void Node::deleteLate()
+{
+   delete lateAttr_;
+   lateAttr_ = NULL;
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+
+

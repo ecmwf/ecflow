@@ -62,7 +62,8 @@ static AlterCmd::Delete_attr_type deleteAttrType(const std::string& s)
 	if (s == "limit") return AlterCmd::DEL_LIMIT;
 	if (s == "limit_path") return AlterCmd::DEL_LIMIT_PATH;
 	if (s == "inlimit") return AlterCmd::DEL_INLIMIT;
-	if (s == "zombie") return AlterCmd::DEL_ZOMBIE;
+   if (s == "zombie") return AlterCmd::DEL_ZOMBIE;
+   if (s == "late") return AlterCmd::DEL_LATE;
 	return AlterCmd::DELETE_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Delete_attr_type d)
@@ -83,7 +84,8 @@ static std::string to_string(AlterCmd::Delete_attr_type d)
 	case AlterCmd::DEL_LIMIT:     return "limit"; break;
 	case AlterCmd::DEL_LIMIT_PATH:return "limit_path"; break;
 	case AlterCmd::DEL_INLIMIT:   return "inlimit";  break;
-	case AlterCmd::DEL_ZOMBIE:    return "zombie";  break;
+   case AlterCmd::DEL_ZOMBIE:    return "zombie";  break;
+   case AlterCmd::DEL_LATE:      return "late";  break;
 	case AlterCmd::DELETE_ATTR_ND: break;
 	default: break;
 	}
@@ -91,7 +93,7 @@ static std::string to_string(AlterCmd::Delete_attr_type d)
 }
 static void validDeleteAttr(std::vector<std::string>& vec)
 {
-	vec.reserve(16);
+	vec.reserve(17);
 	vec.push_back("variable");
 	vec.push_back("time");
 	vec.push_back("today");
@@ -107,7 +109,8 @@ static void validDeleteAttr(std::vector<std::string>& vec)
 	vec.push_back("limit");
 	vec.push_back("limit_path");
 	vec.push_back("inlimit");
-	vec.push_back("zombie");
+   vec.push_back("zombie");
+   vec.push_back("late");
 }
 
 
@@ -118,7 +121,8 @@ static AlterCmd::Add_attr_type addAttrType(const std::string& s)
 	if (s == "date") return AlterCmd::ADD_DATE;
 	if (s == "day") return AlterCmd::ADD_DAY;
 	if (s == "zombie") return AlterCmd::ADD_ZOMBIE;
-	if (s == "variable") return AlterCmd::ADD_VARIABLE;
+   if (s == "variable") return AlterCmd::ADD_VARIABLE;
+   if (s == "late") return AlterCmd::ADD_LATE;
 	return AlterCmd::ADD_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Add_attr_type a) {
@@ -128,20 +132,22 @@ static std::string to_string(AlterCmd::Add_attr_type a) {
 	case AlterCmd::ADD_DATE:    return "date"; break;
 	case AlterCmd::ADD_DAY:     return "day"; break;
 	case AlterCmd::ADD_ZOMBIE:  return "zombie"; break;
-	case AlterCmd::ADD_VARIABLE:return "variable"; break;
+   case AlterCmd::ADD_VARIABLE:return "variable"; break;
+   case AlterCmd::ADD_LATE:    return "late"; break;
 	case AlterCmd::ADD_ATTR_ND:  break;
 	}
 	return string();
 }
 static void validAddAttr(std::vector<std::string>& vec)
 {
-	vec.reserve(6);
+	vec.reserve(7);
 	vec.push_back("time");
 	vec.push_back("today");
 	vec.push_back("date");
 	vec.push_back("day");
 	vec.push_back("zombie");
-	vec.push_back("variable");
+   vec.push_back("variable");
+   vec.push_back("late");
 }
 
 
@@ -160,7 +166,8 @@ static AlterCmd::Change_attr_type changeAttrType(const std::string& s)
 	if (s == "repeat") return AlterCmd::REPEAT;
 	if (s == "limit_max") return AlterCmd::LIMIT_MAX;
 	if (s == "limit_value") return AlterCmd::LIMIT_VAL;
-	if (s == "defstatus") return AlterCmd::DEFSTATUS;
+   if (s == "defstatus") return AlterCmd::DEFSTATUS;
+   if (s == "late") return AlterCmd::LATE;
 	return AlterCmd::CHANGE_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Change_attr_type c)
@@ -179,7 +186,8 @@ static std::string to_string(AlterCmd::Change_attr_type c)
 	case AlterCmd::REPEAT:       return "repeat"; break;
 	case AlterCmd::LIMIT_MAX:    return "limit_max"; break;
 	case AlterCmd::LIMIT_VAL:    return "limit_value"; break;
-	case AlterCmd::DEFSTATUS:    return "defstatus";  break;
+   case AlterCmd::DEFSTATUS:    return "defstatus";  break;
+   case AlterCmd::LATE:         return "late";  break;
 	case AlterCmd::CHANGE_ATTR_ND: break;
 	default: break;
 	}
@@ -187,7 +195,7 @@ static std::string to_string(AlterCmd::Change_attr_type c)
 }
 static void validChangeAttr(std::vector<std::string>& vec)
 {
-	vec.reserve(15);
+	vec.reserve(16);
 	vec.push_back("variable");
 	vec.push_back("clock_type");
 	vec.push_back("clock_gain");
@@ -202,7 +210,8 @@ static void validChangeAttr(std::vector<std::string>& vec)
 	vec.push_back("limit_max");
 	vec.push_back("limit_value");
 	vec.push_back("defstatus");
-	vec.push_back("free_password");
+   vec.push_back("free_password");
+   vec.push_back("late");
 }
 
 //=======================================================================================
@@ -319,7 +328,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 			case AlterCmd::DEL_LIMIT:     node->deleteLimit(name_);break;
 			case AlterCmd::DEL_LIMIT_PATH:node->delete_limit_path(name_,value_);break;
 			case AlterCmd::DEL_INLIMIT:   node->deleteInlimit(name_); break;
-			case AlterCmd::DEL_ZOMBIE:    node->deleteZombie(name_); break;
+         case AlterCmd::DEL_ZOMBIE:    node->deleteZombie(name_); break;
+         case AlterCmd::DEL_LATE:      node->deleteLate(); break;
 			case AlterCmd::DELETE_ATTR_ND: break;
 			default: break;
 			}
@@ -343,7 +353,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 			case AlterCmd::REPEAT:      node->changeRepeat(name_); break;            //
 			case AlterCmd::LIMIT_MAX:   node->changeLimitMax(name_,value_);break;    // value must be convertible to int
 			case AlterCmd::LIMIT_VAL:   node->changeLimitValue(name_,value_); break; // value < limit max, & value must be convertible to an int
-			case AlterCmd::DEFSTATUS:   node->changeDefstatus(name_);  break;        // must be a valid state
+         case AlterCmd::DEFSTATUS:   node->changeDefstatus(name_);  break;        // must be a valid state
+         case AlterCmd::LATE:        node->changeLate(LateAttr::create(name_)); break; // must be a valid late
 			case AlterCmd::CHANGE_ATTR_ND: break;
 			default: break;
 			}
@@ -359,7 +370,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 			case AlterCmd::ADD_DATE:    node->addDate( DateAttr::create(name_) ); break;
 			case AlterCmd::ADD_DAY:     node->addDay( DayAttr::create(name_) ); break;
 			case AlterCmd::ADD_ZOMBIE:  node->addZombie( ZombieAttr::create(name_) ); break;
-			case AlterCmd::ADD_VARIABLE:node->add_variable( name_, value_); break;
+         case AlterCmd::ADD_VARIABLE:node->add_variable( name_, value_); break;
+         case AlterCmd::ADD_LATE:    node->addLate( LateAttr::create(name_)); break;
 			case AlterCmd::ADD_ATTR_ND:  break;
 			}
 		}
@@ -390,21 +402,21 @@ const char* AlterCmd::desc() {
          "  arg1 = [ delete | change | add | set_flag | clear_flag]\n"
          "           one option must be specified\n"
          "  arg2 = For delete:\n"
-         "           [ variable | time | today | date  | day | cron | event | meter |\n"
+         "           [ variable | time | today | date  | day | cron | event | meter | late |\n"
          "             label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
          "         For change:\n"
          "           [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-         "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus ]\n"
+         "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late ]\n"
          "             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
          "             the change to take effect fully.\n"
          "         For add:\n"
-         "           [ variable | time | today | date | day | zombie ]\n"
+         "           [ variable | time | today | date | day | zombie | late ]\n"
          "         For set_flag and clear_flag:\n"
          "           [ force_aborted | user_edit | task_aborted | edit_failed |\n"
          "             ecfcmd_failed | no_script | killed | migrated | late |\n"
          "             message | complete | queue_limit | task_waiting | locked | zombie ]\n"
          "  arg3 = name/value\n"
-         "         when changing, attributes like variable,meter,event,label,limits\n"
+         "         when changing, attributes like variable,meter,event,label,limits,late\n"
          "         we expect arguments to be quoted\n"
          "  arg4 = new_value\n"
          "         specifies the new value only used for 'change'\n"
@@ -513,7 +525,8 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
 		case AlterCmd::ADD_TODAY: (void) TimeSeries::create(name); break;
 		case AlterCmd::ADD_DATE:  (void) DateAttr::create(name); break;
 		case AlterCmd::ADD_DAY:   (void) DayAttr::create(name); break;
-		case AlterCmd::ADD_ZOMBIE:(void) ZombieAttr::create(name); break;
+      case AlterCmd::ADD_ZOMBIE:(void) ZombieAttr::create(name); break;
+      case AlterCmd::ADD_LATE:  (void) LateAttr::create(name); break;
 		case AlterCmd::ADD_VARIABLE: {
 			if (options.size() == 3 && paths.size() > 1) {
 				// variable value may be a path, hence it will be in the paths parameter
@@ -547,7 +560,7 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
 void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const
 {
 	// options[0] = delete
-	// options[1] = variable | time | today | date | day | cron | event | meter | label | trigger | complete | repeat | limit | limit_path | inlimit | zombie
+	// options[1] = variable | time | today | date | day | cron | event | meter | label | trigger | complete | repeat | limit | limit_path | inlimit | zombie |late
 	// options[2] = name ( of object to be delete ) optional
 	// options[3] = limit_path (optional *ONLY* applicable for limit_path, specifies the path to be deleted
 	AlterCmd::Delete_attr_type theAttrType = deleteAttrType(options[1]);
@@ -621,9 +634,10 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
 			if (!name.empty()) Label check(name,"value");  // will throw if not valid
 			break;
 		}
-		case AlterCmd::DEL_TRIGGER:  break; // there can only be on trigger per node, so we delete by path
-		case AlterCmd::DEL_COMPLETE: break; // there can only be on complete per node, so we delete by path
-		case AlterCmd::DEL_REPEAT:   break; // there can only be on repeat per node, so we delete by path
+		case AlterCmd::DEL_TRIGGER:  break; // there can only be one trigger per node, so we delete by path
+		case AlterCmd::DEL_COMPLETE: break; // there can only be one complete per node, so we delete by path
+      case AlterCmd::DEL_REPEAT:   break; // there can only be one repeat per node, so we delete by path
+      case AlterCmd::DEL_LATE:     break; // there can only be one late per node, so we delete by path
 		case AlterCmd::DEL_LIMIT:    {
 			if (!name.empty()) Limit check(name,10);  // will throw if not valid
 			break;
@@ -683,7 +697,7 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
 void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const
 {
 	// options[0] = change
-	// options[1] = variable | clock_type | clock_gain | clock_date | clock_sync | event | meter | label | trigger | complete | repeat | limit_max | limit_value | defstatus  ]
+	// options[1] = variable | clock_type | clock_gain | clock_date | clock_sync | event | meter | label | trigger | complete | repeat | limit_max | limit_value | defstatus | late ]
 	// options[2] = name
 	// options[3] = value
 
@@ -826,6 +840,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
 		break; }
 
+
 	case AlterCmd::LABEL: {
 	   // ECFLOW-480 take into account label values that is a path, add ing quotes around the value does not help:
       // Note boost program options will remove the quotes around the value
@@ -845,6 +860,17 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 		value = options[3];
 		Label check(name,value); // Check name , by creating
 		break; }
+
+   case AlterCmd::LATE: {
+      if (options.size() != 3) {
+         ss << "AlterCmd: change: expected three args: change late \"late -s +00:15  -a  20:00  -c +02:00\" <path_to_node>";
+         ss << " but found only " << (options.size() + paths.size()) << " arguments\n";
+         ss << dump_args(options,paths) << "\n";
+         throw std::runtime_error( ss.str() );
+      }
+      name = options[2];
+      (void) LateAttr::create(name); // Check we can create the late
+      break; }
 
 	case AlterCmd::TRIGGER: {
 		// ECFLOW-137, if the expression contains a leading '/' and *no* spaces,

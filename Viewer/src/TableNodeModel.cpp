@@ -21,7 +21,7 @@
 #include "VNode.hpp"
 #include "VNState.hpp"
 
-#define _UI_TABLENODEMODEL_DEBUG
+//#define _UI_TABLENODEMODEL_DEBUG
 
 //static int hitCount=0;
 

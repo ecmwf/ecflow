@@ -82,4 +82,55 @@ BOOST_AUTO_TEST_CASE( test_late )
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
 
+BOOST_AUTO_TEST_CASE( test_late_hierarchically )
+{
+   // ECFLOW-610
+   DurationTimer timer;
+   cout << "Test:: ...test_late_hierarchically " << flush;
+   char* the_env = getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS");
+   if (the_env) {
+      std::cout << "\n    Disable test_late_hierarchically for old server *************************************************************\n";
+      return;
+   }
+   TestClean clean_at_start_and_end;
+
+   /// This test will sleep longer than the job submission interval
+   /// which cause the task to be late
+   /// as the active time has been set for 1 minute.
+   /// The check for lateness is ONLY done are server poll time.
+   /// Hence the task run time must be at least twice the poll time.
+   Defs theDefs;
+   {
+      suite_ptr suite = theDefs.add_suite("test_late_hierarchically");
+      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()*2) ); // this will cause the late
+      ecf::LateAttr lateAttr;
+      lateAttr.addComplete( ecf::TimeSlot(0,1), true);
+      suite->addLate( lateAttr );
+
+      family_ptr fam = suite->add_family("f1");
+      fam->add_task("t1");
+      fam->add_task("t2");
+   }
+
+   ServerTestHarness serverTestHarness;
+   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_late_hierarchically.def"));
+
+   TestFixture::client().set_throw_on_error(true);
+   TestFixture::client().sync_local();
+   BOOST_CHECK_MESSAGE( TestFixture::client().defs(),"Expected defs");
+
+   node_ptr t1 = TestFixture::client().defs()->findAbsNode("/test_late_hierarchically/f1/t1");
+   BOOST_CHECK_MESSAGE( t1,"Expected task to be found");
+   BOOST_CHECK_MESSAGE( t1->flag().is_set(ecf::Flag::LATE),"Expected late flag to be set");
+
+   node_ptr t2 = TestFixture::client().defs()->findAbsNode("/test_late_hierarchically/f1/t2");
+   BOOST_CHECK_MESSAGE( t2,"Expected task to be found");
+   BOOST_CHECK_MESSAGE( t2->flag().is_set(ecf::Flag::LATE),"Expected late flag to be set");
+
+
+   // cout << TestFixture::client().defs() << "\n";
+
+   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+}
+
 BOOST_AUTO_TEST_SUITE_END()

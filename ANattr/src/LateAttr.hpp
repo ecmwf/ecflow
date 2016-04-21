@@ -24,8 +24,13 @@ namespace ecf { class Calendar;} // forward declare class
 
 namespace ecf {
 /// ========================================================================
-/// Use compiler ,  destructor, assignment, copy constructor,
+/// Use compiler,  destructor, assignment, copy constructor,
 ///
+/// ************************************************************************
+/// late attribute: Only applies to a task, it can be set on suite/family
+///                 but this is treated as an inherited attribute.
+///                 late attribute lower down the hierarchy overrides it.
+/// ************************************************************************
 /// The late late attribute will not work correctly when the suites clock
 /// start and stops with the server. Since the late relies on real time
 /// for some of its functionality.
@@ -37,10 +42,10 @@ namespace ecf {
 /// -c Complete : The time node must become complete (format {+}hh:mm). If relative, time is
 ///               taken from the time the node became active, otherwise node must be complete by
 ///               the time given.
-/// ===========================================================================
+/// ========================================================================
 class LateAttr  {
 public:
-	LateAttr();
+   LateAttr();
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const LateAttr& rhs) const;
@@ -62,13 +67,17 @@ public:
 
 	/// Given the state and time of state change, and calendar work out if we are late
 	/// if we are sets the late flag
-	void checkForLateness( const std::pair<NState,boost::posix_time::time_duration>&  state, const ecf::Calendar& c );
+   void checkForLateness( const std::pair<NState,boost::posix_time::time_duration>&  state, const ecf::Calendar& c );
+   bool check_for_lateness( const std::pair<NState,boost::posix_time::time_duration>&  state, const ecf::Calendar& c ) const;
 
 	///  To be used by GUI to inform used that a node is late
 	bool isLate() const { return isLate_;}
 
 	/// To be called at begin and re-queue time
 	void reset() { setLate(false); }
+
+	// Overide this late attributes with the settings form the input.
+	void override_with(LateAttr*);
 
 	// The state_change_no is never reset. Must be incremented if it can affect equality
  	unsigned int state_change_no() const { return state_change_no_; }
@@ -77,8 +86,11 @@ public:
 	void setLate(bool f);
 
 	std::string toString() const;
-        std::string name() const { return toString(); }
+   std::string name() const { return toString(); }
   
+   static void parse(LateAttr&, const std::string& line, const std::vector<std::string >& lineTokens, size_t index);
+   static LateAttr create(const std::string& lateString);
+
 private:
 
 	TimeSlot submitted_;  // relative by default
@@ -90,15 +102,15 @@ private:
 
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int /*version*/) {
-    	 ar & submitted_;
-         ar & active_;
-         ar & complete_;
-         ar & completeIsRelative_;
-         ar & isLate_;
-    }
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int /*version*/) {
+	   ar & submitted_;
+	   ar & active_;
+	   ar & complete_;
+	   ar & completeIsRelative_;
+	   ar & isLate_;
+	}
 };
 
 }
