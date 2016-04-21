@@ -704,6 +704,8 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 	if(data.count() !=3)
 			return;
 
+    int triggerType=data[1].toInt();
+
 	QString	text=data.at(2);
 
     int offset=2;
@@ -739,8 +741,11 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 	painter->drawRect(fillRect);
 
 	//Draw text
-	painter->setPen(Qt::black);
-	painter->setFont(font);
+    if(triggerType==0)
+        painter->setPen(Qt::black);
+    else
+        painter->setPen(Qt::blue);
+    painter->setFont(font);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
 	if(setClipRect)
@@ -848,10 +853,10 @@ void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyl
 
 void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
-	if(data.count() != 3)
+    if(data.count() < 3)
 			return;
 
-	QString name=data.at(1) + ":";
+    QString name=data.at(1) + "=...";
 	QString val=data.at(2);
 
     int offset=2;
@@ -864,7 +869,6 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 
 	//The text rectangle
 	QFont nameFont=attrFont_;
-	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
 	QRect nameRect = fillRect.adjusted(offset,0,0,0);
@@ -872,14 +876,22 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 
 	//The value rectangle
 	QFont valFont=attrFont_;
-	fm=QFontMetrics(valFont);
+    valFont.setBold(true);
+    fm=QFontMetrics(valFont);
 	int valWidth=fm.width(val);
 	QRect valRect = nameRect;
 	valRect.setLeft(nameRect.right()+fm.width('A'));
 	valRect.setWidth(valWidth);
 
+    //...
+    fm=QFontMetrics(nameFont);
+    int dotWidth=fm.width("...");
+    QRect dotRect = valRect;
+    dotRect.setLeft(valRect.right()+fm.width('A'));
+    dotRect.setWidth(dotWidth);
+
 	//Adjust the filled rect width
-	fillRect.setRight(valRect.right()+offset);
+    fillRect.setRight(dotRect.right()+offset);
 
 	//Define clipping
 	int rightPos=fillRect.right()+1;
@@ -899,6 +911,11 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 	painter->setPen(Qt::black);
 	painter->setFont(valFont);
 	painter->drawText(valRect,Qt::AlignLeft | Qt::AlignVCenter,val);
+
+    //Draw dots
+    painter->setPen(Qt::black);
+    painter->setFont(nameFont);
+    painter->drawText(dotRect,Qt::AlignLeft | Qt::AlignVCenter,"...");
 
 	if(setClipRect)
 	{

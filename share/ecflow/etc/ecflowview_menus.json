@@ -702,7 +702,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "label or meter or limit",
+            "visible_for"    : "label or meter or limit or repeat",
             "command"        : "edit",
             "handler"        : "tree",
             "view"           : "tree"

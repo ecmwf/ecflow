@@ -42,6 +42,20 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
 
 }
 
+void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
+                                    const std::string& action, const std::string& type,
+                                    const std::string& value)
+{
+    cmd.push_back("ecflow_client");
+    cmd.push_back("--alter");
+    cmd.push_back(action);
+    cmd.push_back(type);
+    cmd.push_back(value);
+
+    cmd.push_back("<full_name>");
+}
+
+
 QString VAttribute::name() const
 {
     if(data_.count() >= 2)

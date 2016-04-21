@@ -48,13 +48,13 @@ public:
     QString toolTip(QStringList d) const;
 };
 
-
 class VRepeatAttribute : public VAttributeType
 {
 public:
     explicit VRepeatAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 class VTriggerAttribute : public VAttributeType
@@ -62,7 +62,8 @@ class VTriggerAttribute : public VAttributeType
 public:
     explicit VTriggerAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 class VLabelAttribute : public VAttributeType
@@ -80,7 +81,8 @@ class VDateAttribute : public VAttributeType
 public:
     explicit VDateAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 class VTimeAttribute : public VAttributeType
@@ -88,7 +90,8 @@ class VTimeAttribute : public VAttributeType
 public:
     explicit VTimeAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 class VLimitAttribute : public VAttributeType
@@ -105,7 +108,8 @@ class VLimiterAttribute : public VAttributeType
 public:
     explicit VLimiterAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 class VLateAttribute : public VAttributeType
@@ -113,7 +117,8 @@ class VLateAttribute : public VAttributeType
 public:
     explicit VLateAttribute(const std::string& n) : VAttributeType(n) {}
 	int num(const VNode *node);
-	bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
 };
 
 class VVarAttribute : public VAttributeType
@@ -744,6 +749,18 @@ bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
     return false;
 }
 
+QString VLimiterAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Limiter<br>";
+    if(d.count() >=3)
+    {
+        t+="<b>Limit:</b> " + d[1] + "<br>";
+        t+="<b>Node:</b> " + d[2];
+
+    }
+    return t;
+}
+
 //================================
 //Triggers
 //================================
@@ -756,13 +773,14 @@ int VTriggerAttribute::num(const VNode *vnode)
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
-
-	return (node->get_trigger() != NULL || node->get_complete()!= NULL)?1:0;
+    int num=(node->get_trigger())?1:0;
+    num+=(node->get_complete())?1:0;
+    return num;
 }
 
 bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
-	if(vnode->isServer())
+    if(vnode->isServer())
 		return false;
 
 	node_ptr node=vnode->node();
@@ -772,24 +790,65 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 #ifdef _UI_ATTR_DEBUG
     UserMessage::debug("VTriggerAttribute::getData -->");
 #endif
-	Expression* eT=node->get_trigger();
-	Expression* eC=node->get_complete();
-	if(row ==0 && (eT || eC))
+
+    Expression* eT=node->get_trigger();
+    Expression* eC=node->get_complete();
+
+    bool getTrigger=false;
+    bool getComplete=false;
+
+    if(row == 0)
+    {    if(eT)
+            getTrigger=true;
+        else if(eC)
+            getComplete=true;
+    }
+    else if(row==1 && eC)
+        getComplete=true;
+
+    if(getTrigger)
+    {
+        data << qName_;
+        data << "0" << QString::fromStdString(eT->expression());
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
+    }
+    else if(getComplete)
 	{
-		data << qName_;
-		if(eT) data << "0" << QString::fromStdString(eT->expression());
-		else if(eC) data << "1" << QString::fromStdString(eC->expression());
+		data << qName_;		
+        data << "1" << QString::fromStdString(eC->expression());
 #ifdef _UI_ATTR_DEBUG
         UserMessage::debug("  data=" + data.join(",").toStdString());
 #endif
         return true;
 	}
 
-	size=(eT || eC)?1:0;
+    size=(eT)?1:0;
+    size+=(eC)?1:0;
+
 #ifdef _UI_ATTR_DEBUG
     UserMessage::debug("  size=" + QString::number(size).toStdString());
 #endif
     return false;
+}
+
+QString VTriggerAttribute::toolTip(QStringList d) const
+{
+    QString t;
+    if(d.count() >=3)
+    {
+        if(d[1] == "0")
+            t+="<b>Type:</b> Trigger<br>";
+        else if(d[1] == "1")
+            t+="<b>Type:</b> Complete<br>";
+        else
+            return t;
+
+        t+="<b>Expression:</b> " + d[2];
+    }
+    return t;
 }
 
 //================================
@@ -844,6 +903,18 @@ bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     return false;
 }
 
+QString VTimeAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Time<br>";
+    if(d.count() >=2)
+    {
+        t+="<b>Name:</b> " + d[1];
+    }
+    return t;
+}
+
+
+
 //================================
 //Date
 //================================
@@ -894,6 +965,15 @@ bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	return false;
 }
 
+QString VDateAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Date<br>";
+    if(d.count() >=2)
+    {
+        t+="<b>Name:</b> " + d[1];
+    }
+    return t;
+}
 
 //================================
 //Repeat
@@ -925,7 +1005,11 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     if(row ==0 && !r.empty())
 	{
 		data << qName_ << QString::fromStdString(r.name()) <<
-		QString::fromStdString(r.valueAsString());
+        QString::fromStdString(r.valueAsString()) <<
+        QString::fromStdString(r.value_as_string(r.start())) <<
+        QString::fromStdString(r.value_as_string(r.end())) <<
+        QString::number(r.value()) << QString::number(r.start()) << QString::number(r.end()) <<
+        QString::number(r.step());
 #ifdef _UI_ATTR_DEBUG
         UserMessage::debug("  data=" + data.join(",").toStdString());
 #endif
@@ -936,6 +1020,21 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     UserMessage::debug("  size=" + QString::number(size).toStdString());
 #endif
     return false;
+}
+
+QString VRepeatAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Repeat<br>";
+    if(d.count() >=9)
+    {
+        t+="<b>Name:</b> " + d[1] + "<br>";
+        t+="<b>Value:</b> " + d[2] + "<br>";
+        t+="<b>Start:</b> " + d[3] + "<br>";
+        t+="<b>End:</b> " + d[4] + "<br>";
+        t+="<b>Step:</b> " + d[8];
+
+    }
+    return t;
 }
 
 //================================
@@ -978,6 +1077,16 @@ bool VLateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     UserMessage::debug("  size=" + QString::number(size).toStdString());
 #endif
     return false;
+}
+
+QString VLateAttribute::toolTip(QStringList d) const
+{
+    QString t="<b>Type:</b> Late<br>";
+    if(d.count() >=2)
+    {
+        t+="<b>Name:</b> " + d[1];
+    }
+    return t;
 }
 
 static SimpleLoader<VAttributeType> loader("attribute");

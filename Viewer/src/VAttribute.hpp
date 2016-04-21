@@ -35,6 +35,10 @@ public:
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,
                          const std::string& name,const std::string& value);
+
+    static void buildAlterCommand(std::vector<std::string>& cmd,
+                         const std::string& action, const std::string& type,
+                         const std::string& value);
 protected:
     VAttributeType* type_;
     QStringList data_;

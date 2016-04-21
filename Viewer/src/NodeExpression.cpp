@@ -842,6 +842,8 @@ bool AttributeCondition::execute(VItem* item)
             return a->type()->name() == "event";
         case NodeExpressionParser::LIMIT:
             return a->type()->name() == "limit";
+        case NodeExpressionParser::REPEAT:
+            return a->type()->name() == "repeat";
         default:
             break;
     }

@@ -101,6 +101,7 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
+    RepeatEditDialog.cpp
     ScriptItemWidget.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
@@ -152,6 +153,7 @@ set(viewer_srcs
     VNState.cpp
     VParam.cpp
     VProperty.cpp   
+    VRepeat.cpp
     VReply.cpp
     VServerSettings.cpp
     VSettings.cpp
@@ -242,6 +244,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp
+    RepeatEditDialog.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
     ServerHandler.hpp
@@ -307,7 +310,8 @@ set(viewer_wrap_ui_files
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui
-    SearchLineWidget.ui 
+    RepeatEditDialog.ui
+    SearchLineWidget.ui
     ServerAddDialog.ui
     ServerEditDialog.ui 
     ServerListDialog.ui

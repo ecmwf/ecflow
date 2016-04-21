@@ -45,6 +45,8 @@ class AttributeEditor : public QDialog
     Q_OBJECT
 public:
     AttributeEditor(VInfo_ptr,QWidget* parent=0);
+    virtual ~AttributeEditor() {}
+
     static void edit(VInfo_ptr,QWidget* parent=0);
 
 public Q_SLOTS:
