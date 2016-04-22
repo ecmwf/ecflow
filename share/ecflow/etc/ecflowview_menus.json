@@ -702,7 +702,15 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "label or meter or limit or repeat",
+            "visible_for"    : "label or meter or limit",
+            "command"        : "edit",
+            "handler"        : "tree",
+            "view"           : "tree"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Edit ...",
+            "visible_for"    : "repeat  and not repeat_day",
             "command"        : "edit",
             "handler"        : "tree",
             "view"           : "tree"

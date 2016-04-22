@@ -83,7 +83,27 @@
  					"default": "font(,)"
  				} 				
 			},
-			
+
+            "attribute" : {
+
+                "eventFillColour"  : {
+                    "label"   : "Event set colour",
+                    "default" : "rgb(0,0,255)"
+                },
+                "meterFillColour"  : {
+                    "label"   : "Meter colour",
+                    "default" : "rgb(0,0,255)"
+                },
+                "meterThresholdColour"  : {
+                    "label"   : "Meter threshold colour",
+                    "default" : "rgb(0,0,255)"
+                },
+                "limitFillColour"  : {
+                    "label"   : "Limit colour",
+                    "default" : "rgb(0,255,0)"
+                }
+            },
+
            "textEdit" : {
 			     
                  "numAreaBackground" : {

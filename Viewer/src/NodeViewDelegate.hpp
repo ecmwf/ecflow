@@ -36,7 +36,8 @@ public:
 protected:
 	void adjustIconSize();
 	virtual void updateSettings()=0;
-
+    void addBaseSettings(std::vector<std::string>&);
+    void updateBaseSettings();
 
 	virtual void renderStatus(QPainter *painter,const QModelIndex& index,
 	                          const QStyleOptionViewItemV4& option) const;
@@ -78,6 +79,10 @@ protected:
 	bool useStateGrad_;
 	mutable QLinearGradient grad_;
 	static int lighter_;
+    QBrush eventFillBrush_;
+    QBrush eventBgBrush_;
+    QBrush meterFillBrush_;
+    QBrush limitFillBrush_;
 
 };
 

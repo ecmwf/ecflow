@@ -88,6 +88,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
         propVec.push_back("view.tree.background");
         propVec.push_back("view.common.node_style");
         propVec.push_back("view.common.node_gradient");
+
+        //Base settings
+        addBaseSettings(propVec);
 	}
 
     prop_=new PropertyMapper(propVec,this);
@@ -172,6 +175,9 @@ void TreeNodeViewDelegate::updateSettings()
     {
         bgCol_=p->value().value<QColor>();
     }
+
+    //Update the settings handled by the base class
+    updateBaseSettings();
 }
 
 QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const

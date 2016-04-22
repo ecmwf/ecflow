@@ -25,6 +25,7 @@
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "VFilter.hpp"
+#include "VRepeat.hpp"
 
 std::map<std::string,VAttributeType*> VAttributeType::items_;
 
@@ -1004,12 +1005,16 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     const Repeat& r=node->repeat();
     if(row ==0 && !r.empty())
     {
-        data << qName_ << QString::fromStdString(r.name()) <<
-        QString::fromStdString(r.valueAsString()) <<
-        QString::fromStdString(r.value_as_string(r.start())) <<
-        QString::fromStdString(r.value_as_string(r.end())) <<
-        QString::number(r.value()) << QString::number(r.start()) << QString::number(r.end()) <<
-        QString::number(r.step());
+        //We try to avoid creating a VRepeat object everytime we are here
+        std::string type=VRepeat::type(r);
+
+        data << qName_ << QString::fromStdString(type) <<
+             QString::fromStdString(r.name()) <<
+             QString::fromStdString(r.valueAsString()) <<
+             QString::fromStdString(r.value_as_string(r.start())) <<
+             QString::fromStdString(r.value_as_string(r.end())) <<
+             QString::number(r.step());
+
 #ifdef _UI_ATTR_DEBUG
         UserMessage::debug("  data=" + data.join(",").toStdString());
 #endif
@@ -1024,16 +1029,25 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 QString VRepeatAttribute::toolTip(QStringList d) const
 {
-    QString t="<b>Type:</b> Repeat<br>";
-    if(d.count() >=9)
+    QString t="<b>Type:</b> Repeat";
+    if(d.count() == 7)
     {
-        t+="<b>Name:</b> " + d[1] + "<br>";
-        t+="<b>Value:</b> " + d[2] + "<br>";
-        t+="<b>Start:</b> " + d[3] + "<br>";
-        t+="<b>End:</b> " + d[4] + "<br>";
-        t+="<b>Step:</b> " + d[8];
+        t+=" " + d[1] + "<br>";
 
+        if(d[1] != "day")
+        {
+            t+="<b>Name:</b> " + d[2] + "<br>";
+            t+="<b>Value:</b> " + d[3] + "<br>";
+            t+="<b>Start:</b> " + d[4] + "<br>";
+            t+="<b>End:</b> " + d[5] + "<br>";
+            t+="<b>Step:</b> " + d[6];
+        }
+        else
+        {
+            t+="<b>Step:</b> " + d[6];
+        }
     }
+
     return t;
 }
 

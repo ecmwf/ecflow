@@ -178,7 +178,9 @@ bool NodeExpressionParser::isAttribute(const std::string &str) const
 
 bool NodeExpressionParser::isAttributeState(const std::string &str) const
 {
-    return (str == "event_set" || str == "event_clear");
+    return (str == "event_set" || str == "event_clear" ||
+            str == "repeat_date" || str == "repeat_int" || str == "repeat_string" || str == "repeat_enum" ||
+            str == "repeat_day");
 }
 
 // NodeExpressionParser::popLastNOperands
@@ -878,7 +880,23 @@ bool AttributeStateCondition::execute(VItem* item)
             else if(attrState_ == "event_clear")
                 return v == "0";
          }
+    }   
+    else if(attrState_.startsWith("repeat_"))
+    {
+        if(a->type()->name() == "repeat" && a->data().count() >= 2)
+        {
+            QString v=a->data()[1];
+            if(attrState_ == "repeat_date")
+                return v == "date";
+            else if(attrState_ == "repeat_int")
+                return v == "integer";
+            else if(attrState_ == "repeat_string")
+                return v == "string";
+            else if(attrState_ == "repeat_enum")
+                return v == "enumeration";
+            else if(attrState_ == "repeat_day")
+                return v == "day";
+         }
     }
-
     return false;
 }

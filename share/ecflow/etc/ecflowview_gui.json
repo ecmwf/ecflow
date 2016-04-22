@@ -133,7 +133,21 @@
                     
                         "line" : "background"                                          
                     }                                          
-                }                                      
+                },
+                "tab" : {
+
+                    "label"  : "Attributes",
+
+                    "group" : {
+                        "title" : "Options",
+                        "prefix" : "view.attribute",
+
+                        "line" : "eventFillColour",
+                        "line" : "meterFillColour",
+                        "line" : "limitFillColour"
+                    }
+                }
+
 			}
  		},	
             

@@ -12,28 +12,31 @@
 #define VREPEAT_HPP
 
 #include <string>
+#include <map>
 #include "RepeatAttr.hpp"
 
 class VRepeat
 {
 public:
-    enum Type {StringType,IntType,NoType};
+    enum ValyeType {StringType,IntType,NoType};
 
     virtual ~VRepeat() {}
     int startIndex() const {return 0;}
     virtual int endIndex() const=0;
     virtual int currentIndex() const=0;
     virtual int step() const {return repeat_.step();}
-    virtual std::string value(int index) const=0;
-    Type type() const {return type_;}
+    virtual std::string value(int index) const=0;    
+    ValyeType type() const {return valueType_;}
 
     static VRepeat* make(const Repeat& r);
+    static const std::string& type(const Repeat& r);
 
 protected:
-    VRepeat(const Repeat& r,Type t) : repeat_(r), type_(t) {}
+    VRepeat(const Repeat& r,ValyeType t) : repeat_(r), valueType_(t) {}
 
     const Repeat& repeat_;
-    Type type_;
+    ValyeType valueType_;
+    static std::map<std::string,std::string> typeNames_;
 };
 
 class VRepeatDate : public VRepeat

@@ -39,7 +39,7 @@ RepeatEditDialog::RepeatEditDialog(VInfo_ptr info,QWidget* parent) :
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "repeat");
 
-    if(a->data().count() < 6)
+    if(a->data().count() < 7)
         return;
 
     VNode *vnode=info_->node();
@@ -49,12 +49,11 @@ RepeatEditDialog::RepeatEditDialog(VInfo_ptr info,QWidget* parent) :
     const Repeat& r=node->repeat();
     repeat_=VRepeat::make(r);
 
-    QString name=a->data().at(1);
-    nameLabel_->setText(name);
-    valueLe_->setText(a->data().at(2));
-    startLabel_->setText(a->data().at(3));
-    endLabel_->setText(a->data().at(4));
-    stepLabel_->setText(a->data().at(8));
+    nameLabel_->setText(a->data().at(2));
+    valueLe_->setText(a->data().at(3));
+    startLabel_->setText(a->data().at(4));
+    endLabel_->setText(a->data().at(5));
+    stepLabel_->setText(a->data().at(6));
 
     buildList();
 

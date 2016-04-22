@@ -13,6 +13,8 @@
 #include <sstream>
 #include "RepeatAttr.hpp"
 
+std::map<std::string,std::string> VRepeat::typeNames_;
+
 static long ecf_repeat_date_to_julian(long ddate);
 static long ecf_repeat_julian_to_date(long jdate);
 
@@ -87,19 +89,42 @@ long ecf_repeat_date_to_julian(long ddate)
     return j1;
 }
 
+const std::string& VRepeat::type(const Repeat& r)
+{
+    if(typeNames_.empty())
+    {
+        typeNames_["repeat date"]="date";
+        typeNames_["repeat integer"]="integer";
+        typeNames_["repeat string"]="string";
+        typeNames_["repeat enumerated"]="enumerated";
+        typeNames_["repeat day"]="day";
+    }
+
+    static std::string noTypeName="";
+
+    std::string t=r.toString();
+    for(std::map<std::string,std::string>::const_iterator it=typeNames_.begin(); it != typeNames_.end(); ++it)
+    {
+        if(t.find(it->first) == 0)
+            return it->second;
+    }
+
+    return noTypeName;
+}
+
 VRepeat* VRepeat::make(const Repeat& r)
 {
-    std::string t=r.toString();
-    if(t.find("repeat date") == 0)
+    const std::string t=VRepeat::type(r);
+    if(t == "date")
         return new VRepeatDate(r);
-    else if(t.find("repeat day") == 0)
-        return new VRepeatDay(r);
-    else if(t.find("repeat integer") == 0)
+    else if(t == "integer")
         return new VRepeatInt(r);
-    else if(t.find("repeat enumerated") == 0)
-        return new VRepeatEnum(r);
-    else if(t.find("repeat string") == 0)
+    else if(t == "string")
         return new VRepeatString(r);
+    else if(t == "enumerated")
+        return new VRepeatEnum(r);
+    else if(t == "day")
+        return new VRepeatDay(r);
 
     return NULL;
 }
