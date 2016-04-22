@@ -12,6 +12,7 @@
 
 #include "ChangeNotify.hpp"
 #include "ChangeNotifyModel.hpp"
+#include "SessionHandler.hpp"
 #include "TreeView.hpp"
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
@@ -418,7 +419,10 @@ void ChangeNotifyDialog::closeEvent(QCloseEvent* e)
 
 void ChangeNotifyDialog::writeSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-ChangeNotifyDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("ChangeNotifyDialog")),
+                       QSettings::NativeFormat);
 
 	//We have to clear it so that should not remember all the previous values
 	settings.clear();
@@ -431,7 +435,10 @@ void ChangeNotifyDialog::writeSettings()
 
 void ChangeNotifyDialog::readSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-ChangeNotifyDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("ChangeNotifyDialog")),
+                       QSettings::NativeFormat);
 
 	settings.beginGroup("main");
 	if(settings.contains("size"))
