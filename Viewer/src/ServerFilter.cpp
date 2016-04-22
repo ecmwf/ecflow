@@ -115,6 +115,16 @@ bool ServerFilter::isFiltered(ServerItem* item) const
 	return false;
 }
 
+bool ServerFilter::isFiltered(ServerHandler* server) const
+{
+    for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if((*it)->serverHandler() == server)
+            return true;
+    }
+    return false;
+}
+
 void ServerFilter::writeSettings(VSettings* vs) const
 {
 	std::vector<std::string> array;

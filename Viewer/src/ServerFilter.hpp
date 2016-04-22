@@ -43,6 +43,7 @@ public:
 	void addServer(ServerItem*,bool broadcast=true);
 	void removeServer(ServerItem*);
     bool isFiltered(ServerItem*) const;
+    bool isFiltered(ServerHandler*) const;
 
     void writeSettings(VSettings*) const;
     void readSettings(VSettings*);

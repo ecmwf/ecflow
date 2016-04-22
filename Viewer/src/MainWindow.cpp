@@ -375,6 +375,11 @@ void MainWindow::slotContentsChanged()
 	MainWindow::saveContents(NULL);
 }
 
+bool MainWindow::selectInTreeView(VInfo_ptr info)
+{
+    return nodePanel_->selectInTreeView(info);
+}
+
 //==============================================================
 //
 //  Close and quit
@@ -498,6 +503,13 @@ void MainWindow::configChanged(MainWindow* owner)
 {
 	Q_FOREACH(MainWindow *win,windows_)
 			win->rerenderContents();
+}
+
+void MainWindow::changeNotifySelectionChanged(VInfo_ptr info)
+{
+    Q_FOREACH(MainWindow *win,windows_)
+        if(win->selectInTreeView(info))
+            return;
 }
 
 //Return true if close is allowed, false otherwise

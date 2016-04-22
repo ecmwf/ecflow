@@ -12,6 +12,7 @@
 
 #include "ChangeNotify.hpp"
 #include "ChangeNotifyModel.hpp"
+#include "MainWindow.hpp"
 #include "SessionHandler.hpp"
 #include "TreeView.hpp"
 #include "VNodeList.hpp"
@@ -34,10 +35,9 @@ void ChangeNotifyDialogWidget::init(ChangeNotify* notifier)
 {
 	notifier_=notifier;
 
-	tree_->setModel(notifier->model());
+    tree_->setModel(notifier_->model());
 
 	label_->hide();
-
 
 	connect(notifier->data(),SIGNAL(endAppendRow()),
 			this,SLOT(slotAppend()));
@@ -47,6 +47,13 @@ void ChangeNotifyDialogWidget::init(ChangeNotify* notifier)
 
 	connect(notifier->data(),SIGNAL(endReset()),
 			this,SLOT(slotReset()));
+
+    //Selection
+    connect(tree_,SIGNAL(clicked(const QModelIndex&)),
+            this,SLOT(slotSelectItem(const QModelIndex&)));
+
+    connect(tree_,SIGNAL(doubleClicked(const QModelIndex&)),
+            this,SLOT(slotDoubleClickItem(const QModelIndex&)));
 
 
 	/*QString txt=notifier->prop()->param("description");
@@ -83,6 +90,24 @@ void ChangeNotifyDialogWidget::update(ChangeNotify* notifier)
 					     stop: 0 " + bgLight.name() + ", stop: 1 " + bgLight.name() + "); }";
 
 	label_->setStyleSheet(st);
+}
+
+void ChangeNotifyDialogWidget::slotSelectItem(const QModelIndex& idx)
+{
+    //QModelIndexList lst=tree_->selectedIndexes();
+    //if(lst.count() > 0)
+    //{
+        VInfo_ptr info=notifier_->model()->nodeInfo(idx);
+        if(info)
+        {
+            Q_EMIT selectionChanged(info);
+        }
+    //}
+}
+
+void ChangeNotifyDialogWidget::slotDoubleClickItem(const QModelIndex&)
+{
+
 }
 
 //===========================================================
@@ -127,6 +152,9 @@ void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
 	connect(w,SIGNAL(contentsChanged()),
 			this,SLOT(slotContentsChanged()));
 
+    connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
+            this,SLOT(slotSelectionChanged(VInfo_ptr)));
+
 	ignoreCurrentChange_=true;
 	tab_->addTab(w,"");
 	ignoreCurrentChange_=false;
@@ -150,6 +178,11 @@ void ChangeNotifyDialog::slotContentsChanged()
 			decorateTab(idx,w->notifier());
 		}
 	}
+}
+
+void ChangeNotifyDialog::slotSelectionChanged(VInfo_ptr info)
+{
+    MainWindow::changeNotifySelectionChanged(info);
 }
 
 void ChangeNotifyDialog::updateStyleSheet(VProperty *currentProp)

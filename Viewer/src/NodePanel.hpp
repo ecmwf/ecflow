@@ -43,6 +43,7 @@ public:
 	void refreshCurrent();
 	void resetCurrent();
 	VInfo_ptr currentSelection();
+    bool selectInTreeView(VInfo_ptr);
 	void addToDashboard(const std::string& type);
 	void init();
 	void openDialog(VInfo_ptr,const std::string& type);
