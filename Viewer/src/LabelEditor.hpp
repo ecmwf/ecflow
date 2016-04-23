@@ -8,23 +8,32 @@
 //
 //============================================================================
 
-#ifndef LABELEDITDIALOG_HPP
-#define LABELEDITDIALOG_HPP
+#ifndef LABELEDITOR_HPP
+#define LABELEDITOR_HPP
 
-#include "ui_LabelEditDialog.h"
+#include "ui_LabelEditWidget.h"
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
-class LabelEditDialog : private Ui::LabelEditDialog, public AttributeEditor
+class LabelEditor;
+
+class LabelEditWidget :  public QWidget, protected Ui::LabelEditWidget
+{
+friend class LabelEditor;
+public:
+    LabelEditWidget(QWidget *parent=0);
+};
+
+class LabelEditor : public AttributeEditor
 {
 public:
-    LabelEditDialog(VInfo_ptr,QWidget* parent=0);
+    LabelEditor(VInfo_ptr,QWidget* parent=0);
 
 protected:
     void apply();
-
+    LabelEditWidget* w_;
 };
 
-#endif // LABELEDITDIALOG_HPP
+#endif // LABELEDITOR_HPP
 

@@ -8,21 +8,28 @@
 //
 //============================================================================
 
-#include "LabelEditDialog.hpp"
+#include "LabelEditor.hpp"
 
 #include <QtGlobal>
 
+#include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
 
-LabelEditDialog::LabelEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
+LabelEditWidget::LabelEditWidget(QWidget* parent) : QWidget(parent)
 {
     setupUi(this);
+}
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-    valueLe_->setClearButtonEnabled(true);
-#endif
+LabelEditor::LabelEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
+{
+    w_=new LabelEditWidget(this);
+    addForm(w_);
+
+//#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+//    w_->valueTe_->setClearButtonEnabled(true);
+//#endif
 
     VAttribute* a=info_->attribute();
 
@@ -38,20 +45,20 @@ LabelEditDialog::LabelEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEdit
     if(a->data().count() > 2)
         val=a->data().at(2);
 
-    nameLabel_->setText(name);
-    valueLe_->setText(val);
+    w_->nameLabel_->setText(name);
+    w_->valueTe_->setPlainText(val);
 
     header_->setInfo(QString::fromStdString(info_->path()),"Label");
 }
 
-void LabelEditDialog::apply()
+void LabelEditor::apply()
 {
-    std::string val=valueLe_->text().toStdString();
-    std::string name=nameLabel_->text().toStdString();
+    std::string val=w_->valueTe_->toPlainText().toStdString();
+    std::string name=w_->nameLabel_->text().toStdString();
 
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"change","label",name,val);
     ServerHandler::command(info_,cmd);
 }
 
-static AttributeEditorMaker<LabelEditDialog> makerStr("label");
+static AttributeEditorMaker<LabelEditor> makerStr("label");

@@ -10,54 +10,26 @@
 
 #include "AttributeEditor.hpp"
 
+#include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
 
-#include <map>
-
-static std::map<std::string,AttributeEditorFactory*>* makers = 0;
-
-//=========================================================================
-//
-// AttributeEditorFactory
-//
-//=========================================================================
-
-AttributeEditorFactory::AttributeEditorFactory(const std::string& type)
-{
-    if(makers == 0)
-        makers = new std::map<std::string,AttributeEditorFactory*>;
-
-    (*makers)[type] = this;
-}
-
-AttributeEditorFactory::~AttributeEditorFactory()
-{
-    // Not called
-}
-
-AttributeEditor* AttributeEditorFactory::create(const std::string& type,VInfo_ptr info,QWidget* parent)
-{
-    std::map<std::string,AttributeEditorFactory*>::iterator j = makers->find(type);
-    if(j != makers->end())
-        return (*j).second->make(info,parent);
-
-    return 0;
-}
-
-
-//=========================================================================
-//
-// AttributeEditor
-//
-//=========================================================================
-
-
 AttributeEditor::AttributeEditor(VInfo_ptr info,QWidget* parent) : QDialog(parent), info_(info)
-{
-    Q_ASSERT(info && info->isAttribute() && info->attribute());
+{    
+    setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose);
+    setModal(false);
+    Q_ASSERT(info_ && info_->isAttribute() && info_->attribute());
+    messageLabel_->hide();
+    
+    attachInfo();
 }
+
+AttributeEditor::~AttributeEditor()
+{
+    detachInfo();
+}    
 
 void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
 {
@@ -65,15 +37,93 @@ void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
     VAttribute* a=info->attribute();
     Q_ASSERT(a->type());
 
-    if(AttributeEditor* e=AttributeEditorFactory::create(a->type()->strName(),info,parent))
+    if(AttributeEditor* e=AttributeEditorFactory::create(a->type()->strName(),info,0))
     {
-        e->exec();
-        e->deleteLater();
+        e->show();
+        //e->deleteLater();
     }
+}
+
+void AttributeEditor::addForm(QWidget* w)
+{
+    mainLayout_->insertWidget(3,w,1);
 }
 
 void AttributeEditor::accept()
 {
     apply();
     QDialog::accept();
+}
+
+void AttributeEditor::attachInfo()
+{
+    if(info_)
+    {
+        if(info_->server())
+            info_->server()->addServerObserver(this);
+        
+        info_->addObserver(this);
+    } 
+}
+
+void AttributeEditor::detachInfo()
+{
+    if(info_)
+    {
+        if(info_->server())
+            info_->server()->removeServerObserver(this);
+        
+        info_->removeObserver(this);
+    }    
+}
+
+
+void AttributeEditor::notifyServerDelete(ServerHandler* server)
+{
+    if(info_ && info_->server() == server)
+    {
+        close();
+        deleteLater();
+    }
+}
+    
+//This must be called at the beginning of a reset
+void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
+{
+    if(info_)
+    {
+        if(info_->server() && info_->server() == server)
+        {
+            messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reloaded. \
+                   Until it is finished only <b>limited functionalty</b> is avaliable in the Info Panel!");
+
+            messageLabel_->startLoadLabel();
+
+            //setSuspended(true);
+        }
+    }
+}
+
+//This must be called at the end of a reset
+void AttributeEditor::notifyEndServerScan(ServerHandler* server)
+{
+    if(info_)
+    {
+        if(info_->server() && info_->server() == server)
+        {
+            messageLabel_->hide();
+            messageLabel_->clear();
+
+            //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
+            //that notifyEndServerScan() will be first called on the VInfo then on the InfoPanel. So it
+            //is possible that the node exists but is still set to NULL in VInfo.
+            info_->regainData();
+
+            //If the node is not available dataLost() will be called.
+            if(!info_->node())
+                return;
+
+            //setSuspended(false);
+        }
+    }
 }

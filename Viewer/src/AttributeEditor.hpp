@@ -8,55 +8,50 @@
 //
 //============================================================================
 
-#ifndef ATTIBUTEEDITOR_HPP
-#define ATTIBUTEEDITOR_HPP
+#ifndef ATTRIBUTEEDITOR_HPP
+#define ATTRIBUTEEDITOR_HPP
 
 #include <QDialog>
-#include <string>
+
+#include "ServerObserver.hpp"
 #include "VInfo.hpp"
 
-class AttributeEditor;
-class QWidget;
+#include "ui_AttributeEditDialog.h"
 
-class AttributeEditorFactory
+class AttributeEditor : public QDialog, public ServerObserver, public VInfoObserver, protected Ui::AttributeEditDialog
 {
+Q_OBJECT
+
 public:
-    explicit AttributeEditorFactory(const std::string& type);
-    virtual ~AttributeEditorFactory();
+    AttributeEditor(VInfo_ptr info,QWidget* parent);
+    virtual ~AttributeEditor();
+    //From VInfoObserver
+    void notifyDelete(VInfo*) {}
+    void notifyDataLost(VInfo*) {};
 
-    virtual AttributeEditor* make(VInfo_ptr,QWidget*) = 0;
-    static AttributeEditor* create(const std::string&,VInfo_ptr,QWidget*);
+    //From ServerObserver
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
+    void notifyServerDelete(ServerHandler* server);
+    void notifyBeginServerClear(ServerHandler* server);
+    void notifyEndServerClear(ServerHandler* server) {}
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
+    void notifyEndServerScan(ServerHandler* server);
+    void notifyServerConnectState(ServerHandler* server) {};
+    void notifyServerSuiteFilterChanged(ServerHandler* server) {};
+    void notifyServerSyncFinished(ServerHandler* server) {};
 
-private:
-    explicit AttributeEditorFactory(const AttributeEditorFactory&);
-    AttributeEditorFactory& operator=(const AttributeEditorFactory&);
-};
-
-template<class T>
-class AttributeEditorMaker : public AttributeEditorFactory
-{
-    AttributeEditor* make(VInfo_ptr info,QWidget* parent) { return new T(info,parent); }
-public:
-    explicit AttributeEditorMaker(const std::string& t) : AttributeEditorFactory(t) {}
-};
-
-class AttributeEditor : public QDialog
-{
-    Q_OBJECT
-public:
-    AttributeEditor(VInfo_ptr,QWidget* parent=0);
-    virtual ~AttributeEditor() {}
-
-    static void edit(VInfo_ptr,QWidget* parent=0);
+    static void edit(VInfo_ptr info,QWidget *parent);
 
 public Q_SLOTS:
     void accept();
 
 protected:
+    void attachInfo();
+    void detachInfo();
+    void addForm(QWidget* w);
     virtual void apply()=0;
 
     VInfo_ptr info_;
 };
 
-#endif // ATTIBUTEEDITOR_HPP
-
+#endif // ATTRIBUTEEDITOR_HPP

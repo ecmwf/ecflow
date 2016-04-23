@@ -181,7 +181,7 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 	if(!w)
 		return 0;
 
-	//The DashBoard or any of its child cannot be the parent of the
+	//The DashBoard or any of its children cannot be the parent of the
 	//dialog because in this case it would be always on top its parent. This is
 	//the behaviour when the dialog's parent is QMainWindow.
 	DashboardDialog* dia=new DashboardDialog(0);

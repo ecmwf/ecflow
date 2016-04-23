@@ -632,8 +632,8 @@ void InfoPanel::notifyEndServerScan(ServerHandler* server)
             messageLabel_->clear();
 
             //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
-            //the notifyEndServerScan() will be first called on the VInfo then on the InfoPanel. So it
-            //is possible that the not still exists but it is still set to NULL in VInfo.
+            //that notifyEndServerScan() will be first called on the VInfo then on the InfoPanel. So it
+            //is possible that the node exists but is still set to NULL in VInfo.
             info_->regainData();
 
             //If the node is not available dataLost() will be called.
