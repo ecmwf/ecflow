@@ -27,15 +27,23 @@ public:
 
 class MeterEditor : public AttributeEditor
 {
+Q_OBJECT;
 public:
     MeterEditor(VInfo_ptr,QWidget* parent=0);
+    ~MeterEditor();
+
+protected Q_SLOTS:
+    void slotValueChanged(int);
+    void slotResetValue();
 
 protected:
     void apply();
+    void checkButtonStatus();
     void readSettings();
     void writeSettings();
 
-     MeterEditorWidget* w_;
+    MeterEditorWidget* w_;
+    int oriVal_;
 };
 
 #endif // METEREDITOR_HPP

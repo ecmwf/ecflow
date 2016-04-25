@@ -221,7 +221,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LogProvider.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
-    NodeFilterDialog.hpp       
+    MeterEditor.hpp
+    NodeFilterDialog.hpp
     NodePanel.hpp
     NodePathWidget.hpp
     NodeQueryCombo.hpp           

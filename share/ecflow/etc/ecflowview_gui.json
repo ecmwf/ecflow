@@ -144,6 +144,7 @@
 
                         "line" : "eventFillColour",
                         "line" : "meterFillColour",
+                        "line" : "meterThresholdColour",
                         "line" : "limitFillColour"
                     }
                 }

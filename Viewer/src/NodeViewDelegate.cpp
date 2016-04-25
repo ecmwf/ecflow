@@ -67,6 +67,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     eventFillBrush_=QBrush(QColor(0,0,255));
     eventFillBrush_=QBrush(QColor(240,240,240));
     meterFillBrush_=QBrush(QColor(0,0,255));
+    meterThresholdBrush_=QBrush(QColor(0,0,255));
     limitFillBrush_=QBrush(QColor(0,255,0));
 
 	attrRenderers_["meter"]=&NodeViewDelegate::renderMeter;
@@ -98,6 +99,7 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
 {
     propVec.push_back("view.attribute.eventFillColour");
     propVec.push_back("view.attribute.meterFillColour");
+    propVec.push_back("view.attribute.meterThresholdColour");
     propVec.push_back("view.attribute.limitFillColour");
 }
 
@@ -109,7 +111,25 @@ void NodeViewDelegate::updateBaseSettings()
     }
     if(VProperty* p=prop_->find("view.attribute.meterFillColour"))
     {
-        meterFillBrush_=QBrush(p->value().value<QColor>());
+        QLinearGradient gr;
+        gr.setCoordinateMode(QGradient::ObjectBoundingMode);
+        gr.setStart(0,0);
+        gr.setFinalStop(0,1);
+        QColor c1=p->value().value<QColor>();
+        gr.setColorAt(0,c1);
+        gr.setColorAt(1,c1.lighter(110));
+        meterFillBrush_=QBrush(gr);
+    }
+    if(VProperty* p=prop_->find("view.attribute.meterThresholdColour"))
+    {
+        QLinearGradient gr;
+        gr.setCoordinateMode(QGradient::ObjectBoundingMode);
+        gr.setStart(0,0);
+        gr.setFinalStop(0,1);
+        QColor c1=p->value().value<QColor>();
+        gr.setColorAt(0,c1);
+        gr.setColorAt(1,c1.lighter(110));
+        meterThresholdBrush_=QBrush(gr);
     }
     if(VProperty* p=prop_->find("view.attribute.limitFillColour"))
     {
@@ -220,14 +240,17 @@ void NodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
 void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() != 6)
-			return;
+        return;
 
 	//The data
 	int	val=data.at(2).toInt();
 	int	min=data.at(3).toInt();
 	int	max=data.at(4).toInt();
-	//bool colChange=data.at(5).toInt();
-    float percent=static_cast<float>(val-min)/static_cast<float>(max-min);
+    int threshold=data.at(5).toInt();
+
+    //float percent=static_cast<float>(val-min)/static_cast<float>(max-min);
+    //float thresholdPercent=static_cast<float>(threshold-min)/static_cast<float>(max-min);
+
     QString name=data.at(1) + ":";
     QString valStr=data.at(2); // + " (" + QString::number(100.*percent) + "%)";
 
@@ -240,14 +263,19 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	if(option.state & QStyle::State_Selected)
 			fillRect.adjust(0,1,0,-1);
 
-	//The status rectangle
-    QRect stRect=fillRect.adjusted(offset,fillRect.height()/5,0,-fillRect.height()/5);
+    QFontMetrics fm(attrFont_);
+
+    //The status rectangle
+    int stHeight=fm.height();
+    int stHeightDiff=(fillRect.height()-stHeight)/2;
+    QRect stRect=fillRect.adjusted(offset,stHeightDiff,
+                                   0,-(fillRect.height()-stHeight-stHeightDiff));
 	stRect.setWidth(50);
 
 	//The text rectangle
 	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
-	QFontMetrics fm(nameFont);
+    fm=QFontMetrics(nameFont);
 	int nameWidth=fm.width(name);
     QRect nameRect = fillRect;
 	nameRect.setLeft(stRect.right()+fm.width('A'));
@@ -273,15 +301,44 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 		painter->setClipRect(option.rect);
 	}
 
-    //Draw st rect
-    painter->fillRect(stRect,QColor(229,229,229));
-    painter->setPen(QColor(180,180,180));
-    painter->drawRect(stRect);
+    //Fill st rect
+    painter->fillRect(stRect,QColor(229,229,229));   
 
     //Draw progress
-    QRect progRect=stRect.adjusted(1,1,0,-1);
-    progRect.setWidth(stRect.width()*percent);
-    painter->fillRect(progRect,meterFillBrush_);
+    if(max > min)
+    {
+        QRect progRect=stRect;
+
+        float percent=static_cast<float>(val-min)/static_cast<float>(max-min);
+        if(threshold > min && threshold < max && val > threshold)
+        {
+            float thresholdPercent=static_cast<float>(threshold-min)/static_cast<float>(max-min);
+            progRect.setWidth((stRect.width())*thresholdPercent);
+            painter->fillRect(progRect,meterFillBrush_);
+
+            progRect.setLeft(progRect.right());
+            progRect.setWidth((stRect.width())*(percent-thresholdPercent));
+            painter->fillRect(progRect,meterThresholdBrush_);
+        }
+        else
+        {
+            progRect.setWidth(stRect.width()*percent);
+            painter->fillRect(progRect,meterFillBrush_);
+        }
+    }
+
+    //Draw st rect border
+    if(max > min)
+    {
+        painter->setPen(QColor(180,180,180));
+    }
+    else
+    {
+        painter->setPen(QPen(QColor(180,180,180),Qt::DotLine));
+    }
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(stRect);
+
 
     //Draw name
 	painter->setPen(Qt::black);

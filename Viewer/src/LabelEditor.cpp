@@ -10,10 +10,13 @@
 
 #include "LabelEditor.hpp"
 
+#include <QSettings>
+
 #include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
+#include "SessionHandler.hpp"
 
 LabelEditorWidget::LabelEditorWidget(QWidget* parent) : QWidget(parent)
 {
@@ -63,6 +66,13 @@ LabelEditor::LabelEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
             this,SLOT(slotResetValue()));
 
     checkButtonStatus();
+
+    readSettings();
+}
+
+LabelEditor::~LabelEditor()
+{
+    writeSettings();
 }
 
 void LabelEditor::apply()
@@ -93,19 +103,25 @@ void LabelEditor::checkButtonStatus()
 
 void LabelEditor::writeSettings()
 {
-    /*QSettings settings("ECMWF","ecflowUI-DashboardDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("LabelEditor")),
+                       QSettings::NativeFormat);
 
     //We have to clear it so that should not remember all the previous values
     settings.clear();
 
     settings.beginGroup("main");
     settings.setValue("size",size());
-    settings.endGroup();*/
+    settings.endGroup();
 }
 
 void LabelEditor::readSettings()
 {
-    /*QSettings settings("ECMWF","ecflowUI-DashboardDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("LabelEditor")),
+                       QSettings::NativeFormat);
 
     settings.beginGroup("main");
     if(settings.contains("size"))
@@ -114,10 +130,10 @@ void LabelEditor::readSettings()
     }
     else
     {
-        resize(QSize(520,500));
+        resize(QSize(300,200));
     }
 
-    settings.endGroup();*/
+    settings.endGroup();
 }
 
 static AttributeEditorMaker<LabelEditor> makerStr("label");

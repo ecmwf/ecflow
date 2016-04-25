@@ -82,6 +82,7 @@ protected:
     QBrush eventFillBrush_;
     QBrush eventBgBrush_;
     QBrush meterFillBrush_;
+    QBrush meterThresholdBrush_;
     QBrush limitFillBrush_;
 
 };

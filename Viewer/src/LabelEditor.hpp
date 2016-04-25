@@ -30,6 +30,7 @@ class LabelEditor : public AttributeEditor
 Q_OBJECT
 public:
     LabelEditor(VInfo_ptr,QWidget* parent=0);    
+    ~LabelEditor();
 
 protected Q_SLOTS:
     void slotResetValue();
