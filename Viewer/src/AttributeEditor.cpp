@@ -14,6 +14,11 @@
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
+#include "VConfig.hpp"
+
+#include <QPushButton>
+
+static QList<AttributeEditor*> editors;
 
 AttributeEditor::AttributeEditor(VInfo_ptr info,QWidget* parent) : QDialog(parent), info_(info)
 {    
@@ -23,12 +28,17 @@ AttributeEditor::AttributeEditor(VInfo_ptr info,QWidget* parent) : QDialog(paren
     Q_ASSERT(info_ && info_->isAttribute() && info_->attribute());
     messageLabel_->hide();
     
+    QString wt=windowTitle();
+    wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    setWindowTitle(wt);
+
     attachInfo();
 }
 
 AttributeEditor::~AttributeEditor()
 {
     detachInfo();
+    editors.removeOne(this);
 }    
 
 void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
@@ -37,9 +47,21 @@ void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
     VAttribute* a=info->attribute();
     Q_ASSERT(a->type());
 
+    Q_FOREACH(AttributeEditor* e,editors)
+    {
+        if((e->info_ && info) &&
+           *(e->info_.get()) == *(info.get()))
+        {
+            e->raise();
+            return;
+        }
+    }
+
+
     if(AttributeEditor* e=AttributeEditorFactory::create(a->type()->strName(),info,0))
     {
         e->show();
+        editors << e;
         //e->deleteLater();
     }
 }
@@ -77,12 +99,30 @@ void AttributeEditor::detachInfo()
     }    
 }
 
+void AttributeEditor::setSuspended(bool st)
+{
+    QPushButton *okpb=buttonBox_->button(QDialogButtonBox::Ok);
+    Q_ASSERT(okpb);
+    okpb->setEnabled(!st);
+}
+
+void AttributeEditor::notifyDataLost(VInfo* info)
+{
+    if(info_ && info_.get() == info)
+    {
+        hide();
+        detachInfo();
+        info_.reset();
+        deleteLater();
+    }
+}
 
 void AttributeEditor::notifyServerDelete(ServerHandler* server)
 {
     if(info_ && info_->server() == server)
     {
-        close();
+        hide();
+        detachInfo();
         deleteLater();
     }
 }
@@ -95,11 +135,11 @@ void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
         if(info_->server() && info_->server() == server)
         {
             messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reloaded. \
-                   Until it is finished only <b>limited functionalty</b> is avaliable in the Info Panel!");
+                   Until it is finished attributes <b>cannot be changed</b>!");
 
             messageLabel_->startLoadLabel();
 
-            //setSuspended(true);
+            setSuspended(true);
         }
     }
 }
@@ -123,7 +163,7 @@ void AttributeEditor::notifyEndServerScan(ServerHandler* server)
             if(!info_->node())
                 return;
 
-            //setSuspended(false);
+            setSuspended(false);
         }
     }
 }

@@ -1006,7 +1006,7 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     if(row ==0 && !r.empty())
     {
         //We try to avoid creating a VRepeat object everytime we are here
-        std::string type=VRepeat::type(r);
+        std::string type=VRepeat::valueType(r);
 
         data << qName_ << QString::fromStdString(type) <<
              QString::fromStdString(r.name()) <<

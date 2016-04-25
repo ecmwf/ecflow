@@ -11,28 +11,38 @@
 #ifndef LABELEDITOR_HPP
 #define LABELEDITOR_HPP
 
-#include "ui_LabelEditWidget.h"
+#include "ui_LabelEditorWidget.h"
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
 class LabelEditor;
 
-class LabelEditWidget :  public QWidget, protected Ui::LabelEditWidget
+class LabelEditorWidget :  public QWidget, protected Ui::LabelEditorWidget
 {
 friend class LabelEditor;
 public:
-    LabelEditWidget(QWidget *parent=0);
+    LabelEditorWidget(QWidget *parent=0);
 };
 
 class LabelEditor : public AttributeEditor
 {
+Q_OBJECT
 public:
-    LabelEditor(VInfo_ptr,QWidget* parent=0);
+    LabelEditor(VInfo_ptr,QWidget* parent=0);    
+
+protected Q_SLOTS:
+    void slotResetValue();
+    void slotValueChanged();
 
 protected:
     void apply();
-    LabelEditWidget* w_;
+    void checkButtonStatus();
+    void readSettings();
+    void writeSettings();
+
+    LabelEditorWidget* w_;
+    QString oriVal_;
 };
 
 #endif // LABELEDITOR_HPP

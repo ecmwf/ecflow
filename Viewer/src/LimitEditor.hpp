@@ -8,26 +8,38 @@
 //
 //============================================================================
 
-#ifndef LIMITEDITDIALOG_HPP
-#define LIMITEDITDIALOG_HPP
+#ifndef LIMITEDITOR_HPP
+#define LIMITEDITOR_HPP
 
-#include "ui_LimitEditDialog.h"
+#include "ui_LimitEditorWidget.h"
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
-class LimitEditDialog : private Ui::LimitEditDialog, public AttributeEditor
+class LimitEditor;
+
+class LimitEditorWidget :  public QWidget, protected Ui::LimitEditorWidget
+{
+friend class LimitEditor;
+public:
+    LimitEditorWidget(QWidget *parent=0);
+};
+
+class LimitEditor : public AttributeEditor
 {
 public:
-    LimitEditDialog(VInfo_ptr,QWidget* parent=0);
+    LimitEditor(VInfo_ptr,QWidget* parent=0);
 
 protected:
     void apply();
+    void readSettings();
+    void writeSettings();
 
+    LimitEditorWidget* w_;
     int valOri_;
     int maxOri_;
 };
 
-#endif // LIMITEDITDIALOG_HPP
+#endif // LIMITEDITOR_HPP
 
 

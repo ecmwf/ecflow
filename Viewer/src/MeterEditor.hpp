@@ -8,24 +8,36 @@
 //
 //============================================================================
 
-#ifndef METEREDITDIALOG_HPP
-#define METEREDITDIALOG_HPP
+#ifndef METEREDITOR_HPP
+#define METEREDITOR_HPP
 
-#include "ui_MeterEditDialog.h"
+#include "ui_MeterEditorWidget.h"
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
-class MeterEditDialog : private Ui::MeterEditDialog, public AttributeEditor
+class MeterEditor;
+
+class MeterEditorWidget :  public QWidget, protected Ui::MeterEditorWidget
+{
+friend class MeterEditor;
+public:
+    MeterEditorWidget(QWidget *parent=0);
+};
+
+class MeterEditor : public AttributeEditor
 {
 public:
-    MeterEditDialog(VInfo_ptr,QWidget* parent=0);
+    MeterEditor(VInfo_ptr,QWidget* parent=0);
 
 protected:
     void apply();
+    void readSettings();
+    void writeSettings();
 
+     MeterEditorWidget* w_;
 };
 
-#endif // METEREDITDIALOG_HPP
+#endif // METEREDITOR_HPP
 
 

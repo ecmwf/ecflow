@@ -168,8 +168,22 @@ void VInfo::removeObserver(VInfoObserver* o)
 
 bool VInfo::operator ==(const VInfo& other)
 {
-    return (server_ == other.server_ && node_ == other.node_ &&
-            nodePath_ == other.nodePath_);
+    if(server_ == other.server_ && node_ == other.node_ &&
+            nodePath_ == other.nodePath_)
+    {
+        if((!attribute() && other.attribute()) ||
+           (attribute() && !other.attribute()))
+            return false;
+
+        else if(attribute() && other.attribute())
+        {
+            return (attribute()->type() == other.attribute()->type() &&
+                    attribute()->data() == other.attribute()->data());
+        }
+        else
+            return true;
+    }
+    return false;
 }
 
 VInfo_ptr VInfo::createParent(VInfo_ptr info)

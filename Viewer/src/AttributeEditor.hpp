@@ -16,29 +16,30 @@
 #include "ServerObserver.hpp"
 #include "VInfo.hpp"
 
-#include "ui_AttributeEditDialog.h"
+#include "ui_AttributeEditorDialog.h"
 
-class AttributeEditor : public QDialog, public ServerObserver, public VInfoObserver, protected Ui::AttributeEditDialog
+class AttributeEditor : public QDialog, public ServerObserver, public VInfoObserver, protected Ui::AttributeEditorDialog
 {
 Q_OBJECT
 
 public:
     AttributeEditor(VInfo_ptr info,QWidget* parent);
     virtual ~AttributeEditor();
+
     //From VInfoObserver
     void notifyDelete(VInfo*) {}
-    void notifyDataLost(VInfo*) {};
+    void notifyDataLost(VInfo*);
 
     //From ServerObserver
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
     void notifyServerDelete(ServerHandler* server);
     void notifyBeginServerClear(ServerHandler* server);
     void notifyEndServerClear(ServerHandler* server) {}
     void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
     void notifyEndServerScan(ServerHandler* server);
-    void notifyServerConnectState(ServerHandler* server) {};
-    void notifyServerSuiteFilterChanged(ServerHandler* server) {};
-    void notifyServerSyncFinished(ServerHandler* server) {};
+    void notifyServerConnectState(ServerHandler* server) {}
+    void notifyServerSuiteFilterChanged(ServerHandler* server) {}
+    void notifyServerSyncFinished(ServerHandler* server) {}
 
     static void edit(VInfo_ptr info,QWidget *parent);
 
@@ -48,6 +49,7 @@ public Q_SLOTS:
 protected:
     void attachInfo();
     void detachInfo();
+    void setSuspended(bool);
     void addForm(QWidget* w);
     virtual void apply()=0;
 

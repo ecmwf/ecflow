@@ -229,8 +229,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	//bool colChange=data.at(5).toInt();
     float percent=static_cast<float>(val-min)/static_cast<float>(max-min);
     QString name=data.at(1) + ":";
-	QString valStr=data.at(2) + " (" +
-            QString::number(100.*percent) + "%)";
+    QString valStr=data.at(2); // + " (" + QString::number(100.*percent) + "%)";
 
     int frontOffset=8;
     int offset=2;
@@ -242,7 +241,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 			fillRect.adjust(0,1,0,-1);
 
 	//The status rectangle
-	QRect stRect=fillRect.adjusted(offset,fillRect.height()/6,0,-fillRect.height()/6);
+    QRect stRect=fillRect.adjusted(offset,fillRect.height()/5,0,-fillRect.height()/5);
 	stRect.setWidth(50);
 
 	//The text rectangle
@@ -250,7 +249,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
-	QRect nameRect = stRect;
+    QRect nameRect = fillRect;
 	nameRect.setLeft(stRect.right()+fm.width('A'));
 	nameRect.setWidth(nameWidth);
 
@@ -258,7 +257,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	QFont valFont=attrFont_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(valStr);
-    QRect valRect = nameRect.adjusted(0,fm.height()/2,0,-fm.height()/2);
+    QRect valRect = nameRect;
 	valRect.setLeft(nameRect.right()+fm.width('A'));
 	valRect.setWidth(valWidth);
 
@@ -274,15 +273,15 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 		painter->setClipRect(option.rect);
 	}
 
-    //Draw progress
-    QRect progRect=stRect;
-    progRect.setWidth(stRect.width()*percent);
-    painter->fillRect(progRect,meterFillBrush_);
-
     //Draw st rect
     painter->fillRect(stRect,QColor(229,229,229));
     painter->setPen(QColor(180,180,180));
     painter->drawRect(stRect);
+
+    //Draw progress
+    QRect progRect=stRect.adjusted(1,1,0,-1);
+    progRect.setWidth(stRect.width()*percent);
+    painter->fillRect(progRect,meterFillBrush_);
 
     //Draw name
 	painter->setPen(Qt::black);

@@ -8,22 +8,29 @@
 //
 //============================================================================
 
-#include "LimitEditDialog.hpp"
+#include "LimitEditor.hpp"
 
 #include <QtGlobal>
 #include <QIntValidator>
 
+#include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
 
-LimitEditDialog::LimitEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
+LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
 {
     setupUi(this);
+}
+
+LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
+{
+    w_=new LimitEditorWidget(this);
+    addForm(w_);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-    valueLe_->setClearButtonEnabled(true);
-    maxLe_->setClearButtonEnabled(true);
+    w_->valueLe_->setClearButtonEnabled(true);
+    w_->maxLe_->setClearButtonEnabled(true);
 #endif
 
     VAttribute* a=info_->attribute();
@@ -37,9 +44,9 @@ LimitEditDialog::LimitEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEdit
 
     QString name=a->data().at(1);
 
-    nameLabel_->setText(name);
-    valueLe_->setText(a->data().at(2));
-    maxLe_->setText(a->data().at(3));
+    w_->nameLabel_->setText(name);
+    w_->valueLe_->setText(a->data().at(2));
+    w_->maxLe_->setText(a->data().at(3));
 
     if(a->data().at(2).isEmpty() || a->data().at(3).isEmpty())
     {
@@ -51,21 +58,22 @@ LimitEditDialog::LimitEditDialog(VInfo_ptr info,QWidget* parent) : AttributeEdit
 
     QIntValidator *valValidator=new QIntValidator(this);
     valValidator->setRange(0,maxOri_);
-    valueLe_->setValidator(valValidator);
+    w_->valueLe_->setValidator(valValidator);
 
     QIntValidator *maxValidator=new QIntValidator(this);
-    valueLe_->setValidator(maxValidator);
+    w_->valueLe_->setValidator(maxValidator);
+    w_->valueLe_->setFocus();
 
     header_->setInfo(QString::fromStdString(info_->path()),"Limit");
 }
 
-void LimitEditDialog::apply()
+void LimitEditor::apply()
 {
-    std::string val=valueLe_->text().toStdString();
-    std::string max=maxLe_->text().toStdString();
-    int intVal=valueLe_->text().toInt();
-    int intMax=maxLe_->text().toInt();
-    std::string name=nameLabel_->text().toStdString();
+    std::string val=w_->valueLe_->text().toStdString();
+    std::string max=w_->maxLe_->text().toStdString();
+    int intVal=w_->valueLe_->text().toInt();
+    int intMax=w_->maxLe_->text().toInt();
+    std::string name=w_->nameLabel_->text().toStdString();
 
     std::vector<std::string> valCmd;
     VAttribute::buildAlterCommand(valCmd,"change","limit_value",name,val);
@@ -97,6 +105,6 @@ void LimitEditDialog::apply()
     }
 }
 
-static AttributeEditorMaker<LimitEditDialog> makerStr("limit");
+static AttributeEditorMaker<LimitEditor> makerStr("limit");
 
 

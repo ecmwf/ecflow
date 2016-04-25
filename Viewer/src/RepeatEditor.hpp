@@ -8,10 +8,10 @@
 //
 //============================================================================
 
-#ifndef REPEATEDITDIALOG_HPP
-#define REPEATEDITDIALOG_HPP
+#ifndef REPEATEDITOR_HPP
+#define REPEATEDITOR_HPP
 
-#include "ui_RepeatEditDialog.h"
+#include "ui_RepeatEditorWidget.h"
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
@@ -21,28 +21,45 @@ class QStringList;
 class QStringListModel;
 class VRepeat;
 
-class RepeatEditDialog : public AttributeEditor, private Ui::RepeatEditDialog
+
+class RepeatEditor;
+
+class RepeatEditorWidget :  public QWidget, protected Ui::RepeatEditorWidget
+{
+friend class RepeatEditor;
+public:
+    RepeatEditorWidget(QWidget *parent=0);
+};
+
+
+class RepeatEditor : public AttributeEditor
 {
 Q_OBJECT
 
 public:
-    RepeatEditDialog(VInfo_ptr,QWidget* parent=0);
-    ~RepeatEditDialog();
+    RepeatEditor(VInfo_ptr,QWidget* parent=0);
+    ~RepeatEditor();
 
 protected Q_SLOTS:
     void slotSelected(const QModelIndex&);
     void slotValueEdited(QString txt);
+    void slotResetValue();
 
 protected:
     void buildList();
     bool isListMode() const;
+    void checkButtonStatus();
     void apply();
+    void readSettings();
+    void writeSettings();
 
+    RepeatEditorWidget* w_;
     VRepeat* repeat_;
     QStringListModel* model_;
     QStringList modelData_;
+    QString oriVal_;
 };
 
-#endif // REPEATEDITDIALOG_HPP
+#endif // REPEATEDITOR_HPP
 
 

@@ -49,7 +49,7 @@ set(viewer_srcs
     InfoProvider.cpp
     JobItemWidget.cpp
     LabelEditor.cpp
-    #LimitEditDialog.cpp
+    LimitEditor.cpp
     LineEdit.cpp
     LogEvent.cpp
     LogModel.cpp
@@ -61,7 +61,7 @@ set(viewer_srcs
     MenuHandler.cpp
     MessageLabel.cpp
     MessageItemWidget.cpp
-    #MeterEditDialog.cpp
+    MeterEditor.cpp
     ModelColumn.cpp
     NodeExpression.cpp
     NodeFilterDialog.cpp    
@@ -102,7 +102,7 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
-    #RepeatEditDialog.cpp
+    RepeatEditor.cpp
     ScriptItemWidget.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
@@ -216,6 +216,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     InfoPanel.hpp
+    LabelEditor.hpp
     LineEdit.hpp
     LogProvider.hpp
     MainWindow.hpp
@@ -245,7 +246,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp
-    #RepeatEditDialog.hpp
+    RepeatEditor.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
     ServerHandler.hpp
@@ -284,7 +285,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
 
 set(viewer_wrap_ui_files
     AboutDialog.ui
-    AttributeEditDialog.ui
+    AttributeEditorDialog.ui
     ChangeNotifyDialog.ui
     ChangeNotifyDialogWidget.ui
     ChangeNotifyEditor.ui
@@ -297,12 +298,12 @@ set(viewer_wrap_ui_files
     GotoLineDialog.ui
     HistoryItemWidget.ui
     InfoPanel.ui    
-    LabelEditWidget.ui
-    #LimitEditDialog.ui
+    LabelEditorWidget.ui
+    LimitEditorWidget.ui
     MainWindow.ui
     MessageItemWidget.ui
     MenuConfigDialog.ui
-    #MeterEditDialog.ui
+    MeterEditorWidget.ui
     NodeFilterDialog.ui
     NodeQueryEditor.ui
     NodeQuerySaveDialog.ui
@@ -311,7 +312,7 @@ set(viewer_wrap_ui_files
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui
-    #RepeatEditDialog.ui
+    RepeatEditorWidget.ui
     SearchLineWidget.ui
     ServerAddDialog.ui
     ServerEditDialog.ui 

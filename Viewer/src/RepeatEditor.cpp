@@ -8,13 +8,14 @@
 //
 //============================================================================
 
-#include "RepeatEditDialog.hpp"
+#include "RepeatEditor.hpp"
 
 #include <QtGlobal>
 #include <QIntValidator>
 #include <QStringListModel>
 
 #include "Node.hpp"
+#include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
@@ -22,15 +23,21 @@
 #include "VNode.hpp"
 #include "VRepeat.hpp"
 
-RepeatEditDialog::RepeatEditDialog(VInfo_ptr info,QWidget* parent) :
+RepeatEditorWidget::RepeatEditorWidget(QWidget* parent) : QWidget(parent)
+{
+    setupUi(this);
+}
+
+RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     AttributeEditor(info,parent),
     repeat_(0),
     model_(0)
 {
-    setupUi(this);
+    w_=new RepeatEditorWidget(this);
+    addForm(w_);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-    valueLe_->setClearButtonEnabled(true);
+    w_->valueLe_->setClearButtonEnabled(true);
 #endif
 
     VAttribute* a=info_->attribute();
@@ -49,13 +56,27 @@ RepeatEditDialog::RepeatEditDialog(VInfo_ptr info,QWidget* parent) :
     const Repeat& r=node->repeat();
     repeat_=VRepeat::make(r);
 
-    nameLabel_->setText(a->data().at(2));
-    valueLe_->setText(a->data().at(3));
-    startLabel_->setText(a->data().at(4));
-    endLabel_->setText(a->data().at(5));
-    stepLabel_->setText(a->data().at(6));
+    oriVal_=a->data().at(3);
+    w_->nameLabel_->setText(a->data().at(2));
+    w_->valueLe_->setText(a->data().at(3));
+    w_->startLabel_->setText(a->data().at(4));
+    w_->endLabel_->setText(a->data().at(5));
+
+    if(repeat_->valueType() == VRepeat::StringType)
+    {
+        w_->stepNameLabel_->hide();
+        w_->stepLabel_->hide();
+    }
+    else
+    {
+        w_->stepLabel_->setText(a->data().at(6));
+    }
+    oriVal_=a->data().at(3);
 
     buildList();
+
+    connect(w_->resetTb_,SIGNAL(clicked()),
+            this,SLOT(slotResetValue()));
 
 #if 0
     QIntValidator *validator=new QIntValidator(this);
@@ -67,16 +88,18 @@ RepeatEditDialog::RepeatEditDialog(VInfo_ptr info,QWidget* parent) :
     valueLe_->setValidator(validator);
 #endif
 
-    header_->setInfo(QString::fromStdString(info_->path()),"Repeat");
+    header_->setInfo(QString::fromStdString(info_->path()),"Repeat " + QString::fromStdString(repeat_->type()));
+
+    checkButtonStatus();
 }
 
-RepeatEditDialog::~RepeatEditDialog()
+RepeatEditor::~RepeatEditor()
 {
     if(repeat_)
         delete repeat_;
 }
 
-void RepeatEditDialog::buildList()
+void RepeatEditor::buildList()
 {
     int start=repeat_->startIndex();
     int end=repeat_->endIndex();
@@ -97,71 +120,72 @@ void RepeatEditDialog::buildList()
 
         model_=new QStringListModel(this);
         model_->setStringList(modelData_);
-        valueView_->setModel(model_);
-        valueView_->setCurrentIndex(model_->index(current,0));
+        w_->valueView_->setModel(model_);
+        w_->valueView_->setCurrentIndex(model_->index(current,0));
 
-        connect(valueView_,SIGNAL(activated(const QModelIndex&)),
+        connect(w_->valueView_,SIGNAL(activated(const QModelIndex&)),
            this,SLOT(slotSelected(const QModelIndex&)));
 
-        connect(valueLe_,SIGNAL(textEdited(QString)),
+        connect(w_->valueLe_,SIGNAL(textEdited(QString)),
            this,SLOT(slotValueEdited(QString)));
     }
     else
     {
-        valueView_->hide();
+        w_->valueView_->hide();
     }
 }
 
-void RepeatEditDialog::slotSelected(const QModelIndex& idx)
+void RepeatEditor::slotSelected(const QModelIndex& idx)
 {
-    valueLe_->setText(idx.data().toString());
+    w_->valueLe_->setText(idx.data().toString());
+    checkButtonStatus();
 }
 
-void RepeatEditDialog::slotValueEdited(QString txt)
+void RepeatEditor::slotValueEdited(QString txt)
 {
     if(isListMode())
     {
         int row=modelData_.indexOf(txt);
         if(row != -1)
         {
-            valueView_->setCurrentIndex(model_->index(row,0));
+            w_->valueView_->setCurrentIndex(model_->index(row,0));
         }
         else
         {
-            valueView_->clearSelection();
-            valueView_->setCurrentIndex(QModelIndex());
+            w_->valueView_->clearSelection();
+            w_->valueView_->setCurrentIndex(QModelIndex());
         }
     }
+    checkButtonStatus();
 }
 
-bool RepeatEditDialog::isListMode() const
+void RepeatEditor::slotResetValue()
+{
+    w_->valueLe_->setText(oriVal_);
+    slotValueEdited(oriVal_);
+    checkButtonStatus();
+}
+
+void RepeatEditor::checkButtonStatus()
+{
+    w_->resetTb_->setEnabled(oriVal_ != w_->valueLe_->text());
+}
+
+bool RepeatEditor::isListMode() const
 {
     return (model_)?true:false;
 }
 
-void RepeatEditDialog::apply()
+void RepeatEditor::apply()
 {
-    std::string val=valueLe_->text().toStdString();
-    std::string name=nameLabel_->text().toStdString();
+    std::string val=w_->valueLe_->text().toStdString();
+    std::string name=w_->nameLabel_->text().toStdString();
 
     std::vector<std::string> cmd;
-    std::string valType;
-    switch(repeat_->type())
-    {
-    case VRepeat::StringType:
-        valType="string";
-        break;
-    case VRepeat::IntType:
-        valType="integer";
-        break;
-    default:
-        break;
-    }
-
     VAttribute::buildAlterCommand(cmd,"change","repeat",val);
     ServerHandler::command(info_,cmd);
 }
 
-static AttributeEditorMaker<RepeatEditDialog> makerStr("repeat");
+static AttributeEditorMaker<RepeatEditor> makerStr("repeat");
 
 

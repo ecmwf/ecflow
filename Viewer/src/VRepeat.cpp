@@ -89,7 +89,7 @@ long ecf_repeat_date_to_julian(long ddate)
     return j1;
 }
 
-const std::string& VRepeat::type(const Repeat& r)
+const std::string& VRepeat::valueType(const Repeat& r)
 {
     if(typeNames_.empty())
     {
@@ -114,7 +114,7 @@ const std::string& VRepeat::type(const Repeat& r)
 
 VRepeat* VRepeat::make(const Repeat& r)
 {
-    const std::string t=VRepeat::type(r);
+    const std::string t=VRepeat::valueType(r);
     if(t == "date")
         return new VRepeatDate(r);
     else if(t == "integer")

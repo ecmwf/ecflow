@@ -76,7 +76,6 @@ public:
     void notifyServerActivityChanged(ServerHandler* server) {}
     void notifyServerSuiteFilterChanged(ServerHandler* server) {}
 
-    // Overload + operator to add two Box objects.
     bool operator ==(const VInfo&);
 
     static VInfo_ptr createParent(VInfo_ptr);

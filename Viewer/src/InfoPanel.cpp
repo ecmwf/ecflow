@@ -193,7 +193,7 @@ void InfoPanel::reset(VInfo_ptr info)
         if(*(info_.get()) == *(info.get()))
             return;
 
-        //it can happen thet the stored info was not yet updated after a
+        //it can happen that the stored info was not yet updated after a
         //server reload. If there is chance for it we try to regain its data and
         //comapare it again to the incoming node
         else if(info_->server() == info->server() &&
@@ -226,7 +226,7 @@ void InfoPanel::slotReload(VInfo_ptr info)
 {
     //When the mode is detached it cannot receive
 	//the reload request
-    if(info_ && info_ && detached())
+    if(info_ && detached())
 		return;
 
     if(info && info->isAttribute())

@@ -10,26 +10,29 @@
 
 #include "LabelEditor.hpp"
 
-#include <QtGlobal>
-
 #include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
 
-LabelEditWidget::LabelEditWidget(QWidget* parent) : QWidget(parent)
+LabelEditorWidget::LabelEditorWidget(QWidget* parent) : QWidget(parent)
 {
     setupUi(this);
+
+    QLayoutItem *item;
+    item=grid_->itemAtPosition(1,0);
+    Q_ASSERT(item);
+    item->setAlignment(Qt::AlignLeft|Qt::AlignTop);
+    item=grid_->itemAtPosition(1,2);
+    Q_ASSERT(item);
+    item->setAlignment(Qt::AlignLeft|Qt::AlignTop);
+
 }
 
 LabelEditor::LabelEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
 {
-    w_=new LabelEditWidget(this);
+    w_=new LabelEditorWidget(this);
     addForm(w_);
-
-//#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-//    w_->valueTe_->setClearButtonEnabled(true);
-//#endif
 
     VAttribute* a=info_->attribute();
 
@@ -45,10 +48,21 @@ LabelEditor::LabelEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
     if(a->data().count() > 2)
         val=a->data().at(2);
 
+    oriVal_=val;
+
     w_->nameLabel_->setText(name);
     w_->valueTe_->setPlainText(val);
+    w_->valueTe_->setFocus();
 
     header_->setInfo(QString::fromStdString(info_->path()),"Label");
+
+    connect(w_->valueTe_,SIGNAL(textChanged()),
+            this,SLOT(slotValueChanged()));
+
+    connect(w_->resetTb_,SIGNAL(clicked()),
+            this,SLOT(slotResetValue()));
+
+    checkButtonStatus();
 }
 
 void LabelEditor::apply()
@@ -59,6 +73,51 @@ void LabelEditor::apply()
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"change","label",name,val);
     ServerHandler::command(info_,cmd);
+}
+
+void LabelEditor::slotResetValue()
+{
+    w_->valueTe_->setPlainText(oriVal_);
+    checkButtonStatus();
+}
+
+void LabelEditor::slotValueChanged()
+{
+    checkButtonStatus();
+}
+
+void LabelEditor::checkButtonStatus()
+{
+    w_->resetTb_->setEnabled(oriVal_ != w_->valueTe_->toPlainText());
+}
+
+void LabelEditor::writeSettings()
+{
+    /*QSettings settings("ECMWF","ecflowUI-DashboardDialog");
+
+    //We have to clear it so that should not remember all the previous values
+    settings.clear();
+
+    settings.beginGroup("main");
+    settings.setValue("size",size());
+    settings.endGroup();*/
+}
+
+void LabelEditor::readSettings()
+{
+    /*QSettings settings("ECMWF","ecflowUI-DashboardDialog");
+
+    settings.beginGroup("main");
+    if(settings.contains("size"))
+    {
+        resize(settings.value("size").toSize());
+    }
+    else
+    {
+        resize(QSize(520,500));
+    }
+
+    settings.endGroup();*/
 }
 
 static AttributeEditorMaker<LabelEditor> makerStr("label");
