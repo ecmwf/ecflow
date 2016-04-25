@@ -322,7 +322,12 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
 
 std::pair<std::string,std::string> ServerEnvironment::hostPort() const
 {
- 	return std::make_pair(serverHost_,serverPort());
+ 	return std::make_pair(serverHost_,the_port());
+}
+
+std::string ServerEnvironment::the_port() const
+{
+   return boost::lexical_cast< std::string >( serverPort_ );
 }
 
 void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string> >& theRetVec) const
@@ -331,7 +336,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	   // Need to setup client environment.
 	   // The server sets these variable for use by the client. i.e when creating the jobs
 	   // The clients then uses them to communicate back with the server.
-  	theRetVec.push_back( std::make_pair(Str::ECF_PORT(), serverPort()) );
+  	theRetVec.push_back( std::make_pair(Str::ECF_PORT(), the_port()) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_NODE"), serverHost_) );
 
 	theRetVec.push_back( std::make_pair(Str::ECF_HOME(), ecfHome_) );
@@ -519,11 +524,6 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
          throw ServerEnvironmentException(ss.str());
       }
    }
-}
-
-std::string ServerEnvironment::serverPort() const
-{
-	return boost::lexical_cast< std::string >( serverPort_ );
 }
 
 void ServerEnvironment::change_dir_to_ecf_home_and_check_accesibility()
