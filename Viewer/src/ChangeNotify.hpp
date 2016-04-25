@@ -32,9 +32,9 @@ public:
 	explicit ChangeNotify(const std::string& id);
 
 	const std::string& id() const {return id_;}
-	VNodeList* data() const {return data_;};
+    VNodeList* data() const {return data_;}
 	VProperty* prop() const {return prop_;}
-	QAbstractItemModel* model() const;
+    ChangeNotifyModel* model() const;
 	QSortFilterProxyModel* proxyModel() const {return proxyModel_;}
 	bool isEnabled() const {return enabled_;}
 	void clearData();
@@ -59,7 +59,7 @@ protected:
 	void setEnabled(bool);
 	void setProperty(VProperty* prop);
 	void loadServerSettings();
-	virtual void loadNodeState() {};
+    virtual void loadNodeState() {}
 
 	static ChangeNotify* find(const std::string&);
 	static ChangeNotifyDialog* dialog();

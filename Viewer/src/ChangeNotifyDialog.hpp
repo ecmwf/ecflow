@@ -18,6 +18,8 @@
 #include "ui_ChangeNotifyDialog.h"
 #include "ui_ChangeNotifyDialogWidget.h"
 
+#include "VInfo.hpp"
+
 class ChangeNotify;
 class VProperty;
 
@@ -29,7 +31,7 @@ class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialo
 
 public:
 	explicit ChangeNotifyDialogWidget(QWidget* parent=0);
-	~ChangeNotifyDialogWidget() {};
+    ~ChangeNotifyDialogWidget() {}
 
 	void init(ChangeNotify*);
 	void update(ChangeNotify*);
@@ -40,8 +42,13 @@ public Q_SLOTS:
 	void slotRemoveRow(int);
 	void slotReset();
 
+protected Q_SLOTS:
+    void slotSelectItem(const QModelIndex&);
+    void slotDoubleClickItem(const QModelIndex&);
+
 Q_SIGNALS:
-	void contentsChanged();
+    void contentsChanged();
+    void selectionChanged(VInfo_ptr);
 
 protected:
 	ChangeNotify* notifier_;
@@ -65,7 +72,10 @@ public Q_SLOTS:
 	void on_tab__currentChanged(int);
 	void on_closePb__clicked(bool b);
 	void on_clearPb__clicked(bool b);
-	void slotContentsChanged();
+    void slotContentsChanged();
+
+protected Q_SLOTS:
+    void slotSelectionChanged(VInfo_ptr);
 
 protected:
 	ChangeNotify* tabToNtf(int tabIdx);

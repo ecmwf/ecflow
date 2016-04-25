@@ -28,6 +28,8 @@ void SessionItem::checkDir()
 	dirPath_=DirectoryHandler::concatenate(DirectoryHandler::configDir(), name_ + ".session");
 	DirectoryHandler::createDir(dirPath_);
 
+    qtPath_=DirectoryHandler::concatenate(dirPath_,"qt");
+    DirectoryHandler::createDir(qtPath_);
 }
 
 std::string SessionItem::sessionFile() const
@@ -60,6 +62,15 @@ std::string SessionItem::serverFile(const std::string& serverName) const
 	return DirectoryHandler::concatenate(dirPath_, serverName + ".conf.json");
 }
 
+std::string SessionItem::qtDir() const
+{
+    return qtPath_;
+}
+
+std::string SessionItem::qtSettingsFile(const std::string name) const
+{
+    return DirectoryHandler::concatenate(qtPath_, name + ".conf");
+}
 
 //=================================================
 //

@@ -17,7 +17,7 @@ class SessionItem
 {
 public:
 	explicit SessionItem(const std::string&);
-	virtual ~SessionItem() {};
+    virtual ~SessionItem() {}
 
 	void  name(const std::string& name);
 	const std::string& name() const {return name_;}
@@ -28,12 +28,15 @@ public:
 	std::string recentCustomCommandsFile() const ;
 	std::string savedCustomCommandsFile() const ;
 	std::string serverFile(const std::string& serverName) const;
+    std::string qtDir() const;
+    std::string qtSettingsFile(const std::string name) const;
 
 protected:
 	void checkDir();
 
 	std::string name_;
-	std::string dirPath_;
+    std::string dirPath_;
+    std::string qtPath_;
 };
 
 class SessionHandler

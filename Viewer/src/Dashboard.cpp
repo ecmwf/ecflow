@@ -446,6 +446,23 @@ void Dashboard::selectFirstServerInView()
 	}
 }
 
+bool Dashboard::selectInTreeView(VInfo_ptr info)
+{
+    if(!info)
+        return false;
+
+    Q_FOREACH(DashboardWidget* w,widgets_)
+    {
+        if(w->type() == "tree")
+        {
+            w->setCurrentSelection(info);
+            return serverFilter_->isFiltered(info->server());
+        }
+    }
+
+    return false;
+}
+
 VInfo_ptr Dashboard::currentSelectionInView()
 {
 	Q_FOREACH(DashboardWidget* w,widgets_)

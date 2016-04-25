@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -21,6 +21,7 @@
 #include "ServerFilter.hpp"
 #include "ServerItem.hpp"
 #include "ServerList.hpp"
+#include "SessionHandler.hpp"
 #include "VConfig.hpp"
 
 //======================================
@@ -527,7 +528,10 @@ void ServerListDialog::slotFilterFavourite(bool b)
 
 void ServerListDialog::writeSettings()
 {
-	QSettings settings("ECMWF","ECF-ServerListDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("ServerListDialog")),
+                       QSettings::NativeFormat);
 
 	//We have to clear it not to remember all the previous windows
 	settings.clear();
@@ -540,7 +544,10 @@ void ServerListDialog::writeSettings()
 
 void ServerListDialog::readSettings()
 {
-	QSettings settings("ECMWF","ECF-ServerListDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("ServerListDialog")),
+                       QSettings::NativeFormat);
 
 	settings.beginGroup("main");
 	if(settings.contains("size"))

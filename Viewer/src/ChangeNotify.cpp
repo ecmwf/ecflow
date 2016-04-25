@@ -69,7 +69,7 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 	items[id] = this;
 }
 
-QAbstractItemModel* ChangeNotify::model() const
+ChangeNotifyModel* ChangeNotify::model() const
 {
 	return model_; //proxyModel_;
 }

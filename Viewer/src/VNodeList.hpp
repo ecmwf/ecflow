@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -59,7 +59,7 @@ public:
  	void setMaxNum(int);
 
     //From ServerObserver
- 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
  	void notifyServerDelete(ServerHandler* server);
     void notifyBeginServerClear(ServerHandler* server);
  	void notifyEndServerClear(ServerHandler* server);

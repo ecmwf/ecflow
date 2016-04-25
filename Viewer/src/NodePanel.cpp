@@ -128,6 +128,23 @@ void NodePanel::slotSelection(VInfo_ptr n)
 			w->currentSelection(n);
 }
 
+bool NodePanel::selectInTreeView(VInfo_ptr info)
+{
+    for(int i=0; i < count(); i++)
+    {
+        if(QWidget *w=widget(i))
+        {
+            if(Dashboard* nw=static_cast<Dashboard*>(w))
+                if(nw->selectInTreeView(info))
+                {
+                    setCurrentIndex(i);
+                    return true;
+                }
+        }
+    }
+    return false;
+}
+
 void NodePanel::setViewMode(Viewer::ViewMode mode)
 {
 	Dashboard *w=currentDashboard();

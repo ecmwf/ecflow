@@ -171,6 +171,31 @@ QModelIndex ChangeNotifyModel::parent(const QModelIndex &child) const
 	return QModelIndex();
 }
 
+VInfo_ptr ChangeNotifyModel::nodeInfo(const QModelIndex& index) const
+{
+    VInfo_ptr res;
+
+    if(!index.isValid() || !hasData())
+    {
+        return res;
+    }
+
+    int row=index.row();
+    if(row < 0 || row >= data_->size())
+        return res;
+
+    VNodeListItem *item=data_->itemAt(row);
+    Q_ASSERT(item);
+    VNode* vnode=item->node();
+    Q_ASSERT(vnode);
+
+    if(vnode->isServer())
+        return VInfoServer::create(vnode->server());
+    else
+        return VInfoNode::create(vnode);
+
+    return res;
+}
 
 void ChangeNotifyModel::slotBeginAppendRow()
 {
