@@ -75,6 +75,7 @@ public:
     bool getData(VNode *node,int row,int& size,QStringList& data);
     int lineNum(const VNode* vnode,int row);
     QString toolTip(QStringList d) const;
+    bool exists(const VNode* vnode,QStringList) const;
 };
 
 class VDateAttribute : public VAttributeType
@@ -472,6 +473,28 @@ QString VLabelAttribute::toolTip(QStringList d) const
         t+="<b>Value:</b> " + d[2];
     }
     return t;
+}
+
+bool VLabelAttribute::exists(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    if(data.count() != 3 && data[0] != qName_)
+        return false;
+
+    const std::vector<Label>&  v=node->labels();
+    for(size_t i=0; i < v.size(); i++)
+    {
+        if(v[i].name() == data[1].toStdString())
+            return true;
+    }
+
+    return false;
 }
 
 //================================
@@ -1006,7 +1029,7 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     if(row ==0 && !r.empty())
     {
         //We try to avoid creating a VRepeat object everytime we are here
-        std::string type=VRepeat::valueType(r);
+        std::string type=VRepeat::type(r);
 
         data << qName_ << QString::fromStdString(type) <<
              QString::fromStdString(r.name()) <<

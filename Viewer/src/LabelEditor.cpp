@@ -25,11 +25,7 @@ LabelEditorWidget::LabelEditorWidget(QWidget* parent) : QWidget(parent)
     QLayoutItem *item;
     item=grid_->itemAtPosition(1,0);
     Q_ASSERT(item);
-    item->setAlignment(Qt::AlignLeft|Qt::AlignTop);
-    item=grid_->itemAtPosition(1,2);
-    Q_ASSERT(item);
-    item->setAlignment(Qt::AlignLeft|Qt::AlignTop);
-
+    item->setAlignment(Qt::AlignLeft|Qt::AlignTop);   
 }
 
 LabelEditor::LabelEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
@@ -62,9 +58,6 @@ LabelEditor::LabelEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
     connect(w_->valueTe_,SIGNAL(textChanged()),
             this,SLOT(slotValueChanged()));
 
-    connect(w_->resetTb_,SIGNAL(clicked()),
-            this,SLOT(slotResetValue()));
-
     checkButtonStatus();
 
     readSettings();
@@ -85,7 +78,7 @@ void LabelEditor::apply()
     ServerHandler::command(info_,cmd);
 }
 
-void LabelEditor::slotResetValue()
+void LabelEditor::resetValue()
 {
     w_->valueTe_->setPlainText(oriVal_);
     checkButtonStatus();
@@ -96,9 +89,9 @@ void LabelEditor::slotValueChanged()
     checkButtonStatus();
 }
 
-void LabelEditor::checkButtonStatus()
+bool LabelEditor::isValueChanged()
 {
-    w_->resetTb_->setEnabled(oriVal_ != w_->valueTe_->toPlainText());
+    return (oriVal_ != w_->valueTe_->toPlainText());
 }
 
 void LabelEditor::writeSettings()
@@ -130,7 +123,7 @@ void LabelEditor::readSettings()
     }
     else
     {
-        resize(QSize(300,200));
+        resize(QSize(310,200));
     }
 
     settings.endGroup();

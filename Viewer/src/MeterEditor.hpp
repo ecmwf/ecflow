@@ -27,18 +27,19 @@ public:
 
 class MeterEditor : public AttributeEditor
 {
-Q_OBJECT;
+Q_OBJECT
+
 public:
     MeterEditor(VInfo_ptr,QWidget* parent=0);
     ~MeterEditor();
 
 protected Q_SLOTS:
     void slotValueChanged(int);
-    void slotResetValue();
 
 protected:
     void apply();
-    void checkButtonStatus();
+    void resetValue();
+    bool isValueChanged();
     void readSettings();
     void writeSettings();
 

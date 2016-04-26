@@ -13,12 +13,13 @@
 
 #include <QDialog>
 
+#include "NodeObserver.hpp"
 #include "ServerObserver.hpp"
 #include "VInfo.hpp"
 
 #include "ui_AttributeEditorDialog.h"
 
-class AttributeEditor : public QDialog, public ServerObserver, public VInfoObserver, protected Ui::AttributeEditorDialog
+class AttributeEditor : public QDialog, public ServerObserver,  public NodeObserver, public VInfoObserver, protected Ui::AttributeEditorDialog
 {
 Q_OBJECT
 
@@ -30,14 +31,18 @@ public:
     void notifyDelete(VInfo*) {}
     void notifyDataLost(VInfo*);
 
+    //From NodeObserver
+    void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&);
+    void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&) {}
+
     //From ServerObserver
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
     void notifyServerDelete(ServerHandler* server);
     void notifyBeginServerClear(ServerHandler* server);
     void notifyEndServerClear(ServerHandler* server) {}
     void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
     void notifyEndServerScan(ServerHandler* server);
-    void notifyServerConnectState(ServerHandler* server) {}
+    void notifyServerConnectState(ServerHandler* server);
     void notifyServerSuiteFilterChanged(ServerHandler* server) {}
     void notifyServerSyncFinished(ServerHandler* server) {}
 
@@ -45,15 +50,22 @@ public:
 
 public Q_SLOTS:
     void accept();
+    void slotButton(QAbstractButton*);
 
 protected:
     void attachInfo();
     void detachInfo();
+    void checkButtonStatus();
+    void setResetStatus(bool st);
     void setSuspended(bool);
     void addForm(QWidget* w);
+    void hideForm();
     virtual void apply()=0;
+    virtual void resetValue()=0;
+    virtual bool isValueChanged()=0;
 
     VInfo_ptr info_;
+    QWidget* form_;
 };
 
 #endif // ATTRIBUTEEDITOR_HPP

@@ -51,25 +51,12 @@ MeterEditor::MeterEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
     w_->maxLabel_->setText(a->data().at(4));
     w_->thresholdLabel_->setText(a->data().at(5));
 
-#if 0    //QString name=a->data().at(1);
-
-    QIntValidator *validator=new QIntValidator(this);
-    if(!a->data().at(3).isEmpty() && !a->data().at(4).isEmpty())
-    {
-        validator->setRange(a->data().at(3).toInt(),
-                            a->data().at(4).toInt());
-    }
-    w_->valueLe_->setValidator(validator);
-#endif
     w_->valueSpin_->setFocus();
 
     header_->setInfo(QString::fromStdString(info_->path()),"Meter");
 
     connect(w_->valueSpin_,SIGNAL(valueChanged(int)),
             this,SLOT(slotValueChanged(int)));
-
-    connect(w_->resetTb_,SIGNAL(clicked()),
-            this,SLOT(slotResetValue()));
 
     checkButtonStatus();
 
@@ -91,7 +78,7 @@ void MeterEditor::apply()
     ServerHandler::command(info_,cmd);
 }
 
-void MeterEditor::slotResetValue()
+void MeterEditor::resetValue()
 {
     w_->valueSpin_->setValue(oriVal_);
     checkButtonStatus();
@@ -102,9 +89,9 @@ void MeterEditor::slotValueChanged(int)
     checkButtonStatus();
 }
 
-void MeterEditor::checkButtonStatus()
+bool MeterEditor::isValueChanged()
 {
-    w_->resetTb_->setEnabled(oriVal_ != w_->valueSpin_->value());
+    return (oriVal_ != w_->valueSpin_->value());
 }
 
 void MeterEditor::writeSettings()
@@ -136,15 +123,11 @@ void MeterEditor::readSettings()
     }
     else
     {
-        resize(QSize(300,200));
+        resize(QSize(310,200));
     }
 
     settings.endGroup();
 }
-
-
-
-
 
 static AttributeEditorMaker<MeterEditor> makerStr("meter");
 

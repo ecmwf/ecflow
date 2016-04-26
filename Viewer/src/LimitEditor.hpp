@@ -27,17 +27,24 @@ public:
 
 class LimitEditor : public AttributeEditor
 {
+Q_OBJECT
 public:
     LimitEditor(VInfo_ptr,QWidget* parent=0);
 
+protected Q_SLOTS:
+    void slotValueChanged(int);
+    void slotMaxChanged(int);
+
 protected:
+    void resetValue();
     void apply();
+    bool isValueChanged();
     void readSettings();
     void writeSettings();
 
     LimitEditorWidget* w_;
-    int valOri_;
-    int maxOri_;
+    int oriVal_;
+    int oriMax_;
 };
 
 #endif // LIMITEDITOR_HPP

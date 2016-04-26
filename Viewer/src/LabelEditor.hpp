@@ -33,12 +33,12 @@ public:
     ~LabelEditor();
 
 protected Q_SLOTS:
-    void slotResetValue();
     void slotValueChanged();
 
 protected:
     void apply();
-    void checkButtonStatus();
+    void resetValue();
+    bool isValueChanged();
     void readSettings();
     void writeSettings();
 

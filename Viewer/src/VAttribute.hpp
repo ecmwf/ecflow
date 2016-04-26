@@ -31,6 +31,7 @@ public:
     QString toolTip() const;
     QString name() const;
     std::string strName() const;
+    bool isValid(VNode* parent);
 
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,

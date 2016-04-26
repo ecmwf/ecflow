@@ -10,13 +10,13 @@
 
 #include "LimitEditor.hpp"
 
-#include <QtGlobal>
-#include <QIntValidator>
+#include <QSettings>
 
 #include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
+#include "SessionHandler.hpp"
 
 LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
 {
@@ -28,11 +28,6 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
     w_=new LimitEditorWidget(this);
     addForm(w_);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-    w_->valueLe_->setClearButtonEnabled(true);
-    w_->maxLe_->setClearButtonEnabled(true);
-#endif
-
     VAttribute* a=info_->attribute();
 
     Q_ASSERT(a);
@@ -43,36 +38,39 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
        return;
 
     QString name=a->data().at(1);
+    oriVal_=a->data().at(2).toInt();
+    oriMax_=a->data().at(3).toInt();
 
     w_->nameLabel_->setText(name);
-    w_->valueLe_->setText(a->data().at(2));
-    w_->maxLe_->setText(a->data().at(3));
+    w_->valueSpin_->setValue(oriVal_);
+    w_->maxSpin_->setValue(oriMax_);
+
+    w_->valueSpin_->setFocus();
 
     if(a->data().at(2).isEmpty() || a->data().at(3).isEmpty())
     {
         return;
     }
 
-    valOri_=a->data().at(2).toInt();
-    maxOri_=a->data().at(3).toInt();
+    connect(w_->valueSpin_,SIGNAL(valueChanged(int)),
+            this,SLOT(slotValueChanged(int)));
 
-    QIntValidator *valValidator=new QIntValidator(this);
-    valValidator->setRange(0,maxOri_);
-    w_->valueLe_->setValidator(valValidator);
-
-    QIntValidator *maxValidator=new QIntValidator(this);
-    w_->valueLe_->setValidator(maxValidator);
-    w_->valueLe_->setFocus();
+    connect(w_->maxSpin_,SIGNAL(valueChanged(int)),
+            this,SLOT(slotMaxChanged(int)));
 
     header_->setInfo(QString::fromStdString(info_->path()),"Limit");
+
+    checkButtonStatus();
+
+    readSettings();
 }
 
 void LimitEditor::apply()
 {
-    std::string val=w_->valueLe_->text().toStdString();
-    std::string max=w_->maxLe_->text().toStdString();
-    int intVal=w_->valueLe_->text().toInt();
-    int intMax=w_->maxLe_->text().toInt();
+    int intVal=w_->valueSpin_->value();
+    int intMax=w_->maxSpin_->value();
+    std::string val=QString::number(intVal).toStdString();
+    std::string max=QString::number(intMax).toStdString();
     std::string name=w_->nameLabel_->text().toStdString();
 
     std::vector<std::string> valCmd;
@@ -81,9 +79,9 @@ void LimitEditor::apply()
     std::vector<std::string> maxCmd;
     VAttribute::buildAlterCommand(maxCmd,"change","limit_max",name,max);
 
-    if(valOri_ != intVal && maxOri_ != intMax)
+    if(oriVal_ != intVal && oriMax_ != intMax)
     {
-        if(intVal < maxOri_)
+        if(intVal < oriMax_)
         {
             ServerHandler::command(info_,valCmd);
             ServerHandler::command(info_,maxCmd);
@@ -94,17 +92,72 @@ void LimitEditor::apply()
             ServerHandler::command(info_,valCmd);
         }
     }
-    else if(valOri_ != intVal)
+    else if(oriVal_ != intVal)
     {
         ServerHandler::command(info_,valCmd);
     }
 
-    if(maxOri_ != intMax)
+    else if(oriMax_ != intMax)
     {
         ServerHandler::command(info_,maxCmd);
     }
 }
 
+void LimitEditor::resetValue()
+{
+    w_->valueSpin_->setValue(oriVal_);
+    w_->maxSpin_->setValue(oriMax_);
+    checkButtonStatus();
+}
+
+void LimitEditor::slotValueChanged(int)
+{
+    checkButtonStatus();
+}
+
+void LimitEditor::slotMaxChanged(int)
+{
+    checkButtonStatus();
+}
+
+bool LimitEditor::isValueChanged()
+{
+    return (oriVal_ != w_->valueSpin_->value() || oriMax_ != w_->maxSpin_->value());
+}
+
+void LimitEditor::writeSettings()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("LimitEditor")),
+                       QSettings::NativeFormat);
+
+    //We have to clear it so that should not remember all the previous values
+    settings.clear();
+
+    settings.beginGroup("main");
+    settings.setValue("size",size());
+    settings.endGroup();
+}
+
+void LimitEditor::readSettings()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("LimitEditor")),
+                       QSettings::NativeFormat);
+
+    settings.beginGroup("main");
+    if(settings.contains("size"))
+    {
+        resize(settings.value("size").toSize());
+    }
+    else
+    {
+        resize(QSize(310,200));
+    }
+
+    settings.endGroup();
+}
+
 static AttributeEditorMaker<LimitEditor> makerStr("limit");
-
-

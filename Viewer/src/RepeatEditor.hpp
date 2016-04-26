@@ -20,17 +20,19 @@ class QModelIndex;
 class QStringList;
 class QStringListModel;
 class VRepeat;
-
-
 class RepeatEditor;
 
 class RepeatEditorWidget :  public QWidget, protected Ui::RepeatEditorWidget
 {
 friend class RepeatEditor;
+friend class RepeatIntEditor;
+friend class RepeatStringEditor;
+friend class RepeatDateEditor;
 public:
     RepeatEditorWidget(QWidget *parent=0);
+protected:
+    void hideRow(QWidget* w);
 };
-
 
 class RepeatEditor : public AttributeEditor
 {
@@ -41,15 +43,12 @@ public:
     ~RepeatEditor();
 
 protected Q_SLOTS:
-    void slotSelected(const QModelIndex&);
-    void slotValueEdited(QString txt);
-    void slotResetValue();
+    void slotSelectedInView(const QModelIndex&);
 
 protected:
     void buildList();
-    bool isListMode() const;
-    void checkButtonStatus();
-    void apply();
+    bool isListMode() const;   
+    virtual void setValue(QString)=0;
     void readSettings();
     void writeSettings();
 
@@ -58,6 +57,54 @@ protected:
     QStringListModel* model_;
     QStringList modelData_;
     QString oriVal_;
+};
+
+class RepeatIntEditor : public RepeatEditor
+{
+Q_OBJECT
+public:
+    RepeatIntEditor(VInfo_ptr,QWidget* parent=0);
+
+protected Q_SLOTS:
+    void slotValueChanged(int);
+
+protected:
+    void apply();
+    void setValue(QString val);
+    void resetValue();
+    bool isValueChanged();
+};
+
+class RepeatStringEditor : public RepeatEditor
+{
+Q_OBJECT
+public:
+    RepeatStringEditor(VInfo_ptr,QWidget* parent=0);
+
+protected Q_SLOTS:
+    void slotValueEdited(QString);
+
+protected:
+    void apply();
+    void setValue(QString val);
+    void resetValue();
+    bool isValueChanged();
+};
+
+class RepeatDateEditor : public RepeatEditor
+{
+Q_OBJECT
+public:
+    RepeatDateEditor(VInfo_ptr,QWidget* parent=0);
+
+protected Q_SLOTS:
+    void slotValueEdited(QString);
+
+protected:
+    void apply();
+    void setValue(QString val);
+    void resetValue();
+    bool isValueChanged();
 };
 
 #endif // REPEATEDITOR_HPP

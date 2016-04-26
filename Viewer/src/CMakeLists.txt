@@ -217,6 +217,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     HistoryItemWidget.hpp              
     InfoPanel.hpp
     LabelEditor.hpp
+    LimitEditor.hpp
     LineEdit.hpp
     LogProvider.hpp
     MainWindow.hpp

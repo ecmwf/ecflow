@@ -15,6 +15,8 @@
 #include <map>
 #include "RepeatAttr.hpp"
 
+class VNode;
+
 class VRepeat
 {
 public:
@@ -30,7 +32,8 @@ public:
     ValyeType valueType() const {return valueType_;}
 
     static VRepeat* make(const Repeat& r);
-    static const std::string& valueType(const Repeat& r);
+    static const std::string& type(const Repeat& r);
+    static const std::string& type(VNode*);
 
 protected:
     VRepeat(const Repeat& r,const std::string& type,ValyeType t) : repeat_(r), type_(type), valueType_(t) {}

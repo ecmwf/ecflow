@@ -55,7 +55,6 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
     cmd.push_back("<full_name>");
 }
 
-
 QString VAttribute::name() const
 {
     if(data_.count() >= 2)
@@ -67,4 +66,14 @@ QString VAttribute::name() const
 std::string VAttribute::strName() const
 {
     return name().toStdString();
+}
+
+bool VAttribute::isValid(VNode* parent)
+{
+    if(type_)
+    {
+        return type_->exists(parent,data_);
+    }
+
+    return false;
 }

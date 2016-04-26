@@ -266,7 +266,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
     QFontMetrics fm(attrFont_);
 
     //The status rectangle
-    int stHeight=fm.height();
+    int stHeight=static_cast<int>(static_cast<float>(fillRect.height())*0.6);
     int stHeightDiff=(fillRect.height()-stHeight)/2;
     QRect stRect=fillRect.adjusted(offset,stHeightDiff,
                                    0,-(fillRect.height()-stHeight-stHeightDiff));
@@ -309,20 +309,28 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
     {
         QRect progRect=stRect;
 
-        float percent=static_cast<float>(val-min)/static_cast<float>(max-min);
+        float valPercent=static_cast<float>(val-min)/static_cast<float>(max-min);
         if(threshold > min && threshold < max && val > threshold)
         {
-            float thresholdPercent=static_cast<float>(threshold-min)/static_cast<float>(max-min);
-            progRect.setWidth((stRect.width())*thresholdPercent);
-            painter->fillRect(progRect,meterFillBrush_);
-
-            progRect.setLeft(progRect.right());
-            progRect.setWidth((stRect.width())*(percent-thresholdPercent));
+            int progWidth=static_cast<int>(static_cast<float>(stRect.width())*valPercent);
+            if(val < max)
+            {
+                progRect.setWidth(progWidth);
+            }
             painter->fillRect(progRect,meterThresholdBrush_);
+
+            float thresholdPercent=static_cast<float>(threshold-min)/static_cast<float>(max-min);
+            progWidth=static_cast<int>(static_cast<float>(stRect.width())*thresholdPercent);
+            progRect.setWidth(progWidth);
+            painter->fillRect(progRect,meterFillBrush_);
         }
         else
         {
-            progRect.setWidth(stRect.width()*percent);
+            int progWidth=static_cast<int>(static_cast<float>(stRect.width())*valPercent);
+            if(val < max)
+            {
+                progRect.setWidth(progWidth);
+            }
             painter->fillRect(progRect,meterFillBrush_);
         }
     }

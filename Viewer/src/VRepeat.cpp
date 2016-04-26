@@ -12,6 +12,7 @@
 
 #include <sstream>
 #include "RepeatAttr.hpp"
+#include "VNode.hpp"
 
 std::map<std::string,std::string> VRepeat::typeNames_;
 
@@ -89,7 +90,7 @@ long ecf_repeat_date_to_julian(long ddate)
     return j1;
 }
 
-const std::string& VRepeat::valueType(const Repeat& r)
+const std::string& VRepeat::type(const Repeat& r)
 {
     if(typeNames_.empty())
     {
@@ -112,9 +113,17 @@ const std::string& VRepeat::valueType(const Repeat& r)
     return noTypeName;
 }
 
+const std::string& VRepeat::type(VNode* n)
+{
+    if(n && n->node())
+    {
+        return VRepeat::type(n->node()->repeat());
+    }
+}
+
 VRepeat* VRepeat::make(const Repeat& r)
 {
-    const std::string t=VRepeat::valueType(r);
+    const std::string t=VRepeat::type(r);
     if(t == "date")
         return new VRepeatDate(r);
     else if(t == "integer")

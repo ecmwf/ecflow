@@ -42,6 +42,7 @@ public:
     static void load(VProperty*);
 
     virtual QString toolTip(QStringList d) const {return QString();}
+    virtual bool exists(const VNode* vnode,QStringList) const {return false;}
 
 protected:
     virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
