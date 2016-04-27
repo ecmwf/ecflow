@@ -98,6 +98,7 @@ void BcWidget::updateSettings()
 void BcWidget::clear()
 {
     items_.clear();
+    reset(items_);
 }
     
 void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)

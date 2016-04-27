@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -440,7 +440,14 @@ void TreeNodeView::slotRestoreExpand()
         if(!s)
         {
             expandState_->selection_->regainData();
-            currentSelection(expandState_->selection_);
+            if(!expandState_->selection_->server())
+            {
+                expandState_->selection_.reset();
+            }
+            else
+            {
+                currentSelection(expandState_->selection_);
+            }
         }
     }
 
@@ -470,6 +477,25 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         if(es->rootSameAs(node->vnode()->strName()))
         {
             es->restore(node);
+
+            if(expandState_->selection_)
+            {
+                VInfo_ptr s=currentSelection();
+                if(!s)
+                {
+                    expandState_->selection_->regainData();
+                    if(!expandState_->selection_->server())
+                    {
+                        expandState_->selection_.reset();
+                    }
+                    else if(node->server()->realServer() == expandState_->selection_->server())
+                    {
+                        currentSelection(expandState_->selection_);
+                        expandState_->selection_.reset();
+                    }
+                }
+            }
+
             expandState_->remove(es);
         }
     }

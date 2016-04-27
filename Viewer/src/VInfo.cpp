@@ -133,6 +133,12 @@ void VInfo::notifyEndServerScan(ServerHandler* server)
 
 void VInfo::regainData()
 {
+    if(!server_)
+    {
+        dataLost();
+        return;
+    }
+
     if(node_)
         return;
 
