@@ -40,7 +40,7 @@ protected:
     void resetValue();
     bool isValueChanged();
     void readSettings();
-    void writeSettings();
+    void writeSettings();   
 
     LabelEditorWidget* w_;
     QString oriVal_;

@@ -23,7 +23,7 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
     setupUi(this);
 }
 
-LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent)
+LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"limit",parent)
 {
     w_=new LimitEditorWidget(this);
     addForm(w_);

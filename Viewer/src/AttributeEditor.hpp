@@ -24,7 +24,7 @@ class AttributeEditor : public QDialog, public ServerObserver,  public NodeObser
 Q_OBJECT
 
 public:
-    AttributeEditor(VInfo_ptr info,QWidget* parent);
+    AttributeEditor(VInfo_ptr info,QString type,QWidget* parent);
     virtual ~AttributeEditor();
 
     //From VInfoObserver
@@ -66,6 +66,7 @@ protected:
 
     VInfo_ptr info_;
     QWidget* form_;
+    QString type_;
 };
 
 #endif // ATTRIBUTEEDITOR_HPP

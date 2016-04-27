@@ -138,8 +138,8 @@ public:
     //Get all the variables
     virtual int variablesNum() const;
     virtual int genVariablesNum() const;
-    virtual void variables(std::vector<Variable>& vars);
-    virtual void genVariables(std::vector<Variable>& genVars);
+    virtual void variables(std::vector<Variable>& vars) const;
+    virtual void genVariables(std::vector<Variable>& genVars) const;
 
     virtual std::string genVariable(const std::string& key) const;
     virtual std::string findVariable(const std::string& key,bool substitute=false) const;
@@ -277,8 +277,8 @@ public:
 	//Get all the variables
     int variablesNum() const;
 	int genVariablesNum() const;
-	void variables(std::vector<Variable>& vars);
-	void genVariables(std::vector<Variable>& genVars);
+    void variables(std::vector<Variable>& vars) const;
+    void genVariables(std::vector<Variable>& genVars) const;
 	std::string genVariable(const std::string& key) const;
 
 	//Find a variable in the Defs. Both the user_variables and the

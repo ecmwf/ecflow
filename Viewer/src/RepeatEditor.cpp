@@ -45,7 +45,7 @@ void RepeatEditorWidget::hideRow(QWidget* w)
 //================================================================
 
 RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
-    AttributeEditor(info,parent),
+    AttributeEditor(info,"repeat",parent),
     repeat_(0),
     model_(0)
 {

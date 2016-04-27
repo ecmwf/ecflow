@@ -38,6 +38,7 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
+    bool exists(const VNode* vnode,QStringList) const;
 };
 
 class VEventAttribute : public VAttributeType
@@ -47,6 +48,7 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
+    bool exists(const VNode* vnode,QStringList) const;
 };
 
 class VRepeatAttribute : public VAttributeType
@@ -56,6 +58,7 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
+    bool exists(const VNode* vnode,QStringList) const;
 };
 
 class VTriggerAttribute : public VAttributeType
@@ -103,6 +106,7 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
+    bool exists(const VNode* vnode,QStringList) const;
 };
 
 class VLimiterAttribute : public VAttributeType
@@ -129,6 +133,7 @@ public:
     explicit VVarAttribute(const std::string& n) : VAttributeType(n) {}
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool exists(const VNode* vnode,QStringList) const;
 };
 
 class VGenvarAttribute : public VAttributeType
@@ -137,6 +142,7 @@ public:
     explicit VGenvarAttribute(const std::string& n) : VAttributeType(n) {}
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool exists(const VNode* vnode,QStringList) const;
 };
 
 static VMeterAttribute meterAttr("meter");
@@ -388,6 +394,27 @@ QString VMeterAttribute::toolTip(QStringList d) const
     return t;
 }
 
+bool VMeterAttribute::exists(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    if(data.count() != 6 && data[0] != qName_)
+        return false;
+
+    const std::vector<Meter>&  v=node->meters();
+    for(size_t i=0; i < v.size(); i++)
+    {
+        if(v[i].name() == data[1].toStdString())
+            return true;
+    }
+
+    return false;
+}
 
 //================================
 // Labels
@@ -554,6 +581,27 @@ QString VEventAttribute::toolTip(QStringList d) const
     return t;
 }
 
+bool VEventAttribute::exists(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    if(data.count() != 3 && data[0] != qName_)
+        return false;
+
+    const std::vector<Event>&  v=node->events();
+    for(size_t i=0; i < v.size(); i++)
+    {
+        if(v[i].name_or_number() == data[1].toStdString())
+            return true;
+    }
+
+    return false;
+}
 
 //================================
 //Generated Variables
@@ -607,6 +655,30 @@ bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     return false;
 }
 
+bool VGenvarAttribute::exists(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    if(data.count() != 3 && data[0] != qName_)
+        return false;
+
+    std::vector<Variable> v;
+    vnode->genVariables(v);
+
+    for(size_t i=0; i < v.size(); i++)
+    {
+        if(v[i].name() == data[1].toStdString())
+           return true;
+    }
+
+    return false;
+}
+
 //================================
 //Variables
 //================================
@@ -629,7 +701,7 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     {
         std::vector<Variable> v;
         vnode->variables(v);
-        node_ptr node=vnode->node();
+        //node_ptr node=vnode->node();
         if(row >=0 && row < v.size())
         {
             data << qName_ <<
@@ -666,6 +738,41 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         UserMessage::debug("  size=" + QString::number(size).toStdString());
 #endif
         size=v.size();
+    }
+
+    return false;
+}
+
+bool VVarAttribute::exists(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    if(data.count() != 3 && data[0] != qName_)
+        return false;
+
+    if(vnode->isServer())
+    {
+        std::vector<Variable> v;
+        vnode->variables(v);
+        for(size_t i=0; i < v.size(); i++)
+        {
+            if(v[i].name() == data[1].toStdString())
+               return true;
+        }
+    }
+    else
+    {
+        const std::vector<Variable>& v=node->variables();
+        for(size_t i=0; i < v.size(); i++)
+        {
+            if(v[i].name() == data[1].toStdString())
+                return true;
+        }
     }
 
     return false;
@@ -728,6 +835,28 @@ QString VLimitAttribute::toolTip(QStringList d) const
         t+="<b>Maximum:</b> " + d[3];
     }
     return t;
+}
+
+bool VLimitAttribute::exists(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    if(data.count() != 4 && data[0] != qName_)
+        return false;
+
+    const std::vector<limit_ptr>& v=node->limits();
+    for(size_t i=0; i < v.size(); i++)
+    {
+        if(v[i]->name() == data[1].toStdString())
+            return true;
+    }
+
+    return false;
 }
 
 //================================
@@ -1072,6 +1201,27 @@ QString VRepeatAttribute::toolTip(QStringList d) const
     }
 
     return t;
+}
+
+bool VRepeatAttribute::exists(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    if(data.count() != 7 && data[0] != qName_)
+        return false;
+
+    const Repeat& r=node->repeat();
+    if(r.name() == data[2].toStdString())
+    {
+        return (VRepeat::type(r) == data[1].toStdString());
+    }
+
+    return false;
 }
 
 //================================

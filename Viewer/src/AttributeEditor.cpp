@@ -28,7 +28,7 @@
 static QList<AttributeEditor*> editors;
 #endif
 
-AttributeEditor::AttributeEditor(VInfo_ptr info,QWidget* parent) : QDialog(parent), info_(info), form_(0)
+AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : QDialog(parent), info_(info), type_(type), form_(0)
 {    
     setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -197,7 +197,7 @@ void AttributeEditor::notifyDataLost(VInfo* info)
     if(info_ && info_.get() == info)
     {
         detachInfo();
-        messageLabel_->showWarning("The parent node and the edited attribute <b>does not exist</b> anymore! Please close the dialog!");
+        messageLabel_->showWarning("The parent node and the edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
     }
 }
@@ -223,7 +223,7 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
                 UserMessage::debug("   attribute does not exist");
 #endif
                 detachInfo();
-                messageLabel_->showWarning("The edited attribute does not exist anymore! Please close the dialog!");
+                messageLabel_->showWarning("The edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
                 setSuspended(true);
             }
         }
@@ -251,7 +251,7 @@ void AttributeEditor::notifyServerDelete(ServerHandler* server)
     if(info_ && info_->server() == server)
     {
         detachInfo();
-        messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> was removed from ecFlowUI! The attribute does not exist anymore! Please close the dialog!");
+        messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> was removed from ecFlowUI! The edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
     }
 }
@@ -264,7 +264,7 @@ void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
         if(info_->server() && info_->server() == server)
         {
             messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reloaded. \
-                   Until it is finished this attribute <b>cannot be modified</b>!");
+                   Until it is finished this " + type_ + " <b>cannot be modified</b>!");
 
             messageLabel_->startLoadLabel();
 
@@ -307,7 +307,7 @@ void AttributeEditor::notifyServerConnectState(ServerHandler* server)
         {
         case ConnectState::Lost:
             messageLabel_->showWarning("Connection lost to server <b>" + QString::fromStdString(server->name()) + "</b>. \
-                   Until it the connection regained the attribute <b>cannot be modified</b>!");
+                   Until it the connection regained this " + type_ + " <b>cannot be modified</b>!");
             setSuspended(true);
             break;
         case ConnectState::Normal:

@@ -353,7 +353,7 @@ int VNode::genVariablesNum() const
 {
 	std::vector<Variable> gv;
 
-	if(node_.get())
+    if(node_)
 	{
 		node_->gen_variables(gv);
 		return static_cast<int>(gv.size());
@@ -362,17 +362,17 @@ int VNode::genVariablesNum() const
 	return 0;
 }
 
-void VNode::variables(std::vector<Variable>& vars)
+void VNode::variables(std::vector<Variable>& vars) const
 {
 	vars.clear();
-	if(node_.get())
+    if(node_)
 		vars=node_->variables();
 }
 
-void VNode::genVariables(std::vector<Variable>& genVars)
+void VNode::genVariables(std::vector<Variable>& genVars) const
 {
 	genVars.clear();
-	if(node_.get())
+    if(node_)
 		node_->gen_variables(genVars);
 }
 
@@ -814,13 +814,13 @@ int VServer::genVariablesNum() const
 	return cache_.genVars_.size();
 }
 
-void VServer::variables(std::vector<Variable>& vars)
+void VServer::variables(std::vector<Variable>& vars) const
 {
 	vars.clear();
 	vars=cache_.vars_;
 }
 
-void VServer::genVariables(std::vector<Variable>& vars)
+void VServer::genVariables(std::vector<Variable>& vars) const
 {
 	vars.clear();
 	vars=cache_.genVars_;

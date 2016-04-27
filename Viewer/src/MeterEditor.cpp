@@ -10,6 +10,7 @@
 
 #include "MeterEditor.hpp"
 
+#include <QDebug>
 #include <QSettings>
 
 #include "AttributeEditorFactory.hpp"
@@ -23,7 +24,7 @@ MeterEditorWidget::MeterEditorWidget(QWidget* parent) : QWidget(parent)
     setupUi(this);
 }
 
-MeterEditor::MeterEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,parent), oriVal_(0)
+MeterEditor::MeterEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"meter",parent), oriVal_(0)
 {
     w_=new MeterEditorWidget(this);
     addForm(w_);
@@ -45,8 +46,9 @@ MeterEditor::MeterEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
         return;
 
     w_->nameLabel_->setText(a->data().at(1));
-    w_->valueSpin_->setValue(oriVal_);
     w_->valueSpin_->setRange(min,max);
+    w_->valueSpin_->setValue(oriVal_);
+
     w_->minLabel_->setText(a->data().at(3));
     w_->maxLabel_->setText(a->data().at(4));
     w_->thresholdLabel_->setText(a->data().at(5));
