@@ -119,6 +119,8 @@ const std::string& VRepeat::type(VNode* n)
     {
         return VRepeat::type(n->node()->repeat());
     }
+    static std::string noTypeName="";
+    return noTypeName;
 }
 
 VRepeat* VRepeat::make(const Repeat& r)
