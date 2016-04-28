@@ -155,6 +155,9 @@ void AttributeEditor::detachInfo()
 #endif
             info_->removeObserver(this);
     }
+
+    messageLabel_->stopLoadLabel();
+
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UserMessage::debug("<-- AttributeEditor::detachInfo");
 #endif
@@ -202,7 +205,7 @@ void AttributeEditor::notifyDataLost(VInfo* info)
     if(info_ && info_.get() == info)
     {
         detachInfo();
-        messageLabel_->showWarning("The parent node and the edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
+        messageLabel_->showWarning("The parent node and the edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");      
         setSuspended(true);
     }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
@@ -340,11 +343,13 @@ void AttributeEditor::notifyServerConnectState(ServerHandler* server)
         case ConnectState::Lost:
             messageLabel_->showWarning("Connection lost to server <b>" + QString::fromStdString(server->name()) + "</b>. \
                    Until it the connection regained this " + type_ + " <b>cannot be modified</b>!");
+            messageLabel_->stopLoadLabel();
             setSuspended(true);
             break;
         case ConnectState::Normal:
             messageLabel_->hide();
             messageLabel_->clear();
+            messageLabel_->stopLoadLabel();
             setSuspended(false);
             break;
         default:
