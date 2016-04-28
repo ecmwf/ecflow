@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -51,12 +51,20 @@ public:
 	SessionItem* current();
 	void save();
 	void load();
+	int numSessions() {return sessions_.size();};
+	SessionItem *find(const std::string&);
+	SessionItem *sessionFromIndex(int i) {return sessions_[i];};
+	SessionItem *copySession(SessionItem* source, std::string &destName);
 
-	const std::vector<SessionItem*>& sessios() const {return sessions_;}
+	const std::vector<SessionItem*>& sessions() const {return sessions_;}
 
+	static std::string sessionDirName(const std::string &sessionName);    // static because they are called from the constructor
+	static std::string sessionQtDirName(const std::string &sessionName);  // static because they are called from the constructor
 	static SessionHandler* instance();
 
 protected:
+	void readSessionListFromDisk();
+
 	static SessionHandler* instance_;
 
 	std::vector<SessionItem*> sessions_;

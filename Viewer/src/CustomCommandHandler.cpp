@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include "CustomCommandHandler.hpp"
+#include "SessionHandler.hpp"
 
 #include "DirectoryHandler.hpp"
 #include "File.hpp"
@@ -47,37 +48,10 @@ CustomCommandHandler::CustomCommandHandler()
 }
 
 
-void CustomCommandHandler::init(const std::string& configFilePath)
+void CustomCommandHandler::init()
 {
-
-    dirPath_ = configFilePath;
     readSettings();
-
-    /*
-    dirPath_=dirPath;
-	DirectoryHandler::createDir(dirPath_);
-
-	std::vector<std::string> res;
-	std::string pattern=".*\\." + suffix_ + "$";
-	DirectoryHandler::findFiles(dirPath_,pattern,res);
-
-	for(std::vector<std::string>::const_iterator it=res.begin(); it != res.end(); ++it)
-	{
-		std::string fName=DirectoryHandler::concatenate(dirPath_,*it);
-		VSettings vs(fName);
-		vs.read();
-
-		std::size_t pos=(*it).find("." + suffix_);
-		assert(pos != std::string::npos);
-
-		std::string name=(*it).substr(0,pos);
-		NodeQuery* item=add(name);
-		item->load(&vs);
-	}
-*/
 }
-
-
 
 
 
@@ -176,7 +150,9 @@ void CustomCommandHandler::writeSettings()
     std::vector<VSettings> vsItems;
     std::string dummyFileName="dummy";
     std::string key="commands";
-    VSettings vs(dirPath_);
+
+    std::string settingsFilePath = settingsFile();
+    VSettings vs(settingsFilePath);
 
     for(int i = 0; i < numCommands(); i++)
     {
@@ -194,7 +170,9 @@ void CustomCommandHandler::readSettings()
     std::vector<VSettings> vsItems;
     std::string dummyFileName="dummy";
     std::string key="commands";
-    VSettings vs(dirPath_);
+
+    std::string settingsFilePath = settingsFile();
+    VSettings vs(settingsFilePath);
 
     bool ok = vs.read(false);  // false means we don't abort if the file is not there
 
@@ -229,8 +207,6 @@ bool CustomCommandHandler::stringToBool(std::string &str)
 CustomSavedCommandHandler* CustomSavedCommandHandler::instance_=0;
 
 
-
-
 CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
 {
     if(!instance_)
@@ -261,6 +237,12 @@ CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std
         writeSettings();
 
     return item;
+}
+
+std::string CustomSavedCommandHandler::settingsFile()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    return cs->savedCustomCommandsFile();
 }
 
 
@@ -314,6 +296,13 @@ CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const s
     }
 
 }
+
+std::string CustomCommandHistoryHandler::settingsFile()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    return cs->recentCustomCommandsFile();
+}
+
 
 /*
 void NodeQueryHandler::add(NodeQuery* item,bool saveToFile)

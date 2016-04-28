@@ -61,6 +61,7 @@ protected Q_SLOTS:
 	void on_actionPreferences_triggered();
 	void on_actionSearch_triggered();
 	void on_actionAbout_triggered();
+	void on_actionSaveSessionAs_triggered();
 
 	void slotCurrentChangedInPanel();
 	void slotSelectionChanged(VInfo_ptr);

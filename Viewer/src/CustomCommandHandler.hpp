@@ -51,7 +51,7 @@ public:
 
 	//void save();
 	//void save(CustomCommand*);
-	void init(const std::string& configFilePath);
+	void init();
 	//const std::vector<NodeQuery*>& items() const {return items_;}
 	CustomCommand* find(const std::string& name) const;
 	int findIndexFromName(const std::string& name) const;
@@ -63,8 +63,8 @@ public:
 
 protected:
 	void readSettings();
+	virtual std::string settingsFile() = 0;
 
-	std::string dirPath_;
 	const std::string suffix_;
 	std::deque<CustomCommand*> items_;
 };
@@ -85,6 +85,7 @@ public:
 
 protected:
     static CustomSavedCommandHandler* instance_;
+    std::string settingsFile();
 };
 
 
@@ -102,6 +103,7 @@ public:
 
 protected:
     static CustomCommandHistoryHandler* instance_;
+    std::string settingsFile();
     int maxCommands_;
 };
 

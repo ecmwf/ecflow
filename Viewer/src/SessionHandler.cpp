@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,6 +12,8 @@
 #include <algorithm>
 
 #include "DirectoryHandler.hpp"
+#include "Str.hpp"
+#include "UserMessage.hpp"
 
 
 SessionHandler* SessionHandler::instance_=0;
@@ -25,10 +27,10 @@ SessionItem::SessionItem(const std::string& name) :
 
 void SessionItem::checkDir()
 {
-	dirPath_=DirectoryHandler::concatenate(DirectoryHandler::configDir(), name_ + ".session");
+	dirPath_ = SessionHandler::sessionDirName(name_);
 	DirectoryHandler::createDir(dirPath_);
 
-    qtPath_=DirectoryHandler::concatenate(dirPath_,"qt");
+    qtPath_= SessionHandler::sessionQtDirName(name_);
     DirectoryHandler::createDir(qtPath_);
 }
 
@@ -83,6 +85,8 @@ SessionHandler::SessionHandler() :
 {
 	//The default must always be exist!
 	current_=add("default");
+
+	readSessionListFromDisk();
 }
 
 SessionHandler* SessionHandler::instance()
@@ -95,12 +99,60 @@ SessionHandler* SessionHandler::instance()
 	return instance_;
 }
 
+std::string SessionHandler::sessionDirName(const std::string &sessionName)
+{
+	return DirectoryHandler::concatenate(DirectoryHandler::configDir(), sessionName + ".session");
+}
+
+std::string SessionHandler::sessionQtDirName(const std::string &sessionName)
+{
+	std::string basedir = sessionDirName(sessionName);
+	return DirectoryHandler::concatenate(basedir, "qt");
+}
+
+SessionItem* SessionHandler::find(const std::string& name)
+{
+    for(std::vector<SessionItem*>::const_iterator it=sessions_.begin(); it != sessions_.end(); ++it)
+    {
+        if((*it)->name() == name)
+            return *it;
+    }
+    return NULL;
+
+}
+
+
+void SessionHandler::readSessionListFromDisk()
+{
+    // get the list of existing sessions (by listing the directories)
+    std::string configDir = DirectoryHandler::configDir();
+    std::string filter = ".*\\.session";
+    std::vector<std::string> dirs;
+    DirectoryHandler::findDirs(configDir, filter, dirs);
+
+    // add each session to our list (but remove the .session first)
+    for(std::vector<std::string>::const_iterator it=dirs.begin(); it != dirs.end(); ++it)
+    {
+        std::string dirName       = (*it);
+        std::string toRemove      = ".session";
+        std::string toReplaceWith = "";
+        ecf::Str::replace(dirName, toRemove, toReplaceWith);
+        add(dirName);
+    }
+}
+
 
 SessionItem* SessionHandler::add(const std::string& name)
 {
-	SessionItem *item=new SessionItem(name);
-	sessions_.push_back(item);
-	return item;
+	// only add if not already there
+	if (find(name) == NULL)
+	{
+		SessionItem *item=new SessionItem(name);
+		sessions_.push_back(item);
+		return item;
+	}
+	else
+		return NULL;
 }
 
 void SessionHandler::remove(const std::string&)
@@ -138,5 +190,25 @@ void SessionHandler::save()
 void SessionHandler::load()
 {
 
+}
+
+SessionItem *SessionHandler::copySession(SessionItem* source, std::string &destName)
+{
+	// the main work is to make a copy of the source session's directory (recursively)
+	std::string errorMessage;
+	std::string sourceSessionDir = sessionDirName(source->name());
+	std::string destSessionDir   = sessionDirName(destName);
+	bool ok = DirectoryHandler::copyDir(sourceSessionDir, destSessionDir, errorMessage);
+	if (ok)
+	{
+		// add it to our list
+		SessionItem *newItem = add(destName);
+		return newItem;
+	}
+	else
+	{
+		UserMessage::message(UserMessage::ERROR, true, errorMessage);
+		return NULL;
+	}
 }
 
