@@ -102,8 +102,8 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
-    SaveSessionAsDialog.cpp
     RepeatEditor.cpp
+    SaveSessionAsDialog.cpp
     ScriptItemWidget.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
@@ -316,10 +316,8 @@ set(viewer_wrap_ui_files
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui
-    SearchLineWidget.ui 
-    SaveSessionAsDialog.ui
-    SearchLineWidget.ui 
     RepeatEditorWidget.ui
+    SaveSessionAsDialog.ui
     SearchLineWidget.ui
     ServerAddDialog.ui
     ServerEditDialog.ui 
