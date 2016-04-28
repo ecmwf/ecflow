@@ -40,7 +40,7 @@ public:
     virtual VAliasNode* isAlias() const {return NULL;}
     virtual VAttribute* isAttribute() const {return NULL;}
 
-    virtual bool isTopLevel() const {false;}
+    virtual bool isTopLevel() const {return false;}
     virtual std::string strName() const=0;
     virtual QString name() const=0;
 
