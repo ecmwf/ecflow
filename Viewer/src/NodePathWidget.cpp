@@ -553,8 +553,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
   	adjust(info,&server,sameServer);
 
-    if(!info_ ||
-  	  (!info_->isServer() && !info_->isNode()))
+    if(!info_ || !info_->server())
   	{
   		clear();
   		return;
@@ -694,7 +693,7 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 		return;
 
 	//Check if there is data in info
-    if(info_ && info_->isNode() && info_->node())
+    if(info_ && !info_->isServer() && info_->node())
 	{
 		//TODO: MAKE IT SAFE!!!!
 
