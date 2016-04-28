@@ -85,11 +85,8 @@ int main(int argc, char **argv)
     MenuHandler::readMenuConfigFile(menuPath);
 
     //Load the custom context menu commands
-    SessionItem* cs=SessionHandler::instance()->current();
-    std::string recentCmdsPath=cs->recentCustomCommandsFile();
-    CustomCommandHistoryHandler::instance()->init(recentCmdsPath);
-    std::string savedCmdsPath=cs->savedCustomCommandsFile();
-    CustomSavedCommandHandler::instance()->init(savedCmdsPath);
+    CustomCommandHistoryHandler::instance()->init();
+    CustomSavedCommandHandler::instance()->init();
     MenuHandler::refreshCustomMenuCommands();
 
     //Load the info panel definition

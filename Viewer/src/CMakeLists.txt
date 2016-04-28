@@ -102,6 +102,7 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
+    SaveSessionAsDialog.cpp
     RepeatEditor.cpp
     ScriptItemWidget.cpp
     ServerComQueue.cpp
@@ -248,6 +249,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp
+    SaveSessionAsDialog.hpp
     RepeatEditor.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
@@ -314,6 +316,9 @@ set(viewer_wrap_ui_files
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui
+    SearchLineWidget.ui 
+    SaveSessionAsDialog.ui
+    SearchLineWidget.ui 
     RepeatEditorWidget.ui
     SearchLineWidget.ui
     ServerAddDialog.ui

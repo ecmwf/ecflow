@@ -173,7 +173,8 @@ void InfoPanel::clear()
 	{
 		if(InfoPanelItem* item=findItem(tab_->widget(i)))
 		{
-			item->clearContents();
+            //Diable and clear the contents
+            item->setActive(false);
 		}
 	}
 	//Clear the tabs
@@ -312,9 +313,8 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	{
 		if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 		{
-			//Disable and force to clear the contents
+			//Disable and force to clear the contents           
 			d->item()->setActive(false);
-			d->item()->clearContents();
 
 			if(d->match(ids))
 				match++;
@@ -636,9 +636,12 @@ void InfoPanel::notifyEndServerScan(ServerHandler* server)
             //is possible that the node exists but is still set to NULL in VInfo.
             info_->regainData();
 
-            //If the node is not available dataLost() will be called.
-            if(!info_->node())
+            //If the info is not available dataLost() might have already been called and
+            //the panel was reset!
+            if(!info_)
                 return;
+
+            Q_ASSERT(info_->server() && info_->node());
 
             //Otherwise we resume all the tabs
             Q_FOREACH(InfoPanelItemHandler *item,items_)

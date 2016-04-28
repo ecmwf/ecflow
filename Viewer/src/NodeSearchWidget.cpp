@@ -84,6 +84,9 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
     connect(resTree_,SIGNAL(selectionChanged(VInfo_ptr)),
     		this,SIGNAL(selectionChanged(VInfo_ptr)));
 
+    connect(resTree_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+
     //--------------------------------
     // Query
     //--------------------------------

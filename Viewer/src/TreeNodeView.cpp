@@ -454,7 +454,14 @@ void TreeNodeView::slotRestoreExpand()
         if(!s)
         {
             expandState_->selection_->regainData();
-            currentSelection(expandState_->selection_);
+            if(!expandState_->selection_->server())
+            {
+                expandState_->selection_.reset();
+            }
+            else
+            {
+                currentSelection(expandState_->selection_);
+            }
         }
     }
 
@@ -484,6 +491,25 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         if(es->rootSameAs(node->vnode()->strName()))
         {
             es->restore(node);
+
+            if(expandState_->selection_)
+            {
+                VInfo_ptr s=currentSelection();
+                if(!s)
+                {
+                    expandState_->selection_->regainData();
+                    if(!expandState_->selection_->server())
+                    {
+                        expandState_->selection_.reset();
+                    }
+                    else if(node->server()->realServer() == expandState_->selection_->server())
+                    {
+                        currentSelection(expandState_->selection_);
+                        expandState_->selection_.reset();
+                    }
+                }
+            }
+
             expandState_->remove(es);
         }
     }

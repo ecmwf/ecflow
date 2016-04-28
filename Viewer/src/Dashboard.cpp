@@ -215,8 +215,12 @@ void Dashboard::addSearchDialog()
 		{
 			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
 				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
+
 		}
 	}
+
+    connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
 	//The dashboard signals the dialog on deletion
 	connect(this,SIGNAL(aboutToDelete()),
@@ -241,6 +245,9 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
 				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
 		}
 	}
+
+    connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
 	//The dashboard signals the dialog on deletion
 	connect(this,SIGNAL(aboutToDelete()),

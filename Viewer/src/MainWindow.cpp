@@ -37,6 +37,7 @@
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
 #include "SessionHandler.hpp"
+#include "SaveSessionAsDialog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VSettings.hpp"
@@ -272,6 +273,13 @@ void MainWindow::on_actionAbout_triggered()
     AboutDialog d;
     d.exec();
 }
+
+void MainWindow::on_actionSaveSessionAs_triggered()
+{
+    SaveSessionAsDialog d;
+    d.exec();
+}
+
 
 void MainWindow::slotCurrentChangedInPanel()
 {
