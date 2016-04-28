@@ -55,7 +55,14 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     setAttribute(Qt::WA_DeleteOnClose);
 
-    setWindowTitle(QString::fromStdString(VConfig::instance()->appLongName()) + "  -  Preview version");
+    // add the name of the session to the title bar?
+    std::string sessionName = SessionHandler::instance()->current()->name();
+    if (sessionName == "default")
+        sessionName = "";
+    else
+        sessionName = " (session: " + sessionName + ")";
+
+    setWindowTitle(QString::fromStdString(VConfig::instance()->appLongName()) + "  -  Preview version" + QString::fromStdString(sessionName));
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
