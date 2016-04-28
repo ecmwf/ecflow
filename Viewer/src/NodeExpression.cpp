@@ -25,7 +25,7 @@
 
 #include <QDebug>
 
-#define _UI_NODEXPRESSIONPARSEER_DEBUG
+//#define _UI_NODEXPRESSIONPARSEER_DEBUG
 
 
 // -------------------------

@@ -148,7 +148,7 @@ void VInfo::regainData()
     {
         node_=server_->vRoot();
     }
-    else if(isNode())
+    else
     {
         node_=server_->vRoot()->find(nodePath_);
         if(!node_)

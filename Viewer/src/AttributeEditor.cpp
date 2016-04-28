@@ -180,6 +180,8 @@ void AttributeEditor::setResetStatus(bool st)
 
 void AttributeEditor::setSuspended(bool st)
 {
+    UserMessage::qdebug("AttributeEditor::setSuspended --> " + QString::number(st));
+
     Q_ASSERT(form_);
     form_->setEnabled(!st);
 
@@ -194,12 +196,18 @@ void AttributeEditor::setSuspended(bool st)
 
 void AttributeEditor::notifyDataLost(VInfo* info)
 {
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UserMessage::debug("AttributeEditor::notifyDataLost -->");
+#endif
     if(info_ && info_.get() == info)
     {
         detachInfo();
         messageLabel_->showWarning("The parent node and the edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
     }
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UserMessage::debug("<-- AttributeEditor::notifyDataLost");
+#endif
 }
 
 void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
@@ -248,17 +256,27 @@ void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector
 
 void AttributeEditor::notifyServerDelete(ServerHandler* server)
 {
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UserMessage::debug("AttributeEditor::notifyServerDelete -->");
+#endif
     if(info_ && info_->server() == server)
     {
         detachInfo();
         messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> was removed from ecFlowUI! The edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
     }
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UserMessage::debug("<-- AttributeEditor::notifyServerDelete");
+#endif
 }
     
 //This must be called at the beginning of a reset
 void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
 {
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UserMessage::debug("AttributeEditor::notifyBeginServerClear -->");
+#endif
+
     if(info_)
     {
         if(info_->server() && info_->server() == server)
@@ -272,11 +290,19 @@ void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
             checkButtonStatus();
         }
     }
+
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UserMessage::debug("<-- AttributeEditor::notifyBeginServerClear");
+#endif
 }
 
 //This must be called at the end of a reset
 void AttributeEditor::notifyEndServerScan(ServerHandler* server)
 {
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UserMessage::debug("AttributeEditor::notifyEndServerScan -->");
+#endif
+
     if(info_)
     {
         if(info_->server() && info_->server() == server)
@@ -289,13 +315,19 @@ void AttributeEditor::notifyEndServerScan(ServerHandler* server)
             //is possible that the node exists but is still set to NULL in VInfo.
             info_->regainData();
 
-            //If the node is not available dataLost() will be called.
-            if(!info_->node())
+            //If the node is not available dataLost() was already called.
+            if(!info_)
                 return;
+
+            Q_ASSERT(info_->server() && info_->node());
 
             setSuspended(false);
         }
     }
+
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UserMessage::debug("<-- AttributeEditor::notifyEndServerScan");
+#endif
 }
 
 void AttributeEditor::notifyServerConnectState(ServerHandler* server)
