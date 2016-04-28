@@ -112,7 +112,7 @@ protected:
 };
 
 
-class NodePathWidget : public QWidget, public NodeObserver, public ServerObserver
+class NodePathWidget : public QWidget, public NodeObserver, public ServerObserver, public VInfoObserver
 {
 Q_OBJECT
 
@@ -137,6 +137,10 @@ public:
     void notifyEndServerScan(ServerHandler* server);
 	void notifyServerConnectState(ServerHandler* server);
 	void notifyServerActivityChanged(ServerHandler* server);
+
+    //From VInfoObserver
+    void notifyDelete(VInfo*) {}
+    void notifyDataLost(VInfo*);
 
 	void rerender();
 
