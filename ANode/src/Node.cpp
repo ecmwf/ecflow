@@ -1827,6 +1827,12 @@ bool Node::getLabelValue(const std::string& labelName, std::string& value) const
    return false;
 }
 
+bool Node::getLabelNewValue(const std::string& labelName, std::string& value) const
+{
+   if (child_attrs_) return child_attrs_->getLabelNewValue(labelName,value);
+   return false;
+}
+
 size_t Node::position() const
 {
    Node* theParent = parent();

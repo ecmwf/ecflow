@@ -321,6 +321,7 @@ public:
 
    virtual void gen_variables(std::vector<Variable>&) const;
    bool getLabelValue(const std::string& name, std::string& value) const;
+   bool getLabelNewValue(const std::string& name, std::string& value) const;
 
    // Use get_trigger()/get_complete() for determining if we have trigger
    // and complete expressions. This is many times faster than calling
