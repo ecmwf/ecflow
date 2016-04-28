@@ -21,7 +21,7 @@
 #
 ##############################################################################
 
-cmake_minimum_required( VERSION 2.8.4 FATAL_ERROR )
+cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
 
 # ===========================================================================
 # Change the default if NO CMAKE_BUILD_TYPE specified
