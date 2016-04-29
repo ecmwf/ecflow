@@ -40,7 +40,7 @@ AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : 
     Q_ASSERT(info_ && info_->isAttribute() && info_->attribute());
     messageLabel_->hide();
     
-    QString wt=windowTitle();
+    QString wt="Edit " + type;
     wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
     setWindowTitle(wt);
 
