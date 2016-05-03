@@ -147,15 +147,16 @@ public:
 
     //Menu *createMenu(QString &name);
     static bool readMenuConfigFile(const std::string &configFile);
-    static QAction *invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view);
+    static MenuItem *invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view);
     static bool addItemToMenu(MenuItem *item, const std::string &menuName);
-    static Menu *findMenu(const std::string &name);
-    static MenuItem* findItem(QAction*);
+    static Menu *findMenu(const std::string &name);    
     static MenuItem* newItem(const std::string &name);
     static void addMenu(Menu *menu) {menus_.push_back(menu);};
     static void refreshCustomMenuCommands();
 
 private:
+    static MenuItem* findItem(QAction*);
+
     static std::vector<Menu *> menus_;
     //static std::vector<MenuItem> items_;
 

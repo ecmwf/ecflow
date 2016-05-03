@@ -28,6 +28,9 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "CustomCommandDialog.hpp"
+#include "UserMessage.hpp"
+
+#define _UI_ACTIONHANDLER_DEBUG
 
 ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 {
@@ -45,18 +48,15 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 
 void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 {
-
     std::string view=parent_->property("view").toString().toStdString();
-    QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_,view);
+    MenuItem* item=MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_,view);
 
-    if(action)
+    if(item)
     {
-    	MenuItem* item=MenuHandler::findItem(action);
-    	
-        if(!item)
-            return;
-        
-        
+
+#ifdef _UI_ACTIONHANDLER_DEBUG
+        UserMessage::debug("ActionHandler::contextMenu --> item=" + item->name());
+#endif
     	if(item->handler() == "info_panel")
     	{
     		Q_EMIT infoPanelCommand(nodesLst.at(0),QString::fromStdString(item->command()));

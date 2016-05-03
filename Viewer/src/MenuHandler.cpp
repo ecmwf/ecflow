@@ -390,9 +390,9 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
 }
 
 
-QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view)
+MenuItem *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view)
 {
-    QAction *selectedAction = NULL;
+    MenuItem *selectedItem = NULL;
     Menu *menu = findMenu(menuName);
 
     if (menu)
@@ -405,7 +405,8 @@ QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_
 
         if (qMenu)
         {
-            selectedAction = qMenu->exec(pos);
+            QAction* selectedAction = qMenu->exec(pos);
+            selectedItem=MenuHandler::findItem(selectedAction);
 
             delete qMenu;
 
@@ -415,12 +416,10 @@ QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_
             	assert(parent == ac->parent());
             	delete ac;
             }
-
-
         }
     }
 
-    return selectedAction;
+    return selectedItem;
 }
 
 // -----------------------------------------------------------------
