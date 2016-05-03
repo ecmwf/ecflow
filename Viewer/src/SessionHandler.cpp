@@ -7,10 +7,10 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "SessionHandler.hpp"
-
 #include <algorithm>
+#include <assert.h>
 
+#include "SessionHandler.hpp"
 #include "DirectoryHandler.hpp"
 #include "Str.hpp"
 #include "UserMessage.hpp"
@@ -210,5 +210,13 @@ SessionItem *SessionHandler::copySession(SessionItem* source, std::string &destN
 		UserMessage::message(UserMessage::ERROR, true, errorMessage);
 		return NULL;
 	}
+}
+
+SessionItem *SessionHandler::copySession(std::string &source, std::string &destName)
+{
+	SessionItem *sourceSession = find(source);
+	assert(sourceSession);
+
+	copySession(sourceSession, destName);
 }
 

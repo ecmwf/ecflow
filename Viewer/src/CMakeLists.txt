@@ -114,6 +114,8 @@ set(viewer_srcs
     ServerList.cpp
     ServerListDialog.cpp
     ServerSettingsItemWidget.cpp
+    SessionDialog.cpp
+    SessionRenameDialog.cpp
     SessionHandler.cpp
     Sound.cpp
     StringMatchCombo.cpp
@@ -256,6 +258,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
     ServerSettingsItemWidget.hpp
+    SessionDialog.hpp
+    SessionRenameDialog.hpp
     StringMatchCombo.hpp
     SuiteItemWidget.hpp
     TabWidget.hpp
@@ -324,6 +328,7 @@ set(viewer_wrap_ui_files
     ServerListDialog.ui
     ServerSettingsItemWidget.ui
     SessionDialog.ui
+    SessionRenameDialog.ui
     SuiteItemWidget.ui
     TableFilterWidget.ui
     TableNodeWidget.ui

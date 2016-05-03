@@ -55,6 +55,7 @@ public:
 	SessionItem *find(const std::string&);
 	SessionItem *sessionFromIndex(int i) {return sessions_[i];};
 	SessionItem *copySession(SessionItem* source, std::string &destName);
+	SessionItem *copySession(std::string &source, std::string &destName);
 
 	const std::vector<SessionItem*>& sessions() const {return sessions_;}
 

@@ -17,40 +17,40 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QListView" name="listView"/>
+      <widget class="QListWidget" name="savedSessionsList_"/>
      </item>
      <item>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="newButton_">
          <property name="text">
           <string>New</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="renameButton_">
          <property name="text">
           <string>Rename</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="cloneButton_">
          <property name="text">
           <string>Clone</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QPushButton" name="pushButton_4">
+        <widget class="QPushButton" name="deleteButton_">
          <property name="text">
           <string>Delete</string>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QPushButton" name="pushButton_5">
+        <widget class="QPushButton" name="switchToButton_">
          <property name="text">
           <string>Switch to</string>
          </property>
