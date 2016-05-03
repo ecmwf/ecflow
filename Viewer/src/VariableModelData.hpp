@@ -47,18 +47,19 @@ public:
 			           const std::string& action, const std::string& type,
 			           const std::string& name,const std::string& value);
 
-    void clear();
-	void reload();
+    void clear();  
 	void setValue(int index,const std::string& val);
     void alter(const std::string& name,const std::string& val);
 	void add(const std::string& name,const std::string& val);
 	void remove(int index,const std::string& val);
 
 protected:
+    void reload();
     void removeDuplicates(const std::vector<Variable>& vars,std::vector<Variable>& genVars);
     void latestVars(std::vector<Variable>& v,std::vector<Variable>& gv);
     int checkUpdateDiff(std::vector<Variable>& v,std::vector<Variable>& gv);
-    bool update(std::vector<Variable>& v,std::vector<Variable>& gv);
+    void reset(const std::vector<Variable>& v,const std::vector<Variable>& gv);
+    bool update(const std::vector<Variable>& v,const std::vector<Variable>& gv);
 
 	std::vector<Variable> vars_;
 	std::vector<Variable> genVars_;
@@ -93,6 +94,7 @@ Q_SIGNALS:
 
 protected:
 	void reload();
+    bool updateVariables(int);
 
 	std::vector<VariableModelData*> data_;
 	ServerHandler* server_;
