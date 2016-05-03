@@ -350,13 +350,17 @@ Menu *MenuHandler::findMenu(const std::string &name)
 
 MenuItem* MenuHandler::findItem(QAction* ac)
 {
-	for(std::vector<Menu*>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
+	// ac could be NULL, e.g. if the user clicked on a separator instead of a menu item
+	if (ac)
 	{
-		for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
+		for(std::vector<Menu*>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
 		{
-			if((*it)->id() == ac->data().toInt())
+			for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
 			{
-				return *it;
+				if((*it)->id() == ac->data().toInt())
+				{
+					return *it;
+				}
 			}
 		}
 	}
