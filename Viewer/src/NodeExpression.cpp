@@ -561,7 +561,7 @@ bool TypeNodeCondition::execute(VItem* item)
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
         UserMessage::debug("TypeNodeCondition::execute --> " + NodeExpressionParser::instance()->typeName(type_));
 #endif
-        qDebug() << item->isNode() << item->isSuite() << item->isFamily() << item->isTask() << item->isAlias();
+        //qDebug() << item->isNode() << item->isSuite() << item->isFamily() << item->isTask() << item->isAlias();
 
         switch(type_)
         {
