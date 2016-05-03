@@ -524,8 +524,14 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       s->addLabel( Label("label","labelValue") );
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LABEL,"label","--fred--")));
       std::string label_value;
-      BOOST_CHECK_MESSAGE(s->getLabelValue("label",label_value ),"Expected to find label");
+      BOOST_CHECK_MESSAGE(s->getLabelNewValue("label",label_value ),"Expected to find label");
       BOOST_CHECK_MESSAGE( label_value == "--fred--", "expected to find label with value --fred--");
+
+      // change label to be empty, ECFLOW-648
+      label_value.clear();
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LABEL,"label","")));
+      BOOST_CHECK_MESSAGE(s->getLabelNewValue("label",label_value ),"Expected to find label");
+      BOOST_CHECK_MESSAGE( label_value.empty(), "expected to find label with empty value");
    }
 
    {   // test add Trigger

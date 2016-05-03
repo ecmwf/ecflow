@@ -90,6 +90,7 @@ public:
    const Event& findEvent(const Event&) const;
    const Event& findEventByNameOrNumber( const std::string& name) const;
    bool getLabelValue(const std::string& labelName, std::string& value) const;
+   bool getLabelNewValue(const std::string& labelName, std::string& value) const;
 
 private:
 

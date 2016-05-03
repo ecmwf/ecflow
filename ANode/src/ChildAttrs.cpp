@@ -290,6 +290,18 @@ bool ChildAttrs::getLabelValue(const std::string& labelName, std::string& value)
    return false;
 }
 
+bool ChildAttrs::getLabelNewValue(const std::string& labelName, std::string& value) const
+{
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == labelName) {
+         value = labels_[i].new_value();
+         return true;
+      }
+   }
+   return false;
+}
+
 void ChildAttrs::addLabel( const Label& l)
 {
    if (findLabel(l.name())) {
