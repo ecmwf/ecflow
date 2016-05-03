@@ -30,6 +30,7 @@
 #include "VConfig.hpp"
 #include "VServerSettings.hpp"
 #include "SessionHandler.hpp"
+#include "SessionDialog.hpp"
 
 int main(int argc, char **argv)
 {
@@ -118,6 +119,11 @@ int main(int argc, char **argv)
     //Initialise the system palette
     Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
 		      "ecflowview_palette.json")); 
+
+    SessionDialog sessionDialog;
+    sessionDialog.exec();
+
+
 
     //Build the GUI
     MainWindow::init();
