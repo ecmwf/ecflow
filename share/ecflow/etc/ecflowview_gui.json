@@ -1,7 +1,12 @@
 {
 	"gui" : {
-							
- 		"appearance":  {
+
+        "hidden" : {
+            "visible" : "false",
+            "line" : "panel.variable.showShadowed"
+        },
+
+        "appearance":  {
  			"label": "Appearance",
  			"desc" : "Appearance",
  			"icon" : "colour.svg",

@@ -234,7 +234,7 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
                 UserMessage::debug("   attribute does not exist");
 #endif
                 detachInfo();
-                messageLabel_->showWarning("The edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
+                messageLabel_->showWarning("The edited " + type_ + " <b>is not available</b> any more! Please close the dialog!");
                 setSuspended(true);
             }
         }
