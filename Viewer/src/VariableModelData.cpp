@@ -97,28 +97,6 @@ void VariableModelData::removeDuplicates(const std::vector<Variable>& vars,std::
     }
 }
 
-#if 0
-void VariableModelData::removeShadowed(const std::set<std::string>& shadowed)
-{
-    for(std::set<std::string>::const_iterator it=shadowed.begin(); it != shadowed.end(); ++it)
-    {
-        std::vector<Variable> vIt=std::find(vars_.begin(),vars_.end(),*it);
-        if(vIt != vars_.end())
-        {
-            vars_.erase(*vIt);
-        }
-        else
-        {
-            vIt=std::find(genVars_.begin(),genVars_.end(),*it);
-            if(vIt != genVars_.end())
-            {
-                genVars_.erase(*vIt);
-            }
-        }
-    }
-}
-#endif
-
 std::string VariableModelData::fullPath()
 {
 	if(info_ && info_->node())
@@ -869,7 +847,8 @@ void VariableModelDataHandler::removeObserver(VariableModelDataObserver* o)
 
 void VariableModelDataHandler::broadcastClear()
 {
-    for(std::vector<VariableModelDataObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+    std::vector<VariableModelDataObserver*> obsCopy=observers_;
+    for(std::vector<VariableModelDataObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
     {
         (*it)->notifyCleared(this);
     }
@@ -882,9 +861,3 @@ void VariableModelDataHandler::broadcastUpdate()
         (*it)->notifyUpdated(this);
     }
 }
-
-
-
-
-
-

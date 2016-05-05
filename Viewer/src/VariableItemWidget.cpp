@@ -27,6 +27,7 @@
 
 #define _UI_VARIABLEITEMWIDGET_DEBUG
 
+#if 0
 //======================================
 //
 // ServerDialogChecked
@@ -77,6 +78,9 @@ void VariableDialogChecker::error(QString msg)
 	QMessageBox::critical(0,QObject::tr("Server item"),errorText_ + "<br>"+ msg);
 }
 
+
+#endif
+
 //======================================
 //
 // VariablePropDialog
@@ -93,8 +97,6 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
 	setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     setModal(false);
-
-    messageLabel_->hide();
 
     Q_ASSERT(data_);
     Q_ASSERT(data_->count() > 0);
@@ -151,7 +153,9 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
 		QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
         Q_ASSERT(sb);
 		sb->setEnabled(false);
-	}
+    }
+
+    messageLabel_->hide();
 }
 
 VariablePropDialog::~VariablePropDialog()
@@ -294,12 +298,8 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *par
 {
 	setupUi(this);
 
-    Q_ASSERT(data);
-    Q_ASSERT(data_->count() > 0);
-
-    label_->setText(tr("Add new variable for ") +
-            QString::fromStdString(data_->data(0)->type()) + ":<b> " +
-            QString::fromStdString(data_->data(0)->name()) + "</b>");
+    init();
+    nameEdit_->setFocus();
 }
 
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name, QString value,QWidget *parent) :
@@ -308,52 +308,125 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name
 {
 	setupUi(this);
 
-    Q_ASSERT(data_);
-    Q_ASSERT(data_->count() > 0);
-
-    label_->setText(tr("Add new variable for ") +
-            QString::fromStdString(data_->data(0)->type()) + ":<b> " +
-            QString::fromStdString(data_->data(0)->name()) + "</b>");
+    init();
 
 	nameEdit_->setText(name + "_copy");
 	valueEdit_->setText(value);
+    nameEdit_->setFocus();
 }
+
+VariableAddDialog::~VariableAddDialog()
+{
+     data_->removeObserver(this);
+}
+
+void VariableAddDialog::init()
+{
+    setAttribute(Qt::WA_DeleteOnClose);
+    setModal(false);
+
+    Q_ASSERT(data_);
+    Q_ASSERT(data_->count() > 0);
+
+    nodeName_=QString::fromStdString(data_->data(0)->name());
+    nodeType_=QString::fromStdString(data_->data(0)->type());
+    nodeTypeCapital_=nodeType_;
+    if(nodeTypeCapital_.size() > 0)
+    {
+        QChar s=nodeTypeCapital_.at(0);
+        s=s.toUpper();
+        nodeTypeCapital_.replace(0,1,s);
+    }
+    data_->addObserver(this);
+
+    label_->setText(tr("Add new variable to ") +
+            nodeType_ + " <b> " +
+            nodeName_ + "</b>") ;
+        //+ "<br>Path: " +
+        //            QString::fromStdString(data_->data(0)->fullPath()));
+
+    messageLabel_->hide();
+}
+
 
 void VariableAddDialog::accept()
 {
 	QString name=nameEdit_->text();
-    //QString value=valueEdit_->text();
+
+    if(name.simplified().isEmpty())
+    {
+        QMessageBox::critical(0,tr("Invalid variable name"),
+                     tr("Variable name cannot be empty! Please specify a valid name!"),
+                      QMessageBox::Ok,QMessageBox::Ok);
+        return;
+    }
 
     Q_ASSERT(data_);
     Q_ASSERT(data_->count() > 0);
 
-    QString nodeName=QString::fromStdString(data_->data(0)->name());
-    QString nodeType=QString::fromStdString(data_->data(0)->type());
-
     if(data_->data(0)->hasName(name.toStdString()))
-	{
+    {
         QString q;
         if(data_->data(0)->isGenVar(name.toStdString()))
         {
             q=tr("Generated variable <b>") + name + tr("</b> is already defined in ") +
-               nodeType + " <b>" + nodeName + "</b>" +
-               tr("</b>. A new user variable will be created and the original variable will be hidden. \
-               <br>Do you want to proceed?");
+                nodeType_ + " <b>" + nodeName_ + "</b>" +
+                tr("</b>. A new user variable will be created and the original variable will be hidden. \
+                <br>Do you want to proceed?");
         }
         else
         {
             q=tr("User variable <b>") + name + tr("</b> is already defined in ") +
-                nodeType + " <b>" + nodeName + "</b>" +
-                tr("<br>Do you want to overwrite it?");
+                nodeType_ + " <b>" + nodeName_ + "</b>" +
+                tr(".<br>Do you want to overwrite it?");
         }
 
         if(QMessageBox::question(0,tr("Confirm: overwrite variable"),q,
-					    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
+           QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
         {
-			QDialog::reject();
-			return;
-		}
-	}
+            return;
+        }
+        else
+        {
+            QDialog::accept();
+        }
+        return;
+    }
+
+    for(size_t i=1; i <data_->count(); i++)
+    {
+        if(data_->data(i)->hasName(name.toStdString()))
+        {
+            QString nodeName=QString::fromStdString(data_->data(i)->name());
+            QString nodeType=QString::fromStdString(data_->data(i)->type());
+
+            QString q;
+            if(data_->data(i)->isGenVar(name.toStdString()))
+            {
+                q=tr("Generated variable");
+            }
+            else
+            {
+                q=tr("User variable");
+            }
+            q+=" <b>" + name + tr("</b> is already defined in ") +
+                    nodeType + " <b>" + nodeName + "</b>" +
+                    tr("</b>. A new user variable will be created for ") +  nodeType_ + " <b>" +
+                    nodeName_ + tr(" </b> and shadow the original one. \
+                    <br>Do you want to proceed?");
+
+            if(QMessageBox::question(0,tr("Confirm: overwrite variable"),q,
+					    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
+            {
+                return;
+            }
+            else
+            {
+                QDialog::accept();
+            }
+            return;
+        }
+    }
 
 	QDialog::accept();
 }
@@ -366,6 +439,19 @@ QString VariableAddDialog::name() const
 QString VariableAddDialog::value() const
 {
 	return valueEdit_->text();
+}
+
+void VariableAddDialog::notifyCleared(VariableModelDataHandler*)
+{
+    messageLabel_->showWarning(nodeTypeCapital_ + " <b>" + nodeName_ +
+         "</b> is not the node to modify any more in the Variables panel. Please close the dialog!");
+
+    QPushButton* sb=buttonBox_->button(QDialogButtonBox::Ok);
+    Q_ASSERT(sb);
+    sb->setEnabled(false);
+    form_->setEnabled(false);
+
+    data_->removeObserver(this);
 }
 
 //========================================================
@@ -696,13 +782,20 @@ void VariableItemWidget::addItem(const QModelIndex& index)
 
     if(data_->count() > 0)
     {
-        //Start add dialog
-        VariableAddDialog d(data_,this);
+        //Start add dialog (will be deleted on close - deleteOnClose is set)
+        VariableAddDialog* d=new VariableAddDialog(data_,this);
+        d->show();
+        connect(d,SIGNAL(accepted()),
+                this,SLOT(slotVariableAdded()));
+
+#if 0
         if(d.exec() == QDialog::Accepted)
         {
             Q_ASSERT(data_->count() > 0);
             data_->data(0)->alter(d.name().toStdString(),d.value().toStdString());
         }
+#endif
+
     }
 
 #if 0
@@ -759,6 +852,13 @@ void VariableItemWidget::slotVariableEdited()
     model_->alterVariable(QModelIndex(),d->name(),d->value());
 }
 
+void VariableItemWidget::slotVariableAdded()
+{
+    VariableAddDialog* d=static_cast<VariableAddDialog*>(sender());
+    Q_ASSERT(d);
+    Q_ASSERT(data_->count() > 0);
+    data_->data(0)->alter(d->name().toStdString(),d->value().toStdString());
+}
 
 void VariableItemWidget::on_varView_doubleClicked(const QModelIndex& index)
 {

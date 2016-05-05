@@ -192,8 +192,8 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 
             if(d->isShadowed(row))
             {
-                s+=". Please note that this variable is <b>shadowed</b> i.e. \
-                   overwritten in one of the descendents of this node shown in this panel!";
+                s+=".<br>Please note that this variable is <b>shadowed</b> i.e. \
+                   overwritten in one of the descendants of this node shown in this panel!";
             }
             return s;
         }
