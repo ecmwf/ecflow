@@ -38,7 +38,7 @@ protected:
 	void error(QString msg);
 
 	QString errorText_;
-};
+};writeSettings()
 #endif
 
 class VariablePropDialog : public QDialog, public VariableModelDataObserver, private Ui::VariablePropDialog
@@ -63,7 +63,10 @@ protected Q_SLOTS:
     void on_valueEdit__textChanged();
 
 protected:
-	bool genVar_;
+    void readSettings();
+    void writeSettings();
+
+    bool genVar_;
     VariableModelDataHandler* data_;
     int defineIndex_;
     QString oriName_;
@@ -95,6 +98,8 @@ public Q_SLOTS:
 
 protected:
     void init();
+    void readSettings();
+    void writeSettings();
 
     VariableModelDataHandler* data_;
     QString nodeName_;

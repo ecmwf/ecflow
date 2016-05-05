@@ -14,10 +14,12 @@
 #include <QItemSelectionModel>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSettings>
 #include <QVBoxLayout>
 
 #include "IconProvider.hpp"
 #include "LineEdit.hpp"
+#include "SessionHandler.hpp"
 #include "UserMessage.hpp"
 #include "VariableModel.hpp"
 #include "VariableModelData.hpp"
@@ -156,12 +158,15 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     }
 
     messageLabel_->hide();
+
+    readSettings();
 }
 
 VariablePropDialog::~VariablePropDialog()
 {
     Q_ASSERT(data_);
     data_->removeObserver(this);
+    writeSettings();
 }
 
 void VariablePropDialog::accept()
@@ -286,6 +291,42 @@ void VariablePropDialog::notifyUpdated(VariableModelDataHandler*)
     }
 }
 
+void VariablePropDialog::writeSettings()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("VariablePropDialog")),
+                       QSettings::NativeFormat);
+
+    //We have to clear it not to remember all the previous windows
+    settings.clear();
+
+    settings.beginGroup("main");
+    settings.setValue("size",size());
+    settings.endGroup();
+}
+
+void VariablePropDialog::readSettings()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("VariablePropDialog")),
+                       QSettings::NativeFormat);
+
+    settings.beginGroup("main");
+    if(settings.contains("size"))
+    {
+        resize(settings.value("size").toSize());
+    }
+    else
+    {
+        resize(QSize(350,250));
+    }
+
+    settings.endGroup();
+}
+
+
 //======================================
 //
 // VariableAddDialog
@@ -300,6 +341,8 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *par
 
     init();
     nameEdit_->setFocus();
+
+    readSettings();
 }
 
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name, QString value,QWidget *parent) :
@@ -313,11 +356,14 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name
 	nameEdit_->setText(name + "_copy");
 	valueEdit_->setText(value);
     nameEdit_->setFocus();
+
+    readSettings();
 }
 
 VariableAddDialog::~VariableAddDialog()
 {
      data_->removeObserver(this);
+     writeSettings();
 }
 
 void VariableAddDialog::init()
@@ -453,6 +499,43 @@ void VariableAddDialog::notifyCleared(VariableModelDataHandler*)
 
     data_->removeObserver(this);
 }
+
+void VariableAddDialog::writeSettings()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("VariableAddDialog")),
+                       QSettings::NativeFormat);
+
+    //We have to clear it not to remember all the previous windows
+    settings.clear();
+
+    settings.beginGroup("main");
+    settings.setValue("size",size());
+    settings.endGroup();
+}
+
+void VariableAddDialog::readSettings()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("VariableAddDialog")),
+                       QSettings::NativeFormat);
+
+    settings.beginGroup("main");
+    if(settings.contains("size"))
+    {
+        resize(settings.value("size").toSize());
+    }
+    else
+    {
+        resize(QSize(320,220));
+    }
+
+    settings.endGroup();
+}
+
+
 
 //========================================================
 //
