@@ -14,10 +14,12 @@
      to compile ecflowview as a replacement for Motif. OpenMotif can be 
      downloaded from http://www.ist.co.uk/downloads/motif_download.html
      
+   - QT5 at least version 5.0.0 is required to build ecflow_ui
+     
 * ecfFlow consists of two tar files i.e. :
    
    - boost_1_53_0.tar.gz
-   - ecFlow-4.0.9-Source.tar.gz
+   - ecFlow-4.1.0-Source.tar.gz
    
 * Create a directory for the build::
 
@@ -28,24 +30,30 @@
 * Un-zip then un-tar the two file files::
 
   > tar -zxf boost_1_53_0.tar.gz
-  > tar -zxf ecFlow-4.0.9-Source.tar.gz
+  > tar -zxf ecFlow-4.1.0-Source.tar.gz
    
 * You should have two directories created::
 
    - boost_1_53_0
-   - ecFlow-4.0.9-Source
+   - ecFlow-4.1.0-Source
     
 * Create two environment variables. These are used by some of scripts::
 
-  > export WK=/tmp/ecflow_build/ecFlow-4.0.9-Source
+  > export WK=/tmp/ecflow_build/ecFlow-4.1.0-Source
   > export BOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
    
 * There are two ways of building ecflow, boost-build/bjam or cmake
   >> Preference should be given to using cmake <<
-  However first we need to build boost libraries
+  The new GUI ecflow_ui can only be built with cmake/ecbuild.
+  
+* To maintain compatibility between different releases of ecflow, you
+  should use the same version of boost. If you do not care about this,
+  then any boost version (> 1.53) should suffice. To use an existing
+  boost release please ensure environment variable BOOST_ROOT is set
 
 boost libs
 =====================================================================
+Use the following step to build boost from scratch:
 
 * Boost uses bjam for building the boost libraries.  
   bjam source is available in boost, hence we first need to build bjam itself
@@ -68,7 +76,7 @@ cmake
 =====================================================================
 
 * 
-  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
+  > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake ..  
   > make -j2
@@ -76,7 +84,7 @@ cmake
   > make test 
   
 * Optionally you can specify install prefix directory and to build debug :
-  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
+  > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DCMAKE_BUILD_TYPE=Debug
@@ -85,7 +93,7 @@ cmake
 
 * Optionally if you do *NOT* want to build the GUI or use the python api:
    
-  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
+  > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DCMAKE_BUILD_TYPE=Release \
@@ -96,7 +104,7 @@ cmake
 
 * Optionally if you did not export BOOST_ROOT you can specify on the command line:
 
-  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
+  > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Release \
@@ -106,7 +114,7 @@ cmake
 
 * On some platforms(AIX) you may need to specify the c++ compiler
 
-  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
+  > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Release \
