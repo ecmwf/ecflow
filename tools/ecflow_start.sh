@@ -3,19 +3,19 @@
 #set -u
 #==========================================================================
 ##.TITLE   ECMWF utility for ECFLOW
-##.NAME    ecf_start
+##.NAME    ecflow_start.sh
 ##.SECTION ECF
 ##.AUTHOR  Avi
 ## Revision    : $Revision: #19 $ 
 ##
-## Copyright 2009-2012 ECMWF. 
+## Copyright 2009-2016 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 ##
-##.FILE    ecflow_start. 
+##.FILE    ecflow_start.sh
 ###        Will start the ecflow_server in the background, using user id
 ###        to make a unique port number.
 
@@ -103,7 +103,7 @@ export ECF_HOME=${ecf_home_directory:-$HOME/ecflow_server}
 export ECF_LISTS=${ECF_LISTS:-$ECF_HOME/ecf.lists}
 
 # ===============================================================================
-# If server is already started the exit
+# If server is already started then exit
 
 rcdir=$HOME/.ecflowrc
 fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT 

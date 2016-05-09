@@ -6,17 +6,17 @@
 ##.AUTHOR  Avi
 ## Revision    : $Revision: #10 $ 
 ##
-## Copyright 2009-2012 ECMWF. 
+## Copyright 2009-2016 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 ##
-##.FILE    ecf_stop
+##.FILE    ecflow_stop.sh
 ##.INFO    this file is expected to be located in /usr/local/share
 ##         it is to be used on ecgate by member states users  
-##         one ecf server occurence will be generated on ecgate
+##         one ecf server occurrence will be generated on ecgate
 #==========================================================================
 
 #set -eux
@@ -33,8 +33,8 @@ backup_server=false
 #==========================================================================
 # Syntax
 # ecf_stop [-b] [-p port_number ] [-h]
+# get command line options if any.
 #==========================================================================
-# get commane line options if any.
 while getopts b:p: option
 do
 case $option in
