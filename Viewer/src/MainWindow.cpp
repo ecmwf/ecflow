@@ -554,7 +554,7 @@ bool MainWindow::aboutToClose(MainWindow* win)
 		}
 		else if(windows_.count() == 1)
 		{
-			return MainWindow::aboutToQuit(win);
+            return MainWindow::aboutToQuit(win);
 		}
 		return true;
 	}
@@ -562,19 +562,23 @@ bool MainWindow::aboutToClose(MainWindow* win)
 
 bool MainWindow::aboutToQuit(MainWindow* topWin)
 {
-  	if(QMessageBox::question(0,tr("Confirm quit"),
+#if 0
+    if(QMessageBox::question(0,tr("Confirm quit"),
   			     tr("Do you want to quit ") +
   			     QString::fromStdString(VConfig::instance()->appName()) + "?",
 			     QMessageBox::Yes | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Yes)
 	{
-		quitStarted_=true;
+#endif
+        quitStarted_=true;
 
 		//Save browser settings
 		MainWindow::save(topWin);
 
 		//Exit ecFlowView
 		QApplication::quit();
-	}
+#if 0
+    }
+#endif
 
 	return false;
 }
