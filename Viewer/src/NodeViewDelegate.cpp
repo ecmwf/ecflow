@@ -135,6 +135,23 @@ void NodeViewDelegate::updateBaseSettings()
     {
         limitFillBrush_=QBrush(p->value().value<QColor>());
     }
+
+    //limit pixmaps
+    QFontMetrics fm(attrFont_);
+    int itemSize=static_cast<int>(static_cast<float>(fm.ascent())*0.9);
+
+    QImage img(itemSize,itemSize,QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::transparent);
+    QPainter painter(&img);
+    //painter.setRenderHint(QPainter::Antialiasing,true);
+    painter.setPen(QPen(QColor(70,70,70),0));
+    painter.setBrush(limitFillBrush_);
+    painter.drawEllipse(1,1,itemSize-2,itemSize-2);
+    limitFillPix_=QPixmap::fromImage(img);
+    painter.fillRect(QRect(QPoint(0,0),img.size()),Qt::transparent);
+    painter.setBrush(QColor(240,240,240));
+    painter.drawEllipse(1,1,itemSize-2,itemSize-2);
+    limitEmptyPix_=QPixmap::fromImage(img);
 }
 
 QSize NodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
@@ -266,7 +283,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
     QFontMetrics fm(attrFont_);
 
     //The status rectangle
-    int stHeight=static_cast<int>(static_cast<float>(fillRect.height())*0.6);
+    int stHeight=static_cast<int>(static_cast<float>(fm.ascent())*0.9);
     int stHeightDiff=(fillRect.height()-stHeight)/2;
     QRect stRect=fillRect.adjusted(offset,stHeightDiff,
                                    0,-(fillRect.height()-stHeight-stHeightDiff));
@@ -338,11 +355,11 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
     //Draw st rect border
     if(max > min)
     {
-        painter->setPen(QColor(180,180,180));
+        painter->setPen(QColor(140,140,140));
     }
     else
     {
-        painter->setPen(QPen(QColor(180,180,180),Qt::DotLine));
+        painter->setPen(QPen(QColor(140,140,140),Qt::DotLine));
     }
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(stRect);
@@ -655,10 +672,9 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	int offset=2;
     int frontOffset=8;
 
-	int itemOffset=3;
+    int itemOffset=0;
 	int gap=fm.width('A');
-	int itemSize=fm.ascent()-2;
-	QColor itemEmptyCol(240,240,240);
+    int itemSize=limitFillPix_.width();
 
 	//The border rect (we will adjust its  width)
     QRect fillRect=option.rect.adjusted(frontOffset,1,0,-1);
@@ -672,7 +688,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	int nameWidth=fm.width(name);
     QRect nameRect = fillRect.adjusted(offset,2,0,-2);
     //nameRect.setLeft(fillRect.left());
-	nameRect.setWidth(nameWidth+offset);
+    nameRect.setWidth(nameWidth);
 
 	//The value rectangle
 	QFont valFont=attrFont_;
@@ -680,7 +696,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	int valWidth=fm.width(valStr);
 	QRect valRect = nameRect;
 	valRect.setLeft(nameRect.right()+gap);
-	valRect.setWidth(valWidth+offset);
+    valRect.setWidth(valWidth);
 
 	int xItem;
 	if(drawItem)
@@ -715,22 +731,23 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 
 	//Draw items
 	if(drawItem)
-	{
-		//painter->setRenderHint(QPainter::Antialiasing,true);
-        painter->setBrush(limitFillBrush_);
+	{	
 		int yItem=option.rect.y()+(option.rect.height()-itemSize)/2;
 		for(int i=0; i < max; i++)
-		{
-			if(i==val)
+		{	 
+            if(i >= val)
 			{
-				painter->setBrush(itemEmptyCol);
+
+                painter->drawPixmap(xItem,yItem,itemSize,itemSize,limitEmptyPix_);
 			}
-			painter->drawEllipse(xItem,yItem,itemSize,itemSize);
-			//painter->drawLine(xItem,fillRect.center().y(),xItem+itemSize,fillRect.center().y());
+            else
+            {
+                painter->drawPixmap(xItem,yItem,itemSize,itemSize,limitFillPix_);
+            }
+
 
 			xItem+=itemOffset+itemSize;
-		}
-		//painter->setRenderHint(QPainter::Antialiasing,false);
+		}		
 	}
 
 	if(setClipRect || drawItem)

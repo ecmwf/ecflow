@@ -84,7 +84,8 @@ protected:
     QBrush meterFillBrush_;
     QBrush meterThresholdBrush_;
     QBrush limitFillBrush_;
-
+    QPixmap limitFillPix_;
+    QPixmap limitEmptyPix_;
 };
 
 #endif

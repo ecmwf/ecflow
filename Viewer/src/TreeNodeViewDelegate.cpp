@@ -25,7 +25,7 @@ static std::vector<std::string> propVec;
 
 static QColor typeFgColourClassic=QColor(Qt::white);
 static QColor typeBgColourClassic=QColor(150,150,150);
-static QColor childCountColour=QColor(100,100,100);
+static QColor childCountColour=QColor(90,91,92);
 
 
 struct NodeShape
