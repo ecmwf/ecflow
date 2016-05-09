@@ -51,6 +51,10 @@ public:
     VTreeServer* nameToServer(const std::string&) const;
     VInfo_ptr nodeInfo(const QModelIndex& index);
 
+    void setEnableServerToolTip(bool st) {serverToolTip_=st;}
+    void setEnableNodeToolTip(bool st) {nodeToolTip_=st;}
+    void setEnableAttributeToolTip(bool st) {attributeToolTip_=st;}
+
    	VModelData* data() const;
 
 public Q_SLOTS:
@@ -103,6 +107,10 @@ private:
 	VTreeModelData* data_;
 	AttributeFilter* atts_;
 	IconFilter* icons_;
+
+    bool serverToolTip_;
+    bool nodeToolTip_;
+    bool attributeToolTip_;
 };
 
 

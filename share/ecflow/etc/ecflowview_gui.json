@@ -118,14 +118,21 @@
                         "line" : "tree.drawBranchLine",
                         "line" : "tree.background"                        
                     },
-                             
+                    "group" : {
+                        "title" : "Tooltips",
+                        "prefix" : "view.tree",
+
+                        "line" : "serverToolTip",
+                        "line" : "nodeToolTip",
+                        "line" : "attributeToolTip"
+                    },
                     "group" : {
                         "title" : "Attributes",
                         "prefix" : "view.tree",
                         
                         "line" : "attributesPolicy",
                         "line" : "defaultAttributes"
-                   }                                                               
+                   }
                 },
                 
                 "tab" : {

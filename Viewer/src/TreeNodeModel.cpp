@@ -40,7 +40,10 @@ TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef
    AbstractNodeModel(parent),
    data_(0),
    atts_(atts),
-   icons_(icons)
+   icons_(icons),
+   serverToolTip_(true),
+   nodeToolTip_(true),
+   attributeToolTip_(true)
 {
 	//Create the data handler for the tree model.
     data_=new VTreeModelData(filterDef,atts_,this);
@@ -183,6 +186,9 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(role == FilterRole)
 		return true;
 
+    if(role == Qt::ToolTipRole & !serverToolTip_)
+        return QVariant();
+
     ServerHandler *server=indexToServerHandler(index);
 	if(!server)
 		return QVariant();
@@ -269,6 +275,9 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
 QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 {
+    if(role == Qt::ToolTipRole & !nodeToolTip_)
+        return QVariant();
+
     VTreeNode* tnode=indexToNode(index);
     if(!tnode)
         return QVariant();
@@ -361,8 +370,11 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 
 QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 {
-	if(role == IconRole)
-			return QVariant();
+    if(role == Qt::ToolTipRole & !attributeToolTip_)
+        return QVariant();
+
+    if(role == IconRole)
+        return QVariant();
 
 	if(index.column()!=0)
 		return QVariant();

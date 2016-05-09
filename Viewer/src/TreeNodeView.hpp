@@ -77,6 +77,9 @@ protected:
     void adjustBackground(QColor col,bool asjustStyleSheet=true);
     void adjustBranchLines(bool,bool asjustStyleSheet=true);
     void adjustStyleSheet();
+    void adjustServerToolTip(bool);
+    void adjustNodeToolTip(bool);
+    void adjustAttributeToolTip(bool);
     void expandAll(const QModelIndex& idx);
 	void collapseAll(const QModelIndex& idx);
 

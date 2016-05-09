@@ -93,6 +93,9 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 	propVec.push_back("view.tree.indentation");
     propVec.push_back("view.tree.background");
     propVec.push_back("view.tree.drawBranchLine");
+    propVec.push_back("view.tree.serverToolTip");
+    propVec.push_back("view.tree.nodeToolTip");
+    propVec.push_back("view.tree.attributeToolTip");
 	prop_=new PropertyMapper(propVec,this);
 
 	//Initialise indentation
@@ -105,6 +108,16 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
     Q_ASSERT(prop_->find("view.tree.drawBranchLine"));
     adjustBranchLines(prop_->find("view.tree.drawBranchLine")->value().toBool(),false);
     adjustStyleSheet();
+
+    //Adjust tooltip
+    Q_ASSERT(prop_->find("view.tree.serverToolTip"));
+    adjustServerToolTip(prop_->find("view.tree.serverToolTip")->value().toBool());
+
+    Q_ASSERT(prop_->find("view.tree.nodeToolTip"));
+    adjustNodeToolTip(prop_->find("view.tree.nodeToolTip")->value().toBool());
+
+    Q_ASSERT(prop_->find("view.tree.attributeToolTip"));
+    adjustAttributeToolTip(prop_->find("view.tree.attributeToolTip")->value().toBool());
 }
 
 TreeNodeView::~TreeNodeView()
@@ -372,6 +385,21 @@ void TreeNodeView::adjustBranchLines(bool st,bool adjust)
         adjustStyleSheet();
 }
 
+void TreeNodeView::adjustServerToolTip(bool st)
+{
+    model_->setEnableServerToolTip(st);
+}
+
+void TreeNodeView::adjustNodeToolTip(bool st)
+{
+    model_->setEnableNodeToolTip(st);
+}
+
+void TreeNodeView::adjustAttributeToolTip(bool st)
+{
+    model_->setEnableAttributeToolTip(st);
+}
+
 void TreeNodeView::notifyChange(VProperty* p)
 {
 	if(p->path() == "view.tree.indentation")
@@ -385,6 +413,18 @@ void TreeNodeView::notifyChange(VProperty* p)
     else if(p->path() == "view.tree.drawBranchLine")
     {
         adjustBranchLines(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.serverToolTip")
+    {
+        adjustServerToolTip(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.nodeToolTip")
+    {
+        adjustNodeToolTip(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.attributeToolTip")
+    {
+        adjustAttributeToolTip(p->value().toBool());
     }
 }
 
