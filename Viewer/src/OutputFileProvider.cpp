@@ -363,7 +363,7 @@ void OutputFileProvider::slotOutputClientError(QString msg)
             bool isJobout=(outClient_->remoteFile() == jobout);
 
             //We try to read the file directly from the disk
-            if(server->readFromDisk())
+            if(server->readFromDisk() || !isJobout)
             {
                 if(fetchLocalFile(outClient_->remoteFile()))
                     return;
