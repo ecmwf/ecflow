@@ -198,16 +198,19 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
             fg=Qt::black;
         painter->setPen(fg);
 
-        if(text.contains("inherited from "))
+        QRegExp rx("^(.+)\\s(\\S+)$");
+        //QRegExp rx("inherited from (\\S+) (\\S+)");
+        if(rx.indexIn(text) > -1 && rx.captureCount() == 2)
         {
             QFont f;
             f.setPointSize(f.pointSize()-1);
             QFontMetrics fm(f);
-            textRect.setWidth(fm.width("inherited from"));
+            QString txt1=rx.cap(1);
+            textRect.setWidth(fm.width(txt1));
             painter->setFont(f);
-            painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,"inherited from");
+            painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,txt1);
             textRect.setLeft(textRect.right()+fm.width("D"));
-            text.remove("inherited from ");
+            text=rx.cap(2);
         }
 
         QFont fBold;
