@@ -69,7 +69,19 @@
                     "default" : "default",
                     "values"  : "default/last",
                     "values_label" : "default visible attributes/attributes from last modified view"
-                 }          	         
+                 },
+                 "serverToolTip" : {
+                    "label" : "Show tooltip on servers",
+                    "default": "true"
+                 },
+                 "nodeToolTip" : {
+                    "label" : "Show tooltip on nodes",
+                    "default": "true"
+                 },
+                 "attributeToolTip" : {
+                    "label" : "Show tooltip on attributes",
+                    "default": "true"
+                 }
             },
 
             "table": {
