@@ -39,5 +39,5 @@ EditorInfoLabel::EditorInfoLabel(QWidget* parent) : QLabel(parent)
 
 void EditorInfoLabel::setInfo(QString parent,QString type)
 {
-    setText("<b>Parent:</b> " + parent + "<br><b>Type:</b> " + type);
+    setText("<b>Node:</b> " + parent + "<br><b>Type:</b> " + type);
 }
