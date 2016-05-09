@@ -29,59 +29,31 @@
 
 #define _UI_VARIABLEITEMWIDGET_DEBUG
 
-#if 0
-//======================================
-//
-// ServerDialogChecked
-//
-//======================================
+//static QColor nodeNameColour(7,108,209);
+//static QColor serverNameColour(72,72,71);
 
-bool VariableDialogChecker::checkName(QString name)
+static QColor nodeNameColour(0,115,48);
+static QColor serverNameColour(0,115,48);
+
+static QString formatNodeName(QString n);
+static QString formatNodePath(QString p);
+
+QString formatNodeName(QString n)
 {
-	if(name.simplified().isEmpty())
-	{
-		error(QObject::tr("<b>Name</b> cannot be empty!"));
-		return false;
-	}
-	else if(name.contains(","))
-	{
-		error(QObject::tr("<b>Name</b> cannot contain comma character!"));
-		return false;
-	}
-
-	/*if(ServerList::instance()->find(name.toStdString()))
-	{
-			error(QObject::tr("The specified server already exists! Please select a different name!"));
-			return false;
-	}*/
-
-	return true;
+    return "<font color=\'" + nodeNameColour.name() + "\'>" + n + "</font>";
 }
 
-bool VariableDialogChecker::checkValue(QString host)
+QString formatNodePath(QString p)
 {
-	if(host.simplified().isEmpty())
-	{
-		error(QObject::tr("<b>Host</b> cannot be empty!"));
-		return false;
-	}
-	else if(host.contains(","))
-	{
-		error(QObject::tr("<b>Host</b> cannot contain comma character!"));
-		return false;
-	}
+    QStringList lst=p.split("://");
+    if(lst.count() ==2 )
+    {
+        QString s="<font color=\'" + serverNameColour.name() + "\'>" + lst[0] + "://</font>" + lst[1];
+        return s;
+    }
 
-	return true;
+    return p;
 }
-
-
-void VariableDialogChecker::error(QString msg)
-{
-	QMessageBox::critical(0,QObject::tr("Server item"),errorText_ + "<br>"+ msg);
-}
-
-
-#endif
 
 //======================================
 //
@@ -94,7 +66,8 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
    genVar_(false),
    data_(data),
    defineIndex_(defineIndex),
-   oriName_(name)
+   oriName_(name),
+   cleared_(false)
 {
 	setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -119,7 +92,8 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     genVar_=data_->data(defineIndex)->isGenVar(name.toStdString());
 
     QString path=QString::fromStdString(data_->data(0)->fullPath());
-    QString h="<b>Node to modify</b>: " + path + "<br>";
+    QString h="<b>Node to modify</b>: <b>" + formatNodeName(nodeName_) + "</b><br>";
+    h+="<b>Path</b>: " + formatNodePath(path) + "<br>";
 
     VariableModelData* defineData=data_->data(defineIndex_);
     Q_ASSERT(defineData);
@@ -139,7 +113,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     if(defineIndex_ > 0)
     {
         QString definePath=QString::fromStdString(defineData->fullPath());
-        h+="<br>(inherited from: " + definePath + ")";
+        h+=" <b>Inherited from</b>: " + formatNodePath(definePath);
     }
     header_->setText(h);
     valueEdit_->setProperty("form","1");   
@@ -164,6 +138,9 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
 
 VariablePropDialog::~VariablePropDialog()
 {
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    UserMessage::debug("VariablePropDialog::~VariablePropDialog -->");
+#endif
     Q_ASSERT(data_);
     data_->removeObserver(this);
     writeSettings();
@@ -172,7 +149,7 @@ VariablePropDialog::~VariablePropDialog()
 void VariablePropDialog::accept()
 {
     QString name=nameEdit_->text();
-	QString value=valueEdit_->toPlainText();
+    //QString value=valueEdit_->toPlainText();
 
     Q_ASSERT(data_);
     Q_ASSERT(data_->count() > 0);
@@ -193,8 +170,7 @@ void VariablePropDialog::accept()
                        tr("</b>. A new user variable will be created for ") +  nodeType_ + " <b>"  + nodeName_ +
                        tr("</b> and shadow the original one.<br><br>Do you want to proceed?"),
                     QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
-                {
-                    QDialog::reject();
+                {                  
                     return;
                 }
                 else
@@ -207,11 +183,10 @@ void VariablePropDialog::accept()
 
         //It is a ne variable
 		if(QMessageBox::question(0,tr("Confirm: create new variable"),
-                        tr("You are about to create a <b>new</b> variable in ") + nodeType_ + " " + nodeName_ + "." +
+                        tr("You are about to create a <b>new</b> variable in ") + nodeType_ + " <b>" + nodeName_ + "</b>." +
                             tr("<br>Do you want to proceed?"),
                         QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
-        {
-            QDialog::reject();
+        {        
             return;
         }
         else
@@ -220,18 +195,21 @@ void VariablePropDialog::accept()
             return;
         }
 	}
-#if 0
-	if(genVar_)
-	{
+    else if(data_->data(0)->isGenVar(name.toStdString()))
+    {
 		if(QMessageBox::question(0,QObject::tr("Confirm: change variable"),
 						tr("You are about to modify a <b>generated variable</b>.<br>Do you want to proceed?"),
 					QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel)  == QMessageBox::Cancel)
-		{
-			QDialog::reject();
+		{			
 			return;
-		}
+        }
+        else
+        {
+            QDialog::accept();
+            return;
+        }
 	}
-#endif
+
 	QDialog::accept();
 }
 
@@ -257,15 +235,19 @@ QString VariablePropDialog::value() const
 
 void VariablePropDialog::notifyCleared(VariableModelDataHandler*)
 {
+    //data_->removeObserver(this);
+    //cleared_=true;
+    close();
+
+    /*
     messageLabel_->showWarning(nodeTypeCapital_ + " <b>" + nodeName_ +
          "</b> is not the node to modify any more in the Variables panel. Please close the dialog!");
 
-    QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
-    Q_ASSERT(sb);
-    sb->setEnabled(false);
-    form_->setEnabled(false);
+    suspendEdit(true);
 
     data_->removeObserver(this);
+    cleared_=true;
+    */
 }
 
 void VariablePropDialog::notifyUpdated(VariableModelDataHandler*)
@@ -288,6 +270,45 @@ void VariablePropDialog::notifyUpdated(VariableModelDataHandler*)
     else
     {
         messageLabel_->hide();
+    }
+}
+
+void VariablePropDialog::slotSuspendedChanged(bool s)
+{
+    if(cleared_)
+        return;
+
+    if(s)
+    {
+        messageLabel_->showWarning("The server holding " + nodeType_ + " <b>" + nodeName_ +
+               "</b> is being reloaded. \
+               Until it is finished variables <b>cannot be edited<b>!");
+
+        suspendEdit(true);
+    }
+    else
+    {
+        messageLabel_->clear();
+        messageLabel_->hide();
+        suspendEdit(false);
+    }
+}
+
+void VariablePropDialog::suspendEdit(bool st)
+{
+    if(st)
+    {
+        QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
+        Q_ASSERT(sb);
+        sb->setEnabled(false);
+        form_->setEnabled(false);
+    }
+    else
+    {
+        QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
+        Q_ASSERT(sb);
+        sb->setEnabled(true);
+        form_->setEnabled(true);
     }
 }
 
@@ -335,7 +356,8 @@ void VariablePropDialog::readSettings()
 
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *parent) :
    QDialog(parent),
-   data_(data)
+   data_(data),
+   cleared_(false)
 {
 	setupUi(this);
 
@@ -347,7 +369,8 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *par
 
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name, QString value,QWidget *parent) :
    QDialog(parent),
-   data_(data)
+   data_(data),
+   cleared_(false)
 {
 	setupUi(this);
 
@@ -492,12 +515,49 @@ void VariableAddDialog::notifyCleared(VariableModelDataHandler*)
     messageLabel_->showWarning(nodeTypeCapital_ + " <b>" + nodeName_ +
          "</b> is not the node to modify any more in the Variables panel. Please close the dialog!");
 
-    QPushButton* sb=buttonBox_->button(QDialogButtonBox::Ok);
-    Q_ASSERT(sb);
-    sb->setEnabled(false);
-    form_->setEnabled(false);
+    suspendEdit(true);
 
     data_->removeObserver(this);
+    cleared_=true;
+}
+
+void VariableAddDialog::slotSuspendedChanged(bool s)
+{
+    if(cleared_)
+        return;
+
+    if(s)
+    {
+        messageLabel_->showWarning("The server holding " + nodeType_ + " <b>" + nodeName_ +
+               "</b> is being reloaded. \
+               Until it is finished variables <b>cannot be added<b>!");
+
+        suspendEdit(true);
+    }
+    else
+    {
+        messageLabel_->clear();
+        messageLabel_->hide();
+        suspendEdit(false);
+    }
+}
+
+void VariableAddDialog::suspendEdit(bool st)
+{
+    if(st)
+    {
+        QPushButton* sb=buttonBox_->button(QDialogButtonBox::Ok);
+        Q_ASSERT(sb);
+        sb->setEnabled(false);
+        form_->setEnabled(false);
+    }
+    else
+    {
+        QPushButton* sb=buttonBox_->button(QDialogButtonBox::Ok);
+        Q_ASSERT(sb);
+        sb->setEnabled(true);
+        form_->setEnabled(true);
+    }
 }
 
 void VariableAddDialog::writeSettings()
@@ -534,8 +594,6 @@ void VariableAddDialog::readSettings()
 
     settings.endGroup();
 }
-
-
 
 //========================================================
 //
@@ -663,7 +721,6 @@ void VariableItemWidget::reload(VInfo_ptr info)
 	data_->reload(info);
 	varView->expandAll();
 	varView->resizeColumnToContents(0);
-	//varView->reload(info);
 
     if(data_->count() > 0)
         actionAdd->setText(tr("Add &new variable to ") +
@@ -681,7 +738,7 @@ void VariableItemWidget::clearContents()
 void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx)
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    qDebug() << "VariableItemWidget::slotItemSelected";
+    UserMessage::debug("VariableItemWidget::slotItemSelected -->");
     qDebug() << "  current:" << idx << "prev:" << prevIdx;
     qDebug() << "  in view:" << varView->currentIndex();
 #endif
@@ -691,6 +748,9 @@ void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelInd
 
 void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
+    if(flags.isSet(SuspendedChanged))
+        Q_EMIT suspendedChanged(suspended_);
+
     checkActionState();
 }
 
@@ -793,34 +853,21 @@ void VariableItemWidget::editItem(const QModelIndex& index)
     //Get the data from the model
 	if(data && model_->variable(vIndex,name,value,genVar))
 	{
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-        qDebug() << "selected before:" <<   varView->currentIndex();
-#endif
         Q_ASSERT(data_->count() > 0);
         Q_ASSERT(block >=0);
 
         //Start edit dialog (will be deleted on close - deleteOnClose is set)
         VariablePropDialog* d=new VariablePropDialog(data_,block,name,value,frozen_,this);
-        d->show();
         connect(d,SIGNAL(accepted()),
                 this,SLOT(slotVariableEdited()));
-#if 0
-        if(d.exec()== QDialog::Accepted && !frozen_)
-		{
-            //data might have been deleted while the dialog was open
-            //so we alter it via the model that can properly lookup the
-            //data object            
-            model_->alterVariable(vIndex,d.name(),d.value());
-        }
-#endif
+        connect(this,SIGNAL(suspendedChanged(bool)),
+                d,SLOT(slotSuspendedChanged(bool)));
+        d->show();
 
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
         qDebug() << "selected after:" <<   varView->currentIndex();
 #endif
 	}
-
-    //Having finished editing we need to reselect the current row. See issue ECFLOW-613.
-    //reselectCurrent();
 
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     UserMessage::debug("<-- VariableItemWidget::editItem");
@@ -867,35 +914,13 @@ void VariableItemWidget::addItem(const QModelIndex& index)
     {
         //Start add dialog (will be deleted on close - deleteOnClose is set)
         VariableAddDialog* d=new VariableAddDialog(data_,this);
-        d->show();
         connect(d,SIGNAL(accepted()),
                 this,SLOT(slotVariableAdded()));
-
-#if 0
-        if(d.exec() == QDialog::Accepted)
-        {
-            Q_ASSERT(data_->count() > 0);
-            data_->data(0)->alter(d.name().toStdString(),d.value().toStdString());
-        }
-#endif
+        connect(this,SIGNAL(suspendedChanged(bool)),
+                d,SLOT(slotSuspendedChanged(bool)));
+        d->show();
 
     }
-
-#if 0
-	QModelIndex vIndex=sortModel_->mapToSource(index);
-
-	if(VariableModelData* data=model_->indexToData(vIndex))
-	{
-		//Start add dialog
-        VariableAddDialog d(data_,this);
-
-		if(d.exec() == QDialog::Accepted)
-        {
-            data->alter(d.name().toStdString(),d.value().toStdString());           
-		}
-	}
-#endif
-
 }
 
 void VariableItemWidget::removeItem(const QModelIndex& index)

@@ -27,20 +27,6 @@ class VariableSortModel;
 class VariableSearchLine;
 class VProperty;
 
-#if 0
-class VariableDialogChecker
-{
-protected:
-    explicit VariableDialogChecker(QString txt) : errorText_(txt) {}
-
-	bool checkName(QString name);
-	bool checkValue(QString value);
-	void error(QString msg);
-
-	QString errorText_;
-};writeSettings()
-#endif
-
 class VariablePropDialog : public QDialog, public VariableModelDataObserver, private Ui::VariablePropDialog
 {
 Q_OBJECT
@@ -57,12 +43,14 @@ public:
 
 public Q_SLOTS:
 	void accept();
+    void slotSuspendedChanged(bool s);
 
 protected Q_SLOTS:
     void on_nameEdit__textEdited(QString);
     void on_valueEdit__textChanged();
 
 protected:
+    void suspendEdit(bool);
     void readSettings();
     void writeSettings();
 
@@ -75,6 +63,7 @@ protected:
     QString nodeTypeCapital_;
     QString defineNodeName_;
     QString defineNodeType_;
+    bool cleared_;
 
 };
 
@@ -95,9 +84,11 @@ public:
 
 public Q_SLOTS:
 	void accept();
+    void slotSuspendedChanged(bool s);
 
 protected:
     void init();
+    void suspendEdit(bool);
     void readSettings();
     void writeSettings();
 
@@ -105,6 +96,7 @@ protected:
     QString nodeName_;
     QString nodeType_;
     QString nodeTypeCapital_;
+    bool cleared_;
 };
 
 
@@ -136,6 +128,9 @@ protected Q_SLOTS:
     void on_shadowTb_clicked(bool showShadowed);
     void slotVariableEdited();
     void slotVariableAdded();
+
+Q_SIGNALS:
+    void suspendedChanged(bool);
 
 protected:
 	void checkActionState();

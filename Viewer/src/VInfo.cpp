@@ -247,7 +247,7 @@ std::string VInfoServer::name()
 
 std::string VInfoServer::path()
 {
-    return name() + ":/";
+    return name() + "://";
 }
 
 //=========================================
