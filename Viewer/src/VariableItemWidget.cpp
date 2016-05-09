@@ -32,8 +32,11 @@
 //static QColor nodeNameColour(7,108,209);
 //static QColor serverNameColour(72,72,71);
 
-static QColor nodeNameColour(0,115,48);
-static QColor serverNameColour(0,115,48);
+//static QColor nodeNameColour(0,115,48);
+//static QColor serverNameColour(0,115,48);
+
+static QColor nodeNameColour(0,0,0);
+static QColor serverNameColour(0,0,0);
 
 static QString formatNodeName(QString n);
 static QString formatNodePath(QString p);
@@ -92,7 +95,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     genVar_=data_->data(defineIndex)->isGenVar(name.toStdString());
 
     QString path=QString::fromStdString(data_->data(0)->fullPath());
-    QString h="<b>Node to modify</b>: <b>" + formatNodeName(nodeName_) + "</b><br>";
+    QString h="<b>Node to modify</b>: " + formatNodeName(nodeName_) + "<br>";
     h+="<b>Path</b>: " + formatNodePath(path) + "<br>";
 
     VariableModelData* defineData=data_->data(defineIndex_);
@@ -512,6 +515,9 @@ QString VariableAddDialog::value() const
 
 void VariableAddDialog::notifyCleared(VariableModelDataHandler*)
 {
+    close();
+
+#if 0
     messageLabel_->showWarning(nodeTypeCapital_ + " <b>" + nodeName_ +
          "</b> is not the node to modify any more in the Variables panel. Please close the dialog!");
 
@@ -519,6 +525,7 @@ void VariableAddDialog::notifyCleared(VariableModelDataHandler*)
 
     data_->removeObserver(this);
     cleared_=true;
+#endif
 }
 
 void VariableAddDialog::slotSuspendedChanged(bool s)
