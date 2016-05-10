@@ -135,7 +135,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 			if(role == Qt::DisplayRole)
 			{
                 if(index.row() ==0)
-                    return "variables defined in " + QString::fromStdString(d->type()) + " " + QString::fromStdString(d->name());
+                    return "defined in " + QString::fromStdString(d->type()) + " " + QString::fromStdString(d->name());
                 else
                     return "inherited from " + QString::fromStdString(d->type()) + " " + QString::fromStdString(d->name());
 			}

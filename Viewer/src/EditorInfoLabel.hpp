@@ -18,6 +18,10 @@ class EditorInfoLabel : public QLabel
 public:
     explicit EditorInfoLabel(QWidget* parent=0);
     void setInfo(QString parent,QString type);
+
+    static QString formatKeyLabel(QString n);
+    static QString formatNodeName(QString n);
+    static QString formatNodePath(QString p);
 };
 
 #endif // EDITORINFOLABEL_HPP
