@@ -49,7 +49,8 @@ BcWidget::BcWidget(QWidget* parent) :
     itemHeight_(0),
     emptyText_("No selection"),
     useGrad_(true),
-    gradLighter_(150)
+    gradLighter_(150),
+    hovered_(-1)
 {
     font_=QFont();
     QFontMetrics fm(font_);
@@ -100,7 +101,22 @@ void BcWidget::clear()
     items_.clear();
     reset(items_);
 }
-    
+
+void BcWidget::resetBorder(int idx)
+{
+    if(idx >=0 && idx < items_.count())
+    {
+        QColor bgCol=items_.at(idx)->bgCol_;
+        if(idx != hovered_)
+            items_.at(idx)->borderCol_=bgCol.darker(125);
+        else
+            items_.at(idx)->borderCol_=bgCol.darker(240);
+
+        updatePixmap(idx);
+        update();
+    }
+}
+
 void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
 {
     if(idx >=0 && idx < items_.count())
@@ -112,8 +128,12 @@ void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
         
         items_.at(idx)->bgCol_=bgCol;
         items_.at(idx)->fontCol_=fontCol;
-        items_.at(idx)->borderCol_=bgCol.darker(125);
-        
+
+        if(idx != hovered_)
+            items_.at(idx)->borderCol_=bgCol.darker(125);
+        else
+            items_.at(idx)->borderCol_=bgCol.darker(240);
+
         if(newText)
            reset(items_);
         else
@@ -127,7 +147,8 @@ void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
 void BcWidget::reset(QList<NodePathItem*> items)
 {
     items_=items;
-    
+    hovered_=-1;
+
     QFontMetrics fm(font_);
     int xp=hMargin_;
     int yp=vMargin_;
@@ -233,7 +254,34 @@ void BcWidget::paintEvent(QPaintEvent*)
 
 void BcWidget::mouseMoveEvent(QMouseEvent *event)
 {   
+    for(int i=0; i < items_.count(); i++)
+    {
+        if(items_.at(i)->shape_.containsPoint(event->pos(),Qt::OddEvenFill))
+        {
+            if(hovered_ == -1)
+            {
+                hovered_=i;
+                resetBorder(i);
+            }
+            else if(hovered_ != i)
+            {
+                int prev=hovered_;
+                hovered_=i;
+                resetBorder(prev);
+                resetBorder(i);
+            }
 
+            return;
+        }
+    }
+
+    if(hovered_ != -1)
+    {
+        int prev=hovered_;
+        hovered_=-1;
+        resetBorder(prev);
+
+    }
 }
 
 void BcWidget::mousePressEvent(QMouseEvent *event)

@@ -60,6 +60,7 @@ protected:
     
     void updateSettings();
     void reset(int);
+    void resetBorder(int);
     void crePixmap();
     void updatePixmap(int);
     
@@ -81,6 +82,7 @@ protected:
     PropertyMapper* prop_;
     bool useGrad_;
     int gradLighter_;
+    int hovered_;
 };
 
 
