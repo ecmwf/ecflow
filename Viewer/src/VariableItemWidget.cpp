@@ -702,8 +702,13 @@ void VariableItemWidget::reload(VInfo_ptr info)
 	varView->resizeColumnToContents(0);
 
     if(data_->count() > 0)
+    {
         actionAdd->setText(tr("Add &new variable to ") +
                            QString::fromStdString(data_->data(0)->name()));
+
+        actionAdd->setToolTip(tr("Add new variable to ") +
+                           "<b>" + QString::fromStdString(data_->data(0)->name()) + "</b>");
+    }
 }
 
 void VariableItemWidget::clearContents()
