@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <fstream>
 
 #include "SessionHandler.hpp"
 #include "DirectoryHandler.hpp"
@@ -84,9 +85,11 @@ SessionHandler::SessionHandler() :
 	current_(0)
 {
 	//The default must always be exist!
-	current_=add("default");
+	current_=add(defaultSessionName());
+	loadedLastSessionName_ = false;
 
 	readSessionListFromDisk();
+	readLastSessionName();
 }
 
 SessionHandler* SessionHandler::instance()
@@ -122,6 +125,19 @@ SessionItem* SessionHandler::find(const std::string& name)
 }
 
 
+// returns -1 if the session name is not found
+int SessionHandler::indexFromName(const std::string& name)
+{
+    int n = 0;
+    for(std::vector<SessionItem*>::const_iterator it=sessions_.begin(); it != sessions_.end(); ++it)
+    {
+        if((*it)->name() == name)
+            return n;
+        n++;
+    }
+    return -1;
+}
+
 void SessionHandler::readSessionListFromDisk()
 {
     // get the list of existing sessions (by listing the directories)
@@ -141,6 +157,13 @@ void SessionHandler::readSessionListFromDisk()
     }
 }
 
+bool SessionHandler::loadLastSessionAtStartup()
+{
+    // if there was a last session file, then it means the user wanted to load at startup
+    return loadedLastSessionName_;
+}
+
+
 
 SessionItem* SessionHandler::add(const std::string& name)
 {
@@ -155,14 +178,51 @@ SessionItem* SessionHandler::add(const std::string& name)
 		return NULL;
 }
 
-void SessionHandler::remove(const std::string&)
+void SessionHandler::remove(const std::string& sessionName)
 {
+	SessionItem *session = find(sessionName);
+	assert(session);
+
+	remove(session);
 }
 
-void SessionHandler::remove(SessionItem*)
+void SessionHandler::remove(SessionItem* session)
 {
+    std::vector<SessionItem*>::iterator it = std::find(sessions_.begin(), sessions_.end(), session);
+    assert(it != sessions_.end());  // session was not found - should not be possible
 
+
+    // remove the session's directory
+    std::string errorMessage;
+    bool ok = DirectoryHandler::removeDir(sessionDirName(session->name()), errorMessage);
+
+    if (ok)
+    {
+        // remove it from our list
+        sessions_.erase(it);
+    }
+    else
+    {
+        UserMessage::message(UserMessage::ERROR, true, errorMessage);
+    }
 }
+
+
+void SessionHandler::rename(SessionItem* item, const std::string& newName)
+{
+    std::string errorMessage;
+    bool ok = DirectoryHandler::renameDir(sessionDirName(item->name()), sessionDirName(newName), errorMessage);
+
+    if (ok)
+    {
+        item->name(newName);
+    }
+    else
+    {
+        UserMessage::message(UserMessage::ERROR, true, errorMessage);
+    }
+}
+
 
 void SessionHandler::current(SessionItem* item)
 {
@@ -191,6 +251,88 @@ void SessionHandler::load()
 {
 
 }
+
+
+bool SessionHandler::requestStartupViaSessionManager()
+{
+	char *sm = getenv("ECFUI_SESSION_MANAGER");
+	if (sm)
+		return true;
+	else
+		return false;
+}
+
+
+void SessionHandler::saveLastSessionName()
+{
+	std::string configDir = DirectoryHandler::configDir();
+	std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
+
+	// open the last_session.txt file and try to read it
+	std::ofstream out(lastSessionFilename.c_str());
+
+	if (out.good())
+	{
+		// the file is a one-line file containing the name of the current session
+		std::string line = current()->name();
+		out << line << std::endl;
+	}
+}
+
+void SessionHandler::removeLastSessionName()
+{
+	std::string configDir = DirectoryHandler::configDir();
+	std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
+
+	std::string errorMessage;
+	bool ok = DirectoryHandler::removeFile(lastSessionFilename, errorMessage);
+
+	if (!ok)
+	{
+		UserMessage::message(UserMessage::ERROR, true, errorMessage);
+	}
+}
+
+
+void SessionHandler::readLastSessionName()
+{
+	std::string configDir = DirectoryHandler::configDir();
+	std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
+
+	// open the last_session.txt file and try to read it
+	std::ifstream in(lastSessionFilename.c_str());
+
+	if (in.good())
+	{
+		// the file is a one-line file containing the name of the session we want
+		std::string line;
+		if (getline(in, line))
+		{
+			loadedLastSessionName_ = true;
+			lastSessionName_ = line;
+		}
+		else
+			lastSessionName_ = defaultSessionName();
+	}
+	else
+	{
+		// could not read the file, so just use the default
+		lastSessionName_ = defaultSessionName();
+	}
+
+
+	// set this session as the current one if it exists
+	SessionItem *item = find(lastSessionName_);
+	if (item)
+	{
+		current(item);
+	}
+	else
+	{
+		lastSessionName_ = defaultSessionName();  // the last session file contained the name of a non-existant session
+	}
+}
+
 
 SessionItem *SessionHandler::copySession(SessionItem* source, std::string &destName)
 {

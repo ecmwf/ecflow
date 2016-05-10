@@ -25,6 +25,22 @@ SessionDialog::SessionDialog(QWidget *parent) : QDialog(parent)
 
     refreshListOfSavedSessions();
 
+
+    // what was saved last time?
+    std::string lastSessionName = SessionHandler::instance()->lastSessionName();
+    int index = SessionHandler::instance()->indexFromName(lastSessionName);
+    if (index != -1)
+        savedSessionsList_->setCurrentRow(index);  // select this one in the table
+
+
+    if (SessionHandler::instance()->loadLastSessionAtStartup())
+        restoreLastSessionCb_->setCheckState(Qt::Checked);
+    else
+        restoreLastSessionCb_->setCheckState(Qt::Unchecked);
+
+
+    newButton_->setVisible(false);  // XXX TODO: enable New Session functionality
+
     // ensure the correct state of the Save button
     on_sessionNameEdit__textChanged();
     setButtonsEnabledStatus();
@@ -52,8 +68,10 @@ void SessionDialog::refreshListOfSavedSessions()
 
 void SessionDialog::addSessionToTable(SessionItem *s)
 {
-
-	savedSessionsList_->addItem(QString::fromStdString(s->name()));
+	QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(s->name()));
+	//item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+	//item->setCheckState(Qt::Unchecked);
+	savedSessionsList_->addItem(item);
 /*
 	int lastRow = sessionsTable_->rowCount()-1;
 	sessionsTable_->insertRow(lastRow+1);
@@ -153,9 +171,64 @@ void SessionDialog::on_cloneButton__clicked()
 	if (result == QDialog::Accepted)
 	{
 		std::string newName = renameDialog.newName();
-		// XXX TODO: check it does not clash?
 		SessionHandler::instance()->copySession(sessionName, newName);
+		refreshListOfSavedSessions();
 	}
+}
+
+void SessionDialog::on_deleteButton__clicked()
+{
+	std::string sessionName = selectedSessionName();
+	assert(!sessionName.empty());  // it should not be possible for the name to be empty
+
+	QString message = tr("Are you sure that you want to delete the session '") + QString::fromStdString(sessionName) + tr("'' from disk?");
+	if(QMessageBox::question(0,tr("Confirm: remove session"),
+		message,
+		QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
+	{
+		SessionHandler::instance()->remove(sessionName);
+		refreshListOfSavedSessions();
+	}
+}
+
+
+void SessionDialog::on_renameButton__clicked()
+{
+	std::string sessionName = selectedSessionName();
+	assert(!sessionName.empty());  // it should not be possible for the name to be empty
+
+	SessionItem *item = SessionHandler::instance()->find(sessionName);
+	assert(item);  // it should not be possible for the name to be empty
+
+	SessionRenameDialog renameDialog;
+	renameDialog.exec();
+
+	int result = renameDialog.result();
+	if (result == QDialog::Accepted)
+	{
+		std::string newName = renameDialog.newName();
+		SessionHandler::instance()->rename(item, newName);
+		refreshListOfSavedSessions();
+	}
+}
+
+
+void SessionDialog::on_switchToButton__clicked()
+{
+	std::string sessionName = selectedSessionName();
+	assert(!sessionName.empty());  // it should not be possible for the name to be empty
+
+	SessionItem *item = SessionHandler::instance()->find(sessionName);
+	assert(item);  // it should not be possible for the name to be empty
+
+	SessionHandler::instance()->current(item);  // set this session as the current one
+
+	if (restoreLastSessionCb_->checkState() == Qt::Checked)  // save details of the selected session?
+		SessionHandler::instance()->saveLastSessionName();
+	else
+		SessionHandler::instance()->removeLastSessionName();  // no, so we can delete the file
+
+	accept();  // close the dialogue and continue loading the main user interface
 }
 
 

@@ -110,6 +110,10 @@ do
 			ECFUI_SLOG=yes
 			;;
 
+		-s)
+			export ECFUI_SESSION_MANAGER=yes
+			;;
+
         -h)
             ECFUI_HELP=yes
             ;;
@@ -136,6 +140,7 @@ then
 EcflowUI
   Command-line flags:
     -log : write log messages to standard output
+    -s   : start via the session manager
     -h   : print this help message
 HEND
 

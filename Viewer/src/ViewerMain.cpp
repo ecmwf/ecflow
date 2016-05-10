@@ -119,16 +119,29 @@ int main(int argc, char **argv)
     Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
 		      "ecflowview_palette.json")); 
 
-    SessionDialog sessionDialog;
-    sessionDialog.exec();
 
+	// startup - via the session manager, or straight to the main window?
+	bool startMainWindow = true;
 
+	if (SessionHandler::requestStartupViaSessionManager())
+	{
+		SessionDialog sessionDialog;
+		if (sessionDialog.exec() != QDialog::Accepted)
+			startMainWindow = false;
+	}
 
-    //Build the GUI
-    MainWindow::init();
+	if (startMainWindow)
+	{
+		//Build the GUI
+		MainWindow::init();
 
-    //Show all the windows
-    MainWindow::showWindows();
+		//Show all the windows
+		MainWindow::showWindows();
 
-    return app.exec();
+		return app.exec();
+	}
+	else
+	{
+		return 0;  // user quit from within the session manager
+	}
 }

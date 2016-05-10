@@ -19,7 +19,7 @@ public:
 	explicit SessionItem(const std::string&);
     virtual ~SessionItem() {}
 
-	void  name(const std::string& name);
+	void  name(const std::string& name) {name_ = name;}
 	const std::string& name() const {return name_;}
 
 	std::string sessionFile() const;
@@ -47,29 +47,41 @@ public:
 	SessionItem* add(const std::string&);
 	void remove(const std::string&);
 	void remove(SessionItem*);
+	void rename(SessionItem*, const std::string&);
 	void current(SessionItem*);
 	SessionItem* current();
 	void save();
 	void load();
 	int numSessions() {return sessions_.size();};
 	SessionItem *find(const std::string&);
+	int          indexFromName(const std::string&);
 	SessionItem *sessionFromIndex(int i) {return sessions_[i];};
 	SessionItem *copySession(SessionItem* source, std::string &destName);
 	SessionItem *copySession(std::string &source, std::string &destName);
+	void         saveLastSessionName();
+	void         removeLastSessionName();
+	bool         loadLastSessionAtStartup();
+	std::string  lastSessionName() {return lastSessionName_;};
+
 
 	const std::vector<SessionItem*>& sessions() const {return sessions_;}
 
 	static std::string sessionDirName(const std::string &sessionName);    // static because they are called from the constructor
 	static std::string sessionQtDirName(const std::string &sessionName);  // static because they are called from the constructor
 	static SessionHandler* instance();
+	static bool requestStartupViaSessionManager();
 
 protected:
 	void readSessionListFromDisk();
+	std::string defaultSessionName() {return "default";};
+	void readLastSessionName();
 
 	static SessionHandler* instance_;
 
 	std::vector<SessionItem*> sessions_;
 	SessionItem* current_;
+	bool loadedLastSessionName_;
+	std::string lastSessionName_;
 };
 
 #endif
