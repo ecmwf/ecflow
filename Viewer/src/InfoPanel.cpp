@@ -244,6 +244,8 @@ void InfoPanel::slotReload(VInfo_ptr info)
 void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 {
     reset(info);
+    if(!detached() && info_)
+       Q_EMIT selectionChanged(info_);
 }
 
 //Set the new VInfo object.

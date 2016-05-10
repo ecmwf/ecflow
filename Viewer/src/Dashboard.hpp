@@ -69,6 +69,7 @@ protected Q_SLOTS:
     void slotDockClose();
     void slotDialogFinished(int);
     void slotPopInfoPanel(QString);
+    void slotInfoPanelSelection(VInfo_ptr);
 
 private:
 	DashboardWidget* addWidgetCore(const std::string& type);
