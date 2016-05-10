@@ -10,7 +10,9 @@
 
 #include "EditorInfoLabel.hpp"
 
+#include <QStringList>
 #include <QVariant>
+
 
 EditorInfoLabel::EditorInfoLabel(QWidget* parent) : QLabel(parent)
 {
@@ -39,5 +41,46 @@ EditorInfoLabel::EditorInfoLabel(QWidget* parent) : QLabel(parent)
 
 void EditorInfoLabel::setInfo(QString parent,QString type)
 {
-    setText("<b>Node:</b> " + parent + "<br><b>Type:</b> " + type);
+    setText(formatKeyLabel("Node: ") + formatNodePath(parent) + "<br>" +
+            formatKeyLabel("Attibute type: ") + type);
 }
+
+static QColor nodeNameColour(7,108,209);
+static QColor serverNameColour(0,0,0);
+static QColor labelColour(59,60,61);
+
+QString EditorInfoLabel::formatKeyLabel(QString n)
+{
+    return "<font color=\'" + labelColour.name() + "\'><b>" + n + "</b></font>";
+}
+
+QString EditorInfoLabel::formatNodeName(QString n)
+{
+    return "<font color=\'" + nodeNameColour.name() + "\'>" + n + "</font>";
+}
+
+QString EditorInfoLabel::formatNodePath(QString p)
+{
+    if(p.endsWith("://"))
+    {
+        return p;
+    }
+
+    QStringList lst=p.split("/");
+    if(lst.count() > 0)
+    {
+        QString n=lst.back();
+        lst.pop_back();
+        QColor c(80,80,80);
+        QString s="<font color=\'" + c.name() + "\'>" + lst.join("/") + "/" +
+                "</font><font color=\'" + serverNameColour.name() + "\'>" +  n + "</font>";
+        return s;
+    }
+
+    return p;
+}
+
+
+
+
+

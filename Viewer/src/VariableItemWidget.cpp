@@ -29,35 +29,6 @@
 
 #define _UI_VARIABLEITEMWIDGET_DEBUG
 
-//static QColor nodeNameColour(7,108,209);
-//static QColor serverNameColour(72,72,71);
-
-//static QColor nodeNameColour(0,115,48);
-//static QColor serverNameColour(0,115,48);
-
-static QColor nodeNameColour(0,0,0);
-static QColor serverNameColour(0,0,0);
-
-static QString formatNodeName(QString n);
-static QString formatNodePath(QString p);
-
-QString formatNodeName(QString n)
-{
-    return "<font color=\'" + nodeNameColour.name() + "\'>" + n + "</font>";
-}
-
-QString formatNodePath(QString p)
-{
-    QStringList lst=p.split("://");
-    if(lst.count() ==2 )
-    {
-        QString s="<font color=\'" + serverNameColour.name() + "\'>" + lst[0] + "://</font>" + lst[1];
-        return s;
-    }
-
-    return p;
-}
-
 //======================================
 //
 // VariablePropDialog
@@ -95,8 +66,9 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     genVar_=data_->data(defineIndex)->isGenVar(name.toStdString());
 
     QString path=QString::fromStdString(data_->data(0)->fullPath());
-    QString h="<b>Node to modify</b>: " + formatNodeName(nodeName_) + "<br>";
-    h+="<b>Path</b>: " + formatNodePath(path) + "<br>";
+    QString h=EditorInfoLabel::formatKeyLabel("Node to modify: ") + "<b>" +
+            EditorInfoLabel::formatNodeName(nodeName_) + "</b><br>";
+    h+= EditorInfoLabel::formatKeyLabel("Path: ") +  EditorInfoLabel::formatNodePath(path) + "<br>";
 
     VariableModelData* defineData=data_->data(defineIndex_);
     Q_ASSERT(defineData);
@@ -104,7 +76,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     defineNodeType_=QString::fromStdString(defineData->type());
 
     genVar_=defineData->isGenVar(name.toStdString());
-    h+="<b>Type</b>: ";
+    h+=EditorInfoLabel::formatKeyLabel("Variable type: ");
     h+=(genVar_)?tr("generated variable"):tr("user variable");
 
     bool readOnly=defineData->isReadOnly(name.toStdString());
@@ -116,7 +88,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     if(defineIndex_ > 0)
     {
         QString definePath=QString::fromStdString(defineData->fullPath());
-        h+=" <b>Inherited from</b>: " + formatNodePath(definePath);
+        h+=" <br>" + EditorInfoLabel::formatKeyLabel("Inherited from: ") + EditorInfoLabel::formatNodePath(definePath);
     }
     header_->setText(h);
     valueEdit_->setProperty("form","1");   
