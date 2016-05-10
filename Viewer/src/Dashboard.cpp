@@ -111,6 +111,8 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
 					ctl,SLOT(slotReload(VInfo_ptr)));
 
+        connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
+                    this,SLOT(slotInfoPanelSelection(VInfo_ptr)));
 		w=ctl;
 	}
 
@@ -441,6 +443,10 @@ void Dashboard::readSettings(VComboSettings* vs)
 	settingsAreRead_=false;
 }
 
+void Dashboard::slotInfoPanelSelection(VInfo_ptr info)
+{
+    selectInTreeView(info);
+}
 
 void Dashboard::selectFirstServerInView()
 {
