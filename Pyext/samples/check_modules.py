@@ -11,6 +11,7 @@ if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=DESC,formatter_class=argparse.RawDescriptionHelpFormatter)
     PARSER.add_argument('--m',help="The module command of some sort")
     PARSER.add_argument('--f',help="Path to a file that is the output of module list")
+    PARSER.add_argument('--remote_host',help="remote host")
     ARGS = PARSER.parse_args()
     #print ARGS  
     
@@ -59,6 +60,8 @@ if __name__ == "__main__":
         #print ">>",module_cmd,"<<"
         if module_cmd[1] == "load":
             if not any(module_cmd[2] in s for s in module_list):
+                if ARGS.remote_host =="sappa" or ARGS.remote_host =="sappb":
+                    if module_cmd[2] == "git": continue  # ignore, uses system git
                 print "Error: package",module_cmd[2],"not found in the module list"
                 exit(1)
         if module_cmd[1] == "swap":
@@ -81,4 +84,4 @@ if __name__ == "__main__":
 # ./check_modules.py --m "module load python module load xxx" --f module_list_file
 # PASS:
 # ./check_modules.py --m "module load python module swap fftw/3.3.1 fftw/3.3.4" --f module_list_file
-# ./check_modules.py --m "module load python module swap sms/4.4.14" --f module_list_file
+# ./check_modules.py --m "module load python module swap sms/4.4.14" --f module_list_file --remote_host sappa
