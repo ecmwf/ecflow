@@ -9,6 +9,7 @@
 
 #include <QMessageBox>
 
+#include "SessionHandler.hpp"
 
 #include "SessionRenameDialog.hpp"
 #include "ui_SessionRenameDialog.h"
@@ -28,8 +29,17 @@ void SessionRenameDialog::on_buttonBox__accepted()
     // store the name
     newName_ = nameEdit_->text().toStdString();
 
-    // close the dialogue
-    accept();
+
+    // check it does not clash with an existing session name
+    if (SessionHandler::instance()->find(newName_))
+    {
+        QMessageBox::critical(0,tr("Rename session"), tr("A session with that name already exists - please choose another name"));
+    }
+    else
+    {
+        // close the dialogue
+        accept();
+    }
 }
 
 void SessionRenameDialog::on_buttonBox__rejected()

@@ -50,16 +50,10 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="menuSessions">
-     <property name="title">
-      <string>Sessions</string>
-     </property>
-    </widget>
     <addaction name="separator"/>
     <addaction name="actionNewTab"/>
     <addaction name="actionNewWindow"/>
     <addaction name="separator"/>
-    <addaction name="menuSessions"/>
     <addaction name="actionSaveSessionAs"/>
     <addaction name="actionManageSessions"/>
     <addaction name="separator"/>
@@ -304,10 +298,13 @@
   </action>
   <action name="actionManageSessions">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Manage sessions ...</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionSearch">
@@ -342,6 +339,9 @@
   <action name="actionSaveSessionAs">
    <property name="text">
     <string>S&amp;ave session as...</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

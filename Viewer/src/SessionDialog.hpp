@@ -32,6 +32,9 @@ public Q_SLOTS:
     void on_sessionNameEdit__textChanged();
     void on_savedSessionsList__currentRowChanged(int currentRow);
     void on_cloneButton__clicked();
+    void on_deleteButton__clicked();
+    void on_renameButton__clicked();
+    void on_switchToButton__clicked();
 
 private:
     //Ui::SaveSessionAsDialog *ui;

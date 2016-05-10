@@ -115,6 +115,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
+
     //actionSearch->setVisible(false);
 
 }
@@ -228,6 +229,13 @@ void MainWindow::on_actionPreferences_triggered()
     }
 
 	delete d;
+}
+
+
+void MainWindow::on_actionManageSessions_triggered()
+{
+	QMessageBox::information(0, tr("Manage Sessions"),
+		tr("To manage sessions, please restart ecFlowUI with the -s command-line option"));
 }
 
 void MainWindow::slotConfigChanged()

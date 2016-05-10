@@ -38,6 +38,9 @@ public:
                 std::vector<std::string>& res);
 
     static bool copyDir(const std::string &srcDir, const std::string &destDir, std::string &errorMessage);
+    static bool removeDir(const std::string &dir, std::string &errorMessage);
+    static bool renameDir(const std::string &dir, const std::string &newName, std::string &errorMessage);
+    static bool removeFile(const std::string &file, std::string &errorMessage);
     static bool isFirstStartUp();
 
 private:

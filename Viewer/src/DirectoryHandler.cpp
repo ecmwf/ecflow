@@ -295,3 +295,69 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
 
     return true;
 }
+
+
+// --------------------------------------------------------
+// removeDir
+// Recursively removes the given directory and its contents
+// --------------------------------------------------------
+
+bool DirectoryHandler::removeDir(const std::string &dir, std::string &errorMessage)
+{
+    try
+    {
+        boost::filesystem::path d(dir);
+        uintmax_t numFilesRemoved = remove_all(d);
+    }
+    catch (const boost::filesystem::filesystem_error& err)
+    {
+        errorMessage = "Could not remove directory " + dir + "; reason: " + err.what();
+        return false;
+    }
+
+    return true;
+}
+
+// --------------------------------------------------------
+// renameDir
+// Same as a 'move' - renames the directory
+// --------------------------------------------------------
+
+bool DirectoryHandler::renameDir(const std::string &dir, const std::string &newName, std::string &errorMessage)
+{
+    try
+    {
+        boost::filesystem::path d1(dir);
+        boost::filesystem::path d2(newName);
+        rename(d1, d2);
+    }
+    catch (const boost::filesystem::filesystem_error& err)
+    {
+        errorMessage = "Could not rename directory " + dir + "; reason: " + err.what();
+        return false;
+    }
+
+    return true;
+}
+
+// --------------------------------------------------------
+// removeFile
+// Removes the given file
+// --------------------------------------------------------
+
+bool DirectoryHandler::removeFile(const std::string &path, std::string &errorMessage)
+{
+    try
+    {
+        boost::filesystem::path f(path);
+        bool ok = remove(f);
+    }
+    catch (const boost::filesystem::filesystem_error& err)
+    {
+        errorMessage = "Could not remove file " + path + "; reason: " + err.what();
+        return false;
+    }
+
+    return true;
+}
+
