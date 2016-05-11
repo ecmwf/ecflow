@@ -3,7 +3,7 @@
 (char*) " ! Author : ",
 (char*) " ! Revision : $Revision: #17 $ ",
 (char*) " ! ",
-(char*) " ! Copyright 2009-2012 ECMWF. ",
+(char*) " ! Copyright 2009-2016 ECMWF. ",
 (char*) " ! This software is licensed under the terms of the Apache Licence version 2.0 ",
 (char*) " ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. ",
 (char*) " ! In applying this licence, ECMWF does not waive the privileges and immunities ",
