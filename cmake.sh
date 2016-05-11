@@ -25,7 +25,7 @@ show_error_and_exit() {
 
 copy_tarball_arg=
 package_source_arg=
-make_arg=
+make_arg="make -j8"
 make_only_arg=
 test_arg=
 test_safe_arg=
