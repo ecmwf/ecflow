@@ -17,9 +17,9 @@ show_error_and_exit() {
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   san            - is short for clang thread sanitiser"
-   echo "   package_source - produces ecFlow-4.0.8-Source.tar.gz file, for users"
+   echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
-   echo "   copy_tarball   - copies ecFlow-4.0.8-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
+   echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
    exit 1
 }
 
