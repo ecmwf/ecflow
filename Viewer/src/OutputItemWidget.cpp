@@ -169,7 +169,9 @@ void OutputItemWidget::getLatestFile()
     fetchInfo_->clearInfo();
 
     //Get the latest file contents
-	infoProvider_->info(info_);
+    infoProvider_->info(info_);
+
+    updateDir(false);  // get the directory listing
 }
 
 void OutputItemWidget::getCurrentFile()
