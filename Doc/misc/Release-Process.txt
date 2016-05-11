@@ -33,18 +33,25 @@ Process
    - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
    
-0/ git flow release start 4.0.9
-
-   *Push* branch onto stash, otherwise we can not pull, from the remote machines
-   - In eclipse, you *may* have to push this branch first
-     Team->Push Branch
-     *otherwise* the option Team->Push Upstream  may well be greyed out.
-
-0/ Update ECFLOW_GIT_BRANCH to "4.0.9" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.0.9)
+0/ Two approaches, both use meta-builder: 
+    1/ git flow release start  4.1.0 
+       USE ECFLOW_GIT_BRANCH git_tag=release/4.1.0
+       Use this approach when multiple people working on the release.
+      *Push* branch onto stash, otherwise we can not pull, from the remote machines
+       - In eclipse, you *may* have to push this branch first Team->Push Branch
+        *otherwise* the option Team->Push Upstream  may well be greyed out.
+       
+    2/ git flow release start  4.1.0
+       git flow release finish 4.1.0  
+       push
+       USE ECFLOW_GIT_BRANCH git_tag=4.1.0
+       Wgen single person making release
+ 
+0/ Update ECFLOW_GIT_BRANCH to "4.1.0" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.1.0)
    Then use the meta builder to build/install.
    Note: if used 
-     > git flow release start 4.0.9    # -> it will create a branch release/4.0.9
-     > Either set package_version="4.0.9"
+     > git flow release start 4.1.0        # -> it will create a branch release/4.1.0
+     > Either set package_version="4.1.0"
      > Either set package_version=""        # extract version from VERSION.cmake
 
 0/ For a PREPIFS release change file:
@@ -63,27 +70,22 @@ Process
        rm -rf Pyext/bin
        bjam -j8
     
-0/ CRAY: If you build on cct-login, then copy build to cca/ccb
-
-         cd /usr/local/apps/ecflow
-         scp -r 4.0.9 emos@cca:/usr/local/apps/ecflow/.
-      
-   REDHAT: If we built on ecgb/redhat we can copy release to sappa/sappab 
+0/ REDHAT: If we built on ecgb/redhat we can copy release to sappa/sappab 
   
-         scp -r 4.0.9 deploy@sappa:/usr/local/apps/ecflow/.
-         scp -r 4.0.9 deploy@sappb:/usr/local/apps/ecflow/.
+         scp -r 4.1.0 deploy@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.1.0 deploy@sappb:/usr/local/apps/ecflow/.
          
          or try with emos  and password.
-         scp -r 4.0.9 emos@sappb:/usr/local/apps/ecflow/.
+         scp -r 4.1.0 emos@sappb:/usr/local/apps/ecflow/.
          
    VIRTUAL Machines: These should treated like regular machines. 
-         - These are based on opensuse113, hence we need top copy over exe for this
+         - These are based on lxop_dev, hence we need top copy over exe for this
          - For a list of machines see view/server.od( vsms1,vmsm2,vsms3,vali)
          - to show kernel version: uname -a
          - to show os version:     lsb_release -a
          
-         - ssh opensuse113/lxab, su emos;
-         - scp -r 4.0.9 emos@<virtual machine>:/usr/local/apps/ecflow/.
+         - ssh lxop_dev, su emos;
+         - scp -r 4.1.0 emos@<virtual machine>:/usr/local/apps/ecflow/.
          
          
   *Make* sure destination has a trailing '/.' otherwise you
@@ -102,9 +104,9 @@ Process
    
         ~rdx/ecflow/servers.config
         
-   # as an emergency we can copy from lxab
-   - ssh lxab, su emos;
-   - scp -r 4.0.9 emos@vecfrdda1:/usr/local/apps/ecflow/.
+   # as an emergency we can copy from lxop_dev
+   - ssh lxop_dev, su emos;
+   - scp -r 4.1.0 emos@vecfrdda1:/usr/local/apps/ecflow/.
         
 
 0/ Update WIKI:
@@ -131,7 +133,7 @@ Process
    Use: Release-Anouncement.txt
   
 0/ Tag the release, This should now be automatic when using git flow:
-       git flow release finish 4.0.9
+       git flow release finish 4.1.0
   
 0/ AFTER the release 
    o increment the version number in $WK/VERSION.cmake THEN, run:
