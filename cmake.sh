@@ -17,9 +17,9 @@ show_error_and_exit() {
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   san            - is short for clang thread sanitiser"
-   echo "   package_source - produces ecFlow-4.0.8-Source.tar.gz file, for users"
+   echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
-   echo "   copy_tarball   - copies ecFlow-4.0.8-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
+   echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
    exit 1
 }
 
@@ -102,7 +102,7 @@ set -x # echo script lines as they are executed
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild
+module load ecbuild/2.2.0
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
@@ -201,7 +201,6 @@ ecbuild $source_dir \
             -DENABLE_WARNINGS=ON \
             -DENABLE_ALL_TESTS=ON \
             -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
-            -DENABLE_QT5=ON \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             ${cmake_extra_options}
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
