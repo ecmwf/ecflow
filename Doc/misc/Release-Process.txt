@@ -45,7 +45,7 @@ Process
        git flow release finish 4.1.0  
        push
        USE ECFLOW_GIT_BRANCH git_tag=4.1.0
-       Wgen single person making release
+       When single person making release
  
 0/ Update ECFLOW_GIT_BRANCH to "4.1.0" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.1.0)
    Then use the meta builder to build/install.
