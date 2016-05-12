@@ -4,17 +4,20 @@
  
 * dependencies
 
-   - python 2.7,  Python 3.0 not tested. 
+   - PYTHON_API:
+     python 2.7,  Python 3.0 not tested. 
      If you intend to use ecFlow Python api, You will need to install python.
      If python installed in non standard installation, you may need to
      customise $BOOST_ROOT/tools/build/v2/site-config.jam
      The python installation should include the development packages
      
-   - Xlib, X11, XMotif for :term:`ecflowview`. Do *not* use Lesstif library
+   - ecflowview:
+     Xlib, X11, XMotif for :term:`ecflowview`. Do *not* use Lesstif library
      to compile ecflowview as a replacement for Motif. OpenMotif can be 
      downloaded from http://www.ist.co.uk/downloads/motif_download.html
      
-   - QT5 at least version 5.0.0 is required to build ecflow_ui
+   - ecflow_ui: ( new GUI )
+     QT5 at least version 5.0.0 is required  or  Qt4 4.8.0 and above
      
 * ecfFlow consists of two tar files i.e. :
    
@@ -71,66 +74,91 @@ Use the following step to build boost from scratch:
   > $WK/build_scripts/boost_1_53_fix.sh    # fix for boost, only for some platforms
   > $WK/build_scripts/boost_build.sh       # compile boost libs used by ecFlow
 
+ecflowview
+====================================================================
+
+* When compiling ecflowview in a system where motif is not installed in the
+  usual location, or where both motif and lesstif are installed, it is possible
+  to export the environment variables MOTIF_INCLUDE and MOTIF_LIBRARY to help
+  bjam to find the right location for include files and libraries.
+
+  Openmotif may be retrieve from IST server and installed locally:
+  wget http://www.ist-inc.com/motif/download/motif_files/openmotif-2.1.32-2_IST.x86_64.rpm
+  rpm2cpio openmotif-2.1.32-2_IST.x86_64.rpm | cpio -idmv 
+
+  user shall then compile setting MOTIF_INCLUDE and MOTIF_LIBRARY variable.
+
+..  ecflowview shall be started setting LD_LIBRARY_PATH=${MOTIF_LIBRARY}:$LD_LIBRARY_PATH
+
+* ECFLOWVIEW_HOME shell variable may be set to link ecflowview to the directory
+  where to find 'servers' and 'ecflowview.menu' files
+
+* ECFLOWRC variable may be set to use alternative directory for user
+  ecflowview option files (default is $HOME/.ecflowrc)
+
 
 cmake
 =====================================================================
-
-* 
+* By default will install /usr/local/bin, hence requires root access rights
   > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake ..  
   > make -j2
   > make install
   > make test 
-  
-* Optionally you can specify install prefix directory and to build debug :
+
+
+* Optionally you can specify install prefix directory:
+
   > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
-  > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
-             -DCMAKE_BUILD_TYPE=Debug
+  > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow 
   > make -j2
   > make install
 
-* Optionally if you do *NOT* want to build the GUI or use the python api:
-   
+
+* Optionally if you do *NOT* want to build the GUI(ecflowview) or UI(ecflow_ui) or Python api:
+
   > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
-             -DCMAKE_BUILD_TYPE=Release \
-             -DENABLE_GUI=OFF    \
+             -DENABLE_GUI=OFF           \
+             -DENABLE_UI=OFF            \
              -DENABLE_PYTHON=OFF
   > make -j2
   > make install
+
 
 * Optionally if you did not export BOOST_ROOT you can specify on the command line:
 
   > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
-             -DCMAKE_BUILD_TYPE=Release \
+             -DCMAKE_BUILD_TYPE=Debug \
              -DBOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
   > make -j2
   > make install
+
 
 * On some platforms(AIX) you may need to specify the c++ compiler
 
   > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
-             -DCMAKE_BUILD_TYPE=Release \
              -DCMAKE_CXX_COMPILER=xlC_r"
   > make -j2
   > make install
 
 
-boost/bjam
+boost/bjam:  This can not build the new UI(ecflow_ui)
 =====================================================================
 * For installation the following environment variables are required.
   
   ECFLOW_INSTALL_DIR         # Directory Location for client ,server and gui program's
   ECFLOW_PYTHON_INSTALL_DIR  # Directory Location for ecflow python package
     
-  The python installation can be customised, by changing Pyext/jamfile.jam and site-config.jam
+  The python installation can be customised, by changing Pyext/jamfile.jam 
+  and site-config.jam
   
 * We now need to build ecFlow. Currently ecflowview is only built if 
   environment variable of name ARCH is set to linux::
@@ -168,22 +196,3 @@ boost/bjam
   
       export PYTHONPATH=$PYTHONPATH:$ECFLOW_PYTHON_INSTALL_DIR
       export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ECFLOW_PYTHON_INSTALL_DIR
-  
-* When compiling ecflowview in a system where motif is not installed in the
-  usual location, or where both motif and lesstif are installed, it is possible
-  to export the environment variables MOTIF_INCLUDE and MOTIF_LIBRARY to help
-  bjam to find the right location for include files and libraries.
-
-  Openmotif may be retrieve from IST server and installed locally:
-  wget http://www.ist-inc.com/motif/download/motif_files/openmotif-2.1.32-2_IST.x86_64.rpm
-  rpm2cpio openmotif-2.1.32-2_IST.x86_64.rpm | cpio -idmv 
-
-  user shall then compile setting MOTIF_INCLUDE and MOTIF_LIBRARY variable.
-
-..  ecflowview shall be started setting LD_LIBRARY_PATH=${MOTIF_LIBRARY}:$LD_LIBRARY_PATH
-
-* ECFLOWVIEW_HOME shell variable may be set to link ecflowview to the directory
-  where to find 'servers' and 'ecflowview.menu' files
-
-* ECFLOWRC variable may be set to use alternative directory for user
-  ecflowview option files (default is $HOME/.ecflowrc)
