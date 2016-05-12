@@ -5,6 +5,6 @@
 
 #define ECFLOW_RELEASE   "4"
 #define ECFLOW_MAJOR     "1"
-#define ECFLOW_MINOR     "0"
+#define ECFLOW_MINOR     "1"
 
 #endif 
