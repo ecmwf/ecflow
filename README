@@ -99,7 +99,7 @@ ecflowview
 
 cmake
 =====================================================================
-* By default will install /usr/local/bin, hence requires root access rights
+* By default will install /usr/local, hence may require root access rights
   > cd /tmp/ecflow_build/ecFlow-4.1.0-Source
   > mkdir build; cd build
   > cmake ..  
