@@ -25,7 +25,7 @@ show_error_and_exit() {
 
 copy_tarball_arg=
 package_source_arg=
-make_arg="make -j8"
+make_arg=
 make_only_arg=
 test_arg=
 test_safe_arg=
@@ -201,7 +201,6 @@ ecbuild $source_dir \
             -DENABLE_WARNINGS=ON \
             -DENABLE_ALL_TESTS=ON \
             -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
-            -DENABLE_QT5=ON \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             ${cmake_extra_options}
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
