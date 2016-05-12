@@ -306,7 +306,7 @@ bool DirectoryHandler::removeDir(const std::string &dir, std::string &errorMessa
     try
     {
         boost::filesystem::path d(dir);
-        uintmax_t numFilesRemoved = remove_all(d);
+        remove_all(d);
     }
     catch (const boost::filesystem::filesystem_error& err)
     {
