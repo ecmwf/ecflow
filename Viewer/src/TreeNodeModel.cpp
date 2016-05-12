@@ -1005,7 +1005,7 @@ void TreeNodeModel::slotBeginServerScan(VModelServer* server,int num)
 	//At this point the server node does not have any rows in the model!!!
     if(idx.isValid() && num >0)
 	{
-		beginInsertRows(idx,0,num-1);
+        beginInsertRows(idx,0,num-1);
 	}
 }
 
@@ -1017,7 +1017,6 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server,int num)
 	QModelIndex idx=serverToIndex(server);
 	if(idx.isValid() && num >0)
 	{
-        beginInsertRows(idx,0,num-1);
         endInsertRows();
 	}
 
