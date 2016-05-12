@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -25,6 +25,8 @@ class VNode;
 class NodeFilter;
 class NodeQuery;
 class NodeQueryOptions;
+class VAttribute;
+class VAttributeType;
 
 class NodeQueryEngine : public QThread
 {
@@ -53,12 +55,14 @@ protected:
 private:
 	void run(ServerHandler*,VNode*);
 	void runRecursively(VNode *node);
-	void broadcastFind(VNode*);
+    void broadcastFind(VNode*,VAttribute* a=NULL);
 	void broadcastChunk(bool);
 
 	NodeQuery* query_;
-	BaseNodeCondition* parser_;
-	std::vector<ServerHandler*> servers_;
+    BaseNodeCondition* parser_;
+    BaseNodeCondition* attrParser_;
+    std::vector<ServerHandler*> servers_;
+    QList<VAttributeType*> attrTypes_;
 	int cnt_;
 	int scanCnt_;
 	int maxNum_;

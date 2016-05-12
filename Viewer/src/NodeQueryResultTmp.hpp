@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,7 +22,8 @@ typedef boost::shared_ptr<NodeQueryResultTmp> NodeQueryResultTmp_ptr;
 struct  NodeQueryResultTmp
 {
 	NodeQueryResultTmp() : node_(NULL) {}
-	NodeQueryResultTmp(VNode *node) : node_(node) {}
+    NodeQueryResultTmp(VNode *node) : node_(node) {}
+    NodeQueryResultTmp(VNode *node,QStringList attr) : node_(node), attr_(attr) {}
 
 	VNode* node_;
 	QStringList attr_;

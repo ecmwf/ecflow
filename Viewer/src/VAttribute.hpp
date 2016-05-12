@@ -24,6 +24,7 @@ class VAttribute : public VItem
 {
 public:
     VAttribute(VNode* parent,int index);
+    VAttribute(VNode *parent,VAttributeType* type,QStringList data);
 
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
     VAttributeType* type() const {return type_;}

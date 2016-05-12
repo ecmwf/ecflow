@@ -17,6 +17,7 @@
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "StringMatchMode.hpp"
+#include "VAttribute.hpp"
 
 class VItem;
 

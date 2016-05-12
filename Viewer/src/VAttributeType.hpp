@@ -19,6 +19,7 @@
 
 class AttributeFilter;
 class VNode;
+class VAttribute;
 
 class VAttributeType : public VParam
 {
@@ -35,14 +36,17 @@ public:
     static void init(const std::string& parFile);
     static int getLineNum(const VNode *vnode,int row,AttributeFilter *filter=0);
     static int getRow(const VNode *vnode,int row,AttributeFilter *filter=0);
-
+    
+    
     static VAttributeType* find(const std::string& name);
-
+    static const std::vector<VAttributeType*>& types() {return types_;}
+    
     //Called from VConfigLoader
     static void load(VProperty*);
 
     virtual QString toolTip(QStringList d) const {return QString();}
     virtual bool exists(const VNode* vnode,QStringList) const {return false;}
+    virtual void getSearchData(const VNode*,QList<VAttribute*>) {}
 
 protected:
     virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
@@ -51,6 +55,7 @@ protected:
 
 private:
     static std::map<std::string,VAttributeType*> items_;
+    static std::vector<VAttributeType*> types_;
 };
 
 #endif

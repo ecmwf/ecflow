@@ -18,6 +18,14 @@ VAttribute::VAttribute(VNode* parent,int index) : VItem(parent), type_(0), index
     data_=parent_->getAttributeData(index_,type_) ;
 }
 
+VAttribute::VAttribute(VNode *parent,VAttributeType* type,QStringList data) : 
+    VItem(parent),
+    type_(type),
+    data_(data),
+    index_(-1)
+{
+}        
+
 QString VAttribute::toolTip() const
 {
     return (type_)?(type_->toolTip(data_)):QString();

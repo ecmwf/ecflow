@@ -26,8 +26,10 @@
 #include "VProperty.hpp"
 #include "VFilter.hpp"
 #include "VRepeat.hpp"
+#include "VAttribute.hpp"
 
 std::map<std::string,VAttributeType*> VAttributeType::items_;
+std::vector<VAttributeType*> VAttributeType::types_;
 
 //#define _UI_ATTR_DEBUG
 
@@ -39,6 +41,7 @@ public:
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
     bool exists(const VNode* vnode,QStringList) const;
+    void getSearchData(const VNode* vnode,QList<VAttribute*> lst);
 };
 
 class VEventAttribute : public VAttributeType
@@ -164,7 +167,10 @@ VAttributeType::VAttributeType(const std::string& name) :
 {
     //items_.push_back(this);
     items_[name]=this;
+    types_.push_back(this);
 }
+
+
 
 std::vector<VParam*> VAttributeType::filterItems()
 {
@@ -271,6 +277,7 @@ bool VAttributeType::getData(const std::string& type,VNode* vnode,int row,QStrin
     }
     return false;
 }
+
 
 int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filter)
 {
@@ -415,6 +422,27 @@ bool VMeterAttribute::exists(const VNode* vnode,QStringList data) const
 
     return false;
 }
+
+void VMeterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*> lst)
+{
+    if(vnode->isServer())
+        return;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return;
+    
+    const std::vector<Meter>& v=node->meters();
+    for(std::vector<Meter>::const_iterator it=v.begin(); it != v.end(); ++it)
+    {    
+        QStringList data;
+        data << qName_ <<
+                        QString::fromStdString((*it).name()) <<
+                        QString::number((*it).value());
+                        
+        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+    } 
+}    
 
 //================================
 // Labels
