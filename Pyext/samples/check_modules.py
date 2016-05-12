@@ -25,8 +25,8 @@ if __name__ == "__main__":
         if len(module_cmd) < 3 and module_cmd[0] != "module": 
             print "Error: Module command ",module_cmds[0]," is not correctly formed, first string must be module"
             exit(1)
-        if module_cmd[1] != "swap" and module_cmd[1] != "load" and module_cmd[1] != "unload" : 
-            print "Error: Module command ",ARGS.m," is not correctly formed, second arg must be one of swap,load or unload"
+        if module_cmd[1] != "swap" and module_cmd[1] != "load" and module_cmd[1] != "unload" and module_cmd[1] != "switch": 
+            print "Error: Module command ",ARGS.m," is not correctly formed, second arg must be one of swap,load,unload,switch"
             exit(1)
     
     # open file,for list of modules,  
@@ -64,7 +64,7 @@ if __name__ == "__main__":
                     if module_cmd[2] == "git": continue  # ignore, uses system git
                 print "Error: package",module_cmd[2],"not found in the module list"
                 exit(1)
-        if module_cmd[1] == "swap":
+        if module_cmd[1] == "swap" or module_cmd[1] == "switch":
             # swap could be
             # module swap PrgEnv-cray PrgEnv-gnu
             # module swap cdt/15.06
