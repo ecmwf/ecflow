@@ -115,7 +115,7 @@ if [[ "$clang_sanitiser_arg" = san ]] ; then
 	cmake_extra_options="$cmake_extra_options -DCMAKE_C_FLAGS=-fsanitize=thread"
 fi
 if [[ "$ARCH" = cray ]] ; then
-    cmake_extra_options="$cmake_extra_options -DENABLE_VIEWER=OFF"
+    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF"
     
     if [[ $intel_arg = intel ]] ; then
         module swap PrgEnv-cray PrgEnv-intel
