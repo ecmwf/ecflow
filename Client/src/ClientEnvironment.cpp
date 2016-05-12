@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -26,6 +26,8 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "boost_archive.hpp"
+#include "TimeStamp.hpp"
+#include "Version.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -176,9 +178,10 @@ bool ClientEnvironment::checkTaskPathAndPassword(std::string& errorMsg) const
 std::string ClientEnvironment::toString() const
 {
 	std::stringstream ss;
-	if (host_vec_.empty()) ss << "\n   ECF_NODE =\n   ";
+	ss << TimeStamp::now() << Version::description() << "\n";
+	if (host_vec_.empty()) ss << "   ECF_NODE =\n   ";
 	else  {
-		ss << "\n   ECF_NODE : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
+		ss << "   ECF_NODE : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
 		std::pair<std::string,std::string> i;
 		BOOST_FOREACH(i, host_vec_) { ss << "   " << i.first << Str::COLON() << i.second << "\n";}
   	}

@@ -146,6 +146,12 @@ QColor VNState::toFontColour(const VNode *n)
 	return (obj)?(obj->fontColour()):QColor();
 }
 
+QColor VNState::toTypeColour(const VNode *n)
+{
+    VNState *obj=VNState::toState(n);
+    return (obj)?(obj->typeColour()):QColor();
+}
+
 QString VNState::toName(const VNode *n)
 {
 	VNState *obj=VNState::toState(n);
@@ -156,6 +162,12 @@ QString VNState::toDefaultStateName(const VNode *n)
 {
 	VNState *obj=VNState::toDefaultState(n);
 	return (obj)?(obj->name()):QString();
+}
+
+QString VNState::toRealStateName(const VNode *n)
+{
+    VNState *obj=VNState::toRealState(n);
+    return (obj)?(obj->name()):QString();
 }
 
 //==================================================

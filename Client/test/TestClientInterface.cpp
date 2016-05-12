@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #75 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -198,6 +198,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.reloadwsfile() == 0,CtsApi::reloadwsfile() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.forceDependencyEval() == 0, CtsApi::forceDependencyEval() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.group("shutdown yes;halt yes;restart") == 0,"--group should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.group("shutdown=yes;halt=yes;restart") == 0,"--group should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.group("get ; show") == 0,"--group should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.group("get ; show state") == 0,"--group should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.group("get ; show defs") == 0,"--group should return 0\n" << theClient.errorMsg());
@@ -286,6 +287,16 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","variable","name","/value/with/path") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/",  "add","variable","name","value") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/",  "add","variable","name","/value/with/path") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -s +00:15 -a 20:00 -c +02:00") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -a 20:00 -c +02:00 -s +00:15") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -c +02:00 -a 20:00  -s +00:15") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -s 00:02 -c +00:05") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -s 00:01 -a 14:30 -c +00:01") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-s +00:15 -a 20:00 -c +02:00") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-a 20:00 -c +02:00 -s +00:15") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-c +02:00 -a 20:00  -s +00:15") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-s 00:02 -c +00:05") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-s 00:01 -a 14:30 -c +00:01") == 0,"--alter should return 0\n" << theClient.errorMsg());
 
    std::vector<std::string> validDays = DayAttr::allDays(); // HPUX barfs if use DayAttr::allDays() directly in BOOST_FOREACH
    BOOST_FOREACH(const string& day, validDays) {
@@ -293,6 +304,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    }
    BOOST_REQUIRE_MESSAGE( theClient.alter("/",  "delete","variable","varName") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","variable","varName") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","variable","/var/with/path") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","variable") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","time") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","time","+12:00") == 0,"--alter should return 0\n" << theClient.errorMsg());
@@ -329,6 +341,8 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","zombie","user") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","zombie","ecf") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","zombie","path") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","late") == 0,"--alter should return 0\n" << theClient.errorMsg());
+
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","variable","name","newValue") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","variable","name","/new/value/with/path") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","clock_type","hybrid") == 0,"--alter should return 0\n" << theClient.errorMsg());
@@ -345,6 +359,8 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","meter","name","20") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","meter","name","-1") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","label","name","newValue") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","label","name","/value/with/path/ECFLOW-480") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","label","name","") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","trigger","(t:step + 20) ge (t:step1 - 20)") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","trigger","/suite/fred == complete") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","trigger","/suite/fred:event") == 0,"--alter should return 0\n" << theClient.errorMsg());
@@ -355,6 +371,13 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","repeat","blue") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","limit_max","limit_name","12") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","limit_value","limit_name","12") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","late -s +00:15 -a 20:00 -c +02:00") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","late -s 00:02 -c +00:05") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","late -s 00:01 -a 14:30 -c +00:01") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-s +00:15 -a 20:00 -c +02:00") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-a 20:00 -c +02:00 -s +00:15") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-c +02:00 -a 20:00  -s +00:15") == 0,"--alter should return 0\n" << theClient.errorMsg());
+
 
    std::vector<std::string> dstates = DState::allStates();
    for(size_t i = 0; i < dstates.size(); i++) {
@@ -413,6 +436,19 @@ BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
    BOOST_REQUIRE_MESSAGE( theClient.alter("/",  "add","variable","na me","value") == 1,"--alter expected to fail\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/",  "add","variable","","value") == 1,"--alter expected to fail\n" << theClient.errorMsg());
 
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -s") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -a") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -c") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -s +00:15 -a") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","late -s +00:15 -a 20:00 -c") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-s") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-a") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-c") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-s +00:15 -a") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-s +00:15 -a 20:00 -c") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-c +02:000 -a 20:00  -s +00:15") == 1,"--alter should return 0\n" << theClient.errorMsg());
 
    BOOST_REQUIRE_MESSAGE( theClient.alter("/",  "delete","vari able","varName") == 1,"--alter expected to fail\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","delete","v ariable","varName") == 1,"--alter expected to fail\n" << theClient.errorMsg());
@@ -489,6 +525,19 @@ BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","limit_max","limit_  name","12") == 1,"--alter expected to fail\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","limit_value","limit_  name","12") == 1,"--alter expected to fail\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","defstatus","complete-34") == 1,"--alter expected to fail\n" << theClient.errorMsg());
+
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","late") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","late -s") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","late -a") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","late -c") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-s +00:15 -a") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-s +00:15 -a 20:00 -c") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-s +00:15 -a") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-s +00:15 -a 20:00 -c") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-s +00:152") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-c +00:152") == 1,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","late","-a +00:152") == 1,"--alter should return 0\n" << theClient.errorMsg());
 }
 
 

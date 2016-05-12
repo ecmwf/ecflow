@@ -21,7 +21,7 @@
 #
 ##############################################################################
 
-cmake_minimum_required( VERSION 2.8.4 FATAL_ERROR )
+cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
 
 # ===========================================================================
 # Change the default if NO CMAKE_BUILD_TYPE specified
@@ -62,33 +62,75 @@ message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
 option( ENABLE_PYTHON         "enable python interface"   ON  )
+option( ENABLE_UI             "Build ecFlowUI"            ON ) 
 option( ENABLE_GUI            "Build ecflowview"          ON  )
-option( ENABLE_QT5            "enable Qt5"                OFF )
 option( ENABLE_ALL_TESTS      "This includes performance/migration/regression tests" OFF )
+option( ENABLE_UI_BACKTRACE   "Print a UI debug backtrace" OFF ) 
 
 
-# Qt4 and Qt5 require different packages to be found, so we need to know
-# in advance which version to search for (user-specified so that it
-# works on systems with both installed)
-if(ENABLE_QT5)
-    list(APPEND QT_DEPS "Qt5Widgets REQUIRED 5.0.0")
-    list(APPEND QT_DEPS "Qt5Gui REQUIRED 5.0.0")
-    list(APPEND QT_DEPS "Qt5Multimedia REQUIRED 5.0.0")
-else()
-    set(QT_DEPS "Qt4 4.8.0 REQUIRED QtCore QtGui" )
+
+# =========================================================================================
+# Qt for ecFlowUI. 
+# Algorithm: we test for Qt5 - if it's there, then use it; otherwise look for Qt4.
+#            if we don't find that, then we cannot build ecFlowUI.
+# =========================================================================================
+
+if(ENABLE_UI)
+
+    ecbuild_info("ecFlowUI is enabled - searching for Qt5; if not found, will try Qt4")
+
+    find_package(Qt5Widgets    5.0.0)
+    find_package(Qt5Gui        5.0.0)
+    find_package(Qt5Network    5.0.0)
+
+    if (Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5Network_FOUND)
+          ecbuild_info("Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
+          set(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR} ${Qt5Network_INCLUDE_DIR})
+          set(ECFLOW_QT_LIBRARIES   ${Qt5Widgets_LIBRARIES}    ${Qt5Gui_LIBRARIES}   ${Qt5Network_LIBRARIES})
+          set(ECFLOW_QT5 1)
+          add_definitions(-DECFLOW_QT5)
+    else()
+        ecbuild_info("Could not find all required Qt5 packages - searching for Qt4")
+
+        find_package(Qt4 4.8.0 REQUIRED QtCore QtGui QtNetwork)
+        if(QT_FOUND)
+            ecbuild_info("Found Qt 4, please ignore any warnings about Qt5 components that were not found.")
+        else()
+            ecbuild_critical("Qt5 and Qt4 not found - one of these is required for ecFlowUI; or use -DENABLE_UI=OFF")
+        endif()
+    endif()
+
+    set(ECFLOW_QT 1)
+    add_definitions(-DQT_NO_KEYWORDS) # We need to disable keywords because there is a problem in using Qt and boost together.
+
 endif()
 
-ecbuild_add_option( FEATURE VIEWER
-                    DEFAULT OFF
-                    DESCRIPTION       "the Qt version of the viewer"
-                    REQUIRED_PACKAGES "${QT_DEPS}" )
+
+
+# sanity check - cannot set ENABLE_UI_BACKTRACE if UI is OFF
+if(ENABLE_UI_BACKTRACE AND (NOT ENABLE_UI))
+    message(WARNING "Cannot ENABLE_UI_BACKTRACE if UI is not enabled")
+    set(ENABLE_UI_BACKTRACE OFF)
+endif()
+
+# sanity check - cannot set UI_BACKTRACE_EMAIL_ADDRESSES if UI and ENABLE_UI_BACKTRACE are OFF
+if(UI_BACKTRACE_EMAIL_ADDRESSES AND (NOT ENABLE_UI))
+    message(WARNING "Cannot set UI_BACKTRACE_EMAIL_ADDRESSES if UI is not enabled")
+    set(UI_BACKTRACE_EMAIL_ADDRESSES)
+endif()
 
 
 message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
 message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
-message( STATUS "ENABLE_VIEWER         : ${ENABLE_VIEWER}" )
-message( STATUS "ENABLE_QT5            : ${ENABLE_QT5}" )
+message( STATUS "ENABLE_UI             : ${ENABLE_UI}" )
 message( STATUS "ENABLE_ALL_TESTS      : ${ENABLE_ALL_TESTS}" )
+
+if (ENABLE_UI)
+    message( STATUS "ENABLE_UI_BACKTRACE   : ${ENABLE_UI_BACKTRACE}" )
+    if(UI_BACKTRACE_EMAIL_ADDRESSES)
+        message( STATUS "UI_BACKTRACE_EMAIL_ADDRESSES : ${UI_BACKTRACE_EMAIL_ADDRESSES}" )
+    endif()
+endif()
 
 # ======================================================================================
 # GUI requires X11 and Motif
@@ -118,16 +160,16 @@ endif()
 
 ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
 
-# Ecflow test require statics libs, otherwise get double free, error.
+# Ecflow test require statics libs for boost < 1.59, otherwise get double free error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
-#set(Boost_DEBUG                  ON)
+#set(Boost_DEBUG                 ON)
 
-find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
+find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 
 # Available boost lib should be referenced as:
 #
@@ -150,38 +192,6 @@ find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system threa
 # Qt
 # =========================================================================================
 
-if(ENABLE_VIEWER)
- if( ENABLE_QT5 )
-      #find_package(Qt5Widgets REQUIRED)
-      #find_package(Qt5Gui REQUIRED)
-#      find_package(Qt5Network REQUIRED)
-#      find_package(Qt5Xml REQUIRED)
-#      find_package(Qt5XmlPatterns REQUIRED)
-#      find_package(Qt5PrintSupport REQUIRED)
-
-      if( Qt5Widgets_FOUND )
-          message(STATUS "Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
-          SET(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR} ${Qt5Multimedia_INCLUDE_DIR})
-          SET(ECFLOW_QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Multimedia_LIBRARIES})
-          set( ECFLOW_QT 1)
-          set( ECFLOW_QT5 1)
-          add_definitions( -DECFLOW_QT5 )
-          #We need to disable keywords because there is a problem in using Qt and boost together.
-          ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
-      else()
-          message(FATAL_ERROR "Qt5 was NOT found - this is required for the new user interface")
-      endif()
-  else( ENABLE_QT5 )
-    #find_package(Qt4 4.6.2 REQUIRED QtCore QtGui )
-    if( QT_FOUND )
-        set( ECFLOW_QT 1)
-        #We need to disable keywords because there is a problem in using Qt and boost together.
-        ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
-    else()
-        message(FATAL_ERROR "Qt was not found - this is required for the new user interface")
-    endif()
-  endif( ENABLE_QT5 )
-endif()
 
 
 # =========================================================================================
@@ -213,12 +223,12 @@ add_subdirectory( Test )
 
 if (ENABLE_PYTHON)
     ecbuild_find_python( VERSION 2.7 REQUIRED )
-    debug_var(PYTHON_LIBRARIES)
-    debug_var(PYTHON_INCLUDE_DIR)
+    #debug_var(PYTHON_LIBRARIES)
+    #debug_var(PYTHON_INCLUDE_DIR)
 	add_subdirectory( Pyext )
 endif()	
 	
-if(ENABLE_VIEWER)
+if(ENABLE_UI)
     add_subdirectory( Viewer )
     add_subdirectory( share )
 endif()
@@ -235,16 +245,12 @@ endif()
 ecbuild_dont_pack( DIRS 
                    	ACore/doc ANattr/doc ANode/doc Client/doc Pyext/doc Server/doc
                    	ecbuild
-                   	Viewer
-                    SCRATCH 
+                    SCRATCH
+                    CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
                     Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
 )
 
-# temporary until its officially released
-if (NOT ENABLE_VIEWER)
-   ecbuild_dont_pack( DIRS Viewer )
-endif()  
 
 # =========================================================================================
 # install scripts
@@ -262,10 +268,8 @@ install( FILES
 )
 
 # install documentation         
-install (FILES  
-            ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
-            ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.docx    
-            ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    
+install (FILES   
+             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
          DESTINATION doc/ecflow
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 )

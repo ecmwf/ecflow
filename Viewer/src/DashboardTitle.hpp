@@ -49,6 +49,7 @@ Q_SIGNALS:
 
 private:
 	void updateTitle();
+	void clear();
 
 	ServerFilter* filter_;
 };

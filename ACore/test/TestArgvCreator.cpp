@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #5 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -38,7 +38,7 @@ static void doCheck(const std::vector<std::string>& theArgs)
 
 BOOST_AUTO_TEST_CASE( test_ArgvCreator )
 {
-	cout << "ACore:: ...test_ArgvCreator\n";
+	cout << "ACore:: ...test_ArgvCreator" << flush ;
 
 	// O args
 	std::vector<std::string> theArgs;

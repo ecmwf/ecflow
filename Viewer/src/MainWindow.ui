@@ -37,8 +37,11 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>24</height>
+     <height>19</height>
     </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>false</bool>
    </property>
    <widget class="QMenu" name="menuLl">
     <property name="tearOffEnabled">
@@ -51,7 +54,7 @@
     <addaction name="actionNewTab"/>
     <addaction name="actionNewWindow"/>
     <addaction name="separator"/>
-    <addaction name="actionSessions"/>
+    <addaction name="actionSaveSessionAs"/>
     <addaction name="actionManageSessions"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
@@ -90,18 +93,33 @@
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionReset"/>
-    <addaction name="actionRefresh"/>
-    <addaction name="separator"/>
     <addaction name="actionAddTreeWidget"/>
     <addaction name="actionAddTableWidget"/>
     <addaction name="actionAddInfoPanel"/>
     <addaction name="actionAddLogPanel"/>
    </widget>
+   <widget class="QMenu" name="menu_Tools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="actionSearch"/>
+   </widget>
+   <widget class="QMenu" name="menuRefresh">
+    <property name="title">
+     <string>&amp;Refresh</string>
+    </property>
+    <addaction name="actionReset"/>
+    <addaction name="actionResetSelected"/>
+    <addaction name="separator"/>
+    <addaction name="actionRefresh"/>
+    <addaction name="actionRefreshSelected"/>
+   </widget>
    <addaction name="menuLl"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
+   <addaction name="menuRefresh"/>
    <addaction name="menuServer"/>
+   <addaction name="menu_Tools"/>
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -121,11 +139,13 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRefresh"/>
+   <addaction name="actionRefreshSelected"/>
+   <addaction name="actionSearch"/>
+   <addaction name="actionManageServers"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
    </property>
    <property name="text">
@@ -140,7 +160,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/exit.svg</normaloff>:/viewer/images/exit.svg</iconset>
    </property>
    <property name="text">
@@ -152,7 +172,7 @@
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
    </property>
    <property name="text">
@@ -174,37 +194,29 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
    </property>
    <property name="text">
-    <string>Refresh</string>
+    <string>Refresh all servers  in tab</string>
    </property>
    <property name="toolTip">
     <string>Refresh &lt;b&gt;all servers&lt;/b&gt; in current tab</string>
    </property>
    <property name="shortcut">
-    <string>F5</string>
+    <string>Shift+F5</string>
    </property>
   </action>
   <action name="actionReset">
    <property name="icon">
     <iconset>
-     <normaloff>:/viewer/images/reset.svg</normaloff>:/viewer/images/reset.svg</iconset>
+     <normaloff>:/viewer/reset.svg</normaloff>:/viewer/reset.svg</iconset>
    </property>
    <property name="text">
-    <string>Reset</string>
+    <string>Reset all servers in tab</string>
    </property>
    <property name="toolTip">
     <string>Reset</string>
-   </property>
-  </action>
-  <action name="actionServers">
-   <property name="text">
-    <string>Servers</string>
-   </property>
-   <property name="toolTip">
-    <string>Server selection</string>
    </property>
   </action>
   <action name="actionConfigureNodeMenu">
@@ -224,13 +236,23 @@
    </property>
   </action>
   <action name="actionManageServers">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/viewer/manage_server.svg</normaloff>:/viewer/manage_server.svg</iconset>
+   </property>
    <property name="text">
     <string>&amp;Manage servers ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Manage servers&lt;br&gt;&lt;code&gt;Ctrl+N&lt;/code&gt;</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionAddInfoPanel">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/add_info.svg</normaloff>:/viewer/images/add_info.svg</iconset>
    </property>
    <property name="text">
@@ -239,7 +261,7 @@
   </action>
   <action name="actionAddTreeWidget">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/add_tree.svg</normaloff>:/viewer/images/add_tree.svg</iconset>
    </property>
    <property name="text">
@@ -251,7 +273,7 @@
   </action>
   <action name="actionAddTableWidget">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/add_table.svg</normaloff>:/viewer/images/add_table.svg</iconset>
    </property>
    <property name="text">
@@ -274,19 +296,55 @@
     <string>Add log panel</string>
    </property>
   </action>
-  <action name="actionSessions">
-   <property name="text">
-    <string>Sessions</string>
-   </property>
-  </action>
   <action name="actionManageSessions">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Manage sessions ...</string>
    </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/viewer/search.svg</normaloff>:/viewer/search.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Search ...</string>
+   </property>
+  </action>
+  <action name="actionRefreshSelected">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/viewer/reload_one.svg</normaloff>:/viewer/reload_one.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh selected server</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionResetSelected">
+   <property name="text">
+    <string>Reset selected server</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset &lt;b&gt;selected&lt;/b&gt; server in current tab</string>
+   </property>
+  </action>
+  <action name="actionSaveSessionAs">
+   <property name="text">
+    <string>S&amp;ave session as...</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
  </widget>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

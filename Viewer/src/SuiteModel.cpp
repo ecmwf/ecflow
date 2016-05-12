@@ -14,16 +14,33 @@
 #include "SuiteFilter.hpp"
 
 SuiteModel::SuiteModel(QObject *parent) :
-          QAbstractItemModel(parent),
-          data_(0)
+     QAbstractItemModel(parent),
+     data_(0),
+     realData_(0),
+	 presentCol_(QColor(1,128,73)),
+	 notPresentCol_(QColor(255,0,0))
 {
 
 }
 
 SuiteModel::~SuiteModel()
 {
+	beginResetModel();
+	clearData();
+	endResetModel();
+}
+
+void SuiteModel::clearData()
+{
 	if(data_)
 		delete data_;
+
+	data_=0;
+
+	if(realData_)
+		realData_->removeObserver(this);
+
+	realData_=0;
 }
 
 void SuiteModel::setData(SuiteFilter* filter)
@@ -32,14 +49,46 @@ void SuiteModel::setData(SuiteFilter* filter)
 
 	if(data_ && data_ != filter)
 	{
-		delete data_;
-		data_=0;
+		clearData();
 	}
 
-	if(filter && data_ != filter)
+	if(filter)
+	{
 		data_=filter->clone();
+		realData_=filter;
+		realData_->addObserver(this);
+	}
 
 	endResetModel();
+}
+
+void SuiteModel::notifyChange(SuiteFilter *filter)
+{
+	if(filter && filter == realData_)
+	{
+		updateData();
+	}
+}
+
+void SuiteModel::notifyDelete(SuiteFilter *filter)
+{
+	if(filter && filter == realData_)
+	{
+		beginResetModel();
+		clearData();
+		endResetModel();
+	}
+}
+
+void SuiteModel::updateData()
+{
+	if(realData_ && data_ &&
+	 !data_->loadedSameAs(realData_->loaded()))
+	{
+		beginResetModel();
+		data_->setLoaded(realData_->loaded());
+		endResetModel();
+	}
 }
 
 void SuiteModel::reloadData()
@@ -47,7 +96,6 @@ void SuiteModel::reloadData()
 	beginResetModel();
 	endResetModel();
 }
-
 
 bool SuiteModel::hasData() const
 {
@@ -123,19 +171,18 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 		if(index.column()==0)
 			return (data_->items().at(row).filtered_)?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
 	}
-	/*else if(role == Qt::ForegroundRole)
+	else if(role == Qt::ForegroundRole)
 	{
-		if(data_->isEnabled())
+		if(!data_->isEnabled())
 		{
 			return QVariant();
 		}
-		else
+		else if(index.column() == 1)
 		{
-			return QColor(200,200,200);
+			return (data_->items().at(row).present_)?presentCol_:notPresentCol_;
 		}
-	}*/
-
-
+		return QVariant();
+	}
 
 	return QVariant();
 }
@@ -168,7 +215,7 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    		switch ( section )
    		{
    		case 0: return tr("Suite");
-   		case 1: return tr("Load status");
+   		case 1: return tr("Status on server");
    		default: return QVariant();
    		}
    	}
@@ -176,8 +223,8 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    	{
    		switch ( section )
    		{
-   		case 0: return tr("Suite name");
-   		case 1: return tr("Indicates if the suite is <b>loaded</b> to the server or not");
+   		case 0: return tr("Suite filter status");
+   		case 1: return tr("Indicates if the suite is currently <b>loaded</b> on the server");
    		default: return QVariant();
    		}
    	}

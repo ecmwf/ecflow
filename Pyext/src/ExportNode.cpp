@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #85 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -97,13 +97,11 @@ std::string get_state_change_time(node_ptr self,const std::string& format)
 }
 
 node_ptr add_defstatus(node_ptr self,DState::State s)      { self->addDefStatus(s); return self; }
-
 node_ptr add_repeat_date(node_ptr self,const RepeatDate& d)       { self->addRepeat(d); return self; }
 node_ptr add_repeat_integer(node_ptr self,const RepeatInteger& d) { self->addRepeat(d); return self; }
 node_ptr add_repeat_string(node_ptr self,const RepeatString& d)   { self->addRepeat(d); return self; }
 node_ptr add_repeat_enum(node_ptr self,const RepeatEnumerated& d) { self->addRepeat(d); return self; }
 node_ptr add_repeat_day(node_ptr self,const RepeatDay& d)         { self->addRepeat(d); return self; }
-
 node_ptr add_trigger(node_ptr self,const std::string& expr)      { self->add_trigger(expr); return self; }
 node_ptr add_trigger_expr(node_ptr self,const Expression& expr)  { self->add_trigger_expr(expr); return self; }
 node_ptr add_complete(node_ptr self,const std::string& expr)     { self->add_complete(expr); return self; }
@@ -123,6 +121,65 @@ std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes;
 
 void export_Node()
 {
+   enum_<Flag::Type>("FlagType",
+         "Flags store state associated with a node\n\n"
+         "FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
+         "USER_EDIT     - task\n"
+         "TASK_ABORTED  - task*\n"
+         "EDIT_FAILED   - task*\n"
+         "JOBCMD_FAILED - task*\n"
+         "NO_SCRIPT     - task*\n"
+         "KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+         "MIGRATED      - Node\n"
+         "LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
+         "MESSAGE       - Node\n"
+         "BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
+         "QUEUELIMIT    - Node\n"
+         "WAIT          - task* \n"
+         "LOCKED        - Server\n"
+         "ZOMBIE        - task*\n"
+         "NO_REQUE      - task\n"
+         "NOT_SET\n"
+   )
+         .value("force_abort",  Flag::FORCE_ABORT)
+         .value("user_edit",    Flag::USER_EDIT)
+         .value("task_aborted", Flag::TASK_ABORTED)
+         .value("edit_failed",  Flag::EDIT_FAILED)
+         .value("jobcmd_failed",Flag::JOBCMD_FAILED)
+         .value("no_script",    Flag::NO_SCRIPT)
+         .value("killed",       Flag::KILLED)
+         .value("migrated",     Flag::MIGRATED)
+         .value("late",         Flag::LATE)
+         .value("message",      Flag::MESSAGE)
+         .value("byrule",       Flag::BYRULE)
+         .value("queuelimit",   Flag::QUEUELIMIT)
+         .value("wait",         Flag::WAIT)
+         .value("locked",       Flag::LOCKED)
+         .value("zombie",       Flag::ZOMBIE)
+         .value("no_reque",     Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
+         .value("not_set",      Flag::NOT_SET)
+         ;
+
+   class_<Flag>("Flag",
+         "Represents additional state associated with a Node.\n\n"
+         ,
+         init<>()
+      )
+   .def("__str__",       &Flag::to_string) // __str__
+   .def(self == self )                     // __eq__
+   .def("is_set",        &Flag::is_set,"Queries if a given flag is set")
+   .def("set",           &Flag::set,   "Sets the given flag. Used in test only")
+   .def("clear",         &Flag::clear, "Clear the given flag. Used in test only")
+   .def("reset",         &Flag::reset, "Clears all flags. Used in test only")
+   .def("list",          &Flag::list,  "Returns the list of all flag types. returns FlagTypeVec. Used in test only").staticmethod("list")
+   .def("type_to_string",&Flag::enum_to_string, "Convert type to a string. Used in test only").staticmethod("type_to_string")
+   ;
+
+   class_<std::vector<Flag::Type> >("FlagTypeVec", "Hold a list of flag types")
+   .def(vector_indexing_suite<std::vector<Flag::Type> , true >()) ;
+
+
+
    class_<JobCreationCtrl, boost::noncopyable, job_creation_ctrl_ptr >("JobCreationCtrl",  DefsDoc::jobgenctrl_doc())
    .def("__init__",make_constructor(makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
    .def("set_node_path", &JobCreationCtrl::set_node_path, "The node we want to check job creation for. If no node specified check all tasks")
@@ -247,7 +304,8 @@ void export_Node()
    .def("update_generated_variables", &Node::update_generated_variables)
    .def("get_generated_variables", &Node::gen_variables, "returns a list of generated variables. Use ecflow.VariableList as return argument")
    .def("is_suspended",     &Node::isSuspended, "Returns true if the :term:`node` is in a :term:`suspended` state")
-   .def("find_variable",    &Node::findVariable,           return_value_policy<copy_const_reference>(), "Find :term:`variable` on the node only.  Returns a object")
+   .def("find_variable",    &Node::findVariable,           return_value_policy<copy_const_reference>(), "Find user variable on the node only.  Returns a object")
+   .def("find_parent_variable",&Node::find_parent_variable,return_value_policy<copy_const_reference>(), "Find user variable variable up the parent hierarchy.  Returns a object")
    .def("find_meter",       &Node::findMeter,              return_value_policy<copy_const_reference>(), "Find the :term:`meter` on the node only. Returns a object")
    .def("find_event",       &Node::findEventByNameOrNumber,return_value_policy<copy_const_reference>(), "Find the :term:`event` on the node only. Returns a object")
    .def("find_label",       &Node::find_label,             return_value_policy<copy_const_reference>(), "Find the :term:`label` on the node only. Returns a object")
@@ -265,6 +323,7 @@ void export_Node()
    .def("get_defs",         get_defs,   return_internal_reference<>() )
    .def("get_parent",       &Node::parent, return_internal_reference<>() )
    .def("get_all_nodes",    &get_all_nodes,"Returns all the child nodes")
+   .def("get_flag",         &Node::get_flag,return_value_policy<copy_const_reference>(),"Return additional state associated with a node.")
    .add_property("meters",    boost::python::range( &Node::meter_begin,    &Node::meter_end) ,  "Returns a list of :term:`meter` s")
    .add_property("events",    boost::python::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of :term:`event` s")
    .add_property("variables", boost::python::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined :term:`variable` s" )

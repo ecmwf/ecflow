@@ -10,15 +10,21 @@
 
 #include "VInfo.hpp"
 
-#include "VNode.hpp"
-#include "Suite.hpp"
-
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VAttribute.hpp"
-#include "VNState.hpp"
-#include "VSState.hpp"
+#include "VAttributeType.hpp"
+#include "VNode.hpp"
+//#include "VNState.hpp"
+//#include "VSState.hpp"
+
+#include <boost/lexical_cast.hpp>
+
+#if 0
 
 static std::map<std::string,VInfoAttributeFactory*>* makers = 0;
+
+//#define _UI_VINFO_DEBUG
 
 //========================================
 //
@@ -41,7 +47,7 @@ VInfoAttributeFactory::~VInfoAttributeFactory()
 	// Not called
 }
 
-VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,VNode* node,ServerHandler* server)
+VInfoAttribute* VInfoAttributeFactory::create(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server)
 {
 	std::string name=att->name().toStdString();
 
@@ -55,6 +61,7 @@ VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,VNode
 	return 0;
 }
 
+#endif
 
 //========================================
 //
@@ -75,11 +82,18 @@ VInfo::VInfo(ServerHandler* server,VNode* node) :
 
 VInfo::~VInfo()
 {
-	if(server_)
+#ifdef _UI_VINFO_DEBUG
+    UserMessage::debug("VInfo::~VInfo() -->  \n" + boost::lexical_cast<std::string>(this));
+#endif
+    if(server_)
 		server_->removeServerObserver(this);
 
 	for(std::vector<VInfoObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 		(*it)->notifyDelete(this);
+
+#ifdef _UI_VINFO_DEBUG
+    UserMessage::debug("<-- VInfo::~VInfo()");
+#endif
 }
 
 void VInfo::notifyServerDelete(ServerHandler* server)
@@ -106,19 +120,42 @@ void VInfo::dataLost()
 
 void VInfo::notifyBeginServerClear(ServerHandler* server)
 {
-	node_=NULL;
+    node_=NULL;
+}
+
+void VInfo::notifyEndServerClear(ServerHandler* server)
+{
+    node_=NULL;
 }
 
 void VInfo::notifyEndServerScan(ServerHandler* server)
 {
-	if(isNode())
-	{
-		node_=server_->vRoot()->find(nodePath_);
-		if(!node_)
-		{
-			dataLost();
-		}
-	}
+    regainData();
+}
+
+void VInfo::regainData()
+{
+    if(!server_)
+    {
+        dataLost();
+        return;
+    }
+
+    if(node_)
+        return;
+
+    if(isServer())
+    {
+        node_=server_->vRoot();
+    }
+    else
+    {
+        node_=server_->vRoot()->find(nodePath_);
+        if(!node_)
+        {
+            dataLost();
+        }
+    }
 }
 
 void VInfo::addObserver(VInfoObserver* o)
@@ -134,6 +171,46 @@ void VInfo::removeObserver(VInfoObserver* o)
 	if(it != observers_.end())
 		observers_.erase(it);
 }
+
+bool VInfo::operator ==(const VInfo& other)
+{
+    if(server_ == other.server_ && node_ == other.node_ &&
+            nodePath_ == other.nodePath_)
+    {
+        if((!attribute() && other.attribute()) ||
+           (attribute() && !other.attribute()))
+            return false;
+
+        else if(attribute() && other.attribute())
+        {
+            return (attribute()->type() == other.attribute()->type() &&
+                    attribute()->data() == other.attribute()->data());
+        }
+        else
+            return true;
+    }
+    return false;
+}
+
+VInfo_ptr VInfo::createParent(VInfo_ptr info)
+{
+    if(!info)
+        return VInfo_ptr();
+
+    if(info->isServer())
+        return info;
+    else if(info->isNode())
+    {
+        return VInfoServer::create(info->server());
+    }
+    else if(info->isAttribute())
+    {
+        return VInfoNode::create(info->node());
+    }
+
+    return VInfo_ptr();
+}
+
 
 //=========================================
 //
@@ -170,7 +247,7 @@ std::string VInfoServer::name()
 
 std::string VInfoServer::path()
 {
-    return name() + ":/";
+    return name() + "://";
 }
 
 //=========================================
@@ -228,12 +305,17 @@ std::string VInfoNode::path()
 //=========================================
 
 
-VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att,int attIndex) :
+VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* attr) :
 		VInfo(server,node),
-		att_(att),
-		attIndex_(attIndex)
+        attr_(attr)
 {
 
+}
+
+VInfoAttribute::~VInfoAttribute()
+{
+    if(attr_)
+        delete attr_;
 }
 
 void VInfoAttribute::accept(VInfoVisitor* v)
@@ -241,11 +323,35 @@ void VInfoAttribute::accept(VInfoVisitor* v)
 	v->visit(this);
 }
 
-VInfo_ptr VInfoAttribute::create(ServerHandler* server,VNode* node,VAttribute* att,int attIndex)
+VInfo_ptr VInfoAttribute::create(VNode* node,int attIndex)
 {
-	return VInfo_ptr(new VInfoAttribute(server,node,att,attIndex));
+    ServerHandler* server=NULL;
+    VAttribute* att=NULL;
+    if(node)
+    {
+        server=node->server();
+        att=new VAttribute(node,attIndex);
+    }
+
+    return VInfo_ptr(new VInfoAttribute(server,node,att));
 }
 
+std::string VInfoAttribute::path()
+{
+    std::string p;
+    if(server_)
+       p=server_->name();
+
+    if(node_ && node_->node())
+        p+=":/" + node_->absNodePath();
+
+    return p;
+}
+
+std::string VInfoAttribute::name()
+{
+    return (attr_)?attr_->strName():std::string();
+}
 
 
 /*

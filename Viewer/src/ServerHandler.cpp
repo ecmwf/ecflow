@@ -26,11 +26,13 @@
 #include "ServerDefsAccess.hpp"
 #include "ServerObserver.hpp"
 #include "SuiteFilter.hpp"
+#include "UpdateTimer.hpp"
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
 #include "VTaskObserver.hpp"
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QMetaType>
 
@@ -43,8 +45,10 @@
 #include <boost/asio/ip/host_name.hpp>
 
 std::vector<ServerHandler*> ServerHandler::servers_;
-std::map<std::string, std::string> ServerHandler::commands_;
 std::string ServerHandler::localHostName_;
+
+//#define __UI_SERVEROBSERVER_DEBUG
+#define __UI_SERVERUPDATE_DEBUG
 
 ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
    name_(name),
@@ -57,7 +61,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    activity_(NoActivity),
    connectState_(new ConnectState()),
    suiteFilter_(new SuiteFilter()),
-   conf_(0)
+   conf_(0),
+   prevServerState_(SState::RUNNING)
 {
 	if(localHostName_.empty())
 	{
@@ -80,7 +85,9 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//Connect up the timer for refreshing the server info. The timer has not
 	//started yet.
-	connect(&refreshTimer_, SIGNAL(timeout()),
+
+    refreshTimer_=new UpdateTimer(this);
+    connect(refreshTimer_, SIGNAL(timeout()),
 			this, SLOT(refreshServerInfo()));
 
 
@@ -140,7 +147,7 @@ ServerHandler::~ServerHandler()
 	saveConf();
 
 	//Notify the observers
-	broadcast(&ServerObserver::notifyServerDelete);
+    broadcast(&ServerObserver::notifyServerDelete);
 
 	//The queue must be deleted before the client, since the thread might
 	//be running a job on the client!!
@@ -163,39 +170,104 @@ ServerHandler::~ServerHandler()
 	delete conf_;
 }
 
+int ServerHandler::secsSinceLastRefresh() const
+{
+    return static_cast<int>(lastRefresh_.secsTo(QDateTime::currentDateTime()));
+}
+
+int ServerHandler::secsTillNextRefresh() const
+{
+     if(refreshTimer_->isActive())
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+         return refreshTimer_->remainingTime()/1000;
+#else
+         return 0;
+#endif
+     return -1;
+}
+
 void ServerHandler::stopRefreshTimer()
 {
-	refreshTimer_.stop();
+    refreshTimer_->stop();
+#ifdef __UI_SERVERUPDATE_DEBUG
+    UserMessage::debug("stopRefreshTimer -->");
+#endif
 }
 
 void ServerHandler::startRefreshTimer()
 {
-	//If we are not connected to the server the
+    UserMessage::debug("startRefreshTimer -->");
+
+    if(!conf_->boolValue(VServerSettings::AutoUpdate))
+    {
+        return;
+    }
+
+    //If we are not connected to the server the
 	//timer should not run.
 	if(connectState_->state() == ConnectState::Disconnected)
 		return;
 
-	if(!refreshTimer_.isActive())
+    if(!refreshTimer_->isActive())
 	{
-		refreshTimer_.setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
-		refreshTimer_.start();
+        refreshTimer_->setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
+        refreshTimer_->start();
 	}
+
+#ifdef __UI_SERVERUPDATE_DEBUG
+    UserMessage::debug("startRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+#endif
 }
 
 void ServerHandler::updateRefreshTimer()
 {
-	//If we are not connected to the server the
+   UserMessage::debug("updateRefreshTimer -->");
+
+   if(!conf_->boolValue(VServerSettings::AutoUpdate))
+    {
+        stopRefreshTimer();
+        return;
+    }
+
+    //If we are not connected to the server the
 	//timer should not run.
 	if(connectState_->state() == ConnectState::Disconnected)
 		return;
 
-	if(refreshTimer_.isActive())
+    if(refreshTimer_->isActive())
 	{
-		refreshTimer_.stop();
-		refreshTimer_.setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
-		refreshTimer_.start();
+        refreshTimer_->stop();
+        refreshTimer_->setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
+        refreshTimer_->start();
 	}
+
+#ifdef __UI_SERVERUPDATE_DEBUG
+    UserMessage::debug("updateRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+#endif
+
 }
+
+void ServerHandler::driftRefreshTimer()
+{
+    if(!conf_->boolValue(VServerSettings::AutoUpdate))
+    {
+        return;
+    }
+
+    //We increase the update frequency
+    if(activity_ != LoadActivity &&
+       conf_->boolValue(VServerSettings::AdaptiveUpdate))
+    {
+        refreshTimer_->drift(conf_->intValue(VServerSettings::AdaptiveUpdateIncrement),
+                              conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
+    }
+
+#ifdef __UI_SERVERUPDATE_DEBUG
+    UserMessage::debug("driftRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+#endif
+
+}
+
 
 void ServerHandler::setActivity(Activity ac)
 {
@@ -220,49 +292,84 @@ void ServerHandler::removeServer(ServerHandler* server)
 	}
 }
 
+//This function can be called many times so we need to avoid locking the mutex.
 SState::State ServerHandler::serverState()
 {
+	SState::State state;
 	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
-		return SState::RUNNING;
-
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if(defs != NULL)
 	{
-		ServerState& st=defs->set_server();
-		return st.get_state();
+		prevServerState_= SState::RUNNING;
+
 	}
-	return SState::RUNNING;
+	//If we are here we can be sure that the defs pointer is not being deleted!! We
+	//access it without locking the mutex!!!
+	else
+	{
+		//If get the defs can be 100% sure that it is not being deleted!! So we can
+		//access it without locking the mutex!!!
+		defs_ptr d=safelyAccessSimpleDefsMembers();
+		if(d && d.get())
+		{
+			prevServerState_= d->set_server().get_state();
+			return prevServerState_;
+		}
+	}
+
+	return prevServerState_;
 }
 
+//This function can be called many times so we need to avoid locking the mutex.
 NState::State ServerHandler::state(bool& suspended)
 {
 	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
 		return NState::UNKNOWN;
 
 	suspended=false;
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if(defs != NULL)
+
+	defs_ptr d=safelyAccessSimpleDefsMembers();
+	if(d && d.get())
 	{
-		suspended=defs->isSuspended();
-		return defs->state();
+		suspended=d->isSuspended();
+		return d->state();
 	}
+
 	return NState::UNKNOWN;
 }
 
 defs_ptr ServerHandler::defs()
 {
+	defs_ptr null;
+
 	if(client_)
 	{
 		return client_->defs();
 	}
 	else
 	{
-		defs_ptr null;
 		return null;
 	}
 }
+
+defs_ptr ServerHandler::safelyAccessSimpleDefsMembers()
+{
+	defs_ptr null;
+
+	//The defs might be deleted during reset so it cannot be accessed.
+	if(activity_ == LoadActivity)
+	{
+		return null;
+	}
+	//Otherwise it is safe to access certain non-vector members
+	else if(client_)
+	{
+		return client_->defs();
+	}
+	else
+	{
+		return null;
+	}
+}
+
 
 void ServerHandler::errorMessage(std::string message)
 {
@@ -313,6 +420,7 @@ void ServerHandler::run(VTask_ptr task)
 	case VTask::ScriptPreprocTask:
 	case VTask::ScriptEditTask:
 	case VTask::ScriptSubmitTask:
+	case VTask::SuiteListTask:
 	case VTask::ZombieListTask:
 		comQueue_->addTask(task);
 		break;
@@ -360,6 +468,7 @@ void ServerHandler::manual(VTask_ptr task)
 	comQueue_->addTask(task);
 }
 
+//The user initiated a refresh
 void ServerHandler::refresh()
 {
 	//We add and refresh task to the queue. On startup this function can be called
@@ -367,14 +476,34 @@ void ServerHandler::refresh()
 	if(comQueue_)
 	{
 		comQueue_->addNewsTask();
+        lastRefresh_=QDateTime::currentDateTime();
 	}
+
+    //Reset the timer to its original value (i.e. remove the drift)
+    updateRefreshTimer();
+}
+
+
+//The user initiated a refresh
+void ServerHandler::refreshInternal()
+{
+    //We add and refresh task to the queue. On startup this function can be called
+    //before the comQueue_ was created so we need to check if it exists.
+    if(comQueue_)
+    {
+        comQueue_->addNewsTask();
+        lastRefresh_=QDateTime::currentDateTime();
+    }
 }
 
 //This slot is called by the timer regularly to get news from the server.
 void ServerHandler::refreshServerInfo()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("auto refreshing server info for ") + name());
-	refresh();
+    refreshInternal();
+
+    //We reduce the update frequency
+    driftRefreshTimer();
 }
 
 std::string ServerHandler::commandToString(const std::vector<std::string>& cmd)
@@ -384,7 +513,7 @@ std::string ServerHandler::commandToString(const std::vector<std::string>& cmd)
 
 //Send a command to a server. The command is specified as a string vector, while the node or server for that
 //the command will be applied is specified in a VInfo object.
-void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, bool resolve)
+void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd)
 {
 	std::vector<std::string> realCommand=cmd;
 
@@ -397,7 +526,7 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, 
 		std::string nodeName;
 		ServerHandler* serverHandler = info->server();
 
-		if(info->isNode())
+        if(info->isNode() || info->isAttribute())
 		{
 			nodeFullName = info->node()->node()->absNodePath();
 			nodeName = info->node()->node()->name();
@@ -439,15 +568,9 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, 
 //Send the same command for a list of objects (nodes/servers) specified in a VInfo vector.
 //The command is specified as a string.
 
-void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool resolve)
+void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
 {
-	std::string realCommand;
-
-	// is this a shortcut name for a command, or the actual command itself?
-	if (resolve)
-		realCommand = resolveServerCommand(cmd);
-	else
-		realCommand = cmd;
+	std::string realCommand(cmd);
 
 	std::vector<ServerHandler *> targetServers;
 
@@ -457,30 +580,72 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 
 		std::map<ServerHandler*,std::string> targetNodeNames;
 		std::map<ServerHandler*,std::string> targetNodeFullNames;
+        std::map<ServerHandler*,std::string> targetParentFullNames;
+
 
 		//Figure out what objects (node/server) the command should be applied to
 		for(int i=0; i < info.size(); i++)
 		{
 			std::string nodeFullName;
-			std::string nodeName;
+            std::string nodeName;
+            std::string parentFullName;
+
+            if(realCommand.find("<node_name>") != std::string::npos)
+            {
+               nodeName=info[i]->name();
+            }
+
+            if(realCommand.find("<full_name>") != std::string::npos)
+            {
+               if(info[i]->isNode())
+                   nodeFullName = info[i]->node()->absNodePath();
+               else if(info[i]->isServer())
+                   info[i]->server()->longName();
+               else if(info[i]->isAttribute())
+                   parentFullName = info[i]->node()->absNodePath();
+            }
+
+            if(realCommand.find("<parent_name>") != std::string::npos)
+            {
+               if(info[i]->isNode())
+               {
+                   if(VNode *p=info[i]->node()->parent())
+                       parentFullName = p->absNodePath();
+               }
+               else if(info[i]->isAttribute())
+                   parentFullName = info[i]->node()->absNodePath();
+            }
+
+#if 0
+            nodeName = info[i]->name();
 
 			//Get the name
 			if(info[i]->isNode())
 			{
-				nodeName     = info[i]->node()->node()->name();
-				nodeFullName = info[i]->node()->node()->absNodePath();
-				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
+                //nodeName     = info[i]->name();
+                nodeFullName = info[i]->node()->absNodePath();
+                if(realCommand.
+
+                parentFullName = info[i]->node()->parent()->absNodePath();
+                //UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
 			}
 			else if(info[i]->isServer())
-			{
-				nodeName     = info[i]->server()->name();
+			{               
 				nodeFullName = info[i]->server()->longName();
 				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 			}
+            else if(info[i]->isAttribute())
+            {
+                nodeFullName = nodeName;
+                parentFullName = info[i]->node()->absNodePath();
+                //UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
+            }
+#endif
 
 			//Storre the names per target servers
 			targetNodeNames[info[i]->server()] += " " + nodeName;
 			targetNodeFullNames[info[i]->server()] += " " + nodeFullName;
+            targetParentFullNames[info[i]->server()] += " " + parentFullName;
 
 			//info[i]->server()->targetNodeNames_     += " " + nodeName;      // build up the list of nodes for each server
 			//info[i]->server()->targetNodeFullNames_ += " " + nodeFullName;  // build up the list of nodes for each server
@@ -502,16 +667,16 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 
 			// replace placeholders with real node names
 
-			std::string placeholder("<full_name>");
-			//ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeFullNames_);
+			std::string placeholder("<full_name>");			
 			ecf::Str::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
 
-			placeholder = "<node_name>";
-			//ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeNames_);
+			placeholder = "<node_name>";			
 			ecf::Str::replace_all(realCommand, placeholder, targetNodeNames[serverHandler]);
 
-			UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
+            placeholder = "<parent_name>";
+            ecf::Str::replace_all(realCommand, placeholder, targetParentFullNames[serverHandler]);
 
+			UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
 
 			// get the command into the right format by first splitting into tokens
 			// and then converting to argc, argv format
@@ -537,7 +702,7 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 //Send the same command for a list of nodes specified by their paths.
 //The command is specified as a string.
 
-void ServerHandler::command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd, bool resolve)
+void ServerHandler::command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd)
 {
 	std::vector<std::string> realCommand=cmd;
 
@@ -549,7 +714,12 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 
 		for(unsigned int i=0; i < fullPaths.size(); ++i)
 		{
-			fullNameStr+= " " +  fullPaths[i];
+			if(i>0)
+			{
+				fullNameStr+= " ";
+			}
+
+			fullNameStr+=fullPaths[i];
 		}
 
 		//Replace placeholders with real node names
@@ -570,30 +740,6 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 	}
 }
 
-void ServerHandler::addServerCommand(const std::string &name, const std::string& command)
-{
-	commands_[name] = command;
-}
-
-std::string ServerHandler::resolveServerCommand(const std::string &name)
-{
-	std::string realCommand;
-
-	// is this command registered?
-	std::map<std::string,std::string>::iterator it = commands_.find(name);
-
-	if (it != commands_.end())
-	{
-		realCommand = it->second;
-	}
-	else
-	{
-		realCommand = "";
-		UserMessage::message(UserMessage::WARN, true, std::string("Command: ") + name + " is not registered" );
-	}
-
-	return realCommand;
-}
 
 
 //======================================================================================
@@ -680,10 +826,29 @@ void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vecto
 //---------------------------------------------------------------------------
 
 //This slot is called when the Defs change.
-void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> a)
+void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect)
 {
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotDefsChanged"));
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+
+	//Begin update for the VNode
+	VNodeChange change;
+	vRoot_->beginUpdate(aspect);
+
+	//Notify the observers
+	//broadcast(&NodeObserver::notifyBeginNodeChange,vn,aspect,change);
+
+	//End update for the VNode
+	//vRoot_->endUpdate(vn,aspect,change);
+
+	//Notify the observers
+	//broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
+
+	//UserMessage::message(UserMessage::DBG, false," --> Update applied");
+
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
-		(*it)->notifyDefsChanged(this,a);
+		(*it)->notifyDefsChanged(this,aspect);
 }
 
 void ServerHandler::addServerObserver(ServerObserver *obs)
@@ -691,7 +856,10 @@ void ServerHandler::addServerObserver(ServerObserver *obs)
 	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
 	if(it == serverObservers_.end())
 	{
-		serverObservers_.push_back(obs);
+        serverObservers_.push_back(obs);
+#ifdef __UI_SERVEROBSERVER_DEBUG
+        UserMessage::debug("ServerHandler::addServerObserver -->  " + boost::lexical_cast<std::string>(obs));
+#endif
 	}
 }
 
@@ -701,18 +869,29 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 	if(it != serverObservers_.end())
 	{
 		serverObservers_.erase(it);
+#ifdef __UI_SERVEROBSERVER_DEBUG
+        UserMessage::debug("ServerHandler::removeServerObserver --> " + boost::lexical_cast<std::string>(obs));
+#endif
 	}
 }
 
 void ServerHandler::broadcast(SoMethod proc)
 {
-	//When the observers are being notified (in a loop) they might
+    bool checkExistence=true;
+
+    //When the observers are being notified (in a loop) they might
 	//want to remove themselves from the observer list. This will cause a crash. To avoid
 	//this we create a copy of the observers and use it in the notification loop.
 	std::vector<ServerObserver*> sObsCopy=serverObservers_;
 
 	for(std::vector<ServerObserver*>::const_iterator it=sObsCopy.begin(); it != sObsCopy.end(); ++it)
-		((*it)->*proc)(this);
+	{
+		//We need to check if the given observer is still in the original list. When we delete the server, due to
+		//dependencies it is possible that the observer is already deleted at this point.
+		if(!checkExistence || std::find(serverObservers_.begin(),serverObservers_.end(),*it) != serverObservers_.end())
+			((*it)->*proc)(this);
+	}
+
 }
 
 void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)
@@ -780,7 +959,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 					}
 					else
 					{
-						comQueue_->addSyncTask(); //comThread()->sendCommand(this, client_, ServerComThread::SYNC);
+						comQueue_->addSyncTask();
 					}
 					break;
 				}
@@ -819,9 +998,8 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				broadcast(&ServerObserver::notifyEndServerSync);
 			}
 
-
-			UserMessage::message(UserMessage::DBG, false, std::string(" --> Update suite filter after sync"));
-			comQueue_->addSuiteListTask();
+			//UserMessage::message(UserMessage::DBG, false, std::string(" --> Update suite filter after sync"));
+			//comQueue_->addSuiteListTask();
 
 			break;
 		}
@@ -830,22 +1008,39 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		{
 			//If not yet connected but the sync task was successful
 			resetFinished();
-			comQueue_->addSuiteListTask();
 			break;
 		}
 
 		case VTask::ScriptTask:
 		case VTask::ManualTask:
 		case VTask::HistoryTask:
-		case VTask::JobTask:
-		case VTask::OutputTask:
+		case VTask::JobTask:	
 		{
-			task->reply()->text(serverReply.get_string());
+			task->reply()->fileReadMode(VReply::ServerReadMode);
+            task->reply()->setText(serverReply.get_string());
+            task->reply()->setReadTruncatedTo(truncatedLinesFromServer(task->reply()->text()));
 			task->status(VTask::FINISHED);
 			break;
 		}
 
-		case VTask::MessageTask:
+        case VTask::OutputTask:
+        {
+            task->reply()->fileReadMode(VReply::ServerReadMode);
+
+            std::string err;
+            VFile_ptr f(VFile::create(false));
+            f->setFetchMode(VFile::ServerFetchMode);
+            f->setFetchModeStr("fetched from server " + name());
+            f->setSourcePath(task->reply()->fileName());
+            f->setTruncatedTo(truncatedLinesFromServer(serverReply.get_string()));
+            f->write(serverReply.get_string(),err);
+            task->reply()->tmpFile(f);
+
+            task->status(VTask::FINISHED);
+            break;
+        }
+
+        case VTask::MessageTask:
 		{
 			task->reply()->setTextVec(serverReply.get_string_vec());
 			task->status(VTask::FINISHED);
@@ -883,7 +1078,9 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
 		case VTask::SuiteListTask:
 		{
-			updateSuiteFilter(serverReply.get_string_vec());
+			//Update the suite filter with the list of suites actually loaded onto the server.
+			//If the suitefilter is enabled this might have only a subset of it in our tree.
+			updateSuiteFilterWithLoaded(serverReply.get_string_vec());
 			break;
 		}
 
@@ -983,7 +1180,7 @@ void ServerHandler::connectServer()
 		startRefreshTimer();
 
 		//Try to get the news
-		refresh();
+        refreshInternal();
 
 		//TODO: attach the observers!!!!
 	}
@@ -993,36 +1190,31 @@ void ServerHandler::reset()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::reset"));
 
-	//We are in the middle of a reset
-	if(comQueue_->state() == ServerComQueue::ResetState)
-	{
-		UserMessage::message(UserMessage::DBG, false, " --> skip reset - it is already running");
-		return;
-	}
-
 	//---------------------------------
 	// First part of reset: clearing
 	//---------------------------------
 
-	//Stop the timer
-	stopRefreshTimer();
+	if(comQueue_->prepareReset())
+	{
+		//Stop the timer
+		stopRefreshTimer();
 
-	//A safety measure
-	comQueue_->suspend();
+		// First part of reset: clear the tree
+		clearTree();
 
-	//Clear the tree
-	clearTree();
+		// Second part of reset: loading
 
-	//--------------------------------------
-	// Second part of reset: loading
-	//--------------------------------------
+		//Indicate that we reload the defs
+		setActivity(LoadActivity);
 
-	//Indicate that we reload the defs
-	setActivity(LoadActivity);
-
-	//NOTE: at this point the queue is not running but reset() will start it.
-	//While the queue is in reset mode it does not accept tasks.
-	comQueue_->reset();
+		//NOTE: at this point the queue is not running but reset() will start it.
+		//While the queue is in reset mode it does not accept tasks.
+		comQueue_->reset();
+	}
+	else
+	{
+		UserMessage::message(UserMessage::DBG, false, " --> skip reset");
+	}
 }
 
 //The reset was successful
@@ -1040,7 +1232,6 @@ void ServerHandler::resetFinished()
 		{
 			ServerState& st=defs->set_server();
 			st.hostPort(std::make_pair(host_,port_));
-			st.add_or_update_user_variables("nameInViewer",name_);
 		}
 	}
 
@@ -1057,10 +1248,13 @@ void ServerHandler::resetFinished()
 	//Finish full scan
 	vRoot_->endScan();
 
-	assert(change.suiteNum_ == vRoot_->numOfChildren());
+    //assert(change.suiteNum_ == vRoot_->numOfChildren());
 
 	//Notify the observers that scan has ended
-	broadcast(&ServerObserver::notifyEndServerScan);
+    broadcast(&ServerObserver::notifyEndServerScan);
+
+	//The suites might have been changed
+	updateSuiteFilter();
 
 	//Restart the timer
 	startRefreshTimer();
@@ -1079,6 +1273,13 @@ void ServerHandler::resetFailed(const std::string& errMsg)
 {
 	//This status is indicated by the connectStat_. Each object needs to be aware of it
 	//and do its tasks accordingly.
+
+    //Create an object to inform the observers about the change
+    VServerChange change;
+    //Notify the observers that the scan has started
+    broadcast(&ServerObserver::notifyBeginServerScan,change);
+    //Notify the observers that scan has ended
+    broadcast(&ServerObserver::notifyEndServerScan);
 
 	connectState_->state(ConnectState::Lost);
 	connectState_->errorMessage(errMsg);
@@ -1099,13 +1300,13 @@ void ServerHandler::clearTree()
 	if(!vRoot_->isEmpty())
 	{
 		//Notify observers that the clear is about to begin
-		broadcast(&ServerObserver::notifyBeginServerClear);
+        broadcast(&ServerObserver::notifyBeginServerClear);
 
 		//Clear vnode
 		vRoot_->clear();
 
 		//Notify observers that the clear ended
-		broadcast(&ServerObserver::notifyEndServerClear);
+        broadcast(&ServerObserver::notifyEndServerClear);
 	}
 
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::clearTree --  end"));
@@ -1126,7 +1327,7 @@ void ServerHandler::rescanTree()
 	stopRefreshTimer();
 
 	//Stop the queue as a safety measure: we do not want any changes during the rescan
-	comQueue_->suspend();
+	comQueue_->suspend(false);
 
 	//clear the tree
 	clearTree();
@@ -1152,10 +1353,13 @@ void ServerHandler::rescanTree()
 	vRoot_->endScan();
 
 	//Notify the observers that scan has ended
-	broadcast(&ServerObserver::notifyEndServerScan);
+    broadcast(&ServerObserver::notifyEndServerScan);
 
 	//Restart the queue
 	comQueue_->start();
+
+	//The suites might have been changed
+	updateSuiteFilter();
 
 	//Start the timer
 	startRefreshTimer();
@@ -1184,34 +1388,48 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 			reset();
 		}
 	}
-
 }
-//This is called internally after an update!!!
-void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuites)
+
+//Update the suite filter with the list of suites actually loaded onto the server.
+//If the suitefilter is enabled this might have only a subset of it in our tree.
+void ServerHandler::updateSuiteFilterWithLoaded(const std::vector<std::string>& loadedSuites)
 {
-	//std::vector<std::string> defSuites;
-	//vRoot_->suites(defSuites);
 	suiteFilter_->setLoaded(loadedSuites);
-	broadcast(&ServerObserver::notifyServerSuiteFilterChanged);
-
-	//if(suiteFilter_->isEnabled())
-	//{
-	/*	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-		defs_ptr defs = defsAccess.defs();
-		if(defs != NULL)
-		{
-			std::vector<std::string> suites;
-			const std::vector<suite_ptr>& suitVec = defs->suiteVec();
-			for(std::vector<suite_ptr>::const_iterator it=suitVec.begin(); it != suitVec.end(); it++)
-			{
-				suites.push_back((*it)->name());
-			}
-
-			suiteFilter_->current(suites);
-		}
-	//}*/
-
 }
+
+//Update the suite filter with the list of suites stored in the defs (in the tree). It only
+//makes sense if the filter is disabled since in this case the defs stores all the loaded servers.
+void ServerHandler::updateSuiteFilterWithDefs()
+{
+	if(suiteFilter_->isEnabled())
+		return;
+
+	std::vector<std::string> defSuites;
+	vRoot_->suites(defSuites);
+	suiteFilter_->setLoaded(defSuites);
+}
+
+//Only called internally after reset or serverscan!!
+void ServerHandler::updateSuiteFilter()
+{
+	bool hasObserver=suiteFilter_->hasObserver();
+
+	//We only fetch the full list of loaded suites from the server
+	//via the thread when the suiteFilter is observerved and it is
+	//enabled!
+	if(hasObserver && suiteFilter_->isEnabled())
+	{
+		//This will call updateSuiteFilterWithLoaded()
+		comQueue_->addSuiteListTask();
+	}
+	else
+	{
+		std::vector<std::string> defSuites;
+		vRoot_->suites(defSuites);
+		suiteFilter_->setLoaded(defSuites);
+	}
+}
+
 
 bool ServerHandler::readFromDisk() const
 {
@@ -1222,7 +1440,10 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 {
 	switch(par)
 	{
-	case VServerSettings::UpdateRate:
+    case VServerSettings::AutoUpdate:
+        updateRefreshTimer();
+        break;
+    case VServerSettings::UpdateRate:
 		updateRefreshTimer();
 		break;
 	case VServerSettings::NotifyAbortedEnabled:
@@ -1275,6 +1496,38 @@ void ServerHandler::loadConf()
 {
 	//This will call confChanged for any non-default settings
 	conf_->loadSettings();
+}
+
+//--------------------------------------------
+// Other
+//--------------------------------------------
+
+void ServerHandler::searchBegan()
+{
+	UserMessage::message(UserMessage::DBG, false,"(" + name() + ") ServerHandler::searchBegan -- suspend queue");
+	comQueue_->suspend(true);
+}
+
+void ServerHandler::searchFinished()
+{
+	UserMessage::message(UserMessage::DBG, false, "(" + name() + ") ServerHandler::searchFinished -- start queue");
+	comQueue_->start();
+
+}
+
+int ServerHandler::truncatedLinesFromServer(const std::string& txt) const
+{
+    //if the text is truncated the following line is added to the bottom of it:
+    //# >>>>>>>> File truncated down to 15. Truncated from the end of file <<<<<<<<<
+    //We search for this string and if truncation did happen we indicate it in the reply
+    size_t txtSize=txt.size();
+    if(txt.find(">> File truncated down to",
+        (txtSize > 200)?(txtSize-100):0) != std::string::npos)
+    {
+        return conf_->intValue(VServerSettings::MaxOutputFileLines);
+    }
+
+    return -1;
 }
 
 //--------------------------------------------------------------

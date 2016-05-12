@@ -15,6 +15,8 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include "UserMessage.hpp"
+
 TabWidget::TabWidget(QWidget* parent) :
 		QWidget(parent),
 		beingCleared_(false)
@@ -262,8 +264,6 @@ void TabWidget::checkTabStatus()
 		bar_->setTabsClosable(false);
 		addTb_->hide();
 	}
-
-	qDebug() << "current" << bar_->currentIndex();
 
 	for (int i = 0; i < bar_->count(); i++)
 	{

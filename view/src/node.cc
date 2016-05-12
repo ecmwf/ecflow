@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #49 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -453,7 +453,8 @@ const std::string& node::name() const
 #ifdef BRIDGE
   if (tree_) { return name_; }
 #endif
-  if (owner_) return owner_->name();
+  if (owner_) 
+    return owner_->name();
   return ecf_node::no_owner();
 }
 
@@ -462,7 +463,8 @@ const std::string& node::full_name() const
 #ifdef BRIDGE
   if (tree_) { return full_name_; }
 #endif
-  if (owner_) return owner_->full_name();
+  if (owner_) 
+    return owner_->full_name();
   return ecf_node::no_owner();
 }
 
@@ -471,7 +473,8 @@ const std::string& node::net_name() const
 #ifdef BRIDGE
   if (tree_) { static std::string fn = sms_node_full_name(tree_); return fn; }
 #endif
-  if (owner_) return owner_->full_name();
+  if (owner_) 
+    return owner_->full_name();
   return ecf_node::no_owner();
 }
 
@@ -492,11 +495,11 @@ void node::search(node_lister& s)
   }
 }
 
-std::string node::variable(const std::string& name, bool subsitute)
+std::string node::variable(const std::string& name, bool substitute)
 {
   for (node* run = kids(); run; run = run->next())
     if (run->type() == NODE_VARIABLE && run->name() == name) {
-      return ((variable_node*) run)->get_var(subsitute);
+      return ((variable_node*) run)->get_var(substitute);
     }
   
   return ecf_node::none();

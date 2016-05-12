@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #31 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -246,7 +246,7 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
 						boost::program_options::variables_map& vm,
 						AbstractClientEnv*  ac ) const
 {
-	if (ac->debug()) cout << "ClientHandleCmd::create api = '" << api_ << "'.\n";
+	if (ac->debug()) cout << "  ClientHandleCmd::create api = '" << api_ << "'.\n";
 
 	switch (api_) {
 

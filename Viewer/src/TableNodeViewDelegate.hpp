@@ -26,6 +26,7 @@ class ModelColumn;
 
 class TableNodeViewDelegate : public NodeViewDelegate
 {
+ Q_OBJECT
 public:
     explicit TableNodeViewDelegate(QWidget *parent=0);
     ~TableNodeViewDelegate();
@@ -33,20 +34,17 @@ public:
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 
+Q_SIGNALS:
+    void sizeHintChangedGlobal();
+
 protected:
     void updateSettings();
 
     void renderNode(QPainter *painter,const QModelIndex& index,
             							const QStyleOptionViewItemV4& option,QString text) const;
 
-    void renderStatus(QPainter *painter,const QModelIndex& index,
-                            const QStyleOptionViewItemV4& option) const;
-
-
-
     ModelColumn* columns_;
     QPen borderPen_;
-
 };
 
 #endif // TABLENODEVIEWDELEGATE_HPP

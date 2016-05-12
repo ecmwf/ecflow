@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #23 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,7 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/bind.hpp>
 #include "DefsDelta.hpp"
-#include "ChangeMgrSingleton.hpp"
 using namespace std;
 
 //#define DEBUG_MEMENTO 1
@@ -37,15 +36,14 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
 {
 	if (!client_def.get()) return false;
 
-   if (ChangeMgrSingleton::exists() && ChangeMgrSingleton::instance()->in_notification()) {
+   if (client_def->in_notification()) {
       // For debug: place a break point here: It appear as Change manager observers, has called another client to server command
-      std::cout << "ecflow:ClientInvoker::incremental_sync() called in the middle of ChangeMgrSingleton::notification.\n";
+      std::cout << "ecflow:ClientInvoker::incremental_sync() called in the middle of notification(server->client sync)\n";
       std::cout << "It appears that change observer have called *ANOTHER* client->server command in the middle synchronising client definition\n";
    }
 
-   /// - Sets notification flag, so that observers can also query if they are in
-   ///   the middle of notification.
-   ChangeMgrStartNotification start_notification;
+   /// - Sets notification flag, so that observers can also query if they are in the middle of notification.
+   ChangeStartNotification start_notification(client_def);
 
 	// Update the client defs with latest server *handle* based state change/modify number
 	// to keep pace with the state changes. Passed back later on, to get further changes
@@ -68,7 +66,9 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
 	if ( compound_mementos_.size() != changed_nodes.size()) {
 	   std::cout << "DefsDelta::incremental_sync: ERROR **** compound_mementos_.size() " << compound_mementos_.size() << "  changed_nodes.size(): " << changed_nodes.size() << " differ.\n";
 	}
-	// assert( compound_mementos_.size() == changed_nodes.size()); // FIXME restore for long term GUI test
+#ifdef DEBUG
+	assert( compound_mementos_.size() == changed_nodes.size()); // FIXME restore for long term GUI test
+#endif
  
 	// return true if there were any changes made
 	return !compound_mementos_.empty();

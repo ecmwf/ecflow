@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #33 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -305,7 +305,7 @@ void Client::stop()
 /// Handle completion of a read operation.
 bool Client::handle_server_response( ServerReply& server_reply, bool debug ) const
 {
-	if (debug) std::cout << "   Client::handle_server_response" << std::endl;
+	if (debug) std::cout << "  Client::handle_server_response" << std::endl;
 	server_reply.set_host_port(host_,port_); // client context, needed by some commands, ie. SServerLoadCmd
 	return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
 }

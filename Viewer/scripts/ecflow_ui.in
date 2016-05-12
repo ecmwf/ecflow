@@ -1,0 +1,242 @@
+#!/bin/bash
+
+#============================================================================
+# Copyright 2016 ECMWF.
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#============================================================================
+
+
+# Environment variables from the configuration step
+ECFLOWUI_BT=@UI_BACKTRACE@
+ECFLOWUI_BT_EMAIL_ADDRESSES=@UI_BACKTRACE_EMAIL_ADDRESSES@
+ECFLOWUI_VERSION=@ECFLOW_VERSION_STR@
+ECFLOWUI_INSTALLDIR=@CMAKE_INSTALL_PREFIX@
+
+# ----------------------------------------------------------
+# Clean up the tmp directory at the end or on error
+#-----------------------------------------------------------
+cleanup(){
+    status=$?
+    trap "" EXIT ERR
+
+    # restore stdout/stderr
+    if [ x$ECFUI_SLOG != xyes ]
+    then
+        exec 1>&5
+        exec 2>&6
+    fi
+
+
+    if [ "$status" -eq "0" ]
+    then
+        echo "$(basename $0): $1 (OK) (line $2), exit status $status, starting 'cleanup'"
+    else
+        echo "$(basename $0): $1 on ERROR (line $2), exit status $status, starting 'cleanup'"
+
+        if [ -e $ECFLOWUI_LOGFILE ] ; then
+
+            TAILNUM=50
+
+            if [ $ECFLOWUI_BT != "no" ] ; then
+                # find the backtrace tag if there
+                btline=$(grep -n "Backtrace:" $ECFLOWUI_LOGFILE | cut -f1 --delimiter=':')
+                gret=$?
+                if [ "$gret" = "0" -a "x$btline" != "x" ] ; then
+                    nlines=$(wc -l $ECFLOWUI_LOGFILE | cut -f1 --delimiter=' ')
+                    TAILNUM=$(expr $nlines - $btline + 100)
+                fi
+            fi
+
+            # Logic: ECFLOWUI_BT_EMAIL_ADDRESSES is not set, then the log/backtrace
+            # will go to stdout; otherwise it will be e-mailed to the
+            # addresses instead (the user will not see the backtrace).
+
+            if [ $ECFLOWUI_BT_EMAIL_ADDRESSES != "x" ] ; then
+                EFLOWUI_LOGTAIL="${ECFLOWUI_LOGFILE}.tail"
+                ecfuimsg="ecFlowUI backtrace from user $USER"
+                echo "Sending crash report by e-mail..."
+                echo "user/host          : $USER/$HOST"          >  $EFLOWUI_LOGTAIL
+                echo "ecflow version     : $ECFLOWUI_VERSION"    >> $EFLOWUI_LOGTAIL
+                echo "ecflow install dir : $ECFLOWUI_INSTALLDIR" >> $EFLOWUI_LOGTAIL
+                echo "start time         : $ECFLOWUI_STARTTIME"  >> $EFLOWUI_LOGTAIL
+                echo "stop time          : $(date)"              >> $EFLOWUI_LOGTAIL
+                echo ""                                          >> $EFLOWUI_LOGTAIL
+                tail -$TAILNUM $ECFLOWUI_LOGFILE                 >> $EFLOWUI_LOGTAIL
+
+                addr=$(echo $ECFLOWUI_BT_EMAIL_ADDRESSES | sed 's/,/ /g')
+                mail -s "$ecfuimsg"  $addr < $EFLOWUI_LOGTAIL
+                rm -f $EFLOWUI_LOGTAIL
+                echo "Report sent"
+            else
+                echo "Last $TAILNUM lines of log file:"
+                tail -$TAILNUM $ECFLOWUI_LOGFILE
+            fi
+
+        fi
+    fi
+
+
+
+    # remove temporary directory
+    if [ $(echo $ECFLOWUI_TMPDIR | grep -c "/ecflow_ui.") -ge 1 ] ; then
+        rm -Rf $ECFLOWUI_TMPDIR
+    fi
+
+    exit $status
+}
+
+
+
+#-----------------------------------------------------------
+# checkoption()
+# Checks the command-line options
+#-----------------------------------------------------------
+
+checkoption() {
+
+while [ "$1" != "" ]
+do
+	case "$1" in
+
+		-log)
+			ECFUI_SLOG=yes
+			;;
+
+		-slog)
+			ECFUI_SLOG=yes
+			;;
+
+		-s)
+			export ECFUI_SESSION_MANAGER=yes
+			;;
+
+        -h)
+            ECFUI_HELP=yes
+            ;;
+
+	esac
+	shift
+done
+}
+
+
+
+checkoption "$@"
+
+
+
+#-----------------------------------------------------------
+# Help message
+#-----------------------------------------------------------
+
+if [ "x$ECFUI_HELP" != x ]
+then
+
+    cat <<HEND
+EcflowUI
+  Command-line flags:
+    -log : write log messages to standard output
+    -s   : start via the session manager
+    -h   : print this help message
+HEND
+
+    exit 0
+fi
+
+
+
+
+
+#Define tmp root dir
+TMPDIR_ROOT=${TMPDIR:=/tmp}
+
+# check that TMPDIR_ROOT actually exists - we can't run without it
+if [ ! -d $TMPDIR_ROOT ]
+then
+    echo ""
+    echo "  Temporary directory '$TMPDIR_ROOT' does not exist"
+    echo "  ecFlowUI needs this in order to run. Check that environment"
+    echo "  variable \$TMPDIR is set to a valid directory and try again."
+    exit 1
+fi
+
+#Define and create tmp dir
+export ECFLOWUI_TMPDIR=${TMPDIR_ROOT}/ecflow_ui.$$.$LOGNAME
+mkdir -p $ECFLOWUI_TMPDIR
+
+#Check if we could create it
+if [ $? -ne 0 ]
+then
+    echo ""
+    echo "  Temporary directory '$ECFLOWUI_TMPDIR' could not be created."
+    echo "  ecFlowUI needs this in order to run. Check that environment"
+    echo "  variable \$TMPDIR is set to a valid directory and try again."
+    exit 1
+fi
+
+
+# Where to write the log file to
+ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
+
+
+#-----------------------------------------------------------
+# Close tty and redirect stdout to a file?
+#-----------------------------------------------------------
+
+if [ x$ECFUI_SLOG != xyes ]
+then
+    exec  < /dev/null
+    exec 5>&1                 # store for later
+    exec 6>&2                 # store for later 
+    exec 1> $ECFLOWUI_LOGFILE # (restored in cleanup())
+    exec 2>&1                 # redirect stderr to stdout, (restored in cleanup())
+    # note that it seems to be better to do
+    #   exec 2>&1
+    # rather than 
+    #   exec 2> $ECFLOWUI_LOGFILE
+    # because this way we get the stderr at the end rather than the start
+    # due to the difference in flushing behaviours
+fi
+
+
+
+# =============================================================
+# tmp directory cleaned automatically at end or at error.
+# on new platforms check that these signals are valid:
+
+ECFLOWUI_SIGLIST="HUP INT QUIT TERM XCPU  XFSZ"
+#           1   2   3    15   30/24 31/25
+
+trap 'cleanup "EXIT" $LINENO' EXIT
+trap 'cleanup "SIGNAL trap" $LINENO' $ECFLOWUI_SIGLIST
+
+#Figure out the directory of the exe
+EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+
+# note when we started it up
+ECFLOWUI_STARTTIME=$(date)
+
+
+#-----------------------------------------------------------
+# Run the executable
+#-----------------------------------------------------------
+
+exe=${EXE_DIR}/ecflow_ui.x
+
+
+#-----------------------------------------------------------
+# Backtrace report?
+#-----------------------------------------------------------
+
+if [ $ECFLOWUI_BT != "no" ]
+then
+    catchsegv $exe
+else
+    ${exe}
+fi
+

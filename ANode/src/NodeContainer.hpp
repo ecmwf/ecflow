@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #88 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -38,12 +38,12 @@ public:
 	virtual void status();
 	virtual void top_down_why(std::vector<std::string>& theReasonWhy) const;
 	virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const OrderMemento* );
-   void set_memento(const ChildrenMemento* );
+   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const ChildrenMemento*,std::vector<ecf::Aspect::Type>& aspects );
    virtual void order(Node* immediateChild, NOrder::Order);
 
 	virtual bool hasAutoCancel() const;
- 	virtual void calendarChanged(const ecf::Calendar&,std::vector<node_ptr>& auto_cancelled_nodes);
+ 	virtual void calendarChanged(const ecf::Calendar&,std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late);
  	virtual bool resolveDependencies(JobsParam& );
  	virtual bool check(std::string& errorMsg, std::string& warningMsg) const;
 

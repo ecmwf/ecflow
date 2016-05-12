@@ -35,8 +35,10 @@ TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
     //Property
     if(propVec.empty())
     {
-        propVec.push_back("view.tree.font");
-        propVec.push_back("view.tree.displayChildCount");
+        propVec.push_back("view.table.font");
+
+        //Base settings
+        addBaseSettings(propVec);
     }
 
     prop_=new PropertyMapper(propVec,this);
@@ -50,9 +52,21 @@ TableNodeViewDelegate::~TableNodeViewDelegate()
 
 void TableNodeViewDelegate::updateSettings()
 {
+	if(VProperty* p=prop_->find("view.table.font"))
+	{
+		QFont newFont=p->value().value<QFont>();
 
+		if(font_ != newFont)
+	    {
+	    	font_=newFont;
+	    	attrFont_=newFont;
+	    	Q_EMIT sizeHintChangedGlobal();
+	    }
+	}
+
+    //Update the settings handled by the base class
+    updateBaseSettings();
 }
-
 
 void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
@@ -137,6 +151,7 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     {
     	QString text=index.data(Qt::DisplayRole).toString();
     	QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+    	painter->setFont(font_);
     	painter->setPen(Qt::black);
     	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
     }
@@ -157,6 +172,8 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
 void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
         							const QStyleOptionViewItemV4& option,QString text) const
 {
+	bool selected=option.state & QStyle::State_Selected;
+
 	int offset=4;
 
 	QFontMetrics fm(font_);
@@ -164,8 +181,8 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 
 	//The initial filled rect (we will adjust its  width)
 	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
-	if(option.state & QStyle::State_Selected)
-		fillRect.adjust(0,0,0,-0);
+	if(selected)
+		fillRect.adjust(0,0,0,0);
 
 	//The text rectangle
 	QRect textRect = fillRect.adjusted(offset,0,0,0);
@@ -194,7 +211,7 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 			{
 				pixLst << IconProvider::pixmap(id,iconSize_);
 				pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
-				xp+=pixLst.back().width();
+				xp+=pixLst.back().width()+2;
 			}
 		}
 
@@ -214,8 +231,16 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	//Draw text
 	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
 	painter->setPen(fg);
+	painter->setFont(font_);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
+
+	if(selected)
+	{
+		painter->setPen(nodeSelectPen_);
+		QRect selRect=textRect.adjusted(-2,0,2,0);
+		painter->drawRect(selRect);
+	}
 
 	//Draw icons
 	for(int i=0; i < pixLst.count(); i++)
@@ -228,49 +253,3 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 		painter->restore();
 	}
 }
-
-void TableNodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
-                                    const QStyleOptionViewItemV4& option) const
-{
-    int offset=4;
-
-    QFontMetrics fm(font_);
-    int deltaH=(option.rect.height()-(fm.height()+4))/2;
-
-    //The initial filled rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(offset,deltaH,-offset,-deltaH-1);
-    if(option.state & QStyle::State_Selected)
-        fillRect.adjust(0,0,0,-0);
-
-    int currentRight=fillRect.right();
-
-    //The text rectangle
-    QString text=index.data(Qt::DisplayRole).toString();
-    int textWidth=fm.width(text);
-    QRect textRect = fillRect.adjusted(offset,0,0,0);
-    textRect.setWidth(textWidth);
-
-    //Define clipping
-    int rightPos=currentRight+1;
-    const bool setClipRect = false; //rightPos > option.rect.right();
-    if(setClipRect)
-    {
-        painter->save();
-        painter->setClipRect(option.rect);
-    }
-
-    //Fill rect
-    QColor bgCol=index.data(Qt::BackgroundRole).value<QColor>();
-    painter->fillRect(fillRect,bgCol);
-
-    //Draw text
-    painter->setPen(Qt::black);
-    painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-
-    if(setClipRect)
-    {
-        painter->restore();
-    }
-}
-

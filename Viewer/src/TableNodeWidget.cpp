@@ -15,39 +15,42 @@
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
 #include "FilterWidget.hpp"
-#include "NodeFilterModel.hpp"
 #include "NodePathWidget.hpp"
 #include "NodeViewBase.hpp"
 #include "TableFilterWidget.hpp"
 #include "TableNodeModel.hpp"
+#include "TableNodeSortModel.hpp"
 #include "TableNodeView.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
 #include <QHBoxLayout>
 
-TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeWidget(parent)
+TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
+    NodeWidget("table",serverFilter,parent),
+    sortModel_(0)
 {
 	//Init qt-creator form
 	setupUi(this);
 
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
-	filterDef_=new NodeFilterDef(NodeFilterDef::GeneralScope);
+	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::GeneralScope);
 
 	//Create the table model. It uses the datahandler to access the data.
-	model_=new TableNodeModel(servers,filterDef_,this);
+    TableNodeModel* tModel=new TableNodeModel(serverFilter_,filterDef_,this);
+    model_=tModel;
 
 	//Create a filter model for the tree.
-	filterModel_=new NodeFilterModel(model_,this);
+    sortModel_=new TableNodeSortModel(tModel,this);
 
 	//Build the filter widget
-	filterW_->build(filterDef_);
+	filterW_->build(filterDef_,serverFilter_);
 
 	//Create the view
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
-	TableNodeView *tv=new TableNodeView(filterModel_,filterDef_,this);
+    TableNodeView *tv=new TableNodeView(sortModel_,filterDef_,this);
 	hb->addWidget(tv);
 
 	//Store the pointer to the (non-QObject) base class of the view!!!
@@ -59,21 +62,27 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
             this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
 
     connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
-                this,SLOT(popInfoPanel(VInfo_ptr,QString)));
+    	    this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
+
+	connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+			this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
     connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
             view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
 
+    connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
+    		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
 
+#if 0
 	connect(model_,SIGNAL(clearBegun(const VNode*)),
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
 
 	connect(model_,SIGNAL(scanEnded(const VNode*)),
 				view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
+#endif
 
 	connect(model_,SIGNAL(rerender()),
 				view_->realWidget(),SLOT(slotRerender()));
-
 
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state
@@ -100,13 +109,25 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	menuState->setTearOffEnabled(true);
 
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-	stateFilterMenu_=new VParamFilterMenu(menuState,states_,VParamFilterMenu::ColourDecor);
+	stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Status filter",
+			        VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
 
 	//Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
 
 	//Sets the title
 	tw->slotUpdateTitle("<b>Table</b>");
+
+    QList<QAction*> acLst;
+    QAction* acFilterEdit=new QAction(this);
+    acFilterEdit->setIcon(QPixmap(":viewer/filter_edit.svg"));
+    acFilterEdit->setToolTip("Edit filter ...");
+    acLst << acFilterEdit;
+
+    connect(acFilterEdit,SIGNAL(triggered()),
+    		filterW_,SLOT(slotEdit()));
+
+    tw->addActions(acLst);
 }
 
 
@@ -142,12 +163,14 @@ void TableNodeWidget::rerender()
 
 void TableNodeWidget::writeSettings(VSettings* vs)
 {
-	vs->put("type","table");
+	vs->put("type",type_);
 	vs->put("dockId",id_);
 
 	bcWidget_->writeSettings(vs);
 
 	states_->writeSettings(vs);
+	filterDef_->writeSettings(vs);
+
 	//atts_->writeSettings(vs);
 	//icons_->writeSettings(vs);
 }
@@ -155,7 +178,7 @@ void TableNodeWidget::writeSettings(VSettings* vs)
 void TableNodeWidget::readSettings(VSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
-	if(type != "table")
+	if(type != type_)
 		return;
 
 	//This will not emit the changed signal. So the "observers" will
@@ -163,6 +186,7 @@ void TableNodeWidget::readSettings(VSettings* vs)
 	states_->readSettings(vs);
 	//atts_->readSettings(vs);
 	//icons_->readSettings(vs);
+	filterDef_->readSettings(vs);
 
 	//The model at this point is inactive (not using its data). We make it active:
 	//	-it will instruct its data provider to filter the data according

@@ -14,38 +14,74 @@
 #include <string>
 #include <vector>
 
+#include <QList>
+
 #include "VInfo.hpp"
 
-class ExpandNode
+class TreeNodeModel;
+class QModelIndex;
+class QTreeView;
+class VTreeNode;
+
+class ExpandStateNode
 {
 	friend class TreeNodeView;
 
 public:
-	explicit ExpandNode(const std::string& name) : name_(name) {}
-	ExpandNode() : name_("") {}
-	~ExpandNode();
+    explicit ExpandStateNode(const std::string& name) : name_(name) {}
+    ExpandStateNode() : name_("") {}
+    ~ExpandStateNode();
 
 	void clear();
-	ExpandNode* add(const std::string&);
+    ExpandStateNode* add(const std::string&);
 
-	std::vector<ExpandNode*> children_;
+    std::vector<ExpandStateNode*> children_;
 	std::string name_;
 
 };
 
-class ExpandState
+class ExpandStateTree
 {
 	friend class TreeNodeView;
 
 public:
-	explicit ExpandState() : root_(0) {}
-	~ExpandState();
+    explicit ExpandStateTree(QTreeView*,TreeNodeModel*);
+    ~ExpandStateTree();
 
+    bool rootSameAs(const std::string&) const;
+    void save(const VTreeNode*);
+    void restore(const VTreeNode*);
+
+protected:
 	void clear();
-	ExpandNode* setRoot(const std::string&);
-	ExpandNode* root() const {return root_;}
+    ExpandStateNode* setRoot(const std::string&);
+    ExpandStateNode* root() const {return root_;}
+    void save(ExpandStateNode*,const QModelIndex&);
+    void restore(ExpandStateNode*,const VTreeNode*);
 
-	ExpandNode* root_;
+    QTreeView* view_;
+    TreeNodeModel* model_;
+    ExpandStateNode* root_;
+};
+
+class ExpandState
+{
+    friend class TreeNodeView;
+
+public:
+    ExpandState(QTreeView*,TreeNodeModel*);
+    ~ExpandState();
+    ExpandStateTree* add();
+    void remove(ExpandStateTree*);
+    void clear();
+    QList<ExpandStateTree*> items() const {return items_;}
+
+protected:
+    QTreeView* view_;
+    TreeNodeModel* model_;
+    VInfo_ptr selection_;
+    QList<ExpandStateTree*> items_;
+
 };
 
 #endif

@@ -14,7 +14,7 @@
 
 #include "AbstractNodeModel.hpp"
 #include "Node.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "Viewer.hpp"
 #include "VInfo.hpp"
 
@@ -24,6 +24,8 @@ class ServerFilter;
 class ServerHandler;
 class VModelServer;
 class VTreeModelData;
+class VTreeNode;
+class VTreeServer;
 
 class TreeNodeModel : public AbstractNodeModel
 {
@@ -43,46 +45,59 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-   	VInfo_ptr nodeInfo(const QModelIndex& index);
+    QModelIndex nodeToIndex(const VTreeNode*,int column=0) const;
+    QModelIndex nodeToIndex(const VNode*,int column=0) const;
+    VTreeServer* indexToServer(const QModelIndex & index) const;
+    VTreeServer* nameToServer(const std::string&) const;
+    VInfo_ptr nodeInfo(const QModelIndex& index);
+
+    void setEnableServerToolTip(bool st) {serverToolTip_=st;}
+    void setEnableNodeToolTip(bool st) {nodeToolTip_=st;}
+    void setEnableAttributeToolTip(bool st) {attributeToolTip_=st;}
 
    	VModelData* data() const;
 
 public Q_SLOTS:
 	void slotServerAddBegin(int row);
 	void slotServerAddEnd();
-	void slotServerRemoveBegin(int row);
-	void slotServerRemoveEnd();
+    void slotServerRemoveBegin(VModelServer*,int);
+    void slotServerRemoveEnd(int);
 
-	void slotDataChanged(VModelServer*);
-	void slotNodeChanged(VModelServer*,const VNode*);
-	void slotAttributesChanged(VModelServer*,const VNode*);
-	void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
-	void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int);
+    void slotNodeChanged(VTreeServer*,const VTreeNode*);
+    void slotAttributesChanged(VTreeServer*,const VTreeNode*);
+    void slotBeginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
+    void slotEndAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
+    void slotBeginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
+    void slotEndFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
+    void slotBeginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
+    void slotEndFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
 
 	//void slotResetBranch(VModelServer*,const VNode*);
-	void slotBeginServerScan(VModelServer* server,int);
+    void slotDataChanged(VModelServer*);
+    void slotBeginServerScan(VModelServer* server,int);
 	void slotEndServerScan(VModelServer* server,int);
 	void slotBeginServerClear(VModelServer* server,int);
 	void slotEndServerClear(VModelServer* server,int);
 
 Q_SIGNALS:
-	void filterChanged();
-	void clearBegun(const VNode*);
-	void scanEnded(const VNode*);
+    void clearBegun(const VTreeNode*);
+    void scanEnded(const VTreeNode*);
+    void filterUpdateRemoveBegun(const VTreeNode*);
+    void filterUpdateAddEnded(const VTreeNode*);
+    void filterChangeBegun();
+    void filterChangeEnded();
 
 private:
 	bool isServer(const QModelIndex & index) const;
 	bool isNode(const QModelIndex & index) const;
 	bool isAttribute(const QModelIndex & index) const;
 
-	ServerHandler* indexToRealServer(const QModelIndex & index) const;
-	VModelServer* indexToServer(const QModelIndex & index) const;
-	QModelIndex serverToIndex(VModelServer* server) const;
+    ServerHandler* indexToServerHandler(const QModelIndex & index) const;
+    QModelIndex serverToIndex(VModelServer* server) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 
-	QModelIndex nodeToIndex(const VNode*,int column=0) const;
-	QModelIndex nodeToIndex(VModelServer*,const VNode*,int column=0) const;
-	VNode* indexToNode( const QModelIndex & index) const;
+    QModelIndex nodeToIndex(VTreeServer*,const VTreeNode*,int column=0) const;
+    VTreeNode* indexToNode( const QModelIndex & index) const;
 
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
@@ -92,6 +107,10 @@ private:
 	VTreeModelData* data_;
 	AttributeFilter* atts_;
 	IconFilter* icons_;
+
+    bool serverToolTip_;
+    bool nodeToolTip_;
+    bool attributeToolTip_;
 };
 
 

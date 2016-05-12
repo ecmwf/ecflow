@@ -20,6 +20,8 @@ MessageItemWidget::MessageItemWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
 
+    searchTb_->setEnabled(false);
+    searchTb_->setVisible(false);
     searchLine_->setVisible(false);
 
     infoProvider_=new MessageProvider(this);
@@ -29,6 +31,8 @@ MessageItemWidget::MessageItemWidget(QWidget *parent) : QWidget(parent)
     treeView_->setProperty("log","1");
     treeView_->setModel(model_);
     treeView_->setItemDelegate(new LogDelegate(this));
+
+    syncTb_->hide();
 }
 
 QWidget* MessageItemWidget::realWidget()
@@ -38,12 +42,15 @@ QWidget* MessageItemWidget::realWidget()
 
 void MessageItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
     info_=info;
 
-    if(info_ && info_.get())
+    if(info_)
     {
         infoProvider_->info(info_);
     }
@@ -52,7 +59,6 @@ void MessageItemWidget::reload(VInfo_ptr info)
 void MessageItemWidget::clearContents()
 {
     InfoPanelItem::clear();
-
     model_->clearData();
 }
 
@@ -66,7 +72,7 @@ void MessageItemWidget::infoReady(VReply* reply)
     	firstRun=false;
     	for(int i=0; i < model_->columnCount()-1; i++)
     	{
-    			treeView_->resizeColumnToContents(i);
+            treeView_->resizeColumnToContents(i);
     	}
     }
 }

@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #42 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -108,6 +108,7 @@ public:
 	virtual bool empty() const { return (left_ && right_) ? false : true ; }
 	virtual void setParentNode(Node*);
 
+	virtual void set_root_name(const std::string&) {}
 protected:
 	Ast* left_;
 	Ast* right_;
@@ -115,7 +116,7 @@ protected:
 
 class AstNot : public AstRoot {
 public:
-	AstNot() {}
+	AstNot() : name_("! ") {}
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNot* clone() const;
 
@@ -126,6 +127,9 @@ public:
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
  	static std::string stype() { return "not";}
+   virtual void set_root_name(const std::string& n) { name_ = n;}
+private:
+   std::string name_;
 };
 
 

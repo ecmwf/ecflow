@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Copyright 2009-2015 ECMWF. 
+## Copyright 2009-2016 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -87,6 +87,8 @@ if test_uname Linux ; then
   	  elif [ $tool = intel ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
+      		#module unload gnu
+      		#module load intel/15.0.2
 
   	  elif [ $tool = clang ] ; then
   
@@ -135,6 +137,8 @@ echo "using compiler $tool with build $1 variants "
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=debug -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=debug  -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=debug  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-regex variant=debug  -j2   # ecflowUi
+ 
 
 
 # ========================================================================
@@ -147,6 +151,7 @@ echo "using compiler $tool with build $1 variants "
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=release -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=release  -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-regex variant=release  -j2
 
 
 # Allow python to be disabled  

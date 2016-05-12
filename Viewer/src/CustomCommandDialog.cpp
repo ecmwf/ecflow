@@ -13,4 +13,8 @@
 CustomCommandDialog::CustomCommandDialog(QWidget *parent)
 {
     setupUi(this);
+
+    // when the user clicks the 'Run' button, we close the dialog with ACCEPT
+    connect(commandDesigner_->runButton(), SIGNAL(clicked()), this, SLOT(accept()));
+
 }

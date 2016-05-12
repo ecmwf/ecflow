@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #77 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -30,7 +30,6 @@
 #include "CtsApi.hpp"
 #include "PrintStyle.hpp"
 #include "Host.hpp"
-#include "ChangeMgrSingleton.hpp" // keep valgrind happy
 #include "Rtt.hpp"
 #include "EcfPortLock.hpp"
 
@@ -251,9 +250,6 @@ TestFixture::~TestFixture()
 
       // remove the lock file
       EcfPortLock::remove( port_ );
-
-      // keep valgrind happy
-      ChangeMgrSingleton::destroy();
 
       // destroy, so that we flush the rtt_filename
       Rtt::destroy();

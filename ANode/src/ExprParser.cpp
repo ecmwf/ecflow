@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #30 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -102,28 +102,29 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 	static const int node_state_active_ID     = 21;
 	static const int node_state_aborted_ID    = 22;
 	static const int not1_ID           = 23;
-	static const int not2_ID          = 24;
-	static const int and_ID           = 25;
-	static const int or_ID            = 26;
-	static const int event_ID         = 27;
- 	static const int dot_dot_path_ID     = 28;
-	static const int event_name_ID       = 29;
- 	static const int base_trigger_ID     = 30;
-	static const int sub_expression_ID   = 31;
-	static const int grouping_ID         = 32;
-	static const int node_path_state_ID  = 33;
-	static const int absolute_path_ID    = 34;
-	static const int some_string_ID      = 35;
-	static const int variable_ID         = 36;
-	static const int variable_path_ID    = 37;
-	static const int normal_variable_path_ID   = 38;
-	static const int grouped_variable_path_ID  = 39;
-	static const int variable_expression_ID    = 40;
-	static const int plus_ID      = 41;
-	static const int minus_ID     = 42;
-	static const int multiply_ID  = 43;
-   static const int divide_ID    = 44;
-   static const int modulo_ID    = 45;
+   static const int not2_ID          = 24;
+   static const int not3_ID          = 25;
+	static const int and_ID           = 26;
+	static const int or_ID            = 27;
+	static const int event_ID         = 28;
+ 	static const int dot_dot_path_ID     = 29;
+	static const int event_name_ID       = 30;
+ 	static const int base_trigger_ID     = 31;
+	static const int sub_expression_ID   = 32;
+	static const int grouping_ID         = 33;
+	static const int node_path_state_ID  = 34;
+	static const int absolute_path_ID    = 35;
+	static const int some_string_ID      = 36;
+	static const int variable_ID         = 37;
+	static const int variable_path_ID    = 38;
+	static const int normal_variable_path_ID   = 39;
+	static const int grouped_variable_path_ID  = 40;
+	static const int variable_expression_ID    = 41;
+	static const int plus_ID      = 42;
+	static const int minus_ID     = 43;
+	static const int multiply_ID  = 44;
+   static const int divide_ID    = 45;
+   static const int modulo_ID    = 46;
 
     template <typename ScannerT>
     struct definition {
@@ -159,7 +160,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
         rule<ScannerT,parser_tag<not1_ID> >   not1_r;
         rule<ScannerT,parser_tag<not2_ID> >   not2_r;
-        rule<ScannerT,parser_tag<not2_ID> >   not3_r;
+        rule<ScannerT,parser_tag<not3_ID> >   not3_r;
         rule<ScannerT,parser_tag<and_ID> >   and_r;
         rule<ScannerT,parser_tag<or_ID> >    or_r;
         rule<ScannerT,parser_tag<event_ID> > event;
@@ -260,7 +261,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 				    | greater_than_1
 				  ;
 
-        	 not1_r = root_node_d [ str_p("not") ];
+        	 not1_r = root_node_d [ str_p("not ") ];
           not2_r = root_node_d [ str_p("~") ];
           not3_r = root_node_d [ str_p("!") ];
         	 not_r = not1_r | not3_r | not2_r;
@@ -419,8 +420,9 @@ static void populate_rule_names()
       rule_names[ExpressionGrammer::less_than_2_ID] = "LESS_THAN";
       rule_names[ExpressionGrammer::greater_than_1_ID] = "GREATER_THAN";
       rule_names[ExpressionGrammer::greater_than_2_ID] = "GREATER_THAN";
-      rule_names[ExpressionGrammer::not1_ID ]  = "NOT";
+      rule_names[ExpressionGrammer::not1_ID ] = "NOT";
       rule_names[ExpressionGrammer::not2_ID ] = "NOT";
+      rule_names[ExpressionGrammer::not3_ID ] = "NOT";
       rule_names[ExpressionGrammer::and_ID ] = "AND";
       rule_names[ExpressionGrammer::or_ID ] = "OR";
       rule_names[ExpressionGrammer::node_name_ID] = "NODE_NAME";
@@ -562,7 +564,8 @@ AstRoot* createRootNode(const tree_iter_t& i,  const std::map< parser_id, std::s
 	if ( i->value.id() == ExpressionGrammer::and_ID ) return new AstAnd();
 	if ( i->value.id() == ExpressionGrammer::or_ID ) return new AstOr();
 	if ( i->value.id() == ExpressionGrammer::not1_ID ) return new AstNot();
-	if ( i->value.id() == ExpressionGrammer::not2_ID ) return new AstNot();
+   if ( i->value.id() == ExpressionGrammer::not2_ID ) return new AstNot();
+   if ( i->value.id() == ExpressionGrammer::not3_ID ) return new AstNot();
 	if ( i->value.id() == ExpressionGrammer::plus_ID ) return new AstPlus();
 
 	if ( i->value.id() == ExpressionGrammer::not_equal_1_ID ) return new AstNotEqual();
@@ -703,7 +706,15 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
  	return NULL;
 }
 
-
+// Needed so that testing , when recreating expression uses same name for not.
+static void set_not_name(AstRoot* not_root, boost::spirit::classic::parser_id id)
+{
+   if (not_root) {
+      if (id == ExpressionGrammer::not1_ID)  not_root->set_root_name("not ");
+      if (id == ExpressionGrammer::not2_ID)  not_root->set_root_name("~ ");
+      if (id == ExpressionGrammer::not3_ID)  not_root->set_root_name("! ");
+   }
+}
 
 // The evaluation function for the AST
 Ast* doCreateAst(  const tree_iter_t& i,
@@ -741,9 +752,9 @@ Ast* doCreateAst(  const tree_iter_t& i,
 		}
  	}
 	else if (i->children.size() == 4 &&
-			 (i->children.begin()->value.id() == ExpressionGrammer::not1_ID ||
-			  i->children.begin()->value.id() == ExpressionGrammer::not2_ID)
-			 ) {
+			  (i->children.begin()->value.id() == ExpressionGrammer::not1_ID ||
+			   i->children.begin()->value.id() == ExpressionGrammer::not2_ID ||
+			   i->children.begin()->value.id() == ExpressionGrammer::not3_ID) ) {
 		// child 0: notRoot                 0
 		// child 1: notChild               +1
 		// child 2: someRoot(i.e ==,!=)    +2
@@ -751,8 +762,12 @@ Ast* doCreateAst(  const tree_iter_t& i,
 		// Create as:         someRoot
 		//              notRoot          right
 		//      notChild
-		LOG_ASSERT((i->children.begin()->value.id() == ExpressionGrammer::not1_ID || i->children.begin()->value.id() == ExpressionGrammer::not2_ID),"");
+		LOG_ASSERT((i->children.begin()->value.id() == ExpressionGrammer::not1_ID ||
+		            i->children.begin()->value.id() == ExpressionGrammer::not2_ID ||
+		            i->children.begin()->value.id() == ExpressionGrammer::not3_ID),"");
 		AstRoot* notRoot = createRootNode(  i->children.begin(), rule_names  );
+      set_not_name(notRoot,i->children.begin()->value.id());
+
 		Ast* notChild = doCreateAst(  i->children.begin() + 1, rule_names, notRoot/*top*/ );
 		if (notChild) notRoot->addChild(notChild);
 
@@ -797,12 +812,14 @@ Ast* doCreateAst(  const tree_iter_t& i,
 		top->addChild(someRoot);
 	}
 	else if (i->children.size() == 2 &&
-			 (i->children.begin()->value.id() == ExpressionGrammer::not1_ID ||
-			  i->children.begin()->value.id() == ExpressionGrammer::not2_ID)
-			 ) {
+			        (i->children.begin()->value.id() == ExpressionGrammer::not1_ID ||
+		            i->children.begin()->value.id() == ExpressionGrammer::not2_ID ||
+		            i->children.begin()->value.id() == ExpressionGrammer::not3_ID ) ) {
  		// child 1: not     0
 		// child 2: left   +1
  		AstRoot* someRoot = createRootNode(  i->children.begin(), rule_names  );
+ 		set_not_name(someRoot,i->children.begin()->value.id());
+
 		Ast* left  = doCreateAst(  i->children.begin() + 1, rule_names, someRoot );
   		if (left) someRoot->addChild(left);
  		top->addChild(someRoot);

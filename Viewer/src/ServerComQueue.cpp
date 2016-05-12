@@ -26,7 +26,7 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	client_(client),
 	comThread_(comThread),
 	timeout_(500),
-	state_(SuspendedState), //the queue is enabled but not running
+	state_(NoState), //the queue is enabled but not running
 	taskIsBeingFinished_(false),
 	taskIsBeingFailed_(false)
 {
@@ -76,7 +76,7 @@ ServerComQueue::~ServerComQueue()
 
 void ServerComQueue::enable()
 {
-	state_=SuspendedState;
+	state_=NoState;
 	start();
 }
 
@@ -106,23 +106,33 @@ void ServerComQueue::disable()
 
 
 //This is a special mode to reload the whole ClientInvoker
-void ServerComQueue::reset()
+bool ServerComQueue::prepareReset()
 {
-	if(state_ == DisabledState || state_ == ResetState)
-		return;
-
-	//Remove all tasks
-	tasks_.clear();
+	if(state_ == DisabledState || state_ == ResetState || state_ ==  SuspendedState)
+		return false;
 
 	//Stop the timer
 	timer_->stop();
 
-	//This state has the highest priority.
+	//Remove all tasks
+	tasks_.clear();
+
 	state_=ResetState;
 
 	//If the comthread is running we need to wait
 	//until it finishes its task.
 	comThread_->wait();
+
+	//The thread cannot be running
+	assert(comThread_->isRunning() == false);
+
+	return true;
+}
+
+//This is a special mode to reload the whole ClientInvoker. Must be called after prepareReset returned true;
+void ServerComQueue::reset()
+{
+	assert(state_ == ResetState);
 
 	//The thread cannot be running
 	assert(comThread_->isRunning() == false);
@@ -171,24 +181,45 @@ void ServerComQueue::start()
 
 //The queue contents remains the same but the timer is stopped. Until start() is
 //called nothing will be submitted to the queue.
-void ServerComQueue::suspend()
+void ServerComQueue::suspend(bool wait)
 {
-	if(state_ != DisabledState &&
-	   state_ != ResetState)
+	if(state_ != DisabledState && state_ != ResetState &&
+	   state_ != SuspendedState)
 	{
 		state_=SuspendedState;
 		timer_->stop();
+		if(wait)
+		{
+			comThread_->wait();
+		}
 	}
 }
+
+bool ServerComQueue::hasTask(VTask::Type t) const
+{
+	for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); ++it)
+	{
+		if(*it && (*it)->type() == t && (*it)->status() != VTask::CANCELLED &&
+		   (*it)->status() != VTask::ABORTED )
+			return true;
+
+	}
+	return false;
+}
+
+bool ServerComQueue::isNextTask(VTask::Type t) const
+{
+	return (!tasks_.empty() && tasks_.back()->type() == t);
+}
+
 
 void ServerComQueue::addTask(VTask_ptr task)
 {
 	if(!task)
 		return;
 
-	if(!tasks_.empty() && task->type() ==  VTask::ZombieListTask && tasks_.back()->type() == task->type())
+	if(isNextTask(VTask::ZombieListTask) && tasks_.back()->type() == task->type())
 		return;
-
 
 	if(state_ == DisabledState || state_ == ResetState ||
 	  (task && task->type() ==VTask::ResetTask) )
@@ -212,7 +243,7 @@ void ServerComQueue::addNewsTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	if(!tasks_.empty() && tasks_.back()->type() == VTask::NewsTask)
+	if(isNextTask(VTask::NewsTask))
 		return;
 
 	VTask_ptr task=VTask::create(VTask::NewsTask);
@@ -224,7 +255,7 @@ void ServerComQueue::addSyncTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	if(!tasks_.empty() && tasks_.back()->type() == VTask::SyncTask)
+	if(isNextTask(VTask::SyncTask))
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SyncTask);
@@ -236,7 +267,7 @@ void ServerComQueue::addSuiteListTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	if(!tasks_.empty() && tasks_.back()->type() == VTask::SuiteListTask)
+	if(isNextTask(VTask::SuiteListTask))
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SuiteListTask);
@@ -248,7 +279,7 @@ void ServerComQueue::addSuiteAutoRegisterTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	if(!tasks_.empty() && tasks_.back()->type() == VTask::SuiteAutoRegisterTask)
+	if(isNextTask(VTask::SuiteAutoRegisterTask))
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SuiteAutoRegisterTask);

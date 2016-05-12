@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #33 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -185,4 +185,11 @@ void Node::changeDefstatus(const std::string& theState)
 
 	// Updates state_change_no on the defStatus
 	defStatus_.setState( DState::toState(theState) );
+}
+
+void Node::changeLate(const ecf::LateAttr& late)
+{
+   if (lateAttr_) delete lateAttr_;
+   lateAttr_ = new ecf::LateAttr(late);
+   state_change_no_ = Ecf::incr_state_change_no();
 }

@@ -24,9 +24,10 @@ fi
 # =======================================================================
 # Kill the server
 # =======================================================================
+export ECF_PORT=4141
 which ecflow_client
 ecflow_client --version
-ecflow_client --terminate=yes --port=4141
+ecflow_client --terminate=yes
 
 # =======================================================================
 # Start server. 
@@ -34,7 +35,7 @@ ecflow_client --terminate=yes --port=4141
 rm -rf `hostname`.4141.*
 
 export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
-ecflow_server --port=4141 &
+ecflow_server&
 sleep 4
 
 # =======================================================================
@@ -43,7 +44,19 @@ sleep 4
 # =======================================================================
 python $WK/build_scripts/nightly/load.py
 
+
+# ======================================================================
+# ecflow metabuilder
+# ======================================================================
+cd /var/tmp/ma0/workspace/metabuilder
+./regenerate.sh ecflow
+
 # =======================================================================
-# Start the viewer
+# Start the viewer's
 # =======================================================================
+cd $SCRATCH
 ecflowview &
+
+module load ecflow/4.1.0-develop
+ecflow_ui &
+

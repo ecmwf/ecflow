@@ -30,6 +30,8 @@ public:
     
     static VConfig* instance();
     
+    const std::string& appName() {return appName_;}
+    const std::string& appLongName() {return appLongName_;}
     void init(const std::string& parDir);
     const std::vector<VProperty*>& groups() {return groups_;}
     VProperty* find(const std::string& path);
@@ -45,15 +47,17 @@ protected:
     void loadInit(const std::string& parFile);
     void loadProperty(const boost::property_tree::ptree& pt,VProperty *prop);
     void loadSettings();
-    void saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs);
-    void loadSettings(const std::string& parFile,VProperty* guiProp);
-    void loadSettings(const boost::property_tree::ptree& pt,VProperty* guiProp);
+    void saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs,bool);
+    void loadSettings(const std::string& parFile,VProperty* guiProp,bool);
+    void loadImportedSettings(const boost::property_tree::ptree& pt,VProperty* guiProp);
     bool readRcFile(const std::string& rcFile,boost::property_tree::ptree& pt);
 
     VProperty* group(const std::string& name);
 
     static VConfig* instance_;
     
+    std::string appName_;
+    std::string appLongName_;
     std::vector<VProperty*> groups_;
 };
 

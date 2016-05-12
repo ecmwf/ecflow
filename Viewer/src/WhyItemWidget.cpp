@@ -10,7 +10,10 @@
 #include "WhyItemWidget.hpp"
 
 #include "Node.hpp"
+
+#include "VConfig.hpp"
 #include "VNode.hpp"
+
 
 //========================================================
 //
@@ -23,7 +26,16 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : CodeItemWidget(parent)
 	messageLabel_->hide();
 	fileLabel_->hide();
 	textEdit_->setShowLineNumbers(false);
+
+	//Editor font
+	textEdit_->setFontProperty(VConfig::instance()->find("panel.why.font"));
+
 }
+
+WhyItemWidget::~WhyItemWidget()
+{
+}
+
 
 QWidget* WhyItemWidget::realWidget()
 {
@@ -32,12 +44,15 @@ QWidget* WhyItemWidget::realWidget()
 
 void WhyItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
 	info_=info;
 
-	if(info_ && info_.get())
+    if(info_)
 	{
 		textEdit_->setPlainText(why());
 	}

@@ -39,7 +39,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="searchTb">
+      <widget class="QToolButton" name="searchTb_">
        <property name="toolTip">
         <string>Show search bar</string>
        </property>
@@ -47,14 +47,14 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
        </property>
        <property name="shortcut">
         <string>Ctrl+F</string>
        </property>
        <property name="checkable">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -62,7 +62,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="toolButton">
+      <widget class="QToolButton" name="syncTb_">
        <property name="toolTip">
         <string>Refresh messages</string>
        </property>
@@ -70,7 +70,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/sync.svg</normaloff>:/viewer/sync.svg</iconset>
        </property>
        <property name="autoRaise">
@@ -81,14 +81,7 @@
     </layout>
    </item>
    <item>
-    <widget class="MessageLabel" name="messageLabel_">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::NoTextInteraction</set>
-     </property>
-    </widget>
+    <widget class="MessageLabel" name="messageLabel_" native="true"/>
    </item>
    <item>
     <widget class="TreeView" name="treeView_">
@@ -113,15 +106,16 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header location="global">MessageLabel.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>PlainTextSearchLine</class>
    <extends>QWidget</extends>
    <header>PlainTextSearchLine.hpp</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MessageLabel</class>
-   <extends>QLabel</extends>
-   <header>MessageLabel.hpp</header>
   </customwidget>
   <customwidget>
    <class>TreeView</class>
@@ -129,8 +123,6 @@
    <header location="global">TreeView.hpp</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

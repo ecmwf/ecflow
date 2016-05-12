@@ -11,14 +11,17 @@
 #ifndef SERVERLISTDIALOG_HPP_
 #define SERVERLISTDIALOG_HPP_
 
+#include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
+
 #include "ui_ServerListDialog.h"
 #include "ui_ServerEditDialog.h"
 #include "ui_ServerAddDialog.h"
 
-class QSortFilterProxyModel;
 class ServerFilter;
 class ServerItem;
 class ServerListModel;
+class ServerListFilterModel;
 
 class ServerDialogChecker
 {
@@ -39,11 +42,12 @@ class ServerEditDialog : public QDialog, private Ui::ServerEditDialog, public Se
 Q_OBJECT
 
 public:
-	ServerEditDialog(QString name,QString host, QString port,QWidget* parent=0);
+	ServerEditDialog(QString name,QString host, QString port,bool favourite,QWidget* parent=0);
 
 	QString name() const;
 	QString host() const;
 	QString port() const;
+	bool isFavourite() const;
 
 public Q_SLOTS:
 	void accept();
@@ -81,7 +85,8 @@ public:
 	~ServerListDialog();
 
 public Q_SLOTS:
-	   void accept();
+	 void accept();
+	 void reject();
 
 protected Q_SLOTS:
 	 void on_actionEdit_triggered();
@@ -90,40 +95,73 @@ protected Q_SLOTS:
 	 void on_actionDelete_triggered();
 	 void on_actionRescan_triggered();
 	 void on_serverView_doubleClicked(const QModelIndex& index);
+	 void on_actionFavourite_triggered(bool checked);
+	 void slotItemSelected(const QModelIndex&,const QModelIndex&);
+	 void slotItemClicked(const QModelIndex&);
+	 void slotFilter(QString);
+	 void slotFilterFavourite(bool);
 
 protected:
+	void closeEvent(QCloseEvent*);
 	void editItem(const QModelIndex& index);
 	void duplicateItem(const QModelIndex& index);
 	void addItem();
 	void removeItem(const QModelIndex& index);
+	void setFavouriteItem(const QModelIndex& index,bool b);
+	void checkActionState();
 	void writeSettings();
 	void readSettings();
 
 	ServerFilter* filter_;
 	ServerListModel* model_;
-	QSortFilterProxyModel* sortModel_;
+	ServerListFilterModel* sortModel_;
 	Mode mode_;
 };
+
 
 class ServerListModel : public QAbstractItemModel
 {
 public:
-	explicit ServerListModel(QObject *parent=0);
+	explicit ServerListModel(ServerFilter*,QObject *parent=0);
 	~ServerListModel();
 
-	virtual int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-   	virtual int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
+   	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
 
-   	virtual QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-   	virtual bool setData( const QModelIndex &, const QVariant &, int role = Qt::EditRole );
-	virtual QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
+   	bool setData( const QModelIndex &, const QVariant &, int role = Qt::EditRole );
+	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
 
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
+   	Qt::ItemFlags flags ( const QModelIndex & index) const;
 
    	void dataIsAboutToChange();
    	void dataChangeFinished();
    	ServerItem* indexToServer(const QModelIndex& index);
+
+   	enum Columns {LoadColumn=0, NameColumn = 1, HostColumn =2, PortColumn =3, FavouriteColumn= 4, UseColumn=5};
+
+protected:
+   	ServerFilter* filter_;
+   	QPixmap favPix_;
+   	QPixmap favEmptyPix_;
+   	QFont loadFont_;
+};
+
+class ServerListFilterModel : public QSortFilterProxyModel
+{
+public:
+	explicit ServerListFilterModel(QObject *parent=0);
+	~ServerListFilterModel() {};
+	void setFilterStr(QString);
+	void setFilterFavourite(bool b);
+
+protected:
+	 bool filterAcceptsRow(int sourceRow,const QModelIndex &sourceParent) const;
+
+	 QString filterStr_;
+	 bool filterFavourite_;
 };
 
 #endif

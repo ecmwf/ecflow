@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #16 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -353,7 +353,7 @@ static const char* get_check_desc() {
             "  arg = [ _all_ | list of node paths ]\n"
             "Usage:\n"
             "  --check=_all_           # Checks the whole suite\n"
-            "  --check /s1 /s2/f1/t1   # Check suite /s1 and task t1"
+            "  --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1"
             ;
 }
 
@@ -366,8 +366,8 @@ static const char* get_kill_desc() {
             "as this allow the --file command to report the output: .e.e.\n"
             " /home/ma/emos/bin/ecfkill %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1::\n"
             "Usage::\n"
-            "   --kill /s1/f1/t1 /s1/f2/t2 # kill the jobs for tasks t1 and t2\n"
-            "   --file /s1/f1/t1 kill      # write to standard out the '.kill' file for task /s1/f1/t1"
+            "   --kill=/s1/f1/t1 /s1/f2/t2 # kill the jobs for tasks t1 and t2\n"
+            "   --file=/s1/f1/t1 kill      # write to standard out the '.kill' file for task /s1/f1/t1"
             ;
 }
 const char*  get_status_desc(){
@@ -379,31 +379,31 @@ const char*  get_status_desc(){
             "This will allow the output of status command to be shown by the --file command\n"
             "i.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::\n"
             "Usage::\n"
-            "   --status /s1/f1/t1 /s1/f2/t2\n"
-            "   --file /s1/f1/t1 stat  # write to standard out the '.stat' file"
+            "   --status=/s1/f1/t1 /s1/f2/t2\n"
+            "   --file=/s1/f1/t1 stat  # write to standard out the '.stat' file"
             ;
 }
 const char* get_edit_history_desc(){
    return
             "Returns the edit history associated with a Node.\n"
              "Usage::\n"
-            "   --edit_history /s1/f1/t1\n"
+            "   --edit_history=/s1/f1/t1\n"
             ;
 }
 const char* suspend_desc(){
    return
             "Suspend the given node. This prevents job generation for the given node, or any child node.\n"
             "Usage::\n"
-            "   --suspend /s1/f1/t1   # suspend task s1/f1/t1\n"
-            "   --suspend /s1 /s2     # suspend suites /s1 and /s2\n"
+            "   --suspend=/s1/f1/t1   # suspend task s1/f1/t1\n"
+            "   --suspend=/s1 /s2     # suspend suites /s1 and /s2\n"
             ;
 }
 const char* resume_desc(){
    return
             "Resume the given node. This allows job generation for the given node, or any child node.\n"
             "Usage::\n"
-            "   --resume /s1/f1/t1   # resume task s1/f1/t1\n"
-            "   --resume /s1 /s2     # resume suites /s1 and /s2\n"
+            "   --resume=/s1/f1/t1   # resume task s1/f1/t1\n"
+            "   --resume=/s1 /s2     # resume suites /s1 and /s2\n"
             ;
 }
 

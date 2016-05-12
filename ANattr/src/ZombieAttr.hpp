@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #9 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -25,7 +25,7 @@
 // ZombieAttr does *not* have any changeable state
 class ZombieAttr {
 public:
-	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime);
+	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime = 0);
 	ZombieAttr() : zombie_type_(ecf::Child::NOT_SET), action_(ecf::User::BLOCK), zombie_lifetime_(0)  {}
 
  	bool operator==(const ZombieAttr& rhs) const;

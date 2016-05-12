@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #33 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -261,6 +261,7 @@ class host : public extent<host>
 
 	virtual void reset(bool full=false, bool sync=true) {};
 	virtual bool connect_mngt(bool connect);
+	void set_loghost(node& n);
 
 	bool updating_; // SUP-423
 	option<int>       jobfile_length_;

@@ -11,6 +11,7 @@
 
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
+#include "VConfig.hpp"
 #include "VReply.hpp"
 #include "VNode.hpp"
 
@@ -24,6 +25,13 @@ JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 	Highlighter* ih=new Highlighter(textEdit_->document(),"job");
 
     infoProvider_=new JobProvider(this);
+
+	//Editor font
+	textEdit_->setFontProperty(VConfig::instance()->find("panel.job.font"));
+}
+
+JobItemWidget::~JobItemWidget()
+{
 }
 
 QWidget* JobItemWidget::realWidget()
@@ -33,15 +41,18 @@ QWidget* JobItemWidget::realWidget()
 
 void JobItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
     info_=info;
+    messageLabel_->hide();
 
     //Info must be a node
-    if(info_.get() && info_->isNode() && info_->node())
+    if(info_ && info_->isNode() && info_->node())
     {
-        fileLabel_->setText(tr("<b>File:</b> ") + QString::fromStdString(info_->node()->genVariable("ECF_JOB")));
         infoProvider_->info(info_);
     }   
 }
@@ -66,6 +77,8 @@ void JobItemWidget::infoReady(VReply* reply)
     {
     	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
     }
+
+    fileLabel_->update(reply);
 }
 
 void JobItemWidget::infoProgress(VReply* reply)

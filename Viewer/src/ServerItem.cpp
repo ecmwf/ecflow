@@ -20,19 +20,23 @@
 ServerItem::ServerItem(const std::string& name) :
   name_(name),
   useCnt_(0),
-  handler_(0)
+  handler_(0),
+  favourite_(false)
 {
 }
 
-ServerItem::ServerItem(const std::string& name,const std::string& host,const std::string& port) :
+ServerItem::ServerItem(const std::string& name,const std::string& host,const std::string& port, bool favourite) :
   name_(name), host_(host), port_(port),
   useCnt_(0),
-  handler_(0)
+  handler_(0),
+  favourite_(favourite)
 {
 }
 
 ServerItem::~ServerItem()
 {
+	broadcastDeletion();
+
 	if(handler_)
 		ServerHandler::removeServer(handler_);
 }
@@ -52,6 +56,11 @@ void ServerItem::reset(const std::string& name,const std::string& host,const std
 	broadcastChanged();
 }
 
+void ServerItem::setFavourite(bool b)
+{
+	favourite_=b;
+	broadcastChanged();
+}
 //===========================================================
 // Register the usage of the server. Create and destroys the
 // the ServerHandler.
@@ -108,6 +117,8 @@ void ServerItem::broadcastChanged()
 
 void ServerItem::broadcastDeletion()
 {
-	for(std::vector<ServerItemObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+	std::vector<ServerItemObserver*> obsCopy=observers_;
+
+	for(std::vector<ServerItemObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
 		(*it)->notifyServerItemDeletion(this);
 }

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #91 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -294,7 +294,7 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 	std::string process_or_remote_id = vm[ arg() ].as< std::string > ();
 
 	if (clientEnv->debug())
-		cout << "InitCmd::create " << InitCmd::arg()
+		cout << "  InitCmd::create " << InitCmd::arg()
 		<< "  clientEnv->task_path(" << clientEnv->task_path()
 		<< ") clientEnv->jobs_password(" << clientEnv->jobs_password()
 		<< ") clientEnv->process_or_remote_id(" << clientEnv->process_or_remote_id()
@@ -379,7 +379,7 @@ void CompleteCmd::create( 	Cmd_ptr& cmd,
 							AbstractClientEnv* clientEnv ) const
 {
 	if (clientEnv->debug())
-		cout << "CompleteCmd::create " << CompleteCmd::arg()
+		cout << "  CompleteCmd::create " << CompleteCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -500,7 +500,7 @@ void CtsWaitCmd::create( 	Cmd_ptr& cmd,
 	std::string expression = vm[ arg() ].as< std::string > ();
 
 	if (clientEnv->debug())
-		cout << "CtsWaitCmd::create " << CtsWaitCmd::arg()
+		cout << "  CtsWaitCmd::create " << CtsWaitCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -599,7 +599,7 @@ void AbortCmd::create( 	Cmd_ptr& cmd,
 	std::string reason = vm[ arg() ].as< std::string > ();
 
 	if (clientEnv->debug())
-		cout << "AbortCmd::create " << AbortCmd::arg()
+		cout << "  AbortCmd::create " << AbortCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -677,7 +677,7 @@ void EventCmd::create( 	Cmd_ptr& cmd,
 	std::string event = vm[ arg() ].as< std::string > ();
 
 	if (clientEnv->debug())
-		cout << "EventCmd::create " << EventCmd::arg()
+		cout << "  EventCmd::create " << EventCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -776,7 +776,7 @@ void MeterCmd::create( 	Cmd_ptr& cmd,
 
 	if (clientEnv->debug()) {
 		dumpVecArgs(MeterCmd::arg(),args);
-		cout << "MeterCmd::create " << MeterCmd::arg()
+		cout << "  MeterCmd::create " << MeterCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -797,7 +797,7 @@ void MeterCmd::create( 	Cmd_ptr& cmd,
 		value = boost::lexical_cast<int>(strVal);
 	}
 	catch (boost::bad_lexical_cast& e) {
- 		throw std::runtime_error( "MeterCmd: Second argument must be a integer, i.e. --meter name 100\n" );
+ 		throw std::runtime_error( "MeterCmd: Second argument must be a integer, i.e. --meter=name 100\n" );
  	}
 
 	std::string errorMsg;
@@ -879,7 +879,7 @@ void LabelCmd::create( 	Cmd_ptr& cmd,
 
 	if (clientEnv->debug()) {
 		dumpVecArgs(LabelCmd::arg(),args);
-		cout << "LabelCmd::create " << LabelCmd::arg()
+		cout << "  LabelCmd::create " << LabelCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()

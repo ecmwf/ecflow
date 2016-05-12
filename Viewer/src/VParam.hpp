@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,6 +19,7 @@ class VParam : public VPropertyObserver
 {
 public:
 		explicit VParam(const std::string& name);
+        ~VParam();
 
 		QString name() const {return qName_;}
 		const std::string& strName() const {return name_;}
@@ -26,6 +27,7 @@ public:
 		QString label() const {return label_;}
 		QColor colour() const {return colour_;}
 		QColor fontColour() const {return fontColour_;}
+        QColor typeColour() const {return typeColour_;}
 
 		void setProperty(VProperty*);
 		
@@ -55,6 +57,7 @@ protected:
 		//Cached information
 		QColor colour_;
 		QColor fontColour_;
+        QColor typeColour_;
 
         /*std::map<std::string,int> numberMap_;
 		std::map<std::string,std::string> textMap_;
@@ -63,7 +66,8 @@ protected:
 
 		VProperty* prop_;
 		QString colourPropName_;
-		QString fontColourPropName_;
+        QString fontColourPropName_;
+        QString typeColourPropName_;
 };
 
 #endif

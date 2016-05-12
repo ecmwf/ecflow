@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #234 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,7 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <ostream>
+#include <vector>
 
 #include <boost/noncopyable.hpp>
 #include <boost/serialization/base_object.hpp>
@@ -23,6 +24,7 @@
 
 #include "NodeAttr.hpp"
 #include "NodeFwd.hpp"
+#include "Aspect.hpp"
 
 class ChildAttrs :  private boost::noncopyable {
 public:
@@ -76,9 +78,9 @@ public:
    bool clear_event( const std::string& event_name_or_number);
 
    // mementos functions:
-   void set_memento(const NodeEventMemento* );
-   void set_memento(const NodeMeterMemento* );
-   void set_memento(const NodeLabelMemento* );
+   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects );
 
    // Find functions: ============================================================
    bool findLabel(const std::string& name) const;
@@ -88,6 +90,7 @@ public:
    const Event& findEvent(const Event&) const;
    const Event& findEventByNameOrNumber( const std::string& name) const;
    bool getLabelValue(const std::string& labelName, std::string& value) const;
+   bool getLabelNewValue(const std::string& labelName, std::string& value) const;
 
 private:
 

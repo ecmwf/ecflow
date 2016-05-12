@@ -15,16 +15,20 @@
 
 #include "Zombie.hpp"
 #include "VFile.hpp"
+#include "VDir.hpp"
 
 class VReply
 {
 public:
 	enum Status {NoStatus,TaskDone,TaskFailed,TaskCancelled};
 	enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode};
-	VReply() : status_(NoStatus), readMode_(NoReadMode) {};
+    VReply(void* sender=NULL) : sender_(sender), status_(NoStatus), readMode_(NoReadMode),readTruncatedTo_(-1) {}
 	~VReply() {}
 
 	void reset();
+
+	void* sender() const {return sender_;}
+	void setSender(void* s) {sender_=s;}
 
 	const std::string& errorText() const {return errorText_;}
 	const std::string& warningText() const {return warningText_;}
@@ -36,7 +40,10 @@ public:
 	FileReadMode fileReadMode() const {return readMode_;}
 	const std::string fileReadMethod() {return readMethod_;}
 	VFile_ptr tmpFile() const {return tmpFile_;}
+	VDir_ptr directory() const {return dir_;}
 	const std::vector<Zombie>& zombies() const {return zombies_;}
+	void setReadTruncatedTo(int ival) {readTruncatedTo_=ival;}
+    const std::vector<std::string>& log() const {return log_;}
 
 	bool textFromFile(const std::string&);
 	void text(const std::vector<std::string>& msg);
@@ -49,7 +56,13 @@ public:
 	void fileReadMode(FileReadMode m) {readMode_=m;}
 	void fileReadMethod(const std::string& m) {readMethod_=m;}
 	void tmpFile(VFile_ptr f) {tmpFile_=f;}
+	void setDirectory(VDir_ptr d) {dir_=d;}
 	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
+	int readTruncatedTo() const {return readTruncatedTo_;}
+    void addLog(const std::string& s) {log_.push_back(s);}
+    void setLog(const std::vector<std::string>& s) {log_=s;}
+    void clearLog() {log_.clear();}
+    void setText(const std::string& txt) {text_=txt;}
 
 	bool hasWarning() const {return !warningText_.empty();}
 	bool hasInfo() const {return !infoText_.empty();}
@@ -60,6 +73,7 @@ public:
 	void status(Status s) {status_=s;}
 
 protected:
+	void* sender_;
 	Status status_;
 	std::string errorText_;
 	std::string warningText_;
@@ -69,7 +83,10 @@ protected:
 	std::string fileName_;
 	FileReadMode readMode_;
 	std::string  readMethod_;
+	int readTruncatedTo_;
+    std::vector<std::string> log_;
 	VFile_ptr  tmpFile_;
+	VDir_ptr dir_;
 	std::vector<Zombie> zombies_;
 };
 

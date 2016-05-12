@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #45 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -126,10 +126,10 @@ public:
 	/// At the moment we will only implement options a/ and b/
 	//
 	/// Returns true if the given user has access to the server, false otherwise
-	virtual bool authenticateUser(const std::string& user) = 0;
+	virtual bool authenticateReadAccess(const std::string& user) = 0;
 
 	/// Returns true if user has matching write access privileges.
-	virtual bool authenticateWriteAccess(const std::string& user, bool client_request_can_change_server_state) = 0;
+	virtual bool authenticateWriteAccess(const std::string& user ) = 0;
 
 	/// Shutdown the server and let 'user' has have exclusive lock on it.
 	/// If the lock succeeds return true, (This will end up calling the shutdown()

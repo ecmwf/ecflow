@@ -7,122 +7,41 @@
     <x>0</x>
     <y>0</y>
     <width>412</width>
-    <height>101</height>
+    <height>118</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="sizeConstraint">
-    <enum>QLayout::SetMinimumSize</enum>
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0">
+   <property name="leftMargin">
+    <number>2</number>
    </property>
-   <property name="margin">
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="exprLayout_">
-     <item>
-      <widget class="QLabel" name="exprLabel_">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="palette">
-        <palette>
-         <active>
-          <colorrole role="Base">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Window">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </active>
-         <inactive>
-          <colorrole role="Base">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Window">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </inactive>
-         <disabled>
-          <colorrole role="Base">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-          <colorrole role="Window">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </disabled>
-        </palette>
-       </property>
-       <property name="autoFillBackground">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>filterExprLabel_</string>
-       </property>
-       <property name="textInteractionFlags">
-        <set>Qt::LinksAccessibleByMouse|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Filter:</string>
+     </property>
+    </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="buttonLayout_">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetMinimumSize</enum>
+    <widget class="OneLineTextEdit" name="queryTe_"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="numLabel_">
+     <property name="text">
+      <string/>
      </property>
-     <item>
-      <widget class="QLineEdit" name="pathLine_">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="placeholderText">
-        <string>Node</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    </widget>
    </item>
   </layout>
   <action name="actionBreadcrumbs">
@@ -148,6 +67,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>OneLineTextEdit</class>
+   <extends>QTextEdit</extends>
+   <header>OneLineTextEdit.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

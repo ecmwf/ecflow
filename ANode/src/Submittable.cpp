@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #37 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -37,7 +37,6 @@
 #include "Ecf.hpp"
 #include "DefsDelta.hpp"
 #include "Extract.hpp"
-#include "ChangeMgrSingleton.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -135,6 +134,15 @@ void Submittable::requeue(bool resetRepeats, int clear_suspended_in_child_nodes,
 #ifdef DEBUG_STATE_CHANGE_NO
    std::cout << "Submittable::requeue\n";
 #endif
+}
+
+
+void Submittable::calendarChanged(const ecf::Calendar& c, std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late)
+{
+   Node::calendarChanged(c,auto_cancelled_nodes,NULL);
+
+   // Late flag should ONLY be set on Submittable
+   check_for_lateness(c,inherited_late);
 }
 
 std::string Submittable::write_state() const
@@ -261,15 +269,26 @@ EcfFile Submittable::locatedEcfFile() const
    // o/ ECF_FETCH (user variable)
    //    if this variable exist, we need to flag it,
    //    So that that file is obtained from running the command. (Output of popen)
-   // o/ ECF_FILES (Typically in the definition file, defines a directory)
-   // o/ ECF_HOME
+   // o/ ECF_SCRIPT_CMD (user variable)
+   //    if this variable exist, we need to flag it,
+   //    So that that file is obtained from running the command. (Output of popen)
+   // o/ ECF_FILES (Typically in the definition file, defines a directory) (backward search)
+   // o/ ECF_HOME (backward search)
+   //    where: backward search is root_path = (ECF_FILES | ECF_HOME)
+   //           <root-path>/suite/family/family2/task.ecf
+   //           <root-path>/family/family2/task.ecf
+   //           <root-path>/family2/task.ecf
+   //           <root-path>/task.ecf
    std::string reasonEcfFileNotFound;
    std::string theAbsNodePath = absNodePath();
    std::string ecf_home;
    findParentUserVariableValue( Str::ECF_HOME(), ecf_home);
 
    /// Update local ECF_SCRIPT variable, ECF_SCRIPT is a generated variable. IT *MUST* exist
-   const Variable& genvar_ecfscript = update_genvar_ecfscript(ecf_home,theAbsNodePath);
+   /// Likewise generated variable like TASK and ECF_NAME as they may occur in ECF_FETCH_CMD/ECF_SCRIPT_CMD
+   update_static_generated_variables(ecf_home,theAbsNodePath);
+
+   const Variable& genvar_ecfscript = get_genvar_ecfscript();
 
 #ifdef DEBUG_TASK_LOCATION
    std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_SCRIPT = '" << genvar_ecfscript.theValue() << "'\n";
@@ -286,24 +305,42 @@ EcfFile Submittable::locatedEcfFile() const
    }
 
    // Caution: This is not used in operations or research, equally is has not been tested.
-   // Need to test or remove.
-   std::string smsFetchCmd;
-   findParentVariableValue( Str::ECF_FETCH(), smsFetchCmd );
-   if ( !smsFetchCmd.empty() ) {
+   std::string ecf_fetch_cmd;
+   findParentVariableValue( Str::ECF_FETCH(), ecf_fetch_cmd );
+   if ( !ecf_fetch_cmd.empty() ) {
 #ifdef DEBUG_TASK_LOCATION
-      std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_FETCH = '" << smsFetchCmd << "' variable exists\n";
+      std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_FETCH = '" << ecf_fetch_cmd << "' variable exists\n";
 #endif
-      if (variableSubsitution(smsFetchCmd))  {
-         return EcfFile( const_cast<Submittable*>(this), smsFetchCmd, true/*is a command*/);
+      if (variableSubsitution(ecf_fetch_cmd))  {
+         return EcfFile( const_cast<Submittable*>(this), ecf_fetch_cmd, EcfFile::ECF_FETCH_CMD);
       }
       else {
-         std::stringstream ss; ss << "   Variable ECF_FETCH(" << smsFetchCmd << ") defined, but variable substitution has failed:\n";
+         std::stringstream ss; ss << "   Variable ECF_FETCH(" << ecf_fetch_cmd << ") defined, but variable substitution has failed:\n";
          reasonEcfFileNotFound += ss.str();
          throw std::runtime_error( reasonEcfFileNotFound ) ;
       }
    }
    else {
       reasonEcfFileNotFound += "   Variable ECF_FETCH not defined:\n";
+   }
+
+   std::string ecf_script_cmd; // ECFLOW-427
+   findParentVariableValue( "ECF_SCRIPT_CMD", ecf_script_cmd );
+   if ( !ecf_script_cmd.empty() ) {
+#ifdef DEBUG_TASK_LOCATION
+      std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_SCRIPT_CMD = '" << ecf_script_cmd << "' variable exists\n";
+#endif
+      if (variableSubsitution(ecf_script_cmd))  {
+         return EcfFile( const_cast<Submittable*>(this), ecf_script_cmd, EcfFile::ECF_SCRIPT_CMD);
+      }
+      else {
+         std::stringstream ss; ss << "   Variable ECF_SCRIPT_CMD(" << ecf_script_cmd << ") defined, but variable substitution has failed:\n";
+         reasonEcfFileNotFound += ss.str();
+         throw std::runtime_error( reasonEcfFileNotFound ) ;
+      }
+   }
+   else {
+      reasonEcfFileNotFound += "   Variable ECF_SCRIPT_CMD not defined:\n";
    }
 
 
@@ -552,7 +589,7 @@ void Submittable::kill(const std::string& zombie_pid)
 
       /// If we are in active state, then ECF_RID must have been setup
       /// This is typically used in the KILL CMD, make sure its there
-      if (state() == NState::ACTIVE && genvar_ecfrid().theValue().empty() ) {
+      if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty() ) {
          std::stringstream ss;
          ss << "Submittable::kill: Generated variable ECF_RID is empty for task " << absNodePath();
          throw std::runtime_error( ss.str() );
@@ -610,7 +647,7 @@ void Submittable::status()
    }
 
    /// If we are in active state, then ECF_RID must have been setup
-   if (state() == NState::ACTIVE && genvar_ecfrid().theValue().empty()) {
+   if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty()) {
       std::stringstream ss;
       ss << "Submittable::status: Generated variable ECF_RID is empty for task " << absNodePath();
       throw std::runtime_error( ss.str() );
@@ -732,13 +769,13 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
    Node::incremental_changes(changes,comp);
 }
 
-void Submittable::set_memento(const SubmittableMemento* memento)
+void Submittable::set_memento(const SubmittableMemento* memento,std::vector<ecf::Aspect::Type>& aspects)
 {
 #ifdef DEBUG_MEMENTO
    std::cout << "Submittable::set_memento(const SubmittableMemento*) " << debugNodePath() << "\n";
 #endif
 
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUBMITTABLE);
+   aspects.push_back(ecf::Aspect::SUBMITTABLE);
 
    jobsPassword_ = memento->jobsPassword_;
    process_or_remote_id_ = memento->process_or_remote_id_;
@@ -755,10 +792,10 @@ void Submittable::update_generated_variables() const
    update_repeat_genvar();
 }
 
-const Variable& Submittable::update_genvar_ecfscript( const std::string& ecf_home, const std::string& theAbsNodePath) const
+void Submittable::update_static_generated_variables(const std::string& ecf_home, const std::string& theAbsNodePath) const
 {
    if (!sub_gen_variables_) sub_gen_variables_ = new SubGenVariables(this);
-   return sub_gen_variables_->update_genvar_ecfscript(ecf_home,theAbsNodePath);
+   sub_gen_variables_->update_static_generated_variables(ecf_home,theAbsNodePath);
 }
 
 const Variable& Submittable::findGenVariable(const std::string& name) const
@@ -782,10 +819,16 @@ void Submittable::gen_variables(std::vector<Variable>& vec) const
    Node::gen_variables(vec);
 }
 
-const Variable& Submittable::genvar_ecfrid() const
+const Variable& Submittable::get_genvar_ecfrid() const
 {
    if (!sub_gen_variables_) return Variable::EMPTY();
    return sub_gen_variables_->genvar_ecfrid();
+}
+
+const Variable& Submittable::get_genvar_ecfscript() const
+{
+   if (!sub_gen_variables_) return Variable::EMPTY();
+   return sub_gen_variables_->genvar_ecfscript();
 }
 
 void Submittable::set_genvar_ecfjob(const std::string& value)
@@ -818,20 +861,37 @@ void SubGenVariables::update_generated_variables() const
 {
    // cache strings that are used in many variables
    std::string theAbsNodePath = submittable_->absNodePath();
-   std::string the_try_no = submittable_->tryNo();
+   std::string ecf_home;
+   submittable_->findParentUserVariableValue(Str::ECF_HOME(), ecf_home);
+   update_static_generated_variables(ecf_home,theAbsNodePath);
+   update_dynamic_generated_variables(ecf_home,theAbsNodePath);
+}
 
+void SubGenVariables::update_static_generated_variables(const std::string& ecf_home,const std::string& theAbsNodePath) const
+{
+   // cache strings that are used in many variables
    if (submittable_->isAlias() && submittable_->parent())
       genvar_task_.set_value(submittable_->parent()->name());     // does *not* modify Variable::state_change_no
    else
       genvar_task_.set_value(submittable_->name());
 
+   genvar_ecfname_.set_value(theAbsNodePath);                     // does *not* modify Variable::state_change_no
+
+   genvar_ecfscript_.value_by_ref().reserve( ecf_home.size() + theAbsNodePath.size() + 4 );
+   genvar_ecfscript_.value_by_ref() = ecf_home;   // does *not* modify Variable::state_change_no
+   genvar_ecfscript_.value_by_ref() += theAbsNodePath;
+   genvar_ecfscript_.value_by_ref() += submittable_->script_extension();
+}
+
+void SubGenVariables::update_dynamic_generated_variables(const std::string& ecf_home,const std::string& theAbsNodePath) const
+{
+   // cache strings that are used in many variables
+   std::string the_try_no = submittable_->tryNo();
+
    genvar_ecfrid_.set_value(submittable_->process_or_remote_id_); // does *not* modify Variable::state_change_no
    genvar_ecftryno_.set_value(the_try_no);                        // does *not* modify Variable::state_change_no
-   genvar_ecfname_.set_value(theAbsNodePath);                     // does *not* modify Variable::state_change_no
    genvar_ecfpass_.set_value(submittable_->jobsPassword_);        // does *not* modify Variable::state_change_no
 
-   std::string ecf_home;
-   submittable_->findParentUserVariableValue(Str::ECF_HOME(), ecf_home);
 
    /// The directory associated with ECF_JOB is automatically created if it does not exist.
    /// This is Done during Job generation. See EcfFile::doCreateJobFile()
@@ -867,17 +927,6 @@ void SubGenVariables::update_generated_variables() const
    genvar_ecfjobout_.value_by_ref() += theAbsNodePath;
    genvar_ecfjobout_.value_by_ref() += ".";
    genvar_ecfjobout_.value_by_ref() += the_try_no;
-
-   (void)update_genvar_ecfscript(ecf_home,theAbsNodePath);
-}
-
-const Variable& SubGenVariables::update_genvar_ecfscript( const std::string& ecf_home, const std::string& theAbsNodePath) const
-{
-   genvar_ecfscript_.value_by_ref().reserve( ecf_home.size() + theAbsNodePath.size() + 4 );
-   genvar_ecfscript_.value_by_ref() = ecf_home;   // does *not* modify Variable::state_change_no
-   genvar_ecfscript_.value_by_ref() += theAbsNodePath;
-   genvar_ecfscript_.value_by_ref() += submittable_->script_extension();
-   return genvar_ecfscript_;
 }
 
 const Variable& SubGenVariables::findGenVariable(const std::string& name) const

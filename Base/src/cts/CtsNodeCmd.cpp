@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #70 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -212,7 +212,7 @@ static const char* why_desc() {
             "  arg = node path | arg = NULL\n"
             "Usage:\n"
             "  --group=\"get; why\"               # returns why for all holding nodes\n"
-            "  --group=\"get; why /suite/family\" # returns why for a specific node"
+            "  --group=\"get; why=/suite/family\" # returns why for a specific node"
             ;
 }
 
@@ -224,7 +224,7 @@ static const char* get_desc() {
             "  arg = NULL | arg = node path\n"
             "Usage:\n"
             "  --get     # gets the definition from the server,and writes to standard out\n"
-            "  --get /s1 # gets the suite from the server,and writes to standard out"
+            "  --get=/s1 # gets the suite from the server,and writes to standard out"
             ;
 }
 
@@ -236,7 +236,7 @@ static const char* get_state_desc() {
             "  arg = NULL | arg = node path\n"
             "Usage:\n"
             "  --get_state     # gets the definition from the server,and writes to standard out\n"
-            "  --get_state /s1 # gets the suite from the server,and writes to standard out"
+            "  --get_state=/s1 # gets the suite from the server,and writes to standard out"
             ;
 }
 
@@ -263,11 +263,11 @@ const char* migrate_desc() {
             "   o shutdown\n"
             "       # ecflow_client --shutdown\n"
             "   o suspend all suites\n"
-            "       # CL=\"ecflow_client --port 32222 --host vsms1\"\n"
-            "       # for s in $($CL --suites); do $CL --suspend /$s; done\n"
+            "       # CL=\"ecflow_client --port=32222 --host=vsms1\"\n"
+            "       # for s in $($CL --suites); do $CL --suspend=/$s; done\n"
             "   o wait for active/submitted tasks to complete\n"
             "   o halt the server\n"
-            "       # ecflow_client --halt\n"
+            "       # ecflow_client --halt=yes\n"
             "   o Use --migrate to dump state and structure to a file\n"
             "       # ecflow_client --migrate > all_suites.def\n"
             "   o terminate server *or* leave server running but start new server on different machine\n"
@@ -277,12 +277,12 @@ const char* migrate_desc() {
             " Steps for New server:\n"
             "   o start server\n"
             "   o load the migration file\n"
-            "       # ecflow_client --load all_suites.def\n"
+            "       # ecflow_client --load=all_suites.def\n"
             "   o set server running:\n"
             "       # ecflow_client --restart\n"
             "   o resume suspended suites\n"
-            "       # CL=\"ecflow_client --port 32222 --host vsms1\"\n"
-            "       # for s in $($CL --suites); do $CL --resume /$s; done\n\n"
+            "       # CL=\"ecflow_client --port=32222 --host=vsms1\"\n"
+            "       # for s in $($CL --suites); do $CL --resume=/$s; done\n\n"
             "Usage:\n"
             "    --migrate         # show all suites\n"
             "    --migrate=/s1     # show state for suite s1\n"
@@ -328,7 +328,7 @@ void CtsNodeCmd::create(   Cmd_ptr& cmd,
 {
    assert( api_ != CtsNodeCmd::NO_CMD);
 
-   if (ac->debug()) cout << "CtsNodeCmd::create = '" << theArg() << "'.\n";
+   if (ac->debug()) cout << "  CtsNodeCmd::create = '" << theArg() << "'.\n";
 
    std::string absNodePath = vm[ theArg() ].as< std::string > ();
 

@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #31 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -55,13 +55,13 @@ public:
    /// If the message has multiple newlines these are split
    /// LogType ERR,WAR,DBG will create a time stamp, otherwise the last cached
    /// time stamp is used.
-   void log(LogType,const std::string& message);
+   bool log(LogType,const std::string& message);
 
    /// Single line message is placed in log file without a newline
-   void log_no_newline(LogType,const std::string& message);
+   bool log_no_newline(LogType,const std::string& message);
 
    /// Append to log file file and add newline
-   void append(const std::string& message);
+   bool append(const std::string& message);
 
    /// Set the time stamp once for each request.
    void cache_time_stamp();
@@ -114,16 +114,16 @@ public:
    LogImpl(const std::string& filename);
    ~LogImpl();
 
-   void log(Log::LogType lt,const std::string& message) { do_log(lt,message,true); }
-   void log_no_newline(Log::LogType lt,const std::string& message) { do_log(lt,message,false); }
-   void append(const std::string& message);
+   bool log(Log::LogType lt,const std::string& message) { return do_log(lt,message,true); }
+   bool log_no_newline(Log::LogType lt,const std::string& message) { return do_log(lt,message,false); }
+   bool append(const std::string& message);
 
    void create_time_stamp();
    const std::string& get_cached_time_stamp() const { return time_stamp_;}
 
 private:
-   void do_log(Log::LogType,const std::string& message, bool newline);
-   void check_file_write(const std::string& message) const;
+   bool do_log(Log::LogType,const std::string& message, bool newline);
+   bool check_file_write(const std::string& message) const;
 
 private:
    std::string time_stamp_;
@@ -142,9 +142,9 @@ private:
    static bool flag_;
 };
 
-void log(Log::LogType,const std::string& message);
-void log_no_newline(Log::LogType,const std::string& message);
-void log_append(const std::string& message);
+bool log(Log::LogType,const std::string& message);
+bool log_no_newline(Log::LogType,const std::string& message);
+bool log_append(const std::string& message);
 void log_assert(char const* expr,char const* file, long line, const std::string& message);
 
 // allow user to do the following:

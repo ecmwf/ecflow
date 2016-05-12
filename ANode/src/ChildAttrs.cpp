@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #285 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,7 +18,6 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Memento.hpp"
-#include "ChangeMgrSingleton.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -291,6 +290,18 @@ bool ChildAttrs::getLabelValue(const std::string& labelName, std::string& value)
    return false;
 }
 
+bool ChildAttrs::getLabelNewValue(const std::string& labelName, std::string& value) const
+{
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == labelName) {
+         value = labels_[i].new_value();
+         return true;
+      }
+   }
+   return false;
+}
+
 void ChildAttrs::addLabel( const Label& l)
 {
    if (findLabel(l.name())) {
@@ -501,33 +512,33 @@ const Label& ChildAttrs::find_label(const std::string& name) const
 }
 
 
-void ChildAttrs::set_memento( const NodeEventMemento* memento ) {
+void ChildAttrs::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeEventMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
 
    if (set_event(memento->event_.name_or_number(),  memento->event_.value())) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::EVENT);
+      aspects.push_back(ecf::Aspect::EVENT);
       return;
    }
    addEvent( memento->event_);
 }
 
-void ChildAttrs::set_memento( const NodeMeterMemento* memento ) {
+void ChildAttrs::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeMeterMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
 
    if (set_meter(memento->meter_.name(), memento->meter_.value())) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::METER);
+      aspects.push_back(ecf::Aspect::METER);
       return;
    }
    addMeter(memento->meter_);
 }
 
-void ChildAttrs::set_memento( const NodeLabelMemento* memento ) {
+void ChildAttrs::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeLabelMemento* memento) " << node_->debugNodePath() << "\n";
@@ -537,7 +548,7 @@ void ChildAttrs::set_memento( const NodeLabelMemento* memento ) {
    for(size_t i = 0; i < theSize; i++) {
       if (labels_[i].name() == memento->label_.name()) {
          labels_[i] = memento->label_;
-         ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::LABEL);
+         aspects.push_back(ecf::Aspect::LABEL);
          return;
       }
    }

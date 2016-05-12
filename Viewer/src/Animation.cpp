@@ -8,6 +8,8 @@
 //============================================================================
 
 #include "Animation.hpp"
+#include "ServerHandler.hpp"
+#include "VNode.hpp"
 
 #include <QWidget>
 
@@ -33,19 +35,24 @@ Animation::Animation(QWidget *view,Type type) :
 			view_,SLOT(slotRepaint(Animation*)));
 }
 
-void Animation::addTarget(const QModelIndex& idx)
+void Animation::addTarget(VNode *n)
 {
-	if(!targets_.contains(idx))
-		targets_ << idx;
+    Q_ASSERT(n);
+    if(!targets_.contains(n))
+        targets_ << n;
+
+    ServerHandler* s=n->server();
+    Q_ASSERT(s);
+    s->addServerObserver(this);
 
 	start();
 }
 
-void Animation::removeTarget(const QModelIndex& idx)
+void Animation::removeTarget(VNode* n)
 {
-	targets_.removeAll(idx);
+    targets_.removeAll(n);
 
-	if(targets_.isEmpty())
+    if(targets_.isEmpty())
 		QMovie::stop();
 }
 
@@ -55,6 +62,18 @@ void Animation::renderFrame(int frame)
 		QMovie::stop();
 
 	Q_EMIT(repaintRequest(this));
+}
+
+void Animation::notifyServerDelete(ServerHandler* server)
+{
+    removeTarget(server->vRoot());
+    server->removeServerObserver(this);
+    //TODO: make it work for nodes as well
+}
+
+void Animation::notifyBeginServerClear(ServerHandler* /*server*/)
+{
+     //TODO: make it work for nodes
 }
 
 //=====================================================

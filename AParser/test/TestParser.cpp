@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -28,7 +28,6 @@
 #include "PrintStyle.hpp"
 #include "PersistHelper.hpp"
 #include "File.hpp"
-#include "ChangeMgrSingleton.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -117,9 +116,6 @@ BOOST_AUTO_TEST_CASE( test_parsing_for_good_defs_state )
 
    // All the defs in this directory are expected to pass
    test_defs(path, true);
-
-   // Fix memory leaks
-   ChangeMgrSingleton::destroy();
 }
 BOOST_AUTO_TEST_SUITE_END()
 

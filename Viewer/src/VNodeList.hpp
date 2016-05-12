@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,7 @@
 
 #include <QObject>
 
+#include <map>
 #include <vector>
 
 class VNodeList;
@@ -25,14 +26,19 @@ class VNodeListItem
 friend class VNodeList;
 
 public:
-	VNodeListItem(VNode* n,QString time) : node_(n), visible_(true), time_(time) {}
+	explicit VNodeListItem(VNode* n);
 	VNode *node() const {return node_;}
-	bool isVisible() const {return visible_;}
+	const std::string& server() const {return server_;}
+	const std::string& path() const {return path_;}
 	QString time() const {return time_;}
+	bool sameAs(VNode *node) const;
+	void invalidateNode();
+	bool updateNode(ServerHandler*);
 
 protected:
 	VNode* node_;
-	bool visible_;
+	std::string server_;
+	std::string path_;
 	QString time_;
 };
 
@@ -49,16 +55,16 @@ public:
  	void add(VNode*);
  	void remove(VNode*);
  	void clear();
- 	void hide();
  	bool contains(VNode*);
+ 	void setMaxNum(int);
 
     //From ServerObserver
- 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
  	void notifyServerDelete(ServerHandler* server);
     void notifyBeginServerClear(ServerHandler* server);
  	void notifyEndServerClear(ServerHandler* server);
- 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
-    void notifyEndServerScan(ServerHandler* server) {};
+ 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
+    void notifyEndServerScan(ServerHandler* server);
 
  	//From NodeObserver
     void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -69,14 +75,24 @@ Q_SIGNALS:
      void endAppendRow();
      void beginRemoveRow(int);
      void endRemoveRow(int);
+     void beginRemoveRows(int,int);
+     void endRemoveRows(int,int);
      void beginReset();
      void endReset();
 
 protected:
      void clearData(bool hideOnly);
      void clear(ServerHandler*);
+     void serverClear(ServerHandler*);
+     void serverScan(ServerHandler*);
+     void attach(ServerHandler*);
+     void detach(ServerHandler*);
+     void detach(VNode*);
+     void trim();
 
      std::vector<VNodeListItem*> data_;
+     std::map<ServerHandler*,int> serverCnt_;
+     int maxNum_;
 };
 
 #endif /* VIEWER_SRC_VNODELIST_HPP_ */

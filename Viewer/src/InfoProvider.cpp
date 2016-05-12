@@ -12,16 +12,20 @@
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
 
+#include <QDateTime>
+
 #include <boost/algorithm/string/predicate.hpp>
 
 InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 	owner_(owner),
 	taskType_(taskType),
-	enabled_(false),
+    active_(false),
 	autoUpdate_(false),
 	inAutoUpdate_(false)
 {
-	reply_=new VReply();
+	reply_=new VReply(this);
+    if(owner_)
+        owner_->registerInfoProvider(this);
 }
 
 InfoProvider::~InfoProvider()
@@ -37,6 +41,18 @@ void InfoProvider::clear()
 
 	reply_->reset();
 	info_.reset();
+}
+
+void InfoProvider::setActive(bool b)
+{
+    active_=b;
+    if(!active_)
+        clear();
+}
+
+void InfoProvider::setAutoUpdate(bool b)
+{
+    autoUpdate_=b;
 }
 
 void InfoProvider::info(VInfo_ptr info)
@@ -91,25 +107,29 @@ void InfoProvider::visit(VInfoNode* info)
     VNode *n=info->node();
 
     std::string fileName;
+    if(!fileVarName_.empty())
+    {
+        //Get the fileName
+        fileName=n->genVariable(fileVarName_);
+    }
 
     //We try to read the file directly from the disk
     if(info->server()->readFromDisk())
     {
     	//There is a variable defined for the filename
-    	if(!fileVarName_.empty())
-    	{
-    		//Get the fileName
-    		fileName=n->genVariable(fileVarName_);
-
+        if(!fileName.empty())
+    	{   		
     		if(reply_->textFromFile(fileName))
     		{
+    			reply_->fileReadMode(VReply::LocalReadMode);
+    			reply_->fileName(fileName);
     			owner_->infoReady(reply_);
     			return;
     		}
-    		else if(handleFileMissing(fileName,reply_))
+    		/*else if(handleFileMissing(fileName,reply_))
     		{
     			return;
-    		}
+    		}*/
     	}
     }
 
@@ -118,6 +138,8 @@ void InfoProvider::visit(VInfoNode* info)
 
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,n,this);
+    task_->reply()->fileName(fileName);
+    task_->reply()->fileReadMode(VReply::ServerReadMode);
 
     //Run the task in the server. When it finish taskFinished() is called. The text returned
     //in the reply will be prepended to the string we generated above.
@@ -144,46 +166,49 @@ void  InfoProvider::taskChanged(VTask_ptr task)
     if(task_ != task)
         return;
 
+    //temporary hack!
+    task_->reply()->setSender(this);
+
     switch(task->status())
     {
-        case VTask::FINISHED:
-            //We prepend the results to the existing text
-            //reply_->text(task->reply()->text());
+        case VTask::FINISHED:                 
+            {
+            task->reply()->addLog("TRY>fetch file from ecflow server: OK");
+
+            //The file should have a copy of the reply log
+            VFile_ptr f=task_->reply()->tmpFile();
+            if(f)
+            {
+                f->setFetchDate(QDateTime::currentDateTime());
+                f->setFetchMode(VFile::ServerFetchMode);
+                f->setLog(task_->reply()->log());
+            }
+            task->reply()->status(VReply::TaskDone);
             owner_->infoReady(task->reply());
+            task_.reset();            
+            }
+            break;
+        case VTask::ABORTED:
+        case VTask::REJECTED:         
+            task->reply()->addLog("TRY>fetch file from ecflow server: FAILED");
+            task->reply()->status(VReply::TaskFailed);
+            owner_->infoFailed(task->reply());
+            task_.reset();
+            break;
+        case VTask::CANCELLED:
+            if(!task->reply()->errorText().empty())
+        	{            	
+                task->reply()->addLog("TRY>fetch file from ecflow server: FAILED");
+                task->reply()->status(VReply::TaskCancelled);
+                owner_->infoFailed(task->reply());
+        	}
             //We do not need the task anymore.
             task_.reset();
             break;
-        case VTask::ABORTED:
-        case VTask::REJECTED:
-           //reply_->setErrorText(task->reply()->errorText());
-           owner_->infoFailed(task->reply());
-           //We do not need the task anymore.
-           task_.reset();break;
-        case VTask::CANCELLED:
-            if(!task->reply()->errorText().empty())
-        	{
-            	//reply_->setErrorText(task->reply()->errorText());
-            	owner_->infoFailed(task->reply());
-        	}
-            //We do not need the task anymore.
-            task_.reset();break;
         default:
             break;
     }
 }
-
-void InfoProvider::setEnabled(bool b)
-{
-	enabled_=b;
-	optionsChanged();
-}
-
-void InfoProvider::setAutoUpdate(bool b)
-{
-	autoUpdate_=b;
-	optionsChanged();
-}
-
 
 JobProvider::JobProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::JobTask)
@@ -243,6 +268,13 @@ HistoryProvider::HistoryProvider(InfoPresenter* owner) :
 {
 
 }
+
+SuiteProvider::SuiteProvider(InfoPresenter* owner) :
+		InfoProvider(owner,VTask::SuiteListTask)
+{
+
+}
+
 
 ZombieProvider::ZombieProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::ZombieListTask)

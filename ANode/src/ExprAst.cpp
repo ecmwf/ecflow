@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #57 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -213,7 +213,7 @@ std::ostream& AstNot::print( std::ostream& os ) const {
 }
 
 void AstNot::print_flat( std::ostream& os,bool add_bracket) const {
-   os << "! ";
+   os << name_;
    if (left_) {
       if (add_bracket) os << "(";
       left_->print_flat(os,add_bracket);

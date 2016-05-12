@@ -23,6 +23,7 @@ public:
 	explicit FileInfoLabel(QWidget* parent=0);
 
 	void update(VReply*,QString str=QString());
+	QColor fileSizeColour(qint64 size) const;
 
 };
 

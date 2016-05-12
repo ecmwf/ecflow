@@ -27,24 +27,8 @@
      </property>
      <item>
       <widget class="FileInfoLabel" name="fileLabel_">
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">border: 1px solid rgb(150,150,150);
-background: rgb(242, 242, 242);  </string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
        <property name="text">
         <string/>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-       <property name="textInteractionFlags">
-        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
        </property>
       </widget>
      </item>
@@ -77,7 +61,7 @@ background: rgb(242, 242, 242);  </string>
         <string>Ctrl+F</string>
        </property>
        <property name="checkable">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -104,14 +88,7 @@ background: rgb(242, 242, 242);  </string>
     </layout>
    </item>
    <item>
-    <widget class="MessageLabel" name="messageLabel_">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::NoTextInteraction</set>
-     </property>
-    </widget>
+    <widget class="MessageLabel" name="messageLabel_" native="true"/>
    </item>
    <item>
     <widget class="TreeView" name="treeView_">
@@ -142,11 +119,6 @@ background: rgb(242, 242, 242);  </string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MessageLabel</class>
-   <extends>QLabel</extends>
-   <header>MessageLabel.hpp</header>
-  </customwidget>
-  <customwidget>
    <class>FileInfoLabel</class>
    <extends>QLabel</extends>
    <header location="global">FileInfoLabel.hpp</header>
@@ -155,6 +127,12 @@ background: rgb(242, 242, 242);  </string>
    <class>TreeView</class>
    <extends>QTreeView</extends>
    <header location="global">TreeView.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header>MessageLabel.hpp</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

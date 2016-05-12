@@ -16,7 +16,7 @@ else
    while read nick host port
    do
       # Ping server 
-      LOG="--host $host --port $port"
+      LOG="--host=$host --port=$port"
       Client/bin/%COMPILER_VERSION%/release/ecflow_client $LOG --ping || continue
       
       # determine version

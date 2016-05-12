@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #95 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -32,7 +32,6 @@
 
 #include "ServerEnvironment.hpp"
 #include "ServerOptions.hpp"
-#include "WhiteListFile.hpp"
 #include "Log.hpp"
 #include "System.hpp"
 #include "Str.hpp"
@@ -306,30 +305,29 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
  		return false;
 	}
 
-	// If the white list file is empty or does not exist, its perfectly valid
+	// If the white list file is empty or does not exist, *ON* server start, its perfectly valid
 	// i.e any user is free to access the server
 	if (ecf_white_list_file_.empty()) return true;
 	if (!fs::exists(ecf_white_list_file_)) return true;
 
-	if (debug()) {
-		std::cout << "White list file " << ecf_white_list_file_ << " exists, opening...\n";
-	}
-
 	/// read in the ecf white list file that specifies valid users and their access rights
 	/// If the file can't be opened returns false and an error message and false;
-	WhiteListFile theFile(ecf_white_list_file_);
-	ServerEnvironment* nonConstThis =  const_cast<ServerEnvironment*>(this);
-	bool parse_result  = theFile.parse(nonConstThis->validUsers_,errorMsg);
+	bool parse_result = white_list_file_.load(ecf_white_list_file_, debug(), errorMsg);
 
    if (debug()) {
-      std::cout << dump_valid_users() << "\n";
+      std::cout << white_list_file_.dump_valid_users() << "\n";
    }
 	return parse_result;
 }
 
 std::pair<std::string,std::string> ServerEnvironment::hostPort() const
 {
- 	return std::make_pair(serverHost_,serverPort());
+ 	return std::make_pair(serverHost_,the_port());
+}
+
+std::string ServerEnvironment::the_port() const
+{
+   return boost::lexical_cast< std::string >( serverPort_ );
 }
 
 void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string> >& theRetVec) const
@@ -338,7 +336,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	   // Need to setup client environment.
 	   // The server sets these variable for use by the client. i.e when creating the jobs
 	   // The clients then uses them to communicate back with the server.
-  	theRetVec.push_back( std::make_pair(Str::ECF_PORT(), serverPort()) );
+  	theRetVec.push_back( std::make_pair(Str::ECF_PORT(), the_port()) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_NODE"), serverHost_) );
 
 	theRetVec.push_back( std::make_pair(Str::ECF_HOME(), ecfHome_) );
@@ -385,54 +383,21 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 	}
 
 	// Only override valid users if we successfully opened and parsed file
-	WhiteListFile theFile(ecf_white_list_file_);
-	std::map<std::string,bool> validUsers;
- 	if (theFile.parse(validUsers,errorMsg)) {
-
- 		validUsers_.clear();
- 		validUsers_ = validUsers;
-
- 	   if (debug())  std::cout << dump_valid_users() << "\n";
- 		return true;
- 	}
- 	return false;
+	return white_list_file_.load(ecf_white_list_file_, debug(), errorMsg );
 }
 
 
-bool ServerEnvironment::authenticateUser(const std::string& user) const
+bool ServerEnvironment::authenticateReadAccess(const std::string& user) const
 {
-	// If validUsers_ is empty , then all user are valid
-	if (validUsers_.empty()) return true;
-
-	if ( validUsers_.find(user) != validUsers_.end() ) {
-		return true;
-	}
-	return false;
+	// if *NO* users specified then all users are valid
+	return white_list_file_.allow_read_access(user);
 }
 
-bool ServerEnvironment::authenticateWriteAccess(const std::string& user, bool client_request_can_change_server_state) const
+bool ServerEnvironment::authenticateWriteAccess(const std::string& user) const
 {
-	// If validUsers_ is empty , then all users have write access
-	if (validUsers_.empty()) return true;
-
-	std::map<std::string,bool>::const_iterator i = validUsers_.find(user);
-	if ( i != validUsers_.end() ) {
-
-	   // (*i).second - true mean user is allowed read/write client requests
-	   //               false means user is only allowed read only client request
-	   if (client_request_can_change_server_state && (*i).second) {
-	      // request can change server state and user is allowed read/write access
-	      // authentication is OK
-	      return true;
-	   }
-	   if (!client_request_can_change_server_state) {
-	      // request is read only, and since user in the list, they must allow read requests
-	      return true;
-	   }
- 	}
-	return false;
+   // if *NO* users specified then all users have write access
+   return white_list_file_.allow_write_access(user);
 }
-
 
 // ============================================================================================
 // Privates:
@@ -561,11 +526,6 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
    }
 }
 
-std::string ServerEnvironment::serverPort() const
-{
-	return boost::lexical_cast< std::string >( serverPort_ );
-}
-
 void ServerEnvironment::change_dir_to_ecf_home_and_check_accesibility()
 {
 	if( chdir(ecfHome_.c_str()) != 0 ) {
@@ -589,22 +549,22 @@ std::string ServerEnvironment::check_mode_str() const { return the_check_mode(ch
 std::string ServerEnvironment::dump() const
 {
    std::stringstream ss;
-	ss << "ECF_HOME = '" << ecfHome_ << "'\n";
-	if (Log::instance()) ss << "ECF_LOG = '" << Log::instance()->path() << "'\n";
-	else                 ss << "ECF_LOG = ''\n";
-	ss << "ECF_PORT = '" << serverPort_ << "'\n";
-	ss << "ECF_CHECK = '" << ecf_checkpt_file_ << "'\n";
-	ss << "ECF_CHECKOLD = '" << ecf_backup_checkpt_file_ << "'\n";
-	ss << "ECF_CHECKINTERVAL = '" << checkPtInterval_ << "'\n";
-	ss << "ECF_INTERVAL = '" << submitJobsInterval_ << "'\n";
-	ss << "ECF_CHECKMODE = '" << the_check_mode(checkMode_) << "'\n";
-	ss << "ECF_JOB_CMD = '" << ecf_cmd_ << "'\n";
-	ss << "ECF_KILL_CMD = '" << killCmd_ << "'\n";
-	ss << "ECF_STATUS_CMD = '" << statusCmd_ << "'\n";
-	ss << "ECF_URL_CMD = '" << urlCmd_ << "'\n";
-	ss << "ECF_URL_BASE = '" << urlBase_ << "'\n";
-	ss << "ECF_URL = '" << url_ << "'\n";
-	ss << "ECF_MICRO = '" << ecf_micro_ << "'\n";
+   ss << "ECF_HOME = '" << ecfHome_ << "'\n";
+   if (Log::instance()) ss << "ECF_LOG = '" << Log::instance()->path() << "'\n";
+   else                 ss << "ECF_LOG = ''\n";
+   ss << "ECF_PORT = '" << serverPort_ << "'\n";
+   ss << "ECF_CHECK = '" << ecf_checkpt_file_ << "'\n";
+   ss << "ECF_CHECKOLD = '" << ecf_backup_checkpt_file_ << "'\n";
+   ss << "ECF_CHECKINTERVAL = '" << checkPtInterval_ << "'\n";
+   ss << "ECF_INTERVAL = '" << submitJobsInterval_ << "'\n";
+   ss << "ECF_CHECKMODE = '" << the_check_mode(checkMode_) << "'\n";
+   ss << "ECF_JOB_CMD = '" << ecf_cmd_ << "'\n";
+   ss << "ECF_KILL_CMD = '" << killCmd_ << "'\n";
+   ss << "ECF_STATUS_CMD = '" << statusCmd_ << "'\n";
+   ss << "ECF_URL_CMD = '" << urlCmd_ << "'\n";
+   ss << "ECF_URL_BASE = '" << urlBase_ << "'\n";
+   ss << "ECF_URL = '" << url_ << "'\n";
+   ss << "ECF_MICRO = '" << ecf_micro_ << "'\n";
    ss << "check pt save time alarm " << checkpt_save_time_alarm_ << "\n";
    ss << "Job generation " << jobGeneration_ << "\n";
    ss << "Server host name " << serverHost_ << "\n";
@@ -614,22 +574,6 @@ std::string ServerEnvironment::dump() const
    if ( tcp_protocol_.family() ==  2 /*PF_INET*/)  ss << "TCP Protocol  v4 \n";
    else if ( tcp_protocol_.family() ==  10 /*PF_INET6*/)  ss << "TCP Protocol  v6 \n";
 
-	ss << dump_valid_users();
-	return ss.str();
-}
-
-std::string ServerEnvironment::dump_valid_users() const
-{
-   std::stringstream ss;
-   ss << "ECF_LISTS = '" << ecf_white_list_file_ << "'\n";
-   if (validUsers_.empty()) ss << " No users specified. Everyone has read/write access\n";
-
-   std::map<std::string,bool>::const_iterator i;
-   for(i=validUsers_.begin(); i!= validUsers_.end(); ++i) {
-      ss << " User: " << (*i).first;
-      if ((*i).second) ss << " has read/write access\n";
-      else            ss << " has read access only\n";
-   }
+   ss << white_list_file_.dump_valid_users();
    return ss.str();
 }
-

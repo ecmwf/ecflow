@@ -12,7 +12,6 @@
 #define TreeNodeViewDelegate_HPP_
 
 #include <QBrush>
-#include <QLinearGradient>
 #include <QMap>
 #include <QPen>
 #include <QStyledItemDelegate>
@@ -24,6 +23,9 @@
 
 class AnimationHandler;
 class PropertyMapper;
+class NodeShape;
+class NodeText;
+class ServerUpdateData;
 
 class TreeNodeViewDelegate : public NodeViewDelegate
 {
@@ -38,6 +40,9 @@ public:
 
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 
+    void setIndentation(int o) {indentation_=o;}
+
+
 Q_SIGNALS:
     void sizeHintChangedGlobal();
 
@@ -50,10 +55,19 @@ protected:
 	void renderNode(QPainter *painter,const QModelIndex& index,
             		const QStyleOptionViewItemV4& option,QString text) const;
 
-	void renderNodeCell(QPainter *painter,QColor bg,QColor realBg,QColor fg,
-                      QRect stateRect,QRect filleRect,QRect realRect,QRect textRect, QString text,
-                      bool selected) const;
-                                        
+    void renderServerCell(QPainter *painter,const NodeShape& stateShape,
+                                            const NodeText& text,bool selected) const;
+
+    void renderNodeCell(QPainter *painter,const NodeShape& stateShape,const NodeShape &realShape,
+                       const NodeText& nodeText,const NodeText& typeText,bool selected) const;
+
+    void renderNodeShape(QPainter* painter,const NodeShape& shape) const;
+    void renderTimer(QPainter *painter,QRect target, int remaining, int total) const;
+    void renderServerUpdate(QPainter* painter,const ServerUpdateData&) const;
+
+    QString formatTime(int timeInSec) const;
+    QColor interpolate(QColor c1,QColor c2,float r) const;
+
     enum NodeStyle {ClassicNodeStyle,BoxAndTextNodeStyle};
                     
     AnimationHandler* animation_;
@@ -61,16 +75,16 @@ protected:
     int nodeRectRad_;
 	bool drawChildCount_;
     NodeStyle nodeStyle_;
-    bool useNodeGrad_;
-    
+    int indentation_;
+    bool drawNodeType_;
+    QColor typeBgCol_;
 
     QFont serverNumFont_;
 	QFont suiteNumFont_;
 	QFont serverInfoFont_;
-
-	mutable QLinearGradient grad_;
-	static int lighter_;
-
+	QFont abortedReasonFont_;
+    QFont typeFont_;
+    QColor bgCol_;
 };
 
 #endif

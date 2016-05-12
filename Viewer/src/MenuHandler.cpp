@@ -13,21 +13,28 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 
+#include <assert.h>
 #include <iostream>
 
 #include <QMessageBox>
 #include <QMenu>
 #include <QLabel>
+#include <QLinearGradient>
 #include <QWidgetAction>
 #include <QDebug>
 #include <QObject>
+#include <QVBoxLayout>
 
 #include "Str.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
+#include "VConfig.hpp"
+#include "VNode.hpp"
+#include "CustomCommandHandler.hpp"
 
+int MenuItem::idCnt_=0;
 
 std::vector<Menu *> MenuHandler::menus_;
 
@@ -124,10 +131,14 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string type     = ItemDef.get("type",        "Command");
                 std::string enabled  = ItemDef.get("enabled_for", "");
                 std::string visible  = ItemDef.get("visible_for", "");
+                std::string questFor = ItemDef.get("question_for","");
                 std::string question = ItemDef.get("question", "");
                 std::string handler  = ItemDef.get("handler", "");
+                std::string views    = ItemDef.get("view", "");
                 std::string icon     = ItemDef.get("icon", "");
                 std::string hidden   = ItemDef.get("hidden", "false");
+                std::string statustip  = ItemDef.get("status_tip", "");
+
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
                 UserMessage::message(UserMessage::DBG, false, std::string("  " + name));
@@ -135,7 +146,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setCommand(command);
 
 
-                BaseNodeCondition *enabledCond = NodeExpressionParser::parseWholeExpression(enabled);
+                BaseNodeCondition *enabledCond = NodeExpressionParser::instance()->parseWholeExpression(enabled);
                 if (enabledCond == NULL)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
@@ -144,7 +155,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setEnabledCondition(enabledCond);
 
 
-                BaseNodeCondition *visibleCond = NodeExpressionParser::parseWholeExpression(visible);
+                BaseNodeCondition *visibleCond = NodeExpressionParser::instance()->parseWholeExpression(visible);
                 if (visibleCond == NULL)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));
@@ -152,9 +163,31 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
                 item->setVisibleCondition(visibleCond);
 
+                BaseNodeCondition *questionCond = NodeExpressionParser::instance()->parseWholeExpression(questFor);
+                if (questionCond == NULL)
+                {
+                    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse question condition: " + questFor));
+                    questionCond = new FalseNodeCondition();
+                }
+                item->setQuestionCondition(questionCond);
+
+
                 item->setQuestion(question);
                 item->setHandler(handler);
                 item->setIcon(icon);
+                item->setStatustip(statustip);
+
+                if(!views.empty())
+                {
+                	std::vector<std::string> viewsVec;
+                	QStringList vLst=QString::fromStdString(views).split("/");
+                	for(int i=0; i < vLst.count(); i++)
+                	{
+                		viewsVec.push_back(vLst[i].toStdString());
+                	}
+
+                	item->setViews(viewsVec);
+                }
 
                 if(hidden == "true")
                 	item->setHidden(true);
@@ -164,9 +197,6 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 addItemToMenu(item, menuName);
                 //std::cout << "   added" << std::endl;
-
-                // tell the ServerHandler how to translate from the item name to an actual command
-                ServerHandler::addServerCommand(name, command);
 
 
                 // parse the valid node types/states for this menu item
@@ -222,6 +252,88 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 }
 
 
+// ---------------------------------------------------------
+// MenuHandler::addCustomMenuCommands
+// Obtains the current list of custom commands and adds them
+// to the list of custom menu items.
+// ---------------------------------------------------------
+
+void MenuHandler::refreshCustomMenuCommands()
+{
+    BaseNodeCondition *trueCond  = new TrueNodeCondition();
+    BaseNodeCondition *falseCond = new FalseNodeCondition();
+	CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
+	CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
+
+    Menu *menu = findMenu("Custom");
+    if (menu)
+    {
+        menu->clearFixedList();
+
+        // create the 'compulsary' menu items
+        MenuItem *item1 = new MenuItem("Manage commands...");
+        item1->setCommand("custom");
+        addItemToMenu(item1, "Custom");
+        item1->setEnabledCondition(trueCond);
+        item1->setVisibleCondition(trueCond);
+        item1->setQuestionCondition(falseCond);
+        item1->setIcon("configure.svg");
+
+		// Saved commands
+		MenuItem *item2 = new MenuItem("-");
+		addItemToMenu(item2, "Custom");
+		item2->setEnabledCondition(trueCond);
+		item2->setVisibleCondition(trueCond);
+		item2->setQuestionCondition(falseCond);
+
+		int numSavedCommands = customSavedCmds->numCommands();
+
+		for (int i = 0; i < numSavedCommands; i++)
+		{
+			CustomCommand *cmd = customSavedCmds->commandFromIndex(i);
+			if (cmd->inContextMenu())
+			{
+				MenuItem *item = new MenuItem(cmd->name());
+				item->setCommand(cmd->command());
+				item->setEnabledCondition(trueCond);
+				item->setVisibleCondition(trueCond);
+				item->setQuestionCondition(trueCond);
+				item->setStatustip("__cmd__");
+				addItemToMenu(item, "Custom");
+			}
+		}
+
+
+		// Recently executed commands
+		MenuItem *item3 = new MenuItem("-");
+		addItemToMenu(item3, "Custom");
+		item3->setEnabledCondition(trueCond);
+		item3->setVisibleCondition(trueCond);
+		item3->setQuestionCondition(falseCond);
+
+		MenuItem *item4 = new MenuItem("Recent");
+		addItemToMenu(item4, "Custom");
+		item4->setEnabledCondition(falseCond);
+		item4->setVisibleCondition(trueCond);
+		item4->setQuestionCondition(falseCond);
+
+		int numRecentCommands = customRecentCmds->numCommands();
+
+		for (int i = 0; i < numRecentCommands; i++)
+        {
+            CustomCommand *cmd = customRecentCmds->commandFromIndex(i);
+
+            MenuItem *item = new MenuItem(cmd->name());
+            item->setCommand(cmd->command());
+            item->setEnabledCondition(trueCond);
+            item->setVisibleCondition(trueCond);
+            item->setQuestionCondition(trueCond);
+            item->setStatustip("__cmd__");
+            addItemToMenu(item, "Custom");
+        }
+    }
+}
+
 
 Menu *MenuHandler::findMenu(const std::string &name)
 {
@@ -238,13 +350,17 @@ Menu *MenuHandler::findMenu(const std::string &name)
 
 MenuItem* MenuHandler::findItem(QAction* ac)
 {
-	for(std::vector<Menu*>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
+	// ac could be NULL, e.g. if the user clicked on a separator instead of a menu item
+	if (ac)
 	{
-		for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
+		for(std::vector<Menu*>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
 		{
-			if((*it)->action() == ac)
+			for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
 			{
-				return *it;
+				if((*it)->id() == ac->data().toInt())
+				{
+					return *it;
+				}
 			}
 		}
 	}
@@ -264,7 +380,7 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
     
     if (menu)
     {
-        menu->addItem(item);
+        menu->addItemToFixedList(item);
         return true;
     }
     else
@@ -278,26 +394,37 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
 }
 
 
-QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent)
+MenuItem *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view)
 {
-    QAction *selectedAction = NULL;
+    MenuItem *selectedItem = NULL;
     Menu *menu = findMenu(menuName);
 
     if (menu)
     {
-        QMenu *qMenu = menu->generateMenu(nodes, parent);
+    	QList<QAction*> acLst;
+
+    	//While create the menus we collect all the actions created with "parent" as the parent.
+    	//QMenu does not take ownership of these actions so we need to delete them.
+        QMenu *qMenu = menu->generateMenu(nodes, parent, NULL, view,acLst);
 
         if (qMenu)
         {
-            selectedAction = qMenu->exec(pos);
+            QAction* selectedAction = qMenu->exec(pos);
+            selectedItem=MenuHandler::findItem(selectedAction);
+
             delete qMenu;
+
+            //Delete all the actions with "parent" as the parent;
+            Q_FOREACH(QAction *ac,acLst)
+            {
+            	assert(parent == ac->parent());
+            	delete ac;
+            }
         }
     }
 
-    return selectedAction;
+    return selectedItem;
 }
-
-
 
 // -----------------------------------------------------------------
 
@@ -317,7 +444,7 @@ Menu::Menu(const std::string &name) : name_(name)
 
 Menu::~Menu()
 {
-    for (std::vector<MenuItem*>::iterator itItems = items_.begin(); itItems != items_.end(); ++itItems)
+    for (std::vector<MenuItem*>::iterator itItems = itemsCombined_.begin(); itItems != itemsCombined_.end(); ++itItems)
     {
         if (*itItems)
             delete (*itItems);
@@ -325,55 +452,29 @@ Menu::~Menu()
 }
 
 
-QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
+QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* parentMenu,const std::string& view,QList<QAction*>& acLst)
 {
-    bool showIcompatibleItems = true;
-    QMenu *qmenu=new QMenu(parent);	
-    qmenu->setTitle(QString::fromStdString(name()));
-
+	QMenu *qmenu=NULL;
+	if(parentMenu)
+	{
+		qmenu=parentMenu->addMenu(QString::fromStdString(name()));
+	}
+	else
+	{
+		qmenu=new QMenu(parent);
+		qmenu->setTitle(QString::fromStdString(name()));
+	}
 
     if (nodes.empty())
         return NULL;
 
-
     //qmenu->setWindowFlags(Qt::Tool);
     //qmenu->setWindowTitle("my title");
-
 
     // add an inactive action(!) to the top of the menu in order to show which
     // node has been selected
 
-    QLabel *nodeLabel = NULL;
-
-    if (nodes.size() == 1)
-    {
-        //single node selected put a label with the node name + colour
-        nodeLabel = new QLabel(QString::fromStdString((*nodes[0]).name()));
-
-        QPalette labelPalette;
-        labelPalette.setColor(QPalette::Window,     (*nodes[0]).node()->stateColour());
-        labelPalette.setColor(QPalette::WindowText, QColor(96,96,96));
-        nodeLabel->setAutoFillBackground(true);
-        nodeLabel->setPalette(labelPalette);
-    }
-    else
-    {
-        // multiple nodes selected - say how many
-        nodeLabel = new QLabel(QObject::tr("%1 nodes selected").arg(nodes.size()));
-    }
-
-    QFont menuTitleFont;
-    menuTitleFont.setBold(true);
-    menuTitleFont.setItalic(true);
-    nodeLabel->setFont(menuTitleFont);
-    nodeLabel->setAlignment(Qt::AlignHCenter);
-    nodeLabel->setObjectName("nodeLabel");
-
-    QWidgetAction *action = new QWidgetAction(0);
-    action->setDefaultWidget(nodeLabel);
-    action->setEnabled(false);
-    action->setParent(parent);
-    qmenu->addAction(action);
+    buildMenuTitle(nodes,qmenu);
 
     //TypeNodeCondition  typeCondFamily   (MenuItem::FAMILY);
     //TypeNodeCondition  typeCondTask     (MenuItem::TASK);
@@ -390,12 +491,18 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
     //}
 
 
+    // merge the fixed menu items (from the config file) with the dynamic ones
+    itemsCombined_ = itemsFixed_;
+    itemsCombined_.insert(itemsCombined_.end(), itemsCustom_.begin(), itemsCustom_.end());
 
-    for (std::vector<MenuItem*>::iterator itItems = items_.begin(); itItems != items_.end(); ++itItems)
+    for (std::vector<MenuItem*>::iterator itItems = itemsCombined_.begin(); itItems != itemsCombined_.end(); ++itItems)
     {
         //  is this item valid for the current selection?
 
     	if((*itItems)->hidden())
+    		continue;
+
+    	if(!(*itItems)->isValidView(view))
     		continue;
 
         bool visible = true;
@@ -419,13 +526,12 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
 
             if ((*itItems)->isSubMenu())
             {
-                //QMenu *subMenu = qmenu->addMenu(QString::fromStdString((*itItems)->name()));
                 Menu *menu = MenuHandler::findMenu((*itItems)->name());
                 if (menu)
                 {
-                    QMenu *subMenu = menu->generateMenu(nodes, 0);
-                    qmenu->addMenu(subMenu);
-                    subMenu->setEnabled(enabled);
+                    //The submenu will be added to qmenu and it will take ownership of it.
+					QMenu *subMenu = menu->generateMenu(nodes, parent, qmenu, view, acLst);
+					subMenu->setEnabled(enabled);
                 }
             }
             else if  ((*itItems)->isDivider())
@@ -434,16 +540,123 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
             }
             else
             {
-                QAction *action = (*itItems)->action();
-                qmenu->addAction(action);
-                action->setParent(parent);
+                //When we add the action to the menu its parent (NULL a.i. the QApplication) does not change.
+            	//So when the menu is deleted the action is not deleted.
+            	//At least this is the behaviour with Qt 4.8. and 5.5.
+            	//QAction *action = (*itItems)->action();
+            	//action->setParent(parent);
+
+            	//These actions will have "parent" as the parent, otherwise the statustip would not work
+            	//on qmainwindows. The downside is that we need to delete these actions separately when the qmenu is deleted.
+            	//In theory the parent of the actions could be the qmenu as well, but in this case the statustip does not work!
+            	QAction* action=(*itItems)->createAction(parent);
+            	qmenu->addAction(action);
                 action->setEnabled(enabled);
+                acLst << action;
             }
         }
     }
 
-
     return qmenu;
+}
+
+/*
+void Menu::addSubHeading(std::string &name)
+{
+    QLabel *nodeLabel = new QLabel(name);
+
+    QFont menuTitleFont;
+    menuTitleFont.setBold(true);
+    menuTitleFont.setItalic(true);
+    nodeLabel->setFont(menuTitleFont);
+    nodeLabel->setAlignment(Qt::AlignHCenter);
+    nodeLabel->setObjectName("nodeLabel");
+
+    QWidget* titleW=new QWidget(qmenu);
+    QVBoxLayout *titleLayout=new QVBoxLayout(titleW);
+    titleLayout->setContentsMargins(2,2,2,2);
+    titleLayout->addWidget(nodeLabel);
+    nodeLabel->setParent(titleW);
+
+    QWidgetAction *wAction = new QWidgetAction(qmenu);
+    //Qt doc says: the ownership of the widget is passed to the widgetaction.
+    //So when the action is deleted it will be deleted as well.
+    wAction->setDefaultWidget(titleW);
+    //wAction->setEnabled(false);
+    qmenu->addAction(wAction);
+
+}
+*/
+void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
+{
+	QLabel *nodeLabel = NULL;
+
+	if (nodes.size() == 1)
+	{
+		VNode *node=nodes.at(0)->node();
+
+		if(!node)
+			return;
+
+		//single node selected put a label with the node name + colour
+		nodeLabel = new QLabel(node->name());
+
+		QBrush bgBrush(node->stateColour());
+
+		if(VProperty* p=VConfig::instance()->find("view.common.node_gradient"))
+		{
+			if(p->value().toBool())
+			{
+				int lighter=150;
+				QColor bg=bgBrush.color();
+				QColor bgLight=bg.lighter(lighter);
+				QColor border=bg.darker(125);
+
+				QLinearGradient grad;
+				grad.setCoordinateMode(QGradient::ObjectBoundingMode);
+				grad.setStart(0,0);
+				grad.setFinalStop(0,1);
+
+				grad.setColorAt(0,bgLight);
+				grad.setColorAt(1,bg);
+				bgBrush=QBrush(grad);
+			}
+		}
+
+		QPalette labelPalette;
+		labelPalette.setBrush(QPalette::Window,bgBrush);
+		labelPalette.setColor(QPalette::WindowText,node->stateFontColour());//QColor(96,96,96));
+		nodeLabel->setAutoFillBackground(true);
+		nodeLabel->setPalette(labelPalette);
+
+		QString titleQss="QLabel {padding: 2px;}";
+		nodeLabel->setStyleSheet(titleQss);
+	}
+	else
+	{
+		// multiple nodes selected - say how many
+		nodeLabel = new QLabel(QObject::tr("%1 nodes selected").arg(nodes.size()));
+	}
+
+	QFont menuTitleFont;
+	menuTitleFont.setBold(true);
+	menuTitleFont.setItalic(true);
+	nodeLabel->setFont(menuTitleFont);
+	nodeLabel->setAlignment(Qt::AlignHCenter);
+	nodeLabel->setObjectName("nodeLabel");
+
+	QWidget* titleW=new QWidget(qmenu);
+	QVBoxLayout *titleLayout=new QVBoxLayout(titleW);
+	titleLayout->setContentsMargins(2,2,2,2);
+	titleLayout->addWidget(nodeLabel);
+	nodeLabel->setParent(titleW);
+
+	QWidgetAction *wAction = new QWidgetAction(qmenu);
+	//Qt doc says: the ownership of the widget is passed to the widgetaction.
+	//So when the action is deleted it will be deleted as well.
+	wAction->setDefaultWidget(titleW);
+	//wAction->setEnabled(false);
+	qmenu->addAction(wAction);
 }
 
 
@@ -453,10 +666,11 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
 
 MenuItem::MenuItem(const std::string &name) :
    name_(name),
-   action_(0),
+   id_(idCnt_++),
    hidden_(false),
    visibleCondition_(NULL),
    enabledCondition_(NULL),
+   questionCondition_(NULL),
    isSubMenu_(false),
    isDivider_(false)
 {
@@ -464,26 +678,18 @@ MenuItem::MenuItem(const std::string &name) :
     {
         isDivider_ = true;
     }
-    else
-    {
-        action_ = new QAction(0);
-        action_->setText(QString(name.c_str()));
-    }
 }
-
 
 MenuItem::~MenuItem()
 {
-    if (action_)
-        delete action_;
 }
 
 void MenuItem::setCommand(const std::string &command)
 {
     command_ = command;
 
-    if (action_)
-        action_->setStatusTip(QString(command.c_str()));  // so we see the command in the status bar
+    //if (action_)
+    //    action_->setStatusTip(QString(command.c_str()));  // so we see the command in the status bar
 }
 
 void MenuItem::setHandler(const std::string& handler)
@@ -495,13 +701,51 @@ void MenuItem::setIcon(const std::string& icon)
 {
 	if(!icon.empty())
 	{
-		action_->setIcon(QPixmap(":/viewer/" + QString::fromStdString(icon)));
+		icon_=QIcon(QPixmap(":/viewer/" + QString::fromStdString(icon)));
 	}
 }
 
+bool MenuItem::shouldAskQuestion(std::vector<VInfo_ptr> &nodes)
+{
+    bool askQuestion = false;
+
+    // ask the question if any of the nodes require it
+    for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
+    {
+        askQuestion = askQuestion || questionCondition()->execute(*itNodes);
+    }
+
+    return askQuestion;
+}
+
+bool MenuItem::isValidView(const std::string& view) const
+{
+	if(views_.empty())
+		return true;
+
+	return (std::find(views_.begin(),views_.end(),view) != views_.end());
+}
+
+QAction* MenuItem::createAction(QWidget* parent)
+{
+	QAction *ac=new QAction(parent);
+	ac->setText(QString::fromStdString(name_));
+	ac->setIcon(icon_);
+
+	if(!statustip_.empty())
+	{
+		if(statustip_ == "__cmd__")
+			ac->setStatusTip(QString::fromStdString(command_));  // so we see the command in the status bar
+		else
+			ac->setStatusTip(QString::fromStdString(statustip_));
+	}
+	ac->setData(id_);
+	return ac;
+
+}
 
 
-// // adds an entry to the list of valid node types for this menu item
+// // adds an entry to the list of valid node types for this menu item(*itItems)
 // void MenuItem::addValidType(std::string type)
 // {
 //     static NodeType all[] = {TASK, FAMILY, SUITE, SERVER, ALIAS};

@@ -12,6 +12,8 @@
 
 #include <vector>
 #include <QString>
+#include <QIcon>
+#include <QList>
 #include <QPoint>
 
 #include "VInfo.hpp"
@@ -40,33 +42,46 @@ public:
     //void addValidType(std::string type);
     //void addValidState(std::string type);
     void setHandler(const std::string &handler);
+    void setViews(const std::vector<std::string> &views) {views_=views;};
     void setQuestion(const std::string &question) {question_=question;}
     void setIcon(const std::string &icon);
+    void setStatustip(const std::string &statustip) {statustip_=statustip;}
     void setHidden(bool b) {hidden_=b;}
     void setAsSubMenu() {isSubMenu_ = true;};
-    void setVisibleCondition(BaseNodeCondition *cond) {visibleCondition_ = cond;};
-    void setEnabledCondition(BaseNodeCondition *cond) {enabledCondition_ = cond;};
-    BaseNodeCondition *visibleCondition() {return visibleCondition_;};
-    BaseNodeCondition *enabledCondition() {return enabledCondition_;};
+    void setVisibleCondition(BaseNodeCondition *cond)  {visibleCondition_  = cond;};
+    void setEnabledCondition(BaseNodeCondition *cond)  {enabledCondition_  = cond;};
+    void setQuestionCondition(BaseNodeCondition *cond) {questionCondition_ = cond;};
+    BaseNodeCondition *visibleCondition()  {return visibleCondition_;};
+    BaseNodeCondition *enabledCondition()  {return enabledCondition_;};
+    BaseNodeCondition *questionCondition() {return questionCondition_;};
+    bool shouldAskQuestion(std::vector<VInfo_ptr> &nodes);
     bool isSubMenu()      {return isSubMenu_;};
     bool isDivider()      {return isDivider_;};
     std::string &name()   {return name_;};
     const std::string handler() const {return handler_;}
+    bool isValidView(const std::string&) const;
     const std::string command() const {return command_;}
     const std::string question() const {return question_;}
     bool hidden() const {return hidden_;}
-    QAction     *action() {return action_;};
+    int id() const {return id_;}
+    QAction* createAction(QWidget* parent);
 
 private:
+    //No copy allowed
+    MenuItem(const MenuItem&);
+    MenuItem& operator=(const MenuItem&);
 
     //bool isNodeTypeValidForMenuItem(NodeType type);
 
     std::string name_;
+    int id_;
     std::string tooltip_;
     std::string command_;
+    std::string statustip_;
     std::string question_;
     std::string defaultAnswer_;
     std::string handler_;
+    std::vector<std::string> views_;
     bool hidden_;
 
     //std::vector<NodeType>      validNodeTypes_;
@@ -75,11 +90,14 @@ private:
 
     BaseNodeCondition *visibleCondition_;
     BaseNodeCondition *enabledCondition_;
+    BaseNodeCondition *questionCondition_;
 
     bool isSubMenu_;
     bool isDivider_;
 
-    QAction *action_;
+    QIcon icon_;
+
+    static int idCnt_;
 };
 
 
@@ -98,14 +116,19 @@ public:
     ~Menu();
     QString exec(std::vector<Node *> nodes);
     std::string &name()       {return name_;};
-    void addItem(MenuItem *item) {items_.push_back(item);};
-    QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent);
-    std::vector<MenuItem *>& items() {return items_;};
-
+    void addItemToFixedList(MenuItem *item) {itemsFixed_.push_back(item);};
+    void addItemToCustomList(MenuItem *item) {itemsCustom_.push_back(item);};
+    void clearFixedList() {itemsFixed_.clear();}
+    QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* parentMenu,const std::string& view,QList<QAction*>&);
+    std::vector<MenuItem *>& items() {return itemsCombined_;};
 
 private:
+    void buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu);
+
     std::string             name_;
-    std::vector<MenuItem *> items_;
+    std::vector<MenuItem *> itemsFixed_;
+    std::vector<MenuItem *> itemsCustom_;
+    std::vector<MenuItem *> itemsCombined_;  // items from config file plus custom commands
 
 };
 
@@ -124,14 +147,16 @@ public:
 
     //Menu *createMenu(QString &name);
     static bool readMenuConfigFile(const std::string &configFile);
-    static QAction *invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent);
+    static MenuItem *invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view);
     static bool addItemToMenu(MenuItem *item, const std::string &menuName);
-    static Menu *findMenu(const std::string &name);
-    static MenuItem* findItem(QAction*);
+    static Menu *findMenu(const std::string &name);    
     static MenuItem* newItem(const std::string &name);
     static void addMenu(Menu *menu) {menus_.push_back(menu);};
+    static void refreshCustomMenuCommands();
 
 private:
+    static MenuItem* findItem(QAction*);
+
     static std::vector<Menu *> menus_;
     //static std::vector<MenuItem> items_;
 

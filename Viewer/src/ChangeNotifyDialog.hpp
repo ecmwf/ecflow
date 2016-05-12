@@ -9,16 +9,51 @@
 //============================================================================
 
 #ifndef CHANGENOTIFYDIALOG_HPP_
-#define CHNAGENOTIFYDIALOG_HPP_
+#define CHANGENOTIFYDIALOG_HPP_
 
 #include <QDialog>
-
-#include <map>
+#include <QLinearGradient>
+#include <QWidget>
 
 #include "ui_ChangeNotifyDialog.h"
+#include "ui_ChangeNotifyDialogWidget.h"
+
+#include "VInfo.hpp"
 
 class ChangeNotify;
 class VProperty;
+
+class QLabel;
+
+class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialogWidget
+{
+ Q_OBJECT
+
+public:
+	explicit ChangeNotifyDialogWidget(QWidget* parent=0);
+    ~ChangeNotifyDialogWidget() {}
+
+	void init(ChangeNotify*);
+	void update(ChangeNotify*);
+	ChangeNotify* notifier() const {return notifier_;}
+
+public Q_SLOTS:
+	void slotAppend();
+	void slotRemoveRow(int);
+	void slotReset();
+
+protected Q_SLOTS:
+    void slotSelectItem(const QModelIndex&);
+    void slotDoubleClickItem(const QModelIndex&);
+
+Q_SIGNALS:
+    void contentsChanged();
+    void selectionChanged(VInfo_ptr);
+
+protected:
+	ChangeNotify* notifier_;
+};
+
 
 class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog
 {
@@ -36,18 +71,25 @@ public:
 public Q_SLOTS:
 	void on_tab__currentChanged(int);
 	void on_closePb__clicked(bool b);
+	void on_clearPb__clicked(bool b);
+    void slotContentsChanged();
+
+protected Q_SLOTS:
+    void slotSelectionChanged(VInfo_ptr);
 
 protected:
 	ChangeNotify* tabToNtf(int tabIdx);
 	int ntfToTab(ChangeNotify*);
-	void decorateTab(int,VProperty*);
+	void decorateTabs();
+	void decorateTab(int,ChangeNotify*);
+	void updateStyleSheet(VProperty *currentProp);
 	void closeEvent(QCloseEvent*);
 	void writeSettings();
 	void readSettings();
 
-	std::map<ChangeNotify*,int> ntfToTabMap_;
-	std::map<int,ChangeNotify*> tabToNtfMap_;
+	QList<ChangeNotifyDialogWidget*> tabWidgets_;
 	bool ignoreCurrentChange_;
+	QLinearGradient grad_;
 };
 
 #endif

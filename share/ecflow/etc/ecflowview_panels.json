@@ -32,7 +32,7 @@
             "dock_icon"    : "script_dock.svg",
             "show"    : "toolbar",
             "tooltip" : "Open <b>script</b> tab in a new Info Panel dialog",
-            "visible_for" : "task"            
+            "visible_for" : "task or alias"            
         }, 
         
         {
@@ -42,7 +42,7 @@
             "dock_icon"	  : "job_dock.svg",
             "show"    : "toolbar", 
             "tooltip" : "Open <b>job</b> tab in a new Info Panel dialog",
-            "visible_for" : "task"            
+            "visible_for" : "task or alias"            
         },    
         
         {
@@ -52,12 +52,12 @@
             "dock_icon"    : "output_dock.svg",
             "show"    : "toolbar",
             "tooltip" : "Open <b>output</b> tab in a new Info Panel dialog",
-            "visible_for" : "task"            
+            "visible_for" : "task or alias"            
         },    
         
         {
         	"name"    : "why",
-            "label"   : "Why?",
+            "label"   : "Why",
             "icon"    : "why.svg",
             "dock_icon"    : "why_dock.svg",
             "show" : "toolbar",
@@ -75,7 +75,8 @@
         {
         	"name"    : "time",
             "label"   : "Time line",
-            "visible_for" : "x"            
+            "hidden"  : "1",  
+            "visible_for" : "server or node"            
         },  
         
         {
@@ -90,9 +91,19 @@
         },  
         
         {
+            "name"    : "edit",
+            "label"   : "Edit",
+            "icon"    : "edit.svg",
+            "dock_icon"   : "edit.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>edit</b> tab in a new Info Panel dialog",            
+            "visible_for" : "task or alias"            
+        } ,           
+        
+        {
         	 "name"   : "history",
              "label"  : "Server log",
-             "icon"	  : "log.svg",
+             "icon"	  : "server_log.svg",
              "dock_icon"	  : "log.svg",
              "show"   : "toolbar",
              "tooltip" : "Open <b>server log</b> tab in a new Info Panel dialog",
@@ -101,23 +112,11 @@
         },  
         
         {
-        	"name"    : "edit",
-            "label"   : "Edit",
-            "icon"	  : "edit.svg",
-            "dock_icon"	  : "edit.svg",
-            "show"    : "toolbar",
-            "tooltip" : "Open <b>edit</b> tab in a new Info Panel dialog",            
-            "visible_for" : "task"            
-        } ,   
-       
-        
-        {
         	"name"    : "message",
-            "label"   : "Messages",
-            "icon"	  : "message.svg",
-            "dock_icon"	  : "message_dock.svg",
+            "label"   : "Node log",
+            "icon"	  : "node_log.svg",          
             "show"    : "toolbar",
-            "tooltip" : "Open <b>messages</b> tab in a new Info Panel dialog",                
+            "tooltip" : "Open <b>Node log</b> tab in a new Info Panel dialog",                
             "visible_for" : "server or node"
              
         },     
@@ -135,7 +134,8 @@
         
         {
         	"name"    : "suite",
-            "label"   : "Suites",
+            "label"   : "Suite filter",
+            "icon"    : "filter.svg",
             "visible_for" : "server"
              
         },

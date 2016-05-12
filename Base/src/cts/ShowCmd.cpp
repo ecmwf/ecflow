@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #20 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -75,8 +75,8 @@ const char* ShowCmd::desc() {
             "    --group=\"get ; show defs\"    # same as the previous example\n"
             "    --group=\"get ; show state\"   # Show all state for the node tree\n"
             "    --group=\"get ; show migrate\" # Shows state and allows migration\n"
-	         "    --group=\"get /s1; show\"      # show state for the node only\n"
-	         "    --group=\"get /s1; show state\""
+	         "    --group=\"get=/s1; show\"      # show state for the node only\n"
+	         "    --group=\"get=/s1; show state\""
 	;
 }
 
@@ -89,7 +89,7 @@ void ShowCmd::create( 	Cmd_ptr& cmd,
 {
    std::string show_state = vm[ ShowCmd::arg() ].as< std::string > ();
 
-   if (ac->debug()) cout << "ShowCmd::create api = '" << show_state << "'.\n";
+   if (ac->debug()) cout << "  ShowCmd::create api = '" << show_state << "'.\n";
 
 	PrintStyle::Type_t style = PrintStyle::DEFS;
 	if (!show_state.empty()) {

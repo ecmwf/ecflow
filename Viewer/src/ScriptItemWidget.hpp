@@ -18,21 +18,22 @@ class ScriptItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit ScriptItemWidget(QWidget *parent=0);
+	~ScriptItemWidget();
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
-	void clearContents();
-    
+    void clearContents();
+
     //From VInfoPresenter
     void infoReady(VReply*);
     void infoFailed(VReply*);
     void infoProgress(VReply*);
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected:
-    void updateWidgetState() {};
+    void updateState(const ChangeFlags&) {}
 };
 
 #endif

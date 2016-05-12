@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #9 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -62,7 +62,8 @@ void jobcheck_panel::show(node& n)
 Boolean jobcheck_panel::enabled(node& n)
 {
   if (n.type() != NODE_TASK && n.type() != NODE_ALIAS) return False;
-  if (n.status() != STATUS_SUBMITTED && n.status() != STATUS_ACTIVE) return False;
+  if (n.status() != STATUS_SUBMITTED && n.status() != STATUS_ACTIVE) 
+    return False;
   const std::string& cmd = n.__node__() ? cmd_str_ecf : cmd_str_sms;
   return n.variable(cmd).size() > 7;
 }

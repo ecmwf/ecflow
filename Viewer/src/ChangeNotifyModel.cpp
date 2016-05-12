@@ -42,10 +42,16 @@ void ChangeNotifyModel::setData(VNodeList *data)
 			this,SLOT(slotEndAppendRow()));
 
 	connect(data_,SIGNAL(beginRemoveRow(int)),
-				this,SLOT(slotBeginRemoveRow(int)));
+			this,SLOT(slotBeginRemoveRow(int)));
 
-	connect(data_,SIGNAL(endAppendRow()),
-				this,SLOT(slotEndAppendRow()));
+	connect(data_,SIGNAL(endRemoveRow(int)),
+			this,SLOT(slotEndRemoveRow(int)));
+
+	connect(data_,SIGNAL(beginRemoveRows(int,int)),
+			this,SLOT(slotBeginRemoveRows(int,int)));
+
+	connect(data_,SIGNAL(endRemoveRows(int,int)),
+			this,SLOT(slotEndRemoveRows(int,int)));
 
 	connect(data_,SIGNAL(beginReset()),
 			this,SLOT(slotBeginReset()));
@@ -99,10 +105,10 @@ QVariant ChangeNotifyModel::data( const QModelIndex& index, int role ) const
 		switch(index.column())
 		{
 		case 0:
-			return QString::fromStdString(item->node()->serverName());
+			return QString::fromStdString(item->server());
 			break;
 		case 1:
-			return QString::fromStdString(item->node()->absNodePath());
+			return QString::fromStdString(item->path());
 			break;
 		case 2:
 			return item->time();
@@ -111,12 +117,7 @@ QVariant ChangeNotifyModel::data( const QModelIndex& index, int role ) const
 			break;
 		}
 	}
-	else if(role == Qt::UserRole)
-	{
-		VNodeListItem *item=data_->itemAt(row);
-		assert(item);
-		return (item->isVisible())?1:0;
-	}
+
 	return QVariant();
 }
 
@@ -170,6 +171,31 @@ QModelIndex ChangeNotifyModel::parent(const QModelIndex &child) const
 	return QModelIndex();
 }
 
+VInfo_ptr ChangeNotifyModel::nodeInfo(const QModelIndex& index) const
+{
+    VInfo_ptr res;
+
+    if(!index.isValid() || !hasData())
+    {
+        return res;
+    }
+
+    int row=index.row();
+    if(row < 0 || row >= data_->size())
+        return res;
+
+    VNodeListItem *item=data_->itemAt(row);
+    Q_ASSERT(item);
+    VNode* vnode=item->node();
+    Q_ASSERT(vnode);
+
+    if(vnode->isServer())
+        return VInfoServer::create(vnode->server());
+    else
+        return VInfoNode::create(vnode);
+
+    return res;
+}
 
 void ChangeNotifyModel::slotBeginAppendRow()
 {
@@ -190,6 +216,17 @@ void ChangeNotifyModel::slotEndRemoveRow(int row)
 {
 	endRemoveRows();
 }
+
+void ChangeNotifyModel::slotBeginRemoveRows(int rowStart,int rowEnd)
+{
+	beginRemoveRows(QModelIndex(),rowStart,rowEnd);
+}
+
+void ChangeNotifyModel::slotEndRemoveRows(int,int)
+{
+	endRemoveRows();
+}
+
 
 void ChangeNotifyModel::slotBeginReset()
 {

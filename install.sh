@@ -38,16 +38,18 @@ cd build
 #  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
 #
 # -DCMAKE_BUILD_TYPE: The default build is RelWithDebInfo for ecbuild, this has been
-#                     overridden in the top level CMakeLists.txt Release
+#                     overridden in the top level CMakeLists.txt to Release
 #                     It can still be overridden specifying on the command line.
 #                     Be sure to remove cache first.
 
 cmake .. -DCMAKE_INSTALL_PREFIX=$prefix_arg  \
          # -DCMAKE_BUILD_TYPE=Release 
-         # -DENABLE_GUI=OFF    \
-         # -DENABLE_PYTHON=OFF  \
+         # -DENABLE_GUI=OFF       \
+         # -DENABLE_UI=OFF        \
+         # -DENABLE_PYTHON=OFF    \
          # -DENABLE_ALL_TESTS=ON  \
          # -DCMAKE_PYTHON_INSTALL_TYPE=local \
+         # -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
          # -DCMAKE_CXX_FLAGS="-Wall -Wno-unused-local-typedefs" \
          # -DCMAKE_CXX_COMPILER=xlC_r"
          # -DBOOST_ROOT=/var/tmp/$USER/boost/boost_1_53_0

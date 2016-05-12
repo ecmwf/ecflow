@@ -17,7 +17,16 @@
    <property name="spacing">
     <number>2</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -53,6 +62,23 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="shadowTb">
+       <property name="toolTip">
+        <string>Show &lt;b&gt;shadowed&lt;/b&gt; variables. A variable is shadowed when it is redefined in one of the descendants of its node shown in this panel.</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>:/viewer/show_shadowed.svg</normaloff>:/viewer/show_shadowed.svg</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QToolButton" name="addTb">
@@ -102,11 +128,11 @@
   </layout>
   <action name="actionAdd">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/add.svg</normaloff>:/viewer/images/add.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;New variable</string>
+    <string>Add &amp;new variable</string>
    </property>
    <property name="toolTip">
     <string>Add new variable</string>
@@ -117,11 +143,11 @@
   </action>
   <action name="actionProp">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/edit.svg</normaloff>:/viewer/edit.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Properties</string>
+    <string>&amp;Edit variable</string>
    </property>
    <property name="toolTip">
     <string>See/edit variable's properties</string>
@@ -132,11 +158,11 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>&amp;Delete variable</string>
    </property>
    <property name="toolTip">
     <string>Delete variable</string>
@@ -147,7 +173,7 @@
   </action>
   <action name="actionExport">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/filesave.svg</normaloff>:/viewer/filesave.svg</iconset>
    </property>
    <property name="text">
@@ -162,11 +188,11 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/editcopy.svg</normaloff>:/viewer/editcopy.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Copy variable</string>
+    <string>&amp;Copy item</string>
    </property>
    <property name="toolTip">
     <string>Copy variable</string>
@@ -177,7 +203,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/editpaste.svg</normaloff>:/viewer/editpaste.svg</iconset>
    </property>
    <property name="text">
@@ -192,7 +218,7 @@
   </action>
   <action name="actionFilter">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
    </property>
    <property name="text">
@@ -204,7 +230,7 @@
   </action>
   <action name="actionSearch">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
    </property>
    <property name="text">
@@ -212,6 +238,14 @@
    </property>
    <property name="toolTip">
     <string>Search mode</string>
+   </property>
+  </action>
+  <action name="actionCopyFull">
+   <property name="text">
+    <string>Copy name and value</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy variable's name and value</string>
    </property>
   </action>
  </widget>
@@ -222,8 +256,6 @@
    <header location="global">VariableView.hpp</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

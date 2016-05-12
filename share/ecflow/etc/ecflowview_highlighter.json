@@ -177,15 +177,75 @@
                "bold"	 : "true"
            }, 
            
-             "comment" : {
+           "comment" : {
                  "pattern" : "(#[^\n]*)",                     
                  "colour"  : "rgb(100,100,100)",
                  "italic"  : "true"                                         
-             }
-             
-             
-    }
-        
-        
+            }                          
+        },
+ 
+        "query"  : {
+
+             "oper" : {
+                 "pattern" : "(=|~)",                       
+                 "colour"  : "rgb(0,110,40)"                                   
+             }, 
+             "logical" : {
+                "pattern" : "(or|and)",                       
+                "colour"  : "rgb(40,40,40)",               
+                "bold"    : "false"
+             }, 
+             "keyword" : {
+                "pattern" : "(scope|scope:|nodes|nodes:|options|options:)",                       
+                "colour"  : "rgb(73,73,73)",               
+                "bold"    : "true"
+             }, 
+             "node" : {
+              "pattern" : "\\b(node_path|node_name)\\b",                       
+              "colour"  : "rgb(102,43,130)",
+              "bold"    : "true"
+            },        
+            "state" : {
+              "pattern" : "\\b(aborted|active|queued|complete|submitted|suspended|unknown)\\b",                       
+              "colour"  : "rgb(102,43,130)",
+              "bold"    : "true"
+            },
+             "type" : {
+              "pattern" : "\\b(server|suite|family|task|alias)\\b",                       
+              "colour"  : "rgb(102,43,130)",
+              "bold"    : "true"
+            }, 
+             "flag" : {
+              "pattern" : "\\b(is_late|has_date|has_message|has_time|is_rerun|is_waiting|is_zombie)\\b",                       
+              "colour"  : "rgb(102,43,130)",
+              "bold"    : "true"
+            }, 
+             "attr" : {
+              "pattern" : "\\b(date|date_name|event|event_name|label|label_name|label_value|late|late_name|limit|limit_name|limit_value|limit_max|limiter|limiter_name|meter|meter_name|repeat|repeat_name|repeat_value|time|time_name|trigger|trigger_expression|variable|variable_name|variable_value)\\b",                       
+              "colour"  : "rgb(102,43,130)",
+              "bold"    : "true"
+            },   
+            "server" : {
+              "pattern" : "\\b(servers|root_node)\\b",                       
+              "colour"  : "rgb(102,43,130)",
+              "bold"    : "false"
+            },             
+           "option" : {
+               "pattern" : "\\b(max_results|case_sensitive|case_insensitive)\\b",                       
+               "colour"  : "rgb(102,43,130)"
+           }, 
+           "int" : {
+               "pattern" : "(\\d+)",                       
+               "colour"  : "rgb(0,110,40)"
+           },            
+            "string" : {
+               "pattern" : "(\"[^\"]*\"|'[^']*')",                       
+               "colour"  : "rgb(0,0,230)"
+           },  
+            "any" : {
+               "pattern" : "(ANY)",                       
+               "colour"  : "rgb(16,16,16)"
+           }                                                                                  
+        }       
 }
 

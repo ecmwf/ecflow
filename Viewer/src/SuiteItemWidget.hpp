@@ -29,28 +29,32 @@ public:
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
-	void clearContents();
+    void clearContents();  
 
 	//From VInfoPresenter
-	void infoReady(VReply*) {};
-	void infoFailed(VReply*) {};
-	void infoProgress(VReply*) {};
+	void infoReady(VReply*);
+	void infoFailed(VReply*);
+    void infoProgress(VReply*) {}
 
-	void suiteFilterChanged();
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
-	void on_autoTb_clicked(bool);
+	void on_autoCb_clicked(bool);
 	void on_enableTb_clicked(bool);
 	void on_selectAllTb_clicked(bool);
 	void on_unselectAllTb_clicked(bool);
+	void on_syncTb_clicked(bool);
 	void on_okTb_clicked(bool);
+	void slotModelEdited(const QModelIndex&,const QModelIndex&);
 
 protected:
-	void updateWidgetState();
+	void updateData();    
+    void updateState(const ChangeFlags&);
+	void settingsChanged();
+    void checkActionState();
 
-	SuiteModel *model_;
+    SuiteModel *model_;
 };
 
 #endif

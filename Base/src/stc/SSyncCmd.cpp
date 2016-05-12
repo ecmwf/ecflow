@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #55 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -390,7 +390,7 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
 #ifdef DEBUG_CLIENT_SYNC
       std::cout << "SSyncCmd::do_sync: No defs in the server. Reset client caches\n";
 #endif
-      if (debug) std::cout << "SSyncCmd::do_sync:: No defs in the server. Reset client caches\n";
+      if (debug) std::cout << "  SSyncCmd::do_sync:: No defs in the server. Reset client caches\n";
       server_reply.client_handle_ = 0;
       server_reply.client_defs_ = defs_ptr();
       server_reply.client_node_ = node_ptr();
@@ -406,7 +406,7 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
        server_reply.client_defs_ = server_defs_;
        server_reply.set_sync( true );
        server_reply.set_full_sync( true );
-       if (debug) cout << "SSyncCmd::do_sync::*FULL sync*, client side state/modify numbers(" << server_defs_->state_change_no() << "," << server_defs_->modify_change_no() << ")\n";
+       if (debug) cout << "  SSyncCmd::do_sync::*FULL sync*, client side state/modify numbers(" << server_defs_->state_change_no() << "," << server_defs_->modify_change_no() << ")\n";
 #ifdef DEBUG_CLIENT_SYNC
        cout << "SSyncCmd::do_sync: defs *FULL sync*, client side state/modify numbers(" << server_defs_->state_change_no() << "," << server_defs_->modify_change_no() << ")\n";
 #endif
@@ -429,7 +429,7 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
       }
       server_reply.set_sync( true );
       server_reply.set_full_sync( true );
-      if (debug) cout << "SSyncCmd::do_sync::*FULL CACHE sync*, client side state/modify numbers(" << server_reply.client_defs_->state_change_no() << "," << server_reply.client_defs_->modify_change_no() << ")\n";
+      if (debug) cout << "  SSyncCmd::do_sync::*FULL CACHE sync*, client side state/modify numbers(" << server_reply.client_defs_->state_change_no() << "," << server_reply.client_defs_->modify_change_no() << ")\n";
 #ifdef DEBUG_CLIENT_SYNC
       cout << ": client side state/modify numbers(" << server_reply.client_defs_->state_change_no() << "," << server_reply.client_defs_->modify_change_no() << ")\n";
 #endif
@@ -446,7 +446,7 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
       bool changes_made_to_client = incremental_changes_.incremental_sync(server_reply.client_defs_,server_reply.changed_nodes());
       server_reply.set_sync( changes_made_to_client );
 
-      if (debug) cout << "SSyncCmd::do_sync::*INCREMENTAL sync*, client side state/modify numbers("
+      if (debug) cout << "  SSyncCmd::do_sync::*INCREMENTAL sync*, client side state/modify numbers("
                       << incremental_changes_.get_server_state_change_no() << ","
                       << incremental_changes_.get_server_modify_change_no() << ") changes_made_to_client("
                       << changes_made_to_client << ")\n";

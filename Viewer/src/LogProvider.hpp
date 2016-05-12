@@ -32,12 +32,10 @@ public:
 
 	 void visit(VInfoServer*);
 	 void clear();
+     void setAutoUpdate(bool);
 
 public Q_SLOTS:
 	void slotLinesAppend(QStringList);
-
-protected:
-	void optionsChanged();
 
 private:
 	void fetchFile();
@@ -46,7 +44,7 @@ private:
 	void stopWatchFile();
 	std::string readLastLines(const std::string& filename,int last_n_lines,size_t& size,std::string& error_msg);
 
-	 FileWatcher* fileWatcher_;
+    FileWatcher* fileWatcher_;
 
 };
 

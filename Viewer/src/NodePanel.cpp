@@ -14,8 +14,6 @@
 #include "ServerHandler.hpp"
 #include "VSettings.hpp"
 
-#include <QDebug>
-
 NodePanel::NodePanel(QWidget* parent) :
   TabWidget(parent)
 
@@ -29,8 +27,7 @@ NodePanel::NodePanel(QWidget* parent) :
 }
 
 NodePanel::~NodePanel()
-{
-	qDebug() << "a";
+{    
 }
 
 //=============================================
@@ -55,6 +52,8 @@ Dashboard *NodePanel::addWidget(QString id)
 	connect(nw,SIGNAL(titleChanged(QWidget*,QString,QPixmap)),
 				this,SLOT(slotTabTitle(QWidget*,QString,QPixmap)));
 
+	connect(nw,SIGNAL(contentsChanged()),
+			this,SIGNAL(contentsChanged()));
 
 	return nw;
 }
@@ -129,6 +128,23 @@ void NodePanel::slotSelection(VInfo_ptr n)
 			w->currentSelection(n);
 }
 
+bool NodePanel::selectInTreeView(VInfo_ptr info)
+{
+    for(int i=0; i < count(); i++)
+    {
+        if(QWidget *w=widget(i))
+        {
+            if(Dashboard* nw=static_cast<Dashboard*>(w))
+                if(nw->selectInTreeView(info))
+                {
+                    setCurrentIndex(i);
+                    return true;
+                }
+        }
+    }
+    return false;
+}
+
 void NodePanel::setViewMode(Viewer::ViewMode mode)
 {
 	Dashboard *w=currentDashboard();
@@ -163,6 +179,14 @@ void NodePanel::openDialog(VInfo_ptr info,const std::string& type)
 	    w->slotPopInfoPanel(info,QString::fromStdString(type));
 	}
 }
+void NodePanel::addSearchDialog()
+{
+	if(Dashboard *w=currentDashboard())
+	{
+		w->addSearchDialog();
+	}
+}
+
 
 void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)
 {
@@ -334,7 +358,6 @@ void NodePanel::readSettings(VComboSettings *vs)
 		{
 			d->addWidget("tree");
 		}
-
 	}
 
 	if(QWidget *w=currentDashboard())

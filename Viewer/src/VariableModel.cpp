@@ -13,12 +13,17 @@
 #include <QDebug>
 
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VariableModelData.hpp"
 
-QColor VariableModel::varCol_=QColor(Qt::black);
-QColor VariableModel::genVarCol_=QColor(34,51,136);
+QColor VariableModel::varCol_=QColor(40,41,42);
+//QColor VariableModel::genVarCol_=QColor(34,51,136);
+QColor VariableModel::genVarCol_=QColor(0,115,48);
+QColor VariableModel::shadowCol_=QColor(130,130,130);
 QColor VariableModel::blockBgCol_=QColor(122,122,122);
 QColor VariableModel::blockFgCol_=QColor(255,255,255);
+
+#define _UI_VARIABLEMODEL_DEBUG
 
 //=======================================================================
 //
@@ -40,10 +45,13 @@ VariableModel::VariableModel(VariableModelDataHandler* data,QObject *parent) :
 				this,SLOT(slotAddRemoveBegin(int,int)));
 
 	connect(data_,SIGNAL(addRemoveEnd(int)),
-						this,SLOT(slotAddRemoveEnd(int)));
+                this,SLOT(slotAddRemoveEnd(int)));
 
 	connect(data_,SIGNAL(dataChanged(int)),
-						this,SLOT(slotDataChanged(int)));
+                this,SLOT(slotDataChanged(int)));
+
+    connect(data_,SIGNAL(rerunFilter()),
+               this,SIGNAL(rerunFilter()));
 }
 
 bool VariableModel::hasData() const
@@ -53,7 +61,7 @@ bool VariableModel::hasData() const
 
 int VariableModel::columnCount( const QModelIndex& /*parent */ ) const
 {
-   	 return 2;
+     return 2;
 }
 
 int VariableModel::rowCount( const QModelIndex& parent) const
@@ -94,7 +102,8 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if(role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole &&
-	   role != ReadOnlyRole)
+       role != ReadOnlyRole && role != Qt::ToolTipRole && role != GenVarRole && role != Qt::FontRole &&
+       role != ShadowRole )
 	{
 		return QVariant();
 	}
@@ -125,7 +134,10 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 		{
 			if(role == Qt::DisplayRole)
 			{
-				return QString::fromStdString(d->name());
+                if(index.row() ==0)
+                    return "defined in " + QString::fromStdString(d->type()) + " " + QString::fromStdString(d->name());
+                else
+                    return "inherited from " + QString::fromStdString(d->type()) + " " + QString::fromStdString(d->name());
 			}
 		}
 
@@ -143,8 +155,13 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 
 		if(role == Qt::ForegroundRole)
 		{
-			//Generated variable
-			if(d->isGenVar(row))
+            if(d->isShadowed(row))
+            {
+                return shadowCol_;
+            }
+
+            //Generated variable
+            if(d->isGenVar(row) && index.column() == 0)
 				return genVarCol_;
 			else
 				return varCol_;
@@ -153,17 +170,46 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
         {    
 		    if(index.column() == 0)
 		    {
-			    return QString::fromStdString(d->name(row));
-		    }
-		    else if(index.column() == 1)
-		    {
-			    return QString::fromStdString(d->value(row));
-		    }
+                QString s=QString::fromStdString(d->name(row));
+                //if(d->isGenVar(row))
+                //    s+=" (g)";
+                return s;
+            }
+            else if(index.column() == 1)
+            {
+                return QString::fromStdString(d->value(row));
+            }
         }
+        else if(role == Qt::ToolTipRole)
+        {
+            QString s="User defined variable";
+            if(d->isGenVar(row))
+            {
+                s="Generated variable";
+            }
+            if(d->isReadOnly(row))
+                s+= " (read only)";
 
+            if(d->isShadowed(row))
+            {
+                s+=".<br>Please note that this variable is <b>shadowed</b> i.e. \
+                   overwritten in one of the descendants of this node shown in this panel!";
+            }
+            return s;
+        }
 		else if(role == ReadOnlyRole)
         {
 			return (d->isReadOnly(row))?true:false;
+        }
+
+        else if(role == GenVarRole)
+        {
+            return (d->isGenVar(row))?true:false;
+        }
+
+        else if(role == ShadowRole)
+        {
+            return (d->isShadowed(row))?true:false;
         }
 
 		return QVariant();
@@ -191,6 +237,51 @@ bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& valu
 	}
 
 	return false;
+}
+
+bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString value)
+{
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    qDebug() << "DEBUG :" << "VariableModel::alterVariable --> index" <<  index  << " name=" <<
+                     name << " value=" <<  value;
+#endif
+
+    if(data_->count() > 0)
+    {
+        //This will call the ServerComThread  so we
+        //do not know if it was successful or not. The model will be
+        //updated through the observer when the value will actually
+        //change.
+        data_->data(0)->alter(name.toStdString(),value.toStdString());
+    }
+
+#if 0
+    int block;
+    int row;
+
+    identify(index,block,row);
+
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    qDebug() << "   block=" <<  block << " row=" << row;
+#endif
+
+    if(block == -1 || row == -1)
+        return false;
+
+    if(block >=0 && block < data_->count())
+    {
+        //This will call the ServerComThread  so we
+        //do not know if it was successful or not. The model will be
+        //updated through the observer when the value will actually
+        //change.
+        data_->data(block)->alter(name.toStdString(),value.toStdString());
+    }
+#endif
+
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UserMessage::debug("<-- VariableModel::alterVariable");
+#endif
+    return false;
 }
 
 bool VariableModel::setVariable(const QModelIndex& index, QString name,QString value)
@@ -258,8 +349,8 @@ QVariant VariableModel::headerData( const int section, const Qt::Orientation ori
 
    	switch ( section )
 	{
-   	case 0: return tr("Name");
-   	case 1: return tr("Value");
+   	case 0: return tr("Name");  
+    case 1: return tr("Value");
    	default: return QVariant();
    	}
 
@@ -336,16 +427,22 @@ int VariableModel::indexToLevel(const QModelIndex& index) const
 
 VariableModelData* VariableModel::indexToData(const QModelIndex& index) const
 {
-	int block;
-	int row;
-
-	identify(index,block,row);
-
-	if(block != -1)
-		return data_->data(block);
-
-	return NULL;
+    int block=-1;
+    return indexToData(index,block);
 }
+
+VariableModelData* VariableModel::indexToData(const QModelIndex& index,int& block) const
+{
+    int row;
+
+    identify(index,block,row);
+
+    if(block != -1)
+        return data_->data(block);
+
+    return NULL;
+}
+
 
 //----------------------------------------------
 //
@@ -429,11 +526,26 @@ void VariableModel::slotAddRemoveEnd(int diff)
 	}
 }
 
+//It must be called after any data change
 void VariableModel::slotDataChanged(int block)
 {
-	QModelIndex blockIndex0=index(block,0);
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UserMessage::debug("VariableModel::slotDataChanged -->");
+#endif
+    QModelIndex blockIndex0=index(block,0);
 	QModelIndex blockIndex1=index(block,1);
+
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    qDebug() << "   emit dataChanged:" << blockIndex0 << blockIndex1;
+#endif
 	Q_EMIT dataChanged(blockIndex0,blockIndex1);
+
+    //We need to rerun the filter in the proxy model!
+    Q_EMIT filterChanged();
+
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UserMessage::debug("<-- VariableModel::slotDataChanged");
+#endif
 }
 
 //=======================================================================
@@ -445,13 +557,19 @@ void VariableModel::slotDataChanged(int block)
 VariableSortModel::VariableSortModel(VariableModel *varModel,QObject* parent) :
 	QSortFilterProxyModel(parent),
 	varModel_(varModel),
+    showShadowed_(true),
 	matchMode_(FilterMode),
 	ignoreDuplicateNames_(false)
 {
 	QSortFilterProxyModel::setSourceModel(varModel_);
 	setDynamicSortFilter(true);
-}
 
+    connect(varModel_,SIGNAL(filterChanged()),
+            this,SLOT(slotFilterChanged()));
+
+    connect(varModel_,SIGNAL(rerunFilter()),
+            this,SLOT(slotRerunFilter()));
+}
 
 void VariableSortModel::setMatchMode(MatchMode mode)
 {
@@ -473,11 +591,56 @@ void VariableSortModel::setMatchText(QString txt)
 
 	if(matchMode_ == FilterMode)
 	{
+#ifdef _UI_VARIABLEMODEL_DEBUG
+        //qDebug() << "before";
+        //print(QModelIndex());
+#endif
 		//reload the filter model
 		invalidate();
+#ifdef _UI_VARIABLEMODEL_DEBUG
+        //qDebug() << "after";
+        //print(QModelIndex());
+#endif
+
 	}
 }
 
+void VariableSortModel::print(const QModelIndex idx)
+{
+    if(rowCount(idx) > 0)
+        qDebug() << "-->" << idx << mapToSource(idx) << data(idx);
+    else
+        qDebug() << idx << mapToSource(idx) << data(idx);
+
+    if(rowCount(idx) > 0) qDebug() << "children:";
+    for(int i=0; i < rowCount(idx); i++)
+    {
+        print(index(i,0,idx));
+    }
+}
+
+void VariableSortModel::slotFilterChanged()
+{
+    if(matchMode_ == FilterMode)
+        invalidate();
+}
+
+void VariableSortModel::slotRerunFilter()
+{
+#ifdef _UI_VARIABLEMODEL_DEBUG
+   UserMessage::debug("VariableSortModel::slotRerunFilter-->");
+#endif
+   invalidate();
+}
+
+void VariableSortModel::slotShowShadowed(bool b)
+{
+   if(showShadowed_ != b)
+    {
+        showShadowed_=b;
+        invalidate();
+    }
+}
 
 bool VariableSortModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const
 {
@@ -502,13 +665,20 @@ bool VariableSortModel::lessThan(const QModelIndex &sourceLeft, const QModelInde
 
 bool VariableSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
 {
-	if(matchMode_ != FilterMode || matchText_.simplified().isEmpty())
+    if(!sourceParent.isValid())
+        return true;
+
+    QModelIndex idx=varModel_->index(sourceRow,0,sourceParent);
+
+    if(!showShadowed_)
+    {
+        if(varModel_->data(idx,VariableModel::ShadowRole).toBool())
+            return false;
+    }
+
+    if(matchMode_ != FilterMode || matchText_.simplified().isEmpty())
 		return true;
 
-	if(!sourceParent.isValid())
-		return true;
-
-	QModelIndex idx=varModel_->index(sourceRow,0,sourceParent);
 	QModelIndex idx2=varModel_->index(sourceRow,1,sourceParent);
 
 	QString s=varModel_->data(idx,Qt::DisplayRole).toString();
@@ -538,7 +708,7 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
         //qDebug() << idx << idx2;
         
         if(matchLst_.contains(idx) || matchLst_.contains(idx2))
-            return QColor(83,187,109);
+            return QColor(169,210,176);
     }
     
     return QSortFilterProxyModel::data(idx,role);

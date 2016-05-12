@@ -18,6 +18,7 @@
 
 #include "VParam.hpp"
 
+#include <QPair>
 #include <QPixmap>
 #include <QVariant>
 
@@ -32,6 +33,7 @@ public:
 
 	static std::vector<VParam*> filterItems();
 	static QVariantList pixmapList(VNode *vnode,VParamSet *filter);
+	static QString toolTip(VNode *vnode,VParamSet *filter);
 	static VIcon* find(const std::string& name);
 
 	//Called from VConfigLoader
@@ -41,10 +43,12 @@ protected:
 	void initPixmap();
 	QPixmap pixmap(int size);
 	virtual bool show(VNode*)=0;
+	QString shortDescription() const;
 
 	int pixId_;
 
 	static std::map<std::string,VIcon*> items_;
+	static std::vector<VIcon*> itemsVec_;
 };
 
 #endif

@@ -21,13 +21,19 @@ Q_OBJECT
 
 public:
 	explicit CodeItemWidget(QWidget *parent=0);
+	~CodeItemWidget();
 
-public Q_SLOTS:
-	void on_searchTb_toggled(bool b);
+protected Q_SLOTS:
+	void on_searchTb__clicked();
+	void on_gotoLineTb__clicked();
+	void on_fontSizeUpTb__clicked();
+	void on_fontSizeDownTb__clicked();
+
+Q_SIGNALS:
+	void editorFontSizeChanged();
 
 protected:
 	void removeSpacer();
-
 };
 
 #endif

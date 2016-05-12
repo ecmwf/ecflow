@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator )
    BOOST_FOREACH(Task* t, theTasks) {
       try {
          EcfFile ecf_file = t->locatedEcfFile();
-         BOOST_REQUIRE_MESSAGE( !ecf_file.path().empty(), "Could not locate ecf file for task ");
+         BOOST_REQUIRE_MESSAGE( ecf_file.valid(), "Could not locate ecf file for task ");
       }
       catch (std::exception& e) {
          BOOST_REQUIRE_MESSAGE(false,"Could not locate ecf file for task " << e.what());
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator_with_dummy_tasks )
    BOOST_FOREACH(task_ptr t, tasks_with_scripts) {
       try {
          EcfFile ecf_file = t->locatedEcfFile();
-         BOOST_REQUIRE_MESSAGE( !ecf_file.path().empty(), "Could not locate ecf file for task ");
+         BOOST_REQUIRE_MESSAGE( ecf_file.valid(), "Could not locate ecf file for task ");
       }
       catch (std::exception& e) {
          BOOST_REQUIRE_MESSAGE(false,"Could not locate ecf file for task " << e.what());

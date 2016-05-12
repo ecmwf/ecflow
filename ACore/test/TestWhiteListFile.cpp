@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #11 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -60,12 +60,9 @@ void test_white_list_files(const std::string& directory, bool pass)
 			std::cout << "......Parsing file " << relPath.string() << "\n";
 #endif
 
-		    WhiteListFile theFile(relPath.string());
-
-		    std::map<std::string,bool> validUsers;
+		   WhiteListFile theFile;
 			std::string errorMsg;
-
-			bool parsedOk = theFile.parse(validUsers, errorMsg);
+			bool parsedOk = theFile.load(relPath.string(),false/*debug*/, errorMsg);
 			if (pass) {
 				// Test expected to pass
 				BOOST_CHECK_MESSAGE(parsedOk,"Failed to parse file " << relPath << "\n" << errorMsg);
@@ -105,6 +102,26 @@ BOOST_AUTO_TEST_CASE( test_parsing_for_bad_white_list_files )
 	test_white_list_files(path, false);
 }
 
+BOOST_AUTO_TEST_CASE( test_white_list_empty_file )
+{
+   cout << "ACore:: ...test_white_list_empty_file\n";
+
+   std::string path = File::test_data("ACore/test/data/goodWhiteListFiles/empty.lists","ACore");
+
+   WhiteListFile theFile;
+   std::string errorMsg;
+   BOOST_CHECK_MESSAGE(theFile.load(path,false, errorMsg),"Failed to parse file " << path << "\n" << errorMsg);
+
+   BOOST_REQUIRE_MESSAGE(0 == theFile.read_access_size(), "expected 0 users with read access but found " << theFile.read_access_size() );
+   BOOST_REQUIRE_MESSAGE(0 == theFile.write_access_size(),"expected 0 users with write access but found " << theFile.write_access_size() );
+
+   // test random user
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("xxxx"),"Expected user xxxx to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("xxtt"),"Expected user xxtt to have read access ");
+
+   BOOST_REQUIRE_MESSAGE( theFile.allow_write_access("yyyy"),"Expected user yyyy to have write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_write_access("zzzz"),"Expected user zzzz to have write access ");
+}
 
 BOOST_AUTO_TEST_CASE( test_white_list )
 {
@@ -112,10 +129,9 @@ BOOST_AUTO_TEST_CASE( test_white_list )
 
    std::string path = File::test_data("ACore/test/data/goodWhiteListFiles/good1.lists","ACore");
 
-   WhiteListFile theFile(path);
-   std::map<std::string,bool> validUsers;
+   WhiteListFile theFile;
 	std::string errorMsg;
- 	BOOST_CHECK_MESSAGE(theFile.parse(validUsers, errorMsg),"Failed to parse file " << path << "\n" << errorMsg);
+ 	BOOST_CHECK_MESSAGE(theFile.load(path,false, errorMsg),"Failed to parse file " << path << "\n" << errorMsg);
 
  	// make sure we find all the users and the access right are correct
 // 	uid1    # a comment
@@ -128,21 +144,136 @@ BOOST_AUTO_TEST_CASE( test_white_list )
 // 	-fred  # a comment
 // 	-bill # a comment
 // 	-jake # a comment
-	std::vector< std::pair<std::string,bool> > expected;
-	expected.push_back(std::make_pair(std::string("uid1"), true));
-	expected.push_back(std::make_pair(std::string("uid2"), true));
-	expected.push_back(std::make_pair(std::string("cog"),  true));
-	expected.push_back(std::make_pair(std::string("fred"), false));
-	expected.push_back(std::make_pair(std::string("bill"), false));
-	expected.push_back(std::make_pair(std::string("jake"), false));
+	std::vector<std::string> expected_users_with_read_access;
+	expected_users_with_read_access.push_back( std::string("fred") );
+	expected_users_with_read_access.push_back( std::string("bill") );
+   expected_users_with_read_access.push_back( std::string("jake") );
 
- 	BOOST_REQUIRE_MESSAGE(expected.size() == validUsers.size(), " expected " << expected.size() << " users but found " << validUsers.size() );
- 	std::vector< std::pair<std::string,bool> >::const_iterator i;
- 	for(i=expected.begin(); i!= expected.end(); ++i) {
- 		std::map<std::string,bool>::const_iterator it = validUsers.find( (*i).first );
-	 	BOOST_REQUIRE_MESSAGE(it != validUsers.end(),"Failed to find user " << (*i).first);
-	 	BOOST_REQUIRE_MESSAGE((*it).second == (*i).second ,"For user " << (*i).first << " expected " <<  (*i).second << " but found " << (*it).second);
+   expected_users_with_read_access.push_back( std::string("uid1") );  // users with write access also have read access
+   expected_users_with_read_access.push_back( std::string("uid2") );  // users with write access also have read access
+   expected_users_with_read_access.push_back( std::string("cog") );   // users with write access also have read access
+
+   std::vector<std::string> expected_users_with_read_write_access;
+   expected_users_with_read_write_access.push_back( std::string("uid1"));
+   expected_users_with_read_write_access.push_back( std::string("uid2"));
+   expected_users_with_read_write_access.push_back( std::string("cog"));
+
+ 	BOOST_REQUIRE_MESSAGE(expected_users_with_read_access.size() == theFile.read_access_size(),
+ 	      " expected " << expected_users_with_read_access.size() << " users with read access but found " << theFile.read_access_size() );
+   BOOST_REQUIRE_MESSAGE(expected_users_with_read_write_access.size() == theFile.write_access_size(),
+         " expected " << expected_users_with_read_write_access.size() << " users with write access but found " << theFile.write_access_size() );
+
+
+ 	std::vector< std::string >::const_iterator i;
+ 	for(i=expected_users_with_read_access.begin(); i!= expected_users_with_read_access.end(); ++i) {
+ 	  BOOST_REQUIRE_MESSAGE( theFile.allow_read_access(*i),"Expected user " << *i << " to have read access ");
 	}
+   for(i=expected_users_with_read_write_access.begin(); i!= expected_users_with_read_write_access.end(); ++i) {
+     BOOST_REQUIRE_MESSAGE( theFile.allow_write_access(*i),"Expected user " << *i << " to have write access ");
+   }
+
+   // test random user
+   BOOST_REQUIRE_MESSAGE( !theFile.allow_read_access("xxxx"),"Expected user xxxx to NOT have read access ");
+   BOOST_REQUIRE_MESSAGE( !theFile.allow_read_access("*"),"Expected user *  to NOT have read access ");
+
+   BOOST_REQUIRE_MESSAGE( !theFile.allow_write_access("yyyy"),"Expected user yyyy  to NOT have write access ");
+   BOOST_REQUIRE_MESSAGE( !theFile.allow_write_access("zzzz"),"Expected user zzzz  to NOT have write access ");
+}
+
+BOOST_AUTO_TEST_CASE( test_white_list_all_users_have_read_access )
+{
+   cout << "ACore:: ...test_white_list_all_users_have_read_access\n";
+
+   std::string path = File::test_data("ACore/test/data/goodWhiteListFiles/all_read_access.lists","ACore");
+
+   WhiteListFile theFile;
+   std::string errorMsg;
+   BOOST_CHECK_MESSAGE(theFile.load(path,false, errorMsg),"Failed to parse file " << path << "\n" << errorMsg);
+
+   // make sure we find all the users and the access right are correct
+//# These user have read and write access to the server
+//uid1  # a comment
+//uid2  # a comment
+//cog   # a comment
+//
+//
+//# Read only users
+//-*
+//-fred  # a comment
+//-bill # a comment
+//-jake # a comment
+
+   std::vector<std::string> expected_users_with_read_write_access;
+   expected_users_with_read_write_access.push_back( std::string("uid1"));
+   expected_users_with_read_write_access.push_back( std::string("uid2"));
+   expected_users_with_read_write_access.push_back( std::string("cog"));
+
+   // When all users have read access, the read access size should be empty
+   BOOST_REQUIRE_MESSAGE(theFile.read_access_size() == 0, " expected 0  but found " << theFile.read_access_size() );
+
+   BOOST_REQUIRE_MESSAGE(expected_users_with_read_write_access.size() == theFile.write_access_size(),
+         " expected " << expected_users_with_read_write_access.size() << " users with write access but found " << theFile.write_access_size() );
+
+   // Any user should have read write access
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("fred"),"Expected user fred  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("bill"),"Expected user bill  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("xxxx"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("uid1"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("uid2"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("cog"),"Expected user xxxx  to have read access ");
+
+   std::vector< std::string >::const_iterator i;
+   for(i=expected_users_with_read_write_access.begin(); i!= expected_users_with_read_write_access.end(); ++i) {
+     BOOST_REQUIRE_MESSAGE( theFile.allow_write_access(*i),"Expected user " << *i << " to have write access ");
+   }
+
+   // test random user for write access
+   BOOST_REQUIRE_MESSAGE( !theFile.allow_write_access("yyyy"),"Expected user yyyy  to NOT have write access ");
+   BOOST_REQUIRE_MESSAGE( !theFile.allow_write_access("zzzz"),"Expected user zzzz  to NOT have write access ");
+}
+
+
+BOOST_AUTO_TEST_CASE( test_white_list_all_users_have_write_access )
+{
+   cout << "ACore:: ...test_white_list_all_users_have_write_access\n";
+
+   std::string path = File::test_data("ACore/test/data/goodWhiteListFiles/all_write_access.lists","ACore");
+
+   WhiteListFile theFile;
+   std::string errorMsg;
+   BOOST_CHECK_MESSAGE(theFile.load(path,false, errorMsg),"Failed to parse file " << path << "\n" << errorMsg);
+
+   // make sure we find all the users and the access right are correct
+//   uid1  # a comment
+//   uid2  # a comment
+//   cog   # a comment
+//   *
+//
+//   # Read only users
+//   -*
+//   -fred  # a comment
+//   -bill # a comment
+//   -jake # a comment
+
+   // When all users have read access, the read access size should be empty
+   BOOST_REQUIRE_MESSAGE(theFile.read_access_size() == 0,  " expected 0  but found " << theFile.read_access_size() );
+   BOOST_REQUIRE_MESSAGE(theFile.write_access_size() == 0, " expected 0  but found " << theFile.read_access_size() );
+
+   // Any user should have read access
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("fred"),"Expected user fred  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("bill"),"Expected user bill  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("xxxx"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("uid1"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("uid2"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_read_access("cog"),"Expected user xxxx  to have read access ");
+
+   // Any user should have read write access
+   BOOST_REQUIRE_MESSAGE( theFile.allow_write_access("fred"),"Expected user fred  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_write_access("bill"),"Expected user bill  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_write_access("xxxx"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_write_access("uid1"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_write_access("uid2"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.allow_write_access("cog"),"Expected user xxxx  to have read access ");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

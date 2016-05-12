@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #13 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -32,28 +32,30 @@ extern "C" {
 collector::collector()
 {
 
-  const int commands_nb = 20;          
+  const int commands_nb = 22;          
   static char* commands[commands_nb] = {
-    (char *) "ecflow_client --zombie_fob <full_name>" ,
-    (char *) "ecflow_client --zombie_fail <full_name>" ,
-    (char *) "ecflow_client --zombie_adopt <full_name>" ,
-    (char *) "ecflow_client --zombie_block <full_name>" ,
-    (char *) "ecflow_client --alter clear_flag zombie <full_name>" ,
+    (char *) "ecflow_client --zombie_fob=<full_name>" ,
+    (char *) "ecflow_client --zombie_fail=<full_name>" ,
+    (char *) "ecflow_client --zombie_adopt=<full_name>" ,
+    (char *) "ecflow_client --zombie_block=<full_name>" ,
+    (char *) "ecflow_client --alter clear_flag zombie=<full_name>" ,
     (char *) "###",
-    (char *) "ecflow_client --suspend <full_name>" ,
-    (char *) "ecflow_client --resume <full_name>" ,
-    (char *) "ecflow_client --kill <full_name>" ,
-    (char *) "ecflow_client --run <full_name>" ,
+    (char *) "ecflow_client --suspend=<full_name>" ,
+    (char *) "ecflow_client --resume=<full_name>" ,
+    (char *) "ecflow_client --kill=<full_name>" ,
+    (char *) "ecflow_client --run=<full_name>" ,
     (char *) "###",
-    (char *) "ecflow_client --delete force yes <full_name>",
+    (char *) "ecflow_client --delete=force yes <full_name>",
     (char *) "###",
-    (char *) "ecflow_client --begin <node_name>",
+    (char *) "ecflow_client --begin=<node_name>",
     (char *) "###",
-    (char *) "ecflow_client --requeue <full_name>",
-    (char *) "ecflow_client --alter change defstatus queued <full_name>",
-    (char *) "ecflow_client --alter change defstatus complete <full_name>",
-    (char *) "ecflow_client --force complete <full_name>",
-    (char *) "ecflow_client --force aborted  <full_name>",
+    (char *) "ecflow_client --requeue=<full_name>",
+    (char *) "ecflow_client --alter=change defstatus queued <full_name>",
+    (char *) "ecflow_client --alter=change defstatus complete <full_name>",
+    (char *) "ecflow_client --force=complete <full_name>",
+    (char *) "ecflow_client --force=aborted  <full_name>",
+    (char *) "###",
+    (char *) "sh python %PYDEF:0% %SUITE% <full_name> %ECF_NODE% # aka replace",
     };
 
 	create(gui::top());	

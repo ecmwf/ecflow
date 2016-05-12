@@ -28,11 +28,14 @@
 #include <QLabel>
 #include <QDockWidget>
 #include <QToolButton>
+#include "NodeSearchDialog.hpp"
+#include "NodeSearchWidget.hpp"
 
 int Dashboard::maxWidgetNum_=20;
 
 Dashboard::Dashboard(QString rootNode,QWidget *parent) :
-        QMainWindow(parent)
+   QMainWindow(parent),
+   settingsAreRead_(false)
 {
 	//We use the mainwindow as a widget. Its task is
 	//to dock all the component widgets!
@@ -40,6 +43,7 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 	//The serverfilter. It holds the list of servers displayed by this dashboard.
 	serverFilter_=new ServerFilter();
+	serverFilter_->addObserver(this);
 
 	titleHandler_=new DashboardTitle(serverFilter_,this);
 
@@ -59,6 +63,9 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 Dashboard::~Dashboard()
 {
+	Q_EMIT aboutToDelete();
+
+	serverFilter_->removeObserver(this);
 	delete serverFilter_;
 }
 
@@ -78,6 +85,9 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
+		connect(ctl,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+				this,SLOT(slotCommand(VInfo_ptr,QString)));
+
 		w=ctl;
 	}
 	else if(type == "table")
@@ -90,6 +100,9 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
+		connect(ctl,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+				this,SLOT(slotCommand(VInfo_ptr,QString)));
+
 		w=ctl;
 	}
 	else if(type == "info")
@@ -98,6 +111,8 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
 					ctl,SLOT(slotReload(VInfo_ptr)));
 
+        connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
+                    this,SLOT(slotInfoPanelSelection(VInfo_ptr)));
 		w=ctl;
 	}
 
@@ -168,17 +183,80 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 	if(!w)
 		return 0;
 
-	DashboardDialog* dia=new DashboardDialog(this);
+	//The DashBoard or any of its children cannot be the parent of the
+	//dialog because in this case it would be always on top its parent. This is
+	//the behaviour when the dialog's parent is QMainWindow.
+	DashboardDialog* dia=new DashboardDialog(0);
+
+    //So the parent is 0 and we will emit a signal from the Dashboard
+    //destructor to notify the dialog about the deletion. Then we can be
+	//sure that the dialog deletes itself when the Dashboard gets deleted.
+    connect(this,SIGNAL(aboutToDelete()),
+    		dia,SLOT(slotOwnerDelete()));
 
     connect(dia,SIGNAL(finished(int)),
             this,SLOT(slotDialogFinished(int)));
 
+    //The dialog will reparent the widget
     dia->add(w);
 	dia->show();
 
     return w;
 }
 
+void Dashboard::addSearchDialog()
+{
+	//It will delete itself on close!!
+	//The parent is 0, for the reason see the comment in addDialog()
+	NodeSearchDialog* d=new NodeSearchDialog(0);
+	d->queryWidget()->setServerFilter(serverFilter_);
+
+	for(int i=0; i < widgets_.count(); i++)
+	{
+		if(widgets_.at(i)->type() == "tree")
+		{
+			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
+
+		}
+	}
+
+    connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
+
+	//The dashboard signals the dialog on deletion
+	connect(this,SIGNAL(aboutToDelete()),
+	    	d,SLOT(slotOwnerDelete()));
+
+	d->show();
+}
+
+void Dashboard::addSearchDialog(VInfo_ptr info)
+{
+	//It will delete itself on close!!
+	//The parent is 0, for the reason see the comment in addDialog()
+	NodeSearchDialog* d=new NodeSearchDialog(0);
+	d->queryWidget()->setServerFilter(serverFilter_);
+	d->queryWidget()->setRootNode(info);
+
+	for(int i=0; i < widgets_.count(); i++)
+	{
+		if(widgets_.at(i)->type() == "tree")
+		{
+			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
+		}
+	}
+
+    connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
+
+	//The dashboard signals the dialog on deletion
+	connect(this,SIGNAL(aboutToDelete()),
+		    d,SLOT(slotOwnerDelete()));
+
+	d->show();
+}
 
 void Dashboard::slotDockClose()
 {
@@ -232,6 +310,19 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
 void Dashboard::slotTitle(QString s,QPixmap p)
 {
 	Q_EMIT titleChanged(this,s,p);
+}
+
+
+
+void Dashboard::slotCommand(VInfo_ptr info,QString cmd)
+{
+	if(!info || !info.get() )
+		return;
+
+	if(cmd == "search")
+	{
+		addSearchDialog(info);
+	}
 }
 
 //------------------------
@@ -304,7 +395,12 @@ void Dashboard::writeSettings(VComboSettings* vs)
 
 void Dashboard::readSettings(VComboSettings* vs)
 {
+	settingsAreRead_=true;
+
+    //This will create the ServerHandler objects
 	serverFilter_->readSettings(vs);
+
+    //At this point each ServerHandler is running its reset()!
 
 	Q_FOREACH(QWidget* w,findChildren<QDockWidget*>())
 	{
@@ -325,7 +421,8 @@ void Dashboard::readSettings(VComboSettings* vs)
 			//Create a dashboard widget
 			if(DashboardWidget *dw=addWidget(type,dockId))
 			{
-				//This will make the widgets active!!!
+                //This will make the widgets active!!! The ServerHandler reset() can
+                //be still running at this point!
 				dw->readSettings(vs);
 			}
 			vs->endGroup();
@@ -337,11 +434,19 @@ void Dashboard::readSettings(VComboSettings* vs)
 	//the the dockwidgets's objectname, so that has to be unique. We need to call
 	//it when the dockwidgets have already been created.
 	if(vs->containsQs("state"))
+	{
 		restoreState(vs->getQs("state").toByteArray());
+	}
 
 	selectFirstServerInView();
+
+	settingsAreRead_=false;
 }
 
+void Dashboard::slotInfoPanelSelection(VInfo_ptr info)
+{
+    selectInTreeView(info);
+}
 
 void Dashboard::selectFirstServerInView()
 {
@@ -352,6 +457,23 @@ void Dashboard::selectFirstServerInView()
 			return;
 		}
 	}
+}
+
+bool Dashboard::selectInTreeView(VInfo_ptr info)
+{
+    if(!info)
+        return false;
+
+    Q_FOREACH(DashboardWidget* w,widgets_)
+    {
+        if(w->type() == "tree")
+        {
+            w->setCurrentSelection(info);
+            return serverFilter_->isFiltered(info->server());
+        }
+    }
+
+    return false;
 }
 
 VInfo_ptr Dashboard::currentSelectionInView()
@@ -394,4 +516,29 @@ std::string Dashboard::widgetSettingsId(int i)
 {
 	return "widget_" + boost::lexical_cast<std::string>(i);
 }
+
+void Dashboard::notifyServerFilterAdded(ServerItem* item)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterRemoved(ServerItem* item)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterChanged(ServerItem*)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterDelete()
+{
+	//if(!settingsAreRead_)
+	//	Q_EMIT contentsChanged();
+}
+
 

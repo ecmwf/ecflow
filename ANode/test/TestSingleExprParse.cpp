@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -39,9 +39,15 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 
 //  	exprMap["inigroup:YMD eq not 1"] = std::make_pair(AstEqual::stype(),true);
 //	exprMap["/net/main:YMD le /net/cleanplus1:YMD and 1"] = std::make_pair(AstAnd::stype(),true);
-   exprMap["!../../../prod2diss//operation_is_late:yes"] = std::make_pair(AstNot::stype(),true);
+//   exprMap["!../../../prod2diss//operation_is_late:yes"] = std::make_pair(AstNot::stype(),true);
 // 	exprMap["../obs:YMD ge  ( 19720101 + 6576 - 1)"] = std::make_pair(AstGreaterEqual::stype(),true);
 // 	exprMap["../obs:YMD ge  ( (19720101 + 6576) - (12 + 1) )"] = std::make_pair(AstGreaterEqual::stype(),true);
+
+   exprMap["../timers/end/ymd:YMD >= ./hind:YMD and hind_info == complete and comp == complete and notready == complete"] = std::make_pair(AstAnd::stype(),false);
+//   exprMap["comp == complete and ! ready == complete"] = std::make_pair(AstAnd::stype(),false);
+//   exprMap["comp == complete and not ready == complete"] = std::make_pair(AstAnd::stype(),false);
+//   exprMap["comp == complete and ~ ready == complete"] = std::make_pair(AstAnd::stype(),false);
+
 
  	std::pair<string, std::pair<string,bool> > p;
 	BOOST_FOREACH(p, exprMap ) {
@@ -54,12 +60,15 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 		string expectedRootType       = p.second.first;
 		bool expectedEvaluationResult = p.second.second;
 
+      std::stringstream ss;
+
 		Ast* top = theExprParser.getAst();
 		BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree");
 		BOOST_REQUIRE_MESSAGE( top->left() ,"No root created");
 		BOOST_REQUIRE_MESSAGE( top->left()->isRoot() ,"First child of top should be a root");
 		BOOST_REQUIRE_MESSAGE( top->left()->type() == expectedRootType,"expected root type " << expectedRootType << " but found " << top->left()->type());
-		BOOST_REQUIRE_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for " << *top);
+      top->print_flat(ss);
+		BOOST_REQUIRE_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << ss.str() << "\n" << *top);
 	}
 }
 

@@ -56,7 +56,7 @@ void VDir::addItem(const std::string& name, unsigned int size,unsigned int mtime
 
 	item->name_=fileName;
 	item->size_=size;
-	item->mtime_ = mtime;
+	item->mtime_ = QDateTime::fromTime_t(mtime);
 
 	items_.push_back(item);
 
@@ -81,8 +81,7 @@ void VDir::reload()
         	item->name_ = p.filename().string();
         	item->size_ =  boost::filesystem::file_size(p);
         	item->size_ =  boost::filesystem::file_size(p);
-        	item->mtime_ = boost::filesystem::last_write_time(p);
-
+        	item->mtime_ = QDateTime::fromTime_t(boost::filesystem::last_write_time(p));
         	items_.push_back(item);
 
         }

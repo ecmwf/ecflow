@@ -9,7 +9,7 @@
                     "values_label" : "Text in status rectangle (classic)/Separate text and status rectangle"
                 },    
                 "node_gradient" : {
-                    "label" : "Gradient shading for nodes",
+                    "label" : "Use gradient shading",
                     "default" : "true"
                 },    
                 "fontSize" : {
@@ -22,62 +22,143 @@
             },
             "tree": {
             	
-                "font" : {
-					"label" : "Font",
-					"default": "font(Sans Serif,9,-1,5,50,0,0,0,0,0)"
+                "nodeFont" : {
+					"label" : "Nodes",
+					"default": "font(,)"
 				},
-				"displayChildCount" : {
-					"label" : "Display number of child nodes for servers/suites",
+				 
+				"attributeFont" : {
+                    "label" : "Attributes",
+                    "default": "font(,)"
+                },
+				
+				"display_child_count" : {
+					"label" : "Display number of children for servers/suites",
 					"default": "true"
 				}, 
-				
-				"nodeFontSize" : {
-                    "label": "Nodes (tree view)",
-                    "suffix" : "points",                                           
-                    "default": "9",
-                    "min" : "7",
-                    "max" : "20"
-                  },  
-                  
-                 "attributeFontSize" : {
-                    "label": "Attributes (tree view)",
-                    "suffix" : "points",                                           
-                    "default": "8",
-                    "min" : "7",
-                    "max" : "20"
-                  }     	          
+
+                "displayNodeType" : {
+                    "label" : "Display node type",
+                    "default": "true"
+                },
+
+				"background"  : {
+				    "label"   :  "Background colour",
+				    "default" : "rgb(250,250,250)"
+				},
+                "indentation" : {
+                    "label" : "Indentation",
+                    "suffix" : "pixels",
+                    "default" : "10",
+                    "min" : "0",
+                    "max" : "100"  
+                 },
+                 "drawBranchLine" : {
+                     "label" : "Draw branch lines",
+                     "default": "false"
+                  },
+                 "defaultAttributes" : {
+                    "label" : "Default visible attributes",
+                    "default" : "meter/event/repeat/trigger/label/time/date/limit/limiter/late",
+                    "multi"   : "true",
+                    "values"  : "meter/event/repeat/trigger/label/time/date/limit/limiter/late/var/genvar",
+                    "values_label" : "Meters/Events/Repeats/Triggers/Labels/Times/Dates/Limits/Limiters/Late/Variables/Generated variables"
+                 },
+                 "attributesPolicy" : {
+                    "label" : "In new tree views show",
+                    "default" : "default",
+                    "values"  : "default/last",
+                    "values_label" : "default visible attributes/attributes from last modified view"
+                 },
+                 "serverToolTip" : {
+                    "label" : "Show tooltip on servers",
+                    "default": "true"
+                 },
+                 "nodeToolTip" : {
+                    "label" : "Show tooltip on nodes",
+                    "default": "true"
+                 },
+                 "attributeToolTip" : {
+                    "label" : "Show tooltip on attributes",
+                    "default": "true"
+                 }
             },
 
             "table": {
             
-            	"font" : {
+            	"background"  : {
+                    "label"   : "Background colour",
+                    "default" : "rgb(250,250,250)"
+                },               
+                "font" : {
  					"label" : "Font",
- 					"default": "font()"
- 				},
- 				
- 				"fontSize" : {
-                    "label": "Table view",
-                    "suffix" : "points",                                           
-                    "default": "9",
-                    "min" : "7",
-                    "max" : "20"
-                  } 
- 				
- 				
+ 					"default": "font(,)"
+ 				} 				
 			},
-			
-	       "textEditor" : {
+
+            "attribute" : {
+
+                "eventFillColour"  : {
+                    "label"   : "Event set colour",
+                    "default" : "rgb(0,0,255)"
+                },
+                "meterFillColour"  : {
+                    "label"   : "Meter colour",
+                    "default" : "rgb(0,0,255)"
+                },
+                "meterThresholdColour"  : {
+                    "label"   : "Meter threshold colour",
+                    "default" : "rgb(0,0,255)"
+                },
+                "limitFillColour"  : {
+                    "label"   : "Limit colour",
+                    "default" : "rgb(0,255,0)"
+                }
+            },
+
+           "textEdit" : {
 			     
-			     "fontSize" : {
-			        "label": "Text editors",
-                    "suffix" : "points",                                           
-                    "default": "9",
-                    "min" : "7",
-                    "max" : "20"
-                  } 
-                 
-			} 
-		     
+                 "numAreaBackground" : {
+                    "label": "Line number area background",
+                    "default": "rgb(232,231,230)"
+                  },
+                  "numAreaFontColour" : {
+                    "label": "Line number area font colour",
+                    "default": "rgb(102,102,102)"
+                  },
+                  "numAreaSeparator" : {
+                    "label": "Line number area separtor colour",
+                    "default": "rgb(210,210,210)"
+                  },
+                  "numAreaCurrent" : {
+                    "label": "Line number area current line colour",
+                    "default": "rgb(212,212,255)"
+                  }
+          }
+
+    },
+    
+    "query_columns": {
+        
+        "server" : {
+            "label" : "Server",
+            "tooltip" : "Server"
+        },
+        "path" : {
+            "label" : "Node",
+            "tooltip" : "Node"
+        },
+        "status" : {
+            "label" : "State",
+            "tooltip" : "Node status"
+        },
+        "type" : {
+            "label" : "Type",
+            "tooltip" : "Node type"
+        },
+        "attribute" : {
+            "label" : "Attribute"
+        }       
     },
     
     "table_columns": {

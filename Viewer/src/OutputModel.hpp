@@ -2,6 +2,7 @@
 #define OUTPUTMODEL_H
 
 #include <QAbstractItemModel>
+#include <QDateTime>
 #include <QSortFilterProxyModel>
 
 #include "NodeObserver.hpp"
@@ -13,9 +14,9 @@ class OutputModel : public QAbstractItemModel
 public:
 	explicit OutputModel(QObject *parent=0);
 
-   	void setData(VDir_ptr dir);
+    void setData(VDir_ptr dir,const std::string& jobout);
    	void clearData();
-
+    bool isEmpty() const {return (!dir_);}
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
 
@@ -31,10 +32,12 @@ public:
 protected:
    	bool hasData() const;
    	QString formatSize(unsigned int size) const;
-   	QString formatDate(const std::time_t&) const;
-   	QString formatAgo(const std::time_t& t) const;
+   	QString formatDate(QDateTime) const;
+   	QString formatAgo(QDateTime) const;
 
    	VDir_ptr dir_;
+    int joboutRow_;
+    static QColor joboutCol_;
 };
 
 //Filters and sorts the output
@@ -42,7 +45,7 @@ class OutputSortModel : public QSortFilterProxyModel
 {
 public:
 	explicit OutputSortModel(QObject *parent=0);
-	~OutputSortModel() {};
+    ~OutputSortModel() {}
 
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 	bool filterAcceptsRow(int,const QModelIndex &) const;

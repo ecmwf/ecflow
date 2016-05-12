@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NodeQueryEditor</class>
+ <widget class="QWidget" name="NodeQueryEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1564</width>
+    <height>1113</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QWidget" name="queryManageW_" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="queryCbLabel_">
+        <property name="text">
+         <string>Queries:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="NodeQueryCombo" name="queryCb_"/>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveAsTb_">
+        <property name="text">
+         <string>Save query as ...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveTb_">
+        <property name="text">
+         <string>Save query</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="advModeTb_">
+        <property name="text">
+         <string>Advanced mode</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QGroupBox" name="scopeBox_">
+       <property name="title">
+        <string>Scope</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="2">
+         <widget class="ComboMulti" name="serverCb_"/>
+        </item>
+        <item row="0" column="3">
+         <widget class="QToolButton" name="serverResetTb_">
+          <property name="toolTip">
+           <string>Clear server filter</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="viewer.qrc">
+            <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="rootLabel_">
+          <property name="text">
+           <string>Search root node:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Search in servers:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="rootLe_"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="optionBox_">
+       <property name="title">
+        <string>Options</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="numLabel_">
+            <property name="text">
+             <string>Max results: </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="numSpin_">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="caseCb_">
+          <property name="text">
+           <string>Case sensitive</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="filterBox_">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Nodes</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinAndMaxSize</enum>
+      </property>
+      <item>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Path:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="StringMatchCombo" name="nameMatchCb_"/>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="nameLe_"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="StringMatchCombo" name="pathMatchCb_"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="pathLe_"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="4">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Flag</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <widget class="QLabel" name="attrLabel_">
+          <property name="text">
+           <string>Attributes</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Type</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QToolButton" name="stateResetTb_">
+          <property name="toolTip">
+           <string>Clear status filter</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="viewer.qrc">
+            <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="7">
+         <widget class="QToolButton" name="attrResetTb_">
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="viewer.qrc">
+            <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="6" colspan="2">
+         <widget class="CustomListWidget" name="attrList_"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QToolButton" name="typeResetTb_">
+          <property name="toolTip">
+           <string>Clear type filter</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="viewer.qrc">
+            <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Status</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QToolButton" name="flagResetTb_">
+          <property name="toolTip">
+           <string>Clear flag filter</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="viewer.qrc">
+            <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="CustomListWidget" name="typeList_"/>
+        </item>
+        <item row="1" column="2" colspan="2">
+         <widget class="CustomListWidget" name="stateList_"/>
+        </item>
+        <item row="1" column="4" colspan="2">
+         <widget class="CustomListWidget" name="flagList_"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="AttributeSearchPanel" name="attrPanel_" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_7">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Query</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTextEdit" name="queryTe_"/>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ComboMulti</class>
+   <extends>QComboBox</extends>
+   <header location="global">ComboMulti.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>AttributeSearchPanel</class>
+   <extends>QWidget</extends>
+   <header>AttributeSearchPanel.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CustomListWidget</class>
+   <extends>QListWidget</extends>
+   <header>CustomListWidget.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>StringMatchCombo</class>
+   <extends>QComboBox</extends>
+   <header>StringMatchCombo.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>NodeQueryCombo</class>
+   <extends>QComboBox</extends>
+   <header>NodeQueryCombo.hpp</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
+ <connections/>
+</ui>

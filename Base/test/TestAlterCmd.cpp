@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #48 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -524,8 +524,14 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       s->addLabel( Label("label","labelValue") );
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LABEL,"label","--fred--")));
       std::string label_value;
-      BOOST_CHECK_MESSAGE(s->getLabelValue("label",label_value ),"Expected to find label");
+      BOOST_CHECK_MESSAGE(s->getLabelNewValue("label",label_value ),"Expected to find label");
       BOOST_CHECK_MESSAGE( label_value == "--fred--", "expected to find label with value --fred--");
+
+      // change label to be empty, ECFLOW-648
+      label_value.clear();
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LABEL,"label","")));
+      BOOST_CHECK_MESSAGE(s->getLabelNewValue("label",label_value ),"Expected to find label");
+      BOOST_CHECK_MESSAGE( label_value.empty(), "expected to find label with empty value");
    }
 
    {   // test add Trigger
@@ -753,6 +759,34 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       }
       // reset back to suspended
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEFSTATUS,"suspended")));
+   }
+
+   // ================================ LATE ==================================================================
+   {   // test add late
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LATE,"late -s 10:10 -a 23:10 -c +23:10")));
+      BOOST_CHECK_MESSAGE( s->get_late(), "expected late to be added");
+
+      // test change late
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LATE,"late -s 10:10")));
+      BOOST_CHECK_MESSAGE( s->get_late() && s->get_late()->toString() == "late -s +10:10", "expected 'late -s 10:10' but found " <<  s->get_late()->toString());
+
+      // test delete variable
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LATE)));
+      BOOST_CHECK_MESSAGE( !s->get_late(), "expected late to be deleted");
+   }
+   {
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LATE,"-s 10:10 -a 23:10 -c +23:10")));
+      BOOST_CHECK_MESSAGE( s->get_late(), "expected late to be added");
+
+      // test change late
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LATE,"-s 10:10 -a 12:00")));
+      BOOST_CHECK_MESSAGE( s->get_late() && s->get_late()->toString() == "late -s +10:10 -a 12:00", "expected 'late -s +10:10 -a 12:00' but found " <<  s->get_late()->toString());
+
+      // test delete variable
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LATE)));
+      BOOST_CHECK_MESSAGE( !s->get_late(), "expected late to be deleted");
    }
 }
 

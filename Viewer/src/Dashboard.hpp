@@ -24,7 +24,7 @@ class ServerFilter;
 class ServerItem;
 class VComboSettings;
 
-class Dashboard : public QMainWindow
+class Dashboard : public QMainWindow, public ServerFilterObserver
 {
     Q_OBJECT
 
@@ -43,6 +43,13 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
+    bool selectInTreeView(VInfo_ptr);
+    void addSearchDialog();
+
+	void notifyServerFilterAdded(ServerItem* item);
+	void notifyServerFilterRemoved(ServerItem* item);
+	void notifyServerFilterChanged(ServerItem*);
+	void notifyServerFilterDelete();
 
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);
@@ -50,15 +57,19 @@ public:
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
 	void titleChanged(QWidget*,QString,QPixmap);
+	void contentsChanged();
+	void aboutToDelete();
 
 public Q_SLOTS:
 	void slotPopInfoPanel(VInfo_ptr,QString);
+	void slotCommand(VInfo_ptr,QString);
 
 protected Q_SLOTS:
 	void slotTitle(QString,QPixmap);
     void slotDockClose();
     void slotDialogFinished(int);
     void slotPopInfoPanel(QString);
+    void slotInfoPanelSelection(VInfo_ptr);
 
 private:
 	DashboardWidget* addWidgetCore(const std::string& type);
@@ -67,10 +78,12 @@ private:
 	static std::string widgetSettingsId(int i);
 	void selectFirstServerInView();
 	VInfo_ptr currentSelectionInView();
+	void addSearchDialog(VInfo_ptr);
 
 	ServerFilter* serverFilter_;
 	DashboardTitle* titleHandler_;
 	QList<DashboardWidget*> widgets_;
+	bool settingsAreRead_;
 	static int maxWidgetNum_;
 };
 

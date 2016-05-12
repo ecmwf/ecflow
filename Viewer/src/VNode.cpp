@@ -16,23 +16,27 @@
 #include "ConnectState.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VFileInfo.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
+#include "VTaskNode.hpp"
 
 #include <boost/algorithm/string.hpp>
-#include "ChangeNotify.hpp"
 
 //=================================================
 // VNode
 //=================================================
 
 VNode::VNode(VNode* parent,node_ptr node) :
+    VItem(parent),
     node_(node),
-    parent_(parent),
+    //parent_(parent),
+#if 0
     attrNum_(-1),
-    cachedAttrNum_(-1)
+    cachedAttrNum_(-1),
+#endif
+	index_(-1)
 {
 	if(parent_)
 		parent_->addChild(this);
@@ -46,17 +50,38 @@ ServerHandler* VNode::server() const
 	return (parent_)?(parent_->server()):NULL;
 }
 
+VNode* VNode::suite() const
+{
+    if(isTopLevel())
+        return const_cast<VNode*>(this);
+
+    VNode* p=parent();
+    while(p)
+    {
+        if(p->isTopLevel())
+            return p;
+        p=p->parent();
+    }
+
+    assert(0);
+
+    return NULL;
+}
+
 bool VNode::isTopLevel() const
 {
-	return (parent_ && parent_->isServer());
+    return isSuite();
+    //return (parent_ && parent_->isServer());
 	//return (node_)?(node_->isSuite() != NULL):false;
 }
 
 void VNode::clear()
 {
 	children_.clear();
-	attrNum_=-1,
+#if 0
+    attrNum_=-1,
 	cachedAttrNum_=-1;
+#endif
 }
 
 bool VNode::hasAccessed() const
@@ -64,6 +89,7 @@ bool VNode::hasAccessed() const
 	return true; //!name_.empty();
 }
 
+#if 0
 //At the beginning of the update we get the current number of attributes
 void VNode::beginUpdateAttrNum()
 {
@@ -79,53 +105,79 @@ void VNode::beginUpdateAttrNum()
 void VNode::endUpdateAttrNum()
 {
 	cachedAttrNum_=attrNum_;
-	attrNum_=VAttribute::totalNum(this);
+    attrNum_=VAttributeType::totalNum(this);
 }
 
 short VNode::cachedAttrNum() const
 {
 	return cachedAttrNum_;
 }
+#endif
 
-short VNode::attrNum() const
-{
-	//If if was not initialised we get its value
+int VNode::attrNum(AttributeFilter *filter) const
+{     
+    return VAttributeType::totalNum(this,filter);
+
+#if 0
+    //If if was not initialised we get its value
 	if(attrNum_==-1)
 	{
-		attrNum_=VAttribute::totalNum(this);
+        attrNum_=VAttributeType::totalNum(this);
 
 		if(cachedAttrNum_ == -1)
 			cachedAttrNum_=attrNum_;
 	}
 
 	return attrNum_;
+#endif
+
 }
 
+#if 0
 short VNode::currentAttrNum() const
 {
-	return VAttribute::totalNum(this);
+    return VAttributeType::totalNum(this);
 }
+#endif
 
-QStringList VNode::getAttributeData(int row,VAttribute*& type)
+QStringList VNode::getAttributeData(int row,VAttributeType*& type)
 {
 	QStringList lst;
-	VAttribute::getData(this,row,type,lst);
+    VAttributeType::getData(this,row,type,lst);
 	return lst;
 }
 
-VAttribute* VNode::getAttributeType(int row)
+QStringList VNode::getAttributeData(int row,AttributeFilter *filter)
 {
-	return VAttribute::getType(this,row);
+    VAttributeType* type;
+    QStringList lst;
+    VAttributeType::getData(this,row,type,lst,filter);
+    return lst;
 }
+
+#if 0
+VAttributeType* VNode::getAttributeType(int row)
+{
+    return VAttributeType::getType(this,row);
+}
+#endif
 
 bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
 {
-	return VAttribute::getData(type,this,row,data);
+    return VAttributeType::getData(type,this,row,data);
 }
 
-int VNode::getAttributeLineNum(int row)
+int VNode::getAttributeLineNum(int row,AttributeFilter *filter)
 {
-	return VAttribute::getLineNum(this,row);
+    return VAttributeType::getLineNum(this,row,filter);
+}
+
+QString VNode::attributeToolTip(int row,AttributeFilter *filter)
+{
+    VAttributeType* type;
+    QStringList lst;
+    VAttributeType::getData(this,row,type,lst,filter);
+    return (type)?(type->toolTip(lst)):QString();
 }
 
 void VNode::addChild(VNode* vn)
@@ -144,14 +196,15 @@ void VNode::removeChild(VNode* vn)
 
 VNode* VNode::childAt(int index) const
 {
-	return (index>=0 && index < children_.size())?children_.at(index):0;
+    assert(index>=0 && index < children_.size());
+    return children_[index];
 }
 
 int VNode::indexOfChild(const VNode* vn) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i) == vn)
+        if(children_[i] == vn)
 			return i;
 	}
 
@@ -162,9 +215,9 @@ int VNode::indexOfChild(node_ptr n) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i)->node() == n)
+        if(children_[i]->node() == n)
 			return i;
-	}
+    }
 
 	return -1;
 }
@@ -173,7 +226,7 @@ VNode *VNode::findChild(const std::string& name) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
-		if(children_.at(i)->sameName(name))
+        if(children_[i]->sameName(name))
 			return children_.at(i);
 	}
 	return 0;
@@ -184,9 +237,19 @@ void VNode::collect(std::vector<VNode*>& vec) const
 	for(int i=0; i < numOfChildren(); i++)
 	{
 		vec.push_back(children_.at(i));
-		children_.at(i)->collect(vec);
+        children_[i]->collect(vec);
 	}
 }
+
+int VNode::tryNo() const
+{
+	std::string v=genVariable("ECF_TRYNO");
+	if(v.empty())
+		return 0;
+
+	return boost::lexical_cast<int>(v);
+}
+
 
 VNode* VNode::find(const std::vector<std::string>& pathVec)
 {
@@ -290,7 +353,7 @@ int VNode::genVariablesNum() const
 {
 	std::vector<Variable> gv;
 
-	if(node_.get())
+    if(node_)
 	{
 		node_->gen_variables(gv);
 		return static_cast<int>(gv.size());
@@ -299,17 +362,17 @@ int VNode::genVariablesNum() const
 	return 0;
 }
 
-void VNode::variables(std::vector<Variable>& vars)
+void VNode::variables(std::vector<Variable>& vars) const
 {
 	vars.clear();
-	if(node_.get())
+    if(node_)
 		vars=node_->variables();
 }
 
-void VNode::genVariables(std::vector<Variable>& genVars)
+void VNode::genVariables(std::vector<Variable>& genVars) const
 {
 	genVars.clear();
-	if(node_.get())
+    if(node_)
 		node_->gen_variables(genVars);
 }
 
@@ -372,10 +435,24 @@ QString VNode::defaultStateName()
 	return VNState::toDefaultStateName(this);
 }
 
+QString VNode::serverStateName()
+{
+	return QString("");
+}
 
 bool VNode::isSuspended() const
 {
 	return (node_ && node_->isSuspended());
+}
+
+bool VNode::isAborted() const
+{
+	return (node_ && node_->state() == NState::ABORTED && !node_->isSuspended());
+}
+
+bool VNode::isSubmitted() const
+{
+    return (node_ && node_->state() == NState::SUBMITTED);
 }
 
 QColor  VNode::stateColour() const
@@ -391,6 +468,11 @@ QColor  VNode::realStateColour() const
 QColor  VNode::stateFontColour() const
 {
 	return VNState::toFontColour(this);
+}
+
+QColor  VNode::typeFontColour() const
+{
+    return VNState::toTypeColour(this);
 }
 
 LogServer_ptr VNode::logServer()
@@ -418,6 +500,30 @@ LogServer_ptr VNode::logServer()
 
 	return lsv;
 }
+
+bool VNode::logServer(std::string& host,std::string& port)
+{
+	if(!node_)
+		return false;
+
+	host=findInheritedVariable("ECF_LOGHOST",true);
+	port=findInheritedVariable("ECF_LOGPORT");
+	//if(logHost.empty())
+	//{
+	//	logHost=findInheritedVariable("LOGHOST",true);
+	//	logPort=findInheritedVariable("LOGPORT");
+	//}
+
+	std::string micro=findInheritedVariable("ECF_MICRO");
+	if(!host.empty() && !port.empty() &&
+	  (micro.empty() || host.find(micro) ==  std::string::npos))
+	{
+		return true;
+	}
+
+	return false;
+}
+
 
 bool VNode::isAncestor(const VNode* n)
 {
@@ -472,7 +578,7 @@ VNode* VNode::ancestorAt(int idx,SortMode sortMode)
 
 	std::vector<VNode*> nodes=ancestors(sortMode);
 
-	if(nodes.size() >= 0 && nodes.size() > idx)
+    if(nodes.size() > idx)
 	{
 		return nodes.at(idx);
 	}
@@ -501,9 +607,40 @@ const std::string&  VNode::nodeType()
 	else if(np->isFamily())
 		return familyStr;
 	else if(np->isTask())
-			return taskStr;
+        return taskStr;
 
 	return defaultStr;
+}
+
+#if 0
+bool VNode::isFamily() const
+{
+    node_ptr np=node();
+
+    if(!np || !np.get())
+        return false;
+
+    return (np->isFamily())?true:false;
+}
+
+bool VNode::isAlias() const
+{
+    node_ptr np=node();
+
+    if(!np || !np.get())
+        return false;
+
+    return (np->isAlias())?true:false;
+}
+#endif
+
+bool VNode::isFlagSet(ecf::Flag::Type f) const
+{
+	if(node_ && node_.get())
+	{
+		return node_->flag().is_set(f);
+	}
+	return false;
 }
 
 void VNode::why(std::vector<std::string>& theReasonWhy) const
@@ -514,148 +651,41 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 	}
 }
 
-
-void VNode::check(VServerSettings* conf,bool stateChange)
+const std::string& VNode::abortedReason() const
 {
-	//TODO: implement it
-	return;
-
-	NState::State new_status = node_->state();
-
-	if(stateChange)
+	if(node_ && node_.get())
 	{
-		//Check for aborted
-		if(new_status == NState::ABORTED)
-		{
-			if(conf->boolValue(VServerSettings::NotifyAbortedEnabled))
-			{
-				bool popup=conf->boolValue(VServerSettings::NotifyAbortedPopup);
-				bool sound=conf->boolValue(VServerSettings::NotifyAbortedSound);
-
-				ChangeNotify::add("aborted",this,popup,sound);
-			}
-		}
-		else
-		{
-			//ChangeNotify::check("aborted",this);
-		}
+		return node_->abortedReason();
 	}
 
-/*
-	if(flagChange)
-	{
+	static std::string emptyStr;
+	return emptyStr;
 
-	}
-*/
 }
-	/*
 
+QString VNode::toolTip()
+{    
+    QString txt="<b>Name</b>: " + name() + "<br>";
+    txt+="<b>Path</b>: " + QString::fromStdString(absNodePath()) + "<br>";
+    txt+="<b>Type</b>: " + QString::fromStdString(nodeType()) + "<br>";
+    
+    txt+="<b>Status</b>: " + stateName();
+    if(isSuspended())        
+        txt+=" (" + VNState::toRealStateName(this) + ")";
 
+    txt+="<br>";
+    txt+="<b>Default status</b>: " + defaultStateName() + "<br>";
+    
+    txt+="<b>Server:</b> " + QString::fromStdString(server()->name()) + "<br>";
+    txt+="<b>Host</b>: " + QString::fromStdString(server()->host());
+    txt+=" <b>Port</b>: " + QString::fromStdString(server()->port());
+    
+    QString rs=QString::fromStdString(abortedReason());
+    if(!rs.isEmpty())
+    	txt+="<br><b>Aborted reason</b>:" + rs;
 
-	NState::State new_status = node_->status();
-	const ecf::Flag& new_flags=node_->get_flag();
-
-	boost::posix_time::ptime t=node_->state_change_time();
-    //return the state and duration time(relative to when suite was begun) when the state change happened
-	std::pair<NState,boost::posix_time::time_duration> get_state() const { return state_;}
-
-
-   int new_try_no = tryno();
-
-
-
-
-
-	if(new_status != old_status_ && new_status == STATUS_ABORTED)
-		serv().aborted(*this);
-
-	if(new_try_no > 1 && new_try_no != old_tryno_ && (
-	         new_status == STATUS_SUBMITTED ||
-	         new_status == STATUS_ACTIVE))
-		      serv().restarted(*this);
-
-	bool new_is_late = is_late(new_flags);
-	if(new_is_late != is_late(old_flags_)) {
-		if(new_is_late)
-                  serv().late(*this);
-		else
-                  late::hide(*this);
-	}
-
-	bool new_is_zombie = is_zombie(new_flags);
-	if(new_is_zombie != is_zombie(old_flags_)) {
-		if(new_is_zombie)
-                  serv().zombie(*this);
-		else
-                  zombie::hide(*this);
-	}
-
-//
-//	if(is_to_check(new_flags) != is_to_check(old_flags_)) {
-//		if(is_to_check(new_flags))
-//                  serv().to_check(*this);
-//		else
-//                  to_check::hide(*this);
-//	}
-
-	old_flags_ = new_flags;
-	old_status_ = new_status;
-	old_tryno_ = new_try_no;*/
-
-
-
-
-
-
-
-
-
-
-/*
-//Get the triggers list for the Triggers view
-void VNode::triggers(TriggerList& tlr)
-{
-	//Check the node itself
-	if(tlr.self())
-	{
-		if(node_ && !node_->isSuite())
-		{
-			std::set<VNode*> theSet;
-			std::set<VNode*>::iterator sit;
-			AstCollateXNodesVisitor astVisitor(theSet);
-
-			if(node_->completeAst())
-				node_->completeAst()->accept(astVisitor);
-
-			if(node_->triggerAst())
-				node_->triggerAst()->accept(astVisitor);
-
-			for (sit = theSet.begin(); sit != theSet.end(); ++sit)
-				tlr.next_node( *(*sit), 0, trigger_lister::normal, *sit);
-     }
-
-	 //Go through the attributes
-     for(std::vector<VNode*>::iterator it=children_.begin(); it!= children_.end(); it++)
-     {
-        int type = node_->type();
-        {
-           ecf_concrete_node<InLimit const> *c =
-                    dynamic_cast<ecf_concrete_node<InLimit const>*> (n->__node__());
-           InLimit const * i = c ? c->get() : 0;
-           if (i) {
-              node *xn = 0;
-              if ((xn = find_limit(i->pathToNode(), i->name())))
-                 tlr.next_node(*xn,0,trigger_lister::normal,xn);
-           }
-        }
-        if (type == NODE_DATE || type == NODE_TIME)
-           tlr.next_node(*n,0,trigger_lister::normal,n);
-     }
-    }
-  }
-
-*/
-
+    return txt;
+}   
 
 //=================================================
 //
@@ -707,10 +737,18 @@ int VServer::totalNumOfTopLevel(int idx) const
 //Clear the whole contents
 void VServer::clear()
 {
-	//Delete the children nodes. It will recursively delete all the nodes.
+	if(totalNum_==0)
+		return;
+
+	cache_.clear();
+	prevNodeState_.clear();
+
+	bool hasNotifications=server_->conf()->notificationsEnabled();
+
+	//Delete the children nodes. It will recursively delete all the nodes. It also saves the prevNodeState!!
 	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); ++it)
 	{
-		deleteNode(*it);
+		deleteNode(*it,hasNotifications);
 	}
 
 	//Clear the children vector
@@ -740,11 +778,22 @@ void VServer::clear()
 }*/
 
 //Delete a particular node
-void VServer::deleteNode(VNode* node)
+void VServer::deleteNode(VNode* node,bool hasNotifications)
 {
 	for(unsigned int i=0; i < node->numOfChildren(); i++)
 	{
-		deleteNode(node->childAt(i));
+		deleteNode(node->childAt(i),hasNotifications);
+	}
+
+	//If there are notifications we need to save previous state
+	if(hasNotifications)
+	{
+		if(node->node_->isTask())
+		{
+			VNodeInternalState st;
+			node->internalState(st);
+			prevNodeState_[node->absNodePath()]=st;
+		}
 	}
 
 	delete node;
@@ -757,53 +806,37 @@ void VServer::deleteNode(VNode* node)
 
 int VServer::variablesNum() const
 {
-	ServerDefsAccess defsAccess(server_);
-	if(defsAccess.defs())
-		return static_cast<int>(defsAccess.defs()->server().user_variables().size());
-
-	return 0;
+	return cache_.vars_.size();
 }
 
 int VServer::genVariablesNum() const
 {
-	ServerDefsAccess defsAccess(server_);
-	if(defsAccess.defs())
-		return static_cast<int>(defsAccess.defs()->server().server_variables().size());
-
-	return 0;
+	return cache_.genVars_.size();
 }
 
-void VServer::variables(std::vector<Variable>& vars)
+void VServer::variables(std::vector<Variable>& vars) const
 {
 	vars.clear();
-	ServerDefsAccess defsAccess(server_);
-	if (defsAccess.defs())
-		vars=defsAccess.defs()->server().user_variables();
+	vars=cache_.vars_;
 }
 
-void VServer::genVariables(std::vector<Variable>& vars)
+void VServer::genVariables(std::vector<Variable>& vars) const
 {
 	vars.clear();
-	ServerDefsAccess defsAccess(server_);
-	if (defsAccess.defs())
-		vars=defsAccess.defs()->server().server_variables();
+	vars=cache_.genVars_;
 }
 
 std::string VServer::genVariable(const std::string& key) const
 {
-    std::string val;
-    ServerDefsAccess defsAccess(server_);
-    if (defsAccess.defs())
-    {
-    	const std::vector<Variable>& vars=defsAccess.defs()->server().server_variables();
-    	for(std::vector<Variable>::const_iterator it=vars.begin(); it != vars.end(); it++)
-    	{
-    		if((*it).name() == key)
-    			val=(*it).theValue();
-    	}
-    }
+	std::string val;
 
-    return val;
+	for(std::vector<Variable>::const_iterator it=cache_.genVars_.begin(); it != cache_.genVars_.end(); ++it)
+	{
+	   if((*it).name() == key)
+		   val=(*it).theValue();
+	}
+
+	return val;
 }
 
 //------------------------------------------
@@ -838,26 +871,55 @@ std::string VServer::findVariable(const std::string& key,bool substitute) const
 {
 	std::string val;
 
-	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if (!defs)
-		return val;
+	//Search user variables first
+	for(std::vector<Variable>::const_iterator it=cache_.vars_.begin(); it != cache_.vars_.end(); ++it)
+	{
+		if((*it).name() == key)
+		{
+			val=(*it).theValue();
+			if(substitute)
+				val=substituteVariableValue(val);
 
-	const Variable& var=defs->server().findVariable(key);
-    if(!var.empty())
-    {
-    	val=var.theValue();
-    	if(substitute)
-    	{
-    		//defs->server().variableSubsitution(val);
-    	}
-    }
-    return val;
+			return val;
+		}
+	}
+
+	//Then search server variables
+	for(std::vector<Variable>::const_iterator it=cache_.genVars_.begin(); it != cache_.genVars_.end(); ++it)
+	{
+		if((*it).name() == key)
+		{
+			val=(*it).theValue();
+			if(substitute)
+				val=substituteVariableValue(val);
+
+			return val;
+		}
+	}
+
+	return val;
 }
 
 std::string VServer::findInheritedVariable(const std::string& key,bool substitute) const
 {
 	return findVariable(key,substitute);
+}
+
+std::string VServer::substituteVariableValue(const std::string& inVal) const
+{
+	std::string val=inVal;
+
+	if(val.empty())
+		return val;
+
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if (!defs)
+		return val;
+
+	defs->server().variableSubsitution(val);
+
+	return val;
 }
 
 //----------------------------------------------
@@ -870,7 +932,7 @@ void VServer::beginScan(VServerChange& change)
 {
 	//Clear the contents
 	clear();
-
+#if 0
 	//Get the Defs.
 	{
 		ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
@@ -884,11 +946,25 @@ void VServer::beginScan(VServerChange& change)
 		std::vector<node_ptr> nv;
 		defs->get_all_nodes(nv);
 		change.totalNum_=change.suiteNum_+nv.size();
+
+		//We need to update the cache server variables
+		updateCache(defs);
 	}
 
 	//This will use ServerDefsAccess as well. So we have to be sure that t=the mutex is
 	//released at this point.
 	change.attrNum_=currentAttrNum();
+#endif
+    //Get the Defs.
+    {
+        ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+        defs_ptr defs = defsAccess.defs();
+        if (!defs)
+            return;
+
+        //We need to update the cache server variables
+        updateCache(defs);
+    }
 }
 
 //Build the whole tree.
@@ -903,29 +979,35 @@ void VServer::endScan()
 		if (!defs)
 			return;
 
+		bool hasNotifications=server_->conf()->notificationsEnabled();
+
 		//Scan the suits.This will recursively scan all nodes in the tree.
 		const std::vector<suite_ptr> &suites = defs->suiteVec();
 
 		for(unsigned int i=0; i < suites.size();i++)
 		{
-			VNode* vn=new VNode(this,suites.at(i));
+            VNode* vn=new VSuiteNode(this,suites.at(i));
 			totalNum_++;
-			scan(vn);
+			scan(vn,hasNotifications);
 		}
 	}
 
+#if 0
 	//This will use ServerDefsAccess as well. So we have to be sure that the mutex is
 	//released at this point.
 	endUpdateAttrNum();
+#endif
 
 	if(totalNum_ > 0)
 	{
 		nodes_.reserve(totalNum_);
 		collect(nodes_);
+		for(size_t i=0; i < nodes_.size(); i++)
+			nodes_[i]->setIndex(i);
 	}
 }
 
-void VServer::scan(VNode *node)
+void VServer::scan(VNode *node,bool hasNotifications)
 {
 	int prevTotalNum=totalNum_;
 
@@ -934,11 +1016,41 @@ void VServer::scan(VNode *node)
 
 	//totalNum_+=nodes.size();
 
+    //Preallocates the children vector to the reqiuired size to save memory.
+    if(nodes.size() > 0)
+        node->children_.reserve(nodes.size());
+
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		VNode* vn=new VNode(node,*it);
+		VNode* vn=NULL;
+		if((*it)->isTask())
+		{
+			vn=new VTaskNode(node,*it);
+
+			//If there are notifications we need to check them using the previous state
+			if(hasNotifications)
+			{
+				std::string path=(*it)->absNodePath();
+				std::map<std::string,VNodeInternalState>::const_iterator itP=prevNodeState_.find(path);
+				if(itP != prevNodeState_.end())
+					vn->check(server_->conf(),itP->second);
+            }
+		}
+        else if((*it)->isFamily())
+		{
+            vn=new VFamilyNode(node,*it);
+		}
+        else if((*it)->isAlias())
+        {
+            vn=new VAliasNode(node,*it);
+        }
+        else
+        {
+            assert(0);
+
+        }
 		totalNum_++;
-		scan(vn);
+		scan(vn,hasNotifications);
 	}
 
 	if(node->parent() == this)
@@ -951,16 +1063,6 @@ VNode* VServer::nodeAt(int idx) const
 {
 	assert(idx>=0 && idx < nodes_.size());
 	return nodes_.at(idx);
-}
-
-int VServer::indexOfNode(const VNode* vn) const
-{
-	for(int i=0; i < nodes_.size(); i++)
-	{
-		if(nodes_.at(i) == vn)
-			return i;
-	}
-	return -1;
 }
 
 //----------------------------------------------
@@ -995,17 +1097,19 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 			node->check(server_->conf(),stateCh);
 		}
 	}
-
+#if 0
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+#endif
+    bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 	//----------------------------------------------------------------------
 	// The number of attributes changed but the number of nodes did not
 	//----------------------------------------------------------------------
 
+#if 0
 	if(attrNumCh && !nodeNumCh)
 	{
-		//The attributes were never used. None of the views have ever
+        //The attributes were never used. None of the views have ever
 		//wanted to display/access these attributes so far, so we can
 		//just ignore this update!!
 		if(!node->isAttrNumInitialised())
@@ -1027,11 +1131,11 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 
 		return;
 	}
-
+#endif
 	//---------------------------------------------------------------------------------
 	// The number of nodes changed.
 	//---------------------------------------------------------------------------------
-	else if(nodeNumCh)
+    if(nodeNumCh)
 	{
 		change.rescan_=true;
 	}
@@ -1046,7 +1150,8 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 
 void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
 {
-	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+#if 0
+    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 	//--------------------------------------------------------------
@@ -1057,6 +1162,18 @@ void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect
 	{
 		//This call updates the number of attributes stored in the VNode
 		node->endUpdateAttrNum();
+	}
+#endif
+}
+
+void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect)
+{
+	//We need to update the cached server variables
+	if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::SERVER_VARIABLE) != aspect.end() ||
+	   std::find(aspect.begin(),aspect.end(),ecf::Aspect::FLAG) != aspect.end())
+	{
+		//This will use the defs!!!
+		updateCache();
 	}
 }
 
@@ -1091,12 +1208,17 @@ QString VServer::stateName()
 		return VNState::toName(server_);
 	}
 
-	return VNState::toName(server_);
+	return VSState::toName(server_);
 }
 
 QString VServer::defaultStateName()
 {
 	return stateName();
+}
+
+QString VServer::serverStateName()
+{
+	return VSState::toName(server_);
 }
 
 bool VServer::isSuspended() const
@@ -1132,6 +1254,32 @@ void VServer::why(std::vector<std::string>& theReasonWhy) const
 		return;
 
 	defs->why(theReasonWhy);
+}
+
+
+
+bool VServer::isFlagSet(ecf::Flag::Type f) const
+{
+	return cache_.flag_.is_set(f);
+}
+
+void VServer::updateCache()
+{
+	cache_.clear();
+
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if (!defs)
+		return;
+
+	updateCache(defs);
+}
+
+void VServer::updateCache(defs_ptr defs)
+{
+	cache_.vars_=defs->server().user_variables();
+	cache_.genVars_=defs->server().server_variables();
+	cache_.flag_=defs->flag();
 }
 
 QString VServer::toolTip()

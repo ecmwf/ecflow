@@ -12,6 +12,7 @@
 #define NODEVIEWDELEGATE_HPP_
 
 #include <QBrush>
+#include <QLinearGradient>
 #include <QMap>
 #include <QPen>
 #include <QStyledItemDelegate>
@@ -35,6 +36,11 @@ public:
 protected:
 	void adjustIconSize();
 	virtual void updateSettings()=0;
+    void addBaseSettings(std::vector<std::string>&);
+    void updateBaseSettings();
+
+	virtual void renderStatus(QPainter *painter,const QModelIndex& index,
+	                          const QStyleOptionViewItemV4& option) const;
 
 	typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
@@ -68,7 +74,18 @@ protected:
 	QFont font_;
 	QFont attrFont_;
 	int iconSize_;
+	int iconGap_;
 
+	bool useStateGrad_;
+	mutable QLinearGradient grad_;
+	static int lighter_;
+    QBrush eventFillBrush_;
+    QBrush eventBgBrush_;
+    QBrush meterFillBrush_;
+    QBrush meterThresholdBrush_;
+    QBrush limitFillBrush_;
+    QPixmap limitFillPix_;
+    QPixmap limitEmptyPix_;
 };
 
 #endif

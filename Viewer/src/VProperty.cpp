@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QRegExp>
 
+#include "Sound.hpp"
 #include "UserMessage.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -25,6 +26,7 @@ VProperty::VProperty(const std::string& name) :
    master_(0),
    useMaster_(false),
    type_(StringType),
+   guiType_(StringGui),
    link_(0)
 {
 }
@@ -37,6 +39,17 @@ VProperty::~VProperty()
     }
 
     children_.clear();
+
+    if(master_)
+        master_->removeObserver(this);
+}
+
+QVariant VProperty::value() const
+{
+	if(master_ && useMaster_)
+		return master_->value();
+
+	return value_;
 }
 
 
@@ -47,30 +60,42 @@ void VProperty::setDefaultValue(const std::string& val)
     {
         defaultValue_=toColour(val);
         type_=ColourType;
+        guiType_=ColourGui;
     }
 	//Font
 	else if(isFont(val))
 	{
 	   defaultValue_=toFont(val);
 	   type_=FontType;
+	   guiType_=FontGui;
+	}
+	//Sound
+	else if(isSound(val))
+	{
+	   defaultValue_=QString::fromStdString(val);
+	   type_=SoundType;
+	   guiType_=SoundGui;
 	}
     //int
     else if(isNumber(val))
     {
        	defaultValue_=toNumber(val);
         type_=IntType;
+        guiType_=IntGui;
     }
     //bool
     else if(isBool(val))
     {
         defaultValue_=toBool(val);
         type_=BoolType;
+        guiType_=BoolGui;
     }
     //text
     else
     {
     	defaultValue_=QString::fromStdString(val);
     	type_=StringType;
+    	guiType_=StringGui;
     }
     
     if(value_.isNull())
@@ -81,9 +106,12 @@ void VProperty::setDefaultValue(const std::string& val)
 
 void VProperty::setValue(const std::string& val)
 {
-    bool changed=false;
+	if(master_ && useMaster_)
+		return;
 
-	if(isColour(val))
+	bool changed=false;
+
+    if(isColour(val))
     {
         QColor col=toColour(val);
 		changed=(value_.value<QColor>() != col);
@@ -108,6 +136,13 @@ void VProperty::setValue(const std::string& val)
     	changed=(value_.toBool() != b);
     	value_=b;
     }
+    //Sound or string
+    else
+    {
+    	QString str=QString::fromStdString(val);
+    	changed=(value_ != str);
+    	value_=str;
+    }
 
     if(!defaultValue_.isNull() &&
             defaultValue_.type() != value_.type())
@@ -123,7 +158,10 @@ void VProperty::setValue(const std::string& val)
 
 void VProperty::setValue(QVariant val)
 {
-    if(!defaultValue_.isNull() &&
+	if(master_ && useMaster_)
+		return;
+
+	if(!defaultValue_.isNull() &&
             defaultValue_.type() != val.type())
     {
         return;
@@ -144,19 +182,22 @@ std::string VProperty::valueAsString() const
 	switch(type_)
 	{
 	case StringType:
-		s=value_.toString();
+		s=value().toString();
 		break;
 	case IntType:
 		s=QString::number(value_.toInt());
 		break;
 	case BoolType:
-		s=(value_.toBool() == true)?"true":"false";
+		s=(value().toBool() == true)?"true":"false";
 		break;
 	case ColourType:
-		s=VProperty::toString(value_.value<QColor>());
+		s=VProperty::toString(value().value<QColor>());
 		break;
 	case FontType:
-		s=VProperty::toString(value_.value<QFont>());
+		s=VProperty::toString(value().value<QFont>());
+		break;
+	case SoundType:
+		s=value().toString();
 		break;
 	default:
 		break;
@@ -168,9 +209,20 @@ std::string VProperty::valueAsString() const
 
 void VProperty::setParam(QString name,QString value)
 {
-	if(name == "values")
-        type_=StringComboType;
-        
+	/*if(name == "values")
+	{
+		if(type_ == SoundType)
+			guiType_=SoundComboGui;
+		else
+			guiType_=StringComboGui;
+	}
+
+	if(name == "multi" && value == "true")
+	{
+		if(type_ == StringType || guiType_ == StringComboGui)
+			guiType_ == MultiStringComboGui;
+	}*/
+
     params_[name]=value;
 }
 
@@ -182,6 +234,30 @@ QString VProperty::param(QString name)
 
 	return QString();
 }
+
+void VProperty::adjustAfterLoad()
+{
+	QString vals=param("values");
+	QString multi=param("multi");
+
+	if(!vals.isEmpty())
+	{
+		if(type_ == SoundType)
+			guiType_=SoundComboGui;
+		else
+		{
+			if(multi == "true")
+			{
+				guiType_ = MultiStringComboGui;
+			}
+			else
+			{
+				guiType_=StringComboGui;
+			}
+		}
+	}
+}
+
 
 void VProperty::addChild(VProperty *prop)
 {
@@ -269,7 +345,7 @@ void VProperty::collectChildren(std::vector<VProperty*>& chVec) const
 
 bool VProperty:: changed() const
 {
-	return value_ != defaultValue_;
+	return value() != defaultValue_;
 }
 
 void VProperty::collectLinks(std::vector<VProperty*>& linkVec)
@@ -317,13 +393,14 @@ void VProperty::setUseMaster(bool b)
 	}
 }
 
-VProperty* VProperty::clone(bool addLink,bool setMaster)
+VProperty* VProperty::clone(bool addLink,bool setMaster,bool useMaster)
 {
 	VProperty *cp=new VProperty(strName_);
 
 	cp->value_=value_;
 	cp->defaultValue_=defaultValue_;
 	cp->type_=type_;
+	cp->guiType_=guiType_;
 
 	if(addLink)
 	{
@@ -334,12 +411,12 @@ VProperty* VProperty::clone(bool addLink,bool setMaster)
 
 	if(setMaster)
 	{
-		cp->setMaster(this);
+		cp->setMaster(this,useMaster);
 	}
 
 	Q_FOREACH(VProperty* p,children_)
 	{
-		VProperty *ch=p->clone(addLink,setMaster);
+		VProperty *ch=p->clone(addLink,setMaster,useMaster);
 		cp->addChild(ch);
 	}
 
@@ -369,6 +446,11 @@ bool VProperty::isColour(const std::string& val)
 bool VProperty::isFont(const std::string& val)
 {
     return QString::fromStdString(val).simplified().startsWith("font(");
+}
+
+bool VProperty::isSound(const std::string& val)
+{
+    return Sound::instance()->isSoundFile(val);
 }
 
 bool VProperty::isNumber(const std::string& val)
@@ -403,10 +485,20 @@ QFont VProperty::toFont(const std::string& name)
 {
 	QString qn=QString::fromStdString(name);
 	QFont f;
-	QRegExp rx("font\\((.+)\\)");
-	if(rx.indexIn(qn) > -1 && rx.captureCount() == 1)
+	QRegExp rx("font\\((.*),(.*)\\)");
+	if(rx.indexIn(qn) > -1 && rx.captureCount() == 2)
 	{
-		f.fromString(rx.cap(1));
+		QString family=rx.cap(1);
+		int size=rx.cap(2).toInt();
+
+		if(!family.isEmpty())
+			f.setFamily(family);
+
+		if(size >=1 && size < 200)
+			f.setPointSize(size);
+
+        //qDebug() << family << size
+		//f.fromString(rx.cap(1));
 	}
 
 	return f;
@@ -432,6 +524,7 @@ QString VProperty::toString(QColor col)
 
 QString VProperty::toString(QFont f)
 {
-	return "font(" + f.toString() + ")";
+	return "font(" + f.family() +"," + QString::number(f.pointSize()) +  ")";
 }
+
 

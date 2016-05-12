@@ -10,6 +10,7 @@
 #ifndef INFOPROVIDER_HPP_
 #define INFOPROVIDER_HPP_
 
+#include "FlagSet.hpp"
 #include "VInfo.hpp"
 #include "InfoPresenter.hpp"
 #include "VTask.hpp"
@@ -27,24 +28,23 @@ public:
 	void command(VTask::Type);
 	virtual void clear();
 
-	bool enabled() const {return enabled_;}
-	void setEnabled(bool);
-	bool autoUpdate() const {return autoUpdate_;}
-	void setAutoUpdate(bool);
+    void setActive(bool);
+    virtual void setAutoUpdate(bool);
+    bool autoUpdate() const {return autoUpdate_;}
 	bool inAutoUpdate() const {return inAutoUpdate_;}
 
 	//From VInfoVisitor
 	void visit(VInfoServer*);
 	void visit(VInfoNode*);
-	void visit(VInfoAttribute*) {};
+    void visit(VInfoAttribute*) {}
 
 	//From VTaskObserver
 	void taskChanged(VTask_ptr);
 
 protected:
-	virtual void handleFileNotDefined(VReply *reply);
+    virtual void handleFileNotDefined(VReply *reply);
 	virtual bool handleFileMissing(const std::string& fileName,VReply *reply);
-	virtual void optionsChanged() {}
+    virtual void optionsChanged() {}
 
 	InfoPresenter* owner_;
 	VInfo_ptr info_;
@@ -54,7 +54,7 @@ protected:
 	std::string fileVarName_;
 	std::string fileNotDefinedText_;
 	std::string fileMissingText_;
-	bool enabled_;
+    bool active_;
 	bool autoUpdate_;
 	bool inAutoUpdate_;
 };
@@ -91,11 +91,16 @@ public:
 	 explicit HistoryProvider(InfoPresenter* owner);
 };
 
+class SuiteProvider : public InfoProvider
+{
+public:
+	 explicit SuiteProvider(InfoPresenter* owner);
+};
+
 class ZombieProvider : public InfoProvider
 {
 public:
 	 explicit ZombieProvider(InfoPresenter* owner);
 };
-
 
 #endif

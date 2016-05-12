@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #65 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -201,12 +201,11 @@ void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
 #endif
 	}
 
- 	update_cache();
-
-	// *This relies on update_cache() being called first, since it needs day_of_week_
 	// Day change required for both REAL and HYBRID. See TimeDependencies.ddoc for reason
-  	if (theDayOfWeek != day_of_week_)  dayChanged_ = true;
- 	else                               dayChanged_ = false;
+ 	// This must be done before change date back. (i.e in hybrid case, below)
+ 	int new_day_of_week = suiteTime_.date().day_of_week().as_number();
+  	if (theDayOfWeek != new_day_of_week)  dayChanged_ = true;
+ 	else                                  dayChanged_ = false;
 
 	// With the hybrid calendar the date does not change
 	if ( ctype_ == Calendar::HYBRID) {
@@ -225,6 +224,10 @@ void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
 #endif
  		}
  	}
+
+	// update_cache *MUST* be last, so we can take into account hybrid. Date does NOT change.
+	// See ECFLOW-458
+   update_cache();
 
 #ifdef DEBUG_CALENDAR
 	cout << "   Calendar::update serverPollPeriod = " << to_simple_string(calUpdateParams.serverPollPeriod()) << " " << toString() << endl;

@@ -32,16 +32,17 @@ public:
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
-	void clearContents();
+    void clearContents();
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
-public Q_SLOTS:
+protected Q_SLOTS:
 	void slotClicked(QAbstractButton* button);
+	void slotEditorChanged();
 
 protected:
-	void updateWidgetState() {};
+    void updateState(const ChangeFlags&);
 };
 
 #endif

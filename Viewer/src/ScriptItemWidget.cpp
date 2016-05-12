@@ -12,6 +12,7 @@
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
 #include "MessageLabel.hpp"
+#include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 
@@ -31,6 +32,13 @@ ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
     Highlighter* ih=new Highlighter(textEdit_->document(),"script");
 
 	infoProvider_=new ScriptProvider(this);
+
+	//Editor font
+	textEdit_->setFontProperty(VConfig::instance()->find("panel.script.font"));
+}
+
+ScriptItemWidget::~ScriptItemWidget()
+{
 }
 
 QWidget* ScriptItemWidget::realWidget()
@@ -40,20 +48,20 @@ QWidget* ScriptItemWidget::realWidget()
 
 void ScriptItemWidget::reload(VInfo_ptr info)
 {
-    clearContents();
-    
-    enabled_=true;
-    info_=info;
+    assert(active_);
 
-    if(!info.get() || !info->isNode() || !info->node())
+    if(suspended_)
+        return;
+
+    clearContents();
+    info_=info;
+    messageLabel_->hide();
+
+    //Info must be a node
+    if(info_ && info_->isNode() && info_->node())
     {
-       return;
-    }
-    else
-    {
-        fileLabel_->setText(tr("<b>File:</b> ") + QString::fromStdString(info->node()->genVariable("ECF_SCRIPT")));
         infoProvider_->info(info_);
-    }	
+    }
 }
 
 void ScriptItemWidget::clearContents()
@@ -79,6 +87,9 @@ void ScriptItemWidget::infoReady(VReply* reply)
     {
         messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
     }
+
+    fileLabel_->update(reply);
+
 }
 
 void ScriptItemWidget::infoProgress(VReply* reply)
@@ -93,5 +104,6 @@ void ScriptItemWidget::infoFailed(VReply* reply)
     //textEdit_->setPlainText(s);   
     messageLabel_->showError(s);
 }
+
 
 static InfoPanelItemMaker<ScriptItemWidget> maker1("script");

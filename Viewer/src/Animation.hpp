@@ -14,7 +14,12 @@
 #include <QMovie>
 #include <QModelIndex>
 
-class Animation : public QMovie
+#include "ServerObserver.hpp"
+#include "VNode.hpp"
+
+class VNode;
+
+class Animation : public QMovie, public ServerObserver
 {
 Q_OBJECT
 
@@ -22,9 +27,13 @@ public:
 	enum Type {ServerLoadType};
 	Animation(QWidget*,Type);
 
-	void addTarget(const QModelIndex&);
-	void removeTarget(const QModelIndex&);
-	QModelIndexList targets() const {return targets_;}
+    void addTarget(VNode*);
+    void removeTarget(VNode*);
+    QList<VNode*> targets() const {return targets_;}
+
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
+    void notifyServerDelete(ServerHandler* server);
+    void notifyBeginServerClear(ServerHandler* server);
 
 Q_SIGNALS:
 	void repaintRequest(Animation*);
@@ -34,7 +43,7 @@ protected Q_SLOTS:
 
 protected:
 	QWidget* view_;
-	QModelIndexList targets_;
+    QList<VNode*> targets_;
 	Type type_;
 };
 

@@ -11,12 +11,18 @@
 
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QLinearGradient>
 #include <QPainter>
+#include <QPalette>
 #include <QPixmap>
 #include <QToolButton>
+#include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include "VNState.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
+#include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VFilter.hpp"
 
@@ -29,11 +35,18 @@
 //
 //===========================================
 
-VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode decorMode) :
+VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString title,ItemMode itemMode,DecorMode decorMode) :
  	menu_(parent),
 	filter_(filter),
+	itemMode_(itemMode),
 	decorMode_(decorMode)
 {
+	buildTitle(title,parent);
+
+	QAction* acSep = new QAction(this);
+	acSep->setSeparator(true);
+	menu_->addAction(acSep);
+
 	//Param name must be unique
 	for(std::set<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); ++it)
 	{
@@ -43,17 +56,49 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode de
 
 	if(decorMode_ == ColourDecor)
 	{
+		QLinearGradient grad;
+		grad.setCoordinateMode(QGradient::ObjectBoundingMode);
+		grad.setStart(0,0);
+		grad.setFinalStop(0,1);
+
+		int lighter=150;
+		bool useStateGrad=true;
+		if(VProperty* p=VConfig::instance()->find("view.common.node_gradient"))
+		{
+		    useStateGrad=p->value().toBool();
+		}
+
+		QFont f;
+		QFontMetrics fm(f);
+		int pixSize=fm.height()-2;
+
 		Q_FOREACH(QAction* ac,menu_->actions())
 		{
 			if(!ac->isSeparator())
 			{
 				if(VNState* vs=VNState::find(ac->data().toString().toStdString()))
 				{
-					QPixmap pix(10,10);
+	    		    //Fill rect
+				    QColor bg=vs->colour();
+				    QColor bgLight=bg.lighter(lighter);
+				    QColor border=bg.darker(125);
+				    QBrush bgBrush;
+				    if(useStateGrad)
+				    {
+				       grad.setColorAt(0,bgLight);
+				       grad.setColorAt(1,bg);
+				       bgBrush=QBrush(grad);
+				    }
+				    else
+				       bgBrush=QBrush(bg);
+
+					QPixmap pix(pixSize,pixSize);
 					QPainter painter(&pix);
-					pix.fill(vs->colour());
-					painter.setPen(Qt::black);
-					painter.drawRect(0,0,9,9);
+
+					QRect fillRect(0,0,pixSize,pixSize);
+					painter.fillRect(fillRect,bgBrush);
+					painter.setPen(border);
+					painter.drawRect(fillRect.adjusted(0,0,-1,-1));
 					ac->setIcon(pix);
 				}
 			}
@@ -64,20 +109,72 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode de
 	ac->setSeparator(true);
 	menu_->addAction(ac);
 
-	ac = new QAction(this);
-	ac->setText(tr("Select all"));
-	menu_->addAction(ac);
-	connect(ac,SIGNAL(triggered(bool)),
-			this,SLOT(slotSelectAll(bool)));
-
-	ac = new QAction(this);
-	ac->setText(tr("Unselect all"));
-	menu_->addAction(ac);
-	connect(ac,SIGNAL(triggered(bool)),
+	if(itemMode_ == FilterMode)
+	{
+		ac = new QAction(this);
+		ac->setText(tr("Clear filter"));
+		menu_->addAction(ac);
+		connect(ac,SIGNAL(triggered(bool)),
 			this,SLOT(slotUnselectAll(bool)));
+	}
+	else
+	{
+		ac = new QAction(this);
+		ac->setText(tr("Show all"));
+		menu_->addAction(ac);
+		connect(ac,SIGNAL(triggered(bool)),
+					this,SLOT(slotSelectAll(bool)));
+
+		ac = new QAction(this);
+		ac->setText(tr("Hide all"));
+		menu_->addAction(ac);
+		connect(ac,SIGNAL(triggered(bool)),
+			this,SLOT(slotUnselectAll(bool)));
+
+	}
 
 	reload();
 }
+
+void VParamFilterMenu::buildTitle(QString title,QMenu* parent)
+{
+	QLabel* titleLabel=new QLabel(title,menu_);
+	QFont f=menu_->font();
+	f.setBold(true);
+	titleLabel->setFont(f);
+	titleLabel->setAlignment(Qt::AlignHCenter);
+	titleLabel->setAutoFillBackground(true);
+	QPalette pal=titleLabel->palette();
+	QColor winCol=menu_->palette().color(QPalette::Window);
+	pal.setColor(QPalette::Window,QColor(237,238,238));
+	titleLabel->setPalette(pal);
+
+	int titlePadding=3;
+	int topMargin=2;
+	if(parent && parent->isTearOffEnabled())
+	{
+		titlePadding=1;
+		topMargin=0;
+	}
+
+	QString titleQss="QLabel {padding: " + QString::number(titlePadding) + "px;}";
+	titleLabel->setStyleSheet(titleQss);
+
+	QWidget *w=new QWidget(menu_);
+	QVBoxLayout *vb=new QVBoxLayout(w);
+	vb->setContentsMargins(2,topMargin,2,2);
+	//vb->addSpacing(2);
+	vb->addWidget(titleLabel);
+	//vb->addSpacing(2);
+
+	QWidgetAction *titleAc = new QWidgetAction(menu_);
+	//Qt doc says: the ownership of the widget is passed to the widgetaction.
+	//So when the action is deleted it will be deleted as well.
+	titleAc->setDefaultWidget(w);
+	//titleAc->setEnabled(false);
+	menu_->addAction(titleAc);
+}
+
 
 void VParamFilterMenu::addAction(QString name,QString id)
 {
@@ -149,58 +246,6 @@ void VParamFilterMenu::reload()
 	}
 }
 
-
-/*
-//===========================================
-//
-// StateFilterMenu
-//
-//===========================================
-
-StateFilterMenu::StateFilterMenu(QMenu * parent) :
-		VParamFilterMenu(parent,VNState::filterItems())
-{
-	Q_FOREACH(QAction* ac,menu_->actions())
-	{
-		if(!ac->isSeparator())
-		{
-			if(VNState* vs=VNState::find(ac->data().toString().toStdString()))
-			{
-				QPixmap pix(10,10);
-				QPainter painter(&pix);
-				pix.fill(vs->colour());
-				painter.setPen(Qt::black);
-				painter.drawRect(0,0,9,9);
-				ac->setIcon(pix);
-			}
-		}
-	}
-}
-
-//===========================================
-//
-// AttributeFilterMenu
-//
-//===========================================
-
-AttributeFilterMenu::AttributeFilterMenu(QMenu * parent) :
-		VParamFilterMenu(parent,VAttribute::filterItems())
-{
-}
-
-//===========================================
-//
-// IconFilterMenu
-//
-//===========================================
-
-IconFilterMenu::IconFilterMenu(QMenu * parent) :
-		VParamFilterMenu(parent,VIcon::filterItems())
-{
-}
-*/
-
-
 //===========================================
 //
 // ServerFilterMenu
@@ -211,6 +256,23 @@ ServerFilterMenu::ServerFilterMenu(QMenu * parent) :
  	menu_(parent),
 	filter_(NULL)
 {
+	loadFont_.setBold(true);
+
+	allMenu_=new QMenu("All servers",menu_);
+	menu_->addMenu(allMenu_);
+
+	QAction* acFavSep = new QAction(this);
+	acFavSep->setSeparator(true);
+	menu_->addAction(acFavSep);
+
+	QAction* acFavTitle = new QAction(this);
+	acFavTitle->setText(tr("Favourite or loaded servers"));
+	QFont f=acFavTitle->font();
+	f.setBold(true);
+	acFavTitle->setFont(f);
+
+	menu_->addAction(acFavTitle);
+
 	init();
 
 	ServerList::instance()->addObserver(this);
@@ -223,27 +285,77 @@ ServerFilterMenu::~ServerFilterMenu()
 		filter_->removeObserver(this);
 }
 
+void ServerFilterMenu::aboutToDestroy()
+{
+	ServerList::instance()->removeObserver(this);
+	if(filter_)
+		filter_->removeObserver(this);
+
+	clear();
+}
+
 void ServerFilterMenu::clear()
 {
-	Q_FOREACH(QAction* ac,acLst_)
+	Q_FOREACH(QAction* ac,acAllMap_)
 	{
 		delete ac;
 	}
-	acLst_.clear();
+	acAllMap_.clear();
+
+	clearFavourite();
+}
+
+void ServerFilterMenu::clearFavourite()
+{
+	Q_FOREACH(QAction* ac,acFavMap_)
+	{
+		delete ac;
+	}
+	acFavMap_.clear();
 }
 
 void ServerFilterMenu::init()
 {
+	clear();
+
 	for(int i=0; i < ServerList::instance()->count(); i++)
 	{
 		ServerItem* item=ServerList::instance()->itemAt(i);
-		//QString name=QString::fromStdString(item->name() + " (" + item->host() + ":" + item->port() + ")");
 		QString name=QString::fromStdString(item->name());
-		addAction(name,i);
+		QAction *ac=createAction(name,i);
+		acAllMap_[name]=ac;
 	}
+
+	Q_FOREACH(QAction *ac,acAllMap_)
+	{
+		allMenu_->addAction(ac);
+	}
+
+	buildFavourite();
 }
 
-void ServerFilterMenu::addAction(QString name,int id)
+void ServerFilterMenu::buildFavourite()
+{
+	clearFavourite();
+
+	for(int i=0; i < ServerList::instance()->count(); i++)
+	{
+		ServerItem* item=ServerList::instance()->itemAt(i);
+		if(item->isFavourite() || (filter_ && filter_->isFiltered(item)))
+		{
+			QString name=QString::fromStdString(item->name());
+			acFavMap_[name]=createAction(name,i);
+		}
+	}
+
+	Q_FOREACH(QAction *ac,acFavMap_)
+	{
+		menu_->addAction(ac);
+	}
+
+}
+
+QAction* ServerFilterMenu::createAction(QString name,int id)
 {
 	QAction *ac = new QAction(this);
 	ac->setText(name);
@@ -251,15 +363,13 @@ void ServerFilterMenu::addAction(QString name,int id)
 	ac->setCheckable(true);
 	ac->setChecked(false);
 
-	menu_->addAction(ac);
-
 	//It will not be emitted when setChecked is called!!
     connect(ac,SIGNAL(triggered(bool)),
 					this,SLOT(slotChanged(bool)));
 
-    acLst_ << ac;
-
+    return ac;
 }
+
 
 void ServerFilterMenu::slotChanged(bool)
 {
@@ -272,11 +382,34 @@ void ServerFilterMenu::slotChanged(bool)
 
 		if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
 		{
-			if(ac->isChecked())
+			QString name=ac->text();
+			bool checked=ac->isChecked();
+			if(checked)
 				filter_->addServer(item);
 			else
 				filter_->removeServer(item);
+
+			//At this point the action (ac) might be deleted so
+			//we need to use the name and check state for syncing
+			syncActionState(name,checked);
 		}
+	}
+}
+
+void ServerFilterMenu::syncActionState(QString name,bool checked)
+{
+	QMap<QString,QAction*>::const_iterator it = acAllMap_.find(name);
+	if(it != acAllMap_.end() && it.value()->isChecked() != checked)
+	{
+		//Triggered() will not be called!!
+		it.value()->setChecked(checked);
+	}
+
+	it = acFavMap_.find(name);
+	if(it != acFavMap_.end() && it.value()->isChecked() != checked)
+	{
+		//Triggered() will not be called!!
+		it.value()->setChecked(checked);
 	}
 }
 
@@ -288,7 +421,6 @@ void ServerFilterMenu::reload(ServerFilter *filter)
 
 	filter_=filter;
 
-
 	if(filter_)
 		filter_->addObserver(this);
 
@@ -298,30 +430,51 @@ void ServerFilterMenu::reload(ServerFilter *filter)
 //Reset actions state when a new filter is loaded
 void ServerFilterMenu::reload()
 {
-	//if(!filter_)
-	//	return;
+	buildFavourite();
 
-	Q_FOREACH(QAction* ac,acLst_)
+	QMap<QString,QAction*>::const_iterator it=acAllMap_.constBegin();
+	while(it != acAllMap_.constEnd())
 	{
-		if(!ac->isSeparator())
+		if(ServerItem *item=ServerList::instance()->find(it.value()->text().toStdString()))
 		{
-			if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
+			bool current=it.value()->isChecked();
+			if(current != filter_->isFiltered(item))
 			{
 				//Triggered() will not be called!!
-				ac->setChecked((filter_)?filter_->isFiltered(item):false);
+				it.value()->setChecked(!current);
+				it.value()->setFont(current?font_:loadFont_);
 			}
 		}
+		++it;
+	}
+
+	it=acFavMap_.constBegin();
+	while(it != acFavMap_.constEnd())
+	{
+		if(ServerItem *item=ServerList::instance()->find(it.value()->text().toStdString()))
+		{
+			bool current=it.value()->isChecked();
+			if(current != filter_->isFiltered(item))
+			{
+				//Triggered() will not be called!!
+				it.value()->setChecked(!current);
+				it.value()->setFont(current?font_:loadFont_);
+			}
+		}
+		++it;
 	}
 }
 
-
 void ServerFilterMenu::notifyServerListChanged()
 {
-	clear();
 	init();
 	reload();
 }
 
+void ServerFilterMenu::notifyServerListFavouriteChanged(ServerItem* item)
+{
+	reload();
+}
 
 void ServerFilterMenu::notifyServerFilterAdded(ServerItem*)
 {
@@ -341,84 +494,4 @@ void ServerFilterMenu::notifyServerFilterChanged(ServerItem*)
 void ServerFilterMenu::notifyServerFilterDelete()
 {
 	reload(0);
-}
-
-
-FilterWidget::FilterWidget(QWidget *parent) :
-   QWidget(parent),
-   data_(0)
-{
-	/*QHBoxLayout *hb=new QHBoxLayout();
-	setLayout(hb);
-
-	hb->setContentsMargins(0,0,0,0);
-	hb->setSpacing(0);
-
-	QList<DState::State> lst;
-	lst << DState::UNKNOWN << DState::SUSPENDED << DState::COMPLETE << DState::QUEUED << DState::SUBMITTED << DState::ACTIVE << DState::ABORTED;
-
-	Q_FOREACH(DState::State st,lst)
-	{
-		QToolButton* tb=createButton(ViewConfig::Instance()->stateShortName(st),ViewConfig::Instance()->stateName(st),ViewConfig::Instance()->stateColour(st));
-
-		items_[st]=tb;
-		//states_[]
-		hb->addWidget(tb);
-
-		//It will not be emitted when setChecked is called!
-		connect(tb,SIGNAL(clicked(bool)),
-				this,SLOT(slotChanged(bool)));
-
-	}*/
-}
-
-QToolButton* FilterWidget::createButton(QString label,QString tooltip,QColor col)
-{
-	QToolButton *tb=new QToolButton(this);
-	tb->setCheckable(true);
-	tb->setChecked(true);
-	tb->setText(label);
-	tb->setToolTip(tooltip);
-
-	QString s; //="QToolButton {border-radius: 0px;  padding: 2px;; border: black;}";
-
-	s+="QToolButton::checked {background: rgb(" +
-			QString::number(col.red()) + "," +
-			QString::number(col.green()) + "," +
-			QString::number(col.blue()) + ");}";
-	tb->setStyleSheet(s);
-
-	return tb;
-}
-
-void FilterWidget::reload(VParamSet* filterData)
-{
-	data_=filterData;
-
-	/*const StateFilter& filter=data_->stateFilter();
-
-	QMapIterator<DState::State,QToolButton*> it(items_);
-	while (it.hasNext())
-	{
-		it.next();
-		if(filter.find(it.key()) != filter.end())
-			it.value()->setChecked(true);
-		else
-			it.value()->setChecked(false);
-	}*/
-}
-
-void FilterWidget::slotChanged(bool)
-{
-	/*StateFilter filter;
-	QMapIterator<DState::State,QToolButton*> it(items_);
-	while (it.hasNext())
-	{
-	     it.next();
-	     if(it.value()->isChecked())
-	    		 filter.insert(it.key());
-	}
-
-	if(data_)
-			data_->stateFilter(filter);*/
 }

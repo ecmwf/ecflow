@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #12 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -78,7 +78,7 @@ std::ostream& SClientHandleSuitesCmd::print(std::ostream& os) const
 
 bool SClientHandleSuitesCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
-   if (debug) std::cout << "SClientHandleSuitesCmd::handle_server_response\n";
+   if (debug) std::cout << "  SClientHandleSuitesCmd::handle_server_response\n";
 
    if (server_reply.cli() && !cts_cmd->group_cmd()) {
       /// This Could be part of a group command, hence ONLY if NOT group command

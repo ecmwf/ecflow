@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,7 @@
 #include "ConfigListDelegate.hpp"
 #include "IconProvider.hpp"
 #include "PropertyEditor.hpp"
+#include "SessionHandler.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
@@ -27,6 +28,10 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 		configChanged_(false)
 {
 	setupUi(this);
+
+	QString wt=windowTitle();
+	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+	setWindowTitle(wt);
 
 	QFont f;
 	f.setBold(true);
@@ -47,7 +52,8 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 
 	readSettings();
 
-	list_->setCurrentRow(0);
+	if(list_->count() >0 && list_->currentRow() == -1)
+		list_->setCurrentRow(0);
 }
 
 void PropertyDialog::closeEvent(QCloseEvent * event)
@@ -66,15 +72,20 @@ void PropertyDialog::build()
 			  if(vPage->param("visible") == "false")
                   continue;
             
-              PropertyEditor* ed=new PropertyEditor(this);
-			  ed->edit(vPage);
 			  QPixmap pix(32,32);
+			  QPixmap edPix;
               QString iconStr=vPage->param("icon");
+
               if(!iconStr.isEmpty())
               {
             	  IconProvider::add(":/viewer/" + iconStr,iconStr);
             	  pix=IconProvider::pixmap(iconStr,32);
+            	  edPix=IconProvider::pixmap(iconStr,20);
               }    
+
+              PropertyEditor* ed=new PropertyEditor(this);
+              ed->edit(vPage,edPix);
+
               addPage(ed,pix,vPage->param("label"));
 			  editors_ << ed;
 		}
@@ -129,10 +140,12 @@ void PropertyDialog::slotButton(QAbstractButton* pb)
 
 void PropertyDialog::manageChange(bool inApply)
 {
+	bool hasChange=false;
 	Q_FOREACH(PropertyEditor* ed,editors_)
 	{
 		if(ed->applyChange())
 		{
+			hasChange=true;
 			VProperty* p=ed->property();
 			if(p && p->name() != "server")
 			{
@@ -143,6 +156,9 @@ void PropertyDialog::manageChange(bool inApply)
 			}
 		}
 	}
+
+	if(hasChange)
+		VConfig::instance()->saveSettings();
 }
 
 void PropertyDialog::load(VProperty* p)
@@ -152,19 +168,26 @@ void PropertyDialog::load(VProperty* p)
 
 void PropertyDialog::writeSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-PropertyDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("PropertyDialog")),
+                       QSettings::NativeFormat);
 
 	//We have to clear it so that should not remember all the previous values
 	settings.clear();
 
 	settings.beginGroup("main");
 	settings.setValue("size",size());
+	settings.setValue("current",list_->currentRow());
 	settings.endGroup();
 }
 
 void PropertyDialog::readSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-PropertyDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("PropertyDialog")),
+                       QSettings::NativeFormat);
 
 	settings.beginGroup("main");
 	if(settings.contains("size"))
@@ -176,6 +199,12 @@ void PropertyDialog::readSettings()
 	  	resize(QSize(550,540));
 	}
 
+	if(settings.contains("current"))
+	{
+		int current=settings.value("current").toInt();
+		if(current >=0)
+			list_->setCurrentRow(current);
+	}
 	settings.endGroup();
 }
 

@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -80,9 +80,9 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con_3_0_1 )
 
 //#define UPDATE_TESTS 1
 
-BOOST_AUTO_TEST_CASE( test_migration_restore_boost_1_47_checkpt_file )
+BOOST_AUTO_TEST_CASE( test_migration_restore_boost_checkpt_file )
 {
-   cout << "ANode:: ...test_migration_restore_boost_1_47_checkpt_file\n";
+   cout << "ANode:: ...test_migration_restore_boost_checkpt_file\n";
 
    std::string file_name = File::test_data("ANode/test/data/migration/fixture/","ANode");
 
@@ -92,17 +92,17 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_boost_1_47_checkpt_file )
    // **Keep*** old checkpt test data, to ensure future ecflow versions can be migrated
    // **Update** here for future boost updates
    // **IF MyDefsFixture is changed, we need to ensure we can migrate it to future versions
-   MyDefsFixture fixture("boost_1_47.checkpt");
+   MyDefsFixture fixture("boost.checkpt");
 
    // Allow the test data, to be used on other platforms
    fixture.remove_host_depedent_server_variables();
 
 #ifdef UPDATE_TESTS
    // remember to check out data
-   doSave(file_name + "boost_1_47.checkpt",fixture.fixtureDefsFile());
+   doSave(file_name + "boost.checkpt",fixture.fixtureDefsFile());
 #else
    Ecf::set_debug_equality(true);
-   do_restore<Defs>(file_name + "boost_1_47.checkpt",fixture.fixtureDefsFile());
+   do_restore<Defs>(file_name + "boost.checkpt",fixture.fixtureDefsFile());
    Ecf::set_debug_equality(false);
 #endif
 }

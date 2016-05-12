@@ -11,6 +11,7 @@
 #include "DashboardDialog.hpp"
 
 #include "DashboardWidget.hpp"
+#include "SessionHandler.hpp"
 
 #include <QAbstractButton>
 #include <QCloseEvent>
@@ -37,12 +38,15 @@ DashboardDialog::DashboardDialog(QWidget *parent) :
 
 DashboardDialog::~DashboardDialog()
 {
-	dw_->deleteLater();
+	//dw_->deleteLater();
 }
 
 void DashboardDialog::add(DashboardWidget* dw)
 {
 	dw_=dw;
+
+	//The dialog takes ownership of the widget
+	dw_->setParent(this);
 
 	layout_->insertWidget(0,dw_,1);
 
@@ -69,10 +73,17 @@ void DashboardDialog::slotUpdateTitle(QString txt)
     setWindowTitle(txt.remove("<b>").remove("</b>"));
 }
 
+void DashboardDialog::slotOwnerDelete()
+{
+	this->deleteLater();
+}
 
 void DashboardDialog::writeSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-DashboardDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("DashboardDialog")),
+                       QSettings::NativeFormat);
 
 	//We have to clear it so that should not remember all the previous values
 	settings.clear();
@@ -84,7 +95,10 @@ void DashboardDialog::writeSettings()
 
 void DashboardDialog::readSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-DashboardDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("DashboardDialog")),
+                       QSettings::NativeFormat);
 
 	settings.beginGroup("main");
 	if(settings.contains("size"))

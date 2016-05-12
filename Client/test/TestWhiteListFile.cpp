@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #4 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -78,6 +78,11 @@ BOOST_AUTO_TEST_CASE( test_loading_of_white_list_file )
 
       // Invoking a client request that requires write access, should pass
       BOOST_CHECK_MESSAGE( theClient.shutdownServer() == 0,"should return 0\n" << theClient.errorMsg());
+
+      // Invoking a client request that requires read access, should also pass
+      BOOST_CHECK_MESSAGE( theClient.getDefs() == 0,"should return 0\n" << theClient.errorMsg());
+      BOOST_CHECK_MESSAGE( theClient.sync_local() == 0,"should return 0\n" << theClient.errorMsg());
+      BOOST_CHECK_MESSAGE( theClient.news_local() == 0,"should return 0\n" << theClient.errorMsg());
 
       // Remove the white list file. Comment out for debug
       fs::remove(the_host.ecf_lists_file(port));

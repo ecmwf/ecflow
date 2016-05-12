@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #43 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -130,7 +130,7 @@ void LoadDefsCmd::create( 	Cmd_ptr& cmd,
 		else if (args[i] == "check_only") check_only = true;
 		else defs_filename = args[i];
 	}
-	if (clientEnv->debug())  cout <<  "LoadDefsCmd::create:  Defs file '" <<  defs_filename << "'.\n";
+	if (clientEnv->debug()) cout << "  LoadDefsCmd::create:  Defs file '" <<  defs_filename << "'.\n";
 
 	cmd = LoadDefsCmd::create(defs_filename,force, check_only,clientEnv );
 }

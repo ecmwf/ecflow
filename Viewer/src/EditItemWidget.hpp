@@ -27,29 +27,31 @@ public:
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
-	void clearContents();
+    void clearContents();
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
 	void infoFailed(VReply*);
 	void infoProgress(VReply*);
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
 	void on_preprocTb__toggled(bool);
 	void on_submitTb__clicked(bool);
-	void on_searchTb__toggled(bool);
+	void on_searchTb__clicked();
+	void on_gotoLineTb__clicked();
+	void on_fontSizeUpTb__clicked();
+	void on_fontSizeDownTb__clicked();
 
 protected:
 	bool preproc() const;
 	bool alias() const;
-	void updateWidgetState() {};
+    void updateState(const ChangeFlags&) {}
 
 	bool preproc_;
 	bool alias_;
-
 };
 
 #endif

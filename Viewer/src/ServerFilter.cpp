@@ -40,6 +40,13 @@ ServerFilter::~ServerFilter()
 	}
 }
 
+void ServerFilter::serverNames(std::vector<std::string>& vec) const
+{
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	{
+		vec.push_back((*it)->name());
+	}
+}
 
 void ServerFilter::addServer(ServerItem *item,bool broadcast)
 {
@@ -106,6 +113,16 @@ bool ServerFilter::isFiltered(ServerItem* item) const
 			return true;
 	}
 	return false;
+}
+
+bool ServerFilter::isFiltered(ServerHandler* server) const
+{
+    for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if((*it)->serverHandler() == server)
+            return true;
+    }
+    return false;
 }
 
 void ServerFilter::writeSettings(VSettings* vs) const

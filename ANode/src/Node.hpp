@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #251 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -56,7 +56,9 @@
 #include "MiscAttrs.hpp"
 #include "NodeFwd.hpp"
 #include "Flag.hpp"
+#include "Aspect.hpp"
 
+class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
 namespace ecf { class Calendar; class NodeTreeVisitor; } // forward declare class
 
@@ -72,7 +74,7 @@ public:
 
    // Server called functions:
    /// Required when we have time attributes, when time related attribute are free they stay free
-   virtual void calendarChanged(const ecf::Calendar&, std::vector<node_ptr>& auto_cancelled_nodes);
+   virtual void calendarChanged(const ecf::Calendar&, std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late);
 
    /// resolving dependencies means we look at day,date,time and triggers and check to
    /// to see if a node is free or still holding. When a node if free of its dependencies and limits
@@ -187,7 +189,7 @@ public:
    /// Find all environment variables, in the input string and substitute.
    /// with correspondingly named variable value.
    /// i.e search for ${ENV} and replace
-   bool enviromentSubsitution(std::string& cmd);
+   bool variable_dollar_subsitution(std::string& cmd);
 
    /// Resolve inlimit references to limits, and check trigger and complete expression
    virtual bool check(std::string& errorMsg,std::string& warningMsg) const;
@@ -319,6 +321,7 @@ public:
 
    virtual void gen_variables(std::vector<Variable>&) const;
    bool getLabelValue(const std::string& name, std::string& value) const;
+   bool getLabelNewValue(const std::string& name, std::string& value) const;
 
    // Use get_trigger()/get_complete() for determining if we have trigger
    // and complete expressions. This is many times faster than calling
@@ -403,6 +406,7 @@ public:
    void delete_limit_path(const std::string& limit_name, const std::string& limit_path);
    void deleteInlimit(const std::string& name);
    void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
+   void deleteLate();
 
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors
@@ -420,6 +424,7 @@ public:
    void changeLimitValue(const std::string& name,const std::string& value);
    void changeLimitValue(const std::string& name,int value);
    void changeDefstatus(const std::string& state);
+   void changeLate(const ecf::LateAttr&);
 
    bool set_meter(const std::string& name,int value); // does not throw if meter not found
    bool set_event(const std::string& name,bool value);  // does not throw if event not found
@@ -431,27 +436,27 @@ public:
    virtual void collateChanges(DefsDelta& ) const = 0;
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
 
-   void set_memento(const StateMemento* );
-   void set_memento(const NodeDefStatusDeltaMemento* );
-   void set_memento(const SuspendedMemento* );
-   void set_memento(const NodeEventMemento* );
-   void set_memento(const NodeMeterMemento* );
-   void set_memento(const NodeLabelMemento* );
-   void set_memento(const NodeTriggerMemento* );
-   void set_memento(const NodeCompleteMemento* );
-   void set_memento(const NodeRepeatMemento* );
-   void set_memento(const NodeLimitMemento* );
-   void set_memento(const NodeInLimitMemento* );
-   void set_memento(const NodeVariableMemento* );
-   void set_memento(const NodeLateMemento* );
-   void set_memento(const NodeTodayMemento* );
-   void set_memento(const NodeTimeMemento* );
-   void set_memento(const NodeDayMemento* );
-   void set_memento(const NodeCronMemento* );
-   void set_memento(const NodeDateMemento* );
-   void set_memento(const NodeZombieMemento* );
-   void set_memento(const NodeVerifyMemento* );
-   void set_memento(const FlagMemento* );
+   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeDefStatusDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const SuspendedMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeTriggerMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeCompleteMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeRepeatMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeLimitMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeInLimitMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeVariableMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeLateMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeTodayMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeTimeMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeDayMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeCronMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeDateMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeZombieMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeVerifyMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects );
 
    // Find functions: ============================================================
    // Will search for a node by name(ie not a path) first on siblings, then on a parent
@@ -488,6 +493,7 @@ public:
 
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
    const Variable& findVariable(const std::string& name) const;
+   const Variable& find_parent_variable(const std::string& name) const;
    virtual const Variable& findGenVariable(const std::string& name) const;
    bool findVariableValue( const std::string& name, std::string& returnedValue) const;
    bool findGenVariableValue( const std::string& name, std::string& returnedValue) const;
@@ -593,6 +599,18 @@ protected:
    virtual std::string write_state() const;
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 
+   // Observer notifications
+protected:
+   std::vector<AbstractObserver*> observers_;
+   void notify_delete();
+   void checkForLateness( const ecf::Calendar& );
+   void check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr*);
+
+public:
+   void notify(const std::vector<ecf::Aspect::Type>& aspects);
+   void attach(AbstractObserver*);
+   void detach(AbstractObserver*);
+
 private:
    void why(std::vector<std::string>& theReasonWhy) const;
    /// Function used as a part of trigger and complete expressions.
@@ -613,7 +631,6 @@ private:
    const Event& findEventByName( const std::string& name) const;
    bool set_meter_used_in_trigger(const std::string& name);
    bool set_event_used_in_trigger(const std::string& name);
-
 
    /// When the begin/re-queue is called this function will initialise the state
    /// on the node. If node has a default state this is applied to the node, and
@@ -641,8 +658,6 @@ private: // alow simulator access
 
    AstTop* completeAst(std::string& errorMsg) const;   // Will create AST on demand
    AstTop* triggerAst(std::string& errorMsg) const;    // Will create AST on demand
-
-   void checkForLateness( const ecf::Calendar& );
 
 private: // All mementos access
    friend class CompoundMemento;

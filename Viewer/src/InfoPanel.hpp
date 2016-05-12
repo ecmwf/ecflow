@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -65,21 +65,21 @@ public:
 
     //From DashboardWidget
     void populateDockTitleBar(DashboardDockTitleWidget*);
-	void reload() {};
+    void reload() {}
 	void rerender();
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 
 	//From VInfoObserver
-	void notifyDelete(VInfo*) {};
+    void notifyDelete(VInfo*) {}
 	void notifyDataLost(VInfo*);
 
 	//From ServerObserver
 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
 	void notifyServerDelete(ServerHandler* server);
 	void notifyBeginServerClear(ServerHandler* server);
-	void notifyEndServerClear(ServerHandler* server) {};
-	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
+    void notifyEndServerClear(ServerHandler* server) {}
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
 	void notifyEndServerScan(ServerHandler* server);
 	void notifyServerConnectState(ServerHandler* server);
 	void notifyServerSuiteFilterChanged(ServerHandler* server);
@@ -87,6 +87,7 @@ public:
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);
+	void setCurrentSelection(VInfo_ptr node) {slotReload(node);}
 
 protected Q_SLOTS:
     void slotReloadFromBc(VInfo_ptr node);

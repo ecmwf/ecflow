@@ -3,7 +3,7 @@
 ! Author      : 
 ! Revision    : $Revision: #26 $ 
 !
-! Copyright 2009-2012 ECMWF. 
+! Copyright 2009-2016 ECMWF. 
 ! This software is licensed under the terms of the Apache Licence version 2.0 
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ! In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -64,16 +64,7 @@ menu 'MAIN'
 
   ( TASK, ~ACTIVE & ~SUBMITTED, 'Rerun', 'ecflow_client --force queued <full_name>')
 
-  (TASK|ALIAS, SUBMITTED|ACTIVE, 'Set complete', 
-    'ecflow_client --force complete <full_name>',
-    'Have you checked that the job is not active anymore (jobstatus) ?', YES)
-  (TASK|ALIAS, UNKNOWN|QUEUED|ABORTED, 'Set complete', 
-    'ecflow_client --force complete <full_name>')
-  (TASK|ALIAS, SUBMITTED|ACTIVE, 'Set aborted', 
-    'ecflow_client --force aborted <full_name>',
-    'Have you checked that the job is not active anymore (jobstatus) ?', YES)
-  (TASK|ALIAS, UNKNOWN|QUEUED|COMPLETE, 'Set aborted', 
-     'ecflow_client --force aborted <full_name>')
+  (TASK | ALIAS, ALL, 'Set', MENU)
 
   (TASK|ALIAS, ~ACTIVE & ~SUBMITTED, 'Execute', 'ecflow_client --run <full_name>')
 
@@ -94,7 +85,7 @@ menu 'MAIN'
   ((NODE|ALIAS)& ADMIN, ALL,'Order', MENU)
 
   (ALL,ALL,'-',SEPARATOR ,'',YES)
-  (SUITE|FAMILY|TASK, ALL, 'Web...', 'ecflow_client --url <full_name> ', '', YES)
+  (SUITE|FAMILY, ALL, 'Web...', 'ecflow_client --url <full_name> ', '', YES)
   (TASK, ALL, 'Web', MENU)
 
   (ALL,ALL,'-',SEPARATOR)
@@ -164,8 +155,30 @@ menu 'MAIN'
   (SERVER, ALL ,  'Stat',  'sh ecflow_client --port %ECF_PORT% --host %ECF_NODE% --stats' )
 }
 
+menu 'Set'
+{
+  (TASK|ALIAS, SUBMITTED|ACTIVE, 'Set complete', 
+    'ecflow_client --force complete <full_name>',
+    'Have you checked that the job is not active anymore (jobstatus) ?', YES)
+  (TASK|ALIAS, UNKNOWN|QUEUED|ABORTED, 'Set complete', 
+    'ecflow_client --force complete <full_name>')
+  (TASK|ALIAS, SUBMITTED|ACTIVE, 'Set aborted', 
+    'ecflow_client --force aborted <full_name>',
+    'Have you checked that the job is not active anymore (jobstatus) ?', YES)
+  (TASK|ALIAS, UNKNOWN|QUEUED|COMPLETE, 'Set aborted', 
+     'ecflow_client --force aborted <full_name>')
+}
+
 menu 'Web' 
 {
+!  (TASK, ALL, 'Web...', 'ecflow_client --url <full_name> ', '', YES)
+  (NODE, ALL ,  'WebM',  MENU  )
+  (NODE, ALL ,  'WebW',  MENU  )
+}
+
+menu 'WebM' 
+{
+  (TASK, ALL, 'Web...', 'ecflow_client --url <full_name> ', '', YES)
   (TASK, ALL, 'Man', 'sh firefox %ECF_URL_BASE%/%ECF_URL%', '', YES)
   (TASK, ALL, 'Script', 'sh xterm -T Script -e vim %ECF_SCRIPT%', '', YES)
   (TASK, ALL, 'Job', 'sh xterm -T Job -e vim %ECF_JOB%', '', YES)
@@ -173,6 +186,17 @@ menu 'Web'
   (TASK, ALL , 'TimeLine...', WINDOW(Timeline))
   ! request from Lidström Jonas https://software.ecmwf.int/issues/browse/SUP-829
   (TASK, ALL,  'Details', 'sh  xterm -T Details-%ECF_NAME% -e "grep %ECF_NAME% %ECF_LOG% ; read"') 
+}
+
+menu 'WebW' 
+{
+  (TASK, ALL, 'WMan',    'sh firefox ${ECFLOW_WEB:-http://eurus.ecmwf.int:8000/api/v1/ecflow}/%ECF_NODE:%/%ECF_PORT:%/man/%ECF_NAME:%', '', YES)
+  (TASK, ALL, 'WScript', 'sh firefox ${ECFLOW_WEB:-http://eurus.ecmwf.int:8000/api/v1/ecflow}/%ECF_NODE:%/%ECF_PORT:%/script/%ECF_NAME:%', '', YES)
+  (TASK, ALL, 'WJob',    'sh firefox ${ECFLOW_WEB:-http://eurus.ecmwf.int:8000/api/v1/ecflow}/%ECF_NODE:%/%ECF_PORT:%/job/%ECF_NAME:%', '', YES)
+  (TASK, ALL, 'WOut',    'sh firefox ${ECFLOW_WEB:-http://eurus.ecmwf.int:8000/api/v1/ecflow}/%ECF_NODE:%/%ECF_PORT:%/output/%ECF_NAME:%', '', YES)
+  (TASK, ALL, 'Suites',  'sh firefox ${ECFLOW_WEB:-http://eurus.ecmwf.int:8000/api/v1/ecflow}/%ECF_NODE:%/%ECF_PORT:%/suites', '', YES)
+  (TASK, ALL, 'Treemap', 'sh firefox ${ECFLOW_WEB:-http://eurus.ecmwf.int:8000/api/v1/ecflow}/%ECF_NODE:%/%ECF_PORT:%/suite/treemap/SAR/none/7/%SUITE:%', '', YES)
+  (TASK, ALL, 'Flask',   'sh firefox ${ECFLOW_WEB_MONITOR:-http://eurus.ecmwf.int:5001}', '', YES)
 }
 
 !==============================================================================
@@ -320,3 +344,7 @@ menu "Windows"
   (SERVER, ALL , 'TimeLine...',  WINDOW(Timeline))
 }
 
+! DIRRC=~/.ecflowrc; rm -rf $DIRRC;         mkdir $DIRRC
+
+! lm=src/ecflowview.menu; um=$HOME/.ecflowrc/ecflowview.menu; rm $um
+! sh src/menu2c.sh < $lm > ${lm}.h && cp -f $lm $um

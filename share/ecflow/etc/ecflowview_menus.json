@@ -29,7 +29,18 @@
         {
             "name"    : "Defstatus",
             "modes"   : ["Submenu"]
+        },
+
+        {
+            "name"    : "Special",
+            "modes"   : ["Submenu"]
+        },
+
+        {
+            "name"    : "Custom",
+            "modes"   : ["Submenu"]
         }
+
 
     ],
 
@@ -43,14 +54,16 @@
             "menu"           : "Node",
             "name"           : "Suspend",
             "visible_for"    : "not suspended and node",
-            "command"        : "ecflow_client --suspend <full_name>"
+            "command"        : "ecflow_client --suspend <full_name>",
+            "status_tip"     : "__cmd__"
         },
 
         {
             "menu"           : "Node",
             "name"           : "Resume",
             "visible_for"    : "suspended and node",
-            "command"        : "ecflow_client --resume <full_name>"
+            "command"        : "ecflow_client --resume <full_name>",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -58,41 +71,41 @@
             "name"           : "Rerun",
             "visible_for"    : "task",
             "enabled_for"    : "(not active) and (not submitted)",
-            "command"        : "ecflow_client --force queued <full_name>"
+            "command"        : "ecflow_client --force queued <full_name>",
+            "status_tip"     : "__cmd__"
         },
 
         {
             "menu"           : "Node",
             "name"           : "Set complete",
             "visible_for"    : "task or alias",
-            "enabled_for"    : "submitted or active",
-            "command"        : "ecflow_client --force complete <full_name>",
+            "enabled_for"    : "submitted or active or unknown or queued or aborted",
+            "command"        : "ecflow_client --force=complete <full_name>",
+            "question_for"   : "submitted or active",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
-            "default_answer" : "Yes"
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
         },
 
         {
             "menu"           : "Node",
             "name"           : "Set aborted",
             "visible_for"    : "task or alias",
-            "enabled_for"    : "submitted or active",
-            "command"        : "ecflow_client --force aborted <full_name>"
-        },
-        {
-            "menu"           : "Node",
-            "name"           : "Set aborted",
-            "visible_for"    : "task or alias",
-            "enabled_for"    : "unknown or queued or complete",
-            "command"        : "ecflow_client --force aborted <full_name>",
+            "enabled_for"    : "submitted or active or unknown or queued or complete",
+            "command"        : "ecflow_client --force=aborted <full_name>",
+            "question_for"   : "submitted or active",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
-            "default_answer" : "Yes"
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
         },
+
         {
             "menu"           : "Node",
             "name"           : "Execute",
             "visible_for"    : "task or alias",
             "enabled_for"    : "(not active) and (not submitted)",
-            "command"        : "ecflow_client --run <full_name>"
+            "command"        : "ecflow_client --run <full_name>",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -100,9 +113,10 @@
             "name"           : "Requeue",
             "visible_for"    : "task or suite or family",
             "enabled_for"    : "(not active) and (not submitted)",
-            "command"        : "ecflow_client --requeue force <full_name>",
+            "command"        : "ecflow_client --requeue=force <full_name>",
             "question"       : "Confirm requeuing of <full_name>",
-            "default_answer" : "Yes"
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -110,9 +124,10 @@
             "name"           : "Requeue aborted",
             "visible_for"    : "suite or family",
             "enabled_for"    : "aborted or suspended",
-            "command"        : "ecflow_client --requeue abort <full_name>",
+            "command"        : "ecflow_client --requeue=abort <full_name>",
             "question"       : "Confirm requeuing of aborted tasks from <full_name>",
-            "default_answer" : "Yes"
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -126,14 +141,6 @@
             "type"           : "Submenu",
             "visible_for"    : "suite or task or family",
             "enabled_for"    : "(queued or suspended or active) and (has_triggers or has_time or has_date)",
-            "command"        : "None"
-        },
-
-        {
-            "menu"           : "Node",
-            "name"           : "Special",
-            "type"           : "Submenu",
-            "visible_for"    : "node or alias",
             "command"        : "None"
         },
 
@@ -162,6 +169,14 @@
         },
 
         {
+            "menu"           : "Node",
+            "name"           : "Special",
+            "type"           : "Submenu",
+            "visible_for"    : "node or alias",
+            "command"        : "None"
+        },
+
+        {
             "name"           : "-",
             "menu"           : "Node"
         },
@@ -171,7 +186,8 @@
             "name"           : "Begin",
             "visible_for"    : "suite and (oper or admin)",
             "enabled_for"    : "unknown or complete",
-            "command"        : "ecflow_client --begin <node_name>"
+            "command"        : "ecflow_client --begin <node_name>",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -179,9 +195,10 @@
             "name"           : "Cancel",
             "visible_for"    : "suite and (oper or admin)",
             "enabled_for"    : "(not active) and (not submitted)",
-            "command"        : "ecflow_client --delete yes <full_name>",
+            "command"        : "ecflow_client --delete=yes <full_name>",
             "question"       : "Do you really want to cancel suite <full_name> ?",
-            "default_answer" : "No"
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
         },
 
 
@@ -189,15 +206,17 @@
             "menu"           : "Node",
             "name"           : "Set",
             "visible_for"    : "event",
-            "enabled_for"    : "clear",
-            "command"        : "ecflow_client --alter change event <node_name> set <parent_name>"
+            "enabled_for"    : "event_clear",
+            "command"        : "ecflow_client --alter change event <node_name> set <parent_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Node",
             "name"           : "Clear",
             "visible_for"    : "event",
-            "enabled_for"    : "set",
-            "command"        : "ecflow_client --alter change event <node_name> clear <parent_name>"
+            "enabled_for"    : "event_set",
+            "command"        : "ecflow_client --alter change event <node_name> clear <parent_name>",
+            "status_tip"     : "__cmd__"
         },
 
 
@@ -207,8 +226,9 @@
             "name"           : "Unlock",
             "visible_for"    : "server and (oper or admin) and locked",
             "command"        : "unlock -y",
-            "question"       : "Before going further, please check why the server was locked.",
-            "default_answer" : "No"
+            "question"       : "Before going further, please check why the server was locked.",           
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -216,9 +236,10 @@
             "name"           : "Restart",
             "visible_for"    : "server",
             "enabled_for"    : "shutdown or halted",
-            "command"        : "ecflow_client --restart yes",
+            "command"        : "ecflow_client --restart",
             "question"       : "Restart the server in <node_name>?",
-            "default_answer" : "No"
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -226,9 +247,10 @@
             "name"           : "Shutdown",
             "visible_for"    : "server",
             "enabled_for"    : "not shutdown",
-            "command"        : "ecflow_client --shutdown yes",
+            "command"        : "ecflow_client --shutdown=yes",
             "question"       : "Shutdown the server in <node_name>?",
-            "default_answer" : "No"
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -236,9 +258,10 @@
             "name"           : "Halt",
             "visible_for"    : "server",
             "enabled_for"    : "not halted",
-            "command"        : "ecflow_client --halt yes",
+            "command"        : "ecflow_client --halt=yes",
             "question"       : "Halt the server in <node_name>?",
-            "default_answer" : "No"
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -246,9 +269,10 @@
             "name"           : "Terminate",
             "visible_for"    : "server",
             "enabled_for"    : "halted or unknown",
-            "command"        : "ecflow_client --terminate yes",
+            "command"        : "ecflow_client --terminate=yes",
             "question"       : "Terminate the server in <node_name>?",
-            "default_answer" : "No"
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -260,7 +284,8 @@
             "menu"           : "Node",
             "name"           : "Checkpoint",
             "visible_for"    : "server",
-            "command"        : "ecflow_client --check_pt"
+            "command"        : "ecflow_client --check_pt",
+            "status_tip"     : "__cmd__"
         },
 
         {
@@ -270,7 +295,8 @@
             "enabled_for"    : "halted",
             "command"        : "ecflow_client --restore_from_checkpt",
             "question"       : "Recover the server in <node_name>?",
-            "default_answer" : "No"
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
         },
 
 
@@ -280,18 +306,20 @@
             "menu"           : "Node",
             "name"           : "Reset",
             "visible_for"    : "limit",
-            "command"        : "ecflow_client --alter change limit_value <node_name> 0 <parent_name>",
-            "question"       : "Confirm resetting <full_name>",
-            "default_answer" : "Yes"
+            "command"        : "ecflow_client --alter=change limit_value <node_name> 0 <parent_name>",
+            "question"       : "Confirm resetting limit <node_name>",
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
         },
 
         {
             "menu"           : "Node",
             "name"           : "Remove",
             "visible_for"    : "alias",
-            "command"        : "ecflow_client --delete yes <full_name>",
+            "command"        : "ecflow_client --delete=yes <full_name>",
             "question"       : "Confirm remove alias <full_name>",
-            "default_answer" : "Yes"
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
         },
 
 
@@ -316,7 +344,8 @@
         {
             "menu"           : "Node",
             "name"           : "Set as root",
-            "enabled_for"    : "suite or task or family"
+            "enabled_for"    : "suite or task or family",
+            "hidden"         : "true"
         },
 
         {
@@ -324,10 +353,15 @@
             "name"           : "-"
         },
 
+
+
+
         {
+            "name"           : "Custom",
+            "type"           : "Submenu",
             "menu"           : "Node",
-            "name"           : "Custom...",
-            "command"        : "CUSTOM_COMMAND"
+            "command"        : "None",
+            "visible_for"    : "server or node"
         },
 
 
@@ -338,54 +372,132 @@
             "menu"           : "Delete",
             "name"           : "All dependencies",
             "enabled_for"    : "has_triggers or has_time or has_date",
-            "command"        : "ecflow_client --free-dep all <full_name>"
+            "command"        : "ecflow_client --free-dep all <full_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Delete",
             "name"           : "Trigger dependencies",
             "enabled_for"    : "has_triggers",
-            "command"        : "ecflow_client --free-dep trigger <full_name>"
+            "command"        : "ecflow_client --free-dep trigger <full_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Delete",
             "name"           : "Time dependencies",
             "enabled_for"    : "has_time",
-            "command"        : "ecflow_client --free-dep time <full_name>"
+            "command"        : "ecflow_client --free-dep time <full_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Delete",
             "name"           : "Date dependencies",
             "enabled_for"    : "has_date",
-            "command"        : "ecflow_client --free-dep date <full_name>"
+            "command"        : "ecflow_client --free-dep date <full_name>",
+            "status_tip"     : "__cmd__"
         },
-
-
-
 
         {
             "menu"           : "Order",
             "name"           : "Top",
-            "command"        : "ecflow_client --order <full_name> top"
+            "command"        : "ecflow_client --order <full_name> top",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Order",
             "name"           : "Up",
-            "command"        : "ecflow_client --order <full_name> up"
+            "command"        : "ecflow_client --order <full_name> up",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Order",
             "name"           : "Down",
-            "command"        : "ecflow_client --order <full_name> down"
+            "command"        : "ecflow_client --order <full_name> down",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Order",
             "name"           : "Bottom",
-            "command"        : "ecflow_client --order <full_name> bottom"
+            "command"        : "ecflow_client --order <full_name> bottom",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Order",
             "name"           : "Alphabetically",
-            "command"        : "ecflow_client --order <full_name> alpha"
+            "command"        : "ecflow_client --order <full_name> alpha",
+            "status_tip"     : "__cmd__"
+        },
+
+
+        {
+            "menu"           : "Special",
+            "name"           : "Kill",
+            "visible_for"    : "(suite or family)",
+            "enabled_for"    : "(active or submitted or aborted)",
+            "command"        : "ecflow_client --kill <full_name>",
+            "question"       : "Confirm kill of <full_name>",
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Kill",
+            "visible_for"    : "(task or alias)",
+            "enabled_for"    : "(active or submitted)",
+            "command"        : "ecflow_client --kill <full_name>",
+            "question"       : "Confirm kill <full_name>",
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Free password",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter add variable ECF_PASS FREE <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Clear zombie flag",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter clear_flag zombie <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Clear late flag",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter clear_flag late <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Clear killed flag",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter clear_flag killed <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Execute",
+            "visible_for"    : "family",
+            "enabled_for"    : "(not active) and (not submitted)",
+            "command"        : "ecflow_client --run <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Walk",
+            "visible_for"    : "(suite or family)",
+            "command"        : "ecflow_client --force-dep-eval <full_name>",
+            "status_tip"     : "__cmd__"
         },
 
 
@@ -395,46 +507,52 @@
             "name"           : "Unknown",
             "visible_for"    : "node",
             "enabled_for"    : "not unknown",
-            "command"        : "ecflow_client --force unknown recursive <full_name>"
+            "command"        : "ecflow_client --force unknown recursive <full_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Force",
             "name"           : "Complete",
             "visible_for"    : "node",
             "enabled_for"    : "not complete and not active and not submitted",
-            "command"        : "ecflow_client --force complete recursive <full_name>",
+            "command"        : "ecflow_client --force=complete recursive <full_name>",
             "question"       : "Check running/queued jobs and Confirm force complete of <full_name>",
-            "default_answer" : "No"
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Force",
             "name"           : "Queued",
             "visible_for"    : "node",
             "enabled_for"    : "not queued and not active and not submitted",
-            "command"        : "ecflow_client --force queued recursive <full_name>"
+            "command"        : "ecflow_client --force queued recursive <full_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Force",
             "name"           : "Submitted",
             "visible_for"    : "node",
             "enabled_for"    : "not submitted and not active",
-            "command"        : "ecflow_client --force submitted recursive <full_name>"
+            "command"        : "ecflow_client --force submitted recursive <full_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Force",
             "name"           : "Active",
             "visible_for"    : "node",
             "enabled_for"    : "not active",
-            "command"        : "ecflow_client --force active recursive <full_name>"
+            "command"        : "ecflow_client --force active recursive <full_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Force",
             "name"           : "Aborted",
             "visible_for"    : "node",
             "enabled_for"    : "not active",
-            "command"        : "ecflow_client --force aborted recursive <full_name>",
+            "command"        : "ecflow_client --force=aborted recursive <full_name>",
             "question"       : "Check running/queued jobs and Confirm force submitted of <full_name>",
-            "default_answer" : "Yes"
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
         },
 
 
@@ -443,33 +561,48 @@
             "menu"           : "Defstatus",
             "name"           : "Complete",
             "visible_for"    : "node",
-            "command"        : "ecflow_client --alter change defstatus complete <full_name>"
+            "command"        : "ecflow_client --alter change defstatus complete <full_name>",
+            "status_tip"     : "__cmd__"
         },
         {
             "menu"           : "Defstatus",
             "name"           : "Queued",
             "visible_for"    : "node",
-            "command"        : "ecflow_client --alter change defstatus queued <full_name>"
+            "command"        : "ecflow_client --alter change defstatus queued <full_name>",            
+            "status_tip"     : "__cmd__"
         },
-
         {
             "menu"           : "Node",
             "name"           : "-"
         },
         {
             "menu"           : "Node",
-            "name"           : "Log ...",
-            "visible_for"    : "server",        
-            "command"        : "history",
-            "handler"        : "info_panel",
-            "icon"           : "log.svg"          
+            "name"           : "Search ...",
+            "visible_for"    : "server or node",        
+            "command"        : "search",
+            "handler"        : "dashboard",
+            "view"           : "tree/table",
+            "icon"           : "search.svg"          
         },         
         {
             "menu"           : "Node",
-            "name"           : "Suites ...",
+            "name"           : "-"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Server log ...",
+            "visible_for"    : "server",        
+            "command"        : "history",
+            "handler"        : "info_panel",
+            "icon"           : "server_log.svg"          
+        },         
+        {
+            "menu"           : "Node",
+            "name"           : "Suite filter ...",
             "visible_for"    : "server",        
             "command"        : "suite",
-            "handler"        : "info_panel"           
+            "handler"        : "info_panel",
+            "icon"           : "filter.svg"          
         }, 
         {
             "menu"           : "Node",
@@ -499,7 +632,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "task",        
+            "visible_for"    : "task or alias",        
             "command"        : "edit",
             "handler"        : "info_panel",
             "icon"           : "edit.svg"          
@@ -507,7 +640,7 @@
         {            
             "menu"           : "Node",
             "name"           : "Output ...",
-            "visible_for"    : "task",        
+            "visible_for"    : "task or alias",        
             "command"        : "output",
             "handler"        : "info_panel",
             "icon"           : "output.svg"          
@@ -523,7 +656,7 @@
         {
             "menu"           : "Node",
             "name"           : "Script ...",
-            "visible_for"    : "task",        
+            "visible_for"    : "task or alias",        
             "command"        : "script",
             "handler"        : "info_panel",
             "icon"           : "script.svg"          
@@ -531,13 +664,57 @@
         {
             "menu"           : "Node",
             "name"           : "Job ...",
-            "visible_for"    : "task",        
+            "visible_for"    : "task or alias",        
             "command"        : "job",
             "handler"        : "info_panel",
             "icon"           : "job.svg"          
+        }, 
+         {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Copy node path",
+            "visible_for"    : "server or node",        
+            "command"        : "copy"                      
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Expand all children",
+            "visible_for"    : "server or node",        
+            "command"        : "expand",
+            "handler"        : "tree",
+            "view"           : "tree"                    
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Collapse all children",
+            "visible_for"    : "server or node",        
+            "command"        : "collapse",
+            "handler"        : "tree",
+            "view"           : "tree"                    
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Edit ...",
+            "visible_for"    : "label or meter or limit",
+            "command"        : "edit",
+            "handler"        : "tree",
+            "view"           : "tree"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Edit ...",
+            "visible_for"    : "repeat  and not repeat_day",
+            "command"        : "edit",
+            "handler"        : "tree",
+            "view"           : "tree"
         }
-        
-
     ]
 
 }

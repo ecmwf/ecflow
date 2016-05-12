@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #3 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -37,7 +37,7 @@ std::ostream& SStringVecCmd::print(std::ostream& os) const
 
 bool SStringVecCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
-   if (debug) cout << "SStringVecCmd::handle_server_response str.size()= " << vec_.size() << "\n";
+   if (debug) cout << "  SStringVecCmd::handle_server_response str.size()= " << vec_.size() << "\n";
    if (server_reply.cli())  {
       for(size_t i = 0; i < vec_.size(); i++) {
          std::cout << vec_[i] << "\n";

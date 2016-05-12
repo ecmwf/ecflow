@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #135 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -35,7 +35,6 @@
 #include "NodeState.hpp"
 #include "SuiteChanged.hpp"
 #include "DefsDelta.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "Str.hpp"
 
 using namespace ecf;
@@ -170,7 +169,7 @@ void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_pt
    Node::incremental_changes(changes, comp);
 }
 
-void NodeContainer::set_memento( const OrderMemento* memento ) {
+void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
@@ -198,15 +197,15 @@ void NodeContainer::set_memento( const OrderMemento* memento ) {
        return;
    }
 
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ORDER);
+   aspects.push_back(ecf::Aspect::ORDER);
    nodeVec_ = vec;
 }
 
-void NodeContainer::set_memento( const ChildrenMemento* memento ) {
+void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ADD_REMOVE_NODE);
+   aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
    nodeVec_ = memento->children_;
 
    // setup child parent pointers
@@ -309,12 +308,26 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 
 void NodeContainer::calendarChanged(
          const ecf::Calendar& c,
-         std::vector<node_ptr>& auto_cancelled_nodes)
+         std::vector<node_ptr>& auto_cancelled_nodes,
+         const ecf::LateAttr* inherited_late)
 {
-	Node::calendarChanged(c,auto_cancelled_nodes);
+   // The late attribute is inherited, we only set late on the task/alias
+	Node::calendarChanged(c,auto_cancelled_nodes,NULL);
+
+
+	LateAttr overridden_late;
+   if (inherited_late && !inherited_late->isNull()) {
+      overridden_late = *inherited_late;
+   }
+	if (lateAttr_ != inherited_late) {
+	   overridden_late.override_with(lateAttr_);
+	}
+
 
  	size_t node_vec_size = nodeVec_.size();
-	for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->calendarChanged(c,auto_cancelled_nodes); }
+	for(size_t t = 0; t < node_vec_size; t++) {
+	   nodeVec_[t]->calendarChanged(c,auto_cancelled_nodes,&overridden_late);
+	}
 }
 
 bool NodeContainer::hasAutoCancel() const

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #8 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -69,7 +69,7 @@ void ServerVersionCmd::create(    Cmd_ptr& cmd,
          boost::program_options::variables_map& vm,
          AbstractClientEnv*  ace ) const
 {
-   if (ace->debug()) cout << "ServerVersionCmd::create\n";
+   if (ace->debug()) cout << "  ServerVersionCmd::create\n";
 
    // testing client interface
    if (ace->under_test())  return;

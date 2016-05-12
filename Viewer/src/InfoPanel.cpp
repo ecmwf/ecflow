@@ -50,7 +50,7 @@ void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 //==============================================
 
 InfoPanel::InfoPanel(QWidget* parent) :
-  DashboardWidget(parent),
+  DashboardWidget("info",parent),
   tabBeingCleared_(false),
   tabBeingAdjusted_(false)
 {
@@ -63,6 +63,8 @@ InfoPanel::InfoPanel(QWidget* parent) :
         this,SLOT(slotReloadFromBc(VInfo_ptr)));
 
 	tab_->setIconSize(QSize(16,16));
+
+    messageLabel_->hide();
 
 	//Builds the menu for the settings tool button
 	/*QMenu *menu=new QMenu(this);
@@ -149,7 +151,10 @@ void InfoPanel::setCurrent(const std::string& name)
 
 void InfoPanel::clear()
 {
-	//Unregister from observer lists
+    messageLabel_->hide();
+    messageLabel_->clear();
+
+    //Unregister from observer lists
 	if(info_ && info_.get())
 	{
 		if(info_->server())
@@ -168,7 +173,8 @@ void InfoPanel::clear()
 	{
 		if(InfoPanelItem* item=findItem(tab_->widget(i)))
 		{
-			item->clearContents();
+            //Diable and clear the contents
+            item->setActive(false);
 		}
 	}
 	//Clear the tabs
@@ -181,7 +187,30 @@ void InfoPanel::clear()
 //TODO: It should be the slot
 void InfoPanel::reset(VInfo_ptr info)
 {
-	//Set info
+    if(info_ && info)
+    {
+        //UserMessage::debug("path: " + info_->path() + " " + info->path());
+
+        if(*(info_.get()) == *(info.get()))
+            return;
+
+        //it can happen that the stored info was not yet updated after a
+        //server reload. If there is chance for it we try to regain its data and
+        //comapare it again to the incoming node
+        else if(info_->server() == info->server() &&
+                info_->storedNodePath() == info->storedNodePath() &&
+                !info_->node() && info->node())
+        {
+            info_->regainData();
+            if(info_->node() == info->node())
+                return;
+        }
+    }
+
+    messageLabel_->hide();
+    messageLabel_->clear();
+
+    //Set info
     adjustInfo(info);
 
     //Set tabs
@@ -190,27 +219,34 @@ void InfoPanel::reset(VInfo_ptr info)
 	//Set breadcrumbs
 	bcWidget_->setPath(info);
 
-
     updateTitle();
 }
 
 //This slot is called when the info object is selected
 void InfoPanel::slotReload(VInfo_ptr info)
 {
-	//When the mode is detached it cannot receive
+    //When the mode is detached it cannot receive
 	//the reload request
-	if(info_ && info_.get() && detached())
+    if(info_ && detached())
 		return;
 
-	reset(info);
+    if(info && info->isAttribute())
+    {
+        reset(VInfo::createParent(info));
+    }
+    else
+    {
+        reset(info);
+    }
 }
 
 //This slot is called when the info object is selected
 void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 {
     reset(info);
+    if(!detached() && info_)
+       Q_EMIT selectionChanged(info_);
 }
-
 
 //Set the new VInfo object.
 //We also we need to manage the node observers. The InfoItem
@@ -279,9 +315,8 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	{
 		if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 		{
-			//Disable and force to clear the contents
-			d->item()->setEnabled(false);
-			d->item()->clearContents();
+			//Disable and force to clear the contents           
+			d->item()->setActive(false);
 
 			if(d->match(ids))
 				match++;
@@ -307,7 +342,8 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		{
 			if(InfoPanelItemHandler* d=findHandler(*it))
 			{
-				d->addToTab(tab_);
+                d->addToTab(tab_);
+                d->item()->setActive(true);
 			}
 		}
 
@@ -333,11 +369,23 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		tabBeingAdjusted_=false;
 	}
 
+    //We use the same set of tabs
+    else
+    {
+        for(int i=0; i < tab_->count(); i++)
+        {
+            if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
+            {
+                d->item()->setActive(true);
+            }
+        }
+    }
+
 	//We reload the current tab
 	if(currentItem)
-	{
-		currentItem->setEnabled(true);
-		currentItem->reload(info);
+    {
+        currentItem->setSelected(true,info);
+        //currentItem->reload(info);
 	}
 }
 
@@ -409,20 +457,19 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 
 	if(InfoPanelItem* current=findItem(tab_->widget(idx)))
 	{
-		//Enable the current item
-		current->setEnabled(true);
+        current->setSelected(true,info_);
 
 		//Reload the item if it is needed
-		if(!current->info())
-			current->reload(info_);
+        /*if(!current->isSuspended() && !current->info())
+            current->reload(info_);*/
 
-		//Disable the others
+        //Deselect the others
 		for(int i=0; i < tab_->count(); i++)
 		{
 			if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 			{
 				if(d->item() != current)
-					d->item()->setEnabled(false);
+                    d->item()->setSelected(false,info_);
 			}
 		}
 	}
@@ -518,13 +565,12 @@ void InfoPanel::updateTitle()
 	Q_EMIT titleUpdated(txt);
 }
 
-
 void InfoPanel::notifyDataLost(VInfo* info)
 {
 	if(info_ && info_.get() == info)
 	{
-		clear();
-	}
+        clear();
+    }
 }
 
 //-------------------------------------------------
@@ -536,7 +582,7 @@ void InfoPanel::notifyDefsChanged(ServerHandler *server, const std::vector<ecf::
 	if(frozen())
 		return;
 
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->server() && info_->server() == server)
 		{
@@ -557,21 +603,63 @@ void InfoPanel::notifyServerDelete(ServerHandler* server)
 	}
 }
 
+//This must be called at the beginning of a reset
 void InfoPanel::notifyBeginServerClear(ServerHandler* server)
 {
+    if(info_)
+    {
+        if(info_->server() && info_->server() == server)
+        {           
+            messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reloaded. \
+                   Until it is finished only <b>limited functionalty</b> is avaliable in the Info Panel!");
+
+            messageLabel_->startLoadLabel();
+
+            Q_FOREACH(InfoPanelItemHandler *item,items_)
+            {
+                item->item()->setSuspended(true,info_);
+            }
+        }
+    }
 }
 
+//This must be called at the end of a reset
 void InfoPanel::notifyEndServerScan(ServerHandler* server)
 {
+    if(info_)
+    {
+        if(info_->server() && info_->server() == server)
+        {
+            messageLabel_->hide();
+            messageLabel_->clear();
 
+            //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
+            //that notifyEndServerScan() will be first called on the VInfo then on the InfoPanel. So it
+            //is possible that the node exists but is still set to NULL in VInfo.
+            info_->regainData();
+
+            //If the info is not available dataLost() might have already been called and
+            //the panel was reset!
+            if(!info_)
+                return;
+
+            Q_ASSERT(info_->server() && info_->node());
+
+            //Otherwise we resume all the tabs
+            Q_FOREACH(InfoPanelItemHandler *item,items_)
+            {
+                item->item()->setSuspended(false,info_);
+            }
+        }
+    }
 }
 
 void InfoPanel::notifyServerConnectState(ServerHandler* server)
 {
-	if(frozen())
-		return;
+    if(frozen())
+        return;
 
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->server() && info_->server() == server)
 		{
@@ -629,7 +717,7 @@ void InfoPanel::rerender()
 
 void InfoPanel::writeSettings(VSettings* vs)
 {
-	vs->put("type","info");
+	vs->put("type",type_);
 	vs->put("dockId",id_);
 
 	bcWidget_->writeSettings(vs);
@@ -641,7 +729,7 @@ void InfoPanel::writeSettings(VSettings* vs)
 void InfoPanel::readSettings(VSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
-	if(type != "info")
+	if(type != type_)
 	{
 		return;
 	}

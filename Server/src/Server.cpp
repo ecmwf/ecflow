@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #173 $
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -634,14 +634,14 @@ bool Server::reloadWhiteListFile(std::string& errorMsg)
    return serverEnv_.reloadWhiteListFile(errorMsg);
 }
 
-bool Server::authenticateUser(const std::string& user)
+bool Server::authenticateReadAccess(const std::string& user)
 {
-   return serverEnv_.authenticateUser(user);
+   return serverEnv_.authenticateReadAccess(user);
 }
 
-bool Server::authenticateWriteAccess(const std::string& user,  bool client_request_can_change_server_state )
+bool Server::authenticateWriteAccess(const std::string& user )
 {
-   return serverEnv_.authenticateWriteAccess(user, client_request_can_change_server_state);
+   return serverEnv_.authenticateWriteAccess(user);
 }
 
 bool Server::lock(const std::string& user)

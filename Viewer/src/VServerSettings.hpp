@@ -22,7 +22,9 @@ class VServerSettings : public VPropertyObserver
 	friend class ServerHandler;
 
 public:
-	enum Param {UpdateRate,AdaptiveUpdate,MaxAdaptiveUpdateRate,MaxJobFileLines,ReadFromDisk,
+    enum Param {AutoUpdate, UpdateRate,
+               AdaptiveUpdate,AdaptiveUpdateIncrement,MaxAdaptiveUpdateRate,
+               MaxOutputFileLines,ReadFromDisk,
 	           NotifyAbortedEnabled, NotifyAbortedPopup, NotifyAbortedSound,
 			   NotifyRestartedEnabled, NotifyRestartedPopup, NotifyRestartedSound,
 			   NotifyLateEnabled, NotifyLatePopup, NotifyLateSound,
@@ -32,7 +34,10 @@ public:
 	int intValue(Param par) const;
 	bool boolValue(Param par) const;
 	VProperty* guiProp() const {return guiProp_;}
+	bool notificationsEnabled() const;
 	static std::string notificationId(Param);
+
+	void saveSettings();
 
 	//From VPropertyObserver
 	void notifyChange(VProperty*);
@@ -48,7 +53,6 @@ protected:
 
 	VProperty* property(Param par) const;
 	void loadSettings();
-	void saveSettings();
 
 	ServerHandler* server_;
 	VProperty* prop_;

@@ -24,7 +24,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-
 LogProvider::LogProvider(InfoPresenter* owner,QObject* parent) :
 	QObject(parent),
 	InfoProvider(owner,VTask::HistoryTask),
@@ -40,24 +39,26 @@ void LogProvider::clear()
 	InfoProvider::clear();
 }
 
-void LogProvider::optionsChanged()
+void LogProvider::setAutoUpdate(bool autoUpdate)
 {
-	if(enabled_)
-	{
-		if(!autoUpdate_)
-		{
-			stopWatchFile();
-		}
-		else
-		{
-			if(!inAutoUpdate_)
-				fetchFile();
-		}
-	}
-	else
-	{
-		stopWatchFile();
-	}
+    InfoProvider::setAutoUpdate(autoUpdate);
+
+    if(active_)
+    {
+        if(!autoUpdate_)
+        {
+            stopWatchFile();
+        }
+        else
+        {
+            if(!inAutoUpdate_)
+                fetchFile();
+        }
+    }
+    else
+    {
+        stopWatchFile();
+    }
 }
 
 void LogProvider::visit(VInfoServer* info)
@@ -67,7 +68,7 @@ void LogProvider::visit(VInfoServer* info)
 
 void LogProvider::fetchFile()
 {
-	if(!enabled_)
+    if(!active_)
 		return;
 
 	stopWatchFile();
@@ -75,7 +76,7 @@ void LogProvider::fetchFile()
 	//Reset the reply
 	reply_->reset();
 
-	if(!info_ || !info_.get())
+    if(!info_)
 	{
 	   owner_->infoFailed(reply_);
 	   return;
@@ -186,7 +187,7 @@ void LogProvider::slotLinesAppend(QStringList lst)
 		owner_->infoFailed(reply_);
 	}
 
-	qDebug() << "LogProvider::slotLinesAppend()" << lst;
+    //qDebug() << "LogProvider::slotLinesAppend()" << lst;
 
 	std::vector<std::string> vec;
 	Q_FOREACH(QString s,lst)

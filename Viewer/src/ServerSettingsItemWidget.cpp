@@ -13,6 +13,10 @@
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 
+#include <QPushButton>
+
+#include <assert.h>
+
 //========================================================
 //
 // ServerSettingsItemWidget
@@ -26,6 +30,12 @@ ServerSettingsItemWidget::ServerSettingsItemWidget(QWidget *parent) : QWidget(pa
 	connect(buttonBox_,SIGNAL(clicked(QAbstractButton*)),
 			this,SLOT(slotClicked(QAbstractButton *)));
 
+	QPushButton* applyPb=buttonBox_->button(QDialogButtonBox::Apply);
+    assert(applyPb);
+	applyPb->setEnabled(false);
+
+	connect(editor_,SIGNAL(changed()),
+		this,SLOT(slotEditorChanged()));
 }
 
 QWidget* ServerSettingsItemWidget::realWidget()
@@ -35,15 +45,16 @@ QWidget* ServerSettingsItemWidget::realWidget()
 
 void ServerSettingsItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	enabled_=true;
+    clearContents();
+
 	info_=info;
 
-	if(info_ && info_.get() && info_->isServer() && info_->server())
+    if(info_ && info_->isServer() && info_->server())
 	{
 		editor_->edit(info_->server()->conf()->guiProp(),
-				"Settings for server " + QString::fromStdString(info_->server()->name()));
+				QString::fromStdString(info_->server()->name()));
 	}
 	else
 	{
@@ -57,16 +68,57 @@ void ServerSettingsItemWidget::clearContents()
 	//TODO: properly set gui state
 }
 
+void ServerSettingsItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(ActiveChanged))
+    {
+        if(active_)
+        {
+            editor_->setEnabled(true);
+            buttonBox_->setEnabled(true);
+        }
+    }
+
+    if(flags.isSet(SuspendedChanged))
+    {
+        if(active_)
+        {
+            if(suspended_)
+            {
+                editor_->setEnabled(false);
+                buttonBox_->setEnabled(false);
+            }
+            else
+            {
+                editor_->setEnabled(true);
+                buttonBox_->setEnabled(true);
+            }
+        }
+    }
+
+}
+
+void  ServerSettingsItemWidget::slotEditorChanged()
+{
+	QPushButton* applyPb=buttonBox_->button(QDialogButtonBox::Apply);
+	assert(applyPb);
+	applyPb->setEnabled(true);
+}
+
 void ServerSettingsItemWidget::slotClicked(QAbstractButton* button)
 {
-	if(!enabled_)
+	if(!active_)
 		return;
 
 	switch(buttonBox_->standardButton(button))
 	{
 	case QDialogButtonBox::Apply:
 		{
-			editor_->applyChange();
+			if(editor_->applyChange())
+			{
+				if(info_ && info_->server())
+					info_->server()->conf()->saveSettings();
+			}
 		}
 		break;
 	default:

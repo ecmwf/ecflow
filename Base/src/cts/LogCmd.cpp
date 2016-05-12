@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #30 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -175,7 +175,7 @@ void LogCmd::create( 	Cmd_ptr& cmd,
 {
 	vector<string> args = vm[ arg() ].as< vector<string> >();
 
-	if (ac->debug())   dumpVecArgs(LogCmd::arg(),args);
+	if (ac->debug()) dumpVecArgs(LogCmd::arg(),args);
 
 	if (!args.empty() && args[0] == "get")  {
 

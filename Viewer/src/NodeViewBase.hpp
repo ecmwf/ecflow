@@ -14,15 +14,16 @@
 #include "VInfo.hpp"
 
 class QWidget;
-class NodeFilterModel;
+
+class TableNodeSortModel;
 class NodeFilterDef;
 class VSettings;
 
 class NodeViewBase
 {
 public:
-		explicit NodeViewBase(NodeFilterModel *model,NodeFilterDef*filterDef);
-		virtual ~NodeViewBase(){};
+        explicit NodeViewBase(NodeFilterDef*filterDef);
+        virtual ~NodeViewBase(){}
 
 		virtual void reload()=0;
 		virtual void rerender()=0;
@@ -34,7 +35,6 @@ public:
 		virtual void readSettings(VSettings* vs)=0;
 
 protected:
-		NodeFilterModel* model_;
 		NodeFilterDef* filterDef_;
 };
 

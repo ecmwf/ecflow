@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #305 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -35,6 +35,7 @@
 #include "Ecf.hpp"
 #include "SuiteChanged.hpp"
 #include "CmdContext.hpp"
+#include "AbstractObserver.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -278,26 +279,49 @@ void Node::miss_next_time_slot()
 
 void Node::calendarChanged(
          const ecf::Calendar& c,
-         std::vector<node_ptr>& auto_cancelled_nodes)
+         std::vector<node_ptr>& auto_cancelled_nodes,
+         const ecf::LateAttr*)
 {
    if (time_dep_attrs_) {
       time_dep_attrs_->calendarChanged(c);
    }
-
-   checkForLateness(c);
 
    if (checkForAutoCancel(c)) {
       auto_cancelled_nodes.push_back(shared_from_this());
    }
 }
 
-void Node::checkForLateness(const ecf::Calendar& c)
+void Node::check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr* inherited_late)
 {
+   // Late flag should ONLY be set on Submittable
    if (lateAttr_) {
-      lateAttr_->checkForLateness(state_, c);
-      if (lateAttr_->isLate()) {
+      // Only check for lateness if we are not late.
+      if (!lateAttr_->isLate()) {
+         if (!inherited_late || inherited_late->isNull())  checkForLateness(c);
+         else {
+            LateAttr overidden_late = *inherited_late;
+            overidden_late.override_with(lateAttr_);
+            if (overidden_late.check_for_lateness( state_, c)) {
+               lateAttr_->setLate(true);
+               flag().set(ecf::Flag::LATE);
+            }
+         }
+      }
+   }
+   else {
+      // inherited late, we can only set late flag.
+      if (inherited_late && !flag().is_set(ecf::Flag::LATE) && inherited_late->check_for_lateness(state_, c)) {
          flag().set(ecf::Flag::LATE);
       }
+   }
+}
+
+void Node::checkForLateness(const ecf::Calendar& c)
+{
+   if (lateAttr_ && lateAttr_->check_for_lateness(state_,c)) {
+      lateAttr_->setLate(true);
+      flag().set(ecf::Flag::LATE);
+      cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
    }
 }
 
@@ -462,7 +486,7 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
 #endif
 
    // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
-   if (lateAttr_) {
+   if (lateAttr_ && isSubmittable()) {
       // since the suite() traverse up the tree, only call when have a late attribute
       checkForLateness(suite()->calendar());
    }
@@ -1119,7 +1143,7 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
 }
 
 
-bool Node::enviromentSubsitution(std::string& cmd)
+bool Node::variable_dollar_subsitution(std::string& cmd)
 {
    // scan command for environment variables, and substitute
    // edit ECF_INCLUDE $ECF_HOME/include
@@ -1297,7 +1321,6 @@ std::ostream& Node::print(std::ostream& os) const
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
          if (completeExpr_->isFree()) Indentor::indent(os) << "# (free)\n";
-         else                         Indentor::indent(os) << "# (holding)\n";
          if ( completeAst() ) {
             if (!defs()) {
                // Full defs is required for extern checking, and finding absolute node paths
@@ -1314,7 +1337,6 @@ std::ostream& Node::print(std::ostream& os) const
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
          if (triggerExpr_->isFree()) Indentor::indent(os) << "# (free)\n";
-         else                        Indentor::indent(os) << "# (holding)\n";
          if ( triggerAst() ) {
             if (!defs()) {
                Indentor in;
@@ -1327,6 +1349,15 @@ std::ostream& Node::print(std::ostream& os) const
    repeat_.print(os);
 
    BOOST_FOREACH(const Variable& v, varVec_ )       { v.print(os); }
+
+   if ( PrintStyle::getStyle() == PrintStyle::STATE ) {
+      // Distinguish normal variable from generated, by adding a #
+      // This also allows it be read in again and compared in the AParser/tests
+      std::vector<Variable> gvec;
+      gen_variables(gvec);
+      BOOST_FOREACH(const Variable& v, gvec ) { v.print_generated(os); }
+   }
+
    BOOST_FOREACH(limit_ptr l, limitVec_)            { l->print(os); }
    inLimitMgr_.print(os);
    if (child_attrs_) child_attrs_->print(os);
@@ -1796,6 +1827,12 @@ bool Node::getLabelValue(const std::string& labelName, std::string& value) const
    return false;
 }
 
+bool Node::getLabelNewValue(const std::string& labelName, std::string& value) const
+{
+   if (child_attrs_) return child_attrs_->getLabelNewValue(labelName,value);
+   return false;
+}
+
 size_t Node::position() const
 {
    Node* theParent = parent();
@@ -1831,6 +1868,52 @@ void Node::update_repeat_genvar() const
       repeat_.update_repeat_genvar();
    }
 }
+
+void Node::notify_delete()
+{
+   // make a copy, to avoid iterating over observer list that is being changed
+   std::vector<AbstractObserver*> copy_of_observers = observers_;
+   for(size_t i = 0; i < copy_of_observers.size(); i++) {
+      copy_of_observers[i]->update_delete(this);
+   }
+
+   /// Check to make sure that the Observer called detach
+   /// We can not call detach ourselves, since the the client needs to
+   /// call detach in the case where the graphical tree is destroyed by user
+   /// In this case the Subject/Node is being deleted.
+   assert(observers_.empty());
+
+#ifdef DEBUG_NODE
+   if (!observers_.empty()) {
+      /// Its not safe to call debugNodePath()/absNodePath() since that will traverse the parent
+      /// This may not be safe during a delete.
+      std::cout << "notify_delete : Node is not observed : " << name() << "\n";
+   }
+#endif
+}
+
+void Node::notify(const std::vector<ecf::Aspect::Type>& aspects)
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      observers_[i]->update(this,aspects);
+   }
+}
+
+void Node::attach(AbstractObserver* obs)
+{
+   observers_.push_back(obs);
+}
+
+void Node::detach(AbstractObserver* obs)
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      if (observers_[i] == obs) {
+         observers_.erase( observers_.begin() + i) ;
+         return;
+      }
+   }
+}
+
 
 static std::vector<ecf::TimeAttr>  timeVec_;
 static std::vector<ecf::TodayAttr> todayVec_;

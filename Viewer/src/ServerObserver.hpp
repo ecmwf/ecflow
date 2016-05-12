@@ -19,18 +19,18 @@ class VServerChange;
 class ServerObserver
 {
 public:
-	ServerObserver() {};
-	virtual ~ServerObserver() {};
+    ServerObserver() {}
+    virtual ~ServerObserver() {}
 	virtual void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)=0;
 	virtual void notifyServerDelete(ServerHandler* server)=0;
-	virtual void notifyBeginServerClear(ServerHandler* server) {};
-	virtual void notifyEndServerClear(ServerHandler* server) {};
-	virtual void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
-	virtual void notifyEndServerScan(ServerHandler* server) {};
-	virtual void notifyServerConnectState(ServerHandler* server) {};
-	virtual void notifyServerActivityChanged(ServerHandler* server) {};
-	virtual void notifyServerSuiteFilterChanged(ServerHandler* server) {};
-	virtual void notifyEndServerSync(ServerHandler* server) {};
+    virtual void notifyBeginServerClear(ServerHandler* server) {}
+    virtual void notifyEndServerClear(ServerHandler* server) {}
+    virtual void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
+    virtual void notifyEndServerScan(ServerHandler* server) {}
+    virtual void notifyServerConnectState(ServerHandler* server) {}
+    virtual void notifyServerActivityChanged(ServerHandler* server) {}
+    virtual void notifyServerSuiteFilterChanged(ServerHandler* server) {}
+    virtual void notifyEndServerSync(ServerHandler* server) {}
 };
 
 

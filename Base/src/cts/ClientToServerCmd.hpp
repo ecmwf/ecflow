@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #143 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -136,7 +136,8 @@ protected:
    /// Log the command. Must typically be done before call doHandleRequest(), in case of crash/exception
    /// In rare case allow override. (i.e for additional debug)
    /// called by handleRequest, part of the template pattern
-   virtual void do_log() const;
+   /// If logging fails set late flag to warn users ECFLOW-536
+   virtual void do_log(AbstractServer*) const;
 
    /// Some commands which cause a change in state, should force an immediate job submission.
    /// Providing the server is *NOT* shutdown
@@ -515,7 +516,6 @@ protected:
             std::vector<std::string>& options,
             std::vector<std::string>& paths);
 
-
 private:
    std::string user_;
 
@@ -686,7 +686,7 @@ private:
 
    /// Custom handling of command logging to add additional debug on same line
    /// makes it easier to debug errors in syncing.
-   virtual void do_log() const;
+   virtual void do_log(AbstractServer*) const;
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
@@ -1417,12 +1417,12 @@ public:
    enum Delete_attr_type  { DEL_VARIABLE, DEL_TIME, DEL_TODAY, DEL_DATE, DEL_DAY,
       DEL_CRON, DEL_EVENT, DEL_METER, DEL_LABEL,
       DEL_TRIGGER, DEL_COMPLETE, DEL_REPEAT, DEL_LIMIT, DEL_LIMIT_PATH,
-      DEL_INLIMIT, DEL_ZOMBIE, DELETE_ATTR_ND };
+      DEL_INLIMIT, DEL_ZOMBIE, DELETE_ATTR_ND, DEL_LATE };
 
    enum Change_attr_type  { VARIABLE, CLOCK_TYPE, CLOCK_DATE, CLOCK_GAIN,  EVENT, METER, LABEL,
-      TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC };
+      TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC, LATE };
 
-   enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND };
+   enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND, ADD_LATE };
 
    AlterCmd(const std::string& path, Add_attr_type  attr,  const std::string& name, const std::string& value = "" )
    : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(attr),

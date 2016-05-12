@@ -4,7 +4,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2012 ECMWF.
+# Copyright 2009-2016 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -338,11 +338,11 @@ def usage():
    o shutdown
         # ecflow_client --shutdown
    o suspend all suites
-        # CL="ecflow_client --port 32222 --host vsms1"
-        # for s in $($CL --suites); do $CL --suspend /$s; done
+        # CL="ecflow_client --port=32222 --host=vsms1"
+        # for s in $($CL --suites); do $CL --suspend=/$s; done
    o wait for active/submitted tasks to complete
    o halt the server
-        # ecflow_client --halt
+        # ecflow_client --halt=yes
    o Use --migrate to dump state and structure to a file
         # ecflow_client --migrate > all_suites.def
    o terminate server *or* leave server running but start new server on different machine
@@ -362,8 +362,8 @@ def usage():
    o set server running:
        # ecflow_client --restart
    o resume suspended suites
-       # CL="ecflow_client --port 32222 --host vsms1"
-       # for s in $($CL --suites); do $CL --resume /$s; done
+       # CL="ecflow_client --port=32222 --host=vsms1"
+       # for s in $($CL --suites); do $CL --resume=/$s; done
 
 
  There could be bugs with *old* "ecflow_client --migrate > all_suites.def"

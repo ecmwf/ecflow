@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #114 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,7 +17,6 @@
 #include "host.h"
 #include "node.h"
 #include "tree.h"
-#include "ChangeMgrSingleton.hpp"
 #include "NodeAttr.hpp"
 #include "Variable.hpp"
 #include "dummy_node.h"
@@ -283,7 +282,7 @@ void ecf_concrete_node<Defs>::why( std::ostream &f ) const
 }
 
 #define UNLINK(T) template<> void ecf_concrete_node<T>::unlink(bool detach) \
-{ if (!owner_) return; if (detach) ChangeMgrSingleton::instance()->detach(owner_,this); owner_ = 0x0; }
+{ if (!owner_) return; if (detach) owner_->detach(this); owner_ = 0x0; }
 UNLINK(Alias)
 UNLINK(Task)
 UNLINK(Family)
@@ -311,7 +310,7 @@ void ecf_concrete_node<Alias>::make_subtree()
 
    full_name_ = owner_->absNodePath();
 
-   ChangeMgrSingleton::instance()->attach(owner_, this);
+   owner_->attach(this);
    n->update_generated_variables();
 
    std::vector<Variable> gvar;
@@ -346,7 +345,7 @@ void ecf_concrete_node<Node>::make_subtree()
    Node* n = owner_;
 
    full_name_ = owner_->absNodePath();
-   ChangeMgrSingleton::instance()->attach(owner_, this);
+   owner_->attach(this);
 
    if (owner_->suite()->begun()) owner_->update_generated_variables();
 
@@ -436,7 +435,7 @@ void ecf_concrete_node<Suite>::make_subtree()
 
    full_name_ = owner_->absNodePath(); // "/" + n->name();
 
-   ChangeMgrSingleton::instance()->attach(owner_, this);
+   owner_->attach(this);
 
    std::vector<node_ptr> kids;
    n->immediateChildren(kids);
@@ -1293,7 +1292,10 @@ std::string ecf_concrete_node<Suite>::get_var( const std::string& name, bool is_
       const Variable& var = owner_->findVariable(name);
       if (!var.empty()) {
          std::string value = var.theValue();
-         if (substitute) owner_->variableSubsitution(value);
+         if (substitute) {
+	   owner_->update_generated_variables();
+	   owner_->variableSubsitution(value);
+	 }
          return value;
       }
    }
@@ -1311,7 +1313,10 @@ std::string ecf_concrete_node<Node>::get_var( const std::string& name, bool is_g
       const Variable& var = owner_->findVariable(name);
       if (!var.empty()) {
          std::string value = var.theValue();
-         if (substitute) owner_->variableSubsitution(value);
+         if (substitute) {
+	   owner_->update_generated_variables();
+	   owner_->variableSubsitution(value);
+	 }
          return value;
       }
    }
@@ -1329,7 +1334,10 @@ std::string ecf_concrete_node<Defs>::get_var( const std::string& name, bool is_g
       const Variable& var = owner_->server().findVariable(name);
       if (!var.empty()) {
          std::string value = var.theValue();
-         if (substitute) owner_->server().variableSubsitution(value);
+         if (substitute) {
+	   // owner_->update_generated_variables();
+	   owner_->server().variableSubsitution(value);
+	 }
          return value;
       }
    }
@@ -1439,7 +1447,7 @@ void ecf_concrete_node<Defs>::make_subtree()
    full_name_ = "/";
    if (!owner_) return;
 
-   ChangeMgrSingleton::instance()->attach(owner_, this);
+   owner_->attach(this);
    make_kids_list(this, owner_->suiteVec());
 
    std::vector<Variable> gvar = owner_->server().server_variables();

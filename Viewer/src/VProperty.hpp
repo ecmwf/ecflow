@@ -50,14 +50,18 @@ public:
     explicit VProperty(const std::string& name);
     ~VProperty();
 
-    enum Type {StringType,IntType,BoolType,ColourType,FontType,StringComboType};
+    enum Type {StringType,IntType,BoolType,ColourType,FontType,SoundType};
+
+    enum GuiType {StringGui,IntGui,BoolGui,ColourGui,FontGui,SoundGui,
+    			  StringComboGui,MultiStringComboGui,SoundComboGui};
 
     QString name() const {return name_;}
     const std::string& strName() const {return strName_;}
     QVariant defaultValue() const {return defaultValue_;}
-    QVariant value() const {return value_;}
+    QVariant value() const;
     std::string valueAsString() const;
     Type type() const {return type_;}
+    GuiType guiType() const {return guiType_;}
     QString param(QString name);
     QColor paramToColour(QString name) {return toColour(param(name).toStdString()) ;}
 
@@ -65,8 +69,10 @@ public:
     void setValue(const std::string&);
     void setValue(QVariant);
     void setParam(QString,QString);
+    void adjustAfterLoad();
 
     std::string path();
+    VProperty* parent() const {return parent_;}
     void setParent(VProperty* p) {parent_=p;}
     bool hasChildren() const {return children_.count() >0;}
     QList<VProperty*> children() const {return children_;}
@@ -85,7 +91,7 @@ public:
     VProperty* master() const {return master_;}
     void setUseMaster(bool);
     bool useMaster() const {return useMaster_;}
-    VProperty *clone(bool addLink,bool setMaster);
+    VProperty *clone(bool addLink,bool setMaster,bool useMaster=false);
 
     void addObserver(VPropertyObserver*);
     void removeObserver(VPropertyObserver*);
@@ -94,6 +100,7 @@ public:
 
     static bool isColour(const std::string&);
     static bool isFont(const std::string&);
+    static bool isSound(const std::string&);
     static bool isNumber(const std::string&);
     static bool isBool(const std::string&);
 
@@ -120,6 +127,7 @@ private:
     VProperty* master_;
     bool useMaster_;
     Type type_;
+    GuiType guiType_;
     QMap<QString,QString> params_;
     VProperty* link_;
 };

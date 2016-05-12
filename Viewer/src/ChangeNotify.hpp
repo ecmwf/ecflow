@@ -29,12 +29,13 @@ class QSortFilterProxyModel;
 class ChangeNotify : public VPropertyObserver
 {
 public:
-	ChangeNotify(const std::string& id);
+	explicit ChangeNotify(const std::string& id);
 
 	const std::string& id() const {return id_;}
-	VNodeList* data() const {return data_;};
+    VNodeList* data() const {return data_;}
 	VProperty* prop() const {return prop_;}
-	QAbstractItemModel* model() const;
+    ChangeNotifyModel* model() const;
+	QSortFilterProxyModel* proxyModel() const {return proxyModel_;}
 	bool isEnabled() const {return enabled_;}
 	void clearData();
 	void showDialog();
@@ -43,6 +44,7 @@ public:
 	void notifyChange(VProperty*);
 
 	static void add(const std::string&,VNode*,bool,bool);
+	static void remove(const std::string&,VNode*);
 	static void setEnabled(const std::string&,bool);
 	static void populate(ChangeNotifyWidget* w);
 	//static void showDialog(const std::string& id);
@@ -53,10 +55,11 @@ public:
 
 protected:
 	void add(VNode*,bool,bool);
+	void remove(VNode*);
 	void setEnabled(bool);
 	void setProperty(VProperty* prop);
 	void loadServerSettings();
-	virtual void loadNodeState() {};
+    virtual void loadNodeState() {}
 
 	static ChangeNotify* find(const std::string&);
 	static ChangeNotifyDialog* dialog();
@@ -73,7 +76,7 @@ protected:
 class AbortedNotify : public ChangeNotify
 {
 public:
-	AbortedNotify(const std::string& id) : ChangeNotify(id) {}
+	explicit AbortedNotify(const std::string& id) : ChangeNotify(id) {}
 protected:
 	void loadNodeState();
 };

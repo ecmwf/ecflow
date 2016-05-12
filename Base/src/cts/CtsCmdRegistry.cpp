@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #52 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -111,7 +111,7 @@ bool CtsCmdRegistry::parse(Cmd_ptr& cmd,
 
 		if ( vm.count( vec_[i]->theArg() ) ) {
 
-			if (clientEnv->debug()) std::cout << "CtsCmdRegistry::parse matched with registered command " << vec_[i]->theArg() << "\n";
+			if (clientEnv->debug()) std::cout << "  CtsCmdRegistry::parse matched with registered command " << vec_[i]->theArg() << "\n";
 
 			vec_[i]->create(cmd,vm,clientEnv);
 			return true;

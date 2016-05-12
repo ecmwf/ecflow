@@ -11,16 +11,22 @@
 #define VIEWFILTER_HPP_
 
 #include <set>
+#include <vector>
 
 #include <QObject>
+#include <QStringList>
 
 #include "VParam.hpp"
 
 #include "Node.hpp"
 
+class NodeQuery;
+class NodeFilterEngine;
+class ServerFilter;
 class ServerHandler;
 class VNode;
 class VSettings;
+class VTree;
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -33,7 +39,10 @@ public:
 	virtual ~VParamSet() {};
 
 	const std::set<VParam*>& current() const {return current_;}
+	void setCurrent(const std::set<VParam*>&);
+	QStringList currentAsList() const;
 	void current(const std::set<std::string>&);
+	void setCurrent(QStringList);
 	const std::set<VParam*>& all() const {return all_;}
 
 	bool isEmpty() const {return current_.empty();}
@@ -86,20 +95,28 @@ friend class  TableNodeFilter;
 
 public:
 	enum Scope {NodeStateScope,GeneralScope};
-	explicit NodeFilterDef(Scope);
+	NodeFilterDef(ServerFilter*,Scope);
+	~NodeFilterDef();
+
 	NodeStateFilter* nodeState() const {return nodeState_;}
 
 	const std::string& exprStr() const {return exprStr_;}
+	NodeQuery* query() const;
+	void setQuery(NodeQuery*);
+
+	void writeSettings(VSettings *vs);
+	void readSettings(VSettings *vs);
 
 Q_SIGNALS:
 	void changed();
 
 protected:
-	//NodeStateFilter *serverState_;
+	ServerFilter *serverFilter_;
 	std::string exprStr_;
 	NodeStateFilter *nodeState_;
 	std::string nodePath_;
 	std::string nodeType_;
+	NodeQuery* query_;
 
 	//AttributeFilter *attribute_;
 	//std::string nodeType_;
@@ -109,85 +126,63 @@ protected:
 
 class NodeFilter
 {
+    friend class NodeFilterEngine;
+    friend class VTreeServer;
+
 public:
-	enum ChangeAspect {AllChanged,StateChanged,AttributeChanged};
-	enum ResultMode {StoreMatched,StoreNonMatched};
+    enum MatchMode {NoneMatch,AllMatch,VectorMatch};
 
-	NodeFilter(NodeFilterDef* def,ResultMode resultMode);
-	virtual ~NodeFilter() {};
+    NodeFilter(NodeFilterDef* def,ServerHandler*);
+	virtual ~NodeFilter();
 
-	virtual void clear()=0;
-	virtual void beginReset(ServerHandler* server)=0;
-	virtual void endReset()=0;
-	virtual bool update(const VNode*)=0;
-
-	virtual bool isNull()=0;
-	virtual bool isFiltered(VNode* node)=0;
-    virtual int  matchCount()=0;
-    virtual int  nonMatchCount()=0;
-    virtual VNode* matchAt(int i)=0;
-    virtual int matchPos(const VNode*)=0;
-
-    virtual int realMatchCount()=0;
-    virtual VNode* realMatchAt(int)=0;
+    virtual void clear()=0;
+    virtual bool isNull()=0;
+    virtual int  matchCount() const = 0;
+    virtual bool update()=0;
 
 protected:
     NodeFilterDef* def_;
+    NodeFilterEngine* queryEngine_;
     std::set<std::string> type_;
-    ResultMode resultMode_;
-	std::set<VNode*> result_;
-	bool beingReset_;
-
+    MatchMode matchMode_;
+    std::vector<VNode*> match_;
+    ServerHandler * server_;
 };
 
 class TreeNodeFilter : public NodeFilter
 {
 public:
-	explicit TreeNodeFilter(NodeFilterDef* def);
+    explicit TreeNodeFilter(NodeFilterDef* def,ServerHandler*,VTree*);
 
-	void clear() {};
-	void beginReset(ServerHandler* server);
-	void endReset();
-	bool update(const VNode*);
-
-	bool isNull();
-	bool isFiltered(VNode* node);
-	int  matchCount();
-	int  nonMatchCount();
-	VNode* matchAt(int i) {return NULL;}
-	int matchPos(const VNode*) {return -1;}
-
-	int realMatchCount();
-	VNode* realMatchAt(int);
+    void clear();
+    bool isNull();
+    int  matchCount() const {return 0;}
+    bool update();
+    bool update(const std::vector<VNode*>& topChange,
+                std::vector<VNode*>& topFilterChange);
 
 private:
 	bool filterState(VNode* node,VParamSet* stateFilter);
-	std::vector<VNode*> match_;
-	std::set<VNode*> nonMatch_;
+    bool checkState(VNode* n,std::vector<VNode*>& topFilterChange);
+
+    VTree* tree_;
 };
 
 class TableNodeFilter : public NodeFilter
 {
 public:
-	explicit TableNodeFilter(NodeFilterDef* def);
+    explicit TableNodeFilter(NodeFilterDef* def,ServerHandler*);
 
 	void clear();
-	void beginReset(ServerHandler* server);
-	void endReset();
-	bool update(const VNode*);
-
-	bool isNull();
-	bool isFiltered(VNode* node);
-	int  matchCount();
-	int  nonMatchCount() {return -1;}
-	VNode* matchAt(int i);
-	int matchPos(const VNode*);
-
-	int realMatchCount();
-	VNode* realMatchAt(int);
+    bool isNull();
+    int  matchCount() const {return matchCount_;}
+    bool update();
+    int indexOf(const VNode*) const;
+    VNode* nodeAt(int index) const;
 
 private:
-	std::vector<VNode*> match_;
+    std::vector<int> index_;
+    int matchCount_;
 };
 
 #endif

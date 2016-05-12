@@ -20,6 +20,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 class QActionGroup;
+class QLabel;
 class InfoPanel;
 class NodePanel;
 class ServerFilterMenu;
@@ -40,6 +41,7 @@ public:
     static void openWindow(QStringList id,QWidget *fromW=0);
     static void reload();
     static void saveSession(SessionItem*);
+    static void changeNotifySelectionChanged(VInfo_ptr);
 
 protected Q_SLOTS:
 	void on_actionNewTab_triggered();
@@ -48,6 +50,8 @@ protected Q_SLOTS:
 	void on_actionQuit_triggered();
 	void on_actionRefresh_triggered();
 	void on_actionReset_triggered();
+	void on_actionRefreshSelected_triggered();
+	void on_actionResetSelected_triggered();
 	void on_actionConfigureNodeMenu_triggered();
 	void on_actionManageServers_triggered();
 	void on_actionShowInInfoPanel_triggered();
@@ -55,12 +59,16 @@ protected Q_SLOTS:
 	void on_actionAddTableWidget_triggered();
 	void on_actionAddInfoPanel_triggered();
 	void on_actionPreferences_triggered();
+	void on_actionSearch_triggered();
 	void on_actionAbout_triggered();
+	void on_actionSaveSessionAs_triggered();
+	void on_actionManageSessions_triggered();
 
 	void slotCurrentChangedInPanel();
 	void slotSelectionChanged(VInfo_ptr);
 	void slotOpenInfoPanel();
 	void slotConfigChanged();
+	void slotContentsChanged();
 
 private:
     void init(MainWindow*);
@@ -68,6 +76,8 @@ private:
     void addInfoPanelActions(QToolBar *toolbar);
     void reloadContents();
     void rerenderContents();
+    bool selectInTreeView(VInfo_ptr info);
+    void updateRefreshActions();
 
     void writeSettings(VComboSettings*);
     void readSettings(VComboSettings*);
@@ -79,6 +89,7 @@ private:
     static bool aboutToClose(MainWindow*);
     static bool aboutToQuit(MainWindow*);
     static void save(MainWindow *);
+    static void saveContents(MainWindow *);
     static MainWindow* findWindow(QWidget *childW);
     static void configChanged(MainWindow *);
 

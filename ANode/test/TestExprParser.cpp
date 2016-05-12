@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -66,18 +66,23 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
    vec.push_back("./a:YMD % ./b:YMD < 5");
    vec.push_back("inigroup:YMD == ! 1");
    vec.push_back("inigroup:YMD == ! 0");
+   vec.push_back("comp == complete and notready == complete");  // ECFLOW-493
+   vec.push_back("comp == complete and not ready == complete");
+   vec.push_back("comp == complete and ! ready == complete");   // we now store the not from the parse, for test comparison
+   vec.push_back("comp == complete and ~ ready == complete");
 
    for(size_t i = 0; i < vec.size(); i++) {
 
       PartExpression part(vec[i]);
       string parseErrorMsg;
       std::auto_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
-      BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse " << vec[i] << "  " << parseErrorMsg);
+      BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse\n" << vec[i] << "  " << parseErrorMsg);
+
 
       std::stringstream s2;
       ast->print_flat(s2);
       std::string ast_expr = s2.str();
-      BOOST_CHECK_MESSAGE(vec[i]==ast_expr," Failed '" << vec[i] << "' != '" << ast_expr << "'" );
+      BOOST_CHECK_MESSAGE(vec[i]==ast_expr," Failed\n'" << vec[i] << "' != '" << ast_expr << "'" );
    }
 }
 
@@ -270,6 +275,7 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
  	exprMap["( stage eq complete or ./stage:YMD gt ./retrieve:YMD) and ( ./retrieve:YMD - ./load:YMD lt 5)"] = std::make_pair(AstAnd::stype(),false);
  	exprMap["./a:YMD - ./b:YMD lt 5"] = std::make_pair(AstLessThan::stype(),true);
 
+   exprMap["comp == complete and notready == complete"] = std::make_pair(AstAnd::stype(),false);
 
  	std::pair<string, std::pair<string,bool> > p;
 	BOOST_FOREACH(p, exprMap ) {
@@ -287,7 +293,7 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
  		BOOST_CHECK_MESSAGE( top->left() ,"No root created");
  		BOOST_CHECK_MESSAGE( top->left()->isRoot() ,"First child of top should be a root");
  		BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType,"expected root type " << expectedRootType << " but found " << top->left()->type());
- 		BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for " << *top);
+ 		BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << *top);
 
  		std::string error_msg;
       BOOST_CHECK_MESSAGE(  top->check(error_msg),error_msg << ":  Check failed for " << *top);

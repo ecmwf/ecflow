@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -48,36 +48,36 @@ BOOST_AUTO_TEST_CASE( test_environment_substitution )
  	// See page 31, section 5.1 variable inheritance, of SMS users guide
 	string expected = "/home/smshome";
  	std::string cmd = "$ECF_HOME";
- 	BOOST_REQUIRE_MESSAGE(s->enviromentSubsitution(cmd)," substitution failed");
+ 	BOOST_REQUIRE_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
  	cmd = "$ECF_HOME/include"; expected = "/home/smshome/include";
- 	BOOST_REQUIRE_MESSAGE(s->enviromentSubsitution(cmd)," substitution failed");
+ 	BOOST_REQUIRE_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
  	cmd = "$ECF_HOME$FRED$BILL$JANE"; expected = "/home/smshome/home/fred/home/bill/home/jane";
- 	BOOST_REQUIRE_MESSAGE(s->enviromentSubsitution(cmd)," substitution failed");
+ 	BOOST_REQUIRE_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
 
  	cmd = "$ECF_HOME/$FRED/$BILL/$JANE";  expected = "/home/smshome//home/fred//home/bill//home/jane";
-  	BOOST_CHECK_MESSAGE(s->enviromentSubsitution(cmd)," substitution failed");
+  	BOOST_CHECK_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
 	cmd = "%PATH"; expected = "%PATH";
- 	BOOST_CHECK_MESSAGE(s->enviromentSubsitution(cmd)," substitution failed");
+ 	BOOST_CHECK_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
  	cmd = "$$"; expected = "$$";
- 	BOOST_CHECK_MESSAGE(s->enviromentSubsitution(cmd)," substitution failed");
+ 	BOOST_CHECK_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
  	cmd = "$ERROR$"; expected = "$ERROR$";
- 	BOOST_CHECK_MESSAGE(!s->enviromentSubsitution(cmd)," substitution expected to fail since ERROR does not exist");
+ 	BOOST_CHECK_MESSAGE(!s->variable_dollar_subsitution(cmd)," substitution expected to fail since ERROR does not exist");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
  	cmd = ""; expected = "";
- 	BOOST_CHECK_MESSAGE(s->enviromentSubsitution(cmd)," substitution failed ");
+ 	BOOST_CHECK_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed ");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 }
 

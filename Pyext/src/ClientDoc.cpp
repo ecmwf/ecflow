@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #89 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -443,12 +443,12 @@ const char* ClientDoc::changed_node_paths() {
             "                                              # otherwise apply incremental changes to Client definition,\n"
             "                                              # bringing it in sync with the server definition\n"
             "          defs = ci.get_defs()                # get the updated/synchronised definition\n"
-            "          for path in ci.changed_node_paths():\n"
+            "          for path in ci.changed_node_paths:\n"
             "              print path\n"
             "              if path == '/':                 # path '/' represent change to server node/defs\n"
             "                 print 'defs changed'         # defs state change or user variables changed\n"
             "              else:\n"
-            "                 node = defs.find_abs_node_path()\n"
+            "                 node = defs.find_abs_node(path)\n"
             "\n"
             "         # if changed_node_paths is empty, then assume entire definition changed\n"
             "         print defs                         # print the synchronised definition. Should be same as server\n"
@@ -930,9 +930,9 @@ const char* ClientDoc::alter(){
             "      (list | string ) paths(s) : A single or list of paths. Path name to the node whose attributes are to be changed\n"
             "      string alter_type         : This must be one of [ 'add' | 'change' | 'delete' | 'set_flag' | 'clear_flag' ]\n"
             "      string attr_type          : This varies according to the 'alter_type'. valid strings are:\n"
-            "         add    : [ variable,time, today, date, day, zombie]\n"
-            "         delete : [ variable,time,today,date,day,cron,event,meter,label,trigger complete, repeat,limit,inlimit,limit_path,zombie]\n"
-            "         change : [ variable,clock-type,clock-gain,event,meter,label,trigger,complete,repeat,limit-max,limit-value]\n"
+            "         add    : [ variable,time,today,date,day,zombie,late]\n"
+            "         delete : [ variable,time,today,date,day,cron,event,meter,label,trigger,complete,repeat,limit,inlimit,limit_path,zombie,late]\n"
+            "         change : [ variable,clock-type,clock-gain,event,meter,label,trigger,complete,repeat,limit-max,limit-value,late]\n"
             "         set_flag and clear_flag:\n"
             "                  [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed | \n"
             "                    migrated | late | message | complete | queue_limit | task_waiting | locked | zombie ]\n"

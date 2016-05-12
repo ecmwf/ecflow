@@ -22,7 +22,6 @@ bool VReply::textFromFile(const std::string& fileName)
 	return false;
 }
 
-
 void VReply::text(const std::vector<std::string>& msg)
 {
 	text_.clear();
@@ -54,4 +53,5 @@ void VReply::reset()
 	readMode_=NoReadMode;
 	readMethod_.clear();
 	tmpFile_.reset();
+    log_.clear();
 }

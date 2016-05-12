@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #34 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -124,7 +124,7 @@ const char* RunNodeCmd::desc() {
             "         If the path is /suite/family will recursively run all tasks\n"
             "         When providing multiple paths avoid running the same task twice\n"
             "Example:\n"
-            "  --run /suite/t1                    # run task t1\n"
+            "  --run=/suite/t1                    # run task t1\n"
             "Effect:\n"
             "     task t1; time 12:00             # will complete if run manually\n"
             "     task t2; time 10:00 13:00 01:00 # will run 4 times before completing\n"

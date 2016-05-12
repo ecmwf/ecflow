@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #16 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -46,6 +46,9 @@ public:
    /// However if there is a valid Repeat or time dependencies then
    /// task will be re-queued afterwards
    void complete();
+
+   /// The late attribute, ONLY applies to the Submittable and not NodeContainer
+   virtual void calendarChanged(const ecf::Calendar&, std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late);
 
    /// Overridden to reset the try number
    /// The tasks job can be invoked multiple times. For each invocation we want to preserve
@@ -109,7 +112,7 @@ public:
 
 // Memento functions:
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
-   void set_memento(const SubmittableMemento* );
+   void set_memento(const SubmittableMemento*,std::vector<ecf::Aspect::Type>& aspects);
 
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 protected:
@@ -139,8 +142,10 @@ private:
 
    void clear(); // process_id password and aborted reason
 
-   const Variable& update_genvar_ecfscript( const std::string& ecf_home,const std::string& theAbsNodePath) const;
-   const Variable& genvar_ecfrid() const;
+
+   void update_static_generated_variables(const std::string& ecf_home, const std::string& theAbsNodePath) const;
+   const Variable& get_genvar_ecfrid() const;
+   const Variable& get_genvar_ecfscript() const;
    void set_genvar_ecfjob(const std::string& value);
    void set_genvar_ecfrid(const std::string& value);
 
@@ -172,11 +177,16 @@ public:
    SubGenVariables(const Submittable*);
 
    void update_generated_variables() const;
+
+   /// distinguish between the two kinds of generated variables
+   void update_static_generated_variables(const std::string& ecf_home, const std::string& theAbsNodePath) const;
+   void update_dynamic_generated_variables(const std::string& ecf_home,const std::string& theAbsNodePath) const;
+
    const Variable& findGenVariable(const std::string& name) const;
    void gen_variables(std::vector<Variable>& vec) const;
-   const Variable& update_genvar_ecfscript( const std::string& ecf_home, const std::string& theAbsNodePath) const;
 
    const Variable& genvar_ecfrid() const  { return genvar_ecfrid_;}
+   const Variable& genvar_ecfscript() const  { return genvar_ecfscript_;}
 
    void set_genvar_ecfjob(const std::string& value) { genvar_ecfjob_.set_value(value); }
    void set_genvar_ecfrid(const std::string& value) { genvar_ecfrid_.set_value(value); }

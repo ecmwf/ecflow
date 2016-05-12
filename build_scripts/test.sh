@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Copyright 2009-2012 ECMWF. 
+## Copyright 2009-2016 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,7 +14,7 @@
 if [ "$#" -gt 3 ] ; then
    echo "Maximum of 3 arguments expected"
    echo " arg1-mode    (optional) default = debug,    valid values = [ debug | release ]"
-   echo " arg2-compiler(optional) default = linux/gcc-4.2.1"
+   echo " arg2-compiler(optional) default = linux/gcc-$(gcc -dumpversion)"
    echo " arg3-safe    (optional) default = no, valid values = [ no | safe ],"
    echo "                                   safe means only run deterministic tests"
    exit 1
@@ -45,7 +45,6 @@ echo "mode=$mode compiler=$compiler_arg safe=$safe"
 
 #======================================================================
 # remove python test, so that they are rerun
-cd $WK
 rm -rf Pyext/bin/*.test   
 
 # Remove any lock file create by tests which used EcfPortLock.hpp

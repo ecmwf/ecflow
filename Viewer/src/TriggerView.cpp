@@ -18,6 +18,7 @@ NodeItem::NodeItem()
 
 QRectF NodeItem::boundingRect() const
 {
+    return QRectF();
 }
 
 void paint(QPainter*, const QStyleOptionGraphicsItem *,QWidget*)

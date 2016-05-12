@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #17 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -48,7 +48,7 @@ public:
    virtual const std::string& script_extension() const;
 
    virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const SubmittableMemento* m) { Submittable::set_memento(m); }
+   void set_memento(const SubmittableMemento* m,std::vector<ecf::Aspect::Type>& aspects) { Submittable::set_memento(m,aspects); }
 
    virtual node_ptr find_node_up_the_tree(const std::string& name) const;
 

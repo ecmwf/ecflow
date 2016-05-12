@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #53 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -341,13 +341,23 @@ std::string simple_node::variable(const std::string& name, bool substitute)
 {
   if (__node__())
     if (__node__()->get_node()) {    
+      std::string value;
       const Variable & var = __node__()->get_node()->findVariable(name);
       if (!var.empty())  {
-        std::string value = var.theValue();
-        if (substitute)
+        value = var.theValue();
+        if (substitute) {
+	  __node__()->get_node()->update_generated_variables();
           __node__()->get_node()->variableSubsitution(value);
+	}
         return value; 
-      } // return var.theValue();
+      } else {
+	__node__()->get_node()->findParentVariableValue(name, value);
+        if (substitute) {
+	  __node__()->get_node()->update_generated_variables();
+          __node__()->get_node()->variableSubsitution(value);
+	}
+	if (!value.empty()) return value;
+      }
     }
   for (node *run = kids(); run; run = run->next()) {
     if (run->type() == NODE_VARIABLE && run->name() == name) {
@@ -723,9 +733,6 @@ Boolean simple_node::ecfFlag(int n) const
 
 Boolean simple_node::show_it() const
 {
-  if(((node*)this) == selection::current_node())
-    return True;  
-  
   if(show::want(show::time_dependant) && (hasDate() || hasTime()))
     return True;
   
@@ -763,6 +770,18 @@ Boolean simple_node::show_it() const
 Boolean simple_node::visible() const
 {
   int wanted = status() - STATUS_UNKNOWN + show::unknown;
+  try {
+    if(selection::current_node())
+      if (selection::current_node()->full_name() == this->full_name())
+	return True;
+    if(this == selection::current_node()) 
+      return True;
+  }
+  catch ( std::exception& e ) {
+      gui::message("# problem with selection?");
+      gui::message(e.what());      
+  }
+
   if((wanted < 32 && (show::want(wanted))) || show::want32(wanted)) 
     return True;
 

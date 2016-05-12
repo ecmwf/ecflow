@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -23,8 +23,8 @@ class ServerItem;
 class ServerItemObserver
 {
 public:
-	ServerItemObserver() {};
-	virtual ~ServerItemObserver() {};
+    ServerItemObserver() {}
+    virtual ~ServerItemObserver() {}
 	virtual void notifyServerItemChanged(ServerItem*)=0;
 	virtual void notifyServerItemDeletion(ServerItem*)=0;
 };
@@ -39,7 +39,10 @@ public:
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
 	const std::string& port() const {return port_;}
-    bool isUsed() const;
+	bool isFavourite() const {return favourite_;}
+
+	bool isUsed() const;
+	int useCnt() const {return useCnt_;}
     ServerHandler* serverHandler() const {return handler_;}
 
 	void addObserver(ServerItemObserver*);
@@ -47,13 +50,14 @@ public:
 
 protected:
 	explicit ServerItem(const std::string&);
-	ServerItem(const std::string&,const std::string&,const std::string&);
+	ServerItem(const std::string&,const std::string&,const std::string&,bool favourite=false);
 	 ~ServerItem();
 
 	void  name(const std::string& name) {name_=name;}
 	void  host(const std::string& host) {host_=host;}
 	void  port(const std::string& port) {port_=port;}
 	void  reset(const std::string& name,const std::string& host,const std::string& port);
+	void  setFavourite(bool b);
 
 	void registerUsageBegin();
 	void registerUsageEnd();
@@ -64,6 +68,7 @@ protected:
 	std::string name_;
 	std::string host_;
 	std::string port_;
+	bool favourite_;
 	int useCnt_;
 	ServerHandler* handler_;
 

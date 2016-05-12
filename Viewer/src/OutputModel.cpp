@@ -13,6 +13,9 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
+#include <QFont>
+
+QColor OutputModel::joboutCol_=QColor(0,115,48);
 
 //=======================================================================
 //
@@ -21,15 +24,30 @@
 //=======================================================================
 
 OutputModel::OutputModel(QObject *parent) :
-          QAbstractItemModel(parent)
+          QAbstractItemModel(parent),
+          joboutRow_(-1)
 
 {
 }
 
-void OutputModel::setData(VDir_ptr dir)
+void OutputModel::setData(VDir_ptr dir,const std::string& jobout)
 {
 	beginResetModel();
 	dir_=dir;
+    joboutRow_=-1;
+
+    if(dir_)
+    {
+        for(int i; i < dir_->count(); i++)
+        {
+            if(dir_->fullName(i) == jobout)
+            {
+                joboutRow_=i;
+                break;
+            }
+        }
+    }
+
 	endResetModel();
 }
 
@@ -58,7 +76,8 @@ int OutputModel::rowCount( const QModelIndex& parent) const
 
 QVariant  OutputModel::data(const QModelIndex& index, int role) const
 {
-	if(!hasData() || (role != Qt::DisplayRole && role != Qt::UserRole))
+    if(!hasData() || (role != Qt::DisplayRole && role != Qt::UserRole &&
+        role != Qt::ForegroundRole && role != Qt::ToolTipRole && role != Qt::FontRole))
 		return QVariant();
 
 	int row=index.row();
@@ -89,11 +108,34 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 		case 1:
 			return static_cast<float>(item->size_)/1024.;
 		case 2:
-			return  static_cast<unsigned int>(item->mtime_);
+			return item->mtime_.toTime_t();
 		default:
 			break;
 		}
 	}
+    else if(role == Qt::ForegroundRole)
+    {
+        if(row == joboutRow_)
+        {
+            return joboutCol_;
+        }
+    }
+    else if(role == Qt::FontRole)
+    {
+        if(row == joboutRow_)
+        {
+            QFont f;
+            f.setBold(true);
+            return f;
+        }
+    }
+    else if(role == Qt::ToolTipRole)
+    {
+        if(row == joboutRow_)
+        {
+            return QString::fromStdString(item->name_) + " is the current job output file.";
+        }
+    }
 
 	return QVariant();
 }
@@ -107,7 +149,7 @@ QVariant OutputModel::headerData( const int section, const Qt::Orientation orien
 	{
    	case 0: return tr("Name");
    	case 1: return tr("Size");
-   	case 2: return tr("Modified");
+    case 2: return tr("Modified (ago)");
    	case 3: return tr("Modified");
    	default: return QVariant();
    	}
@@ -165,19 +207,19 @@ QString OutputModel::formatSize(unsigned int size) const
  	return QString();
 }
 
-QString OutputModel::formatDate(const std::time_t& t) const
+QString OutputModel::formatDate(QDateTime dt) const
 {
-  	QDateTime dt=QDateTime::fromTime_t(t);
+  	//QDateTime dt=QDateTime::fromTime_t(t);
 	return dt.toString("yyyy-MM-dd hh:mm:ss");
 }
 
-QString OutputModel::formatAgo(const std::time_t& t) const
+QString OutputModel::formatAgo(QDateTime dt) const
 {
 	QString str=tr("Right now");
 
-	time_t now = time(0);
+	QDateTime now=QDateTime::currentDateTime();
 
-	int delta  = now - t;
+	int delta  = dt.secsTo(now);
 	if(delta<0) delta = 0;
 
 	if(delta ==1)

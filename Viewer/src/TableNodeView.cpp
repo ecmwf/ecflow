@@ -9,28 +9,42 @@
 
 #include "TableNodeView.hpp"
 
+#include <QtGlobal>
 #include <QComboBox>
 #include <QDebug>
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMenu>
+#include <QMouseEvent>
+#include <QPainter>
 #include <QScrollBar>
+#include <QStyle>
+#include <QToolButton>
 
 #include "ActionHandler.hpp"
 #include "FilterWidget.hpp"
-#include "NodeFilterModel.hpp"
+#include "IconProvider.hpp"
+#include "TableNodeSortModel.hpp"
+#include "PropertyMapper.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeViewDelegate.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
-TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) : QTreeView(parent), NodeViewBase(model,filterDef)
+TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+     QTreeView(parent),
+     NodeViewBase(filterDef),
+     model_(model),
+	 needItemsLayout_(false),
+	 prop_(NULL)
 {
 	setProperty("style","nodeView");
+	setProperty("view","table");
 
 	setRootIsDecorated(false);
 
-	setSortingEnabled(true);
-	sortByColumn(0,Qt::AscendingOrder);
+    setSortingEnabled(true);
+    //sortByColumn(0,Qt::AscendingOrder);
 
 	setAllColumnsShowFocus(true);
 	setUniformRowHeights(true);
@@ -41,7 +55,7 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 	//The background colour between the views left border and the nodes cannot be
 	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
 	//colour from the palette. Here we set this to transparent so that Qt could leave
-	//this are empty and we will fill it appropriately in our delegate.
+    //this area empty and we fill it appropriately in our delegate.
 	QPalette pal=palette();
 	pal.setColor(QPalette::Highlight,QColor(128,128,128,0));
 	setPalette(pal);
@@ -61,19 +75,21 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 
 	actionHandler_=new ActionHandler(this);
 
-	expandAll();
-
+	//expandAll();
 
 	//Header
+	header_=new TableNodeHeader(this);
 
-	//setHeader(new TableNodeHeader(this));
-
+	setHeader(header_);
 
 	//Set header ContextMenuPolicy
-	header()->setContextMenuPolicy(Qt::CustomContextMenu);
+	header_->setContextMenuPolicy(Qt::CustomContextMenu);
 
-	connect(header(),SIGNAL(customContextMenuRequested(const QPoint &)),
+	connect(header_,SIGNAL(customContextMenuRequested(const QPoint &)),
                 this, SLOT(slotHeaderContextMenu(const QPoint &)));
+
+	connect(header_,SIGNAL(customButtonClicked(QString,QPoint)),
+	        this,SIGNAL(headerButtonClicked(QString,QPoint)));
 
 	//for(int i=0; i < model_->columnCount(QModelIndex())-1; i++)
 	//  	resizeColumnToContents(i);
@@ -81,15 +97,30 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 	/*connect(header(),SIGNAL(sectionMoved(int,int,int)),
                 this, SLOT(slotMessageTreeColumnMoved(int,int,int)));*/
 
-
 	QTreeView::setModel(model_);
 
     //Create delegate to the view
     TableNodeViewDelegate *delegate=new TableNodeViewDelegate(this);
     setItemDelegate(delegate);
+
+	connect(delegate,SIGNAL(sizeHintChangedGlobal()),
+			this,SLOT(slotSizeHintChangedGlobal()));
+
+    //Properties
+	std::vector<std::string> propVec;
+	propVec.push_back("view.table.background");
+	prop_=new PropertyMapper(propVec,this);
+
+	//Initialise bg
+	adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
 }
 
-void TableNodeView::setModel(NodeFilterModel *model)
+TableNodeView::~TableNodeView()
+{
+    delete prop_;
+}
+
+void TableNodeView::setModel(TableNodeSortModel *model)
 {
 	model_= model;
 
@@ -187,9 +218,45 @@ void TableNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
 	}
 }
 
+void TableNodeView::rerender()
+{
+	if(needItemsLayout_)
+	{
+		doItemsLayout();
+		needItemsLayout_=false;
+	}
+	else
+	{
+		viewport()->update();
+	}
+}
 
+void TableNodeView::slotRerender()
+{
+	rerender();
+}
 
+void TableNodeView::slotSizeHintChangedGlobal()
+{
+	needItemsLayout_=true;
+}
 
+void TableNodeView::adjustBackground(QColor col)
+{
+	if(col.isValid())
+	{
+		QString sh="QTreeView { background : " + col.name() + ";}";
+		setStyleSheet(sh);
+	}
+}
+
+void TableNodeView::notifyChange(VProperty* p)
+{
+	if(p->path() == "view.table.background")
+	{
+		adjustBackground(p->value().value<QColor>());
+	}
+}
 
 //=========================================
 // Header
@@ -197,18 +264,18 @@ void TableNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
 
 void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 {
-	int section=header()->logicalIndexAt(position);
+	int section=header_->logicalIndexAt(position);
 
-	if(section< 0 || section >= header()->count())
+	if(section< 0 || section >= header_->count())
 		return;
 
 	QList<QAction*> lst;
 	QMenu *menu=new QMenu(this);
 	QAction *ac;
 
-	for(int i=0; i <header()->count(); i++)
+	for(int i=0; i <header_->count(); i++)
 	{
-	  	QString name=header()->model()->headerData(i,Qt::Horizontal).toString();
+	  	QString name=header_->model()->headerData(i,Qt::Horizontal).toString();
 		ac=new QAction(menu);
 		ac->setText(name);
 		ac->setCheckable(true);
@@ -221,28 +288,21 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 		}
 		else
 		{
-			ac->setChecked(!(header()->isSectionHidden(i)));
+			ac->setChecked(!(header_->isSectionHidden(i)));
 		}
 
 		menu->addAction(ac);
 	}
 
 
-
-
-
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 	//VParamFilterMenu stateFilterMenu(menu,filterDef_->nodeState(),VParamFilterMenu::ColourDecor);
 
-
-
-
-
-	ac=menu->exec(header()->mapToGlobal(position));
+	ac=menu->exec(header_->mapToGlobal(position));
 	if(ac && ac->isEnabled() && ac->isCheckable())
 	{
 	  	int i=ac->data().toInt();
-	  	header()->setSectionHidden(i,!ac->isChecked());
+	  	header_->setSectionHidden(i,!ac->isChecked());
 		//MvQDesktopSettings::headerVisible_[i]=ac->isChecked();
 		//broadcastHeaderChange();
 	}
@@ -269,10 +329,21 @@ void TableNodeView::readSettings(VSettings* vs)
 }
 
 
+//=========================================
+// TableNodeHeader
+//=========================================
+
 TableNodeHeader::TableNodeHeader(QWidget *parent) : QHeaderView(Qt::Horizontal, parent)
 {
-     connect(this, SIGNAL(sectionResized(int, int, int)),
+	setStretchLastSection(true);
+
+	connect(this, SIGNAL(sectionResized(int, int, int)),
     		 this, SLOT(slotSectionResized(int)));
+
+    int pixId=IconProvider::add(":viewer/filter_decor.svg","filter_decor");
+
+    customPix_=IconProvider::pixmap(pixId,10);
+
 
      //connect(this, SIGNAL(sectionMoved(int, int, int)), this,
      //        SLOT(handleSectionMoved(int, int, int)));
@@ -282,30 +353,25 @@ TableNodeHeader::TableNodeHeader(QWidget *parent) : QHeaderView(Qt::Horizontal, 
 
 void TableNodeHeader::showEvent(QShowEvent *e)
 {
-    for(int i=0;i<count();i++)
+  /*  for(int i=0;i<count();i++)
     {
-    	if(i==1 && !combo_[i])
-    	{
-
-    			QComboBox *box = new QComboBox(this);
-    			combo_[i] = box;
-    	}
 
 
-       if(combo_[i])
+       if(1)
        {
-    	   combo_[i]->setGeometry(sectionViewportPosition(i),height()/2 ,
-                                sectionSize(i) - 16, height()/2);
-    	   combo_[i]->show();
+    	   widgets_[i]->setGeometry(sectionViewportPosition(i),0,
+                                sectionSize(i),height());
+    	   widgets_[i]->show();
        }
     }
+    */
 
     QHeaderView::showEvent(e);
 }
 
 void TableNodeHeader::slotSectionResized(int i)
 {
-    for (int j=visualIndex(i);j<count();j++)
+    /*for (int j=visualIndex(i);j<count();j++)
     {
         int logical = logicalIndex(j);
 
@@ -314,35 +380,227 @@ void TableNodeHeader::slotSectionResized(int i)
         	combo_[logical]->setGeometry(sectionViewportPosition(logical), height()/2,
                                    sectionSize(logical) - 16, height());
         }
-   }
+   }*/
 }
 
 QSize TableNodeHeader::sizeHint() const
 {
-    QSize s = size();
+	return QHeaderView::sizeHint();
+
+	QSize s = size();
     //s.setHeight(headerSections[0]->minimumSizeHint().height() + 35);
-    s.setHeight(2*35);
+    //s.setHeight(2*35);
     return s;
 }
 
-
-//Param name must be unique
-/*	for(std::set<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); ++it)
+void TableNodeHeader::setModel(QAbstractItemModel *model)
+{
+	if(model)
 	{
-		addAction((*it)->label(),
-				  (*it)->name());
+		for(int i=0; i< model->columnCount(); i++)
+		{
+			QString id=model->headerData(i,Qt::Horizontal,Qt::UserRole).toString();
+			if(id == "status")
+				customButton_.insert(i,TableNodeHeaderButton(id));
+		}
+	}
+	QHeaderView::setModel(model);
+}
+
+void TableNodeHeader::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const
+{
+	painter->save();
+	//QHeaderView::paintSection(painter, rect, logicalIndex);
+	//painter->restore();
+
+
+	/*QPixmap customPix(":viewer/filter_decor.svg");
+    QRect cbRect(0,0,12,12);
+	cbRect.moveCenter(QPoint(rect.right()-16-6,rect.center().y()));
+	customButton_[logicalIndex].setRect(cbRect);
+	painter->drawPixmap(cbRect,pix);*/
+
+	if (!rect.isValid())
+		return;
+
+	 QStyleOptionHeader opt;
+	 initStyleOption(&opt);
+	 QStyle::State state = QStyle::State_None;
+	 if(isEnabled())
+	    state |= QStyle::State_Enabled;
+	 if(window()->isActiveWindow())
+	    state |= QStyle::State_Active;
+
+	bool clickable;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	clickable=sectionsClickable();
+#else
+	clickable=isClickable();
+#endif
+
+	 if(clickable)
+	 {
+		 /*if (logicalIndex == d->hover)
+	            state |= QStyle::State_MouseOver;
+	        if (logicalIndex == d->pressed)
+	            state |= QStyle::State_Sunken;
+	        else if (d->highlightSelected) {
+	            if (d->sectionIntersectsSelection(logicalIndex))
+	                state |= QStyle::State_On;
+	            if (d->isSectionSelected(logicalIndex))
+	                state |= QStyle::State_Sunken;
+	        }*/
+
+	    }
+
+	// if(isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
+	//        opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder)
+	//                            ? QStyleOptionHeader::SortDown : QStyleOptionHeader::SortUp;
+
+	 // setup the style options structure
+	 //QVariant textAlignment = model->headerData(logicalIndex, d->orientation,
+	 //                                                 Qt::TextAlignmentRole);
+	 opt.rect = rect;
+	 opt.section = logicalIndex;
+	 opt.state |= state;
+	 //opt.textAlignment = Qt::Alignment(textAlignment.isValid()
+	 //                                     ? Qt::Alignment(textAlignment.toInt())
+	 //                                     : d->defaultAlignment);
+
+	 //opt.text = model()->headerData(logicalIndex, Qt::Horizontal),
+	 //                                    Qt::DisplayRole).toString();
+
+	 QVariant foregroundBrush;
+	 if (foregroundBrush.canConvert<QBrush>())
+	     opt.palette.setBrush(QPalette::ButtonText, qvariant_cast<QBrush>(foregroundBrush));
+
+	 QPointF oldBO = painter->brushOrigin();
+	 QVariant backgroundBrush;
+	 if (backgroundBrush.canConvert<QBrush>())
+	 {
+	        opt.palette.setBrush(QPalette::Button, qvariant_cast<QBrush>(backgroundBrush));
+	        opt.palette.setBrush(QPalette::Window, qvariant_cast<QBrush>(backgroundBrush));
+	        painter->setBrushOrigin(opt.rect.topLeft());
+	 }
+
+	// the section position
+	int visual = visualIndex(logicalIndex);
+	assert(visual != -1);
+
+	if (count() == 1)
+		opt.position = QStyleOptionHeader::OnlyOneSection;
+	else if (visual == 0)
+		opt.position = QStyleOptionHeader::Beginning;
+    else if (visual == count() - 1)
+	    opt.position = QStyleOptionHeader::End;
+	else
+	    opt.position = QStyleOptionHeader::Middle;
+
+	opt.orientation = Qt::Horizontal;
+
+	// the selected position
+	/*bool previousSelected = d->isSectionSelected(logicalIndex(visual - 1));
+	    bool nextSelected =  d->isSectionSelected(logicalIndex(visual + 1));
+	    if (previousSelected && nextSelected)
+	        opt.selectedPosition = QStyleOptionHeader::NextAndPreviousAreSelected;
+	    else if (previousSelected)
+	        opt.selectedPosition = QStyleOptionHeader::PreviousIsSelected;
+	    else if (nextSelected)
+	        opt.selectedPosition = QStyleOptionHeader::NextIsSelected;
+	    else
+	        opt.selectedPosition = QStyleOptionHeader::NotAdjacent;
+	*/
+
+	// draw the section
+	style()->drawControl(QStyle::CE_Header, &opt, painter, this);
+	painter->setBrushOrigin(oldBO);
+
+	painter->restore();
+
+
+	int rightPos=rect.right();
+	if(isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
+		opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder)
+                            ? QStyleOptionHeader::SortDown : QStyleOptionHeader::SortUp;
+		if (opt.sortIndicator != QStyleOptionHeader::None)
+		{
+			QStyleOptionHeader subopt = opt;
+			subopt.rect = style()->subElementRect(QStyle::SE_HeaderArrow, &opt, this);
+			rightPos=subopt.rect.left();
+		    style()->drawPrimitive(QStyle::PE_IndicatorHeaderArrow, &subopt, painter, this);
+		 }
+
+
+	QMap<int,TableNodeHeaderButton>::iterator it=customButton_.find(logicalIndex);
+	if(it != customButton_.end())
+	{
+		//Custom button
+		QStyleOptionButton optButton;
+
+		//visPbOpt.text="Visualise";
+		optButton.state = QStyle::State_AutoRaise ; //QStyle::State_Active | QStyle::State_Enabled;
+		//optButton.icon=customIcon_;
+		//optButton.iconSize=QSize(12,12);
+
+		int buttonWidth=customPix_.width();
+		int buttonHeight=buttonWidth;
+		optButton.rect = QRect(rightPos-4-buttonWidth,(rect.height()-buttonWidth)/2,
+								   buttonWidth,buttonHeight);
+
+		painter->drawPixmap(optButton.rect,customPix_);
+
+		rightPos=optButton.rect.left();
+		it.value().setRect(optButton.rect);
 	}
 
-*/
-/*
-QMenu *menu=new QMenu(this);
-	menu->setTearOffEnabled(true);
+	QString text=model()->headerData(logicalIndex,Qt::Horizontal).toString();
+	QRect textRect=rect;
+	textRect.setRight(rightPos-5);
 
-	menu->addAction(actionBreadcrumbs);
-	QMenu *menuState=menu->addMenu(tr("Status"));
+	painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
 
-	menuState->setTearOffEnabled(true);
 
-	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-	stateFilterMenu_=new VParamFilterMenu(menuState,states_,VParamFilterMenu::ColourDecor);
-*/
+	//style()->drawControl(QStyle::CE_PushButton, &optButton,painter,this);
+}
+
+void TableNodeHeader::mousePressEvent(QMouseEvent *event)
+{
+	QMap<int,TableNodeHeaderButton>::const_iterator it = customButton_.constBegin();
+	while(it != customButton_.constEnd())
+	{
+		if(it.value().rect_.contains(event->pos()))
+		{
+			qDebug() << "header" << it.key() << "clicked";
+			Q_EMIT customButtonClicked(it.value().id(),event->globalPos());
+		}
+	     ++it;
+	 }
+
+	QHeaderView::mousePressEvent(event);
+}
+
+/*void TableNodeHeader::mouseMoveEvent(QMouseEvent *event)
+{
+	int prevIndex=hoverIndex_;
+	QMap<int,TableNodeHeaderButton>::const_iterator it = customButton_.constBegin();
+	while(it != customButton_.constEnd())
+	{
+		if(it.value().rect_.contains(event->pos()))
+		{
+			hoverIndex_=it.key();
+			if(hoveIndex != prevIndex)
+			{
+				rerender;
+			}
+		}
+	    ++it;
+	}
+
+	if(preIndex !=-1)
+	{
+
+	}
+	hoverIndex_=-1;
+}*/
+

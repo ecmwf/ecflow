@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #4 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -26,7 +26,7 @@ bool SClientHandleCmd::equals(ServerToClientCmd* rhs) const
 
 bool SClientHandleCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
-	if (debug) cout << "SClientHandleCmd::handle_server_response handle_ = " << handle_ << "\n";
+	if (debug) cout << "  SClientHandleCmd::handle_server_response handle_ = " << handle_ << "\n";
 	server_reply.set_client_handle( handle_ );
 	return true;
 }

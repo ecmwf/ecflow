@@ -16,6 +16,7 @@
 #include "ui_VariableItemWidget.h"
 
 #include "InfoPanelItem.hpp"
+#include "VariableModelDataObserver.hpp"
 #include "VInfo.hpp"
 
 class LineEdit;
@@ -24,55 +25,78 @@ class VariableModelData;
 class VariableModelDataHandler;
 class VariableSortModel;
 class VariableSearchLine;
+class VProperty;
 
-class VariableDialogChecker
-{
-protected:
-	explicit VariableDialogChecker(QString txt) : errorText_(txt) {};
-
-	bool checkName(QString name);
-	bool checkValue(QString value);
-	void error(QString msg);
-
-	QString errorText_;
-};
-
-
-class VariablePropDialog : public QDialog, private Ui::VariablePropDialog //, public VariableDialogChecker
+class VariablePropDialog : public QDialog, public VariableModelDataObserver, private Ui::VariablePropDialog
 {
 Q_OBJECT
 
 public:
-	VariablePropDialog(VariableModelData* data,QString name,QString value,bool genVar,bool frozen,QWidget* parent=0);
+    VariablePropDialog(VariableModelDataHandler* data,int defineIndex,QString name,QString value,bool frozen,QWidget* parent=0);
+    ~VariablePropDialog();
 
 	QString name() const;
 	QString value() const;
 
+    void notifyCleared(VariableModelDataHandler*);
+    void notifyUpdated(VariableModelDataHandler*);
+
 public Q_SLOTS:
 	void accept();
+    void slotSuspendedChanged(bool s);
+
+protected Q_SLOTS:
+    void on_nameEdit__textEdited(QString);
+    void on_valueEdit__textChanged();
 
 protected:
-	bool genVar_;
-	VariableModelData* data_;
+    void suspendEdit(bool);
+    void readSettings();
+    void writeSettings();
+
+    bool genVar_;
+    VariableModelDataHandler* data_;
+    int defineIndex_;
+    QString oriName_;
+    QString nodeName_;
+    QString nodeType_;
+    QString nodeTypeCapital_;
+    QString defineNodeName_;
+    QString defineNodeType_;
+    bool cleared_;
 
 };
 
-class VariableAddDialog : public QDialog, private Ui::VariableAddDialog //, public VariableDialogChecker
+class VariableAddDialog : public QDialog, public VariableModelDataObserver, private Ui::VariableAddDialog
 {
 Q_OBJECT
 
 public:
-	VariableAddDialog(VariableModelData* data,QWidget* parent=0);
-	VariableAddDialog(VariableModelData* data,QString name,QString value,QWidget* parent=0);
+    VariableAddDialog(VariableModelDataHandler* data,QWidget* parent=0);
+    VariableAddDialog(VariableModelDataHandler* data,QString name,QString value,QWidget* parent=0);
+    ~VariableAddDialog();
 
 	QString name() const;
 	QString value() const;
 
+    void notifyCleared(VariableModelDataHandler*);
+    void notifyUpdated(VariableModelDataHandler*) {}
+
 public Q_SLOTS:
 	void accept();
+    void slotSuspendedChanged(bool s);
 
 protected:
-	VariableModelData* data_;
+    void init();
+    void suspendEdit(bool);
+    void readSettings();
+    void writeSettings();
+
+    VariableModelDataHandler* data_;
+    QString nodeName_;
+    QString nodeType_;
+    QString nodeTypeCapital_;
+    bool cleared_;
 };
 
 
@@ -86,17 +110,27 @@ public:
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
-	void clearContents();
+    void clearContents();
 
-public Q_SLOTS:
-	void on_actionProp_triggered();
-	void on_actionAdd_triggered();
-	void on_actionDelete_triggered();
-	void on_varView_doubleClicked(const QModelIndex& index);
-	void on_actionFilter_triggered();
-	void on_actionSearch_triggered();
-	void slotFilterTextChanged(QString text);
+public Q_SLOTS:	
+    void slotFilterTextChanged(QString text);
 	void slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx);
+
+protected Q_SLOTS:
+    void on_actionProp_triggered();
+    void on_actionAdd_triggered();
+    void on_actionDelete_triggered();
+    void on_varView_doubleClicked(const QModelIndex& index);
+    void on_actionFilter_triggered();
+    void on_actionSearch_triggered();
+    void on_actionCopy_triggered();
+    void on_actionCopyFull_triggered();
+    void on_shadowTb_clicked(bool showShadowed);
+    void slotVariableEdited();
+    void slotVariableAdded();
+
+Q_SIGNALS:
+    void suspendedChanged(bool);
 
 protected:
 	void checkActionState();
@@ -104,9 +138,11 @@ protected:
 	void duplicateItem(const QModelIndex& index);
 	void addItem(const QModelIndex& index);
 	void removeItem(const QModelIndex& index);
-	void updateWidgetState();
+    void updateState(const ChangeFlags&);
+    void toClipboard(QString txt) const;
+    void reselectCurrent();
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
 
 	VariableModelDataHandler* data_;
@@ -115,6 +151,8 @@ protected:
 
 	LineEdit* filterLine_;
 	VariableSearchLine *searchLine_;
+
+    VProperty* shadowProp_;
 };
 
 #endif

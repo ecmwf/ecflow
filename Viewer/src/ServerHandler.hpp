@@ -24,7 +24,6 @@
 #include "VServerSettings.hpp"
 
 #include <QMutex>
-#include <QTimer>
 
 class ClientInvoker;
 class ServerReply;
@@ -35,6 +34,7 @@ class ServerHandler;
 class ServerComQueue;
 class ServerObserver;
 class SuiteFilter;
+class UpdateTimer;
 class VNodeChange;
 class VServer;
 class VServerChange;
@@ -61,7 +61,9 @@ public:
 	bool communicating() {return communicating_;}
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
+
 	void updateSuiteFilter(SuiteFilter*);
+	void updateSuiteFilterWithDefs();
 
 	void connectServer();
 	void disconnectServer();
@@ -94,14 +96,16 @@ public:
 	static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
 	static void removeServer(ServerHandler*);
 
-	void command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd, bool resolve);
-	static void command(VInfo_ptr,const std::vector<std::string>&, bool resolve);
-	static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
+	void command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd);
+	static void command(VInfo_ptr,const std::vector<std::string>&);
+	static void command(std::vector<VInfo_ptr>,std::string);
+
+	void searchBegan();
+	void searchFinished();
+    int secsSinceLastRefresh() const;
+    int secsTillNextRefresh() const;
 
 	static ServerHandler* find(const std::string& name);
-
-	static void addServerCommand(const std::string &name, const std::string& command);
-	static std::string resolveServerCommand(const std::string &name);
 
 protected:
 	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
@@ -131,7 +135,6 @@ protected:
     SuiteFilter* suiteFilter_;
 
 	static std::vector<ServerHandler*> servers_;
-	static std::map<std::string, std::string> commands_;
 
 private Q_SLOTS:
 	void errorMessage(std::string message); // invoked when an error message is received
@@ -142,19 +145,22 @@ private Q_SLOTS:
 
 private:
 	//Begin and end the initialisation by connecting to the server and syncing.
-	void resetFinished();
+    void refreshInternal();
+    void resetFinished();
 	void resetFailed(const std::string& errMsg);
 	void clearTree();
 	void rescanTree();
 	void connectionLost(const std::string& errMsg);
 	bool connectionGained();
 
-	void updateSuiteFilter(const std::vector<std::string>&);
+	void updateSuiteFilterWithLoaded(const std::vector<std::string>&);
+	void updateSuiteFilter();
 
 	//Handle the refresh timer
 	void stopRefreshTimer();
 	void startRefreshTimer();
-	void updateRefreshTimer();
+    void updateRefreshTimer();
+    void driftRefreshTimer();
 
 	void script(VTask_ptr req);
 	void job(VTask_ptr req);
@@ -162,12 +168,13 @@ private:
 	void manual(VTask_ptr req);
 
 	defs_ptr defs();
+	defs_ptr safelyAccessSimpleDefsMembers();
 
 	void setActivity(Activity activity);
 
 	typedef void (ServerObserver::*SoMethod)(ServerHandler*);
 	typedef void (ServerObserver::*SoMethodV1)(ServerHandler*,const VServerChange&);
-	void broadcast(SoMethod);
+    void broadcast(SoMethod);
 	void broadcast(SoMethodV1,const VServerChange&);
 
 	typedef void (NodeObserver::*NoMethod)(const VNode*);
@@ -180,17 +187,22 @@ private:
 	void saveConf();
 	void loadConf();
 
+    int truncatedLinesFromServer(const std::string& txt) const;
+
 	QMutex           defsMutex_;
+	defs_ptr defs_;
 
 	ServerComQueue* comQueue_;
 
 	//std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
 	//std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
 
-	QTimer refreshTimer_;
+    UpdateTimer* refreshTimer_;
+    QDateTime lastRefresh_;
 
 	Activity activity_;
 	ConnectState* connectState_;
+	SState::State prevServerState_;
 
 	VServerSettings* conf_;
 

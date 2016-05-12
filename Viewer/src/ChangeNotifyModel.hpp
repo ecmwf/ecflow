@@ -15,6 +15,8 @@
 
 #include <vector>
 
+#include "VInfo.hpp"
+
 class VNodeList;
 
 class ChangeNotifyModel : public QAbstractItemModel
@@ -36,12 +38,15 @@ public:
    	void setData(VNodeList *);
 	bool hasData() const;
 	VNodeList* data();
+    VInfo_ptr nodeInfo(const QModelIndex&) const;
 
 public Q_SLOTS:
 	void slotBeginAppendRow();
 	void slotEndAppendRow();
 	void slotBeginRemoveRow(int);
 	void slotEndRemoveRow(int);
+	void slotBeginRemoveRows(int,int);
+	void slotEndRemoveRows(int,int);
 	void slotBeginReset();
 	void slotEndReset();
 

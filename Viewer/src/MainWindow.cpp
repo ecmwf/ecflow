@@ -23,9 +23,6 @@
 
 #include <QDebug>
 
-#include "Version.hpp"
-
-
 #include "MainWindow.hpp"
 
 #include "AboutDialog.hpp"
@@ -40,6 +37,7 @@
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
 #include "SessionHandler.hpp"
+#include "SaveSessionAsDialog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VSettings.hpp"
@@ -57,7 +55,14 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     setAttribute(Qt::WA_DeleteOnClose);
 
-    setWindowTitle("EcflowUI (" + QString::fromStdString(ecf::Version::raw()) + ")  -  Preview version");
+    // add the name of the session to the title bar?
+    std::string sessionName = SessionHandler::instance()->current()->name();
+    if (sessionName == "default")
+        sessionName = "";
+    else
+        sessionName = " (session: " + sessionName + ")";
+
+    setWindowTitle(QString::fromStdString(VConfig::instance()->appLongName()) + "  -  Preview version" + QString::fromStdString(sessionName));
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -79,15 +84,18 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
+    connect(nodePanel_,SIGNAL(contentsChanged()),
+    	    this,SLOT(slotContentsChanged()));
+
     //Add temporary preview label
-    /*QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
+    QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
     label->setAutoFillBackground(true);
     label->setProperty("previewLabel","1");
 
     QLabel *label1=new QLabel("      ",this);
 
     viewToolBar->addWidget(label1);
-    viewToolBar->addWidget(label);*/
+    viewToolBar->addWidget(label);
 
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -97,13 +105,25 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     addInfoPanelActions(viewToolBar);
     //addToolBar(ipToolBar);
 
-    /*ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
-    viewToolBar->addWidget(chw);*/
+    //Actions based on selection
+    actionRefreshSelected->setEnabled(false);
+    actionResetSelected->setEnabled(false);
+
+    //Status bar
+
+    //Add notification widget
+    ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
+    statusBar()->addPermanentWidget(chw);
+
+
+    //actionSearch->setVisible(false);
+
 }
 
 MainWindow::~MainWindow()
 {
 	qDebug() << "exit";
+	serverFilterMenu_->aboutToDestroy();
 }
 
 void MainWindow::init(MainWindow *win)
@@ -134,8 +154,6 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 	   }
    }
 }
-
-
 
 //==============================================================
 //
@@ -173,6 +191,28 @@ void MainWindow::on_actionReset_triggered()
 	nodePanel_->resetCurrent();
 }
 
+void MainWindow::on_actionRefreshSelected_triggered()
+{
+	if(selection_ && selection_.get())
+	{
+		if(ServerHandler* s=selection_->server())
+		{
+			s->refresh();
+		}
+	}
+}
+
+void MainWindow::on_actionResetSelected_triggered()
+{
+	if(selection_ && selection_.get())
+	{
+		if(ServerHandler* s=selection_->server())
+		{
+			s->reset();
+		}
+	}
+}
+
 void MainWindow::on_actionPreferences_triggered()
 {
     PropertyDialog* d=new PropertyDialog; //belongs to the whole app
@@ -191,6 +231,13 @@ void MainWindow::on_actionPreferences_triggered()
 	delete d;
 }
 
+
+void MainWindow::on_actionManageSessions_triggered()
+{
+	QMessageBox::information(0, tr("Manage Sessions"),
+		tr("To manage sessions, please restart ecFlowUI with the -s command-line option"));
+}
+
 void MainWindow::slotConfigChanged()
 {
 	configChanged(this);
@@ -203,6 +250,12 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
 	if(menuConfigDialog.exec() == QDialog::Accepted)
 	{
     }
+}
+
+void MainWindow::on_actionSearch_triggered()
+{
+    //It takes ownership of the dialogue.
+    nodePanel_->addSearchDialog();
 }
 
 void MainWindow::on_actionManageServers_triggered()
@@ -235,6 +288,13 @@ void MainWindow::on_actionAbout_triggered()
     AboutDialog d;
     d.exec();
 }
+
+void MainWindow::on_actionSaveSessionAs_triggered()
+{
+    SaveSessionAsDialog d;
+    d.exec();
+}
+
 
 void MainWindow::slotCurrentChangedInPanel()
 {
@@ -273,7 +333,45 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 			 }
 		}
 	}
+
+	updateRefreshActions();
 }
+
+void MainWindow::updateRefreshActions()
+{
+	QString serverName;
+	if(selection_ && selection_.get())
+	{
+		if(ServerHandler* s=selection_->server())
+		{
+			serverName=QString::fromStdString(s->name());
+		}
+	}
+
+	bool hasSel=(selection_ && selection_.get());
+	actionRefreshSelected->setEnabled(hasSel);
+	actionResetSelected->setEnabled(hasSel);
+
+	if(serverName.isEmpty())
+	{
+		QString tnew=tr("Refresh <b>selected</b> server<br>") +
+					 + "<code>" + actionRefreshSelected->shortcut().toString() + "</code>";
+
+		actionRefreshSelected->setToolTip(tnew);
+	}
+	else
+	{
+		QString t=actionRefreshSelected->toolTip();
+		if(!t.contains(serverName))
+		{
+			QString tnew=tr("Refresh server <b>") + serverName + tr("</b><br>") +
+			 + "<code>" + actionRefreshSelected->shortcut().toString() + "</code>";
+
+			actionRefreshSelected->setToolTip(tnew);
+		}
+	}
+}
+
 
 void MainWindow::slotOpenInfoPanel()
 {
@@ -293,6 +391,16 @@ void MainWindow::reloadContents()
 void MainWindow::rerenderContents()
 {
 	nodePanel_->rerender();
+}
+
+void MainWindow::slotContentsChanged()
+{
+	MainWindow::saveContents(NULL);
+}
+
+bool MainWindow::selectInTreeView(VInfo_ptr info)
+{
+    return nodePanel_->selectInTreeView(info);
 }
 
 //==============================================================
@@ -420,6 +528,13 @@ void MainWindow::configChanged(MainWindow* owner)
 			win->rerenderContents();
 }
 
+void MainWindow::changeNotifySelectionChanged(VInfo_ptr info)
+{
+    Q_FOREACH(MainWindow *win,windows_)
+        if(win->selectInTreeView(info))
+            return;
+}
+
 //Return true if close is allowed, false otherwise
 bool MainWindow::aboutToClose(MainWindow* win)
 {
@@ -447,7 +562,7 @@ bool MainWindow::aboutToClose(MainWindow* win)
 		}
 		else if(windows_.count() == 1)
 		{
-			return MainWindow::aboutToQuit(win);
+            return MainWindow::aboutToQuit(win);
 		}
 		return true;
 	}
@@ -455,17 +570,23 @@ bool MainWindow::aboutToClose(MainWindow* win)
 
 bool MainWindow::aboutToQuit(MainWindow* topWin)
 {
-  	if(QMessageBox::question(0,tr("Confirm quit"),tr("Do you want to quit ecFlowView?"),
+#if 0
+    if(QMessageBox::question(0,tr("Confirm quit"),
+  			     tr("Do you want to quit ") +
+  			     QString::fromStdString(VConfig::instance()->appName()) + "?",
 			     QMessageBox::Yes | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Yes)
 	{
-		quitStarted_=true;
+#endif
+        quitStarted_=true;
 
 		//Save browser settings
 		MainWindow::save(topWin);
 
 		//Exit ecFlowView
 		QApplication::quit();
-	}
+#if 0
+    }
+#endif
 
 	return false;
 }
@@ -532,6 +653,46 @@ void MainWindow::init()
 
 void MainWindow::save(MainWindow *topWin)
 {
+	MainWindow::saveContents(topWin);
+
+	/*SessionItem* cs=SessionHandler::instance()->current();
+	assert(cs);
+
+	VComboSettings vs(cs->sessionFile(),cs->windowFile());
+
+	//We have to clear it so that not to remember all the previous windows
+	vs.clear();
+
+	//Add total window number and id of active window
+	vs.put("windowCount",windows_.count());
+	vs.put("topWindowId",windows_.indexOf(topWin));
+
+	//Save info for all the windows
+	for(int i=0; i < windows_.count(); i++)
+	{
+		std::string id="window_"+boost::lexical_cast<std::string>(i);
+		vs.beginGroup(id);
+		windows_.at(i)->writeSettings(&vs);
+		vs.endGroup();
+	}
+
+	//Write to json
+	vs.write();*/
+
+	//Save global config
+	VConfig::instance()->saveSettings();
+
+	ServerHandler::saveSettings();
+
+	//Save non-global config
+	for(int i=0; i < windows_.count(); i++)
+	{
+		//windows_.at(i)->saveSettings();
+	}
+}
+
+void MainWindow::saveContents(MainWindow *topWin)
+{
 	SessionItem* cs=SessionHandler::instance()->current();
 	assert(cs);
 
@@ -555,19 +716,8 @@ void MainWindow::save(MainWindow *topWin)
 
 	//Write to json
 	vs.write();
-
-	//Save global config
-	VConfig::instance()->saveSettings();
-
-	ServerHandler::saveSettings();
-
-
-	//Save non-global config
-	for(int i=0; i < windows_.count(); i++)
-	{
-		//windows_.at(i)->saveSettings();
-	}
 }
+
 
 void MainWindow::reload()
 {

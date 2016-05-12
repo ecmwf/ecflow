@@ -24,7 +24,6 @@ class AbstractNodeModel;
 class AttributeFilter;
 class IconFilter;
 class NodeFilterDef;
-class NodeFilterModel;
 class NodeStateFilter;
 class VModelData;
 class NodePathWidget;
@@ -41,26 +40,31 @@ public:
 	NodeViewBase* view() const {return view_;}
 	QWidget* widget();
 	VInfo_ptr currentSelection();
-	void currentSelection(VInfo_ptr info);
+	//void currentSelection(VInfo_ptr info);
 	void reload();
-    void populateDialog() {};
+    void populateDialog() {}
     QList<QAction*> dockTitleActions() {return dockActions_;}
 
-Q_SIGNALS:
-	void selectionChanged(VInfo_ptr);
-	void popInfoPanel(VInfo_ptr,QString);
+public Q_SLOTS:
+	void setCurrentSelection(VInfo_ptr);
 
 protected Q_SLOTS:
 	void slotInfoPanelAction();
 
+Q_SIGNALS:
+	void selectionChanged(VInfo_ptr);
+	void popInfoPanel(VInfo_ptr,QString);
+	void dashboardCommand(VInfo_ptr,QString);
+
 protected:
-	explicit NodeWidget(QWidget* parent=0);
+	explicit NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent=0);
 	virtual ~NodeWidget();
 
 	void updateActionState(VInfo_ptr);
 
-	AbstractNodeModel* model_;
-	NodeFilterModel* filterModel_;
+	ServerFilter* serverFilter_;
+
+	AbstractNodeModel* model_;	
 	NodeViewBase* view_;
 
 	IconFilter* icons_;

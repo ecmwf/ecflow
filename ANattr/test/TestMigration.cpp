@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #13 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -155,7 +155,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    doSave(file_name + "Event_1",Event(1));
    doSave(file_name + "Event_2",Event("event"));
    doSave(file_name + "Meter",Meter("meter",10,100,100));
-   doSave(file_name + "ZombieAttr",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10));
+   doSave(file_name + "ZombieAttr",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB));
+   doSave(file_name + "ZombieAttr1",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,500));
 #endif
 
    do_restore<VerifyAttr>(file_name + "VerifyAttr",VerifyAttr(NState::COMPLETE,3));
@@ -177,7 +178,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    do_restore<Event>(file_name + "Event_1",Event(1));
    do_restore<Event>(file_name + "Event_2",Event("event"));
    do_restore<Meter>(file_name + "Meter",Meter("meter",10,100,100));
-   do_restore<ZombieAttr>(file_name + "ZombieAttr",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10));
+   do_restore<ZombieAttr>(file_name + "ZombieAttr",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB));
+   do_restore<ZombieAttr>(file_name + "ZombieAttr1",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,500));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

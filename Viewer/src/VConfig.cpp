@@ -17,6 +17,8 @@
 #include "SessionHandler.hpp"
 #include "UserMessage.hpp"
 
+#include "Version.hpp"
+
 #include <QDebug>
 
 #include <boost/property_tree/json_parser.hpp>
@@ -26,9 +28,12 @@
 
 VConfig* VConfig::instance_=0;
 
+//#define _UI_CONFIG_LOAD_DEBUG
+
 VConfig::VConfig()
 {
-
+	appName_="ecFlowUI";
+	appLongName_=appName_ + " (" + ecf::Version::raw() + ")";
 }
 
 VConfig::~VConfig()
@@ -56,16 +61,24 @@ void VConfig::init(const std::string& parDirPath)
    fs::path parDir(parDirPath);
     
    if(fs::exists(parDir) && fs::is_directory(parDir))
-    {
-        for(fs::directory_iterator it(parDir) ; 
-            it != fs::directory_iterator() ; ++it)
-        {
-            if(fs::is_regular_file(it->status()) )
+   {
+       //fs::directory_iterator it(parDir);
+       
+       //The conf files have to be loaded in alphabetical order!! At least NotifyChange require it!
+       //So we read the paths into a vector and sort it.
+       std::vector<fs::path> vec; 
+       copy(fs::directory_iterator(parDir), fs::directory_iterator(), back_inserter(vec));
+       std::sort(vec.begin(), vec.end()); 
+       
+       //The paths are now in alphabetical order
+       for(std::vector<fs::path>::const_iterator it=vec.begin(); it != vec.end(); ++it) 
+       {
+            if(fs::is_regular_file(*it))
             {
-                std::string name=it->path().filename().string();
+                std::string name=it->filename().string();
                 if(name.find("_conf.json") != std::string::npos)
                 {    
-                    loadInit(it->path().string());
+                    loadInit(it->string());
                 }    
             }
         }
@@ -74,6 +87,10 @@ void VConfig::init(const std::string& parDirPath)
    //Read gui definition for the editable properties
    std::string guiFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui.json");
    loadInit(guiFile);
+
+   //Read gui definition for the editable properties tahat can be cutomised per server
+   std::string guiServerFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui_server.json");
+   loadInit(guiServerFile);
 
    //Load existing user settings for the editable properties
    loadSettings();
@@ -94,7 +111,8 @@ void VConfig::loadInit(const std::string& parFile)
     {
          std::string errorMessage = e.what();
          UserMessage::message(UserMessage::ERROR, true,
-                 std::string("Error! VConfig::load() unable to parse definition file: " + parFile + " Message: " +errorMessage));
+                 std::string("Fatal error!\nVConfig::load() unable to parse definition file: " + parFile + "\nMessage: " +errorMessage));
+         exit(1);
          return;
     }
     
@@ -131,45 +149,76 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	std::string name=it->first;
     	ptree ptProp=it->second;
 
+#ifdef _UI_CONFIG_LOAD_DEBUG
     	UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() read item: " + name);
-
+#endif
     	//Default value
     	if(name == "default")
     	{
     		std::string val=ptProp.get_value<std::string>();
     		prop->setDefaultValue(val);
     	}
-    	else if(name == "line")
+
+    	//If it is just a key/value pair "line"
+    	else if(name == "line" && ptProp.empty())
     	{
     		VProperty *chProp=new VProperty(name);
     		prop->addChild(chProp);
-
     		std::string val=ptProp.get_value<std::string>();
 
     		QString prefix=prop->param("prefix");
     		if(!prefix.isEmpty())
     			val=prefix.toStdString() + "." + val;
 
+#ifdef _UI_CONFIG_LOAD_DEBUG
     		UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line: " + val);
-            
+#endif
     		if(VProperty* lineEditProp=find(val))
     		{
-    			UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#endif
                 chProp->setLink(lineEditProp);
+            }
+            else
+    		{
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#endif
+            }
+    	}
+    	//If the property is a "line" (i.e. a line with additional parameters)
+    	else if(prop->name() == "line" && name ==  "link")
+    	{
+    		std::string val=ptProp.get_value<std::string>();
+
+#ifdef _UI_CONFIG_LOAD_DEBUG
+            UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line link: " + val);
+#endif
+    		if(VProperty* lineEditProp=find(val))
+    		{
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#endif
+                prop->setLink(lineEditProp);
     		}
     		else
     		{
-    			UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#endif
     		}
     	}
+
         //Here we only load the properties with
-        //children (i.e. key/value pairs (like "label" etc above)
+        //children (i.e. key/value pairs (like "line" etc above)
         //are ignored.
     	else if(!ptProp.empty())
         {
             VProperty *chProp=new VProperty(name);
             prop->addChild(chProp);
             loadProperty(ptProp,chProp);
+            chProp->adjustAfterLoad();
         }
         else
         {
@@ -209,7 +258,7 @@ VProperty* VConfig::group(const std::string& name)
 
 VProperty* VConfig::cloneServerGui(VProperty *linkTarget)
 {
-	VProperty* gr=find("gui.server");
+	VProperty* gr=find("gui_server.server");
 
 	assert(gr);
 
@@ -226,10 +275,10 @@ VProperty* VConfig::cloneServerGui(VProperty *linkTarget)
 		}
 	}
 
-
 	return cGr;
 }
 
+//Saves the global settings that can be edited through the gui
 void VConfig::saveSettings()
 {
 	SessionItem* cs=SessionHandler::instance()->current();
@@ -237,23 +286,36 @@ void VConfig::saveSettings()
 
 	VProperty *guiProp=group("gui");
 
-	saveSettings(fName,guiProp,NULL);
+	saveSettings(fName,guiProp,NULL,true);
 }
 
-
-void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs)
+//Saves the settings per server that can be edited through the servers option gui
+void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs,bool global)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
 
-	//Get editable properties
+	//Get editable properties. We will operate on the links.
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
 
 	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
 	{
-		if((*it)->changed())
-			pt.put((*it)->path(),(*it)->valueAsString());
+		if(global)
+		{
+			if((*it)->changed())
+			{
+				pt.put((*it)->path(),(*it)->valueAsString());
+			}
+		}
+
+		else
+		{
+			if(!(*it)->useMaster())
+			{
+				pt.put((*it)->path(),(*it)->valueAsString());
+			}
+		}
 	}
 
 	//Add settings stored in VSettings
@@ -269,6 +331,7 @@ void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettin
 	write_json(parFile,pt);
 }
 
+//Loads the global settings that can be edited through the gui
 void VConfig::loadSettings()
 {
 	SessionItem* cs=SessionHandler::instance()->current();
@@ -276,13 +339,13 @@ void VConfig::loadSettings()
 
 	VProperty *guiProp=group("gui");
 
-	loadSettings(parFile,guiProp);
+	loadSettings(parFile,guiProp,true);
 }
 
-
-
-void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
+//Loads the settings per server that can be edited through the servers option gui
+void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp,bool global)
 {
+	//We will operate on the links
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
 
@@ -310,20 +373,18 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
 		if(pt.get_child_optional((*it)->path()) != boost::none)
 		{
 			std::string val=pt.get<std::string>((*it)->path());
+
+			if(!global)
+			{
+				(*it)->setUseMaster(false);
+			}
+
 			(*it)->setValue(val);
 		}
-		else
-		{
-			if((*it)->master())
-			{
-				(*it)->setUseMaster(true);
-			}
-		}
-
 	}
 }
 
-void VConfig::loadSettings(const boost::property_tree::ptree& pt,VProperty* guiProp)
+void VConfig::loadImportedSettings(const boost::property_tree::ptree& pt,VProperty* guiProp)
 {
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
@@ -334,6 +395,10 @@ void VConfig::loadSettings(const boost::property_tree::ptree& pt,VProperty* guiP
 		{
 			std::string val=pt.get<std::string>((*it)->path());
 			(*it)->setValue(val);
+		}
+		else if((*it)->master())
+		{
+			(*it)->setUseMaster(true);
 		}
 	}
 }
@@ -346,7 +411,7 @@ void VConfig::importSettings()
 	if(readRcFile(globalRcFile,pt))
 	{
 		VProperty* gr=VConfig::find("gui");
-		loadSettings(pt,gr);
+		loadImportedSettings(pt,gr);
 		VConfig::saveSettings();
 	}
 }
@@ -410,38 +475,38 @@ bool VConfig::readRcFile(const std::string& rcFile,boost::property_tree::ptree& 
 				}
 				else if(par[0] == "jobfile_length")
 				{
-					pt.put("server.files.maxJobFileLines",par[1]);
+					pt.put("server.files.maxOutputFileLines",par[1]);
 					hasValue=true;
 				}
 
 				//Popup
 				else if(par[0] == "aborted")
 				{
-					pt.put("server.notification.aborted.button",par[1]);
+					pt.put("server.notification.aborted.enabled",par[1]);
 					pt.put("server.notification.aborted.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "restarted")
 				{
-					pt.put("server.notification.restarted.button",par[1]);
+					pt.put("server.notification.restarted.enabled",par[1]);
 					pt.put("server.notification.restarted.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "late")
 				{
-					pt.put("server.notification.late.button",par[1]);
+					pt.put("server.notification.late.enabled",par[1]);
 					pt.put("server.notification.late.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "zombies")
 				{
-					pt.put("server.notification.zombie.button",par[1]);
+					pt.put("server.notification.zombie.enabled",par[1]);
 					pt.put("server.notification.zombie.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "aliases")
 				{
-					pt.put("server.notification.alias.button",par[1]);
+					pt.put("server.notification.alias.enabled",par[1]);
 					pt.put("server.notification.alias.popup",par[1]);
 					hasValue=true;
 				}

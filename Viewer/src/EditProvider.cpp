@@ -17,72 +17,7 @@
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 
-//#include <boost/filesystem/operations.hpp>
-//#include <boost/filesystem/path.hpp>
-//#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string.hpp>
-
-/*void  InfoProvider::taskChanged(VTask_ptr task)
-{
-    if(task_ != task)
-        return;
-
-    switch(task->status())
-    {
-        case VTask::FINISHED:
-            //We prepend the results to the existing text
-            reply_->text(task->reply()->text());
-            owner_->infoReady(reply_);
-            //We do not need the task anymore.
-            task_.reset();
-            break;
-        case VTask::ABORTED:
-        case VTask::CANCELLED:
-        case VTask::REJECTED:
-            reply_->errorText(task->reply()->errorText());
-            owner_->infoFailed(reply_);
-            //We do not need the task anymore.
-            task_.reset();break;
-        default:
-            break;
-    }
-}*/
-
-
-
-
-/*
-tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
-{
-   gui::message("%s: fetching source", name());
-   try {
-      if (preproc)
-         client_.edit_script_preprocess(n.full_name());
-      else
-         client_.edit_script_edit(n.full_name());
-      return tmp_file(client_.server_reply().get_string());
-   } catch ( std::exception &e ) {
-       gui::error("host::edit-error: %s", e.what());
-   } catch ( ... ) {
-       gui::error("host::edit-error");
-   }
-  std::string error = "no script!\n"
-"\n"
-"check server->History:\n"
-"\tsome suite variable may be 'unterminated' (micro character missing) in script or include files\n"
-"\tcheck duplicate occurences of micro character when it is expected in the job (%% becomes %)\n"
-"\tuse %nopp ... %end or %includenopp <file.h> to disable job preprocessing where needed\n"
-"\tan include file may not be found\n"
-"check ECF_FILE directory is accessible, by opening the Script panel\n"
-"check ECF_INCLUDE directory is accessible from the server\n"
-"\tit must contain the included files (or links)\n"
-"client must be capable to create temporary file:\n"
-"\tcheck /tmp directory with write access, and space available,\n"
-"or preprocessed file may be truncated beyond some size.\n";
-   return tmp_file(error);
-}*/
-
-
 
 //Node
 void EditProvider::visit(VInfoNode* info)
@@ -132,7 +67,7 @@ void EditProvider::submit(const std::vector<std::string>& txt,bool alias)
     // Extract user variables
     //---------------------------
 
-    //static std::string defMicro="%";
+    static std::string defMicro="%";
     static std::string comStartText = "comment - ecf user variables";
     static std::string comEndText   = "end - ecf user variables";
 
@@ -140,7 +75,7 @@ void EditProvider::submit(const std::vector<std::string>& txt,bool alias)
 
     //Find out the micro
   	std::string microVar=node->findInheritedVariable("ECF_MICRO");
-    std::string micro = (microVar.size() == 1) ? microVar.c_str() : micro;
+    std::string micro = (microVar.size() == 1) ? microVar.c_str() : defMicro;
 
 	//Find out the full comment start and end texts
 	std::string comStart= micro + comStartText;

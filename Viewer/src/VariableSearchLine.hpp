@@ -37,6 +37,7 @@ public Q_SLOTS:
 
 protected:   
     void selectIndex(const QModelIndex& index);
+    void clearRequested() {}
     
     QTreeView* view_;
     QModelIndexList resultItems_;

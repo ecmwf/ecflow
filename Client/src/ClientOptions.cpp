@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -67,15 +67,16 @@ ClientOptions::~ClientOptions()
 Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) const
 {
    if (env->debug()) {
-      cout <<  "ClientOptions::parse argc=" << argc;
+      cout <<  "  ClientOptions::parse argc=" << argc;
       for(int i = 0; i < argc; i++) { cout << "  arg" << i << "=" << argv[i];}
       cout << "\n";
-      std::cout << "help column width = " << po::options_description::m_default_line_length + 80 << "\n";
+      std::cout << "  help column width = " << po::options_description::m_default_line_length + 80 << "\n";
    }
 
    // parse arguments into 'vm'.
+   //       --alter delete cron -w 0,1 10:00 /s1     # -w treated as option
+   //       --alter=/s1 change meter name -1         # -1 treated as option
    // Note: negative numbers get treated as options: i.e trying to change meter value to a negative number
-   //       --alter=/s1 change meter name -1
    //       To avoid negative numbers from being treated as option use, we need to change command line style:
    //       po::command_line_style::unix_style ^ po::command_line_style::allow_short
    boost::program_options::variables_map vm;
@@ -87,7 +88,7 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
    std::string host,port;
    if ( vm.count( "port" ) ) {
       port = vm[ "port" ].as< std::string > ();
-      if (env->debug())  std::cout << "   port " << port << " overridden at the command line\n";
+      if (env->debug())  std::cout << "  port " << port << " overridden at the command line\n";
       try { boost::lexical_cast< int >( port );}
       catch ( boost::bad_lexical_cast& e ) {
          std::stringstream ss; ss << "ClientOptions::parse: The specified port(" << port << ") must be convertible to an integer";
@@ -107,7 +108,7 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
    }
    if ( vm.count( "rid" ) ) {
       std::string rid = vm[ "rid" ].as< std::string > ();
-      if (env->debug())  std::cout << "   rid " << rid << " overridden at the command line\n";
+      if (env->debug())  std::cout << "  rid " << rid << " overridden at the command line\n";
       env->set_remote_id(rid);
    }
 
@@ -160,11 +161,11 @@ void ClientOptions::show_help(const std::string & help_cmd) const
       cout << Ecf::CLIENT_NAME() << " provides the command line interface, for interacting with the server:\n";
 
       cout << "Try:\n\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help all       # List all commands, verbosely\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help summary   # One line summary of all commands\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help child     # One line summary of child commands\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help user      # One line summary of user command\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help <cmd>     # Detailed help on each command\n\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=all       # List all commands, verbosely\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=summary   # One line summary of all commands\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=child     # One line summary of child commands\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=user      # One line summary of user command\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=<cmd>     # Detailed help on each command\n\n";
 
       show_all_commands("Commands:");
     }
@@ -293,7 +294,7 @@ const char* client_env_description() {
             "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
             "|----------|----------|------------|-------------------------------------------------------------------|\n\n"
             "* The host and port must be specified in order for the client to communicate with the server, this can \n"
-            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host <host> --port <int> on the command line\n"
+            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n"
             ;
 }
 

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #42 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -253,7 +253,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 	/// The file could get very large, hence truncate at the start
 	if (Str::truncate_at_start(fileContents, max_lines_)) {
 		std::stringstream ss;
-		ss << "\n# >>>>>>>> File truncated down to " << max_lines_ << ". Truncated from the start <<<<<<<<<\n";
+		ss << "\n# >>>>>>>> File truncated down to " << max_lines_ << ". Truncated from the end of the file <<<<<<<<<\n";
 		fileContents += ss.str();
 	}
 

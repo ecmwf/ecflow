@@ -23,10 +23,33 @@ class VNode;
 class VServer;
 
 class AbstractNodeModel;
+class AttributeFilter;
 class NodeFilter;
 class NodeFilterDef;
+class NodeQUery;
 class ServerHandler;
+class TableNodeFilter;
+class TreeNodeFilter;
 class VParamSet;
+class VAttributeType;
+class VTreeServer;
+class VTableServer;
+class VTree;
+class VTreeNode;
+
+
+class VTreeChangeInfo
+{
+public:
+    VTreeChangeInfo() {}
+    void addStateChange(const VNode*);
+    const std::vector<VNode*> stateChangeSuites() const { return stateSuites_;}
+    void clear() {stateSuites_.clear();}
+
+protected:
+    std::vector<VNode*> stateSuites_;
+};
+
 
 class VModelServer : public QObject, public ServerObserver, public NodeObserver
 {
@@ -41,47 +64,51 @@ public:
     virtual ~VModelServer();
 
     ServerHandler* realServer() const {return server_;}
-    int topLevelNodeNum() const;
-    int indexOfTopLevelNode(const VNode* node) const;
-    VNode* topLevelNode(int row) const;
-    int totalNodeNum() const;
-    void runFilter();
-    int attrNum() const;
 
+    int totalNodeNum() const;
+    virtual int nodeNum() const = 0;
+    virtual void reload()=0;
+    //virtual void filterChanged()=0;
+    bool inScan() const {return inScan_;}
+    virtual NodeFilter* filter() const=0;
+
+    //Performance hack to avoid casts
+    virtual VTreeServer* treeServer() const {return NULL;}
+    virtual VTableServer* tableServer() const {return NULL;}
 
 Q_SIGNALS:
-	void beginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
-	void endAddRemoveAttributes(VModelServer*,const VNode*,int,int);
-
-	void dataChanged(VModelServer*);
-	void nodeChanged(VModelServer*,const VNode*);
-	void attributesChanged(VModelServer*,const VNode*);
-
+    void dataChanged(VModelServer*);
 	void beginServerScan(VModelServer*,int);
 	void endServerScan(VModelServer*,int);
 	void beginServerClear(VModelServer*,int);
 	void endServerClear(VModelServer*,int);
 
-	void filterChanged();
 	void rerender();
 
 protected:
 	ServerHandler *server_;
-	NodeFilter* filter_;
-	NodeFilter* cachedFilter_;
+    bool inScan_;
 };
 
 class VTreeServer : public VModelServer
 {
+Q_OBJECT
+
 public:
-	 VTreeServer(ServerHandler *server,NodeFilterDef* filterDef);
+     VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,AttributeFilter *attrFilter);
 	 ~VTreeServer();
 
-	 int checkAttributeUpdateDiff(VNode *node);
+     void reload();
+     void filterChanged();
+     int nodeNum() const;
+     NodeFilter* filter() const;
+     VTree* tree() const {return tree_;}
+     VTreeServer* treeServer() const {return const_cast<VTreeServer*>(this);}
+     void attrFilterChanged();
 
-	 //From ServerObserver
+     //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
-	 void notifyServerDelete(ServerHandler* server) {};
+     void notifyServerDelete(ServerHandler*);
 	 void notifyBeginServerClear(ServerHandler* server);
 	 void notifyEndServerClear(ServerHandler* server);
 	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
@@ -94,20 +121,41 @@ public:
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 
-protected:
-	 int nodeStateChangeCnt_;
+Q_SIGNALS:
+     void beginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
+     void endAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
+     void nodeChanged(VTreeServer*,const VTreeNode*);
+     void attributesChanged(VTreeServer*,const VTreeNode*);
+     void beginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
+     void endFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
+     void beginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
+     void endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
 
+private:
+     VTree* tree_;
+     VTreeChangeInfo* changeInfo_;
+     AttributeFilter *attrFilter_;
+     TreeNodeFilter* filter_;
 };
 
 class VTableServer : public VModelServer
 {
+ Q_OBJECT
 public:
 	 VTableServer(ServerHandler *server,NodeFilterDef* filterDef);
 	 ~VTableServer();
 
+     void reload();
+     void filterChanged() {}
+     int nodeNum() const;
+     VNode* nodeAt(int) const;
+     int indexOf(const VNode* node) const;
+     NodeFilter* filter() const;
+     VTableServer* tableServer() const {return const_cast<VTableServer*>(this);}
+
 	 //From ServerObserver
-	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
-	 void notifyServerDelete(ServerHandler* server) {};
+     void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
+     void notifyServerDelete(ServerHandler*);
 	 void notifyBeginServerClear(ServerHandler* server);
      void notifyEndServerClear(ServerHandler* server);
      void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
@@ -120,9 +168,11 @@ public:
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 
+Q_SIGNALS:
+     void nodeChanged(VTableServer*,const VNode*);
+
 private:
-	 bool useCachedFilter_;
-	 size_t totalNumBeforeClear_;
+     TableNodeFilter* filter_;
 };
 
 //This class defines the data a given Node Model (Tree or Table) displays. The
@@ -139,20 +189,23 @@ public:
 	VModelData(NodeFilterDef* filterDef,AbstractNodeModel* model);
 	~VModelData();
 
-	void clear();
+    void setActive(bool);
+    void clear();
 	void reset(ServerFilter* servers);
 
-	void runFilter(bool broadcast);
+    void reload(bool broadcast);
 
 	int count() const {return static_cast<int>(servers_.size());}
 	int  indexOfServer(void*) const;
-	ServerHandler* realServer(void*) const;
-	ServerHandler* realServer(int) const;
+    ServerHandler* serverHandler(void*) const;
+    ServerHandler* serverHandler(int) const;
 	VModelServer* server(int) const;
-	VModelServer* server(void*) const;
+    VModelServer* server(const void*) const;
+    VModelServer* server(const std::string&) const;
+    VModelServer* server(ServerHandler*) const;
 	int indexOfServer(ServerHandler* s) const;
 	int numOfNodes(int) const;
-	virtual bool isFiltered(VNode *node) const=0;
+    bool isFilterNull() const;
 
 	//From ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*);
@@ -161,40 +214,46 @@ public:
 	void notifyServerFilterDelete();
 
 public Q_SLOTS:
-	void slotFilterDefChanged();
+    void slotFilterDefChanged();
 
 Q_SIGNALS:
-	void filterChanged();
+    //void filterChanged();
 	void filterDeleteBegin();
 	void filterDeleteEnd();
-	void serverAddBegin(int);
+    void filterChangeBegun();
+    void filterChangeEnded();
+    void serverAddBegin(int);
 	void serverAddEnd();
-	void serverRemoveBegin(int);
-	void serverRemoveEnd();
+    void serverRemoveBegin(VModelServer*,int);
+    void serverRemoveEnd(int);
 
 protected:
 	void init();
 	virtual void add(ServerHandler*)=0;
-	void connectToModel(VModelServer* d);
+    virtual void connectToModel(VModelServer* d);
 
 	std::vector<VModelServer*> servers_;
 	ServerFilter *serverFilter_;
 	NodeFilterDef* filterDef_;
 	AbstractNodeModel* model_;
+    bool active_;
 };
 
 class VTreeModelData : public VModelData
 {
-public:
-	VTreeModelData(NodeFilterDef* filterDef,AbstractNodeModel* model);
+    Q_OBJECT
 
-	bool identifyTopLevelNode(const VNode* node,VModelServer**,int& index);
-	VNode* topLevelNode(void*,int);
-	bool isFiltered(VNode *node) const;
+public:
+    VTreeModelData(NodeFilterDef* filterDef,AttributeFilter* attrFilter,AbstractNodeModel* model);
+
+protected Q_SLOTS:
+    void slotAttrFilterChanged();
 
 protected:
-	void add(ServerHandler *server);
+    void add(ServerHandler *server);
+    void connectToModel(VModelServer* d);
 
+    AttributeFilter *attrFilter_;
 };
 
 class VTableModelData : public VModelData
@@ -203,16 +262,15 @@ public:
 	VTableModelData(NodeFilterDef* filterDef,AbstractNodeModel* model);
 
 	int numOfFiltered(int index) const;
-	VNode* getNodeFromFilter(int totalRow);
-	int posInFilter(const VNode *node) const;
-	int posInFilter(VModelServer*,const VNode *node) const;
-	int pos(VModelServer* server,VNode**);
-	bool identifyInFilter(VModelServer* server,int& start,int& count,VNode**);
-	bool isFiltered(VNode *node) const;
+    VNode* nodeAt(int totalRow);
+    int position(const VNode *node) const;
+    int position(VTableServer*,const VNode *node) const;
+    int position(VTableServer* server);
+    bool position(VTableServer* server,int& start,int& count);
 
 protected:
-	void add(ServerHandler *server);
-
+    void add(ServerHandler *server);
+    void connectToModel(VModelServer* d);
 };
 
 #endif

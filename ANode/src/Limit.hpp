@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #61 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -62,8 +62,12 @@ public:
 
    // for python interface
    std::string toString() const;
-   std::set<std::string>::const_iterator paths_begin() const { return paths_.begin();}
-   std::set<std::string>::const_iterator paths_end() const { return paths_.end();}
+
+   // ECFLOW-518, we can't use:
+   //    std::set<std::string>::const_iterator paths_begin() const { return paths_.begin();}
+   //    std::set<std::string>::const_iterator paths_end() const { return paths_.end();}
+   // because boost python does not support std::set<std::string> out of the box
+   // we will wrap and return list instead. See ExportNodeAttr.cpp
 
 private:
    void update_change_no();

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #12 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -50,6 +50,7 @@ std::vector<Flag::Type> Flag::list()
    ret.push_back(Flag::FORCE_ABORT);
    ret.push_back(Flag::USER_EDIT);
    ret.push_back(Flag::TASK_ABORTED);
+   ret.push_back(Flag::EDIT_FAILED);
    ret.push_back(Flag::JOBCMD_FAILED);
    ret.push_back(Flag::NO_SCRIPT);
    ret.push_back(Flag::KILLED);

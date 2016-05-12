@@ -7,29 +7,37 @@
             	"label" : "Update",
             	"tooltip" : "update",      
             
-            	"update": {
-            		"label": "Enable automatic update",                     
+                "autoUpdate": {
+                    "label": "Update server state automatically",
+                    "tooltip" : "When enabled the server is queried for updates at regular intervals.",
             		"default": "true"
                 },
             	           	
             	"updateRateInSec": {
-            		"label": "Update frequency",
+                    "label": "Server update period",
             		"suffix" : "seconds", 
-            		"tooltip": "update frequency",                          
+                    "tooltip": "Defines the automatic server update period.",
             		"default": "60",
             		"min" : "0"
                 },
                 
                 "adaptiveUpdate": {
-                	"label": "Adaptive update frequency",
-                	"tooltip": "Adaptive update frequency",                          
+                    "label": "Increase server update period when inactive",
+                    "tooltip" : "When enabled the server update period is <b>increased at every automatic update</b> until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again.",
                 	"default": "true"
                 },
-			
+
+                "adaptiveUpdateIncrementInSec": {
+                    "label": "Server update period increment",
+                    "suffix" : "seconds",
+                    "tooltip": "Defines by how many seconds the server update period is <b>increased</b> at every automatic update.",
+                    "default": "5",
+                    "min" : "0"
+                },
                 "maxAdaptiveUpdateRateInMin": {
-                	"label": "Maximum adaptive update frequency",
+                    "label": "Do not increase server update period over",
                 	"suffix" : "minutes", 
-                	"tooltip": "Maximum adaptive update frequency",                          
+                    "tooltip": "Defines the <b>maximum</b> server update period. When it is reached the update period is not increased any more.",
                 	"default": "60",
                 	"min" : "0"
                 }
@@ -40,14 +48,14 @@
 				"tooltip" : "files", 
 				
 				"readFilesFromDisk": {
-            		"label": "Read files from disk when possible",
-            		"tooltip": "",                          
+                    "label": "Read files from disk when appropriate",
+                    "tooltip": "The following steps are tried to fetch the files: <ol><li>fetch the files from the logserver (if defined)</li><li>read from disk (if option is <b>enabled</b> and file is accessible)</li><li>fetch from the ecflow server</li></ul>",
             		"default": "true"
                 	},
             
-            	"maxJobFileLines": {
-                	"label": "Maximum size of job files",
-                	"suffix" : "lines", 
+            	"maxOutputFileLines": {
+                	"label": "Fetch the last",
+                	"suffix" : "lines of files from the server", 
                 	"tooltip": "",                          
                 	"default": "15000",
                 	"min" : "0"	
@@ -62,12 +70,15 @@
                     "label" : "Aborted",
 
                     "enabled" : {
+                        "label"   : "Enabled",
                         "default" : "true"    
                     },
                     "popup" : {
-                        "default" : "true"
+                         "label"   : "Popup dialog",
+                         "default" : "true"
                     },
 				    "sound" : {				 
+                        "label": "Play sound",
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -76,13 +87,16 @@
                     "label" : "Restarted",
 
                     "enabled" : {
-                        "default" : "true"
+                         "label"   : "Enabled",
+                         "default" : "true"
     
                     },
                     "popup" : {
+                        "label"   : "Popup dialog",
                         "default" : "true"
                     },
                     "sound" : {                     
+                        "label": "Play sound",
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -91,12 +105,15 @@
                     "label" : "Late tasks",
 
                     "enabled" : {
-                        "default" : "false"    
+                        "label"   : "Enabled",
+                        "default" : "true"    
                     },
                     "popup" : {
-                        "default" : "false"
+                        "label"   : "Popup dialog",
+                        "default" : "true"
                     },
                     "sound" : {                       
+                        "label": "Play sound",
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -105,13 +122,16 @@
                     "label" : "Zombies",
 
                     "enabled" : {
+                        "label"   : "Enabled",
                         "default" : "false"
     
                     },
                     "popup" : {
+                        "label"   : "Popup dialog",
                         "default" : "false"
                     },
                     "sound" : {                        
+                        "label": "Play sound",
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -120,14 +140,16 @@
                     "label" : "Aborted or restarted aliases",
 
                     "enabled" : {
+                        "label"   : "Enabled",
                         "default" : "false"
     
                     },
                     "popup" : {
-                        "default" : "false"
+                         "label"   : "Popup dialog",
+                         "default" : "false"
                     },
                     "sound" : {                     
-                        "tooltip": "Play sound",                          
+                        "label": "Play sound",                          
                         "default": "false"
                     }    
                 }                 

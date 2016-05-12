@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -90,15 +90,15 @@ static const char* arg_desc()
             "Usage:\n"
             "  --check_pt\n"
             "    Immediately check point the definition held in the server\n"
-            "  --check_pt never\n"
+            "  --check_pt=never\n"
             "    Switch off check pointing\n"
-            "  --check_pt on_time\n"
+            "  --check_pt=on_time\n"
             "    Start automatic check pointing at the interval stored in the server\n"
-            "  --check_pt 180\n"
+            "  --check_pt=180\n"
             "    Change the check pt interval to 180 seconds\n"
-            "  --check_pt on_time:90\n"
+            "  --check_pt=on_time:90\n"
             "    Change mode and interval, to automatic check pointing every 90 seconds\n"
-            "  --check_pt alarm:35\n"
+            "  --check_pt=alarm:35\n"
             "    Change the alarm time for check pt saves. i.e if saving the check pt takes longer than 35 seconds\n"
             "    set the late flag on the server."
             ;

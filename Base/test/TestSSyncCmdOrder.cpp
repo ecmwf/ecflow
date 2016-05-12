@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -24,7 +24,6 @@
 #include "Ecf.hpp"
 #include "NodeFwd.hpp"
 #include "SuiteChanged.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "System.hpp"
 
 using namespace std;
@@ -225,7 +224,6 @@ BOOST_AUTO_TEST_CASE( test_ssync_cmd_test_order  )
    test_sync_scaffold(reorder_family_using_handles,  1 /* test size     */, true /* expect full_sync */, 1 /* client handle */);
 
    /// Keep valgrind happy
-   ChangeMgrSingleton::destroy();
    System::destroy();
 }
 

@@ -18,10 +18,11 @@ class OverviewItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit OverviewItemWidget(QWidget *parent=0);
+	~OverviewItemWidget();
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
-	void clearContents();
+    void clearContents();
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
@@ -34,7 +35,7 @@ public:
 
 protected:
 	void reload();
-	void updateWidgetState() {};
+    void updateState(const ChangeFlags&) {}
 
 	int lastScrollPos_;
 };

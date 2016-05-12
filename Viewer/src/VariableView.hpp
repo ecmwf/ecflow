@@ -19,10 +19,12 @@
 
 #include "TreeView.hpp"
 
-#include <string>
+class VariableView;
 
 class VariableDelegate : public QStyledItemDelegate
 {
+    friend class VariableView;
+
 public:
     explicit VariableDelegate(QWidget *parent=0);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -32,8 +34,11 @@ public:
 protected:
     QPen selectPen_;
     QBrush selectBrush_;
+    QBrush selectBrushBlock_;
     QPen borderPen_;
     QPixmap lockPix_;
+    int genVarPixId_;
+    int shadowGenVarPixId_;
 };
 
 class VariableView : public TreeView
@@ -42,7 +47,8 @@ public:
 	explicit VariableView(QWidget *parent=0);
 
 protected:
-	void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const;
+    void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const;
+    VariableDelegate *delegate_;
 };
 
 

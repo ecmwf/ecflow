@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #32 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -212,11 +212,11 @@ void RequeueNodeCmd::create( 	Cmd_ptr& cmd,
    for(size_t i = 0; i < vec_size; i++) {
       if (options[i] == "abort") {
          option = RequeueNodeCmd::ABORT;
-         if (ac->debug()) cout << "ABORT selected\n";
+         if (ac->debug()) cout << "  ABORT selected\n";
       }
       else if (options[i] == "force") {
          option = RequeueNodeCmd::FORCE;
-         if (ac->debug())  cout << "FORCE selected\n";
+         if (ac->debug())  cout << "  FORCE selected\n";
       }
       else {
          std::stringstream ss;
