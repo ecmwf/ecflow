@@ -56,7 +56,5 @@ cd /var/tmp/ma0/workspace/metabuilder
 # =======================================================================
 cd $SCRATCH
 ecflowview &
-
-module load ecflow/4.1.0-develop
 ecflow_ui &
 
