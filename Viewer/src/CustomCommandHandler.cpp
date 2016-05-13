@@ -74,7 +74,7 @@ CustomCommand* CustomCommandHandler::replace(int index, const std::string& name,
 
 CustomCommand* CustomCommandHandler::replace(int index, const CustomCommand &cmd)
 {
-    replace(index, cmd.name(), cmd.command(), cmd.inContextMenu());
+    return replace(index, cmd.name(), cmd.command(), cmd.inContextMenu());
 }
 
 
@@ -105,6 +105,8 @@ CustomCommand* CustomCommandHandler::duplicate(int index)
     CustomCommand*newCmd = add(newName, item->command(), item->inContextMenu(), false);
 
     writeSettings();
+
+    return newCmd;
 }
 
 void CustomCommandHandler::swapCommandsByIndex(int i1, int i2)

@@ -359,6 +359,6 @@ SessionItem *SessionHandler::copySession(std::string &source, std::string &destN
 	SessionItem *sourceSession = find(source);
 	assert(sourceSession);
 
-	copySession(sourceSession, destName);
+	return copySession(sourceSession, destName);
 }
 
