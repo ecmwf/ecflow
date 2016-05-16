@@ -123,6 +123,8 @@ if [[ "$ARCH" = cray ]] ; then
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
     module load boost/1.53.0
+    export CRAY_ADD_RPATH=no
+    export ECFLOW_CRAY_BATCH=1
 fi
 
 # boost
