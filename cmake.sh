@@ -122,6 +122,7 @@ if [[ "$ARCH" = cray ]] ; then
     else
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
+    module load boost/1.53.0
 fi
 
 # boost
