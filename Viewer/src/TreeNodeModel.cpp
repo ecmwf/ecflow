@@ -186,7 +186,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(role == FilterRole)
 		return true;
 
-    if(role == Qt::ToolTipRole & !serverToolTip_)
+    if(role == Qt::ToolTipRole && !serverToolTip_)
         return QVariant();
 
     ServerHandler *server=indexToServerHandler(index);
@@ -275,7 +275,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
 QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 {
-    if(role == Qt::ToolTipRole & !nodeToolTip_)
+    if(role == Qt::ToolTipRole && !nodeToolTip_)
         return QVariant();
 
     VTreeNode* tnode=indexToNode(index);
@@ -370,7 +370,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 
 QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 {
-    if(role == Qt::ToolTipRole & !attributeToolTip_)
+    if(role == Qt::ToolTipRole && !attributeToolTip_)
         return QVariant();
 
     if(role == IconRole)
