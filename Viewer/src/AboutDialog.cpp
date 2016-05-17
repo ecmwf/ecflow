@@ -52,13 +52,15 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     	descTxt+="<br><b>Qt version: </b>" + QString(qtv);
     }
 
-    QString logoTxt;
-    logoTxt+="<h3>&nbsp;&nbsp;" + title + "</h3>";
+    QString logoTxt="<table><tr><td><img src=\':/viewer/logo.png\'></td>&nbsp;&nbsp;&nbsp;&nbsp;<td></td><td>";
+    logoTxt+="<h2>" + title + "</h2>";
     if(!ecfVersionTxt.isEmpty())
     {
-    	logoTxt+="<p>&nbsp;&nbsp;ecflow version: " + ecfVersionTxt + "</p>";
+        logoTxt+="<p>ecflow version: <b>" + ecfVersionTxt + "</b><br>";
+        logoTxt+="<i>Copyright 2009-2016 ECMWF</i><p>";
     }
 
+    logoTxt+="</td></tr></table>";
     logoLabel_->setText(logoTxt);
 
     versionLabel_->setText(descTxt);

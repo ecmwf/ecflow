@@ -58,6 +58,8 @@
     <file alias="large_file_search.svg">../images/large_file_search.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
+    <file alias="logo.png">../images/logo.png</file>
+    <file alias="logo_small.png">../images/logo_small.png</file>
     <file alias="manage_server.svg">../images/manage_server.svg</file>
     <file alias="manual.svg">../images/manual.svg</file>
     <file alias="node_log.svg">../images/node_log.svg</file>
