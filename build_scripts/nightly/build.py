@@ -80,7 +80,7 @@ def add_localhost_clang_variables( localhost_clang ):
     localhost_clang.add_variable("TOOLSET","clang")
     localhost_clang.add_variable("BOOTSTRAP_TOOLSET","gcc")  # can't seem to build jam with clang, using gcc instead
     localhost_clang.add_variable("REMOTE_COPY","cp")
-    localhost_clang.add_variable("ARCH","opensuse113")
+    localhost_clang.add_variable("ARCH","opensuse131")
     localhost_clang.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64-clang.jam")
     localhost_clang.add_variable("BOOST_DIR","/var/tmp/ma0/boost/clang")
     add_local_job_variables( localhost_clang )
