@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QStyleFactory>
+#include <QPixmap>
 
 #include "File.hpp"
 #include "MainWindow.hpp"
@@ -43,6 +44,8 @@ int main(int argc, char **argv)
 
     //Init qt
     QApplication app(argc, argv);
+
+    app.setWindowIcon(QPixmap(":/viewer/logo_small.png"));
 
     QStringList styleLst=QStyleFactory::keys();
 
