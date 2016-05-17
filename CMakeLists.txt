@@ -167,7 +167,7 @@ set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
-set(Boost_DEBUG                 ON)
+#set(Boost_DEBUG                 ON)
 
 find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 
