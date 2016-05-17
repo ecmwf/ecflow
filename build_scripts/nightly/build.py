@@ -599,79 +599,6 @@ def add_cray_boost_tasks( family ):
     boost_build.add_trigger("../boost_site_config == complete")
 
 
-def build_boost( boost ):
-    boost.add_defstatus( ecflow.DState.suspended );
-    boost.add_variable("LAYOUT","tagged")
-    
-    family = boost.add_family("localhost")
-    add_localhost_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("localhost_clang")
-    add_localhost_clang_variables(family)
-    add_boost_tasks( family )
-     
-    family = boost.add_family("linux64")
-    add_linux_64_variables(family)
-    add_remote_linux_64_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("linux64_lxop")
-    add_linux_64_lxop_variables(family)
-    add_remote_linux_64_lxop_variables(family)
-    add_boost_tasks( family )
-    
-    family = boost.add_family("linux64_lxc")
-    add_linux_64_lxc_variables(family)
-    add_remote_linux_64_lxc_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("linux64intel")
-    add_linux_64_intel_variables(family)
-    add_remote_linux_64_intel_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("opensuse113")
-    add_opensuse113_variables(family)
-    add_remote_opensuse113_variables(family)
-    add_boost_tasks( family )
-    
-    family = boost.add_family("opensuse131")
-    family.add_variable("GIT","git")   # hack 
-    add_opensuse131_variables(family)
-    add_remote_opensuse131_variables(family)
-    add_boost_tasks( family )
-    
-    family = boost.add_family("opensuse103")
-    add_opensuse103_variables(family)
-    add_remote_opensuse103_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("redhat")
-    add_redhat_variables(family)
-    add_remote_redhat_variables(family)
-    add_boost_tasks( family )
-    
-    family = boost.add_family("cray_cct")
-    add_cray_variables(family)
-    add_remote_cray_variables(family)
-    add_cray_gnu_compiler_variables(family)
-    add_cray_boost_tasks(family)
-
-    family = boost.add_family("cray_cca")
-    add_cray_variables(family)
-    add_remote_cray_variables(family)
-    add_cray_gnu_compiler_variables(family)
-    add_cray_boost_tasks(family)
-    family.add_defstatus( ecflow.DState.suspended )
-     
-    family = boost.add_family("cray_ccb")
-    add_cray_variables(family)
-    add_remote_cray_variables(family)
-    add_cray_gnu_compiler_variables(family)
-    add_cray_boost_tasks(family)
-    
-    
 def add_suite_variables( suite ):
     suite.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/workspace")
     suite.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly")
@@ -690,7 +617,6 @@ def add_suite_variables( suite ):
     suite.add_variable("ECBUILD_GIT_BRANCH","develop")   
     suite.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
     suite.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
-
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []
@@ -727,59 +653,6 @@ with defs.add_suite("experiment") as experiment:
         task.add_variable("ECFLOW_LAST_INSTALLED_VERSION","/usr/local/apps/ecflow/current") 
         task.add_variable("ARCH","opensuse113")
 
-print "build boost"
-with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")
-    boost_suite.add_variable("REMOTE_COPY","rcp")
-    boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
-    add_suite_variables(boost_suite)
-    build_boost(boost_suite)
-
-
-print "incremental and full builds on all platforms"
-with defs.add_suite("suite") as suite:
-    suite.add_variable("REMOTE_COPY","rcp")
-    suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/suite")
-    suite.add_variable("BOOST_VERSION","boost_1_53_0")
-    add_suite_variables(suite)
-
-    with suite.add_family("build") as build:
-        build.add_repeat( ecflow.RepeatDay() )
-        build.add_time("18:15")
-        build.add_defstatus( ecflow.DState.suspended );
-    
-        git_pull_ecflow = build.add_task("git_pull_ecflow")
-        git_pull_ecflow.add_variable("ARCH","opensuse131")
-        add_local_job_variables(git_pull_ecflow)  # run this locally
-        
-        git_pull_ecbuild = build.add_task("git_pull_ecbuild")
-        git_pull_ecbuild.add_variable("ARCH","opensuse131")
-        add_local_job_variables(git_pull_ecbuild)  # run this locally
-
-        tar_fam = build.add_family("tar")
-        tar_fam.add_trigger("git_pull_ecflow == complete and git_pull_ecbuild == complete")
-    
-        create_tar = tar_fam.add_task("create_tar")
-        create_tar.add_variable("ARCH","opensuse113")
-        add_local_job_variables(create_tar)  # run this locally
-
-        with build.add_family("local") as local:
-            build_localhost( local )
-            build_localhost_cmake( local )
-            build_localhost_clang( local )
-
-        with build.add_family("remote") as remote:
-            remote.add_variable("BUILD_TYPE","boost")  # choose between [  cmake | boost ]
-            build_linux_64( remote )
-            build_linux_64_lxop( remote )
-            build_linux_64_lxc( remote )
-            build_linux_64_intel( remote )
-            build_opensuse113( remote )
-            build_opensuse131( remote )
-            build_opensuse103( remote )
-            build_redhat( remote )
-            build_cray( remote )
-        
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
 #print defs
 

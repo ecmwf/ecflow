@@ -24,9 +24,3 @@ try:
 except RuntimeError, e:
     print "failed: " + str(e)
 
-
-# =====================================================================================
-#print "Remove 'build.def' the build.defs since it is auto generated"
-# =====================================================================================
-#os.remove(generated_defs_file)
-
