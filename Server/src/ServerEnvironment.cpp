@@ -390,13 +390,29 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 bool ServerEnvironment::authenticateReadAccess(const std::string& user) const
 {
 	// if *NO* users specified then all users are valid
-	return white_list_file_.allow_read_access(user);
+	return white_list_file_.verify_read_access(user);
+}
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& path) const
+{
+   return white_list_file_.verify_read_access(user,path);
+}
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::vector<std::string>& paths) const
+{
+   return white_list_file_.verify_read_access(user,paths);
 }
 
 bool ServerEnvironment::authenticateWriteAccess(const std::string& user) const
 {
    // if *NO* users specified then all users have write access
-   return white_list_file_.allow_write_access(user);
+   return white_list_file_.verify_write_access(user);
+}
+bool ServerEnvironment::authenticateWriteAccess(const std::string& user,const std::string& path) const
+{
+   return white_list_file_.verify_write_access(user,path);
+}
+bool ServerEnvironment::authenticateWriteAccess(const std::string& user,const std::vector<std::string>& paths) const
+{
+   return white_list_file_.verify_write_access(user,paths);
 }
 
 // ============================================================================================
