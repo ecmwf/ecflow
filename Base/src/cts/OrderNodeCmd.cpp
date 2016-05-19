@@ -53,6 +53,11 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const
    return doJobSubmission( as );
 }
 
+bool OrderNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,absNodepath_);
+}
+
 const char* OrderNodeCmd::arg()  { return CtsApi::orderArg();}
 const char* OrderNodeCmd::desc() {
    return
