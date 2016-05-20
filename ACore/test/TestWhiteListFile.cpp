@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( test_white_list_default )
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxtt",paths),"Expected user xxtt to have read access ");
 
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("yyyy"),"Expected user yyyy to have write access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz","y"),"Expected user zzzz to have write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz","/y"),"Expected user zzzz to have write access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz",paths),"Expected user zzzz to have write access ");
 }
 
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( test_white_list_empty_file )
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxtt",paths),"Expected user xxtt to have read access ");
 
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("yyyy"),"Expected user yyyy to have write access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz","y"),"Expected user zzzz to have write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz","/y"),"Expected user zzzz to have write access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz",paths),"Expected user zzzz to have write access ");
 }
 
@@ -202,10 +202,13 @@ BOOST_AUTO_TEST_CASE( test_white_list )
 
    // test random user
    BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("xxxx"),"Expected user xxxx to NOT have read access ");
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("xxxx","/x"),"Expected user xxxx to NOT have read access ");
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("xxxx",paths),"Expected user xxxx to NOT have read access ");
    BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("*"),"Expected user *  to NOT have read access ");
 
    BOOST_REQUIRE_MESSAGE( !theFile.verify_write_access("yyyy"),"Expected user yyyy  to NOT have write access ");
-   BOOST_REQUIRE_MESSAGE( !theFile.verify_write_access("zzzz"),"Expected user zzzz  to NOT have write access ");
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_write_access("zzzz","/x"),"Expected user zzzz  to NOT have write access ");
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_write_access("zzzz",paths),"Expected user zzzz  to NOT have write access ");
 }
 
 BOOST_AUTO_TEST_CASE( test_white_list_all_users_have_read_access )
@@ -242,8 +245,11 @@ BOOST_AUTO_TEST_CASE( test_white_list_all_users_have_read_access )
    BOOST_REQUIRE_MESSAGE(expected_users_with_read_write_access.size() == theFile.write_access_size(),
          " expected " << expected_users_with_read_write_access.size() << " users with write access but found " << theFile.write_access_size() );
 
-   // Any user should have read write access
+   // Any user should have read access
+   vector<string> paths; paths.push_back("/a");  paths.push_back("/b"); paths.push_back("/c");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred"),"Expected user fred  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred","/x"),"Expected user fred  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred",paths),"Expected user fred  to have read access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("bill"),"Expected user bill  to have read access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxxx"),"Expected user xxxx  to have read access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("uid1"),"Expected user xxxx  to have read access ");
@@ -252,7 +258,9 @@ BOOST_AUTO_TEST_CASE( test_white_list_all_users_have_read_access )
 
    std::vector< std::string >::const_iterator i;
    for(i=expected_users_with_read_write_access.begin(); i!= expected_users_with_read_write_access.end(); ++i) {
-     BOOST_REQUIRE_MESSAGE( theFile.verify_write_access(*i),"Expected user " << *i << " to have write access ");
+      BOOST_REQUIRE_MESSAGE( theFile.verify_write_access(*i),"Expected user " << *i << " to have write access ");
+      BOOST_REQUIRE_MESSAGE( theFile.verify_write_access(*i,"/x"),"Expected user " << *i << " to have write access ");
+      BOOST_REQUIRE_MESSAGE( theFile.verify_write_access(*i,paths),"Expected user " << *i << " to have write access ");
    }
 
    // test random user for write access
@@ -288,20 +296,20 @@ BOOST_AUTO_TEST_CASE( test_white_list_all_users_have_write_access )
    BOOST_REQUIRE_MESSAGE(theFile.write_access_size() == 0, " expected 0  but found " << theFile.read_access_size() );
 
    // Any user should have read access
+   vector<string> paths; paths.push_back("/a");  paths.push_back("/b"); paths.push_back("/c");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred"),"Expected user fred  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred","/x"),"Expected user fred  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred",paths),"Expected user fred  to have read access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("bill"),"Expected user bill  to have read access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxxx"),"Expected user xxxx  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("uid1"),"Expected user xxxx  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("uid2"),"Expected user xxxx  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("cog"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxxx","/x"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxxx",paths),"Expected user xxxx  to have read access ");
 
    // Any user should have read write access
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("fred"),"Expected user fred  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("bill"),"Expected user bill  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("xxxx"),"Expected user xxxx  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("uid1"),"Expected user xxxx  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("uid2"),"Expected user xxxx  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("cog"),"Expected user xxxx  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("fred"),"Expected user fred  to have read/write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzzzz"),"Expected user zzzzzz  to have read/write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzzzz","/x"),"Expected user zzzzzz  to have read/write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzzzz",paths),"Expected user zzzzzz  to have read/write access ");
 }
 
 BOOST_AUTO_TEST_CASE( test_white_list_all_path_users_have_write_access )
@@ -325,10 +333,11 @@ BOOST_AUTO_TEST_CASE( test_white_list_all_path_users_have_write_access )
    vector<string> paths1; paths1.push_back("/a");  paths1.push_back("/b");
    // Any user should have read/write access
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred"),"Expected user fred  to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred"),"Expected user fred  to have read access ");
-
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred","/x"),"Expected user fred  to have read access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred",paths),"Expected user fred  to have read access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("fred",paths1),"Expected user fred  to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("fred"),"Expected user fred  to have read/write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("fred","/x"),"Expected user fred  to have read/write access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("fred",paths),"Expected user fred  to have read/write access ");
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("fred",paths1),"Expected user fred  to have read/write access ");
 }
@@ -346,9 +355,9 @@ BOOST_AUTO_TEST_CASE( test_white_list_all_path_users_have_read_access )
    //   4.4.14
    //   -* /  # same as '*'
 
-   // When all users have read access, the read access size should be empty
+   // When all users have read/write access, the size should be empty
    BOOST_REQUIRE_MESSAGE(theFile.read_access_size() == 0,  " expected 0  but found " << theFile.read_access_size() );
-   BOOST_REQUIRE_MESSAGE(theFile.write_access_size() == 0, " expected 0  but found " << theFile.read_access_size() );
+   BOOST_REQUIRE_MESSAGE(theFile.write_access_size() == 0, " expected 0  but found " << theFile.write_access_size() );
 
    // When no write access specified all user have write access
    vector<string> paths; paths.push_back("/a");  paths.push_back("/b"); paths.push_back("/c");
@@ -412,10 +421,13 @@ BOOST_AUTO_TEST_CASE( test_white_list_path_access_list )
 
    // When no write access specified all user have write access
    vector<string> paths; paths.push_back("/a");  paths.push_back("/b"); paths.push_back("/c");
+   vector<string> partial_paths; partial_paths.push_back("/a");  partial_paths.push_back("/b");
 
    // read/write
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("user1",paths),"Expected user to have read access to /a,/b,/c" << theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("user1",partial_paths),"Expected user to have read access to /a,/b,/c" << theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("user1",paths),"Expected user to have read/write access to /a,/b,/c" << theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("user1",partial_paths),"Expected user to have read/write access to /a,/b,/c" << theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("user2",paths),"Expected user to have read access to /a,/b,/c" << theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("user2",paths),"Expected user to have read/write access to /a,/b,/c" << theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("user3",paths),"Expected user to have read access to /a,/b,/c" << theFile.dump_valid_users());
@@ -470,12 +482,18 @@ BOOST_AUTO_TEST_CASE( test_white_list_path_access_list )
 
    // ============================================================================================
    // Failure
+   // ============================================================================================
+
    // single path failure
+   //   user1 /a,/b,/c  # user1 has read write access to suite /a /b /c
    vector<string> single_path_failure; single_path_failure.push_back("/fail");
+   BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1","/fail"),"Expected user to not have read access to /fail"<< theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1",single_path_failure),"Expected user to not have read access to /fail"<< theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1","/fail"),"Expected user to not have read/write access to /fail"<< theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1",single_path_failure),"Expected user to not have read/write access to /fail"<< theFile.dump_valid_users());
 
    // multi path failure
+   //   user1 /a,/b,/c  # user1 has read write access to suite /a /b /c
    vector<string> multiple_paths_failure;
    multiple_paths_failure.push_back("/a");
    multiple_paths_failure.push_back("/b");
@@ -483,14 +501,20 @@ BOOST_AUTO_TEST_CASE( test_white_list_path_access_list )
    BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1",multiple_paths_failure),"Expected user to not have read access to /fail"<< theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1",multiple_paths_failure),"Expected user to not have read/write access to /fail"<< theFile.dump_valid_users());
 
-   // expect failure for unkown user,
-   BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("unkown","/a"),"Expected failure for unknown user"<< theFile.dump_valid_users());
-   BOOST_REQUIRE_MESSAGE( !theFile.verify_write_access("unkown","/a"),"Expected failure for unknown user"<< theFile.dump_valid_users());
-   BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("unkown",paths),"Expected failure for unknown user"<< theFile.dump_valid_users());
-   BOOST_REQUIRE_MESSAGE( !theFile.verify_write_access("unkown",paths),"Expected failure for unknown user"<< theFile.dump_valid_users());
+   // expect failure for unknown user,
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("unknown"),"Expected failure for unknown user"<< theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("unknown","/a"),"Expected failure for unknown user"<< theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_write_access("unknown","/a"),"Expected failure for unknown user"<< theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_read_access("unknown",paths),"Expected failure for unknown user"<< theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE( !theFile.verify_write_access("unknown",paths),"Expected failure for unknown user"<< theFile.dump_valid_users());
 
-   // expect failure if no paths
+   // expect failure if NO PATHS for known user
+   //   user1 /a,/b,/c  # user1 has read write access to suite /a /b /c
+   BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1"),"Expected user to not have read access if no paths specified"<< theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1",vector<string>()),"Expected user to not have read access if no paths specified"<< theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1",""),"Expected user to not have read access if no paths specified"<< theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1"),"Expected user to not have read/write if no paths specified"<< theFile.dump_valid_users());
+   BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1",""),"Expected user to not have read/write if no paths specified"<< theFile.dump_valid_users());
    BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1",vector<string>()),"Expected user to not have read/write if no paths specified"<< theFile.dump_valid_users());
 }
 
