@@ -81,8 +81,10 @@ if test_uname Linux ; then
       if [ $tool = gcc ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
-      		# for boost 1.53 and > gcc 4.8 get a lot warning messages use suppress
-      		#CXXFLAGS=-no-unused-local-typedefs 
+            # for boost 1.53 and > gcc 4.8 -Wno-unused-local-typedefs  : get a lot warning messages , suppress
+            # for boost 1.53 and > gcc 6.1 -Wno-deprecated-declarations: std::auto_ptr deprecated messages, suppress
+            CXXFLAGS="-no-unused-local-typedefs"
+            #CXXFLAGS="-no-unused-local-typedefs -no-deprecated-declarations"
       		
   	  elif [ $tool = intel ] ; then
   

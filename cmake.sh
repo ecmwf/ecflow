@@ -196,6 +196,8 @@ fi
 # -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #   *AND* for testing python install to local directory
 #
+# GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
+# GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 
 ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
@@ -206,6 +208,7 @@ ecbuild $source_dir \
             -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             ${cmake_extra_options}
+            #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated-declarations'" \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
             #-DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
         
