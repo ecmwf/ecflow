@@ -102,6 +102,26 @@ BOOST_AUTO_TEST_CASE( test_parsing_for_bad_white_list_files )
 	test_white_list_files(path, false);
 }
 
+BOOST_AUTO_TEST_CASE( test_white_list_default )
+{
+   cout << "ACore:: ...test_white_list_default\n";
+
+   WhiteListFile theFile;
+
+   BOOST_REQUIRE_MESSAGE(0 == theFile.read_access_size(), "expected 0 users with read access but found " << theFile.read_access_size() );
+   BOOST_REQUIRE_MESSAGE(0 == theFile.write_access_size(),"expected 0 users with write access but found " << theFile.write_access_size() );
+
+   // test random user
+   vector<string> paths; paths.push_back("/a");  paths.push_back("/b"); paths.push_back("/c");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxxx"),"Expected user xxxx to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxtt","/x"),"Expected user xxtt to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxtt",paths),"Expected user xxtt to have read access ");
+
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("yyyy"),"Expected user yyyy to have write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz","y"),"Expected user zzzz to have write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz",paths),"Expected user zzzz to have write access ");
+}
+
 BOOST_AUTO_TEST_CASE( test_white_list_empty_file )
 {
    cout << "ACore:: ...test_white_list_empty_file\n";
@@ -116,11 +136,14 @@ BOOST_AUTO_TEST_CASE( test_white_list_empty_file )
    BOOST_REQUIRE_MESSAGE(0 == theFile.write_access_size(),"expected 0 users with write access but found " << theFile.write_access_size() );
 
    // test random user
+   vector<string> paths; paths.push_back("/a");  paths.push_back("/b"); paths.push_back("/c");
    BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxxx"),"Expected user xxxx to have read access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxtt"),"Expected user xxtt to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxtt","/x"),"Expected user xxtt to have read access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_read_access("xxtt",paths),"Expected user xxtt to have read access ");
 
    BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("yyyy"),"Expected user yyyy to have write access ");
-   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz"),"Expected user zzzz to have write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz","y"),"Expected user zzzz to have write access ");
+   BOOST_REQUIRE_MESSAGE( theFile.verify_write_access("zzzz",paths),"Expected user zzzz to have write access ");
 }
 
 BOOST_AUTO_TEST_CASE( test_white_list )
@@ -164,12 +187,17 @@ BOOST_AUTO_TEST_CASE( test_white_list )
          " expected " << expected_users_with_read_write_access.size() << " users with write access but found " << theFile.write_access_size() );
 
 
+   vector<string> paths; paths.push_back("/a");  paths.push_back("/b"); paths.push_back("/c");
  	std::vector< std::string >::const_iterator i;
  	for(i=expected_users_with_read_access.begin(); i!= expected_users_with_read_access.end(); ++i) {
- 	  BOOST_REQUIRE_MESSAGE( theFile.verify_read_access(*i),"Expected user " << *i << " to have read access ");
+      BOOST_CHECK_MESSAGE( theFile.verify_read_access(*i),"Expected user " << *i << " to have read access ");
+      BOOST_CHECK_MESSAGE( theFile.verify_read_access(*i,"/x"),"Expected user " << *i << " to have read access ");
+      BOOST_CHECK_MESSAGE( theFile.verify_read_access(*i,paths),"Expected user " << *i << " to have read access ");
 	}
    for(i=expected_users_with_read_write_access.begin(); i!= expected_users_with_read_write_access.end(); ++i) {
-     BOOST_REQUIRE_MESSAGE( theFile.verify_write_access(*i),"Expected user " << *i << " to have write access ");
+      BOOST_CHECK_MESSAGE( theFile.verify_write_access(*i),"Expected user " << *i << " to have write access ");
+      BOOST_CHECK_MESSAGE( theFile.verify_write_access(*i,"/x"),"Expected user " << *i << " to have write access ");
+      BOOST_CHECK_MESSAGE( theFile.verify_write_access(*i,paths),"Expected user " << *i << " to have write access ");
    }
 
    // test random user

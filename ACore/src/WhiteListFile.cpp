@@ -68,6 +68,14 @@ bool WhiteListFile::verify_write_access(const std::string& user,const std::strin
 
 bool WhiteListFile::verify_read_access(const std::string& user, const std::vector<std::string>& paths) const
 {
+//   std::cout << "WhiteListFile::verify_read_access user " << user << " paths( ";
+//   for(size_t i = 0; i < paths.size(); i++) { std::cout << paths[i] << " "; }
+//   std::cout << ") \n";
+//   std::cout << "  all_users_have_read_access_: " << all_users_have_read_access_ << "\n";
+//   std::cout << "  users_with_read_access_.size(): " << users_with_read_access_.size() << "\n";
+//   std::cout << "  users_with_write_access_.size(): " << users_with_write_access_.size() << "\n";
+//   std::cout << dump_valid_users() << "\n\n";
+
    if (all_users_have_read_access_) return true;
    if (users_with_read_access_.empty() && users_with_write_access_.empty() ) return true;
    if (verify_path_access(user,paths,users_with_read_access_)) return true;
@@ -94,14 +102,12 @@ bool WhiteListFile::verify_path_access(const std::string& user,const std::vector
    mymap::const_iterator it = user_path_map.find(user);
    if (it != user_path_map.end()) {
       const std::vector<std::string>& allowed_paths = it->second;
-      if ( paths.empty()) {
-         if (allowed_paths.empty()) return true;
-         else return false;
-      }
+      if (allowed_paths.empty()) return true;
+      if ( paths.empty())  return false;
 
+      size_t allowed_paths_size = allowed_paths.size();
       for(size_t i = 0; i < paths.size(); i++) {
          bool found_path_in_allowed_paths = false;
-         size_t allowed_paths_size = allowed_paths.size();
          for(size_t ap = 0; ap < allowed_paths_size; ap++) {
             string::size_type fnd = allowed_paths[ap].find(paths[i]);
             if (fnd != std::string::npos && fnd == 0) {
@@ -121,10 +127,8 @@ bool WhiteListFile::verify_path_access(const std::string& user,const std::string
    mymap::const_iterator it = user_path_map.find(user);
    if (it != user_path_map.end()) {
       const std::vector<std::string>& allowed_paths = it->second;
-      if ( path.empty()) {
-         if (allowed_paths.empty()) return true;
-         else return false;
-      }
+      if (allowed_paths.empty()) return true;
+      if ( path.empty())  return false;
 
       size_t allowed_paths_size = allowed_paths.size();
       for(size_t ap = 0; ap < allowed_paths_size; ap++) {

@@ -501,7 +501,6 @@ protected:
 
    virtual bool equals(ClientToServerCmd*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&) const;
    bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const;
    bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const;
 

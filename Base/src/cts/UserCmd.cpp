@@ -42,11 +42,6 @@ bool UserCmd::equals(ClientToServerCmd* rhs) const
 
 bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 {
-   return do_authenticate(as,cmd);
-}
-
-bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&) const
-{
    // The user should NOT be empty. Rather than asserting and killing the server, fail authentication
    // ECFLOW-577 and ECFLOW-512. When user_ empty ??
    if (!user_.empty() && as->authenticateReadAccess(user_)) {
@@ -99,7 +94,9 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::strin
 
    std::string msg = "[ authentication failed ] User '";
    msg += user_;
-   msg += "' is not allowed any access.";
+   msg += "' is not allowed any access. path(";
+   msg += path;
+   msg += ")";
    throw std::runtime_error( msg );
 
    return false;
@@ -130,7 +127,9 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vecto
 
    std::string msg = "[ authentication failed ] User '";
    msg += user_;
-   msg += "' is not allowed any access.";
+   msg += "' is not allowed any access. paths(";
+   for(size_t i=0; i < paths.size(); ++i) { msg += paths[i];msg += ",";}
+   msg += ")";
    throw std::runtime_error( msg );
 
    return false;

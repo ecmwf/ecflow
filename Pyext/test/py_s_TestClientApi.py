@@ -94,12 +94,14 @@ def test_set_host_port():
     assert test_client_host_port_("3141:host") == False , "Expected errors"
 
 def test_version(ci):
+    print "test_version"
     client_version = ci.version();
     server_version = ci.server_version();
+    print "  client_version: ",client_version
+    print "  server_version: ",server_version
     assert client_version == server_version, "Expected client version(" + client_version +") and server version(" +  server_version + ") to match\n";
     
 def test_client_get_server_defs(ci):
-    print "Client version is " + ci.version();
     print "test_client_get_server_defs"
     ci.delete_all() # start fresh
     ci.load(create_defs())  
@@ -771,7 +773,8 @@ def test_client_alter_add(ci):
     assert( len(list(task_t1.todays))) == 3 ,"Expected 3 today's :\n" + str(ci.get_defs())
     assert( len(list(task_t1.dates))) == 4 ,"Expected 4 dates :\n" + str(ci.get_defs())
     assert( len(list(task_t1.days))) == 7 ,"Expected 7 days :\n" + str(ci.get_defs())
-    assert( str(task_t1.get_late()) == "late -s +00:15 -a 20:00 -c +02:00", "Expected late 'late -s +00:15 -a 20:00 -c +02:00'" + str(ci.get_defs()))
+    print str(task_t1.get_late())
+    assert str(task_t1.get_late()) == "late -s +00:15 -a 20:00 -c +02:00", "Expected late 'late -s +00:15 -a 20:00 -c +02:00'" + str(ci.get_defs())
            
 
 def test_client_alter_delete(ci):
@@ -809,13 +812,13 @@ def test_client_alter_delete(ci):
     task_t1.add_trigger( "t2 == active" )
     task_t1.add_complete( "t2 == complete" )
     
-    assert( len(str(task_t1.get_late())) == 0, "expected no late" )
+    assert task_t1.get_late() == None, "expected no late" 
     late = Late()
     late.submitted(20, 10)
     late.active(20, 10)
     late.complete(20, 10, True)
     task_t1.add_late(late)
-    assert( len(str(task_t1.get_late())) != 0, "expected late" )
+    assert len(str(task_t1.get_late())) != 0, "expected late" 
     
             
     t2 = "/test_client_alter_delete/f1/t2"
@@ -922,7 +925,7 @@ def test_client_alter_delete(ci):
     ci.alter(t1,"delete","late")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
-    assert( len(str(task_t1.get_late())) == 0, "expected no late after delete" )
+    assert task_t1.get_late() == None, "expected no late after delete" 
 
 
     task_t1 = ci.get_defs().find_abs_node(t1)
