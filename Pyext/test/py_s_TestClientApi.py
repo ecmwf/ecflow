@@ -773,7 +773,6 @@ def test_client_alter_add(ci):
     assert( len(list(task_t1.todays))) == 3 ,"Expected 3 today's :\n" + str(ci.get_defs())
     assert( len(list(task_t1.dates))) == 4 ,"Expected 4 dates :\n" + str(ci.get_defs())
     assert( len(list(task_t1.days))) == 7 ,"Expected 7 days :\n" + str(ci.get_defs())
-    print str(task_t1.get_late())
     assert str(task_t1.get_late()) == "late -s +00:15 -a 20:00 -c +02:00", "Expected late 'late -s +00:15 -a 20:00 -c +02:00'" + str(ci.get_defs())
            
 
@@ -818,7 +817,7 @@ def test_client_alter_delete(ci):
     late.active(20, 10)
     late.complete(20, 10, True)
     task_t1.add_late(late)
-    assert len(str(task_t1.get_late())) != 0, "expected late" 
+    assert task_t1.get_late() != None, "expected late" 
     
             
     t2 = "/test_client_alter_delete/f1/t2"
