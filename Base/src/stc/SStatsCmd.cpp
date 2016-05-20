@@ -50,7 +50,7 @@ bool SStatsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr /*cts
 {
 	if (debug) std::cout << "  SStatsCmd::handle_server_response\n";
    if (server_reply.cli())  stats_.show();
-   else server_reply.set_stats( stats_ );
+   else { server_reply.set_stats( stats_ ); }
 	return true;
 }
 

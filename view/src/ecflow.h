@@ -62,8 +62,9 @@ bool ecf_list_add(T **list, T *kid)
 {
   T **top = list; 
   T  *run = *top;
-  if( !kid ) return false; kid->next = NULL;
-  if( run ) {
+  if ( !kid ) return false;
+  kid->next = NULL;
+  if ( run ) {
     while( run->next ) run = run->next;
     run->next = kid;
   } else
