@@ -12,6 +12,7 @@
 
 #include <QDebug>
 
+#include "UserMessage.hpp"
 #include "VSettings.hpp"
 
 StringMatchMode::Mode NodeQueryStringOption::defaultMatchMode_=StringMatchMode::WildcardMatch;
@@ -25,6 +26,8 @@ QStringList NodeQuery::flagTerms_;
 QStringList NodeQuery::attrGroupTerms_;
 QMap<QString,QStringList> NodeQuery::attrTerms_;
 int NodeQuery::defaultMaxNum_=50000;
+
+#define _UI_NODEQUERY_DEBUG
 
 NodeQueryStringOption::NodeQueryStringOption(QString name) :
   name_(name),
@@ -186,7 +189,7 @@ NodeQuery* NodeQuery::clone(const std::string& name)
 void NodeQuery::swap(const NodeQuery* q)
 {
 	advanced_=q->advanced_;
-	query_=q->query_;
+	//query_=q->query_;
 	extQuery_=q->extQuery_;
 	rootNode_=q->rootNode_;
 	servers_=q->servers_;
@@ -213,10 +216,12 @@ void  NodeQuery::setName(const std::string& name)
 	name_=name;
 }
 
-void NodeQuery::setQuery(QString query)
+#if 0
+    void NodeQuery::setQuery(QString query)
 {
 	query_=query;
 }
+#endif
 
 bool NodeQuery::hasServer(const std::string& name) const
 {
@@ -328,9 +333,53 @@ void NodeQuery::setAttrGroupSelection(const std::vector<std::string>& vec)
 	selectOptions_["attr"]->selection_=vecToLst(vec);
 }
 
+QString NodeQuery::query() const
+{
+    QString s1=nodeQueryPart();   
+    QString s2=attrQueryPart();
+    if(!s1.isEmpty())       
+        if(!s2.isEmpty())
+            return s1+ " and " + s2;
+        else
+            return s1;
+    else
+        return s2;
+           
+    return QString();
+}
+
+QString NodeQuery::nodeQueryPart() const
+{   
+    QStringList lst;
+    QStringList keys;
+    keys << "node" << "type" << "state" << "flag";
+    Q_FOREACH(QString s,keys)
+    {
+        if(!extQuery_.value(s).isEmpty())
+            lst << extQuery_.value(s);
+    }
+    
+    //TODO : handle all   
+    return lst.join(" and ");
+}    
+    
+QString NodeQuery::attrQueryPart()  const  
+{        
+    return extQuery_.value("attr");
+}
+
+bool NodeQuery::hasAttribute(QString typeName) const
+{
+    return attrGroupSelection().contains(typeName);
+}
+
 void NodeQuery::buildQueryString()
 {
-	//Scope
+#ifdef _UI_NODEQUERY_DEBUG
+    UserMessage::debug("NodeQuery::buildQueryString -->");
+#endif
+
+    //Scope
 	QString nodePart;
 	QString name=stringOptions_["node_name"]->value().simplified();
 	QString path=stringOptions_["node_path"]->value().simplified();
@@ -381,7 +430,8 @@ void NodeQuery::buildQueryString()
 			NodeQueryStringOption* op=stringOption(opName);
 			assert(op);
 			QString s=op->value();
-			if(!s.isEmpty())
+            qDebug() << "attr" << op->name() << op->value();
+            if(!s.isEmpty())
 			{
 				if(!grPart.isEmpty())
 					grPart+=" or ";
@@ -395,7 +445,8 @@ void NodeQuery::buildQueryString()
 
 		if(!attrPart.isEmpty())
 			attrPart+=" or ";
-		attrPart+=grPart;
+		
+        attrPart+=grPart;
 	}
 
 	if(!attrPart.isEmpty())
@@ -404,50 +455,66 @@ void NodeQuery::buildQueryString()
 	}
 
 	//Put everything together
-	query_.clear();
-	extQuery_.clear();
+	//query_.clear()
+	
+    extQuery_.clear();
 
+    extQuery_["node"]=nodePart;
+    extQuery_["type"]=typePart;
+    extQuery_["state"]=statePart;
+    extQuery_["flag"]=flagPart;
+    
+    if(extQuery_.values().join("") == "")
+        extQuery_["node"] = "ALL";
+    
+    extQuery_["attr"]=attrPart;
+    
+    bool hasEq=extQuery_.values().join("").contains("=");
+      
+#if 0    
 	if(!nodePart.isEmpty())
 	{
-		query_+=nodePart;
-		extQuery_["node"]=nodePart;
+		hasNodeAPrt=true;
+        //query_+=nodePart;
+	   extQuery_["node"]=nodePart;
 	}
 
 	if(!typePart.isEmpty())
 	{
-		if(!query_.isEmpty())
-			query_+=" and ";
+		//if(!query_.isEmpty())
+		//	query_+=" and ";
 
-		query_+=typePart;
+		//query_+=typePart;
 		extQuery_["type"]=typePart;
 	}
 
 	if(!statePart.isEmpty())
 	{
-		if(!query_.isEmpty())
-			query_+=" and ";
+		//if(!query_.isEmpty())
+		//	query_+=" and ";
 
-		query_+=statePart;
+		//query_+=statePart;
 		extQuery_["state"]=statePart;
 	}
 
 	if(!flagPart.isEmpty())
 	{
-		if(!query_.isEmpty())
-			query_+=" and ";
+		//if(!query_.isEmpty())
+		//	query_+=" and ";
 
-		query_+=flagPart;
+		//query_+=flagPart;
 		extQuery_["flag"]=flagPart;
 	}
-
+	
 	if(!attrPart.isEmpty())
 	{
-		if(!query_.isEmpty())
-			query_+=" and ";
+		//if(!query_.isEmpty())
+		//	query_+=" and ";
 
-		query_+=attrPart;
+		//query_+=attrPart;
 		extQuery_["attr"]=attrPart;
 	}
+#endif
 
 	//Extended query
 	QString scopePart;
@@ -464,8 +531,8 @@ void NodeQuery::buildQueryString()
 	if(!scopePart.isEmpty())
 		extQuery_["scope"]=scopePart;
 
-	if(query_.isEmpty())
-		extQuery_["node"] = "ALL";
+	//if(query_.isEmpty())
+	//	extQuery_["node"] = "ALL";
 
 	QString opPart;
 	if(!ignoreMaxNum_)
@@ -473,7 +540,7 @@ void NodeQuery::buildQueryString()
 		opPart="max_results = " + QString::number(maxNum_);
 	}
 
-	if(query_.contains("="))
+	if(hasEq)
 	{
 		if(!opPart.isEmpty())
 			opPart+=" and ";
@@ -485,6 +552,14 @@ void NodeQuery::buildQueryString()
 
 	if(!opPart.isEmpty())
 		extQuery_["options"]=opPart;
+
+#ifdef _UI_NODEQUERY_DEBUG
+    qDebug() << extQuery_;
+#endif
+
+#ifdef _UI_NODEQUERY_DEBUG
+    UserMessage::debug("<-- NodeQuery::buildQueryString");
+#endif
 }
 
 QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
@@ -500,7 +575,7 @@ QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 				       "\">scope</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("scope") + "</tr></td>";
 
 			QStringList nodeParts;
-			nodeParts << "node" << "type" << "state" << "flag";
+            nodeParts << "node" << "type" << "state" << "flag";
 			Q_FOREACH(QString s,nodeParts)
 			{
 				if(!extQuery_.value(s).isEmpty())
@@ -517,6 +592,15 @@ QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 
 			if(str.contains("nodes</td>"))
 				str+="</td></tr>";
+
+            if(!extQuery_.value("attr").isEmpty())
+            {
+                //if(!str.isEmpty())
+                //	str+="\n";
+                str+="<tr><td bgcolor=\"" + bg + "\">attributes</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("attr") +"</td></tr>";
+            }
+
+
 
 			if(!extQuery_.value("options").isEmpty())
 			{

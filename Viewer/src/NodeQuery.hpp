@@ -92,8 +92,10 @@ public:
 	void  setName(const std::string& name);
 	const std::string& name() const {return name_;}
 
-	void  setQuery(QString);
-	const QString query() const {return query_;}
+	QString query() const;
+	QString nodeQueryPart() const;
+    QString attrQueryPart() const;
+    bool hasAttribute(QString) const;
 
 	void setRootNode(const std::string& rootNode) {rootNode_=rootNode;}
 	const std::string& rootNode() const {return rootNode_;}
@@ -156,7 +158,7 @@ protected:
 	std::string rootNode_;
 	QStringList servers_;
 	bool allServers_;
-    QString query_;
+    //QString query_;
     QMap<QString,QString> extQuery_;
     bool caseSensitive_;
     int maxNum_;

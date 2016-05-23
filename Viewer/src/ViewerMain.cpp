@@ -66,7 +66,8 @@ int main(int argc, char **argv)
     //app.setFont(font);
 
     //Initialise the config and other paths
-    DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from
+    std::string exe(argv[0]);
+    DirectoryHandler::init(exe);  // we need to tell the Directory class where we started from
 
     //Set the stylesheet
     std::string styleSheetFileName="viewer.qss";

@@ -41,9 +41,10 @@ DirectoryHandler::DirectoryHandler()
 void DirectoryHandler::init(const std::string& exeStr)
 {
 	//Sets paths in the home directory
-	if(char *h=getenv("HOME"))
+    if(char *h=getenv("HOME"))
 	{
-  	    boost::filesystem::path homeDir(h);
+        std::string home(h);
+        boost::filesystem::path homeDir(home);
 
 		boost::filesystem::path configDir = homeDir;
 		configDir /= ".ecflow_ui";

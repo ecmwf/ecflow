@@ -41,7 +41,7 @@ public:
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
     bool exists(const VNode* vnode,QStringList) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*> lst);
+    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
 };
 
 class VEventAttribute : public VAttributeType
@@ -423,7 +423,7 @@ bool VMeterAttribute::exists(const VNode* vnode,QStringList data) const
     return false;
 }
 
-void VMeterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*> lst)
+void VMeterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
 {
     if(vnode->isServer())
         return;

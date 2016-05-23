@@ -58,6 +58,8 @@ NodeQueryEngine::~NodeQueryEngine()
 
 bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 {
+    UserMessage::debug("NodeQueryEngine::runQuery -->");
+
     if(isRunning())
         wait();
 
@@ -66,6 +68,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     cnt_=0;
     scanCnt_=0;
     rootNode_=0;
+    attrTypes_.clear();
 
     query_->swap(query);
 
@@ -73,23 +76,26 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 
     servers_.clear();
 
+    //Init the parsers
     if(parser_)
     {
         delete parser_;
         parser_=NULL;
     }
+
     if(attrParser_)
     {
         delete attrParser_;
         attrParser_=NULL;
     }
 
-    UserMessage::message(UserMessage::DBG,false, std::string("Query: " + query_->query().toStdString()));
+    //The nodequery parser
+    UserMessage::debug("   node part: " + query_->nodeQueryPart().toStdString());
 
-    parser_=NodeExpressionParser::instance()->parseWholeExpression(query_->query().toStdString(), query->caseSensitive());
+    parser_=NodeExpressionParser::instance()->parseWholeExpression(query_->nodeQueryPart().toStdString(), query->caseSensitive());
     if(parser_ == NULL)
     {
-        UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
+        UserMessage::message(UserMessage::ERROR,true,"Error, unable to parse node query: " + query_->nodeQueryPart().toStdString());
         return false;
     }
 
@@ -113,25 +119,24 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
         rootNode_=servers_.at(0)->vRoot()->find(query_->rootNode());
     }
 
-#if 0
-    attrParser_=NodeExpressionParser::instance()->parseWholeExpression(query_->query().toStdString(), query->caseSensitive());
+    //The attribute parser
+    UserMessage::debug("   attr part: " + query_->attrQueryPart().toStdString());
+
+    attrParser_=NodeExpressionParser::instance()->parseWholeExpression(query_->attrQueryPart().toStdString(), query->caseSensitive());
     if(attrParser_ == NULL)
     {
-        UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
+        UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse attribute query: " + query_->attrQueryPart().toStdString()));
         return false;
     }
-#endif
 
-    if(attrParser_)
+    //figure out what attribute types are there in the query
+    for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
+        it != VAttributeType::types().end(); ++it)
     {
-        for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
-            it != VAttributeType::types().end(); ++it)
+        //TODO: make it work for attr types
+        if(query_->hasAttribute((*it)->name()))
         {
-            //TODO: make it work for attr types 
-            if(attrParser_->containsAttributeSearch()) //hasAttribute((*it)->name()))
-            {
-                attrTypes_ << *it;
-            }
+            attrTypes_ << *it;
         }
     }
 
@@ -143,6 +148,8 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 
     //Start thread execution
     start();
+
+    UserMessage::debug("<-- NodeQueryEngine::runQuery");
 
     return true;
 }
@@ -199,13 +206,15 @@ void NodeQueryEngine::runRecursively(VNode *node)
         {
             Q_FOREACH(VAttributeType* aType, attrTypes_)
             {
+                qDebug() << "SEARCH" << aType->name();
                 QList<VAttribute*> aLst;
                 aType->getSearchData(node,aLst);
                 Q_FOREACH(VAttribute* a,aLst)
                 {
                     if(attrParser_->execute(a))
                     {
-                        broadcastFind(node,a);
+                        qDebug() << a->data();
+                        broadcastFind(node,a->data());
                         scanCnt_++;
                     }
 
@@ -225,14 +234,15 @@ void NodeQueryEngine::runRecursively(VNode *node)
     }
 }
 
-void NodeQueryEngine::broadcastFind(VNode* node,VAttribute* a)
+void NodeQueryEngine::broadcastFind(VNode* node,QStringList attr)
 {
     Q_ASSERT(node);
 
-    if(a)
+    if(!attr.isEmpty())
     {
-        NodeQueryResultTmp_ptr d(new NodeQueryResultTmp(node,a->data()));
+        NodeQueryResultTmp_ptr d(new NodeQueryResultTmp(node,attr));
         res_ << d;
+        qDebug() << "RES" << attr;
     }
     else
     {
@@ -250,6 +260,25 @@ void NodeQueryEngine::broadcastFind(VNode* node,VAttribute* a)
         stopIt_=true;
     }
 }
+
+void NodeQueryEngine::broadcastFind(VNode* node)
+{
+    Q_ASSERT(node);
+
+    NodeQueryResultTmp_ptr d(new NodeQueryResultTmp(node));
+    res_ << d;
+
+    broadcastChunk(false);
+
+    cnt_++;
+
+    if(cnt_ >= maxNum_)
+    {
+        broadcastChunk(true);
+        stopIt_=true;
+    }
+}
+
 
 void NodeQueryEngine::broadcastChunk(bool force)
 {

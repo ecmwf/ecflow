@@ -55,7 +55,8 @@ protected:
 private:
 	void run(ServerHandler*,VNode*);
 	void runRecursively(VNode *node);
-    void broadcastFind(VNode*,VAttribute* a=NULL);
+    void broadcastFind(VNode*);
+    void broadcastFind(VNode*,QStringList);
 	void broadcastChunk(bool);
 
 	NodeQuery* query_;

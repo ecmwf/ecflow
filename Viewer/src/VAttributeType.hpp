@@ -46,7 +46,7 @@ public:
 
     virtual QString toolTip(QStringList d) const {return QString();}
     virtual bool exists(const VNode* vnode,QStringList) const {return false;}
-    virtual void getSearchData(const VNode*,QList<VAttribute*>) {}
+    virtual void getSearchData(const VNode*,QList<VAttribute*>&) {}
 
 protected:
     virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;

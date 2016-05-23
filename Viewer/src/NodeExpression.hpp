@@ -37,7 +37,7 @@ public:
 
     static NodeExpressionParser* instance();
 
-    BaseNodeCondition *parseWholeExpression(std::string, bool caseSensitiveStringMatch=true);
+    BaseNodeCondition *parseWholeExpression(const std::string&, bool caseSensitiveStringMatch=true);
 
     NodeType  nodeType(const std::string &name) const;
     const std::string& typeName(const NodeType&) const;

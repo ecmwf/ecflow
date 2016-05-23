@@ -43,6 +43,8 @@ public:
 	QString typeStr() const;
 	QString stateStr() const;
 	QColor stateColour() const;
+    QStringList attr() const;
+    bool hasAttribute() const {return attr_.count() > 0;}
 
 protected:
 	VNode* node_;
@@ -83,7 +85,7 @@ public:
  	void clear();
 
     //From ServerObserver
- 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
  	void notifyServerDelete(ServerHandler* server);
     void notifyBeginServerClear(ServerHandler* server);
  	void notifyEndServerClear(ServerHandler* server);

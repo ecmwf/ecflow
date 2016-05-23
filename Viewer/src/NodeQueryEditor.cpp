@@ -249,7 +249,6 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     connect(saveAsTb_,SIGNAL(clicked()),
     		this,SLOT(slotSaveQueryAs()));
 
-
     connect(advModeTb_,SIGNAL(clicked(bool)),
        		this,SLOT(slotAdvMode(bool)));
 
@@ -261,9 +260,9 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     saveAsTb_->hide();
     saveTb_->hide();*/
 
-    attrList_->hide();
-    attrLabel_->hide();
-    attrResetTb_->hide();
+    //attrList_->hide();
+    //attrLabel_->hide();
+    //attrResetTb_->hide();
 
     checkGuiState();
 }

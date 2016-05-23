@@ -126,8 +126,11 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
 		else if(id == "type")
 			return d->typeStr();
 		else if(id == "status")
-			return d->stateStr();
-		return QVariant();
+            return d->stateStr();
+        else if(id == "attribute")
+            return d->attr();
+
+        return QVariant();
 	}
 	else if(role == Qt::BackgroundRole)
 	{

@@ -201,15 +201,16 @@ std::vector<BaseNodeCondition *> NodeExpressionParser::popLastNOperands(std::vec
 
 
 
-BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr, bool caseSensitiveStringMatch)
-{
+BaseNodeCondition *NodeExpressionParser::parseWholeExpression(const std::string& exprIn, bool caseSensitiveStringMatch)
+{       
+    std::string expr=exprIn;
+
     std::vector<std::string> tokens;
     char delimiter = ' ';
     char insideQuote = '\0';  // \0 if not inside a quote, \' if we are inside a quote
                               // will not handle the case of nested quotes!
 
     UserMessage::message(UserMessage::DBG, false, std::string("parseWholeExpression:    ") + expr);
-
 
     ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
     ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
@@ -219,7 +220,6 @@ BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr, 
     int    index  = 0;
     int    length = expr.length();
     std::string token  = "";
-
 
     // loop through each character in the string
 
