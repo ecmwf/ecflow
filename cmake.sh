@@ -205,8 +205,8 @@ ecbuild $source_dir \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DENABLE_WARNINGS=ON \
             -DENABLE_ALL_TESTS=ON \
-            -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
+            -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
             ${cmake_extra_options}
             #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated-declarations'" \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
