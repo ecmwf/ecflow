@@ -38,7 +38,9 @@ public Q_SLOTS:
 protected Q_SLOTS:
 	void slotTextEdited(QString);
 	void slotMatchChanged(int);
-	void slotCaseChanged(bool);
+#if 0
+    void slotCaseChanged(bool);
+#endif
 
 Q_SIGNALS:
 	void queryChanged();

@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include <QMap>
 #include <QStringList>
 #include <QThread>
 
@@ -61,9 +62,8 @@ private:
 
 	NodeQuery* query_;
     BaseNodeCondition* parser_;
-    BaseNodeCondition* attrParser_;
+    QMap<VAttributeType*,BaseNodeCondition*> attrParser_;
     std::vector<ServerHandler*> servers_;
-    QList<VAttributeType*> attrTypes_;
 	int cnt_;
 	int scanCnt_;
 	int maxNum_;

@@ -74,7 +74,8 @@ protected Q_SLOTS:
 	void slotTypeListChanged();
 	void slotStateListChanged();
 	void slotFlagListChanged();
-	void slotAttrListChanged();
+    void slotAttrListChanged();
+    void slotAttrPanelChanged();
 	void slotSaveQueryAs();
 	void slotAdvMode(bool b);
 	void slotMaxNum(int);

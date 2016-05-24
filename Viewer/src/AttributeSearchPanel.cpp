@@ -67,7 +67,9 @@ class AttrGroupDesc
 public:
 	AttrGroupDesc(QString name,QGridLayout* grid) : name_(name), grid_(grid) {}
 
-	QString query() const;
+#if 0
+    QString query() const;
+#endif
 	void hide();
 	void show();
 	void add(AttrLineDesc* line) {lines_ << line;}
@@ -78,6 +80,8 @@ protected:
 	QGridLayout* grid_;
 };
 
+
+#if 0
 QString AttrGroupDesc::query() const
 {
 	QString q;
@@ -97,6 +101,7 @@ QString AttrGroupDesc::query() const
 
 	return q;
 }
+#endif
 
 void AttrGroupDesc::hide()
 {
@@ -148,11 +153,13 @@ AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
 
 	QVBoxLayout* vb=new QVBoxLayout;
 	setLayout(vb);
+    vb->setContentsMargins(0,0,0,0);
 
 	grid_=new QGridLayout();
 	vb->addLayout(grid_);
+    vb->addStretch(1);
 
-	//Build groups
+            //Build groups
 	//QStringList attGroupNames;
 	//attGroupNames << "date" << "event" << "label" << "late" << "limit" << "limiter" << "meter"
 	//    	   << "repeat" << "time" << "trigger" << "variable";
@@ -222,11 +229,15 @@ void AttributeSearchPanel::addStringLine(QString labelTxt,QString text,QString g
 	QLabel *label=new QLabel(labelTxt + ":",this);
 	QLineEdit* le=new QLineEdit(this);
 	StringMatchCombo *matchCb=new StringMatchCombo(this);
-	CaseSensitiveButton* caseTb=new CaseSensitiveButton(this);
-
+#if 0
+    CaseSensitiveButton* caseTb=new CaseSensitiveButton(this);
+#endif
 	le->setProperty("id",text);
 	matchCb->setProperty("id",text);
-	caseTb->setProperty("id",text);
+
+#if 0
+    caseTb->setProperty("id",text);
+#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     le->setClearButtonEnabled(true);
@@ -234,18 +245,21 @@ void AttributeSearchPanel::addStringLine(QString labelTxt,QString text,QString g
 
 	int row=grid_->rowCount();
 	grid_->addWidget(label,row,0);
-	grid_->addWidget(le,row,1);
-	grid_->addWidget(matchCb,row,2);
-	grid_->addWidget(caseTb,row,3);
-
+    grid_->addWidget(matchCb,row,1);
+    grid_->addWidget(le,row,2);
+#if 0
+    grid_->addWidget(caseTb,row,3);
+#endif
 	connect(le,SIGNAL(textEdited(QString)),
 			this,SLOT(slotTextEdited(QString)));
 
 	connect(matchCb,SIGNAL(currentIndexChanged(int)),
 			this,SLOT(slotMatchChanged(int)));
 
+#if 0
 	connect(caseTb,SIGNAL(changed(bool)),
 			this,SLOT(slotCaseChanged(bool)));
+#endif
 
 	AttrLineStringDesc* line=new AttrLineStringDesc(text,row,le);
 
@@ -300,6 +314,8 @@ void AttributeSearchPanel::slotTextEdited(QString val)
 		{
 			op->setValue(val);
 		}
+
+         Q_EMIT queryChanged();
 	}
 
 	buildQuery();
@@ -313,12 +329,15 @@ void AttributeSearchPanel::slotMatchChanged(int val)
 		if(NodeQueryStringOption *op=query_->stringOption(id))
 		{
 			op->setMatchMode(cb->currentMatchMode());
-		}
+        }
+
+        Q_EMIT queryChanged();
 	}
 
 	buildQuery();
 }
 
+#if 0
 void AttributeSearchPanel::slotCaseChanged(bool val)
 {
 	if(CaseSensitiveButton *tb=static_cast<CaseSensitiveButton*>(sender()))
@@ -332,7 +351,7 @@ void AttributeSearchPanel::slotCaseChanged(bool val)
 
 	buildQuery();
 }
-
+#endif
 
 void AttributeSearchPanel::buildQuery()
 {

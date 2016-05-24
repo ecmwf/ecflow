@@ -33,6 +33,7 @@ public:
     QString name() const;
     std::string strName() const;
     bool isValid(VNode* parent);
+    bool value(const std::string& key,std::string& val) const;
 
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,

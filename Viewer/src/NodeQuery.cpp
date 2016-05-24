@@ -362,10 +362,38 @@ QString NodeQuery::nodeQueryPart() const
     //TODO : handle all   
     return lst.join(" and ");
 }    
-    
-QString NodeQuery::attrQueryPart()  const  
+
+QString NodeQuery::attrQueryPart() const
+{
+    return extQuery_["attr"];
+}
+
+QString NodeQuery::attrQueryPart(QString typeName) const
 {        
-    return extQuery_.value("attr");
+    QString q;
+    if(hasAttribute(typeName))
+    {
+        QStringList qLst;
+
+        Q_FOREACH(QString opName,attrTerms_[typeName])
+        {
+            NodeQueryStringOption* op=stringOption(opName);
+            assert(op);
+            QString s=op->value();
+            qDebug() << "attr" << op->name() << op->value();
+            if(!s.isEmpty())
+            {
+                qLst <<  opName + " " + op->matchOperator() + " \'" + s + "\'";
+            }
+        }
+
+        if(qLst.isEmpty())
+            q=typeName;
+        else
+            q=qLst.join(" or ");
+    }
+
+    return q;
 }
 
 bool NodeQuery::hasAttribute(QString typeName) const
@@ -424,8 +452,10 @@ void NodeQuery::buildQueryString()
 	QString attrPart;
 	Q_FOREACH(QString gr,attrGroupSelection())
 	{
-		QString grPart;
-		Q_FOREACH(QString opName,attrTerms_[gr])
+        QString grPart=attrQueryPart(gr);
+
+#if 0
+        Q_FOREACH(QString opName,attrTerms_[gr])
 		{
 			NodeQueryStringOption* op=stringOption(opName);
 			assert(op);
@@ -441,7 +471,7 @@ void NodeQuery::buildQueryString()
 
 		if(grPart.isEmpty())
 			grPart=gr;
-
+#endif
 
 		if(!attrPart.isEmpty())
 			attrPart+=" or ";
@@ -463,58 +493,9 @@ void NodeQuery::buildQueryString()
     extQuery_["type"]=typePart;
     extQuery_["state"]=statePart;
     extQuery_["flag"]=flagPart;
-    
-    if(extQuery_.values().join("") == "")
-        extQuery_["node"] = "ALL";
-    
     extQuery_["attr"]=attrPart;
     
     bool hasEq=extQuery_.values().join("").contains("=");
-      
-#if 0    
-	if(!nodePart.isEmpty())
-	{
-		hasNodeAPrt=true;
-        //query_+=nodePart;
-	   extQuery_["node"]=nodePart;
-	}
-
-	if(!typePart.isEmpty())
-	{
-		//if(!query_.isEmpty())
-		//	query_+=" and ";
-
-		//query_+=typePart;
-		extQuery_["type"]=typePart;
-	}
-
-	if(!statePart.isEmpty())
-	{
-		//if(!query_.isEmpty())
-		//	query_+=" and ";
-
-		//query_+=statePart;
-		extQuery_["state"]=statePart;
-	}
-
-	if(!flagPart.isEmpty())
-	{
-		//if(!query_.isEmpty())
-		//	query_+=" and ";
-
-		//query_+=flagPart;
-		extQuery_["flag"]=flagPart;
-	}
-	
-	if(!attrPart.isEmpty())
-	{
-		//if(!query_.isEmpty())
-		//	query_+=" and ";
-
-		//query_+=attrPart;
-		extQuery_["attr"]=attrPart;
-	}
-#endif
 
 	//Extended query
 	QString scopePart;
@@ -574,38 +555,42 @@ QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 				str+="<tr><td width=\"" + QString::number(firstColWidth) + "\" bgcolor=\"" + bg +
 				       "\">scope</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("scope") + "</tr></td>";
 
-			QStringList nodeParts;
-            nodeParts << "node" << "type" << "state" << "flag";
-			Q_FOREACH(QString s,nodeParts)
-			{
-				if(!extQuery_.value(s).isEmpty())
-				{
-					//if(!str.isEmpty() && !str.contains("<td>nodes"))
-					//	str+="<br>";
+            if(nodeQueryPart().isEmpty())
+            {
+                QString v="ALL";
+                if(!str.contains("nodes</td>"))
+                    str+="<tr><td bgcolor=\"" + bg + "\">nodes</td><td bgcolor=\"" +
+                            bg + "\">"+ v;
+                else
+                    str+=" and<br> " + v;
+            }
+            else
+            {
+                QStringList nodeParts;
+                nodeParts << "node" << "type" << "state" << "flag";
 
-					if(!str.contains("nodes</td>"))
-						str+="<tr><td bgcolor=\"" + bg + "\">nodes</td><td bgcolor=\"" + bg + "\">"+ extQuery_.value(s);
-					else
-						str+=" and<br> " + extQuery_.value(s);
-				}
-			}
+                Q_FOREACH(QString s,nodeParts)
+                {
+                    if(!extQuery_.value(s).isEmpty())
+                    {
+                        if(!str.contains("nodes</td>"))
+                            str+="<tr><td bgcolor=\"" + bg + "\">nodes</td><td bgcolor=\"" + bg + "\">"+ extQuery_.value(s);
+                        else
+                            str+=" and<br> " + extQuery_.value(s);
+                    }
+                }
+            }
 
 			if(str.contains("nodes</td>"))
 				str+="</td></tr>";
 
             if(!extQuery_.value("attr").isEmpty())
-            {
-                //if(!str.isEmpty())
-                //	str+="\n";
+            {              
                 str+="<tr><td bgcolor=\"" + bg + "\">attributes</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("attr") +"</td></tr>";
             }
 
-
-
 			if(!extQuery_.value("options").isEmpty())
-			{
-				//if(!str.isEmpty())
-				//	str+="\n";
+			{				
 				str+="<tr><td bgcolor=\"" + bg + "\">options</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("options") +"</td></tr>";
 			}
 
@@ -628,21 +613,30 @@ QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 			str+="<tr><td bgcolor=\"" + bg + "\">&nbsp;scope:&nbsp;</td>" +
 			"<td bgcolor=\"" + bgDark + "\">&nbsp;" + extQuery_.value("scope") + "&nbsp;</td><td>&nbsp;&nbsp;</td>";
 
-		QStringList nodeParts;
-		nodeParts << "node" << "type" << "state" << "flag";
-		Q_FOREACH(QString s,nodeParts)
-		{
-			if(!extQuery_.value(s).isEmpty())
-			{
-				//if(!str.isEmpty() && !str.contains("nodes: "))
-				//	str+=" | ";
-
-				if(!str.contains("nodes"))
-					str+="&nbsp;<td  bgcolor=\"" + bg + "\">&nbsp;nodes:&nbsp;</td><td bgcolor=\"" + bgDark + "\">&nbsp;"+ extQuery_.value(s);
-				else
-					str+=" and " + extQuery_.value(s);
-			}
-		}
+        if(nodeQueryPart().isEmpty())
+        {
+            QString v="ALL";
+            if(!str.contains("nodes"))
+                str+="&nbsp;<td  bgcolor=\"" + bg + "\">&nbsp;nodes:&nbsp;</td><td bgcolor=\"" +
+                        bgDark + "\">&nbsp;"+ v;
+            else
+                str+=" and " + v;
+        }
+        else
+        {
+            QStringList nodeParts;
+            nodeParts << "node" << "type" << "state" << "flag";
+            Q_FOREACH(QString s,nodeParts)
+            {
+                if(!extQuery_.value(s).isEmpty())
+                {
+                    if(!str.contains("nodes"))
+                        str+="&nbsp;<td  bgcolor=\"" + bg + "\">&nbsp;nodes:&nbsp;</td><td bgcolor=\"" + bgDark + "\">&nbsp;"+ extQuery_.value(s);
+                    else
+                        str+=" and " + extQuery_.value(s);
+                }
+            }
+        }
 
 		if(str.contains("nodes:"))
 			str+="&nbsp;</td></td><td>&nbsp;&nbsp;</td>";

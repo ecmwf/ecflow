@@ -162,7 +162,14 @@ bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttr
     }
 
     // list of attributes that we can search in
-    else if (str == "label_name" || str == "label_value")
+    else if (str == "var_name" || str =="var_value" ||
+        str == "label_name" || str == "label_value" ||
+        str == "meter_name" || str == "event_name" ||
+        str == "date_name" || str == "time_name" ||
+        str == "limit_name" || str == "limit_value" || str == "limit_max" ||
+        str == "limiter_name" ||
+        str == "repeat_name" || str == "repeat_value" ||
+        str == "trigger_expression" )
     {
         isAttr = true;
         return true;
@@ -323,7 +330,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     updatedOperands = true;
                 }
 
-                // node attribute
+                // node has attribute
                 else if (isNodeHasAttribute(*i_))
                 {
                     NodeAttributeCondition *attrCond = new NodeAttributeCondition(QString::fromStdString(*i_));
@@ -340,7 +347,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     updatedOperands = true;
                 }
 
-                // node attribute
+                // node attribute type
                 else if ((attrType = toAttrType(*i_)) != NodeExpressionParser::BADATTRIBUTE)
                 {
                     AttributeCondition *attrCond = new AttributeCondition(attrType);
@@ -723,6 +730,14 @@ bool StringMatchCondition::execute(VItem *item)
         {
             return matcher_->match(searchForOperand->what(), n->absNodePath());
         }
+    }
+    else if(VAttribute* a=item->isAttribute())
+    {
+        std::string str;
+        if(a->value(searchIn,str))
+            return matcher_->match(searchForOperand->what(),str);
+        else
+            return false;
     }
 
     return false;

@@ -10,6 +10,7 @@
 
 #include "NodeQueryEngine.hpp"
 
+#include <QtAlgorithms>
 #include <QStandardItemModel>
 
 #include "NodeExpression.hpp"
@@ -27,7 +28,6 @@ NodeQueryEngine::NodeQueryEngine(QObject* parent) :
     QThread(parent),
     query_(new NodeQuery("tmp")),
     parser_(NULL),
-    attrParser_(NULL),
     stopIt_(false),
     cnt_(0),
     scanCnt_(0),
@@ -68,7 +68,6 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     cnt_=0;
     scanCnt_=0;
     rootNode_=0;
-    attrTypes_.clear();
 
     query_->swap(query);
 
@@ -83,11 +82,8 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
         parser_=NULL;
     }
 
-    if(attrParser_)
-    {
-        delete attrParser_;
-        attrParser_=NULL;
-    }
+    qDeleteAll(attrParser_);
+    attrParser_.clear();
 
     //The nodequery parser
     UserMessage::debug("   node part: " + query_->nodeQueryPart().toStdString());
@@ -121,14 +117,23 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 
     //The attribute parser
     UserMessage::debug("   attr part: " + query_->attrQueryPart().toStdString());
-
-    attrParser_=NodeExpressionParser::instance()->parseWholeExpression(query_->attrQueryPart().toStdString(), query->caseSensitive());
-    if(attrParser_ == NULL)
+    for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
+        it != VAttributeType::types().end(); ++it)
     {
-        UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse attribute query: " + query_->attrQueryPart().toStdString()));
-        return false;
+        if(query_->hasAttribute((*it)->name()))
+        {
+            QString attrPart=(query_->attrQueryPart((*it)->name()));
+            BaseNodeCondition* ac=NodeExpressionParser::instance()->parseWholeExpression(attrPart.toStdString(), query->caseSensitive());
+            if(!ac)
+            {
+                UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse attribute query: " + attrPart.toStdString()));
+                return false;
+            }
+            attrParser_[*it]=ac;
+         }
     }
 
+#if 0
     //figure out what attribute types are there in the query
     for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
         it != VAttributeType::types().end(); ++it)
@@ -139,6 +144,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
             attrTypes_ << *it;
         }
     }
+#endif
 
     //Notify the servers that the search began
     Q_FOREACH(ServerHandler* s,servers_)
@@ -199,31 +205,40 @@ void NodeQueryEngine::runRecursively(VNode *node)
     //Execute the node part
     if(parser_->execute(node))
     {
-        broadcastFind(node);
-        scanCnt_;
+        //broadcastFind(node);
+        //scanCnt_;
         
-        if(attrParser_)
+        if(!attrParser_.isEmpty())
         {
-            Q_FOREACH(VAttributeType* aType, attrTypes_)
+            QMap<VAttributeType*,BaseNodeCondition*>::const_iterator it = attrParser_.constBegin();
+            while (it != attrParser_.constEnd())
             {
-                qDebug() << "SEARCH" << aType->name();
+                qDebug() << "SEARCH" << it.key()->name();
                 QList<VAttribute*> aLst;
-                aType->getSearchData(node,aLst);
+                it.key()->getSearchData(node,aLst);
+
                 Q_FOREACH(VAttribute* a,aLst)
                 {
-                    if(attrParser_->execute(a))
+                    if(it.value()->execute(a))
                     {
                         qDebug() << a->data();
                         broadcastFind(node,a->data());
                         scanCnt_++;
                     }
-
-                    delete a;
                 }
+
+                qDeleteAll(aLst);
+
+                ++it;
             }
 
-        }
 
+        }
+        else
+        {
+            broadcastFind(node);
+            scanCnt_;
+        }
     }
 
     for(int i=0; i < node->numOfChildren(); i++)

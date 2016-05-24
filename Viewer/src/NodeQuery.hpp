@@ -93,8 +93,9 @@ public:
 	const std::string& name() const {return name_;}
 
 	QString query() const;
-	QString nodeQueryPart() const;
+    QString nodeQueryPart() const;
     QString attrQueryPart() const;
+    QString attrQueryPart(QString) const;
     bool hasAttribute(QString) const;
 
 	void setRootNode(const std::string& rootNode) {rootNode_=rootNode;}

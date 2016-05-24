@@ -85,3 +85,8 @@ bool VAttribute::isValid(VNode* parent)
 
     return false;
 }
+
+bool VAttribute::value(const std::string& key,std::string& val) const
+{
+    return true;
+}

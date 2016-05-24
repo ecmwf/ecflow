@@ -42,6 +42,10 @@ public:
     QString toolTip(QStringList d) const;
     bool exists(const VNode* vnode,QStringList) const;
     void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+
+private:
+    void getData(const Meter& m,QStringList& data);
+
 };
 
 class VEventAttribute : public VAttributeType
@@ -371,10 +375,11 @@ bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     const std::vector<Meter>&  v=node->meters();
     if(row >=0 && row < v.size())
     {
-        data << qName_ <<
+        getData(v[row],data);
+       /* data << qName_ <<
                         QString::fromStdString(v.at(row).name()) <<
                         QString::number(v.at(row).value()) << QString::number(v.at(row).min()) << QString::number(v.at(row).max()) <<
-                        QString::number(v.at(row).colorChange());
+                        QString::number(v.at(row).colorChange());*/
 #ifdef _UI_ATTR_DEBUG
     UserMessage::debug("  data=" + data.join(",").toStdString());
 #endif
@@ -436,13 +441,19 @@ void VMeterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
     for(std::vector<Meter>::const_iterator it=v.begin(); it != v.end(); ++it)
     {    
         QStringList data;
-        data << qName_ <<
-                        QString::fromStdString((*it).name()) <<
-                        QString::number((*it).value());
-                        
+        getData(*it,data);
         lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
     } 
 }    
+
+void VMeterAttribute::getData(const Meter& m,QStringList& data)
+{
+    data << qName_ <<
+                    QString::fromStdString(m.name()) <<
+                    QString::number(m.value()) << QString::number(m.min()) << QString::number(m.max()) <<
+                    QString::number(m.colorChange());
+}
+
 
 //================================
 // Labels

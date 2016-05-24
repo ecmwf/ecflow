@@ -242,6 +242,10 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     flagResetTb_->setEnabled(flagList_->hasSelection());
     attrResetTb_->setEnabled(attrList_->hasSelection());
 
+    //Attr panel
+    connect(attrPanel_,SIGNAL(queryChanged()),
+            this,SLOT(slotAttrPanelChanged()));
+
     //--------------------------------
     // Query management
     //--------------------------------
@@ -517,6 +521,15 @@ void NodeQueryEditor::slotAttrListChanged()
 		updateQueryTe();
 		checkGuiState();
 	}
+}
+
+void NodeQueryEditor::slotAttrPanelChanged()
+{
+    if(!initIsOn_)
+    {
+        updateQueryTe();
+        checkGuiState();
+    }
 }
 
 void NodeQueryEditor::checkGuiState()
