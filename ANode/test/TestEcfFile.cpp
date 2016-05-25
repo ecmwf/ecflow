@@ -1181,4 +1181,52 @@ BOOST_AUTO_TEST_CASE( test_manual_files )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_ECFLOW_672 )
+{
+   cout << "ANode:: ...test_ECFLOW_672";
+   if (getenv("ECFLOW_CRAY_BATCH")) {
+      cout << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+      return;
+   }
+   cout << "\n";
+
+   // Create the defs file corresponding to the text below
+   //suite ECFLOW_672
+   //  edit ECF_INCLUDE $ECF_HOME/ECFLOW_672
+   //  task t
+   //endsuite
+   Defs theDefs;
+   suite_ptr suite = theDefs.add_suite("ECFLOW_672");
+   suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/ECFLOW_672" ) );
+   task_ptr task_t1 = suite->add_task("t");
+
+   // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
+   // or when file does not exist in ECF_INCLUDE
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the ecf files
+   theDefs.beginAll();
+
+   string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
+   BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
+
+   // Create the generated variables
+   task_t1->update_generated_variables();
+
+   /// Now finally the test
+   EcfFile ecfFile(task_t1.get(),ecf_file_location);
+
+   JobsParam jobsParam(true); // spawn_jobs = false
+   try { ecfFile.create_job(jobsParam); }
+   catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected job creation to succeed " << e.what());}
+
+   string job_file_location = ecf_home  + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+   BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
+
+   /// Remove generate file
+   boost::filesystem::remove( job_file_location );
+}
+
 BOOST_AUTO_TEST_SUITE_END()

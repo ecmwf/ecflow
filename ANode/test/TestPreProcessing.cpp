@@ -160,12 +160,12 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 			try {
 				fs::path relPath( directory + "/" + dir_itr->path().filename().string());
 
-				// Ignore directores were only interested in .ecf files.
+				// Ignore directories were only interested in .ecf files.
  				if (fs::is_directory(relPath)) continue;
             if (File::getExt(relPath.filename().string()) != "ecf" ) continue; // ignore other files
 
 				//std::cout << "......Parsing file " << relPath.string() << "\n";
- 				//std::cout << "adding task name " << relPath.leaf() << "\n";
+ 				//std::cout << "      adding task name " << relPath.leaf() << "\n";
  				fam->add_task( relPath.stem().string() );
 			}
 			catch ( const std::exception & ex ) {
