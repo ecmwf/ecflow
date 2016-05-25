@@ -352,8 +352,8 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
    // include pre-processing on the included file.
    // Note: include directives _in_ manual/comment should he handled.
    //       only include directives in %nopp/%end are ignored
-   std::set<std::string> globalIncludedFileSet; // test for recursive includes
-   int recursive_count = 0;
+   typedef std::map<std::string,int> my_map;
+   my_map globalIncludedFileSet;          // test for recursive includes, include,no of includes
    std::vector<std::string> tokens;       // re-use to save memory
    std::vector<std::string> includeLines; // re-use to save memory
    std::vector<std::string> included_files;
@@ -524,17 +524,18 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
       // To get round this will use a simple count.
       BOOST_FOREACH(const string& theInclude, localIncludedFileSet) {
 
-         if (globalIncludedFileSet.find(theInclude) != globalIncludedFileSet.end()) {
+         my_map::iterator it = globalIncludedFileSet.find(theInclude);
+         if (it != globalIncludedFileSet.end()) {
 
-            if ( recursive_count > 10) {
+            if ( (*it).second > 100) {
                std::stringstream ss;
                ss << "Recursive include of file " << theInclude << " for " << script_path_or_cmd_;
                errormsg += ss.str();
                return false;
             }
-            recursive_count++;
+            (*it).second++;
          }
-         else globalIncludedFileSet.insert(theInclude);
+         else globalIncludedFileSet.insert(std::make_pair(theInclude,0));
       }
 
       if (included_files.empty()) break;
