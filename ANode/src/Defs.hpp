@@ -301,7 +301,7 @@ private:
    void setupDefaultEnv();
    void add_suite_only(suite_ptr, size_t position);
 
-   /// Removes the suite, from defs returned as auto_ptr, asserts if suite does not exist
+   /// Removes the suite, from defs returned as suite_ptr, asserts if suite does not exist
    suite_ptr removeSuite(suite_ptr);
    node_ptr removeChild(Node*);
    bool addChild( node_ptr, size_t position = std::numeric_limits<std::size_t>::max());
