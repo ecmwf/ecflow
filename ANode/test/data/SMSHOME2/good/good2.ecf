@@ -1,0 +1,6 @@
+# sleep %SLEEPTIME test for uneven number for microcharacter's
+sleep %SLEEPTIME%
+# sleep %SLEEPTIME test for uneven number for microcharacter's
+# %fred
+# fred%
+        # %%fred%

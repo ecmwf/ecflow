@@ -1384,16 +1384,20 @@ void EcfFile::remove_nopp_end_tokens()
 
 int EcfFile::countEcfMicro(const std::string& line, const std::string& ecfMicro)
 {
-   if (line.find("#") != string::npos) {
+   size_t end = line.size();
+   size_t comment_pos = line.find("#");
+   if (comment_pos != string::npos) {
       // ignore ecfmicro character in comments
-      return 0;
+      if ( comment_pos == 0 ){
+         return 0;
+      }
+      end = comment_pos;
    }
 
    /// Pound char could be more than one char ?
    int count = 0;
    if ( !ecfMicro.empty()) {
       const char theChar = ecfMicro[0];
-      size_t end = line.size();
       for(size_t i = 0; i < end; ++i) {
          if (line[i] == theChar) {
             count++;
