@@ -50,7 +50,7 @@ static const char* T_END         = "end";
 static const char* T_ECFMICRO    = "ecfmicro";
 static const char* T_INCLUDE     = "include";
 static const char* T_INCLUDENOPP = "includenopp";
-static const char* T_INCLUDEONCE = "includeonce";
+//static const char* T_INCLUDEONCE = "includeonce";
 
 static void vector_to_string(const std::vector<std::string>& vec, std::string& str)
 {
@@ -355,7 +355,7 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
    //       only include directives in %nopp/%end are ignored
    typedef std::map<std::string,int> my_map;
    my_map globalIncludedFileSet;          // test for recursive includes, include,no of includes
-   std::set<std::string> include_once_set;
+   //std::set<std::string> include_once_set;
    std::vector<std::string> tokens;       // re-use to save memory
    std::vector<std::string> includeLines; // re-use to save memory
    std::vector<std::string> included_files;
@@ -366,6 +366,7 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
    string pp_manual = ecfMicro;  pp_manual  += T_MANUAL;
    string pp_end = ecfMicro;     pp_end     += T_END;
 
+   // Use a breadth traversal on includes at the same level are expanded first
    while (1) {
 
       bool found_includes = false; // repeat this loop until no includes found
@@ -482,13 +483,16 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
 
          // order is *IMPORTANT*, hence search for includenopp,includeonce,include
          // Otherwise string::find() of include will match includenopp and includeonce
-         bool fnd_include = false; bool fnd_includeonce = false;
+         bool fnd_include = false;
+//         bool fnd_includeonce = false;
          bool fnd_includenopp = (script_line.find(T_INCLUDENOPP) == 1);
          if (!fnd_includenopp) {
-            fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
-            if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
+//            fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
+//            if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
+            fnd_include = (script_line.find(T_INCLUDE) == 1);
          }
-         if (!fnd_include && !fnd_includenopp && !fnd_includeonce) continue;
+         // if (!fnd_include && !fnd_includenopp && !fnd_includeonce) continue;
+         if (!fnd_include && !fnd_includenopp) continue;
 
          // remove %include from the job lines, since were going to expand or ignore it.
          jobLines_.pop_back();
@@ -503,11 +507,11 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
          std::string includedFile = getIncludedFilePath(tokens[1], script_line, errormsg);
          if (!errormsg.empty()) return false;
 
-         // handle %include || %includeonce  of include that was specified as %includeonce
-         if (include_once_set.find(includedFile) != include_once_set.end() ) {
-            continue; // Already processed once ignore
-         }
-         if ( fnd_includeonce ) include_once_set.insert(includedFile);
+//         // handle %include || %includeonce  of include that was specified as %includeonce
+//         if (include_once_set.find(includedFile) != include_once_set.end() ) {
+//            continue; // Already processed once ignore
+//         }
+//         if ( fnd_includeonce ) include_once_set.insert(includedFile);
 
 
          localIncludedFileSet.insert(includedFile);
@@ -540,10 +544,8 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
       // are included many times, but the include is not recursive.
       // To get round this will use a simple count.
       BOOST_FOREACH(const string& theInclude, localIncludedFileSet) {
-
          my_map::iterator it = globalIncludedFileSet.find(theInclude);
          if (it != globalIncludedFileSet.end()) {
-
             if ( (*it).second > 100) {
                std::stringstream ss;
                ss << "Recursive include of file " << theInclude << " for " << script_path_or_cmd_;
