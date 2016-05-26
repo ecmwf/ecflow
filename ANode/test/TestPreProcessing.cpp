@@ -127,7 +127,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 //	cerr << " directory =  " << directory << "\n";
 
 	// SET ECF_HOME
-	std::string smshome = directory;
+	std::string ecf_home = directory;
 
 	fs::path full_path( fs::initial_path<fs::path>() );
 	full_path = fs::system_complete( fs::path( directory ) );
@@ -148,7 +148,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 		// variable substitution. hence if variable substitution fails its likely to be
 		// a bug in autoDiscoverVariables
 		std::set<std::string> discoveredVariables;
-		autoDiscoverVariables(smshome + "/includes", discoveredVariables );
+		autoDiscoverVariables(ecf_home + "/includes", discoveredVariables );
 		BOOST_FOREACH(const string& var, discoveredVariables) {
 // 			cerr << "autoDiscoverVariables = " << var << "\n";
 			suite->addVariable( Variable( var, "gobblygook" ) );
@@ -180,7 +180,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
  	theDefs.getAllTasks(theTasks);
 
 	// Override ECF_HOME.   ECF_HOME is need to locate the ecf files
-	theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),smshome);
+	theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
 
 	/// begin , will cause creation of generated variables. The generated variables
 	/// are used in client scripts(sms) and used to locate the sms files
@@ -189,7 +189,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 	// Test Job creator, this will pre-process and perform variable substitution on ecf files
 	BOOST_FOREACH(Task* t, theTasks) {
 
-	   //cout << "task " << t->absNodePath() << "\n";
+	   //cout << "  task " << t->absNodePath() << "\n";
 	   JobsParam jobsParam; // create jobs =  false, spawn_jobs = false
 	   bool ok = t-> submitJob( jobsParam ) ;
 
