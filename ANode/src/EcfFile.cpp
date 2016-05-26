@@ -50,6 +50,7 @@ static const char* T_END         = "end";
 static const char* T_ECFMICRO    = "ecfmicro";
 static const char* T_INCLUDE     = "include";
 static const char* T_INCLUDENOPP = "includenopp";
+static const char* T_INCLUDEONCE = "includeonce";
 
 static void vector_to_string(const std::vector<std::string>& vec, std::string& str)
 {
@@ -354,6 +355,7 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
    //       only include directives in %nopp/%end are ignored
    typedef std::map<std::string,int> my_map;
    my_map globalIncludedFileSet;          // test for recursive includes, include,no of includes
+   std::set<std::string> include_once_set;
    std::vector<std::string> tokens;       // re-use to save memory
    std::vector<std::string> includeLines; // re-use to save memory
    std::vector<std::string> included_files;
@@ -366,6 +368,7 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
 
    while (1) {
 
+      bool found_includes = false; // repeat this loop until no includes found
       std::set<std::string> localIncludedFileSet;
       bool nopp =  false; bool comment = false; bool manual = false;
       for(size_t i=0; i < script_lines.size(); ++i) {
@@ -439,10 +442,12 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
          }
          if (nopp) continue;
 
+
+         // =================================================================================
+         // Handle ecfmicro replacement
+         // =================================================================================
          tokens.clear();
          Str::split( script_line, tokens );
-
-         // Handle ecfmicro replacement ================================================================================
          if (script_line.find(T_ECFMICRO) == 1) {    // %ecfmicro #
             // keep %ecfmicro in jobs file later processing, i.e for comments/manuals
 
@@ -470,20 +475,24 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
             continue;
          }
 
-         // Handle the includes ===================================================================================
+         // =================================================================================
+         // Handle the includes: Notice we only do recursive includes for %include
+         // =================================================================================
          if (tokens.size() < 2) continue;
 
-         bool includenopp = (script_line.find(T_INCLUDENOPP) == 1);
-         bool file_to_include = false;
-         if (!includenopp) {
-            // Notice we only do recursive includes for %include
-            file_to_include = (script_line.find(T_INCLUDE) != string::npos);
+         // order is *IMPORTANT*, hence search for includenopp,includeonce,include
+         // Otherwise string::find() of include will match includenopp and includeonce
+         bool fnd_include = false; bool fnd_includeonce = false;
+         bool fnd_includenopp = (script_line.find(T_INCLUDENOPP) == 1);
+         if (!fnd_includenopp) {
+            fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
+            if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
          }
-         if (!file_to_include && !includenopp) continue;
+         if (!fnd_include && !fnd_includenopp && !fnd_includeonce) continue;
 
-         // remove %include since were going to expand it.
+         // remove %include from the job lines, since were going to expand or ignore it.
          jobLines_.pop_back();
-         included_files.push_back(script_line);
+         found_includes = true;
 
 #ifdef DEBUG_PRE_PROCESS_INCLUDES
          // Output the includes for debug purposes. Will appear in preProcess.ecf
@@ -492,7 +501,15 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
 #endif
 
          std::string includedFile = getIncludedFilePath(tokens[1], script_line, errormsg);
-         if (!errormsg.empty())  return false;
+         if (!errormsg.empty()) return false;
+
+         // handle %include || %includeonce  of include that was specified as %includeonce
+         if (include_once_set.find(includedFile) != include_once_set.end() ) {
+            continue; // Already processed once ignore
+         }
+         if ( fnd_includeonce ) include_once_set.insert(includedFile);
+
+
          localIncludedFileSet.insert(includedFile);
 #ifdef DEBUG_PRE_PROCESS
          cout << "EcfFile::preProcess processing " << includedFile  << "\n";
@@ -505,9 +522,9 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
 
 
          // append included script_lines to jobsLines
-         if (includenopp) jobLines_.push_back(ecfMicro + T_NOOP);
+         if (fnd_includenopp) jobLines_.push_back(ecfMicro + T_NOOP);
          std::copy( includeLines.begin(), includeLines.end(), std::back_inserter( jobLines_ ) );
-         if (includenopp) jobLines_.push_back(ecfMicro + T_END);
+         if (fnd_includenopp) jobLines_.push_back(ecfMicro + T_END);
       }
 
 
@@ -538,10 +555,9 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
          else globalIncludedFileSet.insert(std::make_pair(theInclude,0));
       }
 
-      if (included_files.empty()) break;
+      if (!found_includes) break;
       else {
          // repeat until no %include left
-         included_files.clear();
          script_lines = jobLines_;
          jobLines_.clear();
       }
@@ -913,7 +929,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
 
 const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const
 {
-   if ( jobLines_.size() > 1 ) {
+   if ( !jobLines_.empty() ) {
       // Guard against ecf file that exist's but is empty,
       // no point in creating empty job files for them
 
@@ -1081,18 +1097,17 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
    return true;
 }
 
-std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
-         const std::string& line,
-         std::string& errormsg)
+std::string EcfFile::getIncludedFilePath(const std::string& includedFile,const std::string& line,std::string& errormsg)
 {
-   // Include can have following format:
+   // Include can have following format: [ %include | %includeonce | %includenopp ]
    //   %include /tmp/file.name   -> /tmp/filename
-   //   %include file.name        -> filename
+   //   %include file.name        -> file.name
    //   %include "../file.name"   -> script_file_location/../file.name
    //   %include "./file.name"    -> script_file_location/./file.name
    //   %include "file.name"      -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
    //   %include <file.name>      -> %ECF_INCLUDE%/filename
-   //   When ECF_INCLUDE          -> path1:path2:path3
+   //
+   // When ECF_INCLUDE            -> path1:path2:path3
    //   %include <file.name>      -> path1/filename || path2/filename || path3/filename
    //
    //   %include <file.name>      -> ECF_HOME/filename
