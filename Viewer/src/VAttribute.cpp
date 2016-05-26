@@ -13,6 +13,7 @@
 
 #include "VNode.hpp"
 
+
 VAttribute::VAttribute(VNode* parent,int index) : VItem(parent), type_(0), index_(index)
 {
     data_=parent_->getAttributeData(index_,type_) ;
@@ -88,5 +89,14 @@ bool VAttribute::isValid(VNode* parent)
 
 bool VAttribute::value(const std::string& key,std::string& val) const
 {
-    return true;
+    if(data_.isEmpty() || !type_)
+        return false;
+
+    int idx=type_->searchKeyToDataIndex(key);
+    if(idx != -1)
+    {
+        val=data_[idx].toStdString();
+        return true;
+    }
+    return false;
 }

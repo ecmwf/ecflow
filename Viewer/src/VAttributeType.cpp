@@ -33,20 +33,24 @@ std::vector<VAttributeType*> VAttributeType::types_;
 
 //#define _UI_ATTR_DEBUG
 
+#if 0
 class VMeterAttribute : public VAttributeType
 {
 public:
-    explicit VMeterAttribute(const std::string& n) : VAttributeType(n) {}
+    explicit VMeterAttribute(const std::string& n);
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
     bool exists(const VNode* vnode,QStringList) const;
     void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    bool getValue(const std::string& key,std::string& value) const;
 
 private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MinIndex=3, MaxIndex=4,ThresholdIndex=5};
     void getData(const Meter& m,QStringList& data);
 
 };
+#endif
 
 class VEventAttribute : public VAttributeType
 {
@@ -152,22 +156,12 @@ public:
     bool exists(const VNode* vnode,QStringList) const;
 };
 
-static VMeterAttribute meterAttr("meter");
-static VEventAttribute eventAttr("event");
-static VRepeatAttribute repeatAttr("repeat");
-static VTriggerAttribute triggerAttr("trigger");
-static VLabelAttribute labelAttr("label");
-static VTimeAttribute timeAttr("time");
-static VDateAttribute dateAttr("date");
-static VLimitAttribute limitAttr("limit");
-static VLimiterAttribute limiterAttr("limiter");
-static VLateAttribute lateAttr("late");
-static VVarAttribute varAttr("var");
-static VGenvarAttribute genvarAttr("genvar");
+
 
 
 VAttributeType::VAttributeType(const std::string& name) :
-        VParam(name)
+        VParam(name),
+        dataCount_(0)
 {
     //items_.push_back(this);
     items_[name]=this;
@@ -186,7 +180,6 @@ std::vector<VParam*> VAttributeType::filterItems()
 
     return v;
 }
-
 
 VAttributeType* VAttributeType::find(const std::string& name)
 {
@@ -347,9 +340,60 @@ void VAttributeType::load(VProperty* group)
     }
 }
 
+int VAttributeType::keyToDataIndex(const std::string& key) const
+{
+    std::map<std::string,int>::const_iterator it=keyToData_.find(key);
+    if(it != keyToData_.end())
+        return it->second;
+
+    return -1;
+}
+
+int VAttributeType::searchKeyToDataIndex(const std::string& key) const
+{
+    std::map<std::string,int>::const_iterator it=searchKeyToData_.find(key);
+    if(it != searchKeyToData_.end())
+        return it->second;
+
+    return -1;
+}
+
+QStringList VAttributeType::searchKeys() const
+{
+    QStringList lst;
+    for(std::map<std::string,int>::const_iterator it=searchKeyToData_.begin(); it != searchKeyToData_.end(); it++)
+    {
+        lst << QString::fromStdString(it->first);
+    }
+    return lst;
+}
+
 //================================
 // Meters
 //================================
+
+class VMeterAttribute : public VAttributeType
+{
+public:
+    explicit VMeterAttribute(const std::string& n);
+    int num(const VNode *node);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
+    bool exists(const VNode* vnode,QStringList) const;
+    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MinIndex=3, MaxIndex=4,ThresholdIndex=5};
+    void getData(const Meter& m,QStringList& data);
+};
+
+VMeterAttribute::VMeterAttribute(const std::string& n) :
+    VAttributeType(n)
+{
+    dataCount_=6;
+    searchKeyToData_["meter_name"]=NameIndex;
+    searchKeyToData_["meter_value"]=ValueIndex;
+}
 
 int VMeterAttribute::num(const VNode *vnode)
 {
@@ -376,10 +420,6 @@ bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     if(row >=0 && row < v.size())
     {
         getData(v[row],data);
-       /* data << qName_ <<
-                        QString::fromStdString(v.at(row).name()) <<
-                        QString::number(v.at(row).value()) << QString::number(v.at(row).min()) << QString::number(v.at(row).max()) <<
-                        QString::number(v.at(row).colorChange());*/
 #ifdef _UI_ATTR_DEBUG
     UserMessage::debug("  data=" + data.join(",").toStdString());
 #endif
@@ -398,10 +438,10 @@ QString VMeterAttribute::toolTip(QStringList d) const
     QString t="<b>Type:</b> Meter<br>";
     if(d.count() >=5)
     {
-        t+="<b>Name:</b> " + d[1] + "<br>";
-        t+="<b>Value:</b> " + d[2]+ "<br>";
-        t+="<b>Minimum:</b> " + d[3] + "<br>";
-        t+="<b>Maximum:</b> " + d[4];
+        t+="<b>Name:</b> " + d[NameIndex] + "<br>";
+        t+="<b>Value:</b> " + d[ValueIndex]+ "<br>";
+        t+="<b>Minimum:</b> " + d[MinIndex] + "<br>";
+        t+="<b>Maximum:</b> " + d[MaxIndex];
     }
     return t;
 }
@@ -415,7 +455,7 @@ bool VMeterAttribute::exists(const VNode* vnode,QStringList data) const
     if(!node)
         return false;
 
-    if(data.count() != 6 && data[0] != qName_)
+    if(data.count() != dataCount_ && data[TypeIndex] != qName_)
         return false;
 
     const std::vector<Meter>&  v=node->meters();
@@ -453,7 +493,6 @@ void VMeterAttribute::getData(const Meter& m,QStringList& data)
                     QString::number(m.value()) << QString::number(m.min()) << QString::number(m.max()) <<
                     QString::number(m.colorChange());
 }
-
 
 //================================
 // Labels
@@ -1315,5 +1354,17 @@ QString VLateAttribute::toolTip(QStringList d) const
     return t;
 }
 
-static SimpleLoader<VAttributeType> loader("attribute");
+static VMeterAttribute meterAttr("meter");
+static VEventAttribute eventAttr("event");
+static VRepeatAttribute repeatAttr("repeat");
+static VTriggerAttribute triggerAttr("trigger");
+static VLabelAttribute labelAttr("label");
+static VTimeAttribute timeAttr("time");
+static VDateAttribute dateAttr("date");
+static VLimitAttribute limitAttr("limit");
+static VLimiterAttribute limiterAttr("limiter");
+static VLateAttribute lateAttr("late");
+static VVarAttribute varAttr("var");
+static VGenvarAttribute genvarAttr("genvar");
 
+static SimpleLoader<VAttributeType> loader("attribute");

@@ -13,6 +13,7 @@
 #include <QDebug>
 
 #include "UserMessage.hpp"
+#include "VAttributeType.hpp"
 #include "VSettings.hpp"
 
 StringMatchMode::Mode NodeQueryStringOption::defaultMatchMode_=StringMatchMode::WildcardMatch;
@@ -127,9 +128,19 @@ NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
 		stateTerms_ << "aborted" << "active" << "complete" << "queued" << "submitted" << "suspended" << "unknown";
 		flagTerms_ << "is_late" << "has_date" << "has_message" << "has_time" << "is_rerun" << "is_waiting" << "is_zombie";
 		attrGroupTerms_ << "date" << "event" << "label" << "late" << "limit" << "limiter" << "meter"
-			    	   << "repeat" << "time" << "trigger" << "variable";
+                       << "repeat" << "time" << "trigger"; //<< "variable";
 
-		attrTerms_["date"] << "date_name";
+        Q_FOREACH(QString s,attrGroupTerms_)
+        {
+             qDebug() << s;
+             VAttributeType *t=VAttributeType::find(s.toStdString());
+             Q_ASSERT(t);
+             Q_FOREACH(QString key,t->searchKeys())
+                attrTerms_[s] << key;
+
+        }
+#if 0
+        attrTerms_["date"] << "date_name";
 		attrTerms_["event"] << "event_name";
 		attrTerms_["label"] << "label_name" << "label_value";
 		attrTerms_["limit"] << "limit_name" << "limit_value" << "limit_max";
@@ -139,7 +150,7 @@ NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
 		attrTerms_["time"] << "time_name";
 		attrTerms_["trigger"] << "trigger_expression";
 		attrTerms_["variable"] << "var_name" << "var_value";
-
+#endif
 	}
 
 	Q_FOREACH(QString s,nodeTerms_)
