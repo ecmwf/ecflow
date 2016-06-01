@@ -128,7 +128,7 @@ NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
 		stateTerms_ << "aborted" << "active" << "complete" << "queued" << "submitted" << "suspended" << "unknown";
 		flagTerms_ << "is_late" << "has_date" << "has_message" << "has_time" << "is_rerun" << "is_waiting" << "is_zombie";
 		attrGroupTerms_ << "date" << "event" << "label" << "late" << "limit" << "limiter" << "meter"
-                       << "repeat" << "time" << "trigger"; //<< "variable";
+                       << "repeat" << "time" << "trigger" << "var";
 
         Q_FOREACH(QString s,attrGroupTerms_)
         {

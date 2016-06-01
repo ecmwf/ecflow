@@ -67,7 +67,8 @@ NodeExpressionParser::NodeExpressionParser()
         nodeTypeToName_[it->second]=it->first;
     }
 
-    nameToAttrType_["attribute"]=ATTRIBUTE;
+#if 0
+    nameToAttrType_["attribute"]=NULL;//ATTRIBUTE;
     nameToAttrType_["meter"]=METER;
     nameToAttrType_["event"]=EVENT;
     nameToAttrType_["repeat"]=REPEAT;
@@ -80,11 +81,28 @@ NodeExpressionParser::NodeExpressionParser()
     nameToAttrType_["limiter"]=LIMITER;
     nameToAttrType_["var"]=VAR;
     nameToAttrType_["genvar"]=GENVAR;
+#endif
 
-    for(std::map<std::string,AttributeType>::const_iterator it=nameToAttrType_.begin();  it != nameToAttrType_.end(); ++it)
+    QStringList attrNames;
+    attrNames << "meter" << "event" << "repeat" << "trigger" << "label" << "time" << "date" << "late" << "limit" <<
+                 "limit" << "limiter" << "var" << "genvar";
+    Q_FOREACH(QString s,attrNames)
     {
-            attrTypeToName_[it->second]=it->first;
+        VAttributeType *t=VAttributeType::find(s.toStdString());
+        Q_ASSERT(t);
+        nameToAttrType_[s.toStdString()]=t;
     }
+
+#if 0
+                 for(std::map<std::string,AttributeType>::const_iterator it=nameToAttrType_.begin();  it != nameToAttrType_.end(); ++it)
+    {
+        //attrTypeToName_[it->second]=it->first;
+        VAttributeType *t=VAttributeType::find(s.toStdString());
+        Q_ASSERT(t);
+        nameToAttrType[it->first]=t;
+    }
+#endif
+
 
     badTypeStr_="BAD";
     badAttributeStr_="BAD";
@@ -108,6 +126,7 @@ const std::string& NodeExpressionParser::typeName(const NodeType& type) const
     return badTypeStr_;
 }
 
+#if 0
 NodeExpressionParser::AttributeType NodeExpressionParser::toAttrType(const std::string &name) const
 {
     std::map<std::string,AttributeType>::const_iterator it=nameToAttrType_.find(name);
@@ -116,7 +135,19 @@ NodeExpressionParser::AttributeType NodeExpressionParser::toAttrType(const std::
 
     return BADATTRIBUTE;
 }
+#endif
 
+VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
+{
+    std::map<std::string,VAttributeType*>::const_iterator it=nameToAttrType_.find(name);
+    if(it != nameToAttrType_.end())
+        return it->second;
+
+    return NULL;
+}
+
+
+#if 0
 const std::string& NodeExpressionParser::toAttrName(const AttributeType& type) const
 {
     std::map<AttributeType,std::string>::const_iterator it=attrTypeToName_.find(type);
@@ -125,6 +156,7 @@ const std::string& NodeExpressionParser::toAttrName(const AttributeType& type) c
 
     return badAttributeStr_;
 }
+#endif
 
 bool NodeExpressionParser::isUserLevel(const std::string &str) const
 {
@@ -178,10 +210,13 @@ bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttr
     return false;
 }
 
+#if 0
 bool NodeExpressionParser::isAttribute(const std::string &str) const
 {
-    return (nameToAttrType_.find(str) != nameToAttrType_.end());
+    return str == "attribute" || (nameToAttrType_.find(str) != nameToAttrType_.end());
 }
+#endif
+
 
 bool NodeExpressionParser::isAttributeState(const std::string &str) const
 {
@@ -300,7 +335,8 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             else
             {
                 bool attr = false;
-                NodeExpressionParser::AttributeType attrType=NodeExpressionParser::BADATTRIBUTE;
+                VAttributeType* attrType=NULL;
+                //NodeExpressionParser::AttributeType attrType=NodeExpressionParser::BADATTRIBUTE;
 
                 // node types
                 NodeExpressionParser::NodeType type = nodeType(*i_);
@@ -348,7 +384,8 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 }
 
                 // node attribute type
-                else if ((attrType = toAttrType(*i_)) != NodeExpressionParser::BADATTRIBUTE)
+                //else if ((attrType = toAttrType(*i_)) != NodeExpressionParser::BADATTRIBUTE)
+                else if ((attrType = toAttrType(*i_)) != NULL)
                 {
                     AttributeCondition *attrCond = new AttributeCondition(attrType);
                     operandStack.push_back(attrCond);
@@ -845,8 +882,11 @@ bool AttributeCondition::execute(VItem* item)
     if(!a)
         return false;
 
-    assert(a->type());
+    Q_ASSERT(a->type());
 
+    return a->type() == type_;
+
+#if 0
     switch(type_)
     {
         case NodeExpressionParser::ATTRIBUTE:
@@ -861,11 +901,15 @@ bool AttributeCondition::execute(VItem* item)
             return a->type()->name() == "limit";
         case NodeExpressionParser::REPEAT:
             return a->type()->name() == "repeat";
+        case NodeExpressionParser::VAR:
+            return a->type()->name() == "var";
+
         default:
             break;
     }
 
     return false;
+#endif
 }
 
 //====================================================

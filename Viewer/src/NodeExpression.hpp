@@ -20,6 +20,7 @@
 #include "VAttribute.hpp"
 
 class VItem;
+class VAttributeType;
 
 // ----------------------
 // Node condition classes
@@ -41,8 +42,9 @@ public:
 
     NodeType  nodeType(const std::string &name) const;
     const std::string& typeName(const NodeType&) const;
-    AttributeType toAttrType(const std::string &name) const;
-    const std::string& toAttrName(const AttributeType&) const;
+    VAttributeType* toAttrType(const std::string &name) const;
+    //AttributeType toAttrType(const std::string &name) const;
+    //const std::string& toAttrName(const AttributeType&) const;
 
 protected:
     NodeExpressionParser();
@@ -51,7 +53,9 @@ protected:
     bool isNodeHasAttribute(const std::string &str) const;
     bool isNodeFlag(const std::string &str) const;
     bool isWhatToSearchIn(const std::string &str, bool &isAttribute) const;
+#if 0
     bool isAttribute(const std::string &str) const;
+#endif
     bool isAttributeState(const std::string &str) const;
 
     BaseNodeCondition *parseExpression(bool caseSensitiveStringMatch);
@@ -63,13 +67,14 @@ protected:
     std::vector<std::string>::const_iterator i_;
     std::map<std::string,NodeType> nameToNodeType_;
     std::map<NodeType,std::string> nodeTypeToName_;
-    std::map<std::string,AttributeType> nameToAttrType_;
-    std::map<AttributeType,std::string> attrTypeToName_;
+
+    std::map<std::string,VAttributeType*> nameToAttrType_;
+
+    //std::map<std::string,AttributeType> nameToAttrType_;
+    //std::map<AttributeType,std::string> attrTypeToName_;
     std::string badTypeStr_;
     std::string badAttributeStr_;
 };
-
-
 
 // -----------------------------------------------------------------
 // BaseNodeCondition
@@ -390,14 +395,17 @@ private:
 class AttributeCondition : public BaseNodeCondition
 {
 public:
-    explicit AttributeCondition(NodeExpressionParser::AttributeType type) {type_ = type;}
+    //explicit AttributeCondition(NodeExpressionParser::AttributeType type) {type_ = type;}
+    explicit AttributeCondition(VAttributeType* type) : type_(type) {}
     ~AttributeCondition() {}
 
     bool execute(VItem*);
-    std::string print() {return NodeExpressionParser::instance()->toAttrName(type_);}
+    //std::string print() {return NodeExpressionParser::instance()->toAttrName(type_);}
+    std::string print() {return ""; /*type_->strName();*/}
 
 private:
-    NodeExpressionParser::AttributeType type_;
+    //NodeExpressionParser::AttributeType type_;
+    VAttributeType *type_;
 };
 
 //---------------------------------
