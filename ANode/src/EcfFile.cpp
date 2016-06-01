@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <set>
 #include <sstream>
 #include <sys/stat.h>
 
@@ -50,7 +49,7 @@ static const char* T_END         = "end";
 static const char* T_ECFMICRO    = "ecfmicro";
 static const char* T_INCLUDE     = "include";
 static const char* T_INCLUDENOPP = "includenopp";
-//static const char* T_INCLUDEONCE = "includeonce";
+static const char* T_INCLUDEONCE = "includeonce";
 
 static void vector_to_string(const std::vector<std::string>& vec, std::string& str)
 {
@@ -341,231 +340,221 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
    /// Clear existing jobLines
    jobLines_.clear();
    jobLines_.reserve(512); // estimate for includes
+   errormsg.clear();
 
    // get the cached ECF_MICRO variable, typically its one char.
-   string ecfMicro = ecfMicroCache_;
-
 #ifdef DEBUG_PRE_PROCESS
-   cout << "   EcfFile::preProcess task:" << node_->absNodePath() << "   script_path_or_cmd_=" << script_path_or_cmd_ << " ecfMicro = " << ecfMicro << "\n";
+   cout << "   EcfFile::preProcess task:" << node_->absNodePath() << "   script_path_or_cmd_=" << script_path_or_cmd_ << " ecfMicro = " << ecfMicroCache_ << "\n";
    for(size_t i=0; i < script_lines.size(); ++i) { cerr << "   script_lines[i] = " << i << "  " << script_lines[i] << "\n"; }
 #endif
 
-   // include pre-processing on the included file.
-   // Note: include directives _in_ manual/comment should he handled.
-   //       only include directives in %nopp/%end are ignored
-   typedef std::map<std::string,int> my_map;
-   my_map globalIncludedFileSet;          // test for recursive includes, include,no of includes
-   //std::set<std::string> include_once_set;
-   std::vector<std::string> tokens;       // re-use to save memory
-   std::vector<std::string> includeLines; // re-use to save memory
-   std::vector<std::string> included_files;
+   PreProcessData pp_data(ecfMicroCache_);
+   pp_data.pp_nopp    += T_NOOP;
+   pp_data.pp_comment += T_COMMENT;
+   pp_data.pp_manual  += T_MANUAL;
+   pp_data.pp_end     += T_END;
 
-   // constant until ecfmicro changes, then reset
-   string pp_nopp = ecfMicro;    pp_nopp    += T_NOOP;
-   string pp_comment = ecfMicro; pp_comment += T_COMMENT;
-   string pp_manual = ecfMicro;  pp_manual  += T_MANUAL;
-   string pp_end = ecfMicro;     pp_end     += T_END;
+   // Uses a Depth first traversal
+   for(size_t i=0; i < script_lines.size(); ++i) {
+      const std::string& script_line = script_lines[i];
+      jobLines_.push_back(script_line);    // copy line
+      preProcess_line(pp_data,script_line,errormsg);
+      if (!errormsg.empty()) return false;
+   }
 
-   // Use a breadth traversal on includes at the same level are expanded first
-   while (1) {
+   if (pp_data.nopp) {
+      std::stringstream ss;
+      ss << "Unterminated nopp, matching 'end' is missing for " << script_path_or_cmd_;
+      errormsg +=  ss.str();
+      dump_expanded_script_file(jobLines_);
+      return false;
+   }
 
-      bool found_includes = false; // repeat this loop until no includes found
-      std::set<std::string> localIncludedFileSet;
-      bool nopp =  false; bool comment = false; bool manual = false;
-      for(size_t i=0; i < script_lines.size(); ++i) {
+   return true;
+}
 
-         const std::string& script_line = script_lines[i];
+void EcfFile::preProcess_line(PreProcessData& pp_data, const std::string& script_line,std::string& errormsg)
+{
+   // For variable substitution % can occur anywhere on the line, for pre -processing of
+   // %ecfmicro,%manual,%comment,%end,%include,%includenopp it must be the very *first* character
+   string::size_type ecfmicro_pos = script_line.find(pp_data.ecf_micro);
+   if (ecfmicro_pos == string::npos) return;
 
-         jobLines_.push_back(script_line);    // copy line
-
-         // For variable substitution % can occur anywhere on the line, for pre -processing of
-         // %ecfmicro,%manual,%comment,%end,%include,%includenopp it must be the very *first* character
-         string::size_type ecfmicro_pos = script_line.find(ecfMicro);
-         if (ecfmicro_pos == string::npos) continue;
-
-         if (!nopp && !comment && !manual) {
-            // For variable substitution '%' can occur anywhere on the line.
-            // Check for Mismatched micro i.e %FRED or %FRED%%
-            if (ecfmicro_pos != 0) {
-               int ecfMicroCount = countEcfMicro( script_line, ecfMicro );
-               if (ecfMicroCount % 2 != 0 ) {
-                  std::stringstream ss;
-                  ss << "Mismatched ecfmicro(" << ecfMicro << ") count(" << ecfMicroCount << ")  '" << script_line << "' in " << script_path_or_cmd_;
-                  errormsg += ss.str();
-                  dump_expanded_script_file(i,script_lines);
-                  return false;
-               }
-            }
-         }
-
-         // %ecfmicro,%manual,%comment,%end,%include,%includenopp it must be the very *first* character
-         if (ecfmicro_pos != 0) continue; //handle 'garbage%include'
-
-#ifdef DEBUG_PRE_PROCESS
-         std::cout << i << ": " << script_line << "\n";
-#endif
-         if (script_line.find(pp_manual) == 0) {
-            if (comment || manual) {
-               std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_line << "' at " << script_path_or_cmd_;
-               errormsg += ss.str();
-               dump_expanded_script_file(i,script_lines);
-               return false;
-            }
-            manual = true ; continue;
-         }
-         if (script_line.find(pp_comment) == 0) {
-            if (comment || manual) {
-               std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_line << "' at " << script_path_or_cmd_;
-               errormsg += ss.str();
-               dump_expanded_script_file(i,script_lines);
-               return false;
-            }
-            comment = true ; continue;
-         }
-         if (script_line.find(pp_nopp) == 0) {
-            if (nopp) {
-               std::stringstream ss; ss << "Embedded nopp not supported '" << script_line << "' in " << script_path_or_cmd_;
-               errormsg += ss.str();
-               dump_expanded_script_file(i,script_lines);
-               return false;
-            }
-            nopp = true ; continue;
-         }
-         if (script_line.find(pp_end) == 0) {
-            if (comment) { comment = false; continue;}
-            if (manual)  { manual = false; continue;}
-            if (nopp)    { nopp = false; continue;}
+   if (!pp_data.nopp && !pp_data.comment && !pp_data.manual) {
+      // For variable substitution '%' can occur anywhere on the line.
+      // Check for Mismatched micro i.e %FRED or %FRED%%
+      if (ecfmicro_pos != 0) {
+         int ecfMicroCount = countEcfMicro( script_line, pp_data.ecf_micro );
+         if (ecfMicroCount % 2 != 0 ) {
             std::stringstream ss;
-            ss << pp_end << " found with no matching %comment | %manual | %nopp at '" << script_line << "' at path " << script_path_or_cmd_;
+            ss << "Mismatched ecfmicro(" << pp_data.ecf_micro << ") count(" << ecfMicroCount << ")  '" << script_line << "' in " << script_path_or_cmd_;
             errormsg += ss.str();
-            dump_expanded_script_file(i,script_lines);
-            return false;
+            dump_expanded_script_file(jobLines_);
+            return;
          }
-         if (nopp) continue;
+      }
+   }
 
+   // %ecfmicro,%manual,%comment,%end,%include,%includenopp it must be the very *first* character
+   if (ecfmicro_pos != 0) return; //handle 'garbage%include'
 
-         // =================================================================================
-         // Handle ecfmicro replacement
-         // =================================================================================
-         tokens.clear();
-         Str::split( script_line, tokens );
-         if (script_line.find(T_ECFMICRO) == 1) {    // %ecfmicro #
-            // keep %ecfmicro in jobs file later processing, i.e for comments/manuals
-
-            if (tokens.size() < 2) {
-               std::stringstream ss;
-               ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
-               errormsg += ss.str();
-               return false;
-            }
-
-            // This is typically a single character, however $/£ will be multi-character i.e size 2
-            ecfMicro = tokens[1];
-            if (ecfMicro.size() > 2) {
-               std::stringstream ss;
-               ss << "Expected ecfmicro replacement to be a single character, but found '" << ecfMicro << "' " <<  ecfMicro.size() << " in file : " << script_path_or_cmd_;
-               errormsg += ss.str();
-               return false;
-            }
-
-            pp_nopp = ecfMicro;    pp_nopp    += T_NOOP;
-            pp_comment = ecfMicro; pp_comment += T_COMMENT;
-            pp_manual = ecfMicro;  pp_manual  += T_MANUAL;
-            pp_end = ecfMicro;     pp_end     += T_END;
-
-            continue;
-         }
-
-         // =================================================================================
-         // Handle the includes: Notice we only do recursive includes for %include
-         // =================================================================================
-         if (tokens.size() < 2) continue;
-
-         // order is *IMPORTANT*, hence search for includenopp,includeonce,include
-         // Otherwise string::find() of include will match includenopp and includeonce
-         bool fnd_include = false;
-//         bool fnd_includeonce = false;
-         bool fnd_includenopp = (script_line.find(T_INCLUDENOPP) == 1);
-         if (!fnd_includenopp) {
-//            fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
-//            if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
-            fnd_include = (script_line.find(T_INCLUDE) == 1);
-         }
-         // if (!fnd_include && !fnd_includenopp && !fnd_includeonce) continue;
-         if (!fnd_include && !fnd_includenopp) continue;
-
-         // remove %include from the job lines, since were going to expand or ignore it.
-         jobLines_.pop_back();
-         found_includes = true;
-
-#ifdef DEBUG_PRE_PROCESS_INCLUDES
-         // Output the includes for debug purposes. Will appear in preProcess.ecf
-         // Note: Will interfere with diff
-         jobLines_.push_back("========== include of " + tokens[1] + " ===========================");
-#endif
-
-         std::string includedFile = getIncludedFilePath(tokens[1], script_line, errormsg);
-         if (!errormsg.empty()) return false;
-
-//         // handle %include || %includeonce  of include that was specified as %includeonce
-//         if (include_once_set.find(includedFile) != include_once_set.end() ) {
-//            continue; // Already processed once ignore
-//         }
-//         if ( fnd_includeonce ) include_once_set.insert(includedFile);
-
-
-         localIncludedFileSet.insert(includedFile);
 #ifdef DEBUG_PRE_PROCESS
-         cout << "EcfFile::preProcess processing " << includedFile  << "\n";
+   std::cout << i << ": " << script_line << "\n";
+#endif
+   if (script_line.find(pp_data.pp_manual) == 0) {
+      if (pp_data.comment || pp_data.manual) {
+         std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_line << "' at " << script_path_or_cmd_;
+         errormsg += ss.str();
+         dump_expanded_script_file(jobLines_);
+         return;
+      }
+      pp_data.manual = true ; return;
+   }
+   if (script_line.find(pp_data.pp_comment) == 0) {
+      if (pp_data.comment || pp_data.manual) {
+         std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_line << "' at " << script_path_or_cmd_;
+         errormsg += ss.str();
+         dump_expanded_script_file(jobLines_);
+         return;
+      }
+      pp_data.comment = true ; return;
+   }
+   if (script_line.find(pp_data.pp_nopp) == 0) {
+      if (pp_data.nopp) {
+         std::stringstream ss; ss << "Embedded nopp not supported '" << script_line << "' in " << script_path_or_cmd_;
+         errormsg += ss.str();
+         dump_expanded_script_file(jobLines_);
+         return;
+      }
+      pp_data.nopp = true ; return;
+   }
+   if (script_line.find(pp_data.pp_end) == 0) {
+      if (pp_data.comment) { pp_data.comment = false; return;}
+      if (pp_data.manual)  { pp_data.manual = false;  return;}
+      if (pp_data.nopp)    { pp_data.nopp = false;    return;}
+      std::stringstream ss;
+      ss << pp_data.pp_end << " found with no matching %comment | %manual | %nopp at '" << script_line << "' at path " << script_path_or_cmd_;
+      errormsg += ss.str();
+      dump_expanded_script_file(jobLines_);
+      return ;
+   }
+   if (pp_data.nopp) return;
+
+
+   // =================================================================================
+   // Handle ecfmicro replacement
+   // =================================================================================
+   pp_data.tokens.clear();
+   Str::split( script_line, pp_data.tokens );
+   if (script_line.find(T_ECFMICRO) == 1) {    // %ecfmicro #
+      // keep %ecfmicro in jobs file later processing, i.e for comments/manuals
+
+      if (pp_data.tokens.size() < 2) {
+         std::stringstream ss;
+         ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
+         errormsg += ss.str();
+         return;
+      }
+
+      // This is typically a single character, however $/£ will be multi-character i.e size 2
+      pp_data.ecf_micro = pp_data.tokens[1];
+      if (pp_data.ecf_micro.size() > 2) {
+         std::stringstream ss;
+         ss << "Expected ecfmicro replacement to be a single character, but found '" << pp_data.ecf_micro << "' " <<  pp_data.ecf_micro.size() << " in file : " << script_path_or_cmd_;
+         errormsg += ss.str();
+         return;
+      }
+      pp_data.pp_nopp = pp_data.ecf_micro;    pp_data.pp_nopp    += T_NOOP;
+      pp_data.pp_comment = pp_data.ecf_micro; pp_data.pp_comment += T_COMMENT;
+      pp_data.pp_manual = pp_data.ecf_micro;  pp_data.pp_manual  += T_MANUAL;
+      pp_data.pp_end = pp_data.ecf_micro;     pp_data.pp_end     += T_END;
+
+      return;
+   }
+
+   if (pp_data.tokens.size() < 2) return;
+
+   preProcess_includes(pp_data,script_line,errormsg);
+}
+
+void EcfFile::preProcess_includes(PreProcessData& pp_data,const std::string& script_line,std::string& errormsg)
+{
+   // =================================================================================
+   // Handle the includes: Notice we only do recursive includes for %include
+   // order is *IMPORTANT*, hence search for includenopp,includeonce,include
+   // Otherwise string::find() of include will match includenopp and includeonce
+   // =================================================================================
+   bool fnd_include = false;
+   bool fnd_includeonce = false;
+   bool fnd_includenopp = (script_line.find(T_INCLUDENOPP) == 1);
+   if (!fnd_includenopp) {
+      fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
+      if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
+      fnd_include = (script_line.find(T_INCLUDE) == 1);
+   }
+   if (!fnd_include && !fnd_includenopp && !fnd_includeonce) return;
+
+   // remove %include from the job lines, since were going to expand or ignore it.
+   jobLines_.pop_back();
+
+   // we only end up here if we have includes
+#ifdef DEBUG_PRE_PROCESS_INCLUDES
+   // Output the includes for debug purposes. Will appear in preProcess.ecf
+   // Note: Will interfere with diff
+   jobLines_.push_back("========== include of " + tokens[1] + " ===========================");
 #endif
 
-         includeLines.clear();
-         if (!open_script_file(includedFile, EcfFile::INCLUDE, includeLines,  errormsg)) {
-            return false;
-         }
+   std::string includedFile = getIncludedFilePath(pp_data.tokens[1], script_line, errormsg);
+   if (!errormsg.empty()) return;
 
+   // handle %include || %includeonce  of include that was specified as %includeonce
+   if (pp_data.include_once_set.find(includedFile) != pp_data.include_once_set.end() ) {
+      return; // Already processed once ignore
+   }
+   if (fnd_includeonce) {
+      pp_data.include_once_set.insert(includedFile);
+   }
 
-         // append included script_lines to jobsLines
-         if (fnd_includenopp) jobLines_.push_back(ecfMicro + T_NOOP);
-         std::copy( includeLines.begin(), includeLines.end(), std::back_inserter( jobLines_ ) );
-         if (fnd_includenopp) jobLines_.push_back(ecfMicro + T_END);
-      }
+#ifdef DEBUG_PRE_PROCESS
+   cout << "EcfFile::preProcess processing " << includedFile  << "\n";
+#endif
 
-
-      if (nopp) {
-         std::stringstream ss;
-         ss << "Unterminated nopp, matching 'end' is missing for " << script_path_or_cmd_;
-         errormsg +=  ss.str();
-         dump_expanded_script_file(1,script_lines);
-         return false;
-      }
-
+   PreProcessData::my_map::iterator it = pp_data.globalIncludedFileSet.find(includedFile);
+   if ( it == pp_data.globalIncludedFileSet.end()) {
+      pp_data.globalIncludedFileSet.insert( std::make_pair(includedFile,0) );
+   }
+   else {
       // Check for recursive includes. some includes like %include <endt.h>
       // are included many times, but the include is not recursive.
       // To get round this will use a simple count.
-      BOOST_FOREACH(const string& theInclude, localIncludedFileSet) {
-         my_map::iterator it = globalIncludedFileSet.find(theInclude);
-         if (it != globalIncludedFileSet.end()) {
-            if ( (*it).second > 100) {
-               std::stringstream ss;
-               ss << "Recursive include of file " << theInclude << " for " << script_path_or_cmd_;
-               errormsg += ss.str();
-               return false;
-            }
-            (*it).second++;
-         }
-         else globalIncludedFileSet.insert(std::make_pair(theInclude,0));
+      if ( (*it).second > 100) {
+         std::stringstream ss;
+         ss << "Recursive include of file " << includedFile << " for " << script_path_or_cmd_;
+         errormsg += ss.str();
+         return;
       }
-
-      if (!found_includes) break;
-      else {
-         // repeat until no %include left
-         script_lines = jobLines_;
-         jobLines_.clear();
-      }
+      (*it).second++;
    }
-   return true;
+
+   std::vector<std::string> include_lines;
+   if (fnd_includenopp) include_lines.push_back(pp_data.ecf_micro + T_NOOP);
+   if (!open_script_file(includedFile, EcfFile::INCLUDE, include_lines, errormsg))  return;
+   if (fnd_includenopp) include_lines.push_back(pp_data.ecf_micro + T_END);
+
+   for(size_t i=0; i < include_lines.size(); ++i) {
+      const std::string& script_line = include_lines[i];
+      jobLines_.push_back(script_line);    // copy line
+      preProcess_line(pp_data,script_line,errormsg);
+      if (!errormsg.empty()) return;
+   }
+
+   if (pp_data.nopp) {
+      std::stringstream ss; ss << "Unterminated nopp, matching 'end' is missing for " << script_path_or_cmd_;
+      errormsg += ss.str();
+      dump_expanded_script_file(jobLines_);
+   }
 }
+
 
 bool EcfFile::open_script_file(
          const std::string& file_or_cmd,
@@ -781,7 +770,7 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
             if ( last_directive == COMMENT || last_directive == MANUAL) continue;
 
             std::stringstream ss;  ss << "EcfFile::variableSubstituition: failed : '" << jobLines_[i] << "'";
-            dump_expanded_script_file( i, jobLines_ );
+            dump_expanded_script_file( jobLines_ );
             throw std::runtime_error(ss.str());
          }
       }
@@ -917,7 +906,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
             if ( last_directive == COMMENT || last_directive == MANUAL) continue;
 
             ss << "Variable find failed for '" << jobLines_[i] << "'  microChar='" << microChar << "' ";
-            dump_expanded_script_file( i, jobLines_ );
+            dump_expanded_script_file( jobLines_ );
          }
       }
    }
@@ -1093,7 +1082,7 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
    if (add) {
       std::stringstream ss; ss << "Unterminated manual. Matching 'end' is missing, for " << script_path_or_cmd_;
       errormsg += ss.str();
-      dump_expanded_script_file(1,lines);
+      dump_expanded_script_file(lines);
       return false;
    }
    return true;
@@ -1425,10 +1414,9 @@ int EcfFile::countEcfMicro(const std::string& line, const std::string& ecfMicro)
    return count;
 }
 
-void EcfFile::dump_expanded_script_file(size_t i, const std::vector<std::string>& lines)
+void EcfFile::dump_expanded_script_file(const std::vector<std::string>& lines)
 {
 #ifdef DEBUG_PRE_PROCESS
-   if (i != 0) std::cout << "\nSee file tmp.ecf around line number " << i-1 << "\n";
    std::string err;
    if (!File::create("tmp" + get_extn(),lines,err))  std::cout << "Could not create file tmp.ecf\n";
 #endif
