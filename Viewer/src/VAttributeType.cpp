@@ -57,6 +57,7 @@ public:
 };
 #endif
 
+#if 0
 class VTriggerAttribute : public VAttributeType
 {
 public:
@@ -65,7 +66,7 @@ public:
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
 };
-
+#endif
 
 #if 0
 class VLabelAttribute : public VAttributeType
@@ -80,6 +81,7 @@ public:
 };
 #endif
 
+#if 0
 class VDateAttribute : public VAttributeType
 {
 public:
@@ -88,6 +90,7 @@ public:
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
 };
+#endif
 
 class VTimeAttribute : public VAttributeType
 {
@@ -98,6 +101,7 @@ public:
     QString toolTip(QStringList d) const;
 };
 
+#if 0
 class VLimitAttribute : public VAttributeType
 {
 public:
@@ -107,7 +111,9 @@ public:
     QString toolTip(QStringList d) const;
     bool exists(const VNode* vnode,QStringList) const;
 };
+#endif
 
+#if 0
 class VLimiterAttribute : public VAttributeType
 {
 public:
@@ -116,6 +122,7 @@ public:
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
 };
+#endif
 
 class VLateAttribute : public VAttributeType
 {
@@ -953,6 +960,29 @@ bool VVarAttribute::exists(const VNode* vnode,QStringList data) const
 // Limits
 //================================
 
+class VLimitAttribute : public VAttributeType
+{
+public:
+    explicit VLimitAttribute(const std::string& n);
+    int num(const VNode *node);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
+    bool exists(const VNode* vnode,QStringList) const;
+    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MaxIndex=3};
+    void getData(limit_ptr lim,QStringList& data);
+};
+
+VLimitAttribute::VLimitAttribute(const std::string& n) : VAttributeType(n)
+{
+    dataCount_=4;
+    searchKeyToData_["limit_name"]=NameIndex;
+    searchKeyToData_["limit_value"]=ValueIndex;
+    searchKeyToData_["limit_max"]=MaxIndex;
+}
+
 int VLimitAttribute::num(const VNode *vnode)
 {
     if(vnode->isServer())
@@ -978,10 +1008,7 @@ bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     const std::vector<limit_ptr>& v=node->limits();
     if(row >=0 && row < v.size())
     {
-        data << qName_ <<
-                    QString::fromStdString(v.at(row)->name()) <<
-                    QString::number(v.at(row)->value()) <<
-                    QString::number(v.at(row)->theLimit());
+        getData(v[row],data);
 #ifdef _UI_ATTR_DEBUG
         UserMessage::debug("  data=" + data.join(",").toStdString());
 #endif
@@ -999,11 +1026,11 @@ bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 QString VLimitAttribute::toolTip(QStringList d) const
 {
     QString t="<b>Type:</b> Limit<br>";
-    if(d.count() >=4)
+    if(d.count()  == dataCount_)
     {
-        t+="<b>Name:</b> " + d[1] + "<br>";
-        t+="<b>Value:</b> " + d[2] + "<br>";
-        t+="<b>Maximum:</b> " + d[3];
+        t+="<b>Name:</b> " + d[NameIndex] + "<br>";
+        t+="<b>Value:</b> " + d[ValueIndex] + "<br>";
+        t+="<b>Maximum:</b> " + d[MaxIndex];
     }
     return t;
 }
@@ -1017,22 +1044,68 @@ bool VLimitAttribute::exists(const VNode* vnode,QStringList data) const
     if(!node)
         return false;
 
-    if(data.count() != 4 && data[0] != qName_)
+    if(data.count() != dataCount_ && data[TypeIndex] != qName_)
         return false;
 
     const std::vector<limit_ptr>& v=node->limits();
     for(size_t i=0; i < v.size(); i++)
     {
-        if(v[i]->name() == data[1].toStdString())
+        if(v[i]->name() == data[NameIndex].toStdString())
             return true;
     }
 
     return false;
 }
 
+void VLimitAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+{
+    if(vnode->isServer())
+        return;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return;
+    
+    const std::vector<limit_ptr>& v=node->limits();
+    for(size_t i=0; i < v.size(); i++)
+    {    
+        QStringList data;
+        getData(v[i],data);
+        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+    } 
+}    
+
+void VLimitAttribute::getData(limit_ptr lim,QStringList& data)
+{    
+        data << qName_ <<
+                    QString::fromStdString(lim->name()) <<
+                    QString::number(lim->value()) <<
+                    QString::number(lim->theLimit());
+}
+
 //================================
 //Limiters
 //================================
+
+class VLimiterAttribute : public VAttributeType
+{
+public:
+    explicit VLimiterAttribute(const std::string& n);
+    int num(const VNode *node);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
+    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,PathIndex=2};
+    void getData(const InLimit& lim,QStringList& data);
+};
+
+VLimiterAttribute::VLimiterAttribute(const std::string& n) : VAttributeType(n)
+{
+    dataCount_=3;
+    searchKeyToData_["limiter_name"]=NameIndex;
+}
 
 int VLimiterAttribute::num(const VNode *vnode)
 {
@@ -1058,9 +1131,7 @@ bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
     const std::vector<InLimit>& v=node->inlimits();
     if(row >=0 && row < v.size())
     {
-        data << qName_ <<
-                    QString::fromStdString(v.at(row).name()) <<
-                    QString::fromStdString(v.at(row).pathToNode());
+        getData(v[row],data);
 #ifdef _UI_ATTR_DEBUG
         UserMessage::debug("  data=" + data.join(",").toStdString());
 #endif
@@ -1076,18 +1147,63 @@ bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 QString VLimiterAttribute::toolTip(QStringList d) const
 {
     QString t="<b>Type:</b> Limiter<br>";
-    if(d.count() >=3)
+    if(d.count() == dataCount_)
     {
-        t+="<b>Limit:</b> " + d[1] + "<br>";
-        t+="<b>Node:</b> " + d[2];
+        t+="<b>Limit:</b> " + d[NameIndex] + "<br>";
+        t+="<b>Node:</b> " + d[PathIndex];
 
     }
     return t;
 }
 
+void VLimiterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+{
+    if(vnode->isServer())
+        return;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return;
+
+    const std::vector<InLimit>& v=node->inlimits();
+    for(size_t i=0; i < v.size(); i++)
+    {
+        QStringList data;
+        getData(v[i],data);
+        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+    }
+}
+
+void VLimiterAttribute::getData(const InLimit& lim,QStringList& data)
+{
+    data << qName_ <<
+           QString::fromStdString(lim.name()) <<
+           QString::fromStdString(lim.pathToNode());
+}
+
+
 //================================
 //Triggers
 //================================
+
+class VTriggerAttribute : public VAttributeType
+{
+public:
+    explicit VTriggerAttribute(const std::string& n);
+    int num(const VNode *node);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
+    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+
+private:
+    enum DataIndex {TypeIndex=0,CompleteIndex=1,ExprIndex=2};
+};
+
+VTriggerAttribute::VTriggerAttribute(const std::string& n) : VAttributeType(n)
+{
+    dataCount_=3;
+    searchKeyToData_["trigger_expression"]=ExprIndex;
+}
 
 int VTriggerAttribute::num(const VNode *vnode)
 {
@@ -1122,7 +1238,8 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
     bool getComplete=false;
 
     if(row == 0)
-    {    if(eT)
+    {
+        if(eT)
             getTrigger=true;
         else if(eC)
             getComplete=true;
@@ -1161,19 +1278,44 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 QString VTriggerAttribute::toolTip(QStringList d) const
 {
     QString t;
-    if(d.count() >=3)
+    if(d.count() == dataCount_)
     {
-        if(d[1] == "0")
+        if(d[CompleteIndex] == "0")
             t+="<b>Type:</b> Trigger<br>";
-        else if(d[1] == "1")
+        else if(d[CompleteIndex] == "1")
             t+="<b>Type:</b> Complete<br>";
         else
             return t;
 
-        t+="<b>Expression:</b> " + d[2];
+        t+="<b>Expression:</b> " + d[ExprIndex];
     }
     return t;
 }
+
+void VTriggerAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+{
+    if(vnode->isServer())
+        return;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return;
+
+    if(Expression* eT=node->get_trigger())
+    {
+        QStringList data;
+        data << qName_ << "0" << QString::fromStdString(eT->expression());
+        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+    }
+
+    if(Expression* eC=node->get_complete())
+    {
+        QStringList data;
+        data << qName_ << "1" << QString::fromStdString(eC->expression());
+        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+    }
+}
+
 
 //================================
 //Times
@@ -1242,6 +1384,15 @@ QString VTimeAttribute::toolTip(QStringList d) const
 //================================
 //Date
 //================================
+
+class VDateAttribute : public VAttributeType
+{
+public:
+    explicit VDateAttribute(const std::string& n) : VAttributeType(n) {}
+    int num(const VNode *node);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    QString toolTip(QStringList d) const;
+};
 
 int VDateAttribute::num(const VNode *vnode)
 {
