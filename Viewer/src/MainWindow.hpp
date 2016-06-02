@@ -41,6 +41,7 @@ public:
     static void openWindow(QStringList id,QWidget *fromW=0);
     static void reload();
     static void saveSession(SessionItem*);
+    static void changeNotifySelectionChanged(VInfo_ptr);
 
 protected Q_SLOTS:
 	void on_actionNewTab_triggered();
@@ -60,6 +61,8 @@ protected Q_SLOTS:
 	void on_actionPreferences_triggered();
 	void on_actionSearch_triggered();
 	void on_actionAbout_triggered();
+	void on_actionSaveSessionAs_triggered();
+	void on_actionManageSessions_triggered();
 
 	void slotCurrentChangedInPanel();
 	void slotSelectionChanged(VInfo_ptr);
@@ -73,6 +76,7 @@ private:
     void addInfoPanelActions(QToolBar *toolbar);
     void reloadContents();
     void rerenderContents();
+    bool selectInTreeView(VInfo_ptr info);
     void updateRefreshActions();
 
     void writeSettings(VComboSettings*);

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #21 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -51,6 +51,11 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const
 	else             as->defs()->order(theNode.get(), option_);
 
    return doJobSubmission( as );
+}
+
+bool OrderNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,absNodepath_);
 }
 
 const char* OrderNodeCmd::arg()  { return CtsApi::orderArg();}

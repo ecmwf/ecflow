@@ -180,7 +180,7 @@ void OutputDirProvider::slotOutputClientError(QString msg)
 	{
 		if(ServerHandler* server=info_->server())
 		{
-			if(outClient_ && !server->isLocalHost())
+			if(outClient_)
 		    {
 				//Check if it is tryno 0
                 //bool tynozero=(boost::algorithm::ends_with(outClient_->remoteFile(),".0"));

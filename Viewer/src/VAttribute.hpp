@@ -8,45 +8,44 @@
 //
 //============================================================================
 
-#ifndef VATTRIBUTE_HPP_
-#define VATTRIBUTE_HPP_
+#ifndef VATTRIBUTE_HPP
+#define VATTRIBUTE_HPP
 
-#include <set>
-#include <vector>
+#include "VItem.hpp"
+
+#include <QStringList>
 #include <string>
+#include <vector>
 
-#include "VParam.hpp"
-
+class VAttributeType;
 class VNode;
-class AttributeFilter;
 
-class VAttribute : public VParam
+class VAttribute : public VItem
 {
 public:
-	explicit VAttribute(const std::string& name);
-    virtual ~VAttribute() {}
-    
-	static std::vector<VParam*> filterItems();
-	
-    static VAttribute* getType(const VNode *vnode,int row,AttributeFilter *filter=0);
-    static bool getData(VNode* vnode,int row,VAttribute* &type,QStringList& data,AttributeFilter *filter=0);
-    static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter=0);
-    static int totalNum(const VNode *vnode,AttributeFilter *filter=0);
-	static void init(const std::string& parFile);
-    static int getLineNum(const VNode *vnode,int row,AttributeFilter *filter=0);
-	
-	static VAttribute* find(const std::string& name);
+    VAttribute(VNode* parent,int index);
 
-    //Called from VConfigLoader
-    static void load(VProperty*);
+    VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
+    VAttributeType* type() const {return type_;}
+    QStringList data() const {return data_;}
+    QString toolTip() const;
+    QString name() const;
+    std::string strName() const;
+    bool isValid(VNode* parent);
 
+    static void buildAlterCommand(std::vector<std::string>& cmd,
+                         const std::string& action, const std::string& type,
+                         const std::string& name,const std::string& value);
+
+    static void buildAlterCommand(std::vector<std::string>& cmd,
+                         const std::string& action, const std::string& type,
+                         const std::string& value);
 protected:
-	virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
-	virtual int num(const VNode* vnode)=0;
-	virtual int lineNum(const VNode* vnode,int row) {return 1;}
-
-private:
-	static std::map<std::string,VAttribute*> items_;
+    VAttributeType* type_;
+    QStringList data_;
+    int index_;
 };
 
-#endif
+
+#endif // VATTRIBUTE_HPP
+

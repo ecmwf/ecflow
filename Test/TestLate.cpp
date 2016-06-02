@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #7 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -84,6 +84,7 @@ BOOST_AUTO_TEST_CASE( test_late )
 
 BOOST_AUTO_TEST_CASE( test_late_hierarchically )
 {
+   // ECFLOW-610
    DurationTimer timer;
    cout << "Test:: ...test_late_hierarchically " << flush;
    char* the_env = getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS");

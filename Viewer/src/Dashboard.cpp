@@ -111,6 +111,8 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
 					ctl,SLOT(slotReload(VInfo_ptr)));
 
+        connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
+                    this,SLOT(slotInfoPanelSelection(VInfo_ptr)));
 		w=ctl;
 	}
 
@@ -181,13 +183,13 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 	if(!w)
 		return 0;
 
-	//The DashBoard or any of its child cannot be the parent of the
+	//The DashBoard or any of its children cannot be the parent of the
 	//dialog because in this case it would be always on top its parent. This is
 	//the behaviour when the dialog's parent is QMainWindow.
 	DashboardDialog* dia=new DashboardDialog(0);
 
     //So the parent is 0 and we will emit a signal from the Dashboard
-	//destructor to notify the dialog about it. Then we can be sure
+    //destructor to notify the dialog about the deletion. Then we can be
 	//sure that the dialog deletes itself when the Dashboard gets deleted.
     connect(this,SIGNAL(aboutToDelete()),
     		dia,SLOT(slotOwnerDelete()));
@@ -215,8 +217,12 @@ void Dashboard::addSearchDialog()
 		{
 			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
 				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
+
 		}
 	}
+
+    connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
 	//The dashboard signals the dialog on deletion
 	connect(this,SIGNAL(aboutToDelete()),
@@ -241,6 +247,9 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
 				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
 		}
 	}
+
+    connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
 	//The dashboard signals the dialog on deletion
 	connect(this,SIGNAL(aboutToDelete()),
@@ -434,6 +443,10 @@ void Dashboard::readSettings(VComboSettings* vs)
 	settingsAreRead_=false;
 }
 
+void Dashboard::slotInfoPanelSelection(VInfo_ptr info)
+{
+    selectInTreeView(info);
+}
 
 void Dashboard::selectFirstServerInView()
 {
@@ -444,6 +457,23 @@ void Dashboard::selectFirstServerInView()
 			return;
 		}
 	}
+}
+
+bool Dashboard::selectInTreeView(VInfo_ptr info)
+{
+    if(!info)
+        return false;
+
+    Q_FOREACH(DashboardWidget* w,widgets_)
+    {
+        if(w->type() == "tree")
+        {
+            w->setCurrentSelection(info);
+            return serverFilter_->isFiltered(info->server());
+        }
+    }
+
+    return false;
 }
 
 VInfo_ptr Dashboard::currentSelectionInView()

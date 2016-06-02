@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,7 @@
 #include "ConfigListDelegate.hpp"
 #include "IconProvider.hpp"
 #include "PropertyEditor.hpp"
+#include "SessionHandler.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
@@ -167,7 +168,10 @@ void PropertyDialog::load(VProperty* p)
 
 void PropertyDialog::writeSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-PropertyDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("PropertyDialog")),
+                       QSettings::NativeFormat);
 
 	//We have to clear it so that should not remember all the previous values
 	settings.clear();
@@ -180,7 +184,10 @@ void PropertyDialog::writeSettings()
 
 void PropertyDialog::readSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-PropertyDialog");
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("PropertyDialog")),
+                       QSettings::NativeFormat);
 
 	settings.beginGroup("main");
 	if(settings.contains("size"))

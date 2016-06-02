@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #36 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -53,18 +53,18 @@ const char* NodeAttrDoc::zombie_doc()
             "Please see: :py:class:`ecflow.ZombieType`, :py:class:`ecflow.ChildCmdType`, :py:class:`ecflow.ZombieUserActionType`\n"
             "\nConstructor::\n\n"
             "   ZombieAttr(ZombieType,ChildCmdTypes, ZombieUserActionType, lifetime)\n"
-            "      ZombieType           : Must be one of ZombieType.ecf, ZombieType.path, ZombieType.user\n"
-            "      ChildCmdType         : A list(ChildCmdType) of Child commands. Can be left empty in\n"
-            "                             which case the action affect all child commands\n"
-            "      ZombieUserActionType : One of [ fob, fail, block, remove, adopt ]\n"
-            "      int lifetime         : Defines the life time in seconds of the zombie in the server.\n"
-            "                             On expiration, zombie is removed automatically\n"
+            "      ZombieType            : Must be one of ZombieType.ecf, ZombieType.path, ZombieType.user\n"
+            "      ChildCmdType          : A list(ChildCmdType) of Child commands. Can be left empty in\n"
+            "                              which case the action affect all child commands\n"
+            "      ZombieUserActionType  : One of [ fob, fail, block, remove, adopt ]\n"
+            "      int lifetime<optional>: Defines the life time in seconds of the zombie in the server.\n"
+            "                              On expiration, zombie is removed automatically\n"
             "\nUsage::\n\n"
             "   # Add a zombie attribute so that child label commands(i.e ecflow_client --label)\n"
             "   # never block the job\n"
             "   s1 = ecflow.Suite('s1')\n"
             "   child_list = [ ChildCmdType.label ]\n"
-            "   zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob, 300)\n"
+            "   zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob)\n"
             "   s1.add_zombie(zombie_attr)\n"
             ;
 }

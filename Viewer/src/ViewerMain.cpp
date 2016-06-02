@@ -30,6 +30,7 @@
 #include "VConfig.hpp"
 #include "VServerSettings.hpp"
 #include "SessionHandler.hpp"
+#include "SessionDialog.hpp"
 
 int main(int argc, char **argv)
 {
@@ -85,10 +86,8 @@ int main(int argc, char **argv)
     MenuHandler::readMenuConfigFile(menuPath);
 
     //Load the custom context menu commands
-    SessionItem* cs=SessionHandler::instance()->current();
-    std::string cmdsPath=cs->recentCustomCommandsFile();
-    //CustomSavedCommandHandler::instance()->init(cmdsPath);
-    CustomCommandHistoryHandler::instance()->init(cmdsPath);
+    CustomCommandHistoryHandler::instance()->init();
+    CustomSavedCommandHandler::instance()->init();
     MenuHandler::refreshCustomMenuCommands();
 
     //Load the info panel definition
@@ -120,11 +119,29 @@ int main(int argc, char **argv)
     Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
 		      "ecflowview_palette.json")); 
 
-    //Build the GUI
-    MainWindow::init();
 
-    //Show all the windows
-    MainWindow::showWindows();
+	// startup - via the session manager, or straight to the main window?
+	bool startMainWindow = true;
 
-    return app.exec();
+	if (SessionHandler::requestStartupViaSessionManager())
+	{
+		SessionDialog sessionDialog;
+		if (sessionDialog.exec() != QDialog::Accepted)
+			startMainWindow = false;
+	}
+
+	if (startMainWindow)
+	{
+		//Build the GUI
+		MainWindow::init();
+
+		//Show all the windows
+		MainWindow::showWindows();
+
+		return app.exec();
+	}
+	else
+	{
+		return 0;  // user quit from within the session manager
+	}
 }

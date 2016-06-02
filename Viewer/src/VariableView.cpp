@@ -27,11 +27,12 @@
 
 VariableDelegate::VariableDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
-	selectPen_=QPen(QColor(8,117,182));
+    selectPen_=QPen(QColor(8,117,182));
     selectBrush_=QBrush(QColor(65,139,212));
     selectBrushBlock_=QBrush(QColor(48,102,178));
     borderPen_=QPen(QColor(230,230,230));
     genVarPixId_=IconProvider::add(":/viewer/genvar.svg","genvar");
+    shadowGenVarPixId_=IconProvider::add(":/viewer/genvar_shadow.svg","genvar_shadow");
 }
 
 void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -142,17 +143,25 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     			           lockPix.width(),lockPix.height());
     	}
 
-        bool gen=index.data(VariableModel::GenVarRole).toBool();
+        bool gen=index.data(VariableModel::GenVarRole).toBool();    
         if(gen && genVarPixId_ >= 0)
         {
-            hasGen=true;
+            int pixId=genVarPixId_;
+            if(index.data(VariableModel::ShadowRole).toBool())
+            {
+                pixId=shadowGenVarPixId_;
+            }
+            if(pixId >=0)
+            {
+                hasGen=true;
 
-            genPix=IconProvider::pixmap(genVarPixId_,textRect.height()-4);
-            genRect=QRect(textRect.left(),
+                genPix=IconProvider::pixmap(pixId,textRect.height()-4);
+                genRect=QRect(textRect.left(),
                           textRect.top()+(textRect.height()-genPix.height())/2,
                           genPix.width(), genPix.height());
 
-            textRect.moveLeft(genRect.right()+4);
+                textRect.moveLeft(genRect.right()+4);
+            }
         }
 
         if(textRect.right()+1 > option.rect.right())
@@ -188,6 +197,22 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         if(!fg.isValid())
             fg=Qt::black;
         painter->setPen(fg);
+
+        QRegExp rx("^(.+)\\s(\\S+)$");
+        //QRegExp rx("inherited from (\\S+) (\\S+)");
+        if(rx.indexIn(text) > -1 && rx.captureCount() == 2)
+        {
+            QFont f;
+            f.setPointSize(f.pointSize()-1);
+            QFontMetrics fm(f);
+            QString txt1=rx.cap(1);
+            textRect.setWidth(fm.width(txt1));
+            painter->setFont(f);
+            painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,txt1);
+            textRect.setLeft(textRect.right()+fm.width("D"));
+            text=rx.cap(2);
+        }
+
         QFont fBold;
         fBold.setPointSize(fBold.pointSize()-1);
         fBold.setBold(true);

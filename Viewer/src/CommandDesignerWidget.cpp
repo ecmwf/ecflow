@@ -9,6 +9,8 @@
 
 #include <boost/bind.hpp>
 
+#include <QMessageBox>
+
 #include "CommandDesignerWidget.hpp"
 #include "CustomCommandHandler.hpp"
 #include "Child.hpp"
@@ -31,7 +33,10 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	commandLineEdit_->setFocus();
 
 	haveSetUpDefaultCommandLine_ = false;
+	inCommandEditMode_           = false;
+	saveCommandsOnExit_          = false;
 
+	addToContextMenuCb_->setChecked(true);  // by default, suggest saving to context menu
 
 	// ensure the Save button is in the right state
 	on_commandLineEdit__textChanged();
@@ -39,16 +44,28 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	saveNameLineEdit_->setPlaceholderText(tr("Unnamed"));
 
 	currentCommandSaved_ = false;
-
 	refreshSavedCommandList();
 
+
+	setSaveOptionsState(false, true);
+
+
+	// ensure we start on the command-builder tab
+	changeToTab(TAB_BUILD);
+	on_tabWidget__currentChanged(TAB_BUILD);  // trigger the callback to ensure the correct visibility of the save buttons
 
 	// set up and populate our list of options to the ecflow client
 	// - this would be more efficient if we did it only once, in a singleton, but
 	//   it seems pretty fast so we'll leave it like this for now
+	initialiseComponentListDetails();
 	clientOptionsDescriptions_ = new po::options_description("help" , po::options_description::m_default_line_length + 80);
 	cmdRegistry_.addAllOptions(*clientOptionsDescriptions_);
 	addClientCommandsToComponentList();
+
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+	commandLineEdit_->setClearButtonEnabled(true);
+#endif
 
 
 	infoLabel_->setShowTypeTitle(false);
@@ -63,9 +80,12 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	connect(nodeSelectionView_, SIGNAL(selectionChanged()), this, SLOT(on_nodeSelectionChanged()));
 
 
+	setSavedCommandsButtonStatus();
+
+
 	// temporary
-	saveCommandGroupBox_->setVisible(false);
-	tabWidget_->setTabEnabled(2, false);
+	//saveCommandGroupBox_->setVisible(false);
+	//tabWidget_->setTabEnabled(2, false);
 	//savedCommandsGroupBox_->setVisible(false);
 
 }
@@ -74,7 +94,48 @@ CommandDesignerWidget::~CommandDesignerWidget()
 {
 	delete clientOptionsDescriptions_;
 
+	if (saveCommandsOnExit_)
+		CustomSavedCommandHandler::instance()->writeSettings();
+
 	MenuHandler::refreshCustomMenuCommands();
+}
+
+
+void CommandDesignerWidget::initialiseComponentListDetails()
+{
+
+	// we don't want all the available commands to appear in the component list because they
+	// are not all relevant for one reason or another
+
+	componentBlacklist_.clear();
+
+	// The following rely on standard out:
+	componentBlacklist_.push_back("help");
+	componentBlacklist_.push_back("get");
+	componentBlacklist_.push_back("get_state");
+	componentBlacklist_.push_back("ch_suites");
+	componentBlacklist_.push_back("migrate");
+	componentBlacklist_.push_back("ping");
+	componentBlacklist_.push_back("server_version");
+	componentBlacklist_.push_back("stats");
+	componentBlacklist_.push_back("status");
+	componentBlacklist_.push_back("suites");
+	componentBlacklist_.push_back("version");
+	componentBlacklist_.push_back("zombie_get");
+
+	// The following only make sense for a persistent client. (like GUI, python):
+	componentBlacklist_.push_back("news");
+	componentBlacklist_.push_back("sync");
+	componentBlacklist_.push_back("sync_full");
+
+	// The following require a prompt:
+	componentBlacklist_.push_back("delete");
+	componentBlacklist_.push_back("terminate");
+	componentBlacklist_.push_back("halt");
+
+	// The following only make sense in a group:
+	componentBlacklist_.push_back("show");
+	componentBlacklist_.push_back("why");
 }
 
 
@@ -89,6 +150,12 @@ void CommandDesignerWidget::initialiseCommandLine()
 
 		haveSetUpDefaultCommandLine_ = true;
 	}
+}
+
+
+void CommandDesignerWidget::changeToTab(TabIndexes i)
+{
+	tabWidget_->setCurrentIndex(i);
 }
 
 
@@ -118,7 +185,7 @@ void CommandDesignerWidget::on_nodeListLinkLabel__linkActivated(const QString &l
 {
 	if (link == "#nodes")
 	{
-		tabWidget_->setCurrentIndex(1);
+		changeToTab(TAB_NODES);
 	}
 }
 
@@ -162,11 +229,15 @@ void CommandDesignerWidget::addClientCommandsToComponentList()
 
 	for(size_t i = 0; i < numOptions; i++)
 	{
-		if (!ecf::Child::valid_child_cmd(options[i]->long_name()))  // do not show the 'child' options
+		std::string longName(options[i]->long_name());
+		if (!ecf::Child::valid_child_cmd(longName))  // do not show the 'child' options
 		{
-			componentsList_->addItem(QString("--") + QString::fromStdString(options[i]->long_name()));
-			QString statusTip(QString::fromStdString(options[i]->long_name()));
-			componentsList_->item(componentsList_->count()-1)->setStatusTip(statusTip);
+			if (std::find(componentBlacklist_.begin(), componentBlacklist_.end(), longName) == componentBlacklist_.end())  // not in blacklist?
+			{
+				componentsList_->addItem(QString("--") + QString::fromStdString(longName));
+				QString statusTip(QString::fromStdString(longName));
+				componentsList_->item(componentsList_->count()-1)->setStatusTip(statusTip);
+			}
 		}
 	}
 
@@ -217,22 +288,30 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem *item, bool showFull
 }
 
 
+void CommandDesignerWidget::on_tabWidget__currentChanged(int index)
+{
+	//bool onSaveTab = (index == TAB_SAVE);
+	//saveCommandGroupBox_->setVisible(onSaveTab);
+	//saveOptionsButton_->setVisible(!onSaveTab);
+}
 
-// when the mouse moves over an item, display the help text for it
+
+
+// when the mouse moves over a command, display the help text for it
 void CommandDesignerWidget::on_componentsList__itemEntered(QListWidgetItem *item)
 {
 	showCommandHelp(item, false);
 	initialiseCommandLine();
 }
 
-// when the mouse moves over an item, display the help text for it
+// when the mouse is clicked on a command, display the help text for it
 void CommandDesignerWidget::on_componentsList__itemClicked(QListWidgetItem *item)
 {
 	showCommandHelp(item, true);
 	commandLineEdit_->setFocus(); // to keep the text cursor visible
 }
 
-// when the mouse moves over an item, display the help text for it
+// when the mouse is double-clicked on a command, insert it into the command line box
 void CommandDesignerWidget::on_componentsList__itemDoubleClicked(QListWidgetItem *item)
 {
 	insertComponent(item);
@@ -242,7 +321,6 @@ void CommandDesignerWidget::on_componentsList__itemDoubleClicked(QListWidgetItem
 
 void CommandDesignerWidget::insertComponent(QListWidgetItem *item)
 {
-	//commandLineEdit_->setText("Silly");
 	commandLineEdit_->insert(item->text() + " ");
 }
 
@@ -254,7 +332,6 @@ void CommandDesignerWidget::on_commandLineEdit__textChanged()
 	runButton_->setEnabled((!commandLineEdit_->text().isEmpty()) && nodes_.size() > 0);
 
 	currentCommandSaved_ = false;
-
 	updateSaveButtonStatus();
 }
 
@@ -264,64 +341,95 @@ void CommandDesignerWidget::on_saveNameLineEdit__textChanged()
 	updateSaveButtonStatus();
 }
 
+void CommandDesignerWidget::on_addToContextMenuCb__stateChanged()
+{
+	currentCommandSaved_ = false;
+	updateSaveButtonStatus();
+}
+
+
 void CommandDesignerWidget::updateSaveButtonStatus()
 {
-
-	// logic:
-	// - if no row in the saved command table is selected, then 'overwrite'
-	//   is disabled
-	// - if nothing has been modified, then 'overwrite' is disabled
-	// - otherwise 'overwrite' is enabled
-	// - if the name is not empty, and it exists in the current list, then
-	//   then 'save as new' is disabled
-	// - if no command is entered, then both buttons are disabled
-
-	if (savedCommandsTable_->currentRow() == -1 ||
-		currentCommandSaved_ ||
-		commandLineEdit_->text().isEmpty())
-		overwriteButton_->setEnabled(false);
-	else
+	// inCommandEditMode_ means we're editing a command from the saved list
+	if (inCommandEditMode_)
+	{
 		overwriteButton_->setEnabled(true);
-
-
-	int thisRow = CustomSavedCommandHandler::instance()->findIndexFromName(saveNameLineEdit_->text().toStdString());
-
-	if ((!saveNameLineEdit_->text().isEmpty() && thisRow != -1) ||
-		commandLineEdit_->text().isEmpty())
 		saveAsNewButton_->setEnabled(false);
+	}
 	else
-		saveAsNewButton_->setEnabled(true);
-
-
-
-/*
-
-	saveAsNewButton_->setEnabled((!commandLineEdit_->text().isEmpty()));
-
-
-	if (commandLineEdit_->text().isEmpty() || currentCommandSaved_)
 	{
 		overwriteButton_->setEnabled(false);
+		saveAsNewButton_->setEnabled(true);
 	}
-	else
-	{
-		overwriteButton_->setEnabled(true);
-	}
-*/
-/*
-	// if the currently-entered name already exists in our list of
-	// commands, change the Save button to 'Overwrite'
 
-	QString name(saveNameLineEdit_->text());
-	if (!name.isEmpty() && CustomCommandHandler::instance()->find(name.toStdString()))
+	// the cancel button is only available if we're in edit mode
+	cancelSaveButton_->setEnabled(inCommandEditMode_);
+}
+
+
+void CommandDesignerWidget::setSavedCommandsButtonStatus()
+{
+	int row = savedCommandsTable_->currentRow();
+	bool isRowSelected = (row != -1);
+	deleteCommandButton_   ->setEnabled(isRowSelected);
+	editCommandButton_     ->setEnabled(isRowSelected);
+	duplicateCommandButton_->setEnabled(isRowSelected);
+	useCommandButton_      ->setEnabled(isRowSelected);
+
+	upButton_  ->setEnabled(isRowSelected && row != 0);  // not the first row
+	downButton_->setEnabled(isRowSelected && row != savedCommandsTable_->rowCount()-1); // not the last row
+}
+
+
+bool CommandDesignerWidget::validSaveName(const std::string &name)
+{
+	// name empty?
+	if (name.empty())
 	{
-		overwriteButton_->setText(tr("Overwrite"));
+		QMessageBox::critical(0,QObject::tr("Custom command"), tr("Please enter a name for the command"));
+		return false;
+	}
+
+
+	// is there already a command with this name?
+	int commandWithThisName = CustomSavedCommandHandler::instance()->findIndexFromName(name);
+	bool nameUnique;
+	if (inCommandEditMode_)
+		nameUnique =  (commandWithThisName == -1 || commandWithThisName == savedCommandsTable_->currentRow());
+	else
+		nameUnique =  (commandWithThisName == -1);
+
+	if (!nameUnique)
+	{
+		QMessageBox::critical(0,QObject::tr("Custom command"), tr("A command with that name already exists - please choose another name"));
+		return false;
 	}
 	else
 	{
-		overwriteButton_->setText(tr("Save"));
+		return true;
 	}
-*/
+}
+
+void CommandDesignerWidget::selectRow(int row)
+{
+	savedCommandsTable_->setCurrentCell(row, 0);
+}
+
+
+void CommandDesignerWidget::selectLastSavedCommand()
+{
+	int lastRow = savedCommandsTable_->rowCount()-1;
+	selectRow(lastRow);
+}
+
+// swap the commands in these two positions and select the one which will end up in the second position
+void CommandDesignerWidget::swapSavedCommands(int i1, int i2)
+{
+	CustomSavedCommandHandler::instance()->swapCommandsByIndex(i1, i2);
+	refreshSavedCommandList();
+	selectRow(i2);
+	setSavedCommandsButtonStatus();
+	saveCommandsOnExit_ = true;  // we won't save the commands yet, but mark for save on exit
 }
 
 
@@ -333,10 +441,18 @@ void CommandDesignerWidget::on_saveAsNewButton__clicked()
 	name    = saveNameLineEdit_->text().toStdString();
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
-	CustomCommand *cmd = CustomSavedCommandHandler::instance()->add(name, command, context, true);
-	refreshSavedCommandList();
-	currentCommandSaved_ = true;
-	updateSaveButtonStatus();
+
+	if (validSaveName(name))
+	{
+		CustomCommand *cmd = CustomSavedCommandHandler::instance()->add(name, command, context, true);
+		refreshSavedCommandList();
+		currentCommandSaved_ = true;
+		updateSaveButtonStatus();
+		changeToTab(TAB_SAVE);
+		selectLastSavedCommand();
+		setSavedCommandsButtonStatus();
+		setSaveOptionsState(true, true);
+	}
 }
 
 void CommandDesignerWidget::on_overwriteButton__clicked()
@@ -347,10 +463,17 @@ void CommandDesignerWidget::on_overwriteButton__clicked()
 	name    = saveNameLineEdit_->text().toStdString();
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
-	CustomCommand *cmd = CustomSavedCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
-	refreshSavedCommandList();
-	currentCommandSaved_ = true;
-	updateSaveButtonStatus();
+
+	if (validSaveName(name))
+	{
+		CustomCommand *cmd = CustomSavedCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
+		savedCommandsTable_->setEnabled(true);  // to show that we are no longer busy editing an entry
+		inCommandEditMode_ = false;
+		refreshSavedCommandList();
+		currentCommandSaved_ = true;
+		updateSaveButtonStatus();
+		setSaveOptionsState(true, true);
+	}
 }
 
 
@@ -367,6 +490,110 @@ void CommandDesignerWidget::on_runButton__clicked()
 	//accept();
 }
 
+void CommandDesignerWidget::setSaveOptionsState(bool optionsVisible, bool saveOptionsButtonEnabled)
+{
+	// we just switch to the Saved Commands tab
+	//changeToTab(TAB_SAVE);
+
+    saveCommandGroupBox_->setVisible(optionsVisible);
+    QString buttonText = (optionsVisible) ? "Save Options <<" :  "Save Options >>";
+    saveOptionsButton_->setText(buttonText);
+    saveOptionsVisible_ = optionsVisible;
+    saveOptionsButton_->setEnabled(saveOptionsButtonEnabled);
+}
+
+
+void CommandDesignerWidget::on_saveOptionsButton__clicked()
+{
+	setSaveOptionsState(!saveOptionsVisible_, true);
+
+	// we just switch to the Saved Commands tab
+	//changeToTab(TAB_SAVE);
+}
+
+
+void CommandDesignerWidget::on_useCommandButton__clicked()
+{
+	// just put the command into the command edit box
+	int row = savedCommandsTable_->currentRow();
+	QTableWidgetItem *commandItem = savedCommandsTable_->item(row, 2);
+	commandLineEdit_->setText(commandItem->text());
+}
+
+
+void CommandDesignerWidget::on_editCommandButton__clicked()
+{
+	int row = savedCommandsTable_->currentRow();
+
+	// get the details of this command from the table
+	QTableWidgetItem *nameItem    = savedCommandsTable_->item(row, 0);
+	QTableWidgetItem *contextItem = savedCommandsTable_->item(row, 1);
+	QTableWidgetItem *commandItem = savedCommandsTable_->item(row, 2);
+
+
+	inCommandEditMode_ = true;
+
+	// insert the details into the edit boxes
+	commandLineEdit_->setText(commandItem->text());
+	saveNameLineEdit_->setText(nameItem->text());
+	std::string context = contextItem->text().toStdString();
+	addToContextMenuCb_->setChecked(CustomSavedCommandHandler::instance()->stringToBool(context));
+
+	savedCommandsTable_    ->setEnabled(false);  // to show that we are busy editing an entry
+	deleteCommandButton_   ->setEnabled(false);  // to show that we are busy editing an entry
+	editCommandButton_     ->setEnabled(false);  // to show that we are busy editing an entry
+	duplicateCommandButton_->setEnabled(false);  // to show that we are busy editing an entry
+	useCommandButton_      ->setEnabled(false);  // to show that we are busy editing an entry
+	upButton_              ->setEnabled(false);  // to show that we are busy editing an entry
+	downButton_            ->setEnabled(false);  // to show that we are busy editing an entry
+
+	updateSaveButtonStatus();
+
+	// users should have the Save Options visible
+	setSaveOptionsState(true, false);
+}
+
+
+void CommandDesignerWidget::on_savedCommandsTable__cellDoubleClicked(int row, int column)
+{
+	on_editCommandButton__clicked();  // same as selecting a cell and clicking 'edit'
+}
+
+void CommandDesignerWidget::on_duplicateCommandButton__clicked()
+{
+	CustomSavedCommandHandler::instance()->duplicate(savedCommandsTable_->currentRow());
+	refreshSavedCommandList();
+}
+
+
+void CommandDesignerWidget::on_deleteCommandButton__clicked()
+{
+	CustomSavedCommandHandler::instance()->remove(savedCommandsTable_->currentRow());
+	refreshSavedCommandList();
+}
+
+void CommandDesignerWidget::on_upButton__clicked()
+{
+	int row = savedCommandsTable_->currentRow();
+	swapSavedCommands(row, row-1);
+}
+
+void CommandDesignerWidget::on_downButton__clicked()
+{
+	int row = savedCommandsTable_->currentRow();
+	swapSavedCommands(row, row+1);
+}
+
+
+void CommandDesignerWidget::on_cancelSaveButton__clicked()
+{
+	savedCommandsTable_->setEnabled(true);  // to show that we are no longer busy editing an entry
+	inCommandEditMode_ = false;
+	updateSaveButtonStatus();
+	refreshSavedCommandList();
+	setSaveOptionsState(true, true);
+}
+
 
 void CommandDesignerWidget::refreshSavedCommandList()
 {
@@ -379,14 +606,15 @@ void CommandDesignerWidget::refreshSavedCommandList()
 		CustomCommand *command = CustomSavedCommandHandler::instance()->commandFromIndex(i);
 		addCommandToSavedList(command, i);
 	}
+	savedCommandsTable_->setRowCount(n);
+	setSavedCommandsButtonStatus();
 }
-
 
 
 void CommandDesignerWidget::addCommandToSavedList(CustomCommand *command, int row)
 {
 	QTableWidgetItem *nameItem    = new QTableWidgetItem(QString::fromStdString(command->name()));
-	QTableWidgetItem *contextItem = new QTableWidgetItem();
+	QTableWidgetItem *contextItem = new QTableWidgetItem(QString::fromStdString(command->contextString()));
 	QTableWidgetItem *commandItem = new QTableWidgetItem(QString::fromStdString(command->command()));
 
 	// if the command already exists (by name) then we will replaced it;
@@ -404,20 +632,14 @@ void CommandDesignerWidget::addCommandToSavedList(CustomCommand *command, int ro
 		savedCommandsTable_->insertRow(row);
 
 	savedCommandsTable_->setItem(row, 0, nameItem);
+	savedCommandsTable_->setItem(row, 1, contextItem);
 	savedCommandsTable_->setItem(row, 2, commandItem);
 }
 
 
 void CommandDesignerWidget::on_savedCommandsTable__cellClicked(int row, int column)
 {
-	// get the details of this command from the table
-	QTableWidgetItem *nameItem    = savedCommandsTable_->item(row, 0);
-	QTableWidgetItem *contextItem = savedCommandsTable_->item(row, 1);
-	QTableWidgetItem *commandItem = savedCommandsTable_->item(row, 2);
-
-	// insert the details into the edit boxes
-	commandLineEdit_->setText(commandItem->text());
-	saveNameLineEdit_->setText(nameItem->text());
+	setSavedCommandsButtonStatus();
 }
 
 

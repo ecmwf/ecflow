@@ -16,7 +16,6 @@
 
 bool UserMessage::echoToCout_ = true;  // XXX should be false to start with
 
-
 UserMessage::UserMessage()
 {
 }
@@ -61,4 +60,14 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
 void UserMessage::debug(const std::string& message)
 {
         std::cout << "DEBUG : " << message << std::endl;
+}
+
+void UserMessage::qdebug(QString message)
+{
+        std::cout << "DEBUG : " << message.toStdString() << std::endl;
+}
+
+std::string UserMessage::toString(int v)
+{
+    return QString::number(v).toStdString();
 }

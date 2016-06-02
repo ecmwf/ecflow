@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #14 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,6 +22,7 @@
 #include "boost/filesystem/operations.hpp"
 
 #include "ServerEnvironment.hpp"
+#include "EcfPortLock.hpp"
 #include "Log.hpp"
 #include "Host.hpp"
 #include "Str.hpp"
@@ -65,9 +66,16 @@ public:
    virtual void shutdown() { Server::shutdown(); }
    virtual void halted() { Server::halted(); }
    virtual void restart() { Server::restart(); }
+
    virtual bool reloadWhiteListFile(std::string& errorMsg) { return Server::reloadWhiteListFile(errorMsg);}
    virtual bool authenticateReadAccess(const std::string& user) { return Server::authenticateReadAccess(user); }
+   virtual bool authenticateReadAccess(const std::string& user, const std::string& path) { return Server::authenticateReadAccess(user,path); }
+   virtual bool authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths){ return Server::authenticateReadAccess(user,paths); }
+
    virtual bool authenticateWriteAccess(const std::string& user) { return Server::authenticateWriteAccess(user); }
+   virtual bool authenticateWriteAccess(const std::string& user, const std::string& path) { return Server::authenticateWriteAccess(user,path); }
+   virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths){ return Server::authenticateWriteAccess(user,paths); }
+
    virtual bool lock(const std::string& user) { return Server::lock(user); }
    virtual void unlock() { Server::unlock();}
    virtual const std::string& lockedUser() const { return Server::lockedUser(); }
@@ -83,11 +91,23 @@ BOOST_AUTO_TEST_CASE( test_server )
 {
    cout << "Server:: ...test_server\n";
 
+   // Create a unique port number, allowing debug and release,gun,cland,intil to run at the same time
+   // Hence the lock file is not sufficient. Hence we will make a client server call.
+   std::string the_port1 = "3144" ;
+   cout << "Find free port to start server, starting with port " << the_port1 << "\n";
+   int the_port = boost::lexical_cast<int>(the_port1);
+   while (!EcfPortLock::is_free(the_port)) the_port++;
+   std::string port = boost::lexical_cast<std::string>(the_port);
+   EcfPortLock::create(port);
+   cout << "Found free port: " << port << "\n";
+
+   std::string server_port = "--port=" + port;
    int argc = 3;
    char* argv[] = { const_cast<char*>("ServerEnvironment"),
-                     const_cast<char*>("--port=3144"),
-                     const_cast<char*>("--ecfinterval=12")
-                   };
+                    const_cast<char*>(server_port.c_str()),
+                    const_cast<char*>("--ecfinterval=12")
+                  };
+
 
    ServerEnvironment server_environment(argc, argv);  // This can throw ServerEnvironmentException
    std::string errorMsg;
@@ -103,7 +123,7 @@ BOOST_AUTO_TEST_CASE( test_server )
 
       //for(size_t i = 0; i < server_variables.size(); ++i)  cout << server_variables[i].dump() << "\n";
       const std::string& ecf_port = theServer.defs()->server().find_variable("ECF_PORT");
-      BOOST_REQUIRE_MESSAGE(ecf_port == "3144","Expected port 3144 but found " << ecf_port << " defs server variables, should be in sync with server");
+      BOOST_REQUIRE_MESSAGE(ecf_port == port,"Expected port " << port << " but found " << ecf_port << " defs server variables, should be in sync with server");
 
 
       const std::string& interval = theServer.defs()->server().find_variable("ECF_INTERVAL");
@@ -125,8 +145,10 @@ BOOST_AUTO_TEST_CASE( test_server )
       BOOST_REQUIRE_MESSAGE(theServer.state() == SState::RUNNING,"Expected unlock to restart server ");
    }
 
+   // cleanup
    Host h;
-   fs::remove(h.ecf_log_file(Str::DEFAULT_PORT_NUMBER()));
+   fs::remove(h.ecf_log_file(port));
+   EcfPortLock::remove(port);
 
    /// Destroy Log singleton to avoid valgrind from complaining
    Log::destroy();

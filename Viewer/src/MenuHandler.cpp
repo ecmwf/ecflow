@@ -31,6 +31,7 @@
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
 #include "VConfig.hpp"
+#include "VNode.hpp"
 #include "CustomCommandHandler.hpp"
 
 int MenuItem::idCnt_=0;
@@ -145,7 +146,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setCommand(command);
 
 
-                BaseNodeCondition *enabledCond = NodeExpressionParser::parseWholeExpression(enabled);
+                BaseNodeCondition *enabledCond = NodeExpressionParser::instance()->parseWholeExpression(enabled);
                 if (enabledCond == NULL)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
@@ -154,7 +155,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setEnabledCondition(enabledCond);
 
 
-                BaseNodeCondition *visibleCond = NodeExpressionParser::parseWholeExpression(visible);
+                BaseNodeCondition *visibleCond = NodeExpressionParser::instance()->parseWholeExpression(visible);
                 if (visibleCond == NULL)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));
@@ -162,7 +163,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
                 item->setVisibleCondition(visibleCond);
 
-                BaseNodeCondition *questionCond = NodeExpressionParser::parseWholeExpression(questFor);
+                BaseNodeCondition *questionCond = NodeExpressionParser::instance()->parseWholeExpression(questFor);
                 if (questionCond == NULL)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse question condition: " + questFor));
@@ -261,7 +262,8 @@ void MenuHandler::refreshCustomMenuCommands()
 {
     BaseNodeCondition *trueCond  = new TrueNodeCondition();
     BaseNodeCondition *falseCond = new FalseNodeCondition();
-    CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
+	CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
+	CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
 
     Menu *menu = findMenu("Custom");
     if (menu)
@@ -269,28 +271,55 @@ void MenuHandler::refreshCustomMenuCommands()
         menu->clearFixedList();
 
         // create the 'compulsary' menu items
-        MenuItem *item1 = new MenuItem("New command...");
+        MenuItem *item1 = new MenuItem("Manage commands...");
         item1->setCommand("custom");
         addItemToMenu(item1, "Custom");
         item1->setEnabledCondition(trueCond);
         item1->setVisibleCondition(trueCond);
         item1->setQuestionCondition(falseCond);
+        item1->setIcon("configure.svg");
 
-        MenuItem *item2 = new MenuItem("-");
-        addItemToMenu(item2, "Custom");
-        item2->setEnabledCondition(trueCond);
-        item2->setVisibleCondition(trueCond);
-        item2->setQuestionCondition(falseCond);
+		// Saved commands
+		MenuItem *item2 = new MenuItem("-");
+		addItemToMenu(item2, "Custom");
+		item2->setEnabledCondition(trueCond);
+		item2->setVisibleCondition(trueCond);
+		item2->setQuestionCondition(falseCond);
 
-        MenuItem *item3 = new MenuItem("Recent");
-        addItemToMenu(item3, "Custom");
-        item3->setEnabledCondition(falseCond);
-        item3->setVisibleCondition(trueCond);
-        item3->setQuestionCondition(falseCond);
+		int numSavedCommands = customSavedCmds->numCommands();
 
-        int numCommands = customRecentCmds->numCommands();
+		for (int i = 0; i < numSavedCommands; i++)
+		{
+			CustomCommand *cmd = customSavedCmds->commandFromIndex(i);
+			if (cmd->inContextMenu())
+			{
+				MenuItem *item = new MenuItem(cmd->name());
+				item->setCommand(cmd->command());
+				item->setEnabledCondition(trueCond);
+				item->setVisibleCondition(trueCond);
+				item->setQuestionCondition(trueCond);
+				item->setStatustip("__cmd__");
+				addItemToMenu(item, "Custom");
+			}
+		}
 
-        for (int i = 0; i < numCommands; i++)
+
+		// Recently executed commands
+		MenuItem *item3 = new MenuItem("-");
+		addItemToMenu(item3, "Custom");
+		item3->setEnabledCondition(trueCond);
+		item3->setVisibleCondition(trueCond);
+		item3->setQuestionCondition(falseCond);
+
+		MenuItem *item4 = new MenuItem("Recent");
+		addItemToMenu(item4, "Custom");
+		item4->setEnabledCondition(falseCond);
+		item4->setVisibleCondition(trueCond);
+		item4->setQuestionCondition(falseCond);
+
+		int numRecentCommands = customRecentCmds->numCommands();
+
+		for (int i = 0; i < numRecentCommands; i++)
         {
             CustomCommand *cmd = customRecentCmds->commandFromIndex(i);
 
@@ -321,13 +350,17 @@ Menu *MenuHandler::findMenu(const std::string &name)
 
 MenuItem* MenuHandler::findItem(QAction* ac)
 {
-	for(std::vector<Menu*>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
+	// ac could be NULL, e.g. if the user clicked on a separator instead of a menu item
+	if (ac)
 	{
-		for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
+		for(std::vector<Menu*>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
 		{
-			if((*it)->id() == ac->data().toInt())
+			for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
 			{
-				return *it;
+				if((*it)->id() == ac->data().toInt())
+				{
+					return *it;
+				}
 			}
 		}
 	}
@@ -361,9 +394,9 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
 }
 
 
-QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view)
+MenuItem *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view)
 {
-    QAction *selectedAction = NULL;
+    MenuItem *selectedItem = NULL;
     Menu *menu = findMenu(menuName);
 
     if (menu)
@@ -376,7 +409,8 @@ QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_
 
         if (qMenu)
         {
-            selectedAction = qMenu->exec(pos);
+            QAction* selectedAction = qMenu->exec(pos);
+            selectedItem=MenuHandler::findItem(selectedAction);
 
             delete qMenu;
 
@@ -386,12 +420,10 @@ QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_
             	assert(parent == ac->parent());
             	delete ac;
             }
-
-
         }
     }
 
-    return selectedAction;
+    return selectedItem;
 }
 
 // -----------------------------------------------------------------

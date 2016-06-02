@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -127,7 +127,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 //	cerr << " directory =  " << directory << "\n";
 
 	// SET ECF_HOME
-	std::string smshome = directory;
+	std::string ecf_home = directory;
 
 	fs::path full_path( fs::initial_path<fs::path>() );
 	full_path = fs::system_complete( fs::path( directory ) );
@@ -148,7 +148,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 		// variable substitution. hence if variable substitution fails its likely to be
 		// a bug in autoDiscoverVariables
 		std::set<std::string> discoveredVariables;
-		autoDiscoverVariables(smshome + "/includes", discoveredVariables );
+		autoDiscoverVariables(ecf_home + "/includes", discoveredVariables );
 		BOOST_FOREACH(const string& var, discoveredVariables) {
 // 			cerr << "autoDiscoverVariables = " << var << "\n";
 			suite->addVariable( Variable( var, "gobblygook" ) );
@@ -160,12 +160,12 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 			try {
 				fs::path relPath( directory + "/" + dir_itr->path().filename().string());
 
-				// Ignore directores were only interested in .ecf files.
+				// Ignore directories were only interested in .ecf files.
  				if (fs::is_directory(relPath)) continue;
             if (File::getExt(relPath.filename().string()) != "ecf" ) continue; // ignore other files
 
 				//std::cout << "......Parsing file " << relPath.string() << "\n";
- 				//std::cout << "adding task name " << relPath.leaf() << "\n";
+ 				//std::cout << "      adding task name " << relPath.leaf() << "\n";
  				fam->add_task( relPath.stem().string() );
 			}
 			catch ( const std::exception & ex ) {
@@ -180,7 +180,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
  	theDefs.getAllTasks(theTasks);
 
 	// Override ECF_HOME.   ECF_HOME is need to locate the ecf files
-	theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),smshome);
+	theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
 
 	/// begin , will cause creation of generated variables. The generated variables
 	/// are used in client scripts(sms) and used to locate the sms files
@@ -189,7 +189,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 	// Test Job creator, this will pre-process and perform variable substitution on ecf files
 	BOOST_FOREACH(Task* t, theTasks) {
 
-	   //cout << "task " << t->absNodePath() << "\n";
+	   //cout << "  task " << t->absNodePath() << "\n";
 	   JobsParam jobsParam; // create jobs =  false, spawn_jobs = false
 	   bool ok = t-> submitJob( jobsParam ) ;
 

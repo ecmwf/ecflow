@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #52 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -63,6 +63,7 @@ public:
 	/// returns the server port. This has a default value defined in server_environment.cfg
 	/// but can be overridden by the environment variable ECF_PORT
 	int port() const { return serverPort_;}
+	std::string the_port() const;
 
 	/// returns the TCP protocol. default is TCPv4. Can be changed via command line to TCPv6
 	boost::asio::ip::tcp tcp_protocol() const { return tcp_protocol_;}
@@ -151,8 +152,12 @@ public:
 	/// At the moment we will only implement options a/ and b/
 	//
 	/// Returns true if the given user has access to the server, false otherwise
-	bool authenticateReadAccess(const std::string& user)const;
+   bool authenticateReadAccess(const std::string& user)const;
+   bool authenticateReadAccess(const std::string& user,const std::string& path)const;
+   bool authenticateReadAccess(const std::string& user,const std::vector<std::string>& paths)const;
  	bool authenticateWriteAccess(const std::string& user) const;
+   bool authenticateWriteAccess(const std::string& user,const std::string& path)const;
+   bool authenticateWriteAccess(const std::string& user,const std::vector<std::string>& paths)const;
 
 	/// return true if help option was selected
    bool help_option() const  { return help_option_; }
@@ -172,9 +177,6 @@ private:
 
 	/// Get the standard environment variables, overwrite any settings from config file
 	void read_environment_variables(std::string& log_file_name);
-
-	/// Convert server port to a string
-	std::string serverPort() const;
 
 	void change_dir_to_ecf_home_and_check_accesibility();
 

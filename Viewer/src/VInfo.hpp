@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -48,12 +48,12 @@ public:
 
 	virtual bool isServer() {return false;}
 	virtual bool isNode()  {return false;}
-	virtual bool isAtrribute()  {return false;}
+    virtual bool isAttribute()  {return false;}
 	virtual bool isEmpty()  {return true;}
 
-    ServerHandler* server() {return server_;}
-	VNode* node()  {return node_;}
-	virtual VAttribute* attribute() {return NULL;}
+    ServerHandler* server() const {return server_;}
+    VNode* node() const {return node_;}
+    virtual VAttribute* attribute() const {return NULL;}
 
 	virtual std::string name()=0;
     virtual std::string path()=0;
@@ -76,8 +76,9 @@ public:
     void notifyServerActivityChanged(ServerHandler* server) {}
     void notifyServerSuiteFilterChanged(ServerHandler* server) {}
 
-    // Overload + operator to add two Box objects.
     bool operator ==(const VInfo&);
+
+    static VInfo_ptr createParent(VInfo_ptr);
 
 protected:
 	VInfo(ServerHandler* server,VNode* node);
@@ -97,14 +98,9 @@ class VInfoServer : public VInfo, public boost::enable_shared_from_this<VInfo>
 public:
 	bool isServer() {return true;}
     bool isEmpty() {return false;}
-
-    void accept(VInfoVisitor*);
-
-    //void variables(std::vector<Variable>& vars);
-    //void genVariables(std::vector<Variable>& vars);
+    void accept(VInfoVisitor*);   
     std::string name();
     std::string path();
-
     static VInfo_ptr create(ServerHandler*);
 
 protected:
@@ -118,167 +114,41 @@ class VInfoNode: public VInfo, public boost::enable_shared_from_this<VInfo>
 public:
 	bool isNode() {return true;}
 	bool isEmpty() {return false;}
-
 	void accept(VInfoVisitor*);
-    std::string path();
-
-    //const std::string&  nodeType();
-
-	//virtual std::string genVariable(const std::string& key);
-	//void variables(std::vector<Variable>& vars);
-	//void genVariables(std::vector<Variable>& vars);
-	std::string name();
-	//std::string fullPath();
-
+    std::string path();  
+	std::string name();	
 	static VInfo_ptr create(VNode*);
 
 protected:
 	VInfoNode(ServerHandler*,VNode*);
 };
 
+
 // Implements the info  base class for attribute selections
 class VInfoAttribute: public VInfo, public boost::enable_shared_from_this<VInfo>
 {
 public:
-	bool isAttribute() {return true;}
+    ~VInfoAttribute();
+    VAttribute* attribute() const {return attr_;}
+    bool isAttribute() {return true;}
 	bool isEmpty() {return false;}
-	void accept(VInfoVisitor*);
-
-	std::string name() {return std::string();}
-    std::string path() {return std::string();}
-
-	static VInfo_ptr create(ServerHandler*,VNode*,VAttribute*,int);
-
-protected:
-	VInfoAttribute(ServerHandler*,VNode*,VAttribute*,int);
-
-	mutable VAttribute* att_;
-	mutable int attIndex_;
-};
-
-
-
-
-
-
-
-/*
-class VInfo
-{
-public:
-	enum NodeOrder {ChildToParentOrder,ParentToChildOrder};
-
-	VInfo();
-	virtual ~VInfo() {};
-
-	virtual bool isServer() {return false;}
-	virtual bool isNode()  {return false;}
-	virtual bool isAtrribute()  {return false;}
-	virtual bool isEmpty()  {return true;}
-
-	virtual ServerHandler* server() {return server_;};
-	virtual VNode* node()  {return node_;}
-	virtual VAttribute* attribute() {return att_;}
-
-	virtual std::string genVariable(const std::string& key) {return "";}
-	virtual void variables(std::vector<Variable>& vars) {};
-	virtual void genVariables(std::vector<Variable>& vars) {};
-	virtual std::string name() {return std::string();}
-	virtual std::string fullPath() {return std::string();}
-
-	void ancestors(ServerHandler **server,std::vector<VNode*>& nodes);
-	std::vector<VNode*> ancestors(NodeOrder);
-    bool sameAs(const VNode* n,bool checkAncestors=false);
-	
-    virtual void accept(VInfoVisitor*)=0;
-
-    static const std::string&  nodeType(VNode*);
-
-	static VInfo* make(ServerHandler*);
-	static VInfo* make(VNode*,ServerHandler* server=0);
-	static VInfo* make(VAttribute*,int,VNode*);
-
-protected:
-	VInfo(ServerHandler*);
-	VInfo(VNode*,ServerHandler* server);
-	VInfo(VAttribute*,int attIndex,VNode*,ServerHandler* server);
-
-	mutable ServerHandler* server_;
-	mutable VNode* node_;
-	mutable VAttribute* att_;
-	mutable int attIndex_;
-
-	std::string nodePath_;
-};
-
-*/
-
-//typedef boost::shared_ptr<VInfo>   VInfo_ptr;
-
-/*
-// Implements the info object for server selections
-class VInfoServer : public VInfo
-{
-public:
-	VInfoServer(ServerHandler*);
-
-	bool isServer() {return true;}
-    bool isEmpty() {return false;}
-    void accept(VInfoVisitor*);
-
-    void variables(std::vector<Variable>& vars);
-    void genVariables(std::vector<Variable>& vars);
+	void accept(VInfoVisitor*);   
     std::string name();
-    std::string fullPath() {return name();}
-};
+    std::string path();
 
-
-
-// Implements the info object for node selections
-class VInfoNode: public VInfo
-{
-public:
-	VInfoNode(VNode*,ServerHandler* server=0);
-
-	bool isNode() {return true;}
-	bool isEmpty() {return false;}
-
-	ServerHandler* server();
-	void accept(VInfoVisitor*);
-	const std::string&  nodeType();
-
-	virtual std::string genVariable(const std::string& key);
-	void variables(std::vector<Variable>& vars);
-	void genVariables(std::vector<Variable>& vars);
-	std::string name();
-	std::string fullPath();
-
+    static VInfo_ptr create(VNode*,int);
 
 protected:
-};
+    VInfoAttribute(ServerHandler*,VNode*,VAttribute*);
 
-// Implements the info  base class for attribute selections
-class VInfoAttribute: public VInfo
-{
-public:
-	VInfoAttribute(VAttribute*,int,VNode*,ServerHandler*);
-
-	bool isAttribute() {return true;}
-	bool isEmpty() {return false;}
-	void accept(VInfoVisitor*);
+    mutable VAttribute* attr_;
 };
-
-// Implements the info object limit attributes
-class VInfoLimit: public VInfoAttribute
-{
-public:
-	VInfoLimit(VAttribute*,int,VNode*,ServerHandler* server=0);
-};
-*/
 
 //=================================================
 // Factory to make attribute info objects
 //=================================================
+
+#if 0
 
 class VInfoAttributeFactory
 {
@@ -286,8 +156,8 @@ public:
 	explicit VInfoAttributeFactory(const std::string&);
 	virtual ~VInfoAttributeFactory();
 
-	virtual VInfoAttribute* make(VAttribute*,int,VNode*,ServerHandler* server=0) = 0;
-	static VInfoAttribute* create(VAttribute* att,int attIndex,VNode* node,ServerHandler* server=0);
+    virtual VInfoAttribute* make(VAttributeType*,int,VNode*,ServerHandler* server=0) = 0;
+    static VInfoAttribute* create(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server=0);
 
 private:
 	explicit VInfoAttributeFactory(const VInfoAttributeFactory&);
@@ -298,11 +168,14 @@ private:
 template<class T>
 class  VInfoAttributeMaker : public VInfoAttributeFactory
 {
-	VInfoAttribute* make(VAttribute* att,int attIndex,VNode* node,ServerHandler* server=0)
+    VInfoAttribute* make(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server=0)
 	       { return new T(att,attIndex,node,server); }
 public:
 	 explicit VInfoAttributeMaker(const std::string& name) : VInfoAttributeFactory(name) {}
 };
+
+
+#endif
 
 typedef boost::shared_ptr<VInfoServer>   VInfoServer_ptr;
 typedef boost::shared_ptr<VInfoNode>   VInfoNode_ptr;
@@ -312,8 +185,8 @@ typedef boost::shared_ptr<VInfoAttribute>   VInfoAttribute_ptr;
 class VInfoVisitor
 {
 public:
-	VInfoVisitor() {};
-	virtual ~VInfoVisitor() {};
+    VInfoVisitor() {}
+    virtual ~VInfoVisitor() {}
 
 	virtual void visit(VInfoServer*)=0;
 	virtual void visit(VInfoNode*)=0;
@@ -324,13 +197,12 @@ public:
 class VInfoObserver
 {
 public:
-	VInfoObserver() {};
-	virtual ~VInfoObserver() {};
+    VInfoObserver() {}
+    virtual ~VInfoObserver() {}
 
 	virtual void notifyDataLost(VInfo*)=0;
 	virtual void notifyDelete(VInfo*)=0;
 };
-
 
 /*class VInfoVisitor
 {

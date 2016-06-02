@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,8 +19,8 @@ class VNodeChange;
 class NodeObserver
 {
 public:
-	NodeObserver() {};
-	virtual ~NodeObserver() {};
+    NodeObserver() {}
+    virtual ~NodeObserver() {}
 
 	virtual void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;
 	virtual void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;

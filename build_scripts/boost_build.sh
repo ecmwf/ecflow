@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Copyright 2009-2015 ECMWF. 
+## Copyright 2009-2016 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -26,7 +26,7 @@ echo "BOOST_ROOT=$BOOST_ROOT"
 #
 SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/v2/site-config.jam
 BOOST_VERSION="$(basename $BOOST_ROOT)"
-if [ "$BOOST_VERSION" = boost_1_56_0 -o "$BOOST_VERSION" = boost_1_57_0 -o "$BOOST_VERSION" = boost_1_58_0 ] ; then
+if [ "$BOOST_VERSION" = boost_1_56_0 -o "$BOOST_VERSION" = boost_1_57_0 -o "$BOOST_VERSION" = boost_1_58_0 -o "$BOOST_VERSION" = boost_1_61_0 ] ; then
    SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/src/site-config.jam
 fi
 
@@ -81,9 +81,11 @@ if test_uname Linux ; then
       if [ $tool = gcc ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
-      		# for boost 1.53 and > gcc 4.8 get a lot warning messages use suppress
-      		#CXXFLAGS=-no-unused-local-typedefs 
-      		
+            # for boost 1.53 and > gcc 4.8 -Wno-unused-local-typedefs  : get a lot warning messages , suppress
+            # for boost 1.53 and > gcc 6.1 -Wno-deprecated-declarations: std::auto_ptr deprecated messages, suppress
+            CXXFLAGS=cxxflags=-Wno-unused-local-typedefs
+            #CXXFLAGS="cxxflags=-Wno-unused-local-typedefs,-Wno-deprecated-declarations"
+       		
   	  elif [ $tool = intel ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
@@ -130,28 +132,28 @@ echo "using compiler $tool with build $1 variants "
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=debug -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=debug -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=debug  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=debug -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=debug -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=debug  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=debug  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-regex variant=debug  -j2   # ecflowUi
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=debug  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-serialization  variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=debug  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-thread variant=debug  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-regex variant=debug  -j2   # ecflowUi
  
 
 
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=release -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=release  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=release   -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=release -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=release -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=release  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-regex variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release   -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-serialization  variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-thread variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-regex variant=release  -j2
 
 
 # Allow python to be disabled  
@@ -169,10 +171,10 @@ else
    #
    # To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
    #
-   ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
-   ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
-   ./bjam toolset=$tool link=static variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
-   ./bjam toolset=$tool link=static variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=shared variant=debug   "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=static variant=debug   "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
 
  

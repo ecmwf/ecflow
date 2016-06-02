@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #50 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -127,6 +127,7 @@ public:
    static const std::string& ECF_JOBOUT();
    static const std::string& ECF_SCRIPT();
    static const std::string& ECF_DUMMY_TASK();
+   static const std::string& ECF_NO_SCRIPT();
    static const std::string& ECF_MICRO();
    static const std::string& ECF_FILES();
    static const std::string& ECF_FETCH();

@@ -34,9 +34,10 @@ ecflow_client --terminate=yes
 # =======================================================================
 rm -rf `hostname`.4141.*
 
-export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
+#export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
 ecflow_server&
 sleep 4
+ecflow_client --server_version
 
 # =======================================================================
 # load the build defs, in the server then delete generated defs.
@@ -57,6 +58,6 @@ cd /var/tmp/ma0/workspace/metabuilder
 cd $SCRATCH
 ecflowview &
 
-module load ecflow/4.1.0-develop
+module load ecflow/4.1.0
 ecflow_ui &
 

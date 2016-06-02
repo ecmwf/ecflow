@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #62 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -392,6 +392,11 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 	}
 
 	return doJobSubmission( as );
+}
+
+bool AlterCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,paths_);
 }
 
 const char* AlterCmd::arg()  { return CtsApi::alterArg();}
@@ -842,22 +847,32 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
 
 	case AlterCmd::LABEL: {
-	   // ECFLOW-480 take into account label values that is a path, add ing quotes around the value does not help:
-      // Note boost program options will remove the quotes around the value
-      //      hence its difficult to say what is an option and what is a path.
-      //      However since we expect 3 options, work around the problem
-	   if (options.size() == 3  && paths.size() > 1) {
-	      options.push_back(paths[0]);
-	      paths.erase(paths.begin());  // remove first path, since it has been added to options
+
+	   if (options.size() == 3 && paths.size() == 1) {
+	      // ECFLOW-648 allow label value to be empty
+	      // HOWEVER , we can not cope multiple paths, and setting value to empty.
+	      // since empty quotes are removed by boost program options, hence if we have a lavel value which is path, and multiple paths
+	      value.clear();
 	   }
-		if (options.size() != 4) {
-			ss << "AlterCmd: change label expected at least five args : change label <label_name> <label_value> <path_to_node> ";
-			ss << " but found  " << (options.size() + paths.size()) << " arguments. the label value should be quoted\n";
-			ss << dump_args(options,paths) << "\n";
-			throw std::runtime_error( ss.str() );
-		}
-		name = options[2];
-		value = options[3];
+	   else {
+	      // ECFLOW-480 take into account label values that is a path, add ing quotes around the value does not help:
+	      // Note boost program options will remove the quotes around the value
+	      //      hence its difficult to say what is an option and what is a path.
+	      //      However since we expect 4(change,label,<label_name>,<label_value>) options, work around the problem
+	      if (options.size() == 3  && paths.size() > 1) {
+	         options.push_back(paths[0]);
+	         paths.erase(paths.begin());  // remove first path, since it has been added to options
+	      }
+	      if (options.size() != 4) {
+	         ss << "AlterCmd: change label expected at least five args : change label <label_name> <label_value> <path_to_node> ";
+	         ss << " but found  " << (options.size() + paths.size()) << " arguments. the label value should be quoted\n";
+	         ss << dump_args(options,paths) << "\n";
+	         throw std::runtime_error( ss.str() );
+	      }
+	      value = options[3];
+	   }
+	   name = options[2];
+
 		Label check(name,value); // Check name , by creating
 		break; }
 

@@ -14,19 +14,20 @@
 #include "VFilter.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "VTree.hpp"
 
 #include <QDebug>
 #include <QMetaMethod>
 
-//#define _UI_VMODELDATA_DEBUG
+#define _UI_VMODELDATA_DEBUG
 
 void VTreeChangeInfo::addStateChange(const VNode* n)
 {
     VNode* s=n->suite();
-    assert(s);
+    Q_ASSERT(s->isTopLevel());
+    Q_ASSERT(s);
     if(std::find(stateSuites_.begin(),stateSuites_.end(),s) == stateSuites_.end())
         stateSuites_.push_back(s);
 }
@@ -109,12 +110,21 @@ void VTreeServer::notifyDefsChanged(ServerHandler* server, const std::vector<ecf
     //TODO: what about node or attr num changes!
 }
 
+void VTreeServer::notifyServerDelete(ServerHandler*)
+{
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("VTreeServer::notifyServerDelete ---> should never be called!!");
+#endif
+    Q_ASSERT(0);
+}
+
 void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
 {
     //When the server scan begins we must be in inScan mode so that the model should think that
     //this server tree is empty.
     inScan_=true;
     Q_ASSERT(tree_->numOfChildren() == 0);
+    changeInfo_->clear();
 }
 
 void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
@@ -145,6 +155,7 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
 void VTreeServer::notifyBeginServerClear(ServerHandler* server)
 {
     Q_EMIT beginServerClear(this,-1);
+    changeInfo_->clear();
     tree_->clear();
     filter_->clear();
     inScan_=true;
@@ -336,7 +347,8 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
                         Q_EMIT nodeChanged(this,node);
                 }
 
-                changeInfo_->addStateChange(vnode);
+                if(!vnode->isServer())
+                    changeInfo_->addStateChange(vnode);
 
 #ifdef _UI_VMODELDATA_DEBUG
                 UserMessage::debug("   node status changed: " + vnode->strName());
@@ -377,6 +389,8 @@ void VTreeServer::notifyEndNodeChange(const VNode* vnode, const std::vector<ecf:
 
 void VTreeServer::reload()
 {
+    changeInfo_->clear();
+
     Q_EMIT beginServerClear(this,-1);
     tree_->clear();
     inScan_=true;
@@ -402,7 +416,7 @@ void VTreeServer::reload()
 
 
 void VTreeServer::attrFilterChanged()
-{
+{   
     //In the tree root the attrNum must be cached/initialised
     Q_ASSERT(tree_->isAttrInitialised());
     int oriNum=tree_->attrNum(attrFilter_)+tree_->numOfChildren();
@@ -467,6 +481,14 @@ int VTableServer::indexOf(const VNode* node) const
 //--------------------------------------------------
 // ServerObserver methods
 //--------------------------------------------------
+
+void VTableServer::notifyServerDelete(ServerHandler*)
+{
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("VTableServer::notifyServerDelete ---> should never be called!!");
+#endif
+    Q_ASSERT(0);
+}
 
 void VTableServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
 {
@@ -763,8 +785,16 @@ void VModelData::notifyServerFilterAdded(ServerItem* item)
 
 void VModelData::notifyServerFilterRemoved(ServerItem* item)
 {
-	if(!item)
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("VModelData::notifyServerFilterRemoved --> ");
+#endif
+
+    if(!item)
 		return;
+
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("   server=" + item->name());
+#endif
 
 	int i=0;
 	for(std::vector<VModelServer*>::iterator it=servers_.begin(); it!= servers_.end(); ++it)
@@ -773,18 +803,31 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
 		{
             int nodeNum=(*it)->nodeNum();
 
+#ifdef _UI_VMODELDATA_DEBUG
+            UserMessage::debug("   emit serverRemoveBegin");
+#endif
             //Notifies the model that a change will happen
             Q_EMIT serverRemoveBegin(*it,nodeNum);
 
 			delete *it;
 			servers_.erase(it);
 
+#ifdef _UI_VMODELDATA_DEBUG
+            UserMessage::debug("   emit serverRemoveEnd");
+#endif
 			//Notifies the model that the change has finished
             Q_EMIT serverRemoveEnd(nodeNum);
-			return;
+#ifdef _UI_VMODELDATA_DEBUG
+     UserMessage::debug("<-- VModelData::notifyServerFilterRemoved");
+#endif
+            return;
 		}
 		i++;
-	}
+    }
+
+#ifdef _UI_VMODELDATA_DEBUG
+     UserMessage::debug("<-- VModelData::notifyServerFilterRemoved");
+#endif
 }
 
 void VModelData::notifyServerFilterChanged(ServerItem* item)
@@ -833,6 +876,10 @@ void VModelData::setActive(bool active)
 
 void VModelData::reload(bool broadcast)
 {
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("VModelData::reload --> ");
+#endif
+
     Q_ASSERT(active_);
 
     if(broadcast)
@@ -845,10 +892,18 @@ void VModelData::reload(bool broadcast)
 
     if(broadcast)
          Q_EMIT filterChangeEnded();
+
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("<-- VModelData::reload");
+#endif
 }
 
 void VModelData::slotFilterDefChanged()
 {
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("VModelData::slotFilterDefChanged --> ");
+#endif
+
     if(active_)
         reload(true);
 }

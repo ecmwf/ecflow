@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #36 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -145,6 +145,11 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
 
 	/// Change of state, do immediate job generation
    return doJobSubmission( as );
+}
+
+bool ForceCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,paths_);
 }
 
 const char* ForceCmd::arg()  { return CtsApi::forceArg();}

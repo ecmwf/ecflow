@@ -15,7 +15,7 @@
 #include <QStringList>
 
 class VNode;
-class VAttribute;
+class VAttributeType;
 class AttributeFilter;
 class VTreeServer;
 class VTree;
@@ -37,11 +37,10 @@ public:
     virtual VTree* root() const;
     virtual VTreeServer* server() const;
 
+    int attrRow(int row,AttributeFilter *filter) const;
     int attrNum(AttributeFilter* filter=0) const;
     bool isAttrInitialised() const;
     void updateAttrNum(AttributeFilter* filter=0);
-    QStringList getAttributeData(int row,VAttribute*& type,AttributeFilter *filter=0);
-    int getAttributeLineNum(int row,AttributeFilter *filter=0);
     void resetAttrNum();
 
     virtual bool isTopLevel() const {if(parent_) return (parent_->parent())?false:true; return false;}

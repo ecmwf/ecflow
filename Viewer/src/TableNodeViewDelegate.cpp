@@ -36,6 +36,9 @@ TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
     if(propVec.empty())
     {
         propVec.push_back("view.table.font");
+
+        //Base settings
+        addBaseSettings(propVec);
     }
 
     prop_=new PropertyMapper(propVec,this);
@@ -60,6 +63,9 @@ void TableNodeViewDelegate::updateSettings()
 	    	Q_EMIT sizeHintChangedGlobal();
 	    }
 	}
+
+    //Update the settings handled by the base class
+    updateBaseSettings();
 }
 
 void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,

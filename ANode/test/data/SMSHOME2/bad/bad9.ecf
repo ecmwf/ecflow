@@ -1,12 +1,2 @@
-#======================================================================
-# test recursive include
-#======================================================================
-%include <recursive_head.h>
 
-
-echo do some work
-sleep 10
-echo end of job
-
-
- 
+sleep %SLEEPTIME # test for uneven number for microcharacter's with comments

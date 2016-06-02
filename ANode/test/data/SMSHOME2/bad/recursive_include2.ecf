@@ -1,0 +1,6 @@
+# test for recursive includes
+%include <a.h>
+
+# a.h -> b.h -> d.h
+#               e.h -> b.h
+#        c.h

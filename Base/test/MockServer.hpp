@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #26 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -52,8 +52,14 @@ public:
  	virtual void halted() {}
  	virtual void restart() {}
 	virtual bool reloadWhiteListFile(std::string&) { return true;}
- 	virtual bool authenticateReadAccess(const std::string& ) { return true;}
- 	virtual bool authenticateWriteAccess(const std::string& ) { return true;}
+
+ 	virtual bool authenticateReadAccess(const std::string&) { return true;}
+   virtual bool authenticateReadAccess(const std::string&, const std::string&){ return true;}
+   virtual bool authenticateReadAccess(const std::string&, const std::vector<std::string>&) { return true;}
+ 	virtual bool authenticateWriteAccess(const std::string&) { return true;}
+   virtual bool authenticateWriteAccess(const std::string&, const std::string&){ return true;}
+   virtual bool authenticateWriteAccess(const std::string&, const std::vector<std::string>&){ return true;}
+
  	virtual bool lock(const std::string& user) {
  		if (userWhoHasLock_.empty()) {
  			userWhoHasLock_ = user;

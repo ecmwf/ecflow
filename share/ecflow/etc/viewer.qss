@@ -70,7 +70,7 @@ QToolButton#pathMenuTb:hover{
 QLabel[previewLabel="1"] {
     padding: 2px;
     border-radius: 4px;
-    background: rgb(255,180,180);
+    background: rgb(234,215,150);
     border: 2px solid rgb(210,210,210);
 }
 
@@ -205,6 +205,17 @@ QLabel[fileInfo="1"] {
      background: rgb(244, 239, 216);
 }
   
+/*----------------------------
+  Editor info label
+------------------------------*/
+
+QLabel[editorInfo="1"] {
+     border: 1px solid rgb(206,209,196);
+     /*background: rgb(252, 241, 219);  */
+     background: rgb(242, 242, 242);
+}
+
+
 /*----------------------------
   Property editor
 ------------------------------*/

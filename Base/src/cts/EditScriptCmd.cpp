@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #37 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -240,6 +240,11 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
    vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
 
 	return PreAllocatedReply::ok_cmd();
+}
+
+bool EditScriptCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,path_to_node_);
 }
 
 const char* EditScriptCmd::arg()  { return CtsApi::edit_script_arg();}

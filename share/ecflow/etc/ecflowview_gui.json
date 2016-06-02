@@ -1,7 +1,12 @@
 {
 	"gui" : {
-							
- 		"appearance":  {
+
+        "hidden" : {
+            "visible" : "false",
+            "line" : "panel.variable.showShadowed"
+        },
+
+        "appearance":  {
  			"label": "Appearance",
  			"desc" : "Appearance",
  			"icon" : "colour.svg",
@@ -113,14 +118,21 @@
                         "line" : "tree.drawBranchLine",
                         "line" : "tree.background"                        
                     },
-                             
+                    "group" : {
+                        "title" : "Tooltips",
+                        "prefix" : "view.tree",
+
+                        "line" : "serverToolTip",
+                        "line" : "nodeToolTip",
+                        "line" : "attributeToolTip"
+                    },
                     "group" : {
                         "title" : "Attributes",
                         "prefix" : "view.tree",
                         
                         "line" : "attributesPolicy",
                         "line" : "defaultAttributes"
-                   }                                                               
+                   }
                 },
                 
                 "tab" : {
@@ -133,7 +145,22 @@
                     
                         "line" : "background"                                          
                     }                                          
-                }                                      
+                },
+                "tab" : {
+
+                    "label"  : "Attributes",
+
+                    "group" : {
+                        "title" : "Options",
+                        "prefix" : "view.attribute",
+
+                        "line" : "eventFillColour",
+                        "line" : "meterFillColour",
+                        "line" : "meterThresholdColour",
+                        "line" : "limitFillColour"
+                    }
+                }
+
 			}
  		},	
             
@@ -357,9 +384,7 @@
  				"line" : "updateRateInSec",
  				"line" : "adaptiveUpdate",
                 "note" : {
-                    "default": "When enabled the server update period is <u>increased at every automatic\n
-                         update</u> until the maximum period is reached. If the user in the meantime updates the\n
-                         server manually the update period is set back to its original value and whole process starts again."
+                    "default": "When enabled the server update period is <u>increased at every automatic update</u> until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again."
                 },
                 "line" : "adaptiveUpdateIncrementInSec",                
  				"line" : "maxAdaptiveUpdateRateInMin"

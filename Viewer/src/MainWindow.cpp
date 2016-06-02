@@ -37,6 +37,7 @@
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
 #include "SessionHandler.hpp"
+#include "SaveSessionAsDialog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VSettings.hpp"
@@ -54,7 +55,14 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     setAttribute(Qt::WA_DeleteOnClose);
 
-    setWindowTitle(QString::fromStdString(VConfig::instance()->appLongName()) + "  -  Preview version");
+    // add the name of the session to the title bar?
+    std::string sessionName = SessionHandler::instance()->current()->name();
+    if (sessionName == "default")
+        sessionName = "";
+    else
+        sessionName = " (session: " + sessionName + ")";
+
+    setWindowTitle(QString::fromStdString(VConfig::instance()->appLongName()) + "  -  Preview version" + QString::fromStdString(sessionName));
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -80,14 +88,14 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     	    this,SLOT(slotContentsChanged()));
 
     //Add temporary preview label
-    /*QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
+    QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
     label->setAutoFillBackground(true);
     label->setProperty("previewLabel","1");
 
     QLabel *label1=new QLabel("      ",this);
 
     viewToolBar->addWidget(label1);
-    viewToolBar->addWidget(label);*/
+    viewToolBar->addWidget(label);
 
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -106,6 +114,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     //Add notification widget
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
+
 
     //actionSearch->setVisible(false);
 
@@ -222,6 +231,13 @@ void MainWindow::on_actionPreferences_triggered()
 	delete d;
 }
 
+
+void MainWindow::on_actionManageSessions_triggered()
+{
+	QMessageBox::information(0, tr("Manage Sessions"),
+		tr("To manage sessions, please restart ecFlowUI with the -s command-line option"));
+}
+
 void MainWindow::slotConfigChanged()
 {
 	configChanged(this);
@@ -272,6 +288,13 @@ void MainWindow::on_actionAbout_triggered()
     AboutDialog d;
     d.exec();
 }
+
+void MainWindow::on_actionSaveSessionAs_triggered()
+{
+    SaveSessionAsDialog d;
+    d.exec();
+}
+
 
 void MainWindow::slotCurrentChangedInPanel()
 {
@@ -373,6 +396,11 @@ void MainWindow::rerenderContents()
 void MainWindow::slotContentsChanged()
 {
 	MainWindow::saveContents(NULL);
+}
+
+bool MainWindow::selectInTreeView(VInfo_ptr info)
+{
+    return nodePanel_->selectInTreeView(info);
 }
 
 //==============================================================
@@ -500,6 +528,13 @@ void MainWindow::configChanged(MainWindow* owner)
 			win->rerenderContents();
 }
 
+void MainWindow::changeNotifySelectionChanged(VInfo_ptr info)
+{
+    Q_FOREACH(MainWindow *win,windows_)
+        if(win->selectInTreeView(info))
+            return;
+}
+
 //Return true if close is allowed, false otherwise
 bool MainWindow::aboutToClose(MainWindow* win)
 {
@@ -527,7 +562,7 @@ bool MainWindow::aboutToClose(MainWindow* win)
 		}
 		else if(windows_.count() == 1)
 		{
-			return MainWindow::aboutToQuit(win);
+            return MainWindow::aboutToQuit(win);
 		}
 		return true;
 	}
@@ -535,19 +570,23 @@ bool MainWindow::aboutToClose(MainWindow* win)
 
 bool MainWindow::aboutToQuit(MainWindow* topWin)
 {
-  	if(QMessageBox::question(0,tr("Confirm quit"),
+#if 0
+    if(QMessageBox::question(0,tr("Confirm quit"),
   			     tr("Do you want to quit ") +
   			     QString::fromStdString(VConfig::instance()->appName()) + "?",
 			     QMessageBox::Yes | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Yes)
 	{
-		quitStarted_=true;
+#endif
+        quitStarted_=true;
 
 		//Save browser settings
 		MainWindow::save(topWin);
 
 		//Exit ecFlowView
 		QApplication::quit();
-	}
+#if 0
+    }
+#endif
 
 	return false;
 }

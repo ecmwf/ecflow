@@ -64,6 +64,23 @@
       </spacer>
      </item>
      <item>
+      <widget class="QToolButton" name="shadowTb">
+       <property name="toolTip">
+        <string>Show &lt;b&gt;shadowed&lt;/b&gt; variables. A variable is shadowed when it is redefined in one of the descendants of its node shown in this panel.</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>:/viewer/show_shadowed.svg</normaloff>:/viewer/show_shadowed.svg</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QToolButton" name="addTb">
        <property name="text">
         <string>...</string>
@@ -115,7 +132,7 @@
      <normaloff>:/viewer/images/add.svg</normaloff>:/viewer/images/add.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;New variable</string>
+    <string>Add &amp;new variable</string>
    </property>
    <property name="toolTip">
     <string>Add new variable</string>
@@ -130,7 +147,7 @@
      <normaloff>:/viewer/edit.svg</normaloff>:/viewer/edit.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Properties</string>
+    <string>&amp;Edit variable</string>
    </property>
    <property name="toolTip">
     <string>See/edit variable's properties</string>
@@ -145,7 +162,7 @@
      <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>&amp;Delete variable</string>
    </property>
    <property name="toolTip">
     <string>Delete variable</string>

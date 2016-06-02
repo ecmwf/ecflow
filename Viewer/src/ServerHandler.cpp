@@ -526,7 +526,7 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd)
 		std::string nodeName;
 		ServerHandler* serverHandler = info->server();
 
-		if(info->isNode())
+        if(info->isNode() || info->isAttribute())
 		{
 			nodeFullName = info->node()->node()->absNodePath();
 			nodeName = info->node()->node()->name();
@@ -580,30 +580,72 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
 
 		std::map<ServerHandler*,std::string> targetNodeNames;
 		std::map<ServerHandler*,std::string> targetNodeFullNames;
+        std::map<ServerHandler*,std::string> targetParentFullNames;
+
 
 		//Figure out what objects (node/server) the command should be applied to
 		for(int i=0; i < info.size(); i++)
 		{
 			std::string nodeFullName;
-			std::string nodeName;
+            std::string nodeName;
+            std::string parentFullName;
+
+            if(realCommand.find("<node_name>") != std::string::npos)
+            {
+               nodeName=info[i]->name();
+            }
+
+            if(realCommand.find("<full_name>") != std::string::npos)
+            {
+               if(info[i]->isNode())
+                   nodeFullName = info[i]->node()->absNodePath();
+               else if(info[i]->isServer())
+                   info[i]->server()->longName();
+               else if(info[i]->isAttribute())
+                   parentFullName = info[i]->node()->absNodePath();
+            }
+
+            if(realCommand.find("<parent_name>") != std::string::npos)
+            {
+               if(info[i]->isNode())
+               {
+                   if(VNode *p=info[i]->node()->parent())
+                       parentFullName = p->absNodePath();
+               }
+               else if(info[i]->isAttribute())
+                   parentFullName = info[i]->node()->absNodePath();
+            }
+
+#if 0
+            nodeName = info[i]->name();
 
 			//Get the name
 			if(info[i]->isNode())
 			{
-				nodeName     = info[i]->node()->node()->name();
-				nodeFullName = info[i]->node()->node()->absNodePath();
-				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
+                //nodeName     = info[i]->name();
+                nodeFullName = info[i]->node()->absNodePath();
+                if(realCommand.
+
+                parentFullName = info[i]->node()->parent()->absNodePath();
+                //UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
 			}
 			else if(info[i]->isServer())
-			{
-				nodeName     = info[i]->server()->name();
+			{               
 				nodeFullName = info[i]->server()->longName();
 				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 			}
+            else if(info[i]->isAttribute())
+            {
+                nodeFullName = nodeName;
+                parentFullName = info[i]->node()->absNodePath();
+                //UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
+            }
+#endif
 
 			//Storre the names per target servers
 			targetNodeNames[info[i]->server()] += " " + nodeName;
 			targetNodeFullNames[info[i]->server()] += " " + nodeFullName;
+            targetParentFullNames[info[i]->server()] += " " + parentFullName;
 
 			//info[i]->server()->targetNodeNames_     += " " + nodeName;      // build up the list of nodes for each server
 			//info[i]->server()->targetNodeFullNames_ += " " + nodeFullName;  // build up the list of nodes for each server
@@ -625,16 +667,16 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
 
 			// replace placeholders with real node names
 
-			std::string placeholder("<full_name>");
-			//ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeFullNames_);
+			std::string placeholder("<full_name>");			
 			ecf::Str::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
 
-			placeholder = "<node_name>";
-			//ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeNames_);
+			placeholder = "<node_name>";			
 			ecf::Str::replace_all(realCommand, placeholder, targetNodeNames[serverHandler]);
 
-			UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
+            placeholder = "<parent_name>";
+            ecf::Str::replace_all(realCommand, placeholder, targetParentFullNames[serverHandler]);
 
+			UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
 
 			// get the command into the right format by first splitting into tokens
 			// and then converting to argc, argv format
@@ -1190,7 +1232,6 @@ void ServerHandler::resetFinished()
 		{
 			ServerState& st=defs->set_server();
 			st.hostPort(std::make_pair(host_,port_));
-			st.add_or_update_user_variables("nameInViewer",name_);
 		}
 	}
 

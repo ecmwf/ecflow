@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #173 $
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -638,10 +638,26 @@ bool Server::authenticateReadAccess(const std::string& user)
 {
    return serverEnv_.authenticateReadAccess(user);
 }
+bool Server::authenticateReadAccess(const std::string& user, const std::string& path)
+{
+   return serverEnv_.authenticateReadAccess(user,path);
+}
+bool Server::authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths)
+{
+   return serverEnv_.authenticateReadAccess(user,paths);
+}
 
 bool Server::authenticateWriteAccess(const std::string& user )
 {
    return serverEnv_.authenticateWriteAccess(user);
+}
+bool Server::authenticateWriteAccess(const std::string& user, const std::string& path)
+{
+   return serverEnv_.authenticateWriteAccess(user,path);
+}
+bool Server::authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths)
+{
+   return serverEnv_.authenticateWriteAccess(user,paths);
 }
 
 bool Server::lock(const std::string& user)

@@ -15,6 +15,8 @@
 class DirectoryHandler
 {
 public:
+    enum FileType {File, Dir};
+
     DirectoryHandler();
 
     static void init(const std::string& exePath);
@@ -24,11 +26,21 @@ public:
     static std::string rcDir()    {return rcDir_;}
     static std::string concatenate(const std::string &path1, const std::string &path2);
     static std::string tmpFileName();
-    static void createDir(const std::string& path);
+    static bool createDir(const std::string& path);
+
+    static void findDirContents(const std::string &dirPath,const std::string &filterStr,
+                FileType type, std::vector<std::string>& res);
 
     static void findFiles(const std::string &dirPath,const std::string &regExpPattern,
     		    std::vector<std::string>& res);
 
+    static void findDirs(const std::string &dirPath,const std::string &regExpPattern,
+                std::vector<std::string>& res);
+
+    static bool copyDir(const std::string &srcDir, const std::string &destDir, std::string &errorMessage);
+    static bool removeDir(const std::string &dir, std::string &errorMessage);
+    static bool renameDir(const std::string &dir, const std::string &newName, std::string &errorMessage);
+    static bool removeFile(const std::string &file, std::string &errorMessage);
     static bool isFirstStartUp();
 
 private:

@@ -43,7 +43,8 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
-	void addSearchDialog();
+    bool selectInTreeView(VInfo_ptr);
+    void addSearchDialog();
 
 	void notifyServerFilterAdded(ServerItem* item);
 	void notifyServerFilterRemoved(ServerItem* item);
@@ -68,6 +69,7 @@ protected Q_SLOTS:
     void slotDockClose();
     void slotDialogFinished(int);
     void slotPopInfoPanel(QString);
+    void slotInfoPanelSelection(VInfo_ptr);
 
 private:
 	DashboardWidget* addWidgetCore(const std::string& type);

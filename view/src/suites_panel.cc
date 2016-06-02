@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #9 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -97,7 +97,9 @@ void suite_lister2::next(suite_lister2&)
 
 void suites_panel::show(node& n)
 {
-  if (done) return; done = true; clear();
+  if (done) return;
+  done = true;
+  clear();
   // XmListDeleteAllItems(list_);  
   { std::vector<std::string> sv1; n.serv().suites(SUITES_LIST,sv1); 
     suite_lister1 sl1(list_, sv1); sl1.run(); }

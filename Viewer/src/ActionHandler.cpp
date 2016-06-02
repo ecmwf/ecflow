@@ -28,6 +28,9 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "CustomCommandDialog.hpp"
+#include "UserMessage.hpp"
+
+#define _UI_ACTIONHANDLER_DEBUG
 
 ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 {
@@ -45,18 +48,15 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 
 void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 {
-
     std::string view=parent_->property("view").toString().toStdString();
-    QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_,view);
+    MenuItem* item=MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_,view);
 
-    if(action)
+    if(item)
     {
-    	MenuItem* item=MenuHandler::findItem(action);
-    	
-        if(!item)
-            return;
-        
-        
+
+#ifdef _UI_ACTIONHANDLER_DEBUG
+        UserMessage::debug("ActionHandler::contextMenu --> item=" + item->name());
+#endif
     	if(item->handler() == "info_panel")
     	{
     		Q_EMIT infoPanelCommand(nodesLst.at(0),QString::fromStdString(item->command()));
@@ -118,41 +118,43 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
         	bool ok=true;
         	if(item && !item->question().empty() && item->shouldAskQuestion(nodesLst))
         	{
+                std::string fullNames("<ul>");
                 std::string nodeNames("<ul>");
                 if (nodesLst.size() == 1)
                 {
-                    nodeNames = nodesLst[0]->path();
+                    fullNames = nodesLst[0]->path();
+                    nodeNames = "<b>" + nodesLst[0]->name() + "</b>";
                 }
                 else
-                {
-                    const int maxItems = 5;  // list no more than this number of nodes
+                {                    
                     int numNodes = nodesLst.size();
                     int numItemsToList = std::min(numNodes, 5);
 
                     for(int i=0; i < numItemsToList; i++)
                     {
+                        fullNames += "<li><b>";
+                        fullNames += nodesLst[i]->path();
+                        fullNames += "</b></li>";
+
                         nodeNames += "<li><b>";
-                        nodeNames += nodesLst[i]->path();
-                        nodeNames += "</b></li>";
-                        //if (i < nodesLst.size()-1)
-                        //    nodeNames += "<br>";
+                        nodeNames += nodesLst[i]->name();
+                        nodeNames += "</b></li>";                    
                     }
                     if(numItemsToList < nodesLst.size())
-                    {
-                        std::string numExtra;  // to convert from int to string
-                        std::ostringstream ss;
-                        ss << (numNodes-numItemsToList);
-                        numExtra = ss.str();
+                    {                  
+                        std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
 
+                        fullNames += "<b>...and " + numExtra + " more </b></li>";
                         nodeNames += "<b>...and " + numExtra + " more </b></li>";
                     }
+                    fullNames += "</ul>";
                     nodeNames += "</ul>";
                 }
 
                 std::string question(item->question());
 
 			    std::string placeholder("<full_name>");
-			    ecf::Str::replace_all(question, placeholder, nodeNames);
+                ecf::Str::replace_all(question, placeholder, fullNames);
                 placeholder = "<node_name>";
 			    ecf::Str::replace_all(question, placeholder, nodeNames);
 

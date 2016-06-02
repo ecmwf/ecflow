@@ -16,7 +16,7 @@
 #include "ConnectState.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VFileInfo.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
@@ -29,8 +29,9 @@
 //=================================================
 
 VNode::VNode(VNode* parent,node_ptr node) :
+    VItem(parent),
     node_(node),
-    parent_(parent),
+    //parent_(parent),
 #if 0
     attrNum_(-1),
     cachedAttrNum_(-1),
@@ -69,7 +70,8 @@ VNode* VNode::suite() const
 
 bool VNode::isTopLevel() const
 {
-	return (parent_ && parent_->isServer());
+    return isSuite();
+    //return (parent_ && parent_->isServer());
 	//return (node_)?(node_->isSuite() != NULL):false;
 }
 
@@ -103,7 +105,7 @@ void VNode::beginUpdateAttrNum()
 void VNode::endUpdateAttrNum()
 {
 	cachedAttrNum_=attrNum_;
-	attrNum_=VAttribute::totalNum(this);
+    attrNum_=VAttributeType::totalNum(this);
 }
 
 short VNode::cachedAttrNum() const
@@ -114,13 +116,13 @@ short VNode::cachedAttrNum() const
 
 int VNode::attrNum(AttributeFilter *filter) const
 {     
-    return VAttribute::totalNum(this,filter);
+    return VAttributeType::totalNum(this,filter);
 
 #if 0
     //If if was not initialised we get its value
 	if(attrNum_==-1)
 	{
-		attrNum_=VAttribute::totalNum(this);
+        attrNum_=VAttributeType::totalNum(this);
 
 		if(cachedAttrNum_ == -1)
 			cachedAttrNum_=attrNum_;
@@ -134,31 +136,48 @@ int VNode::attrNum(AttributeFilter *filter) const
 #if 0
 short VNode::currentAttrNum() const
 {
-	return VAttribute::totalNum(this);
+    return VAttributeType::totalNum(this);
 }
 #endif
 
-
-QStringList VNode::getAttributeData(int row,VAttribute*& type)
+QStringList VNode::getAttributeData(int row,VAttributeType*& type)
 {
 	QStringList lst;
-	VAttribute::getData(this,row,type,lst);
+    VAttributeType::getData(this,row,type,lst);
 	return lst;
 }
 
-VAttribute* VNode::getAttributeType(int row)
+QStringList VNode::getAttributeData(int row,AttributeFilter *filter)
 {
-	return VAttribute::getType(this,row);
+    VAttributeType* type;
+    QStringList lst;
+    VAttributeType::getData(this,row,type,lst,filter);
+    return lst;
 }
+
+#if 0
+VAttributeType* VNode::getAttributeType(int row)
+{
+    return VAttributeType::getType(this,row);
+}
+#endif
 
 bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
 {
-	return VAttribute::getData(type,this,row,data);
+    return VAttributeType::getData(type,this,row,data);
 }
 
-int VNode::getAttributeLineNum(int row)
+int VNode::getAttributeLineNum(int row,AttributeFilter *filter)
 {
-	return VAttribute::getLineNum(this,row);
+    return VAttributeType::getLineNum(this,row,filter);
+}
+
+QString VNode::attributeToolTip(int row,AttributeFilter *filter)
+{
+    VAttributeType* type;
+    QStringList lst;
+    VAttributeType::getData(this,row,type,lst,filter);
+    return (type)?(type->toolTip(lst)):QString();
 }
 
 void VNode::addChild(VNode* vn)
@@ -334,7 +353,7 @@ int VNode::genVariablesNum() const
 {
 	std::vector<Variable> gv;
 
-	if(node_.get())
+    if(node_)
 	{
 		node_->gen_variables(gv);
 		return static_cast<int>(gv.size());
@@ -343,17 +362,17 @@ int VNode::genVariablesNum() const
 	return 0;
 }
 
-void VNode::variables(std::vector<Variable>& vars)
+void VNode::variables(std::vector<Variable>& vars) const
 {
 	vars.clear();
-	if(node_.get())
+    if(node_)
 		vars=node_->variables();
 }
 
-void VNode::genVariables(std::vector<Variable>& genVars)
+void VNode::genVariables(std::vector<Variable>& genVars) const
 {
 	genVars.clear();
-	if(node_.get())
+    if(node_)
 		node_->gen_variables(genVars);
 }
 
@@ -593,6 +612,7 @@ const std::string&  VNode::nodeType()
 	return defaultStr;
 }
 
+#if 0
 bool VNode::isFamily() const
 {
     node_ptr np=node();
@@ -612,6 +632,7 @@ bool VNode::isAlias() const
 
     return (np->isAlias())?true:false;
 }
+#endif
 
 bool VNode::isFlagSet(ecf::Flag::Type f) const
 {
@@ -793,13 +814,13 @@ int VServer::genVariablesNum() const
 	return cache_.genVars_.size();
 }
 
-void VServer::variables(std::vector<Variable>& vars)
+void VServer::variables(std::vector<Variable>& vars) const
 {
 	vars.clear();
 	vars=cache_.vars_;
 }
 
-void VServer::genVariables(std::vector<Variable>& vars)
+void VServer::genVariables(std::vector<Variable>& vars) const
 {
 	vars.clear();
 	vars=cache_.genVars_;
@@ -965,7 +986,7 @@ void VServer::endScan()
 
 		for(unsigned int i=0; i < suites.size();i++)
 		{
-			VNode* vn=new VNode(this,suites.at(i));
+            VNode* vn=new VSuiteNode(this,suites.at(i));
 			totalNum_++;
 			scan(vn,hasNotifications);
 		}
@@ -1013,12 +1034,21 @@ void VServer::scan(VNode *node,bool hasNotifications)
 				std::map<std::string,VNodeInternalState>::const_iterator itP=prevNodeState_.find(path);
 				if(itP != prevNodeState_.end())
 					vn->check(server_->conf(),itP->second);
-			}
+            }
 		}
-		else
+        else if((*it)->isFamily())
 		{
-			vn=new VNode(node,*it);
+            vn=new VFamilyNode(node,*it);
 		}
+        else if((*it)->isAlias())
+        {
+            vn=new VAliasNode(node,*it);
+        }
+        else
+        {
+            assert(0);
+
+        }
 		totalNum_++;
 		scan(vn,hasNotifications);
 	}

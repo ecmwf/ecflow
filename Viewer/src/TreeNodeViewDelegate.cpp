@@ -25,6 +25,8 @@ static std::vector<std::string> propVec;
 
 static QColor typeFgColourClassic=QColor(Qt::white);
 static QColor typeBgColourClassic=QColor(150,150,150);
+static QColor childCountColour=QColor(90,91,92);
+
 
 struct NodeShape
 {
@@ -64,10 +66,10 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	serverInfoFont_=font_;
 
 	serverInfoFont_=font_;
-	serverNumFont_.setBold(true);
+    //serverNumFont_.setBold(true);
 
 	suiteNumFont_=font_;
-	suiteNumFont_.setBold(true);
+    //suiteNumFont_.setBold(true);
 
 	abortedReasonFont_=font_;
 	abortedReasonFont_.setBold(true);
@@ -88,6 +90,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
         propVec.push_back("view.tree.background");
         propVec.push_back("view.common.node_style");
         propVec.push_back("view.common.node_gradient");
+
+        //Base settings
+        addBaseSettings(propVec);
 	}
 
     prop_=new PropertyMapper(propVec,this);
@@ -135,9 +140,9 @@ void TreeNodeViewDelegate::updateSettings()
     		font_=newFont;
     		serverInfoFont_=font_;
     		serverNumFont_.setFamily(font_.family());
-    		serverNumFont_.setPointSize(font_.pointSize());
+            serverNumFont_.setPointSize(font_.pointSize()-1);
     		suiteNumFont_.setFamily(font_.family());
-    		suiteNumFont_.setPointSize(font_.pointSize());
+            suiteNumFont_.setPointSize(font_.pointSize()-1);
     		abortedReasonFont_.setFamily(font_.family());
 			abortedReasonFont_.setPointSize(font_.pointSize());       
             typeFont_.setFamily(font_.family());
@@ -172,6 +177,9 @@ void TreeNodeViewDelegate::updateSettings()
     {
         bgCol_=p->value().value<QColor>();
     }
+
+    //Update the settings handled by the base class
+    updateBaseSettings();
 }
 
 QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
@@ -543,7 +551,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	//Draw number
 	if(hasNum)
 	{
-		painter->setPen(Qt::black);
+        painter->setPen(childCountColour);
 		painter->setFont(serverNumFont_);
 		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
 	}
@@ -773,7 +781,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//Draw number
 	if(hasNum)
 	{
-		painter->setPen(QColor(120,120,120));
+        painter->setPen(childCountColour);
 		painter->setFont(suiteNumFont_);
 		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
 	}

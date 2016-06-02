@@ -11,7 +11,7 @@
 
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "VFilter.hpp"
 #include "VModelData.hpp"
@@ -87,6 +87,11 @@ bool VTreeNode::isAttrInitialised() const
     return (attrNum_ != -1);
 }
 
+int VTreeNode::attrRow(int row,AttributeFilter *filter) const
+{
+    return VAttributeType::getRow(vnode_,row,filter);
+}
+
 int VTreeNode::attrNum(AttributeFilter *filter) const
 {
     if(!filter)
@@ -101,18 +106,6 @@ int VTreeNode::attrNum(AttributeFilter *filter) const
 void VTreeNode::updateAttrNum(AttributeFilter *filter)
 {
     attrNum_=vnode_->attrNum(filter);
-}
-
-QStringList VTreeNode::getAttributeData(int row,VAttribute*& type,AttributeFilter *filter)
-{
-    QStringList lst;
-    VAttribute::getData(vnode_,row,type,lst,filter);
-    return lst;
-}
-
-int VTreeNode::getAttributeLineNum(int row,AttributeFilter *filter)
-{
-    return VAttribute::getLineNum(vnode_,row,filter);
 }
 
 void VTreeNode::resetAttrNum()

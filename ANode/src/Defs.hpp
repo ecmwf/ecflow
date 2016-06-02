@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #165 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -301,7 +301,7 @@ private:
    void setupDefaultEnv();
    void add_suite_only(suite_ptr, size_t position);
 
-   /// Removes the suite, from defs returned as auto_ptr, asserts if suite does not exist
+   /// Removes the suite, from defs returned as suite_ptr, asserts if suite does not exist
    suite_ptr removeSuite(suite_ptr);
    node_ptr removeChild(Node*);
    bool addChild( node_ptr, size_t position = std::numeric_limits<std::size_t>::max());

@@ -95,7 +95,7 @@ void InfoPanelHandler::init(const std::string &configFile)
                 	def->setHidden(true);
                 }
 
-                BaseNodeCondition *enabledCond = NodeExpressionParser::parseWholeExpression(enabled);
+                BaseNodeCondition *enabledCond = NodeExpressionParser::instance()->parseWholeExpression(enabled);
                 if (enabledCond == NULL)
                 {
                 	UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
@@ -104,7 +104,7 @@ void InfoPanelHandler::init(const std::string &configFile)
                 def->setEnabledCondition(enabledCond);
 
 
-                BaseNodeCondition *visibleCond = NodeExpressionParser::parseWholeExpression(visible);
+                BaseNodeCondition *visibleCond = NodeExpressionParser::instance()->parseWholeExpression(visible);
                 if (visibleCond == NULL)
                 {
                 	UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));

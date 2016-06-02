@@ -222,7 +222,7 @@ void ZombieItemWidget::command(const std::string& cmdName)
 	if(info_ && info_->server())
 	{
 		//Get selection form view
-		QModelIndexList lst=zombieView->selectionModel()->selectedRows(0);
+        QModelIndexList lst=zombieView->selectionModel()->selectedRows(0);
 
 		if(!lst.isEmpty())
 		{

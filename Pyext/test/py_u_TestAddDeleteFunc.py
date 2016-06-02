@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2012 ECMWF.
+# Copyright 2009-2016 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -288,7 +288,6 @@ if __name__ == "__main__":
     for zombie_type in zombie_type_list:
         zombie_attr = ZombieAttr(zombie_type, child_list, ZombieUserActionType.block, zombie_life_time_in_server)
         s1.add_zombie(zombie_attr).add_variable("fred","j") 
-        
     assert len(list(s1.zombies)) == 3,"Expected 3 zombie attributes but found " + str(len(list(s1.zombies)))
     
     # delete all the zombies
@@ -296,10 +295,11 @@ if __name__ == "__main__":
     assert len(list(s1.zombies)) == 0,"Expected zero zombie attributes but found " + str(len(list(s1.zombies)))
 
     # repeat the the test with empty child list. Empty child list means apply to all child commands
+    # + don't specify zombie_life_time_in_server as this is optional
     child_list = [ ]
     zombie_type_list = [ ZombieType.ecf, ZombieType.user, ZombieType.path ]
     for zombie_type in zombie_type_list:
-        zombie_attr = ZombieAttr(zombie_type, child_list, ZombieUserActionType.block, zombie_life_time_in_server)
+        zombie_attr = ZombieAttr(zombie_type, child_list, ZombieUserActionType.block)
         s1.add_zombie(zombie_attr).add_variable("fred","j") 
         
         # test delete of specific zombie attribute

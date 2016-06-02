@@ -49,7 +49,8 @@ BcWidget::BcWidget(QWidget* parent) :
     itemHeight_(0),
     emptyText_("No selection"),
     useGrad_(true),
-    gradLighter_(150)
+    gradLighter_(150),
+    hovered_(-1)
 {
     font_=QFont();
     QFontMetrics fm(font_);
@@ -98,8 +99,24 @@ void BcWidget::updateSettings()
 void BcWidget::clear()
 {
     items_.clear();
+    reset(items_);
 }
-    
+
+void BcWidget::resetBorder(int idx)
+{
+    if(idx >=0 && idx < items_.count())
+    {
+        QColor bgCol=items_.at(idx)->bgCol_;
+        if(idx != hovered_)
+            items_.at(idx)->borderCol_=bgCol.darker(125);
+        else
+            items_.at(idx)->borderCol_=bgCol.darker(240);
+
+        updatePixmap(idx);
+        update();
+    }
+}
+
 void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
 {
     if(idx >=0 && idx < items_.count())
@@ -111,8 +128,12 @@ void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
         
         items_.at(idx)->bgCol_=bgCol;
         items_.at(idx)->fontCol_=fontCol;
-        items_.at(idx)->borderCol_=bgCol.darker(125);
-        
+
+        if(idx != hovered_)
+            items_.at(idx)->borderCol_=bgCol.darker(125);
+        else
+            items_.at(idx)->borderCol_=bgCol.darker(240);
+
         if(newText)
            reset(items_);
         else
@@ -126,7 +147,8 @@ void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
 void BcWidget::reset(QList<NodePathItem*> items)
 {
     items_=items;
-    
+    hovered_=-1;
+
     QFontMetrics fm(font_);
     int xp=hMargin_;
     int yp=vMargin_;
@@ -232,7 +254,34 @@ void BcWidget::paintEvent(QPaintEvent*)
 
 void BcWidget::mouseMoveEvent(QMouseEvent *event)
 {   
+    for(int i=0; i < items_.count(); i++)
+    {
+        if(items_.at(i)->shape_.containsPoint(event->pos(),Qt::OddEvenFill))
+        {
+            if(hovered_ == -1)
+            {
+                hovered_=i;
+                resetBorder(i);
+            }
+            else if(hovered_ != i)
+            {
+                int prev=hovered_;
+                hovered_=i;
+                resetBorder(prev);
+                resetBorder(i);
+            }
 
+            return;
+        }
+    }
+
+    if(hovered_ != -1)
+    {
+        int prev=hovered_;
+        hovered_=-1;
+        resetBorder(prev);
+
+    }
 }
 
 void BcWidget::mousePressEvent(QMouseEvent *event)
@@ -394,15 +443,30 @@ NodePathWidget::~NodePathWidget()
 
 void NodePathWidget::clear(bool detachObservers)
 {
-	if(detachObservers && info_ && info_->server())
+    setEnabled(true);
+
+    if(detachObservers && info_ && info_->server())
 	{
 		info_->server()->removeNodeObserver(this);
 		info_->server()->removeServerObserver(this);
 	}
 
-	info_.reset();
+    if(detachObservers && info_)
+    {
+        info_->removeObserver(this);
+    }
+
+    if(info_)
+        info_->removeObserver(this);
+
+    info_.reset();
     
-    clearItems();	
+    clearItems();
+
+    setEnabled(true);
+
+    reloadTb_->setEnabled(false);
+    reloadTb_->setToolTip("");
 }
 
 void NodePathWidget::clearItems()
@@ -444,9 +508,9 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
 	ServerHandler* server=0;
 
   	//Check if there is data in info
-  	if(info.get())
+    if(info)
   	{
-  		server=info->server();
+        server=info->server();
 
   		sameServer=(info_)?(info_->server() == server):false;
 
@@ -467,11 +531,13 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
   				if(reloadTb_)
   				{
   					reloadTb_->setToolTip("Refresh server <b>" + QString::fromStdString(server->name()) + "</b>");
+                    reloadTb_->setEnabled(true);
   				}
   			}
   			else
   			{
-  				reloadTb_->setToolTip("Refresh server");
+                reloadTb_->setToolTip("");
+                reloadTb_->setEnabled(false);
   			}
 
   		}
@@ -485,15 +551,24 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
   	  		info_->server()->removeNodeObserver(this);
   	  	}
 
-  	  	reloadTb_->setToolTip("Reload server");
+        reloadTb_->setToolTip("");
+        reloadTb_->setEnabled(false);
   	}
 
-  	//Set the info
-  	info_=info;
+    //Set the info
+    if(info_)
+    {
+        info_->removeObserver(this);
+    }
+
+    info_=info;
+
+    if(info_)
+    {
+        info_->addObserver(this);
+    }
 
   	*serverOut=server;
-
-
 }
 
 
@@ -510,6 +585,10 @@ void NodePathWidget::setPath(QString)
 
 void NodePathWidget::setPath(VInfo_ptr info)
 {
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("NodePathWidget::setPath -->");
+#endif
+
     setEnabled(true);
 
     if(!active_)
@@ -522,8 +601,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
   	adjust(info,&server,sameServer);
 
-  	if(!info_ || !info_.get() ||
-  	  (!info_->isServer() && !info_->isNode()))
+    if(!info_ || !info_->server())
   	{
   		clear();
   		return;
@@ -556,6 +634,9 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 		VNode *n=lst.at(i);
 		col=n->stateColour(); 
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+        UserMessage::debug("   state=" + n->stateName().toStdString());
+#endif
 		QColor fontCol=n->stateFontColour();
 		name=n->name();
 		bool hasChildren=hasChildren=(n->numOfChildren() >0);
@@ -565,8 +646,10 @@ void NodePathWidget::setPath(VInfo_ptr info)
 	}
 
 	bc_->reset(nodeItems_);
-	
-	//layout_->addStretch(1);	
+
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("<-- NodePathWidget::setPath");
+#endif
 }
 
 void  NodePathWidget::slotNodeSelected(int idx)
@@ -596,7 +679,7 @@ void  NodePathWidget::slotMenuSelected(int idx,QPoint bcPos)
 VInfo_ptr NodePathWidget::nodeAt(int idx)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::message(UserMessage::DBG,false,"NodePathWidget::nodeAt idx=" + boost::statc_cast<std::string>(idx));
+    UserMessage::debug("NodePathWidget::nodeAt idx=" + boost::lexical_cast<std::string>(idx));
 #endif
 	ServerHandler* server=info_->server();
 
@@ -658,7 +741,7 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 		return;
 
 	//Check if there is data in info
-	if(info_.get() && info_->isNode() && info_->node())
+    if(info_ && !info_->isServer() && info_->node())
 	{
 		//TODO: MAKE IT SAFE!!!!
 
@@ -700,7 +783,11 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 
 void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>& aspect)
 {
-	if(!active_)
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("NodePathWidget::notifyDefsChanged -->");
+#endif
+
+    if(!active_)
 		return;
 
 	//Check if there is data in inf0
@@ -724,47 +811,64 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
 //This must be called at the beginning of a reset
 void NodePathWidget::notifyBeginServerClear(ServerHandler* server)
 {
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("NodePathWidget::notifyBeginServerClear -->");
+#endif
     if(info_)
     {
         if(info_->server() && info_->server() == server)
         {
             setEnabled(false);
-
-            /*messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reset. \
-                   Until the server is fully \
-                   reloaded only <b>limited functionalty</b> is avaliable in the Info Panel!");
-
-            messageLabel_->startLoadLabel();
-
-            Q_FOREACH(InfoPanelItemHandler *item,items_)
-            {
-                item->item()->setSuspended(true,info_);
-            }*/
         }
     }
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("<-- NodePathWidget::notifyBeginServerClear");
+#endif
 }
 
 //This must be called at the end of a reset
 void NodePathWidget::notifyEndServerScan(ServerHandler* server)
 {
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("NodePathWidget::notifyEndServerScan -->");
+#endif
+
     if(info_)
     {
         if(info_->server() && info_->server() == server)
         {
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+            UserMessage::debug("   setEnabled(true)");
+#endif
+
             setEnabled(true);
 
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+            UserMessage::debug("   regainData");
+#endif
             //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
             //the notifyEndServerScan() will be first called on the VInfo then on the breadcrumbs. So it
             //is possible that the node still exists but it is still set to NULL in VInfo.
             info_->regainData();
 
-            //Should we observer the info?
-            if(!info_->node())
-                clear(true);
+            //If the info is not available dataLost() must have already been called and
+            //the breadcrumbs were reset!
+            if(!info_)
+                return;
+
+            Q_ASSERT(info_->server() && info_->node());
+
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+            UserMessage::debug("   reset");
+#endif
+            reset();
         }
     }
-}
 
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("<-- NodePathWidget::notifyEndServerScan");
+#endif
+}
 
 void NodePathWidget::notifyServerDelete(ServerHandler* server)
 {
@@ -776,15 +880,35 @@ void NodePathWidget::notifyServerDelete(ServerHandler* server)
 	}
 }
 
-void NodePathWidget::notifyServerConnectState(ServerHandler* /*server*/)
+void NodePathWidget::notifyServerConnectState(ServerHandler* server)
 {
-//TODO: we need to indicate the state here!
-    //reset();
+    //TODO: we need to indicate the state here!
+    if(info_ && info_->server() ==  server)
+    {
+        reset();
+    }
 }
 
 void NodePathWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
 {
     //reset();
+}
+
+void NodePathWidget::notifyDataLost(VInfo* info)
+{
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("NodePathWidget::notifyDataLost -->");
+#endif
+    if(info_ && info_.get() == info)
+    {
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+        UserMessage::debug("   clear(true)");
+#endif
+        clear(true);
+    }
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("<-- NodePathWidget::notifyDataLost");
+#endif
 }
 
 void  NodePathWidget::slotRefreshServer()

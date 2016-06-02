@@ -110,6 +110,10 @@ do
 			ECFUI_SLOG=yes
 			;;
 
+		-s)
+			export ECFUI_SESSION_MANAGER=yes
+			;;
+
         -h)
             ECFUI_HELP=yes
             ;;
@@ -136,6 +140,7 @@ then
 EcflowUI
   Command-line flags:
     -log : write log messages to standard output
+    -s   : start via the session manager
     -h   : print this help message
 HEND
 
@@ -230,23 +235,7 @@ exe=${EXE_DIR}/ecflow_ui.x
 
 if [ $ECFLOWUI_BT != "no" ]
 then
-
     catchsegv $exe
-
-#    segv_output=`mktemp ${TMPDIR:-/tmp}/segv_output.XXXXXX` || exit
-#
-#    (exec
-#    LD_PRELOAD=${LD_PRELOAD:+${LD_PRELOAD}:}/lib64/libSegFault.so \
-#      SEGFAULT_SIGNALS="all" \
-#      SEGFAULT_USE_ALTSTACK=1 \
-#      SEGFAULT_OUTPUT_NAME=$segv_output \
-#      "$exe" ${1+"$@"})
-#    exval=$?
-#    echo "exval: $exval"
-#
-#
-#    exit $exval
-
 else
     ${exe}
 fi

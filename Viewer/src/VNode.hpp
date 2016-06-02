@@ -21,9 +21,11 @@
 #include "Node.hpp"
 
 class AttributeFilter;
+#include "VItem.hpp"
+
 class IconFilter;
 class ServerHandler;
-class VAttribute;
+class VAttributeType;
 class VServer;
 class VServerSettings;
 
@@ -78,7 +80,7 @@ public:
     }
 };
 
-class VNode
+class VNode : public VItem
 {
 friend class VServer;
 
@@ -91,12 +93,22 @@ public:
     virtual ServerHandler* server() const;
     virtual VNode* suite() const;
     node_ptr node() const {return node_;}
-    virtual bool isTopLevel() const;
-    virtual bool isServer() const {return false;}
-    virtual bool isSuite() const {return isTopLevel();}
-    virtual bool isFamily() const;
-    virtual bool isTask() const {return false;}
-    virtual bool isAlias() const;
+
+    //VServer* isServer() const {return NULL;}
+    VNode* isNode() const {return const_cast<VNode*>(this);}
+    //VSuiteNode* isSuite() const {return NULL;}
+    //VFamilyNode* isFamily() const {return NULL;}
+    //VTaskNode* isTask() const {return NULL;}
+    //VAliasNode* isAlias() const {return NULL;}
+    //virtual VAttribute* isAttribute() const {return NULL;}
+
+    bool isTopLevel() const;
+    //bool isServer() const {return false;}
+
+    /*bool isSuite() const {return isTopLevel();}
+    bool isFamily() const;
+    bool isTask() const {return false;}
+    bool isAlias() const;*/
 
 #if 0
     void beginUpdateAttrNum();
@@ -106,12 +118,16 @@ public:
 
     int attrNum(AttributeFilter* filter=0) const;
 
-    QStringList getAttributeData(int,VAttribute*&);
+    QStringList getAttributeData(int,VAttributeType*&);
+    QStringList getAttributeData(int,AttributeFilter *filter=0);
     bool getAttributeData(const std::string& type,int row, QStringList&);
-    VAttribute* getAttributeType(int);
-    int getAttributeLineNum(int row);
+#if 0
+    VAttributeType* getAttributeType(int);
+#endif
+    int getAttributeLineNum(int row,AttributeFilter *filter=0);
+    QString attributeToolTip(int row,AttributeFilter *filter=0);
 
-    VNode* parent() const {return parent_;}
+    //VNode* parent() const {return parent_;}
     int numOfChildren() const { return static_cast<int>(children_.size());}
     VNode* childAt(int index) const;
     int indexOfChild(const VNode* vn) const;
@@ -122,8 +138,8 @@ public:
     //Get all the variables
     virtual int variablesNum() const;
     virtual int genVariablesNum() const;
-    virtual void variables(std::vector<Variable>& vars);
-    virtual void genVariables(std::vector<Variable>& genVars);
+    virtual void variables(std::vector<Variable>& vars) const;
+    virtual void genVariables(std::vector<Variable>& genVars) const;
 
     virtual std::string genVariable(const std::string& key) const;
     virtual std::string findVariable(const std::string& key,bool substitute=false) const;
@@ -134,8 +150,8 @@ public:
 
     virtual std::string absNodePath() const;
     bool sameName(const std::string& name) const;
-    virtual std::string strName() const;
-    virtual QString name() const;
+    std::string strName() const;
+    QString name() const;
     std::string serverName() const;
     virtual QString stateName();
     virtual QString serverStateName();
@@ -169,7 +185,6 @@ public:
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
 
-
 protected:
     void clear();
     void addChild(VNode*);
@@ -184,13 +199,34 @@ protected:
     void setIndex(int i) {index_=i;}
 
     node_ptr node_;
-    VNode* parent_;
+    //VNode* parent_;
     std::vector<VNode*> children_;
 #if 0
     mutable short attrNum_;
     mutable short cachedAttrNum_;
 #endif
     int index_;
+};
+
+class VSuiteNode : public VNode
+{
+public:
+    VSuiteNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
+    VSuiteNode* isSuite() const {return const_cast<VSuiteNode*>(this);}
+};
+
+class VFamilyNode : public VNode
+{
+public:
+    VFamilyNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
+    VFamilyNode* isFamily() const {return const_cast<VFamilyNode*>(this);}
+};
+
+class VAliasNode : public VNode
+{
+public:
+    VAliasNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
+    VAliasNode* isAlias() const {return const_cast<VAliasNode*>(this);}
 };
 
 //This is the root node representing the Server.
@@ -207,7 +243,8 @@ public:
 
 	bool isEmpty() const { return numOfChildren() == 0;}
 	bool isTopLevel() const {return false;}
-	bool isServer() const {return true;}
+    VServer* isServer() const {return const_cast<VServer*>(this);}
+    VNode* isNode() const {return NULL;}
 
 	int totalNum() const {return totalNum_;}
 	int totalNumOfTopLevel(int) const;
@@ -240,8 +277,8 @@ public:
 	//Get all the variables
     int variablesNum() const;
 	int genVariablesNum() const;
-	void variables(std::vector<Variable>& vars);
-	void genVariables(std::vector<Variable>& genVars);
+    void variables(std::vector<Variable>& vars) const;
+    void genVariables(std::vector<Variable>& genVars) const;
 	std::string genVariable(const std::string& key) const;
 
 	//Find a variable in the Defs. Both the user_variables and the

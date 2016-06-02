@@ -7,6 +7,8 @@ set(viewer_srcs
     AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
     Animation.cpp
+    AttributeEditor.cpp
+    AttributeEditorFactory.cpp
     AttributeSearchPanel.cpp
     CaseSensitiveButton.cpp
     ChangeNotify.cpp
@@ -31,6 +33,7 @@ set(viewer_srcs
     DirectoryHandler.cpp
     EditItemWidget.cpp
     EditProvider.cpp
+    EditorInfoLabel.cpp
     ExpandState.cpp
     FlagSet.hpp
     FileInfoLabel.cpp
@@ -45,6 +48,8 @@ set(viewer_srcs
     InfoPanelHandler.cpp
     InfoProvider.cpp
     JobItemWidget.cpp
+    LabelEditor.cpp
+    LimitEditor.cpp
     LineEdit.cpp
     LogEvent.cpp
     LogModel.cpp
@@ -56,6 +61,7 @@ set(viewer_srcs
     MenuHandler.cpp
     MessageLabel.cpp
     MessageItemWidget.cpp
+    MeterEditor.cpp
     ModelColumn.cpp
     NodeExpression.cpp
     NodeFilterDialog.cpp    
@@ -96,6 +102,8 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
+    RepeatEditor.cpp
+    SaveSessionAsDialog.cpp
     ScriptItemWidget.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
@@ -106,6 +114,8 @@ set(viewer_srcs
     ServerList.cpp
     ServerListDialog.cpp
     ServerSettingsItemWidget.cpp
+    SessionDialog.cpp
+    SessionRenameDialog.cpp
     SessionHandler.cpp
     Sound.cpp
     StringMatchCombo.cpp
@@ -133,6 +143,7 @@ set(viewer_srcs
     UpdateTimer.cpp
     UserMessage.cpp
     VAttribute.cpp
+    VAttributeType.cpp
     VConfig.cpp   
     VDir.cpp
     VFilter.cpp
@@ -146,6 +157,7 @@ set(viewer_srcs
     VNState.cpp
     VParam.cpp
     VProperty.cpp   
+    VRepeat.cpp
     VReply.cpp
     VServerSettings.cpp
     VSettings.cpp
@@ -184,6 +196,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     AbstractSearchLine.hpp
     ActionHandler.hpp
     Animation.hpp
+    AttributeEditor.hpp
     AttributeSearchPanel.hpp
     CaseSensitiveButton.hpp
     ChangeNotifyDialog.hpp
@@ -206,11 +219,14 @@ set(viewer_moc_files AbstractNodeModel.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     InfoPanel.hpp
+    LabelEditor.hpp
+    LimitEditor.hpp
     LineEdit.hpp
     LogProvider.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
-    NodeFilterDialog.hpp       
+    MeterEditor.hpp
+    NodeFilterDialog.hpp
     NodePanel.hpp
     NodePathWidget.hpp
     NodeQueryCombo.hpp           
@@ -235,11 +251,15 @@ set(viewer_moc_files AbstractNodeModel.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp
+    SaveSessionAsDialog.hpp
+    RepeatEditor.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
     ServerSettingsItemWidget.hpp
+    SessionDialog.hpp
+    SessionRenameDialog.hpp
     StringMatchCombo.hpp
     SuiteItemWidget.hpp
     TabWidget.hpp
@@ -253,7 +273,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeView.hpp           
     TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
-    UserMessage.hpp
     VariableItemWidget.hpp
     VariableModel.hpp
     VariableModelData.hpp
@@ -274,6 +293,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
 
 set(viewer_wrap_ui_files
     AboutDialog.ui
+    AttributeEditorDialog.ui
     ChangeNotifyDialog.ui
     ChangeNotifyDialogWidget.ui
     ChangeNotifyEditor.ui
@@ -286,9 +306,12 @@ set(viewer_wrap_ui_files
     GotoLineDialog.ui
     HistoryItemWidget.ui
     InfoPanel.ui    
-    MainWindow.ui 
+    LabelEditorWidget.ui
+    LimitEditorWidget.ui
+    MainWindow.ui
     MessageItemWidget.ui
     MenuConfigDialog.ui
+    MeterEditorWidget.ui
     NodeFilterDialog.ui
     NodeQueryEditor.ui
     NodeQuerySaveDialog.ui
@@ -297,12 +320,15 @@ set(viewer_wrap_ui_files
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui
-    SearchLineWidget.ui 
+    RepeatEditorWidget.ui
+    SaveSessionAsDialog.ui
+    SearchLineWidget.ui
     ServerAddDialog.ui
     ServerEditDialog.ui 
     ServerListDialog.ui
     ServerSettingsItemWidget.ui
     SessionDialog.ui
+    SessionRenameDialog.ui
     SuiteItemWidget.ui
     TableFilterWidget.ui
     TableNodeWidget.ui

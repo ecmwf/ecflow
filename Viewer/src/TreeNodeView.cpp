@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -21,6 +21,7 @@
 
 #include "ActionHandler.hpp"
 #include "Animation.hpp"
+#include "AttributeEditor.hpp"
 #include "ExpandState.hpp"
 #include "TableNodeSortModel.hpp"
 #include "PropertyMapper.hpp"
@@ -92,6 +93,9 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 	propVec.push_back("view.tree.indentation");
     propVec.push_back("view.tree.background");
     propVec.push_back("view.tree.drawBranchLine");
+    propVec.push_back("view.tree.serverToolTip");
+    propVec.push_back("view.tree.nodeToolTip");
+    propVec.push_back("view.tree.attributeToolTip");
 	prop_=new PropertyMapper(propVec,this);
 
 	//Initialise indentation
@@ -104,6 +108,16 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
     Q_ASSERT(prop_->find("view.tree.drawBranchLine"));
     adjustBranchLines(prop_->find("view.tree.drawBranchLine")->value().toBool(),false);
     adjustStyleSheet();
+
+    //Adjust tooltip
+    Q_ASSERT(prop_->find("view.tree.serverToolTip"));
+    adjustServerToolTip(prop_->find("view.tree.serverToolTip")->value().toBool());
+
+    Q_ASSERT(prop_->find("view.tree.nodeToolTip"));
+    adjustNodeToolTip(prop_->find("view.tree.nodeToolTip")->value().toBool());
+
+    Q_ASSERT(prop_->find("view.tree.attributeToolTip"));
+    adjustAttributeToolTip(prop_->find("view.tree.attributeToolTip")->value().toBool());
 }
 
 TreeNodeView::~TreeNodeView()
@@ -192,8 +206,13 @@ void TreeNodeView::selectFirstServer()
 }
 
 
-void TreeNodeView::slotDoubleClickItem(const QModelIndex&)
+void TreeNodeView::slotDoubleClickItem(const QModelIndex& idx)
 {
+    VInfo_ptr info=model_->nodeInfo(idx);
+    if(info && info->isAttribute())
+    {
+        slotViewCommand(info,"edit");
+    }
 }
 
 void TreeNodeView::slotContextMenu(const QPoint &position)
@@ -255,6 +274,14 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 				collapseAll(idx);
 		}
 	}
+
+    else if(cmd ==  "edit")
+    {
+        if(info && info->isAttribute())
+        {
+            AttributeEditor::edit(info,this);
+        }
+    }
 
 	/*if(cmd == "set_as_root")
 	{
@@ -358,6 +385,21 @@ void TreeNodeView::adjustBranchLines(bool st,bool adjust)
         adjustStyleSheet();
 }
 
+void TreeNodeView::adjustServerToolTip(bool st)
+{
+    model_->setEnableServerToolTip(st);
+}
+
+void TreeNodeView::adjustNodeToolTip(bool st)
+{
+    model_->setEnableNodeToolTip(st);
+}
+
+void TreeNodeView::adjustAttributeToolTip(bool st)
+{
+    model_->setEnableAttributeToolTip(st);
+}
+
 void TreeNodeView::notifyChange(VProperty* p)
 {
 	if(p->path() == "view.tree.indentation")
@@ -371,6 +413,18 @@ void TreeNodeView::notifyChange(VProperty* p)
     else if(p->path() == "view.tree.drawBranchLine")
     {
         adjustBranchLines(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.serverToolTip")
+    {
+        adjustServerToolTip(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.nodeToolTip")
+    {
+        adjustNodeToolTip(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.attributeToolTip")
+    {
+        adjustAttributeToolTip(p->value().toBool());
     }
 }
 
@@ -440,7 +494,14 @@ void TreeNodeView::slotRestoreExpand()
         if(!s)
         {
             expandState_->selection_->regainData();
-            currentSelection(expandState_->selection_);
+            if(!expandState_->selection_->server())
+            {
+                expandState_->selection_.reset();
+            }
+            else
+            {
+                currentSelection(expandState_->selection_);
+            }
         }
     }
 
@@ -470,6 +531,25 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         if(es->rootSameAs(node->vnode()->strName()))
         {
             es->restore(node);
+
+            if(expandState_->selection_)
+            {
+                VInfo_ptr s=currentSelection();
+                if(!s)
+                {
+                    expandState_->selection_->regainData();
+                    if(!expandState_->selection_->server())
+                    {
+                        expandState_->selection_.reset();
+                    }
+                    else if(node->server()->realServer() == expandState_->selection_->server())
+                    {
+                        currentSelection(expandState_->selection_);
+                        expandState_->selection_.reset();
+                    }
+                }
+            }
+
             expandState_->remove(es);
         }
     }

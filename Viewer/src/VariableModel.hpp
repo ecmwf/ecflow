@@ -23,7 +23,7 @@ friend class VariableSortModel;
 public:
    	VariableModel(VariableModelDataHandler* data,QObject *parent=0);
 
-    enum CustomItemRole {ReadOnlyRole = Qt::UserRole+1,GenVarRole = Qt::UserRole+2};
+    enum CustomItemRole {ReadOnlyRole = Qt::UserRole+1,GenVarRole = Qt::UserRole+2,ShadowRole = Qt::UserRole+3};
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -40,7 +40,8 @@ public:
     bool setVariable(const QModelIndex& index,QString name,QString value);
 	bool removeVariable(const QModelIndex& index,QString name,QString value);
 
-	VariableModelData* indexToData(const QModelIndex& index) const;
+    VariableModelData* indexToData(const QModelIndex& index) const;
+    VariableModelData* indexToData(const QModelIndex& index,int& block) const;
 
 	bool isVariable(const QModelIndex & index) const;
 
@@ -49,7 +50,11 @@ public Q_SLOTS:
 	void slotReloadEnd();
 	void slotAddRemoveBegin(int block,int diff);
 	void slotAddRemoveEnd(int diff);
-	void slotDataChanged(int);
+    void slotDataChanged(int);
+
+Q_SIGNALS:
+    void filterChanged();
+    void rerunFilter();
 
 protected:
 	bool hasData() const;
@@ -59,7 +64,8 @@ protected:
 
 	VariableModelDataHandler* data_;
 	static QColor varCol_;
-	static QColor genVarCol_;
+    static QColor genVarCol_;
+    static QColor shadowCol_;
 	static QColor blockBgCol_;
 	static QColor blockFgCol_;
 };
@@ -69,11 +75,13 @@ protected:
 
 class VariableSortModel : public QSortFilterProxyModel
 {
+    Q_OBJECT
+
 public:
 	enum MatchMode {FilterMode,SearchMode};
 
 	VariableSortModel(VariableModel*,QObject *parent=0);
-	~VariableSortModel() {};
+    ~VariableSortModel() {}
 
 	MatchMode matchMode() const {return matchMode_;}
 	void setMatchMode(MatchMode mode);
@@ -84,15 +92,24 @@ public:
 
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
-	void setSourceModel(QAbstractItemModel*) {};
+    void setSourceModel(QAbstractItemModel*) {}
     QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
 	
     QModelIndexList match(const QModelIndex& start,int role,const QVariant& value,int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap )) const;
 
+public Q_SLOTS:
+    void slotShowShadowed(bool);
+
+protected Q_SLOTS:
+    void slotFilterChanged();
+    void slotRerunFilter();
+
 protected:
     void match(QString text);
+    void print(const QModelIndex idx);
 
-	VariableModel* varModel_;
+    VariableModel* varModel_;
+    bool showShadowed_;
 
 	MatchMode matchMode_;
 	mutable QString matchText_;

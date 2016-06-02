@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #13 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -40,7 +40,7 @@ ZombieAttr::ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::C
 {
    /// Server typically checks every 60 seconds, hence this is lowest valid value for
    /// zombie_lifetime_ is 60 seconds
-	if ( zombie_lifetime_ == -1) {
+	if (zombie_lifetime_ <= 59) {
  		switch (zombie_type_) {
 			case Child::USER: zombie_lifetime_ = user_zombie_life_time; break;
 			case Child::PATH: zombie_lifetime_ = path_zombie_life_time; break;

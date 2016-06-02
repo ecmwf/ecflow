@@ -10,6 +10,8 @@
 #include "VariableModelData.hpp"
 
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
+#include "VariableModelDataObserver.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
 
@@ -19,6 +21,8 @@
 static std::string defaultStr("");
 
 QStringList VariableModelData::readOnlyVars_;
+
+#define _UI_VARIABLEMODELDATA_DEBBUG
 
 //==========================================
 //
@@ -60,7 +64,19 @@ void VariableModelData::reload()
 	}
 }
 
-void  VariableModelData::removeDuplicates(const std::vector<Variable>& vars,std::vector<Variable>& genVars)
+//When this function called duplicates must have already been removed!!
+void VariableModelData::reset(const std::vector<Variable>& vars,const std::vector<Variable>& genVars)
+{
+    clear();
+
+    if(info_ && info_->node())
+    {
+        vars_=vars;
+        genVars_=genVars;
+    }
+}
+
+void VariableModelData::removeDuplicates(const std::vector<Variable>& vars,std::vector<Variable>& genVars)
 {
     std::vector<Variable> gvOri=genVars;
     genVars.clear();
@@ -80,8 +96,6 @@ void  VariableModelData::removeDuplicates(const std::vector<Variable>& vars,std:
              genVars.push_back(*it);
     }
 }
-
-
 
 std::string VariableModelData::fullPath()
 {
@@ -149,6 +163,32 @@ const std::string& VariableModelData::value(int index) const
 	}
 
 	return defaultStr;
+}
+
+const std::string& VariableModelData::value(const std::string n,bool& hasIt) const
+{
+    hasIt=false;
+    if(n.empty())
+        return defaultStr;
+
+    for(std::vector<Variable>::const_iterator it=vars_.begin(); it != vars_.end(); ++it)
+    {
+        if((*it).name() == n)
+        {
+            hasIt=true;
+            return (*it).theValue();
+        }
+    }
+    for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); ++it)
+    {
+        if((*it).name() == n)
+        {
+            hasIt=true;
+            return (*it).theValue();
+        }
+    }
+
+    return defaultStr;
 }
 
 bool VariableModelData::hasName(const std::string& n) const
@@ -271,6 +311,10 @@ bool VariableModelData::isReadOnly(const std::string& varName) const
 	return readOnlyVars_.contains(QString::fromStdString(varName));
 }
 
+bool VariableModelData::isShadowed(int index) const
+{
+    return (shadowed_.find(name(index)) != shadowed_.end());
+}
 
 int VariableModelData::varNum() const
 {
@@ -287,6 +331,81 @@ void VariableModelData::latestVars(std::vector<Variable>& v,std::vector<Variable
     }
 }
 
+bool VariableModelData::updateShadowed(std::set<std::string>& names)
+{
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelData::updateShadowed -->  node=" + name());
+#endif
+
+    std::set<std::string> ori=shadowed_;
+    shadowed_.clear();
+    bool changed=false;
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   ori shadowed:");
+    for(std::set<std::string>::const_iterator it=ori.begin(); it != ori.end(); ++it)
+    {
+        UserMessage::debug("      " + *it);
+    }
+#endif
+
+    for(std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+    {
+        if(hasName(*it))
+        {
+            shadowed_.insert(*it);
+            if(ori.find(*it) == ori.end())
+                changed=true;
+        }
+    }
+
+    for(unsigned int i=0; i < vars_.size(); i++)
+    {
+        names.insert(vars_[i].name());
+    }
+    for(unsigned int i=0; i < genVars_.size(); i++)
+    {
+        names.insert(genVars_[i].name());
+    }
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   shadowed:");
+    for(std::set<std::string>::const_iterator it=shadowed_.begin(); it != shadowed_.end(); ++it)
+    {
+        UserMessage::debug("      " + *it);
+    }
+
+    UserMessage::qdebug("   changed: " + QString::number(changed));
+#endif
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("<-- VariableModelData::updateShadowed");
+#endif
+
+    return changed;
+}
+
+bool VariableModelData::checkUpdateNames(const std::vector<Variable>& v,const std::vector<Variable>& vg)
+{
+    for(unsigned int i=0; i < vars_.size(); i++)
+    {
+        if(vars_[i].name() != v[i].name())
+        {
+            return true;
+        }
+    }
+
+    for(unsigned int i=0; i < genVars_.size(); i++)
+    {
+        if(genVars_[i].name() != vg[i].name())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 //Check if the total number of variables will change. It does not update the local data!
 int VariableModelData::checkUpdateDiff(std::vector<Variable>& v,std::vector<Variable>& vg)
 {
@@ -300,29 +419,58 @@ int VariableModelData::checkUpdateDiff(std::vector<Variable>& v,std::vector<Vari
 }
 
 
-//Check if any of the values has changed. We suppose that the number of current and new
+//Check if any of the names or values has changed. We suppose that the number of current and new
 //variables are the same but some of their names or values have been changed.
-bool VariableModelData::update(std::vector<Variable>& v,std::vector<Variable>& vg)
+bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<Variable>& vg)
 {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelData::update -->");
+#endif
+
+#if 0
     if(info_ && info_->node() && v.empty() && vg.empty())
 	{
         latestVars(v,vg);
-	}
 
-	//We must have the same numbe rof variables
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   call latestVars");
+#endif
+
+	}
+#endif
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   new list of variables:");
+    for(size_t i=0; i < v.size(); i++)
+        UserMessage::debug("     " + v[i].name() + "=" + v[i].theValue());
+    UserMessage::debug("   new list of generated variables:");
+    for(size_t i=0; i < vg.size(); i++)
+        UserMessage::debug("     " + vg[i].name() + "=" + vg[i].theValue());
+#endif
+
+    //We must have the same number of variables
     assert(v.size() + vg.size() == vars_.size() + genVars_.size());
 
     bool changed=false;
     if(v.size() != vars_.size() || vg.size() != genVars_.size())
     {
         changed=true;
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::qdebug("   variables size changed! var: " + QString::number(vars_.size()) +
+                            " -> " +  QString::number(v.size()) + "gen var: " +
+                            QString::number(genVars_.size()) + " -> " +  QString::number(vg.size()));
+#endif
     }
     else
     {
         for(unsigned int i=0; i < vars_.size(); i++)
         {
             if(vars_[i].name() != v[i].name() || vars_[i].theValue() != v[i].theValue())
-            {
+            {                
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                UserMessage::debug("   variable changed! name: " + vars_[i].name() + " -> " +
+                           v[i].name()  + " value: " +   vars_[i].theValue() + " -> " +   v[i].theValue());
+#endif
                 changed=true;
                 break;
             }
@@ -334,6 +482,11 @@ bool VariableModelData::update(std::vector<Variable>& v,std::vector<Variable>& v
             {
                 if(genVars_[i].name() != vg[i].name() || genVars_[i].theValue() != vg[i].theValue())
                 {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+                    UserMessage::debug("   generated variable changed! name: " + genVars_[i].name() + " -> " +
+                           vg[i].name()  + " value: " +   genVars_[i].theValue() + " -> " +   vg[i].theValue());
+#endif
+
                     changed=true;
                     break;
                 }
@@ -344,8 +497,15 @@ bool VariableModelData::update(std::vector<Variable>& v,std::vector<Variable>& v
 	if(changed)
 	{
 		vars_=v;
-		genVars_=vg;
+		genVars_=vg;        
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::debug("   updated vars and genvars");
+#endif
 	}
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("<-- VariableModelData::update");
+#endif
 
 	return changed;
 
@@ -363,18 +523,17 @@ VariableModelDataHandler::VariableModelDataHandler() : server_(0)
 
 VariableModelDataHandler::~VariableModelDataHandler()
 {
-	clear();
+    clear();
 }
+
 void VariableModelDataHandler::reload(VInfo_ptr info)
 {
 	//Notifies the model that a change will happen
 	Q_EMIT reloadBegin();
 
-	clear();
+    clear(false);
 
-	server_=0;
-
-	if(info.get() != 0 && info->node())
+    if(info && info->node())
 	{
 		server_=info->server();
 
@@ -394,14 +553,15 @@ void VariableModelDataHandler::reload(VInfo_ptr info)
 				VInfo_ptr ptr=VInfoNode::create(n);
 				data_.push_back(new VariableModelData(ptr));
 			}
-		}
+        }
+
+        updateShadowed();
 	}
 
 	Q_EMIT reloadEnd();
-
-	//Reset the model (views will be n
 }
 
+#if 0
 void VariableModelDataHandler::reload()
 {
 	//Notifies the model that a change will happen
@@ -412,23 +572,66 @@ void VariableModelDataHandler::reload()
 		(*it)->reload();
 	}
 
-	Q_EMIT reloadEnd();
+    updateShadowed();
+
+    Q_EMIT reloadEnd();
+}
+#endif
+
+bool VariableModelDataHandler::updateShadowed()
+{
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelDataHandler::updateShadowed -->");
+#endif
+
+    bool shadowChanged=false;
+
+    names_.clear();
+
+    if(data_.size()== 0)
+        return shadowChanged;
+
+    //There are no shadowed vars in the first node
+    for(size_t i=0; i < data_[0]->varNum(); i++)
+    {
+        names_.insert(data_[0]->name(i));
+    }
+
+    for(size_t i=1; i < data_.size(); i++)
+    {
+        if(data_[i]->updateShadowed(names_))
+            shadowChanged=true;
+    }
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("   names:");
+    for(std::set<std::string>::const_iterator it=names_.begin(); it != names_.end(); ++it)
+    {
+        UserMessage::debug("      " + *it);
+    }
+#endif
+
+    return shadowChanged;
 }
 
-
-void VariableModelDataHandler::clear()
+void VariableModelDataHandler::clear(bool emitSignal)
 {
-	//Notifies the model that a change will happen
-	Q_EMIT reloadBegin();
+    if(emitSignal)
+        Q_EMIT reloadBegin();
 
 	for(std::vector<VariableModelData*>::iterator it=data_.begin(); it != data_.end(); ++it)
 	{
 		delete *it;
 	}
 
-	data_.clear();
+    server_=0;
+    data_.clear();
+    names_.clear();
 
-	Q_EMIT reloadEnd();
+    broadcastClear();
+
+    if(emitSignal)
+        Q_EMIT reloadEnd();
 }
 
 int VariableModelDataHandler::varNum(int index) const
@@ -447,10 +650,13 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 	return 0;
 }
 
-//It is called when a node was changed.
-void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+//It is called when a node changed.
+bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
-	int dataIndex=-1;
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelDataHandler::nodeChanged -->");
+#endif
+    int dataIndex=-1;
 	for(unsigned int i=0; i < data_.size(); i++)
 	{
 		if(data_.at(i)->node() == node)
@@ -460,104 +666,198 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 		}
 	}
 
-	if(dataIndex == -1)
-		assert(0);
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::qdebug("   dataIndex=" + QString::number(dataIndex));
+#endif
+    Q_ASSERT(dataIndex != -1);
 
-    std::vector<Variable> v;
-    std::vector<Variable> vg;
+    bool retVal=updateVariables(dataIndex);
 
-    //Check if some variables were added or removed.
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-	{
-		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
-		{
-			//If the number of the variables not the same we reset the whole model           
-            int cntDiff=data_.at(dataIndex)->checkUpdateDiff(v,vg);
-			if(cntDiff != 0)
-			{
-				//Notifies the model that rows will be added or removed for this data item
-				Q_EMIT addRemoveBegin(dataIndex,cntDiff);
-				data_.at(dataIndex)->reload();
-				Q_EMIT addRemoveEnd(cntDiff);
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+            UserMessage::debug("<-- VariableModelDataHandler::nodeChanged");
+#endif
+    if(retVal)
+        broadcastUpdate();
 
-				//Update the data item in the model
-				Q_EMIT dataChanged(dataIndex);
-
-				return;
-			}
-		}
-	}
-
-	//Check if some variables' value changed
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-	{
-		//A variable's value changed
-		if(*it == ecf::Aspect::NODE_VARIABLE)
-		{           
-            //Update the names/values
-            if(data_.at(dataIndex)->update(v,vg))
-			{
-				//Update the data item in the model
-				Q_EMIT dataChanged(dataIndex);
-			}
-			return;
-		}
-	}
-
-	//If we are here no update happened. However, here we need to update the generated
-	//variables because there is no notification (aspect) to indicate their change. So as a safety
-	//measure we try to update them within each update call!!
-
-    if(data_.at(dataIndex)->update(v,vg))
-	{
-		//Update the data item in the model
-		Q_EMIT dataChanged(dataIndex);
-	}
+    return retVal;
 }
 
-//ADD_REMOVE_ATTR?????
+//It is called when the server defs was changed
+bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
+{
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelDataHandler::defsChanged -->");
+#endif
+
+    if(data_.size() == 0)
+    {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::debug("<-- VariableModelDataHandler::defsChanged");
+#endif
+        return false;
+    }
+
+    int dataIndex=data_.size()-1;
+    Q_ASSERT(dataIndex >=0 && dataIndex < data_.size());
+    VariableModelData* d=data_.at(data_.size()-1);
+    Q_ASSERT(d);
+    Q_ASSERT(d->type() == "server");
+
+    bool retVal=updateVariables(dataIndex);
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("<-- VariableModelDataHandler::defsChanged");
+#endif
+
+    if(retVal)
+        broadcastUpdate();
+
+    return retVal;
+}
 
 //It is called when the server defs was changed
-void VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
+bool VariableModelDataHandler::updateVariables(int dataIndex)
 {
-	if(data_.size() == 0)
-		return;
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+    UserMessage::debug("VariableModelDataHandler::updateVariables -->");
+#endif
 
-	VariableModelData* d=data_.at(data_.size()-1);
-	if(d->type() != "server")
-	{
-		return;
-	}
+    bool retVal=false;
 
-	int dIndex=data_.size()-1;
-
+    //There is no notification about generated variables. Basically they can change at any update!!
+    //So we have to check all the variables at every update!!
     std::vector<Variable> v;
     std::vector<Variable> vg;
 
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-	{
-		if(*it == ecf::Aspect::SERVER_VARIABLE)
-		{
-			//Check if some variables were added or removed
-            int cntDiff=d->checkUpdateDiff(v,vg);
-			if(cntDiff != 0)
-			{
-				//Notifies the model that rows will be added or removed for this data item
-				Q_EMIT addRemoveBegin(dIndex,cntDiff);
-				d->reload();
-				Q_EMIT addRemoveEnd(cntDiff);
+    //Get the current set of variables and check if the total number of variables
+    //has changed. At this point v and vg do not contain any duplicates.
+    int cntDiff=data_.at(dataIndex)->checkUpdateDiff(v,vg);
 
-				//Update the data item in the model
-				Q_EMIT dataChanged(dIndex);
-			}
-			//Otherwise Update the names/values
-            else if(d->update(v,vg))
-			{
-				//Update the data item in the model
-				Q_EMIT dataChanged(dIndex);
-			}
+    //If the number of the variables is not the same as we store we reset the given block in the model
+    if(cntDiff != 0)
+    {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::qdebug("    cntDiff=" + QString::number(cntDiff));
+#endif
+        const int numNew=v.size()+vg.size();
 
-			break;
-		}
-	}
+        //Notifies the model that rows will be added or removed for this data item
+        Q_EMIT addRemoveBegin(dataIndex,cntDiff);
+
+        //Reset the variables using v and vg.
+        data_.at(dataIndex)->reset(v,vg);
+        Q_ASSERT(data_.at(dataIndex)->varNum() == numNew);
+
+        //Notifies the model that the change happened
+        Q_EMIT addRemoveEnd(cntDiff);
+
+        //Check if the shadowed list of variables changed
+        if(updateShadowed())
+        {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+            UserMessage::qdebug("   emit rerunFilter");
+#endif
+            Q_EMIT rerunFilter();
+        }
+        //The shadowed list did not change
+        else
+        {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+            UserMessage::qdebug("   emit dataChanged");
+#endif
+            //Update the data item in the model
+            Q_EMIT dataChanged(dataIndex);
+        }
+
+        retVal=true;
+    }
+    //Check if some variables' name or value changed
+    else
+    {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::debug("   Change: NODE_VARIABLE");
+#endif
+        //At this point we must have the same number of vars
+        const int numNew=v.size()+vg.size();
+        Q_ASSERT(data_.at(dataIndex)->varNum() == numNew);
+
+        //Find out if any names chhanged
+        bool nameChanged=data_.at(dataIndex)->checkUpdateNames(v,vg);
+
+        //Update the names/values
+        if(data_.at(dataIndex)->update(v,vg))
+        {
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+            UserMessage::debug("   Variable name or value changed");
+#endif
+            //At this point the stored variables are already updated
+            if(nameChanged)
+            {
+                 if(updateShadowed())
+                 {
+                     Q_EMIT rerunFilter();
+                 }
+                 else
+                     //Update the data item in the model
+                     Q_EMIT dataChanged(dataIndex);
+            }
+            else
+            {
+                //Update the data item in the model
+                Q_EMIT dataChanged(dataIndex);
+            }
+        }
+        retVal=true;
+    }
+
+#ifdef _UI_VARIABLEMODELDATA_DEBBUG
+        UserMessage::debug("<-- VariableModelDataHandler::updateVariables");
+#endif
+
+    return retVal;
+}
+
+const std::string& VariableModelDataHandler::value(const std::string& node,const std::string& name, bool& hasIt) const
+{
+    hasIt=false;
+    for(unsigned int i=0; i < data_.size(); i++)
+    {
+        if(data_.at(i)->name() == node)
+        {
+            return data_.at(i)->value(name,hasIt);
+        }
+    }
+
+    return defaultStr;
+}
+
+void VariableModelDataHandler::addObserver(VariableModelDataObserver* o)
+{
+    std::vector<VariableModelDataObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+    if(it == observers_.end())
+        observers_.push_back(o);
+}
+
+void VariableModelDataHandler::removeObserver(VariableModelDataObserver* o)
+{
+    std::vector<VariableModelDataObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+    if(it != observers_.end())
+        observers_.erase(it);
+}
+
+void VariableModelDataHandler::broadcastClear()
+{
+    std::vector<VariableModelDataObserver*> obsCopy=observers_;
+    for(std::vector<VariableModelDataObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
+    {
+        (*it)->notifyCleared(this);
+    }
+}
+
+void VariableModelDataHandler::broadcastUpdate()
+{
+    for(std::vector<VariableModelDataObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+    {
+        (*it)->notifyUpdated(this);
+    }
 }

@@ -3,14 +3,8 @@
 	First include head.h
 %end
 
- 
-
-
 echo do some work
 echo end of job
-
-
- 
 
 %manual
   Rest of the manual page is placed here, closer to the code

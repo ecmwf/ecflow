@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #122 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -1258,7 +1258,7 @@ bool check_version( const std::string& server_version,  const std::string& viewe
    // We know viewer version 4.1.0 is still compatible with old server versions 4.0.x
 //   cout  << "server version '" << server_version << "'\n";
 //   cout  << "viewer version '" << viewer_version << "'\n";
-   if (viewer_version == "4.1.0" && server_version.find("4.0.") != std::string::npos) {
+   if (viewer_version.find("4.1.") != std::string::npos && server_version.find("4.0.") != std::string::npos) {
       return true;
    }
 

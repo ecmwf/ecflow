@@ -1,0 +1,5 @@
+%includeonce <head.h>
+%includeonce <head.h>
+%include <head.h>
+%includeonce <tail.h>
+%include <tail.h>

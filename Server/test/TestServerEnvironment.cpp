@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #14 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -43,6 +43,7 @@ BOOST_AUTO_TEST_CASE( test_server_environment_ecfinterval )
 	cout << "Server:: ...test_server_environment_ecfinterval\n";
 
 	// ecflow server interval is valid for range [1-60]
+	std::string port = Str::DEFAULT_PORT_NUMBER();
 	for(int i=-10; i< 70; ++i)
 	{
 		string errorMsg;
@@ -57,10 +58,12 @@ BOOST_AUTO_TEST_CASE( test_server_environment_ecfinterval )
 			BOOST_CHECK_MESSAGE(serverEnv.submitJobsInterval() == i,"Expected submit jobs interval of " << i << " but found " << serverEnv.submitJobsInterval());
  		}
 		else   BOOST_CHECK_MESSAGE(!valid,"Server environment ecfinterval valid range is [1-60] " << errorMsg);
+
+		port = serverEnv.the_port();
 	}
 
 	Host h;
-	fs::remove(h.ecf_log_file(Str::DEFAULT_PORT_NUMBER()));
+	fs::remove(h.ecf_log_file(port));
 }
 
 BOOST_AUTO_TEST_CASE( test_server_environment_port )
@@ -79,21 +82,21 @@ BOOST_AUTO_TEST_CASE( test_server_environment_port )
 		char* argv[] = { const_cast<char*>("ServerEnvironment"),  const_cast<char*>("--port=0") };
 		ServerEnvironment serverEnv(argc,argv);
 		BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg)," Server environment not valid " << errorMsg);
-		fs::remove(h.ecf_log_file("0"));
+		fs::remove(h.ecf_log_file(serverEnv.the_port()));
  	}
 	{
 		std::string errorMsg;
 		char* argv[] = { const_cast<char*>("ServerEnvironment"),  const_cast<char*>("--port=1000") };
 		ServerEnvironment serverEnv(argc,argv);
 		BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg)," Server environment not valid " << errorMsg);
-		fs::remove(h.ecf_log_file("1000"));
+		fs::remove(h.ecf_log_file(serverEnv.the_port()));
  	}
 	{
 		std::string errorMsg;
 		char* argv[] = { const_cast<char*>("ServerEnvironment"),  const_cast<char*>("--port=49151") };
 		ServerEnvironment serverEnv(argc,argv);
 		BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg)," Server environment not valid " << errorMsg);
-		fs::remove(h.ecf_log_file("49151"));
+		fs::remove(h.ecf_log_file(serverEnv.the_port()));
  	}
 
 	{
@@ -102,7 +105,7 @@ BOOST_AUTO_TEST_CASE( test_server_environment_port )
 		ServerEnvironment serverEnv(argc,argv);
 		BOOST_CHECK_MESSAGE(serverEnv.valid(errorMsg)," Server environment not valid " << errorMsg);
 		BOOST_CHECK_MESSAGE(serverEnv.port() == 3144,"Expected 3144 but found " << serverEnv.port());
-		fs::remove(h.ecf_log_file("3144"));
+		fs::remove(h.ecf_log_file(serverEnv.the_port()));
 	}
 }
 
@@ -135,7 +138,7 @@ BOOST_AUTO_TEST_CASE( test_server_environment_log_file )
 
    // tear down remove the log file created by ServerEnvironment
    Host h;
-   fs::remove(h.ecf_log_file("3144"));
+   fs::remove(h.ecf_log_file(serverEnv.the_port()));
 
    /// Destroy Log singleton to avoid valgrind from complaining
    Log::destroy();
@@ -263,7 +266,7 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
 
    // tear down remove the log file created by ServerEnvironment
    Host host;
-   fs::remove(host.ecf_log_file(Str::DEFAULT_PORT_NUMBER()));
+   fs::remove(host.ecf_log_file(serverEnv.the_port()));
 }
 
 
@@ -320,7 +323,7 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
 
    // tear down remove the log file created by ServerEnvironment
    Host h;
-   fs::remove(h.ecf_log_file("3144"));
+   fs::remove(h.ecf_log_file(serverEnv.the_port()));
 
    /// Destroy Log singleton to avoid valgrind from complaining
    Log::destroy();
@@ -333,10 +336,9 @@ BOOST_AUTO_TEST_CASE( test_server_profile_threshold_environment_variable )
    {
       char* put = const_cast<char*>("ECF_TASK_THRESHOLD=9");
       BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
-
-      ServerEnvironment serverEnv(argc,argv);
-      BOOST_CHECK_MESSAGE(JobProfiler::task_threshold() == 9,"Expected task threshold of 9 but found " <<  JobProfiler::task_threshold());
    }
+   ServerEnvironment serverEnv(argc,argv);
+   BOOST_CHECK_MESSAGE(JobProfiler::task_threshold() == 9,"Expected task threshold of 9 but found " <<  JobProfiler::task_threshold());
 
    // ==================================================================================
    // Note test for errors
@@ -355,7 +357,7 @@ BOOST_AUTO_TEST_CASE( test_server_profile_threshold_environment_variable )
    putenv(const_cast<char*>("ECF_TASK_THRESHOLD")); // remove from env, otherwise valgrind complains
 
    Host h;
-   fs::remove(h.ecf_log_file(Str::DEFAULT_PORT_NUMBER()));
+   fs::remove(h.ecf_log_file(serverEnv.the_port()));
 
    /// Destroy Log singleton to avoid valgrind from complaining
    Log::destroy();

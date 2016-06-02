@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include "CustomCommandHandler.hpp"
+#include "SessionHandler.hpp"
 
 #include "DirectoryHandler.hpp"
 #include "File.hpp"
@@ -37,6 +38,7 @@ void CustomCommand::save(VSettings *vs)
 {
     vs->put("name",    name());
     vs->put("command", command());
+    vs->put("context", contextString());
 }
 
 
@@ -46,43 +48,19 @@ CustomCommandHandler::CustomCommandHandler()
 }
 
 
-void CustomCommandHandler::init(const std::string& configFilePath)
+void CustomCommandHandler::init()
 {
-
-    dirPath_ = configFilePath;
     readSettings();
-
-    /*
-    dirPath_=dirPath;
-	DirectoryHandler::createDir(dirPath_);
-
-	std::vector<std::string> res;
-	std::string pattern=".*\\." + suffix_ + "$";
-	DirectoryHandler::findFiles(dirPath_,pattern,res);
-
-	for(std::vector<std::string>::const_iterator it=res.begin(); it != res.end(); ++it)
-	{
-		std::string fName=DirectoryHandler::concatenate(dirPath_,*it);
-		VSettings vs(fName);
-		vs.read();
-
-		std::size_t pos=(*it).find("." + suffix_);
-		assert(pos != std::string::npos);
-
-		std::string name=(*it).substr(0,pos);
-		NodeQuery* item=add(name);
-		item->load(&vs);
-	}
-*/
 }
-
-
 
 
 
 
 CustomCommand* CustomCommandHandler::replace(int index, const std::string& name, const std::string& command, bool context)
 {
+    assert(index >= 0);
+    assert(index < items_.size());
+
     CustomCommand *item;
 
     // already in the list - just update it
@@ -93,6 +71,54 @@ CustomCommand* CustomCommandHandler::replace(int index, const std::string& name,
 
     return item;
 }
+
+CustomCommand* CustomCommandHandler::replace(int index, const CustomCommand &cmd)
+{
+    replace(index, cmd.name(), cmd.command(), cmd.inContextMenu());
+}
+
+
+
+void CustomCommandHandler::remove(int index)
+{
+    assert(index >= 0);
+    assert(index < items_.size());
+
+    items_.erase(items_.begin()+index);
+
+    writeSettings();
+}
+
+CustomCommand* CustomCommandHandler::duplicate(int index)
+{
+    assert(index >= 0);
+    assert(index < items_.size());
+
+    CustomCommand *item = items_[index];
+    std::string postfix("_1");
+    std::string newName = item->name() + postfix;
+
+    // ensure we are creating a unique new name - if we find an existing item with the same name, add another postfix
+    while(find(newName) != NULL)
+        newName += postfix;
+
+    CustomCommand*newCmd = add(newName, item->command(), item->inContextMenu(), false);
+
+    writeSettings();
+}
+
+void CustomCommandHandler::swapCommandsByIndex(int i1, int i2)
+{
+    assert(i1 >= 0);
+    assert(i1 < items_.size());
+    assert(i2 >= 0);
+    assert(i2 < items_.size());
+
+    CustomCommand *temp = items_[i2];
+    items_[i2] = items_[i1];
+    items_[i1] = temp;
+}
+
 
 CustomCommand* CustomCommandHandler::find(const std::string& name) const
 {
@@ -124,7 +150,9 @@ void CustomCommandHandler::writeSettings()
     std::vector<VSettings> vsItems;
     std::string dummyFileName="dummy";
     std::string key="commands";
-    VSettings vs(dirPath_);
+
+    std::string settingsFilePath = settingsFile();
+    VSettings vs(settingsFilePath);
 
     for(int i = 0; i < numCommands(); i++)
     {
@@ -142,7 +170,9 @@ void CustomCommandHandler::readSettings()
     std::vector<VSettings> vsItems;
     std::string dummyFileName="dummy";
     std::string key="commands";
-    VSettings vs(dirPath_);
+
+    std::string settingsFilePath = settingsFile();
+    VSettings vs(settingsFilePath);
 
     bool ok = vs.read(false);  // false means we don't abort if the file is not there
 
@@ -157,9 +187,16 @@ void CustomCommandHandler::readSettings()
             std::string emptyDefault="";
             std::string name    = vsCommand->get("name",    emptyDefault);
             std::string command = vsCommand->get("command", emptyDefault);
-            CustomCommandHistoryHandler::instance()->add(name, command, true, false);  // add it to our in-memory list
+            std::string context = vsCommand->get("context", emptyDefault);
+            add(name, command, stringToBool(context), false);  // add it to our in-memory list
         }
     }
+}
+
+bool CustomCommandHandler::stringToBool(std::string &str)
+{
+    bool result = (!str.empty() && str == "yes");
+    return result;
 }
 
 
@@ -168,8 +205,6 @@ void CustomCommandHandler::readSettings()
 // -------------------------
 
 CustomSavedCommandHandler* CustomSavedCommandHandler::instance_=0;
-
-
 
 
 CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
@@ -202,6 +237,12 @@ CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std
         writeSettings();
 
     return item;
+}
+
+std::string CustomSavedCommandHandler::settingsFile()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    return cs->savedCustomCommandsFile();
 }
 
 
@@ -255,6 +296,13 @@ CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const s
     }
 
 }
+
+std::string CustomCommandHistoryHandler::settingsFile()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    return cs->recentCustomCommandsFile();
+}
+
 
 /*
 void NodeQueryHandler::add(NodeQuery* item,bool saveToFile)

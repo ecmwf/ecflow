@@ -206,7 +206,7 @@
             "menu"           : "Node",
             "name"           : "Set",
             "visible_for"    : "event",
-            "enabled_for"    : "clear",
+            "enabled_for"    : "event_clear",
             "command"        : "ecflow_client --alter change event <node_name> set <parent_name>",
             "status_tip"     : "__cmd__"
         },
@@ -214,7 +214,7 @@
             "menu"           : "Node",
             "name"           : "Clear",
             "visible_for"    : "event",
-            "enabled_for"    : "set",
+            "enabled_for"    : "event_set",
             "command"        : "ecflow_client --alter change event <node_name> clear <parent_name>",
             "status_tip"     : "__cmd__"
         },
@@ -307,7 +307,7 @@
             "name"           : "Reset",
             "visible_for"    : "limit",
             "command"        : "ecflow_client --alter=change limit_value <node_name> 0 <parent_name>",
-            "question"       : "Confirm resetting <full_name>",
+            "question"       : "Confirm resetting limit <node_name>",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -360,7 +360,8 @@
             "name"           : "Custom",
             "type"           : "Submenu",
             "menu"           : "Node",
-            "command"        : "None"
+            "command"        : "None",
+            "visible_for"    : "server or node"
         },
 
 
@@ -697,9 +698,23 @@
             "command"        : "collapse",
             "handler"        : "tree",
             "view"           : "tree"                    
-        }        
-        
-
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Edit ...",
+            "visible_for"    : "label or meter or limit",
+            "command"        : "edit",
+            "handler"        : "tree",
+            "view"           : "tree"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Edit ...",
+            "visible_for"    : "repeat  and not repeat_day",
+            "command"        : "edit",
+            "handler"        : "tree",
+            "view"           : "tree"
+        }
     ]
 
 }

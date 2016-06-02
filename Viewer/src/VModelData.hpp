@@ -31,7 +31,7 @@ class ServerHandler;
 class TableNodeFilter;
 class TreeNodeFilter;
 class VParamSet;
-class VAttribute;
+class VAttributeType;
 class VTreeServer;
 class VTableServer;
 class VTree;
@@ -108,7 +108,7 @@ public:
 
      //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
-     void notifyServerDelete(ServerHandler*) {}
+     void notifyServerDelete(ServerHandler*);
 	 void notifyBeginServerClear(ServerHandler* server);
 	 void notifyEndServerClear(ServerHandler* server);
 	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
@@ -155,7 +155,7 @@ public:
 
 	 //From ServerObserver
      void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
-     void notifyServerDelete(ServerHandler*) {}
+     void notifyServerDelete(ServerHandler*);
 	 void notifyBeginServerClear(ServerHandler* server);
      void notifyEndServerClear(ServerHandler* server);
      void notifyBeginServerScan(ServerHandler* server,const VServerChange&);

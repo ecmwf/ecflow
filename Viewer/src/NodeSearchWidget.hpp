@@ -47,7 +47,8 @@ protected Q_SLOTS:
 
 Q_SIGNALS:
 	void closeClicked();
-	void selectionChanged(VInfo_ptr);
+    void selectionChanged(VInfo_ptr);
+    void infoPanelCommand(VInfo_ptr,QString);
 
 private:
     void adjustColumns();

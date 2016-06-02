@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #16 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -132,16 +132,15 @@ private:
    friend class AlterCmd;
 
    void set_jobs_password(const std::string& p);
-
    void set_process_or_remote_id(const std::string&);
 
    // Use when we _only_ want to set the state,
    void set_aborted_only(const std::string& reason);
-
    bool createChildProcess(JobsParam& jobsParam);
-
    void clear(); // process_id password and aborted reason
 
+   bool script_based_job_submission(JobsParam& jobsParam);
+   bool non_script_based_job_submission(JobsParam& jobsParam);
 
    void update_static_generated_variables(const std::string& ecf_home, const std::string& theAbsNodePath) const;
    const Variable& get_genvar_ecfrid() const;

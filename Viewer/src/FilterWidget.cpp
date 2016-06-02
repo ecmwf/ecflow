@@ -21,7 +21,7 @@
 #include <QWidgetAction>
 
 #include "VNState.hpp"
-#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VFilter.hpp"
@@ -245,58 +245,6 @@ void VParamFilterMenu::reload()
 		}
 	}
 }
-
-
-/*
-//===========================================
-//
-// StateFilterMenu
-//
-//===========================================
-
-StateFilterMenu::StateFilterMenu(QMenu * parent) :
-		VParamFilterMenu(parent,VNState::filterItems())
-{
-	Q_FOREACH(QAction* ac,menu_->actions())
-	{
-		if(!ac->isSeparator())
-		{
-			if(VNState* vs=VNState::find(ac->data().toString().toStdString()))
-			{
-				QPixmap pix(10,10);
-				QPainter painter(&pix);
-				pix.fill(vs->colour());
-				painter.setPen(Qt::black);
-				painter.drawRect(0,0,9,9);
-				ac->setIcon(pix);
-			}
-		}
-	}
-}
-
-//===========================================
-//
-// AttributeFilterMenu
-//
-//===========================================
-
-AttributeFilterMenu::AttributeFilterMenu(QMenu * parent) :
-		VParamFilterMenu(parent,VAttribute::filterItems())
-{
-}
-
-//===========================================
-//
-// IconFilterMenu
-//
-//===========================================
-
-IconFilterMenu::IconFilterMenu(QMenu * parent) :
-		VParamFilterMenu(parent,VIcon::filterItems())
-{
-}
-*/
-
 
 //===========================================
 //

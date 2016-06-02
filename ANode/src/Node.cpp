@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #305 $ 
 //
-// Copyright 2009-2012 ECMWF. 
+// Copyright 2009-2016 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -1824,6 +1824,12 @@ node_ptr Node::remove()
 bool Node::getLabelValue(const std::string& labelName, std::string& value) const
 {
    if (child_attrs_) return child_attrs_->getLabelValue(labelName,value);
+   return false;
+}
+
+bool Node::getLabelNewValue(const std::string& labelName, std::string& value) const
+{
+   if (child_attrs_) return child_attrs_->getLabelNewValue(labelName,value);
    return false;
 }
 

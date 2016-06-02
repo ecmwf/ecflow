@@ -26,9 +26,10 @@ public:
 	~VTaskNode();
 
 	bool isEmpty() const { return true;}
-	bool isTopLevel() const {return false;}
-	bool isServer() const {return false;}
-	bool isTask() const {return true;}
+    //bool isNode() const {return true;}
+    bool isTopLevel() const {return false;}
+    //bool isServer() const {return false;}
+    VTaskNode* isTask() const {return const_cast<VTaskNode*>(this);}
 	void internalState(VNodeInternalState&);
 
 protected:

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -23,8 +23,8 @@ class ServerItem;
 class ServerItemObserver
 {
 public:
-	ServerItemObserver() {};
-	virtual ~ServerItemObserver() {};
+    ServerItemObserver() {}
+    virtual ~ServerItemObserver() {}
 	virtual void notifyServerItemChanged(ServerItem*)=0;
 	virtual void notifyServerItemDeletion(ServerItem*)=0;
 };

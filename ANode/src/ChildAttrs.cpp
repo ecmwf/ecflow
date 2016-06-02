@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #285 $
 //
-// Copyright 2009-2012 ECMWF.
+// Copyright 2009-2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -284,6 +284,18 @@ bool ChildAttrs::getLabelValue(const std::string& labelName, std::string& value)
       if (labels_[i].name() == labelName) {
          if (!(labels_[i].new_value().empty())) value = labels_[i].new_value();
          else                                   value = labels_[i].value();
+         return true;
+      }
+   }
+   return false;
+}
+
+bool ChildAttrs::getLabelNewValue(const std::string& labelName, std::string& value) const
+{
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == labelName) {
+         value = labels_[i].new_value();
          return true;
       }
    }

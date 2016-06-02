@@ -68,10 +68,10 @@ NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
 
 	//Selection
 	connect(this,SIGNAL(clicked(const QModelIndex&)),
-			this,SLOT(slotSelectItem(const QModelIndex)));
+            this,SLOT(slotSelectItem(const QModelIndex&)));
 
 	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
-			this,SLOT(slotDoubleClickItem(const QModelIndex)));
+            this,SLOT(slotDoubleClickItem(const QModelIndex&)));
 
 }
 
@@ -120,14 +120,12 @@ QModelIndexList NodeQueryResultView::selectedList()
 	return lst;
 }
 
-
 // this is called even if the user clicks outside of the node list to deselect all
 void NodeQueryResultView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
 	QTreeView::selectionChanged(selected, deselected);
 	Q_EMIT selectionChanged();
 }
-
 
 void NodeQueryResultView::slotSelectItem(const QModelIndex&)
 {
@@ -141,6 +139,7 @@ void NodeQueryResultView::slotSelectItem(const QModelIndex&)
 		}
 	}
 }
+
 VInfo_ptr NodeQueryResultView::currentSelection()
 {
 	QModelIndexList lst=selectedIndexes();

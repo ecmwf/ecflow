@@ -157,28 +157,39 @@ std::string DirectoryHandler::concatenate(const std::string &path1, const std::s
 }
 
 
-void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &filterStr,std::vector<std::string>& res)
+void DirectoryHandler::findDirContents(const std::string &dirPath,const std::string &filterStr, FileType type, std::vector<std::string>& res)
 {
-	boost::filesystem::path path(dirPath);
+    boost::filesystem::path path(dirPath);
     boost::filesystem::directory_iterator it(path), eod;
 
     const boost::regex expr(filterStr);
 
     BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod ))
     {
-    	boost::smatch what;
-    	std::string fileName=p.filename().string();
+        boost::smatch what;
+        std::string fileName=p.filename().string();
 
-        if(is_regular_file(p) &&
-        	//boost::algorithm::starts_with(p.filename().string(),startsWith))
-        	boost::regex_match(fileName, what,expr))
+        bool rightType = (type == File) ? is_regular_file(p) : is_directory(p);  // file or directory?
+
+        if(rightType && boost::regex_match(fileName, what,expr))
         {
             res.push_back(fileName);
         }
     }
 }
 
-void DirectoryHandler::createDir(const std::string& path)
+
+void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &filterStr,std::vector<std::string>& res)
+{
+    findDirContents(dirPath, filterStr, File, res);
+}
+
+void DirectoryHandler::findDirs(const std::string &dirPath,const std::string &filterStr,std::vector<std::string>& res)
+{
+    findDirContents(dirPath, filterStr, Dir, res);
+}
+
+bool DirectoryHandler::createDir(const std::string& path)
 {
 	//Create configDir if if does not exist
 	if(!boost::filesystem::exists(path))
@@ -191,8 +202,11 @@ void DirectoryHandler::createDir(const std::string& path)
 		{
 			UserMessage::message(UserMessage::ERROR, true,
                     "Could not create dir: " + path + " reason: " + err.what());
+            return false;
 		}
 	}
+
+	return true;  // will also return true if the directory already exists
 }
 
 bool DirectoryHandler::isFirstStartUp()
@@ -220,5 +234,129 @@ std::string DirectoryHandler::tmpFileName()
     }
 
     return std::string();
+}
+
+
+// -----------------------------------------------------
+// copyDir
+// recursively copy a directory and its contents
+// -----------------------------------------------------
+
+bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &destDir, std::string &errorMessage)
+{
+    boost::filesystem::path src(srcDir);
+    boost::filesystem::path dest(destDir);
+
+    // does the source directory exist (and is a directory)?
+    if (!boost::filesystem::exists(src) || !boost::filesystem::is_directory(src))
+    {
+        errorMessage = "Source directory (" + srcDir + ") does not exist";
+        return false;
+    }
+
+
+    // create the destination directory if it does not alreadt exist
+    if (!boost::filesystem::exists(dest))
+    {
+        bool created = createDir(dest.string());
+        if (!created)
+        {
+            errorMessage = "Could not create destination directory (" + destDir + ")";
+            return false;
+        }
+    }
+
+    // go through all the files/dirs in the
+    boost::filesystem::directory_iterator it(src), eod;
+    BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
+    {
+        std::string fileName = p.filename().string();
+
+        if (is_regular_file(p))  // file? then copy it into its new home
+        {
+            try
+            {
+                boost::filesystem::copy_file(p, dest / p.filename());
+            }
+            catch (const boost::filesystem::filesystem_error& err)
+            {
+                errorMessage = "Could not copy file " + fileName + " to " + destDir + "; reason: " + err.what();
+                return false;
+            }
+        }
+        else if (is_directory(p))  // directory? then copt it recursively
+        {
+            boost::filesystem::path destSubDir(destDir);
+            destSubDir /= p.filename();
+            return copyDir(p.string(), destSubDir.string(), errorMessage);
+        }
+    }
+
+    return true;
+}
+
+
+// --------------------------------------------------------
+// removeDir
+// Recursively removes the given directory and its contents
+// --------------------------------------------------------
+
+bool DirectoryHandler::removeDir(const std::string &dir, std::string &errorMessage)
+{
+    try
+    {
+        boost::filesystem::path d(dir);
+        remove_all(d);
+    }
+    catch (const boost::filesystem::filesystem_error& err)
+    {
+        errorMessage = "Could not remove directory " + dir + "; reason: " + err.what();
+        return false;
+    }
+
+    return true;
+}
+
+// --------------------------------------------------------
+// renameDir
+// Same as a 'move' - renames the directory
+// --------------------------------------------------------
+
+bool DirectoryHandler::renameDir(const std::string &dir, const std::string &newName, std::string &errorMessage)
+{
+    try
+    {
+        boost::filesystem::path d1(dir);
+        boost::filesystem::path d2(newName);
+        rename(d1, d2);
+    }
+    catch (const boost::filesystem::filesystem_error& err)
+    {
+        errorMessage = "Could not rename directory " + dir + "; reason: " + err.what();
+        return false;
+    }
+
+    return true;
+}
+
+// --------------------------------------------------------
+// removeFile
+// Removes the given file
+// --------------------------------------------------------
+
+bool DirectoryHandler::removeFile(const std::string &path, std::string &errorMessage)
+{
+    try
+    {
+        boost::filesystem::path f(path);
+        bool ok = remove(f);
+    }
+    catch (const boost::filesystem::filesystem_error& err)
+    {
+        errorMessage = "Could not remove file " + path + "; reason: " + err.what();
+        return false;
+    }
+
+    return true;
 }
 

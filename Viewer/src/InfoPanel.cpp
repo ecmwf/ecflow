@@ -173,7 +173,8 @@ void InfoPanel::clear()
 	{
 		if(InfoPanelItem* item=findItem(tab_->widget(i)))
 		{
-			item->clearContents();
+            //Diable and clear the contents
+            item->setActive(false);
 		}
 	}
 	//Clear the tabs
@@ -193,7 +194,7 @@ void InfoPanel::reset(VInfo_ptr info)
         if(*(info_.get()) == *(info.get()))
             return;
 
-        //it can happen thet the stored info was not yet updated after a
+        //it can happen that the stored info was not yet updated after a
         //server reload. If there is chance for it we try to regain its data and
         //comapare it again to the incoming node
         else if(info_->server() == info->server() &&
@@ -224,18 +225,27 @@ void InfoPanel::reset(VInfo_ptr info)
 //This slot is called when the info object is selected
 void InfoPanel::slotReload(VInfo_ptr info)
 {
-	//When the mode is detached it cannot receive
+    //When the mode is detached it cannot receive
 	//the reload request
-    if(info_ && info_ && detached())
+    if(info_ && detached())
 		return;
 
-	reset(info);
+    if(info && info->isAttribute())
+    {
+        reset(VInfo::createParent(info));
+    }
+    else
+    {
+        reset(info);
+    }
 }
 
 //This slot is called when the info object is selected
 void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 {
     reset(info);
+    if(!detached() && info_)
+       Q_EMIT selectionChanged(info_);
 }
 
 //Set the new VInfo object.
@@ -305,9 +315,8 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	{
 		if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 		{
-			//Disable and force to clear the contents
+			//Disable and force to clear the contents           
 			d->item()->setActive(false);
-			d->item()->clearContents();
 
 			if(d->match(ids))
 				match++;
@@ -625,13 +634,16 @@ void InfoPanel::notifyEndServerScan(ServerHandler* server)
             messageLabel_->clear();
 
             //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
-            //the notifyEndServerScan() will be first called on the VInfo then on the InfoPanel. So it
-            //is possible that the not still exists but it is still set to NULL in VInfo.
+            //that notifyEndServerScan() will be first called on the VInfo then on the InfoPanel. So it
+            //is possible that the node exists but is still set to NULL in VInfo.
             info_->regainData();
 
-            //If the node is not available dataLost() will be called.
-            if(!info_->node())
+            //If the info is not available dataLost() might have already been called and
+            //the panel was reset!
+            if(!info_)
                 return;
+
+            Q_ASSERT(info_->server() && info_->node());
 
             //Otherwise we resume all the tabs
             Q_FOREACH(InfoPanelItemHandler *item,items_)

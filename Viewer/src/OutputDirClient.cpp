@@ -17,6 +17,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
+#define _UI_OUTPUTDIRCLIENT_DEBUG
+
 OutputDirClient::OutputDirClient(const std::string& host,const std::string& portStr,QObject* parent) :
 	OutputClient(host,portStr,parent)
 {
@@ -52,34 +54,62 @@ void OutputDirClient::slotConnected()
 
 void OutputDirClient::slotError(QAbstractSocket::SocketError err)
 {
-    //qDebug() << "error" <<  soc_->errorString();
-
+#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+    UserMessage::debug("OutputDirClient::slotError --> " + soc_->errorString().toStdString());
+#endif
 	switch(err)
 	{
-	case QAbstractSocket::RemoteHostClosedError:
+    //The logserver does not notify us if the file trasfer finish. We simply get this error.
+    case QAbstractSocket::RemoteHostClosedError:
 
+#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+        UserMessage::debug("   RemoteHostClosedError ");
+#endif
         //qDebug() << "remote host closed";
+        //If no data was transferred we think it is a real error.
+        if(data_.isEmpty())
+        {
+#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+            UserMessage::debug("   --> data is empty: file transfer failed");
+#endif
+            break;
+        }
+        //If there is some data we think the transfer succeeded.
+        else
+        {
+#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+            UserMessage::debug("   --> has data: file transfer succeeded");
+#endif
+            if(dir_)
+            {
+                parseData();
+            }
 
-		if(dir_)
-		{
-			parseData();
-		}
+            Q_EMIT finished();
 
-		Q_EMIT finished();
+            if(dir_)
+                dir_.reset();
 
-		if(dir_)
-			dir_.reset();
+            return;
+        }
 
 		break;
-	default:
-		soc_->abort();
-		if(dir_)
-		{
-			dir_.reset();
-		}
-		Q_EMIT error(soc_->errorString());
+    case QAbstractSocket::UnknownSocketError:
+        if(soc_->state() != QAbstractSocket::ConnectedState)
+        {
+            break;
+        }
+        break;
+    default:
 		break;
 	}
+
+    soc_->abort();
+    if(dir_)
+    {
+        dir_.reset();
+    }
+    Q_EMIT error(soc_->errorString());
 }
 
 void OutputDirClient::getDir(const std::string& name)
