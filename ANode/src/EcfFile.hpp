@@ -15,6 +15,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "NodeFwd.hpp"
+#include <boost/noncopyable.hpp>
 #include <set>
 
 /// This class is used in the pre-processing of files( .ecf or .usr or .man typically)
@@ -27,36 +28,6 @@
 /// When returning the manual we pre-process the files first
 ///
 /// However for testing purpose this capability may be retained.
-
-struct PreProcessData {
-   PreProcessData(const std::string& ecf_micro) : nopp(false),comment(false),manual(false),ecf_micro(ecf_micro) {
-      pp_nopp = ecf_micro;
-      pp_comment = ecf_micro;
-      pp_manual = ecf_micro;
-      pp_end = ecf_micro;
-   }
-   ~PreProcessData(){}
-
-   bool nopp;
-   bool comment;
-   bool manual;
-
-   // include pre-processing on the included file.
-   // Note: include directives _in_ manual/comment should he handled.
-   //       only include directives in %nopp/%end are ignored
-   typedef std::map<std::string, int > my_map;
-   my_map globalIncludedFileSet;          // test for recursive includes, <no _of times it was included>
-   std::set<std::string> include_once_set;
-   std::vector<std::string> tokens;       // re-use to save memory
-
-   // constant until ecfmicro changes, then reset
-   std::string pp_nopp;
-   std::string pp_comment;
-   std::string pp_manual;
-   std::string pp_end;
-   std::string ecf_micro;
-};
-
 
 class EcfFile {
 public:
@@ -109,13 +80,11 @@ public:
 	static void extract_used_variables(NameValueMap& used_variables_as_map,const std::vector<std::string> &script_lines);
 
 private:
+	friend class PreProcessor;
 	enum Type { SCRIPT, INCLUDE, MANUAL, COMMENT };
 	static std::string fileType(EcfFile::Type);
 
 	bool open_script_file(const std::string& file, EcfFile::Type, std::vector<std::string>& lines, std::string& errormsg) const;
-   bool preProcess(std::vector<std::string>& script_lines, std::string& errormsg);
-   void preProcess_line(PreProcessData&,const std::string& script_line,std::string& errormsg);
-   void preProcess_includes(PreProcessData&,const std::string& script_line, std::string& errormsg);
 
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
 	std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
@@ -150,5 +119,41 @@ private:
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
 };
 
+class PreProcessor : private boost::noncopyable {
+public:
+   PreProcessor(EcfFile*);
+   ~PreProcessor();
+
+   bool preProcess(std::vector<std::string>& script_lines );
+   const std::string& error_msg() const { return error_msg_;}
+
+private:
+   // include pre-processing on the included file.
+   // Note: include directives _in_ manual/comment should he handled.
+   //       only include directives in %nopp/%end are ignored
+   void preProcess_line(const std::string& script_line );
+   void preProcess_includes(const std::string& script_line);
+
+private:
+   EcfFile* ecfile_;
+
+   bool nopp;
+   bool comment;
+   bool manual;
+
+   std::string pp_nopp;
+   std::string pp_comment;
+   std::string pp_manual;
+   std::string pp_end;
+   std::string ecf_micro_;                 // constant until ecfmicro changes, then reset
+
+   std::string error_msg_;
+   std::vector<std::string>& jobLines_;
+   std::vector<std::string> tokens_;       // re-use to save memory
+
+   typedef std::map<std::string, int > my_map;
+   my_map globalIncludedFileSet_;          // test for recursive includes, <no _of times it was included>
+   std::set<std::string> include_once_set_;
+};
 
 #endif
