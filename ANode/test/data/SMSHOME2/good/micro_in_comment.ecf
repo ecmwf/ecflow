@@ -1,4 +1,3 @@
-
 echo do %% some work
 
 # mismatched micro characters staring with a # are not reported as errors
