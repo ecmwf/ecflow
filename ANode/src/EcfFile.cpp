@@ -337,7 +337,7 @@ void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,const s
 
 bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& errormsg)
 {
-   /// Clear existing jobLines
+   /// Clear existing jobLines, pre-processing will populate jobLines_
    jobLines_.clear();
    jobLines_.reserve(512); // estimate for includes
    errormsg.clear();
@@ -395,7 +395,7 @@ void EcfFile::preProcess_line(PreProcessData& pp_data, const std::string& script
       }
    }
 
-   // %ecfmicro,%manual,%comment,%end,%include,%includenopp it must be the very *first* character
+   // %ecfmicro,%manual,%comment,%end,%include,%includenopp,%includeonce it must be the very *first* character
    if (ecfmicro_pos != 0) return; //handle 'garbage%include'
 
 #ifdef DEBUG_PRE_PROCESS
@@ -474,6 +474,7 @@ void EcfFile::preProcess_line(PreProcessData& pp_data, const std::string& script
 
    if (pp_data.tokens.size() < 2) return;
 
+   // we only end up here if we have includes
    preProcess_includes(pp_data,script_line,errormsg);
 }
 
@@ -497,7 +498,6 @@ void EcfFile::preProcess_includes(PreProcessData& pp_data,const std::string& scr
    // remove %include from the job lines, since were going to expand or ignore it.
    jobLines_.pop_back();
 
-   // we only end up here if we have includes
 #ifdef DEBUG_PRE_PROCESS_INCLUDES
    // Output the includes for debug purposes. Will appear in preProcess.ecf
    // Note: Will interfere with diff
