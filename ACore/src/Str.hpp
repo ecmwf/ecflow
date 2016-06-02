@@ -127,6 +127,7 @@ public:
    static const std::string& ECF_JOBOUT();
    static const std::string& ECF_SCRIPT();
    static const std::string& ECF_DUMMY_TASK();
+   static const std::string& ECF_NO_SCRIPT();
    static const std::string& ECF_MICRO();
    static const std::string& ECF_FILES();
    static const std::string& ECF_FETCH();
