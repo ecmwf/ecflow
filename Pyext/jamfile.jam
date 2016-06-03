@@ -62,6 +62,7 @@ if ! [ python.configured ]
     #     :  # condition
     #     ;
     using python ;
+    # using python : 3.5 : python3 : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;
 }
 
 # Specify the path to the Boost project.  If you move this project,
