@@ -87,7 +87,6 @@ private:
 	bool open_script_file(const std::string& file, EcfFile::Type, std::vector<std::string>& lines, std::string& errormsg) const;
 
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
-	std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
  	void variableSubstituition(JobsParam&);
  	const std::string&  doCreateJobFile(JobsParam&) const;
  	bool doCreateManFile(std::string& errormsg);
@@ -119,6 +118,9 @@ private:
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
 };
 
+
+// This class is used in expanding(pre-processing) the includes.
+// The pre-processing is done in a depth first fashion (ECFLOW-673)
 class PreProcessor : private boost::noncopyable {
 public:
    PreProcessor(EcfFile*);
@@ -133,18 +135,19 @@ private:
    //       only include directives in %nopp/%end are ignored
    void preProcess_line(const std::string& script_line );
    void preProcess_includes(const std::string& script_line);
+   std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
 
 private:
    EcfFile* ecfile_;
 
-   bool nopp;
-   bool comment;
-   bool manual;
+   bool nopp_;
+   bool comment_;
+   bool manual_;
 
-   std::string pp_nopp;
-   std::string pp_comment;
-   std::string pp_manual;
-   std::string pp_end;
+   std::string pp_nopp_;
+   std::string pp_comment_;
+   std::string pp_manual_;
+   std::string pp_end_;
    std::string ecf_micro_;                 // constant until ecfmicro changes, then reset
 
    std::string error_msg_;

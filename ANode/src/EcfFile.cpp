@@ -873,139 +873,6 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
    return true;
 }
 
-std::string EcfFile::getIncludedFilePath(const std::string& includedFile,const std::string& line,std::string& errormsg)
-{
-   // Include can have following format: [ %include | %includeonce | %includenopp ]
-   //   %include /tmp/file.name   -> /tmp/filename
-   //   %include file.name        -> file.name
-   //   %include "../file.name"   -> script_file_location/../file.name
-   //   %include "./file.name"    -> script_file_location/./file.name
-   //   %include "file.name"      -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
-   //   %include <file.name>      -> %ECF_INCLUDE%/filename
-   //
-   // When ECF_INCLUDE            -> path1:path2:path3
-   //   %include <file.name>      -> path1/filename || path2/filename || path3/filename
-   //
-   //   %include <file.name>      -> ECF_HOME/filename
-
-   std::string the_include_file = includedFile.substr( 1, includedFile.size() - 2 );
-   if ( includedFile.size() >=2 && includedFile[1] == '/') {
-      // filename starts with '/' no interpretation return as in
-      // %include </home/ecf/fred.ecf>
-      // %include "/home/ecf/fred.ecf"
-      return the_include_file;
-   }
-
-   std::stringstream ss;
-   if ( includedFile[0] == '<' ) {
-      // %include <filename> can be one of:
-      //    o When ECF_INCLUDE is a single path -> path1/filename
-      //    o When ECF_INCLUDE is a multi  path -> path1:path2:path3  -> ECFLOW-261
-      //                                        -> path1/filename || path2/filename || path3/filename
-      //    o ECF_HOME/filename
-      std::string ecf_include;
-      if (node_->findParentUserVariableValue( Str::ECF_INCLUDE() , ecf_include ) && !ecf_include.empty() ) {
-
-         // if ECF_INCLUDE is a set a paths, search in order. i.e like $PATH
-         if (ecf_include.find(':') != std::string::npos) {
-            std::vector<std::string> include_paths;
-            Str::split(ecf_include,include_paths,":");
-            for(size_t i =0; i < include_paths.size();i++) {
-               ecf_include.clear();
-               ecf_include = include_paths[i];
-               ecf_include += '/';
-               ecf_include += the_include_file;
-
-               // Don't rely on hard coded paths. Added for testing, but could be generally useful
-               // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
-               node_->variable_dollar_subsitution(ecf_include);
-
-               if (fs::exists(ecf_include)) return ecf_include;
-            }
-         }
-         else {
-            ecf_include += '/';
-            ecf_include += the_include_file;
-            node_->variable_dollar_subsitution(ecf_include);
-            if (fs::exists(ecf_include)) return ecf_include;
-         }
-
-         // ECF_INCLUDE is specified *BUT* the file does *NOT* exist, Look in ECF_HOME
-      }
-
-      // WE get HERE *if* ECF_INCLUDE not specified, or if specified but file *not found*
-      ecf_include.clear();
-      node_->findParentVariableValue( Str::ECF_HOME() , ecf_include );
-      if (ecf_include.empty()) {
-         ss << "ECF_INCLUDE/ECF_HOME not specified, for task " << node_->absNodePath() << " at " << line;
-         errormsg += ss.str();
-         return string();
-      }
-
-      ecf_include += '/';
-      ecf_include += the_include_file;
-
-      return ecf_include;
-   }
-   else if ( includedFile[0] == '"' ) {
-
-      // we have two forms: "head.h" & "../head.h"
-
-      //  ECFLOW-274 need to allow:
-      //     - %include "../fred.h"     # this one directory up
-      //     - %include "./fred.h"      # this is at the same level as script
-      std::string path;
-      if ( includedFile.find("./") == 1 || includedFile.find("../") == 1) {
-         // remove the leading and trailing '"'
-         std::string the_included_file = includedFile;
-         Str::removeQuotes(the_included_file);
-
-         // Get the root path, i.e. script_or_job_path() is of the form "/user/home/ma/mao/course/t1.ecf || /user/home/ma/mao/course/t1.job"
-         // we need "/user/home/ma/mao/course/"
-         std::string the_script_or_job_path = script_or_job_path();
-         std::string::size_type last_slash = the_script_or_job_path.rfind("/");
-         if (last_slash != std::string::npos) {
-            path = the_script_or_job_path.substr( 0, last_slash + 1 );
-            path += the_included_file;
-            // std::cout << "path == " << path << "\n";
-            return path;
-         }
-      }
-
-      // include contents of %ECF_HOME%/%SUITE%/%FAMILY%/filename
-      node_->findParentUserVariableValue( Str::ECF_HOME() , path);
-      if ( path.empty() ) {
-         ss << "ECF_HOME not specified, for task " << node_->absNodePath() << " at " << line;
-         errormsg += ss.str();
-         return string();
-      }
-      path += '/';
-      std::string suite;
-      node_->findParentVariableValue( "SUITE" , suite);   // SUITE is a generated variable
-      if ( suite.empty() ) {
-         ss << "SUITE not specified, for task " << node_->absNodePath() << " at " << line;
-         errormsg += ss.str();
-         return string();
-      }
-      path += suite;
-      path += '/';
-      std::string family;
-      node_->findParentVariableValue( "FAMILY" , family); // FAMILY is a generated variable
-      if ( family.empty() ) {
-         ss << "FAMILY not specified, for task " << node_->absNodePath() << " at " << line;
-         errormsg += ss.str();
-         return string();
-      }
-      path += family;
-      path += '/';
-      path += the_include_file ; // "filename"
-      return path;
-   }
-
-   // File either has an absolute pathname or is in the current working dir.
-   // include file name as is, from current working directory
-   return includedFile;
-}
 
 void EcfFile::removeCommentAndManual()
 {
@@ -1223,16 +1090,16 @@ const std::string& EcfFile::get_extn() const
 
 PreProcessor::PreProcessor(EcfFile* ecfile)
 : ecfile_(ecfile),
-  nopp(false),
-  comment(false),
-  manual(false),
+  nopp_(false),
+  comment_(false),
+  manual_(false),
   ecf_micro_(ecfile->ecfMicroCache_),
   jobLines_(ecfile->jobLines_)
 {
-   pp_nopp = ecf_micro_;    pp_nopp    += T_NOOP;
-   pp_comment = ecf_micro_; pp_comment += T_COMMENT;
-   pp_manual = ecf_micro_;  pp_manual  += T_MANUAL;
-   pp_end = ecf_micro_;     pp_end     += T_END;
+   pp_nopp_ = ecf_micro_;    pp_nopp_    += T_NOOP;
+   pp_comment_ = ecf_micro_; pp_comment_ += T_COMMENT;
+   pp_manual_ = ecf_micro_;  pp_manual_  += T_MANUAL;
+   pp_end_ = ecf_micro_;     pp_end_     += T_END;
 
    /// Clear existing jobLines, pre-processing will populate jobLines_
    jobLines_.clear();
@@ -1252,9 +1119,8 @@ bool PreProcessor::preProcess(std::vector<std::string>& script_lines )
       if (!error_msg_.empty()) return false;
    }
 
-   if (nopp) {
-      std::stringstream ss;
-      ss << "Unterminated nopp, matching 'end' is missing for " << ecfile_->script_path_or_cmd_;
+   if (nopp_) {
+      std::stringstream ss; ss << "Unterminated nopp, matching 'end' is missing for " << ecfile_->script_path_or_cmd_;
       error_msg_ += ss.str();
       ecfile_->dump_expanded_script_file(jobLines_);
       return false;
@@ -1270,7 +1136,7 @@ void PreProcessor::preProcess_line(const std::string& script_line)
    string::size_type ecfmicro_pos = script_line.find(ecf_micro_);
    if (ecfmicro_pos == string::npos) return;
 
-   if (!nopp && !comment && !manual) {
+   if (!nopp_ && !comment_ && !manual_) {
       // For variable substitution '%' can occur anywhere on the line.
       // Check for Mismatched micro i.e %FRED or %FRED%%
       if (ecfmicro_pos != 0) {
@@ -1291,44 +1157,44 @@ void PreProcessor::preProcess_line(const std::string& script_line)
 #ifdef DEBUG_PRE_PROCESS
    std::cout << i << ": " << script_line << "\n";
 #endif
-   if (script_line.find(pp_manual) == 0) {
-      if (comment || manual) {
+   if (script_line.find(pp_manual_) == 0) {
+      if (comment_ || manual_) {
          std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_line << "' at " << ecfile_->script_path_or_cmd_;
          error_msg_ += ss.str();
          ecfile_->dump_expanded_script_file(jobLines_);
          return;
       }
-      manual = true ; return;
+      manual_ = true ; return;
    }
-   if (script_line.find(pp_comment) == 0) {
-      if (comment || manual) {
+   if (script_line.find(pp_comment_) == 0) {
+      if (comment_ || manual_) {
          std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_line << "' at " << ecfile_->script_path_or_cmd_;
          error_msg_ += ss.str();
          ecfile_->dump_expanded_script_file(jobLines_);
          return;
       }
-      comment = true ; return;
+      comment_ = true ; return;
    }
-   if (script_line.find(pp_nopp) == 0) {
-      if (nopp) {
+   if (script_line.find(pp_nopp_) == 0) {
+      if (nopp_) {
          std::stringstream ss; ss << "Embedded nopp not supported '" << script_line << "' in " << ecfile_->script_path_or_cmd_;
          error_msg_ += ss.str();
          ecfile_->dump_expanded_script_file(jobLines_);
          return;
       }
-      nopp = true ; return;
+      nopp_ = true ; return;
    }
-   if (script_line.find(pp_end) == 0) {
-      if (comment) { comment = false; return;}
-      if (manual)  { manual = false;  return;}
-      if (nopp)    { nopp = false;    return;}
+   if (script_line.find(pp_end_) == 0) {
+      if (comment_) { comment_ = false; return;}
+      if (manual_)  { manual_ = false;  return;}
+      if (nopp_)    { nopp_ = false;    return;}
       std::stringstream ss;
-      ss << pp_end << " found with no matching %comment | %manual | %nopp at '" << script_line << "' at path " << ecfile_->script_path_or_cmd_;
+      ss << pp_end_ << " found with no matching %comment | %manual | %nopp at '" << script_line << "' at path " << ecfile_->script_path_or_cmd_;
       error_msg_ += ss.str();
       ecfile_->dump_expanded_script_file(jobLines_);
-      return ;
+      return;
    }
-   if (nopp) return;
+   if (nopp_) return;
 
 
    // =================================================================================
@@ -1354,10 +1220,10 @@ void PreProcessor::preProcess_line(const std::string& script_line)
          error_msg_ += ss.str();
          return;
       }
-      pp_nopp = ecf_micro_;    pp_nopp    += T_NOOP;
-      pp_comment = ecf_micro_; pp_comment += T_COMMENT;
-      pp_manual = ecf_micro_;  pp_manual  += T_MANUAL;
-      pp_end = ecf_micro_;     pp_end     += T_END;
+      pp_nopp_ = ecf_micro_;    pp_nopp_    += T_NOOP;
+      pp_comment_ = ecf_micro_; pp_comment_ += T_COMMENT;
+      pp_manual_ = ecf_micro_;  pp_manual_  += T_MANUAL;
+      pp_end_ = ecf_micro_;     pp_end_     += T_END;
 
       return;
    }
@@ -1371,8 +1237,7 @@ void PreProcessor::preProcess_line(const std::string& script_line)
 void PreProcessor::preProcess_includes(const std::string& script_line)
 {
    // =================================================================================
-   // Handle the includes: Notice we only do recursive includes for %include
-   // order is *IMPORTANT*, hence search for includenopp,includeonce,include
+   // order is *IMPORTANT*, hence search for includenopp, includeonce, include
    // Otherwise string::find() of include will match includenopp and includeonce
    // =================================================================================
    bool fnd_include = false;
@@ -1394,7 +1259,7 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    jobLines_.push_back("========== include of " + tokens_[1] + " ===========================");
 #endif
 
-   std::string includedFile = ecfile_->getIncludedFilePath(tokens_[1], script_line, error_msg_);
+   std::string includedFile = getIncludedFilePath(tokens_[1], script_line, error_msg_);
    if (!error_msg_.empty()) return;
 
    // handle %include || %includeonce  of include that was specified as %includeonce
@@ -1431,16 +1296,153 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    if (!ecfile_->open_script_file(includedFile, EcfFile::INCLUDE, include_lines, error_msg_))  return;
    if (fnd_includenopp) include_lines.push_back(ecf_micro_ + T_END);
 
-   for(size_t i=0; i < include_lines.size(); ++i) {
+   size_t include_lines_size = include_lines.size();
+   for(size_t i=0; i < include_lines_size; ++i) {
       const std::string& script_line = include_lines[i];
       jobLines_.push_back(script_line);    // copy line
       preProcess_line(script_line);
       if (!error_msg_.empty()) return;
    }
 
-   if (nopp) {
+   if (nopp_) {
       std::stringstream ss; ss << "Unterminated nopp, matching 'end' is missing for " << ecfile_->script_path_or_cmd_;
       error_msg_ += ss.str();
       ecfile_->dump_expanded_script_file(jobLines_);
    }
+}
+
+std::string PreProcessor::getIncludedFilePath(const std::string& includedFile,const std::string& line,std::string& errormsg)
+{
+   // Include can have following format: [ %include | %includeonce | %includenopp ]
+   //   %include /tmp/file.name   -> /tmp/filename
+   //   %include file.name        -> file.name
+   //   %include "../file.name"   -> script_file_location/../file.name
+   //   %include "./file.name"    -> script_file_location/./file.name
+   //   %include "file.name"      -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
+   //   %include <file.name>      -> %ECF_INCLUDE%/filename
+   //
+   // When ECF_INCLUDE            -> path1:path2:path3
+   //   %include <file.name>      -> path1/filename || path2/filename || path3/filename
+   //
+   //   %include <file.name>      -> ECF_HOME/filename
+
+   std::string the_include_file = includedFile.substr( 1, includedFile.size() - 2 );
+   if ( includedFile.size() >=2 && includedFile[1] == '/') {
+      // filename starts with '/' no interpretation return as in
+      // %include </home/ecf/fred.ecf>
+      // %include "/home/ecf/fred.ecf"
+      return the_include_file;
+   }
+
+   Node* node = ecfile_->node_;
+   std::stringstream ss;
+   if ( includedFile[0] == '<' ) {
+      // %include <filename> can be one of:
+      //    o When ECF_INCLUDE is a single path -> path1/filename
+      //    o When ECF_INCLUDE is a multi  path -> path1:path2:path3  -> ECFLOW-261
+      //                                        -> path1/filename || path2/filename || path3/filename
+      //    o ECF_HOME/filename
+      std::string ecf_include;
+      if (node->findParentUserVariableValue( Str::ECF_INCLUDE() , ecf_include ) && !ecf_include.empty() ) {
+
+         // if ECF_INCLUDE is a set a paths, search in order. i.e like $PATH
+         if (ecf_include.find(':') != std::string::npos) {
+            std::vector<std::string> include_paths;
+            Str::split(ecf_include,include_paths,":");
+            for(size_t i =0; i < include_paths.size();i++) {
+               ecf_include.clear();
+               ecf_include = include_paths[i];
+               ecf_include += '/';
+               ecf_include += the_include_file;
+
+               // Don't rely on hard coded paths. Added for testing, but could be generally useful
+               // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
+               node->variable_dollar_subsitution(ecf_include);
+
+               if (fs::exists(ecf_include)) return ecf_include;
+            }
+         }
+         else {
+            ecf_include += '/';
+            ecf_include += the_include_file;
+            node->variable_dollar_subsitution(ecf_include);
+            if (fs::exists(ecf_include)) return ecf_include;
+         }
+
+         // ECF_INCLUDE is specified *BUT* the file does *NOT* exist, Look in ECF_HOME
+      }
+
+      // WE get HERE *if* ECF_INCLUDE not specified, or if specified but file *not found*
+      ecf_include.clear();
+      node->findParentVariableValue( Str::ECF_HOME() , ecf_include );
+      if (ecf_include.empty()) {
+         ss << "ECF_INCLUDE/ECF_HOME not specified, for task " << node->absNodePath() << " at " << line;
+         errormsg += ss.str();
+         return string();
+      }
+
+      ecf_include += '/';
+      ecf_include += the_include_file;
+
+      return ecf_include;
+   }
+   else if ( includedFile[0] == '"' ) {
+
+      // we have two forms: "head.h" & "../head.h"
+
+      //  ECFLOW-274 need to allow:
+      //     - %include "../fred.h"     # this one directory up
+      //     - %include "./fred.h"      # this is at the same level as script
+      std::string path;
+      if ( includedFile.find("./") == 1 || includedFile.find("../") == 1) {
+         // remove the leading and trailing '"'
+         std::string the_included_file = includedFile;
+         Str::removeQuotes(the_included_file);
+
+         // Get the root path, i.e. script_or_job_path() is of the form:
+         //    "/user/home/ma/mao/course/t1.ecf || /user/home/ma/mao/course/t1.job"
+         // we need "/user/home/ma/mao/course/"
+         std::string the_script_or_job_path = ecfile_->script_or_job_path();
+         std::string::size_type last_slash = the_script_or_job_path.rfind("/");
+         if (last_slash != std::string::npos) {
+            path = the_script_or_job_path.substr( 0, last_slash + 1 );
+            path += the_included_file;
+            // std::cout << "path == " << path << "\n";
+            return path;
+         }
+      }
+
+      // include contents of %ECF_HOME%/%SUITE%/%FAMILY%/filename
+      node->findParentUserVariableValue( Str::ECF_HOME() , path);
+      if ( path.empty() ) {
+         ss << "ECF_HOME not specified, for task " << node->absNodePath() << " at " << line;
+         errormsg += ss.str();
+         return string();
+      }
+      path += '/';
+      std::string suite;
+      node->findParentVariableValue( "SUITE" , suite);   // SUITE is a generated variable
+      if ( suite.empty() ) {
+         ss << "SUITE not specified, for task " << node->absNodePath() << " at " << line;
+         errormsg += ss.str();
+         return string();
+      }
+      path += suite;
+      path += '/';
+      std::string family;
+      node->findParentVariableValue( "FAMILY" , family); // FAMILY is a generated variable
+      if ( family.empty() ) {
+         ss << "FAMILY not specified, for task " << node->absNodePath() << " at " << line;
+         errormsg += ss.str();
+         return string();
+      }
+      path += family;
+      path += '/';
+      path += the_include_file ; // "filename"
+      return path;
+   }
+
+   // File either has an absolute pathname or is in the current working dir.
+   // include file name as is, from current working directory
+   return includedFile;
 }
