@@ -16,7 +16,7 @@
 #         $(BOOST_ROOT)/tools/build/v2
 # However for version >= 1.56, boost build is found in:
 #         $(BOOST_ROOT)/tools/build/src
-# This allows both to be searched.
+# This allows both to be searched
 # ---------------------------------------------------------------------------
 local rule if-has-file ( file + : dir * )
 {
