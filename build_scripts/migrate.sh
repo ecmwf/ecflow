@@ -1,7 +1,7 @@
 
 
 prepare_migration() {
-   use ecflow
+   module load ecflow
    while read nick host port
    do
      LOG="--host=$host --port=$port"
