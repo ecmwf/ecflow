@@ -1,14 +1,14 @@
 #!/bin/sh
 
+# wait for server to start
 set +e # ignore error 
 count=0
 while [ 1 ] ; do   
+    sleep 3
     ecflow_client --ping 2> /dev/null
     if [[ $? == 0 ]] ; then
         echo "server up and running"
         break;
-    else
-        sleep 3
     fi
     count=$((count + 1))
     #echo $count
@@ -17,5 +17,6 @@ while [ 1 ] ; do
         exit 1
     fi
 done
+set -e  # re-enable error 
 
  
