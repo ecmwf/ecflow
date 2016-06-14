@@ -138,9 +138,9 @@ def check_defs(path_to_defs):
         return False
           
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
  
     # Names with leading '.' should not be allowed. Will interfere with triggers
     # Empty names not allowed
@@ -233,7 +233,7 @@ if __name__ == "__main__":
  
 
     # ========================================================================
-    print "Check node names"
+    print("Check node names")
     for i in range(25):
         assert check_node_name(str(i)),             "Integer names should be allowed"
      
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     assert check_defs("a_made_up_path_that_doesnt_not_exit.def") == False, "Expected exception, Defs file does not exist"
 
     # =================================================================================
-    print "test save_as_defs"
+    print("test save_as_defs")
     defs = Defs()                      # create a empty definition
     s1 = defs.add_suite("s1")          # create a suite "s1" and add to defs
     defs.save_as_defs("testerror.def") # create a defs on disk
@@ -255,13 +255,13 @@ if __name__ == "__main__":
     os.remove("testerror.def")
 
     # =================================================================================
-    print "Check duplicate suites not allowed"
+    print("Check duplicate suites not allowed")
     test_passed = False
     try :
         defs = Defs()               # create a empty definition
         s1 = defs.add_suite("s1")   # create a suite "s1" and add to defs
         s2 = defs.add_suite("s1")   # Exception thrown trying to add suite name "s1" again
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass 
     assert test_passed,"duplicate suite test failed"   
@@ -271,48 +271,48 @@ if __name__ == "__main__":
     try:
         defs = Defs()
         defs.add_suite("1").add_today("00:30")
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"Adding today at the suite level should fail"   
-    print "check adding today at the suite level: RuntimeError: ",e
+    print("check adding today at the suite level: RuntimeError: ",e)
 
     # =================================================================================
     test_passed = False
     try:
         defs = Defs()
         defs.add_suite("1").add_time("00:30")
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"Adding time at the suite level should fail"    
-    print "check adding time at the suite level: RuntimeError: ",e
+    print("check adding time at the suite level: RuntimeError: ",e)
 
     # =================================================================================
     test_passed = False
     try:
         defs = Defs()
         defs.add_suite("1").add_date(1,1,2016)
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"Adding date at the suite level should fail"    
-    print "check adding date at the suite level: RuntimeError: ",e
+    print("check adding date at the suite level: RuntimeError: ",e)
 
     # =================================================================================
     test_passed = False
     try:
         defs = Defs()
         defs.add_suite("1").add_day("monday")
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"Adding day at the suite level should fail"    
-    print "check adding day at the suite level: RuntimeError: ",e
+    print("check adding day at the suite level: RuntimeError: ",e)
 
 
     # =================================================================================
-    print "check duplicate family not allowed"
+    print("check duplicate family not allowed")
     test_passed = False
     try:
         suite = Suite("1")
@@ -320,13 +320,13 @@ if __name__ == "__main__":
         fam2 = Family("1")
         suite.add_family(fam1)
         suite.add_family(fam2)
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"duplicate Family test failed"   
   
     # =================================================================================
-    print "duplicate task not allowed"
+    print("duplicate task not allowed")
     test_passed = False
     try:
         suite = Suite("1")
@@ -334,13 +334,13 @@ if __name__ == "__main__":
         tb = Task("a")
         suite.add_task(ta)
         suite.add_task(tb)
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"duplicate Task test failed"   
 
     # =================================================================================
-    print "check duplicate meter not allowed"
+    print("check duplicate meter not allowed")
     test_passed = False
     try:
         defs = Defs()
@@ -348,7 +348,7 @@ if __name__ == "__main__":
         ta = suite.add_task("a")
         ta.add_meter("meter",0,100);
         ta.add_meter("meter",0,100);
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"duplicate event test failed"   
@@ -360,13 +360,13 @@ if __name__ == "__main__":
         ta = suite.add_task("a")
         ta.add_meter(Meter("meter",0,100));
         ta.add_meter(Meter("meter",10,100));
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"duplicate meter test failed"   
     
     # =================================================================================
-    print "check duplicate event not allowed"
+    print("check duplicate event not allowed")
     test_passed = False
     try:
         defs = Defs()
@@ -374,7 +374,7 @@ if __name__ == "__main__":
         ta = suite.add_task("a")
         ta.add_event(1);
         ta.add_event("1");
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"duplicate event test failed"   
@@ -386,7 +386,7 @@ if __name__ == "__main__":
         ta = suite.add_task("a")
         ta.add_event("name");
         ta.add_event("name");
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"duplicate event test failed"   
@@ -398,14 +398,14 @@ if __name__ == "__main__":
         ta = suite.add_task("a")
         ta.add_event(1,"name");
         ta.add_event(1,"name");
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass
     assert test_passed,"duplicate event test failed"   
     
     
     # =================================================================================
-    print "check cannot add same node to different containers"
+    print("check cannot add same node to different containers")
     defs1 = Defs();
     suite = defs1.add_suite("s1")
     family =  suite.add_family("f1")
@@ -415,7 +415,7 @@ if __name__ == "__main__":
     try :
         defs2 = Defs();
         defs2.add_suite(suite)
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass    
     assert test_passed,"Can't add same suite to two different defs"   
@@ -425,7 +425,7 @@ if __name__ == "__main__":
         defs3 = Defs();
         suite = defs3.add_suite(suite)
         suite.add_family(family)
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass    
     assert test_passed,"Can't add same family to two different suites"   
@@ -435,9 +435,9 @@ if __name__ == "__main__":
         defs4 = Defs();
         suite = defs4.add_suite("s1")
         suite.add_task(task)
-    except RuntimeError, e : 
+    except RuntimeError as e : 
         test_passed = True
         pass    
     assert test_passed,"Can't add same task to two different containers"   
 
-    print "All Tests pass"
+    print("All Tests pass")

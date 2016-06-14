@@ -20,9 +20,9 @@ from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, 
     
 if __name__ == "__main__":
 
-    print "####################################################################"
-    print "Running ecflow version " + Client().version()  + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version()  + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
     
     #
     # Add Nodes functional way
@@ -42,7 +42,7 @@ if __name__ == "__main__":
          .add_variable("ECF_URL_BASE",'http://www.ecmwf.int')\
          .add_variable("ECF_URL",'"publications/manuals/sms"')\
          .add_variable(a_dict)
-    print suite
+    print(suite)
     assert len(list(suite.variables)) == 8,"Expected 8 variable"    
     suite.delete_variable("");         assert len(list(suite.variables)) == 0,"Expected 0 variable since we should have deleted all"
     
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
     task.add_repeat( RepeatEnumerated("enum", ["red", "green", "blue" ]) ).add_variable("Q","j")
-    print task
+    print(task)
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
 
@@ -307,5 +307,5 @@ if __name__ == "__main__":
         s1.delete_zombie(zombie_type)
         assert len(list(s1.zombies)) == 0,"Expected 0 zombie attributes but found " + str(len(list(s1.zombies)))
 
-    print "All Tests pass"
+    print("All Tests pass")
     

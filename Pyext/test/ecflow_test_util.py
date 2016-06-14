@@ -45,7 +45,7 @@ def get_root_source_dir():
             
             # bjam, already at the source directory
             if os.path.exists(cwd + "/VERSION.cmake"): 
-                print "   Found VERSION.cmake in " + cwd
+                print("   Found VERSION.cmake in " + cwd)
                 return cwd
         
         if tail != "Pyext" and tail != "migrate":
@@ -75,7 +75,7 @@ def backup_checkpt_file_path(port): return "./" + gethostname() + "." + port + "
 def white_list_file_path(port): return "./" + gethostname() + "." + port + ".ecf.lists"
 
 def clean_up_server(port):
-    print "   clean_up " + port
+    print("   clean_up " + port)
     try: os.remove(log_file_path(port))
     except: pass
     try: os.remove(checkpt_file_path(port))
@@ -86,12 +86,12 @@ def clean_up_server(port):
     except: pass
     
 def clean_up_data(port):
-    print "   Attempting to Removing ECF_HOME " + ecf_home(port)
+    print("   Attempting to Removing ECF_HOME " + ecf_home(port))
     try: 
         shutil.rmtree(ecf_home(port),True)   # True means ignore errors 
-        print "   Remove OK" 
+        print("   Remove OK") 
     except: 
-        print "   Remove Failed" 
+        print("   Remove Failed") 
         pass
         
 # =======================================================================================
@@ -99,19 +99,19 @@ class EcfPortLock(object):
     """allow debug and release version of python tests to run at the same
     time, buy generating a unique port each time"""
     def __init__(self):
-        print "   EcfPortLock:__init__"
+        print("   EcfPortLock:__init__")
         pass
     
     def find_free_port(self,seed_port):
-        print "   EcfPortLock:find_free_port starting with " + str(seed_port)
+        print("   EcfPortLock:find_free_port starting with " + str(seed_port))
         port = seed_port
         while 1:
             if self._free_port(port) == True:
-                print "   *FOUND* free server port " + str(port)
+                print("   *FOUND* free server port " + str(port))
                 if self._do_lock(port) == True:
                     break;
             else:
-                 print "   *Server* port " + str(port) + " busy, trying next port"
+                 print("   *Server* port " + str(port) + " busy, trying next port")
             port = port + 1
             
         return str(port)  
@@ -122,7 +122,7 @@ class EcfPortLock(object):
             ci.set_host_port("localhost",str(port))
             ci.ping() 
             return False
-        except RuntimeError, e:
+        except RuntimeError as e:
             return True
             
     def _do_lock(self,port):
@@ -132,13 +132,13 @@ class EcfPortLock(object):
             try:
                 fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 self.lock_file_fp = fp
-                print "   *LOCKED* file " + file
+                print("   *LOCKED* file " + file)
                 return True;
             except IOError:
-                print "   Could *NOT* lock file " + file + " trying next port"
+                print("   Could *NOT* lock file " + file + " trying next port")
                 return False
-        except IOError, e:
-             print "   Could not open file " + file + " for write trying next port"
+        except IOError as e:
+             print("   Could not open file " + file + " for write trying next port")
              return False
         
     def remove(self,port):
@@ -155,7 +155,7 @@ class Server(object):
     """TestServer: allow debug and release version of python tests to run at the same
     time, by generating a unique port each time"""
     def __init__(self):
-        print "Server:__init__: Starting server"      
+        print("Server:__init__: Starting server")      
         if not debugging():
             seed_port = 3153
             if debug_build(): seed_port = 3152
@@ -172,12 +172,12 @@ class Server(object):
      
     def __enter__(self):
         try:
-            print "Server:__enter__: About to ping localhost:" + self.the_port       
+            print("Server:__enter__: About to ping localhost:" + self.the_port)       
             self.ci.ping() 
-            print "   ------- Server all ready running *UNEXPECTED* ------"
-        except RuntimeError, e:
-            print "   ------- Server not running as *EXPECTED* ------ " 
-            print "   ------- Start the server on port " + self.the_port + " ---------"  
+            print("   ------- Server all ready running *UNEXPECTED* ------")
+        except RuntimeError as e:
+            print("   ------- Server not running as *EXPECTED* ------ ") 
+            print("   ------- Start the server on port " + self.the_port + " ---------")  
             clean_up_server(str(self.the_port))
             clean_up_data(str(self.the_port))
     
@@ -185,33 +185,33 @@ class Server(object):
             assert len(server_exe) != 0, "Could not locate the server executable"
         
             server_exe += " --port=" + self.the_port + " --ecfinterval=4 &"
-            print "   TestClient.py: Starting server ", server_exe
+            print("   TestClient.py: Starting server ", server_exe)
             os.system(server_exe) 
         
-            print "   Allow time for server to start"
+            print("   Allow time for server to start")
             if self.ci.wait_for_server_reply() :
-                print "   Server has started"
+                print("   Server has started")
             else:
-                print "   Server failed to start after 60 second !!!!!!"
+                print("   Server failed to start after 60 second !!!!!!")
                 assert False , "Server failed to start after 60 second !!!!!!"
             
-        print "   Run the tests, leaving Server:__enter__:" 
+        print("   Run the tests, leaving Server:__enter__:") 
 
         # return the Client, that can call to the server
         return self.ci
     
     def __exit__(self,exctype,value,tb):
-        print "   Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME"
-        print "   exctype:==================================================="
-        print exctype
-        print "   value:=====================================================" 
-        print value
-        print "   tb:========================================================"; 
-        print tb
-        print "   Terminate server ===================================================="
+        print("   Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME")
+        print("   exctype:===================================================")
+        print(exctype)
+        print("   value:=====================================================") 
+        print(value)
+        print("   tb:========================================================"); 
+        print(tb)
+        print("   Terminate server ====================================================")
         self.ci.terminate_server()  
-        print "   Terminate server OK ================================================="
-        print "   Remove lock file"
+        print("   Terminate server OK =================================================")
+        print("   Remove lock file")
         self.lock_file.remove(self.the_port)
         clean_up_server(str(self.the_port))
         

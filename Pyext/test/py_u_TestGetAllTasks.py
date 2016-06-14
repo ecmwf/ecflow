@@ -35,7 +35,7 @@ def test_get_all_tasks(defs):
     assert task_vec2[2].name() == "t2", "Expected task of name t2 but found " + task_vec2[2].name()
     assert task_vec2[3].name() == "t3", "Expected task of name t3 but found " + task_vec2[3].name()
    
-    print "test_get_all_tasks PASSED"
+    print("test_get_all_tasks PASSED")
    
 def test_get_all_nodes(defs):
     
@@ -61,7 +61,7 @@ def test_get_all_nodes(defs):
     node_vec = one_suite_defs.get_all_nodes()
     assert len(node_vec) == 1, "Expected one node, but found " + str(len(node_vec))
 
-    print "test_get_all_nodes PASSED"
+    print("test_get_all_nodes PASSED")
     
 def test_get_all_nodes_from_nodes():
     defs = Defs()
@@ -89,15 +89,15 @@ def test_get_all_nodes_from_nodes():
     node_vec = suite.get_all_nodes()
     assert len(node_vec) == 6, "Expected 6 nodes but found " + str(len(node_vec))
 
-    print "test_get_all_nodes_from_nodes PASSED"
+    print("test_get_all_nodes_from_nodes PASSED")
    
 
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
  
     test_get_all_tasks(create_defs())
     test_get_all_nodes(create_defs())
     test_get_all_nodes_from_nodes()
-    print "All Tests pass"    
+    print("All Tests pass")    

@@ -34,9 +34,9 @@ def absNodePath(node):
     
 
 if __name__ == "__main__":    
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
    
     suite = Suite("s1");
     family = Family("f1")
@@ -46,9 +46,9 @@ if __name__ == "__main__":
     assert not family.get_parent(), "Expect no parent"
     assert not task.get_parent(), "Expect no parent"
     
-    print "suite.get_defs() = " + str(suite.get_defs())
-    print "family.get_defs() = " + str(family.get_defs())
-    print "task.get_defs() = " + str(task.get_defs())
+    print("suite.get_defs() = " + str(suite.get_defs()))
+    print("family.get_defs() = " + str(family.get_defs()))
+    print("task.get_defs() = " + str(task.get_defs()))
     assert not suite.get_defs(),   "Expected no defs, since suite not added to defs yet"
     assert not family.get_defs(),  "Expected no defs"
     assert not task.get_defs(),    "Expected no defs"
@@ -65,13 +65,13 @@ if __name__ == "__main__":
     defs = Defs()
     defs.add_suite(suite);
     
-    print absNodePath(t1)
-    print absNodePath(family2)
-    print absNodePath(family)
-    print absNodePath(suite)
+    print(absNodePath(t1))
+    print(absNodePath(family2))
+    print(absNodePath(family))
+    print(absNodePath(suite))
     
     assert t1.get_abs_node_path() == absNodePath(t1),          "Expected " + t1.get_abs_node_path()      + " but got " + absNodePath(t1)
     assert family2.get_abs_node_path() == absNodePath(family2),"Expected " + family2.get_abs_node_path() + " but got " + absNodePath(family2)
     assert family.get_abs_node_path() == absNodePath(family),  "Expected " + family.get_abs_node_path()  + " but got " + absNodePath(family)
     assert suite.get_abs_node_path() == absNodePath(suite),    "Expected " + family.get_abs_node_path()  + " but got " + absNodePath(suite)
-    print "All Tests pass"
+    print("All Tests pass")

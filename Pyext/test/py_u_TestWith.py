@@ -18,16 +18,16 @@ from ecflow import Defs, Suite, Family, Client, debug_build
 import sys
     
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
  
     version = sys.version_info;
     if  version[1] < 7 : 
-        print "This test only run with python version 2.7, but found : " + str(version)
+        print("This test only run with python version 2.7, but found : " + str(version))
         exit(0)
     
-    print "start test"
+    print("start test")
     # Add with context manager, in our case this only provides ability to indent
     with Defs() as defs:
         with defs.add_suite("s2") as s2:
@@ -76,4 +76,4 @@ if __name__ == "__main__":
                     
     assert defs1 == defs2,"expected defs to be the same"        
         
-    print "All tests pass"
+    print("All tests pass")
