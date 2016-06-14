@@ -275,7 +275,7 @@ if __name__ == "__main__":
         test_passed = True
         pass
     assert test_passed,"Adding today at the suite level should fail"   
-    print("check adding today at the suite level: RuntimeError: ",e)
+    print("check adding today at the suite level: RuntimeError: ")
 
     # =================================================================================
     test_passed = False
@@ -286,7 +286,7 @@ if __name__ == "__main__":
         test_passed = True
         pass
     assert test_passed,"Adding time at the suite level should fail"    
-    print("check adding time at the suite level: RuntimeError: ",e)
+    print("check adding time at the suite level: RuntimeError: ")
 
     # =================================================================================
     test_passed = False
@@ -297,7 +297,7 @@ if __name__ == "__main__":
         test_passed = True
         pass
     assert test_passed,"Adding date at the suite level should fail"    
-    print("check adding date at the suite level: RuntimeError: ",e)
+    print("check adding date at the suite level: RuntimeError: ")
 
     # =================================================================================
     test_passed = False
@@ -308,7 +308,7 @@ if __name__ == "__main__":
         test_passed = True
         pass
     assert test_passed,"Adding day at the suite level should fail"    
-    print("check adding day at the suite level: RuntimeError: ",e)
+    print("check adding day at the suite level: RuntimeError: ")
 
 
     # =================================================================================
