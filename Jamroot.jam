@@ -127,8 +127,7 @@ install install-tools
 	;
 
 install install-doc
-        : [ glob Doc/user-manual/*.docx ] 
-          [ glob Doc/user-manual/*.pdf ] 
+        : [ glob Doc/user-manual/client_*.docx ] 
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/doc/ecflow
 	;
  
