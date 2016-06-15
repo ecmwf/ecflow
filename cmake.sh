@@ -36,6 +36,7 @@ mode_arg=release
 verbose_arg=
 ctest_arg=
 clean_arg=
+python3_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -55,23 +56,16 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
-   elif  [[ "$1" = clang ]] ; then
-      clang_arg=$1
-   elif  [[ "$1" = intel ]] ; then
-      intel_arg=$1
-   elif  [[ "$1" = clean ]] ; then
-      clean_arg=$1
-   elif  [[ "$1" = san ]] ; then
-      clang_sanitiser_arg=$1
-   elif  [[ "$1" = package_source ]] ; then
-      package_source_arg=$1
-   elif  [[ "$1" = copy_tarball ]] ; then
-      copy_tarball_arg=$1
-   elif  [[ "$1" = test ]] ; then
-      test_arg=$1
-   elif  [[ "$1" = test_safe ]] ; then
-      test_safe_arg=$1
-   elif [[ "$1" = ctest ]] ;     then  
+   elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
+   elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
+   elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
+   elif [[ "$1" = san ]]   ; then clang_sanitiser_arg=$1 ;
+   elif [[ "$1" = package_source ]] ; then package_source_arg=$1 ;
+   elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
+   elif [[ "$1" = test ]] ;  then test_arg=$1 ;
+   elif [[ "$1" = test_safe ]] ; then test_safe_arg=$1 ;
+   elif [[ "$1" = python3 ]] ;   then python3_arg=$1 ;
+   elif [[ "$1" = ctest ]] ; then  
       ctest_arg=$1 ; 
       shift
       while [[ "$#" != 0 ]] ; do
@@ -96,6 +90,7 @@ echo "clang_arg=$clang_arg"
 echo "clang_sanitiser_arg=$clang_sanitiser_arg"
 echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
+echo "python3_arg=$python3_arg"
 set -x # echo script lines as they are executed
 
 # ==================== modules ================================================
@@ -125,6 +120,12 @@ if [[ "$ARCH" = cray ]] ; then
     module load boost/1.53.0
     export CRAY_ADD_RPATH=no
     export ECFLOW_CRAY_BATCH=1
+fi
+
+
+if [[ "$python3_arg" = python3 ]] ; then
+    # Need to wait for ecbuild to fix print error, meanwhile use local ecbuild to test python3
+    cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
 fi
 
 # boost
@@ -199,6 +200,7 @@ fi
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 
+#$workspace/ecbuild/bin/ecbuild $source_dir \
 ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \

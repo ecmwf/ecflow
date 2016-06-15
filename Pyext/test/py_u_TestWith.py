@@ -22,9 +22,10 @@ if __name__ == "__main__":
     print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
     print("####################################################################")
  
+    # sys.version_info is a tuple containing (major,minor,micro,releaselevel,serial)
     version = sys.version_info;
-    if  version[1] < 7 : 
-        print("This test only run with python version 2.7, but found : " + str(version))
+    if (sys.version_info < (2, 7)):
+        print("This test only run with python version 2.7 or greater, but found : " + str(version))
         exit(0)
     
     print("start test")
