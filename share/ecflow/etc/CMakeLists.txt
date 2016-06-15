@@ -11,6 +11,7 @@ set (files ecflowview_menus.json
            ecflowview_palette.json
            ecflowview_panels.json
            ecflowview_panel_conf.json
+           ecflowview_query_conf.json
            ecflowview_sstate_conf.json
            ecflowview_server_conf.json
            ecflowview_view_conf.json

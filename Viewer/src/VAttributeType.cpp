@@ -33,122 +33,6 @@ std::vector<VAttributeType*> VAttributeType::types_;
 
 //#define _UI_ATTR_DEBUG
 
-#if 0
-class VEventAttribute : public VAttributeType
-{
-public:
-    explicit  VEventAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-};
-#endif
-
-#if 0
-class VRepeatAttribute : public VAttributeType
-{
-public:
-    explicit VRepeatAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-};
-#endif
-
-#if 0
-class VTriggerAttribute : public VAttributeType
-{
-public:
-    explicit VTriggerAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    QString toolTip(QStringList d) const;
-};
-#endif
-
-#if 0
-class VLabelAttribute : public VAttributeType
-{
-public:
-    explicit VLabelAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    int lineNum(const VNode* vnode,int row);
-    QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-};
-#endif
-
-#if 0
-class VDateAttribute : public VAttributeType
-{
-public:
-    explicit VDateAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    QString toolTip(QStringList d) const;
-};
-#endif
-
-#if 0
-class VTimeAttribute : public VAttributeType
-{
-public:
-    explicit VTimeAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    QString toolTip(QStringList d) const;
-};
-#endif
-
-#if 0
-class VLimitAttribute : public VAttributeType
-{
-public:
-    explicit VLimitAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-};
-#endif
-
-#if 0
-class VLimiterAttribute : public VAttributeType
-{
-public:
-    explicit VLimiterAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    QString toolTip(QStringList d) const;
-};
-#endif
-
-#if 0
-class VLateAttribute : public VAttributeType
-{
-public:
-    explicit VLateAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    QString toolTip(QStringList d) const;
-};
-#endif
-
-#if 0
-class VVarAttribute : public VAttributeType
-{
-public:
-    explicit VVarAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    bool exists(const VNode* vnode,QStringList) const;
-};
-#endif
-
-
 class VGenvarAttribute : public VAttributeType
 {
 public:
@@ -157,8 +41,6 @@ public:
     bool getData(VNode *node,int row,int& size,QStringList& data);
     bool exists(const VNode* vnode,QStringList) const;
 };
-
-
 
 
 VAttributeType::VAttributeType(const std::string& name) :
@@ -887,6 +769,7 @@ VVarAttribute::VVarAttribute(const std::string& n) : VAttributeType(n)
     dataCount_=3;
     searchKeyToData_["var_name"]=NameIndex;
     searchKeyToData_["var_value"]=ValueIndex;
+    searchKeyToData_["var_type"]=TypeIndex;
 }
 
 int VVarAttribute::num(const VNode *vnode)

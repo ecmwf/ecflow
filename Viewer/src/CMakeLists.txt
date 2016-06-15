@@ -72,6 +72,7 @@ set(viewer_srcs
     NodeQueryEditor.cpp
     NodeQueryEngine.cpp
     NodeQueryHandler.cpp
+    NodeQueryOptionEdit.cpp
     NodeQueryResult.cpp
     NodeQueryResultModel.cpp
     NodeQueryResultView.cpp
@@ -231,6 +232,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodePathWidget.hpp
     NodeQueryCombo.hpp           
     NodeQueryEditor.hpp
+    NodeQueryOptionEdit.hpp
     NodeQueryEngine.hpp
     NodeQueryResult.hpp
     NodeQueryResultModel.hpp

@@ -79,6 +79,8 @@ void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
 		QMenu *menu=new QMenu(this);
 		//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 
+//TODO
+#if 0
 		NodeStateFilter sf;
 		sf.setCurrent(q->stateSelection());
 		VParamFilterMenu* sfm= new VParamFilterMenu(menu,&sf,"Status filter",
@@ -89,7 +91,7 @@ void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
 			q->setStateSelection(sf.currentAsList());
 			filterDef_->setQuery(q);
 		}
-
+#endif
 		delete menu;
 	}
 

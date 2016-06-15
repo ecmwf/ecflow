@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,47 +14,141 @@
 
 #include "UserMessage.hpp"
 #include "VAttributeType.hpp"
+#include "VConfigLoader.hpp"
+#include "VProperty.hpp"
 #include "VSettings.hpp"
 
 StringMatchMode::Mode NodeQueryStringOption::defaultMatchMode_=StringMatchMode::WildcardMatch;
 bool NodeQueryStringOption::defaultCaseSensitive_=false;
-//QMap<NodeQueryStringOption::MatchMode,QString> NodeQueryStringOption::matchOper_;
-
-QStringList NodeQuery::nodeTerms_;
-QStringList NodeQuery::typeTerms_;
-QStringList NodeQuery::stateTerms_;
-QStringList NodeQuery::flagTerms_;
-QStringList NodeQuery::attrGroupTerms_;
-QMap<QString,QStringList> NodeQuery::attrTerms_;
+QMap<QString,NodeQueryDef*> NodeQuery::def_;
+QMap<QString,NodeQueryAttrDef*> NodeQuery::attrDef_;
 int NodeQuery::defaultMaxNum_=50000;
 
 #define _UI_NODEQUERY_DEBUG
 
-NodeQueryStringOption::NodeQueryStringOption(QString name) :
-  name_(name),
+//===============================================
+//
+// NodeQueryDef
+//
+//===============================================
+
+NodeQueryDef::NodeQueryDef(VProperty* p)
+{
+    name_=p->name();
+    label_=p->param("label");
+    if(label_.isEmpty())
+        label_=name_;
+}
+
+void NodeQueryStringDef::buildOption(NodeQuery* q)
+{
+    q->options_[name_]=new NodeQueryStringOption(this);
+}
+
+NodeQueryListDef::NodeQueryListDef(VProperty* p) : NodeQueryDef(p)
+{
+    values_=p->param("values").split("|");
+    valueLabels_=p->param("labels").split("|");
+    if(valueLabels_.count() == 1 && valueLabels_[0].isEmpty())
+        valueLabels_=values_;
+
+    Q_ASSERT(valueLabels_.count() == values_.count());
+}
+
+void NodeQueryListDef::buildOption(NodeQuery* q)
+{
+    q->options_[name_]=new NodeQueryListOption(this);
+}
+
+NodeQueryComboDef::NodeQueryComboDef(VProperty* p) : NodeQueryDef(p)
+{
+    values_=p->param("values").split("|");
+    valueLabels_=p->param("labels").split("|");
+    if(valueLabels_.count() == 1 && valueLabels_[0].isEmpty())
+        valueLabels_=values_;
+
+    Q_ASSERT(valueLabels_.count() == values_.count());
+}
+
+void NodeQueryComboDef::buildOption(NodeQuery* q)
+{
+    q->options_[name_]=new NodeQueryComboOption(this);
+}
+
+NodeQueryAttrDef::NodeQueryAttrDef(VProperty* p) : NodeQueryDef(p)
+{
+    QString types=p->param("types");
+    if(types.isEmpty())
+    {
+        VAttributeType *t=VAttributeType::find(types.toStdString());
+        Q_ASSERT(t);
+        types_ << t;
+    }
+    else
+    {
+        QStringList typeLst=types.split("|");
+        Q_FOREACH(QString s,typeLst)
+        {
+            VAttributeType *t=VAttributeType::find(s.toStdString());
+            Q_ASSERT(t);
+            types_ << t;
+        }
+     }
+
+     Q_ASSERT(!types_.empty());
+
+     //TODO: use a factory here
+     Q_FOREACH(VProperty* ch,p->children())
+     {
+         if(ch->name() == "string")
+         {
+            defs_ << new NodeQueryStringDef(ch);
+         }
+         else if(ch->name() == "combo")
+         {
+            defs_ << new NodeQueryComboDef(ch);
+         }
+    }
+}
+
+void NodeQueryAttrDef::buildOption(NodeQuery* q)
+{
+    Q_FOREACH(NodeQueryDef *t,defs_)
+        t->buildOption(q);
+}
+
+//===============================================
+//
+// NodeQueryStringOption
+//
+//===============================================
+
+NodeQueryStringOption::NodeQueryStringOption(NodeQueryDef* def) :
+  NodeQueryOption(def),
   matchMode_(defaultMatchMode_),
   caseSensitive_(defaultCaseSensitive_)
 {
-	/*if(matchOper_.isEmpty())
-	{
-		matchOper_[ContainsMatch]="~";
-		matchOper_[WildcardMatch]="=";
-		matchOper_[RegexpMatch]="=~";
-	}*/
 }
 
-void NodeQueryStringOption::swap(const NodeQueryStringOption* op)
+QString NodeQueryStringOption::query() const
 {
-	value_=op->value();
+    QString s;
+    if(!value_.isEmpty())
+    {
+        s= name() + " " + matchOperator() + " \'" + value_ + "\'";
+    }
+    return s;
+}
+
+void NodeQueryStringOption::swap(const NodeQueryOption* option)
+{
+    const NodeQueryStringOption* op=static_cast<const NodeQueryStringOption*>(option);
+    Q_ASSERT(op);
+
+    value_=op->value();
 	matchMode_=op->matchMode();
 	caseSensitive_=op->caseSensitive();
 }
-
-
-/*QString NodeQueryStringOption::matchOperator() const
-{
-	return matchOper_.value(matchMode_);
-}*/
 
 void NodeQueryStringOption::save(VSettings* vs)
 {
@@ -62,32 +156,49 @@ void NodeQueryStringOption::save(VSettings* vs)
        caseSensitive_ == defaultCaseSensitive_)
         return;
         
-    vs->beginGroup(name_.toStdString());
+    vs->beginGroup(name().toStdString());
     vs->put("value",value_.toStdString());
     vs->put("matchMode",matchMode_.toInt());
     vs->putAsBool("caseSensistive",caseSensitive_);
     vs->endGroup();   
 }
 
-
 void NodeQueryStringOption::load(VSettings* vs)
 {
-    if(!vs->contains(name_.toStdString()))
+    if(!vs->contains(name().toStdString()))
         return;
     
-    vs->beginGroup(name_.toStdString());
+    vs->beginGroup(name().toStdString());
     value_=QString::fromStdString(vs->get("value",value_.toStdString())); 
     matchMode_.setMode(static_cast<StringMatchMode::Mode>(vs->get<int>("matchMode",matchMode_.toInt())));
     caseSensitive_=vs->getAsBool("caseSensistive",caseSensitive_);
     vs->endGroup();   
 }
 
-void NodeQuerySelectOption::swap(const NodeQuerySelectOption* op)
+//===============================================
+//
+// NodeQueryListOption
+//
+//===============================================
+
+QString NodeQueryListOption::query(QString op) const
 {
-	selection_=op->selection();
+    QString s;
+    if(!selection_.isEmpty())
+    {
+        s=selection_.join(op);
+    }
+    return s;
 }
 
-void NodeQuerySelectOption::save(VSettings* vs)
+void NodeQueryListOption::swap(const NodeQueryOption* option)
+{
+    const NodeQueryListOption* op=static_cast<const NodeQueryListOption*>(option);
+    Q_ASSERT(op);
+    selection_=op->selection();
+}
+
+void NodeQueryListOption::save(VSettings* vs)
 {
     if(selection_.isEmpty())
         return;
@@ -96,93 +207,98 @@ void NodeQuerySelectOption::save(VSettings* vs)
     Q_FOREACH(QString s, selection_)
         v.push_back(s.toStdString());
         
-    vs->put(name_.toStdString(),v);
+    vs->put(name().toStdString(),v);
 }
 
-void NodeQuerySelectOption::load(VSettings* vs)
+void NodeQueryListOption::load(VSettings* vs)
 {
-    if(!vs->contains(name_.toStdString()))
+    if(!vs->contains(name().toStdString()))
         return;
 
     std::vector<std::string> v;
-    vs->get(name_.toStdString(),v);
+    vs->get(name().toStdString(),v);
     
     selection_.clear();
     for(std::vector<std::string>::const_iterator it=v.begin(); it != v.end(); ++it)
         selection_ << QString::fromStdString(*it);
 }
 
+//===============================================
+//
+// NodeQueryComboOption
+//
+//===============================================
+
+QString NodeQueryComboOption::query(QString op) const
+{
+    QString s;
+    if(!value_.isEmpty())
+    {
+        s= name() + " " + " \'" + value_ + "\'";
+    }
+    return s;
+}
+
+void NodeQueryComboOption::swap(const NodeQueryOption* option)
+{
+    const NodeQueryComboOption* op=static_cast<const NodeQueryComboOption*>(option);
+    Q_ASSERT(op);
+    value_=op->value();
+}
+
+void NodeQueryComboOption::save(VSettings* vs)
+{
+    vs->put(name().toStdString(),value().toStdString());
+}
+
+void NodeQueryComboOption::load(VSettings* vs)
+{
+
+}
+
+//===============================================
+//
+// NodeQuery
+//
+//===============================================
 
 NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
   name_(name),
   advanced_(false),
-  //allServers_(true),
   caseSensitive_(false),
   maxNum_(defaultMaxNum_),
   ignoreMaxNum_(ignoreMaxNum)
 {
-	if(nodeTerms_.isEmpty())
-	{
-		nodeTerms_ << "node_name" << "node_path";
-		typeTerms_ << "server" << "suite" << "family" << "task" << "alias";
-		stateTerms_ << "aborted" << "active" << "complete" << "queued" << "submitted" << "suspended" << "unknown";
-		flagTerms_ << "is_late" << "has_date" << "has_message" << "has_time" << "is_rerun" << "is_waiting" << "is_zombie";
-		attrGroupTerms_ << "date" << "event" << "label" << "late" << "limit" << "limiter" << "meter"
-                       << "repeat" << "time" << "trigger" << "var";
 
-        Q_FOREACH(QString s,attrGroupTerms_)
-        {
-             qDebug() << s;
-             VAttributeType *t=VAttributeType::find(s.toStdString());
-             Q_ASSERT(t);
-             Q_FOREACH(QString key,t->searchKeys())
-                attrTerms_[s] << key;
-
-        }
-#if 0
-        attrTerms_["date"] << "date_name";
-		attrTerms_["event"] << "event_name";
-		attrTerms_["label"] << "label_name" << "label_value";
-		attrTerms_["limit"] << "limit_name" << "limit_value" << "limit_max";
-		attrTerms_["limiter"] << "limiter_name";
-		attrTerms_["meter"] << "meter_name";
-		attrTerms_["repeat"] << "repeat_name" << "repeat_value";
-		attrTerms_["time"] << "time_name";
-		attrTerms_["trigger"] << "trigger_expression";
-		attrTerms_["variable"] << "var_name" << "var_value";
+#ifdef _UI_NODEQUERY_DEBUG
+    UserMessage::debug("NodeQuery::NodeQuery -->");
 #endif
-	}
 
-	Q_FOREACH(QString s,nodeTerms_)
-	{
-		stringOptions_[s]=new NodeQueryStringOption(s);
-	}
+    //Build options from defs. Options store the actual query settings. They are
+    //editable through the gui.
+    for(QMap<QString,NodeQueryDef*>::const_iterator it = def_.constBegin(); it != def_.constEnd(); ++it)
+    {
+        it.value()->buildOption(this);
+    }
 
-	Q_FOREACH(QString gr,attrGroupTerms_)
-	{
-		Q_FOREACH(QString s,attrTerms_[gr])
-			stringOptions_[s]=new NodeQueryStringOption(s);
-	}
+    for(QMap<QString,NodeQueryAttrDef*>::const_iterator it = attrDef_.constBegin(); it != attrDef_.constEnd(); ++it)
+    {
+        it.value()->buildOption(this);
+    }
 
-	selectOptions_["type"]=new NodeQuerySelectOption("type");
-	selectOptions_["state"]=new NodeQuerySelectOption("state");
-	selectOptions_["flag"]=new NodeQuerySelectOption("flag");
-	selectOptions_["attr"]=new NodeQuerySelectOption("attr");
+#ifdef _UI_NODEQUERY_DEBUG
+    qDebug() << options_;
+#endif
+
+#ifdef _UI_NODEQUERY_DEBUG
+    UserMessage::debug("<-- NodeQuery::NodeQuery");
+#endif
 }
 
 NodeQuery::~NodeQuery()
 {
-    Q_FOREACH(QString s,stringOptions_.keys())
-    {
-        delete stringOptions_[s];
-    }
-
-    Q_FOREACH(QString s,selectOptions_.keys())
-    {
-        delete selectOptions_[s];
-    }
+    qDeleteAll(options_);
 }
-
 
 NodeQuery* NodeQuery::clone()
 {
@@ -209,15 +325,8 @@ void NodeQuery::swap(const NodeQuery* q)
 	maxNum_=q->maxNum_;
 	ignoreMaxNum_=q->ignoreMaxNum_;
 
-	Q_FOREACH(QString s,stringOptions_.keys())
-	{
-		stringOptions_[s]->swap(q->stringOptions_.value(s));
-	}
-
-	Q_FOREACH(QString s,selectOptions_.keys())
-	{
-		selectOptions_[s]->swap(q->selectOptions_.value(s));
-	}
+    for(QMap<QString,NodeQueryOption*>::const_iterator it = options_.constBegin(); it != options_.constEnd(); ++it)
+        it.value()->swap(q->option(it.key()));
 
 	buildQueryString();
 }
@@ -227,16 +336,12 @@ void  NodeQuery::setName(const std::string& name)
 	name_=name;
 }
 
-#if 0
-    void NodeQuery::setQuery(QString query)
-{
-	query_=query;
-}
-#endif
-
 bool NodeQuery::hasServer(const std::string& name) const
 {
-	qDebug() << "servers" << servers_;
+#ifdef _UI_NODEQUERY_DEBUG
+    UserMessage::debug("NodeQuery::hasServer -->");
+    qDebug() << "   servers=" << servers_;
+#endif
 
 	if(servers_.empty())
 		return true;
@@ -244,105 +349,48 @@ bool NodeQuery::hasServer(const std::string& name) const
 	return servers_.contains(QString::fromStdString(name));
 }
 
-void NodeQuery::adjustServers(const std::vector<std::string>& all)
-{
-	QStringList allLst=vecToLst(all);
+#if 0
 
-	/*if(allServers_)
-	{
-		servers_=allLst;
-		buildQueryString();
-	}*/
+QStringList NodeQuery::attrDefs(QString group)
+{
+    if(NodeQueryAttributeDef* a=attr_.value(group))
+    {
+        //return a->defs_;
+    }
+}
+#endif
+
+
+NodeQueryOption* NodeQuery::option(QString name) const
+{
+    QMap<QString,NodeQueryOption*>::const_iterator it = options_.find(name);
+    if(it != options_.constEnd())
+        return it.value();
+    return NULL;
 }
 
-QStringList NodeQuery::typeSelection() const
+NodeQueryDef* NodeQuery::def(QString name)
 {
-	return selectOptions_.value("type")->selection_;
+    QMap<QString,NodeQueryDef*>::const_iterator it = def_.find(name);
+    if(it != def_.constEnd())
+        return it.value();
+    return NULL;
 }
 
-std::vector<std::string> NodeQuery::typeSelectionVec() const
-{
-	return lstToVec(selectOptions_.value("type")->selection_);
-}
 
-QStringList NodeQuery::stateSelection() const
-{
-	return selectOptions_.value("state")->selection_;
-}
-
-std::vector<std::string> NodeQuery::stateSelectionVec() const
-{
-	return lstToVec(selectOptions_.value("state")->selection_);
-}
-
-QStringList NodeQuery::flagSelection() const
-{
-	return selectOptions_["flag"]->selection_;
-}
-
-std::vector<std::string> NodeQuery::flagSelectionVec() const
-{
-	return lstToVec(selectOptions_["flag"]->selection_);
-}
-
-NodeQueryStringOption*  NodeQuery::stringOption(QString name) const
-{
-	QMap<QString,NodeQueryStringOption*>::const_iterator it = stringOptions_.find(name);
-	if(it != stringOptions_.constEnd())
-		return it.value();
-	return NULL;
-}
-
+#if 0
 QStringList NodeQuery::attrGroupSelection() const
 {
-	return selectOptions_["attr"]->selection_;
+    return options_["attribute"]->selection();
+    //return selectOptions_["attr"]->selection_;
 }
-
+#endif
+#if 0
 std::vector<std::string> NodeQuery::attrGroupSelectionVec() const
 {
 	return lstToVec(selectOptions_["attr"]->selection_);
 }
-
-void NodeQuery::setTypeSelection(QStringList lst)
-{
-	selectOptions_["type"]->selection_=lst;
-}
-
-void NodeQuery::setTypeSelection(const std::vector<std::string>& vec)
-{
-	selectOptions_["type"]->selection_=vecToLst(vec);
-}
-
-
-void NodeQuery::setStateSelection(QStringList lst)
-{
-	selectOptions_["state"]->selection_=lst;
-}
-
-void NodeQuery::setStateSelection(const std::vector<std::string>& vec)
-{
-	selectOptions_["state"]->selection_=vecToLst(vec);
-}
-
-void NodeQuery::setFlagSelection(QStringList lst)
-{
-	selectOptions_["flag"]->selection_=lst;
-}
-
-void NodeQuery::setFlagSelection(const std::vector<std::string>& vec)
-{
-	selectOptions_["flag"]->selection_=vecToLst(vec);
-}
-
-void NodeQuery::setAttrGroupSelection(QStringList lst)
-{
-	selectOptions_["attr"]->selection_=lst;
-}
-
-void NodeQuery::setAttrGroupSelection(const std::vector<std::string>& vec)
-{
-	selectOptions_["attr"]->selection_=vecToLst(vec);
-}
+#endif
 
 QString NodeQuery::query() const
 {
@@ -379,14 +427,57 @@ QString NodeQuery::attrQueryPart() const
     return extQuery_["attr"];
 }
 
-QString NodeQuery::attrQueryPart(QString typeName) const
+QString NodeQuery::attrQueryPart(VAttributeType* t) const
 {        
+    //TODO
+    QStringList attrSel; //=options_["attribute"]->selection();
     QString q;
-    if(hasAttribute(typeName))
+    Q_FOREACH(NodeQueryAttrDef* tm,attrDef_.values())
+    {
+        if(tm->hasType(t) &&
+           attrSel.contains(tm->name()))
+        {
+            QStringList qLst;
+
+            Q_FOREACH(NodeQueryDef* def,tm->defs_)
+            {
+                NodeQueryOption* op=options_[def->name()];
+                Q_ASSERT(op);
+                QString s=op->query();
+                if(!s.isEmpty())
+                {
+                    qLst << s;
+                }
+            }
+
+            if(qLst.isEmpty())
+               q=t->name();
+            else
+               q=qLst.join(" and ");
+
+            break;
+         }
+    }
+    return q;
+
+#if 0
+    QString q;
+
+    NodeQueryAttributeDef* def=0;
+    Q_FOREACH(NodeQueryAttributeDef* tm,attr_.values())
+    {
+        if(tm->types_.contains(t) &&
+           attrGroupSelection().contains(tm->name_))
+        {
+            def=tm;
+            break;
+        }
+    }
+
+    if(term)
     {
         QStringList qLst;
-
-        Q_FOREACH(QString opName,attrTerms_[typeName])
+        Q_FOREACH(QString opName,term->terms_)
         {
             NodeQueryStringOption* op=stringOption(opName);
             assert(op);
@@ -399,17 +490,26 @@ QString NodeQuery::attrQueryPart(QString typeName) const
         }
 
         if(qLst.isEmpty())
-            q=typeName;
+            q=t->name();
         else
             q=qLst.join(" or ");
     }
 
     return q;
+#endif
+
 }
 
-bool NodeQuery::hasAttribute(QString typeName) const
+bool NodeQuery::hasAttribute(VAttributeType *t) const
 {
-    return attrGroupSelection().contains(typeName);
+    Q_FOREACH(NodeQueryAttrDef* d,attrDef_.values())
+    {
+#if 0
+        if(d->hasType(t))
+            return attrGroupSelection().contains(term->name_);
+#endif
+    }
+    return false;
 }
 
 void NodeQuery::buildQueryString()
@@ -418,97 +518,51 @@ void NodeQuery::buildQueryString()
     UserMessage::debug("NodeQuery::buildQueryString -->");
 #endif
 
-    //Scope
-	QString nodePart;
-	QString name=stringOptions_["node_name"]->value().simplified();
-	QString path=stringOptions_["node_path"]->value().simplified();
-	if(!name.isEmpty())
-	{
-		nodePart="node_name " + stringOptions_["node_name"]->matchOperator() + " \'" +  name + "\'";
-	}
-	if(!path.isEmpty())
-	{
-		if(!nodePart.isEmpty())
-			nodePart+=" and ";
+    extQuery_.clear();
 
-		nodePart+="node_path " + stringOptions_["node_path"]->matchOperator() + " \'" +  path + "\'";
-	}
-	if(!nodePart.isEmpty())
-	{
-		nodePart="(" + nodePart + ")";
-	}
+    //Node
+    QStringList nodePart;
+    QString name=options_["node_name"]->query();
+    QString path=options_["node_path"]->query();
+    if(!name.isEmpty()) nodePart << name;
+    if(!path.isEmpty()) nodePart << path;
+    if(nodePart.count() > 0)
+        extQuery_["node"]="(" +nodePart.join(" and ") + ")";
 
 	//Type
-	QString typePart;
-	if(typeSelection().count() >0)
-	{
-		typePart="(" + typeSelection().join(" or ") + ")";
-	}
+    QString typePart=options_["type"]->query(" or ");
+    if(!typePart.isEmpty())
+        extQuery_["type"]="(" + typePart + ")";
 
-	//State
-	QString statePart;
-	if(stateSelection().count() >0)
-	{
-		statePart="(" + stateSelection().join(" or ") + ")";
-	}
+    //State
+    QString statePart=options_["state"]->query(" or ");
+    if(!statePart.isEmpty())
+        extQuery_["state"]="(" + statePart + ")";
 
 	//Flag
-	QString flagPart;
-	if(flagSelection().count() >0)
-	{
-		flagPart="(" + flagSelection().join(" or ") + ")";
-	}
+    QString flagPart=options_["flag"]->query(" or ");
+    if(!flagPart.isEmpty())
+        extQuery_["flag"]="(" + flagPart + ")";;
 
 	//Attributes
 	QString attrPart;
-	Q_FOREACH(QString gr,attrGroupSelection())
-	{
-        QString grPart=attrQueryPart(gr);
-
 #if 0
-        Q_FOREACH(QString opName,attrTerms_[gr])
-		{
-			NodeQueryStringOption* op=stringOption(opName);
-			assert(op);
-			QString s=op->value();
-            qDebug() << "attr" << op->name() << op->value();
-            if(!s.isEmpty())
-			{
-				if(!grPart.isEmpty())
-					grPart+=" or ";
-				grPart+=opName + " " + op->matchOperator() + " \'" + s + "\'";
-			}
-		}
-
-		if(grPart.isEmpty())
-			grPart=gr;
-#endif
+    Q_FOREACH(QString gr,attrGroupSelection())
+	{
+        QString grPart=attrQueryPart(VAttributeType::find(gr.toStdString()));
 
 		if(!attrPart.isEmpty())
 			attrPart+=" or ";
 		
         attrPart+=grPart;
 	}
-
+#endif
 	if(!attrPart.isEmpty())
-	{
-		attrPart="(" + attrPart + ")";
-	}
+        extQuery_["attr"]="(" + attrPart + ")";
 
-	//Put everything together
-	//query_.clear()
-	
-    extQuery_.clear();
-
-    extQuery_["node"]=nodePart;
-    extQuery_["type"]=typePart;
-    extQuery_["state"]=statePart;
-    extQuery_["flag"]=flagPart;
-    extQuery_["attr"]=attrPart;
-    
     bool hasEq=extQuery_.values().join("").contains("=");
 
-	//Extended query
+    //Scope
 	QString scopePart;
 	if(!servers_.isEmpty())
 		scopePart="servers = \'" + servers_.join(", ") + "\'";
@@ -523,9 +577,7 @@ void NodeQuery::buildQueryString()
 	if(!scopePart.isEmpty())
 		extQuery_["scope"]=scopePart;
 
-	//if(query_.isEmpty())
-	//	extQuery_["node"] = "ALL";
-
+    //Other options
 	QString opPart;
 	if(!ignoreMaxNum_)
 	{
@@ -559,6 +611,7 @@ QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 	QString str;
 	QString bg=bgCol.name();
 
+    //Multiline version
 	if(multi)
 	{
 			str="<table width=\"100%\" cellPadding=\"2\">";
@@ -689,16 +742,16 @@ void NodeQuery::load(VSettings* vs)
 
 	rootNode_=vs->get("rootNode",rootNode_);
     
-    Q_FOREACH(QString s,stringOptions_.keys())
+    Q_FOREACH(QString s,options_.keys())
     {
-        stringOptions_[s]->load(vs);
+        options_[s]->load(vs);
     }
-
+#if 0
     Q_FOREACH(QString s,selectOptions_.keys())
     {
         selectOptions_[s]->load(vs);
     }
-
+#endif
     buildQueryString();
 
 	//query_=QString::fromStdString(vs->get("query",query_.toStdString()));
@@ -728,19 +781,19 @@ void NodeQuery::save(VSettings* vs)
     if(!rootNode_.empty())
 		vs->put("rootNode",rootNode_);
     
-	Q_FOREACH(QString s,stringOptions_.keys())
+    Q_FOREACH(QString s,options_.keys())
     {
-        stringOptions_[s]->save(vs);
+        options_[s]->save(vs);
     }
-
+#if 0
     Q_FOREACH(QString s,selectOptions_.keys())
     {
         selectOptions_[s]->save(vs);
     }
-        
+ #endif
     //vs->put("query",query_.toStdString());
 }
-
+#if 0
 std::vector<std::string> NodeQuery::lstToVec(QStringList lst) const
 {
 	std::vector<std::string> vec;
@@ -756,5 +809,53 @@ QStringList NodeQuery::vecToLst(const std::vector<std::string>& vec) const
 		lst << QString::fromStdString(*it);
 	return lst;
 }
+#endif
 
+//Called from VConfigLoader
+void NodeQuery::load(VProperty* group)
+{
+#ifdef _UI_NODEQUERY_DEBUG
+    UserMessage::debug("NodeQuery::load -->");
+#endif
 
+    if(group->name() == "node_query")
+    {
+        for(int i=0; i < group->children().size(); i++)
+        {
+            VProperty *p=group->children().at(i);
+            QString type=p->param("type");
+
+#ifdef _UI_NODEQUERY_DEBUG
+            UserMessage::qdebug("   name=" + p->name() + " type=" + type);
+#endif
+            if(type.isEmpty() || type == "string")
+            {
+                def_[p->name()]=new NodeQueryStringDef(p);
+            }
+            else if(type == "list")
+            {
+                def_[p->name()]=new NodeQueryListDef(p);
+            }
+        }
+     }
+     else if(group->name() == "attribute_query")
+     {
+        for(int i=0; i < group->children().size(); i++)
+        {
+            VProperty *p=group->children().at(i);
+            if(p->name() == "attribute")
+            {
+                def_[p->name()]=new NodeQueryListDef(p);
+
+                Q_FOREACH(VProperty* ch,p->children())
+                {
+                    //Q_ASSERT(attrDef_->values_.contains(ch->name()));
+                    attrDef_[ch->name()] = new NodeQueryAttrDef(ch);
+                }
+           }
+        }
+    }
+}
+
+static SimpleLoader<NodeQuery> loaderNodeQuery("node_query");
+static SimpleLoader<NodeQuery> loaderAttrQuery("attribute_query");

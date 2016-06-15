@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,19 +22,101 @@
 #include "VSettings.hpp"
 
 class NodeQuery;
+class NodeQueryAttributeTerm;
+class VAttributeType;
+class VProperty;
 
+//===============================================
+//
+// Definition terms
+//
+//===============================================
 
-class NodeQueryStringOption
+class NodeQueryDef
 {
-    friend class NodeQuery;
+public:
+    NodeQueryDef(VProperty* p);
+    virtual void buildOption(NodeQuery*)=0;
+    QString name() const {return name_;}
+    QString label() const {label_;}
+    QStringList values() const {return values_;}
+    QStringList valueLabels() const {return valueLabels_;}
+
+protected:
+    QString name_;
+    QString label_;
+    QStringList values_;
+    QStringList valueLabels_;
+};
+
+class NodeQueryStringDef : public NodeQueryDef
+{
+public:
+    NodeQueryStringDef(VProperty* p) : NodeQueryDef(p) {}
+    void buildOption(NodeQuery*);
+};
+
+class NodeQueryListDef : public NodeQueryDef
+{
+public:
+    NodeQueryListDef(VProperty* p);
+    QStringList values();
+    void buildOption(NodeQuery*);
+};
+
+class NodeQueryComboDef : public NodeQueryDef
+{
+public:
+    NodeQueryComboDef(VProperty* p);
+    QStringList values();
+    void buildOption(NodeQuery*);
+};
+
+class NodeQueryAttrDef : public NodeQueryDef
+{
+friend class NodeQuery;
 
 public:
-	NodeQueryStringOption(QString name);
-	void swap(const NodeQueryStringOption*);
+    NodeQueryAttrDef(VProperty* p);
+    void buildOption(NodeQuery*);
+    bool hasType(VAttributeType* t) const {return types_.contains(t);}
+    QList<NodeQueryDef*> defs() const {return defs_;}
 
-	//enum MatchMode {ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
+protected:
+    QList<NodeQueryDef*> defs_;
+    QList<VAttributeType*> types_;
+};
 
-	QString name() const {return name_;}
+//===============================================
+//
+// Query options
+//
+//===============================================
+
+class NodeQueryOption
+{
+public:
+    NodeQueryOption(NodeQueryDef *def) : def_(def) {}
+
+    QString name() const {return def_->name();}
+    QString label() const {return def_->label();}
+
+    virtual void swap(const NodeQueryOption*)=0;
+    virtual QString query() const {return QString();}
+    virtual QString query(QString op) const {return QString();}
+    virtual void load(VSettings*)=0;
+    virtual void save(VSettings*)=0;
+
+protected:
+    NodeQueryDef *def_;
+};
+
+class NodeQueryStringOption : public NodeQueryOption
+{
+public:
+    NodeQueryStringOption(NodeQueryDef *def);
+    void swap(const NodeQueryOption*);
+
 	QString value() const {return value_;}
 	const StringMatchMode&  matchMode() const {return matchMode_;}
 	QString matchOperator() const {return QString::fromStdString(matchMode_.matchOperator());}
@@ -45,42 +127,71 @@ public:
 	void setMatchMode(const StringMatchMode& m) {matchMode_=m;}
 	void setCaseSensitive(bool b) {caseSensitive_=b;}
 
+    QString query() const;
 	void load(VSettings*);
 	void save(VSettings*);
 
 protected:
-	QString name_;
-	QString value_;
+    QString value_;
 	StringMatchMode matchMode_;
 	bool caseSensitive_;
     
     static StringMatchMode::Mode defaultMatchMode_;
     static bool defaultCaseSensitive_;
-	//static QMap<MatchMode,QString> matchOper_;
 };
 
-class NodeQuerySelectOption
+class NodeQueryListOption : public NodeQueryOption
 {
-	friend class NodeQuery;
-
 public:
-	NodeQuerySelectOption(QString name) : name_(name) {}
-	void swap(const NodeQuerySelectOption*);
+    NodeQueryListOption(NodeQueryDef *def) : NodeQueryOption(def) {}
 
-	void load(VSettings*);
+    void swap(const NodeQueryOption*);
+
+    QString query(QString op) const;
+    void load(VSettings*);
 	void save(VSettings*);
 
-	QString name() const {return name_;}
+    QStringList values() const {return def_->values();}
+    QStringList valueLabels() const {return def_->valueLabels();}
+    void setSelection(QStringList lst) {selection_=lst;}
 	QStringList selection() const {return selection_;}
 
 protected:
-	QString name_;
 	QStringList selection_;
 };
 
+class NodeQueryComboOption : public NodeQueryOption
+{
+public:
+    NodeQueryComboOption(NodeQueryDef *def) : NodeQueryOption(def) {}
+
+    void swap(const NodeQueryOption*);
+
+    QString query(QString op) const;
+    void load(VSettings*);
+    void save(VSettings*);
+
+    QStringList values() const {return def_->values();}
+    QStringList valueLabels() const {return def_->valueLabels();}
+    void setValue() const;
+    QString value() const {return value_;}
+
+protected:
+    QString value_;
+};
+
+//===============================================
+//
+// NodeQuery
+//
+//===============================================
 
 class NodeQuery
 {
+friend class  NodeQueryStringDef;
+friend class  NodeQueryListDef;
+friend class  NodeQueryComboDef;
+
 public:
 	NodeQuery(const std::string& name,bool ignoreMaxNum=false);
 	~NodeQuery();
@@ -95,18 +206,14 @@ public:
 	QString query() const;
     QString nodeQueryPart() const;
     QString attrQueryPart() const;
-    QString attrQueryPart(QString) const;
-    bool hasAttribute(QString) const;
+    QString attrQueryPart(VAttributeType*) const;
+    bool hasAttribute(VAttributeType*) const;
 
 	void setRootNode(const std::string& rootNode) {rootNode_=rootNode;}
 	const std::string& rootNode() const {return rootNode_;}
-
-	//void setServers(QStringList servers,bool all=false) {servers_=servers; allServers_=all;}
-	void setServers(QStringList servers) {servers_=servers;}
-	//const std::vector<std::string>& servers() const {return servers_;}
+	void setServers(QStringList servers) {servers_=servers;}	
 	QStringList servers() const {return servers_;}
 	bool hasServer(const std::string& name) const;
-	void adjustServers(const std::vector<std::string>& servers);
 
 	QString extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const;
 	void buildQueryString();
@@ -118,63 +225,33 @@ public:
 	void setCaseSensitive(bool b) {caseSensitive_=b;}
 	bool caseSensitive() const {return caseSensitive_;}
 
-	NodeQueryStringOption* stringOption(QString name) const;
+    NodeQueryOption* option(QString name) const;
+    static NodeQueryDef* def(QString name);
+    static QMap<QString,NodeQueryAttrDef*> attrDef() {return attrDef_;}
 
-	QStringList typeSelection() const;
-	QStringList stateSelection() const;
-	QStringList flagSelection() const;
-	QStringList attrGroupSelection() const;
-
-	std::vector<std::string> typeSelectionVec() const;
-	std::vector<std::string>stateSelectionVec() const;
-	std::vector<std::string>flagSelectionVec() const;
-	std::vector<std::string>attrGroupSelectionVec() const;
-
-	void setTypeSelection(QStringList);
-	void setStateSelection(QStringList);
-	void setFlagSelection(QStringList);
-	void setAttrGroupSelection(QStringList);
-
-	void setTypeSelection(const std::vector<std::string>&);
-	void setStateSelection(const std::vector<std::string>&);
-	void setFlagSelection(const std::vector<std::string>&);
-	void setAttrGroupSelection(const std::vector<std::string>&);
-
-	static QStringList typeTerms() {return typeTerms_;}
-	static QStringList stateTerms() {return stateTerms_;}
-	static QStringList flagTerms() {return flagTerms_;}
-	static QStringList attrGroupTerms() {return attrGroupTerms_;}
-	static QStringList attrTerms(QString group) {return attrTerms_.value(group);}
+    //Called from VConfigLoader
+    static void load(VProperty* group);
 
 	void load(VSettings*);
 	void save(VSettings*);
 
 protected:
 	void checkDir();
-	std::vector<std::string> lstToVec(QStringList) const;
-	QStringList vecToLst(const std::vector<std::string>&) const;
 
 	std::string name_;
 	bool advanced_;	
 	std::string rootNode_;
 	QStringList servers_;
 	bool allServers_;
-    //QString query_;
     QMap<QString,QString> extQuery_;
     bool caseSensitive_;
     int maxNum_;
     bool ignoreMaxNum_;
 
-	QMap<QString,NodeQueryStringOption*> stringOptions_;
-	QMap<QString,NodeQuerySelectOption*> selectOptions_;
+    QMap<QString,NodeQueryOption*> options_;
 
-	static QStringList nodeTerms_;
-	static QStringList typeTerms_;
-	static QStringList stateTerms_;
-	static QStringList flagTerms_;
-	static QStringList attrGroupTerms_;
-	static QMap<QString,QStringList> attrTerms_;
-
+    static QMap<QString,NodeQueryDef*> def_;
+    static QMap<QString,NodeQueryAttrDef*> attrDef_;
 	static bool defaultCaseSensitive_;
 	static int defaultMaxNum_;
 };

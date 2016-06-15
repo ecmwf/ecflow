@@ -1,0 +1,44 @@
+{
+    "node_query" : {
+
+        "node_name" : {
+            "type" : "string"
+        },
+        "node_path" : {
+            "type" : "string"
+        },
+        "type" : {
+            "type" : "list",
+            "values" : "server|suite|family|task|alias"
+        },
+        "state"  : {
+            "type"   : "list",
+            "values" : "aborted|active|complete|queued|submitted|suspended|unknown"
+        },
+        "flag"  : {
+            "type"   : "list",
+            "values" : "is_late|has_date|has_message|has_time|is_rerun|is_waiting|is_zombie"
+        }
+    },
+    "attribute_query" : {
+
+        "attribute"  : {
+            "type"  : "list",
+            "values" : "event|meter|variable"
+        },
+
+        "event" : {
+            "event_name" : {},
+            "event_type" : {}
+        },
+        "variable" : {
+            "types" : "var|genvar",
+            "var_type" : {
+               "type"  : "combo",
+               "label" : "Variable type",
+               "values" : "var|genvar|all",
+               "labels" : "User variable|Generated variable|Any"
+            }
+         }
+      }
+}

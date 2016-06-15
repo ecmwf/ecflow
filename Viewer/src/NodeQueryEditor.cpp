@@ -8,7 +8,6 @@
 //
 //============================================================================
 
-
 #include "NodeQueryEditor.hpp"
 
 #include "ComboMulti.hpp"
@@ -16,6 +15,7 @@
 #include "Highlighter.hpp"
 #include "NodeQuery.hpp"
 #include "NodeQueryHandler.hpp"
+#include "NodeQueryOptionEdit.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
@@ -155,92 +155,24 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
            this,SLOT(slotRootNodeEdited(QString)));
 
     //Name
-    connect(nameLe_,SIGNAL(textChanged(QString)),
-           this,SLOT(slotNameEdited(QString)));
-
-    connect(nameMatchCb_,SIGNAL(currentIndexChanged(int)),
-           this,SLOT(slotNameMatchChanged(int)));
-
-    /*connect(nameCaseTb_,SIGNAL(changed(bool)),
-           this,SLOT(slotNameCaseChanged(bool)));*/
-
-    //Path
-    connect(pathLe_,SIGNAL(textChanged(QString)),
-           this,SLOT(slotPathEdited(QString)));
-
-    connect(pathMatchCb_,SIGNAL(currentIndexChanged(int)),
-           this,SLOT(slotPathMatchChanged(int)));
-
-    /*connect(pathCaseTb_,SIGNAL(changed(bool)),
-           this,SLOT(slotPathCaseChanged(bool)));*/
+    nameEdit_=new NodeQueryStringOptionEdit("node_name",nodePathGrid_,this);
+    pathEdit_=new NodeQueryStringOptionEdit("node_path",nodePathGrid_,this);
 
     //-------------------------
     // Filter
     //-------------------------
 
     //Node type
-    typeList_->addItems(NodeQuery::typeTerms(),false);
-
-    connect(typeList_,SIGNAL(selectionChanged()),
-            this,SLOT(slotTypeListChanged()));
-
-    connect(typeResetTb_,SIGNAL(clicked()),
-          	typeList_,SLOT(clearSelection()));
-
-    //Node state
-    stateList_->addItems(NodeQuery::stateTerms(),false); //,stateColLst);
-
-    connect(stateList_,SIGNAL(selectionChanged()),
-           this,SLOT(slotStateListChanged()));
-
-    connect(stateResetTb_,SIGNAL(clicked()),
-          	stateList_,SLOT(clearSelection()));
-
-    /*QStringList stateLst;
-    stateLst << "aborted" << "active" << "complete" << "queued" << "submitted" << "suspended" << "unknown";
-    QList<QColor> stateColLst;
-    Q_FOREACH(QString s,stateLst)
-    {
-    	if(VNState* vn=VNState::find(s.toStdString()))
-    	{
-    		stateColLst << vn->colour();
-    	}
-    	else
-    	{
-    		stateColLst << QColor();
-    	}
-    }
-
-    stateList_->addItems(stateLst,false); //,stateColLst);*/
-
-    //Node flags
-    flagList_->addItems(NodeQuery::flagTerms(),false);
-
-    connect(flagList_,SIGNAL(selectionChanged()),
-           this,SLOT(slotFlagListChanged()));
-
-    connect(flagResetTb_,SIGNAL(clicked()),
-            flagList_,SLOT(clearSelection()));
-
-    //Attributes
-    attrList_->addItems(NodeQuery::attrGroupTerms(),false);
-
-    connect(attrList_,SIGNAL(selectionChanged()),
-           this,SLOT(slotAttrListChanged()));
-
-    connect(attrResetTb_,SIGNAL(clicked()),
-            attrList_,SLOT(clearSelection()));
+    typeEdit_=new NodeQueryListOptionEdit("type",typeList_,typeResetTb_,this);
+    stateEdit_=new NodeQueryListOptionEdit("state",stateList_,stateResetTb_,this);
+    flagEdit_=new NodeQueryListOptionEdit("flag",flagList_,flagResetTb_,this);
+    attrEdit_=new NodeQueryListOptionEdit("attribute",attrList_,attrResetTb_,this);
 
     int listHeight=(fm.height()+2)*6+6;
     typeList_->setFixedHeight(listHeight);
     stateList_->setFixedHeight(listHeight);
     flagList_->setFixedHeight(listHeight);
     attrList_->setFixedHeight(listHeight);
-
-    typeResetTb_->setEnabled(typeList_->hasSelection());
-    stateResetTb_->setEnabled(stateList_->hasSelection());
-    flagResetTb_->setEnabled(flagList_->hasSelection());
-    attrResetTb_->setEnabled(attrList_->hasSelection());
 
     //Attr panel
     connect(attrPanel_,SIGNAL(queryChanged()),
@@ -267,6 +199,8 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     //attrList_->hide();
     //attrLabel_->hide();
     //attrResetTb_->hide();
+
+    init();
 
     checkGuiState();
 }
@@ -297,24 +231,14 @@ void NodeQueryEditor::init()
 		serverCb_->setSelection(servers);
 
 	//Node name
-	NodeQueryStringOption* op=query_->stringOption("node_name");
-	assert(op);
-	nameLe_->setText(op->value());
-	nameMatchCb_->setMatchMode(op->matchMode());
-	//nameCaseTb_->setChecked(op->caseSensitive());
-
-	//Node path
-	op=query_->stringOption("node_path");
-	assert(op);
-	pathLe_->setText(op->value());
-	pathMatchCb_->setMatchMode(op->matchMode());
-	//pathCaseTb_->setChecked(op->caseSensitive());
+    nameEdit_->init(query_);
+    pathEdit_->init(query_);
 
 	//Lists
-	typeList_->setSelection(query_->typeSelection());
-	stateList_->setSelection(query_->stateSelection());
-	flagList_->setSelection(query_->flagSelection());
-	attrList_->setSelection(query_->attrGroupSelection());
+    typeEdit_->init(query_);
+    stateEdit_->init(query_);
+    flagEdit_->init(query_);
+    attrEdit_->init(query_);
 
 	attrPanel_->init();
 
@@ -405,112 +329,21 @@ void NodeQueryEditor::slotRootNodeEdited(QString s)
 	}
 }
 
-void NodeQueryEditor::slotNameEdited(QString val)
+void NodeQueryEditor::slotOptionEditChanged()
 {
-	if(!initIsOn_)
-	{
-		NodeQueryStringOption* op=query_->stringOption("node_name");
-		assert(op);
-		op->setValue(val);
-		updateQueryTe();
-		checkGuiState();
-	}
+    if(!initIsOn_)
+    {
+        updateQueryTe();
+        checkGuiState();
+
+        NodeQueryOptionEdit *e=static_cast<NodeQueryOptionEdit*>(sender());
+        Q_ASSERT(e);
+        if(e->optionId() == "attribute")
+           attrPanel_->setSelection(attrList_->selection());
+    }
 }
 
-void NodeQueryEditor::slotNameMatchChanged(int val)
-{
-	if(!initIsOn_)
-	{
-		NodeQueryStringOption* op=query_->stringOption("node_name");
-		assert(op);
-		op->setMatchMode(nameMatchCb_->matchMode(val));
-		updateQueryTe();
-		checkGuiState();
-	}
-}
-
-
-void NodeQueryEditor::slotNameCaseChanged(bool val)
-{
-	/*if(!initIsOn_)
-	{
-		NodeQueryStringOption* op=query_->stringOption("node_name");
-		assert(op);
-		op->setCaseSensitive(val);
-		updateQueryTe();
-		checkGuiState();
-	}*/
-}
-
-void NodeQueryEditor::slotPathEdited(QString val)
-{
-	if(!initIsOn_)
-	{
-		NodeQueryStringOption* op=query_->stringOption("node_path");
-		assert(op);
-		op->setValue(val);
-		updateQueryTe();
-		checkGuiState();
-	}
-}
-
-void NodeQueryEditor::slotPathMatchChanged(int val)
-{
-	if(!initIsOn_)
-	{
-		NodeQueryStringOption* op=query_->stringOption("node_path");
-		assert(op);
-		op->setMatchMode(pathMatchCb_->matchMode(val));
-		updateQueryTe();
-		checkGuiState();
-	}
-}
-
-void NodeQueryEditor::slotPathCaseChanged(bool val)
-{
-	/*if(!initIsOn_)
-	{
-		NodeQueryStringOption* op=query_->stringOption("node_path");
-		assert(op);
-		op->setCaseSensitive(val);
-		updateQueryTe();
-		checkGuiState();
-	}*/
-}
-
-void NodeQueryEditor::slotTypeListChanged()
-{
-	typeResetTb_->setEnabled(typeList_->hasSelection());
-	if(!initIsOn_)
-	{
-		query_->setTypeSelection(typeList_->selection());
-		updateQueryTe();
-		checkGuiState();
-	}
-}
-
-void NodeQueryEditor::slotStateListChanged()
-{
-	stateResetTb_->setEnabled(stateList_->hasSelection());
-	if(!initIsOn_)
-	{
-		query_->setStateSelection(stateList_->selection());
-		updateQueryTe();
-		checkGuiState();
-	}
-}
-
-void NodeQueryEditor::slotFlagListChanged()
-{
-	flagResetTb_->setEnabled(flagList_->hasSelection());
-	if(!initIsOn_)
-	{
-		query_->setFlagSelection(flagList_->selection());
-		updateQueryTe();
-		checkGuiState();
-	}
-}
-
+#if 0
 void NodeQueryEditor::slotAttrListChanged()
 {
 	if(!initIsOn_)
@@ -522,6 +355,8 @@ void NodeQueryEditor::slotAttrListChanged()
 		checkGuiState();
 	}
 }
+#endif
+
 
 void NodeQueryEditor::slotAttrPanelChanged()
 {

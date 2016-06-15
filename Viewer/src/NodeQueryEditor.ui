@@ -14,7 +14,16 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -90,7 +99,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="viewer.qrc">
+           <iconset>
             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
           </property>
           <property name="autoRaise">
@@ -173,7 +182,7 @@
        <enum>QLayout::SetMinAndMaxSize</enum>
       </property>
       <item>
-       <layout class="QGridLayout" name="gridLayout_3">
+       <layout class="QGridLayout" name="nodePathGrid_">
         <item row="0" column="0">
          <widget class="QLabel" name="label_7">
           <property name="text">
@@ -234,7 +243,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="viewer.qrc">
+           <iconset>
             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
           </property>
           <property name="autoRaise">
@@ -248,7 +257,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="viewer.qrc">
+           <iconset>
             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
           </property>
           <property name="autoRaise">
@@ -268,7 +277,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="viewer.qrc">
+           <iconset>
             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
           </property>
           <property name="autoRaise">
@@ -292,7 +301,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset resource="viewer.qrc">
+           <iconset>
             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
           </property>
           <property name="autoRaise">
@@ -364,8 +373,6 @@
    <header>NodeQueryCombo.hpp</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

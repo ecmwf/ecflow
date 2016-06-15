@@ -117,12 +117,13 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 
     //The attribute parser
     UserMessage::debug("   attr part: " + query_->attrQueryPart().toStdString());
+
     for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
         it != VAttributeType::types().end(); ++it)
     {
-        if(query_->hasAttribute((*it)->name()))
+        if(query_->hasAttribute(*it))
         {
-            QString attrPart=(query_->attrQueryPart((*it)->name()));
+            QString attrPart=(query_->attrQueryPart(*it));
             BaseNodeCondition* ac=NodeExpressionParser::instance()->parseWholeExpression(attrPart.toStdString(), query->caseSensitive());
             if(!ac)
             {
