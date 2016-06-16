@@ -83,6 +83,7 @@ private:
 	void adjustQueryTe(int rowNum=0);
 	void setQueryTe(QString);
 	void checkGuiState();
+    void setAttributePanel(QStringList lst);
 
 	NodeQuery* query_;
 	ServerFilter* serverFilter_;
@@ -96,6 +97,7 @@ private:
     NodeQueryOptionEdit* stateEdit_;
     NodeQueryOptionEdit* flagEdit_;
     NodeQueryOptionEdit* attrEdit_;
+    QMap<QString,QList<NodeQueryOptionEdit*> > attr_;
 };
 
 #endif

@@ -17,10 +17,13 @@ class CustomListWidget;
 class NodeQuery;
 class NodeQueryDef;
 class NodeQueryListModel;
+class NodeQueryOption;
 class NodeQueryStringOption;
 class NodeQueryListOption;
+class NodeQueryComboOption;
 class StringMatchCombo;
 
+class QComboBox;
 class QLabel;
 class QGridLayout;
 class QLineEdit;
@@ -33,7 +36,7 @@ Q_OBJECT
 public:
     NodeQueryOptionEdit(QString optionId,QGridLayout* grid,QWidget *parent);
 
-    virtual void init(NodeQuery*)=0;
+    void init(NodeQuery*);
     QString optionId() const {return optionId_;}
     virtual void setVisible(bool)=0;
 
@@ -41,6 +44,8 @@ Q_SIGNALS:
     void changed();
 
 protected:
+    virtual void init(NodeQueryOption*)=0;
+
     QString optionId_;
     bool initIsOn_;
     QWidget* parent_;
@@ -51,8 +56,7 @@ class NodeQueryStringOptionEdit : public  NodeQueryOptionEdit
 {
 Q_OBJECT
 public:
-    NodeQueryStringOptionEdit(QString optionId,QGridLayout* grid,QWidget* parent);
-    void init(NodeQuery*);
+    NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget* parent);
     void setVisible(bool);
 
 protected Q_SLOTS:
@@ -60,6 +64,8 @@ protected Q_SLOTS:
     void slotMatchChanged(int val);
 
 protected:
+    void init(NodeQueryOption*);
+
     QLabel* label_;
     StringMatchCombo* matchCb_;
     QLineEdit *le_;
@@ -70,18 +76,38 @@ class NodeQueryListOptionEdit : public  NodeQueryOptionEdit
 {
 Q_OBJECT
 public:
-    NodeQueryListOptionEdit(QString optionId,CustomListWidget* cl,QToolButton*,QWidget*);
-    void init(NodeQuery*);
+    NodeQueryListOptionEdit(NodeQueryOption* option,CustomListWidget* cl,QToolButton*,QWidget*);
     void setVisible(bool) {}
 
 protected Q_SLOTS:
     void slotListChanged();
 
 protected:
+    void init(NodeQueryOption*);
+
     CustomListWidget* list_;
     QToolButton *resetTb_;
     NodeQueryListOption* option_;
 };
+
+class NodeQueryComboOptionEdit : public  NodeQueryOptionEdit
+{
+Q_OBJECT
+public:
+    NodeQueryComboOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget*);
+    void setVisible(bool);
+
+protected Q_SLOTS:
+    void slotCbChanged(int);
+
+protected:
+    void init(NodeQueryOption*);
+
+    QLabel* label_;
+    QComboBox* cb_;
+    NodeQueryComboOption* option_;
+};
+
 
 #endif // NODEQUERYOPTIONEDIT_HPP
 

@@ -14,7 +14,6 @@
 #include <string>
 #include <vector>
 
-#include <QColor>
 #include <QStringList>
 #include <QMap>
 
@@ -22,175 +21,31 @@
 #include "VSettings.hpp"
 
 class NodeQuery;
-class NodeQueryAttributeTerm;
+class NodeQueryOption;
 class VAttributeType;
-class VProperty;
 
-//===============================================
-//
-// Definition terms
-//
-//===============================================
-
-class NodeQueryDef
-{
-public:
-    NodeQueryDef(VProperty* p);
-    virtual void buildOption(NodeQuery*)=0;
-    QString name() const {return name_;}
-    QString label() const {label_;}
-    QStringList values() const {return values_;}
-    QStringList valueLabels() const {return valueLabels_;}
-
-protected:
-    QString name_;
-    QString label_;
-    QStringList values_;
-    QStringList valueLabels_;
-};
-
-class NodeQueryStringDef : public NodeQueryDef
-{
-public:
-    NodeQueryStringDef(VProperty* p) : NodeQueryDef(p) {}
-    void buildOption(NodeQuery*);
-};
-
-class NodeQueryListDef : public NodeQueryDef
-{
-public:
-    NodeQueryListDef(VProperty* p);
-    QStringList values();
-    void buildOption(NodeQuery*);
-};
-
-class NodeQueryComboDef : public NodeQueryDef
-{
-public:
-    NodeQueryComboDef(VProperty* p);
-    QStringList values();
-    void buildOption(NodeQuery*);
-};
-
-class NodeQueryAttrDef : public NodeQueryDef
+class NodeQueryAttrGroup
 {
 friend class NodeQuery;
 
 public:
-    NodeQueryAttrDef(VProperty* p);
-    void buildOption(NodeQuery*);
+    NodeQueryAttrGroup(QString name,QList<VAttributeType*> types,QList<NodeQueryOption*> options) :
+        name_(name), types_(types), options_(options) {}
+
+    QString name() const {return name_;}
     bool hasType(VAttributeType* t) const {return types_.contains(t);}
-    QList<NodeQueryDef*> defs() const {return defs_;}
-
-protected:
-    QList<NodeQueryDef*> defs_;
-    QList<VAttributeType*> types_;
-};
-
-//===============================================
-//
-// Query options
-//
-//===============================================
-
-class NodeQueryOption
-{
-public:
-    NodeQueryOption(NodeQueryDef *def) : def_(def) {}
-
-    QString name() const {return def_->name();}
-    QString label() const {return def_->label();}
-
-    virtual void swap(const NodeQueryOption*)=0;
-    virtual QString query() const {return QString();}
-    virtual QString query(QString op) const {return QString();}
-    virtual void load(VSettings*)=0;
-    virtual void save(VSettings*)=0;
-
-protected:
-    NodeQueryDef *def_;
-};
-
-class NodeQueryStringOption : public NodeQueryOption
-{
-public:
-    NodeQueryStringOption(NodeQueryDef *def);
-    void swap(const NodeQueryOption*);
-
-	QString value() const {return value_;}
-	const StringMatchMode&  matchMode() const {return matchMode_;}
-	QString matchOperator() const {return QString::fromStdString(matchMode_.matchOperator());}
-	bool caseSensitive() const {return caseSensitive_;}
-
-	void setValue(QString s) {value_=s;}
-	void setMatchMode(StringMatchMode::Mode m) {matchMode_.setMode(m);}
-	void setMatchMode(const StringMatchMode& m) {matchMode_=m;}
-	void setCaseSensitive(bool b) {caseSensitive_=b;}
-
+    QList<NodeQueryOption*> options() const {return options_;}
     QString query() const;
-	void load(VSettings*);
-	void save(VSettings*);
 
 protected:
-    QString value_;
-	StringMatchMode matchMode_;
-	bool caseSensitive_;
-    
-    static StringMatchMode::Mode defaultMatchMode_;
-    static bool defaultCaseSensitive_;
+    QString name_;
+    QList<VAttributeType*> types_;
+    QList<NodeQueryOption*> options_;
 };
-
-class NodeQueryListOption : public NodeQueryOption
-{
-public:
-    NodeQueryListOption(NodeQueryDef *def) : NodeQueryOption(def) {}
-
-    void swap(const NodeQueryOption*);
-
-    QString query(QString op) const;
-    void load(VSettings*);
-	void save(VSettings*);
-
-    QStringList values() const {return def_->values();}
-    QStringList valueLabels() const {return def_->valueLabels();}
-    void setSelection(QStringList lst) {selection_=lst;}
-	QStringList selection() const {return selection_;}
-
-protected:
-	QStringList selection_;
-};
-
-class NodeQueryComboOption : public NodeQueryOption
-{
-public:
-    NodeQueryComboOption(NodeQueryDef *def) : NodeQueryOption(def) {}
-
-    void swap(const NodeQueryOption*);
-
-    QString query(QString op) const;
-    void load(VSettings*);
-    void save(VSettings*);
-
-    QStringList values() const {return def_->values();}
-    QStringList valueLabels() const {return def_->valueLabels();}
-    void setValue() const;
-    QString value() const {return value_;}
-
-protected:
-    QString value_;
-};
-
-//===============================================
-//
-// NodeQuery
-//
-//===============================================
 
 class NodeQuery
 {
-friend class  NodeQueryStringDef;
-friend class  NodeQueryListDef;
-friend class  NodeQueryComboDef;
+friend class  NodeQueryOption;
 
 public:
 	NodeQuery(const std::string& name,bool ignoreMaxNum=false);
@@ -208,6 +63,7 @@ public:
     QString attrQueryPart() const;
     QString attrQueryPart(VAttributeType*) const;
     bool hasAttribute(VAttributeType*) const;
+    QStringList attrSelection() const;
 
 	void setRootNode(const std::string& rootNode) {rootNode_=rootNode;}
 	const std::string& rootNode() const {return rootNode_;}
@@ -226,11 +82,7 @@ public:
 	bool caseSensitive() const {return caseSensitive_;}
 
     NodeQueryOption* option(QString name) const;
-    static NodeQueryDef* def(QString name);
-    static QMap<QString,NodeQueryAttrDef*> attrDef() {return attrDef_;}
-
-    //Called from VConfigLoader
-    static void load(VProperty* group);
+    QMap<QString,NodeQueryAttrGroup*> attrGroup() {return attrGroup_;}
 
 	void load(VSettings*);
 	void save(VSettings*);
@@ -247,11 +99,8 @@ protected:
     bool caseSensitive_;
     int maxNum_;
     bool ignoreMaxNum_;
-
     QMap<QString,NodeQueryOption*> options_;
-
-    static QMap<QString,NodeQueryDef*> def_;
-    static QMap<QString,NodeQueryAttrDef*> attrDef_;
+    QMap<QString,NodeQueryAttrGroup*> attrGroup_;
 	static bool defaultCaseSensitive_;
 	static int defaultMaxNum_;
 };

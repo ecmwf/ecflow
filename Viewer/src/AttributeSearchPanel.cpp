@@ -151,7 +151,7 @@ AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
 	query_(NULL)
 {
 	//setupUi(this);
-
+#if 0
 	QVBoxLayout* vb=new QVBoxLayout;
 	setLayout(vb);
     vb->setContentsMargins(0,0,0,0);
@@ -176,8 +176,8 @@ AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
 
         Q_FOREACH(NodeQueryDef* d,aDef->defs())
         {
-            NodeQueryOptionEdit *e=new NodeQueryStringOptionEdit(d->name(),grid_,this);
-            groups_[grName] << e;
+            //NodeQueryOptionEdit *e=new NodeQueryStringOptionEdit(d->name(),grid_,this);
+            //groups_[grName] << e;
 
 #if 0
             AttrLineStringDesc* line=new AttrLineStringDesc(text,row,le);
@@ -186,7 +186,7 @@ AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
             assert(it != groups_.end());
             it.value()->add(line);
 #endif
-            e->setVisible(false);
+            //e->setVisible(false);
 
             //addStringLine(d->label(),d->name(),grName);
         }
@@ -224,6 +224,9 @@ AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
 	}
 	hide();
 #endif
+
+#endif
+
 }
 
 AttributeSearchPanel::~AttributeSearchPanel()

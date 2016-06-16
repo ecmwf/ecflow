@@ -8,8 +8,7 @@ set(viewer_srcs
     ActionHandler.cpp
     Animation.cpp
     AttributeEditor.cpp
-    AttributeEditorFactory.cpp
-    AttributeSearchPanel.cpp
+    AttributeEditorFactory.cpp   
     CaseSensitiveButton.cpp
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
@@ -72,6 +71,7 @@ set(viewer_srcs
     NodeQueryEditor.cpp
     NodeQueryEngine.cpp
     NodeQueryHandler.cpp
+    NodeQueryOption.cpp
     NodeQueryOptionEdit.cpp
     NodeQueryResult.cpp
     NodeQueryResultModel.cpp
@@ -198,7 +198,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ActionHandler.hpp
     Animation.hpp
     AttributeEditor.hpp
-    AttributeSearchPanel.hpp
     CaseSensitiveButton.hpp
     ChangeNotifyDialog.hpp
     ChangeNotifyEditor.hpp

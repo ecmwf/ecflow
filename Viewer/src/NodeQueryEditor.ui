@@ -177,7 +177,7 @@
      <property name="title">
       <string>Nodes</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
       <property name="sizeConstraint">
        <enum>QLayout::SetMinAndMaxSize</enum>
       </property>
@@ -321,7 +321,25 @@
        </layout>
       </item>
       <item>
-       <widget class="AttributeSearchPanel" name="attrPanel_" native="true"/>
+       <widget class="QWidget" name="attrPanel_" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QGridLayout" name="attrGrid_"/>
+         </item>
+        </layout>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -350,12 +368,6 @@
    <class>ComboMulti</class>
    <extends>QComboBox</extends>
    <header location="global">ComboMulti.hpp</header>
-  </customwidget>
-  <customwidget>
-   <class>AttributeSearchPanel</class>
-   <extends>QWidget</extends>
-   <header>AttributeSearchPanel.hpp</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
    <class>CustomListWidget</class>

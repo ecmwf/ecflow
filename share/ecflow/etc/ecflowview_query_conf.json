@@ -2,10 +2,12 @@
     "node_query" : {
 
         "node_name" : {
-            "type" : "string"
+            "type" : "string",
+            "label" : "Name"
         },
         "node_path" : {
-            "type" : "string"
+            "type" : "string",
+            "label" : "Path"
         },
         "type" : {
             "type" : "list",
@@ -24,12 +26,86 @@
 
         "attribute"  : {
             "type"  : "list",
-            "values" : "event|meter|variable"
+            "values" : "date|event|label|limit|limiter|meter|repeat|time|trigger|variable"
         },
 
         "event" : {
-            "event_name" : {},
-            "event_type" : {}
+            "event_name" : {
+                "type" : "string",
+                "label" : "Event name"
+            },
+            "event_value" : {
+                "type" : "string",
+                "label" : "Event value"
+            }
+        },
+        "label" : {
+            "label_name" : {
+                "type" : "string",
+                "label" : "Label name"
+            },
+            "label_value" : {
+                "type" : "string",
+                "label" : "Label value"
+            }
+        },
+        "meter" : {
+            "meter_name" : {
+                "type" : "string",
+                "label" : "Meter name"
+            },
+            "meter_value" : {
+                "type" : "string",
+                "label" : "Meter value"
+            }
+        },
+        "limit" : {
+            "limit_name" : {
+                "type" : "string",
+                "label" : "Limit name"
+            },
+            "limit_value" : {
+                "type" : "string",
+                "label" : "Limit value"
+            },
+            "limit_max" : {
+                "type" : "string",
+                "label" : "Limit max"
+            }
+        },
+        "limiter" : {
+            "limiter_name" : {
+                "type" : "string",
+                "label" : "Limiter name"
+            }
+        },
+        "trigger" : {
+            "trigger_expression" : {
+                "type" : "string",
+                "label" : "Trigger expression"
+            }
+        },
+        "time" : {
+            "time_name" : {
+                "type" : "string",
+                "label" : "Time name"
+            }
+        },
+        "date" : {
+            "date_name" : {
+                "type" : "string",
+                "label" : "Date name"
+            }
+        },
+        "repeat" : {
+            "repeat_name" : {
+                "type" : "string",
+                "label" : "Repeat name"
+            },
+            "repeat_value" : {
+                "type" : "string",
+                "label" : "Repeat value"
+            }
         },
         "variable" : {
             "types" : "var|genvar",
@@ -38,6 +114,14 @@
                "label" : "Variable type",
                "values" : "var|genvar|all",
                "labels" : "User variable|Generated variable|Any"
+            },
+            "var_name" : {
+                "type" : "string",
+                "label" : "Variable name"
+            },
+            "var_value" : {
+                "type" : "string",
+                "label" : "Variable value"
             }
          }
       }

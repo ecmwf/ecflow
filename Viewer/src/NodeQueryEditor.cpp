@@ -15,6 +15,7 @@
 #include "Highlighter.hpp"
 #include "NodeQuery.hpp"
 #include "NodeQueryHandler.hpp"
+#include "NodeQueryOption.hpp"
 #include "NodeQueryOptionEdit.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
@@ -83,7 +84,7 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     setupUi(this);
 
     query_=new NodeQuery("tmp");
-    attrPanel_->setQuery(query_);
+    //attrPanel_->setQuery(query_);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     nameLe_->setClearButtonEnabled(true);
@@ -155,18 +156,18 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
            this,SLOT(slotRootNodeEdited(QString)));
 
     //Name
-    nameEdit_=new NodeQueryStringOptionEdit("node_name",nodePathGrid_,this);
-    pathEdit_=new NodeQueryStringOptionEdit("node_path",nodePathGrid_,this);
+    nameEdit_=new NodeQueryStringOptionEdit(query_->option("node_name"),nodePathGrid_,this);
+    pathEdit_=new NodeQueryStringOptionEdit(query_->option("node_path"),nodePathGrid_,this);
 
     //-------------------------
     // Filter
     //-------------------------
 
     //Node type
-    typeEdit_=new NodeQueryListOptionEdit("type",typeList_,typeResetTb_,this);
-    stateEdit_=new NodeQueryListOptionEdit("state",stateList_,stateResetTb_,this);
-    flagEdit_=new NodeQueryListOptionEdit("flag",flagList_,flagResetTb_,this);
-    attrEdit_=new NodeQueryListOptionEdit("attribute",attrList_,attrResetTb_,this);
+    typeEdit_=new NodeQueryListOptionEdit(query_->option("type"),typeList_,typeResetTb_,this);
+    stateEdit_=new NodeQueryListOptionEdit(query_->option("state"),stateList_,stateResetTb_,this);
+    flagEdit_=new NodeQueryListOptionEdit(query_->option("flag"),flagList_,flagResetTb_,this);
+    attrEdit_=new NodeQueryListOptionEdit(query_->option("attribute"),attrList_,attrResetTb_,this);
 
     int listHeight=(fm.height()+2)*6+6;
     typeList_->setFixedHeight(listHeight);
@@ -175,8 +176,32 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     attrList_->setFixedHeight(listHeight);
 
     //Attr panel
-    connect(attrPanel_,SIGNAL(queryChanged()),
-            this,SLOT(slotAttrPanelChanged()));
+    //connect(attrPanel_,SIGNAL(queryChanged()),
+    //        this,SLOT(slotAttrPanelChanged()));
+
+
+    //Attributes
+    Q_FOREACH(NodeQueryAttrGroup* aGrp,query_->attrGroup().values())
+    {
+        Q_ASSERT(aGrp);
+        QString grName=aGrp->name();
+
+        Q_FOREACH(NodeQueryOption* op,aGrp->options())
+        {
+            NodeQueryOptionEdit *e=0;
+            //TODO: use factory here
+            if(op->type() == "string")
+                e=new NodeQueryStringOptionEdit(op,attrGrid_,this);
+            else if(op->type() == "combo")
+                e=new NodeQueryComboOptionEdit(op,attrGrid_,this);
+
+            Q_ASSERT(e);
+            attr_[grName] << e;
+            e->setVisible(false);
+        }
+    }
+
+    attrPanel_->hide();
 
     //--------------------------------
     // Query management
@@ -240,7 +265,7 @@ void NodeQueryEditor::init()
     flagEdit_->init(query_);
     attrEdit_->init(query_);
 
-	attrPanel_->init();
+    //attrPanel_->init();
 
 	initIsOn_=false;
 
@@ -332,16 +357,36 @@ void NodeQueryEditor::slotRootNodeEdited(QString s)
 void NodeQueryEditor::slotOptionEditChanged()
 {
     if(!initIsOn_)
-    {
-        updateQueryTe();
-        checkGuiState();
-
+    {      
         NodeQueryOptionEdit *e=static_cast<NodeQueryOptionEdit*>(sender());
         Q_ASSERT(e);
         if(e->optionId() == "attribute")
-           attrPanel_->setSelection(attrList_->selection());
+           setAttributePanel(attrList_->selection());
+
+        updateQueryTe();
+        checkGuiState();
     }
 }
+
+void NodeQueryEditor::setAttributePanel(QStringList lst)
+{
+    QMapIterator<QString,QList<NodeQueryOptionEdit*> > it(attr_);
+    while (it.hasNext())
+    {
+        it.next();
+        bool st=lst.contains(it.key());
+        Q_FOREACH(NodeQueryOptionEdit* e,it.value())
+        {
+            e->setVisible(st);
+        }
+    }
+
+    if(lst.isEmpty())
+        attrPanel_->hide();
+    else
+        attrPanel_->show();
+}
+
 
 #if 0
 void NodeQueryEditor::slotAttrListChanged()
