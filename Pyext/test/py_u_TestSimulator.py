@@ -23,7 +23,7 @@ def simulate_defs_with_time():
     #         time 00:00 23:00 04:00  # should run 6 times 00:00 04:00 08:00 12:00 16:00 20:00
     #  endfamily
     #endsuite
-    print "simulate_defs_with_time()"
+    print("simulate_defs_with_time()")
     defs = ecflow.Defs()
     suite = defs.add_suite("test_time_series")
     clock = ecflow.Clock(1, 1, 2011, False)       # day,month, year, hybrid make test start at midnight, otherwise current time used
@@ -37,12 +37,12 @@ def simulate_defs_with_time():
     theResult = defs.simulate()
     assert len(theResult) == 0,  "Expected simulation to return without any errors, but found:\n" + theResult
     
-    print "  simple check for state change time"
-    print "   iso_extended:",task.get_state_change_time()
-    print "   iso_extended:",task.get_state_change_time("is0_extended")
-    print "   iso         :",task.get_state_change_time("iso")
-    print "   simple      :",task.get_state_change_time("simple")
-    print "   rubbish     :",task.get_state_change_time("rubbish")
+    print("  simple check for state change time")
+    print("   iso_extended:",task.get_state_change_time())
+    print("   iso_extended:",task.get_state_change_time("is0_extended"))
+    print("   iso         :",task.get_state_change_time("iso"))
+    print("   simple      :",task.get_state_change_time("simple"))
+    print("   rubbish     :",task.get_state_change_time("rubbish"))
  
     os.remove("test_time_series.def.log")
     
@@ -66,17 +66,17 @@ def simulate_deadlock():
     
     theResult = defs.simulate()
     assert len(theResult) != 0, "Expected simulation to return errors, but found none" 
-    print theResult
+    print(theResult)
            
     os.remove("dead_lock.def.log")
     os.remove("defs.depth")
     os.remove("defs.flat")
 
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")")
+    print("####################################################################")
  
     simulate_defs_with_time()
     simulate_deadlock()
-    print "All Tests pass"
+    print("All Tests pass")

@@ -16,44 +16,44 @@
 import ecflow
     
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")")
+    print("####################################################################")
      
     #===========================================================================
-    print "Defs: test generated variables"
+    print("Defs: test generated variables")
     #===========================================================================
     defs = ecflow.Defs()
     suite = defs.add_suite("s1")
     family = suite.add_family("f1")
     task = family.add_task("t1")
 
-    print "\nsuite generated variables, Most of date related suite generated variables will only have values after the suite has begun"
+    print("\nsuite generated variables, Most of date related suite generated variables will only have values after the suite has begun")
     variable_list = ecflow.VariableList()
     suite.get_generated_variables(variable_list)
     for gen_var in variable_list:
-        print gen_var
+        print(gen_var)
     assert len(list(variable_list)) == 12,"Expected 12 generated variables for suites"    
     assert variable_list[0].name() == "SUITE", "expected generated variable of name SUITE but found " + variable_list[0].name()
     assert variable_list[0].value() == "s1", "expected generated variable of value 's1' but found " + variable_list[0].value()
 
 
-    print "\nfamily generated variables"
+    print("\nfamily generated variables")
     variable_list = ecflow.VariableList()
     family.get_generated_variables(variable_list)
     for gen_var in variable_list:
-        print gen_var
+        print(gen_var)
     assert len(list(variable_list)) == 2,"Expected 2 generated variables for families"    
     assert variable_list[0].name() == "FAMILY", "expected generated variable of name FAMILY but found " + variable_list[0].name()
     assert variable_list[0].value() == "f1", "expected generated variable of value 'f1' but found " + variable_list[0].value()
     assert variable_list[1].name() == "FAMILY1", "expected generated variable of name FAMILY1 but found " + variable_list[1].name()
     assert variable_list[1].value() == "f1", "expected generated variable of value 'f1' but found " + variable_list[1].value()
 
-    print "\ntask generated variables"
+    print("\ntask generated variables")
     variable_list = ecflow.VariableList()
     task.get_generated_variables(variable_list)
     for gen_var in variable_list:
-        print gen_var
+        print(gen_var)
     assert len(list(variable_list)) == 8,"Expected 8 generated variables for tasks"    
     assert variable_list[0].name() == "TASK", "expected generated variable of name TASK but found " + variable_list[0].name()
     assert variable_list[0].value() == "t1", "expected generated variable of value 't1' but found " + variable_list[0].value()
@@ -72,5 +72,5 @@ if __name__ == "__main__":
     assert variable_list[7].name() == "ECF_PASS", "expected generated variable of name ECF_NAME but found " + variable_list[7].name()
     assert variable_list[7].value() == "_DJP_", "expected generated variable of value '_DJP_' but found " + variable_list[7].value()
 
-    print "\nAll Tests pass"
+    print("\nAll Tests pass")
     

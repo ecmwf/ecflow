@@ -48,9 +48,9 @@ def create_defs_functionally():
     
     
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version()  + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version()  + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
 
     #
     # Add Nodes functional way
@@ -65,5 +65,5 @@ if __name__ == "__main__":
     # hence calling add_family/add_task still works.
     assert create_defs_sequentially() == create_defs_functionally(),"Functional suite not as expected "
   
-    print "All Tests pass"
+    print("All Tests pass")
     

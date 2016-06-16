@@ -19,11 +19,11 @@ import os
  
 if __name__ == "__main__":
     
-    print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")"
-    print "PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep))
-    print "sys.path:   " + str(sys.path)
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
+    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
+    print("sys.path:   " + str(sys.path))
+    print("####################################################################")
  
     #===========================================================================
     # Defs: add and delete *USER* variables
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     the_limit.increment(1,"/path2") ;  assert the_limit.value() == 2 ,"Expected limit value of 2"
     the_limit.increment(1,"/path3") ;  assert the_limit.value() == 3 ,"Expected limit value of 3"
     the_limit.increment(1,"/path4") ;  assert the_limit.value() == 4 ,"Expected limit value of 4"
-    for path in the_limit.node_paths(): print path
+    for path in the_limit.node_paths(): print(path)
     assert len(list(the_limit.node_paths())) == 4 ,"expected 4 path"
     the_limit.decrement(1,"/path1") ; assert the_limit.value() == 3 ,"Expected limit value of 3"
     the_limit.decrement(1,"/path2") ; assert the_limit.value() == 2 ,"Expected limit value of 2"
@@ -211,12 +211,12 @@ if __name__ == "__main__":
     assert(event.name() == "fred"), "Expected name to be empty, when name defind an not number, number is max_int"
     assert(event.value() == 0),"Expected to not to find event"
 
-    for e in task.events:     print str(e)," # value: ",str(e.value())
+    for e in task.events:     print(str(e)," # value: ",str(e.value()))
     a_dict = {}
     for e in task.events:
         if e.name() != "": a_dict[e.name()] = e.value()
         else:              a_dict[e.number()] = e.value()
-    print a_dict
+    print(a_dict)
 
     assert len(list(task.events)) == 5, "Expected 5 Events"
     task.delete_event("1");         assert len(list(task.events)) == 4, "Expected 4 Events"
@@ -259,7 +259,7 @@ if __name__ == "__main__":
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
     task.add_repeat(ecflow.RepeatEnumerated("enum", ["red", "green", "blue" ]))
-    print task
+    print(task)
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
 
@@ -402,24 +402,24 @@ if __name__ == "__main__":
     #===========================================================================
     # add autocancel
     #===========================================================================
-    print "test add autoCancel"
+    print("test add autoCancel")
     t1 = ecflow.Task("t1")
     assert t1.get_autocancel() == None, " Expected no autocancel"
     t1.add_autocancel(3)                       # 3 days
     assert t1.get_autocancel() != None, " Expected autocancel"
-    print str(t1.get_autocancel())
+    print(str(t1.get_autocancel()))
 
     t3 = ecflow.Task("t3")
     t3.add_autocancel(20, 10, True)              # hour,minutes,relative
-    print str(t3.get_autocancel())
+    print(str(t3.get_autocancel()))
     
     t4 = ecflow.Task("t4")
     t4.add_autocancel(ecflow.TimeSlot(10, 10), True)    # hour,minutes,relative
-    print str(t4.get_autocancel())
+    print(str(t4.get_autocancel()))
 
     t5 = ecflow.Task("t5")
     t5.add_autocancel(ecflow.Autocancel(1, 10, True))   # hour,minutes,relative
-    print str(t5.get_autocancel())
+    print(str(t5.get_autocancel()))
     
     #===========================================================================
     # add late
@@ -470,9 +470,9 @@ if __name__ == "__main__":
     s1 = ecflow.Suite("s1")
     s1.add_clock(clock)
     
-    print "#==========================================================================="
-    print "# get clock"
-    print "#==========================================================================="
+    print("#===========================================================================")
+    print("# get clock")
+    print("#===========================================================================")
     s0 = ecflow.Suite("s0")
     assert s0.get_clock() == None, "Expected no clock"
     
@@ -516,5 +516,5 @@ if __name__ == "__main__":
         assert len(list(s1.zombies)) == 0, "Expected 0 zombie attributes but found " + str(len(list(s1.zombies)))
 
 
-    print "All Tests pass"
+    print("All Tests pass")
     

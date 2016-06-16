@@ -57,15 +57,15 @@ if __name__ == "__main__":
                 family.add_complete("../main:YMD ge " + str(self.end_))
             return
  
-    print str( ExperimentalSuite(20050601,20050605).generate() )
+    print(str( ExperimentalSuite(20050601,20050605).generate() ))
    
 # ==========================================================================
  
 # Control structure and looping
     var = "aa"
-    if var in ( "a", "aa", "aaa" ) :     print "it is a kind of a "
-    elif var in ( "b", "bb", "bb" ) :    print "it is a kind of b "
-    else :                               print "it is something else "
+    if var in ( "a", "aa", "aaa" ) :     print("it is a kind of a ")
+    elif var in ( "b", "bb", "bb" ) :    print("it is a kind of b ")
+    else :                               print("it is something else ")
    
 # ==========================================================================
 
@@ -105,41 +105,41 @@ if __name__ == "__main__":
              }.get(time, self.errorHandler)(self)
       
         def add6(self, time):  
-            print "add6 " + str(time)
+            print("add6 " + str(time))
             self.node.add_today(17, 30)
             self.node.add_variable("ANTIME", str(time))
 
         def add12(self, time):  
-            print "add12 " + str(time)
+            print("add12 " + str(time))
             self.node.add_today(19, 15)
             self.node.add_variable("ANTIME", str(time))
 
         def add18(self, time):  
-            print "add18 " + str(time)
+            print("add18 " + str(time))
             self.node.add_time(1, 30)
             self.node.add_variable("ANTIME", str(time))
 
         def add24(self, time):  
-            print "add24 " + str(time)
+            print("add24 " + str(time))
             self.node.add_time(3, 0)
             self.node.add_variable("ANTIME", "0")
             self.node.add_variable("DELTA_DAY", "1")
             self.node.add_variable("EXPVER", "0002")
          
-        def errorHandler(self, ignore): print "invalid time " + str(ignore)
+        def errorHandler(self, ignore): print("invalid time " + str(ignore))
 
 #for i in (0, 6 ,12, 18, 24):
 for i in (0, 6):
     task = Task("t" + str(i))
-    print task.name()
+    print(task.name())
     varAdder = VarAdder(task)
     varAdder.add(114)
     for var in task.variables: 
-        print str(var) + "\n"
+        print(str(var) + "\n")
     for the_time in task.times : 
-        print str(the_time) + "\n"
+        print(str(the_time) + "\n")
     for today in task.todays : 
-        print str(today) + "\n"
+        print(str(today) + "\n")
          
 # ==========================================================================
 

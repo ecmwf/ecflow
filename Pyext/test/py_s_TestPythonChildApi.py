@@ -14,6 +14,7 @@
 import time
 import os
 import pwd
+import sys  # determine python version
 from datetime import datetime
 import shutil   # used to remove directory tree
 
@@ -34,7 +35,12 @@ def create_defs(name,the_port):
     suite.add_variable("ECF_INCLUDE", ecf_includes());
 
     family = suite.add_family("f1")
-    family.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
+    # sys.version_info is a tuple containing (major,minor,micro,releaselevel,serial)
+    # releaselevel = alpha beta candidate final
+    if (sys.version_info > (3, 0)):
+        family.add_variable("ECF_JOB_CMD","python3 %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
+    else:
+        family.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
 
     task = family.add_task("t1")
     task.add_event("event_fred")
@@ -47,9 +53,9 @@ def create_defs(name,the_port):
     
 
 def test_client_run(ci):            
-    print "\ntest_client_run " + ci.get_host() + ":" + str(ci.get_port())
-    print " ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")"
-    print " ECF_INCLUDES(" + ecf_includes() + ")"
+    print("\ntest_client_run " + ci.get_host() + ":" + str(ci.get_port()))
+    print(" ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")")
+    print(" ECF_INCLUDES(" + ecf_includes() + ")")
     ci.delete_all()     
     defs = create_defs("test_client_run",ci.get_port())  
     suite = defs.find_suite("test_client_run")
@@ -76,36 +82,36 @@ def test_client_run(ci):
 
     file = dir + "/t1.ecf"
     contents = "%include <head.py>\n\n"
-    contents += "print 'doing some work'\n"
+    contents += "print('doing some work')\n"
     contents += "try:\n"
     contents += "    ci.child_event('event_fred')\n"
     contents += "    ci.child_meter('meter',100)\n"
     contents += "    ci.child_label('label_name','100')\n"
-    contents += "    print 'Finished event,meter and label child commands'\n"
+    contents += "    print('Finished event,meter and label child commands')\n"
     contents += "except:\n"
     contents += "    ci.child_abort()\n\n"
     contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
-    print " Created file " + file
+    print(" Created file " + file)
       
     # create the ecf file /test_client_run/f1/t2
     file = dir + "/t2.ecf"
     contents = "%include <head.py>\n\n"
-    contents += "print 'Waiting for /test_client_run/f1/t1 == complete'\n"
+    contents += "print('Waiting for /test_client_run/f1/t1 == complete')\n"
     contents += "try:\n"
     contents += "    ci.child_wait('/test_client_run/f1/t1 == complete')\n"
-    contents += "    print 'Finished waiting'\n"
+    contents += "    print('Finished waiting')\n"
     contents += "except:\n"
     contents += "    ci.child_abort()\n\n"
     contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
-    print " Created file " + file
+    print((" Created file " , file))
       
     ci.restart_server()
     ci.load(defs)           
     ci.begin_all_suites()
     ci.run("/test_client_run", False)
-    print " Running the test, wait for suite to complete ..."  
+    print(" Running the test, wait for suite to complete ...")  
 
     count = 0
     while 1:
@@ -116,7 +122,7 @@ def test_client_run(ci):
         if suite.get_state() == State.complete:
             break;
         if suite.get_state() == State.aborted:
-            print defs;
+            print(defs);
             assert False," Suite aborted \n"  
         time.sleep(2)
         if count > 20:
@@ -126,15 +132,15 @@ def test_client_run(ci):
     
     if not Test.debugging():
         dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_client_run"
-        print " Test OK: removing directory " + dir_to_remove
+        print((" Test OK: removing directory " , dir_to_remove))
         shutil.rmtree(dir_to_remove)      
         
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
 
     with Test.Server() as ci:
         PrintStyle.set_style( Style.STATE ) # show node state 
         test_client_run(ci)  
-        print "\nAll Tests pass ======================================================================"    
+        print("\nAll Tests pass ======================================================================")    

@@ -71,10 +71,10 @@ def test_client_host_port_(host_port):
         return False 
         
 def test_set_host_port():
-    print "test_set_host_port"
+    print("test_set_host_port")
     ci = Client();
-    print " Client.get_host() = " + ci.get_host()
-    print " Client.get_port() = " + ci.get_port()
+    print(" Client.get_host() = " + ci.get_host())
+    print(" Client.get_port() = " + ci.get_port())
     assert test_host_port(ci,"host","3141") ,  "Expected no errors"
     assert test_host_port(ci,"host",4444) ,    "Expected no errors"
     assert test_host_port_(ci,"host:4444") ,    "Expected no errors"
@@ -94,15 +94,15 @@ def test_set_host_port():
     assert test_client_host_port_("3141:host") == False , "Expected errors"
 
 def test_version(ci):
-    print "test_version"
+    print("test_version")
     client_version = ci.version();
     server_version = ci.server_version();
-    print "  client_version: ",client_version
-    print "  server_version: ",server_version
+    print("  client_version: ",client_version)
+    print("  server_version: ",server_version)
     assert client_version == server_version, "Expected client version(" + client_version +") and server version(" +  server_version + ") to match\n";
     
 def test_client_get_server_defs(ci):
-    print "test_client_get_server_defs"
+    print("test_client_get_server_defs")
     ci.delete_all() # start fresh
     ci.load(create_defs())  
     ci.get_server_defs() 
@@ -115,7 +115,7 @@ def test_client_get_server_defs(ci):
 
 
 def test_client_new_log(ci, port):
-    print "test_client_new_log"
+    print("test_client_new_log")
     try : os.remove("./test_client_new_log.log") # delete file if it exists
     except: pass
     
@@ -136,7 +136,7 @@ def test_client_new_log(ci, port):
 
 
 def test_client_clear_log(ci, port):
-    print "test_client_clear_log"
+    print("test_client_clear_log")
     # populate log
     ci.ping();
     ci.ping();
@@ -154,7 +154,7 @@ def test_client_clear_log(ci, port):
 
 
 def test_client_log_msg(ci, port):
-    print "test_client_log_msg"
+    print("test_client_log_msg")
     # Send a message to the log file, then make sure it was written
     ci.log_msg("Humpty dumpty sat on a wall!")
     ci.flush_log(); # flush and close log file, so we can open it
@@ -165,7 +165,7 @@ def test_client_log_msg(ci, port):
         
          
 def test_client_restart_server(ci):
-    print "test_client_restart_server"
+    print("test_client_restart_server")
     ci.restart_server()
     ci.sync_local()
     assert ci.get_defs().get_server_state() == SState.RUNNING, "Expected server to be running"
@@ -175,7 +175,7 @@ def test_client_restart_server(ci):
     assert paths[0] == "/", "Expected root path but found " + str(paths[0])
 
 def test_client_halt_server(ci):
-    print "test_client_halt_server"
+    print("test_client_halt_server")
     ci.halt_server()
     ci.sync_local()
     assert ci.get_defs().get_server_state() == SState.HALTED, "Expected server to be halted"
@@ -185,7 +185,7 @@ def test_client_halt_server(ci):
     assert paths[0] == "/", "Expected root path but found " + str(paths[0])
 
 def test_client_shutdown_server(ci):
-    print "test_client_shutdown_server"
+    print("test_client_shutdown_server")
     ci.shutdown_server()
     ci.sync_local()
     assert ci.get_defs().get_server_state() == SState.SHUTDOWN, "Expected server to be shutdown"
@@ -196,7 +196,7 @@ def test_client_shutdown_server(ci):
 
 
 def test_client_load_in_memory_defs(ci):
-    print "test_client_load_in_memory_defs"
+    print("test_client_load_in_memory_defs")
     ci.delete_all() # start fresh
     ci.load(create_defs())  
     ci.sync_local() 
@@ -204,7 +204,7 @@ def test_client_load_in_memory_defs(ci):
 
 
 def test_client_load_from_disk(ci):            
-    print "test_client_load_from_disk"
+    print("test_client_load_from_disk")
     ci.delete_all() # start fresh
     defs = create_defs();
     defs_file = "test_client_load_from_disk.def"
@@ -219,7 +219,7 @@ def test_client_load_from_disk(ci):
 
 
 def test_client_checkpt(ci, port):
-    print "test_client_checkpt"
+    print("test_client_checkpt")
     # start fresh
     ci.delete_all() 
     try:    
@@ -246,7 +246,7 @@ def test_client_checkpt(ci, port):
 
 
 def test_client_restore_from_checkpt(ci, port):          
-    print "test_client_restore_from_checkpt"
+    print("test_client_restore_from_checkpt")
     # start fresh
     ci.delete_all() 
     try:    
@@ -273,7 +273,7 @@ def test_client_restore_from_checkpt(ci, port):
 def get_username(): return pwd.getpwuid(os.getuid())[ 0 ]
 
 def test_client_reload_wl_file(ci, port):
-    print "test_client_reload_wl_file"
+    print("test_client_reload_wl_file")
     
     expected = False
     try:    ci.reload_wl_file();            
@@ -298,7 +298,7 @@ def test_client_reload_wl_file(ci, port):
 
 
 def test_client_run(ci):            
-    print "test_client_run"
+    print("test_client_run")
     ci.delete_all()     
     defs = create_defs("test_client_run")  
     suite = defs.find_suite("test_client_run")
@@ -333,7 +333,7 @@ def test_client_run(ci):
     shutil.rmtree(dir_to_remove)      
 
 def test_client_run_with_multiple_paths(ci):            
-    print "test_client_run_with_multiple_paths"
+    print("test_client_run_with_multiple_paths")
     ci.delete_all()     
     defs = create_defs("test_client_run_with_multiple_paths")  
     suite = defs.find_suite("test_client_run_with_multiple_paths")
@@ -370,7 +370,7 @@ def test_client_run_with_multiple_paths(ci):
 
     
 def test_client_requeue(ci):
-    print "test_client_requeue"
+    print("test_client_requeue")
     ci.delete_all()     
     defs = create_defs("test_client_requeue")  
     suite = defs.find_suite("test_client_requeue")
@@ -399,7 +399,7 @@ def test_client_requeue(ci):
     shutil.rmtree(dir_to_remove)      
 
 def test_client_requeue_with_multiple_paths(ci):
-    print "test_client_requeue_with_multiple_paths"
+    print("test_client_requeue_with_multiple_paths")
     ci.delete_all()     
     defs = create_defs("test_client_requeue_with_multiple_paths")  
     suite = defs.find_suite("test_client_requeue_with_multiple_paths")
@@ -434,7 +434,7 @@ def test_client_requeue_with_multiple_paths(ci):
 
 
 def test_client_free_dep(ci):
-    print "test_client_free_dep"
+    print("test_client_free_dep")
     ci.delete_all()  
        
     # add a real clock, since we are adding date dependencies
@@ -499,22 +499,22 @@ def test_client_free_dep(ci):
 
 
 def test_client_stats(ci):
-    print "test_client_stats"
+    print("test_client_stats")
     ci.stats()  # writes to standard out
     
 def test_client_stats_reset(ci):
-    print "test_client_stats_reset"
+    print("test_client_stats_reset")
     ci.stats_reset()   
     ci.stats()  # should produce no ouput, where we measure requests
             
 def test_client_debug_server_on_off(ci):
-    print "test_client_debug_server_on_off"
+    print("test_client_debug_server_on_off")
     ci.debug_server_on()  # writes to standard out
     ci.debug_server_off()  
 
 
 def test_client_check(ci):
-    print "test_client_check"
+    print("test_client_check")
     ci.delete_all()     
     
     defs = Defs()
@@ -555,7 +555,7 @@ def test_client_check(ci):
     assert len(server_check) > 0, "Expected defs to fail, since no externs in server "
     
 def test_client_suites(ci):
-    print "test_client_suites"
+    print("test_client_suites")
     ci.delete_all() 
     assert len(ci.suites()) == 0 ,"expected 0 suite "
 
@@ -569,7 +569,7 @@ def test_client_suites(ci):
     assert len(ci.suites()) == 2 ,"expected 2 suite "
     
 def test_client_ch_suites(ci):
-    print "test_client_ch_suites"
+    print("test_client_ch_suites")
     ci.delete_all()     
     
     defs = Defs()
@@ -583,7 +583,7 @@ def test_client_ch_suites(ci):
     ci.ch_suites()  # writes to standard out, list of suites and handles
 
 def test_client_ch_register(ci):
-    print "test_client_ch_register"
+    print("test_client_ch_register")
     ci.delete_all()  
     try: ci.ch_drop_user("")  # drop all handle associated with current user
     except: pass              # Drop throws if no handle registered
@@ -598,7 +598,7 @@ def test_client_ch_register(ci):
   
             
 def test_client_ch_drop(ci):
-    print "test_client_ch_drop"
+    print("test_client_ch_drop")
     ci.delete_all()   
     try: ci.ch_drop_user("")  # drop all handle associated with current user
     except: pass              # Drop throws if no handle registered
@@ -616,7 +616,7 @@ def test_client_ch_drop(ci):
           
           
 def test_client_ch_drop_user(ci):
-    print "test_client_ch_drop_user"
+    print("test_client_ch_drop_user")
     ci.delete_all()   
     try: ci.ch_drop_user("")  # drop all handle associated with current user
     except: pass              # Drop throws if no handle registered
@@ -629,14 +629,14 @@ def test_client_ch_drop_user(ci):
         # register interest in suites s1,s2,s3 and any new suites
         suite_names = [ 's1', 's2', 's3' ]
         ci.ch_register(True, suite_names)
-    except RuntimeError, e:
-        print str(e)
+    except RuntimeError as e:
+        print(str(e))
     
     ci.ch_drop_user("")  # drop all handle associated with current user
             
             
 def test_client_ch_add(ci):
-    print "test_client_ch_add"
+    print("test_client_ch_add")
     ci.delete_all()  
     try: ci.ch_drop_user("")  # drop all handle associated with current user
     except: pass              # Drop throws if no handle registered
@@ -652,14 +652,14 @@ def test_client_ch_add(ci):
         ci.ch_add(suite_names)                  # add suites s1,s2 to the last added handle
         suite_names = [ 's3', 's4' ]
         ci.ch_add( ci.ch_handle(),suite_names)  # add suites s3,s4 using last handle
-    except RuntimeError, e:
-        print str(e)
+    except RuntimeError as e:
+        print(str(e))
         
     ci.ch_drop_user("")  # drop all handle associated with current user
 
             
 def test_client_ch_auto_add(ci):
-    print "test_client_ch_auto_add"
+    print("test_client_ch_auto_add")
     ci.delete_all()  
     try: ci.ch_drop_user("")  # drop all handle associated with current user
     except: pass              # Drop throws if no handle registered
@@ -674,14 +674,14 @@ def test_client_ch_auto_add(ci):
         ci.ch_auto_add( False )                 # disable adding newly created suites to last registered handle\n"
         ci.ch_auto_add( True )                  # enable adding newly created suites to last registered handle\n"
         ci.ch_auto_add( ci.ch_handle(), False ) # disable adding newly created suites to handle\n"
-    except RuntimeError, e:
-        print str(e)
+    except RuntimeError as e:
+        print(str(e))
         
     ci.ch_drop_user("")  # drop all handle associated with current user
         
            
 def test_client_ch_remove(ci):
-    print "test_client_ch_remove"
+    print("test_client_ch_remove")
     ci.delete_all()  
     try: ci.ch_drop_user("")  # drop all handle associated with current user
     except: pass              # Drop throws if no handle registered
@@ -697,14 +697,14 @@ def test_client_ch_remove(ci):
         ci.ch_remove( suite_names )          # remove suites s1 from the last added handle\n"
         suite_names = [ 's2' ]
         ci.ch_remove( ci.ch_handle(), suite_names )  # remove suites s2 from the last added handle\n"
-    except RuntimeError, e:
-        print str(e)
+    except RuntimeError as e:
+        print(str(e))
         
     ci.ch_drop_user("")  # drop all handle associated with current user
            
            
 def test_client_get_file(ci):
-    print "test_client_get_file"
+    print("test_client_get_file")
     ci.delete_all()     
     defs = create_defs("test_client_get_file")  
       
@@ -730,8 +730,8 @@ def test_client_get_file(ci):
         for file_t in [ 'script', 'job', 'jobout', 'manual' ]:
             the_returned_file = ci.get_file('/test_client_get_file/f1/t1',file_t)  # make a request to the server
             assert len(the_returned_file) > 0,"Expected ci.get_file(/test_client_get_file/f1/t1," + file_t + ") to return something"
-    except RuntimeError, e:
-        print str(e)
+    except RuntimeError as e:
+        print(str(e))
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_get_file"
     shutil.rmtree(dir_to_remove,True)   # True means ignore errors   
@@ -741,7 +741,7 @@ def test_client_plug(ci):
     pass
            
 def test_client_alter_add(ci):
-    print "test_client_alter_add"
+    print("test_client_alter_add")
     ci.delete_all()     
     ci.load(create_defs("test_client_alter_add"))   
 
@@ -777,7 +777,7 @@ def test_client_alter_add(ci):
            
 
 def test_client_alter_delete(ci):
-    print "test_client_alter_delete"
+    print("test_client_alter_delete")
     ci.delete_all() 
     defs =create_defs("test_client_alter_delete")  
      
@@ -948,7 +948,7 @@ def test_client_alter_delete(ci):
     assert repeat.empty(), "Expected repeat to be deleted:\n" + str(ci.get_defs())
  
 def test_client_alter_change(ci):
-    print "test_client_alter_change"
+    print("test_client_alter_change")
     ci.delete_all() 
     defs =create_defs("test_client_alter_change")   
     t1 = "/test_client_alter_change/f1/t1"
@@ -1075,7 +1075,7 @@ def test_client_alter_change(ci):
 
 
 def test_client_force(ci):
-    print "test_client_force"
+    print("test_client_force")
     ci.delete_all()     
     defs = create_defs("test_client_force") 
      
@@ -1143,7 +1143,7 @@ def test_client_force(ci):
       
 
 def test_client_replace(ci,on_disk):
-    print "test_client_replace client_defs on disk = " + str(on_disk)
+    print("test_client_replace client_defs on disk = " + str(on_disk))
     # Create and load the following defs
     # s1
     #   f1
@@ -1231,7 +1231,7 @@ def test_client_group(ci):
     pass
            
 def test_client_suspend(ci):
-    print "test_client_suspend"
+    print("test_client_suspend")
     ci.delete_all()     
     defs = create_defs("test_client_suspend")  
     suite = defs.find_suite("test_client_suspend")
@@ -1248,7 +1248,7 @@ def test_client_suspend(ci):
     
 
 def test_client_suspend_multiple_paths(ci):
-    print "test_client_suspend_multiple_paths"
+    print("test_client_suspend_multiple_paths")
     ci.delete_all()     
     defs = create_defs("test_client_suspend_multiple_paths")  
     suite = defs.find_suite("test_client_suspend_multiple_paths")
@@ -1267,7 +1267,7 @@ def test_client_suspend_multiple_paths(ci):
     assert task_t2.is_suspended(), "Expected to find task t2 to be suspended"
             
 def test_client_resume(ci):
-    print "test_client_resume"
+    print("test_client_resume")
     ci.delete_all()     
     defs = create_defs("test_client_resume")  
     suite = defs.find_suite("test_client_resume")
@@ -1287,7 +1287,7 @@ def test_client_resume(ci):
     assert suite.is_suspended() == False, "Expected to find suite resumed"
 
 def test_client_resume_multiple_paths(ci):
-    print "test_client_resume_multiple_paths"
+    print("test_client_resume_multiple_paths")
     ci.delete_all()     
     defs = create_defs("test_client_resume_multiple_paths")  
     suite = defs.find_suite("test_client_resume_multiple_paths")
@@ -1314,7 +1314,7 @@ def test_client_resume_multiple_paths(ci):
  
           
 def test_client_delete_node(ci): 
-    print "test_client_delete_node"
+    print("test_client_delete_node")
     ci.delete_all() 
     defs = create_defs("test_client_delete_node")
     
@@ -1336,7 +1336,7 @@ def test_client_delete_node(ci):
         assert node == None , "Expected not to find task " + task.get_abs_node_path()  + " as it should have been deleted:\n" + str(ci.get_defs())   
     
 def test_client_delete_node_multiple_paths(ci): 
-    print "test_client_delete_node_multiple_paths"
+    print("test_client_delete_node_multiple_paths")
     ci.delete_all() 
     defs = create_defs("test_client_delete_node_multiple_paths")
     
@@ -1363,7 +1363,7 @@ def test_client_delete_node_multiple_paths(ci):
     
 
 def test_client_check_defstatus(ci):            
-    print "test_client_check_defstatus"
+    print("test_client_check_defstatus")
     ci.delete_all()     
     defs = create_defs("test_client_check_defstatus")  
     
@@ -1405,7 +1405,7 @@ def test_client_check_defstatus(ci):
 def test_ECFLOW_189(ci):
     # Bug, when a node is resumed it ignored holding dependencies higher up the tree.
     # i.e Previously when we resumed a node, it ignored trigger/time/node state, dependencies higher up the tree
-    print "test_ECFLOW_189"
+    print("test_ECFLOW_189")
     ci.delete_all()     
     defs = create_defs("test_ECFLOW_189")  
     defs.generate_scripts();
@@ -1455,7 +1455,7 @@ def test_ECFLOW_189(ci):
 
 def test_ECFLOW_199(ci):
     # Test ClientInvoker::changed_node_paths
-    print "test_ECFLOW_199"
+    print("test_ECFLOW_199")
     ci.delete_all()     
     defs = create_defs("test_ECFLOW_199")  
     defs.generate_scripts();
@@ -1481,13 +1481,13 @@ def test_ECFLOW_199(ci):
     ci.resume("/test_ECFLOW_199/f1/t1")
     ci.sync_local() 
     for path in ci.changed_node_paths:
-        print "   changed node path " + path;
+        print("   changed node path " + path);
     assert len(list(ci.changed_node_paths)) == 1, "Expected 1 changed path but found " + str(len(list(ci.changed_node_paths)))
 
     ci.resume("/test_ECFLOW_199/f1/t2")
     ci.sync_local() 
     for path in ci.changed_node_paths:
-        print "   changed node path " + path;
+        print("   changed node path " + path);
     assert len(list(ci.changed_node_paths)) == 1, "Expected 1 changed path but found " + str(len(list(ci.changed_node_paths)))
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_ECFLOW_199"
@@ -1495,9 +1495,9 @@ def test_ECFLOW_199(ci):
 
 
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
 
     # server independent tests
     test_set_host_port();
@@ -1569,4 +1569,4 @@ if __name__ == "__main__":
         test_ECFLOW_189(ci)         
         test_ECFLOW_199(ci)         
 
-        print "All Tests pass ======================================================================"    
+        print("All Tests pass ======================================================================")    

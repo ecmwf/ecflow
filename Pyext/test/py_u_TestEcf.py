@@ -17,9 +17,9 @@ import ecflow
 from ecflow import Ecf, Client, debug_build
 
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running TestEcf, ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running TestEcf, ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
     
     default_debug_level = Ecf.debug_level()
     assert default_debug_level == 0, "Expected default debug level to be 0"
@@ -35,4 +35,4 @@ if __name__ == "__main__":
     Ecf.set_debug_equality(False)
     assert  Ecf.debug_equality() == False, "Expected  Ecf.debug_equality() == False "
 
-    print "All tests pass"
+    print("All tests pass")

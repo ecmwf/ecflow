@@ -155,26 +155,26 @@ def check_traversal(path_to_def):
     # be the same as def on disk.
     try:
         traversed_def = ecflow.Defs( file_name )
-    except RuntimeError, e: 
-        print "Could not parse file " + file_name + "\n" + str(e)
+    except RuntimeError as e: 
+        print("Could not parse file " + file_name + "\n" + str(e))
         exit(1)
          
     # compare the two defs
     ecflow.Ecf.set_debug_equality(True)
     defs_equal = (traversed_def == reference_def)
     if not defs_equal:
-        print str(path_to_def) + " FAILED "
-        print "The traversed defs=========\n" + str(traversed_def) + "\nnot the same as reference def============\n" + str(reference_def)
-        print "===================== " + file_name + " ===================================="
+        print(str(path_to_def) + " FAILED ")
+        print("The traversed defs=========\n" + str(traversed_def) + "\nnot the same as reference def============\n" + str(reference_def))
+        print("===================== " + file_name + " ====================================")
         the_traversed_def_on_disk = open(file_name)
         for line in the_traversed_def_on_disk:
-            print line,
+            print(line)
             
         assert defs_equal, "Failed: ---"
       
         # Notice: this path does not delete file_name, left for analysis of failure
     else:
-        print str(path_to_def) + " PASSED "
+        print(str(path_to_def) + " PASSED ")
         os.remove(file_name)        
         
 
@@ -194,9 +194,9 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
             break    
         
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")")
+    print("####################################################################")
  
     cwd = os.getcwd()
     #print cwd
@@ -218,4 +218,4 @@ if __name__ == "__main__":
     # try the mega_def. Commented out since it takes to long
     #mega_def = os.path.join( os.path.dirname(cwd), "AParser/test/data/single_defs/mega.def")
     #check_traversal(mega_def)
-    print "All Tests pass"    
+    print("All Tests pass")    
