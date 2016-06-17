@@ -59,6 +59,7 @@ public:
 	const std::string& name() const {return name_;}
 
 	QString query() const;
+    QString sqlQuery() const {return sqlQuery_;}
     QString nodeQueryPart() const;
     QString attrQueryPart() const;
     QString attrQueryPart(VAttributeType*) const;
@@ -96,6 +97,7 @@ protected:
 	QStringList servers_;
 	bool allServers_;
     QMap<QString,QString> extQuery_;
+    QString sqlQuery_;
     bool caseSensitive_;
     int maxNum_;
     bool ignoreMaxNum_;

@@ -171,7 +171,7 @@ QString NodeQuery::attrQueryPart() const
 QString NodeQuery::attrQueryPart(VAttributeType* t) const
 {        
     //TODO
-    QStringList attrSel; //=options_["attribute"]->selection();
+    QStringList attrSel=attrSelection();
     QString q;
     Q_FOREACH(NodeQueryAttrGroup* tm,attrGroup_.values())
     {
@@ -207,8 +207,7 @@ bool NodeQuery::hasAttribute(VAttributeType *t) const
     {
         if(d->hasType(t))
         {
-            //options_["attribute"]
-            //return attrGroupSelection().contains(term->name_);
+            return attrSelection().contains(d->name());
         }
     }
     return false;
@@ -315,6 +314,53 @@ void NodeQuery::buildQueryString()
 #ifdef _UI_NODEQUERY_DEBUG
     qDebug() << extQuery_;
 #endif
+
+    sqlQuery_.clear();
+    QStringList selectPart;
+    QStringList fromPart;
+    QStringList wherePart;
+    sqlQuery_="SELECT";
+    QStringList nodeParts;
+    nodeParts << "node" << "type" << "state" << "flag";
+    Q_FOREACH(QString s,nodeParts)
+    {
+        if(!extQuery_.value(s).isEmpty())
+            wherePart << extQuery_.value(s);
+    }
+    selectPart << "node";
+
+    //Attribute
+    Q_FOREACH(QString attrName,attrSelection())
+    {
+        NodeQueryAttrGroup* grp=attrGroup_.value(attrName);
+        Q_ASSERT(grp);
+        selectPart << grp->name();
+
+        QString grpPart=grp->query();
+        wherePart << grpPart;
+    }
+
+    sqlQuery_+=" " + selectPart.join(", ");
+
+    //FROM
+    if(!servers_.isEmpty())
+    {
+        if(servers_.size() ==1 && !rootNode_.empty())
+        {
+            fromPart << QString::fromStdString(rootNode_);
+        }
+        else
+            fromPart=servers_;
+
+        sqlQuery_+=" FROM " + fromPart.join(", ");
+    }
+    else
+    {
+        sqlQuery_+=" FROM any";
+    }
+
+    if(wherePart.count() > 0)
+        sqlQuery_+=" WHERE " + wherePart.join(" and ");
 
 #ifdef _UI_NODEQUERY_DEBUG
     UserMessage::debug("<-- NodeQuery::buildQueryString");

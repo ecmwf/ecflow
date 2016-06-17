@@ -40,7 +40,8 @@ void NodeQueryOptionEdit::init(NodeQuery* query)
 }
 
 
-NodeQueryStringOptionEdit::NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget* parent) :
+NodeQueryStringOptionEdit::NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,
+                                                     QWidget* parent,bool sameRow) :
     NodeQueryOptionEdit(option->name(),grid,parent),
     label_(0),
     matchCb_(0),
@@ -50,14 +51,29 @@ NodeQueryStringOptionEdit::NodeQueryStringOptionEdit(NodeQueryOption* option,QGr
     label_=new QLabel(option->label() + ":",parent_);
     matchCb_=new StringMatchCombo(parent_);
     le_=new QLineEdit(parent_);
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     le_->setClearButtonEnabled(true);
 #endif
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+    le_->setPlaceholderText(tr("ANY"));
+#endif
 
     int row=grid_->rowCount();
-    grid_->addWidget(label_,row,0);
-    grid_->addWidget(matchCb_,row,1);
-    grid_->addWidget(le_,row,2,1,-1);
+    if(!sameRow)
+    {
+        grid_->addWidget(label_,row,0);
+        grid_->addWidget(matchCb_,row,1);
+        grid_->addWidget(le_,row,2,1,1);
+    }
+    else
+    {
+        row=row-1;
+        Q_ASSERT(row >= 0);
+        grid_->addWidget(label_,row,3);
+        grid_->addWidget(matchCb_,row,4);
+        grid_->addWidget(le_,row,5,1,-1);
+    }
 
     connect(le_,SIGNAL(textChanged(QString)),
            this,SLOT(slotEdited(QString)));
@@ -179,7 +195,7 @@ NodeQueryComboOptionEdit::NodeQueryComboOptionEdit(NodeQueryOption *option,QGrid
 
     int row=grid_->rowCount();
     grid_->addWidget(label_,row,0);
-    grid_->addWidget(cb_,row,1,1-1);
+    grid_->addWidget(cb_,row,1,1,-1);
 
     connect(cb_,SIGNAL(currentIndexChanged(int)),
             this,SLOT(slotCbChanged(int)));

@@ -56,7 +56,7 @@ class NodeQueryStringOptionEdit : public  NodeQueryOptionEdit
 {
 Q_OBJECT
 public:
-    NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget* parent);
+    NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget* parent, bool sameRow);
     void setVisible(bool);
 
 protected Q_SLOTS:

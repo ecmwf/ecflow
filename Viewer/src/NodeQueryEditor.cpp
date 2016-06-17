@@ -87,14 +87,7 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     //attrPanel_->setQuery(query_);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-    nameLe_->setClearButtonEnabled(true);
-    pathLe_->setClearButtonEnabled(true);
     rootLe_->setClearButtonEnabled(true);
-#endif
-
-#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
-	nameLe_->setPlaceholderText(tr("ANY"));
-	pathLe_->setPlaceholderText(tr("ANY"));
 #endif
 
 	//-------------------------
@@ -115,7 +108,7 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
 	queryTe_->setFixedHeight((fm.height()+2)*3+6);
 	queryTe_->setReadOnly(true);
-	queryTe_->setWordWrapMode(QTextOption::NoWrap);
+    queryTe_->setWordWrapMode(QTextOption::WordWrap);
 
     Highlighter* ih=new Highlighter(queryTe_->document(),"query");
 
@@ -155,9 +148,11 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     connect(rootLe_,SIGNAL(textChanged(QString)),
            this,SLOT(slotRootNodeEdited(QString)));
 
+    //nodePathGrid_
+
     //Name
-    nameEdit_=new NodeQueryStringOptionEdit(query_->option("node_name"),nodePathGrid_,this);
-    pathEdit_=new NodeQueryStringOptionEdit(query_->option("node_path"),nodePathGrid_,this);
+    nameEdit_=new NodeQueryStringOptionEdit(query_->option("node_name"),nodeGrid_,this,false);
+    pathEdit_=new NodeQueryStringOptionEdit(query_->option("node_path"),nodeGrid_,this,false);
 
     //-------------------------
     // Filter
@@ -167,13 +162,18 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     typeEdit_=new NodeQueryListOptionEdit(query_->option("type"),typeList_,typeResetTb_,this);
     stateEdit_=new NodeQueryListOptionEdit(query_->option("state"),stateList_,stateResetTb_,this);
     flagEdit_=new NodeQueryListOptionEdit(query_->option("flag"),flagList_,flagResetTb_,this);
+
     attrEdit_=new NodeQueryListOptionEdit(query_->option("attribute"),attrList_,attrResetTb_,this);
 
     int listHeight=(fm.height()+2)*6+6;
     typeList_->setFixedHeight(listHeight);
     stateList_->setFixedHeight(listHeight);
     flagList_->setFixedHeight(listHeight);
+
+    listHeight=(fm.height()+2)*10+6;
+    int listWidth=fm.width("variable")+60;
     attrList_->setFixedHeight(listHeight);
+    attrList_->setFixedWidth(listWidth);
 
     //Attr panel
     //connect(attrPanel_,SIGNAL(queryChanged()),
@@ -191,7 +191,7 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
             NodeQueryOptionEdit *e=0;
             //TODO: use factory here
             if(op->type() == "string")
-                e=new NodeQueryStringOptionEdit(op,attrGrid_,this);
+                e=new NodeQueryStringOptionEdit(op,attrGrid_,this,false);
             else if(op->type() == "combo")
                 e=new NodeQueryComboOptionEdit(op,attrGrid_,this);
 
@@ -201,7 +201,10 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
         }
     }
 
-    attrPanel_->hide();
+    attrPanelLayout_->addStretch(1);
+    //attrPanel_->hide();
+
+    tab_->setCurrentIndex(0);
 
     //--------------------------------
     // Query management
@@ -275,7 +278,9 @@ void NodeQueryEditor::init()
 
 void NodeQueryEditor::setQueryTeCanExpand(bool b)
 {
-	queryTeCanExpand_=b;
+    return;
+
+    queryTeCanExpand_=b;
 	if(queryTeCanExpand_)
 	{
 		queryTe_->setFixedHeight(QWIDGETSIZE_MAX);
@@ -290,8 +295,9 @@ void NodeQueryEditor::toggleDefPanelVisible()
 {
 	bool b=isDefPanelVisible();
 	scopeBox_->setVisible(!b);
-	filterBox_->setVisible(!b);
+//	filterBox_->setVisible(!b);
 	optionBox_->setVisible(!b);
+    tab_->setVisible(!b);
 }
 
 bool NodeQueryEditor::isDefPanelVisible() const
@@ -301,7 +307,7 @@ bool NodeQueryEditor::isDefPanelVisible() const
 
 void NodeQueryEditor::slotAdvMode(bool b)
 {
-	filterBox_->setVisible(!b);
+//	filterBox_->setVisible(!b);
 	queryTe_->setReadOnly(!b);
 
 	if(b)
@@ -380,11 +386,12 @@ void NodeQueryEditor::setAttributePanel(QStringList lst)
             e->setVisible(st);
         }
     }
-
+#if 0
     if(lst.isEmpty())
         attrPanel_->hide();
     else
         attrPanel_->show();
+#endif
 }
 
 
@@ -427,12 +434,15 @@ void NodeQueryEditor::updateQueryTe()
 	query_->buildQueryString();
 
 	QColor bg(241,241,241);
-	setQueryTe(query_->extQueryHtml(true,bg,65));
+    //setQueryTe(query_->extQueryHtml(true,bg,65));
+    setQueryTe(query_->sqlQuery());
 }
 
 void NodeQueryEditor::setQueryTe(QString s)
 {
-	int rowNum=s.count("<tr>")+s.count("<br>")+1;
+    queryTe_->setHtml(s);
+    return;
+    int rowNum=s.count("<tr>")+s.count("<br>")+1;
 	if(rowNum==0 && !s.isEmpty())
 		rowNum=1;
 
@@ -456,7 +466,8 @@ void NodeQueryEditor::setQueryTe(QString s)
 
 void NodeQueryEditor::adjustQueryTe(int rn)
 {
-	int rowNum=0;
+    return ;
+    int rowNum=0;
 	if(rn <= 0)
 	{
 		rowNum=queryTe_->toPlainText().count("\n")+1;

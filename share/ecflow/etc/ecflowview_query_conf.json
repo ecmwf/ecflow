@@ -35,8 +35,10 @@
                 "label" : "Event name"
             },
             "event_value" : {
-                "type" : "string",
-                "label" : "Event value"
+                "type" : "combo",
+                "label" : "Event value",
+                "values" : "any|set|clear",
+                "labels" : "Any|Set|Clear"
             }
         },
         "label" : {

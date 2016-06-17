@@ -318,7 +318,7 @@ QString NodeQueryComboOption::query(QString op) const
     QString s;
     if(!value_.isEmpty())
     {
-        s= name_ + " " + " \'" + value_ + "\'";
+        s= name_ + " = " + " \'" + value_ + "\'";
     }
     return s;
 }

@@ -196,7 +196,7 @@
                 "bold"    : "false"
              }, 
              "keyword" : {
-                "pattern" : "(scope|scope:|nodes|nodes:|options|options:|attributes:|attributes)",
+                "pattern" : "(SELECT|FROM|WHERE|scope|scope:|nodes|nodes:|options|options:|attributes:|attributes)",
                 "colour"  : "rgb(73,73,73)",               
                 "bold"    : "true"
              }, 
