@@ -123,15 +123,15 @@ endif()
 
 # ==========================================================================
 # install
-#    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
-#    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
-#    setup : experimental only,python way of installing
+#    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
+#
+#    local | not defined : this will install to:
+#                          $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
+#    setup               : experimental only,python way of installing
 #
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory
 # ==========================================================================
-
-# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
    
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
