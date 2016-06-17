@@ -204,15 +204,14 @@ fi
 ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \
-            -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DENABLE_WARNINGS=ON \
             -DENABLE_ALL_TESTS=ON \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
+            -DCMAKE_PYTHON_INSTALL_TYPE=local \
             ${cmake_extra_options}
-            #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'" \
-            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
-            #-DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
+            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
+            #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'"
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
