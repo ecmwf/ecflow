@@ -131,6 +131,10 @@ endif()
 #
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory
+#
+# Note:  To install only the python module
+#       cd  buildir
+#       cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR -DCOMPONENT=python -P cmake_install.cmake -- make install
 # ==========================================================================
    
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
@@ -139,10 +143,8 @@ if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INST
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
       set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
       
-      install( TARGETS ecflow   DESTINATION ${PYTHON_DEST} 
-               RENAME ecflow.so
-             )
-      install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST} )
+      install( TARGETS ecflow              DESTINATION ${PYTHON_DEST}  RENAME ecflow.so COMPONENT python )
+      install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST}                   COMPONENT python )
       
 else()
 	  message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
