@@ -158,8 +158,6 @@ endif()
 # Boost
 # =========================================================================================
 
-ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
-
 # Ecflow test require statics libs for boost < 1.59, otherwise get double free error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
