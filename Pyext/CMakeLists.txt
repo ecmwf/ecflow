@@ -70,7 +70,7 @@ set_target_properties(ecflow PROPERTIES
 ecbuild_add_test( TARGET py_u_TestMigrate
                   TYPE PYTHON 
                   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/py_u_TestMigrate.py
-                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
+                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" )
 
 list( APPEND u_tests
         py_u_TestAddDelete   
@@ -97,7 +97,7 @@ foreach( test ${u_tests} )
     ecbuild_add_test( TARGET ${test} 
                       TYPE PYTHON 
                       ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" 
                       TEST_DEPENDS u_base
                      )
 endforeach()
@@ -105,8 +105,8 @@ endforeach()
 
 if ( ENABLE_ALL_TESTS)
 	list( APPEND s_tests
-	        py_s_TestClientApi    
-	        py_s_TestPythonChildApi
+	             py_s_TestClientApi    
+	             py_s_TestPythonChildApi
 	)
 	
 	foreach( test ${s_tests} )
@@ -114,7 +114,7 @@ if ( ENABLE_ALL_TESTS)
 	    ecbuild_add_test( TARGET ${test} 
 	                      TYPE PYTHON 
 	                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-	                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+	                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" 
 	                      TEST_DEPENDS u_base
 	                     )
 	endforeach()
