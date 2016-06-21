@@ -31,8 +31,11 @@ include_directories(
                     )
 
 # =====================================================================     
-# INCLUDES here is for external includes           
+# INCLUDES here is for external includes   
+#   NOINSTALL this stops double install, the one in i.e lib/ecflow.so
+#             The other install is in python2.7/site-packages/ecflow.so
 ecbuild_add_library( TARGET    ecflow
+                     NOINSTALL
                      TYPE      MODULE
                      SOURCES   ${srcs}
 					 CONDITION PYTHONLIBS_FOUND

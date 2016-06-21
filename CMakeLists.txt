@@ -255,14 +255,16 @@ install( FILES
             ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
          DESTINATION bin
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-)
+         COMPONENT binary
+       )
 
 # install documentation         
-install (FILES   
-             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
-         DESTINATION doc/ecflow
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-)
+#install( FILES   
+#             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
+#         DESTINATION doc/ecflow
+#         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+#         COMPONENT doc
+#       )
         
 # =========================================================================================
 # final
