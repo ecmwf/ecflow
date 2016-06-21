@@ -181,7 +181,7 @@ find_package( Threads )
 
 
 # =========================================================================================
-# view needs to be compiled as dynamic lib  otherwise the icons do not appear.
+# ecflow_view needs to be compiled as dynamic lib  otherwise the icons do not appear.
 #
 # Note: -DECFLOW_SHARED_DIR is *ONLY* required for one file view/src/directory.cc
 #
@@ -203,7 +203,7 @@ include_directories( src
                     )
 
 # in ecbuild_add_library INCLUDES is only for external includes
-ecbuild_add_library(TARGET    view
+ecbuild_add_library(TARGET    ecflow_view
 				    CONDITION 
 				              MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                     SOURCES  
@@ -230,7 +230,7 @@ ecbuild_add_executable( TARGET    ecflowview
 						CONDITION 
 						          MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                         LIBS      
-                                  view libclient base libparser node nodeattr core
+                                  ecflow_view libclient base libparser node nodeattr core
                                   ${CMAKE_THREAD_LIBS_INIT} 
                                   ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
                                   ${CMATH_LIBRARIES}
