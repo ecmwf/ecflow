@@ -77,11 +77,18 @@ option( ENABLE_UI_BACKTRACE   "Print a UI debug backtrace" OFF )
 
 if(ENABLE_UI)
 
+    ecbuild_info("")
+    ecbuild_info("------------------------------ Qt start ---------------------------")
     ecbuild_info("ecFlowUI is enabled - searching for Qt5; if not found, will try Qt4")
+    ecbuild_info("To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH")
 
-    find_package(Qt5Widgets    5.0.0)
-    find_package(Qt5Gui        5.0.0)
-    find_package(Qt5Network    5.0.0)
+    find_package(Qt5Widgets 5.0.0)
+    if (Qt5Widgets_FOUND)
+        find_package(Qt5Gui 5.0.0)
+        if (Qt5Gui_FOUND)
+            find_package(Qt5Network 5.0.0)
+        endif()
+    endif()
 
     if (Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5Network_FOUND)
           ecbuild_info("Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
@@ -90,18 +97,22 @@ if(ENABLE_UI)
           set(ECFLOW_QT5 1)
           add_definitions(-DECFLOW_QT5)
     else()
-        ecbuild_info("Could not find all required Qt5 packages - searching for Qt4")
+        ecbuild_info("Could not find all required Qt5 packages (Qt5Widgets, Qt5Gui and Qt5Network) - searching for Qt4")
+        ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
 
         find_package(Qt4 4.8.0 REQUIRED QtCore QtGui QtNetwork)
         if(QT_FOUND)
             ecbuild_info("Found Qt 4, please ignore any warnings about Qt5 components that were not found.")
         else()
+            ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
             ecbuild_critical("Qt5 and Qt4 not found - one of these is required for ecFlowUI; or use -DENABLE_UI=OFF")
         endif()
     endif()
 
     set(ECFLOW_QT 1)
     add_definitions(-DQT_NO_KEYWORDS) # We need to disable keywords because there is a problem in using Qt and boost together.
+    ecbuild_info("------------------------------ Qt end----------------------------")
+    ecbuild_info("")
 
 endif()
 
