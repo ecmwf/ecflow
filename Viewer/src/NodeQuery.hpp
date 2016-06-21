@@ -59,7 +59,7 @@ friend class  NodeQueryOption;
 
 public:
 	NodeQuery(const std::string& name,bool ignoreMaxNum=false);
-	~NodeQuery();
+    ~NodeQuery();
     NodeQuery* clone();
 	NodeQuery* clone(const std::string& name);
 

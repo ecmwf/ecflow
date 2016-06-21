@@ -28,6 +28,7 @@ class NodeQueryOption
 {
 public:
     NodeQueryOption(VProperty*);
+    virtual ~NodeQueryOption() {}
 
     QString type() const {return type_;}
     QString name() const {return name_;}

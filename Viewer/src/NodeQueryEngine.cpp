@@ -202,9 +202,6 @@ void NodeQueryEngine::runRecursively(VNode *node)
     //Execute the node part
     if(parser_->execute(node))
     {
-        //broadcastFind(node);
-        //scanCnt_;
-        
         if(!attrParser_.isEmpty())
         {
             QMap<VAttributeType*,BaseNodeCondition*>::const_iterator it = attrParser_.constBegin();
@@ -234,7 +231,7 @@ void NodeQueryEngine::runRecursively(VNode *node)
         else
         {
             broadcastFind(node);
-            scanCnt_;
+            scanCnt_++;
         }
     }
 
