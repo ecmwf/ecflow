@@ -181,12 +181,11 @@ find_package( Threads )
 
 
 # =========================================================================================
-# libecflowview needs to be compiled as dynamic lin  otherwise the icons do not appear.
+# view needs to be compiled as dynamic lib  otherwise the icons do not appear.
 #
 # Note: -DECFLOW_SHARED_DIR is *ONLY* required for one file view/src/directory.cc
 #
 add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
-
 
 # local includes
 include_directories( src
@@ -204,8 +203,9 @@ include_directories( src
                     )
 
 # in ecbuild_add_library INCLUDES is only for external includes
-ecbuild_add_library(TARGET    libecflowview
-				        CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+ecbuild_add_library(TARGET    view
+				    CONDITION 
+				              MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                     SOURCES  
                               ${srcs_cc} ${srcs_c} ${srcs_cpp} ${libicon_srcs} ${libxec_srcs} ${libui_srcs}
                     TEMPLATES
@@ -227,17 +227,17 @@ SET_SOURCE_FILES_PROPERTIES(src/host.cc PROPERTIES COMPILE_FLAGS "-O0")
 ecbuild_add_executable( TARGET    ecflowview
                         SOURCES   
                                   src/ecflowview.cc
-						      CONDITION 
-						                MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+						CONDITION 
+						          MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                         LIBS      
-                                  libecflowview  libclient base libparser node nodeattr core
+                                  view libclient base libparser node nodeattr core
                                   ${CMAKE_THREAD_LIBS_INIT} 
                                   ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
                                   ${CMATH_LIBRARIES}
                         INCLUDES  
                                   ${X11_INCLUDE_DIR}
                                   ${MOTIF_INCLUDE_DIR}
-                     )
+                       )
 
 
 # ===================================================================
