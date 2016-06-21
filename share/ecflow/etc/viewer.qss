@@ -187,6 +187,10 @@ QPlainTextEdit[readOnly="true"] {
     background-color: rgb(245,245,245);
 }
 
+QTextEdit[readOnly="true"] {
+    background-color: rgb(245,245,245);
+}
+
 QLineEdit[readOnly="true"] { 
     background-color: rgb(245,245,245);
 }
@@ -252,8 +256,15 @@ QScrollArea[editor="1"] {
 QWidget[editorArea="1"] {
     background-color: rgb(245,244,244);
 } 
-    
-   
+
+/*----------------------------
+  Query
+------------------------------*/
+
+QWidget[attrArea="1"] {
+    background-color: rgb(245,244,244);
+}
+
 /*----------------------------
   Dock widget
 ------------------------------*/

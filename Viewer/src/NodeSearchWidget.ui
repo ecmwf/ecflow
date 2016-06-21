@@ -25,7 +25,16 @@
         <property name="spacing">
          <number>4</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -68,14 +77,14 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0">
      <item>
       <widget class="QPushButton" name="findPb_">
        <property name="text">
         <string>Search</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
        </property>
       </widget>
@@ -95,6 +104,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="showLabel_">
+       <property name="text">
+        <string>Show:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QToolButton" name="defPanelTb_">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -103,13 +119,29 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>...</string>
+        <string>Editor</string>
        </property>
        <property name="checkable">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="checked">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="queryPanelTb_">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Query</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -150,8 +182,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

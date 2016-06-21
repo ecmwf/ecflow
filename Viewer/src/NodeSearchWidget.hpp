@@ -12,6 +12,8 @@
 
 #include <QAbstractItemModel>
 #include <QDialog>
+#include <QSettings>
+#include <QTime>
 #include <QWidget>
 
 #include "ServerFilter.hpp"
@@ -34,11 +36,15 @@ public:
     void setServerFilter(ServerFilter*);
     void setRootNode(VInfo_ptr);
 
+    void writeSettings(QSettings &settings);
+    void readSettings(const QSettings &settings);
+
 public Q_SLOTS:
 	void slotStop();
 
 protected Q_SLOTS:
-	void slotShowDefPanel(bool);
+    void slotShowDefPanel(bool);
+    void slotShowQueryPanel(bool);
 	void slotFind();
 	void slotClose();
 	void slotQueryStarted();
@@ -59,6 +65,7 @@ private:
 	NodeQueryEngine* engine_;
 	NodeQueryResultModel* model_;
 	bool columnsAdjusted_;
+    QTime elapsed_;
 };
 
 #endif /* VIEWER_SRC_NODESEARCHWIDGET_HPP_ */

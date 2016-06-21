@@ -22,7 +22,7 @@
 #include "VProperty.hpp"
 #include "VSettings.hpp"
 
-StringMatchMode::Mode NodeQueryStringOption::defaultMatchMode_=StringMatchMode::WildcardMatch;
+StringMatchMode::Mode NodeQueryStringOption::defaultMatchMode_=StringMatchMode::ContainsMatch;
 bool NodeQueryStringOption::defaultCaseSensitive_=false;
 
 #define _UI_NODEQUERY_DEBUG
@@ -83,13 +83,15 @@ NodeQueryOption* NodeQueryOptionFactory::create(VProperty *p)
 //
 //===============================================
 
-NodeQueryOption::NodeQueryOption(VProperty* p)
+NodeQueryOption::NodeQueryOption(VProperty* p) : ignoreIfAny_(false)
 {
     type_=p->param("type");
     name_=p->name();
     label_=p->param("label");
     if(label_.isEmpty())
         label_=name_;
+
+    ignoreIfAny_=(p->param("ignoreIfAny") == "true")?true:false;
 }
 
 void NodeQueryOption::build(NodeQuery* query)
@@ -168,8 +170,10 @@ void NodeQueryOption::build(NodeQuery* query)
                 opLst << op;
                 Q_ASSERT(op);
             }
-
-            query->attrGroup_[p->name()] = new NodeQueryAttrGroup(p->name(),typeLst,opLst);
+            if(p->name() == "variable")    
+                query->attrGroup_[p->name()] = new NodeQueryVarAttrGroup(p->name(),typeLst,opLst);
+            else
+                query->attrGroup_[p->name()] = new NodeQueryAttrGroup(p->name(),typeLst,opLst);
        }
    }
 
@@ -310,12 +314,20 @@ NodeQueryComboOption::NodeQueryComboOption(VProperty* p) :
     if(valueLabels_.count() == 1 && valueLabels_[0].isEmpty())
         valueLabels_=values_;
 
+    Q_ASSERT(values_.count() >0);
     Q_ASSERT(valueLabels_.count() == values_.count());
+    
+    value_=p->defaultValue().toString();
+    if(!values_.contains(value_))
+        value_=values_[0];
 }
 
-QString NodeQueryComboOption::query(QString op) const
+QString NodeQueryComboOption::query() const
 {
     QString s;
+    if(ignoreIfAny_ && value_ == "any")
+        return s;
+
     if(!value_.isEmpty())
     {
         s= name_ + " = " + " \'" + value_ + "\'";

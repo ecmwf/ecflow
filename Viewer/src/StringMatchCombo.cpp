@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,14 +10,31 @@
 
 #include "StringMatchCombo.hpp"
 
+#include <QMenu>
 #include <QVariant>
+
+StringMatchTb::StringMatchTb(QWidget* parent) : QToolButton(parent)
+{
+   QIcon ic(QPixmap(":/viewer/edit.svg")); 
+   setIcon(ic);
+   setAutoRaise(true);
+   QMenu *menu=new QMenu(this);
+   menu->addAction("Contains"); //,StringMatchMode::ContainsMatch);
+   menu->addAction("Matches"); //,StringMatchMode::WildcardMatch);
+   menu->addAction("Regexp"); //,StringMatchMode::RegexpMatch);
+   setMenu(menu);
+   setPopupMode(QToolButton::InstantPopup);
+}
+    
+
 
 StringMatchCombo::StringMatchCombo(QWidget* parent) : QComboBox(parent)
 {
 	//addItem("Exact match","=");
-	addItem("Contains",StringMatchMode::ContainsMatch);
-	addItem("Matches",StringMatchMode::WildcardMatch);
-	addItem("Regexp",StringMatchMode::RegexpMatch);
+	QIcon ic(QPixmap(":/viewer/close.svg"));
+    addItem(ic,"Contains",StringMatchMode::ContainsMatch);
+	addItem(ic,"Matches",StringMatchMode::WildcardMatch);
+	addItem(ic,"Regexp",StringMatchMode::RegexpMatch);
 
 	setCurrentIndex(1);
 }

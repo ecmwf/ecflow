@@ -21,6 +21,7 @@ int NodeQuery::defaultMaxNum_=50000;
 
 #define _UI_NODEQUERY_DEBUG
 
+ 
 QString NodeQueryAttrGroup::query() const
 {
     QStringList lst;
@@ -45,6 +46,30 @@ QString NodeQueryAttrGroup::query() const
     return QString();
 }
 
+bool NodeQueryVarAttrGroup::hasType(VAttributeType* t) const 
+{
+    if(types_.contains(t))
+    {
+        Q_FOREACH(NodeQueryOption* op,options_)
+        {
+            if(op->name() == "var_type")
+            {
+                QString v=op->valueAsString();
+#ifdef _UI_NODEQUERY_DEBUG
+                UserMessage::qdebug("NodeQueryVarAttrGroup::hasType  var_type=" + v);
+#endif
+                if(v == "any")
+                    return true;
+                else
+                    return (v == t->name());
+            }
+        }
+        
+        Q_ASSERT(false);
+    }
+    
+    return false;
+}
 
 NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
   name_(name),
@@ -222,6 +247,12 @@ QStringList NodeQuery::attrSelection() const
     return op->selection();
 }
 
+NodeQueryListOption* NodeQuery::stateOption() const
+{
+    NodeQueryOption* op=option("state");
+    Q_ASSERT(op);
+    return op->isList();
+}
 
 void NodeQuery::buildQueryString()
 {
@@ -315,6 +346,7 @@ void NodeQuery::buildQueryString()
     qDebug() << extQuery_;
 #endif
 
+    //SQL-like query
     sqlQuery_.clear();
     QStringList selectPart;
     QStringList fromPart;
@@ -324,8 +356,9 @@ void NodeQuery::buildQueryString()
     nodeParts << "node" << "type" << "state" << "flag";
     Q_FOREACH(QString s,nodeParts)
     {
-        if(!extQuery_.value(s).isEmpty())
-            wherePart << extQuery_.value(s);
+        QString vs=extQuery_.value(s);
+        if(!vs.isEmpty())
+            wherePart << vs;
     }
     selectPart << "node";
 
@@ -335,9 +368,10 @@ void NodeQuery::buildQueryString()
         NodeQueryAttrGroup* grp=attrGroup_.value(attrName);
         Q_ASSERT(grp);
         selectPart << grp->name();
-
+        selectPart.removeOne("node");
         QString grpPart=grp->query();
-        wherePart << grpPart;
+        if(grpPart != grp->name())
+            wherePart << grpPart;
     }
 
     sqlQuery_+=" " + selectPart.join(", ");
@@ -347,7 +381,7 @@ void NodeQuery::buildQueryString()
     {
         if(servers_.size() ==1 && !rootNode_.empty())
         {
-            fromPart << QString::fromStdString(rootNode_);
+            fromPart << servers_[0] + ":/" + QString::fromStdString(rootNode_);
         }
         else
             fromPart=servers_;
@@ -356,134 +390,22 @@ void NodeQuery::buildQueryString()
     }
     else
     {
-        sqlQuery_+=" FROM any";
+        //sqlQuery_+=" FROM *";
     }
 
     if(wherePart.count() > 0)
         sqlQuery_+=" WHERE " + wherePart.join(" and ");
 
+    if(!ignoreMaxNum_)
+    {
+        sqlQuery_+=" LIMIT " + QString::number(maxNum_);
+    }
+
+
 #ifdef _UI_NODEQUERY_DEBUG
     UserMessage::debug("<-- NodeQuery::buildQueryString");
 #endif
 }
-
-QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
-{
-	QString str;
-	QString bg=bgCol.name();
-
-    //Multiline version
-	if(multi)
-	{
-			str="<table width=\"100%\" cellPadding=\"2\">";
-			if(!extQuery_.value("scope").isEmpty())
-				str+="<tr><td width=\"" + QString::number(firstColWidth) + "\" bgcolor=\"" + bg +
-				       "\">scope</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("scope") + "</tr></td>";
-
-            if(nodeQueryPart().isEmpty())
-            {
-                QString v="ALL";
-                if(!str.contains("nodes</td>"))
-                    str+="<tr><td bgcolor=\"" + bg + "\">nodes</td><td bgcolor=\"" +
-                            bg + "\">"+ v;
-                else
-                    str+=" and<br> " + v;
-            }
-            else
-            {
-                QStringList nodeParts;
-                nodeParts << "node" << "type" << "state" << "flag";
-
-                Q_FOREACH(QString s,nodeParts)
-                {
-                    if(!extQuery_.value(s).isEmpty())
-                    {
-                        if(!str.contains("nodes</td>"))
-                            str+="<tr><td bgcolor=\"" + bg + "\">nodes</td><td bgcolor=\"" + bg + "\">"+ extQuery_.value(s);
-                        else
-                            str+=" and<br> " + extQuery_.value(s);
-                    }
-                }
-            }
-
-			if(str.contains("nodes</td>"))
-				str+="</td></tr>";
-
-            if(!extQuery_.value("attr").isEmpty())
-            {              
-                str+="<tr><td bgcolor=\"" + bg + "\">attributes</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("attr") +"</td></tr>";
-            }
-
-			if(!extQuery_.value("options").isEmpty())
-			{				
-				str+="<tr><td bgcolor=\"" + bg + "\">options</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("options") +"</td></tr>";
-			}
-
-			str+="</table>";
-		}
-
-	else
-	{
-		QString css;
-		css = "<style type=\"text/css\">";
-		css += "table.tbl {border-width: 1px;border-style: solid;border-color: \"#AAAAAA\";margin-top: 0px;margin-bottom: 0px;color: black;}";
-		//css += "table.tbl td {padding: 3px;}";
-		//css += "table.tbl th {padding: 3px;}";
-		css+="</style>";
-
-		QString bgDark=bgCol.darker(108).name();
-		str="<table cellSpacing=\"0\" class=\"tbl\">";
-
-		if(!extQuery_.value("scope").isEmpty())
-			str+="<tr><td bgcolor=\"" + bg + "\">&nbsp;scope:&nbsp;</td>" +
-			"<td bgcolor=\"" + bgDark + "\">&nbsp;" + extQuery_.value("scope") + "&nbsp;</td><td>&nbsp;&nbsp;</td>";
-
-        if(nodeQueryPart().isEmpty())
-        {
-            QString v="ALL";
-            if(!str.contains("nodes"))
-                str+="&nbsp;<td  bgcolor=\"" + bg + "\">&nbsp;nodes:&nbsp;</td><td bgcolor=\"" +
-                        bgDark + "\">&nbsp;"+ v;
-            else
-                str+=" and " + v;
-        }
-        else
-        {
-            QStringList nodeParts;
-            nodeParts << "node" << "type" << "state" << "flag";
-            Q_FOREACH(QString s,nodeParts)
-            {
-                if(!extQuery_.value(s).isEmpty())
-                {
-                    if(!str.contains("nodes"))
-                        str+="&nbsp;<td  bgcolor=\"" + bg + "\">&nbsp;nodes:&nbsp;</td><td bgcolor=\"" + bgDark + "\">&nbsp;"+ extQuery_.value(s);
-                    else
-                        str+=" and " + extQuery_.value(s);
-                }
-            }
-        }
-
-		if(str.contains("nodes:"))
-			str+="&nbsp;</td></td><td>&nbsp;&nbsp;</td>";
-
-		if(!extQuery_.value("options").isEmpty())
-		{
-			//if(!str.isEmpty())
-			//	str+=" | ";
-			str+="&nbsp;<td bgcolor=\"" + bg + "\"> &nbsp;options:&nbsp;</td><td bgcolor=\"" + bgDark + "\">&nbsp;" + extQuery_.value("options") + "&nbsp;</td>";
-		}
-
-		if(str.contains("<tr>"))
-			str+="</tr>";
-
-		str+="</table>";
-
-		//str=css+str;
-	}
-
-	return str;
-}
-
 
 void NodeQuery::load(VSettings* vs)
 {

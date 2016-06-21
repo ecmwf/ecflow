@@ -13,6 +13,9 @@
 
 #include "VNode.hpp"
 
+#include <QDebug>
+
+//#define  _UI_VATTRIBUTE_DEBUG
 
 VAttribute::VAttribute(VNode* parent,int index) : VItem(parent), type_(0), index_(index)
 {
@@ -93,6 +96,13 @@ bool VAttribute::value(const std::string& key,std::string& val) const
         return false;
 
     int idx=type_->searchKeyToDataIndex(key);
+
+#ifdef _UI_VATTRIBUTE_DEBUG
+    qDebug() << QString::fromStdString(key) << QString::fromStdString(val);
+    qDebug() << "  data=" << data_;
+    qDebug() << "  idx=" << idx;
+#endif
+
     if(idx != -1)
     {
         val=data_[idx].toStdString();

@@ -22,18 +22,19 @@
 
 class NodeQuery;
 class NodeQueryOption;
+class NodeQueryListOption;
 class VAttributeType;
 
 class NodeQueryAttrGroup
 {
-friend class NodeQuery;
+//friend class NodeQuery;
 
 public:
     NodeQueryAttrGroup(QString name,QList<VAttributeType*> types,QList<NodeQueryOption*> options) :
         name_(name), types_(types), options_(options) {}
 
     QString name() const {return name_;}
-    bool hasType(VAttributeType* t) const {return types_.contains(t);}
+    virtual bool hasType(VAttributeType* t) const {return types_.contains(t);}
     QList<NodeQueryOption*> options() const {return options_;}
     QString query() const;
 
@@ -41,6 +42,15 @@ protected:
     QString name_;
     QList<VAttributeType*> types_;
     QList<NodeQueryOption*> options_;
+};
+
+class NodeQueryVarAttrGroup : public  NodeQueryAttrGroup
+{
+public:
+    NodeQueryVarAttrGroup(QString name,QList<VAttributeType*> types,QList<NodeQueryOption*> options) :
+      NodeQueryAttrGroup(name,types,options) {}
+    
+    bool hasType(VAttributeType*) const;
 };
 
 class NodeQuery
@@ -65,6 +75,7 @@ public:
     QString attrQueryPart(VAttributeType*) const;
     bool hasAttribute(VAttributeType*) const;
     QStringList attrSelection() const;
+    NodeQueryListOption* stateOption() const;
 
 	void setRootNode(const std::string& rootNode) {rootNode_=rootNode;}
 	const std::string& rootNode() const {return rootNode_;}
@@ -72,7 +83,6 @@ public:
 	QStringList servers() const {return servers_;}
 	bool hasServer(const std::string& name) const;
 
-	QString extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const;
 	void buildQueryString();
 
 	int maxNum() const {return maxNum_;}

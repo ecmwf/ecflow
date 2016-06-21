@@ -188,18 +188,18 @@
 
              "oper" : {
                  "pattern" : "(=|~)",                       
-                 "colour"  : "rgb(0,110,40)"                                   
+                 "colour"  : "rgb(0,0,0)"
              }, 
              "logical" : {
                 "pattern" : "(or|and)",                       
                 "colour"  : "rgb(40,40,40)",               
                 "bold"    : "false"
-             }, 
-             "keyword" : {
-                "pattern" : "(SELECT|FROM|WHERE|scope|scope:|nodes|nodes:|options|options:|attributes:|attributes)",
-                "colour"  : "rgb(73,73,73)",               
-                "bold"    : "true"
-             }, 
+             },             
+            "select" : {
+                "pattern" : "(node|date|event|label|late|limit|limiter|meter|repeat|time|trigger|variable)",
+                "colour"  : "rgb(0,0,200)",
+                "bold"    : "false"
+             },
              "node" : {
               "pattern" : "\\b(node_path|node_name)\\b",                       
               "colour"  : "rgb(102,43,130)",
@@ -221,31 +221,27 @@
               "bold"    : "true"
             }, 
              "attr" : {
-              "pattern" : "\\b(date|date_name|event|event_name|label|label_name|label_value|late|late_name|limit|limit_name|limit_value|limit_max|limiter|limiter_name|meter|meter_name|repeat|repeat_name|repeat_value|time|time_name|trigger|trigger_expression|variable|variable_name|variable_value)\\b",                       
+              "pattern" : "\\b(date_name|event_name|event_value|label_name|label_value|late_name|limit_name|limit_value|limit_max|limiter_name|meter_name|meter_value|repeat_name|repeat_value|time_name|trigger_expression|var_type|var_name|var_value)\\b",
               "colour"  : "rgb(102,43,130)",
               "bold"    : "true"
             },   
-            "server" : {
-              "pattern" : "\\b(servers|root_node)\\b",                       
-              "colour"  : "rgb(102,43,130)",
-              "bold"    : "false"
-            },             
-           "option" : {
-               "pattern" : "\\b(max_results|case_sensitive|case_insensitive)\\b",                       
-               "colour"  : "rgb(102,43,130)"
-           }, 
-           "int" : {
-               "pattern" : "(\\d+)",                       
-               "colour"  : "rgb(0,110,40)"
-           },            
-            "string" : {
-               "pattern" : "(\"[^\"]*\"|'[^']*')",                       
-               "colour"  : "rgb(0,0,230)"
-           },  
-            "any" : {
-               "pattern" : "(ANY)",                       
-               "colour"  : "rgb(16,16,16)"
-           }                                                                                  
-        }       
+            "int" : {
+               "pattern" : "\\b(\\d+)",
+               "colour"  : "rgb(128,128,0)"
+            },
+            "quoted" : {
+                "pattern" : "(\"[^\"]*\"|'[^']*')",
+                "colour"  : "rgb(0,110,20)"
+                },
+            "text" : {
+                "pattern" : "FROM\\s(.*)\\s(?=WHERE\\s.*LIMIT)",
+                "colour"  : "rgb(191,3,3)"
+                },
+            "keyword" : {
+                "pattern" : "(SELECT|FROM|WHERE|LIMIT)",
+                "colour"  : "rgb(73,73,73)",
+                "bold"    : "true"
+          }
+       }
 }
 

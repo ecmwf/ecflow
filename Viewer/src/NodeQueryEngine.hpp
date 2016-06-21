@@ -41,6 +41,8 @@ public:
     bool runQuery(NodeQuery* query,QStringList allServers);
 	void stopQuery();
 	int scannedCount() const {return scanCnt_;}
+    bool wasStopped() const {return stopIt_;}
+    bool wasMaxReached() const {return maxReached_;}
 
 protected Q_SLOTS:
 	void slotFinished();
@@ -70,8 +72,8 @@ private:
 	int chunkSize_;
 	QList<NodeQueryResultTmp_ptr> res_;
 	bool stopIt_;
+    bool maxReached_;
 	VNode* rootNode_;
-
 };
 
 class NodeFilterEngine

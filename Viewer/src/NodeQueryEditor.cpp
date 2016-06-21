@@ -90,7 +90,11 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     rootLe_->setClearButtonEnabled(true);
 #endif
 
-	//-------------------------
+    Q_ASSERT(tab_->count() == 2);
+    nodeTabText_=tab_->tabText(0);
+    attrTabText_=tab_->tabText(1);
+
+    //-------------------------
     // Query display
 	//-------------------------
 
@@ -181,6 +185,8 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
 
     //Attributes
+
+    attrPanel_->setProperty("attrArea","1");
     Q_FOREACH(NodeQueryAttrGroup* aGrp,query_->attrGroup().values())
     {
         Q_ASSERT(aGrp);
@@ -276,6 +282,7 @@ void NodeQueryEditor::init()
 	checkGuiState();
 }
 
+#if 0
 void NodeQueryEditor::setQueryTeCanExpand(bool b)
 {
     return;
@@ -290,14 +297,13 @@ void NodeQueryEditor::setQueryTeCanExpand(bool b)
 		adjustQueryTe();
 	}
 }
+#endif
 
-void NodeQueryEditor::toggleDefPanelVisible()
+void NodeQueryEditor::showDefPanel(bool b)
 {
-	bool b=isDefPanelVisible();
-	scopeBox_->setVisible(!b);
-//	filterBox_->setVisible(!b);
-	optionBox_->setVisible(!b);
-    tab_->setVisible(!b);
+    scopeBox_->setVisible(b);
+    optionBox_->setVisible(b);
+    tab_->setVisible(b);
 }
 
 bool NodeQueryEditor::isDefPanelVisible() const
@@ -305,19 +311,23 @@ bool NodeQueryEditor::isDefPanelVisible() const
 	return scopeBox_->isVisible();
 }
 
+void NodeQueryEditor::showQueryPanel(bool b)
+{
+    queryLabel_->setVisible(b);
+    queryTe_->setVisible(b);
+}
+
+bool NodeQueryEditor::isQueryPanelVisible() const
+{
+    return queryTe_->isVisible();
+}
+
 void NodeQueryEditor::slotAdvMode(bool b)
 {
-//	filterBox_->setVisible(!b);
+#if 0
+    //	filterBox_->setVisible(!b);
 	queryTe_->setReadOnly(!b);
-
-	if(b)
-	{
-		adjustQueryTe(6);
-	}
-	else
-	{
-		adjustQueryTe();
-	}
+#endif
 }
 
 void NodeQueryEditor::slotMaxNum(int v)
@@ -427,6 +437,16 @@ void NodeQueryEditor::checkGuiState()
 
 	rootLabel_->setEnabled(oneServer);
 	rootLe_->setEnabled(oneServer);
+
+    QString t=nodeTabText_;
+    if(!query_->nodeQueryPart().isEmpty())
+      t+="*";
+    tab_->setTabText(0,t);
+
+    t=attrTabText_;
+    if(!query_->attrQueryPart().isEmpty())
+        t+="*";
+      tab_->setTabText(1,t);
 }
 
 void NodeQueryEditor::updateQueryTe()
@@ -434,58 +454,7 @@ void NodeQueryEditor::updateQueryTe()
 	query_->buildQueryString();
 
 	QColor bg(241,241,241);
-    //setQueryTe(query_->extQueryHtml(true,bg,65));
-    setQueryTe(query_->sqlQuery());
-}
-
-void NodeQueryEditor::setQueryTe(QString s)
-{
-    queryTe_->setHtml(s);
-    return;
-    int rowNum=s.count("<tr>")+s.count("<br>")+1;
-	if(rowNum==0 && !s.isEmpty())
-		rowNum=1;
-
-	int oldRowNum=queryTe_->toPlainText().count("\n")+1;
-	if(oldRowNum==0 && !queryTe_->toPlainText().isEmpty())
-		oldRowNum=1;
-
-	queryTe_->setHtml(s);
-
-	if(!queryTeCanExpand_)
-	{
-        if(oldRowNum != rowNum && (oldRowNum > 3 || rowNum > 3))
-		{
-			QFont f;
-			QFontMetrics fm(f);
-
-			queryTe_->setFixedHeight((fm.height()+2)*rowNum+6);
-		}
-	}
-}
-
-void NodeQueryEditor::adjustQueryTe(int rn)
-{
-    return ;
-    int rowNum=0;
-	if(rn <= 0)
-	{
-		rowNum=queryTe_->toPlainText().count("\n")+1;
-	}
-	else
-	{
-		rowNum=rn;
-	}
-
-	if(rowNum < 3)
-		rowNum=3;
-
-	if(!queryTeCanExpand_)
-	{
-		QFontMetrics fm(queryTe_->font());
-
-		queryTe_->setFixedHeight((fm.height()+2)*rowNum+6);
-	}
+    queryTe_->setHtml(query_->sqlQuery());
 }
 
 //------------------------------------------

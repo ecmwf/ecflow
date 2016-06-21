@@ -20,6 +20,9 @@ class NodeQueryAttributeTerm;
 class VAttributeType;
 class VProperty;
 class VSettings;
+class NodeQueryStringOption;
+class NodeQueryListOption;
+class NodeQueryComboOption;
 
 class NodeQueryOption
 {
@@ -29,6 +32,7 @@ public:
     QString type() const {return type_;}
     QString name() const {return name_;}
     QString label() const {return label_;}
+    virtual QString valueAsString() const=0;
 
     virtual void swap(const NodeQueryOption*)=0;
     virtual QString query() const {return QString();}
@@ -36,12 +40,17 @@ public:
     virtual void load(VSettings*)=0;
     virtual void save(VSettings*)=0;
 
+    virtual NodeQueryStringOption* isString() const {return NULL;}
+    virtual NodeQueryListOption* isList() const {return NULL;}
+    virtual NodeQueryComboOption* isCombo() const {return NULL;}
+
     static void build(NodeQuery*);
 
 protected:
     QString type_;
     QString name_;
     QString label_;
+    bool ignoreIfAny_;
 
     //QStringList values_;
     //QStringList valueLabels_;
@@ -55,6 +64,7 @@ public:
     void swap(const NodeQueryOption*);
 
     QString value() const {return value_;}
+    QString valueAsString() const {return value();}
     const StringMatchMode&  matchMode() const {return matchMode_;}
     QString matchOperator() const {return QString::fromStdString(matchMode_.matchOperator());}
     bool caseSensitive() const {return caseSensitive_;}
@@ -67,6 +77,8 @@ public:
     QString query() const;
     void load(VSettings*);
     void save(VSettings*);
+
+    NodeQueryStringOption* isString() const {return const_cast<NodeQueryStringOption*>(this);}
 
 protected:
     QString value_;
@@ -88,10 +100,13 @@ public:
     void load(VSettings*);
     void save(VSettings*);
 
+    QString valueAsString() const {return QString();}
     QStringList values() const {return values_;}
     QStringList valueLabels() const {return valueLabels_;}
     void setSelection(QStringList lst) {selection_=lst;}
     QStringList selection() const {return selection_;}
+
+    NodeQueryListOption* isList() const {return const_cast<NodeQueryListOption*>(this);}
 
 protected:
     QStringList selection_;
@@ -106,7 +121,7 @@ public:
 
     void swap(const NodeQueryOption*);
 
-    QString query(QString op) const;
+    QString query() const;
     void load(VSettings*);
     void save(VSettings*);
 
@@ -114,6 +129,9 @@ public:
     QStringList valueLabels() const {return valueLabels_;}
     void setValue(QString);
     QString value() const {return value_;}
+    QString valueAsString() const {return value();}
+    
+    NodeQueryComboOption* isCombo() const {return const_cast<NodeQueryComboOption*>(this);}
 
 protected:
     QString value_;

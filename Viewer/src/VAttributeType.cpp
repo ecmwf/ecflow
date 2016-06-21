@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -32,16 +32,6 @@ std::map<std::string,VAttributeType*> VAttributeType::items_;
 std::vector<VAttributeType*> VAttributeType::types_;
 
 //#define _UI_ATTR_DEBUG
-
-class VGenvarAttribute : public VAttributeType
-{
-public:
-    explicit VGenvarAttribute(const std::string& n) : VAttributeType(n) {}
-    int num(const VNode *node);
-    bool getData(VNode *node,int row,int& size,QStringList& data);
-    bool exists(const VNode* vnode,QStringList) const;
-};
-
 
 VAttributeType::VAttributeType(const std::string& name) :
         VParam(name),
@@ -674,18 +664,32 @@ void VEventAttribute::getData(const Event& e,QStringList& data)
 //Generated Variables
 //================================
 
+class VGenvarAttribute : public VAttributeType
+{
+public:
+    explicit VGenvarAttribute(const std::string& n);
+    int num(const VNode *node);
+    bool getData(VNode *node,int row,int& size,QStringList& data);
+    bool exists(const VNode* vnode,QStringList) const;
+    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+    void getData(const Variable&,QStringList& data);
+};
+
+VGenvarAttribute::VGenvarAttribute(const std::string& n) : VAttributeType(n)
+{
+    dataCount_=3;
+    searchKeyToData_["var_name"]=NameIndex;
+    searchKeyToData_["var_value"]=ValueIndex;
+    searchKeyToData_["var_type"]=TypeIndex;
+}
+
+
 int VGenvarAttribute::num(const VNode *vnode)
 {
     return vnode->genVariablesNum();
-
-    /*node_ptr node=vnode->node();
-    if(node.get())
-    {
-        std::vector<Variable> genV;
-        node->gen_variables(genV);
-        return static_cast<int>(genV.size());
-    }
-    return 0;*/
 }
 
 bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
@@ -697,18 +701,12 @@ bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     std::vector<Variable> genV;
     vnode->genVariables(genV);
 
-    /*node_ptr node=vnode->node();
-    if(!node.get())
-            return false;
-
-    std::vector<Variable> genV;
-    node->gen_variables(genV);*/
-
     if(row >=0 && row < genV.size())
     {
-        data << qName_ <<
-                QString::fromStdString(genV.at(row).name()) <<
-                QString::fromStdString(genV.at(row).theValue());
+        getData(genV[row],data);
+        //data << qName_ <<
+        //        QString::fromStdString(genV.at(row).name()) <<
+        //        QString::fromStdString(genV.at(row).theValue());
 #ifdef _UI_ATTR_DEBUG
     UserMessage::debug("  data=" + data.join(",").toStdString());
 #endif
@@ -724,14 +722,7 @@ bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 bool VGenvarAttribute::exists(const VNode* vnode,QStringList data) const
 {
-    if(vnode->isServer())
-        return false;
-
-    node_ptr node=vnode->node();
-    if(!node)
-        return false;
-
-    if(data.count() != 3 && data[0] != qName_)
+    if(data.count() != dataCount_ && data[TypeIndex] != qName_)
         return false;
 
     std::vector<Variable> v;
@@ -739,11 +730,30 @@ bool VGenvarAttribute::exists(const VNode* vnode,QStringList data) const
 
     for(size_t i=0; i < v.size(); i++)
     {
-        if(v[i].name() == data[1].toStdString())
+        if(v[i].name() == data[NameIndex].toStdString())
            return true;
     }
 
     return false;
+}
+
+void VGenvarAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+{
+    std::vector<Variable> v;
+    vnode->genVariables(v);
+    for(size_t i=0; i < v.size(); i++)
+    {
+        QStringList data;
+        getData(v[i],data);
+        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+    }
+}
+
+void VGenvarAttribute::getData(const Variable& v,QStringList& data)
+{
+    data << qName_ <<
+            QString::fromStdString(v.name()) <<
+            QString::fromStdString(v.theValue());
 }
 
 //================================
@@ -826,13 +836,6 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 bool VVarAttribute::exists(const VNode* vnode,QStringList data) const
 {
-    if(vnode->isServer())
-        return false;
-
-    node_ptr node=vnode->node();
-    if(!node)
-        return false;
-
     if(data.count() != dataCount_ && data[TypeIndex] != qName_)
         return false;
 
@@ -848,6 +851,13 @@ bool VVarAttribute::exists(const VNode* vnode,QStringList data) const
     }
     else
     {
+        node_ptr node=vnode->node();
+        if(!node)
+            return false
+            
+            
+            ;
+        
         const std::vector<Variable>& v=node->variables();
         for(size_t i=0; i < v.size(); i++)
         {
@@ -862,13 +872,6 @@ bool VVarAttribute::exists(const VNode* vnode,QStringList data) const
 void VVarAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
 {
     if(vnode->isServer())
-        return;
-
-    node_ptr node=vnode->node();
-    if(!node)
-        return;
-
-    if(vnode->isServer())
     {
         std::vector<Variable> v;
         vnode->variables(v);
@@ -881,6 +884,10 @@ void VVarAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
     }
     else
     {
+        node_ptr node=vnode->node();
+        if(!node)
+            return;
+    
         const std::vector<Variable>& v=node->variables();
         for(size_t i=0; i < v.size(); i++)
         {

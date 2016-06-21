@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -29,6 +29,7 @@ NodeQueryEngine::NodeQueryEngine(QObject* parent) :
     query_(new NodeQuery("tmp")),
     parser_(NULL),
     stopIt_(false),
+    maxReached_(false),
     cnt_(0),
     scanCnt_(0),
     maxNum_(250000),
@@ -64,6 +65,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
         wait();
 
     stopIt_=false;
+    maxReached_=false;
     res_.clear();
     cnt_=0;
     scanCnt_=0;
@@ -113,10 +115,16 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
             return false;
 
         rootNode_=servers_.at(0)->vRoot()->find(query_->rootNode());
+        if(!rootNode_)
+        {
+            UserMessage::message(UserMessage::ERROR,true,
+                         "Error, the specified root node <u>does not</u> exist: " + query_->rootNode());
+            return false;
+        }
     }
 
     //The attribute parser
-    UserMessage::debug("   attr part: " + query_->attrQueryPart().toStdString());
+    UserMessage::debug("   full attr part: " + query_->attrQueryPart().toStdString());
 
     for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
         it != VAttributeType::types().end(); ++it)
@@ -124,6 +132,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
         if(query_->hasAttribute(*it))
         {
             QString attrPart=(query_->attrQueryPart(*it));
+            UserMessage::qdebug("    " + (*it)->name() + ": " + attrPart);
             BaseNodeCondition* ac=NodeExpressionParser::instance()->parseWholeExpression(attrPart.toStdString(), query->caseSensitive());
             if(!ac)
             {
@@ -133,19 +142,6 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
             attrParser_[*it]=ac;
          }
     }
-
-#if 0
-    //figure out what attribute types are there in the query
-    for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
-        it != VAttributeType::types().end(); ++it)
-    {
-        //TODO: make it work for attr types
-        if(query_->hasAttribute((*it)->name()))
-        {
-            attrTypes_ << *it;
-        }
-    }
-#endif
 
     //Notify the servers that the search began
     Q_FOREACH(ServerHandler* s,servers_)
@@ -214,7 +210,7 @@ void NodeQueryEngine::runRecursively(VNode *node)
             QMap<VAttributeType*,BaseNodeCondition*>::const_iterator it = attrParser_.constBegin();
             while (it != attrParser_.constEnd())
             {
-                qDebug() << "SEARCH" << it.key()->name();
+                //qDebug() << "SEARCH" << it.key()->name();
                 QList<VAttribute*> aLst;
                 it.key()->getSearchData(node,aLst);
 
@@ -258,7 +254,7 @@ void NodeQueryEngine::broadcastFind(VNode* node,QStringList attr)
     {
         NodeQueryResultTmp_ptr d(new NodeQueryResultTmp(node,attr));
         res_ << d;
-        qDebug() << "RES" << attr;
+        //qDebug() << "RES" << attr;
     }
     else
     {
@@ -274,6 +270,7 @@ void NodeQueryEngine::broadcastFind(VNode* node,QStringList attr)
     {
         broadcastChunk(true);
         stopIt_=true;
+        maxReached_=true;
     }
 }
 
@@ -292,6 +289,7 @@ void NodeQueryEngine::broadcastFind(VNode* node)
     {
         broadcastChunk(true);
         stopIt_=true;
+        maxReached_=true;
     }
 }
 

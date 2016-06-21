@@ -22,6 +22,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QToolButton>
+#include <QWidgetAction>
 
 NodeQueryOptionEdit::NodeQueryOptionEdit(QString optionId,QGridLayout* grid,QWidget* parent) :
     QObject(parent),
@@ -54,6 +55,10 @@ NodeQueryStringOptionEdit::NodeQueryStringOptionEdit(NodeQueryOption* option,QGr
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     le_->setClearButtonEnabled(true);
+    //QWidgetAction *wa=new QWidgetAction(this);
+    //StringMatchTb* tb=new StringMatchTb(parent_);
+    //wa->setDefaultWidget(tb);
+    //le_->addAction(wa,QLineEdit::LeadingPosition);
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
     le_->setPlaceholderText(tr("ANY"));

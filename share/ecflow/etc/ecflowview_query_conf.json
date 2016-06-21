@@ -37,8 +37,10 @@
             "event_value" : {
                 "type" : "combo",
                 "label" : "Event value",
-                "values" : "any|set|clear",
-                "labels" : "Any|Set|Clear"
+                "values" : "any|1|0",
+                "labels" : "Any|Set|Clear",
+                "default" : "any",
+                "ignoreIfAny" : "true"
             }
         },
         "label" : {
@@ -114,8 +116,10 @@
             "var_type" : {
                "type"  : "combo",
                "label" : "Variable type",
-               "values" : "var|genvar|all",
-               "labels" : "User variable|Generated variable|Any"
+               "values" : "any|var|genvar",
+               "labels" : "Any|User variable|Generated variable",
+               "default" : "any",
+               "ignoreIfAny" : "true"
             },
             "var_name" : {
                 "type" : "string",

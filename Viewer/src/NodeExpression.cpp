@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -27,23 +27,12 @@
 
 //#define _UI_NODEXPRESSIONPARSEER_DEBUG
 
-
 // -------------------------
 // Expression parser classes
 // -------------------------
 
 NodeExpressionParser* NodeExpressionParser::instance_=NULL;
 
-
-#if 0
-std::vector<std::string> NodeExpressionParser::tokens_;
-std::vector<std::string>::const_iterator NodeExpressionParser::i_;
-
-std::map<std::string,NodeExpressionParser::NodeType>  NodeExpressionParser::nameToNodeType_;
-std::map<NodeExpressionParser::NodeType,std::string>  NodeExpressionParser::nodeTypeToName_;
-std::map<std::string,NodeExpressionParser::AttributeType> NodeExpressionParser::nameToAttrType_;
-std::map<NodeExpressionParser::AttributeType,std::string> NodeExpressionParser::attrTypeToName_;
-#endif
 
 NodeExpressionParser* NodeExpressionParser::instance()
 {
@@ -67,22 +56,6 @@ NodeExpressionParser::NodeExpressionParser()
         nodeTypeToName_[it->second]=it->first;
     }
 
-#if 0
-    nameToAttrType_["attribute"]=NULL;//ATTRIBUTE;
-    nameToAttrType_["meter"]=METER;
-    nameToAttrType_["event"]=EVENT;
-    nameToAttrType_["repeat"]=REPEAT;
-    nameToAttrType_["trigger"]=TRIGGER;
-    nameToAttrType_["label"]=LABEL;
-    nameToAttrType_["time"]=TIME;
-    nameToAttrType_["date"]=DATE;
-    nameToAttrType_["late"]=LATE;
-    nameToAttrType_["limit"]=LIMIT;
-    nameToAttrType_["limiter"]=LIMITER;
-    nameToAttrType_["var"]=VAR;
-    nameToAttrType_["genvar"]=GENVAR;
-#endif
-
     QStringList attrNames;
     attrNames << "meter" << "event" << "repeat" << "trigger" << "label" << "time" << "date" << "late" << "limit" <<
                  "limit" << "limiter" << "var" << "genvar";
@@ -92,17 +65,6 @@ NodeExpressionParser::NodeExpressionParser()
         Q_ASSERT(t);
         nameToAttrType_[s.toStdString()]=t;
     }
-
-#if 0
-                 for(std::map<std::string,AttributeType>::const_iterator it=nameToAttrType_.begin();  it != nameToAttrType_.end(); ++it)
-    {
-        //attrTypeToName_[it->second]=it->first;
-        VAttributeType *t=VAttributeType::find(s.toStdString());
-        Q_ASSERT(t);
-        nameToAttrType[it->first]=t;
-    }
-#endif
-
 
     badTypeStr_="BAD";
     badAttributeStr_="BAD";
@@ -126,17 +88,6 @@ const std::string& NodeExpressionParser::typeName(const NodeType& type) const
     return badTypeStr_;
 }
 
-#if 0
-NodeExpressionParser::AttributeType NodeExpressionParser::toAttrType(const std::string &name) const
-{
-    std::map<std::string,AttributeType>::const_iterator it=nameToAttrType_.find(name);
-    if(it != nameToAttrType_.end())
-        return it->second;
-
-    return BADATTRIBUTE;
-}
-#endif
-
 VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
 {
     std::map<std::string,VAttributeType*>::const_iterator it=nameToAttrType_.find(name);
@@ -145,18 +96,6 @@ VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
 
     return NULL;
 }
-
-
-#if 0
-const std::string& NodeExpressionParser::toAttrName(const AttributeType& type) const
-{
-    std::map<AttributeType,std::string>::const_iterator it=attrTypeToName_.find(type);
-    if(it != attrTypeToName_.end())
-        return it->second;
-
-    return badAttributeStr_;
-}
-#endif
 
 bool NodeExpressionParser::isUserLevel(const std::string &str) const
 {
@@ -194,9 +133,10 @@ bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttr
     }
 
     // list of attributes that we can search in
-    else if (str == "var_name" || str =="var_value" ||
+    else if (str == "var_name" || str =="var_value" || str =="var_type" ||
         str == "label_name" || str == "label_value" ||
-        str == "meter_name" || str == "event_name" ||
+        str == "meter_name" ||  str == "meter_value" ||
+        str == "event_name" || str == "event_value" ||
         str == "date_name" || str == "time_name" ||
         str == "limit_name" || str == "limit_value" || str == "limit_max" ||
         str == "limiter_name" ||
@@ -209,13 +149,6 @@ bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttr
 
     return false;
 }
-
-#if 0
-bool NodeExpressionParser::isAttribute(const std::string &str) const
-{
-    return str == "attribute" || (nameToAttrType_.find(str) != nameToAttrType_.end());
-}
-#endif
 
 
 bool NodeExpressionParser::isAttributeState(const std::string &str) const
@@ -885,31 +818,6 @@ bool AttributeCondition::execute(VItem* item)
     Q_ASSERT(a->type());
 
     return a->type() == type_;
-
-#if 0
-    switch(type_)
-    {
-        case NodeExpressionParser::ATTRIBUTE:
-            return true;
-        case NodeExpressionParser::LABEL:
-            return a->type()->name() == "label";
-        case NodeExpressionParser::METER:
-            return a->type()->name() == "meter";
-        case NodeExpressionParser::EVENT:
-            return a->type()->name() == "event";
-        case NodeExpressionParser::LIMIT:
-            return a->type()->name() == "limit";
-        case NodeExpressionParser::REPEAT:
-            return a->type()->name() == "repeat";
-        case NodeExpressionParser::VAR:
-            return a->type()->name() == "var";
-
-        default:
-            break;
-    }
-
-    return false;
-#endif
 }
 
 //====================================================

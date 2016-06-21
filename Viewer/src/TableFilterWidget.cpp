@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,7 @@
 #include "FilterWidget.hpp"
 #include "NodeFilterDialog.hpp"
 #include "NodeQuery.hpp"
+#include "NodeQueryOption.hpp"
 #include "ServerFilter.hpp"
 #include "UserMessage.hpp"
 #include "VFilter.hpp"
@@ -68,7 +69,7 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 void TableFilterWidget::slotDefChanged()
 {
 	QColor bg(240,240,240);
-	queryTe_->setHtml(filterDef_->query()->extQueryHtml(false,bg,0));
+    queryTe_->setHtml(filterDef_->query()->sqlQuery());
 }
 
 void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
@@ -79,19 +80,20 @@ void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
 		QMenu *menu=new QMenu(this);
 		//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 
-//TODO
-#if 0
 		NodeStateFilter sf;
-		sf.setCurrent(q->stateSelection());
+        NodeQueryListOption* op=q->stateOption();
+        Q_ASSERT(op);
+        sf.setCurrent(op->selection());
 		VParamFilterMenu* sfm= new VParamFilterMenu(menu,&sf,"Status filter",
 				          VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
 
 		if(menu->exec(globalPos) != NULL)
 		{
-			q->setStateSelection(sf.currentAsList());
-			filterDef_->setQuery(q);
+            op->setSelection(sf.currentAsList());
+            //this will create deep copy so we can delet q in the end
+            filterDef_->setQuery(q);
 		}
-#endif
+
 		delete menu;
 	}
 

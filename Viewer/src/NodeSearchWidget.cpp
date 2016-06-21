@@ -29,6 +29,8 @@
 #include <QVBoxLayout>
 #include "NodeSearchWidget.hpp"
 
+#define _UI_NODESEARCHWIDGET_DEBUG
+
 //======================================================
 //
 // NodeQueryWidget
@@ -42,19 +44,28 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
 {
     setupUi(this);
 
-	//Query
-	QFont f;
-	QFontMetrics fm(f);
+    //--------------------
+    // Show/hide
+    //--------------------
 
     //Show hide def panel
-    defPanelTb_->setText("Editor <<");
-    connect(defPanelTb_,SIGNAL(clicked(bool)),
+    connect(defPanelTb_,SIGNAL(toggled(bool)),
            this,SLOT(slotShowDefPanel(bool)));
 
 	editor_->show();
 
-	connect(editor_,SIGNAL(queryEnabledChanged(bool)),
-			this,SLOT(slotQueryEnabledChanged(bool)));
+    //connect(editor_,SIGNAL(queryEnabledChanged(bool)),
+    //		this,SLOT(slotQueryEnabledChanged(bool)));
+
+    //Show hide query
+    connect(queryPanelTb_,SIGNAL(toggled(bool)),
+           this,SLOT(slotShowQueryPanel(bool)));
+
+    QFont showf;
+    showf.setBold(true);
+    showf.setPointSize(showf.pointSize()-1);
+    showLabel_->setFont(showf);
+    showLabel_->setText("<font color=\'#565656\'>Show:</font>");
 
     //Find button
     findPb_->setProperty("startSearch","1");
@@ -117,11 +128,7 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
 
     queryProgress_->hide();
 
-    //resW_->hide();
-	editor_->setQueryTeCanExpand(true);
     stopPb_->setEnabled(false);
-	//mainLayout_->setStretch(1,0);
-	//mainLayout_->setStretch(0,1);
 }
 
 NodeSearchWidget::~NodeSearchWidget()
@@ -139,18 +146,14 @@ void NodeSearchWidget::setRootNode(VInfo_ptr info)
 	editor_->setRootNode(info);
 }
 
-void NodeSearchWidget::slotShowDefPanel(bool)
+void NodeSearchWidget::slotShowDefPanel(bool b)
 {
-	editor_->toggleDefPanelVisible();
+    editor_->showDefPanel(b);
+}
 
-	if(editor_->isDefPanelVisible())
-	{
-		defPanelTb_->setText("Editor <<");
-	}
-	else
-	{
-		defPanelTb_->setText("Editor >>");
-	}
+void NodeSearchWidget::slotShowQueryPanel(bool b)
+{
+    editor_->showQueryPanel(b);
 }
 
 void NodeSearchWidget::slotQueryEnabledChanged(bool queryEnabled)
@@ -166,7 +169,9 @@ void NodeSearchWidget::slotQueryEnabledChanged(bool queryEnabled)
 
 void NodeSearchWidget::slotFind()
 {
+#ifdef _UI_NODESEARCHWIDGET_DEBUG
     UserMessage::debug("NodeSearchWidget::slotFind -->");
+#endif
 
     //Avoid double clicking
     if(!findPb_->isEnabled())
@@ -175,14 +180,8 @@ void NodeSearchWidget::slotFind()
          return;
     }
 
+#ifdef _UI_NODESEARCHWIDGET_DEBUG
     qDebug() << engine_->isRunning();
-
-#if 0
-    if(!resW_->isVisible())
-	{
-		resW_->show();
-		editor_->setQueryTeCanExpand(false);
-	}
 #endif
 
 	adjustColumns();
@@ -197,13 +196,17 @@ void NodeSearchWidget::slotFind()
     //We set the button state in advance as if the engine were running
     adjustButtonState(true);
 
+    elapsed_.start();
     if(!engine_->runQuery(editor_->query(),editor_->allServers()))
     {
+        elapsed_=QTime();
+
         //if we are here we could not start the query and we need to reset the button state
         adjustButtonState();
     }
-
+#ifdef _UI_NODESEARCHWIDGET_DEBUG
     UserMessage::debug("<-- NodeSearchWidget::slotFind");
+#endif
 }
 
 void NodeSearchWidget::slotStop()
@@ -211,7 +214,6 @@ void NodeSearchWidget::slotStop()
     //It is a blocking call!
     engine_->stopQuery();
     assert(!engine_->isRunning());
-
     adjustButtonState();
 }
 
@@ -223,22 +225,26 @@ void NodeSearchWidget::slotClose()
 
 void NodeSearchWidget::slotQueryStarted()
 {
+#ifdef _UI_NODESEARCHWIDGET_DEBUG
     UserMessage::debug("NodeSearchWidget::slotQueryStarted -->");
-
+#endif
     adjustButtonState();
 
     queryProgress_->setRange(0,0);
 	queryProgress_->show();
 
 	progressLabel_->setText("Search in progress ...");
-
+#ifdef _UI_NODESEARCHWIDGET_DEBUG
     UserMessage::debug("<-- NodeSearchWidget::slotQueryStarted");
+#endif
 }
 
 void NodeSearchWidget::slotQueryFinished()
 {
+#ifdef _UI_NODESEARCHWIDGET_DEBUG
     UserMessage::debug("NodeSearchWidget::slotQueryFinished -->");
     UserMessage::debug("  Search finished. Total node scanned: " + boost::lexical_cast<std::string>(engine_->scannedCount()));
+#endif
 
     adjustButtonState();
 
@@ -246,14 +252,27 @@ void NodeSearchWidget::slotQueryFinished()
 	queryProgress_->setRange(0,1);
 	queryProgress_->setValue(1);
 
-	progressLabel_->setText(QString::number(model_->rowCount()) + " items found");
+    QString s="<b>" + QString::number(model_->rowCount()) + "</b> items found in " +
+             QString::number(elapsed_.elapsed()*0.001,'f',1)  + " s";
 
-	adjustColumns();
+    QColor col(90,92,92);
+    if(engine_->wasMaxReached())
+    {
+        s+=" (stopped due to <b><u><font color=\'" + col.name() + "\'>maxnum reached!</font></u></b>)";
+    }
+    else if(engine_->wasStopped())
+    {
+        s+=" (query was <b><u><font color=\'" + col.name() + "\'>interrupted!</font></u></b>)";
+    }
+    progressLabel_->setText(s);
+    elapsed_=QTime();
 
+#ifdef _UI_NODESEARCHWIDGET_DEBUG
     qDebug() << engine_->isRunning();
-
     UserMessage::debug("<-- NodeSearchWidget::slotQueryFinished");
+#endif
 }
+
 
 void NodeSearchWidget::adjustButtonState()
 {
@@ -286,21 +305,49 @@ void NodeSearchWidget::adjustColumns()
 	{
 		columnsAdjusted_=true;
 
-    //We preset the column width. Setting it dynamically can be expensive
-	//for a large number of rows (> 1M)
-	QFont f;
-	QFontMetrics fm(f);
-	resTree_->setColumnWidth(0,fm.width("serverserverser"));
-	resTree_->setColumnWidth(1,fm.width("/suite/family1/family2/longtaskname1"));
-	resTree_->setColumnWidth(2,fm.width("suspended"));
-	resTree_->setColumnWidth(3,fm.width("family"));
-
-	//for(int i=0; i < model_->columnCount()-1; i++)
-	//	resTree_->resizeColumnToContents(i);
+        //We preset the column width. Setting it dynamically can be expensive
+        //for a large number of rows (> 1M)
+        QFont f;
+        QFontMetrics fm(f);
+        resTree_->setColumnWidth(0,fm.width("serverserverserse"));
+        resTree_->setColumnWidth(1,fm.width("/suite/family1/family2/longtaskname1"));
+        resTree_->setColumnWidth(2,fm.width("suspended"));
+        resTree_->setColumnWidth(3,fm.width("family"));
 	}
-
 }
 
+void NodeSearchWidget::writeSettings(QSettings &settings)
+{
+    settings.setValue("defPanel",editor_->isDefPanelVisible());
+    settings.setValue("queryPanel",editor_->isQueryPanelVisible());
+    QStringList colW;
+    for(int i=0; i < resTree_->model()->columnCount()-1; i++)
+        colW << QString::number(resTree_->columnWidth(i));
+
+    settings.setValue("resColumnWidth",colW);
+}
+
+void NodeSearchWidget::readSettings(const QSettings &settings)
+{
+    if(settings.contains("defPanel"))
+    {
+        defPanelTb_->setChecked(settings.value("defPanel").toBool());
+    }
+    if(settings.contains("queryPanel"))
+    {
+        queryPanelTb_->setChecked(settings.value("queryPanel").toBool());
+    }
+    if(settings.contains("resColumnWidth"))
+    {
+        QStringList lst=settings.value("resColumnWidth").toStringList();
+        for(int i=0; i < lst.count(); i++)
+            resTree_->setColumnWidth(i,lst[i].toInt());
+
+        if(lst.count() >= 3)
+            columnsAdjusted_=true;
+    }
+
+}
 
 
 

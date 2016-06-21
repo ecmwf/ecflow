@@ -33,8 +33,7 @@ NodeFilterDialog::NodeFilterDialog(QWidget *parent) :
     connect(cancelPb_,SIGNAL(clicked()),
     		this,SLOT(reject()));
 
-    editor_->setQueryTeCanExpand(true);
-
+    leftVb_->addStretch(1);
 
     //Read the qt settings
     readSettings();

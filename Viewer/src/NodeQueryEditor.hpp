@@ -52,8 +52,10 @@ public:
     void setQuery(NodeQuery*);
     NodeQuery* query() const;
     void setQueryTeCanExpand(bool);
-    void toggleDefPanelVisible();
     bool isDefPanelVisible() const;
+    void showDefPanel(bool);
+    bool isQueryPanelVisible() const;
+    void showQueryPanel(bool);
     int maxNum() const;
     QStringList allServers() const;
 
@@ -80,8 +82,6 @@ private:
 	void init();
 	void initAttr();
 	void updateQueryTe();
-	void adjustQueryTe(int rowNum=0);
-	void setQueryTe(QString);
 	void checkGuiState();
     void setAttributePanel(QStringList lst);
 
@@ -98,6 +98,8 @@ private:
     NodeQueryOptionEdit* flagEdit_;
     NodeQueryOptionEdit* attrEdit_;
     QMap<QString,QList<NodeQueryOptionEdit*> > attr_;
+    QString nodeTabText_;
+    QString attrTabText_;
 };
 
 #endif
