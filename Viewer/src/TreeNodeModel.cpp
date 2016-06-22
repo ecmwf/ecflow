@@ -505,7 +505,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
             Q_ASSERT(row >=0);
             VTreeServer *ts=root->server();
 
-            int serverAttrNum=root->attrNum();
+            int serverAttrNum=root->attrNum(atts_);
             return createIndex(serverAttrNum+row,0,ts);
 
 #if 0
@@ -524,7 +524,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 		//is its parent (i.e.. the grandparent)
         else if(VTreeNode *grandParentNode=parentNode->parent())
 		{
-			int num=grandParentNode->attrNum()+grandParentNode->indexOfChild(parentNode);
+            int num=grandParentNode->attrNum(atts_)+grandParentNode->indexOfChild(parentNode);
 
 			//qDebug() << "PARENT 2" << child << grandParentNode->node()->name().c_str() << num;
 			return createIndex(num,0,grandParentNode);

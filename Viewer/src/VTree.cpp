@@ -94,9 +94,6 @@ int VTreeNode::attrRow(int row,AttributeFilter *filter) const
 
 int VTreeNode::attrNum(AttributeFilter *filter) const
 {
-    if(!filter)
-       return attrNum_;
-
     if(!isAttrInitialised())
         attrNum_=vnode_->attrNum(filter);
 

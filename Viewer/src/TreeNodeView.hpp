@@ -82,6 +82,7 @@ protected:
     void adjustAttributeToolTip(bool);
     void expandAll(const QModelIndex& idx);
 	void collapseAll(const QModelIndex& idx);
+    void expandTo(const QModelIndex& idxTo);
 
     TreeNodeModel* model_;
 	ActionHandler* actionHandler_;

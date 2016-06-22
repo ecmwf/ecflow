@@ -179,27 +179,22 @@ void TreeNodeView::currentSelection(VInfo_ptr info)
 	QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
 	{
-		setCurrentIndex(idx);
+        setCurrentIndex(idx);
 		Q_EMIT selectionChanged(info);
 	}
 }
 
 void TreeNodeView::slotSetCurrent(VInfo_ptr info)
 {
-	QModelIndex idx=model_->infoToIndex(info);
-	if(idx.isValid())
-	{
-			setCurrentIndex(idx);
-			Q_EMIT selectionChanged(info);
-	}
+    currentSelection(info);
 }
 
 void TreeNodeView::selectFirstServer()
 {
 	QModelIndex idx=model_->index(0,0);
 	if(idx.isValid())
-	{
-		setCurrentIndex(idx);
+	{      
+        setCurrentIndex(idx);
 		VInfo_ptr info=model_->nodeInfo(idx);
 		Q_EMIT selectionChanged(info);
 	}
@@ -453,6 +448,29 @@ void TreeNodeView::collapseAll(const QModelIndex& idx)
 		collapseAll(chIdx);
 	}
 }
+
+void TreeNodeView::expandTo(const QModelIndex& idxTo)
+{
+    QModelIndex idx=model_->parent(idxTo);
+    QModelIndexList lst;
+
+    qDebug() << idxTo << idx;
+
+    while(idx.isValid())
+    {
+        lst.push_front(idx);
+        idx=idx.parent();
+    }
+
+    qDebug() << lst;
+
+    Q_FOREACH(QModelIndex d,lst)
+    {
+        expand(d);
+        qDebug() << "expand" << d << isExpanded(d);
+    }
+}
+
 
 //Save all
 void TreeNodeView::slotSaveExpand()
