@@ -61,13 +61,12 @@ message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
-option( ENABLE_PYTHON         "enable python interface"   ON  )
-option( ENABLE_UI             "Build ecFlowUI"            ON ) 
-option( ENABLE_GUI            "Build ecflowview"          ON  )
-option( ENABLE_ALL_TESTS      "This includes performance/migration/regression tests" OFF )
-option( ENABLE_UI_BACKTRACE   "Print a UI debug backtrace" OFF ) 
-
-
+option( ENABLE_PYTHON            "enable python interface"   ON )
+option( ENABLE_UI                "Build ecFlowUI"            ON ) 
+option( ENABLE_GUI               "Build ecflowview"          ON )
+option( ENABLE_ALL_TESTS         "This includes performance/migration/regression tests" OFF )
+option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace" OFF ) 
+option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" OFF )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -120,10 +119,11 @@ if(UI_BACKTRACE_EMAIL_ADDRESSES AND (NOT ENABLE_UI))
 endif()
 
 
-message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
-message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
-message( STATUS "ENABLE_UI             : ${ENABLE_UI}" )
-message( STATUS "ENABLE_ALL_TESTS      : ${ENABLE_ALL_TESTS}" )
+message( STATUS "ENABLE_PYTHON            : ${ENABLE_PYTHON}" )
+message( STATUS "ENABLE_GUI               : ${ENABLE_GUI}" )
+message( STATUS "ENABLE_UI                : ${ENABLE_UI}" )
+message( STATUS "ENABLE_ALL_TESTS         : ${ENABLE_ALL_TESTS}" )
+message( STATUS "ENABLE_STATIC_BOOST_LIBS : ${ENABLE_STATIC_BOOST_LIBS}" )
 
 if (ENABLE_UI)
     message( STATUS "ENABLE_UI_BACKTRACE   : ${ENABLE_UI_BACKTRACE}" )
@@ -158,12 +158,12 @@ endif()
 # Boost
 # =========================================================================================
 
-ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
-
 # Ecflow test require statics libs for boost < 1.59, otherwise get double free error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
-set(Boost_USE_STATIC_LIBS        ON)
+if ( ENABLE_STATIC_BOOST_LIBS )
+    set(Boost_USE_STATIC_LIBS ON)
+endif()
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
@@ -183,15 +183,7 @@ find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system threa
 #    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
 #    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
 
-
 #message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
-
-
-
-# =========================================================================================
-# Qt
-# =========================================================================================
-
 
 
 # =========================================================================================
@@ -265,14 +257,16 @@ install( FILES
             ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
          DESTINATION bin
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-)
+         COMPONENT binary
+       )
 
 # install documentation         
-install (FILES   
-             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
-         DESTINATION doc/ecflow
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-)
+#install( FILES   
+#             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
+#         DESTINATION doc/ecflow
+#         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+#         COMPONENT doc
+#       )
         
 # =========================================================================================
 # final
