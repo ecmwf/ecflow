@@ -466,13 +466,25 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
    flag().clear(ecf::Flag::JOBCMD_FAILED);
    requeue_labels(); // ECFLOW-195, requeue no longer resets labels on tasks, hence we do it at task run time.
 
+   theValue.clear();
+   if (findParentUserVariableValue(Str::ECF_NO_SCRIPT(),theValue)) {
+      // The script is based on the ECF_JOB_CMD
+      return non_script_based_job_submission(jobsParam);
+   }
+
+   return script_based_job_submission(jobsParam);
+}
+
+bool Submittable::script_based_job_submission(JobsParam& jobsParam)
+{
    try {
-      // Locate the ecf files corresponding to the jobs.
+      // Locate the ecf files corresponding to the task.
       EcfFile ecf_file = locatedEcfFile();
 
-      // Pre-process sms file (i.e expand includes, remove comments,manual) and perform
+      // Pre-process ecf file (i.e expand includes, remove comments,manual) and perform
       // variable substitution. This will then form the '.job' files.
       // If the job file already exist it is overridden
+      // The job file SHOULD be referenced in ECF_JOB_CMD
       try {
          const std::string& job_size = ecf_file.create_job( jobsParam );
 
@@ -483,7 +495,6 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
             set_state(NState::SUBMITTED, false, job_size );
             return true;
          }
-
          // Fall through job submission failed.
       }
       catch ( std::exception& e) {
@@ -499,7 +510,6 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
       }
    }
    catch (std::exception& e) {
-
       flag().set(ecf::Flag::NO_SCRIPT);
       std::stringstream ss; ss << "Submittable::submit_job_only: Script location failed for task " << absNodePath() << " :\n" << e.what() << "\n";
       jobsParam.errorMsg() += ss.str();
@@ -507,6 +517,30 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
       return false;
    }
 
+   flag().set(ecf::Flag::JOBCMD_FAILED);
+   std::string reason = " Job creation failed for task ";
+   reason += absNodePath();
+   reason += " could not create child process.";
+   jobsParam.errorMsg() += reason;
+   set_aborted_only( reason );
+   return false;
+}
+
+bool Submittable::non_script_based_job_submission(JobsParam& jobsParam)
+{
+   // No script(i.e .ecf file), hence it is assumed the ECF_JOB_CMD will call:
+   //  ECF_PASS=%ECF_PASS%;ECF_PORT=%ECF_PORT%;ECF_NODE=%ECF_NODE%;ECF_NAME=%ECF_NAME%;ECF_TRYNO=%ECF_TRYNO%;
+   //  ecflow_client --init %%;
+   //     . some user script, or in-line command, should use full path.;
+   //     ecflow_client (--meter,--event,--label);
+   //  ecflow_client --hcomplete
+
+   if (createChildProcess(jobsParam)) {
+      set_state(NState::SUBMITTED, false, Str::EMPTY()/*job size*/ );
+      return true;
+   }
+
+   // Fall through job submission failed.
    flag().set(ecf::Flag::JOBCMD_FAILED);
    std::string reason = " Job creation failed for task ";
    reason += absNodePath();

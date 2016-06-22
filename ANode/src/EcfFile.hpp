@@ -15,6 +15,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "NodeFwd.hpp"
+#include <boost/noncopyable.hpp>
+#include <set>
 
 /// This class is used in the pre-processing of files( .ecf or .usr or .man typically)
 /// It is used to to create the job file.
@@ -26,6 +28,7 @@
 /// When returning the manual we pre-process the files first
 ///
 /// However for testing purpose this capability may be retained.
+
 class EcfFile {
 public:
    enum ScriptType { ECF_FILE,      // Look for .ecf file, uses default algorithm to find %includes
@@ -77,13 +80,13 @@ public:
 	static void extract_used_variables(NameValueMap& used_variables_as_map,const std::vector<std::string> &script_lines);
 
 private:
+	friend class PreProcessor;
 	enum Type { SCRIPT, INCLUDE, MANUAL, COMMENT };
 	static std::string fileType(EcfFile::Type);
 
 	bool open_script_file(const std::string& file, EcfFile::Type, std::vector<std::string>& lines, std::string& errormsg) const;
-	bool preProcess(std::vector<std::string>& script_lines, std::string& errormsg);
+
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
-	std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
  	void variableSubstituition(JobsParam&);
  	const std::string&  doCreateJobFile(JobsParam&) const;
  	bool doCreateManFile(std::string& errormsg);
@@ -92,7 +95,7 @@ private:
  	void remove_nopp_end_tokens();
 
  	static int countEcfMicro(const std::string& line, const std::string& ecfMicro);
- 	static void dump_expanded_script_file(size_t i, const std::vector<std::string>& lines); // for DEBUG
+ 	static void dump_expanded_script_file(const std::vector<std::string>& lines); // for DEBUG
 
  	/// returns the extension, i.e for task->.ecf for alias->.usr, will throw if node_ is not task or alias
  	const std::string& get_extn() const;
@@ -113,6 +116,47 @@ private:
 	mutable std::string  job_size_;      // to be placed in log file during job submission
 	EcfFile::ScriptType    script_type_; // get script from a file, or from running a command
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
+};
+
+
+// This class is used in expanding(pre-processing) the includes.
+// The pre-processing is done in a depth first fashion (ECFLOW-673)
+class PreProcessor : private boost::noncopyable {
+public:
+   PreProcessor(EcfFile*);
+   ~PreProcessor();
+
+   bool preProcess(std::vector<std::string>& script_lines );
+   const std::string& error_msg() const { return error_msg_;}
+
+private:
+   // include pre-processing on the included file.
+   // Note: include directives _in_ manual/comment should he handled.
+   //       only include directives in %nopp/%end are ignored
+   void preProcess_line(const std::string& script_line );
+   void preProcess_includes(const std::string& script_line);
+   std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
+
+private:
+   EcfFile* ecfile_;
+
+   bool nopp_;
+   bool comment_;
+   bool manual_;
+
+   std::string pp_nopp_;
+   std::string pp_comment_;
+   std::string pp_manual_;
+   std::string pp_end_;
+   std::string ecf_micro_;                 // constant until ecfmicro changes, then reset
+
+   std::string error_msg_;
+   std::vector<std::string>& jobLines_;
+   std::vector<std::string> tokens_;       // re-use to save memory
+
+   typedef std::map<std::string, int > my_map;
+   my_map globalIncludedFileSet_;          // test for recursive includes, <no _of times it was included>
+   std::set<std::string> include_once_set_;
 };
 
 #endif

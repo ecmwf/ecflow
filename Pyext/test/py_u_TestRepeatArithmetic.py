@@ -19,9 +19,9 @@
 import ecflow
  
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) + ")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) + ")")
+    print("####################################################################")
  
     defs = ecflow.Defs()
     s1 = defs.add_suite("s1");
@@ -48,5 +48,5 @@ if __name__ == "__main__":
     t2.change_trigger("t1:YMD + 1 eq 20090201");   
     assert t2.evaluate_trigger(), "Expected trigger to evaluate. 20090131 + 1  == 20090201"
 
-    print "All Tests pass"
+    print("All Tests pass")
     

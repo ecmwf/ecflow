@@ -394,6 +394,11 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 	return doJobSubmission( as );
 }
 
+bool AlterCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,paths_);
+}
+
 const char* AlterCmd::arg()  { return CtsApi::alterArg();}
 const char* AlterCmd::desc() {
    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8

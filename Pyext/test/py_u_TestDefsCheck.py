@@ -16,15 +16,15 @@
 from ecflow import  Defs, Limit, InLimit, Client, debug_build
             
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
      
     defs = Defs()
     suite = defs.add_suite("s1");
     suite.add_task("t1").add_trigger("t2 == active)")   
     theCheckValue = defs.check();
-    print "Message: '" + theCheckValue + "'"
+    print("Message: '" + theCheckValue + "'")
     assert len(theCheckValue) != 0,  "Expected Error: triggers fail parse, miss-matched brackets in expression."
  
     # The number of tokens specified on the in-limit must be less than or equal to those specified on the LIMIT
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     family.add_inlimit( InLimit("disk","/s1",100) )
     family.add_task( "t1" );
     theCheckValue = defs.check();
-    print "Message: '" + theCheckValue + "'"
+    print("Message: '" + theCheckValue + "'")
     assert len(theCheckValue) != 0,  "Expected Error: since inlimit value('100') is greater than the LIMIT value('50')"  
 
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     family.add_inlimit( InLimit("disk","/s1",100) )
     family.add_task( "t1" );
     theCheckValue = defs.check();
-    print "Message: '" + theCheckValue + "'"
+    print("Message: '" + theCheckValue + "'")
     assert len(theCheckValue) != 0,  "Expected warning: since inlimit PATH(/s1:disk) reference a limit('disk') that does not exist"  
     
     # Add as extern and repeat the check
@@ -61,12 +61,12 @@ if __name__ == "__main__":
     family.add_inlimit( InLimit("disk","",100) )
     family.add_task( "t1" );
     theCheckValue = defs.check();
-    print "Message: '" + theCheckValue + "'"
+    print("Message: '" + theCheckValue + "'")
     assert len(theCheckValue) != 0,  "Expected warning: since inlimit SHOULD reference a limit('disk') somewhere UP parent hierarchy"  
     
     # Add as extern and repeat the check
     defs.add_extern("disk")
     assert len(defs.check()) == 0,  "Expected no warnings, since extern specified"  
     
-    print "All Tests pass"
+    print("All Tests pass")
     

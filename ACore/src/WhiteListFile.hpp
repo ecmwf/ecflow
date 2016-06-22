@@ -17,10 +17,11 @@
 
 #include <boost/noncopyable.hpp>
 #include <string>
-#include <set>
+#include <map>
+#include <vector>
 
 // ----------------------------------------------------------------
-// The whitelist file, is used to indicate users who are allowed
+// The whiteList file, is used to indicate users who are allowed
 // read/write access to the server when calling *user* commands
 
 class WhiteListFile : private boost::noncopyable {
@@ -28,8 +29,13 @@ public:
 	WhiteListFile();
 	~WhiteListFile();
 
-   bool allow_read_access(const std::string& user) const;
-   bool allow_write_access(const std::string& user) const;
+   bool verify_read_access(const std::string& user) const;
+   bool verify_write_access(const std::string& user) const;
+   bool verify_read_access(const std::string& user, const std::string& path) const;
+   bool verify_write_access(const std::string& user,const std::string& path) const;
+   bool verify_read_access(const std::string& user, const std::vector<std::string>& paths) const;
+   bool verify_write_access(const std::string& user,const std::vector<std::string>& paths) const;
+
    std::string dump_valid_users() const;
 
 	// Parse the file if any errors found return false and errorMsg
@@ -48,13 +54,17 @@ public:
 private:
 
 	bool validateVersionNumber(const std::string& line, std::string& errorMsg) const;
-	void add_user(const std::string& token);
+	bool add_user(std::vector<std::string>& tokens, std::string& error_msg);
+
+	typedef std::map<std::string,std::vector<std::string> > mymap;
+   bool verify_path_access(const std::string& user,const std::vector<std::string>& paths,const mymap&) const;
+   bool verify_path_access(const std::string& user,const std::string& path,const mymap&) const;
 
    bool all_users_have_read_access_;
    bool all_users_have_write_access_;
 	std::string white_list_file_;
-   std::set<std::string> users_with_read_access_;
-   std::set<std::string> users_with_write_access_;
+	mymap users_with_read_access_;   // user,paths
+	mymap users_with_write_access_;  // user,paths
 };
 
 #endif

@@ -106,6 +106,11 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	return PreAllocatedReply::ok_cmd();
 }
 
+bool RunNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,paths_);
+}
+
 const char* RunNodeCmd::arg()  { return CtsApi::runArg();}
 const char* RunNodeCmd::desc() {
    return  "Ignore triggers, limits, time or date dependencies, just run the Task.\n"

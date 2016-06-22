@@ -17,11 +17,11 @@ import os
  
 if __name__ == "__main__":
     
-    print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")"
-    print "PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep))
-    print "sys.path:   " + str(sys.path)
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
+    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
+    print("sys.path:   " + str(sys.path))
+    print("####################################################################")
  
     flag = ecflow.Flag()
     assert str(flag) == "", "expected empty string, for an empty flag"
@@ -44,10 +44,10 @@ if __name__ == "__main__":
                      ecflow.FlagType.zombie ,
                      ecflow.FlagType.no_reque 
                    ]
-    print "Flag list:"
-    for flg in flag_list: print "flag ",flag.type_to_string(flg)
-    print "My   list:"
-    for flg in my_flag_list: print "flag ",flag.type_to_string(flg)
+    print("Flag list:")
+    for flg in flag_list: print("flag ",flag.type_to_string(flg))
+    print("My   list:")
+    for flg in my_flag_list: print("flag ",flag.type_to_string(flg))
 
     assert len(flag_list) == len(my_flag_list), "expected flag list have changed"
     expected_flags = "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,no_script,killed,migrated,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque";
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     #===========================================================================
     for flg in my_flag_list:
         flag.set( flg )
-        print "current flag:",flag
+        print("current flag:",flag)
         assert flag.is_set( flg ),"expected flag %r to be set" % flag.type_to_string(flg)
 
     #===========================================================================
@@ -88,4 +88,4 @@ if __name__ == "__main__":
     assert str(flag) == "", "expected empty string, for an empty flag"
     
     #assert False
-    print "All tests pass"
+    print("All tests pass")

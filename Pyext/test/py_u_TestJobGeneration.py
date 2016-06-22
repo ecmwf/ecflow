@@ -47,28 +47,28 @@ def create_defs(ecf_home,task_vec):
 
 
 def delete_jobs(task_vec, ecf_home):
-    print "delete jobs"
+    print("delete jobs")
     for task in task_vec:
         the_job_file = ecf_home + task.get_abs_node_path() + ".job" + task.get_try_no()
         if os.path.exists(the_job_file) :
-            print "removing file " + the_job_file
+            print("removing file " + the_job_file)
             try: os.remove(the_job_file)
             except: pass
         man_file = ecf_home + task.get_abs_node_path() + ".man"  
         if os.path.exists(man_file) :
-            print "removing man_file " + man_file
+            print("removing man_file " + man_file)
             try: os.remove(man_file)
             except: pass
    
 def check_jobs(task_vec, ecf_home):
-    print "Check job file exists"
+    print("Check job file exists")
     for task in task_vec:
         variable = task.find_variable("ECF_DUMMY_TASK")
         if not variable.empty(): continue;
         the_job_file = ecf_home + task.get_abs_node_path() + ".job" + task.get_try_no()
       
         if os.path.exists(the_job_file) :
-            print "Found job file " + the_job_file
+            print("Found job file " + the_job_file)
         else:
             assert False, "Could not find job file " + the_job_file
 
@@ -76,46 +76,46 @@ def check_jobs(task_vec, ecf_home):
 
 
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
  
     workspace = Test.get_root_source_dir();
-    print workspace
+    print(workspace)
     
     ecf_home = workspace + "/Pyext/test/data/ECF_HOME"
     task_vec = TaskVec()
     defs = create_defs(ecf_home,task_vec)
-    print str(defs)
+    print(str(defs))
 
-    print "Generate jobs for *ALL* tasks, to default locations ECF_HOME/ECF_NAME.job0" 
-    print defs.check_job_creation()   
+    print("Generate jobs for *ALL* tasks, to default locations ECF_HOME/ECF_NAME.job0") 
+    print(defs.check_job_creation())   
     check_jobs(task_vec,ecf_home)
     delete_jobs(task_vec,ecf_home)
        
-    print "\nGenerate jobs for *ALL* tasks, to default locations ECF_HOME/ECF_NAME.job0"
+    print("\nGenerate jobs for *ALL* tasks, to default locations ECF_HOME/ECF_NAME.job0")
     job_ctrl = JobCreationCtrl()
     defs.check_job_creation( job_ctrl )       
-    print job_ctrl.get_error_msg()
+    print(job_ctrl.get_error_msg())
     check_jobs(task_vec,ecf_home)
     delete_jobs(task_vec,ecf_home)
     
-    print "\nGenerate jobs for all nodes, under path, to default locations ECF_HOME/ECF_NAME.job0"    
+    print("\nGenerate jobs for all nodes, under path, to default locations ECF_HOME/ECF_NAME.job0")    
     job_ctrl = JobCreationCtrl()
     job_ctrl.set_node_path( task_vec[0].get_abs_node_path() )    
     defs.check_job_creation(job_ctrl)       
-    print job_ctrl.get_error_msg();
+    print(job_ctrl.get_error_msg());
     delete_jobs(task_vec,ecf_home)
    
-    print "\nGenerate jobs for all tasks, to the specified directory"
+    print("\nGenerate jobs for all tasks, to the specified directory")
     # Directory will automatically created under the provided directory
     job_ctrl = JobCreationCtrl()
     job_ctrl.set_dir_for_job_creation(workspace + "/Pyext/test/data")  # generate jobs file under this directory
     defs.check_job_creation(job_ctrl)
-    print job_ctrl.get_error_msg()
+    print(job_ctrl.get_error_msg())
     
     generated_dir = job_ctrl.get_dir_for_job_creation() + "/suite_job_gen"
-    print "removing directory tree " + generated_dir
+    print("removing directory tree " + generated_dir)
     shutil.rmtree(generated_dir)      
  
  
@@ -125,11 +125,11 @@ if __name__ == "__main__":
         job_ctrl = JobCreationCtrl()                    
         job_ctrl.generate_temp_dir()       
         defs.check_job_creation(job_ctrl)
-        print job_ctrl.get_error_msg()
-        print "removing directory tree " + job_ctrl.get_dir_for_job_creation()
+        print(job_ctrl.get_error_msg())
+        print("removing directory tree " + job_ctrl.get_dir_for_job_creation())
         shutil.rmtree(job_ctrl.get_dir_for_job_creation())     
     
         delete_jobs(task_vec,ecf_home)
-        print "All test pass"
-    except RuntimeError, e:
-        print "failed: " + str(e)    
+        print("All test pass")
+    except RuntimeError as e:
+        print("failed: " + str(e))    

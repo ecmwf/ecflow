@@ -9,23 +9,23 @@ def get_parent_dir(file_path):
 
 def get_root_source_dir():
     cwd = os.getcwd()
-    #print "get_root_source_dir from: " + cwd
+    #print("get_root_source_dir from: " + cwd)
     while (1):
         # Get to directory that has ecflow
         head, tail = os.path.split(cwd)
-        #print "   head:" + head
-        #print "   tail:" + tail
+        #print("   head:" + head)
+        #print("   tail:" + tail)
         if tail.find("ecflow") != -1 :
             
             # bjam, already at the source directory
             if os.path.exists(cwd + "/VERSION.cmake"): 
-                print "   Found VERSION.cmake in " + cwd
+                print("   Found VERSION.cmake in " + cwd)
                 return cwd
         
         if tail != "Pyext" and tail != "migrate":
             # in cmake, we may be in the build directory, hence we need to determine source directory
             file = cwd + "/CTestTestfile.cmake"
-            #print "   searching for " + file
+            #print("   searching for " + file)
             if os.path.exists(file):
                 # determine path by looking into this file:
                 for line in open(file):
@@ -33,7 +33,7 @@ def get_root_source_dir():
                     if line.find("Source directory"):
                         tokens = line.split()
                         if len(tokens) == 4:
-                            #print "   returning root_source_dir:", tokens[3]
+                            #print("   returning root_source_dir:", tokens[3])
                             return tokens[3]
                 raise RuntimeError("ERROR could not find Source directory in CTestTestfile.cmake")
             else:
@@ -52,7 +52,7 @@ class TestMigrate318(unittest.TestCase):
     def setUp(self):
         # perform setup actions if any
         self.workspace_dir = get_root_source_dir()
-        #print "setup : " + self.workspace_dir
+        #print("setup : " + self.workspace_dir)
         
     def tearDown(self):
         # Perform clean -up actions if any
@@ -178,7 +178,7 @@ class TestMigrate318(unittest.TestCase):
 #test history
  
     def test_migrate_history(self):
-        print "test_migrate_history"
+        print("test_migrate_history")
         migration_count = ecflow_migrate.do_migrate(self.locate("migrate/history_bug.def"))
         self.assertEqual(migration_count,1,"Expected 1 migrations,for history")
                  
@@ -188,5 +188,5 @@ class TestMigrate318(unittest.TestCase):
 
 #run the tests 
 if __name__  == '__main__':
-    #print "Current working directory: " + os.getcwd()
+    #print("Current working directory: " + os.getcwd())
     unittest.main()

@@ -36,6 +36,12 @@
 # building the extension. Hence this requires that ECFLOW_INSTALL_DIR 
 # is correctly set during build time. Yuk. 
 #
+# python3 add test and migrate directories to PYTHONPATH for testing
+#  - some tests require:
+#    test/ecflow_test_util.py
+#    migrate/ecflow_migrate.py
+project : requirements <pythonpath>./test:./migrate  ;
+
 project thePyext ;
 
 use-project theCore      : ../ACore ;
@@ -51,9 +57,9 @@ import python ;
 
 if ! [ python.configured ]
 {
-    # ECHO "notice: no Python configured in user-config.jam" ;
-    # ECHO "notice: will use default configuration" ;
-    # We will typically place this in user-congig/site-config.jam
+    ECHO "notice: no Python configured in *user-config.jam*" ;
+    ECHO "notice: will use default configuration" ;
+    # We will typically place this in user-config/site-config.jam
     #using python
     #     :  # version
     #     :  # cmd-or-prefix
@@ -61,7 +67,8 @@ if ! [ python.configured ]
     #     :  # libraries
     #     :  # condition
     #     ;
-    using python ;
+    #using python ;
+    #using python : 3.5 : python3 : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;
 }
 
 # Specify the path to the Boost project.  If you move this project,

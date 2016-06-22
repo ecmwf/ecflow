@@ -638,10 +638,26 @@ bool Server::authenticateReadAccess(const std::string& user)
 {
    return serverEnv_.authenticateReadAccess(user);
 }
+bool Server::authenticateReadAccess(const std::string& user, const std::string& path)
+{
+   return serverEnv_.authenticateReadAccess(user,path);
+}
+bool Server::authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths)
+{
+   return serverEnv_.authenticateReadAccess(user,paths);
+}
 
 bool Server::authenticateWriteAccess(const std::string& user )
 {
    return serverEnv_.authenticateWriteAccess(user);
+}
+bool Server::authenticateWriteAccess(const std::string& user, const std::string& path)
+{
+   return serverEnv_.authenticateWriteAccess(user,path);
+}
+bool Server::authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths)
+{
+   return serverEnv_.authenticateWriteAccess(user,paths);
 }
 
 bool Server::lock(const std::string& user)

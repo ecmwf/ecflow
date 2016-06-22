@@ -1,10 +1,10 @@
 #ifndef ecflow_version_config_h
 #define ecflow_version_config_h
  
-#define ECFLOW_VERSION   "4.1.0"
+#define ECFLOW_VERSION   "4.1.1rc1"
 
 #define ECFLOW_RELEASE   "4"
 #define ECFLOW_MAJOR     "1"
-#define ECFLOW_MINOR     "0"
+#define ECFLOW_MINOR     "1rc1"
 
 #endif 

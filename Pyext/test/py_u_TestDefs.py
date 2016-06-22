@@ -13,8 +13,8 @@
 #  code for testing creation of defs file in python
 import os
 import ecflow
-print ecflow.__doc__
-print ecflow.Defs.__doc__
+print(ecflow.__doc__)
+print(ecflow.Defs.__doc__)
     
 from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Variable, Limit, InLimit, \
                    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
@@ -22,9 +22,9 @@ from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Var
                    Verify, PrintStyle, Time, Today, Late, Cron, Client, debug_build
 
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
     
     suite = Suite("s1")
     assert (isinstance(suite, ecflow.Suite)), "Expected suite"
@@ -159,8 +159,8 @@ if __name__ == "__main__":
     
     task8 = family.add_task("t8")
     task8.add_repeat( RepeatDay() )
-    print "task8.get_try_no()    :string:",task8.get_try_no()
-    print "task8.get_int_try_no():int   :",task8.get_int_try_no()
+    print("task8.get_try_no()    :string:",task8.get_try_no())
+    print("task8.get_int_try_no():int   :",task8.get_int_try_no())
     
     the_defs = task8.get_defs()
  
@@ -180,42 +180,42 @@ if __name__ == "__main__":
     restored_checkpt_defs = Defs()
     restored_checkpt_defs.restore_from_checkpt(checkpt_file)
     
-    print "Save and restore as Defs ******************************************************"
+    print("Save and restore as Defs ******************************************************")
     defs.save_as_defs(defs_file)           # default is to save as DEFS
     restored_from_defs = Defs( defs_file ) # restore the defs
 
     defs.save_as_defs(defs_file,Style.DEFS)
     restored_from_defs = Defs( defs_file ) # restore the defs
             
-    print "Save and restore using STATE ******************************************************"
+    print("Save and restore using STATE ******************************************************")
     defs.save_as_defs(defs_file,Style.STATE)
     restored_from_defs = Defs( defs_file ) # restore the defs
 
-    print "Save and restore using MIGRATE ******************************************************"
+    print("Save and restore using MIGRATE ******************************************************")
     defs.save_as_defs(defs_file,Style.MIGRATE)
     restored_from_defs = Defs( defs_file ) # restore the defs
     assert restored_checkpt_defs == restored_from_defs ,"File should be the same"
 
         
-    print "Print in DEFS style ******************************************************"
+    print("Print in DEFS style ******************************************************")
     PrintStyle.set_style(Style.DEFS)
     the_string = str(restored_from_defs)
     assert the_string.find("defs_state") == -1, "Print in DEFS style failed"
-    print the_string
+    print(the_string)
     
-    print "Print in STATE style *****************************************************"
+    print("Print in STATE style *****************************************************")
     PrintStyle.set_style(Style.STATE)
     the_string = str(restored_from_defs)
     assert the_string.find("defs_state STATE") != -1, "Print in STATE style failed"
-    print the_string
+    print(the_string)
     
-    print "Print in MIGRATE style *****************************************************"
+    print("Print in MIGRATE style *****************************************************")
     PrintStyle.set_style(Style.MIGRATE)
     the_string = str(restored_from_defs)
     assert the_string.find("defs_state MIGRATE") != -1, "Print in MIGRATE style failed"
-    print the_string
+    print(the_string)
      
     # Comment this out if you want to see what the file looked like
     os.remove(checkpt_file)
     os.remove(defs_file)
-    print "All tests pass"
+    print("All tests pass")

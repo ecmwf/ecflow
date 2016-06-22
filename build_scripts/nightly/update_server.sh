@@ -33,6 +33,4 @@ python $WK/build_scripts/nightly/load.py
 # Start the viewer
 # =======================================================================
 ecflowview &
-
-
  

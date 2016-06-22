@@ -369,6 +369,10 @@ std::string TestFixture::local_ecf_home()
 
 #endif
 
+   // Allow post-fix to be added, to allow test to run in parallel
+   char* theEnv = getenv("TEST_ECF_HOME_POSTFIX");
+   if (theEnv) rel_path += std::string(theEnv);
+
    std::string absolute_path = File::test_data(rel_path,project_test_dir_);
    return absolute_path;
 }

@@ -147,6 +147,11 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
    return doJobSubmission( as );
 }
 
+bool ForceCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,paths_);
+}
+
 const char* ForceCmd::arg()  { return CtsApi::forceArg();}
 const char* ForceCmd::desc() {
             /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8

@@ -55,6 +55,7 @@ const std::string& Str::ECF_JOB()        { static std::string ECF_JOB = "ECF_JOB
 const std::string& Str::ECF_JOBOUT()     { static std::string ECF_JOBOUT = "ECF_JOBOUT"; return ECF_JOBOUT;}
 const std::string& Str::ECF_SCRIPT()     { static std::string ECF_SCRIPT = "ECF_SCRIPT"; return ECF_SCRIPT;}
 const std::string& Str::ECF_DUMMY_TASK() { static std::string ECF_DUMMY_TASK = "ECF_DUMMY_TASK"; return ECF_DUMMY_TASK;}
+const std::string& Str::ECF_NO_SCRIPT()  { static std::string ECF_NO_SCRIPT = "ECF_NO_SCRIPT"; return ECF_NO_SCRIPT;}
 const std::string& Str::ECF_MICRO()      { static std::string ECF_MICRO = "ECF_MICRO"; return ECF_MICRO;}
 const std::string& Str::ECF_FILES()      { static std::string ECF_FILES = "ECF_FILES"; return ECF_FILES;}
 const std::string& Str::ECF_FETCH()      { static std::string ECF_FETCH = "ECF_FETCH"; return ECF_FETCH;}

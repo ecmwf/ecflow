@@ -40,7 +40,7 @@ bool UserCmd::equals(ClientToServerCmd* rhs) const
    return user_ == the_rhs->user();
 }
 
-bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& ) const
+bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 {
    // The user should NOT be empty. Rather than asserting and killing the server, fail authentication
    // ECFLOW-577 and ECFLOW-512. When user_ empty ??
@@ -66,6 +66,70 @@ bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& ) const
    std::string msg = "[ authentication failed ] User '";
    msg += user_;
    msg += "' is not allowed any access.";
+   throw std::runtime_error( msg );
+
+   return false;
+}
+
+bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const
+{
+   if (!user_.empty() && as->authenticateReadAccess(user_,path)) {
+
+      // Does this user command require write access
+      if ( isWrite() ) {
+         // command requires write access. Check user has write access, add access to suite/node/path
+         if ( as->authenticateWriteAccess(user_,path) ) {
+            return true;
+         }
+         std::string msg = "[ authentication failed ] User ";
+         msg += user_;
+         msg += " has no *write* access. path(";msg += path; msg += ")Please see your administrator.";
+         throw std::runtime_error( msg );
+      }
+      else {
+         // read request, and we have read access
+         return true;
+      }
+   }
+
+   std::string msg = "[ authentication failed ] User '";
+   msg += user_;
+   msg += "' is not allowed any access. path(";
+   msg += path;
+   msg += ")";
+   throw std::runtime_error( msg );
+
+   return false;
+}
+
+bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const
+{
+   if (!user_.empty() && as->authenticateReadAccess(user_,paths)) {
+
+      // Does this user command require write access
+      if ( isWrite() ) {
+         // command requires write access. Check user has write access
+         if ( as->authenticateWriteAccess(user_,paths) ) {
+            return true;
+         }
+         std::string msg = "[ authentication failed ] User ";
+         msg += user_;
+         msg += " has no *write* access. paths(";
+         for(size_t i=0; i < paths.size(); ++i) { msg += paths[i];msg += ",";}
+         msg += ") Please see your administrator.";
+         throw std::runtime_error( msg );
+      }
+      else {
+         // read request, and we have read access
+         return true;
+      }
+   }
+
+   std::string msg = "[ authentication failed ] User '";
+   msg += user_;
+   msg += "' is not allowed any access. paths(";
+   for(size_t i=0; i < paths.size(); ++i) { msg += paths[i];msg += ",";}
+   msg += ")";
    throw std::runtime_error( msg );
 
    return false;

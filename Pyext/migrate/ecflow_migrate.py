@@ -42,7 +42,7 @@ class Migrator(object):
         migrated = self._migration_hook(default_version_number)
         if migrated : 
             self.list_of_input_lines = self.list_of_output_lines   # preserve this migration
-            print "Applying " + type(self).__name__  
+            print("Applying ", type(self).__name__)  
         else:
             self.list_of_output_lines = self.list_of_input_lines   
         return migrated         
@@ -55,9 +55,9 @@ class Migrator(object):
         if len(self.list_of_input_lines) > 0:
             tokens = self.list_of_input_lines[0].split()
             if len(tokens) > 1:
-                # print tokens
+                # print(tokens)
                 version = (int)(tokens[1].replace(".",""))
-                # print "******************* found version " + str(version)
+                # print("******************* found version " , str(version))
                 return version;
         return default_version
     
@@ -89,7 +89,7 @@ class MigrateForTaskAbort(Migrator):
                     start_line_append = ""
                 
                 if start_abort_pos != -1 and end_abort_pos == -1:
-                    # print "start abort found with no end abort"
+                    # print("start abort found with no end abort")
                     start_line_append = line
                     start_line_append = start_line_append.rstrip('\n')
                     start_line_append += " "
@@ -100,7 +100,7 @@ class MigrateForTaskAbort(Migrator):
                 start_line_append += line
                 if end_abort_pos != -1:
                     self.list_of_output_lines.append(start_line_append) # preserve'\n' for this case                   
-                    # print start_line_append
+                    # print(start_line_append)
                     start_line_append = "";
                 else:
                     start_line_append = start_line_append.rstrip('\n')
@@ -135,9 +135,9 @@ class MigrateForLabel(Migrator):
         start_line_append = ""
         for line in self.list_of_input_lines:
             #count =  count + 1
-            #print str(count) + ": " + line
+            #print(str(count) , ": " , line)
             #if count == 383119:
-            #    print "debug mee"
+            #    print("debug mee")
             if len(start_line_append) > 0:
                 no_of_label_quotes += line.count('"')
                 start_line_append += line
@@ -185,9 +185,9 @@ class MigrateForVariable(Migrator):
         start_line_append = ""
         for line in self.list_of_input_lines:
             #count =  count + 1
-            #print str(count) + ": " + line
+            #print(str(count) , ": " , line)
             #if count == 383119:
-            #    print "debug mee"
+            #    print("debug mee")
             if len(start_line_append) > 0:
                 no_of_label_quotes += line.count("'")
                 start_line_append += line
@@ -387,21 +387,21 @@ if __name__ == "__main__":
 #     PARSER.add_argument('defs_file',  help="The definition file to *fix* for migration")
 #     ARGS = PARSER.parse_args()
 #     ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
-#     print ARGS    
+#     print(ARGS)    
 #     do_migrate( ARGS.defs_file )
     
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hd", ["help", "defs_file="])
     except getopt.GetoptError as err:
-        # print help information and exit:
+        # print("help information and exit:")
         print(err) # will print something like "option -a not recognised"
-        print usage()
+        print(usage())
         sys.exit(2)
         
     defs_file = None
     for o, a in opts:
         if o in ("-h", "--help"):
-            print usage()
+            print(usage())
             sys.exit()
         elif o in ("-d", "--defs_file"):
             defs_file = a
@@ -409,7 +409,7 @@ if __name__ == "__main__":
             assert False, "un-handled option"
     
     if defs_file == None:
-        print "Please enter path to the defs file i.e ecflow_migrate --d ./defs_file.def"
+        print("Please enter path to the defs file i.e ecflow_migrate --d ./defs_file.def")
         sys.exit(1)
         
     defs_file = os.path.expandvars(defs_file); # expand references to any environment variables

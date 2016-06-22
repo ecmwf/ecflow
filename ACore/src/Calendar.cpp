@@ -300,7 +300,7 @@ std::string Calendar::toString() const
    else if (day_of_week_ == 5) ss << " FRIDAY";
    else if (day_of_week_ == 6) ss << " SATURDAY";
 
- 	return ss.str();
+   return ss.str();
 }
 
 

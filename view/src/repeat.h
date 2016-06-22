@@ -25,28 +25,28 @@ class repeat_date_node : public repeat_node {
   }
 
   virtual int current() const {
-    if (owner_ && get()) { 
-      int cur = (ecf_repeat_date_to_julian(get()->index_or_value()) -
-		 ecf_repeat_date_to_julian(start())) / step();
-      int gui = ecf_repeat_julian_to_date(ecf_repeat_date_to_julian(start()) + cur * step());
-      
-      if (get()->index_or_value() != gui) {
-	std::stringstream ss;
-	ss << "# WAR repeat value does not match: " 
-		  << get()->index_or_value()
-		  << ", gui "   << gui
-		  << ", index " << cur
-		  << ", start " << start()
-		  << ", last "   << last()
-		  << ", step "  << step() << "\n";    
+     if (owner_ && get()) {
+        int cur = (ecf_repeat_date_to_julian(get()->index_or_value()) -
+              ecf_repeat_date_to_julian(start())) / step();
+        int gui = ecf_repeat_julian_to_date(ecf_repeat_date_to_julian(start()) + cur * step());
 
-	std::string msg (ss.str());
-	serv().command(clientName, "--msg", msg.c_str(), NULL);
-	std::cerr << ss;
-      }
-      return cur;
-    }
-    return repeat_node::current(); }
+        if (get()->index_or_value() != gui) {
+           std::stringstream ss;
+           ss << "# WAR repeat value does not match: "
+                 << get()->index_or_value()
+                 << ", gui "   << gui
+                 << ", index " << cur
+                 << ", start " << start()
+                 << ", last "   << last()
+                 << ", step "  << step() << "\n";
+
+           std::string msg (ss.str());
+           serv().command(clientName, "--msg", msg.c_str(), NULL);
+           std::cerr << msg;
+        }
+        return cur;
+     }
+     return repeat_node::current(); }
 
   virtual void value(char* n,int i) const {
     if (n) {
