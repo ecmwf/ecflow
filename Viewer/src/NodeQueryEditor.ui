@@ -366,7 +366,7 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>This is the query reformulated in a MySQL-like syntax.</string>
+        <string>This is the query presented in a MySQL-like syntax.</string>
        </property>
        <property name="readOnly">
         <bool>true</bool>
