@@ -211,6 +211,7 @@ ecbuild $source_dir \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DENABLE_GUI=OFF       \
             -DENABLE_UI=OFF        \
+            -DENABLE_STATIC_BOOST_LIBS=ON \
             ${cmake_extra_options}
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
             #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'"
