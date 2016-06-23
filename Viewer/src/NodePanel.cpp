@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,9 +10,13 @@
 #include "NodePanel.hpp"
 
 #include "Dashboard.hpp"
+#include "DashboardTitle.hpp"
 #include "InfoPanel.hpp"
 #include "ServerHandler.hpp"
 #include "VSettings.hpp"
+
+#include <QDebug>
+#include <QResizeEvent>
 
 NodePanel::NodePanel(QWidget* parent) :
   TabWidget(parent)
@@ -23,6 +27,9 @@ NodePanel::NodePanel(QWidget* parent) :
 
 	connect(this,SIGNAL(newTabRequested()),
 		    this,SLOT(slotNewTab()));
+
+    connect(this,SIGNAL(tabRemoved()),
+            this,SLOT(slotTabRemoved()));
 
 }
 
@@ -40,22 +47,26 @@ Dashboard *NodePanel::addWidget(QString id)
 {
   	Dashboard  *nw=new Dashboard("",this);
 
-  	QString name("node");
+    QString name("");
   	QPixmap pix;
 
 	addTab(nw,pix,name);
 
-
 	connect(nw,SIGNAL(selectionChanged(VInfo_ptr)),
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
-	connect(nw,SIGNAL(titleChanged(QWidget*,QString,QPixmap)),
-				this,SLOT(slotTabTitle(QWidget*,QString,QPixmap)));
+    connect(nw->titleHandler(),SIGNAL(changed(DashboardTitle*)),
+                this,SLOT(slotTabTitle(DashboardTitle*)));
 
 	connect(nw,SIGNAL(contentsChanged()),
 			this,SIGNAL(contentsChanged()));
 
-	return nw;
+    adjustTabTitle();
+
+    //init the title
+    slotTabTitle(nw->titleHandler());
+
+    return nw;
 }
 
 
@@ -104,7 +115,16 @@ Dashboard *NodePanel::currentDashboard()
 
 void NodePanel::slotCurrentWidgetChanged(int /*index*/)
 {
-  	Q_EMIT currentWidgetChanged();
+    for(int i=0; i < count(); i++)
+    {
+        if(QWidget *w=widget(i))
+        {
+            if(Dashboard* nw=static_cast<Dashboard*>(w))
+                nw->titleHandler()->setCurrent(i==currentIndex());
+        }
+     }
+
+    Q_EMIT currentWidgetChanged();
   	//setDefaults(this);
 }
 
@@ -188,15 +208,55 @@ void NodePanel::addSearchDialog()
 }
 
 
-void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)
+void NodePanel::slotTabTitle(DashboardTitle* t)
 {
-	int index=indexOfWidget(w);
-	if(index != -1)
+    int index=indexOfWidget(t->dashboard());
+    if(index != -1)
 	{
-		setTabText(index,text);
-		setTabIcon(index,pix);
+        setTabText(index,t->title());
+        setTabIcon(index,t->pix());
+        setTabToolTip(index,t->tooltip());
+        setTabWht(index,t->desc());
+        setTabData(index,t->descPix());
 	}
 }
+
+void NodePanel::slotTabRemoved()
+{
+   adjustTabTitle();
+}
+
+int NodePanel::tabAreaWidth() const
+{
+    return width()-80;
+}
+
+void NodePanel::adjustTabTitle()
+{
+    if(count() > 1)
+    {
+        qDebug() << tabAreaWidth() << count();
+        int dw=tabAreaWidth()/count();
+        if(dw < 30)
+            dw=30;
+
+        for(int i=0; i < count(); i++)
+        {
+            if(QWidget *w=widget(i))
+            {
+                if(Dashboard* nw=static_cast<Dashboard*>(w))
+                    nw->titleHandler()->setMaxPixWidth(dw);
+            }
+        }
+    }
+}
+
+void NodePanel::resizeEvent(QResizeEvent *e)
+{
+    if(abs(e->oldSize().width()-width()) > 5)
+            adjustTabTitle();
+}
+
 
 
 /*void NodePanel::slotNewWindow(bool)

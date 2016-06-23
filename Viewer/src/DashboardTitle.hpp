@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -26,8 +26,17 @@ Q_OBJECT
 friend class Dashboard;
 
 public:
-	DashboardTitle(ServerFilter*,QObject *parent=0);
+    DashboardTitle(ServerFilter*,Dashboard *parent);
 	~DashboardTitle();
+
+    Dashboard* dashboard() const {return dashboard_;}
+    QString title() const {return title_;}
+    QString tooltip() const {return tooltip_;}
+    QString desc() const {return desc_;}
+    QPixmap pix() const {return pix_;}
+    QPixmap descPix() const {return descPix_;}
+    void setMaxPixWidth(int w);
+    void setCurrent(bool b);
 
 	void notifyServerFilterAdded(ServerItem* item);
 	void notifyServerFilterRemoved(ServerItem* item);
@@ -36,22 +45,32 @@ public:
 
 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
 	void notifyServerDelete(ServerHandler* server);
-	void notifyBeginServerClear(ServerHandler* server) {};
+    void notifyBeginServerClear(ServerHandler* server) {}
 	void notifyEndServerClear(ServerHandler* server);
-	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
 	void notifyEndServerScan(ServerHandler* server);
 	void notifyServerConnectState(ServerHandler* server);
 	void notifyServerActivityChanged(ServerHandler* server);
-	void notifyServerSuiteFilterChanged(ServerHandler* server) {};
+    void notifyServerSuiteFilterChanged(ServerHandler* server) {}
 
 Q_SIGNALS:
-	void changed(QString,QPixmap);
+    void changed(DashboardTitle*);
 
 private:
-	void updateTitle();
 	void clear();
+    void updateTitle();
+    //void drawServerRect(QPainter *,QColor,QRect,QString,QColor,QRect);
 
+    Dashboard* dashboard_;
 	ServerFilter* filter_;
+    int maxPixWidth_;
+    QPixmap pix_;
+    QPixmap descPix_;
+    QString title_;
+    QString tooltip_;
+    QString desc_;
+    bool current_;
+    static int lighter_;
 };
 
 #endif

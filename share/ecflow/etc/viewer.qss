@@ -309,6 +309,41 @@ QTreeView[var="1"]::item {
 /*---------------------------------
   Tab widget
 ------------------------------------*/
+
+/*QTabBar[nodePanel="1"]::close-button {
+    image: url(:/viewer/dock_menu_indicator.png);
+    padding-left: -13px;
+}*/
+
+
+QTabBar[nodePanel="1"]::tab {
+    padding-left : 4px;
+    padding-right : 4px;
+    padding-top : 5px;
+    padding-bottom : 5px;
+    /*margin-left: 1px;
+    margin-right: 1px;*/
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border: 1px solid rgb(136,135,135);
+    background: rgb(220,220,220);
+    /*margin: 2px;*/
+}
+
+QTabBar[nodePanel="1"]::tab:selected{
+    padding-left : 4px;
+    padding-right : 4x;
+    padding-bottom : 5px;
+    /*background: rgb(125,125,125);*/
+    /*background: rgb(248,247,247);*/
+    /*margin-top: -5px;*/
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border: 1px solid rgb(126,125,125);
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(160,160,160), stop: 1 rgb(125,125,125));
+}
+
+
 /*QTabBar[change="1"]::tab {
     padding : 2px;
 }*/

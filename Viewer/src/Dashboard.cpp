@@ -56,9 +56,6 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 	layout()->setContentsMargins(0,0,0,0);
 
 	setDockOptions(QMainWindow::AnimatedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AllowNestedDocks);
-
-	connect(titleHandler_,SIGNAL(changed(QString,QPixmap)),
-			this,SLOT(slotTitle(QString,QPixmap)));
 }
 
 Dashboard::~Dashboard()
@@ -306,13 +303,6 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
 		}
 	}
 }
-
-void Dashboard::slotTitle(QString s,QPixmap p)
-{
-	Q_EMIT titleChanged(this,s,p);
-}
-
-
 
 void Dashboard::slotCommand(VInfo_ptr info,QString cmd)
 {

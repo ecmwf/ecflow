@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,8 +19,10 @@
 #include <boost/property_tree/ptree.hpp>
 
 class Dashboard;
+class DashboardTitle;
 class ServerFilter;
 class VComboSettings;
+class VProperty;
 
 class NodePanel : public TabWidget
 {
@@ -54,13 +56,12 @@ public:
 
 public Q_SLOTS:
 	void slotCurrentWidgetChanged(int);
-	void slotSelection(VInfo_ptr);
+    void slotSelection(VInfo_ptr);
+    void slotNewTab();
 
-	//void slotIconCommand(QString,IconObjectH);
-	//void slotDesktopCommand(QString,QPoint);
-	void slotNewTab();
-	//void slotNewWindow(bool);
-	void slotTabTitle(QWidget* w,QString text,QPixmap pix);
+protected Q_SLOTS:
+    void slotTabRemoved();
+    void slotTabTitle(DashboardTitle* w);
 
 Q_SIGNALS:
 	void itemInfoChanged(QString);
@@ -69,10 +70,15 @@ Q_SIGNALS:
 	void contentsChanged();
 
 protected:
-	Dashboard* addWidget(QString);
+    void resizeEvent(QResizeEvent *e);
+    void adjustTabTitle();
+    int tabAreaWidth() const;
+
+    Dashboard* addWidget(QString);
 	void tabBarCommand(QString, int);
 	Dashboard* nodeWidget(int index);
 	static std::string tabSettingsId(int i);
+    VProperty* tabTitleMode_;
 };
 
 #endif

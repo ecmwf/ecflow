@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,12 +10,32 @@
 #include "TabWidget.hpp"
 
 #include <QDebug>
+#include <QAction>
+#include <QLabel>
+#include <QMenu>
 #include <QStackedWidget>
+#include <QStyleOptionTabV2>
+#include <QStylePainter>
 #include <QTabBar>
 #include <QToolButton>
 #include <QVBoxLayout>
 
 #include "UserMessage.hpp"
+
+void IconTabBar::paintEvent(QPaintEvent *e)
+{
+    QStylePainter painter(this);
+    for(int i = 0; i < count(); ++i)
+    {
+        QStyleOptionTabV2 option;
+        initStyleOption(&option, i);
+        qDebug() << i << option.iconSize;
+        painter.drawItemPixmap(option.rect, Qt::AlignTop|Qt::AlignHCenter, option.icon.pixmap(option.iconSize));
+        //painter.drawItemText(option.rect, Qt::AlignBottom|Qt::AlignHCenter, palette(), 1, option.text);
+
+    }
+}
+
 
 TabWidget::TabWidget(QWidget* parent) :
 		QWidget(parent),
@@ -33,12 +53,12 @@ TabWidget::TabWidget(QWidget* parent) :
 	layout->addLayout(hb);
 
 	//Tab bar
-	bar_ = new QTabBar(this);
+    bar_ = new QTabBar(this);
 	hb->addWidget(bar_, 1);
 
-	//bar_->setProperty("mvStyle","folder");
+    bar_->setProperty("nodePanel","1");
 	bar_->setMovable(true);
-	bar_->setExpanding(true);
+    //bar_->setExpanding(true);
 
 	//QString st=bar_->styleSheet();
 	//st+="QTabBar::tab{padding: 4px;}";
@@ -53,7 +73,14 @@ TabWidget::TabWidget(QWidget* parent) :
 	addTb_->setToolTip(tr("Open a new tab"));
 	hb->addWidget(addTb_);
 
-	//Stacked widget to store the actual tab widgets
+    //Tab list menu
+    tabListTb_=new QToolButton(this);
+    tabListTb_->setAutoRaise(true);
+    tabListTb_->setIcon(QPixmap(":/viewer/menu_arrow_down.svg"));
+    tabListTb_->setToolTip(tr("List all tabs"));
+    hb->addWidget(tabListTb_);
+
+    //Stacked widget to store the actual tab widgets
 	stacked_ = new QStackedWidget(this);
 	stacked_->setMinimumHeight(1);
 	stacked_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
@@ -76,11 +103,31 @@ TabWidget::TabWidget(QWidget* parent) :
 
 	connect(addTb_,SIGNAL(clicked()),
 			this,SIGNAL(newTabRequested()));
+
+    connect(tabListTb_,SIGNAL(clicked()),
+            this,SLOT(slotTabList()));
 }
 
 void TabWidget::slotContextMenu(const QPoint& pos) {
-	if (pos.isNull())
+
+    if (pos.isNull())
 		return;
+
+    int index = bar_->tabAt(pos);
+    if(index < 0 || index > bar_->count())
+        return;
+
+    QList<QAction*> lst;
+    QAction *closeAc=new QAction(QPixmap(":/viewer/close.svg"),"&Close tab",this);
+    lst << closeAc;
+    if(QAction *ac=QMenu::exec(lst,mapToGlobal(pos),closeAc,this))
+    {
+        if(ac == closeAc)
+            removeTab(index);
+    }
+
+    qDeleteAll(lst);
+
 
 	/*MvQContextItemSet *cms = cmSet();
 	if (!cms)
@@ -160,6 +207,8 @@ void TabWidget::removeTab(int index)
 		bar_->removeTab(index);
 		w->hide();
 		w->deleteLater();
+
+        Q_EMIT tabRemoved();
 	}
 
 	checkTabStatus();
@@ -212,13 +261,49 @@ void TabWidget::setTabText(int index, QString txt)
 	}
 }
 
+void TabWidget::setTabToolTip(int index, QString txt)
+{
+    if (index >= 0 && index < bar_->count()) {
+        bar_->setTabToolTip(index, txt);
+    }
+}
+
+void TabWidget::setTabWht(int index, QString txt)
+{
+    if (index >= 0 && index < bar_->count()) {
+        bar_->setTabWhatsThis(index, txt);
+    }
+}
+
+void TabWidget::setTabData(int index, QPixmap pix)
+{
+    if (index >= 0 && index < bar_->count()) {
+        bar_->setTabData(index,QIcon(pix));
+    }
+}
+
 void TabWidget::setTabIcon(int index, QPixmap pix)
 {
 	if (index >= 0 && index < bar_->count())
 	{
-		QSize maxSize=maxIconSize();
+        QLabel *lab=static_cast<QLabel*>(bar_->tabButton(index,QTabBar::RightSide));
+        if(!lab)
+        {
+            lab=new QLabel();
+            lab->setAlignment(Qt::AlignCenter);
+        }
+        else
+        {
+            bar_->setTabButton(index,QTabBar::RightSide,0);
+        }
+        lab->setPixmap(pix);
+        lab->setFixedSize(pix.size());
+        bar_->setTabButton(index,QTabBar::RightSide,lab);
 
-		if(maxSize.width() < pix.width())
+#if 0
+        QSize maxSize=maxIconSize();
+
+        if(maxSize.width() < pix.width())
 			maxSize.setWidth(pix.width());
 
 		if(maxSize.height() < pix.height())
@@ -228,6 +313,8 @@ void TabWidget::setTabIcon(int index, QPixmap pix)
 			bar_->setIconSize(maxSize);
 
 		bar_->setTabIcon(index, QIcon(pix));
+#endif
+
 	}
 }
 
@@ -255,16 +342,19 @@ void TabWidget::checkTabStatus()
 	if (bar_->count() > 1)
 	{
 		bar_->show();
-		bar_->setTabsClosable(true);
+        //bar_->setTabsClosable(true);
 		addTb_->show();
+        tabListTb_->show();
 	}
 	else
 	{
 		bar_->hide();
-		bar_->setTabsClosable(false);
-		addTb_->hide();
+        //bar_->setTabsClosable(false);
+        addTb_->hide();
+        tabListTb_->hide();
 	}
 
+    /*
 	for (int i = 0; i < bar_->count(); i++)
 	{
 		if (QWidget *w = bar_->tabButton(i, QTabBar::RightSide))
@@ -274,5 +364,38 @@ void TabWidget::checkTabStatus()
 			else
 				w->hide();
 		}
-	}
+    }*/
+}
+
+void TabWidget::slotTabList()
+{
+    QMenu* menu=new QMenu(tabListTb_);
+
+    for(int i=0; i < bar_->count(); i++)
+    {
+        QAction *ac=new QAction(menu);
+        ac->setText(bar_->tabWhatsThis(i));
+        ac->setIcon(bar_->tabData(i).value<QIcon>());
+        ac->setData(i);
+        if(i==bar_->currentIndex())
+        {
+            QFont font;
+            font.setBold(true);
+            ac->setFont(font);
+        }
+
+        menu->addAction(ac);
+    }
+
+    if(QAction *ac=menu->exec(QCursor::pos()))
+    {
+        int index=ac->data().toInt();
+        if(index >=0 && index < count())
+        {
+            setCurrentIndex(index);
+        }
+    }
+
+    menu->clear();
+    menu->deleteLater();
 }
