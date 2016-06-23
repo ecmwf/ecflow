@@ -35,7 +35,9 @@ void ZombieUtil::test_clean_up(int timeout) {
    TestFixture::client().zombieGet();
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
    if (!zombies.empty()) {
-      cout << "\n***** test_clean_up: found\n" << Zombie::pretty_print( zombies , 9) << "\n, attempting to *fob* then *remove* ...\n";
+      cout << "\nZombieUtil::test_clean_up: Found Zombies:\n";
+      cout << "Client Environment:\n" << TestFixture::client().to_string() << "\n";
+      cout << Zombie::pretty_print( zombies , 9) << "\n, attempting to *fob* then *remove* ...\n";
 
       int no_fobed = do_zombie_user_action(User::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
 
