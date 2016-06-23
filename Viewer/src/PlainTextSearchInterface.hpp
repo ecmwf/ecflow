@@ -30,6 +30,7 @@ public:
     void disableHighlights();
     void enableHighlights() {}
 	bool highlightsNeedSearch() {return true;}
+	void gotoLastLine();
 
 protected:
 

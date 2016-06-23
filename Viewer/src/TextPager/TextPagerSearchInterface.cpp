@@ -216,3 +216,13 @@ void TextPagerSearchInterface::disableHighlights()
     if(editor_)
         editor_->setEnableSearchHighlighter(false);
 }
+
+void TextPagerSearchInterface::gotoLastLine()
+{
+	// move the cursor to the start of the last line
+	TextPagerCursor cursor = editor_->textCursor();
+	cursor.movePosition(TextPagerCursor::End);
+	cursor.movePosition(TextPagerCursor::StartOfLine);
+	editor_->setTextCursor(cursor);
+	editor_->ensureCursorVisible();
+}

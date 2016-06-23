@@ -116,7 +116,6 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 					cursor.movePosition(QTextCursor::End);
 				else
 					cursor.movePosition(QTextCursor::Start);
-				editor_->setTextCursor(cursor);
 				iteration = 1;  // iteration=1 to avoid infinite wraparound!
 			}
 		}
@@ -175,10 +174,7 @@ void PlainTextSearchInterface::automaticSearchForKeywords(bool userClickedReload
 		if(userClickedReload)
 		{
 			// move the cursor to the start of the last line
-			QTextCursor cursor = editor_->textCursor();
-			cursor.movePosition(QTextCursor::End);
-			cursor.movePosition(QTextCursor::StartOfLine);
-			editor_->setTextCursor(cursor);
+			gotoLastLine();
 		}
 	}
 }
@@ -209,4 +205,15 @@ void PlainTextSearchInterface::clearHighlights()
 void PlainTextSearchInterface::disableHighlights()
 {
     clearHighlights();
+}
+
+
+void PlainTextSearchInterface::gotoLastLine()
+{
+	// move the cursor to the start of the last line
+	QTextCursor cursor = editor_->textCursor();
+	cursor.movePosition(QTextCursor::End);
+	cursor.movePosition(QTextCursor::StartOfLine);
+	editor_->setTextCursor(cursor);
+	editor_->ensureCursorVisible();
 }
