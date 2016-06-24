@@ -169,6 +169,17 @@ endif()
 # Boost
 # =========================================================================================
 
+
+
+# this can help in some situations:
+set (_CMAKE_PREFIX_PATH_BACKUP ${CMAKE_PREFIX_PATH}) # make a backup of CMAKE_PREFIX_PATH
+foreach(BOOST_PATH_TO_SEARCH ${BOOST_PATH} ${BOOST_ROOT} $ENV{BOOST_ROOT})
+    ecbuild_debug("adding: ${BOOST_PATH_TO_SEARCH} to CMAKE_PREFIX_PATH")
+    list(APPEND CMAKE_PREFIX_PATH ${BOOST_PATH_TO_SEARCH})
+    list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
+endforeach()
+
+
 # Ecflow test require statics libs for boost < 1.59, otherwise get double free error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
@@ -195,6 +206,12 @@ find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system threa
 #    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
 
 #message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
+
+
+if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
+    set (CMAKE_PREFIX_PATH ${_CMAKE_PREFIX_PATH_BACKUP}) # restore CMAKE_PREFIX_PATH
+    ecbuild_debug("Resetting CMAKE_PREFIX_PATH to ${CMAKE_PREFIX_PATH}")
+endif()
 
 
 # =========================================================================================
