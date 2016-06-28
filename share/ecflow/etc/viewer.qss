@@ -335,12 +335,12 @@ QTabBar[nodePanel="1"]::tab:selected{
     padding-right : 4x;
     padding-bottom : 5px;
     /*background: rgb(125,125,125);*/
-    /*background: rgb(248,247,247);*/
+    background: rgb(248,247,247);
     /*margin-top: -5px;*/
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border: 1px solid rgb(126,125,125);
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(160,160,160), stop: 1 rgb(125,125,125));
+    /*background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(160,160,160), stop: 1 rgb(125,125,125));*/
 }
 
 

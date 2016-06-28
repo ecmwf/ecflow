@@ -346,10 +346,15 @@ void DashboardTitle::updateTitle()
                 QColor bg1,bg2,fg,bgBorder;
                 if(current_)
                 {
-                    bg1=QColor(140,140,140);
-                    bg2=QColor(120,120,120);
-                    fg=QColor(250,250,250);
-                    bgBorder=QColor(100,100,100);
+                    //bg1=QColor(140,140,140);
+                    //bg2=QColor(120,120,120);
+                    //fg=QColor(250,250,250);
+                    //bgBorder=QColor(100,100,100);
+
+                    bg1=QColor(250,250,250);
+                    bg2=QColor(230,230,230);
+                    fg=QColor(0,0,0);
+                    bgBorder=QColor(195,195,195);
                 }
                 else
                 {
