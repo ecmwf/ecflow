@@ -91,7 +91,6 @@ protected:
     bool elided_;
 };
 
-
 class NodePathItem 
 {
 
@@ -157,8 +156,6 @@ friend class BcWidget;
 
 public:
     NodePathEllipsisItem();
-    void draw(QPainter*,bool,int);
-protected:
 };
 
 

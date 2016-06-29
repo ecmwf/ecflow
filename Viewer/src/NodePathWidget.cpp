@@ -39,8 +39,7 @@ int NodePathItem::height_=0;
 int NodePathItem::hPadding_=2;
 int NodePathItem::vPadding_=1;
 
-
-#define _UI_NODEPATHWIDGET_DEBUG
+//#define _UI_NODEPATHWIDGET_DEBUG
 
 BcWidget::BcWidget(QWidget* parent) : 
     QWidget(parent),
@@ -720,6 +719,12 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
     
 }
 
+//=====================================================
+//
+// NodePathServerItem
+//
+//=====================================================
+
 //It returns the x position of the top right corner!
 int NodePathServerItem::rightPos(int xp,int len) const
 {
@@ -740,46 +745,16 @@ void NodePathServerItem::makeShape(int xp,int yp,int len)
     textRect_=QRect(xp+hPadding_,yp,len,height_);
 }
 
+//=====================================================
+//
+// NodePathEllipsisItem
+//
+//=====================================================
 
 NodePathEllipsisItem::NodePathEllipsisItem() :
     NodePathItem(-1,QString(0x2026),QColor(240,240,240),QColor(Qt::black),false,false)
 {
     borderCol_=QColor(190,190,190);
-}
-
-void NodePathEllipsisItem::draw(QPainter  *painter,bool useGrad,int lighter)
-{
-    if(!visible_)
-        return;
-
-    QColor border, bg, fontCol;
-    if(enabled_)
-    {
-        border=borderCol_;
-        bg=bgCol_;
-        fontCol=fontCol_;
-    }
-    else
-    {
-        border=disabledBorderCol_;
-        bg=disabledBgCol_;
-        fontCol=disabledFontCol_;
-    }
-
-    painter->setPen(QPen(border,0));
-
-    painter->setBrush(bg);
-    painter->drawPolygon(shape_);
-    //painter->drawPolygon(shape1_);
-
-    /*if(current_)
-    {
-        painter->setPen(QPen(borderCol_,0));
-    }*/
-
-    painter->setPen(fontCol);
-    painter->drawText(textRect_,Qt::AlignVCenter | Qt::AlignHCenter,text_);
-
 }
 
 //=============================================================
@@ -1188,22 +1163,32 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
     if(!active_)
 		return;
 
-	//Check if there is data in inf0
+    //Check if there is data in info
     if(info_ && info_->server()  && info_->server() == server)
 	{
-		//State changed
-		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::SERVER_STATE) != aspect.end())
-		{
-			if(nodeItems_.count() > 0)
-			{
-				bc_->reset(0,server->vRoot()->name(),
+        qDebug() << "Server change";
+
+        //State changed
+        for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+        {
+            if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::SERVER_STATE)
+            {
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+                UserMessage::debug("   update server item");
+#endif
+                if(nodeItems_.count() > 0)
+                {
+                    bc_->reset(0,server->vRoot()->name(),
 						                server->vRoot()->stateColour(),
 										server->vRoot()->stateFontColour());
-			}
+                }
 
-		}
+            }
+        }
 	}
-
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::debug("<-- NodePathWidget::notifyDefsChanged");
+#endif
 }
 
 //This must be called at the beginning of a reset
