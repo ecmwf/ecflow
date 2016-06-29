@@ -26,15 +26,11 @@ StringMatchTb::StringMatchTb(QWidget* parent) : QToolButton(parent)
    setPopupMode(QToolButton::InstantPopup);
 }
     
-
-
 StringMatchCombo::StringMatchCombo(QWidget* parent) : QComboBox(parent)
 {
-	//addItem("Exact match","=");
-	QIcon ic(QPixmap(":/viewer/close.svg"));
-    addItem(ic,"Contains",StringMatchMode::ContainsMatch);
-	addItem(ic,"Matches",StringMatchMode::WildcardMatch);
-	addItem(ic,"Regexp",StringMatchMode::RegexpMatch);
+    addItem("Contains",StringMatchMode::ContainsMatch);
+    addItem("Matches",StringMatchMode::WildcardMatch);
+    addItem("Regexp",StringMatchMode::RegexpMatch);
 
 	setCurrentIndex(1);
 }

@@ -79,7 +79,8 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 	serverFilter_(NULL),
 	queryTeCanExpand_(false),
 	initIsOn_(false),
-	canBeRun_(false)
+    canBeRun_(false),
+    filterMode_(false)
 {
     setupUi(this);
 
@@ -245,6 +246,15 @@ NodeQueryEditor::~NodeQueryEditor()
 
 	if(serverFilter_)
 		serverFilter_->removeObserver(this);
+}
+
+void NodeQueryEditor::setFilterMode(bool b)
+{
+    if(filterMode_ != b)
+    {
+        filterMode_=b;
+        tab_->setTabEnabled(1,!filterMode_);
+    }
 }
 
 void NodeQueryEditor::init()
@@ -443,10 +453,13 @@ void NodeQueryEditor::checkGuiState()
       t+="*";
     tab_->setTabText(0,t);
 
-    t=attrTabText_;
-    if(!query_->attrQueryPart().isEmpty())
-        t+="*";
-      tab_->setTabText(1,t);
+    if(!filterMode_)
+    {
+        t=attrTabText_;
+        if(!query_->attrQueryPart().isEmpty())
+            t+="*";
+        tab_->setTabText(1,t);
+    }
 }
 
 void NodeQueryEditor::updateQueryTe()

@@ -58,6 +58,7 @@ public:
     void showQueryPanel(bool);
     int maxNum() const;
     QStringList allServers() const;
+    void setFilterMode(bool);
 
     void notifyServerFilterAdded(ServerItem*);
     void notifyServerFilterRemoved(ServerItem*);
@@ -90,6 +91,7 @@ private:
 	bool queryTeCanExpand_;
 	bool initIsOn_;
 	bool canBeRun_;
+    bool filterMode_;
 
     NodeQueryOptionEdit* nameEdit_;
     NodeQueryOptionEdit* pathEdit_;
