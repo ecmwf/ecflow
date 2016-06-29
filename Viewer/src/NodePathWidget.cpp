@@ -44,11 +44,8 @@ int NodePathItem::vPadding_=1;
 
 BcWidget::BcWidget(QWidget* parent) : 
     QWidget(parent),
-    hPadding_(2),
-    vPadding_(1),
 	hMargin_(1),
-	vMargin_(1),
-    triLen_(10),
+	vMargin_(1),    
 	gap_(5),
     width_(0),
     maxWidth_(0),
@@ -62,7 +59,7 @@ BcWidget::BcWidget(QWidget* parent) :
     font_=QFont();
     QFontMetrics fm(font_);
 
-    itemHeight_=fm.height()+2*vPadding_;
+    itemHeight_=NodePathItem::height();
     height_=itemHeight_+2*vMargin_;
     
     setMouseTracking(true);
@@ -101,8 +98,6 @@ void BcWidget::notifyChange(VProperty *p)
     
 void BcWidget::updateSettings()
 {
-    //if(VProperty *p=prop_->find("view.common.node_style"))
-    //    node_style=p->value().toString()';
     if(VProperty *p=prop_->find("view.common.node_gradient"))
         useGrad_=p->value().toBool();
 }    
@@ -165,7 +160,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
     if(items_.count() ==0)
     {
         int len=fm.width(emptyText_);
-        emptyRect_=QRect(xp+hPadding_,yp,len,itemHeight_);
+        emptyRect_=QRect(xp,yp,len,itemHeight_);
         width_=xp+len+4;
     }
     else
@@ -205,7 +200,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
         }
 
         //The total width
-        width_=xp+triLen_+hMargin_;
+        width_=xp+NodePathItem::triLen_+hMargin_;
 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
         qDebug() << "   full width" << width_;
@@ -237,36 +232,15 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
                 {
                     //Estimate the total size with the elided text items
                     xp=hMargin_;
-                    for(int i=0; i < items_.count(); i++)
-                    {
-                        if(i != items_.count()-1)
-                        {
-                            xp=items_[i]->estimateRightPos(xp,redTextLen);
-                            xp+=gap_;
-                        }
-                        else
-                            xp=items_[i]->estimateRightPos(xp);
-                    }
-
-                    int estWidth=xp+triLen_+hMargin_;
+                    int estWidth=estimateWidth(0,xp,redTextLen);
 
                     //if the size fits into maxWidth we adjust all the items
                     if(estWidth < maxWidth)
                     {
                         int xp=hMargin_;
-                        for(int i=0; i < items_.count(); i++)
-                        {
-                            if(i != items_.count()-1)
-                            {
-                                xp=items_[i]->adjust(xp,yp,redTextLen);
-                                xp+=gap_;                                
-                            }
-                            else
-                                xp=items_[i]->adjust(xp,yp);                           
-                        }
-
+                        width_ = adjustItems(0,xp,yp,redTextLen);
                         elided_=true;
-                        width_ = xp+triLen_+hMargin_;
+
                         Q_ASSERT(width_== estWidth);
                         Q_ASSERT(width_ <  maxWidth);
                         break; //This breaks the whole for loop
@@ -302,19 +276,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
 #ifdef _UI_NODEPATHWIDGET_DEBUG
                 qDebug() << "     omit item" << i;          
 #endif
-                for(int j=i+1; j < items_.count(); j++)
-                {
-                    if(j!= items_.count()-1)
-                    {
-                        xp=items_[j]->estimateRightPos(xp,redTextLen);
-                        xp+=gap_;                       
-                    }    
-                    else
-                        xp=items_[j]->estimateRightPos(xp);                   
-                }
-                
-                estWidth=xp+triLen_+hMargin_;
-                
+                estWidth=estimateWidth(i+1,xp,redTextLen);
 #ifdef _UI_NODEPATHWIDGET_DEBUG
                 qDebug() << "     estWidth" << estWidth;          
 #endif                
@@ -328,20 +290,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
             if(fitOk)
             {                
                 xp=xpAfterEllipsis;
-                for(int i=0; i < items_.count() ; i++)
-                {
-                    if(items_[i]->visible_)
-                    {                        
-                        if(i != items_.count()-1)
-                        {                           
-                            xp=items_[i]->adjust(xp,yp,redTextLen);
-                            xp+=gap_;                                                
-                        }
-                        else
-                            xp=items_[i]->adjust(xp,yp);         
-                    }
-                }
-                width_=xp+triLen_+hMargin_;
+                width_=adjustVisibleItems(0,xp,yp,redTextLen);
                 Q_ASSERT(width_ == estWidth);
                 Q_ASSERT(width_ < maxWidth);
             }
@@ -349,12 +298,12 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
             {
                 xp=xpAfterEllipsis;           
                 xp=lastItem->estimateRightPos(xp);
-                estWidth=xp+triLen_+hMargin_;
+                estWidth=xp+NodePathItem::triLen_+hMargin_;
                 if(estWidth < maxWidth)
                 {
                     xp=xpAfterEllipsis;
                     xp=lastItem->adjust(xp,yp);
-                    width_=xp+triLen_+hMargin_;
+                    width_=xp+NodePathItem::triLen_+hMargin_;
                     Q_ASSERT(width_ == estWidth);
                     Q_ASSERT(width_ < maxWidth);
                 }
@@ -385,12 +334,12 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
                     //Estimate the total size with the elided text item
                     xp=xpAfterEllipsis;
                     xp=lastItem->estimateRightPos(xp,redTextLen);
-                    int estWidth=xp+triLen_+hMargin_;
+                    int estWidth=xp+NodePathItem::triLen_+hMargin_;
                     if(estWidth < maxWidth)
                     {
                         xp=xpAfterEllipsis;
                         xp=lastItem->adjust(xp,yp,redTextLen);
-                        width_=xp+triLen_+hMargin_;
+                        width_=xp+NodePathItem::triLen_+hMargin_;
                         Q_ASSERT(width_ == estWidth);
                         Q_ASSERT(width_ < maxWidth);
                         break;
@@ -414,6 +363,56 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
 
     update();
 }  
+
+int BcWidget::estimateWidth(int startIndex,int xp,int redTextLen)
+{
+    for(int i=startIndex; i < items_.count(); i++)
+    {
+        if(i != items_.count()-1)
+        {
+            xp=items_[i]->estimateRightPos(xp,redTextLen);
+            xp+=gap_;
+        }
+        else
+            xp=items_[i]->estimateRightPos(xp);
+    }
+
+    return xp+NodePathItem::triLen_+hMargin_;
+}
+
+int BcWidget::adjustItems(int startIndex,int xp,int yp,int redTextLen)
+{
+    for(int i=startIndex; i < items_.count(); i++)
+    {
+        if(i != items_.count()-1)
+        {
+            xp=items_[i]->adjust(xp,yp,redTextLen);
+            xp+=gap_;
+        }
+        else
+            xp=items_[i]->adjust(xp,yp);
+    }
+
+    return xp+NodePathItem::triLen_+hMargin_;
+}
+
+int BcWidget::adjustVisibleItems(int startIndex,int xp,int yp,int redTextLen)
+{
+    for(int i=startIndex; i < items_.count(); i++)
+    {
+        if(items_[i]->visible_)
+        {
+            if(i != items_.count()-1)
+            {
+                xp=items_[i]->adjust(xp,yp,redTextLen);
+                xp+=gap_;
+            }
+            else
+                xp=items_[i]->adjust(xp,yp);
+        }
+    }
+    return xp+NodePathItem::triLen_+hMargin_;
+}
 
 void BcWidget::adjustSize(int maxWidth)
 {
@@ -556,13 +555,7 @@ NodePathItem::NodePathItem(int index,QString text,QColor bgCol,QColor fontCol,bo
     visible_(false),
     enabled_(true)
 {
-
-    if(height_==0)
-    {
-        QFont f;
-        QFontMetrics fm(f);
-        height_=fm.height()+2*vPadding_;
-    }
+    height();
 
     if(!disabledBgCol_.isValid())
     {
@@ -575,6 +568,17 @@ NodePathItem::NodePathItem(int index,QString text,QColor bgCol,QColor fontCol,bo
     grad_.setStart(0,0);
     grad_.setFinalStop(0,1);
 }    
+
+int NodePathItem::height()
+{
+    if(height_==0)
+    {
+        QFont f;
+        QFontMetrics fm(f);
+        height_=fm.height()+2*vPadding_;
+    }
+    return height_;
+}
 
 void NodePathItem::setCurrent(bool)
 {

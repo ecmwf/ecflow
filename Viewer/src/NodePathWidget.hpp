@@ -66,14 +66,14 @@ protected:
     void crePixmap();
     void updatePixmap(int);
     bool isFull() const;
+    int estimateWidth(int,int,int);
+    int adjustItems(int,int,int,int);
+    int adjustVisibleItems(int,int,int,int);
 
     QFont font_;
-    QPixmap pix_;
-    int hPadding_;
-    int vPadding_;
+    QPixmap pix_;   
     int hMargin_;
-    int vMargin_;
-    int triLen_;
+    int vMargin_;   
     int gap_;
     int width_;
     int maxWidth_;
@@ -106,6 +106,7 @@ public:
     void resetBorder(bool hovered);
     void reset(QString text,QColor bgCol,QColor fontCol,bool hovered);
     int textLen() const;
+    static int height();
 
 protected:
     virtual void makeShape(int xp,int yp,int len);
