@@ -234,18 +234,17 @@ int NodePanel::tabAreaWidth() const
 void NodePanel::adjustTabTitle()
 {
     if(count() > 1)
-    {
-        qDebug() << tabAreaWidth() << count();
-        int dw=tabAreaWidth()/count();
-        if(dw < 30)
-            dw=30;
+    {       
+        int tabWidth=tabAreaWidth()/count();
+        if(tabWidth < 30)
+            tabWidth=30;
 
         for(int i=0; i < count(); i++)
         {
             if(QWidget *w=widget(i))
             {
                 if(Dashboard* nw=static_cast<Dashboard*>(w))
-                    nw->titleHandler()->setMaxPixWidth(dw);
+                    nw->titleHandler()->setMaxPixWidth(tabWidth);
             }
         }
     }
@@ -254,10 +253,8 @@ void NodePanel::adjustTabTitle()
 void NodePanel::resizeEvent(QResizeEvent *e)
 {
     if(abs(e->oldSize().width()-width()) > 5)
-            adjustTabTitle();
+        adjustTabTitle();
 }
-
-
 
 /*void NodePanel::slotNewWindow(bool)
 {

@@ -71,8 +71,9 @@ protected:
 	virtual void tabBarCommand(QString,int)=0;
 
 private:
-	QSize maxIconSize() const;
-
+#if 0
+    QSize maxIconSize() const;
+#endif
 	QTabBar *bar_;
 	QStackedWidget *stacked_;
     QToolButton* addTb_;

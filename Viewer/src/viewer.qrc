@@ -23,7 +23,7 @@
     <file>../images/arrow_up.svg</file>
     <file>../images/arrow_down.svg</file>
     <file>../images/add.svg</file>
-    <file>../images/close.svg</file>
+    <file alias="close.svg">../images/close.svg</file>
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file> 

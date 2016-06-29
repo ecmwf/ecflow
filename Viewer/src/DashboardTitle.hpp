@@ -37,6 +37,7 @@ public:
     QPixmap descPix() const {return descPix_;}
     void setMaxPixWidth(int w);
     void setCurrent(bool b);
+    int fullWidth() const;
 
 	void notifyServerFilterAdded(ServerItem* item);
 	void notifyServerFilterRemoved(ServerItem* item);
@@ -59,7 +60,6 @@ Q_SIGNALS:
 private:
 	void clear();
     void updateTitle();
-    //void drawServerRect(QPainter *,QColor,QRect,QString,QColor,QRect);
 
     Dashboard* dashboard_;
 	ServerFilter* filter_;

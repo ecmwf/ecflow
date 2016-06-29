@@ -159,19 +159,7 @@
                         "line" : "meterThresholdColour",
                         "line" : "limitFillColour"
                     }
-                },
-                "tab" : {
-
-                    "label"  : "Tabs",
-
-                    "group" : {
-                        "title" : "Options",
-                        "prefix" : "view.tab",
-
-                        "line" : "tabTitleMode"
-                    }
                 }
-
 			}
  		},	
             

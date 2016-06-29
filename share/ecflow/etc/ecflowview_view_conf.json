@@ -134,16 +134,7 @@
                     "label": "Line number area current line colour",
                     "default": "rgb(212,212,255)"
                   }
-          },
-          "tab" : {
-              "tabTitleMode" : {
-                   "label" : "In tab title",
-                    "values" : "full/adjusted",
-                    "values_label" : "show full server names/adjust names to width",
-                    "default" : "full"
-                   }
           }
-
     },
     
     "query_columns": {

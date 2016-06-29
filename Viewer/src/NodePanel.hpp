@@ -22,7 +22,6 @@ class Dashboard;
 class DashboardTitle;
 class ServerFilter;
 class VComboSettings;
-class VProperty;
 
 class NodePanel : public TabWidget
 {
@@ -78,7 +77,6 @@ protected:
 	void tabBarCommand(QString, int);
 	Dashboard* nodeWidget(int index);
 	static std::string tabSettingsId(int i);
-    VProperty* tabTitleMode_;
 };
 
 #endif

@@ -120,6 +120,7 @@ void TabWidget::slotContextMenu(const QPoint& pos) {
     QList<QAction*> lst;
     QAction *closeAc=new QAction(QPixmap(":/viewer/close.svg"),"&Close tab",this);
     lst << closeAc;
+
     if(QAction *ac=QMenu::exec(lst,mapToGlobal(pos),closeAc,this))
     {
         if(ac == closeAc)
@@ -318,6 +319,7 @@ void TabWidget::setTabIcon(int index, QPixmap pix)
 	}
 }
 
+#if 0
 QSize TabWidget::maxIconSize() const
 {
 	QSize maxSize(0,0);
@@ -335,7 +337,7 @@ QSize TabWidget::maxIconSize() const
 	}
 	return maxSize;
 }
-
+#endif
 
 void TabWidget::checkTabStatus()
 {

@@ -20,7 +20,7 @@
 
 int DashboardTitle::lighter_=150;
 
-#define _UI_DASHBOARDTITLE_DEBUG
+//#define _UI_DASHBOARDTITLE_DEBUG
 
 DashboardTitle::DashboardTitle(ServerFilter* filter,Dashboard *parent) :
   QObject(parent),
@@ -120,6 +120,23 @@ void DashboardTitle::setCurrent(bool b)
     }
 }
 
+int DashboardTitle::fullWidth() const
+{
+    QFont f;
+    QFontMetrics fm(f);
+    const int gap=1;
+    const int padding=10;
+    int w=0;
+    for(size_t i=0; i < filter_->items().size(); i++)
+    {
+        QString str=QString::fromStdString(filter_->items()[i]->name());
+        int tw=fm.width(str);
+        if(tw > w) w=tw;
+    }
+
+    return 10+filter_->items().size()*(w+padding)+(filter_->items().size()-1)*gap;
+}
+
 void DashboardTitle::updateTitle()
 {
     pix_=QPixmap();
@@ -158,12 +175,9 @@ void DashboardTitle::updateTitle()
         //Description for tab list menu
         if(!desc_.isEmpty())
         {
-            desc_+=" ";
+            desc_+=", ";
         }
-        if(filter_->itemCount() <=3)
-            desc_+=str + " (" + host + "@" + port + ")";
-        else
-            desc_+=str;
+        desc_+=str;
 
         //Tooltip
         if(!tooltip_.isEmpty())
@@ -175,56 +189,6 @@ void DashboardTitle::updateTitle()
 
     int num=texts.count();
     Q_ASSERT(num>0);
-
-#if 0
-    if(titleMode_ == "full")
-    {
-        const int marginX=0;
-        const int marginY=0;
-        const int textMarginX=1;
-        const int textMarginY=1;
-        const int gap=2;
-        QFont f;
-        QFontMetrics fm(f);
-
-        //Compute the pixmap size
-        int w=0;
-        int h=fm.height()+2*marginY+2*textMarginY+1;
-
-        QList<QRect> textRects;
-        QList<QRect> fillRects;
-
-        int xp=marginX;
-        int yp=marginY;
-        for(int i=0; i < texts.count(); i++)
-        {
-            if(titleMode_ == "one")
-            {
-                texts[i].truncate(1);
-            }
-            else if(titleMode_ == "two")
-            {
-                texts[i].truncate(2);
-            }
-
-            textRects << QRect(xp+textMarginX,yp+textMarginY,fm.width(texts[i]),fm.height());
-            fillRects << QRect(xp,yp,fm.width(texts[i])+2*textMarginX,fm.height()+2*textMarginY);
-            xp=fillRects.back().right()+gap;
-        }
-
-        w=xp-gap+marginX+2;
-
-        //Render the pixmap
-        pix_=QPixmap(w,h);
-        pix_.fill(Qt::transparent);
-        QPainter painter(&pix_);
-
-        for(int i=0; i < texts.count(); i++)
-        {
-            drawServerRect(&painter,fillColors[i],fillRects[i],texts[i],textColors[i],textRects[i]);
-        }
-    }
-#endif
 
     {
         const int marginX=0;
@@ -382,7 +346,7 @@ void DashboardTitle::updateTitle()
                 QColor borderCol=bg.darker(150);
                 painter.setPen(borderCol);
                 painter.setBrush(bg);
-                painter.drawRect(fillRects[i].adjusted(2,0,-2,0));
+                painter.drawRect(fillRects[i]);
             }
         }
     }
@@ -438,48 +402,6 @@ void DashboardTitle::updateTitle()
 
     Q_EMIT changed(this);
 }
-
-
-#if 0
-void DashboardTitle::drawServerRect(QPainter *painter,QColor bg,QRect fillRect,QString text,QColor textCol, QRect textRect)
-{
-    QColor bgLight;
-    if(bg.value() < 235)
-        bgLight=bg.lighter(130);
-    else
-        bgLight=bg.lighter(lighter_);
-
-    QColor borderCol=bg.darker(150);
-    QLinearGradient grad;
-    grad.setCoordinateMode(QGradient::ObjectBoundingMode);
-    grad.setStart(0,0);
-    grad.setFinalStop(0,1);
-
-    useStateGrad_=false;
-
-    QBrush bgBrush;
-    if(useStateGrad_)
-    {
-        grad.setColorAt(0,bgLight);
-        grad.setColorAt(1,bg);
-        bgBrush=QBrush(grad);
-    }
-    else
-        bgBrush=QBrush(bg);
-
-    painter->setPen(borderCol);
-    painter->setBrush(bgBrush);
-    painter->drawRect(fillRect);
-
-    if(!text.isEmpty())
-    {
-        painter->setPen(QPen(textCol));
-        painter->drawText(textRect,Qt::AlignCenter,text);
-    }
-}
-#endif
-
-
 
 
 
