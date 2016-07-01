@@ -31,6 +31,7 @@
 class TimeDepAttrs  {
 public:
    TimeDepAttrs(Node* node) : node_(node) {}
+   TimeDepAttrs(const TimeDepAttrs&); // users must call set_node() afterwards
    TimeDepAttrs() : node_(NULL) {}
 
    // needed by node serialisation

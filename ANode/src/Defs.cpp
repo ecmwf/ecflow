@@ -54,8 +54,36 @@ Defs::Defs() :
    order_state_change_no_(0),
    save_edit_history_(false),
    client_suite_mgr_(this),
+   in_notification_(false) {}
+
+Defs::Defs(const Defs& rhs) :
+   state_change_no_(0),
+   modify_change_no_( 0 ),
+   updateCalendarCount_(0),
+   order_state_change_no_(0),
+   save_edit_history_(false),
+   client_suite_mgr_(this),
    in_notification_(false)
 {
+   state_ = rhs.state_;
+   server_ = rhs.server_;
+   flag_ =  rhs.flag_;
+
+   size_t theSize = rhs.suiteVec_.size();
+   for(size_t s = 0; s < theSize; s++) {
+      suite_ptr suite_copy = boost::make_shared<Suite>( *rhs.suiteVec_[s] );
+      suite_copy->set_defs(this);
+      suiteVec_.push_back( suite_copy );
+   }
+
+   // edit history is not copied
+   // std::map<std::string, std::deque<std::string> > edit_history_;
+
+   /// externs not copied
+   // std::set<std::string> externs_;                      // NOT persisted
+
+   // observers not copied
+   // std::vector<AbstractObserver*> observers_;
 }
 
 defs_ptr Defs::create()

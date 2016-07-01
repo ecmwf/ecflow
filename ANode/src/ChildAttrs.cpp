@@ -23,6 +23,16 @@ using namespace ecf;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
+
+ChildAttrs::ChildAttrs(const ChildAttrs& rhs)
+: meters_(rhs.meters_),
+  events_(rhs.events_),
+  labels_(rhs.labels_),
+  node_(NULL)
+{
+  // users must call set_node() afterwards
+}
+
 void ChildAttrs::begin()
 {
    for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }

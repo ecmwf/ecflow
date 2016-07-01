@@ -37,6 +37,17 @@ ServerState::ServerState() :
 	setup_default_env();
 }
 
+ServerState::ServerState(const ServerState& rhs)
+{
+   state_change_no_ = 0;                  // *not* persisted, only used on server side
+   variable_state_change_no_ = 0;         // *not* persisted, only used on server side
+   jobSubmissionInterval_ = 60;           // NOT persisted, since set in the server
+   jobGeneration_ = true;                 // NOT persisted, since set in the server
+   // hostPort_ -> empty on construction; // NOT persisted, set by server hence no need to persist
+   server_state_  = rhs.server_state_;
+   server_variables_ = rhs.server_variables_;
+}
+
 bool ServerState::operator==(const ServerState& rhs) const
 {
    if ( get_state() != rhs.get_state()) {
