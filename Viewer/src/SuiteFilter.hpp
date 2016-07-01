@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,6 +15,7 @@
 
 #include "FlagSet.hpp"
 
+class SuiteFilter;
 class SuiteFilterObserver;
 class VSettings;
 
@@ -41,35 +42,44 @@ private:
 
 class SuiteFilterItem
 {
+   friend class SuiteFilter;
 public:
-	SuiteFilterItem(const std::string& name,bool present, bool filtered) :
-		     name_(name), present_(present), filtered_(filtered) {}
+    SuiteFilterItem(const std::string& name,bool loaded, bool filtered) :
+             name_(name), loaded_(loaded), filtered_(filtered) {}
 
 	SuiteFilterItem(const SuiteFilterItem& other);
 
+    bool operator!=(const SuiteFilterItem& rhs) {return name_ != rhs.name_ || loaded_ != rhs.loaded_ ||
+                filtered_ != rhs.filtered_;}
+
+    const std::string& name() const {return name_;}
+    bool loaded() const {return loaded_;}
+    bool filtered() const {return filtered_;}
+
+protected:
 	std::string name_;
-	bool present_;
+    bool loaded_;
 	bool filtered_;
 };
 
 class SuiteFilter
 {
 public:
-	SuiteFilter() : autoAddNew_(false), enabled_(false) {}
+    SuiteFilter() : autoAddNew_(false), enabled_(false), loadedInitialised_(false) {}
 	~SuiteFilter();
 
 	enum ChangeFlag {AutoAddChanged=1,EnabledChanged=2,ItemChanged=4};
 
 	SuiteFilter* clone();
 
-	const std::vector<std::string>& filter() const {return filter_;}
-	const std::vector<std::string>& loaded() const {return loaded_;}
+    std::vector<std::string> filter() const;
+    std::vector<std::string> loaded() const;
 	const std::vector<SuiteFilterItem> items() const {return items_;}
 
 	void current(const std::vector<std::string>& suites);
 	int count() const {return static_cast<int>(items_.size());}
 	void setFiltered(int index,bool val);
-
+    bool isLoadedInitialised() const {return loadedInitialised_;}
 	bool autoAddNewSuites() const {return autoAddNew_;}
 	bool isEnabled() const {return enabled_;}
 
@@ -93,18 +103,21 @@ public:
 private:
 	void clear();
 	void adjust();
-	void broadcastChange();
-	void checkForNewLoaded(const std::vector<std::string>& loaded);
+    void broadcastChange();
+    void adjustLoaded(const std::vector<std::string>& loaded);
+    void adjustFiltered(const std::vector<std::string>& filtered);
+    //void checkForNewLoaded(const std::vector<std::string>& loaded);
 
 	//All the suites currently loaded onto the server
-    std::vector<std::string> loaded_;
+    //std::vector<std::string> loaded_;
 
     //The suites we want to filter (they might not be loaded)
-    std::vector<std::string> filter_;
+    //std::vector<std::string> filter_;
 
-	std::vector<SuiteFilterItem> items_;
-	bool autoAddNew_;
+    std::vector<SuiteFilterItem> items_;
+    bool autoAddNew_;
 	bool enabled_;
+    bool loadedInitialised_;
 	FlagSet<ChangeFlag> changeFlags_;
 	std::vector<SuiteFilterObserver*> observers_;
 };

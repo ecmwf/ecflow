@@ -82,13 +82,23 @@ void SuiteModel::notifyDelete(SuiteFilter *filter)
 
 void SuiteModel::updateData()
 {
-	if(realData_ && data_ &&
+    if(realData_ && data_ &&
+         !data_->loadedSameAs(realData_->loaded()))
+        {
+            beginResetModel();
+            data_->setLoaded(realData_->loaded());
+            endResetModel();
+        }
+
+#if 0
+    if(realData_ && data_ &&
 	 !data_->loadedSameAs(realData_->loaded()))
 	{
 		beginResetModel();
 		data_->setLoaded(realData_->loaded());
 		endResetModel();
 	}
+#endif
 }
 
 void SuiteModel::reloadData()
@@ -157,10 +167,10 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 		switch(index.column())
 		{
 		case 0:
-			return QString::fromStdString(data_->items().at(row).name_);
+            return QString::fromStdString(data_->items().at(row).name());
 			break;
 		case 1:
-			return (data_->items().at(row).present_)?"loaded":"not loaded";
+            return (data_->items().at(row).loaded())?"loaded":"not loaded";
 			break;
 		default:
 			break;
@@ -169,7 +179,7 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 	else if(role == Qt::CheckStateRole)
 	{
 		if(index.column()==0)
-			return (data_->items().at(row).filtered_)?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
+            return (data_->items().at(row).filtered())?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
 	}
 	else if(role == Qt::ForegroundRole)
 	{
@@ -179,7 +189,7 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 		}
 		else if(index.column() == 1)
 		{
-			return (data_->items().at(row).present_)?presentCol_:notPresentCol_;
+            return (data_->items().at(row).loaded())?presentCol_:notPresentCol_;
 		}
 		return QVariant();
 	}

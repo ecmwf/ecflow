@@ -1412,12 +1412,13 @@ void ServerHandler::updateSuiteFilterWithDefs()
 //Only called internally after reset or serverscan!!
 void ServerHandler::updateSuiteFilter()
 {
-	bool hasObserver=suiteFilter_->hasObserver();
-
 	//We only fetch the full list of loaded suites from the server
-	//via the thread when the suiteFilter is observerved and it is
-	//enabled!
-	if(hasObserver && suiteFilter_->isEnabled())
+    //via the thread when
+    //  -the suiteFilter is not yet initialised
+    //   OR
+    //  -the suiteFilter is observerved and it is enabled!
+    if(!suiteFilter_->isLoadedInitialised() ||
+       (suiteFilter_->hasObserver() && suiteFilter_->isEnabled()))
 	{
 		//This will call updateSuiteFilterWithLoaded()
 		comQueue_->addSuiteListTask();

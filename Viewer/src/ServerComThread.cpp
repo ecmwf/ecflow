@@ -70,7 +70,10 @@ void ServerComThread::task(VTask_ptr task)
 		//Suite filter
 		hasSuiteFilter_=server_->suiteFilter()->isEnabled();
 		autoAddNewSuites_=server_->suiteFilter()->autoAddNewSuites();
-		filteredSuites_=server_->suiteFilter()->filter();
+        if(hasSuiteFilter_)
+            filteredSuites_=server_->suiteFilter()->filter();
+        else
+            filteredSuites_.clear();
 
 		maxLineNum_=server_->conf()->intValue(VServerSettings::MaxOutputFileLines);
 
