@@ -49,7 +49,7 @@ public:
 
 	SuiteFilterItem(const SuiteFilterItem& other);
 
-    bool operator!=(const SuiteFilterItem& rhs) {return name_ != rhs.name_ || loaded_ != rhs.loaded_ ||
+    bool operator!=(const SuiteFilterItem& rhs) const {return name_ != rhs.name_ || loaded_ != rhs.loaded_ ||
                 filtered_ != rhs.filtered_;}
 
     const std::string& name() const {return name_;}
@@ -74,7 +74,7 @@ public:
 
     std::vector<std::string> filter() const;
     std::vector<std::string> loaded() const;
-	const std::vector<SuiteFilterItem> items() const {return items_;}
+    const std::vector<SuiteFilterItem>& items() const {return items_;}
 
 	void current(const std::vector<std::string>& suites);
 	int count() const {return static_cast<int>(items_.size());}
@@ -87,7 +87,10 @@ public:
 	void setEnabled(bool b) {enabled_=b;}
 	void selectAll();
 	void unselectAll();
+    bool removeUnloaded();
+    bool hasUnloaded() const;
 
+    bool sameAs(const SuiteFilter*) const;
 	bool update(SuiteFilter*);
 	bool setLoaded(const std::vector<std::string>& loaded,bool checkDiff=true);
 	bool loadedSameAs(const std::vector<std::string>& loaded) const;

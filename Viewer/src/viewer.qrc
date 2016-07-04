@@ -70,6 +70,7 @@
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
     <file alias="reload_one.svg">../images/reload_one.svg</file>
+    <file alias="remove.svg">../images/remove.svg</file>
     <file alias="rescue.svg">../images/rescue.svg</file>
     <file alias="reset_to_default.svg">../images/reset_to_default.svg</file>
     <file alias="script.svg">../images/script.svg</file>
@@ -83,6 +84,7 @@
     <file alias="status.svg">../images/status.svg</file>
     <file alias="submit.svg">../images/submit.svg</file>
     <file alias="sync.svg">../images/sync.svg</file>
+    <file alias="sync_black.svg">../images/sync_black.svg</file>
     <file alias="terminate.svg">../images/terminate.svg</file>
     <file alias="tree_branch_end.png">../images/tree_branch_end.png</file>
     <file alias="tree_branch_more.png">../images/tree_branch_more.png</file>

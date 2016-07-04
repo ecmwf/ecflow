@@ -28,9 +28,10 @@ public:
 	void setData(SuiteFilter* filter);
 	void reloadData();
 
-   	SuiteFilter* filter() const {return data_;}
+   	SuiteFilter* filter() const {return data_;}   
+    SuiteFilter* realFilter() const {return realData_;}
 
-   	void notifyChange(SuiteFilter*);
+    void notifyChange(SuiteFilter*);
    	void notifyDelete(SuiteFilter*);
 
 protected:

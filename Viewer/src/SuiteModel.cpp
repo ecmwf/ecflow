@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -225,7 +225,7 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    		switch ( section )
    		{
    		case 0: return tr("Suite");
-   		case 1: return tr("Status on server");
+        case 1: return tr("Load status on server");
    		default: return QVariant();
    		}
    	}
@@ -233,8 +233,10 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    	{
    		switch ( section )
    		{
-   		case 0: return tr("Suite filter status");
-   		case 1: return tr("Indicates if the suite is currently <b>loaded</b> on the server");
+        case 0: return tr("Filter status of suite");
+        case 1: return tr("Indicates if the suite is currently <b>loaded</b> on the server.<br><br>\
+                          Please note: this information might not be up to date for <b>unfiltered</b> suites. Use <u>Fetch load status</u> \
+                          to get the actual load status list.");
    		default: return QVariant();
    		}
    	}

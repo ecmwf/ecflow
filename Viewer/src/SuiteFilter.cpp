@@ -342,6 +342,28 @@ bool SuiteFilter::setLoaded(const std::vector<std::string>& loaded,bool checkDif
 }
 
 
+bool SuiteFilter::sameAs(const SuiteFilter* sf) const
+{
+    if(autoAddNew_ != sf->autoAddNewSuites())
+        return false;
+
+    if(enabled_ != sf->isEnabled())
+        return false;
+
+    if(sf->count() != count())
+        return false;
+
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i] != sf->items()[i])
+        {
+           return false;
+        }
+    }
+
+    return true;
+}
+
 bool SuiteFilter::update(SuiteFilter* sf)
 {
 	changeFlags_.clear();
@@ -350,7 +372,6 @@ bool SuiteFilter::update(SuiteFilter* sf)
     //	return false;
 
     assert(sf);
-    assert(sf->count() == count());
 
     //if(sf->count() != count())
     //	return false;
@@ -429,6 +450,41 @@ void SuiteFilter::unselectAll()
     }
 
     //adjust();
+}
+
+bool SuiteFilter::removeUnloaded()
+{
+    //it cannot change loaded_ or items_
+    //filter_.clear();
+    std::vector<SuiteFilterItem> v;
+
+    bool changed=false;
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i].loaded())
+        {
+            v.push_back(items_[i]);
+        }
+        else
+        {
+            changed=true;
+        }
+    }
+
+    if(changed)
+        items_=v;
+
+    return changed;
+}
+
+bool SuiteFilter::hasUnloaded() const
+{
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(!items_[i].loaded())
+            return true;
+    }
+    return false;
 }
 
 void SuiteFilter::addObserver(SuiteFilterObserver* o)
