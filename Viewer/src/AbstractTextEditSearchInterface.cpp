@@ -22,11 +22,11 @@ AbstractTextEditSearchInterface::AbstractTextEditSearchInterface()
 		highlightColour_=p->value().value<QColor>();
 	}
 
-	vpPerformAutomaticSearch_ = VConfig::instance()->find("panel.automaticOutputSearch.performSearch");
-	vpAutomaticSearchMode_    = VConfig::instance()->find("panel.automaticOutputSearch.searchMode");
-	vpAutomaticSearchText_    = VConfig::instance()->find("panel.automaticOutputSearch.searchText");
-	vpAutomaticSearchFrom_    = VConfig::instance()->find("panel.automaticOutputSearch.searchFrom");
-	vpAutomaticSearchCase_    = VConfig::instance()->find("panel.automaticOutputSearch.caseSensitive");
+	vpPerformAutomaticSearch_ = VConfig::instance()->find("panel.output.automaticSearch.performSearch");
+	vpAutomaticSearchMode_    = VConfig::instance()->find("panel.output.automaticSearch.searchMode");
+	vpAutomaticSearchText_    = VConfig::instance()->find("panel.output.automaticSearch.searchText");
+	vpAutomaticSearchFrom_    = VConfig::instance()->find("panel.output.automaticSearch.searchFrom");
+	vpAutomaticSearchCase_    = VConfig::instance()->find("panel.output.automaticSearch.caseSensitive");
 
 	// these should always exist - if they don't then there is a spelling error in the above lines
 	assert(vpPerformAutomaticSearch_);

@@ -41,8 +41,46 @@
              "font" : {
                  "label" : "Output tab",
                  "default": "font(Monospace,)"
-             }
-        },  
+             },
+
+            "automaticSearch": {
+                "label" : "Files",
+                "tooltip" : "Automatic output search",
+
+                "performSearch": {
+                    "label": "Perform automatic search when reloading job output",
+                    "tooltip": "This will not take effect when the text search bar is open",
+                    "default": "true"
+                },
+
+                "searchMode" : {
+                    "label" : "Search mode",
+                    "values"  : "~/=/=~",
+                    "values_label" : "Contains/Matches/Regexp",
+                    "default" : "=~"
+                },
+
+                "searchText": {
+                    "label": "Search text",
+                    "tooltip": "",
+                    "default": "--(abort|complete)"
+                },
+
+                "caseSensitive": {
+                    "label": "Case sensitive",
+                    "tooltip": "Perform a case-sensitive search",
+                    "default": "false"
+                },
+
+                "searchFrom": {
+                    "label": "Search from",
+                    "tooltip": "",
+                    "values"  : "top/bottom",
+                    "values_label" : "Top/Bottom",
+                    "default": "bottom"
+                }
+            }
+        },
         "why" : {
                     
              "font" : {
@@ -63,44 +101,6 @@
                   "label" : "Show shadowed",
                   "default" : "true"
               }
-        },
-
-        "automaticOutputSearch": {
-            "label" : "Files",
-            "tooltip" : "Automatic output search", 
-
-            "performSearch": {
-                "label": "Perform automatic search when reloading job output",
-                "tooltip": "This will not take effect when the text search bar is open",
-                "default": "true"
-                },
-
-            "searchMode" : {
-                "label" : "Search mode",
-                "values"  : "~/=/=~",
-                "values_label" : "Contains/Matches/Regexp",
-                "default" : "=~"
-                },    
-
-            "searchText": {
-                "label": "Search text",
-                "tooltip": "",                          
-                "default": "--(abort|complete)"
-                },
-
-            "caseSensitive": {
-                "label": "Case sensitive",
-                "tooltip": "Perform a case-sensitive search",
-                "default": "false"
-                },
-
-            "searchFrom": {
-                "label": "Search from",
-                "tooltip": "",                          
-                "values"  : "top/bottom",
-                "values_label" : "Top/Bottom",
-                "default": "bottom"
-                }
         }
     }                     
 }
