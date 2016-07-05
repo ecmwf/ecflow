@@ -305,7 +305,7 @@ void NodeQuery::buildQueryString()
         //extQuery_["attr"]="(" + attrPart + ")";
         extQuery_["attr"]=attrPart;
 
-    bool hasEq=extQuery_.values().join("").contains("=");
+    bool hasEq=QStringList(extQuery_.values()).join("").contains("=");
 
     //Scope
 	QString scopePart;
