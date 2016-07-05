@@ -730,6 +730,16 @@ int VServer::totalNumOfTopLevel(int idx) const
 	return -1;
 }
 
+int VServer::totalNumOfTopLevel(const std::string& name) const
+{
+    for(size_t i=0; i < children_.size(); i++)
+    {
+        if(name == children_[i]->strName())
+            return totalNumOfTopLevel(i);
+    }
+    return -1;
+}
+
 //--------------------------------
 // Clear
 //--------------------------------

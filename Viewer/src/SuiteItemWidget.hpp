@@ -59,6 +59,7 @@ protected:
     void checkActionState();
 
     SuiteModel *model_;
+    bool columnsAdjusted_;
 };
 
 #endif

@@ -22,7 +22,9 @@
 //
 //========================================================
 
-SuiteItemWidget::SuiteItemWidget(QWidget *parent) : QWidget(parent)
+SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
+    QWidget(parent),
+    columnsAdjusted_(false)
 {
 	setupUi(this);
 
@@ -89,7 +91,17 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 		assert(sf);
 
 		//The model will be an observer of the suitefilter
-		model_->setData(sf);
+        model_->setData(sf,info_->server());
+
+        if(!columnsAdjusted_)
+        {
+            for(int i=0; i < model_->columnCount()-1; i++)
+            {
+                suiteView->resizeColumnToContents(i);
+                suiteView->setColumnWidth(i,suiteView->columnWidth(i)+(i==0)?25:15);
+            }
+            columnsAdjusted_=true;
+        }
 
         model_->filter()->addObserver(this);
 
@@ -140,10 +152,10 @@ void SuiteItemWidget::infoFailed(VReply* reply)
 
 void SuiteItemWidget::clearContents()
 {
-	model_->setData(0);
+    model_->setData(0,0);
 	InfoPanelItem::clear();
 	okTb->setEnabled(false);
-	//messageLabel->hide();
+    messageLabel->hide();
 }
 
 void SuiteItemWidget::updateState(const FlagSet<ChangeFlag>&)
@@ -201,9 +213,8 @@ void SuiteItemWidget::on_autoCb_clicked(bool val)
 	if(SuiteFilter* sf=model_->filter())
 	{
 		sf->setAutoAddNewSuites(val);
+        settingsChanged();
 	}
-
-    checkActionState();
 }
 
 void SuiteItemWidget::on_enableTb_clicked(bool val)
@@ -281,8 +292,8 @@ void SuiteItemWidget::slotModelEdited(const QModelIndex&,const QModelIndex&)
 
 void SuiteItemWidget::settingsChanged()
 {
-    SuiteFilter *sf;
-    SuiteFilter *oriSf;
+    SuiteFilter *sf=model_->filter();
+    SuiteFilter *oriSf=model_->realFilter();
     if(sf && oriSf)
     {
         bool st=oriSf->sameAs(sf);

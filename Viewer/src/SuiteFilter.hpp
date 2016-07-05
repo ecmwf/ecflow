@@ -109,13 +109,6 @@ private:
     void broadcastChange();
     void adjustLoaded(const std::vector<std::string>& loaded);
     void adjustFiltered(const std::vector<std::string>& filtered);
-    //void checkForNewLoaded(const std::vector<std::string>& loaded);
-
-	//All the suites currently loaded onto the server
-    //std::vector<std::string> loaded_;
-
-    //The suites we want to filter (they might not be loaded)
-    //std::vector<std::string> filter_;
 
     std::vector<SuiteFilterItem> items_;
     bool autoAddNew_;
