@@ -15,6 +15,8 @@ ECFLOWUI_BT=@UI_BACKTRACE@
 ECFLOWUI_BT_EMAIL_ADDRESSES=@UI_BACKTRACE_EMAIL_ADDRESSES@
 ECFLOWUI_VERSION=@ECFLOW_VERSION_STR@
 ECFLOWUI_INSTALLDIR=@CMAKE_INSTALL_PREFIX@
+ECFLOWUI_USAGE_LOG=@UI_LOG_FILE@
+ECFLOWUI_SITE_TAG=@UI_LOG_SITE_TAG@
 
 # ----------------------------------------------------------
 # Clean up the tmp directory at the end or on error
@@ -148,6 +150,27 @@ HEND
 fi
 
 
+#-----------------------------------------------------------
+# usage log
+#-----------------------------------------------------------
+
+set +e  # failing to write to the log file should not cause a fatal error
+if [ $ECFLOWUI_USAGE_LOG != x ]
+then
+	# checks on file existence and size
+	if [ -f $ECFLOWUI_USAGE_LOG ]  # log file exists?
+	then
+		if [ ! -s $ECFLOWUI_USAGE_LOG ]  # file is empty? - write the header line
+		then
+			echo "date,time,version,user,host,site" >> $ECFLOWUI_USAGE_LOG
+		fi
+
+		echo "`date -u '+%Y.%m.%d,%R'`,$ECFLOWUI_VERSION,$USER,`hostname`,$ECFLOWUI_SITE_TAG" >> $ECFLOWUI_USAGE_LOG
+	else
+		echo "Log file $ECFLOWUI_USAGE_LOG does not exist."
+	fi
+fi
+set -e
 
 
 

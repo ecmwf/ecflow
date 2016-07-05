@@ -15,6 +15,13 @@ if(NOT UI_BACKTRACE_EMAIL_ADDRESSES)
     set(UI_BACKTRACE_EMAIL_ADDRESSES "x")
 endif()
 
+if(NOT UI_LOG_FILE)
+	set(UI_LOG_FILE "x")
+endif()
+
+if(NOT UI_LOG_SITE_TAG)
+	set(UI_LOG_SITE_TAG "x")
+endif()
 
 # for each file, copy it into the build directory at build time
 # and install it into the installation directory at install time (!)
