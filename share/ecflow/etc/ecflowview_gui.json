@@ -395,7 +395,19 @@
 				"prefix" : "server.files",
 				
 				"line" : "readFilesFromDisk",
-				"line" : "maxOutputFileLines"				
+				"line" : "maxOutputFileLines"
+			},
+
+ 			"group" : {
+				
+				"title" : "Automatic search on output files",
+				"prefix" : "panel.automaticOutputSearch",
+				
+				"line" : "performSearch",
+				"line" : "searchMode",
+				"line" : "searchText",
+				"line" : "searchFrom",
+				"line" : "caseSensitive"
 			},
 
 			"grid-hidden" : {
