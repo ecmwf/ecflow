@@ -98,7 +98,7 @@ void SuiteItemWidget::reload(VInfo_ptr info)
             for(int i=0; i < model_->columnCount()-1; i++)
             {
                 suiteView->resizeColumnToContents(i);
-                suiteView->setColumnWidth(i,suiteView->columnWidth(i)+(i==0)?25:15);
+                suiteView->setColumnWidth(i,suiteView->columnWidth(i) + ((i==0)?25:15));
             }
             columnsAdjusted_=true;
         }
