@@ -54,9 +54,10 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
     loadedLabel->setFont(labelF);
     loadedLabel->setText("<font color=\'#565656\'>" + loadedLabel->text() + "</font>");
 
-    //QPalette pal=okTb->palette();
-    //QColor col(230,245,253);
-    //pal.setColor(QPalette::Button,col);
+    QPalette pal=okTb->palette();
+    QColor col(10,150,10);
+    pal.setColor(QPalette::Active,QPalette::Button,col);
+    pal.setColor(QPalette::Active,QPalette::ButtonText,QColor(Qt::white));
     //okTb->setPalette(pal);
 
     okTb->setEnabled(false);
@@ -305,13 +306,14 @@ void SuiteItemWidget::settingsChanged()
         }
         else
         {
-            messageLabel->showInfo("The suite filter has changed! Please click <b>Apply</b> to submit the changes to the server!");
+            messageLabel->showTip("The suite filter has changed! Please click <b>Apply</b> to submit the changes to the server!");
         }
     }
 }
 
 void SuiteItemWidget::notifyChange(SuiteFilter *filter)
 {
+    settingsChanged();
     checkActionState();
 }
 
