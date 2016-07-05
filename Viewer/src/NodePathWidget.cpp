@@ -430,7 +430,7 @@ void BcWidget::crePixmap()
 {        
     pix_=QPixmap(width_,height_);
     pix_.fill(Qt::transparent);
-    
+
     QPainter painter(&pix_);
     painter.setRenderHints(QPainter::Antialiasing,true);
     
