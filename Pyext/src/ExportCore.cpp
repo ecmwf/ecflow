@@ -23,6 +23,7 @@
 #include "TimeSeries.hpp"
 #include "CheckPt.hpp"
 #include "Ecf.hpp"
+#include "BoostPythonUtil.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 template<class K, class T>
@@ -194,6 +195,7 @@ void export_Core()
 			init<int,int>()
 		)
 	.def("__str__",     &TimeSlot::toString)       // __str__
+   .def("__copy__",copyObject<TimeSlot>)          // __copy__ uses copy constructor
 	.def(self == self )                            // __eq__
 	.def("hour",   &TimeSlot::hour)                // return int
 	.def("minute", &TimeSlot::minute)              // return int
@@ -232,8 +234,9 @@ void export_Core()
 			init<TimeSlot, optional<bool> >())
  	.def( init<int,int,optional<bool> >())
 	.def( init<TimeSlot,TimeSlot,TimeSlot,optional<bool> >())
- 	.def("__str__",     &TimeSeries::toString)         // __str__
  	.def(self == self )                                // __eq__
+ 	.def("__str__",     &TimeSeries::toString)         // __str__
+   .def("__copy__",copyObject<TimeSeries>)            // __copy__ uses copy constructor
 	.def("has_increment", &TimeSeries::hasIncrement,"distinguish between a single time slot and a series. returns true for a series")  // false if single time slot
 	.def("start",         &TimeSeries::start , return_value_policy<copy_const_reference>(),"returns the start time") // returns a time slot
 	.def("finish",        &TimeSeries::finish, return_value_policy<copy_const_reference>(),"returns the finish time if time series specified, else returns a NULL time slot") // returns a time slot

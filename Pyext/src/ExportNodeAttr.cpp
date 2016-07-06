@@ -148,6 +148,7 @@ void export_NodeAttr()
    .def("__init__",make_constructor(&create_ZombieAttr) )
    .def("__init__",make_constructor(&create_ZombieAttr1) )
  	.def("__str__",    &ZombieAttr::toString)              // __str__
+   .def("__copy__",   copyObject<ZombieAttr>)             // __copy__ uses copy constructor
  	.def(self == self )                                    // __eq__
  	.def("empty",          &ZombieAttr::empty,          "Return true if the attribute is empty")
  	.def("zombie_type",    &ZombieAttr::zombie_type,    "Returns the :term:`zombie type`")
@@ -158,6 +159,7 @@ void export_NodeAttr()
 
  	class_<Variable>("Variable",NodeAttrDoc::variable_doc(),init<std::string, std::string>())
  	.def("__str__",    &Variable::toString)                // __str__
+   .def("__copy__",   copyObject<Variable>)               // __copy__ uses copy constructor
  	.def(self == self )                                    // __eq__
 	.def("name",     &Variable::name,     return_value_policy<copy_const_reference>(), "Return the variable name as string")
    .def("value",    &Variable::theValue, return_value_policy<copy_const_reference>(), "Return the variable value as a string")
@@ -172,6 +174,7 @@ void export_NodeAttr()
 	class_<Label>("Label",NodeAttrDoc::label_doc(),init<std::string, std::string>())
 	.def(self == self )                                    // __eq__
 	.def("__str__",   &Label::toString)                    // __str__
+   .def("__copy__",   copyObject<Label>)                  // __copy__ uses copy constructor
 	.def("name",      &Label::name,      return_value_policy<copy_const_reference>(), "Return the :term:`label` name as string")
 	.def("value",     &Label::value,     return_value_policy<copy_const_reference>(), "Return the original :term:`label` value as string")
 	.def("new_value", &Label::new_value, return_value_policy<copy_const_reference>(), "Return the new label value as string")
@@ -181,9 +184,10 @@ void export_NodeAttr()
 	// This will not work, because paths_begin
    //.add_property("node_paths", boost::python::range(&Limit::paths_begin,&Limit::paths_begin),"List of nodes(paths) that have consumed a limit")
 
-	class_<Limit,  boost::shared_ptr<Limit> >("Limit",NodeAttrDoc::limit_doc(),init<std::string, int>())
+	class_<Limit, boost::shared_ptr<Limit> >("Limit",NodeAttrDoc::limit_doc(),init<std::string, int>())
 	.def(self == self )                               // __eq__
 	.def("__str__",  &Limit::toString)                // __str__
+   .def("__copy__",   copyObject<Limit>)             // __copy__ uses copy constructor
 	.def("name",     &Limit::name, return_value_policy<copy_const_reference>(), "Return the :term:`limit` name as string")
    .def("value",    &Limit::value,    "The :term:`limit` token value as an integer")
    .def("limit",    &Limit::theLimit, "The max value of the :term:`limit` as an integer")
@@ -197,6 +201,7 @@ void export_NodeAttr()
 	.def( init<std::string> () )
 	.def(self == self )                                  // __eq__
 	.def("__str__",     &InLimit::toString)              // __str__
+   .def("__copy__",   copyObject<InLimit>)              // __copy__ uses copy constructor
 	.def("name",        &InLimit::name,       return_value_policy<copy_const_reference>(), "Return the :term:`inlimit` name as string")
 	.def("path_to_node",&InLimit::pathToNode, return_value_policy<copy_const_reference>(), "Path to the node that holds the limit, can be empty")
 	.def("tokens",      &InLimit::tokens,                                                  "The number of token to consume from the Limit")
@@ -206,6 +211,7 @@ void export_NodeAttr()
    .def( init<std::string> () )
 	.def(self == self )                                  // __eq__
 	.def("__str__",     &Event::toString)                // __str__
+   .def("__copy__",   copyObject<Event>)                // __copy__ uses copy constructor
 	.def("name",        &Event::name,       return_value_policy<copy_const_reference>(), "Return the Events name as string. If number supplied name may be empty.")
 	.def("number",      &Event::number,     "Return events number as a integer. if not specified return max integer value")
 	.def("value",       &Event::value,      "Return events current value")
@@ -215,6 +221,7 @@ void export_NodeAttr()
 	class_<Meter>("Meter",NodeAttrDoc::meter_doc(),init<std::string,int,int,optional<int> >())
  	.def(self == self )                                  // __eq__
 	.def("__str__",     &Meter::toString)                // __str__
+   .def("__copy__",   copyObject<Meter>)                // __copy__ uses copy constructor
 	.def("name",        &Meter::name,       return_value_policy<copy_const_reference>(), "Return the Meters name as string")
 	.def("min",         &Meter::min,                                                     "Return the Meters minimum value")
 	.def("max",         &Meter::max,                                                     "Return the Meters maximum value")
@@ -226,6 +233,7 @@ void export_NodeAttr()
 	class_<DateAttr>("Date",NodeAttrDoc::date_doc() ,init<int,int,int>())  // day,month,year
 	.def(self == self )                                     // __eq__
 	.def("__str__",     &DateAttr::toString)                // __str__
+   .def("__copy__",    copyObject<DateAttr>)               // __copy__ uses copy constructor
 	.def("day",         &DateAttr::day,      "Return the day. The range is 0-31, 0 means its wild-carded")
 	.def("month",       &DateAttr::month,    "Return the month. The range is 0-12, 0 means its wild-carded")
    .def("year",        &DateAttr::year,     "Return the year, 0 means its wild-carded")
@@ -243,6 +251,7 @@ void export_NodeAttr()
 	class_<DayAttr>("Day",NodeAttrDoc::day_doc(),init<DayAttr::Day_t>() )
 	.def(self == self )                                    // __eq__
 	.def("__str__",     &DayAttr::toString)                // __str__
+   .def("__copy__",    copyObject<DayAttr>)               // __copy__ uses copy constructor
 	.def("day",         &DayAttr::day,      "Return the day as enumerator")
 	;
 
@@ -252,6 +261,7 @@ void export_NodeAttr()
 	.def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
 	.def(self == self )                           // __eq__
 	.def("__str__",    &TimeAttr::toString)       // __str__
+   .def("__copy__",    copyObject<TimeAttr>)     // __copy__ uses copy constructor
 	.def("time_series",&TimeAttr::time_series,return_value_policy<copy_const_reference>(), "Return the Time attributes time series")
 	;
 
@@ -261,6 +271,7 @@ void export_NodeAttr()
 	.def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
 	.def(self == self )                                     // __eq__
 	.def("__str__",    &TodayAttr::toString)                // __str__
+   .def("__copy__",   copyObject<TodayAttr>)               // __copy__ uses copy constructor
 	.def("time_series",&TodayAttr::time_series,return_value_policy<copy_const_reference>(), "Return the Todays time series")
 	;
 
@@ -292,6 +303,7 @@ void export_NodeAttr()
 	 )
 	.def(self == self )                                  // __eq__
 	.def("__str__",   &LateAttr::toString)               // __str__
+   .def("__copy__",   copyObject<LateAttr>)             // __copy__ uses copy constructor
 	.def("submitted", &LateAttr::submitted,return_value_policy<copy_const_reference>(), "Return the submitted time as a TimeSlot")
 	.def("active",    &LateAttr::active,   return_value_policy<copy_const_reference>(), "Return the active time as a TimeSlot")
 	.def("complete",  &LateAttr::complete, return_value_policy<copy_const_reference>(), "Return the complete time as a TimeSlot")
@@ -308,6 +320,7 @@ void export_NodeAttr()
 	.def( init<TimeSlot, bool>())
 	.def(self == self )                                       // __eq__
 	.def("__str__", &AutoCancelAttr::toString)                // __str__
+   .def("__copy__",copyObject<AutoCancelAttr>)               // __copy__ uses copy constructor
 	.def("time",    &AutoCancelAttr::time, return_value_policy<copy_const_reference>(), "returns cancel time as a TimeSlot")
 	.def("relative",&AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
 	.def("days",    &AutoCancelAttr::days,     "Returns a boolean true if time was specified in days")
@@ -317,6 +330,7 @@ void export_NodeAttr()
 	class_<RepeatDate >("RepeatDate",NodeAttrDoc::repeat_date_doc() ,init< std::string, int, int, optional<int> >()) // name, start, end , delta
  	.def(self == self )                              // __eq__
 	.def("__str__",        &RepeatDate::toString)    // __str__
+   .def("__copy__",       copyObject<RepeatDate>)   // __copy__ uses copy constructor
 	.def("name",           &RepeatDate::name, return_value_policy<copy_const_reference>(),"Return the name of the repeat.")
 	.def("start",          &RepeatDate::start ,"Return the start date as an integer in yyyymmdd format")
 	.def("end",            &RepeatDate::end,   "Return the end date as an integer in yyyymmdd format")
@@ -326,6 +340,7 @@ void export_NodeAttr()
 	class_<RepeatInteger>("RepeatInteger",NodeAttrDoc::repeat_integer_doc(),init< std::string, int, int, optional<int> >()) // name, start, end , delta = 1
  	.def(self == self )                                  // __eq__
 	.def("__str__",        &RepeatInteger::toString)     // __str__
+   .def("__copy__",       copyObject<RepeatInteger>)    // __copy__ uses copy constructor
 	.def("name",           &RepeatInteger::name, return_value_policy<copy_const_reference>(),"Return the name of the repeat.")
 	.def("start",          &RepeatInteger::start)
 	.def("end",            &RepeatInteger::end)
@@ -338,6 +353,7 @@ void export_NodeAttr()
    .def("__init__",make_constructor(&create_RepeatEnumerated) )
 	.def(self == self )                                     // __eq__
 	.def("__str__",        &RepeatEnumerated::toString)     // __str__
+   .def("__copy__",       copyObject<RepeatEnumerated>)    // __copy__ uses copy constructor
 	.def("name",           &RepeatEnumerated::name, return_value_policy<copy_const_reference>(),"Return the name of the :term:`repeat`.")
 	.def("start",          &RepeatEnumerated::start)
 	.def("end",            &RepeatEnumerated::end)
@@ -348,6 +364,7 @@ void export_NodeAttr()
    .def("__init__",make_constructor(&create_RepeatString) )
 	.def(self == self )                                 // __eq__
 	.def("__str__",        &RepeatString::toString)     // __str__
+   .def("__copy__",       copyObject<RepeatString>)    // __copy__ uses copy constructor
 	.def("name",           &RepeatString::name, return_value_policy<copy_const_reference>(),"Return the name of the :term:`repeat`.")
 	.def("start",          &RepeatString::start)
 	.def("end",            &RepeatString::end)
@@ -357,11 +374,13 @@ void export_NodeAttr()
 	class_<RepeatDay>("RepeatDay",NodeAttrDoc::repeat_day_doc(),init< optional<int> >())
  	.def(self == self )                              // __eq__
 	.def("__str__",        &RepeatDay::toString)     // __str__
+   .def("__copy__",       copyObject<RepeatDay>)    // __copy__ uses copy constructor
 	;
 
 	class_<Repeat>("Repeat",NodeAttrDoc::repeat_doc() ,init< int >())
 	.def(self == self )                    // __eq__
 	.def("__str__", &Repeat::toString)     // __str__
+   .def("__copy__",copyObject<Repeat>)    // __copy__ uses copy constructor
 	.def("empty",   &Repeat::empty ,"Return true if the repeat is empty.")
 	.def("name",    &Repeat::name, return_value_policy<copy_const_reference>(), "The :term:`repeat` name, can be referenced in :term:`trigger` expressions")
 	.def("start",   &Repeat::start,"The start value of the repeat, as an integer")
@@ -376,6 +395,7 @@ void export_NodeAttr()
 	class_<CronAttr>("Cron",NodeAttrDoc::cron_doc() )
 	.def(self == self )                                // __eq__
 	.def("__str__",            &CronAttr::toString)    // __str__
+   .def("__copy__",copyObject<CronAttr>)              // __copy__ uses copy constructor
    .def( "set_week_days",     &set_week_days ,   "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
 	.def( "set_days_of_month", &set_days_of_month,"Specifies days of the month. Expects a list of integers with integer range 1-31" )
 	.def( "set_months",        &set_months  ,     "Specifies months. Expects a list of integers, with integer range 1-12")
@@ -393,6 +413,7 @@ void export_NodeAttr()
 	class_<VerifyAttr>("Verify", init<NState::State,int>())  // state, expected
 	.def(self == self )                               // __eq__
 	.def("__str__",        &VerifyAttr::toString)     // __str__
+   .def("__copy__",copyObject<VerifyAttr>)           // __copy__ uses copy constructor
 	;
 
 
@@ -402,6 +423,7 @@ void export_NodeAttr()
    .def( init<bool>())
 	.def(self == self )                                   // __eq__
 	.def("__str__",             &ClockAttr::toString)     // __str__
+   .def("__copy__",copyObject<ClockAttr>)                // __copy__ uses copy constructor
 	.def( "set_gain_in_seconds",&ClockAttr::set_gain_in_seconds, "Set the gain in seconds")
 	.def( "set_gain",     &ClockAttr::set_gain,                  "Set the gain in hours and minutes")
  	.def( "set_virtual",  start_stop_with_server,   "Sets/unsets the clock as being virtual")

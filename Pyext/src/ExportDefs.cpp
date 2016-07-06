@@ -150,9 +150,10 @@ void delete_variable(defs_ptr self,const std::string& name) { self->set_server()
 
 void export_Defs()
 {
-	class_<Defs, boost::noncopyable, defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))
+	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))
    .def("__init__",make_constructor(&create_defs),         DefsDoc::add_definition_doc())
 	.def(self == self )                                           // __eq__
+   .def("__copy__",              copyObject<Defs>)               // __copy__ uses copy constructor
 	.def("__str__",               &Defs::toString)                // __str__
    .def("__enter__",             &defs_enter)                    // allow with statement, hence indentation support
    .def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support

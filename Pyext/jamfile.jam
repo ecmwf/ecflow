@@ -166,11 +166,12 @@ local rule run-test ( test-name : sources + )
 
 #
 # Declare test targets; 
-# Note cant run TestWith until all plarforms support with statement, i.e python 2.6 or greater
+# Note can't run TestWith until all platforms support with statement, i.e python 2.6 or greater
 #                       
 run-test TestClientApi      : ecflow [ glob test/py_s_TestClientApi.py ] ;
 run-test TestPythonChildApi : ecflow [ glob test/py_s_TestPythonChildApi.py ] ;
 run-test TestDefs           : ecflow [ glob test/py_u_TestDefs.py ] ;
+run-test TestCopy           : ecflow [ glob test/py_u_TestCopy.py ] ;
 run-test TestError          : ecflow [ glob test/py_u_TestError.py ] ;
 run-test TestTraversal      : ecflow [ glob test/py_u_TestTraversal.py ] ;
 run-test TestDefsCheck      : ecflow [ glob test/py_u_TestDefsCheck.py ] ;
@@ -187,7 +188,7 @@ run-test TestDerivable     : ecflow [ glob test/py_u_TestDerivable.py ] ;
 run-test TestWith          : ecflow [ glob test/py_u_TestWith.py ] ;
 run-test TestFind          : ecflow [ glob test/py_u_TestFind.py ] ;
 run-test TestMigrate       : ecflow [ glob migrate/py_u_TestMigrate.py ] ;
-run-test TestRepeatArithmetic  :  ecflow [ glob test/py_u_TestRepeatArithmetic.py ] ;
+run-test TestRepeatArithmetic  : ecflow [ glob test/py_u_TestRepeatArithmetic.py ] ;
 run-test TestGeneratedVariable : ecflow [ glob test/py_u_TestGeneratedVariable.py ] ;
 run-test TestEcf               : ecflow [ glob test/py_u_TestEcf.py ] ;
 run-test TestFlag              : ecflow [ glob test/py_u_TestFlag.py ] ;
@@ -198,7 +199,7 @@ alias test-all
  :  TestUserManual TestJobGeneration  TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable  TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag
+    TestClientApi TestPythonChildApi TestFlag TestCopy
     # test_embed test_embed_ecf 
     ;
    
@@ -207,7 +208,7 @@ explicit test-all
     TestUserManual TestJobGeneration TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag
+    TestClientApi TestPythonChildApi TestFlag TestCopy
     # test_embed test_embed_ecf 
     ;
  
