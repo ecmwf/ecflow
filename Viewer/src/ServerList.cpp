@@ -50,6 +50,16 @@ ServerItem* ServerList::find(const std::string& name)
 	return 0;
 }
 
+ServerItem* ServerList::find(const std::string& name, const std::string& host, const std::string& port)
+{
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	{
+		if((*it)->name() == name && (*it)->host() == host && (*it)->port() == port)
+			return *it;
+	}
+	return 0;
+}
+
 ServerItem* ServerList::add(const std::string& name,const std::string& host,const std::string& port,bool favourite,bool saveIt)
 {
     //Check if there is an item with the same name. Names have to be unique!

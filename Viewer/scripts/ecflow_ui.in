@@ -116,9 +116,22 @@ do
 			export ECFUI_SESSION_MANAGER=yes
 			;;
 
-        -h)
-            ECFUI_HELP=yes
-            ;;
+		-ts)
+			export ECFUI_TEMP_SESSION_HOST=$2
+			export ECFUI_TEMP_SESSION_PORT=$3
+			if [ "x$ECFUI_TEMP_SESSION_HOST" == x -o "x$ECFUI_TEMP_SESSION_PORT" == x ]
+			then
+				echo "Please supply a host and port:"
+				echo "ecflow_ui -ts <host> <port>"
+				exit 1
+			fi
+			echo "Starting a temporary session: host=$ECFUI_TEMP_SESSION_HOST, port=$ECFUI_TEMP_SESSION_PORT"
+			shift 2
+			;;
+
+		-h)
+			ECFUI_HELP=yes
+			;;
 
 	esac
 	shift
@@ -141,9 +154,10 @@ then
     cat <<HEND
 EcflowUI
   Command-line flags:
-    -log : write log messages to standard output
-    -s   : start via the session manager
-    -h   : print this help message
+    -log              : write log messages to standard output
+    -s                : start via the session manager
+    -ts <host> <port> : start a temporary session viewing the given server
+    -h                : print this help message
 HEND
 
     exit 0

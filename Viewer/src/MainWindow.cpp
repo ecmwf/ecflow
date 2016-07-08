@@ -582,6 +582,15 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 		//Save browser settings
 		MainWindow::save(topWin);
 
+		// handle session cleanup
+		if (SessionHandler::instance()->current()->temporary())
+		{
+			if(QMessageBox::question(0,tr("Delete temporary session?"),
+						 tr("This was a temporary session - would you like to preserve it for future use?"),
+						 QMessageBox::Yes | QMessageBox::No,QMessageBox::No) == QMessageBox::No)
+				SessionHandler::destroyInstance();
+		}
+
 		//Exit ecFlowView
 		QApplication::quit();
 #if 0
