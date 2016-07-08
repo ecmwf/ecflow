@@ -22,8 +22,32 @@
                     "active": "1"
                 },
                 "state": "",
-                "attribute": "",
-                "icon": ""
+                "attribute":
+                [
+                    "meter",
+                    "event",
+                    "repeat",
+                    "trigger",
+                    "label",
+                    "time",
+                    "date",
+                    "limit",
+                    "limiter",
+                    "late"
+                ],
+                "icon":
+                [
+                    "message",
+                    "rerun",
+                    "complete",
+                    "late",
+                    "time",
+                    "date",
+                    "wait",
+                    "zombie",
+                    "killed",
+                    "slow"
+                ]
             },
             "widget_1":
             {
