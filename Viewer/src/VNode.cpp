@@ -10,12 +10,16 @@
 
 #include "VNode.hpp"
 
+#include <QDebug>
+
 #include "Node.hpp"
 #include "Variable.hpp"
 
+#include "AstCollateVNodesVisitor.hpp"
 #include "ConnectState.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
+#include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VFileInfo.hpp"
 #include "VNState.hpp"
@@ -23,6 +27,8 @@
 #include "VTaskNode.hpp"
 
 #include <boost/algorithm/string.hpp>
+
+#define _UI_VNODE_DEBUG
 
 //=================================================
 // VNode
@@ -686,6 +692,141 @@ QString VNode::toolTip()
 
     return txt;
 }   
+
+
+//Get the triggers list for the Triggers view
+void VNode::triggers() //TriggerList& tlr)
+{
+    //Check the node itself
+    //if(tlr.self())
+    {
+        //find nodes, event, meters and variables triggering this node
+        if(node_ && !node_->isSuite())
+        {
+            std::set<VItem*> theSet;
+            AstCollateVNodesVisitor astVisitor(theSet);
+
+            //Collect the nodes from ast
+            if(node_->completeAst())
+                node_->completeAst()->accept(astVisitor);
+
+            if(node_->triggerAst())
+                node_->triggerAst()->accept(astVisitor);
+
+            for(std::set<VItem*>::iterator sit = theSet.begin(); sit != theSet.end(); ++sit)
+            {
+#ifdef _UI_VNODE_DEBUG
+                qDebug() << "trigger ast:" << (*sit)->name();
+#endif
+                //tlr.next_node( *(*sit), 0, TriggerList::normal, *sit);
+            }
+        }
+
+        //Attributes
+        VAttributeType *t=VAttributeType::find("limiter");
+        Q_ASSERT(t);
+        QList<VAttribute*> limiter;
+        t->getSearchData(this,limiter);
+        Q_FOREACH(VAttribute* a, limiter)
+        {
+            std::string v;
+            if(a->value("limiter_path",v))
+            {
+                if(VItem *n = findLimit(v, a->strName()))
+                {
+#ifdef _UI_VNODE_DEBUG
+                    qDebug() << "trigger limit:" << n->name();
+#endif
+                }
+            }
+        }
+
+        //Add date and time
+
+        //Check parents
+/*        if(trl.parents())
+        {
+            VNode* p=parent();
+            while(p)
+            {
+                //fip f(p,tlr);
+                //p->triggers(f);
+                p->triggers();
+                p = p->parent();
+            }
+        }
+*/
+    }
+}
+
+//pikachu://e_41r2_peter/main/18bc/getreq/collectreq
+
+VItem* VNode::findLimit(const std::string& path, const std::string& name)
+{
+   // if (!strncmp("/", path.c_str(), 1))
+
+#if 0
+   if(!path.empty() && path[0] == '/')
+      if (! (f = serv().top()->find(path)))
+         return &dummy_node::get(path + ":" + name);
+#endif
+
+    //If
+    if(!path.empty() && path[0] == '/')
+    {
+        VNode* n=server()->vRoot()->find(path);
+        if(n && n != this)
+            return n->findLimit(path,name);
+   }
+
+   //Find the matching limit in the node
+   VAttributeType *t=VAttributeType::find("limit");
+   Q_ASSERT(t);
+   QList<VAttribute*> limit;
+   t->getSearchData(this,limit);
+   Q_FOREACH(VAttribute* a, limit)
+   {
+       if(a->strName() == name)
+           return a;
+   }
+
+
+#if 0
+   for (node *n = f->kids(); n != 0; n = n->next()) {
+      if (n->type() == NODE_LIMIT && n->name() == name)
+         return n;
+   }
+#endif
+
+    //Find the matching limit in the ancestors
+    VNode* p=parent();
+    Q_ASSERT(p);
+    if(p->isNode() || p->isTask() || p->isSuite())
+    {
+        if (p->strName() == path.substr(0, p->name().size()))
+        {
+            std::string::size_type next = path.find('/');
+            return p->findLimit(path.substr(next+1, path.size()), name);
+        }
+    }
+
+    return NULL;
+
+#if 0
+   for (node *p = f->parent()->kids(); p != 0; p = p->next()) {
+      if (p->type() == NODE_FAMILY || p->type() == NODE_TASK || p->type() == NODE_SUITE)
+         if (p->name() == path.substr(0, p->name().size())) {
+            std::string::size_type next = path.find('/');
+            if (next != std::string::npos)
+               return p->find_limit(path.substr(next+1, path.size()), name);
+         }
+   }
+#endif
+
+   //return &dummy_node::get(path + ":" + name);
+}
+
+
 
 //=================================================
 //

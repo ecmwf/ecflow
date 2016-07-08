@@ -7,6 +7,7 @@ set(viewer_srcs
     AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
     Animation.cpp
+    AstCollateVNodesVisitor.cpp
     AttributeEditor.cpp
     AttributeEditorFactory.cpp   
     CaseSensitiveButton.cpp

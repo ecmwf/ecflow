@@ -185,6 +185,8 @@ public:
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
 
+    void triggers();
+
 protected:
     void clear();
     void addChild(VNode*);
@@ -197,6 +199,8 @@ protected:
     virtual void check(VServerSettings* conf,bool) {}
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
+
+    VItem* findLimit(const std::string& path, const std::string& name);
 
     node_ptr node_;
     //VNode* parent_;

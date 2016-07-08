@@ -68,8 +68,7 @@
         {
         	"name"    : "triggers",
             "label"   : "Triggers",
-            "visible_for" : "node",
-            "hidden"  : "1"            
+            "visible_for" : "node"
         },  
         
         {

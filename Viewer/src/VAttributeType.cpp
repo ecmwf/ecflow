@@ -1054,6 +1054,7 @@ VLimiterAttribute::VLimiterAttribute(const std::string& n) : VAttributeType(n)
 {
     dataCount_=3;
     searchKeyToData_["limiter_name"]=NameIndex;
+    searchKeyToData_["limiter_path"]=PathIndex;
 }
 
 int VLimiterAttribute::num(const VNode *vnode)

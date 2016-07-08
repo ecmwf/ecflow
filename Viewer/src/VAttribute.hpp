@@ -32,10 +32,6 @@ public:
     QString toolTip() const;
     QString name() const;
     std::string strName() const;
-    bool value(std::string&) const;
-    int value() const;
-    //int min() const;
-    //int max() const;
 
     bool isValid(VNode* parent);
     bool value(const std::string& key,std::string& val) const;

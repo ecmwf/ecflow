@@ -9,7 +9,7 @@
 
 #include "TriggerItemWidget.hpp"
 
-#include "Node.hpp"
+#include "VNode.hpp"
 #include "TriggerView.hpp"
 
 //========================================================
@@ -34,10 +34,11 @@ void TriggerItemWidget::reload(VInfo_ptr nodeInfo)
 
 	active_=true;
 
-	if(nodeInfo.get() != 0 && nodeInfo->isNode())
-	{
-		//Node* n=nodeInfo->node();
-	}
+    if(nodeInfo && nodeInfo->isNode())
+	{        
+            nodeInfo->node()->triggers();
+    }
+
 	else
 	{
 
