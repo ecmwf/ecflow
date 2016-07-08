@@ -27,11 +27,12 @@ if __name__ == "__main__":
     print("####################################################################")
     
     defs = ecflow.Defs()
-    defs.add_suite("a").add_family("f1").add_task("t1")
+    defs.add_suite("a").add_family("f1").add_task("t1").add_variable("a","b").add_event(1).add_meter("meter", 0, 100).add_label("label", "v").add_time("+00:30 20:00 01:00")
     print(defs)
     
     defs_copy = copy.copy(defs)
     print(defs_copy)
+    assert defs_copy == defs,"defs should be equal after copy"
     
  
     #===========================================================================
