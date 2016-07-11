@@ -765,7 +765,9 @@ NodePathEllipsisItem::NodePathEllipsisItem() :
 
 NodePathWidget::NodePathWidget(QWidget *parent) :
   QWidget(parent),
+#if 0
   reloadTb_(0),
+#endif
   active_(true)
 {
 	setProperty("breadcrumbs","1");
