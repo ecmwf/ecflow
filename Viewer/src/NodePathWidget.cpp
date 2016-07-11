@@ -782,7 +782,8 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
              this,SLOT(slotNodeSelected(int)));
     connect(bc_,SIGNAL(menuSelected(int,QPoint)),
              this,SLOT(slotMenuSelected(int,QPoint)));
-    
+
+#if 0
     reloadTb_=new QToolButton(this);
     //reloadTb_->setDefaultAction(actionReload_);
     reloadTb_->setIcon(QPixmap(":/viewer/reload_one.svg"));
@@ -795,6 +796,7 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
             this,SLOT(slotRefreshServer()));
 
     layout_->addWidget(reloadTb_);
+#endif
 }
 
 NodePathWidget::~NodePathWidget()
@@ -826,8 +828,10 @@ void NodePathWidget::clear(bool detachObservers)
 
     setEnabled(true);
 
+#if 0
     reloadTb_->setEnabled(false);
     reloadTb_->setToolTip("");
+#endif
 }
 
 void NodePathWidget::clearItems()
@@ -887,6 +891,7 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
   			info->server()->addServerObserver(this);
   			info->server()->addNodeObserver(this);
 
+#if 0
   			if(server)
   			{
   				if(reloadTb_)
@@ -900,7 +905,7 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
                 reloadTb_->setToolTip("");
                 reloadTb_->setEnabled(false);
   			}
-
+#endif
   		}
   	}
   	//If the there is no data we clean everything and return
@@ -911,9 +916,10 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
   	  		info_->server()->removeServerObserver(this);
   	  		info_->server()->removeNodeObserver(this);
   	  	}
-
+#if 0
         reloadTb_->setToolTip("");
         reloadTb_->setEnabled(false);
+#endif
   	}
 
     //Set the info
@@ -1022,7 +1028,8 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 int NodePathWidget::bcWidth()
 {
-    return width()-reloadTb_->width()-5;
+    //return width()-reloadTb_->width()-5;
+    return width()-5;
 }
 
 void  NodePathWidget::slotNodeSelected(int idx)
