@@ -37,6 +37,8 @@ public:
 	bool temporary() {return isTemporary_;};
 	void temporaryServerAlias(const std::string &alias) {temporaryServerAlias_ = alias;};
 	std::string temporaryServerAlias() {return temporaryServerAlias_;};
+	void askToPreserveTemporarySession(bool a) {askToPreserveTemporarySession_ = a;};
+	bool askToPreserveTemporarySession() {return askToPreserveTemporarySession_;};
 
 protected:
 	void checkDir();
@@ -46,6 +48,7 @@ protected:
 	std::string qtPath_;
 	std::string temporaryServerAlias_;
 	bool isTemporary_;
+	bool askToPreserveTemporarySession_;
 };
 
 class SessionHandler

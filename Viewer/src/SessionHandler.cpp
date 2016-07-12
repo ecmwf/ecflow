@@ -26,6 +26,7 @@ SessionItem::SessionItem(const std::string& name) :
 {
 	checkDir();
 	isTemporary_ = false;
+	askToPreserveTemporarySession_ = true;
 }
 
 SessionItem::~SessionItem()
@@ -310,6 +311,10 @@ void SessionHandler::setTemporarySessionIfReqested()
 
 			instance()->current(si);
 			si->temporary(true);
+
+			char *sask = getenv("ECFUI_TEMP_SESSION_PRESERVE_CONFIRM");
+			if (sask && !strcmp(sask, "no"))
+				si->askToPreserveTemporarySession(false);
 
 			std::string templateName("ecflow_ui_test_session_template.json");
 			instance()->createSessionDirWithTemplate(sname, templateName);

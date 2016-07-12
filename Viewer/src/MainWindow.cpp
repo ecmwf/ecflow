@@ -583,12 +583,21 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 		MainWindow::save(topWin);
 
 		// handle session cleanup
-		if (SessionHandler::instance()->current()->temporary())
+		// temporary sessions can be saved or deleted
+		SessionItem *si = SessionHandler::instance()->current();
+		if (si->temporary())
 		{
-			if(QMessageBox::question(0,tr("Delete temporary session?"),
-						 tr("This was a temporary session - would you like to preserve it for future use?"),
-						 QMessageBox::Yes | QMessageBox::No,QMessageBox::No) == QMessageBox::No)
+			if (si->askToPreserveTemporarySession())
+			{
+				if(QMessageBox::question(0,tr("Delete temporary session?"),
+							tr("This was a temporary session - would you like to preserve it for future use?"),
+							QMessageBox::Yes | QMessageBox::No,QMessageBox::No) == QMessageBox::No)
+					SessionHandler::destroyInstance();
+			}
+			else  // if askToPreserveTemporarySession() is false, then we assume we want to delete
+			{
 				SessionHandler::destroyInstance();
+			}
 		}
 
 		//Exit ecFlowView
