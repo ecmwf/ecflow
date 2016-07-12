@@ -33,6 +33,8 @@ public:
      alias_no_(0)
      {}
 
+   Task(const Task& rhs);
+
 	virtual ~Task();
 
 	static task_ptr create(const std::string& name);

@@ -29,6 +29,7 @@
 class ChildAttrs :  private boost::noncopyable {
 public:
    ChildAttrs(Node* node) : node_(node) {}
+   ChildAttrs(const ChildAttrs&); // users must call set_node() afterwards
    ChildAttrs() : node_(NULL) {}
    ~ChildAttrs() {}
 

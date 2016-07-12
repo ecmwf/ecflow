@@ -22,6 +22,7 @@
 
 #include "Task.hpp"
 #include "DefsDoc.hpp"
+#include "BoostPythonUtil.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -49,18 +50,20 @@ void export_Task()
    .def("get_aborted_reason" ,     &Submittable::abortedReason,return_value_policy<copy_const_reference>(),        "If node was aborted and a reason was provided, return the string")
    ;
 
-   class_<Task, bases<Submittable>, task_ptr, boost::noncopyable>("Task",DefsDoc::task_doc() )
+   class_<Task, bases<Submittable>, task_ptr>("Task",DefsDoc::task_doc() )
    .def("__init__",make_constructor(&Task::create), DefsDoc::task_doc())
    .def(self == self )                        // __eq__
    .def("__enter__", &task_enter)             // allow with statement, hence indentation support
    .def("__exit__",  &task_exit)              // allow with statement, hence indentation support
    .def("__str__",         &Task::to_string)  // __str__
+   .def("__copy__",  copyObject<Task>)        // __copy__ uses copy constructor
    .add_property("aliases",boost::python::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    .add_property("nodes",  boost::python::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    ;
 
-   class_<Alias, bases<Submittable>, alias_ptr, boost::noncopyable>("Alias",DefsDoc::alias_doc(),no_init)
-   .def(self == self )                 // __eq__
-   .def("__str__", &Alias::to_string)  // __str__
+   class_<Alias, bases<Submittable>, alias_ptr>("Alias",DefsDoc::alias_doc(),no_init)
+   .def(self == self )                  // __eq__
+   .def("__str__", &Alias::to_string)   // __str__
+   .def("__copy__", copyObject<Alias>)  // __copy__ uses copy constructor
    ;
 }
