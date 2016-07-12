@@ -1,6 +1,6 @@
 
 # the list of files we want to install
-set (files ecflow_ui)
+set (files ecflow_ui ecflow_test_ui.sh)
 
 
 
