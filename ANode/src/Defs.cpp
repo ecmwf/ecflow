@@ -61,14 +61,13 @@ Defs::Defs(const Defs& rhs) :
    modify_change_no_( 0 ),
    updateCalendarCount_(0),
    order_state_change_no_(0),
+   state_(rhs.state_),
+   server_(rhs.server_),
    save_edit_history_(false),
+   flag_(rhs.flag_),
    client_suite_mgr_(this),
    in_notification_(false)
 {
-   state_ = rhs.state_;
-   server_ = rhs.server_;
-   flag_ =  rhs.flag_;
-
    size_t theSize = rhs.suiteVec_.size();
    for(size_t s = 0; s < theSize; s++) {
       suite_ptr suite_copy = boost::make_shared<Suite>( *rhs.suiteVec_[s] );
