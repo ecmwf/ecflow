@@ -38,7 +38,7 @@ public:
     virtual VTreeServer* server() const;
 
     int attrRow(int row,AttributeFilter *filter) const;
-    int attrNum(AttributeFilter* filter=0) const;
+    int attrNum(AttributeFilter* filter) const;
     bool isAttrInitialised() const;
     void updateAttrNum(AttributeFilter* filter=0);
     void resetAttrNum();

@@ -129,6 +129,8 @@ void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChang
 
 void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
 {
+    Q_ASSERT(tree_->numOfChildren() == 0);
+
     //We still must be in inScan mode so that the model should think
     //that this server tree is empty.
     inScan_=true;
@@ -144,12 +146,13 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
         tree_->build(filter_->match_);
     }
 
+    int num=tree_->attrNum(attrFilter_)+tree_->numOfChildren();
     //Notifies the model of the number of children nodes to be added to the server node.
-    Q_EMIT beginServerScan(this, tree_->attrNum(attrFilter_)+tree_->numOfChildren());
+    Q_EMIT beginServerScan(this, num);
     //We leave the inScan mode. From this moment on the model can see the whole tree in the server.
     inScan_=false;
     //Notifies the model that the scan finished. The model can now relayout its new contents.
-    Q_EMIT endServerScan(this, tree_->attrNum(attrFilter_)+tree_->numOfChildren());
+    Q_EMIT endServerScan(this, num);
 }
 
 void VTreeServer::notifyBeginServerClear(ServerHandler* server)

@@ -24,7 +24,8 @@
 
 TextEditSearchLine::TextEditSearchLine(QWidget *parent) :
 	AbstractSearchLine(parent),
-	interface_(0)
+	interface_(0),
+	lastFindSuccessful_(false)
 {
 	connect(matchModeCb_,SIGNAL(currentIndexChanged(int)),
 		this, SLOT(matchModeChanged(int)));
@@ -43,7 +44,8 @@ void TextEditSearchLine::setSearchInterface(AbstractTextEditSearchInterface *e)
 bool TextEditSearchLine::findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration)
 {
 	QTextDocument::FindFlags flags = findFlags() | extraFlags;
-	return interface_->findString(str,highlightAll,flags,gotoStartOfWord,iteration,matchModeCb_->currentMatchMode());
+	lastFindSuccessful_ = interface_->findString(str,highlightAll,flags,gotoStartOfWord,iteration,matchModeCb_->currentMatchMode());
+	return lastFindSuccessful_;
 }
 
 void TextEditSearchLine::highlightMatches(QString txt)
@@ -90,6 +92,7 @@ void TextEditSearchLine::slotFind(QString txt)
 
 	highlightAllTimer_.stop();
 	bool found = findString(txt, false, 0, true, 0);  // find the next match
+	lastFindSuccessful_ = found;
 
 	if (!isEmpty()) // there is a search term supplied by the user
 	{
@@ -114,8 +117,8 @@ void TextEditSearchLine::slotFindNext()
 	if(!interface_)
 		return;
 
-	bool found = findString(searchLine_->text(), false, 0, false, 0);
-	updateButtons(found);
+	lastFindSuccessful_ = findString(searchLine_->text(), false, 0, false, 0);
+	updateButtons(lastFindSuccessful_);
 }
 
 void TextEditSearchLine::slotFindPrev()
@@ -123,8 +126,8 @@ void TextEditSearchLine::slotFindPrev()
 	if(!interface_)
 		return;
 
-	bool found = findString(searchLine_->text(), false, QTextDocument::FindBackward, false, 0);
-	updateButtons(found);
+	lastFindSuccessful_ = findString(searchLine_->text(), false, QTextDocument::FindBackward, false, 0);
+	updateButtons(lastFindSuccessful_);
 }
 
 QTextDocument::FindFlags TextEditSearchLine::findFlags()
@@ -223,15 +226,18 @@ void TextEditSearchLine::slotClose()
 // Called when we load a new node's information into the panel, or
 // when we move to the panel from another one.
 // If the search box is open, then search for the first matching item;
-// otherwise, search for a pre-configured list of keywords. If none
-// are found, and the user has clicked on the 'reload' button then
-// we just go to the last line of the output
+// if not found, go to the last line.
+// If the search box is not open, search for a pre-configured list of
+// keywords. If none are found, and the user has clicked on the 'reload'
+// button then we just go to the last line of the output
 void TextEditSearchLine::searchOnReload(bool userClickedReload)
 {
 	if (isVisible() && !isEmpty())
 	{
 		slotFindNext();
 		slotHighlight();
+		if(!lastFindSuccessful())
+			interface_->gotoLastLine();
 	}
 	else if(interface_)
 	{

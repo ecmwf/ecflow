@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,6 +9,8 @@
 //============================================================================
 
 #include "NodeQueryResult.hpp"
+
+#include <QDebug>
 
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
@@ -93,6 +95,11 @@ QColor NodeQueryResultItem::stateColour() const
 	return QColor(Qt::transparent);
 }
 
+QStringList NodeQueryResultItem::attr() const
+{
+    return attr_;
+}
+
 void NodeQueryResultBlock::add(VNode* node,int pos)
 {
 	if(pos_==-1)
@@ -161,7 +168,7 @@ void NodeQueryResult::add(NodeQueryResultTmp_ptr item)
 
 	Q_EMIT beginAppendRow();
 
-	data_.push_back(new NodeQueryResultItem(item->node_));
+    data_.push_back(new NodeQueryResultItem(item));
 	blocks_[s].add(item->node_,data_.size()-1);
 
 	Q_EMIT endAppendRow();
@@ -176,10 +183,10 @@ void NodeQueryResult::add(QList<NodeQueryResultTmp_ptr> items)
 
 	for(int i=0; i < items.count(); i++)
 	{
-		VNode *node=items.at(i)->node_;
+        VNode *node=items[i]->node_;
 		ServerHandler *s=node->server();
 		attach(s);
-		data_.push_back(new NodeQueryResultItem(node));
+        data_.push_back(new NodeQueryResultItem(items[i]));
 		blocks_[s].add(node,data_.size()-1);
 	}
 
@@ -191,29 +198,29 @@ void NodeQueryResult::add(std::vector<VInfo_ptr> items)
 	if(items.size() == 0)
 		return;
 
-        //Count the needed items
-        int num=0;
-        for(unsigned int i=0; i < items.size(); i++)
+    //Count the needed items
+    int num=0;
+    for(unsigned int i=0; i < items.size(); i++)
 	{   
-            assert(items.at(i) && items.at(i).get());
-            if(items.at(i)->isServer() || items.at(i)->isNode())
-            {
-                num++;
-            }    
+        assert(items.at(i) && items.at(i).get());
+        if(items.at(i)->isServer() || items.at(i)->isNode())
+        {
+            num++;
         }
+    }
         
 	Q_EMIT beginAppendRows(items.size());
 
 	for(unsigned int i=0; i < items.size(); i++)
 	{           
-            if(items.at(i)->isServer() || items.at(i)->isNode())
-            {
-                VNode *node=items.at(i)->node();
-		ServerHandler *s=items.at(i)->server();
-		attach(s);
-		data_.push_back(new NodeQueryResultItem(node));
-		blocks_[s].add(node,data_.size()-1);
-            }    
+        if(items.at(i)->isServer() || items.at(i)->isNode())
+        {
+            VNode *node=items.at(i)->node();
+            ServerHandler *s=items.at(i)->server();
+            attach(s);
+            data_.push_back(new NodeQueryResultItem(node));
+            blocks_[s].add(node,data_.size()-1);
+        }
 	}
 
 	Q_EMIT endAppendRows(items.size());

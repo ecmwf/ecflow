@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include <QMap>
 #include <QStringList>
 #include <QThread>
 
@@ -25,6 +26,8 @@ class VNode;
 class NodeFilter;
 class NodeQuery;
 class NodeQueryOptions;
+class VAttribute;
+class VAttributeType;
 
 class NodeQueryEngine : public QThread
 {
@@ -38,6 +41,8 @@ public:
     bool runQuery(NodeQuery* query,QStringList allServers);
 	void stopQuery();
 	int scannedCount() const {return scanCnt_;}
+    bool wasStopped() const {return stopIt_;}
+    bool wasMaxReached() const {return maxReached_;}
 
 protected Q_SLOTS:
 	void slotFinished();
@@ -53,20 +58,22 @@ protected:
 private:
 	void run(ServerHandler*,VNode*);
 	void runRecursively(VNode *node);
-	void broadcastFind(VNode*);
+    void broadcastFind(VNode*);
+    void broadcastFind(VNode*,QStringList);
 	void broadcastChunk(bool);
 
 	NodeQuery* query_;
-	BaseNodeCondition* parser_;
-	std::vector<ServerHandler*> servers_;
+    BaseNodeCondition* parser_;
+    QMap<VAttributeType*,BaseNodeCondition*> attrParser_;
+    std::vector<ServerHandler*> servers_;
 	int cnt_;
 	int scanCnt_;
 	int maxNum_;
 	int chunkSize_;
 	QList<NodeQueryResultTmp_ptr> res_;
 	bool stopIt_;
+    bool maxReached_;
 	VNode* rootNode_;
-
 };
 
 class NodeFilterEngine

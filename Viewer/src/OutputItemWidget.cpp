@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -35,7 +35,8 @@ int OutputItemWidget::updateDirTimeout_=1000*60;
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent),
 	userClickedReload_(false),
-	ignoreOutputSelection_(false)
+    ignoreOutputSelection_(false),
+    dirColumnsAdjusted_(false)
 {
     //We try to keep the contents when clicking away
     //tryToKeepContents_=true;
@@ -458,6 +459,14 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 		dirView_->selectionModel()->clearSelection();
         dirModel_->setData(dir,op->joboutFileName());
         dirWidget_->show();
+
+        if(!dirColumnsAdjusted_)
+        {
+            dirColumnsAdjusted_=true;
+            for(int i=0; i< dirModel_->columnCount()-1; i++)
+                dirView_->resizeColumnToContents(i);
+
+        }
 
         UserMessage::qdebug("  dir item count=" + QString::number(dirModel_->rowCount()));
 

@@ -15,7 +15,11 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
    <item>
-    <widget class="NodeQueryEditor" name="editor_" native="true"/>
+    <layout class="QVBoxLayout" name="leftVb_">
+     <item>
+      <widget class="NodeQueryEditor" name="editor_" native="true"/>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -25,7 +29,7 @@
         <string>Apply</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/submit.svg</normaloff>:/viewer/submit.svg</iconset>
        </property>
       </widget>
@@ -62,8 +66,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

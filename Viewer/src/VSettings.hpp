@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -37,7 +37,7 @@ class VSettings
 public:
 	explicit VSettings(const std::string& file);
 	explicit VSettings(boost::property_tree::ptree pt);
-	virtual ~VSettings() {};
+    virtual ~VSettings() {}
 
 	//bool read(const std::string &fs);
 	//virtual void write(const std::string &fs);
@@ -70,7 +70,6 @@ public:
 
 	const boost::property_tree::ptree & propertyTree() const {return pt_;}
 
-
 protected:
 	boost::property_tree::ptree pt_;
 	VSettingsPath path_;
@@ -90,7 +89,6 @@ public:
 	void clear();
 
 	void write();
-
 
 	bool containsQs(const std::string& key);
 

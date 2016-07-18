@@ -143,17 +143,27 @@ void TestFixture::init(const std::string& project_test_dir)
    else if (!host_.empty() && host_ == Str::LOCALHOST()) {
 
       client().set_host_port(host_,port_);
-      std::cout << "   EXTERNAL SERVER running on _SAME_ PLATFORM. Assuming " << host_ << ":" << port_ << "\n";
+      std::cout << "   EXTERNAL SERVER running on _SAME_ PLATFORM. Assuming " << client().host() << ":" << client().port() << "\n";
+
+      // Print the server stats before we start + checks if it is up and running::
+      client().set_cli(true); // so server stats are written to standard out
+      if (client().stats() != 0) {
+         std::cout << "   ClientInvoker " << CtsApi::stats() << " failed: " << client().errorMsg() << ". Is the server running?\n";
+         assert(false);
+      }
+      client().set_cli(false);
 
       // log file may have been deleted, by previous tests. Create a new log file
       std::string the_log_file = TestFixture::pathToLogFile();
       if ( !fs::exists( the_log_file )) {
          std::cout << "   Log file " << the_log_file << " does NOT exist, attempting to recreate\n";
          std::cout << "   Creating new log(via remote server) file " << the_log_file  << "\n";
-         client().new_log( the_log_file );
-         client().logMsg("Created new log file. msg sent to force new log file to be written to disk");
+         if ( 0 == client().new_log( the_log_file )) {
+            client().logMsg("Created new log file. msg sent to force new log file to be written to disk");
+         }
+         else  cout << "   Log file " << TestFixture::pathToLogFile() << " creation failed " << client().errorMsg() << "\n";
       }
-      else std::cout << "   Log file " << the_log_file << " already exist\n";
+      else cout << "   Log file " << the_log_file << " already exists\n";
    }
    else {
       // For local host start by removing log file. Server invocation should create a new log file
@@ -192,22 +202,27 @@ void TestFixture::init(const std::string& project_test_dir)
    /// Either way, we wait for 60 seconds for server, for it to respond to pings
    /// This is important when server is started locally. We must wait for it to come alive.
    if (!client().wait_for_server_reply()) {
-      cout << "Ping server on " << host_ << Str::COLON() << port_ << " failed. Is the server running ? " << client().errorMsg() << "\n";
+      cout << "   Ping server on " << client().host() << Str::COLON() << client().port() << " failed. Is the server running ? " << client().errorMsg() << "\n";
       assert(false);
    }
+   cout << "   Ping OK: server running on:  " << client().host() << Str::COLON() << client().port() << "\n";
 
    // Log file must exist, otherwise test will not work. Log file required for comparison
    if ( !fs::exists( TestFixture::pathToLogFile() )) {
-      cout << "Log file " << TestFixture::pathToLogFile() << " does not exist\n";
+      cout << "   Log file " << TestFixture::pathToLogFile() << " does not exist *************************** \n";
       assert(false);
    }
+
+   // Check host and port match
+   assert(host_ == client().host());
+   assert(port_ == client().port());
 }
 
 
 TestFixture::~TestFixture()
 {
 	// Note: Global fixture Destructor can not use BOOST macro
-  	std::cout << "TestFixture::~TestFixture() " << host_ << ":" << port_ << "\n";
+  	std::cout << "TestFixture::~TestFixture() " << client().host() << ":" << client().port() << "\n";
 
    // destructors should not allow exception propagation
    try {

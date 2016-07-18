@@ -34,6 +34,15 @@ protected:
      state_change_no_(0),
      sub_gen_variables_(NULL) {}
 
+   Submittable(const Submittable& rhs)
+   : Node(rhs),
+     jobsPassword_(rhs.jobsPassword_),
+     process_or_remote_id_(rhs.process_or_remote_id_),
+     abortedReason_(rhs.abortedReason_),
+     tryNo_(rhs.tryNo_),
+     state_change_no_(0),
+     sub_gen_variables_(NULL) {}
+
    bool operator==(const Submittable& rhs) const;
 
 public:

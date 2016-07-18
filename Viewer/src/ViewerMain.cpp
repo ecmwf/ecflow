@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QStyleFactory>
+#include <QPixmap>
 
 #include "File.hpp"
 #include "MainWindow.hpp"
@@ -44,6 +45,8 @@ int main(int argc, char **argv)
     //Init qt
     QApplication app(argc, argv);
 
+    app.setWindowIcon(QPixmap(":/viewer/logo_small.png"));
+
     QStringList styleLst=QStyleFactory::keys();
 
     //Set the style
@@ -67,7 +70,8 @@ int main(int argc, char **argv)
     //app.setFont(font);
 
     //Initialise the config and other paths
-    DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from
+    std::string exe(argv[0]);
+    DirectoryHandler::init(exe);  // we need to tell the Directory class where we started from
 
     //Set the stylesheet
     std::string styleSheetFileName="viewer.qss";

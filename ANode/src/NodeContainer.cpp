@@ -47,8 +47,33 @@ using namespace std;
 /////////////////////////////////////////////////////////////////////////////////////////
 NodeContainer::NodeContainer( const std::string& name )
 : Node(name),order_state_change_no_(0), add_remove_state_change_no_(0) {}
+
 NodeContainer::NodeContainer()
 : order_state_change_no_(0),add_remove_state_change_no_(0) {}
+
+NodeContainer::NodeContainer(const NodeContainer& rhs )
+  : Node(rhs),
+    order_state_change_no_(0),
+    add_remove_state_change_no_(0)
+{
+   size_t theSize = rhs.nodeVec_.size();
+   for(size_t s = 0; s < theSize; s++) {
+      Task* task = rhs.nodeVec_[s]->isTask();
+      if ( task ) {
+         task_ptr task_copy = boost::make_shared<Task>( *task );
+         task_copy->set_parent(this);
+         nodeVec_.push_back(task_copy);
+      }
+      else {
+         Family* family = rhs.nodeVec_[s]->isFamily();
+         assert(family);
+         family_ptr family_copy = boost::make_shared<Family>( *family );
+         family_copy->set_parent(this);
+         nodeVec_.push_back(family_copy);
+      }
+   }
+}
+
 NodeContainer::~NodeContainer() {}
 
 void NodeContainer::accept(ecf::NodeTreeVisitor& v)

@@ -1,0 +1,134 @@
+{
+    "node_query" : {
+
+        "node_name" : {
+            "type" : "string",
+            "label" : "Name"
+        },
+        "node_path" : {
+            "type" : "string",
+            "label" : "Path"
+        },
+        "type" : {
+            "type" : "list",
+            "values" : "server|suite|family|task|alias"
+        },
+        "state"  : {
+            "type"   : "list",
+            "values" : "aborted|active|complete|queued|submitted|suspended|unknown"
+        },
+        "flag"  : {
+            "type"   : "list",
+            "values" : "is_late|has_date|has_message|has_time|is_rerun|is_waiting|is_zombie"
+        }
+    },
+    "attribute_query" : {
+
+        "attribute"  : {
+            "type"  : "list",
+            "values" : "date|event|label|limit|limiter|meter|repeat|time|trigger|variable"
+        },
+
+        "event" : {
+            "event_name" : {
+                "type" : "string",
+                "label" : "Event name"
+            },
+            "event_value" : {
+                "type" : "combo",
+                "label" : "Event value",
+                "values" : "any|1|0",
+                "labels" : "Any|Set|Clear",
+                "default" : "any",
+                "ignoreIfAny" : "true"
+            }
+        },
+        "label" : {
+            "label_name" : {
+                "type" : "string",
+                "label" : "Label name"
+            },
+            "label_value" : {
+                "type" : "string",
+                "label" : "Label value"
+            }
+        },
+        "meter" : {
+            "meter_name" : {
+                "type" : "string",
+                "label" : "Meter name"
+            },
+            "meter_value" : {
+                "type" : "string",
+                "label" : "Meter value"
+            }
+        },
+        "limit" : {
+            "limit_name" : {
+                "type" : "string",
+                "label" : "Limit name"
+            },
+            "limit_value" : {
+                "type" : "string",
+                "label" : "Limit value"
+            },
+            "limit_max" : {
+                "type" : "string",
+                "label" : "Limit max"
+            }
+        },
+        "limiter" : {
+            "limiter_name" : {
+                "type" : "string",
+                "label" : "Limiter name"
+            }
+        },
+        "trigger" : {
+            "trigger_expression" : {
+                "type" : "string",
+                "label" : "Trigger expression"
+            }
+        },
+        "time" : {
+            "time_name" : {
+                "type" : "string",
+                "label" : "Time name"
+            }
+        },
+        "date" : {
+            "date_name" : {
+                "type" : "string",
+                "label" : "Date name"
+            }
+        },
+        "repeat" : {
+            "repeat_name" : {
+                "type" : "string",
+                "label" : "Repeat name"
+            },
+            "repeat_value" : {
+                "type" : "string",
+                "label" : "Repeat value"
+            }
+        },
+        "variable" : {
+            "types" : "var|genvar",
+            "var_type" : {
+               "type"  : "combo",
+               "label" : "Variable type",
+               "values" : "any|var|genvar",
+               "labels" : "Any|User variable|Generated variable",
+               "default" : "any",
+               "ignoreIfAny" : "true"
+            },
+            "var_name" : {
+                "type" : "string",
+                "label" : "Variable name"
+            },
+            "var_value" : {
+                "type" : "string",
+                "label" : "Variable value"
+            }
+         }
+      }
+}

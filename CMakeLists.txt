@@ -61,12 +61,12 @@ message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
-option( ENABLE_PYTHON            "enable python interface"   ON )
-option( ENABLE_UI                "Build ecFlowUI"            ON ) 
-option( ENABLE_GUI               "Build ecflowview"          ON )
+option( ENABLE_PYTHON            "enable python interface"         ON  )
+option( ENABLE_UI                "Build ecFlowUI"                  ON  ) 
+option( ENABLE_GUI               "Build ecflowview"                ON  )
 option( ENABLE_ALL_TESTS         "This includes performance/migration/regression tests" OFF )
-option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace" OFF ) 
-option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" OFF )
+option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace"      OFF ) 
+option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" ON  )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -76,11 +76,18 @@ option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" OFF )
 
 if(ENABLE_UI)
 
+    ecbuild_info("")
+    ecbuild_info("------------------------------ Qt start ---------------------------")
     ecbuild_info("ecFlowUI is enabled - searching for Qt5; if not found, will try Qt4")
+    ecbuild_info("To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH")
 
-    find_package(Qt5Widgets    5.0.0)
-    find_package(Qt5Gui        5.0.0)
-    find_package(Qt5Network    5.0.0)
+    find_package(Qt5Widgets 5.0.0)
+    if (Qt5Widgets_FOUND)
+        find_package(Qt5Gui 5.0.0)
+        if (Qt5Gui_FOUND)
+            find_package(Qt5Network 5.0.0)
+        endif()
+    endif()
 
     if (Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5Network_FOUND)
           ecbuild_info("Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
@@ -89,18 +96,22 @@ if(ENABLE_UI)
           set(ECFLOW_QT5 1)
           add_definitions(-DECFLOW_QT5)
     else()
-        ecbuild_info("Could not find all required Qt5 packages - searching for Qt4")
+        ecbuild_info("Could not find all required Qt5 packages (Qt5Widgets, Qt5Gui and Qt5Network) - searching for Qt4")
+        ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
 
         find_package(Qt4 4.8.0 REQUIRED QtCore QtGui QtNetwork)
         if(QT_FOUND)
             ecbuild_info("Found Qt 4, please ignore any warnings about Qt5 components that were not found.")
         else()
+            ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
             ecbuild_critical("Qt5 and Qt4 not found - one of these is required for ecFlowUI; or use -DENABLE_UI=OFF")
         endif()
     endif()
 
     set(ECFLOW_QT 1)
     add_definitions(-DQT_NO_KEYWORDS) # We need to disable keywords because there is a problem in using Qt and boost together.
+    ecbuild_info("------------------------------ Qt end----------------------------")
+    ecbuild_info("")
 
 endif()
 
@@ -158,6 +169,17 @@ endif()
 # Boost
 # =========================================================================================
 
+
+
+# this can help in some situations:
+set (_CMAKE_PREFIX_PATH_BACKUP ${CMAKE_PREFIX_PATH}) # make a backup of CMAKE_PREFIX_PATH
+foreach(BOOST_PATH_TO_SEARCH ${BOOST_PATH} ${BOOST_ROOT} $ENV{BOOST_ROOT})
+    ecbuild_debug("adding: ${BOOST_PATH_TO_SEARCH} to CMAKE_PREFIX_PATH")
+    list(APPEND CMAKE_PREFIX_PATH ${BOOST_PATH_TO_SEARCH})
+    list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
+endforeach()
+
+
 # Ecflow test require statics libs for boost < 1.59, otherwise get double free error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
@@ -184,6 +206,12 @@ find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system threa
 #    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
 
 #message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
+
+
+if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
+    set (CMAKE_PREFIX_PATH ${_CMAKE_PREFIX_PATH_BACKUP}) # restore CMAKE_PREFIX_PATH
+    ecbuild_debug("Resetting CMAKE_PREFIX_PATH to ${CMAKE_PREFIX_PATH}")
+endif()
 
 
 # =========================================================================================

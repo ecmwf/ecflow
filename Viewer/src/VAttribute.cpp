@@ -13,10 +13,22 @@
 
 #include "VNode.hpp"
 
+#include <QDebug>
+
+//#define  _UI_VATTRIBUTE_DEBUG
+
 VAttribute::VAttribute(VNode* parent,int index) : VItem(parent), type_(0), index_(index)
 {
     data_=parent_->getAttributeData(index_,type_) ;
 }
+
+VAttribute::VAttribute(VNode *parent,VAttributeType* type,QStringList data) : 
+    VItem(parent),
+    type_(type),
+    data_(data),
+    index_(-1)
+{
+}        
 
 QString VAttribute::toolTip() const
 {
@@ -75,5 +87,26 @@ bool VAttribute::isValid(VNode* parent)
         return type_->exists(parent,data_);
     }
 
+    return false;
+}
+
+bool VAttribute::value(const std::string& key,std::string& val) const
+{
+    if(data_.isEmpty() || !type_)
+        return false;
+
+    int idx=type_->searchKeyToDataIndex(key);
+
+#ifdef _UI_VATTRIBUTE_DEBUG
+    qDebug() << QString::fromStdString(key) << QString::fromStdString(val);
+    qDebug() << "  data=" << data_;
+    qDebug() << "  idx=" << idx;
+#endif
+
+    if(idx != -1)
+    {
+        val=data_[idx].toStdString();
+        return true;
+    }
     return false;
 }

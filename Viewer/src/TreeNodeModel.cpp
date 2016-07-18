@@ -186,7 +186,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(role == FilterRole)
 		return true;
 
-    if(role == Qt::ToolTipRole & !serverToolTip_)
+    if(role == Qt::ToolTipRole && !serverToolTip_)
         return QVariant();
 
     ServerHandler *server=indexToServerHandler(index);
@@ -275,7 +275,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
 QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 {
-    if(role == Qt::ToolTipRole & !nodeToolTip_)
+    if(role == Qt::ToolTipRole && !nodeToolTip_)
         return QVariant();
 
     VTreeNode* tnode=indexToNode(index);
@@ -370,7 +370,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 
 QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 {
-    if(role == Qt::ToolTipRole & !attributeToolTip_)
+    if(role == Qt::ToolTipRole && !attributeToolTip_)
         return QVariant();
 
     if(role == IconRole)
@@ -505,7 +505,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
             Q_ASSERT(row >=0);
             VTreeServer *ts=root->server();
 
-            int serverAttrNum=root->attrNum();
+            int serverAttrNum=root->attrNum(atts_);
             return createIndex(serverAttrNum+row,0,ts);
 
 #if 0
@@ -524,7 +524,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 		//is its parent (i.e.. the grandparent)
         else if(VTreeNode *grandParentNode=parentNode->parent())
 		{
-			int num=grandParentNode->attrNum()+grandParentNode->indexOfChild(parentNode);
+            int num=grandParentNode->attrNum(atts_)+grandParentNode->indexOfChild(parentNode);
 
 			//qDebug() << "PARENT 2" << child << grandParentNode->node()->name().c_str() << num;
 			return createIndex(num,0,grandParentNode);
@@ -1005,7 +1005,7 @@ void TreeNodeModel::slotBeginServerScan(VModelServer* server,int num)
 	//At this point the server node does not have any rows in the model!!!
     if(idx.isValid() && num >0)
 	{
-		beginInsertRows(idx,0,num-1);
+        beginInsertRows(idx,0,num-1);
 	}
 }
 
@@ -1017,7 +1017,6 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server,int num)
 	QModelIndex idx=serverToIndex(server);
 	if(idx.isValid() && num >0)
 	{
-        beginInsertRows(idx,0,num-1);
         endInsertRows();
 	}
 

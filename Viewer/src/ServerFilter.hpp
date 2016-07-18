@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,7 +22,7 @@ class VSettings;
 class ServerFilterObserver
 {
 public:
-	virtual ~ServerFilterObserver() {};
+    virtual ~ServerFilterObserver() {}
 	virtual void notifyServerFilterAdded(ServerItem*)=0;
 	virtual void notifyServerFilterRemoved(ServerItem*)=0;
 	virtual void notifyServerFilterChanged(ServerItem*)=0;
@@ -38,7 +38,8 @@ public:
 	enum ChangeAspect {Reset,Added,Removed};
 
 	const std::vector<ServerItem*>& items() const {return items_;}
-	void serverNames(std::vector<std::string>&) const;
+    int  itemCount() const {return static_cast<int>(items_.size());}
+    void serverNames(std::vector<std::string>&) const;
 
 	void addServer(ServerItem*,bool broadcast=true);
 	void removeServer(ServerItem*);

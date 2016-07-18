@@ -22,6 +22,7 @@ NodeFilterDialog::NodeFilterDialog(QWidget *parent) :
     setupUi(this);
 
     //setAttribute(Qt::WA_DeleteOnClose);
+    editor_->setFilterMode(true);
 
 	QString wt=windowTitle();
 	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
@@ -33,8 +34,7 @@ NodeFilterDialog::NodeFilterDialog(QWidget *parent) :
     connect(cancelPb_,SIGNAL(clicked()),
     		this,SLOT(reject()));
 
-    editor_->setQueryTeCanExpand(true);
-
+    leftVb_->addStretch(1);
 
     //Read the qt settings
     readSettings();
@@ -94,7 +94,6 @@ void NodeFilterDialog::writeSettings()
 
 	settings.beginGroup("main");
 	settings.setValue("size",size());
-	//settings.setValue("current",list_->currentRow());
 	settings.endGroup();
 }
 
@@ -112,15 +111,9 @@ void NodeFilterDialog::readSettings()
 	}
 	else
 	{
-	  	resize(QSize(550,540));
+        resize(QSize(590,460));
 	}
 
-	/*if(settings.contains("current"))
-	{
-		int current=settings.value("current").toInt();
-		if(current >=0)
-			list_->setCurrentRow(current);
-	}*/
 	settings.endGroup();
 }
 

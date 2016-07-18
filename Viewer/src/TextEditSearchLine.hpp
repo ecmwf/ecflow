@@ -48,10 +48,12 @@ protected:
 	void highlightMatches(QString txt);
     void clearHighlights();
     void disableHighlights();
+    bool lastFindSuccessful() {return lastFindSuccessful_;}
 
     AbstractTextEditSearchInterface* interface_;
     QTimer highlightAllTimer_;
 	QColor highlightColour_;
+	bool lastFindSuccessful_;
 };
 
 #endif /* VIEWER_SRC_TEXTEDITSEARCHLINE_HPP_ */

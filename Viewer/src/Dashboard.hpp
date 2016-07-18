@@ -45,6 +45,7 @@ public:
 	void selectFirstServer();
     bool selectInTreeView(VInfo_ptr);
     void addSearchDialog();
+    DashboardTitle* titleHandler() const {return titleHandler_;}
 
 	void notifyServerFilterAdded(ServerItem* item);
 	void notifyServerFilterRemoved(ServerItem* item);
@@ -56,7 +57,6 @@ public:
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
-	void titleChanged(QWidget*,QString,QPixmap);
 	void contentsChanged();
 	void aboutToDelete();
 
@@ -65,7 +65,6 @@ public Q_SLOTS:
 	void slotCommand(VInfo_ptr,QString);
 
 protected Q_SLOTS:
-	void slotTitle(QString,QPixmap);
     void slotDockClose();
     void slotDialogFinished(int);
     void slotPopInfoPanel(QString);

@@ -13,6 +13,7 @@
     <file alias="icon_calendar.svg">../images/icon_calendar.svg</file>   
     <file alias="icon_clock.svg">../images/icon_clock.svg</file>     
     <file alias="icon_complete.svg">../images/icon_complete.svg</file>   
+    <file alias="icon_killed.svg">../images/icon_killed.svg</file>
     <file alias="icon_late.svg">../images/icon_late.svg</file>
     <file alias="icon_node_log.svg">../images/icon_node_log.svg</file>
     <file alias="icon_rerun.svg">../images/icon_rerun.svg</file>
@@ -22,7 +23,7 @@
     <file>../images/arrow_up.svg</file>
     <file>../images/arrow_down.svg</file>
     <file>../images/add.svg</file>
-    <file>../images/close.svg</file>
+    <file alias="close.svg">../images/close.svg</file>
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file> 
@@ -57,8 +58,11 @@
     <file alias="large_file_search.svg">../images/large_file_search.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
+    <file alias="logo.png">../images/logo.png</file>
+    <file alias="logo_small.png">../images/logo_small.png</file>
     <file alias="manage_server.svg">../images/manage_server.svg</file>
     <file alias="manual.svg">../images/manual.svg</file>
+    <file alias="menu_arrow_down.svg">../images/menu_arrow_down.svg</file>
     <file alias="node_log.svg">../images/node_log.svg</file>
     <file alias="notification.svg">../images/notification.svg</file>
     <file alias="output.svg">../images/output.svg</file>

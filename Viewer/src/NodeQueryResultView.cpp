@@ -28,7 +28,6 @@ NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
 	model_(NULL),
 	sortModel_(NULL),
     needItemsLayout_(false)
-
 {
 	//setProperty("style","nodeView");
 	setProperty("view","query");
@@ -135,7 +134,7 @@ void NodeQueryResultView::slotSelectItem(const QModelIndex&)
 		VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(lst.front()));
 		if(info)
 		{
-			Q_EMIT selectionChanged(info);
+			Q_EMIT selectionChanged(info);            
 		}
 	}
 }

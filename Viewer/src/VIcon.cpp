@@ -103,6 +103,13 @@ public:
 	bool show(VNode*);
 };
 
+class VKilledIcon : public VIcon
+{
+public:
+    explicit VKilledIcon(const std::string& name) : VIcon(name) {};
+    bool show(VNode*);
+};
+
 //==========================================================
 //
 // Create VIcon instances
@@ -118,6 +125,7 @@ static VTimeIcon timeIcon("time");
 static VDateIcon dateIcon("date");
 static VWaitIcon waitIcon("wait");
 static VZombieIcon zombieIcon("zombie");
+static VKilledIcon killedIcon("killed");
 static VSlowIcon slowIcon("slow");
 
 //==========================================================
@@ -420,3 +428,17 @@ bool VSlowIcon::show(VNode *n)
 
 	return n->isFlagSet(ecf::Flag::LATE);
 }
+
+//==========================================================
+// Killed
+//==========================================================
+
+//Node only?
+bool VKilledIcon::show(VNode *n)
+{
+    if(!n || n->isServer())
+        return false;
+
+    return n->isFlagSet(ecf::Flag::KILLED);
+}
+

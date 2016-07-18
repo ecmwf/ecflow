@@ -103,16 +103,15 @@ VNState* VNState::toRealState(const VNode *n)
 
 VNState* VNState::toDefaultState(const VNode *n)
 {
-	if(!n || !n->node().get())
+    if(!n || !n->node())
 		return NULL;
 
 	node_ptr node=n->node();
 
-	std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(DState::convert(node->defStatus()));
-	if(it != stateMap_.end())
-			return it->second;
-
-	return NULL;
+    const char *dStateName=DState::toString(node->defStatus());
+    assert(dStateName);
+    std::string dsn(dStateName);
+    return find(dsn);
 }
 
 VNState* VNState::find(const std::string& name)

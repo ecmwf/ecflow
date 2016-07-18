@@ -31,7 +31,8 @@ public:
    static void list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec);
    static void list_to_str_vec(const boost::python::list& list, std::vector<std::string>& int_vec);
    static void dict_to_str_vec(const boost::python::dict& dict, std::vector<std::pair<std::string,std::string> >& str_pair);
-
 };
+
+template<typename T> const T copyObject(const T& v) { return v; }
 
 #endif

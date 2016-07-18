@@ -30,6 +30,7 @@ public:
     virtual void disableHighlights()=0;
 	virtual void enableHighlights()=0;
 	virtual bool highlightsNeedSearch()=0;
+	virtual void gotoLastLine()=0;
 
 protected:
 	static QColor highlightColour_;

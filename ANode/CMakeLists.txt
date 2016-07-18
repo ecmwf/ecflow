@@ -28,6 +28,7 @@ test/Test_ECFLOW-417.cpp
 test/TestAdd.cpp
 test/TestAlias.cpp
 test/TestChangeMgrSingleton.cpp
+test/TestCopyConstructor.cpp
 test/TestDefStatus.cpp
 test/TestDefs.cpp
 test/TestEcfFile.cpp

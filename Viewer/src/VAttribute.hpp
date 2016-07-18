@@ -24,6 +24,7 @@ class VAttribute : public VItem
 {
 public:
     VAttribute(VNode* parent,int index);
+    VAttribute(VNode *parent,VAttributeType* type,QStringList data);
 
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
     VAttributeType* type() const {return type_;}
@@ -31,7 +32,13 @@ public:
     QString toolTip() const;
     QString name() const;
     std::string strName() const;
+    bool value(std::string&) const;
+    int value() const;
+    //int min() const;
+    //int max() const;
+
     bool isValid(VNode* parent);
+    bool value(const std::string& key,std::string& val) const;
 
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,
@@ -40,6 +47,8 @@ public:
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,
                          const std::string& value);
+
+
 protected:
     VAttributeType* type_;
     QStringList data_;
