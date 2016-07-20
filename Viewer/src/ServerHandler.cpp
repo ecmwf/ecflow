@@ -925,7 +925,8 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			// just did something!)
 
 			UserMessage::message(UserMessage::DBG, false, std::string(" --> COMMAND finished"));
-			comQueue_->addNewsTask();
+			//comQueue_->addNewsTask();
+			comQueue_->addSyncTask();
 			break;
 		}
 		case VTask::NewsTask:
