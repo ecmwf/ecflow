@@ -15,6 +15,7 @@
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "UserMessage.hpp"
 
 //========================================================
 //
@@ -83,10 +84,11 @@ void EditItemWidget::infoReady(VReply* reply)
 	textEdit_->setPlainText(s);
 }
 
-void EditItemWidget::infoFailed(VReply*)
+void EditItemWidget::infoFailed(VReply* reply)
 {
-
+	UserMessage::message(UserMessage::ERROR, true, reply->errorText());
 }
+
 void EditItemWidget::infoProgress(VReply*)
 {
 
