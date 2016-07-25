@@ -44,7 +44,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     setupUi(this);
 
 	messageLabel_->hide();
-    warnLabel_->hide();
+	warnLabel_->hide();
 	dirLabel_->hide();
 
 	fileLabel_->setProperty("fileInfo","1");
@@ -458,7 +458,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 
 		dirView_->selectionModel()->clearSelection();
         dirModel_->setData(dir,op->joboutFileName());
-        dirWidget_->show();
+        enableDir(true, dir);
 
         if(!dirColumnsAdjusted_)
         {
@@ -477,8 +477,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 	}
 	else
 	{
-		dirWidget_->hide();
-		dirModel_->clearData();
+		enableDir(false);
 	}
 
 	if(restartTimer)
@@ -534,13 +533,24 @@ void OutputItemWidget::enableDir(bool status)
 {
 	if(status)
 	{
-		dirWidget_->show();
+		//dirWidget_->show();
+		//dirView_->show();
+		dirLabel_->clearDir();
+		dirLabel_->hide();
 	}
 	else
 	{
-		dirWidget_->hide();
+		//dirWidget_->hide();
+		//dirView_->hide();
 		dirModel_->clearData();
+		dirLabel_->updateOnNonReadableDir();
+		dirLabel_->show();
 	}
+}
+void OutputItemWidget::enableDir(bool status, VDir_ptr dir)
+{
+	dirLabel_->setDir(dir);
+	enableDir(status);
 }
 
 //---------------------------------------------

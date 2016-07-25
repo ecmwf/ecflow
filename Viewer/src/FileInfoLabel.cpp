@@ -273,3 +273,30 @@ void DirInfoLabel::update(VDir_ptr dir)
 
 	setText(s);
 }
+
+void DirInfoLabel:: setDir(VDir_ptr dir)
+{
+	dir_ = dir;
+}
+
+void DirInfoLabel:: clearDir()
+{
+	dir_ = VDir_ptr();
+}
+
+void DirInfoLabel::updateOnNonReadableDir()
+{
+	QColor col(Qt::black);
+	QString s;
+
+	s="<b><font color=" + col.name() + ">Output directory not readable - it is probably on another machine.</font></b>";
+
+	if (dir_)
+	{
+		QString dirName = QString::fromStdString(dir_->path());
+		s += "<br>Dir: " + dirName;
+	}
+
+	setText(s);
+	return;
+}

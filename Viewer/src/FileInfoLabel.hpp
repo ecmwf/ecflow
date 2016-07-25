@@ -32,8 +32,12 @@ class DirInfoLabel : public FileInfoLabel
 public:
 	explicit DirInfoLabel(QWidget* parent=0) : FileInfoLabel(parent) {}
 
+	void setDir(VDir_ptr dir);
+	void clearDir();
 	void update(VDir_ptr);
-
+	void updateOnNonReadableDir();
+private:
+	VDir_ptr dir_;
 };
 
 #endif
