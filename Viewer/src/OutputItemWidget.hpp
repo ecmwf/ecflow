@@ -60,8 +60,7 @@ protected:
 	void updateDir(VDir_ptr,bool);
 	void updateDir(bool,const std::string&);
 	void enableDir(bool);
-	void enableDir(bool, VDir_ptr);
-	void updateState(const FlagSet<ChangeFlag>&);
+    void updateState(const FlagSet<ChangeFlag>&);
 	void searchOnReload();
 	void getCurrentFile();
 	void getLatestFile();
