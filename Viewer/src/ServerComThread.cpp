@@ -458,8 +458,9 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	}
 
     //This is a radical change
-	if(std::find(types.begin(),types.end(),ecf::Aspect::ADD_REMOVE_NODE) != types.end())
-	{
+    if((std::find(types.begin(),types.end(),ecf::Aspect::ADD_REMOVE_NODE) != types.end()) ||
+       (std::find(types.begin(),types.end(),ecf::Aspect::ORDER)           != types.end()))
+    {
 		UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
 		rescanNeed_=true;
 
