@@ -285,14 +285,14 @@ private:
 
 private:
 
-	void log_error(const char* msg) {
+	void log_error(const char* msg) const {
       const char* in_context = ", in client";
       if (Ecf::server()) in_context = ", in server";
       ecf::LogToCout logToCout;
       LOG(ecf::Log::ERR, msg << in_context);
 	}
 
-   void log_archive_error(const char* msg,const boost::archive::archive_exception& ae) {
+   void log_archive_error(const char* msg,const boost::archive::archive_exception& ae) const {
       const char* in_context = ", in client";
       if (Ecf::server()) in_context = ", in server";
       ecf::LogToCout logToCout;

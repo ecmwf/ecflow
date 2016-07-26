@@ -28,6 +28,7 @@
 #include "PrintStyle.hpp"
 #include "PersistHelper.hpp"
 #include "File.hpp"
+#include "Ecf.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -73,6 +74,12 @@ void test_defs(const std::string& directory, bool pass)
  					PersistHelper helper;
 					BOOST_CHECK_MESSAGE( helper.test_persist_and_reload(defs,parser.get_file_type()), relPath.string() << " " << helper.errorMsg());
 					BOOST_CHECK_MESSAGE( helper.test_checkpt_and_reload(defs), relPath.string() << " " << helper.errorMsg());
+
+					// test copy constructor
+				   Ecf::set_debug_equality(true);
+					Defs copy_of_defs = Defs(defs);
+					BOOST_CHECK_MESSAGE(copy_of_defs == defs,"Error copy constructor failed " << relPath);
+				   Ecf::set_debug_equality(false);
 				}
  			}
 			else {

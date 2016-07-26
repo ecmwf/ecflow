@@ -61,13 +61,13 @@ ecbuild_info( "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
-option( ENABLE_PYTHON            "enable python interface"   ON )
-option( ENABLE_UI                "Build ecFlowUI"            ON ) 
-option( ENABLE_GUI               "Build ecflowview"          ON )
+option( ENABLE_PYTHON            "enable python interface"         ON  )
+option( ENABLE_UI                "Build ecFlowUI"                  ON  ) 
+option( ENABLE_GUI               "Build ecflowview"                ON  )
 option( ENABLE_ALL_TESTS         "This includes performance/migration/regression tests" OFF )
-option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace" OFF ) 
-option( ENABLE_UI_USAGE_LOG      "Enable UI usage logging"    OFF )
-option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" OFF )
+option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace"      OFF ) 
+option( ENABLE_UI_USAGE_LOG      "Enable UI usage logging"         OFF )
+option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" ON  )
 
 # =========================================================================================
 # Qt for ecFlowUI. 

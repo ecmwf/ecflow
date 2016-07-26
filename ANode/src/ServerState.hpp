@@ -15,7 +15,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/string.hpp>         // no need to include <string>
 
@@ -33,9 +32,10 @@
 //
 // Note The default state here is RUNNING while in the server the default state is HALTED
 // By choosing RUNNING, it allows the Defs related test, to run without explicitly setting the state
-class ServerState : private boost::noncopyable {
+class ServerState {
 public:
-	ServerState();
+   ServerState();
+   ServerState(const ServerState&);
 
    /// Check pointing, SAVES server variables, since they are visualised by client like ecflowview
    /// HOWEVER PrintStyle::MIGRATE does not save the server variables, since they should

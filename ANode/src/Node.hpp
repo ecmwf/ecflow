@@ -62,11 +62,12 @@ class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
 namespace ecf { class Calendar; class NodeTreeVisitor; } // forward declare class
 
-class Node : public boost::enable_shared_from_this<Node>, private boost::noncopyable {
+class Node : public boost::enable_shared_from_this<Node>  {
 protected:
    Node(const std::string& name);
    Node();
 public:
+   Node(const Node& rhs);
    virtual ~Node();
 
    /// The Parent Must set the parent pointer. For a Suite however this will be NULL

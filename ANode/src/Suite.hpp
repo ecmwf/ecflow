@@ -45,6 +45,8 @@ public:
      suite_gen_variables_(NULL)
      {}
 
+   Suite( const Suite&);
+
    virtual ~Suite();
 
    static suite_ptr create(const std::string& name);
