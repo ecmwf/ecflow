@@ -15,7 +15,7 @@
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
-#include "UserMessage.hpp"
+#include "MessageLabel.hpp"
 
 //========================================================
 //
@@ -76,17 +76,22 @@ void EditItemWidget::clearContents()
 {
 	InfoPanelItem::clear();
 	textEdit_->clear();
+	infoLabel_->clear();
+	infoLabel_->hide();
 }
 
 void EditItemWidget::infoReady(VReply* reply)
 {
+	infoLabel_->hide();
 	QString s=QString::fromStdString(reply->text());
 	textEdit_->setPlainText(s);
 }
 
 void EditItemWidget::infoFailed(VReply* reply)
 {
-	UserMessage::message(UserMessage::ERROR, true, reply->errorText());
+	infoLabel_->showError(QString::fromStdString(reply->errorText()));
+	infoLabel_->show();
+	//UserMessage::message(UserMessage::ERROR, true, reply->errorText());
 }
 
 void EditItemWidget::infoProgress(VReply*)
