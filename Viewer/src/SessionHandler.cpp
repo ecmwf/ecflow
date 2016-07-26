@@ -10,7 +10,8 @@
 #include <algorithm>
 #include <assert.h>
 #include <fstream>
-
+#include <unistd.h>
+ 
 #include "SessionHandler.hpp"
 #include "DirectoryHandler.hpp"
 #include "Str.hpp"
