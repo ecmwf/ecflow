@@ -15,18 +15,16 @@
 #include <iostream>
 #include <fstream>
 #include <stdlib.h> // for getenv()
-#include <sys/types.h> // for getpid
-#include <unistd.h>    // for getpid
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include <boost/lexical_cast.hpp>
 
 #include "Log.hpp"
 #include "File.hpp"
 #include "DurationTimer.hpp"
+#include "Pid.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -38,13 +36,8 @@ BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 static std::string getLogPath() {
 
    // ECFLOW-712, generate unique name for log file, To allow parallel test
-   std::string pid;
-   try { pid = boost::lexical_cast<std::string>(getpid());  }
-   catch (boost::bad_lexical_cast& e) {
-      throw std::runtime_error("CoreTestSuite::getLogPath:: Could not convert PID to a string\n");
-   }
    std::string log_file = "ACore/test/logfile";
-   log_file += pid;
+   log_file += Pid::getpid(); // can throw
    log_file += ".txt";
    return File::test_data(log_file,"ACore");
 }
