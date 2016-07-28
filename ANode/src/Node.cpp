@@ -1008,7 +1008,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
          else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
       }
 
-      // First search user variable (*ONLY* set when doing user edit's the script)
+      // First search user variable (*ONLY* set user edit's the script)
       // Handle case: cmd = "%fred:bill% and where we have user variable "fred:bill"
       // Handle case: cmd = "%fred%      and where we have user variable "fred"
       // If we fail to find the variable we return false.
