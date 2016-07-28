@@ -117,7 +117,6 @@ if(ENABLE_UI)
 endif()
 
 
-
 # sanity check - cannot set ENABLE_UI_BACKTRACE if UI is OFF
 if(ENABLE_UI_BACKTRACE AND (NOT ENABLE_UI))
 	ecbuild_warn("Cannot ENABLE_UI_BACKTRACE if UI is not enabled")
@@ -192,8 +191,6 @@ endif()
 # =========================================================================================
 # Boost
 # =========================================================================================
-
-
 
 # this can help in some situations:
 set (_CMAKE_PREFIX_PATH_BACKUP ${CMAKE_PREFIX_PATH}) # make a backup of CMAKE_PREFIX_PATH
@@ -288,7 +285,7 @@ endif()
 
 # =========================================================================================
 # tar ball, by default ecbuild will tar everything apart from hard wired directory called 'build' 
-#   hence we can tell it, what directories not to pack
+# hence we can tell it, what directories not to pack
 # =========================================================================================
 
 ecbuild_dont_pack( DIRS 
@@ -316,14 +313,6 @@ install( FILES
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
          COMPONENT binary
        )
-
-# install documentation         
-#install( FILES   
-#             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
-#         DESTINATION doc/ecflow
-#         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-#         COMPONENT doc
-#       )
         
 # =========================================================================================
 # final
