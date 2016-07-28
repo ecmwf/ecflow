@@ -260,8 +260,8 @@ add_subdirectory( ANattr )
 add_subdirectory( ANode )
 add_subdirectory( AParser )
 add_subdirectory( Base )
-add_subdirectory( Client )
 add_subdirectory( CSim )
+add_subdirectory( Client )
 add_subdirectory( Server )
 add_subdirectory( Test )
 
@@ -269,6 +269,11 @@ if (ENABLE_PYTHON)
     ecbuild_find_python( VERSION 2.7 REQUIRED )
     #debug_var(PYTHON_LIBRARIES)
     #debug_var(PYTHON_INCLUDE_DIR)
+    
+    if( NOT PYTHON_FOUND )
+        ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
+    endif()
+
 	add_subdirectory( Pyext )
 endif()	
 	
