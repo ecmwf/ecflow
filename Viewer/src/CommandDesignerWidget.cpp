@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,14 +15,14 @@
 #include "CustomCommandHandler.hpp"
 #include "Child.hpp"
 #include "Str.hpp"
-#include "MenuHandler.hpp"
 #include "NodeQueryResult.hpp"
+#include "NodeExpression.hpp"
 
 using namespace boost;
 namespace po = boost::program_options;
 
 
-CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
+CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent), menuItem_("")
 {
 	setupUi(this);
 
@@ -640,6 +640,24 @@ void CommandDesignerWidget::addCommandToSavedList(CustomCommand *command, int ro
 void CommandDesignerWidget::on_savedCommandsTable__cellClicked(int row, int column)
 {
 	setSavedCommandsButtonStatus();
+}
+
+
+// the caller has asked for a 'fake' menu item from the dialogue, so we create it here
+MenuItem &CommandDesignerWidget::menuItem()
+{
+	// put the right information into our menu item and return a reference to it
+	menuItem_.setCommand(commandLineEdit_->text().toStdString());
+	menuItem_.setCustom(true);
+
+	if (menuItem_.visibleCondition() == NULL)
+	{
+		BaseNodeCondition *trueCond  = new TrueNodeCondition();
+		menuItem_.setEnabledCondition(trueCond);
+		menuItem_.setVisibleCondition(trueCond);
+		menuItem_.setQuestionCondition(trueCond);
+	}
+	return menuItem_;
 }
 
 

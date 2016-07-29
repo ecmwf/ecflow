@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF. 
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -11,6 +11,7 @@
 #define MENUHANDLER_HPP_
 
 #include <vector>
+#include <map>
 #include <QString>
 #include <QIcon>
 #include <QList>
@@ -51,12 +52,14 @@ public:
     void setVisibleCondition(BaseNodeCondition *cond)  {visibleCondition_  = cond;};
     void setEnabledCondition(BaseNodeCondition *cond)  {enabledCondition_  = cond;};
     void setQuestionCondition(BaseNodeCondition *cond) {questionCondition_ = cond;};
+    void setCustom(bool b) {isCustom_ = b;};
     BaseNodeCondition *visibleCondition()  {return visibleCondition_;};
     BaseNodeCondition *enabledCondition()  {return enabledCondition_;};
     BaseNodeCondition *questionCondition() {return questionCondition_;};
     bool shouldAskQuestion(std::vector<VInfo_ptr> &nodes);
     bool isSubMenu()      {return isSubMenu_;};
     bool isDivider()      {return isDivider_;};
+    bool isCustom()       {return isCustom_;};
     std::string &name()   {return name_;};
     const std::string handler() const {return handler_;}
     bool isValidView(const std::string&) const;
@@ -94,6 +97,7 @@ private:
 
     bool isSubMenu_;
     bool isDivider_;
+    bool isCustom_;
 
     QIcon icon_;
 
@@ -152,12 +156,16 @@ public:
     static Menu *findMenu(const std::string &name);    
     static MenuItem* newItem(const std::string &name);
     static void addMenu(Menu *menu) {menus_.push_back(menu);};
+    static void interceptCommandsThatNeedConfirmation(MenuItem *item);
     static void refreshCustomMenuCommands();
 
 private:
+    typedef std::map<std::string, std::string> ConfirmationMap;
     static MenuItem* findItem(QAction*);
+    static ConfirmationMap &getCommandsThatRequireConfirmation();
 
     static std::vector<Menu *> menus_;
+    static ConfirmationMap commandsWhichRequireConfirmation_;
     //static std::vector<MenuItem> items_;
 
 };
