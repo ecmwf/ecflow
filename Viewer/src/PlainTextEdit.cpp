@@ -19,12 +19,14 @@
 #include <QWheelEvent>
 
 #include "VConfig.hpp"
+#include "UserMessage.hpp"
 
 PlainTextEdit::PlainTextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
     showLineNum_(true),
     rightMargin_(2),
     gotoLineDialog_(0),
+    hyperlinkEnabled_(false),
     fontProp_(NULL),
     numAreaBgCol_(232,231,230),
     numAreaFontCol_(102,102,102),
@@ -73,6 +75,12 @@ PlainTextEdit::~PlainTextEdit()
 
     if(fontProp_)
     	fontProp_->removeObserver(this);
+}
+
+bool PlainTextEdit::setHyperlinkEnabled(bool h)
+{
+    hyperlinkEnabled_ = h;
+    setMouseTracking(h);
 }
 
 void PlainTextEdit::setShowLineNumbers(bool b)
@@ -525,5 +533,60 @@ void PlainTextEdit::notifyChange(VProperty* p)
 }
 
 
+void PlainTextEdit::mousePressEvent(QMouseEvent *e)
+{
+    if (hyperlinkEnabled_)
+    {
+        // left button only - if pressed, we just store the link that was clicked on
+        // - we don't want to do anything until the mouse button has been released and
+        // we know it hasd not been moved away from the hyperlinked text
 
+        if (e->button() & Qt::LeftButton)
+            currentLink_ = anchorAt(e->pos());
+        else
+            currentLink_ = QString();
+    }
+
+    QPlainTextEdit::mousePressEvent(e);
+}
+
+void PlainTextEdit::mouseReleaseEvent(QMouseEvent *e)
+{
+    if (hyperlinkEnabled_)
+    {
+        // only activate the hyperlink if the user releases the left mouse button on the
+        // same link they were on when they pressed the button
+
+        if ((e->button() & Qt::LeftButton) && !currentLink_.isEmpty())
+        {
+            if (currentLink_ == anchorAt(e->pos()))
+            {
+                Q_EMIT hyperlinkActivated(currentLink_);
+                UserMessage::debug(std::string("clicked:") + currentLink_.toStdString());
+            }
+        }
+    }
+
+    QPlainTextEdit::mouseReleaseEvent(e);
+}
+
+
+void PlainTextEdit::mouseMoveEvent(QMouseEvent *e)
+{
+    if (hyperlinkEnabled_)
+    {
+        QString thisAnchor = anchorAt(e->pos());
+
+        if (!thisAnchor.isEmpty())
+        {
+            viewport()->setCursor(Qt::PointingHandCursor);
+        }
+        else
+        {
+            viewport()->unsetCursor();
+        }
+    }
+
+    QPlainTextEdit::mouseMoveEvent(e);
+}
 
