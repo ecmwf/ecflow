@@ -1,11 +1,11 @@
  # =======================================================
  # LIB
  # to list all sources to build use:
- #    cd $WK/Base
+ #    cd $WK/Client
  #    find src -name \*.cpp --print
  # =======================================================
  
- # Excludes src/ClientMain.cpp
+# Excludes src/ClientMain.cpp
 list( APPEND srcs
    src/Rtt.cpp
    src/ClientEnvironment.cpp
@@ -16,18 +16,18 @@ list( APPEND srcs
 )
 ecbuild_add_library( TARGET libclient
                      NOINSTALL
-                   TYPE     STATIC
-                   SOURCES  ${srcs}
-                   LIBS     base libparser node nodeattr core 
-                            pthread
-                   INCLUDES src
-                            ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../AParser/src
-                            ../Base/src
-                            ../Base/src/cts
-                            ../Base/src/stc
+                     TYPE     STATIC
+                     SOURCES  ${srcs}
+                     LIBS     base libparser node nodeattr core 
+                              pthread
+                     INCLUDES src
+                              ../ACore/src 
+                              ../ANattr/src
+                              ../ANode/src
+                              ../AParser/src
+                              ../Base/src
+                              ../Base/src/cts
+                              ../Base/src/stc
                 )
 
 # ========================================================================
@@ -66,27 +66,35 @@ SET_TARGET_PROPERTIES(ecflow_client PROPERTIES
 # TEST
 # Use following to populate list: 
 #  cd $WK/Client                            
-#  find test -name \*.cpp | sort                   
+#  find test -name \*.cpp | sort     
+
 list( APPEND test_srcs
- test/SCPort.cpp
- test/TestCheckPtDefsCmd.cpp
- test/TestClientEnvironment.cpp
- test/TestClientInterface.cpp
- test/TestClientInvoker.cpp
- test/TestClientTimeout.cpp
- test/TestGroupCmd.cpp
- test/TestJobGenOnly.cpp
- test/TestLifeCycle.cpp
- test/TestLoadDefsCmd.cpp
- test/TestPlugCmd.cpp
- test/TestRtt.cpp
- test/TestServer.cpp
- test/TestServerAndLifeCycle.cpp
- test/TestServerLoad.cpp
- test/TestSignalSIGTERM.cpp
- test/TestUrlCmd.cpp
- test/TestWhiteListFile.cpp
-)
+    test/TestClientEnvironment.cpp
+    test/TestClientInterface.cpp
+    test/TestJobGenOnly.cpp
+    test/TestLifeCycle.cpp
+    test/TestRtt.cpp
+    test/TestUrlCmd.cpp
+    )
+
+if (ENABLE_SERVER)
+    list(APPEND test_srcs
+        test/SCPort.cpp
+        test/TestClientInvoker.cpp
+        test/TestClientTimeout.cpp
+        test/TestCheckPtDefsCmd.cpp
+        test/TestGroupCmd.cpp
+        test/TestLoadDefsCmd.cpp
+        test/TestPlugCmd.cpp
+        test/TestServer.cpp
+        test/TestServerAndLifeCycle.cpp
+        test/TestServerLoad.cpp
+        test/TestSignalSIGTERM.cpp
+        test/TestWhiteListFile.cpp
+        )
+endif()
+              
+
 ecbuild_add_test( TARGET    s_client
                   BOOST
                   SOURCES   ${test_srcs}
@@ -97,7 +105,7 @@ ecbuild_add_test( TARGET    s_client
                  )
 
 
-if (ENABLE_ALL_TESTS)
+if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	# 
 	# Simple stand alone test
 	#
