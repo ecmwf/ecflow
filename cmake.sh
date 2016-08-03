@@ -206,13 +206,14 @@ ecbuild $source_dir \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \
             -DENABLE_WARNINGS=ON \
             -DENABLE_ALL_TESTS=ON \
-            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DENABLE_GUI=OFF       \
             -DENABLE_UI=OFF        \
+            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
             ${cmake_extra_options}
+            #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
             #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'"
         

@@ -11,14 +11,6 @@
 #
 #       -DCMAKE_PREFIX_PATH=/path/to/jasper:/path/to/any/package/out/of/place
 #       -DBUILD_SHARED_LIBS=OFF
-# =========================================================================================
-# Usage instructions:
-#
-# cd $WK
-# release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
-# major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
-# minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
-#
 ##############################################################################
 
 cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
@@ -26,7 +18,7 @@ cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
 # ===========================================================================
 # Change the default if NO CMAKE_BUILD_TYPE specified
 if (NOT DEFINED CMAKE_BUILD_TYPE)
-     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
+   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
 endif()
 
 
@@ -51,16 +43,17 @@ ecbuild_declare_project()
 # The ecflow version config is done in ACore directory
 # =========================================================================================
 
-ecbuild_info( "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}" )
-ecbuild_info( "ECFLOW_RELEASE       : ${ECFLOW_RELEASE}" )
-ecbuild_info( "ECFLOW_MAJOR         : ${ECFLOW_MAJOR}" )
-ecbuild_info( "ECFLOW_MINOR         : ${ECFLOW_MINOR}" )
-ecbuild_info( "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
+ecbuild_info( "CMAKE_INSTALL_PREFIX     : ${CMAKE_INSTALL_PREFIX}" )
+ecbuild_info( "ECFLOW_RELEASE           : ${ECFLOW_RELEASE}" )
+ecbuild_info( "ECFLOW_MAJOR             : ${ECFLOW_MAJOR}" )
+ecbuild_info( "ECFLOW_MINOR             : ${ECFLOW_MINOR}" )
+ecbuild_info( "ECFLOW_VERSION           : ${ECFLOW_VERSION_STR}" )
 
 # =========================================================================================
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
+option( ENABLE_SERVER            "Build the server, can be switched off if just building UI" ON  )
 option( ENABLE_PYTHON            "enable python interface"         ON  )
 option( ENABLE_UI                "Build ecFlowUI"                  ON  ) 
 option( ENABLE_GUI               "Build ecflowview"                ON  )
@@ -146,6 +139,7 @@ if(ENABLE_UI_USAGE_LOG AND (NOT UI_LOG_SITE_TAG))
 endif()
 
 
+ecbuild_info( "ENABLE_SERVER            : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON            : ${ENABLE_PYTHON}" )
 ecbuild_info( "ENABLE_GUI               : ${ENABLE_GUI}" )
 ecbuild_info( "ENABLE_UI                : ${ENABLE_UI}" )
@@ -259,8 +253,10 @@ add_subdirectory( AParser )
 add_subdirectory( Base )
 add_subdirectory( CSim )
 add_subdirectory( Client )
-add_subdirectory( Server )
-add_subdirectory( Test )
+if (ENABLE_SERVER)
+    add_subdirectory( Server )
+    add_subdirectory( Test )
+endif()
 
 if (ENABLE_PYTHON)
     ecbuild_find_python( VERSION 2.7 REQUIRED )

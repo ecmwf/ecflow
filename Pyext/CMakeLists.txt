@@ -104,7 +104,7 @@ foreach( test ${u_tests} )
 endforeach()
 
 
-if ( ENABLE_ALL_TESTS)
+if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	list( APPEND s_tests
 	             py_s_TestClientApi    
 	             py_s_TestPythonChildApi
