@@ -19,6 +19,8 @@
 
 #define _UI_SUITEFILTER_DEBUG
 
+std::string SuiteFilter::dummySuite_="__DUMMY_FOR_UI__";
+
 //=================================================================
 //
 // SuiteFilterItem

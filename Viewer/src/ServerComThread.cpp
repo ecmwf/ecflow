@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -275,11 +275,6 @@ void ServerComThread::sync_local()
 			attach(defsAccess.defs());
 		}
 	}
-
-	/*if(rescanNeed_ || ci_->server_reply().full_sync())
-	{
-		updateRegSuites();
-	}*/
 }
 
 void ServerComThread::reset()
@@ -291,10 +286,6 @@ void ServerComThread::reset()
 
     //Detach the defs and the nodes from the observer
     detach(defsAccess.defs());
-
-	/// registering with empty set would lead
-	//      to retrieve all server content,
-	//      opposite of expected result
 
 	//If we have already set a handle we
 	//need to drop it.
@@ -322,6 +313,18 @@ void ServerComThread::reset()
 			//This will add a new handle to the client
 			ci_->ch_register(autoAddNewSuites_, filteredSuites_);
 		}
+        //If the suite filter is empty
+        else
+        {
+            //Registering with empty set would lead to retrieve all server content,
+            //opposite of expected result. So we just register a dummy suite
+            //to achive the our goal: for an empty suite filter no suites are retrieved.
+            UserMessage::message(UserMessage::DBG, false, std::string(" REGISTER EMPTY SUITE LIST"));
+
+            std::vector<std::string> fsl;
+            fsl.push_back(SuiteFilter::dummySuite());
+            ci_->ch_register(autoAddNewSuites_, fsl);
+        }
 	}
 	else
 	{
@@ -337,99 +340,6 @@ void ServerComThread::reset()
 	attach(defsAccess.defs());
 
 	UserMessage::message(UserMessage::DBG, false,"ServerComThread::reset -- end");
-}
-
-
-//Called from sync local!!!
-void ServerComThread::updateRegSuites()
-{
-	if(!hasSuiteFilter_)
-		return;
-
-	//----------------------------------------
-	// Get the registered list of suites!!
-	//----------------------------------------
-	try
-	{
-		ci_->ch_suites();
-	}
-	catch ( std::exception& e )
-	{
-		UserMessage::message(UserMessage::DBG, false, std::string("host::update-reg-suite-error:") + e.what());
-	}
-
-	const std::vector<std::pair<unsigned int, std::vector<std::string> > >& vct=ci_->server_reply().get_client_handle_suites();
-
-	std::vector<std::string> regSuites;
-	for(size_t i = 0; i < vct.size(); ++i)
-	{
-		if(vct[i].first == static_cast<unsigned int>(ci_->client_handle()))
-		{
-		    regSuites = vct[i].second;
-		    break;
-		}
-    }
-
-	//-----------------------------------------
-	// Get the list of suites from the defs
-	//-----------------------------------------
-	const std::vector<suite_ptr>& defSuites = ci_->defs()->suiteVec();
-
-	//-----------------------------------------------------------------------
-	// If something is registered but not in the defs we need to remove it
-	//-----------------------------------------------------------------------
-
-	std::vector<std::string> delSuites;
-	for(std::vector<std::string>::iterator it=regSuites.begin(); it != regSuites.end(); ++it)
-	{
-		bool found=0;
-		for(size_t i = 0; i < defSuites.size(); ++i)
-		{
-			if(defSuites.at(i)->name() == *it)
-			{
-				found=true;
-				break;
-			}
-		}
-		if(!found)
-		{
-			delSuites.push_back(*it);
-		}
-	}
-
-	if(!delSuites.empty())
-	{
-		ci_->ch_remove(ci_->client_handle(),delSuites);
-	}
-
-	//------------------------------------------------------
-	// If something is loaded and in the filter but
-	// not registered we need to register it!!
-	//------------------------------------------------------
-
-	if(!autoAddNewSuites_)
-	{
-		//get the list of loaded suites
-		ci_->suites();
-		const std::vector<std::string>& loadedSuites=ci_->server_reply().get_string_vec();
-
-		std::vector<std::string> addSuites;
-		for(std::vector<std::string>::const_iterator it=loadedSuites.begin(); it != loadedSuites.end(); ++it)
-		{
-			if(std::find(filteredSuites_.begin(),filteredSuites_.end(),*it) != filteredSuites_.end() &&
-			   std::find(regSuites.begin(),regSuites.end(),*it) != regSuites.end())
-			{
-				addSuites.push_back(*it);
-			}
-		}
-
-		if(!addSuites.empty())
-		{
-			ci_->ch_add(ci_->client_handle(),addSuites);
-		}
-	}
-
-	UserMessage::message(UserMessage::DBG, false, std::string("Suite update finished"));
 }
 
 //This is an observer notification method!!

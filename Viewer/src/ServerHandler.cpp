@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -1080,8 +1080,8 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		case VTask::SuiteListTask:
 		{
 			//Update the suite filter with the list of suites actually loaded onto the server.
-			//If the suitefilter is enabled this might have only a subset of it in our tree.
-			updateSuiteFilterWithLoaded(serverReply.get_string_vec());
+            //If the suitefilter is enabled this might have only a subset of it in our tree
+            updateSuiteFilterWithLoaded(serverReply.get_string_vec());
 			break;
 		}
 
@@ -1394,8 +1394,8 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 //Update the suite filter with the list of suites actually loaded onto the server.
 //If the suitefilter is enabled this might have only a subset of it in our tree.
 void ServerHandler::updateSuiteFilterWithLoaded(const std::vector<std::string>& loadedSuites)
-{
-	suiteFilter_->setLoaded(loadedSuites);
+{	
+    suiteFilter_->setLoaded(loadedSuites);
 }
 
 //Update the suite filter with the list of suites stored in the defs (in the tree). It only

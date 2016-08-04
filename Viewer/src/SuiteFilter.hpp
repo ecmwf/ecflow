@@ -103,6 +103,8 @@ public:
 	void readSettings(VSettings *vs);
 	void writeSettings(VSettings *vs);
 
+    static const std::string dummySuite() {return dummySuite_;}
+
 private:
 	void clear();
 	void adjust();
@@ -116,6 +118,7 @@ private:
     bool loadedInitialised_;
 	FlagSet<ChangeFlag> changeFlags_;
 	std::vector<SuiteFilterObserver*> observers_;
+    static std::string dummySuite_;
 };
 
 
