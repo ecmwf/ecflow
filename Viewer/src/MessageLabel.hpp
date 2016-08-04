@@ -1,4 +1,12 @@
-// Copyright 2014 ECMWF.
+//============================================================================
+// Copyright 2016 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+//============================================================================
 
 #ifndef MESSAGELABEL_HPP_
 #define MESSAGELABEL_HPP_
@@ -14,11 +22,12 @@ class MessageLabel : public QWidget
 public:
 	explicit MessageLabel(QWidget *parent=0);
 
-	enum Type {NoType,InfoType,WarningType,ErrorType};
+    enum Type {NoType,InfoType,WarningType,ErrorType,TipType};
 
 	void showInfo(QString);
 	void showWarning(QString);
-	void showError(QString);
+    void showError(QString);
+    void showTip(QString);
 	void startLoadLabel();
 	void stopLoadLabel();
     void startProgress(int max=0);

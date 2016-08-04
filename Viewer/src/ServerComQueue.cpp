@@ -25,7 +25,7 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	server_(server),
 	client_(client),
 	comThread_(comThread),
-	timeout_(500),
+	timeout_(5),
 	state_(NoState), //the queue is enabled but not running
 	taskIsBeingFinished_(false),
 	taskIsBeingFailed_(false)
@@ -288,6 +288,7 @@ void ServerComQueue::addSuiteAutoRegisterTask()
 
 void ServerComQueue::slotRun()
 {
+	//UserMessage::message(UserMessage::DBG, false,std::string("**** ServerComQueue::slotRun"));
 	if(state_ == DisabledState ||state_ == SuspendedState )
 		return;
 

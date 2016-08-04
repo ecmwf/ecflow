@@ -25,7 +25,8 @@ int DashboardTitle::lighter_=150;
 DashboardTitle::DashboardTitle(ServerFilter* filter,Dashboard *parent) :
   QObject(parent),
   dashboard_(parent),
-  filter_(filter)
+  filter_(filter),
+  maxPixWidth_(0)
 {
     filter_->addObserver(this);
 }
@@ -153,6 +154,9 @@ void DashboardTitle::updateTitle()
         return;
     }
 
+    if(maxPixWidth_ == 0)
+        return;
+
     QStringList texts;
     QList<QColor> fillColors;
     QList<QColor> textColors;
@@ -273,9 +277,7 @@ void DashboardTitle::updateTitle()
         QPainter painter(&pix_);
 
         for(int i=0; i < texts.count(); i++)
-        {
-            //drawServerRect(&painter,fillColors[i],fillRects[i],texts[i],textColors[i],textRects[i]);
-
+        {       
             QColor bg=fillColors[i];
 
             if(noText)
@@ -308,36 +310,6 @@ void DashboardTitle::updateTitle()
             else
             {                
                 QColor fg=QColor(0,0,0);
-#if 0
-                QColor bg1,bg2,fg,bgBorder;
-                if(current_)
-                {                    
-                    bg1=QColor(250,250,250);
-                    bg2=QColor(230,230,230);
-                    fg=QColor(0,0,0);
-                    bgBorder=QColor(195,195,195);
-                }
-                else
-                {
-                    bg1=QColor(220,220,220);
-                    bg2=QColor(200,200,200);
-                    fg=QColor(0,0,0);
-                    bgBorder=QColor(195,195,195);
-                }
-
-                QLinearGradient grad;
-                grad.setCoordinateMode(QGradient::ObjectBoundingMode);
-                grad.setStart(0,0);
-                grad.setFinalStop(0,1);
-
-                grad.setColorAt(0,bg1);
-                grad.setColorAt(1,bg2);
-
-                painter.setBrush(QBrush(grad));
-                painter.setPen(bgBorder);
-                painter.drawRect(textRects[i]);
-#endif
-
                 painter.setPen(fg);
                 painter.drawText(textRects[i],Qt::AlignCenter,texts[i]);
 

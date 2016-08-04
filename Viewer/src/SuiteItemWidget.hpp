@@ -15,12 +15,13 @@
 
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
+#include "SuiteFilterObserver.hpp"
 
 #include "ui_SuiteItemWidget.h"
 
 class SuiteModel;
 
-class SuiteItemWidget : public QWidget, public InfoPanelItem, protected Ui::SuiteItemWidget
+class SuiteItemWidget : public QWidget, public InfoPanelItem, public SuiteFilterObserver, protected Ui::SuiteItemWidget
 {
 Q_OBJECT
 
@@ -31,7 +32,6 @@ public:
 	QWidget* realWidget();
     void clearContents();  
 
-	//From VInfoPresenter
 	void infoReady(VReply*);
 	void infoFailed(VReply*);
     void infoProgress(VReply*) {}
@@ -39,13 +39,17 @@ public:
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
+    void notifyChange(SuiteFilter *filter);
+    void notifyDelete(SuiteFilter *filter);
+
 protected Q_SLOTS:
 	void on_autoCb_clicked(bool);
 	void on_enableTb_clicked(bool);
 	void on_selectAllTb_clicked(bool);
 	void on_unselectAllTb_clicked(bool);
 	void on_syncTb_clicked(bool);
-	void on_okTb_clicked(bool);
+    void on_okTb_clicked(bool);
+    void on_removeTb_clicked(bool);
 	void slotModelEdited(const QModelIndex&,const QModelIndex&);
 
 protected:
@@ -55,6 +59,7 @@ protected:
     void checkActionState();
 
     SuiteModel *model_;
+    bool columnsAdjusted_;
 };
 
 #endif

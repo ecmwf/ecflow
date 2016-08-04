@@ -70,7 +70,10 @@ void ServerComThread::task(VTask_ptr task)
 		//Suite filter
 		hasSuiteFilter_=server_->suiteFilter()->isEnabled();
 		autoAddNewSuites_=server_->suiteFilter()->autoAddNewSuites();
-		filteredSuites_=server_->suiteFilter()->filter();
+        if(hasSuiteFilter_)
+            filteredSuites_=server_->suiteFilter()->filter();
+        else
+            filteredSuites_.clear();
 
 		maxLineNum_=server_->conf()->intValue(VServerSettings::MaxOutputFileLines);
 
@@ -455,8 +458,9 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	}
 
     //This is a radical change
-	if(std::find(types.begin(),types.end(),ecf::Aspect::ADD_REMOVE_NODE) != types.end())
-	{
+    if((std::find(types.begin(),types.end(),ecf::Aspect::ADD_REMOVE_NODE) != types.end()) ||
+       (std::find(types.begin(),types.end(),ecf::Aspect::ORDER)           != types.end()))
+    {
 		UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
 		rescanNeed_=true;
 

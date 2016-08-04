@@ -147,7 +147,8 @@ public:
 	QWidget* item();
 	QWidget* button();
 	bool applyChange();
-	QVariant currentValue();
+    QVariant currentValue();
+    bool canExpand() const {return true;}
 
 public Q_SLOTS:
 	void slotEdited(QString);

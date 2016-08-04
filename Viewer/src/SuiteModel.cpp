@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,10 +11,13 @@
 
 #include <QDebug>
 
+#include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
+#include "VNode.hpp"
 
 SuiteModel::SuiteModel(QObject *parent) :
      QAbstractItemModel(parent),
+     server_(0),
      data_(0),
      realData_(0),
 	 presentCol_(QColor(1,128,73)),
@@ -32,7 +35,9 @@ SuiteModel::~SuiteModel()
 
 void SuiteModel::clearData()
 {
-	if(data_)
+    server_=0;
+
+    if(data_)
 		delete data_;
 
 	data_=0;
@@ -43,7 +48,7 @@ void SuiteModel::clearData()
 	realData_=0;
 }
 
-void SuiteModel::setData(SuiteFilter* filter)
+void SuiteModel::setData(SuiteFilter* filter,ServerHandler* server)
 {
 	beginResetModel();
 
@@ -54,7 +59,9 @@ void SuiteModel::setData(SuiteFilter* filter)
 
 	if(filter)
 	{
-		data_=filter->clone();
+        server_=server;
+        Q_ASSERT(server);
+        data_=filter->clone();
 		realData_=filter;
 		realData_->addObserver(this);
 	}
@@ -82,13 +89,13 @@ void SuiteModel::notifyDelete(SuiteFilter *filter)
 
 void SuiteModel::updateData()
 {
-	if(realData_ && data_ &&
-	 !data_->loadedSameAs(realData_->loaded()))
-	{
-		beginResetModel();
-		data_->setLoaded(realData_->loaded());
-		endResetModel();
-	}
+    if(realData_ && data_ &&
+         !data_->loadedSameAs(realData_->loaded()))
+        {
+            beginResetModel();
+            data_->setLoaded(realData_->loaded());
+            endResetModel();
+        }
 }
 
 void SuiteModel::reloadData()
@@ -104,7 +111,7 @@ bool SuiteModel::hasData() const
 
 int SuiteModel::columnCount( const QModelIndex& /*parent */ ) const
 {
-   	 return 2;
+     return 3;
 }
 
 int SuiteModel::rowCount( const QModelIndex& parent) const
@@ -157,19 +164,34 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 		switch(index.column())
 		{
 		case 0:
-			return QString::fromStdString(data_->items().at(row).name_);
+            return QString::fromStdString(data_->items().at(row).name());
 			break;
 		case 1:
-			return (data_->items().at(row).present_)?"loaded":"not loaded";
+            return (data_->items().at(row).loaded())?"loaded":"not loaded";
 			break;
-		default:
+        case 2:
+            {
+                if(data_->items().at(row).loaded())
+                {
+                    Q_ASSERT(server_);
+                    int n=server_->vRoot()->totalNumOfTopLevel(data_->items().at(row).name());
+                    if(n != -1)
+                        return n;
+                    else
+                        return QVariant();
+                }
+                else
+                    return QVariant();
+            }
+            break;
+        default:
 			break;
 		}
 	}
 	else if(role == Qt::CheckStateRole)
 	{
 		if(index.column()==0)
-			return (data_->items().at(row).filtered_)?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
+            return (data_->items().at(row).filtered())?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
 	}
 	else if(role == Qt::ForegroundRole)
 	{
@@ -179,7 +201,7 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 		}
 		else if(index.column() == 1)
 		{
-			return (data_->items().at(row).present_)?presentCol_:notPresentCol_;
+            return (data_->items().at(row).loaded())?presentCol_:notPresentCol_;
 		}
 		return QVariant();
 	}
@@ -215,7 +237,8 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    		switch ( section )
    		{
    		case 0: return tr("Suite");
-   		case 1: return tr("Status on server");
+        case 1: return tr("Load status on server");
+        case 2: return tr("Number of children");
    		default: return QVariant();
    		}
    	}
@@ -223,8 +246,11 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    	{
    		switch ( section )
    		{
-   		case 0: return tr("Suite filter status");
-   		case 1: return tr("Indicates if the suite is currently <b>loaded</b> on the server");
+        case 0: return tr("Filter status of suite");
+        case 1: return tr("Indicates if the suite is currently <b>loaded</b> on the server.<br><br>\
+                          Please note: this information might not be up to date for <b>unfiltered</b> suites. Use <u>Fetch load status</u> \
+                          to get the actual load status list.");
+        case 2: return tr("Number of children");
    		default: return QVariant();
    		}
    	}

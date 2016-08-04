@@ -133,6 +133,10 @@ int main(int argc, char **argv)
 		if (sessionDialog.exec() != QDialog::Accepted)
 			startMainWindow = false;
 	}
+	else
+	{
+		SessionHandler::setTemporarySessionIfReqested(); // user starts with -ts command-line switch?
+	}
 
 	if (startMainWindow)
 	{

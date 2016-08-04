@@ -30,6 +30,7 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "PrintStyle.hpp"
+#include "Pid.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -85,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_simple_include_file")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );
@@ -110,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
    ecf_file += tail;
 
    string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
-   // cout << "file_location = " << ecf_file_location << "\n";
+   //cout << "file_location = " << ecf_file_location << "\n";
    BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
 
    string errormsg;
@@ -158,9 +159,12 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_495 )
    //  task t1
    //endsuite
    Defs theDefs;
-   suite_ptr suite = theDefs.add_suite("suite");
+   suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_ECFLOW_495"));
    suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
    task_ptr task_t1 = suite->add_task("t1");
+
+   //PrintStyle style(PrintStyle::STATE);
+   //std::cout << theDefs << "\n";
 
    // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
    // or when file does not exist in ECF_INCLUDE
@@ -225,7 +229,7 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "test_ECF_SCRIPT_CMD_ECFLOW_427"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ECF_SCRIPT_CMD_ECFLOW_427")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );
@@ -334,7 +338,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_file )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_include_file")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );
@@ -412,7 +416,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_multi_paths_ECFLOW_261 )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_include_multi_paths_ECFLOW_261")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/empty_include1:$ECF_HOME/empty_include2:$ECF_HOME/includes:$ECF_HOME/includes2" ) );
       suite->addTask( task_t1 );
@@ -489,7 +493,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_ECFLOW_274 )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_include_ECFLOW_274")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );
@@ -577,7 +581,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables )
    task_ptr task_t1;
    suite_ptr suite;
    Defs theDefs; {
-      suite = theDefs.add_suite("suite");
+      suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables"));
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->add_variable("ESUITE","suite");
       task_t1 = suite->add_family("f1")->add_task( "t1" );
@@ -648,7 +652,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables_with_comments )
    task_ptr task_t1;
    suite_ptr suite;
    Defs theDefs; {
-      suite = theDefs.add_suite("suite");
+      suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables_with_comments"));
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->add_variable("ETASK","suite");
       suite->add_variable("FRED","fred");
@@ -717,7 +721,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables_errors )
    task_ptr task_t1;
    suite_ptr suite;
    Defs theDefs; {
-      suite = theDefs.add_suite("suite");
+      suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables_errors"));
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->add_variable("ETASK","suite");
       task_t1 = suite->add_family("f1")->add_task( "t1" );
@@ -787,7 +791,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
 
    // Create a defs file, where the task name mirrors the sms files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_file") );
    std::pair<std::string,std::string> p;
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
@@ -954,7 +958,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_includenoop )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite_test_ecf_file_includenopp"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_file_includenoop") );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );
@@ -1045,7 +1049,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_override_ECF_JOB )
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
    task_t1->addVariable( Variable( "ECF_JOB",  job_file_location  ) );
-   suite_ptr suite = Suite::create( "test_ecf_file_override_ECF_JOB"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_file_override_ECF_JOB") );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );
@@ -1118,7 +1122,7 @@ BOOST_AUTO_TEST_CASE( test_manual_files )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    Defs theDefs;
-   suite_ptr suite = theDefs.add_suite( "suite"  );
+   suite_ptr suite = theDefs.add_suite( "suite") ;  // ** relies on name of suite, in SMSHOME/suite
    suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/../includes" ) );
    family_ptr family = suite->add_family("family");
    task_ptr task_t1 = family->add_task("t1");
@@ -1135,8 +1139,8 @@ BOOST_AUTO_TEST_CASE( test_manual_files )
    // Create the generated variables
    task_t1->update_generated_variables();
 
-//   PrintStyle style(PrintStyle::STATE);
-//   std::cout << theDefs << "\n";
+   //PrintStyle style(PrintStyle::STATE);
+   //std::cout << theDefs << "\n";
 
    /// Now finally the test
 
@@ -1197,7 +1201,7 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_672 )
    //endsuite
    Defs theDefs;
    suite_ptr suite = theDefs.add_suite("ECFLOW_672");
-   suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/ECFLOW_672" ) );
+   suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/ECFLOW_672") );
    task_ptr task_t1 = suite->add_task("t");
 
    // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
@@ -1249,7 +1253,7 @@ BOOST_AUTO_TEST_CASE( test_includeonce )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_includeonce") );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );
@@ -1325,7 +1329,7 @@ BOOST_AUTO_TEST_CASE( test_includeonce_hierarchical )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_includeonce_hierarchical") );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );

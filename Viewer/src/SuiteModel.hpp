@@ -6,6 +6,7 @@
 
 #include "SuiteFilterObserver.hpp"
 
+class ServerHandler;
 class SuiteFilter;
 
 class SuiteModel : public QAbstractItemModel, public SuiteFilterObserver
@@ -25,12 +26,13 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-	void setData(SuiteFilter* filter);
+    void setData(SuiteFilter* filter,ServerHandler* server);
 	void reloadData();
 
-   	SuiteFilter* filter() const {return data_;}
+   	SuiteFilter* filter() const {return data_;}   
+    SuiteFilter* realFilter() const {return realData_;}
 
-   	void notifyChange(SuiteFilter*);
+    void notifyChange(SuiteFilter*);
    	void notifyDelete(SuiteFilter*);
 
 protected:
@@ -38,6 +40,7 @@ protected:
 	void clearData();
 	void updateData();
 
+    ServerHandler* server_;
 	SuiteFilter* data_;
 	SuiteFilter* realData_;
 	QColor presentCol_;

@@ -31,6 +31,7 @@ public:
 	int count() {return static_cast<int>(items_.size());}
 	ServerItem* itemAt(int);
 	ServerItem* find(const std::string& name);
+	ServerItem* find(const std::string& name, const std::string& host, const std::string& port);
 
 	//Can be added or changed only via these static methods
 	ServerItem* add(const std::string&,const std::string&,const std::string&,bool,bool saveIt=true);

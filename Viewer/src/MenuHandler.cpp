@@ -655,7 +655,7 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 	//Qt doc says: the ownership of the widget is passed to the widgetaction.
 	//So when the action is deleted it will be deleted as well.
 	wAction->setDefaultWidget(titleW);
-	//wAction->setEnabled(false);
+	wAction->setEnabled(false);
 	qmenu->addAction(wAction);
 }
 

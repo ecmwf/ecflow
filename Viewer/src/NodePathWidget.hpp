@@ -225,7 +225,9 @@ protected:
 	QHBoxLayout* layout_;
 	VInfo_ptr info_;
 	VInfo_ptr infoFull_;
-	QToolButton* reloadTb_;
+#if 0
+    QToolButton* reloadTb_;
+#endif
     BcWidget* bc_;
    
    
