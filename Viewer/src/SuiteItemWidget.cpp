@@ -9,6 +9,8 @@
 
 #include "SuiteItemWidget.hpp"
 
+#include <QSortFilterProxyModel>
+
 #include "InfoProvider.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
@@ -31,8 +33,12 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
 	infoProvider_=new SuiteProvider(this);
 
 	model_=new SuiteModel(this);
+    QSortFilterProxyModel* sortModel=new QSortFilterProxyModel(this);
+    sortModel->setSourceModel(model_);
 
-	suiteView->setModel(model_);
+    suiteView->setUniformRowHeights(true);
+    suiteView->setSortingEnabled(true);
+    suiteView->setModel(sortModel);
 
 	connect(model_,SIGNAL(dataChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotModelEdited(QModelIndex,QModelIndex)));
@@ -104,6 +110,8 @@ void SuiteItemWidget::reload(VInfo_ptr info)
             columnsAdjusted_=true;
         }
 
+        suiteView->sortByColumn(0,Qt::AscendingOrder);
+
         model_->filter()->addObserver(this);
 
 		enableTb->setChecked(sf->isEnabled());
@@ -141,7 +149,8 @@ void SuiteItemWidget::updateData()
 
 void SuiteItemWidget::infoReady(VReply* reply)
 {
-	//updateData();
+    suiteView->sortByColumn(0,Qt::AscendingOrder);
+    //updateData();
 }
 
 void SuiteItemWidget::infoFailed(VReply* reply)

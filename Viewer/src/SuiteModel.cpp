@@ -20,8 +20,8 @@ SuiteModel::SuiteModel(QObject *parent) :
      server_(0),
      data_(0),
      realData_(0),
-	 presentCol_(QColor(1,128,73)),
-	 notPresentCol_(QColor(255,0,0))
+     presentCol_(QColor(1,128,73)),
+     notPresentCol_(QColor(255,0,0))
 {
 
 }
