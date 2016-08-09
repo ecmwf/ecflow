@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -136,7 +136,19 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
     inScan_=true;
 
     //When the server scan ends we need to rebuild the tree.
-    if(filter_->isNull())
+#if 0
+    if(filter_->())
+    {
+        tree_->build();
+    }
+    else
+    {
+        filter_->update();
+        tree_->build(filter_->match_);
+    }
+#endif
+
+    if(filter_->isComplete())
     {
         tree_->build();
     }
@@ -188,7 +200,7 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
 #endif
 
     //if there was a state change during the sync
-    if(changeInfo_->stateChangeSuites().size() > 0 && !filter_->isNull())
+    if(changeInfo_->stateChangeSuites().size() > 0 && !filter_->isNull() && !filter_->isComplete())
 	{
 #ifdef _UI_VMODELDATA_DEBUG
         UserMessage::debug("  Suites changed:");
@@ -197,9 +209,8 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
 #endif
         //Update the filter for the suites with a status change. topFilterChange
         //will contain the branches where the filter changed. A branch is
-        //defined by the parent of the top level nodes with a filter status change in a given
-        //suite. Suites are always visible (part of the tree) so a branch cannot be a server (root)
-        //but at most a suite.
+        //defined by the top level node with a filter status change in a given
+        //suite. A branch cannot be a server (root) but at most a suite.
         std::vector<VNode*> topFilterChange;
         filter_->update(changeInfo_->stateChangeSuites(),topFilterChange);
 
@@ -221,49 +232,158 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
 #ifdef _UI_VMODELDATA_DEBUG
             UserMessage::debug("  Branch: " + topFilterChange[i]->absNodePath());
 #endif
-            //This is the branch where there is a change in the filter
-            VTreeNode* tn=tree_->find(topFilterChange[i]);
-
-            //If the branch is not in tree (not yet filtered) we need to
-            //find it nearest ancestor up in the tree. This must exist because
-            //the suites are always part of the tree.
-            if(!tn)
+            //If the filter status of a SUITE has changed
+            if(topFilterChange[i]->isSuite())
             {
-                tn=tree_->findAncestor(topFilterChange[i]);
-                Q_ASSERT(tn);
-                Q_ASSERT(!tn->isRoot());
-            }
+                VNode *suite=topFilterChange[i];
+                Q_ASSERT(suite);
+
+                //This is the branch where there is a change in the filter
+                VTreeNode* tn=tree_->find(topFilterChange[i]);
+
+                //Remove the suite if it is in the tree
+                if(tn)
+                {
+                    Q_ASSERT(!tn->isRoot());
 
 #ifdef _UI_VMODELDATA_DEBUG
-            UserMessage::debug("  Branch treeNode: " + tn->vnode()->absNodePath());
+                    UserMessage::debug("  Remove suite: " + suite->absNodePath());
 #endif
-            //First, we remove the branch contents
-            if(tn->numOfChildren())
+                    int index=tree_->indexOfTopLevel(tn);
+                    Q_ASSERT(index >=0);
+
+                    int row=tree_->attrNum(attrFilter_) + index;
+                    Q_EMIT beginFilterUpdateRemoveTop(this,row);
+                    tree_->remove(tn);
+                    Q_EMIT endFilterUpdateRemoveTop(this,row);
+                }
+                //Add the suite if it is NOT in the tree
+                else
+                {
+#ifdef _UI_VMODELDATA_DEBUG
+                    UserMessage::debug("  Add suite: " + suite->absNodePath());
+#endif
+                    VTreeNode *branch=tree_->makeTopLevelBranch(filter_->match_,suite);
+                    int index=tree_->indexOfTopLevelToInsert(suite);
+                    Q_ASSERT(index >=0);
+
+                    Q_EMIT beginFilterUpdateInsertTop(this,index);
+                    tree_->insertTopLevelBranch(branch,index);
+                    Q_EMIT endFilterUpdateInsertTop(this,index);
+                }
+           }
+
+            //If the top level node that changed is not a suite
+            else
             {
-                int totalRows=tn->attrNum(attrFilter_) + tn->numOfChildren();
-                Q_EMIT beginFilterUpdateRemove(this,tn,totalRows);
-                tree_->removeChildren(tn);
-                Q_EMIT endFilterUpdateRemove(this,tn,totalRows);
+                //We need to find the nearest existing parent in the tree
+                VTreeNode* tn=tree_->findAncestor(topFilterChange[i]);
+
+                //This must be at most a suite. It cannot be the root!
+                Q_ASSERT(tn);
+                Q_ASSERT(!tn->isRoot());
+
+#ifdef _UI_VMODELDATA_DEBUG
+                UserMessage::debug("  tree node to update: " + tn->vnode()->absNodePath());
+#endif
+                //First, we remove the branch contents
+                if(tn->numOfChildren())
+                {
+                    int totalRows=tn->attrNum(attrFilter_) + tn->numOfChildren();
+                    Q_EMIT beginFilterUpdateRemove(this,tn,totalRows);
+                    tree_->removeChildren(tn);
+                    Q_EMIT endFilterUpdateRemove(this,tn,totalRows);
+                }
+
+                //Second, we add the new contents
+                VTreeNode *branch=tree_->makeBranch(filter_->match_,tn);
+                int chNum=branch->numOfChildren();
+
+                Q_EMIT beginFilterUpdateAdd(this,tn,chNum);
+                if(chNum > 0)
+                {
+                    tree_->replaceWithBranch(tn,branch);
+                }
+                Q_EMIT endFilterUpdateAdd(this,tn,chNum);
+
+                //branch must be empty now
+                Q_ASSERT(branch->numOfChildren() == 0);
+                delete branch;
+
             }
-
-            //Second, we add the new contents
-            VTreeNode *branch=new VTreeNode(tn->vnode(),0);
-            tree_->buildBranch(filter_->match_,tn,branch);
-            int chNum=branch->numOfChildren();
-
-            Q_EMIT beginFilterUpdateAdd(this,tn,chNum);
-            if(chNum)
-            {
-               tree_->addBranch(tn,branch);
-            }
-            Q_EMIT endFilterUpdateAdd(this,tn,chNum);
-
-            //branch must be empty now
-            Q_ASSERT(branch->numOfChildren() == 0);
-
-            delete branch;
         }
     }
+
+        //If the branch is not in tree (not yet filtered) we need to
+            //find its nearest ancestor up in the tree. This must exist because
+            //the suites are always part of the tree.
+          /*  if(!tn)
+            {
+                tn=tree_->findAncestor(topFilterChange[i]);
+                if(!tn)
+                {
+                    Q_ASSERT(!tn->isRoot());
+                }
+
+
+                Q_ASSERT(tn);
+                Q_ASSERT(!tn->isRoot());
+            }*/
+#if 0
+            //If the branch is in tree
+            if(tn)
+            {
+                Q_ASSERT(!tn->isRoot());
+
+#ifdef _UI_VMODELDATA_DEBUG
+                UserMessage::debug("  Branch treeNode: " + tn->vnode()->absNodePath());
+#endif
+                //First, we remove the branch contents
+                if(tn->numOfChildren())
+                {
+                    int totalRows=tn->attrNum(attrFilter_) + tn->numOfChildren();
+                    Q_EMIT beginFilterUpdateRemove(this,tn,totalRows);
+                    tree_->removeChildren(tn);
+                    Q_EMIT endFilterUpdateRemove(this,tn,totalRows);
+                }
+
+                //Second, we add the new contents
+                VTreeNode *branch=new VTreeNode(tn->vnode(),0);
+                tree_->buildBranch(filter_->match_,tn,branch);
+                int chNum=branch->numOfChildren();
+
+                Q_EMIT beginFilterUpdateAdd(this,tn,chNum);
+                if(chNum > 0)
+                {
+                    tree_->addBranch(tn,branch);
+                }
+                Q_EMIT endFilterUpdateAdd(this,tn,chNum);
+
+                //branch must be empty now
+                Q_ASSERT(branch->numOfChildren() == 0);
+            }
+            else
+            {
+#ifdef _UI_VMODELDATA_DEBUG
+                UserMessage::debug("  Branch treeNode does not exist. A new suite will be added");
+#endif
+                //we add the new contents
+                VNode *suite=topFilterChange[i];
+                Q_ASSERT(suite);
+                VTreeNode *branch=new VTreeNode(suite,0);
+                tree_->buildSuiteBranch(filter_->match_,suite,branch);
+                int chNum=branch->numOfChildren();
+
+                Q_EMIT beginFilterUpdateAdd(this,tn,chNum);
+                if(chNum)
+                {
+                    tree_->addSuiteBranch(branch);
+                }
+                Q_EMIT endFilterUpdateAdd(this,tn,chNum);
+        }
+    }
+#endif
+
 
     changeInfo_->clear();
 
@@ -401,11 +521,23 @@ void VTreeServer::reload()
 
     Q_ASSERT(filter_);
 
+#if 0
     if(filter_->isNull())
     {
         tree_->build();
     }
 
+    else
+    {
+        filter_->update();
+        tree_->build(filter_->match_);
+    }
+#endif
+
+    if(filter_->isComplete())
+    {
+        tree_->build();
+    }
     else
     {
         filter_->update();
@@ -911,11 +1043,11 @@ void VModelData::slotFilterDefChanged()
         reload(true);
 }
 
-bool VModelData::isFilterNull() const
+bool VModelData::isFilterComplete() const
 {
     for(unsigned int i=0; i < servers_.size(); i++)
     {      
-        return servers_.at(i)->filter()->isNull();
+        return servers_.at(i)->filter()->isComplete();
     }
 
     return true;
@@ -966,6 +1098,18 @@ void VTreeModelData::connectToModel(VModelServer* s)
 
     connect(ts,SIGNAL(endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)),
             model_,SLOT(slotEndFilterUpdateAdd(VTreeServer*,const VTreeNode*,int)));
+
+    connect(ts,SIGNAL(beginFilterUpdateRemoveTop(VTreeServer*,int)),
+            model_,SLOT(slotBeginFilterUpdateRemoveTop(VTreeServer*,int)));
+
+    connect(ts,SIGNAL(endFilterUpdateRemoveTop(VTreeServer*,int)),
+            model_,SLOT(slotEndFilterUpdateRemoveTop(VTreeServer*,int)));
+
+    connect(ts,SIGNAL(beginFilterUpdateInsertTop(VTreeServer*,int)),
+            model_,SLOT(slotBeginFilterUpdateInsertTop(VTreeServer*,int)));
+
+    connect(ts,SIGNAL(endFilterUpdateInsertTop(VTreeServer*,int)),
+            model_,SLOT(slotEndFilterUpdateInsertTop(VTreeServer*,int)));
 }
 
 void VTreeModelData::add(ServerHandler *server)

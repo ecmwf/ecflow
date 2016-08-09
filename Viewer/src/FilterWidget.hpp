@@ -44,11 +44,14 @@ protected Q_SLOTS:
 protected:
 	void buildTitle(QString,QMenu*);
 	void addAction(QString name,QString id);
+    void checkActionState();
 
 	QMenu*  menu_;
 	VParamSet* filter_;
 	ItemMode itemMode_;
 	DecorMode decorMode_;
+    QAction *selectAllAc_;
+    QAction *unselectAllAc_;
 };
 
 

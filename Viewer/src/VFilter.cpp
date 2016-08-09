@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -46,6 +46,8 @@ void VParamSet::init(const std::vector<VParam*>& items)
 	{
 		all_.insert((*it));
 	}
+
+    current_=all_;
 }
 
 bool VParamSet::isSet(VParam* p) const
@@ -117,10 +119,17 @@ void VParamSet::writeSettings(VSettings *vs)
 {
 	std::vector<std::string> array;
 
-	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
-	{
-		array.push_back((*it)->strName());
-	}
+    if(isComplete())
+    {
+        array.push_back("_ALL_");
+    }
+    else
+    {
+        for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
+        {
+            array.push_back((*it)->strName());
+        }
+    }
 
 	vs->put(settingsId_,array);
 }
@@ -130,15 +139,38 @@ void VParamSet::readSettings(VSettings* vs)
 	current_.clear();
 
 	std::vector<std::string> array;
-	vs->get(settingsId_,array);
+
+    //Try to read the old version (aka V0) of the settings
+    //In this case an empty list means all is selected!
+    if(vs->contains(settingsIdV0_))
+    {
+        vs->get(settingsIdV0_,array);
+        if(array.empty())
+        {
+            current_=all_;
+            return;
+        }
+    }
+    //otherwise read the standard version
+    else
+    {
+        vs->get(settingsId_,array);
+    }
+
 
 	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
 	{
 		std::string name=*it;
-		for(std::set<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
+        if(name == "_ALL_")
+        {
+            current_=all_;
+            return;
+        }
+
+        for(std::set<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
 		{
 			if((*itA)->strName() == name)
-					current_.insert(*itA);
+                current_.insert(*itA);
 		}
 	}
 }
@@ -151,8 +183,9 @@ void VParamSet::readSettings(VSettings* vs)
 
 NodeStateFilter::NodeStateFilter() : VParamSet()
 {
-	settingsId_="state";
-	std::vector<VParam*> v=VNState::filterItems();
+    settingsId_="states";
+    settingsIdV0_="state";
+    std::vector<VParam*> v=VNState::filterItems();
 	init(v);
 }
 
@@ -165,8 +198,9 @@ NodeStateFilter::NodeStateFilter() : VParamSet()
 
 AttributeFilter::AttributeFilter() : VParamSet()
 {
-	settingsId_="attribute";
-	std::vector<VParam*> v=VAttributeType::filterItems();
+    settingsId_="attributes";
+    settingsIdV0_="attribute";
+    std::vector<VParam*> v=VAttributeType::filterItems();
 	init(v);
 
 	/*for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
@@ -184,7 +218,8 @@ AttributeFilter::AttributeFilter() : VParamSet()
 
 IconFilter::IconFilter() : VParamSet()
 {
-	settingsId_="icon";
+    settingsId_="icons";
+    settingsIdV0_="icon";
 	std::vector<VParam*> v=VIcon::filterItems();
 	init(v);
 	current_=all_;
@@ -282,7 +317,13 @@ void TreeNodeFilter::clear()
 
 bool TreeNodeFilter::isNull()
 {
-    return def_->nodeState_->isComplete() || def_->nodeState_->isEmpty();
+    //return def_->nodeState_->isComplete() || def_->nodeState_->isEmpty();
+    return def_->nodeState_->isEmpty();
+}
+
+bool TreeNodeFilter::isComplete()
+{
+    return def_->nodeState_->isComplete();
 }
 
 //
@@ -294,7 +335,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
 
     //nodes_.clear();
 
-    //If all states are visible
+    //If all states are hidden or visible
     if(def_->nodeState_->isComplete() || def_->nodeState_->isEmpty())
     {
         //deallocate the match vector
@@ -372,7 +413,8 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
             //topChange so we need this step!
             for(size_t i=0; i < topChange.size(); i++)
             {
-                checkState(topChange[i],topFilterChange);
+                assert(topChange[i]->isSuite());
+                collectTopFilterChange(topChange[i],topFilterChange);
             }
 
 #ifdef _UI_VFILTER_DEBUG
@@ -400,6 +442,10 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
     UserMessage::debug("  capacity:" + QString::number(match_.capacity()).toStdString());
 #endif
 
+#ifdef _UI_VFILTER_DEBUG
+    UserMessage::debug("<-- TreeNodeFilter::update");
+#endif
+
     return true;
 }
 
@@ -410,25 +456,22 @@ bool TreeNodeFilter::update()
     return update(topChange,topFilterChange);
 }
 
-bool TreeNodeFilter::checkState(VNode* n,std::vector<VNode*>& topFilterChange)
+//Finds the top level nodes whose filter status changed
+bool TreeNodeFilter::collectTopFilterChange(VNode* node,std::vector<VNode*>& topFilterChange)
 {
-    int idx=n->index();
+    int idx=node->index();
     if(tree_->vnodeAt(idx) != match_[idx])
     {
-        VNode *pn=n->parent();
-        if(!pn) pn=n;
-
-        if(std::find(topFilterChange.begin(),topFilterChange.end(),pn) == topFilterChange.end())
-            topFilterChange.push_back(pn);
-
+        topFilterChange.push_back(node);
         return true;
     }
-    else
+
+    for(unsigned int i=0; i < node->numOfChildren(); i++)
     {
-         for(unsigned int i=0; i < n->numOfChildren(); i++)
-         {
-            checkState(n->childAt(i),topFilterChange);
-         }
+        if(collectTopFilterChange(node->childAt(i),topFilterChange))
+        {
+            break;
+        }
     }
 
     return false;
@@ -437,8 +480,8 @@ bool TreeNodeFilter::checkState(VNode* n,std::vector<VNode*>& topFilterChange)
 bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 {
     bool ok=false;
-    //Suites always match!!
-    if(node->isSuite() || stateFilter->isSet(VNState::toState(node)))
+
+    if(stateFilter->isSet(VNState::toState(node)))
     {
         ok=true;
     }
@@ -475,9 +518,20 @@ TableNodeFilter::TableNodeFilter(NodeFilterDef* def,ServerHandler* server) :
 {
 }
 
+//When nothing should be shown
 bool TableNodeFilter::isNull()
 {
-	return def_->nodeState_->isComplete();
+    return false;
+    //return def_->nodeState_->isComplete();
+    //return def_->nodeState_->isNull();
+
+}
+
+//When everything should be shown
+bool TableNodeFilter::isComplete()
+{
+    return false;
+    //return def_->nodeState_->isComplete();
 }
 
 void TableNodeFilter::clear()

@@ -22,6 +22,7 @@ class VTree;
 
 class VTreeNode
 {
+    friend class VTree;
 public:
     VTreeNode(VNode* vnode,VTreeNode* parent);
     virtual ~VTreeNode();
@@ -45,12 +46,30 @@ public:
 
     virtual bool isTopLevel() const {if(parent_) return (parent_->parent())?false:true; return false;}
     virtual bool isRoot() const {return false;}
+    virtual int totalNumOfChildren() const;
 
 public:
     VNode* vnode_;
     std::vector<VTreeNode*> children_;
     VTreeNode *parent_;
     mutable short attrNum_;
+
+protected:
+    virtual void countChildren() const;
+    void countChildren(int&) const;
+
+};
+
+class VTreeSuiteNode : public VTreeNode
+{
+    friend class VTree;
+public:
+    VTreeSuiteNode(VNode* vnode,VTreeNode* parent);
+    virtual int totalNumOfChildren() const;
+
+protected:
+    void countChildren() const;
+    mutable int num_;
 };
 
 class VTree : public VTreeNode
@@ -71,8 +90,9 @@ public:
      int totalNum() const {return totalNum_;}
      int totalNumOfTopLevel(VTreeNode*) const;
      int totalNumOfTopLevel(int i) const;
-     VNode* vnodeAt(int index) const;
-
+     int indexOfTopLevel(VTreeNode*) const;
+     int indexOfTopLevelToInsert(VNode* suite) const;
+     VNode* vnodeAt(int index) const;     
      const std::vector<VTreeNode*>& nodeVec() const {return nodeVec_;}
 
 protected:
@@ -80,17 +100,19 @@ protected:
      void build(const std::vector<VNode*>& filter);
      void build();
      void removeChildren(VTreeNode*);
-     void buildBranch(const std::vector<VNode*>& filter,VTreeNode* node,VTreeNode* branch);
-     void addBranch(VTreeNode* node,VTreeNode* branch);
+     void remove(VTreeNode*);
+     VTreeNode* makeBranch(const std::vector<VNode*>& filter,VTreeNode* parentNode);
+     void replaceWithBranch(VTreeNode* node,VTreeNode* branch);
+     VTreeNode* makeTopLevelBranch(const std::vector<VNode*>& filter,VNode* suite);
+     void insertTopLevelBranch(VTreeNode* branch,int index);
 
 private:
-     void build(VTreeNode* parent,VNode* vnode,const std::vector<VNode*>& filter);
+     bool build(VTreeNode* parent,VNode* vnode,const std::vector<VNode*>& filter);
      void build(VTreeNode* parent,VNode* vnode);
 
      VTreeServer* server_;
      std::vector<VTreeNode*> nodeVec_;
      int totalNum_;
-     std::vector<int> totalNumInChild_;
 };
 
 #endif // VTREENODE_HPP

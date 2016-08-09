@@ -1674,7 +1674,7 @@ public:
     void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=2};
+    enum DataIndex {TypeIndex=0,NameIndex=1};
     void getData(ecf::LateAttr *late,QStringList& data);
 };
 
