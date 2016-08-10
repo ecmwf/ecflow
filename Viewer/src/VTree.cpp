@@ -335,6 +335,7 @@ void VTree::insertTopLevelBranch(VTreeNode* branch,int index)
     assert(suite);
     assert(suite->isSuite());
     assert(index >=0 && index <=numOfChildren());
+    assert(suite->index() >=0);
 
     if(index < numOfChildren())
     {
@@ -346,6 +347,7 @@ void VTree::insertTopLevelBranch(VTreeNode* branch,int index)
        children_.push_back(branch);
     }
 
+    nodeVec_[suite->index()]=branch;
     branch->parent_=this;
     totalNum_+=branch->totalNumOfChildren()+1;
 }
