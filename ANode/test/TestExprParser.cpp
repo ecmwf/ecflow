@@ -309,8 +309,8 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
          BOOST_CHECK_MESSAGE( top ,"No abstract syntax tree "+ p.first);
          if (top) {
             BOOST_CHECK_MESSAGE( top->left() ,"No root created "+ p.first);
-            BOOST_CHECK_MESSAGE( top->left()->isRoot() ,"First child of top should be a root " + p.first);
-            BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType,"expected root type " << expectedRootType << " but found " << top->left()->type() << " " << p.first);
+            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
+            BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type " << expectedRootType << " or 'variable' but found " << top->left()->type() << " " << p.first);
             BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << *top);
 
             std::string error_msg;

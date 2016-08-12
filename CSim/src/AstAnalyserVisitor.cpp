@@ -42,7 +42,6 @@ void AstAnalyserVisitor::visitGreaterThan(AstGreaterThan*) {}
 void AstAnalyserVisitor::visitLessThan(AstLessThan*) {}
 void AstAnalyserVisitor::visitLeaf(AstLeaf*) {}
 void AstAnalyserVisitor::visitInteger(AstInteger*) {}
-void AstAnalyserVisitor::visitString(AstString*) {}
 void AstAnalyserVisitor::visitNodeState(AstNodeState*) {}
 void AstAnalyserVisitor::visitEventState(AstEventState*) {}
 

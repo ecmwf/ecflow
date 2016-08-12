@@ -830,43 +830,6 @@ std::string AstInteger::expression(bool /*why*/) const
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void AstString::accept(ExprAstVisitor& v)
-{
-	v.visitString(this); // Not calling base
-}
-
-AstString* AstString::clone() const
-{
-   return new AstString(value_);
-}
-
-std::ostream& AstString::print( std::ostream& os ) const {
-	Indentor in;
-	return Indentor::indent( os ) << "# LEAF_STRING " << value_ << " value() = " << value() << "\n";
-}
-void AstString::print_flat(std::ostream& os,bool /*add_bracket*/) const {
-   os << value_;
-}
-
-std::string AstString::expression(bool /*why*/) const
-{
-	return value_;
-}
-
-int AstString::value() const
-{
-	if (value_ == Event::SET()) {    // allow us to compare with a event and a string
-		return 1;
-	}
-	if (value_ == Event::CLEAR()) {  // allow us to compare with a event and a string
-		return 0;
-	}
-	// see if the value is convertible to a integer
-	return Str::to_int( value_, 0/* value to return if conversion fails*/);
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-
 void AstNodeState::accept(ExprAstVisitor& v)
 {
 	v.visitNodeState(this);  // Not calling base
@@ -1231,7 +1194,6 @@ std::ostream& operator<<( std::ostream& os, const AstGreaterThan& d ) {return d.
 std::ostream& operator<<( std::ostream& os, const AstLessThan& d )    {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstLeaf& d )      {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstInteger& d)    {return d.print( os );}
-std::ostream& operator<<( std::ostream& os, const AstString& d)    {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstNodeState& d)  {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstEventState& d) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstNode& d ) {return d.print( os );}

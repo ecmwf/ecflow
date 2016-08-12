@@ -51,6 +51,7 @@
 #include "Indentor.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
+#include "NodeAttr.hpp"
 
 // Reference
 //‘*’   Zero or more
@@ -601,17 +602,17 @@ AstRoot* createRootNode(const tree_iter_t& i,  const std::map< parser_id, std::s
 //   if ( i->value.id() == ExpressionGrammer::not_equal_2_ID ) return true;
 //   return false;
 //}
+//static bool has_child_not(const tree_iter_t& i) {
+//   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
+//      if (is_not(t)) return true;
+//   }
+//   return false;
+//}
 
 static bool is_not(const tree_iter_t& i) {
    if ( i->value.id() == ExpressionGrammer::not1_ID ) return true;
    if ( i->value.id() == ExpressionGrammer::not2_ID ) return true;
    if ( i->value.id() == ExpressionGrammer::not3_ID ) return true;
-   return false;
-}
-static bool has_child_not(const tree_iter_t& i) {
-   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
-      if (is_not(t)) return true;
-   }
    return false;
 }
 static bool child_has(const tree_iter_t& i, int id) {
@@ -709,7 +710,9 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
 
       string thevalue( i->value.begin(), i->value.end() );
       boost::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
- 		return new AstString(thevalue);
+      if ( thevalue == Event::SET()) return new AstEventState(true);
+      assert(thevalue == Event::CLEAR());
+      return new AstEventState(false);
    }
    else if ( i->value.id() == ExpressionGrammer::integer_ID) {
 
@@ -761,24 +764,26 @@ Ast* doCreateAst(  const tree_iter_t& i,
 #endif
 
    Indentor in2;
-	if ( top && top->isTop() && i->value.id() == ExpressionGrammer::basic_variable_path_ID) {
-		// Event need to handled in a custom way
-		LOG_ASSERT(i->children.size() == 2,"");
-		if (i->children.size() == 2) {
-		   // a:eventname ||  ../a/b:eventname
-		   // child 1: path                     a || ../a/b
-		   // child 2: event name
-		   // WE add an event state so that when the event is evaluated it is compared to true
-		   Ast* someRoot =  new AstEqual();
-		   Ast* leftEvent = createAst(i, rule_names);
-		   Ast* rightEvent = new AstEventState( true );
-		   someRoot->addChild(leftEvent);
-		   someRoot->addChild(rightEvent);
-		   top->addChild(someRoot);
-		}
- 	}
+   if (i->children.size() == 3) {
+      // child 1: left                0
+      // child 2: root(i.e ==,!=)    +1
+      // child 3: right              +2
+
+      //cout << "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG\n";
+      AstRoot* someRoot = createRootNode(  i->children.begin() + 1, rule_names  );
+      if (someRoot ) {
+         Ast* left  = doCreateAst(  i->children.begin(), rule_names, someRoot);
+         if (left) someRoot->addChild(left);
+         Ast* right = doCreateAst(  i->children.begin() + 2, rule_names,  someRoot);
+         if (right) someRoot->addChild(right);
+
+         if (top) top->addChild(someRoot);
+         else return someRoot;
+      }
+   }
    else if ( is_root_node(i) && i->children.size() == 2) {
 
+      //cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n";
       AstRoot* someRoot = createRootNode(  i, rule_names  );
 
       Ast* left  = doCreateAst(  i->children.begin() , rule_names    ,someRoot  );
@@ -789,75 +794,6 @@ Ast* doCreateAst(  const tree_iter_t& i,
       if (top) top->addChild(someRoot);
       else return someRoot;
    }
-   else if ( is_root_node(i) && i->children.size() == 3 && is_not(i->children.begin()) ) {
-      // Not should be root
-//      PRINT_TREE  ! ../../../prod2diss/operation_is_late:yes == set
-//        Rule EQUALS(size:3)  ==
-//            Rule NOT(size:0)  !
-//            Rule basic_variable_path_ID(size:2)
-//                Rule DOT_DOT_PATH(size:0)   ../../../prod2diss/operation_is_late
-//                Rule VARIABLE(size:0)  yes
-//            Rule EVENT_STATE(size:0)   set
-
-      AstRoot* notRoot = createRootNode( i->children.begin(), rule_names  );
-      Ast* someRoot  = createRootNode(  i, rule_names  );
-
-      if ( someRoot ) {
-
-         Ast* not_child  = doCreateAst(  i->children.begin() +1 , rule_names , notRoot );
-         if (not_child) notRoot->addChild(not_child);
-         someRoot->addChild( notRoot );
-
-         Ast* right = doCreateAst(  i->children.begin() +2 , rule_names , someRoot );
-         if (right) someRoot->addChild(right);
-
-         if (top) top->addChild(someRoot);
-         else return someRoot;
-      }
-   }
-   else if ( is_root_node(i) && i->children.size() >= 3 && has_child_not(i) ) {
-      // ! ../../../operation_is_late:yes == set or ! a == complete
-
-      AstRoot* someRoot = createRootNode(  i, rule_names  );
-      AstNot* astnot = NULL;
-      for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
-         if (is_not(t)) {
-            astnot = new AstNot();
-            someRoot->addChild(astnot);
-            continue;
-         }
-         if (astnot) {
-            Ast* notChild  = doCreateAst( t , rule_names ,astnot );
-            if (notChild) astnot->addChild(notChild);
-            astnot = NULL;
-            continue;
-         }
-         Ast* child  = doCreateAst( t , rule_names , someRoot );
-         if (child) someRoot->addChild(child);
-      }
-      if (top) top->addChild(someRoot);
-      else return someRoot;
-   }
-   else if ( i->children.size() == 3 && is_not(i->children.begin() + 1) ) {
-      // inigroup:YMD == ! 1  ||  1 != ! 1   || comp == complete and ! ready == complete
-      //      Rule EQUALS(size:3)  ==
-      //           Rule basic_variable_path_ID(size:2)
-      //               Rule ABSOLUTE_PATH(size:0)  inigroup
-      //               Rule VARIABLE(size:0)  YMD
-      //           Rule NOT(size:0)  !
-      //           Rule INTEGER(size:0)   1
-      AstRoot* comparableRoot = createRootNode(  i, rule_names  );
-      Ast* left  = doCreateAst(  i->children.begin() , rule_names , comparableRoot  );
-      if (left) comparableRoot->addChild(left);
-      AstRoot* rightnotRoot = createRootNode(  i->children.begin() + 1, rule_names  );
-      if (rightnotRoot) comparableRoot->addChild(rightnotRoot);
-
-      Ast* notChild = doCreateAst(  i->children.begin() + 2, rule_names,  rightnotRoot/* top*/  );
-      if (notChild) rightnotRoot->addChild(notChild);
-
-      if (top) top->addChild(comparableRoot);
-      else return comparableRoot;
-   }
    else if (i->children.size() == 4 && is_not(i->children.begin())) {
       // child 0: notRoot                 0
       // child 1: notChild               +1
@@ -866,6 +802,8 @@ Ast* doCreateAst(  const tree_iter_t& i,
       // Create as:         someRoot
       //              notRoot          right
       //      notChild
+      //cout << "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n";
+
       LOG_ASSERT(is_not(i->children.begin()),"");
       AstRoot* notRoot = createRootNode(  i->children.begin(), rule_names  );
 
@@ -889,6 +827,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
       // Create as:         someRoot
       //              child          notRoot
       //                                    notChild
+      //cout << "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\n";
       AstRoot* someRoot = createRootNode(  i->children.begin()+1, rule_names  );
       Ast* varPath = doCreateAst(  i->children.begin(), rule_names, someRoot/*top*/);
       if (varPath) someRoot->addChild(varPath); //left
@@ -902,35 +841,16 @@ Ast* doCreateAst(  const tree_iter_t& i,
       if (top) top->addChild(someRoot);
       else return someRoot;
    }
-   else if (i->children.size() == 3) {
-      // child 1: left                0
-      // child 2: root(i.e ==,!=)    +1
-      // child 3: right              +2
-
-      AstRoot* someRoot = createRootNode(  i->children.begin() + 1, rule_names  );
-      if (someRoot ) {
-         Ast* left  = doCreateAst(  i->children.begin(), rule_names, someRoot);
-         if (left) someRoot->addChild(left);
-         Ast* right = doCreateAst(  i->children.begin() + 2, rule_names,  someRoot);
-         if (right) someRoot->addChild(right);
-
-         if (top) top->addChild(someRoot);
-         else return someRoot;
-      }
-   }
    else if (i->children.size() == 2 && is_not(i->children.begin()) ) {
       // child 1: not     0
       // child 2: left   +1
+      //cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n";
+
       AstRoot* notRoot = createRootNode(  i->children.begin(), rule_names  );
 
       if (child_has(i,ExpressionGrammer::basic_variable_path_ID)) {
          // special case where we treat as a event i.e ! ../../../prod2diss/operation_is_late:yes
-         Ast* astEqual =  new AstEqual();
-         Ast* leftEvent = createAst(i->children.begin() + 1, rule_names);   // basic variable path
-         Ast* rightEvent = new AstEventState( true );
-         astEqual->addChild(leftEvent);
-         astEqual->addChild(rightEvent);
-         notRoot->addChild(astEqual);
+         notRoot->addChild( createAst(i->children.begin() + 1, rule_names));
       }
       else {
          Ast* left  = doCreateAst(  i->children.begin() + 1, rule_names, notRoot);
@@ -940,11 +860,10 @@ Ast* doCreateAst(  const tree_iter_t& i,
       if (top) top->addChild(notRoot);
       else return notRoot;
    }
-   else if (i->children.size() == 0 && is_root_node(i) ) {
-      return createRootNode(  i , rule_names  );
-   }
    else {
-      return createAst(i,rule_names);
+      //cout << "JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ\n";
+      Ast* child = createAst(i,rule_names);
+      if (top && child) top->addChild(child);
    }
    return NULL;
 }
