@@ -92,17 +92,17 @@ DState::State DState::toState( const std::string& str ) {
 bool DState::isValid( const std::string& state ) {
 	if ( state == "complete" )
 		return true;
+   if ( state == "aborted" )
+      return true;
+   if ( state == "queued" )
+      return true;
+   if ( state == "active" )
+      return true;
 	if ( state == "suspended" )
 		return true;
 	if ( state == "unknown" )
 		return true;
-	if ( state == "aborted" )
-		return true;
 	if ( state == "submitted" )
-		return true;
-	if ( state == "active" )
-		return true;
-	if ( state == "queued" )
 		return true;
 	return false;
 }

@@ -282,8 +282,8 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
           nodestate
               =  node_state_complete
                 | node_state_aborted
-                | node_state_active
                 | node_state_queued
+                | node_state_active
                 | node_state_submitted
                 | node_state_unknown
                 ;
@@ -296,15 +296,15 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                  | basic_variable_path
                  | discard_node_d[ ch_p('(') ] >>  calc_expression >> discard_node_d[ ch_p(')') ]
                  | root_node_d[operators] >>  calc_factor
-                 ;
+               ;
           calc_term
-                 = calc_factor
-                 >> *( root_node_d[operators] >> calc_factor )
+               = calc_factor
+                   >> *( root_node_d[operators] >> calc_factor )
                  ;
           calc_expression
                  = calc_term
                  >> *( root_node_d[operators] >> calc_term )
-                ;
+                 ;
 
 
           // We need to take special care so that 'and' has a higher priority than 'or'
@@ -313,19 +313,19 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
           andExpr = nodepathstate >> and_r >> nodepathstate;
 
           compare_expression
-                 =     andExpr  |
-                       nodepathstate |
-                       basic_variable_path >> equality_comparible >> event_state |
-                       root_node_d[
-                               calc_expression >> *(( equality_comparible | less_than_comparable) >> ( !not_r >> calc_expression))
-                             ]
-                  ;
+                 = andExpr  |
+                   nodepathstate |
+                   basic_variable_path >> equality_comparible >> event_state |
+                   root_node_d[
+                     calc_expression >> *(( equality_comparible | less_than_comparable) >> ( !not_r >> calc_expression))
+                   ]
+                 ;
 
-          calc_grouping = !not_r >> discard_node_d[ ch_p('(') ] >> !not_r >> calc_subexpression >> discard_node_d[ ch_p(')') ];
+          calc_grouping = !not_r >> discard_node_d[ ch_p('(') ] >>  calc_subexpression >> discard_node_d[ ch_p(')') ];
 
           calc_subexpression = !not_r >> ( compare_expression | calc_grouping ) >> *( (and_r | or_r) >> calc_subexpression)   ;
 
-          expression =   calc_subexpression  >> end_p;
+          expression = calc_subexpression  >> end_p;
 
           BOOST_SPIRIT_DEBUG_NODE(expression);
           BOOST_SPIRIT_DEBUG_NODE(andExpr);
@@ -473,7 +473,7 @@ bool ExprParser::doParse(std::string& errorMsg)
       print(info,expr_,rule_names);
 #endif
       // Spirit has created a AST for us. However it is not use able as is
-      // we will traverse the AST and create our OWN  persist-able AST.
+      // we will traverse the AST and create our OWN
  		ast_.reset( createAst(info,expr_,rule_names) );
       if (ast_->empty())  errorMsg = "Abstract syntax tree creation failed";
       else {
@@ -507,9 +507,7 @@ void do_print(const tree_iter_t& i,  const std::map< parser_id, std::string >& r
    }
 
    Indentor in2;
-   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t) {
-      do_print( t, rule_names );
-   }
+   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t) { do_print( t, rule_names );  }
 }
 
 void print(tree_parse_info<> info,

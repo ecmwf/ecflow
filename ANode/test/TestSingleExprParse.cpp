@@ -13,6 +13,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "ExprParser.hpp"
 #include "ExprAst.hpp"
+#include "ExprDuplicate.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/foreach.hpp>
@@ -21,7 +22,6 @@
 #include <iostream>
 #include <fstream>
 using namespace std;
-
 
 // DEBUG AID: to see the expression tree, invert the expected evaluation
 //            so that test fail's
@@ -63,5 +63,36 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 	}
 }
 
-BOOST_AUTO_TEST_SUITE_END()
 
+//BOOST_AUTO_TEST_CASE( test_expression_read_from_file )
+//{
+//   std::cout <<  "ANode:: ...test_expression_read_from_file\n";
+//
+//   std::string filename = "/var/tmp/ma0/BIG_DEFS/triggers.list";
+//   std::ifstream the_file(filename.c_str(),std::ios_base::in);
+//   BOOST_REQUIRE_MESSAGE(the_file,"file " << filename << "not found");
+//
+//   int  i = 0;
+//   string line;
+//   while ( std::getline(the_file,line) ) {
+//      i++;
+//      // cout << i << ": " << line << "\n";
+//      ExprParser theExprParser(line);
+//      std::string errorMsg;
+//      bool ok = theExprParser.doParse(errorMsg);
+//      BOOST_CHECK_MESSAGE(ok,errorMsg << " line: " << i );
+//
+//      if (ok) {
+//         Ast* top = theExprParser.getAst();
+//         BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree " + line);
+//         BOOST_REQUIRE_MESSAGE( top->left() ,"No root created " + line);
+//         BOOST_REQUIRE_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + line);
+//         //top->print_flat(ss);
+//      }
+//   }
+//
+//   ExprDuplicate reclaim_cloned_ast_memory;
+//   cout << " read " << i << " expressions\n";
+//}
+
+BOOST_AUTO_TEST_SUITE_END()
