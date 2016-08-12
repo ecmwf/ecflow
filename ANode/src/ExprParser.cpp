@@ -16,11 +16,11 @@
 // Un-comment these for selective for debugging. At the moment because we have added
 //            ast generation BOOST_SPIRIT_DEBUG is to verbose, making debugging a pain.
 // Tpyically I will comment out ONLY BOOST_SPIRIT_DEBUG and enable all the others
-#define BOOST_SPIRIT_DEBUG
-#define BOOST_SPIRIT_DUMP_PARSETREE_AS_XML
-#define PRINT_TREE
-#define PRINT_AST_TRAVERSAL
-#define PRINT_AST
+//#define BOOST_SPIRIT_DEBUG
+//#define BOOST_SPIRIT_DUMP_PARSETREE_AS_XML
+//#define PRINT_TREE
+//#define PRINT_AST_TRAVERSAL
+//#define PRINT_AST
 
 #include <boost/spirit/include/classic.hpp>
 #include <boost/spirit/include/classic_core.hpp>

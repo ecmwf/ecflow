@@ -39,7 +39,7 @@ public:
 	virtual void addChild(Ast*) {}
 	virtual Ast* left() const { return NULL;}
 	virtual Ast* right() const { return NULL;}
-	virtual bool evaluate() const { return false;}
+	virtual bool evaluate() const { assert(false); return false;}
 	virtual bool isleaf() const { return false; }
 	virtual bool isRoot() const { return false; }
 	virtual AstTop* isTop() const { return NULL; }
@@ -446,6 +446,7 @@ public:
 	// although AstVariable is leaf, However allow to evaluate to cope with
    //     ( ../family1/a:myMeter >= 20 and ../family1/a:myEvent)
 	// This avoids having to create an additional class like AstEventState
+	// Treat this like an integer
    virtual bool evaluate() const { return value() != 0 ? true: false; }
  	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstVariable* clone() const;
