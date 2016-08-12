@@ -546,7 +546,7 @@ int TextPagerCursor::lineNumber() const
 void TextPagerCursor::detach()
 {
     Q_ASSERT(d);
-    if (d->ref > 1) {
+    if (int(d->ref) > 1) {
         d->ref.deref();
         TextCursorSharedPrivate *p = new TextCursorSharedPrivate;
         p->position = d->position;
