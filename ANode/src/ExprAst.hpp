@@ -34,14 +34,15 @@ public:
 
 	virtual void accept(ecf::ExprAstVisitor&) = 0;
    virtual Ast* clone() const = 0;
+   virtual bool is_variable() const { return false; }
+   virtual bool isleaf() const { return false; }
+	virtual bool isRoot() const { return false; }
+	virtual AstTop* isTop() const { return NULL; }
 
 	virtual void addChild(Ast*) {}
 	virtual Ast* left() const { return NULL;}
 	virtual Ast* right() const { return NULL;}
 	virtual bool evaluate() const { assert(false); return false;}
-	virtual bool isleaf() const { return false; }
-	virtual bool isRoot() const { return false; }
-	virtual AstTop* isTop() const { return NULL; }
 	virtual bool empty() const { return true; }
    virtual int value() const { assert(false); return 0;} // only valid for leaf or operators
    virtual bool check(std::string& error_msg) const { return true; } // check divide or modulo by zero
@@ -91,7 +92,7 @@ private:
 	std::string exprType_; // trigger or complete
 };
 
-// This if one of AND, OR, == != <= >=
+// This if one of AND, OR, == != <= >= +, -,*,!,%,/
 class AstRoot : public Ast {
 public:
    AstRoot() :left_(NULL), right_(NULL) {}
@@ -119,6 +120,7 @@ public:
 	AstNot() : name_("! ") {}
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNot* clone() const;
+   virtual bool is_not() const { return true;}
 
 	virtual bool evaluate() const { assert(!right_);  return ! left_->evaluate();}
 	virtual int value() const {  assert(!right_);     return ! left_->value();}
@@ -344,22 +346,6 @@ private:
 	int value_;
 };
 
-class AstString : public AstLeaf {
-public:
-	AstString(const std::string& s) : value_(s) {}
-
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstString* clone() const;
- 	virtual int value() const;
- 	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
-	static std::string stype() { return "string";}
-private:
-	std::string value_;
-};
-
 
 class AstNodeState : public AstLeaf {
 public:
@@ -436,10 +422,20 @@ private:
 ///     user variable,
 ///     repeat  variable, for enumerated/string we use the positional value
 ///     generated variable
+/// ** IT is treated in a same as an integer, and can appear in that context
+//  ** i.e  "2 == (((/seasplots/lag:YMD / 100 ) % 100) % 3"
 class AstVariable : public AstLeaf {
 public:
 	AstVariable(const std::string& nodePath, const std::string& variablename)
 	: parentNode_(NULL), nodePath_(nodePath), name_(variablename)  {}
+
+   virtual bool is_variable() const { return true; }
+
+	// although AstVariable is leaf, However allow to evaluate to cope with
+   //     ( ../family1/a:myMeter >= 20 and ../family1/a:myEvent)
+	// This avoids having to create an additional class like AstEventState
+	// Treat this like an integer
+   virtual bool evaluate() const { return value() != 0 ? true: false; }
 
  	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstVariable* clone() const;
@@ -511,7 +507,6 @@ std::ostream& operator<<(std::ostream& os, const AstGreaterThan&);
 std::ostream& operator<<(std::ostream& os, const AstLessThan&);
 std::ostream& operator<<(std::ostream& os, const AstLeaf&);
 std::ostream& operator<<(std::ostream& os, const AstInteger&);
-std::ostream& operator<<(std::ostream& os, const AstString&);
 std::ostream& operator<<(std::ostream& os, const AstNodeState&);
 std::ostream& operator<<(std::ostream& os, const AstEventState&);
 std::ostream& operator<<(std::ostream& os, const AstNode&);
