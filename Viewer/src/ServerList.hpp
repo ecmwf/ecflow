@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,8 +19,8 @@ class ServerList;
 class ServerListObserver
 {
 public:
-	ServerListObserver() {};
-	virtual ~ServerListObserver() {};
+    ServerListObserver() {}
+    virtual ~ServerListObserver() {}
 	virtual void notifyServerListChanged()=0;
 	virtual void notifyServerListFavouriteChanged(ServerItem*)=0;
 };
@@ -44,6 +44,7 @@ public:
 	void init();
 	void save();
 	void rescan();
+    void syncSystemFile();
 
 	void addObserver(ServerListObserver*);
 	void removeObserver(ServerListObserver*);
@@ -51,8 +52,8 @@ public:
 	static ServerList* instance();
 
 protected:
-	ServerList() {};
-	~ServerList() {};
+    ServerList() {}
+    ~ServerList() {}
 
 	static ServerList* instance_;
 

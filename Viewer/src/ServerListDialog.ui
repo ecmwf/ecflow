@@ -30,7 +30,7 @@
           <string>Show favourite and loaded only</string>
          </property>
          <property name="icon">
-          <iconset resource="viewer.qrc">
+          <iconset>
            <normaloff>:/viewer/favourite.svg</normaloff>:/viewer/favourite.svg</iconset>
          </property>
          <property name="checkable">
@@ -137,6 +137,19 @@
         </widget>
        </item>
        <item>
+        <widget class="QToolButton" name="sysSyncTb">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Sync</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -166,7 +179,7 @@
   </layout>
   <action name="actionAdd">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/add.svg</normaloff>:/viewer/images/add.svg</iconset>
    </property>
    <property name="text">
@@ -181,7 +194,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
    </property>
    <property name="text">
@@ -196,7 +209,7 @@
   </action>
   <action name="actionEdit">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
    </property>
    <property name="text">
@@ -237,7 +250,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/favourite.svg</normaloff>:/viewer/favourite.svg</iconset>
    </property>
    <property name="text">
@@ -250,9 +263,7 @@
   <zorder>buttonBox</zorder>
   <zorder></zorder>
  </widget>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
