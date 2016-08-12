@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -100,23 +100,36 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 #endif
     	}
 
-        else if(item->command() == "custom")  // would expect this to be 'Custom...' but it's just 'Custom'
-        {
-            CustomCommandDialog customCommandDialog(0);
-            customCommandDialog.setNodes(nodesLst);
-            if (customCommandDialog.exec() == QDialog::Accepted)
-            {
-                // the user could have changed the node selection within the custom editor
-                std::vector<VInfo_ptr> selectedNodes = customCommandDialog.selectedNodes();
-
-                // send the command to the server
-                ServerHandler::command(selectedNodes, customCommandDialog.command().toStdString());
-            }
-        }
         else
         {
-        	bool ok=true;
-        	if(item && !item->question().empty() && item->shouldAskQuestion(nodesLst))
+            CustomCommandDialog *customCommandDialog = NULL;
+
+            if(item->command() == "custom")  // would expect this to be 'Custom...' but it's just 'Custom'
+            {
+                // invoke the custom command dialogue
+                customCommandDialog = new CustomCommandDialog(0);
+                customCommandDialog->setNodes(nodesLst);
+                if (customCommandDialog->exec() == QDialog::Accepted)
+                {
+                    // the user could have changed the node selection within the custom editor
+                    std::vector<VInfo_ptr> selectedNodes = customCommandDialog->selectedNodes();
+
+                    // the dialogue contains a 'fake' menu item created from the custom command
+                    item = &(customCommandDialog->menuItem());
+                }
+                else
+                {
+                    // user cancelled the custom command dialogue
+                    delete customCommandDialog;
+                    return;
+                }
+            }
+
+            bool ok=true;
+            if (item->isCustom())
+                MenuHandler::interceptCommandsThatNeedConfirmation(item);
+
+            if(item && !item->question().empty() && item->shouldAskQuestion(nodesLst))
         	{
                 std::string fullNames("<ul>");
                 std::string nodeNames("<ul>");
@@ -153,10 +166,10 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
                 std::string question(item->question());
 
-			    std::string placeholder("<full_name>");
+                std::string placeholder("<full_name>");
                 ecf::Str::replace_all(question, placeholder, fullNames);
                 placeholder = "<node_name>";
-			    ecf::Str::replace_all(question, placeholder, nodeNames);
+                ecf::Str::replace_all(question, placeholder, nodeNames);
 
                 QMessageBox msgBox;
                 msgBox.setText(QString::fromStdString(question));
@@ -172,6 +185,9 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             if(ok)
                 ServerHandler::command(nodesLst,item->command());
                 //ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
+
+            if (customCommandDialog)
+                   delete customCommandDialog;
         }
     }
 

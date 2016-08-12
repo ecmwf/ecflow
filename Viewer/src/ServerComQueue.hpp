@@ -55,8 +55,6 @@ public:
 
 protected Q_SLOTS:
 	void slotRun();
-
-protected Q_SLOTS:
 	void slotTaskFinished();
 	void slotTaskFailed(std::string);
 

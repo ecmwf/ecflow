@@ -343,7 +343,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		{
 			if(vnode->isTopLevel())
 			{
-                if(data_->isFilterNull())
+                if(data_->isFilterComplete())
                     return vnode->server()->vRoot()->totalNumOfTopLevel(vnode);
                 else
                     return  QString::number(tnode->root()->totalNumOfTopLevel(tnode)) + "/" +
@@ -1113,4 +1113,42 @@ void TreeNodeModel::slotEndFilterUpdateAdd(VTreeServer* /*server*/,const VTreeNo
     Q_EMIT filterUpdateAddEnded(topChange);
 }
 
+void TreeNodeModel::slotBeginFilterUpdateRemoveTop(VTreeServer* server,int row)
+{
+    Q_ASSERT(server);
+    QModelIndex idx=serverToIndex(server);
+    int attrNum=server->tree()->attrNum(atts_);
+    int chNum=server->tree()->numOfChildren();
 
+    Q_ASSERT(chNum > row);
+    Q_ASSERT(attrNum >=0);
+    Q_ASSERT(chNum >=0);
+
+    beginRemoveRows(idx,attrNum+row,attrNum+row);
+}
+
+void TreeNodeModel::slotEndFilterUpdateRemoveTop(VTreeServer* server,int)
+{
+    Q_ASSERT(server);
+    endRemoveRows();
+}
+
+void TreeNodeModel::slotBeginFilterUpdateInsertTop(VTreeServer* server,int row)
+{
+    Q_ASSERT(server);
+    QModelIndex idx=serverToIndex(server);
+    int attrNum=server->tree()->attrNum(atts_);
+    int chNum=server->tree()->numOfChildren();
+
+    Q_ASSERT(chNum >= row);
+    Q_ASSERT(attrNum >=0);
+    Q_ASSERT(chNum >=0);
+
+    beginInsertRows(idx,attrNum+row,attrNum+row);
+}
+
+void TreeNodeModel::slotEndFilterUpdateInsertTop(VTreeServer* server,int)
+{
+    Q_ASSERT(server);
+    endInsertRows();
+}

@@ -37,6 +37,17 @@ ServerState::ServerState() :
 	setup_default_env();
 }
 
+ServerState::ServerState(const ServerState& rhs)
+: state_change_no_(0),
+  variable_state_change_no_(0),
+  server_state_(rhs.server_state_),
+  server_variables_(rhs.server_variables_),
+  user_variables_(rhs.user_variables_),
+  jobSubmissionInterval_(rhs.jobSubmissionInterval_),
+  jobGeneration_(rhs.jobGeneration_),
+  hostPort_(rhs.hostPort_)
+{}
+
 bool ServerState::operator==(const ServerState& rhs) const
 {
    if ( get_state() != rhs.get_state()) {

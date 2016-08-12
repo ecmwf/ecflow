@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -925,7 +925,8 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			// just did something!)
 
 			UserMessage::message(UserMessage::DBG, false, std::string(" --> COMMAND finished"));
-			comQueue_->addNewsTask();
+			//comQueue_->addNewsTask();
+			comQueue_->addSyncTask();
 			break;
 		}
 		case VTask::NewsTask:
@@ -1079,8 +1080,8 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		case VTask::SuiteListTask:
 		{
 			//Update the suite filter with the list of suites actually loaded onto the server.
-			//If the suitefilter is enabled this might have only a subset of it in our tree.
-			updateSuiteFilterWithLoaded(serverReply.get_string_vec());
+            //If the suitefilter is enabled this might have only a subset of it in our tree
+            updateSuiteFilterWithLoaded(serverReply.get_string_vec());
 			break;
 		}
 
@@ -1393,8 +1394,8 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 //Update the suite filter with the list of suites actually loaded onto the server.
 //If the suitefilter is enabled this might have only a subset of it in our tree.
 void ServerHandler::updateSuiteFilterWithLoaded(const std::vector<std::string>& loadedSuites)
-{
-	suiteFilter_->setLoaded(loadedSuites);
+{	
+    suiteFilter_->setLoaded(loadedSuites);
 }
 
 //Update the suite filter with the list of suites stored in the defs (in the tree). It only
@@ -1412,12 +1413,13 @@ void ServerHandler::updateSuiteFilterWithDefs()
 //Only called internally after reset or serverscan!!
 void ServerHandler::updateSuiteFilter()
 {
-	bool hasObserver=suiteFilter_->hasObserver();
-
 	//We only fetch the full list of loaded suites from the server
-	//via the thread when the suiteFilter is observerved and it is
-	//enabled!
-	if(hasObserver && suiteFilter_->isEnabled())
+    //via the thread when
+    //  -the suiteFilter is not yet initialised
+    //   OR
+    //  -the suiteFilter is observerved and it is enabled!
+    if(!suiteFilter_->isLoadedInitialised() ||
+       (suiteFilter_->hasObserver() && suiteFilter_->isEnabled()))
 	{
 		//This will call updateSuiteFilterWithLoaded()
 		comQueue_->addSuiteListTask();

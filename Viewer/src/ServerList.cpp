@@ -13,6 +13,7 @@
 
 #include "DirectoryHandler.hpp"
 #include "ServerItem.hpp"
+#include "UserMessage.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -22,6 +23,7 @@
 
 ServerList* ServerList::instance_=0;
 
+#define _UI_SERVERLIST_DEBUG
 
 //Singleton instance method
 ServerList* ServerList::instance()
@@ -45,6 +47,16 @@ ServerItem* ServerList::find(const std::string& name)
 	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		if((*it)->name() == name)
+			return *it;
+	}
+	return 0;
+}
+
+ServerItem* ServerList::find(const std::string& name, const std::string& host, const std::string& port)
+{
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	{
+		if((*it)->name() == name && (*it)->host() == host && (*it)->port() == port)
 			return *it;
 	}
 	return 0;
@@ -194,9 +206,14 @@ bool ServerList::load()
 		if(sv.size() >= 4)
 			favourite=(sv[3]=="1")?true:false;
 
-		if(sv.size() >= 3)
+        bool sys=false;
+        if(sv.size() >= 5)
+            sys=(sv[4]=="1")?true:false;
+
+        if(sv.size() >= 3)
 		{
-			add(sv[0],sv[1],sv[2],favourite,false);
+            ServerItem* item=add(sv[0],sv[1],sv[2],favourite,false);
+            item->setSystem(sys);
 		}
 	}
 
@@ -215,12 +232,13 @@ void ServerList::save()
 	if(!out.good())
 		  	return;
 
-	out << "#Name Host Port Favourite" << std::endl;
+    out << "#Name Host Port Favourite System" << std::endl;
 
 	for(std::vector<ServerItem*>::iterator it=items_.begin(); it != items_.end(); ++it)
 	{
-		std::string fav=((*it)->isFavourite())?"1":"0";
-		out << (*it)->name() << "," << (*it)->host() << "," <<  (*it)->port() <<  "," <<  fav <<  std::endl;
+        std::string fav=((*it)->isFavourite())?"1":"0";
+        std::string sys=((*it)->isSystem())?"1":"0";
+        out << (*it)->name() << "," << (*it)->host() << "," <<  (*it)->port() <<  "," <<  fav << "," <<  sys << std::endl;
 	}
 	out.close();
 }
@@ -266,7 +284,7 @@ bool ServerList::readRcFile()
 bool ServerList::readSystemFile()
 {
 	std::string path(DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers"));
-	std::ifstream in(path.c_str());
+    std::ifstream in(path.c_str());
 
 	if(in.good())
 	{
@@ -297,6 +315,87 @@ bool ServerList::readSystemFile()
 	in.close();
 
 	return true;
+}
+
+void ServerList::syncSystemFile()
+{
+    std::vector<ServerItem*> sysVec;
+
+    std::string path(DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers"));
+    path="/usr/local/apps/ecflow/4.3.0-develop/share/ecflow/servers";
+    std::ifstream in(path.c_str());
+
+    if(in.good())
+    {
+        std::string line;
+        while(getline(in,line))
+        {
+            std::string buf=boost::trim_left_copy(line);
+            if(buf.size() >0 && buf.at(0) == '#')
+                    continue;
+
+            std::stringstream ssdata(line);
+            std::vector<std::string> vec;
+
+            while(ssdata >> buf)
+            {
+                vec.push_back(buf);
+            }
+
+            if(vec.size() >= 3)
+            {
+                sysVec.push_back(new ServerItem(vec[0],vec[1],vec[2],false));
+            }
+        }
+    }
+    else
+        return;
+
+    in.close();
+
+#ifdef _UI_SERVERLIST_DEBUG
+    for(unsigned int i=0; i < sysVec.size(); i++)
+        UserMessage::debug(sysVec[i]->name() + "\t" + sysVec[i]->host() + "\t" + sysVec[i]->port());
+#endif
+
+    for(unsigned int i=0; i < sysVec.size(); i++)
+    {
+#ifdef _UI_SERVERLIST_DEBUG
+        UserMessage::debug(sysVec[i]->name() + "\t" + sysVec[i]->host() + "\t" + sysVec[i]->port());
+#endif
+        ServerItem *item=0;
+
+        //There is a server with same name, host and ports in the list
+        item=find(sysVec[i]->name(),sysVec[i]->host(),sysVec[i]->port());
+        if(item)
+        {
+#ifdef _UI_SERVERLIST_DEBUG
+            UserMessage::debug("  already in list (same name, host, port) -> mark as system");
+#endif
+            item->setSystem(true);
+            continue;
+        }
+
+        //There is no server with the same name in the list
+        item=find(sysVec[i]->name());
+        if(!item)
+        {
+#ifdef _UI_SERVERLIST_DEBUG
+            UserMessage::debug("  name not in list -> import as system");
+#endif
+            //item=add(sysVec[i]->name(),sysVec[i]->host(),sysVec[i]->port(), false, false);
+            //item->setSystem(true);
+            continue;
+        }
+        //There is a server with the same name but with different host or/and port
+        else
+        {
+#ifdef _UI_SERVERLIST_DEBUG
+            UserMessage::debug("  name in list with different port or/and host");
+#endif
+            continue;
+        }
+    }
 }
 
 //===========================================================

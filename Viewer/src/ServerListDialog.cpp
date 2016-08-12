@@ -473,6 +473,11 @@ void ServerListDialog::on_actionRescan_triggered()
 
 }
 
+void ServerListDialog::on_sysSyncTb_clicked(bool)
+{
+    ServerList::instance()->syncSystemFile();
+}
+
 void ServerListDialog::slotItemSelected(const QModelIndex& current,const QModelIndex& prev)
 {
 	checkActionState();
@@ -508,7 +513,7 @@ void ServerListDialog::checkActionState()
 
 		assert(item);
 
-		actionEdit->setEnabled(true);
+        actionEdit->setEnabled(!item->isSystem());
 		actionDuplicate->setEnabled(true);
 		actionDelete->setEnabled(true);
 		actionFavourite->setEnabled(true);
@@ -586,6 +591,9 @@ ServerListModel::ServerListModel(ServerFilter* filter,QObject *parent) :
 	id=IconProvider::add(":/viewer/favourite_empty.svg","favourite_empty");
 	favEmptyPix_=IconProvider::pixmap(id,12);
 
+    id=IconProvider::add(":/viewer/system.svg","system");
+    sysPix_=IconProvider::pixmap(id,12);
+
 	loadFont_.setBold(true);
 }
 
@@ -605,7 +613,7 @@ void ServerListModel::dataChangeFinished()
 
 int ServerListModel::columnCount(const QModelIndex& parent) const
 {
-	return 6;
+    return 7;
 }
 
 int ServerListModel::rowCount(const QModelIndex& parent) const
@@ -620,7 +628,8 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 {
 	if(!index.isValid() ||
 	  (role != Qt::DisplayRole && role != Qt::ForegroundRole && role != Qt::DecorationRole &&
-			  role != Qt::CheckStateRole  && role != Qt::UserRole && role != Qt::FontRole))
+              role != Qt::CheckStateRole  && role != Qt::UserRole && role != Qt::FontRole &&
+              role != IconStatusRole))
 	{
 		return QVariant();
 	}
@@ -636,8 +645,8 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 		{
 		case NameColumn: return QString::fromStdString(item->name());
 		case HostColumn: return QString::fromStdString(item->host());
-		case PortColumn: return QString::fromStdString(item->port());
-		case UseColumn:
+        case PortColumn: return QString::fromStdString(item->port());
+        case UseColumn:
 		{
 			int i=item->useCnt();
 			if(item->useCnt() > 0)
@@ -650,17 +659,14 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 	}
 	else if (role == Qt::ForegroundRole)
 	{
-		//QColor selectCol_=QColor(34,51,136);
-
-		//if(index.column() != LoadColumn && index.column() != FavouriteColumn &&
-		//  filter_ && filter_->isFiltered(item))
-		//	return selectCol_;
-
-		return QVariant();
+        return (item->isSystem())?QColor(70,71,72):QVariant();
 	}
 	else if (role == Qt::DecorationRole)
 	{
-		if(index.column() == FavouriteColumn)
+       if(index.column() == SystemColumn)
+            return (item->isSystem())?sysPix_:QPixmap();
+
+        else if(index.column() == FavouriteColumn)
 			return (item->isFavourite())?favPix_:favEmptyPix_;
 
 		return QVariant();
@@ -687,6 +693,16 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 
 		return QVariant();
 	}
+    else if (role == IconStatusRole)
+    {
+        if(index.column() == SystemColumn)
+            return item->isSystem();
+
+        else if(index.column() == FavouriteColumn)
+            return item->isFavourite();
+
+        return QVariant();
+    }
 
 	return QVariant();
 }
@@ -705,7 +721,8 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
     		case LoadColumn: return tr("L");
     		case NameColumn: return tr("Name");
     		case HostColumn: return tr("Host");
-    		case PortColumn: return tr("Port");
+            case PortColumn: return tr("Port");
+            case SystemColumn: return tr("S");
     		case FavouriteColumn: return tr("F");
     		case UseColumn: return tr("Usage");
     		default: return QVariant();
@@ -719,7 +736,9 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
     		case NameColumn: return tr("Server name is a freely customisable <b>nickname</b>. It is only used by the </b>viewer</b>.");
     		case HostColumn: return tr("Hostname of the server");
     		case PortColumn: return tr("Port number of the server");
-    		case FavouriteColumn: return tr("Indicates if a server is a <b>favourite</b>. Only favourite and loaded servers \
+            case SystemColumn: return tr("Indicates if a server appears in the centrally maintained <b>system server list</b>. \
+                                         <br>The name, host and port of these server entries cannot be edited.");
+            case FavouriteColumn: return tr("Indicates if a server is a <b>favourite</b>. Only favourite and loaded servers \
     				                        are appearing in the server list under the <b>Servers menu</b> in the menubar");
     		case UseColumn: return tr("Indicates the <b>number of tabs</b> where the server is loaded.");
     		default: return QVariant();
@@ -845,4 +864,14 @@ bool ServerListFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex &so
 
 }
 
+bool ServerListFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    if(left.column() == ServerListModel::SystemColumn || left.column() == ServerListModel::FavouriteColumn)
+    {
+        return left.data(ServerListModel::IconStatusRole).toBool() <
+               right.data(ServerListModel::IconStatusRole).toBool();
+    }
+
+    return QSortFilterProxyModel::lessThan(left,right);
+}
 

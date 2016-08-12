@@ -83,13 +83,19 @@ void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
 		NodeStateFilter sf;
         NodeQueryListOption* op=q->stateOption();
         Q_ASSERT(op);
+        //if(!op->selection().isEmpty())
         sf.setCurrent(op->selection());
-		VParamFilterMenu* sfm= new VParamFilterMenu(menu,&sf,"Status filter",
-				          VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
+
+        VParamFilterMenu* sfm= new VParamFilterMenu(menu,&sf,"Status filter",
+                          VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
 
 		if(menu->exec(globalPos) != NULL)
 		{
-            op->setSelection(sf.currentAsList());
+            //if(sf.isComplete())
+            //   op->setSelection(QStringList());
+            //else
+                op->setSelection(sf.currentAsList());
+
             //this will create deep copy so we can delet q in the end
             filterDef_->setQuery(q);
 		}

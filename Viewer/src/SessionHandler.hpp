@@ -13,11 +13,14 @@
 #include <string>
 #include <vector>
 
+class ServerItem;
+
+
 class SessionItem
 {
 public:
 	explicit SessionItem(const std::string&);
-    virtual ~SessionItem() {}
+	virtual ~SessionItem();
 
 	void  name(const std::string& name) {name_ = name;}
 	const std::string& name() const {return name_;}
@@ -28,21 +31,31 @@ public:
 	std::string recentCustomCommandsFile() const ;
 	std::string savedCustomCommandsFile() const ;
 	std::string serverFile(const std::string& serverName) const;
-    std::string qtDir() const;
-    std::string qtSettingsFile(const std::string name) const;
+	std::string qtDir() const;
+	std::string qtSettingsFile(const std::string name) const;
+	void temporary(bool t) {isTemporary_ = t;};
+	bool temporary() {return isTemporary_;};
+	void temporaryServerAlias(const std::string &alias) {temporaryServerAlias_ = alias;};
+	std::string temporaryServerAlias() {return temporaryServerAlias_;};
+	void askToPreserveTemporarySession(bool a) {askToPreserveTemporarySession_ = a;};
+	bool askToPreserveTemporarySession() {return askToPreserveTemporarySession_;};
 
 protected:
 	void checkDir();
 
 	std::string name_;
-    std::string dirPath_;
-    std::string qtPath_;
+	std::string dirPath_;
+	std::string qtPath_;
+	std::string temporaryServerAlias_;
+	bool isTemporary_;
+	bool askToPreserveTemporarySession_;
 };
 
 class SessionHandler
 {
 public:
 	SessionHandler();
+	~SessionHandler();
 
 	SessionItem* add(const std::string&);
 	void remove(const std::string&);
@@ -58,6 +71,7 @@ public:
 	SessionItem *sessionFromIndex(int i) {return sessions_[i];};
 	SessionItem *copySession(SessionItem* source, std::string &destName);
 	SessionItem *copySession(std::string &source, std::string &destName);
+	bool         createSessionDirWithTemplate(const std::string &sessionName, const std::string &templateFile);
 	void         saveLastSessionName();
 	void         removeLastSessionName();
 	bool         loadLastSessionAtStartup();
@@ -69,7 +83,9 @@ public:
 	static std::string sessionDirName(const std::string &sessionName);    // static because they are called from the constructor
 	static std::string sessionQtDirName(const std::string &sessionName);  // static because they are called from the constructor
 	static SessionHandler* instance();
+	static void destroyInstance();
 	static bool requestStartupViaSessionManager();
+	static void setTemporarySessionIfReqested();
 
 protected:
 	void readSessionListFromDisk();

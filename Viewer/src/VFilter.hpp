@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -36,7 +36,7 @@ Q_OBJECT
 
 public:
 	VParamSet();
-	virtual ~VParamSet() {};
+    virtual ~VParamSet() {}
 
 	const std::set<VParam*>& current() const {return current_;}
 	void setCurrent(const std::set<VParam*>&);
@@ -61,7 +61,8 @@ protected:
 
 	std::set<VParam*> all_;
 	std::set<VParam*> current_;
-	std::string settingsId_;
+    std::string settingsId_;
+    std::string settingsIdV0_;
 };
 
 class NodeStateFilter : public VParamSet
@@ -137,6 +138,7 @@ public:
 
     virtual void clear()=0;
     virtual bool isNull()=0;
+    virtual bool isComplete()=0;
     virtual int  matchCount() const = 0;
     virtual bool update()=0;
 
@@ -156,6 +158,7 @@ public:
 
     void clear();
     bool isNull();
+    bool isComplete();
     int  matchCount() const {return 0;}
     bool update();
     bool update(const std::vector<VNode*>& topChange,
@@ -163,7 +166,7 @@ public:
 
 private:
 	bool filterState(VNode* node,VParamSet* stateFilter);
-    bool checkState(VNode* n,std::vector<VNode*>& topFilterChange);
+    bool collectTopFilterChange(VNode* n,std::vector<VNode*>& topFilterChange);
 
     VTree* tree_;
 };
@@ -175,6 +178,7 @@ public:
 
 	void clear();
     bool isNull();
+    bool isComplete();
     int  matchCount() const {return matchCount_;}
     bool update();
     int indexOf(const VNode*) const;

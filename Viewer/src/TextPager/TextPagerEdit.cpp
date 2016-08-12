@@ -1095,11 +1095,21 @@ void TextEditPrivate::onScrollBarValueChanged(int value)
 
 void TextEditPrivate::onScrollBarActionTriggered(int action)
 {
+    // IR: see comment at the top of cursorMoveKeyEventReadOnly().
+    // Also: added code to handle SliderPageStepAdd and SliderPageStepSub because
+    // these cases were not handled well by default. These cases occur when the user clicks inside
+    // the scrollbar area, but not on the bar itself; this should do something similar or
+    // identical to a page up/down operation.
+
     switch (action) {
     case QAbstractSlider::SliderSingleStepAdd:
         scrollLines(1); requestedScrollBarPosition = -1; break;
     case QAbstractSlider::SliderSingleStepSub:
         scrollLines(-1); requestedScrollBarPosition = -1; break;
+    case QAbstractSlider::SliderPageStepAdd:
+        scrollLines(qMax(1, visibleLines - 1)); requestedScrollBarPosition = -1; break;
+    case QAbstractSlider::SliderPageStepSub:
+        scrollLines(-qMax(1, visibleLines - 2)); requestedScrollBarPosition = -1; break;
     default: break;
     }
 
@@ -1306,6 +1316,8 @@ void TextEditPrivate::onDocumentDestroyed()
 
 void TextEditPrivate::scrollLines(int lines)
 {
+    // IR: see comment at the top of cursorMoveKeyEventReadOnly().
+
     int pos = viewportPosition;
     const Direction d = (lines < 0 ? Backward : Forward);
     const int add = lines < 0 ? -1 : 1;
@@ -1318,6 +1330,14 @@ void TextEditPrivate::scrollLines(int lines)
             // (ie. lines containing only '\n') by just ignoring them here
             // - updateViewportPosition automatically takes us one index past
             // this newline, thus displaying the next line)
+
+            // IR: the above comment does not seem to be true, at least it is not always true.
+            // If performing a 'page down' operation, this 'break' causes one less line to
+            // be scrolled. This is because pos is already on the newline at the end of
+            // the previous line; this check re-reads that newline and then breaks without
+            // reading the last line at all. This is not done when paging backwards. So
+            // scrolling down 5 lines actually scrolls down 4 lines, and scrolling up 5
+            // lines does indeed scroll up 5 lines.
             break;
         } else {
             pos += add;
@@ -1411,6 +1431,14 @@ bool TextEditPrivate::isSectionOnScreen(const TextPagerSection *section) const
 
 void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent *e)
 {
+    // IR: changed MoveToPreviousPage from visibleLines to (visibleLines-2) because:
+    // the scrollLines routine does not perform consistently between page up and page down;
+    // performing a page down followed by a page up does not get you back to where you started.
+    // See my comment in scrollLines, which might point to why this is. The quickest way
+    // to make the functions consistent was to make this change. The primary reason was to
+    // ensure that the user does not miss any lines of text when they page up and down through
+    // the document. The same change was made in onScrollBarActionTriggered.
+
     if (e == QKeySequence::MoveToNextLine) {
         scrollLines(1);
     } else if (e == QKeySequence::MoveToPreviousLine) {
@@ -1422,7 +1450,7 @@ void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent *e)
     } else if (e == QKeySequence::MoveToNextPage) {
         scrollLines(qMax(1, visibleLines - 1));
     } else if (e == QKeySequence::MoveToPreviousPage) {
-        scrollLines(-qMax(1, visibleLines));
+        scrollLines(-qMax(1, visibleLines - 2));
     } else if (e == QKeySequence::MoveToStartOfLine) {
          textCursor.movePosition(TextPagerCursor::StartOfLine);
          e->accept();

@@ -104,15 +104,18 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	menu->setTearOffEnabled(true);
 
 	menu->addAction(actionBreadcrumbs);
-	QMenu *menuState=menu->addMenu(tr("Status"));
 
+#if 0
+    QMenu *menuState=menu->addMenu(tr("Status"));
 	menuState->setTearOffEnabled(true);
 
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 	stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Status filter",
-			        VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
+                    //VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
+                     VParamFilterMenu::ShowMode,VParamFilterMenu::ColourDecor);
 
-	//Sets the menu on the toolbutton
+#endif
+    //Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
 
 	//Sets the title
@@ -206,7 +209,7 @@ void TableNodeWidget::readSettings(VSettings* vs)
 
 	//attrFilterMenu_->reload();
 	//iconFilterMenu_->reload();
-	stateFilterMenu_->reload();
+    //stateFilterMenu_->reload();
 
 }
 

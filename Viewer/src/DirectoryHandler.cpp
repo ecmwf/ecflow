@@ -256,7 +256,7 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
     }
 
 
-    // create the destination directory if it does not alreadt exist
+    // create the destination directory if it does not already exist
     if (!boost::filesystem::exists(dest))
     {
         bool created = createDir(dest.string());
@@ -285,7 +285,7 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
                 return false;
             }
         }
-        else if (is_directory(p))  // directory? then copt it recursively
+        else if (is_directory(p))  // directory? then copy it recursively
         {
             boost::filesystem::path destSubDir(destDir);
             destSubDir /= p.filename();
@@ -339,6 +339,29 @@ bool DirectoryHandler::renameDir(const std::string &dir, const std::string &newN
 
     return true;
 }
+
+
+// -------------------------------------------------------------
+// copyFile
+// Copies the given file to the given destintation (full paths).
+// -------------------------------------------------------------
+
+bool DirectoryHandler::copyFile(const std::string &srcFile, std::string &destFile, std::string &errorMessage)
+{
+    boost::filesystem::path src(srcFile);
+    boost::filesystem::path dest(destFile);
+
+    try
+    {
+        boost::filesystem::copy_file(src, dest);
+    }
+    catch (const boost::filesystem::filesystem_error& err)
+    {
+        errorMessage = "Could not copy file " + srcFile + " to " + destFile + "; reason: " + err.what();
+        return false;
+    }
+}
+
 
 // --------------------------------------------------------
 // removeFile

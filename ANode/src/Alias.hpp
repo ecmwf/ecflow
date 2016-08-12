@@ -20,6 +20,7 @@ class Alias : public Submittable {
 public:
    Alias(const std::string& name);
    Alias();
+   Alias(const Alias&);
    virtual ~Alias();
 
    static alias_ptr create(const std::string& name);

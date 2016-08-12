@@ -127,8 +127,8 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	menu->setTearOffEnabled(true);
 
 	menu->addAction(actionBreadcrumbs);
-	QMenu *menuState=new QMenu(this); //menu->addMenu(tr("Status"));
-	QMenu *menuType=new QMenu(this); //menu->addMenu(tr("Attribute"));
+    QMenu *menuState=new QMenu(this);
+    QMenu *menuType=new QMenu(this);
 	QMenu *menuIcon=menu->addMenu(tr("Icon"));
 
 	menuState->setTearOffEnabled(true);
@@ -138,8 +138,8 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 	attrFilterMenu_=new VParamFilterMenu(menuType,atts_,"Show attributes",VParamFilterMenu::ShowMode);
 	iconFilterMenu_=new VParamFilterMenu(menuIcon,icons_,"Show icons",VParamFilterMenu::ShowMode);
-	stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Status filter",
-			       VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
+    stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Show statuses",
+                   VParamFilterMenu::ShowMode,VParamFilterMenu::ColourDecor);
 
 	//Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
@@ -150,14 +150,13 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     QList<QAction*> acLst;
     QAction* acState=new QAction(this);
     acState->setIcon(QPixmap(":viewer/status.svg"));
-    acState->setToolTip("Status filter");
+    acState->setToolTip("Show statuses");
     acState->setMenu(menuState);
     acLst << acState;
 
     QAction* acAttr=new QAction(this);
     acAttr->setIcon(QPixmap(":viewer/attribute.svg"));
     acAttr->setToolTip("Show attributes");
-    //acAttr->setText("Attributes ");
     acAttr->setMenu(menuType);
     acLst << acAttr;
 

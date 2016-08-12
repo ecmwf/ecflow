@@ -13,11 +13,20 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1,0">
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -70,7 +79,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/fontsize_up.svg</normaloff>:/viewer/fontsize_up.svg</iconset>
        </property>
        <property name="shortcut">
@@ -90,7 +99,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/fontsize_down.svg</normaloff>:/viewer/fontsize_down.svg</iconset>
        </property>
        <property name="shortcut">
@@ -117,7 +126,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
        </property>
        <property name="shortcut">
@@ -140,7 +149,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/images/goto_line.svg</normaloff>:/viewer/images/goto_line.svg</iconset>
        </property>
        <property name="shortcut">
@@ -160,7 +169,7 @@
         <string>Submit</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/submit.svg</normaloff>:/viewer/submit.svg</iconset>
        </property>
        <property name="toolButtonStyle">
@@ -169,6 +178,10 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="MessageLabel" name="infoLabel_" native="true">
+    </widget>
    </item>
    <item>
     <widget class="PlainTextEdit" name="textEdit_">
@@ -203,9 +216,13 @@
    <extends>QPlainTextEdit</extends>
    <header location="global">PlainTextEdit.hpp</header>
   </customwidget>
+  <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header>MessageLabel.hpp</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

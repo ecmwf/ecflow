@@ -260,7 +260,8 @@ public:
 
 	int totalNum() const {return totalNum_;}
 	int totalNumOfTopLevel(int) const;
-	int totalNumOfTopLevel(VNode*) const;
+    int totalNumOfTopLevel(VNode*) const;
+    int totalNumOfTopLevel(const std::string&) const;
 
 	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,6 +18,7 @@ class CommandLineEdit;
 #include "ui_CommandDesignerWidget.h"
 #include "CustomCommandHandler.hpp"
 #include "NodeQueryResultModel.hpp"
+#include "MenuHandler.hpp"
 
 #include "CtsCmdRegistry.hpp"
 
@@ -29,7 +30,7 @@ public:
 	explicit CommandDesignerWidget(QWidget *parent = 0);
 	~CommandDesignerWidget();
 
-	QString command() {return commandLineEdit_->text();};
+	MenuItem &menuItem();
 	void setNodes(std::vector<VInfo_ptr> &nodes);
 	std::vector<VInfo_ptr> &selectedNodes();
 
@@ -89,6 +90,7 @@ private:
 	bool saveCommandsOnExit_;
 	bool saveOptionsVisible_;
 	std::vector<std::string> componentBlacklist_;
+	MenuItem menuItem_;
 
 	std::vector<VInfo_ptr> nodes_;
 	NodeQueryResultModel nodeModel_; 

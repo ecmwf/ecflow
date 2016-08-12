@@ -50,10 +50,11 @@ class Limit;
 class AbstractObserver;
 namespace ecf { class NodeTreeVisitor; class CalendarUpdateParams; } // forward declare
 
-class Defs : private boost::noncopyable {
+class Defs {
 public:
    static defs_ptr create();
    Defs();
+   Defs(const Defs&);
    ~Defs();
 
    bool operator==(const Defs& rhs) const;
@@ -320,7 +321,7 @@ private:
    friend void export_Defs();
 
 private:
-   /// Note: restoring form a check point file will reset, defs state and modify numbers
+   /// Note: restoring from a check point file will reset, defs state and modify numbers
    unsigned int    state_change_no_;            // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int    modify_change_no_;           // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int    updateCalendarCount_;

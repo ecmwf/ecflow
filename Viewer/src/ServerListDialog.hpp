@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -26,7 +26,7 @@ class ServerListFilterModel;
 class ServerDialogChecker
 {
 protected:
-	explicit ServerDialogChecker(QString txt) : errorText_(txt) {};
+    explicit ServerDialogChecker(QString txt) : errorText_(txt) {}
 
     bool checkName(QString name,QString oriName=QString());
 	bool checkHost(QString host);
@@ -95,7 +95,8 @@ protected Q_SLOTS:
 	 void on_actionDelete_triggered();
 	 void on_actionRescan_triggered();
 	 void on_serverView_doubleClicked(const QModelIndex& index);
-	 void on_actionFavourite_triggered(bool checked);
+     void on_actionFavourite_triggered(bool checked);
+     void on_sysSyncTb_clicked(bool);
 	 void slotItemSelected(const QModelIndex&,const QModelIndex&);
 	 void slotItemClicked(const QModelIndex&);
 	 void slotFilter(QString);
@@ -140,12 +141,14 @@ public:
    	void dataChangeFinished();
    	ServerItem* indexToServer(const QModelIndex& index);
 
-   	enum Columns {LoadColumn=0, NameColumn = 1, HostColumn =2, PortColumn =3, FavouriteColumn= 4, UseColumn=5};
+    enum Columns {LoadColumn=0, SystemColumn=1, NameColumn=2, HostColumn=3, PortColumn=4, FavouriteColumn= 5, UseColumn=6};
+    enum CustomItemRole {IconStatusRole = Qt::UserRole+1};
 
 protected:
    	ServerFilter* filter_;
    	QPixmap favPix_;
    	QPixmap favEmptyPix_;
+    QPixmap sysPix_;
    	QFont loadFont_;
 };
 
@@ -153,12 +156,13 @@ class ServerListFilterModel : public QSortFilterProxyModel
 {
 public:
 	explicit ServerListFilterModel(QObject *parent=0);
-	~ServerListFilterModel() {};
+    ~ServerListFilterModel() {}
 	void setFilterStr(QString);
 	void setFilterFavourite(bool b);
 
 protected:
 	 bool filterAcceptsRow(int sourceRow,const QModelIndex &sourceParent) const;
+     bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
 	 QString filterStr_;
 	 bool filterFavourite_;

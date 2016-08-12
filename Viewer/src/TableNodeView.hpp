@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -50,7 +50,6 @@ public:
 	void readSettings(VSettings* vs);
 
 public Q_SLOTS:
-	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(std::vector<VInfo_ptr>,QString);
@@ -70,8 +69,8 @@ protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void adjustBackground(QColor col);
-
-    TableNodeSortModel* model_;
+	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+	TableNodeSortModel* model_;
 	ActionHandler* actionHandler_;
 	TableNodeHeader* header_;
 	bool needItemsLayout_;

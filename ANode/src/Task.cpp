@@ -49,6 +49,21 @@ using namespace boost;
 
 //#define DEBUG_TASK_LOCATION 1
 
+Task::Task(const Task& rhs)
+: Submittable(rhs),
+  order_state_change_no_(0),
+  add_remove_state_change_no_(0),
+  alias_change_no_(0),
+  alias_no_(rhs.alias_no_)
+{
+   size_t theSize = rhs.aliases_.size();
+   for(size_t s = 0; s < theSize; s++) {
+      alias_ptr alias_copy = boost::make_shared<Alias>( *rhs.aliases_[s] );
+      alias_copy->set_parent(this);
+      aliases_.push_back( alias_copy );
+   }
+}
+
 Task::~Task()
 {
    if (!Ecf::server()) {

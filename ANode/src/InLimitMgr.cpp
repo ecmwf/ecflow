@@ -402,13 +402,14 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit, std::string& errorMsg, 
    }
 
    // *FOUND* the referenced LIMIT. inlimit tokens must be less than limit.
+   // ECFLOW-713 make this a warning and not error, it allows job control over multiple suites, at load/begin time
    if ( inLimit.tokens() > referencedLimit->theLimit() ) {
-      if (reportErrors) {
+      if (reportWarnings) {
          // in limit exceeds the LIMIT value
          std::stringstream ss;
          ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString() << " reference\n";
          ss << " with value '" << inLimit.tokens() << "' which exceeds '" << referencedLimit->theLimit() << "' defined on the Limit\n";
-         errorMsg += ss.str();
+         warningMsg += ss.str();
       }
    }
    return referencedLimit;
