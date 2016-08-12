@@ -56,6 +56,9 @@
     </layout>
    </item>
    <item>
+    <widget class="QTextBrowser" name="triggerBrowser_"/>
+   </item>
+   <item>
     <widget class="TriggerView" name="triggerView_"/>
    </item>
   </layout>

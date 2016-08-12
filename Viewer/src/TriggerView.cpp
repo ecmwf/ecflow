@@ -69,11 +69,11 @@ protected:
 
 };
 
-class TriggerList
+class TriggerCollector
 {
 public:
-    TriggerList() {}
-    virtual ~TriggerList() {}
+    TriggerCollector() {}
+    virtual ~TriggerCollector() {}
 
     enum Mode { Normal    = 0,   // Normal trigger_node
                 Parent    = 1,   // Through parent
@@ -81,36 +81,39 @@ public:
                 Hierarchy = 3    // Through child
     }
 
-    virtual void next_node(VItem*, VNode*,Mode,VNode*) = 0;
-    virtual bool parents() { return false; }
-    virtual bool kids()    { return false; }
-    virtual bool self()    { return true; }
+    virtual void add(VItem*, VNode*,Mode,VNode*) = 0;
+    virtual bool scanParents() { return false; }
+    virtual bool scnaKids()    { return false; }
+    virtual bool scanSelf()    { return true; }
 
 private:
-	TriggerList(const trigger_lister&);
-	TriggerList& operator=(const trigger_lister&);
+    TriggerCollector(const trigger_lister&);
+    TriggerCollector& operator=(const trigger_lister&);
 
     std::vector<VItem*> items_;
 };
 
-class InfoLister : public TriggerList
+
+
+class TriggerListCollector : public TriggerCollector
 {
 public:
-    InfoLister(FILE* f,const std::string& *title,bool extended) :
+    TriggerListCollector(FILE* f,const std::string& *title,bool extended) :
         file_(f), title_(t), extended_(extended) {}
 
-    void next_node(VNode& n, VNode*,Mode,VNode*);
-    bool parents() { return extended_; }
-    bool kids() { return extended_; }
+    void add(VItem*, VNode*,Mode,VNode*);
+    bool scanParents() { return extended_; }
+    bool scanKids() { return extended_; }
 
 protected:
     //panel& p_;
     FILE* file_;
     std::string title_;
     bool extended_;
+    std::vector<VItem*> items_;
 };
 
-void InfoLister::next_node(VItem* n, VNode* parent,Mode mode,VNode*)
+void InfoLister::add(VItem* n, VNode* parent,Mode mode,VNode*)
 {
     items_.push_back(n);
 

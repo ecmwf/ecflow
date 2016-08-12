@@ -46,6 +46,7 @@ public:
     virtual QString toolTip(QStringList d) const {return QString();}
     virtual bool exists(const VNode* vnode,QStringList) const {return false;}
     virtual void getSearchData(const VNode*,QList<VAttribute*>&) {}
+    static void getSearchData(const std::string& type,const VNode*,QList<VAttribute*>&);
 
     int keyToDataIndex(const std::string& key) const;
     int searchKeyToDataIndex(const std::string& key) const;

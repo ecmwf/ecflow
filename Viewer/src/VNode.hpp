@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -25,6 +25,7 @@ class AttributeFilter;
 
 class IconFilter;
 class ServerHandler;
+class TriggerCollector;
 class VAttributeType;
 class VServer;
 class VServerSettings;
@@ -148,8 +149,11 @@ public:
     //generated variables are searched.
     virtual std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
+    std::string fullPath() const;
     virtual std::string absNodePath() const;
+
     bool sameName(const std::string& name) const;
+    bool sameContents(VItem* item) const;
     std::string strName() const;
     QString name() const;
     std::string serverName() const;
@@ -177,6 +181,7 @@ public:
     int index() const {return index_;}
 
     const std::string& nodeType();
+    //const std::string& typeStr() const;
     virtual QString toolTip();
     
     virtual void why(std::vector<std::string>& theReasonWhy) const;
@@ -185,7 +190,7 @@ public:
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
 
-    void triggers();
+    void triggers(TriggerCollector*);
 
 protected:
     void clear();
@@ -217,6 +222,7 @@ class VSuiteNode : public VNode
 public:
     VSuiteNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
     VSuiteNode* isSuite() const {return const_cast<VSuiteNode*>(this);}
+    const std::string& typeName() const;
 };
 
 class VFamilyNode : public VNode
@@ -224,6 +230,7 @@ class VFamilyNode : public VNode
 public:
     VFamilyNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
     VFamilyNode* isFamily() const {return const_cast<VFamilyNode*>(this);}
+    const std::string& typeName() const;
 };
 
 class VAliasNode : public VNode
@@ -231,6 +238,7 @@ class VAliasNode : public VNode
 public:
     VAliasNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
     VAliasNode* isAlias() const {return const_cast<VAliasNode*>(this);}
+    const std::string& typeName() const;
 };
 
 //This is the root node representing the Server.
@@ -262,7 +270,8 @@ public:
 	VNode* nodeAt(int) const;
 	const std::vector<VNode*>& nodes() const {return nodes_;}
 
-	QString toolTip();
+    const std::string& typeName() const;
+    QString toolTip();
 
 	//From VNode
 	std::string absNodePath() const {return "/";}

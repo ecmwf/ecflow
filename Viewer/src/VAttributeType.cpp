@@ -242,6 +242,14 @@ QStringList VAttributeType::searchKeys() const
     return lst;
 }
 
+void VAttributeType::getSearchData(const std::string& type,const VNode* vnode,QList<VAttribute*>& lst)
+{
+    VAttributeType *t=VAttributeType::find(type);
+    Q_ASSERT(t);
+    t->getSearchData(vnode,lst);
+}
+
+
 //================================
 // Meters
 //================================

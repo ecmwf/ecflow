@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -33,6 +33,26 @@ VAttribute::VAttribute(VNode *parent,VAttributeType* type,QStringList data) :
 QString VAttribute::toolTip() const
 {
     return (type_)?(type_->toolTip(data_)):QString();
+}
+
+const std::string& VAttribute::typeName() const
+{
+    static std::string e;
+    return (type_)?(type_->strName()):e;
+}
+
+std::string VAttribute::fullPath() const
+{
+    return (parent_)?parent_->fullPath():"";
+}
+
+bool VAttribute::sameContents(VItem* item) const
+{
+    if(VAttribute *a=item->isAttribute())
+    {    return a->parent() == parent() && a->type_ == type_ &&
+           a->index_ == index_ && a->strName() == strName();
+    }
+    return false;
 }
 
 void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,

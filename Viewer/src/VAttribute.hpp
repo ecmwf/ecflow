@@ -32,6 +32,9 @@ public:
     QString toolTip() const;
     QString name() const;
     std::string strName() const;
+    const std::string& typeName() const;
+    std::string fullPath() const;
+    bool sameContents(VItem*) const;
 
     bool isValid(VNode* parent);
     bool value(const std::string& key,std::string& val) const;

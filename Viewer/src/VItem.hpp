@@ -43,6 +43,9 @@ public:
     virtual bool isTopLevel() const {return false;}
     virtual std::string strName() const=0;
     virtual QString name() const=0;
+    virtual const std::string& typeName() const=0;
+    virtual std::string fullPath() const=0;
+    virtual bool sameContents(VItem*) const=0;
 
 protected:
     VNode* parent_;

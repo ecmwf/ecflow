@@ -31,6 +31,7 @@ public:
     //bool isServer() const {return false;}
     VTaskNode* isTask() const {return const_cast<VTaskNode*>(this);}
 	void internalState(VNodeInternalState&);
+    const std::string& typeName() const;
 
 protected:
 	void check(VServerSettings* conf,const VNodeInternalState&);

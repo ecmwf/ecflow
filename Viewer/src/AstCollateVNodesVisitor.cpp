@@ -44,15 +44,23 @@ void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar)
             QStringList types;
             types << "event" << "meter" << "var" << "genvar";
             Q_FOREACH(QString tName,types)
-            {
-                VAttributeType *t=VAttributeType::find(tName.toStdString());
-                assert(t);
-
+            {                
                 QList<VAttribute*> lst;
-                t->getSearchData(n,lst);
+                VAttributeType::getSearchData(tName.toStdString(),n,lst);
                 Q_FOREACH(VAttribute *a,lst)
                 {
-                    if(a->strName() == astVar->name())
+                    bool hasIt=false;
+                    for(std::set<VItem*>::iterator it = theSet_.begin();
+                        it != theSet_.end(); ++it)
+                    {
+                        if(a->sameContents(*it))
+                        {
+                            hasIt=true;
+                            break;
+                        }
+                    }
+
+                    if(!hasIt && a->strName() == astVar->name())
                         theSet_.insert(a);
                     else
                         delete a;

@@ -19,6 +19,7 @@
 #include "ConnectState.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
+#include "TriggerCollector.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VFileInfo.hpp"
@@ -382,9 +383,19 @@ void VNode::genVariables(std::vector<Variable>& genVars) const
 		node_->gen_variables(genVars);
 }
 
+std::string VNode::fullPath() const
+{
+    return absNodePath();
+}
+
 std::string VNode::absNodePath() const
 {
 	return (node_)?node_->absNodePath():"";
+}
+
+bool VNode::sameContents(VItem* item) const
+{
+    return item == this;
 }
 
 bool VNode::sameName(const std::string& name) const
@@ -695,7 +706,7 @@ QString VNode::toolTip()
 
 
 //Get the triggers list for the Triggers view
-void VNode::triggers() //TriggerList& tlr)
+void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
 {
     //Check the node itself
     //if(tlr.self())
@@ -713,21 +724,23 @@ void VNode::triggers() //TriggerList& tlr)
             if(node_->triggerAst())
                 node_->triggerAst()->accept(astVisitor);
 
-            for(std::set<VItem*>::iterator sit = theSet.begin(); sit != theSet.end(); ++sit)
+            //Add the found items to the collector
+            for(std::set<VItem*>::iterator it = theSet.begin(); it != theSet.end(); ++it)
             {
 #ifdef _UI_VNODE_DEBUG
-                qDebug() << "trigger ast:" << (*sit)->name();
+                qDebug() << "trigger ast:" << (*it)->name() << *it;
 #endif
+                tlc->add(*it,NULL, TriggerCollector::Normal,this);
                 //tlr.next_node( *(*sit), 0, TriggerList::normal, *sit);
             }
         }
 
-        //Attributes
-        VAttributeType *t=VAttributeType::find("limiter");
-        Q_ASSERT(t);
-        QList<VAttribute*> limiter;
-        t->getSearchData(this,limiter);
-        Q_FOREACH(VAttribute* a, limiter)
+        //Check other attributes
+
+        //Limiters
+        QList<VAttribute*> limiterLst;
+        VAttributeType::getSearchData("limiter",this,limiterLst);
+        Q_FOREACH(VAttribute* a, limiterLst)
         {
             std::string v;
             if(a->value("limiter_path",v))
@@ -737,28 +750,74 @@ void VNode::triggers() //TriggerList& tlr)
 #ifdef _UI_VNODE_DEBUG
                     qDebug() << "trigger limit:" << n->name();
 #endif
+                    tlc->add(n,NULL, TriggerCollector::Normal,this);
                 }
             }
         }
 
-        //Add date and time
-
-        //Check parents
-/*        if(trl.parents())
+        //Date
+        QList<VAttribute*> dateLst;
+        VAttributeType::getSearchData("date",this,dateLst);
+        Q_FOREACH(VAttribute* a, dateLst)
         {
-            VNode* p=parent();
-            while(p)
-            {
-                //fip f(p,tlr);
-                //p->triggers(f);
-                p->triggers();
-                p = p->parent();
-            }
+            tlc->add(a,NULL, TriggerCollector::Normal,this);
         }
-*/
+
+        //Time
+        QList<VAttribute*> timeLst;
+        VAttributeType::getSearchData("time",this,timeLst);
+        Q_FOREACH(VAttribute* a, timeLst)
+        {
+            tlc->add(a,NULL, TriggerCollector::Normal,this);
+        }
+    }
+
+    if(tlc->scanParents())
+    {
+        VNode* p=parent();
+        while(p)
+        {
+            TriggerParentCollector tpc(p,tlc);
+            p->triggers(&tpc);
+            p = p->parent();
+        }
     }
 }
 
+#if 0
+void VNode::collectTriggered(TriggerCollector* tlc,VNode* p)
+{
+  triggers(tlc);
+  for(int i=0; i < children_.size(); i++)
+      children_[i]->triggers(tlc);
+
+  while(p)
+  {
+    TriggerListCollector tlc(p);
+    p->triggers(tlc);
+    //p->triggered_ = true;
+    collectTriggered(p->kids());
+    p = p->next();
+  }
+}
+
+
+void VNode::triggered(TriggerCollector* tlc)
+{
+  server()->vTree()->collectTriggered(tlc);
+
+  if(!triggered_) // Scan all tree
+    gather_triggered(serv().top());
+
+  if(data_) data_->triggered(l);
+
+  if(l.kids()) triggered_by_kids(this,kids(),l);
+  if(l.parents()) triggered_by_parent(this,parent(),l);
+}
+#endif
+
+
+//pikachu://e_41r2_peter/pop/00lw/lxops/cleanup
 //pikachu://e_41r2_peter/main/18bc/getreq/collectreq
 
 VItem* VNode::findLimit(const std::string& path, const std::string& name)
@@ -772,61 +831,62 @@ VItem* VNode::findLimit(const std::string& path, const std::string& name)
 #endif
 
     //If
+    VNode* n=this;
     if(!path.empty() && path[0] == '/')
     {
-        VNode* n=server()->vRoot()->find(path);
-        if(n && n != this)
-            return n->findLimit(path,name);
-   }
+        n=server()->vRoot()->find(path);
+        if(!n)
+            return NULL;
 
-   //Find the matching limit in the node
-   VAttributeType *t=VAttributeType::find("limit");
-   Q_ASSERT(t);
-   QList<VAttribute*> limit;
-   t->getSearchData(this,limit);
-   Q_FOREACH(VAttribute* a, limit)
-   {
+        //if(n && n != this)
+        //    return n->findLimit(path,name);
+    }
+
+    //Find the matching limit in the node
+    QList<VAttribute*> limit;
+    VAttributeType::getSearchData("limit",n,limit);
+    Q_FOREACH(VAttribute* a, limit)
+    {
        if(a->strName() == name)
            return a;
-   }
-
-
-#if 0
-   for (node *n = f->kids(); n != 0; n = n->next()) {
-      if (n->type() == NODE_LIMIT && n->name() == name)
-         return n;
-   }
-#endif
+    }
 
     //Find the matching limit in the ancestors
-    VNode* p=parent();
+    VNode* p=n->parent();
     Q_ASSERT(p);
-    if(p->isNode() || p->isTask() || p->isSuite())
+    for(int i=0; i < p->numOfChildren(); i++)
     {
-        if (p->strName() == path.substr(0, p->name().size()))
+        VNode* ch=p->childAt(i);
+        if (ch->strName() == path.substr(0, ch->name().size()))
         {
             std::string::size_type next = path.find('/');
-            return p->findLimit(path.substr(next+1, path.size()), name);
+            return ch->findLimit(path.substr(next+1, path.size()), name);
         }
     }
 
     return NULL;
 
-#if 0
-   for (node *p = f->parent()->kids(); p != 0; p = p->next()) {
-      if (p->type() == NODE_FAMILY || p->type() == NODE_TASK || p->type() == NODE_SUITE)
-         if (p->name() == path.substr(0, p->name().size())) {
-            std::string::size_type next = path.find('/');
-            if (next != std::string::npos)
-               return p->find_limit(path.substr(next+1, path.size()), name);
-         }
-   }
-#endif
-
    //return &dummy_node::get(path + ":" + name);
 }
 
 
+const std::string& VSuiteNode::typeName() const
+{
+   static std::string t("suite");
+   return t;
+}
+
+const std::string& VFamilyNode::typeName() const
+{
+   static std::string t("family");
+   return t;
+}
+
+const std::string& VAliasNode::typeName() const
+{
+   static std::string t("alias");
+   return t;
+}
 
 //=================================================
 //
@@ -1421,6 +1481,12 @@ void VServer::updateCache(defs_ptr defs)
 	cache_.vars_=defs->server().user_variables();
 	cache_.genVars_=defs->server().server_variables();
 	cache_.flag_=defs->flag();
+}
+
+const std::string& VServer::typeName() const
+{
+   static std::string t("server");
+   return t;
 }
 
 QString VServer::toolTip()
