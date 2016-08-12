@@ -34,11 +34,12 @@ public:
 
 	virtual void accept(ecf::ExprAstVisitor&) = 0;
    virtual Ast* clone() const = 0;
+   virtual bool is_not() const { return false;}
 
 	virtual void addChild(Ast*) {}
 	virtual Ast* left() const { return NULL;}
 	virtual Ast* right() const { return NULL;}
-	virtual bool evaluate() const { assert(false); return false;}
+	virtual bool evaluate() const { return false;}
 	virtual bool isleaf() const { return false; }
 	virtual bool isRoot() const { return false; }
 	virtual AstTop* isTop() const { return NULL; }
@@ -119,6 +120,7 @@ public:
 	AstNot() : name_("! ") {}
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNot* clone() const;
+   virtual bool is_not() const { return true;}
 
 	virtual bool evaluate() const { assert(!right_);  return ! left_->evaluate();}
 	virtual int value() const {  assert(!right_);     return ! left_->value();}
