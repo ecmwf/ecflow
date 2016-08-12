@@ -13,6 +13,7 @@
 
 #include "DirectoryHandler.hpp"
 #include "ServerItem.hpp"
+#include "ServerListSyncDialog.hpp"
 #include "UserMessage.hpp"
 
 #include <algorithm>
@@ -305,7 +306,8 @@ bool ServerList::readSystemFile()
 
 			if(vec.size() >= 3)
 			{
-				add(vec[0],vec[1],vec[2],false,false);
+                ServerItem *item=add(vec[0],vec[1],vec[2],false,false);
+                item->setSystem(true);
 			}
 		}
 	}
@@ -353,6 +355,8 @@ void ServerList::syncSystemFile()
 
     in.close();
 
+    std::vector<ServerListSyncConflictItem*> conflictVec;
+
 #ifdef _UI_SERVERLIST_DEBUG
     for(unsigned int i=0; i < sysVec.size(); i++)
         UserMessage::debug(sysVec[i]->name() + "\t" + sysVec[i]->host() + "\t" + sysVec[i]->port());
@@ -383,8 +387,8 @@ void ServerList::syncSystemFile()
 #ifdef _UI_SERVERLIST_DEBUG
             UserMessage::debug("  name not in list -> import as system");
 #endif
-            //item=add(sysVec[i]->name(),sysVec[i]->host(),sysVec[i]->port(), false, false);
-            //item->setSystem(true);
+            item=add(sysVec[i]->name(),sysVec[i]->host(),sysVec[i]->port(), false, false);
+            item->setSystem(true);
             continue;
         }
         //There is a server with the same name but with different host or/and port
@@ -393,9 +397,19 @@ void ServerList::syncSystemFile()
 #ifdef _UI_SERVERLIST_DEBUG
             UserMessage::debug("  name in list with different port or/and host");
 #endif
+            conflictVec.push_back(new ServerListSyncConflictItem(sysVec[i],item,
+                                     ServerListSyncConflictItem::MatchConflict));
             continue;
         }
     }
+
+    if(!conflictVec.empty())
+    {
+        ServerListSyncDialog d;
+        d.init(conflictVec);
+        d.exec();
+    }
+
 }
 
 //===========================================================

@@ -105,6 +105,9 @@ int main(int argc, char **argv)
     //Initialise the server list
     ServerList::instance()->init();
 
+    //Sync the server list with the system server list
+    //ServerList::instance()->syncSystemFile();
+
     //Load the global configurations
     VConfig::instance()->init(DirectoryHandler::etcDir());
     

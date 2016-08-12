@@ -16,6 +16,7 @@
 class ServerItem;
 class ServerList;
 
+
 class ServerListObserver
 {
 public:
@@ -23,6 +24,18 @@ public:
     virtual ~ServerListObserver() {}
 	virtual void notifyServerListChanged()=0;
 	virtual void notifyServerListFavouriteChanged(ServerItem*)=0;
+};
+
+class ServerListSyncConflictItem
+{
+public:
+    enum ConflictType {RemovedConflict, MatchConflict};
+    ServerListSyncConflictItem(ServerItem* sys,ServerItem* local,ConflictType type) :
+        sys_(sys), local_(local), type_(type) {}
+
+    ServerItem *sys_;
+    ServerItem *local_;
+    ConflictType type_;
 };
 
 class ServerList
