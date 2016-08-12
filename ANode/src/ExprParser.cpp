@@ -107,12 +107,9 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
    static const int not3_ID          = 25;
    static const int and_ID           = 26;
    static const int or_ID            = 27;
-   static const int event_ID         = 28;
    static const int dot_dot_path_ID     = 29;
-   static const int event_name_ID       = 30;
    static const int base_trigger_ID     = 31;
    static const int sub_expression_ID   = 32;
-
    static const int node_path_state_ID  = 34;
    static const int absolute_path_ID    = 35;
 	static const int event_state_ID      = 36;
@@ -168,12 +165,10 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         rule<ScannerT,parser_tag<not3_ID> >   not3_r;
         rule<ScannerT,parser_tag<and_ID> >   and_r;
         rule<ScannerT,parser_tag<or_ID> >    or_r;
-        rule<ScannerT,parser_tag<event_ID> > event;
 
         rule<ScannerT,parser_tag<dot_path_ID> >      dotpath;
         rule<ScannerT,parser_tag<dot_dot_path_ID> >  dotdotpath;
         rule<ScannerT,parser_tag<absolute_path_ID> > absolutepath;
-        rule<ScannerT,parser_tag<event_name_ID> >    eventname;
 
         rule<ScannerT,parser_tag<node_path_state_ID> >  nodepathstate;
 
@@ -205,7 +200,9 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                              ]
                 ;
 
-          // Can be [ /suite/family/task   |  family/task  |   family  ]
+          // Can be /suite/family/task
+          //        family/task
+          //        family
           absolutepath
              =    leaf_node_d[
                         !(str_p("/")) >> nodename
@@ -273,19 +270,9 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
           or_r = root_node_d [ str_p("or") ]   || root_node_d [ str_p("||") ] ;
           and_or =  and_r | or_r;
 
-
-          eventname = leaf_node_d [ nodename ];
-          event
-             =  nodepath
-                >>  discard_node_d[ ch_p(':') ]
-                >>  eventname
-              ;
-
         	 event_state = leaf_node_d[ str_p("set") ] || leaf_node_d[ str_p("clear")] ;
 
-          variable = leaf_node_d [ nodename ];
-//          variable_path =   | normal_variable_path ;
-//
+          variable = leaf_node_d [ nodename ];  // ?????????????????????
 
           node_state_unknown = root_node_d [ str_p("unknown") ];
           node_state_complete = root_node_d [ str_p("complete") ];
@@ -302,30 +289,30 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                 | node_state_unknown
                 ;
 
-          basic_variable_path = nodepath >> discard_node_d[ ch_p(':') ] >> variable ;
-          calc_factor
+           basic_variable_path = nodepath >> discard_node_d[ ch_p(':') ] >> variable ;
+
+           calc_factor
                = integer
-                 | root_node_d[or_r]
                  | basic_variable_path
                  | discard_node_d[ ch_p('(') ] >>  calc_expression >> discard_node_d[ ch_p(')') ]
                  | root_node_d[operators] >>  calc_factor
                  ;
-          calc_term
+           calc_term
                  = calc_factor
                  >> *( root_node_d[operators] >> calc_factor )
                  ;
-          calc_expression
+           calc_expression
                  = calc_term
                  >> *( root_node_d[operators] >> calc_term )
-                 ;
+                ;
 
 
            // We need to take special care so that 'and' has a higher priority than 'or'
            // (( This is done by have a custom rule for the and, *** however could not get this to work)
-          nodepathstate = nodepath >> equality_comparible >> nodestate;
-          andExpr = nodepathstate >> and_r >> nodepathstate;
+           nodepathstate = nodepath >> equality_comparible >> nodestate;
+           andExpr = nodepathstate >> and_r >> nodepathstate;
 
-          compare_expression
+           compare_expression
                  =     andExpr  |
                        nodepathstate |
                        basic_variable_path >> equality_comparible >> event_state |
@@ -334,48 +321,46 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                              ]
                   ;
 
-          calc_grouping = !not_r >> discard_node_d[ ch_p('(') ] >> !not_r >> calc_subexpression >> discard_node_d[ ch_p(')') ];
+           calc_grouping = !not_r >> discard_node_d[ ch_p('(') ] >> !not_r >> calc_subexpression >> discard_node_d[ ch_p(')') ];
 
-          calc_subexpression = !not_r >> ( compare_expression | calc_grouping ) >> *( (and_r | or_r) >> calc_subexpression)   ;
+           calc_subexpression = !not_r >> ( compare_expression | calc_grouping ) >> *( (and_r | or_r) >> calc_subexpression)   ;
 
-          expression =   calc_subexpression  >> end_p;
+           expression =   calc_subexpression  >> end_p;
 
-          BOOST_SPIRIT_DEBUG_NODE(expression);
-          BOOST_SPIRIT_DEBUG_NODE(andExpr);
-          BOOST_SPIRIT_DEBUG_NODE(not_r);
-          BOOST_SPIRIT_DEBUG_NODE(not1_r);
-          BOOST_SPIRIT_DEBUG_NODE(not2_r);
-          BOOST_SPIRIT_DEBUG_NODE(expression);
-          BOOST_SPIRIT_DEBUG_NODE(nodename);
-          BOOST_SPIRIT_DEBUG_NODE(nodepath);
-          BOOST_SPIRIT_DEBUG_NODE(dotdotpath);
-          BOOST_SPIRIT_DEBUG_NODE(dotpath);
-          BOOST_SPIRIT_DEBUG_NODE(absolutepath);
-          BOOST_SPIRIT_DEBUG_NODE(event);
-          BOOST_SPIRIT_DEBUG_NODE(less_than_comparable);
-          BOOST_SPIRIT_DEBUG_NODE(nodestate);
-          BOOST_SPIRIT_DEBUG_NODE(equality_comparible);
-          BOOST_SPIRIT_DEBUG_NODE(equal_1);
-          BOOST_SPIRIT_DEBUG_NODE(equal_2);
-          BOOST_SPIRIT_DEBUG_NODE(not_equal_1);
-          BOOST_SPIRIT_DEBUG_NODE(not_equal_2);
-          BOOST_SPIRIT_DEBUG_NODE(and_or);
-          BOOST_SPIRIT_DEBUG_NODE(plus);
-          BOOST_SPIRIT_DEBUG_NODE(minus);
-          BOOST_SPIRIT_DEBUG_NODE(divide);
-          BOOST_SPIRIT_DEBUG_NODE(multiply);
-          BOOST_SPIRIT_DEBUG_NODE(modulo);
-          BOOST_SPIRIT_DEBUG_NODE(grouping);
-          BOOST_SPIRIT_DEBUG_NODE(nodepathstate);
-          BOOST_SPIRIT_DEBUG_NODE(integer);
-          BOOST_SPIRIT_DEBUG_NODE(event_state);
-          BOOST_SPIRIT_DEBUG_NODE(variable);
-          BOOST_SPIRIT_DEBUG_NODE(basic_variable_path);
-          BOOST_SPIRIT_DEBUG_NODE(calc_factor);
-          BOOST_SPIRIT_DEBUG_NODE(calc_expression);
-          BOOST_SPIRIT_DEBUG_NODE(calc_term);
-          BOOST_SPIRIT_DEBUG_NODE(compare_expression);
-        };
+              BOOST_SPIRIT_DEBUG_NODE(expression);
+              BOOST_SPIRIT_DEBUG_NODE(andExpr);
+              BOOST_SPIRIT_DEBUG_NODE(not_r);
+              BOOST_SPIRIT_DEBUG_NODE(not1_r);
+              BOOST_SPIRIT_DEBUG_NODE(not2_r);
+              BOOST_SPIRIT_DEBUG_NODE(expression);
+              BOOST_SPIRIT_DEBUG_NODE(nodename);
+              BOOST_SPIRIT_DEBUG_NODE(nodepath);
+              BOOST_SPIRIT_DEBUG_NODE(dotdotpath);
+              BOOST_SPIRIT_DEBUG_NODE(dotpath);
+              BOOST_SPIRIT_DEBUG_NODE(absolutepath);
+              BOOST_SPIRIT_DEBUG_NODE(less_than_comparable);
+              BOOST_SPIRIT_DEBUG_NODE(nodestate);
+              BOOST_SPIRIT_DEBUG_NODE(equality_comparible);
+              BOOST_SPIRIT_DEBUG_NODE(equal_1);
+              BOOST_SPIRIT_DEBUG_NODE(equal_2);
+              BOOST_SPIRIT_DEBUG_NODE(not_equal_1);
+              BOOST_SPIRIT_DEBUG_NODE(not_equal_2);
+              BOOST_SPIRIT_DEBUG_NODE(and_or);
+              BOOST_SPIRIT_DEBUG_NODE(plus);
+              BOOST_SPIRIT_DEBUG_NODE(minus);
+              BOOST_SPIRIT_DEBUG_NODE(divide);
+              BOOST_SPIRIT_DEBUG_NODE(multiply);
+              BOOST_SPIRIT_DEBUG_NODE(modulo);
+              BOOST_SPIRIT_DEBUG_NODE(nodepathstate);
+              BOOST_SPIRIT_DEBUG_NODE(integer);
+              BOOST_SPIRIT_DEBUG_NODE(event_state);
+              BOOST_SPIRIT_DEBUG_NODE(variable);
+              BOOST_SPIRIT_DEBUG_NODE(basic_variable_path);
+              BOOST_SPIRIT_DEBUG_NODE(calc_factor);
+              BOOST_SPIRIT_DEBUG_NODE(calc_expression);
+              BOOST_SPIRIT_DEBUG_NODE(calc_term);
+              BOOST_SPIRIT_DEBUG_NODE(compare_expression);
+         };
 
         rule<ScannerT> const& start() const { return expression; }
     };
@@ -425,11 +410,9 @@ static void populate_rule_names()
       rule_names[ExpressionGrammer::node_state_active_ID ] = "ACTIVE";
       rule_names[ExpressionGrammer::node_state_aborted_ID ] = "ABORTED";
       rule_names[ExpressionGrammer::integer_ID] = "INTEGER";
-      rule_names[ExpressionGrammer::event_ID ] = "EVENT";
       rule_names[ExpressionGrammer::dot_path_ID ] = "DOT_PATH";
       rule_names[ExpressionGrammer::dot_dot_path_ID ] = "DOT_DOT_PATH";
       rule_names[ExpressionGrammer::absolute_path_ID ] = "ABSOLUTE_PATH";
-      rule_names[ExpressionGrammer::event_name_ID ] = "EVENT_NAME";
 
       rule_names[ExpressionGrammer::base_trigger_ID  ] = "BASE_TRIGGER";
       rule_names[ExpressionGrammer::sub_expression_ID  ] = "SUB_EXPRESSION";
@@ -583,42 +566,43 @@ AstRoot* createRootNode(const tree_iter_t& i,  const std::map< parser_id, std::s
    return NULL;
 }
 
-static bool is_node_state(const tree_iter_t& i) {
-   if ( i->value.id() == ExpressionGrammer::node_state_unknown_ID  ) return true;
-   if ( i->value.id() == ExpressionGrammer::node_state_complete_ID  ) return true;
-   if ( i->value.id() == ExpressionGrammer::node_state_queued_ID  ) return true;
-   if ( i->value.id() == ExpressionGrammer::node_state_submitted_ID  ) return true;
-   if ( i->value.id() == ExpressionGrammer::node_state_active_ID  ) return true;
-   if ( i->value.id() == ExpressionGrammer::node_state_aborted_ID  ) return true;
-   return false;
-}
-static bool has_child_node_state(const tree_iter_t& i) {
-   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
-      if (is_node_state(t)) return true;
-   }
-   return false;
-}
-static bool has_child_event_state(const tree_iter_t& i) {
-   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
-      if ( t->value.id() == ExpressionGrammer::event_state_ID) return true;
-   }
-   return false;
-}
-static bool child_has_path(const tree_iter_t& i) {
-   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
-      if ( t->value.id() == ExpressionGrammer::dot_path_ID ) return true;
-      if ( t->value.id() == ExpressionGrammer::dot_dot_path_ID ) return true;
-      if ( t->value.id() == ExpressionGrammer::absolute_path_ID ) return true;
-   }
-   return false;
-}
-static bool is_comparable(const tree_iter_t& i) {
-   if ( i->value.id() == ExpressionGrammer::equal_1_ID ) return true;
-   if ( i->value.id() == ExpressionGrammer::equal_2_ID ) return true;
-   if ( i->value.id() == ExpressionGrammer::not_equal_1_ID ) return true;
-   if ( i->value.id() == ExpressionGrammer::not_equal_2_ID ) return true;
-   return false;
-}
+//static bool is_node_state(const tree_iter_t& i) {
+//   if ( i->value.id() == ExpressionGrammer::node_state_unknown_ID  ) return true;
+//   if ( i->value.id() == ExpressionGrammer::node_state_complete_ID  ) return true;
+//   if ( i->value.id() == ExpressionGrammer::node_state_queued_ID  ) return true;
+//   if ( i->value.id() == ExpressionGrammer::node_state_submitted_ID  ) return true;
+//   if ( i->value.id() == ExpressionGrammer::node_state_active_ID  ) return true;
+//   if ( i->value.id() == ExpressionGrammer::node_state_aborted_ID  ) return true;
+//   return false;
+//}
+//static bool has_child_node_state(const tree_iter_t& i) {
+//   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
+//      if (is_node_state(t)) return true;
+//   }
+//   return false;
+//}
+//static bool has_child_event_state(const tree_iter_t& i) {
+//   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
+//      if ( t->value.id() == ExpressionGrammer::event_state_ID) return true;
+//   }
+//   return false;
+//}
+//static bool child_has_path(const tree_iter_t& i) {
+//   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
+//      if ( t->value.id() == ExpressionGrammer::dot_path_ID ) return true;
+//      if ( t->value.id() == ExpressionGrammer::dot_dot_path_ID ) return true;
+//      if ( t->value.id() == ExpressionGrammer::absolute_path_ID ) return true;
+//   }
+//   return false;
+//}
+//static bool is_comparable(const tree_iter_t& i) {
+//   if ( i->value.id() == ExpressionGrammer::equal_1_ID ) return true;
+//   if ( i->value.id() == ExpressionGrammer::equal_2_ID ) return true;
+//   if ( i->value.id() == ExpressionGrammer::not_equal_1_ID ) return true;
+//   if ( i->value.id() == ExpressionGrammer::not_equal_2_ID ) return true;
+//   return false;
+//}
+
 static bool is_not(const tree_iter_t& i) {
    if ( i->value.id() == ExpressionGrammer::not1_ID ) return true;
    if ( i->value.id() == ExpressionGrammer::not2_ID ) return true;
@@ -722,19 +706,6 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
       LOG_ASSERT( !thevalue.empty() , "");
       return new AstNode( thevalue );
    }
-   else if ( i->value.id() == ExpressionGrammer::event_ID) {
-
-      LOG_ASSERT(i->children.size() >= 2, "");
-      tree_iter_t theNodePathIter = i->children.begin();
-      tree_iter_t theEventNameIter = i->children.begin()+1;
-
-      string nodePath( theNodePathIter->value.begin(), theNodePathIter->value.end() );
-      string eventName( theEventNameIter->value.begin(), theEventNameIter->value.end() );
-      boost::algorithm::trim(nodePath);  // don't know why we get leading/trailing spaces
-      boost::algorithm::trim(eventName); // don't know why we get leading/trailing spaces
-
-      return new AstVariable( nodePath, eventName );
-   }
 	else if ( i->value.id() == ExpressionGrammer::event_state_ID) {
 
       string thevalue( i->value.begin(), i->value.end() );
@@ -791,7 +762,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
 #endif
 
    Indentor in2;
-	if ( i->value.id() == ExpressionGrammer::event_ID || (top && top->isTop() && i->value.id() == ExpressionGrammer::basic_variable_path_ID)) {
+	if ( top && top->isTop() && i->value.id() == ExpressionGrammer::basic_variable_path_ID) {
 		// Event need to handled in a custom way
 		LOG_ASSERT(i->children.size() == 2,"");
 		if (i->children.size() == 2) {
@@ -811,18 +782,12 @@ Ast* doCreateAst(  const tree_iter_t& i,
 
       AstRoot* someRoot = createRootNode(  i, rule_names  );
 
-      if (child_has(i,ExpressionGrammer::event_ID)) {
-         Ast* left = createAst(i->children.begin(), rule_names);
-         if (left) someRoot->addChild(left);
-         Ast* right = createAst(i->children.begin()+1, rule_names);
-         if (right) someRoot->addChild(right);
-      }
-      else {
+
          Ast* left  = doCreateAst(  i->children.begin() , rule_names    ,someRoot  );
          if (left) someRoot->addChild(left);
          Ast* right = doCreateAst(  i->children.begin() + 1, rule_names , someRoot  );
          if (right) someRoot->addChild(right);
-      }
+
 
       if (top) top->addChild(someRoot);
       else return someRoot;
@@ -895,24 +860,6 @@ Ast* doCreateAst(  const tree_iter_t& i,
 
       if (top) top->addChild(comparableRoot);
       else return comparableRoot;
-   }
-   else if ( i->value.id() == ExpressionGrammer::event_ID ) {
-
-      // Event need to handled in a custom way
-      LOG_ASSERT(i->children.size() == 2,"");
-      if (i->children.size() == 2) {
-         // a:eventname ||  ../a/b:eventname
-         // child 1: path                     a || ../a/b
-         // child 2: event name
-         // WE add an event state so that when the event is evaluated it is compared to true
-         Ast* someRoot =  new AstEqual();
-         Ast* leftEvent = createAst(i, rule_names);
-         Ast* rightEvent = new AstEventState( true );
-         someRoot->addChild(leftEvent);
-         someRoot->addChild(rightEvent);
-         top->addChild(someRoot);
-         assert(false);
-      }
    }
    else if (i->children.size() == 4 && is_not(i->children.begin())) {
       // child 0: notRoot                 0

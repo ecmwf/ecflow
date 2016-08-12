@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    exprMap["../a/b/c != aborted"] = std::make_pair(AstNotEqual::stype(),true);
 
    exprMap["inigroup:YMD == ! 1"] = std::make_pair(AstEqual::stype(),true);
-//   exprMap["1 != ! 1"] = std::make_pair(AstNotEqual::stype(),true);
+   exprMap["1 != ! 1"] = std::make_pair(AstNotEqual::stype(),true);
    exprMap["b == complete or nodepath:eventname"] = std::make_pair(AstOr::stype(),false);
 
    exprMap["a eq unknown and b ne complete"] = std::make_pair(AstAnd::stype(),true);
