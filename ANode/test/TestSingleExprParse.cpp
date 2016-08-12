@@ -37,9 +37,8 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
     // value.second = result of expected evaluation
 	map<string,std::pair<string,bool> > exprMap;
 
-   exprMap["(/skull/consumer/admin/leader:1 and (0 le /skull/consumer/produce1/produce:STEP)) or (not /skull/consumer/admin/leader:1)"] = std::make_pair(AstOr::stype(),true);
-   exprMap["a == complete &&  b == complete || c == complete"] = std::make_pair(AstOr::stype(),false);
-   //exprMap["2 == (((/seasplots/lag:YMD / 100 ) % 100) % 3)"] = std::make_pair(AstEqual::stype(),false);
+   exprMap["../family1/a:myEvent"] = std::make_pair(AstOr::stype(),true);
+   //exprMap["checkdata:done or checkdata == complete"] = std::make_pair(AstOr::stype(),false);
 
  	std::pair<string, std::pair<string,bool> > p;
 	BOOST_FOREACH(p, exprMap ) {

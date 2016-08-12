@@ -443,6 +443,10 @@ public:
 	AstVariable(const std::string& nodePath, const std::string& variablename)
 	: parentNode_(NULL), nodePath_(nodePath), name_(variablename)  {}
 
+	// although AstVariable is leaf, However allow to evaluate to cope with
+   //     ( ../family1/a:myMeter >= 20 and ../family1/a:myEvent)
+	// This avoids having to create an additional class like AstEventState
+   virtual bool evaluate() const { return value() != 0 ? true: false; }
  	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstVariable* clone() const;
 	virtual int value() const;

@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    std::pair<string, std::pair<string,bool> > p;
    BOOST_FOREACH(p, exprMap ) {
 
-      cout << "parsing: " << p.first << "\n";
+      //cout << "parsing: " << p.first << "\n";
       ExprParser theExprParser(p.first);
       std::string errorMsg;
       bool ok = theExprParser.doParse(errorMsg);

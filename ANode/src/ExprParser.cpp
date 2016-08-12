@@ -16,11 +16,11 @@
 // Un-comment these for selective for debugging. At the moment because we have added
 //            ast generation BOOST_SPIRIT_DEBUG is to verbose, making debugging a pain.
 // Tpyically I will comment out ONLY BOOST_SPIRIT_DEBUG and enable all the others
-//#define BOOST_SPIRIT_DEBUG
-//#define BOOST_SPIRIT_DUMP_PARSETREE_AS_XML
-//#define PRINT_TREE
-//#define PRINT_AST_TRAVERSAL
-//#define PRINT_AST
+#define BOOST_SPIRIT_DEBUG
+#define BOOST_SPIRIT_DUMP_PARSETREE_AS_XML
+#define PRINT_TREE
+#define PRINT_AST_TRAVERSAL
+#define PRINT_AST
 
 #include <boost/spirit/include/classic.hpp>
 #include <boost/spirit/include/classic_core.hpp>
@@ -272,8 +272,6 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
         	 event_state = leaf_node_d[ str_p("set") ] || leaf_node_d[ str_p("clear")] ;
 
-          variable = leaf_node_d [ nodename ];  // ?????????????????????
-
           node_state_unknown = root_node_d [ str_p("unknown") ];
           node_state_complete = root_node_d [ str_p("complete") ];
           node_state_queued = root_node_d [ str_p("queued") ];
@@ -289,30 +287,31 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                 | node_state_unknown
                 ;
 
-           basic_variable_path = nodepath >> discard_node_d[ ch_p(':') ] >> variable ;
+          variable = leaf_node_d [ nodename ];
+          basic_variable_path = nodepath >> discard_node_d[ ch_p(':') ] >> variable ;
 
-           calc_factor
+          calc_factor
                = integer
                  | basic_variable_path
                  | discard_node_d[ ch_p('(') ] >>  calc_expression >> discard_node_d[ ch_p(')') ]
                  | root_node_d[operators] >>  calc_factor
                  ;
-           calc_term
+          calc_term
                  = calc_factor
                  >> *( root_node_d[operators] >> calc_factor )
                  ;
-           calc_expression
+          calc_expression
                  = calc_term
                  >> *( root_node_d[operators] >> calc_term )
                 ;
 
 
-           // We need to take special care so that 'and' has a higher priority than 'or'
-           // (( This is done by have a custom rule for the and, *** however could not get this to work)
-           nodepathstate = nodepath >> equality_comparible >> nodestate;
-           andExpr = nodepathstate >> and_r >> nodepathstate;
+          // We need to take special care so that 'and' has a higher priority than 'or'
+          // (( This is done by have a custom rule for the and, *** however could not get this to work)
+          nodepathstate = nodepath >> equality_comparible >> nodestate;
+          andExpr = nodepathstate >> and_r >> nodepathstate;
 
-           compare_expression
+          compare_expression
                  =     andExpr  |
                        nodepathstate |
                        basic_variable_path >> equality_comparible >> event_state |
@@ -321,46 +320,46 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                              ]
                   ;
 
-           calc_grouping = !not_r >> discard_node_d[ ch_p('(') ] >> !not_r >> calc_subexpression >> discard_node_d[ ch_p(')') ];
+          calc_grouping = !not_r >> discard_node_d[ ch_p('(') ] >> !not_r >> calc_subexpression >> discard_node_d[ ch_p(')') ];
 
-           calc_subexpression = !not_r >> ( compare_expression | calc_grouping ) >> *( (and_r | or_r) >> calc_subexpression)   ;
+          calc_subexpression = !not_r >> ( compare_expression | calc_grouping ) >> *( (and_r | or_r) >> calc_subexpression)   ;
 
-           expression =   calc_subexpression  >> end_p;
+          expression =   calc_subexpression  >> end_p;
 
-              BOOST_SPIRIT_DEBUG_NODE(expression);
-              BOOST_SPIRIT_DEBUG_NODE(andExpr);
-              BOOST_SPIRIT_DEBUG_NODE(not_r);
-              BOOST_SPIRIT_DEBUG_NODE(not1_r);
-              BOOST_SPIRIT_DEBUG_NODE(not2_r);
-              BOOST_SPIRIT_DEBUG_NODE(expression);
-              BOOST_SPIRIT_DEBUG_NODE(nodename);
-              BOOST_SPIRIT_DEBUG_NODE(nodepath);
-              BOOST_SPIRIT_DEBUG_NODE(dotdotpath);
-              BOOST_SPIRIT_DEBUG_NODE(dotpath);
-              BOOST_SPIRIT_DEBUG_NODE(absolutepath);
-              BOOST_SPIRIT_DEBUG_NODE(less_than_comparable);
-              BOOST_SPIRIT_DEBUG_NODE(nodestate);
-              BOOST_SPIRIT_DEBUG_NODE(equality_comparible);
-              BOOST_SPIRIT_DEBUG_NODE(equal_1);
-              BOOST_SPIRIT_DEBUG_NODE(equal_2);
-              BOOST_SPIRIT_DEBUG_NODE(not_equal_1);
-              BOOST_SPIRIT_DEBUG_NODE(not_equal_2);
-              BOOST_SPIRIT_DEBUG_NODE(and_or);
-              BOOST_SPIRIT_DEBUG_NODE(plus);
-              BOOST_SPIRIT_DEBUG_NODE(minus);
-              BOOST_SPIRIT_DEBUG_NODE(divide);
-              BOOST_SPIRIT_DEBUG_NODE(multiply);
-              BOOST_SPIRIT_DEBUG_NODE(modulo);
-              BOOST_SPIRIT_DEBUG_NODE(nodepathstate);
-              BOOST_SPIRIT_DEBUG_NODE(integer);
-              BOOST_SPIRIT_DEBUG_NODE(event_state);
-              BOOST_SPIRIT_DEBUG_NODE(variable);
-              BOOST_SPIRIT_DEBUG_NODE(basic_variable_path);
-              BOOST_SPIRIT_DEBUG_NODE(calc_factor);
-              BOOST_SPIRIT_DEBUG_NODE(calc_expression);
-              BOOST_SPIRIT_DEBUG_NODE(calc_term);
-              BOOST_SPIRIT_DEBUG_NODE(compare_expression);
-         };
+          BOOST_SPIRIT_DEBUG_NODE(expression);
+          BOOST_SPIRIT_DEBUG_NODE(andExpr);
+          BOOST_SPIRIT_DEBUG_NODE(not_r);
+          BOOST_SPIRIT_DEBUG_NODE(not1_r);
+          BOOST_SPIRIT_DEBUG_NODE(not2_r);
+          BOOST_SPIRIT_DEBUG_NODE(expression);
+          BOOST_SPIRIT_DEBUG_NODE(nodename);
+          BOOST_SPIRIT_DEBUG_NODE(nodepath);
+          BOOST_SPIRIT_DEBUG_NODE(dotdotpath);
+          BOOST_SPIRIT_DEBUG_NODE(dotpath);
+          BOOST_SPIRIT_DEBUG_NODE(absolutepath);
+          BOOST_SPIRIT_DEBUG_NODE(less_than_comparable);
+          BOOST_SPIRIT_DEBUG_NODE(nodestate);
+          BOOST_SPIRIT_DEBUG_NODE(equality_comparible);
+          BOOST_SPIRIT_DEBUG_NODE(equal_1);
+          BOOST_SPIRIT_DEBUG_NODE(equal_2);
+          BOOST_SPIRIT_DEBUG_NODE(not_equal_1);
+          BOOST_SPIRIT_DEBUG_NODE(not_equal_2);
+          BOOST_SPIRIT_DEBUG_NODE(and_or);
+          BOOST_SPIRIT_DEBUG_NODE(plus);
+          BOOST_SPIRIT_DEBUG_NODE(minus);
+          BOOST_SPIRIT_DEBUG_NODE(divide);
+          BOOST_SPIRIT_DEBUG_NODE(multiply);
+          BOOST_SPIRIT_DEBUG_NODE(modulo);
+          BOOST_SPIRIT_DEBUG_NODE(nodepathstate);
+          BOOST_SPIRIT_DEBUG_NODE(integer);
+          BOOST_SPIRIT_DEBUG_NODE(event_state);
+          BOOST_SPIRIT_DEBUG_NODE(variable);
+          BOOST_SPIRIT_DEBUG_NODE(basic_variable_path);
+          BOOST_SPIRIT_DEBUG_NODE(calc_factor);
+          BOOST_SPIRIT_DEBUG_NODE(calc_expression);
+          BOOST_SPIRIT_DEBUG_NODE(calc_term);
+          BOOST_SPIRIT_DEBUG_NODE(compare_expression);
+        };
 
         rule<ScannerT> const& start() const { return expression; }
     };
@@ -782,12 +781,10 @@ Ast* doCreateAst(  const tree_iter_t& i,
 
       AstRoot* someRoot = createRootNode(  i, rule_names  );
 
-
-         Ast* left  = doCreateAst(  i->children.begin() , rule_names    ,someRoot  );
-         if (left) someRoot->addChild(left);
-         Ast* right = doCreateAst(  i->children.begin() + 1, rule_names , someRoot  );
-         if (right) someRoot->addChild(right);
-
+      Ast* left  = doCreateAst(  i->children.begin() , rule_names    ,someRoot  );
+      if (left) someRoot->addChild(left);
+      Ast* right = doCreateAst(  i->children.begin() + 1, rule_names , someRoot  );
+      if (right) someRoot->addChild(right);
 
       if (top) top->addChild(someRoot);
       else return someRoot;
@@ -904,45 +901,6 @@ Ast* doCreateAst(  const tree_iter_t& i,
 
       if (top) top->addChild(someRoot);
       else return someRoot;
-   }
-   else if ( i->children.size() >= 5) {
-      // ! ../../../prod2diss/operation_is_late:yes == set or ! a == complete
-      stack<Ast*> childStack;
-      stack<Ast*> parentStack;
-      Ast* someRoot = NULL;
-      // children are one [ compare_expression_ID | and | or ]
-      for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t) {
-         // do_print( t, rule_names );
-         Ast* ast = doCreateAst(  t, rule_names, NULL );
-         if (t->value.id() == ExpressionGrammer::compare_expression_ID) { childStack.push(ast); }
-         else  { if (parentStack.empty()) parentStack.push(ast); else childStack.push(ast);  }
-
-         if (!ast->is_not()) someRoot = ast;
-         if (parentStack.size() == 1) {
-            if ( parentStack.top()->is_not() && childStack.size() == 1) {
-               Ast* parent = parentStack.top(); parentStack.pop();
-               Ast* child1 = childStack.top(); childStack.pop();
-               parent->addChild(child1);
-               assert(childStack.empty() && parentStack.empty());
-               childStack.push(parent);
-            }
-            else if ( childStack.size() == 2 ) {
-               Ast* parent = parentStack.top(); parentStack.pop();
-               Ast* child1 = childStack.top(); childStack.pop();
-               Ast* child2 = childStack.top(); childStack.pop();
-               parent->addChild(child2);
-               parent->addChild(child1);
-               assert(childStack.empty() && parentStack.empty());
-               if ( child2->is_not() || child1->is_not() ) {
-                  if (child2->is_not()) parentStack.push(child2);
-                  if (child1->is_not()) parentStack.push(child1);
-               }
-               else childStack.push(parent);
-            }
-         }
-      }
-      assert(someRoot);
-      top->addChild(someRoot);
    }
    else if (i->children.size() == 3) {
       // child 1: left                0
