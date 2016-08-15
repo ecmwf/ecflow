@@ -201,9 +201,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                              ]
                 ;
 
-          // Can be /suite/family/task
-          //        family/task
-          //        family
+          // Can be /suite/family/task ||  family/task ||   family
           absolutepath
              =    leaf_node_d[
                         !(str_p("/")) >> nodename
@@ -306,24 +304,23 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                  >> *( root_node_d[operators] >> calc_term )
                  ;
 
-
-          // We need to take special care so that 'and' has a higher priority than 'or'
-          // (( This is done by have a custom rule for the and, *** however could not get this to work)
           nodepathstate = nodepath >> equality_comparible >> nodestate;
-          andExpr = nodepathstate >> and_r >> nodepathstate;
 
           compare_expression
-                 = andExpr  |
-                   nodepathstate |
+                 = nodepathstate |
                    basic_variable_path >> equality_comparible >> event_state |
                    root_node_d[
                      calc_expression >> *(( equality_comparible | less_than_comparable) >> ( !not_r >> calc_expression))
                    ]
                  ;
 
+          // We need to take special care so that 'and' has a higher priority than 'or'
+          // (( This is done by have a custom rule for the and
+          andExpr = !not_r >> compare_expression >> *(and_r >> !not_r >> compare_expression) ;
+
           calc_grouping = !not_r >> discard_node_d[ ch_p('(') ] >>  calc_subexpression >> discard_node_d[ ch_p(')') ];
 
-          calc_subexpression = !not_r >> ( compare_expression | calc_grouping ) >> *( (and_r | or_r) >> calc_subexpression)   ;
+          calc_subexpression = ( andExpr | calc_grouping ) >> *( (and_r | or_r) >> calc_subexpression) ;
 
           expression = calc_subexpression  >> end_p;
 
@@ -858,10 +855,60 @@ Ast* doCreateAst(  const tree_iter_t& i,
       if (top) top->addChild(notRoot);
       else return notRoot;
    }
+   else if (i->children.size() >=5 ) {
+      // Must be multiple and's could have nots  Could have:
+      //     !a and b
+      //      a and !b
+      // We always treat the not as *child*
+      stack<Ast*> childs;
+      stack<Ast*> parents;
+      Ast* not_ast = NULL;
+      for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t) {
+         if (is_root_node(t) && !is_not(t)) {
+            Ast* and_ast = createRootNode(  t, rule_names  );
+            assert(and_ast);
+            assert(parents.empty());
+            parents.push( and_ast );
+         }
+         else {
+            if ( is_not(t)) {
+                assert(!not_ast);
+                not_ast = createRootNode(  t, rule_names  );
+                assert(not_ast);
+                childs.push( not_ast );
+            }
+            else {
+               Ast* child_ast = doCreateAst(t, rule_names, /*Top*/NULL);
+               assert(child_ast);
+               if (not_ast) {
+                  not_ast->addChild(child_ast);
+                  not_ast = NULL;
+               }
+               else {
+                  childs.push(child_ast );
+               }
+            }
+         }
+
+         if (parents.size() == 1 && childs.size() == 2) {
+            Ast* parent = parents.top(); parents.pop();
+            Ast* child1 = childs.top(); childs.pop();
+            Ast* child2 = childs.top(); childs.pop();
+            parent->addChild(child2);
+            parent->addChild(child1);
+            assert( parents.empty() && childs.empty());
+            childs.push(parent);
+         }
+      }
+      assert(top);
+      assert( childs.size() == 1);
+      if (top) top->addChild(childs.top());
+   }
    else {
       //cout << "JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ\n";
       Ast* child = createAst(i,rule_names);
       if (top && child) top->addChild(child);
+      else return child;
    }
    return NULL;
 }

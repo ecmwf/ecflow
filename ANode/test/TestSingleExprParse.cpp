@@ -37,8 +37,8 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
     // value.second = result of expected evaluation
 	map<string,std::pair<string,bool> > exprMap;
 
-   exprMap["! ../../../operation_is_late:yes == set or ! a == complete"] = std::make_pair(AstOr::stype(),true);
-   //exprMap["checkdata:done or checkdata == complete"] = std::make_pair(AstOr::stype(),false);
+   exprMap["! a:a && ! b:b && ! c:c && ! d:d "] = std::make_pair(AstAnd::stype(),true);
+   exprMap["! a:a || ! b:b || ! c:c || ! d:d "] = std::make_pair(AstOr::stype(),true);
 
  	std::pair<string, std::pair<string,bool> > p;
 	BOOST_FOREACH(p, exprMap ) {
@@ -57,6 +57,7 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 		BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree");
 		BOOST_REQUIRE_MESSAGE( top->left() ,"No root created");
 		BOOST_REQUIRE_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
+		BOOST_REQUIRE_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
 		BOOST_REQUIRE_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type " << expectedRootType << " or 'variable' but found " << top->left()->type() << " " << p.first);
       top->print_flat(ss);
 		BOOST_REQUIRE_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << ss.str() << "\n" << *top);

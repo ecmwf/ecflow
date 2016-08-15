@@ -169,6 +169,7 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    exprMap["10 ge 4"] = std::make_pair(AstGreaterEqual::stype(),true);
    exprMap["10 le 4"] = std::make_pair(AstLessEqual::stype(),false);
 
+   exprMap["0 == 0"] = std::make_pair(AstEqual::stype(),true);
    exprMap["0 == 1"] = std::make_pair(AstEqual::stype(),false);
    exprMap["0 != 1"] = std::make_pair(AstNotEqual::stype(),true);
    exprMap["0 < 1"] = std::make_pair(AstLessThan::stype(),true);
@@ -181,6 +182,7 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    exprMap["10 > 1"] = std::make_pair(AstGreaterThan::stype(),true);
 
    exprMap["a:eventname"] = std::make_pair(AstEqual::stype(),false);
+   exprMap["a:eventname == 0"] = std::make_pair(AstEqual::stype(),true);
    exprMap["./a/b:eventname"] = std::make_pair(AstEqual::stype(),false);
    exprMap["/a/b:eventname"] = std::make_pair(AstEqual::stype(),false);
    exprMap["../a/b:eventname == set"] = std::make_pair(AstEqual::stype(),false);
@@ -195,6 +197,27 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    exprMap["./b:metername <= 100"] = std::make_pair(AstLessEqual::stype(),true);
    exprMap["../a/b:metername ge 100"] = std::make_pair(AstGreaterEqual::stype(),false);
    exprMap["../a/b/c:metername >= 100"] = std::make_pair(AstGreaterEqual::stype(),false);
+
+   exprMap["!a:a  &&   b:b"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["a:a   && ! b:b"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["! a:a ||   b:b"] = std::make_pair(AstOr::stype(),true);
+   exprMap["a:a   || ! b:b"] = std::make_pair(AstOr::stype(),true);
+   exprMap["! a:a &&   b:b &&   c:c"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["! a:a &&   b:b ||   c:c"] = std::make_pair(AstOr::stype(),false);
+   exprMap["a:a && !   b:b &&   c:c"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["a:a && !   b:b ||   c:c"] = std::make_pair(AstOr::stype(),false);
+   exprMap["a:a ||     b:b && ! c:c"] = std::make_pair(AstOr::stype(),false);
+   exprMap["a:a ||     b:b || ! c:c"] = std::make_pair(AstOr::stype(),true);
+
+   exprMap["a:b && b:c && c:d && ../c:b && ./x:y && z:x"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["! a:b && b:c && c:d && ../c:b && ./x:y && z:x"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["! a:b || b:c && c:d && ../c:b && ./x:y && z:x"] = std::make_pair(AstOr::stype(),true);
+   exprMap["a:b || b:c && ! c:d && ../c:b && ./x:y && z:x"] = std::make_pair(AstOr::stype(),false);
+   exprMap["a:b && b:c && c:d && ../c:b && ./x:y && ! z:x"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["x:x || a:b && b:c && c:d && ../c:b && ./x:y && z:x"] = std::make_pair(AstOr::stype(),false);
+   exprMap["x:x == 0 || a:b && b:c && c:d && ../c:b && ./x:y && z:x"] = std::make_pair(AstOr::stype(),true);
+   exprMap["! a:a && ! b:b && ! c:c && ! d:d "] = std::make_pair(AstAnd::stype(),true);
+   exprMap["! a:a || ! b:b || ! c:c || ! d:d "] = std::make_pair(AstOr::stype(),true);
 
    exprMap["./a == unknown"] = std::make_pair(AstEqual::stype(),true);
    exprMap["./a/b != queued"] = std::make_pair(AstNotEqual::stype(),true);
@@ -226,6 +249,9 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    exprMap["a == complete and (b == complete or c == complete)"] = std::make_pair(AstAnd::stype(),false);
    exprMap["a == complete or b == complete and c == complete"] = std::make_pair(AstOr::stype(),false);
    exprMap["((a == complete or b == complete)) and c == complete"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["a == complete && b == complete and c == complete or x:a == 0"] = std::make_pair(AstOr::stype(),true);
+   exprMap["a == complete || b == complete and c == complete and x:a == 0 || x == complete"] = std::make_pair(AstOr::stype(),false);
+   exprMap["a == complete || b == complete and c == complete and x:a || x == complete"] = std::make_pair(AstOr::stype(),false);
 
    exprMap["(a != aborted and b == unknown or c != queued)"] = std::make_pair(AstOr::stype(),true);
    exprMap["(a == complete and b == complete) or nodepath:eventname"] = std::make_pair(AstOr::stype(),false);
@@ -310,7 +336,8 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
          if (top) {
             BOOST_CHECK_MESSAGE( top->left() ,"No root created "+ p.first);
             BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
-            BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type " << expectedRootType << " or 'variable' but found " << top->left()->type() << " " << p.first);
+            BOOST_CHECK_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
+            BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type '" << expectedRootType << "' or 'variable' but found '" << top->left()->type() << "' " << p.first);
             BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << *top);
 
             std::string error_msg;

@@ -35,9 +35,11 @@ public:
 	virtual void accept(ecf::ExprAstVisitor&) = 0;
    virtual Ast* clone() const = 0;
    virtual bool is_variable() const { return false; }
+   virtual bool is_not() const { return false; }
    virtual bool isleaf() const { return false; }
 	virtual bool isRoot() const { return false; }
-	virtual AstTop* isTop() const { return NULL; }
+   virtual AstTop* isTop() const { return NULL; }
+   virtual bool is_evaluateable() const { return false; }
 
 	virtual void addChild(Ast*) {}
 	virtual Ast* left() const { return NULL;}
@@ -98,6 +100,9 @@ public:
    AstRoot() :left_(NULL), right_(NULL) {}
 	virtual ~AstRoot();
 
+ 	virtual bool isRoot() const { return true;}
+   virtual bool is_evaluateable() const { return true; }
+
    virtual bool check(std::string& error_msg) const;
 	virtual void accept(ecf::ExprAstVisitor&);
 	virtual void addChild(Ast* n);
@@ -105,7 +110,6 @@ public:
  	virtual Ast* right() const { return right_;}
 	virtual std::ostream& print(std::ostream& os) const;
 	virtual bool why(std::string& theReasonWhy) const;
- 	virtual bool isRoot() const { return true;}
 	virtual bool empty() const { return (left_ && right_) ? false : true ; }
 	virtual void setParentNode(Node*);
 
@@ -333,7 +337,9 @@ class AstInteger : public AstLeaf {
 public:
 	AstInteger(int value) : value_(value) {}
 
+   virtual bool is_evaluateable() const { return true; }
 	virtual bool evaluate() const {  return value_; } // -1 -2 1 2 3 evaluates to true, 0 returns false
+
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstInteger* clone() const;
  	virtual int value() const {  return value_;}
@@ -433,8 +439,8 @@ public:
 
 	// although AstVariable is leaf, However allow to evaluate to cope with
    //     ( ../family1/a:myMeter >= 20 and ../family1/a:myEvent)
-	// This avoids having to create an additional class like AstEventState
 	// Treat this like an integer
+   virtual bool is_evaluateable() const { return true; }
    virtual bool evaluate() const { return value() != 0 ? true: false; }
 
  	virtual void accept(ecf::ExprAstVisitor&);
