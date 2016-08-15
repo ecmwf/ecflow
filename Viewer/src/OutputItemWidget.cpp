@@ -17,6 +17,7 @@
 #include "ServerHandler.hpp"
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
+#include "VNode.hpp"
 #include "VReply.hpp"
 #include "UserMessage.hpp"
 
@@ -268,16 +269,33 @@ void OutputItemWidget::infoReady(VReply* reply)
         //is reset to default when we first call infoready. So we need to set it again!!
         browser_->updateFont();
 
+        //TODO: make it possible to show warning and info at the same time
         bool hasMessage=false;
-        if(reply->hasWarning())
+        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        if(reply->fileName() == op->joboutFileName() &&
+           info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
         {
-            messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
             hasMessage=true;
+      #if 0
+            messageLabel_->showWarning("The content below, although it is supposed to be the <b>current</b> job output\
+                   (as defined by variable <b>ECF_JOBOUT</b>), might have come from a previous run since the node status is <b>submitted</b> \
+                   is <b>submitted</b>!");
+      #endif
+            messageLabel_->showWarning("This is the <b>current</b> job output (as defined by variable <b>ECF_JOBOUT</b>), but \
+                   beacuse the node status is <b>submitted</b> it may contain the ouput from a previous run!");
         }
-        else if(reply->hasInfo())
+        else
         {
-            messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-            hasMessage=true;
+            if(reply->hasWarning())
+            {
+                messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+                hasMessage=true;
+            }
+            else if(reply->hasInfo())
+            {
+                messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+                hasMessage=true;
+            }
         }
 
         browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));

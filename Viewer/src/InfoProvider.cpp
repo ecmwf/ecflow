@@ -183,7 +183,7 @@ void  InfoProvider::taskChanged(VTask_ptr task)
                 f->setFetchMode(VFile::ServerFetchMode);
                 f->setLog(task_->reply()->log());
             }
-            task->reply()->status(VReply::TaskDone);
+            task->reply()->status(VReply::TaskDone);           
             owner_->infoReady(task->reply());
             task_.reset();            
             }
