@@ -29,6 +29,7 @@ class TriggerCollector;
 class VAttributeType;
 class VServer;
 class VServerSettings;
+class VNodeTriggerData;
 
 class VNodeInternalState
 {
@@ -87,10 +88,11 @@ friend class VServer;
 
 public:
 	VNode(VNode* parent,node_ptr);
-    virtual ~VNode() {}
+    virtual ~VNode();
 
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
+    VServer *root() const;
     virtual ServerHandler* server() const;
     virtual VNode* suite() const;
     node_ptr node() const {return node_;}
@@ -172,7 +174,7 @@ public:
     virtual void internalState(VNodeInternalState&) {}
 
     bool hasAccessed() const;
-    bool isAncestor(const VNode* n);
+    //bool isAncestor(const VNode* n) const;
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
 
@@ -190,7 +192,11 @@ public:
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
 
-    void triggers(TriggerCollector*);
+    void triggers(TriggerCollector*);   
+    void triggered(TriggerCollector* tlc);
+    void addTriggeredData(VItem* n);
+    void addTriggeredData(VItem* a,VItem* n);
+
 
 protected:
     void clear();
@@ -206,6 +212,10 @@ protected:
     void setIndex(int i) {index_=i;}
 
     VItem* findLimit(const std::string& path, const std::string& name);
+    static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
+    void collectTriggered(TriggerCollector* tlc);
+    static void scanForTriggered(VNode *n);
+    static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
 
     node_ptr node_;
     //VNode* parent_;
@@ -215,6 +225,7 @@ protected:
     mutable short cachedAttrNum_;
 #endif
     int index_;
+    VNodeTriggerData* data_;
 };
 
 class VSuiteNode : public VNode
@@ -245,6 +256,7 @@ public:
 class VServer : public VNode
 {
 	friend class ServerHandler;
+    friend class VNode;
 
 public:
 	explicit VServer(ServerHandler*);
@@ -308,6 +320,8 @@ protected:
 	//Clear contents and rebuild the whole tree.
 	void beginScan(VServerChange&);
 	void endScan();
+    bool triggeredScanned() const {return triggeredScanned_;}
+    void setTriggeredScanned(bool b) {triggeredScanned_=b;}
 
 private:
 	void clear();
@@ -322,6 +336,7 @@ private:
     int totalNum_;
     std::vector<int> totalNumInChild_;
     std::vector<VNode*> nodes_;
+    bool triggeredScanned_;
 
     VServerCache cache_;
     std::vector<Variable> prevGenVars_;

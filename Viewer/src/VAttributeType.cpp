@@ -35,14 +35,13 @@ std::vector<VAttributeType*> VAttributeType::types_;
 
 VAttributeType::VAttributeType(const std::string& name) :
         VParam(name),
-        dataCount_(0)
+        dataCount_(0),
+        id_(types_.size())
 {
     //items_.push_back(this);
     items_[name]=this;
     types_.push_back(this);
 }
-
-
 
 std::vector<VParam*> VAttributeType::filterItems()
 {
@@ -70,6 +69,12 @@ VAttributeType* VAttributeType::find(const std::string& name)
     }
 
     return NULL;*/
+}
+
+VAttributeType* VAttributeType::find(int id)
+{
+    assert(id >=0  && id < types_.size());
+    return types_[id];
 }
 
 int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
@@ -360,11 +365,13 @@ void VMeterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
         return;
     
     const std::vector<Meter>& v=node->meters();
-    for(std::vector<Meter>::const_iterator it=v.begin(); it != v.end(); ++it)
+    for(size_t i=0; i < node->meters().size(); i++)
+
+        //std::vector<Meter>::const_iterator it=v.begin(); it != v.end(); ++it)
     {    
         QStringList data;
-        getData(*it,data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        getData(node->meters()[i],data);
+        lst << new VAttribute(const_cast<VNode*>(vnode),this,data,i);
     } 
 }    
 

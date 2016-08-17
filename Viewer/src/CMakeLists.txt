@@ -135,6 +135,7 @@ set(viewer_srcs
     TableNodeWidget.cpp
     TextEditSearchLine.cpp
     TimeItemWidget.cpp
+    TriggerBrowser.cpp
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
@@ -154,6 +155,7 @@ set(viewer_srcs
     VInfo.cpp
     VFile.cpp
     VFileInfo.cpp
+    VItem.cpp
     VModelData.cpp
     VNode.cpp
     VNodeList.cpp
@@ -276,6 +278,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeView.hpp           
     TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
+    TriggerItemWidget.hpp
     VariableItemWidget.hpp
     VariableModel.hpp
     VariableModelData.hpp

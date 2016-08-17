@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -56,7 +56,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QTextBrowser" name="triggerBrowser_"/>
+    <widget class="TriggerBrowser" name="triggerBrowser_"/>
    </item>
    <item>
     <widget class="TriggerView" name="triggerView_"/>
@@ -67,7 +67,12 @@
   <customwidget>
    <class>TriggerView</class>
    <extends>QGraphicsView</extends>
-   <header location="global">TriggerView.hpp</header>
+   <header>TriggerView.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>TriggerBrowser</class>
+   <extends>QTextBrowser</extends>
+   <header>TriggerBrowser.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

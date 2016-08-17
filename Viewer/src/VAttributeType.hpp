@@ -38,6 +38,7 @@ public:
     static int getRow(const VNode *vnode,int row,AttributeFilter *filter=0);
      
     static VAttributeType* find(const std::string& name);
+    static VAttributeType* find(int id);
     static const std::vector<VAttributeType*>& types() {return types_;}
     
     //Called from VConfigLoader
@@ -46,8 +47,10 @@ public:
     virtual QString toolTip(QStringList d) const {return QString();}
     virtual bool exists(const VNode* vnode,QStringList) const {return false;}
     virtual void getSearchData(const VNode*,QList<VAttribute*>&) {}
+    virtual VAttribute* getSearchData(const VNode*,int index) {}
     static void getSearchData(const std::string& type,const VNode*,QList<VAttribute*>&);
 
+    int id() const {return id_;}
     int keyToDataIndex(const std::string& key) const;
     int searchKeyToDataIndex(const std::string& key) const;
     QStringList searchKeys() const;
@@ -60,6 +63,7 @@ protected:
     std::map<std::string,int> keyToData_;
     std::map<std::string,int> searchKeyToData_;
     int dataCount_;
+    int id_;
 
 private:
     static std::map<std::string,VAttributeType*> items_;

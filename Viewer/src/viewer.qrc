@@ -98,5 +98,6 @@
     <file alias="warning.svg">../images/warning.svg</file>
     <file alias="why.svg">../images/why.svg</file>
     <file alias="zombie.svg">../images/zombie.svg</file>
+    <file alias="trigger.css">trigger.css</file>
   </qresource>
 </RCC>

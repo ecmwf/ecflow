@@ -17,18 +17,25 @@
 
 //#define  _UI_VATTRIBUTE_DEBUG
 
-VAttribute::VAttribute(VNode* parent,int index) : VItem(parent), type_(0), index_(index)
+VAttribute::VAttribute(VNode* parent,int index) : VItem(parent),
+    type_(0), index_(index)
 {
     data_=parent_->getAttributeData(index_,type_) ;
 }
 
-VAttribute::VAttribute(VNode *parent,VAttributeType* type,QStringList data) : 
+VAttribute::VAttribute(VNode *parent,VAttributeType* type,QStringList data,int indexInType) :
     VItem(parent),
     type_(type),
     data_(data),
     index_(-1)
 {
+    id_=indexToId(type_,indexInType);
 }        
+
+VServer* VAttribute::root() const
+{
+    return (parent_)?parent_->root():NULL;
+}
 
 QString VAttribute::toolTip() const
 {
@@ -43,7 +50,7 @@ const std::string& VAttribute::typeName() const
 
 std::string VAttribute::fullPath() const
 {
-    return (parent_)?parent_->fullPath():"";
+    return (parent_)?(parent_->fullPath() + ":" + strName()):"";
 }
 
 bool VAttribute::sameContents(VItem* item) const
@@ -130,3 +137,30 @@ bool VAttribute::value(const std::string& key,std::string& val) const
     }
     return false;
 }
+
+VAttribute* VAttribute::makeFromId(VNode* n,int id)
+{
+    if(id ==-1) return NULL;
+    VAttributeType *t=idToType(id);
+    int idx=idToTypeIndex(id);
+    return t->getSearchData(n,idx);
+}
+
+int VAttribute::indexToId(VAttributeType* t,int idx)
+{
+    return t->id()*10000+idx;
+}
+
+VAttributeType* VAttribute::idToType(int id)
+{
+    if(id < 0) return NULL;
+    return VAttributeType::find(id/10000);
+}
+
+int VAttribute::idToTypeIndex(int id)
+{
+    if(id < 0) return -1;
+    return id-(id/10000)*10000;
+}
+
+

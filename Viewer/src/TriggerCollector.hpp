@@ -35,7 +35,7 @@ public:
 
     virtual void add(VItem*, VItem*,Mode,VItem*) = 0;
     virtual bool scanParents() { return false; }
-    virtual bool scnaKids()    { return false; }
+    virtual bool scanKids()    { return false; }
     virtual bool scanSelf()    { return true; }
 
 private:
@@ -90,6 +90,18 @@ private:
   TriggerCollector* collector_;
 };
 
+#if 0
+class TriggeredCollector : public TriggerListCollector
+{
+public:
+    TriggeredCollector(VNode* n) :
+        TriggerListCollector(NULL,"",false), node_(n) {}
+    void add(VItem*, VItem*,Mode,VItem*);
+
+private:
+  VNode* node_;
+};
+#endif
 
 class TriggeredCollector : public TriggerListCollector
 {
@@ -102,7 +114,31 @@ private:
   VNode* node_;
 };
 
+class TriggeredChildCollector : public TriggerCollector
+{
+public:
+    TriggeredChildCollector(VNode* n,VItem* child,TriggerCollector* collector) :
+        node_(n), child_(child), collector_(collector) {}
+    void add(VItem*, VItem*,Mode,VItem*);
 
+private:
+  VItem* node_;
+  VItem* child_;
+  TriggerCollector* collector_;
+};
+
+class TriggeredParentCollector : public TriggerCollector
+{
+public:
+    TriggeredParentCollector(VNode* n,VItem* parent,TriggerCollector* collector) :
+        node_(n), parent_(parent), collector_(collector) {}
+    void add(VItem*, VItem*,Mode,VItem*);
+
+private:
+  VItem* node_;
+  VItem* parent_;
+  TriggerCollector* collector_;
+};
 
 #endif // TRIGGERCOLLECTOR_HPP
 

@@ -24,8 +24,9 @@ class VAttribute : public VItem
 {
 public:
     VAttribute(VNode* parent,int index);
-    VAttribute(VNode *parent,VAttributeType* type,QStringList data);
+    VAttribute(VNode *parent,VAttributeType* type,QStringList data,int indexInType=-1);
 
+    VServer* root() const;
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
     VAttributeType* type() const {return type_;}
     QStringList data() const {return data_;}
@@ -35,9 +36,12 @@ public:
     const std::string& typeName() const;
     std::string fullPath() const;
     bool sameContents(VItem*) const;
+    int id() const {return id_;}
 
     bool isValid(VNode* parent);
     bool value(const std::string& key,std::string& val) const;
+
+    static VAttribute* makeFromId(VNode*,int);
 
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,
@@ -47,11 +51,15 @@ public:
                          const std::string& action, const std::string& type,
                          const std::string& value);
 
-
 protected:
+    static int indexToId(VAttributeType* t,int idx);
+    static VAttributeType* idToType(int id);
+    static int idToTypeIndex(int id);
+
     VAttributeType* type_;
     QStringList data_;
     int index_;
+    int id_;
 };
 
 

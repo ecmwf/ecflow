@@ -31,6 +31,50 @@
 
 #define _UI_VNODE_DEBUG
 
+
+class VNodeTriggerData
+{
+public:
+    std::vector<std::pair<int,int> > data_;
+
+    void get(VServer* s,TriggerCollector* tc)
+    {
+        for(size_t i=0; i < data_.size(); i++)
+        {
+            if(data_[i].second == -1)
+            {
+                tc->add(s->nodeAt(data_[i].first),0,TriggerCollector::Normal,0);
+            }
+            else
+            {
+
+                tc->add(VAttribute::makeFromId(s->nodeAt(data_[i].first),
+                                       data_[i].second),0,TriggerCollector::Normal,0);
+            }
+        }
+    }
+
+
+    void add(VItem* n)
+    {
+        assert(n);
+        VNode* node=n->isNode();
+        assert(node);
+        data_.push_back(std::make_pair(node->index(),-1));
+    }
+
+    void add(VItem* n,VItem* a)
+    {
+        assert(a);
+        assert(n);
+        VNode* node=n->isNode();
+        assert(node);
+        VAttribute* attr=a->isAttribute();
+        assert(attr);
+        data_.push_back(std::make_pair(node->index(),attr->id()));
+    }
+};
+
 //=================================================
 // VNode
 //=================================================
@@ -43,13 +87,25 @@ VNode::VNode(VNode* parent,node_ptr node) :
     attrNum_(-1),
     cachedAttrNum_(-1),
 #endif
-	index_(-1)
+    index_(-1),
+    data_(NULL)
 {
 	if(parent_)
 		parent_->addChild(this);
 
 	if(node_)
 		node_->set_graphic_ptr(this);
+}
+
+VNode::~VNode()
+{
+    if(data_)
+        delete data_;
+}
+
+VServer* VNode::root() const
+{
+    return server()->vRoot();
 }
 
 ServerHandler* VNode::server() const
@@ -541,7 +597,7 @@ bool VNode::logServer(std::string& host,std::string& port)
 	return false;
 }
 
-
+#if 0
 bool VNode::isAncestor(const VNode* n)
 {
 	if(n == this)
@@ -557,6 +613,7 @@ bool VNode::isAncestor(const VNode* n)
     }
     return false;
 }
+#endif
 
 std::vector<VNode*> VNode::ancestors(SortMode sortMode)
 {
@@ -704,8 +761,11 @@ QString VNode::toolTip()
     return txt;
 }   
 
+//===========================================================
+// Triggers
+//===========================================================
 
-//Get the triggers list for the Triggers view
+//Collect the information about all the triggers triggering this node
 void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
 {
     //Check the node itself
@@ -728,7 +788,7 @@ void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
             for(std::set<VItem*>::iterator it = theSet.begin(); it != theSet.end(); ++it)
             {
 #ifdef _UI_VNODE_DEBUG
-                qDebug() << "trigger ast:" << (*it)->name() << *it;
+                //qDebug() << "trigger ast:" << (*it)->name() << *it;
 #endif
                 tlc->add(*it,NULL, TriggerCollector::Normal,this);
                 //tlr.next_node( *(*sit), 0, TriggerList::normal, *sit);
@@ -748,7 +808,7 @@ void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
                 if(VItem *n = findLimit(v, a->strName()))
                 {
 #ifdef _UI_VNODE_DEBUG
-                    qDebug() << "trigger limit:" << n->name();
+                    //qDebug() << "trigger limit:" << n->name();
 #endif
                     tlc->add(n,NULL, TriggerCollector::Normal,this);
                 }
@@ -782,6 +842,111 @@ void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
             p = p->parent();
         }
     }
+
+    if(tlc->scanKids())
+    {
+        triggersInChildren(this,this,tlc);
+    }
+}
+
+//Collect the triggers triggering node n in the children of parent
+void VNode::triggersInChildren(VNode *n,VNode* p,TriggerCollector* tlc)
+{
+    for(size_t i=0; i < p->children_.size(); i++)
+    {
+        TriggerChildCollector tcc(n,p->children_[i],tlc);
+        p->children_[i]->triggers(&tcc);
+        triggersInChildren(n,p->children_[i],tlc);
+  }
+}
+
+
+//Scan the the whole tree to find for each node all the node it or its attributes
+//trigger.
+void VNode::scanForTriggered(VNode *n)
+{
+    TriggeredCollector tc(n);
+    n->triggers(&tc);
+    for(int i=0; i < n->children_.size(); i++)
+        scanForTriggered(n->children_[i]);
+}
+
+//These are called during the scan for triggered nodes
+void VNode::addTriggeredData(VItem* n)
+{
+    if(!data_)
+        data_=new VNodeTriggerData;
+
+    data_->add(n);
+}
+
+void VNode::addTriggeredData(VItem* a,VItem* n)
+{
+    if(!data_)
+        data_=new VNodeTriggerData;
+
+    data_->add(n,a);
+}
+
+void VNode::collectTriggered(TriggerCollector* tlc)
+{
+#if 0
+    TriggeredCollector tc(n,nn->children_[i]);
+    triggers(tc);
+    for(int i=0; i < children_.size(); i++)
+        children_[i]->collectTriggered(tlc);
+#endif
+}
+
+//Collect the information about all the nodes this node or its attrubutes trigger
+void VNode::triggered(TriggerCollector* tlc)
+{
+    if(!root()->triggeredScanned())
+    {
+        scanForTriggered(server()->vRoot());
+        root()->setTriggeredScanned(true);
+    }
+
+    //Get the nodes directly triggered by this node
+    if(data_)
+        data_->get(root(),tlc);
+
+
+    if(tlc->scanParents())
+    {
+        VNode* p=parent();
+        while(p)
+        {
+            TriggerParentCollector tpc(p,tlc);
+            p->triggered(&tpc);
+            p = p->parent();
+        }
+    }
+
+    if(tlc->scanKids())
+    {
+        triggeredByChildren(this,this,tlc);
+    }
+
+#if 0
+  if(!triggered_) // Scan all tree
+    gather_triggered(serv().top());
+
+  if(data_) data_->triggered(l);
+
+  if(l.kids()) triggered_by_kids(this,kids(),l);
+  if(l.parents()) triggered_by_parent(this,parent(),l);
+#endif
+}
+
+void VNode::triggeredByChildren(VNode *n,VNode* p,TriggerCollector* tlc)
+{
+    for(size_t i=0; i < p->children_.size(); i++)
+    {
+        TriggerChildCollector tcc(n,p->children_[i],tlc);
+        p->children_[i]->triggers(&tcc);
+        triggersInChildren(n,p->children_[i],tlc);
+    }
 }
 
 #if 0
@@ -789,8 +954,9 @@ void VNode::collectTriggered(TriggerCollector* tlc,VNode* p)
 {
   triggers(tlc);
   for(int i=0; i < children_.size(); i++)
-      children_[i]->triggers(tlc);
+      children_[i]->collectTriggered(tlc);
 
+#if 0
   while(p)
   {
     TriggerListCollector tlc(p);
@@ -799,6 +965,7 @@ void VNode::collectTriggered(TriggerCollector* tlc,VNode* p)
     collectTriggered(p->kids());
     p = p->next();
   }
+#endif
 }
 
 
@@ -897,7 +1064,8 @@ const std::string& VAliasNode::typeName() const
 VServer::VServer(ServerHandler* server) :
 	VNode(0,node_ptr()),
 	server_(server),
-	totalNum_(0)
+    totalNum_(0),
+    triggeredScanned_(false)
 {
 }
 

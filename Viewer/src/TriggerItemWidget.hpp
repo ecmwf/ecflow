@@ -20,6 +20,8 @@
 
 class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::TriggerItemWidget
 {
+Q_OBJECT
+
 public:
 	explicit TriggerItemWidget(QWidget *parent=0);
 
@@ -30,8 +32,13 @@ public:
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
+protected Q_SLOTS:
+    void on_dependTb__toggled(bool);
+
 protected:
+    void load();
     void updateState(const ChangeFlags&) {}
+    bool dependency() const;
 
 };
 

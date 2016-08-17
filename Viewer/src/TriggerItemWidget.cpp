@@ -13,6 +13,7 @@
 #include "TriggerCollector.hpp"
 #include "TriggerView.hpp"
 
+
 //========================================================
 //
 // TriggerItemWidget
@@ -22,9 +23,6 @@
 TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
-
-    triggerBrowser_->setOpenExternalLinks(false);
-    triggerBrowser_->setOpenLinks(false);
 }
 
 QWidget* TriggerItemWidget::realWidget()
@@ -32,35 +30,55 @@ QWidget* TriggerItemWidget::realWidget()
 	return this;
 }
 
-void TriggerItemWidget::reload(VInfo_ptr nodeInfo)
+void TriggerItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	active_=true;
+    if(suspended_)
+        return;
 
-    if(nodeInfo && nodeInfo->isNode())
-	{        
-        TriggerListCollector c(0,"trigger",true);
+    clearContents();
 
-        nodeInfo->node()->triggers(&c);
+    info_=info;
+    //messageLabel_->hide();
 
-        triggerBrowser_->setHtml(c.text());
-
-        //TriggeredCollector c1(nodeInfo->node());
-        //nodeInfo->server()->triggered(c1);
-
+    //Info must be a node
+    if(info_ && info_->isNode() && info_->node())
+    {
+        load();
     }
+}
 
-	else
-	{
 
-	}
+void TriggerItemWidget::load()
+{
+    if(info_ && info_->isNode() && info_->node())
+    {
+        VNode *n=info_->node();
+        TriggerListCollector c(0,"trigger",dependency());
+        n->triggers(&c);
 
+        TriggerListCollector c1(0,"trigger",dependency());
+        n->triggered(&c1);
+
+        triggerBrowser_->setHtml(c.text()+c1.text());
+    }
 }
 
 void TriggerItemWidget::clearContents()
 {
 	InfoPanelItem::clear();
+}
+
+
+void TriggerItemWidget::on_dependTb__toggled(bool)
+{
+    load();
+}
+
+bool TriggerItemWidget::dependency() const
+{
+    return dependTb_->isChecked();
 }
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");

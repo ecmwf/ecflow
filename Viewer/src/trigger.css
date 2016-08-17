@@ -1,0 +1,70 @@
+/*============================================================================
+// Copyright 2016 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+//============================================================================*/
+
+html
+    {
+        color: #000000;
+        /*background-color: #f5f5f5;*/
+        /*background-color: #c7c7c7;*/
+    }
+
+a:link
+    {
+        text-decoration:none;
+        color: #0000bb;
+    }
+/*
+table
+    {
+    border-color:  #0000FF;
+    background-color: #FF0000;
+    padding: 3px 2px 3px 2px;
+     }
+*/
+  /*table
+   {
+        background-color: #F6F6F6;
+        border: 1px solid #000000;
+        border-collapse: separate;
+        font-size: 11px;
+        margin-bottom: 25px;
+    border-collapse: collapse;
+        border-spacing: 0;
+        padding-top: 0px;
+    }*/
+    th
+      {
+         padding-left: 4px;
+         padding-top: 4px;
+         padding-bottom: 4px;
+         background-color: #e1e1e1;
+         color: #000000;
+         font-size: 12px;
+         text-align: left;
+
+      }
+
+tr:nth-child(even) {background-color: #ffffff}
+
+td {
+    padding-left: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    /*background-color: #efefef;*/
+}
+
+
+/*   tr
+    {
+        background-color: #F6F6F6;
+        color: #000000;
+    }
+
+*/
