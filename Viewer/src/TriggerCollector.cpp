@@ -18,18 +18,28 @@
 class TriggerListItem
 {
 public:
-    TriggerListItem(VItem* trigger,VItem* dep,TriggerCollector::Mode mode) :
-        trigger_(trigger), dep_(dep), mode_(mode) {}
+    TriggerListItem(VItem* t,VItem* dep,TriggerCollector::Mode mode) :
+        t_(t), dep_(dep), mode_(mode) {}
 
-    VItem* trigger_;
+    ~TriggerListItem() {if(t_->isAttribute()) delete t_;}
+
+    VItem* t_; //trigger or triggered
     VItem* dep_;
     TriggerCollector::Mode mode_;
 };
 
-
-void TriggerListCollector::add(VItem* trigger, VItem* dep,Mode mode,VItem*)
+TriggerListCollector::~TriggerListCollector()
 {
-    TriggerListItem *item=new TriggerListItem(trigger,dep,mode) ;
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        delete items_[i];
+    }
+}
+
+
+void TriggerListCollector::add(VItem* t, VItem* dep,Mode mode,VItem* t1)
+{
+    TriggerListItem *item=new TriggerListItem(t,dep,mode) ;
     items_.push_back(item);
 
     if(dep)
@@ -70,13 +80,16 @@ void TriggerListCollector::add(VItem* trigger, VItem* dep,Mode mode,VItem*)
 QString TriggerListCollector::text()
 {
     QString s="<table>";
-//<a href=\"file.pdf\" style=\"color:#33FFFF\">here</a> for PDF file.
-    s+="<tr><th colspan=\'2\'>Nodes triggering this node</th></tr>";
+    s+="<tr><th colspan=\'2\'>" + QString::fromStdString(title_) + "</th></tr>";
     for(unsigned int i=0; i < items_.size(); i++)
     {
-         s+="<tr>";
 
-         VItem *t=items_[i]->trigger_;
+         VItem *t=items_[i]->t_;
+
+         if(!t)
+             continue;
+
+         s+="<tr>";
          s+="<td>" + QString::fromStdString(t->typeName()) + "</td>";
          //s+="<td>" + t->name() +"</td>";
          //s+="<td><a style=\'text-decoration:none;\' href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
@@ -110,70 +123,28 @@ QString TriggerListCollector::text()
 }
 
 
-void TriggerChildCollector::add(VItem* n, VItem*,Mode mode,VItem *t)
+void TriggerChildCollector::add(VItem* t, VItem*,Mode mode,VItem *t1)
 {
-    if(!n->isAncestor(node_))
+    if(!t->isAncestor(node_))
     {
         // child is a kid of n whose trigger_panel is outside its subtree
-        collector_->add(n,child_,TriggerCollector::Child,t);
+        collector_->add(t,child_,TriggerCollector::Child,t1);
     }
 }
 
-void TriggerParentCollector::add(VItem* n, VItem*,Mode mode,VItem *t)
+void TriggerParentCollector::add(VItem* t, VItem*,Mode mode,VItem *t1)
 {
-    collector_->add(n,parent_,TriggerCollector::Parent,t);
+    collector_->add(t,parent_,TriggerCollector::Parent,t1);
 }
 
-#if 0
 
-//Trigger on node_ triggers n
-void TriggeredCollector::add(VItem* trigger, VItem*,Mode mode,VItem* n)
-{
-    if(trigger ==  node_ || (trigger->isAttribute() && trigger->parent() == node_))
-    {
-#ifdef _UI_TRIGGERCOLLECTOR_DEBUG
-    UserMessage::debug("TriggeredCollector::add -->");
-#endif
-    TriggerListItem *item=new TriggerListItem(trigger,0,mode) ;
-        items_.push_back(item);
-#ifdef _UI_TRIGGERCOLLECTOR_DEBUG
-        UserMessage::debug(" n=" + n->typeName() + " " +  n->strName());
-        UserMessage::debug("    ->" + trigger->typeName() + " " +  trigger->strName());
-#endif
-#ifdef _UI_TRIGGERCOLLECTOR_DEBUG
-    UserMessage::debug("<-- TriggeredCollector::add");
-#endif
-    }
-
-    //if(n->isAttribute())
-    //   if(n->parent() == node_)
-    //        items_.push_back(n);
-}
-#endif
-
-void TriggeredCollector::add(VItem* trigger, VItem*,Mode mode,VItem* n)
+void TriggeredCollector::add(VItem* trigger, VItem*,Mode mode,VItem*)
 {
     if(trigger->isNode())
         trigger->isNode()->addTriggeredData(node_);
-    else if(trigger->isAttribute())
-        trigger->parent()->addTriggeredData(trigger,node_);
 
-    //if(n->isAttribute())
-    //   if(n->parent() == node_)
-    //        items_.push_back(n);
+    //else if(trigger->isAttribute())
+    //    trigger->parent()->addTriggeredData(node_,trigger);
+
 }
 
-
-void TriggeredChildCollector::add(VItem* n, VItem*,Mode mode,VItem *t)
-{
-    if(!n->isAncestor(node_))
-    {
-        // child is a kid of n whose trigger_panel is outside its subtree
-        collector_->add(n,child_,TriggerCollector::Child,t);
-    }
-}
-
-void TriggeredParentCollector::add(VItem* n, VItem*,Mode mode,VItem *t)
-{
-    collector_->add(n,parent_,TriggerCollector::Parent,t);
-}

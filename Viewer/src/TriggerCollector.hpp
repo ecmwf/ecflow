@@ -49,19 +49,17 @@ public:
     TriggerListCollector(FILE* f,const std::string& title,bool extended) :
         file_(f), title_(title), extended_(extended) {}
 
+    ~TriggerListCollector();
     void add(VItem*,VItem*,Mode,VItem*);
     bool scanParents() { return extended_; }
     bool scanKids() { return extended_; }
 
     QString text();
 
-
-protected:
-    //panel& p_;
+protected:   
     FILE* file_;
     std::string title_;
     bool extended_;
-    //std::vector<VItem*> items_;
     std::vector<TriggerListItem*> items_;
 };
 
@@ -90,19 +88,6 @@ private:
   TriggerCollector* collector_;
 };
 
-#if 0
-class TriggeredCollector : public TriggerListCollector
-{
-public:
-    TriggeredCollector(VNode* n) :
-        TriggerListCollector(NULL,"",false), node_(n) {}
-    void add(VItem*, VItem*,Mode,VItem*);
-
-private:
-  VNode* node_;
-};
-#endif
-
 class TriggeredCollector : public TriggerListCollector
 {
 public:
@@ -114,31 +99,7 @@ private:
   VNode* node_;
 };
 
-class TriggeredChildCollector : public TriggerCollector
-{
-public:
-    TriggeredChildCollector(VNode* n,VItem* child,TriggerCollector* collector) :
-        node_(n), child_(child), collector_(collector) {}
-    void add(VItem*, VItem*,Mode,VItem*);
 
-private:
-  VItem* node_;
-  VItem* child_;
-  TriggerCollector* collector_;
-};
-
-class TriggeredParentCollector : public TriggerCollector
-{
-public:
-    TriggeredParentCollector(VNode* n,VItem* parent,TriggerCollector* collector) :
-        node_(n), parent_(parent), collector_(collector) {}
-    void add(VItem*, VItem*,Mode,VItem*);
-
-private:
-  VItem* node_;
-  VItem* parent_;
-  TriggerCollector* collector_;
-};
 
 #endif // TRIGGERCOLLECTOR_HPP
 

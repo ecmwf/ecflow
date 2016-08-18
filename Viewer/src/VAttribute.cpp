@@ -18,7 +18,7 @@
 //#define  _UI_VATTRIBUTE_DEBUG
 
 VAttribute::VAttribute(VNode* parent,int index) : VItem(parent),
-    type_(0), index_(index)
+    type_(0), index_(index), id_(-1)
 {
     data_=parent_->getAttributeData(index_,type_) ;
 }
@@ -142,13 +142,14 @@ VAttribute* VAttribute::makeFromId(VNode* n,int id)
 {
     if(id ==-1) return NULL;
     VAttributeType *t=idToType(id);
+    assert(t);
     int idx=idToTypeIndex(id);
     return t->getSearchData(n,idx);
 }
 
 int VAttribute::indexToId(VAttributeType* t,int idx)
 {
-    return t->id()*10000+idx;
+    return (idx >=0)?(t->id()*10000+idx):-1;
 }
 
 VAttributeType* VAttribute::idToType(int id)

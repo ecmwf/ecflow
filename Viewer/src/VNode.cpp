@@ -37,20 +37,19 @@ class VNodeTriggerData
 public:
     std::vector<std::pair<int,int> > data_;
 
-    void get(VServer* s,TriggerCollector* tc)
+    void get(VNode* node ,TriggerCollector* tc)
     {
+        VServer* s=node->root();
+
         for(size_t i=0; i < data_.size(); i++)
         {
-            if(data_[i].second == -1)
+            VNode* triggered=s->nodeAt(data_[i].first);
+            VItem* trigger=node;
+            if(data_[i].second != -2)
             {
-                tc->add(s->nodeAt(data_[i].first),0,TriggerCollector::Normal,0);
+                trigger=VAttribute::makeFromId(node,data_[i].second);
             }
-            else
-            {
-
-                tc->add(VAttribute::makeFromId(s->nodeAt(data_[i].first),
-                                       data_[i].second),0,TriggerCollector::Normal,0);
-            }
+            tc->add(triggered,0,TriggerCollector::Normal,trigger);
         }
     }
 
@@ -60,18 +59,19 @@ public:
         assert(n);
         VNode* node=n->isNode();
         assert(node);
-        data_.push_back(std::make_pair(node->index(),-1));
+        data_.push_back(std::make_pair(node->index(),-2));
     }
 
-    void add(VItem* n,VItem* a)
+    void add(VItem* triggered,VItem* trigger)
     {
-        assert(a);
-        assert(n);
-        VNode* node=n->isNode();
+        assert(triggered);
+        assert(trigger);
+        VNode* node=triggered->isNode();
         assert(node);
-        VAttribute* attr=a->isAttribute();
+        VAttribute* attr=trigger->isAttribute();
         assert(attr);
-        data_.push_back(std::make_pair(node->index(),attr->id()));
+        if(attr->id() >=0)
+            data_.push_back(std::make_pair(node->index(),attr->id()));
     }
 };
 
@@ -788,7 +788,8 @@ void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
             for(std::set<VItem*>::iterator it = theSet.begin(); it != theSet.end(); ++it)
             {
 #ifdef _UI_VNODE_DEBUG
-                //qDebug() << "trigger ast:" << (*it)->name() << *it;
+                //if((*it)->parent() && (*it)->parent()->absNodePath() == "/e_41r2_peter/main")
+                //    qDebug() << "trigger ast:" << (*it)->name() << *it;
 #endif
                 tlc->add(*it,NULL, TriggerCollector::Normal,this);
                 //tlr.next_node( *(*sit), 0, TriggerList::normal, *sit);
@@ -810,7 +811,7 @@ void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
 #ifdef _UI_VNODE_DEBUG
                     //qDebug() << "trigger limit:" << n->name();
 #endif
-                    tlc->add(n,NULL, TriggerCollector::Normal,this);
+                    tlc->add(n,NULL, TriggerCollector::Normal,NULL);
                 }
             }
         }
@@ -820,7 +821,7 @@ void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
         VAttributeType::getSearchData("date",this,dateLst);
         Q_FOREACH(VAttribute* a, dateLst)
         {
-            tlc->add(a,NULL, TriggerCollector::Normal,this);
+            tlc->add(a,NULL,TriggerCollector::Normal,NULL);
         }
 
         //Time
@@ -828,7 +829,7 @@ void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
         VAttributeType::getSearchData("time",this,timeLst);
         Q_FOREACH(VAttribute* a, timeLst)
         {
-            tlc->add(a,NULL, TriggerCollector::Normal,this);
+            tlc->add(a,NULL,TriggerCollector::Normal,NULL);
         }
     }
 
@@ -861,8 +862,8 @@ void VNode::triggersInChildren(VNode *n,VNode* p,TriggerCollector* tlc)
 }
 
 
-//Scan the the whole tree to find for each node all the node it or its attributes
-//trigger.
+//Scan the the whole tree to find for each node all the nodes it or its
+//attributes trigger.
 void VNode::scanForTriggered(VNode *n)
 {
     TriggeredCollector tc(n);
@@ -880,22 +881,13 @@ void VNode::addTriggeredData(VItem* n)
     data_->add(n);
 }
 
-void VNode::addTriggeredData(VItem* a,VItem* n)
+void VNode::addTriggeredData(VItem* triggered,VItem* trigger)
 {
     if(!data_)
         data_=new VNodeTriggerData;
 
-    data_->add(n,a);
-}
-
-void VNode::collectTriggered(TriggerCollector* tlc)
-{
-#if 0
-    TriggeredCollector tc(n,nn->children_[i]);
-    triggers(tc);
-    for(int i=0; i < children_.size(); i++)
-        children_[i]->collectTriggered(tlc);
-#endif
+    assert(trigger->parent() == this);
+    data_->add(triggered,trigger);
 }
 
 //Collect the information about all the nodes this node or its attrubutes trigger
@@ -909,8 +901,7 @@ void VNode::triggered(TriggerCollector* tlc)
 
     //Get the nodes directly triggered by this node
     if(data_)
-        data_->get(root(),tlc);
-
+        data_->get(this,tlc);
 
     if(tlc->scanParents())
     {
@@ -927,16 +918,6 @@ void VNode::triggered(TriggerCollector* tlc)
     {
         triggeredByChildren(this,this,tlc);
     }
-
-#if 0
-  if(!triggered_) // Scan all tree
-    gather_triggered(serv().top());
-
-  if(data_) data_->triggered(l);
-
-  if(l.kids()) triggered_by_kids(this,kids(),l);
-  if(l.parents()) triggered_by_parent(this,parent(),l);
-#endif
 }
 
 void VNode::triggeredByChildren(VNode *n,VNode* p,TriggerCollector* tlc)
@@ -944,48 +925,10 @@ void VNode::triggeredByChildren(VNode *n,VNode* p,TriggerCollector* tlc)
     for(size_t i=0; i < p->children_.size(); i++)
     {
         TriggerChildCollector tcc(n,p->children_[i],tlc);
-        p->children_[i]->triggers(&tcc);
-        triggersInChildren(n,p->children_[i],tlc);
+        p->children_[i]->triggered(&tcc);
+        triggeredByChildren(n,p->children_[i],tlc);
     }
 }
-
-#if 0
-void VNode::collectTriggered(TriggerCollector* tlc,VNode* p)
-{
-  triggers(tlc);
-  for(int i=0; i < children_.size(); i++)
-      children_[i]->collectTriggered(tlc);
-
-#if 0
-  while(p)
-  {
-    TriggerListCollector tlc(p);
-    p->triggers(tlc);
-    //p->triggered_ = true;
-    collectTriggered(p->kids());
-    p = p->next();
-  }
-#endif
-}
-
-
-void VNode::triggered(TriggerCollector* tlc)
-{
-  server()->vTree()->collectTriggered(tlc);
-
-  if(!triggered_) // Scan all tree
-    gather_triggered(serv().top());
-
-  if(data_) data_->triggered(l);
-
-  if(l.kids()) triggered_by_kids(this,kids(),l);
-  if(l.parents()) triggered_by_parent(this,parent(),l);
-}
-#endif
-
-
-//pikachu://e_41r2_peter/pop/00lw/lxops/cleanup
-//pikachu://e_41r2_peter/main/18bc/getreq/collectreq
 
 VItem* VNode::findLimit(const std::string& path, const std::string& name)
 {

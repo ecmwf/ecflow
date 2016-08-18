@@ -55,10 +55,10 @@ void TriggerItemWidget::load()
     if(info_ && info_->isNode() && info_->node())
     {
         VNode *n=info_->node();
-        TriggerListCollector c(0,"trigger",dependency());
+        TriggerListCollector c(0,"Nodes/attributes triggering this node",dependency());
         n->triggers(&c);
 
-        TriggerListCollector c1(0,"trigger",dependency());
+        TriggerListCollector c1(0,"Nodes triggered by this node",dependency());
         n->triggered(&c1);
 
         triggerBrowser_->setHtml(c.text()+c1.text());

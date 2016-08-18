@@ -213,7 +213,6 @@ protected:
 
     VItem* findLimit(const std::string& path, const std::string& name);
     static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
-    void collectTriggered(TriggerCollector* tlc);
     static void scanForTriggered(VNode *n);
     static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
 
