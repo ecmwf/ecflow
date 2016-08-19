@@ -259,7 +259,7 @@ if (ENABLE_SERVER)
 endif()
 
 if (ENABLE_PYTHON)
-    ecbuild_find_python( VERSION 2.7 REQUIRED )
+    ecbuild_find_python( VERSION 2.6 REQUIRED )
     #debug_var(PYTHON_LIBRARIES)
     #debug_var(PYTHON_INCLUDE_DIR)
     
