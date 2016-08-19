@@ -44,21 +44,23 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     setupUi(this);
 
-	messageLabel_->hide();
-    warnLabel_->hide();
-	dirLabel_->hide();
-
-	fileLabel_->setProperty("fileInfo","1");
-
 	//--------------------------------
 	// The file contents
 	//--------------------------------
+
+    messageLabel_->hide();
+    warnLabel_->hide();
+    fileLabel_->setProperty("fileInfo","1");
 
 	infoProvider_=new OutputFileProvider(this);
 
 	//--------------------------------
 	// The dir contents
 	//--------------------------------
+
+    dirMessageLabel_->hide();
+    dirMessageLabel_->setShowTypeTitle(false);
+    dirLabel_->setProperty("fileInfo","1");
 
 	dirProvider_=new OutputDirProvider(this);
 
@@ -168,6 +170,8 @@ void OutputItemWidget::getLatestFile()
     messageLabel_->stopProgress();
     fileLabel_->clear();
     browser_->clear();
+    dirLabel_->clear();
+    dirMessageLabel_->hide();
     fetchInfo_->clearInfo();
 
     //Get the latest file contents
@@ -201,7 +205,8 @@ void OutputItemWidget::clearContents()
     enableDir(false);
     messageLabel_->hide();
     messageLabel_->stopProgress();
-    fileLabel_->clear();
+    fileLabel_->clear();      
+    dirLabel_->clear();
     browser_->clearCursorCache();
     browser_->clear();
     reloadTb_->setEnabled(true);
@@ -276,11 +281,11 @@ void OutputItemWidget::infoReady(VReply* reply)
            info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
         {
             hasMessage=true;
-      #if 0
+#if 0
             messageLabel_->showWarning("The content below, although it is supposed to be the <b>current</b> job output\
                    (as defined by variable <b>ECF_JOBOUT</b>), might have come from a previous run since the node status is <b>submitted</b> \
                    is <b>submitted</b>!");
-      #endif
+#endif
             messageLabel_->showWarning("This is the <b>current</b> job output (as defined by variable <b>ECF_JOBOUT</b>), but \
                    beacuse the node status is <b>submitted</b> it may contain the ouput from a previous run!");
         }
@@ -382,9 +387,17 @@ void OutputItemWidget::infoReady(VReply* reply)
     // From output dir provider
     //------------------------
     else
-    {
+    {    
+        //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_ and
+        //is only supposed to display error messages!
+
+        enableDir(true);
+
         //Update the dir widget and select the proper file in the list
         updateDir(reply->directory(),true);
+
+        //Update the dir label
+        dirLabel_->update(reply);
     }
 }
 
@@ -411,17 +424,14 @@ void OutputItemWidget::infoFailed(VReply* reply)
     if(reply->sender() == infoProvider_)
 	{
 		QString s=QString::fromStdString(reply->errorText());
-
-		messageLabel_->showError(s);
-        //messageLabel_->stopLoadLabel();
+		messageLabel_->showError(s);       
         messageLabel_->stopProgress();
 
 		//Update the file label
 		fileLabel_->update(reply);
 
         userClickedReload_ = false;
-        reloadTb_->setEnabled(true);
-        //updateDir(true);
+        reloadTb_->setEnabled(true);       
 
         fetchInfo_->setInfo(reply,info_);
 	}
@@ -429,6 +439,10 @@ void OutputItemWidget::infoFailed(VReply* reply)
     {
         //We do not have directories
         enableDir(false);
+
+        QString s="<b>Output directory</b>: " + QString::fromStdString(reply->errorText(" <b>+</b> "));
+        dirMessageLabel_->showError(s);
+
         //the timer is stopped. It will be restarted again if we get a local file or
         //a file via the logserver
         updateDirTimer_->stop();
@@ -476,7 +490,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 
 		dirView_->selectionModel()->clearSelection();
         dirModel_->setData(dir,op->joboutFileName());
-        dirWidget_->show();
+        //dirWidget_->show();
 
         if(!dirColumnsAdjusted_)
         {
@@ -495,7 +509,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 	}
 	else
 	{
-		dirWidget_->hide();
+        //dirWidget_->hide();
 		dirModel_->clearData();
 	}
 
@@ -512,37 +526,6 @@ void OutputItemWidget::updateDir(bool restartTimer)
 	//updateDir(restartTimer,fullName);
 }
 
-void OutputItemWidget::updateDir(bool restartTimer,const std::string& selectFullName)
-{
-	/*if(restartTimer)
-		updateDirTimer_->stop();
-
-	OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
-	VDir_ptr dir=op->directory();
-
-	bool status=(dir && dir.get());
-
-	if(status)
-	{
-		dirView_->selectionModel()->clearSelection();
-		dirModel_->setData(dir);
-		dirWidget_->show();
-
-		//Try to preserve the selection
-		ignoreOutputSelection_=true;
-		dirView_->setCurrentIndex(dirSortModel_->fullNameToIndex(selectFullName));
-		ignoreOutputSelection_=false;
-	}
-	else
-	{
-		dirWidget_->hide();
-		dirModel_->clearData();
-	}
-
-	if(restartTimer)
-		updateDirTimer_->start(updateDirTimeout_);*/
-}
-
 void OutputItemWidget::slotUpdateDir()
 {
 	updateDir(false);
@@ -551,13 +534,15 @@ void OutputItemWidget::slotUpdateDir()
 void OutputItemWidget::enableDir(bool status)
 {
 	if(status)
-	{
-		dirWidget_->show();
+	{       
+        dirWidget_->show();
+        dirMessageLabel_->hide();
 	}
 	else
 	{
-		dirWidget_->hide();
-		dirModel_->clearData();
+        dirWidget_->hide();
+        dirModel_->clearData();
+        dirMessageLabel_->show();
 	}
 }
 

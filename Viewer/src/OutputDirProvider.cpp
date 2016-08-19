@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -84,28 +84,6 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
 		return;
 	}
 
-    //----------------------------------
-    // The host is the localhost
-    //----------------------------------
-#if 0
-    //if(server->isLocalHost())
-    //{
-        if(server->readFromDisk())
-        {
-            dir=fetchLocalDir(fileName,tynozero);
-            if(dir)
-            {
-                reply_->setDirectory(dir);
-                owner_->infoReady(reply_);
-                return;
-            }
-        }
-   // }
-#endif
-    //----------------------------------------------------
-    // Not the localhost or we could not read dir
-    //----------------------------------------------------
-
     //We try the output client, its asynchronous!
     if(fetchDirViaOutputClient(n,fileName))
     {
@@ -115,20 +93,18 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
       	return;
     }
 
-    //If there is no output client and it is not the localhost we try
-    //to read it again from the disk!!!
-
+    //If there is no output client we try to read it from disk
     dir=fetchLocalDir(fileName);
     if(dir)
     {
         reply_->setDirectory(dir);
         owner_->infoReady(reply_);
         return;
-     }
+    }
 
-     //If we are we coud not get the file
-     reply_->setDirectory(dir);
-     owner_->infoFailed(reply_);
+    //If we are here the error or warning is already set in reply
+    reply_->setDirectory(dir);
+    owner_->infoFailed(reply_);
 }
 
 bool OutputDirProvider::fetchDirViaOutputClient(VNode *n,const std::string& fileName)
@@ -136,14 +112,8 @@ bool OutputDirProvider::fetchDirViaOutputClient(VNode *n,const std::string& file
 	std::string host, port;
 	if(n->logServer(host,port))
 	{
-		//host=host + "baaad";
-
-		//reply_->setInfoText("Getting file through log server: " + host + "@" + port);
-		//owner_->infoProgress(reply_);
-
 		outClient_=makeOutputClient(host,port);
 		outClient_->getDir(fileName);
-
 		return true;
 	}
 
@@ -156,12 +126,12 @@ void OutputDirProvider::slotOutputClientFinished()
 
 	if(dir && dir.get())
 	{
-		reply_->setInfoText("");
-		//reply_->fileReadMode(VReply::LogServerReadMode);
+        dir->setFetchMode(VDir::LogServerFetchMode);
+        std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
+        dir->setFetchModeStr(method);
+        dir->setFetchDate(QDateTime::currentDateTime());
 
-		//std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
-		//reply_->fileReadMethod(method);
-
+        reply_->setInfoText("");
 		reply_->setDirectory(dir);
 		owner_->infoReady(reply_);
 	}
@@ -169,37 +139,44 @@ void OutputDirProvider::slotOutputClientFinished()
 
 void OutputDirProvider::slotOutputClientProgress(QString,int)
 {
-	/*reply_->setInfoText(msg.toStdString());
-	owner_->infoProgress(reply_);
-	reply_->setInfoText("");*/
 }
 
 void OutputDirProvider::slotOutputClientError(QString msg)
 {
-	if(info_ && info_.get())
+    if(info_)
 	{
-		if(ServerHandler* server=info_->server())
-		{
-			if(outClient_)
-		    {
-				//Check if it is tryno 0
-                //bool tynozero=(boost::algorithm::ends_with(outClient_->remoteFile(),".0"));
-                VDir_ptr dir=fetchLocalDir(outClient_->remoteFile()); //,tynozero);
-				if(dir)
-				{
-					reply_->setDirectory(dir);
-					owner_->infoReady(reply_);
-					return;
-				}
-		    }
-		}
+        std::string sDesc;
+        if(outClient_)
+        {
+            sDesc="Failed to fetch from " + outClient_->host() + "@" + outClient_->portStr();
+            if(!msg.isEmpty())
+                sDesc+=" error: " + msg.toStdString();
+            reply_->setErrorText(sDesc);
 
-		reply_->setErrorText(msg.toStdString());
+            VDir_ptr dir=fetchLocalDir(outClient_->remoteFile());
+            if(dir)
+            {
+                dir->setFetchDate(QDateTime::currentDateTime());
+                dir->setFetchMode(VDir::LocalFetchMode);
+                reply_->setErrorText("");
+                reply_->setDirectory(dir);
+                owner_->infoReady(reply_);
+                return;
+            }
+		}
+        else
+        {
+            sDesc="Failed to fetch from logserver";
+            if(!msg.isEmpty())
+                sDesc+=": " + msg.toStdString();
+            reply_->setErrorText(sDesc);
+        }
+
 		owner_->infoFailed(reply_);
 	}
 }
 
-VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path)  //,bool trynozero)
+VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path)
 {
 	VDir_ptr res;
 
@@ -208,32 +185,34 @@ VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path)  //,bool tryn
 	try {
 		//Is it a directory?
 		if(boost::filesystem::is_directory(p))
-		{
-			return res;
+		{			
+            return res;
 		}
-		//It must be a file
-        //if((trynozero || boost::filesystem::exists(p)) &&
+
         if(boost::filesystem::exists(p.parent_path()))
 		{
-			std::string dirName=p.parent_path().string();
-            //std::string fileName=p.leaf().string();
-
+			std::string dirName=p.parent_path().string();           
             if(info_ && info_->isNode() && info_->node())
             {
                 std::string nodeName=info_->node()->strName();
                 std::string pattern=nodeName+".";
 				res=VDir_ptr(new VDir(dirName,pattern));
-				return res;          
+                res->setFetchDate(QDateTime::currentDateTime());
+                res->setFetchMode(VDir::LocalFetchMode);
+                return res;
             }
-		}
+        }
 
+        std::string msg("No access to path on disk!");
+        reply_->appendErrorText(msg);
 	}
 	catch (const boost::filesystem::filesystem_error& e)
 	{
-		UserMessage::message(UserMessage::WARN,false,"fetchLocalDir failed:" + std::string(e.what()));
-		return res;
+        std::string msg;
+        msg+="No access to path on disk! error: " + std::string(e.what());
+        reply_->appendErrorText(msg);
+        UserMessage::message(UserMessage::WARN,false,"fetchLocalDir failed:" + std::string(e.what()));
 	}
-
 
 	return res;
 }
@@ -264,10 +243,4 @@ OutputDirClient* OutputDirProvider::makeOutputClient(const std::string& host,con
 	}
 
 	return outClient_;
-
-
 }
-
-
-
-

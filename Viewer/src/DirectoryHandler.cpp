@@ -360,6 +360,8 @@ bool DirectoryHandler::copyFile(const std::string &srcFile, std::string &destFil
         errorMessage = "Could not copy file " + srcFile + " to " + destFile + "; reason: " + err.what();
         return false;
     }
+
+    return true;
 }
 
 

@@ -17,13 +17,14 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 
-VDir::VDir(const std::string& path) : path_(path)
+VDir::VDir(const std::string& path) : path_(path), fetchMode_(NoFetchMode)
 {
 }
 
 VDir::VDir(const std::string& path,const std::string& pattern) :
      path_(path),
-     pattern_(pattern)
+     pattern_(pattern),
+     fetchMode_(NoFetchMode)
 {
 	reload();
 }

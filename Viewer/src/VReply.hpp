@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -30,9 +30,9 @@ public:
 	void* sender() const {return sender_;}
 	void setSender(void* s) {sender_=s;}
 
-	const std::string& errorText() const {return errorText_;}
-	const std::string& warningText() const {return warningText_;}
-	const std::string& infoText() const {return infoText_;}
+    std::string errorText(const std::string& sep="") const;
+    std::string warningText(const std::string& sep="") const;
+    std::string infoText(const std::string& sep="") const;
 	const std::string& text() const {return text_;}
 	const std::vector<std::string>& textVec() const {return textVec_;}
 	Status status() const {return status_;}
@@ -49,9 +49,12 @@ public:
 	void text(const std::vector<std::string>& msg);
 	void setTextVec(const std::vector<std::string>& msg) {textVec_=msg;;}
 	void text(const std::string& s) {text_=s;}
-	void setErrorText(const std::string& s) {errorText_=s;}
-	void setWarningText(const std::string& s) {warningText_=s;}
-	void setInfoText(const std::string& s) {infoText_=s;}
+    void setErrorText(const std::string& s);
+    void appendErrorText(const std::string& s);
+    void setWarningText(const std::string& s);
+    void appendWarningText(const std::string& s);
+    void setInfoText(const std::string& s);
+    void appendInfoText(const std::string& s);
 	void fileName(const std::string& s) {fileName_=s;}
 	void fileReadMode(FileReadMode m) {readMode_=m;}
 	void fileReadMethod(const std::string& m) {readMethod_=m;}
@@ -75,9 +78,9 @@ public:
 protected:
 	void* sender_;
 	Status status_;
-	std::string errorText_;
-	std::string warningText_;
-	std::string infoText_;
+    std::vector<std::string> errorText_;
+    std::vector<std::string> warningText_;
+    std::vector<std::string> infoText_;
 	std::string text_;
 	std::vector<std::string> textVec_;
 	std::string fileName_;
