@@ -80,9 +80,6 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 		                this, SLOT(slotContextMenu(const QPoint &)));
 
 	//Selection
-	connect(this,SIGNAL(clicked(const QModelIndex&)),
-			this,SLOT(slotSelectItem(const QModelIndex)));
-
 	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
 			this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
@@ -152,18 +149,22 @@ QModelIndexList TreeNodeView::selectedList()
 	return lst;
 }
 
-void TreeNodeView::slotSelectItem(const QModelIndex&)
+// reimplement virtual function from QTreeView - called when the selection is changed
+void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-	QModelIndexList lst=selectedIndexes();
-	if(lst.count() > 0)
-	{
-		VInfo_ptr info=model_->nodeInfo(lst.front());
-		if(info)
-		{
-			Q_EMIT selectionChanged(info);
-		}
-	}
+    QModelIndexList lst=selectedIndexes();
+    if(lst.count() > 0)
+    {
+        VInfo_ptr info=model_->nodeInfo(lst.front());
+        if(info && !info->isEmpty())
+        {
+            Q_EMIT selectionChanged(info);
+        }
+    }
+    QTreeView::selectionChanged(selected, deselected);
 }
+
+
 
 VInfo_ptr TreeNodeView::currentSelection()
 {

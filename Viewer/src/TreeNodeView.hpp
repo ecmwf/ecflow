@@ -50,7 +50,6 @@ public:
     void readSettings(VSettings* vs) {}
 
 public Q_SLOTS:
-	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(VInfo_ptr,QString);
@@ -82,6 +81,7 @@ protected:
     void expandAll(const QModelIndex& idx);
 	void collapseAll(const QModelIndex& idx);
     void expandTo(const QModelIndex& idxTo);
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
     TreeNodeModel* model_;
 	ActionHandler* actionHandler_;
