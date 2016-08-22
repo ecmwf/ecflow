@@ -31,6 +31,7 @@ public:
 	void setSender(void* s) {sender_=s;}
 
     std::string errorText(const std::string& sep="") const;
+    const std::vector<std::string>& errorTextVec() const {return errorText_;}
     std::string warningText(const std::string& sep="") const;
     std::string infoText(const std::string& sep="") const;
 	const std::string& text() const {return text_;}

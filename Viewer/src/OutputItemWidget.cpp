@@ -435,7 +435,18 @@ void OutputItemWidget::infoFailed(VReply* reply)
         //We do not have directories
         enableDir(false);
 
-        QString s="<b>Output directory</b>: " + QString::fromStdString(reply->errorText(" <b>+</b> "));
+        QColor col(70,71,72);
+        QString s="<b><font color=\'" + col.name() +  "\'>Output directory</font></b>: ";
+        const std::vector<std::string> et=reply->errorTextVec();
+        if(et.size() > 1)
+        {
+            for(size_t i=0; i < et.size(); i++)
+                s+="<b><font color=\'" + col.name() +  "\'>[" + QString::number(i+1) + "]</font></b> " +
+                        QString::fromStdString(et[i]) + ". &nbsp;&nbsp;";
+        }
+        else if(et.size() == 1)
+            s+=QString::fromStdString(et[0]);
+
         dirMessageLabel_->showError(s);
 
         //the timer is stopped. It will be restarted again if we get a local file or
