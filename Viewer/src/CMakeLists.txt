@@ -28,7 +28,7 @@ set(viewer_srcs
     DashboardDialog.cpp
     DashboardDock.cpp
     DashboardTitle.cpp
-    DashboardWidget.hpp
+    DashboardWidget.cpp
     DirectoryHandler.cpp
     EditItemWidget.cpp
     EditProvider.cpp

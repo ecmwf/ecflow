@@ -39,8 +39,8 @@ public:
 	void reload();
 	void rerender();
 	QWidget* realWidget();
-	VInfo_ptr currentSelection();
-	void currentSelection(VInfo_ptr n);
+    VInfo_ptr currentSelection();
+    void setCurrentSelection(VInfo_ptr n,bool broadcast);
 	void selectFirstServer();
 #if 0
     void setModel(NodeFilterModel* model);
@@ -54,7 +54,6 @@ public Q_SLOTS:
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(VInfo_ptr,QString);
-	void slotSetCurrent(VInfo_ptr);
     void slotSaveExpand();
     void slotRestoreExpand();
     void slotSaveExpand(const VTreeNode* node);

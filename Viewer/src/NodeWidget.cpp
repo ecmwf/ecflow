@@ -56,7 +56,7 @@ QWidget* NodeWidget::widget()
 
 VInfo_ptr NodeWidget::currentSelection()
 {
-	return view_->currentSelection();
+    return view_->currentSelection();
 }
 
 /*void NodeWidget::currentSelection(VInfo_ptr info)
@@ -66,7 +66,13 @@ VInfo_ptr NodeWidget::currentSelection()
 
 void NodeWidget::setCurrentSelection(VInfo_ptr info)
 {
-	view_->currentSelection(info);
+    if(!detached())
+        view_->setCurrentSelection(info,false);
+}
+
+void NodeWidget::slotSelectionChangedInBc(VInfo_ptr info)
+{
+    view_->setCurrentSelection(info,true);
 }
 
 void NodeWidget::reload()

@@ -64,23 +64,11 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 	tab_->setIconSize(QSize(16,16));
 
-    messageLabel_->hide();
-
-	//Builds the menu for the settings tool button
-	/*QMenu *menu=new QMenu(this);
-	menu->setTearOffEnabled(true);
-
-	menu->addAction(actionBreadcrumbs_);
-	menu->addAction(actionDetached_);
-	menu->addAction(actionFrozen_);
-
-	//Sets the menu on the toolbutton
-	optionTb_->setMenu(menu);*/
+    messageLabel_->hide();	
 
 	//Initialise action state
 	actionBreadcrumbs_->setChecked(bcWidget_->active());
 	actionFrozen_->setChecked(false);
-	actionDetached_->setChecked(false);
 }
 
 InfoPanel::~InfoPanel()
@@ -97,7 +85,6 @@ QMenu* InfoPanel::buildOptionsMenu()
     menu->setTearOffEnabled(true);
 
     menu->addAction(actionBreadcrumbs_);
-    menu->addAction(actionDetached_);
     menu->addAction(actionFrozen_);
 
     return menu;
@@ -244,7 +231,7 @@ void InfoPanel::slotReload(VInfo_ptr info)
 void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 {
     reset(info);
-    if(!detached() && info_)
+    if(info_)
        Q_EMIT selectionChanged(info_);
 }
 
@@ -482,11 +469,14 @@ void InfoPanel::clearTab()
 	tabBeingCleared_=false;
 }
 
-void InfoPanel::setDetached(bool b)
+void InfoPanel::detachedChanged()
 {
-    actionDetached_->setChecked(b);
+    Q_FOREACH(InfoPanelItemHandler *item,items_)
+    {
+        item->item()->setDetached(detached());
+    }
+    updateTitle();
 }
-
 
 void InfoPanel::on_actionBreadcrumbs__toggled(bool b)
 {
@@ -499,8 +489,6 @@ void InfoPanel::on_actionBreadcrumbs__toggled(bool b)
 	{
 		bcWidget_->active(false);
 	}
-
-	//bcWidget_->clear();
 }
 
 void InfoPanel::on_actionFrozen__toggled(bool b)
@@ -512,23 +500,9 @@ void InfoPanel::on_actionFrozen__toggled(bool b)
     updateTitle();
 }
 
-void InfoPanel::on_actionDetached__toggled(bool b)
-{
-	Q_FOREACH(InfoPanelItemHandler *item,items_)
-	{
-		item->item()->setDetached(b);
-	}
-	updateTitle();
-}
-
 bool InfoPanel::frozen() const
 {
 	return actionFrozen_->isChecked();
-}
-
-bool InfoPanel::detached() const
-{
-	return actionDetached_->isChecked();
 }
 
 void InfoPanel::updateTitle()
@@ -538,15 +512,6 @@ void InfoPanel::updateTitle()
 	QString txt;
 	if(frozen())
 		txt+="frozen";
-
-	if(detached())
-	{
-		if(!txt.isEmpty())
-		{
-			txt+=",";
-		}
-		txt+="detached";
-	}
 
 	if(!txt.isEmpty())
 	{
@@ -723,7 +688,7 @@ void InfoPanel::writeSettings(VSettings* vs)
 	bcWidget_->writeSettings(vs);
 
 	vs->putAsBool("frozen",frozen());
-	vs->putAsBool("detached",detached());
+    DashboardWidget::writeSettings(vs);
 }
 
 void InfoPanel::readSettings(VSettings* vs)
@@ -745,7 +710,7 @@ void InfoPanel::readSettings(VSettings* vs)
 	actionBreadcrumbs_->setChecked(bcWidget_->active());
 
 	actionFrozen_->setChecked(vs->getAsBool("frozen",frozen()));
-	actionDetached_->setChecked(vs->getAsBool("detached",detached()));
 
+    DashboardWidget::readSettings(vs);
 }
 

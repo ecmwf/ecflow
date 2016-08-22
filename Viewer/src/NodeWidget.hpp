@@ -50,9 +50,10 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
 	void slotInfoPanelAction();
+    void slotSelectionChangedInBc(VInfo_ptr info);
 
 Q_SIGNALS:
-	void selectionChanged(VInfo_ptr);
+    //void selectionChanged(VInfo_ptr);
 	void popInfoPanel(VInfo_ptr,QString);
 	void dashboardCommand(VInfo_ptr,QString);
 

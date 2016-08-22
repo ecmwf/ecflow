@@ -67,8 +67,8 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
 	connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
 			this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
-    connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
-            view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
+    connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),           
+            this,SLOT(slotSelectionChangedInBc(VInfo_ptr)));
 
     connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
     		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
@@ -146,16 +146,13 @@ void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 	if(b)
 	{
 		bcWidget_->active(true);
-		bcWidget_->setPath(view_->currentSelection());
+        bcWidget_->setPath(view_->currentSelection());
 	}
 	else
 	{
 		bcWidget_->active(false);
 	}
-
-	//bcWidget_->clear();
 }
-
 
 void TableNodeWidget::rerender()
 {
@@ -174,8 +171,7 @@ void TableNodeWidget::writeSettings(VSettings* vs)
 	states_->writeSettings(vs);
 	filterDef_->writeSettings(vs);
 
-	//atts_->writeSettings(vs);
-	//icons_->writeSettings(vs);
+    DashboardWidget::writeSettings(vs);
 }
 
 void TableNodeWidget::readSettings(VSettings* vs)
@@ -187,8 +183,6 @@ void TableNodeWidget::readSettings(VSettings* vs)
 	//This will not emit the changed signal. So the "observers" will
 	//not notice the change.
 	states_->readSettings(vs);
-	//atts_->readSettings(vs);
-	//icons_->readSettings(vs);
 	filterDef_->readSettings(vs);
 
 	//The model at this point is inactive (not using its data). We make it active:
@@ -207,10 +201,7 @@ void TableNodeWidget::readSettings(VSettings* vs)
 	//This will not emit the trigered signal of the action!!
 	actionBreadcrumbs->setChecked(bcWidget_->active());
 
-	//attrFilterMenu_->reload();
-	//iconFilterMenu_->reload();
-    //stateFilterMenu_->reload();
-
+    DashboardWidget::readSettings(vs);
 }
 
 

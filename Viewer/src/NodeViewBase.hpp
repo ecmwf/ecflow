@@ -28,9 +28,9 @@ public:
 		virtual void reload()=0;
 		virtual void rerender()=0;
 		virtual QWidget* realWidget()=0;
-		virtual VInfo_ptr currentSelection()=0;
+        virtual VInfo_ptr currentSelection()=0;
 		virtual void selectFirstServer()=0;
-		virtual void currentSelection(VInfo_ptr n)=0;
+        virtual void setCurrentSelection(VInfo_ptr n,bool broadcast)=0;
 
 		virtual void readSettings(VSettings* vs)=0;
 

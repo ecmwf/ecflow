@@ -37,6 +37,9 @@ protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
     void slotSelectionChangedInView(VInfo_ptr info);
 
+protected:
+    void detachedChanged() {}
+
 private:
     TableNodeSortModel *sortModel_;
     VParamFilterMenu *stateFilterMenu_;

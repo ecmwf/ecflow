@@ -164,6 +164,7 @@ void TreeNodeView::slotSelectItem(const QModelIndex&)
 		}
 	}
 }
+
 VInfo_ptr TreeNodeView::currentSelection()
 {
 	QModelIndexList lst=selectedIndexes();
@@ -174,19 +175,15 @@ VInfo_ptr TreeNodeView::currentSelection()
 	return VInfo_ptr();
 }
 
-void TreeNodeView::currentSelection(VInfo_ptr info)
+void TreeNodeView::setCurrentSelection(VInfo_ptr info,bool broadcast)
 {
 	QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
 	{
         setCurrentIndex(idx);
-		Q_EMIT selectionChanged(info);
+        if(broadcast)
+            Q_EMIT selectionChanged(info);
 	}
-}
-
-void TreeNodeView::slotSetCurrent(VInfo_ptr info)
-{
-    currentSelection(info);
 }
 
 void TreeNodeView::selectFirstServer()
@@ -319,7 +316,6 @@ void TreeNodeView::slotRepaint(Animation* an)
         update(model_->nodeToIndex(n));
 	}
 }
-
 
 void TreeNodeView::slotSizeHintChangedGlobal()
 {
@@ -518,7 +514,7 @@ void TreeNodeView::slotRestoreExpand()
             }
             else
             {
-                currentSelection(expandState_->selection_);
+                setCurrentSelection(expandState_->selection_,true);
             }
         }
     }
@@ -562,7 +558,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
                     }
                     else if(node->server()->realServer() == expandState_->selection_->server())
                     {
-                        currentSelection(expandState_->selection_);
+                        setCurrentSelection(expandState_->selection_,true);
                         expandState_->selection_.reset();
                     }
                 }

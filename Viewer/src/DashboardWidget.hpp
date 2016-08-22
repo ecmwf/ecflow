@@ -14,6 +14,7 @@
 #include <QDockWidget>
 #include <QWidget>
 #include <QAction>
+#include <QIcon>
 
 #include "VInfo.hpp"
 
@@ -26,8 +27,7 @@ class DashboardWidget : public QWidget
 Q_OBJECT
 
 public:
-	DashboardWidget(const std::string& type, QWidget* parent=0) :
-        QWidget(parent),type_(type), acceptSetCurrent_(false) {}
+	DashboardWidget(const std::string& type, QWidget* parent=0);
     virtual ~DashboardWidget() {}
 
     virtual void populateDockTitleBar(DashboardDockTitleWidget*)=0;
@@ -36,10 +36,14 @@ public:
 	virtual void rerender()=0;
     virtual bool selectFirstServerInView() {return false;}
 	virtual VInfo_ptr currentSelection() {return VInfo_ptr(); }
-	virtual QList<QAction*> dockTitleActions() {return QList<QAction*>();}
+    QAction* detachedAction() const {return detachedAction_;}
+    virtual QList<QAction*> dockTitleActions() {return QList<QAction*>();}
 
-	virtual void writeSettings(VSettings*)=0;
-	virtual void readSettings(VSettings*)=0;
+    bool detached() const;
+    void setDetached(bool b);
+
+    virtual void writeSettings(VSettings*);
+    virtual void readSettings(VSettings*);
 
 	const std::string type() const {return type_;}
 	void id(const std::string& id) {id_=id;}
@@ -48,12 +52,20 @@ public Q_SLOTS:
 	virtual void setCurrentSelection(VInfo_ptr)=0;
 
 Q_SIGNALS:
-	void titleUpdated(QString);
+    void titleUpdated(QString);
+    void selectionChanged(VInfo_ptr);
+
+protected Q_SLOTS:
+    void slotDetachedToggled(bool);
 
 protected:
-	std::string id_;
+    virtual void detachedChanged()=0;
+
+    std::string id_;
 	std::string type_;
 	bool acceptSetCurrent_;
+    QAction *detachedAction_;
 };
+
 
 #endif

@@ -76,9 +76,6 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 	{
 		NodeWidget* ctl=new TreeNodeWidget(serverFilter_,this);
 
-		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
-				this,SIGNAL(selectionChanged(VInfo_ptr)));
-
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
@@ -91,9 +88,6 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 	{
 		NodeWidget* ctl=new TableNodeWidget(serverFilter_,this);
 
-		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
-				this,SIGNAL(selectionChanged(VInfo_ptr)));
-
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
@@ -104,16 +98,31 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 	}
 	else if(type == "info")
 	{
-		InfoPanel* ctl=new InfoPanel(this);
-		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
-					ctl,SLOT(slotReload(VInfo_ptr)));
-
-        connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
-                    this,SLOT(slotInfoPanelSelection(VInfo_ptr)));
+		InfoPanel* ctl=new InfoPanel(this);       
 		w=ctl;
 	}
 
+    if(w)
+    {
+        connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
+                this,SLOT(slotSelectionChanged(VInfo_ptr)));
+    }
+
 	return w;
+}
+
+
+void Dashboard::slotSelectionChanged(VInfo_ptr info)
+{
+    DashboardWidget* s=static_cast<DashboardWidget*>(sender());
+
+    Q_FOREACH(DashboardWidget* dw,widgets_)
+    {
+         if(dw != s)
+             dw->setCurrentSelection(info);
+    }
+
+    Q_EMIT selectionChanged(info);
 }
 
 
@@ -433,10 +442,13 @@ void Dashboard::readSettings(VComboSettings* vs)
 	settingsAreRead_=false;
 }
 
+#if 0
 void Dashboard::slotInfoPanelSelection(VInfo_ptr info)
 {
     selectInTreeView(info);
 }
+#endif
+
 
 void Dashboard::selectFirstServerInView()
 {

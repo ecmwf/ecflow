@@ -41,7 +41,7 @@ public:
 	void rerender();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
-    void currentSelection(VInfo_ptr n) {}
+    void setCurrentSelection(VInfo_ptr n,bool broadcast);
 	void selectFirstServer() {}
 	void setModel(TableNodeSortModel *model);
 
@@ -57,7 +57,6 @@ public Q_SLOTS:
 	void slotSizeHintChangedGlobal();
     void slotRerender();
     void slotViewCommand(VInfo_ptr,QString) {}
-    void slotSetCurrent(VInfo_ptr) {}
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
