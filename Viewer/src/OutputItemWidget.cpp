@@ -281,12 +281,7 @@ void OutputItemWidget::infoReady(VReply* reply)
            info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
         {
             hasMessage=true;
-#if 0
-            messageLabel_->showWarning("The content below, although it is supposed to be the <b>current</b> job output\
-                   (as defined by variable <b>ECF_JOBOUT</b>), might have come from a previous run since the node status is <b>submitted</b> \
-                   is <b>submitted</b>!");
-#endif
-            messageLabel_->showWarning("This is the <b>current</b> job output (as defined by variable <b>ECF_JOBOUT</b>), but \
+            messageLabel_->showWarning("This is the current job output (as defined by variable ECF_JOBOUT), but \
                    beacuse the node status is <b>submitted</b> it may contain the ouput from a previous run!");
         }
         else

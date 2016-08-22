@@ -63,7 +63,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
 
 		bg=QColor(234,215,150);
 		bgLight=bg.lighter(112);
-		typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning",bg,bgLight,QColor(226,195,110)); //255,198,63
+        typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning",bg,bgLight,QColor(226,170,91)); //QColor(226,195,110)); //226,170,91
 
 		bg=QColor(255,231,231);
 		bgLight=bg.lighter(105);
