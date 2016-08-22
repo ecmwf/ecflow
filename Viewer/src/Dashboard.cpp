@@ -220,18 +220,6 @@ void Dashboard::addSearchDialog()
     connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
             this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
-#if 0
-	for(int i=0; i < widgets_.count(); i++)
-	{
-		if(widgets_.at(i)->type() == "tree")
-		{
-			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
-
-		}
-	}
-#endif
-
     connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
             this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
@@ -253,16 +241,6 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
     connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
             this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
-#if 0
-    for(int i=0; i < widgets_.count(); i++)
-	{
-		if(widgets_.at(i)->type() == "tree")
-		{
-			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
-		}
-	}
-#endif
     connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
             this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
