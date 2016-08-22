@@ -324,7 +324,6 @@ void ServerList::syncSystemFile()
     std::vector<ServerItem*> sysVec;
 
     std::string path(DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers"));
-    path="/usr/local/apps/ecflow/4.3.0-develop/share/ecflow/servers";
     std::ifstream in(path.c_str());
 
     if(in.good())

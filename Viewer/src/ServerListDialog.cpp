@@ -214,6 +214,9 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 {
 	setupUi(this);
 
+    //TODO!!
+    sysSyncTb->hide();
+
 	QString wt=windowTitle();
 	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
 	setWindowTitle(wt);
