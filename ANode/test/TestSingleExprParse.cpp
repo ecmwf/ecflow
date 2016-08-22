@@ -17,16 +17,23 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/foreach.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/conversion.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
+
 #include <string>
 #include <map>
 #include <iostream>
 #include <fstream>
 using namespace std;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 
 // DEBUG AID: to see the expression tree, invert the expected evaluation
 //            so that test fail's
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
+
 
 BOOST_AUTO_TEST_CASE( test_single_expression )
 {
@@ -37,8 +44,8 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
     // value.second = result of expected evaluation
 	map<string,std::pair<string,bool> > exprMap;
 
-   exprMap["! a:a && ! b:b && ! c:c && ! d:d "] = std::make_pair(AstAnd::stype(),true);
-   exprMap["! a:a || ! b:b || ! c:c || ! d:d "] = std::make_pair(AstOr::stype(),true);
+   exprMap["20160819 == cal::julian_to_date( 2457620 )"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["2457620 == cal::date_to_julian( 20160819 )"] = std::make_pair(AstEqual::stype(),true);
 
  	std::pair<string, std::pair<string,bool> > p;
 	BOOST_FOREACH(p, exprMap ) {

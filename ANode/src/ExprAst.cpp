@@ -22,6 +22,7 @@
 #include "Node.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
+#include "Cal.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -798,6 +799,75 @@ std::string AstLessThan::expression(bool why) const
 void AstLeaf::accept(ExprAstVisitor& v)
 {
 	v.visitLeaf(this);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+void AstFunction::accept(ecf::ExprAstVisitor& v)
+{
+   v.visitFunction(this); // Not calling base
+}
+
+AstFunction* AstFunction::clone() const
+{
+   return new AstFunction( ft_, arg()->clone() );
+}
+
+static int digits_in_integer(int number)
+{
+    int digits = 0;
+    if (number < 0) digits = 1; // remove this line if '-' counts as a digit
+    while (number) {
+        number /= 10;
+        digits++;
+    }
+    return digits;
+}
+
+int AstFunction::value() const {
+   int arg_eval = arg_->value();
+
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: {
+         // cope with 8 digit, yyyymmdd and 10 digit yyyymmddhh
+         int integer_digits = digits_in_integer(arg_eval);
+         if (integer_digits == 10  ) arg_eval = arg_eval/100 ;
+         else if (integer_digits != 8 ) return 0;
+         return Cal::date_to_julian( arg_eval );}
+      case AstFunction::JULIAN_TO_DATE:
+         return Cal::julian_to_date( arg_eval );
+      default: assert(false);
+   }
+   return 0;
+}
+
+std::ostream& AstFunction::print(std::ostream& os) const {
+   Indentor in;
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: return Indentor::indent( os ) << "# DATE_TO_JULIAN " << value() << "\n";
+      case AstFunction::JULIAN_TO_DATE: return Indentor::indent( os ) << "# JULIAN_TO_DATE " << value() << "\n";
+      default: assert(false);
+   }
+   return os;
+}
+
+void AstFunction::print_flat(std::ostream& os,bool add_brackets) const {
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: os << "date_to_julian(arg:" << arg_->value() << ") = " << value(); break;
+      case AstFunction::JULIAN_TO_DATE: os << "julian_to_date(arg:" << arg_->value() << ") = " << value(); break;
+      default: assert(false);
+   }
+}
+
+std::string AstFunction::expression(bool why) const
+{
+   std::stringstream ss;
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: ss << "date_to_julian( arg:" << arg_->expression(why) << ") = " << value(); break;
+      case AstFunction::JULIAN_TO_DATE: ss << "julian_to_date( arg:" << arg_->expression(why) << ") = " << value(); break;
+      default: assert(false);
+   }
+   return ss.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

@@ -178,6 +178,7 @@ public:
   virtual void visitLessThan(AstLessThan*){}
   virtual void visitLeaf(AstLeaf*){}
   virtual void visitInteger(AstInteger*){}
+  virtual void visitFunction(AstFunction*){}
   virtual void visitNodeState(AstNodeState*){}
   virtual void visitEventState(AstEventState*);
   virtual void visitNode(AstNode*);

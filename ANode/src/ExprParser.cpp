@@ -128,9 +128,16 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
    static const int basic_variable_path_ID   = 52;
    static const int compare_expression_ID   = 53;
 
+   static const int cal_date_to_julian_ID   = 54;
+   static const int cal_julian_to_date_ID   = 55;
+   static const int cal_argument_ID   = 56;
 
     template <typename ScannerT>
     struct definition {
+       rule<ScannerT,parser_tag<cal_date_to_julian_ID> > cal_date_to_julian;
+       rule<ScannerT,parser_tag<cal_julian_to_date_ID> > cal_julian_to_date;
+        rule<ScannerT,parser_tag<cal_argument_ID> > cal_argument;
+
         rule<ScannerT,parser_tag<integer_ID> > integer;
         rule<ScannerT,parser_tag<plus_ID> > plus;
         rule<ScannerT,parser_tag<minus_ID> > minus;
@@ -289,11 +296,27 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
           variable = leaf_node_d [ nodename ];
           basic_variable_path = nodepath >> discard_node_d[ ch_p(':') ] >> variable ;
 
+          cal_argument = basic_variable_path | integer  ;
+          cal_date_to_julian
+             = str_p("cal::date_to_julian")
+                >>  discard_node_d[ ch_p('(')]
+                >> cal_argument
+                >> discard_node_d[ ch_p(')') ]
+             ;
+          cal_julian_to_date
+             = str_p("cal::julian_to_date")
+                >>  discard_node_d[ ch_p('(')]
+                >> cal_argument
+                >> discard_node_d[ ch_p(')') ]
+             ;
+
           calc_factor
                = integer
                  | basic_variable_path
                  | discard_node_d[ ch_p('(') ] >>  calc_expression >> discard_node_d[ ch_p(')') ]
                  | root_node_d[operators] >>  calc_factor
+                 | cal_date_to_julian
+                 | cal_julian_to_date
                ;
           calc_term
                = calc_factor
@@ -324,7 +347,8 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
           expression = calc_subexpression  >> end_p;
 
-          BOOST_SPIRIT_DEBUG_NODE(expression);
+          BOOST_SPIRIT_DEBUG_NODE(cal_argument);
+          BOOST_SPIRIT_DEBUG_NODE(cal_date_to_julian);
           BOOST_SPIRIT_DEBUG_NODE(andExpr);
           BOOST_SPIRIT_DEBUG_NODE(not_r);
           BOOST_SPIRIT_DEBUG_NODE(not1_r);
@@ -381,6 +405,9 @@ static std::map< parser_id, std::string > rule_names;
 static void populate_rule_names()
 {
    if (rule_names.empty()) {
+      rule_names[ExpressionGrammer::cal_date_to_julian_ID] = "cal_date_to_julian";
+      rule_names[ExpressionGrammer::cal_julian_to_date_ID] = "cal_julian_to_date";
+      rule_names[ExpressionGrammer::cal_argument_ID] = "cal_argument";
       rule_names[ExpressionGrammer::modulo_ID] = "MODULO";
       rule_names[ExpressionGrammer::equal_1_ID] = "EQUALS";
       rule_names[ExpressionGrammer::equal_2_ID] = "EQUALS";
@@ -735,6 +762,18 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
    else if ( i->value.id() == ExpressionGrammer::node_state_unknown_ID) {
 
       return new AstNodeState( DState::UNKNOWN );
+   }
+   else if ( i->value.id() == ExpressionGrammer::cal_date_to_julian_ID) {
+
+      LOG_ASSERT((i->children.size() == 2), ""); // 1st is function, 2nd is arg(integer | basic variable path)
+
+      return new AstFunction(AstFunction::DATE_TO_JULIAN, createAst( i->children.begin()+1 , rule_names)  );
+   }
+   else if ( i->value.id() == ExpressionGrammer::cal_julian_to_date_ID) {
+
+      LOG_ASSERT((i->children.size() == 2), ""); // 1st is function, 2nd is arg(integer | basic variable path)
+
+      return new AstFunction(AstFunction::JULIAN_TO_DATE, createAst( i->children.begin()+1 , rule_names)  );
    }
 
    return NULL;

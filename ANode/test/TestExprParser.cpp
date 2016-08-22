@@ -11,18 +11,25 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include "ExprParser.hpp"
-#include "ExprAst.hpp"
-#include "Expression.hpp"
 
-#include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
 #include <string>
 #include <map>
 #include <iostream>
 #include <fstream>
-using namespace std;
 
+#include <boost/test/unit_test.hpp>
+#include <boost/foreach.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/conversion.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
+
+#include "ExprParser.hpp"
+#include "ExprAst.hpp"
+#include "Expression.hpp"
+
+using namespace std;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
@@ -35,8 +42,6 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
    // This test ENSURES the the AST matches the expression. (i.e by getting AST to print the expression)
    // Note: we can use NOT,eq,ne,le,ge, or brackets
    //       we can't use a:event_name  ==> a:event_name == set
-
-
    std::vector<std::string> vec;
    vec.push_back("a == complete");
    vec.push_back("a != complete");
@@ -348,7 +353,120 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    BOOST_REQUIRE_MESSAGE( parse_failure == 0 &&  ast_failure == 0,"Found failures parse_failure:" << parse_failure << " ast failure:" << ast_failure);
 }
 
- 
+
+BOOST_AUTO_TEST_CASE( test_trigger_functions )
+{
+    std::cout <<  "ANode:: ...test_trigger_functions\n";
+
+   // The map key  = trigger expression,
+    // value.first  = type of the expected root abstract syntax tree
+    // value.second = result of expected evaluation
+   map<string,std::pair<string,bool> > exprMap;
+
+   exprMap["cal::date_to_julian(A:x) == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["cal::date_to_julian( 0 ) == cal::date_to_julian( 0 )"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["cal::date_to_julian( 0 ) == cal::date_to_julian( A:x )"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["2457620 == cal::date_to_julian( 20160819 )"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["20160819 == cal::julian_to_date( 2457620 )"] = std::make_pair(AstEqual::stype(),true);
+
+   // test 10 digit integer, ie yyyymmddhh
+   exprMap["2457620 == cal::date_to_julian( 2016081912 )"] = std::make_pair(AstEqual::stype(),true);
+
+   int parse_failure = 0;
+   int ast_failure = 0;
+   std::pair<string, std::pair<string,bool> > p;
+   BOOST_FOREACH(p, exprMap ) {
+
+      //cout << "parsing: " << p.first << "\n";
+      ExprParser theExprParser(p.first);
+      std::string errorMsg;
+      bool ok = theExprParser.doParse(errorMsg);
+      if (!ok) parse_failure++;
+      BOOST_CHECK_MESSAGE(ok,errorMsg + "failed for " + p.first);
+
+      if (ok) {
+         string expectedRootType       = p.second.first;
+         bool expectedEvaluationResult = p.second.second;
+
+         Ast* top = theExprParser.getAst();
+         if (!top) ast_failure++;
+         BOOST_CHECK_MESSAGE( top ,"No abstract syntax tree "+ p.first);
+         if (top) {
+            BOOST_CHECK_MESSAGE( top->left() ,"No root created "+ p.first);
+            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
+            BOOST_CHECK_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
+            BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type '" << expectedRootType << "' or 'variable' but found '" << top->left()->type() << "' " << p.first);
+            BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << *top);
+
+            std::string error_msg;
+            BOOST_CHECK_MESSAGE(  top->check(error_msg),error_msg << ":  Check failed for " << *top);
+         }
+      }
+   }
+   BOOST_REQUIRE_MESSAGE( parse_failure == 0 &&  ast_failure == 0,"Found failures parse_failure:" << parse_failure << " ast failure:" << ast_failure);
+}
+
+BOOST_AUTO_TEST_CASE( test_trigger_functions_with_boost_date )
+{
+   std::cout <<  "ANode:: ...test_trigger_functions_with_boost_date\n";
+   // The map key  = trigger expression,
+   // value.first  = type of the expected root abstract syntax tree
+   // value.second = result of expected evaluation
+   map<string,std::pair<string,bool> > exprMap;
+
+   boost::gregorian::date startDate(2016,1,1);
+   boost::gregorian::date endDate(2016,12,31);
+   while(startDate != endDate) {
+      long julian_day = startDate.julian_day();
+      std::string str_julian_day = boost::lexical_cast<std::string>(julian_day);
+      std::string eight_digit_iso_string =  to_iso_string(startDate);
+      string expr = str_julian_day + " ==  cal::date_to_julian(" + eight_digit_iso_string + ")";
+      exprMap[expr] = std::make_pair(AstEqual::stype(),true);
+
+      std::string ten_digit_string = eight_digit_iso_string + "12" ;
+      expr = str_julian_day + " ==  cal::date_to_julian(" + ten_digit_string + ")";
+      exprMap[expr] = std::make_pair(AstEqual::stype(),true);
+
+      string expr2 = to_iso_string(startDate) + " == cal::julian_to_date(" + str_julian_day + ")";
+      exprMap[expr2] = std::make_pair(AstEqual::stype(),true);
+      startDate += days(1);
+   }
+
+   int parse_failure = 0;
+   int ast_failure = 0;
+   std::pair<string, std::pair<string,bool> > p;
+   BOOST_FOREACH(p, exprMap ) {
+
+      //cout << "parsing: " << p.first << "\n";
+      ExprParser theExprParser(p.first);
+      std::string errorMsg;
+      bool ok = theExprParser.doParse(errorMsg);
+      if (!ok) parse_failure++;
+      BOOST_CHECK_MESSAGE(ok,errorMsg + "failed for " + p.first);
+
+      if (ok) {
+         string expectedRootType       = p.second.first;
+         bool expectedEvaluationResult = p.second.second;
+
+         Ast* top = theExprParser.getAst();
+         if (!top) ast_failure++;
+         BOOST_CHECK_MESSAGE( top ,"No abstract syntax tree "+ p.first);
+         if (top) {
+            BOOST_CHECK_MESSAGE( top->left() ,"No root created "+ p.first);
+            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
+            BOOST_CHECK_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
+            BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type '" << expectedRootType << "' or 'variable' but found '" << top->left()->type() << "' " << p.first);
+            BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << *top);
+
+            std::string error_msg;
+            BOOST_CHECK_MESSAGE(  top->check(error_msg),error_msg << ":  Check failed for " << *top);
+         }
+      }
+   }
+   BOOST_REQUIRE_MESSAGE( parse_failure == 0 &&  ast_failure == 0,"Found failures parse_failure:" << parse_failure << " ast failure:" << ast_failure);
+}
+
+
 BOOST_AUTO_TEST_CASE( test_trigger_expression_divide_by_zero )
 {
    std::cout <<  "ANode:: ...test_trigger_expression_divide_by_zero\n";
@@ -387,6 +505,7 @@ BOOST_AUTO_TEST_CASE( test_trigger_expression_divide_by_zero )
       BOOST_CHECK_MESSAGE( !top->check(error_msg),error_msg << ":  Check failed for " << *top);
    }
 }
+
 
 BOOST_AUTO_TEST_CASE( test_parser_bad_expressions ) 
 {
@@ -450,4 +569,3 @@ BOOST_AUTO_TEST_CASE( test_parser_bad_expressions )
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
