@@ -333,6 +333,32 @@ public:
 	virtual bool isleaf() const { return true; }
 };
 
+class AstFunction : public AstLeaf {
+public:
+   enum FuncType { DATE_TO_JULIAN, JULIAN_TO_DATE };
+   AstFunction(FuncType ft, Ast* arg) : ft_(ft), arg_(arg) { assert(arg_);}
+   ~AstFunction() { delete arg_;}
+
+   virtual bool is_evaluateable() const { return true; }
+   virtual bool evaluate() const { return value() != 0 ? true: false; }
+
+   virtual void accept(ecf::ExprAstVisitor&);
+   virtual AstFunction* clone() const;
+   virtual int value() const;
+   virtual std::ostream& print(std::ostream& os) const;
+   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual std::string type() const { return stype();}
+   virtual std::string expression(bool why = false) const;
+   static std::string stype() { return "AstFunction";}
+
+   Ast* arg() const { return arg_;}
+   FuncType ft() const { return ft_;}
+private:
+   FuncType ft_;
+   Ast* arg_;
+};
+
+
 class AstInteger : public AstLeaf {
 public:
 	AstInteger(int value) : value_(value) {}
