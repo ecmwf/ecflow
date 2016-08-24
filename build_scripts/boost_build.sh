@@ -83,12 +83,12 @@ if test_uname Linux ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
       		
-            # for boost 1.53 and > gcc 4.3 -Wno-unused-local-typedefs  not valid
+            # for boost 1.53 and > gcc 4.3 -Wno-unused-local-typedefs  : not valid
             # for boost 1.53 and > gcc 4.8 -Wno-unused-local-typedefs  : get a lot warning messages , suppress
             # for boost 1.53 and > gcc 6.1 -Wno-deprecated-declarations: std::auto_ptr deprecated messages, suppress
             compiler=$(gcc -dumpversion)
             if [ $compiler = "4.3" ] ; then
-               CXXFLAGS=-d2    #  dummy argument, since CXXFLAGS is quoted
+                CXXFLAGS=-d2    #  dummy argument, since CXXFLAGS is quoted
             else 
                 CXXFLAGS=cxxflags=-Wno-unused-local-typedefs
                 #CXXFLAGS="cxxflags=-Wno-unused-local-typedefs,-Wno-deprecated-declarations"
