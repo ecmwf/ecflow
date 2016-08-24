@@ -193,6 +193,20 @@ void VSettings::get(const std::string& key,std::vector<std::string>& val)
 	}
 }
 
+void VSettings::get(const std::string& key,std::vector<int>& val)
+{
+    boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.path(key));
+    if(!ptArray)
+    {
+        return;
+    }
+
+    for(boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it)
+    {
+        val.push_back(it->second.get_value<int>());
+    }
+}
+
 bool VSettings::getAsBool(const std::string& key,bool defaultVal)
 {
 	std::string v=pt_.get<std::string>(path_.path(key),(defaultVal)?"true":"false");

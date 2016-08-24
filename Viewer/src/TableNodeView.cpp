@@ -275,7 +275,7 @@ void TableNodeView::notifyChange(VProperty* p)
 
 void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 {
-	int section=header_->logicalIndexAt(position);
+    int section=header_->logicalIndexAt(position);
 
 	if(section< 0 || section >= header_->count())
 		return;
@@ -324,23 +324,32 @@ void TableNodeView::readSettings(VSettings* vs)
 {
     vs->beginGroup("columns");
 
-#if 0
-    std::vector<std::string> array;
-	vs->get("columns",array);
+    std::vector<std::string> orderVec;
+    std::vector<int> visVec, wVec;
 
-	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
-	{
-		std::string id=*it;
-		for(int i=0; i < model_->columnCount(QModelIndex()); i++)
-		{
-			if(model_->headerData(i,Qt::Horizontal,Qt::UserRole).toString().toStdString() == id)
-			{
-				header()->setSectionHidden(i,false);
-				break;
-			}
-		}
-	}
-#endif
+    vs->get("order",orderVec);
+    vs->get("visible",visVec);
+    vs->get("width",wVec);
+
+    if(orderVec.size() == visVec.size() && orderVec.size() == wVec.size())
+
+    for(size_t i=0; i < orderVec.size(); i++)
+    {
+        std::string id=orderVec[i];
+        for(int j=0; j < model_->columnCount(QModelIndex()); j++)
+        {
+            if(model_->headerData(j,Qt::Horizontal,Qt::UserRole).toString().toStdString() == id)
+            {
+                if(visVec[i] == 0)
+                    header()->setSectionHidden(j,true);
+
+                else if(wVec[i] > 0)
+                    setColumnWidth(j,wVec[i]);
+
+                break;
+            }
+        }
+    }
 
     vs->endGroup();
 }
@@ -355,7 +364,7 @@ void TableNodeView::writeSettings(VSettings* vs)
     {
         std::string id=model_->headerData(i,Qt::Horizontal,Qt::UserRole).toString().toStdString();
         orderVec.push_back(id);
-        visVec.push_back((header()->isSectionHidden(i))?1:0);
+        visVec.push_back((header()->isSectionHidden(i))?0:1);
         wVec.push_back(columnWidth(i));
     }
 
