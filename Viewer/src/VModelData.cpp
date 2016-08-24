@@ -1230,7 +1230,7 @@ int VTableModelData::position(VTableServer* server,const VNode *node) const
 		int totalRow=0;
 		for(unsigned int i=0; i < servers_.size(); i++)
 		{
-			if(servers_.at(i) == server)
+            if(servers_[i] == server)
 			{				
                 int pos=server->tableServer()->indexOf(node);
 				if(pos != -1)
@@ -1243,7 +1243,7 @@ int VTableModelData::position(VTableServer* server,const VNode *node) const
 			}
 			else
 			{
-                totalRow+=server->nodeNum();
+                totalRow+=servers_[i]->nodeNum();
 			}
 		}
 	}
