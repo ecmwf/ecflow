@@ -37,7 +37,8 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent),
 	userClickedReload_(false),
     ignoreOutputSelection_(false),
-    dirColumnsAdjusted_(false)
+    dirColumnsAdjusted_(false),
+    submittedWarning_(false)
 {
     //We try to keep the contents when clicking away
     //tryToKeepContents_=true;
@@ -128,8 +129,9 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
-    //enabled_=true;
-	info_=info;
+    //set the info
+    adjust(info);
+
     userClickedReload_ = false;
 
     //info must be a node
@@ -212,6 +214,7 @@ void OutputItemWidget::clearContents()
     reloadTb_->setEnabled(true);
     userClickedReload_ = false;
     fetchInfo_->clearInfo();
+    submittedWarning_=false;
 }
 
 void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
@@ -276,11 +279,13 @@ void OutputItemWidget::infoReady(VReply* reply)
 
         //TODO: make it possible to show warning and info at the same time
         bool hasMessage=false;
+        submittedWarning_=false;
         OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-        if(reply->fileName() == op->joboutFileName() &&
+        if(reply->fileName() == op->joboutFileName() && !op->isTryNoZero(reply->fileName()) &&
            info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
         {
             hasMessage=true;
+            submittedWarning_=true;
             messageLabel_->showWarning("This is the current job output (as defined by variable ECF_JOBOUT), but \
                    beacuse the node status is <b>submitted</b> it may contain the ouput from a previous run!");
         }
@@ -421,6 +426,7 @@ void OutputItemWidget::infoFailed(VReply* reply)
 		QString s=QString::fromStdString(reply->errorText());
 		messageLabel_->showError(s);       
         messageLabel_->stopProgress();
+        submittedWarning_=false;
 
 		//Update the file label
 		fileLabel_->update(reply);
@@ -599,6 +605,29 @@ void OutputItemWidget::on_fontSizeDownTb__clicked()
 {
 	//We need to call a custom slot here instead of "zoomOut"!!!
 	browser_->zoomOut();
+}
+
+//-------------------------
+// Update
+//-------------------------
+
+void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
+{
+    //Changes in the nodes
+    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    {
+        if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::DEFSTATUS ||
+            *it == ecf::Aspect::SUSPENDED)
+        {
+            if(submittedWarning_)
+               getLatestFile();
+            else if(info_ && info_->node() == n && info_->node()->isSubmitted())
+               getLatestFile();
+
+
+            return;
+        }
+    }
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

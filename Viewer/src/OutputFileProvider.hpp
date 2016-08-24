@@ -36,6 +36,7 @@ public:
      void setDir(VDir_ptr);
 
      std::string joboutFileName() const;
+     bool isTryNoZero(const std::string& fileName) const;
 
 private Q_SLOTS:
 	void slotOutputClientError(QString);

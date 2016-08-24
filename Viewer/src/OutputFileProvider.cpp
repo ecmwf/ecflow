@@ -434,6 +434,11 @@ std::string OutputFileProvider::joboutFileName() const
 	return std::string();
 }
 
+bool OutputFileProvider::isTryNoZero(const std::string& filename) const
+{
+    return boost::algorithm::ends_with(filename,".0");
+}
+
 void OutputFileProvider::setDir(VDir_ptr dir)
 {
     if(outClient_)
