@@ -14,8 +14,6 @@
 //
 //============================================================================
 
-#include <sys/types.h> // for getpid
-#include <unistd.h>    // for getpid
 #include <stdlib.h>    // for getenv()
 
 #include <iostream>
@@ -41,6 +39,7 @@
 #include "File.hpp"
 #include "boost_archive.hpp"
 #include "JobProfiler.hpp"
+#include "Pid.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -126,8 +125,8 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
    }
 
    // get server process id. This may be visualised in xecf. makes it easier to kill server
-   try { ecf_pid_ = boost::lexical_cast<std::string>(getpid());  }
-   catch (boost::bad_lexical_cast& e) {
+   try { ecf_pid_ = Pid::getpid();  }
+   catch (...) {
       throw ServerEnvironmentException("ServerEnvironment::ServerEnvironment:: Could not convert PID to a string\n");
    }
    // std::cout << "PID = " << ecf_pid_ << "\n";

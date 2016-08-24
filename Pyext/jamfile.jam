@@ -54,6 +54,7 @@ use-project theSimulator : ../CSim ;
 
 # Make the definition of the python-extension rule available
 import python ;
+# using python : 3.5.1 : /usr/local/apps/python3/3.5.1-01/ ; 
 
 if ! [ python.configured ]
 {

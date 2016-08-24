@@ -22,6 +22,7 @@
 #include "Node.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
+#include "Cal.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -801,6 +802,75 @@ void AstLeaf::accept(ExprAstVisitor& v)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
+
+void AstFunction::accept(ecf::ExprAstVisitor& v)
+{
+   v.visitFunction(this); // Not calling base
+}
+
+AstFunction* AstFunction::clone() const
+{
+   return new AstFunction( ft_, arg()->clone() );
+}
+
+static int digits_in_integer(int number)
+{
+    int digits = 0;
+    if (number < 0) digits = 1; // remove this line if '-' counts as a digit
+    while (number) {
+        number /= 10;
+        digits++;
+    }
+    return digits;
+}
+
+int AstFunction::value() const {
+   int arg_eval = arg_->value();
+
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: {
+         // cope with 8 digit, yyyymmdd and 10 digit yyyymmddhh
+         int integer_digits = digits_in_integer(arg_eval);
+         if (integer_digits == 10  ) arg_eval = arg_eval/100 ;
+         else if (integer_digits != 8 ) return 0;
+         return Cal::date_to_julian( arg_eval );}
+      case AstFunction::JULIAN_TO_DATE:
+         return Cal::julian_to_date( arg_eval );
+      default: assert(false);
+   }
+   return 0;
+}
+
+std::ostream& AstFunction::print(std::ostream& os) const {
+   Indentor in;
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: return Indentor::indent( os ) << "# DATE_TO_JULIAN " << value() << "\n";
+      case AstFunction::JULIAN_TO_DATE: return Indentor::indent( os ) << "# JULIAN_TO_DATE " << value() << "\n";
+      default: assert(false);
+   }
+   return os;
+}
+
+void AstFunction::print_flat(std::ostream& os,bool add_brackets) const {
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: os << "date_to_julian(arg:" << arg_->value() << ") = " << value(); break;
+      case AstFunction::JULIAN_TO_DATE: os << "julian_to_date(arg:" << arg_->value() << ") = " << value(); break;
+      default: assert(false);
+   }
+}
+
+std::string AstFunction::expression(bool why) const
+{
+   std::stringstream ss;
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: ss << "date_to_julian( arg:" << arg_->expression(why) << ") = " << value(); break;
+      case AstFunction::JULIAN_TO_DATE: ss << "julian_to_date( arg:" << arg_->expression(why) << ") = " << value(); break;
+      default: assert(false);
+   }
+   return ss.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////////
 void AstInteger::accept(ExprAstVisitor& v)
 {
 	v.visitInteger(this); // Not calling base
@@ -829,43 +899,6 @@ std::string AstInteger::expression(bool /*why*/) const
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-
-void AstString::accept(ExprAstVisitor& v)
-{
-	v.visitString(this); // Not calling base
-}
-
-AstString* AstString::clone() const
-{
-   return new AstString(value_);
-}
-
-std::ostream& AstString::print( std::ostream& os ) const {
-	Indentor in;
-	return Indentor::indent( os ) << "# LEAF_STRING " << value_ << " value() = " << value() << "\n";
-}
-void AstString::print_flat(std::ostream& os,bool /*add_bracket*/) const {
-   os << value_;
-}
-
-std::string AstString::expression(bool /*why*/) const
-{
-	return value_;
-}
-
-int AstString::value() const
-{
-	if (value_ == Event::SET()) {    // allow us to compare with a event and a string
-		return 1;
-	}
-	if (value_ == Event::CLEAR()) {  // allow us to compare with a event and a string
-		return 0;
-	}
-	// see if the value is convertible to a integer
-	return Str::to_int( value_, 0/* value to return if conversion fails*/);
-}
-
-////////////////////////////////////////////////////////////////////////////////////
 
 void AstNodeState::accept(ExprAstVisitor& v)
 {
@@ -1231,7 +1264,6 @@ std::ostream& operator<<( std::ostream& os, const AstGreaterThan& d ) {return d.
 std::ostream& operator<<( std::ostream& os, const AstLessThan& d )    {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstLeaf& d )      {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstInteger& d)    {return d.print( os );}
-std::ostream& operator<<( std::ostream& os, const AstString& d)    {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstNodeState& d)  {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstEventState& d) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstNode& d ) {return d.print( os );}
