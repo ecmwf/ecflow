@@ -60,7 +60,10 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 Dashboard::~Dashboard()
 {
-	Q_EMIT aboutToDelete();
+    widgets_.clear();
+    popupWidgets_.clear();
+
+    Q_EMIT aboutToDelete();
 
 	serverFilter_->removeObserver(this);
 	delete serverFilter_;
@@ -117,6 +120,11 @@ void Dashboard::slotSelectionChanged(VInfo_ptr info)
     DashboardWidget* s=static_cast<DashboardWidget*>(sender());
 
     Q_FOREACH(DashboardWidget* dw,widgets_)
+    {
+         if(dw != s)
+             dw->setCurrentSelection(info);
+    }
+    Q_FOREACH(DashboardWidget* dw,popupWidgets_)
     {
          if(dw != s)
              dw->setCurrentSelection(info);
@@ -203,6 +211,9 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
     connect(dia,SIGNAL(finished(int)),
             this,SLOT(slotDialogFinished(int)));
 
+    connect(dia,SIGNAL(aboutToClose()),
+            this,SLOT(slotDialogClosed()));
+
     //The dialog will reparent the widget
     dia->add(w);
 	dia->show();
@@ -284,6 +295,8 @@ void Dashboard::slotPopInfoPanel(QString name)
             ip->setDetached(true);
 			ip->setCurrent(name.toStdString());
 		}
+
+        popupWidgets_ <<  dw;
 	}
 }
 
@@ -297,6 +310,8 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
             ip->slotReload(info);
             ip->setCurrent(name.toStdString());
 		}
+
+        popupWidgets_ <<  dw;
 	}
 }
 
@@ -320,7 +335,17 @@ void Dashboard::slotDialogFinished(int)
 	if(DashboardDialog* dia=static_cast<DashboardDialog*>(sender()))
 	{
 		disconnect(this,0,dia->dashboardWidget(),0);
+        popupWidgets_.removeOne(dia->dashboardWidget());
 	}
+}
+
+void Dashboard::slotDialogClosed()
+{
+    if(DashboardDialog* dia=static_cast<DashboardDialog*>(sender()))
+    {
+        disconnect(this,0,dia->dashboardWidget(),0);
+        popupWidgets_.removeOne(dia->dashboardWidget());
+    }
 }
 
 //------------------------

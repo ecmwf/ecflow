@@ -19,7 +19,7 @@ DashboardWidget::DashboardWidget(const std::string& type, QWidget* parent) :
     type_(type),
     acceptSetCurrent_(false)
 {
-    detachedAction_=new QAction(this);
+    detachedAction_=new QAction("Detached",this);
     QIcon ic(QPixmap(":viewer/dock_chain_closed.svg"));
     ic.addPixmap(QPixmap(":viewer/dock_chain_open.svg"),QIcon::Normal,QIcon::On);
     detachedAction_->setIcon(ic);

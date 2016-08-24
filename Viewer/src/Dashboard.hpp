@@ -67,6 +67,7 @@ public Q_SLOTS:
 protected Q_SLOTS:
     void slotDockClose();
     void slotDialogFinished(int);
+    void slotDialogClosed();
     void slotPopInfoPanel(QString);
     //void slotInfoPanelSelection(VInfo_ptr);
     void slotSelectionChanged(VInfo_ptr info);
@@ -82,7 +83,8 @@ private:
 
 	ServerFilter* serverFilter_;
 	DashboardTitle* titleHandler_;
-	QList<DashboardWidget*> widgets_;
+    QList<DashboardWidget*> widgets_;
+    QList<DashboardWidget*> popupWidgets_;
 	bool settingsAreRead_;
 	static int maxWidgetNum_;
 };

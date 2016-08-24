@@ -108,6 +108,9 @@ void InfoPanel::populateDialog()
 {
     QMenu *menu=buildOptionsMenu();
 
+    detachedAction_->setIcon(QIcon());
+    menu->addAction(detachedAction_);
+
     QToolButton* optionsTb=new QToolButton(this);
     optionsTb->setAutoRaise(true);
     optionsTb->setIcon(QPixmap(":/viewer/configure.svg"));
