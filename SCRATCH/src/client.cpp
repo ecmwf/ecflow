@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
 
     boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
-    ctx.load_verify_file("ca.pem");
+    ctx.load_verify_file("server.crt");
 
     client c(io_service, ctx, iterator);
 
