@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,7 +22,7 @@ class VSettings;
 class NodeViewBase
 {
 public:
-        explicit NodeViewBase(NodeFilterDef*filterDef);
+        explicit NodeViewBase(NodeFilterDef*);
         virtual ~NodeViewBase(){}
 
 		virtual void reload()=0;
@@ -30,7 +30,7 @@ public:
 		virtual QWidget* realWidget()=0;
         virtual VInfo_ptr currentSelection()=0;
 		virtual void selectFirstServer()=0;
-        virtual void setCurrentSelection(VInfo_ptr n,bool broadcast)=0;
+        virtual void setCurrentSelection(VInfo_ptr n)=0;
 
         virtual void readSettings(VSettings* vs)=0;
         virtual void writeSettings(VSettings* vs)=0;

@@ -168,14 +168,12 @@ VInfo_ptr TableNodeView::currentSelection()
 	return VInfo_ptr();
 }
 
-void TableNodeView::setCurrentSelection(VInfo_ptr info,bool broadcast)
+void TableNodeView::setCurrentSelection(VInfo_ptr info)
 {
     QModelIndex idx=model_->infoToIndex(info);
     if(idx.isValid())
     {
         setCurrentIndex(idx);
-        if(broadcast)
-            Q_EMIT selectionChanged(info);
     }
 }
 

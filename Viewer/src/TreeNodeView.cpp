@@ -164,8 +164,6 @@ void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemS
     QTreeView::selectionChanged(selected, deselected);
 }
 
-
-
 VInfo_ptr TreeNodeView::currentSelection()
 {
 	QModelIndexList lst=selectedIndexes();
@@ -176,14 +174,12 @@ VInfo_ptr TreeNodeView::currentSelection()
 	return VInfo_ptr();
 }
 
-void TreeNodeView::setCurrentSelection(VInfo_ptr info,bool broadcast)
+void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 {
 	QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
-	{
+	{          
         setCurrentIndex(idx);
-        if(broadcast)
-            Q_EMIT selectionChanged(info);
 	}
 }
 
@@ -515,7 +511,7 @@ void TreeNodeView::slotRestoreExpand()
             }
             else
             {
-                setCurrentSelection(expandState_->selection_,true);
+                setCurrentSelection(expandState_->selection_);
             }
         }
     }
@@ -559,7 +555,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
                     }
                     else if(node->server()->realServer() == expandState_->selection_->server())
                     {
-                        setCurrentSelection(expandState_->selection_,true);
+                        setCurrentSelection(expandState_->selection_);
                         expandState_->selection_.reset();
                     }
                 }

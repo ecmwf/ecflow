@@ -138,7 +138,8 @@ void TableNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
 {
     updateActionState(info);
     bcWidget_->setPath(info);
-    Q_EMIT selectionChanged(info);
+    if(broadcastSelection())
+        Q_EMIT selectionChanged(info);
 }
 
 void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)

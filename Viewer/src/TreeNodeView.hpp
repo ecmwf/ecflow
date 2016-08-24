@@ -40,7 +40,7 @@ public:
 	void rerender();
 	QWidget* realWidget();
     VInfo_ptr currentSelection();
-    void setCurrentSelection(VInfo_ptr n,bool broadcast);
+    void setCurrentSelection(VInfo_ptr n);
 	void selectFirstServer();
 #if 0
     void setModel(NodeFilterModel* model);

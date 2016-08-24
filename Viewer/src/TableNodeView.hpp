@@ -41,7 +41,7 @@ public:
 	void rerender();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
-    void setCurrentSelection(VInfo_ptr n,bool broadcast);
+    void setCurrentSelection(VInfo_ptr n);
 	void selectFirstServer() {}
 	void setModel(TableNodeSortModel *model);
 

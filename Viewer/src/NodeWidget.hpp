@@ -62,6 +62,7 @@ protected:
 	virtual ~NodeWidget();
 
 	void updateActionState(VInfo_ptr);
+    bool broadcastSelection() const {return broadcastSelection_;}
 
 	ServerFilter* serverFilter_;
 
@@ -79,6 +80,7 @@ private:
 	QList<QAction*> dockActions_;
 	QMap<QString,QAction*> dockActionMap_;
 	QList<QAction*> infoPanelActions_;
+    bool broadcastSelection_;
 };
 
 #endif

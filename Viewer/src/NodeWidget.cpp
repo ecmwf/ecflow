@@ -26,7 +26,8 @@ NodeWidget::NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidge
    icons_(0),
    atts_(0),
    filterDef_(0),
-   states_(0)
+   states_(0),
+   broadcastSelection_(true)
 {
 	//Define the icon filter for the model. It controls what icons
 	//are displayed next to the nodes. This is exposed via a menu.
@@ -67,12 +68,16 @@ VInfo_ptr NodeWidget::currentSelection()
 void NodeWidget::setCurrentSelection(VInfo_ptr info)
 {
     if(!detached())
-        view_->setCurrentSelection(info,false);
+    {
+        broadcastSelection_=false;
+        view_->setCurrentSelection(info);
+        broadcastSelection_=true;
+    }
 }
 
 void NodeWidget::slotSelectionChangedInBc(VInfo_ptr info)
 {
-    view_->setCurrentSelection(info,true);
+    view_->setCurrentSelection(info);
 }
 
 void NodeWidget::reload()

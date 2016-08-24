@@ -168,7 +168,8 @@ void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
 {
 	updateActionState(info);
 	bcWidget_->setPath(info);
-	Q_EMIT selectionChanged(info);
+    if(broadcastSelection())
+        Q_EMIT selectionChanged(info);
 }
 
 
