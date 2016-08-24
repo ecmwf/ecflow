@@ -324,7 +324,10 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 
 void TableNodeView::readSettings(VSettings* vs)
 {
-	std::vector<std::string> array;
+    vs->beginGroup("columns");
+
+#if 0
+    std::vector<std::string> array;
 	vs->get("columns",array);
 
 	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
@@ -339,8 +342,31 @@ void TableNodeView::readSettings(VSettings* vs)
 			}
 		}
 	}
+#endif
+
+    vs->endGroup();
 }
 
+void TableNodeView::writeSettings(VSettings* vs)
+{
+    vs->beginGroup("columns");
+
+    std::vector<std::string> orderVec;
+    std::vector<int> visVec, wVec;
+    for(int i=0; i < model_->columnCount(QModelIndex()); i++)
+    {
+        std::string id=model_->headerData(i,Qt::Horizontal,Qt::UserRole).toString().toStdString();
+        orderVec.push_back(id);
+        visVec.push_back((header()->isSectionHidden(i))?1:0);
+        wVec.push_back(columnWidth(i));
+    }
+
+    vs->put("order",orderVec);
+    vs->put("visible",visVec);
+    vs->put("width",wVec);
+
+    vs->endGroup();
+}
 
 //=========================================
 // TableNodeHeader

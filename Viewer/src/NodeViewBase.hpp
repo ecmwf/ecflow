@@ -32,7 +32,8 @@ public:
 		virtual void selectFirstServer()=0;
         virtual void setCurrentSelection(VInfo_ptr n,bool broadcast)=0;
 
-		virtual void readSettings(VSettings* vs)=0;
+        virtual void readSettings(VSettings* vs)=0;
+        virtual void writeSettings(VSettings* vs)=0;
 
 protected:
 		NodeFilterDef* filterDef_;

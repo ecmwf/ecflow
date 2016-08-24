@@ -164,7 +164,7 @@
     	
     	"path" : {
     		"label" : "Node",
-    		"tooltip" : "Node"
+            "tooltip" : "Node"
     	},
     	"status" : {
     		"label" : "Status"

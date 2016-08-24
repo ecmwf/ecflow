@@ -47,7 +47,8 @@ public:
 
 	void notifyChange(VProperty* p);
 
-	void readSettings(VSettings* vs);
+    void readSettings(VSettings*);
+    void writeSettings(VSettings*);
 
 public Q_SLOTS:
 	void slotDoubleClickItem(const QModelIndex&);

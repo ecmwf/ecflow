@@ -171,6 +171,8 @@ void TableNodeWidget::writeSettings(VSettings* vs)
 	states_->writeSettings(vs);
 	filterDef_->writeSettings(vs);
 
+    view_->writeSettings(vs);
+
     DashboardWidget::writeSettings(vs);
 }
 
