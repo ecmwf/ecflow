@@ -196,7 +196,8 @@ public:
 
     ~TextCursorSharedPrivate()
     {
-        ASSUME(ref == 0);
+        int refint = ref.fetchAndAddRelaxed(0); // required to get past a bug in Qt 5.2.1 (see Ubuntu 14.04)
+        ASSUME(refint == 0);
     }
 
     void invalidate()
