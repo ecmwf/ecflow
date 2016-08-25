@@ -94,7 +94,7 @@ echo "clang_sanitiser_arg=$clang_sanitiser_arg"
 echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
 echo "python3_arg=$python3_arg"
-echo "no_gui=$no_gui"
+echo "no_gui_arg=$no_gui_arg"
 set -x # echo script lines as they are executed
 
 # ==================== modules ================================================
@@ -206,7 +206,7 @@ fi
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 
 gui_options=
-if [[ $no_gui_arg = no_gui ]] ; the
+if [[ $no_gui_arg = no_gui ]] ; then
     gui_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF -DENABLE_ALL_TESTS=ON"
 fi
 
