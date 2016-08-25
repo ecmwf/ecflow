@@ -200,6 +200,12 @@ fi
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 
+develop_build_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF -DENABLE_ALL_TESTS=ON"
+if [[ $package_source_arg = package_source ]] ; then
+    # for packaging we build GUI by default, and do not run all tests
+    develop_build_options=  
+fi
+
 #$workspace/ecbuild/bin/ecbuild $source_dir \
 ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
@@ -209,11 +215,9 @@ ecbuild $source_dir \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
-            -DENABLE_ALL_TESTS=ON \
-            ${cmake_extra_options}
+            ${cmake_extra_options} \
+            ${develop_build_options}
             
-            #-DENABLE_GUI=OFF      \
-            #-DENABLE_UI=OFF       \
             #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
             #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'"
@@ -236,7 +240,7 @@ if [[ $package_source_arg = package_source ]] ; then
 		tar -zxf ecFlow-$release.$major.$minor-Source.tar.gz
 	fi
 	
-	cp ecFlow-$release.$major.$minor-Source.tar.gz $SCRATCH/.
+	#cp ecFlow-$release.$major.$minor-Source.tar.gz $SCRATCH/.
 fi
 
 # =========================================================================================
