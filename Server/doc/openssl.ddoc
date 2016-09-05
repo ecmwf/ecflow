@@ -1,4 +1,5 @@
 ref:http://panoptic.com/wiki/aolserver/How_to_generate_self-signed_SSL_certificates
+https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs
 
 You need to create your certificates and sign them appropriately. Here are the commands for linux:
 
@@ -11,7 +12,7 @@ openssl genrsa -des3 -out server.key 1024
 openssl req -new -key server.key -out server.csr
 
 
-# Sign certificate with private key
+# Sign certificate with private key (self signed certificate)
 openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
 
 
