@@ -249,7 +249,7 @@ if [[ $package_source_arg = package_source ]] ; then
 		tar -zxf ecFlow-$release.$major.$minor-Source.tar.gz
 	fi
 	
-	#cp ecFlow-$release.$major.$minor-Source.tar.gz $SCRATCH/.
+	cp ecFlow-$release.$major.$minor-Source.tar.gz $SCRATCH/.
 fi
 
 # =========================================================================================
