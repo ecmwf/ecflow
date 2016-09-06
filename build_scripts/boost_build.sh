@@ -59,7 +59,7 @@ test_uname ()
 # On *CRAY* we can have 3 compilers we will use the versioned for CRAY and INTEL library
 layout=tagged
 
-CXXFLAGS=
+CXXFLAGS=-d2     # dummy argument, since CXXFLAGS is quoted
 if test_uname Linux ; then
   X64=$(uname -m)
   if [ "$X64" = x86_64 ]
