@@ -47,11 +47,9 @@ Client
 Others 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-o Parser expression:
-//    exprMap["../obs:YMD ge  ( (19720101 + 6576) - (12 + 1) )"] = std::make_pair(AstGreaterEqual::stype(),true);
-
-o Size of full defs, returned to client keeps on growing ????
-  Data specific, small defs does not show problem.
-  This is partly accounted for by:
-   - Task process id:
-   - Task password
+o Update replace
+  currently the definition file, sent to server could include hundreds of suites
+  We should prune the suites, that do not take part in the replace. *****
+  
+  
+  
