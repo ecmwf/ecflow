@@ -280,6 +280,11 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 	if(section< 0 || section >= header_->count())
 		return;
 
+    int visCnt=0;
+    for(int i=0; i <header_->count(); i++)
+        if(!header_->isSectionHidden(i))
+            visCnt++;
+
 	QList<QAction*> lst;
 	QMenu *menu=new QMenu(this);
 	QAction *ac;
@@ -292,19 +297,16 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 		ac->setCheckable(true);
 		ac->setData(i);
 
-		if(i==0)
-		{
-		  	ac->setChecked(true);
-			ac->setEnabled(false);
-		}
-		else
-		{
-			ac->setChecked(!(header_->isSectionHidden(i)));
-		}
+        bool vis=!header_->isSectionHidden(i);
+        ac->setChecked(vis);
+
+        if(vis && visCnt <=1)
+        {
+            ac->setEnabled(false);
+        }
 
 		menu->addAction(ac);
 	}
-
 
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 	//VParamFilterMenu stateFilterMenu(menu,filterDef_->nodeState(),VParamFilterMenu::ColourDecor);
@@ -314,15 +316,13 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 	{
 	  	int i=ac->data().toInt();
 	  	header_->setSectionHidden(i,!ac->isChecked());
-		//MvQDesktopSettings::headerVisible_[i]=ac->isChecked();
-		//broadcastHeaderChange();
 	}
 	delete menu;
 }
 
 void TableNodeView::readSettings(VSettings* vs)
 {
-    vs->beginGroup("columns");
+    vs->beginGroup("column");
 
     std::vector<std::string> orderVec;
     std::vector<int> visVec, wVec;
@@ -331,7 +331,10 @@ void TableNodeView::readSettings(VSettings* vs)
     vs->get("visible",visVec);
     vs->get("width",wVec);
 
-    if(orderVec.size() == visVec.size() && orderVec.size() == wVec.size())
+    vs->endGroup();
+
+    if(orderVec.size() != visVec.size() || orderVec.size() != wVec.size())
+        return;
 
     for(size_t i=0; i < orderVec.size(); i++)
     {
@@ -341,7 +344,7 @@ void TableNodeView::readSettings(VSettings* vs)
             if(model_->headerData(j,Qt::Horizontal,Qt::UserRole).toString().toStdString() == id)
             {
                 if(visVec[i] == 0)
-                    header()->setSectionHidden(j,true);
+                    header()->setSectionHidden(j,true);               
 
                 else if(wVec[i] > 0)
                     setColumnWidth(j,wVec[i]);
@@ -351,12 +354,21 @@ void TableNodeView::readSettings(VSettings* vs)
         }
     }
 
-    vs->endGroup();
+    if(header_->count() > 0)
+    {
+        int visCnt=0;
+        for(int i=0; i < header_->count(); i++)
+            if(!header_->isSectionHidden(i))
+                visCnt++;
+
+        if(visCnt==0)
+            header()->setSectionHidden(0,false);
+    }
 }
 
 void TableNodeView::writeSettings(VSettings* vs)
 {
-    vs->beginGroup("columns");
+    vs->beginGroup("column");
 
     std::vector<std::string> orderVec;
     std::vector<int> visVec, wVec;
