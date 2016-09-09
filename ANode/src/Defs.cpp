@@ -936,6 +936,10 @@ bool Defs::replaceChild(const std::string& path,
  		}
 	}
 
+	// For node that were migrated, preserve state.
+	bool migrated = (clientDefs->flag().is_set(ecf::Flag::MIGRATED) || clientNode->flag().is_set(ecf::Flag::MIGRATED));
+	clientNode->flag().clear(ecf::Flag::MIGRATED);
+
 	/// REPLACE ===========================================================
  	if (!createNodesAsNeeded || serverNode.get()) {
 		// Then the child must exist in the server defs (i.e. this)
@@ -946,9 +950,9 @@ bool Defs::replaceChild(const std::string& path,
 		}
 		// HAVE a FULL match in the server
 
-		// Copy over begun and suspended states
- 		if (serverNode->suite()->begun())  clientNode->begin();
- 		if (serverNode->isSuspended())     clientNode->suspend();
+		// Copy over begun and suspended states, otherwise preserve state of client node
+		if (!migrated && serverNode->suite()->begun())  clientNode->begin();
+		if (serverNode->isSuspended())                  clientNode->suspend();
 
  		// Find the position of the server node relative to its peers
  		// We use this to re-add client node at the same position
@@ -984,7 +988,7 @@ bool Defs::replaceChild(const std::string& path,
  	Node* client_parent = clientNode->parent();
 	while (client_parent) {
 	   server_parent = findAbsNode( client_parent->absNodePath() );
-      if (server_parent ) {
+      if (server_parent) {
          break;
       }
       last_client_child = client_parent;

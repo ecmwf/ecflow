@@ -336,6 +336,11 @@ void NodeContainer::calendarChanged(
          std::vector<node_ptr>& auto_cancelled_nodes,
          const ecf::LateAttr* inherited_late)
 {
+   // A node that is migrate should not allow any change of state.
+   if (flag().is_set(ecf::Flag::MIGRATED)) {
+      return;
+   }
+
    // The late attribute is inherited, we only set late on the task/alias
 	Node::calendarChanged(c,auto_cancelled_nodes,NULL);
 

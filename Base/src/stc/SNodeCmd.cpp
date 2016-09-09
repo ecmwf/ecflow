@@ -106,6 +106,13 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
       throw std::runtime_error(ss.str());
    }
 
+   // If user wants to show defs with state or migrate(full state), flag defs as migrate
+   // So that if we do a *replace* with the same def's we preserve the state
+   bool set_migrated_flag =  false;
+   if (cts_cmd->show_style() == PrintStyle::MIGRATE || cts_cmd->show_style() == PrintStyle::STATE) {
+      set_migrated_flag = true;
+   }
+
 
    if (server_reply.cli() && !cts_cmd->group_cmd()) {
       /// This Could be part of a group command, hence ONLY show Node if NOT group command
@@ -113,6 +120,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
 
       Suite* suite = node->isSuite();
       if (suite) {
+         if (set_migrated_flag) suite->flag().set(ecf::Flag::MIGRATED);
          if (cts_cmd->show_style() != PrintStyle::MIGRATE) {
             /// Auto generate externs, before writing to standard out. This can be expensive since
             /// All the trigger references need to to be resolved. & AST need to be created first
@@ -122,6 +130,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
             Defs defs;
             defs.addSuite(boost::dynamic_pointer_cast<Suite>( node ));
             defs.auto_add_externs();
+            if (set_migrated_flag) defs.flag().set(ecf::Flag::MIGRATED);
             std::cout << defs;
             return true;
          }
@@ -129,7 +138,10 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
          return true;
       }
       Family* fam = node->isFamily();
-      if (fam) std::cout << *fam << "\n";
+      if (fam) {
+         if (set_migrated_flag) fam->flag().set(ecf::Flag::MIGRATED);
+         std::cout << *fam << "\n";
+      }
       Task* task = node->isTask();
       if (task) std::cout << *task << "\n";
       Alias* alias = node->isAlias();
