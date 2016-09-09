@@ -84,6 +84,8 @@ public:
 	ServerListDialog(Mode,ServerFilter*,QWidget *parent=0);
 	~ServerListDialog();
 
+     void showSysSyncLog();
+
 public Q_SLOTS:
 	 void accept();
 	 void reject();
@@ -97,7 +99,8 @@ protected Q_SLOTS:
 	 void on_serverView_doubleClicked(const QModelIndex& index);
      void on_actionFavourite_triggered(bool checked);
      void on_sysSyncTb_clicked(bool);
-	 void slotItemSelected(const QModelIndex&,const QModelIndex&);
+     void on_sysSyncLogTb_toggled(bool);
+     void slotItemSelected(const QModelIndex&,const QModelIndex&);
 	 void slotItemClicked(const QModelIndex&);
 	 void slotFilter(QString);
 	 void slotFilterFavourite(bool);

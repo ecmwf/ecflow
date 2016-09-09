@@ -23,11 +23,14 @@
        </item>
        <item>
         <widget class="QToolButton" name="filterFavTb_">
+         <property name="toolTip">
+          <string>Show favourite and loaded servers only</string>
+         </property>
          <property name="statusTip">
           <string>Show favourite servers only</string>
          </property>
          <property name="text">
-          <string>Show favourite and loaded only</string>
+          <string>Favourites and loaded</string>
          </property>
          <property name="icon">
           <iconset>
@@ -41,14 +44,36 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QToolButton" name="sysSyncLogTb">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Show change log for &lt;b&gt;system servers&lt;/b&gt;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>:/viewer/info.svg</normaloff>:/viewer/info.svg</iconset>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonIconOnly</enum>
+         </property>
+         <property name="autoRaise">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
-     </item>
-     <item row="1" column="0">
-      <widget class="QTreeView" name="serverView">
-       <property name="contextMenuPolicy">
-        <enum>Qt::ActionsContextMenu</enum>
-       </property>
-      </widget>
      </item>
      <item row="1" column="1">
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -137,6 +162,29 @@
         </widget>
        </item>
        <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="systemListLabel">
+         <property name="text">
+          <string>System servers:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QToolButton" name="sysSyncTb">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -145,7 +193,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Sync</string>
+          <string>&amp;Update from central list</string>
          </property>
         </widget>
        </item>
@@ -163,6 +211,40 @@
         </spacer>
        </item>
       </layout>
+     </item>
+     <item row="1" column="0">
+      <widget class="QWidget" name="widget" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QSplitter" name="splitter_">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QTreeView" name="serverView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ActionsContextMenu</enum>
+           </property>
+          </widget>
+          <widget class="ServerListSyncWidget" name="sysSyncLogW_" native="true"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </item>
     </layout>
    </item>
@@ -263,6 +345,14 @@
   <zorder>buttonBox</zorder>
   <zorder></zorder>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ServerListSyncWidget</class>
+   <extends>QWidget</extends>
+   <header>ServerListSyncWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

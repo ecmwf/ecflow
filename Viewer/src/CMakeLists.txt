@@ -114,7 +114,7 @@ set(viewer_srcs
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp
-    ServerListSyncDialog.cpp
+    ServerListSyncWidget.cpp
     ServerSettingsItemWidget.cpp
     SessionDialog.cpp
     SessionRenameDialog.cpp
@@ -259,7 +259,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerComThread.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
-    ServerListSyncDialog.hpp
+    ServerListSyncWidget.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp
@@ -329,7 +329,7 @@ set(viewer_wrap_ui_files
     ServerAddDialog.ui
     ServerEditDialog.ui 
     ServerListDialog.ui
-    ServerListSyncDialog.ui
+    ServerListSyncWidget.ui
     ServerSettingsItemWidget.ui
     SessionDialog.ui
     SessionRenameDialog.ui

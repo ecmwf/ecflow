@@ -75,7 +75,6 @@ protected:
 	int useCnt_;
 	ServerHandler* handler_;
 
-	std::set<std::string> suiteFilter_;
 	std::vector<ServerItemObserver*> observers_;
 };
 
