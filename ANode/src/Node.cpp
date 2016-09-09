@@ -518,6 +518,11 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
    LOG(Log::DBG,"   " << debugNodePath() << "::resolveDependencies " << NState::toString(state()) << " AT " << suite()->calendar().toString());
 #endif
 
+   // A node that is migrated/archived should not allow any change of state.
+   if (flag().is_set(ecf::Flag::MIGRATED)) {
+      return false;
+   }
+
    // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
    if (lateAttr_ && isSubmittable()) {
       // since the suite() traverse up the tree, only call when have a late attribute

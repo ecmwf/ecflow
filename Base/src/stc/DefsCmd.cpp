@@ -79,6 +79,12 @@ bool DefsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd
 		/// This Could be part of a group command, hence ONLY show defs if NOT group command
 	   PrintStyle style(cts_cmd->show_style());
 
+	   // If user wants to show defs with state or migrate(full state), flag defs as migrate
+	   // So that if we do a *replace* with the same def's we preserve the state
+	   if (cts_cmd->show_style() == PrintStyle::MIGRATE || cts_cmd->show_style() == PrintStyle::STATE) {
+	      defs_->flag().set(ecf::Flag::MIGRATED);
+	   }
+
 	   if (cts_cmd->show_style() != PrintStyle::MIGRATE) {
 	      /// Auto generate externs, before writing to standard out. This can be expensive since
 	      /// All the trigger references need to to be resolved. & AST need to be created first
