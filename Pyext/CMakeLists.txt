@@ -31,8 +31,11 @@ include_directories(
                     )
 
 # =====================================================================     
-# INCLUDES here is for external includes           
+# INCLUDES here is for external includes   
+#   NOINSTALL this stops double install, the one in i.e lib/ecflow.so
+#             The other install is in python2.7/site-packages/ecflow.so
 ecbuild_add_library( TARGET    ecflow
+                     NOINSTALL
                      TYPE      MODULE
                      SOURCES   ${srcs}
 					 CONDITION PYTHONLIBS_FOUND
@@ -67,12 +70,13 @@ set_target_properties(ecflow PROPERTIES
 ecbuild_add_test( TARGET py_u_TestMigrate
                   TYPE PYTHON 
                   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/py_u_TestMigrate.py
-                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
+                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" )
 
 list( APPEND u_tests
         py_u_TestAddDelete   
         py_u_TestAddDeleteFunc 
         py_u_TestAddNodeFunc  
+        py_u_TestCopy        
         py_u_TestDefs         
         py_u_TestDefsCheck    
         py_u_TestDerivable   
@@ -94,16 +98,16 @@ foreach( test ${u_tests} )
     ecbuild_add_test( TARGET ${test} 
                       TYPE PYTHON 
                       ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" 
                       TEST_DEPENDS u_base
                      )
 endforeach()
 
 
-if ( ENABLE_ALL_TESTS)
+if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	list( APPEND s_tests
-	        py_s_TestClientApi    
-	        py_s_TestPythonChildApi
+	             py_s_TestClientApi    
+	             py_s_TestPythonChildApi
 	)
 	
 	foreach( test ${s_tests} )
@@ -111,7 +115,7 @@ if ( ENABLE_ALL_TESTS)
 	    ecbuild_add_test( TARGET ${test} 
 	                      TYPE PYTHON 
 	                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-	                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+	                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" 
 	                      TEST_DEPENDS u_base
 	                     )
 	endforeach()
@@ -123,15 +127,19 @@ endif()
 
 # ==========================================================================
 # install
-#    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
-#    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
-#    setup : experimental only,python way of installing
+#    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
+#
+#    local | not defined : this will install to:
+#                          $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
+#    setup               : experimental only,python way of installing
 #
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory
+#
+# Note:  To install only the python module
+#       cd  buildir
+#       cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR -DCOMPONENT=python -P cmake_install.cmake -- make install
 # ==========================================================================
-
-# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
    
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
@@ -139,10 +147,8 @@ if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INST
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
       set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
       
-      install( TARGETS ecflow   DESTINATION ${PYTHON_DEST} 
-               RENAME ecflow.so
-             )
-      install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST} )
+      install( TARGETS ecflow              DESTINATION ${PYTHON_DEST}  RENAME ecflow.so COMPONENT python )
+      install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST}                   COMPONENT python )
       
 else()
 	  message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")

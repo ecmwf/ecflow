@@ -29,14 +29,20 @@ public:
 	QSize minimumSizeHint() const;
 	QToolButton* optionsTb() const;
 	void addActions(QList<QAction*> lst);
+    void setDetachedAction(QAction *ac);
 
 public Q_SLOTS:
 	void slotUpdateTitle(QString txt);
 
 protected Q_SLOTS:
-	void on_floatTb__clicked(bool);
+#if 0
+    void on_floatTb__clicked(bool);
+#endif
     void on_closeTb__clicked(bool);
     void slotActionChanged();
+
+Q_SIGNALS:
+    void detachedChanged(bool);
 
 protected:
     QList<QToolButton*> actionTbList_;

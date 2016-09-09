@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QStyleFactory>
+#include <QPixmap>
 
 #include "File.hpp"
 #include "MainWindow.hpp"
@@ -44,6 +45,8 @@ int main(int argc, char **argv)
     //Init qt
     QApplication app(argc, argv);
 
+    app.setWindowIcon(QPixmap(":/viewer/logo_small.png"));
+
     QStringList styleLst=QStyleFactory::keys();
 
     //Set the style
@@ -67,7 +70,8 @@ int main(int argc, char **argv)
     //app.setFont(font);
 
     //Initialise the config and other paths
-    DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from
+    std::string exe(argv[0]);
+    DirectoryHandler::init(exe);  // we need to tell the Directory class where we started from
 
     //Set the stylesheet
     std::string styleSheetFileName="viewer.qss";
@@ -101,6 +105,9 @@ int main(int argc, char **argv)
     //Initialise the server list
     ServerList::instance()->init();
 
+    //Sync the server list with the system server list
+    //ServerList::instance()->syncSystemFile();
+
     //Load the global configurations
     VConfig::instance()->init(DirectoryHandler::etcDir());
     
@@ -128,6 +135,10 @@ int main(int argc, char **argv)
 		SessionDialog sessionDialog;
 		if (sessionDialog.exec() != QDialog::Accepted)
 			startMainWindow = false;
+	}
+	else
+	{
+		SessionHandler::setTemporarySessionIfReqested(); // user starts with -ts command-line switch?
 	}
 
 	if (startMainWindow)

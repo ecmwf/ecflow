@@ -44,6 +44,11 @@ Alias::Alias( const std::string& name )
    set_state_only(NState::QUEUED);
 }
 
+Alias::Alias( const Alias& rhs)
+: Submittable(rhs)
+{
+}
+
 Alias::Alias()
 {
    set_state_only(NState::QUEUED);

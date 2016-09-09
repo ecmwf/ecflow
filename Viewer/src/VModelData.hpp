@@ -130,6 +130,10 @@ Q_SIGNALS:
      void endFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
      void beginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
      void endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
+     void beginFilterUpdateRemoveTop(VTreeServer*,int);
+     void endFilterUpdateRemoveTop(VTreeServer*,int);
+     void beginFilterUpdateInsertTop(VTreeServer*,int);
+     void endFilterUpdateInsertTop(VTreeServer*,int);
 
 private:
      VTree* tree_;
@@ -205,7 +209,7 @@ public:
     VModelServer* server(ServerHandler*) const;
 	int indexOfServer(ServerHandler* s) const;
 	int numOfNodes(int) const;
-    bool isFilterNull() const;
+    bool isFilterComplete() const;
 
 	//From ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*);

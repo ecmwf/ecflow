@@ -71,6 +71,10 @@ public Q_SLOTS:
     void slotEndFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
     void slotBeginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
     void slotEndFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
+    void slotBeginFilterUpdateRemoveTop(VTreeServer*,int);
+    void slotEndFilterUpdateRemoveTop(VTreeServer*,int);
+    void slotBeginFilterUpdateInsertTop(VTreeServer*,int);
+    void slotEndFilterUpdateInsertTop(VTreeServer*,int);
 
 	//void slotResetBranch(VModelServer*,const VNode*);
     void slotDataChanged(VModelServer*);

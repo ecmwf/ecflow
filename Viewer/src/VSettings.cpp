@@ -15,6 +15,8 @@
 
 #include <QDebug>
 
+#include <sstream>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem/path.hpp>
@@ -145,6 +147,17 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	pt_.put_child(path_.path(key),array);
 }
 
+void VSettings::put(const std::string& key,const std::vector<int>& val)
+{
+    boost::property_tree::ptree array;
+    for(std::vector<int>::const_iterator it=val.begin(); it != val.end(); ++it)
+    {
+        std::stringstream ss;
+        ss << (*it);
+        array.push_back(std::make_pair("",ss.str()));
+    }
+    pt_.put_child(path_.path(key),array);
+}
 
 // for adding a list of 'structs'
 void VSettings::put(const std::string& key,const std::vector<VSettings>& val)

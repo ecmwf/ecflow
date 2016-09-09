@@ -69,19 +69,21 @@ void export_SuiteAndFamily()
    ;
 
 
-   class_<Family, bases<NodeContainer>, family_ptr, boost::noncopyable>("Family",DefsDoc::family_doc())
+   class_<Family, bases<NodeContainer>, family_ptr>("Family",DefsDoc::family_doc())
    .def("__init__",make_constructor(&Family::create), DefsDoc::family_doc())
    .def(self == self )                    // __eq__
    .def("__str__",   &Family::to_string)  // __str__
+   .def("__copy__",  copyObject<Family>)  // __copy__ uses copy constructor
    .def("__enter__", &family_enter)       // allow with statement, hence indentation support
    .def("__exit__",  &family_exit)        // allow with statement, hence indentation support
    ;
 
 
-   class_<Suite, bases<NodeContainer>, suite_ptr, boost::noncopyable>("Suite",DefsDoc::suite_doc())
+   class_<Suite, bases<NodeContainer>, suite_ptr>("Suite",DefsDoc::suite_doc())
    .def("__init__",make_constructor(&Suite::create), DefsDoc::suite_doc())
    .def(self == self )                   // __eq__
    .def("__str__",   &Suite::to_string)  // __str__
+   .def("__copy__",  copyObject<Suite>)  // __copy__ uses copy constructor
    .def("__enter__", &suite_enter)       // allow with statement, hence indentation support
    .def("__exit__",  &suite_exit)        // allow with statement, hence indentation support
    .def("add_clock", &add_clock)

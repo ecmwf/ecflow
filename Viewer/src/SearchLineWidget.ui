@@ -111,7 +111,7 @@
      </property>
      <property name="icon">
       <iconset resource="viewer.qrc">
-       <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
+       <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
      </property>
      <property name="autoRaise">
       <bool>true</bool>

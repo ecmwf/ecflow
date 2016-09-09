@@ -260,6 +260,11 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 	return PreAllocatedReply::string_cmd(fileContents);
 }
 
+bool CFileCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,pathToNode_);
+}
+
 const char* CFileCmd::arg()  { return CtsApi::fileArg();}
 const char* CFileCmd::desc() {
 	        /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8

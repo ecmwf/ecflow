@@ -1,0 +1,65 @@
+{
+    "windowCount": "1",
+    "topWindowId": "0",
+    "window_0":
+    {
+        "infoPanelCount": "2",
+        "tabCount": "1",
+        "currentTabId": "0",
+        "tab_0":
+        {
+            "server":
+            [
+                "SERVER_ALIAS_PLACEHOLDER"
+            ],
+            "widgetCount": "2",
+            "widget_0":
+            {
+                "type": "tree",
+                "dockId": "dock_0",
+                "breadcrumbs":
+                {
+                    "active": "1"
+                },
+                "state": "",
+                "attribute":
+                [
+                    "meter",
+                    "event",
+                    "repeat",
+                    "trigger",
+                    "label",
+                    "time",
+                    "date",
+                    "limit",
+                    "limiter",
+                    "late"
+                ],
+                "icon":
+                [
+                    "message",
+                    "rerun",
+                    "complete",
+                    "late",
+                    "time",
+                    "date",
+                    "wait",
+                    "zombie",
+                    "killed",
+                    "slow"
+                ]
+            },
+            "widget_1":
+            {
+                "type": "info",
+                "dockId": "dock_1",
+                "breadcrumbs":
+                {
+                    "active": "1"
+                },
+                "frozen": "false",
+                "detached": "false"
+            }
+        }
+    }
+}

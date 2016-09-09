@@ -83,7 +83,7 @@ void NodeSearchDialog::writeSettings()
 
 	settings.beginGroup("main");
 	settings.setValue("size",size());
-	//settings.setValue("current",list_->currentRow());
+    queryWidget_->writeSettings(settings);
 	settings.endGroup();
 }
 
@@ -103,6 +103,8 @@ void NodeSearchDialog::readSettings()
 	{
 	  	resize(QSize(550,540));
 	}
+
+    queryWidget_->readSettings(settings);
 
 	/*if(settings.contains("current"))
 	{

@@ -46,6 +46,22 @@ using namespace boost::gregorian;
 // is abstract syntax tree during the post process call
 
 
+Suite::Suite(const Suite& rhs)
+: NodeContainer(rhs),
+  defs_(NULL),
+  begun_(rhs.begun_),
+  state_change_no_(0),
+  modify_change_no_(0),
+  begun_change_no_(0),
+  calendar_change_no_(0),
+  suite_gen_variables_(NULL)
+{
+   if (rhs.clockAttr_.get())
+      clockAttr_ = boost::make_shared<ClockAttr>( *rhs.clockAttr_ );
+
+   calendar_ = rhs.calendar_;
+}
+
 Suite::~Suite()
 {
 //	std::cout << "Suite::~Suite() " << debugNodePath() << "\n";

@@ -135,7 +135,6 @@
                     "default": "rgb(212,212,255)"
                   }
           }
-
     },
     
     "query_columns": {
@@ -165,7 +164,7 @@
     	
     	"path" : {
     		"label" : "Node",
-    		"tooltip" : "Node"
+            "tooltip" : "Node"
     	},
     	"status" : {
     		"label" : "Status"

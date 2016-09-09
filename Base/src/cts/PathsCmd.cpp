@@ -299,6 +299,11 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
    return PreAllocatedReply::ok_cmd();
 }
 
+bool PathsCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,paths_);
+}
+
 static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete)
 {
    vector<Task*> taskVec;

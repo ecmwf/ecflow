@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -17,6 +17,7 @@
 #include "ServerHandler.hpp"
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
+#include "VNode.hpp"
 #include "VReply.hpp"
 #include "UserMessage.hpp"
 
@@ -35,28 +36,32 @@ int OutputItemWidget::updateDirTimeout_=1000*60;
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent),
 	userClickedReload_(false),
-	ignoreOutputSelection_(false)
+    ignoreOutputSelection_(false),
+    dirColumnsAdjusted_(false),
+    submittedWarning_(false)
 {
     //We try to keep the contents when clicking away
     //tryToKeepContents_=true;
 
     setupUi(this);
 
-	messageLabel_->hide();
-    warnLabel_->hide();
-	dirLabel_->hide();
-
-	fileLabel_->setProperty("fileInfo","1");
-
 	//--------------------------------
 	// The file contents
 	//--------------------------------
+
+    messageLabel_->hide();
+    warnLabel_->hide();
+    fileLabel_->setProperty("fileInfo","1");
 
 	infoProvider_=new OutputFileProvider(this);
 
 	//--------------------------------
 	// The dir contents
 	//--------------------------------
+
+    dirMessageLabel_->hide();
+    dirMessageLabel_->setShowTypeTitle(false);
+    dirLabel_->setProperty("fileInfo","1");
 
 	dirProvider_=new OutputDirProvider(this);
 
@@ -124,8 +129,9 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
-    //enabled_=true;
-	info_=info;
+    //set the info
+    adjust(info);
+
     userClickedReload_ = false;
 
     //info must be a node
@@ -166,6 +172,8 @@ void OutputItemWidget::getLatestFile()
     messageLabel_->stopProgress();
     fileLabel_->clear();
     browser_->clear();
+    dirLabel_->clear();
+    dirMessageLabel_->hide();
     fetchInfo_->clearInfo();
 
     //Get the latest file contents
@@ -199,12 +207,14 @@ void OutputItemWidget::clearContents()
     enableDir(false);
     messageLabel_->hide();
     messageLabel_->stopProgress();
-    fileLabel_->clear();
+    fileLabel_->clear();      
+    dirLabel_->clear();
     browser_->clearCursorCache();
     browser_->clear();
     reloadTb_->setEnabled(true);
     userClickedReload_ = false;
     fetchInfo_->clearInfo();
+    submittedWarning_=false;
 }
 
 void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
@@ -267,16 +277,30 @@ void OutputItemWidget::infoReady(VReply* reply)
         //is reset to default when we first call infoready. So we need to set it again!!
         browser_->updateFont();
 
+        //TODO: make it possible to show warning and info at the same time
         bool hasMessage=false;
-        if(reply->hasWarning())
+        submittedWarning_=false;
+        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        if(reply->fileName() == op->joboutFileName() && !op->isTryNoZero(reply->fileName()) &&
+           info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
         {
-            messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
             hasMessage=true;
+            submittedWarning_=true;
+            messageLabel_->showWarning("This is the current job output (as defined by variable ECF_JOBOUT), but \
+                   beacuse the node status is <b>submitted</b> it may contain the ouput from a previous run!");
         }
-        else if(reply->hasInfo())
+        else
         {
-            messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-            hasMessage=true;
+            if(reply->hasWarning())
+            {
+                messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+                hasMessage=true;
+            }
+            else if(reply->hasInfo())
+            {
+                messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+                hasMessage=true;
+            }
         }
 
         browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));
@@ -363,9 +387,17 @@ void OutputItemWidget::infoReady(VReply* reply)
     // From output dir provider
     //------------------------
     else
-    {
+    {    
+        //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_ and
+        //is only supposed to display error messages!
+
+        enableDir(true);
+
         //Update the dir widget and select the proper file in the list
         updateDir(reply->directory(),true);
+
+        //Update the dir label
+        dirLabel_->update(reply);
     }
 }
 
@@ -392,17 +424,15 @@ void OutputItemWidget::infoFailed(VReply* reply)
     if(reply->sender() == infoProvider_)
 	{
 		QString s=QString::fromStdString(reply->errorText());
-
-		messageLabel_->showError(s);
-        //messageLabel_->stopLoadLabel();
+		messageLabel_->showError(s);       
         messageLabel_->stopProgress();
+        submittedWarning_=false;
 
 		//Update the file label
 		fileLabel_->update(reply);
 
         userClickedReload_ = false;
-        reloadTb_->setEnabled(true);
-        //updateDir(true);
+        reloadTb_->setEnabled(true);       
 
         fetchInfo_->setInfo(reply,info_);
 	}
@@ -410,6 +440,21 @@ void OutputItemWidget::infoFailed(VReply* reply)
     {
         //We do not have directories
         enableDir(false);
+
+        QColor col(70,71,72);
+        QString s="<b><font color=\'" + col.name() +  "\'>Output directory</font></b>: ";
+        const std::vector<std::string> et=reply->errorTextVec();
+        if(et.size() > 1)
+        {
+            for(size_t i=0; i < et.size(); i++)
+                s+="<b><font color=\'" + col.name() +  "\'>[" + QString::number(i+1) + "]</font></b> " +
+                        QString::fromStdString(et[i]) + ". &nbsp;&nbsp;";
+        }
+        else if(et.size() == 1)
+            s+=QString::fromStdString(et[0]);
+
+        dirMessageLabel_->showError(s);
+
         //the timer is stopped. It will be restarted again if we get a local file or
         //a file via the logserver
         updateDirTimer_->stop();
@@ -457,7 +502,15 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 
 		dirView_->selectionModel()->clearSelection();
         dirModel_->setData(dir,op->joboutFileName());
-        dirWidget_->show();
+        //dirWidget_->show();
+
+        if(!dirColumnsAdjusted_)
+        {
+            dirColumnsAdjusted_=true;
+            for(int i=0; i< dirModel_->columnCount()-1; i++)
+                dirView_->resizeColumnToContents(i);
+
+        }
 
         UserMessage::qdebug("  dir item count=" + QString::number(dirModel_->rowCount()));
 
@@ -468,7 +521,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 	}
 	else
 	{
-		dirWidget_->hide();
+        //dirWidget_->hide();
 		dirModel_->clearData();
 	}
 
@@ -485,37 +538,6 @@ void OutputItemWidget::updateDir(bool restartTimer)
 	//updateDir(restartTimer,fullName);
 }
 
-void OutputItemWidget::updateDir(bool restartTimer,const std::string& selectFullName)
-{
-	/*if(restartTimer)
-		updateDirTimer_->stop();
-
-	OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
-	VDir_ptr dir=op->directory();
-
-	bool status=(dir && dir.get());
-
-	if(status)
-	{
-		dirView_->selectionModel()->clearSelection();
-		dirModel_->setData(dir);
-		dirWidget_->show();
-
-		//Try to preserve the selection
-		ignoreOutputSelection_=true;
-		dirView_->setCurrentIndex(dirSortModel_->fullNameToIndex(selectFullName));
-		ignoreOutputSelection_=false;
-	}
-	else
-	{
-		dirWidget_->hide();
-		dirModel_->clearData();
-	}
-
-	if(restartTimer)
-		updateDirTimer_->start(updateDirTimeout_);*/
-}
-
 void OutputItemWidget::slotUpdateDir()
 {
 	updateDir(false);
@@ -524,13 +546,15 @@ void OutputItemWidget::slotUpdateDir()
 void OutputItemWidget::enableDir(bool status)
 {
 	if(status)
-	{
-		dirWidget_->show();
+	{       
+        dirWidget_->show();
+        dirMessageLabel_->hide();
 	}
 	else
 	{
-		dirWidget_->hide();
-		dirModel_->clearData();
+        dirWidget_->hide();
+        dirModel_->clearData();
+        dirMessageLabel_->show();
 	}
 }
 
@@ -581,6 +605,29 @@ void OutputItemWidget::on_fontSizeDownTb__clicked()
 {
 	//We need to call a custom slot here instead of "zoomOut"!!!
 	browser_->zoomOut();
+}
+
+//-------------------------
+// Update
+//-------------------------
+
+void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
+{
+    //Changes in the nodes
+    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    {
+        if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::DEFSTATUS ||
+            *it == ecf::Aspect::SUSPENDED)
+        {
+            if(submittedWarning_)
+               getLatestFile();
+            else if(info_ && info_->node() == n && info_->node()->isSubmitted())
+               getLatestFile();
+
+
+            return;
+        }
+    }
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

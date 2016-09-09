@@ -87,6 +87,11 @@ STC_Cmd_ptr FreeDepCmd::doHandleRequest(AbstractServer* as) const
    return doJobSubmission( as );
 }
 
+bool FreeDepCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,paths_);
+}
+
 const char* FreeDepCmd::arg()  { return CtsApi::freeDepArg();}
 const char* FreeDepCmd::desc() {
    return

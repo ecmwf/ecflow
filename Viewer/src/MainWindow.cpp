@@ -88,14 +88,14 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     	    this,SLOT(slotContentsChanged()));
 
     //Add temporary preview label
-    QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
+   /* QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
     label->setAutoFillBackground(true);
     label->setProperty("previewLabel","1");
 
     QLabel *label1=new QLabel("      ",this);
 
     viewToolBar->addWidget(label1);
-    viewToolBar->addWidget(label);
+    viewToolBar->addWidget(label);*/
 
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -581,6 +581,24 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 
 		//Save browser settings
 		MainWindow::save(topWin);
+
+		// handle session cleanup
+		// temporary sessions can be saved or deleted
+		SessionItem *si = SessionHandler::instance()->current();
+		if (si->temporary())
+		{
+			if (si->askToPreserveTemporarySession())
+			{
+				if(QMessageBox::question(0,tr("Delete temporary session?"),
+							tr("This was a temporary session - would you like to preserve it for future use?"),
+							QMessageBox::Yes | QMessageBox::No,QMessageBox::No) == QMessageBox::No)
+					SessionHandler::destroyInstance();
+			}
+			else  // if askToPreserveTemporarySession() is false, then we assume we want to delete
+			{
+				SessionHandler::destroyInstance();
+			}
+		}
 
 		//Exit ecFlowView
 		QApplication::quit();

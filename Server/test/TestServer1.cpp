@@ -66,9 +66,16 @@ public:
    virtual void shutdown() { Server::shutdown(); }
    virtual void halted() { Server::halted(); }
    virtual void restart() { Server::restart(); }
+
    virtual bool reloadWhiteListFile(std::string& errorMsg) { return Server::reloadWhiteListFile(errorMsg);}
    virtual bool authenticateReadAccess(const std::string& user) { return Server::authenticateReadAccess(user); }
+   virtual bool authenticateReadAccess(const std::string& user, const std::string& path) { return Server::authenticateReadAccess(user,path); }
+   virtual bool authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths){ return Server::authenticateReadAccess(user,paths); }
+
    virtual bool authenticateWriteAccess(const std::string& user) { return Server::authenticateWriteAccess(user); }
+   virtual bool authenticateWriteAccess(const std::string& user, const std::string& path) { return Server::authenticateWriteAccess(user,path); }
+   virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths){ return Server::authenticateWriteAccess(user,paths); }
+
    virtual bool lock(const std::string& user) { return Server::lock(user); }
    virtual void unlock() { Server::unlock();}
    virtual const std::string& lockedUser() const { return Server::lockedUser(); }

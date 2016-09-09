@@ -128,6 +128,11 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
    return doJobSubmission( as );
 }
 
+bool ReplaceNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,pathToNode_);
+}
+
 std::ostream& ReplaceNodeCmd::print(std::ostream& os) const
 {
    std::string path_to_client_defs = path_to_defs_;

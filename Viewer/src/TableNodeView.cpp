@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -67,9 +67,6 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 		                this, SLOT(slotContextMenu(const QPoint &)));
 
 	//Selection
-	connect(this,SIGNAL(clicked(const QModelIndex&)),
-			this,SLOT(slotSelectItem(const QModelIndex)));
-
 	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
 			this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
@@ -133,17 +130,20 @@ QWidget* TableNodeView::realWidget()
 	return this;
 }
 
+
 //Collects the selected list of indexes
 QModelIndexList TableNodeView::selectedList()
 {
-  	QModelIndexList lst;
-  	Q_FOREACH(QModelIndex idx,selectedIndexes())
-	  	if(idx.column() == 0)
-		  	lst << idx;
-	return lst;
+    QModelIndexList lst;
+    Q_FOREACH(QModelIndex idx,selectedIndexes())
+        if(idx.column() == 0)
+            lst << idx;
+    return lst;
 }
 
-void TableNodeView::slotSelectItem(const QModelIndex&)
+
+// reimplement virtual function from QTreeView - called when the selection is changed
+void TableNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
@@ -154,7 +154,9 @@ void TableNodeView::slotSelectItem(const QModelIndex&)
 			Q_EMIT selectionChanged(info);
 		}
 	}
+	QTreeView::selectionChanged(selected, deselected);
 }
+
 
 VInfo_ptr TableNodeView::currentSelection()
 {
@@ -164,6 +166,15 @@ VInfo_ptr TableNodeView::currentSelection()
 		return model_->nodeInfo(lst.front());
 	}
 	return VInfo_ptr();
+}
+
+void TableNodeView::setCurrentSelection(VInfo_ptr info)
+{
+    QModelIndex idx=model_->infoToIndex(info);
+    if(idx.isValid())
+    {
+        setCurrentIndex(idx);
+    }
 }
 
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)
@@ -311,7 +322,10 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 
 void TableNodeView::readSettings(VSettings* vs)
 {
-	std::vector<std::string> array;
+    vs->beginGroup("columns");
+
+#if 0
+    std::vector<std::string> array;
 	vs->get("columns",array);
 
 	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
@@ -326,8 +340,31 @@ void TableNodeView::readSettings(VSettings* vs)
 			}
 		}
 	}
+#endif
+
+    vs->endGroup();
 }
 
+void TableNodeView::writeSettings(VSettings* vs)
+{
+    vs->beginGroup("columns");
+
+    std::vector<std::string> orderVec;
+    std::vector<int> visVec, wVec;
+    for(int i=0; i < model_->columnCount(QModelIndex()); i++)
+    {
+        std::string id=model_->headerData(i,Qt::Horizontal,Qt::UserRole).toString().toStdString();
+        orderVec.push_back(id);
+        visVec.push_back((header()->isSectionHidden(i))?1:0);
+        wVec.push_back(columnWidth(i));
+    }
+
+    vs->put("order",orderVec);
+    vs->put("visible",visVec);
+    vs->put("width",wVec);
+
+    vs->endGroup();
+}
 
 //=========================================
 // TableNodeHeader

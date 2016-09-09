@@ -32,7 +32,7 @@ class DirInfoLabel : public FileInfoLabel
 public:
 	explicit DirInfoLabel(QWidget* parent=0) : FileInfoLabel(parent) {}
 
-	void update(VDir_ptr);
+    void update(VReply*);
 
 };
 

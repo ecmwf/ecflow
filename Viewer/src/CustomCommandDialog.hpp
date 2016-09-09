@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -23,7 +23,7 @@ public:
 	explicit CustomCommandDialog(QWidget *parent = 0);
 	~CustomCommandDialog() {};
 
-    QString command() {return commandDesigner_->command();};
+	MenuItem &menuItem() {return commandDesigner_->menuItem();};
 	void setNodes(std::vector<VInfo_ptr> &nodes) {commandDesigner_->setNodes(nodes);};
 	std::vector<VInfo_ptr> &selectedNodes() {return commandDesigner_->selectedNodes();};
 

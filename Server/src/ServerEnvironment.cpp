@@ -14,8 +14,6 @@
 //
 //============================================================================
 
-#include <sys/types.h> // for getpid
-#include <unistd.h>    // for getpid
 #include <stdlib.h>    // for getenv()
 
 #include <iostream>
@@ -41,6 +39,7 @@
 #include "File.hpp"
 #include "boost_archive.hpp"
 #include "JobProfiler.hpp"
+#include "Pid.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -126,8 +125,8 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
    }
 
    // get server process id. This may be visualised in xecf. makes it easier to kill server
-   try { ecf_pid_ = boost::lexical_cast<std::string>(getpid());  }
-   catch (boost::bad_lexical_cast& e) {
+   try { ecf_pid_ = Pid::getpid();  }
+   catch (...) {
       throw ServerEnvironmentException("ServerEnvironment::ServerEnvironment:: Could not convert PID to a string\n");
    }
    // std::cout << "PID = " << ecf_pid_ << "\n";
@@ -390,13 +389,29 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 bool ServerEnvironment::authenticateReadAccess(const std::string& user) const
 {
 	// if *NO* users specified then all users are valid
-	return white_list_file_.allow_read_access(user);
+	return white_list_file_.verify_read_access(user);
+}
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& path) const
+{
+   return white_list_file_.verify_read_access(user,path);
+}
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::vector<std::string>& paths) const
+{
+   return white_list_file_.verify_read_access(user,paths);
 }
 
 bool ServerEnvironment::authenticateWriteAccess(const std::string& user) const
 {
    // if *NO* users specified then all users have write access
-   return white_list_file_.allow_write_access(user);
+   return white_list_file_.verify_write_access(user);
+}
+bool ServerEnvironment::authenticateWriteAccess(const std::string& user,const std::string& path) const
+{
+   return white_list_file_.verify_write_access(user,path);
+}
+bool ServerEnvironment::authenticateWriteAccess(const std::string& user,const std::vector<std::string>& paths) const
+{
+   return white_list_file_.verify_write_access(user,paths);
 }
 
 // ============================================================================================

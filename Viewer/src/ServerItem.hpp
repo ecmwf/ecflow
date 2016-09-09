@@ -40,6 +40,7 @@ public:
 	const std::string& host() const {return host_;}
 	const std::string& port() const {return port_;}
 	bool isFavourite() const {return favourite_;}
+    bool isSystem() const {return system_;}
 
 	bool isUsed() const;
 	int useCnt() const {return useCnt_;}
@@ -57,7 +58,8 @@ protected:
 	void  host(const std::string& host) {host_=host;}
 	void  port(const std::string& port) {port_=port;}
 	void  reset(const std::string& name,const std::string& host,const std::string& port);
-	void  setFavourite(bool b);
+    void  setFavourite(bool b);
+    void  setSystem(bool b);
 
 	void registerUsageBegin();
 	void registerUsageEnd();
@@ -69,6 +71,7 @@ protected:
 	std::string host_;
 	std::string port_;
 	bool favourite_;
+    bool system_;
 	int useCnt_;
 	ServerHandler* handler_;
 

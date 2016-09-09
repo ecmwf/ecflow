@@ -48,7 +48,7 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
             case DBG:   icon = QMessageBox::NoIcon;      break;
             default:    icon = QMessageBox::NoIcon;      break;
         }
-        QString title("Ecflowview");
+        QString title("EcFlowUI");
         QString qmsg = QString::fromStdString(message);
 
         QMessageBox box(icon, title, qmsg);

@@ -36,6 +36,12 @@
 # building the extension. Hence this requires that ECFLOW_INSTALL_DIR 
 # is correctly set during build time. Yuk. 
 #
+# python3 add test and migrate directories to PYTHONPATH for testing
+#  - some tests require:
+#    test/ecflow_test_util.py
+#    migrate/ecflow_migrate.py
+project : requirements <pythonpath>./test:./migrate  ;
+
 project thePyext ;
 
 use-project theCore      : ../ACore ;
@@ -48,12 +54,13 @@ use-project theSimulator : ../CSim ;
 
 # Make the definition of the python-extension rule available
 import python ;
+# using python : 3.5.1 : /usr/local/apps/python3/3.5.1-01/ ; 
 
 if ! [ python.configured ]
 {
-    # ECHO "notice: no Python configured in user-config.jam" ;
-    # ECHO "notice: will use default configuration" ;
-    # We will typically place this in user-congig/site-config.jam
+    ECHO "notice: no Python configured in *user-config.jam*" ;
+    ECHO "notice: will use default configuration" ;
+    # We will typically place this in user-config/site-config.jam
     #using python
     #     :  # version
     #     :  # cmd-or-prefix
@@ -61,7 +68,8 @@ if ! [ python.configured ]
     #     :  # libraries
     #     :  # condition
     #     ;
-    using python ;
+    #using python ;
+    #using python : 3.5 : python3 : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;
 }
 
 # Specify the path to the Boost project.  If you move this project,
@@ -159,11 +167,12 @@ local rule run-test ( test-name : sources + )
 
 #
 # Declare test targets; 
-# Note cant run TestWith until all plarforms support with statement, i.e python 2.6 or greater
+# Note can't run TestWith until all platforms support with statement, i.e python 2.6 or greater
 #                       
 run-test TestClientApi      : ecflow [ glob test/py_s_TestClientApi.py ] ;
 run-test TestPythonChildApi : ecflow [ glob test/py_s_TestPythonChildApi.py ] ;
 run-test TestDefs           : ecflow [ glob test/py_u_TestDefs.py ] ;
+run-test TestCopy           : ecflow [ glob test/py_u_TestCopy.py ] ;
 run-test TestError          : ecflow [ glob test/py_u_TestError.py ] ;
 run-test TestTraversal      : ecflow [ glob test/py_u_TestTraversal.py ] ;
 run-test TestDefsCheck      : ecflow [ glob test/py_u_TestDefsCheck.py ] ;
@@ -180,7 +189,7 @@ run-test TestDerivable     : ecflow [ glob test/py_u_TestDerivable.py ] ;
 run-test TestWith          : ecflow [ glob test/py_u_TestWith.py ] ;
 run-test TestFind          : ecflow [ glob test/py_u_TestFind.py ] ;
 run-test TestMigrate       : ecflow [ glob migrate/py_u_TestMigrate.py ] ;
-run-test TestRepeatArithmetic  :  ecflow [ glob test/py_u_TestRepeatArithmetic.py ] ;
+run-test TestRepeatArithmetic  : ecflow [ glob test/py_u_TestRepeatArithmetic.py ] ;
 run-test TestGeneratedVariable : ecflow [ glob test/py_u_TestGeneratedVariable.py ] ;
 run-test TestEcf               : ecflow [ glob test/py_u_TestEcf.py ] ;
 run-test TestFlag              : ecflow [ glob test/py_u_TestFlag.py ] ;
@@ -191,7 +200,7 @@ alias test-all
  :  TestUserManual TestJobGeneration  TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable  TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag
+    TestClientApi TestPythonChildApi TestFlag TestCopy
     # test_embed test_embed_ecf 
     ;
    
@@ -200,7 +209,7 @@ explicit test-all
     TestUserManual TestJobGeneration TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag
+    TestClientApi TestPythonChildApi TestFlag TestCopy
     # test_embed test_embed_ecf 
     ;
  

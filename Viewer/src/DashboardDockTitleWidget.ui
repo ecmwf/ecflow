@@ -25,7 +25,7 @@
   <property name="autoFillBackground">
    <bool>true</bool>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0">
    <property name="spacing">
     <number>2</number>
    </property>
@@ -105,9 +105,22 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="QToolButton" name="detachedTb_">
+     <property name="toolTip">
+      <string>Detach from selection in other panels</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>:/viewer/images/dock_float.svg</normaloff>:/viewer/images/dock_float.svg</iconset>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="autoRaise">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -120,7 +133,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="viewer.qrc">
+      <iconset>
        <normaloff>:/viewer/dock_config.svg</normaloff>:/viewer/dock_config.svg</iconset>
      </property>
      <property name="checkable">
@@ -131,26 +144,6 @@
      </property>
      <property name="autoRaise">
       <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="floatTb_">
-     <property name="toolTip">
-      <string>Float</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="viewer.qrc">
-       <normaloff>:/viewer/images/dock_float.svg</normaloff>:/viewer/images/dock_float.svg</iconset>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
-     </property>
-     <property name="autoRaise">
-      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -175,7 +168,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="viewer.qrc">
+      <iconset>
        <normaloff>:/viewer/images/dock_close.svg</normaloff>:/viewer/images/dock_close.svg</iconset>
      </property>
      <property name="iconSize">
@@ -191,8 +184,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

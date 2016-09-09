@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -40,6 +40,8 @@ public:
     void setFontProperty(VProperty* p);
     void updateFont();
     void notifyChange(VProperty* p);
+    bool isHyperlinkEnabled() {return hyperlinkEnabled_;};
+    bool setHyperlinkEnabled(bool h);
 
 public Q_SLOTS:
      void gotoLine();
@@ -55,12 +57,16 @@ Q_SIGNALS:
     void focusRegained ();
     void focusLost();
     void fontSizeChangedByWheel();
+    void hyperlinkActivated(QString link);
 
 protected:
     void resizeEvent(QResizeEvent *event);
     void focusInEvent(QFocusEvent *event);
     void focusOutEvent(QFocusEvent *event);
     void wheelEvent(QWheelEvent *event);
+    void mousePressEvent(QMouseEvent *e);
+    void mouseReleaseEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
 
 private:
     void fontSizeChangedByZoom();
@@ -68,7 +74,9 @@ private:
     bool showLineNum_;
     QWidget *lineNumArea_;
     int rightMargin_;
-    QString  lastFindString_;
+    bool hyperlinkEnabled_;
+    QString lastFindString_;
+    QString currentLink_;
     QTextDocument::FindFlags lastFindFlags_;
     GotoLineDialog *gotoLineDialog_;
     static QString emptyString_;

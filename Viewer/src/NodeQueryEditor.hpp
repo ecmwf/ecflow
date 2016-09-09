@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,7 +14,6 @@
 #include "ui_NodeQueryEditor.h"
 #include "ui_NodeQuerySaveDialog.h"
 
-
 #include <QAbstractItemModel>
 #include <QDialog>
 #include <QWidget>
@@ -23,7 +22,9 @@
 #include "VInfo.hpp"
 
 class NodeQuery;
+class NodeQueryDef;
 class NodeQueryListModel;
+class NodeQueryOptionEdit;
 
 class NodeQuerySaveDialog : public QDialog, protected Ui::NodeQuerySaveDialog
 {
@@ -38,7 +39,6 @@ public Q_SLOTS:
 	void accept();
 };
 
-
 class NodeQueryEditor : public QWidget, protected Ui::NodeQueryEditor, public ServerFilterObserver
 {
     Q_OBJECT
@@ -52,10 +52,13 @@ public:
     void setQuery(NodeQuery*);
     NodeQuery* query() const;
     void setQueryTeCanExpand(bool);
-    void toggleDefPanelVisible();
     bool isDefPanelVisible() const;
+    void showDefPanel(bool);
+    bool isQueryPanelVisible() const;
+    void showQueryPanel(bool);
     int maxNum() const;
     QStringList allServers() const;
+    void setFilterMode(bool);
 
     void notifyServerFilterAdded(ServerItem*);
     void notifyServerFilterRemoved(ServerItem*);
@@ -63,18 +66,10 @@ public:
     void notifyServerFilterDelete();
 
 protected Q_SLOTS:
-	void slotServerCbChanged();
+    void slotOptionEditChanged();
+    void slotServerCbChanged();
 	void slotRootNodeEdited(QString);
-	void slotNameEdited(QString);
-	void slotNameMatchChanged(int);
-	void slotNameCaseChanged(bool);
-	void slotPathEdited(QString);
-	void slotPathMatchChanged(int);
-	void slotPathCaseChanged(bool);
-	void slotTypeListChanged();
-	void slotStateListChanged();
-	void slotFlagListChanged();
-	void slotAttrListChanged();
+    void slotAttrPanelChanged();
 	void slotSaveQueryAs();
 	void slotAdvMode(bool b);
 	void slotMaxNum(int);
@@ -88,15 +83,25 @@ private:
 	void init();
 	void initAttr();
 	void updateQueryTe();
-	void adjustQueryTe(int rowNum=0);
-	void setQueryTe(QString);
 	void checkGuiState();
+    void setAttributePanel(QStringList lst);
 
 	NodeQuery* query_;
 	ServerFilter* serverFilter_;
 	bool queryTeCanExpand_;
 	bool initIsOn_;
 	bool canBeRun_;
+    bool filterMode_;
+
+    NodeQueryOptionEdit* nameEdit_;
+    NodeQueryOptionEdit* pathEdit_;
+    NodeQueryOptionEdit* typeEdit_;
+    NodeQueryOptionEdit* stateEdit_;
+    NodeQueryOptionEdit* flagEdit_;
+    NodeQueryOptionEdit* attrEdit_;
+    QMap<QString,QList<NodeQueryOptionEdit*> > attr_;
+    QString nodeTabText_;
+    QString attrTabText_;
 };
 
 #endif

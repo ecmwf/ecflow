@@ -64,8 +64,8 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
 			this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
-	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
-			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
+	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),            
+            this,SLOT(slotSelectionChangedInBc(VInfo_ptr)));
 
     connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
             view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
@@ -127,8 +127,8 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	menu->setTearOffEnabled(true);
 
 	menu->addAction(actionBreadcrumbs);
-	QMenu *menuState=new QMenu(this); //menu->addMenu(tr("Status"));
-	QMenu *menuType=new QMenu(this); //menu->addMenu(tr("Attribute"));
+    QMenu *menuState=new QMenu(this);
+    QMenu *menuType=new QMenu(this);
 	QMenu *menuIcon=menu->addMenu(tr("Icon"));
 
 	menuState->setTearOffEnabled(true);
@@ -138,8 +138,8 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 	attrFilterMenu_=new VParamFilterMenu(menuType,atts_,"Show attributes",VParamFilterMenu::ShowMode);
 	iconFilterMenu_=new VParamFilterMenu(menuIcon,icons_,"Show icons",VParamFilterMenu::ShowMode);
-	stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Status filter",
-			       VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
+    stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Show statuses",
+                   VParamFilterMenu::ShowMode,VParamFilterMenu::ColourDecor);
 
 	//Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
@@ -148,16 +148,16 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     tw->slotUpdateTitle("<b>Tree</b>");
     
     QList<QAction*> acLst;
+
     QAction* acState=new QAction(this);
     acState->setIcon(QPixmap(":viewer/status.svg"));
-    acState->setToolTip("Status filter");
+    acState->setToolTip("Show statuses");
     acState->setMenu(menuState);
     acLst << acState;
 
     QAction* acAttr=new QAction(this);
     acAttr->setIcon(QPixmap(":viewer/attribute.svg"));
     acAttr->setToolTip("Show attributes");
-    //acAttr->setText("Attributes ");
     acAttr->setMenu(menuType);
     acLst << acAttr;
 
@@ -168,7 +168,8 @@ void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
 {
 	updateActionState(info);
 	bcWidget_->setPath(info);
-	Q_EMIT selectionChanged(info);
+    if(broadcastSelection())
+        Q_EMIT selectionChanged(info);
 }
 
 
@@ -177,14 +178,12 @@ void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 	if(b)
 	{
 		bcWidget_->active(true);
-		bcWidget_->setPath(view_->currentSelection());
+        bcWidget_->setPath(view_->currentSelection());
 	}
 	else
 	{
 		bcWidget_->active(false);
 	}
-
-	//bcWidget_->clear();
 }
 
 void TreeNodeWidget::rerender()
@@ -213,7 +212,9 @@ void TreeNodeWidget::writeSettings(VSettings* vs)
 
 	states_->writeSettings(vs);
 	atts_->writeSettings(vs);
-	icons_->writeSettings(vs);
+    icons_->writeSettings(vs);
+
+    DashboardWidget::writeSettings(vs);
 }
 
 void TreeNodeWidget::readSettings(VSettings* vs)
@@ -249,4 +250,6 @@ void TreeNodeWidget::readSettings(VSettings* vs)
 	attrFilterMenu_->reload();
 	iconFilterMenu_->reload();
 	stateFilterMenu_->reload();
+
+    DashboardWidget::readSettings(vs);
 }

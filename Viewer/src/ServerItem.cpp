@@ -21,7 +21,8 @@ ServerItem::ServerItem(const std::string& name) :
   name_(name),
   useCnt_(0),
   handler_(0),
-  favourite_(false)
+  favourite_(false),
+  system_(false)
 {
 }
 
@@ -29,7 +30,8 @@ ServerItem::ServerItem(const std::string& name,const std::string& host,const std
   name_(name), host_(host), port_(port),
   useCnt_(0),
   handler_(0),
-  favourite_(favourite)
+  favourite_(favourite),
+  system_(false)
 {
 }
 
@@ -61,6 +63,13 @@ void ServerItem::setFavourite(bool b)
 	favourite_=b;
 	broadcastChanged();
 }
+
+void ServerItem::setSystem(bool b)
+{
+    system_=b;
+    //broadcastChanged();
+}
+
 //===========================================================
 // Register the usage of the server. Create and destroys the
 // the ServerHandler.

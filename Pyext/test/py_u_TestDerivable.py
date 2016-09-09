@@ -21,8 +21,8 @@ class MyTask(ecflow.Task): pass
 class MyClient(ecflow.Client): pass
 
 if __name__ == "__main__":
-    print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")")
+    print("####################################################################")
  
-    print "All tests pass"
+    print("All tests pass")

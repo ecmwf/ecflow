@@ -1,0 +1,103 @@
+# 3.1.2
+suite operation_suite
+  repeat day 1
+  edit ECF_HOME    'ECF_HOME_PLACEHOLDER'
+  edit ECF_INCLUDE 'ECF_INCLUDE_PLACEHOLDER'
+  edit ECF_FILES   'ECF_FILES_PLACEHOLDER'
+  edit SLEEP 3
+  family 0
+    edit CYCLE '0'
+    edit LAST_STEP '24'
+    family analysis
+      task get_observations
+      task run_analysis
+        trigger get_observations == complete
+      task post_processing
+        trigger run_analysis == complete
+    endfamily
+    family forecast
+      trigger analysis == complete
+      task get_input_data
+      task run_forecast
+        trigger get_input_data == complete
+        meter step 0 24 24
+    endfamily
+    family archive
+      family analysis
+        trigger ../analysis/run_analysis == complete
+        edit TYPE 'analysis'
+        edit STEP '0'
+        task save
+        family step_6
+          trigger ../../forecast/run_forecast:step ge 6
+          edit TYPE 'forecast'
+          edit STEP '6'
+          task save
+        endfamily
+        family step_12
+          trigger ../../forecast/run_forecast:step ge 12
+          edit TYPE 'forecast'
+          edit STEP '12'
+          task save
+        endfamily
+        family step_18
+          trigger ../../forecast/run_forecast:step ge 18
+          edit TYPE 'forecast'
+          edit STEP '18'
+          task save
+        endfamily
+      endfamily
+    endfamily
+  endfamily
+  family 12
+    trigger ./0 == complete
+    edit CYCLE '12'
+    edit LAST_STEP '240'
+    family analysis
+      task get_observations
+      task run_analysis
+        trigger get_observations == complete
+      task post_processing
+        trigger run_analysis == complete
+    endfamily
+    family forecast
+      trigger analysis == complete
+      task get_input_data
+      task run_forecast
+        trigger get_input_data == complete
+        meter step 0 240 240
+    endfamily
+    family archive
+      family analysis
+        trigger ../analysis/run_analysis == complete
+        edit TYPE 'analysis'
+        edit STEP '0'
+        task save
+        family step_6
+          trigger ../../forecast/run_forecast:step ge 6
+          edit TYPE 'forecast'
+          edit STEP '6'
+          task save
+        endfamily
+        family step_12
+          trigger ../../forecast/run_forecast:step ge 12
+          edit TYPE 'forecast'
+          edit STEP '12'
+          task save
+        endfamily
+        family step_18
+          trigger ../../forecast/run_forecast:step ge 18
+          edit TYPE 'forecast'
+          edit STEP '18'
+          task save
+        endfamily
+        family step_24
+          trigger ../../forecast/run_forecast:step ge 24
+          edit TYPE 'forecast'
+          edit STEP '24'
+          task save
+        endfamily
+      endfamily
+    endfamily
+  endfamily
+endsuite

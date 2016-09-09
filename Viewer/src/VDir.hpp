@@ -36,8 +36,9 @@ class VDir
 public:
 	explicit VDir(const std::string& path);
 	VDir(const std::string& path, const std::string& pattern);
-
 	~VDir();
+
+    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode};
 
 	const std::string& path() const {return path_;}
     void path(const std::string& path,bool reload=true);
@@ -53,11 +54,22 @@ public:
 	void addItem(const std::string&, unsigned int, unsigned int);
 	const std::vector<VDirItem*>& items() const {return items_;}
 
+    void setFetchDate(QDateTime d) {fetchDate_=d;}
+    QDateTime fetchDate() const {return fetchDate_;}
+    void setFetchMode(FetchMode m) {fetchMode_=m;}
+    FetchMode fetchMode() const {return fetchMode_;}
+    void setFetchModeStr(const std::string& fetchMethod) {fetchModeStr_=fetchMethod;}
+    const std::string& fetchModeStr() const {return fetchModeStr_;}
+
 protected:
 	std::string path_;
 	std::string pattern_;
 	std::string where_;
 	std::vector<VDirItem*> items_;
+
+    FetchMode fetchMode_;
+    std::string fetchModeStr_;
+    QDateTime fetchDate_;
 };
 
 class VDir;

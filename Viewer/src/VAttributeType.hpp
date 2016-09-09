@@ -11,7 +11,7 @@
 #ifndef VATTRIBUTETYPE_HPP_
 #define VATTRIBUTETYPE_HPP_
 
-#include <set>
+#include <map>
 #include <vector>
 #include <string>
 
@@ -19,6 +19,7 @@
 
 class AttributeFilter;
 class VNode;
+class VAttribute;
 
 class VAttributeType : public VParam
 {
@@ -35,22 +36,33 @@ public:
     static void init(const std::string& parFile);
     static int getLineNum(const VNode *vnode,int row,AttributeFilter *filter=0);
     static int getRow(const VNode *vnode,int row,AttributeFilter *filter=0);
-
+     
     static VAttributeType* find(const std::string& name);
-
+    static const std::vector<VAttributeType*>& types() {return types_;}
+    
     //Called from VConfigLoader
     static void load(VProperty*);
 
     virtual QString toolTip(QStringList d) const {return QString();}
     virtual bool exists(const VNode* vnode,QStringList) const {return false;}
+    virtual void getSearchData(const VNode*,QList<VAttribute*>&) {}
+
+    int keyToDataIndex(const std::string& key) const;
+    int searchKeyToDataIndex(const std::string& key) const;
+    QStringList searchKeys() const;
 
 protected:
     virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
     virtual int num(const VNode* vnode)=0;
     virtual int lineNum(const VNode* vnode,int row) {return 1;}
 
+    std::map<std::string,int> keyToData_;
+    std::map<std::string,int> searchKeyToData_;
+    int dataCount_;
+
 private:
     static std::map<std::string,VAttributeType*> items_;
+    static std::vector<VAttributeType*> types_;
 };
 
 #endif

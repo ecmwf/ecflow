@@ -166,6 +166,7 @@ bool VFile::write(const char *buf,size_t len,std::string& err)
 		{
 			memcpy(data_+dataSize_,buf,len);
 			dataSize_+=len;
+			data_[dataSize_] = '\0'; //terminate the string
 			return true;
 		}
 		else

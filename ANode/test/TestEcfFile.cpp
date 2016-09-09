@@ -30,6 +30,7 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "PrintStyle.hpp"
+#include "Pid.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -85,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_simple_include_file")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );
@@ -110,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
    ecf_file += tail;
 
    string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
-   // cout << "file_location = " << ecf_file_location << "\n";
+   //cout << "file_location = " << ecf_file_location << "\n";
    BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
 
    string errormsg;
@@ -158,9 +159,12 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_495 )
    //  task t1
    //endsuite
    Defs theDefs;
-   suite_ptr suite = theDefs.add_suite("suite");
+   suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_ECFLOW_495"));
    suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
    task_ptr task_t1 = suite->add_task("t1");
+
+   //PrintStyle style(PrintStyle::STATE);
+   //std::cout << theDefs << "\n";
 
    // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
    // or when file does not exist in ECF_INCLUDE
@@ -225,7 +229,7 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "test_ECF_SCRIPT_CMD_ECFLOW_427"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ECF_SCRIPT_CMD_ECFLOW_427")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );
@@ -334,7 +338,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_file )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_include_file")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );
@@ -412,7 +416,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_multi_paths_ECFLOW_261 )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_include_multi_paths_ECFLOW_261")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/empty_include1:$ECF_HOME/empty_include2:$ECF_HOME/includes:$ECF_HOME/includes2" ) );
       suite->addTask( task_t1 );
@@ -489,7 +493,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_ECFLOW_274 )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_include_ECFLOW_274")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addTask( task_t1 );
@@ -577,7 +581,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables )
    task_ptr task_t1;
    suite_ptr suite;
    Defs theDefs; {
-      suite = theDefs.add_suite("suite");
+      suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables"));
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->add_variable("ESUITE","suite");
       task_t1 = suite->add_family("f1")->add_task( "t1" );
@@ -648,7 +652,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables_with_comments )
    task_ptr task_t1;
    suite_ptr suite;
    Defs theDefs; {
-      suite = theDefs.add_suite("suite");
+      suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables_with_comments"));
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->add_variable("ETASK","suite");
       suite->add_variable("FRED","fred");
@@ -717,7 +721,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables_errors )
    task_ptr task_t1;
    suite_ptr suite;
    Defs theDefs; {
-      suite = theDefs.add_suite("suite");
+      suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables_errors"));
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->add_variable("ETASK","suite");
       task_t1 = suite->add_family("f1")->add_task( "t1" );
@@ -787,7 +791,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
 
    // Create a defs file, where the task name mirrors the sms files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_file") );
    std::pair<std::string,std::string> p;
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
@@ -954,7 +958,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_includenoop )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
-   suite_ptr suite = Suite::create( "suite_test_ecf_file_includenopp"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_file_includenoop") );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );
@@ -1045,7 +1049,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_override_ECF_JOB )
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
    task_t1->addVariable( Variable( "ECF_JOB",  job_file_location  ) );
-   suite_ptr suite = Suite::create( "test_ecf_file_override_ECF_JOB"  );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_file_override_ECF_JOB") );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );
@@ -1118,7 +1122,7 @@ BOOST_AUTO_TEST_CASE( test_manual_files )
 
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    Defs theDefs;
-   suite_ptr suite = theDefs.add_suite( "suite"  );
+   suite_ptr suite = theDefs.add_suite( "suite") ;  // ** relies on name of suite, in SMSHOME/suite
    suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/../includes" ) );
    family_ptr family = suite->add_family("family");
    task_ptr task_t1 = family->add_task("t1");
@@ -1135,8 +1139,8 @@ BOOST_AUTO_TEST_CASE( test_manual_files )
    // Create the generated variables
    task_t1->update_generated_variables();
 
-//   PrintStyle style(PrintStyle::STATE);
-//   std::cout << theDefs << "\n";
+   //PrintStyle style(PrintStyle::STATE);
+   //std::cout << theDefs << "\n";
 
    /// Now finally the test
 
@@ -1179,6 +1183,205 @@ BOOST_AUTO_TEST_CASE( test_manual_files )
       BOOST_CHECK_MESSAGE(manual.find("Test manual files are pre-processed") != std::string::npos,"Pre-processing in manual failed");
       BOOST_CHECK_MESSAGE(manual.find("suite manual") != std::string::npos,"Suite manual extraction failed");
    }
+}
+
+BOOST_AUTO_TEST_CASE( test_ECFLOW_672 )
+{
+   cout << "ANode:: ...test_ECFLOW_672";
+   if (getenv("ECFLOW_CRAY_BATCH")) {
+      cout << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+      return;
+   }
+   cout << "\n";
+
+   // Create the defs file corresponding to the text below
+   //suite ECFLOW_672
+   //  edit ECF_INCLUDE $ECF_HOME/ECFLOW_672
+   //  task t
+   //endsuite
+   Defs theDefs;
+   suite_ptr suite = theDefs.add_suite("ECFLOW_672");
+   suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/ECFLOW_672") );
+   task_ptr task_t1 = suite->add_task("t");
+
+   // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
+   // or when file does not exist in ECF_INCLUDE
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the ecf files
+   theDefs.beginAll();
+
+   string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
+   BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
+
+   // Create the generated variables
+   task_t1->update_generated_variables();
+
+   /// Now finally the test
+   EcfFile ecfFile(task_t1.get(),ecf_file_location);
+
+   JobsParam jobsParam(true); // spawn_jobs = false
+   try { ecfFile.create_job(jobsParam); }
+   catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected job creation to succeed " << e.what());}
+
+   string job_file_location = ecf_home  + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+   BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
+
+   /// Remove generate file
+   boost::filesystem::remove( job_file_location );
+}
+
+BOOST_AUTO_TEST_CASE( test_includeonce )
+{
+   // simplest test of include once, no hierarchy
+   cout << "ANode:: ...test_includeonce";
+
+   // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
+    if (getenv("ECFLOW_CRAY_BATCH")) {
+       cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+       return;
+    }
+    cout << "\n";
+
+   // Create the defs file corresponding to the text below
+   //suite suite
+   //  edit ECF_INCLUDE $ECF_HOME/includes
+   //  task t1
+   //endsuite
+
+   // Create a defs file, where the task name mirrors the ecf files in the given directory
+   task_ptr task_t1 = Task::create( "t1" );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_includeonce") );
+   Defs theDefs; {
+      suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
+      suite->addTask( task_t1 );
+      theDefs.addSuite( suite );
+   }
+
+   // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
+   // or when file does not exist in ECF_INCLUDE
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the sms files
+   theDefs.beginAll();
+
+   // generate the ecf file;
+   string ecf_file = "%includeonce <simple_head.h>\n";
+   ecf_file += "%includeonce <simple_head.h>\n";
+   ecf_file += "%include <simple_head.h>\n";
+   ecf_file += "#body\n";
+   ecf_file += "%includeonce <simple_tail.h>\n";
+   ecf_file += "%include <simple_tail.h>\n";
+
+   string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
+   // cout << "file_location = " << ecf_file_location << "\n";
+   BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
+
+   string errormsg;
+   BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
+   BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
+
+   // Create the generated variables
+   task_t1->update_generated_variables();
+
+   /// Now finally the test
+   EcfFile ecfFile(task_t1.get(),ecf_file_location);
+
+   /// Check generation of '.usr' and job files
+   JobsParam jobsParam(true); // spawn_jobs = false
+   try { ecfFile.create_job(jobsParam); }
+   catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected job creation to succeed " << e.what());}
+
+   string job_file_location = ecf_home  + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+   BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
+
+   // Open the job file/
+   std::string job_file_contents;
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+
+   std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
+   BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n" <<expected_job_file_contents << "' but found \n" <<  job_file_contents << "'");
+
+   /// Remove all the generated files
+   boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
+}
+
+BOOST_AUTO_TEST_CASE( test_includeonce_hierarchical )
+{
+   // Test the pre-processing is done depth first, ( < 4.1.1 it was done breadth first)
+   cout << "ANode:: ...test_includeonce_hierarchical";
+   // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
+   if (getenv("ECFLOW_CRAY_BATCH")) {
+      cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+      return;
+   }
+   cout << "\n";
+
+   // Create the defs file corresponding to the text below
+   //suite suite
+   //  edit ECF_INCLUDE $ECF_HOME/includes
+   //  task t1
+   //endsuite
+
+   // Create a defs file, where the task name mirrors the ecf files in the given directory
+   task_ptr task_t1 = Task::create( "t1" );
+   suite_ptr suite = Suite::create( Pid::unique_name("test_includeonce_hierarchical") );
+   Defs theDefs; {
+      suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
+      suite->addTask( task_t1 );
+      theDefs.addSuite( suite );
+   }
+
+   // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
+   // or when file does not exist in ECF_INCLUDE
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the sms files
+   theDefs.beginAll();
+
+   // generate the ecf file;
+   string ecf_file = "%includeonce <AA.h>\n";
+   ecf_file += "%includeonce <BB.h>\n";
+   ecf_file += "%includeonce <CC.h>\n";
+
+   string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
+   // cout << "file_location = " << ecf_file_location << "\n";
+   BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
+
+   string errormsg;
+   BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
+   BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
+
+   // Create the generated variables
+   task_t1->update_generated_variables();
+
+   /// Now finally the test
+   EcfFile ecfFile(task_t1.get(),ecf_file_location);
+
+   /// Check generation of '.usr' and job files
+   JobsParam jobsParam(true); // spawn_jobs = false
+   try { ecfFile.create_job(jobsParam); }
+   catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected job creation to succeed " << e.what());}
+
+   string job_file_location = ecf_home  + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+   BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
+
+   // Open the job file/
+   std::string job_file_contents;
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+
+   // This shows that pre-processing is done depth first
+   std::string expected_job_file_contents = "#startAA\n#startBB\n#CC\n#endBB\n#endAA";
+   BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n" <<expected_job_file_contents << "' but found \n" <<  job_file_contents << "'");
+
+   /// Remove all the generated files
+   boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

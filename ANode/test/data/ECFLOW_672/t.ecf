@@ -1,0 +1,2 @@
+%include <se_mem.h>
+%include <ms_mem.h>

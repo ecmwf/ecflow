@@ -56,10 +56,8 @@ public:
     explicit InfoPanel(QWidget* parent=0);
 	virtual ~InfoPanel();
 	bool frozen() const;
-	bool detached() const;
 	void clear();
 	void setCurrent(const std::string& name);
-    void setDetached(bool);
 
     void populateDialog();
 
@@ -94,10 +92,12 @@ protected Q_SLOTS:
     void slotCurrentWidgetChanged(int);
     void on_actionBreadcrumbs__toggled(bool b);
     void on_actionFrozen__toggled(bool b);
-    void on_actionDetached__toggled(bool b);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
+
+protected:
+    void detachedChanged();
 
 private:
 	void reset(VInfo_ptr node);

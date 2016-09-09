@@ -64,7 +64,8 @@ void DashboardDialog::reject()
 
 void DashboardDialog::closeEvent(QCloseEvent * event)
 {
-	event->accept();
+    Q_EMIT aboutToClose();
+    event->accept();
 	writeSettings();
 }
 

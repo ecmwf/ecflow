@@ -13,9 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0">
    <property name="spacing">
-    <number>1</number>
+    <number>0</number>
    </property>
    <property name="leftMargin">
     <number>0</number>
@@ -39,6 +39,9 @@
        <property name="spacing">
         <number>1</number>
        </property>
+       <item>
+        <widget class="MessageLabel" name="messageLabel_" native="true"/>
+       </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0">
          <property name="spacing">
@@ -177,9 +180,6 @@
         </layout>
        </item>
        <item>
-        <widget class="MessageLabel" name="messageLabel_" native="true"/>
-       </item>
-       <item>
         <widget class="MessageLabel" name="warnLabel_" native="true"/>
        </item>
        <item>
@@ -217,6 +217,9 @@
       </layout>
      </widget>
     </widget>
+   </item>
+   <item>
+    <widget class="MessageLabel" name="dirMessageLabel_" native="true"/>
    </item>
   </layout>
  </widget>

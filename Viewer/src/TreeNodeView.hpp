@@ -39,8 +39,8 @@ public:
 	void reload();
 	void rerender();
 	QWidget* realWidget();
-	VInfo_ptr currentSelection();
-	void currentSelection(VInfo_ptr n);
+    VInfo_ptr currentSelection();
+    void setCurrentSelection(VInfo_ptr n);
 	void selectFirstServer();
 #if 0
     void setModel(NodeFilterModel* model);
@@ -48,13 +48,12 @@ public:
 	void notifyChange(VProperty* p);
 
     void readSettings(VSettings* vs) {}
+    void writeSettings(VSettings* vs) {}
 
 public Q_SLOTS:
-	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(VInfo_ptr,QString);
-	void slotSetCurrent(VInfo_ptr);
     void slotSaveExpand();
     void slotRestoreExpand();
     void slotSaveExpand(const VTreeNode* node);
@@ -82,6 +81,8 @@ protected:
     void adjustAttributeToolTip(bool);
     void expandAll(const QModelIndex& idx);
 	void collapseAll(const QModelIndex& idx);
+    void expandTo(const QModelIndex& idxTo);
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
     TreeNodeModel* model_;
 	ActionHandler* actionHandler_;

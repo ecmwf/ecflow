@@ -180,6 +180,11 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
    return PreAllocatedReply::ok_cmd();
 }
 
+bool CtsNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,absNodePath_);
+}
+
 static const char* job_gen_only_desc() {
    return
             "Test hierarchical Job generation only, for chosen Node.\n"

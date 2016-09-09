@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -37,7 +37,7 @@
 int MenuItem::idCnt_=0;
 
 std::vector<Menu *> MenuHandler::menus_;
-
+MenuHandler::ConfirmationMap MenuHandler::commandsWhichRequireConfirmation_;
 
 MenuHandler::MenuHandler()
 {
@@ -262,8 +262,8 @@ void MenuHandler::refreshCustomMenuCommands()
 {
     BaseNodeCondition *trueCond  = new TrueNodeCondition();
     BaseNodeCondition *falseCond = new FalseNodeCondition();
-	CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
-	CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
+    CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
+    CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
 
     Menu *menu = findMenu("Custom");
     if (menu)
@@ -279,47 +279,48 @@ void MenuHandler::refreshCustomMenuCommands()
         item1->setQuestionCondition(falseCond);
         item1->setIcon("configure.svg");
 
-		// Saved commands
-		MenuItem *item2 = new MenuItem("-");
-		addItemToMenu(item2, "Custom");
-		item2->setEnabledCondition(trueCond);
-		item2->setVisibleCondition(trueCond);
-		item2->setQuestionCondition(falseCond);
+        // Saved commands
+        MenuItem *item2 = new MenuItem("-");
+        addItemToMenu(item2, "Custom");
+        item2->setEnabledCondition(trueCond);
+        item2->setVisibleCondition(trueCond);
+        item2->setQuestionCondition(falseCond);
 
-		int numSavedCommands = customSavedCmds->numCommands();
+        int numSavedCommands = customSavedCmds->numCommands();
 
-		for (int i = 0; i < numSavedCommands; i++)
-		{
-			CustomCommand *cmd = customSavedCmds->commandFromIndex(i);
-			if (cmd->inContextMenu())
-			{
-				MenuItem *item = new MenuItem(cmd->name());
-				item->setCommand(cmd->command());
-				item->setEnabledCondition(trueCond);
-				item->setVisibleCondition(trueCond);
-				item->setQuestionCondition(trueCond);
-				item->setStatustip("__cmd__");
-				addItemToMenu(item, "Custom");
-			}
-		}
+        for (int i = 0; i < numSavedCommands; i++)
+        {
+            CustomCommand *cmd = customSavedCmds->commandFromIndex(i);
+            if (cmd->inContextMenu())
+            {
+                MenuItem *item = new MenuItem(cmd->name());
+                item->setCommand(cmd->command());
+                item->setEnabledCondition(trueCond);
+                item->setVisibleCondition(trueCond);
+                item->setQuestionCondition(trueCond);
+                item->setCustom(true);
+                item->setStatustip("__cmd__");
+                addItemToMenu(item, "Custom");
+            }
+        }
 
 
-		// Recently executed commands
-		MenuItem *item3 = new MenuItem("-");
-		addItemToMenu(item3, "Custom");
-		item3->setEnabledCondition(trueCond);
-		item3->setVisibleCondition(trueCond);
-		item3->setQuestionCondition(falseCond);
+        // Recently executed commands
+        MenuItem *item3 = new MenuItem("-");
+        addItemToMenu(item3, "Custom");
+        item3->setEnabledCondition(trueCond);
+        item3->setVisibleCondition(trueCond);
+        item3->setQuestionCondition(falseCond);
 
-		MenuItem *item4 = new MenuItem("Recent");
-		addItemToMenu(item4, "Custom");
-		item4->setEnabledCondition(falseCond);
-		item4->setVisibleCondition(trueCond);
-		item4->setQuestionCondition(falseCond);
+        MenuItem *item4 = new MenuItem("Recent");
+        addItemToMenu(item4, "Custom");
+        item4->setEnabledCondition(falseCond);
+        item4->setVisibleCondition(trueCond);
+        item4->setQuestionCondition(falseCond);
 
-		int numRecentCommands = customRecentCmds->numCommands();
+        int numRecentCommands = customRecentCmds->numCommands();
 
-		for (int i = 0; i < numRecentCommands; i++)
+        for (int i = 0; i < numRecentCommands; i++)
         {
             CustomCommand *cmd = customRecentCmds->commandFromIndex(i);
 
@@ -328,6 +329,7 @@ void MenuHandler::refreshCustomMenuCommands()
             item->setEnabledCondition(trueCond);
             item->setVisibleCondition(trueCond);
             item->setQuestionCondition(trueCond);
+            item->setCustom(true);
             item->setStatustip("__cmd__");
             addItemToMenu(item, "Custom");
         }
@@ -425,6 +427,66 @@ MenuItem *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo
 
     return selectedItem;
 }
+
+MenuHandler::ConfirmationMap &MenuHandler::getCommandsThatRequireConfirmation()
+{
+    // populate the list only the first time this function is called
+    if (commandsWhichRequireConfirmation_.empty())
+    {
+        // list the commands which require a prompt:
+        commandsWhichRequireConfirmation_["delete"]    = "Do you really want to delete <full_name> ?";
+        commandsWhichRequireConfirmation_["terminate"] = "Do you really want to terminate <full_name> ?";
+        commandsWhichRequireConfirmation_["halt"]      = "Do you really want to halt <full_name> ?";
+    }
+    return commandsWhichRequireConfirmation_;
+}
+
+
+
+// some commands, such as --delete, prompt the user for confirmation on the command line, which
+// causes the application to hang. The way we get around this is to intercept these commands and,
+// where possible, add a "yes" argument, which will bypass the prompt.
+void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem *item)
+{
+	std::string command = item->command();
+	QString wholeCmd = QString::fromStdString(command);
+
+	// find the verb in the command
+	//QRegExp rx("ecflow_client\\s+--(\\S+).*");  //  \s=whitespace, \S=non-whitespace
+	QRegExp rx("ecflow_client\\s+--([a-zA-Z]+).*");  //  \s=whitespace, \S=non-whitespace
+	int i = rx.indexIn(wholeCmd);
+	if (i != -1) // a command was found
+	{
+		QString commandName = rx.cap(1);
+		std::string cmdName = commandName.toStdString();
+
+		// is this command one of the ones that requires a prompt?
+		MenuHandler::ConfirmationMap &list = getCommandsThatRequireConfirmation();
+		MenuHandler::ConfirmationMap::iterator it=list.find(cmdName);
+		if(it != list.end())
+		{
+			// does the command already have a 'yes'?
+			QRegExp rx2(".*\\byes\\b.*");  // \b=word boundary
+			int j = rx2.indexIn(wholeCmd);
+			if (j == -1)  // no
+			{
+				item->setQuestion((*it).second); // note that we need to ask the user
+
+				// fix the command so that it has "yes" in it
+				std::string minusCmd     = std::string("--") + cmdName;
+				std::string cmdEquals    = minusCmd + "=";
+				std::string cmdEqualsYes = cmdEquals + "yes ";
+				std::string cmdYes       = minusCmd + " yes ";
+				if (!ecf::Str::replace(command, cmdEquals, cmdEqualsYes))  // --command=foo -> --command=yes foo
+				{
+					ecf::Str::replace(command, minusCmd, cmdYes);  // --command foo -> --command yes foo
+				}
+				item->setCommand(command);
+			}
+		}
+	}
+}
+
 
 // -----------------------------------------------------------------
 
@@ -655,7 +717,7 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 	//Qt doc says: the ownership of the widget is passed to the widgetaction.
 	//So when the action is deleted it will be deleted as well.
 	wAction->setDefaultWidget(titleW);
-	//wAction->setEnabled(false);
+	wAction->setEnabled(false);
 	qmenu->addAction(wAction);
 }
 
@@ -672,7 +734,8 @@ MenuItem::MenuItem(const std::string &name) :
    enabledCondition_(NULL),
    questionCondition_(NULL),
    isSubMenu_(false),
-   isDivider_(false)
+   isDivider_(false),
+   isCustom_(false)
 {
     if (name == "-")
     {

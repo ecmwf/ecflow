@@ -21,7 +21,8 @@
 
 class NodeContainer : public Node {
 public:
-	NodeContainer ( const std::string& name );
+   NodeContainer( const std::string& name );
+   NodeContainer(const NodeContainer& );
 	NodeContainer();
 	virtual ~NodeContainer();
 

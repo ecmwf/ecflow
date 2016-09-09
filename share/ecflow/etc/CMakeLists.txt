@@ -11,9 +11,13 @@ set (files ecflowview_menus.json
            ecflowview_palette.json
            ecflowview_panels.json
            ecflowview_panel_conf.json
+           ecflowview_query_conf.json
            ecflowview_sstate_conf.json
            ecflowview_server_conf.json
            ecflowview_view_conf.json
+           ecflow_ui_test.def
+           ecflow_ui_test_session_template.json
+           ecflow_ui_test_server_scripts.tar.gz
            viewer.qss)
 
 # for each file, copy it into the build directory at build time

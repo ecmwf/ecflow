@@ -203,7 +203,7 @@ public:
 
 protected:
    /// Overridden to do nothing since Task based commands don't need _user_
-   /// based authentification
+   /// based authentication
    virtual void setup_user_authentification(){}
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const; /// Task have their own mechanism,can throw std::runtime_error
    Submittable* get_submittable(AbstractServer* as) const ; // can throw std::runtime_error
@@ -501,6 +501,9 @@ protected:
 
    virtual bool equals(ClientToServerCmd*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const;
+   bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const;
+
 
    /// Prompt the user for confirmation: If user responds with no, will exit client
    static void prompt_for_confirmation(const std::string& prompt);
@@ -630,6 +633,7 @@ public:
 private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
+private:
    ecf::CheckPt::Mode mode_;
    int check_pt_interval_;
    int check_pt_save_time_alarm_;
@@ -816,6 +820,7 @@ public:
             AbstractClientEnv* clientEnv ) const;
 private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
 private:
    Api api_;
@@ -861,6 +866,7 @@ public:
             AbstractClientEnv* clientEnv ) const;
 private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
    std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
 
@@ -982,6 +988,7 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
+private:
    std::string suiteName_;
    bool        force_;      // reset begin status on suites & bypass checks, can create zombies, used in test only
 
@@ -1062,6 +1069,7 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
 private:
    mutable std::vector<std::string>  paths_;  // mutable to allow swap to clear & reclaim memory, as soon as possible
@@ -1099,7 +1107,9 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
+private:
    std::string   absNodepath_;
    NOrder::Order      option_;
 
@@ -1142,6 +1152,7 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
 private:
    std::vector<std::string> paths_;
@@ -1270,6 +1281,7 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
    bool        createNodesAsNeeded_;
    bool        force_;
@@ -1331,6 +1343,7 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
 private:
    std::vector<std::string> paths_;
@@ -1392,6 +1405,7 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
 private:
    std::vector<std::string> paths_;
@@ -1482,6 +1496,7 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    STC_Cmd_ptr alter_server_state(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
    void createAdd(    Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
    void createDelete( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const;
@@ -1550,6 +1565,7 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
    File_t        file_;
    std::string   pathToNode_;
@@ -1620,7 +1636,9 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
+private:
    EditType      edit_type_;
    std::string   path_to_node_;
    mutable std::vector<std::string>  user_file_contents_;

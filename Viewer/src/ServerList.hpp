@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,13 +16,26 @@
 class ServerItem;
 class ServerList;
 
+
 class ServerListObserver
 {
 public:
-	ServerListObserver() {};
-	virtual ~ServerListObserver() {};
+    ServerListObserver() {}
+    virtual ~ServerListObserver() {}
 	virtual void notifyServerListChanged()=0;
 	virtual void notifyServerListFavouriteChanged(ServerItem*)=0;
+};
+
+class ServerListSyncConflictItem
+{
+public:
+    enum ConflictType {RemovedConflict, MatchConflict};
+    ServerListSyncConflictItem(ServerItem* sys,ServerItem* local,ConflictType type) :
+        sys_(sys), local_(local), type_(type) {}
+
+    ServerItem *sys_;
+    ServerItem *local_;
+    ConflictType type_;
 };
 
 class ServerList
@@ -31,6 +44,7 @@ public:
 	int count() {return static_cast<int>(items_.size());}
 	ServerItem* itemAt(int);
 	ServerItem* find(const std::string& name);
+	ServerItem* find(const std::string& name, const std::string& host, const std::string& port);
 
 	//Can be added or changed only via these static methods
 	ServerItem* add(const std::string&,const std::string&,const std::string&,bool,bool saveIt=true);
@@ -43,6 +57,7 @@ public:
 	void init();
 	void save();
 	void rescan();
+    void syncSystemFile();
 
 	void addObserver(ServerListObserver*);
 	void removeObserver(ServerListObserver*);
@@ -50,8 +65,8 @@ public:
 	static ServerList* instance();
 
 protected:
-	ServerList() {};
-	~ServerList() {};
+    ServerList() {}
+    ~ServerList() {}
 
 	static ServerList* instance_;
 

@@ -8,8 +8,7 @@ set(viewer_srcs
     ActionHandler.cpp
     Animation.cpp
     AttributeEditor.cpp
-    AttributeEditorFactory.cpp
-    AttributeSearchPanel.cpp
+    AttributeEditorFactory.cpp   
     CaseSensitiveButton.cpp
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
@@ -29,7 +28,7 @@ set(viewer_srcs
     DashboardDialog.cpp
     DashboardDock.cpp
     DashboardTitle.cpp
-    DashboardWidget.hpp
+    DashboardWidget.cpp
     DirectoryHandler.cpp
     EditItemWidget.cpp
     EditProvider.cpp
@@ -72,6 +71,8 @@ set(viewer_srcs
     NodeQueryEditor.cpp
     NodeQueryEngine.cpp
     NodeQueryHandler.cpp
+    NodeQueryOption.cpp
+    NodeQueryOptionEdit.cpp
     NodeQueryResult.cpp
     NodeQueryResultModel.cpp
     NodeQueryResultView.cpp
@@ -113,6 +114,7 @@ set(viewer_srcs
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp
+    ServerListSyncDialog.cpp
     ServerSettingsItemWidget.cpp
     SessionDialog.cpp
     SessionRenameDialog.cpp
@@ -197,7 +199,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ActionHandler.hpp
     Animation.hpp
     AttributeEditor.hpp
-    AttributeSearchPanel.hpp
     CaseSensitiveButton.hpp
     ChangeNotifyDialog.hpp
     ChangeNotifyEditor.hpp
@@ -231,6 +232,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodePathWidget.hpp
     NodeQueryCombo.hpp           
     NodeQueryEditor.hpp
+    NodeQueryOptionEdit.hpp
     NodeQueryEngine.hpp
     NodeQueryResult.hpp
     NodeQueryResultModel.hpp
@@ -257,6 +259,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerComThread.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
+    ServerListSyncDialog.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp
@@ -326,6 +329,7 @@ set(viewer_wrap_ui_files
     ServerAddDialog.ui
     ServerEditDialog.ui 
     ServerListDialog.ui
+    ServerListSyncDialog.ui
     ServerSettingsItemWidget.ui
     SessionDialog.ui
     SessionRenameDialog.ui

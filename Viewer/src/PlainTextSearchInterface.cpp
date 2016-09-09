@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,8 +13,13 @@
 #include <QPlainTextEdit>
 
 
+PlainTextSearchInterface::PlainTextSearchInterface() : editor_(NULL)
+{
+}
+
+
 bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QTextDocument::FindFlags flags,
-		                                bool gotoStartOfWord, int iteration,StringMatchMode::Mode matchMode)
+										   QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode)
 {
 	if(!editor_)
 		return false;
@@ -27,8 +32,8 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 	if (highlightAll)  // if highlighting all matches, start from the start of the document
 		cursor.movePosition(QTextCursor::Start);
 
-	else if (gotoStartOfWord)	// go to start of word?
-		cursor.movePosition(QTextCursor::StartOfWord);
+	else // move the cursor?
+		cursor.movePosition(move);
 
 
 	QList<QTextEdit::ExtraSelection> extraSelections;
@@ -46,7 +51,6 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 			{
 				cursor = editor_->document()->find(str, cursor, flags);  // perform the search
 				found = (!cursor.isNull());
-
 				break;
 			}
 			case StringMatchMode::WildcardMatch:
@@ -57,7 +61,6 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 
 				cursor = editor_->document()->find(regexp, cursor, flags);  // perform the search
 				found = (!cursor.isNull());
-
 				break;
 			}
 			case StringMatchMode::RegexpMatch:
@@ -67,7 +70,6 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 
 				cursor = editor_->document()->find(regexp, cursor, flags);  // perform the search
 				found = (!cursor.isNull());
-
 				break;
 			}
 
@@ -116,7 +118,6 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 					cursor.movePosition(QTextCursor::End);
 				else
 					cursor.movePosition(QTextCursor::Start);
-				editor_->setTextCursor(cursor);
 				iteration = 1;  // iteration=1 to avoid infinite wraparound!
 			}
 		}
@@ -140,46 +141,54 @@ void PlainTextSearchInterface::automaticSearchForKeywords(bool userClickedReload
     if(editor_->document()->isEmpty())
         return;
 
-    bool found = false;
+    bool performSearch = vpPerformAutomaticSearch_->value().toBool();
 
-	QTextDocument::FindFlags findFlags = QTextDocument::FindBackward;
-	QTextCursor cursor(editor_->textCursor());
-	cursor.movePosition(QTextCursor::End);
-
-	QRegExp regexp("--(abort|complete)");
-	QTextCursor findCursor = editor_->document()->find(regexp, cursor, findFlags);  // perform the search
-	found = (!findCursor.isNull());
-	if(found)
+	if (performSearch)
 	{
-		editor_->setTextCursor(findCursor);
+		// search direction
+		QTextDocument::FindFlags findFlags;
+		QTextCursor cursor(editor_->textCursor());
+		std::string searchFrom = vpAutomaticSearchFrom_->valueAsString();
+		QTextCursor::MoveOperation move;
+		if (searchFrom == "bottom")
+		{
+			findFlags = QTextDocument::FindBackward;
+			move = QTextCursor::End;
+		}
+		else
+		{
+			move = QTextCursor::Start;
+		}
+
+		// case sensitivity
+		bool caseSensitive = vpAutomaticSearchCase_->value().toBool();
+		if (caseSensitive)
+			findFlags = findFlags | QTextDocument::FindCaseSensitively;
+
+		// string match mode
+		std::string matchMode(vpAutomaticSearchMode_->valueAsString());
+		StringMatchMode::Mode mode = StringMatchMode::operToMode(matchMode);
+
+		// the term to be searched for
+		std::string searchTerm_s(vpAutomaticSearchText_->valueAsString());
+		QString searchTerm = QString::fromStdString(searchTerm_s);
+
+		// perform the search
+		bool found = findString (searchTerm, false, findFlags, move, 1, mode);
+
+		if(!found)
+		{
+			if(userClickedReload)
+			{
+				// move the cursor to the start of the last line
+				gotoLastLine();
+			}
+		}
 	}
-
-#if 0
-	QStringList keywords;
-	keywords << "--abort" << "--complete";// << "xabort" << "xcomplete"
-	         << "System Billing Units";
-
-	// find any of the keywords and stop at the first one
-	int i = 0;
-	while (!found && i < keywords.size())
-	{
-		cursor.movePosition(QTextCursor::End);
-		textEdit_->setTextCursor(cursor);
-		found = textEdit_->findString(keywords.at(i), findFlags);
-		i++;
-	}
-#endif
-
 	else
 	{
-		if(userClickedReload)
-		{
-			// move the cursor to the start of the last line
-			QTextCursor cursor = editor_->textCursor();
-			cursor.movePosition(QTextCursor::End);
-			cursor.movePosition(QTextCursor::StartOfLine);
-			editor_->setTextCursor(cursor);
-		}
+		// move the cursor to the start of the last line
+		gotoLastLine();
 	}
 }
 
@@ -209,4 +218,15 @@ void PlainTextSearchInterface::clearHighlights()
 void PlainTextSearchInterface::disableHighlights()
 {
     clearHighlights();
+}
+
+
+void PlainTextSearchInterface::gotoLastLine()
+{
+	// move the cursor to the start of the last line
+	QTextCursor cursor = editor_->textCursor();
+	cursor.movePosition(QTextCursor::End);
+	cursor.movePosition(QTextCursor::StartOfLine);
+	editor_->setTextCursor(cursor);
+	editor_->ensureCursorVisible();
 }

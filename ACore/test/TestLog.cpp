@@ -24,6 +24,7 @@
 #include "Log.hpp"
 #include "File.hpp"
 #include "DurationTimer.hpp"
+#include "Pid.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -34,7 +35,11 @@ BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
 static std::string getLogPath() {
 
-   return File::test_data("ACore/test/logfile.txt","ACore");
+   // ECFLOW-712, generate unique name for log file, To allow parallel test
+   std::string log_file = "ACore/test/logfile";
+   log_file += Pid::getpid(); // can throw
+   log_file += ".txt";
+   return File::test_data(log_file,"ACore");
 }
 
 BOOST_AUTO_TEST_CASE( test_log )
@@ -45,7 +50,7 @@ BOOST_AUTO_TEST_CASE( test_log )
 
 	// delete the log file if it exists.
 	fs::remove(path);
-	BOOST_CHECK_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
+	BOOST_REQUIRE_MESSAGE(!fs::exists( path ), "log file not deleted " << path);
 
 	Log::create(path);
 	LOG(Log::MSG,"First Message");
@@ -69,7 +74,7 @@ BOOST_AUTO_TEST_CASE( test_log_append )
 
 	std::string path = getLogPath();
 
- 	BOOST_CHECK_MESSAGE(fs::exists( path ), "log file " << path << " not created by previous test\n");
+	BOOST_REQUIRE_MESSAGE(fs::exists( path ), "log file " << path << " not created by previous test\n");
 
  	LOG(Log::MSG,"Last Message");
 
@@ -115,10 +120,11 @@ BOOST_AUTO_TEST_CASE( test_log_new_path_errors )
    cout << "ACore:: ...test_log_new_path_errors\n";
 
    // delete the log file if it exists.
-   fs::remove(getLogPath());
+   std::string path = getLogPath();
+   fs::remove(path);
 
    // create a now log file.
-   Log::create(getLogPath());
+   Log::create(path);
    LOG(Log::MSG,"First Message");
    LOG(Log::LOG,"LOG");
 
@@ -163,10 +169,11 @@ BOOST_AUTO_TEST_CASE( test_log_new_path )
    cout << "ACore:: ...test_log_new_path\n";
 
    // delete the log file if it exists.
-   fs::remove(getLogPath());
+   std::string path = getLogPath();
+   fs::remove(path);
 
    // create a new log file.
-   Log::create(getLogPath());
+   Log::create(path);
    BOOST_CHECK_MESSAGE(fs::exists( Log::instance()->path() ), "Log file should be created after explicit call to Log::create()\n");
    LOG(Log::LOG,"LOG");
    fs::remove(Log::instance()->path());
@@ -188,6 +195,7 @@ BOOST_AUTO_TEST_CASE( test_log_new_path )
    // File not created until a message is logged
    LOG(Log::LOG,"LOG");
    BOOST_CHECK_MESSAGE(fs::exists( Log::instance()->path() ), "Log file should be created after first message is logged\n");
+
    fs::remove(Log::instance()->path());
 
    // Explicitly destroy log. To keep valgrind happy
@@ -201,7 +209,7 @@ BOOST_AUTO_TEST_CASE( test_get_last_n_lines_from_log )
    // delete the log file if it exists.
    std::string path = getLogPath();
    fs::remove(path);
-   BOOST_CHECK_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
+   BOOST_REQUIRE_MESSAGE(!fs::exists( path ), "log file not deleted " << path);
 
    // Create the log file;
    Log::create(path);
@@ -263,7 +271,7 @@ BOOST_AUTO_TEST_CASE( test_get_first_n_lines_from_log )
    // delete the log file if it exists.
    std::string path = getLogPath();
    fs::remove(path);
-   BOOST_CHECK_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
+   BOOST_REQUIRE_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
 
    // Create the log file;
    Log::create(path);
@@ -333,7 +341,7 @@ BOOST_AUTO_TEST_CASE( test_get_log_timing )
    // delete the log file if it exists.
    std::string path = getLogPath();
    fs::remove(getLogPath());
-   BOOST_CHECK_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
+   BOOST_REQUIRE_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
 
    // Create the log file;
    Log::create(path);

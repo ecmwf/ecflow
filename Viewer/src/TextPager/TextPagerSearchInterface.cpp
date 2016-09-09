@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -7,12 +7,10 @@
 // nor does it submit to any jurisdiction.
 //
 //============================================================================
-
-// Copyright 2014 ECMWF.
+#include <assert.h>
 
 #include "TextPager/TextPagerSearchInterface.hpp"
 
-//#include <QTextEdit>
 #include "TextPagerEdit.hpp"
 #include "UserMessage.hpp"
 
@@ -20,13 +18,32 @@
 #include <QGuiApplication>
 #endif
 
+TextPagerCursor::MoveOperation TextPagerSearchInterface::translateCursorMoveOp(QTextCursor::MoveOperation move)
+{
+	switch (move)
+	{
+		case QTextCursor::NoMove:       return TextPagerCursor::NoMove;
+		case QTextCursor::Start:        return TextPagerCursor::Start;
+		case QTextCursor::StartOfLine:  return TextPagerCursor::StartOfLine;
+		case QTextCursor::StartOfWord:  return TextPagerCursor::StartOfWord;
+		case QTextCursor::PreviousWord: return TextPagerCursor::PreviousWord;
+		case QTextCursor::End:          return TextPagerCursor::End;
+		default:
+		{
+			assert(0);
+			return TextPagerCursor::NoMove;
+		}
+	}
+}
+
+
 bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QTextDocument::FindFlags flags,
-		                                bool gotoStartOfWord, int iteration,StringMatchMode::Mode matchMode)
+										   QTextCursor::MoveOperation move, int iteration, StringMatchMode::Mode matchMode)
 {
 	if(!editor_)
 		return false;
 
-    if(editor_->document()->documentSize() ==0)
+    if(editor_->document()->documentSize() == 0)
         return false;
 
     bool doSearch=true;
@@ -37,8 +54,7 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 
 	TextPagerCursor cursor(editor_->textCursor());
 
-	if (gotoStartOfWord)	// go to start of word?
-		cursor.movePosition(TextPagerCursor::StartOfWord);
+	cursor.movePosition(translateCursorMoveOp(move));  // move the cursor?
 
 	TextPagerDocument::FindMode mode=TextPagerDocument::FindWrap;
 
@@ -131,58 +147,66 @@ void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload
     if(editor_->document()->documentSize() ==0)
         return;
 
-    bool found = false;
-	TextPagerDocument::FindMode findMode = TextPagerDocument::FindBackward;
-	TextPagerCursor cursor(editor_->textCursor());
-	cursor.movePosition(TextPagerCursor::End);
+    bool performSearch = vpPerformAutomaticSearch_->value().toBool();
 
-    qDebug() << "automaticSearchForKeyword" << editor_->textCursor().position();
+	if (performSearch)
+	{
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-	QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+		QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 
-	//QRegExp regexp("10:56:45 4");
-	QRegExp regexp("--(abort|complete)");
-	TextPagerCursor findCursor = editor_->document()->find(regexp, cursor, findMode);  // perform the search
-	//TextPagerCursor findCursor = editor_->document()->find("--abort", cursor, findMode);
-	found = (!findCursor.isNull());
-	if(found)
-	{
-		editor_->setTextCursor(findCursor);
-	}
+		// search direction
+		QTextDocument::FindFlags findFlags;
+		TextPagerCursor cursor(editor_->textCursor());
+		std::string searchFrom = vpAutomaticSearchFrom_->valueAsString();
+		QTextCursor::MoveOperation move;
 
-#if 0
-	QStringList keywords;
-	keywords << "--abort" << "--complete";// << "xabort" << "xcomplete"
-	         << "System Billing Units";
-
-	// find any of the keywords and stop at the first one
-	int i = 0;
-	while (!found && i < keywords.size())
-	{
-		cursor.movePosition(QTextCursor::End);
-		textEdit_->setTextCursor(cursor);
-		found = textEdit_->findString(keywords.at(i), findFlags);
-		i++;
-	}
-#endif
-
-    else
-	{
-		if(userClickedReload)
+		if (searchFrom == "bottom")
 		{
-			// move the cursor to the start of the last line
-			TextPagerCursor cursor = editor_->textCursor();
-			cursor.movePosition(TextPagerCursor::End);
-			cursor.movePosition(TextPagerCursor::StartOfLine);
-			editor_->setTextCursor(cursor);
+			findFlags = QTextDocument::FindBackward;
+			move = QTextCursor::End;
 		}
-	}
+		else
+		{
+			move = QTextCursor::Start;
+		}
+
+		// case sensitivity
+		bool caseSensitive = vpAutomaticSearchCase_->value().toBool();
+		if (caseSensitive)
+			findFlags = findFlags | QTextDocument::FindCaseSensitively;
+
+		// string match mode
+		std::string matchMode(vpAutomaticSearchMode_->valueAsString());
+		StringMatchMode::Mode mode = StringMatchMode::operToMode(matchMode);
+
+		// the term to be searched for
+		std::string searchTerm_s(vpAutomaticSearchText_->valueAsString());
+		QString searchTerm = QString::fromStdString(searchTerm_s);
+
+		// perform the search
+		bool found = findString (searchTerm, false, findFlags, move, 1, mode);
+
+		if(!found)
+		{
+			if(userClickedReload)
+			{
+				// move the cursor to the start of the last line
+				gotoLastLine();
+			}
+		}
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-	QGuiApplication::restoreOverrideCursor();
+		QGuiApplication::restoreOverrideCursor();
 #endif
+
+	}
+	else
+	{
+		// move the cursor to the start of the last line
+		gotoLastLine();
+	}
 }
 
 void TextPagerSearchInterface::refreshSearch()
@@ -215,4 +239,14 @@ void TextPagerSearchInterface::disableHighlights()
 {
     if(editor_)
         editor_->setEnableSearchHighlighter(false);
+}
+
+void TextPagerSearchInterface::gotoLastLine()
+{
+	// move the cursor to the start of the last line
+	TextPagerCursor cursor = editor_->textCursor();
+	cursor.movePosition(TextPagerCursor::End);
+	cursor.movePosition(TextPagerCursor::StartOfLine);
+	editor_->setTextCursor(cursor);
+	editor_->ensureCursorVisible();
 }

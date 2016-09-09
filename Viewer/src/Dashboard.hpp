@@ -45,6 +45,7 @@ public:
 	void selectFirstServer();
     bool selectInTreeView(VInfo_ptr);
     void addSearchDialog();
+    DashboardTitle* titleHandler() const {return titleHandler_;}
 
 	void notifyServerFilterAdded(ServerItem* item);
 	void notifyServerFilterRemoved(ServerItem* item);
@@ -56,7 +57,6 @@ public:
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
-	void titleChanged(QWidget*,QString,QPixmap);
 	void contentsChanged();
 	void aboutToDelete();
 
@@ -65,11 +65,12 @@ public Q_SLOTS:
 	void slotCommand(VInfo_ptr,QString);
 
 protected Q_SLOTS:
-	void slotTitle(QString,QPixmap);
     void slotDockClose();
     void slotDialogFinished(int);
+    void slotDialogClosed();
     void slotPopInfoPanel(QString);
-    void slotInfoPanelSelection(VInfo_ptr);
+    //void slotInfoPanelSelection(VInfo_ptr);
+    void slotSelectionChanged(VInfo_ptr info);
 
 private:
 	DashboardWidget* addWidgetCore(const std::string& type);
@@ -82,7 +83,8 @@ private:
 
 	ServerFilter* serverFilter_;
 	DashboardTitle* titleHandler_;
-	QList<DashboardWidget*> widgets_;
+    QList<DashboardWidget*> widgets_;
+    QList<DashboardWidget*> popupWidgets_;
 	bool settingsAreRead_;
 	static int maxWidgetNum_;
 };

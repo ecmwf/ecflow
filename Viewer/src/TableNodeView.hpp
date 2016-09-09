@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -41,16 +41,16 @@ public:
 	void rerender();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
-    void currentSelection(VInfo_ptr n) {}
+    void setCurrentSelection(VInfo_ptr n);
 	void selectFirstServer() {}
 	void setModel(TableNodeSortModel *model);
 
 	void notifyChange(VProperty* p);
 
-	void readSettings(VSettings* vs);
+    void readSettings(VSettings*);
+    void writeSettings(VSettings*);
 
 public Q_SLOTS:
-	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(std::vector<VInfo_ptr>,QString);
@@ -58,7 +58,6 @@ public Q_SLOTS:
 	void slotSizeHintChangedGlobal();
     void slotRerender();
     void slotViewCommand(VInfo_ptr,QString) {}
-    void slotSetCurrent(VInfo_ptr) {}
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -70,6 +69,7 @@ protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void adjustBackground(QColor col);
+	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
     TableNodeSortModel* model_;
 	ActionHandler* actionHandler_;

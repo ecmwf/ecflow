@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -8,6 +8,8 @@
 //============================================================================
 
 #include "SuiteItemWidget.hpp"
+
+#include <QSortFilterProxyModel>
 
 #include "InfoProvider.hpp"
 #include "ServerHandler.hpp"
@@ -22,25 +24,54 @@
 //
 //========================================================
 
-SuiteItemWidget::SuiteItemWidget(QWidget *parent) : QWidget(parent)
+SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
+    QWidget(parent),
+    columnsAdjusted_(false)
 {
 	setupUi(this);
 
 	infoProvider_=new SuiteProvider(this);
 
 	model_=new SuiteModel(this);
+    QSortFilterProxyModel* sortModel=new QSortFilterProxyModel(this);
+    sortModel->setSourceModel(model_);
 
-	suiteView->setModel(model_);
+    suiteView->setUniformRowHeights(true);
+    suiteView->setSortingEnabled(true);
+    suiteView->setModel(sortModel);
 
 	connect(model_,SIGNAL(dataChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotModelEdited(QModelIndex,QModelIndex)));
 
-	//messageLabel->hide();
+    messageLabel->setShowTypeTitle(false);
+    messageLabel->setNarrowMode(true);
+    messageLabel->hide();
 
-	okTb->setEnabled(false);
+    QFont labelF;
+    labelF.setBold(true);
+    labelF.setPointSize(labelF.pointSize()-1);
+
+    controlLabel->setFont(labelF);
+    controlLabel->setText("<font color=\'#565656\'>" + controlLabel->text() + "</font>");
+
+    selectLabel->setFont(labelF);
+    selectLabel->setText("<font color=\'#565656\'>" + selectLabel->text() + "</font>");
+
+    loadedLabel->setFont(labelF);
+    loadedLabel->setText("<font color=\'#565656\'>" + loadedLabel->text() + "</font>");
+
+    QPalette pal=okTb->palette();
+    QColor col(10,150,10);
+    pal.setColor(QPalette::Active,QPalette::Button,col);
+    pal.setColor(QPalette::Active,QPalette::ButtonText,QColor(Qt::white));
+    //okTb->setPalette(pal);
+
+    okTb->setEnabled(false);
 	enableTb->setChecked(false);
 
     checkActionState();
+
+    okTb->setEnabled(false);
 }
 
 QWidget* SuiteItemWidget::realWidget()
@@ -67,7 +98,21 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 		assert(sf);
 
 		//The model will be an observer of the suitefilter
-		model_->setData(sf);
+        model_->setData(sf,info_->server());
+
+        if(!columnsAdjusted_)
+        {
+            for(int i=0; i < model_->columnCount()-1; i++)
+            {
+                suiteView->resizeColumnToContents(i);
+                suiteView->setColumnWidth(i,suiteView->columnWidth(i) + ((i==0)?25:15));
+            }
+            columnsAdjusted_=true;
+        }
+
+        suiteView->sortByColumn(0,Qt::AscendingOrder);
+
+        model_->filter()->addObserver(this);
 
 		enableTb->setChecked(sf->isEnabled());
 		autoCb->setChecked(sf->autoAddNewSuites());
@@ -104,7 +149,8 @@ void SuiteItemWidget::updateData()
 
 void SuiteItemWidget::infoReady(VReply* reply)
 {
-	//updateData();
+    suiteView->sortByColumn(0,Qt::AscendingOrder);
+    //updateData();
 }
 
 void SuiteItemWidget::infoFailed(VReply* reply)
@@ -116,10 +162,10 @@ void SuiteItemWidget::infoFailed(VReply* reply)
 
 void SuiteItemWidget::clearContents()
 {
-	model_->setData(0);
+    model_->setData(0,0);
 	InfoPanelItem::clear();
 	okTb->setEnabled(false);
-	//messageLabel->hide();
+    messageLabel->hide();
 }
 
 void SuiteItemWidget::updateState(const FlagSet<ChangeFlag>&)
@@ -136,6 +182,7 @@ void SuiteItemWidget::checkActionState()
         selectAllTb->setEnabled(false);
         unselectAllTb->setEnabled(false);
         syncTb->setEnabled(false);
+        removeTb->setEnabled(false);
         suiteView->setEnabled(false);
         okTb->setEnabled(false);
         return;
@@ -143,7 +190,6 @@ void SuiteItemWidget::checkActionState()
     else
     {
          enableTb->setEnabled(true);
-         okTb->setEnabled(true);
          suiteView->setEnabled(true);
     }
 
@@ -151,24 +197,15 @@ void SuiteItemWidget::checkActionState()
 	{
 		autoCb->setEnabled(true);
 		selectAllTb->setEnabled(true);
-		unselectAllTb->setEnabled(true);
+        unselectAllTb->setEnabled(true);
+        syncTb->setEnabled(true);
 
 		if(SuiteFilter* sf=model_->filter())
 		{
 			autoCb->setChecked(sf->autoAddNewSuites());
+            removeTb->setEnabled(sf->hasUnloaded());
+            syncTb->setEnabled(true);
 
-			if(!sf->autoAddNewSuites())
-			{
-				syncTb->setEnabled(true);
-			}
-			else
-			{
-				syncTb->setEnabled(false);
-			}
-		}
-		else
-		{
-			syncTb->setEnabled(false);
 		}
 	}
 	else
@@ -176,7 +213,8 @@ void SuiteItemWidget::checkActionState()
 		autoCb->setEnabled(false);
 		selectAllTb->setEnabled(false);
 		unselectAllTb->setEnabled(false);
-		syncTb->setEnabled(false);
+        syncTb->setEnabled(false);
+        removeTb->setEnabled(false);
 	}
 }
 
@@ -185,9 +223,8 @@ void SuiteItemWidget::on_autoCb_clicked(bool val)
 	if(SuiteFilter* sf=model_->filter())
 	{
 		sf->setAutoAddNewSuites(val);
+        settingsChanged();
 	}
-
-    checkActionState();
 }
 
 void SuiteItemWidget::on_enableTb_clicked(bool val)
@@ -231,6 +268,20 @@ void SuiteItemWidget::on_syncTb_clicked(bool)
 	}
 }
 
+void SuiteItemWidget::on_removeTb_clicked(bool val)
+{
+    if(SuiteFilter* sf=model_->filter())
+    {
+        if(sf->removeUnloaded())
+        {
+            model_->reloadData();
+            settingsChanged();
+        }
+    }
+
+    checkActionState();
+}
+
 void SuiteItemWidget::on_okTb_clicked(bool)
 {
 	if(info_.get() && info_->isServer() && info_->server())
@@ -238,7 +289,9 @@ void SuiteItemWidget::on_okTb_clicked(bool)
 		//This replace the edited filter in model the one
 		//stored by the server
 		info_->server()->updateSuiteFilter(model_->filter());
-		okTb->setEnabled(false);
+        okTb->setEnabled(false);
+        messageLabel->clear();
+        messageLabel->hide();
 	}
 }
 
@@ -249,12 +302,34 @@ void SuiteItemWidget::slotModelEdited(const QModelIndex&,const QModelIndex&)
 
 void SuiteItemWidget::settingsChanged()
 {
-	if(!okTb->isEnabled())
-	{
-		okTb->setEnabled(true);
-		//messageLabel->show();
-		//messageLabel->showInfo("The suite filter changed!");
-	}
+    SuiteFilter *sf=model_->filter();
+    SuiteFilter *oriSf=model_->realFilter();
+    if(sf && oriSf)
+    {
+        bool st=oriSf->sameAs(sf);
+        okTb->setEnabled(!st);
+        if(st)
+        {
+            messageLabel->clear();
+            messageLabel->hide();
+        }
+        else
+        {
+            messageLabel->showTip("The suite filter has changed! Please click <b>Apply</b> to submit the changes to the server!");
+        }
+    }
+}
+
+void SuiteItemWidget::notifyChange(SuiteFilter *filter)
+{
+    settingsChanged();
+    checkActionState();
+}
+
+void SuiteItemWidget::notifyDelete(SuiteFilter *filter)
+{
+    Q_ASSERT(filter);
+    filter->removeObserver(this);
 }
 
 

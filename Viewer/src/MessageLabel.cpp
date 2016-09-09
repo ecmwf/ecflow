@@ -1,4 +1,12 @@
-// Copyright 2014 ECMWF.
+//============================================================================
+// Copyright 2016 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+//============================================================================
 
 #include "MessageLabel.hpp"
 
@@ -55,11 +63,15 @@ MessageLabel::MessageLabel(QWidget *parent) :
 
 		bg=QColor(234,215,150);
 		bgLight=bg.lighter(112);
-		typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning",bg,bgLight,QColor(226,195,110)); //255,198,63
+        typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning",bg,bgLight,QColor(226,170,91)); //QColor(226,195,110)); //226,170,91
 
 		bg=QColor(255,231,231);
 		bgLight=bg.lighter(105);
 		typeData[ErrorType]=MessageLabelData(":/viewer/error.svg","Error",bg,bgLight,QColor(223,152,152));
+
+        bg=QColor(232,249,236);
+        bgLight=bg.lighter(105);
+        typeData[TipType]=MessageLabelData(":/viewer/tip.svg","Tip",bg,bgLight,QColor(190,220,190));
 	}
 
 	pixLabel_=new QLabel(this);
@@ -126,6 +138,11 @@ void MessageLabel::showWarning(QString msg)
 void MessageLabel::showError(QString msg)
 {
 	showMessage(ErrorType,msg);
+}
+
+void MessageLabel::showTip(QString msg)
+{
+    showMessage(TipType,msg);
 }
 
 void MessageLabel::showMessage(const Type& type,QString msg)

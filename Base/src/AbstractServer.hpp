@@ -126,10 +126,14 @@ public:
 	/// At the moment we will only implement options a/ and b/
 	//
 	/// Returns true if the given user has access to the server, false otherwise
-	virtual bool authenticateReadAccess(const std::string& user) = 0;
+   virtual bool authenticateReadAccess(const std::string& user) = 0;
+   virtual bool authenticateReadAccess(const std::string& user, const std::string& path) = 0;
+   virtual bool authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths) = 0;
 
 	/// Returns true if user has matching write access privileges.
-	virtual bool authenticateWriteAccess(const std::string& user ) = 0;
+   virtual bool authenticateWriteAccess(const std::string& user) = 0;
+   virtual bool authenticateWriteAccess(const std::string& user, const std::string& path) = 0;
+   virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) = 0;
 
 	/// Shutdown the server and let 'user' has have exclusive lock on it.
 	/// If the lock succeeds return true, (This will end up calling the shutdown()

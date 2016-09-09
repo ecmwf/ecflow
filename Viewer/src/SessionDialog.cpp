@@ -146,6 +146,7 @@ bool SessionDialog::validSaveName(const std::string &name)
 	{
 		return true;
 	}*/
+	return true;
 }
 
 void SessionDialog::on_sessionNameEdit__textChanged()

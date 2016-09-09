@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>19</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -145,8 +145,8 @@
   </widget>
   <action name="actionClose">
    <property name="icon">
-    <iconset>
-     <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Close</string>
@@ -160,7 +160,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/images/exit.svg</normaloff>:/viewer/images/exit.svg</iconset>
    </property>
    <property name="text">
@@ -172,7 +172,7 @@
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
    </property>
    <property name="text">
@@ -194,7 +194,7 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
    </property>
    <property name="text">
@@ -209,7 +209,7 @@
   </action>
   <action name="actionReset">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/reset.svg</normaloff>:/viewer/reset.svg</iconset>
    </property>
    <property name="text">
@@ -237,7 +237,7 @@
   </action>
   <action name="actionManageServers">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/manage_server.svg</normaloff>:/viewer/manage_server.svg</iconset>
    </property>
    <property name="text">
@@ -252,7 +252,7 @@
   </action>
   <action name="actionAddInfoPanel">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/images/add_info.svg</normaloff>:/viewer/images/add_info.svg</iconset>
    </property>
    <property name="text">
@@ -261,7 +261,7 @@
   </action>
   <action name="actionAddTreeWidget">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/images/add_tree.svg</normaloff>:/viewer/images/add_tree.svg</iconset>
    </property>
    <property name="text">
@@ -273,7 +273,7 @@
   </action>
   <action name="actionAddTableWidget">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/images/add_table.svg</normaloff>:/viewer/images/add_table.svg</iconset>
    </property>
    <property name="text">
@@ -309,7 +309,7 @@
   </action>
   <action name="actionSearch">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/search.svg</normaloff>:/viewer/search.svg</iconset>
    </property>
    <property name="text">
@@ -318,7 +318,7 @@
   </action>
   <action name="actionRefreshSelected">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/reload_one.svg</normaloff>:/viewer/reload_one.svg</iconset>
    </property>
    <property name="text">
@@ -345,6 +345,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -13,20 +13,27 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "ExprParser.hpp"
 #include "ExprAst.hpp"
+#include "ExprDuplicate.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/foreach.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/conversion.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
+
 #include <string>
 #include <map>
 #include <iostream>
 #include <fstream>
 using namespace std;
-
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 
 // DEBUG AID: to see the expression tree, invert the expected evaluation
 //            so that test fail's
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
+
 
 BOOST_AUTO_TEST_CASE( test_single_expression )
 {
@@ -37,17 +44,8 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
     // value.second = result of expected evaluation
 	map<string,std::pair<string,bool> > exprMap;
 
-//  	exprMap["inigroup:YMD eq not 1"] = std::make_pair(AstEqual::stype(),true);
-//	exprMap["/net/main:YMD le /net/cleanplus1:YMD and 1"] = std::make_pair(AstAnd::stype(),true);
-//   exprMap["!../../../prod2diss//operation_is_late:yes"] = std::make_pair(AstNot::stype(),true);
-// 	exprMap["../obs:YMD ge  ( 19720101 + 6576 - 1)"] = std::make_pair(AstGreaterEqual::stype(),true);
-// 	exprMap["../obs:YMD ge  ( (19720101 + 6576) - (12 + 1) )"] = std::make_pair(AstGreaterEqual::stype(),true);
-
-   exprMap["../timers/end/ymd:YMD >= ./hind:YMD and hind_info == complete and comp == complete and notready == complete"] = std::make_pair(AstAnd::stype(),false);
-//   exprMap["comp == complete and ! ready == complete"] = std::make_pair(AstAnd::stype(),false);
-//   exprMap["comp == complete and not ready == complete"] = std::make_pair(AstAnd::stype(),false);
-//   exprMap["comp == complete and ~ ready == complete"] = std::make_pair(AstAnd::stype(),false);
-
+   exprMap["20160819 == cal::julian_to_date( 2457620 )"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["2457620 == cal::date_to_julian( 20160819 )"] = std::make_pair(AstEqual::stype(),true);
 
  	std::pair<string, std::pair<string,bool> > p;
 	BOOST_FOREACH(p, exprMap ) {
@@ -65,12 +63,44 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 		Ast* top = theExprParser.getAst();
 		BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree");
 		BOOST_REQUIRE_MESSAGE( top->left() ,"No root created");
-		BOOST_REQUIRE_MESSAGE( top->left()->isRoot() ,"First child of top should be a root");
-		BOOST_REQUIRE_MESSAGE( top->left()->type() == expectedRootType,"expected root type " << expectedRootType << " but found " << top->left()->type());
+		BOOST_REQUIRE_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
+		BOOST_REQUIRE_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
+		BOOST_REQUIRE_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type " << expectedRootType << " or 'variable' but found " << top->left()->type() << " " << p.first);
       top->print_flat(ss);
 		BOOST_REQUIRE_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << ss.str() << "\n" << *top);
 	}
 }
 
-BOOST_AUTO_TEST_SUITE_END()
 
+//BOOST_AUTO_TEST_CASE( test_expression_read_from_file )
+//{
+//   std::cout <<  "ANode:: ...test_expression_read_from_file\n";
+//
+//   std::string filename = "/var/tmp/ma0/BIG_DEFS/triggers.list";
+//   std::ifstream the_file(filename.c_str(),std::ios_base::in);
+//   BOOST_REQUIRE_MESSAGE(the_file,"file " << filename << "not found");
+//
+//   int  i = 0;
+//   string line;
+//   while ( std::getline(the_file,line) ) {
+//      i++;
+//      // cout << i << ": " << line << "\n";
+//      ExprParser theExprParser(line);
+//      std::string errorMsg;
+//      bool ok = theExprParser.doParse(errorMsg);
+//      BOOST_CHECK_MESSAGE(ok,errorMsg << " line: " << i );
+//
+//      if (ok) {
+//         Ast* top = theExprParser.getAst();
+//         BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree " + line);
+//         BOOST_REQUIRE_MESSAGE( top->left() ,"No root created " + line);
+//         BOOST_REQUIRE_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + line);
+//         //top->print_flat(ss);
+//      }
+//   }
+//
+//   ExprDuplicate reclaim_cloned_ast_memory;
+//   cout << " read " << i << " expressions\n";
+//}
+
+BOOST_AUTO_TEST_SUITE_END()

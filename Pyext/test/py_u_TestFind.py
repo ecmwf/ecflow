@@ -33,9 +33,9 @@ def create_defs(name=""):
     
     
 if __name__ == "__main__":    
-    print "####################################################################"
-    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print("####################################################################")
+    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("####################################################################")
  
     defs = create_defs();
     tasks = defs.get_all_tasks()
@@ -73,4 +73,4 @@ if __name__ == "__main__":
             node = task.find_node_up_the_tree("freddd")
             assert node == None
             
-    print "All Tests pass"
+    print("All Tests pass")

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -43,15 +43,17 @@ public Q_SLOTS:
 
 protected:
 	QTextDocument::FindFlags findFlags();
-	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration);
+	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, QTextCursor::MoveOperation move, int iteration);
 	void refreshSearch();
 	void highlightMatches(QString txt);
     void clearHighlights();
     void disableHighlights();
+    bool lastFindSuccessful() {return lastFindSuccessful_;}
 
     AbstractTextEditSearchInterface* interface_;
     QTimer highlightAllTimer_;
 	QColor highlightColour_;
+	bool lastFindSuccessful_;
 };
 
 #endif /* VIEWER_SRC_TEXTEDITSEARCHLINE_HPP_ */

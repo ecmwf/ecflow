@@ -152,8 +152,12 @@ public:
 	/// At the moment we will only implement options a/ and b/
 	//
 	/// Returns true if the given user has access to the server, false otherwise
-	bool authenticateReadAccess(const std::string& user)const;
+   bool authenticateReadAccess(const std::string& user)const;
+   bool authenticateReadAccess(const std::string& user,const std::string& path)const;
+   bool authenticateReadAccess(const std::string& user,const std::vector<std::string>& paths)const;
  	bool authenticateWriteAccess(const std::string& user) const;
+   bool authenticateWriteAccess(const std::string& user,const std::string& path)const;
+   bool authenticateWriteAccess(const std::string& user,const std::vector<std::string>& paths)const;
 
 	/// return true if help option was selected
    bool help_option() const  { return help_option_; }

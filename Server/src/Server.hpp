@@ -108,7 +108,11 @@ protected: // Allow test to override
    virtual void restart();
    virtual bool reloadWhiteListFile(std::string& errorMsg);
    virtual bool authenticateReadAccess(const std::string& user);
+   virtual bool authenticateReadAccess(const std::string& user, const std::string& path);
+   virtual bool authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths);
    virtual bool authenticateWriteAccess(const std::string& user);
+   virtual bool authenticateWriteAccess(const std::string& user, const std::string& path);
+   virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths);
    virtual bool lock(const std::string& user);
    virtual void unlock();
    virtual const std::string& lockedUser() const;

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,6 +12,7 @@
 #define VIEWER_SRC_TEXTPAGER_TEXTPAGERSEARCHINTERFACE_HPP_
 
 #include "AbstractTextEditSearchInterface.hpp"
+#include "TextPagerCursor.hpp"
 
 class TextPagerEdit;
 
@@ -22,7 +23,7 @@ public:
 	void setEditor(TextPagerEdit* e) {editor_=e;}
 
 	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags findFlags,
-			         bool gotoStartOfWord, int iteration,StringMatchMode::Mode matchMode);
+					 QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode);
 
 	void automaticSearchForKeywords(bool);
 	void refreshSearch();
@@ -30,9 +31,10 @@ public:
     void disableHighlights();
 	void enableHighlights();
 	bool highlightsNeedSearch() {return false;}
+	void gotoLastLine();
 
 protected:
-
+	TextPagerCursor::MoveOperation translateCursorMoveOp(QTextCursor::MoveOperation move);
 	TextPagerEdit *editor_;
 
 };

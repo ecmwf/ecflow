@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -37,7 +37,7 @@ class VSettings
 public:
 	explicit VSettings(const std::string& file);
 	explicit VSettings(boost::property_tree::ptree pt);
-	virtual ~VSettings() {};
+    virtual ~VSettings() {}
 
 	//bool read(const std::string &fs);
 	//virtual void write(const std::string &fs);
@@ -55,7 +55,8 @@ public:
 	void put(const std::string& key,int val);
 	//void put(const std::string& key,bool val);
 	void put(const std::string& key,const std::string& val);
-	void put(const std::string& key,const std::vector<std::string>& val);
+    void put(const std::string& key,const std::vector<std::string>& val);
+    void put(const std::string& key,const std::vector<int>& val);
 	void put(const std::string& key,const std::vector<VSettings>& val);
 	void putAsBool(const std::string& key,bool val);
 
@@ -69,7 +70,6 @@ public:
 	void get(const std::string& key,std::vector<VSettings>& val);
 
 	const boost::property_tree::ptree & propertyTree() const {return pt_;}
-
 
 protected:
 	boost::property_tree::ptree pt_;
@@ -90,7 +90,6 @@ public:
 	void clear();
 
 	void write();
-
 
 	bool containsQs(const std::string& key);
 

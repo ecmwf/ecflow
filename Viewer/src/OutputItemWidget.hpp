@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -42,7 +42,7 @@ public:
     void infoProgressStart(const std::string& text,int max);
     void infoProgress(const std::string& text,int value);
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
@@ -58,7 +58,6 @@ protected:
     void setCurrentInDir(const std::string&);
     void updateDir(bool);
 	void updateDir(VDir_ptr,bool);
-	void updateDir(bool,const std::string&);
 	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&);
 	void searchOnReload();
@@ -76,6 +75,8 @@ protected:
 	QTimer* updateDirTimer_;
 	static int updateDirTimeout_;
     OutputFetchInfo* fetchInfo_;
+    bool dirColumnsAdjusted_;
+    bool submittedWarning_;
 };
 
 #endif

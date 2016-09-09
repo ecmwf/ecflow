@@ -109,29 +109,23 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString titl
 	ac->setSeparator(true);
 	menu_->addAction(ac);
 
-	if(itemMode_ == FilterMode)
-	{
-		ac = new QAction(this);
-		ac->setText(tr("Clear filter"));
-		menu_->addAction(ac);
-		connect(ac,SIGNAL(triggered(bool)),
-			this,SLOT(slotUnselectAll(bool)));
-	}
-	else
-	{
-		ac = new QAction(this);
-		ac->setText(tr("Show all"));
-		menu_->addAction(ac);
-		connect(ac,SIGNAL(triggered(bool)),
-					this,SLOT(slotSelectAll(bool)));
+    selectAllAc_ = new QAction(this);
+    if(itemMode_ == FilterMode)
+        selectAllAc_->setText(tr("Select all"));
+    else
+        selectAllAc_->setText(tr("Show all"));
+    menu_->addAction(selectAllAc_);
+    connect(selectAllAc_,SIGNAL(triggered(bool)),
+                this,SLOT(slotSelectAll(bool)));
 
-		ac = new QAction(this);
-		ac->setText(tr("Hide all"));
-		menu_->addAction(ac);
-		connect(ac,SIGNAL(triggered(bool)),
-			this,SLOT(slotUnselectAll(bool)));
-
-	}
+    unselectAllAc_ = new QAction(this);
+    if(itemMode_ == FilterMode)
+        unselectAllAc_->setText(tr("Clear filter"));
+    else
+        unselectAllAc_->setText(tr("Hide all"));
+    menu_->addAction(unselectAllAc_);
+    connect(unselectAllAc_,SIGNAL(triggered(bool)),
+        this,SLOT(slotUnselectAll(bool)));
 
 	reload();
 }
@@ -216,7 +210,7 @@ void VParamFilterMenu::slotUnselectAll(bool)
 		}
 	}
 
-	slotChanged(true);
+	slotChanged(true);    
 }
 
 void VParamFilterMenu::slotChanged(bool)
@@ -233,6 +227,8 @@ void VParamFilterMenu::slotChanged(bool)
 
 	if(filter_)
 		filter_->current(items);
+
+   checkActionState();
 }
 
 void VParamFilterMenu::reload()
@@ -244,6 +240,13 @@ void VParamFilterMenu::reload()
 			ac->setChecked(filter_->isSet(ac->data().toString().toStdString()));
 		}
 	}
+    checkActionState();
+}
+
+void VParamFilterMenu::checkActionState()
+{
+    selectAllAc_->setEnabled(!filter_->isComplete());
+    unselectAllAc_->setEnabled(!filter_->isEmpty());
 }
 
 //===========================================

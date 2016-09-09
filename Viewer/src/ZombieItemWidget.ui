@@ -26,16 +26,7 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -155,7 +146,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="viewer.qrc">
          <normaloff>:/viewer/sync.svg</normaloff>:/viewer/sync.svg</iconset>
        </property>
        <property name="autoRaise">
@@ -199,7 +190,7 @@
   </layout>
   <action name="actionTerminate">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/terminate.svg</normaloff>:/viewer/terminate.svg</iconset>
    </property>
    <property name="text">
@@ -208,7 +199,7 @@
   </action>
   <action name="actionRescue">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/rescue.svg</normaloff>:/viewer/rescue.svg</iconset>
    </property>
    <property name="text">
@@ -222,8 +213,8 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset>
-     <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -242,6 +233,8 @@
    <header>TreeView.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

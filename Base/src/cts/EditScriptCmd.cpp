@@ -242,6 +242,11 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 	return PreAllocatedReply::ok_cmd();
 }
 
+bool EditScriptCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,path_to_node_);
+}
+
 const char* EditScriptCmd::arg()  { return CtsApi::edit_script_arg();}
 const char* EditScriptCmd::desc() {
 	/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8

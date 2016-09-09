@@ -38,8 +38,12 @@
 //
 class InLimitMgr : private boost::noncopyable {
 public:
-	InLimitMgr(Node* n) : node_(n) {}
+   InLimitMgr(Node* n) : node_(n) {}
+   InLimitMgr(const InLimitMgr& rhs) : node_(NULL),inLimitVec_(rhs.inLimitVec_){}
 	InLimitMgr() : node_(NULL) {}
+
+   // needed by node copy constructor
+   void set_node(Node* n) { node_ = n; }
 
 // standard functions: ==============================================
  	std::ostream& print(std::ostream&) const;

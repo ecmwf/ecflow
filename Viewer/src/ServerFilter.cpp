@@ -13,6 +13,7 @@
 #include "ServerItem.hpp"
 #include "ServerList.hpp"
 #include "VSettings.hpp"
+#include "SessionHandler.hpp"
 
 //==============================================
 //
@@ -149,6 +150,21 @@ void ServerFilter::readSettings(VSettings* vs)
 		if(ServerItem* s=ServerList::instance()->find(name))
 		{
 			addServer(s,true);
+		}
+		// special case - if we're starting a temporary session for looking at one
+		// particular server, then we need to replace the placeholder server alias
+		// with the one we actually want to look at
+		else if (name == "SERVER_ALIAS_PLACEHOLDER")
+		{
+			SessionItem *session = SessionHandler::instance()->current();
+			if (session->temporary())
+			{
+				std::string alias = session->temporaryServerAlias();
+				if (ServerItem* s=ServerList::instance()->find(alias))
+				{
+					addServer(s,true);
+				}
+			}
 		}
 	}
 }

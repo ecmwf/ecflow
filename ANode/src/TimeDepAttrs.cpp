@@ -31,6 +31,17 @@ using namespace boost::posix_time;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+TimeDepAttrs::TimeDepAttrs(const TimeDepAttrs& rhs)
+: node_(NULL),
+  timeVec_(rhs.timeVec_),
+  todayVec_(rhs.todayVec_),
+  dates_(rhs.dates_),
+  days_(rhs.days_),
+  crons_(rhs.crons_)
+{
+   // users must call set_node() afterwards
+}
+
 void TimeDepAttrs::begin()
 {
    // Let time base attributes use, relative duration if applicable

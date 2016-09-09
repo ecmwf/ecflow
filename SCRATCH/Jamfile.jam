@@ -10,6 +10,16 @@
 #project theSCRATCH ;
 
 lib pthread ;
+lib libssl    : : <file>/usr/lib64/libssl.a ;
+lib libcrypto : : <file>/usr/lib64/libcrypto.a ;
+
+#
+# link with libdl.so, (shared lib containing dlopen(),dlclose()dysym(),
+# these functions are used by OpenSSL internally & thus -ldl is an
+# indirect dependency when using -lcrypto(on Linux) Because we linking
+# with static version of crypto, need to explicitly link against indirect dependencies.
+#
+lib dl ;  # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
 
 # ***********************************************************
 # Comment this in for test:
@@ -24,10 +34,24 @@ lib pthread ;
 #           <variant>debug:<define>DEBUG
 #         ;
          
-exe test : [ glob src/*.cpp  ] 
+exe client : [ glob src/client.cpp  ] 
            pthread
+           libssl
+           libcrypto
+           dl
+           /site-config//boost_system
          : <include>src/
            <variant>debug:<define>DEBUG
          ;
-        
+
+exe server : [ glob src/server.cpp  ] 
+           pthread
+           libssl
+           libcrypto
+           dl
+           /site-config//boost_system
+         : <include>src/
+           <variant>debug:<define>DEBUG
+         ;
+       
  

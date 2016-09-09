@@ -43,6 +43,9 @@ public:
    ClientInvoker(const std::string& host, const std::string& port);
    ClientInvoker(const std::string& host, int port);
 
+   /// for debug allow the current client environment to be printed
+   std::string to_string() const { return clientEnv_.toString();}
+
 	/// if throw_exception_on_error = false, then
 	///    invoke() will return 0 for success and 1 for error.
 	///    The error message can be retrieved from errorMsg()

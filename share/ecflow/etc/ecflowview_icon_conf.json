@@ -75,6 +75,14 @@
                 "icon"  : {
                     "default" : "icon_slow.svg"
                 }
+            },
+            "killed" : {
+                "label" : "Killed",
+                "tooltip" : "Task/alias killed by user",
+                "shortDesc" : "Killed by user",
+                "icon"  : {
+                    "default" : "icon_killed.svg"
             }
+        }
      }
 }

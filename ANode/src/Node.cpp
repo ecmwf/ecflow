@@ -16,6 +16,7 @@
 #include <deque>
 
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -83,6 +84,38 @@ Node::Node()
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
   graphic_ptr_(0)
 {}
+
+Node::Node(const Node& rhs)
+: parent_(NULL),
+  name_(rhs.name_),
+  suspended_(rhs.suspended_),
+  state_( rhs.state_),
+  defStatus_(rhs.defStatus_),
+  completeExpr_( (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL ),
+  triggerExpr_(  (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL ),
+  lateAttr_((rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL),
+  autoCancel_( (rhs.autoCancel_) ? new ecf::AutoCancelAttr(*rhs.autoCancel_) : NULL),
+  time_dep_attrs_((rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL),
+  child_attrs_((rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL),
+  misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
+  repeat_( rhs.repeat_),
+  varVec_(rhs.varVec_),
+  inLimitMgr_(rhs.inLimitMgr_),
+  flag_(rhs.flag_),
+  state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
+  graphic_ptr_(0)
+{
+   inLimitMgr_.set_node(this);
+   if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
+   if ( child_attrs_ )    child_attrs_->set_node(this);
+   if ( misc_attrs_ )     misc_attrs_->set_node(this);
+
+   for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
+      limit_ptr the_limit = boost::make_shared<Limit>( *rhs.limitVec_[l]);
+      the_limit->set_node(this);
+      limitVec_.push_back( the_limit );
+   }
+}
 
 Node::~Node() {
    delete completeExpr_;
@@ -975,7 +1008,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
          else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
       }
 
-      // First search user variable (*ONLY* set when doing user edit's the script)
+      // First search user variable (*ONLY* set user edit's the script)
       // Handle case: cmd = "%fred:bill% and where we have user variable "fred:bill"
       // Handle case: cmd = "%fred%      and where we have user variable "fred"
       // If we fail to find the variable we return false.

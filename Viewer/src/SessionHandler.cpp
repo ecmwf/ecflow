@@ -10,11 +10,13 @@
 #include <algorithm>
 #include <assert.h>
 #include <fstream>
-
+#include <unistd.h>
+ 
 #include "SessionHandler.hpp"
 #include "DirectoryHandler.hpp"
 #include "Str.hpp"
 #include "UserMessage.hpp"
+#include "ServerList.hpp"
 
 
 SessionHandler* SessionHandler::instance_=0;
@@ -24,6 +26,18 @@ SessionItem::SessionItem(const std::string& name) :
   name_(name)
 {
 	checkDir();
+	isTemporary_ = false;
+	askToPreserveTemporarySession_ = true;
+}
+
+SessionItem::~SessionItem()
+{
+	// temporary session? if so, remove the directory on exit
+	if (isTemporary_)
+	{
+		std::string msg;
+		bool ok = DirectoryHandler::removeDir(dirPath_, msg);
+	}
 }
 
 void SessionItem::checkDir()
@@ -92,6 +106,15 @@ SessionHandler::SessionHandler() :
 	readLastSessionName();
 }
 
+SessionHandler::~SessionHandler()
+{
+    for(std::vector<SessionItem*>::const_iterator it=sessions_.begin(); it != sessions_.end(); ++it)
+    {
+        delete (*it);
+    }
+}
+
+
 SessionHandler* SessionHandler::instance()
 {
 	if(!instance_)
@@ -100,6 +123,14 @@ SessionHandler* SessionHandler::instance()
 	}
 
 	return instance_;
+}
+
+void SessionHandler::destroyInstance()
+{
+	if (instance_)
+		delete instance_;
+
+	instance_ = 0;
 }
 
 std::string SessionHandler::sessionDirName(const std::string &sessionName)
@@ -263,6 +294,53 @@ bool SessionHandler::requestStartupViaSessionManager()
 }
 
 
+void SessionHandler::setTemporarySessionIfReqested()
+{
+	char *sh = getenv("ECFUI_TEMP_SESSION_HOST");
+	if (sh)
+	{
+		char *sp = getenv("ECFUI_TEMP_SESSION_PORT");
+		if (sp)
+		{
+			// create a session name, likely to be unique - if it already exists in the list, then use that
+			char sessName[1024];
+			sprintf(sessName, "temporary_%s_%s_%d", sh, sp, getpid());
+			std::string sname(sessName);
+			SessionItem *si = instance()->add(sname);
+			if (!si)
+				si = instance()->find(sname);
+
+			instance()->current(si);
+			si->temporary(true);
+
+			char *sask = getenv("ECFUI_TEMP_SESSION_PRESERVE_CONFIRM");
+			if (sask && !strcmp(sask, "no"))
+				si->askToPreserveTemporarySession(false);
+
+			std::string templateName("ecflow_ui_test_session_template.json");
+			instance()->createSessionDirWithTemplate(sname, templateName);
+
+			// construct an alias for this server
+			char calias[1024];
+			sprintf(calias, "%s:%s", sh, sp);
+			std::string alias(calias);
+			si->temporaryServerAlias(alias);
+
+			// does this exact server already exist in the user's list?
+			std::string host(sh);
+			std::string port(sp);
+			ServerItem *serverItem = ServerList::instance()->find(alias, host, port);
+			if (!serverItem)
+			{
+				// no - add it, and make sure it's got a unique alias
+				std::string uniqueName = ServerList::instance()->uniqueName(alias);
+				serverItem = ServerList::instance()->add(uniqueName, host, port, false, true);
+			}
+		}
+	}
+}
+
+
 void SessionHandler::saveLastSessionName()
 {
 	std::string configDir = DirectoryHandler::configDir();
@@ -334,6 +412,37 @@ void SessionHandler::readLastSessionName()
 }
 
 
+bool SessionHandler::createSessionDirWithTemplate(const std::string &sessionName, const std::string &templateFile)
+{
+	// we want to:
+	// 1) create a new directory for the session
+	// 2) copy the session template JSON file across to the new dir
+
+	std::string sessionDir = sessionDirName(sessionName);
+	bool created = DirectoryHandler::createDir(sessionDir);
+
+	if (created)
+	{
+		std::string errorMsg;
+		std::string fullTemplatePath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), templateFile);
+		std::string fullDestPath = DirectoryHandler::concatenate(sessionDir, "session.json");
+		bool copied = DirectoryHandler::copyFile(fullTemplatePath, fullDestPath, errorMsg);
+		if (!copied)
+		{
+			UserMessage::message(UserMessage::ERROR, true, errorMsg);
+			return false;
+		}
+	}
+	else
+	{
+		UserMessage::message(UserMessage::ERROR, true, "Could not create temporary session directory: " + sessionDir);
+		return false;
+	}
+
+	return true;
+}
+
+
 SessionItem *SessionHandler::copySession(SessionItem* source, std::string &destName)
 {
 	// the main work is to make a copy of the source session's directory (recursively)
@@ -359,6 +468,6 @@ SessionItem *SessionHandler::copySession(std::string &source, std::string &destN
 	SessionItem *sourceSession = find(source);
 	assert(sourceSession);
 
-	copySession(sourceSession, destName);
+	return copySession(sourceSession, destName);
 }
 

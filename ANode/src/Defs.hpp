@@ -50,10 +50,11 @@ class Limit;
 class AbstractObserver;
 namespace ecf { class NodeTreeVisitor; class CalendarUpdateParams; } // forward declare
 
-class Defs : private boost::noncopyable {
+class Defs {
 public:
    static defs_ptr create();
    Defs();
+   Defs(const Defs&);
    ~Defs();
 
    bool operator==(const Defs& rhs) const;
@@ -301,7 +302,7 @@ private:
    void setupDefaultEnv();
    void add_suite_only(suite_ptr, size_t position);
 
-   /// Removes the suite, from defs returned as auto_ptr, asserts if suite does not exist
+   /// Removes the suite, from defs returned as suite_ptr, asserts if suite does not exist
    suite_ptr removeSuite(suite_ptr);
    node_ptr removeChild(Node*);
    bool addChild( node_ptr, size_t position = std::numeric_limits<std::size_t>::max());
@@ -320,7 +321,7 @@ private:
    friend void export_Defs();
 
 private:
-   /// Note: restoring form a check point file will reset, defs state and modify numbers
+   /// Note: restoring from a check point file will reset, defs state and modify numbers
    unsigned int    state_change_no_;            // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int    modify_change_no_;           // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int    updateCalendarCount_;

@@ -17,16 +17,7 @@
    <property name="spacing">
     <number>2</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -72,7 +63,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="viewer.qrc">
          <normaloff>:/viewer/show_shadowed.svg</normaloff>:/viewer/show_shadowed.svg</iconset>
        </property>
        <property name="checkable">
@@ -128,7 +119,7 @@
   </layout>
   <action name="actionAdd">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/images/add.svg</normaloff>:/viewer/images/add.svg</iconset>
    </property>
    <property name="text">
@@ -143,7 +134,7 @@
   </action>
   <action name="actionProp">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/edit.svg</normaloff>:/viewer/edit.svg</iconset>
    </property>
    <property name="text">
@@ -158,8 +149,8 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset>
-     <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Delete variable</string>
@@ -173,7 +164,7 @@
   </action>
   <action name="actionExport">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/filesave.svg</normaloff>:/viewer/filesave.svg</iconset>
    </property>
    <property name="text">
@@ -188,7 +179,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/editcopy.svg</normaloff>:/viewer/editcopy.svg</iconset>
    </property>
    <property name="text">
@@ -203,7 +194,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/editpaste.svg</normaloff>:/viewer/editpaste.svg</iconset>
    </property>
    <property name="text">
@@ -218,7 +209,7 @@
   </action>
   <action name="actionFilter">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
    </property>
    <property name="text">
@@ -230,7 +221,7 @@
   </action>
   <action name="actionSearch">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
    </property>
    <property name="text">
@@ -256,6 +247,8 @@
    <header location="global">VariableView.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

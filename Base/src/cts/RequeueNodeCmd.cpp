@@ -161,6 +161,11 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
    return doJobSubmission(as);
 }
 
+bool RequeueNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
+{
+   return do_authenticate(as,cmd,paths_);
+}
+
 const char* RequeueNodeCmd::arg()  { return CtsApi::requeueArg();}
 const char* RequeueNodeCmd::desc() {
    return

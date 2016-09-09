@@ -1,5 +1,5 @@
 {
-	"gui" : {
+    "gui" : {
 
         "hidden" : {
             "visible" : "false",
@@ -7,116 +7,116 @@
         },
 
         "appearance":  {
- 			"label": "Appearance",
- 			"desc" : "Appearance",
- 			"icon" : "colour.svg",
+            "label": "Appearance",
+            "desc" : "Appearance",
+            "icon" : "colour.svg",
             
             "tabs"  : {
-                 "tab" : {
-                    "label"  : "Status",   
- 
+                "tab" : {
+                    "label"  : "Status",
+
                     "group" : {
                         "title" : "Status rendering options",
-                        "prefix" : "view.common",                                     
+                        "prefix" : "view.common",
                         "line" : "node_gradient"
                     },
-                              
+
                     "grid" : {
-                        "title" : "Status colours",                                    
+                        "title" : "Status colours",
                         "h1" : "Node cell",
                         "h2" : "Name in cell",
                         "h3" : "Type in cell",
-                    
+
                         "row" : {
                             "label" : "Unknown",
-                            "prefix" :   "nstate.unknown",		 		       
- 				            "line" :  "fill_colour",
-                            "line" :  "font_colour",
-                            "line" :  "type_colour"
-			             },					 				
-			             "row" : {
-                            "label" : "Complete",
-                            "prefix" :   "nstate.complete",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour",
-                            "line" :  "type_colour"
-                        },  
-                        "row" : {
-                            "label" : "Queued",
-                            "prefix" :   "nstate.queued",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour",
-                            "line" :  "type_colour"
-                        },  
-                        "row" : {
-                            "label" : "Aborted",
-                            "prefix" :   "nstate.aborted",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour",
-                            "line" :  "type_colour"
-                        },                                  
-                        "row" : {
-                            "label" : "Submitted",
-                            "prefix" :   "nstate.submitted",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour",
-                            "line" :  "type_colour"
-                        },  
-                        "row" : {
-                            "label" : "Active",
-                            "prefix" :   "nstate.active",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour",
-                            "line" :  "type_colour"
-                        },  			
-			             "row" : {
-                            "label" : "Suspended ",
-                            "prefix" :   "nstate.suspended",                     
+                            "prefix" :   "nstate.unknown",
                             "line" :  "fill_colour",
                             "line" :  "font_colour",
                             "line" :  "type_colour"
                         },
-                
-			             "note" : {
-			             "default" : "the states below are only valid for <b>servers</b>"
-			             },  
-                    
+                        "row" : {
+                            "label" : "Complete",
+                            "prefix" :   "nstate.complete",
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
+                        },
+                        "row" : {
+                            "label" : "Queued",
+                            "prefix" :   "nstate.queued",
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
+                        },
+                        "row" : {
+                            "label" : "Aborted",
+                            "prefix" :   "nstate.aborted",
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
+                        },
+                        "row" : {
+                            "label" : "Submitted",
+                            "prefix" :   "nstate.submitted",
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
+                        },
+                        "row" : {
+                            "label" : "Active",
+                            "prefix" :   "nstate.active",
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
+                        },
+                        "row" : {
+                            "label" : "Suspended ",
+                            "prefix" :   "nstate.suspended",
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
+                        },
+
+                        "note" : {
+                            "default" : "the states below are only valid for <b>servers</b>"
+                        },
+
                         "row" : {
                             "label" : "Halted",
-                            "prefix" :   "sstate.halted",                     
+                            "prefix" :   "sstate.halted",
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                        },                                  
+                        },
                         "row" : {
                             "label" : "Shutdown  ",
-                            "prefix" :   "sstate.shutdown",                     
+                            "prefix" :   "sstate.shutdown",
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                        },  
+                        },
                         "row" : {
                             "label" : "Running",
-                            "prefix" :   "sstate.running",                     
+                            "prefix" :   "sstate.running",
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                        }  		
- 			
- 				   }		
- 			    }, 
- 			    
- 			    "tab" : {
-                  
-                    "label"  : "Tree view",   
- 
+                        }
+
+                    }
+                },
+
+                "tab" : {
+
+                    "label"  : "Tree view",
+
                     "group" : {
                         "title" : "Options",
                         "prefix" : "view",
-                
+
                         "line" : "common.node_style",
                         "line" : "tree.displayNodeType",
-                        "line" : "tree.display_child_count",                        
+                        "line" : "tree.display_child_count",
                         "line" : "tree.indentation",
                         "line" : "tree.drawBranchLine",
-                        "line" : "tree.background"                        
+                        "line" : "tree.background"
                     },
                     "group" : {
                         "title" : "Tooltips",
@@ -132,19 +132,19 @@
                         
                         "line" : "attributesPolicy",
                         "line" : "defaultAttributes"
-                   }
+                    }
                 },
                 
                 "tab" : {
-                  
-                    "label"  : "Table view",   
- 
+
+                    "label"  : "Table view",
+
                     "group" : {
                         "title" : "Options",
-                        "prefix" : "view.table",                
-                    
-                        "line" : "background"                                          
-                    }                                          
+                        "prefix" : "view.table",
+
+                        "line" : "background"
+                    }
                 },
                 "tab" : {
 
@@ -160,260 +160,271 @@
                         "line" : "limitFillColour"
                     }
                 }
+            }
+        },
 
-			}
- 		},	
-            
-     "font":  {
+        "font":  {
             "label": "Fonts",
             "desc" : "Fonts",
             "icon" : "font.svg",
-        
+
             "group" : {
-                 "title" : "Tree view",
-                 "prefix" : "view.tree",
+                "title" : "Tree view",
+                "prefix" : "view.tree",
                 
-                 "line" : "nodeFont",
-                 "line" : "attributeFont"                                 
-             },       
+                "line" : "nodeFont",
+                "line" : "attributeFont"
+            },
             
             "group" : {
-                 "title" : "Table view",
-                 "prefix" : "view.table",
+                "title" : "Table view",
+                "prefix" : "view.table",
                 
-                 "line" : "font"                                           
-             },       
-        
+                "line" : "font"
+            },
+
             "group" : {
-                 "title" : "Info panel text browsers",
-                 "prefix" : "panel",
+                "title" : "Info panel text browsers",
+                "prefix" : "panel",
                 
-                 "line" : "overview.font",
-                 "line" : "manual.font",
-                 "line" : "script.font",
-                 "line" : "job.font",  
-                 "line" : "output.font",   
-                 "line" : "why.font",
-                 "line" : "edit.font"             
-             }       
-       },             
-                     		
- 	  "notification":  {
+                "line" : "overview.font",
+                "line" : "manual.font",
+                "line" : "script.font",
+                "line" : "job.font",
+                "line" : "output.font",
+                "line" : "why.font",
+                "line" : "edit.font"
+            }
+        },
+
+        "notification":  {
             "visible" : "true",
             "label": "Notifications",
             "desc" : "Notifications",
-            "icon" : "notification.svg",           
+            "icon" : "notification.svg",
 
-            "line"  : "notification.settings.max_item_num",      
-                              
+            "line"  : "notification.settings.max_item_num",
+
             "custom-notification" : {
-                "title" : "Notification types",               
+                "title" : "Notification types",
                 "group" : "true",
-            
-                    "row" : {
-                        "label" : "Aborted",                                          
-                         "root" :  "notification.aborted",
-                         "group" : {
-                              "title" : "Main settings",                                                          
-                              "line" : "server.notification.aborted.enabled",
-                              "line" : "server.notification.aborted.popup",
-                              "line" : "server.notification.aborted.sound",     
-                              "note" : {
-                                  "default" : "These settings can be customised for each server separately"
-                                } 
-                                                             
-                         },                                  
-                         "group" : {
-                              "title" : "Colour",
-                              "line" : "notification.aborted.count_fill_colour",
-                              "line" : "notification.aborted.count_text_colour",  
-                              "note" : {
-                                  "default" : "For aborted notifications the background and text colours <br> are taken from the <u>Status</u> colour settings"
-                                }   
-                         },                                     
-                         "group" : {
-                              "title" : "Sound",
-                              "line" : "notification.aborted.sound_file_type",
-                              "line" : {
-                                   "link" : "notification.aborted.sound_system_file",
-                                    "helpers" : "notification.aborted.sound_volume/notification.aborted.sound_loop"
-                              },    
-                              "line" : "notification.aborted.sound_user_file",
-                              "line" : "notification.aborted.sound_volume_tmp",
-                              "line" : "notification.aborted.sound_loop"
-                         }                                    
-                      },
-                      "row" : {
-                          "label" : "Restarted", 
-                          "root" :  "notification.restarted",                                  
-                          "group" : {
-                               "title" : "Settings",                                                   
-                               "line" : "server.notification.restarted.enabled",
-                               "line" : "server.notification.restarted.popup",
-                               "line" : "server.notification.restarted.sound",
-                               "note" : {
-                                  "default" : "These settings can be customised for each server separately"
-                                } 
-                           },
-                           "group" : {
-                               "title" : "Colour",                             
-                               "line" : "notification.restarted.fill_colour",
-                               "line" : "notification.restarted.text_colour",
-                               "line" : "notification.restarted.count_fill_colour",
-                               "line" : "notification.restarted.count_text_colour"
-                            },
-                            "group" : {
-                                 "title" : "Sound",
-                                 "line" : "notification.restarted.sound_file_type",                                    
-                                 "line" : {
-                                      "link" : "notification.restarted.sound_system_file",
-                                      "helpers" : "notification.restarted.sound_volume/notification.restarted.sound_loop"
-                                 },   
-                                 "line" : "notification.restarted.sound_user_file",
-                                 "line" : "notification.restarted.sound_volume_tmp",
-                                 "line" : "notification.restarted.sound_loop"
-                            }                                         
-                       },
-                       "row" : {
-                           "label" : "Late",
-                            "root" :  "notification.late", 
-                            "group" : {                    
-                                 "title" : "Settings",  
-                                 "line" : "server.notification.late.enabled",                   
-                                 "line" : "server.notification.late.popup",
-                                 "line" : "server.notification.late.sound",
-                                 "note" : {
-                                      "default" : "These settings can be customised for each server separately"
-                                 } 
-                            },  
-                            "group" : {
-                                 "title" : "Colour", 
-                                 "line" : "notification.late.fill_colour",
-                                 "line" : "notification.late.text_colour",
-                                 "line" : "notification.late.count_fill_colour",
-                                 "line" : "notification.late.count_text_colour"
-                             },
-                            "group" : {
-                                 "title" : "Sound",
-                                 "line" : "notification.late.sound_file_type",                                     
-                                 "line" : {
-                                     "link" : "notification.late.sound_system_file",
-                                     "helpers" : "notification.late.sound_volume/notification.late.sound_loop"
-                                  },   
-                                 "line" : "notification.late.sound_user_file",
-                                 "line" : "notification.late.sound_volume_tmp",
-                                 "line" : "notification.late.sound_loop"                                                                   
-                             }
+
+                "row" : {
+                    "label" : "Aborted",
+                    "root" :  "notification.aborted",
+                    "group" : {
+                        "title" : "Main settings",
+                        "line" : "server.notification.aborted.enabled",
+                        "line" : "server.notification.aborted.popup",
+                        "line" : "server.notification.aborted.sound",
+                        "note" : {
+                            "default" : "These settings can be customised for each server separately"
+                        }
+
+                    },
+                    "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.aborted.count_fill_colour",
+                        "line" : "notification.aborted.count_text_colour",
+                        "note" : {
+                            "default" : "For aborted notifications the background and text colours <br> are taken from the <u>Status</u> colour settings"
+                        }
+                    },
+                    "group" : {
+                        "title" : "Sound",
+                        "line" : "notification.aborted.sound_file_type",
+                        "line" : {
+                            "link" : "notification.aborted.sound_system_file",
+                            "helpers" : "notification.aborted.sound_volume/notification.aborted.sound_loop"
                         },
-                        "row" : {
-                            "label" : "Zombies",
-                            "root" :  "notification.zombie",   
-                            "group" : {                    
-                                 "title" : "Settings",                                                       
-                                 "line" : "server.notification.zombie.enabled",
-                                 "line" : "server.notification.zombie.popup",
-                                 "line" : "server.notification.zombie.sound",
-                                 "note" : {
-                                      "default" : "These settings can be customised for each server separately"
-                                 } 
-                            },
-                            "group" : {
-                                 "title" : "Colour",  
-                                 "line" : "notification.zombie.fill_colour",
-                                 "line" : "notification.zombie.text_colour",
-                                 "line" : "notification.zombie.count_fill_colour",
-                                 "line" : "notification.zombie.count_text_colour" 
-                             },
-                            "group" : {
-                                 "title" : "Sound",
-                                 "line" : "notification.zombie.sound_file_type",                                      
-                                 "line" : {
-                                     "link" : "notification.zombie.sound_system_file",
-                                     "helpers" : "notification.zombie.sound_volume/notification.zombie.sound_loop"
-                                  },   
-                                 "line" : "notification.zombie.sound_user_file",
-                                 "line" : "notification.zombie.sound_volume_tmp",
-                                 "line" : "notification.zombie.sound_loop"                                        
-                             }    
-                         },
-                         "row" : {
-                             "label" : "Aliases", 
-                             "root" :  "notification.alias",    
-                             "group" : {                    
-                                  "title" : "Settings",                          
-                                  "line" : "server.notification.alias.enabled",
-                                  "line" : "server.notification.alias.popup",
-                                  "line" : "server.notification.alias.sound",
-                                  "note" : {
-                                      "default" : "These settings can be customised for each server separately"
-                                  } 
-                              },
-                             "group" : {
-                                  "title" : "Colour",                                                                                 
-                                  "line" : "notification.alias.fill_colour",
-                                  "line" : "notification.alias.text_colour",
-                                  "line" : "notification.alias.count_fill_colour",
-                                  "line" : "notification.alias.count_text_colour"
-                             }, 
-                             "group" : {
-                                  "title" : "Sound",
-                                  "line" : "notification.alias.sound_file_type",                                     
-                                  "line" : {
-                                      "link" : "notification.alias.sound_system_file",
-                                      "helpers" : "notification.alias.sound_volume/notification.alias.sound_loop"
-                                  },  
-                                  "line" : "notification.alias.sound_user_file",
-                                  "line" : "notification.alias.sound_volume_tmp",
-                                  "line" : "notification.alias.sound_loop"                                                                             
-                            }       
-                       }                                  
-               } 
-          	   
- 		},        
- 			
- 		"server": {
- 			"label" : "Server options",
- 		    "desc" : "Server options",
- 			"icon" : "server.svg",
- 			"group" : {
- 				
- 				"title" : "Update",
- 				"prefix" : "server.update",
- 				
+                        "line" : "notification.aborted.sound_user_file",
+                        "line" : "notification.aborted.sound_volume_tmp",
+                        "line" : "notification.aborted.sound_loop"
+                    }
+                },
+                "row" : {
+                    "label" : "Restarted",
+                    "root" :  "notification.restarted",
+                    "group" : {
+                        "title" : "Settings",
+                        "line" : "server.notification.restarted.enabled",
+                        "line" : "server.notification.restarted.popup",
+                        "line" : "server.notification.restarted.sound",
+                        "note" : {
+                            "default" : "These settings can be customised for each server separately"
+                        }
+                    },
+                    "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.restarted.fill_colour",
+                        "line" : "notification.restarted.text_colour",
+                        "line" : "notification.restarted.count_fill_colour",
+                        "line" : "notification.restarted.count_text_colour"
+                    },
+                    "group" : {
+                        "title" : "Sound",
+                        "line" : "notification.restarted.sound_file_type",
+                        "line" : {
+                            "link" : "notification.restarted.sound_system_file",
+                            "helpers" : "notification.restarted.sound_volume/notification.restarted.sound_loop"
+                        },
+                        "line" : "notification.restarted.sound_user_file",
+                        "line" : "notification.restarted.sound_volume_tmp",
+                        "line" : "notification.restarted.sound_loop"
+                    }
+                },
+                "row" : {
+                    "label" : "Late",
+                    "root" :  "notification.late",
+                    "group" : {
+                        "title" : "Settings",
+                        "line" : "server.notification.late.enabled",
+                        "line" : "server.notification.late.popup",
+                        "line" : "server.notification.late.sound",
+                        "note" : {
+                            "default" : "These settings can be customised for each server separately"
+                        }
+                    },
+                    "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.late.fill_colour",
+                        "line" : "notification.late.text_colour",
+                        "line" : "notification.late.count_fill_colour",
+                        "line" : "notification.late.count_text_colour"
+                    },
+                    "group" : {
+                        "title" : "Sound",
+                        "line" : "notification.late.sound_file_type",
+                        "line" : {
+                            "link" : "notification.late.sound_system_file",
+                            "helpers" : "notification.late.sound_volume/notification.late.sound_loop"
+                        },
+                        "line" : "notification.late.sound_user_file",
+                        "line" : "notification.late.sound_volume_tmp",
+                        "line" : "notification.late.sound_loop"
+                    }
+                },
+                "row" : {
+                    "label" : "Zombies",
+                    "root" :  "notification.zombie",
+                    "group" : {
+                        "title" : "Settings",
+                        "line" : "server.notification.zombie.enabled",
+                        "line" : "server.notification.zombie.popup",
+                        "line" : "server.notification.zombie.sound",
+                        "note" : {
+                            "default" : "These settings can be customised for each server separately"
+                        }
+                    },
+                    "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.zombie.fill_colour",
+                        "line" : "notification.zombie.text_colour",
+                        "line" : "notification.zombie.count_fill_colour",
+                        "line" : "notification.zombie.count_text_colour"
+                    },
+                    "group" : {
+                        "title" : "Sound",
+                        "line" : "notification.zombie.sound_file_type",
+                        "line" : {
+                            "link" : "notification.zombie.sound_system_file",
+                            "helpers" : "notification.zombie.sound_volume/notification.zombie.sound_loop"
+                        },
+                        "line" : "notification.zombie.sound_user_file",
+                        "line" : "notification.zombie.sound_volume_tmp",
+                        "line" : "notification.zombie.sound_loop"
+                    }
+                },
+                "row" : {
+                    "label" : "Aliases",
+                    "root" :  "notification.alias",
+                    "group" : {
+                        "title" : "Settings",
+                        "line" : "server.notification.alias.enabled",
+                        "line" : "server.notification.alias.popup",
+                        "line" : "server.notification.alias.sound",
+                        "note" : {
+                            "default" : "These settings can be customised for each server separately"
+                        }
+                    },
+                    "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.alias.fill_colour",
+                        "line" : "notification.alias.text_colour",
+                        "line" : "notification.alias.count_fill_colour",
+                        "line" : "notification.alias.count_text_colour"
+                    },
+                    "group" : {
+                        "title" : "Sound",
+                        "line" : "notification.alias.sound_file_type",
+                        "line" : {
+                            "link" : "notification.alias.sound_system_file",
+                            "helpers" : "notification.alias.sound_volume/notification.alias.sound_loop"
+                        },
+                        "line" : "notification.alias.sound_user_file",
+                        "line" : "notification.alias.sound_volume_tmp",
+                        "line" : "notification.alias.sound_loop"
+                    }
+                }
+            }
+
+        },
+
+        "server": {
+            "label" : "Server options",
+            "desc" : "Server options",
+            "icon" : "server.svg",
+            "group" : {
+
+                "title" : "Update",
+                "prefix" : "server.update",
+
                 "line" : "autoUpdate",
- 				"line" : "updateRateInSec",
- 				"line" : "adaptiveUpdate",
+                "line" : "updateRateInSec",
+                "line" : "adaptiveUpdate",
                 "note" : {
                     "default": "When enabled the server update period is <u>increased at every automatic update</u> until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again."
                 },
-                "line" : "adaptiveUpdateIncrementInSec",                
- 				"line" : "maxAdaptiveUpdateRateInMin"
- 			},
- 			
- 			"group" : {
-				
-				"title" : "Files (manual, script, job and job output)",
-				"prefix" : "server.files",
-				
-				"line" : "readFilesFromDisk",
-				"line" : "maxOutputFileLines"				
-			},
+                "line" : "adaptiveUpdateIncrementInSec",
+                "line" : "maxAdaptiveUpdateRateInMin"
+            },
 
-			"grid-hidden" : {
-				"title" : "Notifications",
-			
-				"h1" : "Show in status bar",
-				"h2" : "Popup dialog",
-				"h3" : "Play sound",
-				
-				"row" : {
-					"label" : "Aborted",
-					"prefix" : "server.notification.aborted",
+            "group" : {
+
+                "title" : "Files (manual, script, job and job output)",
+                "prefix" : "server.files",
+                
+                "line" : "readFilesFromDisk",
+                "line" : "maxOutputFileLines"
+            },
+
+            "group" : {
+
+                "title" : "Automatic search on output files",
+                "prefix" : "panel.output.automaticSearch",
+                
+                "line" : "performSearch",
+                "line" : "searchMode",
+                "line" : "searchText",
+                "line" : "searchFrom",
+                "line" : "caseSensitive"
+            },
+
+            "grid-hidden" : {
+                "title" : "Notifications",
+
+                "h1" : "Show in status bar",
+                "h2" : "Popup dialog",
+                "h3" : "Play sound",
+                
+                "row" : {
+                    "label" : "Aborted",
+                    "prefix" : "server.notification.aborted",
                     "line" : "enabled",
-					"line" : "popup",
-					"line" : "sound",
-					"line" : "soundFile"
-				},
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                },
                 "row" : {
                     "label" : "Restarted",
                     "prefix" : "server.notification.restarted",
@@ -438,7 +449,7 @@
                     "line" : "sound",
                     "line" : "soundFile"
                 },
-                 "row" : {
+                "row" : {
                     "label" : "Restarted or aborted aliases",
                     "prefix" : "server.notification.alias",
                     "line" : "enabled",
@@ -446,17 +457,17 @@
                     "line" : "sound",
                     "line" : "soundFile"
                 }
-			}
- 		
- 		},
+            }
 
- 		"Tree view" : {
- 			"visible" : "false",
- 			"desc" : "Tree view options",
- 			 			
- 			"line" : "view.tree.font",
- 			"line" : "view.tree.nodeRectRadius",
- 			"line" : "view.tree.displayChildCount" 
- 		}		
- 	}
+        },
+
+        "Tree view" : {
+            "visible" : "false",
+            "desc" : "Tree view options",
+
+            "line" : "view.tree.font",
+            "line" : "view.tree.nodeRectRadius",
+            "line" : "view.tree.displayChildCount"
+        }
+    }
 }
