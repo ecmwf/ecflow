@@ -806,7 +806,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
     		case HostColumn: return tr("Host");
             case PortColumn: return tr("Port");
             case SystemColumn: return tr("S");
-            case FavouriteColumn: return tr("Favourite");
+            case FavouriteColumn: return tr("F");
             case UseColumn: return tr("Loaded");
     		default: return QVariant();
 		}

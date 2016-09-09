@@ -144,7 +144,7 @@ public:
    	void dataChangeFinished();
    	ServerItem* indexToServer(const QModelIndex& index);
 
-    enum Columns {LoadColumn=0, SystemColumn=1, NameColumn=2, HostColumn=3, PortColumn=4, FavouriteColumn= 5, UseColumn=6};
+    enum Columns {LoadColumn=0, SystemColumn=1, FavouriteColumn=2, NameColumn=3, HostColumn=4, PortColumn=5, UseColumn=6};
     enum CustomItemRole {IconStatusRole = Qt::UserRole+1};
 
 protected:
