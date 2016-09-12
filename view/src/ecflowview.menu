@@ -279,6 +279,12 @@ menu "Defstatus"
 
 menu "Special"
 {
+! ( (SUITE|FAMILY) & (COMPLETE|QUEUED|SUSPENDED) & ~MIGRATED,ALL,'Migrate', 'ecflow_client --migrate <full_name>','',NO)
+! ( (SUITE|FAMILY) & MIGRATED,ALL,'Restore','ecflow_client --restore <full_name>','',YES)
+
+  ( (SUITE|FAMILY) & (COMPLETE|QUEUED|SUSPENDED) & ~MIGRATED,ALL,'Migrate', 'ecflow_client --alter set_flag migrated <full_name>')
+  ( (SUITE|FAMILY) & MIGRATED,ALL,'Restore','ecflow_client --alter clear_flag migrated <full_name>', 'click shift-update to display content below', YES)
+
   (SUITE|FAMILY,(ACTIVE|SUBMITTED|ABORTED),'Kill', 'ecflow_client --kill <full_name>','',YES)
   (TASK|ALIAS,(ACTIVE|SUBMITTED),'Kill','ecflow_client --kill <full_name>','',YES)
   (ALL,ALL,'Check',WINDOW(Check),'',YES)

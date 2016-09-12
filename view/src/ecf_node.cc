@@ -224,6 +224,7 @@ node* ecf_node::create_tree( host& h, node* xnode )
    }
    if (get_node()) get_node()->set_graphic_ptr(node_);
 
+   if (node_->isMigrated()) return node_;
    for(std::vector<ecf_node*>::const_iterator j = kids_.begin(); j != kids_.end(); ++j)
       if (*j) node_->insert((*j)->create_tree(h, 0x0));
 

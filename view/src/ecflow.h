@@ -54,7 +54,7 @@ class ecf_dir : public extent<ecf_dir> {
  ecf_dir() : name_ (0x0), next (0x0) {}
  virtual ~ecf_dir() {}
 
-  std::string name() const { return (name_); }
+ std::string name() const { return (name_); }
 };
 
 template<class T>
@@ -152,7 +152,7 @@ typedef uint64_t uint64;
 #include <boost/algorithm/string.hpp>
 
 char    *ecf_string(char *str, char *file, int lineno);
-ecf_dir *ecf_file_dir(char *path, char *pattern, int fullname);
+ecf_dir *ecf_file_dir(char *path, char *pattern, int fullname, ecf_dir *dir = NULL);
 
 #endif
 

@@ -153,7 +153,7 @@ void top_shell_c::create (Display *display, char *app_name, int app_argc, char *
 	Widget toggle15 = (Widget)NULL;
 	Widget toggle16 = (Widget)NULL;
 	Widget toggle17 = (Widget)NULL;
-	// Widget toggle18 = (Widget)NULL;
+	Widget toggle18 = (Widget)NULL;
 	Widget toggle19 = (Widget)NULL;
 	Widget toggle20 = (Widget)NULL;
 	Widget cascade5 = (Widget)NULL;
@@ -176,7 +176,7 @@ void top_shell_c::create (Display *display, char *app_name, int app_argc, char *
         Widget toggle68 = (Widget)NULL;
 	Widget toggle69 = (Widget)NULL;
         Widget toggle70 = (Widget)NULL;
-        // Widget toggle71 = (Widget)NULL;
+        Widget toggle71 = (Widget)NULL;
         Widget toggle72 = (Widget)NULL;
         // Widget toggle74 = (Widget)NULL; Widget toggle75 = (Widget)NULL; Widget toggle76 = (Widget)NULL; Widget toggle77 = (Widget)NULL;
         Widget toggle78 = (Widget)NULL;
@@ -481,12 +481,12 @@ XtSetArg(al[ac],XmNmnemonic,'m'); ac++;        /* mnemonic */
 	xmstrings[0] = XmStringCreateLtoR ( "Waiting nodes", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG );
 	XtSetArg(al[ac], XmNlabelString, xmstrings[0]); ac++;
 	toggle17 = XmCreateToggleButton ( show2_, "toggle17", al, ac );
-	/* ac = 0;
+	ac = 0;
 	XmStringFree ( xmstrings [ 0 ] );
 	XtSetArg(al[ac], XmNuserData, new show(show::migrated_nodes)); ac++;
 	xmstrings[0] = XmStringCreateLtoR ( "Migrated nodes", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG );
 	XtSetArg(al[ac], XmNlabelString, xmstrings[0]); ac++;
-	toggle18 = XmCreateToggleButton ( show2_, "toggle18", al, ac ); */
+	toggle18 = XmCreateToggleButton ( show2_, "toggle18", al, ac );
 	ac = 0;
 	XmStringFree ( xmstrings [ 0 ] );
 	XtSetArg(al[ac], XmNuserData, new show(show::rerun_tasks)); ac++;
@@ -609,12 +609,12 @@ XtSetArg(al[ac],XmNmnemonic,'m'); ac++;        /* mnemonic */
 	xmstrings[0] = XmStringCreateLtoR ( "Rerun icons", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG );
 	XtSetArg(al[ac], XmNlabelString, xmstrings[0]); ac++;
 	toggle70 = XmCreateToggleButton ( show3_, "rerun_icon", al, ac );
-	/* ac = 0;
+	ac = 0;
 	XmStringFree ( xmstrings [ 0 ] );
 	XtSetArg(al[ac], XmNuserData, new show(show::migrated_icon)); ac++;
 	xmstrings[0] = XmStringCreateLtoR ( "Migrated icons", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG );
 	XtSetArg(al[ac], XmNlabelString, xmstrings[0]); ac++;
-	toggle71 = XmCreateToggleButton ( show3_, "migrated_icon", al, ac ); */
+	toggle71 = XmCreateToggleButton ( show3_, "migrated_icon", al, ac );
 	ac = 0;
 	XmStringFree ( xmstrings [ 0 ] );
 	XtSetArg(al[ac], XmNuserData, new show(show::message_icon)); ac++;
@@ -830,7 +830,7 @@ XtSetArg(al[ac],XmNmnemonic,'m'); ac++;        /* mnemonic */
 	children[ac++] = toggle15;
 	children[ac++] = toggle16;
 	children[ac++] = toggle17;
-	// children[ac++] = toggle18;
+	children[ac++] = toggle18;
 	children[ac++] = toggle19;
 	children[ac++] = toggle20;
 	XtManageChildren(children, ac);
@@ -862,7 +862,7 @@ XtSetArg(al[ac],XmNmnemonic,'m'); ac++;        /* mnemonic */
 	children[ac++] = toggle68;
 	children[ac++] = toggle69;
         children[ac++] = toggle70;
-        // children[ac++] = toggle71;
+        children[ac++] = toggle71;
         children[ac++] = toggle72;
         children[ac++] = toggle78;
         children[ac++] = toggle79;

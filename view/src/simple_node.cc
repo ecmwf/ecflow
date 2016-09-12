@@ -391,6 +391,20 @@ void simple_node::info(std::ostream& f)
       if (defs != STATUS_QUEUED && defs != STATUS_UNKNOWN)
         f << inc << "defstatus " << ecf::status_name[defs] << "\n";
 
+      if (ecfFlag(FLAG_FORCE_ABORT)) f << inc << "# flag force_aborted\n";
+      if (ecfFlag(FLAG_USER_EDIT)) f << inc << "# flag user_edit\n";
+      if (ecfFlag(FLAG_EDIT_FAILED)) f << inc << "# flag edit_failed\n";
+      if (ecfFlag(FLAG_CMD_FAILED)) f << inc << "# flag cmd_failed\n";
+      if (ecfFlag(FLAG_NO_SCRIPT)) f << inc << "# flag no_script\n";
+      if (ecfFlag(FLAG_KILLED)) f << inc << "# flag klled\n";
+      if (isMigrated())	f << inc << "# flag migrated\n";
+      if (ecfFlag(FLAG_LATE)) f << inc << "# flag late\n";
+      if (hasMessages()) f << inc << "# flag message\n";
+      if (ecfFlag(FLAG_QUEUELIMIT)) f << inc << "# flag queue_limit\n";
+      if (ecfFlag(FLAG_WAIT)) f << inc << "# flag task_waiting\n";
+      if (ecfFlag(FLAG_LOCKED)) f << inc << "# flag locked\n";
+      if (isZombie()) f << inc << "# flag zombie\n";
+
       Node* node = owner_->get_node();
       if (node) {
         // if (node->repeat().toString() != "") // repeat // duplicated on suite node

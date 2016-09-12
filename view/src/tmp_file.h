@@ -70,11 +70,9 @@ class tmp_file {
   
   tmp_file& operator=(const tmp_file&);
   
-  const char* c_str(); /* { if (imp_) return imp_->str(); 
-			  return load.c_str();} */
+  const char* c_str(); 
 
 private:
-
   tmp_file_imp* imp_;
 };
 
