@@ -23,6 +23,10 @@
 #include "re.h"
 #include "ecf_node.h"
 
+#ifndef tip_H
+#include "tip.h"
+#endif
+
 char *ecf_flag_name[]  = { (char*)"has been forced to aborted",
       (char*)"user edit failed",
       (char*)"the job failed",
@@ -55,6 +59,7 @@ task_node::task_node(host& h,ecf_node* n):
   } else {
     folded_ = True; 
   }
+  // tip::makeTips(this->getBox());
 }
 
 

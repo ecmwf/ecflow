@@ -62,7 +62,7 @@ panel_window::panel_window(panel_window* other):
 	load_size();
 	XtRealizeWidget(panel_top);
 	XmToggleButtonSetState(detached_,other->detached(),True);
-	XmToggleButtonSetState(frozen_,other->frozen(),True);
+	// XmToggleButtonSetState(frozen_, XmToggleButtonGetState(other->frozen()),  True);
 	XmToggleButtonSetState(close_on_apply_,
 		XmToggleButtonGetState(other->close_on_apply_),True);
 }

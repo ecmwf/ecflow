@@ -56,7 +56,7 @@ tmp_file::tmp_file(const std::string& p,bool del):
   std::ofstream f (imp_->str());
   if (f.is_open())
     { 
-      f << p; 
+      f << p << "\0"; 
       f.close(); 
     }
 }
@@ -99,9 +99,7 @@ char * tmpnam(char *) __THROW {
   if (!path || !access(path, R_OK))
     path=(char*)"/tmp";
   snprintf(s, 128, "%s/%sXXXXXX", path, appName);
-  // int fid = 
-    mkstemp(s);
-  // return s = tempnam(path, appName);
+  mkstemp(s);
   return s;
 }
 
