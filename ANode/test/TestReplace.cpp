@@ -20,6 +20,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Ecf.hpp"
+#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -57,6 +58,49 @@ BOOST_AUTO_TEST_CASE( test_replace_add_task )
    BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
    BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
 }
+
+BOOST_AUTO_TEST_CASE( test_replace_add_mirated_task )
+{
+   cout << "ANode:: ...test_replace_add_mirated_task\n";
+   // When the client defs is migrated(has state info,
+   // make sure replace recovers state from the client definition)
+   defs_ptr clientDef = Defs::create(); {
+      clientDef->flag().set(ecf::Flag::MIGRATED);
+      suite_ptr suite = clientDef->add_suite( "suite1" ) ;
+      family_ptr fam = suite->add_family("family" ) ;
+      task_ptr t2 = fam->add_task( "t2" );
+      suite->begin();
+      t2->set_state(NState::ABORTED);
+   }
+   //PrintStyle::setStyle(PrintStyle::MIGRATE);
+   //cout << "Client   defs=====================================\n" << clientDef;
+
+   // add Child t2 to the server defs, this should recover t2 with state aborted
+   Defs serverDefs; {
+      suite_ptr suite = serverDefs.add_suite( "suite1" ) ;
+      family_ptr fam = suite->add_family("family" ) ;
+      fam->add_task( "t1"  );
+      suite->begin();
+   }
+
+   Defs expectedDefs;  {
+      suite_ptr suite = expectedDefs.add_suite( "suite1" ) ;
+      family_ptr fam = suite->add_family("family" ) ;
+      task_ptr t2 = fam->add_task(  "t2"   );   // notice we preserve client position, and not server position
+      fam->add_task(  "t1"   );
+      suite->begin();
+      t2->set_state(NState::ABORTED);
+   }
+
+   std::string errorMsg;
+   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+   Ecf::set_debug_equality(true);
+   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   //cout << "Server   defs=====================================\n" << serverDefs;
+   //cout << "Expected defs=====================================\n" << expectedDefs;
+   Ecf::set_debug_equality(false);
+}
+
 
 BOOST_AUTO_TEST_CASE( test_replace_add_suite )
 {
@@ -192,6 +236,58 @@ BOOST_AUTO_TEST_CASE( test_replace_add_preserves_states )
    BOOST_REQUIRE_MESSAGE(st2->state() == NState::ABORTED," state on task t2 not preserved after replace");
    BOOST_REQUIRE_MESSAGE(st3->state() == NState::ACTIVE," state on task t3 not preserved after replace");
    BOOST_REQUIRE_MESSAGE(st4->state() == NState::QUEUED," state on task t4 to be queued");
+   BOOST_REQUIRE_MESSAGE(fam->state() == NState::ABORTED,"Aborted should have propagated to family");
+   BOOST_REQUIRE_MESSAGE(suite->state() == NState::ABORTED,"Aborted should have propagated to suite");
+   BOOST_REQUIRE_MESSAGE(serverDefs.state() == NState::ABORTED,"Aborted should have propagated to Defs");
+}
+
+BOOST_AUTO_TEST_CASE( test_replace_add_preserves_migrated_states )
+{
+   cout << "ANode:: ...test_replace_add_preserves_migrated_states\n" ;
+   defs_ptr clientDef = Defs::create(); {
+      clientDef->flag().set(ecf::Flag::MIGRATED);
+      suite_ptr suite = clientDef->add_suite( "suite1" ) ;
+      family_ptr fam = suite->add_family("family" ) ;
+      fam->add_task( "t1"  );
+      fam->add_task( "t2"  );
+      fam->add_task( "t3"  );
+      task_ptr t4 = fam->add_task( "t4"  );
+      t4->set_state(NState::ABORTED);   // this should be preserved if ecf::Flag::MIGRATED flag used
+   }
+
+   // add Child t4 to the server defs, the states on t1->t3 should be preserved
+   // The abort should be progagated up the node tree
+   family_ptr fam;
+   suite_ptr suite;
+   Defs serverDefs; {
+      suite = serverDefs.add_suite( "suite1" ) ;
+      fam = suite->add_family("family" ) ;
+      task_ptr t1 = fam->add_task( "t1"  );
+      task_ptr t2 = fam->add_task( "t2"  );
+      task_ptr t3 = fam->add_task( "t3"  );
+      serverDefs.beginAll();
+      t1->set_state(NState::COMPLETE);
+      t2->set_state(NState::ABORTED);
+      t3->set_state(NState::ACTIVE);
+   }
+
+   //cout << serverDefs;
+   std::string errorMsg;
+   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/family/t4",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+
+   /// The Nodes t1,t2,t3 may have been replaced hence we must get Nodes again
+   node_ptr st1 = serverDefs.findAbsNode("/suite1/family/t1");
+   node_ptr st2 = serverDefs.findAbsNode("/suite1/family/t2");
+   node_ptr st3 = serverDefs.findAbsNode("/suite1/family/t3");
+   node_ptr st4 = serverDefs.findAbsNode("/suite1/family/t4");
+   BOOST_REQUIRE_MESSAGE(st1,"Expected to find task t1");
+   BOOST_REQUIRE_MESSAGE(st2,"Expected to find task t2");
+   BOOST_REQUIRE_MESSAGE(st3,"Expected to find task t3");
+   BOOST_REQUIRE_MESSAGE(st4,"Expected to find task t4");
+   BOOST_REQUIRE_MESSAGE(st1->state() == NState::COMPLETE," state on task t1 not preserved after replace");
+   BOOST_REQUIRE_MESSAGE(st2->state() == NState::ABORTED," state on task t2 not preserved after replace");
+   BOOST_REQUIRE_MESSAGE(st3->state() == NState::ACTIVE," state on task t3 not preserved after replace");
+   BOOST_REQUIRE_MESSAGE(st4->state() == NState::ABORTED," state on task t4 to be ABORTED");
    BOOST_REQUIRE_MESSAGE(fam->state() == NState::ABORTED,"Aborted should have propagated to family");
    BOOST_REQUIRE_MESSAGE(suite->state() == NState::ABORTED,"Aborted should have propagated to suite");
    BOOST_REQUIRE_MESSAGE(serverDefs.state() == NState::ABORTED,"Aborted should have propagated to Defs");
