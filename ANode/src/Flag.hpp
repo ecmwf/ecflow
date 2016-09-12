@@ -56,7 +56,7 @@ public:
       JOBCMD_FAILED =  4,  // task*
       NO_SCRIPT     =  5,  // task*
       KILLED        =  6,  // task* do not run when try_no > ECF_TRIES, and task killed by user
-      MIGRATED      =  7,  // Node                                   ( NOT USED currently )
+      MIGRATED      =  7,  // Node,defs set during --get_state,--migrate, reused on replace cmd , to preserver state
       LATE          =  8,  // Node attribute, Task is late, or Defs checkpt takes to long
       MESSAGE       =  9,  // Node
       BYRULE        = 10,  // Node*, set if node is set to complete by complete trigger expression
