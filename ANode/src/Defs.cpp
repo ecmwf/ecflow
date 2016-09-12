@@ -1029,8 +1029,8 @@ bool Defs::replaceChild(const std::string& path,
 	   deleteChild(server_child.get());
 	}
 
-	/// copy over begin/queued status
-	if (server_parent->suite()->begun())  {
+	/// copy over begin/queued status if not migrated
+	if (!migrated && server_parent->suite()->begun())  {
 	   last_client_child->begin();
 	}
 
