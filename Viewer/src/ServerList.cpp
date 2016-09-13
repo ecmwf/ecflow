@@ -438,7 +438,7 @@ void ServerList::syncSystemFile()
                                      ServerListSyncChangeItem::MatchChange));
 
             item->reset(sysVec[i].name(),sysVec[i].host(),sysVec[i].port());
-            //save();
+            item->setSystem(true);
             broadcastChanged();
             continue;
         }

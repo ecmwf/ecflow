@@ -346,7 +346,10 @@ void ServerListDialog::editItem(const QModelIndex& index)
 {
 	if(ServerItem* item=model_->indexToServer(sortModel_->mapToSource(index)))
 	{
-		ServerEditDialog d(QString::fromStdString(item->name()),
+        if(item->isSystem())
+            return;
+
+        ServerEditDialog d(QString::fromStdString(item->name()),
 						   QString::fromStdString(item->host()),
 						   QString::fromStdString(item->port()),
 						   item->isFavourite(),this);
