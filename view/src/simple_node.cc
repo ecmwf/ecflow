@@ -747,6 +747,10 @@ Boolean simple_node::ecfFlag(int n) const
 
 Boolean simple_node::show_it() const
 {
+  if(parent())
+    if(parent()->isMigrated())
+      return False;
+
   if(show::want(show::time_dependant) && (hasDate() || hasTime()))
     return True;
   
@@ -795,6 +799,9 @@ Boolean simple_node::visible() const
       gui::message("# problem with selection?");
       gui::message(e.what());      
   }
+  if(parent())
+    if(parent()->isMigrated())
+      return False;
 
   if((wanted < 32 && (show::want(wanted))) || show::want32(wanted)) 
     return True;
