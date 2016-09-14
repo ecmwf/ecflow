@@ -589,7 +589,7 @@ void ServerListDialog::checkActionState()
 
         actionEdit->setEnabled(!item->isSystem());
 		actionDuplicate->setEnabled(true);
-		actionDelete->setEnabled(true);
+        actionDelete->setEnabled(!item->isSystem());
 		actionFavourite->setEnabled(true);
 		actionFavourite->setChecked(item->isFavourite());
 	}
@@ -733,7 +733,8 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 	}
 	else if (role == Qt::ForegroundRole)
 	{
-        return (item->isSystem())?QColor(70,71,72):QVariant();
+        //return (item->isSystem())?QColor(70,71,72):QVariant();
+        return (item->isSystem())?QColor(67,78,109):QVariant();
 	}
 	else if (role == Qt::DecorationRole)
 	{
