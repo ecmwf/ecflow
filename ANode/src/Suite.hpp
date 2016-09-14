@@ -46,6 +46,7 @@ public:
      {}
 
    Suite( const Suite&);
+   Suite& operator=(const Suite&);
 
    virtual ~Suite();
 

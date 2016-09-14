@@ -55,6 +55,8 @@ public:
    static defs_ptr create();
    Defs();
    Defs(const Defs&);
+   Defs& operator=(const Defs&);
+
    ~Defs();
 
    bool operator==(const Defs& rhs) const;

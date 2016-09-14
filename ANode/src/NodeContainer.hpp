@@ -18,8 +18,11 @@
 
 #include <limits>
 #include "Node.hpp"
+#include "ServerToClientCmdContext.hpp"
 
 class NodeContainer : public Node {
+protected:
+   NodeContainer& operator=(const NodeContainer&);
 public:
    NodeContainer( const std::string& name );
    NodeContainer(const NodeContainer& );
@@ -122,10 +125,18 @@ protected:
    unsigned int order_state_change_no_;     // no need to persist
    unsigned int add_remove_state_change_no_;// no need to persist
 
+   virtual void force_sync();
+
    void incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) const;
 
 private:
+   void copy(const NodeContainer& rhs);
 	friend class boost::serialization::access;
+
+	// distinguish between check-pointing and server->client comm's
+	// *when* handling Flag::MIGRATED.
+	// Check-pointing should always persist nodeVec_
+	// Flag::MIGRATED should not persist nodeVec_ when in server->client command context
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int /*version*/)
 	{
@@ -134,7 +145,26 @@ private:
 
 	   // serialise base class information
 	   ar & boost::serialization::base_object<Node>(*this);
-	   ar & nodeVec_;
+
+	   // Handle ecf::Flag::MIGRATED, don't save nodeVec_
+	   // if in ServerToClientCmdContext & ecf::Flag::MIGRATED set on suite/family
+	   if (Archive::is_saving::value) {
+	      if (ecf::ServerToClientCmdContext::in_command()) {
+	         if (get_flag().is_set(ecf::Flag::MIGRATED)) {
+	            std::vector<node_ptr> nodeVec;
+	            ar & nodeVec;
+	         }
+	         else {
+	            ar & nodeVec_;
+	         }
+	      }
+	      else {
+	         ar & nodeVec_;
+	      }
+	   }
+	   else {
+	      ar & nodeVec_;
+	   }
 
       // Setup the parent pointers. Since they are not serialised
       if (Archive::is_loading::value) {

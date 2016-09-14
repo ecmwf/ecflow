@@ -117,6 +117,45 @@ Node::Node(const Node& rhs)
    }
 }
 
+Node& Node::operator=(const Node& rhs)
+{
+   // parent must set parent_
+   if (this != &rhs) {
+      name_ = rhs.name_;
+      suspended_ = rhs.suspended_;
+      state_ =  rhs.state_;
+      defStatus_ = rhs.defStatus_;
+      completeExpr_ =  (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL  ;
+      triggerExpr_ =   (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL  ;
+      lateAttr_ = (rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL ;
+      autoCancel_ =  (rhs.autoCancel_) ? new ecf::AutoCancelAttr(*rhs.autoCancel_) : NULL ;
+      time_dep_attrs_ = (rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL ;
+      child_attrs_ = (rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL ;
+      misc_attrs_ = (rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL;
+      repeat_ =  rhs.repeat_ ;
+      varVec_ = rhs.varVec_ ;
+      inLimitMgr_ = rhs.inLimitMgr_ ;
+      inLimitMgr_.set_node(this);
+      flag_ = rhs.flag_ ;
+
+      state_change_no_ = 0;
+      variable_change_no_ = 0;
+      suspended_change_no_ = 0;
+      graphic_ptr_ = 0;
+
+      if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
+      if ( child_attrs_ )    child_attrs_->set_node(this);
+      if ( misc_attrs_ )     misc_attrs_->set_node(this);
+
+      for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
+         limit_ptr the_limit = boost::make_shared<Limit>( *rhs.limitVec_[l]);
+         the_limit->set_node(this);
+         limitVec_.push_back( the_limit );
+      }
+   }
+   return *this;
+}
+
 Node::~Node() {
    delete completeExpr_;
    delete triggerExpr_;
@@ -198,6 +237,7 @@ void Node::requeue(
    LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
 #endif
    /// Note: we don't reset verify attributes as they record state stat's
+
 
    // Set the state without causing any side effects
    initState(clear_suspended_in_child_nodes);
@@ -354,7 +394,7 @@ void Node::checkForLateness(const ecf::Calendar& c)
    if (lateAttr_ && lateAttr_->check_for_lateness(state_,c)) {
       lateAttr_->setLate(true);
       flag().set(ecf::Flag::LATE);
-      cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
+      // cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
    }
 }
 
@@ -519,7 +559,7 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
 #endif
 
    // A node that is migrated/archived should not allow any change of state.
-   if (flag().is_set(ecf::Flag::MIGRATED)) {
+   if (get_flag().is_set(ecf::Flag::MIGRATED)) {
       return false;
    }
 
