@@ -242,6 +242,20 @@
                 "colour"  : "rgb(73,73,73)",
                 "bold"    : "true"
           }
-       }
+       },
+
+       "trigger"  : {
+
+             "oper" : {
+                 "pattern" : "(==|\\s+(eq|ge|gt|le|lt)\\s+",
+                 "colour"  : "rgb(0,0,255)",
+                 "bold"    : "true"
+             },
+             "logical" : {
+                "pattern" : "(or|and)",
+                "colour"  : "rgb(255,40,40)",
+                "bold"    : "true"
+             }
+        }
 }
 

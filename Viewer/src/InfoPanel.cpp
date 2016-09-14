@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -724,6 +724,12 @@ void InfoPanel::writeSettings(VSettings* vs)
 
 	vs->putAsBool("frozen",frozen());
 	vs->putAsBool("detached",detached());
+
+    Q_FOREACH(InfoPanelItemHandler *d,items_)
+    {
+        if(d->item())
+            d->item()->writeSettings(vs);
+    }
 }
 
 void InfoPanel::readSettings(VSettings* vs)
@@ -747,5 +753,10 @@ void InfoPanel::readSettings(VSettings* vs)
 	actionFrozen_->setChecked(vs->getAsBool("frozen",frozen()));
 	actionDetached_->setChecked(vs->getAsBool("detached",detached()));
 
+    Q_FOREACH(InfoPanelItemHandler *d,items_)
+    {
+        if(d->item())
+            d->item()->readSettings(vs);
+    }
 }
 

@@ -26,6 +26,7 @@ class AttributeFilter;
 class IconFilter;
 class ServerHandler;
 class TriggerCollector;
+class TriggeredScanner;
 class VAttributeType;
 class VServer;
 class VServerSettings;
@@ -192,8 +193,10 @@ public:
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
 
+    void triggerExpr(std::string&,std::string&) const;
+
     void triggers(TriggerCollector*);   
-    void triggered(TriggerCollector* tlc);
+    void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=0);
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VItem* n);
 
@@ -213,7 +216,7 @@ protected:
 
     VItem* findLimit(const std::string& path, const std::string& name);
     static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
-    static void scanForTriggered(VNode *n);
+    //static void scanForTriggered(VNode *n);
     static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
 
     node_ptr node_;

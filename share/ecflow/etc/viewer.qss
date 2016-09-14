@@ -191,6 +191,10 @@ QTextEdit[readOnly="true"] {
     background-color: rgb(245,245,245);
 }
 
+QTextEdit[readOnly="true"][trigger="1"] {
+    background-color: rgb(255,255,255);
+}
+
 QLineEdit[readOnly="true"] { 
     background-color: rgb(245,245,245);
 }

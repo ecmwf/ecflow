@@ -10,7 +10,7 @@
 
 html
     {
-        color: #000000;
+        background-color:  #ffffff;
         /*background-color: #f5f5f5;*/
         /*background-color: #c7c7c7;*/
     }
@@ -18,7 +18,15 @@ html
 a:link
     {
         text-decoration:none;
-        color: #0000bb;
+        color: #0645AD;
+    }
+
+a:link.chp
+    {
+        text-decoration:none;
+        /*color: #ffffff;*/
+        color: #1a1f20;
+        font-weight: bold;
     }
 /*
 table
@@ -39,7 +47,7 @@ table
         border-spacing: 0;
         padding-top: 0px;
     }*/
-    th
+/*    th
       {
          padding-left: 4px;
          padding-top: 4px;
@@ -51,15 +59,58 @@ table
 
       }
 
-tr:nth-child(even) {background-color: #ffffff}
 
 td {
     padding-left: 2px;
     padding-top: 1px;
     padding-bottom: 1px;
-    /*background-color: #efefef;*/
+}*/
+
+th
+{
+    padding-left: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background-color: #5f6e95;
+    color: #ffffff;
+    font-size: 12px;
+    text-align: left;
 }
 
+td.main {
+    padding-left: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    background-color: #5f6e95;
+    color: #ffffff;
+}
+
+td.child {
+    padding-left: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    /*background-color: #6677a0;
+    color: #ffffff;*/
+    /*background-color: #e2e2e2;*/
+    /*background-color: #b2c4e3;*/
+    /*background-color: #bcd0ef;*/
+    background-color: #d9e0ef;
+    color: #1a1f20;
+
+}
+
+td.parent {
+    padding-left: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    background-color: #e3e3e3;
+}
+
+td
+{
+    background-color: #F9F9F9;
+    color: #000000;
+}
 
 /*   tr
     {

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -20,6 +20,7 @@
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
 #include "TriggerCollector.hpp"
+#include "TriggeredScanner.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VFileInfo.hpp"
@@ -765,6 +766,25 @@ QString VNode::toolTip()
 // Triggers
 //===========================================================
 
+void VNode::triggerExpr(std::string& trigger, std::string& complete) const
+{
+    if(node_)
+    {
+        QList<VAttribute*> v;
+        VAttributeType::getSearchData("trigger",this,v);
+        Q_FOREACH(VAttribute* a,v)
+        {
+            std::string t;
+            a->value("trigger_type",t);
+            if(t=="0")
+                a->value("trigger_expression",trigger);
+            else if(t=="1")
+                a->value("trigger_expression",complete);
+        }
+        qDeleteAll(v);
+    }
+}
+
 //Collect the information about all the triggers triggering this node
 void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
 {
@@ -861,16 +881,18 @@ void VNode::triggersInChildren(VNode *n,VNode* p,TriggerCollector* tlc)
   }
 }
 
-
+#if 0
 //Scan the the whole tree to find for each node all the nodes it or its
 //attributes trigger.
-void VNode::scanForTriggered(VNode *n)
+void VNode::scanForTriggered(VNode *n,TriggerScanObserver* o)
 {
     TriggeredCollector tc(n);
     n->triggers(&tc);
+    o->oneScanned();
     for(int i=0; i < n->children_.size(); i++)
         scanForTriggered(n->children_[i]);
 }
+#endif
 
 //These are called during the scan for triggered nodes
 void VNode::addTriggeredData(VItem* n)
@@ -890,12 +912,13 @@ void VNode::addTriggeredData(VItem* triggered,VItem* trigger)
     data_->add(triggered,trigger);
 }
 
-//Collect the information about all the nodes this node or its attrubutes trigger
-void VNode::triggered(TriggerCollector* tlc)
+//Collect the information about all the nodes this node or its attributes trigger
+void VNode::triggered(TriggerCollector* tlc,TriggeredScanner* scanner)
 {
-    if(!root()->triggeredScanned())
+    if(scanner && !root()->triggeredScanned())
     {
-        scanForTriggered(server()->vRoot());
+        scanner->start(root());
+        //scanForTriggered(server()->vRoot(),obs);
         root()->setTriggeredScanned(true);
     }
 

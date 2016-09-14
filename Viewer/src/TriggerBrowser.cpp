@@ -9,23 +9,40 @@
 
 #include "TriggerBrowser.hpp"
 
-#include <QFile>
-#include <QTextStream>
+#include "Highlighter.hpp"
+#include "TriggerCollector.hpp"
 
-TriggerBrowser::TriggerBrowser(QWidget* parent) : QTextBrowser(parent)
+TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), scanner_(0)
 {
-    setOpenExternalLinks(false);
-    setOpenLinks(false);
-    setReadOnly(true);
+    setupUi(this);
 
-    //Set css for the text formatting
-    QString cssDoc;
-    QFile f(":/viewer/trigger.css");
-    QTextStream in(&f);
-    if(f.open(QIODevice::ReadOnly | QIODevice::Text))
+    //Highlighter* ih=new Highlighter(triggerBrowser_->document(),"trigger");
+}
+
+void TriggerBrowser::setScanner(TriggeredScanner* scanner)
+{
+    scanner_=scanner;
+}
+
+void TriggerBrowser::load(VInfo_ptr info,bool dependency)
+{
+    VNode *n=info->node();
+
+    std::string te,ce;
+    n->triggerExpr(te,ce);
+
+    QString s;
+    if(!te.empty())
     {
-        cssDoc=QString(f.readAll());
+        s+="<b>Trigger expression:</b><p>" + QString::fromStdString(te) + "<p>";
     }
-    f.close();
-    document()->setDefaultStyleSheet(cssDoc);
+
+    TriggerListCollector c(0,"",dependency);
+    n->triggers(&c);
+
+    TriggerListCollector c1(0,"",dependency);
+    n->triggered(&c1,scanner_);
+
+    triggerBrowser_->setHtml(s + c.text());
+    triggeredBrowser_->setHtml(c1.text());
 }

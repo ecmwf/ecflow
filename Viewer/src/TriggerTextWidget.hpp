@@ -7,27 +7,16 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef TRIGGERBROWSER_HPP
-#define TRIGGERBROWSER_HPP
+#ifndef TRIGGERTEXTWIDGET_HPP
+#define TRIGGERTEXTWIDGET_HPP
 
-#include <QWidget>
+#include <QTextBrowser>
 
-#include "ui_TriggerBrowser.h"
-
-#include "VInfo.hpp"
-
-class TriggeredScanner;
-
-class TriggerBrowser : public QWidget, protected Ui::TriggerBrowser
+class TriggerTextWidget : public QTextBrowser
 {
 public:
-    explicit TriggerBrowser(QWidget *parent=0);
-
-    void setScanner(TriggeredScanner* scanner);
-    void load(VInfo_ptr,bool);
-
-protected:
-    TriggeredScanner* scanner_;
+    explicit TriggerTextWidget(QWidget *parent=0);
 };
 
-#endif // TRIGGERBROWSER_HPP
+#endif
+

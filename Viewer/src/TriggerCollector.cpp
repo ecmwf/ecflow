@@ -79,6 +79,69 @@ void TriggerListCollector::add(VItem* t, VItem* dep,Mode mode,VItem* t1)
 
 QString TriggerListCollector::text()
 {
+    QString s="<table width=\'100%\'>";
+    //s+="<tr><th width=\'100\'>Type</th><th>Path</th></tr>";
+
+    bool firstDirectTrigger=true;
+
+    for(unsigned int i=0; i < items_.size(); i++)
+    {
+        VItem *t=items_[i]->t_;
+        VItem *d=items_[i]->dep_;
+        if(!t)
+            continue;
+
+        if(!d)
+        {
+            if(firstDirectTrigger)
+            {
+                s+="<tr><td class=\'main\' colspan=\'2\'>Triggers directly triggering the selected node</td></tr>";
+                firstDirectTrigger=false;
+            }
+
+            s+="<tr>";
+            s+="<td width=\'100\'>" + QString::fromStdString(t->typeName()) + "</td>";
+            //s+="<td>" + t->name() +"</td>";
+            //s+="<td><a style=\'text-decoration:none;\' href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
+            s+="<td><a href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
+        }
+    }
+
+    QString prevH;
+
+    for(unsigned int i=0; i < items_.size(); i++)
+    {
+        VItem *t=items_[i]->t_;
+        VItem *d=items_[i]->dep_;
+        if(!t || !d)
+            continue;
+
+        QString h;
+
+        if(items_[i]->mode_== Parent)
+           h+="Through parent";
+        else
+           h+="Through child";
+
+        h+="  " + QString::fromStdString(d->typeName());
+        h+=" <a class=\'chp\' href=\'aa\'>" + QString::fromStdString(d->fullPath()) +"</a>";
+
+        if(h != prevH)
+        {
+            s+="<tr><td class=\'child\' colspan=\'2\'>" + h + "</td></tr>";
+            prevH=h;
+        }
+
+        s+="<tr>";
+        s+="<td width=\'100\'>" + QString::fromStdString(t->typeName()) + "</td>";
+        //s+="<td>" + t->name() +"</td>";
+        //s+="<td><a style=\'text-decoration:none;\' href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
+        s+="<td><a href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
+     }
+
+    return s;
+
+#if 0
     QString s="<table>";
     s+="<tr><th colspan=\'2\'>" + QString::fromStdString(title_) + "</th></tr>";
     for(unsigned int i=0; i < items_.size(); i++)
@@ -119,6 +182,7 @@ QString TriggerListCollector::text()
 
     s+="</table>";
     return s;
+#endif
 
 }
 

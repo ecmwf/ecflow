@@ -87,7 +87,7 @@
                  "label" : "Why tab",
                  "default": "font(Monospace,)"
              }
-        },   
+        },          
         "edit" : {
                     
              "font" : {

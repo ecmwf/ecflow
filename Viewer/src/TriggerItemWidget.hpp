@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,6 +18,8 @@
 
 #include "ui_TriggerItemWidget.h"
 
+class TriggeredScanner;
+
 class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::TriggerItemWidget
 {
 Q_OBJECT
@@ -32,14 +34,21 @@ public:
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
+    void writeSettings(VSettings* vs);
+    void readSettings(VSettings* vs);
+
 protected Q_SLOTS:
     void on_dependTb__toggled(bool);
+    void scanStarted();
+    void scanFinished();
+    void scanProgressed(int);
 
 protected:
     void load();
     void updateState(const ChangeFlags&) {}
     bool dependency() const;
 
+    TriggeredScanner *scanner_;
 };
 
 #endif

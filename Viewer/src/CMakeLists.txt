@@ -134,9 +134,10 @@ set(viewer_srcs
     TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
     TextEditSearchLine.cpp
-    TimeItemWidget.cpp
+    TimeItemWidget.cpp    
     TriggerBrowser.cpp
     TriggerItemWidget.cpp
+    TriggerTextWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
@@ -144,6 +145,7 @@ set(viewer_srcs
     TreeView.cpp
     TriggerCollector.cpp
     TriggerView.cpp
+    TriggeredScanner.cpp
     UpdateTimer.cpp
     UserMessage.cpp
     VAttribute.cpp
@@ -279,6 +281,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
     TriggerItemWidget.hpp
+    TriggeredScanner.hpp
     VariableItemWidget.hpp
     VariableModel.hpp
     VariableModelData.hpp
@@ -340,7 +343,8 @@ set(viewer_wrap_ui_files
     TableNodeWidget.ui
     TimeItemWidget.ui
     TreeNodeWidget.ui
-    TriggerItemWidget.ui          
+    TriggerBrowser.ui
+    TriggerItemWidget.ui
     VariableAddDialog.ui
     VariablePropDialog.ui
     VariableItemWidget.ui

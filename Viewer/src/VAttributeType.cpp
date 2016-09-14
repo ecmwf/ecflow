@@ -1313,6 +1313,7 @@ private:
 VTriggerAttribute::VTriggerAttribute(const std::string& n) : VAttributeType(n)
 {
     dataCount_=3;
+    searchKeyToData_["trigger_type"]=CompleteIndex;
     searchKeyToData_["trigger_expression"]=ExprIndex;
 }
 

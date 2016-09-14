@@ -22,6 +22,7 @@
 class QWidget;
 class InfoPanel;
 class InfoProvider;
+class VSettings;
 
 //This is the (abstract) base class to represent one tab in the info panel.
 
@@ -65,6 +66,9 @@ public:
 	//From NodeObserver
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) {}
+
+    virtual void writeSettings(VSettings* vs) {}
+    virtual void readSettings(VSettings* vs) {}
 
 protected:
 	void adjust(VInfo_ptr);
