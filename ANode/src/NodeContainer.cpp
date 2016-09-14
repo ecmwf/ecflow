@@ -51,10 +51,7 @@ NodeContainer::NodeContainer( const std::string& name )
 NodeContainer::NodeContainer()
 : order_state_change_no_(0),add_remove_state_change_no_(0) {}
 
-NodeContainer::NodeContainer(const NodeContainer& rhs )
-  : Node(rhs),
-    order_state_change_no_(0),
-    add_remove_state_change_no_(0)
+void NodeContainer::copy(const NodeContainer& rhs)
 {
    size_t theSize = rhs.nodeVec_.size();
    for(size_t s = 0; s < theSize; s++) {
@@ -72,6 +69,26 @@ NodeContainer::NodeContainer(const NodeContainer& rhs )
          nodeVec_.push_back(family_copy);
       }
    }
+}
+
+NodeContainer::NodeContainer(const NodeContainer& rhs )
+  : Node(rhs),
+    order_state_change_no_(0),
+    add_remove_state_change_no_(0)
+{
+   copy(rhs);
+}
+
+NodeContainer& NodeContainer::operator=(const NodeContainer& rhs)
+{
+   if (this != &rhs) {
+      Node::operator=(rhs);
+      nodeVec_.clear();
+      copy(rhs);
+      order_state_change_no_ = 0;
+      add_remove_state_change_no_ = Ecf::incr_state_change_no();
+   }
+   return *this;
 }
 
 NodeContainer::~NodeContainer() {}
@@ -181,7 +198,14 @@ void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_pt
    /// There no point doing a OrderMemento if children have been added/delete
    if (add_remove_state_change_no_ > changes.client_state_change_no()) {
       if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
-      comp->add( boost::make_shared<ChildrenMemento>( nodeVec_ ) );
+
+      if (get_flag().is_set(ecf::Flag::MIGRATED)) {
+         // Treat node as having no children
+         comp->add( boost::make_shared<ChildrenMemento>( std::vector<node_ptr>() ) );
+      }
+      else {
+         comp->add( boost::make_shared<ChildrenMemento>( nodeVec_ ) );
+      }
    }
    else if (order_state_change_no_ > changes.client_state_change_no()) {
       if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
@@ -337,7 +361,7 @@ void NodeContainer::calendarChanged(
          const ecf::LateAttr* inherited_late)
 {
    // A node that is migrate should not allow any change of state.
-   if (flag().is_set(ecf::Flag::MIGRATED)) {
+   if (get_flag().is_set(ecf::Flag::MIGRATED)) {
       return;
    }
 
@@ -419,6 +443,11 @@ NState::State NodeContainer::computedState(Node::TraverseType traverseType) cons
 	// returns the computed state depending on traverseType
 	// If not IMMEDIATE_CHILDREN, will recurse down calling each child's computedState() function
   	return ecf::theComputedNodeState(nodeVec_, (traverseType == Node::IMMEDIATE_CHILDREN) );
+}
+
+void NodeContainer::force_sync()
+{
+   add_remove_state_change_no_ = Ecf::incr_state_change_no();
 }
 
 node_ptr NodeContainer::removeChild(Node* child)

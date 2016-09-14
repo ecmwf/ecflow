@@ -34,6 +34,7 @@ public:
      {}
 
    Task(const Task& rhs);
+   Task& operator=(const Task&);
 
 	virtual ~Task();
 
@@ -117,6 +118,7 @@ public:
 
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 private:
+   void copy(const Task&);
    virtual size_t child_position(const Node*) const;
    virtual std::string write_state() const;
 

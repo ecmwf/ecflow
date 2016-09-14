@@ -43,6 +43,8 @@ protected:
      state_change_no_(0),
      sub_gen_variables_(NULL) {}
 
+   Submittable& operator=(const Submittable&);
+
    bool operator==(const Submittable& rhs) const;
 
 public:

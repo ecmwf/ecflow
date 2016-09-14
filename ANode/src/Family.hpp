@@ -24,6 +24,8 @@ public:
    Family( const std::string& name ) : NodeContainer(name),fam_gen_variables_(NULL) {}
    Family() : fam_gen_variables_(NULL)  {}
    Family(const Family& rhs) : NodeContainer(rhs), fam_gen_variables_(NULL) {}
+   Family& operator=(const Family&);
+
 	virtual ~Family();
 
 	static family_ptr create(const std::string& name);

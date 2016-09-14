@@ -16,6 +16,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "ServerToClientCmd.hpp"
+#include "ServerToClientCmdContext.hpp"
 class AbstractServer;
 
 //================================================================================
@@ -45,6 +46,7 @@ private:
    friend class boost::serialization::access;
    template<class Archive>
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
+      ecf::ServerToClientCmdContext context;
       ar & boost::serialization::base_object< ServerToClientCmd >( *this );
       ar & suite_;
       ar & family_;

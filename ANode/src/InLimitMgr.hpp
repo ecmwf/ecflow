@@ -36,7 +36,7 @@
 // base on the Ecf class,so that we need only update the pointers
 // when a structural modification is made.
 //
-class InLimitMgr : private boost::noncopyable {
+class InLimitMgr {
 public:
    InLimitMgr(Node* n) : node_(n) {}
    InLimitMgr(const InLimitMgr& rhs) : node_(NULL),inLimitVec_(rhs.inLimitVec_){}
@@ -46,6 +46,7 @@ public:
    void set_node(Node* n) { node_ = n; }
 
 // standard functions: ==============================================
+   InLimitMgr& operator=(const InLimitMgr&);
  	std::ostream& print(std::ostream&) const;
  	bool operator==(const InLimitMgr& rhs) const;
  	void clear() { inLimitVec_.clear(); }
@@ -117,15 +118,15 @@ private:
  	limit_ptr find_limit(const InLimit&, std::string& errorMsg, std::string& warningMsg,bool reportErrors, bool reportWarnings) const;
 
 private:
-	Node* node_; // Not persisted, constructor will always set this up.
+ 	Node* node_; // Not persisted, constructor will always set this up.
 
  	mutable std::vector<InLimit>        inLimitVec_;
 
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int /*version*/) {
-         ar & inLimitVec_;
-    }
+ 	friend class boost::serialization::access;
+ 	template<class Archive>
+ 	void serialize(Archive & ar, const unsigned int /*version*/) {
+ 	   ar & inLimitVec_;
+ 	}
 };
 
 // This should ONLY be added to objects that are *NOT* serialised through a pointer
