@@ -28,6 +28,15 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs)
+{
+   if (this != &rhs) {
+      inLimitVec_ = rhs.inLimitVec_;
+      node_ = NULL;
+   }
+   return *this;
+}
+
 std::ostream& InLimitMgr::print(std::ostream& os) const
 {
 	BOOST_FOREACH(const InLimit& i, inLimitVec_)     { i.print(os); }

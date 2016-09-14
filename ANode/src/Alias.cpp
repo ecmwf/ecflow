@@ -61,6 +61,14 @@ Alias::~Alias()
    }
 }
 
+Alias& Alias::operator=(const Alias& rhs)
+{
+   if (this != &rhs ) {
+      Submittable::operator=(rhs);
+   }
+   return *this;
+}
+
 alias_ptr Alias::create(const std::string& name)
 {
    return boost::make_shared<Alias>( name );

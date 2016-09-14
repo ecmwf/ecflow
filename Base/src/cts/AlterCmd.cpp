@@ -383,6 +383,11 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 		if (flag_type_ != Flag::NOT_SET) {
 			if (flag_) node->flag().set(flag_type_);
 			else       node->flag().clear(flag_type_);
+
+			if (flag_type_ == ecf::Flag::MIGRATED) {
+			   // This should force client to sync since suite/family have added or deleted its children
+			   node->force_sync();
+			}
 		}
 	}
 
