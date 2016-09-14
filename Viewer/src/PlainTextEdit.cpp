@@ -81,6 +81,7 @@ bool PlainTextEdit::setHyperlinkEnabled(bool h)
 {
     hyperlinkEnabled_ = h;
     setMouseTracking(h);
+    return true;
 }
 
 void PlainTextEdit::setShowLineNumbers(bool b)

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -102,7 +102,8 @@ int main(int argc, char **argv)
     std::string queryDir = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "query");
     NodeQueryHandler::instance()->init(queryDir);
 
-    //Initialise the server list
+    //Initialise the server list. This will update the server list
+    //from the central the system server list
     ServerList::instance()->init();
 
     //Load the global configurations

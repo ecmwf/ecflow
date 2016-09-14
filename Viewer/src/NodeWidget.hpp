@@ -50,9 +50,10 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
 	void slotInfoPanelAction();
+    void slotSelectionChangedInBc(VInfo_ptr info);
 
 Q_SIGNALS:
-	void selectionChanged(VInfo_ptr);
+    //void selectionChanged(VInfo_ptr);
 	void popInfoPanel(VInfo_ptr,QString);
 	void dashboardCommand(VInfo_ptr,QString);
 
@@ -61,6 +62,7 @@ protected:
 	virtual ~NodeWidget();
 
 	void updateActionState(VInfo_ptr);
+    bool broadcastSelection() const {return broadcastSelection_;}
 
 	ServerFilter* serverFilter_;
 
@@ -78,6 +80,7 @@ private:
 	QList<QAction*> dockActions_;
 	QMap<QString,QAction*> dockActionMap_;
 	QList<QAction*> infoPanelActions_;
+    bool broadcastSelection_;
 };
 
 #endif

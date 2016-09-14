@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -35,8 +35,6 @@ void OutputFileClient::clearResult()
 
 void OutputFileClient::slotConnected()
 {
-    //Q_EMIT progress("",0);
-
 	soc_->write("get ",4);
 	soc_->write(remoteFile_.c_str(),remoteFile_.size());
 	soc_->write("\n",1);
@@ -48,16 +46,17 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 	{
 	case QAbstractSocket::RemoteHostClosedError:
 
-		soc_->abort();
-
 		if(total_ == 0)
 		{
-			out_.reset();
-			Q_EMIT error(soc_->errorString());
+            break;
 		}
-		else
+        //Probably there was no error and the connection was closed because all
+        //the data was transferred. Unfortunately the logserver does not send anything
+        //at the end of the data transfer.
+        else
 		{
-			if(out_)
+            soc_->abort();
+            if(out_)
 			{
 				out_->setTransferDuration(stopper_.elapsed());
 				out_->setFetchDate(QDateTime::currentDateTime());
@@ -72,6 +71,7 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
             return;
 
 		}
+
 		break;
     case QAbstractSocket::UnknownSocketError:
         if(soc_->state() != QAbstractSocket::ConnectedState)

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -158,20 +158,18 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     	return;
     }
 
-    if(isJobout && n->isSubmitted())
-    {
-        reply_->setInfoText("Current job output does not exist yet (node status is <b>submitted</b>!)");
-        reply_->addLog("MSG>Current job output does not exist yet (node status is <b>submitted</b>!)");
-        owner_->infoReady(reply_);
-        return;
-    }
-
     //----------------------------------
     // The host is the localhost
     //----------------------------------
 
     if(isJobout)
-       reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
+    {
+        if(n->isSubmitted())
+            reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>), but \
+                  beacuse the node status is <b>submitted</b> it may contain the ouput from a previous run!");
+        else
+            reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
+    }
     else
        reply_->addLog("REMARK>This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
 
@@ -434,6 +432,11 @@ std::string OutputFileProvider::joboutFileName() const
 	}
 
 	return std::string();
+}
+
+bool OutputFileProvider::isTryNoZero(const std::string& filename) const
+{
+    return boost::algorithm::ends_with(filename,".0");
 }
 
 void OutputFileProvider::setDir(VDir_ptr dir)

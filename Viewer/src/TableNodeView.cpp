@@ -168,6 +168,15 @@ VInfo_ptr TableNodeView::currentSelection()
 	return VInfo_ptr();
 }
 
+void TableNodeView::setCurrentSelection(VInfo_ptr info)
+{
+    QModelIndex idx=model_->infoToIndex(info);
+    if(idx.isValid())
+    {
+        setCurrentIndex(idx);
+    }
+}
+
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)
 {
 }
@@ -266,10 +275,15 @@ void TableNodeView::notifyChange(VProperty* p)
 
 void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 {
-	int section=header_->logicalIndexAt(position);
+    int section=header_->logicalIndexAt(position);
 
 	if(section< 0 || section >= header_->count())
 		return;
+
+    int visCnt=0;
+    for(int i=0; i <header_->count(); i++)
+        if(!header_->isSectionHidden(i))
+            visCnt++;
 
 	QList<QAction*> lst;
 	QMenu *menu=new QMenu(this);
@@ -283,19 +297,16 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 		ac->setCheckable(true);
 		ac->setData(i);
 
-		if(i==0)
-		{
-		  	ac->setChecked(true);
-			ac->setEnabled(false);
-		}
-		else
-		{
-			ac->setChecked(!(header_->isSectionHidden(i)));
-		}
+        bool vis=!header_->isSectionHidden(i);
+        ac->setChecked(vis);
+
+        if(vis && visCnt <=1)
+        {
+            ac->setEnabled(false);
+        }
 
 		menu->addAction(ac);
 	}
-
 
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 	//VParamFilterMenu stateFilterMenu(menu,filterDef_->nodeState(),VParamFilterMenu::ColourDecor);
@@ -305,31 +316,76 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 	{
 	  	int i=ac->data().toInt();
 	  	header_->setSectionHidden(i,!ac->isChecked());
-		//MvQDesktopSettings::headerVisible_[i]=ac->isChecked();
-		//broadcastHeaderChange();
 	}
 	delete menu;
 }
 
 void TableNodeView::readSettings(VSettings* vs)
 {
-	std::vector<std::string> array;
-	vs->get("columns",array);
+    vs->beginGroup("column");
 
-	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
-	{
-		std::string id=*it;
-		for(int i=0; i < model_->columnCount(QModelIndex()); i++)
-		{
-			if(model_->headerData(i,Qt::Horizontal,Qt::UserRole).toString().toStdString() == id)
-			{
-				header()->setSectionHidden(i,false);
-				break;
-			}
-		}
-	}
+    std::vector<std::string> orderVec;
+    std::vector<int> visVec, wVec;
+
+    vs->get("order",orderVec);
+    vs->get("visible",visVec);
+    vs->get("width",wVec);
+
+    vs->endGroup();
+
+    if(orderVec.size() != visVec.size() || orderVec.size() != wVec.size())
+        return;
+
+    for(size_t i=0; i < orderVec.size(); i++)
+    {
+        std::string id=orderVec[i];
+        for(int j=0; j < model_->columnCount(QModelIndex()); j++)
+        {
+            if(model_->headerData(j,Qt::Horizontal,Qt::UserRole).toString().toStdString() == id)
+            {
+                if(visVec[i] == 0)
+                    header()->setSectionHidden(j,true);               
+
+                else if(wVec[i] > 0)
+                    setColumnWidth(j,wVec[i]);
+
+                break;
+            }
+        }
+    }
+
+    if(header_->count() > 0)
+    {
+        int visCnt=0;
+        for(int i=0; i < header_->count(); i++)
+            if(!header_->isSectionHidden(i))
+                visCnt++;
+
+        if(visCnt==0)
+            header()->setSectionHidden(0,false);
+    }
 }
 
+void TableNodeView::writeSettings(VSettings* vs)
+{
+    vs->beginGroup("column");
+
+    std::vector<std::string> orderVec;
+    std::vector<int> visVec, wVec;
+    for(int i=0; i < model_->columnCount(QModelIndex()); i++)
+    {
+        std::string id=model_->headerData(i,Qt::Horizontal,Qt::UserRole).toString().toStdString();
+        orderVec.push_back(id);
+        visVec.push_back((header()->isSectionHidden(i))?0:1);
+        wVec.push_back(columnWidth(i));
+    }
+
+    vs->put("order",orderVec);
+    vs->put("visible",visVec);
+    vs->put("width",wVec);
+
+    vs->endGroup();
+}
 
 //=========================================
 // TableNodeHeader

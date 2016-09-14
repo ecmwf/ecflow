@@ -60,7 +60,10 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 Dashboard::~Dashboard()
 {
-	Q_EMIT aboutToDelete();
+    widgets_.clear();
+    popupWidgets_.clear();
+
+    Q_EMIT aboutToDelete();
 
 	serverFilter_->removeObserver(this);
 	delete serverFilter_;
@@ -76,9 +79,6 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 	{
 		NodeWidget* ctl=new TreeNodeWidget(serverFilter_,this);
 
-		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
-				this,SIGNAL(selectionChanged(VInfo_ptr)));
-
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
@@ -91,9 +91,6 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 	{
 		NodeWidget* ctl=new TableNodeWidget(serverFilter_,this);
 
-		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
-				this,SIGNAL(selectionChanged(VInfo_ptr)));
-
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
@@ -104,16 +101,36 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 	}
 	else if(type == "info")
 	{
-		InfoPanel* ctl=new InfoPanel(this);
-		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
-					ctl,SLOT(slotReload(VInfo_ptr)));
-
-        connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
-                    this,SLOT(slotInfoPanelSelection(VInfo_ptr)));
+		InfoPanel* ctl=new InfoPanel(this);       
 		w=ctl;
 	}
 
+    if(w)
+    {
+        connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
+                this,SLOT(slotSelectionChanged(VInfo_ptr)));
+    }
+
 	return w;
+}
+
+
+void Dashboard::slotSelectionChanged(VInfo_ptr info)
+{
+    DashboardWidget* s=static_cast<DashboardWidget*>(sender());
+
+    Q_FOREACH(DashboardWidget* dw,widgets_)
+    {
+         if(dw != s)
+             dw->setCurrentSelection(info);
+    }
+    Q_FOREACH(DashboardWidget* dw,popupWidgets_)
+    {
+         if(dw != s)
+             dw->setCurrentSelection(info);
+    }
+
+    Q_EMIT selectionChanged(info);
 }
 
 
@@ -194,6 +211,9 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
     connect(dia,SIGNAL(finished(int)),
             this,SLOT(slotDialogFinished(int)));
 
+    connect(dia,SIGNAL(aboutToClose()),
+            this,SLOT(slotDialogClosed()));
+
     //The dialog will reparent the widget
     dia->add(w);
 	dia->show();
@@ -208,15 +228,8 @@ void Dashboard::addSearchDialog()
 	NodeSearchDialog* d=new NodeSearchDialog(0);
 	d->queryWidget()->setServerFilter(serverFilter_);
 
-	for(int i=0; i < widgets_.count(); i++)
-	{
-		if(widgets_.at(i)->type() == "tree")
-		{
-			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
-
-		}
-	}
+    connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+            this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
     connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
             this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
@@ -236,14 +249,8 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
 	d->queryWidget()->setServerFilter(serverFilter_);
 	d->queryWidget()->setRootNode(info);
 
-	for(int i=0; i < widgets_.count(); i++)
-	{
-		if(widgets_.at(i)->type() == "tree")
-		{
-			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
-		}
-	}
+    connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+            this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
     connect(d->queryWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
             this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
@@ -288,6 +295,8 @@ void Dashboard::slotPopInfoPanel(QString name)
             ip->setDetached(true);
 			ip->setCurrent(name.toStdString());
 		}
+
+        popupWidgets_ <<  dw;
 	}
 }
 
@@ -301,6 +310,8 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
             ip->slotReload(info);
             ip->setCurrent(name.toStdString());
 		}
+
+        popupWidgets_ <<  dw;
 	}
 }
 
@@ -324,7 +335,17 @@ void Dashboard::slotDialogFinished(int)
 	if(DashboardDialog* dia=static_cast<DashboardDialog*>(sender()))
 	{
 		disconnect(this,0,dia->dashboardWidget(),0);
+        popupWidgets_.removeOne(dia->dashboardWidget());
 	}
+}
+
+void Dashboard::slotDialogClosed()
+{
+    if(DashboardDialog* dia=static_cast<DashboardDialog*>(sender()))
+    {
+        disconnect(this,0,dia->dashboardWidget(),0);
+        popupWidgets_.removeOne(dia->dashboardWidget());
+    }
 }
 
 //------------------------
@@ -433,10 +454,13 @@ void Dashboard::readSettings(VComboSettings* vs)
 	settingsAreRead_=false;
 }
 
+#if 0
 void Dashboard::slotInfoPanelSelection(VInfo_ptr info)
 {
     selectInTreeView(info);
 }
+#endif
+
 
 void Dashboard::selectFirstServerInView()
 {

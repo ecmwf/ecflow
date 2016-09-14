@@ -84,6 +84,8 @@ public:
 	ServerListDialog(Mode,ServerFilter*,QWidget *parent=0);
 	~ServerListDialog();
 
+     void showSysSyncLog();
+
 public Q_SLOTS:
 	 void accept();
 	 void reject();
@@ -97,7 +99,8 @@ protected Q_SLOTS:
 	 void on_serverView_doubleClicked(const QModelIndex& index);
      void on_actionFavourite_triggered(bool checked);
      void on_sysSyncTb_clicked(bool);
-	 void slotItemSelected(const QModelIndex&,const QModelIndex&);
+     void on_sysSyncLogTb_toggled(bool);
+     void slotItemSelected(const QModelIndex&,const QModelIndex&);
 	 void slotItemClicked(const QModelIndex&);
 	 void slotFilter(QString);
 	 void slotFilterFavourite(bool);
@@ -141,7 +144,7 @@ public:
    	void dataChangeFinished();
    	ServerItem* indexToServer(const QModelIndex& index);
 
-    enum Columns {LoadColumn=0, SystemColumn=1, NameColumn=2, HostColumn=3, PortColumn=4, FavouriteColumn= 5, UseColumn=6};
+    enum Columns {LoadColumn=0, NameColumn=1, HostColumn=2, PortColumn=3, SystemColumn=4, FavouriteColumn=5, UseColumn=6};
     enum CustomItemRole {IconStatusRole = Qt::UserRole+1};
 
 protected:

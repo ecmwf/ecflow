@@ -2,7 +2,7 @@
 #define MAINWINDOW_HPP_
 
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -21,6 +21,7 @@
 
 class QActionGroup;
 class QLabel;
+class QToolButton;
 class InfoPanel;
 class NodePanel;
 class ServerFilterMenu;
@@ -69,6 +70,7 @@ protected Q_SLOTS:
 	void slotOpenInfoPanel();
 	void slotConfigChanged();
 	void slotContentsChanged();
+    void slotServerSyncNotify(bool);
 
 private:
     void init(MainWindow*);
@@ -78,6 +80,7 @@ private:
     void rerenderContents();
     bool selectInTreeView(VInfo_ptr info);
     void updateRefreshActions();
+    void hideServerSyncNotify();
 
     void writeSettings(VComboSettings*);
     void readSettings(VComboSettings*);
@@ -92,11 +95,13 @@ private:
     static void saveContents(MainWindow *);
     static MainWindow* findWindow(QWidget *childW);
     static void configChanged(MainWindow *);
+    static void hideServerSyncNotify(MainWindow*);
 
     ServerFilterMenu* serverFilterMenu_;
     NodePanel* nodePanel_;
     QList<QAction*> infoPanelActions_;
     VInfo_ptr selection_;
+    QToolButton* serverSyncNotifyTb_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

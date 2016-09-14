@@ -437,6 +437,7 @@ void BcWidget::crePixmap()
     if(items_.count() == 0)
     {
         painter.setPen(Qt::black);
+        qDebug() << "crePixmap" << emptyRect_ << emptyText_;
         painter.drawText(emptyRect_,Qt::AlignHCenter | Qt::AlignVCenter, emptyText_);
     }
     else

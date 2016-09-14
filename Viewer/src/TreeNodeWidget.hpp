@@ -43,6 +43,7 @@ protected Q_SLOTS:
 
 protected:
 	void initAtts();
+    void detachedChanged() {}
 
 	VParamFilterMenu *stateFilterMenu_;
 	VParamFilterMenu *attrFilterMenu_;

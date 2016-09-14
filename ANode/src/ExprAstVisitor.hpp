@@ -39,7 +39,7 @@ class AstLessThan;
 class AstGreaterThan;
 class AstLeaf;
 class AstInteger;
-class AstString;
+class AstFunction;
 class AstNodeState;
 class AstEventState;
 class AstNode;
@@ -68,8 +68,8 @@ public:
  	virtual void visitGreaterThan(AstGreaterThan*) = 0;
  	virtual void visitLessThan(AstLessThan*) = 0;
  	virtual void visitLeaf(AstLeaf*) = 0;
- 	virtual void visitInteger(AstInteger*) = 0;
- 	virtual void visitString(AstString*) = 0;
+   virtual void visitInteger(AstInteger*) = 0;
+   virtual void visitFunction(AstFunction*) = 0;
  	virtual void visitNodeState(AstNodeState*) = 0;
  	virtual void visitEventState(AstEventState*) = 0;
  	virtual void visitNode(AstNode*) = 0;
@@ -101,7 +101,7 @@ public:
  	virtual void visitLessThan(AstLessThan*){}
  	virtual void visitLeaf(AstLeaf*){}
  	virtual void visitInteger(AstInteger*){}
- 	virtual void visitString(AstString*){}
+   virtual void visitFunction(AstFunction*){}
  	virtual void visitNodeState(AstNodeState*){}
  	virtual void visitEventState(AstEventState*){}
  	virtual void visitNode(AstNode*);
@@ -135,7 +135,7 @@ public:
  	virtual void visitLessThan(AstLessThan*){}
  	virtual void visitLeaf(AstLeaf*){}
  	virtual void visitInteger(AstInteger*){}
- 	virtual void visitString(AstString*){}
+   virtual void visitFunction(AstFunction*){}
  	virtual void visitNodeState(AstNodeState*){}
  	virtual void visitEventState(AstEventState*){}
  	virtual void visitNode(AstNode*);

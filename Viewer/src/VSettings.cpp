@@ -15,6 +15,8 @@
 
 #include <QDebug>
 
+#include <sstream>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem/path.hpp>
@@ -145,6 +147,17 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	pt_.put_child(path_.path(key),array);
 }
 
+void VSettings::put(const std::string& key,const std::vector<int>& val)
+{
+    boost::property_tree::ptree array;
+    for(std::vector<int>::const_iterator it=val.begin(); it != val.end(); ++it)
+    {
+        std::stringstream ss;
+        ss << (*it);
+        array.push_back(std::make_pair("",ss.str()));
+    }
+    pt_.put_child(path_.path(key),array);
+}
 
 // for adding a list of 'structs'
 void VSettings::put(const std::string& key,const std::vector<VSettings>& val)
@@ -178,6 +191,20 @@ void VSettings::get(const std::string& key,std::vector<std::string>& val)
 		std::string name=it->second.get_value<std::string>();
 		val.push_back(name);
 	}
+}
+
+void VSettings::get(const std::string& key,std::vector<int>& val)
+{
+    boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.path(key));
+    if(!ptArray)
+    {
+        return;
+    }
+
+    for(boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it)
+    {
+        val.push_back(it->second.get_value<int>());
+    }
 }
 
 bool VSettings::getAsBool(const std::string& key,bool defaultVal)

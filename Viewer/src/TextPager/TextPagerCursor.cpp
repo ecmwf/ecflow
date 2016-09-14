@@ -546,7 +546,8 @@ int TextPagerCursor::lineNumber() const
 void TextPagerCursor::detach()
 {
     Q_ASSERT(d);
-    if (int(d->ref) > 1) {
+    int refint = d->ref.fetchAndAddRelaxed(0); // required to get past a bug in Qt 5.2.1 (see Ubuntu 14.04)
+    if (refint > 1) {
         d->ref.deref();
         TextCursorSharedPrivate *p = new TextCursorSharedPrivate;
         p->position = d->position;

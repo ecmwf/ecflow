@@ -25,13 +25,16 @@ public:
     ~DashboardDialog();
 	
     void add(DashboardWidget*);
-	DashboardWidget* dashboardWidget() const {return dw_;}
+	DashboardWidget* dashboardWidget() const {return dw_;} 
 
 public Q_SLOTS:	
 	void reject();
     void slotUpdateTitle(QString);
     void slotOwnerDelete();
 	
+Q_SIGNALS:
+    void aboutToClose();
+
 protected:
 	void closeEvent(QCloseEvent * event);
     void readSettings();

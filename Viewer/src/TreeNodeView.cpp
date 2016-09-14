@@ -80,9 +80,6 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 		                this, SLOT(slotContextMenu(const QPoint &)));
 
 	//Selection
-	connect(this,SIGNAL(clicked(const QModelIndex&)),
-			this,SLOT(slotSelectItem(const QModelIndex)));
-
 	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
 			this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
@@ -152,18 +149,21 @@ QModelIndexList TreeNodeView::selectedList()
 	return lst;
 }
 
-void TreeNodeView::slotSelectItem(const QModelIndex&)
+// reimplement virtual function from QTreeView - called when the selection is changed
+void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-	QModelIndexList lst=selectedIndexes();
-	if(lst.count() > 0)
-	{
-		VInfo_ptr info=model_->nodeInfo(lst.front());
-		if(info)
-		{
-			Q_EMIT selectionChanged(info);
-		}
-	}
+    QModelIndexList lst=selectedIndexes();
+    if(lst.count() > 0)
+    {
+        VInfo_ptr info=model_->nodeInfo(lst.front());
+        if(info && !info->isEmpty())
+        {
+            Q_EMIT selectionChanged(info);
+        }
+    }
+    QTreeView::selectionChanged(selected, deselected);
 }
+
 VInfo_ptr TreeNodeView::currentSelection()
 {
 	QModelIndexList lst=selectedIndexes();
@@ -174,19 +174,13 @@ VInfo_ptr TreeNodeView::currentSelection()
 	return VInfo_ptr();
 }
 
-void TreeNodeView::currentSelection(VInfo_ptr info)
+void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 {
 	QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
-	{
+	{          
         setCurrentIndex(idx);
-		Q_EMIT selectionChanged(info);
 	}
-}
-
-void TreeNodeView::slotSetCurrent(VInfo_ptr info)
-{
-    currentSelection(info);
 }
 
 void TreeNodeView::selectFirstServer()
@@ -319,7 +313,6 @@ void TreeNodeView::slotRepaint(Animation* an)
         update(model_->nodeToIndex(n));
 	}
 }
-
 
 void TreeNodeView::slotSizeHintChangedGlobal()
 {
@@ -518,7 +511,7 @@ void TreeNodeView::slotRestoreExpand()
             }
             else
             {
-                currentSelection(expandState_->selection_);
+                setCurrentSelection(expandState_->selection_);
             }
         }
     }
@@ -562,7 +555,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
                     }
                     else if(node->server()->realServer() == expandState_->selection_->server())
                     {
-                        currentSelection(expandState_->selection_);
+                        setCurrentSelection(expandState_->selection_);
                         expandState_->selection_.reset();
                     }
                 }

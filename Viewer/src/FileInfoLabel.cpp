@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -237,39 +237,56 @@ QColor FileInfoLabel::fileSizeColour(qint64 size) const
 	return col;
 }
 
-void DirInfoLabel::update(VDir_ptr dir)
+void DirInfoLabel::update(VReply* reply) //VDir_ptr dir)
 {
-	if(!dir)
+    VDir_ptr dir=reply->directory();
+
+    if(!dir)
 		clear();
 
 	QString s;
-	QColor col(Qt::black);
-	QColor colText("#000010");
-	QColor colSize(0,0,255);
-	QColor colErr(255,0,0);
+
+    QColor col(39,49,101);
+    QColor colText("#000010");
+    QColor colSize(0,0,255);
+    QColor colErr(255,0,0);
 
 	QString dirName=QString::fromStdString(dir->path());
 
 	if(dirName.isEmpty())
 	{
-		s="<b><font color=" + col.name() + ">Directory: </font></b>";
+        s="<b><font color=" + col.name() + ">Directory: </font></b>";
 		s+="<font color=" + colErr.name() + "> ??? </font>";
 		setText(s);
 		return;
 	}
 
+#if 0
 	//Name
-	s="<b><font color=" + col.name() + ">Directory: </font></b>";
+    s="<b><font color=" + col.name() + ">Dir: </font></b>";
 	s+="<font color=" +colText.name() + ">" + dirName + "</font>";
+#endif
+    //Local read
+    if(dir->fetchMode() == VDir::LocalFetchMode)
+    {
+        s+="<b><font color=" + col.name() + "> Directory: </font></b>";
+        s+="<font color=" + colText.name() + "> read from disk</font>";
 
-	//Where
-	QString where=QString::fromStdString(dir->where());
-	if(where.isEmpty())
-		where="???";
+        QString dt=dir->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
+        s+="<b><font color=" + col.name() + "> at </font></b>";
+        s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
 
-	s+="<br>";
-	s+="<b><font color=" + col.name() + ">Host: </font></b>";
-	s+="<font color=" +colText.name() + ">" + where + "</font>";
+    }
+    else if(dir->fetchMode() == VDir::LogServerFetchMode)
+    {
+        s+="<b><font color=" + col.name() + "> Directory: </font></b>";
+        s+="<font color=" + colText.name() + "> " + QString::fromStdString(dir->fetchModeStr()) + "</font>";
+
+        QString dt=dir->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
+        s+="<b><font color=" + col.name() + "> at </font></b>";
+        s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
+
+    }
 
 	setText(s);
 }

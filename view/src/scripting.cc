@@ -117,6 +117,7 @@ int process_command(const char *cmd) {
   } else if (!strncmp("menu", cmd, 4)) {
     menu_cmd(cmd);
 
+
   } else if (!strncmp("quit", cmd, 4)) {
     quit_cmd();
 
@@ -125,6 +126,23 @@ int process_command(const char *cmd) {
       sscanf(cmd, "login %s", host);
       if (host[0] != 0) {
 	login_cmd(host);
+      }
+
+
+  } else if (!strncmp("output", cmd, 6)) {
+      char node[2048] = { 0, };
+      char path[2048] = { 0, };
+      // sscanf(cmd, "output %s", node, path);
+      if (node[0] != 0 && path[0] != 0) {
+	// panel_window::new_window(selection::current_node(),"Output",detached,frozen);
+      }
+      // host::sfile(node, path);
+  } else if (!strncmp("dir", cmd, 3)) {
+      char node[2048] = { 0, };
+      char path[2048] = { 0, };
+      // sscanf(cmd, "dir %s %d", node, path);
+      if (node[0] != 0 && path[0] != 0) {
+	/* */
       }
 
   } else if (!strncmp("logout", cmd, 6)) {

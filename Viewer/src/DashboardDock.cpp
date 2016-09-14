@@ -37,9 +37,11 @@ DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
 	p.setColor(QPalette::WindowText,Qt::white);
 	titleLabel_->setPalette(p);
 
+    detachedTb_->setProperty("docktitle","1");
     optionsTb_->setProperty("docktitle","1");
     closeTb_->setProperty("docktitle","1");
 
+#if 0
 	//Set the initial state of the float tool button
 	if(QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget()))
 	{
@@ -49,6 +51,12 @@ DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
             floatTb_->hide();
 		}
 	}
+#endif
+}
+
+void DashboardDockTitleWidget::setDetachedAction(QAction *ac)
+{
+    detachedTb_->setDefaultAction(ac);
 }
 
 void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
@@ -81,8 +89,8 @@ void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
     }
 
     //Hide the separator line if no buttons were added
-    if(actionTbList_.isEmpty())
-        line_->hide();
+    //if(actionTbList_.isEmpty())
+    //    line_->hide();
 }
 
 void DashboardDockTitleWidget::slotActionChanged()
@@ -120,6 +128,7 @@ QToolButton* DashboardDockTitleWidget::optionsTb() const
 	return optionsTb_;
 }
 
+#if 0
 void DashboardDockTitleWidget::on_floatTb__clicked(bool)
 {
 	if(QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget()))
@@ -131,6 +140,7 @@ void DashboardDockTitleWidget::on_floatTb__clicked(bool)
 		}
 	}
 }
+#endif
 
 void DashboardDockTitleWidget::on_closeTb__clicked(bool)
 {
@@ -160,6 +170,7 @@ DashboardDock::DashboardDock(DashboardWidget *dw,QWidget * parent) :
 
 	setTitleBarWidget(dt);
 
+    dt->setDetachedAction(dw->detachedAction());
 	dt->addActions(dw->dockTitleActions());
 
 	connect(dw,SIGNAL(titleUpdated(QString)),

@@ -64,8 +64,8 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
 			this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
-	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
-			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
+	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),            
+            this,SLOT(slotSelectionChangedInBc(VInfo_ptr)));
 
     connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
             view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
@@ -148,6 +148,7 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     tw->slotUpdateTitle("<b>Tree</b>");
     
     QList<QAction*> acLst;
+
     QAction* acState=new QAction(this);
     acState->setIcon(QPixmap(":viewer/status.svg"));
     acState->setToolTip("Show statuses");
@@ -167,7 +168,8 @@ void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
 {
 	updateActionState(info);
 	bcWidget_->setPath(info);
-	Q_EMIT selectionChanged(info);
+    if(broadcastSelection())
+        Q_EMIT selectionChanged(info);
 }
 
 
@@ -176,14 +178,12 @@ void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 	if(b)
 	{
 		bcWidget_->active(true);
-		bcWidget_->setPath(view_->currentSelection());
+        bcWidget_->setPath(view_->currentSelection());
 	}
 	else
 	{
 		bcWidget_->active(false);
 	}
-
-	//bcWidget_->clear();
 }
 
 void TreeNodeWidget::rerender()
@@ -212,7 +212,9 @@ void TreeNodeWidget::writeSettings(VSettings* vs)
 
 	states_->writeSettings(vs);
 	atts_->writeSettings(vs);
-	icons_->writeSettings(vs);
+    icons_->writeSettings(vs);
+
+    DashboardWidget::writeSettings(vs);
 }
 
 void TreeNodeWidget::readSettings(VSettings* vs)
@@ -248,4 +250,6 @@ void TreeNodeWidget::readSettings(VSettings* vs)
 	attrFilterMenu_->reload();
 	iconFilterMenu_->reload();
 	stateFilterMenu_->reload();
+
+    DashboardWidget::readSettings(vs);
 }

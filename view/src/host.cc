@@ -543,6 +543,9 @@ bool use_ecf_out_cmd(node&n, std::string path, ecf_dir *dir, std::string& conten
   else if (dir) cmd += " -d";
   else if (!path.empty()) cmd += " -f " + path;
 
+  // command(cmd);
+  return 0;
+
   FILE *pipe = popen(cmd.c_str(), "r");
   if (!pipe) return false;
 
@@ -777,7 +780,7 @@ bool ehost::create_tree( int hh, int min, int sec )
    XECFDEBUG {
       time_t now;
       time(&now);
-      struct tm* then = localtime(&now);
+      struct tm* then = gmtime(&now); // localtime(&now);
       then_sec = then->tm_sec;
       gui::message("%s: build %02d:%02d:%02d",
 		   this->name(), then->tm_hour, then->tm_min, then->tm_sec);
@@ -791,9 +794,9 @@ bool ehost::create_tree( int hh, int min, int sec )
    node *top = make_xnode<Defs>(client_.defs().get(), 0x0, *this);
 
    XECFDEBUG {
-      time_t nnow;
-      time(&nnow);
-      struct tm* next = localtime(&nnow);
+      time_t now;
+      time(&now);
+      struct tm* next = gmtime(&now); // localtime(&nnow);
       if (then_sec != next->tm_sec) 
 	printf("# time blt: %02d:%02d:%02d %s\n", 
 	       next->tm_hour, next->tm_min, next->tm_sec, this->name());
@@ -831,7 +834,7 @@ void ehost::reset( bool full, bool sync )
    if (!connected_ || !connect_) return;
    time_t now;
    time(&now);
-   struct tm* curr = localtime(&now);
+   struct tm* curr = gmtime(&now); // localtime(&now);
    gui::message("%s: full tree %02d:%02d:%02d", 
 		this->name(), curr->tm_hour, curr->tm_min, curr->tm_sec);
    SelectNode select(this->name());
@@ -875,7 +878,7 @@ void ehost::reset( bool full, bool sync )
    XECFDEBUG {
       time_t now;
       time(&now);
-      struct tm* curr = localtime(&now);
+      struct tm* curr = gmtime(&now); // localtime(&now);
       hour = curr->tm_hour, min = curr->tm_min, sec = curr->tm_sec;
       gui::message("%s: start %02d:%02d:%02d", this->name(), hour, min, sec);
    }
@@ -1646,17 +1649,16 @@ int ehost::update()
 
       time_t now;
       time(&now);
-      struct tm* curr = localtime(&now);
+      struct tm* curr = gmtime(&now); // localtime(&now);
       gui::message("%s: checking status %02d:%02d:%02d",
 		   this->name(), curr->tm_hour, curr->tm_min, curr->tm_sec);
       client_.news_local(); // call the server
       if (tree_) tree_->connected(True);
 
       XECFDEBUG {
-         struct tm* next;
          time_t now;
          time(&now);
-         next = localtime(&now);
+         struct tm* next = gmtime(&now); // localtime(&now);
          if (curr->tm_sec != next->tm_sec) {
             printf("# time chk: %02d:%02d:%02d %s\n", 
 		   curr->tm_hour, curr->tm_min, curr->tm_sec, this->name());

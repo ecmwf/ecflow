@@ -41,13 +41,14 @@ public:
 	void rerender();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
-    void currentSelection(VInfo_ptr n) {}
+    void setCurrentSelection(VInfo_ptr n);
 	void selectFirstServer() {}
 	void setModel(TableNodeSortModel *model);
 
 	void notifyChange(VProperty* p);
 
-	void readSettings(VSettings* vs);
+    void readSettings(VSettings*);
+    void writeSettings(VSettings*);
 
 public Q_SLOTS:
 	void slotDoubleClickItem(const QModelIndex&);
@@ -57,7 +58,6 @@ public Q_SLOTS:
 	void slotSizeHintChangedGlobal();
     void slotRerender();
     void slotViewCommand(VInfo_ptr,QString) {}
-    void slotSetCurrent(VInfo_ptr) {}
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -70,7 +70,8 @@ protected:
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void adjustBackground(QColor col);
 	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-	TableNodeSortModel* model_;
+
+    TableNodeSortModel* model_;
 	ActionHandler* actionHandler_;
 	TableNodeHeader* header_;
 	bool needItemsLayout_;

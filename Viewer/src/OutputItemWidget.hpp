@@ -42,7 +42,7 @@ public:
     void infoProgressStart(const std::string& text,int max);
     void infoProgress(const std::string& text,int value);
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
@@ -58,7 +58,6 @@ protected:
     void setCurrentInDir(const std::string&);
     void updateDir(bool);
 	void updateDir(VDir_ptr,bool);
-	void updateDir(bool,const std::string&);
 	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&);
 	void searchOnReload();
@@ -77,6 +76,7 @@ protected:
 	static int updateDirTimeout_;
     OutputFetchInfo* fetchInfo_;
     bool dirColumnsAdjusted_;
+    bool submittedWarning_;
 };
 
 #endif

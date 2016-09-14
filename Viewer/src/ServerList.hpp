@@ -13,8 +13,11 @@
 #include <string>
 #include <vector>
 
+#include <QDateTime>
+
 class ServerItem;
 class ServerList;
+
 
 class ServerListObserver
 {
@@ -23,6 +26,42 @@ public:
     virtual ~ServerListObserver() {}
 	virtual void notifyServerListChanged()=0;
 	virtual void notifyServerListFavouriteChanged(ServerItem*)=0;
+};
+
+class ServerListTmpItem
+{
+public:
+    ServerListTmpItem() {}
+    ServerListTmpItem(const std::string name,const std::string& host, const std::string& port) :
+        name_(name), host_(host), port_(port) {}
+    explicit ServerListTmpItem(ServerItem* item);
+    ServerListTmpItem(const ServerListTmpItem& o) {name_=o.name_; host_=o.host_; port_=o.port_;}
+
+    const std::string& name() const {return name_;}
+    const std::string& host() const {return host_;}
+    const std::string& port() const {return port_;}
+
+protected:
+    std::string name_;
+    std::string host_;
+    std::string port_;
+};
+
+class ServerListSyncChangeItem
+{
+public:
+    enum ChangeType {AddedChange,RemovedChange, MatchChange, SetSysChange,UnsetSysChange};
+
+    ServerListSyncChangeItem(const ServerListTmpItem& sys,const ServerListTmpItem& local,ChangeType type) :
+       sys_(sys), local_(local), type_(type) {}
+
+    const ServerListTmpItem& sys() const {return sys_;}
+    const ServerListTmpItem& local() const {return local_;}
+    ChangeType type() const {return type_;}
+
+    ServerListTmpItem sys_;
+    ServerListTmpItem local_;
+    ChangeType type_;
 };
 
 class ServerList
@@ -45,6 +84,10 @@ public:
 	void save();
 	void rescan();
     void syncSystemFile();
+    bool hasSystemFile() const;
+    const std::vector<ServerListSyncChangeItem*>&  syncChange() const {return syncChange_;}
+    bool hasSyncChange() const {return !syncChange_.empty();}
+    QDateTime syncDate() const {return syncDate_;}
 
 	void addObserver(ServerListObserver*);
 	void removeObserver(ServerListObserver*);
@@ -59,14 +102,18 @@ protected:
 
 	bool load();
 	bool readRcFile();
-	bool readSystemFile();
+    //bool readSystemFile();
+    void clearSyncChange();
 
 	void broadcastChanged();
 	void broadcastChanged(ServerItem*);
 
 	std::vector<ServerItem*> items_;
-	std::string serversPath_;
+    std::string localFile_;
+    std::string systemFile_;
 	std::vector<ServerListObserver*> observers_;
+    std::vector<ServerListSyncChangeItem*> syncChange_;
+    QDateTime syncDate_;
 };
 
 
