@@ -212,7 +212,7 @@ void InfoPanel::reset(VInfo_ptr info)
     updateTitle();
 }
 
-//This slot is called when the info object is selected
+//This slot is called when the info object is selected in another panel
 void InfoPanel::slotReload(VInfo_ptr info)
 {
     //When the mode is detached it cannot receive
@@ -240,8 +240,9 @@ void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 
 void InfoPanel::linkSelected(VInfo_ptr info)
 {
-    //reset(info);
-    if(info)
+    //Here info can be an attribute!
+    slotReload(info);
+    if(info_ && info)
        Q_EMIT selectionChanged(info);
 }
 
@@ -252,7 +253,7 @@ void InfoPanel::linkSelected(VInfo_ptr info)
 void InfoPanel::adjustInfo(VInfo_ptr info)
 {
   	//Check if there is data in info
-  	if(info.get())
+    if(info)
   	{
   		ServerHandler *server=info->server();
 

@@ -94,6 +94,7 @@
     <file alias="tree_branch_end.png">../images/tree_branch_end.png</file>
     <file alias="tree_branch_more.png">../images/tree_branch_more.png</file>
     <file alias="tree_vline.png">../images/tree_vline.png</file>
+    <file alias="trigger.svg">../images/trigger.svg</file>
     <file alias="unknown.svg">../images/unknown.svg</file>
     <file alias="unselect_all.svg">../images/unselect_all.svg</file>
     <file alias="variable.svg">../images/variable.svg</file>

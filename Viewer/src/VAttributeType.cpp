@@ -221,7 +221,7 @@ int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
     if(filter && !filter->isSet(a->type()))
         return -1;
 
-    int absIndex=0;
+    int absIndex=-1;
     for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
     {
         if(a->type() == it->second)

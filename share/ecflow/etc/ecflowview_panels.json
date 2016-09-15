@@ -68,6 +68,9 @@
         {
         	"name"    : "triggers",
             "label"   : "Triggers",
+            "icon"    : "trigger.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>triggers</b> tab in a new Info Panel dialog",
             "visible_for" : "node"
         },  
         

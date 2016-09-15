@@ -60,7 +60,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
     drawNodeType_(true),
     bgCol_(Qt::white)
 {
-	attrFont_=font_;
+    drawAttrSelectionRect_=true;
+
+    attrFont_=font_;
 	attrFont_.setPointSize(8);
 
 	serverInfoFont_=font_;

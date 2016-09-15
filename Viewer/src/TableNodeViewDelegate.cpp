@@ -234,8 +234,7 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	painter->setFont(font_);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
-
-	if(selected)
+    if(selected)
 	{
 		painter->setPen(nodeSelectPen_);
 		QRect selRect=textRect.adjusted(-2,0,2,0);
