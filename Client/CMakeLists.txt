@@ -82,6 +82,7 @@ if (ENABLE_SERVER)
         test/SCPort.cpp
         test/TestClientInvoker.cpp
         test/TestClientTimeout.cpp
+        test/TestFlagMigrate.cpp
         test/TestCheckPtDefsCmd.cpp
         test/TestGroupCmd.cpp
         test/TestLoadDefsCmd.cpp
