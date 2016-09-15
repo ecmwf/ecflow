@@ -37,6 +37,13 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_flag_migrate )
 {
+   // This test relies on a NEW server invocation. Hence if ECF_NODE/remote server is used
+   // the test will will invalid. hence ignore.
+   if (!ClientEnvironment::hostSpecified().empty()) {
+      cout << "Client:: ...test_flag_migrate: ignoring test when ECF_NODE specified\n";
+      return;
+   }
+
    /// Test that when a node is  ecf::Flag::MIGRATED, the children are not persisted for sync
    /// But nodes are still persisted for check-pointing
    InvokeServer invokeServer("Client:: ...test_flag_migrate",SCPort::next());
