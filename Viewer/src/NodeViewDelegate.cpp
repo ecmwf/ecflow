@@ -392,7 +392,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
     {
         QRect sr=stRect;
         sr.setRight(valRect.right());
-        renderSelectionRect(painter,sr.adjusted(-2,-2,2,3));
+        renderSelectionRect(painter,sr.adjusted(-3,-2,2,3));
     }
 
 	if(setClipRect)
@@ -520,7 +520,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
             sr.setBottom(multiValRect.bottom());
         }
 
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
     }
 
     if(setClipRect)
@@ -552,7 +552,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
 	//The border rect (we will adjust its  width)
     QRect fillRect=option.rect.adjusted(frontOffset,1,0,-1);
     if(selected)
-			fillRect.adjust(0,1,0,-1);
+        fillRect.adjust(0,1,0,-1);
 
 	//The control rect
 	int ch=(fillRect.height()-4 < 10)?(fillRect.height()-4):8;
@@ -594,7 +594,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
     {
         QRect sr=cRect;
         sr.setRight(nameRect.right());
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,-3,2,4));
     }
 
 	if(setClipRect)
@@ -650,7 +650,7 @@ void NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyle
     if(selected && drawAttrSelectionRect_)
     {
         QRect sr=textRect;
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
     }
 
 	if(setClipRect)
@@ -706,7 +706,7 @@ void NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
     if(selected && drawAttrSelectionRect_)
     {
         QRect sr=textRect;
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
     }
 
 	if(setClipRect)
@@ -815,7 +815,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
     {
         QRect sr=nameRect;
         sr.setRight(valRect.right());
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,-1,3,1));
     }
 
 	if(setClipRect || drawItem)
@@ -869,7 +869,7 @@ void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QS
     if(selected && drawAttrSelectionRect_)
     {
         QRect sr=nameRect;
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
     }
 
 	if(setClipRect)
@@ -933,7 +933,7 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
     if(selected && drawAttrSelectionRect_)
     {
         QRect sr=textRect;
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
     }
 
 	if(setClipRect)
@@ -987,7 +987,7 @@ void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyl
     if(selected && drawAttrSelectionRect_)
     {
         QRect sr=nameRect;
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
     }
 
 	if(setClipRect)
@@ -1041,7 +1041,7 @@ void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyl
     if(selected && drawAttrSelectionRect_)
     {
         QRect sr=nameRect;
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
     }
 
 	if(setClipRect)
@@ -1099,6 +1099,12 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
         painter->setPen(Qt::black);
         painter->setFont(nameFont);
         painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
+
+        if(selected && drawAttrSelectionRect_)
+        {
+            QRect sr=nameRect;
+            renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
+        }
 
         if(setClipRect)
         {
@@ -1249,7 +1255,7 @@ void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyl
     if(selected && drawAttrSelectionRect_)
     {
         QRect sr=nameRect;
-        renderSelectionRect(painter,sr.adjusted(-2,0,2,0));
+        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
     }
 
 	if(setClipRect)
