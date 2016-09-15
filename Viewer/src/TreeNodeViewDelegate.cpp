@@ -88,8 +88,7 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
         propVec.push_back("view.tree.display_child_count");
         propVec.push_back("view.tree.displayNodeType");
         propVec.push_back("view.tree.background");
-        propVec.push_back("view.common.node_style");
-        propVec.push_back("view.common.node_gradient");
+        propVec.push_back("view.common.node_style");      
 
         //Base settings
         addBaseSettings(propVec);
@@ -122,11 +121,6 @@ void TreeNodeViewDelegate::updateSettings()
         else
             nodeStyle_=BoxAndTextNodeStyle;
     }
-    if(VProperty* p=prop_->find("view.common.node_gradient"))
-    {
-        useStateGrad_=p->value().toBool();
-    }
-        
     if(VProperty* p=prop_->find("view.tree.nodeRectRadius"))
 	{
 		nodeRectRad_=p->value().toInt();
