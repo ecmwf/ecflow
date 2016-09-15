@@ -97,6 +97,7 @@ void NodeViewDelegate::notifyChange(VProperty* p)
 
 void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
 {
+    propVec.push_back("view.common.node_gradient");
     propVec.push_back("view.attribute.eventFillColour");
     propVec.push_back("view.attribute.meterFillColour");
     propVec.push_back("view.attribute.meterThresholdColour");
@@ -105,6 +106,10 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
 
 void NodeViewDelegate::updateBaseSettings()
 {
+    if(VProperty* p=prop_->find("view.common.node_gradient"))
+    {
+        useStateGrad_=p->value().toBool();
+    }
     if(VProperty* p=prop_->find("view.attribute.eventFillColour"))
     {
         eventFillBrush_=QBrush(p->value().value<QColor>());

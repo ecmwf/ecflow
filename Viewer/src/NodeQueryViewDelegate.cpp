@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -31,18 +31,16 @@ NodeQueryViewDelegate::NodeQueryViewDelegate(QWidget *parent)
 
 	columns_=ModelColumn::def("query_columns");
 
-	/*adjustIconSize();
-
     //Property
     if(propVec.empty())
     {
-        propVec.push_back("view.tree.font");
-        propVec.push_back("view.tree.displayChildCount");
+        //Base settings
+        addBaseSettings(propVec);
     }
 
     prop_=new PropertyMapper(propVec,this);
 
-    updateSettings();*/
+    updateSettings();
 }
 
 NodeQueryViewDelegate::~NodeQueryViewDelegate()
@@ -51,7 +49,8 @@ NodeQueryViewDelegate::~NodeQueryViewDelegate()
 
 void NodeQueryViewDelegate::updateSettings()
 {
-
+    //Update the settings handled by the base class
+    updateBaseSettings();
 }
 
 QSize NodeQueryViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
