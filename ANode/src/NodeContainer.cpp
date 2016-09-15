@@ -913,64 +913,73 @@ std::vector<family_ptr> NodeContainer::familyVec() const
 
 bool NodeContainer::operator==(const NodeContainer& rhs) const
 {
-	size_t node_vec_size = nodeVec_.size();
-	if ( node_vec_size != rhs.nodeVec_.size()) {
-#ifdef DEBUG
-		if (Ecf::debug_equality()) {
-			std::cout << "NodeContainer::operator==  node_vec_size != rhs.nodeVec_.size() " << absNodePath() << "\n";
-			std::cout << "   nodeVec_.size() = " << node_vec_size << "  rhs.nodeVec_.size() = " << rhs.nodeVec_.size() << "\n";
-		}
-#endif
- 		return false;
-	}
+   // Ignore equality of nodeVec *IF* both nodes have ecf::Flag::MIGRATED set.
+   // i.e server will have a nodeVec_ and client will have an empty nodeVec_ ECFLOW-763
+   bool test_nodeVec_equality = true;
+   if (get_flag().is_set(ecf::Flag::MIGRATED) && rhs.get_flag().is_set(ecf::Flag::MIGRATED)) {
+      test_nodeVec_equality = false;
+   }
 
-	for(size_t i =0; i < node_vec_size; ++i) {
-
-		Task* task = nodeVec_[i]->isTask();
-		if (task) {
-			Task* rhs_task = rhs.nodeVec_[i]->isTask();
-			if ( !rhs_task ) {
+   if ( test_nodeVec_equality ) {
+      size_t node_vec_size = nodeVec_.size();
+      if ( node_vec_size != rhs.nodeVec_.size()) {
 #ifdef DEBUG
-				if (Ecf::debug_equality()) {
-					std::cout << "NodeContainer::operator==  if ( !rhs_task ) " << absNodePath() << "\n";
-				}
+         if (Ecf::debug_equality()) {
+            std::cout << "NodeContainer::operator==  node_vec_size != rhs.nodeVec_.size() " << absNodePath() << "\n";
+            std::cout << "   nodeVec_.size() = " << node_vec_size << "  rhs.nodeVec_.size() = " << rhs.nodeVec_.size() << "\n";
+         }
 #endif
-				return false;
-			}
+         return false;
+      }
 
-			if ( !( *task == *rhs_task )) {
-#ifdef DEBUG
-				if (Ecf::debug_equality()) {
-					std::cout << "NodeContainer::operator==  if ( !( *task == *rhs_task )) " << absNodePath() << "\n";
-				}
-#endif
-				return false;
-			}
-		}
-		else {
-			Family* rhs_family = rhs.nodeVec_[i]->isFamily();
-			if ( !rhs_family ) {
-#ifdef DEBUG
-				if (Ecf::debug_equality()) {
-					std::cout << "NodeContainer::operator==  if ( !rhs_family ) " << absNodePath() << "\n";
-				}
-#endif
-				return false;
-			}
+      for(size_t i =0; i < node_vec_size; ++i) {
 
-			Family* family = nodeVec_[i]->isFamily(); LOG_ASSERT( family, "" );
-			if ( !( *family == *rhs_family )) {
+         Task* task = nodeVec_[i]->isTask();
+         if (task) {
+            Task* rhs_task = rhs.nodeVec_[i]->isTask();
+            if ( !rhs_task ) {
 #ifdef DEBUG
-				if (Ecf::debug_equality()) {
-					std::cout << "NodeContainer::operator==  if ( !( *family == *rhs_family )) " << absNodePath() << "\n";
-				}
+               if (Ecf::debug_equality()) {
+                  std::cout << "NodeContainer::operator==  if ( !rhs_task ) " << absNodePath() << "\n";
+               }
 #endif
-				return false;
-			}
-		}
-	}
+               return false;
+            }
 
-	return Node::operator==(rhs);
+            if ( !( *task == *rhs_task )) {
+#ifdef DEBUG
+               if (Ecf::debug_equality()) {
+                  std::cout << "NodeContainer::operator==  if ( !( *task == *rhs_task )) " << absNodePath() << "\n";
+               }
+#endif
+               return false;
+            }
+         }
+         else {
+            Family* rhs_family = rhs.nodeVec_[i]->isFamily();
+            if ( !rhs_family ) {
+#ifdef DEBUG
+               if (Ecf::debug_equality()) {
+                  std::cout << "NodeContainer::operator==  if ( !rhs_family ) " << absNodePath() << "\n";
+               }
+#endif
+               return false;
+            }
+
+            Family* family = nodeVec_[i]->isFamily(); LOG_ASSERT( family, "" );
+            if ( !( *family == *rhs_family )) {
+#ifdef DEBUG
+               if (Ecf::debug_equality()) {
+                  std::cout << "NodeContainer::operator==  if ( !( *family == *rhs_family )) " << absNodePath() << "\n";
+               }
+#endif
+               return false;
+            }
+         }
+      }
+   }
+
+   return Node::operator==(rhs);
 }
 
 std::ostream& NodeContainer::print(std::ostream& os) const
