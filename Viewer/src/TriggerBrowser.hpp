@@ -12,22 +12,39 @@
 
 #include <QWidget>
 
+#include <set>
+
 #include "ui_TriggerBrowser.h"
 
 #include "VInfo.hpp"
 
-class TriggeredScanner;
+class TriggerItemWidget;
 
 class TriggerBrowser : public QWidget, protected Ui::TriggerBrowser
 {
+Q_OBJECT
+
 public:
     explicit TriggerBrowser(QWidget *parent=0);
 
-    void setScanner(TriggeredScanner* scanner);
-    void load(VInfo_ptr,bool);
+    void setOwner(TriggerItemWidget*);
+    void clear();
+    void load();
 
-protected:
-    TriggeredScanner* scanner_;
+protected Q_SLOTS:
+    void on_tab__currentChanged(int idx);
+    void anchorClicked(const QUrl& link);
+
+private:
+    enum TabIndex {TriggerTabIndex=0, TriggeredTabIndex=1};
+
+    void loadTriggerTab(bool forceLoad=false);
+    void loadTriggeredTab(bool forceLoad=false);
+    bool isTabLoaded(TabIndex idx) const;
+    int tabIndexToInt(TabIndex idx) const;
+
+    TriggerItemWidget* owner_;
+    std::set<TabIndex> loadedTabs_;
 };
 
 #endif // TRIGGERBROWSER_HPP

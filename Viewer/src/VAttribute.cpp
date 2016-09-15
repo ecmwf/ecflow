@@ -62,6 +62,11 @@ bool VAttribute::sameContents(VItem* item) const
     return false;
 }
 
+int VAttribute::absIndex(AttributeFilter *filter) const
+{
+    return VAttributeType::absIndexOf(this,filter);
+}
+
 void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
                                     const std::string& action, const std::string& type,
                                     const std::string& name,const std::string& value)
@@ -136,6 +141,13 @@ bool VAttribute::value(const std::string& key,std::string& val) const
         return true;
     }
     return false;
+}
+
+VAttribute* VAttribute::make(VNode* n,const std::string& type,const std::string& name)
+{
+    VAttributeType *t=VAttributeType::find(type);
+    assert(t);
+    return t->getSearchData(n,name);
 }
 
 VAttribute* VAttribute::makeFromId(VNode* n,int id)

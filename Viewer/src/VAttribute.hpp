@@ -17,8 +17,10 @@
 #include <string>
 #include <vector>
 
+class AttributeFilter;
 class VAttributeType;
 class VNode;
+
 
 class VAttribute : public VItem
 {
@@ -37,10 +39,12 @@ public:
     std::string fullPath() const;
     bool sameContents(VItem*) const;
     int id() const {return id_;}
+    int absIndex(AttributeFilter *filter) const;
 
     bool isValid(VNode* parent);
     bool value(const std::string& key,std::string& val) const;
 
+    static VAttribute* make(VNode* n,const std::string& type,const std::string& name);
     static VAttribute* makeFromId(VNode*,int);
 
     static void buildAlterCommand(std::vector<std::string>& cmd,

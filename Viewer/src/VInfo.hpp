@@ -79,6 +79,7 @@ public:
     bool operator ==(const VInfo&);
 
     static VInfo_ptr createParent(VInfo_ptr);
+    static VInfo_ptr createFromPath(ServerHandler*,const std::string&);
 
 protected:
 	VInfo(ServerHandler* server,VNode* node);
@@ -136,7 +137,8 @@ public:
     std::string name();
     std::string path();
 
-    static VInfo_ptr create(VNode*,int);
+   static VInfo_ptr create(VAttribute*);
+   static VInfo_ptr create(VNode*,int);
 
 protected:
     VInfoAttribute(ServerHandler*,VNode*,VAttribute*);

@@ -22,6 +22,8 @@ class TriggeredScanner;
 
 class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::TriggerItemWidget
 {
+  friend class TriggerBrowser;
+
 Q_OBJECT
 
 public:
@@ -34,6 +36,8 @@ public:
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
+    bool dependency() const;
+
     void writeSettings(VSettings* vs);
     void readSettings(VSettings* vs);
 
@@ -45,8 +49,8 @@ protected Q_SLOTS:
 
 protected:
     void load();
-    void updateState(const ChangeFlags&) {}
-    bool dependency() const;
+    void updateState(const ChangeFlags&) {}   
+    TriggeredScanner* triggeredScanner() const {return scanner_;}
 
     TriggeredScanner *scanner_;
 };

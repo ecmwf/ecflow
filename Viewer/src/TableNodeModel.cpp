@@ -235,6 +235,11 @@ QModelIndex TableNodeModel::nodeToIndex(VTableServer* server,const VNode* node, 
 	return QModelIndex();
 }
 
+QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) const
+{
+    return QModelIndex();
+}
+
 VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 {
 	VNode *n=indexToNode(index);

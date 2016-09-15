@@ -9,24 +9,62 @@
 
 #include "TriggerBrowser.hpp"
 
-#include "Highlighter.hpp"
-#include "TriggerCollector.hpp"
+#include <QDebug>
 
-TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), scanner_(0)
+#include "TriggerCollector.hpp"
+#include "TriggerItemWidget.hpp"
+
+TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
 {
     setupUi(this);
 
-    //Highlighter* ih=new Highlighter(triggerBrowser_->document(),"trigger");
+    Q_ASSERT(tab_->count() == 2);
+    tab_->setCurrentIndex(tabIndexToInt(TriggerTabIndex));
+
+    connect(triggerBrowser_,SIGNAL(anchorClicked(const QUrl&)),
+            this,SLOT(anchorClicked(const QUrl&)));
+
+    connect(triggeredBrowser_,SIGNAL(anchorClicked(const QUrl&)),
+            this,SLOT(anchorClicked(const QUrl&)));
+
 }
 
-void TriggerBrowser::setScanner(TriggeredScanner* scanner)
+void TriggerBrowser::setOwner(TriggerItemWidget* owner)
 {
-    scanner_=scanner;
+    Q_ASSERT(!owner_);
+    owner_=owner;
 }
 
-void TriggerBrowser::load(VInfo_ptr info,bool dependency)
+void TriggerBrowser::clear()
 {
-    VNode *n=info->node();
+    loadedTabs_.clear();
+    triggerBrowser_->clear();
+    triggeredBrowser_->clear();
+}
+
+void TriggerBrowser::load()
+{    
+    Q_ASSERT(owner_);
+
+    loadedTabs_.clear();
+
+    if(tab_->currentIndex() == tabIndexToInt(TriggerTabIndex))
+    {
+        loadTriggerTab(true);
+    }
+    else if(tab_->currentIndex() == tabIndexToInt(TriggeredTabIndex))
+    {
+        loadTriggeredTab(true);
+    }
+}
+
+void TriggerBrowser::loadTriggerTab(bool forceLoad)
+{
+    if(!forceLoad && isTabLoaded(TriggerTabIndex))
+        return;
+
+    VNode *n=owner_->info()->node();
+    Q_ASSERT(n);
 
     std::string te,ce;
     n->triggerExpr(te,ce);
@@ -37,12 +75,53 @@ void TriggerBrowser::load(VInfo_ptr info,bool dependency)
         s+="<b>Trigger expression:</b><p>" + QString::fromStdString(te) + "<p>";
     }
 
-    TriggerListCollector c(0,"",dependency);
+    TriggerListCollector c(0,"",owner_->dependency());
     n->triggers(&c);
 
-    TriggerListCollector c1(0,"",dependency);
-    n->triggered(&c1,scanner_);
-
     triggerBrowser_->setHtml(s + c.text());
-    triggeredBrowser_->setHtml(c1.text());
+
+    loadedTabs_.insert(TriggerTabIndex);
+}
+
+void TriggerBrowser::loadTriggeredTab(bool forceLoad)
+{
+    if(!forceLoad && isTabLoaded(TriggeredTabIndex))
+        return;
+
+    VNode *n=owner_->info()->node();
+    Q_ASSERT(n);
+
+    TriggerListCollector c(0,"",owner_->dependency());
+    n->triggered(&c,owner_->triggeredScanner());
+
+    triggeredBrowser_->setHtml(c.text());
+
+    loadedTabs_.insert(TriggeredTabIndex);
+}
+
+void TriggerBrowser::on_tab__currentChanged(int idx)
+{
+    if(owner_)
+    {
+        if(idx == tabIndexToInt(TriggerTabIndex))
+            loadTriggerTab();
+        else if(idx == tabIndexToInt(TriggeredTabIndex))
+            loadTriggeredTab();
+    }
+}
+
+bool TriggerBrowser::isTabLoaded(TabIndex idx) const
+{
+    return (loadedTabs_.find(idx) != loadedTabs_.end());
+}
+
+int TriggerBrowser::tabIndexToInt(TabIndex idx) const
+{
+    return static_cast<int>(idx);
+}
+
+void TriggerBrowser::anchorClicked(const QUrl& link)
+{
+    qDebug() << link.url();
+    owner_->linkSelected(link.url().toStdString());
 }

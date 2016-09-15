@@ -20,6 +20,7 @@
 #include "VFilter.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
+#include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "VIcon.hpp"
@@ -776,6 +777,41 @@ QModelIndex TreeNodeModel::nodeToIndex(VTreeServer* server,const VTreeNode* node
 	return QModelIndex();
 
 }
+
+//Find the index for the node! The VNode can be a server as well!!!
+QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) const
+{
+    if(!a)
+        return QModelIndex();
+
+    VNode* node=a->parent();
+    if(!node)
+        return QModelIndex();
+
+    VModelServer *mserver=data_->server(node->server());
+    VTreeServer* server=mserver->treeServer();
+    Q_ASSERT(server);
+
+    int row=a->absIndex(atts_);
+    if(row != -1)
+    {
+        //This is a server!!!
+        if(node->isServer())
+        {
+            return createIndex(row,column,server);
+        }
+        else
+        {
+            if(VTreeNode* tn=server->tree()->find(node))
+            {
+                return createIndex(row,column,tn);
+            }
+        }
+    }
+
+    return QModelIndex();
+}
+
 
 //------------------------------------------------------------------
 // Create info object to index. It is used to identify nodes in

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,6 +9,7 @@
 
 #include "InfoPanelItem.hpp"
 
+#include "InfoPanel.hpp"
 #include "InfoProvider.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
@@ -35,7 +36,7 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 {
 	std::map<std::string,InfoPanelItemFactory*>::iterator j = makers->find(name);
 	if(j != makers->end())
-		return (*j).second->make();
+        return (*j).second->make();
 
 	return 0;
 }
@@ -50,6 +51,12 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 InfoPanelItem::~InfoPanelItem()
 {
 	clear();
+}
+
+void InfoPanelItem::setOwner(InfoPanel* owner)
+{
+    assert(!owner_);
+    owner_=owner;
 }
 
 //Set the new VInfo object.
@@ -236,7 +243,13 @@ void InfoPanelItem::setDetached(bool b)
 
     //We update the derived class
     updateState(DetachedChanged);
+}
 
+void InfoPanelItem::linkSelected(const std::string& path)
+{
+    VInfo_ptr info=VInfo::createFromPath(info_->server(),path);
+    assert(owner_);
+    owner_->linkSelected(info);
 }
 
 //From NodeObserver

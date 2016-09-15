@@ -11,6 +11,7 @@
 
 #include "UserMessage.hpp"
 #include "VItem.hpp"
+#include "VItemPathParser.hpp"
 #include "VNode.hpp"
 
 #define _UI_TRIGGERCOLLECTOR_DEBUG
@@ -99,11 +100,15 @@ QString TriggerListCollector::text()
                 firstDirectTrigger=false;
             }
 
+            QString type=QString::fromStdString(t->typeName());
+            QString path=QString::fromStdString(t->fullPath());
+            QString anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
+
             s+="<tr>";
-            s+="<td width=\'100\'>" + QString::fromStdString(t->typeName()) + "</td>";
+            s+="<td width=\'100\'>" + type + "</td>";
             //s+="<td>" + t->name() +"</td>";
             //s+="<td><a style=\'text-decoration:none;\' href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
-            s+="<td><a href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
+            s+="<td><a href=\'" + anchor  + "\'>" + path +"</a>";
         }
     }
 
@@ -123,8 +128,13 @@ QString TriggerListCollector::text()
         else
            h+="Through child";
 
-        h+="  " + QString::fromStdString(d->typeName());
-        h+=" <a class=\'chp\' href=\'aa\'>" + QString::fromStdString(d->fullPath()) +"</a>";
+        QString type=QString::fromStdString(d->typeName());
+        QString path=QString::fromStdString(d->fullPath());
+        QString anchor=QString::fromStdString(VItemPathParser::encode(d->fullPath(),d->typeName()));
+
+
+        h+="  " + type;
+        h+=" <a class=\'chp\' href=\'" + anchor + "\'>" + path +"</a>";
 
         if(h != prevH)
         {
@@ -132,11 +142,13 @@ QString TriggerListCollector::text()
             prevH=h;
         }
 
+        type=QString::fromStdString(t->typeName());
+        path=QString::fromStdString(t->fullPath());
+        anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
+
         s+="<tr>";
-        s+="<td width=\'100\'>" + QString::fromStdString(t->typeName()) + "</td>";
-        //s+="<td>" + t->name() +"</td>";
-        //s+="<td><a style=\'text-decoration:none;\' href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
-        s+="<td><a href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
+        s+="<td width=\'100\'>" + type + "</td>";
+        s+="<td><a href=\'" +  anchor + "\'>" + path +"</a>";
      }
 
     return s;

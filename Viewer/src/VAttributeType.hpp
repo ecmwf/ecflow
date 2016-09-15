@@ -45,10 +45,15 @@ public:
     static void load(VProperty*);
 
     virtual QString toolTip(QStringList d) const {return QString();}
-    virtual bool exists(const VNode* vnode,QStringList) const {return false;}
-    virtual void getSearchData(const VNode*,QList<VAttribute*>&) {}
-    virtual VAttribute* getSearchData(const VNode*,const std::string&) {return NULL;}
-    virtual VAttribute* getSearchData(const VNode*,int index) {return NULL;}
+
+    static int absIndexOf(const VAttribute*,AttributeFilter *filter=0);
+    int indexOf(const VAttribute*);
+    virtual int indexOf(const VNode* vnode,QStringList data) const=0;
+    bool exists(const VNode* vnode,QStringList data) { return (indexOf(vnode,data) != -1); }
+
+    virtual void getSearchData(const VNode*,QList<VAttribute*>&)=0;
+    virtual VAttribute* getSearchData(const VNode*,const std::string&)=0;
+    virtual VAttribute* getSearchData(const VNode*,int index)=0;
     static void getSearchData(const std::string& type,const VNode*,QList<VAttribute*>&);
 
     int id() const {return id_;}

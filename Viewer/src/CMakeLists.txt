@@ -159,6 +159,7 @@ set(viewer_srcs
     VFile.cpp
     VFileInfo.cpp
     VItem.cpp
+    VItemPathParser.cpp
     VModelData.cpp
     VNode.cpp
     VNodeList.cpp
@@ -282,6 +283,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeView.hpp           
     TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
+    TriggerBrowser.hpp
     TriggerItemWidget.hpp
     TriggeredScanner.hpp
     VariableItemWidget.hpp

@@ -51,6 +51,7 @@ public:
 	virtual VModelData* data() const = 0;
 	virtual QModelIndex infoToIndex(VInfo_ptr,int column=0) const;
 	virtual QModelIndex nodeToIndex(const VNode*,int column=0) const=0;
+    virtual QModelIndex attributeToIndex(const VAttribute* a, int column=0) const=0;
 
 Q_SIGNALS:
 	void changed();

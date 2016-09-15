@@ -230,12 +230,19 @@ void InfoPanel::slotReload(VInfo_ptr info)
     }
 }
 
-//This slot is called when the info object is selected
+
 void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 {
     reset(info);
     if(info_)
        Q_EMIT selectionChanged(info_);
+}
+
+void InfoPanel::linkSelected(VInfo_ptr info)
+{
+    //reset(info);
+    if(info)
+       Q_EMIT selectionChanged(info);
 }
 
 //Set the new VInfo object.
@@ -338,14 +345,15 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		}
 
 		//Try to set the previous current widget as current again
-		bool hasCurrent=false;
+        currentItem=0;
+        bool hasCurrent=false;
 		for(int i=0 ; i < tab_->count(); i++)
 		{
 			if(tab_->widget(i) == current)
 			{
 				tab_->setCurrentIndex(i);
-
-				hasCurrent=true;
+                currentItem=findItem(current);
+                hasCurrent=true;
 				break;
 			}
 		}
@@ -420,13 +428,14 @@ InfoPanelItemHandler* InfoPanel::findHandler(InfoPanelDef* def)
 
 InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 {
-	if(InfoPanelItem *iw=InfoPanelItemFactory::create(def->name()))
+    if(InfoPanelItem *iw=InfoPanelItemFactory::create(def->name()))
 	{
-		iw->setFrozen(frozen());
+        iw->setOwner(this);
+        iw->setFrozen(frozen());
 		iw->setDetached(detached());
 
 		//iw will be added to the tab so the tab will be its parent. Moreover
-		//the tab will stay its parent even if iw got removed from the tab!
+        //the tab will stay its parent even if iw got removed from the tab!
 		//So when the tab is deleted all the iw-s will be correctly deleted as well.
 
 		InfoPanelItemHandler* h=new InfoPanelItemHandler(def,iw);

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -31,7 +31,7 @@ class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObs
 friend class InfoPanel;
 
 public:
-    InfoPanelItem() : active_(false), selected_(false), suspended_(false),
+    InfoPanelItem() : owner_(0), active_(false), selected_(false), suspended_(false),
                       frozen_(false), detached_(false), unselectedFlags_(KeepContents),
                       useAncestors_(false) {}
 	virtual ~InfoPanelItem();
@@ -46,6 +46,8 @@ public:
 	virtual void reload(VInfo_ptr info)=0;
 	virtual QWidget* realWidget()=0;
 	virtual void clearContents()=0;
+
+    void setOwner(InfoPanel*);
 
     virtual void setActive(bool);
     void setSelected(bool,VInfo_ptr);
@@ -74,6 +76,7 @@ protected:
 	void adjust(VInfo_ptr);
     virtual void clear();
     virtual void updateState(const ChangeFlags&)=0;
+    void linkSelected(const std::string& path);
 
 	//Notifications about the server changes
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
@@ -84,6 +87,7 @@ protected:
 	//Notifications about the node changes
 	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;
 	
+    InfoPanel* owner_;
     bool active_;
     bool selected_;
     bool suspended_;
@@ -99,8 +103,8 @@ public:
 	explicit InfoPanelItemFactory(const std::string&);
 	virtual ~InfoPanelItemFactory();
 
-	virtual InfoPanelItem* make() = 0;
-	static InfoPanelItem* create(const std::string& name);
+    virtual InfoPanelItem* make() = 0;
+    static InfoPanelItem* create(const std::string& name);
 
 private:
 	explicit InfoPanelItemFactory(const InfoPanelItemFactory&);
@@ -111,7 +115,7 @@ private:
 template<class T>
 class InfoPanelItemMaker : public InfoPanelItemFactory
 {
-	InfoPanelItem* make() { return new T(); }
+    InfoPanelItem* make() { return new T(); }
 public:
 	explicit InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
 };

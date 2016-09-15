@@ -49,6 +49,9 @@ public:
     QModelIndex nodeToIndex(const VNode*,int column=0) const;
     VTreeServer* indexToServer(const QModelIndex & index) const;
     VTreeServer* nameToServer(const std::string&) const;
+
+    QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
+
     VInfo_ptr nodeInfo(const QModelIndex& index);
 
     void setEnableServerToolTip(bool st) {serverToolTip_=st;}

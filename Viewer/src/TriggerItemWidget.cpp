@@ -24,6 +24,9 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
 
+    messageLabel_->hide();
+    messageLabel_->setShowTypeTitle(false);
+
     textTb_->hide();
     graphTb_->hide();
     triggerView_->hide();
@@ -43,7 +46,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     connect(scanner_,SIGNAL(scanProgressed(int)),
             this,SLOT(scanProgressed(int)));
 
-    textBrowser_->setScanner(scanner_);
+    textBrowser_->setOwner(this);
 }
 
 QWidget* TriggerItemWidget::realWidget()
@@ -66,7 +69,7 @@ void TriggerItemWidget::reload(VInfo_ptr info)
     //Info must be a node
     if(info_ && info_->isNode() && info_->node())
     {
-        load();
+        textBrowser_->load();
     }
 }
 
@@ -74,13 +77,14 @@ void TriggerItemWidget::load()
 {
     if(info_ && info_->isNode() && info_->node())
     {        
-        textBrowser_->load(info_,dependency());
+        textBrowser_->load();
     }
 }
 
 void TriggerItemWidget::clearContents()
 {
-	InfoPanelItem::clear();
+    InfoPanelItem::clear();
+    textBrowser_->clear();
 }
 
 
@@ -109,7 +113,7 @@ void TriggerItemWidget::infoProgress(const std::string& text,int value)
 
 void TriggerItemWidget::scanStarted()
 {
-    messageLabel_->showInfo("Scan");
+    messageLabel_->showInfo("Scanning tree for triggers ...");
     messageLabel_->startProgress(100);
 }
 
@@ -121,7 +125,7 @@ void TriggerItemWidget::scanFinished()
 
 void TriggerItemWidget::scanProgressed(int value)
 {
-    std::string text="A";
+    std::string text="";
     messageLabel_->progress(QString::fromStdString(text),value);
 }
 
@@ -138,6 +142,5 @@ void TriggerItemWidget::readSettings(VSettings* vs)
     dependTb_->setChecked(vs->getAsBool("dependency",dependency()));
     vs->endGroup();
 }
-
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");
