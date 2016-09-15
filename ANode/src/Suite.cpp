@@ -147,7 +147,7 @@ void Suite::requeue(
    SuiteChanged1 changed(this); //
 
    // requeue can cause thousands of mementos to be created, to avoid this we
-   // update the modify change number.
+   // update the modify change number, this will force a full sync in client
    Ecf::incr_modify_change_no();
 
    requeue_calendar();
