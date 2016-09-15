@@ -148,19 +148,12 @@ private:
 
 	   // Handle ecf::Flag::MIGRATED, don't save nodeVec_
 	   // if in ServerToClientCmdContext & ecf::Flag::MIGRATED set on suite/family
-	   if (Archive::is_saving::value) {
-	      if (ecf::ServerToClientCmdContext::in_command()) {
-	         if (get_flag().is_set(ecf::Flag::MIGRATED)) {
-	            std::vector<node_ptr> nodeVec;
-	            ar & nodeVec;
-	         }
-	         else {
-	            ar & nodeVec_;
-	         }
-	      }
-	      else {
-	         ar & nodeVec_;
-	      }
+	   if (Archive::is_saving::value &&
+	       ecf::ServerToClientCmdContext::in_command() &&
+	       get_flag().is_set(ecf::Flag::MIGRATED)) {
+
+	      std::vector<node_ptr> nodeVec;
+	      ar & nodeVec;
 	   }
 	   else {
 	      ar & nodeVec_;
