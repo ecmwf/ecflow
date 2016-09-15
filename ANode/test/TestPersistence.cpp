@@ -84,8 +84,10 @@ BOOST_AUTO_TEST_CASE( test_node_tree_persistence_text )
 #endif
 
 
-BOOST_AUTO_TEST_CASE( test_persistece_with_migrate_flag )
+BOOST_AUTO_TEST_CASE( test_persistence_with_migrate_flag )
 {
+   cout << "ANode:: ...test_persistence_with_migrate_flag\n" ;
+
    Defs defs;
    suite_ptr s = defs.add_suite("test_persistece_with_migrate_flag");
    family_ptr f1 = s->add_family("f1");
