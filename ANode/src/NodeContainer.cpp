@@ -114,13 +114,18 @@ void NodeContainer::begin()
 }
 
 void NodeContainer::requeue(
-         bool resetRepeats,
-         int clear_suspended_in_child_nodes,
-         bool reset_next_time_slot
-         )
+      bool resetRepeats,
+      int clear_suspended_in_child_nodes,
+      bool reset_next_time_slot
+)
 {
 //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
-	Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
+
+   // Node::requeue(..) will clear ecf::Flag::MIGRATED,
+   // this should cause children to be added in client def's, provided we force a sync
+   if (get_flag().is_set(ecf::Flag::MIGRATED)) force_sync();
+
+   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
 
 	// For negative numbers, do nothing, i.e do not clear
 	if (clear_suspended_in_child_nodes >=0) clear_suspended_in_child_nodes++;
