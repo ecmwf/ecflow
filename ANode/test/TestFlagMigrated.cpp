@@ -123,4 +123,58 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_flag_migrated_with_reque )
+{
+   cout << "ANode:: ...test_flag_migrated_with_reque\n" ;
+   // This will test the re-queue should clear the migrated flag, and cause children of
+   // suite/families to appear once again.
+
+   Defs defs;
+   suite_ptr s = defs.add_suite("test_flag_migrated_with_reque");
+   family_ptr f1 = s->add_family("f1");
+   f1->add_task("t1");
+   task_ptr t2 = f1->add_task("t2");
+   defs.beginAll();
+
+   // Remove host dependent variables from server state, so that we can run on other platforms
+   defs.set_server().delete_server_variable("ECF_LOG");
+   defs.set_server().delete_server_variable("ECF_CHECK");
+   defs.set_server().delete_server_variable("ECF_CHECKOLD");
+
+   std::string file_name = File::test_data("ANode/test/data/test_flag_migrated_with_reque","ANode");
+   {
+      // this time we only expect 1 node
+      s->flag().set(ecf::Flag::MIGRATED);
+
+      {
+         // Will not persist children of migrate node
+         ServerToClientCmdContext cmd;
+         defs.save_as_checkpt(file_name);
+      }
+
+      Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+      std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
+      BOOST_CHECK_MESSAGE(all_nodes.size()==1,"expected 1 nodes but found " << all_nodes.size());
+
+      fs::remove(file_name);
+   }
+
+   {
+      defs.requeue(); // this should clear the migrate flag
+
+      BOOST_CHECK_MESSAGE(!s->get_flag().is_set(ecf::Flag::MIGRATED),"Expected migrate flag to be cleared");
+
+      {
+         // Reque means migrate flag was cleared, hence we expect full set of nodes.
+         ServerToClientCmdContext cmd;
+         defs.save_as_checkpt(file_name);
+      }
+
+      Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+      std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
+      BOOST_CHECK_MESSAGE(all_nodes.size()==4,"expected 4 nodes but found " << all_nodes.size());
+
+      fs::remove(file_name);
+   }
+}
 BOOST_AUTO_TEST_SUITE_END()
