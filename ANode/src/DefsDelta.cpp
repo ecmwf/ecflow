@@ -34,6 +34,9 @@ void DefsDelta::init(unsigned int client_state_change_no)
 
 bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes) const
 {
+   // ****************************************************
+   // On the client side
+   // ****************************************************
 	if (!client_def.get()) return false;
 
    if (client_def->in_notification()) {
