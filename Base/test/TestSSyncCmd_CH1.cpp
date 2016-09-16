@@ -153,8 +153,6 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
          BOOST_CHECK_MESSAGE( server_defs->server().compare(server_reply.client_defs()->server()),test_name << ": Server state does not match");
          Ecf::set_debug_equality(false);
       }
-      else {
-      }
 
       // * Note we expect client defs to fail invariant checking when doing a full sync with handles
       // * Under real server this should be ok since, we fix up the defs ptr, during serialisation
@@ -173,13 +171,12 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
    }
    else {
 
-      BOOST_CHECK_MESSAGE( !news_cmd.get_news(), test_name << ": Expected no change");
+      BOOST_CHECK_MESSAGE( !news_cmd.get_news(),         test_name << ": Expected no change");
       BOOST_CHECK_MESSAGE( !cmd.do_sync( server_reply ), test_name << ": Expected no change");
       BOOST_CHECK_MESSAGE( !server_reply.in_sync(),      test_name << ": Expected no change");
       BOOST_CHECK_MESSAGE( !(*server_defs == *server_reply.client_defs()), test_name << ": Server and client defs expected to differ" );
    }
 }
-
 
 static bool set_server_state_shutdown(defs_ptr defs) {
    defs->set_server().set_state( SState::SHUTDOWN );
@@ -333,11 +330,45 @@ static bool change_server_variable(defs_ptr defs) {
    return true;
 }
 
+
+static bool s1_set_migrate_flag(defs_ptr defs) {
+
+   // suite s1 is *NOT* in the handle, hence expect no change
+   suite_ptr s1 = defs->findSuite("s1");
+   MockSuiteChangedServer mockServer(s1);   // Increment suite state/modify change number
+   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(s1->absNodePath(),ecf::Flag::MIGRATED,true)));
+   return false;                            // expect no changes
+}
+
+static bool s1_f_set_migrate_flag(defs_ptr defs) {
+   // suite s1 is *NOT* in the handle, hence expect no change
+   suite_ptr s1 = defs->findSuite("s1");
+   MockSuiteChangedServer mockServer(s1);    // Increment suite state/modify change number
+   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd("/s1/f",ecf::Flag::MIGRATED,true)));
+   return false;                             // expect no changes
+}
+
 // ===============================================================================
 // The modifiers, do this for suite s0 which is in a handle
 // ===============================================================================
-static bool s0_delete_some_attributes(defs_ptr defs) {
 
+static bool s0_set_migrate_flag(defs_ptr defs) {
+   // suite s0 in the handle
+   suite_ptr s0 = defs->findSuite("s0");
+   MockSuiteChangedServer mockServer(s0);      // Increment suite state/modify change number
+   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(s0->absNodePath(),ecf::Flag::MIGRATED,true)));
+   return true;                                // expect changes
+}
+
+static bool s0_f_set_migrate_flag(defs_ptr defs) {
+   // suite s0 in the handle
+   suite_ptr s0 = defs->findSuite("s0");
+   MockSuiteChangedServer mockServer(s0); // Increment suite state/modify change number
+   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd("/s0/f",ecf::Flag::MIGRATED,true)));
+   return true;                                // expect changes
+}
+
+static bool s0_delete_some_attributes(defs_ptr defs) {
    /// Ok now make state change to s4, which **is** in the handle
    /// We need MockSuiteChangedServer, so that change is propagated to the suite.
    suite_ptr suite = defs->findSuite("s0");
@@ -396,7 +427,6 @@ static bool s0_remove_all_tasks(defs_ptr defs) {
    BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
    MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-
    // Remove tasks should force a incremental sync
    std::vector<task_ptr> tasks;
    suite->get_all_tasks(tasks);
@@ -428,7 +458,6 @@ static bool s0_remove_a_family(defs_ptr defs) {
    BOOST_REQUIRE_MESSAGE( vec.size() < family_size, "Failed to delete family");
    return true;
 }
-
 
 static bool s0_change_clock_gain(defs_ptr defs) {
    suite_ptr suite = defs->findSuite("s0");
@@ -499,18 +528,14 @@ static bool s0_change_limit_value(defs_ptr defs) {
 }
 
 static bool s0_update_repeat(defs_ptr defs) {
-
    suite_ptr suite = defs->findSuite("s0");
    BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
    MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
-
 
    SuiteChanged1 changed(suite.get());
    suite->increment_repeat();
    return true;
 }
-
-// ===============================================
 
 BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
 {
@@ -552,6 +577,10 @@ BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
    test_sync_scaffold(delete_family_on_suite_s4,"delete_family_on_suite_s4");
    test_sync_scaffold(delete_suite_s4,"delete_suite_s4", true /* expect a full sync */);
 
+   test_sync_scaffold(s1_set_migrate_flag,"s1_set_migrate_flag");     // s1   *NOT* in handle
+   test_sync_scaffold(s1_f_set_migrate_flag,"s1_f_set_migrate_flag"); // s1/f *NOT* in handle
+   test_sync_scaffold(s0_set_migrate_flag,"s0_set_migrate_flag");     // s0   is in handle
+   test_sync_scaffold(s0_f_set_migrate_flag,"s0_set_migrate_flag");  // s0/f is in handle
 
    test_sync_scaffold(s0_delete_some_attributes,"s0_delete_some_attributes");
    test_sync_scaffold(s0_add_some_attributes,"s0_add_some_attributes");
@@ -570,7 +599,7 @@ BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
    test_sync_scaffold(s0_change_clock_sync,"s0_change_clock_sync", true/* expect a full sync */);
 }
 
-
+// =============================================================================================
 
 static defs_ptr create_the_server_defs()
 {
@@ -639,8 +668,8 @@ BOOST_AUTO_TEST_CASE( test_ssync_full_sync_using_handle  )
    // Now sync from server
    Ecf::set_server(true);
    MockServer mock_server(server_defs);
-   /* server side */ SNewsCmd news_cmd(client_handle, server_reply.client_defs()->state_change_no(),  server_reply.client_defs()->modify_change_no(), &mock_server );
-   /* server side */ SSyncCmd cmd(client_handle, server_reply.client_defs()->state_change_no(),  server_reply.client_defs()->modify_change_no(), &mock_server );
+   /* server side */ SNewsCmd news_cmd(client_handle, server_reply.client_defs()->state_change_no(), server_reply.client_defs()->modify_change_no(), &mock_server );
+   /* server side */ SSyncCmd cmd(client_handle, server_reply.client_defs()->state_change_no(), server_reply.client_defs()->modify_change_no(), &mock_server );
    Ecf::set_server(false);
 
    // make sure SSyncCmd updated the server change numbers, to use global change numbers
