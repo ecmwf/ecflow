@@ -25,15 +25,12 @@ using namespace ecf;
 Memento::~Memento() {}
 
 // ===============================================================
-void CompoundMemento::incremental_sync(defs_ptr client_def,std::vector<std::string>& changed_nodes) const
+void CompoundMemento::incremental_sync(defs_ptr client_def) const
 {
    /// Clear out aspects, for this Memento.
    ///   Aspects are added via do_incremental_* / set_mememto functions
    ///   AND in *this* function when node attributes have been added or deleted.
    aspects_.clear();
-
-   // Record changes nodes for the Python interface
-   changed_nodes.push_back(absNodePath_);
 
 	node_ptr node = client_def->findAbsNode(absNodePath_);
  	if (!node.get()) {

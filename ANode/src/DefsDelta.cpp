@@ -31,7 +31,6 @@ void DefsDelta::init(unsigned int client_state_change_no)
 	compound_mementos_.clear();
 }
 
-
 bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes) const
 {
    // ****************************************************
@@ -39,14 +38,9 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
    // ****************************************************
 	if (!client_def.get()) return false;
 
-   if (client_def->in_notification()) {
-      // For debug: place a break point here: It appear as Change manager observers, has called another client to server command
-      std::cout << "ecflow:ClientInvoker::incremental_sync() called in the middle of notification(server->client sync)\n";
-      std::cout << "It appears that change observer have called *ANOTHER* client->server command in the middle synchronising client definition\n";
-   }
-
-   /// - Sets notification flag, so that observers can also query if they are in the middle of notification.
-   ChangeStartNotification start_notification(client_def);
+   // Clear the changed nodes since we want it to match number of changed memento's
+	// This should have been clear anyway in ServerReply::clear_for_invoke
+	changed_nodes.clear();
 
 	// Update the client defs with latest server *handle* based state change/modify number
 	// to keep pace with the state changes. Passed back later on, to get further changes
@@ -57,22 +51,21 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
 #ifdef DEBUG_MEMENTO
 		std::cout << "DefsDelta::incremental_sync compound_mementos_.size() = " << compound_mementos_.size() << "\n";
 #endif
-		std::for_each(compound_mementos_.begin(),compound_mementos_.end(),
-		              boost::bind(&CompoundMemento::incremental_sync,_1,client_def,boost::ref(changed_nodes)));
+
+	   // For each compound memento, we should have a changed node,
+      BOOST_FOREACH(compound_memento_ptr m, compound_mementos_) {
+         changed_nodes.push_back( m->abs_node_path());  // Record changed nodes for the Python interface
+         m->incremental_sync(client_def);
+      }
 	}
 	catch ( std::exception& e) {
 		throw std::runtime_error("Could not apply incremental server changes to client defs, because: " + string(e.what()));
 	}
 
-	// For each compound memento, we should have a changed node,
-   // If the assertion fails, then the sync in the observers, would have called another client->server command in the middle synchronising
-	if ( compound_mementos_.size() != changed_nodes.size()) {
-	   std::cout << "DefsDelta::incremental_sync: ERROR **** compound_mementos_.size() " << compound_mementos_.size() << "  changed_nodes.size(): " << changed_nodes.size() << " differ.\n";
-	}
-#ifdef DEBUG
-	assert( compound_mementos_.size() == changed_nodes.size()); // FIXME restore for long term GUI test
-#endif
- 
+	// For each compound memento, we should have a changed node.(for use with python interface)
+   assert( compound_mementos_.size() == changed_nodes.size());
+
+
 	// return true if there were any changes made
 	return !compound_mementos_.empty();
 }
@@ -81,4 +74,3 @@ void DefsDelta::add(compound_memento_ptr memento)
 {
 	compound_mementos_.push_back(memento);
 }
-
