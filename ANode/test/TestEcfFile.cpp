@@ -1387,7 +1387,6 @@ BOOST_AUTO_TEST_CASE( test_include_with_variables_mismatched_micros )
 
 BOOST_AUTO_TEST_CASE( test_include_with_variable_not_defined )
 {
-   // generate the ecf file, where include file has missmatched ecf_micro
    string ecf_file;
    ecf_file += "%include %simple_head.h%\n";
    ecf_file += "#body\n";
