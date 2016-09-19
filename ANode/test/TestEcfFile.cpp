@@ -1385,4 +1385,18 @@ BOOST_AUTO_TEST_CASE( test_include_with_variables_mismatched_micros )
    basic_test_template("test_include_with_variables_mismatched_micros",ecf_file,expected_job_file_contents,false/*expect failure*/);
 }
 
+BOOST_AUTO_TEST_CASE( test_include_with_variable_not_defined )
+{
+   // generate the ecf file, where include file has missmatched ecf_micro
+   string ecf_file;
+   ecf_file += "%include %simple_head.h%\n";
+   ecf_file += "#body\n";
+   ecf_file += "%include <simple_%tail%.h>\n";
+
+   std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
+
+   basic_test_template("test_include_with_variable_not_defined",ecf_file,expected_job_file_contents,false/*expect failure*/);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
