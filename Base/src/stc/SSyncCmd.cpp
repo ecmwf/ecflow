@@ -439,6 +439,17 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
    // Can only sync, *if* we have definition on the client side
    if (server_reply.client_defs_.get() ) {
       // *INCREMENTAL* sync
+
+
+      if (server_reply.client_defs_->in_notification()) {
+         // For debug: place a break point here: It appear as Change manager observers, has called another client to server command
+         std::cout << "SSyncCmd::do_sync ERROR!!!!! called in the middle of notification(server->client sync)\n";
+         std::cout << "It appears that change observer have called *ANOTHER* client->server command in the middle synchronising client definition\n";
+      }
+      /// - Sets notification flag, so that observers can also query if they are in the middle of notification.
+      ChangeStartNotification start_notification(server_reply.client_defs_);
+
+
       // Apply mementos to the client side defs, to bring in sync with server defs
       // If *no* server loaded, then no changes applied
       // Returns true if are any memento's, i.e. server changed.
