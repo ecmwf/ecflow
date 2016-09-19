@@ -1347,7 +1347,6 @@ BOOST_AUTO_TEST_CASE( test_include_with_variables )
 {
    // Test includes with variables %include <%head%.h> ECFLOW-765
 
-   // generate the ecf file;
    string ecf_file;
    ecf_file += "%include <%simple%_head.h>\n";
    ecf_file += "#body\n";
@@ -1356,6 +1355,18 @@ BOOST_AUTO_TEST_CASE( test_include_with_variables )
    std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
 
    basic_test_template("test_include_with_variables",ecf_file,expected_job_file_contents);
+}
+
+BOOST_AUTO_TEST_CASE( test_include_with_variable_alternative )
+{
+   string ecf_file;
+   ecf_file += "%include %FRED:<simple_head.h>%\n";
+   ecf_file += "#body\n";
+   ecf_file += "%include %TAIL:<simple_tail.h>%\n";
+
+   std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
+
+   basic_test_template("test_include_with_variable_alternative",ecf_file,expected_job_file_contents);
 }
 
 BOOST_AUTO_TEST_CASE( test_include_with_variables_change_micro )
