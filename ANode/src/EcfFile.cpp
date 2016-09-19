@@ -1311,7 +1311,10 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    }
 }
 
-std::string PreProcessor::getIncludedFilePath(const std::string& includedFile,const std::string& line,std::string& errormsg)
+std::string PreProcessor::getIncludedFilePath(
+      const std::string& includedFile1,
+      const std::string& line,
+      std::string& errormsg)
 {
    // Include can have following format: [ %include | %includeonce | %includenopp ]
    //   %include /tmp/file.name   -> /tmp/filename
@@ -1321,10 +1324,28 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile,co
    //   %include "file.name"      -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
    //   %include <file.name>      -> %ECF_INCLUDE%/filename
    //
-   // When ECF_INCLUDE            -> path1:path2:path3
-   //   %include <file.name>      -> path1/filename || path2/filename || path3/filename
+   //   %include <%file%.name>        -> %ECF_INCLUDE%/filename
+   //   %include "%file%.name"        -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
+   //   %include "./%file%.name"      -> script_file_location/./file.name
+   //   %include "/%tmp%/%file%.name" -> /%tmp%/%file%.name
+   //   %include %INCLUDE%            -> any of the above
    //
-   //   %include <file.name>      -> ECF_HOME/filename
+   // When ECF_INCLUDE           -> path1:path2:path3
+   //   %include <filename>      -> path1/filename || path2/filename || path3/filename || ECF_HOME/filename
+
+   // the included file could have variables,(ECFLOW-765), check for miss-matched ecf_micro
+   std::string includedFile = includedFile1;
+   if ( includedFile.find(ecf_micro_) != std::string::npos) {
+      int ecfMicroCount = ecfile_->countEcfMicro( includedFile, ecf_micro_ );
+      if (ecfMicroCount % 2 != 0 ) {
+         std::stringstream ss;
+         ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ")  '" << line << "' in " << ecfile_->script_path_or_cmd_;
+         errormsg += ss.str();
+         return string();
+      }
+      NameValueMap user_edit_variables;
+      ecfile_->node_->variable_substitution(includedFile,user_edit_variables,ecf_micro_[0]);
+   }
 
    std::string the_include_file = includedFile.substr( 1, includedFile.size() - 2 );
    if ( includedFile.size() >=2 && includedFile[1] == '/') {
