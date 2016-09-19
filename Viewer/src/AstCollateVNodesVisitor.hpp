@@ -13,14 +13,17 @@
 
 #include "ExprAstVisitor.hpp"
 
-#include <set>
+//#include <set>
+#include <vector>
 
 class VItem;
+
+#include "VItemTmp.hpp"
 
 class AstCollateVNodesVisitor : public ecf::ExprAstVisitor
 {
 public:
-  AstCollateVNodesVisitor(std::set<VItem*>& );
+  AstCollateVNodesVisitor(std::vector<VItemTmp_ptr>& );
   virtual ~AstCollateVNodesVisitor();
 
   virtual void visitTop(AstTop*){}
@@ -48,7 +51,8 @@ public:
   virtual void visitVariable(AstVariable*);
 
 private:
-  std::set<VItem*>& theSet_;
+  //std::set<VItem*>& theSet_;
+  std::vector<VItemTmp_ptr>& items_;
 };
 
 #endif // ASTCOLLATEVNODESVISITOR_HPP

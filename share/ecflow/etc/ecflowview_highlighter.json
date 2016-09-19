@@ -246,15 +246,30 @@
 
        "trigger"  : {
 
-             "oper" : {
-                 "pattern" : "(==|\\s+(eq|ge|gt|le|lt)\\s+",
-                 "colour"  : "rgb(0,0,255)",
-                 "bold"    : "true"
-             },
-             "logical" : {
-                "pattern" : "(or|and)",
-                "colour"  : "rgb(255,40,40)",
+            "node" : {
+                "pattern" : "(\\S*/\\S+)\\s+",
+                "colour"  : "rgb(100,101,102)",
                 "bold"    : "true"
+             },
+            "oper" : {
+                 "pattern" : "\\b(eq|ge|gt|le|lt)\\b",
+                 "colour"  : "rgb(0,80,50)"
+             },
+             "oper1" : {
+                 "pattern" : "(==)",
+                 "colour"  : "rgb(0,80,50)"
+              },
+             "logical" : {
+                "pattern" : "\\b(or|and|OR|AND)\\b",
+                "colour"  : "rgb(34,51,136)"
+             },
+             "state" : {
+               "pattern" : "\\b(aborted|active|queued|complete|submitted|suspended|unknown)\\b",
+               "colour"  : "rgb(102,43,130)"
+             },
+            "int" : {
+                "pattern" : "\\s+(\\d+)",
+                "colour"  : "rgb(128,128,0)"
              }
         }
 }

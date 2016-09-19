@@ -87,6 +87,21 @@ void TriggerItemWidget::clearContents()
     textBrowser_->clear();
 }
 
+void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    checkActionState();
+}
+
+void TriggerItemWidget::checkActionState()
+{
+    if(suspended_)
+    {
+         dependTb_->setEnabled(false);
+         return;
+    }
+
+    dependTb_->setEnabled(false);
+}
 
 void TriggerItemWidget::on_dependTb__toggled(bool)
 {   

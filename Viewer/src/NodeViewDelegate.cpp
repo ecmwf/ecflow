@@ -950,7 +950,7 @@ void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyl
 	QString name=data.at(1);
 
     int offset=2;
-    int frontOffset=2;
+    int frontOffset=8;
 
     bool selected=option.state & QStyle::State_Selected;
 

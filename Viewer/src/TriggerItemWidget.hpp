@@ -49,8 +49,9 @@ protected Q_SLOTS:
 
 protected:
     void load();
-    void updateState(const ChangeFlags&) {}   
+    void updateState(const ChangeFlags&);
     TriggeredScanner* triggeredScanner() const {return scanner_;}
+    void checkActionState();
 
     TriggeredScanner *scanner_;
 };

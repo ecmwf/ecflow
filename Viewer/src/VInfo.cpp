@@ -385,6 +385,7 @@ VInfo_ptr VInfoAttribute::create(VAttribute* att)
     return VInfo_ptr(new VInfoAttribute(server,node,att));
 }
 
+#if 0
 VInfo_ptr VInfoAttribute::create(VNode* node,int attIndex)
 {
     ServerHandler* server=NULL;
@@ -397,6 +398,7 @@ VInfo_ptr VInfoAttribute::create(VNode* node,int attIndex)
 
     return VInfo_ptr(new VInfoAttribute(server,node,att));
 }
+#endif
 
 std::string VInfoAttribute::path()
 {

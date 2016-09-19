@@ -17,21 +17,26 @@
 #include <string>
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 class AttributeFilter;
 class VAttributeType;
 class VNode;
 
+class VAttribute;
+typedef boost::shared_ptr<VAttribute> VAttribute_ptr;
 
 class VAttribute : public VItem
 {
 public:
-    VAttribute(VNode* parent,int index);
-    VAttribute(VNode *parent,VAttributeType* type,QStringList data,int indexInType=-1);
+    VAttribute(VNode *parent,VAttributeType* type,int indexInType);
+    ~VAttribute();
 
+    VAttribute* clone();
     VServer* root() const;
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
-    VAttributeType* type() const {return type_;}
-    QStringList data() const {return data_;}
+    VAttributeType* type() const;
+    QStringList data() const;
     QString toolTip() const;
     QString name() const;
     std::string strName() const;
@@ -41,7 +46,7 @@ public:
     int id() const {return id_;}
     int absIndex(AttributeFilter *filter) const;
 
-    bool isValid(VNode* parent);
+    bool isValid(VNode* parent,QStringList);
     bool value(const std::string& key,std::string& val) const;
 
     static VAttribute* make(VNode* n,const std::string& type,const std::string& name);
@@ -55,14 +60,16 @@ public:
                          const std::string& action, const std::string& type,
                          const std::string& value);
 
+    static QString total();
+
 protected:
+    VAttribute(VNode *parent,int id);
+
     static int indexToId(VAttributeType* t,int idx);
     static VAttributeType* idToType(int id);
     static int idToTypeIndex(int id);
 
-    VAttributeType* type_;
-    QStringList data_;
-    int index_;
+    //VAttributeType* type_;
     int id_;
 };
 

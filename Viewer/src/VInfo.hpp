@@ -138,7 +138,7 @@ public:
     std::string path();
 
    static VInfo_ptr create(VAttribute*);
-   static VInfo_ptr create(VNode*,int);
+   //static VInfo_ptr create(VNode*,int);
 
 protected:
     VInfoAttribute(ServerHandler*,VNode*,VAttribute*);

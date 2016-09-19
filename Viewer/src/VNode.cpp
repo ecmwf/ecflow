@@ -32,7 +32,6 @@
 
 #define _UI_VNODE_DEBUG
 
-
 class VNodeTriggerData
 {
 public:
@@ -44,16 +43,23 @@ public:
 
         for(size_t i=0; i < data_.size(); i++)
         {
-            VNode* triggered=s->nodeAt(data_[i].first);
-            VItem* trigger=node;
-            if(data_[i].second != -2)
+            VItemTmp_ptr triggered(VItemTmp::create(s->nodeAt(data_[i].first)));
+#if 0
+            VItemTmp_ptr trigger;
+            if(data_[i].second == -2)
             {
-                trigger=VAttribute::makeFromId(node,data_[i].second);
+                trigger=VItemTmp::creaate(node);
+            else
+            {
+                trigger=VItemTmp::create(VAttribute::makeFromId(node,data_[i].second));
             }
+
             tc->add(triggered,0,TriggerCollector::Normal,trigger);
+#endif
+            VItemTmp_ptr nullItem;
+            tc->add(triggered,nullItem,TriggerCollector::Normal);
         }
     }
-
 
     void add(VItem* n)
     {
@@ -770,32 +776,38 @@ void VNode::triggerExpr(std::string& trigger, std::string& complete) const
 {
     if(node_)
     {
-        QList<VAttribute*> v;
-        VAttributeType::getSearchData("trigger",this,v);
-        Q_FOREACH(VAttribute* a,v)
+        QList<VItemTmp_ptr> v;
+        VAttributeType::items("trigger",this,v);
+        Q_FOREACH(VItemTmp_ptr aItem,v)
         {
+            VAttribute* a=aItem->attribute();
+            assert(a);
             std::string t;
             a->value("trigger_type",t);
             if(t=="0")
                 a->value("trigger_expression",trigger);
             else if(t=="1")
                 a->value("trigger_expression",complete);
-        }
-        qDeleteAll(v);
+        }       
     }
 }
 
 //Collect the information about all the triggers triggering this node
-void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
+void VNode::triggers(TriggerCollector* tlc)
 {
+    VItemTmp_ptr nullItem;
+
+    qDebug() << "--->" << VAttribute::total();
+    QString NUM=VAttribute::total();
+
     //Check the node itself
     //if(tlr.self())
     {
         //find nodes, event, meters and variables triggering this node
         if(node_ && !node_->isSuite())
         {
-            std::set<VItem*> theSet;
-            AstCollateVNodesVisitor astVisitor(theSet);
+            std::vector<VItemTmp_ptr> theVec;
+            AstCollateVNodesVisitor astVisitor(theVec);
 
             //Collect the nodes from ast
             if(node_->completeAst())
@@ -805,52 +817,55 @@ void VNode::triggers(TriggerCollector* tlc)  //TriggerList& tlr)
                 node_->triggerAst()->accept(astVisitor);
 
             //Add the found items to the collector
-            for(std::set<VItem*>::iterator it = theSet.begin(); it != theSet.end(); ++it)
+            //for(std::set<VItem*>::iterator it = theSet.begin(); it != theSet.end(); ++it)
+            for(std::vector<VItemTmp_ptr>::iterator it = theVec.begin(); it != theVec.end(); ++it)
             {
 #ifdef _UI_VNODE_DEBUG
                 //if((*it)->parent() && (*it)->parent()->absNodePath() == "/e_41r2_peter/main")
                 //    qDebug() << "trigger ast:" << (*it)->name() << *it;
 #endif
-                tlc->add(*it,NULL, TriggerCollector::Normal,this);
-                //tlr.next_node( *(*sit), 0, TriggerList::normal, *sit);
+                tlc->add(*it,nullItem, TriggerCollector::Normal);
             }
         }
 
         //Check other attributes
 
         //Limiters
-        QList<VAttribute*> limiterLst;
-        VAttributeType::getSearchData("limiter",this,limiterLst);
-        Q_FOREACH(VAttribute* a, limiterLst)
+        QList<VItemTmp_ptr> limiterLst;
+        VAttributeType::items("limiter",this,limiterLst);
+        Q_FOREACH(VItemTmp_ptr aItem, limiterLst)
         {
+            VAttribute* a=aItem->attribute();
+            assert(a);
             std::string v;
             if(a->value("limiter_path",v))
             {
-                if(VItem *n = findLimit(v, a->strName()))
+                if(VItemTmp_ptr n = findLimit(v, a->strName()))
                 {
 #ifdef _UI_VNODE_DEBUG
                     //qDebug() << "trigger limit:" << n->name();
-#endif
-                    tlc->add(n,NULL, TriggerCollector::Normal,NULL);
+#endif                   
+                    tlc->add(n,nullItem, TriggerCollector::Normal);
                 }
             }
         }
 
         //Date
-        QList<VAttribute*> dateLst;
-        VAttributeType::getSearchData("date",this,dateLst);
-        Q_FOREACH(VAttribute* a, dateLst)
-        {
-            tlc->add(a,NULL,TriggerCollector::Normal,NULL);
+        QList<VItemTmp_ptr> dateLst;
+        VAttributeType::items("date",this,dateLst);
+        Q_FOREACH(VItemTmp_ptr a, dateLst)
+        {            
+            tlc->add(a,nullItem,TriggerCollector::Normal);
         }
 
         //Time
-        QList<VAttribute*> timeLst;
-        VAttributeType::getSearchData("time",this,timeLst);
-        Q_FOREACH(VAttribute* a, timeLst)
+        QList<VItemTmp_ptr> timeLst;
+        VAttributeType::items("time",this,timeLst);
+        Q_FOREACH(VItemTmp_ptr a, timeLst)
         {
-            tlc->add(a,NULL,TriggerCollector::Normal,NULL);
+             tlc->add(a,nullItem,TriggerCollector::Normal);
         }
+
     }
 
     if(tlc->scanParents())
@@ -906,7 +921,7 @@ void VNode::addTriggeredData(VItem* n)
 void VNode::addTriggeredData(VItem* triggered,VItem* trigger)
 {
     if(!data_)
-        data_=new VNodeTriggerData;
+       data_=new VNodeTriggerData;
 
     assert(trigger->parent() == this);
     data_->add(triggered,trigger);
@@ -917,9 +932,11 @@ void VNode::triggered(TriggerCollector* tlc,TriggeredScanner* scanner)
 {
     if(scanner && !root()->triggeredScanned())
     {
+        qDebug() << "before" << VAttribute::total();
         scanner->start(root());
         //scanForTriggered(server()->vRoot(),obs);
         root()->setTriggeredScanned(true);
+        qDebug() << "after" << VAttribute::total();
     }
 
     //Get the nodes directly triggered by this node
@@ -953,9 +970,10 @@ void VNode::triggeredByChildren(VNode *n,VNode* p,TriggerCollector* tlc)
     }
 }
 
-VItem* VNode::findLimit(const std::string& path, const std::string& name)
+VItemTmp_ptr VNode::findLimit(const std::string& path, const std::string& name)
 {
    // if (!strncmp("/", path.c_str(), 1))
+   VItemTmp_ptr nullItem;
 
 #if 0
    if(!path.empty() && path[0] == '/')
@@ -969,19 +987,24 @@ VItem* VNode::findLimit(const std::string& path, const std::string& name)
     {
         n=server()->vRoot()->find(path);
         if(!n)
-            return NULL;
+            return nullItem;
 
         //if(n && n != this)
         //    return n->findLimit(path,name);
     }
 
     //Find the matching limit in the node
-    QList<VAttribute*> limit;
-    VAttributeType::getSearchData("limit",n,limit);
-    Q_FOREACH(VAttribute* a, limit)
+    QList<VItemTmp_ptr> limit;
+    VAttributeType::items("limit",n,limit);
+    Q_FOREACH(VItemTmp_ptr aItem, limit)
     {
-       if(a->strName() == name)
-           return a;
+       assert(aItem);
+       assert(aItem->item());
+       assert(aItem->item()->isAttribute());
+       if(aItem->item()->strName() == name)
+       {
+           return aItem;
+       }
     }
 
     //Find the matching limit in the ancestors
@@ -997,7 +1020,7 @@ VItem* VNode::findLimit(const std::string& path, const std::string& name)
         }
     }
 
-    return NULL;
+    return nullItem;
 
    //return &dummy_node::get(path + ":" + name);
 }

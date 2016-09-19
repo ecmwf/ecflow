@@ -247,9 +247,12 @@ void InfoPanelItem::setDetached(bool b)
 
 void InfoPanelItem::linkSelected(const std::string& path)
 {
-    VInfo_ptr info=VInfo::createFromPath(info_->server(),path);
-    assert(owner_);
-    owner_->linkSelected(info);
+    if(!suspended_ && !detached_)
+    {
+        VInfo_ptr info=VInfo::createFromPath(info_->server(),path);
+        assert(owner_);
+        owner_->linkSelected(info);
+    }
 }
 
 //From NodeObserver

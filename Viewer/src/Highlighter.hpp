@@ -18,7 +18,8 @@ class Highlighter : public QSyntaxHighlighter
 {
 public:
 	Highlighter(QTextDocument *parent,QString id);
-	static void init(const std::string& parFile);
+    static void init(const std::string& parFile);
+    void asHtml(QString& html);
 
 protected:
 	void highlightBlock(const QString &text);

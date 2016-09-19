@@ -40,6 +40,8 @@ AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : 
     Q_ASSERT(info_ && info_->isAttribute() && info_->attribute());
     messageLabel_->hide();
     
+    attrData_=info_->attribute()->data();
+
     QString wt="Edit " + type;
     wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
     setWindowTitle(wt);
@@ -228,7 +230,7 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
 #endif
             VAttribute* a=info_->attribute();
             Q_ASSERT(a);
-            if(!a->isValid(info_->node()))
+            if(!a->isValid(info_->node(),attrData_))
             {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
                 UserMessage::debug("   attribute does not exist");

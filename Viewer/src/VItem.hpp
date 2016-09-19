@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <QString>
 
+
 class ServerHandler;
 class VNode;
 class VServer;
@@ -28,6 +29,7 @@ class VItem
 {
 public:
     VItem(VNode* parent) : parent_(parent) {}
+    virtual ~VItem() {}
 
     VNode* parent() const {return parent_;}
     //virtual ServerHandler* server() const;
@@ -52,6 +54,7 @@ public:
 protected:
     VNode* parent_;
 };
+
 
 #if 0
 class VItemVisitor

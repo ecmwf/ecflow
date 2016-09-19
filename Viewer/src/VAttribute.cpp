@@ -17,20 +17,38 @@
 
 //#define  _UI_VATTRIBUTE_DEBUG
 
-VAttribute::VAttribute(VNode* parent,int index) : VItem(parent),
-    type_(0), index_(index), id_(-1)
+static int attrNum=0;
+
+VAttribute::VAttribute(VNode *parent,VAttributeType* type,int indexInType) :
+    VItem(parent)
 {
-    data_=parent_->getAttributeData(index_,type_) ;
+    assert(indexInType >=0);
+    assert(type);
+    id_=indexToId(type,indexInType);
+    attrNum++;
+}        
+
+VAttribute::VAttribute(VNode *parent,int id) :
+    VItem(parent),
+    id_(id)
+{
+    attrNum++;
 }
 
-VAttribute::VAttribute(VNode *parent,VAttributeType* type,QStringList data,int indexInType) :
-    VItem(parent),
-    type_(type),
-    data_(data),
-    index_(-1)
+VAttribute::~VAttribute()
 {
-    id_=indexToId(type_,indexInType);
-}        
+    attrNum--;
+}
+
+VAttribute* VAttribute::clone()
+{
+    return new VAttribute(parent_,id_);
+}
+
+QString VAttribute::total()
+{
+    return QString::number(attrNum);
+}
 
 VServer* VAttribute::root() const
 {
@@ -39,13 +57,20 @@ VServer* VAttribute::root() const
 
 QString VAttribute::toolTip() const
 {
-    return (type_)?(type_->toolTip(data_)):QString();
+    VAttributeType* t=type();
+    return (t)?(t->toolTip(data())):QString();
+}
+
+VAttributeType* VAttribute::type() const
+{
+    return idToType(id_);
 }
 
 const std::string& VAttribute::typeName() const
 {
+    VAttributeType* t=type();
     static std::string e;
-    return (type_)?(type_->strName()):e;
+    return (t)?(t->strName()):e;
 }
 
 std::string VAttribute::fullPath() const
@@ -55,11 +80,24 @@ std::string VAttribute::fullPath() const
 
 bool VAttribute::sameContents(VItem* item) const
 {
+    if(!item)
+        return false;
+
     if(VAttribute *a=item->isAttribute())
-    {    return a->parent() == parent() && a->type_ == type_ &&
-           a->index_ == index_ && a->strName() == strName();
+    {    return a->parent() == parent() && a->id_ == id_;
     }
     return false;
+}
+
+QStringList VAttribute::data() const
+{
+    QStringList d;
+    if(id_ ==-1) return d;
+    VAttributeType *t=idToType(id_);
+    assert(t);
+    int idx=idToTypeIndex(id_);
+    t->itemData(parent(),idx,d);
+    return d;
 }
 
 int VAttribute::absIndex(AttributeFilter *filter) const
@@ -101,8 +139,9 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
 
 QString VAttribute::name() const
 {
-    if(data_.count() >= 2)
-       return data_[1];
+    QStringList d=data();
+    if(d.count() >= 2)
+       return d[1];
 
     return QString();
 }
@@ -112,32 +151,33 @@ std::string VAttribute::strName() const
     return name().toStdString();
 }
 
-bool VAttribute::isValid(VNode* parent)
+bool VAttribute::isValid(VNode* parent,QStringList data)
 {
-    if(type_)
+    if(VAttributeType* t=type())
     {
-        return type_->exists(parent,data_);
+        return t->exists(parent,data);
     }
-
     return false;
 }
 
 bool VAttribute::value(const std::string& key,std::string& val) const
 {
-    if(data_.isEmpty() || !type_)
+    QStringList d=data();
+    VAttributeType* t=type();
+    if(d.isEmpty() || !t)
         return false;
 
-    int idx=type_->searchKeyToDataIndex(key);
+    int idx=t->searchKeyToDataIndex(key);
 
 #ifdef _UI_VATTRIBUTE_DEBUG
     qDebug() << QString::fromStdString(key) << QString::fromStdString(val);
-    qDebug() << "  data=" << data_;
+    qDebug() << "  data=" << d;
     qDebug() << "  idx=" << idx;
 #endif
 
     if(idx != -1)
     {
-        val=data_[idx].toStdString();
+        val=d[idx].toStdString();
         return true;
     }
     return false;
@@ -147,7 +187,8 @@ VAttribute* VAttribute::make(VNode* n,const std::string& type,const std::string&
 {
     VAttributeType *t=VAttributeType::find(type);
     assert(t);
-    return t->getSearchData(n,name);
+    VItemTmp_ptr item=t->item(n,name);
+    return (item)?item->attribute()->clone():NULL;
 }
 
 VAttribute* VAttribute::makeFromId(VNode* n,int id)
@@ -155,8 +196,10 @@ VAttribute* VAttribute::makeFromId(VNode* n,int id)
     if(id ==-1) return NULL;
     VAttributeType *t=idToType(id);
     assert(t);
+    QStringList d;
     int idx=idToTypeIndex(id);
-    return t->getSearchData(n,idx);
+    return NULL;
+    //return t->getSearchData(n,idx,d);
 }
 
 int VAttribute::indexToId(VAttributeType* t,int idx)

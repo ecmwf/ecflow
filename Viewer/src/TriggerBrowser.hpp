@@ -18,7 +18,10 @@
 
 #include "VInfo.hpp"
 
+class QPlainTextEdit;
+class Highlighter;
 class TriggerItemWidget;
+class TriggerListCollector;
 
 class TriggerBrowser : public QWidget, protected Ui::TriggerBrowser
 {
@@ -42,9 +45,12 @@ private:
     void loadTriggeredTab(bool forceLoad=false);
     bool isTabLoaded(TabIndex idx) const;
     int tabIndexToInt(TabIndex idx) const;
+    QString makeHtml(TriggerListCollector *tc,QString,QString) const;
 
     TriggerItemWidget* owner_;
     std::set<TabIndex> loadedTabs_;
+    QPlainTextEdit* exprTe_;
+    Highlighter* exprHighlight_;
 };
 
 #endif // TRIGGERBROWSER_HPP

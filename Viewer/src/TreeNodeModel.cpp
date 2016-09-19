@@ -869,12 +869,26 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		//It is an attribute
 		else
 		{
+            VNode *n=parentNode->vnode();
+            Q_ASSERT(n);
+            VAttributeType* type=NULL;
+            int indexInType=-1;
+            if(VAttributeType::findByAbsIndex(n,index.row(),atts_,type,indexInType))
+            {
+                Q_ASSERT(indexInType >= 0);
+                VInfo_ptr p=VInfoAttribute::create(new VAttribute(n,type,indexInType));
+                qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
+                return p;
+            }
+
+#if 0
             int realAttrRow=parentNode->attrRow(index.row(),atts_);
             Q_ASSERT(realAttrRow >= 0);
 
             VInfo_ptr p=VInfoAttribute::create(parentNode->vnode(),realAttrRow);
             qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
             return p;
+#endif
 		}
 	}
 

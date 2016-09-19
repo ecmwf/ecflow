@@ -16,18 +16,11 @@
 
 #define _UI_TRIGGERCOLLECTOR_DEBUG
 
-class TriggerListItem
+TriggerListItem::~TriggerListItem()
 {
-public:
-    TriggerListItem(VItem* t,VItem* dep,TriggerCollector::Mode mode) :
-        t_(t), dep_(dep), mode_(mode) {}
-
-    ~TriggerListItem() {if(t_->isAttribute()) delete t_;}
-
-    VItem* t_; //trigger or triggered
-    VItem* dep_;
-    TriggerCollector::Mode mode_;
-};
+    //if(t_ && t_->isAttribute()) delete t_;
+    //if(dep_ && dep_->isAttribute()) delete dep_;
+}
 
 TriggerListCollector::~TriggerListCollector()
 {
@@ -37,17 +30,19 @@ TriggerListCollector::~TriggerListCollector()
     }
 }
 
-
-void TriggerListCollector::add(VItem* t, VItem* dep,Mode mode,VItem* t1)
+bool TriggerListCollector::add(VItemTmp_ptr t, VItemTmp_ptr dep,Mode mode)
 {
     TriggerListItem *item=new TriggerListItem(t,dep,mode) ;
     items_.push_back(item);
+    return true;
 
+#if 0
     if(dep)
     {
         UserMessage::debug(" dep=" + dep->typeName() + " " +  dep->strName());
         UserMessage::debug("    =" + item->dep_->typeName() + " " +  item->dep_->strName());
     }
+#endif
 
 
 #if 0
@@ -78,149 +73,41 @@ void TriggerListCollector::add(VItem* t, VItem* dep,Mode mode,VItem* t1)
 #endif
 }
 
-QString TriggerListCollector::text()
+TriggerChildCollector::~TriggerChildCollector()
 {
-    QString s="<table width=\'100%\'>";
-    //s+="<tr><th width=\'100\'>Type</th><th>Path</th></tr>";
-
-    bool firstDirectTrigger=true;
-
-    for(unsigned int i=0; i < items_.size(); i++)
-    {
-        VItem *t=items_[i]->t_;
-        VItem *d=items_[i]->dep_;
-        if(!t)
-            continue;
-
-        if(!d)
-        {
-            if(firstDirectTrigger)
-            {
-                s+="<tr><td class=\'main\' colspan=\'2\'>Triggers directly triggering the selected node</td></tr>";
-                firstDirectTrigger=false;
-            }
-
-            QString type=QString::fromStdString(t->typeName());
-            QString path=QString::fromStdString(t->fullPath());
-            QString anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
-
-            s+="<tr>";
-            s+="<td width=\'100\'>" + type + "</td>";
-            //s+="<td>" + t->name() +"</td>";
-            //s+="<td><a style=\'text-decoration:none;\' href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
-            s+="<td><a href=\'" + anchor  + "\'>" + path +"</a>";
-        }
-    }
-
-    QString prevH;
-
-    for(unsigned int i=0; i < items_.size(); i++)
-    {
-        VItem *t=items_[i]->t_;
-        VItem *d=items_[i]->dep_;
-        if(!t || !d)
-            continue;
-
-        QString h;
-
-        if(items_[i]->mode_== Parent)
-           h+="Through parent";
-        else
-           h+="Through child";
-
-        QString type=QString::fromStdString(d->typeName());
-        QString path=QString::fromStdString(d->fullPath());
-        QString anchor=QString::fromStdString(VItemPathParser::encode(d->fullPath(),d->typeName()));
-
-
-        h+="  " + type;
-        h+=" <a class=\'chp\' href=\'" + anchor + "\'>" + path +"</a>";
-
-        if(h != prevH)
-        {
-            s+="<tr><td class=\'child\' colspan=\'2\'>" + h + "</td></tr>";
-            prevH=h;
-        }
-
-        type=QString::fromStdString(t->typeName());
-        path=QString::fromStdString(t->fullPath());
-        anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
-
-        s+="<tr>";
-        s+="<td width=\'100\'>" + type + "</td>";
-        s+="<td><a href=\'" +  anchor + "\'>" + path +"</a>";
-     }
-
-    return s;
-
-#if 0
-    QString s="<table>";
-    s+="<tr><th colspan=\'2\'>" + QString::fromStdString(title_) + "</th></tr>";
-    for(unsigned int i=0; i < items_.size(); i++)
-    {
-
-         VItem *t=items_[i]->t_;
-
-         if(!t)
-             continue;
-
-         s+="<tr>";
-         s+="<td>" + QString::fromStdString(t->typeName()) + "</td>";
-         //s+="<td>" + t->name() +"</td>";
-         //s+="<td><a style=\'text-decoration:none;\' href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
-         s+="<td><a href=\'aa\'>" + QString::fromStdString(t->fullPath()) +"</a>";
-
-         VItem *d=items_[i]->dep_;
-         if(d)
-         {
-
-             UserMessage::debug(" dep=" + d->typeName() + " " +  d->strName());
-
-            // s+="<td>";
-             //s+="<td>" + QString::fromStdString(d->typeName());
-             //s+=" " + d->name();
-
-             if(items_[i]->mode_== Parent)
-                s+="  through parent";
-             else
-                s+="  through child";
-
-             s+="  " + QString::fromStdString(d->typeName());
-             s+=" <a href=\'aa\'>" + QString::fromStdString(d->fullPath()) +"</a></td>";
-         }
-
-         s+="</tr>";
-    }
-
-    s+="</table>";
-    return s;
-#endif
-
+    //if(node_ && node_->isAttribute()) delete node_;
+    //if(child_ && child_->isAttribute()) delete child_;
 }
 
-
-void TriggerChildCollector::add(VItem* t, VItem*,Mode mode,VItem *t1)
+bool TriggerChildCollector::add(VItemTmp_ptr t, VItemTmp_ptr,Mode)
 {
-    if(!t->isAncestor(node_))
+    if(!t->item()->isAncestor(node_->item()))
     {
         // child is a kid of n whose trigger_panel is outside its subtree
-        collector_->add(t,child_,TriggerCollector::Child,t1);
+        return collector_->add(t,child_,TriggerCollector::Child);
     }
+    return false;
 }
 
-void TriggerParentCollector::add(VItem* t, VItem*,Mode mode,VItem *t1)
+TriggerParentCollector::~TriggerParentCollector()
 {
-    collector_->add(t,parent_,TriggerCollector::Parent,t1);
+    //if(parent_ && parent_->isAttribute()) delete parent_;
 }
 
-
-void TriggeredCollector::add(VItem* trigger, VItem*,Mode mode,VItem*)
+bool TriggerParentCollector::add(VItemTmp_ptr t, VItemTmp_ptr,Mode)
 {
-    if(trigger->isNode())
-        trigger->isNode()->addTriggeredData(node_);
+    return collector_->add(t,parent_,TriggerCollector::Parent);
+}
+
+bool TriggeredCollector::add(VItemTmp_ptr trigger, VItemTmp_ptr,Mode)
+{
+    if(VNode *n=trigger->item()->isNode())
+    {
+        n->addTriggeredData(node_->item());
+    }
+    return false;
 
     //else if(trigger->isAttribute())
     //    trigger->parent()->addTriggeredData(node_,trigger);
-
 }
 

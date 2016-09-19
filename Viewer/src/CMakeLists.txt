@@ -160,6 +160,7 @@ set(viewer_srcs
     VFileInfo.cpp
     VItem.cpp
     VItemPathParser.cpp
+    VItemTmp.cpp
     VModelData.cpp
     VNode.cpp
     VNodeList.cpp

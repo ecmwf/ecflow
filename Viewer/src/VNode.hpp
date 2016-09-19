@@ -20,9 +20,10 @@
 #include "LogServer.hpp"
 #include "Node.hpp"
 
-class AttributeFilter;
 #include "VItem.hpp"
+#include "VItemTmp.hpp"
 
+class AttributeFilter;
 class IconFilter;
 class ServerHandler;
 class TriggerCollector;
@@ -214,7 +215,7 @@ protected:
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
-    VItem* findLimit(const std::string& path, const std::string& name);
+    VItemTmp_ptr findLimit(const std::string& path, const std::string& name);
     static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
     //static void scanForTriggered(VNode *n);
     static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);

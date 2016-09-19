@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 
+#include "VItemTmp.hpp"
 #include "VParam.hpp"
 
 class AttributeFilter;
@@ -36,7 +37,8 @@ public:
     static void init(const std::string& parFile);
     static int getLineNum(const VNode *vnode,int row,AttributeFilter *filter=0);
     static int getRow(const VNode *vnode,int row,AttributeFilter *filter=0);
-     
+    static bool findByAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter,VAttributeType* &type,int& indexInType);
+
     static VAttributeType* find(const std::string& name);
     static VAttributeType* find(int id);
     static const std::vector<VAttributeType*>& types() {return types_;}
@@ -51,10 +53,10 @@ public:
     virtual int indexOf(const VNode* vnode,QStringList data) const=0;
     bool exists(const VNode* vnode,QStringList data) { return (indexOf(vnode,data) != -1); }
 
-    virtual void getSearchData(const VNode*,QList<VAttribute*>&)=0;
-    virtual VAttribute* getSearchData(const VNode*,const std::string&)=0;
-    virtual VAttribute* getSearchData(const VNode*,int index)=0;
-    static void getSearchData(const std::string& type,const VNode*,QList<VAttribute*>&);
+    void items(const VNode* vnode,QList<VItemTmp_ptr>& lst);
+    static void items(const std::string& type,const VNode* vnode,QList<VItemTmp_ptr>& lst);
+    VItemTmp_ptr item(const VNode*,const std::string&);
+    virtual bool itemData(const VNode*,int index,QStringList&)=0;
 
     int id() const {return id_;}
     int keyToDataIndex(const std::string& key) const;
@@ -62,6 +64,7 @@ public:
     QStringList searchKeys() const;
 
 protected:
+    virtual void itemNames(const VNode* node,std::vector<std::string>&)=0;
     virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
     virtual int num(const VNode* vnode)=0;
     virtual int lineNum(const VNode* vnode,int row) {return 1;}
@@ -72,7 +75,7 @@ protected:
     int id_;
 
 private:
-    static std::map<std::string,VAttributeType*> items_;
+    static std::map<std::string,VAttributeType*> typesMap_;
     static std::vector<VAttributeType*> types_;
 };
 
