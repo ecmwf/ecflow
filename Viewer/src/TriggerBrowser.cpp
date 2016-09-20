@@ -12,9 +12,14 @@
 #include <QDebug>
 #include <QPlainTextEdit>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#endif
+
 #include "Highlighter.hpp"
 #include "TriggerCollector.hpp"
 #include "TriggerItemWidget.hpp"
+#include "VAttribute.hpp"
 #include "VItemPathParser.hpp"
 
 TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
@@ -27,6 +32,8 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
     exprTe_->hide();
     exprHighlight_=new Highlighter(exprTe_->document(),"trigger");
 
+    triggerCollector_=new TriggerListCollector(false);
+
     Q_ASSERT(tab_->count() == 2);
     tab_->setCurrentIndex(tabIndexToInt(TriggerTabIndex));
 
@@ -35,6 +42,11 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
 
     connect(triggeredBrowser_,SIGNAL(anchorClicked(const QUrl&)),
             this,SLOT(anchorClicked(const QUrl&)));
+}
+
+TriggerBrowser::~TriggerBrowser()
+{
+    delete triggerCollector_;
 }
 
 void TriggerBrowser::setOwner(TriggerItemWidget* owner)
@@ -98,11 +110,18 @@ void TriggerBrowser::loadTriggerTab(bool forceLoad)
                  tb + "</p></td></tr>";
     }
 
-    TriggerListCollector c(0,"",owner_->dependency());
-    n->triggers(&c);
-    s+=makeHtml(&c,"Triggers directly triggering the selected node","Triggers");
+    triggerCollector_->setDependency(owner_->dependency());
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+    n->triggers(triggerCollector_);
+    s+=makeHtml(triggerCollector_,"Triggers directly triggering the selected node","Triggers");
     s+="</table>";
     triggerBrowser_->setHtml(s);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::restoreOverrideCursor();
+#endif
 
     loadedTabs_.insert(TriggerTabIndex);
 }
@@ -115,7 +134,7 @@ void TriggerBrowser::loadTriggeredTab(bool forceLoad)
     VNode *n=owner_->info()->node();
     Q_ASSERT(n);
 
-    TriggerListCollector c(0,"",owner_->dependency());
+    TriggerListCollector c(owner_->dependency());
     n->triggered(&c,owner_->triggeredScanner());
 
     QString s="<table width=\'100%\'>";
@@ -147,9 +166,33 @@ int TriggerBrowser::tabIndexToInt(TabIndex idx) const
     return static_cast<int>(idx);
 }
 
+//Updates the trigger list if the right type of change happened
+void TriggerBrowser::nodeChanged(const VNode* n)
+{
+    if(!isTabLoaded(TriggerTabIndex))
+        return;
+
+    const std::vector<TriggerListItem*>& items=triggerCollector_->items();
+    for(unsigned int i=0; i < items.size(); i++)
+    {
+        if(VItem *t=items[i]->item())
+        {
+            if(VAttribute* a=t->isAttribute())
+            {
+                if(a->parent() == n)
+                {
+                    loadTriggerTab(true);
+                    return;
+                }
+            }
+        }
+    }
+}
+
 void TriggerBrowser::anchorClicked(const QUrl& link)
 {
     owner_->linkSelected(link.url().toStdString());
+    tab_->setCurrentIndex(TriggerTabIndex);
 }
 
 QString TriggerBrowser::makeHtml(TriggerListCollector *tc,QString directTitle,QString modeText) const

@@ -60,7 +60,7 @@ public:
                          const std::string& action, const std::string& type,
                          const std::string& value);
 
-    static QString total();
+    static unsigned int totalNum();
 
 protected:
     VAttribute(VNode *parent,int id);

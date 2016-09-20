@@ -48,10 +48,8 @@ void TriggeredScanner::scan(VNode *n)
 void TriggeredScanner::updateProgress()
 {
     current_++;
-
     if(current_ > 0 && current_ % batchSize_ == 0)
-    {
-        qDebug() << "progress" << progress();
+    {      
         Q_EMIT scanProgressed(progress());
     }
 }

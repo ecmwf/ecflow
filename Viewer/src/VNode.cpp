@@ -32,6 +32,37 @@
 
 #define _UI_VNODE_DEBUG
 
+//For a given node this class stores all the nodes that this node itself triggers.
+//For memory efficiency we only store the index of the nodes not the pointers themselves.
+class VNodeTriggerData
+{
+public:
+    std::vector<int> data_;
+
+    void get(VNode* node ,TriggerCollector* tc)
+    {
+        VServer* s=node->root();
+        for(size_t i=0; i < data_.size(); i++)
+        {
+            VItemTmp_ptr triggered(VItemTmp::create(s->nodeAt(data_[i])));
+            VItemTmp_ptr nullItem;
+            tc->add(triggered,nullItem,TriggerCollector::Normal);
+        }
+    }
+    void add(VItem* n)
+    {
+        assert(n);
+        VNode* node=n->isNode();
+        assert(node);
+        data_.push_back(node->index());
+    }
+
+    void add(VItem* /*triggered*/,VItem* /*trigger*/)
+    {
+    }
+};
+
+#if 0
 class VNodeTriggerData
 {
 public:
@@ -44,7 +75,6 @@ public:
         for(size_t i=0; i < data_.size(); i++)
         {
             VItemTmp_ptr triggered(VItemTmp::create(s->nodeAt(data_[i].first)));
-#if 0
             VItemTmp_ptr trigger;
             if(data_[i].second == -2)
             {
@@ -55,7 +85,6 @@ public:
             }
 
             tc->add(triggered,0,TriggerCollector::Normal,trigger);
-#endif
             VItemTmp_ptr nullItem;
             tc->add(triggered,nullItem,TriggerCollector::Normal);
         }
@@ -81,6 +110,7 @@ public:
             data_.push_back(std::make_pair(node->index(),attr->id()));
     }
 };
+#endif
 
 //=================================================
 // VNode
@@ -796,10 +826,6 @@ void VNode::triggerExpr(std::string& trigger, std::string& complete) const
 void VNode::triggers(TriggerCollector* tlc)
 {
     VItemTmp_ptr nullItem;
-
-    qDebug() << "--->" << VAttribute::total();
-    QString NUM=VAttribute::total();
-
     //Check the node itself
     //if(tlr.self())
     {
@@ -817,7 +843,6 @@ void VNode::triggers(TriggerCollector* tlc)
                 node_->triggerAst()->accept(astVisitor);
 
             //Add the found items to the collector
-            //for(std::set<VItem*>::iterator it = theSet.begin(); it != theSet.end(); ++it)
             for(std::vector<VItemTmp_ptr>::iterator it = theVec.begin(); it != theVec.end(); ++it)
             {
 #ifdef _UI_VNODE_DEBUG
@@ -896,19 +921,6 @@ void VNode::triggersInChildren(VNode *n,VNode* p,TriggerCollector* tlc)
   }
 }
 
-#if 0
-//Scan the the whole tree to find for each node all the nodes it or its
-//attributes trigger.
-void VNode::scanForTriggered(VNode *n,TriggerScanObserver* o)
-{
-    TriggeredCollector tc(n);
-    n->triggers(&tc);
-    o->oneScanned();
-    for(int i=0; i < n->children_.size(); i++)
-        scanForTriggered(n->children_[i]);
-}
-#endif
-
 //These are called during the scan for triggered nodes
 void VNode::addTriggeredData(VItem* n)
 {
@@ -932,11 +944,10 @@ void VNode::triggered(TriggerCollector* tlc,TriggeredScanner* scanner)
 {
     if(scanner && !root()->triggeredScanned())
     {
-        qDebug() << "before" << VAttribute::total();
+        unsigned int aNum=VAttribute::totalNum();
         scanner->start(root());
-        //scanForTriggered(server()->vRoot(),obs);
         root()->setTriggeredScanned(true);
-        qDebug() << "after" << VAttribute::total();
+        assert(aNum == VAttribute::totalNum());
     }
 
     //Get the nodes directly triggered by this node

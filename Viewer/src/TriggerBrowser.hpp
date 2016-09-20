@@ -29,10 +29,12 @@ Q_OBJECT
 
 public:
     explicit TriggerBrowser(QWidget *parent=0);
+    ~TriggerBrowser();
 
     void setOwner(TriggerItemWidget*);
     void clear();
     void load();
+    void nodeChanged(const VNode*);
 
 protected Q_SLOTS:
     void on_tab__currentChanged(int idx);
@@ -51,6 +53,7 @@ private:
     std::set<TabIndex> loadedTabs_;
     QPlainTextEdit* exprTe_;
     Highlighter* exprHighlight_;
+    TriggerListCollector* triggerCollector_;
 };
 
 #endif // TRIGGERBROWSER_HPP

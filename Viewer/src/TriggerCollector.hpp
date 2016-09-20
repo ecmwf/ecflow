@@ -32,7 +32,6 @@ public:
                 Hierarchy = 3    // Through child
     };
 
-    //virtual bool add(VItem*, VItem*,Mode,VItem*) = 0;
     virtual bool add(VItemTmp_ptr, VItemTmp_ptr,Mode) = 0;
     virtual bool scanParents() { return false; }
     virtual bool scanKids()    { return false; }
@@ -46,19 +45,19 @@ private:
 class TriggerListCollector : public TriggerCollector
 {
 public:
-    TriggerListCollector(FILE* f,const std::string& title,bool extended) :
-        file_(f), title_(title), extended_(extended) {}
+    TriggerListCollector(bool extended) :
+        extended_(extended) {}
 
     ~TriggerListCollector();
     bool add(VItemTmp_ptr, VItemTmp_ptr,Mode);
     bool scanParents() { return extended_; }
     bool scanKids() { return extended_; }
+    void setDependency(bool);
+    void clear();
 
     const std::vector<TriggerListItem*>& items() const {return items_;}
 
-protected:   
-    FILE* file_;
-    std::string title_;
+protected:
     bool extended_;
     std::vector<TriggerListItem*> items_;
 };
@@ -69,7 +68,6 @@ public:
     TriggerChildCollector(VItem *n,VItem* child,TriggerCollector* collector) :
         node_(VItemTmp::create(n)), child_(VItemTmp::create(child)), collector_(collector) {}
 
-    ~TriggerChildCollector();
     bool add(VItemTmp_ptr, VItemTmp_ptr,Mode);
 
 private:
@@ -83,7 +81,6 @@ class TriggerParentCollector : public TriggerCollector
 public:
     TriggerParentCollector(VItem* parent,TriggerCollector* collector) :
         parent_(VItemTmp::create(parent)), collector_(collector) {}
-    ~TriggerParentCollector();
 
     bool add(VItemTmp_ptr, VItemTmp_ptr,Mode);
 
@@ -96,7 +93,7 @@ class TriggeredCollector : public TriggerListCollector
 {
 public:
     TriggeredCollector(VNode* n) :
-        TriggerListCollector(NULL,"",false), node_(VItemTmp::create(n)) {}
+        TriggerListCollector(false), node_(VItemTmp::create(n)) {}
     bool add(VItemTmp_ptr, VItemTmp_ptr,Mode);
 
 private:
@@ -108,8 +105,6 @@ class TriggerListItem
 public:
     TriggerListItem(VItemTmp_ptr t,VItemTmp_ptr dep,TriggerCollector::Mode mode) :
         t_(t), dep_(dep), mode_(mode) {}
-
-    ~TriggerListItem();
 
     VItem* item() const {return (t_)?t_->item():NULL;}
     VItem* dep()  const {return (dep_)?dep_->item():NULL;}

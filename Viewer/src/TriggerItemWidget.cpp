@@ -100,7 +100,7 @@ void TriggerItemWidget::checkActionState()
          return;
     }
 
-    dependTb_->setEnabled(false);
+    dependTb_->setEnabled(true);
 }
 
 void TriggerItemWidget::on_dependTb__toggled(bool)
@@ -128,7 +128,7 @@ void TriggerItemWidget::infoProgress(const std::string& text,int value)
 
 void TriggerItemWidget::scanStarted()
 {
-    messageLabel_->showInfo("Scanning tree for triggers ...");
+    messageLabel_->showInfo("Mapping trigger connections in the whole tree ...");
     messageLabel_->startProgress(100);
 }
 
@@ -146,16 +146,41 @@ void TriggerItemWidget::scanProgressed(int value)
 
 void TriggerItemWidget::writeSettings(VSettings* vs)
 {
+#if 0
     vs->beginGroup("triggers");
     vs->putAsBool("dependency",dependency());
     vs->endGroup();
+#endif
 }
 
 void TriggerItemWidget::readSettings(VSettings* vs)
 {
+#if 0
     vs->beginGroup("triggers");
     dependTb_->setChecked(vs->getAsBool("dependency",dependency()));
     vs->endGroup();
+#endif
+}
+
+//-------------------------
+// Update
+//-------------------------
+
+void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
+{
+    if(!info_ || !info_->isNode())
+        return;
+
+    //Changes in the nodes
+    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    {
+        if(*it == ecf::Aspect::ADD_REMOVE_ATTR || *it == ecf::Aspect::NODE_VARIABLE ||
+            *it == ecf::Aspect::EXPR_TRIGGER || *it == ecf::Aspect::EXPR_COMPLETE)
+        {
+            textBrowser_->nodeChanged(n);
+            return;
+        }
+    }
 }
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");

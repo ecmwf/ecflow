@@ -16,18 +16,9 @@
 
 #define _UI_TRIGGERCOLLECTOR_DEBUG
 
-TriggerListItem::~TriggerListItem()
-{
-    //if(t_ && t_->isAttribute()) delete t_;
-    //if(dep_ && dep_->isAttribute()) delete dep_;
-}
-
 TriggerListCollector::~TriggerListCollector()
 {
-    for(size_t i=0; i < items_.size(); i++)
-    {
-        delete items_[i];
-    }
+    clear();
 }
 
 bool TriggerListCollector::add(VItemTmp_ptr t, VItemTmp_ptr dep,Mode mode)
@@ -43,41 +34,23 @@ bool TriggerListCollector::add(VItemTmp_ptr t, VItemTmp_ptr dep,Mode mode)
         UserMessage::debug("    =" + item->dep_->typeName() + " " +  item->dep_->strName());
     }
 #endif
-
-
-#if 0
-    // Title
-    if(title_)
-    {
-            int n = fprintf(f_,"\n%s:\n",t_) - 2;
-            while(n--) fputc('-',f_);
-            fputc('\n',f_);
-            t_ = 0;
-    }
-
-    p_.observe(&n);
-    fprintf(f_,"%s {%s}",n.type_name(), n.full_name().c_str());
-    if(p) {
-        fprintf(f_," through ");
-        p_.observe(p);
-
-        switch(mode)
-        {
-            case trigger_lister::parent:  fprintf(f_,"parent "); break;
-            case trigger_lister::child:   fprintf(f_,"child ");  break;
-        }
-
-        fprintf(f_,"%s {%s}",p->type_name(),p->full_name().c_str());
-    }
-    fputc('\n',f_);
-#endif
 }
 
-TriggerChildCollector::~TriggerChildCollector()
+void TriggerListCollector::setDependency(bool b)
 {
-    //if(node_ && node_->isAttribute()) delete node_;
-    //if(child_ && child_->isAttribute()) delete child_;
+    extended_=b;
+    clear();
 }
+
+void TriggerListCollector::clear()
+{
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        delete items_[i];
+    }
+    items_.clear();
+}
+
 
 bool TriggerChildCollector::add(VItemTmp_ptr t, VItemTmp_ptr,Mode)
 {
@@ -87,11 +60,6 @@ bool TriggerChildCollector::add(VItemTmp_ptr t, VItemTmp_ptr,Mode)
         return collector_->add(t,child_,TriggerCollector::Child);
     }
     return false;
-}
-
-TriggerParentCollector::~TriggerParentCollector()
-{
-    //if(parent_ && parent_->isAttribute()) delete parent_;
 }
 
 bool TriggerParentCollector::add(VItemTmp_ptr t, VItemTmp_ptr,Mode)

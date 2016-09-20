@@ -17,7 +17,7 @@
 
 //#define  _UI_VATTRIBUTE_DEBUG
 
-static int attrNum=0;
+static unsigned int totalAttrNum=0;
 
 VAttribute::VAttribute(VNode *parent,VAttributeType* type,int indexInType) :
     VItem(parent)
@@ -25,19 +25,19 @@ VAttribute::VAttribute(VNode *parent,VAttributeType* type,int indexInType) :
     assert(indexInType >=0);
     assert(type);
     id_=indexToId(type,indexInType);
-    attrNum++;
+    totalAttrNum++;
 }        
 
 VAttribute::VAttribute(VNode *parent,int id) :
     VItem(parent),
     id_(id)
 {
-    attrNum++;
+    totalAttrNum++;
 }
 
 VAttribute::~VAttribute()
 {
-    attrNum--;
+    totalAttrNum--;
 }
 
 VAttribute* VAttribute::clone()
@@ -45,9 +45,9 @@ VAttribute* VAttribute::clone()
     return new VAttribute(parent_,id_);
 }
 
-QString VAttribute::total()
+unsigned int VAttribute::totalNum()
 {
-    return QString::number(attrNum);
+    return totalAttrNum;
 }
 
 VServer* VAttribute::root() const
