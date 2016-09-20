@@ -51,6 +51,23 @@ const std::string& Submittable::DUMMY_JOBS_PASSWORD()        { static const std:
 const std::string& Submittable::FREE_JOBS_PASSWORD()         { static const std::string FREE_JOBS_PASSWORD = "FREE"; return FREE_JOBS_PASSWORD;}
 const std::string& Submittable::DUMMY_PROCESS_OR_REMOTE_ID() { static const std::string DUMMY_PROCESS_OR_REMOTE_ID = "_RID_"; return DUMMY_PROCESS_OR_REMOTE_ID;}
 
+Submittable& Submittable::operator=(const Submittable& rhs)
+{
+   if (this != &rhs) {
+      Node::operator=(rhs);
+      jobsPassword_ = rhs.jobsPassword_;
+      process_or_remote_id_ = rhs.process_or_remote_id_;
+      abortedReason_ = rhs.abortedReason_;
+      tryNo_ = rhs.tryNo_;
+
+      delete sub_gen_variables_;
+      sub_gen_variables_ = NULL;
+
+      state_change_no_ = Ecf::incr_state_change_no();
+   }
+   return *this;
+}
+
 Submittable::~Submittable()
 {
    delete sub_gen_variables_;

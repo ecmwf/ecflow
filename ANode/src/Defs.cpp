@@ -85,6 +85,30 @@ Defs::Defs(const Defs& rhs) :
    // std::vector<AbstractObserver*> observers_;
 }
 
+Defs& Defs::operator=(const Defs& rhs)
+{
+   if (this != &rhs) {
+      Defs tmp(rhs);
+
+      std::swap(state_,tmp.state_);
+      std::swap(server_,tmp.server_);
+      std::swap(suiteVec_,tmp.suiteVec_);
+      std::swap(flag_,tmp.flag_);
+
+      // edit history is not copied
+      // externs not copied
+      // observers not copied
+
+      size_t vec_size = suiteVec_.size();
+      for(size_t i = 0; i < vec_size; i++) {
+         suiteVec_[i]->set_defs(this);
+      }
+
+      modify_change_no_ = Ecf::incr_modify_change_no();
+   }
+   return *this;
+}
+
 defs_ptr Defs::create()
 {
 	return boost::make_shared<Defs>();
@@ -946,9 +970,9 @@ bool Defs::replaceChild(const std::string& path,
 		}
 		// HAVE a FULL match in the server
 
-		// Copy over begun and suspended states
- 		if (serverNode->suite()->begun())  clientNode->begin();
- 		if (serverNode->isSuspended())     clientNode->suspend();
+		// Copy over begun and suspended states, otherwise preserve state of client node
+		if (serverNode->suite()->begun()) clientNode->begin();
+		if (serverNode->isSuspended())    clientNode->suspend();
 
  		// Find the position of the server node relative to its peers
  		// We use this to re-add client node at the same position
@@ -984,7 +1008,7 @@ bool Defs::replaceChild(const std::string& path,
  	Node* client_parent = clientNode->parent();
 	while (client_parent) {
 	   server_parent = findAbsNode( client_parent->absNodePath() );
-      if (server_parent ) {
+      if (server_parent) {
          break;
       }
       last_client_child = client_parent;
@@ -1025,7 +1049,7 @@ bool Defs::replaceChild(const std::string& path,
 	   deleteChild(server_child.get());
 	}
 
-	/// copy over begin/queued status
+	/// copy over begin/queued status if not migrated
 	if (server_parent->suite()->begun())  {
 	   last_client_child->begin();
 	}

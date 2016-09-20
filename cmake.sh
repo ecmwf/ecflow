@@ -10,13 +10,14 @@ umask 0022
 # ====================================================================
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"
-   echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [package_source] [debug]"
+   echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
    echo "  "
    echo "   make           - run make after cmake"
    echo "   test           - run all the tests"
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   san            - is short for clang thread sanitiser"
+   echo "   no_gui         - Don't build the gui"
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
    echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
@@ -36,6 +37,7 @@ mode_arg=release
 verbose_arg=
 ctest_arg=
 clean_arg=
+no_gui_arg=
 python3_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
@@ -56,6 +58,7 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
+   elif [[ "$1" = no_gui ]] ; then no_gui_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
@@ -91,13 +94,14 @@ echo "clang_sanitiser_arg=$clang_sanitiser_arg"
 echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
 echo "python3_arg=$python3_arg"
+echo "no_gui_arg=$no_gui_arg"
 set -x # echo script lines as they are executed
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild/2.3.0
+module load ecbuild/2.3.1
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
@@ -122,14 +126,15 @@ if [[ "$ARCH" = cray ]] ; then
     export ECFLOW_CRAY_BATCH=1
 fi
 
-
 if [[ "$python3_arg" = python3 ]] ; then
     # Need to wait for ecbuild to fix print error, meanwhile use local ecbuild to test python3
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
 fi
 
 # boost
-#module load boost/1.59.0
+if [[ $OS_VERSION = leap42 ]] ; then
+    module load boost/1.53.0
+fi
 
 # ====================================================================================  
 cmake_build_type=
@@ -200,6 +205,16 @@ fi
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 
+gui_options=
+if [[ $no_gui_arg = no_gui ]] ; then
+    gui_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF -DENABLE_ALL_TESTS=ON"
+fi
+
+if [[ $package_source_arg = package_source ]] ; then
+    # for packaging we build GUI by default, and do not run all tests
+    gui_options=  
+fi
+
 #$workspace/ecbuild/bin/ecbuild $source_dir \
 ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
@@ -209,11 +224,9 @@ ecbuild $source_dir \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
-            -DENABLE_ALL_TESTS=ON \
-            ${cmake_extra_options}
-            
-            #-DENABLE_GUI=OFF      \
-            #-DENABLE_UI=OFF       \
+            ${cmake_extra_options} \
+            ${gui_options}
+            #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
             #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'"

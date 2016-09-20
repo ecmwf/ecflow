@@ -542,9 +542,7 @@ bool use_ecf_out_cmd(node&n, std::string path, ecf_dir *dir, std::string& conten
   else if (cmd.length() < 3) return false; // may be empty space characters, ignore cmd
   else if (dir) cmd += " -d";
   else if (!path.empty()) cmd += " -f " + path;
-
-  // command(cmd);
-  return 0;
+  // return 0;
 
   FILE *pipe = popen(cmd.c_str(), "r");
   if (!pipe) return false;
@@ -581,16 +579,15 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
    gui::message("%s: fetching file list", this->name());
    std::string content;
    std::auto_ptr<ecf_dir> dir(new ecf_dir());
-   if (use_ecf_out_cmd(n, path, dir.get(), content))
-     { if (dir.get()) l.scan(dir.get()); } 
-   else if (loghost_ != ecf_node::none()) {
+   // if (use_ecf_out_cmd(n, path, dir.get(), content)) { l.scan(dir.get()); }   else 
+   if (loghost_ != ecf_node::none()) {
       logsvr log_server(loghost_, logport_);
 
       if (log_server.ok()) {
-         std::auto_ptr<ecf_dir> dir(log_server.getdir(path));
-         if (dir.get()) {
-            l.scan(dir.get());
-            // return; // 20151115 add both remote + local?
+	// std::auto_ptr<ecf_dir> 
+	std::auto_ptr<ecf_dir> rdir(log_server.getdir(path));
+	if (rdir.get()) {
+	  l.scan(rdir.get());
          }
       }
    }
@@ -626,9 +623,9 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
             c++;
          }
 
-         std::auto_ptr<ecf_dir> dir(ecf_file_dir(dirname, basename, true));
-         if (dir.get()) {
-            l.scan(dir.get());
+         std::auto_ptr<ecf_dir> ldir (ecf_file_dir(dirname, basename, true));
+         if (ldir.get()) {
+	   l.scan(ldir.get());
          }
       }
    }
@@ -1162,7 +1159,6 @@ struct dup_slash { // INT-74
 
 tmp_file ehost::sfile( node& n, std::string name )
 {
-  // set_loghost(n); 
    return host::sfile(n, name);
 }
 
@@ -1176,7 +1172,7 @@ tmp_file host::sfile( node& n, std::string name )
    if (std::string::npos == pos && loghost_ != ecf_node::none()) {
       logsvr log_server(loghost_, logport_);
       if (log_server.ok()) {
-         tmp_file tmp = log_server.getfile(name);
+ 	 tmp_file tmp(log_server.getfile(name));
          if (access(tmp.c_str(), R_OK) == 0) return tmp;
       }
    }
@@ -1379,6 +1375,7 @@ tmp_file ehost::file(node& n, std::string name)
       "check ECF_FILES or ECF_HOME directories, for read access\n"
       "check for file presence and read access below files directory\n"
       "or this may be a 'dummy' task.\n";    
+
   } else if (name == "ECF_JOB") {
     std::string filename = n.variable(name);
     if (read && (access(filename.c_str(), R_OK) == 0))
@@ -1393,16 +1390,16 @@ tmp_file ehost::file(node& n, std::string name)
       "check for file presence and read access below\n"
       "The file may have been deleted\n"
       "or this may be a 'dummy' task.\n";    
+
   } else if (boost::algorithm::ends_with(name, ".0")) {
     error = "no output to be expected when TRYNO is 0!\n";
     return tmp_file(error);
+
   } else if (name != ecf_node::none()) { // Try logserver
-    // set_loghost(n); 
       std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
       std::string content;
       if (use_ecf_out_cmd(n, name, NULL, content)) {
-	tmp_file tmp(content); // tmpnam(NULL));
-	// tmp << content;
+	tmp_file tmp(content);
 	return tmp;
       } else if (std::string::npos == pos && loghost_ != ecf_node::none()) {
          logsvr log_server(loghost_, logport_);

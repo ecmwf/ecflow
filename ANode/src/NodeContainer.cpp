@@ -51,10 +51,7 @@ NodeContainer::NodeContainer( const std::string& name )
 NodeContainer::NodeContainer()
 : order_state_change_no_(0),add_remove_state_change_no_(0) {}
 
-NodeContainer::NodeContainer(const NodeContainer& rhs )
-  : Node(rhs),
-    order_state_change_no_(0),
-    add_remove_state_change_no_(0)
+void NodeContainer::copy(const NodeContainer& rhs)
 {
    size_t theSize = rhs.nodeVec_.size();
    for(size_t s = 0; s < theSize; s++) {
@@ -72,6 +69,26 @@ NodeContainer::NodeContainer(const NodeContainer& rhs )
          nodeVec_.push_back(family_copy);
       }
    }
+}
+
+NodeContainer::NodeContainer(const NodeContainer& rhs )
+  : Node(rhs),
+    order_state_change_no_(0),
+    add_remove_state_change_no_(0)
+{
+   copy(rhs);
+}
+
+NodeContainer& NodeContainer::operator=(const NodeContainer& rhs)
+{
+   if (this != &rhs) {
+      Node::operator=(rhs);
+      nodeVec_.clear();
+      copy(rhs);
+      order_state_change_no_ = 0;
+      add_remove_state_change_no_ = Ecf::incr_state_change_no();
+   }
+   return *this;
 }
 
 NodeContainer::~NodeContainer() {}
@@ -97,13 +114,18 @@ void NodeContainer::begin()
 }
 
 void NodeContainer::requeue(
-         bool resetRepeats,
-         int clear_suspended_in_child_nodes,
-         bool reset_next_time_slot
-         )
+      bool resetRepeats,
+      int clear_suspended_in_child_nodes,
+      bool reset_next_time_slot
+)
 {
 //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
-	Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
+
+   // Node::requeue(..) will clear ecf::Flag::MIGRATED,
+   // this should cause children to be added in client def's, provided we force a sync
+   if (get_flag().is_set(ecf::Flag::MIGRATED)) force_sync();
+
+   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
 
 	// For negative numbers, do nothing, i.e do not clear
 	if (clear_suspended_in_child_nodes >=0) clear_suspended_in_child_nodes++;
@@ -181,7 +203,14 @@ void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_pt
    /// There no point doing a OrderMemento if children have been added/delete
    if (add_remove_state_change_no_ > changes.client_state_change_no()) {
       if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
-      comp->add( boost::make_shared<ChildrenMemento>( nodeVec_ ) );
+
+      if (get_flag().is_set(ecf::Flag::MIGRATED)) {
+         // Treat node as having no children
+         comp->add( boost::make_shared<ChildrenMemento>( std::vector<node_ptr>() ) );
+      }
+      else {
+         comp->add( boost::make_shared<ChildrenMemento>( nodeVec_ ) );
+      }
    }
    else if (order_state_change_no_ > changes.client_state_change_no()) {
       if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
@@ -336,6 +365,11 @@ void NodeContainer::calendarChanged(
          std::vector<node_ptr>& auto_cancelled_nodes,
          const ecf::LateAttr* inherited_late)
 {
+   // A node that is migrate should not allow any change of state.
+   if (get_flag().is_set(ecf::Flag::MIGRATED)) {
+      return;
+   }
+
    // The late attribute is inherited, we only set late on the task/alias
 	Node::calendarChanged(c,auto_cancelled_nodes,NULL);
 
@@ -414,6 +448,11 @@ NState::State NodeContainer::computedState(Node::TraverseType traverseType) cons
 	// returns the computed state depending on traverseType
 	// If not IMMEDIATE_CHILDREN, will recurse down calling each child's computedState() function
   	return ecf::theComputedNodeState(nodeVec_, (traverseType == Node::IMMEDIATE_CHILDREN) );
+}
+
+void NodeContainer::force_sync()
+{
+   add_remove_state_change_no_ = Ecf::incr_state_change_no();
 }
 
 node_ptr NodeContainer::removeChild(Node* child)
@@ -879,64 +918,73 @@ std::vector<family_ptr> NodeContainer::familyVec() const
 
 bool NodeContainer::operator==(const NodeContainer& rhs) const
 {
-	size_t node_vec_size = nodeVec_.size();
-	if ( node_vec_size != rhs.nodeVec_.size()) {
-#ifdef DEBUG
-		if (Ecf::debug_equality()) {
-			std::cout << "NodeContainer::operator==  node_vec_size != rhs.nodeVec_.size() " << absNodePath() << "\n";
-			std::cout << "   nodeVec_.size() = " << node_vec_size << "  rhs.nodeVec_.size() = " << rhs.nodeVec_.size() << "\n";
-		}
-#endif
- 		return false;
-	}
+   // Ignore equality of nodeVec *IF* both nodes have ecf::Flag::MIGRATED set.
+   // i.e server will have a nodeVec_ and client will have an empty nodeVec_ ECFLOW-763
+   bool test_nodeVec_equality = true;
+   if (get_flag().is_set(ecf::Flag::MIGRATED) && rhs.get_flag().is_set(ecf::Flag::MIGRATED)) {
+      test_nodeVec_equality = false;
+   }
 
-	for(size_t i =0; i < node_vec_size; ++i) {
-
-		Task* task = nodeVec_[i]->isTask();
-		if (task) {
-			Task* rhs_task = rhs.nodeVec_[i]->isTask();
-			if ( !rhs_task ) {
+   if ( test_nodeVec_equality ) {
+      size_t node_vec_size = nodeVec_.size();
+      if ( node_vec_size != rhs.nodeVec_.size()) {
 #ifdef DEBUG
-				if (Ecf::debug_equality()) {
-					std::cout << "NodeContainer::operator==  if ( !rhs_task ) " << absNodePath() << "\n";
-				}
+         if (Ecf::debug_equality()) {
+            std::cout << "NodeContainer::operator==  node_vec_size != rhs.nodeVec_.size() " << absNodePath() << "\n";
+            std::cout << "   nodeVec_.size() = " << node_vec_size << "  rhs.nodeVec_.size() = " << rhs.nodeVec_.size() << "\n";
+         }
 #endif
-				return false;
-			}
+         return false;
+      }
 
-			if ( !( *task == *rhs_task )) {
-#ifdef DEBUG
-				if (Ecf::debug_equality()) {
-					std::cout << "NodeContainer::operator==  if ( !( *task == *rhs_task )) " << absNodePath() << "\n";
-				}
-#endif
-				return false;
-			}
-		}
-		else {
-			Family* rhs_family = rhs.nodeVec_[i]->isFamily();
-			if ( !rhs_family ) {
-#ifdef DEBUG
-				if (Ecf::debug_equality()) {
-					std::cout << "NodeContainer::operator==  if ( !rhs_family ) " << absNodePath() << "\n";
-				}
-#endif
-				return false;
-			}
+      for(size_t i =0; i < node_vec_size; ++i) {
 
-			Family* family = nodeVec_[i]->isFamily(); LOG_ASSERT( family, "" );
-			if ( !( *family == *rhs_family )) {
+         Task* task = nodeVec_[i]->isTask();
+         if (task) {
+            Task* rhs_task = rhs.nodeVec_[i]->isTask();
+            if ( !rhs_task ) {
 #ifdef DEBUG
-				if (Ecf::debug_equality()) {
-					std::cout << "NodeContainer::operator==  if ( !( *family == *rhs_family )) " << absNodePath() << "\n";
-				}
+               if (Ecf::debug_equality()) {
+                  std::cout << "NodeContainer::operator==  if ( !rhs_task ) " << absNodePath() << "\n";
+               }
 #endif
-				return false;
-			}
-		}
-	}
+               return false;
+            }
 
-	return Node::operator==(rhs);
+            if ( !( *task == *rhs_task )) {
+#ifdef DEBUG
+               if (Ecf::debug_equality()) {
+                  std::cout << "NodeContainer::operator==  if ( !( *task == *rhs_task )) " << absNodePath() << "\n";
+               }
+#endif
+               return false;
+            }
+         }
+         else {
+            Family* rhs_family = rhs.nodeVec_[i]->isFamily();
+            if ( !rhs_family ) {
+#ifdef DEBUG
+               if (Ecf::debug_equality()) {
+                  std::cout << "NodeContainer::operator==  if ( !rhs_family ) " << absNodePath() << "\n";
+               }
+#endif
+               return false;
+            }
+
+            Family* family = nodeVec_[i]->isFamily(); LOG_ASSERT( family, "" );
+            if ( !( *family == *rhs_family )) {
+#ifdef DEBUG
+               if (Ecf::debug_equality()) {
+                  std::cout << "NodeContainer::operator==  if ( !( *family == *rhs_family )) " << absNodePath() << "\n";
+               }
+#endif
+               return false;
+            }
+         }
+      }
+   }
+
+   return Node::operator==(rhs);
 }
 
 std::ostream& NodeContainer::print(std::ostream& os) const

@@ -96,6 +96,12 @@ static void test_sync_scaffold(
 
 	Ecf::set_debug_equality(true);
 	BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(),"Test:" << test_name << ": Server and client should be same after sync" );
+//	if (! (*server_defs == *server_reply.client_defs()) ) {
+//	   cout << "Server====================================================================\n";
+//	   cout << server_defs;
+//    cout << "Client====================================================================\n";
+//    cout << server_reply.client_defs();
+//	}
 	Ecf::set_debug_equality(false);
 }
 
@@ -337,6 +343,21 @@ void set_defs_state(defs_ptr defs) {
    defs->set_state(NState::ABORTED);
 }
 
+void set_migrated_flag_on_suites(defs_ptr defs) {
+   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+      TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(suite->absNodePath(),ecf::Flag::MIGRATED,true)));
+   }
+}
+void set_migrated_flag_on_families(defs_ptr defs) {
+   std::vector<Node*> nodes; defs->getAllNodes(nodes);
+   BOOST_FOREACH(Node* n, nodes) {
+      if (n->isFamily()) {
+         TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(n->absNodePath(),ecf::Flag::MIGRATED,true)));
+      }
+   }
+}
+
+
 BOOST_AUTO_TEST_CASE( test_ssync_cmd  )
 {
 	// To DEBUG: enable the defines in Memento.hpp
@@ -358,6 +379,8 @@ BOOST_AUTO_TEST_CASE( test_ssync_cmd  )
    test_sync_scaffold(change_limit_max,"change_limit_max");
    test_sync_scaffold(change_limit_value,"change_limit_value");
    test_sync_scaffold(delete_suite,"delete_suite", true /* expect full_sync */);
+   test_sync_scaffold(set_migrated_flag_on_suites,"set_migrated_flag_on_suites");
+   test_sync_scaffold(set_migrated_flag_on_families,"set_migrated_flag_on_families");
 
    // Test Changes in Defs
    // The default server state is HALTED, hence setting to halted will not show a change

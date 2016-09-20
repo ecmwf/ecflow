@@ -1,0 +1,41 @@
+ref:http://panoptic.com/wiki/aolserver/How_to_generate_self-signed_SSL_certificates
+https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs
+
+You need to create your certificates and sign them appropriately. Here are the commands for linux:
+
+# Generate a private key, will request a pass phrase.
+openssl genrsa -des3 -out server.key 1024
+
+
+# Generate Certificate signing request. This asks a few questions
+# Note common name must match host name.
+openssl req -new -key server.key -out server.csr
+
+
+# Sign certificate with private key (self signed certificate)
+openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
+
+
+# Remove password requirement (needed for example)
+#  OR For more security the server can read the password from a more secure location.
+#     See: context_.set_password_callback(boost::bind(&server::get_password, this));
+#     Then this step can be bypassed.
+cp server.key server.key.secure
+openssl rsa -in server.key.secure -out server.key
+
+
+# Generate dhparam file
+openssl dhparam -out dh512.pem 512
+
+
+Once you've done that, you need to change the filenames in server.cpp and client.cpp.
+
+server.cpp
+
+context_.use_certificate_chain_file("server.crt"); 
+context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
+context_.use_tmp_dh_file("dh512.pem");
+
+client.cpp
+
+ctx.load_verify_file("server.crt");

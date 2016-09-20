@@ -21,6 +21,8 @@ public:
    Alias(const std::string& name);
    Alias();
    Alias(const Alias&);
+   Alias& operator=(const Alias&);
+
    virtual ~Alias();
 
    static alias_ptr create(const std::string& name);

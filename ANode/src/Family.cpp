@@ -35,6 +35,17 @@ using namespace std;
 /////////////////////////////////////////////////////////////////////////////////////////
 // The false below is used as a dummy argument to call the Variable constructor that does not
 // Check the variable names. i.e we know they are valid
+
+Family& Family::operator=(const Family& rhs)
+{
+   if (this != &rhs ) {
+      NodeContainer::operator=(rhs);
+      delete fam_gen_variables_;
+      fam_gen_variables_ = NULL;
+   }
+   return *this;
+}
+
 Family::~Family()
 {
    if (!Ecf::server()) {

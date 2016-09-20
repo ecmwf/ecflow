@@ -218,7 +218,8 @@ static const char* const_ecf_string(const char *str)
 #include <sys/stat.h>
 #include <dirent.h>
 
-ecf_dir *ecf_file_dir(char *path, char *pattern, int fullname)
+ecf_dir *ecf_file_dir(char *path, char *pattern, int fullname,
+		      ecf_dir       *dir)
 /**************************************************************************
 ?  Read the directory and generate the listing
 ************************************o*************************************/
@@ -228,8 +229,7 @@ ecf_dir *ecf_file_dir(char *path, char *pattern, int fullname)
   struct stat    st;
 
   ecf_dir       *cur = NULL;
-  ecf_dir       *dir = NULL;
-
+  //ecf_dir       *dir = NULL;
   bool            ok = true;
 
   if( (dp=opendir(path)) )
@@ -250,7 +250,7 @@ ecf_dir *ecf_file_dir(char *path, char *pattern, int fullname)
         if( !pattern || strncmp(de->d_name,pattern,strlen(pattern))==0 )
           if( lstat(name,&st) == 0 )
           {
-            if( (cur = new ecf_dir())) // (ecf_dir*) calloc(1,sizeof(ecf_dir))) )  
+            if( (cur = new ecf_dir())) 
             {
               if(fullname)
               {

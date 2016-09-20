@@ -27,6 +27,7 @@ test/Test_ECFLOW-247.cpp
 test/Test_ECFLOW-417.cpp
 test/TestAdd.cpp
 test/TestAlias.cpp
+test/TestAssignmentOperator.cpp
 test/TestChangeMgrSingleton.cpp
 test/TestCopyConstructor.cpp
 test/TestDefStatus.cpp
@@ -37,6 +38,7 @@ test/TestExprParser.cpp
 test/TestExprRepeatDateArithmetic.cpp
 test/TestFindAbsNodePath.cpp
 test/TestFlag.cpp
+test/TestFlagMigrated.cpp
 test/TestHistoryParser.cpp
 test/TestInLimit.cpp
 test/TestJobCreator.cpp
