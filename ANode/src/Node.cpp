@@ -1269,29 +1269,28 @@ std::string Node::triggerExpression() const
    return string();
 }
 
-
-static void check_expressions(const Node* node, bool trigger, std::string& errorMsg)
+bool Node::check_expressions(Ast* ast,const std::string& expr,bool trigger, std::string& errorMsg) const
 {
-   Ast* ast = NULL;
-   if (trigger) ast = node->triggerAst();
-   else         ast = node->completeAst();
    if ( ast ) {
       // The expression have been parsed and we have created the abstract syntax tree
       // Try to resolve the path/node references in the expressions
       // Also resolve references to events,meter,repeats variables.
-      AstResolveVisitor astVisitor(node);
+      AstResolveVisitor astVisitor(this);
       ast->accept(astVisitor);
 
       if ( !astVisitor.errorMsg().empty() ) {
-         errorMsg += "Expression node tree references failed for ";
-         if ( trigger ) errorMsg += node->triggerExpression();
-         else           errorMsg += node->completeExpression();
+         errorMsg += "Expression node tree references failed for '";
+         if ( trigger ) errorMsg += "trigger ";
+         else           errorMsg += "complete ";
+         errorMsg += expr;
          errorMsg += "' at ";
-         errorMsg += node->absNodePath();
+         errorMsg += absNodePath();
          errorMsg += "\n ";
          errorMsg += astVisitor.errorMsg();
+         return false;
       }
    }
+   return true;
 }
 
 bool Node::check(std::string& errorMsg, std::string& warningMsg) const
@@ -1301,7 +1300,7 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    //#endif
 
    /// ************************************************************************************
-   /// *IMPORTANT side effec: *
+   /// *IMPORTANT side effect: *
    /// The simulator relies AstResolveVisitor to set usedInTriggger() for events and meters
    /// *************************************************************************************
 
@@ -1309,24 +1308,35 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    /// defs which fail parse errors should not be allowed to be loaded into the server
    /// Even if the code parses, check the expression for divide by zero, for divide and modulo operators
    AstTop* ctop = completeAst(errorMsg);
-   if (ctop && !ctop->check(errorMsg)) {
-      errorMsg += " ";
-      if (completeExpr_) errorMsg += completeExpr_->expression();
-      errorMsg += " on ";
-      errorMsg += debugNodePath();
+   if (ctop) {
+
+      // capture node path resolve errors
+      std::string expr;
+      if (completeExpr_) expr = completeExpr_->expression();
+      (void)check_expressions(ctop,expr,false,errorMsg);
+
+      if (!ctop->check(errorMsg)) {
+         errorMsg += " ";
+         errorMsg += expr;
+         errorMsg += " on ";
+         errorMsg += debugNodePath();
+      }
    }
    AstTop* ttop = triggerAst(errorMsg);
-   if (ttop && !ttop->check(errorMsg)) {
-      errorMsg += " ";
-      if (triggerExpr_) errorMsg += triggerExpr_->expression();
-      errorMsg += " on ";
-      errorMsg += debugNodePath();
+   if (ttop) {
+
+      // capture node path resolve errors
+      std::string expr;
+      if (triggerExpr_) expr = triggerExpr_->expression();
+      (void)check_expressions(ttop,expr,true,errorMsg);
+
+      if (!ttop->check(errorMsg)) {
+         errorMsg += " ";
+         errorMsg += expr;
+         errorMsg += " on ";
+         errorMsg += debugNodePath();
+      }
    }
-
-
-   // capture node path resolve errors
-   check_expressions(this, true,errorMsg);
-   check_expressions(this, false,errorMsg);
 
    // check inLimit references to limits.
    // Client: Unresolved references, which are not in the externs reported as errors/warnings

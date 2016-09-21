@@ -279,6 +279,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
    Defs defs;
    suite_ptr s = defs.add_suite("suite");
    task_ptr task = s->add_task("t1");
+   task_ptr t2 = s->add_task("t2");
    {
       ClockAttr clockAttr(false); // real clock
       clockAttr.date(1,1,2009);
@@ -536,32 +537,36 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
    {   // test add Trigger
       TestStateChanged changed(s);
-      s->add_trigger( "t1 == complete");
-      BOOST_CHECK_MESSAGE( s->get_trigger(), "expected  trigger to be added");
+      task->add_trigger( "t1 == complete");
+      BOOST_CHECK_MESSAGE( task->get_trigger(), "expected  trigger to be added");
 
       // test delete trigger
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_TRIGGER)));
-      BOOST_CHECK_MESSAGE( !s->get_trigger(), "expected  trigger to be deleted");
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TRIGGER)));
+      BOOST_CHECK_MESSAGE( !task->get_trigger(), "expected  trigger to be deleted");
 
       // test change trigger expression
-      s->add_trigger( "t1 == complete" );
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::TRIGGER,"x == complete","")));
-      BOOST_CHECK_MESSAGE( s->triggerExpression() == "trigger x == complete", "expected trigger to be changed found " << s->triggerExpression());
+      task->add_trigger( "t1 == complete" );
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::TRIGGER,"x == complete","")));
+
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::TRIGGER,"t2 == complete","")));
+      BOOST_CHECK_MESSAGE( task->triggerExpression() == "trigger t2 == complete", "expected trigger to be changed found " << task->triggerExpression());
    }
 
    {   // test add complete expression
       TestStateChanged changed(s);
-      s->add_complete( "t1 == complete" );
-      BOOST_CHECK_MESSAGE( s->get_complete(), "expected complete to be added");
+      task->add_complete( "t1 == complete" );
+      BOOST_CHECK_MESSAGE( task->get_complete(), "expected complete to be added");
 
       // test delete complete
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_COMPLETE)));
-      BOOST_CHECK_MESSAGE( !s->get_complete(), "expected complete to be deleted");
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_COMPLETE)));
+      BOOST_CHECK_MESSAGE( !task->get_complete(), "expected complete to be deleted");
 
       // test change complete expression
-      s->add_complete(  "t1 == complete" );
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::COMPLETE,"x == complete","")));
-      BOOST_CHECK_MESSAGE( s->completeExpression() == "complete x == complete", "expected complete expression to be changed found " << s->completeExpression() );
+      task->add_complete(  "t1 == complete" );
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::COMPLETE,"x == complete","")));
+
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::COMPLETE,"t2 == complete","")));
+      BOOST_CHECK_MESSAGE( task->completeExpression() == "complete t2 == complete", "expected complete expression to be changed found " << task->completeExpression() );
    }
 
    {   // test add limit
