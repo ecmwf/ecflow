@@ -113,7 +113,11 @@
                 "limitFillColour"  : {
                     "label"   : "Limit colour",
                     "default" : "rgb(0,255,0)"
-                }
+                },
+                "limitExtraFillColour"  : {
+                    "label"   : "Limit exceed colour",
+                    "default" : "rgb(0,0,255)"
+            }
             },
 
            "textEdit" : {

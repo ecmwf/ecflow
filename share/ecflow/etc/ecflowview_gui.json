@@ -157,7 +157,8 @@
                         "line" : "eventFillColour",
                         "line" : "meterFillColour",
                         "line" : "meterThresholdColour",
-                        "line" : "limitFillColour"
+                        "line" : "limitFillColour",
+                        "line" : "limitExtraFillColour"
                     }
                 }
             }

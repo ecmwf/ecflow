@@ -70,6 +70,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     meterFillBrush_=QBrush(QColor(0,0,255));
     meterThresholdBrush_=QBrush(QColor(0,0,255));
     limitFillBrush_=QBrush(QColor(0,255,0));
+    limitExtraFillBrush_=QBrush(QColor(0,0,255));
 
 	attrRenderers_["meter"]=&NodeViewDelegate::renderMeter;
 	attrRenderers_["label"]=&NodeViewDelegate::renderLabel;
@@ -103,6 +104,7 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
     propVec.push_back("view.attribute.meterFillColour");
     propVec.push_back("view.attribute.meterThresholdColour");
     propVec.push_back("view.attribute.limitFillColour");
+    propVec.push_back("view.attribute.limitExtraFillColour");
 }
 
 void NodeViewDelegate::updateBaseSettings()
@@ -140,6 +142,10 @@ void NodeViewDelegate::updateBaseSettings()
     if(VProperty* p=prop_->find("view.attribute.limitFillColour"))
     {
         limitFillBrush_=QBrush(p->value().value<QColor>());
+    }   
+    if(VProperty* p=prop_->find("view.attribute.limitExtraFillColour"))
+    {
+        limitExtraFillBrush_=QBrush(p->value().value<QColor>());
     }
 
     //limit pixmaps
@@ -154,10 +160,16 @@ void NodeViewDelegate::updateBaseSettings()
     painter.setBrush(limitFillBrush_);
     painter.drawEllipse(1,1,itemSize-2,itemSize-2);
     limitFillPix_=QPixmap::fromImage(img);
+
     painter.fillRect(QRect(QPoint(0,0),img.size()),Qt::transparent);
     painter.setBrush(QColor(240,240,240));
     painter.drawEllipse(1,1,itemSize-2,itemSize-2);
     limitEmptyPix_=QPixmap::fromImage(img);
+
+    painter.fillRect(QRect(QPoint(0,0),img.size()),Qt::transparent);
+    painter.setBrush(limitExtraFillBrush_);
+    painter.drawEllipse(1,1,itemSize-2,itemSize-2);
+    limitExtraFillPix_=QPixmap::fromImage(img);
 }
 
 QSize NodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
@@ -722,10 +734,10 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 
 	//The data
 	int	val=data.at(2).toInt();
-	int	max=data.at(3).toInt();
+    int	maxVal=data.at(3).toInt();
 	QString name=data.at(1) + ":";
-	QString valStr=QString::number(val) + "/" + QString::number(max);
-	bool drawItem=(max < 21);
+    QString valStr=QString::number(val) + "/" + QString::number(maxVal);
+    bool drawItem=(maxVal < 51);
 
 	QFontMetrics fm(attrFont_);
 	int offset=2;
@@ -763,7 +775,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	if(drawItem)
 	{
 		xItem=valRect.right()+gap;
-		fillRect.setRight(xItem+max*(itemSize+itemOffset)+itemOffset);
+        fillRect.setRight(xItem+maxVal*(itemSize+itemOffset)+itemOffset);
 	}
 	else
 	{
@@ -786,15 +798,19 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
 
 	//Draw value
-	painter->setPen(Qt::black);
-	painter->setFont(valFont);
+    if(val < maxVal)
+        painter->setPen(Qt::black);
+    else
+        painter->setPen(Qt::red);
+
+    painter->setFont(valFont);
 	painter->drawText(valRect,Qt::AlignLeft | Qt::AlignVCenter,valStr);
 
 	//Draw items
 	if(drawItem)
 	{	
 		int yItem=option.rect.y()+(option.rect.height()-itemSize)/2;
-		for(int i=0; i < max; i++)
+        for(int i=0; i < maxVal; i++)
 		{	 
             if(i >= val)
 			{
@@ -802,13 +818,17 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
                 painter->drawPixmap(xItem,yItem,itemSize,itemSize,limitEmptyPix_);
 			}
             else
-            {
+            {              
                 painter->drawPixmap(xItem,yItem,itemSize,itemSize,limitFillPix_);
             }
 
-
 			xItem+=itemOffset+itemSize;
-		}		
+        }
+        for(int i=maxVal; i < val; i++)
+        {
+            painter->drawPixmap(xItem,yItem,itemSize,itemSize,limitExtraFillPix_);
+            xItem+=itemOffset+itemSize;
+        }
 	}
 
     if(selected && drawAttrSelectionRect_)
