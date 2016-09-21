@@ -40,7 +40,7 @@ public:
     void setFontProperty(VProperty* p);
     void updateFont();
     void notifyChange(VProperty* p);
-    bool isHyperlinkEnabled() {return hyperlinkEnabled_;};
+    bool isHyperlinkEnabled() {return hyperlinkEnabled_;}
     bool setHyperlinkEnabled(bool h);
 
 public Q_SLOTS:

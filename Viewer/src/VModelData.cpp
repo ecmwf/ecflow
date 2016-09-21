@@ -432,6 +432,16 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
                 node->updateAttrNum(attrFilter_);
                 Q_EMIT endAddRemoveAttributes(this,node,currentNum,cachedNum);
             }
+
+            //This can happen. When we change a trigger expression the change aspect we receive is ADD_REMOVE_ATTR.
+            //In this case we just update all the attributes of the node!
+            else
+            {
+                if(node)
+                {
+                    Q_EMIT attributesChanged(this,node);
+                }
+            }
         }
 	}
 

@@ -137,6 +137,7 @@ set(viewer_srcs
     TextEditSearchLine.cpp
     TimeItemWidget.cpp    
     TriggerBrowser.cpp
+    TriggerEditor.cpp
     TriggerItemWidget.cpp
     TriggerTextWidget.cpp
     TreeNodeModel.cpp
@@ -285,6 +286,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
     TriggerBrowser.hpp
+    TriggerEditor.hpp
     TriggerItemWidget.hpp
     TriggeredScanner.hpp
     VariableItemWidget.hpp
@@ -350,6 +352,7 @@ set(viewer_wrap_ui_files
     TimeItemWidget.ui
     TreeNodeWidget.ui
     TriggerBrowser.ui
+    TriggerEditorWidget.ui
     TriggerItemWidget.ui
     VariableAddDialog.ui
     VariablePropDialog.ui

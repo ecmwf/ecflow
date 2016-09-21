@@ -500,8 +500,6 @@
             "status_tip"     : "__cmd__"
         },
 
-
-
         {
             "menu"           : "Force",
             "name"           : "Unknown",
@@ -702,7 +700,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "label or meter or limit",
+            "visible_for"    : "label or meter or limit or trigger",
             "command"        : "edit",
             "handler"        : "tree",
             "view"           : "tree"

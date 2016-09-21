@@ -37,6 +37,14 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
     Q_ASSERT(tab_->count() == 2);
     tab_->setCurrentIndex(tabIndexToInt(TriggerTabIndex));
 
+    QFont f("Monospace");
+    f.setStyleHint(QFont::TypeWriter);
+    f.setFixedPitch(true);
+    f.setPointSize(10);
+    f.setStyleStrategy(QFont::PreferAntialias);
+    triggerBrowser_->setFont(f);
+    triggeredBrowser_->setFont(f);
+
     connect(triggerBrowser_,SIGNAL(anchorClicked(const QUrl&)),
             this,SLOT(anchorClicked(const QUrl&)));
 
@@ -97,7 +105,7 @@ void TriggerBrowser::loadTriggerTab(bool forceLoad)
         //Generate syntax highlighted html text for the trigger expression
         QString tb;
         exprTe_->setPlainText(QString::fromStdString(te));
-        exprHighlight_->asHtml(tb);
+        exprHighlight_->toHtml(tb);
 
         //We extract the useful bit from the html text
         QRegExp rx("<!--StartFragment-->(.+)<!--EndFragment-->");
@@ -105,6 +113,8 @@ void TriggerBrowser::loadTriggerTab(bool forceLoad)
         {
             tb=rx.cap(1);
         }
+
+        tb="<font face=\'monospace\'>" + tb + "</font>";
 
         s+="<tr><td colspan=\'2\' class=\'trigger_title\'>Trigger expression</td></tr><tr><td colspan=\'2\' class=\'trigger\'> <p>" +
                  tb + "</p></td></tr>";
@@ -172,6 +182,14 @@ void TriggerBrowser::nodeChanged(const VNode* n)
     if(!isTabLoaded(TriggerTabIndex))
         return;
 
+    VNode *node=owner_->info()->node();
+    Q_ASSERT(node);
+    if(n == node)
+    {
+        loadTriggerTab(true);
+        return;
+    }
+
     const std::vector<TriggerListItem*>& items=triggerCollector_->items();
     for(unsigned int i=0; i < items.size(); i++)
     {
@@ -191,7 +209,7 @@ void TriggerBrowser::nodeChanged(const VNode* n)
 
 void TriggerBrowser::anchorClicked(const QUrl& link)
 {
-    owner_->linkSelected(link.url().toStdString());
+    owner_->linkSelected(link.toString().toStdString());
     tab_->setCurrentIndex(TriggerTabIndex);
 }
 

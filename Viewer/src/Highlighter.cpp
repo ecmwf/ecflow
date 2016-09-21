@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,8 +11,10 @@
 #include "UserMessage.hpp"
 #include "VParam.hpp"
 
+#include <QTextCursor>
 #include <QTextDocument>
 #include <QTextDocumentFragment>
+#include <QTextLayout>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -112,54 +114,58 @@ void Highlighter::load(QString id)
 	}
 }
 
-void Highlighter::asHtml(QString& html)
+void Highlighter::toHtml(QString& html)
 {
     // Create a new document from all the selected text document.
     QTextCursor cursor(document());
     cursor.select(QTextCursor::Document);
-    QTextDocument* tempDocument(new QTextDocument);
-    Q_ASSERT(tempDocument);
-    QTextCursor tempCursor(tempDocument);
 
-    tempCursor.insertFragment(cursor.selection());
-    tempCursor.select(QTextCursor::Document);
+    QTextDocument* tmpDoc(new QTextDocument());
+    Q_ASSERT(tmpDoc);
+    QTextCursor tmpCursor(tmpDoc);
+    tmpCursor.insertFragment(cursor.selection());
+    tmpCursor.select(QTextCursor::Document);
+
     // Set the default foreground for the inserted characters.
-    QTextCharFormat textfmt = tempCursor.charFormat();
-    textfmt.setForeground(Qt::black);
-    tempCursor.setCharFormat(textfmt);
+    //QTextCharFormat textfmt = tmpCursor.charFormat();
+    //textfmt.setForeground(Qt::black);
+    //tmpCursor.setCharFormat(textfmt);
 
     // Apply the additional formats set by the syntax highlighter
     QTextBlock start = document()->findBlock(cursor.selectionStart());
     QTextBlock end = document()->findBlock(cursor.selectionEnd());
     end = end.next();
+
     const int selectionStart = cursor.selectionStart();
-    const int endOfDocument = tempDocument->characterCount() - 1;
-    for(QTextBlock current = start; current.isValid() and current not_eq end; current = current.next()) {
+    const int endOfDocument = tmpDoc->characterCount() - 1;
+    for(QTextBlock current = start; current.isValid() and current not_eq end; current = current.next())
+    {
         const QTextLayout* layout(current.layout());
 
-        Q_FOREACH(const QTextLayout::FormatRange &range, layout->additionalFormats()) {
+        Q_FOREACH(const QTextLayout::FormatRange &range, layout->additionalFormats())
+        {
             const int start = current.position() + range.start - selectionStart;
             const int end = start + range.length;
             if(end <= 0 or start >= endOfDocument)
                 continue;
-            tempCursor.setPosition(qMax(start, 0));
-            tempCursor.setPosition(qMin(end, endOfDocument), QTextCursor::KeepAnchor);
-            tempCursor.setCharFormat(range.format);
+            tmpCursor.setPosition(qMax(start, 0));
+            tmpCursor.setPosition(qMin(end, endOfDocument), QTextCursor::KeepAnchor);
+            tmpCursor.setCharFormat(range.format);
         }
     }
 
     // Reset the user states since they are not interesting
-    for(QTextBlock block = tempDocument->begin(); block.isValid(); block = block.next())
+    for(QTextBlock block = tmpDoc->begin(); block.isValid(); block = block.next())
         block.setUserState(-1);
 
     // Make sure the text appears pre-formatted, and set the background we want.
-    tempCursor.select(QTextCursor::Document);
-    QTextBlockFormat blockFormat = tempCursor.blockFormat();
+    tmpCursor.select(QTextCursor::Document);
+    QTextBlockFormat blockFormat = tmpCursor.blockFormat();
     blockFormat.setNonBreakableLines(true);
     blockFormat.setBackground(Qt::black);
-    tempCursor.setBlockFormat(blockFormat);
+    tmpCursor.setBlockFormat(blockFormat);
 
     // Finally retreive the syntax higlighted and formatted html.
-    html = tempCursor.selection().toHtml();
-    delete tempDocument;
-} // asHtml
+    html = tmpCursor.selection().toHtml();
+    delete tmpDoc;
+}

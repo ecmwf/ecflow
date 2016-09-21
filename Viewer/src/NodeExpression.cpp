@@ -678,8 +678,6 @@ StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode, bool
     }
 }
 
-
-
 bool StringMatchCondition::execute(VItem *item)
 {
     WhatToSearchForOperand *searchForOperand = static_cast<WhatToSearchForOperand*> (operands_[0]);

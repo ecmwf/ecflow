@@ -2170,14 +2170,14 @@ void VLateAttribute::itemNames(const VNode* vnode,std::vector<std::string>& name
         nameVec.push_back(late->name());
 }
 
-bool VLateAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+bool VLateAttribute::itemData(const VNode* vnode,int /*index*/,QStringList& data)
 {
     if(vnode->isServer())
-        return NULL;
+        return false;
 
     node_ptr node=vnode->node();
     if(!node)
-        return NULL;
+        return false;
 
     ecf::LateAttr *late=node->get_late();
     if(late)
