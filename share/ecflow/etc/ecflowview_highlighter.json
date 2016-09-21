@@ -2,7 +2,7 @@
         "info"  : {
 
         		"main" : {
-                       	"pattern" : "^\\s*(name|type|status|at)\\s+:",                      
+                        "pattern" : "^\\s*(name|type|status|at|aborted reason)\\s+:",
                         "colour"  : "rgb(0,0,128)",
                         "bold"    : "true"
                                 
@@ -280,44 +280,6 @@
                  "pattern" : "\\s+(\\d+)",
                  "colour"  : "rgb(128,128,0)"
               }
-        },
-        "trigger_edit"  : {
-
-             "node" : {
-                 "pattern" : "(\\S+)",
-                 "colour"  : "rgb(75,75,75)",
-                 "bold"    : "true"
-              },
-             "attr" : {
-                  "pattern" : "\\S+(:\\S+)\\s+",
-                  "colour"  : "rgb(32,80,129)",
-                  "bold"    : "true"
-               },
-             "oper" : {
-                  "pattern" : "\\b(eq|ge|gt|le|lt)\\b",
-                  "colour"  : "rgb(0,80,50)"
-              },
-              "oper1" : {
-                  "pattern" : "(==)",
-                  "colour"  : "rgb(0,80,50)"
-               },
-              "logical" : {
-                 "pattern" : "\\b(or|and|OR|AND)\\b",
-                 "colour"  : "rgb(0,80,50)"
-              },
-              "not" : {
-                 "pattern" : "(not|NOT)\\b",
-                 "colour"  : "rgb(0,80,50)"
-              },
-              "state" : {
-                "pattern" : "\\b(aborted|active|queued|complete|submitted|suspended|unknown)\\b",
-                "colour"  : "rgb(102,43,130)"
-              },
-             "int" : {
-                 "pattern" : "\\s+(\\d+)",
-                 "colour"  : "rgb(128,128,0)"
-              }
-         }
-
+        }
 }
 
