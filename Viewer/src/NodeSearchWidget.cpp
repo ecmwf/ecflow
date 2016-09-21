@@ -80,6 +80,9 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
     connect(stopPb_,SIGNAL(clicked()),
         	this,SLOT(slotStop()));
 
+    //Clear
+    connect(clearPb_,SIGNAL(clicked()),
+            editor_,SLOT(slotClear()));
 
     //Close button
     connect(closePb_,SIGNAL(clicked()),

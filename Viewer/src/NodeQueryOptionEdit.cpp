@@ -125,6 +125,11 @@ void NodeQueryStringOptionEdit::slotMatchChanged(int val)
     }
 }
 
+void NodeQueryStringOptionEdit::clear()
+{
+    le_->clear();
+}
+
 void NodeQueryStringOptionEdit::setVisible(bool st)
 {
     label_->setVisible(st);
@@ -167,6 +172,11 @@ void NodeQueryListOptionEdit::init(NodeQueryOption* option)
     Q_ASSERT(option_->name() == optionId_);
     list_->setSelection(option_->selection());
     initIsOn_=false;
+}
+
+void NodeQueryListOptionEdit::clear()
+{
+    list_->clearSelection();
 }
 
 void NodeQueryListOptionEdit::slotListChanged()
