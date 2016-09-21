@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -43,70 +43,77 @@ std::vector<VIcon*> VIcon::itemsVec_;
 class VWaitIcon : public VIcon
 {
 public:
-	explicit VWaitIcon(const std::string& name) : VIcon(name) {};
+    explicit VWaitIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VRerunIcon : public VIcon
 {
 public:
-	explicit VRerunIcon(const std::string& name) : VIcon(name) {};
+    explicit VRerunIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VNodeLogIcon : public VIcon
 {
 public:
-	explicit VNodeLogIcon(const std::string& name) : VIcon(name) {};
+    explicit VNodeLogIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VCompleteIcon : public VIcon
 {
 public:
-	explicit VCompleteIcon(const std::string& name) : VIcon(name) {};
+    explicit VCompleteIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VTimeIcon : public VIcon
 {
 public:
-	explicit VTimeIcon(const std::string& name) : VIcon(name) {};
+    explicit VTimeIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VDateIcon : public VIcon
 {
 public:
-	explicit VDateIcon(const std::string& name) : VIcon(name) {};
+    explicit VDateIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VZombieIcon : public VIcon
 {
 public:
-	explicit VZombieIcon(const std::string& name) : VIcon(name) {};
+    explicit VZombieIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VLateIcon : public VIcon
 {
 public:
-	explicit VLateIcon(const std::string& name) : VIcon(name) {};
+    explicit VLateIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VSlowIcon : public VIcon
 {
 public:
-	explicit VSlowIcon(const std::string& name) : VIcon(name) {};
+    explicit VSlowIcon(const std::string& name) : VIcon(name) {}
 	bool show(VNode*);
 };
 
 class VKilledIcon : public VIcon
 {
 public:
-    explicit VKilledIcon(const std::string& name) : VIcon(name) {};
+    explicit VKilledIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*);
+};
+
+class VMigratedIcon : public VIcon
+{
+public:
+    explicit VMigratedIcon(const std::string& name) : VIcon(name) {}
     bool show(VNode*);
 };
 
@@ -127,6 +134,7 @@ static VWaitIcon waitIcon("wait");
 static VZombieIcon zombieIcon("zombie");
 static VKilledIcon killedIcon("killed");
 static VSlowIcon slowIcon("slow");
+static VMigratedIcon migratedIcon("migrated");
 
 //==========================================================
 //
@@ -442,3 +450,15 @@ bool VKilledIcon::show(VNode *n)
     return n->isFlagSet(ecf::Flag::KILLED);
 }
 
+//==========================================================
+// Migrated
+//==========================================================
+
+bool VMigratedIcon::show(VNode *n)
+{
+    if(n && (n->isSuite() || n->isFamily()))
+    {
+        return n->isFlagSet(ecf::Flag::MIGRATED);
+    }
+    return false;
+}
