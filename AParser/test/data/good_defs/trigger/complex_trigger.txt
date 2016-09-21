@@ -26,11 +26,13 @@ suite suiteName
    		task c
    			trigger ../familyName/a == complete
    		task d
-   			trigger ../familyName/b == aborted
+   			trigger ../familyName/b != aborted
    		task e
    			trigger (a == complete and b == complete)
+        task ee
+            trigger (a == complete AND b == complete)
    		task f
-   			trigger (a == complete and b == complete or ../familyName/a == complete)
+   			trigger (a == complete and b == complete OR ../familyName/a == complete)
    		task g
    			trigger a:theEventName and a:aEvent
    		task h
@@ -40,9 +42,11 @@ suite suiteName
    		task j
    			trigger a == complete                      # this is a comment
    		task k
-   		    trigger (a == complete and b == complete) or (c == complete and d == complete)
+   		    trigger (a == complete AND b == complete) or (c == complete && d == complete)
    		task l
-   			trigger (a == complete and b == complete) or ../familyName/a:theEventName == set
+   			trigger (a == complete and b == complete) OR ../familyName/a:theEventName == set
+        task ll
+            trigger (a == complete and b == complete) || ../familyName/a:theEventName == set
    		task m
    			trigger ../familyName/heir_familyName/taskName0 == complete
    		task n

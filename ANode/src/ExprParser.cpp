@@ -272,8 +272,8 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
           not3_r = root_node_d [ str_p("!") ];
           not_r = not1_r | not3_r | not2_r;
 
-          and_r = root_node_d [ str_p("and") ] || root_node_d [ str_p("&&") ] ;
-          or_r = root_node_d [ str_p("or") ]   || root_node_d [ str_p("||") ] ;
+          and_r = root_node_d [str_p("and")] || root_node_d [str_p("&&")] || root_node_d [str_p("AND")];
+          or_r =  root_node_d [str_p("or") ] || root_node_d [str_p("||")] || root_node_d [str_p("OR")];
           and_or =  and_r | or_r;
 
         	 event_state = leaf_node_d[ str_p("set") ] || leaf_node_d[ str_p("clear")] ;
