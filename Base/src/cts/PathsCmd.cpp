@@ -351,15 +351,16 @@ static const char* delete_node_desc() {
 
 static const char* get_check_desc() {
    return
-            "Checks the expression and limits in the server. Will also check trigger references.\n"
-            "Trigger expressions that reference paths that don't exist, will be reported as errors.\n"
-            "(Note: On the client side unresolved paths in trigger expressions must\n"
-            "have an associated 'extern' specified)\n"
-            "  arg = [ _all_ | list of node paths ]\n"
-            "Usage:\n"
-            "  --check=_all_           # Checks the whole suite\n"
-            "  --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1"
-            ;
+         "Checks the expression and limits in the server. Will also check trigger references.\n"
+         "Trigger expressions that reference paths that don't exist, will be reported as errors.\n"
+         "(Note: On the client side unresolved paths in trigger expressions must\n"
+         "have an associated 'extern' specified)\n"
+         "  arg = [ _all_ | / | list of node paths ]\n"
+         "Usage:\n"
+         "  --check=_all_           # Checks all the suites\n"
+         "  --check=/               # Checks all the suites\n"
+         "  --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1"
+         ;
 }
 
 static const char* get_kill_desc() {
@@ -501,8 +502,12 @@ void PathsCmd::create(   Cmd_ptr& cmd,
       }
       if (!all && paths.empty()) {
          std::stringstream ss;
-         ss << "Check: Please specify '_all_' or a list of paths. Paths must begin with a leading '/' character\n";
+         ss << "Check: Please specify one of [ _all_ | / | /<path/to/anode> ]. Paths must begin with a leading '/' character\n";
          throw std::runtime_error( ss.str() );
+      }
+      if (paths.size() == 1 && paths[0] == "/") {
+         // treat as _all_
+         paths.clear();
       }
    }
    else {

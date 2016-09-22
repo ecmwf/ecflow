@@ -96,6 +96,8 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.job_gen("") == 0,CtsApi::job_gen("") << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.job_gen("/s") == 0,CtsApi::job_gen("/s") << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.check("") == 0,CtsApi::to_string(CtsApi::check("")) << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.check("/") == 0,CtsApi::to_string(CtsApi::check("/")) << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.check("_all_") == 0,CtsApi::to_string(CtsApi::check("_all_")) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.check("/s") == 0,CtsApi::to_string(CtsApi::check("/s")) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.check(paths) == 0,CtsApi::to_string(CtsApi::check(paths)) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.kill("/s") == 0,CtsApi::to_string(CtsApi::kill("/s")) << " should return 0\n" << theClient.errorMsg());
@@ -110,6 +112,9 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
 
    // empty string should be same as delete all
    BOOST_REQUIRE_MESSAGE( theClient.delete_node("") == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.delete_node("_all_") == 0,CtsApi::to_string(CtsApi::delete_node("_all")) << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.delete_node("_all_",true) == 0,CtsApi::to_string(CtsApi::delete_node("_all",true)) << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.delete_node("_all_",false) == 0,CtsApi::to_string(CtsApi::delete_node("_all",false)) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.delete_node("/s") == 0,CtsApi::to_string(CtsApi::delete_node("/s")) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.delete_node("/s",true) == 0,CtsApi::to_string(CtsApi::delete_node("/s",true)) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.delete_node("/s",false) == 0,CtsApi::to_string(CtsApi::delete_node("/s",false)) << " should return 0\n" << theClient.errorMsg());
@@ -401,6 +406,8 @@ BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
    theClient.set_throw_on_error(false);
 
    std::vector<std::string> paths; paths.push_back("/s1"); paths.push_back("/s2");
+
+   BOOST_REQUIRE_MESSAGE( theClient.check("fred") == 1,CtsApi::to_string(CtsApi::check("fred")) << " should return 1\n" << theClient.errorMsg());
 
    /// test alter
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","time","") == 1,"--alter expected to fail\n" << theClient.errorMsg());
