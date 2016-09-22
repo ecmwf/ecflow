@@ -87,6 +87,7 @@ list( APPEND u_tests
         py_u_TestGetAllTasks   
         py_u_TestJobGeneration 
         py_u_TestParent        
+        py_u_TestRemove
         py_u_TestRepeatArithmetic
         py_u_TestSimulator  
         py_u_TestTraversal     

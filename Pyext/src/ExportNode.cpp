@@ -220,6 +220,7 @@ void export_Node()
    // expects self to be of type Node.
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
+   .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
    .def("add_trigger",      &add_trigger,             DefsDoc::add_trigger_doc())
    .def("add_trigger",      &add_trigger_expr)
    .def("add_complete",     &add_complete,            DefsDoc::add_trigger_doc())
