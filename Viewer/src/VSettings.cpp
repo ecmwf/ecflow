@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -272,7 +272,7 @@ VComboSettings::~VComboSettings()
 void VComboSettings::clear()
 {
 	VSettings::clear();
-	pt_.clear();
+    qs_.clear();
 }
 
 bool VComboSettings::containsQs(const std::string& key)
