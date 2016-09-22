@@ -20,17 +20,21 @@
 #include <unistd.h>
 
 #include "ExprAst.hpp"
-
-#include "IconProvider.hpp"
 #include "Submittable.hpp"
+
+#include "DirectoryHandler.hpp"
+#include "IconProvider.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VFilter.hpp"
 #include "VNode.hpp"
 #include "VProperty.hpp"
+#include "VConfig.hpp"
+#include "VSettings.hpp"
 
 std::map<std::string,VIcon*> VIcon::items_;
 std::vector<VIcon*> VIcon::itemsVec_;
+std::vector<std::string> VIcon::lastNames_;
 
 //==========================================================
 //
@@ -267,6 +271,34 @@ QString VIcon::shortDescription() const
 		v=name();
 
 	return v;
+}
+void VIcon::names(std::vector<std::string>& v)
+{
+    for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+        v.push_back(it->first);
+}
+
+void VIcon::saveLastNames()
+{
+    lastNames_.clear();
+    for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+        lastNames_.push_back(it->first);
+
+    std::string iconFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_icons.txt");
+    VSettings vs(iconFile);
+    vs.clear();
+    vs.put("icons",lastNames_);
+    vs.write();
+}
+
+void VIcon::initLastNames()
+{
+    //It has to be called only once
+    assert(lastNames_.empty());
+    std::string iconFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_icons.txt");
+    VSettings vs(iconFile);
+    if(vs.read(false))
+        vs.get("icons",lastNames_);
 }
 
 void VIcon::load(VProperty* group)

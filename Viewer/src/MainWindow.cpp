@@ -42,6 +42,7 @@
 #include "SaveSessionAsDialog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
+#include "VIcon.hpp"
 #include "VSettings.hpp"
 
 #include <boost/lexical_cast.hpp>
@@ -658,7 +659,6 @@ void MainWindow::init()
 
 	VComboSettings vs(cs->sessionFile(),cs->windowFile());
 
-
 	//Read configuration. If it fails we create an empty window!!
 	if(!vs.read())
 	{
@@ -715,40 +715,14 @@ void MainWindow::save(MainWindow *topWin)
 {
 	MainWindow::saveContents(topWin);
 
-	/*SessionItem* cs=SessionHandler::instance()->current();
-	assert(cs);
-
-	VComboSettings vs(cs->sessionFile(),cs->windowFile());
-
-	//We have to clear it so that not to remember all the previous windows
-	vs.clear();
-
-	//Add total window number and id of active window
-	vs.put("windowCount",windows_.count());
-	vs.put("topWindowId",windows_.indexOf(topWin));
-
-	//Save info for all the windows
-	for(int i=0; i < windows_.count(); i++)
-	{
-		std::string id="window_"+boost::lexical_cast<std::string>(i);
-		vs.beginGroup(id);
-		windows_.at(i)->writeSettings(&vs);
-		vs.endGroup();
-	}
-
-	//Write to json
-	vs.write();*/
-
 	//Save global config
 	VConfig::instance()->saveSettings();
 
+    //Save server list
 	ServerHandler::saveSettings();
 
-	//Save non-global config
-	for(int i=0; i < windows_.count(); i++)
-	{
-		//windows_.at(i)->saveSettings();
-	}
+    //Save icon name list
+    VIcon::saveLastNames();
 }
 
 void MainWindow::saveContents(MainWindow *topWin)

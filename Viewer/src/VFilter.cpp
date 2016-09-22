@@ -157,7 +157,6 @@ void VParamSet::readSettings(VSettings* vs)
         vs->get(settingsId_,array);
     }
 
-
 	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
 	{
 		std::string name=*it;
@@ -225,6 +224,46 @@ IconFilter::IconFilter() : VParamSet()
 	current_=all_;
 }
 
+void IconFilter::readSettings(VSettings* vs)
+{
+    VParamSet::readSettings(vs);
+
+    //If the filter list is not complete we need to be sure that a newly added icon type
+    //is automatically enabled in the filter. This is based on the contents of the lastNames icon
+    //file. This file is updated on exit and stores the full list of icon names (existing at exit).
+    //So we can figure out if a new icon type were introduced since the last startup and we can
+    //guarantee that is is always enabled for the first time.
+    if(!isComplete())
+    {
+        const std::vector<std::string>& lastNames=VIcon::lastNames();
+
+        //The lastNames are not found. This must be the first startup after lastNames concept were introduced
+        //or it is a fresh startup after cleaning the config (or the very first one). We enable all the icons.
+        //It could be only a one-time problem for users who already set theit icon filter.
+        if(lastNames.empty())
+        {
+            current_=all_;
+        }
+        else
+        {
+            //Check which icons are not in lastNames
+            for(std::set<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
+            {
+                //The item is not in lastNames so it must be a newly added icon type. We add it to the filter list
+                if(std::find(lastNames.begin(),lastNames.end(),(*itA)->strName()) == lastNames.end())
+                {
+                    current_.insert(*itA);
+                }
+            }
+        }
+    }
+}
+
+//==============================================
+//
+// NodeFilter
+//
+//==============================================
 
 NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter,Scope scope) :
 	serverFilter_(serverFilter),

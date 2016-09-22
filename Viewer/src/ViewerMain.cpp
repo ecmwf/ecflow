@@ -29,6 +29,7 @@
 #include "Palette.hpp"
 #include "ServerList.hpp"
 #include "VConfig.hpp"
+#include "VIcon.hpp"
 #include "VServerSettings.hpp"
 #include "SessionHandler.hpp"
 #include "SessionDialog.hpp"
@@ -124,6 +125,9 @@ int main(int argc, char **argv)
     Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
 		      "ecflowview_palette.json")); 
 
+
+    //Initialise the list containing all the icon names existed on last exit
+    VIcon::initLastNames();
 
 	// startup - via the session manager, or straight to the main window?
 	bool startMainWindow = true;
