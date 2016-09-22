@@ -298,7 +298,13 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					server_reply_.clear_for_invoke(cli_);
 
 					boost::asio::io_service io_service;
-					Client theClient( io_service, cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
+#ifdef ECF_OPENSSL
+				   boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+				   ctx.load_verify_file("server.crt");
+	            Client theClient( io_service,ctx,cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
+#else
+	            Client theClient( io_service, cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
+#endif
 					if (clientEnv_.allow_new_client_old_server() != 0) theClient.allow_new_client_old_server(clientEnv_.allow_new_client_old_server());
 					io_service.run();
 					if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;;

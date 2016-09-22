@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -59,27 +60,21 @@ class connection {
 public:
 	/// Allow tentative support for new client to talk to old server
    /// by changing the boost serialisation archive version, hence tentative
-	connection(boost::asio::io_service& io_service)
-    : allow_new_client_old_server_(0),
-      allow_old_client_new_server_(0),
-      socket_(io_service)
-	{
-#ifdef DEBUG_CONNECTION
-		std::cout << "Connection::connection\n";
-#endif
-	}
+	connection(boost::asio::io_service& io_service);
+	~connection();
 
-	~connection() {
-#ifdef DEBUG_CONNECTION
-		std::cout << "Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
+#ifdef ECF_OPENSLL
+     connection(boost::asio::io_service& io_service,boost::asio::ssl::context& context);
+	  bool verify_certificate(bool preverified, boost::asio::ssl::verify_context& ctx);
 #endif
-	}
 
 	/// Get the underlying socket. Used for making a connection or for accepting
 	/// an incoming connection.
-	boost::asio::ip::tcp::socket& socket() {
-		return socket_;
-	}
+#ifdef ECF_OPENSLL
+	ssl_socket::lowest_layer_type& socket() { return socket_.lowest_layer();}
+#else
+	boost::asio::ip::tcp::socket& socket() { return socket_; }
+#endif
 
 	// support for forward compatibility, by changing boost archive version, used in client context
 	// See: ACore/src/boost_archive.hpp for details about serialisation migration issues
@@ -285,24 +280,17 @@ private:
 
 private:
 
-	void log_error(const char* msg) const {
-      const char* in_context = ", in client";
-      if (Ecf::server()) in_context = ", in server";
-      ecf::LogToCout logToCout;
-      LOG(ecf::Log::ERR, msg << in_context);
-	}
-
-   void log_archive_error(const char* msg,const boost::archive::archive_exception& ae) const {
-      const char* in_context = ", in client";
-      if (Ecf::server()) in_context = ", in server";
-      ecf::LogToCout logToCout;
-      LOG(ecf::Log::ERR, msg << ae.what() << in_context);
-   }
+	void log_error(const char* msg) const;
+   void log_archive_error(const char* msg,const boost::archive::archive_exception& ae) const;
 
 private:
    int allow_new_client_old_server_;
    int allow_old_client_new_server_;
+#ifdef ECF_OPENSSL
+	boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
+#else
 	boost::asio::ip::tcp::socket socket_;/// The underlying socket.
+#endif
 	std::string outbound_header_;        /// Holds an out-bound header.
 	std::string outbound_data_;          /// Holds the out-bound data.
 	enum { header_length = 8 };          /// The size of a fixed length header.

@@ -66,6 +66,11 @@ private:
    /// Handle completion of a accept operation.
    void handle_accept(const boost::system::error_code& e);
 #else
+
+#ifdef ECF_OPENSLL
+   void handle_handshake(const boost::system::error_code& error,connection_ptr conn);
+#endif
+
    /// Handle completion of a accept operation.
    void handle_accept(const boost::system::error_code& e, connection_ptr conn);
 
@@ -79,6 +84,13 @@ private:
    void handle_terminate();
    void start_accept();
    bool shutdown_socket(connection_ptr conn, const std::string& msg) const;
+
+#ifdef ECF_OPENSSL
+   std::string get_password() const
+   {
+     return "test";
+   }
+#endif
 
 private:
 
@@ -129,6 +141,10 @@ private:
 
    /// The io_service used to perform asynchronous operations.
    boost::asio::io_service io_service_;
+
+#ifdef ECF_OPENSLL
+   boost::asio::ssl::context context_;
+#endif
 
    /// The signal_set is used to register for automatic check pointing
    boost::asio::signal_set signals_;

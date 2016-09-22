@@ -33,12 +33,22 @@
 
 /// Constructor starts the asynchronous connect operation.
 Client::Client( boost::asio::io_service& io_service,
+#ifdef ECF_OPENSSL
+           boost::asio::ssl::context& context,
+#endif
 				Cmd_ptr cmd_ptr,
 				const std::string& host,
 				const std::string& port,
 				int timeout
 			  )
-: stopped_(false),host_( host ), port_( port ), connection_( io_service ),deadline_(io_service),timeout_(timeout)
+: stopped_(false),host_( host ), port_( port ),
+#ifdef ECF_OPENSSL
+  connection_(io_service,context),
+#else
+  connection_(io_service),
+#endif
+  deadline_(io_service),
+  timeout_(timeout)
 {
 	/// Avoid sending a NULL request to the server
 	if (!cmd_ptr.get())  throw std::runtime_error("Client::Client: No request specified !");
@@ -54,6 +64,7 @@ Client::Client( boost::asio::io_service& io_service,
 #endif
 
   	outbound_request_.set_cmd( cmd_ptr );
+
 
   	// Host name resolution is performed using a resolver, where host and service
   	// names(or ports) are looked up and converted into one or more end points
@@ -170,11 +181,50 @@ void Client::handle_connect(  const boost::system::error_code& e,
 #ifdef DEBUG_CLIENT
      std::cout << "   Client::handle_connect **Successfully** established connection to the server: Sending Out bound request = " << outbound_request_ << std::endl;
 #endif
+
      // **Successfully** established connection to the server
+#ifdef ECF_OPENSSL
+     start_handshake();
+#else
      // Start operation to *SEND* a request to the server
      start_write();
+#endif
   }
 }
+
+#ifdef ECF_OPENSSL
+void Client::start_handshake()
+{
+#ifdef DEBUG_CLIENT
+     std::cout << "   Client::start_handshake " << outbound_request_ << std::endl;
+#endif
+   // expires_from_now cancels any pending asynchronous waits, and returns the number of asynchronous waits that were cancelled.
+   // If it returns 0 then you were too late and the wait handler has already been executed, or will soon be executed.
+   // If it returns 1 then the wait handler was successfully cancelled.
+   // Set a deadline for the write operation.
+   deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
+
+   connection_.socket().async_handshake(boost::asio::ssl::stream_base::client,
+        boost::bind(&Client::handle_handshake, this, boost::asio::placeholders::error));
+}
+
+void Client::handle_handshake( const boost::system::error_code& e )
+{
+   if (!e) {
+      start_write();
+   }
+   else {
+
+      std::cout << "Handshake failed: " << e.message() << "\n";
+
+      // An error occurred.
+      stop();
+
+      std::stringstream ss;  ss << "Client::handle_handshake: error (" << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" <<  port_;
+      throw std::runtime_error(ss.str());
+   }
+}
+#endif
 
 void Client::start_write()
 {
