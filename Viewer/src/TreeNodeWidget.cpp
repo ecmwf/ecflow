@@ -137,7 +137,8 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 	attrFilterMenu_=new VParamFilterMenu(menuType,atts_,"Show attributes",VParamFilterMenu::ShowMode);
-	iconFilterMenu_=new VParamFilterMenu(menuIcon,icons_,"Show icons",VParamFilterMenu::ShowMode);
+    iconFilterMenu_=new VParamFilterMenu(menuIcon,icons_,"Show icons",VParamFilterMenu::ShowMode,
+                                         VParamFilterMenu::PixmapDecor);
     stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Show statuses",
                    VParamFilterMenu::ShowMode,VParamFilterMenu::ColourDecor);
 

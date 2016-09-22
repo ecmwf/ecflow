@@ -40,12 +40,13 @@ public:
     static void saveLastNames();
     static void initLastNames();
 
+    QPixmap pixmap(int size);
+
 	//Called from VConfigLoader
 	static void load(VProperty* group);
 
 protected:
 	void initPixmap();
-	QPixmap pixmap(int size);
 	virtual bool show(VNode*)=0;
 	QString shortDescription() const;
 

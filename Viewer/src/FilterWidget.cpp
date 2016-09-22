@@ -54,6 +54,7 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString titl
 				  (*it)->name());
 	}
 
+    //For status
 	if(decorMode_ == ColourDecor)
 	{
 		QLinearGradient grad;
@@ -104,6 +105,26 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString titl
 			}
 		}
 	}
+
+    //For icons
+    else if(decorMode_ == PixmapDecor)
+    {
+        QFont f;
+        QFontMetrics fm(f);
+        int pixSize=fm.height()-2;
+
+        Q_FOREACH(QAction* ac,menu_->actions())
+        {
+            if(!ac->isSeparator())
+            {
+                if(VIcon* vs=VIcon::find(ac->data().toString().toStdString()))
+                {
+                    QPixmap pix(vs->pixmap(pixSize));
+                    ac->setIcon(pix);
+                }
+            }
+        }
+    }
 
 	QAction *ac = new QAction(this);
 	ac->setSeparator(true);
