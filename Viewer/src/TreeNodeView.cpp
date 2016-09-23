@@ -61,9 +61,11 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 	setMouseTracking(true);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
     header()->setStretchLastSection(false);
     header()->setMinimumSectionSize(4096);
+#endif
 
 	//!!!!We need to do it because:
 	//The background colour between the view's left border and the nodes cannot be
