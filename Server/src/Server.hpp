@@ -69,6 +69,7 @@ private:
 
 #ifdef ECF_OPENSSL
    void handle_handshake(const boost::system::error_code& error,connection_ptr conn);
+   std::string get_password() const { return "test"; }
 #endif
 
    /// Handle completion of a accept operation.
@@ -84,13 +85,6 @@ private:
    void handle_terminate();
    void start_accept();
    bool shutdown_socket(connection_ptr conn, const std::string& msg) const;
-
-#ifdef ECF_OPENSSL
-   std::string get_password() const
-   {
-     return "test";
-   }
-#endif
 
 private:
 
