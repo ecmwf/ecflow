@@ -121,6 +121,26 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
             line.replace(path + "'","<a href=\'" + anchor  + "\'>" + path +"</a>");
 
         }
+        else
+        {
+            rx=QRegExp("\\s+(/\\S+)\\b");
+            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
+            {
+                QString path=rx.cap(1);
+                rx=QRegExp("(SUITE|FAMILY|TASK|ALIAS)");
+                QString type;
+                if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
+                {
+                    type=rx.cap(1);
+                }
+
+                QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
+                line.replace(path,"<a href=\'" + anchor  + "\'>" + path +"</a>");
+            }
+        }
+
+
+
         s+=line+"<br>";
     }
     return s;

@@ -59,6 +59,9 @@ VItemPathParser::VItemPathParser(const std::string& path) : itemType_(NoType)
 
 std::string VItemPathParser::encode(const std::string& path,const std::string& type)
 {
+    if(type.empty())
+        return path;
+
     return "[" + type + "]" + path;
 }
 
