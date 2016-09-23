@@ -72,6 +72,7 @@ exe ecflow_client : [ glob src/*Main.cpp ]
              /site-config//boost_program_options
              /site-config//boost_datetime
 	         pthread
+	         /ecflow_top//openssl_libs
            : <variant>debug:<define>DEBUG
            ;
  
@@ -87,6 +88,7 @@ exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cp
            /theParser//libparser
            /theBase//base
            libclient
+           /ecflow_top//openssl_libs
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
@@ -106,6 +108,7 @@ exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPor
            /theBase//base
            libclient
            pthread
+           /ecflow_top//openssl_libs
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
@@ -125,6 +128,7 @@ exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp
            /theBase//base
            libclient
            pthread
+           /ecflow_top//openssl_libs
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem

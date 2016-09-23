@@ -25,10 +25,6 @@
 #include <vector>
 
 #include <boost/asio.hpp>
-#ifdef ECF_OPENSSL
-#include <boost/asio/ssl.hpp>
-#endif
-
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -37,6 +33,11 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Serialization.hpp"
+
+#ifdef ECF_OPENSSL
+#include <boost/asio/ssl.hpp>
+typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
+#endif
 
 #ifdef DEBUG
 //#define DEBUG_CONNECTION 1
@@ -63,7 +64,6 @@ class connection {
 public:
 	/// Allow tentative support for new client to talk to old server
    /// by changing the boost serialisation archive version, hence tentative
-	connection(boost::asio::io_service& io_service);
 	~connection();
 
 #ifdef ECF_OPENSSL
@@ -72,9 +72,12 @@ public:
 
 	/// Get the underlying socket. Used for making a connection or for accepting
 	/// an incoming connection.
-	ssl_socket::lowest_layer_type& socket() { return socket_.lowest_layer();}
+	ssl_socket::lowest_layer_type& socket_ll() { return socket_.lowest_layer();}
+	boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& socket() { return socket_;}
 #else
-	boost::asio::ip::tcp::socket& socket() { return socket_; }
+   connection(boost::asio::io_service& io_service);
+   boost::asio::ip::tcp::socket& socket_ll() { return socket_; }
+   boost::asio::ip::tcp::socket& socket() { return socket_; }
 #endif
 
 	// support for forward compatibility, by changing boost archive version, used in client context

@@ -61,6 +61,7 @@ exe ecflow_server : [ glob src/*Main.cpp ]
              /theParser//libparser
              /theBase//base
              libserver
+             /ecflow_top//openssl_libs
              /site-config//boost_system
              /site-config//boost_thread
              /site-config//boost_serialization
@@ -82,6 +83,7 @@ exe u_server : [ glob test/*.cpp ]
              /theParser//libparser
              /theBase//base
              libserver
+             /ecflow_top//openssl_libs
              /site-config//boost_system
              /site-config//boost_thread
              /site-config//boost_serialization

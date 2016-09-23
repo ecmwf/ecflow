@@ -133,13 +133,13 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
             // Server is acting like a client, Send MoveCmd to another server
             // The source should end up being copied, when sent to remote server
             boost::asio::io_service io_service;
-//#ifdef ECF_OPENSSL
-//            boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
-//            ctx.load_verify_file("server.crt");
-//            Client theClient( io_service, ctx, Cmd_ptr( new MoveCmd(as->hostPort(),sourceNode.get(), destPath) ),  host, port  );
-//#else
+#ifdef ECF_OPENSSL
+            boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+            ctx.load_verify_file("server.crt");
+            Client theClient( io_service, ctx, Cmd_ptr( new MoveCmd(as->hostPort(),sourceNode.get(), destPath) ),  host, port  );
+#else
             Client theClient( io_service, Cmd_ptr( new MoveCmd(as->hostPort(),sourceNode.get(), destPath) ),  host, port  );
-//#endif
+#endif
             io_service.run();
 
             ServerReply server_reply;

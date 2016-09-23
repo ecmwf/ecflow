@@ -65,6 +65,7 @@ exe u_base : [ glob test/*.cpp  ]
            /site-config//boost_program_options
            /site-config//boost_test
            pthread
+           /ecflow_top//openssl_libs
          : <include>../ANode/test
            <variant>debug:<define>DEBUG
 	     ;

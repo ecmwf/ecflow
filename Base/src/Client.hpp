@@ -59,7 +59,7 @@ private:
 
 #ifdef ECF_OPENSSL
 	void start_handshake();
-	void handle_handshake( const boost::system::error_code& e )
+	void handle_handshake( const boost::system::error_code& e );
 #endif
 	void start_write();
 	void start_read();

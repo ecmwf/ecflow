@@ -15,22 +15,12 @@
 
 #include "Connection.hpp"
 
-connection::connection(boost::asio::io_service& io_service)
-: allow_new_client_old_server_(0),
-  allow_old_client_new_server_(0),
-  socket_(io_service)
-{
-#ifdef DEBUG_CONNECTION
-   std::cout << "Connection::connection\n";
-#endif
-}
 
 connection::~connection() {
 #ifdef DEBUG_CONNECTION
    std::cout << "Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
 #endif
 }
-
 
 #ifdef ECF_OPENSSL
 connection::connection(boost::asio::io_service& io_service , boost::asio::ssl::context& context)
@@ -58,9 +48,19 @@ bool connection::verify_certificate(bool preverified,boost::asio::ssl::verify_co
     char subject_name[256];
     X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
     X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-    std::cout << "Verifying " << subject_name << "\n";
+    //std::cout << "Verifying " << subject_name << "\n";
 
     return preverified;
+}
+#else
+connection::connection(boost::asio::io_service& io_service)
+: allow_new_client_old_server_(0),
+  allow_old_client_new_server_(0),
+  socket_(io_service)
+{
+#ifdef DEBUG_CONNECTION
+   std::cout << "Connection::connection\n";
+#endif
 }
 #endif
 

@@ -47,7 +47,7 @@ using namespace ecf;
 Server::Server( ServerEnvironment& serverEnv ) :
    io_service_(),
 #ifdef ECF_OPENSSL
-   context_(boost::asio::ssl::context::sslv23)
+   context_(boost::asio::ssl::context::sslv23),
 #endif
    signals_(io_service_),
    acceptor_(io_service_),
@@ -73,17 +73,6 @@ Server::Server( ServerEnvironment& serverEnv ) :
 #endif
                                 << endl;
 
-#ifdef ECF_OPENSSL
-   context_.set_options(
-       boost::asio::ssl::context::default_workarounds
-       | boost::asio::ssl::context::no_sslv2
-       | boost::asio::ssl::context::single_dh_use);
-   context_.set_password_callback(boost::bind(&Server::get_password, this));
-   context_.use_certificate_chain_file("server.crt");
-   context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
-   context_.use_tmp_dh_file("dh512.pem");
-#endif
-
    // Register to handle the signals.
    // Support for emergency check pointing during system session.
    signals_.add(SIGTERM);
@@ -96,6 +85,17 @@ Server::Server( ServerEnvironment& serverEnv ) :
    acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
    acceptor_.bind(endpoint);
    acceptor_.listen();   // address is use error, when it comes, bombs out here
+
+#ifdef ECF_OPENSSL
+   context_.set_options(
+       boost::asio::ssl::context::default_workarounds
+       | boost::asio::ssl::context::no_sslv2
+       | boost::asio::ssl::context::single_dh_use);
+   context_.set_password_callback(boost::bind(&Server::get_password, this));
+   context_.use_certificate_chain_file("server.crt");
+   context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
+   context_.use_tmp_dh_file("dh512.pem");
+#endif
 
 
    // Update stats, this is returned via --stats command option
@@ -181,56 +181,21 @@ void Server::start_accept()
    if (serverEnv_.debug()) cout << "   Server::start_accept()" << endl;
 
 #ifdef ECF_OPENSSL
-   connection_ptr new_conn( new connection( io_service_,context_ ) );
-
-   new_conn->socket().async_handshake(boost::asio::ssl::stream_base::server,
-                           boost::bind(&Server::handle_handshake, this,
-                                 boost::asio::placeholders::error,new_conn ));
-
+   connection_ptr new_conn( new connection( io_service_, context_ ) );
 #else
    connection_ptr new_conn( new connection( io_service_ ) );
+#endif
+
    if (serverEnv_.allow_old_client_new_server() !=0 ) {
       new_conn->allow_old_client_new_server(serverEnv_.allow_old_client_new_server());
    }
 
-   acceptor_.async_accept( new_conn->socket(),
+   acceptor_.async_accept( new_conn->socket_ll(),
                            boost::bind( &Server::handle_accept, this,
                                  boost::asio::placeholders::error,
                                  new_conn ) );
-#endif // ECF_OPENSSL
-
 #endif // ECFLOW_MT
 }
-
-
-#ifdef ECF_OPENSSL
-void Server::handle_handshake(const boost::system::error_code& e,connection_ptr new_conn )
-{
-  if (!error)
-  {
-     acceptor_.async_accept( new_conn->socket(),
-                              boost::bind( &Server::handle_accept, this,
-                                    boost::asio::placeholders::error,
-                                    new_conn ) );
-  }
-  else
-  {
-     // An error occurred.
-     // o/ If client has been killed/disconnected/timed out
-     //       Server::handle_read : End of file
-     //
-     // o/ If a *new* client talks to an *old* server, with an unrecognised request/command
-     //    we will see:
-     //       Connection::handle_read_data boost::archive::archive_exception unregistered class
-     //       Server::handle_read : Invalid argument
-     LogToCout toCoutAsWell;
-     LOG(Log::ERR, "Server::handle_handshake: " <<  e.message());
-     // delete this;
-  }
-}
-#endif
-
-
 
 #ifdef ECFLOW_MT
 void Server::handle_accept(const boost::system::error_code& e)
@@ -255,6 +220,8 @@ void Server::handle_accept(const boost::system::error_code& e)
 #else
 void Server::handle_accept( const boost::system::error_code& e, connection_ptr conn )
 {
+   if (serverEnv_.debug()) cout << "   Server::handle_accept" << endl;
+
    // Check whether the server was stopped by a signal before this completion
    // handler had a chance to run.
    if (!acceptor_.is_open()) {
@@ -266,12 +233,20 @@ void Server::handle_accept( const boost::system::error_code& e, connection_ptr c
       // Read and interpret message from the client
       if (serverEnv_.debug()) cout << "   Server::handle_accept" << endl;
 
+#ifdef ECF_OPENSSL
+         conn->socket().async_handshake(boost::asio::ssl::stream_base::server,
+                                 boost::bind(&Server::handle_handshake, this,
+                                       boost::asio::placeholders::error,conn ));
+
+#else
       // Successfully accepted a new connection. Determine what the
       // client sent to us. The connection::async_read() function will
       // automatically. serialise the inbound_request_ data structure for us.
       conn->async_read( inbound_request_,
                      boost::bind( &Server::handle_read, this,
                                 boost::asio::placeholders::error,conn ) );
+#endif
+
    }
    else {
       if (serverEnv_.debug()) cout << "   Server::handle_accept " << e.message() << endl;
@@ -289,6 +264,37 @@ void Server::handle_accept( const boost::system::error_code& e, connection_ptr c
    // Moved here to follow the examples used in ASIO.
    // However can this get into an infinite loop ???
    start_accept();
+}
+#endif
+
+#ifdef ECF_OPENSSL
+void Server::handle_handshake(const boost::system::error_code& e,connection_ptr new_conn )
+{
+   if (serverEnv_.debug()) cout << "   Server::handle_handshake" << endl;
+
+   if (!e)
+   {
+      // Successfully accepted a new connection. Determine what the
+      // client sent to us. The connection::async_read() function will
+      // automatically. serialise the inbound_request_ data structure for us.
+      new_conn->async_read( inbound_request_,
+                     boost::bind( &Server::handle_read, this,
+                                boost::asio::placeholders::error,new_conn ) );
+   }
+   else
+   {
+      // An error occurred.
+      // o/ If client has been killed/disconnected/timed out
+      //       Server::handle_read : End of file
+      //
+      // o/ If a *new* client talks to an *old* server, with an unrecognised request/command
+      //    we will see:
+      //       Connection::handle_read_data boost::archive::archive_exception unregistered class
+      //       Server::handle_read : Invalid argument
+      LogToCout toCoutAsWell;
+      LOG(Log::ERR, "Server::handle_handshake: " <<  e.message());
+      // delete this;
+   }
 }
 #endif
 
@@ -389,7 +395,7 @@ bool Server::shutdown_socket(connection_ptr conn, const std::string& msg) const
    //
    // Since this can happen, instead of throwing, we use non-throwing version & just report it
    boost::system::error_code ec;
-   conn->socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both,ec);
+   conn->socket_ll().shutdown(boost::asio::ip::tcp::socket::shutdown_both,ec);
    if (ec) {
       ecf::LogToCout logToCout;
       std::stringstream ss; ss << msg << " socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;

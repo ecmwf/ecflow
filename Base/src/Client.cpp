@@ -116,7 +116,7 @@ bool Client::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_ite
       deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
       boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
-      connection_.socket().async_connect(
+      connection_.socket_ll().async_connect(
                endpoint,
                boost::bind(
                         &Client::handle_connect,
@@ -144,7 +144,7 @@ void Client::handle_connect(  const boost::system::error_code& e,
   // The async_connect() function automatically opens the socket at the start
   // of the asynchronous operation. If the socket is closed at this time then
   // the timeout handler must have run first.
-  if (!connection_.socket().is_open())
+  if (!connection_.socket_ll().is_open())
   {
 #ifdef DEBUG_CLIENT
      std::cout << "   Client::handle_connect: *Connect timeout*:  Trying next end point" << std::endl;
@@ -167,7 +167,7 @@ void Client::handle_connect(  const boost::system::error_code& e,
 
      // Some kind of error. We need to close the socket used in the previous connection attempt
      // before starting a new one.
-     connection_.socket().close();
+     connection_.socket_ll().close();
 
      // Try the next end point.
      if (!start_connect( ++endpoint_iterator)) {
@@ -196,7 +196,7 @@ void Client::handle_connect(  const boost::system::error_code& e,
 void Client::start_handshake()
 {
 #ifdef DEBUG_CLIENT
-     std::cout << "   Client::start_handshake " << outbound_request_ << std::endl;
+   std::cout << "   Client::start_handshake " << outbound_request_ << std::endl;
 #endif
    // expires_from_now cancels any pending asynchronous waits, and returns the number of asynchronous waits that were cancelled.
    // If it returns 0 then you were too late and the wait handler has already been executed, or will soon be executed.
@@ -210,13 +210,13 @@ void Client::start_handshake()
 
 void Client::handle_handshake( const boost::system::error_code& e )
 {
+#ifdef DEBUG_CLIENT
+   std::cout << "   Client::handle_handshake " << std::endl;
+#endif
    if (!e) {
       start_write();
    }
    else {
-
-      std::cout << "Handshake failed: " << e.message() << "\n";
-
       // An error occurred.
       stop();
 
@@ -347,7 +347,7 @@ void Client::handle_read( const boost::system::error_code& e )
 void Client::stop()
 {
    stopped_ = true;
-   connection_.socket().close();
+   connection_.socket_ll().close();
    deadline_.cancel();
 }
 
