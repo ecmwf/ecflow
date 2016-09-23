@@ -203,7 +203,7 @@ void Server::start_accept()
 }
 
 
-#ifdef ECF_OPENSLL
+#ifdef ECF_OPENSSL
 void Server::handle_handshake(const boost::system::error_code& e,connection_ptr new_conn )
 {
   if (!error)
@@ -398,8 +398,6 @@ bool Server::shutdown_socket(connection_ptr conn, const std::string& msg) const
    }
    return true;
 }
-
-#endif
 
 
 void Server::terminate()

@@ -25,7 +25,10 @@
 #include <vector>
 
 #include <boost/asio.hpp>
+#ifdef ECF_OPENSSL
 #include <boost/asio/ssl.hpp>
+#endif
+
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -63,14 +66,12 @@ public:
 	connection(boost::asio::io_service& io_service);
 	~connection();
 
-#ifdef ECF_OPENSLL
-     connection(boost::asio::io_service& io_service,boost::asio::ssl::context& context);
-	  bool verify_certificate(bool preverified, boost::asio::ssl::verify_context& ctx);
-#endif
+#ifdef ECF_OPENSSL
+	connection(boost::asio::io_service& io_service,boost::asio::ssl::context& context);
+	bool verify_certificate(bool preverified, boost::asio::ssl::verify_context& ctx);
 
 	/// Get the underlying socket. Used for making a connection or for accepting
 	/// an incoming connection.
-#ifdef ECF_OPENSLL
 	ssl_socket::lowest_layer_type& socket() { return socket_.lowest_layer();}
 #else
 	boost::asio::ip::tcp::socket& socket() { return socket_; }

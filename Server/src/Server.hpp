@@ -67,7 +67,7 @@ private:
    void handle_accept(const boost::system::error_code& e);
 #else
 
-#ifdef ECF_OPENSLL
+#ifdef ECF_OPENSSL
    void handle_handshake(const boost::system::error_code& error,connection_ptr conn);
 #endif
 
@@ -142,7 +142,7 @@ private:
    /// The io_service used to perform asynchronous operations.
    boost::asio::io_service io_service_;
 
-#ifdef ECF_OPENSLL
+#ifdef ECF_OPENSSL
    boost::asio::ssl::context context_;
 #endif
 

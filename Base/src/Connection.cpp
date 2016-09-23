@@ -15,7 +15,6 @@
 
 #include "Connection.hpp"
 
-
 connection::connection(boost::asio::io_service& io_service)
 : allow_new_client_old_server_(0),
   allow_old_client_new_server_(0),
@@ -33,8 +32,7 @@ connection::~connection() {
 }
 
 
-#ifdef ECF_OPENSLL
-
+#ifdef ECF_OPENSSL
 connection::connection(boost::asio::io_service& io_service , boost::asio::ssl::context& context)
 : allow_new_client_old_server_(0),
   allow_old_client_new_server_(0),
