@@ -13,6 +13,7 @@
 #  code for testing creation of defs file in python
 import os
 import ecflow
+import copy
 from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Variable, Limit, InLimit, \
                    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
                    RepeatString, RepeatDate, RepeatInteger, RepeatDay, RepeatEnumerated, \
@@ -30,23 +31,34 @@ if __name__ == "__main__":
     t1 = f1.add_task("t1")
     t2 = f1.add_task("t2")
     assert len(list(f1.nodes)) == 2 ,"Expected family to have 2 nodes"
+    defs_copy = copy.copy(defs)
+     
     
-    t2.remove()
+    t2_remove = t2.remove()
     assert len(list(f1.nodes)) == 1 ,"Expected family to have 1 nodes"
 
-    t1.remove()
+    t1_remove = t1.remove()
     assert len(list(f1.nodes)) == 0 ,"Expected family to have 0 nodes"
 
-    f1.remove()
+    f1_remove = f1.remove()
     assert len(list(s1.nodes)) == 0 ,"Expected suite to have no nodes"
 
     node_vec = defs.get_all_nodes()
     assert len(node_vec) == 2, "Expected 2 suites only, but found " + str(len(node_vec))
 
-    s1.remove()
+    s1_remove = s1.remove()
     node_vec = defs.get_all_nodes()
     assert len(node_vec) == 1, "Expected 1 suites only, but found " + str(len(node_vec))
 
-    s0.remove()
+    s0_remove = s0.remove()
     node_vec = defs.get_all_nodes()
     assert len(node_vec) == 0, "Expected 0 suites only, but found " + str(len(node_vec))
+
+    # =========================================================
+    defs2 = Defs();
+    defs2.add_suite(s0_remove)
+    s = defs2.add_suite(s1_remove) # s1_remove is returned as s
+    f =  s.add_family(f1_remove)   # f1_remove is returned as f
+    f.add_task(t1_remove)
+    f.add_task(t2_remove)
+    assert defs2 == defs_copy ,"expected defs to be the same"

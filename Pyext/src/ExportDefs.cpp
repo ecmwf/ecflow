@@ -112,7 +112,7 @@ std::string simulate(defs_ptr defs)
 SState::State get_server_state(defs_ptr self) { return self->server().get_state(); }
 
 /// Since we don't pass in a child pos, the nodes are added to the end
-void add_suite(defs_ptr self,suite_ptr s){ self->addSuite(s); }
+suite_ptr add_suite(defs_ptr self,suite_ptr s){ self->addSuite(s); return s; }
 
 std::vector<task_ptr> get_all_tasks(defs_ptr self){ std::vector<task_ptr> tasks; self->get_all_tasks(tasks); return tasks; }
 std::vector<node_ptr> get_all_nodes(defs_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
