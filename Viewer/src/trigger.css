@@ -22,50 +22,18 @@ a:link
     color: #0645AD;
 }
 
+a:hover
+{
+    text-decoration:bold;
+    color: #0645AD;
+}
+
 a:link.chp
 {
     text-decoration:none;
     color: #1a1f20;
     font-weight: bold;
 }
-
-/*
-table
-    {
-    border-color:  #0000FF;
-    background-color: #FF0000;
-    padding: 3px 2px 3px 2px;
-     }
-*/
-  /*table
-   {
-        background-color: #F6F6F6;
-        border: 1px solid #000000;
-        border-collapse: separate;
-        font-size: 11px;
-        margin-bottom: 25px;
-    border-collapse: collapse;
-        border-spacing: 0;
-        padding-top: 0px;
-    }*/
-/*    th
-      {
-         padding-left: 4px;
-         padding-top: 4px;
-         padding-bottom: 4px;
-         background-color: #e1e1e1;
-         color: #000000;
-         font-size: 12px;
-         text-align: left;
-
-      }
-
-
-td {
-    padding-left: 2px;
-    padding-top: 1px;
-    padding-bottom: 1px;
-}*/
 
 th
 {
@@ -102,24 +70,6 @@ td.title {
     /*background-color: #98a7c2;*/
     color: #1a1f20;
 }
-
-
-/*
-td.child {
-    padding-left: 2px;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    background-color: #d9e0ef;
-    color: #1a1f20;
-}
-
-td.parent {
-    padding-left: 2px;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    background-color: #e3e3e3;
-}
-*/
 
 td.trigger {
     padding-left: 2px;
