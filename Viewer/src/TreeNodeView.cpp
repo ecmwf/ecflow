@@ -61,6 +61,10 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 	setMouseTracking(true);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+    header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+    header()->setStretchLastSection(false);
+    header()->setMinimumSectionSize(4096);
+
 	//!!!!We need to do it because:
 	//The background colour between the view's left border and the nodes cannot be
 	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
@@ -71,7 +75,8 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 	setPalette(pal);
 
 	//Hide header
-	header()->hide();
+    setHeaderHidden(true);
+    //header()->hide();
 
 	//Context menu
 	setContextMenuPolicy(Qt::CustomContextMenu);
@@ -137,6 +142,12 @@ void TreeNodeView::setModel(NodeFilterModel *model)
 QWidget* TreeNodeView::realWidget()
 {
 	return this;
+}
+
+void TreeNodeView::resizeEvent(QResizeEvent* e)
+{
+    QTreeView::resizeEvent(e);
+    //resizeColumnToContents(0);
 }
 
 //Collects the selected list of indexes

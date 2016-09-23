@@ -785,7 +785,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//Draw aborted reason
 	if(hasReason)
 	{
-        painter->setPen(stateShape.col_);
+        painter->setPen(stateShape.col_.darker(120));
 		painter->setFont(abortedReasonFont_);
 		painter->drawText(reasonRect,Qt::AlignLeft | Qt::AlignVCenter,reasonTxt);
 	}

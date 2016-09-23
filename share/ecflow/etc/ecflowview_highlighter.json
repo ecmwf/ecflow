@@ -4,8 +4,7 @@
         		"main" : {
                         "pattern" : "^\\s*(name|type|status|at|aborted reason)\\s+:",
                         "colour"  : "rgb(0,0,128)",
-                        "bold"    : "true"
-                                
+                        "bold"    : "true"                               
                 },
                 
                 "def" : {
@@ -19,7 +18,12 @@
                     "colour"  : "rgb(136,0,136)",               
                     "bold"    : "true"
                 }, 
-                         
+
+                "aborted_reason" : {
+                    "pattern" : "aborted reason : ([^\n]*)",
+                     "colour"  : "rgb(172,0,0)"
+                },
+
                 "comment" : {
                     "pattern" : "(#[^\n]*)",                     
                     "colour"  : "rgb(100,100,100)",
