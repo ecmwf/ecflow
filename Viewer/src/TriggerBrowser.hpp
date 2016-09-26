@@ -34,6 +34,7 @@ public:
     void setOwner(TriggerItemWidget*);
     void clear();
     void load();
+    void suspend();
     void nodeChanged(const VNode*);
 
 protected Q_SLOTS:

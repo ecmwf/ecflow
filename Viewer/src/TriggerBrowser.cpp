@@ -65,9 +65,15 @@ void TriggerBrowser::setOwner(TriggerItemWidget* owner)
 
 void TriggerBrowser::clear()
 {
+    triggerCollector_->clear();
     loadedTabs_.clear();
     triggerBrowser_->clear();
     triggeredBrowser_->clear();
+}
+
+void TriggerBrowser::suspend()
+{
+    triggerCollector_->clear();
 }
 
 void TriggerBrowser::load()
@@ -157,7 +163,7 @@ void TriggerBrowser::loadTriggeredTab(bool forceLoad)
 
 void TriggerBrowser::on_tab__currentChanged(int idx)
 {
-    if(owner_)
+    if(owner_ && !owner_->isSuspended())
     {
         if(idx == tabIndexToInt(TriggerTabIndex))
             loadTriggerTab();

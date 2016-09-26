@@ -89,6 +89,12 @@ void TriggerItemWidget::clearContents()
 
 void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
+    if(flags.isSet(SuspendedChanged))
+    {
+        if(suspended_)
+           textBrowser_->suspend();
+    }
+
     checkActionState();
 }
 

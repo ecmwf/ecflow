@@ -55,6 +55,8 @@ public:
 	void setFrozen(bool);
 	void setDetached(bool);
 
+    bool isSuspended() const {return suspended_;}
+
 	//From VTaskObserver
     void taskChanged(VTask_ptr) {}
 
