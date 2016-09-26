@@ -126,7 +126,11 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test )
   	boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 	DurationTimer duration_timer;
 	ClientInvoker theClient(invokeServer.host(), invokeServer.port());
+#ifdef ECF_OPENSSL
+	int load = 30;
+#else
 	int load = 125;
+#endif
 	for(int i = 0; i < load; i++) {
 
 		BOOST_REQUIRE_MESSAGE(theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
@@ -177,8 +181,11 @@ BOOST_AUTO_TEST_CASE( test_server_group_stress_test )
 	groupRequest += CtsApi::get();
 
 	//cout << "groupRequest = " << groupRequest << "\n";
-
-	int load = 125;
+#ifdef ECF_OPENSSL
+   int load = 30;
+#else
+   int load = 125;
+#endif
 	for(int i = 0; i < load; i++) {
    	BOOST_REQUIRE_MESSAGE( theClient.group(groupRequest) == 0,"Group request " << CtsApi::group(groupRequest) << " failed should return 0\n" << theClient.errorMsg());
  	 	BOOST_REQUIRE_MESSAGE( theClient.defs().get(),"Server returned a NULL defs");
@@ -212,6 +219,10 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
    int load = 65; // On non linux systems use different load otherwise it takes to long
 #else
    int load = 136;
+#endif
+
+#ifdef ECF_OPENSSL
+   load = 10;
 #endif
 
    boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
