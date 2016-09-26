@@ -94,7 +94,7 @@ Server::Server( ServerEnvironment& serverEnv ) :
    context_.set_password_callback(boost::bind(&Server::get_password, this));
    context_.use_certificate_chain_file("server.crt");
    context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
-   context_.use_tmp_dh_file("dh512.pem");
+   context_.use_tmp_dh_file("dh1024.pem");
 #endif
 
 
