@@ -1015,11 +1015,11 @@ def test_client_alter_change(ci):
     trigger = task_t1.get_trigger()
     assert trigger.get_expression() == "t2 == aborted", "Expected alter of trigger to be 't2 == aborted' but found " + trigger.get_expression()
 
-    ci.alter(t1,"change","trigger","/s1/f1/t2 == complete")   
+    ci.alter(t1,"change","trigger","/test_client_alter_change/f1/t2 == complete")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     trigger = task_t1.get_trigger()
-    assert trigger.get_expression() == "/s1/f1/t2 == complete", "Expected alter of trigger to be '/s1/f1/t2 == complete' but found " + trigger.get_expression()
+    assert trigger.get_expression() == "/test_client_alter_change/f1/t2 == complete", "Expected alter of trigger to be '/test_client_alter_change/f1/t2 == complete' but found " + trigger.get_expression()
 
     ci.alter(t1,"change","complete","t2 == aborted")   
     ci.sync_local()
@@ -1027,11 +1027,11 @@ def test_client_alter_change(ci):
     complete = task_t1.get_complete()
     assert complete.get_expression() == "t2 == aborted", "Expected alter of complete to be 't2 == aborted' but found " + complete.get_expression()
 
-    ci.alter(t1,"change","complete","/s1/f1/t2 == active")   
+    ci.alter(t1,"change","complete","/test_client_alter_change/f1/t2 == active")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     complete = task_t1.get_complete()
-    assert complete.get_expression() == "/s1/f1/t2 == active", "Expected alter of complete to be '/s1/f1/t2 == active' but found " + complete.get_expression()
+    assert complete.get_expression() == "/test_client_alter_change/f1/t2 == active", "Expected alter of complete to be '/test_client_alter_change/f1/t2 == active' but found " + complete.get_expression()
 
     ci.alter(t1,"change","limit_max","limit", "2")   
     ci.sync_local()
@@ -1575,24 +1575,24 @@ if __name__ == "__main__":
         test_client_new_log(ci, the_port)             
         test_client_clear_log(ci, the_port)             
         test_client_log_msg(ci, the_port)             
-          
+           
         test_client_restart_server(ci)             
         test_client_halt_server(ci)             
         test_client_shutdown_server(ci)   
-      
+       
         test_client_load_in_memory_defs(ci)             
         test_client_load_from_disk(ci)             
         test_client_checkpt(ci, the_port)             
         test_client_restore_from_checkpt(ci, the_port)             
-           
+            
         test_client_reload_wl_file(ci, the_port)             
-   
+    
         test_client_run(ci)  
         test_client_run_with_multiple_paths(ci)     
         test_client_requeue(ci)             
         test_client_requeue_with_multiple_paths(ci)             
         test_client_free_dep(ci)              
-  
+   
         test_client_suites(ci)
         test_client_ch_suites(ci)  
         test_client_ch_register(ci)             
@@ -1601,7 +1601,7 @@ if __name__ == "__main__":
         test_client_ch_add(ci)             
         test_client_ch_auto_add(ci)             
         test_client_ch_remove(ci)             
-             
+              
         test_client_get_file(ci)             
         #test_client_plug(ci)             
         test_client_alter_add(ci) 
@@ -1609,11 +1609,11 @@ if __name__ == "__main__":
         test_client_alter_change(ci) 
         test_client_alter_flag(ci) 
         test_client_flag_migrated(ci) 
-
+ 
         test_client_force(ci)             
         test_client_replace(ci,False)             
         test_client_replace(ci,True)             
-  
+   
         #test_client_kill(ci)             
         #test_client_status(ci)             
         #test_client_order(ci)             
@@ -1624,14 +1624,14 @@ if __name__ == "__main__":
         test_client_resume_multiple_paths(ci)             
         test_client_delete_node(ci)             
         test_client_delete_node_multiple_paths(ci)             
-  
+   
         test_client_check(ci)  
         test_client_check_defstatus(ci)  
-   
+    
         test_client_stats(ci)             
         test_client_stats_reset(ci)             
         test_client_debug_server_on_off(ci)    
-         
+          
         test_ECFLOW_189(ci)         
         test_ECFLOW_199(ci)         
 
