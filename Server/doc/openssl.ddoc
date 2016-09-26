@@ -1,3 +1,9 @@
+Build
+================================================================
+b8r define=ECF_OPENSSL
+
+Keys
+===================================================================
 ref:http://panoptic.com/wiki/aolserver/How_to_generate_self-signed_SSL_certificates
 https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs
 
@@ -24,8 +30,8 @@ cp server.key server.key.secure
 openssl rsa -in server.key.secure -out server.key
 
 
-# Generate dhparam file
-openssl dhparam -out dh512.pem 512
+# Generate dhparam file, Using 512 causes Handshake failed: dh key too small 
+openssl dhparam -out dh1024.pem 1024
 
 
 Once you've done that, you need to change the filenames in server.cpp and client.cpp.
@@ -39,3 +45,11 @@ context_.use_tmp_dh_file("dh512.pem");
 client.cpp
 
 ctx.load_verify_file("server.crt");
+
+
+Python
+====================================================
+python -c "import ssl; print(ssl.OPENSSL_VERSION)"
+
+
+ 
