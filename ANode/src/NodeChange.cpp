@@ -108,6 +108,13 @@ void Node::changeTrigger(const std::string& expression)
 		throw std::runtime_error( ss.str() );
 	}
 
+	std::string errorMsg;
+   if (!check_expressions(ast.get(),expression,true/*trigger*/,errorMsg)) {
+      std::stringstream ss;
+      ss << "Node::changeTrigger: Failed checking. " << errorMsg ;
+      throw std::runtime_error( ss.str() );
+   }
+
 	deleteTrigger();
 	add_trigger( expression );
 }
@@ -122,6 +129,13 @@ void Node::changeComplete(const std::string& expression)
 		ss << "Node::changeComplete: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
 		throw std::runtime_error( ss.str() );
 	}
+
+   std::string errorMsg;
+   if (!check_expressions(ast.get(),expression,false/*complete*/,errorMsg)) {
+      std::stringstream ss;
+      ss << "Node::changeComplete: Failed checking. " << errorMsg ;
+      throw std::runtime_error( ss.str() );
+   }
 
 	deleteComplete();
 	add_complete( expression );

@@ -30,6 +30,8 @@ ECFLOW-631 why command should force calendar to sync.
           
        The work around is suspend/resume to force a change change, and then call why command.
        
+- Stats- If new command added stats command needs to be changed.
+
     
 Client 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8

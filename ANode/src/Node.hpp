@@ -556,6 +556,9 @@ public:
    /// update change numbers to force sync
    virtual void force_sync(){};
 
+   /// check trigger expression have nodes that resolve
+   bool check_expressions(Ast*,const std::string& expr, bool trigger, std::string& errorMsg) const;
+
 protected:
    /// Used in conjunction with Node::position()
    /// returns std::numeric_limits<std::size_t>::max() if child not found
