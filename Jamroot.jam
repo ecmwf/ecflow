@@ -10,8 +10,8 @@ project ecflow_top ;
 #
 # OPENSSL support, should really be in site-config.jam
 #
-lib libssl    : : <file>/usr/lib64/libssl.a ;
-lib libcrypto : : <file>/usr/lib64/libcrypto.a ;
+lib libssl    : : <file>/usr/lib64/libssl.so ;
+lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
 
 # link with libdl.so, shared lib containing dlopen(),dlclose()dysym(),
 # these functions are used by OpenSSL internally & thus -ldl is an
@@ -21,6 +21,11 @@ lib dl ;  # this dependency for using libcrypto, i.e dlopen,dlclose etc, when us
 
 alias openssl_libs : libssl libcrypto dl : <define>ECF_OPENSSL ;
 
+#import feature : feature ;
+#feature with-ssl : off on : optional composite propagated ;
+#feature.compose <with-ssl>on : <define>ECF_OPENSSL ;
+
+ 
 #
 # To clean all the sub projects just use: bjam --clean
 #

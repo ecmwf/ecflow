@@ -96,19 +96,6 @@ lib unwind ;
 lib m ;
 alias hpux_std_libs : std_v2 stream Csup unwind m ;
 
-
-lib libssl_so    : : <file>/usr/lib64/libssl.so ;
-lib libcrypto_so : : <file>/usr/lib64/libcrypto.so ;
-
-# link with libdl.so, shared lib containing dlopen(),dlclose()dysym(),
-# these functions are used by OpenSSL internally & thus -ldl is an
-# indirect dependency when using -lcrypto(on Linux) Because we linking
-# with static version of crypto, need to explicitly link against indirect dependencies.
-lib dl ;  # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
-
-alias openssl_libs_so : libssl_so libcrypto_so dl   ;
-
-
 # ========================================================================
 # Extension:  Declare a Python extension called ecflow.  
 # ========================================================================
@@ -126,7 +113,7 @@ python-extension ecflow : [ glob src/*.cpp ]
     /site-config//boost_program_options
     /site-config//boost_datetime
     /site-config//boost_python_static
-    openssl_libs_so
+    /ecflow_top//openssl_libs
     : <variant>debug:<define>DEBUG
       <toolset>acc:<library>hpux_std_libs  
     ;
