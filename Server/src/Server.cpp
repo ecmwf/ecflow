@@ -87,14 +87,16 @@ Server::Server( ServerEnvironment& serverEnv ) :
    acceptor_.listen();   // address is use error, when it comes, bombs out here
 
 #ifdef ECF_OPENSSL
+   std::string home_path = getenv("HOME");
+   home_path += "/.ecflow/";
    context_.set_options(
        boost::asio::ssl::context::default_workarounds
        | boost::asio::ssl::context::no_sslv2
        | boost::asio::ssl::context::single_dh_use);
    context_.set_password_callback(boost::bind(&Server::get_password, this));
-   context_.use_certificate_chain_file("server.crt");
-   context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
-   context_.use_tmp_dh_file("dh1024.pem");
+   context_.use_certificate_chain_file(home_path + "server.crt" );
+   context_.use_private_key_file(home_path + "server.key", boost::asio::ssl::context::pem);
+   context_.use_tmp_dh_file(home_path + "dh1024.pem");
 #endif
 
 
