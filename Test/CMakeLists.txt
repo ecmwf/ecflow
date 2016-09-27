@@ -54,18 +54,19 @@ if (ENABLE_ALL_TESTS)
 	./TestWhyCmd.cpp
 	./Test_Time.cpp
 	)
+	
+	# if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 	ecbuild_add_test( TARGET s_test
 	                  BOOST
 	                  SOURCES  ${test_srcs}
-	                  LIBS     libharness
+	                  LIBS     libharness ${OPENSSL_LIBRARIES}
 	                  TEST_DEPENDS s_client
 	                )
-	
 	
 	ecbuild_add_test( TARGET  s_test_zombies
 	                  BOOST
 	                  SOURCES   ./TestZombies.cpp
-	                  LIBS      libharness 
+	                  LIBS      libharness ${OPENSSL_LIBRARIES}
 	                  TEST_DEPENDS s_test
 	                )
 	

@@ -18,6 +18,8 @@ show_error_and_exit() {
    echo "   ctest          - all ctest -R <test> -V"
    echo "   san            - is short for clang thread sanitiser"
    echo "   no_gui         - Don't build the gui"
+   echo "   ssl            - build using openssl"
+   echo "   log            - enable debug output"
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
    echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
@@ -39,6 +41,8 @@ ctest_arg=
 clean_arg=
 no_gui_arg=
 python3_arg=
+ssl_arg=
+log_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -59,6 +63,8 @@ while [[ "$#" != 0 ]] ; do
       done
       break
    elif [[ "$1" = no_gui ]] ; then no_gui_arg=$1 ;
+   elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
+   elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
@@ -205,6 +211,16 @@ fi
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 
+ssl_options=
+if [[ $ssl_arg = ssl ]] ; then
+    ssl_options="-DENABLE_SSL=ON"
+fi
+
+log_options=
+if [[ $log_arg = log ]] ; then
+    log_options="-DECBUILD_LOG_LEVEL=DEBUG"
+fi
+
 gui_options=
 if [[ $no_gui_arg = no_gui ]] ; then
     gui_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF -DENABLE_ALL_TESTS=ON"
@@ -225,7 +241,9 @@ ecbuild $source_dir \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
             ${cmake_extra_options} \
-            ${gui_options}
+            ${gui_options} \
+            ${ssl_options} \
+            ${log_options}
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \

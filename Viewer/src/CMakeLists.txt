@@ -401,6 +401,7 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
          pthread  
          m crypt dl fl
          ${ECFLOW_QT_LIBRARIES}
+         ${OPENSSL_LIBRARIES}
 )
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs

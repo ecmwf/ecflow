@@ -31,13 +31,14 @@ ecbuild_add_library( TARGET libclient
                 )
 
 # ========================================================================
-# EXE ecflow_client
+# EXE ecflow_client, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
+
 ecbuild_add_executable( TARGET   ecflow_client
                         SOURCES  src/ClientMain.cpp
-                        LIBS     libclient 
+                        LIBS     libclient ${OPENSSL_LIBRARIES}
                         INCLUDES ${Boost_INCLUDE_DIRS} 
                       )
-   
+
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""
 # Using SKIP_BUILD_RPATH,BUILD_WITH_INSTALL_RPATH,INSTALL_RPATH_USE_LINK_PATH
@@ -95,11 +96,11 @@ if (ENABLE_SERVER)
         )
 endif()
               
-
+# if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 ecbuild_add_test( TARGET    s_client
                   BOOST
                   SOURCES   ${test_srcs}
-                  LIBS      libclient 
+                  LIBS      libclient ${OPENSSL_LIBRARIES}
                   INCLUDES  ../ANode/test
                             ../Base/test 
                   TEST_DEPENDS u_base

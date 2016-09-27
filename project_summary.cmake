@@ -19,3 +19,8 @@ if( PYTHONINTERP_FOUND )
 	message( STATUS "       libs     : ${PYTHON_LIBRARIES}" )
 endif()
 
+if (ENABLE_SSL)
+    ecbuild_info("OpenSSL VERSION  ${OPENSSL_VERSION}")
+    ecbuild_info("        LIBS     ${OPENSSL_LIBRARIES}")
+    ecbuild_info("        INCLUDES ${OPENSSL_INCLUDE_DIR}")
+endif()
