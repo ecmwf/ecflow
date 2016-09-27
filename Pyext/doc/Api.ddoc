@@ -27,3 +27,20 @@ o leave as a specific import:
   + more flexible
   - version mismatch between extension and API could arise
   - Need to test separately
+  
+Client- Set port specific to a user
+======================================================================
+
+import os
+import socket
+
+etc ...
+
+defs = Defs()
+defs.add(suite)
+ci = ecflow.Client()
+ci.set_host_port(socket.gethostname(),os.geteuid()+1500)
+ci.load(defs)
+ci.begin_suite(node_name)
+
+  
