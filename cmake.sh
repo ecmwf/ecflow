@@ -244,6 +244,7 @@ ecbuild $source_dir \
             ${gui_options} \
             ${ssl_options} \
             ${log_options}
+            #-DENABLE_ALL_TESTS=ON
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \

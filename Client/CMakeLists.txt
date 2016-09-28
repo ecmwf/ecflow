@@ -114,7 +114,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	ecbuild_add_test( TARGET   perf_test_large_defs 
                       BOOST
                       SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
-                      LIBS     libclient 
+                      LIBS     libclient ${OPENSSL_LIBRARIES}
                       INCLUDES ../ANode/test
                                ../Base/test 
                       TEST_DEPENDS u_base
@@ -126,7 +126,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	ecbuild_add_test( TARGET m_test_migration
                       BOOST
                       SOURCES  test/TestMigration.cpp test/SCPort.cpp
-                      LIBS     libclient 
+                      LIBS     libclient ${OPENSSL_LIBRARIES}
                       INCLUDES ../ANode/test
                                ../Base/test 
                       TEST_DEPENDS u_base
