@@ -76,7 +76,7 @@ ClientInvoker::ClientInvoker(const std::string& host_port)
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
+  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
    set_host_port(host,port);
@@ -84,7 +84,7 @@ ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 
 ClientInvoker::ClientInvoker(const std::string& host, int port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
+  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
    set_host_port(host, boost::lexical_cast<std::string>(port));
