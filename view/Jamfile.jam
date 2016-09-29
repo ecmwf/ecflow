@@ -49,8 +49,8 @@ exe ecflowview
      /site-config//boost_program_options
      /site-config//boost_datetime
      pthread
-     /ecflow_top//openssl_libs
    : <variant>debug:<define>DEBUG
+     [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
 #     <variant>release:<cxxflags>-O1
      <toolset>gcc:<include>$(MOTIF_INCLUDE)
      <include>../view/src
@@ -113,10 +113,10 @@ exe test-view : [ glob test/*.cpp  ]
            /site-config//boost_program_options
            /site-config//boost_datetime
            /site-config//boost_test
-           /ecflow_top//openssl_libs
          : <include>../Base/test 
            <include>../Test/src 
            <variant>debug:<define>DEBUG
+           [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
 #  	   <variant>release:<cxxflags>-O1
         ;
 # bjam -j8 release c++-template-depth=512

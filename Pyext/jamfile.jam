@@ -113,9 +113,9 @@ python-extension ecflow : [ glob src/*.cpp ]
     /site-config//boost_program_options
     /site-config//boost_datetime
     /site-config//boost_python_static
-    /ecflow_top//openssl_libs
     : <variant>debug:<define>DEBUG
       <toolset>acc:<library>hpux_std_libs  
+      [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
     ;
 
 # ========================================================================

@@ -61,7 +61,6 @@ exe ecflow_server : [ glob src/*Main.cpp ]
              /theParser//libparser
              /theBase//base
              libserver
-             /ecflow_top//openssl_libs
              /site-config//boost_system
              /site-config//boost_thread
              /site-config//boost_serialization
@@ -69,6 +68,7 @@ exe ecflow_server : [ glob src/*Main.cpp ]
              /site-config//boost_datetime
              /site-config//boost_program_options
            : <variant>debug:<define>DEBUG
+             [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
            ;
 
 #
@@ -83,7 +83,6 @@ exe u_server : [ glob test/*.cpp ]
              /theParser//libparser
              /theBase//base
              libserver
-             /ecflow_top//openssl_libs
              /site-config//boost_system
              /site-config//boost_thread
              /site-config//boost_serialization
@@ -92,4 +91,5 @@ exe u_server : [ glob test/*.cpp ]
              /site-config//boost_program_options
              /site-config//boost_test
            : <variant>debug:<define>DEBUG
+             [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
            ;
