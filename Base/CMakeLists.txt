@@ -28,6 +28,7 @@
  src/stc/ZombieGetCmd.cpp
  src/ClientToServerRequest.cpp
  src/Gnuplot.cpp
+ src/Openssl.cpp
  src/WhyCmd.cpp
  src/ServerToClientResponse.cpp
  src/cts/CSyncCmd.cpp

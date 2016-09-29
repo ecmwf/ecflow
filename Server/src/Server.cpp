@@ -35,6 +35,9 @@
 #include "Calendar.hpp"
 #include "Version.hpp"
 #include "Str.hpp"
+#ifdef ECF_OPENSSL
+#include "Openssl.hpp"
+#endif
 
 using boost::asio::ip::tcp;
 namespace fs = boost::filesystem;
@@ -87,8 +90,7 @@ Server::Server( ServerEnvironment& serverEnv ) :
    acceptor_.listen();   // address is use error, when it comes, bombs out here
 
 #ifdef ECF_OPENSSL
-   std::string home_path = getenv("HOME");
-   home_path += "/.ecflow/";
+   std::string home_path = ecf::Openssl::certificates_dir();
    context_.set_options(
        boost::asio::ssl::context::default_workarounds
        | boost::asio::ssl::context::no_sslv2

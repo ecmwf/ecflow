@@ -29,6 +29,9 @@
 #include "DurationTimer.hpp"
 #include "TimeStamp.hpp"
 #include "Log.hpp"
+#ifdef ECF_OPENSSL
+#include "Openssl.hpp"
+#endif
 
 #ifdef DEBUG
 
@@ -300,8 +303,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
 				   boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
-				   std::string home_path = getenv("HOME"); home_path += "/.ecflow/";
-				   ctx.load_verify_file(home_path + "server.crt");
+				   ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
 	            Client theClient( io_service,ctx,cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
 #else
 	            Client theClient( io_service, cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );

@@ -26,6 +26,9 @@
 #include "NodePath.hpp"
 #include "Client.hpp"
 #include "SuiteChanged.hpp"
+#ifdef ECF_OPENSSL
+#include "Openssl.hpp"
+#endif
 
 using namespace ecf;
 using namespace std;
@@ -135,8 +138,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
             boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
             boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
-            std::string home_path = getenv("HOME"); home_path += "/.ecflow/";
-            ctx.load_verify_file(home_path + "server.crt");
+            ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
             Client theClient( io_service, ctx, Cmd_ptr( new MoveCmd(as->hostPort(),sourceNode.get(), destPath) ),  host, port  );
 #else
             Client theClient( io_service, Cmd_ptr( new MoveCmd(as->hostPort(),sourceNode.get(), destPath) ),  host, port  );
