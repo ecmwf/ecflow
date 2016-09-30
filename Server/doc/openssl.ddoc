@@ -47,7 +47,9 @@ openssl rsa -in server.key.secure -out server.key
 openssl dhparam -out dh1024.pem 1024
 
 //==============================================================================================
+
 # How can you verify that the Private key matches a certificate and CSR
+------------------------------------------------------------------------
 openssl rsa -noout -modulus -in server.key  | openssl md5
 openssl x509 -noout -modulus -in server.crt | openssl md5
 openssl req -noout -modulus -in server.csr  | openssl md5
@@ -56,18 +58,41 @@ If the output of each command is identical there is an extremely high probabilit
 the private key, certificate, and CSR are related. 
 
 
-//==============================================================================================
-Once you've done that, you need to change the filenames in server.cpp and client.cpp.
+# How can I retrieve remote certificates & check expiration dates
+--------------------------------------------------------------
+Start your ssl based server.
 
-server.cpp
+cat <<EOF > retrieve-cert.sh
+#!/bin/sh
+#
+# usage: retrieve-cert.sh remote.host.name [port]
+#
+REMHOST=\$1
+REMPORT=\${2}
 
-context_.use_certificate_chain_file("server.crt"); 
-context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
-context_.use_tmp_dh_file("dh512.pem");
+echo |\
+openssl s_client -connect \${REMHOST}:\${REMPORT} 2>&1 |\
+sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
+EOF
 
-client.cpp
 
-ctx.load_verify_file("server.crt");
+You can, in turn, pipe that information back to openssl to do things like check 
+the dates on all your active certificates.
+
+cat <<EOF > retrieve-cert.sh
+#!/bin/sh
+#
+for CERT in \
+  eurydice:3142
+do
+  echo |\
+  openssl s_client -connect \${CERT} 2>/dev/null |\
+  sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' |\
+  openssl x509 -noout -subject -dates
+done
+EOF
+
+
 
 
 Python
