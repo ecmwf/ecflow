@@ -50,7 +50,7 @@ using namespace ecf;
 Server::Server( ServerEnvironment& serverEnv ) :
    io_service_(),
 #ifdef ECF_OPENSSL
-   context_(boost::asio::ssl::context::sslv23),
+   context_(ecf::Openssl::method()),
 #endif
    signals_(io_service_),
    acceptor_(io_service_),

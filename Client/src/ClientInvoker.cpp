@@ -302,7 +302,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 
 					boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
-				   boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+				   boost::asio::ssl::context ctx(ecf::Openssl::method());
 				   ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
 	            Client theClient( io_service,ctx,cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
 #else

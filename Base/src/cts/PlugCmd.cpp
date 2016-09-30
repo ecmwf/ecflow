@@ -137,7 +137,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
             // The source should end up being copied, when sent to remote server
             boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
-            boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+            boost::asio::ssl::context ctx(ecf::Openssl::method());
             ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
             Client theClient( io_service, ctx, Cmd_ptr( new MoveCmd(as->hostPort(),sourceNode.get(), destPath) ),  host, port  );
 #else
