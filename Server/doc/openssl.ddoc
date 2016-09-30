@@ -1,25 +1,38 @@
-Build
+Build 
 ================================================================
-b8r define=ECF_OPENSSL
+b8r       ssl=on           # boost/bjam
+ecbuild   -DENABLE_SLL=ON  # cmake/ecbuild
 
-Keys
+
+How to create the CSR, certificate and private key for ecflow
 ===================================================================
 ref:http://panoptic.com/wiki/aolserver/How_to_generate_self-signed_SSL_certificates
 https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs
 
-You need to create your certificates and sign them appropriately. Here are the commands for linux:
+You need to create your certificates and sign them appropriately. 
+Here are the commands for linux:
 
-# Generate a private key, will request a pass phrase.
+# Generate a password protected private key, will request a pass phrase.
 openssl genrsa -des3 -out server.key 1024
 
+   # Use this command to check that a private key (domain.key) is a valid key
+   openssl rsa -check -in server.key
 
-# Generate Certificate signing request. This asks a few questions
-# Note common name must match host name.
+# Generate Certificate signing request(CSR).PEM format
+# This asks a few questions:
+# Note 'common name' must match host name where your server is going to run.
 openssl req -new -key server.key -out server.csr
 
+   # This command allows you to view and verify the contents of a CSR (domain.csr) in plain text:
+   openssl req -text -noout -verify -in server.csr
 
+
+# generate certificate CRT, by using CSR and private key.
 # Sign certificate with private key (self signed certificate)
 openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
+
+   # This command allows you to view the contents of a certificate (server.crt) in plain text:
+   openssl x509 -text -noout -in server.crt
 
 
 # Remove password requirement (needed for example)
@@ -33,7 +46,17 @@ openssl rsa -in server.key.secure -out server.key
 # Generate dhparam file, Using 512 causes Handshake failed: dh key too small 
 openssl dhparam -out dh1024.pem 1024
 
+//==============================================================================================
+# How can you verify that the Private key matches a certificate and CSR
+openssl rsa -noout -modulus -in server.key  | openssl md5
+openssl x509 -noout -modulus -in server.crt | openssl md5
+openssl req -noout -modulus -in server.csr  | openssl md5
 
+If the output of each command is identical there is an extremely high probability that 
+the private key, certificate, and CSR are related. 
+
+
+//==============================================================================================
 Once you've done that, you need to change the filenames in server.cpp and client.cpp.
 
 server.cpp
