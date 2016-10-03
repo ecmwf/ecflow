@@ -32,6 +32,11 @@ connection::connection(boost::asio::io_service& io_service , boost::asio::ssl::c
    std::cout << "Connection::connection openssl\n";
 #endif
    socket_.set_verify_mode(boost::asio::ssl::verify_peer);
+
+   // If we want server to verify client certificate, the use as below:
+   // However this requires that certificate is installed.
+   //if (Ecf::server())  socket_.set_verify_mode(boost::asio::ssl::verify_peer|boost::asio::ssl::verify_fail_if_no_peer_cert);
+   //else                socket_.set_verify_mode(boost::asio::ssl::verify_peer);
    socket_.set_verify_callback(boost::bind(&connection::verify_certificate, this, _1, _2));
 }
 
@@ -48,7 +53,7 @@ bool connection::verify_certificate(bool preverified,boost::asio::ssl::verify_co
     char subject_name[256];
     X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
     X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-    //std::cout << "Verifying " << subject_name << "\n";
+    // std::cout << "Verifying " << subject_name << "\n";
 
     return preverified;
 }

@@ -13,26 +13,12 @@ You need to create your certificates and sign them appropriately.
 Here are the commands for linux:
 
 # Generate a password protected private key, will request a pass phrase.
-openssl genrsa -des3 -out server.key 1024
+# This key is a 1024 bit RSA key which is encrypted using Triple-DES and 
+# stored in a PEM format so that it is readable as ASCII text
+openssl genrsa -des3 -out server.key 1024     
 
    # Use this command to check that a private key (domain.key) is a valid key
    openssl rsa -check -in server.key
-
-# Generate Certificate signing request(CSR).PEM format
-# This asks a few questions:
-# Note 'common name' must match host name where your server is going to run.
-openssl req -new -key server.key -out server.csr
-
-   # This command allows you to view and verify the contents of a CSR (domain.csr) in plain text:
-   openssl req -text -noout -verify -in server.csr
-
-
-# generate certificate CRT, by using CSR and private key.
-# Sign certificate with private key (self signed certificate)
-openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
-
-   # This command allows you to view the contents of a certificate (server.crt) in plain text:
-   openssl x509 -text -noout -in server.crt
 
 
 # Remove password requirement (needed for example)
@@ -43,8 +29,44 @@ cp server.key server.key.secure
 openssl rsa -in server.key.secure -out server.key
 
 
+# Generate Certificate Signing Request(CSR). (This is used to create a certificate)
+# The CSR is used in one of two ways. Ideally, the CSR will be sent to a Certificate Authority, 
+# such as Verisign who will verify the identity of the requestor and issue a signed certificate. 
+# The second option is to self-sign the CSR, which will be demonstrated in the next section. 
+# This asks a few questions:
+# Note 'common name' must match host name where your server is going to run.
+openssl req -new -key server.key -out server.csr
+
+   # This command allows you to view and verify the contents of a CSR (domain.csr) in plain text:
+   openssl req -text -noout -verify -in server.csr
+
+
+# generate certificate CRT, by using the CSR and private key.
+# Sign certificate with private key (self signed certificate)
+openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
+
+   # This command allows you to view the contents of a certificate (server.crt) in plain text:
+   openssl x509 -text -noout -in server.crt
+
+  > server.crt   # self signed certificate
+  > server.key   # is the private key
+
+  # Generate a CSR from an Existing Certificate and Private Key
+  # Use this method if you want to renew an existing certificate but you or your 
+  # CA do not have the original CSR for some reason. 
+  # It basically saves you the trouble of re-entering the CSR information, as it extracts that 
+  # information from the existing certificate.
+  openssl x509  -in server.crt -signkey server.key -x509toreq -out server.csr
+
+
 # Generate dhparam file, Using 512 causes Handshake failed: dh key too small 
 openssl dhparam -out dh1024.pem 1024
+
+
+# Copy to the install area.
+$ cp server.crt /etc/ssl/certs/ssl.crt
+$ cp server.key /etc/ssl/private/ssl.key
+
 
 //==============================================================================================
 
