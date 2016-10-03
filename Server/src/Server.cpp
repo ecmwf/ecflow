@@ -288,13 +288,6 @@ void Server::handle_handshake(const boost::system::error_code& e,connection_ptr 
    else
    {
       // An error occurred.
-      // o/ If client has been killed/disconnected/timed out
-      //       Server::handle_read : End of file
-      //
-      // o/ If a *new* client talks to an *old* server, with an unrecognised request/command
-      //    we will see:
-      //       Connection::handle_read_data boost::archive::archive_exception unregistered class
-      //       Server::handle_read : Invalid argument
       LogToCout toCoutAsWell;
       LOG(Log::ERR, "Server::handle_handshake: " <<  e.message());
       // delete this;
