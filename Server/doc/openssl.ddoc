@@ -117,6 +117,44 @@ EOF
 
 
 
+If we want server to verify client certificate, thes use as below:
+===================================================================
+See File Connection.cpp
+
+*HOWEVER* this requires that certificate is installed.
+if (Ecf::server())  socket_.set_verify_mode(boost::asio::ssl::verify_peer|boost::asio::ssl::verify_fail_if_no_peer_cert);
+else                socket_.set_verify_mode(boost::asio::ssl::verify_peer);
+
+Otherwise we can error: See: http://gagravarr.org/writing/openssl-certs/errors.shtml
+>error 18 at 0 depth lookup:self signed certificate
+=> OpenSSL can't verify the certificate in question
+
+So, to veryify a certificate, we need to trust someone in the key signing chain. 
+At the very top of the chain will be a self signed certificate (it has to be, that's the chain termination). 
+If OpenSSL gets to the end of this chain without trusting anyone, and doesn't the self signed bit either, 
+then it can't verify the certificate. In this case, it'll give an error like:
+oxford-ca.pem: /C=GB/ST=Oxfordshire/L=Oxford/O=Oxford University/OU=Computing Services/CN=Oxford University Computing Services CA/Email=ca@computing-services.oxford.ac.uk
+error 18 at 0 depth lookup:self signed certificate
+
+What this says is that at 0 depth (i.e. the top of the signer tree), it hit a self signed certificate, but this certificate wasn't trusted. Since OpenSSL can't verify any of the signers of the certificate, it can't verify the certificate. Since this is a fatal problem, it throws the above error.
+
+Once you get someone on the signing chain trusted, you'll get something like:
+oxford-herald2-server.pem: OK
+
+The Cause
+One of:
+
+    A man in the middle attack, sending you an alternate certificate for the server, which was signed by a different CA
+    The server certificate is self signed and not trusted
+    The server certificate is signed by a CA you don't trust (eg an in-house one) 
+
+The Fix
+
+    In this case, you have big problems. Still, it's a good thing that OpenSSL gave you an error about it, rather than blindly trusting it regardless, isn't it?
+    Get the server certificate (if you haven't already), and install it as a trusted certificate
+    Get the CA certificate, and install it as a trusted CA
+     
+
 Python
 ====================================================
 python -c "import ssl; print(ssl.OPENSSL_VERSION)"
