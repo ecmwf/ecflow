@@ -27,7 +27,7 @@ show_error_and_exit() {
    exit 1
 }
 
-ecbuild_arg=ecbuild
+ecbuild_arg=
 copy_tarball_arg=
 package_source_arg=
 make_arg=
