@@ -380,7 +380,6 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 		Q_EMIT rescanNeed();
 
 		return;
-
 	}
 
     //This will notify SeverHandler
@@ -409,6 +408,20 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
 	    return;
 	}
+
+    //This is a radical change
+    if(std::find(types.begin(),types.end(),ecf::Aspect::ORDER) != types.end())
+    {
+        UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
+        rescanNeed_=true;
+
+        //We notify ServerHandler about the radical changes. When ServerHandler receives this signal
+        //it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
+        //reset update_delete() might be called, so it should not write any shared variables!
+        Q_EMIT rescanNeed();
+
+        return;
+    }
 
     //This will notify SeverHandler
 	UserMessage::message(UserMessage::DBG, false, std::string(" -->  defsChanged() emitted"));
