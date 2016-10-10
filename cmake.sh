@@ -13,6 +13,7 @@ show_error_and_exit() {
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
    echo "  "
    echo "   make           - run make after cmake"
+   echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
    echo "   test           - run all the tests"
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
@@ -26,6 +27,7 @@ show_error_and_exit() {
    exit 1
 }
 
+ecbuild_arg=ecbuild
 copy_tarball_arg=
 package_source_arg=
 make_arg=
@@ -64,6 +66,7 @@ while [[ "$#" != 0 ]] ; do
       break
    elif [[ "$1" = no_gui ]] ; then no_gui_arg=$1 ;
    elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
+   elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
@@ -101,6 +104,7 @@ echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
 echo "python3_arg=$python3_arg"
 echo "no_gui_arg=$no_gui_arg"
+echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
 
 # ==================== modules ================================================
@@ -108,6 +112,7 @@ set -x # echo script lines as they are executed
 
 module load cmake/3.3.2
 module load ecbuild/2.4.0
+
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
@@ -231,8 +236,12 @@ if [[ $package_source_arg = package_source ]] ; then
     gui_options=  
 fi
 
-#$workspace/ecbuild/bin/ecbuild $source_dir \
-ecbuild $source_dir \
+ecbuild=ecbuild
+if [[ $ecbuild_arg = ecbuild ]] ; then
+   ecbuild=$workspace/ecbuild/bin/ecbuild
+fi
+
+$ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \
             -DENABLE_WARNINGS=ON \
