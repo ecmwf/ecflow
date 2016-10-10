@@ -228,36 +228,14 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
     }
     else if(p.itemType() ==  VItemPathParser::AttributeType)
     {
-        VNode* n=s->vRoot()->find(p.node());
-        return VInfoAttribute::create(VAttribute::make(n,p.type(),p.attribute()));
-    }
-#if 0
-    std::string p=path;
-
-    size_t pos=p.find("://");
-    if(pos != std::string::npos)
-    {
-        p=path.substr(pos+2);
-    }
-
-    if(p == "/")
-        return VInfoServer::create(s);
-
-    pos=path.find_last_of(":");
-    if(pos != std::string::npos)
-    {
-        VNode* n=s->find(p);
-        return VInfoNode::create(n);
-    }
-    else
-    {
-        if(VNode* n=s->find(p.substr(0,pos)))
+        if(VNode* n=s->vRoot()->find(p.node()))
         {
-            std::string attrName=p.substr(pos+1);
-            return VAttributeNode::create(VAttribute::make(n,type,attrName));
+            if(VAttribute* a=(VAttribute::make(n,p.type(),p.attribute())))
+            {
+                return VInfoAttribute::create(a);
+            }
         }
     }
-#endif
 
     return VInfo_ptr();
 }

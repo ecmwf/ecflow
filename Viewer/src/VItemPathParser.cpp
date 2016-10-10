@@ -43,7 +43,8 @@ VItemPathParser::VItemPathParser(const std::string& path) : itemType_(NoType)
         return;
     }
 
-    pos=p.find_last_of(":");
+    //Here we suppose that the node name cannot contain ":"
+    pos=p.find_first_of(":");
     if(pos != std::string::npos)
     {
         node_=p.substr(0,pos);

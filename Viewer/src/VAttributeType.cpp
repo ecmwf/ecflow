@@ -770,7 +770,7 @@ void VEventAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nam
     const std::vector<Event>& v=node->events();
     for(size_t i=0; i < v.size(); i++)
     {
-        nameVec.push_back(v[i].name());
+        nameVec.push_back(v[i].name_or_number());
     }
 }
 

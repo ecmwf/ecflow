@@ -185,6 +185,7 @@ bool VAttribute::value(const std::string& key,std::string& val) const
 
 VAttribute* VAttribute::make(VNode* n,const std::string& type,const std::string& name)
 {
+    if(!n) return NULL;
     VAttributeType *t=VAttributeType::find(type);
     assert(t);
     VItemTmp_ptr item=t->item(n,name);
