@@ -141,6 +141,7 @@ if [[ "$ARCH" = cray ]] ; then
     fi
     module unload atp
     module load boost/1.53.0
+    export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1
 fi
 
