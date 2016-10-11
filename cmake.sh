@@ -136,7 +136,7 @@ if [[ "$ARCH" = cray ]] ; then
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
     module load boost/1.53.0
-    export CRAY_ADD_RPATH=no
+    export CRAY_ADD_RPATH=yes  # Use link time system libs, at run time. Avoid depending on modules
     export ECFLOW_CRAY_BATCH=1
 fi
 
