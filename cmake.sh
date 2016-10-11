@@ -128,7 +128,11 @@ if [[ "$clang_sanitiser_arg" = san ]] ; then
 	cmake_extra_options="$cmake_extra_options -DCMAKE_C_FLAGS=-fsanitize=thread"
 fi
 if [[ "$ARCH" = cray ]] ; then
-    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF"
+
+    # disable new UI, no QT on cray
+    # Use the cray wrappers, these will add the correct flags.
+    # Assumes we have CRAY_ADD_RPATH=yes
+    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DCMAKE_Fortran_COMPILER=ftn"
     
     if [[ $intel_arg = intel ]] ; then
         module swap PrgEnv-cray PrgEnv-intel
@@ -136,7 +140,6 @@ if [[ "$ARCH" = cray ]] ; then
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
     module load boost/1.53.0
-    export CRAY_ADD_RPATH=yes  # Use link time system libs, at run time. Avoid depending on modules
     export ECFLOW_CRAY_BATCH=1
 fi
 
