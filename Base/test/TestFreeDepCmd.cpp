@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd )
    MockServer mockServer(&theDefs);
 
    FreeDepCmd cmd(task->absNodePath(),true/*trigger*/,true/* all */);
-   cmd.setup_user_authentification();
+   cmd.setup_user_authentification(UserCmd::get_user(),string());
    STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
    BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to for FreeDepCmd");
 
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_single_time_slot )
    // Invoke the FreeDepCmd
    MockServer mockServer(&theDefs);
    FreeDepCmd cmd(task->absNodePath(),true/*trigger*/,true/* all */);
-   cmd.setup_user_authentification();
+   cmd.setup_user_authentification(UserCmd::get_user(),string());
    STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
    BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to for FreeDepCmd");
 
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_with_time_series )
    // Invoke the FreeDepCmd
    MockServer mockServer(&theDefs);
    FreeDepCmd cmd(task->absNodePath(),true/*trigger*/,true/* all */);
-   cmd.setup_user_authentification();
+   cmd.setup_user_authentification(UserCmd::get_user(),string());
    STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
    BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to for FreeDepCmd");
 
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_with_time_series_2 )
    // Invoke the FreeDepCmd. This will update next nextTimeSlot to 09:32
    MockServer mockServer(&theDefs);
    FreeDepCmd cmd(task->absNodePath(),true/*trigger*/,true/* all */);
-   cmd.setup_user_authentification();
+   cmd.setup_user_authentification(UserCmd::get_user(),string());
    STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
    BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to for FreeDepCmd");
 

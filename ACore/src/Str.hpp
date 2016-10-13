@@ -141,7 +141,8 @@ public:
    static const std::string& ECF_EXTN();
    static const std::string& ECF_LOG();
 
-	static const std::string& WHITE_LIST_FILE();
+   static const std::string& WHITE_LIST_FILE();
+   static const std::string& ECF_PASSWD();
 private:
 	Str(){}
 };

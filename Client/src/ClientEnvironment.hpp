@@ -86,6 +86,9 @@ public:
    // Needs to be the same value as supplied to child command init
    void set_remote_id(const std::string& rid) { remote_id_ = rid; }
 
+   // Returns the user password. This value is cached, so we only read passwd file once
+   const std::string& get_user_password() const;
+
 // AbstractClientEnv functions:
  	virtual bool checkTaskPathAndPassword(std::string& errorMsg) const;
  	virtual const std::string& task_path() const { return task_path_; }
@@ -121,6 +124,10 @@ private:
 	int  host_vec_index_;               // index into host_vec;
 	int allow_new_client_old_server_;   // the boost archive version of old server, allow new client--> old server communication
 	std::string env_ecf_new_client_old_server_;
+
+
+   mutable std::string passwd_;                  // Only used when ECF_SECURE_USER defined
+   mutable bool passwd_file_read_;               // Only used when ECF_SECURE_USER defined
 
 	/// The option read from the command line.
  	friend class ClientOptions;

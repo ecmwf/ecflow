@@ -73,6 +73,9 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE)));
+#ifdef ECF_SECURE_USER
+	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE)));
+#endif
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS_RESET)));
@@ -139,6 +142,9 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER))  );
 	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE))  );
+#ifdef ECF_SECURE_USER
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE))  );
+#endif
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::SERVER_LOAD))  );
 	theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND,"EmptySuite"))  );
 	theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::RESUME,"EmptySuite"))  );

@@ -94,7 +94,8 @@ public:
    /// This Must be called for client->server commands.As this is required
    /// for authentication. *However* task based commands have their own authentication
    /// mechanism, and don't need setup_user_authentification().
-   virtual void setup_user_authentification() = 0;
+   virtual void setup_user_authentification(const std::string& user, const std::string& passwd) = 0;
+   virtual void check_user_setup() = 0;
 
    /// Allow control over connection to different servers/hosts if the main server is down
    /// i.e for a getCmd, we do not want to wait 24 hours, trying all the servers
@@ -204,7 +205,8 @@ public:
 protected:
    /// Overridden to do nothing since Task based commands don't need _user_
    /// based authentication
-   virtual void setup_user_authentification(){}
+   virtual void setup_user_authentification(const std::string& user, const std::string& passwd){}
+   virtual void check_user_setup(){}
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const; /// Task have their own mechanism,can throw std::runtime_error
    Submittable* get_submittable(AbstractServer* as) const ; // can throw std::runtime_error
 
@@ -494,8 +496,12 @@ class UserCmd : public ClientToServerCmd {
 public:
    UserCmd(){}
 
+   static std::string get_user();
    const std::string& user() const { return user_;}
-   virtual void setup_user_authentification();
+   const std::string& passwd() const { return passwd_;}
+
+   virtual void setup_user_authentification(const std::string& user, const std::string& passwd);
+   virtual void check_user_setup();
 
 protected:
 
@@ -521,12 +527,18 @@ protected:
 
 private:
    std::string user_;
+   std::string passwd_;     // only valid with ECF_SECURE_USER
+   std::string hostname_;   // only valid with ECF_SECURE_USER
 
    friend class boost::serialization::access;
    template<class Archive>
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
       ar & boost::serialization::base_object< ClientToServerCmd >( *this );
       ar & user_;
+#ifdef ECF_SECURE_USER
+      ar & passwd_;
+      ar & hostname_;
+#endif
    }
 };
 
@@ -577,6 +589,9 @@ public:
       PING, GET_ZOMBIES, STATS, SUITES,
       DEBUG_SERVER_ON, DEBUG_SERVER_OFF,
       SERVER_LOAD, STATS_RESET
+#ifdef ECF_SECURE_USER
+      ,RELOAD_PASSWD_FILE
+#endif
      };
 
    CtsCmd(Api a) : api_(a) {}
@@ -1787,7 +1802,9 @@ private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual void setup_user_authentification();
+   virtual void setup_user_authentification(const std::string& user, const std::string& passwd);
+   virtual void check_user_setup();
+
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 

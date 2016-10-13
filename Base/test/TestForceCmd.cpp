@@ -87,7 +87,7 @@ static void doForce(MockServer& mockServer,
          const std::vector<Node*>& nodes)
 {
    ForceCmd cmd(node->absNodePath(), stateOrEvent, true /*recursive */, true /* set Repeat to last value */);
-   cmd.setup_user_authentification();
+   cmd.setup_user_authentification(UserCmd::get_user(),string());
    STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
    BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force for node " << node->debugNodePath());
 
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE( test_force_cmd_bubbles_up_state_changes )
       // 		cout << "Setting all tasks to state " << state << "\n";
       BOOST_FOREACH(Task* task, tasks) {
          ForceCmd cmd(task->absNodePath(), state, false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
          BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force for node " << task->debugNodePath());
       }
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE( test_force_cmd_alias_does_not_bubble_up_state_changes )
 
       BOOST_FOREACH(alias_ptr alias, aliases) {
          ForceCmd cmd(alias->absNodePath(), state, false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
          BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force for alias " << alias->debugNodePath());
       }
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE( test_force_events )
       BOOST_FOREACH(const Event& e, node->events()) {
          std::string path = node->absNodePath() + ":" + e.name_or_number();
          ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
          BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force event for node " << node->debugNodePath());
       }
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( test_force_events )
       BOOST_FOREACH(const Event& e, node->events()) {
          std::string path = node->absNodePath() + ":" + e.name_or_number();
          ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
          BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force event for node " << node->debugNodePath());
       }
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
       BOOST_FOREACH(const Event& e, node->events()) {
          std::string path = node->absNodePath() + "/path/doesnot/exist" + ":" + e.name_or_number();
          ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
       BOOST_FOREACH(const Event& e, node->events()) {
          std::string path = node->absNodePath() + "/path/doesnot/exist" + ":" + e.name_or_number();
          ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
       if (node->events().empty()) {
          std::string path = node->absNodePath() ;
          ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
       if (node->events().empty()) {
          std::string path = node->absNodePath();
          ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
       BOOST_FOREACH(const Event& e, node->events()) {
          std::string path = node->absNodePath() +  ":" + e.name_or_number() + "made_up";
          ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
       BOOST_FOREACH(const Event& e, node->events()) {
          std::string path = node->absNodePath() + ":" + e.name_or_number() + "made_up";
          ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
-         cmd.setup_user_authentification();
+         cmd.setup_user_authentification(UserCmd::get_user(),string());
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }

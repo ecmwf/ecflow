@@ -19,6 +19,8 @@
 #include <stdlib.h> // for getenv()
 
 #include "boost/foreach.hpp"
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include "ClientEnvironment.hpp"
 #include "ClientToServerCmd.hpp"
@@ -28,7 +30,11 @@
 #include "boost_archive.hpp"
 #include "TimeStamp.hpp"
 #include "Version.hpp"
+#ifdef ECF_SECURE_USER
+#include "PasswdFile.hpp"
+#endif
 
+namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
 using namespace boost;
@@ -391,4 +397,26 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 	}
 
 	return true;
+}
+
+
+const std::string& ClientEnvironment::get_user_password() const
+{
+#ifdef ECF_SECURE_USER
+   if (passwd_file_read_) return passwd_;
+   std::string user_passwd_file = getenv("ECF_PASSWD");
+
+   if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
+      PasswdFile passwd_file;
+      std::string errorMsg;
+      if (!passwd_file.load(user_passwd_file,debug(),errorMsg)) {
+         std::stringstream ss; ss << "Could not parse ECF_PASSWD file. " << errorMsg;
+         throw std::runtime_error(ss.str());
+      }
+      passwd_ = passwd_file.get_passwd(UserCmd::get_user(), host(), port());
+      passwd_file_read_ = true;
+      return passwd_;
+   }
+#endif
+   return Str::EMPTY();
 }

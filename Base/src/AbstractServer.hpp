@@ -119,6 +119,10 @@ public:
 	/// If errors arise the exist user still stay in affect
 	virtual bool reloadWhiteListFile(std::string& errorMsg)  = 0;
 
+#ifdef ECF_SECURE_USER
+   virtual bool reloadPasswdFile(std::string& errorMsg) = 0;
+#endif
+
 	/// There are several kinds of authentifications:
 	///     a/ None
 	///     b/ List mode.   ASCII file based on ECF_LISTS is defined. referred as white list file
@@ -126,9 +130,9 @@ public:
 	/// At the moment we will only implement options a/ and b/
 	//
 	/// Returns true if the given user has access to the server, false otherwise
-   virtual bool authenticateReadAccess(const std::string& user) = 0;
-   virtual bool authenticateReadAccess(const std::string& user, const std::string& path) = 0;
-   virtual bool authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths) = 0;
+   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd) = 0;
+   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path) = 0;
+   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths) = 0;
 
 	/// Returns true if user has matching write access privileges.
    virtual bool authenticateWriteAccess(const std::string& user) = 0;

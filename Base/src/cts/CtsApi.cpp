@@ -657,6 +657,11 @@ const char* CtsApi::alterArg() { return "alter"; }
 std::string CtsApi::reloadwsfile()     { return "--reloadwsfile"; }
 const char* CtsApi::reloadwsfileArg()  { return "reloadwsfile"; }
 
+#ifdef ECF_SECURE_USER
+std::string CtsApi::reloadpasswdfile()     { return "--reloadpasswdfile"; }
+const char* CtsApi::reloadpasswdfile_arg() { return "reloadpasswdfile";}
+#endif
+
 std::string CtsApi::group(const std::string& cmds) {
    std::string ret = "--group=";
    ret += cmds;

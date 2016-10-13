@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
       size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
       BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
       PathsCmd cmd(PathsCmd::DELETE,paths);
-      cmd.setup_user_authentification();
+      cmd.setup_user_authentification(UserCmd::get_user(),string());
       STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
       BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete aliases");
       {
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
       BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
       size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
       PathsCmd cmd(PathsCmd::DELETE,paths);
-	   cmd.setup_user_authentification();
+	   cmd.setup_user_authentification(UserCmd::get_user(),string());
 	   STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 	   BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete tasks");
       {
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 		      if (!paths.empty()) {
 		         size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
 		         PathsCmd cmd(PathsCmd::DELETE,paths);
-		         cmd.setup_user_authentification();
+		         cmd.setup_user_authentification(UserCmd::get_user(),string());
 		         STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 		         BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete families");
 		         BOOST_REQUIRE_MESSAGE( s->familyVec().empty(),"Expected all Families to be deleted but found " << s->familyVec().size());
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
          size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
 			std::string absNodePath = s->absNodePath();
 	      PathsCmd cmd(PathsCmd::DELETE,absNodePath);
-			cmd.setup_user_authentification();
+			cmd.setup_user_authentification(UserCmd::get_user(),string());
 			STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 			BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete suite at path " << absNodePath);
 	      {
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 //      DurationTimer duration_timer;
 //      MockServer mockServer(&defs);
 //      PathsCmd cmd(PathsCmd::DELETE,"",true);
-//      cmd.setup_user_authentification();
+//      cmd.setup_user_authentification(UserCmd::get_user(),string());
 //      STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 //      BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete defs");
 //      cout << " ...Deleting took " << duration_timer.duration() << "\n";

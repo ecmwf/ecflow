@@ -44,7 +44,7 @@ bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 {
    // The user should NOT be empty. Rather than asserting and killing the server, fail authentication
    // ECFLOW-577 and ECFLOW-512. When user_ empty ??
-   if (!user_.empty() && as->authenticateReadAccess(user_)) {
+   if (!user_.empty() && as->authenticateReadAccess(user_,passwd_)) {
 
       // Does this user command require write access
       if ( isWrite() ) {
@@ -73,7 +73,7 @@ bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 
 bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const
 {
-   if (!user_.empty() && as->authenticateReadAccess(user_,path)) {
+   if (!user_.empty() && as->authenticateReadAccess(user_,passwd_,path)) {
 
       // Does this user command require write access
       if ( isWrite() ) {
@@ -104,7 +104,7 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::strin
 
 bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const
 {
-   if (!user_.empty() && as->authenticateReadAccess(user_,paths)) {
+   if (!user_.empty() && as->authenticateReadAccess(user_,passwd_,paths)) {
 
       // Does this user command require write access
       if ( isWrite() ) {
@@ -135,9 +135,20 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vecto
    return false;
 }
 
-void UserCmd::setup_user_authentification()
+void UserCmd::setup_user_authentification(const std::string& user, const std::string& passwd)
 {
-   // Minimise system calls by using static.
+   user_ = user;
+   passwd_ = passwd;        // Only sent to server if ECF_SECURE_USER define set .
+   assert(!user_.empty());
+}
+
+void UserCmd::check_user_setup()
+{
+   if (user_.empty()) throw std::runtime_error("UserCmd::check_user_setup() user not setup");
+}
+
+std::string UserCmd::get_user()
+{
    static std::string the_user_name;
    if (the_user_name.empty()) {
 
@@ -149,23 +160,22 @@ void UserCmd::setup_user_authentification()
       if (thePassWord == 0 ) {
          if ( errno != 0) {
             std::string theError = strerror(errno);
-            throw std::runtime_error("UserCmd::setup_user_authentification: could not determine user name. Because: " + theError);
+            throw std::runtime_error("UserCmd::get_user: could not determine user name. Because: " + theError);
          }
 
          std::stringstream ss;
-         ss << "UserCmd::setup_user_authentification: could not determine user name for uid " << real_user_id_of_process;
+         ss << "UserCmd::get_user: could not determine user name for uid " << real_user_id_of_process;
          throw std::runtime_error(ss.str());
       }
 
       the_user_name = thePassWord->pw_name;  // equivalent to the login name
       if ( the_user_name.empty() ) {
-         throw std::runtime_error("UserCmd::setup_user_authentification: could not determine user name. Because: thePassWord->pw_name is empty");
+         throw std::runtime_error("UserCmd::get_user: could not determine user name. Because: thePassWord->pw_name is empty");
       }
    }
-
-   user_ = the_user_name;
-   assert(!user_.empty());
+   return the_user_name;
 }
+
 
 void UserCmd::prompt_for_confirmation(const std::string& prompt)
 {

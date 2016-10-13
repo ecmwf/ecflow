@@ -133,15 +133,19 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
          }
 
          {
+            // MoveCmd should inherit user and passwd, from PlugCmd
+            Cmd_ptr cts_cmd = Cmd_ptr(new MoveCmd(as->hostPort(),sourceNode.get(), destPath));
+            cts_cmd->setup_user_authentification(user(),passwd());
+
             // Server is acting like a client, Send MoveCmd to another server
             // The source should end up being copied, when sent to remote server
             boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
             boost::asio::ssl::context ctx(ecf::Openssl::method());
             ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
-            Client theClient( io_service, ctx, Cmd_ptr( new MoveCmd(as->hostPort(),sourceNode.get(), destPath) ),  host, port  );
+            Client theClient( io_service, ctx, cts_cmd,  host, port  );
 #else
-            Client theClient( io_service, Cmd_ptr( new MoveCmd(as->hostPort(),sourceNode.get(), destPath) ),  host, port  );
+            Client theClient( io_service, cts_cmd,  host, port  );
 #endif
             io_service.run();
 

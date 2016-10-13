@@ -149,6 +149,11 @@ public:
  	                                            bool create_alias = false,
  	                                            bool run = true);
 
+#ifdef ECF_SECURE_USER
+   static std::string reloadpasswdfile();
+   static const char* reloadpasswdfile_arg();
+#endif
+
  	// Only to be used in Cmd
    static const char* server_version_arg();
    static const char* statsArg();

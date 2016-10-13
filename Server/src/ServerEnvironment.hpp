@@ -34,6 +34,9 @@
 #include "Host.hpp"
 #include "WhiteListFile.hpp"
 #include "CheckPt.hpp"
+#ifdef ECF_SECURE_USER
+#include "PasswdFile.hpp"
+#endif
 
 // Added ServerEvinronmentException so that it can be in the same scope as server
 // in ServerMain. Previously we had a separate try block
@@ -140,6 +143,10 @@ public:
 	/// If errors arise the exist user still stay in affect
   	bool reloadWhiteListFile(std::string& errorMsg);
 
+#ifdef ECF_SECURE_USER
+  	bool reloadPasswdFile(std::string& errorMsg);
+#endif
+
 #ifdef ECFLOW_MT
   	// returns the numbers threads to be used by the server.
    size_t threads() const { return threads_; };
@@ -152,9 +159,9 @@ public:
 	/// At the moment we will only implement options a/ and b/
 	//
 	/// Returns true if the given user has access to the server, false otherwise
-   bool authenticateReadAccess(const std::string& user)const;
-   bool authenticateReadAccess(const std::string& user,const std::string& path)const;
-   bool authenticateReadAccess(const std::string& user,const std::vector<std::string>& paths)const;
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd)const;
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path)const;
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths)const;
  	bool authenticateWriteAccess(const std::string& user) const;
    bool authenticateWriteAccess(const std::string& user,const std::string& path)const;
    bool authenticateWriteAccess(const std::string& user,const std::vector<std::string>& paths)const;
@@ -209,6 +216,11 @@ private:
 	std::string ecf_micro_;
    std::string ecf_white_list_file_;
    mutable WhiteListFile white_list_file_;
+
+   std::string ecf_passwd_file_;
+#ifdef ECF_SECURE_USER
+   mutable PasswdFile passwd_file_;
+#endif
 	boost::asio::ip::tcp tcp_protocol_;      // defaults to IPv4 TCP protocol
 	friend class ServerOptions;
 };

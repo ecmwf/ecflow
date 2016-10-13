@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 
 	// Create a LoadDefsCmd. This capable of merging defs files and resolving externs
 	LoadDefsCmd cmd(firstDefs);
-	cmd.setup_user_authentification();
+	cmd.setup_user_authentification(UserCmd::get_user(),string());
 
 	// Calling handelRequest will absorb the first defs into second including externs & server user variables
 	// AND resolve any references to node paths in the trigger expressions

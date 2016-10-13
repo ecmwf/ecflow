@@ -694,17 +694,26 @@ bool Server::reloadWhiteListFile(std::string& errorMsg)
    return serverEnv_.reloadWhiteListFile(errorMsg);
 }
 
-bool Server::authenticateReadAccess(const std::string& user)
+#ifdef ECF_SECURE_USER
+bool Server::reloadPasswdFile(std::string& errorMsg)
 {
-   return serverEnv_.authenticateReadAccess(user);
+   if (serverEnv_.debug()) cout << "   Server::reloadPasswdFile" << endl;
+
+   return serverEnv_.reloadPasswdFile(errorMsg);
 }
-bool Server::authenticateReadAccess(const std::string& user, const std::string& path)
+#endif
+
+bool Server::authenticateReadAccess(const std::string& user,const std::string& passwd)
 {
-   return serverEnv_.authenticateReadAccess(user,path);
+   return serverEnv_.authenticateReadAccess(user,passwd);
 }
-bool Server::authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths)
+bool Server::authenticateReadAccess(const std::string& user,const std::string& passwd, const std::string& path)
 {
-   return serverEnv_.authenticateReadAccess(user,paths);
+   return serverEnv_.authenticateReadAccess(user,passwd,path);
+}
+bool Server::authenticateReadAccess(const std::string& user,const std::string& passwd, const std::vector<std::string>& paths)
+{
+   return serverEnv_.authenticateReadAccess(user,passwd,paths);
 }
 
 bool Server::authenticateWriteAccess(const std::string& user )
