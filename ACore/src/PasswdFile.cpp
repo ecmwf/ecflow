@@ -78,6 +78,7 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
          }
          else  {
            if (!add_user(lineTokens,errorMsg)) {
+              errorMsg += theLine;
               return false;
            }
          }
@@ -122,8 +123,14 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
 
    // User found in password file and passwd did not match
    if (user_found) return false;
+   else {
+      // User not found, but if passwd is not empty, then fail.
+      if (!passwd.empty()) {
+         return false;
+      }
+   }
 
-   // User not found in the password file. Allow access
+   // User not found in the password file and passwd is empty. Allow access
    return true;
 }
 
@@ -172,7 +179,6 @@ bool PasswdFile::validateVersionNumber(const std::string& line, std::string& err
    return false;
 }
 
-
 bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_msg)
 {
    // Expected format is:
@@ -186,11 +192,16 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
       return false;
    }
 
+   try { boost::lexical_cast< int >( tokens[2] ); }
+   catch ( boost::bad_lexical_cast& ) {
+      error_msg += "Port number must be integer's\n";
+      return false;
+   }
+
    vec_.push_back(Passwd(tokens[0],tokens[1],tokens[2],tokens[3]));
 
    return true;
 }
-
 
 std::string PasswdFile::dump() const
 {

@@ -22,13 +22,13 @@
 
 // ----------------------------------------------------------------
 //
-
 class Passwd {
 public:
    Passwd(const std::string& user,const std::string& host,const std::string& port, const std::string& passwd )
    : user_(user),host_(host),port_(port),passwd_(passwd) {}
    ~Passwd() {}
 
+   bool operator==(const Passwd& rhs) const { return rhs.user_ == user_ && rhs.host_ == host_ && rhs.port_ == port_ && rhs.passwd_ == passwd_;}
    const std::string& user() const { return user_;}
    const std::string& host() const { return host_;}
    const std::string& port()  const { return port_;}
@@ -41,6 +41,7 @@ private:
    std::string passwd_;
 };
 
+// This class is used to authenticate, user commands, i.e like ping,alter, etc
 class PasswdFile : private boost::noncopyable {
 public:
    PasswdFile();
@@ -54,11 +55,13 @@ public:
 
    bool authenticate(const std::string& user, const std::string& passwd) const ;
 
-private:
+   const std::vector<Passwd>& passwds() const { return vec_;}
 
+   std::string dump() const;
+
+private:
    bool add_user(std::vector<std::string>& tokens, std::string& error_msg);
    bool validateVersionNumber(const std::string& line, std::string& errorMsg) const;
-   std::string dump() const;
 
 private:
 
