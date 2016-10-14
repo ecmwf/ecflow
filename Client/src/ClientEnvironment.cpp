@@ -66,7 +66,8 @@ ClientEnvironment::ClientEnvironment()
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
   host_vec_index_(0),
-  allow_new_client_old_server_(0)
+  allow_new_client_old_server_(0),
+  passwd_file_read_(false)
 {
 	init();
 }
@@ -78,7 +79,8 @@ ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::str
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
   host_vec_index_(0),
-  allow_new_client_old_server_(0)
+  allow_new_client_old_server_(0),
+  passwd_file_read_(false)
 {
 	init();
 
@@ -404,7 +406,11 @@ const std::string& ClientEnvironment::get_user_password() const
 {
 #ifdef ECF_SECURE_USER
    if (passwd_file_read_) return passwd_;
-   std::string user_passwd_file = getenv("ECF_PASSWD");
+   passwd_file_read_ = true;
+
+   std::string user_passwd_file;
+   char* file = getenv("ECF_PASSWD");
+   if (file) user_passwd_file = file;
 
    if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
       PasswdFile passwd_file;
