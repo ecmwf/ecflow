@@ -690,18 +690,14 @@ void Server::traverse_node_tree_and_job_generate(const boost::posix_time::ptime&
 bool Server::reloadWhiteListFile(std::string& errorMsg)
 {
    if (serverEnv_.debug()) cout << "   Server::reloadWhiteListFile" << endl;
-
    return serverEnv_.reloadWhiteListFile(errorMsg);
 }
 
-#ifdef ECF_SECURE_USER
 bool Server::reloadPasswdFile(std::string& errorMsg)
 {
    if (serverEnv_.debug()) cout << "   Server::reloadPasswdFile" << endl;
-
    return serverEnv_.reloadPasswdFile(errorMsg);
 }
-#endif
 
 bool Server::authenticateReadAccess(const std::string& user,const std::string& passwd)
 {

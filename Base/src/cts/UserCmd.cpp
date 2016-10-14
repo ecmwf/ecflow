@@ -139,7 +139,7 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vecto
 void UserCmd::setup_user_authentification(const std::string& user, const std::string& passwd)
 {
    user_ = user;
-   passwd_ = passwd;        // Only sent to server if ECF_SECURE_USER define set .
+   passwd_ = passwd;
    assert(!user_.empty());
 }
 

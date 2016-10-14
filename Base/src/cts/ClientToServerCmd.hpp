@@ -530,7 +530,7 @@ protected:
 private:
    std::string user_;
    std::string passwd_;     // only valid with ECF_SECURE_USER
-   std::string hostname_;   // only valid with ECF_SECURE_USER
+   std::string hostname_;   // only valid with ECF_SECURE_USER, not used at the moment
 
    friend class boost::serialization::access;
    template<class Archive>
@@ -591,9 +591,7 @@ public:
       PING, GET_ZOMBIES, STATS, SUITES,
       DEBUG_SERVER_ON, DEBUG_SERVER_OFF,
       SERVER_LOAD, STATS_RESET
-#ifdef ECF_SECURE_USER
       ,RELOAD_PASSWD_FILE
-#endif
      };
 
    CtsCmd(Api a) : api_(a) {}

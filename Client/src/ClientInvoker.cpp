@@ -32,9 +32,7 @@
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
-#ifdef ECF_SECURE_USER
 #include "PasswdFile.hpp"
-#endif
 
 #ifdef DEBUG
 
@@ -982,13 +980,11 @@ int ClientInvoker::reloadwsfile() const
    return invoke(Cmd_ptr(new CtsCmd( CtsCmd::RELOAD_WHITE_LIST_FILE )));
 }
 
-#ifdef ECF_SECURE_USER
 int ClientInvoker::reloadpasswdfile() const
 {
    if (testInterface_) return invoke(CtsApi::reloadpasswdfile());
    return invoke(Cmd_ptr(new CtsCmd( CtsCmd::RELOAD_PASSWD_FILE )));
 }
-#endif
 
 int ClientInvoker::group( const std::string& groupRequest ) const
 {

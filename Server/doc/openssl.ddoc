@@ -1,7 +1,7 @@
 Build 
 ================================================================
 b8r       ssl=on                  # boost/bjam
-bgr       define=ECF_SECURE_USER  # boost/bjam
+b8r       define=ECF_SECURE_USER  # boost/bjam
 
 cmake
 ./cmake.sh secure_user

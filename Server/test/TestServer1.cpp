@@ -68,9 +68,7 @@ public:
    virtual void restart() { Server::restart(); }
 
    virtual bool reloadWhiteListFile(std::string& errorMsg) { return Server::reloadWhiteListFile(errorMsg);}
-#ifdef ECF_SECURE_USER
    virtual bool reloadPasswdFile(std::string& errorMsg) { return Server::reloadPasswdFile(errorMsg);}
-#endif
 
    virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd) { return Server::authenticateReadAccess(user,passwd); }
    virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd, const std::string& path) { return Server::authenticateReadAccess(user,passwd,path); }

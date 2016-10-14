@@ -402,7 +402,6 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 	return white_list_file_.load(ecf_white_list_file_, debug(), errorMsg );
 }
 
-#ifdef ECF_SECURE_USER
 bool ServerEnvironment::reloadPasswdFile(std::string& errorMsg)
 {
    if (debug()) cout << "ServerEnvironment::reloadPasswdFile:(" << ecf_passwd_file_ << ") CWD(" << fs::current_path().string() << ")\n";
@@ -422,7 +421,6 @@ bool ServerEnvironment::reloadPasswdFile(std::string& errorMsg)
    // Only override valid users if we successfully opened and parsed file
    return passwd_file_.load(ecf_passwd_file_, debug(), errorMsg );
 }
-#endif
 
 bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd) const
 {

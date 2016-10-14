@@ -32,11 +32,9 @@
 #include <boost/asio.hpp>
 
 #include "Host.hpp"
-#include "WhiteListFile.hpp"
 #include "CheckPt.hpp"
-#ifdef ECF_SECURE_USER
+#include "WhiteListFile.hpp"
 #include "PasswdFile.hpp"
-#endif
 
 // Added ServerEvinronmentException so that it can be in the same scope as server
 // in ServerMain. Previously we had a separate try block
@@ -143,9 +141,7 @@ public:
 	/// If errors arise the exist user still stay in affect
   	bool reloadWhiteListFile(std::string& errorMsg);
 
-#ifdef ECF_SECURE_USER
   	bool reloadPasswdFile(std::string& errorMsg);
-#endif
 
 #ifdef ECFLOW_MT
   	// returns the numbers threads to be used by the server.
@@ -217,10 +213,9 @@ private:
    std::string ecf_white_list_file_;
    mutable WhiteListFile white_list_file_;
 
-   std::string ecf_passwd_file_;
-#ifdef ECF_SECURE_USER
-   mutable PasswdFile passwd_file_;
-#endif
+   std::string ecf_passwd_file_;      // Only used if ECF_SECURE_USER defined
+   mutable PasswdFile passwd_file_;   // Only used if ECF_SECURE_USER defined
+
 	boost::asio::ip::tcp tcp_protocol_;      // defaults to IPv4 TCP protocol
 	friend class ServerOptions;
 };

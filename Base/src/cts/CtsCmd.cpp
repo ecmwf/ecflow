@@ -42,9 +42,7 @@ std::ostream& CtsCmd::print(std::ostream& os) const
       case CtsCmd::HALT_SERVER:                return user_cmd(os,CtsApi::haltServer()); break;
       case CtsCmd::TERMINATE_SERVER:           return user_cmd(os,CtsApi::terminateServer()); break;
       case CtsCmd::RELOAD_WHITE_LIST_FILE:     return user_cmd(os,CtsApi::reloadwsfile()); break;
-#ifdef ECF_SECURE_USER
       case CtsCmd::RELOAD_PASSWD_FILE:         return user_cmd(os,CtsApi::reloadpasswdfile()); break;
-#endif
       case CtsCmd::FORCE_DEP_EVAL:             return user_cmd(os,CtsApi::forceDependencyEval()); break;
       case CtsCmd::PING:                       return user_cmd(os,CtsApi::pingServer()); break;
       case CtsCmd::STATS:                      return user_cmd(os,CtsApi::stats()); break;
@@ -77,9 +75,7 @@ bool CtsCmd::isWrite() const
       case CtsCmd::HALT_SERVER:      return true; break;  // requires write privilege
       case CtsCmd::TERMINATE_SERVER: return true; break;  // requires write privilege
       case CtsCmd::RELOAD_WHITE_LIST_FILE:return true; break;  // requires write privilege
-#ifdef ECF_SECURE_USER
-      case CtsCmd::RELOAD_PASSWD_FILE:return true; break;  // requires write privilege
-#endif
+      case CtsCmd::RELOAD_PASSWD_FILE:return true; break;      // requires write privilege
       case CtsCmd::FORCE_DEP_EVAL:   return true; break;       // requires write privilege
       case CtsCmd::PING:             return false; break;      // read only
       case CtsCmd::STATS:            return false; break;      // read only
@@ -111,9 +107,7 @@ const char* CtsCmd::theArg() const
       case CtsCmd::HALT_SERVER:      return CtsApi::haltServerArg(); break;
       case CtsCmd::TERMINATE_SERVER: return CtsApi::terminateServerArg(); break;
       case CtsCmd::RELOAD_WHITE_LIST_FILE:return CtsApi::reloadwsfileArg(); break;
-#ifdef ECF_SECURE_USER
       case CtsCmd::RELOAD_PASSWD_FILE:return CtsApi::reloadpasswdfile_arg(); break;
-#endif
       case CtsCmd::FORCE_DEP_EVAL:   return CtsApi::forceDependencyEvalArg(); break;
       case CtsCmd::PING:             return CtsApi::pingServerArg(); break;
       case CtsCmd::STATS:            return CtsApi::statsArg(); break;
@@ -159,16 +153,16 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          }
          break;
       }
-#ifdef ECF_SECURE_USER
       case CtsCmd::RELOAD_PASSWD_FILE: {
+#ifdef ECF_SECURE_USER
          as->update_stats().reload_passwd_file_++;
+#endif
          std::string errorMsg;
          if (!as->reloadPasswdFile(errorMsg)) {
             throw std::runtime_error( errorMsg ) ;
          }
          break;
       }
-#endif
       case CtsCmd::FORCE_DEP_EVAL: {
          // The Default JobsParam does *not* allow Job creation, & hence => does not submit jobs
          // The default does *not* allow job spawning
@@ -322,7 +316,6 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
          );
          break;
       }
-#ifdef ECF_SECURE_USER
       case CtsCmd::RELOAD_PASSWD_FILE:{
          desc.add_options()( CtsApi::reloadpasswdfile_arg(),
                "Reload the server password file.\n"
@@ -349,7 +342,6 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
          );
          break;
       }
-#endif
       case CtsCmd::FORCE_DEP_EVAL:{
          desc.add_options()( CtsApi::forceDependencyEvalArg(),
                   "Force dependency evaluation. Used for DEBUG only."

@@ -119,15 +119,12 @@ public:
 	/// If errors arise the exist user still stay in affect
 	virtual bool reloadWhiteListFile(std::string& errorMsg)  = 0;
 
-#ifdef ECF_SECURE_USER
    virtual bool reloadPasswdFile(std::string& errorMsg) = 0;
-#endif
 
-	/// There are several kinds of authentifications:
+	/// There are several kinds of authentications:
 	///     a/ None
 	///     b/ List mode.   ASCII file based on ECF_LISTS is defined. referred as white list file
-	///     c/ Secure mode. binary file based ECF_PASSWD is defined. Referred to as black list file
-	/// At the moment we will only implement options a/ and b/
+	///     c/ Secure mode. ASCII file based ECF_PASSWD is defined. Referred to as black list file
 	//
 	/// Returns true if the given user has access to the server, false otherwise
    virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd) = 0;

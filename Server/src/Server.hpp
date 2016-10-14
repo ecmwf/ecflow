@@ -113,9 +113,7 @@ protected: // Allow test to override
    virtual void halted();
    virtual void restart();
    virtual bool reloadWhiteListFile(std::string& errorMsg);
-#ifdef ECF_SECURE_USER
    virtual bool reloadPasswdFile(std::string& errorMsg);
-#endif
    virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd);
    virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path);
    virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths);
