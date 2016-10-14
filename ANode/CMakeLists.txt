@@ -33,6 +33,7 @@ test/TestCopyConstructor.cpp
 test/TestDefStatus.cpp
 test/TestDefs.cpp
 test/TestEcfFile.cpp
+test/TestEcfFileLocator.cpp
 test/TestEnviromentSubstitution.cpp
 test/TestExprParser.cpp
 test/TestExprRepeatDateArithmetic.cpp
@@ -53,7 +54,6 @@ test/TestPersistence.cpp
 test/TestPreProcessing.cpp
 test/TestReplace.cpp
 test/TestSetState.cpp
-test/TestSmsLocator.cpp
 test/TestTaskScriptGenerator.cpp
 test/TestTimeDependencies.cpp
 test/TestVariableGeneration.cpp

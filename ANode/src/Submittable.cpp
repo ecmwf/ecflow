@@ -378,6 +378,7 @@ EcfFile Submittable::locatedEcfFile() const
       }
       else {
          // Before failing try again but with variable Subsitution. ECFLOW-788
+         std::string original_ecf_filesDirectory = ecf_filesDirectory;
          variableSubsitution(ecf_filesDirectory);
          if ( !ecf_filesDirectory.empty() && fs::exists(ecf_filesDirectory) && fs::is_directory(ecf_filesDirectory))
          {
@@ -389,7 +390,11 @@ EcfFile Submittable::locatedEcfFile() const
             }
             else return EcfFile(const_cast<Submittable*>(this), searchResult);
          }
-         std::stringstream ss; ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") does not exist:\n";
+
+         std::stringstream ss;
+         ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
+         if (original_ecf_filesDirectory != ecf_filesDirectory )
+            ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") after variable substitution does not exist:\n";
          reasonEcfFileNotFound += ss.str();
       }
    }
