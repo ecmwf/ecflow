@@ -325,8 +325,27 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
 #ifdef ECF_SECURE_USER
       case CtsCmd::RELOAD_PASSWD_FILE:{
          desc.add_options()( CtsApi::reloadpasswdfile_arg(),
-               "Reload the password file.\n"
-               ""
+               "Reload the server password file.\n"
+               "Although the password file can be reloaded(i.e to add/remove users), its location can't be changed\n"
+               "The password file is located by the ECF_PASSWD environment variable, both for the client and server\n"
+               "On the server the default file name is <host>.<port>.ecf.passwd\n"
+               "On the client the default file name is ecf.passwd\n"
+               "The format of the file is same for client and server:\n\n"
+               "4.4.0\n"
+               "# comment\n"
+               "<user> <host> <port> <passwd> # comment\n\n"
+               "i.e\n"
+               "4.4.0 # the version\n"
+               "fred machine1 3142 xxyyyd\n"
+               "fred machine2 3133 xxyyyd # comment\n"
+               "bill machine2 3133 xxyggyyd\n\n"
+               "The same user may appear multiple times. i.e with different host/port. This allows the password file\n"
+               "to be used for multiple servers\n"
+               "For the password authentication to work. It must be:\n"
+               "  - Defined for the client and server\n"
+               "  - The password permission's must be set for reading by the user only\n"
+               "Usage:\n"
+               " --reloadpasswdfile"
          );
          break;
       }

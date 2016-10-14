@@ -26,6 +26,7 @@
 #include "ClientToServerCmd.hpp"
 
 #include "AbstractServer.hpp"
+#include "AbstractClientEnv.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
 
@@ -142,9 +143,15 @@ void UserCmd::setup_user_authentification(const std::string& user, const std::st
    assert(!user_.empty());
 }
 
-void UserCmd::check_user_setup()
+void UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv)
 {
-   if (user_.empty()) throw std::runtime_error("UserCmd::check_user_setup() user not setup");
+   setup_user_authentification(UserCmd::get_user(),clientEnv.get_user_password());
+}
+
+void UserCmd::setup_user_authentification()
+{
+   if (user_.empty())  user_ = UserCmd::get_user();
+   assert(!user_.empty());
 }
 
 std::string UserCmd::get_user()

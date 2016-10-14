@@ -25,10 +25,9 @@ class ClientToServerRequest : private boost::noncopyable {
 public:
 
    ClientToServerRequest() {}
-   ClientToServerRequest(const Cmd_ptr& cmd) : cmd_(cmd) { cmd_->check_user_setup();}
    ~ClientToServerRequest() {}
 
-   void set_cmd(const Cmd_ptr& cmd) { cmd_ = cmd; cmd_->check_user_setup(); }
+   void set_cmd(const Cmd_ptr& cmd) { cmd_ = cmd; cmd_->setup_user_authentification(); }
    Cmd_ptr get_cmd() const { return cmd_;}
 
    /// This is called in the server only, to handle the quest.

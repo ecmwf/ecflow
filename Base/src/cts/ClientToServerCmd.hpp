@@ -94,8 +94,9 @@ public:
    /// This Must be called for client->server commands.As this is required
    /// for authentication. *However* task based commands have their own authentication
    /// mechanism, and don't need setup_user_authentification().
-   virtual void setup_user_authentification(const std::string& user, const std::string& passwd) = 0;
-   virtual void check_user_setup() = 0;
+   virtual void setup_user_authentification(const std::string& user, const std::string& passwd) = 0; // Used by PlugCmd
+   virtual void setup_user_authentification(AbstractClientEnv&) = 0; // set user and passwd(ECF_SECURE_USER)
+   virtual void setup_user_authentification() = 0;                   // if user empty setup.
 
    /// Allow control over connection to different servers/hosts if the main server is down
    /// i.e for a getCmd, we do not want to wait 24 hours, trying all the servers
@@ -203,10 +204,11 @@ public:
    virtual bool connect_to_different_servers() const { return true; }
 
 protected:
-   /// Overridden to do nothing since Task based commands don't need _user_
-   /// based authentication
+   /// Overridden to do nothing since Task based commands don't need _user_ based authentication
    virtual void setup_user_authentification(const std::string& user, const std::string& passwd){}
-   virtual void check_user_setup(){}
+   virtual void setup_user_authentification(AbstractClientEnv&){}
+   virtual void setup_user_authentification(){}
+
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const; /// Task have their own mechanism,can throw std::runtime_error
    Submittable* get_submittable(AbstractServer* as) const ; // can throw std::runtime_error
 
@@ -501,7 +503,8 @@ public:
    const std::string& passwd() const { return passwd_;}
 
    virtual void setup_user_authentification(const std::string& user, const std::string& passwd);
-   virtual void check_user_setup();
+   virtual void setup_user_authentification(AbstractClientEnv&);
+   virtual void setup_user_authentification();
 
 protected:
 
@@ -509,7 +512,6 @@ protected:
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
    bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const;
    bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const;
-
 
    /// Prompt the user for confirmation: If user responds with no, will exit client
    static void prompt_for_confirmation(const std::string& prompt);
@@ -1803,7 +1805,8 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    virtual void setup_user_authentification(const std::string& user, const std::string& passwd);
-   virtual void check_user_setup();
+   virtual void setup_user_authentification(AbstractClientEnv&);
+   virtual void setup_user_authentification();
 
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;

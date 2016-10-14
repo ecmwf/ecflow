@@ -302,11 +302,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					/// However this is only done, if we are not using the Command Level Interface(cli)
 					server_reply_.clear_for_invoke(cli_);
 
-					if (!cts_cmd->task_cmd()) {
-					   // The password file is read once and password for user is cached.
-					   // Likewise UserCmd::get_user(), caches the user
-					   cts_cmd->setup_user_authentification(UserCmd::get_user(),clientEnv_.get_user_password());
-					}
+					cts_cmd->setup_user_authentification( clientEnv_ );
 
 					boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL

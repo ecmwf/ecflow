@@ -184,11 +184,19 @@ void GroupCTSCmd::setup_user_authentification(const std::string& user, const std
  	}
 }
 
-void GroupCTSCmd::check_user_setup()
+void GroupCTSCmd::setup_user_authentification(AbstractClientEnv& env)
 {
-   UserCmd::check_user_setup();
+   UserCmd::setup_user_authentification(env);
    for(size_t i = 0; i < cmdVec_.size(); i++) {
-      cmdVec_[i]->check_user_setup();
+      cmdVec_[i]->setup_user_authentification(env);
+   }
+}
+
+void GroupCTSCmd::setup_user_authentification()
+{
+   UserCmd::setup_user_authentification();
+   for(size_t i = 0; i < cmdVec_.size(); i++) {
+      cmdVec_[i]->setup_user_authentification();
    }
 }
 

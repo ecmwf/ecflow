@@ -86,8 +86,6 @@ public:
    // Needs to be the same value as supplied to child command init
    void set_remote_id(const std::string& rid) { remote_id_ = rid; }
 
-   // Returns the user password. This value is cached, so we only read passwd file once
-   const std::string& get_user_password() const;
 
 // AbstractClientEnv functions:
  	virtual bool checkTaskPathAndPassword(std::string& errorMsg) const;
@@ -99,6 +97,7 @@ public:
    virtual const std::string& host() const;
    virtual const std::string& port() const;
 	virtual const std::vector<std::pair<std::string,std::string> >& env() const { return env_;}
+	virtual const std::string& get_user_password() const;
 	virtual bool debug() const { return debug_;} //enabled if ECF_DEBUG_CLIENT set
    virtual void set_test() { under_test_ = true; }
    virtual bool under_test() const { return under_test_; }

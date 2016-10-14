@@ -228,7 +228,8 @@ static void test_persistence(const Defs& theFixtureDefs )
 			BOOST_CHECK_MESSAGE(theCmd->task_cmd(),"Currently only tasks commands, are allowed to connect to different servers");
 		}
 
-		const ClientToServerRequest cmd_request(theCmd); // MUST be const to avoid AIX compiler warning
+		ClientToServerRequest cmd_request;
+		cmd_request.set_cmd(theCmd);
 		{
 			if (theCmd.get()->handleRequestIsTestable()) {
 				// test handleRequest while were at it.
