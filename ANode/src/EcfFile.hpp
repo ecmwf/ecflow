@@ -87,7 +87,7 @@ private:
 	bool open_script_file(const std::string& file, EcfFile::Type, std::vector<std::string>& lines, std::string& errormsg) const;
 
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
- 	void variableSubstituition(JobsParam&);
+ 	void variableSubstitution(JobsParam&);
  	const std::string&  doCreateJobFile(JobsParam&) const;
  	bool doCreateManFile(std::string& errormsg);
  	bool extractManual(const std::vector< std::string >& lines, std::vector< std::string >& theManualLines, std::string& errormsg) const;
