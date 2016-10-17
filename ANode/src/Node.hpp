@@ -67,11 +67,16 @@ protected:
    Node(const std::string& name);
    Node();
 public:
+   Node& operator=(const Node&);
    Node(const Node& rhs);
    virtual ~Node();
 
    /// The Parent Must set the parent pointer. For a Suite however this will be NULL
    void set_parent(Node* p) { parent_ = p; }
+
+   /// Both these function can throw
+   bool archive(std::string& error_msg);
+   bool restore(std::string& error_msg);
 
    // Server called functions:
    /// Required when we have time attributes, when time related attribute are free they stay free
@@ -547,6 +552,12 @@ public:
    /// ** meaningless, since it will always be the computed state.
    /// ** For Aliases we only update the limits, and do not bubble up state changes
    virtual void handleStateChange() = 0; // can end up changing state
+
+   /// update change numbers to force sync
+   virtual void force_sync(){};
+
+   /// check trigger expression have nodes that resolve
+   bool check_expressions(Ast*,const std::string& expr, bool trigger, std::string& errorMsg) const;
 
 protected:
    /// Used in conjunction with Node::position()

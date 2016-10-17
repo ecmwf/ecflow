@@ -15,6 +15,7 @@
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
+#include "VAttribute.hpp"
 #include "VFilter.hpp"
 #include "VIcon.hpp"
 #include "VModelData.hpp"
@@ -233,6 +234,23 @@ QModelIndex TableNodeModel::nodeToIndex(VTableServer* server,const VNode* node, 
 		return createIndex(row,column,const_cast<VNode*>(node));
 	}
 	return QModelIndex();
+}
+
+QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) const
+{
+    if(!a)
+        return QModelIndex();
+
+    VNode* node=a->parent();
+    if(!node)
+        return QModelIndex();
+
+    int row=0;
+    if((row=data_->position(node)) != -1)
+    {
+        return createIndex(row,column,const_cast<VNode*>(node));
+    }
+    return QModelIndex();
 }
 
 VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)

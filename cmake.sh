@@ -13,17 +13,23 @@ show_error_and_exit() {
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
    echo "  "
    echo "   make           - run make after cmake"
+   echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
+   echo "   install        - install to /usr/local/apps/eflow.  defaults is /var/tmp/$USER/install/cmake/ecflow"
    echo "   test           - run all the tests"
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   san            - is short for clang thread sanitiser"
    echo "   no_gui         - Don't build the gui"
+   echo "   ssl            - build using openssl"
+   echo "   log            - enable debug output"
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
    echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
    exit 1
 }
 
+install_arg=
+ecbuild_arg=
 copy_tarball_arg=
 package_source_arg=
 make_arg=
@@ -39,6 +45,8 @@ ctest_arg=
 clean_arg=
 no_gui_arg=
 python3_arg=
+ssl_arg=
+log_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -59,6 +67,10 @@ while [[ "$#" != 0 ]] ; do
       done
       break
    elif [[ "$1" = no_gui ]] ; then no_gui_arg=$1 ;
+   elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
+   elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
+   elif [[ "$1" = install ]] ; then install_arg=$1 ;
+   elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
@@ -95,13 +107,15 @@ echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
 echo "python3_arg=$python3_arg"
 echo "no_gui_arg=$no_gui_arg"
+echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild/2.3.1
+module load ecbuild/2.4.0
+
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
@@ -114,15 +128,20 @@ if [[ "$clang_sanitiser_arg" = san ]] ; then
 	cmake_extra_options="$cmake_extra_options -DCMAKE_C_FLAGS=-fsanitize=thread"
 fi
 if [[ "$ARCH" = cray ]] ; then
-    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF"
+
+    # disable new UI, no QT on cray
+    # Use the cray wrappers, these will add the correct flags.
+    # Assumes we have CRAY_ADD_RPATH=yes
+    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DCMAKE_Fortran_COMPILER=ftn"
     
     if [[ $intel_arg = intel ]] ; then
         module swap PrgEnv-cray PrgEnv-intel
     else
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
+    module unload atp
     module load boost/1.53.0
-    export CRAY_ADD_RPATH=no
+    export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1
 fi
 
@@ -205,6 +224,16 @@ fi
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 
+ssl_options=
+if [[ $ssl_arg = ssl ]] ; then
+    ssl_options="-DENABLE_SSL=ON"
+fi
+
+log_options=
+if [[ $log_arg = log ]] ; then
+    log_options="-DECBUILD_LOG_LEVEL=DEBUG"
+fi
+
 gui_options=
 if [[ $no_gui_arg = no_gui ]] ; then
     gui_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF -DENABLE_ALL_TESTS=ON"
@@ -215,18 +244,30 @@ if [[ $package_source_arg = package_source ]] ; then
     gui_options=  
 fi
 
-#$workspace/ecbuild/bin/ecbuild $source_dir \
-ecbuild $source_dir \
+install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
+if [[ $install_arg = install ]] ; then
+    install_prefix=/usr/local/apps/ecflow/$release.$major.$minor
+fi
+
+ecbuild=ecbuild
+if [[ $ecbuild_arg = ecbuild ]] ; then
+   ecbuild=$workspace/ecbuild/bin/ecbuild
+fi
+
+$ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
-            -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \
+            -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
             -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
             ${cmake_extra_options} \
-            ${gui_options}
-            
+            ${gui_options} \
+            ${ssl_options} \
+            ${log_options}
+            #-DENABLE_ALL_TESTS=ON
+            #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
             #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'"

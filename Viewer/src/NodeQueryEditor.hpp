@@ -65,6 +65,9 @@ public:
     void notifyServerFilterChanged(ServerItem*);
     void notifyServerFilterDelete();
 
+public Q_SLOTS:
+    void slotClear();
+
 protected Q_SLOTS:
     void slotOptionEditChanged();
     void slotServerCbChanged();

@@ -28,26 +28,25 @@
 #include "VRepeat.hpp"
 #include "VAttribute.hpp"
 
-std::map<std::string,VAttributeType*> VAttributeType::items_;
+std::map<std::string,VAttributeType*> VAttributeType::typesMap_;
 std::vector<VAttributeType*> VAttributeType::types_;
 
 //#define _UI_ATTR_DEBUG
 
 VAttributeType::VAttributeType(const std::string& name) :
         VParam(name),
-        dataCount_(0)
+        dataCount_(0),
+        id_(types_.size())
 {
     //items_.push_back(this);
-    items_[name]=this;
+    typesMap_[name]=this;
     types_.push_back(this);
 }
-
-
 
 std::vector<VParam*> VAttributeType::filterItems()
 {
     std::vector<VParam*> v;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
     {
         v.push_back(it->second);
     }
@@ -57,8 +56,8 @@ std::vector<VParam*> VAttributeType::filterItems()
 
 VAttributeType* VAttributeType::find(const std::string& name)
 {
-    std::map<std::string,VAttributeType*>::const_iterator it=items_.find(name);
-    if(it != items_.end())
+    std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.find(name);
+    if(it != typesMap_.end())
             return it->second;
 
     return 0;
@@ -72,13 +71,19 @@ VAttributeType* VAttributeType::find(const std::string& name)
     return NULL;*/
 }
 
+VAttributeType* VAttributeType::find(int id)
+{
+    assert(id >=0  && id < types_.size());
+    return types_[id];
+}
+
 int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
 {
     if(!vnode)
         return 0;
 
     int total=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -95,7 +100,7 @@ VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilt
         return NULL;
 
     int totalRow=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -119,7 +124,7 @@ bool VAttributeType::getData(VNode *vnode,int row,VAttributeType* &type,QStringL
         return false;
 
     int totalRow=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -156,7 +161,7 @@ int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filte
         return 1;
 
     int totalRow=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -182,7 +187,7 @@ int VAttributeType::getRow(const VNode *vnode,int row,AttributeFilter *filter)
 
     int totalRow=0;
     int realRow=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
@@ -199,6 +204,73 @@ int VAttributeType::getRow(const VNode *vnode,int row,AttributeFilter *filter)
             realRow+=it->second->num(vnode);
         }
     }
+
+    return -1;
+}
+
+bool VAttributeType::findByAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter,VAttributeType* &type,int& indexInType)
+{
+    if(!vnode)
+        return false;
+
+    int totalNum=0;
+    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
+    {
+        if(!filter || filter->isSet(it->second))
+        {
+            int size=it->second->num(vnode);;
+            if(absIndex-totalNum >=0 && absIndex-totalNum < size)
+            {
+                indexInType=absIndex-totalNum;
+                type=it->second;
+                return true;
+            }
+            totalNum+=size;
+        }
+    }
+
+    return false;
+}
+
+
+//Returns the absolute index of the given attribute within the whole list of attributes of a given node.
+int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
+{
+    if(!a)
+        return -1;
+
+    VNode* vnode=a->parent();
+    if(!vnode)
+        return -1;
+
+    if(filter && !filter->isSet(a->type()))
+        return -1;
+
+    int absIndex=-1;
+    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
+    {
+        if(a->type() == it->second)
+        {
+           int idx=it->second->indexOf(a);
+           return (idx != -1)?(absIndex+idx+1):-1;
+        }
+
+        if(!filter || filter->isSet(it->second))
+        {
+            int size=it->second->num(vnode);
+            if(size > 0)
+                absIndex+=size;
+        }
+    }
+
+    return -1;
+}
+
+//Returns the index of the given attribute within the given type
+int VAttributeType::indexOf(const VAttribute* a)
+{
+    if(a && a->parent())
+        return indexOf(a->parent(),a->data());
 
     return -1;
 }
@@ -242,6 +314,31 @@ QStringList VAttributeType::searchKeys() const
     return lst;
 }
 
+void VAttributeType::items(const VNode* vnode,QList<VItemTmp_ptr>& lst)
+{
+    int cnt=num(vnode);
+    for(int i=0; i < cnt; i++)
+        lst << VItemTmp::create(new VAttribute(const_cast<VNode*>(vnode),this,i));
+}
+
+void VAttributeType::items(const std::string& type,const VNode* vnode,QList<VItemTmp_ptr>& lst)
+{
+    VAttributeType *t=VAttributeType::find(type);
+    Q_ASSERT(t);
+    t->items(vnode,lst);
+}
+
+VItemTmp_ptr VAttributeType::item(const VNode* vnode,const std::string& name)
+{
+    std::vector<std::string> nameVec;
+    itemNames(vnode,nameVec);
+    for(size_t i=0; i < nameVec.size(); i++)
+        if(nameVec[i] == name)
+            return VItemTmp::create(new VAttribute(const_cast<VNode*>(vnode),this,i));
+
+    return VItemTmp_ptr();
+}
+
 //================================
 // Meters
 //================================
@@ -253,12 +350,13 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MinIndex=3, MaxIndex=4,ThresholdIndex=5};
-    void getData(const Meter& m,QStringList& data);
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
+    void getData(const Meter& m,QStringList& data) const;
 };
 
 VMeterAttribute::VMeterAttribute(const std::string& n) :
@@ -320,29 +418,29 @@ QString VMeterAttribute::toolTip(QStringList d) const
     return t;
 }
 
-bool VMeterAttribute::exists(const VNode* vnode,QStringList data) const
+int VMeterAttribute::indexOf(const VNode* vnode,QStringList data) const
 {
     if(vnode->isServer())
-        return false;
+        return -1;
 
     node_ptr node=vnode->node();
     if(!node)
-        return false;
+        return -1;
 
     if(data.count() != dataCount_ && data[TypeIndex] != qName_)
-        return false;
+        return -1;
 
     const std::vector<Meter>&  v=node->meters();
     for(size_t i=0; i < v.size(); i++)
     {
         if(v[i].name() == data[NameIndex].toStdString())
-            return true;
+            return i;
     }
 
-    return false;
+    return -1;
 }
 
-void VMeterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+void VMeterAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -350,17 +448,30 @@ void VMeterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
     node_ptr node=vnode->node();
     if(!node)
         return;
-    
-    const std::vector<Meter>& v=node->meters();
-    for(std::vector<Meter>::const_iterator it=v.begin(); it != v.end(); ++it)
-    {    
-        QStringList data;
-        getData(*it,data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
-    } 
-}    
 
-void VMeterAttribute::getData(const Meter& m,QStringList& data)
+    const std::vector<Meter>& v=node->meters();
+    for(size_t i=0; i < v.size(); i++)
+    {
+        nameVec.push_back(v[i].name());
+    }
+}
+
+bool VMeterAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    const std::vector<Meter>& v=node->meters();
+    assert(index >=0 && index < v.size());
+    getData(v[index],data);
+    return true;
+}
+
+void VMeterAttribute::getData(const Meter& m,QStringList& data) const
 {
     data << qName_ <<
                     QString::fromStdString(m.name()) <<
@@ -380,11 +491,12 @@ public:
     bool getData(VNode *node,int row,int& size,QStringList& data);
     int lineNum(const VNode* vnode,int row);
     QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(const Label& label,QStringList& data);
 };
 
@@ -470,29 +582,29 @@ QString VLabelAttribute::toolTip(QStringList d) const
     return t;
 }
 
-bool VLabelAttribute::exists(const VNode* vnode,QStringList data) const
+int VLabelAttribute::indexOf(const VNode* vnode,QStringList data) const
 {
     if(vnode->isServer())
-        return false;
+        return -1;
 
     node_ptr node=vnode->node();
     if(!node)
-        return false;
+        return -1;
 
     if(data.count() != dataCount_ && data[TypeIndex] != qName_)
-        return false;
+        return -1;
 
     const std::vector<Label>&  v=node->labels();
     for(size_t i=0; i < v.size(); i++)
     {
         if(v[i].name() == data[NameIndex].toStdString())
-            return true;
+            return i;
     }
 
-    return false;
+    return -1;
 }
 
-void VLabelAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+void VLabelAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -502,12 +614,25 @@ void VLabelAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
         return;
 
     const std::vector<Label>& v=node->labels();
-    for(std::vector<Label>::const_iterator it=v.begin(); it != v.end(); ++it)
+    for(size_t i=0; i < v.size(); i++)
     {
-        QStringList data;
-        getData(*it,data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(v[i].name());
     }
+}
+
+bool VLabelAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    const std::vector<Label>& v=node->labels();
+    assert(index >=0 && index < v.size());
+    getData(v[index],data);
+    return true;
 }
 
 void VLabelAttribute::getData(const Label& label,QStringList& data)
@@ -523,7 +648,6 @@ void VLabelAttribute::getData(const Label& label,QStringList& data)
                 QString::fromStdString(val);
 }
 
-
 //================================
 // Events
 //================================
@@ -536,11 +660,12 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MinIndex=3, MaxIndex=4,ThresholdIndex=5};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(const Event& m,QStringList& data);
 
 };
@@ -552,7 +677,6 @@ VEventAttribute::VEventAttribute(const std::string& n) :
     searchKeyToData_["event_name"]=NameIndex;
     searchKeyToData_["event_value"]=ValueIndex;
 }
-
 
 int VEventAttribute::num(const VNode *vnode)
 {
@@ -612,29 +736,29 @@ QString VEventAttribute::toolTip(QStringList d) const
     return t;
 }
 
-bool VEventAttribute::exists(const VNode* vnode,QStringList data) const
+int VEventAttribute::indexOf(const VNode* vnode,QStringList data) const
 {
     if(vnode->isServer())
-        return false;
+        return -1;
 
     node_ptr node=vnode->node();
     if(!node)
-        return false;
+        return -1;
 
     if(data.count() != dataCount_ && data[TypeIndex] != qName_)
-        return false;
+        return -1;
 
     const std::vector<Event>&  v=node->events();
     for(size_t i=0; i < v.size(); i++)
     {
         if(v[i].name_or_number() == data[NameIndex].toStdString())
-            return true;
+            return i;
     }
 
-    return false;
+    return -1;
 }
 
-void VEventAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+void VEventAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -644,12 +768,25 @@ void VEventAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
         return;
 
     const std::vector<Event>& v=node->events();
-    for(std::vector<Event>::const_iterator it=v.begin(); it != v.end(); ++it)
+    for(size_t i=0; i < v.size(); i++)
     {
-        QStringList data;
-        getData(*it,data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(v[i].name_or_number());
     }
+}
+
+bool VEventAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    const std::vector<Event>& v=node->events();
+    assert(index >=0 && index < v.size());
+    getData(v[index],data);
+    return true;
 }
 
 void VEventAttribute::getData(const Event& e,QStringList& data)
@@ -670,11 +807,12 @@ public:
     explicit VGenvarAttribute(const std::string& n);
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
-    bool exists(const VNode* vnode,QStringList) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList& data);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(const Variable&,QStringList& data);
 };
 
@@ -685,7 +823,6 @@ VGenvarAttribute::VGenvarAttribute(const std::string& n) : VAttributeType(n)
     searchKeyToData_["var_value"]=ValueIndex;
     searchKeyToData_["var_type"]=TypeIndex;
 }
-
 
 int VGenvarAttribute::num(const VNode *vnode)
 {
@@ -720,10 +857,10 @@ bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     return false;
 }
 
-bool VGenvarAttribute::exists(const VNode* vnode,QStringList data) const
+int VGenvarAttribute::indexOf(const VNode* vnode,QStringList data) const
 {
     if(data.count() != dataCount_ && data[TypeIndex] != qName_)
-        return false;
+        return -1;
 
     std::vector<Variable> v;
     vnode->genVariables(v);
@@ -731,22 +868,29 @@ bool VGenvarAttribute::exists(const VNode* vnode,QStringList data) const
     for(size_t i=0; i < v.size(); i++)
     {
         if(v[i].name() == data[NameIndex].toStdString())
-           return true;
+           return i;
     }
 
-    return false;
+    return -1;
 }
 
-void VGenvarAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+void VGenvarAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     std::vector<Variable> v;
     vnode->genVariables(v);
     for(size_t i=0; i < v.size(); i++)
     {
-        QStringList data;
-        getData(v[i],data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(v[i].name());
     }
+}
+
+bool VGenvarAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    std::vector<Variable> v;
+    vnode->genVariables(v);
+    assert(index >=0 && index  < v.size());
+    getData(v[index],data);
+    return true;
 }
 
 void VGenvarAttribute::getData(const Variable& v,QStringList& data)
@@ -766,11 +910,12 @@ public:
     explicit VVarAttribute(const std::string& n);
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
-    bool exists(const VNode* vnode,QStringList) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(const Variable&,QStringList& data);
 };
 
@@ -834,10 +979,10 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     return false;
 }
 
-bool VVarAttribute::exists(const VNode* vnode,QStringList data) const
+int VVarAttribute::indexOf(const VNode* vnode,QStringList data) const
 {
     if(data.count() != dataCount_ && data[TypeIndex] != qName_)
-        return false;
+        return -1;
 
     if(vnode->isServer())
     {
@@ -846,30 +991,27 @@ bool VVarAttribute::exists(const VNode* vnode,QStringList data) const
         for(size_t i=0; i < v.size(); i++)
         {
             if(v[i].name() == data[NameIndex].toStdString())
-               return true;
+               return i;
         }
     }
     else
     {
         node_ptr node=vnode->node();
         if(!node)
-            return false
-            
-            
-            ;
-        
+            return -1;
+
         const std::vector<Variable>& v=node->variables();
         for(size_t i=0; i < v.size(); i++)
         {
             if(v[i].name() == data[NameIndex].toStdString())
-                return true;
+                return i;
         }
     }
 
-    return false;
+    return -1;
 }
 
-void VVarAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+void VVarAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
     {
@@ -877,9 +1019,7 @@ void VVarAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
         vnode->variables(v);
         for(size_t i=0; i < v.size(); i++)
         {
-            QStringList data;
-            getData(v[i],data);
-            lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+            nameVec.push_back(v[i].name());
         }
     }
     else
@@ -887,15 +1027,36 @@ void VVarAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
         node_ptr node=vnode->node();
         if(!node)
             return;
-    
+
         const std::vector<Variable>& v=node->variables();
         for(size_t i=0; i < v.size(); i++)
         {
-            QStringList data;
-            getData(v[i],data);
-            lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+            nameVec.push_back(v[i].name());
         }
-     }
+    }
+}
+
+bool VVarAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+    {
+        std::vector<Variable> v;
+        vnode->variables(v);        
+        getData(v[index],data);
+
+    }
+    else
+    {
+        node_ptr node=vnode->node();
+        if(!node)
+            return false;
+
+        const std::vector<Variable>& v=node->variables();
+        assert(index >=0 && index  < v.size());
+        getData(v[index],data);       
+    }
+
+    return true;
 }
 
 void VVarAttribute::getData(const Variable& v,QStringList& data)
@@ -916,11 +1077,12 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MaxIndex=3};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(limit_ptr lim,QStringList& data);
 };
 
@@ -984,29 +1146,29 @@ QString VLimitAttribute::toolTip(QStringList d) const
     return t;
 }
 
-bool VLimitAttribute::exists(const VNode* vnode,QStringList data) const
+int VLimitAttribute::indexOf(const VNode* vnode,QStringList data) const
 {
     if(vnode->isServer())
-        return false;
+        return -1;
 
     node_ptr node=vnode->node();
     if(!node)
-        return false;
+        return -1;
 
     if(data.count() != dataCount_ && data[TypeIndex] != qName_)
-        return false;
+        return -1;
 
     const std::vector<limit_ptr>& v=node->limits();
     for(size_t i=0; i < v.size(); i++)
     {
         if(v[i]->name() == data[NameIndex].toStdString())
-            return true;
+            return i;
     }
 
-    return false;
+    return -1;
 }
 
-void VLimitAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+void VLimitAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -1014,22 +1176,35 @@ void VLimitAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
     node_ptr node=vnode->node();
     if(!node)
         return;
-    
+
     const std::vector<limit_ptr>& v=node->limits();
     for(size_t i=0; i < v.size(); i++)
-    {    
-        QStringList data;
-        getData(v[i],data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
-    } 
-}    
+    {
+        nameVec.push_back(v[i]->name());
+    }
+}
+
+bool VLimitAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    const std::vector<limit_ptr>& v=node->limits();
+    assert(index >=0 && index < v.size()); 
+    getData(v[index],data);
+    return true;
+}
 
 void VLimitAttribute::getData(limit_ptr lim,QStringList& data)
 {    
-        data << qName_ <<
-                    QString::fromStdString(lim->name()) <<
-                    QString::number(lim->value()) <<
-                    QString::number(lim->theLimit());
+    data << qName_ <<
+        QString::fromStdString(lim->name()) <<
+        QString::number(lim->value()) <<
+        QString::number(lim->theLimit());
 }
 
 //================================
@@ -1043,10 +1218,12 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,PathIndex=2};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(const InLimit& lim,QStringList& data);
 };
 
@@ -1054,6 +1231,7 @@ VLimiterAttribute::VLimiterAttribute(const std::string& n) : VAttributeType(n)
 {
     dataCount_=3;
     searchKeyToData_["limiter_name"]=NameIndex;
+    searchKeyToData_["limiter_path"]=PathIndex;
 }
 
 int VLimiterAttribute::num(const VNode *vnode)
@@ -1105,7 +1283,30 @@ QString VLimiterAttribute::toolTip(QStringList d) const
     return t;
 }
 
-void VLimiterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+int VLimiterAttribute::indexOf(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return -1;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return -1;
+
+    if(data.count() != dataCount_ && data[TypeIndex] != qName_)
+        return -1;
+
+    const std::vector<InLimit>& v=node->inlimits();
+    for(size_t i=0; i < v.size(); i++)
+    {
+        if(v[i].name() == data[NameIndex].toStdString() &&
+           v[i].pathToNode() == data[PathIndex].toStdString())
+            return i;
+    }
+
+    return -1;
+}
+
+void VLimiterAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -1117,10 +1318,23 @@ void VLimiterAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst
     const std::vector<InLimit>& v=node->inlimits();
     for(size_t i=0; i < v.size(); i++)
     {
-        QStringList data;
-        getData(v[i],data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(v[i].name());
     }
+}
+
+bool VLimiterAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    const std::vector<InLimit>& v=node->inlimits();
+    assert(index >=0 && index < v.size());
+    getData(v[index],data);
+    return true;
 }
 
 void VLimiterAttribute::getData(const InLimit& lim,QStringList& data)
@@ -1129,7 +1343,6 @@ void VLimiterAttribute::getData(const InLimit& lim,QStringList& data)
            QString::fromStdString(lim.name()) <<
            QString::fromStdString(lim.pathToNode());
 }
-
 
 //================================
 //Triggers
@@ -1142,15 +1355,18 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList data) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,CompleteIndex=1,ExprIndex=2};
+    void itemNames(const VNode*,std::vector<std::string>&) {}
 };
 
 VTriggerAttribute::VTriggerAttribute(const std::string& n) : VAttributeType(n)
 {
     dataCount_=3;
+    searchKeyToData_["trigger_type"]=CompleteIndex;
     searchKeyToData_["trigger_expression"]=ExprIndex;
 }
 
@@ -1224,6 +1440,83 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
     return false;
 }
 
+int VTriggerAttribute::indexOf(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return -1;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return -1;
+
+    if(data.count() != dataCount_ && data[TypeIndex] != qName_)
+        return -1;
+
+    Expression* eT=node->get_trigger();
+    Expression* eC=node->get_complete();
+
+    int index=-1;
+    if(eT)
+    {
+        index=0;
+        if(data[CompleteIndex] == "0")
+            return index;
+    }
+
+    if(eC)
+    {
+        if(index==0)
+            index=1;
+        else
+            index=0;
+
+        if(data[CompleteIndex] == "1")
+            return index;
+    }
+
+    //TODO: we should check the expressions as well
+
+    return -1;
+}
+
+bool VTriggerAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    Expression* eT=node->get_trigger();
+    Expression* eC=node->get_complete();
+
+    bool getTrigger=false;
+    bool getComplete=false;
+
+    if(index == 0)
+    {
+        if(eT)
+            getTrigger=true;
+        else if(eC)
+            getComplete=true;
+    }
+    else if(index==1 && eC)
+        getComplete=true;
+
+    if(getTrigger)
+    {
+        data << qName_ << "0" << QString::fromStdString(eT->expression());
+        return true;
+    }
+    else if(getComplete)
+    {        
+        data << qName_ << "1" << QString::fromStdString(eC->expression());     
+    }
+
+    return false;
+}
+
 QString VTriggerAttribute::toolTip(QStringList d) const
 {
     QString t;
@@ -1241,31 +1534,6 @@ QString VTriggerAttribute::toolTip(QStringList d) const
     return t;
 }
 
-void VTriggerAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
-{
-    if(vnode->isServer())
-        return;
-
-    node_ptr node=vnode->node();
-    if(!node)
-        return;
-
-    if(Expression* eT=node->get_trigger())
-    {
-        QStringList data;
-        data << qName_ << "0" << QString::fromStdString(eT->expression());
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
-    }
-
-    if(Expression* eC=node->get_complete())
-    {
-        QStringList data;
-        data << qName_ << "1" << QString::fromStdString(eC->expression());
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
-    }
-}
-
-
 //================================
 //Times
 //================================
@@ -1277,10 +1545,12 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(const ecf::TimeAttr& lim,QStringList& data);
     void getData(const ecf::TodayAttr& lim,QStringList& data);
     void getData(const ecf::CronAttr& lim,QStringList& data);
@@ -1325,7 +1595,7 @@ bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         else if(row < tV.size() + tdV.size())
             getData(tdV[row-tV.size()],data);
         else
-             getData(cV[row-tV.size()-tdV.size()],data);
+            getData(cV[row-tV.size()-tdV.size()],data);
 
 #ifdef _UI_ATTR_DEBUG
         UserMessage::debug("  data=" + data.join(",").toStdString());
@@ -1350,7 +1620,47 @@ QString VTimeAttribute::toolTip(QStringList d) const
     return t;
 }
 
-void VTimeAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+int VTimeAttribute::indexOf(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return -1;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return -1;
+
+    if(data.count() != dataCount_ && data[TypeIndex] != qName_)
+        return -1;
+
+    const std::vector<ecf::TimeAttr>& tV=node->timeVec();
+    const std::vector<ecf::TodayAttr>& tdV=node->todayVec();
+    const std::vector<ecf::CronAttr>& cV=node->crons();
+
+    int cnt=0;
+    for(size_t i=0; i < tV.size(); i++)
+    {
+        if(tV[i].name() == data[NameIndex].toStdString())
+            return i;
+    }
+
+    cnt+=tV.size();
+    for(size_t i=0; i < tdV.size(); i++)
+    {
+        if(tdV[i].name() == data[NameIndex].toStdString())
+            return cnt+i;
+    }
+
+    cnt+=tdV.size();
+    for(size_t i=0; i < cV.size(); i++)
+    {
+        if(cV[i].name() == data[NameIndex].toStdString())
+            return cnt+i;
+    }
+
+    return -1;
+}
+
+void VTimeAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -1365,24 +1675,44 @@ void VTimeAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
 
     for(size_t i=0; i < tV.size(); i++)
     {
-        QStringList data;
-        getData(tV[i],data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(tV[i].name());
     }
-
     for(size_t i=0; i < tdV.size(); i++)
     {
-        QStringList data;
-        getData(tdV[i],data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(tdV[i].name());
     }
-
     for(size_t i=0; i < cV.size(); i++)
     {
-        QStringList data;
-        getData(cV[i],data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(cV[i].name());
     }
+}
+
+bool VTimeAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    const std::vector<ecf::TimeAttr>& tV=node->timeVec();
+    const std::vector<ecf::TodayAttr>& tdV=node->todayVec();
+    const std::vector<ecf::CronAttr>& cV=node->crons();
+
+    if(index >=0 && index < tV.size()+tdV.size()+ cV.size())
+    {
+        if(index < tV.size())
+            getData(tV[index],data);
+        else if(index < tV.size() + tdV.size())
+            getData(tdV[index-tV.size()],data);
+        else
+            getData(cV[index-tV.size()-tdV.size()],data);
+
+        assert(!data.isEmpty());
+    }
+
+    return false;
 }
 
 void VTimeAttribute::getData(const ecf::TimeAttr& d,QStringList& data)
@@ -1411,10 +1741,12 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;    
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(const DateAttr& lim,QStringList& data);
     void getData(const DayAttr& lim,QStringList& data);
 };
@@ -1480,7 +1812,39 @@ QString VDateAttribute::toolTip(QStringList d) const
     return t;
 }
 
-void VDateAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+int VDateAttribute::indexOf(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return -1;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return -1;
+
+    if(data.count() != dataCount_ && data[TypeIndex] != qName_)
+        return -1;
+
+    const std::vector<DateAttr>& dV=node->dates();
+    const std::vector<DayAttr>& dayV=node->days();
+
+    int cnt=0;
+    for(size_t i=0; i < dV.size(); i++)
+    {
+        if(dV[i].name() == data[NameIndex].toStdString())
+            return i;
+    }
+
+    cnt+=dV.size();
+    for(size_t i=0; i < dayV.size(); i++)
+    {
+        if(dayV[i].name() == data[NameIndex].toStdString())
+            return cnt+i;
+    }
+
+    return -1;
+}
+
+void VDateAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -1494,17 +1858,38 @@ void VDateAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
 
     for(size_t i=0; i < dV.size(); i++)
     {
-        QStringList data;
-        getData(dV[i],data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(dV[i].name());
     }
-
     for(size_t i=0; i < dayV.size(); i++)
     {
-        QStringList data;
-        getData(dayV[i],data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        nameVec.push_back(dayV[i].name());
     }
+}
+
+bool VDateAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    const std::vector<DateAttr>& dV=node->dates();
+    const std::vector<DayAttr>& dayV=node->days();
+
+    if(index >=0 && index < dV.size()+dayV.size())
+    {
+        QStringList  data;
+        if(index < dV.size())
+            getData(dV[index],data);
+        else
+            getData(dayV[index-dV.size()],data);
+
+        assert(!data.isEmpty());
+    }
+
+    return false;
 }
 
 void VDateAttribute::getData(const DateAttr& d,QStringList& data)
@@ -1517,7 +1902,6 @@ void VDateAttribute::getData(const DayAttr& d,QStringList& data)
     data << qName_ << QString::fromStdString(d.name());
 }
 
-
 //================================
 //Repeat
 //================================
@@ -1529,11 +1913,12 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    bool exists(const VNode* vnode,QStringList) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList&);
 
 private:
     enum DataIndex {TypeIndex=0,SubtypeIndex=1,NameIndex=2,ValueIndex=3,StartIndex=4,EndIndex=5,StepIndex=6};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(const Repeat& r,QStringList& data);
 };
 
@@ -1607,28 +1992,29 @@ QString VRepeatAttribute::toolTip(QStringList d) const
     return t;
 }
 
-bool VRepeatAttribute::exists(const VNode* vnode,QStringList data) const
+int VRepeatAttribute::indexOf(const VNode* vnode,QStringList data) const
 {
     if(vnode->isServer())
-        return false;
+        return -1;
 
     node_ptr node=vnode->node();
     if(!node)
-        return false;
+        return -1;
 
     if(data.count() != dataCount_ && data[TypeIndex] != qName_)
-        return false;
+        return -1;
 
     const Repeat& r=node->repeat();
     if(r.name() == data[NameIndex].toStdString())
     {
-        return (VRepeat::type(r) == data[SubtypeIndex].toStdString());
+        if(VRepeat::type(r) == data[SubtypeIndex].toStdString())
+            return 0;
     }
 
-    return false;
+    return -1;
 }
 
-void VRepeatAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+void VRepeatAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -1639,11 +2025,26 @@ void VRepeatAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
 
     const Repeat& r=node->repeat();
     if(!r.empty())
+        nameVec.push_back(r.name());
+}
+
+bool VRepeatAttribute::itemData(const VNode* vnode,int index,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    const Repeat& r=node->repeat();
+    if(index == 0 && !r.empty())
     {
-        QStringList data;
         getData(r,data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        return true;
     }
+
+    return false;
 }
 
 void VRepeatAttribute::getData(const Repeat& r,QStringList& data)
@@ -1671,10 +2072,12 @@ public:
     int num(const VNode *node);
     bool getData(VNode *node,int row,int& size,QStringList& data);
     QString toolTip(QStringList d) const;
-    void getSearchData(const VNode* vnode,QList<VAttribute*>& lst);
+    int indexOf(const VNode* vnode,QStringList) const;
+    bool itemData(const VNode*,int index,QStringList& data);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1};
+    void itemNames(const VNode* vnode,std::vector<std::string>& nameVec);
     void getData(ecf::LateAttr *late,QStringList& data);
 };
 
@@ -1732,7 +2135,28 @@ QString VLateAttribute::toolTip(QStringList d) const
     return t;
 }
 
-void VLateAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
+int VLateAttribute::indexOf(const VNode* vnode,QStringList data) const
+{
+    if(vnode->isServer())
+        return -1;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return -1;
+
+    if(data.count() != dataCount_ && data[TypeIndex] != qName_)
+        return -1;
+
+    ecf::LateAttr *late=node->get_late();
+    if(late && late->name() == data[NameIndex].toStdString())
+    {
+        return 0;
+    }
+
+    return -1;
+}
+
+void VLateAttribute::itemNames(const VNode* vnode,std::vector<std::string>& nameVec)
 {
     if(vnode->isServer())
         return;
@@ -1743,11 +2167,26 @@ void VLateAttribute::getSearchData(const VNode* vnode,QList<VAttribute*>& lst)
 
     ecf::LateAttr *late=node->get_late();
     if(late)
+        nameVec.push_back(late->name());
+}
+
+bool VLateAttribute::itemData(const VNode* vnode,int /*index*/,QStringList& data)
+{
+    if(vnode->isServer())
+        return false;
+
+    node_ptr node=vnode->node();
+    if(!node)
+        return false;
+
+    ecf::LateAttr *late=node->get_late();
+    if(late)
     {
-        QStringList data;
         getData(late,data);
-        lst << new VAttribute(const_cast<VNode*>(vnode),this,data);
+        return true;
     }
+
+    return false;
 }
 
 void VLateAttribute::getData(ecf::LateAttr *late,QStringList& data)

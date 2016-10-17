@@ -35,20 +35,26 @@ public:
 	static QVariantList pixmapList(VNode *vnode,VParamSet *filter);
 	static QString toolTip(VNode *vnode,VParamSet *filter);
 	static VIcon* find(const std::string& name);
+    static void names(std::vector<std::string>&);
+    static const std::vector<std::string>& lastNames() {return lastNames_;}
+    static void saveLastNames();
+    static void initLastNames();
+
+    QPixmap pixmap(int size);
 
 	//Called from VConfigLoader
 	static void load(VProperty* group);
 
 protected:
 	void initPixmap();
-	QPixmap pixmap(int size);
 	virtual bool show(VNode*)=0;
 	QString shortDescription() const;
 
 	int pixId_;
 
 	static std::map<std::string,VIcon*> items_;
-	static std::vector<VIcon*> itemsVec_;
+    static std::vector<VIcon*> itemsVec_;
+    static std::vector<std::string> lastNames_;
 };
 
 #endif

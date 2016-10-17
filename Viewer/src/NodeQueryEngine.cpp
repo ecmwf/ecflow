@@ -206,23 +206,20 @@ void NodeQueryEngine::runRecursively(VNode *node)
         {
             QMap<VAttributeType*,BaseNodeCondition*>::const_iterator it = attrParser_.constBegin();
             while (it != attrParser_.constEnd())
-            {
-                //qDebug() << "SEARCH" << it.key()->name();
-                QList<VAttribute*> aLst;
-                it.key()->getSearchData(node,aLst);
+            {        
+                QList<VItemTmp_ptr> aLst;
+                it.key()->items(node,aLst);
 
-                Q_FOREACH(VAttribute* a,aLst)
+                Q_FOREACH(VItemTmp_ptr aItem,aLst)
                 {
+                    VAttribute* a=aItem->attribute();
+                    Q_ASSERT(a);
                     if(it.value()->execute(a))
                     {
-                        qDebug() << a->data();
                         broadcastFind(node,a->data());
                         scanCnt_++;
                     }
                 }
-
-                qDeleteAll(aLst);
-
                 ++it;
             }
 

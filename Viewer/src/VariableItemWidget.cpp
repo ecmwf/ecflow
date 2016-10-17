@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -709,6 +709,8 @@ void VariableItemWidget::reload(VInfo_ptr info)
         actionAdd->setToolTip(tr("Add new variable to ") +
                            "<b>" + QString::fromStdString(data_->data(0)->name()) + "</b>");
     }
+
+    checkActionState();
 }
 
 void VariableItemWidget::clearContents()
@@ -743,7 +745,7 @@ void VariableItemWidget::checkActionState()
 	QModelIndex vIndex=varView->currentIndex();
 	QModelIndex index=sortModel_->mapToSource(vIndex);
 
-    if(suspended_)
+    if(suspended_ || !info_)
     {
          actionAdd->setEnabled(false);
          actionProp->setEnabled(false);
@@ -756,7 +758,6 @@ void VariableItemWidget::checkActionState()
 	//The index is invalid (no selection)
 	if(!index.isValid())
 	{
-		actionAdd->setEnabled(false);
 		actionProp->setEnabled(false);
         actionDelete->setEnabled(false);
         actionCopy->setEnabled(false);
@@ -768,13 +769,11 @@ void VariableItemWidget::checkActionState()
 		if(model_->isVariable(index))
 		{
 			if(frozen_)
-			{
-				actionAdd->setEnabled(false);
+			{				
 				actionDelete->setEnabled(false);
 			}
 			else
-			{
-				actionAdd->setEnabled(true);
+			{				
                 int block=-1;
                 if(model_->indexToData(index,block))
                 {
@@ -794,13 +793,11 @@ void VariableItemWidget::checkActionState()
 		else
 		{
 			if(frozen_)
-			{
-				actionAdd->setEnabled(false);
+			{				
 				actionDelete->setEnabled(false);
 			}
 			else
-			{
-				actionAdd->setEnabled(true);
+			{				
 				actionDelete->setEnabled(false);
 			}
             actionProp->setEnabled(false);
@@ -808,6 +805,15 @@ void VariableItemWidget::checkActionState()
             actionCopyFull->setEnabled(false);
 		}
 	}
+
+    if(frozen_)
+    {
+        actionAdd->setEnabled(false);
+    }
+    else
+    {
+        actionAdd->setEnabled(true);
+    }
 }
 
 void VariableItemWidget::editItem(const QModelIndex& index)

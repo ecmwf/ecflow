@@ -20,7 +20,7 @@ import shutil   # used to remove directory tree
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow_test_util as Test
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
-                   JobCreationCtrl, CheckPt, Cron, Late, debug_build
+                   JobCreationCtrl, CheckPt, Cron, Late, debug_build, Flag, FlagType
 #from __builtin__ import None
 
 def ecf_includes() :  return os.getcwd() + "/test/data/includes"
@@ -183,6 +183,7 @@ def test_client_halt_server(ci):
     paths = list(ci.changed_node_paths)
     assert len(paths) == 1, "expected changed node to be the root node"
     assert paths[0] == "/", "Expected root path but found " + str(paths[0])
+    ci.restart_server()   
 
 def test_client_shutdown_server(ci):
     print("test_client_shutdown_server")
@@ -268,6 +269,7 @@ def test_client_restore_from_checkpt(ci, port):
     assert ci.get_defs().find_suite("s1") != None, "Expected to find suite s1 after restore from checkpt:\n" + str(ci.get_defs())
 
     os.remove(Test.checkpt_file_path(port))
+    ci.restart_server()   
 
 
 def get_username(): return pwd.getpwuid(os.getuid())[ 0 ]
@@ -1013,11 +1015,11 @@ def test_client_alter_change(ci):
     trigger = task_t1.get_trigger()
     assert trigger.get_expression() == "t2 == aborted", "Expected alter of trigger to be 't2 == aborted' but found " + trigger.get_expression()
 
-    ci.alter(t1,"change","trigger","/s1/f1/t2 == complete")   
+    ci.alter(t1,"change","trigger","/test_client_alter_change/f1/t2 == complete")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     trigger = task_t1.get_trigger()
-    assert trigger.get_expression() == "/s1/f1/t2 == complete", "Expected alter of trigger to be '/s1/f1/t2 == complete' but found " + trigger.get_expression()
+    assert trigger.get_expression() == "/test_client_alter_change/f1/t2 == complete", "Expected alter of trigger to be '/test_client_alter_change/f1/t2 == complete' but found " + trigger.get_expression()
 
     ci.alter(t1,"change","complete","t2 == aborted")   
     ci.sync_local()
@@ -1025,11 +1027,11 @@ def test_client_alter_change(ci):
     complete = task_t1.get_complete()
     assert complete.get_expression() == "t2 == aborted", "Expected alter of complete to be 't2 == aborted' but found " + complete.get_expression()
 
-    ci.alter(t1,"change","complete","/s1/f1/t2 == active")   
+    ci.alter(t1,"change","complete","/test_client_alter_change/f1/t2 == active")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     complete = task_t1.get_complete()
-    assert complete.get_expression() == "/s1/f1/t2 == active", "Expected alter of complete to be '/s1/f1/t2 == active' but found " + complete.get_expression()
+    assert complete.get_expression() == "/test_client_alter_change/f1/t2 == active", "Expected alter of complete to be '/test_client_alter_change/f1/t2 == active' but found " + complete.get_expression()
 
     ci.alter(t1,"change","limit_max","limit", "2")   
     ci.sync_local()
@@ -1058,6 +1060,68 @@ def test_client_alter_change(ci):
     repeat = task.get_repeat()
     assert repeat.value() == 20100113, "Expected alter of repeat to be 20100113 but found " + str(repeat.value())
  
+def test_client_alter_flag(ci):
+    print("test_client_alter_flag")
+    ci.delete_all() 
+    defs =create_defs("test_client_alter_flag")   
+    t1 = "/test_client_alter_flag/f1/t1"
+     
+    task_t1 = defs.find_abs_node(t1)
+           
+    ci.load(defs)   
+
+    flag = Flag()
+    flag_list = flag.list() # flag_list is of type FlagTypeVec
+    for flg in flag_list: 
+        ci.alter(t1,"set_flag",flag.type_to_string(flg) )   
+        ci.sync_local()
+        task_t1 = ci.get_defs().find_abs_node(t1)
+        task_flag = task_t1.get_flag()
+        assert task_flag.is_set( flg ),"expected flag %r to be set" % task_flag.type_to_string(flg)
+
+        # alter itself causes the flag message to be set, and preserved
+        if flg == FlagType.message: continue 
+        
+        ci.alter(t1,"clear_flag",flag.type_to_string(flg) )   
+        ci.sync_local()
+        task_t1 = ci.get_defs().find_abs_node(t1)
+        task_flag = task_t1.get_flag()
+        assert not task_flag.is_set( flg ),"expected flag %r NOT to be set" % task_flag.type_to_string(flg)
+
+
+def test_client_flag_migrated(ci):
+    print("test_client_flag_migrated")
+    ci.delete_all() 
+    defs =create_defs("test_client_flag_migrated")   
+    s1 = "/test_client_flag_migrated"
+  
+    ci.load(defs)   
+    ci.sync_local()
+
+    node_vec = ci.get_defs().get_all_nodes()
+    assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
+
+    ci.alter(s1,"set_flag","migrated")   
+    ci.sync_local()
+    node_vec = ci.get_defs().get_all_nodes()
+    assert len(node_vec) == 1, "Expected 1 nodes, but found " + str(len(node_vec))
+
+    ci.checkpt()  # checkpoint after setting flag migrated, need to prove nodes still persisted
+    
+    ci.alter(s1,"clear_flag","migrated")   
+    ci.sync_local()
+    node_vec = ci.get_defs().get_all_nodes()
+    assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
+
+    ci.delete_all() 
+    
+    ci.halt_server()  # server must be halted, otherwise restore_from_checkpt will throw
+    ci.restore_from_checkpt()
+    ci.sync_local() 
+    node_vec = ci.get_defs().get_all_nodes()
+    assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
+    ci.restart_server()   
+
 
     # ISSUES:
     # o Currently we can only change clock attr if we have one.
@@ -1511,24 +1575,24 @@ if __name__ == "__main__":
         test_client_new_log(ci, the_port)             
         test_client_clear_log(ci, the_port)             
         test_client_log_msg(ci, the_port)             
-          
+           
         test_client_restart_server(ci)             
         test_client_halt_server(ci)             
         test_client_shutdown_server(ci)   
-      
+       
         test_client_load_in_memory_defs(ci)             
         test_client_load_from_disk(ci)             
         test_client_checkpt(ci, the_port)             
         test_client_restore_from_checkpt(ci, the_port)             
-           
+            
         test_client_reload_wl_file(ci, the_port)             
-   
+    
         test_client_run(ci)  
         test_client_run_with_multiple_paths(ci)     
         test_client_requeue(ci)             
         test_client_requeue_with_multiple_paths(ci)             
         test_client_free_dep(ci)              
-  
+   
         test_client_suites(ci)
         test_client_ch_suites(ci)  
         test_client_ch_register(ci)             
@@ -1537,17 +1601,19 @@ if __name__ == "__main__":
         test_client_ch_add(ci)             
         test_client_ch_auto_add(ci)             
         test_client_ch_remove(ci)             
-             
+              
         test_client_get_file(ci)             
         #test_client_plug(ci)             
         test_client_alter_add(ci) 
         test_client_alter_delete(ci) 
         test_client_alter_change(ci) 
-                  
+        test_client_alter_flag(ci) 
+        test_client_flag_migrated(ci) 
+ 
         test_client_force(ci)             
         test_client_replace(ci,False)             
         test_client_replace(ci,True)             
-  
+   
         #test_client_kill(ci)             
         #test_client_status(ci)             
         #test_client_order(ci)             
@@ -1558,14 +1624,14 @@ if __name__ == "__main__":
         test_client_resume_multiple_paths(ci)             
         test_client_delete_node(ci)             
         test_client_delete_node_multiple_paths(ci)             
-  
+   
         test_client_check(ci)  
         test_client_check_defstatus(ci)  
-   
+    
         test_client_stats(ci)             
         test_client_stats_reset(ci)             
         test_client_debug_server_on_off(ci)    
-         
+          
         test_ECFLOW_189(ci)         
         test_ECFLOW_199(ci)         
 

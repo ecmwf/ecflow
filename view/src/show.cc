@@ -27,7 +27,7 @@ option<int> show::status_ (globals::instance(), "show_mask",
 			     |(1<<show::aborted)  
 			     |(1<<show::time_dependant) 
 			     |(1<<show::late_nodes)    
-			   //			     |(1<<show::migrated_nodes)
+  			     |(1<<show::migrated_nodes)
 			     |(1<<show::rerun_tasks)   
 			     |(1<<show::nodes_with_messages) 
 			     |(1<<show::label)     
@@ -47,7 +47,7 @@ option<int> show::status_ (globals::instance(), "show_mask",
 			     |(1<<show::late_icon) 
 			     |(1<<show::waiting_icon) 
 			     |(1<<show::rerun_icon) 
-			   // |(1<<show::migrated_icon) 
+			     |(1<<show::migrated_icon) 
 			     |(1<<show::message_icon)
  // & (~(1<<show::defstatus_icon)) & (~(1<<show::zombie_icon))
 			     ); 

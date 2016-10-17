@@ -19,7 +19,7 @@ class IconItem
 {
 public:
   	explicit IconItem(QString);
-  	virtual ~IconItem() {};
+    virtual ~IconItem() {}
 
 	QPixmap pixmap(int);
 	int id () const {return id_;}

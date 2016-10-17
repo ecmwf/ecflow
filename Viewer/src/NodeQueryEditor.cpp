@@ -470,6 +470,16 @@ void NodeQueryEditor::updateQueryTe()
     queryTe_->setHtml(query_->sqlQuery());
 }
 
+void NodeQueryEditor::slotClear()
+{
+    nameEdit_->clear();
+    pathEdit_->clear();
+    typeEdit_->clear();
+    stateEdit_->clear();
+    flagEdit_->clear();
+    attrEdit_->clear();
+}
+
 //------------------------------------------
 // Servers
 //------------------------------------------

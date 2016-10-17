@@ -8,12 +8,13 @@
 //============================================================================
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include "ServerList.hpp"
 
 #include "DirectoryHandler.hpp"
 #include "ServerItem.hpp"
-#include "ServerListSyncDialog.hpp"
 #include "UserMessage.hpp"
 
 #include <algorithm>
@@ -25,6 +26,12 @@
 ServerList* ServerList::instance_=0;
 
 #define _UI_SERVERLIST_DEBUG
+
+ServerListTmpItem::ServerListTmpItem(ServerItem* item) :
+    name_(item->name()),
+    host_(item->host()),
+    port_(item->port())
+{}
 
 //Singleton instance method
 ServerList* ServerList::instance()
@@ -124,14 +131,14 @@ void ServerList::setFavourite(ServerItem* item,bool b)
 std::string ServerList::uniqueName(const std::string& name)
 {
 	bool hasIt=false;
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		if((*it)->name() == name)
-		{
-			hasIt=true;
-			break;
-		}
-	}
+    for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if((*it)->name() == name)
+        {
+            hasIt=true;
+            break;
+        }
+    }
 	if(!hasIt)
 	{
 		return name;
@@ -174,21 +181,21 @@ void ServerList::rescan()
 
 void ServerList::init()
 {
-	serversPath_ = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "servers.txt");
+    localFile_ = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "servers.txt");
+    systemFile_=DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers");
 
-	if(load() == false)
-	{
-		if(readRcFile() ==  false)
-		{
-			readSystemFile();
-		}
-		save();
+    if(load() == false)
+	{		
+        if(readRcFile())
+            save();
 	}
+
+    syncSystemFile();
 }
 
 bool ServerList::load()
 {
-	std::ifstream in(serversPath_.c_str());
+    std::ifstream in(localFile_.c_str());
 	if(!in.good())
 		return false;
 
@@ -229,7 +236,7 @@ bool ServerList::load()
 void ServerList::save()
 {
 	std::ofstream out;
-	out.open(serversPath_.c_str());
+    out.open(localFile_.c_str());
 	if(!out.good())
 		  	return;
 
@@ -241,7 +248,7 @@ void ServerList::save()
         std::string sys=((*it)->isSystem())?"1":"0";
         out << (*it)->name() << "," << (*it)->host() << "," <<  (*it)->port() <<  "," <<  fav << "," <<  sys << std::endl;
 	}
-	out.close();
+	out.close();    
 }
 
 
@@ -282,6 +289,7 @@ bool ServerList::readRcFile()
 	return true;
 }
 
+#if 0
 bool ServerList::readSystemFile()
 {
 	std::string path(DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers"));
@@ -318,13 +326,26 @@ bool ServerList::readSystemFile()
 
 	return true;
 }
+#endif
+
+
+bool ServerList::hasSystemFile() const
+{
+    boost::filesystem::path p(systemFile_);
+    return boost::filesystem::exists(p);
+}
 
 void ServerList::syncSystemFile()
 {
-    std::vector<ServerItem*> sysVec;
+#ifdef _UI_SERVERLIST_DEBUG
+    UserMessage::debug("ServerList::syncSystemFile -->");
+#endif
 
-    std::string path(DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers"));
-    std::ifstream in(path.c_str());
+    std::vector<ServerListTmpItem> sysVec;
+    std::ifstream in(systemFile_.c_str());
+
+    syncDate_=QDateTime::currentDateTime();
+    clearSyncChange();
 
     if(in.good())
     {
@@ -345,7 +366,7 @@ void ServerList::syncSystemFile()
 
             if(vec.size() >= 3)
             {
-                sysVec.push_back(new ServerItem(vec[0],vec[1],vec[2],false));
+                sysVec.push_back(ServerListTmpItem(vec[0],vec[1],vec[2]));
             }
         }
     }
@@ -354,40 +375,52 @@ void ServerList::syncSystemFile()
 
     in.close();
 
-    std::vector<ServerListSyncConflictItem*> conflictVec;
-
 #ifdef _UI_SERVERLIST_DEBUG
     for(unsigned int i=0; i < sysVec.size(); i++)
-        UserMessage::debug(sysVec[i]->name() + "\t" + sysVec[i]->host() + "\t" + sysVec[i]->port());
+        UserMessage::debug(sysVec[i].name() + "\t" + sysVec[i].host() + "\t" + sysVec[i].port());
 #endif
 
+    bool changed=false;
+    bool needBrodcast=false;
+
+    //See what changed or was added
     for(unsigned int i=0; i < sysVec.size(); i++)
     {
 #ifdef _UI_SERVERLIST_DEBUG
-        UserMessage::debug(sysVec[i]->name() + "\t" + sysVec[i]->host() + "\t" + sysVec[i]->port());
+        UserMessage::debug(sysVec[i].name() + "\t" + sysVec[i].host() + "\t" + sysVec[i].port());
 #endif
         ServerItem *item=0;
 
-        //There is a server with same name, host and ports in the list
-        item=find(sysVec[i]->name(),sysVec[i]->host(),sysVec[i]->port());
+        //There is a server with same name, host and port as in the local list. We
+        //mark it as system
+        item=find(sysVec[i].name(),sysVec[i].host(),sysVec[i].port());
         if(item)
-        {
+        {            
+            if(!item->isSystem())
+            {
 #ifdef _UI_SERVERLIST_DEBUG
-            UserMessage::debug("  already in list (same name, host, port) -> mark as system");
+                UserMessage::debug("  already in list (same name, host, port) -> mark as system");
 #endif
-            item->setSystem(true);
+                changed=true;
+                syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],sysVec[i],
+                                     ServerListSyncChangeItem::SetSysChange));
+                item->setSystem(true);
+            }
             continue;
         }
 
-        //There is no server with the same name in the list
-        item=find(sysVec[i]->name());
+        //There is no server with the same name in the local list
+        item=find(sysVec[i].name());
         if(!item)
         {
 #ifdef _UI_SERVERLIST_DEBUG
             UserMessage::debug("  name not in list -> import as system");
 #endif
-            item=add(sysVec[i]->name(),sysVec[i]->host(),sysVec[i]->port(), false, false);
+            changed=true;
+            item=add(sysVec[i].name(),sysVec[i].host(),sysVec[i].port(), false, false);
             item->setSystem(true);
+            syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],sysVec[i],
+                                     ServerListSyncChangeItem::AddedChange));
             continue;
         }
         //There is a server with the same name but with different host or/and port
@@ -396,20 +429,68 @@ void ServerList::syncSystemFile()
 #ifdef _UI_SERVERLIST_DEBUG
             UserMessage::debug("  name in list with different port or/and host");
 #endif
-            conflictVec.push_back(new ServerListSyncConflictItem(sysVec[i],item,
-                                     ServerListSyncConflictItem::MatchConflict));
+            changed=true;
+            needBrodcast=true;
+            assert(item->name() == sysVec[i].name());
+
+            ServerListTmpItem localTmp(item);
+            syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],localTmp,
+                                     ServerListSyncChangeItem::MatchChange));
+
+            item->reset(sysVec[i].name(),sysVec[i].host(),sysVec[i].port());
+            item->setSystem(true);
+            broadcastChanged();
             continue;
         }
     }
 
-    if(!conflictVec.empty())
-    {
-        ServerListSyncDialog d;
-        d.init(conflictVec);
-        d.exec();
-    }
+    std::vector<ServerItem*> itemsCopy=items_;
 
+    //See what needs to be removed
+    for(std::vector<ServerItem*>::const_iterator it=itemsCopy.begin(); it != itemsCopy.end(); ++it)
+    {
+        if((*it)->isSystem())
+        {
+            bool found=false;
+            for(unsigned int i=0; i < sysVec.size(); i++)
+            {
+                if(sysVec[i].name() == (*it)->name())
+                {
+                    found=true;
+                    break;
+                }
+            }
+            if(!found)
+            {
+                changed=true;
+                ServerListTmpItem localTmp(*it);
+                syncChange_.push_back(new ServerListSyncChangeItem(localTmp,localTmp,
+                                  ServerListSyncChangeItem::UnsetSysChange));
+                //remove item
+                remove(*it);
+            }
+         }
+     }
+
+    if(changed)
+        save();
+
+    if(needBrodcast)
+        broadcastChanged();
+
+#ifdef _UI_SERVERLIST_DEBUG
+    UserMessage::debug("<-- ServerList::syncSystemFile");
+#endif
 }
+
+void ServerList::clearSyncChange()
+{
+    for(size_t i=0;i < syncChange_.size(); i++)
+        delete syncChange_[i];
+
+    syncChange_.clear();
+}
+
 
 //===========================================================
 // Observers

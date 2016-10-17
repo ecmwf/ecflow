@@ -60,7 +60,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
     drawNodeType_(true),
     bgCol_(Qt::white)
 {
-	attrFont_=font_;
+    drawAttrSelectionRect_=true;
+
+    attrFont_=font_;
 	attrFont_.setPointSize(8);
 
 	serverInfoFont_=font_;
@@ -88,8 +90,7 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
         propVec.push_back("view.tree.display_child_count");
         propVec.push_back("view.tree.displayNodeType");
         propVec.push_back("view.tree.background");
-        propVec.push_back("view.common.node_style");
-        propVec.push_back("view.common.node_gradient");
+        propVec.push_back("view.common.node_style");      
 
         //Base settings
         addBaseSettings(propVec);
@@ -122,11 +123,6 @@ void TreeNodeViewDelegate::updateSettings()
         else
             nodeStyle_=BoxAndTextNodeStyle;
     }
-    if(VProperty* p=prop_->find("view.common.node_gradient"))
-    {
-        useStateGrad_=p->value().toBool();
-    }
-        
     if(VProperty* p=prop_->find("view.tree.nodeRectRadius"))
 	{
 		nodeRectRad_=p->value().toInt();
@@ -789,7 +785,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//Draw aborted reason
 	if(hasReason)
 	{
-        painter->setPen(stateShape.col_);
+        painter->setPen(stateShape.col_.darker(120));
 		painter->setFont(abortedReasonFont_);
 		painter->drawText(reasonRect,Qt::AlignLeft | Qt::AlignVCenter,reasonTxt);
 	}

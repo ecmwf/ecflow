@@ -6,14 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>510</width>
-    <height>465</height>
+    <width>620</width>
+    <height>728</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0">
+   <property name="spacing">
+    <number>1</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -56,6 +68,12 @@
     </layout>
    </item>
    <item>
+    <widget class="MessageLabel" name="messageLabel_" native="true"/>
+   </item>
+   <item>
+    <widget class="TriggerBrowser" name="textBrowser_" native="true"/>
+   </item>
+   <item>
     <widget class="TriggerView" name="triggerView_"/>
    </item>
   </layout>
@@ -64,7 +82,19 @@
   <customwidget>
    <class>TriggerView</class>
    <extends>QGraphicsView</extends>
-   <header location="global">TriggerView.hpp</header>
+   <header>TriggerView.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>TriggerBrowser</class>
+   <extends>QWidget</extends>
+   <header>TriggerBrowser.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header>MessageLabel.hpp</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

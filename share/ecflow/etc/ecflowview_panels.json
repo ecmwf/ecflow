@@ -68,8 +68,10 @@
         {
         	"name"    : "triggers",
             "label"   : "Triggers",
-            "visible_for" : "node",
-            "hidden"  : "1"            
+            "icon"    : "trigger.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>triggers</b> tab in a new Info Panel dialog",
+            "visible_for" : "node"
         },  
         
         {

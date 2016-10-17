@@ -8,6 +8,7 @@
  src/Stats.cpp
  src/Client.cpp
  src/ServerReply.cpp
+ src/Connection.cpp
  src/stc/DefsCmd.cpp
  src/stc/PreAllocatedReply.cpp
  src/stc/SStringVecCmd.cpp
@@ -27,6 +28,7 @@
  src/stc/ZombieGetCmd.cpp
  src/ClientToServerRequest.cpp
  src/Gnuplot.cpp
+ src/Openssl.cpp
  src/WhyCmd.cpp
  src/ServerToClientResponse.cpp
  src/cts/CSyncCmd.cpp
@@ -99,12 +101,13 @@ list( APPEND test_srcs
    test/TestSSyncCmd.cpp
    test/TestSSyncCmdOrder.cpp
 )
+
+# if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 ecbuild_add_test( TARGET       u_base
                   BOOST
                   SOURCES      ${test_srcs}
-                  LIBS         base       
-                               pthread 
+                  LIBS         base pthread ${OPENSSL_LIBRARIES}
                   INCLUDES     ../ANode/test
                   TEST_DEPENDS u_aparser
                   )
-                  
+       

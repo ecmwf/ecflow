@@ -116,7 +116,7 @@ bool NodeExpressionParser::isNodeHasAttribute(const std::string &str) const
 bool NodeExpressionParser::isNodeFlag(const std::string &str) const
 {
     if (str == "is_late" || str == "has_message" ||
-    	str == "is_rerun" || str == "is_waiting" || str == "is_zombie")
+        str == "is_rerun" || str == "is_waiting" || str == "is_zombie" || str == "is_migrated")
         return true;
 
     return false;
@@ -678,8 +678,6 @@ StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode, bool
     }
 }
 
-
-
 bool StringMatchCondition::execute(VItem *item)
 {
     WhatToSearchForOperand *searchForOperand = static_cast<WhatToSearchForOperand*> (operands_[0]);
@@ -783,7 +781,10 @@ bool NodeFlagCondition::execute(VItem* item)
 			return false;
 		}
 		else if(nodeFlagName_ == "is_waiting")
-			return vnode->isFlagSet(ecf::Flag::WAIT);
+            return vnode->isFlagSet(ecf::Flag::WAIT);
+
+        else if(nodeFlagName_ == "is_migrated")
+            return vnode->isFlagSet(ecf::Flag::MIGRATED);
 
 	}
 

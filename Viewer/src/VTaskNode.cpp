@@ -177,3 +177,9 @@ void VTaskNode::check(VServerSettings* conf,bool stateChange)
 
 	updatePrev(new_tryNo,new_aborted,new_zombie,new_late);
 }
+
+const std::string& VTaskNode::typeName() const
+{
+   static std::string t("task");
+   return t;
+}

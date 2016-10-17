@@ -2,10 +2,9 @@
         "info"  : {
 
         		"main" : {
-                       	"pattern" : "^\\s*(name|type|status|at)\\s+:",                      
+                        "pattern" : "^\\s*(name|type|status|at|aborted reason)\\s+:",
                         "colour"  : "rgb(0,0,128)",
-                        "bold"    : "true"
-                                
+                        "bold"    : "true"                               
                 },
                 
                 "def" : {
@@ -19,7 +18,12 @@
                     "colour"  : "rgb(136,0,136)",               
                     "bold"    : "true"
                 }, 
-                         
+
+                "aborted_reason" : {
+                    "pattern" : "aborted reason : ([^\n]*)",
+                     "colour"  : "rgb(172,0,0)"
+                },
+
                 "comment" : {
                     "pattern" : "(#[^\n]*)",                     
                     "colour"  : "rgb(100,100,100)",
@@ -242,6 +246,44 @@
                 "colour"  : "rgb(73,73,73)",
                 "bold"    : "true"
           }
-       }
+       },
+
+       "trigger"  : {
+
+             "node" : {
+                 "pattern" : "(\\S+)",
+                 "colour"  : "rgb(80,80,80)",
+                 "bold"    : "true"
+              },
+             "attr" : {
+                  "pattern" : "\\S+(:\\S+)\\s+",
+                  "colour"  : "rgb(32,80,129)",
+                  "bold"    : "true"
+               },
+             "oper" : {
+                  "pattern" : "\\b(eq|ge|gt|le|lt)\\b",
+                  "colour"  : "rgb(0,110,40)"
+              },
+              "oper1" : {
+                  "pattern" : "(==|\\|\\||&&)",
+                  "colour"  : "rgb(0,110,40)"
+               },
+              "logical" : {
+                 "pattern" : "\\b(or|and|OR|AND)\\b",
+                 "colour"  : "rgb(0,110,40)"
+              },
+              "not" : {
+                 "pattern" : "(not|NOT)\\b",
+                 "colour"  : "rgb(0,110,40)"
+              },
+              "state" : {
+                "pattern" : "\\b(aborted|active|queued|complete|submitted|suspended|unknown)\\b",
+                "colour"  : "rgb(102,43,130)"
+              },
+             "int" : {
+                 "pattern" : "\\s+(\\d+)",
+                 "colour"  : "rgb(128,128,0)"
+              }
+        }
 }
 

@@ -73,8 +73,10 @@ protected:
 	QModelIndex serverToIndex(ServerHandler*) const {return QModelIndex();}
 
     QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;
-   	QModelIndex nodeToIndex(const VNode*,int column=0) const;
-	VNode* indexToNode( const QModelIndex & index) const;
+    QModelIndex nodeToIndex(const VNode*,int column=0) const;
+    VNode* indexToNode( const QModelIndex & index) const;
+
+    QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
 
 	QVariant nodeData(const QModelIndex& index,int role) const;
 

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -29,6 +29,7 @@
 #include "Palette.hpp"
 #include "ServerList.hpp"
 #include "VConfig.hpp"
+#include "VIcon.hpp"
 #include "VServerSettings.hpp"
 #include "SessionHandler.hpp"
 #include "SessionDialog.hpp"
@@ -102,11 +103,9 @@ int main(int argc, char **argv)
     std::string queryDir = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "query");
     NodeQueryHandler::instance()->init(queryDir);
 
-    //Initialise the server list
+    //Initialise the server list. This will update the server list
+    //from the central the system server list
     ServerList::instance()->init();
-
-    //Sync the server list with the system server list
-    //ServerList::instance()->syncSystemFile();
 
     //Load the global configurations
     VConfig::instance()->init(DirectoryHandler::etcDir());
@@ -126,6 +125,9 @@ int main(int argc, char **argv)
     Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
 		      "ecflowview_palette.json")); 
 
+
+    //Initialise the list containing all the icon names existed on last exit
+    VIcon::initLastNames();
 
 	// startup - via the session manager, or straight to the main window?
 	bool startMainWindow = true;

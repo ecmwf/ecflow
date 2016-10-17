@@ -82,9 +82,11 @@ public:
 
    CompoundMemento() : clear_attributes_(false) {} // for serialization
 
-   void incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes) const;
+   void incremental_sync(defs_ptr client_def) const;
    void add(memento_ptr m) { vec_.push_back(m); }
    void clear_attributes() { clear_attributes_ = true;}
+
+   const std::string& abs_node_path() const { return absNodePath_;}
 
 private:
 

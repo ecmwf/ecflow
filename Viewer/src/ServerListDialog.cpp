@@ -12,6 +12,7 @@
 
 #include <QtGlobal>
 #include <QCloseEvent>
+#include <QDebug>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
@@ -21,8 +22,11 @@
 #include "ServerFilter.hpp"
 #include "ServerItem.hpp"
 #include "ServerList.hpp"
+#include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "VConfig.hpp"
+
+static bool firstShowSysSyncLogW=true;
 
 //======================================
 //
@@ -214,9 +218,6 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 {
 	setupUi(this);
 
-    //TODO!!
-    sysSyncTb->hide();
-
 	QString wt=windowTitle();
 	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
 	setWindowTitle(wt);
@@ -289,11 +290,33 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 
 	for(int i=0; i < model_->columnCount()-1; i++)
 		serverView->resizeColumnToContents(i);
+
+#if 0
+    QFont labelF;
+    labelF.setBold(true);
+    labelF.setPointSize(labelF.pointSize()-1);
+
+    systemListLabel->setFont(labelF);
+    systemListLabel->setText("<font color=\'#565656\'>" + systemListLabel->text() + "</font>");
+#endif
+    systemListLabel->hide();
+
+    //At the moment we do not want users to sync manually. It is done automatically
+    //on each startup.
+    sysSyncTb->hide();
+
+    //The synclog is hidden
+    sysSyncLogTb->setChecked(false);
+    sysSyncLogW_->hide();
+    if(!ServerList::instance()->hasSystemFile())
+    {
+        sysSyncLogTb->setEnabled(false);
+    }
 }
 
 ServerListDialog::~ServerListDialog()
 {
-	writeSettings();
+    writeSettings();
 }
 
 void ServerListDialog::closeEvent(QCloseEvent* event)
@@ -323,7 +346,10 @@ void ServerListDialog::editItem(const QModelIndex& index)
 {
 	if(ServerItem* item=model_->indexToServer(sortModel_->mapToSource(index)))
 	{
-		ServerEditDialog d(QString::fromStdString(item->name()),
+        if(item->isSystem())
+            return;
+
+        ServerEditDialog d(QString::fromStdString(item->name()),
 						   QString::fromStdString(item->host()),
 						   QString::fromStdString(item->port()),
 						   item->isFavourite(),this);
@@ -478,7 +504,52 @@ void ServerListDialog::on_actionRescan_triggered()
 
 void ServerListDialog::on_sysSyncTb_clicked(bool)
 {
+#if 0
     ServerList::instance()->syncSystemFile();
+    on_sysSyncLogTb_toggled(true);
+#endif
+}
+
+void ServerListDialog::on_sysSyncLogTb_toggled(bool b)
+{
+    sysSyncLogW_->setVisible(b);
+    if(b && firstShowSysSyncLogW)
+    {
+        firstShowSysSyncLogW=false;
+
+        //Set the initial splitter sizes
+        QList<int> sList=splitter_->sizes();
+        qDebug() << "SPLITTER" << sList << splitter_->height();;
+        Q_ASSERT(sList.count()==2);
+        int h=sList[0]+sList[1];
+        if(h==0)
+        {
+           sList[0]=75;
+           sList[1]=25;
+        }
+        else
+        {
+            sList[1]=h/2;
+            if(ServerList::instance()->hasSyncChange())
+            {
+                if(h > 500)
+                    sList[1]=250;
+            }
+            else
+            {
+                if(h > 100)
+                    sList[1]=50;
+            }
+            sList[0]=h-sList[1];
+        }
+
+        splitter_->setSizes(sList);
+    }
+}
+
+void ServerListDialog::showSysSyncLog()
+{
+    sysSyncLogTb->setChecked(true);
 }
 
 void ServerListDialog::slotItemSelected(const QModelIndex& current,const QModelIndex& prev)
@@ -518,7 +589,7 @@ void ServerListDialog::checkActionState()
 
         actionEdit->setEnabled(!item->isSystem());
 		actionDuplicate->setEnabled(true);
-		actionDelete->setEnabled(true);
+        actionDelete->setEnabled(!item->isSystem());
 		actionFavourite->setEnabled(true);
 		actionFavourite->setChecked(item->isFavourite());
 	}
@@ -616,7 +687,7 @@ void ServerListModel::dataChangeFinished()
 
 int ServerListModel::columnCount(const QModelIndex& parent) const
 {
-    return 7;
+    return 6;
 }
 
 int ServerListModel::rowCount(const QModelIndex& parent) const
@@ -632,7 +703,7 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 	if(!index.isValid() ||
 	  (role != Qt::DisplayRole && role != Qt::ForegroundRole && role != Qt::DecorationRole &&
               role != Qt::CheckStateRole  && role != Qt::UserRole && role != Qt::FontRole &&
-              role != IconStatusRole))
+              role != IconStatusRole && role != Qt::ToolTipRole))
 	{
 		return QVariant();
 	}
@@ -653,7 +724,7 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 		{
 			int i=item->useCnt();
 			if(item->useCnt() > 0)
-				return "used (" + QString::number(item->useCnt()) + ")";
+                return "loaded (" + QString::number(item->useCnt()) + ")";
 
 			return QVariant();
 		}
@@ -662,7 +733,8 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 	}
 	else if (role == Qt::ForegroundRole)
 	{
-        return (item->isSystem())?QColor(70,71,72):QVariant();
+        //return (item->isSystem())?QColor(70,71,72):QVariant();
+        return (item->isSystem())?QColor(67,78,109):QVariant();
 	}
 	else if (role == Qt::DecorationRole)
 	{
@@ -707,6 +779,18 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
+    else if(role == Qt::ToolTipRole)
+    {
+        if(item->isSystem() && (index.column() == SystemColumn || index.column() == NameColumn ||
+          index.column() == HostColumn || index.column() == PortColumn))
+        {
+            return "This server appears in the central <b>system server list</b> and its name, \
+                    host or port cannot be modified.";
+        }
+
+        return QString();
+    }
+
 	return QVariant();
 }
 
@@ -726,8 +810,8 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
     		case HostColumn: return tr("Host");
             case PortColumn: return tr("Port");
             case SystemColumn: return tr("S");
-    		case FavouriteColumn: return tr("F");
-    		case UseColumn: return tr("Usage");
+            case FavouriteColumn: return tr("F");
+            case UseColumn: return tr("Loaded");
     		default: return QVariant();
 		}
 	}
@@ -877,4 +961,5 @@ bool ServerListFilterModel::lessThan(const QModelIndex &left, const QModelIndex 
 
     return QSortFilterProxyModel::lessThan(left,right);
 }
+
 

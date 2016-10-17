@@ -82,7 +82,15 @@
                 "shortDesc" : "Killed by user",
                 "icon"  : {
                     "default" : "icon_killed.svg"
+                }
+            },
+            "migrated" : {
+                "label" : "Migrated",
+                "tooltip" : "Suite/family migrated by user",
+                "shortDesc" : "Migrated by user",
+                "icon"  : {
+                    "default" : "icon_migrated.svg"
+                }
             }
-        }
      }
 }

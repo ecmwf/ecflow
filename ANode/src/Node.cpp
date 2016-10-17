@@ -117,6 +117,45 @@ Node::Node(const Node& rhs)
    }
 }
 
+Node& Node::operator=(const Node& rhs)
+{
+   // parent must set parent_
+   if (this != &rhs) {
+      name_ = rhs.name_;
+      suspended_ = rhs.suspended_;
+      state_ =  rhs.state_;
+      defStatus_ = rhs.defStatus_;
+      completeExpr_ =  (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL  ;
+      triggerExpr_ =   (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL  ;
+      lateAttr_ = (rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL ;
+      autoCancel_ =  (rhs.autoCancel_) ? new ecf::AutoCancelAttr(*rhs.autoCancel_) : NULL ;
+      time_dep_attrs_ = (rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL ;
+      child_attrs_ = (rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL ;
+      misc_attrs_ = (rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL;
+      repeat_ =  rhs.repeat_ ;
+      varVec_ = rhs.varVec_ ;
+      inLimitMgr_ = rhs.inLimitMgr_ ;
+      inLimitMgr_.set_node(this);
+      flag_ = rhs.flag_ ;
+
+      state_change_no_ = 0;
+      variable_change_no_ = 0;
+      suspended_change_no_ = 0;
+      graphic_ptr_ = 0;
+
+      if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
+      if ( child_attrs_ )    child_attrs_->set_node(this);
+      if ( misc_attrs_ )     misc_attrs_->set_node(this);
+
+      for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
+         limit_ptr the_limit = boost::make_shared<Limit>( *rhs.limitVec_[l]);
+         the_limit->set_node(this);
+         limitVec_.push_back( the_limit );
+      }
+   }
+   return *this;
+}
+
 Node::~Node() {
    delete completeExpr_;
    delete triggerExpr_;
@@ -198,6 +237,7 @@ void Node::requeue(
    LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
 #endif
    /// Note: we don't reset verify attributes as they record state stat's
+
 
    // Set the state without causing any side effects
    initState(clear_suspended_in_child_nodes);
@@ -354,7 +394,7 @@ void Node::checkForLateness(const ecf::Calendar& c)
    if (lateAttr_ && lateAttr_->check_for_lateness(state_,c)) {
       lateAttr_->setLate(true);
       flag().set(ecf::Flag::LATE);
-      cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
+      // cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
    }
 }
 
@@ -517,6 +557,11 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
    LogToCout toCoutAsWell; cout << "\n";
    LOG(Log::DBG,"   " << debugNodePath() << "::resolveDependencies " << NState::toString(state()) << " AT " << suite()->calendar().toString());
 #endif
+
+   // A node that is migrated/archived should not allow any change of state.
+   if (get_flag().is_set(ecf::Flag::MIGRATED)) {
+      return false;
+   }
 
    // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
    if (lateAttr_ && isSubmittable()) {
@@ -1224,29 +1269,28 @@ std::string Node::triggerExpression() const
    return string();
 }
 
-
-static void check_expressions(const Node* node, bool trigger, std::string& errorMsg)
+bool Node::check_expressions(Ast* ast,const std::string& expr,bool trigger, std::string& errorMsg) const
 {
-   Ast* ast = NULL;
-   if (trigger) ast = node->triggerAst();
-   else         ast = node->completeAst();
    if ( ast ) {
       // The expression have been parsed and we have created the abstract syntax tree
       // Try to resolve the path/node references in the expressions
       // Also resolve references to events,meter,repeats variables.
-      AstResolveVisitor astVisitor(node);
+      AstResolveVisitor astVisitor(this);
       ast->accept(astVisitor);
 
       if ( !astVisitor.errorMsg().empty() ) {
-         errorMsg += "Expression node tree references failed for ";
-         if ( trigger ) errorMsg += node->triggerExpression();
-         else           errorMsg += node->completeExpression();
+         errorMsg += "Expression node tree references failed for '";
+         if ( trigger ) errorMsg += "trigger ";
+         else           errorMsg += "complete ";
+         errorMsg += expr;
          errorMsg += "' at ";
-         errorMsg += node->absNodePath();
+         errorMsg += absNodePath();
          errorMsg += "\n ";
          errorMsg += astVisitor.errorMsg();
+         return false;
       }
    }
+   return true;
 }
 
 bool Node::check(std::string& errorMsg, std::string& warningMsg) const
@@ -1256,7 +1300,7 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    //#endif
 
    /// ************************************************************************************
-   /// *IMPORTANT side effec: *
+   /// *IMPORTANT side effect: *
    /// The simulator relies AstResolveVisitor to set usedInTriggger() for events and meters
    /// *************************************************************************************
 
@@ -1264,24 +1308,35 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    /// defs which fail parse errors should not be allowed to be loaded into the server
    /// Even if the code parses, check the expression for divide by zero, for divide and modulo operators
    AstTop* ctop = completeAst(errorMsg);
-   if (ctop && !ctop->check(errorMsg)) {
-      errorMsg += " ";
-      if (completeExpr_) errorMsg += completeExpr_->expression();
-      errorMsg += " on ";
-      errorMsg += debugNodePath();
+   if (ctop) {
+
+      // capture node path resolve errors
+      std::string expr;
+      if (completeExpr_) expr = completeExpr_->expression();
+      (void)check_expressions(ctop,expr,false,errorMsg);
+
+      if (!ctop->check(errorMsg)) {
+         errorMsg += " ";
+         errorMsg += expr;
+         errorMsg += " on ";
+         errorMsg += debugNodePath();
+      }
    }
    AstTop* ttop = triggerAst(errorMsg);
-   if (ttop && !ttop->check(errorMsg)) {
-      errorMsg += " ";
-      if (triggerExpr_) errorMsg += triggerExpr_->expression();
-      errorMsg += " on ";
-      errorMsg += debugNodePath();
+   if (ttop) {
+
+      // capture node path resolve errors
+      std::string expr;
+      if (triggerExpr_) expr = triggerExpr_->expression();
+      (void)check_expressions(ttop,expr,true,errorMsg);
+
+      if (!ttop->check(errorMsg)) {
+         errorMsg += " ";
+         errorMsg += expr;
+         errorMsg += " on ";
+         errorMsg += debugNodePath();
+      }
    }
-
-
-   // capture node path resolve errors
-   check_expressions(this, true,errorMsg);
-   check_expressions(this, false,errorMsg);
 
    // check inLimit references to limits.
    // Client: Unresolved references, which are not in the externs reported as errors/warnings

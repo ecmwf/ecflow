@@ -65,7 +65,8 @@ public:
 	{
 		return pt_.get<T>(path_.path(key),defaultVal);
 	}
-	void get(const std::string& key,std::vector<std::string>& val);
+    void get(const std::string& key,std::vector<std::string>& val);
+    void get(const std::string& key,std::vector<int>& val);
 	bool getAsBool(const std::string& key,bool defaultVal);
 	void get(const std::string& key,std::vector<VSettings>& val);
 

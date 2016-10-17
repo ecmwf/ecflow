@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -35,11 +35,14 @@
 #include "NodePanel.hpp"
 #include "PropertyDialog.hpp"
 #include "ServerHandler.hpp"
+#include "ServerList.hpp"
 #include "ServerListDialog.hpp"
+#include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
+#include "VIcon.hpp"
 #include "VSettings.hpp"
 
 #include <boost/lexical_cast.hpp>
@@ -49,7 +52,9 @@ bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
 int MainWindow::maxWindowNum_=25;
 
-MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
+    QMainWindow(parent),
+    serverSyncNotifyTb_(0)
 {
     setupUi(this);
     
@@ -111,13 +116,27 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 
     //Status bar
 
+    //Add server list sync notification
+    if(ServerList::instance()->hasSyncChange())
+    {
+        //Add server list sync notification
+        serverSyncNotifyTb_=new QToolButton(this);
+        serverSyncNotifyTb_->setAutoRaise(true);
+        serverSyncNotifyTb_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/info.svg"));
+        serverSyncNotifyTb_->setText("Server list updated");
+        serverSyncNotifyTb_->setToolTip("Your local copy of the <b>system server list</b> was updated. Click to see the changes.");
+        statusBar()->addWidget(serverSyncNotifyTb_);
+
+        connect(serverSyncNotifyTb_,SIGNAL(clicked(bool)),
+            this,SLOT(slotServerSyncNotify(bool)));
+    }
+
     //Add notification widget
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
-
     //actionSearch->setVisible(false);
-
 }
 
 MainWindow::~MainWindow()
@@ -230,7 +249,6 @@ void MainWindow::on_actionPreferences_triggered()
 
 	delete d;
 }
-
 
 void MainWindow::on_actionManageSessions_triggered()
 {
@@ -403,6 +421,25 @@ bool MainWindow::selectInTreeView(VInfo_ptr info)
     return nodePanel_->selectInTreeView(info);
 }
 
+void MainWindow::slotServerSyncNotify(bool)
+{
+    if(serverSyncNotifyTb_)
+    {
+        serverSyncNotifyTb_->hide();
+        MainWindow::hideServerSyncNotify(this);
+
+        ServerListDialog dialog(ServerListDialog::SelectionMode,nodePanel_->serverFilter(),this);
+        dialog.showSysSyncLog();
+        dialog.exec();
+    }
+}
+
+void MainWindow::hideServerSyncNotify()
+{
+   if(serverSyncNotifyTb_)
+      serverSyncNotifyTb_->hide();
+}
+
 //==============================================================
 //
 //  Close and quit
@@ -522,7 +559,7 @@ void MainWindow::showWindows()
 		win->show();
 }
 
-void MainWindow::configChanged(MainWindow* owner)
+void MainWindow::configChanged(MainWindow*)
 {
 	Q_FOREACH(MainWindow *win,windows_)
 			win->rerenderContents();
@@ -533,6 +570,12 @@ void MainWindow::changeNotifySelectionChanged(VInfo_ptr info)
     Q_FOREACH(MainWindow *win,windows_)
         if(win->selectInTreeView(info))
             return;
+}
+
+void MainWindow::hideServerSyncNotify(MainWindow*)
+{
+    Q_FOREACH(MainWindow *win,windows_)
+        win->hideServerSyncNotify();
 }
 
 //Return true if close is allowed, false otherwise
@@ -616,7 +659,6 @@ void MainWindow::init()
 
 	VComboSettings vs(cs->sessionFile(),cs->windowFile());
 
-
 	//Read configuration. If it fails we create an empty window!!
 	if(!vs.read())
 	{
@@ -673,40 +715,14 @@ void MainWindow::save(MainWindow *topWin)
 {
 	MainWindow::saveContents(topWin);
 
-	/*SessionItem* cs=SessionHandler::instance()->current();
-	assert(cs);
-
-	VComboSettings vs(cs->sessionFile(),cs->windowFile());
-
-	//We have to clear it so that not to remember all the previous windows
-	vs.clear();
-
-	//Add total window number and id of active window
-	vs.put("windowCount",windows_.count());
-	vs.put("topWindowId",windows_.indexOf(topWin));
-
-	//Save info for all the windows
-	for(int i=0; i < windows_.count(); i++)
-	{
-		std::string id="window_"+boost::lexical_cast<std::string>(i);
-		vs.beginGroup(id);
-		windows_.at(i)->writeSettings(&vs);
-		vs.endGroup();
-	}
-
-	//Write to json
-	vs.write();*/
-
 	//Save global config
 	VConfig::instance()->saveSettings();
 
+    //Save server list
 	ServerHandler::saveSettings();
 
-	//Save non-global config
-	for(int i=0; i < windows_.count(); i++)
-	{
-		//windows_.at(i)->saveSettings();
-	}
+    //Save icon name list
+    VIcon::saveLastNames();
 }
 
 void MainWindow::saveContents(MainWindow *topWin)

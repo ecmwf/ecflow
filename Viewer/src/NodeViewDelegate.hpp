@@ -39,6 +39,8 @@ protected:
     void addBaseSettings(std::vector<std::string>&);
     void updateBaseSettings();
 
+    void renderSelectionRect(QPainter* painter,QRect r) const;
+
 	virtual void renderStatus(QPainter *painter,const QModelIndex& index,
 	                          const QStyleOptionViewItemV4& option) const;
 
@@ -79,13 +81,16 @@ protected:
 	bool useStateGrad_;
 	mutable QLinearGradient grad_;
 	static int lighter_;
+    bool drawAttrSelectionRect_;
     QBrush eventFillBrush_;
     QBrush eventBgBrush_;
     QBrush meterFillBrush_;
     QBrush meterThresholdBrush_;
     QBrush limitFillBrush_;
+    QBrush limitExtraFillBrush_;
     QPixmap limitFillPix_;
     QPixmap limitEmptyPix_;
+    QPixmap limitExtraFillPix_;
 };
 
 #endif

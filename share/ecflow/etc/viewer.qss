@@ -191,6 +191,14 @@ QTextEdit[readOnly="true"] {
     background-color: rgb(245,245,245);
 }
 
+QTextEdit[readOnly="true"][log="1"] {
+    background-color: rgb(253,252,252);
+}
+
+QTextEdit[readOnly="true"][trigger="1"] {
+    background-color: rgb(255,255,255);
+}
+
 QLineEdit[readOnly="true"] { 
     background-color: rgb(245,245,245);
 }
@@ -208,7 +216,12 @@ QLabel[fileInfo="1"] {
      /*background: rgb(252, 241, 219);  */
      background: rgb(244, 239, 216);
 }
-  
+
+QLabel[fileInfo="2"] {
+     border: 1px solid rgb(216,210,200);
+     background: rgb(242, 242, 242);
+}
+
 /*----------------------------
   Editor info label
 ------------------------------*/

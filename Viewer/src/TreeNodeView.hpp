@@ -68,7 +68,8 @@ Q_SIGNALS:
 	void dashboardCommand(VInfo_ptr,QString);
 
 protected:
-	QModelIndexList selectedList();
+    void resizeEvent(QResizeEvent*);
+    QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
 	void restoreExpand(ExpandNode *expand,const VNode* node);

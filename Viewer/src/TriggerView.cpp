@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,6 +10,7 @@
 
 #include "TriggerView.hpp"
 
+#include "VNode.hpp"
 
 NodeItem::NodeItem()
 {
@@ -57,36 +58,129 @@ TriggerView::TriggerView(QWidget *parent) : QGraphicsView(parent)
 
 ////////////////////////////////////////////////////////////////////////
 /*
-class TriggerList
+
+class TriggerListItem
 {
 public:
+    std::string type_;
+    std::string name_;
+    std::string path_;
+protected:
 
-    TriggerList() {}
-    virtual ~TriggerList() {}
+};
 
-    enum { normal    = 0,   // Normal trigger_node
-           parent    = 1,   // Through parent
-           child     = 2,   // Through child
-	   hierarchy = 3    // Through child
-    };
+class TriggerCollector
+{
+public:
+    TriggerCollector() {}
+    virtual ~TriggerCollector() {}
 
-    virtual void next_node(node&, node*,int,node*) = 0;
-    virtual bool parents() { return false; }
-    virtual bool kids()    { return false; }
-    virtual bool self()    { return true; }
+    enum Mode { Normal    = 0,   // Normal trigger_node
+                Parent    = 1,   // Through parent
+                Child     = 2,   // Through child
+                Hierarchy = 3    // Through child
+    }
+
+    virtual void add(VItem*, VNode*,Mode,VNode*) = 0;
+    virtual bool scanParents() { return false; }
+    virtual bool scnaKids()    { return false; }
+    virtual bool scanSelf()    { return true; }
 
 private:
-	TriggerList(const trigger_lister&);
-	TriggerList& operator=(const trigger_lister&);
+    TriggerCollector(const trigger_lister&);
+    TriggerCollector& operator=(const trigger_lister&);
+
+    std::vector<VItem*> items_;
 };
+
+
+
+class TriggerListCollector : public TriggerCollector
+{
+public:
+    TriggerListCollector(FILE* f,const std::string& *title,bool extended) :
+        file_(f), title_(t), extended_(extended) {}
+
+    void add(VItem*, VNode*,Mode,VNode*);
+    bool scanParents() { return extended_; }
+    bool scanKids() { return extended_; }
+
+protected:
+    //panel& p_;
+    FILE* file_;
+    std::string title_;
+    bool extended_;
+    std::vector<VItem*> items_;
+};
+
+void InfoLister::add(VItem* n, VNode* parent,Mode mode,VNode*)
+{
+    items_.push_back(n);
+
+
+#if 0
+    // Title
+    if(title_)
+    {
+            int n = fprintf(f_,"\n%s:\n",t_) - 2;
+            while(n--) fputc('-',f_);
+            fputc('\n',f_);
+            t_ = 0;
+    }
+
+    p_.observe(&n);
+    fprintf(f_,"%s {%s}",n.type_name(), n.full_name().c_str());
+    if(p) {
+        fprintf(f_," through ");
+        p_.observe(p);
+
+        switch(mode)
+        {
+            case trigger_lister::parent:  fprintf(f_,"parent "); break;
+            case trigger_lister::child:   fprintf(f_,"child ");  break;
+        }
+
+        fprintf(f_,"%s {%s}",p->type_name(),p->full_name().c_str());
+    }
+    fputc('\n',f_);
+#endif
+}
+
+
+
+class fik : public TriggerList
+{
+public:
+    fik(node* n,node* k,trigger_lister& l): n_(n),k_(k),l_(l) {};
+
+    void next_node(node& n, node*,int type,node *t)
+    {
+        if(!n.is_my_parent(n_))
+        {
+        // k is a kid of n whose trigger_panel is outside its subtree
+            l_.next_node(n,k_,trigger_lister::child,t);
+        }
+    }
+
+private:
+  node*     n_;
+  node*     k_;
+  trigger_lister& l_;
+};
+
+class fip : public trigger_lister {
+  node* p_;
+  trigger_lister& l_;
+
+public:
+  fip(node* p,trigger_lister& l) : p_(p), l_(l) {}
+
+  void next_node(node& n, node*,int type,node *t)
+  { l_.next_node(n,p_,trigger_lister::parent,t); }
+};
+
+
 */
-
-
-
-
-
-
-
 
 
 

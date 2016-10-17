@@ -36,8 +36,8 @@ namespace bp = boost::python;
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
 /// Since we don't pass in a child pos, the nodes are added to the end
-void add_family(NodeContainer* self,family_ptr f){ self->addFamily(f); }
-void add_task(NodeContainer* self,task_ptr t){ self->addTask(t); }
+family_ptr add_family(NodeContainer* self,family_ptr f){ self->addFamily(f); return f; }
+task_ptr add_task(NodeContainer* self,task_ptr t){ self->addTask(t); return t;}
 
 suite_ptr add_clock(suite_ptr self, const ClockAttr& clk) { self->addClock(clk); return self;}
 

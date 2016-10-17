@@ -39,6 +39,7 @@ public:
     void init(NodeQuery*);
     QString optionId() const {return optionId_;}
     virtual void setVisible(bool)=0;
+    virtual void clear() {}
 
 Q_SIGNALS:
     void changed();
@@ -58,6 +59,7 @@ Q_OBJECT
 public:
     NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget* parent, bool sameRow);
     void setVisible(bool);
+    void clear();
 
 protected Q_SLOTS:
     void slotEdited(QString val);
@@ -78,6 +80,7 @@ Q_OBJECT
 public:
     NodeQueryListOptionEdit(NodeQueryOption* option,CustomListWidget* cl,QToolButton*,QWidget*);
     void setVisible(bool) {}
+    void clear();
 
 protected Q_SLOTS:
     void slotListChanged();

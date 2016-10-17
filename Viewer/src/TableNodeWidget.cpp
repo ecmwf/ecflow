@@ -204,6 +204,8 @@ void TableNodeWidget::readSettings(VSettings* vs)
 	//This will not emit the trigered signal of the action!!
 	actionBreadcrumbs->setChecked(bcWidget_->active());
 
+    view_->readSettings(vs);
+
     DashboardWidget::readSettings(vs);
 }
 

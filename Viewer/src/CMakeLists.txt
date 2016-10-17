@@ -7,6 +7,7 @@ set(viewer_srcs
     AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
     Animation.cpp
+    AstCollateVNodesVisitor.cpp
     AttributeEditor.cpp
     AttributeEditorFactory.cpp   
     CaseSensitiveButton.cpp
@@ -114,7 +115,7 @@ set(viewer_srcs
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp
-    ServerListSyncDialog.cpp
+    ServerListSyncWidget.cpp
     ServerSettingsItemWidget.cpp
     SessionDialog.cpp
     SessionRenameDialog.cpp
@@ -134,14 +135,19 @@ set(viewer_srcs
     TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
     TextEditSearchLine.cpp
-    TimeItemWidget.cpp
+    TimeItemWidget.cpp    
+    TriggerBrowser.cpp
+    TriggerEditor.cpp
     TriggerItemWidget.cpp
+    TriggerTextWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
     TreeNodeWidget.cpp
     TreeView.cpp
+    TriggerCollector.cpp
     TriggerView.cpp
+    TriggeredScanner.cpp
     UpdateTimer.cpp
     UserMessage.cpp
     VAttribute.cpp
@@ -153,6 +159,9 @@ set(viewer_srcs
     VInfo.cpp
     VFile.cpp
     VFileInfo.cpp
+    VItem.cpp
+    VItemPathParser.cpp
+    VItemTmp.cpp
     VModelData.cpp
     VNode.cpp
     VNodeList.cpp
@@ -259,7 +268,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerComThread.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
-    ServerListSyncDialog.hpp
+    ServerListSyncWidget.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp
@@ -276,6 +285,10 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeView.hpp           
     TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
+    TriggerBrowser.hpp
+    TriggerEditor.hpp
+    TriggerItemWidget.hpp
+    TriggeredScanner.hpp
     VariableItemWidget.hpp
     VariableModel.hpp
     VariableModelData.hpp
@@ -283,6 +296,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     VFilter.hpp
     VModelData.hpp
     VNodeList.hpp
+    WhyItemWidget.hpp
     ZombieItemWidget.hpp
     TextPager/TextPagerCursor_p.hpp
     TextPager/TextPagerDocument.hpp
@@ -329,7 +343,7 @@ set(viewer_wrap_ui_files
     ServerAddDialog.ui
     ServerEditDialog.ui 
     ServerListDialog.ui
-    ServerListSyncDialog.ui
+    ServerListSyncWidget.ui
     ServerSettingsItemWidget.ui
     SessionDialog.ui
     SessionRenameDialog.ui
@@ -338,7 +352,9 @@ set(viewer_wrap_ui_files
     TableNodeWidget.ui
     TimeItemWidget.ui
     TreeNodeWidget.ui
-    TriggerItemWidget.ui          
+    TriggerBrowser.ui
+    TriggerEditorWidget.ui
+    TriggerItemWidget.ui
     VariableAddDialog.ui
     VariablePropDialog.ui
     VariableItemWidget.ui
@@ -385,6 +401,7 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
          pthread  
          m crypt dl fl
          ${ECFLOW_QT_LIBRARIES}
+         ${OPENSSL_LIBRARIES}
 )
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs

@@ -34,17 +34,19 @@ include_directories(
 # INCLUDES here is for external includes   
 #   NOINSTALL this stops double install, the one in i.e lib/ecflow.so
 #             The other install is in python2.7/site-packages/ecflow.so
+# if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 ecbuild_add_library( TARGET    ecflow
                      NOINSTALL
                      TYPE      MODULE
                      SOURCES   ${srcs}
 					 CONDITION PYTHONLIBS_FOUND
                      LIBS      libclient libsimu base libparser node nodeattr core
-                               ${PYTHON_LIBRARIES}
+                               ${PYTHON_LIBRARIES} ${OPENSSL_LIBRARIES}
                      INCLUDES 
                                ${Boost_INCLUDE_DIRS}
                                ${PYTHON_INCLUDE_DIRS} 
                     )
+
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs 
 if (   PYTHONLIBS_FOUND )             
@@ -87,6 +89,7 @@ list( APPEND u_tests
         py_u_TestGetAllTasks   
         py_u_TestJobGeneration 
         py_u_TestParent        
+        py_u_TestRemove
         py_u_TestRepeatArithmetic
         py_u_TestSimulator  
         py_u_TestTraversal     

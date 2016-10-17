@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <QString>
 
+
 class ServerHandler;
 class VNode;
 class VServer;
@@ -28,6 +29,7 @@ class VItem
 {
 public:
     VItem(VNode* parent) : parent_(parent) {}
+    virtual ~VItem() {}
 
     VNode* parent() const {return parent_;}
     //virtual ServerHandler* server() const;
@@ -40,13 +42,19 @@ public:
     virtual VAliasNode* isAlias() const {return NULL;}
     virtual VAttribute* isAttribute() const {return NULL;}
 
+    virtual VServer* root() const=0;
     virtual bool isTopLevel() const {return false;}
     virtual std::string strName() const=0;
     virtual QString name() const=0;
+    virtual const std::string& typeName() const=0;
+    virtual std::string fullPath() const=0;
+    virtual bool sameContents(VItem*) const=0;
+    virtual bool isAncestor(const VItem*) const;
 
 protected:
     VNode* parent_;
 };
+
 
 #if 0
 class VItemVisitor

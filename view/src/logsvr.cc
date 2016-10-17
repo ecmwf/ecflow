@@ -144,60 +144,53 @@ logsvr::~logsvr()
 tmp_file logsvr::getfile(std::string name)
 {
   tmp_file empty((char*)"",false);
-  if(soc_ < 0)
+  if(soc_ < 0) return empty;
+
+  write(soc_,"get ",4);	
+  write(soc_,name.c_str(),name.size());
+  write(soc_,"\n",1);	
+
+  const int size = 64*1024;
+  char buf[size];
+  unsigned int len = 0;
+  int total = 0;
+
+  tmp_file out(tmpnam(NULL), true);
+  FILE *f = fopen(out.c_str(),"w");
+  
+  if(!f) {
+    char buf[2048];
+    sprintf(buf,"Cannot create %s",out.c_str());
+    gui::syserr(buf);
     return empty;
-
-	write(soc_,"get ",4);	
-	write(soc_,name.c_str(),name.size());
-	write(soc_,"\n",1);	
-
-	const int size = 64*1204;
-	char buf[size];
-	unsigned int len = 0;
-	int total = 0;
-
-	tmp_file out(tmpnam(NULL));
-	FILE *f = fopen(out.c_str(),"w");
-
-	if(!f)
-	{
-	  char buf[2048];
-	  sprintf(buf,"Cannot create %s",out.c_str());
-	  gui::syserr(buf);
-	  return empty;
-	}
+  }
 	
-	while( (len = read(soc_,buf,size)) > 0)
-	{
-	  if(fwrite(buf,1,len,f) != len)
-	    {
-	      char buf[2048];
-	      sprintf(buf,"Write error on %s",out.c_str());
-	      gui::syserr(buf);
-	      fclose(f);
-	      return empty;
-	    }
-	  total += len;
-	}
+  while( (len = read(soc_,buf,size)) > 0) {
+    if(fwrite(buf,1,len,f) != len) {
+      char buf[2048];
+      sprintf(buf,"Write error on %s",out.c_str());
+      gui::syserr(buf);
+      fclose(f);
+      return empty;
+    }
+    total += len;
+  }
 
-	sprintf(buf, "\n# served by %s@%s # telnet %s %s # get %s",
+  sprintf(buf, "\n# served by %s@%s # telnet %s %s # get %s\n",
 		host_.c_str(), port_.c_str(), 
 		host_.c_str(), port_.c_str(), 
 		name.c_str());
-	fwrite(buf,1,size,f);
+  fwrite(buf,1,size,f);
 
-	if(fclose(f))
-	{
-	  char buf[2048];
-	  sprintf(buf,"Write error on %s",out.c_str());
-	  gui::syserr(buf); 
-	  return empty;
-	}
+  if(fclose(f))	{
+    char buf[2048];
+    sprintf(buf,"Write error on %s",out.c_str());
+    gui::syserr(buf); 
+    return empty;
+  }
 
-	if(total)
-		return out;
-
-	return empty;
+  if(total) return out;
+  return empty;
 }
 
 ecf_dir *logsvr::getdir(const char* name)

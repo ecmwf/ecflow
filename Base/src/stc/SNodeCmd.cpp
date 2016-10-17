@@ -106,7 +106,6 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
       throw std::runtime_error(ss.str());
    }
 
-
    if (server_reply.cli() && !cts_cmd->group_cmd()) {
       /// This Could be part of a group command, hence ONLY show Node if NOT group command
       PrintStyle style(cts_cmd->show_style());
@@ -129,7 +128,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
          return true;
       }
       Family* fam = node->isFamily();
-      if (fam) std::cout << *fam << "\n";
+      if (fam)  std::cout << *fam << "\n";
       Task* task = node->isTask();
       if (task) std::cout << *task << "\n";
       Alias* alias = node->isAlias();

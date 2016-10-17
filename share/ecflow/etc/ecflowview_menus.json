@@ -500,8 +500,23 @@
             "status_tip"     : "__cmd__"
         },
 
+        {
+            "menu"           : "Special",
+            "name"           : "Migrate",
+            "visible_for"    : "(suite or family)",
+            "enabled_for"    : "(not is_migrated)",
+            "command"        : "ecflow_client --alter set_flag migrated <full_name>",
+            "status_tip"     : "__cmd__"
+        },
 
-
+        {
+            "menu"           : "Special",
+            "name"           : "Restore",
+            "visible_for"    : "(suite or family)",
+            "enabled_for"    : "is_migrated",
+            "command"        : "ecflow_client --alter clear_flag migrated <full_name>",
+            "status_tip"     : "__cmd__"
+        },
         {
             "menu"           : "Force",
             "name"           : "Unknown",
@@ -702,7 +717,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "label or meter or limit",
+            "visible_for"    : "label or meter or limit or trigger",
             "command"        : "edit",
             "handler"        : "tree",
             "view"           : "tree"

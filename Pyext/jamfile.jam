@@ -115,6 +115,7 @@ python-extension ecflow : [ glob src/*.cpp ]
     /site-config//boost_python_static
     : <variant>debug:<define>DEBUG
       <toolset>acc:<library>hpux_std_libs  
+      [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
     ;
 
 # ========================================================================
@@ -190,6 +191,7 @@ run-test TestWith          : ecflow [ glob test/py_u_TestWith.py ] ;
 run-test TestFind          : ecflow [ glob test/py_u_TestFind.py ] ;
 run-test TestMigrate       : ecflow [ glob migrate/py_u_TestMigrate.py ] ;
 run-test TestRepeatArithmetic  : ecflow [ glob test/py_u_TestRepeatArithmetic.py ] ;
+run-test TestRemove            : ecflow [ glob test/py_u_TestRemove.py ] ;
 run-test TestGeneratedVariable : ecflow [ glob test/py_u_TestGeneratedVariable.py ] ;
 run-test TestEcf               : ecflow [ glob test/py_u_TestEcf.py ] ;
 run-test TestFlag              : ecflow [ glob test/py_u_TestFlag.py ] ;
@@ -199,7 +201,7 @@ run-test TestFlag              : ecflow [ glob test/py_u_TestFlag.py ] ;
 alias test-all
  :  TestUserManual TestJobGeneration  TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
-    TestDerivable  TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
+    TestDerivable  TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
     TestClientApi TestPythonChildApi TestFlag TestCopy
     # test_embed test_embed_ecf 
     ;
@@ -208,7 +210,7 @@ alias test-all
 explicit test-all
     TestUserManual TestJobGeneration TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
-    TestDerivable TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
+    TestDerivable TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
     TestClientApi TestPythonChildApi TestFlag TestCopy
     # test_embed test_embed_ecf 
     ;

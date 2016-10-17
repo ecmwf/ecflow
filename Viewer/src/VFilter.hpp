@@ -51,7 +51,7 @@ public:
 	bool isSet(VParam*) const;
 
 	void writeSettings(VSettings* vs);
-	void readSettings(VSettings* vs);
+    void virtual readSettings(VSettings* vs);
 
 Q_SIGNALS:
 	void changed();
@@ -80,7 +80,8 @@ public:
 class IconFilter : public VParamSet
 {
 public:
-	IconFilter();
+    IconFilter();
+    void readSettings(VSettings* vs);
 };
 
 

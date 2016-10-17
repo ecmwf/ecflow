@@ -20,6 +20,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Ecf.hpp"
+#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

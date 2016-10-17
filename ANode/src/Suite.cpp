@@ -62,6 +62,26 @@ Suite::Suite(const Suite& rhs)
    calendar_ = rhs.calendar_;
 }
 
+Suite& Suite::operator=(const Suite& rhs)
+{
+   // defs_ not set
+   if (this != &rhs) {
+      NodeContainer::operator=(rhs);
+      begun_ = rhs.begun_;
+      if (rhs.clockAttr_.get()) clockAttr_ = boost::make_shared<ClockAttr>( *rhs.clockAttr_ );
+      calendar_ = rhs.calendar_;
+
+      state_change_no_ = 0;
+      modify_change_no_ = Ecf::incr_modify_change_no();
+      begun_change_no_ = 0;
+      calendar_change_no_ = 0;
+
+      delete suite_gen_variables_;
+      suite_gen_variables_ = NULL;
+   }
+   return *this;
+}
+
 Suite::~Suite()
 {
 //	std::cout << "Suite::~Suite() " << debugNodePath() << "\n";
@@ -127,7 +147,7 @@ void Suite::requeue(
    SuiteChanged1 changed(this); //
 
    // requeue can cause thousands of mementos to be created, to avoid this we
-   // update the modify change number.
+   // update the modify change number, this will force a full sync in client
    Ecf::incr_modify_change_no();
 
    requeue_calendar();

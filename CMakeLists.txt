@@ -57,17 +57,17 @@ option( ENABLE_SERVER            "Build the server, can be switched off if just 
 option( ENABLE_PYTHON            "enable python interface"         ON  )
 option( ENABLE_UI                "Build ecFlowUI"                  ON  ) 
 option( ENABLE_GUI               "Build ecflowview"                ON  )
-option( ENABLE_ALL_TESTS         "This includes performance/migration/regression tests" OFF )
-option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace"      OFF ) 
-option( ENABLE_UI_USAGE_LOG      "Enable UI usage logging"         OFF )
 option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" ON  )
+option( ENABLE_ALL_TESTS         "This includes performance/migration/regression tests" OFF )
+option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace"         OFF ) 
+option( ENABLE_UI_USAGE_LOG      "Enable UI usage logging"            OFF )
+option( ENABLE_SSL               "Enable SSL encrypted communication" OFF )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
 # Algorithm: we test for Qt5 - if it's there, then use it; otherwise look for Qt4.
 #            if we don't find that, then we cannot build ecFlowUI.
 # =========================================================================================
-
 if(ENABLE_UI)
 
     ecbuild_info("")
@@ -145,6 +145,7 @@ ecbuild_info( "ENABLE_GUI               : ${ENABLE_GUI}" )
 ecbuild_info( "ENABLE_UI                : ${ENABLE_UI}" )
 ecbuild_info( "ENABLE_ALL_TESTS         : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS : ${ENABLE_STATIC_BOOST_LIBS}" )
+ecbuild_info( "ENABLE_SSL               : ${ENABLE_SSL}" )
 
 if (ENABLE_UI)
 	ecbuild_info( "ENABLE_UI_BACKTRACE      : ${ENABLE_UI_BACKTRACE}" )
@@ -229,6 +230,17 @@ if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
 endif()
 
 
+# =======================================================================
+# SSL
+# =======================================================================
+if (ENABLE_SSL)
+    find_package(OpenSSL REQUIRED)
+    if (NOT OPENSSL_FOUND )
+        ecbuild_error("Can not find openssl libraries")
+    endif() 
+    add_definitions( -DECF_OPENSSL )
+endif()
+
 # =========================================================================================
 # debug
 # =========================================================================================
@@ -306,7 +318,7 @@ install( FILES
             ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
             ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
          DESTINATION bin
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
          COMPONENT binary
        )
         

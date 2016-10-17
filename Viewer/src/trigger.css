@@ -1,0 +1,85 @@
+/*============================================================================
+// Copyright 2016 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+//============================================================================*/
+
+p
+{
+    border:3px;
+    border-style:solid;
+    border-color:#FF0000;
+    padding: 1em;
+}
+
+a:link
+{
+    text-decoration:none;
+    color: #0645AD;
+}
+
+a:hover
+{
+    text-decoration:bold;
+    color: #0645AD;
+}
+
+a:link.chp
+{
+    text-decoration:none;
+    color: #1a1f20;
+    font-weight: bold;
+}
+
+th
+{
+    padding-left: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background-color: #5f6e95;
+    color: #ffffff;
+    font-size: 12px;
+    text-align: left;
+}
+
+td.trigger_title {
+    padding-left: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    background-color: #5f6e95;
+    color: #ffffff;
+}
+
+td.direct_title {
+    padding-left: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    background-color: #5f6e95;
+    color: #ffffff;
+}
+
+td.title {
+    padding-left: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    background-color: #d9e0ef;
+    /*background-color: #98a7c2;*/
+    color: #1a1f20;
+}
+
+td.trigger {
+    padding-left: 2px;
+    padding-top: 2px;
+    padding-bottom: 10px;
+    /*background-color: #5f6e95;
+    color: #ffffff;*/
+}
+td
+{
+    background-color: #F9F9F9;
+    color: #000000;
+}

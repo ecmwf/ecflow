@@ -58,6 +58,7 @@ public:
 	bool frozen() const;
 	void clear();
 	void setCurrent(const std::string& name);
+    void linkSelected(VInfo_ptr);
 
     void populateDialog();
 
@@ -65,7 +66,7 @@ public:
     void populateDockTitleBar(DashboardDockTitleWidget*);
     void reload() {}
 	void rerender();
-	void writeSettings(VSettings*);
+    void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 
 	//From VInfoObserver

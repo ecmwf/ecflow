@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -193,6 +193,20 @@ void VSettings::get(const std::string& key,std::vector<std::string>& val)
 	}
 }
 
+void VSettings::get(const std::string& key,std::vector<int>& val)
+{
+    boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.path(key));
+    if(!ptArray)
+    {
+        return;
+    }
+
+    for(boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it)
+    {
+        val.push_back(it->second.get_value<int>());
+    }
+}
+
 bool VSettings::getAsBool(const std::string& key,bool defaultVal)
 {
 	std::string v=pt_.get<std::string>(path_.path(key),(defaultVal)?"true":"false");
@@ -258,7 +272,7 @@ VComboSettings::~VComboSettings()
 void VComboSettings::clear()
 {
 	VSettings::clear();
-	pt_.clear();
+    qs_.clear();
 }
 
 bool VComboSettings::containsQs(const std::string& key)

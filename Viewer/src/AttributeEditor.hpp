@@ -65,6 +65,7 @@ protected:
     virtual bool isValueChanged()=0;
 
     VInfo_ptr info_;
+    QStringList attrData_;
     QWidget* form_;
     QString type_;
 };

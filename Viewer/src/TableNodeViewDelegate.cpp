@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -234,8 +234,7 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	painter->setFont(font_);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
-
-	if(selected)
+    if(selected)
 	{
 		painter->setPen(nodeSelectPen_);
 		QRect selRect=textRect.adjusted(-2,0,2,0);

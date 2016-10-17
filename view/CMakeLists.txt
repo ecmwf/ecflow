@@ -234,21 +234,21 @@ ecbuild_add_executable( TARGET    ecflowview
                                   ${CMAKE_THREAD_LIBS_INIT} 
                                   ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
                                   ${CMATH_LIBRARIES}
+                                  ${OPENSSL_LIBRARIES}
                         INCLUDES  
                                   ${X11_INCLUDE_DIR}
                                   ${MOTIF_INCLUDE_DIR}
                        )
 
-
 # ===================================================================
-# test
+# test. if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 # ===================================================================
 
 ecbuild_add_test( TARGET  test-view
                   BOOST
                   CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                   SOURCES   test/TestRunner.cpp test/TestView.cpp
-                  LIBS      libharness    
+                  LIBS      libharness  ${OPENSSL_LIBRARIES} 
                   INCLUDES  ../Test/src
                   TEST_DEPENDS s_test_zombies
                 )

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,9 +14,8 @@
 #include "UserMessage.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "VItemPathParser.hpp"
 #include "VNode.hpp"
-//#include "VNState.hpp"
-//#include "VSState.hpp"
 
 #include <boost/lexical_cast.hpp>
 
@@ -211,6 +210,35 @@ VInfo_ptr VInfo::createParent(VInfo_ptr info)
     return VInfo_ptr();
 }
 
+VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
+{
+    if(!s || path.empty())
+        return VInfo_ptr();
+
+    VItemPathParser p(path);
+
+    if(p.itemType() ==  VItemPathParser::ServerType)
+    {
+        return VInfoServer::create(s);
+    }
+    else if(p.itemType() ==  VItemPathParser::NodeType)
+    {
+        VNode* n=s->vRoot()->find(p.node());
+        return VInfoNode::create(n);
+    }
+    else if(p.itemType() ==  VItemPathParser::AttributeType)
+    {
+        if(VNode* n=s->vRoot()->find(p.node()))
+        {
+            if(VAttribute* a=(VAttribute::make(n,p.type(),p.attribute())))
+            {
+                return VInfoAttribute::create(a);
+            }
+        }
+    }
+
+    return VInfo_ptr();
+}
 
 //=========================================
 //
@@ -323,6 +351,19 @@ void VInfoAttribute::accept(VInfoVisitor* v)
 	v->visit(this);
 }
 
+VInfo_ptr VInfoAttribute::create(VAttribute* att)
+{
+    ServerHandler* server=NULL;
+    VNode* node=att->parent();
+    if(node)
+    {
+        server=node->server();
+    }
+
+    return VInfo_ptr(new VInfoAttribute(server,node,att));
+}
+
+#if 0
 VInfo_ptr VInfoAttribute::create(VNode* node,int attIndex)
 {
     ServerHandler* server=NULL;
@@ -335,6 +376,7 @@ VInfo_ptr VInfoAttribute::create(VNode* node,int attIndex)
 
     return VInfo_ptr(new VInfoAttribute(server,node,att));
 }
+#endif
 
 std::string VInfoAttribute::path()
 {

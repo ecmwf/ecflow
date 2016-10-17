@@ -1,19 +1,24 @@
+Build 
+================================================================
+b8r       ssl=on           # boost/bjam
+ecbuild   -DENABLE_SLL=ON  # cmake/ecbuild
+
+
+How to create the CSR, certificate and private key for ecflow
+===================================================================
 ref:http://panoptic.com/wiki/aolserver/How_to_generate_self-signed_SSL_certificates
 https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs
 
-You need to create your certificates and sign them appropriately. Here are the commands for linux:
+You need to create your certificates and sign them appropriately. 
+Here are the commands for linux:
 
-# Generate a private key, will request a pass phrase.
-openssl genrsa -des3 -out server.key 1024
+# Generate a password protected private key, will request a pass phrase.
+# This key is a 1024 bit RSA key which is encrypted using Triple-DES and 
+# stored in a PEM format so that it is readable as ASCII text
+openssl genrsa -des3 -out server.key 1024     
 
-
-# Generate Certificate signing request. This asks a few questions
-# Note common name must match host name.
-openssl req -new -key server.key -out server.csr
-
-
-# Sign certificate with private key (self signed certificate)
-openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
+   # Use this command to check that a private key (domain.key) is a valid key
+   openssl rsa -check -in server.key
 
 
 # Remove password requirement (needed for example)
@@ -24,18 +29,135 @@ cp server.key server.key.secure
 openssl rsa -in server.key.secure -out server.key
 
 
-# Generate dhparam file
-openssl dhparam -out dh512.pem 512
+# Generate Certificate Signing Request(CSR). (This is used to create a certificate)
+# The CSR is used in one of two ways. Ideally, the CSR will be sent to a Certificate Authority, 
+# such as Verisign who will verify the identity of the requestor and issue a signed certificate. 
+# The second option is to self-sign the CSR, which will be demonstrated in the next section. 
+# This asks a few questions:
+# Note 'common name' must match host name where your server is going to run.
+openssl req -new -key server.key -out server.csr
+
+   # This command allows you to view and verify the contents of a CSR (domain.csr) in plain text:
+   openssl req -text -noout -verify -in server.csr
 
 
-Once you've done that, you need to change the filenames in server.cpp and client.cpp.
+# generate certificate CRT, by using the CSR and private key.
+# Sign certificate with private key (self signed certificate)
+openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
 
-server.cpp
+   # This command allows you to view the contents of a certificate (server.crt) in plain text:
+   openssl x509 -text -noout -in server.crt
 
-context_.use_certificate_chain_file("server.crt"); 
-context_.use_private_key_file("server.key", boost::asio::ssl::context::pem);
-context_.use_tmp_dh_file("dh512.pem");
+  > server.crt   # self signed certificate
+  > server.key   # is the private key
 
-client.cpp
+  # Generate a CSR from an Existing Certificate and Private Key
+  # Use this method if you want to renew an existing certificate but you or your 
+  # CA do not have the original CSR for some reason. 
+  # It basically saves you the trouble of re-entering the CSR information, as it extracts that 
+  # information from the existing certificate.
+  openssl x509  -in server.crt -signkey server.key -x509toreq -out server.csr
 
-ctx.load_verify_file("server.crt");
+
+# Generate dhparam file, Using 512 causes Handshake failed: dh key too small 
+openssl dhparam -out dh1024.pem 1024
+
+
+# Copy to the install area.
+$ cp server.crt /etc/ssl/certs/ssl.crt
+$ cp server.key /etc/ssl/private/ssl.key
+
+
+//==============================================================================================
+
+# How can you verify that the Private key matches a certificate and CSR
+------------------------------------------------------------------------
+openssl rsa -noout -modulus -in server.key  | openssl md5
+openssl x509 -noout -modulus -in server.crt | openssl md5
+openssl req -noout -modulus -in server.csr  | openssl md5
+
+If the output of each command is identical there is an extremely high probability that 
+the private key, certificate, and CSR are related. 
+
+
+# How can I retrieve remote certificates & check expiration dates
+--------------------------------------------------------------
+Start your ssl based server.
+
+cat <<EOF > retrieve-cert.sh
+#!/bin/sh
+#
+# usage: retrieve-cert.sh remote.host.name [port]
+#
+REMHOST=\$1
+REMPORT=\${2}
+
+echo |\
+openssl s_client -connect \${REMHOST}:\${REMPORT} 2>&1 |\
+sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
+EOF
+
+
+You can, in turn, pipe that information back to openssl to do things like check 
+the dates on all your active certificates.
+
+cat <<EOF > retrieve-cert.sh
+#!/bin/sh
+#
+for CERT in \
+  eurydice:3142
+do
+  echo |\
+  openssl s_client -connect \${CERT} 2>/dev/null |\
+  sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' |\
+  openssl x509 -noout -subject -dates
+done
+EOF
+
+
+
+
+If we want server to verify client certificate, thes use as below:
+===================================================================
+See File Connection.cpp
+
+*HOWEVER* this requires that certificate is installed.
+if (Ecf::server())  socket_.set_verify_mode(boost::asio::ssl::verify_peer|boost::asio::ssl::verify_fail_if_no_peer_cert);
+else                socket_.set_verify_mode(boost::asio::ssl::verify_peer);
+
+Otherwise we can error: See: http://gagravarr.org/writing/openssl-certs/errors.shtml
+>error 18 at 0 depth lookup:self signed certificate
+=> OpenSSL can't verify the certificate in question
+
+So, to veryify a certificate, we need to trust someone in the key signing chain. 
+At the very top of the chain will be a self signed certificate (it has to be, that's the chain termination). 
+If OpenSSL gets to the end of this chain without trusting anyone, and doesn't the self signed bit either, 
+then it can't verify the certificate. In this case, it'll give an error like:
+oxford-ca.pem: /C=GB/ST=Oxfordshire/L=Oxford/O=Oxford University/OU=Computing Services/CN=Oxford University Computing Services CA/Email=ca@computing-services.oxford.ac.uk
+error 18 at 0 depth lookup:self signed certificate
+
+What this says is that at 0 depth (i.e. the top of the signer tree), it hit a self signed certificate, but this certificate wasn't trusted. Since OpenSSL can't verify any of the signers of the certificate, it can't verify the certificate. Since this is a fatal problem, it throws the above error.
+
+Once you get someone on the signing chain trusted, you'll get something like:
+oxford-herald2-server.pem: OK
+
+The Cause
+One of:
+
+    A man in the middle attack, sending you an alternate certificate for the server, which was signed by a different CA
+    The server certificate is self signed and not trusted
+    The server certificate is signed by a CA you don't trust (eg an in-house one) 
+
+The Fix
+
+    In this case, you have big problems. Still, it's a good thing that OpenSSL gave you an error about it, rather than blindly trusting it regardless, isn't it?
+    Get the server certificate (if you haven't already), and install it as a trusted certificate
+    Get the CA certificate, and install it as a trusted CA
+     
+
+Python
+====================================================
+python -c "import ssl; print(ssl.OPENSSL_VERSION)"
+
+
+ 

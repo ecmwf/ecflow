@@ -5,7 +5,28 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+project ecflow_top ;
+
+# ==================== OPENSSL ======================================================
+# OPENSSL support, should really be in site-config.jam
 #
+# to enable use:   b2 ssl=on
+#
+
+# link with libdl.so, shared lib containing dlopen(),dlclose()dysym(),
+# these functions are used by OpenSSL internally & thus -ldl is an
+# indirect dependency when using -lcrypto(on Linux) Because we linking
+# with static version of crypto, need to explicitly link against indirect dependencies.
+lib libssl    : : <file>/usr/lib64/libssl.so ;
+lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
+lib dl ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
+alias openssl_libs : libssl libcrypto dl ;
+
+import feature : feature ;
+feature ssl : off on : optional composite propagated link-incompatible ;
+feature.compose <ssl>on : <define>ECF_OPENSSL ;
+
+# ===============================================================================
 # To clean all the sub projects just use: bjam --clean
 #
 path-constant TOP : . ;     # After that, the TOP variable can be used in every Jamfile. 

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -20,14 +20,18 @@
 #include "LogServer.hpp"
 #include "Node.hpp"
 
-class AttributeFilter;
 #include "VItem.hpp"
+#include "VItemTmp.hpp"
 
+class AttributeFilter;
 class IconFilter;
 class ServerHandler;
+class TriggerCollector;
+class TriggeredScanner;
 class VAttributeType;
 class VServer;
 class VServerSettings;
+class VNodeTriggerData;
 
 class VNodeInternalState
 {
@@ -86,10 +90,11 @@ friend class VServer;
 
 public:
 	VNode(VNode* parent,node_ptr);
-    virtual ~VNode() {}
+    virtual ~VNode();
 
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
+    VServer *root() const;
     virtual ServerHandler* server() const;
     virtual VNode* suite() const;
     node_ptr node() const {return node_;}
@@ -148,8 +153,11 @@ public:
     //generated variables are searched.
     virtual std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
+    std::string fullPath() const;
     virtual std::string absNodePath() const;
+
     bool sameName(const std::string& name) const;
+    bool sameContents(VItem* item) const;
     std::string strName() const;
     QString name() const;
     std::string serverName() const;
@@ -168,7 +176,7 @@ public:
     virtual void internalState(VNodeInternalState&) {}
 
     bool hasAccessed() const;
-    bool isAncestor(const VNode* n);
+    //bool isAncestor(const VNode* n) const;
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
 
@@ -177,6 +185,7 @@ public:
     int index() const {return index_;}
 
     const std::string& nodeType();
+    //const std::string& typeStr() const;
     virtual QString toolTip();
     
     virtual void why(std::vector<std::string>& theReasonWhy) const;
@@ -184,6 +193,14 @@ public:
 
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
+
+    void triggerExpr(std::string&,std::string&) const;
+
+    void triggers(TriggerCollector*);   
+    void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=0);
+    void addTriggeredData(VItem* n);
+    void addTriggeredData(VItem* a,VItem* n);
+
 
 protected:
     void clear();
@@ -198,6 +215,11 @@ protected:
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
+    VItemTmp_ptr findLimit(const std::string& path, const std::string& name);
+    static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
+    //static void scanForTriggered(VNode *n);
+    static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
+
     node_ptr node_;
     //VNode* parent_;
     std::vector<VNode*> children_;
@@ -206,6 +228,7 @@ protected:
     mutable short cachedAttrNum_;
 #endif
     int index_;
+    VNodeTriggerData* data_;
 };
 
 class VSuiteNode : public VNode
@@ -213,6 +236,7 @@ class VSuiteNode : public VNode
 public:
     VSuiteNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
     VSuiteNode* isSuite() const {return const_cast<VSuiteNode*>(this);}
+    const std::string& typeName() const;
 };
 
 class VFamilyNode : public VNode
@@ -220,6 +244,7 @@ class VFamilyNode : public VNode
 public:
     VFamilyNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
     VFamilyNode* isFamily() const {return const_cast<VFamilyNode*>(this);}
+    const std::string& typeName() const;
 };
 
 class VAliasNode : public VNode
@@ -227,12 +252,14 @@ class VAliasNode : public VNode
 public:
     VAliasNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
     VAliasNode* isAlias() const {return const_cast<VAliasNode*>(this);}
+    const std::string& typeName() const;
 };
 
 //This is the root node representing the Server.
 class VServer : public VNode
 {
 	friend class ServerHandler;
+    friend class VNode;
 
 public:
 	explicit VServer(ServerHandler*);
@@ -259,7 +286,8 @@ public:
 	VNode* nodeAt(int) const;
 	const std::vector<VNode*>& nodes() const {return nodes_;}
 
-	QString toolTip();
+    const std::string& typeName() const;
+    QString toolTip();
 
 	//From VNode
 	std::string absNodePath() const {return "/";}
@@ -295,6 +323,8 @@ protected:
 	//Clear contents and rebuild the whole tree.
 	void beginScan(VServerChange&);
 	void endScan();
+    bool triggeredScanned() const {return triggeredScanned_;}
+    void setTriggeredScanned(bool b) {triggeredScanned_=b;}
 
 private:
 	void clear();
@@ -309,6 +339,7 @@ private:
     int totalNum_;
     std::vector<int> totalNumInChild_;
     std::vector<VNode*> nodes_;
+    bool triggeredScanned_;
 
     VServerCache cache_;
     std::vector<Variable> prevGenVars_;
