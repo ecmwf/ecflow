@@ -78,6 +78,13 @@ std::string Version::description()
    ss << "TEXT_ARCHIVE)";
 #endif
 
+#ifdef ECF_SECURE_USER
+   ss << " secure_user";
+#endif
+#ifdef ECF_OPENSSL
+   ss << " openssl";
+#endif
+
    ss << " Compiled on " << __DATE__ << " " << __TIME__;
    return ss.str();
 }

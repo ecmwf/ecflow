@@ -32,6 +32,7 @@
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
+#include "PasswdFile.hpp"
 
 #ifdef DEBUG
 
@@ -259,7 +260,6 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const
    return res;
 }
 
-
 int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 {
 	if (clientEnv_.debug()) cout << "\n" << TimeStamp::now() << "ClientInvoker::do_invoke_cmd : on_error_throw_exception_(" << on_error_throw_exception_ << ")" << std::endl;
@@ -300,13 +300,15 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					/// However this is only done, if we are not using the Command Level Interface(cli)
 					server_reply_.clear_for_invoke(cli_);
 
+					cts_cmd->setup_user_authentification( clientEnv_ );
+
 					boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
 				   boost::asio::ssl::context ctx(ecf::Openssl::method());
 				   ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
-	            Client theClient( io_service,ctx,cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
+	            Client theClient(io_service,ctx,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout() );
 #else
-	            Client theClient( io_service, cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
+	            Client theClient(io_service,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
 #endif
 					if (clientEnv_.allow_new_client_old_server() != 0) theClient.allow_new_client_old_server(clientEnv_.allow_new_client_old_server());
 					io_service.run();
@@ -977,6 +979,13 @@ int ClientInvoker::reloadwsfile() const
    if (testInterface_) return invoke(CtsApi::reloadwsfile());
    return invoke(Cmd_ptr(new CtsCmd( CtsCmd::RELOAD_WHITE_LIST_FILE )));
 }
+
+int ClientInvoker::reloadpasswdfile() const
+{
+   if (testInterface_) return invoke(CtsApi::reloadpasswdfile());
+   return invoke(Cmd_ptr(new CtsCmd( CtsCmd::RELOAD_PASSWD_FILE )));
+}
+
 int ClientInvoker::group( const std::string& groupRequest ) const
 {
    if (testInterface_)  return invoke(CtsApi::group(groupRequest));
