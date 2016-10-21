@@ -153,8 +153,12 @@ if [[ "$python3_arg" = python3 ]] ; then
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
 fi
 
+# ===================================================================================
 # boost
-if [[ $OS_VERSION = leap42 ]] ; then
+# if OS_VERSION not defined , default to empty string
+: ${OS_VERSION:=""}
+
+if [[ "$OS_VERSION" = "leap42" ]] ; then
     module load boost/1.53.0
 fi
 
