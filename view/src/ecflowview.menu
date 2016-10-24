@@ -78,7 +78,7 @@ menu 'MAIN'
 
   (ALL,ALL,'-',SEPARATOR)
 
-  (SUITE|TASK|FAMILY,(QUEUED|SUSPENDED|ACTIVE) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU)
+  (SUITE|TASK|FAMILY,(QUEUED|SUSPENDED|ACTIVE) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Free Deps',MENU)
   (NODE | ALIAS, ALL, 'Special', MENU)
   (NODE | ALIAS, ALL, 'Defstatus', MENU)
   (NODE & ADMIN, ALL, 'Force',   MENU)
@@ -239,7 +239,7 @@ menu 'Suite'
 ! Delete submenu
 !==============================================================================
 
-menu 'Delete'
+menu 'Free Deps'
 {
 	(ALL,HAS_TRIGGERS|HAS_TIME|HAS_DATE, 'All dependencies','ecflow_client --free-dep all <full_name>')
 	(ALL,HAS_TRIGGERS, 'Trigger dependencies','ecflow_client --free-dep trigger <full_name>')
