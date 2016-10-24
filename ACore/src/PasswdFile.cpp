@@ -98,6 +98,7 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
 
 std::string PasswdFile::get_passwd(const std::string& user, const std::string& host, const std::string& port)
 {
+   //cout << "PasswdFile::get_passwd user(" << user << ") host(" << host << ") port(" << port << ")\n";
    size_t vec_size = vec_.size();
    for (size_t i = 0; i < vec_size; i++) {
       if (vec_[i].user() == user && vec_[i].host() == host && vec_[i].port() == port) {
@@ -136,7 +137,7 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
 
 bool PasswdFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const
 {
-   // Expect 4.4.0
+   // Expect 4.5.0
    // If first character is NUMERIC and we have dots
    bool firstCharIsNumeric = Str::NUMERIC().find( line[0], 0 ) != string::npos;
    if ( firstCharIsNumeric && line.find( "." ) != string::npos) {
@@ -155,15 +156,15 @@ bool PasswdFile::validateVersionNumber(const std::string& line, std::string& err
          int minor = boost::lexical_cast< int >( versionNumberTokens[1] );
          int part = boost::lexical_cast< int >( versionNumberTokens[2] );
          if ( major < 4  ) {
-            errorMsg += "Only passwd files with a version >= 4.4.0 is supported\n";
+            errorMsg += "Only passwd files with a version >= 4.5.0 is supported\n";
             return false;
          }
-         if ( major == 4 && minor < 4 ) {
-            errorMsg += "Only passwd files with a version >= 4.4.0 is supported\n";
+         if ( major == 4 && minor < 5 ) {
+            errorMsg += "Only passwd files with a version >= 4.5.0 is supported\n";
             return false;
          }
-         if ( major == 4 && minor == 4  && part > 0) {
-            errorMsg += "Only passwd files with a version >= 4.4.0 is supported\n";
+         if ( major == 4 && minor == 5  && part > 0) {
+            errorMsg += "Only passwd files with a version >= 4.5.0 is supported\n";
             return false;
          }
       }
@@ -182,7 +183,7 @@ bool PasswdFile::validateVersionNumber(const std::string& line, std::string& err
 bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_msg)
 {
    // Expected format is:
-   // 4.4.0
+   // 4.5.0
    // # comment
    // <user> <host> <port> <passwd> # comment
    // <user> <host> <port> <passwd> # comment
@@ -210,4 +211,41 @@ std::string PasswdFile::dump() const
       ss << vec_[i].user() << " " << vec_[i].host() << ":" << vec_[i].port() << "\n";
    }
    return ss.str();
+}
+
+
+bool PasswdFile::createWithAccess(
+      const std::string& pathToFile,
+      const std::string& host,
+      const std::string& port,
+      const std::string& passwd,
+      std::string& errorMsg)
+{
+   std::vector<std::string> lines; lines.reserve( 2 );
+
+   lines.push_back("4.5.0");
+
+   string line;
+   struct passwd * thePassWord = getpwuid ( getuid() );
+   string user = string( thePassWord->pw_name ) ;  // equivalent to the login name
+   line += user;
+   line += " ";
+   line += host;
+   line += " ";
+   line += port;
+   line += " ";
+   line += passwd;
+   lines.push_back(line);
+
+   line.clear();
+   line += user;
+   line += " ";
+   line += Str::LOCALHOST();
+   line += " ";
+   line += port;
+   line += " ";
+   line += passwd;
+   lines.push_back(line);
+
+   return File::create(pathToFile,lines,errorMsg);
 }

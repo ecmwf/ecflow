@@ -67,6 +67,11 @@ std::string Host::ecf_lists_file(const std::string& port) const
    return prefix_host_and_port(port,Str::WHITE_LIST_FILE());
 }
 
+std::string Host::ecf_passwd_file(const std::string& port) const
+{
+   return prefix_host_and_port(port,Str::ECF_PASSWD());
+}
+
 std::string Host::prefix_host_and_port( const std::string& port,const std::string& file_name ) const
 {
    // The file name may include a path.  /user/avi/fred.log

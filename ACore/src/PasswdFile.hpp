@@ -48,7 +48,7 @@ public:
    ~PasswdFile();
 
    // Parse the file if any errors found return false and errorMsg
-   // The parser expects version number  4.4.0
+   // The parser expects version number  4.5.0
    bool load(const std::string& file,bool debug,  std::string& errorMsg);
 
    std::string get_passwd(const std::string& user, const std::string& host, const std::string& port);
@@ -58,6 +58,15 @@ public:
    const std::vector<Passwd>& passwds() const { return vec_;}
 
    std::string dump() const;
+
+   // Function used in test:
+   // Will overwrite the existing file
+   static bool createWithAccess(
+         const std::string& pathToFile,
+         const std::string& host,
+         const std::string& port,
+         const std::string& passwd,
+         std::string& errorMsg);
 
 private:
    bool add_user(std::vector<std::string>& tokens, std::string& error_msg);

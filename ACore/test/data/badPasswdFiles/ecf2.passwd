@@ -1,2 +1,2 @@
-4.4.0
-fred host port passwd #  port show be an integer
+4.5.0
+fred host port passwd #  port should be an integer
