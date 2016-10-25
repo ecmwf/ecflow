@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( test_loading_of_passwd )
       return;
    }
 
-   cout << "passwd_file " << passwd_file << "\n";
+   // cout << "passwd_file " << passwd_file << "\n";
 
    // Set ECF_PASSWD environment variable. Use same file for client and server
    // add on construction, and remove at destruction.
