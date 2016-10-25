@@ -148,6 +148,7 @@ private:
 
 	   // Handle ecf::Flag::MIGRATED, don't save nodeVec_
 	   // if in ServerToClientCmdContext & ecf::Flag::MIGRATED set on suite/family
+	   // When check-pointing we always need save the children
 	   if (Archive::is_saving::value &&
 	       ecf::ServerToClientCmdContext::in_command() &&
 	       get_flag().is_set(ecf::Flag::MIGRATED)) {
