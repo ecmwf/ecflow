@@ -110,6 +110,8 @@ std::string PasswdFile::get_passwd(const std::string& user, const std::string& h
 
 bool PasswdFile::authenticate(const std::string& user, const std::string& passwd) const
 {
+   //cout << "   PasswdFile::authenticate user(" << user << ") passwd(" << passwd << ")\n";
+
    // Only fail if user exists in the passwd file
    bool user_found  = false;
    size_t vec_size = vec_.size();
@@ -117,21 +119,27 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
       if (vec_[i].user() == user) {
          user_found = true;
          if (vec_[i].passwd() == passwd) {
+            //cout << "      PasswdFile::authenticate TRUE \n";
             return true;
          }
       }
    }
 
    // User found in password file and passwd did not match
-   if (user_found) return false;
+   if (user_found) {
+      //cout << "      PasswdFile::authenticate FALSE, user found but passwd did not match\n";
+      return false;
+   }
    else {
       // User not found, but if passwd is not empty, then fail.
       if (!passwd.empty()) {
+         //cout << "      PasswdFile::authenticate FALSE, user NOT found, passwd is NOT EMPTY\n";
          return false;
       }
    }
 
    // User not found in the password file and passwd is empty. Allow access
+   //cout << "      PasswdFile::authenticate TRUE, user NOT found, and passwd EMPTY\n";
    return true;
 }
 
@@ -248,4 +256,25 @@ bool PasswdFile::createWithAccess(
    lines.push_back(line);
 
    return File::create(pathToFile,lines,errorMsg);
+}
+
+
+bool PasswdFile::clear(
+      const std::string& pathToFile,
+      std::string& errorMsg)
+{
+   std::vector<std::string> lines;
+   if (File::splitFileIntoLines(pathToFile,lines,true /* ignore empty lines */)) {
+      // Just leave the version. i.e the first line.
+      if (lines.size() > 1) {
+         lines.erase(lines.begin()+1,lines.end());
+
+         // Overwrite the file.
+         return File::create(pathToFile,lines,errorMsg);
+      }
+      return true;
+   }
+   errorMsg += "PasswdFile::clear: Could not open file ";
+   errorMsg += errorMsg;
+   return false;
 }

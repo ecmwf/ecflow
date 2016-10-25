@@ -66,8 +66,7 @@ ClientEnvironment::ClientEnvironment()
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
   host_vec_index_(0),
-  allow_new_client_old_server_(0),
-  passwd_file_read_(false)
+  allow_new_client_old_server_(0)
 {
 	init();
 }
@@ -79,8 +78,7 @@ ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::str
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
   host_vec_index_(0),
-  allow_new_client_old_server_(0),
-  passwd_file_read_(false)
+  allow_new_client_old_server_(0)
 {
 	init();
 
@@ -405,24 +403,31 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 const std::string& ClientEnvironment::get_user_password() const
 {
 #ifdef ECF_SECURE_USER
-   if (passwd_file_read_) return passwd_;
-   passwd_file_read_ = true;
-
-   std::string user_passwd_file;
-   char* file = getenv("ECF_PASSWD");
-   if (file) user_passwd_file = file;
-
-   if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
-      PasswdFile passwd_file;
-      std::string errorMsg;
-      if (!passwd_file.load(user_passwd_file,debug(),errorMsg)) {
-         std::stringstream ss; ss << "Could not parse ECF_PASSWD file. " << errorMsg;
-         throw std::runtime_error(ss.str());
-      }
-      passwd_ = passwd_file.get_passwd(UserCmd::get_user(), host(), port());
-      passwd_file_read_ = true;
+   //cout << "ClientEnvironment::get_user_password() ECF_SECURE_USER passwd_(" << passwd_ << ")\n";
+   if (!passwd_.empty()) {
+      //cout << "  ClientEnvironment::get_user_password() CACHED returning " << passwd_ << "\n";
       return passwd_;
    }
+
+   char* file = getenv("ECF_PASSWD");
+   if (file) {
+      std::string user_passwd_file = file;
+      //cout << "  ClientEnvironment::get_user_password() ECF_PASSWD " << user_passwd_file  << "\n";
+      if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
+         //cout << "  ClientEnvironment::get_user_password() LOADING password file\n";
+         PasswdFile passwd_file;
+         std::string errorMsg;
+         if (!passwd_file.load(user_passwd_file,debug(),errorMsg)) {
+            std::stringstream ss; ss << "Could not parse ECF_PASSWD file. " << errorMsg;
+            throw std::runtime_error(ss.str());
+         }
+         //std::cout << "ClientEnvironment::get_user_password() PasswdFile.dump()\n" << passwd_file.dump() << "\n";
+         passwd_ = passwd_file.get_passwd(UserCmd::get_user(), host(), port());
+         //cout << "  ClientEnvironment::get_user_password() returning " << passwd_ << "\n";
+         return passwd_;
+      }
+   }
 #endif
+   //cout << "  ClientEnvironment::get_user_password() returning EMPTY \n";
    return Str::EMPTY();
 }

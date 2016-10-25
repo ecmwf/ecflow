@@ -59,13 +59,17 @@ public:
 
    std::string dump() const;
 
-   // Function used in test:
-   // Will overwrite the existing file
+   // Function used in test: Will overwrite the existing file
    static bool createWithAccess(
          const std::string& pathToFile,
          const std::string& host,
          const std::string& port,
          const std::string& passwd,
+         std::string& errorMsg);
+
+   // Open password file and make it empty
+   static bool clear(
+         const std::string& pathToFile,
          std::string& errorMsg);
 
 private:

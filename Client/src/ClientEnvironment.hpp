@@ -126,7 +126,6 @@ private:
 
 
    mutable std::string passwd_;                  // Only used when ECF_SECURE_USER defined
-   mutable bool passwd_file_read_;               // Only used when ECF_SECURE_USER defined
 
 	/// The option read from the command line.
  	friend class ClientOptions;
