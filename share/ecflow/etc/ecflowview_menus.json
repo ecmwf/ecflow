@@ -12,7 +12,7 @@
         },
 
         {
-            "name"    : "Delete",
+            "name"    : "Free deps",
             "modes"   : ["Submenu"]
         },
 
@@ -137,7 +137,7 @@
 
         {
             "menu"           : "Node",
-            "name"           : "Delete",
+            "name"           : "Free deps",
             "type"           : "Submenu",
             "visible_for"    : "suite or task or family",
             "enabled_for"    : "(queued or suspended or active) and (has_triggers or has_time or has_date)",
@@ -369,28 +369,28 @@
 
 
         {
-            "menu"           : "Delete",
+            "menu"           : "Free deps",
             "name"           : "All dependencies",
             "enabled_for"    : "has_triggers or has_time or has_date",
             "command"        : "ecflow_client --free-dep all <full_name>",
             "status_tip"     : "__cmd__"
         },
         {
-            "menu"           : "Delete",
+            "menu"           : "Free deps",
             "name"           : "Trigger dependencies",
             "enabled_for"    : "has_triggers",
             "command"        : "ecflow_client --free-dep trigger <full_name>",
             "status_tip"     : "__cmd__"
         },
         {
-            "menu"           : "Delete",
+            "menu"           : "Free deps",
             "name"           : "Time dependencies",
             "enabled_for"    : "has_time",
             "command"        : "ecflow_client --free-dep time <full_name>",
             "status_tip"     : "__cmd__"
         },
         {
-            "menu"           : "Delete",
+            "menu"           : "Free deps",
             "name"           : "Date dependencies",
             "enabled_for"    : "has_date",
             "command"        : "ecflow_client --free-dep date <full_name>",
