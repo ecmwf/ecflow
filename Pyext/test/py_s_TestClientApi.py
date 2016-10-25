@@ -1117,6 +1117,7 @@ def test_client_flag_migrated(ci):
     
     ci.halt_server()  # server must be halted, otherwise restore_from_checkpt will throw
     ci.restore_from_checkpt()
+    ci.alter(s1,"clear_flag","migrated")   
     ci.sync_local() 
     node_vec = ci.get_defs().get_all_nodes()
     assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
