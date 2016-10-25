@@ -15,7 +15,7 @@
     <file alias="icon_complete.svg">../images/icon_complete.svg</file>   
     <file alias="icon_killed.svg">../images/icon_killed.svg</file>
     <file alias="icon_late.svg">../images/icon_late.svg</file>
-    <file alias="icon_migrated.svg">../images/icon_migrated.svg</file>
+    <file alias="icon_children_hidden.svg">../images/icon_children_hidden.svg</file>
     <file alias="icon_node_log.svg">../images/icon_node_log.svg</file>
     <file alias="icon_rerun.svg">../images/icon_rerun.svg</file>
     <file alias="icon_slow.svg">../images/icon_slow.svg</file>   
