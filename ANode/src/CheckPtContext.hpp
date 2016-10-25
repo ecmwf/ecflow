@@ -1,5 +1,5 @@
-#ifndef SERVER_TO_CLIENT_CMD_CONTEXT_HPP_
-#define SERVER_TO_CLIENT_CMD_CONTEXT_HPP_
+#ifndef CHECKPT_CONTEXT_HPP_
+#define CHECKPT_CONTEXT_HPP_
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
@@ -21,15 +21,15 @@
 
 namespace  ecf {
 
-class ServerToClientCmdContext : private boost::noncopyable {
+class CheckPtContext : private boost::noncopyable {
 public:
-   ServerToClientCmdContext();
-   ~ServerToClientCmdContext();
+   CheckPtContext();
+   ~CheckPtContext();
 
-   static bool in_command() { return in_command_; }
+   static bool in_checkpt() { return in_checkpt_; }
 
 private:
-   static bool in_command_;
+   static bool in_checkpt_;
 };
 }
 

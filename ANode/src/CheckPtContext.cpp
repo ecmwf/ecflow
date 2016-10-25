@@ -11,19 +11,19 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "ServerToClientCmdContext.hpp"
+#include "CheckPtContext.hpp"
 
 namespace ecf {
-bool ServerToClientCmdContext::in_command_ =  false;
+bool CheckPtContext::in_checkpt_ =  false;
 
-ServerToClientCmdContext::ServerToClientCmdContext()
+CheckPtContext::CheckPtContext()
 {
-   in_command_ = true;
+   in_checkpt_ = true;
 }
 
-ServerToClientCmdContext::~ServerToClientCmdContext()
+CheckPtContext::~CheckPtContext()
 {
-   in_command_ = false;
+   in_checkpt_ = false;
 }
 
 }

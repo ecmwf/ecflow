@@ -18,7 +18,7 @@
 
 #include <limits>
 #include "Node.hpp"
-#include "ServerToClientCmdContext.hpp"
+#include "CheckPtContext.hpp"
 
 class NodeContainer : public Node {
 protected:
@@ -147,11 +147,11 @@ private:
 	   ar & boost::serialization::base_object<Node>(*this);
 
 	   // Handle ecf::Flag::MIGRATED, don't save nodeVec_
-	   // if in ServerToClientCmdContext & ecf::Flag::MIGRATED set on suite/family
-	   // When check-pointing we always need save the children
+	   // When check-pointing we always need to save the children
 	   if (Archive::is_saving::value &&
-	       ecf::ServerToClientCmdContext::in_command() &&
-	       get_flag().is_set(ecf::Flag::MIGRATED)) {
+	         get_flag().is_set(ecf::Flag::MIGRATED) &&
+	         ! ecf::CheckPtContext::in_checkpt()
+	       ) {
 
 	      std::vector<node_ptr> nodeVec;
 	      ar & nodeVec;
