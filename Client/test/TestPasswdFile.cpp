@@ -168,6 +168,6 @@ BOOST_AUTO_TEST_CASE( test_loading_of_passwd_fail )
    // Remove the white list file. Comment out for debug
    fs::remove(passwd_file);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()
+#endif
