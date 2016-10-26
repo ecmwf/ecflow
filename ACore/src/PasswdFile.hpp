@@ -51,15 +51,19 @@ public:
    // The parser expects version number  4.5.0
    bool load(const std::string& file,bool debug,  std::string& errorMsg);
 
+   // to be called by the server, to at least one user with given host and port
+   bool check_at_least_one_user_with_host_and_port(const std::string& host, const std::string& port);
+
+   // get the password for the given user, host and port. Otherwise return a empty string
    std::string get_passwd(const std::string& user, const std::string& host, const std::string& port);
 
+   // authenticate the user, given the password.
    bool authenticate(const std::string& user, const std::string& passwd) const ;
 
-   const std::vector<Passwd>& passwds() const { return vec_;}
+   // ===========================================================================
+   // For test/debug
 
-   std::string dump() const;
-
-   // Function used in test: Will overwrite the existing file
+   // Will overwrite the existing file
    static bool createWithAccess(
          const std::string& pathToFile,
          const std::string& host,
@@ -68,9 +72,10 @@ public:
          std::string& errorMsg);
 
    // Open password file and make it empty
-   static bool clear(
-         const std::string& pathToFile,
-         std::string& errorMsg);
+   static bool clear( const std::string& pathToFile, std::string& errorMsg);
+
+   const std::vector<Passwd>& passwds() const { return vec_;}
+   std::string dump() const;
 
 private:
    bool add_user(std::vector<std::string>& tokens, std::string& error_msg);

@@ -96,6 +96,18 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
    return false;
 }
 
+
+bool PasswdFile::check_at_least_one_user_with_host_and_port(const std::string& host, const std::string& port)
+{
+   size_t vec_size = vec_.size();
+   for (size_t i = 0; i < vec_size; i++) {
+      if (vec_[i].host() == host && vec_[i].port() == port) {
+         return true;
+      }
+   }
+   return false;
+}
+
 std::string PasswdFile::get_passwd(const std::string& user, const std::string& host, const std::string& port)
 {
    //cout << "PasswdFile::get_passwd user(" << user << ") host(" << host << ") port(" << port << ")\n";

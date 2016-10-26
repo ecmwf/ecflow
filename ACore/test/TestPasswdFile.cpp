@@ -129,6 +129,12 @@ BOOST_AUTO_TEST_CASE( test_passwd )
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(theFile.load(path,false, errorMsg),"Failed to parse file " << path << "\n" << errorMsg);
 
+   BOOST_CHECK_MESSAGE(theFile.check_at_least_one_user_with_host_and_port("host","3141"),"expected to pass");
+   BOOST_CHECK_MESSAGE(theFile.check_at_least_one_user_with_host_and_port("host3","3143"),"expected to pass");
+   BOOST_CHECK_MESSAGE(theFile.check_at_least_one_user_with_host_and_port("host4","3145"),"expected to pass");
+   BOOST_CHECK_MESSAGE(!theFile.check_at_least_one_user_with_host_and_port("xxxx","3141"),"expected fail ");
+   BOOST_CHECK_MESSAGE(!theFile.check_at_least_one_user_with_host_and_port("host","13141"),"expected fail ");
+
    // make sure we find all the users and the access right are correct
 //   4.4.0  # comment
 //
@@ -148,7 +154,7 @@ BOOST_AUTO_TEST_CASE( test_passwd )
    expected_passwds.push_back(Passwd("jake", "host", "3141",  "x12ggg"));
    expected_passwds.push_back(Passwd("tom", "host3", "3143",  "x12ggg"));
 
-   BOOST_REQUIRE_MESSAGE(expected_passwds == theFile.passwds() ,"expected passwors to match");
+   BOOST_REQUIRE_MESSAGE(expected_passwds == theFile.passwds() ,"expected passwords to match");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
