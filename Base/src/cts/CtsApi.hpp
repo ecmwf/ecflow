@@ -129,6 +129,7 @@ public:
                                          const std::string& value = "");
 
 	static std::string reloadwsfile();
+   static std::string reloadpasswdfile();
 
 	// "expect string of the form "shutdown; get" must be ';' separated
 	static std::string group(const std::string& cmds);
@@ -148,6 +149,7 @@ public:
  	                                            const std::string& path_to_script = "",
  	                                            bool create_alias = false,
  	                                            bool run = true);
+
 
  	// Only to be used in Cmd
    static const char* server_version_arg();
@@ -208,6 +210,7 @@ public:
 	static const char* fileArg();
 	static const char* plugArg();
 	static const char* reloadwsfileArg();
+   static const char* reloadpasswdfile_arg();
 	static const char* groupArg();
 	static const char* forceDependencyEvalArg();
 	static const char* alterArg();

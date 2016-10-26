@@ -40,6 +40,7 @@
 #include "Version.hpp"
 #include "Indentor.hpp"
 #include "AbstractObserver.hpp"
+#include "CheckPtContext.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -1066,6 +1067,9 @@ bool Defs::replaceChild(const std::string& path,
 
 void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
 {
+   // Save NodeContainer children even if ecf::Flag::MIGRATED set
+   CheckPtContext checkpt_context;
+
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
 
@@ -1075,9 +1079,23 @@ void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at
 
 void Defs::save_checkpt_as_string(std::string& output) const
 {
+   // Save NodeContainer children even if ecf::Flag::MIGRATED set
+   CheckPtContext checkpt_context;
+
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
 
+   ecf::save_as_string(output,*this);
+}
+
+void Defs::save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
+{
+   /// Can throw archive exception
+   ecf::save(the_fileName,*this,at);
+}
+
+void Defs::save_as_string(std::string& output) const
+{
    ecf::save_as_string(output,*this);
 }
 
@@ -1097,6 +1115,20 @@ void Defs::restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Ty
    modify_change_no_ = Ecf::modify_change_no();
 
 //	cout << "Restored: " << suiteVec_.size() << " suites\n";
+}
+
+void Defs::restore_from_string(const std::string& rest)
+{
+   if (rest.empty()) return;
+
+   // deleting existing content first. *** Note: Server environment left as is ****
+   clear();
+
+   ecf::restore_from_string(rest,*this);
+
+   // Reset the state and modify numbers, **After the restore**
+   state_change_no_ = Ecf::state_change_no();
+   modify_change_no_ = Ecf::modify_change_no();
 }
 
 void Defs::clear()

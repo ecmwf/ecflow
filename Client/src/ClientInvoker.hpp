@@ -279,6 +279,8 @@ public:
              const std::string& value = "") const { return invoke(CtsApi::alter(path,alterType,attrType,name,value)); }
 
 	int reloadwsfile() const;
+	int reloadpasswdfile() const;
+
 	int group(const std::string& groupRequest) const;
 
 	int logMsg(const std::string& msg) const;

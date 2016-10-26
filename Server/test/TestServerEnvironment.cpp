@@ -173,6 +173,9 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
    expected_variables.push_back(  Str::ECF_PORT() );
    expected_variables.push_back( "ECF_NODE");
    expected_variables.push_back( "ECF_INTERVAL");
+#ifdef ECF_SECURE_USER
+   expected_variables.push_back( "ECF_PASSWD");
+#endif
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);
@@ -262,6 +265,19 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
           BOOST_CHECK_MESSAGE(p.second == expected,"for ECF_MICRODEF expected " <<  expected << " but found " << p.second);
           continue;
       }
+
+#ifdef ECF_SECURE_USER
+      if (string("ECF_PASSWD") == p.first) {
+
+         Host host;
+         std::string port = Str::DEFAULT_PORT_NUMBER();
+         if (getenv("ECF_PORT")) port = getenv("ECF_PORT");
+         std::string expected = host.prefix_host_and_port(port,Str::ECF_PASSWD());
+
+         BOOST_CHECK_MESSAGE(p.second == expected,"for ECF_PASSWD expected " <<  expected << " but found " << p.second);
+         continue;
+      }
+#endif
    }
 
    // tear down remove the log file created by ServerEnvironment
@@ -298,6 +314,9 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
    expected_variables.push_back(  Str::ECF_PORT() );
    expected_variables.push_back( "ECF_NODE");
    expected_variables.push_back( "ECF_INTERVAL");
+#ifdef ECF_SECURE_USER
+   expected_variables.push_back( "ECF_PASSWD");
+#endif
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);

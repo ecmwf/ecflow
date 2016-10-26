@@ -19,6 +19,8 @@
 #include <stdlib.h> // for getenv()
 
 #include "boost/foreach.hpp"
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include "ClientEnvironment.hpp"
 #include "ClientToServerCmd.hpp"
@@ -28,7 +30,11 @@
 #include "boost_archive.hpp"
 #include "TimeStamp.hpp"
 #include "Version.hpp"
+#ifdef ECF_SECURE_USER
+#include "PasswdFile.hpp"
+#endif
 
+namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
 using namespace boost;
@@ -391,4 +397,37 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 	}
 
 	return true;
+}
+
+
+const std::string& ClientEnvironment::get_user_password() const
+{
+#ifdef ECF_SECURE_USER
+   //cout << "ClientEnvironment::get_user_password() ECF_SECURE_USER passwd_(" << passwd_ << ")\n";
+   if (!passwd_.empty()) {
+      //cout << "  ClientEnvironment::get_user_password() CACHED returning " << passwd_ << "\n";
+      return passwd_;
+   }
+
+   char* file = getenv("ECF_PASSWD");
+   if (file) {
+      std::string user_passwd_file = file;
+      //cout << "  ClientEnvironment::get_user_password() ECF_PASSWD " << user_passwd_file  << "\n";
+      if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
+         //cout << "  ClientEnvironment::get_user_password() LOADING password file\n";
+         PasswdFile passwd_file;
+         std::string errorMsg;
+         if (!passwd_file.load(user_passwd_file,debug(),errorMsg)) {
+            std::stringstream ss; ss << "Could not parse ECF_PASSWD file. " << errorMsg;
+            throw std::runtime_error(ss.str());
+         }
+         //std::cout << "ClientEnvironment::get_user_password() PasswdFile.dump()\n" << passwd_file.dump() << "\n";
+         passwd_ = passwd_file.get_passwd(UserCmd::get_user(), host(), port());
+         //cout << "  ClientEnvironment::get_user_password() returning " << passwd_ << "\n";
+         return passwd_;
+      }
+   }
+#endif
+   //cout << "  ClientEnvironment::get_user_password() returning EMPTY \n";
+   return Str::EMPTY();
 }

@@ -21,6 +21,7 @@ show_error_and_exit() {
    echo "   san            - is short for clang thread sanitiser"
    echo "   no_gui         - Don't build the gui"
    echo "   ssl            - build using openssl"
+   echo "   secure_user    - enable password for client server"
    echo "   log            - enable debug output"
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
@@ -46,6 +47,7 @@ clean_arg=
 no_gui_arg=
 python3_arg=
 ssl_arg=
+secure_user_arg=
 log_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
@@ -68,6 +70,7 @@ while [[ "$#" != 0 ]] ; do
       break
    elif [[ "$1" = no_gui ]] ; then no_gui_arg=$1 ;
    elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
+   elif [[ "$1" = secure_user ]]   ; then secure_user_arg=$1 ;
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
    elif [[ "$1" = install ]] ; then install_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
@@ -128,15 +131,20 @@ if [[ "$clang_sanitiser_arg" = san ]] ; then
 	cmake_extra_options="$cmake_extra_options -DCMAKE_C_FLAGS=-fsanitize=thread"
 fi
 if [[ "$ARCH" = cray ]] ; then
-    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF"
+
+    # disable new UI, no QT on cray
+    # Use the cray wrappers, these will add the correct flags.
+    # Assumes we have CRAY_ADD_RPATH=yes
+    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DCMAKE_Fortran_COMPILER=ftn"
     
     if [[ $intel_arg = intel ]] ; then
         module swap PrgEnv-cray PrgEnv-intel
     else
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
+    module unload atp
     module load boost/1.53.0
-    export CRAY_ADD_RPATH=no
+    export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1
 fi
 
@@ -145,8 +153,12 @@ if [[ "$python3_arg" = python3 ]] ; then
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
 fi
 
+# ===================================================================================
 # boost
-if [[ $OS_VERSION = leap42 ]] ; then
+# if OS_VERSION not defined , default to empty string
+: ${OS_VERSION:=""}
+
+if [[ "$OS_VERSION" = "leap42" ]] ; then
     module load boost/1.53.0
 fi
 
@@ -224,6 +236,11 @@ if [[ $ssl_arg = ssl ]] ; then
     ssl_options="-DENABLE_SSL=ON"
 fi
 
+secure_user_options=
+if [[ $secure_user_arg = secure_user ]] ; then
+    secure_user_options="-DENABLE_SECURE_USER=ON"
+fi
+
 log_options=
 if [[ $log_arg = log ]] ; then
     log_options="-DECBUILD_LOG_LEVEL=DEBUG"
@@ -260,6 +277,7 @@ $ecbuild $source_dir \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \
+            ${secure_user_options} \
             ${log_options}
             #-DENABLE_ALL_TESTS=ON
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    

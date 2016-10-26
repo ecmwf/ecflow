@@ -57,6 +57,10 @@ public:
 	/// debug client, when environment variable ECF_CLIENT_DEBUG is set.
 	virtual bool debug() const = 0 ;
 
+   // Returns the user password. This value is cached, so we only read passwd file once
+	// Only returns a value if ECF_SECURE_USER is defined, otherwise return an empty string
+   virtual const std::string& get_user_password() const = 0;
+
 	/// Some commands work on construction. to avoid this under test. Call set_test
 	/// i.e Command like CtsCmd::SERVER_LOAD can be client side only, in which case
 	/// when testing the client interface we want to avoid opening the log file.

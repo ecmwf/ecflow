@@ -115,7 +115,7 @@ void EcfFile::manual(std::string& theManual)
    // perform variable sub's but don't error if failure
    try {
       JobsParam dummy; // create jobs = false, spawn jobs =  false
-      variableSubstituition(dummy);
+      variableSubstitution(dummy);
    }
    catch (...) {}
 
@@ -278,7 +278,7 @@ const std::string& EcfFile::create_job( JobsParam& jobsParam)
    /// Will use *USER* supplied edit variables in preference to node tree variable *IF* supplied
    /// expand %VAR% or %VAR:sub% & replace %% with %
    // Allow variable substitution in comment and manual blocks. But if it fails, don't report as an error
-   variableSubstituition(jobsParam);
+   variableSubstitution(jobsParam);
 
 #ifdef DEBUG_VAR_SUB_OUTPUT
    std::string err1;
@@ -484,7 +484,7 @@ bool EcfFile::replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::str
    return true;
 }
 
-void EcfFile::variableSubstituition(JobsParam& jobsParam)
+void EcfFile::variableSubstitution(JobsParam& jobsParam)
 {
    // Allow variable substitution in comment and manual blocks.
    // But if it fails, don't report as an error
@@ -520,7 +520,7 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
          if (jobLines_[i].find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
          if (jobLines_[i].find(T_NOOP)    == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
          if (jobLines_[i].find(T_END) == 1) {
-            if (pp_stack.empty()) throw std::runtime_error("EcfFile::variableSubstituition: failed unpaired %end");
+            if (pp_stack.empty()) throw std::runtime_error("EcfFile::variableSubstitution: failed unpaired %end");
             int last_directive = pp_stack.back(); pp_stack.pop_back();
             if (last_directive == NOPP) nopp = false;
             continue;
@@ -532,7 +532,7 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
             Str::split( jobLines_[i], tokens );
             if (tokens.size() < 2) {
                std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
-               throw std::runtime_error("EcfFile::variableSubstituition: failed : " + ss.str());
+               throw std::runtime_error("EcfFile::variableSubstitution: failed : " + ss.str());
             }
             ecfMicro = tokens[1];
             microChar = ecfMicro[0];
@@ -554,7 +554,7 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
             if (!pp_stack.empty()) last_directive = pp_stack.back();
             if ( last_directive == COMMENT || last_directive == MANUAL) continue;
 
-            std::stringstream ss;  ss << "EcfFile::variableSubstituition: failed : '" << jobLines_[i] << "'";
+            std::stringstream ss;  ss << "EcfFile::variableSubstitution: failed : '" << jobLines_[i] << "'";
             dump_expanded_script_file( jobLines_ );
             throw std::runtime_error(ss.str());
          }

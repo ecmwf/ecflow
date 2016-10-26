@@ -374,12 +374,27 @@ EcfFile Submittable::locatedEcfFile() const
             std::stringstream ss; ss << "   Search of directory ECF_FILES(" << ecf_filesDirectory << ") failed:\n";
             reasonEcfFileNotFound += ss.str();
          }
-         else {
-            return EcfFile(const_cast<Submittable*>(this), searchResult);
-         }
+         else  return EcfFile(const_cast<Submittable*>(this), searchResult);
       }
       else {
-         std::stringstream ss; ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") does not exist:\n";
+         // Before failing try again but with variable Subsitution. ECFLOW-788
+         std::string original_ecf_filesDirectory = ecf_filesDirectory;
+         variableSubsitution(ecf_filesDirectory);
+         if ( !ecf_filesDirectory.empty() && fs::exists(ecf_filesDirectory) && fs::is_directory(ecf_filesDirectory))
+         {
+            // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
+            std::string searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
+            if ( searchResult.empty()) {
+               std::stringstream ss; ss << "   Search of directory ECF_FILES(variable substituted)(" << ecf_filesDirectory << ") failed:\n";
+               reasonEcfFileNotFound += ss.str();
+            }
+            else return EcfFile(const_cast<Submittable*>(this), searchResult);
+         }
+
+         std::stringstream ss;
+         ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
+         if (original_ecf_filesDirectory != ecf_filesDirectory )
+            ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") after variable substitution does not exist:\n";
          reasonEcfFileNotFound += ss.str();
       }
    }
