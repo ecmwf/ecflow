@@ -30,6 +30,7 @@ using namespace boost;
 PasswdFile::PasswdFile() {}
 PasswdFile::~PasswdFile() {}
 
+//#define DEBUG_ME 1
 
 // Parse the file if any errors found return false and errorMsg
 // The parser expects version number  4.5.0
@@ -96,7 +97,6 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
    return false;
 }
 
-
 bool PasswdFile::check_at_least_one_user_with_host_and_port(const std::string& host, const std::string& port)
 {
    size_t vec_size = vec_.size();
@@ -110,7 +110,7 @@ bool PasswdFile::check_at_least_one_user_with_host_and_port(const std::string& h
 
 std::string PasswdFile::get_passwd(const std::string& user, const std::string& host, const std::string& port)
 {
-   //cout << "PasswdFile::get_passwd user(" << user << ") host(" << host << ") port(" << port << ")\n";
+   // cout << "PasswdFile::get_passwd user(" << user << ") host(" << host << ") port(" << port << ")\n";
    size_t vec_size = vec_.size();
    for (size_t i = 0; i < vec_size; i++) {
       if (vec_[i].user() == user && vec_[i].host() == host && vec_[i].port() == port) {
@@ -122,7 +122,16 @@ std::string PasswdFile::get_passwd(const std::string& user, const std::string& h
 
 bool PasswdFile::authenticate(const std::string& user, const std::string& passwd) const
 {
-   //cout << "   PasswdFile::authenticate user(" << user << ") passwd(" << passwd << ")\n";
+//#ifdef DEBUG_ME
+//   cout << "   PasswdFile::authenticate user(" << user << ") passwd(" << passwd << ")\n";
+//#endif
+
+   if (user.empty()) {
+//#ifdef DEBUG_ME
+//      cout << "      PasswdFile::authenticate FALSE user empty.\n";
+//#endif
+      return false;
+   }
 
    // Only fail if user exists in the passwd file
    bool user_found  = false;
@@ -131,7 +140,9 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
       if (vec_[i].user() == user) {
          user_found = true;
          if (vec_[i].passwd() == passwd) {
-            //cout << "      PasswdFile::authenticate TRUE \n";
+//#ifdef DEBUG_ME
+//            cout << "      PasswdFile::authenticate TRUE \n";
+//#endif
             return true;
          }
       }
@@ -139,20 +150,33 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
 
    // User found in password file and passwd did not match
    if (user_found) {
-      //cout << "      PasswdFile::authenticate FALSE, user found but passwd did not match\n";
+//#ifdef DEBUG_ME
+//      cout << "      PasswdFile::authenticate FALSE, user found but passwd did not match\n";
+//#endif
       return false;
    }
    else {
       // User not found, but if passwd is not empty, then fail.
       if (!passwd.empty()) {
-         //cout << "      PasswdFile::authenticate FALSE, user NOT found, passwd is NOT EMPTY\n";
+//#ifdef DEBUG_ME
+//         cout << "      PasswdFile::authenticate FALSE, user NOT found, passwd is NOT EMPTY\n";
+//#endif
          return false;
       }
    }
 
-   // User not found in the password file and passwd is empty. Allow access
-   //cout << "      PasswdFile::authenticate TRUE, user NOT found, and passwd EMPTY\n";
-   return true;
+   // Server has a password file, but user not found and passwd is empty.
+   if (vec_.empty()) {
+//#ifdef DEBUG_ME
+//    cout << "      PasswdFile::authenticate true, user NOT found, and passwd EMPTY, and password file EMPTY\n";
+//#endif
+      return true;
+   }
+
+//#ifdef DEBUG_ME
+//  cout << "      PasswdFile::authenticate false, user NOT found, and passwd EMPTY\n";
+//#endif
+   return false;
 }
 
 bool PasswdFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const
@@ -233,7 +257,6 @@ std::string PasswdFile::dump() const
    return ss.str();
 }
 
-
 bool PasswdFile::createWithAccess(
       const std::string& pathToFile,
       const std::string& host,
@@ -269,7 +292,6 @@ bool PasswdFile::createWithAccess(
 
    return File::create(pathToFile,lines,errorMsg);
 }
-
 
 bool PasswdFile::clear(
       const std::string& pathToFile,
