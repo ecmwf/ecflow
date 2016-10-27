@@ -24,7 +24,7 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
-#include "Server.hpp" // Must come before boost/serialization headers.
+#include "Server.hpp"  // Must come before boost/serialization headers.
                        // defines ECFLOW_MT
 #include <boost/thread/thread.hpp> // needed for ECFLOW_MT and debug() to print thread ID
 #include "Defs.hpp"
@@ -35,6 +35,7 @@
 #include "Calendar.hpp"
 #include "Version.hpp"
 #include "Str.hpp"
+#include "File.hpp"
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
@@ -101,7 +102,6 @@ Server::Server( ServerEnvironment& serverEnv ) :
    context_.use_tmp_dh_file(home_path + "dh1024.pem");
 #endif
 
-
    // Update stats, this is returned via --stats command option
    stats().host_ = serverEnv.hostPort().first;
    stats().port_ = serverEnv.hostPort().second;
@@ -133,6 +133,30 @@ Server::Server( ServerEnvironment& serverEnv ) :
    // Start an accept operation for a new connection.
    start_accept();
 }
+
+
+#ifdef ECF_OPENSSL
+std::string Server::get_password() const
+{
+   std::string passwd_file = ecf::Openssl::certificates_dir();
+   passwd_file += "/server.passwd";
+   if (fs::exists(passwd_file)) {
+      std::string contents;
+      if (ecf::File::open(passwd_file,contents)) {
+         // remove /n added by editor.
+         if (!contents.empty() && contents[contents.size()-1] == '\n') contents.erase(contents.begin() + contents.size()-1);
+         //std::cout << "Server::get_password() passwd('" << contents << "')\n";
+         return contents;
+      }
+      else {
+         std::stringstream ss; ss << "Server::get_password file " << passwd_file << " exists, but can't be opened";
+         throw std::runtime_error(ss.str());
+      }
+   }
+   //std::cout << "Server::get_password() passwd('test')\n";
+   return "test";
+}
+#endif
 
 Server::~Server()
 {
