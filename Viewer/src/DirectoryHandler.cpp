@@ -353,7 +353,7 @@ bool DirectoryHandler::copyFile(const std::string &srcFile, std::string &destFil
 
     try
     {
-        boost::filesystem::copy_file(src, dest);
+        boost::filesystem::copy_file(src, dest,  boost::filesystem::copy_option::overwrite_if_exists);
     }
     catch (const boost::filesystem::filesystem_error& err)
     {
