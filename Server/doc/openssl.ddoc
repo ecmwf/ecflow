@@ -49,6 +49,7 @@ openssl req -new -key server.key -out server.csr
 
 # generate certificate CRT, by using the CSR and private key.
 # Sign certificate with private key (self signed certificate)
+# This file must be accessible by the client and server
 openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
 
    # This command allows you to view the contents of a certificate (server.crt) in plain text:

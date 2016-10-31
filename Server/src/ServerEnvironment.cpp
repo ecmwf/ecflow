@@ -85,6 +85,7 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
    init(argc,argv,"server_environment.cfg");
+   if (debug_) std::cout << dump() << "\n";
 }
 
 // This is ONLY used in test
@@ -106,6 +107,7 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& 
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
    init(argc,argv,path_to_config_file);
+   if (debug_) std::cout << dump() << "\n";
 }
 
 void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_config_file)
@@ -311,9 +313,14 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
 
 #ifdef ECF_SECURE_USER
  	if (!ecf_passwd_file_.empty() && fs::exists(ecf_passwd_file_)) {
- 	   if (!passwd_file_.load(ecf_passwd_file_, debug(), errorMsg)) {
+	   if (!passwd_file_.load(ecf_passwd_file_, debug(), errorMsg)) {
  	      std::cout << "Error: could not parse ECF_PASSWD file " << ecf_passwd_file_ << "\n" << errorMsg << "\n";
  	      return false;
+ 	   }
+ 	   if (!passwd_file_.check_at_least_one_user_with_host_and_port(serverHost_,the_port())) {
+         std::cout << "Error: password file " << ecf_passwd_file_;
+         std::cout << " does not contain any users, which match the host and port of this server\n";
+         return false;
  	   }
  	}
 #endif
@@ -634,6 +641,9 @@ std::string ServerEnvironment::dump() const
    ss << "check pt save time alarm " << checkpt_save_time_alarm_ << "\n";
    ss << "Job generation " << jobGeneration_ << "\n";
    ss << "Server host name " << serverHost_ << "\n";
+#ifdef ECF_SECURE_USER
+   ss << "ECF_PASSWD = " << ecf_passwd_file_ << "\n";
+#endif
 #ifdef ECFLOW_MT
    ss << "No of threads used by server " << threads_ << "\n";
 #endif
