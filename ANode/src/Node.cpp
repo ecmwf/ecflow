@@ -2002,6 +2002,15 @@ void Node::detach(AbstractObserver* obs)
    }
 }
 
+bool Node::is_observed(AbstractObserver* obs) const
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      if (observers_[i] == obs) {
+         return true;
+      }
+   }
+   return false;
+}
 
 static std::vector<ecf::TimeAttr>  timeVec_;
 static std::vector<ecf::TodayAttr> todayVec_;
