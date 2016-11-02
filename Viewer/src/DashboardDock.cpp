@@ -26,10 +26,10 @@ DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
 	QPalette p=palette();
 	QLinearGradient gr(0,0,0,1);
 	gr.setCoordinateMode(QGradient::ObjectBoundingMode);
-	gr.setColorAt(0,QColor(130,130,130));
-	gr.setColorAt(0.4,QColor(120,120,120));
-	gr.setColorAt(0.41,QColor(112,112,112));
-	gr.setColorAt(1,QColor(95,95,95));
+    gr.setColorAt(0,QColor(126,126,126));
+    gr.setColorAt(0.4,QColor(105,105,105));
+    gr.setColorAt(0.41,QColor(97,97,97));
+    gr.setColorAt(1,QColor(70,70,70));
 	p.setBrush(QPalette::Window,gr);
 	setPalette(p);
 
