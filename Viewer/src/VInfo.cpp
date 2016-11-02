@@ -120,11 +120,13 @@ void VInfo::regainData()
         if(p.itemType() == VItemPathParser::NodeType)
         {
             node_=server_->vRoot()->find(p.node());
-            return;
+            if(node_)
+                return;
         }
         if(!node_)
         {
             dataLost();
+            return;
         }
     }
     else if(isAttribute())
@@ -136,7 +138,6 @@ void VInfo::regainData()
             if(node_)
             {
                 attr_=VAttribute::make(node_,p.type(),p.attribute());
-                return;
             }
             if(!node_ || !attr_)
             {
