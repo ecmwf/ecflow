@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -41,6 +41,16 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
 	columns_=ModelColumn::def("table_columns");
 
     Q_ASSERT(columns_);
+
+    //Check the mapping between the enum and column ids
+    Q_ASSERT(columns_->id(PathColumn) == "path");
+    Q_ASSERT(columns_->id(StatusColumn) == "status");
+    Q_ASSERT(columns_->id(TypeColumn) == "type");
+    Q_ASSERT(columns_->id(TriggerColumn) == "trigger");
+    Q_ASSERT(columns_->id(LabelColumn) == "label");
+    Q_ASSERT(columns_->id(EventColumn) == "event");
+    Q_ASSERT(columns_->id(MeterColumn) == "meter");
+    Q_ASSERT(columns_->id(StatusChangeColumn) == "statusChange");
 
 	//Create the data handler for the model.
 	data_=new VTableModelData(filterDef,this);
@@ -100,7 +110,7 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 	//the cases where the default should be used.
 	if( !index.isValid() ||
        (role != Qt::DisplayRole && role != Qt::ToolTipRole &&
-        role != Qt::BackgroundRole && role != IconRole))
+        role != Qt::BackgroundRole && role != IconRole && role != SortRole))
     {
 		return QVariant();
 	}
@@ -115,30 +125,40 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(!vnode || !vnode->node())
 		return QVariant();
 
+    ColumnType id=static_cast<ColumnType>(index.column());
+
 	if(role == Qt::DisplayRole)
 	{
-        QString id=columns_->id(index.column());
+        //QString id=columns_->id(index.column());
 
-		if(id == "path")
+        if(id == PathColumn)
         {   return QString::fromStdString(vnode->absNodePath());
         }
-        else if(id == "status")
+        else if(id == StatusColumn)
 			return vnode->stateName();
-		else if(id == "type")
+        else if(id == TypeColumn)
 			return QString::fromStdString(vnode->nodeType());
 
 		//Attributes
-		else if(id == "event" || id == "label" || id == "meter" || id == "trigger")
+        else if(id == EventColumn || id == LabelColumn || id == MeterColumn ||
+                id == TriggerColumn)
 		{
 			QStringList lst;
-			if(vnode->getAttributeData(id.toStdString(),0,lst))
+            if(vnode->getAttributeData(columns_->id(index.column()).toStdString(),0,lst))
 				return lst;
 			else
 				return QVariant();
 		}
 
-        else if(id == "icon")
-            return VIcon::pixmapList(vnode,0);
+        else if(id == StatusChangeColumn)
+        {
+            QString s;
+            vnode->statusChangeTime(s);
+            return s;
+        }
+
+        //else if(id == "icon")
+        //    return VIcon::pixmapList(vnode,0);
 	}
 	else if(role == Qt::BackgroundRole)
 	{
@@ -146,11 +166,18 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(role == IconRole)
 	{
-		if(columns_->id(index.column()) =="path")
+        if(id == PathColumn)
 			return VIcon::pixmapList(vnode,0);
 		else
 			return QVariant();
 	}
+    else if(role == SortRole)
+    {
+        if(id == StatusChangeColumn)
+        {
+            return vnode->statusChangeTime();
+        }
+    }
 
 	return QVariant();
 }

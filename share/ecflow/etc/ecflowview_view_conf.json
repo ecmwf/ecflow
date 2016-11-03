@@ -187,7 +187,10 @@
         },    
         "meter" : {
     		"label" : "Meter"
-    	}	
+        },
+        "statusChange" : {
+            "label" : "Status changed"
+        }
     },
     
     "zombie_columns": {

@@ -756,7 +756,7 @@ bool VNode::isFlagSet(ecf::Flag::Type f) const
 
 void VNode::why(std::vector<std::string>& theReasonWhy) const
 {
-	if(node_ && node_.get())
+    if(node_)
 	{
 		node_->bottom_up_why(theReasonWhy);
 	}
@@ -764,7 +764,7 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 
 const std::string& VNode::abortedReason() const
 {
-	if(node_ && node_.get())
+    if(node_)
 	{
 		return node_->abortedReason();
 	}
@@ -772,6 +772,28 @@ const std::string& VNode::abortedReason() const
 	static std::string emptyStr;
 	return emptyStr;
 
+}
+
+void VNode::statusChangeTime(QString& sct) const
+{
+    if(node_)
+    {
+        boost::posix_time::ptime t = node_->state_change_time();
+        std::string s=boost::posix_time::to_simple_string(t);
+        sct=QString::fromStdString(s);
+    }
+}
+
+uint VNode::statusChangeTime() const
+{
+    if(node_)
+    {
+        static  boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+        boost::posix_time::ptime t = node_->state_change_time();
+        boost::posix_time::time_duration diff(t - epoch);
+        return diff.ticks()/diff.ticks_per_second();
+    }
+    return 0;
 }
 
 QString VNode::toolTip()

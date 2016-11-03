@@ -10,6 +10,7 @@
 #include "TableNodeSortModel.hpp"
 
 #include "TableNodeModel.hpp"
+#include "ModelColumn.hpp"
 
 TableNodeSortModel::TableNodeSortModel(TableNodeModel* nodeModel,QObject *parent) :
 		QSortFilterProxyModel(parent),
@@ -45,6 +46,14 @@ QModelIndex TableNodeSortModel::nodeToIndex(const VNode *node)
 bool TableNodeSortModel::lessThan(const QModelIndex &left,
                                   const QModelIndex &right) const
 {
+    TableNodeModel::ColumnType id=static_cast<TableNodeModel::ColumnType>(left.column());
+
+    if(id == TableNodeModel::StatusChangeColumn)
+    {
+        return left.data(AbstractNodeModel::SortRole).toUInt() <
+               right.data(AbstractNodeModel::SortRole).toUInt();
+    }
+
     QVariant leftData = nodeModel_->data(left);
     QVariant rightData = nodeModel_->data(right);
 

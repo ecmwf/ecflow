@@ -190,6 +190,8 @@ public:
     
     virtual void why(std::vector<std::string>& theReasonWhy) const;
     const std::string&  abortedReason() const;
+    void statusChangeTime(QString&) const;
+    uint statusChangeTime() const;
 
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
