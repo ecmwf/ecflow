@@ -17,6 +17,7 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "VTree.hpp"
+#include "UIDebug.hpp"
 
 #include <QDebug>
 #include <QMetaMethod>
@@ -123,13 +124,13 @@ void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChang
     //When the server scan begins we must be in inScan mode so that the model should think that
     //this server tree is empty.
     inScan_=true;
-    Q_ASSERT(tree_->numOfChildren() == 0);
+    UI_ASSERT(tree_->numOfChildren() == 0, "num: " << UIDebug::longToString(tree_->numOfChildren()));
     changeInfo_->clear();
 }
 
 void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
 {
-    Q_ASSERT(tree_->numOfChildren() == 0);
+    UI_ASSERT(tree_->numOfChildren() == 0, "num: " << UIDebug::longToString(tree_->numOfChildren()));
 
     //We still must be in inScan mode so that the model should think
     //that this server tree is empty.

@@ -8,10 +8,12 @@
 //
 //============================================================================
 
+
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 
 #include "VNode.hpp"
+#include "UIDebug.hpp"
 
 #include <QDebug>
 
@@ -22,7 +24,7 @@ static unsigned int totalAttrNum=0;
 VAttribute::VAttribute(VNode *parent,VAttributeType* type,int indexInType) :
     VItem(parent)
 {
-    assert(indexInType >=0);
+    UI_ASSERT(indexInType >=0, "Index = " << UIDebug::longToString(indexInType));
     assert(type);
     id_=indexToId(type,indexInType);
     totalAttrNum++;
