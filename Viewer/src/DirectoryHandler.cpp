@@ -267,7 +267,8 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
         }
     }
 
-    // go through all the files/dirs in the
+    // go through all the files/dirs in the dir
+    bool ok = true;
     boost::filesystem::directory_iterator it(src), eod;
     BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
     {
@@ -289,11 +290,11 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
         {
             boost::filesystem::path destSubDir(destDir);
             destSubDir /= p.filename();
-            return copyDir(p.string(), destSubDir.string(), errorMessage);
+            ok = ok && copyDir(p.string(), destSubDir.string(), errorMessage);
         }
     }
 
-    return true;
+    return ok;
 }
 
 
