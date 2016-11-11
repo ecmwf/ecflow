@@ -359,6 +359,7 @@ public:
    void notify(const std::vector<ecf::Aspect::Type>& aspects);
    void attach(AbstractObserver*);
    void detach(AbstractObserver*);
+   bool is_observed(AbstractObserver*) const; // return true if we have this observer in our list
    bool in_notification() const { return in_notification_;}
 
 private:
