@@ -311,6 +311,26 @@ private:
 
 // -----------------------------------------------------------------
 
+// --------------------
+// UI state condition
+// --------------------
+
+class UIStateCondition : public BaseNodeCondition
+{
+public:
+    explicit UIStateCondition(std::string uiStateName) {uiStateName_ = uiStateName;}
+    ~UIStateCondition() {}
+
+    bool execute(VItem*);
+    std::string print() {return uiStateName_;}
+
+private:
+    std::string uiStateName_;
+};
+
+
+// -----------------------------------------------------------------
+
 // ------------------------
 // Node attribute condition
 // ------------------------

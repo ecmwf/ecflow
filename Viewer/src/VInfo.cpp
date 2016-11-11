@@ -331,6 +331,24 @@ std::string VInfoNode::path()
     return p;
 }
 
+std::string VInfoNode::serverAlias()
+{
+    std::string p;
+    if(server_)
+       p = server_->name();
+    return p;
+}
+
+std::string VInfoNode::relativePath()
+{
+    std::string p;
+    if(node_ && node_->node())
+        p = node_->absNodePath();
+    return p;
+}
+
+
+
 //=========================================
 //
 // VInfoAttribute

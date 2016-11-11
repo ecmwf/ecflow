@@ -130,96 +130,6 @@
             "status_tip"     : "__cmd__"
         },
 
-        {
-            "menu"           : "Node",
-            "name"           : "-"
-        },
-
-        {
-            "menu"           : "Node",
-            "name"           : "Free deps",
-            "type"           : "Submenu",
-            "visible_for"    : "suite or task or family",
-            "enabled_for"    : "(queued or suspended or active) and (has_triggers or has_time or has_date)",
-            "command"        : "None"
-        },
-
-        {
-            "name"           : "Defstatus",
-            "type"           : "Submenu",
-            "menu"           : "Node",
-            "visible_for"    : "node or alias",
-            "command"        : "None"
-        },
-
-        {
-            "menu"           : "Node",
-            "name"           : "Force",
-            "type"           : "Submenu",
-            "visible_for"    : "node and admin",
-            "command"        : "None"
-        },
-
-        {
-            "menu"           : "Node",
-            "name"           : "Order",
-            "type"           : "Submenu",
-            "visible_for"    : "(node or alias) and admin",
-            "command"        : "None"
-        },
-
-        {
-            "menu"           : "Node",
-            "name"           : "Special",
-            "type"           : "Submenu",
-            "visible_for"    : "node or alias",
-            "command"        : "None"
-        },
-
-        {
-            "name"           : "-",
-            "menu"           : "Node"
-        },
-
-        {
-            "menu"           : "Node",
-            "name"           : "Begin",
-            "visible_for"    : "suite and (oper or admin)",
-            "enabled_for"    : "unknown or complete",
-            "command"        : "ecflow_client --begin <node_name>",
-            "status_tip"     : "__cmd__"
-        },
-
-        {
-            "menu"           : "Node",
-            "name"           : "Cancel",
-            "visible_for"    : "suite and (oper or admin)",
-            "enabled_for"    : "(not active) and (not submitted)",
-            "command"        : "ecflow_client --delete=yes <full_name>",
-            "question"       : "Do you really want to cancel suite <full_name> ?",
-            "default_answer" : "No",
-            "status_tip"     : "__cmd__"
-        },
-
-
-        {
-            "menu"           : "Node",
-            "name"           : "Set",
-            "visible_for"    : "event",
-            "enabled_for"    : "event_clear",
-            "command"        : "ecflow_client --alter change event <node_name> set <parent_name>",
-            "status_tip"     : "__cmd__"
-        },
-        {
-            "menu"           : "Node",
-            "name"           : "Clear",
-            "visible_for"    : "event",
-            "enabled_for"    : "event_set",
-            "command"        : "ecflow_client --alter change event <node_name> clear <parent_name>",
-            "status_tip"     : "__cmd__"
-        },
-
-
 
         {
             "menu"           : "Node",
@@ -274,6 +184,100 @@
             "default_answer" : "No",
             "status_tip"     : "__cmd__"
         },
+
+
+
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Free deps",
+            "type"           : "Submenu",
+            "visible_for"    : "suite or task or family",
+            "enabled_for"    : "(queued or suspended or active) and (has_triggers or has_time or has_date)",
+            "command"        : "None"
+        },
+
+        {
+            "name"           : "Defstatus",
+            "type"           : "Submenu",
+            "menu"           : "Node",
+            "visible_for"    : "node or alias",
+            "command"        : "None"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Force",
+            "type"           : "Submenu",
+            "visible_for"    : "node and admin",
+            "command"        : "None"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Order",
+            "type"           : "Submenu",
+            "visible_for"    : "(node or alias) and admin",
+            "command"        : "None"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Special",
+            "type"           : "Submenu",
+            "visible_for"    : "server or node or alias",
+            "command"        : "None"
+        },
+
+        {
+            "name"           : "-",
+            "menu"           : "Node"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Begin",
+            "visible_for"    : "suite and (oper or admin)",
+            "enabled_for"    : "unknown or complete",
+            "command"        : "ecflow_client --begin <node_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Cancel",
+            "visible_for"    : "suite and (oper or admin)",
+            "enabled_for"    : "(not active) and (not submitted)",
+            "command"        : "ecflow_client --delete=yes <full_name>",
+            "question"       : "Do you really want to cancel suite <full_name> ?",
+            "default_answer" : "No",
+            "status_tip"     : "__cmd__"
+        },
+
+
+        {
+            "menu"           : "Node",
+            "name"           : "Set",
+            "visible_for"    : "event",
+            "enabled_for"    : "event_clear",
+            "command"        : "ecflow_client --alter change event <node_name> set <parent_name>",
+            "status_tip"     : "__cmd__"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Clear",
+            "visible_for"    : "event",
+            "enabled_for"    : "event_set",
+            "command"        : "ecflow_client --alter change event <node_name> clear <parent_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+
 
         {
             "menu"           : "Node",
@@ -494,6 +498,25 @@
 
         {
             "menu"           : "Special",
+            "name"           : "Mark for move",
+            "visible_for"    : "(suite or family or task)",
+            "command"        : "mark_for_move",
+            "status_tip"     : "Marks the node in order to be moved"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Move marked node here",
+            "visible_for"    : "(server or suite or family)",
+            "enabled_for"    : "(not active) and (not submitted) and marked",
+            "command"        : "move_marked",
+            "question"       : "This will move node <marked_node> to <full_name>",
+            "default_answer" : "No",
+            "status_tip"     : "Moves the previously marked node so that this node is its new parent"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "Walk",
             "visible_for"    : "(suite or family)",
             "command"        : "ecflow_client --force-dep-eval <full_name>",
@@ -506,7 +529,7 @@
             "visible_for"    : "(suite or family)",
             "enabled_for"    : "(not is_migrated)",
             "command"        : "ecflow_client --alter set_flag migrated <full_name>",
-            "question"       : "This command will hide the children for all users. Ok?",
+            "question"       : "This command will hide the children for everyone viewing this server. Ok?",
             "default_answer" : "No",
             "status_tip"     : "__cmd__"
         },

@@ -58,6 +58,8 @@ public:
 
 	virtual std::string name()=0;
     virtual std::string path()=0;
+    virtual std::string serverAlias() {return "";}
+    virtual std::string relativePath() {return "";}
     std::string storedNodePath() const;
 
 	virtual void accept(VInfoVisitor*)=0;
@@ -122,6 +124,8 @@ public:
     void accept(VInfoVisitor*);
     std::string path();  
 	std::string name();	
+	std::string serverAlias();
+	std::string relativePath();
 	static VInfo_ptr create(VNode*);
 
 protected:

@@ -32,6 +32,12 @@
 
 #define _UI_VNODE_DEBUG
 
+
+// static member of VNode
+std::string VNode::nodeMarkedForMoveRelPath_;
+std::string VNode::nodeMarkedForMoveServerAlias_;
+
+
 //For a given node this class stores all the nodes that this node itself triggers.
 //For memory efficiency we only store the index of the nodes not the pointers themselves.
 class VNodeTriggerData
@@ -485,6 +491,20 @@ std::string VNode::absNodePath() const
 {
 	return (node_)?node_->absNodePath():"";
 }
+
+
+void VNode::setNodeMarkedForMove(std::string serverAlias, std::string relPath)
+{
+	nodeMarkedForMoveServerAlias_ = serverAlias;
+	nodeMarkedForMoveRelPath_ = relPath;
+}
+
+void VNode::clearNodeMarkedForMove()
+{
+	nodeMarkedForMoveRelPath_.clear();
+	nodeMarkedForMoveServerAlias_.clear();
+}
+
 
 bool VNode::sameContents(VItem* item) const
 {

@@ -292,6 +292,22 @@ void ServerHandler::removeServer(ServerHandler* server)
 	}
 }
 
+ServerHandler* ServerHandler::findServer(const std::string &alias)
+{
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+	{
+		ServerHandler *s=*it;
+
+		if (s->name() == alias)
+		{
+			return s;
+		}
+	}
+	return NULL; // did not find it
+}
+
+
+
 //This function can be called many times so we need to avoid locking the mutex.
 SState::State ServerHandler::serverState()
 {
@@ -738,6 +754,19 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 	{
 		UserMessage::message(UserMessage::ERROR, true, std::string("command ") +   commandToString(cmd) + " is not recognised. Check the menu definition.");
 	}
+}
+
+
+// convenience function
+void ServerHandler::command(const std::string& fullPath, const std::string&cmd)
+{
+    std::vector<std::string> paths;
+    std::vector<std::string> commands;
+
+    paths.push_back(fullPath);
+    ecf::Str::split(cmd, commands);
+
+    command(paths, commands);
 }
 
 
