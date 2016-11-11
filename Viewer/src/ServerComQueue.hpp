@@ -16,6 +16,7 @@
 #include "VTask.hpp"
 
 #include <QObject>
+#include <QTime>
 #include <QTimer>
 
 class ClientInvoker;
@@ -55,11 +56,13 @@ public:
 
 protected Q_SLOTS:
 	void slotRun();
+    void slotTaskStarted();
 	void slotTaskFinished();
 	void slotTaskFailed(std::string);
 
 protected:
-	void endReset();
+    void startCurrentTask();
+    void endReset();
 	bool hasTask(VTask::Type t) const;
 	bool isNextTask(VTask::Type t) const;
 
@@ -67,11 +70,14 @@ protected:
 	ClientInvoker* client_;
 	ServerComThread *comThread_;
 	QTimer* timer_;
-	int timeout_;
+    int timeout_;
+    QTime taskTime_;
+    int taskTimeout_;
 	std::deque<VTask_ptr> tasks_;
 	VTask_ptr current_;
 	State state_;
-	bool taskIsBeingFinished_;
+    bool taskStarted_;
+    bool taskIsBeingFinished_;
 	bool taskIsBeingFailed_;
 };
 
