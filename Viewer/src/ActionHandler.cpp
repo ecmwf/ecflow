@@ -155,7 +155,14 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             // can only do this if the source (marked) node is suspended
             std::string pathOfMarkedNode(VNode::nodeMarkedForMoveRelPath());
             VServer* vs = shSource->vRoot();
+            assert(vs);
             VNode* vnodeSource = vs->find(pathOfMarkedNode);
+            if (!vnodeSource)
+            {
+                UserMessage::message(UserMessage::ERROR, true, "The source node " + pathOfMarkedNode + " no longer exists on server " + aliasOfMarkedServer);
+                return;
+            }
+
             if (!vnodeSource->isSuspended())
             {
                 UserMessage::message(UserMessage::ERROR, true, "Node " + VNode::nodeMarkedForMoveServerAlias() + ":/" +
