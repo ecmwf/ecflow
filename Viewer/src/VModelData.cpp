@@ -253,10 +253,9 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
                     int index=tree_->indexOfTopLevel(tn);
                     Q_ASSERT(index >=0);
 
-                    int row=tree_->attrNum(attrFilter_) + index;
-                    Q_EMIT beginFilterUpdateRemoveTop(this,row);
+                    Q_EMIT beginFilterUpdateRemoveTop(this,index);
                     tree_->remove(tn);
-                    Q_EMIT endFilterUpdateRemoveTop(this,row);
+                    Q_EMIT endFilterUpdateRemoveTop(this,index);
                 }
                 //Add the suite if it is NOT in the tree
                 else
