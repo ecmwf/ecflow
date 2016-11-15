@@ -31,9 +31,8 @@ class Tester(object) :
         self.ARGS_ = args
             
     def clean_up_server(self):
-        self.log_msg("   clean_up " + self.port_)
-        #try: os.remove(log_file_path(port))
-        #except: pass
+        self.log_msg("   clean_up server, clear log, remove check-pt, and white list file" )
+        self.ci_.clear_log()    
         try: os.remove(self.checkpt_file_path())
         except: pass
         try: os.remove(self.backup_checkpt_file_path())
@@ -1613,6 +1612,8 @@ if __name__ == "__main__":
     tester = Tester(CL,ARGS)
     try:
         CL.ping() 
+        tester.clean_up_data()
+        tester.clean_up_server()
         
         count = 1
         start_time = time.time()
