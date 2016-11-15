@@ -129,6 +129,11 @@ do
 			shift 2
 			;;
 
+		-title)
+			export ECFUI_TITLE=$2
+            shift
+			;;
+
 		-h)
 			ECFUI_HELP=yes
 			;;

@@ -44,6 +44,7 @@
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VSettings.hpp"
+#include "Version.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -60,14 +61,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     
     setAttribute(Qt::WA_DeleteOnClose);
 
-    // add the name of the session to the title bar?
-    std::string sessionName = SessionHandler::instance()->current()->name();
-    if (sessionName == "default")
-        sessionName = "";
-    else
-        sessionName = " (session: " + sessionName + ")";
-
-    setWindowTitle(QString::fromStdString(VConfig::instance()->appLongName()) + "  -  Preview version" + QString::fromStdString(sessionName));
+    constructWindowTitle();
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -173,6 +167,24 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 	   }
    }
 }
+
+
+void MainWindow::constructWindowTitle()
+{
+    char *userTitle = getenv("ECFUI_TITLE");
+    std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
+                                                : VConfig::instance()->appLongName();
+
+    // add the name of the session to the title bar?
+    std::string sessionName = SessionHandler::instance()->current()->name();
+    if (sessionName == "default")
+        sessionName = "";
+    else
+        sessionName = " (session: " + sessionName + ")";
+
+    setWindowTitle(QString::fromStdString(mainTitle) + "  -  Preview version" + QString::fromStdString(sessionName));
+}
+
 
 //==============================================================
 //
