@@ -1182,6 +1182,8 @@ void VServer::clear()
 
 	//Deallocate the nodes vector
 	nodes_=std::vector<VNode*>();
+
+    triggeredScanned_=false;
 }
 
 //Clear the contents of a particular VNode
