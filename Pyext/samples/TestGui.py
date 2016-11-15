@@ -55,7 +55,7 @@ class Tester(object) :
         # debug_build() is defined for ecflow. Used in test to distinguish debug/release ecflow
         # Vary ECF_HOME based on debug/release/port allowing multiple invocations of these tests
         if debug_build():
-            return os.getcwd() + "/test_gui/data/ecf_home_debug_" + str(self_.port_)
+            return os.getcwd() + "/test_gui/data/ecf_home_debug_" + str(self.port_)
         return os.getcwd() + "/test_gui/data/ecf_home_release_" + str(self.port_)
 
     def ecf_includes(self) :  return os.getcwd() + "Pyext/test/data/includes"
