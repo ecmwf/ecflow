@@ -51,8 +51,6 @@ class Tester(object) :
             print("   Remove Failed") 
             pass
         
-    def ecf_includes(self) :  return os.getcwd() + "Pyext/test/data/includes"
-
     def ecf_home(self): 
         # debug_build() is defined for ecflow. Used in test to distinguish debug/release ecflow
         # Vary ECF_HOME based on debug/release/port allowing multiple invocations of these tests
@@ -60,6 +58,7 @@ class Tester(object) :
             return os.getcwd() + "/test_gui/data/ecf_home_debug_" + str(self_.port_)
         return os.getcwd() + "/test_gui/data/ecf_home_release_" + str(self.port_)
 
+    def ecf_includes(self) :  return os.getcwd() + "Pyext/test/data/includes"
     def log_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.log"
     def checkpt_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.check"
     def backup_checkpt_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.check.b"
@@ -95,8 +94,8 @@ class Tester(object) :
            For check test are working comment out the delay
            """
         self.ci_.sync_local()
-#         if not self.ARGS_.fast and sleep_time != 0:
-#             time.sleep(sleep_time)
+        if self.ARGS_.sync_sleep != 0 and sleep_time != 0:
+            time.sleep(sleep_time)
      
     def log_msg(self,msg):
         print(msg)
@@ -1604,8 +1603,8 @@ if __name__ == "__main__":
                         help="The port on the host, defaults to 3141")
     PARSER.add_argument('--time', default=0,   
                         help="How long to run the tests in seconds. default is 0, which is one test loop")
-    PARSER.add_argument('--fast', default=False,   
-                        help="Run through the test quickly. i.e Dont sleep during sync_local")
+    PARSER.add_argument('--sync_sleep', type=int,default=4,   
+                        help="Time to wait after sync_local.Allow GUI to refresh. Set to 0 for debug.")
     ARGS = PARSER.parse_args()
     print ARGS   
      
