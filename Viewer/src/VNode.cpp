@@ -32,6 +32,12 @@
 
 #define _UI_VNODE_DEBUG
 
+
+// static member of VNode
+std::string VNode::nodeMarkedForMoveRelPath_;
+std::string VNode::nodeMarkedForMoveServerAlias_;
+
+
 //For a given node this class stores all the nodes that this node itself triggers.
 //For memory efficiency we only store the index of the nodes not the pointers themselves.
 class VNodeTriggerData
@@ -486,6 +492,20 @@ std::string VNode::absNodePath() const
 	return (node_)?node_->absNodePath():"";
 }
 
+
+void VNode::setNodeMarkedForMove(std::string serverAlias, std::string relPath)
+{
+	nodeMarkedForMoveServerAlias_ = serverAlias;
+	nodeMarkedForMoveRelPath_ = relPath;
+}
+
+void VNode::clearNodeMarkedForMove()
+{
+	nodeMarkedForMoveRelPath_.clear();
+	nodeMarkedForMoveServerAlias_.clear();
+}
+
+
 bool VNode::sameContents(VItem* item) const
 {
     return item == this;
@@ -756,7 +776,7 @@ bool VNode::isFlagSet(ecf::Flag::Type f) const
 
 void VNode::why(std::vector<std::string>& theReasonWhy) const
 {
-	if(node_ && node_.get())
+    if(node_)
 	{
 		node_->bottom_up_why(theReasonWhy);
 	}
@@ -764,7 +784,7 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 
 const std::string& VNode::abortedReason() const
 {
-	if(node_ && node_.get())
+    if(node_)
 	{
 		return node_->abortedReason();
 	}
@@ -772,6 +792,28 @@ const std::string& VNode::abortedReason() const
 	static std::string emptyStr;
 	return emptyStr;
 
+}
+
+void VNode::statusChangeTime(QString& sct) const
+{
+    if(node_)
+    {
+        boost::posix_time::ptime t = node_->state_change_time();
+        std::string s=boost::posix_time::to_simple_string(t);
+        sct=QString::fromStdString(s);
+    }
+}
+
+uint VNode::statusChangeTime() const
+{
+    if(node_)
+    {
+        static  boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
+        boost::posix_time::ptime t = node_->state_change_time();
+        boost::posix_time::time_duration diff(t - epoch);
+        return diff.ticks()/diff.ticks_per_second();
+    }
+    return 0;
 }
 
 QString VNode::toolTip()
@@ -1140,6 +1182,8 @@ void VServer::clear()
 
 	//Deallocate the nodes vector
 	nodes_=std::vector<VNode*>();
+
+    triggeredScanned_=false;
 }
 
 //Clear the contents of a particular VNode

@@ -518,7 +518,7 @@ void TreeNodeView::slotRestoreExpand()
         if(!s)
         {
             expandState_->selection_->regainData();
-            if(!expandState_->selection_->server())
+            if(!expandState_->selection_->hasData())
             {
                 expandState_->selection_.reset();
             }
@@ -562,7 +562,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
                 if(!s)
                 {
                     expandState_->selection_->regainData();
-                    if(!expandState_->selection_->server())
+                    if(!expandState_->selection_->hasData())
                     {
                         expandState_->selection_.reset();
                     }

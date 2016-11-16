@@ -30,6 +30,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QWidgetAction>
+#include <QFileDialog>
 
 int OutputItemWidget::updateDirTimeout_=1000*60;
 
@@ -606,6 +607,27 @@ void OutputItemWidget::on_fontSizeDownTb__clicked()
 	//We need to call a custom slot here instead of "zoomOut"!!!
 	browser_->zoomOut();
 }
+
+//-----------------------------------------
+// Save local copy of file
+//-----------------------------------------
+
+void OutputItemWidget::on_saveFileAsTb__clicked()
+{
+	if (browser_->isFileLoaded())
+	{
+		QString fileName = QFileDialog::getSaveFileName(this);
+		if (fileName.isEmpty())
+			return;
+
+		browser_->saveCurrentFile(fileName);
+	}
+	else
+	{
+		UserMessage::message(UserMessage::INFO,true,"No file loaded!");
+	}
+}
+
 
 //-------------------------
 // Update

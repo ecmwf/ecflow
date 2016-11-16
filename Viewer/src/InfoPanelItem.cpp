@@ -250,6 +250,7 @@ void InfoPanelItem::linkSelected(const std::string& path)
     if(!suspended_ && !detached_)
     {
         VInfo_ptr info=VInfo::createFromPath(info_->server(),path);
+
         assert(owner_);
         owner_->linkSelected(info);
     }

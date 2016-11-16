@@ -85,11 +85,11 @@
                 }
             },
             "migrated" : {
-                "label" : "Migrated",
-                "tooltip" : "Suite/family migrated by user",
-                "shortDesc" : "Migrated by user",
+                "label" : "Hidden children",
+                "tooltip" : "Child nodes hidden by user",
+                "shortDesc" : "Children hidden by user",
                 "icon"  : {
-                    "default" : "icon_migrated.svg"
+                    "default" : "icon_children_hidden.svg"
                 }
             }
      }

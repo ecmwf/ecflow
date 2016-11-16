@@ -171,7 +171,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 			         "   --ch_drop=10            # drop the client handle 10\n"
 			         "An error is returned if the handle had not previously been registered\n"
 			         "The handle stored on the local client is set to zero\n"
-			         "To list all suites and handles use --suites"
+			         "To list all suites and handles use --ch_suites"
  			);
 			break;
 		}
@@ -186,7 +186,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
                   "   --ch_drop_user=ma0    # drop all handles associated with user ma0\n"
                   "   --ch_drop_user        # drop all handles associated with current user\n"
                   "An error is returned if no registered handles\n"
-                  "To list all suites and handles use --suites"
+                  "To list all suites and handles use --ch_suites"
          );
          break;
       }
@@ -200,7 +200,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 					"   --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10\n"
 					"An error is returned if the handle had not previously been registered\n"
 					"The handle is created with --ch_register command\n"
-					"To list all suites and handles use --suites"
+					"To list all suites and handles use --ch_suites"
 			);
 			break;
 		}
@@ -213,7 +213,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 					"Usage:\n"
 					"   --ch_rem=10 s2 s3 s4     # remove suites s2 s3,s4 from handle 10\n"
 					"The handle is created with --ch_register command\n"
-					"To list all suites and handles use --suites"
+					"To list all suites and handles use --ch_suites"
 			);
  			break;
 		}
@@ -227,7 +227,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 					" --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it\n"
 					" --ch_auto_add=10 false    # modify handle 10 so that no new suites are added\n"
 					"The handle is created with --ch_register command\n"
-					"To list all suites and handles use --suites"
+					"To list all suites and handles use --ch_suites"
 			);
 			break;
 		}

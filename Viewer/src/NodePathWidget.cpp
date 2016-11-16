@@ -1349,7 +1349,3 @@ void NodePathWidget::readSettings(VSettings* vs)
 }
 
 
-
-
-
-

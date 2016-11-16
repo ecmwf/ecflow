@@ -148,6 +148,7 @@ set(viewer_srcs
     TriggerCollector.cpp
     TriggerView.cpp
     TriggeredScanner.cpp
+    UIDebug.cpp
     UpdateTimer.cpp
     UserMessage.cpp
     VAttribute.cpp

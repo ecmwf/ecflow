@@ -57,6 +57,22 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
 
 }
 
+bool UserMessage::confirm(const std::string& message)
+{
+    bool ok = true;
+    QMessageBox msgBox;
+    msgBox.setText(QString::fromStdString(message));
+    msgBox.setTextFormat(Qt::RichText);
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    if (msgBox.exec() == QMessageBox::Cancel)
+    {
+        ok=false;
+    }
+    return ok;
+}
+
+
 void UserMessage::debug(const std::string& message)
 {
         std::cout << "DEBUG : " << message << std::endl;

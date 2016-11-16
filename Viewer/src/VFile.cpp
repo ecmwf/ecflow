@@ -147,7 +147,7 @@ void VFile::setStorageMode(StorageMode mode)
 
 bool VFile::write(const std::string& buf,std::string& err)
 {
-    return write(buf.c_str(),buf.size(),err);
+	return write(buf.c_str(),buf.size(),err);
 }
 
 bool VFile::write(const char *buf,size_t len,std::string& err)
@@ -194,6 +194,7 @@ bool VFile::write(const char *buf,size_t len,std::string& err)
 		    fclose(fp_);
 		    return false;
 		}
+		fflush(fp_);
 	}
 
 	return true;

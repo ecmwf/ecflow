@@ -1541,6 +1541,15 @@ void Defs::detach(AbstractObserver* obs)
    }
 }
 
+bool Defs::is_observed(AbstractObserver* obs) const
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+       if (observers_[i] == obs) {
+          return true;
+       }
+    }
+   return false;
+}
 // =====================================================================================
 
 std::ostream& operator<<(std::ostream& os, const Defs* d)

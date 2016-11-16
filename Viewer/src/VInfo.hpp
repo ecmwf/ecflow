@@ -50,14 +50,17 @@ public:
 	virtual bool isNode()  {return false;}
     virtual bool isAttribute()  {return false;}
 	virtual bool isEmpty()  {return true;}
+    virtual bool hasData() const=0;
 
     ServerHandler* server() const {return server_;}
     VNode* node() const {return node_;}
-    virtual VAttribute* attribute() const {return NULL;}
+    VAttribute* attribute() const {return attr_;}
 
 	virtual std::string name()=0;
     virtual std::string path()=0;
-    const std::string& storedNodePath() const {return nodePath_;}
+    virtual std::string serverAlias() {return "";}
+    virtual std::string relativePath() {return "";}
+    std::string storedNodePath() const;
 
 	virtual void accept(VInfoVisitor*)=0;
 
@@ -82,16 +85,16 @@ public:
     static VInfo_ptr createFromPath(ServerHandler*,const std::string&);
 
 protected:
-	VInfo(ServerHandler* server,VNode* node);
+    VInfo(ServerHandler* server,VNode* node,VAttribute* attr=0);
 	void dataLost();
 
 	mutable ServerHandler* server_;
-	mutable std::string nodePath_;
-	mutable VNode* node_;
+    mutable VNode* node_;
+    mutable VAttribute* attr_;
+    mutable std::string storedPath_;
 
 	std::vector<VInfoObserver*> observers_;
 };
-
 
 // Implements the info object for server selections
 class VInfoServer : public VInfo, public boost::enable_shared_from_this<VInfo>
@@ -99,6 +102,8 @@ class VInfoServer : public VInfo, public boost::enable_shared_from_this<VInfo>
 public:
 	bool isServer() {return true;}
     bool isEmpty() {return false;}
+    bool hasData() const;
+
     void accept(VInfoVisitor*);   
     std::string name();
     std::string path();
@@ -115,9 +120,12 @@ class VInfoNode: public VInfo, public boost::enable_shared_from_this<VInfo>
 public:
 	bool isNode() {return true;}
 	bool isEmpty() {return false;}
-	void accept(VInfoVisitor*);
+    bool hasData() const;
+    void accept(VInfoVisitor*);
     std::string path();  
 	std::string name();	
+	std::string serverAlias();
+	std::string relativePath();
 	static VInfo_ptr create(VNode*);
 
 protected:
@@ -133,56 +141,20 @@ public:
     VAttribute* attribute() const {return attr_;}
     bool isAttribute() {return true;}
 	bool isEmpty() {return false;}
-	void accept(VInfoVisitor*);   
+    bool hasData() const;
+    void accept(VInfoVisitor*);
     std::string name();
     std::string path();
 
-   static VInfo_ptr create(VAttribute*);
-   //static VInfo_ptr create(VNode*,int);
+    static VInfo_ptr create(VAttribute*);
 
 protected:
     VInfoAttribute(ServerHandler*,VNode*,VAttribute*);
-
-    mutable VAttribute* attr_;
 };
-
-//=================================================
-// Factory to make attribute info objects
-//=================================================
-
-#if 0
-
-class VInfoAttributeFactory
-{
-public:
-	explicit VInfoAttributeFactory(const std::string&);
-	virtual ~VInfoAttributeFactory();
-
-    virtual VInfoAttribute* make(VAttributeType*,int,VNode*,ServerHandler* server=0) = 0;
-    static VInfoAttribute* create(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server=0);
-
-private:
-	explicit VInfoAttributeFactory(const VInfoAttributeFactory&);
-	VInfoAttributeFactory& operator=(const VInfoAttributeFactory &);
-
-};
-
-template<class T>
-class  VInfoAttributeMaker : public VInfoAttributeFactory
-{
-    VInfoAttribute* make(VAttributeType* att,int attIndex,VNode* node,ServerHandler* server=0)
-	       { return new T(att,attIndex,node,server); }
-public:
-	 explicit VInfoAttributeMaker(const std::string& name) : VInfoAttributeFactory(name) {}
-};
-
-
-#endif
 
 typedef boost::shared_ptr<VInfoServer>   VInfoServer_ptr;
 typedef boost::shared_ptr<VInfoNode>   VInfoNode_ptr;
 typedef boost::shared_ptr<VInfoAttribute>   VInfoAttribute_ptr;
-
 
 class VInfoVisitor
 {
@@ -205,69 +177,6 @@ public:
 	virtual void notifyDataLost(VInfo*)=0;
 	virtual void notifyDelete(VInfo*)=0;
 };
-
-/*class VInfoVisitor
-{
-public:
-	VInfoVisitor() {};
-	virtual ~VInfoVisitor() {};
-
-	virtual void visit(boost::shared_ptr<VInfoServer>)=0;
-	virtual void visit(boost::shared_ptr<VInfoNode>)=0;
-	virtual void visit(boost::shared_ptr<VInfoAttribute>)=0;
-};
-*/
-
-
-/*
-#include "ViewNodeInfo.hpp"
-
-#include "ServerHandler.hpp"
-
-ViewNodeInfo::ViewNodeInfo() : node_(NULL),server_(NULL)
-{
-}
-
-ViewNodeInfo::ViewNodeInfo(Node *node,ServerHandler* server) : node_(node), server_(server)
-{
-}
-
-ViewNodeInfo::ViewNodeInfo(ServerHandler* server) : node_(NULL),server_(server)
-{
-
-}
-
-bool ViewNodeInfo::isNode() const
-{
-	return (node_ != NULL);
-}
-
-bool ViewNodeInfo::isServer() const
-{
-	return (node_ == NULL && server_ != NULL);
-}
-
-bool ViewNodeInfo::isEmpty() const
-{
-	return (node_ == NULL && server_ == NULL);
-}
-
-Node* ViewNodeInfo::node() const
-{
-	return node_;
-}
-
-ServerHandler* ViewNodeInfo::server() const
-{
-	if(server_ == NULL && node_)
-	{
-		server_=ServerHandler::find(node_);
-	}
-	return server_;
-}
-*/
-
-
 
 #endif
 

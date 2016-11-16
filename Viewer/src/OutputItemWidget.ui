@@ -55,6 +55,23 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="saveFileAsTb_">
+           <property name="toolTip">
+            <string>Save a local copy of the current file to disk</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>:/viewer/filesaveas.svg</normaloff>:/viewer/filesaveas_up.svg</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="fetchInfoTb_">
            <property name="toolTip">
             <string>Additional information about the fetched output file</string>

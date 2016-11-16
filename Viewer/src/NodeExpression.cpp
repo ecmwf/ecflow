@@ -343,6 +343,14 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     updatedOperands = true;
                 }
 
+                else if (*i_ == "marked")
+                {
+                    UIStateCondition *uiCond = new UIStateCondition(*i_);
+                    operandStack.push_back(uiCond);
+                    result = uiCond;
+                    updatedOperands = true;
+                }
+
                 // logical operators
                 else if (*i_ == "and")
                 {
@@ -615,6 +623,23 @@ bool UserLevelCondition::execute(VItem*)
     // return true for now
 
     return true;
+}
+
+
+//=========================================================================
+//
+//  UIStateCondition
+//
+//=========================================================================
+
+bool UIStateCondition::execute(VItem*)
+{
+    if (uiStateName_ == "marked")
+    {
+        return !(VNode::nodeMarkedForMoveServerAlias().empty());
+    }
+
+    return false;
 }
 
 

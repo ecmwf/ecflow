@@ -14,6 +14,8 @@
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 
+//#define _UI_SERVERCOMQUEUE_DEBUG
+
 // This class manages the tasks to be sent to the ServerComThread, which controls
 // the communication with the ClientInvoker. The ClientInvoker is hidden from the
 // ServerHandler. The ServerHandler defines a task and sends it to
@@ -26,8 +28,10 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	client_(client),
 	comThread_(comThread),
 	timeout_(5),
+    taskTimeout_(500),
 	state_(NoState), //the queue is enabled but not running
-	taskIsBeingFinished_(false),
+    taskStarted_(false),
+    taskIsBeingFinished_(false),
 	taskIsBeingFailed_(false)
 {
 	timer_=new QTimer(this);
@@ -36,7 +40,12 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	connect(timer_,SIGNAL(timeout()),
 			this,SLOT(slotRun()));
 
-	//When the ServerComThread finishes it emits a signal that
+    //When the ServerComThread starts it emits a signal that
+    //is connected to the queue.
+    connect(comThread_, SIGNAL(started()),
+            this, SLOT(slotTaskStarted()));
+
+    //When the ServerComThread finishes it emits a signal that
 	//is connected to the queue.
 	connect(comThread_, SIGNAL(finished()),
 			this, SLOT(slotTaskFinished()));
@@ -102,6 +111,8 @@ void ServerComQueue::disable()
 	//Clear the current task
 	if(current_)
 		current_.reset();
+
+    taskStarted_=false;
 }
 
 
@@ -116,6 +127,8 @@ bool ServerComQueue::prepareReset()
 
 	//Remove all tasks
 	tasks_.clear();
+
+    taskStarted_=false;
 
 	state_=ResetState;
 
@@ -165,6 +178,8 @@ void ServerComQueue::start()
 	if(state_ != DisabledState && state_ != ResetState)
 	{
 		UserMessage::message(UserMessage::DBG, false, std::string("comQueue::start"));
+
+        taskStarted_=false;
 
 		//If the comthread is running we need to wait
 		//until it finishes its task.
@@ -286,38 +301,91 @@ void ServerComQueue::addSuiteAutoRegisterTask()
 	addTask(task);
 }
 
+void ServerComQueue::startCurrentTask()
+{
+    taskStarted_=false;
+    taskTime_.start();
+    comThread_->task(current_);
+}
+
 void ServerComQueue::slotRun()
 {
-	//UserMessage::message(UserMessage::DBG, false,std::string("**** ServerComQueue::slotRun"));
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+    UserMessage::debug("ServerComQueue::slotRun -->");
+#endif
+
 	if(state_ == DisabledState ||state_ == SuspendedState )
-		return;
+    {
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+        UserMessage::debug(" queue is either disabled or suspended");
+        UserMessage::debug("<-- ServerComQueue::slotRun");
+#endif
+        return;
+    }
 
 	if(taskIsBeingFinished_ || taskIsBeingFailed_)
-		return;
+    {
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+        UserMessage::debug(" task is either being finished or failed");
+        UserMessage::debug("<-- ServerComQueue::slotRun");
+#endif
+        return;
+    }
 
-	//UserMessage::message(UserMessage::DBG, false, std::string("ServerComQueue::slotRun"));
-	//UserMessage::message(UserMessage::DBG, false, std::string("     --> number of tasks: " + boost::lexical_cast<std::string>(tasks_.size()) ));
-	//for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); it++)
-	//{
-	//	UserMessage::message(UserMessage::DBG, false,"        -task: " + (*it)->typeString());
-	//}
-
-	if(tasks_.empty())
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+    UserMessage::debug(" number of tasks: " + boost::lexical_cast<std::string>(tasks_.size()));
+    for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); it++)
+    {
+        UserMessage::debug("   task: " + (*it)->typeString());
+    }
+#endif
+    if(tasks_.empty() && !current_)
 	{
-		//UserMessage::message(UserMessage::DBG, false, std::string("     --> stop timer"));
-		timer_->stop();
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+        UserMessage::debug(" there are no tasks! Stop timer!");
+        UserMessage::debug("<-- ServerComQueue::slotRun");
+#endif
+        timer_->stop();
 		return;
 	}
 
+    //If the thread could not start up for the current task.
+    if(current_ && !taskStarted_ && !comThread_->isRunning() &&
+       taskTime_.elapsed() > taskTimeout_)
+    {
+        UserMessage::debug(" It seems that the thread could not start. Try to run task again.");
+        comThread_->wait();
+
+        if(current_->status() != VTask::CANCELLED &&
+           current_->status() != VTask::ABORTED )
+        {
+            startCurrentTask();
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+            UserMessage::debug("<-- ServerComQueue::slotRun");
+#endif
+            return;
+        }
+        else
+        {
+            current_.reset();
+        }
+    }
+
 	if(current_)
 	{
-		//UserMessage::message(UserMessage::DBG, false, std::string("     --> processing reply from previous task"));
-		return;
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+        UserMessage::debug(" processing reply from previous task");
+        UserMessage::debug("<-- ServerComQueue::slotRun");
+#endif
+        return;
 	}
 
 	if(comThread_->isRunning())
 	{
-		//UserMessage::message(UserMessage::DBG, false, std::string("     --> thread is active"));
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+        UserMessage::debug(" thread is active");
+        UserMessage::debug("<-- ServerComQueue::slotRun");
+#endif
 		return;
 	}
 
@@ -338,18 +406,31 @@ void ServerComQueue::slotRun()
 		timer_->stop();
 		return;
 	}
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+    UserMessage::debug(" run task: " +  current_->typeString());
+#endif
 
-	//UserMessage::message(UserMessage::DBG, false,"     --> run task: " +  current_->typeString());
+    //Send it to the thread
+    startCurrentTask();
 
-	//Send it to the thread
-	comThread_->task(current_);
+#ifdef _UI_SERVERCOMQUEUE_DEBUG
+    UserMessage::debug("<-- ServerComQueue::slotRun");
+#endif
+}
+
+//This slot is called when ComThread finishes its task. At this point the
+//thread is not running so it is safe to access the ClientInvoker!
+void ServerComQueue::slotTaskStarted()
+{
+    taskStarted_=true;
 }
 
 //This slot is called when ComThread finishes its task. At this point the
 //thread is not running so it is safe to access the ClientInvoker!
 void ServerComQueue::slotTaskFinished()
 {
-	taskIsBeingFinished_=true;
+    taskStarted_=false;
+    taskIsBeingFinished_=true;
 
 	UserMessage::message(UserMessage::DBG, false,std::string("ServerComQueue::slotTaskFinished"));
 
@@ -375,7 +456,8 @@ void ServerComQueue::slotTaskFinished()
 //to the slotTaskFinished slot.
 void ServerComQueue::slotTaskFailed(std::string msg)
 {
-	taskIsBeingFailed_=true;
+    taskStarted_=false;
+    taskIsBeingFailed_=true;
 
 	UserMessage::message(UserMessage::DBG, false,std::string("ServerComQueue::slotTaskFailed"));
 

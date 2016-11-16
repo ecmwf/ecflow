@@ -44,6 +44,12 @@ public:
    	VInfo_ptr nodeInfo(const QModelIndex&);
 
    	VModelData* data() const;
+    ModelColumn* columns() const {return columns_;}
+
+    //To speed up identifying a column. The mapping here must match the definition of
+    //"table_columns" in ecflowview_view_conf.json !!!
+    enum ColumnType {PathColumn=0,StatusColumn=1,TypeColumn=2,TriggerColumn=3,
+                     LabelColumn=4, EventColumn=5, MeterColumn=6, StatusChangeColumn=7};
 
 public Q_SLOTS:
     void slotServerAddBegin(int);

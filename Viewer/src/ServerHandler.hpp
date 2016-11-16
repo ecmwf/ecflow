@@ -95,8 +95,10 @@ public:
 	static const std::vector<ServerHandler*>& servers() {return servers_;}
 	static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
 	static void removeServer(ServerHandler*);
+	static ServerHandler* findServer(const std::string &alias);
 
 	void command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd);
+	void command(const std::string& fullPath, const std::string&cmd);
 	static void command(VInfo_ptr,const std::vector<std::string>&);
 	static void command(std::vector<VInfo_ptr>,std::string);
 

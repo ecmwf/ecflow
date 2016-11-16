@@ -138,6 +138,8 @@ Server::Server( ServerEnvironment& serverEnv ) :
 #ifdef ECF_OPENSSL
 std::string Server::get_password() const
 {
+   // Running the tests, shows that this is called only once, at server start up
+   // std::cout << "Server::get_password()\n";
    std::string passwd_file = ecf::Openssl::certificates_dir();
    passwd_file += "/server.passwd";
    if (fs::exists(passwd_file)) {

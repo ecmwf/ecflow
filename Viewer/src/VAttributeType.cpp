@@ -27,6 +27,7 @@
 #include "VFilter.hpp"
 #include "VRepeat.hpp"
 #include "VAttribute.hpp"
+#include "UIDebug.hpp"
 
 std::map<std::string,VAttributeType*> VAttributeType::typesMap_;
 std::vector<VAttributeType*> VAttributeType::types_;
@@ -630,7 +631,7 @@ bool VLabelAttribute::itemData(const VNode* vnode,int index,QStringList& data)
         return false;
 
     const std::vector<Label>& v=node->labels();
-    assert(index >=0 && index < v.size());
+    UI_ASSERT(index >=0 && index < v.size(), "Index: " << UIDebug::longToString(index) << " v.size: " << v.size());
     getData(v[index],data);
     return true;
 }
@@ -784,7 +785,7 @@ bool VEventAttribute::itemData(const VNode* vnode,int index,QStringList& data)
         return false;
 
     const std::vector<Event>& v=node->events();
-    assert(index >=0 && index < v.size());
+    UI_ASSERT(index >=0 && index < v.size(), "Index: " << UIDebug::longToString(index) << " v.size: " << v.size());
     getData(v[index],data);
     return true;
 }
@@ -1194,7 +1195,7 @@ bool VLimitAttribute::itemData(const VNode* vnode,int index,QStringList& data)
         return false;
 
     const std::vector<limit_ptr>& v=node->limits();
-    assert(index >=0 && index < v.size()); 
+    UI_ASSERT(index >=0 && index < v.size(), "index = " << UIDebug::longToString(index) << " v.size: " << UIDebug::longToString(v.size()));
     getData(v[index],data);
     return true;
 }
