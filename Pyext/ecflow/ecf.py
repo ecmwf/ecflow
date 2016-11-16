@@ -9,7 +9,7 @@ variables overwrite
 import sys, pwd, os, unittest
 try: import ecflow
 except:
-    PATH = "/usr/local/apps/ecflow/4.0.7/lib/python2.7/site-packages/ecflow"
+    PATH = "/usr/local/apps/ecflow/current/lib/python2.7/site-packages/ecflow"
     sys.path.append(PATH)
     import ecflow
 try:
