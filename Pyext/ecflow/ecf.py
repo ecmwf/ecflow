@@ -66,7 +66,7 @@ def set_raw_mode(kind=True):
 
 def translate(name, value=None):
     """ Translate from sms to ecflow """
-    try: import sms2ecf, sys
+    try: import sms2ecf
     except: return name, value
     def is_sms():
         if sys.argv[-1] in ("sms", "od3", "ode", "map", "od", "od2",):
