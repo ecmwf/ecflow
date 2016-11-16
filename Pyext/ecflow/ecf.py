@@ -69,8 +69,7 @@ def translate(name, value=None):
     try: import sms2ecf, sys
     except: return name, value
     def is_sms():
-        if sys.argv[-1] in ("sms", "od3", "ode", "map", "od", "od2",
-                            "ligarius",):
+        if sys.argv[-1] in ("sms", "od3", "ode", "map", "od", "od2",):
             sms2ecf.ECF_MODE = "sms"
             return True
         return sms2ecf.ECF_MODE == "sms"
