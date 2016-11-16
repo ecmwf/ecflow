@@ -1,1 +1,0 @@
-SELECTION = "test" # suite name

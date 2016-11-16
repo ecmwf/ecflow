@@ -1,0 +1,2 @@
+This folder contains an example of extending the ecflow python API.
+It adds another convenience layer, that is used by operations.
