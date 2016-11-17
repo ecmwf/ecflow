@@ -811,7 +811,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
       // test delete variables, with a non existent path
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/idont/exist",AlterCmd::DEL_VARIABLE,"FRED1")));
 
-      // ECFLOW-380 test change read only server variables,ECF_NODE, ECF_PORT, ECF_PID, ECF_VERSION, ECF_LISTS
+      // ECFLOW-380 test change read only server variables
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_NODE","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_HOST","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_PORT","a")));
