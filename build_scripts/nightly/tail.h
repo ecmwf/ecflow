@@ -10,6 +10,6 @@ fi
 # could arrive at the server before say, a --label command
 # This would result in zombies. To avoid this we use wait
 wait
-ecflow_client --complete  --host=%ECF_NODE% --port=%ECF_PORT%
+ecflow_client --complete  --host=%ECF_HOST% --port=%ECF_PORT%
 trap 0                 # Remove all traps
 exit 0                 # End the shell

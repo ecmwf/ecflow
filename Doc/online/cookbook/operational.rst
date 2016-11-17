@@ -42,7 +42,7 @@ For a maintenable operational suite, we recommand to:
   side.
 
 * after seding the job complete command, the job may copy its output
-  to **ECF_NODE**, to enable direct access from ecFlow server.
+  to **ECF_HOST**, to enable direct access from ecFlow server.
 
   When a file is requested from the ecflow-server, it is limited to
   15k lines, to avoid the server spending too much time delivering
@@ -184,7 +184,7 @@ an 'admin' suite will be required:
 * to ensure that ecflow logfile is not filling up the disk, nor
   touching a quota limit, issuing regularly the command::
 
-    ecflow_client --port=%ECF_PORT% --host=%ECF_NODE% --log=new
+    ecflow_client --port=%ECF_PORT% --host=%ECF_HOST% --log=new
 
 * to duplicate the checkpoint file, on a remote, backup server, or a
   slower long term archive system. (to handle the case when disk

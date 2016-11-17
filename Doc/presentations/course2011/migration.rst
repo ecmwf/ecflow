@@ -446,7 +446,7 @@ Text client interface
 
 * implicit-explicit call::
 
-	ECF_NODE, ECF_PORT (ECF_NAME, ECF_PASS)
+	ECF_HOST, ECF_PORT (ECF_NAME, ECF_PASS)
 	ecflow_client --port 3141 --host mordred --get
 
 * load-replace suites into the server::
@@ -485,7 +485,7 @@ Child commands: ecflow_client
 
 * configuration::
 
-	ECF_NODE, # server hostname
+	ECF_HOST, # server hostname
 	ECF_PORT, # server port
 	ECF_NAME, # task path
 	ECF_PASS, # pseurandom string to detect zombies
@@ -747,7 +747,7 @@ Migration: task headers
 * SMS_PROG, ecflow communication port, as discreminator::
 
 	if [[ %SMS_PROG:0% != 0 ]]; then echo SMS_NODE
-	elif [[ %ECF_PORT:0% != 0 ]]; then echo ECF_NODE; fi
+	elif [[ %ECF_PORT:0% != 0 ]]; then echo ECF_HOST; fi
 
 * convert SMS system variables: 
 
@@ -971,7 +971,7 @@ Migration: Migrated Variables
 sms2ecf =       {                       
 --------------- ------------------ --------------- -------------------
 'SMSNAME' :     'ECF_NAME',        'SMSPID' :      'ECF_PID',
-'SMSNODE' :     'ECF_NODE',        'SMSHOST' :     'ECF_HOST',
+'SMSNODE' :     'ECF_HOST',        'SMSHOST' :     'ECF_HOST',
 'SMSPASS' :     'ECF_PASS',        'SMSDATE' :     'ECF_DATE',
 'SMS_PROG' :    'ECF_PORT',        'SMSURL' :      'ECF_URL',
 'SMSINCLUDE' :  'ECF_INCLUDE',     'SMSURLBASE' :  'ECF_URLBASE',

@@ -813,16 +813,11 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
 
       // ECFLOW-380 test change read only server variables,ECF_NODE, ECF_PORT, ECF_PID, ECF_VERSION, ECF_LISTS
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_NODE","a")));
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_HOST","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_PORT","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_PID","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_VERSION","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_LISTS","a")));
-
-      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::VARIABLE,"ECF_NODE","a")));
-      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::VARIABLE,"ECF_PORT","a")));
-      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::VARIABLE,"ECF_PID","a")));
-      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::VARIABLE,"ECF_VERSION","a")));
-      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::VARIABLE,"ECF_LISTS","a")));
    }
 
    /// Destroy singleton's to avoid valgrind from complaining

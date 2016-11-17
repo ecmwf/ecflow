@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE( test_load_defs_check_only )
    BOOST_REQUIRE_MESSAGE( theClient.loadDefs(path,false,true/* check only*/) == 0,"Expected load to succeed\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0,"Expected sync to succeed\n" << theClient.errorMsg());
 
-   // Note: when running with ECF_NODE=localhost the defs may exist, but the number of suites should be empty
+   // Note: when running with ECF_HOST=localhost the defs may exist, but the number of suites should be empty
    BOOST_REQUIRE_MESSAGE( !theClient.defs() || theClient.defs()->suiteVec().empty(),"Expected no defs, since nothing should have been loaded\n" << theClient.errorMsg());
 
    // provide path to definition that should fail to parse

@@ -93,7 +93,8 @@ void log_event::load(host& h,const char* name,bool reset)
       gn = h.top();
       std::string varlog = gn->variable("ECF_LOG");
       std::string varhom = gn->variable("ECF_HOME");
-      std::string varnod = gn->variable("ECF_NODE");   
+      std::string varnod = gn->variable("ECF_NODE");
+      if (varnod.empty() || varnod == "%ECF_HOST%") varnod = gn->variable("ECF_HOST");
 
       if (gn->variable("ECF_PORT") == ecf_node::none()) {
 	varlog = gn->variable("SMSLOG");

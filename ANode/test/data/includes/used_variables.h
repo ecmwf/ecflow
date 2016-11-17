@@ -7,6 +7,6 @@ suite=%ECF_JOB%
 suite=%ECF_JOBOUT%
 suite=%ECF_PASS%
 suite=%ECF_PORT%
-suite=%ECF_NODE%
+suite=%ECF_HOST%
 suite=%ECF_NAME%
 suite=%ESUITE%

@@ -16,7 +16,7 @@ stat = subm
 
 DICT_SMS_ECF = {
     'SMSNAME': 'ECF_NAME',
-    'SMSNODE': 'ECF_NODE',
+    'SMSNODE': 'ECF_HOST',
     'SMSPASS': 'ECF_PASS',
     'SMS_PROG': 'ECF_PORT',
     'SMSFILES': 'ECF_FILES',

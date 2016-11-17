@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
 //
 // Note: To test HPUX->Linux, invoke serve on (Linux/HPUX) and the client cmds on other system
-//       On the client side set ECF_NODE to machine name. To allow further testing if ECF_NODE
+//       On the client side set ECF_HOST to machine name. To allow further testing if ECF_HOST
 //       is specified then *don't* shutdown the server
 // ************************************************************************************
 

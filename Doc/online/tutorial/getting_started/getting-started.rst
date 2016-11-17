@@ -45,7 +45,7 @@ Shared Machine
 | When you want to access this server using :term:`ecflow_client`, :ref:`client_server_python_api` 
 | or :term:`ecflowview` you need to know these information.
 
-| By setting the value of the environment variables ECF_NODE and ECF_PORT you 
+| By setting the value of the environment variables ECF_HOST and ECF_PORT you 
 | identify the server you wish to access. Multiple :term:`ecflow_server`'s can run on the same system.
 
 Local Machine

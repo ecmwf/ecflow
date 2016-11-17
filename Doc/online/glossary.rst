@@ -114,7 +114,7 @@
          :term:`ecflow_client`  --complete    Sets the :term:`task` to the :term:`complete` :term:`status`
          ===================================  ======================================================
          
-      The following environment variables must be set for the child commands. ECF_NODE, ECF_NAME ,ECF_PASS  and
+      The following environment variables must be set for the child commands. ECF_HOST, ECF_NAME ,ECF_PASS  and
       ECF_RID. See :term:`ecflow_client`.                                         
        
       
@@ -674,7 +674,7 @@
       ============== =========================================================== ========== ===================================
       Variable Name  Explanation                                                 Compulsory Example
       ============== =========================================================== ========== ===================================
-      ECF_NODE       Name of the host running the :term:`ecflow_server`          Yes        pikachu
+      ECF_HOST       Name of the host running the :term:`ecflow_server`          Yes        pikachu
       ECF_NAME       Path to the task                                            Yes        /suite/family/task
       ECF_PASS       Jobs password.                                              Yes        (generated)
       ECF_RID        Remote id. Allow easier job kill, and disambiguate a zombie Yes        (generated)

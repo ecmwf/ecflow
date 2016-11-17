@@ -10,10 +10,10 @@ OPT="[+DESCRIPTION?retrieve server log file, call client server_load, and displa
 OPT="[g][n:ecf_node][h:ecf_home][p:ecf_port][?][l:ecf_log][r][z]"
 # OPT=":n:p:h:?"
 ECF_PORT=$((1500 + $(id -u)))
-ECF_NODE=$(uname -n) # ssh may not like localhost
+ECF_HOST=$(uname -n) # ssh may not like localhost
 ECF_HOME=
-ECF_LOG=$ECF_NODE.$ECF_PORT.log
-PNG=$ECF_NODE.$ECF_PORT.png
+ECF_LOG=$ECF_HOST.$ECF_PORT.log
+PNG=$ECF_HOST.$ECF_PORT.png
 RETRIEVE=0
 DEBUG=0
 REMOTE=0
@@ -25,7 +25,7 @@ do
   case $options in
   g) DEBUG=1; set -eux;;
   p) ECF_PORT=$OPTARG;;
-  n) ECF_NODE=$OPTARG;;
+  n) ECF_HOST=$OPTARG;;
   h) ECF_HOME=$OPTARG;;
   l) ECF_LOG=$OPTARG;;
   r) RETRIEVE=1;;
@@ -39,7 +39,7 @@ which ecflow_client > /dev/null || module load ecflow
 client=$(which ecflow_client)
 test=/tmp/map/work/git/cmake_build_dir/ecflow/debug/bin/ecflow_client && \
   [[ -f $test ]] && client=$test
-client="$client --host $ECF_NODE --port $ECF_PORT --server_load"
+client="$client --host $ECF_HOST --port $ECF_PORT --server_load"
 
 case $ECF_LOG in
 ./* ) if [[ ! -f $ECF_LOG ]]; then 
@@ -56,17 +56,17 @@ echo "#MSG: ECF_LOG is $ECF_LOG "
 
 rm -f $PNG || :
 if [[ 1 == $REMOTE ]]; then
-  ssh $ECF_NODE -l $USER ($client && scp $ECF_NODE.$ECF_PORT.png $USER:$LOCALH:$PNG)
-  # ssh -l $USER $ECF_NODE $client; scp $USER@$ECF_NODE:$ECF_NODE.$ECF_PORT.png .
+  ssh $ECF_HOST -l $USER ($client && scp $ECF_HOST.$ECF_PORT.png $USER:$LOCALH:$PNG)
+  # ssh -l $USER $ECF_HOST $client; scp $USER@$ECF_HOST:$ECF_HOST.$ECF_PORT.png .
   [[ -f $PNG ]] && ${EOG:-eog} $PNG || echo "#ERR: could not display $PNG"
   exit 0
 
 elif [[ 1 == $RETRIEVE ]]; then
   TMPDIR=/tmp/$USER
   mkdir -p $TMPDIR || :
-  TMPLOG=$TMPDIR/$ECF_NODE.$ECF_PORT.log
+  TMPLOG=$TMPDIR/$ECF_HOST.$ECF_PORT.log
   # NO: avoid scp log-file, it is better is issue the command remotely and retrieve the plot
-  # scp $USER@$ECF_NODE:$ECF_LOG $TMPLOG || rcp $USER@$ECF_NODE:$ECF_LOG $TMPLOG 
+  # scp $USER@$ECF_HOST:$ECF_LOG $TMPLOG || rcp $USER@$ECF_HOST:$ECF_LOG $TMPLOG 
 
   ECF_LOG=$TMPLOG
 fi
@@ -76,7 +76,7 @@ if [[ -f $ECF_LOG ]]; then
   $client $ECF_LOG
 
 else
-  ssh $ECF_NODE -l $USER ($client && scp $ECF_NODE.$ECF_PORT.png $USER:$LOCALH:$(pwd))
+  ssh $ECF_HOST -l $USER ($client && scp $ECF_HOST.$ECF_PORT.png $USER:$LOCALH:$(pwd))
   # leave remote png behind? clean?
 fi
 
@@ -84,4 +84,4 @@ fi
 
 exit 0
 load=./ecflow_show_load.sh
-$load -p $ECF_PORT -n $ECF_NODE -h $TMPDIR/. -l ${ECF_NODE}.ecf.${ECF_PORT}.log -z
+$load -p $ECF_PORT -n $ECF_HOST -h $TMPDIR/. -l ${ECF_HOST}.ecf.${ECF_PORT}.log -z

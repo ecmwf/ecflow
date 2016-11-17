@@ -15,10 +15,10 @@ fi
 # ============================================================================
 # Defines the variables that are needed for any communication with ECF
 #
-# Note: We do *NOT* _export_ ECF_PORT,ECF_NODE,ECF_RID to avoid interferences
+# Note: We do *NOT* _export_ ECF_PORT,ECF_HOST,ECF_RID to avoid interferences
 # from the ecflow regression tests. which also use ecflow_client, instead we explicitly
 # set the host,port and rid on each ecflow_client call,
-# i.e  --host=%ECF_NODE% --port=%ECF_PORT%
+# i.e  --host=%ECF_HOST% --port=%ECF_PORT%
 # This is only required because we are using ecflow to test ecflow
 #
 # The typical head.h file would just export these variables
@@ -100,7 +100,7 @@ ulimit
 
 ####################################################################################
 # Tell ecFlow we have stated
-ecflow_client --init=$PID_RID --host=%ECF_NODE% --port=%ECF_PORT%
+ecflow_client --init=$PID_RID --host=%ECF_HOST% --port=%ECF_PORT%
 
 
 # Defined a error hanlder
@@ -108,7 +108,7 @@ ERROR() {
    # Clear -e flag, so we don't fail
    set +e
    wait
-   ecflow_client --abort=trap  --host=%ECF_NODE% --port=%ECF_PORT%
+   ecflow_client --abort=trap  --host=%ECF_HOST% --port=%ECF_PORT%
 
    echo "environment was:"; printenv | sort
    trap 0                      # Remove the trap

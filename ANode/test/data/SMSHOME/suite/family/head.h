@@ -15,7 +15,7 @@ set -x # echo script lines as they are executed
 # communication with ECF_
 
 export ECF_PORT=%ECF_PORT%    # ECF_ port numner
-export ECF_NODE=%ECF_NODE%    # The name ecf server that issued this task
+export ECF_HOST=%ECF_HOST%    # The hostname where the server is running
 export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task

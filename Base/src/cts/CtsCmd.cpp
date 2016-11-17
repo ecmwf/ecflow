@@ -354,12 +354,12 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
          desc.add_options()( CtsApi::pingServerArg(),
                   "Check if server is running on given host/port. Result reported to standard output.\n"
                   "Usage:\n"
-                  "  --ping --host=mach --port=3144 # Check if server alive on host mach & port 3144\n"
+                  "  --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144\n"
                   "  --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,\n"
                   "                                  # otherwise default port of 3141\n"
                   "  --ping                          # Check if server alive by using environment variables\n"
-                  "                                  # ECF_NODE and ECF_PORT\n"
-                  "If ECF_NODE not defined uses 'localhost', if ECF_PORT not defined assumes 3141"
+                  "                                  # ECF_HOST and ECF_PORT\n"
+                  "If ECF_HOST not defined uses 'localhost', if ECF_PORT not defined assumes 3141"
          );
          break;
       }

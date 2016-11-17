@@ -87,7 +87,7 @@ $SCRATCH  : This specifies the location of the file system shared between the
             client and server. The test data that resides on local linux machine
             is copied over.
                
- $ECF_NODE : This specfies the machine name on which the server is running.
+ $ECF_HOST : This specfies the machine name on which the server is running.
             The server must be running first.
             
  $ECF_LOG : specifies the path to log file created by the server.

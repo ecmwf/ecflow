@@ -55,7 +55,7 @@ collector::collector()
     (char *) "ecflow_client --force=complete <full_name>",
     (char *) "ecflow_client --force=aborted  <full_name>",
     (char *) "###",
-    (char *) "sh python %PYDEF:0% %SUITE% <full_name> %ECF_NODE% # aka replace",
+    (char *) "sh python %PYDEF:0% %SUITE% <full_name> %ECF_HOST% # aka replace",
     };
 
 	create(gui::top());	

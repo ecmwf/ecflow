@@ -52,7 +52,7 @@ struct TestFixture {
 	/// that was created in the constructor
 	static std::string smshome();
 
-	/// Will end up checking to see if ECF_NODE is specified. This specifies the name
+	/// Will end up checking to see if ECF_HOST is specified. This specifies the name
 	/// of the machine that is running the server. Otherwise return true
 	static bool serverOnLocalMachine();
 

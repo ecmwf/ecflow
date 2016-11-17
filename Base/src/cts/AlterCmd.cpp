@@ -272,8 +272,8 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 	}
 	else if ( change_attr_type_ == AlterCmd::VARIABLE  || add_attr_type_ == AlterCmd::ADD_VARIABLE) {
 
-	   // ECFLOW-380: ECF_NODE, ECF_PORT, ECF_PID, ECF_VERSION, ECF_LISTS
-	   if (name_ == Str::ECF_NODE() || name_ == Str::ECF_PORT() || name_ == "ECF_PID" || name_ == "ECF_VERSION" || name_ == "ECF_LISTS" ) {
+	   // ECFLOW-380: Some variable should be read only
+	   if (name_ == Str::ECF_HOST() || name_ == Str::ECF_NODE() || name_ == Str::ECF_PORT() || name_ == "ECF_PID" || name_ == "ECF_VERSION" || name_ == "ECF_LISTS" ) {
 	      std::stringstream ss; ss << "AlterCmd:: Can not add or change read only server variable " << name_;
 	      throw std::runtime_error(ss.str());
 	   }

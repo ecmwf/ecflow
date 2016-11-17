@@ -56,7 +56,7 @@ ClientOptions::ClientOptions()
    desc_->add_options()("port",po::value< string >()->implicit_value( string("") ),
             "port: If specified will override the environment variable ECF_PORT and default port number of 3141");
    desc_->add_options()("host",po::value< string >()->implicit_value( string("") ),
-            "host: If specified will override the environment variable ECF_NODE and default host, localhost");
+            "host: If specified will override the environment variable ECF_HOST and default host, localhost");
 }
 
 ClientOptions::~ClientOptions()
@@ -100,9 +100,9 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
       if (env->debug())  std::cout << "   host " << host << " overridden at the command line\n";
    }
    if (!host.empty() || !port.empty()) {
-      if (host.empty()) host = env->hostSpecified();       // get the environment variable ECF_NODE
-      if (port.empty()) port = env->portSpecified();       // get the environment variable ECF_PORT
-      if (host.empty()) host = Str::LOCALHOST();           // if ECF_NODE not specified default to localhost
+      if (host.empty()) host = env->hostSpecified();       // get the environment variable ECF_HOST
+      if (port.empty()) port = env->portSpecified();       // get the environment variable ECF_PORT || Str::DEFAULT_PORT_NUMBER()
+      if (host.empty()) host = Str::LOCALHOST();           // if ECF_HOST not specified default to localhost
       if (port.empty()) port = Str::DEFAULT_PORT_NUMBER(); // if ECF_PORT not specified use default
       env->set_host_port(host,port);
    }
@@ -290,11 +290,11 @@ const char* client_env_description() {
             "|----------|----------|------------|-------------------------------------------------------------------|\n"
             "| Name     |  Type    | Required   | Description                                                       |\n"
             "|----------|----------|------------|-------------------------------------------------------------------|\n"
-            "| ECF_NODE | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |\n"
+            "| ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |\n"
             "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
             "|----------|----------|------------|-------------------------------------------------------------------|\n\n"
             "* The host and port must be specified in order for the client to communicate with the server, this can \n"
-            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n"
+            "  be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n"
             ;
 }
 

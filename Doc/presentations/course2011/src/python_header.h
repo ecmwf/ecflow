@@ -2,7 +2,7 @@
 import os, sys, signal
 ECF_PORT = ^ECF_PORT:0^
 XECF = "ecflow_client "
-XECF += "--port %s --host ^ECF_NODE:0^ "%ECF_PORT
+XECF += "--port %s --host ^ECF_HOST:0^ "%ECF_PORT
 XSVR="sms"
 if ECF_PORT > 0: XSVR = XECF + "--"
 pid = os.getpid()
@@ -15,7 +15,7 @@ signal.signal (signal.SIGINT,  SigHandler); # ...
 if (ECF_PORT > 0):
   os.environ['ECF_PORT'] = "^ECF_PORT:0^"
   os.environ['ECF_NAME'] = "^ECF_NAME:0^"
-  os.environ['ECF_NODE'] = "^ECF_NODE:0^"
+  os.environ['ECF_HOST'] = "^ECF_HOST:0^"
   os.environ['ECF_PASS'] = "^ECF_PASS:0^"
 else:
   os.environ['SMS_PROG'] = "^SMS_PROG:0^"

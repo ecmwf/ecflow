@@ -2,7 +2,7 @@
 import ecflow
    
 try:
-    # When no arguments specified uses ECF_NODE and/or ECF_PORT,
+    # When no arguments specified uses ECF_HOST and/or ECF_PORT,
     # otherwise defaults to localhost:3141
     ci = ecflow.Client()
     ci.ping()

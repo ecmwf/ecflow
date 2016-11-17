@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_no_script )
    {
       suite_ptr suite = theDefs.add_suite("test_ecf_no_script");
       suite->add_variable("ECF_NO_SCRIPT","1");
-      std::string ecf_job_cmd="export ECF_PASS=%ECF_PASS%;export ECF_PORT=%ECF_PORT%;export ECF_NODE=%ECF_NODE%;export ECF_NAME=%ECF_NAME%;export ECF_TRYNO=%ECF_TRYNO%;";
+      std::string ecf_job_cmd="export ECF_PASS=%ECF_PASS%;export ECF_PORT=%ECF_PORT%;export ECF_HOST=%ECF_HOST%;export ECF_NAME=%ECF_NAME%;export ECF_TRYNO=%ECF_TRYNO%;";
       ecf_job_cmd += "%ECF_CLIENT_EXE_PATH% --init=$$; echo 'test test_ecf_no_script' >> %ECF_JOBOUT%; %ECF_CLIENT_EXE_PATH% --complete";
       suite->add_variable("ECF_JOB_CMD",ecf_job_cmd);
       suite->add_task("t1")->addVerify( VerifyAttr(NState::COMPLETE,1) );

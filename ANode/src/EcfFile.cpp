@@ -586,7 +586,7 @@ void EcfFile::get_used_variables(std::string& used_variables) const
       // This way at job submission we use the latest/correct value, which is in-sync with JOB OUTPUT
       // Note: Otherwise the job output will not be in sync
       //
-      // Custom handling of ECF_PORT,ECF_NODE,ECF_NAME do not show these variables, these variables
+      // Custom handling of ECF_PORT,ECF_HOST,ECF_NAME do not show these variables, these variables
       // including ECF_PASS appear in the script. If the user accidentally edits them,
       // Child communication with the server will be broken. Hence not shown
       //
@@ -602,6 +602,7 @@ void EcfFile::get_used_variables(std::string& used_variables) const
          if ( item.first.find(Str::ECF_PASS())    != std::string::npos) continue;
          if ( item.first.find(Str::ECF_PORT())    != std::string::npos) continue;
          if ( item.first.find(Str::ECF_NODE())    != std::string::npos) continue;
+         if ( item.first.find(Str::ECF_HOST())    != std::string::npos) continue;
          if ( item.first.find(Str::ECF_NAME())    != std::string::npos) continue;
 
          // We must use exact match, to avoid user variables like ESUITE,EFAMILY,ETASK

@@ -580,10 +580,10 @@ if __name__ == '__main__':
     )
 
 """
-python ecflow_fuse.py $ECF_NODE $ECF_PORT eod3
+python ecflow_fuse.py $ECF_HOST $ECF_PORT eod3
 
-ecflow_client  --server_load --port $ECF_PORT --host $ECF_NODE
-xdg-open ${ECF_NODE}.${ECF_PORT}.png
+ecflow_client  --server_load --port $ECF_PORT --host $ECF_HOST
+xdg-open ${ECF_HOST}.${ECF_PORT}.png
 
 dircolors -p 
 LS_COLORS+="*.abo=41:*.com=43:*.sus=01;45:*.que=44:*.sub=01;46:*.unk=47:*.act=01;42:"
