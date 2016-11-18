@@ -12,7 +12,7 @@ set -x # echo script lines as they are executed
 # communication with ECF
 
 export ECF_PORT=%ECF_PORT%    # The port number on the ecflow server
-export ECF_HOST=%ECF_HOST%    # The hostname where the server is running
+export ECF_HOST=%ECF_HOST:%   # The hostname where the server is running
 export ECF_NODE=%ECF_NODE%    # *TEMP* Needed for migration tests, since *OLD* servers( < 4.5.0) dont have ECF_HOST
 export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
