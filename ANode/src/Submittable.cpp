@@ -390,12 +390,13 @@ EcfFile Submittable::locatedEcfFile() const
             }
             else return EcfFile(const_cast<Submittable*>(this), searchResult);
          }
-
-         std::stringstream ss;
-         ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
-         if (original_ecf_filesDirectory != ecf_filesDirectory )
-            ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") after variable substitution does not exist:\n";
-         reasonEcfFileNotFound += ss.str();
+         else {
+            std::stringstream ss;
+            ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
+            if (original_ecf_filesDirectory != ecf_filesDirectory )
+               ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") after variable substitution does not exist:\n";
+            reasonEcfFileNotFound += ss.str();
+         }
       }
    }
    else {
