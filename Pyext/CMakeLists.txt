@@ -128,6 +128,16 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
 endif()
 
 
+# =============================================================================
+# Configure __init__.py to add __version__
+# =============================================================================
+
+set(INIT_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
+set(INIT_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
+
+configure_file(${INIT_PY_IN} ${INIT_PY_OUT} )
+
+
 # ==========================================================================
 # install
 #    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
