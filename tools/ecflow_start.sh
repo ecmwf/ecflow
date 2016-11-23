@@ -60,7 +60,7 @@ echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_ser
 echo "       -f        forces the ECF to be restarted"
 echo "       -v        verbose mode"
 echo "       -h        print this help page"
-echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1000+<UID> | 500+<UID> for backup server"
+echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1500+<UID> | 1000+<UID> for backup server"
 exit 0
 ;;
 *)
@@ -229,7 +229,7 @@ fi
 
 
 echo 
-echo "To view server on ecflowview - goto Edit/Preferences/Servers and enter"
+echo "To view server on ecflow_ui - goto Servers/Manage Servers... and enter"
 echo "Name        : <unique ecFlow server name>"
 echo "Host        : $ECF_HOST"
 echo "Port Number : $ECF_PORT"
