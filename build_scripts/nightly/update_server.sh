@@ -32,5 +32,6 @@ python $WK/build_scripts/nightly/load.py
 # =======================================================================
 # Start the viewer
 # =======================================================================
-ecflowview &
+module swap ecflow/dev
+ecflow_ui &
  

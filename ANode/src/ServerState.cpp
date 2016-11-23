@@ -76,7 +76,7 @@ bool ServerState::operator==(const ServerState& rhs) const
       return false;
    }
 
-   /// Check pointing, SAVES server variables, since they are visualised by client like ecflowview
+   /// Check pointing, SAVES server variables, since they are visualised by client like ecflow_ui
    /// HOWEVER PrintStyle::MIGRATE does not save the server variables, since they should
    /// not take part in migration. However the testing compares migration files with check point files
    /// This would always fail. Hence we do not compare server variables.

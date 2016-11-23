@@ -45,7 +45,7 @@ void SNewsCmd::init(
 	news_ = ServerReply::NO_NEWS;
 
 	// After ECFLOW-182 server will always have a defs, hence we should never return ServerReply::NO_DEFS
-	// However keep as an enum, to allow new client(ecflowview) deal with reply from old server
+	// However keep as an enum, to allow new client(GUI) deal with reply from old server
 	//   defs_ptr server_defs = as->defs();
 	//   if ( ! server_defs.get() ) {
 	//
