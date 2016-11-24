@@ -75,7 +75,7 @@ public:
 	/// for debug
 	std::string toString() const;
 
-	/// Return contents of ECF_NODE environment variable, Otherwise an EMPTY string
+	/// Return contents of ECF_HOST environment variable, Otherwise an EMPTY string
 	static std::string hostSpecified();
 
 	/// Returns of ECF_PORT,environment variable, otherwise returns Str::DEFAULT_PORT_NUMBER

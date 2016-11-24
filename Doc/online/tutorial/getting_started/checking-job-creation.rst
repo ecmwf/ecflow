@@ -37,7 +37,7 @@ Python
 The following point's should be noted about about :term:`job creation` checking:
 
 * | It is **independent** of the :term:`ecflow_server`. 
-  | Hence ECF_PORT and ECF_NODE in the :term:`job file` will have default values.
+  | Hence ECF_PORT and ECF_HOST in the :term:`job file` will have default values.
 * | Job files have a **.job0** extension, whereas the server will always generate
   | jobs with a extension **.job<1-n>**,  i.e t1.job1, t1.job2. 
   | The numbers correspond to :term:`ECF_TRYNO` which is never zero.

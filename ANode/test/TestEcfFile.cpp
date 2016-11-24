@@ -919,6 +919,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
 //    cout << "\n" << job_file_contents << "\n";
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PORT%") == string::npos,"Expected variables to be substituted:");
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NODE%") == string::npos,"Expected variables to be substituted:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_HOST%") == string::npos,"Expected variables to be substituted:");
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NAME%") == string::npos,"Expected variables to be substituted:");
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PASS%") == string::npos,"Expected variables to be substituted");
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_TRYNO%") == string::npos,"Expected variables to be substituted");
@@ -1009,7 +1010,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_includenoop )
    //cout << "\n" << job_file_contents << "\n";
    BOOST_CHECK_MESSAGE(job_file_contents.find("%includenopp") == string::npos,"Expected all includes to be removed");
    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PORT%") != string::npos,"Expected variables as is:");
-   BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NODE%") != string::npos,"Expected variables as is:");
+   BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_HOST%") != string::npos,"Expected variables as is:");
    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NAME%") != string::npos,"Expected variables as is:");
    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PASS%") != string::npos,"Expected variables as is:");
    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_TRYNO%") != string::npos,"Expected variables as is:");

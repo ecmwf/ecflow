@@ -40,6 +40,9 @@ JobProfiler::JobProfiler(Task* node,JobsParam& jobsParam, size_t threshold)
   start_time_(boost::posix_time::microsec_clock::universal_time()),
   threshold_(threshold)
 {
+   // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
+   // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
+   // Should allow greater child/user command communication.
 	if (!jobsParam_.next_poll_time().is_special() && start_time_ >= jobsParam_.next_poll_time()) {
 		jobsParam_.set_timed_out_of_job_generation(start_time_);
 	}

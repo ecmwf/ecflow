@@ -17,6 +17,6 @@ python $WK/build_scripts/nightly/build.py
 # load the generated defs, *ASSUMES* server is running
 python $WK/build_scripts/nightly/load.py
 
-# start the viewer
-#/usr/local/apps/ecflow/current/bin/ecflowview &
-ecflowview &
+# start the GUI
+module swap ecflow/dev
+ecflow_ui &

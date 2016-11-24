@@ -17,7 +17,7 @@ banner trap.h
 typeset -l ARCH
 
 if [[ "$ARCH" = hpia64 ]] ; then
-  rcp /home/ma/emos/data/dummy.output emos@%ECF_NODE%:%ECF_JOBOUT% || true
+  rcp /home/ma/emos/data/dummy.output emos@%ECF_HOST%:%ECF_JOBOUT% || true
 fi
 
 set -a
@@ -49,7 +49,7 @@ else
 fi
 
 ECF_PASS=%ECF_PASS%
-ECF_NODE=%ECF_NODE%
+ECF_HOST=%ECF_HOST%
 ECF_NAME=%ECF_NAME%
 ECF_TRYNO=%ECF_TRYNO%
 ECF_HOSTFILE=$HOME/.smshostfile

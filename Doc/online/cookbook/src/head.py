@@ -3,7 +3,7 @@
 import os, sys, signal
 
 ECF_PORT = ^ECF_PORT:0^
-XSVR = "ecflow_client --port=%s --host=^ECF_NODE:0^ --" % ECF_PORT
+XSVR = "ecflow_client --port=%s --host=^ECF_HOST:0^ --" % ECF_PORT
 pid = os.getpid()
 
 def xinit(): 
@@ -18,7 +18,7 @@ def SigHandler(signum, frame):
 signal.signal (signal.SIGINT,  SigHandler); # ...
 os.environ['ECF_PORT'] = "^ECF_PORT:0^"
 os.environ['ECF_NAME'] = "^ECF_NAME:0^"
-os.environ['ECF_NODE'] = "^ECF_NODE:0^"
+os.environ['ECF_HOST'] = "^ECF_HOST:0^"
 os.environ['ECF_PASS'] = "^ECF_PASS:0^"
 
 def xmeter(name, step):

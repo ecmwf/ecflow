@@ -50,16 +50,16 @@ ERROR() {
 }
 
 kill_submitted_and_abort() {
-    # not used while not deterministic: job may run in betweem and 
+    # not used while not deterministic: job may run in between and 
     # become a zombie 
     outf=$TMPDIR/kill$$
     if [[ $? == 0 ]] && [[ -d $TMPDIR ]] ; then
         touch $outf
-        grep "ECF_NODE="  ${subfile%.sub}   > $outf && \
+        grep "ECF_HOST="  ${subfile%.sub}   > $outf && \
             grep "ECF_PORT=" ${subfile%.sub}  >> $outf && \
             grep "ECF_NAME="  ${subfile%.sub}  >> $outf && \
             grep "ECF_PASS="  ${subfile%.sub}  >> $outf && \
-            echo "export ECF_NODE ECF_PORT ECF_NAME ECF_PASS" >>$outf &&\
+            echo "export ECF_HOST ECF_PORT ECF_NAME ECF_PASS" >>$outf &&\
             echo "ecflow_client --abort || :" >> $outf && . $outf
         grep "^SMSNODE="  ${subfile%.sub}   > $outf && \
             grep "^SMS_PROG=" ${subfile%.sub}  >> $outf && \

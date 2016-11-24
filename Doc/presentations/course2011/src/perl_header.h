@@ -4,7 +4,7 @@ my $ECF_PORT=^ECF_PORT:0^;
 my ($svr, $xini, $xabo, $xcom, $xmet, $xeve, $xlab);
 if ($ECF_PORT > 0) {
   $ENV{'ECF_PORT'} = "^ECF_PORT:0^"; # port
-  $ENV{'ECF_NODE'} = "^ECF_NODE:0^"; # host
+  $ENV{'ECF_HOST'} = "^ECF_HOST:0^"; # host
   $ENV{'ECF_NAME'} = "^ECF_NAME:0^"; # task path
   $ENV{'ECF_PASS'} = "^ECF_PASS:0^"; # password
   $ENV{'ECF_TRYNO'} = "^ECF_TRYNO:0^"; # job number

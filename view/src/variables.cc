@@ -209,7 +209,7 @@ void variables::show( node& n )
                for(it = gvar.begin(); it !=  gvar.end(); ++it) {
 		  const std::string& name = (*it).name();
 		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
-		    bool readOnly = name=="ECF_NODE" || name=="ECF_PORT" ||
+		    bool readOnly = name=="ECF_NODE" || name=="ECF_HOST" || name=="ECF_PORT" ||
 		      name=="ECF_LISTS" || // security ???
 		      name=="ECF_PID"  || name=="ECF_VERSION";
 		    snprintf(buffer, 1024, readOnly ? fmt3 : fmt1, 

@@ -80,7 +80,7 @@ class Client(object):
     def __init__(self):
       print "Creating Client"
       self.ci = ecflow.Client()
-      self.ci.set_host_port("$ECF_NODE$","$ECF_PORT$")
+      self.ci.set_host_port("$ECF_HOST$","$ECF_PORT$")
       self.ci.set_child_pid(os.getpid())
       self.ci.set_child_path("$ECF_NAME$")
       self.ci.set_child_password("$ECF_PASS$")
@@ -173,7 +173,7 @@ import signal
 
 ECF_PORT=$ECF_PORT:0$
 XECF="/usr/local/apps/ecflow/current/bin/ecflow_client ";
-# --port=$ECF_PORT:0$ --host=$ECF_NODE:0$ ";
+# --port=$ECF_PORT:0$ --host=$ECF_HOST:0$ ";
 def SigHandler(signum, frame):
    print "caught signal " + signum
    xabort()
@@ -238,7 +238,7 @@ logto(sys.stdout, syslogfile, open("log.tmp", "w"))
 if ECF_PORT > 0:
   os.environ['ECF_PORT'] = "$ECF_PORT:0$"
   os.environ['ECF_NAME'] = "$ECF_NAME:0$"
-  os.environ['ECF_NODE'] = "$ECF_NODE:0$"
+  os.environ['ECF_HOST'] = "$ECF_HOST:0$"
   os.environ['ECF_PASS'] = "$ECF_PASS:0$"
 
   def xinit():
@@ -318,7 +318,7 @@ my $xabort = "smsabort";
 
 if (^ECF_PORT:0^ != 0) {
 $ENV{'ECF_PORT'}  = "^ECF_PORT:0^" ;  # ecFlow port number
-$ENV{'ECF_NODE'}  = "^ECF_NODE:0^"  ; # ecFlow host
+$ENV{'ECF_HOST'}  = "^ECF_HOST:0^"  ; # ecFlow host
 $ENV{'ECF_NAME'}  = "^ECF_NAME:0^"  ; # task path into the suite
 $ENV{'ECF_PASS'}  = "^ECF_PASS:0^"  ; # password for the job
 $ENV{'ECF_TRYNO'} = "^ECF_TRYNO:0^" ; # job occurence number
@@ -680,9 +680,9 @@ ECF_NAME=$1
 ECF_PASS=$2
 ECF_JOB=$3
 ECF_JOBOUT=$4
-ECF_NODE=$5
+ECF_HOST=$5
 ECF_PORT=$6
-export ECF_NAME ECF_PASS ECF_NODE ECF_PORT ECF_JOB ECF_JOBOUT
+export ECF_NAME ECF_PASS ECF_HOST ECF_PORT ECF_JOB ECF_JOBOUT
 echo "#MSG: START USER SCRIPT"
 . $ECF_JOB # >> $ECF_JOBOUT 2>&1
 '''
@@ -725,7 +725,7 @@ exit 0 # test bubbling up an error through ssh
   example of minimalist script: only variables, wrapper is added at submission time
 %end
 #SET ECF_NAME=%ECF_NAME%
-#SET ECF_NODE=%ECF_NODE%
+#SET ECF_HOST=%ECF_HOST%
 #SET ECF_PORT=%ECF_PORT%
 #SET ECF_PASS=%ECF_PASS%
 #SET ECF_JOB=%ECF_JOB%
@@ -746,7 +746,7 @@ echo "#!/bin/ksh" > $ECF_JOB
 cat $ECF_JOB.set $ECF_JOB.var >> $ECF_JOB
 cat >> $ECF_JOB <<\@@
 set -eux
-export ECF_NAME ECF_PASS ECF_NODE ECF_PORT
+export ECF_NAME ECF_PASS ECF_HOST ECF_PORT
 export PATH=/usr/local/apps/ecflow/current/bin:$PATH
 export SIGNAL_LIST='1 2 3 4 5 6 7 8 13 15 24 31'
 ERROR() {
@@ -760,8 +760,8 @@ trap ERROR 0 $SIGNAL_LIST
 
 if [[ ${USE_SSH_SUB:=0} == 1 ]]; then
 ssh $SCHOST mkdir -p $(dirname $ECF_JOBOUT)
-ssh $SCHOST -R$ECF_PORT:$ECF_NODE:$ECF_PORT ''' + wdir + '''/smhi_run.sh \
-  $ECF_NAME $ECF_PASS $SCRIPT_PATH/$SCRIPT_NAME $ECF_JOBOUT $ECF_NODE $ECF_PORT
+ssh $SCHOST -R$ECF_PORT:$ECF_HOST:$ECF_PORT ''' + wdir + '''/smhi_run.sh \
+  $ECF_NAME $ECF_PASS $SCRIPT_PATH/$SCRIPT_NAME $ECF_JOBOUT $ECF_HOST $ECF_PORT
 echo "#MSG: ssh exits with $?"
 else
 ecflow_client --init=$$
@@ -807,9 +807,9 @@ export PATH=/usr/local/apps/ecflow/current/bin:$PATH
 export SIGNAL_LIST='1 2 3 4 5 6 7 8 13 15 24 31'
 ECF_NAME=%ECF_NAME%
 ECF_PASS=%ECF_PASS%
-ECF_NODE=%ECF_NODE%
+ECF_HOST=%ECF_HOST%
 ECF_PORT=%ECF_PORT%
-export ECF_NAME ECF_PASS ECF_NODE ECF_PORT
+export ECF_NAME ECF_PASS ECF_HOST ECF_PORT
 
 ERROR() {
   ecflow_client --abort # raise:trap
@@ -824,8 +824,8 @@ trap ERROR 0 $SIGNAL_LIST
 
 if [[ %USE_SSH_SUB:0% == 1 ]]; then
 ssh %SCHOST% mkdir -p $(dirname %ECF_JOBOUT%)
-ssh %SCHOST% -R%ECF_PORT%:%ECF_NODE%:%ECF_PORT% ''' + wdir + '''/smhi_run.sh \
-  %ECF_NAME% %ECF_PASS% %SCRIPT_PATH%/%SCRIPT_NAME% %ECF_JOBOUT% %ECF_NODE% %ECF_PORT%
+ssh %SCHOST% -R%ECF_PORT%:%ECF_HOST%:%ECF_PORT% ''' + wdir + '''/smhi_run.sh \
+  %ECF_NAME% %ECF_PASS% %SCRIPT_PATH%/%SCRIPT_NAME% %ECF_JOBOUT% %ECF_HOST% %ECF_PORT%
   echo "#MSG: ssh exits with $?"
 else
 ecflow_client --init=$$

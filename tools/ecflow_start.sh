@@ -60,7 +60,7 @@ echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_ser
 echo "       -f        forces the ECF to be restarted"
 echo "       -v        verbose mode"
 echo "       -h        print this help page"
-echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1000+<UID> | 500+<UID> for backup server"
+echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1500+<UID> | 1000+<UID> for backup server"
 exit 0
 ;;
 *)
@@ -140,18 +140,18 @@ date -u
 # ======================================================================================
 # set up default environment variables
 #
-export ECF_NODE=$host
-export ECF_LOG=$ECF_NODE.$ECF_PORT.ecf.log
-export ECF_CHECK=$ECF_NODE.$ECF_PORT.check
-export ECF_CHECKOLD=$ECF_NODE.$ECF_PORT.check.b
+export ECF_HOST=$host
+export ECF_LOG=$ECF_HOST.$ECF_PORT.ecf.log
+export ECF_CHECK=$ECF_HOST.$ECF_PORT.check
+export ECF_CHECKOLD=$ECF_HOST.$ECF_PORT.check.b
 if [ "$verbose" = "false" ]; then
      export ECF_OUT=/dev/null
 else
-     export ECF_OUT=$ECF_NODE.$ECF_PORT.ecf.out
+     export ECF_OUT=$ECF_HOST.$ECF_PORT.ecf.out
 fi
 
 echo 
-echo User \"$username\" attempting to start ecf server on \"$ECF_NODE\" using ECF_PORT \"$ECF_PORT\" and with:
+echo User \"$username\" attempting to start ecf server on \"$ECF_HOST\" using ECF_PORT \"$ECF_PORT\" and with:
 echo "ECF_HOME     : \"$ECF_HOME\""
 echo "ECF_LOG      : \"$ECF_LOG\""
 echo "ECF_CHECK    : \"$ECF_CHECK\""
@@ -159,17 +159,17 @@ echo "ECF_CHECKOLD : \"$ECF_CHECKOLD\""
 if [ "$verbose" = "false" ]; then
      echo "ECF_OUT      : \"/dev/null\""
 else
-     echo "ECF_OUT      : \"$ECF_NODE.$ECF_PORT.ecf.out\""
+     echo "ECF_OUT      : \"$ECF_HOST.$ECF_PORT.ecf.out\""
 fi
 echo 
 
 #==========================================================================
 
 echo "client version is $(ecflow_client --version)"
-echo "Checking if the server is already running on $ECF_NODE and port $ECF_PORT"
+echo "Checking if the server is already running on $ECF_HOST and port $ECF_PORT"
 ecflow_client --ping 
 if [ $? -eq 0 ]; then
-  echo "... The server on $ECF_NODE:$ECF_PORT is already running. Use 'netstat -lnptu' for listing active port" 
+  echo "... The server on $ECF_HOST:$ECF_PORT is already running. Use 'netstat -lnptu' for listing active port" 
   exit 1
 fi
 
@@ -193,8 +193,8 @@ cp $ECF_CHECK    log/ 2>/dev/null
 cp $ECF_CHECKOLD log/ 2>/dev/null
 cp $ECF_LOG      log/ 2>/dev/null
 
-if [ -f $ECF_NODE.$ECF_PORT.ecf.out ]; then
-   cp $ECF_NODE.$ECF_PORT.ecf.out log/ 2>/dev/null
+if [ -f $ECF_HOST.$ECF_PORT.ecf.out ]; then
+   cp $ECF_HOST.$ECF_PORT.ecf.out log/ 2>/dev/null
 fi
 
 set -e
@@ -229,9 +229,9 @@ fi
 
 
 echo 
-echo "To view server on ecflowview - goto Edit/Preferences/Servers and enter"
+echo "To view server on ecflow_ui - goto Servers/Manage Servers... and enter"
 echo "Name        : <unique ecFlow server name>"
-echo "Host        : $ECF_NODE"
+echo "Host        : $ECF_HOST"
 echo "Port Number : $ECF_PORT"
 echo
 

@@ -53,7 +53,7 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
    // If all else fails search defs environment, returns empty string if match not found
    // The defs environment is constructed via:
    //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
-   //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_NODE
+   //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_HOST
    //   o/ These values are updated from the server environment when the BEGIN cmd is called.
    Defs* the_defs = defs();
    if ( the_defs ) {
@@ -76,7 +76,7 @@ bool Node::find_parent_gen_variable_value(const std::string& name, std::string& 
     // If all else fails search defs environment, returns empty string if match not found
     // The defs environment is constructed via:
     //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
-    //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_NODE
+    //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_HOST
     //   o/ These values are updated from the server environment when the BEGIN cmd is called.
     Defs* the_defs = defs();
     if ( the_defs ) {

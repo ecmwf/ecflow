@@ -144,7 +144,7 @@ void SSyncCmd::init(
    reset_data_members(client_state_change_no);
 
    // After ECFLOW-182 server will always have a defs, hence we should never return ServerReply::NO_DEFS
-   // We have kept no_defs_ to allow compatibility. To allow new client(ecflowview) deal with reply from old server
+   // We have kept no_defs_ to allow compatibility. To allow new client(GUI) deal with reply from old server
    // Hence from release >= 4.0.7 no_defs_ will always be false
    //   if ( ! as->defs().get() ) {
    //#ifdef DEBUG_SERVER_SYNC

@@ -144,10 +144,10 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt )
 
 BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
 {
-   // This test relies on a NEW server invocation. Hence if ECF_NODE/remote server is used
+   // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
    // the test will will invalid. hence ignore.
    if (!ClientEnvironment::hostSpecified().empty()) {
-      cout << "Client:: ...test_restore_from_check_pt_using_new_server: ignoring test when ECF_NODE specified\n";
+      cout << "Client:: ...test_restore_from_check_pt_using_new_server: ignoring test when ECF_HOST specified\n";
       return;
    }
 
@@ -190,10 +190,10 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
 
 BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
 {
-   // This test relies on a NEW server invocation. Hence if ECF_NODE/remote server is used
+   // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
    // the test will will invalid. hence ignore.
    if (!ClientEnvironment::hostSpecified().empty()) {
-      cout << "Client:: ...test_check_pt_edit_history: ignoring test when ECF_NODE specified\n";
+      cout << "Client:: ...test_check_pt_edit_history: ignoring test when ECF_HOST specified\n";
       return;
    }
 

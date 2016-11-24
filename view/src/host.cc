@@ -1320,6 +1320,7 @@ void ehost::login()
           }
       }
       else {
+	if (0)  // activate when an new release introduces loss of compat
          if (!check_version(server_version, ecf::Version::raw())) {
             if (!confirm::ask(
 		     false,

@@ -18,6 +18,8 @@
 #include "SCPort.hpp"
 #include "EcfPortLock.hpp"
 #include "ClientInvoker.hpp"
+#include "ClientEnvironment.hpp"
+#include "Str.hpp"
 
 namespace ecf {
 
@@ -33,17 +35,15 @@ int SCPort::thePort_ = 3142;
 
 std::string SCPort::next()
 {
-   std::string host;
-   char* ecf_host = getenv("ECF_NODE");
-   if ( ecf_host )  host = ecf_host;
-   if ( host == "localhost" ) {
+   std::string host = ClientEnvironment::hostSpecified();
+   if ( host == Str::LOCALHOST() ) {
 
       std::string port;
       char* ecf_port = getenv("ECF_PORT");
       if ( ecf_port )  port = ecf_port;
       if (!port.empty()) {
 
-         //std::cout << "SCPort::next() ECF_NODE(" << host << ") ECF_PORT(" << port << ")\n";
+         //std::cout << "SCPort::next() ECF_HOST(" << host << ") ECF_PORT(" << port << ")\n";
          return port;
       }
    }

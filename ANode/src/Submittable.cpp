@@ -390,12 +390,13 @@ EcfFile Submittable::locatedEcfFile() const
             }
             else return EcfFile(const_cast<Submittable*>(this), searchResult);
          }
-
-         std::stringstream ss;
-         ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
-         if (original_ecf_filesDirectory != ecf_filesDirectory )
-            ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") after variable substitution does not exist:\n";
-         reasonEcfFileNotFound += ss.str();
+         else {
+            std::stringstream ss;
+            ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
+            if (original_ecf_filesDirectory != ecf_filesDirectory )
+               ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") after variable substitution does not exist:\n";
+            reasonEcfFileNotFound += ss.str();
+         }
       }
    }
    else {
@@ -561,7 +562,7 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam)
 bool Submittable::non_script_based_job_submission(JobsParam& jobsParam)
 {
    // No script(i.e .ecf file), hence it is assumed the ECF_JOB_CMD will call:
-   //  ECF_PASS=%ECF_PASS%;ECF_PORT=%ECF_PORT%;ECF_NODE=%ECF_NODE%;ECF_NAME=%ECF_NAME%;ECF_TRYNO=%ECF_TRYNO%;
+   //  ECF_PASS=%ECF_PASS%;ECF_PORT=%ECF_PORT%;ECF_HOST=%ECF_HOST%;ECF_NAME=%ECF_NAME%;ECF_TRYNO=%ECF_TRYNO%;
    //  ecflow_client --init %%;
    //     . some user script, or in-line command, should use full path.;
    //     ecflow_client (--meter,--event,--label);

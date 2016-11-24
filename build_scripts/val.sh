@@ -31,8 +31,8 @@ echo "valgrind: variant=$mode compiler=$compiler"
 #
 # Use valgrind which is newer than standard installation
 #
-# Note: To valgrind the server, start it separately on a different shell and define ECF_NODE=localhost
-# export ECF_NODE=localhost
+# Note: To valgrind the server, start it separately on a different shell and define ECF_HOST=localhost
+# export ECF_HOST=localhost
 # valgrind Server/bin/$compiler/$mode/ecflow_server --interval=3
 # Then restart this shell
    

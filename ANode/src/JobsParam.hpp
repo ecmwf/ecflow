@@ -62,6 +62,10 @@ public:
    void set_next_poll_time(const boost::posix_time::ptime& next_poll_time) { next_poll_time_ = next_poll_time;}
    const boost::posix_time::ptime&  next_poll_time() const { return next_poll_time_;}
    const boost::posix_time::ptime&  time_out_time() const { return time_out_time_;}
+
+   // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
+   // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
+   // Should allow greater child/user command communication.
    void set_timed_out_of_job_generation(const boost::posix_time::ptime& t) { time_out_time_ = t; timed_out_of_job_generation_ = true;}
    bool timed_out_of_job_generation() const { return timed_out_of_job_generation_; }
 

@@ -185,9 +185,9 @@ std::string ClientEnvironment::toString() const
 {
 	std::stringstream ss;
 	ss << TimeStamp::now() << Version::description() << "\n";
-	if (host_vec_.empty()) ss << "   ECF_NODE =\n   ";
+	if (host_vec_.empty()) ss << "   ECF_HOST =\n   ";
 	else  {
-		ss << "   ECF_NODE : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
+		ss << "   ECF_HOST : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
 		std::pair<std::string,std::string> i;
 		BOOST_FOREACH(i, host_vec_) { ss << "   " << i.first << Str::COLON() << i.second << "\n";}
   	}
@@ -215,10 +215,10 @@ std::string ClientEnvironment::toString() const
 
 std::string ClientEnvironment::hostSpecified()
 {
+   char* the_host = getenv(Str::ECF_HOST().c_str());
+   if (the_host)  return std::string(the_host);
 	char* theEnv = getenv(Str::ECF_NODE().c_str());
-	if (theEnv) {
-		return std::string(theEnv);
- 	}
+	if (theEnv)  return std::string(theEnv);
 	return std::string();
 }
 
@@ -230,7 +230,6 @@ std::string ClientEnvironment::portSpecified()
  	}
 	return Str::DEFAULT_PORT_NUMBER();
 }
-
 
 void ClientEnvironment::read_environment_variables()
 {
@@ -274,7 +273,7 @@ void ClientEnvironment::read_environment_variables()
  		host_vec_.push_back(std::make_pair(host,port));
 	}
 
-	// Add the ECF_NODE host into list of hosts. Make sure its first in host_vec_
+	// Add the ECF_HOST host into list of hosts. Make sure its first in host_vec_
 	// as we want environment setting to take priority.
  	string env_host = hostSpecified();
 	if (!env_host.empty()) {

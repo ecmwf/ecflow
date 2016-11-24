@@ -76,7 +76,7 @@ bool ServerState::operator==(const ServerState& rhs) const
       return false;
    }
 
-   /// Check pointing, SAVES server variables, since they are visualised by client like ecflowview
+   /// Check pointing, SAVES server variables, since they are visualised by client like ecflow_ui
    /// HOWEVER PrintStyle::MIGRATE does not save the server variables, since they should
    /// not take part in migration. However the testing compares migration files with check point files
    /// This would always fail. Hence we do not compare server variables.
@@ -467,7 +467,8 @@ void ServerState::setup_default_server_variables(std::vector<Variable>&  server_
    // The server sets these variable for use by the client. i.e when creating the jobs
    // The clients then uses them to communicate with the server.
    server_variables.push_back( Variable(Str::ECF_PORT(),port) );
-   server_variables.push_back( Variable(Str::ECF_NODE(),Str::LOCALHOST()) );
+   server_variables.push_back( Variable(Str::ECF_NODE(),"%ECF_HOST%") );
+   server_variables.push_back( Variable(Str::ECF_HOST(),Str::LOCALHOST()) );
 }
 
 /// determines why the node is not running.

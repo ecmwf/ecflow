@@ -51,9 +51,9 @@ namespace fs = boost::filesystem;
 // ************************************************************************************************
 // For test purpose the server can be started:
 // 	1/ By this test fixture
-//  2/ Externally but on the same machine. by defining env variable: export ECF_NODE=localhost
+//  2/ Externally but on the same machine. by defining env variable: export ECF_HOST=localhost
 // 	   WHY? To test for memory leak. (i.e. with valgrind)
-//  3/ Externally but on a different platform. by defining env variable: export ECF_NODE=itanium
+//  3/ Externally but on a different platform. by defining env variable: export ECF_HOST=itanium
 //     In this case we NEED to copy the test data, so that it is
 //     accessible by the client AND server
 //
@@ -98,7 +98,7 @@ void TestFixture::init(const std::string& project_test_dir)
    // ********************************************************
    PrintStyle::setStyle(PrintStyle::STATE);
 
-   // Let first see if we need do anything. If ECF_NODE is specified (ie the name
+   // Let first see if we need do anything. If ECF_HOST is specified (ie the name
    // of the machine, which has the ecflow server), only then do we need to do anything.
    // The server must have access to the file system specified by ECF_HOME.
    // This becomes an issue when the server is on a different machine
@@ -194,7 +194,7 @@ void TestFixture::init(const std::string& project_test_dir)
       theServerInvokePath += "&";
       if ( system( theServerInvokePath.c_str() ) != 0)  assert(false); // " Server invoke failed "
 
-      std::cout << "   ECF_NODE not specified, starting LOCAL " << theServerInvokePath << "\n";
+      std::cout << "   ECF_HOST not specified, starting LOCAL " << theServerInvokePath << "\n";
    }
 
    /// Ping the server to see if its running
