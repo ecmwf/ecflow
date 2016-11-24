@@ -97,6 +97,7 @@ private:
     static MainWindow* findWindow(QWidget *childW);
     static void configChanged(MainWindow *);
     static void hideServerSyncNotify(MainWindow*);
+    static void destroyAllWindows();
 
     ServerFilterMenu* serverFilterMenu_;
     NodePanel* nodePanel_;
