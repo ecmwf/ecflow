@@ -89,4 +89,63 @@ BOOST_AUTO_TEST_CASE( test_triggers_and_meters )
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
 
+
+BOOST_AUTO_TEST_CASE( test_triggers_with_limits )
+{
+   // One family is in the limits, another is without. Bit of hack
+   // But shows use of limits in triggers
+   DurationTimer timer;
+   cout << "Test:: ...test_triggers_with_limits " << flush;
+   TestClean clean_at_start_and_end;
+
+   //# Note: we have to use relative paths, since these tests are relocatable
+   //suite test_triggers_with_limits
+   // limit limit 10
+   // edit SLEEPTIME 1
+   // edit ECF_INCLUDE $ECF_HOME/includes
+   // family family
+   //      inlimit /test_triggers_and_meters:limit 3
+   //      task model
+   //      task t0
+   //      task t1
+   //      task t2
+   //  endfamily
+   //  family other
+   //      trigger /test_triggers_with_limits:limit >1
+   //      task t1
+   //      task t2
+   //  endfamily
+   //endsuite
+   std::string meterName = "file";
+   std::string taskName = "model";
+   Defs theDefs;
+   {
+      suite_ptr suite = theDefs.add_suite( "test_triggers_with_limits");
+      suite->addLimit(Limit("limit",10));
+      suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      family_ptr fam = suite->add_family( "family");
+      fam->addInLimit(InLimit("limit","/test_triggers_with_limits",3));
+      fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      int taskSize = 10;
+      for(int i=0; i < taskSize; i++) {
+         task_ptr task = fam->add_task( "t" + boost::lexical_cast<std::string>(i) );
+         task->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      }
+
+      family_ptr fam2 = suite->add_family( "other");
+      fam2->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      fam2->add_trigger("/test_triggers_with_limits:limit > 1");
+      for(int i=0; i < 3; i++) {
+         task_ptr task = fam2->add_task( "t" + boost::lexical_cast<std::string>(i) );
+         task->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      }
+   }
+
+   // The test harness will create corresponding directory structure & default ecf file
+   ServerTestHarness serverTestHarness;
+   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation( "test_triggers_and_meters.def"));
+
+   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+}
+
 BOOST_AUTO_TEST_SUITE_END()
