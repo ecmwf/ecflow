@@ -65,6 +65,8 @@ void export_SuiteAndFamily()
    .def("add_family",add_family )
    .def("add_task",  &NodeContainer::add_task ,  DefsDoc::add_task_doc())
    .def("add_task",  add_task )
+   .def("find_task",   &NodeContainer::findTask    , "Find a task given a name")
+   .def("find_family", &NodeContainer::findFamily  , "Find a family given a name")
    .add_property("nodes",boost::python::range( &NodeContainer::node_begin,&NodeContainer::node_end),"Returns a list of Node's")
    ;
 

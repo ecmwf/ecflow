@@ -30,14 +30,37 @@ def create_defs(name=""):
     f2.add_task("f2_t1").add_variable("TASK_VAR","3")
     f2.add_task("f2_t2").add_variable("TASK_VAR","3")
     return defs;
-    
-    
+
 if __name__ == "__main__":    
     print("####################################################################")
     print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
     print("####################################################################")
- 
-    defs = create_defs();
+
+    defs = create_defs()
+    s1 = defs.find_suite("s1")
+    assert s1 != None, "expected find find suite s1"
+
+    sx = defs.find_suite("sx")
+    assert sx == None, "expected not to find suite sx"
+    
+    f1 = s1.find_family("f1")
+    assert f1 != None, "expected find find family f1"
+
+    fx = s1.find_family("fx")
+    assert fx == None, "expected not to find family fx"
+
+    f2 = s1.find_family("f2")
+    assert f2 != None, "expected find find family f2"
+    
+    f2_t1 = f2.find_task("f2_t1")
+    assert f2_t1 != None, "Expected to find task"
+
+    f2_t2 = f2.find_task("f2_t2")
+    assert f2_t2 != None, "Expected to find task"
+
+    f2_tx = f2.find_task("f2_tx")
+    assert f2_tx == None, "Expected not to find task"
+
     tasks = defs.get_all_tasks()
     assert len(tasks) == 4, "Expected four tasks, but found " + str(len(tasks))
     for task in tasks:
