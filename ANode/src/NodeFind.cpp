@@ -325,6 +325,9 @@ bool Node::findExprVariable( const std::string& name)
    const Variable& gen_variable = findGenVariable( name );
    if (!gen_variable.empty()) return true;
 
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) return true;
+
    return false;
 }
 
@@ -355,6 +358,10 @@ int Node::findExprVariableValue( const std::string& name) const
 
    const Variable& gen_variable =  findGenVariable( name );
    if ( !gen_variable.empty() )  return gen_variable.value();
+
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) return limit->value();
+
    return 0;
 }
 
@@ -385,6 +392,10 @@ int Node::findExprVariableValueAndPlus(const std::string& name, int val) const
 
    const Variable& gen_variable =  findGenVariable( name );
    if ( !gen_variable.empty() )  return (gen_variable.value()+val);
+
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) return (limit->value() + val);
+
    return val;
 }
 
@@ -415,6 +426,10 @@ int Node::findExprVariableValueAndMinus(const std::string& name, int val) const
 
    const Variable& gen_variable = findGenVariable( name );
    if ( !gen_variable.empty() )  return (gen_variable.value() - val);
+
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) return (limit->value() - val);
+
    return -val;
 }
 
@@ -445,6 +460,12 @@ int Node::findExprVariableValueAndType( const std::string& name, std::string& va
       varType = "gen-variable";
       return gen_variable.value();
    }
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) {
+      varType = "limit";
+      return limit->value();
+   }
+
    varType = "variable-not-found";
    return 0;
 }
@@ -474,6 +495,11 @@ void Node::findExprVariableAndPrint( const std::string& name, ostream& os) const
    const Variable& gen_variable = findGenVariable( name );
    if ( !gen_variable.empty() )  {
       os << "GEN-VARIABLE " << gen_variable.dump();
+      return;
+   }
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) {
+      os << limit->toString() << " value(" << limit->value() << ")";
       return;
    }
 }
