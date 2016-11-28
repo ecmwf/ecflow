@@ -104,7 +104,7 @@ class Tester(object) :
         self.log_msg("test_version")
         client_version = self.ci_.version();
         server_version = self.ci_.server_version();
-        assert client_version == server_version, "Expected client version(" + client_version +") and server version(" +  server_version + ") to match\n";
+        #assert client_version == server_version, "Expected client version(" + client_version +") and server version(" +  server_version + ") to match\n";
         
     def test_client_get_server_defs(self):
         test = "test_client_get_server_defs"
