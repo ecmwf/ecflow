@@ -1590,8 +1590,12 @@ class Tester(object) :
 if __name__ == "__main__":
     
     DESC = """Will run various tests on the server. These will be used to test the GUI
+              This assumes that gui has been set to sync every second, as this will allows changes
+              in the server to be reflected in the GUI.
+              The test will sleep for sync_sleep seconds, after each change to the server.
+              This should allow GUI (1 second poll), to see the effects of this test.
+              To debug this tests, just set sync_sleep = 0.
               Usage:
-                Example1: List all the server variables
                    TestGui.py --host cca --port 4141 --time <sec> /
             """    
     PARSER = argparse.ArgumentParser(description=DESC,  
