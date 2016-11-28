@@ -291,8 +291,6 @@ class Tester(object) :
         self.ci_.log_msg("Looped " + str(count) + " times")
         
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
-        dir_to_remove = self.ecf_home() + "/" + test
-        shutil.rmtree(dir_to_remove)      
     
     def test_client_run_with_multiple_paths(self):            
         test = "test_client_run_with_multiple_paths"
@@ -328,8 +326,6 @@ class Tester(object) :
             
         self.ci_.log_msg("Looped " + str(count) + " times")
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this   
-        dir_to_remove = self.ecf_home() + "/" + test
-        shutil.rmtree(dir_to_remove)      
     
     def test_client_requeue(self):
         test = "test_client_requeue"
@@ -358,9 +354,6 @@ class Tester(object) :
         suite = self.ci_.get_defs().find_suite(test)
         assert suite.get_state() == State.queued, "Expected to find suite with state queued"
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
-    
-        dir_to_remove = self.ecf_home() + "/" + test
-        shutil.rmtree(dir_to_remove)      
     
     def test_client_requeue_with_multiple_paths(self):
         test = "test_client_requeue_with_multiple_paths"
@@ -394,9 +387,6 @@ class Tester(object) :
         assert task1.get_state() == State.queued, "Expected to find task t1 with state queued"
         assert task2.get_state() == State.queued, "Expected to find task t2 with state queued"
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
-    
-        dir_to_remove = self.ecf_home() + "/" + test
-        shutil.rmtree(dir_to_remove)      
     
     def test_client_free_dep(self):
         test = "test_client_free_dep"
@@ -461,9 +451,7 @@ class Tester(object) :
             time.sleep(3)       
                 
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
-        dir_to_remove = self.ecf_home() + "/" + test
-        shutil.rmtree(dir_to_remove)             
-    
+
     
     def test_client_check(self):
         test = "test_client_check"
@@ -701,8 +689,6 @@ class Tester(object) :
         except RuntimeError as e:
             print(str(e))
     
-        dir_to_remove = self.ecf_home() + "/" + test
-        shutil.rmtree(dir_to_remove,True)   # True means ignore errors   
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
         
     def test_client_alter_add(self):
@@ -1431,8 +1417,6 @@ class Tester(object) :
         assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_state())
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
        
-        dir_to_remove = self.ecf_home() + "/" + test
-        shutil.rmtree(dir_to_remove)      
         
     def test_ECFLOW_189(self):
         # Bug, when a node is resumed it ignored holding dependencies higher up the tree.
@@ -1482,10 +1466,6 @@ class Tester(object) :
         assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_dstate())
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
     
-        dir_to_remove = self.ecf_home() + "/" + "test_ECFLOW_189"
-        shutil.rmtree(dir_to_remove)      
-    
-    
     def test_ECFLOW_199(self):
         # Test ClientInvoker::changed_node_paths
         test = "test_ECFLOW_199"
@@ -1528,8 +1508,7 @@ class Tester(object) :
             assert False, "Expected 1 changed path but found " + str(len(list(self.ci_.changed_node_paths)))
             
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
-        dir_to_remove = self.ecf_home() + "/" + test
-        shutil.rmtree(dir_to_remove)      
+
     
     def test_gui(self):   
         self.ci_.delete_all() # start fresh
