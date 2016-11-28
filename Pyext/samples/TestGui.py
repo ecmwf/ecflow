@@ -94,7 +94,7 @@ class Tester(object) :
            """
         self.ci_.sync_local()
         if self.ARGS_.sync_sleep != 0 and sleep_time != 0:
-            time.sleep(sleep_time)
+            time.sleep(self.ARGS_.sync_sleep)
      
     def log_msg(self,msg):
         print(msg)
