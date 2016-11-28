@@ -1573,9 +1573,14 @@ if __name__ == "__main__":
               in the server to be reflected in the GUI.
               The test will sleep for sync_sleep seconds, after each change to the server.
               This should allow GUI (1 second poll), to see the effects of this test.
-              To debug this tests, just set sync_sleep = 0.
+              To debug this tests, just set sync_sleep = 0, this will also preserve the test data.
+                 - Test data is created in directory: test_gui, this will deleted at the end of the test.
+                 - Assumes includes head.h and tail.h are in CWD + /Pyext/test/data/includes
+                 - We will look for the ecflow_client in the embedded child commands in the generetd scripts, 
+                   first in the current cmake build tree, otherwise /usr/local/apps/ecflow, with same 
+                   version as this ecflow python api.
               Usage:
-                   TestGui.py --host cca --port 4141 --time <sec> /
+                   TestGui.py --host <hostname> --port <portname> --time <sec> --syn_sleep <sec> 
             """    
     PARSER = argparse.ArgumentParser(description=DESC,  
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -1586,7 +1591,7 @@ if __name__ == "__main__":
     PARSER.add_argument('--time', default=0,   
                         help="How long to run the tests in seconds. default is 0, which is one test loop")
     PARSER.add_argument('--sync_sleep', type=int,default=4,   
-                        help="Time to wait after sync_local.Allow GUI to refresh. Set to 0 for debug.")
+                        help="Time to wait after sync_local. Allow GUI to refresh. Set to 0 for debug.")
     ARGS = PARSER.parse_args()
     print ARGS   
      
@@ -1615,5 +1620,7 @@ if __name__ == "__main__":
         print "Error: " + str(ex)
         print "Check host and port number are correct."
 
-    tester.clean_up_server()
-    tester.clean_up_data()
+    # When debugging keep test data.
+    if ARGS.sync_sleep != 0:
+        tester.clean_up_server()
+        tester.clean_up_data()
