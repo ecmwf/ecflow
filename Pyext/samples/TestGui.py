@@ -258,13 +258,7 @@ class Tester(object) :
         self.ci_.reload_wl_file();  
         os.remove(self.white_list_file_path())          
     
-    def create_and_load_defs(self,test,add_defstatus = True):
-        self.log_msg(test)
-        defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        if add_defstatus :
-            suite.add_defstatus(DState.suspended)
-    
+    def generate_scripts_and_load_defs(self,defs):
         defs.generate_scripts();
         msg = defs.check_job_creation()       
         assert len(msg) == 0, msg
@@ -272,6 +266,15 @@ class Tester(object) :
         self.ci_.restart_server()
         self.ci_.load(defs)           
         self.sync_local() # clear changed_node_paths 
+
+    def create_and_load_defs(self,test,add_defstatus = True):
+        self.log_msg(test)
+        defs = self.create_defs(test)  
+        suite = defs.find_suite(test)
+        if add_defstatus :
+            suite.add_defstatus(DState.suspended)
+    
+        self.generate_scripts_and_load_defs(defs);
         self.ci_.begin_suite(test)
 
     def test_client_run(self):            
@@ -383,13 +386,7 @@ class Tester(object) :
         t4.add_date(day,month,year)
         t4.add_trigger("1 == 0")
     
-        defs.generate_scripts();
-        msg = defs.check_job_creation()       
-        assert len(msg) == 0, msg
-         
-        self.ci_.restart_server()
-        self.ci_.load(defs)           
-        self.sync_local()  
+        self.generate_scripts_and_load_defs(defs);
         self.ci_.begin_suite(test)
         
         t1_path = "/" + test + "/f1/t1"
@@ -491,6 +488,7 @@ class Tester(object) :
     def test_client_ch_register(self):
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg("test_client_ch_register")
+        
         try: self.ci_.ch_drop_user("")  # drop all handle associated with current user
         except: pass              # Drop throws if no handle registered
         
@@ -508,6 +506,7 @@ class Tester(object) :
     def test_client_ch_drop(self):
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
+        
         try: self.ci_.ch_drop_user("")  # drop all handle associated with current user
         except: pass              # Drop throws if no handle registered
         
@@ -586,9 +585,9 @@ class Tester(object) :
         try:
             suite_names = [ test + '1', test + '2', test + '3' ]
             self.ci_.ch_register(True,suite_names)     # register interest in suites s1,s2,s3 and any new suites
-            self.ci_.ch_auto_add( False )                 # disable adding newly created suites to last registered handle\n"
-            self.ci_.ch_auto_add( True )                  # enable adding newly created suites to last registered handle\n"
-            self.ci_.ch_auto_add( self.ci_.ch_handle(), False ) # disable adding newly created suites to handle\n"
+            self.ci_.ch_auto_add( False )              # disable adding newly created suites to last registered handle
+            self.ci_.ch_auto_add( True )               # enable adding newly created suites to last registered handle
+            self.ci_.ch_auto_add( self.ci_.ch_handle(), False ) # disable adding newly created suites to handle
             self.sync_local();
         except RuntimeError as e:
             print(str(e))
@@ -962,9 +961,9 @@ class Tester(object) :
     def test_client_alter_flag(self):
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
-        defs = self.create_defs(test)   
-        t1 = "/" + test + "/f1/t1"
+        defs = self.create_defs(test)  
          
+        t1 = "/" + test + "/f1/t1"
         task_t1 = defs.find_abs_node(t1)
                
         self.ci_.load(defs)   
@@ -1020,20 +1019,6 @@ class Tester(object) :
         assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
      
-        # ISSUES:
-        # o Currently we can only change clock attr if we have one.
-        # o Even when we have a clock attr, it only makes sense to apply clock attr changes
-        #   before begin(), i.e how do we apply change in gain after begin ??
-        
-        #" change clock-type name        # The name must be one of 'hybrid' or 'real'.\n"
-        #       " change clock-gain name        # The gain must be convertible to an integer.\n"
-        #        " change label name value       # sets the label\n"
-        #        " change repeat value           # If the repeat is a date, then the value must be a valid YMD ( ie. yyyymmdd)\n"
-        #        "                               # and be convertible to an integer, additionally the value must be in range\n"
-        #        "                               # of the repeat start and end dates. Like wise for repeat integer. For repeat\n"
-        #         "                               # string and enum,  the name must either be an integer, that is a valid index or\n"
-        #         "                               # if it is a string, it must correspond to one of enum's or strings list\n"
-    
     def test_client_force(self):
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
@@ -1187,9 +1172,9 @@ class Tester(object) :
     def test_client_suspend(self):
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
+        
         defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_variable("ECF_DUMMY_TASK","")
+        defs.find_suite(test).add_variable("ECF_DUMMY_TASK","")
             
         self.ci_.load(defs)  
         self.sync_local()  
@@ -1227,8 +1212,7 @@ class Tester(object) :
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_variable("ECF_DUMMY_TASK","")
+        defs.find_suite(test).add_variable("ECF_DUMMY_TASK","")
             
         self.ci_.load(defs)  
         self.ci_.begin_suite(test)  
@@ -1251,8 +1235,7 @@ class Tester(object) :
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_variable("ECF_DUMMY_TASK","")
+        defs.find_suite(test).add_variable("ECF_DUMMY_TASK","")
             
         self.ci_.load(defs)  
         self.ci_.begin_suite(test)  
@@ -1332,21 +1315,15 @@ class Tester(object) :
         self.log_msg(test)
         defs = self.create_defs(test)  
         
-        # stop defs form running when begin is called.
-        suite = defs.find_suite(test)
-        suite.add_defstatus(DState.suspended)
+        # stop defs from running when begin is called.
+        defs.find_suite(test).add_defstatus(DState.suspended)
     
         t1 = "/" + test + "/f1/t1"
         t2 = "/" + test + "/f1/t2"
         task_t1 = defs.find_abs_node(t1)
         task_t1.add_defstatus(DState.suspended)
         
-        defs.generate_scripts();
-        msg = defs.check_job_creation()       
-        assert len(msg) == 0, msg
-        
-        self.ci_.restart_server()
-        self.ci_.load(defs)           
+        self.generate_scripts_and_load_defs(defs);
         self.ci_.begin_suite(test)
          
         self.sync_local() # get the changes, synced with local defs
@@ -1363,21 +1340,12 @@ class Tester(object) :
         assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_state())
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
        
-        
     def test_ECFLOW_189(self):
         # Bug, when a node is resumed it ignored holding dependencies higher up the tree.
         # i.e Previously when we resumed a node, it ignored trigger/time/node state, dependencies higher up the tree
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
-        defs = self.create_defs(test) 
-         
-        defs.generate_scripts();
-        msg = defs.check_job_creation()       
-        assert len(msg) == 0, msg
-        
-        self.ci_.restart_server()
-        self.ci_.load(defs)   
-        self.sync_local()  
+        self.generate_scripts_and_load_defs(self.create_defs(test));
         
         self.ci_.suspend("/" + test  )
         self.ci_.suspend("/" + test + "/f1/t1")
@@ -1415,15 +1383,7 @@ class Tester(object) :
         # Test ClientInvoker::changed_node_paths
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
-        defs = self.create_defs(test)  
-        
-        defs.generate_scripts();
-        msg = defs.check_job_creation()       
-        assert len(msg) == 0, msg
-         
-        self.ci_.restart_server()
-        self.ci_.load(defs)   
-        self.sync_local() # get the changes, synced with local defs
+        self.generate_scripts_and_load_defs(self.create_defs(test));
         
         self.ci_.suspend("/" + test  )
         self.ci_.suspend("/" + test + "/f1/t1")
