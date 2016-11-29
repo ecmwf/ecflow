@@ -22,7 +22,8 @@ import shutil   # used to remove directory tree
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
-                   JobCreationCtrl, CheckPt, Cron, Late, debug_build, Flag, FlagType
+                   CheckPt, Cron, Late, debug_build, Flag, FlagType
+
 
 class Tester(object) : 
     def __init__(self,ci,args):
@@ -68,8 +69,11 @@ class Tester(object) :
         path_to_client = File.find_client()
         if os.path.exists(path_to_client):
             return path_to_client
-        return "/usr/local/apps/ecflow/" + self.ci_.version() + "/bin/ecflow_client"
-    
+        path_to_client = "/usr/local/apps/ecflow/" + self.ci_.version() + "/bin/ecflow_client"
+        if os.path.exists(path_to_client):
+            return path_to_client
+        return "ecflow_client" # fall back, just search on $PATH in the scripts
+     
     def create_defs(self,name=""):
         defs = Defs()
         suite_name = name
@@ -265,10 +269,8 @@ class Tester(object) :
         suite.add_defstatus(DState.suspended)
     
         defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
         
         self.ci_.restart_server()
         self.ci_.load(defs)           
@@ -300,11 +302,9 @@ class Tester(object) :
         suite.add_defstatus(DState.suspended)
     
         defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-        
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
+ 
         self.ci_.restart_server()
         self.ci_.load(defs)           
         self.sync_local()  
@@ -335,9 +335,8 @@ class Tester(object) :
         suite.add_defstatus(DState.suspended)
          
         defs.generate_scripts();
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
      
         self.ci_.restart_server()
         self.ci_.load(defs)           
@@ -363,9 +362,8 @@ class Tester(object) :
         suite.add_defstatus(DState.suspended)
          
         defs.generate_scripts();
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
      
         self.ci_.restart_server()
         self.ci_.load(defs)           
@@ -419,11 +417,9 @@ class Tester(object) :
         t4.add_trigger("1 == 0")
     
         defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-     
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
+         
         self.ci_.restart_server()
         self.ci_.load(defs)           
         self.sync_local()  
@@ -664,10 +660,8 @@ class Tester(object) :
         defs = self.create_defs(test)  
           
         defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
      
         self.ci_.restart_server()
         self.ci_.load(defs)           
@@ -1393,11 +1387,8 @@ class Tester(object) :
         task_t1.add_defstatus(DState.suspended)
         
         defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        job_ctrl.set_node_path("/" + test)
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
         
         self.ci_.restart_server()
         self.ci_.load(defs)           
@@ -1423,12 +1414,11 @@ class Tester(object) :
         # i.e Previously when we resumed a node, it ignored trigger/time/node state, dependencies higher up the tree
         test = "test_ECFLOW_189"
         self.log_msg(test)
-        defs = self.create_defs(test)  
+        defs = self.create_defs(test) 
+         
         defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
         
         self.ci_.restart_server()
         self.ci_.load(defs)   
@@ -1471,12 +1461,11 @@ class Tester(object) :
         test = "test_ECFLOW_199"
         self.log_msg(test)
         defs = self.create_defs(test)  
+        
         defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-        
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
+         
         self.ci_.restart_server()
         self.ci_.load(defs)   
         self.sync_local() # get the changes, synced with local defs
