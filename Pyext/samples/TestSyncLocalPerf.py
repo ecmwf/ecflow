@@ -52,16 +52,12 @@ if __name__ == "__main__":
     print("####################################################################")
 
     CL = Client(ARGS.host, ARGS.port)
-    try: CL.ch_drop()
-    except: pass
-    
     sync_local(CL,"* All suites *")   # timing for downloading all suites
     print ""
 
     suites = CL.get_defs().suites
     for suite in suites:
-        suites_to_register = [suite.name()]
-        CL.ch_register(False,suites_to_register)
+        CL.ch_register(False,[suite.name()])
         
         sync_local(CL,suite.name()) # time this
         
