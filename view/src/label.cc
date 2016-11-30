@@ -39,14 +39,19 @@ xmstring label_node::make_label_tree()
 
 void label_node::drawNode(Widget w,XRectangle* r,bool)
 {
-  std::string msg = value();
-  boost::algorithm::to_lower(msg);
-  bool red = std::string::npos != msg.find("error");
-
+  std::string info = value();
+  boost::algorithm::to_lower(info);
+  bool err = std::string::npos != info.find("err");
+  bool war = std::string::npos != info.find("war");
+  bool msg = std::string::npos != info.find("msg");
+  GC gc = blackGC();
+  if (err) gc = redGC();
+  else if (war) gc = gui::orangeGC();
+  else if (msg) gc = blueGC();
     XmStringDraw(XtDisplay(w),XtWindow(w),
         smallfont(),
         labelTree(),
-        red ? redGC() : blackGC(),
+		 gc, // red ? redGC() : blackGC(),
         r->x+2,
         r->y+2,
         r->width,

@@ -73,6 +73,9 @@ void logsvr::connect(std::string host,int port)
 
 	struct sockaddr_in s_in;
 	struct hostent *him;
+	struct timeval tv;
+	tv.tv_sec = 5;
+	tv.tv_usec = 0;
 
 	soc_ = socket(AF_INET, SOCK_STREAM, 0);
 	if(soc_ < 0)
@@ -82,7 +85,7 @@ void logsvr::connect(std::string host,int port)
 	}
 
 	bzero(&s_in,sizeof(s_in));
-
+	setsockopt(soc_, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 	s_in.sin_port = htons(port);
 	s_in.sin_family = AF_INET;
 	addr = inet_addr(host.c_str());
