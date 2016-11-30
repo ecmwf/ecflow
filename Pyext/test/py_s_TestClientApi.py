@@ -20,7 +20,7 @@ import shutil   # used to remove directory tree
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow_test_util as Test
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
-                   JobCreationCtrl, CheckPt, Cron, Late, debug_build, Flag, FlagType
+                   CheckPt, Cron, Late, debug_build, Flag, FlagType
 #from __builtin__ import None
 
 def ecf_includes() :  return os.getcwd() + "/test/data/includes"
@@ -174,6 +174,7 @@ def test_client_restart_server(ci):
     assert len(paths) == 1, "expected changed node to be the root node"
     assert paths[0] == "/", "Expected root path but found " + str(paths[0])
 
+
 def test_client_halt_server(ci):
     print("test_client_halt_server")
     ci.halt_server()
@@ -307,10 +308,8 @@ def test_client_run(ci):
     suite.add_defstatus(DState.suspended)
 
     defs.generate_scripts();
-    
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
     
     ci.restart_server()
     ci.load(defs)           
@@ -342,10 +341,8 @@ def test_client_run_with_multiple_paths(ci):
     suite.add_defstatus(DState.suspended)
 
     defs.generate_scripts();
-    
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
     
     ci.restart_server()
     ci.load(defs)           
@@ -378,10 +375,9 @@ def test_client_requeue(ci):
     suite = defs.find_suite("test_client_requeue")
     suite.add_defstatus(DState.suspended)
      
-    defs.generate_scripts();
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    defs.generate_scripts()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
  
     ci.restart_server()
     ci.load(defs)           
@@ -407,10 +403,9 @@ def test_client_requeue_with_multiple_paths(ci):
     suite = defs.find_suite("test_client_requeue_with_multiple_paths")
     suite.add_defstatus(DState.suspended)
      
-    defs.generate_scripts();
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    defs.generate_scripts()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
  
     ci.restart_server()
     ci.load(defs)           
@@ -466,10 +461,8 @@ def test_client_free_dep(ci):
     t4.add_trigger("1 == 0")
 
     defs.generate_scripts();
-    
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
  
     ci.restart_server()
     ci.load(defs)           
@@ -580,9 +573,15 @@ def test_client_ch_suites(ci):
     
     suite_names = [ 's1', 's2', 's3' ]
     ci.ch_register(True,suite_names)    # register interest in suites s1,s2,s3 and any new suites
-    ci.ch_register(False,[ "s1"])       # register interest in suites s1 
- 
+    ci.sync_local()
+    assert len(list(ci.get_defs().suites)) == 3,"Expected 3 registered suites but found " + str(len(list((ci.get_defs().suites))))
+
+    ci.ch_register(False,[ "s1"])       # register interest in suites s1. ci remembers the last client handle
+    ci.sync_local()
+    assert len(list(ci.get_defs().suites)) == 1,"Expected 1 registered suites but found " + str(len(list((ci.get_defs().suites))))
+    
     ci.ch_suites()  # writes to standard out, list of suites and handles
+
 
 def test_client_ch_register(ci):
     print("test_client_ch_register")
@@ -597,6 +596,9 @@ def test_client_ch_register(ci):
     suite_names = [ 's1', 's2', 's3' ]
     ci.ch_register(True, suite_names)    # register interest in suites s1,s2,s3 and any new suites
     ci.ch_register(False,suite_names)    # register interest in suites s1,s2,s3 only
+
+    ci.sync_local()
+    assert len(list(ci.get_defs().suites)) == 3,"Expected 3 registered suites but found " + str(len(list((ci.get_defs().suites))))
   
             
 def test_client_ch_drop(ci):
@@ -615,7 +617,10 @@ def test_client_ch_drop(ci):
         ci.ch_register(True, suite_names)    
     finally:  
         ci.ch_drop()  # drop using handle stored in ci., from last register
-          
+
+    ci.sync_local()
+    assert len(list(ci.get_defs().suites)) == 6,"Expected 6 suites but found " + str(len(list((ci.get_defs().suites))))
+         
           
 def test_client_ch_drop_user(ci):
     print("test_client_ch_drop_user")
@@ -631,10 +636,15 @@ def test_client_ch_drop_user(ci):
         # register interest in suites s1,s2,s3 and any new suites
         suite_names = [ 's1', 's2', 's3' ]
         ci.ch_register(True, suite_names)
+        ci.sync_local()
+        assert len(list(ci.get_defs().suites)) == 3,"Expected 3 suites but found " + str(len(list((ci.get_defs().suites))))
+
     except RuntimeError as e:
         print(str(e))
     
     ci.ch_drop_user("")  # drop all handle associated with current user
+    ci.sync_local()
+    assert len(list(ci.get_defs().suites)) == 6,"Expected 6 suites but found " + str(len(list((ci.get_defs().suites))))
             
             
 def test_client_ch_add(ci):
@@ -652,12 +662,20 @@ def test_client_ch_add(ci):
         ci.ch_register(True,suite_names)        # register interest in any new suites
         suite_names = [ 's1', 's2' ]
         ci.ch_add(suite_names)                  # add suites s1,s2 to the last added handle
+        ci.sync_local()
+        assert len(list(ci.get_defs().suites)) == 2,"Expected 2 suites but found " + str(len(list((ci.get_defs().suites))))
+
         suite_names = [ 's3', 's4' ]
         ci.ch_add( ci.ch_handle(),suite_names)  # add suites s3,s4 using last handle
+        ci.sync_local()
+        assert len(list(ci.get_defs().suites)) == 4,"Expected 4 suites but found " + str(len(list((ci.get_defs().suites))))
+        
     except RuntimeError as e:
         print(str(e))
         
     ci.ch_drop_user("")  # drop all handle associated with current user
+    ci.sync_local()
+    assert len(list(ci.get_defs().suites)) == 6,"Expected 6 suites but found " + str(len(list((ci.get_defs().suites))))
 
             
 def test_client_ch_auto_add(ci):
@@ -672,14 +690,18 @@ def test_client_ch_auto_add(ci):
     
     try:
         suite_names = [ 's1', 's2' , 's3']
-        ci.ch_register(True,suite_names)     # register interest in suites s1,s2,s3 and any new suites
+        ci.ch_register(True,suite_names)        # register interest in suites s1,s2,s3 and any new suites
         ci.ch_auto_add( False )                 # disable adding newly created suites to last registered handle\n"
         ci.ch_auto_add( True )                  # enable adding newly created suites to last registered handle\n"
         ci.ch_auto_add( ci.ch_handle(), False ) # disable adding newly created suites to handle\n"
+        ci.sync_local()
+        assert len(list(ci.get_defs().suites)) == 3,"Expected 3 suites but found " + str(len(list((ci.get_defs().suites))))
     except RuntimeError as e:
         print(str(e))
         
     ci.ch_drop_user("")  # drop all handle associated with current user
+    ci.sync_local()
+    assert len(list(ci.get_defs().suites)) == 6,"Expected 6 suites but found " + str(len(list((ci.get_defs().suites))))
         
            
 def test_client_ch_remove(ci):
@@ -695,14 +717,25 @@ def test_client_ch_remove(ci):
     try:
         suite_names = [ 's1', 's2' , 's3']
         ci.ch_register(True,suite_names)     # register interest in suites s1,s2,s3 and any new suites
+        ci.sync_local()
+        assert len(list(ci.get_defs().suites)) == 3,"Expected 3 suites but found " + str(len(list((ci.get_defs().suites))))
+
         suite_names = [ 's1' ]
         ci.ch_remove( suite_names )          # remove suites s1 from the last added handle\n"
+        ci.sync_local()
+        assert len(list(ci.get_defs().suites)) == 2,"Expected 2 suites but found " + str(len(list((ci.get_defs().suites))))
+        
         suite_names = [ 's2' ]
         ci.ch_remove( ci.ch_handle(), suite_names )  # remove suites s2 from the last added handle\n"
+        ci.sync_local()
+        assert len(list(ci.get_defs().suites)) == 1,"Expected 1 suites but found " + str(len(list((ci.get_defs().suites))))
+
     except RuntimeError as e:
         print(str(e))
         
     ci.ch_drop_user("")  # drop all handle associated with current user
+    ci.sync_local()
+    assert len(list(ci.get_defs().suites)) == 6,"Expected 6 suites but found " + str(len(list((ci.get_defs().suites))))
            
            
 def test_client_get_file(ci):
@@ -711,10 +744,8 @@ def test_client_get_file(ci):
     defs = create_defs("test_client_get_file")  
       
     defs.generate_scripts();
-    
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
  
     ci.restart_server()
     ci.load(defs)           
@@ -1442,10 +1473,8 @@ def test_client_check_defstatus(ci):
     task_t1.add_defstatus(DState.suspended)
     
     defs.generate_scripts();
-    
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
     
     ci.restart_server()
     ci.load(defs)           
@@ -1474,10 +1503,8 @@ def test_ECFLOW_189(ci):
     ci.delete_all()     
     defs = create_defs("test_ECFLOW_189")  
     defs.generate_scripts();
-    
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
     
     ci.restart_server()
     ci.load(defs)   
@@ -1524,10 +1551,8 @@ def test_ECFLOW_199(ci):
     ci.delete_all()     
     defs = create_defs("test_ECFLOW_199")  
     defs.generate_scripts();
-    
-    job_ctrl = JobCreationCtrl()
-    defs.check_job_creation(job_ctrl)       
-    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    msg = defs.check_job_creation()
+    assert len(msg) == 0, msg
     
     ci.restart_server()
     ci.load(defs)   
