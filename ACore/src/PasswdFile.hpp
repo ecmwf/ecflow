@@ -22,13 +22,13 @@
 
 // ----------------------------------------------------------------
 //
-class Passwd {
+class Pass_wd {
 public:
-   Passwd(const std::string& user,const std::string& host,const std::string& port, const std::string& passwd )
+   Pass_wd(const std::string& user,const std::string& host,const std::string& port, const std::string& passwd )
    : user_(user),host_(host),port_(port),passwd_(passwd) {}
-   ~Passwd() {}
+   ~Pass_wd() {}
 
-   bool operator==(const Passwd& rhs) const { return rhs.user_ == user_ && rhs.host_ == host_ && rhs.port_ == port_ && rhs.passwd_ == passwd_;}
+   bool operator==(const Pass_wd& rhs) const { return rhs.user_ == user_ && rhs.host_ == host_ && rhs.port_ == port_ && rhs.passwd_ == passwd_;}
    const std::string& user() const { return user_;}
    const std::string& host() const { return host_;}
    const std::string& port()  const { return port_;}
@@ -74,7 +74,7 @@ public:
    // Open password file and make it empty
    static bool clear( const std::string& pathToFile, std::string& errorMsg);
 
-   const std::vector<Passwd>& passwds() const { return vec_;}
+   const std::vector<Pass_wd>& passwds() const { return vec_;}
    std::string dump() const;
 
 private:
@@ -84,7 +84,7 @@ private:
 private:
 
    std::string passwd_file_;
-   std::vector<Passwd> vec_;
+   std::vector<Pass_wd> vec_;
 };
 
 #endif

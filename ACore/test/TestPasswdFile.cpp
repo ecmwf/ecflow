@@ -149,12 +149,12 @@ BOOST_AUTO_TEST_CASE( test_passwd )
 //   jake host 3141  x12ggg
 //   tom host3 3143    x12ggg # sdsdsd
 
-   std::vector<Passwd> expected_passwds;
-   expected_passwds.push_back(Passwd("fred", "host", "3141",  "x12ggg"));
-   expected_passwds.push_back(Passwd("fred", "host3", "3143",  "passwd"));
-   expected_passwds.push_back(Passwd("fred", "host4", "3145",  "x12ggg"));
-   expected_passwds.push_back(Passwd("jake", "host", "3141",  "x12ggg"));
-   expected_passwds.push_back(Passwd("tom", "host3", "3143",  "x12ggg"));
+   std::vector<Pass_wd> expected_passwds;
+   expected_passwds.push_back(Pass_wd("fred", "host", "3141",  "x12ggg"));
+   expected_passwds.push_back(Pass_wd("fred", "host3", "3143",  "passwd"));
+   expected_passwds.push_back(Pass_wd("fred", "host4", "3145",  "x12ggg"));
+   expected_passwds.push_back(Pass_wd("jake", "host", "3141",  "x12ggg"));
+   expected_passwds.push_back(Pass_wd("tom", "host3", "3143",  "x12ggg"));
 
    BOOST_REQUIRE_MESSAGE(expected_passwds == theFile.passwds() ,"expected passwords to match");
 }

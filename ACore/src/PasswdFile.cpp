@@ -243,7 +243,7 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
       return false;
    }
 
-   vec_.push_back(Passwd(tokens[0],tokens[1],tokens[2],tokens[3]));
+   vec_.push_back(Pass_wd(tokens[0],tokens[1],tokens[2],tokens[3]));
 
    return true;
 }
