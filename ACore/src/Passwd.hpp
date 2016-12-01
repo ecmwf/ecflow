@@ -37,9 +37,6 @@ public:
 	/// generate a random password
 	static std::string generate();
 
-	/// encrypt the password
-//	static std::string doCrypt( const std::string& generated);
-
 private:
 	Passwd();
 };
