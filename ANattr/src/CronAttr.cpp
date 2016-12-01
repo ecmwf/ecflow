@@ -368,66 +368,11 @@ bool CronAttr::month_matches(int theMonth) const
 }
 
 //------------------------------------------------------------------
-//int CronAttr::max_month() const {
-//	int max = -1;
-//	BOOST_FOREACH(int month, months_) {
-//		max = std::max(month,max);
-//	}
-//	return max;
-//}
-
-//int CronAttr::max_day_of_month() const
-//{
-//	int max = -1;
-//	BOOST_FOREACH(int dayOfMonth, daysOfMonth_) {
-//		max = std::max(dayOfMonth,max);
-//	}
-//	return max;
-//}
-
-//int CronAttr::max_day_of_week() const
-//{
-//	int max = -1;
-// 	BOOST_FOREACH(int theWeekDay, weekDays_) {
-//		max = std::max(theWeekDay,max);
-//  	}
-//	return max;
-//}
-
-//-------------------------------------------------------------------------------
-//int CronAttr::min_month() const{
-//	int min = std::numeric_limits<int>::max();
-//	BOOST_FOREACH(int month, months_) {
-//		min = std::min(month,min);
-//	}
-//	return min;
-//}
-
-//int CronAttr::min_day_of_month() const
-//{
-//	int min = std::numeric_limits<int>::max();
-// 	BOOST_FOREACH(int dayOfMonth, daysOfMonth_) {
-// 		min = std::min(dayOfMonth,min);
-//	}
-//	return min;
-//}
-//
-//int CronAttr::min_day_of_week() const
-//{
-//	int min = std::numeric_limits<int>::max();
-//  	BOOST_FOREACH(int theWeekDay, weekDays_) {
-// 		min = std::min(theWeekDay,min);
-//  	}
-//	return min;
-//}
-//------------------------------------------------------------
-
 
 bool CronAttr::checkInvariants(std::string& errormsg) const
 {
 	return  timeSeries_.checkInvariants(errormsg);
 }
-
 
 //--------------------------------------------------------------
 
