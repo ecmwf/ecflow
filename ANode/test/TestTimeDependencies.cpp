@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE( test_day_time_combination )
 {
    cout << "ANode:: ...test_day_time_combination\n";
    // See ECFLOW-337 , this is where the job was being run twice in a week instead of once.
-   //                  i.e because the day for still free past midnight.
+   //                  i.e because the day was still free past midnight.
 
    // Create the suite, starting on a sunday
    Defs  defs;
@@ -50,17 +50,17 @@ BOOST_AUTO_TEST_CASE( test_day_time_combination )
 
    CalendarUpdateParams calUpdateParams( hours(1) );
    boost::posix_time::ptime expected_time = boost::posix_time::ptime(date(2015,6,8),time_duration(10,0,0)); //Monday & 10
-    //cout << "expected_time =  " << expected_time << "\n";
+   //cout << "expected_time =  " << expected_time << "\n";
 
-   bool submitted = false;
-   for(int m=1; m < 100; m++) {
+   int submitted = 0;
+   for(int m=1; m < 120; m++) {  // run for 5 days
 
       Jobs jobs(&defs);
       JobsParam jobsParam;
       jobs.generate(jobsParam);
 
       if (jobsParam.submitted().size() ) {
-         submitted = true;
+         submitted++;
          //cout << "submitted at " << suite->calendar().suiteTime() << "\n";
 
          BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time,"\nExpected to submit at " << expected_time << " only, but also found " << suite->calendar().suiteTime());
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( test_day_time_combination )
 
       defs.updateCalendar(calUpdateParams);
    }
-   BOOST_CHECK_MESSAGE( submitted ,"Expected one submission but found none");
+   BOOST_CHECK_MESSAGE( submitted == 1 ,"Expected one submission but found " << submitted);
 }
 
 BOOST_AUTO_TEST_CASE( test_date_time_combination )
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_date_time_combination )
    boost::posix_time::ptime expected_time = boost::posix_time::ptime(date(2015,6,8),time_duration(10,0,0)); // Monday & 10
    //cout << "expected_time =  " << expected_time << "\n";
 
-   bool submitted = false;
+   int submitted = 0;
    for(int m=1; m < 100; m++) {
 
       Jobs jobs(&defs);
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( test_date_time_combination )
       jobs.generate(jobsParam);
 
       if (jobsParam.submitted().size() ) {
-         submitted = true;
+         submitted++;
          //cout << "submitted at " << suite->calendar().suiteTime() << "\n";
 
          BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time,"\nExpected to submit at " << expected_time << " only, but also found " << suite->calendar().suiteTime());
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE( test_date_time_combination )
 
       defs.updateCalendar(calUpdateParams);
    }
-   BOOST_CHECK_MESSAGE( submitted ,"Expected one submission but found none");
+   BOOST_CHECK_MESSAGE( submitted == 1 ,"Expected one submission but found " << submitted);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
