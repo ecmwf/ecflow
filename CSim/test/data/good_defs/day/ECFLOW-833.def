@@ -1,0 +1,12 @@
+suite suite
+  clock real 04.12.2016               # Sunday
+  family family
+    repeat enumerated VARIABLE first  # repeat will re-queue suite calendar, back to start date
+    verify complete:1                 # Family should complete once
+    task x
+      time 06:00
+        day monday
+        day thursday
+        verify complete:2        # task should complete twice
+  endfamily
+endsuite
