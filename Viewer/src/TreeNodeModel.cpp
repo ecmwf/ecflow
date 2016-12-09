@@ -673,6 +673,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
             VTreeServer* server=mserver->treeServer();
             Q_ASSERT(server);
 
+            //the node is displayed in the tree
             if(VTreeNode* tn=server->tree()->find(node))
             {
                 int row=tn->indexInParent();
@@ -812,6 +813,94 @@ QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) con
     return QModelIndex();
 }
 
+QModelIndex TreeNodeModel::forceShowNode(const VNode* node) const
+{
+    if(data_->isFilterNull())
+        return QModelIndex();
+
+    Q_ASSERT(node);
+    Q_ASSERT(!node->isServer());
+    Q_ASSERT(node->server());
+
+    if(VModelServer *mserver=data_->server(node->server()))
+    {
+        VTreeServer* server=mserver->treeServer();
+        Q_ASSERT(server);
+        server->setForceShowNode(node);
+        return nodeToIndex(node);
+    }
+
+    return QModelIndex();
+}
+
+QModelIndex TreeNodeModel::forceShowAttribute(const VAttribute* a) const
+{
+    //if(data_->attrFilter()->isComplete())
+    //    return QModelIndex();
+
+    VNode* node=a->parent();
+    Q_ASSERT(node);
+    //Q_ASSERT(!node->isServer());
+    Q_ASSERT(node->server());
+
+    if(VModelServer *mserver=data_->server(node->server()))
+    {
+        VTreeServer* server=mserver->treeServer();
+        Q_ASSERT(server);
+        if(server->tree()->find(node))
+
+        server->setForceShowAttribute(a);
+        return attributeToIndex(a);
+    }
+
+    return QModelIndex();
+}
+
+
+void TreeNodeModel::selectionChanged(QModelIndexList lst)
+{
+    if(data_->isFilterNull())
+        return;
+
+    Q_FOREACH(QModelIndex idx,lst)
+    {
+        VInfo_ptr info=nodeInfo(idx);
+
+        for(int i=0; i < data_->count(); i++)
+        {
+           VTreeServer *ts=data_->server(i)->treeServer();
+           Q_ASSERT(ts);
+           ts->clearForceShow(info->item());
+
+        }
+#if 0
+        if(isServer(idx))
+        {
+        }
+        else if(VTreeNode* n=indexToNode(idx))
+        {
+            VTreeServer *ts=n->server();
+            Q_ASSERT(ts);
+            VTree* tree=ts->tree();
+            Q_ASSERT(tree);
+
+            tree->clearForceShow(n);
+
+            if(tree->forceShowNode() != 0 && n->vnode() != tree->forceShowNode())
+            {
+                ts->clearForceShowNode();
+            }
+        }
+        //Attribute
+        else if(VTreeNode* n=indexToAttribute(idx))
+        {
+
+        }
+    }
+#endif
+}
+}
+
 
 //------------------------------------------------------------------
 // Create info object to index. It is used to identify nodes in
@@ -871,6 +960,15 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		{
             VNode *n=parentNode->vnode();
             Q_ASSERT(n);
+            VItemTmp_ptr atmp=VAttributeType::makeByAbsIndex(n,index.row(),atts_);
+            if(atmp->attribute())
+            {
+                //VInfo will take charge of the attribute!
+                VInfo_ptr p=VInfoAttribute::create(atmp->attribute());
+                qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
+                return p;
+            }
+#if 0
             VAttributeType* type=NULL;
             int indexInType=-1;
             if(VAttributeType::findByAbsIndex(n,index.row(),atts_,type,indexInType))
@@ -880,6 +978,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
                 qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
                 return p;
             }
+#endif
 
 #if 0
             int realAttrRow=parentNode->attrRow(index.row(),atts_);

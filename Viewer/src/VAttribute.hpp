@@ -32,7 +32,7 @@ public:
     VAttribute(VNode *parent,VAttributeType* type,int indexInType);
     ~VAttribute();
 
-    VAttribute* clone();
+    VAttribute* clone() const;
     VServer* root() const;
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
     VAttributeType* type() const;

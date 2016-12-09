@@ -278,6 +278,11 @@ std::string VInfoServer::path()
     return name() + "://";
 }
 
+VItem* VInfoServer::item() const
+{
+    return node_;
+}
+
 //=========================================
 //
 // VInfoNode
@@ -347,7 +352,10 @@ std::string VInfoNode::relativePath()
     return p;
 }
 
-
+VItem* VInfoNode::item() const
+{
+    return node_;
+}
 
 //=========================================
 //
@@ -408,6 +416,10 @@ std::string VInfoAttribute::name()
     return (attr_)?attr_->strName():std::string();
 }
 
+VItem* VInfoAttribute::item() const
+{
+    return attr_;
+}
 
 
 

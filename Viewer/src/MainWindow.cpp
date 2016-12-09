@@ -590,14 +590,11 @@ void MainWindow::hideServerSyncNotify(MainWindow*)
         win->hideServerSyncNotify();
 }
 
-
-
 void MainWindow::destroyAllWindows()
 {
 	Q_FOREACH(MainWindow *win,windows_)
 		delete win;
 }
-
 
 //Return true if close is allowed, false otherwise
 bool MainWindow::aboutToClose(MainWindow* win)

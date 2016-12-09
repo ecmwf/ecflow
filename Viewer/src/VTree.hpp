@@ -15,6 +15,7 @@
 #include <QStringList>
 
 class VNode;
+class VAttribute;
 class VAttributeType;
 class AttributeFilter;
 class VTreeServer;
@@ -38,7 +39,9 @@ public:
     virtual VTree* root() const;
     virtual VTreeServer* server() const;
 
+#if 0
     int attrRow(int row,AttributeFilter *filter) const;
+#endif
     int attrNum(AttributeFilter* filter) const;
     bool isAttrInitialised() const;
     void updateAttrNum(AttributeFilter* filter=0);
@@ -94,6 +97,8 @@ public:
      int indexOfTopLevelToInsert(VNode* suite) const;
      VNode* vnodeAt(int index) const;     
      const std::vector<VTreeNode*>& nodeVec() const {return nodeVec_;}
+     VNode* forceShowNode() const {return forceShowNode_;}
+     VAttribute* forceShowAttribute() const {return forceShowAttr_;}
 
 protected:
      void clear();
@@ -105,6 +110,7 @@ protected:
      void replaceWithBranch(VTreeNode* node,VTreeNode* branch);
      VTreeNode* makeTopLevelBranch(const std::vector<VNode*>& filter,VNode* suite);
      void insertTopLevelBranch(VTreeNode* branch,int index);
+     void setForceShowNode(VNode* n) {forceShowNode_=n;}
 
 private:
      bool build(VTreeNode* parent,VNode* vnode,const std::vector<VNode*>& filter);
@@ -113,6 +119,9 @@ private:
      VTreeServer* server_;
      std::vector<VTreeNode*> nodeVec_;
      int totalNum_;
+     VNode* forceShowNode_;
+     VAttribute* forceShowAttr_;
+
 };
 
 #endif // VTREENODE_HPP

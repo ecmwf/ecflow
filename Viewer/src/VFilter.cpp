@@ -13,6 +13,7 @@
 #include "NodeQueryEngine.hpp"
 #include "UserMessage.hpp"
 #include "VNState.hpp"
+#include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VIcon.hpp"
 #include "VNode.hpp"
@@ -207,6 +208,31 @@ AttributeFilter::AttributeFilter() : VParamSet()
 		if((*it)->strName() != "var" && (*it)->strName() != "genvar")
 			current_.insert(*it);
 	}*/
+}
+
+bool AttributeFilter::matchForceShowAttr(const VNode *n,VAttributeType* t) const
+{
+    if(forceShowAttr_)
+    {
+        if(VAttribute *a=forceShowAttr_->attribute())
+            return (a->parent() == n && a->type() == t);
+    }
+    return false;
+}
+
+void AttributeFilter::setForceShowAttr(const VAttribute* a)
+{
+    forceShowAttr_=VInfoAttribute::create(a->clone());
+}
+
+VAttribute* AttributeFilter::forceShowAttr() const
+{
+    return (forceShowAttr_)?(forceShowAttr_->attribute()):0;
+}
+
+void AttributeFilter::clearForceShowAttr()
+{
+    forceShowAttr_.reset();
 }
 
 //==============================================
@@ -520,7 +546,7 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 {
     bool ok=false;
 
-    if(stateFilter->isSet(VNState::toState(node)))
+    if(stateFilter->isSet(VNState::toState(node)) || tree_->forceShowNode() == node )
     {
         ok=true;
     }

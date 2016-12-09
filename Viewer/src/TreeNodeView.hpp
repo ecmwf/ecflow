@@ -93,6 +93,7 @@ protected:
 	TreeNodeViewDelegate* delegate_;
 	PropertyMapper* prop_;
     QMap<QString,QString> styleSheet_;
+    bool setCurrentIsRunning_;
 };
 
 #endif

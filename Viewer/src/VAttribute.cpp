@@ -42,7 +42,7 @@ VAttribute::~VAttribute()
     totalAttrNum--;
 }
 
-VAttribute* VAttribute::clone()
+VAttribute* VAttribute::clone() const
 {
     return new VAttribute(parent_,id_);
 }

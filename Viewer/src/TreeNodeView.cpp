@@ -37,7 +37,8 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
     model_(model),
     needItemsLayout_(false),
 	defaultIndentation_(indentation()),
-	prop_(NULL)
+    prop_(NULL),
+    setCurrentIsRunning_(false)
 {
 	setProperty("style","nodeView");
 	setProperty("view","tree");
@@ -171,10 +172,15 @@ void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemS
         VInfo_ptr info=model_->nodeInfo(lst.front());
         if(info && !info->isEmpty())
         {
-            Q_EMIT selectionChanged(info);
+            Q_EMIT selectionChanged(info);           
         }
     }
+
     QTreeView::selectionChanged(selected, deselected);
+
+    //The model has to know about the selection in order to manage the
+    //nodes that are forced to be shown
+    model_->selectionChanged(lst);
 }
 
 VInfo_ptr TreeNodeView::currentSelection()
@@ -189,11 +195,18 @@ VInfo_ptr TreeNodeView::currentSelection()
 
 void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 {
-	QModelIndex idx=model_->infoToIndex(info);
+    //While the current is being selected we do not allow
+    //another setCurrent call go through
+    if(setCurrentIsRunning_)
+        return;
+
+    setCurrentIsRunning_=true;
+    QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
 	{          
         setCurrentIndex(idx);
 	}
+    setCurrentIsRunning_=false;
 }
 
 void TreeNodeView::selectFirstServer()

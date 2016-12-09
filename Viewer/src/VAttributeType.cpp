@@ -85,17 +85,22 @@ int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
 
     int total=0;
     for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
-    {
-        if(!filter || filter->isSet(it->second))
+    {        
+        if(!filter || filter->isSet(it->second) )
         {
             total+=it->second->num(vnode);
+        }
+        //If the filter contains a forceShow item
+        else if(filter->matchForceShowAttr(vnode,it->second))
+        {
+            total+=1;
         }
     }
 
     return total;
 }
 
-VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilter *filter)
+VAttributeType* VAttributeType::getType(const VNode *vnode,int absRowInFilter,AttributeFilter *filter)
 {
     if(!vnode)
         return NULL;
@@ -106,7 +111,16 @@ VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilt
         if(!filter || filter->isSet(it->second))
         {
             int size=it->second->num(vnode);
-            if(row-totalRow >=0 && row-totalRow < size)
+            if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
+            {
+                return it->second;
+            }
+            totalRow+=size;
+        }
+        else if(filter && filter->matchForceShowAttr(vnode,it->second))
+        {
+            int size=1;
+            if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
             {
                 return it->second;
             }
@@ -117,7 +131,7 @@ VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilt
     return NULL;
 }
 
-bool VAttributeType::getData(VNode *vnode,int row,VAttributeType* &type,QStringList& data,AttributeFilter *filter)
+bool VAttributeType::getData(VNode *vnode,int absRowInFilter,VAttributeType* &type,QStringList& data,AttributeFilter *filter)
 {
     type=0;
 
@@ -130,33 +144,41 @@ bool VAttributeType::getData(VNode *vnode,int row,VAttributeType* &type,QStringL
         if(!filter || filter->isSet(it->second))
         {
             int size=0;
-            if(it->second->getData(vnode,row-totalRow,size,data))
+            if(it->second->getData(vnode,absRowInFilter-totalRow,size,data))
             {
                 type=it->second;
                 return true;
             }
             totalRow+=size;
         }
-    }
-
-    return false;
-}
-
-bool VAttributeType::getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter)
-{
-    if(VAttributeType* va=find(type))
-    {
-        if(!filter || filter->isSet(va))
+        else if(filter && filter->matchForceShowAttr(vnode,it->second))
         {
-            int size=0;
-            return va->getData(vnode,row,size,data);
+            if(absRowInFilter == totalRow)
+            {
+                VAttribute* a=filter->forceShowAttr();
+                Q_ASSERT(a);
+                data=a->data();
+                type=it->second;
+                return true;
+            }
+            totalRow+=1;
         }
     }
+
     return false;
 }
 
+bool VAttributeType::getData(const std::string& type,VNode* vnode,int rowInType,QStringList& data)
+{
+    if(VAttributeType* va=find(type))
+    {       
+        int size=0;
+        return va->getData(vnode,rowInType,size,data);
+    }
+    return false;
+}
 
-int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filter)
+int VAttributeType::getLineNum(const VNode *vnode,int absRowInFilter,AttributeFilter *filter)
 {
     if(!vnode)
         return 1;
@@ -167,17 +189,20 @@ int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filte
         if(!filter || filter->isSet(it->second))
         {
             int size=it->second->num(vnode);
-            if(row-totalRow >=0 && row-totalRow < size)
+            if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
             {
-                return it->second->lineNum(vnode,row-totalRow);
+                return it->second->lineNum(vnode,absRowInFilter-totalRow);
             }
             totalRow+=size;
         }
     }
 
+    //TODO:: add forceShowAttr
+
     return 1;
 }
 
+#if 0
 int VAttributeType::getRow(const VNode *vnode,int row,AttributeFilter *filter)
 {
     if(!vnode)
@@ -208,31 +233,41 @@ int VAttributeType::getRow(const VNode *vnode,int row,AttributeFilter *filter)
 
     return -1;
 }
+#endif
 
-bool VAttributeType::findByAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter,VAttributeType* &type,int& indexInType)
+VItemTmp_ptr VAttributeType::makeByAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter) //,VAttributeType* &type,int& indexInType)
 {
     if(!vnode)
-        return false;
+        return VItemTmp_ptr();
 
     int totalNum=0;
     for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
-            int size=it->second->num(vnode);;
+            int size=it->second->num(vnode);
             if(absIndex-totalNum >=0 && absIndex-totalNum < size)
             {
-                indexInType=absIndex-totalNum;
-                type=it->second;
-                return true;
+                int indexInType=absIndex-totalNum;
+                return VItemTmp::create(new VAttribute(const_cast<VNode*>(vnode),it->second,indexInType));
+            }
+            totalNum+=size;
+        }
+        else if(filter && filter->matchForceShowAttr(vnode,it->second))
+        {
+            int size=1;
+            if(absIndex-totalNum >=0 && absIndex-totalNum < size)
+            {
+                VAttribute* a=filter->forceShowAttr();
+                Q_ASSERT(a);
+                return VItemTmp::create(a->clone());
             }
             totalNum+=size;
         }
     }
 
-    return false;
+    return VItemTmp_ptr();
 }
-
 
 //Returns the absolute index of the given attribute within the whole list of attributes of a given node.
 int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
@@ -244,7 +279,8 @@ int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
     if(!vnode)
         return -1;
 
-    if(filter && !filter->isSet(a->type()))
+    if(filter && !filter->isSet(a->type()) &&
+       a->sameContents(filter->forceShowAttr()) == false)
         return -1;
 
     int absIndex=-1;
@@ -252,8 +288,13 @@ int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
     {
         if(a->type() == it->second)
         {
-           int idx=it->second->indexOf(a);
-           return (idx != -1)?(absIndex+idx+1):-1;
+            int idx=-1;
+            if(filter && a->sameContents(filter->forceShowAttr()))
+                idx=0;
+            else
+                idx=it->second->indexOf(a);
+
+            return (idx != -1)?(absIndex+idx+1):-1;
         }
 
         if(!filter || filter->isSet(it->second))
@@ -261,6 +302,10 @@ int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
             int size=it->second->num(vnode);
             if(size > 0)
                 absIndex+=size;
+        }
+        else if(filter->matchForceShowAttr(vnode,it->second))
+        {
+            absIndex+=1;
         }
     }
 

@@ -53,6 +53,7 @@ public:
     QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
 
     VInfo_ptr nodeInfo(const QModelIndex& index);
+    void selectionChanged(QModelIndexList lst);
 
     void setEnableServerToolTip(bool st) {serverToolTip_=st;}
     void setEnableNodeToolTip(bool st) {nodeToolTip_=st;}
@@ -94,6 +95,10 @@ Q_SIGNALS:
     void filterChangeBegun();
     void filterChangeEnded();
 
+protected:
+    QModelIndex forceShowNode(const VNode* node) const;
+    QModelIndex forceShowAttribute(const VAttribute* a) const;
+
 private:
 	bool isServer(const QModelIndex & index) const;
 	bool isNode(const QModelIndex & index) const;
@@ -109,6 +114,7 @@ private:
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
 	QVariant attributesData(const QModelIndex& index,int role) const;
+
 
 	//Attribute filter
 	VTreeModelData* data_;
