@@ -30,8 +30,9 @@ using namespace boost::posix_time;
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
-SimulatorVisitor::SimulatorVisitor(int /* truncateRepeats */)
+SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename,int /* truncateRepeats */)
 : /* truncateRepeats_(truncateRepeats), */
+  defs_filename_(defs_filename),
   foundTasks_(false),
   foundCrons_(false),
   hasTimeDependencies_(false),
@@ -76,14 +77,16 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc)
 
    if (!nc->crons().empty()) {
       foundCrons_ = true;
-      cout << "Found crons on NodeContainer\n";
+      cout << defs_filename_ << ": Found crons on NodeContainer\n";
    }
 
    // If suite has repeat day attribute( a infinite repeat), it will run forever, hence disable this for simulation purposes
    /// reset will clear the invalid flag., when doing a real job submission.
    /// *** this must be placed after begin() since begin() will reset all attributes() *****
    if (nc->ref_repeat().makeInfiniteInValid()) {
-      cout << "Disabling '" << nc->repeat().dump() << "' attribute of " << nc->debugNodePath() << ". This will allow simulation to complete earlier.\n";
+      cout << defs_filename_ << ": Disabling '" << nc->repeat().dump()
+           << "' attribute of " << nc->debugNodePath()
+           << ". This will allow simulation to complete earlier.\n";
    }
 
 	BOOST_FOREACH(node_ptr t, nc->nodeVec()) { t->acceptVisitTraversor(*this);}
@@ -97,7 +100,7 @@ void SimulatorVisitor::visitTask( Task* t )
 
    if (!t->crons().empty()) {
       foundCrons_ = true;
-      // cout << "Found crons on task\n";
+      // cout << defs_filename_ << ": Found crons on task\n";
    }
 }
 

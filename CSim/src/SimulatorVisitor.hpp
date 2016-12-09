@@ -28,7 +28,7 @@ namespace ecf {
 
 class SimulatorVisitor : public NodeTreeVisitor {
 public:
-	SimulatorVisitor(int truncateRepeats);
+	SimulatorVisitor(const std::string& defs_filename,int truncateRepeats);
 
 	/// If the definition file has suites with no tasks, ie they could have server limits
 	/// then for simulation purposes(i.e when all suites complete we terminate simulation)
@@ -62,6 +62,7 @@ private:
 //	void analyse(Node* node);
 //	int truncateRepeats_;  // allow for simulation to complete earlier. ***NOT USED, kept for reference *****
 
+	std::string defs_filename_;
 	bool foundTasks_;
 	bool foundCrons_;
 	bool hasTimeDependencies_;
