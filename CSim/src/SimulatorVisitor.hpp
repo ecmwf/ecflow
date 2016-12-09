@@ -46,7 +46,7 @@ public:
  	boost::posix_time::time_duration maxSimulationPeriod() const;
 
   	// default calendar increment is one minute, however if we have no time dependencies,
- 	// then simulation can be speeded up, ie by using hour increment
+ 	// then simulation can be speeded up, i.e by using hour increment
  	const boost::posix_time::time_duration& calendarIncrement() const { return ci_;}
 
 	virtual bool traverseObjectStructureViaVisitors() const { return true;}

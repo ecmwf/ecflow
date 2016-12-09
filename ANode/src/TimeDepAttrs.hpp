@@ -117,14 +117,16 @@ public:
    std::vector<ecf::CronAttr>::const_iterator cron_begin() const { return crons_.begin();}
    std::vector<ecf::CronAttr>::const_iterator cron_end() const { return crons_.end();}
 
-
    void clear(); /// Clear *ALL* internal attributes
-
 
    /// Under the hybrid calendar some time dependent attributes may not be applicable
    /// i.e if day,date,cron attributes does correspond to 24 hours of today, then we
    /// need make them as complete.
    void markHybridTimeDependentsAsComplete();
+
+   /// If we have just day/date then we have a resolution of 1 hour
+   /// Otherwise if we have time/today/cron with minutes, then resolution is 1 minute
+   void get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const;
 
 private:
    Node*        node_; // *NOT* persisted must be set by the parent class

@@ -881,3 +881,32 @@ bool TimeDepAttrs::set_memento( const NodeDateMemento* memento,std::vector<ecf::
    return false;
 }
 
+void TimeDepAttrs::get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const
+{
+   for(size_t i = 0; i < timeVec_.size(); i++){
+      const TimeSeries& time_series = timeVec_[i].time_series();
+      if (time_series.start().minute() != 0 )  { resol = minutes(1); return; }
+      if (time_series.hasIncrement()) {
+         if (time_series.finish().minute() != 0 ) { resol = minutes(1); return; }
+         if (time_series.incr().minute() != 0 )   { resol = minutes(1); return; }
+      }
+   }
+
+   for(size_t i = 0; i < todayVec_.size(); i++){
+      const TimeSeries& time_series = todayVec_[i].time_series();
+      if (time_series.start().minute() != 0 )     { resol = minutes(1); return; }
+      if (time_series.hasIncrement()) {
+         if (time_series.finish().minute() != 0 ) { resol = minutes(1); return; }
+         if (time_series.incr().minute() != 0 )   { resol = minutes(1); return; }
+      }
+   }
+
+   for(size_t i = 0; i < crons_.size(); i++){
+      const TimeSeries& time_series = crons_[i].time_series();
+      if (time_series.start().minute() != 0 )     { resol = minutes(1); return; }
+      if (time_series.hasIncrement()) {
+         if (time_series.finish().minute() != 0 ) { resol = minutes(1); return; }
+         if (time_series.incr().minute() != 0 )   { resol = minutes(1); return; }
+      }
+   }
+}

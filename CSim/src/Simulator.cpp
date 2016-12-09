@@ -77,13 +77,17 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 	// ** By default checking in done when reading a defs file from disk:
 	// ** However many test create Defs on the fly. These may not do_checks.
 	// ** Hence we do it here, since it is simulator specific.
+
+	//   Please note that when we use a clock attribute, for a specific date
+   //   then when we are using repeat, they can cause the suite to re-queue
+   //   and RESET the suite time, back to clock attribute time
+
 	if (do_checks) {
 	   std::string warningMsg;
 	   if (!theDefs.check(errorMsg,warningMsg)) {
 	      return false;
 	   }
 	}
-
 
 	// Allow new log to be created each time, by destroying the old log.
 	LogDestroyer destroyLog;
@@ -102,6 +106,11 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 	// o determine max simulation period. ie looks at size of repeats
 	// o If multiple suites and some suites have no tasks, mark them as complete, these may have server limits
 	// o If no tasks at all, no point in simulating
+   // o ********************************************************************************
+   //   Please note that when we use a clock attribute, for a specific date
+   //   then when we are using repeat, they can cause the suite to re-queue
+   //   and RESET the suite time, back to clock attribute time
+   //   *********************************************************************************
  	// **** Need a better mechanism of handling long repeats, the old way of changing repeat
  	// **** attributes is not acceptable.(i.e user could save in python after simulation
  	// **** and there defs would be corrupted
@@ -126,17 +135,20 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 #ifdef DEBUG_LONG_RUNNING_SUITES
  	cout << defs_filename << " time dependency = " <<  simiVisitor.hasTimeDependencies()
 		<< " max_simulation_period_=" << to_simple_string(max_simulation_period_)
-		<< " calendarIncrement=" << to_simple_string(calendarIncrement)
- 	    << endl;
+		<< " calendarIncrement=" << to_simple_string(calendarIncrement) << endl;
 #endif
+
 
  	CalendarUpdateParams calUpdateParams( calendarIncrement );
 
 	// Start simulation ...
 	boost::posix_time::time_duration duration(0,0,0,0);
  	while (1) {
-
-// 		cout << "duration = " << to_simple_string(duration) << endl;
+#ifdef DEBUG_LONG_RUNNING_SUITES
+      BOOST_FOREACH(suite_ptr ss, theDefs.suiteVec()) {
+         cout << "duration: " << to_simple_string(duration) << " " << ss->calendar().toString() << endl;
+      }
+#endif
 
  		// Resolve dependencies and submit jobs
  		if (!doJobSubmission(theDefs,errorMsg)) return false;
@@ -229,11 +241,6 @@ bool Simulator::abortSimulation( const SimulatorVisitor& simiVisitor,
                                  const boost::posix_time::time_duration& duration,
                                  std::string& errorMsg) const
 {
-#ifdef DEBUG_LONG_RUNNING_SUITES
- 	cout << " duration = " << to_simple_string(duration)
-		 << " max_simulation_period_=" << to_simple_string(max_simulation_period_)
-  	     << "\n";
-#endif
 	if (duration > max_simulation_period_) {
 
 		errorMsg = "\nTimed out after ";
@@ -246,7 +253,6 @@ bool Simulator::abortSimulation( const SimulatorVisitor& simiVisitor,
 
 	return false;
 }
-
 
 bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 {
@@ -274,8 +280,9 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 	BOOST_FOREACH(Submittable* t, jobsParam.submitted()) {
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
+
 		// If task repeating themselves, determine what is causing this:
-		std::map<Task*,int>::iterator i = taskIntMap_.find(t);
+		std::map<Submittable*,int>::iterator i = taskIntMap_.find(t);
 		if (i == taskIntMap_.end())  taskIntMap_.insert( std::make_pair(t,1));
 		else {
 			(*i).second++;
@@ -347,6 +354,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 #ifdef DEBUG_LONG_RUNNING_SUITES
 		cout << t->debugNodePath() << " completes at " << t->suite()->calendar().toString() << " level " << level_ << endl;
 #endif
+	   // for autocancel
 		if (!doJobSubmission(theDefs,errorMsg)) {
 			level_--;
 			return false;
