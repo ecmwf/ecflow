@@ -39,7 +39,7 @@ public:
 #if 0
     static int getRow(const VNode *vnode,int row,AttributeFilter *filter=0);
 #endif
-    static VItemTmp_ptr makeByAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter); //,VAttributeType* &type,int& indexInType);
+    static VItemTmp_ptr itemForAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter);
 
     static VAttributeType* find(const std::string& name);
     static VAttributeType* find(int id);

@@ -235,7 +235,7 @@ int VAttributeType::getRow(const VNode *vnode,int row,AttributeFilter *filter)
 }
 #endif
 
-VItemTmp_ptr VAttributeType::makeByAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter) //,VAttributeType* &type,int& indexInType)
+VItemTmp_ptr VAttributeType::itemForAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter) //,VAttributeType* &type,int& indexInType)
 {
     if(!vnode)
         return VItemTmp_ptr();

@@ -108,7 +108,6 @@ public:
      VTreeServer* treeServer() const {return const_cast<VTreeServer*>(this);}
      void attrFilterChanged();
      void setForceShowNode(const VNode* node);
-     void clearForceShowNode();
      void setForceShowAttribute(const VAttribute* node);
      void clearForceShow(const VItem*);
 

@@ -871,7 +871,6 @@ void TreeNodeModel::selectionChanged(QModelIndexList lst)
            VTreeServer *ts=data_->server(i)->treeServer();
            Q_ASSERT(ts);
            ts->clearForceShow(info->item());
-
         }
 #if 0
         if(isServer(idx))
@@ -960,34 +959,13 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		{
             VNode *n=parentNode->vnode();
             Q_ASSERT(n);
-            VItemTmp_ptr atmp=VAttributeType::makeByAbsIndex(n,index.row(),atts_);
+            VItemTmp_ptr atmp=VAttributeType::itemForAbsIndex(n,index.row(),atts_);
             if(atmp->attribute())
             {
                 //VInfo will take charge of the attribute!
-                VInfo_ptr p=VInfoAttribute::create(atmp->attribute());
-                qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
+                VInfo_ptr p=VInfoAttribute::create(atmp->attribute()->clone());
                 return p;
             }
-#if 0
-            VAttributeType* type=NULL;
-            int indexInType=-1;
-            if(VAttributeType::findByAbsIndex(n,index.row(),atts_,type,indexInType))
-            {
-                Q_ASSERT(indexInType >= 0);
-                VInfo_ptr p=VInfoAttribute::create(new VAttribute(n,type,indexInType));
-                qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
-                return p;
-            }
-#endif
-
-#if 0
-            int realAttrRow=parentNode->attrRow(index.row(),atts_);
-            Q_ASSERT(realAttrRow >= 0);
-
-            VInfo_ptr p=VInfoAttribute::create(parentNode->vnode(),realAttrRow);
-            qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
-            return p;
-#endif
 		}
 	}
 
