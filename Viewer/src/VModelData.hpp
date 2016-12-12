@@ -163,6 +163,9 @@ public:
      int indexOf(const VNode* node) const;
      NodeFilter* filter() const;
      VTableServer* tableServer() const {return const_cast<VTableServer*>(this);}
+     void setForceShowNode(const VNode* node);
+     void setForceShowAttribute(const VAttribute* node);
+     void clearForceShow(const VItem*);
 
 	 //From ServerObserver
      void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}

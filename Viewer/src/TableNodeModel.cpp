@@ -280,6 +280,49 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
     return QModelIndex();
 }
 
+QModelIndex TableNodeModel::forceShowNode(const VNode* node) const
+{
+    if(!node)
+        return QModelIndex();
+
+    Q_ASSERT(node);
+    Q_ASSERT(!node->isServer());
+    Q_ASSERT(node->server());
+
+    if(VModelServer *mserver=data_->server(node->server()))
+    {
+        VTableServer* server=mserver->tableServer();
+        server->setForceShowNode(node);
+        return nodeToIndex(node);
+    }
+
+    return QModelIndex();
+}
+
+QModelIndex TableNodeModel::forceShowAttribute(const VAttribute* a) const
+{
+    Q_ASSERT(a);
+    VNode* node=a->parent();
+    Q_ASSERT(node);
+
+    return forceShowNode(const_cast<VNode*>(node));
+}
+
+void TableNodeModel::selectionChanged(QModelIndexList lst)
+{
+    Q_FOREACH(QModelIndex idx,lst)
+    {
+        VInfo_ptr info=nodeInfo(idx);
+
+        for(int i=0; i < data_->count(); i++)
+        {
+           VTableServer *ts=data_->server(i)->tableServer();
+           Q_ASSERT(ts);
+           ts->clearForceShow(info->item());
+        }
+    }
+}
+
 VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 {
 	VNode *n=indexToNode(index);
@@ -291,7 +334,6 @@ VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 	VInfo_ptr info;
 	return info;
 }
-
 
 //Server is about to be added
 void TableNodeModel::slotServerAddBegin(int /*row*/)

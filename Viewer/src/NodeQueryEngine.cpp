@@ -372,7 +372,8 @@ void NodeFilterEngine::runQuery(ServerHandler* server)
 
 void NodeFilterEngine::runRecursively(VNode *node)
 {
-    if(!node->isServer() && parser_->execute(node))
+    if(!node->isServer() &&
+       (node == owner_->forceShowNode() ||  parser_->execute(node)))
     {
         //UserMessage::message(UserMessage::DBG,false,"FOUND: " + node->absNodePath());
         //owner_->res_[node->index()]=node;

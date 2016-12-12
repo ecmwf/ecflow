@@ -69,10 +69,8 @@ protected:
     static VAttributeType* idToType(int id);
     static int idToTypeIndex(int id);
 
-    //VAttributeType* type_;
     int id_;
 };
-
 
 #endif // VATTRIBUTE_HPP
 

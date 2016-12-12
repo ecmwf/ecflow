@@ -835,9 +835,6 @@ QModelIndex TreeNodeModel::forceShowNode(const VNode* node) const
 
 QModelIndex TreeNodeModel::forceShowAttribute(const VAttribute* a) const
 {
-    //if(data_->attrFilter()->isComplete())
-    //    return QModelIndex();
-
     VNode* node=a->parent();
     Q_ASSERT(node);
     //Q_ASSERT(!node->isServer());
@@ -846,9 +843,7 @@ QModelIndex TreeNodeModel::forceShowAttribute(const VAttribute* a) const
     if(VModelServer *mserver=data_->server(node->server()))
     {
         VTreeServer* server=mserver->treeServer();
-        Q_ASSERT(server);
-        if(server->tree()->find(node))
-
+        Q_ASSERT(server);        
         server->setForceShowAttribute(a);
         return attributeToIndex(a);
     }
@@ -872,32 +867,7 @@ void TreeNodeModel::selectionChanged(QModelIndexList lst)
            Q_ASSERT(ts);
            ts->clearForceShow(info->item());
         }
-#if 0
-        if(isServer(idx))
-        {
-        }
-        else if(VTreeNode* n=indexToNode(idx))
-        {
-            VTreeServer *ts=n->server();
-            Q_ASSERT(ts);
-            VTree* tree=ts->tree();
-            Q_ASSERT(tree);
-
-            tree->clearForceShow(n);
-
-            if(tree->forceShowNode() != 0 && n->vnode() != tree->forceShowNode())
-            {
-                ts->clearForceShowNode();
-            }
-        }
-        //Attribute
-        else if(VTreeNode* n=indexToAttribute(idx))
-        {
-
-        }
     }
-#endif
-}
 }
 
 

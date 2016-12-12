@@ -43,6 +43,16 @@ QModelIndex TableNodeSortModel::nodeToIndex(const VNode *node)
 	return mapFromSource(nodeModel_->nodeToIndex(node));
 }
 
+void TableNodeSortModel::selectionChanged(QModelIndexList lst)
+{
+    QModelIndexList lstm;
+    Q_FOREACH(QModelIndex idx,lst)
+        lstm << mapToSource(idx);
+
+    nodeModel_->selectionChanged(lstm);
+}
+
+
 bool TableNodeSortModel::lessThan(const QModelIndex &left,
                                   const QModelIndex &right) const
 {

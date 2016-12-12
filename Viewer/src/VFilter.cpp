@@ -351,7 +351,8 @@ void NodeFilterDef::readSettings(VSettings *vs)
 NodeFilter::NodeFilter(NodeFilterDef* def,ServerHandler* server) :
 	def_(def),
     matchMode_(VectorMatch),
-    server_(server)
+    server_(server),
+    forceShowNode_(0)
 {
     assert(server_);
 
@@ -361,6 +362,21 @@ NodeFilter::NodeFilter(NodeFilterDef* def,ServerHandler* server) :
 NodeFilter::~NodeFilter()
 {
 	delete queryEngine_;
+}
+
+void NodeFilter::clear()
+{
+    clearForceShowNode();
+}
+
+void NodeFilter::setForceShowNode(VNode* n)
+{
+    forceShowNode_=n;
+}
+
+void NodeFilter::clearForceShowNode()
+{
+    forceShowNode_=0;
 }
 
 //============================================
@@ -377,6 +393,7 @@ TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def,ServerHandler* server,VTree* t
 
 void TreeNodeFilter::clear()
 {
+    NodeFilter::clear();
     match_=std::vector<VNode*>();
 }
 
@@ -546,7 +563,7 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 {
     bool ok=false;
 
-    if(stateFilter->isSet(VNState::toState(node)) || tree_->forceShowNode() == node )
+    if(stateFilter->isSet(VNState::toState(node)) || forceShowNode_ == node)
     {
         ok=true;
     }
@@ -601,7 +618,8 @@ bool TableNodeFilter::isComplete()
 
 void TableNodeFilter::clear()
 {
-	match_.clear();
+    NodeFilter::clear();
+    match_.clear();
     index_.clear();
     matchCount_=0;
 }

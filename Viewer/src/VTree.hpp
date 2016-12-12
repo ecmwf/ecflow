@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -97,8 +97,6 @@ public:
      int indexOfTopLevelToInsert(VNode* suite) const;
      VNode* vnodeAt(int index) const;     
      const std::vector<VTreeNode*>& nodeVec() const {return nodeVec_;}
-     VNode* forceShowNode() const {return forceShowNode_;}
-     VAttribute* forceShowAttribute() const {return forceShowAttr_;}
 
 protected:
      void clear();
@@ -109,8 +107,7 @@ protected:
      VTreeNode* makeBranch(const std::vector<VNode*>& filter,VTreeNode* parentNode);
      void replaceWithBranch(VTreeNode* node,VTreeNode* branch);
      VTreeNode* makeTopLevelBranch(const std::vector<VNode*>& filter,VNode* suite);
-     void insertTopLevelBranch(VTreeNode* branch,int index);
-     void setForceShowNode(VNode* n) {forceShowNode_=n;}
+     void insertTopLevelBranch(VTreeNode* branch,int index);   
 
 private:
      bool build(VTreeNode* parent,VNode* vnode,const std::vector<VNode*>& filter);
@@ -119,9 +116,6 @@ private:
      VTreeServer* server_;
      std::vector<VTreeNode*> nodeVec_;
      int totalNum_;
-     VNode* forceShowNode_;
-     VAttribute* forceShowAttr_;
-
 };
 
 #endif // VTREENODE_HPP

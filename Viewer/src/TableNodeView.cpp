@@ -36,7 +36,8 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
      NodeViewBase(filterDef),
      model_(model),
 	 needItemsLayout_(false),
-	 prop_(NULL)
+     prop_(NULL),
+     setCurrentIsRunning_(false)
 {
 	setProperty("style","nodeView");
 	setProperty("view","table");
@@ -155,8 +156,11 @@ void TableNodeView::selectionChanged(const QItemSelection &selected, const QItem
 		}
 	}
 	QTreeView::selectionChanged(selected, deselected);
-}
 
+    //The model has to know about the selection in order to manage the
+    //nodes that are forced to be shown
+    model_->selectionChanged(lst);
+}
 
 VInfo_ptr TableNodeView::currentSelection()
 {
@@ -170,11 +174,18 @@ VInfo_ptr TableNodeView::currentSelection()
 
 void TableNodeView::setCurrentSelection(VInfo_ptr info)
 {
+    //While the current is being selected we do not allow
+    //another setCurrent call go through
+    if(setCurrentIsRunning_)
+        return;
+
+    setCurrentIsRunning_=true;
     QModelIndex idx=model_->infoToIndex(info);
     if(idx.isValid())
     {
         setCurrentIndex(idx);
     }
+    setCurrentIsRunning_=false;
 }
 
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)

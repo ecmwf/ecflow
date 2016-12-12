@@ -137,19 +137,10 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
     //that this server tree is empty.
     inScan_=true;
 
-    //When the server scan ends we need to rebuild the tree.
-#if 0
-    if(filter_->())
-    {
-        tree_->build();
-    }
-    else
-    {
-        filter_->update();
-        tree_->build(filter_->match_);
-    }
-#endif
+    filter_->clearForceShowNode();
+    attrFilter_->clearForceShowAttr();
 
+    //When the server scan ends we need to rebuild the tree.
     if(filter_->isComplete())
     {
         tree_->build();
@@ -175,6 +166,7 @@ void VTreeServer::notifyBeginServerClear(ServerHandler* server)
     changeInfo_->clear();
     tree_->clear();
     filter_->clear();
+    attrFilter_->clearForceShowAttr();
     inScan_=true;
 }
 
@@ -198,7 +190,7 @@ void VTreeServer::notifyServerActivityChanged(ServerHandler* server)
 void VTreeServer::notifyEndServerSync(ServerHandler* server)
 {
 #ifdef _UI_VMODELDATA_DEBUG
-        UserMessage::debug("VTreeServer::notifyEndServerSync --> number of state changes: " + QString::number(changeInfo_->stateChangeSuites().size()).toStdString());
+   UserMessage::debug("VTreeServer::notifyEndServerSync --> number of state changes: " + QString::number(changeInfo_->stateChangeSuites().size()).toStdString());
 #endif
 
     updateFilter(changeInfo_->stateChangeSuites());
@@ -348,19 +340,7 @@ void VTreeServer::reload()
 
     Q_ASSERT(filter_);
 
-#if 0
-    if(filter_->isNull())
-    {
-        tree_->build();
-    }
-
-    else
-    {
-        filter_->update();
-        tree_->build(filter_->match_);
-    }
-#endif
-
+    filter_->clearForceShowNode();
     if(filter_->isComplete())
     {
         tree_->build();
@@ -516,14 +496,15 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
     }
 }
 
-//Set the forceShowNode and rerun the filter
+//Set the forceShowNode and rerun the filter. The forceShowNode is a node that
+//has to be visible even if it does not match the status filter.
 void VTreeServer::setForceShowNode(const VNode* node)
 {
-    //Clear
-    clearForceShow(node);
-
     if(filter_->isNull() || tree_->find(node))
+    {
+        clearForceShow(node);
         return;
+    }
 
     Q_ASSERT(node);
 
@@ -535,7 +516,7 @@ void VTreeServer::setForceShowNode(const VNode* node)
     std::vector<VNode*> sv;
     sv.push_back(s);
 
-    tree_->setForceShowNode(const_cast<VNode*>(node));
+    filter_->setForceShowNode(const_cast<VNode*>(node));
     updateFilter(sv);
 }
 
@@ -557,7 +538,7 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     attrFilter_->setForceShowAttr(a);
 
     //Tell the tree that this node must always be visible
-    tree_->setForceShowNode(const_cast<VNode*>(vnode));
+    filter_->setForceShowNode(const_cast<VNode*>(vnode));
 
     //The node is not visible at the moment e.i. not in the tree. We rerun
     //updatefilter in the nodes's branch. This will add the node to the tree
@@ -578,8 +559,8 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     else if(!attrFilter_->isSet(a->type()))
     {
         //We only need to handle this case. When the attributes are not yet initialised
-        //the selection in the view will trigger the attribute initialisation that
-        //will use the filter that we aklready set to use the attribute (as forceShowAttr).
+        //the selection in the view will trigger the attribute initialisation. This
+        //will use the filter that we already set to use the attribute (as forceShowAttr).
         if(node->isAttrInitialised())
         {
             //This is the current attribute num using the modified attribute filter
@@ -608,7 +589,7 @@ void VTreeServer::clearForceShow(const VItem* item)
     if(!item)
         return;
 
-    VNode* vnPrev=tree_->forceShowNode();
+    VNode* vnPrev=filter_->forceShowNode();
     VAttribute* aPrev=attrFilter_->forceShowAttr();
 
     if(aPrev)
@@ -637,7 +618,7 @@ void VTreeServer::clearForceShow(const VItem* item)
         }
     }
 
-    tree_->setForceShowNode(0);
+    filter_->clearForceShowNode();
 
     VNode* s=vnPrev->suite();
     Q_ASSERT(s->isTopLevel());
@@ -761,6 +742,7 @@ void VTableServer::notifyEndServerClear(ServerHandler* server)
 {
     int oriNodeNum=nodeNum();
     filter_->clear();
+    //filter_->clearForceShowNode();
     Q_EMIT endServerClear(this,oriNodeNum);
 }
 
@@ -802,7 +784,9 @@ void VTableServer::reload()
 #endif
 
     Q_EMIT beginServerClear(this,oriNodeNum);
+    VNode *fsn=filter_->forceShowNode();
     filter_->clear();
+    filter_->setForceShowNode(fsn);
     inScan_=true;
     Q_EMIT endServerClear(this,oriNodeNum);
 
@@ -816,8 +800,56 @@ void VTableServer::reload()
     UserMessage::debug("    nodeNum: " + QString::number(oriNodeNum).toStdString());
     UserMessage::debug("<-- VTableServer::reload");
 #endif
+}
 
+//Set the forceShowNode and rerun the filter. The forceShowNode is a node that
+//has to be visible even if it does not match the filter.
+void VTableServer::setForceShowNode(const VNode* node)
+{
+    if(filter_->indexOf(node) != -1)
+    {
+        clearForceShow(node);
+        return;
+    }
 
+    Q_ASSERT(node);
+
+    filter_->setForceShowNode(const_cast<VNode*>(node));
+    reload();
+}
+
+void VTableServer::setForceShowAttribute(const VAttribute*)
+{
+}
+
+void VTableServer::clearForceShow(const VItem* item)
+{
+    if(!item)
+        return;
+
+    VNode* vnPrev=filter_->forceShowNode();
+    if(!vnPrev)
+        return;
+
+    if(item->parent()->server() == server_)
+    {
+        if(VNode *itn=item->isNode())
+        {
+            if(itn == vnPrev)
+                return;
+        }
+
+        if(VAttribute *ita=item->isAttribute())
+        {
+            if(ita->parent() == vnPrev)
+            {
+                return;
+            }
+        }
+    }
+
+    filter_->clearForceShowNode();
+    reload();
 }
 
 //==========================================
