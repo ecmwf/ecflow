@@ -232,6 +232,7 @@ bool Simulator::run(const std::string& theDefsFile,std::string& errorMsg) const
 	std::string warningMsg;
  	if (!checkPtParser.doParse(errorMsg,warningMsg))  return false;
 
+ 	//cout << theDefs << "\n";
  	return run(theDefs,theDefsFile,errorMsg, false /* don't do check, allready done */);
 }
 
