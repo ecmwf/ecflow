@@ -1,4 +1,49 @@
+See ECFLOW-833
 
+* Time goes deep. As soon as possible. Once a time has expired it stays expired.
+  All time attributes are updated no matter how deep they are in the hierarchy.
+  
+* triggers avoids going down the hierarchy. Act like a umbrella.
+  However you can reference time in the triggers
+  i.e trigger /suite:TIME == 0800  and (/suite:DOW == 1  or /suite:DOW == 5)
+
+Assume we have a repeat day 1, and we start saturday/sunday
+
+Case 1:
+task tt
+  day monday
+  time 10:00       # run on Monday at 10 am
+
+Case 2:
+  family f1
+     day monday
+     task tt
+        time 10:00   # actually runs on Monday at midnight, and Monday at 10 am
+                     # This is because the time is set free on sunday at 10 am
+                     # This is not intuitive, but what Axel is happy with.
+                     
+Case 3:
+    family f1
+       time 10:00
+       task tt
+          day monday # Likewise, will run Monday at midnight and Monday at 10:00
+                     
+Take the following case:
+
+suite s1
+   repeat day 1
+   time 10:00     # time time goes down it stays down, until re-queue
+   family f1
+      time 11:00  # time goes down and stays down, until re-queue.
+      task tt
+          time 12:00 # run at 12 midday
+      task t2
+   task t1
+   endfamily
+   task t1             # run everyday at 10 am
+endsuite
+
+==========================================================================================
 o Long term testing of server *******
   24 * 60 * 60 = 86400 seconds: hence 24hrs = 86400 seconds
   
@@ -65,7 +110,7 @@ o Documentation of Today/time attribute
 
    Time Series
    ============
-   Note: Current we dont implement this, in that after the time series we hold ******
+   Note: Current we don't implement this, in that after the time series we hold ******
 
 
                                                           isFree:hhhhhhhhhhhhhhhhhh
@@ -109,7 +154,7 @@ Task run times
       i.e time 00:00  12:00 00:30
       if task run takes longer than 30 minutes, it is run straight away, on completion
       until it reaches 12:00.
-  However this leads to non-determistic behaviour.
+  However this leads to non-deterministic behaviour.
     
   In the new ECF under real mode, the behaviour is similar.
   Under the virual clock, if server is suspended so is the time,
@@ -123,7 +168,7 @@ Task run times
 Relative times
 ---------------
   o ********relative times not actually used in the operational suites *****
-  o When a Node has multipe relative times then only the attribute with
+  o When a Node has multiple relative times then only the attribute with
     the smallest time is ever used. (may need to warn about the others)
     i.e  time +10:00
          time +20:00
@@ -138,7 +183,7 @@ Relative times
     
    o Issues: relative time series and day changes ?
         - relative time is time relative to the suite/Family start, and this
-          is could be concieved to be independent of day change.
+          is could be conceived to be independent of day change.
               
 Real Clock
 ----------
