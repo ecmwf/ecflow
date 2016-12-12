@@ -96,6 +96,64 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
 
+BOOST_AUTO_TEST_CASE( test_single_time_trigger )
+{
+   DurationTimer timer;
+   cout << "Test:: ...test_single_time_trigger " << flush;
+   TestClean clean_at_start_and_end;
+
+   // Create the defs file corresponding to the text below
+   // ECF_HOME variable is automatically added by the test harness.
+   // ECF_INCLUDE variable is automatically added by the test harness.
+   // SLEEPTIME variable is automatically added by the test harness.
+   // ECF_CLIENT_EXE_PATH variable is automatically added by the test harness.
+   //                     This is substituted in sms includes
+   //                     Allows test to run without requiring installation
+
+   //# Note: we have to use relative paths, since these tests are relocatable
+   //suite suite
+   // edit SLEEPTIME 1
+   // edit ECF_INCLUDE $ECF_HOME/includes
+   //  clock real <todays date>
+   // family family
+   //    task t1
+   //         trigger /suite:time == 1001
+   //    endfamily
+   //endsuite
+   Defs theDefs;
+   {
+      // Initialise clock with fixed date and time, then create a time attribute
+      // with todays time + minute
+      // Avoid adding directly to TimeSlot
+      // i.e if local time is 9:59 and we create a TimeSlot like
+      //       task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
+      // The the minute will be 62, which is illegal and will not parse
+      boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
+
+      // For each 2 seconds of poll in the server update calendar by 1 minute
+      // Note: if we use 1 seconds poll to update calendar by 1 minute, then
+      //       we will find that state change happens at job submission interval,
+      //       and hence skews time series.  Which can leave state in a queued state,
+      //       and hence test never completes
+      suite_ptr suite = theDefs.add_suite("test_single_time_trigger");
+      ClockAttr clockAttr(theLocalTime,false);
+      suite->addClock( clockAttr );
+
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
+      std::stringstream ss; ss << "/test_single_time_trigger:TIME == " << "1001";
+      task->add_trigger( ss.str());
+      task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 1 times
+   }
+
+   // The test harness will create corresponding directory structure
+   // and populate with standard ecf files.
+   ServerTestHarness serverTestHarness;
+   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_single_time_trigger.def"));
+
+   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+}
+
 BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
 {
    DurationTimer timer;

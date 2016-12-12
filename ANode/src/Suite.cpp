@@ -791,6 +791,7 @@ const Variable& SuiteGenVariables::findGenVariable(const std::string& name) cons
    if (genvar_month_.name() == name) return genvar_month_;
    if (genvar_ecf_clock_.name() == name) return genvar_ecf_clock_;
    if (genvar_ecf_time_.name() == name) return genvar_ecf_time_;
+   if (genvar_time_.name() == name) return genvar_time_;
    return Variable::EMPTY();
 }
 
@@ -808,4 +809,5 @@ void SuiteGenVariables::gen_variables(std::vector<Variable>& vec) const
    vec.push_back(genvar_month_);
    vec.push_back(genvar_ecf_clock_);
    vec.push_back(genvar_ecf_time_);
+   vec.push_back(genvar_time_);
 }
