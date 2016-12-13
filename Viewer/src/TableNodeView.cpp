@@ -28,8 +28,11 @@
 #include "PropertyMapper.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeViewDelegate.hpp"
+#include "UserMessage.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
+
+#define _UI_TABLENODEVIEW_DEBUG
 
 TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget* parent) :
      QTreeView(parent),
@@ -152,6 +155,9 @@ void TableNodeView::selectionChanged(const QItemSelection &selected, const QItem
 		VInfo_ptr info=model_->nodeInfo(lst.front());
 		if(info && !info->isEmpty())
 		{
+#ifdef _UI_TABLENODEVIEW_DEBUG
+            UserMessage::debug("TableNodeView::selectionChanged --> emit=" + info->path());
+#endif
 			Q_EMIT selectionChanged(info);
 		}
 	}
@@ -183,6 +189,10 @@ void TableNodeView::setCurrentSelection(VInfo_ptr info)
     QModelIndex idx=model_->infoToIndex(info);
     if(idx.isValid())
     {
+#ifdef _UI_TABLENODEVIEW_DEBUG
+    if(info)
+        UserMessage::debug("TableNodeView::setCurrentSelection --> " + info->path());
+#endif
         setCurrentIndex(idx);
     }
     setCurrentIsRunning_=false;

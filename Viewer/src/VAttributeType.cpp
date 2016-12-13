@@ -411,6 +411,7 @@ VMeterAttribute::VMeterAttribute(const std::string& n) :
     dataCount_=6;
     searchKeyToData_["meter_name"]=NameIndex;
     searchKeyToData_["meter_value"]=ValueIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VMeterAttribute::num(const VNode *vnode)
@@ -553,6 +554,7 @@ VLabelAttribute::VLabelAttribute(const std::string& n) :
     dataCount_=3;
     searchKeyToData_["label_name"]=NameIndex;
     searchKeyToData_["label_value"]=ValueIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VLabelAttribute::num(const VNode *vnode)
@@ -722,6 +724,7 @@ VEventAttribute::VEventAttribute(const std::string& n) :
     dataCount_=3;
     searchKeyToData_["event_name"]=NameIndex;
     searchKeyToData_["event_value"]=ValueIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VEventAttribute::num(const VNode *vnode)
@@ -868,6 +871,7 @@ VGenvarAttribute::VGenvarAttribute(const std::string& n) : VAttributeType(n)
     searchKeyToData_["var_name"]=NameIndex;
     searchKeyToData_["var_value"]=ValueIndex;
     searchKeyToData_["var_type"]=TypeIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VGenvarAttribute::num(const VNode *vnode)
@@ -971,6 +975,7 @@ VVarAttribute::VVarAttribute(const std::string& n) : VAttributeType(n)
     searchKeyToData_["var_name"]=NameIndex;
     searchKeyToData_["var_value"]=ValueIndex;
     searchKeyToData_["var_type"]=TypeIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VVarAttribute::num(const VNode *vnode)
@@ -1138,6 +1143,7 @@ VLimitAttribute::VLimitAttribute(const std::string& n) : VAttributeType(n)
     searchKeyToData_["limit_name"]=NameIndex;
     searchKeyToData_["limit_value"]=ValueIndex;
     searchKeyToData_["limit_max"]=MaxIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VLimitAttribute::num(const VNode *vnode)
@@ -1278,6 +1284,7 @@ VLimiterAttribute::VLimiterAttribute(const std::string& n) : VAttributeType(n)
     dataCount_=3;
     searchKeyToData_["limiter_name"]=NameIndex;
     searchKeyToData_["limiter_path"]=PathIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VLimiterAttribute::num(const VNode *vnode)
@@ -1414,6 +1421,7 @@ VTriggerAttribute::VTriggerAttribute(const std::string& n) : VAttributeType(n)
     dataCount_=3;
     searchKeyToData_["trigger_type"]=CompleteIndex;
     searchKeyToData_["trigger_expression"]=ExprIndex;
+    searchKeyToData_["name"]=CompleteIndex;
 }
 
 int VTriggerAttribute::num(const VNode *vnode)
@@ -1606,6 +1614,7 @@ VTimeAttribute::VTimeAttribute(const std::string& n) : VAttributeType(n)
 {
     dataCount_=2;
     searchKeyToData_["time_name"]=NameIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VTimeAttribute::num(const VNode *vnode)
@@ -1801,6 +1810,7 @@ VDateAttribute::VDateAttribute(const std::string& n) : VAttributeType(n)
 {
     dataCount_=2;
     searchKeyToData_["date_name"]=NameIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VDateAttribute::num(const VNode *vnode)
@@ -1974,6 +1984,7 @@ VRepeatAttribute::VRepeatAttribute(const std::string& n) : VAttributeType(n)
     dataCount_=7;
     searchKeyToData_["repeat_name"]=NameIndex;
     searchKeyToData_["repeat_value"]=ValueIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VRepeatAttribute::num(const VNode *vnode)
@@ -2130,7 +2141,10 @@ private:
 
 VLateAttribute::VLateAttribute(const std::string& n) : VAttributeType(n)
 {
-    dataCount_=2;
+    dataCount_=2;   
+    searchKeyToData_["late_name"]=NameIndex;
+    searchKeyToData_["late_type"]=TypeIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VLateAttribute::num(const VNode *vnode)

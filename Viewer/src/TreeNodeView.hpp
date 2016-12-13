@@ -84,6 +84,7 @@ protected:
 	void collapseAll(const QModelIndex& idx);
     void expandTo(const QModelIndex& idxTo);
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void setCurrentSelectionFromExpand(VInfo_ptr info);
 
     TreeNodeModel* model_;
 	ActionHandler* actionHandler_;
@@ -94,6 +95,7 @@ protected:
 	PropertyMapper* prop_;
     QMap<QString,QString> styleSheet_;
     bool setCurrentIsRunning_;
+    bool setCurrentFromExpand_;
 };
 
 #endif

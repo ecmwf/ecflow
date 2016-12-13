@@ -404,9 +404,8 @@ std::string VInfoAttribute::path()
     std::string p;
     if(server_)
        p=server_->name();
-
-    if(node_ && node_->node())
-        p+=":/" + node_->absNodePath();
+    if(attr_)
+        p+=attr_->fullPath();
 
     return p;
 }
