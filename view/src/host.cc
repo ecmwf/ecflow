@@ -1447,10 +1447,6 @@ tmp_file ehost::file(node& n, std::string name)
 tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
 {  
    std::string no_script = n.variable("ECF_NO_SCRIPT");
-   if (!no_script.empty()) {
-     std::string error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
-     return tmp_file(error);
-   }
    gui::message("%s: fetching source", this->name());
    try {
       if (preproc)
@@ -1478,6 +1474,12 @@ tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
 "client must be capable to create temporary file:\n"
 "\tcheck /tmp directory with write access, and space available,\n"
 "or preprocessed file may be truncated beyond some size.\n";
+   if (!no_script.empty()) {
+     std::string error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD"
+       + no_script.empty();
+     // return tmp_file(error);
+   }
+
   return tmp_file(error);
 }
 
