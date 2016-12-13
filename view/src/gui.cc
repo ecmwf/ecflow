@@ -35,6 +35,7 @@ static resource* gui_resources[] = {
 	new option<str>(globals::instance(),"color_blue","blue"),
 	new option<str>(globals::instance(),"color_red","red"),
 	new option<str>(globals::instance(),"color_orange","orange"),
+	new option<str>(globals::instance(),"color_green","green"),
 
 	new option<str>(globals::instance(),"color_unknown",   "grey"),
 	new option<str>(globals::instance(),"color_suspended", "orange"),
@@ -294,6 +295,12 @@ GC gui::redGC(void)
 GC gui::orangeGC(void)
 {
 	static GC gc = makegc("orange");
+	return gc;
+}
+
+GC gui::greenGC(void)
+{
+	static GC gc = makegc("green");
 	return gc;
 }
 
