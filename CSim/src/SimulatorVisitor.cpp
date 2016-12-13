@@ -30,8 +30,9 @@ using namespace boost::posix_time;
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
-SimulatorVisitor::SimulatorVisitor(int /* truncateRepeats */)
+SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename,int /* truncateRepeats */)
 : /* truncateRepeats_(truncateRepeats), */
+  defs_filename_(defs_filename),
   foundTasks_(false),
   foundCrons_(false),
   hasTimeDependencies_(false),
@@ -50,61 +51,57 @@ void SimulatorVisitor::visitSuite( Suite* s)   {
 #endif
 
 	/// begin , will cause creation of generated variables. The generated variables
-	/// are use in client scripts and used to locate the sms files.
+	/// are use in client scripts and used to locate the ecf files.
 	s->begin();
-
-	// IF the suite has no task  (i.e could consist of just limits, set suite to complete
-	// Since we rely on it for termination of tests
-	// make setting NState::COMPLETE is after begin(), which will set Node into the queued state
-  	std::vector<Task*> theTasks;
-	s->getAllTasks(theTasks);
-	if (theTasks.empty()) {
-		s->set_state(NState::COMPLETE);
-		return;
- 	}
-	foundTasks_ = true;
 
 	// Found time dependencies use calendar increment of one minute
 	if (s->hasTimeDependencies()) {
 		hasTimeDependencies_ = true;
-		ci_ = minutes(1);
-	}
-
-	// If suite has repeat day attribute( a infinite repeat), it will run forever, hence disable this for simulation purposes
-	/// reset will clear the invalid flag., when doing a real job submission.
-	/// *** this must be placed after begin() since begin() will reset all attributes() *****
-	if (s->ref_repeat().makeInfiniteInValid()) {
-		cout << "Disabling '" << s->repeat().dump() << "' attribute of " << s->debugNodePath() << ". This will allow simulation to complete earlier.\n";
-	}
-
-	if (!s->crons().empty()) {
-	   foundCrons_ = true;
-	   //cout << "Found crons on Suite\n";
 	}
 
  	visitNodeContainer(s);
+
+   // IF the suite has no task  (i.e could consist of just limits, set suite to complete
+   // Since we rely on it for termination of tests
+   // make setting NState::COMPLETE is after begin(), which will set Node into the queued state
+ 	if (!foundTasks_) {
+      s->set_state(NState::COMPLETE);
+ 	}
 }
 
 void SimulatorVisitor::visitFamily( Family* f) { visitNodeContainer(f);}
 
 void SimulatorVisitor::visitNodeContainer(NodeContainer* nc)
 {
+   if (ci_ == hours(1)) nc->get_time_resolution_for_simulation(ci_);
+
    if (!nc->crons().empty()) {
       foundCrons_ = true;
-      cout << "Found crons on NodeContainer\n";
+      cout << defs_filename_ << ": Found crons on NodeContainer\n";
    }
 
-//	analyse(nc);
+   // If suite has repeat day attribute( a infinite repeat), it will run forever, hence disable this for simulation purposes
+   /// reset will clear the invalid flag., when doing a real job submission.
+   /// *** this must be placed after begin() since begin() will reset all attributes() *****
+   if (nc->ref_repeat().makeInfiniteInValid()) {
+      cout << defs_filename_ << ": Disabling '" << nc->repeat().dump()
+           << "' attribute of " << nc->debugNodePath()
+           << ". This will allow simulation to complete earlier.\n";
+   }
+
 	BOOST_FOREACH(node_ptr t, nc->nodeVec()) { t->acceptVisitTraversor(*this);}
 }
 
 void SimulatorVisitor::visitTask( Task* t )
 {
+   if (ci_ == hours(1)) t->get_time_resolution_for_simulation(ci_);
+
+   foundTasks_ = true;
+
    if (!t->crons().empty()) {
       foundCrons_ = true;
-      // cout << "Found crons on task\n";
+      // cout << defs_filename_ << ": Found crons on task\n";
    }
-//   analyse(t);
 }
 
 boost::posix_time::time_duration SimulatorVisitor::maxSimulationPeriod() const

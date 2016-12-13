@@ -14,6 +14,7 @@
 import argparse # for argument parsing  
 import time
 import os
+import sys
 import pwd
 from datetime import datetime
 from socket import gethostname 
@@ -22,7 +23,7 @@ import shutil   # used to remove directory tree
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
-                   JobCreationCtrl, CheckPt, Cron, Late, debug_build, Flag, FlagType
+                   CheckPt, Cron, Late, debug_build, Flag, FlagType
 
 class Tester(object) : 
     def __init__(self,ci,args):
@@ -68,8 +69,11 @@ class Tester(object) :
         path_to_client = File.find_client()
         if os.path.exists(path_to_client):
             return path_to_client
-        return "/usr/local/apps/ecflow/" + self.ci_.version() + "/bin/ecflow_client"
-    
+        path_to_client = "/usr/local/apps/ecflow/" + self.ci_.version() + "/bin/ecflow_client"
+        if os.path.exists(path_to_client):
+            return path_to_client
+        return "ecflow_client" # fall back, just search on $PATH in the scripts
+     
     def create_defs(self,name=""):
         defs = Defs()
         suite_name = name
@@ -85,12 +89,11 @@ class Tester(object) :
         family = suite.add_family("f1")
         family.add_task("t1")
         family.add_task("t2")
-        return defs;
-
+        return defs;        
+        
     def sync_local(self,sleep_time=4):
         """Delay added so that we can see the change in the GUI.
            The GUI refresh rate should be set to 1 second
-           For check test are working comment out the delay
            """
         self.ci_.sync_local()
         if self.ARGS_.sync_sleep != 0 and sleep_time != 0:
@@ -101,13 +104,10 @@ class Tester(object) :
         self.ci_.log_msg("======================== " + msg + " ========================")
     
     def test_version(self):
-        self.log_msg("test_version")
-        client_version = self.ci_.version();
-        server_version = self.ci_.server_version();
-        #assert client_version == server_version, "Expected client version(" + client_version +") and server version(" +  server_version + ") to match\n";
+        self.log_msg("test_version Client_version(" + self.ci_.version() + ") server version(" + self.ci_.server_version() + ")")
         
     def test_client_get_server_defs(self):
-        test = "test_client_get_server_defs"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         self.ci_.load(self.create_defs(test))  
         self.sync_local()  
@@ -117,7 +117,8 @@ class Tester(object) :
         self.sync_local()  
     
     def test_client_restart_server(self):
-        self.log_msg("test_client_restart_server")
+        test = sys._getframe().f_code.co_name # returns function name
+        self.log_msg(test)
         self.ci_.restart_server()
         self.sync_local()
         assert self.ci_.get_defs().get_server_state() == SState.RUNNING, "Expected server to be running"
@@ -129,7 +130,7 @@ class Tester(object) :
         assert paths[0] == "/", "Expected root path but found " + str(paths[0])
     
     def test_client_halt_server(self):
-        self.log_msg("test_client_halt_server")
+        self.log_msg(sys._getframe().f_code.co_name)
         self.ci_.halt_server()
         self.sync_local()
         assert self.ci_.get_defs().get_server_state() == SState.HALTED, "Expected server to be halted"
@@ -142,7 +143,7 @@ class Tester(object) :
         self.ci_.restart_server()   
     
     def test_client_shutdown_server(self):
-        self.log_msg("test_client_shutdown_server")
+        self.log_msg(sys._getframe().f_code.co_name)
         self.ci_.shutdown_server()
         self.sync_local()
         assert self.ci_.get_defs().get_server_state() == SState.SHUTDOWN, "Expected server to be shutdown"
@@ -154,7 +155,7 @@ class Tester(object) :
         assert paths[0] == "/", "Expected root path but found " + str(paths[0])
     
     def test_client_load_in_memory_defs(self):
-        test = "test_client_load_in_memory_defs"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         self.ci_.load(self.create_defs(test))  
         self.sync_local() 
@@ -162,7 +163,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
     def test_client_load_from_disk(self):            
-        test = "test_client_load_from_disk"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test);
         defs_file = test + ".def"
@@ -177,7 +178,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
     def test_client_checkpt(self):
-        test = "test_client_checkpt"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         try:    
             os.remove(self.checkpt_file_path())
@@ -205,7 +206,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
     def test_client_restore_from_checkpt(self):          
-        test = "test_client_restore_from_checkpt"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         try:    
             os.remove(self.checkpt_file_path())
@@ -233,7 +234,7 @@ class Tester(object) :
     def get_username(self): return pwd.getpwuid(os.getuid())[ 0 ]
     
     def test_client_reload_wl_file(self):
-        test = "test_client_reload_wl_file"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         
         expected = False
@@ -257,23 +258,29 @@ class Tester(object) :
         self.ci_.reload_wl_file();  
         os.remove(self.white_list_file_path())          
     
-    def test_client_run(self):            
-        test = "test_client_run"
-        self.log_msg(test)
-        defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_defstatus(DState.suspended)
-    
+    def generate_scripts_and_load_defs(self,defs):
         defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+        msg = defs.check_job_creation()       
+        assert len(msg) == 0, msg
         
         self.ci_.restart_server()
         self.ci_.load(defs)           
         self.sync_local() # clear changed_node_paths 
+
+    def create_and_load_defs(self,test,add_defstatus = True):
+        self.log_msg(test)
+        defs = self.create_defs(test)  
+        suite = defs.find_suite(test)
+        if add_defstatus :
+            suite.add_defstatus(DState.suspended)
+    
+        self.generate_scripts_and_load_defs(defs);
         self.ci_.begin_suite(test)
+
+    def test_client_run(self):            
+        test = sys._getframe().f_code.co_name # returns function name
+        self.create_and_load_defs(test)
+        
         self.ci_.run("/" + test, False)
         
         count = 0
@@ -293,22 +300,9 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
     def test_client_run_with_multiple_paths(self):            
-        test = "test_client_run_with_multiple_paths"
-        self.log_msg(test)
-        defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_defstatus(DState.suspended)
-    
-        defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-        
-        self.ci_.restart_server()
-        self.ci_.load(defs)           
-        self.sync_local()  
-        self.ci_.begin_suite(test)
+        test = sys._getframe().f_code.co_name # returns function name
+        self.create_and_load_defs(test)
+
         path_list = [ "/" + test + "/f1/t1", "/" + test + "/f1/t2"]
         self.ci_.run( path_list, False)
     
@@ -328,21 +322,8 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this   
     
     def test_client_requeue(self):
-        test = "test_client_requeue"
-        self.log_msg(test)
-        defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_defstatus(DState.suspended)
-         
-        defs.generate_scripts();
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-     
-        self.ci_.restart_server()
-        self.ci_.load(defs)           
-        self.sync_local()  
-        self.ci_.begin_suite(test)
+        test = sys._getframe().f_code.co_name # returns function name
+        self.create_and_load_defs(test)
         
         self.ci_.force_state_recursive("/" + test,State.unknown)
         self.sync_local();
@@ -356,22 +337,9 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
     def test_client_requeue_with_multiple_paths(self):
-        test = "test_client_requeue_with_multiple_paths"
-        self.log_msg(test)
-        defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_defstatus(DState.suspended)
-         
-        defs.generate_scripts();
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-     
-        self.ci_.restart_server()
-        self.ci_.load(defs)           
-        self.sync_local()  
-        self.ci_.begin_suite(test)
-        
+        test = sys._getframe().f_code.co_name # returns function name
+        self.create_and_load_defs(test)
+
         self.ci_.force_state_recursive("/" + test,State.unknown)
         self.sync_local();
         task1 = self.ci_.get_defs().find_abs_node("/" + test + "/f1/t1")
@@ -389,7 +357,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
     def test_client_free_dep(self):
-        test = "test_client_free_dep"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
            
         # add a real clock, since we are adding date dependencies
@@ -418,15 +386,7 @@ class Tester(object) :
         t4.add_date(day,month,year)
         t4.add_trigger("1 == 0")
     
-        defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-     
-        self.ci_.restart_server()
-        self.ci_.load(defs)           
-        self.sync_local()  
+        self.generate_scripts_and_load_defs(defs);
         self.ci_.begin_suite(test)
         
         t1_path = "/" + test + "/f1/t1"
@@ -454,7 +414,7 @@ class Tester(object) :
 
     
     def test_client_check(self):
-        test = "test_client_check"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         
         defs = Defs()
@@ -498,7 +458,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
         
     def test_client_suites(self):
-        test = "test_client_suites"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         no_of_suites = len(self.ci_.suites())
     
@@ -508,7 +468,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
         
     def test_client_ch_suites(self):
-        test = "test_client_ch_suites"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         
         defs = Defs()
@@ -526,8 +486,9 @@ class Tester(object) :
         self.sync_local();    
     
     def test_client_ch_register(self):
-        test = "test_client_ch_register"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg("test_client_ch_register")
+        
         try: self.ci_.ch_drop_user("")  # drop all handle associated with current user
         except: pass              # Drop throws if no handle registered
         
@@ -543,8 +504,9 @@ class Tester(object) :
         for i in range(1,7):  self.ci_.delete("/" + test + str(i)  ) # stop  downstream test from re-starting this
                 
     def test_client_ch_drop(self):
-        test = "test_client_ch_drop"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
+        
         try: self.ci_.ch_drop_user("")  # drop all handle associated with current user
         except: pass              # Drop throws if no handle registered
         
@@ -563,7 +525,7 @@ class Tester(object) :
         for i in range(1,7):  self.ci_.delete("/" + test + str(i)  ) # stop  downstream test from re-starting this
               
     def test_client_ch_drop_user(self):
-        test = "test_client_ch_drop_user"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         try: self.ci_.ch_drop_user("")  # drop all handle associated with current user
         except: pass              # Drop throws if no handle registered
@@ -585,7 +547,7 @@ class Tester(object) :
         for i in range(1,7):  self.ci_.delete("/" + test + str(i)  ) # stop  downstream test from re-starting this
                 
     def test_client_ch_add(self):
-        test = "test_client_ch_add"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         try: self.ci_.ch_drop_user("")  # drop all handle associated with current user
         except: pass              # Drop throws if no handle registered
@@ -610,7 +572,7 @@ class Tester(object) :
         for i in range(1,7):  self.ci_.delete("/" + test + str(i)  ) # stop  downstream test from re-starting this
                 
     def test_client_ch_auto_add(self):
-        test = "test_client_ch_auto_add"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         try: self.ci_.ch_drop_user("")  # drop all handle associated with current user
         except: pass              # Drop throws if no handle registered
@@ -623,9 +585,9 @@ class Tester(object) :
         try:
             suite_names = [ test + '1', test + '2', test + '3' ]
             self.ci_.ch_register(True,suite_names)     # register interest in suites s1,s2,s3 and any new suites
-            self.ci_.ch_auto_add( False )                 # disable adding newly created suites to last registered handle\n"
-            self.ci_.ch_auto_add( True )                  # enable adding newly created suites to last registered handle\n"
-            self.ci_.ch_auto_add( self.ci_.ch_handle(), False ) # disable adding newly created suites to handle\n"
+            self.ci_.ch_auto_add( False )              # disable adding newly created suites to last registered handle
+            self.ci_.ch_auto_add( True )               # enable adding newly created suites to last registered handle
+            self.ci_.ch_auto_add( self.ci_.ch_handle(), False ) # disable adding newly created suites to handle
             self.sync_local();
         except RuntimeError as e:
             print(str(e))
@@ -634,7 +596,7 @@ class Tester(object) :
         for i in range(1,7):  self.ci_.delete("/" + test + str(i)  ) # stop  downstream test from re-starting this
                
     def test_client_ch_remove(self):
-        test = "test_client_ch_remove"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         try: self.ci_.ch_drop_user("")  # drop all handle associated with current user
         except: pass              # Drop throws if no handle registered
@@ -659,21 +621,9 @@ class Tester(object) :
         for i in range(1,7):  self.ci_.delete("/" + test + str(i)  ) # stop  downstream test from re-starting this
                
     def test_client_get_file(self):
-        test = "test_client_get_file"
-        self.log_msg(test)
-        defs = self.create_defs(test)  
-          
-        defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-     
-        self.ci_.restart_server()
-        self.ci_.load(defs)           
-        self.sync_local()  
-        self.ci_.begin_suite(test)
-        
+        test = sys._getframe().f_code.co_name # returns function name
+        self.create_and_load_defs(test,False)
+  
         while 1:
             if self.ci_.news_local():
                 self.sync_local(0) # get the changes, synced with local defs
@@ -681,7 +631,7 @@ class Tester(object) :
                 assert suite != None, "Expected to find suite"
                 if suite.get_state() == State.complete:
                     break;
-                time.sleep(3)
+            time.sleep(3)
         try:
             for file_t in [ 'script', 'job', 'jobout', 'manual' ]:
                 the_returned_file = self.ci_.get_file('/' + test +'/f1/t1',file_t)  # make a request to the server
@@ -692,7 +642,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
         
     def test_client_alter_add(self):
-        test = "test_client_alter_add"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         self.ci_.load(self.create_defs(test))   
         self.sync_local()  
@@ -729,8 +679,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
                
     def test_client_alter_delete(self):
-        test = "test_client_alter_delete"
-        self.log_msg(test)
+        test = sys._getframe().f_code.co_name # returns function name
         defs = self.create_defs(test)  
          
         t1 = "/" + test + "/f1/t1"
@@ -878,7 +827,6 @@ class Tester(object) :
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
         assert task_t1.get_late() == None, "expected no late after delete" 
     
-    
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
         assert task_t1.get_trigger() != None, "Expected trigger:\n" + str(self.ci_.get_defs())
         self.ci_.alter(t1,"delete","trigger")   
@@ -901,7 +849,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
      
     def test_client_alter_change(self):
-        test = "test_client_alter_change"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)   
         t1 = "/" + test + "/f1/t1"
@@ -1011,11 +959,11 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
      
     def test_client_alter_flag(self):
-        test = "test_client_alter_flag"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
-        defs = self.create_defs(test)   
-        t1 = "/" + test + "/f1/t1"
+        defs = self.create_defs(test)  
          
+        t1 = "/" + test + "/f1/t1"
         task_t1 = defs.find_abs_node(t1)
                
         self.ci_.load(defs)   
@@ -1043,7 +991,7 @@ class Tester(object) :
     def test_client_flag_migrated(self):
         # ENABLE for ecflow 4.5.0
         return
-        test = "test_client_flag_migrated"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         
         defs = self.create_defs(test)   
@@ -1071,22 +1019,8 @@ class Tester(object) :
         assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
      
-        # ISSUES:
-        # o Currently we can only change clock attr if we have one.
-        # o Even when we have a clock attr, it only makes sense to apply clock attr changes
-        #   before begin(), i.e how do we apply change in gain after begin ??
-        
-        #" change clock-type name        # The name must be one of 'hybrid' or 'real'.\n"
-        #       " change clock-gain name        # The gain must be convertible to an integer.\n"
-        #        " change label name value       # sets the label\n"
-        #        " change repeat value           # If the repeat is a date, then the value must be a valid YMD ( ie. yyyymmdd)\n"
-        #        "                               # and be convertible to an integer, additionally the value must be in range\n"
-        #        "                               # of the repeat start and end dates. Like wise for repeat integer. For repeat\n"
-        #         "                               # string and enum,  the name must either be an integer, that is a valid index or\n"
-        #         "                               # if it is a string, it must correspond to one of enum's or strings list\n"
-    
     def test_client_force(self):
-        test = "test_client_force"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test) 
          
@@ -1155,9 +1089,9 @@ class Tester(object) :
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
           
     def test_client_replace(self,on_disk):
-        test = "test_client_replace"
+        test = sys._getframe().f_code.co_name # returns function name
         if on_disk:
-            test = "test_client_replace_on_disk"
+            test = test + "on_disk"
         self.log_msg(test)
         self.ci_.log_msg(str(on_disk))
          
@@ -1236,11 +1170,11 @@ class Tester(object) :
         self.sync_local()  
     
     def test_client_suspend(self):
-        test = "test_client_suspend"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
+        
         defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_variable("ECF_DUMMY_TASK","")
+        defs.find_suite(test).add_variable("ECF_DUMMY_TASK","")
             
         self.ci_.load(defs)  
         self.sync_local()  
@@ -1254,7 +1188,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
         
     def test_client_suspend_multiple_paths(self):
-        test = "test_client_suspend_multiple_paths"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)  
         suite = defs.find_suite(test)
@@ -1275,11 +1209,10 @@ class Tester(object) :
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
                 
     def test_client_resume(self):
-        test = "test_client_resume"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_variable("ECF_DUMMY_TASK","")
+        defs.find_suite(test).add_variable("ECF_DUMMY_TASK","")
             
         self.ci_.load(defs)  
         self.ci_.begin_suite(test)  
@@ -1299,11 +1232,10 @@ class Tester(object) :
         self.ci_.suspend("/" + test )  
     
     def test_client_resume_multiple_paths(self):
-        test = "test_client_resume_multiple_paths"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)  
-        suite = defs.find_suite(test)
-        suite.add_variable("ECF_DUMMY_TASK","")
+        defs.find_suite(test).add_variable("ECF_DUMMY_TASK","")
             
         self.ci_.load(defs)  
         self.ci_.begin_suite(test)  
@@ -1329,7 +1261,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test )  
       
     def test_client_delete_node(self): 
-        test = "test_client_delete_node"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)
         
@@ -1352,7 +1284,7 @@ class Tester(object) :
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
         
     def test_client_delete_node_multiple_paths(self): 
-        test = "test_client_delete_node_multiple_paths"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)
         
@@ -1379,28 +1311,19 @@ class Tester(object) :
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this    
     
     def test_client_check_defstatus(self):            
-        test = "test_client_check_defstatus"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
         defs = self.create_defs(test)  
         
-        # stop defs form running when begin is called.
-        suite = defs.find_suite(test)
-        suite.add_defstatus(DState.suspended)
+        # stop defs from running when begin is called.
+        defs.find_suite(test).add_defstatus(DState.suspended)
     
         t1 = "/" + test + "/f1/t1"
         t2 = "/" + test + "/f1/t2"
         task_t1 = defs.find_abs_node(t1)
         task_t1.add_defstatus(DState.suspended)
         
-        defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        job_ctrl.set_node_path("/" + test)
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-        
-        self.ci_.restart_server()
-        self.ci_.load(defs)           
+        self.generate_scripts_and_load_defs(defs);
         self.ci_.begin_suite(test)
          
         self.sync_local() # get the changes, synced with local defs
@@ -1417,22 +1340,12 @@ class Tester(object) :
         assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_state())
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
        
-        
     def test_ECFLOW_189(self):
         # Bug, when a node is resumed it ignored holding dependencies higher up the tree.
         # i.e Previously when we resumed a node, it ignored trigger/time/node state, dependencies higher up the tree
-        test = "test_ECFLOW_189"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
-        defs = self.create_defs(test)  
-        defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-        
-        self.ci_.restart_server()
-        self.ci_.load(defs)   
-        self.sync_local()  
+        self.generate_scripts_and_load_defs(self.create_defs(test));
         
         self.ci_.suspend("/" + test  )
         self.ci_.suspend("/" + test + "/f1/t1")
@@ -1468,18 +1381,9 @@ class Tester(object) :
     
     def test_ECFLOW_199(self):
         # Test ClientInvoker::changed_node_paths
-        test = "test_ECFLOW_199"
+        test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
-        defs = self.create_defs(test)  
-        defs.generate_scripts();
-        
-        job_ctrl = JobCreationCtrl()
-        defs.check_job_creation(job_ctrl)       
-        assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
-        
-        self.ci_.restart_server()
-        self.ci_.load(defs)   
-        self.sync_local() # get the changes, synced with local defs
+        self.generate_scripts_and_load_defs(self.create_defs(test));
         
         self.ci_.suspend("/" + test  )
         self.ci_.suspend("/" + test + "/f1/t1")
@@ -1580,7 +1484,7 @@ if __name__ == "__main__":
                    first in the current cmake build tree, otherwise /usr/local/apps/ecflow, with same 
                    version as this ecflow python api.
               Usage:
-                   TestGui.py --host <hostname> --port <portname> --time <sec> --syn_sleep <sec> 
+                   TestGui.py --host <hostname> --port <portname> --time <sec> --sync_sleep <sec> 
             """    
     PARSER = argparse.ArgumentParser(description=DESC,  
                                      formatter_class=argparse.RawDescriptionHelpFormatter)

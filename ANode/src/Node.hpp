@@ -297,6 +297,10 @@ public:
    virtual bool hasTimeDependencies() const { return (time_dep_attrs_) ? true : false; }
    bool isTimeFree() const { return (time_dep_attrs_) ? time_dep_attrs_->timeDependenciesFree() : false;}
 
+   /// If no time dependencies then we have a resolution of 1 hour.
+   /// If we have just day/date then we have a resolution of 1 hour
+   /// Otherwise if we have time/today/cron with minutes, then resolution is 1 minute
+   void get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const;
 
    /// A hierarchical function
    virtual bool hasAutoCancel() const { return (autoCancel_) ? true : false;}

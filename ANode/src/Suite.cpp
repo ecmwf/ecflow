@@ -657,6 +657,8 @@ void Suite::gen_variables(std::vector<Variable>& vec) const
 SuiteGenVariables::SuiteGenVariables(const Suite* s)
 :  suite_(s),
    genvar_suite_("SUITE", "", false),
+   genvar_ecf_time_("ECF_TIME", "", false ),
+   genvar_time_("TIME", "", false ),
    genvar_yyyy_("YYYY","", false),
    genvar_dow_("DOW", "", false),
    genvar_doy_("DOY", "", false),
@@ -665,9 +667,8 @@ SuiteGenVariables::SuiteGenVariables(const Suite* s)
    genvar_dd_("DD", "", false ),
    genvar_mm_("MM", "", false ),
    genvar_month_("MONTH", "", false ),
-   genvar_smsdate_("ECF_DATE", "", false ),
-   genvar_clock_("ECF_CLOCK", "", false ),
-   genvar_time_("ECF_TIME", "", false ),
+   genvar_ecf_date_("ECF_DATE", "", false ),
+   genvar_ecf_clock_("ECF_CLOCK", "", false ),
    force_update_(false){}
 
 void SuiteGenVariables::update_generated_variables() const
@@ -709,8 +710,15 @@ void SuiteGenVariables::update_generated_variables() const
    //#endif
 
    char smstime[255];
-   sprintf(smstime,"%02d:%02d", time_of_day.hours(),time_of_day.minutes());
+   sprintf(smstime,"%02d%02d", time_of_day.hours(),time_of_day.minutes());
    genvar_time_.set_value( smstime );
+
+   sprintf(smstime,"%02d:%02d", time_of_day.hours(),time_of_day.minutes());
+   genvar_ecf_time_.set_value( smstime );
+
+   //cout << "genvar_time_ = " << genvar_time_.theValue() << "\n";
+   //cout << "genvar_ecf_time_ = " << genvar_ecf_time_.theValue() << "\n";
+
 
    // **********************************************************************
    // The following generated variable need only be updated if NULL or if day changed
@@ -722,31 +730,31 @@ void SuiteGenVariables::update_generated_variables() const
       genvar_yyyy_.set_value(boost::lexical_cast<std::string>(suite_->calendar_.year()));
       genvar_dow_.set_value( boost::lexical_cast<std::string>(suite_->calendar_.day_of_week()) );
       genvar_doy_.set_value( boost::lexical_cast<std::string>(suite_->calendar_.day_of_year()) );
-      //cout << "genvar_yyyy_ = " << genvar_yyyy_->theValue() << "\n";
-      //cout << "genvar_dow_ = " << genvar_dow_->theValue() << "\n";
-      //cout << "genvar_doy_ = " << genvar_doy_->theValue() << "\n";
+      //cout << "genvar_yyyy_ = " << genvar_yyyy_.theValue() << "\n";
+      //cout << "genvar_dow_ = " << genvar_dow_.theValue() << "\n";
+      //cout << "genvar_doy_ = " << genvar_doy_.theValue() << "\n";
 
       char ddmmyyyyBuffer[255];
       sprintf(ddmmyyyyBuffer,"%02d.%02d.%04d", suite_->calendar_.day_of_month(), suite_->calendar_.month(), suite_->calendar_.year());
       genvar_date_.set_value( ddmmyyyyBuffer );
-      //cout << "genvar_date_ = " << genvar_date_->theValue() << "\n";
+      //cout << "genvar_date_ = " << genvar_date_.theValue() << "\n";
 
       char *day_name[]= { const_cast<char*>("sunday"),   const_cast<char*>("monday"),
                           const_cast<char*>("tuesday"),  const_cast<char*>("wednesday"),
                           const_cast<char*>("thursday"), const_cast<char*>("friday"),
                           const_cast<char*>("saturday"), NULL };
       genvar_day_.set_value( day_name[suite_->calendar_.day_of_week()]  );
-      //cout << "genvar_day_ = " << genvar_day_->theValue() << "\n";
+      //cout << "genvar_day_ = " << genvar_day_.theValue() << "\n";
 
       char dd[255];
       sprintf(dd,"%02d",suite_->calendar_.day_of_month());
       genvar_dd_.set_value( dd  );
-      //cout << "genvar_dd_ = " << genvar_dd_->theValue() << "\n";
+      //cout << "genvar_dd_ = " << genvar_dd_.theValue() << "\n";
 
       char mm[255];
       sprintf(mm,"%02d",suite_->calendar_.month());
       genvar_mm_.set_value( mm  );
-      //cout << "genvar_mm_ = " << genvar_mm_->theValue() << "\n";
+      //cout << "genvar_mm_ = " << genvar_mm_.theValue() << "\n";
 
       char *month_name[]
                        = { const_cast<char*>("january"),   const_cast<char*>("february"),  const_cast<char*>("march"),
@@ -755,24 +763,24 @@ void SuiteGenVariables::update_generated_variables() const
                            const_cast<char*>("october"),   const_cast<char*>("november"),  const_cast<char*>("december"),
                                 NULL } ;
       genvar_month_.set_value( month_name[suite_->calendar_.month()-1]  );
-      //cout << "genvar_month_ = " << genvar_month_->theValue() << "\n";
+      //cout << "genvar_month_ = " << genvar_month_.theValue() << "\n";
 
       char smsdate[255];
       sprintf(smsdate,"%04d%02d%02d", suite_->calendar_.year(), suite_->calendar_.month() , suite_->calendar_.day_of_month());
-      genvar_smsdate_.set_value( smsdate );
-      //cout << "genvar_smsdate_ = " << genvar_smsdate_->theValue() << "\n";
+      genvar_ecf_date_.set_value( smsdate );
+      //cout << "genvar_ecf_date_ = " << genvar_ecf_date_.theValue() << "\n";
 
       char smsclock[255];
       sprintf(smsclock,"%s:%s:%d:%d", day_name[suite_->calendar_.day_of_week()], month_name[suite_->calendar_.month()-1],suite_->calendar_.day_of_week(),suite_->calendar_.day_of_year());
-      genvar_clock_.set_value( smsclock );
-      //cout << "genvar_clock_ = " << genvar_clock_->theValue() << "\n";
+      genvar_ecf_clock_.set_value( smsclock );
+      //cout << "genvar_ecf_clock_ = " << genvar_ecf_clock_.theValue() << "\n";
    }
 }
 
 const Variable& SuiteGenVariables::findGenVariable(const std::string& name) const
 {
    if (genvar_suite_.name() == name) return genvar_suite_;
-   if (genvar_smsdate_.name() == name) return genvar_smsdate_;
+   if (genvar_ecf_date_.name() == name) return genvar_ecf_date_;
    if (genvar_yyyy_.name() == name) return genvar_yyyy_;
    if (genvar_dow_.name() == name) return genvar_dow_;
    if (genvar_doy_.name() == name) return genvar_doy_;
@@ -781,7 +789,8 @@ const Variable& SuiteGenVariables::findGenVariable(const std::string& name) cons
    if (genvar_dd_.name() == name) return genvar_dd_;
    if (genvar_mm_.name() == name) return genvar_mm_;
    if (genvar_month_.name() == name) return genvar_month_;
-   if (genvar_clock_.name() == name) return genvar_clock_;
+   if (genvar_ecf_clock_.name() == name) return genvar_ecf_clock_;
+   if (genvar_ecf_time_.name() == name) return genvar_ecf_time_;
    if (genvar_time_.name() == name) return genvar_time_;
    return Variable::EMPTY();
 }
@@ -789,7 +798,7 @@ const Variable& SuiteGenVariables::findGenVariable(const std::string& name) cons
 void SuiteGenVariables::gen_variables(std::vector<Variable>& vec) const
 {
    vec.push_back(genvar_suite_);
-   vec.push_back(genvar_smsdate_);
+   vec.push_back(genvar_ecf_date_);
    vec.push_back(genvar_yyyy_);
    vec.push_back(genvar_dow_);
    vec.push_back(genvar_doy_);
@@ -798,6 +807,7 @@ void SuiteGenVariables::gen_variables(std::vector<Variable>& vec) const
    vec.push_back(genvar_dd_);
    vec.push_back(genvar_mm_);
    vec.push_back(genvar_month_);
-   vec.push_back(genvar_clock_);
+   vec.push_back(genvar_ecf_clock_);
+   vec.push_back(genvar_ecf_time_);
    vec.push_back(genvar_time_);
 }

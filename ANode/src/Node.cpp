@@ -1,4 +1,4 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+   /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
 // Revision    : $Revision: #305 $ 
@@ -1955,6 +1955,13 @@ void Node::update_repeat_genvar() const
 {
    if (!repeat_.empty()) {
       repeat_.update_repeat_genvar();
+   }
+}
+
+void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const
+{
+   if ( time_dep_attrs_ ) {
+      time_dep_attrs_->get_time_resolution_for_simulation(resol);
    }
 }
 

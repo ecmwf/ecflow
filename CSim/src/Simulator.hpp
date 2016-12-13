@@ -22,6 +22,7 @@
 #include <map>
 class Defs;
 class Task;
+class Submittable;
 namespace ecf { class SimulatorVisitor;}
 
 namespace ecf {
@@ -52,7 +53,7 @@ private:
 	bool doJobSubmission(Defs&, std::string& errorMsg) const;
 
 	mutable boost::posix_time::time_duration max_simulation_period_;
-	mutable std::map<Task*,int> taskIntMap_;
+	mutable std::map<Submittable*,int> taskIntMap_;
 	int truncateLongRepeatsTo_;
 	mutable int level_;
 	mutable bool foundCrons_;

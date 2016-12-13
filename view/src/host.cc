@@ -167,7 +167,7 @@ host::host( const std::string& name, const std::string& host, int number )
 	 , connected_(false)
 	 , after_command_(true)
 	 , passwd_("-none-")
-	 , timeout_(this, "timeout", 5)
+	 , timeout_(this, "timeout", 30)
 	 , maximum_(this, "maximum", 60)
 	 , drift_(this, "drift", true)
 	 , connect_(this, "connect", false)
@@ -198,8 +198,8 @@ host::host( const std::string& name, const std::string& host, int number )
       gui::add_host(name);
    }
 
-   if (timeout_ < 1) timeout_ = 1;
-   if (maximum_ < 1) maximum_ = 1;
+   if (timeout_ < 30) timeout_ = 30;
+   if (maximum_ < 30) maximum_ = 30;
 
    frequency(timeout_);
 }
@@ -1392,7 +1392,7 @@ tmp_file ehost::file(node& n, std::string name)
       "The file may have been deleted\n"
       "or this may be a 'dummy' task.\n";    
 
-  } else if (boost::algorithm::ends_with(name, ".0")) {
+  } else if (0) { // boost::algorithm::ends_with(name, ".0")) {
     error = "no output to be expected when TRYNO is 0!\n";
     return tmp_file(error);
 
