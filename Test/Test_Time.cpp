@@ -98,6 +98,12 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
 
 BOOST_AUTO_TEST_CASE( test_single_time_trigger )
 {
+   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+      std::cout << "\n    Disable test_single_time_trigger for old server ************************************************\n";
+      return;
+   }
+
+   // ECFLOW-833
    DurationTimer timer;
    cout << "Test:: ...test_single_time_trigger " << flush;
    TestClean clean_at_start_and_end;
@@ -117,7 +123,7 @@ BOOST_AUTO_TEST_CASE( test_single_time_trigger )
    //  clock real <todays date>
    // family family
    //    task t1
-   //         trigger /suite:time == 1001
+   //         trigger /suite:TIME == 1001
    //    endfamily
    //endsuite
    Defs theDefs;
