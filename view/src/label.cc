@@ -41,13 +41,12 @@ void label_node::drawNode(Widget w,XRectangle* r,bool)
 {
   std::string info = value();
   boost::algorithm::to_lower(info);
-  bool err = std::string::npos != info.find("err");
-  bool war = std::string::npos != info.find("war");
-  bool msg = std::string::npos != info.find("msg");
-  GC gc = blackGC();
-  if (err) gc = redGC();
-  else if (war) gc = gui::orangeGC();
-  else if (msg) gc = blueGC();
+  GC gc;
+  if (std::string::npos != info.find("err"))      gc = redGC();
+  else if (std::string::npos != info.find("war")) gc = gui::orangeGC();
+  else if (std::string::npos != info.find("ok"))  gc = greenGC();
+  else if (std::string::npos != info.find("msg")) gc = blueGC();
+  else gc = blackGC();
     XmStringDraw(XtDisplay(w),XtWindow(w),
         smallfont(),
         labelTree(),

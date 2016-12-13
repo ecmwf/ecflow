@@ -275,6 +275,7 @@ public:
 
 	static GC         blackGC()      { return gui::blackGC();   }
 	static GC         blueGC()       { return gui::blueGC();    }
+	static GC         greenGC()      { return gui::greenGC();   }
 	static GC         redGC()        { return gui::redGC();     }
 	static XmFontList smallfont()    { return gui::smallfont(); }
 	static XmFontList fontlist()     { return gui::fontlist();  }

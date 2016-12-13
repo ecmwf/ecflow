@@ -1369,6 +1369,7 @@ tmp_file ehost::file(node& n, std::string name)
 {
   std::string error;
   bool read = direct_read_;
+  std::string no_script = n.variable("ECF_NO_SCRIPT");
   name.erase(std::unique(name.begin(), name.end(), dup_slash()), name.end()); // INT-74
 
   if (name == "ECF_SCRIPT") {
@@ -1376,21 +1377,22 @@ tmp_file ehost::file(node& n, std::string name)
       "check ECF_FILES or ECF_HOME directories, for read access\n"
       "check for file presence and read access below files directory\n"
       "or this may be a 'dummy' task.\n";    
-
   } else if (name == "ECF_JOB") {
     std::string filename = n.variable(name);
     if (read && (access(filename.c_str(), R_OK) == 0))
       return tmp_file(filename.c_str(), false);
-
-    if (std::string::npos != filename.find(".job0")) {
+    else if (!no_script.empty()) {
+      // pass
+      // error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
+    } else if (std::string::npos != filename.find(".job0")) {
 	error = "job0: no job to be generated yet!";
 	return tmp_file(error);
-      } else 
-	  error = "no script!\n"
-      "check ECF_HOME,directory for read/write access\n"
-      "check for file presence and read access below\n"
-      "The file may have been deleted\n"
-      "or this may be a 'dummy' task.\n";    
+    } else 
+      error = "no script!\n"
+	"check ECF_HOME,directory for read/write access\n"
+	"check for file presence and read access below\n"
+	"The file may have been deleted\n"
+	"or this may be a 'dummy' task.\n";    
 
   } else if (0) { // boost::algorithm::ends_with(name, ".0")) {
     error = "no output to be expected when TRYNO is 0!\n";
@@ -1437,12 +1439,18 @@ tmp_file ehost::file(node& n, std::string name)
          gui::message("host::file-error: %s", e.what());
       }
    }
-
+   if (!no_script.empty())
+     error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
    return tmp_file(error);
 }
 
 tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
-{
+{  
+   std::string no_script = n.variable("ECF_NO_SCRIPT");
+   if (!no_script.empty()) {
+     std::string error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
+     return tmp_file(error);
+   }
    gui::message("%s: fetching source", this->name());
    try {
       if (preproc)
@@ -1470,7 +1478,7 @@ tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
 "client must be capable to create temporary file:\n"
 "\tcheck /tmp directory with write access, and space available,\n"
 "or preprocessed file may be truncated beyond some size.\n";
-   return tmp_file(error);
+  return tmp_file(error);
 }
 
 tmp_file host::manual( node& n )
