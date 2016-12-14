@@ -471,10 +471,19 @@ void MainWindow::closeEvent(QCloseEvent* event)
 	}
 }
 
-//void MainWindow::slotQuit()
-//{
-//	 MainWindow::aboutToQuit(this);
-//}
+//On quitting we need to call the destructor of all the servers shown in the gui.
+//This will guarantee that the server log out is properly done.
+//Unfortunately when we quit qt does not call the destructor of the mainwindows.
+//We tried to explicitely delete the mainwindows here but it caused a crash on the
+//leap42 system. So here we only delete the nodePanel in the mainwindow. This panel
+//contains all the tabs. Each tab contains a serverfilter and when the serverfilters
+//get deleted in the end the destructors of the servers will be called.
+void MainWindow::cleanUpOnQuit()
+{
+    Q_ASSERT(quitStarted_==true);
+    serverFilterMenu_->aboutToDestroy();
+    delete nodePanel_;
+}
 
 //====================================================
 //
@@ -590,10 +599,10 @@ void MainWindow::hideServerSyncNotify(MainWindow*)
         win->hideServerSyncNotify();
 }
 
-void MainWindow::destroyAllWindows()
+void MainWindow::cleanUpOnQuit(MainWindow*)
 {
-	Q_FOREACH(MainWindow *win,windows_)
-		delete win;
+    Q_FOREACH(MainWindow *win,windows_)
+        win->cleanUpOnQuit();
 }
 
 //Return true if close is allowed, false otherwise
@@ -662,7 +671,7 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 		}
 
 		// ensure the window destructors are called
-		destroyAllWindows();
+        MainWindow::cleanUpOnQuit(topWin);
 
 		//Exit ecFlowView
 		QApplication::quit();

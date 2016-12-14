@@ -82,6 +82,7 @@ private:
     void updateRefreshActions();
     void hideServerSyncNotify();
     void constructWindowTitle();
+    void cleanUpOnQuit();
 
     void writeSettings(VComboSettings*);
     void readSettings(VComboSettings*);
@@ -97,7 +98,7 @@ private:
     static MainWindow* findWindow(QWidget *childW);
     static void configChanged(MainWindow *);
     static void hideServerSyncNotify(MainWindow*);
-    static void destroyAllWindows();
+    static void cleanUpOnQuit(MainWindow *);
 
     ServerFilterMenu* serverFilterMenu_;
     NodePanel* nodePanel_;
