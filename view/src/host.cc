@@ -1399,6 +1399,11 @@ tmp_file ehost::file(node& n, std::string name)
     return tmp_file(error);
 
   } else if (name != ecf_node::none()) { // Try logserver
+    if (n.isCmdFailed()) {
+      error = "Submission command Failed! check .sub file, ssh, or queueing system reported error";
+      return tmp_file(error);
+      
+    }
       std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
       std::string content;
       if (use_ecf_out_cmd(n, name, NULL, content)) {
@@ -1423,11 +1428,11 @@ tmp_file ehost::file(node& n, std::string name)
 	   client_.file(n.full_name(), "job", 
 			boost::lexical_cast<std::string>(jobfile_length_));
 	 }
-         else if (name == "ECF_JOBOUT")
+         else // if (name == "ECF_JOBOUT")
             client_.file(n.full_name(), "jobout");
-         else {
-            client_.file(n.full_name(), "jobout");
-         }
+         //else {
+         //   client_.file(n.full_name(), "jobout");
+         //}
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
          // in the case of job output the string could be several megabytes.
