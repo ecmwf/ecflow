@@ -579,12 +579,14 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
    gui::message("%s: fetching file list", this->name());
    std::string content;
    std::auto_ptr<ecf_dir> dir(new ecf_dir());
+   std::string job = n.variable("ECF_JOB");
    // if (use_ecf_out_cmd(n, path, dir.get(), content)) { l.scan(dir.get()); }   else 
-   if (loghost_ != ecf_node::none()) {
+   std::cout << n.full_name() << "\n" << path << "\n";
+   if (n.isCmdFailed()) { // so that local dir content is displayed with .sub file
+     path = job.c_str();
+   } else if (loghost_ != ecf_node::none()) {
       logsvr log_server(loghost_, logport_);
-
       if (log_server.ok()) {
-	// std::auto_ptr<ecf_dir> 
 	std::auto_ptr<ecf_dir> rdir(log_server.getdir(path));
 	if (rdir.get()) {
 	  l.scan(rdir.get());
@@ -593,10 +595,8 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
    }
 
    if (path && direct_read_) {
-
       const char* p = path;
       const char* q = 0;
-
       while ( *p ) {
          if (*p == '/') q = p;
          p++;
@@ -1382,8 +1382,6 @@ tmp_file ehost::file(node& n, std::string name)
     if (read && (access(filename.c_str(), R_OK) == 0))
       return tmp_file(filename.c_str(), false);
     else if (!no_script.empty()) {
-      // pass
-      // error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
     } else if (std::string::npos != filename.find(".job0")) {
 	error = "job0: no job to be generated yet!";
 	return tmp_file(error);
@@ -1400,9 +1398,8 @@ tmp_file ehost::file(node& n, std::string name)
 
   } else if (name != ecf_node::none()) { // Try logserver
     if (n.isCmdFailed()) {
-      error = "Submission command Failed! check .sub file, ssh, or queueing system reported error";
-      return tmp_file(error);
-      
+      error = "Submission command Failed! check .sub file, ssh, or queueing system error";
+      // return tmp_file(error);      
     }
       std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
       std::string content;
@@ -1444,7 +1441,9 @@ tmp_file ehost::file(node& n, std::string name)
          gui::message("host::file-error: %s", e.what());
       }
    }
-   if (!no_script.empty())
+   if (n.isCmdFailed()) {
+      error = "Submission command Failed! check .sub file, ssh, or queueing system error";
+   } else if (no_script.size())
      error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
    return tmp_file(error);
 }
@@ -1479,12 +1478,9 @@ tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
 "client must be capable to create temporary file:\n"
 "\tcheck /tmp directory with write access, and space available,\n"
 "or preprocessed file may be truncated beyond some size.\n";
-   if (!no_script.empty()) {
-     std::string error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD"
-       + no_script.empty();
-     // return tmp_file(error);
-   }
-
+  if (no_script.size()) {
+    std::string error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
+  }
   return tmp_file(error);
 }
 
