@@ -1405,7 +1405,7 @@ tmp_file ehost::file(node& n, std::string name)
       // return tmp_file(error);      
     } else if (no_script != ecf_node::none()) {
       error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
-    }
+    } else {
       std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
       std::string content;
       if (use_ecf_out_cmd(n, name, NULL, content)) {
@@ -1418,6 +1418,7 @@ tmp_file ehost::file(node& n, std::string name)
             if (access(tmp.c_str(), R_OK) == 0) return tmp;
          }
       }
+    }
    }
    if (read && (access(name.c_str(), R_OK) == 0)) {
       return tmp_file(name.c_str(), false);
