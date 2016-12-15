@@ -670,7 +670,7 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 			}
 		}
 
-		// ensure the window destructors are called
+        //Ensure the ServerHandler destructors are called
         MainWindow::cleanUpOnQuit(topWin);
 
 		//Exit ecFlowView

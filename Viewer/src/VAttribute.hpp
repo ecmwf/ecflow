@@ -51,6 +51,7 @@ public:
 
     static VAttribute* make(VNode* n,const std::string& type,const std::string& name);
     static VAttribute* makeFromId(VNode*,int);
+    static VAttribute* make(VNode *parent,QStringList data);
 
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,

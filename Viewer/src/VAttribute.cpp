@@ -211,6 +211,26 @@ VAttribute* VAttribute::makeFromId(VNode* n,int id)
     //return t->getSearchData(n,idx,d);
 }
 
+VAttribute* VAttribute::make(VNode *parent,QStringList data)
+{
+    assert(parent);
+    if(data.count() >=2)
+    {
+        std::string type=data[0].toStdString();
+        VAttributeType *t=VAttributeType::find(type);
+        assert(t);
+
+        int idx=t->searchKeyToDataIndex("name");
+        if(idx != -1 && idx < data.count())
+        {
+            std::string name=data[idx].toStdString();
+            VItemTmp_ptr item=t->item(parent,name);
+            return (item)?item->attribute()->clone():NULL;
+        }
+    }
+    return 0;
+}
+
 int VAttribute::indexToId(VAttributeType* t,int idx)
 {
     return (idx >=0)?(t->id()*10000+idx):-1;

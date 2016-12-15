@@ -589,26 +589,41 @@ void VTreeServer::clearForceShow(const VItem* item)
     if(!item)
         return;
 
+    //filter_ is unique for each VTreeServer while attrFilter_ is
+    //shared by the servers!
     VNode* vnPrev=filter_->forceShowNode();
     VAttribute* aPrev=attrFilter_->forceShowAttr();
 
     if(aPrev)
     {
-        Q_ASSERT(vnPrev);
-        Q_ASSERT(aPrev->parent() == vnPrev);
+        Q_ASSERT(aPrev->parent()->server());
+        //The stored attribute belongs to this server
+        if(aPrev->parent()->server()== server_)
+        {
+            Q_ASSERT(vnPrev);
+            Q_ASSERT(aPrev->parent() == vnPrev);
+        }
+        //Otherwise we pretend it is 0
+        else
+            aPrev=0;
     }
 
     if(!vnPrev && !aPrev)
         return;
 
+    //We need to figure out if item is the same as what we
+    //currently store because in this case there is nothing to do.
+
+    //The server matches
     if(item->parent()->server() == server_)
     {
+        //Item is a node and it is the same as we store
         if(VNode *itn=item->isNode())
         {
             if(itn == vnPrev && !aPrev)
                 return;
         }
-
+        //Item is an attribute and it is the same as we store
         if(VAttribute *ita=item->isAttribute())
         {
             if(aPrev && aPrev->sameContents(ita))
@@ -618,6 +633,7 @@ void VTreeServer::clearForceShow(const VItem* item)
         }
     }
 
+    //Relaod the node status filter
     filter_->clearForceShowNode();
 
     VNode* s=vnPrev->suite();
