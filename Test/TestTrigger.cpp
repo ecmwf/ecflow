@@ -121,8 +121,6 @@ BOOST_AUTO_TEST_CASE( test_triggers_with_limits )
    //      task t2
    //  endfamily
    //endsuite
-   std::string meterName = "file";
-   std::string taskName = "model";
    Defs theDefs;
    {
       suite_ptr suite = theDefs.add_suite( "test_triggers_with_limits");
