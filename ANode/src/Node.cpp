@@ -1861,8 +1861,7 @@ AstTop* Node::completeAst() const
 {
    if (completeExpr_) {
       std::string ignoredErrorMsg;
-      (void) completeAst(ignoredErrorMsg);
-      return completeExpr_->get_ast();
+      return completeAst(ignoredErrorMsg);
    }
    return NULL;
 }
@@ -1871,19 +1870,21 @@ AstTop* Node::triggerAst() const
 {
    if (triggerExpr_) {
       std::string ignoredErrorMsg;
-      (void) triggerAst(ignoredErrorMsg);
-      return triggerExpr_->get_ast();
+      return triggerAst(ignoredErrorMsg);
    }
    return NULL;
 }
 
 AstTop* Node::completeAst(std::string& errorMsg) const
 {
-   if (completeExpr_ && completeExpr_->get_ast() == NULL) {
-      completeExpr_->createAST(const_cast<Node*>(this),"complete",errorMsg);
+   if (completeExpr_) {
+      if (completeExpr_->get_ast() == NULL) {
+
+         completeExpr_->createAST(const_cast<Node*>(this),"complete",errorMsg);
 #ifdef DEBUG
-      if (errorMsg.empty()) LOG_ASSERT(completeExpr_->get_ast(),"");
+         if (errorMsg.empty()) LOG_ASSERT(completeExpr_->get_ast(),"");
 #endif
+      }
       return completeExpr_->get_ast();
    }
    return NULL;
@@ -1891,11 +1892,14 @@ AstTop* Node::completeAst(std::string& errorMsg) const
 
 AstTop* Node::triggerAst(std::string& errorMsg) const
 {
-   if (triggerExpr_ && triggerExpr_->get_ast() == NULL) {
-      triggerExpr_->createAST(const_cast<Node*>(this),"trigger",errorMsg);
+   if (triggerExpr_) {
+      if (triggerExpr_->get_ast() == NULL) {
+
+         triggerExpr_->createAST(const_cast<Node*>(this),"trigger",errorMsg);
 #ifdef DEBUG
-      if (errorMsg.empty()) LOG_ASSERT(triggerExpr_->get_ast(),"");
+         if (errorMsg.empty()) LOG_ASSERT(triggerExpr_->get_ast(),"");
 #endif
+      }
       return triggerExpr_->get_ast();
    }
    return NULL;

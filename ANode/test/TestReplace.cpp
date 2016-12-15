@@ -11,20 +11,43 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/make_shared.hpp>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Ecf.hpp"
-#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
+
+class ExpectStateChange  {
+public:
+   ExpectStateChange() : state_change_no_(Ecf::state_change_no()) {Ecf::set_server(true); }
+   ~ExpectStateChange() { BOOST_CHECK_MESSAGE(state_change_no_ != Ecf::state_change_no() ,"Expected state change" );Ecf::set_server(false); }
+private:
+   unsigned int state_change_no_;
+};
+
+class ExpectModifyChange  {
+public:
+   ExpectModifyChange() : modify_change_no_(Ecf::modify_change_no()) {Ecf::set_server(true); }
+   ~ExpectModifyChange() { BOOST_CHECK_MESSAGE(modify_change_no_ != Ecf::modify_change_no() ,"Expected Modify change" );Ecf::set_server(false);}
+private:
+   unsigned int modify_change_no_;
+};
+
+class ExpectNoChange {
+public:
+   ExpectNoChange() : state_change_no_(Ecf::state_change_no()), modify_change_no_(Ecf::modify_change_no()) { Ecf::set_server(true);}
+   ~ExpectNoChange() {
+      BOOST_CHECK_MESSAGE(state_change_no_ == Ecf::state_change_no() && modify_change_no_ == Ecf::modify_change_no(),"Expected no change" );
+      Ecf::set_server(false);
+   }
+private:
+   unsigned int state_change_no_;
+   unsigned int modify_change_no_;
+};
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
@@ -54,6 +77,7 @@ BOOST_AUTO_TEST_CASE( test_replace_add_task )
       expectedDefs.addSuite( suite );
    }
 
+   ExpectStateChange expect_state_change;
    std::string errorMsg;
    BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
    BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
@@ -80,8 +104,8 @@ BOOST_AUTO_TEST_CASE( test_replace_add_suite )
          fam->add_task( "t2"  );
       }
 
-      // Server defs is empty
-      Defs serverDefs;
+      ExpectModifyChange expect_state_change;
+      Defs serverDefs;  // Server defs is empty
 
       std::string errorMsg;
       BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
@@ -97,8 +121,8 @@ BOOST_AUTO_TEST_CASE( test_replace_add_suite )
           fam->add_task( "t2"  );
        }
 
-       // Server defs is empty
-       Defs serverDefs;
+       ExpectModifyChange expect_state_change;
+       Defs serverDefs; // Server defs is empty
 
        std::string errorMsg;
        BOOST_REQUIRE_MESSAGE(serverDefs.replaceChild("/suite1/family",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
@@ -114,8 +138,8 @@ BOOST_AUTO_TEST_CASE( test_replace_add_suite )
           fam->add_task( "t2"  );
        }
 
-       // Server defs is empty
-       Defs serverDefs;
+       ExpectModifyChange expect_state_change;
+       Defs serverDefs;  // Server defs is empty
 
        std::string errorMsg;
        BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
@@ -142,6 +166,7 @@ BOOST_AUTO_TEST_CASE( test_replace_child )
  	}
 	BOOST_CHECK_MESSAGE(comparisonDef == *clientDef,"client and comparisonDef should be the same");
 
+   ExpectModifyChange expect_state_change;
  	std::string errorMsg;
  	Defs serverDefs;
  	BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
@@ -177,6 +202,7 @@ BOOST_AUTO_TEST_CASE( test_replace_add_preserves_states )
    }
 
    //cout << serverDefs;
+   ExpectStateChange expect_state_change;
    std::string errorMsg;
    BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/family/t4",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
 
@@ -219,6 +245,7 @@ BOOST_AUTO_TEST_CASE( test_replace_preserves_sibling_states )
       fam->add_task( "t4"  );
    }
 
+   ExpectStateChange expect_state_change;
    std::string errorMsg;
    BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/family/t4",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
    BOOST_REQUIRE_MESSAGE(t1->state() == NState::COMPLETE," state on task t1 not preserved after replace");
@@ -249,6 +276,7 @@ BOOST_AUTO_TEST_CASE( test_replace_preserves_begun_status )
    }
    serverDefs->beginAll();
 
+   ExpectStateChange expect_state_change;
    std::string errorMsg;
    BOOST_REQUIRE_MESSAGE( serverDefs->replaceChild("/suite1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
    BOOST_REQUIRE_MESSAGE( serverDefs->findSuite("suite1"),"Can't find suite1");
@@ -288,7 +316,9 @@ BOOST_AUTO_TEST_CASE( test_replace_add_node )
   		suite->addFamily( fam );
  		serverDefs.addSuite( suite );
  	}
- 	std::string errorMsg;
+
+   ExpectStateChange expect_state_change;
+   std::string errorMsg;
  	BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
 	BOOST_CHECK_MESSAGE(comparisonDef == serverDefs,"comparisonDef and servers defs should be the same");
 }
@@ -331,7 +361,9 @@ BOOST_AUTO_TEST_CASE( test_replace_add_hierarchy )
 		suite_ptr suite = Suite::create( "suite1" ) ;
   		serverDefs.addSuite( suite );
  	}
- 	std::string errorMsg;
+
+   ExpectStateChange expect_state_change;
+   std::string errorMsg;
  	BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/fa/fb/fc/fd/t1",clientDef,true/*create nodes as needed*/, false/*force*/,errorMsg), errorMsg  );
 	BOOST_CHECK_MESSAGE(comparisonDef == serverDefs,"comparisonDef and servers defs should be the same");
 }
@@ -362,14 +394,21 @@ BOOST_AUTO_TEST_CASE( test_replace_order_preserved_for_suite )
    }
 
    std::string errorMsg;
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/s1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
-
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/s2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
-
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/s3",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   {
+      ExpectModifyChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/s1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
+   {
+      ExpectModifyChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/s2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
+   {
+      ExpectModifyChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/s3",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
 }
 
 
@@ -402,12 +441,21 @@ BOOST_AUTO_TEST_CASE( test_replace_order_preserved_for_family )
 
    std::string errorMsg;
    Ecf::set_debug_equality(true);  // only has affect in DEBUG build
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f3",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   {
+      ExpectStateChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
+   {
+      ExpectStateChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
+   {
+      ExpectStateChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f3",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
    Ecf::set_debug_equality(false);
 }
 
@@ -443,12 +491,21 @@ BOOST_AUTO_TEST_CASE( test_replace_order_preserved_for_task )
 
    std::string errorMsg;
    Ecf::set_debug_equality(true);  // only has affect in DEBUG build
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1/t1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
-   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1/t3",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
-   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   {
+      ExpectStateChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1/t1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
+   {
+      ExpectStateChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
+   {
+      ExpectStateChange expect_state_change;
+      BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1/t3",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+      BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+   }
    Ecf::set_debug_equality(false);
 }
 
@@ -463,6 +520,8 @@ BOOST_AUTO_TEST_CASE( test_replace_child_errors )
   		suite->addTask(  Task::create( "t2" ) );
  		clientDef->addSuite( suite );
  	}
+
+	ExpectNoChange expect_no_change;
  	Defs serverDefs;
  	std::string errorMsg;
  	BOOST_REQUIRE_MESSAGE(!serverDefs.replaceChild("/suite1/i/dont/exist", clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), "Expected failure"  );
@@ -487,16 +546,20 @@ BOOST_AUTO_TEST_CASE( test_replace_child_errors_2 )
  		serverDefs.addSuite( suite );
  	}
 
-  	// because createNodesAsNeeded is false, child adoption should fail since /suite1/t2
-  	// does not exist on the server
- 	std::string errorMsg;
- 	BOOST_REQUIRE_MESSAGE(!serverDefs.replaceChild("/suite1/t2", clientDef , false/*create nodes as needed*/, false, errorMsg), "Expected failure");
-
- 	// With flag now set, we will create any missing nodes even if they dont exist in the server
- 	errorMsg.clear();
- 	BOOST_REQUIRE_MESSAGE(serverDefs.replaceChild("/suite1/t2", clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), "Expected success " << errorMsg );
+  	std::string errorMsg;
+  	{
+  	   ExpectNoChange expect_no_change;
+  	   // because createNodesAsNeeded is false, child adoption should fail since /suite1/t2
+  	   // does not exist on the server
+  	   BOOST_REQUIRE_MESSAGE(!serverDefs.replaceChild("/suite1/t2", clientDef , false/*create nodes as needed*/, false, errorMsg), "Expected failure");
+  	}
+  	{
+  	   // With flag now set, we will create any missing nodes even if they dont exist in the server
+      ExpectStateChange expect_state_change;
+  	   errorMsg.clear();
+  	   BOOST_REQUIRE_MESSAGE(serverDefs.replaceChild("/suite1/t2", clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), "Expected success " << errorMsg );
+  	}
 }
-
 
 BOOST_AUTO_TEST_CASE( test_replace_child_errors_3 )
 {
@@ -522,12 +585,19 @@ BOOST_AUTO_TEST_CASE( test_replace_child_errors_3 )
 
  		t2->set_state( NState::ACTIVE ); // Must be done after parent has been setup
  	}
- 	std::string errorMsg;
- 	BOOST_REQUIRE_MESSAGE( !serverDefs.replaceChild("/suite1/t2", clientDef, true/*create nodes as needed*/, false/*force*/, errorMsg), "Expected failure since server task t2 is active, and force not used");
- 	errorMsg.clear();
- 	BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/t2",  clientDef, true/*create nodes as needed*/, true/*force*/, errorMsg),  errorMsg);
-}
 
+ 	std::string errorMsg;
+ 	{
+      ExpectNoChange expect_no_change;
+ 	   BOOST_REQUIRE_MESSAGE( !serverDefs.replaceChild("/suite1/t2", clientDef, true/*create nodes as needed*/, false/*force*/, errorMsg),
+ 	      "Expected failure since server task t2 is active, and force not used");
+ 	}
+ 	{
+ 	   errorMsg.clear();
+      ExpectStateChange expect_state_change;
+ 	   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/t2",  clientDef, true/*create nodes as needed*/, true/*force*/, errorMsg),  errorMsg);
+ 	}
+}
 
 BOOST_AUTO_TEST_CASE( test_replace_add_task_with_bad_trigger )
 {
@@ -546,9 +616,18 @@ BOOST_AUTO_TEST_CASE( test_replace_add_task_with_bad_trigger )
       fam->add_task( "t1"  );
    }
 
-   // expect to fail since trigger expression on added task, should not resolve
+   // Expect to pass, since the replace part is ok.
    std::string errorMsg;
-   BOOST_REQUIRE_MESSAGE( !serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+   node_ptr replaced_node;
+   {
+      ExpectStateChange expect_state_change;
+      replaced_node = serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg);
+      BOOST_REQUIRE_MESSAGE( replaced_node, "Expected replaced to succeed, even though triggers are dodgy"  );
+   }
+
+   // Although we have change the data model, Check if the trigger expressions are still valid. Should fail
+   std::string warning_msg;
+   BOOST_REQUIRE_MESSAGE(!replaced_node->suite()->check(errorMsg,warning_msg),"Expected failure " << errorMsg);
 }
 
 BOOST_AUTO_TEST_CASE( test_replace_add_suite_with_bad_triggers )
@@ -568,9 +647,18 @@ BOOST_AUTO_TEST_CASE( test_replace_add_suite_with_bad_triggers )
    // Server defs is empty
    Defs serverDefs;
 
-   // expect failure since trigger expression should not resolve
+   // Expect to pass, since the replace part is ok.
    std::string errorMsg;
-   BOOST_REQUIRE_MESSAGE( !serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+   node_ptr replaced_node;
+   {
+      ExpectModifyChange expect_state_change;
+      replaced_node = serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg);
+      BOOST_REQUIRE_MESSAGE( replaced_node, "Expected replaced to succeed, even though triggers are dodgy"  );
+   }
+
+   // Although we have changed the data model, Check if the trigger expressions are still valid. Should fail.
+   std::string warning_msg;
+   BOOST_REQUIRE_MESSAGE(!replaced_node->suite()->check(errorMsg,warning_msg),"Expected failure " << errorMsg);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

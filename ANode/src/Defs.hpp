@@ -228,7 +228,8 @@ public:
    /// if  createNodesAsNeeded = true, and the path does not exist on this defs
    /// then the missing path nodes are created.
    /// In both the client and this defs the trigger references and cleared first.
-   bool replaceChild(const std::string& path,
+   /// Returns the changed node, or NULL and error message set.
+   node_ptr replaceChild(const std::string& path,
             const defs_ptr& clientDef,
             bool createNodesAsNeeded,
             bool force,
