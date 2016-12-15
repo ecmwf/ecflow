@@ -11,6 +11,7 @@
 
 #include <QClipboard>
 #include <QDebug>
+#include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QMessageBox>
 #include <QPushButton>
@@ -598,6 +599,13 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) : shadowProp_(0)
 
     varView->setSelectionBehavior(QAbstractItemView::SelectRows);
     varView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    //varView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    varView->header()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
+    varView->header()->setStretchLastSection(false);
+#endif
 
     //Shadowed variables
     bool showShadowed = true;

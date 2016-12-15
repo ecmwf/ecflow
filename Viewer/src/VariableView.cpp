@@ -56,6 +56,15 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     //The background rect
     QRect bgRect=option.rect;
 
+    if(index.column() == 1)
+    {
+        int pw=painter->device()->width();
+        if(bgRect.right() < pw)
+            bgRect.adjust(0,0,pw-bgRect.right()+1,0);
+
+        qDebug() << "varView" << option.rect << bgRect;
+    }
+
     //For variables in the first column we want to extend the item
     //rect to the left for the background painting.
     if(index.column()==0 && !hasChild)
@@ -78,6 +87,11 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     	{
             painter->fillRect(bgRect,bg);
     	}
+        //alternating row colour?
+        else
+        {
+
+        }
     }
 
     //Paint selection. This should be transparent.
@@ -87,12 +101,12 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         QRect selectRect;
         if(hasChild)
         {
-            selectRect=option.rect.adjusted(0,1,0,-1);
+            selectRect=bgRect.adjusted(0,1,0,-1);
             painter->fillRect(selectRect,selectBrushBlock_);
         }
         else
         {
-            selectRect=option.rect.adjusted(0,1,0,-1);
+            selectRect=bgRect.adjusted(0,1,0,-1);
 
             //For the first column we extend the selection
             //rect to left edge.
@@ -272,7 +286,7 @@ VariableView::VariableView(QWidget* parent) : TreeView(parent)
 	setRootIsDecorated(true);
 	setAllColumnsShowFocus(true);
 	setUniformRowHeights(true);
-	setAlternatingRowColors(true);
+    //setAlternatingRowColors(true);
     setSortingEnabled(true);
 
 	//Context menu
