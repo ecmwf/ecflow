@@ -932,7 +932,7 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
 	return false;
 }
 
-bool Defs::replaceChild(const std::string& path,
+node_ptr Defs::replaceChild(const std::string& path,
 	               const defs_ptr& clientDefs,
 	               bool createNodesAsNeeded,
 	               bool force,
@@ -942,7 +942,7 @@ bool Defs::replaceChild(const std::string& path,
 	if (! clientNode.get() ) {
 		errorMsg = "Can not replace node since path "; errorMsg += path;
 		errorMsg += " does not exist on the client definition";
-		return false;
+		return node_ptr();
 	}
 
 	node_ptr serverNode = findAbsNode( path ) ;
@@ -956,8 +956,8 @@ bool Defs::replaceChild(const std::string& path,
 			std::stringstream ss;
 			ss << "Can not replace node " << serverNode->debugNodePath() << " because it has " << count << " tasks which are active or submitted\n";
 			ss << "Please use the 'force' option to bypass this check, at the expense of creating zombies\n";
-			errorMsg += ss.str();
-			return false;
+			errorMsg = ss.str();
+			return node_ptr();
  		}
 	}
 
@@ -967,7 +967,7 @@ bool Defs::replaceChild(const std::string& path,
 		if (! serverNode.get() ) {
 			errorMsg = "Can not replace child since path "; errorMsg += path;
 			errorMsg += " does not exist on the server definition. Please use <parent> option";
-			return false;
+			return node_ptr();
 		}
 		// HAVE a FULL match in the server
 
@@ -992,10 +992,7 @@ bool Defs::replaceChild(const std::string& path,
 	 	LOG_ASSERT(addOk,"");
 
 	 	client_node_to_add->set_most_significant_state_up_node_tree();
-
-	 	// The changes have been made, do a sanity test, check trigger expressions
-	 	std::string warning_msg;
-	 	return client_node_to_add->suite()->check(errorMsg,warning_msg);
+	 	return client_node_to_add;
  	}
 
 
@@ -1020,11 +1017,9 @@ bool Defs::replaceChild(const std::string& path,
       node_ptr client_suite_to_add = clientNode->suite()->remove();
  		bool addOk = addChild( client_suite_to_add  );
  		LOG_ASSERT( addOk ,"");
- 		client_suite_to_add->set_most_significant_state_up_node_tree();
 
-      // The changes have been made, do a sanity test, check trigger expressions
- 	   std::string warning_msg;
- 	   return client_suite_to_add->suite()->check(errorMsg,warning_msg);
+ 		client_suite_to_add->set_most_significant_state_up_node_tree();
+ 		return client_suite_to_add;
 	}
 
 
@@ -1060,9 +1055,7 @@ bool Defs::replaceChild(const std::string& path,
 	LOG_ASSERT( addOk,"" );
 	client_node_to_add->set_most_significant_state_up_node_tree();
 
-   // The changes have been made, do a sanity test, check trigger expressions
-	std::string warning_msg;
-	return client_node_to_add->suite()->check(errorMsg,warning_msg);
+	return client_node_to_add;
 }
 
 void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
