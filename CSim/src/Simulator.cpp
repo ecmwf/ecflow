@@ -306,6 +306,10 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 		}
 #endif
 
+      // any state change should be followed with a job submission
+      t->complete();  // mark task as complete
+
+
 		// If the task has any event used in the trigger expressions, then update event.
  		BOOST_FOREACH(Event& event, t->ref_events()) {
  			if (event.usedInTrigger()) { // event used in triger/complete expression
@@ -337,9 +341,6 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 				meter.set_value(meter.max());
  			}
 		}
-
- 		// any state change should be followed with a job submission
- 		t->complete();  // Finally mark task as complete
 
  		// crons run for ever. To terminate, we rely on test to have Verify attributes
  		if (foundCrons_) {
