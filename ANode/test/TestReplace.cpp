@@ -659,6 +659,10 @@ BOOST_AUTO_TEST_CASE( test_replace_add_suite_with_bad_triggers )
    // Although we have changed the data model, Check if the trigger expressions are still valid. Should fail.
    std::string warning_msg;
    BOOST_REQUIRE_MESSAGE(!replaced_node->suite()->check(errorMsg,warning_msg),"Expected failure " << errorMsg);
+
+   // reset, to avoid effecting downstream tests
+   Ecf::set_state_change_no(0);
+   Ecf::set_modify_change_no(0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
