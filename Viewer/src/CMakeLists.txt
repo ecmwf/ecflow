@@ -399,7 +399,7 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
      ${CMAKE_CURRENT_BINARY_DIR}
     LIBS core nodeattr node libparser base libclient 
          pthread  
-         m crypt dl fl
+         m dl
          ${ECFLOW_QT_LIBRARIES}
          ${OPENSSL_LIBRARIES}
 )
