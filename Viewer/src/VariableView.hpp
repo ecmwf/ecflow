@@ -48,6 +48,7 @@ public:
 
 protected:
     void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const;
+
     VariableDelegate *delegate_;
 };
 

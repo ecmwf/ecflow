@@ -61,8 +61,6 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         int pw=painter->device()->width();
         if(bgRect.right() < pw)
             bgRect.adjust(0,0,pw-bgRect.right()+1,0);
-
-        qDebug() << "varView" << option.rect << bgRect;
     }
 
     //For variables in the first column we want to extend the item
@@ -88,10 +86,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
             painter->fillRect(bgRect,bg);
     	}
         //alternating row colour?
-        else
-        {
-
-        }
+        else {}
     }
 
     //Paint selection. This should be transparent.
@@ -316,16 +311,3 @@ void VariableView::drawBranches(QPainter* painter,const QRect& rect,const QModel
 		QTreeView::drawBranches(painter,rect,index);
 	}
 }
-
-/*
-void VariableView::slotSelectItem(const QModelIndex&)
-{
-
-}
-
-void VariableView::reload(VInfo_ptr info)
-{
-	//model_->setData(info);
-	//expandAll();
-}
-*/
