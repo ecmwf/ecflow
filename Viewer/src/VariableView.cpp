@@ -14,6 +14,7 @@
 #include <QImageReader>
 #include <QItemSelectionModel>
 #include <QPainter>
+#include <QHeaderView>
 
 #include "IconProvider.hpp"
 #include "VariableModel.hpp"
@@ -25,7 +26,7 @@
 //
 //========================================================
 
-VariableDelegate::VariableDelegate(QWidget *parent) : QStyledItemDelegate(parent)
+VariableDelegate::VariableDelegate(QTreeView *parent) : QStyledItemDelegate(parent), view_(parent)
 {
     selectPen_=QPen(QColor(8,117,182));
     selectBrush_=QBrush(QColor(65,139,212));
@@ -55,13 +56,6 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     //The background rect
     QRect bgRect=option.rect;
-
-    if(index.column() == 1)
-    {
-        int pw=painter->device()->width();
-        if(bgRect.right() < pw)
-            bgRect.adjust(0,0,pw-bgRect.right()+1,0);
-    }
 
     //For variables in the first column we want to extend the item
     //rect to the left for the background painting.
@@ -262,6 +256,13 @@ QSize VariableDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 
 	size+=QSize(0,2);
 
+    if(index.column() == 1)
+    {
+        int w1=view_->header()->sectionSize(0);
+        int w=view_->viewport()->size().width();
+        if(w1+size.width() < w)
+            size.setWidth(w-w1+1);
+    }
     return size;
 }
 
