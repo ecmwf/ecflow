@@ -256,6 +256,7 @@ QSize VariableDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 
 	size+=QSize(0,2);
 
+    //We need to starcth the second column to the right edge of the viewport
     if(index.column() == 1)
     {
         int w1=view_->header()->sectionSize(0);
