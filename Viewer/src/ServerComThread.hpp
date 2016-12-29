@@ -12,6 +12,7 @@
 
 #include <deque>
 #include <utility>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -67,8 +68,10 @@ private:
     void detach();
     void detach(defs_ptr d);
     void detach(Node *node);
+    void aspectToStr(std::stringstream& s,const std::vector<ecf::Aspect::Type>& t) const;
 
 	ServerHandler *server_;
+    std::string serverName_;
 	ClientInvoker *ci_;
 	VTask::Type taskType_;
 	std::vector<std::string> command_;
