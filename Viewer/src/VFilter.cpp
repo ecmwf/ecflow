@@ -11,7 +11,7 @@
 
 #include "NodeQuery.hpp"
 #include "NodeQueryEngine.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VNState.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
@@ -412,7 +412,7 @@ bool TreeNodeFilter::isComplete()
 bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNode*>& topFilterChange)
 {
 #ifdef _UI_VFILTER_DEBUG
-    UserMessage::debug("TreeNodeFilter::update --> " + server_->name());
+    UiLog(server_).dbg() << "TreeNodeFilter::update -->";
 #endif
 
     //nodes_.clear();
@@ -424,7 +424,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
         match_=std::vector<VNode*>();
         //assert(match_.capacity() == 0);
 #ifdef _UI_VFILTER_DEBUG
-        UserMessage::debug("  no filter is defined!");
+        UiLog(server_).dbg() << " no filter is defined!";
 #endif
         return false;
     }
@@ -488,7 +488,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
                 if(tree_->vnodeAt(i) != match_[i])
                     diffCnt++;
             }
-            UserMessage::debug("  number of differences in filter: " + QString::number(diffCnt).toStdString());
+            UiLog(server_).dbg() << " number of differences in filter: " << diffCnt;
 #endif
 
             //We collect the topmost nodes with changes. It could be different to
@@ -507,9 +507,9 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
         }
 
 #ifdef _UI_VFILTER_DEBUG
-        UserMessage::debug("  Top level nodes that changed in filter:");
+        UiLog(server_).dbg() << " top level nodes that changed in filter:";
         for(size_t i= 0; i < topFilterChange.size(); i++)
-            UserMessage::debug("     " +  topFilterChange.at(i)->strName());
+            UiLog(server_).dbg() << "  " <<  topFilterChange.at(i)->strName();
 #endif
 
     }
@@ -519,13 +519,13 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
     }
 
 #ifdef _UI_VFILTER_DEBUG
-    UserMessage::debug("  elapsed time: " + QString::number(timer.elapsed()).toStdString() + " ms");
-    UserMessage::debug("  filter size:" + QString::number(match_.size()).toStdString());
-    UserMessage::debug("  capacity:" + QString::number(match_.capacity()).toStdString());
+    UiLog(server_).dbg() << " elapsed time: " << timer.elapsed() << " ms";
+    UiLog(server_).dbg() << " filter size: " << match_.size();
+    UiLog(server_).dbg() << " capacity:" << match_.capacity();
 #endif
 
 #ifdef _UI_VFILTER_DEBUG
-    UserMessage::debug("<-- TreeNodeFilter::update");
+    UiLog(server_).dbg() << "<-- update";
 #endif
 
     return true;
@@ -663,7 +663,7 @@ VNode* TableNodeFilter::nodeAt(int index) const
 bool TableNodeFilter::update()
 {
 #ifdef _UI_VFILTER_DEBUG
-    UserMessage::debug("TableNodeFilter::update --> " + server_->name());
+    UiLog(server_).dbg() << "TableNodeFilter::update -->";
 #endif
 
     NodeQuery* q=def_->query_;
@@ -676,7 +676,7 @@ bool TableNodeFilter::update()
         index_=std::vector<int>();
         matchCount_=0;
 #ifdef _UI_VFILTER_DEBUG
-        UserMessage::debug("  no nodes are filtered!");
+        UiLog(server_).dbg() << " no nodes are filtered!";
 #endif
         return true;
     }
@@ -689,7 +689,7 @@ bool TableNodeFilter::update()
         index_=std::vector<int>();
         matchCount_=server_->vRoot()->totalNum();
 #ifdef _UI_VFILTER_DEBUG
-        UserMessage::debug("  all the nodes are filtered!");
+        UiLog(server_).dbg() << " all the nodes are filtered!";
 #endif
         return true;
     }
@@ -723,9 +723,9 @@ bool TableNodeFilter::update()
      }
 
 #ifdef _UI_VFILTER_DEBUG
-    UserMessage::debug("  elapsed time: " + QString::number(timer.elapsed()).toStdString() + " ms");
-    UserMessage::debug("  filter size:" + QString::number(match_.size()).toStdString());
-    UserMessage::debug("  capacity:" + QString::number(match_.capacity()).toStdString());
+    UiLog(server_).dbg() << " elapsed time: " + timer.elapsed() << " ms";
+    UiLog(server_).dbg() << " filter size: " + match_.size();
+    UiLog(server_).dbg() << " capacity: " + match_.capacity();
 #endif
 
     return true;

@@ -15,7 +15,7 @@
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VRepeat.hpp"
 
@@ -55,7 +55,7 @@ AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : 
 AttributeEditor::~AttributeEditor()
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("AttributeEditor::~AttributeEditor -->");
+    UiLog().dbg() << "AttributeEditor::~AttributeEditor -->";
 #endif
     detachInfo();
 #ifdef _USE_MODELESS_ATTRIBUTEDITOR
@@ -115,7 +115,7 @@ void AttributeEditor::accept()
 void AttributeEditor::attachInfo()
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("AttributeEditor::attachInfo -->");
+    UiLog().dbg() << "AttributeEditor::attachInfo -->";
 #endif
 
     if(info_)
@@ -130,30 +130,30 @@ void AttributeEditor::attachInfo()
     } 
 
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("<-- AttributeEditor::attachInfo");
+    UiLog().dbg() << "<-- attachInfo";
 #endif
 }
 
 void AttributeEditor::detachInfo()
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("AttributeEditor::detachInfo -->");
+    UiLog().dbg() << "AttributeEditor::detachInfo -->";
 #endif
     if(info_)
     {
         if(info_->server())
         {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-            UserMessage::debug("   remove NodeObserver");
+            UiLog().dbg() << " remove NodeObserver";
 #endif
             info_->server()->removeNodeObserver(this);
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-            UserMessage::debug("   remove ServerObserver");
+            UiLog().dbg() << " remove ServerObserver";
 #endif
             info_->server()->removeServerObserver(this);
         }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-            UserMessage::debug("   remove InfoObserver");
+            UiLog().dbg() << " remove InfoObserver";
 #endif
             info_->removeObserver(this);
     }
@@ -161,7 +161,7 @@ void AttributeEditor::detachInfo()
     messageLabel_->stopLoadLabel();
 
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("<-- AttributeEditor::detachInfo");
+    UiLog().dbg() << "<-- detachInfo";
 #endif
 }
 
@@ -185,7 +185,7 @@ void AttributeEditor::setResetStatus(bool st)
 
 void AttributeEditor::setSuspended(bool st)
 {
-    UserMessage::qdebug("AttributeEditor::setSuspended --> " + QString::number(st));
+    UiLog().dbg() << "AttributeEditor::setSuspended --> " << st;
 
     Q_ASSERT(form_);
     form_->setEnabled(!st);
@@ -202,7 +202,7 @@ void AttributeEditor::setSuspended(bool st)
 void AttributeEditor::notifyDataLost(VInfo* info)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("AttributeEditor::notifyDataLost -->");
+    UiLog().dbg() << "AttributeEditor::notifyDataLost -->";
 #endif
     if(info_ && info_.get() == info)
     {
@@ -211,14 +211,14 @@ void AttributeEditor::notifyDataLost(VInfo* info)
         setSuspended(true);
     }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("<-- AttributeEditor::notifyDataLost");
+    UiLog().dbg() << "<-- notifyDataLost";
 #endif
 }
 
 void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("AttributeEditor::notifyBeginNodeChange -->");
+    UiLog().dbg() << "AttributeEditor::notifyBeginNodeChange -->";
 #endif
     if(info_ && info_->node() && info_->node() == vn)
     {
@@ -226,14 +226,14 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
         if(attrNumCh)
         {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("   ADD_REMOVE_ATTR");
+            UiLog().dbg() << " ADD_REMOVE_ATTR";
 #endif
             VAttribute* a=info_->attribute();
             Q_ASSERT(a);
             if(!a->isValid(info_->node(),attrData_))
             {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-                UserMessage::debug("   attribute does not exist");
+                UiLog().dbg() << " attribute does not exist";
 #endif
                 detachInfo();
                 messageLabel_->showWarning("The edited " + type_ + " <b>is not available</b> any more! Please close the dialog!");
@@ -246,7 +246,7 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
         }
     }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("<-- AttributeEditor::notifyBeginNodeChange");
+    UiLog().dbg() << "<-- notifyBeginNodeChange";
 #endif
 }
 
@@ -262,7 +262,7 @@ void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector
 void AttributeEditor::notifyServerDelete(ServerHandler* server)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("AttributeEditor::notifyServerDelete -->");
+    UiLog().dbg() << "AttributeEditor::notifyServerDelete -->";
 #endif
     if(info_ && info_->server() == server)
     {
@@ -271,7 +271,7 @@ void AttributeEditor::notifyServerDelete(ServerHandler* server)
         setSuspended(true);
     }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("<-- AttributeEditor::notifyServerDelete");
+    UiLog().dbg() << "<-- notifyServerDelete";
 #endif
 }
     
@@ -279,7 +279,7 @@ void AttributeEditor::notifyServerDelete(ServerHandler* server)
 void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("AttributeEditor::notifyBeginServerClear -->");
+    UiLog().dbg() << "AttributeEditor::notifyBeginServerClear -->";
 #endif
 
     if(info_)
@@ -297,7 +297,7 @@ void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
     }
 
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("<-- AttributeEditor::notifyBeginServerClear");
+    UiLog().dbg() << "<-- notifyBeginServerClear";
 #endif
 }
 
@@ -305,7 +305,7 @@ void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
 void AttributeEditor::notifyEndServerScan(ServerHandler* server)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("AttributeEditor::notifyEndServerScan -->");
+    UiLog(server).dbg() << "AttributeEditor::notifyEndServerScan -->";
 #endif
 
     if(info_)
@@ -331,7 +331,7 @@ void AttributeEditor::notifyEndServerScan(ServerHandler* server)
     }
 
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UserMessage::debug("<-- AttributeEditor::notifyEndServerScan");
+    UiLog(server).dbg() << "<-- notifyEndServerScan";
 #endif
 }
 

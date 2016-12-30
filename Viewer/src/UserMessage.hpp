@@ -28,7 +28,6 @@ public:
     static bool confirm(const std::string& message);
 
     static void debug(const std::string& message);
-    static void qdebug(QString message);
     static std::string toString(int);
 
 private:

@@ -33,10 +33,10 @@ void UiLog::appendType(std::string& s,Type t) const
 {
     switch(t)
     {
+    case DBG: s.append("DBG:"); break;
     case INFO: s.append("INF:"); break;
     case WARN: s.append("WAR:"); break;
     case ERROR: s.append("ERR:"); break;
-    case DBG: s.append("DBG:"); break;
     default: assert(false); break;
     }
 }
@@ -68,7 +68,8 @@ std::ostringstream& UiLog::dbg()
 void UiLog::output(const std::string& msg)
 {
     std::string ts;
-    ecf::TimeStamp::now(ts);
+    //ecf::TimeStamp::now(ts);
+    timeStamp(ts);
 
     std::string s;
     appendType(s,type_);
@@ -81,3 +82,15 @@ void UiLog::output(const std::string& msg)
     std::cout << s << std::endl;
 
 }
+
+void UiLog::timeStamp(std::string& time_stamp)
+{
+   char t_fmt[255];
+   time_t stamp = time( NULL);
+   struct tm *tod = localtime(&stamp);
+   sprintf(t_fmt, "[%02d:%02d:%02d %d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
+           tod->tm_mday, tod->tm_mon + 1);
+
+   time_stamp = t_fmt;
+}
+

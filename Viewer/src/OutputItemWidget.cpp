@@ -19,6 +19,7 @@
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 #include <QApplication>
@@ -513,7 +514,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 
         }
 
-        UserMessage::qdebug("  dir item count=" + QString::number(dirModel_->rowCount()));
+        UiLog().dbg() << " dir item count=" << dirModel_->rowCount();
 
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;

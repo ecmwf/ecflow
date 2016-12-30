@@ -64,6 +64,7 @@ public:
 protected:
    void output(const std::string& msg);
    void appendType(std::string& s,Type t) const;
+   void timeStamp(std::string& time_stamp);
 
    Type type_;
    std::ostringstream os_;

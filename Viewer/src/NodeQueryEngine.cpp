@@ -17,6 +17,7 @@
 #include "NodeQuery.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VAttributeType.hpp"
 #include "VFilter.hpp"
@@ -59,7 +60,7 @@ NodeQueryEngine::~NodeQueryEngine()
 
 bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 {
-    UserMessage::debug("NodeQueryEngine::runQuery -->");
+    UiLog().dbg() << "NodeQueryEngine::runQuery -->";
 
     if(isRunning())
         wait();
@@ -88,11 +89,12 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     attrParser_.clear();
 
     //The nodequery parser
-    UserMessage::debug("   node part: " + query_->nodeQueryPart().toStdString());
+    UiLog().dbg() << " node part: " << query_->nodeQueryPart().toStdString();
 
     parser_=NodeExpressionParser::instance()->parseWholeExpression(query_->nodeQueryPart().toStdString(), query->caseSensitive());
     if(parser_ == NULL)
     {
+        UiLog().err() << " unable to parse node query: " << query_->nodeQueryPart().toStdString();
         UserMessage::message(UserMessage::ERROR,true,"Error, unable to parse node query: " + query_->nodeQueryPart().toStdString());
         return false;
     }
@@ -117,6 +119,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
         rootNode_=servers_.at(0)->vRoot()->find(query_->rootNode());
         if(!rootNode_)
         {
+            UiLog().err() << " the specified root node does not exist: " << query_->rootNode();
             UserMessage::message(UserMessage::ERROR,true,
                          "Error, the specified root node <u>does not</u> exist: " + query_->rootNode());
             return false;
@@ -124,7 +127,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     }
 
     //The attribute parser
-    UserMessage::debug("   full attr part: " + query_->attrQueryPart().toStdString());
+    UiLog().dbg() << " full attr part: " << query_->attrQueryPart().toStdString();
 
     for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
         it != VAttributeType::types().end(); ++it)
@@ -132,11 +135,12 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
         if(query_->hasAttribute(*it))
         {
             QString attrPart=(query_->attrQueryPart(*it));
-            UserMessage::qdebug("    " + (*it)->name() + ": " + attrPart);
+            UiLog().dbg() << "  " << (*it)->strName() << ": " << attrPart.toStdString();
             BaseNodeCondition* ac=NodeExpressionParser::instance()->parseWholeExpression(attrPart.toStdString(), query->caseSensitive());
             if(!ac)
             {
-                UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse attribute query: " + attrPart.toStdString()));
+                UiLog().err() << "  unable to parse attribute query: " << attrPart.toStdString();
+                UserMessage::message(UserMessage::ERROR,true, "Error, unable to parse attribute query: " + attrPart.toStdString());
                 return false;
             }
             attrParser_[*it]=ac;
@@ -152,7 +156,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     //Start thread execution
     start();
 
-    UserMessage::debug("<-- NodeQueryEngine::runQuery");
+    UiLog().dbg() << "<-- runQuery";
 
     return true;
 }
@@ -350,7 +354,8 @@ void NodeFilterEngine::setQuery(NodeQuery* query)
     parser_=NodeExpressionParser::instance()->parseWholeExpression(query_->query().toStdString());
     if(parser_ == NULL)
     {
-        UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
+        UiLog().err() << "Error, unable to parse enabled condition: " << query_->query().toStdString();
+        UserMessage::message(UserMessage::ERROR, true,"Error, unable to parse enabled condition: " + query_->query().toStdString());
     }
 }
 
