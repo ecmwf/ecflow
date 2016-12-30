@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -24,6 +24,7 @@ std::string DirectoryHandler::etcDir_;
 std::string DirectoryHandler::configDir_;
 std::string DirectoryHandler::rcDir_;
 std::string DirectoryHandler::tmpDir_;
+std::string DirectoryHandler::uiLogFile_;
 
 static bool firstStartUp=false;
 
@@ -121,6 +122,7 @@ void DirectoryHandler::init(const std::string& exeStr)
         tmpDir_=std::string(h);
         boost::filesystem::path tmp(tmpDir_);
         tmp /= "eclow_ui.tmp";
+        tmpDir_=tmp.string();
         if(!boost::filesystem::exists(tmp))
         {
             UserMessage::message(UserMessage::WARN, false,
@@ -129,8 +131,7 @@ void DirectoryHandler::init(const std::string& exeStr)
             try
             {
                 if(boost::filesystem::create_directory(tmp))
-                {
-                    tmpDir_=tmp.string();
+                {                   
                     UserMessage::debug("Tmp dir created: " + tmpDir_);
                 }
             }
@@ -138,7 +139,7 @@ void DirectoryHandler::init(const std::string& exeStr)
             {
                 UserMessage::message(UserMessage::ERROR,true,"Creating tmp directory failed:" + std::string(e.what()));
             }
-        }
+        }        
     }
     else
     {
@@ -146,6 +147,18 @@ void DirectoryHandler::init(const std::string& exeStr)
             "Neither of ECFLOWUI_TMPDIR and TMPDIR are defined. ecflowUI cannot be started up!");
         exit(1);
     }
+
+    //Ui logfile
+    if(char *h=getenv("ECFLOWUI_UI_LOGFILE"))
+    {
+        uiLogFile_=std::string(h);
+    }
+    else
+    {
+        boost::filesystem::path tmp(tmpDir_);
+        tmp /= "ecflowui_uilog.txt";
+        uiLogFile_=tmp.string();
+     }
 }
 
 

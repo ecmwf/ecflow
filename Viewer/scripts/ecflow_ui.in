@@ -224,6 +224,8 @@ fi
 # Where to write the log file to
 ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
 
+# Where to write the user interaction log file to
+ECFLOWUI_UI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 
 #-----------------------------------------------------------
 # Close tty and redirect stdout to a file?

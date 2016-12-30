@@ -47,6 +47,7 @@ set(viewer_srcs
     InfoPanelItem.cpp   
     InfoPanelHandler.cpp
     InfoProvider.cpp
+    InputEventLog.cpp
     JobItemWidget.cpp
     LabelEditor.cpp
     LimitEditor.cpp

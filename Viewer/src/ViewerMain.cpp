@@ -22,6 +22,7 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "InfoPanelHandler.hpp"
+#include "InputEventLog.hpp"
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
 #include "NodeQueryHandler.hpp"
@@ -150,6 +151,9 @@ int main(int argc, char **argv)
 
 		//Show all the windows
 		MainWindow::showWindows();
+
+        InputEventLog log(0);
+        app.installEventFilter(&log);
 
 		return app.exec();
 	}
