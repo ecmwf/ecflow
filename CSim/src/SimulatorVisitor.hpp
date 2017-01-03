@@ -28,12 +28,10 @@ namespace ecf {
 
 class SimulatorVisitor : public NodeTreeVisitor {
 public:
-	SimulatorVisitor(const std::string& defs_filename,int truncateRepeats);
+	SimulatorVisitor(const std::string& defs_filename);
 
-	/// If the definition file has suites with no tasks, ie they could have server limits
-	/// then for simulation purposes(i.e when all suites complete we terminate simulation)
- 	/// mark these as complete. Must be done *AFTER* beginAll() which sets all nodes to queued state
- 	bool foundTasks() const { return foundTasks_;}
+	/// If the we have crons and no endclock then show error message
+	const std::string& errors_found() const { return error_msg_;}
 
  	/// Crons run for ever. Detect them so that we can abort early
    bool foundCrons() const { return foundCrons_;}
@@ -41,9 +39,9 @@ public:
  	/// returns true if defs has time,date,today, date time based attributes
  	bool hasTimeDependencies() const { return hasTimeDependencies_;}
 
- 	/// Determine the max simulation period in hours. We will default to a years 8784 =  366 X 24
+ 	/// Determine the max simulation period in hours. We will default to a year( 8784 =  366 X 24)
  	/// However by going through and looking at the repeats, we can get a better idea
- 	boost::posix_time::time_duration maxSimulationPeriod() const;
+ 	boost::posix_time::time_duration maxSimulationPeriod() const { return max_length_;}
 
   	// default calendar increment is one minute, however if we have no time dependencies,
  	// then simulation can be speeded up, i.e by using hour increment
@@ -63,10 +61,12 @@ private:
 //	int truncateRepeats_;  // allow for simulation to complete earlier. ***NOT USED, kept for reference *****
 
 	std::string defs_filename_;
+	std::string error_msg_;
 	bool foundTasks_;
 	bool foundCrons_;
 	bool hasTimeDependencies_;
-	int  max_length_;
+	bool has_end_clock_;
+	boost::posix_time::time_duration max_length_;
  	boost::posix_time::time_duration ci_;
 };
 

@@ -301,6 +301,7 @@ public:
    /// If we have just day/date then we have a resolution of 1 hour
    /// Otherwise if we have time/today/cron with minutes, then resolution is 1 minute
    void get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const;
+   void get_max_simulation_duration(boost::posix_time::time_duration& resol) const;
 
    /// A hierarchical function
    virtual bool hasAutoCancel() const { return (autoCancel_) ? true : false;}

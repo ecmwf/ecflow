@@ -910,3 +910,12 @@ void TimeDepAttrs::get_time_resolution_for_simulation(boost::posix_time::time_du
       }
    }
 }
+
+void TimeDepAttrs::get_max_simulation_duration(boost::posix_time::time_duration& duration) const
+{
+   // don't override a higher value of duration
+   if ((!timeVec_.empty() || !todayVec_.empty()) && duration < hours(24)) duration = hours(24); // day
+   if (!days_.empty()  && duration < hours(168))     duration = hours(168);                     // week
+   if (!dates_.empty() && duration < hours(24*7*31)) duration = hours(24*7*31);                 // month
+   if (!crons_.empty()) duration = hours(8760);                                                 // year
+}

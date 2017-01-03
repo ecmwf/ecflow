@@ -52,6 +52,7 @@ public:
 	void startStopWithServer(bool f);
 	bool startStopWithServer() const { return startStopWithServer_; }
  	void hybrid( bool f );
+ 	void set_end_clock() { end_clock_ = true;}
 
  	// clear local attributes so, than when we re-queue suite, we sync with computer clock
  	void sync();
@@ -71,11 +72,13 @@ public:
  	bool hybrid() const { return hybrid_;}
  	bool is_virtual() const { return startStopWithServer_;}
 	std::string toString() const;
+   boost::posix_time::ptime ptime() const;
 
 private:
 	bool hybrid_;
 	bool positiveGain_;
 	bool startStopWithServer_;  // see Calendar.hpp for more details
+	bool end_clock_;            // *NOT* persisted, used for end clock, simulator only
 	long gain_;                 // in seconds
 	int day_;
 	int month_;
@@ -96,5 +99,4 @@ private:
 	   ar & year_;
 	}
 };
-
 #endif

@@ -20,6 +20,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
+#include "PrintStyle.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -76,10 +77,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer  )
  	   //		cout << theDefs << "\n";
  	}
 
+ 	PrintStyle::setStyle(PrintStyle::STATE);
  	Simulator simulator;
  	std::string errorMsg;
- 	BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_integer.def"),errorMsg),errorMsg);
-//	cout << theDefs << "\n";
+ 	BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_integer.def"),errorMsg),errorMsg << "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_integer_relative  )
@@ -121,8 +122,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer_relative  )
 
    Simulator simulator;
 	std::string errorMsg;
-	BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_integer_relative.def"),errorMsg),errorMsg);
-//	cout << theDefs << "\n";
+	BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_integer_relative.def"),errorMsg),errorMsg << "\n" << theDefs);
 }
 
 
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date  )
 
    Simulator simulator;
 	std::string errorMsg;
-	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg);
+	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg << "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_date_2  )
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_2  )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg << "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop  )
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop  )
 
    Simulator simulator;
 	std::string errorMsg;
-	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop.def"), errorMsg),errorMsg);
+	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop.def"), errorMsg),errorMsg << "\n" << theDefs);
 }
 
 
@@ -284,39 +284,41 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop2.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop2.def"), errorMsg),errorMsg << "\n" << theDefs);
 }
-
 
 BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 {
  	cout << "Simulator:: ...test_repeat_with_cron\n";
-// 	suite s
-//    clock real <today date>
-// 	  family f
-//	     repeat date YMD 20091001  20091004 1  # yyyymmdd
-// 		family plot
-// 			complete plot/finish == complete
-//
-// 			task finish
-// 				trigger 1 == 0    # stops task from running
-// 				complete checkdata::done or checkdata == complete
-//
-// 			task checkdata
-// 				event done
-// 				cron <today date> + 2 minutes     # cron that run forever
-//      endfamily
-//   endfamily
-// endsuite
+ 	// 	suite s
+ 	//    clock real <today date>
+ 	//    endclock <today date> + 1 week
+ 	// 	  family f
+ 	//	     repeat date YMD 20091001 20091004 1  # yyyymmdd
+ 	// 		family plot
+ 	// 			complete plot/finish == complete
+ 	//
+ 	// 			task finish
+ 	// 				trigger 1 == 0    # stops task from running
+ 	// 				complete checkdata::done or checkdata == complete
+ 	//
+ 	// 			task checkdata
+ 	// 				event done
+ 	// 				cron <today date> + 2 minutes     # cron that run forever
+ 	//      endfamily
+ 	//   endfamily
+ 	// endsuite
 
    Defs theDefs;
  	{
  	 	boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
   	 	boost::posix_time::ptime   time_plus_2_minute =  theLocalTime +  minutes(2);
 		ClockAttr clockAttr(theLocalTime, false/* real clock*/);
+      ClockAttr end_clock(theLocalTime + hours(24*7), false/* real clock*/);
 
       suite_ptr suite = theDefs.add_suite("test_repeat_with_cron");
   		suite->addClock( clockAttr );
+      suite->add_end_clock( end_clock );
 
       family_ptr f = suite->add_family( "f" );
  		f->addRepeat( RepeatDate("YMD",20091001,20091004,1));  // repeat contents 4 times
@@ -325,7 +327,6 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
       family_ptr family_plot = f->add_family( "plot" );
  		family_plot->add_complete(  "plot/finish ==  complete");
  		family_plot->addVerify( VerifyAttr(NState::COMPLETE,4) );
-
 
       task_ptr task_finish = family_plot->add_task("finish");
 		task_finish->add_trigger(  "1 == 0");
@@ -345,7 +346,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 
    Simulator simulator;
 	std::string errorMsg;
-	BOOST_REQUIRE_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_with_cron.def"), errorMsg),errorMsg);
+	BOOST_REQUIRE_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_with_cron.def"), errorMsg),errorMsg << "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_enumerated )
@@ -380,7 +381,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_enumerated.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_enumerated.def"), errorMsg),errorMsg << "\n" << theDefs);
    //	cout << theDefs << "\n";
 
 
@@ -428,7 +429,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
 
  	Simulator simulator;
  	std::string errorMsg;
- 	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_string.def"), errorMsg),errorMsg);
+ 	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_string.def"), errorMsg),errorMsg << "\n" << theDefs);
  	//	cout << theDefs << "\n";
 
  	std::vector<Task*> theServerTasks;
@@ -442,7 +443,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
  	   BOOST_REQUIRE_MESSAGE(repeat.value() == 2,"Expected to find repeat with value 2 but found " << repeat.value() );
       BOOST_REQUIRE_MESSAGE(repeat.last_valid_value() == 1,"Expected to find repeat with last valid value 1 but found " << repeat.last_valid_value() );
  	}
+
+   PrintStyle::setStyle(PrintStyle::DEFS);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

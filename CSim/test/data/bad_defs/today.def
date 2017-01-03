@@ -1,6 +1,6 @@
 suite suiteName
    family familyName0
    		today 15:00
-   		today 23:59 00:00  00:30     # start should be less than finish
+   		today 23:59 00:00 00:30  # start should be less than finish
     endfamily
 endsuite

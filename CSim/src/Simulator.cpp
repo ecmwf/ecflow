@@ -52,15 +52,20 @@ public:
 	~LogDestroyer() { Log::destroy(); }
 };
 
-Simulator::Simulator(const boost::posix_time::time_duration& period)
-: max_simulation_period_(period),
-  truncateLongRepeatsTo_(0),
-  level_(0),
-  foundCrons_(false)
+Simulator::Simulator() : level_(0){}
+
+bool Simulator::run(const std::string& theDefsFile,std::string& errorMsg) const
 {
 #ifdef DEBUG_LONG_RUNNING_SUITES
-	std::cout << "Simulator::Simulator max_simulation_period_ " << to_simple_string(max_simulation_period_) << endl;
+   cout << "Simulator::run parsing file " << theDefsFile << endl;
 #endif
+
+   Defs theDefs;
+   DefsStructureParser checkPtParser( &theDefs , theDefsFile );
+   std::string warningMsg;
+   if (!checkPtParser.doParse(errorMsg,warningMsg))  return false;
+   //cout << theDefs << "\n";
+   return run(theDefs,theDefsFile,errorMsg, false /* don't do check, allready done */);
 }
 
 bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::string& errorMsg, bool do_checks) const
@@ -111,39 +116,34 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
    //   then when we are using repeat, they can cause the suite to re-queue
    //   and RESET the suite time, back to clock attribute time
    //   *********************************************************************************
- 	// **** Need a better mechanism of handling long repeats, the old way of changing repeat
- 	// **** attributes is not acceptable.(i.e user could save in python after simulation
- 	// **** and there defs would be corrupted
-	SimulatorVisitor simiVisitor(defs_filename,truncateLongRepeatsTo_ /* NOT USED */);
+	SimulatorVisitor simiVisitor(defs_filename);
 	theDefs.acceptVisitTraversor(simiVisitor);
-	foundCrons_ = simiVisitor.foundCrons();
-
-	if (!simiVisitor.foundTasks()) {
-		errorMsg += "The defs file ";
-		errorMsg += defs_filename;
-		errorMsg +=  " has no tasks, can not simulate\n";
- 		return false;
+	if (!simiVisitor.errors_found().empty()) {
+      errorMsg +=  simiVisitor.errors_found();
+      return false;
 	}
 
 	// Let visitor determine calendar increment. i.e if no time dependencies we will use 1 hour increment
-	// Default max_simulation_period_ is 1 year, however some operation suites run for many years
-	// Analyse the repeats to determine max simulation period
  	time_duration calendarIncrement =  simiVisitor.calendarIncrement();
  	boost::posix_time::time_duration max_simulation_period = simiVisitor.maxSimulationPeriod();
- 	if ( max_simulation_period > max_simulation_period_) max_simulation_period_ = max_simulation_period;
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
- 	cout << defs_filename << " time dependency = " <<  simiVisitor.hasTimeDependencies()
-		<< " max_simulation_period_=" << to_simple_string(max_simulation_period_)
-		<< " calendarIncrement=" << to_simple_string(calendarIncrement) << endl;
+ 	cout << defs_filename << " time dependency(" <<  simiVisitor.hasTimeDependencies()
+		<< ") max_simulation_period(" << to_simple_string(max_simulation_period)
+		<< ") calendarIncrement(" << to_simple_string(calendarIncrement) << ")" << "\n";
 #endif
 
+ 	// Do we have autocancel, must be done before.
+   int hasAutoCancel = 0;
+   BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->hasAutoCancel()) hasAutoCancel++; }
 
- 	CalendarUpdateParams calUpdateParams( calendarIncrement );
 
 	// Start simulation ...
+ 	// Assume: simulation has taken into account autocancel end time.
+ 	CalendarUpdateParams calUpdateParams( calendarIncrement );
 	boost::posix_time::time_duration duration(0,0,0,0);
- 	while (1) {
+ 	while (duration <= max_simulation_period) {
+
 #ifdef DEBUG_LONG_RUNNING_SUITES
       BOOST_FOREACH(suite_ptr ss, theDefs.suiteVec()) {
          cout << "duration: " << to_simple_string(duration) << " " << ss->calendar().toString() << endl;
@@ -153,106 +153,46 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  		// Resolve dependencies and submit jobs
  		if (!doJobSubmission(theDefs,errorMsg)) return false;
 
- 		// Determine termination criteria. If all suite complete, exit,
- 		// Let simulation termination take autocancel into account. i.e we extend simulation even though
- 		// suite may have completed, to allow autocancel to take effect.
- 		// Hence if a suite has complete, but has autocancel we continue simulation
- 		// Note: should also handle case of autocancel which remove all suites
-		size_t completeSuiteCnt = 0;
-		int hasAutoCancel = 0;
-		BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) {
-			if (s->state() == NState::COMPLETE) completeSuiteCnt++;
-			if (s->hasAutoCancel()) hasAutoCancel++;
-		}
-		if ( (theDefs.suiteVec().size() == completeSuiteCnt) && (hasAutoCancel == 0)) {
- 			LOG(Log::MSG, "Simulation complete in " << to_simple_string(duration) );
-
- 			if ( !theDefs.checkInvariants(errorMsg) )  break;
-
-			// Run verification on the completed suite
-  			return theDefs.verification(errorMsg);
-		}
-
-		// crons run for ever. To terminate, we rely on test to have Verify attributes
-		// The verify attributes should *only* be on the task. (i.e task auto-reques
-		// hance parent is never complete, and hence no point in having verify attributes
-		if (foundCrons_) {
-		   std::string msg;
-		   if (theDefs.verification(msg)) {
-		      return true;
-		   }
-		}
-
-		// if simulation runs to long bomb out.,  then Analyse the defs,
-		// to determine why the simulation would not complete
-		if (abortSimulation(simiVisitor, duration, errorMsg) ) {
-
- 			if ( !theDefs.checkInvariants(errorMsg) )  break;
-
- 			if ( (theDefs.suiteVec().size() == completeSuiteCnt) && (hasAutoCancel != 0)) {
- 				errorMsg += "All suites have completed, but autocancel has not taken effect?\n";
- 			}
-
- 			if (foundCrons_) {
- 			   std::string msg;
- 			   if (!theDefs.verification(msg)) {
- 			      errorMsg += msg;
- 			      errorMsg += "\n";
- 			   }
- 			}
-
-  			Analyser analyser;
-  			analyser.run(theDefs);
-  			errorMsg += "Please see files .flat and .depth for analysis\n";
-
-  			PrintStyle::setStyle(PrintStyle::MIGRATE);
-  			std::stringstream ss;
-  			ss << theDefs;
-  			errorMsg += ss.str();
-			return false;
-		}
-
 		// Increment calendar.
 		theDefs.updateCalendar( calUpdateParams );
 		duration += calendarIncrement;
   	}
 
+ 	// ==================================================================================
+ 	// END of simulation
+ 	// ==================================================================================
+ 	if ( !theDefs.checkInvariants(errorMsg) )  {
+ 	   return false;
+ 	}
+
+   // Cater for suite, with no verify attributes, but which are not complete. testAnalysis.cpp
+ 	// Ignore suites with crons as they will never complete
+ 	if (!simiVisitor.foundCrons()) {
+ 	   size_t completeSuiteCnt = 0;
+ 	   BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->state() == NState::COMPLETE) completeSuiteCnt++; }
+ 	   if ( (theDefs.suiteVec().size() != completeSuiteCnt) && (hasAutoCancel == 0)) {
+ 	      std::stringstream ss; ss << "Defs file " << defs_filename << "\n";
+ 	      BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) {
+ 	         ss << "  suite '/" << s->name() << " has not completed\n";
+ 	      }
+ 	      errorMsg += ss.str();
+ 	      return false;
+ 	   }
+ 	}
+
+ 	if ( theDefs.verification(errorMsg)) {
+ 	   return true;
+ 	}
+
+ 	Analyser analyser;
+ 	analyser.run(theDefs);
+ 	errorMsg += "Please see files .flat and .depth for analysis\n";
+
+ 	PrintStyle::setStyle(PrintStyle::MIGRATE);
+ 	std::stringstream ss;
+ 	ss << theDefs;
+ 	errorMsg += ss.str();
  	return false;
-}
-
-
-bool Simulator::run(const std::string& theDefsFile,std::string& errorMsg) const
-{
-#ifdef DEBUG_LONG_RUNNING_SUITES
- 	cout << "Simulator::run parsing file " << theDefsFile << endl;
-#endif
-
- 	Defs theDefs;
-	DefsStructureParser checkPtParser( &theDefs , theDefsFile );
-	std::string warningMsg;
- 	if (!checkPtParser.doParse(errorMsg,warningMsg))  return false;
-
- 	//cout << theDefs << "\n";
- 	return run(theDefs,theDefsFile,errorMsg, false /* don't do check, allready done */);
-}
-
-//---------------------------------------------------------------------------------------
-
-bool Simulator::abortSimulation( const SimulatorVisitor& simiVisitor,
-                                 const boost::posix_time::time_duration& duration,
-                                 std::string& errorMsg) const
-{
-	if (duration > max_simulation_period_) {
-
-		errorMsg = "\nTimed out after ";
-		errorMsg += to_simple_string(max_simulation_period_);
-		errorMsg += " hours of simulation.\n";
-
-		if (!simiVisitor.hasTimeDependencies())  errorMsg += "The definition has no time dependencies.\n";
-		return true;
-	}
-
-	return false;
 }
 
 bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
@@ -341,15 +281,6 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 				meter.set_value(meter.max());
  			}
 		}
-
- 		// crons run for ever. To terminate, we rely on test to have Verify attributes
- 		if (foundCrons_) {
- 		   std::string msg;
- 		   t->verification(msg);
- 		   if (msg.empty()) {
- 		      return true;
- 		   }
- 		}
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
 		cout << t->debugNodePath() << " completes at " << t->suite()->calendar().toString() << " level " << level_ << " parent state:" <<  endl;

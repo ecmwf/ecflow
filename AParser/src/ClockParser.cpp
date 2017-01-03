@@ -141,3 +141,65 @@ bool ClockParser::doParse( const std::string& line,
 	return true;
 }
 
+
+bool EndClockParser::doParse( const std::string& line, std::vector<std::string >& lineTokens )
+{
+   // Note: endclock > clock
+   // Also endclock will be same type as the clock
+
+   // endclock 300
+   // endclock 300
+   // endclock +01:00
+   // endclock 20.1.2007
+   // endclock 20.1.2007 +01:00
+
+   // Allow clock to be stopped/started when the server is stopped/started
+   // and hence always honour time dependencies. See Calendar.h for more details
+   if ( lineTokens.size() < 2 ) {
+      throw std::runtime_error( "ClockEndParser::doParse: Invalid clock :" + line );
+   }
+   if ( nodeStack().empty() ) {
+      throw std::runtime_error("ClockEndParser::doParse: Could not add end clock as node stack is empty at line: " + line );
+   }
+
+
+   ClockAttr clockAttr(false);
+
+   if ( lineTokens.size() >= 2 && lineTokens[1][0] != '#' ) {
+      // if third token is not a comment the time must be of the form
+      // endclock 300
+      // endclock +01:00
+      // endclock 20.1.2007
+
+      if ( lineTokens[1].find(".") != std::string::npos ) {
+         // endclock 20.1.2007
+
+         // If 0 returned then day,month,year is of form *, and not valid
+         int day,month,year;
+         DateAttr::getDate(lineTokens[1],day,month,year);
+
+         // This will throw std::out_of_range for an invalid clock date. Note no wild carding allowed.
+         clockAttr.date(day,month,year); // this will check the date
+
+         if ( lineTokens.size() >= 3 && lineTokens[2][0] != '#' ) {
+            // endclock 20.1.2007 +01:00
+            // endclock 20.1.2007 +300
+            // endclock 20.1.2007 350
+            extractTheGain(lineTokens[2], clockAttr);
+         }
+      }
+      else {
+         // endclock 300
+         // endclock +01:00
+         extractTheGain(lineTokens[1], clockAttr);
+      }
+   }
+
+   Suite* suite =  nodeStack_top()->isSuite();
+   if (!suite) throw std::runtime_error("Clock can only be added to suites and not " + nodeStack_top()->debugType()  );
+
+   suite->add_end_clock(clockAttr);
+
+   return true;
+}
+
