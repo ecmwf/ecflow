@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( test_time )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time.def"), errorMsg),errorMsg << "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_time_series )
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( test_time_series )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time_series.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time_series.def"), errorMsg),errorMsg<< "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_time_and_date )
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE( test_time_and_date )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time_and_date.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time_and_date.def"), errorMsg),errorMsg<< "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_time_and_tomorrows_date )
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE( test_time_and_tomorrows_date )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time_and_tomorrows_date.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time_and_tomorrows_date.def"), errorMsg),errorMsg<< "\n" << theDefs);
 }
 
 
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_multiple_times_and_dates.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_multiple_times_and_dates.def"), errorMsg),errorMsg<< "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates_hybrid )
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates_hybrid )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_dates_hybrid.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_dates_hybrid.def"), errorMsg),errorMsg<< "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_multiple_times_and_days )
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_days )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_days.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_days.def"), errorMsg),errorMsg<< "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_CASE( test_multiple_times_and_days_hybrid )
@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_days_hybrid )
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_days_hybrid.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_days_hybrid.def"), errorMsg),errorMsg<< "\n" << theDefs);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

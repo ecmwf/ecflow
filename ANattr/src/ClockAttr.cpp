@@ -31,7 +31,7 @@ using namespace boost::posix_time;
 //==========================================================================================
 
 ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid,bool positiveGain)
-: hybrid_(hybrid), positiveGain_(positiveGain), startStopWithServer_(false),
+: hybrid_(hybrid), positiveGain_(positiveGain), startStopWithServer_(false), end_clock_(false),
   gain_(0), day_(0),month_(0),year_(0),
   state_change_no_(Ecf::incr_state_change_no())
 {
@@ -45,7 +45,7 @@ ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid,bool posi
 }
 
 ClockAttr::ClockAttr(int day, int month, int year, bool hybrid )
-: hybrid_(hybrid), positiveGain_(false), startStopWithServer_(false),
+: hybrid_(hybrid), positiveGain_(false), startStopWithServer_(false), end_clock_(false),
   gain_(0), day_(day),month_(month),year_(year),
   state_change_no_(Ecf::incr_state_change_no())
 {
@@ -54,7 +54,7 @@ ClockAttr::ClockAttr(int day, int month, int year, bool hybrid )
 }
 
 ClockAttr::ClockAttr(bool hybrid)
-: hybrid_(hybrid), positiveGain_(false), startStopWithServer_(false),
+: hybrid_(hybrid), positiveGain_(false), startStopWithServer_(false), end_clock_(false),
   gain_(0), day_(0),month_(0),year_(0),
   state_change_no_(Ecf::incr_state_change_no()) {}
 
@@ -68,9 +68,14 @@ std::ostream& ClockAttr::print(std::ostream& os) const
 std::string ClockAttr::toString() const
 {
 	std::stringstream ss;
-	ss << "clock ";
-	if (hybrid_) ss << "hybrid ";
-	else         ss << "real ";
+	if (!end_clock_) {
+	   ss << "clock ";
+	   if (hybrid_) ss << "hybrid ";
+	   else         ss << "real ";
+	}
+	else  {
+	   ss << "endclock ";
+	}
 
 	if (day_ != 0) ss << day_ << "." << month_ << "." << year_ << " ";
 
@@ -150,20 +155,20 @@ void ClockAttr::init_calendar(ecf::Calendar& calendar)
 
 void ClockAttr::begin_calendar(ecf::Calendar& calendar)
 {
-   using namespace boost::posix_time;
-   using namespace boost::gregorian;
+   calendar.begin(ptime());
+}
 
+boost::posix_time::ptime ClockAttr::ptime() const
+{
    if (day_ != 0) {
       // Use the date given. ie we start from midnight on the given day + gain.
       boost::gregorian::date theDate(year_,month_,day_);
-      ptime the_time(theDate, seconds(gain_));
-      calendar.begin(the_time);
+      return boost::posix_time::ptime(theDate, seconds(gain_));
    }
-   else {
-      // Get the local time, second level resolution, based on the time zone settings of the computer.
-      ptime the_time(Calendar::second_clock_time());
-      the_time += seconds(gain_);
-      calendar.begin(the_time);
-   }
+
+   // Get the local time, second level resolution, based on the time zone settings of the computer.
+   boost::posix_time::ptime the_time(Calendar::second_clock_time());
+   the_time += seconds(gain_);
+   return the_time;
 }
 

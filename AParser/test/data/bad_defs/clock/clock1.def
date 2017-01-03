@@ -1,12 +1,11 @@
-suite suiteName
-    clock real 0.1.2006   # clock date should not have wild carding
+suite s1
+ clock real 0.1.2006 # clock date should not have wild carding
 endsuite
 
-suite suiteName1
-    clock real 1.0.2006   # clock date should not have wild carding
+suite s2
+ clock real 1.0.2006 # clock date should not have wild carding
 endsuite
 
-suite suiteName1
-    clock real 1.12.0   # clock date should not have wild carding
+suite s3
+ clock real 1.12.0  # clock date should not have wild carding
 endsuite
-

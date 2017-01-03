@@ -1,0 +1,4 @@
+suite suiteName
+  clock real 20.1.2006
+  endclock  19.1.2006    # endclock should be greater than clock start
+endsuite

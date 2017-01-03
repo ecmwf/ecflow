@@ -59,6 +59,9 @@ Suite::Suite(const Suite& rhs)
    if (rhs.clockAttr_.get())
       clockAttr_ = boost::make_shared<ClockAttr>( *rhs.clockAttr_ );
 
+   if (rhs.clock_end_attr_.get())
+      clock_end_attr_ = boost::make_shared<ClockAttr>( *rhs.clock_end_attr_ );
+
    calendar_ = rhs.calendar_;
 }
 
@@ -69,6 +72,7 @@ Suite& Suite::operator=(const Suite& rhs)
       NodeContainer::operator=(rhs);
       begun_ = rhs.begun_;
       if (rhs.clockAttr_.get()) clockAttr_ = boost::make_shared<ClockAttr>( *rhs.clockAttr_ );
+      if (rhs.clock_end_attr_.get()) clock_end_attr_ = boost::make_shared<ClockAttr>( *rhs.clock_end_attr_ );
       calendar_ = rhs.calendar_;
 
       state_change_no_ = 0;
@@ -287,7 +291,8 @@ std::ostream& Suite::print(std::ostream& os) const
 	Node::print(os);
 
 	// make sure clock attribute is written before
-	if (clockAttr_.get()) clockAttr_->print(os);
+   if (clockAttr_.get()) clockAttr_->print(os);
+   if (clock_end_attr_.get()) clock_end_attr_->print(os);
 	if (!PrintStyle::defsStyle()) {
 	   std::string calendar_state = calendar_.write_state();
 	   if (!calendar_state.empty()) {
@@ -328,8 +333,17 @@ void Suite::addClock( const ClockAttr& c,bool initialize_calendar)
 	if ( clockAttr_.get()) {
  		throw std::runtime_error("Add Clock failed: Suite can only have one clock " + absNodePath());
  	}
+   if (clock_end_attr_.get()) {
+       if (clock_end_attr_->ptime() <= c.ptime()) {
+          throw std::runtime_error("Add Clock failed:: End time must be greater than start time " + absNodePath());
+       }
+    }
+
 	clockAttr_ = boost::make_shared<ClockAttr>(c);
 	if (initialize_calendar) clockAttr_->init_calendar(calendar_);
+
+   // clock_end_attr_ is always same type as clock
+   if (clock_end_attr_.get())  clock_end_attr_->hybrid(clockAttr_->hybrid());
 }
 
 void Suite::changeClock( const ClockAttr& c)
@@ -337,6 +351,25 @@ void Suite::changeClock( const ClockAttr& c)
    // When changing the clock, *WAIT* till requeue/begin to init the calendar
 	clockAttr_.reset();
  	addClock( c , false);
+}
+
+void Suite::add_end_clock( const ClockAttr& c)
+{
+   // end clock is for for simulator only
+   if ( clock_end_attr_.get()) {
+      throw std::runtime_error("Add end Clock failed: Suite can only have one end clock " + absNodePath());
+   }
+   if (clockAttr_.get()) {
+      if (c.ptime() <=  clockAttr_->ptime()) {
+         throw std::runtime_error("Add end Clock failed: End time must be greater than start time " + absNodePath());
+      }
+   }
+
+   clock_end_attr_ = boost::make_shared<ClockAttr>(c);
+   clock_end_attr_->set_end_clock();
+
+   // clock_end_attr_ is always same type as clock
+   if (clockAttr_.get())  clock_end_attr_->hybrid(clockAttr_->hybrid());
 }
 
 void Suite::changeClockType(const std::string& clockType)
@@ -370,6 +403,9 @@ void Suite::changeClockType(const std::string& clockType)
    else {
       addClock( ClockAttr( clockType == "hybrid") ); // will update state change_no
    }
+
+   // clock_end_attr_ is always same type as clock
+   if (clock_end_attr_.get()) clock_end_attr_->hybrid(clockAttr_->hybrid());
 
    // re-sync suite calendar for clock attribute, re-queue all time based attributes
    handle_clock_attribute_change();
