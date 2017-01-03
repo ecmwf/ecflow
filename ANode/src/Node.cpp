@@ -1969,6 +1969,16 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
    }
 }
 
+void Node::get_max_simulation_duration(boost::posix_time::time_duration& duration) const
+{
+   if ( time_dep_attrs_ ) {
+      time_dep_attrs_->get_max_simulation_duration(duration);
+   }
+   if (!repeat_.empty()) {
+      duration = hours(8760);  // year
+   }
+}
+
 void Node::notify_delete()
 {
    // make a copy, to avoid iterating over observer list that is being changed

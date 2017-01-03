@@ -1,5 +1,6 @@
 suite suite
- 	clock hybrid 11.10.2009             # 11 october 2009 was a sunday, task x should complete on begin
+    clock hybrid 11.10.2009  # 11 october 2009 was a sunday, task x should complete on begin
+    endclock     13.10.2009  # end time
  	family family
  	   	verify complete:1
  	   	task y

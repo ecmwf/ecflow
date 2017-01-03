@@ -1,12 +1,13 @@
 suite suite
- 	clock real 11.10.2009             # 11 october 2009 was a sunday, task x should hold for a day
- 	family family
- 	    verify complete:1        # family should complete once
- 	   	task y
- 	   	task x
-	  		trigger ./y == complete
-	  		time 01:00
- 	        day monday
- 	        verify complete:1        # task should complete once
- 	endfamily
+ clock real 11.10.2009  # 11 october 2009 was a sunday, task x should hold for a day
+ endclock   13.10.2009  # End time, otherwise will simulate for a year, when we have time dependencies
+ family family
+   verify complete:1        # family should complete once
+   task y
+   task x
+    trigger ./y == complete
+	  time 01:00
+ 	  day monday
+ 	  verify complete:1        # task should complete once
+ endfamily
 endsuite

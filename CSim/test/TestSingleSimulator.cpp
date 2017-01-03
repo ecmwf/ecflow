@@ -24,6 +24,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
+#include "System.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -43,62 +44,58 @@ namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( SimulatorTestSuite )
 
-//BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
-//{
-//   cout << "Simulator:: ...test_repeat_date_for_loop2\n";
-//
-//   //suite suite
-//   // clock real <todays date>
-//   // repeat date YMD 20091001  20091005 1  # yyyymmdd
-//   // family family
-//   //     repeat date YMD 20091001  20091005 1  # yyyymmdd
-//   //    task t
-//   //       time 10:00
-//   //       time 11:00
-//   //    endfamily
-//   //endsuite
-//
-//   // Each task should be run 5 * 5 * 2 = 50 times, ie every day from from 1st Oct -> 5 Oct 5*5 times * 2 time slots
-//   Defs theDefs;
-//   {
-//      // start at specific time other wise time dependent checks will not verify
-//      suite_ptr suite = theDefs.add_suite("test_repeat_date_for_loop2");
-//      suite->addRepeat( RepeatDate("YMD",20091001,20091005,1));  // repeat contents 5 times
-//      suite->addVerify( VerifyAttr(NState::COMPLETE,5) );
-//
-//      ClockAttr clockAttr;
-//      clockAttr.date(1,10,2009);
-//      suite->addClock( clockAttr );
-//
-//      family_ptr fam = suite->add_family( "family" );
-//      fam->addRepeat( RepeatDate("YMD",20091001,20091005,1));  // repeat contents 5 times
-//      fam->addVerify( VerifyAttr(NState::COMPLETE,25) );
-//
-//      task_ptr task = fam->add_task("t");
-//      task->addTime( ecf::TimeAttr( TimeSlot(10,0) ) );
-//      task->addTime( ecf::TimeAttr( TimeSlot(11,0) ) );
-//      task->addVerify( VerifyAttr(NState::COMPLETE,50) );     // task should complete 50 times
-//
-//      // cout << theDefs << "\n";
-//   }
-//
-//   Simulator simulator;
-//   std::string errorMsg;
-//   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop2.def"), errorMsg),errorMsg);
-//}
-
-
-BOOST_AUTO_TEST_CASE( test_single_from_file  )
+BOOST_AUTO_TEST_CASE( test_analysys )
 {
-   cout << "Simulator:: ...test_single_from_file\n";
+   cout << "Simulator:: ...test_analysys\n";
+   //suite suite
+   // family family
+   //    task t1
+   //          trigger t2 == complete
+   //    task t2
+   //          trigger t1 == complete
+   //    endfamily
+   //endsuite
 
-   std::string path = File::test_data("CSim/test/data/good_defs/cron/cron7.def","CSim");
+   // This simulation is expected to fail, since we have a deadlock/ race condition
+   // It will prodice a defs.depth and defs.flat files. Make sure to remove them
+   Defs theDefs;
+   {
+      suite_ptr suite = theDefs.add_suite("test_analysys");
+      family_ptr fam = suite->add_family("family");
+
+      task_ptr task1 = fam->add_task("t1");
+      task1->add_trigger( "t2 == complete" );
+
+      task_ptr task2 = fam->add_task("t2");
+      task2->add_trigger( "t1 == complete" );
+
+      //    cout << theDefs << "\n";
+   }
 
    Simulator simulator;
    std::string errorMsg;
-   bool passed = simulator.run(path, errorMsg);
+   BOOST_CHECK_MESSAGE(!simulator.run(theDefs, TestUtil::testDataLocation("test_analysys.def") , errorMsg),errorMsg);
 
-   BOOST_REQUIRE_MESSAGE(passed, path << " failed simulation \n" << errorMsg);
+   // cout << theDefs << "\n";
+   boost::filesystem::remove("defs.depth");
+   boost::filesystem::remove("defs.flat");
+
+   /// Destroy singleton's to avoid valgrind from complaining
+   System::destroy();
 }
+
+
+//BOOST_AUTO_TEST_CASE( test_single_from_file  )
+//{
+//   cout << "Simulator:: ...test_single_from_file\n";
+//
+//   std::string path = File::test_data("CSim/test/data/good_defs/day/ECFLOW-833.def","CSim");
+//
+//   Simulator simulator;
+//   std::string errorMsg;
+//   bool passed = simulator.run(path, errorMsg);
+//
+//   BOOST_REQUIRE_MESSAGE(passed, path << " failed simulation \n" << errorMsg);
+//}
 
 BOOST_AUTO_TEST_SUITE_END()

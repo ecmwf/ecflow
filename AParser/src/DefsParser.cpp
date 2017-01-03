@@ -342,7 +342,7 @@ class SuiteParser : public Parser {
 public:
 	SuiteParser(DefsStructureParser* p) : Parser(p), started_(false)
 	{
-      reserve_vec(17);
+      reserve_vec(18);
 	   addParser( new VariableParser(p) );
 	   addParser( new FamilyParser(p) );
 	   addParser( new TaskParser(p,this) );
@@ -360,6 +360,7 @@ public:
       addParser( new LabelParser(p) );
       addParser( new CalendarParser(p) );
       addParser( new MeterParser(p) );
+      addParser( new EndClockParser(p) );
  	}
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {

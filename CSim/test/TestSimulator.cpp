@@ -47,64 +47,64 @@ void simulate(const std::string& directory, bool pass)
 	fs::directory_iterator end_iter;
 	for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr ) {
 
-		try {
-         fs::path relPath(directory + "/" + dir_itr->path().filename().string());
+	   try {
+	      fs::path relPath(directory + "/" + dir_itr->path().filename().string());
 
- 			// recurse down directories
-		    if ( is_directory(dir_itr->status()) )  {
-		    	simulate(relPath.string(),pass);
-		    	continue;
-		    }
+	      // recurse down directories
+	      if ( is_directory(dir_itr->status()) )  {
+	         simulate(relPath.string(),pass);
+	         continue;
+	      }
 
-		    // Only simulate file with .def file extension, i.e. ignore log files.
-// 			cout << "path = " << relPath << "\n";
-          if (File::getExt(relPath.filename().string()) != "def" && File::getExt(relPath.filename().string()) != "got") continue;
+	      // Only simulate file with .def file extension, i.e. ignore log files.
+	      // cout << "path = " << relPath << "\n";
+	      if (File::getExt(relPath.filename().string()) != "def" && File::getExt(relPath.filename().string()) != "got") continue;
 
-//			std::cout << "...............Simulating file " << relPath.string() << "\n";
-		    Simulator simulator;
- 			std::string errorMsg;
-			bool simPass = simulator.run(relPath.string(), errorMsg);
-			if (pass) {
-				// Test expected to pass
-				BOOST_CHECK_MESSAGE(simPass,"Simulator expected to pass for " << relPath << "\n" << errorMsg);
+	      //			std::cout << "...............Simulating file " << relPath.string() << "\n";
+	      Simulator simulator;
+	      std::string errorMsg;
+	      bool simPass = simulator.run(relPath.string(), errorMsg);
+	      if (pass) {
+	         // Test expected to pass
+	         BOOST_CHECK_MESSAGE(simPass,"Simulator expected to pass for " << relPath << "\n" << errorMsg);
 
-				// Compare/ create log files
-				if (simPass) {
- 					std::string logFileName = relPath.string() + ".log";
-					std::string goldenFileName = relPath.string() + ".glog";
-					BOOST_CHECK_MESSAGE(fs::exists(logFileName),"Log file " << logFileName << " should have been created");
-					if (fs::exists(goldenFileName) ) {
+	         // Compare/ create log files
+	         if (simPass) {
+	            std::string logFileName = relPath.string() + ".log";
+	            std::string goldenFileName = relPath.string() + ".glog";
+	            BOOST_CHECK_MESSAGE(fs::exists(logFileName),"Log file " << logFileName << " should have been created");
+	            if (fs::exists(goldenFileName) ) {
 
-						ofstream my_file(goldenFileName.c_str());
-						if (!my_file.good()) {
-							// read able file
-//							cout << "file " << goldenFileName << " is readable \n";
-							std::string errorMessage;
-							BOOST_CHECK_MESSAGE(LogVerification::compareNodeStates(logFileName,goldenFileName,errorMessage),
-							                    "Log file comparison failed for " << relPath.string() << "\n" << errorMessage);
- 						}
-						else {
-							// writable file, overwrite
-//							cout << "Golden file " << goldenFileName << " is writeable, overwriting\n";
-							fs::remove(goldenFileName);
-							fs::copy_file(logFileName,goldenFileName);
-						}
-					}
-					else {
-						// Create golden log file so that it can be compared next time
-						// fs::copy_file(logFileName,goldenFileName);
-					}
-				}
- 			}
-			else {
-				// test expected to fail
-				BOOST_CHECK_MESSAGE(!simPass,"Simulator expected to fail for " << relPath << "\n" << errorMsg);
- 			}
-		}
-		catch ( const std::exception & ex )
-		{
- 			std::cout << dir_itr->path().filename() << " " << ex.what() << std::endl;
-		}
+	               ofstream my_file(goldenFileName.c_str());
+	               if (!my_file.good()) {
+	                  // read able file
+	                  //							cout << "file " << goldenFileName << " is readable \n";
+	                  std::string errorMessage;
+	                  BOOST_CHECK_MESSAGE(LogVerification::compareNodeStates(logFileName,goldenFileName,errorMessage),
+	                        "Log file comparison failed for " << relPath.string() << "\n" << errorMessage);
+	               }
+	               else {
+	                  // writable file, overwrite
+	                  //							cout << "Golden file " << goldenFileName << " is writeable, overwriting\n";
+	                  fs::remove(goldenFileName);
+	                  fs::copy_file(logFileName,goldenFileName);
+	               }
+	            }
+	            else {
+	               // Create golden log file so that it can be compared next time
+	               // fs::copy_file(logFileName,goldenFileName);
+	            }
+	         }
+	      }
+	      else {
+	         // test expected to fail
+	         BOOST_CHECK_MESSAGE(!simPass,"Simulator expected to fail for " << relPath << "\n" << errorMsg);
+	      }
+	   }
+	   catch ( const std::exception & ex )
+	   {
+	      std::cout << dir_itr->path().filename() << " " << ex.what() << std::endl;
+	   }
 	}
 }
 
