@@ -26,6 +26,7 @@ class TimeStamp : private boost::noncopyable {
 public:
    static std::string now();
    static void now(std::string&);
+   static void now_in_brief(std::string&);
 private:
    TimeStamp();
 };
