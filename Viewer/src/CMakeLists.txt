@@ -186,6 +186,7 @@ set(viewer_srcs
     VariableView.cpp
     VConfigLoader.cpp
     WhyItemWidget.cpp
+    WidgetNameProvider.cpp
     ZombieItemWidget.cpp
     ZombieModel.cpp
     TextPager/TextPagerCursor.cpp

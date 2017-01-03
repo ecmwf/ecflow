@@ -1,0 +1,5 @@
+#ifndef WIDGETNAME_HPP
+#define WIDGETNAME_HPP
+
+#endif // WIDGETNAME_HPP
+
