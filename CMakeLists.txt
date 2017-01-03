@@ -241,6 +241,7 @@ if (ENABLE_SSL)
     if (NOT OPENSSL_FOUND )
         ecbuild_error("Can not find openssl libraries")
     endif() 
+    include_directories( ${OPENSSL_INCLUDE_DIR} )
     add_definitions( -DECF_OPENSSL )
 endif()
 

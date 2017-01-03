@@ -28,7 +28,6 @@
  src/stc/ZombieGetCmd.cpp
  src/ClientToServerRequest.cpp
  src/Gnuplot.cpp
- src/Openssl.cpp
  src/WhyCmd.cpp
  src/ServerToClientResponse.cpp
  src/cts/CSyncCmd.cpp
@@ -64,13 +63,17 @@
  src/cts/ServerVersionCmd.cpp
 )
 
+if(OPENSSL_FOUND)
+  list( APPEND srcs src/Openssl.cpp )
+endif()
+
 ecbuild_add_library( TARGET   base
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     libparser node nodeattr core 
+                     LIBS     libparser node nodeattr core
                      INCLUDES src
-                              ../ACore/src 
+                              ../ACore/src
                               ../ANattr/src
                               ../ANode/src
                               ../AParser/src
@@ -81,7 +84,7 @@ ecbuild_add_library( TARGET   base
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
 target_link_libraries(base debug ${Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG}   ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE})
- 
+
 list( APPEND test_srcs
    test/TestAlterCmd.cpp
    test/TestClientHandleCmd.cpp
@@ -110,4 +113,3 @@ ecbuild_add_test( TARGET       u_base
                   INCLUDES     ../ANode/test
                   TEST_DEPENDS u_aparser
                   )
-       
