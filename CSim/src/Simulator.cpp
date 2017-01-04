@@ -139,7 +139,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 
    // ==================================================================================
 	// Start simulation ...
- 	// Assume: simulation has taken into account autocancel end time.
+ 	// Assume: User has taken into account autocancel end time.
    // ==================================================================================
  	CalendarUpdateParams calUpdateParams( calendarIncrement );
 	boost::posix_time::time_duration duration(0,0,0,0);
@@ -168,10 +168,12 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 
    // Cater for suite, with no verify attributes, but which are not complete. testAnalysis.cpp
  	// Ignore suites with crons as they will never complete
- 	if (!simiVisitor.foundCrons()) {
+ 	// Ignore suites with autocancel, as suite may get deleted
+ 	if (!simiVisitor.foundCrons() && (hasAutoCancel == 0)) {
  	   size_t completeSuiteCnt = 0;
  	   BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->state() == NState::COMPLETE) completeSuiteCnt++; }
- 	   if ( (theDefs.suiteVec().size() != completeSuiteCnt) && (hasAutoCancel == 0)) {
+
+ 	   if ( (theDefs.suiteVec().size() != completeSuiteCnt)) {
  	      std::stringstream ss; ss << "Defs file " << defs_filename << "\n";
  	      BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) {
  	         ss << "  suite '/" << s->name() << " has not completed\n";
@@ -205,11 +207,9 @@ void Simulator::run_analyser(Defs& theDefs,std::string& errorMsg ) const
 
 bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 {
-	// For the simulation we ensure job submission takes less than 2 seconds
-	int submitJobsInterval = 10;
-
+	// For the simulation we ensure job submission takes less than 10 seconds
 	// Resolve dependencies and submit jobs
-	JobsParam jobsParam(submitJobsInterval, false /*create jobs*/); // spawn jobs *will* be set to false
+	JobsParam jobsParam(10 /*submitJobsInterval */, false /*create jobs*/); // spawn jobs *will* be set to false
 	Jobs jobs(&theDefs);
 	if (!jobs.generate(jobsParam)) {
 		ecf::log(Log::ERR, jobsParam.getErrorMsg());
@@ -264,7 +264,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 
 		// If the task has any event used in the trigger expressions, then update event.
  		BOOST_FOREACH(Event& event, t->ref_events()) {
- 			if (event.usedInTrigger()) { // event used in triger/complete expression
+ 			if (event.usedInTrigger()) { // event used in trigger/complete expression
  				event.set_value(true);
   				if (!doJobSubmission(theDefs,errorMsg))  {
   					level_--;
