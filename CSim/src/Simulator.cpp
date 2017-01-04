@@ -137,9 +137,10 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
    int hasAutoCancel = 0;
    BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->hasAutoCancel()) hasAutoCancel++; }
 
-
+   // ==================================================================================
 	// Start simulation ...
  	// Assume: simulation has taken into account autocancel end time.
+   // ==================================================================================
  	CalendarUpdateParams calUpdateParams( calendarIncrement );
 	boost::posix_time::time_duration duration(0,0,0,0);
  	while (duration <= max_simulation_period) {
@@ -161,7 +162,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	// ==================================================================================
  	// END of simulation
  	// ==================================================================================
- 	if ( !theDefs.checkInvariants(errorMsg) )  {
+ 	if ( !theDefs.checkInvariants(errorMsg)) {
  	   return false;
  	}
 
@@ -176,6 +177,8 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	         ss << "  suite '/" << s->name() << " has not completed\n";
  	      }
  	      errorMsg += ss.str();
+
+ 	      run_analyser(theDefs,errorMsg);
  	      return false;
  	   }
  	}
@@ -184,15 +187,20 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	   return true;
  	}
 
- 	Analyser analyser;
- 	analyser.run(theDefs);
- 	errorMsg += "Please see files .flat and .depth for analysis\n";
-
- 	PrintStyle::setStyle(PrintStyle::MIGRATE);
- 	std::stringstream ss;
- 	ss << theDefs;
- 	errorMsg += ss.str();
+ 	run_analyser(theDefs,errorMsg);
  	return false;
+}
+
+void Simulator::run_analyser(Defs& theDefs,std::string& errorMsg ) const
+{
+   Analyser analyser;
+   analyser.run(theDefs);
+   errorMsg += "Please see files .flat and .depth for analysis\n";
+
+   PrintStyle::setStyle(PrintStyle::MIGRATE);
+   std::stringstream ss;
+   ss << theDefs;
+   errorMsg += ss.str();
 }
 
 bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
