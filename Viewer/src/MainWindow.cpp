@@ -135,7 +135,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     statusBar()->addPermanentWidget(chw);
 
     //Assigns name to each object
-    WidgetNameProvider::nameButtons(viewToolBar);
+    WidgetNameProvider::nameChildren(this);
 
     //actionSearch->setVisible(false);
 }

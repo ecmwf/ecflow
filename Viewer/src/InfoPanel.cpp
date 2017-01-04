@@ -64,13 +64,14 @@ InfoPanel::InfoPanel(QWidget* parent) :
         this,SLOT(slotReloadFromBc(VInfo_ptr)));
 
 	tab_->setIconSize(QSize(16,16));
-    WidgetNameProvider::nameTabBar(tab_);
 
     messageLabel_->hide();	
 
 	//Initialise action state
 	actionBreadcrumbs_->setChecked(bcWidget_->active());
 	actionFrozen_->setChecked(false);
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 InfoPanel::~InfoPanel()

@@ -20,8 +20,6 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 {
     setupUi(this);
 
-    WidgetNameProvider::nameButtons(buttonBox);
-
     QString title="EcflowUI";
     QString ecfVersionTxt=QString::fromStdString(ecf::Version::raw());
     QString desc=QString::fromStdString(ecf::Version::description());
@@ -75,4 +73,6 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     licenseText+=" nor does it submit to any jurisdiction.";
 
     licenseLabel_->setText(licenseText);
+
+    WidgetNameProvider::nameChildren(this);
 }

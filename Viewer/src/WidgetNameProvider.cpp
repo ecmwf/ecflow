@@ -12,13 +12,42 @@
 #include <QAbstractButton>
 #include <QAction>
 #include <QDialogButtonBox>
+#include <QList>
+#include <QScrollArea>
+#include <QStackedWidget>
 #include <QTabWidget>
 #include <QTabBar>
 #include <QToolBar>
 
-void WidgetNameProvider::nameButtons(QToolBar* tb)
+void WidgetNameProvider::nameChildren(QWidget* w)
 {
-    Q_FOREACH(QAction *ac,tb->actions())
+    nameButtons(w->actions());
+
+    Q_FOREACH(QToolBar* tb,w->findChildren<QToolBar*>(QString(),Qt::FindDirectChildrenOnly))
+    {
+        nameButtons(tb->actions());
+    }
+
+    Q_FOREACH(QDialogButtonBox* bb,w->findChildren<QDialogButtonBox*>(QString()))
+    {
+        nameButtons(bb);
+    }
+
+    Q_FOREACH(QTabWidget* t,w->findChildren<QTabWidget*>(QString()))
+    {
+        nameTabWidget(t);
+    }
+
+    Q_FOREACH(QScrollArea* sa,w->findChildren<QScrollArea*>(QString()))
+    {
+        nameViewport(sa->viewport());
+    }
+}
+
+
+void WidgetNameProvider::nameButtons(QList<QAction*> acLst)
+{
+    Q_FOREACH(QAction *ac,acLst)
     {
         Q_FOREACH(QWidget* w,ac->associatedWidgets())
         {
@@ -42,8 +71,45 @@ void WidgetNameProvider::nameButtons(QDialogButtonBox* bb)
     }
 }
 
-void WidgetNameProvider::nameTabBar(QTabWidget* t)
+void WidgetNameProvider::nameTabWidget(QTabWidget* t)
 {
-    //if(t->tabBar()->objectName().isEmpty())
-        t->tabBar()->setObjectName("bar");
+    Q_FOREACH(QTabBar* tb,t->findChildren<QTabBar*>(QString(),Qt::FindDirectChildrenOnly))
+    {
+        nameTabBar(tb);
+    }
+
+    Q_FOREACH(QStackedWidget* tb,t->findChildren<QStackedWidget*>(QString(),Qt::FindDirectChildrenOnly))
+    {
+        nameStacked(tb);
+    }
+}
+
+void WidgetNameProvider::nameTabBar(QTabBar* t)
+{
+    if(t->objectName().isEmpty() ||
+       t->objectName() == "qt_tabwidget_tabbar")
+    {
+        t->setObjectName("bar");
+    }
+}
+
+void WidgetNameProvider::nameStacked(QStackedWidget* t)
+{
+    if(t->objectName().isEmpty() ||
+       t->objectName() == "qt_tabwidget_stackedwidget")
+    {
+        t->setObjectName("stacked");
+    }
+}
+
+void WidgetNameProvider::nameViewport(QWidget* t)
+{
+    if(!t)
+        return;
+
+    if(t->objectName().isEmpty() ||
+       t->objectName() == "qt_scrollarea_viewport")
+    {
+        t->setObjectName("viewport");
+    }
 }

@@ -105,6 +105,8 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	prop_=guiProp_->link();
 	assert(prop_);
 
+    setObjectName(guiProp->name());
+
 	oriVal_=prop_->value();
 
 	if(addLabel)
@@ -642,6 +644,7 @@ void IntPropertyLine::setEnabledEditable(bool b)
 BoolPropertyLine::BoolPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,false,parent)
 {
 	cb_=new QCheckBox(prop_->param("label"),parent);
+    cb_->setObjectName(prop_->name());
 
 	connect(cb_,SIGNAL(stateChanged(int)),
 			   this,SLOT(slotStateChanged(int)));

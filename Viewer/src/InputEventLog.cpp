@@ -29,7 +29,9 @@ static QString objectPath(QObject *obj)
         if (!res.isEmpty())
             res.prepend("/");
         QString s=obj->objectName();
+        //QString cn(obj->metaObject()->className());
         if(s.isEmpty()) s="?";
+        //res.prepend("[" + cn + "]" +s);
         res.prepend(s);
     }
     return res;
