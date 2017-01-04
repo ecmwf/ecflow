@@ -127,10 +127,14 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	time_duration calendarIncrement =  simiVisitor.calendarIncrement();
  	boost::posix_time::time_duration max_simulation_period = simiVisitor.maxSimulationPeriod();
 
-#ifdef DEBUG_LONG_RUNNING_SUITES
- 	cout << defs_filename << " time dependency(" <<  simiVisitor.hasTimeDependencies()
+ 	std::stringstream ss;
+ 	ss << " time dependency(" <<  simiVisitor.hasTimeDependencies()
 		<< ") max_simulation_period(" << to_simple_string(max_simulation_period)
-		<< ") calendarIncrement(" << to_simple_string(calendarIncrement) << ")" << "\n";
+		<< ") calendarIncrement(" << to_simple_string(calendarIncrement) << ")";
+ 	std::string msg = ss.str();
+ 	log(Log::MSG,msg);
+#ifdef DEBUG_LONG_RUNNING_SUITES
+ 	cout << defs_filename << msg << "\n";
 #endif
 
  	// Do we have autocancel, must be done before.
@@ -185,7 +189,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	   }
  	}
 
- 	if ( theDefs.verification(errorMsg)) {
+ 	if (theDefs.verification(errorMsg)) {
  	   return true;
  	}
 
