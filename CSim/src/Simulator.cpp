@@ -258,6 +258,10 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
       t->complete();  // mark task as complete
 
 
+#ifdef DEBUG_LONG_RUNNING_SUITES
+      cout << t->debugNodePath() << " completes at " << t->suite()->calendar().toString() << " level " << level_ << " parent state:" <<  endl;
+#endif
+
 		// If the task has any event used in the trigger expressions, then update event.
  		BOOST_FOREACH(Event& event, t->ref_events()) {
  			if (event.usedInTrigger()) { // event used in triger/complete expression
@@ -288,16 +292,6 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
  				// Meters that are not used in trigger are usually used to indicate progress.
 				meter.set_value(meter.max());
  			}
-		}
-
-#ifdef DEBUG_LONG_RUNNING_SUITES
-		cout << t->debugNodePath() << " completes at " << t->suite()->calendar().toString() << " level " << level_ << " parent state:" <<  endl;
-#endif
-
-	   // for autocancel and trigger expressions
-		if (!doJobSubmission(theDefs,errorMsg)) {
-			level_--;
-			return false;
 		}
 	}
 
