@@ -12,7 +12,11 @@
 #include <assert.h>
 #include <iostream>
 
+#include <QDebug>
+#include <QModelIndex>
 #include <QString>
+#include <QStringList>
+#include <QVariant>
 
 #include "ServerHandler.hpp"
 #include "TimeStamp.hpp"
@@ -71,7 +75,6 @@ void UiLog::output(const std::string& msg)
 {
     std::string ts;
     ecf::TimeStamp::now_in_brief(ts);
-    //timeStamp(ts);
 
     std::string s;
     appendType(s,type_);
@@ -85,9 +88,35 @@ void UiLog::output(const std::string& msg)
 
 }
 
-std::ostringstream&  operator <<(std::ostringstream &stream,const QString &str)
+std::ostream&  operator <<(std::ostream &stream,const QString &str)
 {
    stream << str.toStdString();
    return stream;
 }
 
+std::ostream& operator <<(std::ostream &stream,const QModelIndex& idx)
+{
+    QString s;
+    QDebug ts(&s);
+    ts << idx;
+    stream << s.toStdString();
+    return stream;
+}
+
+std::ostream&  operator <<(std::ostream &stream,const QVariant &v)
+{
+   QString s;
+   QDebug ts(&s);
+   ts << v;
+   stream << s.toStdString();
+   return stream;
+}
+
+std::ostream&  operator <<(std::ostream &stream,const QStringList &lst)
+{
+   QString s;
+   QDebug ts(&s);
+   ts << lst;
+   stream << s.toStdString();
+   return stream;
+}

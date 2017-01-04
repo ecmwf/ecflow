@@ -15,6 +15,8 @@
 
 class QString;
 class QModelIndex;
+class QStringList;
+class QVariant;
 
 class ServerHandler;
 
@@ -47,8 +49,10 @@ private:
 };
 
 //Overload ostringstream for qt objects
-std::ostringstream&  operator <<(std::ostringstream&,const QString &str);
-//std::ostringstream&  operator <<(std::ostringstream&,const QModelIndex &);
+std::ostream&  operator <<(std::ostream&,const QString &);
+std::ostream&  operator <<(std::ostream&,const QModelIndex&);
+std::ostream&  operator <<(std::ostream&,const QVariant&);
+std::ostream&  operator <<(std::ostream&,const QStringList&);
 
 #endif // UILOG_HPP
 

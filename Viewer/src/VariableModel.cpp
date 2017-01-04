@@ -13,6 +13,7 @@
 #include <QDebug>
 
 #include "ServerHandler.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VariableModelData.hpp"
 
@@ -242,7 +243,7 @@ bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& valu
 bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString value)
 {
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    qDebug() << "DEBUG :" << "VariableModel::alterVariable --> index" <<  index  << " name=" <<
+    UiLog().dbg() << "VariableModel::alterVariable --> " <<  index  << " name=" <<
                      name << " value=" <<  value;
 #endif
 
@@ -262,7 +263,7 @@ bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString
     identify(index,block,row);
 
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    qDebug() << "   block=" <<  block << " row=" << row;
+    UiLog().dbg() << "   block=" <<  block << " row=" << row;
 #endif
 
     if(block == -1 || row == -1)
@@ -608,7 +609,7 @@ void VariableSortModel::setMatchText(QString txt)
 void VariableSortModel::print(const QModelIndex idx)
 {
     if(rowCount(idx) > 0)
-        qDebug() << "-->" << idx << mapToSource(idx) << data(idx);
+        UiLog().dbg() << "--> " << idx << " " << mapToSource(idx) << " " << data(idx);
     else
         qDebug() << idx << mapToSource(idx) << data(idx);
 
