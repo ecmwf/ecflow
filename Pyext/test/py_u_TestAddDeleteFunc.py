@@ -11,13 +11,11 @@
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#
 from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, \
                    Event, Meter, Label, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatString, \
                    TimeSlot, TimeSeries, Today, Time, Date, Day, Days, Cron, Autocancel, Late, \
                    DState, Clock, ChildCmdType, ZombieType, ZombieAttr, ZombieUserActionType, Client, debug_build
         
-    
 if __name__ == "__main__":
 
     print("####################################################################")
@@ -274,10 +272,14 @@ if __name__ == "__main__":
     suite =  Suite("suite")
     suite.add_clock(clock).add_variable("fred1","j") 
     
+    end_clock = Clock(1, 1, 2017, False)     # day,month, year, hybrid
+    suite.add_end_clock(end_clock).add_variable("fred2","j") 
+    
     clock = Clock(1, 1, 2011, True)       # day,month, year, hybrid
     clock.set_gain_in_seconds(12, True)
     s1 =  Suite("s1")
-    s1.add_clock(clock).add_variable("fred2","j") 
+    s1.add_clock(clock).add_variable("fred3","j") 
+    s1.add_end_clock(end_clock).add_variable("fred4","j") 
     
     #
     # Add zombie. Note we can *NOT* add two zombie attributes of the same ZombieType
@@ -285,9 +287,11 @@ if __name__ == "__main__":
     zombie_life_time_in_server = 800
     child_list = [ ChildCmdType.init, ChildCmdType.event, ChildCmdType.meter, ChildCmdType.label, ChildCmdType.wait, ChildCmdType.abort, ChildCmdType.complete ]
     zombie_type_list = [ ZombieType.ecf, ZombieType.user, ZombieType.path ]
+    count = 1;
     for zombie_type in zombie_type_list:
         zombie_attr = ZombieAttr(zombie_type, child_list, ZombieUserActionType.block, zombie_life_time_in_server)
-        s1.add_zombie(zombie_attr).add_variable("fred","j") 
+        s1.add_zombie(zombie_attr).add_variable("afred" + str(count),"j") 
+        count += 1
     assert len(list(s1.zombies)) == 3,"Expected 3 zombie attributes but found " + str(len(list(s1.zombies)))
     
     # delete all the zombies
@@ -300,12 +304,13 @@ if __name__ == "__main__":
     zombie_type_list = [ ZombieType.ecf, ZombieType.user, ZombieType.path ]
     for zombie_type in zombie_type_list:
         zombie_attr = ZombieAttr(zombie_type, child_list, ZombieUserActionType.block)
-        s1.add_zombie(zombie_attr).add_variable("fred","j") 
+        s1.add_zombie(zombie_attr).add_variable("bfred" + str(count),"j") 
         
         # test delete of specific zombie attribute
         assert len(list(s1.zombies)) == 1,"Expected 1 zombie attributes but found " + str(len(list(s1.zombies)))
         s1.delete_zombie(zombie_type)
         assert len(list(s1.zombies)) == 0,"Expected 0 zombie attributes but found " + str(len(list(s1.zombies)))
+        count += 1;
 
     print("All Tests pass")
     
