@@ -45,6 +45,7 @@
 #include "VIcon.hpp"
 #include "VSettings.hpp"
 #include "Version.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -59,6 +60,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
 {
     setupUi(this);
     
+    //Assigns name to each object
+    setObjectName("win_" + QString::number(windows_.count()));
+
     setAttribute(Qt::WA_DeleteOnClose);
 
     constructWindowTitle();
@@ -129,6 +133,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     //Add notification widget
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
+
+    //Assigns name to each object
+    WidgetNameProvider::nameButtons(viewToolBar);
 
     //actionSearch->setVisible(false);
 }

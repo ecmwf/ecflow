@@ -11,6 +11,7 @@
 #include "AboutDialog.hpp"
 
 #include "Version.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <QDate>
 #include <QRegExp>
@@ -19,6 +20,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 {
     setupUi(this);
 
+    WidgetNameProvider::nameButtons(buttonBox);
 
     QString title="EcflowUI";
     QString ecfVersionTxt=QString::fromStdString(ecf::Version::raw());

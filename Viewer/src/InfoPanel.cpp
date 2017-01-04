@@ -20,6 +20,7 @@
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 #include "VSettings.hpp"
+#include "WidgetNameProvider.hpp"
 
 //==============================================
 //
@@ -63,6 +64,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
         this,SLOT(slotReloadFromBc(VInfo_ptr)));
 
 	tab_->setIconSize(QSize(16,16));
+    WidgetNameProvider::nameTabBar(tab_);
 
     messageLabel_->hide();	
 

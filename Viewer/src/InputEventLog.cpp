@@ -11,9 +11,15 @@
 
 #include "DirectoryHandler.hpp"
 
+#include <QAction>
 #include <QDebug>
 #include <QEvent>
 #include <QFile>
+#include <QMenu>
+#include <QMouseEvent>
+#include <QTabBar>
+
+#include "TimeStamp.hpp"
 
 static QString objectPath(QObject *obj)
 {
@@ -22,7 +28,9 @@ static QString objectPath(QObject *obj)
     {
         if (!res.isEmpty())
             res.prepend("/");
-        res.prepend(obj->objectName());
+        QString s=obj->objectName();
+        if(s.isEmpty()) s="?";
+        res.prepend(s);
     }
     return res;
 }
@@ -46,27 +54,53 @@ bool InputEventLog::eventFilter(QObject *obj, QEvent *event)
 {
     if(out_.device())
     {
-        if(event->type() == QEvent::MouseButtonPress)
+        //out_ << event->type() << " " << obj->objectName() << " " << obj->metaObject()->className() << "\n";
+        //out_.flush();
+
+        if(event->type() == QEvent::MouseButtonRelease)
         {
-           out_ << "mouseClick " << obj->metaObject()->className() << objectPath(obj) << "\n";
-           out_.flush();
+            mouseRelease(obj,static_cast<QMouseEvent*>(event));
+
+            //out_ << "mc " << obj->metaObject()->className() << " " << obj->objectName() << " " << objectPath(obj) << "\n";
+           //out_.flush();
         }
     }
 
     return QObject::eventFilter(obj,event);
 }
 
-#if 0
-    if (clonedEv)
+void InputEventLog::mouseRelease(QObject* obj,QMouseEvent *event)
+{
+    QString cn(obj->metaObject()->className());
+    if(cn != "QWidget" && cn != "QWidgetWindow" && cn != "QMenuBar" &&
+       cn != "QToolBar" && cn != "MainWindow")
     {
-        int timeOffset;
-        QDateTime curDt(QDateTime::currentDateTime());
-        timeOffset = m_RecordingStartTime.daysTo(curDt) * 24 * 3600 * 1000 + m_RecordingStartTime.time().msecsTo(curDt.time());
-        m_Recording.push_back(EventDelivery(timeOffset, obj, clonedEv));
+        std::string s;
+        ecf::TimeStamp::now_in_brief(s);
+        out_ << s.c_str() << "mr " << cn << " " << objectPath(obj);
+
+        if(cn == "QTabBar")
+        {
+            if(QTabBar* t=static_cast<QTabBar*>(obj))
+            {
+                int idx=t->tabAt(event->pos());
+                if(idx >=0)
+                {
+                    out_ << " " << t->tabText(idx);
+                }
+            }
+        }
+        else if(cn == "QMenu")
+        {
+            if(QMenu* m=static_cast<QMenu*>(obj))
+            {
+                if(QAction* ac=m->actionAt(event->pos()))
+                {
+                    out_ << " " << ac->objectName();
+                }
+            }
+        }
+        out_ << "\n";
+        out_.flush();
     }
-
-    return false;
 }
-
-#endif
-

@@ -13,31 +13,10 @@
 #include <string>
 #include <sstream>
 
+class QString;
+class QModelIndex;
+
 class ServerHandler;
-
-#if 0
-class UserMessage
-{
-//Q_OBJECT
-public:
-    UserMessage();
-
-    enum MessageType {INFO, WARN, ERROR, DBG};  // note: cannot have DEBUG because of possible -DDEBUG in cpp!
-
-    static void setEchoToCout(bool toggle) {echoToCout_ = toggle;}
-    static void message(MessageType type, bool popup, const std::string& message);
-    static bool confirm(const std::string& message);
-
-    static void debug(const std::string& message);
-    static void qdebug(QString message);
-    static std::string toString(int);
-
-private:
-    static bool echoToCout_;
-
-
-};
-#endif
 
 class UiLog
 {
@@ -54,17 +33,9 @@ public:
    std::ostringstream& warn();
    std::ostringstream& dbg();
 
-#if 0
-   std::ostringstream& info(const std::string& server);
-   std::ostringstream& err(const std::string& server);
-   std::ostringstream& warn(const std::string& server);
-   std::ostringstream& dbg(const std::string& server);
-#endif
-
 protected:
    void output(const std::string& msg);
    void appendType(std::string& s,Type t) const;
-   void timeStamp(std::string& time_stamp);
 
    Type type_;
    std::ostringstream os_;
@@ -74,6 +45,10 @@ private:
    UiLog(const UiLog&);
    UiLog& operator =(const UiLog&);
 };
+
+//Overload ostringstream for qt objects
+std::ostringstream&  operator <<(std::ostringstream&,const QString &str);
+//std::ostringstream&  operator <<(std::ostringstream&,const QModelIndex &);
 
 #endif // UILOG_HPP
 

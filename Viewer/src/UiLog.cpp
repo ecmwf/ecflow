@@ -9,8 +9,10 @@
 
 #include "UiLog.hpp"
 
-#include <iostream>
 #include <assert.h>
+#include <iostream>
+
+#include <QString>
 
 #include "ServerHandler.hpp"
 #include "TimeStamp.hpp"
@@ -68,8 +70,8 @@ std::ostringstream& UiLog::dbg()
 void UiLog::output(const std::string& msg)
 {
     std::string ts;
-    //ecf::TimeStamp::now(ts);
-    timeStamp(ts);
+    ecf::TimeStamp::now_in_brief(ts);
+    //timeStamp(ts);
 
     std::string s;
     appendType(s,type_);
@@ -83,14 +85,9 @@ void UiLog::output(const std::string& msg)
 
 }
 
-void UiLog::timeStamp(std::string& time_stamp)
+std::ostringstream&  operator <<(std::ostringstream &stream,const QString &str)
 {
-   char t_fmt[255];
-   time_t stamp = time( NULL);
-   struct tm *tod = localtime(&stamp);
-   sprintf(t_fmt, "[%02d:%02d:%02d %d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
-           tod->tm_mday, tod->tm_mon + 1);
-
-   time_stamp = t_fmt;
+   stream << str.toStdString();
+   return stream;
 }
 

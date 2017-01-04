@@ -41,6 +41,8 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 	//to dock all the component widgets!
 	setWindowFlags(Qt::Widget);
 
+    setObjectName("db");
+
 	//The serverfilter. It holds the list of servers displayed by this dashboard.
 	serverFilter_=new ServerFilter();
 	serverFilter_->addObserver(this);
@@ -50,7 +52,8 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 	//Central widget - we need to create it but we do not
 	//use it. So we can hide it!
 	QWidget *w=new QLabel("centre",this);
-	setCentralWidget(w);
+    w->setObjectName("dbc");
+    setCentralWidget(w);
 	w->hide();
 
 	layout()->setContentsMargins(0,0,0,0);

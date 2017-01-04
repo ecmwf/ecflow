@@ -14,6 +14,7 @@
 #include <QTextStream>
 
 class QFile;
+class QMouseEvent;
 
 class InputEventLog : public QObject
 {
@@ -23,6 +24,7 @@ public:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
+    void mouseRelease(QObject* obj,QMouseEvent *e);
 
     QFile *outFile_;
     QTextStream out_;

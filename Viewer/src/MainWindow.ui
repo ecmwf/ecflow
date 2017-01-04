@@ -43,7 +43,7 @@
    <property name="nativeMenuBar">
     <bool>false</bool>
    </property>
-   <widget class="QMenu" name="menuLl">
+   <widget class="QMenu" name="menuFile">
     <property name="tearOffEnabled">
      <bool>true</bool>
     </property>
@@ -70,7 +70,7 @@
     <addaction name="actionPreferences"/>
     <addaction name="actionConfigureNodeMenu"/>
    </widget>
-   <widget class="QMenu" name="menu_Help">
+   <widget class="QMenu" name="menuHelp">
     <property name="tearOffEnabled">
      <bool>true</bool>
     </property>
@@ -91,14 +91,14 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <addaction name="actionAddTreeWidget"/>
     <addaction name="actionAddTableWidget"/>
     <addaction name="actionAddInfoPanel"/>
     <addaction name="actionAddLogPanel"/>
    </widget>
-   <widget class="QMenu" name="menu_Tools">
+   <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>&amp;Tools</string>
     </property>
@@ -114,13 +114,13 @@
     <addaction name="actionRefresh"/>
     <addaction name="actionRefreshSelected"/>
    </widget>
-   <addaction name="menuLl"/>
+   <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuRefresh"/>
    <addaction name="menuServer"/>
-   <addaction name="menu_Tools"/>
-   <addaction name="menu_Help"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="viewToolBar">
@@ -198,7 +198,7 @@
      <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
    </property>
    <property name="text">
-    <string>Refresh all servers  in tab</string>
+    <string>Refresh all servers  &amp;in tab</string>
    </property>
    <property name="toolTip">
     <string>Refresh &lt;b&gt;all servers&lt;/b&gt; in current tab</string>
@@ -213,7 +213,7 @@
      <normaloff>:/viewer/reset.svg</normaloff>:/viewer/reset.svg</iconset>
    </property>
    <property name="text">
-    <string>Reset all servers in tab</string>
+    <string>&amp;Reset all servers in tab</string>
    </property>
    <property name="toolTip">
     <string>Reset</string>
@@ -256,7 +256,7 @@
      <normaloff>:/viewer/images/add_info.svg</normaloff>:/viewer/images/add_info.svg</iconset>
    </property>
    <property name="text">
-    <string>Add info panel</string>
+    <string>Add &amp;info panel</string>
    </property>
   </action>
   <action name="actionAddTreeWidget">
@@ -265,7 +265,7 @@
      <normaloff>:/viewer/images/add_tree.svg</normaloff>:/viewer/images/add_tree.svg</iconset>
    </property>
    <property name="text">
-    <string>Add tree view</string>
+    <string>&amp;Add tree view</string>
    </property>
    <property name="toolTip">
     <string>Add tree widget</string>
@@ -277,7 +277,7 @@
      <normaloff>:/viewer/images/add_table.svg</normaloff>:/viewer/images/add_table.svg</iconset>
    </property>
    <property name="text">
-    <string>Add table view</string>
+    <string>Add table &amp;view</string>
    </property>
    <property name="toolTip">
     <string>Add table widget</string>
@@ -285,7 +285,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About EcflowUI ...</string>
+    <string>&amp;About EcflowUI ...</string>
    </property>
   </action>
   <action name="actionAddLogPanel">
@@ -293,7 +293,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Add log panel</string>
+    <string>Add &amp;log panel</string>
    </property>
   </action>
   <action name="actionManageSessions">
@@ -301,7 +301,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Manage sessions ...</string>
+    <string>&amp;Manage sessions ...</string>
    </property>
    <property name="visible">
     <bool>true</bool>
@@ -313,7 +313,7 @@
      <normaloff>:/viewer/search.svg</normaloff>:/viewer/search.svg</iconset>
    </property>
    <property name="text">
-    <string>Search ...</string>
+    <string>&amp;Search ...</string>
    </property>
   </action>
   <action name="actionRefreshSelected">
@@ -322,7 +322,7 @@
      <normaloff>:/viewer/reload_one.svg</normaloff>:/viewer/reload_one.svg</iconset>
    </property>
    <property name="text">
-    <string>Refresh selected server</string>
+    <string>R&amp;efresh selected server</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
@@ -330,7 +330,7 @@
   </action>
   <action name="actionResetSelected">
    <property name="text">
-    <string>Reset selected server</string>
+    <string>Reset &amp;selected server</string>
    </property>
    <property name="toolTip">
     <string>Reset &lt;b&gt;selected&lt;/b&gt; server in current tab</string>
