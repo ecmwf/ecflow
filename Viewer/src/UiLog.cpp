@@ -88,6 +88,9 @@ void UiLog::output(const std::string& msg)
 
 }
 
+//------------------------------------------
+// Overload ostringstream for qt objects
+//------------------------------------------
 std::ostream&  operator <<(std::ostream &stream,const QString &str)
 {
    stream << str.toStdString();

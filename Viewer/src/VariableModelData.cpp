@@ -16,7 +16,6 @@
 #include "VNode.hpp"
 #include "VNState.hpp"
 
-#include <QDebug>
 #include <QString>
 
 static std::string defaultStr("");
@@ -665,7 +664,7 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 	}
 
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-    qDebug() << "   dataIndex=" << QString::number(dataIndex);
+    UiLog().dbg() << " dataIndex=" << dataIndex;
 #endif
     Q_ASSERT(dataIndex != -1);
 
