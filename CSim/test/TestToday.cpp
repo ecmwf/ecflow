@@ -81,6 +81,10 @@ BOOST_AUTO_TEST_CASE( test_today )
    bool result = simulator.run(theDefs, TestUtil::testDataLocation("test_today.def"), errorMsg);
 
    BOOST_CHECK_MESSAGE(result,errorMsg);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_today.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_today_time_series )
@@ -114,6 +118,10 @@ BOOST_AUTO_TEST_CASE( test_today_time_series )
    Simulator simulator;
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_today_time_series.def") , errorMsg),errorMsg);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_today_time_series.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_today_time_and_date )
@@ -153,6 +161,10 @@ BOOST_AUTO_TEST_CASE( test_today_time_and_date )
    Simulator simulator;
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_today_time_and_date.def"),errorMsg),errorMsg);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_today_time_and_date.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
