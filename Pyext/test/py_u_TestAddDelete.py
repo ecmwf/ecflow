@@ -480,6 +480,27 @@ if __name__ == "__main__":
     assert s0.get_clock() != None, "Expected clock"
 
     #===========================================================================
+    # end clock, used in simulator only, not persisted
+    #===========================================================================
+    clock = ecflow.Clock(1, 1, 2010, False)     # day,month, year, hybrid
+    clock.set_gain(1, 10, True)                 # True means positive gain
+    suite = ecflow.Suite("suite")
+    suite.add_end_clock(clock)
+    
+    clock = ecflow.Clock(1, 1, 2011, True)       # day,month, year, hybrid
+    clock.set_gain_in_seconds(12, True)
+    s1 = ecflow.Suite("s1")
+    s1.add_end_clock(clock)
+    
+    print("#===========================================================================")
+    print("# get end clock")
+    print("#===========================================================================")
+    s0 = ecflow.Suite("s0")
+    assert s0.get_end_clock() == None, "Expected no end clock"
+    
+    s0.add_end_clock(ecflow.Clock(1, 1, 2010, False))
+    assert s0.get_end_clock() != None, "Expected end clock"
+    #===========================================================================
     # Add zombie. Note we can *NOT* add two zombie attributes of the same ZombieType
     #===========================================================================
     zombie_life_time_in_server = 800
