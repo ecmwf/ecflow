@@ -510,16 +510,6 @@ std::string RepeatInteger::value_as_string(int index) const
    return string();
 }
 
-//void RepeatInteger::truncate(int theLength)
-//{
-////	 cout << "   RepeatInteger::truncate by " <<  theLength << " BEFORE " << toString();
-//
-//	LOG_ASSERT(theLength < length(),"");
-//	 end_ = start_ + (theLength * delta_);
-//
-////	 cout << " AFTER " << toString() << "\n";
-//}
-
 //======================================================================================
 
 RepeatEnumerated::RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums)
@@ -712,18 +702,6 @@ bool RepeatEnumerated::operator==(const RepeatEnumerated& rhs) const
 	return true;
 }
 
-//void RepeatEnumerated::truncate(int theLength)
-//{
-////	 cout << "   RepeatEnumerated::truncate by " <<  theLength << " BEFORE " << toString();
-//
-//	 LOG_ASSERT(theLength < length(),"");
-//	 while ( static_cast<int>(theEnums_.size()) > theLength) {
-//		 theEnums_.pop_back();
-//	 }
-//
-////	 cout << " AFTER " << toString() << "\n";
-//}
-
 //======================================================================================
 
 RepeatString::RepeatString( const std::string& variable, const std::vector<std::string>& theEnums)
@@ -862,18 +840,6 @@ bool RepeatString::operator==(const RepeatString& rhs) const
    }
 	return true;
 }
-
-//void RepeatString::truncate(int theLength)
-//{
-////	 cout << "   RepeatString::truncate by " <<  theLength << " BEFORE " << toString();
-//
-//	 LOG_ASSERT(theLength < length(),"");
-//	 while ( static_cast<int>(theStrings_.size()) > theLength) {
-//		 theStrings_.pop_back();
-//	 }
-//
-////	 cout << " AFTER " << toString() << "\n";
-//}
 
 //=======================================================================================
 

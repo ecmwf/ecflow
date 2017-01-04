@@ -53,6 +53,7 @@ public:
 private:
 
 	bool doJobSubmission(Defs&, std::string& errorMsg) const;
+	void run_analyser(Defs& theDefs,std::string& errorMsg ) const;
 
 	mutable std::map<Submittable*,int> taskIntMap_;
 	mutable int level_;
