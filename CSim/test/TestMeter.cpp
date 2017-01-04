@@ -100,6 +100,10 @@ BOOST_AUTO_TEST_CASE( test_meter )
 	}
 	BOOST_REQUIRE_MESSAGE(found_task ,"Failed to find task fc ");
 
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_meter.def") + ".log";
+   fs::remove(logFileName);
+
 	/// Destroy System singleton to avoid valgrind from complaining
 	System::destroy();
 }

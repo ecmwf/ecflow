@@ -76,6 +76,10 @@ BOOST_AUTO_TEST_SUITE( SimulatorTestSuite )
 //   std::string errorMsg;
 //   BOOST_CHECK_MESSAGE(!simulator.run(theDefs, TestUtil::testDataLocation("test_analysys.def") , errorMsg),errorMsg);
 //
+//   // remove generated log file. Comment out to debug
+//   std::string logFileName = TestUtil::testDataLocation("test_analysys.def") + ".log";
+//   fs::remove(logFileName);
+//
 //   // cout << theDefs << "\n";
 //   boost::filesystem::remove("defs.depth");
 //   boost::filesystem::remove("defs.flat");
