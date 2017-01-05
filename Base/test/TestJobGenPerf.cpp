@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
    }
 
    // delete the log file if it exists.
-   std::string log_path = File::test_data("AParser/test/TestJobGenPerf.log","AParser");
+   std::string log_path = File::test_data("Base/test/TestJobGenPerf.log","AParser");
    fs::remove(log_path);
 
 
@@ -65,6 +65,18 @@ int main(int argc, char* argv[])
 
    defs.beginAll();
 
+   // we testing processing, hence free suspended time and trigger dependencies
+   std::vector<node_ptr> all_nodes;
+   defs.get_all_nodes(all_nodes);
+   for(size_t i = 0; i < all_nodes.size(); ++i) {
+      if (all_nodes[i]->isSuspended()) {
+         cout << "Node " << all_nodes[i]->absNodePath() << " is suspended\n";
+         all_nodes[i]->resume();
+      }
+      all_nodes[i]->freeTrigger();
+      all_nodes[i]->freeHoldingDateDependencies();
+      all_nodes[i]->freeHoldingTimeDependencies();
+   }
 
    // Create a new log, file, place after begin to avoid queued state
    Log::create(log_path);
