@@ -1,10 +1,9 @@
-suite cron6             # use real clock otherwise the date wont change
-   clock real  1.1.2006 # need to define a date otherwise log file content varies according to the time 
-   endclock   17.1.2006 # When to finish. 
-   family cronFamily
-		task t
-  			 cron -d 15,16  -m 1 10:00 11:00 01:00  # run 15,16 January at 10 and 11am	
-  			 verify complete:4	
+suite cron6              
+  clock real  1.1.2006 # Define a start date for deterministic simulation 
+  endclock   17.1.2006 # When to finish. 
+  family cronFamily
+    task t
+  	  cron -d 15,16  -m 1 10:00 11:00 01:00  # run 15,16 January at 10 and 11am	
+      verify complete:4	
    endfamily
 endsuite
-
