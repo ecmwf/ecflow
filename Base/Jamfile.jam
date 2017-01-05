@@ -69,3 +69,22 @@ exe u_base : [ glob test/*.cpp  ]
            [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
            <variant>debug:<define>DEBUG
 	     ;
+
+	     
+#
+# Tests job generation performance, relies on python (Pyext/samples/TestJobGenPerf.py) to setup data
+#
+exe perf_job_gen : test/TestJobGenPerf.cpp   
+           pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /theParser//libparser
+           base
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_datetime
+         : <include>../ANode/test 
+           <variant>debug:<define>DEBUG
+        ;
