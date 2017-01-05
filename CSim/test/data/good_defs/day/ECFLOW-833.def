@@ -1,6 +1,6 @@
 suite Icemap2_to_DB
   clock    real 04.12.2016     # Sunday
-  endclock      09.12.2016     # Saturday
+  endclock      09.12.2016     # Saturday, and endclock otherwise we simulate for year due to repeat.
   repeat enumerated VARIABLE first        
 
   family icemap
