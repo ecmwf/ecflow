@@ -11,6 +11,8 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -44,10 +46,9 @@ int main(int argc, char* argv[])
    // delete the log file if it exists.
    std::string log_path = File::test_data("Base/test/TestJobGenPerf.log","AParser");
    fs::remove(log_path);
-
-
    std::string path = argv[1];
 
+   //cout << "Loading file " << path << " log file " << log_path  << "\n";
    Defs defs;
    DefsStructureParser checkPtParser( &defs, path);
    std::string errorMsg,warningMsg;
@@ -57,11 +58,21 @@ int main(int argc, char* argv[])
       return 1;
    }
 
+   // remove dodgy suites, these are based on localhost
+   std::vector<std::string> suites_to_remove;
+   suites_to_remove.push_back("codes_ui");
+   suites_to_remove.push_back("libemos_test");
+   suites_to_remove.push_back("metview");
+   suites_to_remove.push_back("ecflow");
+   suites_to_remove.push_back("mir_bundle");
+   for(size_t i = 0; i < suites_to_remove.size(); ++i) {
+      suite_ptr suite = defs.findSuite(suites_to_remove[i]);
+      if (suite) suite->remove();
+   }
+
    // Check number of tasks, if the submitted output below is too low
-   // Then remove, limits,triggers,time,cron so more jobs can be generated.
    std::vector<Task*> tasks;
    defs.getAllTasks(tasks);
-   cout << "Tasks = " << tasks.size() << "\n";
 
    defs.beginAll();
 
@@ -70,7 +81,6 @@ int main(int argc, char* argv[])
    defs.get_all_nodes(all_nodes);
    for(size_t i = 0; i < all_nodes.size(); ++i) {
       if (all_nodes[i]->isSuspended()) {
-         cout << "Node " << all_nodes[i]->absNodePath() << " is suspended\n";
          all_nodes[i]->resume();
       }
       all_nodes[i]->freeTrigger();
@@ -82,15 +92,13 @@ int main(int argc, char* argv[])
    Log::create(log_path);
 
    // This controls the log output when job generation > submitJobsInterval
-   JobProfiler::set_task_threshold(0);
+   JobProfiler::set_task_threshold(5); // 5ms 1000 is one second
 
    JobsParam jobParam(20 /*submitJobsInterval*/, true /*createJobs*/, false/* spawn jobs */);
    Jobs job(&defs);
-   bool ok = job.generate( jobParam );
-   if (!ok) cout << " generate failed: " << jobParam.getErrorMsg();
-   cout << "submitted " << jobParam.submitted().size() << "\n";
+   if (!job.generate( jobParam )) cout << " generate failed: " << jobParam.getErrorMsg();
+   cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
 
    // fs::remove(log_path);
-
    return 0;
 }
