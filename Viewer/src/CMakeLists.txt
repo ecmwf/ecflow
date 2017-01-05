@@ -56,6 +56,7 @@ set(viewer_srcs
     LogModel.cpp
     LogProvider.cpp
     LogServer.cpp
+    LogTruncator.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
     MenuConfigDialog.cpp
@@ -233,10 +234,12 @@ set(viewer_moc_files AbstractNodeModel.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     InfoPanel.hpp
+    InputEventLog.hpp
     LabelEditor.hpp
     LimitEditor.hpp
     LineEdit.hpp
     LogProvider.hpp
+    LogTruncator.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
     MeterEditor.hpp

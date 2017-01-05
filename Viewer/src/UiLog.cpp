@@ -18,8 +18,12 @@
 #include <QStringList>
 #include <QVariant>
 
+#include "DirectoryHandler.hpp"
+#include "LogTruncator.hpp"
 #include "ServerHandler.hpp"
 #include "TimeStamp.hpp"
+
+static LogTruncator *truncator=0;
 
 UiLog::UiLog(ServerHandler* sh) :
     type_(INFO), server_(sh->longName())
@@ -86,6 +90,13 @@ void UiLog::output(const std::string& msg)
 
     std::cout << s << std::endl;
 
+}
+
+void UiLog::enableTruncation()
+{
+    if(!truncator)
+        truncator=new LogTruncator(QString::fromStdString(DirectoryHandler::uiLogFileName()),
+                                     86400*1000,10*1024*1024,1000);
 }
 
 //------------------------------------------

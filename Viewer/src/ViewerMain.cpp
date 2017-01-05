@@ -34,6 +34,7 @@
 #include "VServerSettings.hpp"
 #include "SessionHandler.hpp"
 #include "SessionDialog.hpp"
+#include "UiLog.hpp"
 
 int main(int argc, char **argv)
 {
@@ -152,8 +153,11 @@ int main(int argc, char **argv)
 		//Show all the windows
 		MainWindow::showWindows();
 
-        InputEventLog log(0);
-        app.installEventFilter(&log);
+        //Start input event logging
+        InputEventLog::instance()->start();
+
+        //Enable (daily) truncation for ui log
+        UiLog::enableTruncation();
 
 		return app.exec();
 	}

@@ -35,6 +35,8 @@ public:
    std::ostringstream& warn();
    std::ostringstream& dbg();
 
+   static void enableTruncation();
+
 protected:
    void output(const std::string& msg);
    void appendType(std::string& s,Type t) const;

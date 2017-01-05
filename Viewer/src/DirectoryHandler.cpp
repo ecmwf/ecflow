@@ -17,6 +17,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "DirectoryHandler.hpp"
+#include "File.hpp"
 #include "UserMessage.hpp"
 
 std::string DirectoryHandler::shareDir_;
@@ -25,6 +26,7 @@ std::string DirectoryHandler::configDir_;
 std::string DirectoryHandler::rcDir_;
 std::string DirectoryHandler::tmpDir_;
 std::string DirectoryHandler::uiLogFile_;
+std::string DirectoryHandler::uiEventLogFile_;
 
 static bool firstStartUp=false;
 
@@ -148,16 +150,23 @@ void DirectoryHandler::init(const std::string& exeStr)
         exit(1);
     }
 
-    //Ui logfile
-    if(char *h=getenv("ECFLOWUI_UI_LOGFILE"))
+    //Ui log. The ui logging either goes into the stdout or into a
+    //file. The startup script desides on it.
+    if(char *h=getenv("ECFLOWUI_LOGFILE"))
     {
         uiLogFile_=std::string(h);
+    }
+
+    //Ui event log file. Ui event logging always goes into a file
+    if(char *h=getenv("ECFLOWUI_UI_LOGFILE"))
+    {
+        uiEventLogFile_=std::string(h);
     }
     else
     {
         boost::filesystem::path tmp(tmpDir_);
         tmp /= "ecflowui_uilog.txt";
-        uiLogFile_=tmp.string();
+        uiEventLogFile_=tmp.string();
      }
 }
 
@@ -400,3 +409,20 @@ bool DirectoryHandler::removeFile(const std::string &path, std::string &errorMes
     return true;
 }
 
+bool DirectoryHandler::truncateFile(const std::string &path,int lastLineNum,std::string &errorMessage)
+{
+    std::string s=ecf::File::get_last_n_lines(path,lastLineNum,errorMessage);
+    if(!errorMessage.empty())
+    {
+        errorMessage="Could not truncate file " + path + "; reason: " + errorMessage;
+        return false;
+    }
+
+    if(!ecf::File::create(path,s,errorMessage))
+    {
+        errorMessage="Could not truncate file " + path + "; reason: " + errorMessage;
+        return false;
+    }
+
+    return true;
+}

@@ -12,16 +12,23 @@
 #include "DirectoryHandler.hpp"
 
 #include <QAction>
+#include <QApplication>
 #include <QCloseEvent>
 #include <QContextMenuEvent>
 #include <QDebug>
 #include <QEvent>
 #include <QFile>
+#include <QFileInfo>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QTabBar>
 
+#include "LogTruncator.hpp"
 #include "TimeStamp.hpp"
+#include "UiLog.hpp"
+
+InputEventLog* InputEventLog::instance_=0;
+static bool firstStart=true;
 
 static QString objectPath(QObject *obj)
 {
@@ -39,19 +46,72 @@ static QString objectPath(QObject *obj)
     return res;
 }
 
-InputEventLog::InputEventLog(QObject* parent) : QObject(parent)
+InputEventLog::InputEventLog(QObject* parent) : QObject(parent), paused_(false)
 {
-    outFile_=new QFile(QString::fromStdString(DirectoryHandler::uiLogFileName()));
-    if(outFile_->open(QFile::WriteOnly | QFile::Truncate))
-    {
-        out_.setDevice(outFile_);
-    }
+    QString path=QString::fromStdString(DirectoryHandler::uiEventLogFileName());
+    outFile_=new QFile(path);
+
+    //truncator_=new LogTruncator(path,86400*1000,5*1024*1024,2000,this);
+    truncator_=new LogTruncator(path,15*1000,100,3,this);
+    connect(truncator_,SIGNAL(truncateBegin()),this,SLOT(truncateLogBegin()));
+    connect(truncator_,SIGNAL(truncateEnd()),this,SLOT(truncateLogEnd()));
 }
 
 InputEventLog::~InputEventLog()
 {
     outFile_->close();
     delete outFile_;
+}
+
+InputEventLog* InputEventLog::instance()
+{
+    if(!instance_)
+        instance_=new InputEventLog(0);
+    return instance_;
+}
+
+void InputEventLog::start()
+{
+    Q_ASSERT(!paused_);
+
+    if(out_.device())
+        return;
+
+    QFile::OpenMode mode=(firstStart)?QFile::WriteOnly:QFile::Append;
+    if(outFile_->open(mode))
+    {
+        firstStart=false;
+        out_.setDevice(outFile_);
+        qApp->removeEventFilter(this);
+        qApp->installEventFilter(this);
+    }
+    else
+    {
+        QFileInfo info(*outFile_);
+        UiLog().err() << "InputEventLog --> cannot open log file for writing: " << info.absoluteFilePath();
+    }
+}
+
+void InputEventLog::stop()
+{
+    qApp->removeEventFilter(this);
+    outFile_->close();
+    out_.setDevice(0);
+}
+
+void InputEventLog::truncateLogBegin()
+{
+    paused_=(out_.device() != 0);
+    stop();
+}
+
+void InputEventLog::truncateLogEnd()
+{
+    if(paused_)
+    {
+        paused_=false;
+        start();
+    }
 }
 
 bool InputEventLog::eventFilter(QObject *obj, QEvent *event)

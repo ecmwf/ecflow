@@ -17,22 +17,37 @@ class QCloseEvent;
 class QContextMenuEvent;
 class QFile;
 class QMouseEvent;
+class LogTruncator;
 
 class InputEventLog : public QObject
 {
+    Q_OBJECT
 public:
-    InputEventLog(QObject* parent);
     ~InputEventLog();
 
+    void start();
+    void stop();
+
+    static InputEventLog* instance();
+
+protected Q_SLOTS:
+    void truncateLogBegin();
+    void truncateLogEnd();
+
 protected:
+    InputEventLog(QObject* parent=0);
+
     bool eventFilter(QObject *obj, QEvent *event);
     void logMousePress(QObject* obj,QMouseEvent *e);
     void logMouseRelease(QObject* obj,QMouseEvent *e);
     void logClose(QObject* obj,QCloseEvent *e);
     void logContextMenu(QObject* obj,QContextMenuEvent *e);
 
+    static InputEventLog* instance_;
+    bool paused_;
     QFile *outFile_;
     QTextStream out_;
+    LogTruncator* truncator_;
 };
 
 
