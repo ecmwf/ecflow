@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE( test_time_and_tomorrows_date )
 
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite suite
-   //  clock real <tomorrows date>
+   //  clock real <todays date>
    // family family
    //    task t1
    //       date  <tomorrows date>
@@ -225,10 +225,9 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates )
    //suite suite
    //  clock real <todays date>
    //	family family
-   //    repeat integer 0 1 1  # repeat twice
    //   	task t1
-   //       date  <today date>
-   //       date  <tomrrows date>
+   //       date <today date>
+   //       date <tomorrows date>
    //       time <start>
    //       time <start>
    //  	endfamily
@@ -252,7 +251,6 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates )
 
 
       family_ptr fam = suite->add_family( "family" );
-      //fam->addRepeat( RepeatInteger("rep",0,1,1) );
       task_ptr task = fam->add_task("t");
       task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
       task->addDate( DateAttr(tomarrows_date.day(),tomarrows_date.month(),tomarrows_date.year()) );
@@ -367,7 +365,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_days_hybrid )
    cout << "Simulator:: ...test_multiple_times_and_days_hybrid\n";
 
    //suite suite
-   //  clock real <sunday>
+   //  clock hybrid <monday>
    //	family family
    //   	task t1
    //       day  monday
