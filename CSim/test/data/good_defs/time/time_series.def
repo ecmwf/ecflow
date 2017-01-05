@@ -1,0 +1,8 @@
+suite suite
+  clock real 12.10.2009 # 12 October 2009 was a Monday
+  family family
+     task t1                   # with time attribute simulator will run for 24 hours
+       time 00:30 23:59 04:00  # should run 6 times 00:30 4:30 8:30 12:30 16:30 20:30
+       verify complete:6
+  endfamily
+endsuite

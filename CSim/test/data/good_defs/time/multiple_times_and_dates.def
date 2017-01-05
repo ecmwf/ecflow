@@ -1,0 +1,11 @@
+suite suite
+  clock real 5.1.2017
+  family family
+    task t1
+      date  05.01.2017     # date means simulator will run for a month unless endclock used
+      date  06.01.2017
+      time  13:00
+      time  14:00
+      verify complete:4
+  endfamily
+endsuite

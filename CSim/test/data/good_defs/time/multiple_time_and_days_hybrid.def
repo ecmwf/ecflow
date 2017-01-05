@@ -1,0 +1,12 @@
+suite suite
+  clock hybrid 12.10.2010  # monday
+  family family
+    task t1
+      day  monday
+      day  tuesday
+      time 09:00
+      time 10:00
+      time 11:00
+      verify complete:3  # because hybrid will be for 24 hrs only, i.e monday
+  endfamily
+endsuite
