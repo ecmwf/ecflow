@@ -434,6 +434,7 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 {
     if(InfoPanelItem *iw=InfoPanelItemFactory::create(def->name()))
 	{
+        WidgetNameProvider::nameChildren(iw->realWidget());
         iw->setOwner(this);
         iw->setFrozen(frozen());
 		iw->setDetached(detached());

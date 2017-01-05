@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,6 +22,7 @@
 #include "UserMessage.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -142,7 +143,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 	//Get a unique dockId stored as objectName
 	QString dockId=uniqueDockId();
 
-	DashboardWidget*w=addWidget(type,dockId.toStdString());
+    DashboardWidget* w=addWidget(type,dockId.toStdString());
 
 	//At this point the widgets can be inactive. Reload will make them active!!!
 	w->reload();

@@ -42,7 +42,8 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
      prop_(NULL),
      setCurrentIsRunning_(false)
 {
-	setProperty("style","nodeView");
+    setObjectName("view");
+    setProperty("style","nodeView");
 	setProperty("view","table");
 
 	setRootIsDecorated(false);

@@ -44,7 +44,8 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
     setCurrentIsRunning_(false),
     setCurrentFromExpand_(false)
 {
-	setProperty("style","nodeView");
+    setObjectName("view");
+    setProperty("style","nodeView");
 	setProperty("view","tree");
 
     expandState_=new ExpandState(this,model_);

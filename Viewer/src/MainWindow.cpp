@@ -71,6 +71,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     QVBoxLayout* layout=new QVBoxLayout();
     layout->setContentsMargins(0,0,0,0);
     QWidget *w=new QWidget(this);
+    w->setObjectName("c");
     w->setLayout(layout);
     setCentralWidget(w);
 
@@ -162,8 +163,9 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 	   if((*it)->show().find("toolbar") != std::string::npos)
 	   {
 		   QAction *ac=toolbar->addAction(QString::fromStdString((*it)->label()));
-		   QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
-		   ac->setIcon(QIcon(pix));
+           QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
+           ac->setObjectName(QString::fromStdString((*it)->label()));
+           ac->setIcon(QIcon(pix));
 		   ac->setData(QString::fromStdString((*it)->name()));
 		   ac->setToolTip(QString::fromStdString((*it)->tooltip()));
 

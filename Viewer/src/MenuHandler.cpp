@@ -524,6 +524,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
 	else
 	{
 		qmenu=new QMenu(parent);
+        qmenu->setObjectName("cm");
 		qmenu->setTitle(QString::fromStdString(name()));
 	}
 
@@ -592,8 +593,8 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
                 if (menu)
                 {
                     //The submenu will be added to qmenu and it will take ownership of it.
-					QMenu *subMenu = menu->generateMenu(nodes, parent, qmenu, view, acLst);
-					subMenu->setEnabled(enabled);
+					QMenu *subMenu = menu->generateMenu(nodes, parent, qmenu, view, acLst);					
+                    subMenu->setEnabled(enabled);
                 }
             }
             else if  ((*itItems)->isDivider())
@@ -602,7 +603,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
             }
             else
             {
-                //When we add the action to the menu its parent (NULL a.i. the QApplication) does not change.
+                //When we add the action to the menu its parent (NULL e.i. the QApplication) does not change.
             	//So when the menu is deleted the action is not deleted.
             	//At least this is the behaviour with Qt 4.8. and 5.5.
             	//QAction *action = (*itItems)->action();
@@ -714,6 +715,7 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 	nodeLabel->setParent(titleW);
 
 	QWidgetAction *wAction = new QWidgetAction(qmenu);
+    wAction->setObjectName("title");
 	//Qt doc says: the ownership of the widget is passed to the widgetaction.
 	//So when the action is deleted it will be deleted as well.
 	wAction->setDefaultWidget(titleW);
@@ -792,7 +794,8 @@ bool MenuItem::isValidView(const std::string& view) const
 QAction* MenuItem::createAction(QWidget* parent)
 {
 	QAction *ac=new QAction(parent);
-	ac->setText(QString::fromStdString(name_));
+    ac->setObjectName(QString::fromStdString(name_));
+    ac->setText(QString::fromStdString(name_));
 	ac->setIcon(icon_);
 
 	if(!statustip_.empty())

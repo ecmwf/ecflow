@@ -13,6 +13,8 @@
 #include <QObject>
 #include <QTextStream>
 
+class QCloseEvent;
+class QContextMenuEvent;
 class QFile;
 class QMouseEvent;
 
@@ -24,7 +26,10 @@ public:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
-    void mouseRelease(QObject* obj,QMouseEvent *e);
+    void logMousePress(QObject* obj,QMouseEvent *e);
+    void logMouseRelease(QObject* obj,QMouseEvent *e);
+    void logClose(QObject* obj,QCloseEvent *e);
+    void logContextMenu(QObject* obj,QContextMenuEvent *e);
 
     QFile *outFile_;
     QTextStream out_;

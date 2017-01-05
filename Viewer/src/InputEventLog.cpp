@@ -12,6 +12,8 @@
 #include "DirectoryHandler.hpp"
 
 #include <QAction>
+#include <QCloseEvent>
+#include <QContextMenuEvent>
 #include <QDebug>
 #include <QEvent>
 #include <QFile>
@@ -59,27 +61,36 @@ bool InputEventLog::eventFilter(QObject *obj, QEvent *event)
         //out_ << event->type() << " " << obj->objectName() << " " << obj->metaObject()->className() << "\n";
         //out_.flush();
 
-        if(event->type() == QEvent::MouseButtonRelease)
+        if(event->type() == QEvent::MouseButtonPress)
         {
-            mouseRelease(obj,static_cast<QMouseEvent*>(event));
-
-            //out_ << "mc " << obj->metaObject()->className() << " " << obj->objectName() << " " << objectPath(obj) << "\n";
-           //out_.flush();
+            logMousePress(obj,static_cast<QMouseEvent*>(event));
+        }
+        else if(event->type() == QEvent::MouseButtonRelease)
+        {
+            logMouseRelease(obj,static_cast<QMouseEvent*>(event));
+        }
+        else if(event->type() == QEvent::Close)
+        {
+            logClose(obj,static_cast<QCloseEvent*>(event));
+        }
+        else if(event->type() == QEvent::ContextMenu)
+        {
+            logContextMenu(obj,static_cast<QContextMenuEvent*>(event));
         }
     }
 
     return QObject::eventFilter(obj,event);
 }
 
-void InputEventLog::mouseRelease(QObject* obj,QMouseEvent *event)
+void InputEventLog::logMousePress(QObject* obj,QMouseEvent *event)
 {
     QString cn(obj->metaObject()->className());
-    if(cn != "QWidget" && cn != "QWidgetWindow" && cn != "QMenuBar" &&
-       cn != "QToolBar" && cn != "MainWindow")
+    if(cn != "QWidgetWindow" && cn != "QMenuBar" &&
+       cn != "QToolBar" && cn != "MainWindow" && cn != "QScrollBar" )
     {
         std::string s;
         ecf::TimeStamp::now_in_brief(s);
-        out_ << s.c_str() << "mr " << cn << " " << objectPath(obj);
+        out_ << s.c_str() << "mp " << cn << " " << objectPath(obj);
 
         if(cn == "QTabBar")
         {
@@ -88,7 +99,7 @@ void InputEventLog::mouseRelease(QObject* obj,QMouseEvent *event)
                 int idx=t->tabAt(event->pos());
                 if(idx >=0)
                 {
-                    out_ << " " << t->tabText(idx);
+                    out_ << " tab=" << t->tabText(idx);
                 }
             }
         }
@@ -98,11 +109,55 @@ void InputEventLog::mouseRelease(QObject* obj,QMouseEvent *event)
             {
                 if(QAction* ac=m->actionAt(event->pos()))
                 {
-                    out_ << " " << ac->objectName();
+                    out_ << " ac=" << ac->objectName();
                 }
             }
         }
         out_ << "\n";
+        out_.flush();
+    }
+}
+
+void InputEventLog::logMouseRelease(QObject* obj,QMouseEvent *event)
+{
+    QString cn(obj->metaObject()->className());
+    if(cn == "QMenu")
+    {
+        std::string s;
+        ecf::TimeStamp::now_in_brief(s);
+        out_ << s.c_str() << "mr " << cn << " " << objectPath(obj);
+        if(QMenu* m=static_cast<QMenu*>(obj))
+        {
+            if(QAction* ac=m->actionAt(event->pos()))
+            {
+                out_ << " ac=" << ac->objectName();
+            }
+        }
+        out_ << "\n";
+        out_.flush();
+    }
+}
+
+void InputEventLog::logClose(QObject* obj,QCloseEvent *event)
+{
+    QString cn(obj->metaObject()->className());
+    if(cn != "QWidgetWindow" && cn != "QTipLabel")
+    {
+        std::string s;
+        ecf::TimeStamp::now_in_brief(s);
+        out_ << s.c_str() << "cl " << cn << " " << objectPath(obj) << "\n";
+        out_.flush();
+    }
+}
+
+void InputEventLog::logContextMenu(QObject* obj,QContextMenuEvent *event)
+{
+    QString cn(obj->metaObject()->className());
+    if(cn != "QWidgetWindow")
+    {
+        std::string s;
+        ecf::TimeStamp::now_in_brief(s);
+        out_ << s.c_str() << "cm " << cn << " " << objectPath(obj) << "\n";
         out_.flush();
     }
 }

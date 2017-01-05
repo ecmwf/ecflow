@@ -10,6 +10,7 @@
 #include "WidgetNameProvider.hpp"
 
 #include <QAbstractButton>
+#include <QAbstractScrollArea>
 #include <QAction>
 #include <QDialogButtonBox>
 #include <QList>
@@ -38,7 +39,7 @@ void WidgetNameProvider::nameChildren(QWidget* w)
         nameTabWidget(t);
     }
 
-    Q_FOREACH(QScrollArea* sa,w->findChildren<QScrollArea*>(QString()))
+    Q_FOREACH(QAbstractScrollArea* sa,w->findChildren<QAbstractScrollArea*>(QString()))
     {
         nameViewport(sa->viewport());
     }

@@ -122,7 +122,8 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	}
 
 	defaultTb_= new QToolButton(parent);
-	defaultTb_->setToolTip(tr("Reset to default value"));
+    defaultTb_->setObjectName("default_" + prop_->name());
+    defaultTb_->setToolTip(tr("Reset to default value"));
     defaultTb_->setIcon(QPixmap(":/viewer/reset_to_default.svg"));
     defaultTb_->setAutoRaise(true);
 
@@ -132,7 +133,8 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
     if(prop_->master())
     {
     	masterTb_=new QToolButton(parent);
-    	masterTb_->setCheckable(true);
+        masterTb_->setObjectName("master_" + prop_->name());
+        masterTb_->setCheckable(true);
     	masterTb_->setText("Use global");
     	masterTb_->setToolTip(tr("Use global server settings"));
     	masterTb_->setIcon(QPixmap(":/viewer/chain.svg"));
@@ -280,6 +282,7 @@ StringPropertyLine::StringPropertyLine(VProperty* guiProp,bool addLabel,QWidget 
         label_->setText(label_->text() + ":");
 
 	le_=new QLineEdit(parent);
+    le_->setObjectName(prop_->name());
 
 	connect(le_,SIGNAL(textEdited(QString)),
 			this,SLOT(slotEdited(QString)));
@@ -349,6 +352,7 @@ ColourPropertyLine::ColourPropertyLine(VProperty* guiProp,bool addLabel,QWidget 
 	int width=fm.width("AAAAAAA");
 
 	cb_=new QToolButton(parent);
+    cb_->setObjectName(prop_->name());
     cb_->setFixedWidth(width);
     cb_->setFixedHeight(height+2);
     cb_->setToolTip(tr("Click to select a colour"));
@@ -443,7 +447,9 @@ FontPropertyLine::FontPropertyLine(VProperty* guiProp,bool addLabel,QWidget * pa
 	QFontDatabase db;
 
 	familyCb_=new QComboBox(parent);
-	hb->addWidget(familyCb_);
+    familyCb_->setObjectName(prop_->name());
+
+    hb->addWidget(familyCb_);
 	Q_FOREACH(QString s,db.families(QFontDatabase::Latin))
 		familyCb_->addItem(s);
 
@@ -568,7 +574,9 @@ IntPropertyLine::IntPropertyLine(VProperty* guiProp,bool addLabel,QWidget * pare
         label_->setText(label_->text() + ":");
 
 	le_=new QLineEdit(parent);
-	QIntValidator* validator=new QIntValidator(le_);
+    le_->setObjectName(prop_->name());
+
+    QIntValidator* validator=new QIntValidator(le_);
 
 	QString s=guiProp->param("max");
 	if(!s.isEmpty())
@@ -716,6 +724,7 @@ ComboPropertyLine::ComboPropertyLine(VProperty* guiProp,bool addLabel,QWidget * 
 	    label_->setText(label_->text() + ":");
 
 	cb_=new QComboBox(parent);//(vProp->param("label"));
+    cb_->setObjectName(prop_->name());
 
 	connect(cb_,SIGNAL(currentIndexChanged(int)),
 			   this,SLOT(slotCurrentChanged(int)));
@@ -806,6 +815,7 @@ ComboMultiPropertyLine::ComboMultiPropertyLine(VProperty* guiProp,bool addLabel,
 	    label_->setText(label_->text() + ":");
 
 	cb_=new ComboMulti(parent);//(vProp->param("label"));
+    cb_->setObjectName(prop_->name());
 
 	cb_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
@@ -890,7 +900,9 @@ SoundComboPropertyLine::SoundComboPropertyLine(VProperty* guiProp,bool addLabel,
 	playTb_(NULL)
 {
 	playTb_=new QToolButton(parent);
-	playTb_->setText("play");
+    playTb_->setObjectName(prop_->name());
+
+    playTb_->setText("play");
 	playTb_->setToolTip(tr("Play sound"));
 
 	connect(playTb_,SIGNAL(clicked(bool)),

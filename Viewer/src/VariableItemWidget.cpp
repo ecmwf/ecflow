@@ -28,6 +28,7 @@
 #include "VariableSearchLine.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
+#include "WidgetNameProvider.hpp"
 
 #define _UI_VARIABLEITEMWIDGET_DEBUG
 
@@ -111,6 +112,8 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     messageLabel_->hide();
 
     readSettings();
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 VariablePropDialog::~VariablePropDialog()
@@ -342,6 +345,8 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *par
     nameEdit_->setFocus();
 
     readSettings();
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name, QString value,QWidget *parent) :
