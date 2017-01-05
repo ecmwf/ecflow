@@ -51,8 +51,7 @@ InputEventLog::InputEventLog(QObject* parent) : QObject(parent), paused_(false)
     QString path=QString::fromStdString(DirectoryHandler::uiEventLogFileName());
     outFile_=new QFile(path);
 
-    //truncator_=new LogTruncator(path,86400*1000,5*1024*1024,2000,this);
-    truncator_=new LogTruncator(path,15*1000,100,3,this);
+    truncator_=new LogTruncator(path,86400*1000,5*1024*1024,2000,this);
     connect(truncator_,SIGNAL(truncateBegin()),this,SLOT(truncateLogBegin()));
     connect(truncator_,SIGNAL(truncateEnd()),this,SLOT(truncateLogEnd()));
 }
