@@ -1021,6 +1021,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       size_t secondPercentPos = cmd.find( micro, firstPercentPos + 1 );
       if ( secondPercentPos == string::npos ) break;
 
+      pos = 0;
       if ( secondPercentPos - firstPercentPos <= 1 ) {
          // handle %% with no characters in between, skip over
          // i.e to handle "printf %%02d %HOUR:00%" --> "printf %02d 00"   i.e if HOUR not defined
@@ -1028,7 +1029,6 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
          double_micro_found = true;
          continue;
       }
-      else pos = 0;
 
       string percentVar( cmd.begin() + firstPercentPos+1, cmd.begin() + secondPercentPos );
 #ifdef DEBUG_S
@@ -1045,13 +1045,13 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       bool generated_variable = false;
       if ( percentVar.find("ECF_") != std::string::npos) {
          if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_JOB())     != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_JOBOUT())  != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_PORT())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NODE())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_HOST())    != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_JOB())     != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_JOBOUT())  != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
       }
 
       // First search user variable (*ONLY* set user edit's the script)
@@ -1060,7 +1060,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       // If we fail to find the variable we return false.
       // Note: When a variable is found, it can have an empty value  which is still valid
       std::string varValue;
-      if (search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
+      if (!user_edit_variables.empty() && search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
       else if (generated_variable && find_parent_gen_variable_value(percentVar,varValue)) {
@@ -1081,7 +1081,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
             cout << "   var " << var << "\n";
 #endif
 
-            if (search_user_edit_variables(var,varValue,user_edit_variables)) {
+            if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
 #ifdef DEBUG_S
                cout << "   user var value = " << varValue << "\n";
 #endif

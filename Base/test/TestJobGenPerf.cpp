@@ -30,6 +30,7 @@ using namespace std;
 using namespace ecf;
 namespace fs = boost::filesystem;
 
+//#define DEBUG 1
 
 // This relies on Pyext/samples/TestJobGenPerf.py to make any defs amenable
 // for this test program.
@@ -49,7 +50,9 @@ int main(int argc, char* argv[])
    fs::remove(log_path);
    std::string path = argv[1];
 
-   //cout << "Loading file " << path << " log file " << log_path  << "\n";
+#ifdef DEBUG
+   cout << "Loading file " << path << " log file " << log_path  << "\n";
+#endif
    Defs defs;
    DefsStructureParser checkPtParser( &defs, path);
    std::string errorMsg,warningMsg;
@@ -59,25 +62,35 @@ int main(int argc, char* argv[])
       return 1;
    }
 
-   // remove dodgy suites, these are based on localhost
-   std::vector<std::string> suites_to_remove;
-   suites_to_remove.push_back("codes_ui");
-   suites_to_remove.push_back("libemos_test");
-   suites_to_remove.push_back("metview");
-   suites_to_remove.push_back("ecflow");
-   suites_to_remove.push_back("mir_bundle");
-   for(size_t i = 0; i < suites_to_remove.size(); ++i) {
-      suite_ptr suite = defs.findSuite(suites_to_remove[i]);
-      if (suite) suite->remove();
-   }
+#ifdef DEBUG
+   cout << "remove dodgy suites, these are based on localhost\n";
+#endif
+//   std::vector<std::string> suites_to_remove;
+//   suites_to_remove.push_back("codes_ui");
+//   suites_to_remove.push_back("libemos_test");
+//   suites_to_remove.push_back("metview");
+//   suites_to_remove.push_back("ecflow");
+//   suites_to_remove.push_back("mir_bundle");
+//   for(size_t i = 0; i < suites_to_remove.size(); ++i) {
+//      suite_ptr suite = defs.findSuite(suites_to_remove[i]);
+//      if (suite) suite->remove();
+//   }
+//   cout << defs ;
 
    // Check number of tasks, if the submitted output below is too low
    std::vector<Task*> tasks;
    defs.getAllTasks(tasks);
 
+#ifdef DEBUG
+   cout << "Total number of tasks" << tasks.size() << "\n";
+   cout << "begin-all\n";
+#endif
    defs.beginAll();
 
-   // we testing processing, hence free suspended time and trigger dependencies
+#ifdef DEBUG
+   cout << "Free all dependencies, free suspended time and trigger dependencies\n";
+#endif
+
    std::vector<node_ptr> all_nodes;
    defs.get_all_nodes(all_nodes);
    for(size_t i = 0; i < all_nodes.size(); ++i) {
@@ -85,6 +98,9 @@ int main(int argc, char* argv[])
       all_nodes[i]->freeTrigger();
       all_nodes[i]->freeHoldingDateDependencies();
       all_nodes[i]->freeHoldingTimeDependencies();
+      if (all_nodes[i]->state() == NState::COMPLETE && all_nodes[i]->isTask()) {
+         all_nodes[i]->set_state(NState::QUEUED);
+      }
    }
 
 
