@@ -666,7 +666,6 @@ private: // alow simulator access
    friend class ecf::Simulator;
    std::vector<Meter>&  ref_meters();// allow simulator set meter value
    std::vector<Event>&  ref_events();// allow simulator set event value
-   Repeat& ref_repeat()              { return repeat_;} // allow simulator to modify repeat
 
    /// Note: If the complete expression evaluation fails. we should continue resolving dependencies
    ///       If the complete expression evaluation evaluates, then we set node to complete
