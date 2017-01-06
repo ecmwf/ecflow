@@ -39,6 +39,7 @@ namespace fs = boost::filesystem;
 int main(int argc, char* argv[])
 {
    if (argc != 2) {
+      cout << "TestJobGenPerf.cpp --> " << argv[0] << "\n";
       cout << "Expect single argument which is path to a defs file\n";
       return 1;
    }
@@ -80,13 +81,12 @@ int main(int argc, char* argv[])
    std::vector<node_ptr> all_nodes;
    defs.get_all_nodes(all_nodes);
    for(size_t i = 0; i < all_nodes.size(); ++i) {
-      if (all_nodes[i]->isSuspended()) {
-         all_nodes[i]->resume();
-      }
+      if (all_nodes[i]->isSuspended())  all_nodes[i]->resume();
       all_nodes[i]->freeTrigger();
       all_nodes[i]->freeHoldingDateDependencies();
       all_nodes[i]->freeHoldingTimeDependencies();
    }
+
 
    // Create a new log, file, place after begin to avoid queued state
    Log::create(log_path);

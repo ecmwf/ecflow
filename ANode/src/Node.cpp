@@ -1435,7 +1435,7 @@ std::ostream& Node::print(std::ostream& os) const
          }
       }
    }
-   repeat_.print(os);
+   repeat_.print(os);  // if repeat is empty print(..) does nothing
 
    BOOST_FOREACH(const Variable& v, varVec_ )       { v.print(os); }
 
@@ -1941,7 +1941,6 @@ size_t Node::position() const
    return std::numeric_limits<std::size_t>::max();
 }
 
-
 void Node::gen_variables(std::vector<Variable>& vec) const
 {
    if (!repeat_.empty()) {
@@ -1957,9 +1956,7 @@ const Variable& Node::findGenVariable(const std::string& name) const
 
 void Node::update_repeat_genvar() const
 {
-   if (!repeat_.empty()) {
-      repeat_.update_repeat_genvar();
-   }
+   repeat_.update_repeat_genvar();  // if repeat_ is empty update_repeat_genvar() does nothing
 }
 
 void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const
