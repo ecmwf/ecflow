@@ -46,7 +46,9 @@ NodeTreeTraverser::NodeTreeTraverser( Server* s,
   serverEnv_(serverEnv),
   timer_( io, boost::posix_time::seconds( 0 ) ),
   interval_(0,0,serverEnv_.submitJobsInterval(),0),
+#ifdef DEBUG_TRAVERSER
   count_( 0 ),
+#endif
   firstTime_( true),
   running_(false)
 {
@@ -68,7 +70,9 @@ void NodeTreeTraverser::start()
 #endif
 
 	if (!running_) {
+#ifdef DEBUG_TRAVERSER
 		count_ = 0;
+#endif
 		running_ = true;
 		if (firstTime_) {
 			// If the server is stopped/started we want to avoid skewing the calendar, since each time
@@ -165,6 +169,7 @@ void NodeTreeTraverser::do_traverse()
 	time_duration duration = time_now - last_time_;
 	int diff_from_last_time = duration.total_seconds();
 	int submitJobsIntervalInSeconds = serverEnv_.submitJobsInterval();
+
 #ifdef DEBUG_TRAVERSER
 	int real_diff = diff_from_last_time - submitJobsIntervalInSeconds;
 	std::stringstream ss;
@@ -186,7 +191,6 @@ void NodeTreeTraverser::do_traverse()
 	}
 
 
-
 	/// Remove any stale zombies
 	server_->zombie_ctrl().remove_stale_zombies(time_now);
 
@@ -194,7 +198,6 @@ void NodeTreeTraverser::do_traverse()
 	time_duration traverse_duration =  Calendar::second_clock_time() - time_now;
 	ss << " Traverse duration:" << traverse_duration.total_seconds();
 #endif
-
 
 	// We poll *EVERY second but update the next_poll_time_ to be consistent with the job submission interval
 	// Hence the next poll times *will* vary( SOFT REAL TIME ).
@@ -322,7 +325,9 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost
 		// In the case where defs/node tree is suspended updateCalendar will continue
 		// to mark those time dep' are free, as free. This information is then used
 		// during the resume
+#ifdef DEBUG_TRAVERSER
 		++count_;
+#endif
 		CalendarUpdateParams calParams(time_now, interval_/* calendar increment */, running_ );
 		server_->defs_->updateCalendar( calParams );
 
