@@ -1265,33 +1265,40 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    if (!error_msg_.empty()) return;
 
    // handle %include || %includeonce  of include that was specified as %includeonce
-   if (include_once_set_.find(includedFile) != include_once_set_.end() ) {
+   if (std::find(include_once_set_.begin(),include_once_set_.end(),includedFile) != include_once_set_.end() ) {
       return; // Already processed once ignore
    }
    if (fnd_includeonce) {
-      include_once_set_.insert(includedFile);
+      include_once_set_.push_back(includedFile);
    }
 
 #ifdef DEBUG_PRE_PROCESS
    cout << "EcfFile::preProcess processing " << includedFile  << "\n";
 #endif
 
-   my_map::iterator it = globalIncludedFileSet_.find(includedFile);
-   if ( it == globalIncludedFileSet_.end()) {
-      globalIncludedFileSet_.insert( std::make_pair(includedFile,0) );
-   }
-   else {
-      // Check for recursive includes. some includes like %include <endt.h>
-      // are included many times, but the include is not recursive.
-      // To get round this will use a simple count.
-      if ( (*it).second > 100) {
-         std::stringstream ss;
-         ss << "Recursive include of file " << includedFile << " for " << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
-         return;
+
+   // Check for recursive includes. some includes like %include <endt.h>
+   // are included many times, but the include is not recursive.
+   // To get round this will use a simple count.
+   // replace map with vector
+   bool fnd = false;
+   for(size_t i = 0; i < globalIncludedFileSet_.size(); ++i) {
+      if (globalIncludedFileSet_[i].first == includedFile) {
+         fnd = true;
+         if ( globalIncludedFileSet_[i].second > 100) {
+            std::stringstream ss;
+            ss << "Recursive include of file " << includedFile << " for " << ecfile_->script_path_or_cmd_;
+            error_msg_ += ss.str();
+            return;
+         }
+         globalIncludedFileSet_[i].second++;
+         break;
       }
-      (*it).second++;
    }
+   if (!fnd) {
+      globalIncludedFileSet_.push_back( std::make_pair(includedFile,0) );
+   }
+
 
    std::vector<std::string> include_lines;
    if (fnd_includenopp) include_lines.push_back(ecf_micro_ + T_NOOP);

@@ -16,7 +16,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "NodeFwd.hpp"
 #include <boost/noncopyable.hpp>
-#include <set>
 
 /// This class is used in the pre-processing of files( .ecf or .usr or .man typically)
 /// It is used to to create the job file.
@@ -154,9 +153,8 @@ private:
    std::vector<std::string>& jobLines_;
    std::vector<std::string> tokens_;       // re-use to save memory
 
-   typedef std::map<std::string, int > my_map;
-   my_map globalIncludedFileSet_;          // test for recursive includes, <no _of times it was included>
-   std::set<std::string> include_once_set_;
+   std::vector<std::pair<std::string,int> > globalIncludedFileSet_;// test for recursive includes, <no _of times it was included>
+   std::vector<std::string> include_once_set_;
 };
 
 #endif
