@@ -27,7 +27,7 @@
 #include "PropertyMapper.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VModelData.hpp"
 #include "VTree.hpp"
@@ -180,7 +180,7 @@ void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemS
         if(info && !info->isEmpty())
         {
 #ifdef _UI_TREENODEVIEW_DEBUG
-            UserMessage::debug("TreeNodeView::selectionChanged --> emit=" + info->path());
+            UiLog().dbg() << "TreeNodeView::selectionChanged --> emit=" << info->path();
 #endif
             Q_EMIT selectionChanged(info);
         }
@@ -215,7 +215,7 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 	if(idx.isValid())
 	{          
 #ifdef _UI_TREENODEVIEW_DEBUG
-        UserMessage::debug("TreeNodeView::setCurrentSelection --> " + info->path());
+        UiLog().dbg() << "TreeNodeView::setCurrentSelection --> " << info->path();
 #endif
         setCurrentIndex(idx);
 	}
@@ -228,7 +228,7 @@ void TreeNodeView::setCurrentSelectionFromExpand(VInfo_ptr info)
         return;
 
 #ifdef _UI_TREENODEVIEW_DEBUG
-        UserMessage::debug("TreeNodeView::setCurrentSelectionFromExpand --> " + info->path());
+        UiLog().dbg() << "TreeNodeView::setCurrentSelectionFromExpand --> " << info->path();
 #endif
 
     setCurrentFromExpand_=true;

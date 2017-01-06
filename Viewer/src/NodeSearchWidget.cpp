@@ -8,6 +8,8 @@
 //
 //============================================================================
 
+#include "NodeSearchWidget.hpp"
+
 #include "ComboMulti.hpp"
 #include "CustomListWidget.hpp"
 #include "Highlighter.hpp"
@@ -18,7 +20,7 @@
 #include "NodeQueryResult.hpp"
 #include "NodeQueryResultModel.hpp"
 #include "ServerFilter.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VNState.hpp"
 
 #include <QtGlobal>
@@ -27,7 +29,6 @@
 #include <QMessageBox>
 #include <QPalette>
 #include <QVBoxLayout>
-#include "NodeSearchWidget.hpp"
 
 #define _UI_NODESEARCHWIDGET_DEBUG
 
@@ -164,7 +165,7 @@ void NodeSearchWidget::slotQueryEnabledChanged(bool queryEnabled)
 	//if(!engine_->isRunning())
 	//{
 #if 0
-    UserMessage::debug("NodeSearchWidget::slotQueryEnabledChanged -->" + std::string((queryEnabled?"true":"false")));
+    UiLog().dbg() << "NodeSearchWidget::slotQueryEnabledChanged -->" <<  std::string((queryEnabled?"true":"false"));
     findPb_->setEnabled(queryEnabled);
 #endif
 	//}
@@ -173,13 +174,13 @@ void NodeSearchWidget::slotQueryEnabledChanged(bool queryEnabled)
 void NodeSearchWidget::slotFind()
 {
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
-    UserMessage::debug("NodeSearchWidget::slotFind -->");
+    UiLog().dbg() << "NodeSearchWidget::slotFind -->";
 #endif
 
     //Avoid double clicking
     if(!findPb_->isEnabled())
     {
-         UserMessage::debug("<-- NodeSearchWidget::slotFind - search is already running");
+         UiLog().dbg() << "<-- NodeSearchWidget::slotFind - search is already running";
          return;
     }
 
@@ -208,7 +209,7 @@ void NodeSearchWidget::slotFind()
         adjustButtonState();
     }
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
-    UserMessage::debug("<-- NodeSearchWidget::slotFind");
+    UiLog().dbg() << "<-- NodeSearchWidget::slotFind";
 #endif
 }
 
@@ -229,7 +230,7 @@ void NodeSearchWidget::slotClose()
 void NodeSearchWidget::slotQueryStarted()
 {
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
-    UserMessage::debug("NodeSearchWidget::slotQueryStarted -->");
+    UiLog().dbg() << "NodeSearchWidget::slotQueryStarted -->";
 #endif
     adjustButtonState();
 
@@ -238,15 +239,15 @@ void NodeSearchWidget::slotQueryStarted()
 
 	progressLabel_->setText("Search in progress ...");
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
-    UserMessage::debug("<-- NodeSearchWidget::slotQueryStarted");
+    UiLog().dbg() << "<-- slotQueryStarted";
 #endif
 }
 
 void NodeSearchWidget::slotQueryFinished()
 {
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
-    UserMessage::debug("NodeSearchWidget::slotQueryFinished -->");
-    UserMessage::debug("  Search finished. Total node scanned: " + boost::lexical_cast<std::string>(engine_->scannedCount()));
+    UiLog().dbg() << "NodeSearchWidget::slotQueryFinished -->";
+    UiLog().dbg() << "  Search finished. Total node scanned: " << engine_->scannedCount();
 #endif
 
     adjustButtonState();
@@ -272,7 +273,7 @@ void NodeSearchWidget::slotQueryFinished()
 
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
     qDebug() << engine_->isRunning();
-    UserMessage::debug("<-- NodeSearchWidget::slotQueryFinished");
+    UiLog().dbg() << "<-- NodeSearchWidget::slotQueryFinished";
 #endif
 }
 
@@ -297,9 +298,9 @@ void NodeSearchWidget::adjustButtonState(bool engineRunning)
         editor_->setEnabled(true);
     }
 
-    UserMessage::debug("NodeSearchWidget::adjustButtonState -->");
-    UserMessage::debug(" findTb_: " + boost::lexical_cast<std::string>(findPb_->isEnabled()));
-    UserMessage::debug("<-- NodeSearchWidget::adjustButtonState");
+    UiLog().dbg() << "NodeSearchWidget::adjustButtonState -->";
+    UiLog().dbg() << " findTb_: " <<  findPb_->isEnabled();
+    UiLog().dbg() << "<-- adjustButtonState";
 }
 
 void NodeSearchWidget::adjustColumns()
@@ -349,7 +350,6 @@ void NodeSearchWidget::readSettings(const QSettings &settings)
         if(lst.count() >= 3)
             columnsAdjusted_=true;
     }
-
 }
 
 

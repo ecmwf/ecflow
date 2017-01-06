@@ -11,7 +11,7 @@
 #include "VInfo.hpp"
 
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VItemPathParser.hpp"
@@ -39,7 +39,7 @@ VInfo::VInfo(ServerHandler* server,VNode* node,VAttribute* attr) :
 VInfo::~VInfo()
 {
 #ifdef _UI_VINFO_DEBUG
-    UserMessage::debug("VInfo::~VInfo() -->  \n" + boost::lexical_cast<std::string>(this));
+    UiLog().dbg() << "VInfo::~VInfo() --> " << this;
 #endif
     if(server_)
 		server_->removeServerObserver(this);
@@ -48,7 +48,7 @@ VInfo::~VInfo()
 		(*it)->notifyDelete(this);
 
 #ifdef _UI_VINFO_DEBUG
-    UserMessage::debug("<-- VInfo::~VInfo()");
+    UiLog().dbg() << "<-- ~VInfo()";
 #endif
 }
 

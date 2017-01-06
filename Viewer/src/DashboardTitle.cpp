@@ -13,8 +13,8 @@
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
+#include "UiLog.hpp"
 
-#include <QDebug>
 #include <QLinearGradient>
 #include <QPainter>
 
@@ -222,11 +222,11 @@ void DashboardTitle::updateTitle()
         for(int i=0; i < texts.count(); i++)
         {
 #ifdef _UI_DASHBOARDTITLE_DEBUG
-            qDebug() << i << texts[i] << dw << fm.width(texts[0]);
+            UiLog().dbg() << i << texts[i] << dw << fm.width(texts[0]);
 #endif
             QString txt=fm.elidedText(texts[i],Qt::ElideRight,dw);
 #ifdef _UI_DASHBOARDTITLE_DEBUG
-            qDebug() << "  " << txt << fm.width(txt);
+            UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
             QString ellips(0x2026); //horizontal ellipsis
 
@@ -236,7 +236,7 @@ void DashboardTitle::updateTitle()
                 txt=fm.elidedText(txt,Qt::ElideRight,dw);
             }
 #ifdef _UI_DASHBOARDTITLE_DEBUG
-            qDebug() << "  " << txt << fm.width(txt);
+            UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
             if(txt.startsWith(ellips))
             {
@@ -244,14 +244,14 @@ void DashboardTitle::updateTitle()
                 txt=fm.elidedText(txt,Qt::ElideRight,dw);
             }
 #ifdef _UI_DASHBOARDTITLE_DEBUG
-            qDebug() << "  " << txt << fm.width(txt);
+            UiLog().dbg()<< "  " << txt << fm.width(txt);
 #endif
             if(txt.isEmpty())
             {
                 txt=texts[i].left(1);
             }
 #ifdef _UI_DASHBOARDTITLE_DEBUG
-            qDebug() << "  " << txt << fm.width(txt);
+            UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
             if(fm.width(txt) > dw)
             {
@@ -263,7 +263,7 @@ void DashboardTitle::updateTitle()
                 texts[i]=txt;
             }
 #ifdef _UI_DASHBOARDTITLE_DEBUG
-            qDebug() << "  " << texts[i] << fm.width(texts[i]);
+            UiLog().dbg() << "  " << texts[i] << fm.width(texts[i]);
 #endif
             textRects << QRect(xp,yp,dw,fm.height());
             fillRects << QRect(xp,yp+fm.height(),dw,bandH);

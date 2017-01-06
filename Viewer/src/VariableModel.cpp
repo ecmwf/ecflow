@@ -13,7 +13,6 @@
 
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
-#include "UserMessage.hpp"
 #include "VariableModelData.hpp"
 
 QColor VariableModel::varCol_=QColor(40,41,42);
@@ -279,7 +278,7 @@ bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString
 #endif
 
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    UserMessage::debug("<-- VariableModel::alterVariable");
+    UiLog().dbg() << "<-- alterVariable";
 #endif
     return false;
 }
@@ -530,7 +529,7 @@ void VariableModel::slotAddRemoveEnd(int diff)
 void VariableModel::slotDataChanged(int block)
 {
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    UserMessage::debug("VariableModel::slotDataChanged -->");
+    UiLog().dbg() << "VariableModel::slotDataChanged -->";
 #endif
     QModelIndex blockIndex0=index(block,0);
 	QModelIndex blockIndex1=index(block,1);
@@ -544,7 +543,7 @@ void VariableModel::slotDataChanged(int block)
     Q_EMIT filterChanged();
 
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    UserMessage::debug("<-- VariableModel::slotDataChanged");
+    UiLog().dbg() << "<-- slotDataChanged";
 #endif
 }
 
@@ -619,7 +618,7 @@ void VariableSortModel::slotFilterChanged()
 void VariableSortModel::slotRerunFilter()
 {
 #ifdef _UI_VARIABLEMODEL_DEBUG
-   UserMessage::debug("VariableSortModel::slotRerunFilter-->");
+   UiLog().dbg() << "VariableSortModel::slotRerunFilter-->";
 #endif
    invalidate();
 }

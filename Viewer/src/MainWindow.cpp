@@ -21,8 +21,6 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
-#include <QDebug>
-
 #include "MainWindow.hpp"
 
 #include "AboutDialog.hpp"
@@ -40,7 +38,7 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VSettings.hpp"
@@ -143,7 +141,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-	qDebug() << "exit";
+    UiLog().dbg() << "MainWindow --> desctutor";
 	serverFilterMenu_->aboutToDestroy();
 }
 
