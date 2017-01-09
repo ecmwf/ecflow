@@ -29,6 +29,7 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "CustomCommandDialog.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 #define _UI_ACTIONHANDLER_DEBUG
@@ -56,7 +57,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     {
 
 #ifdef _UI_ACTIONHANDLER_DEBUG
-        UserMessage::debug("ActionHandler::contextMenu --> item=" + item->name());
+        UiLog().dbg() << "ActionHandler::contextMenu --> item=" + item->name();
 #endif
     	if(item->handler() == "info_panel")
     	{

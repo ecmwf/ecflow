@@ -19,7 +19,7 @@
 #include <QWheelEvent>
 
 #include "VConfig.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 PlainTextEdit::PlainTextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
@@ -563,7 +563,7 @@ void PlainTextEdit::mouseReleaseEvent(QMouseEvent *e)
             if (currentLink_ == anchorAt(e->pos()))
             {
                 Q_EMIT hyperlinkActivated(currentLink_);
-                UserMessage::debug(std::string("clicked:") + currentLink_.toStdString());
+                UiLog().dbg() << "clicked:" << currentLink_;
             }
         }
     }

@@ -28,7 +28,7 @@
 #include "PropertyMapper.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeViewDelegate.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
@@ -157,7 +157,7 @@ void TableNodeView::selectionChanged(const QItemSelection &selected, const QItem
 		if(info && !info->isEmpty())
 		{
 #ifdef _UI_TABLENODEVIEW_DEBUG
-            UserMessage::debug("TableNodeView::selectionChanged --> emit=" + info->path());
+            UiLog().dbg() << "TableNodeView::selectionChanged --> emit=" << info->path();
 #endif
 			Q_EMIT selectionChanged(info);
 		}
@@ -192,7 +192,7 @@ void TableNodeView::setCurrentSelection(VInfo_ptr info)
     {
 #ifdef _UI_TABLENODEVIEW_DEBUG
     if(info)
-        UserMessage::debug("TableNodeView::setCurrentSelection --> " + info->path());
+        UiLog().dbg() << "TableNodeView::setCurrentSelection --> " <<  info->path();
 #endif
         setCurrentIndex(idx);
     }

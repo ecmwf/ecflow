@@ -18,7 +18,7 @@
 #include "InfoPanelItem.hpp"
 #include "InfoPanelHandler.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
@@ -182,7 +182,7 @@ void InfoPanel::reset(VInfo_ptr info)
 {
     if(info_ && info)
     {
-        //UserMessage::debug("path: " + info_->path() + " " + info->path());
+        //UiLog().dbg() << "path: " << info_->path() << " " << info->path();
 
         if(*(info_.get()) == *(info.get()))
             return;
@@ -308,7 +308,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 
 	for(int i=0; i < ids.size(); i++)
 	{
-		UserMessage::message(UserMessage::DBG,false,std::string("InfoPanel --> tab: ") + ids[i]->name());
+        UiLog().dbg() << "InfoPanel --> tab: " << ids[i]->name();
 	}
 
 	int match=0;

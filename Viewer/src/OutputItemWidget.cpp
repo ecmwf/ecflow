@@ -196,7 +196,7 @@ void OutputItemWidget::getCurrentFile()
     if(info_)
 	{
 		std::string fullName=currentFullName();
-        UserMessage::message(UserMessage::DBG,false,"output selected: " + fullName);
+        UiLog().dbg()  << "output selected: " << fullName;
 		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
 		op->file(fullName);
 	}
@@ -488,7 +488,7 @@ void OutputItemWidget::setCurrentInDir(const std::string& fullName)
 
 void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 {
-    UserMessage::debug("OutputItemWidget::updateDir -->");
+    UiLog().dbg() << "OutputItemWidget::updateDir -->";
 
     if(restartTimer)
 		updateDirTimer_->stop();
@@ -625,7 +625,7 @@ void OutputItemWidget::on_saveFileAsTb__clicked()
 	}
 	else
 	{
-		UserMessage::message(UserMessage::INFO,true,"No file loaded!");
+        UserMessage::message(UserMessage::INFO,true,"No file loaded!");
 	}
 }
 

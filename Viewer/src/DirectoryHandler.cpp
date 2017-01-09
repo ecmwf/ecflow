@@ -18,6 +18,7 @@
 
 #include "DirectoryHandler.hpp"
 #include "File.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 std::string DirectoryHandler::shareDir_;
@@ -127,14 +128,14 @@ void DirectoryHandler::init(const std::string& exeStr)
         tmpDir_=tmp.string();
         if(!boost::filesystem::exists(tmp))
         {
-            UserMessage::message(UserMessage::WARN, false,
-                "ECFLOWUI_TMPDIR env variable is not defined. ecFlowUI creates its tmp direcoty in TMPDIR as "  + tmp.string());
+            UiLog().warn() << "ECFLOWUI_TMPDIR env variable is not defined. ecFlowUI creates its tmp direcoty in TMPDIR as "  <<
+                              tmp.string();
 
             try
             {
                 if(boost::filesystem::create_directory(tmp))
                 {                   
-                    UserMessage::debug("Tmp dir created: " + tmpDir_);
+                    UiLog().dbg() << "Tmp dir created: " << tmpDir_;
                 }
             }
             catch (const boost::filesystem::filesystem_error& e)
@@ -251,8 +252,7 @@ std::string DirectoryHandler::tmpFileName()
         }
         catch(const boost::filesystem::filesystem_error& err)
         {
-            UserMessage::message(UserMessage::WARN, false,
-                std::string("Could not generate tmp filename! Reason: ") + err.what());
+            UiLog().warn() << "Could not generate tmp filename! Reason: " << err.what();
         }
     }
 
