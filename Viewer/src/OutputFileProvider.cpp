@@ -14,7 +14,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <QDateTime>
 
@@ -241,7 +241,7 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
     std::string host, port;
     assert(n);
 
-    UserMessage::debug("OutputFileProvider::fetchFileViaOutputClient <-- file: " + fileName);
+    UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient <-- file: " << fileName;
 
     //If it is not the jobout file or it is the joubout but it is not the current item in the cache
     //(i.e. we do not want to referesh it) we try to use the cache
@@ -255,7 +255,7 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
             assert(f);
             f->setCached(true);
 
-            UserMessage::debug("  File found in cache");
+            UiLog().dbg() << "  File found in cache";
 
             reply_->setInfoText("");
             reply_->fileReadMode(VReply::LogServerReadMode);
@@ -277,8 +277,8 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 	{
 		//host=host + "baaad";
 
-        UserMessage::debug("OutputFileProvider::fetchFileViaOutputClient --> host:" + host +
-                             " port:" + port + " file: " + fileName);
+        UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient --> host:" << host <<
+                             " port:" << port << " file: " << fileName;
 
         //reply_->setInfoText("Getting file through log server: " + host + "@" + port);
         //owner_->infoProgress(reply_);
@@ -332,22 +332,18 @@ void OutputFileProvider::slotOutputClientFinished()
 
 void OutputFileProvider::slotOutputClientProgress(QString msg,int value)
 {
-    //UserMessage::debug("OutputFileProvider::slotOutputClientProgress " + msg.toStdString());
+    //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
 
     owner_->infoProgress(msg.toStdString(),value);
 
     //reply_->setInfoText(msg.toStdString());
     //owner_->infoProgress(reply_);
     //reply_->setInfoText("");
-
-    //qDebug() << "prog: " << msg;
 }
-
-
 
 void OutputFileProvider::slotOutputClientError(QString msg)
 {
-    UserMessage::message(UserMessage::DBG,false,"OutputFileProvider::slotOutputClientError error:" + msg.toStdString());
+    UiLog().dbg() << "OutputFileProvider::slotOutputClientError error:" << msg;
     reply_->addLog("TRY> fetch file from logserver: " + outClient_->host() + "@" + outClient_->portStr() + " FAILED");
 
     if(info_)

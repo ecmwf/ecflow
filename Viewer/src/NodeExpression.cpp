@@ -18,12 +18,10 @@
 
 #include "NodeExpression.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
-
-#include <QDebug>
 
 //#define _UI_NODEXPRESSIONPARSEER_DEBUG
 
@@ -185,7 +183,7 @@ BaseNodeCondition *NodeExpressionParser::parseWholeExpression(const std::string&
     char insideQuote = '\0';  // \0 if not inside a quote, \' if we are inside a quote
                               // will not handle the case of nested quotes!
 
-    UserMessage::message(UserMessage::DBG, false, std::string("parseWholeExpression:    ") + expr);
+    UiLog().dbg() << "parseWholeExpression:    " << expr;
 
     ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
     ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
@@ -426,7 +424,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
         }
         else
         {
-            UserMessage::message(UserMessage::ERROR, false, std::string("Error parsing expression " + *i_));
+            UiLog().err() << "Error parsing expression " << *i_;
             result = new FalseNodeCondition();
             return result;
         }
@@ -451,7 +449,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
     }
 
 
-    UserMessage::message(UserMessage::DBG, false, std::string("    ") + result->print());
+    UiLog().dbg() << "    " <<  result->print();
 
     return result;
 }
@@ -510,8 +508,8 @@ bool AndNodeCondition::execute(VItem* node)
 bool OrNodeCondition::execute(VItem* node)
 {
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
-    UserMessage::debug("OrNodeCondition::execute --->");
-    qDebug() <<  operands_[0]->execute(node) << operands_[1]->execute(node);
+    UiLog().dbg() << "OrNodeCondition::execute --->";
+    UiLog().dbg() <<  operands_[0]->execute(node) << " "  << operands_[1]->execute(node);
 #endif
     return operands_[0]->execute(node) || operands_[1]->execute(node);
 }
@@ -544,39 +542,39 @@ bool TypeNodeCondition::execute(VItem* item)
     else if(item->isNode())
     {
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
-        UserMessage::debug("TypeNodeCondition::execute --> " + NodeExpressionParser::instance()->typeName(type_));
+        UiLog().dbg() << "TypeNodeCondition::execute --> " << NodeExpressionParser::instance()->typeName(type_);
+        UiLog().dbg() << item->isNode() << " " << item->isSuite() << " " << item->isFamily() <<
+                         " " << item->isTask() << " " << item->isAlias();
 #endif
-        //qDebug() << item->isNode() << item->isSuite() << item->isFamily() << item->isTask() << item->isAlias();
-
         switch(type_)
         {
         case NodeExpressionParser::NODE:
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
-            UserMessage::debug("   NODE");
+            UiLog().dbg() << "   NODE";
 #endif
             return true;
             break;
         case NodeExpressionParser::SUITE:
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
-            UserMessage::debug("   SUITE");
+            UiLog().dbg() << "   SUITE";
 #endif
             return (item->isSuite() != NULL);
             break;
         case NodeExpressionParser::TASK:
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
-            UserMessage::debug("   TASK");
+            UiLog().dbg() << "   TASK";
 #endif
             return (item->isTask() != NULL);
             break;
         case NodeExpressionParser::FAMILY:
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
-            UserMessage::debug("   FAMILY");
+            UiLog().dbg() << "   FAMILY";
 #endif
             return (item->isFamily() != NULL);
             break;
         case NodeExpressionParser::ALIAS:
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
-            UserMessage::debug("   ALIAS");
+            UiLog().dbg() << "   ALIAS";
 #endif
             return (item->isAlias() != NULL);
             break;
@@ -697,7 +695,7 @@ StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode, bool
             matcher_ = new StringMatchRegexp(caseSensitive);
             break;
         default:
-            UserMessage::message(UserMessage::ERROR, false, "StringMatchCondition: bad matchMode");
+            UiLog().dbg() << "StringMatchCondition: bad matchMode";
             matcher_ = new StringMatchExact(caseSensitive);
             break;
     }

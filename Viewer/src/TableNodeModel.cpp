@@ -9,12 +9,11 @@
 
 #include "TableNodeModel.hpp"
 
-#include <QDebug>
 #include <QMetaMethod>
 
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VAttribute.hpp"
 #include "VFilter.hpp"
 #include "VIcon.hpp"
@@ -393,7 +392,8 @@ void TableNodeModel::slotBeginServerScan(VModelServer* server,int num)
     Q_ASSERT(server);
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("TableNodeModel::slotBeginServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+     UiLog().dbg() << "TableNodeModel::slotBeginServerScan --> " << server->realServer()->name() <<
+                      " " << num;
 #endif
 
 	if(num >0)
@@ -409,7 +409,8 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 	assert(active_ == true);
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("TableNodeModel::slotEndServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+     UiLog().dbg() << "TableNodeModel::slotEndServerScan --> " << server->realServer()->name() <<
+                      " " << num;
      QTime t;
      t.start();
 #endif
@@ -418,8 +419,8 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 		endInsertRows();
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("  elapsed: " + QString::number(t.elapsed()).toStdString() + " ms");
-     UserMessage::debug("<-- TableNodeModel::slotEndServerScan");
+     UiLog().dbg() << "  elapsed: " << t.elapsed() << " ms";
+     UiLog().dbg() << "<-- slotEndServerScan";
 
      //qDebug() << "hit" << hitCount;
 #endif
