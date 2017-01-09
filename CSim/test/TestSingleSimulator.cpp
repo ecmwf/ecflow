@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_single_from_file  )
 {
    cout << "Simulator:: ...test_single_from_file\n";
 
-   std::string path = File::test_data("CSim/test/data/good_defs/misc/multiple_days.def","CSim");
+   std::string path = File::test_data("CSim/test/data/good_defs/day/multiple_days.def","CSim");
 
    Simulator simulator;
    std::string errorMsg;
