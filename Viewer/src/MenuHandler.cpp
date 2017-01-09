@@ -28,6 +28,7 @@
 #include "Str.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
 #include "VConfig.hpp"
@@ -79,7 +80,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
         if (itTopLevel->first == "menus")
         {
-            UserMessage::message(UserMessage::DBG, false, std::string("Menus:"));
+            UiLog().dbg() << "Menus:";
 
             ptree const &menusDef = itTopLevel->second;
 
@@ -90,7 +91,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 ptree const &menuDef = itMenus->second;
 
                 std::string cname = menuDef.get("name", "NoName");
-                UserMessage::message(UserMessage::DBG, false, std::string("  ") + cname);
+                UiLog().dbg() << "  " << cname;
                 Menu *menu = new Menu(cname);
 
                 //ptree const &menuModesDef = menuDef.get_child("modes");
@@ -115,7 +116,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
         else if (itTopLevel->first == "menu_items")
         {
-            UserMessage::message(UserMessage::DBG, false, std::string("Menu items:"));
+            UiLog().dbg() << "Menu items:";
 
             ptree const &itemsDef = itTopLevel->second;
 
@@ -141,7 +142,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
-                UserMessage::message(UserMessage::DBG, false, std::string("  " + name));
+                UiLog().dbg() << "  " << name;
                 MenuItem *item = new MenuItem(name);
                 item->setCommand(command);
 
@@ -387,8 +388,8 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
     }
     else
     {
-        UserMessage::message(UserMessage::ERROR, false, std::string("Could not find menu called " + 
-                             menuName + " to add item " + item->name() + " to."));
+        UiLog().err() << "Could not find menu called " <<
+                             menuName << " to add item " << item->name() << " to.";
         return false;
     }
 

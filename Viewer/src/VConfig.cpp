@@ -15,6 +15,7 @@
 
 #include "DirectoryHandler.hpp"
 #include "SessionHandler.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 #include "Version.hpp"
@@ -126,7 +127,7 @@ void VConfig::loadInit(const std::string& parFile)
         VProperty *grProp=new VProperty(groupName);
         groups_.push_back(grProp);
 
-        UserMessage::message(UserMessage::DBG,false,std::string("VConfig::loadInit() read config group: ") + groupName);
+        UiLog().dbg() << "VConfig::loadInit() read config group: " << groupName;
 
         //Load the property parameters. It will recursively add all the
         //children properties.
@@ -150,7 +151,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	ptree ptProp=it->second;
 
 #ifdef _UI_CONFIG_LOAD_DEBUG
-    	UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() read item: " + name);
+        UiLog().dbg() << "   VConfig::loadProperty() read item: " << name;
 #endif
     	//Default value
     	if(name == "default")
@@ -171,19 +172,19 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     			val=prefix.toStdString() + "." + val;
 
 #ifdef _UI_CONFIG_LOAD_DEBUG
-    		UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line: " + val);
+            UiLog().dbg() << "   VConfig::loadProperty() line: " << val;
 #endif
     		if(VProperty* lineEditProp=find(val))
     		{
 #ifdef _UI_CONFIG_LOAD_DEBUG
-                UserMessage::message(UserMessage::DBG,false,"     --> link found");
+                UiLog().dbg() << "     --> link found";
 #endif
                 chProp->setLink(lineEditProp);
             }
             else
     		{
 #ifdef _UI_CONFIG_LOAD_DEBUG
-                UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+                UiLog().dbg() << "     --> link NOT found";
 #endif
             }
     	}
@@ -193,19 +194,19 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     		std::string val=ptProp.get_value<std::string>();
 
 #ifdef _UI_CONFIG_LOAD_DEBUG
-            UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line link: " + val);
+            UiLog().dbg() << "   VConfig::loadProperty() line link: " << val;
 #endif
     		if(VProperty* lineEditProp=find(val))
     		{
 #ifdef _UI_CONFIG_LOAD_DEBUG
-                UserMessage::message(UserMessage::DBG,false,"     --> link found");
+                UiLog().dbg() << "     --> link found";
 #endif
                 prop->setLink(lineEditProp);
     		}
     		else
     		{
 #ifdef _UI_CONFIG_LOAD_DEBUG
-                UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+                UiLog().dbg() << "     --> link NOT found";
 #endif
     		}
     	}
