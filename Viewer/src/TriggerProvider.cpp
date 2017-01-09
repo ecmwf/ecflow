@@ -15,7 +15,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -232,7 +232,7 @@ VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path)  //,bool tryn
     }
     catch (const boost::filesystem::filesystem_error& e)
     {
-        UserMessage::message(UserMessage::WARN,false,"fetchLocalDir failed:" + std::string(e.what()));
+        UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
         return res;
     }
 
