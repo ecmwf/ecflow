@@ -10,6 +10,12 @@ test scenario. Ideally this needs to be done with a real server.
 i.e BUT without submitting the jobs ????????
 
 
+class Variable {
+...
+
+   bool operator<(const Variable& a) const    { return name_ < a.name();}
+   bool operator<(const std::string& b) const { return name_ < b;}
+}
 
 const Variable& Node::findVariable(const std::string& name) const
 {
