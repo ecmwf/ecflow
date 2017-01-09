@@ -10,6 +10,7 @@
 #include "LogTruncator.hpp"
 
 #include <QFileInfo>
+#include <QTime>
 #include <QTimer>
 
 #include "DirectoryHandler.hpp"
@@ -24,7 +25,14 @@ LogTruncator::LogTruncator(QString path, int timeout,int sizeLimit,int lineNum,Q
 {
     timer_=new QTimer(this);
     connect(timer_,SIGNAL(timeout()),this,SLOT(truncate()));
-    timer_->start(timeout_);
+    int secToM=86400-QTime::currentTime().msecsSinceStartOfDay()/1000;
+    if(secToM > 5*60)
+        timer_->start(secToM*1000);
+    else
+        timer_->start(secToM*1000+timeout_);
+
+    UiLog().dbg() << "LogTruncator --> secs to midnight=" << secToM << "s" <<
+                     " initial timeout=" << timer_->interval()/1000 << "s";
 }
 
 void LogTruncator::truncate()
@@ -51,4 +59,7 @@ void LogTruncator::truncate()
     }
 
     Q_EMIT truncateEnd();
+
+    if(timeout_ != timer_->interval())
+        timer_->setInterval(timeout_);
 }
