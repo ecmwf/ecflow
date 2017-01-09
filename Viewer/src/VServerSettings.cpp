@@ -17,7 +17,7 @@
 #include "ServerList.hpp"
 #include "SessionHandler.hpp"
 #include "SuiteFilter.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
@@ -88,7 +88,7 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 		}
 		else
 		{
-			UserMessage::message(UserMessage::DBG, false, std::string("VServerSettings - could not find property: ") + it->second);
+            UiLog().dbg() << "VServerSettings - could not find property: " << it->second;
 			assert(0);
 		}
 	}

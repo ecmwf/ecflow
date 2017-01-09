@@ -19,7 +19,7 @@
 #include "ServerFilter.hpp"
 #include "TableNodeWidget.hpp"
 #include "TreeNodeWidget.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
@@ -419,7 +419,7 @@ void Dashboard::readSettings(VComboSettings* vs)
 
 	Q_FOREACH(QWidget* w,findChildren<QDockWidget*>())
 	{
-		UserMessage::message(UserMessage::DBG,false,std::string("DashBoard::readSettings() dock: ") +  w->objectName().toStdString());
+        UiLog().dbg() << "DashBoard::readSettings() dock: " <<  w->objectName();
 	}
 
 	//Read the information about the dashboard widgets.

@@ -15,7 +15,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -109,7 +109,7 @@ void EditProvider::submit(const std::vector<std::string>& txt,bool alias)
 
     if(vars.empty())
     {
-    	UserMessage::message(UserMessage::DBG, false, std::string(" No user variables!"));
+        UiLog().dbg() << " No user variables!";
     }
 
 

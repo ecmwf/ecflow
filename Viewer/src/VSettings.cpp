@@ -11,6 +11,7 @@
 #include "VSettings.hpp"
 
 #include "DirectoryHandler.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 #include <QDebug>
@@ -261,7 +262,7 @@ VComboSettings::VComboSettings(const std::string& file,const std::string& qsFile
 	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
 	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
 #ifdef _UI_SETTINGS_DEBUG
-    UserMessage::message(UserMessage::DBG,false,"VComboSettings --> fileName=" + qs_.fileName().toStdString());
+    UiLog().dbg() << "VComboSettings --> fileName=" << qs_.fileName();
 #endif
 }
 
