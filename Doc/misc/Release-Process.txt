@@ -78,16 +78,10 @@ Process
          or try with emos  and password.
          scp -r 4.5.0 emos@sappb:/usr/local/apps/ecflow/.
          
-   VIRTUAL Machines: These should treated like regular machines. 
-         - These are based on lxop_dev, hence we need top copy over exe for this
-         - For a list of machines see view/server.od( vsms1,vmsm2,vsms3,vali)
-         - to show kernel version: uname -a
-         - to show os version:     lsb_release -a
-         
-         - ssh lxop_dev, su emos;
-         - scp -r 4.5.0 emos@<virtual machine>:/usr/local/apps/ecflow/.
-         
-         
+   VIRTUAL Machines:
+         - The virtual machines are out sync with lxop_dev.(due to python unicode)
+           We now build on via metabuilder ecflow-metab directly.
+          
   *Make* sure destination has a trailing '/.' otherwise you
   can end up renaming.
 
@@ -105,7 +99,7 @@ Process
         ~rdx/ecflow/servers.config
         
    # as an emergency we can copy from lxop_dev
-   - ssh lxop_dev, su emos;
+   - ssh ecflow-metab, su emos;
    - scp -r 4.5.0 emos@vecfrdda1:/usr/local/apps/ecflow/.
         
 
@@ -144,4 +138,4 @@ Process
      
      Then check this file in for, for the other platforms.
      
-0/ Reset metabuilder ecflow git_tag, back to develop
+0/ Reset metabuilder and ecflow git_tag, back to develop
