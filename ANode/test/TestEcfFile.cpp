@@ -550,8 +550,9 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_ECFLOW_274 )
    std::string job_file_contents;
    BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
 
-   /// Remove all the generated files
-   boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
+   /// Remove all the generated files. This occasionally fails on ecgb/lxg ???
+   try { boost::filesystem::remove_all( ecf_home + suite->absNodePath() ); }
+   catch (...) {  cout << "Could not remove directory " << ecf_home + suite->absNodePath() << "\n";}
 }
 
 
