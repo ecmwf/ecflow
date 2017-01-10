@@ -18,6 +18,7 @@
 #include "boost/filesystem/path.hpp"
 
 #include "Defs.hpp"
+#include "Task.hpp"
 #include "Str.hpp"
 #include "File.hpp"
 #include "Log.hpp"
@@ -115,6 +116,16 @@ int main(int argc, char* argv[])
    if (!job.generate( jobParam )) cout << " generate failed: " << jobParam.getErrorMsg();
    cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
 
+//   for(size_t i = 0; i < tasks.size(); i++) {
+//      if (tasks[i]->state() != NState::SUBMITTED) {
+//         cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
+//         Node* parent = tasks[i]->parent();
+//         while (parent) {
+//            cout << "node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
+//            parent = parent->parent();
+//         }
+//      }
+//   }
    // fs::remove(log_path);
    return 0;
 }
