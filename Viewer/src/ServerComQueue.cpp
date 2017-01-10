@@ -16,7 +16,7 @@
 
 #include "Log.hpp"
 
-#define _UI_SERVERCOMQUEUE_DEBUG
+//#define _UI_SERVERCOMQUEUE_DEBUG
 
 // This class manages the tasks to be sent to the ServerComThread, which controls
 // the communication with the ClientInvoker. The ClientInvoker is hidden from the
