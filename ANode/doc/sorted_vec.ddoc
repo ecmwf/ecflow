@@ -1,0 +1,79 @@
+
+The time for sorted vec, were slightly slower than without.
+This may have been, because the test, Parsed a large def.
+When adding, variable in sorted fashion the, variable vec
+would have done reallocation ~N/2.
+However this needs investigation
+
+Since loading is a rarely done, we need a more realistic
+test scenario. Ideally this needs to be done with a real server.
+i.e BUT without submitting the jobs ????????
+
+
+class Variable {
+...
+
+   bool operator<(const Variable& a) const    { return name_ < a.name();}
+   bool operator<(const std::string& b) const { return name_ < b;}
+}
+
+const Variable& Node::findVariable(const std::string& name) const
+{
+   if (varVec_.empty()) {
+      return Variable::EMPTY();
+   }
+
+//   bool fnd = false;
+//   size_t theSize = varVec_.size();
+//   for(size_t i = 0; i < theSize; i++) {
+//      if (varVec_[i].name() == name) {
+//         fnd = true;
+//      }
+//   }
+
+   //Variable var(name,"",false);
+   std::vector<Variable>::const_iterator l = std::lower_bound(varVec_.begin(),varVec_.end(),name); // should use < and not ==
+   if (l == varVec_.end() || name < (*l).name() ) {
+      //cout << "not found\n";
+//      assert(!fnd);
+      return Variable::EMPTY();
+   }
+
+//   assert(fnd);
+   return *l;
+}
+
+
+void Node::addVariable(const Variable& v )
+{
+   state_change_no_ = Ecf::incr_state_change_no();
+
+//   bool fnd = false;
+//   size_t theSize = varVec_.size();
+//   for(size_t i = 0; i < theSize; i++) {
+//      if (varVec_[i].name() == v.name()) {
+//         fnd = true;
+//      }
+//   }
+
+   std::vector<Variable>::iterator l = std::lower_bound(varVec_.begin(),varVec_.end(),v); // should use < and not ==
+   if (l == varVec_.end() || v.name() < (*l).name() ) {
+
+//      assert(!fnd);
+      //cout << "Node::addVariable: (" << v.name() << " : " << v.theValue() << ") NOT found\n";
+      if (varVec_.capacity() == 0) varVec_.reserve(5);
+
+      if (varVec_.empty()) varVec_.push_back(v);
+      else {
+         varVec_.insert(l, v );
+      }
+      return;
+   }
+
+//   assert(fnd);
+
+   // Variable already exist, *UPDATE* its value
+   (*l).set_value(v.theValue());
+   if (0 == Ecf::debug_level())
+      std::cout << "Node::addVariable: Variable of name '" << v.name() << "' already exist for node " << debugNodePath() << " updating with value '" << v.theValue() << "'\n";
+}

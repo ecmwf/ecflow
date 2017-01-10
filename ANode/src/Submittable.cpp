@@ -512,14 +512,16 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam)
 {
    try {
       // Locate the ecf files corresponding to the task.
-      EcfFile ecf_file = locatedEcfFile();
+      // Assign lifetime of EcfFile to JobsParam.
+      // Minimise memory allocation/deallocation with Job lines and allow include file caching
+      jobsParam.set_ecf_file( locatedEcfFile() );
 
       // Pre-process ecf file (i.e expand includes, remove comments,manual) and perform
       // variable substitution. This will then form the '.job' files.
       // If the job file already exist it is overridden
       // The job file SHOULD be referenced in ECF_JOB_CMD
       try {
-         const std::string& job_size = ecf_file.create_job( jobsParam );
+         const std::string& job_size = jobsParam.ecf_file().create_job( jobsParam );
 
          //... make sure ECF_PASS is set on the task, This is substituted in <head.h> file
          //... and hence must be done before variable substitution in ECF_/JOB file

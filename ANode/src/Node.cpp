@@ -1245,6 +1245,11 @@ bool Node::variable_dollar_subsitution(std::string& cmd)
       }
 
       cmd.replace( firstPos, secondPos - firstPos , envValue );
+
+      if (envValue.find(env) != std::string::npos) {
+         // infinite loop
+         break;
+      }
    }
    return true;
 }
