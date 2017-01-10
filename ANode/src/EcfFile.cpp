@@ -424,8 +424,12 @@ bool EcfFile::open_script_file(
 }
 
 #define USE_INCLUDE_CACHE  1
-//  Without cache: real:10.15  user: 5.58  sys: 1.62
-//  With cache:    real: 4.66  user: 3.84  sys: 0.74  Only open/close include file once.
+//  max open files allowed is:
+//     VM:       cat /proc/sys/fs/file-max:  188086
+//     Desk top: cat /proc/sys/fs/file-max: 3270058
+//  Desktop:
+//     Without cache: real:10.15  user: 5.58  sys: 1.62
+//     With cache:    real: 4.46  user: 3.72  sys: 0.74  Only open/close include file once.
 //  TODO: Could sort
 bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>& lines,std::string& errormsg) const
 {
@@ -445,8 +449,7 @@ bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>
 
    boost::shared_ptr<IncludeFileCache> ptr = boost::make_shared<IncludeFileCache>(file);
    include_file_cache_.push_back( ptr );
-
-   // cout << "NOT found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
+   //cout << "NOT found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
 
    if (!ptr->lines(lines)) {
       std::stringstream ss; ss  << "Could not open include file: " << file;
@@ -567,8 +570,6 @@ void EcfFile::variableSubstitution(JobsParam& jobsParam)
    bool nopp =  false;
    size_t jobLines_size = jobLines_.size();
    for(size_t i=0; i < jobLines_size; ++i) {
-
-      if (jobLines_[i].empty()) continue;
 
       // take into account micro char during variable substitution
       string::size_type ecfmicro_pos = jobLines_[i].find(ecfMicro);
@@ -1536,28 +1537,25 @@ std::string PreProcessor::getIncludedFilePath(
    return includedFile;
 }
 
+// **********************************************************************************
+
 IncludeFileCache::IncludeFileCache(const std::string& path) : path_(path), fp_(path.c_str(), std::ios_base::in),no_of_lines_(0) {}
+
 IncludeFileCache::~IncludeFileCache() { fp_.close(); }
 
-bool IncludeFileCache::lines(std::vector<std::string>& lns)
-{
-   if ( !fp_ )  {
-      return false;
-   }
+bool IncludeFileCache::lines(std::vector<std::string>& lns) {
+   if ( !fp_ ) return false;
 
    if (no_of_lines_ != 0 ) {
-      // Using cache, reset pos back to 0
       lns.reserve(no_of_lines_);
-      fp_.seekg(0);
+      fp_.seekg(0);               // Using cache, reset pos back to 0
    }
 
    // Note if we use: while( getline( theEcfFile, line)), then we will miss the *last* *empty* line
    string line;
    while ( std::getline(fp_,line) ) { lns.push_back(line); }
-   // eol fp_ will be in bad state reset. So we can re-use
-   fp_.clear();
-
-   no_of_lines_ = lns.size();
+   fp_.clear();               // eol fp_ will be in bad state reset. So we can re-use
+   no_of_lines_ = lns.size(); // cache for next time
 
    return true;
 }

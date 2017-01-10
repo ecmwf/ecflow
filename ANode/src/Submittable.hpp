@@ -203,14 +203,14 @@ public:
 
 private:
    const Submittable* submittable_;
-   mutable Variable genvar_task_;
-   mutable Variable genvar_ecfrid_;
-   mutable Variable genvar_ecftryno_;
-   mutable Variable genvar_ecfname_;
-   mutable Variable genvar_ecfpass_;
    mutable Variable genvar_ecfjob_;
    mutable Variable genvar_ecfjobout_;
+   mutable Variable genvar_ecftryno_;
+   mutable Variable genvar_task_;
+   mutable Variable genvar_ecfpass_;
    mutable Variable genvar_ecfscript_;
+   mutable Variable genvar_ecfname_;
+   mutable Variable genvar_ecfrid_;
 };
 
 #endif

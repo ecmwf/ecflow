@@ -33,9 +33,10 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 bool Node::findParentVariableValue(const std::string& name, std::string& theValue) const
 {
-   if (findVariableValue(name,theValue)) return true;
-   const Repeat& repeat = findRepeat(name);
-   if (!repeat.empty())  { theValue = repeat.valueAsString(); return true; }
+   if (!varVec_.empty() && findVariableValue(name,theValue)) return true;
+   if (!repeat_.empty() && repeat_.name() == name) {
+      theValue = repeat_.valueAsString(); return true;
+   }
    if (findGenVariableValue(name,theValue)) return true;
 
 
@@ -43,8 +44,10 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
    while (theParent) {
 
       if (theParent->findVariableValue(name,theValue)) return true;
-      const Repeat& repeatVar = theParent->findRepeat(name);
-      if (!repeatVar.empty()) { theValue = repeatVar.valueAsString(); return true; }
+      const Repeat& rep = theParent->repeat();
+      if (!rep.empty() && rep.name() == name) {
+         theValue = rep.valueAsString(); return true;
+      }
       if (theParent->findGenVariableValue(name,theValue)) return true;
 
       theParent =  theParent->parent();
