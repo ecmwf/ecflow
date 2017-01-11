@@ -19,8 +19,9 @@ Process
 0/ Create the tarball using cmake, in the build directory with  
    This can be done using:
    
+   cd $WK
    rm -rf ../bdir               # *REMOVE* build tree
-   $WK/cmake.sh package_source
+   ./cmake.sh package_source
 
 0/ Inform user support, allows user support to test rpm
    
