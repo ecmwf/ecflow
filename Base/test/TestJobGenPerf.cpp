@@ -77,6 +77,7 @@ int main(int argc, char* argv[])
 //      if (suite) suite->remove();
 //   }
 //   cout << defs ;
+//   exit(0);
 
    // Check number of tasks, if the submitted output below is too low
    std::vector<Task*> tasks;
