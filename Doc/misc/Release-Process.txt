@@ -129,9 +129,6 @@ Process
    mail group:  ecflow_int@lists.ecmwf.int 
    Use: Release-Anouncement.txt
   
-0/ Tag the release, This should now be automatic when using git flow:
-       git flow release finish 4.5.0
-  
 0/ AFTER the release 
    o increment the version number in $WK/VERSION.cmake THEN, run:
      sh -x $WK/cmake.sh debug
