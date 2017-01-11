@@ -18,6 +18,7 @@ Process
 
 0/ Create the tarball using cmake, in the build directory with  
    This can be done using:
+   *make sure ecbuild in cmake.sh matches the metabuilder*
    
    cd $WK
    rm -rf ../bdir               # *REMOVE* build tree
