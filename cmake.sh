@@ -117,7 +117,7 @@ set -x # echo script lines as they are executed
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild/2.4.0
+module load ecbuild/2.5.0
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
