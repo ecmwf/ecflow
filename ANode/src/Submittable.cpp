@@ -433,7 +433,7 @@ EcfFile Submittable::locatedEcfFile() const
    // failed to find  .ecf file
    std::string error_msg = "   Script for ";
    error_msg += theAbsNodePath;
-   error_msg += "can not be found:\n";
+   error_msg += " can not be found:\n";
    error_msg += reasonEcfFileNotFound;
    throw std::runtime_error( error_msg ) ;
 }
