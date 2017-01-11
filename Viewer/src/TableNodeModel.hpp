@@ -42,8 +42,15 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
    	VInfo_ptr nodeInfo(const QModelIndex&);
+    void selectionChanged(QModelIndexList lst);
 
    	VModelData* data() const;
+    ModelColumn* columns() const {return columns_;}
+
+    //To speed up identifying a column. The mapping here must match the definition of
+    //"table_columns" in ecflowview_view_conf.json !!!
+    enum ColumnType {PathColumn=0,StatusColumn=1,TypeColumn=2,TriggerColumn=3,
+                     LabelColumn=4, EventColumn=5, MeterColumn=6, StatusChangeColumn=7};
 
 public Q_SLOTS:
     void slotServerAddBegin(int);
@@ -79,6 +86,9 @@ protected:
     QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
 
 	QVariant nodeData(const QModelIndex& index,int role) const;
+
+    QModelIndex forceShowNode(const VNode* node) const;
+    QModelIndex forceShowAttribute(const VAttribute* a) const;
 
 	VTableModelData* data_;
 	ModelColumn* columns_;

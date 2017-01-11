@@ -12,7 +12,7 @@ class Client(object):
    def __init__(self):
       print "Creating Client"
       self.ci = ecflow.Client()
-      self.ci.set_host_port("%ECF_NODE%","%ECF_PORT%")
+      self.ci.set_host_port("%ECF_HOST%","%ECF_PORT%")
       self.ci.set_child_pid(os.getpid())
       self.ci.set_child_path("%ECF_NAME%")
       self.ci.set_child_password("%ECF_PASS%")

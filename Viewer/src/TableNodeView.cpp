@@ -28,17 +28,22 @@
 #include "PropertyMapper.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeViewDelegate.hpp"
+#include "UiLog.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
+
+#define _UI_TABLENODEVIEW_DEBUG
 
 TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget* parent) :
      QTreeView(parent),
      NodeViewBase(filterDef),
      model_(model),
 	 needItemsLayout_(false),
-	 prop_(NULL)
+     prop_(NULL),
+     setCurrentIsRunning_(false)
 {
-	setProperty("style","nodeView");
+    setObjectName("view");
+    setProperty("style","nodeView");
 	setProperty("view","table");
 
 	setRootIsDecorated(false);
@@ -151,12 +156,18 @@ void TableNodeView::selectionChanged(const QItemSelection &selected, const QItem
 		VInfo_ptr info=model_->nodeInfo(lst.front());
 		if(info && !info->isEmpty())
 		{
+#ifdef _UI_TABLENODEVIEW_DEBUG
+            UiLog().dbg() << "TableNodeView::selectionChanged --> emit=" << info->path();
+#endif
 			Q_EMIT selectionChanged(info);
 		}
 	}
 	QTreeView::selectionChanged(selected, deselected);
-}
 
+    //The model has to know about the selection in order to manage the
+    //nodes that are forced to be shown
+    model_->selectionChanged(lst);
+}
 
 VInfo_ptr TableNodeView::currentSelection()
 {
@@ -170,11 +181,22 @@ VInfo_ptr TableNodeView::currentSelection()
 
 void TableNodeView::setCurrentSelection(VInfo_ptr info)
 {
+    //While the current is being selected we do not allow
+    //another setCurrent call go through
+    if(setCurrentIsRunning_)
+        return;
+
+    setCurrentIsRunning_=true;
     QModelIndex idx=model_->infoToIndex(info);
     if(idx.isValid())
     {
+#ifdef _UI_TABLENODEVIEW_DEBUG
+    if(info)
+        UiLog().dbg() << "TableNodeView::setCurrentSelection --> " <<  info->path();
+#endif
         setCurrentIndex(idx);
     }
+    setCurrentIsRunning_=false;
 }
 
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)

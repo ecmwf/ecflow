@@ -210,7 +210,7 @@ void TaskScriptGenerator::generate_head_file() const
    contents += "\n";
    contents += "# Defines the variables that are needed for any communication with ECF\n";
    contents += "export ECF_PORT=%ECF_PORT%    # The server port number\n";
-   contents += "export ECF_NODE=%ECF_NODE%    # The name of ecf host that issued this task\n";
+   contents += "export ECF_HOST=%ECF_HOST%    # The name of ecf host that issued this task\n";
    contents += "export ECF_NAME=%ECF_NAME%    # The name of this current task\n";
    contents += "export ECF_PASS=%ECF_PASS%    # A unique password\n";
    contents += "export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task\n";

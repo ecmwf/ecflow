@@ -12,6 +12,7 @@
 
 #include "DashboardWidget.hpp"
 #include "SessionHandler.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <QAbstractButton>
 #include <QCloseEvent>
@@ -34,6 +35,8 @@ DashboardDialog::DashboardDialog(QWidget *parent) :
 	}
 
 	readSettings();
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 DashboardDialog::~DashboardDialog()

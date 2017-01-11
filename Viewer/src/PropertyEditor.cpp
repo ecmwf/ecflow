@@ -92,6 +92,7 @@ void PropertyEditor::build()
 	assert(holder_==NULL);
 
 	holder_=new QWidget(scAreaContents_);
+    holder_->setObjectName("h");
 	QVBoxLayout *vb=new QVBoxLayout(holder_);
 	vb->setContentsMargins(0,0,0,0);
 	vBox_->addWidget(holder_);
@@ -484,6 +485,7 @@ void PropertyEditor::addTabs(VProperty* vProp,QVBoxLayout *layout,QWidget* paren
         return;
     
     QTabWidget *t=new QTabWidget(parent);
+    t->setObjectName("tab");
     layout->addWidget(t);
    
     int col=1;

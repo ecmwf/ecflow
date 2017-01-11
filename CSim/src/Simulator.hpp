@@ -22,6 +22,7 @@
 #include <map>
 class Defs;
 class Task;
+class Submittable;
 namespace ecf { class SimulatorVisitor;}
 
 namespace ecf {
@@ -29,18 +30,21 @@ namespace ecf {
 /// This class is used to simulate a definition file. This is use full
 /// because:
 //       a/ Save time over involving server and asking client to play definition file
-//       b/ Tells you of any parser errors in the definition file
+//       b/ Tells you about any parser errors in the definition file
 //       c/ Tells you about any deadlocks, ie if suite does not complete
 //       d/ Will simulate for both real and hybrid clocks
-//       e/ Simulation will by default run for a year.
+//       e/ Simulation will by default run for a year. Should really use start/end clock for accurate simulations
 class Simulator : private boost::noncopyable {
 public:
-	// default to run simulation for 1 year, or until suites complete if there are time dependencies 8784 =  366 X 24
-	// Otherwise will simulate for 24 hours
- 	Simulator(const boost::posix_time::time_duration& period = boost::posix_time::time_duration(8784,0,0,0));
-
- 	/// Some definition file will run forever. **NOT USED ***, kept for reference. Need a better mechanism
-  	void truncateLongRepeats(int truncateTo) { truncateLongRepeatsTo_ = truncateTo ;}
+   // For deterministic results simulate using clock(start) and endclock(finish)
+   // Otherwise default to run simulation for:
+   // No time dependencies: simulate for 24 hours
+   //    time || today // 24 hours
+   //    day           // 1 week
+   //    date          // 1 month
+   //    cron          // 1 year
+   //    repeat        // 1 year
+ 	Simulator();
 
  	/// return true if all ok else returns false;
 	bool run(Defs&, const std::string& defs_filename, std::string& errorMsg, bool do_checks = true) const;
@@ -48,14 +52,11 @@ public:
 
 private:
 
-	bool abortSimulation(const ecf::SimulatorVisitor&, const boost::posix_time::time_duration& duration,std::string& message) const;
 	bool doJobSubmission(Defs&, std::string& errorMsg) const;
+	void run_analyser(Defs& theDefs,std::string& errorMsg ) const;
 
-	mutable boost::posix_time::time_duration max_simulation_period_;
-	mutable std::map<Task*,int> taskIntMap_;
-	int truncateLongRepeatsTo_;
+	mutable std::map<Submittable*,int> taskIntMap_;
 	mutable int level_;
-	mutable bool foundCrons_;
 };
 }
 #endif /* SIMULATOR_HPP_ */

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,12 +9,11 @@
 
 #include "TableNodeModel.hpp"
 
-#include <QDebug>
 #include <QMetaMethod>
 
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VAttribute.hpp"
 #include "VFilter.hpp"
 #include "VIcon.hpp"
@@ -41,6 +40,16 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
 	columns_=ModelColumn::def("table_columns");
 
     Q_ASSERT(columns_);
+
+    //Check the mapping between the enum and column ids
+    Q_ASSERT(columns_->id(PathColumn) == "path");
+    Q_ASSERT(columns_->id(StatusColumn) == "status");
+    Q_ASSERT(columns_->id(TypeColumn) == "type");
+    Q_ASSERT(columns_->id(TriggerColumn) == "trigger");
+    Q_ASSERT(columns_->id(LabelColumn) == "label");
+    Q_ASSERT(columns_->id(EventColumn) == "event");
+    Q_ASSERT(columns_->id(MeterColumn) == "meter");
+    Q_ASSERT(columns_->id(StatusChangeColumn) == "statusChange");
 
 	//Create the data handler for the model.
 	data_=new VTableModelData(filterDef,this);
@@ -100,7 +109,7 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 	//the cases where the default should be used.
 	if( !index.isValid() ||
        (role != Qt::DisplayRole && role != Qt::ToolTipRole &&
-        role != Qt::BackgroundRole && role != IconRole))
+        role != Qt::BackgroundRole && role != IconRole && role != SortRole))
     {
 		return QVariant();
 	}
@@ -115,30 +124,40 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(!vnode || !vnode->node())
 		return QVariant();
 
+    ColumnType id=static_cast<ColumnType>(index.column());
+
 	if(role == Qt::DisplayRole)
 	{
-        QString id=columns_->id(index.column());
+        //QString id=columns_->id(index.column());
 
-		if(id == "path")
+        if(id == PathColumn)
         {   return QString::fromStdString(vnode->absNodePath());
         }
-        else if(id == "status")
+        else if(id == StatusColumn)
 			return vnode->stateName();
-		else if(id == "type")
+        else if(id == TypeColumn)
 			return QString::fromStdString(vnode->nodeType());
 
 		//Attributes
-		else if(id == "event" || id == "label" || id == "meter" || id == "trigger")
+        else if(id == EventColumn || id == LabelColumn || id == MeterColumn ||
+                id == TriggerColumn)
 		{
 			QStringList lst;
-			if(vnode->getAttributeData(id.toStdString(),0,lst))
+            if(vnode->getAttributeData(columns_->id(index.column()).toStdString(),0,lst))
 				return lst;
 			else
 				return QVariant();
 		}
 
-        else if(id == "icon")
-            return VIcon::pixmapList(vnode,0);
+        else if(id == StatusChangeColumn)
+        {
+            QString s;
+            vnode->statusChangeTime(s);
+            return s;
+        }
+
+        //else if(id == "icon")
+        //    return VIcon::pixmapList(vnode,0);
 	}
 	else if(role == Qt::BackgroundRole)
 	{
@@ -146,11 +165,18 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(role == IconRole)
 	{
-		if(columns_->id(index.column()) =="path")
+        if(id == PathColumn)
 			return VIcon::pixmapList(vnode,0);
 		else
 			return QVariant();
 	}
+    else if(role == SortRole)
+    {
+        if(id == StatusChangeColumn)
+        {
+            return vnode->statusChangeTime();
+        }
+    }
 
 	return QVariant();
 }
@@ -253,6 +279,49 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
     return QModelIndex();
 }
 
+QModelIndex TableNodeModel::forceShowNode(const VNode* node) const
+{
+    if(!node)
+        return QModelIndex();
+
+    Q_ASSERT(node);
+    Q_ASSERT(!node->isServer());
+    Q_ASSERT(node->server());
+
+    if(VModelServer *mserver=data_->server(node->server()))
+    {
+        VTableServer* server=mserver->tableServer();
+        server->setForceShowNode(node);
+        return nodeToIndex(node);
+    }
+
+    return QModelIndex();
+}
+
+QModelIndex TableNodeModel::forceShowAttribute(const VAttribute* a) const
+{
+    Q_ASSERT(a);
+    VNode* node=a->parent();
+    Q_ASSERT(node);
+
+    return forceShowNode(const_cast<VNode*>(node));
+}
+
+void TableNodeModel::selectionChanged(QModelIndexList lst)
+{
+    Q_FOREACH(QModelIndex idx,lst)
+    {
+        VInfo_ptr info=nodeInfo(idx);
+
+        for(int i=0; i < data_->count(); i++)
+        {
+           VTableServer *ts=data_->server(i)->tableServer();
+           Q_ASSERT(ts);
+           ts->clearForceShow(info->item());
+        }
+    }
+}
+
 VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 {
 	VNode *n=indexToNode(index);
@@ -264,7 +333,6 @@ VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 	VInfo_ptr info;
 	return info;
 }
-
 
 //Server is about to be added
 void TableNodeModel::slotServerAddBegin(int /*row*/)
@@ -324,7 +392,8 @@ void TableNodeModel::slotBeginServerScan(VModelServer* server,int num)
     Q_ASSERT(server);
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("TableNodeModel::slotBeginServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+     UiLog().dbg() << "TableNodeModel::slotBeginServerScan --> " << server->realServer()->name() <<
+                      " " << num;
 #endif
 
 	if(num >0)
@@ -340,7 +409,8 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 	assert(active_ == true);
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("TableNodeModel::slotEndServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+     UiLog().dbg() << "TableNodeModel::slotEndServerScan --> " << server->realServer()->name() <<
+                      " " << num;
      QTime t;
      t.start();
 #endif
@@ -349,8 +419,8 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 		endInsertRows();
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("  elapsed: " + QString::number(t.elapsed()).toStdString() + " ms");
-     UserMessage::debug("<-- TableNodeModel::slotEndServerScan");
+     UiLog().dbg() << "  elapsed: " << t.elapsed() << " ms";
+     UiLog().dbg() << "<-- slotEndServerScan";
 
      //qDebug() << "hit" << hitCount;
 #endif

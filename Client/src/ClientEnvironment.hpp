@@ -75,7 +75,7 @@ public:
 	/// for debug
 	std::string toString() const;
 
-	/// Return contents of ECF_NODE environment variable, Otherwise an EMPTY string
+	/// Return contents of ECF_HOST environment variable, Otherwise an EMPTY string
 	static std::string hostSpecified();
 
 	/// Returns of ECF_PORT,environment variable, otherwise returns Str::DEFAULT_PORT_NUMBER
@@ -85,6 +85,7 @@ public:
    // May be need a better name, is really the process id of running job.
    // Needs to be the same value as supplied to child command init
    void set_remote_id(const std::string& rid) { remote_id_ = rid; }
+
 
 // AbstractClientEnv functions:
  	virtual bool checkTaskPathAndPassword(std::string& errorMsg) const;
@@ -96,6 +97,7 @@ public:
    virtual const std::string& host() const;
    virtual const std::string& port() const;
 	virtual const std::vector<std::pair<std::string,std::string> >& env() const { return env_;}
+	virtual const std::string& get_user_password() const;
 	virtual bool debug() const { return debug_;} //enabled if ECF_DEBUG_CLIENT set
    virtual void set_test() { under_test_ = true; }
    virtual bool under_test() const { return under_test_; }
@@ -121,6 +123,9 @@ private:
 	int  host_vec_index_;               // index into host_vec;
 	int allow_new_client_old_server_;   // the boost archive version of old server, allow new client--> old server communication
 	std::string env_ecf_new_client_old_server_;
+
+
+   mutable std::string passwd_;                  // Only used when ECF_SECURE_USER defined
 
 	/// The option read from the command line.
  	friend class ClientOptions;

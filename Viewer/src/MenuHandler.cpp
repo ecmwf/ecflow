@@ -28,6 +28,7 @@
 #include "Str.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
 #include "VConfig.hpp"
@@ -79,7 +80,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
         if (itTopLevel->first == "menus")
         {
-            UserMessage::message(UserMessage::DBG, false, std::string("Menus:"));
+            UiLog().dbg() << "Menus:";
 
             ptree const &menusDef = itTopLevel->second;
 
@@ -90,7 +91,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 ptree const &menuDef = itMenus->second;
 
                 std::string cname = menuDef.get("name", "NoName");
-                UserMessage::message(UserMessage::DBG, false, std::string("  ") + cname);
+                UiLog().dbg() << "  " << cname;
                 Menu *menu = new Menu(cname);
 
                 //ptree const &menuModesDef = menuDef.get_child("modes");
@@ -115,7 +116,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
         else if (itTopLevel->first == "menu_items")
         {
-            UserMessage::message(UserMessage::DBG, false, std::string("Menu items:"));
+            UiLog().dbg() << "Menu items:";
 
             ptree const &itemsDef = itTopLevel->second;
 
@@ -141,7 +142,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
-                UserMessage::message(UserMessage::DBG, false, std::string("  " + name));
+                UiLog().dbg() << "  " << name;
                 MenuItem *item = new MenuItem(name);
                 item->setCommand(command);
 
@@ -387,8 +388,8 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
     }
     else
     {
-        UserMessage::message(UserMessage::ERROR, false, std::string("Could not find menu called " + 
-                             menuName + " to add item " + item->name() + " to."));
+        UiLog().err() << "Could not find menu called " <<
+                             menuName << " to add item " << item->name() << " to.";
         return false;
     }
 
@@ -524,6 +525,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
 	else
 	{
 		qmenu=new QMenu(parent);
+        qmenu->setObjectName("cm");
 		qmenu->setTitle(QString::fromStdString(name()));
 	}
 
@@ -592,8 +594,8 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
                 if (menu)
                 {
                     //The submenu will be added to qmenu and it will take ownership of it.
-					QMenu *subMenu = menu->generateMenu(nodes, parent, qmenu, view, acLst);
-					subMenu->setEnabled(enabled);
+					QMenu *subMenu = menu->generateMenu(nodes, parent, qmenu, view, acLst);					
+                    subMenu->setEnabled(enabled);
                 }
             }
             else if  ((*itItems)->isDivider())
@@ -602,7 +604,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
             }
             else
             {
-                //When we add the action to the menu its parent (NULL a.i. the QApplication) does not change.
+                //When we add the action to the menu its parent (NULL e.i. the QApplication) does not change.
             	//So when the menu is deleted the action is not deleted.
             	//At least this is the behaviour with Qt 4.8. and 5.5.
             	//QAction *action = (*itItems)->action();
@@ -714,6 +716,7 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 	nodeLabel->setParent(titleW);
 
 	QWidgetAction *wAction = new QWidgetAction(qmenu);
+    wAction->setObjectName("title");
 	//Qt doc says: the ownership of the widget is passed to the widgetaction.
 	//So when the action is deleted it will be deleted as well.
 	wAction->setDefaultWidget(titleW);
@@ -792,7 +795,8 @@ bool MenuItem::isValidView(const std::string& view) const
 QAction* MenuItem::createAction(QWidget* parent)
 {
 	QAction *ac=new QAction(parent);
-	ac->setText(QString::fromStdString(name_));
+    ac->setObjectName(QString::fromStdString(name_));
+    ac->setText(QString::fromStdString(name_));
 	ac->setIcon(icon_);
 
 	if(!statustip_.empty())

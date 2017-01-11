@@ -1,0 +1,4 @@
+suite s1
+ clock real 400  #  
+ endclock  300  #  # endclock should be greater than clock start
+endsuite

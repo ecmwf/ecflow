@@ -1,4 +1,4 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+   /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
 // Revision    : $Revision: #305 $ 
@@ -1021,6 +1021,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       size_t secondPercentPos = cmd.find( micro, firstPercentPos + 1 );
       if ( secondPercentPos == string::npos ) break;
 
+      pos = 0;
       if ( secondPercentPos - firstPercentPos <= 1 ) {
          // handle %% with no characters in between, skip over
          // i.e to handle "printf %%02d %HOUR:00%" --> "printf %02d 00"   i.e if HOUR not defined
@@ -1028,7 +1029,6 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
          double_micro_found = true;
          continue;
       }
-      else pos = 0;
 
       string percentVar( cmd.begin() + firstPercentPos+1, cmd.begin() + secondPercentPos );
 #ifdef DEBUG_S
@@ -1045,12 +1045,13 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       bool generated_variable = false;
       if ( percentVar.find("ECF_") != std::string::npos) {
          if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_JOB())     != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_JOBOUT())  != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_PORT())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NODE())    != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_HOST())    != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_JOB())     != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_JOBOUT())  != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
       }
 
       // First search user variable (*ONLY* set user edit's the script)
@@ -1059,7 +1060,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       // If we fail to find the variable we return false.
       // Note: When a variable is found, it can have an empty value  which is still valid
       std::string varValue;
-      if (search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
+      if (!user_edit_variables.empty() && search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
       else if (generated_variable && find_parent_gen_variable_value(percentVar,varValue)) {
@@ -1080,7 +1081,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
             cout << "   var " << var << "\n";
 #endif
 
-            if (search_user_edit_variables(var,varValue,user_edit_variables)) {
+            if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
 #ifdef DEBUG_S
                cout << "   user var value = " << varValue << "\n";
 #endif
@@ -1244,6 +1245,11 @@ bool Node::variable_dollar_subsitution(std::string& cmd)
       }
 
       cmd.replace( firstPos, secondPos - firstPos , envValue );
+
+      if (envValue.find(env) != std::string::npos) {
+         // infinite loop
+         break;
+      }
    }
    return true;
 }
@@ -1434,7 +1440,7 @@ std::ostream& Node::print(std::ostream& os) const
          }
       }
    }
-   repeat_.print(os);
+   repeat_.print(os);  // if repeat is empty print(..) does nothing
 
    BOOST_FOREACH(const Variable& v, varVec_ )       { v.print(os); }
 
@@ -1860,8 +1866,7 @@ AstTop* Node::completeAst() const
 {
    if (completeExpr_) {
       std::string ignoredErrorMsg;
-      (void) completeAst(ignoredErrorMsg);
-      return completeExpr_->get_ast();
+      return completeAst(ignoredErrorMsg);
    }
    return NULL;
 }
@@ -1870,19 +1875,21 @@ AstTop* Node::triggerAst() const
 {
    if (triggerExpr_) {
       std::string ignoredErrorMsg;
-      (void) triggerAst(ignoredErrorMsg);
-      return triggerExpr_->get_ast();
+      return triggerAst(ignoredErrorMsg);
    }
    return NULL;
 }
 
 AstTop* Node::completeAst(std::string& errorMsg) const
 {
-   if (completeExpr_ && completeExpr_->get_ast() == NULL) {
-      completeExpr_->createAST(const_cast<Node*>(this),"complete",errorMsg);
+   if (completeExpr_) {
+      if (completeExpr_->get_ast() == NULL) {
+
+         completeExpr_->createAST(const_cast<Node*>(this),"complete",errorMsg);
 #ifdef DEBUG
-      if (errorMsg.empty()) LOG_ASSERT(completeExpr_->get_ast(),"");
+         if (errorMsg.empty()) LOG_ASSERT(completeExpr_->get_ast(),"");
 #endif
+      }
       return completeExpr_->get_ast();
    }
    return NULL;
@@ -1890,11 +1897,14 @@ AstTop* Node::completeAst(std::string& errorMsg) const
 
 AstTop* Node::triggerAst(std::string& errorMsg) const
 {
-   if (triggerExpr_ && triggerExpr_->get_ast() == NULL) {
-      triggerExpr_->createAST(const_cast<Node*>(this),"trigger",errorMsg);
+   if (triggerExpr_) {
+      if (triggerExpr_->get_ast() == NULL) {
+
+         triggerExpr_->createAST(const_cast<Node*>(this),"trigger",errorMsg);
 #ifdef DEBUG
-      if (errorMsg.empty()) LOG_ASSERT(triggerExpr_->get_ast(),"");
+         if (errorMsg.empty()) LOG_ASSERT(triggerExpr_->get_ast(),"");
 #endif
+      }
       return triggerExpr_->get_ast();
    }
    return NULL;
@@ -1936,7 +1946,6 @@ size_t Node::position() const
    return std::numeric_limits<std::size_t>::max();
 }
 
-
 void Node::gen_variables(std::vector<Variable>& vec) const
 {
    if (!repeat_.empty()) {
@@ -1952,8 +1961,23 @@ const Variable& Node::findGenVariable(const std::string& name) const
 
 void Node::update_repeat_genvar() const
 {
+   repeat_.update_repeat_genvar();  // if repeat_ is empty update_repeat_genvar() does nothing
+}
+
+void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const
+{
+   if ( time_dep_attrs_ ) {
+      time_dep_attrs_->get_time_resolution_for_simulation(resol);
+   }
+}
+
+void Node::get_max_simulation_duration(boost::posix_time::time_duration& duration) const
+{
+   if ( time_dep_attrs_ ) {
+      time_dep_attrs_->get_max_simulation_duration(duration);
+   }
    if (!repeat_.empty()) {
-      repeat_.update_repeat_genvar();
+      duration = hours(8760);  // year
    }
 }
 
@@ -2002,6 +2026,15 @@ void Node::detach(AbstractObserver* obs)
    }
 }
 
+bool Node::is_observed(AbstractObserver* obs) const
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      if (observers_[i] == obs) {
+         return true;
+      }
+   }
+   return false;
+}
 
 static std::vector<ecf::TimeAttr>  timeVec_;
 static std::vector<ecf::TodayAttr> todayVec_;

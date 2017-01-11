@@ -39,6 +39,7 @@ public:
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
 	const std::string& port() const {return port_;}
+    std::string longName() const;
 	bool isFavourite() const {return favourite_;}
     bool isSystem() const {return system_;}
 

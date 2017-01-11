@@ -1,6 +1,6 @@
-suite cron4
-                         # use real clock otherwise the date wont change
-   clock real 1.1.2006  # need to define a date otherwise log file content varies according to the time 
+suite cron4             # use real clock otherwise the date wont change
+   clock real 1.1.2017  # need to define a date otherwise log file content varies according to the time 
+   endclock   1.2.2017  # When to finish. 
    family cronFamily
 		task t
   			 cron -m 1   10:00 11:00 01:00   # run every day at 10 and 11 for Jan	

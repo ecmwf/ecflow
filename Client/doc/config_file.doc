@@ -23,7 +23,7 @@ void ClientEnvironment::read_config_file()
       // read the environment from the config file
       po::options_description config_file_options("Configuration");
       config_file_options.add_options()
-      ("ECF_NODE", po::value<std::string>(&host)->default_value(Str::LOCALHOST()), "The host name")
+      ("ECF_HOST", po::value<std::string>(&host)->default_value(Str::LOCALHOST()), "The host name")
       ("ECF_NAME", po::value<std::string>(&task_path_) ,       "Full name of task")
       ("ECF_PASS", po::value<std::string>(&jobs_password_)->default_value(""),    "The jobs password")
       ("ECF_TRYNO", po::value<int>(&task_try_num_), "The task try number")
@@ -50,7 +50,7 @@ void ClientEnvironment::read_config_file()
          host_file_ = constructor_supplied_host_file;
       }
 
-      // Add the ECF_NODE host into list of hosts
+      // Add the ECF_HOST host into list of hosts
       if (!host.empty()) {
          if (port.empty()) host_vec_.push_back(std::make_pair(host,Str::DEFAULT_PORT_NUMBER()));
          else              host_vec_.push_back(std::make_pair(host,port));

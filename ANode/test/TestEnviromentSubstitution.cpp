@@ -41,13 +41,19 @@ BOOST_AUTO_TEST_CASE( test_environment_substitution )
   		env.push_back( std::make_pair(Str::ECF_HOME(), string("/home/smshome")) );
   		env.push_back( std::make_pair(string("FRED"),    string("/home/fred")) );
   		env.push_back( std::make_pair(string("BILL"),    string("/home/bill")) );
-  		env.push_back( std::make_pair(string("JANE"),    string("/home/jane")) );
+      env.push_back( std::make_pair(string("JANE"),    string("/home/jane")) );
+      env.push_back( std::make_pair(string("REP"),    string("$REP/bill")) );
   		defs.set_server().add_or_update_user_variables( env );
 	}
 
+   // Check for recursive, in which case we only substitute once
+   string expected = "$REP/bill";
+   std::string cmd = "$REP";
+   BOOST_REQUIRE_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed");
+   BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
+
  	// See page 31, section 5.1 variable inheritance, of SMS users guide
-	string expected = "/home/smshome";
- 	std::string cmd = "$ECF_HOME";
+ 	cmd = "$ECF_HOME"; expected = "/home/smshome";
  	BOOST_REQUIRE_MESSAGE(s->variable_dollar_subsitution(cmd)," substitution failed");
  	BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 

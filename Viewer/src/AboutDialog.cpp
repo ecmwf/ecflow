@@ -11,6 +11,7 @@
 #include "AboutDialog.hpp"
 
 #include "Version.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <QDate>
 #include <QRegExp>
@@ -18,7 +19,6 @@
 AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 {
     setupUi(this);
-
 
     QString title="EcflowUI";
     QString ecfVersionTxt=QString::fromStdString(ecf::Version::raw());
@@ -73,4 +73,6 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     licenseText+=" nor does it submit to any jurisdiction.";
 
     licenseLabel_->setText(licenseText);
+
+    WidgetNameProvider::nameChildren(this);
 }

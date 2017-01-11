@@ -40,6 +40,7 @@ family_ptr add_family(NodeContainer* self,family_ptr f){ self->addFamily(f); ret
 task_ptr add_task(NodeContainer* self,task_ptr t){ self->addTask(t); return t;}
 
 suite_ptr add_clock(suite_ptr self, const ClockAttr& clk) { self->addClock(clk); return self;}
+suite_ptr add_end_clock(suite_ptr self, const ClockAttr& clk) { self->add_end_clock(clk); return self;}
 
 // Context management, Only used to provide indentation
 suite_ptr suite_enter(suite_ptr self) { return self;}
@@ -65,6 +66,8 @@ void export_SuiteAndFamily()
    .def("add_family",add_family )
    .def("add_task",  &NodeContainer::add_task ,  DefsDoc::add_task_doc())
    .def("add_task",  add_task )
+   .def("find_task",   &NodeContainer::findTask    , "Find a task given a name")
+   .def("find_family", &NodeContainer::findFamily  , "Find a family given a name")
    .add_property("nodes",boost::python::range( &NodeContainer::node_begin,&NodeContainer::node_end),"Returns a list of Node's")
    ;
 
@@ -88,6 +91,8 @@ void export_SuiteAndFamily()
    .def("__exit__",  &suite_exit)        // allow with statement, hence indentation support
    .def("add_clock", &add_clock)
    .def("get_clock", &Suite::clockAttr,"Returns the :term:`suite` :term:`clock`")
+   .def("add_end_clock", &add_end_clock,"End clock, used to mark end of simulation")
+   .def("get_end_clock", &Suite::clock_end_attr,"Return the suite's end clock. Can be NULL")
    .def("begun",     &Suite::begun, "Returns true if the :term:`suite` has begun, false otherwise")
    ;
 }

@@ -9,7 +9,7 @@
 
 #include "TriggerCollector.hpp"
 
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VItem.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
@@ -30,8 +30,8 @@ bool TriggerListCollector::add(VItemTmp_ptr t, VItemTmp_ptr dep,Mode mode)
 #if 0
     if(dep)
     {
-        UserMessage::debug(" dep=" + dep->typeName() + " " +  dep->strName());
-        UserMessage::debug("    =" + item->dep_->typeName() + " " +  item->dep_->strName());
+        UiLog().dbg() << " dep=" << dep->typeName() << " " +  dep->strName();
+        UiLog().dbg() << "    =" << item->dep_->typeName() << " " <<  item->dep_->strName());
     }
 #endif
 }

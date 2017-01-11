@@ -56,7 +56,7 @@ public:
     void addToLog(const std::string& s) {log_.push_back(s);}
     const std::vector<std::string>& log() const {return log_;}
 
-	bool write(const char *buf,size_t len,std::string& err);
+    bool write(const char *buf,size_t len,std::string& err);
     bool write(const std::string& buf,std::string& err);
 
     void close();

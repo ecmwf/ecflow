@@ -216,8 +216,8 @@ void node_window::click(XEvent* event)
   
   switch(button) {
   case 1: raw_click1(event,x); break;
-  case 2:	raw_click2(event,x); break;
-  case 3:	raw_click3(event,x); break;
+  case 2: raw_click2(event,x); break;
+  case 3: raw_click3(event,x); break;
   default: keypress(event);
   }
 }

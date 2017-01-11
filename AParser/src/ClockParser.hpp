@@ -26,4 +26,11 @@ public:
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 };
 
+class EndClockParser : public Parser {
+public:
+   EndClockParser(DefsStructureParser* p) : Parser(p) {}
+   virtual const char* keyword() const { return "endclock"; }
+   virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
+};
+
 #endif

@@ -69,7 +69,7 @@ private:
 
 #ifdef ECF_OPENSSL
    void handle_handshake(const boost::system::error_code& error,connection_ptr conn);
-   std::string get_password() const { return "test"; }
+   std::string get_password() const;
 #endif
 
    /// Handle completion of a accept operation.
@@ -113,9 +113,10 @@ protected: // Allow test to override
    virtual void halted();
    virtual void restart();
    virtual bool reloadWhiteListFile(std::string& errorMsg);
-   virtual bool authenticateReadAccess(const std::string& user);
-   virtual bool authenticateReadAccess(const std::string& user, const std::string& path);
-   virtual bool authenticateReadAccess(const std::string& user, const std::vector<std::string>& paths);
+   virtual bool reloadPasswdFile(std::string& errorMsg);
+   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd);
+   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path);
+   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths);
    virtual bool authenticateWriteAccess(const std::string& user);
    virtual bool authenticateWriteAccess(const std::string& user, const std::string& path);
    virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths);

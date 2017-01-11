@@ -1,6 +1,6 @@
 
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2016 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,6 +14,8 @@
 
 #include "UserMessage.hpp"
 
+#include "UiLog.hpp"
+
 bool UserMessage::echoToCout_ = true;  // XXX should be false to start with
 
 UserMessage::UserMessage()
@@ -25,6 +27,7 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
 
     if (echoToCout_)
     {
+#if 0
         switch (type)
         {
             case INFO:  std::cout << "INFO  : "; break;
@@ -35,6 +38,16 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
         }
 
         std::cout << message << std::endl;
+#endif
+
+        switch (type)
+        {
+        case DBG:   UiLog().dbg() << message; break;
+        case INFO:  UiLog().info() << message ; break;
+        case WARN:  UiLog().warn() << message; break;
+        case ERROR: UiLog().err() << message; break;
+        default:   break;
+        }
     }
 
     if (popup)
@@ -57,14 +70,25 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
 
 }
 
-void UserMessage::debug(const std::string& message)
+bool UserMessage::confirm(const std::string& message)
 {
-        std::cout << "DEBUG : " << message << std::endl;
+    bool ok = true;
+    QMessageBox msgBox;
+    msgBox.setText(QString::fromStdString(message));
+    msgBox.setTextFormat(Qt::RichText);
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    if (msgBox.exec() == QMessageBox::Cancel)
+    {
+        ok=false;
+    }
+    return ok;
 }
 
-void UserMessage::qdebug(QString message)
+
+void UserMessage::debug(const std::string& message)
 {
-        std::cout << "DEBUG : " << message.toStdString() << std::endl;
+    UiLog().dbg() << message;
 }
 
 std::string UserMessage::toString(int v)

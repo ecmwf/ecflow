@@ -18,7 +18,7 @@
 #include "NodeQuery.hpp"
 #include "NodeQueryOption.hpp"
 #include "ServerFilter.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VFilter.hpp"
 
 #include <assert.h>
@@ -51,7 +51,7 @@ void TableFilterWidget::slotEdit()
 	if(d.exec() == QDialog::Accepted)
 	{
 		filterDef_->setQuery(d.query());
-		UserMessage::message(UserMessage::DBG,false,"new table query: " + filterDef_->query()->query().toStdString());
+        UiLog().dbg() << "new table query: " << filterDef_->query()->query();
 	}
 }
 

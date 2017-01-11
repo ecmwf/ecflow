@@ -46,7 +46,7 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
    if (! nodeToReplace.get() ) {
       std::stringstream ss;
       ss << "ReplaceNodeCmd::ReplaceNodeCmd: Can not replace child since path " << node_path;
-      ss << " does not exist in the client definition ";
+      ss << ", does not exist in the client definition ";
       throw std::runtime_error( ss.str() );
    }
 
@@ -118,12 +118,23 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
 	      as->zombie_ctrl().add_user_zombies( as->defs()->findAbsNode( pathToNode_ ) );
 	   }
 
+	   // If we return a node_ptr then we have changed the data model, and therefore must flag node as changed.
 	   std::string errorMsg;
-	   if (!as->defs()->replaceChild(pathToNode_, clientDefs_, createNodesAsNeeded_, force_, errorMsg)) {
+	   node_ptr client_node_to_add = as->defs()->replaceChild(pathToNode_, clientDefs_, createNodesAsNeeded_, force_, errorMsg);
+	   if (!client_node_to_add) {
 	      throw std::runtime_error(errorMsg);
 	   }
 
+	   // ECFLOW-835, flag node as changed, before check for trigger expressions.
 	   add_node_for_edit_history(as,pathToNode_);
+
+	   // Although we have change the data model, Check if the trigger expressions are still valid.
+	   // Note:: trigger AST are not copied. If you use trigger in the test environment
+	   //        then copying the nodes will copy the trigger reference, which will be out of sync
+      std::string warning_msg;
+      if (!client_node_to_add->suite()->check(errorMsg,warning_msg)) {
+         throw std::runtime_error(errorMsg);
+      }
  	}
    return doJobSubmission( as );
 }

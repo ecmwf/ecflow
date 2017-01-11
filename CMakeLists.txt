@@ -62,6 +62,7 @@ option( ENABLE_ALL_TESTS         "This includes performance/migration/regression
 option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace"         OFF ) 
 option( ENABLE_UI_USAGE_LOG      "Enable UI usage logging"            OFF )
 option( ENABLE_SSL               "Enable SSL encrypted communication" OFF )
+option( ENABLE_SECURE_USER       "Enable passwords for user"          OFF )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -146,6 +147,8 @@ ecbuild_info( "ENABLE_UI                : ${ENABLE_UI}" )
 ecbuild_info( "ENABLE_ALL_TESTS         : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS : ${ENABLE_STATIC_BOOST_LIBS}" )
 ecbuild_info( "ENABLE_SSL               : ${ENABLE_SSL}" )
+ecbuild_info( "ENABLE_SECURE_USER       : ${ENABLE_SECURE_USER}" )
+
 
 if (ENABLE_UI)
 	ecbuild_info( "ENABLE_UI_BACKTRACE      : ${ENABLE_UI_BACKTRACE}" )
@@ -168,18 +171,18 @@ ecbuild_info("")
 if(ENABLE_GUI)
   find_package( X11 )
 #  if ( X11_FOUND )
-#	debug_var( X11_INCLUDE_DIR )
-#	debug_var( X11_LIBRARIES )  
-#	debug_var( X11_Xt_INCLUDE_PATH )
-#	debug_var( X11_Xt_LIB )
-#	debug_var( X11_Xpm_INCLUDE_PATH )
-#	debug_var( X11_Xpm_LIB )
+#	   ecbuild_debug_var( X11_INCLUDE_DIR )
+#	   ecbuild_debug_var( X11_LIBRARIES )  
+#	   ecbuild_debug_var( X11_Xt_INCLUDE_PATH )
+#	   ecbuild_debug_var( X11_Xt_LIB )
+#	   ecbuild_debug_var( X11_Xpm_INCLUDE_PATH )
+#	   ecbuild_debug_var( X11_Xpm_LIB )
 #  endif()
 
   find_package( Motif )
 #  if ( MOTIF_FOUND )
-#	debug_var( MOTIF_INCLUDE_DIR )
-#	debug_var( MOTIF_LIBRARIES )  
+#	   ecbuild_debug_var( MOTIF_INCLUDE_DIR )
+#	   ecbuild_debug_var( MOTIF_LIBRARIES )  
 #  endif()
 endif()
  
@@ -238,8 +241,17 @@ if (ENABLE_SSL)
     if (NOT OPENSSL_FOUND )
         ecbuild_error("Can not find openssl libraries")
     endif() 
+    include_directories( ${OPENSSL_INCLUDE_DIR} )
     add_definitions( -DECF_OPENSSL )
 endif()
+
+# =======================================================================
+# SECURE_USER
+# =======================================================================
+if (ENABLE_SECURE_USER)
+    add_definitions( -DECF_SECURE_USER )
+endif()
+
 
 # =========================================================================================
 # debug
@@ -272,8 +284,8 @@ endif()
 
 if (ENABLE_PYTHON)
     ecbuild_find_python( VERSION 2.6 REQUIRED )
-    #debug_var(PYTHON_LIBRARIES)
-    #debug_var(PYTHON_INCLUDE_DIR)
+    # ecbuild_debug_var(PYTHON_LIBRARIES)
+    # ecbuild_debug_var(PYTHON_INCLUDE_DIR)
     
     if( NOT PYTHON_FOUND )
         ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")

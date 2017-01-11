@@ -26,6 +26,7 @@
 #include "ServerDefsAccess.hpp"
 #include "ServerObserver.hpp"
 #include "SuiteFilter.hpp"
+#include "UiLog.hpp"
 #include "UpdateTimer.hpp"
 #include "UserMessage.hpp"
 #include "VNode.hpp"
@@ -190,13 +191,13 @@ void ServerHandler::stopRefreshTimer()
 {
     refreshTimer_->stop();
 #ifdef __UI_SERVERUPDATE_DEBUG
-    UserMessage::debug("stopRefreshTimer -->");
+    UiLog(this).dbg() << "ServerHandler::stopRefreshTimer -->";
 #endif
 }
 
 void ServerHandler::startRefreshTimer()
 {
-    UserMessage::debug("startRefreshTimer -->");
+    UiLog(this).dbg() << "ServerHandler::startRefreshTimer -->";
 
     if(!conf_->boolValue(VServerSettings::AutoUpdate))
     {
@@ -215,13 +216,13 @@ void ServerHandler::startRefreshTimer()
 	}
 
 #ifdef __UI_SERVERUPDATE_DEBUG
-    UserMessage::debug("startRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+    UiLog(this).dbg() << " refreshTimer interval: " <<  refreshTimer_->interval();
 #endif
 }
 
 void ServerHandler::updateRefreshTimer()
 {
-   UserMessage::debug("updateRefreshTimer -->");
+   UiLog(this).dbg() << "ServerHandler::updateRefreshTimer -->";
 
    if(!conf_->boolValue(VServerSettings::AutoUpdate))
     {
@@ -242,7 +243,7 @@ void ServerHandler::updateRefreshTimer()
 	}
 
 #ifdef __UI_SERVERUPDATE_DEBUG
-    UserMessage::debug("updateRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+    UiLog(this).dbg() << " refreshTimer interval: " << refreshTimer_->interval();
 #endif
 
 }
@@ -258,16 +259,19 @@ void ServerHandler::driftRefreshTimer()
     if(activity_ != LoadActivity &&
        conf_->boolValue(VServerSettings::AdaptiveUpdate))
     {
+#ifdef __UI_SERVERUPDATE_DEBUG
+        UiLog(this).dbg() << "driftRefreshTimer -->";
+#endif
+
         refreshTimer_->drift(conf_->intValue(VServerSettings::AdaptiveUpdateIncrement),
                               conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
     }
 
 #ifdef __UI_SERVERUPDATE_DEBUG
-    UserMessage::debug("driftRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+    UiLog(this).dbg() << "driftRefreshTimer interval: " << refreshTimer_->interval();
 #endif
 
 }
-
 
 void ServerHandler::setActivity(Activity ac)
 {
@@ -291,6 +295,22 @@ void ServerHandler::removeServer(ServerHandler* server)
 		delete s;
 	}
 }
+
+ServerHandler* ServerHandler::findServer(const std::string &alias)
+{
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+	{
+		ServerHandler *s=*it;
+
+		if (s->name() == alias)
+		{
+			return s;
+		}
+	}
+	return NULL; // did not find it
+}
+
+
 
 //This function can be called many times so we need to avoid locking the mutex.
 SState::State ServerHandler::serverState()
@@ -368,12 +388,6 @@ defs_ptr ServerHandler::safelyAccessSimpleDefsMembers()
 	{
 		return null;
 	}
-}
-
-
-void ServerHandler::errorMessage(std::string message)
-{
-	UserMessage::message(UserMessage::ERROR, true, message);
 }
 
 //-------------------------------------------------------------
@@ -499,7 +513,7 @@ void ServerHandler::refreshInternal()
 //This slot is called by the timer regularly to get news from the server.
 void ServerHandler::refreshServerInfo()
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("auto refreshing server info for ") + name());
+    UiLog(this).dbg() << "Auto refreshing server";
     refreshInternal();
 
     //We reduce the update frequency
@@ -519,7 +533,7 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd)
 
 	if (!realCommand.empty())
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string("command: ") + commandToString(realCommand));
+        UiLog().dbg() << "ServerHandler::command --> " << commandToString(realCommand);
 
 		//Get the name of the object for that the command will be applied
 		std::string nodeFullName;
@@ -548,7 +562,7 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd)
 				realCommand[i]=nodeName;
 		}
 
-		UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + commandToString(realCommand));
+        UiLog().dbg() << " final command: " << commandToString(realCommand);
 
 		// get the command into the right format by first splitting into tokens
 		// and then converting to argc, argv format
@@ -562,7 +576,8 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd)
 	}
 	else
 	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("command is not recognised."));
+        UiLog().err() << " command is not recognised!";
+        UserMessage::message(UserMessage::ERROR, true, std::string("command is not recognised."));
 	}
 }
 //Send the same command for a list of objects (nodes/servers) specified in a VInfo vector.
@@ -576,12 +591,11 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
 
 	if (!realCommand.empty())
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string("command: ") + cmd + " (real: " + realCommand + ")");
+        UiLog().dbg() << "ServerHandler::command -->" << cmd << " (real: " << realCommand + ")";
 
 		std::map<ServerHandler*,std::string> targetNodeNames;
 		std::map<ServerHandler*,std::string> targetNodeFullNames;
         std::map<ServerHandler*,std::string> targetParentFullNames;
-
 
 		//Figure out what objects (node/server) the command should be applied to
 		for(int i=0; i < info.size(); i++)
@@ -676,7 +690,7 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
             placeholder = "<parent_name>";
             ecf::Str::replace_all(realCommand, placeholder, targetParentFullNames[serverHandler]);
 
-			UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
+            UiLog().dbg() << " final command: " << realCommand;
 
 			// get the command into the right format by first splitting into tokens
 			// and then converting to argc, argv format
@@ -695,7 +709,8 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
 	}
 	else
 	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("command ") + cmd + " is not recognised. Check the menu definition.");
+        UiLog().err() << " command is not recognised. Check the menu definition.";
+        UserMessage::message(UserMessage::ERROR, true, std::string("command ") + cmd + " is not recognised. Check the menu definition.");
 	}
 }
 
@@ -708,7 +723,7 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 
 	if (!realCommand.empty())
 	{
-		UserMessage::message(UserMessage::DBG, false, "command: " +  commandToString(realCommand));
+        UiLog().dbg() << "ServerHandler::command: " << commandToString(realCommand);
 
 		std::string fullNameStr;
 
@@ -729,15 +744,28 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 				realCommand[i]=fullNameStr;
 		}
 
-		UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + commandToString(realCommand));
+        UiLog().dbg() << " final command: " << commandToString(realCommand);
 
 		// set up and run the thread for server communication
 		runCommand(realCommand);
 	}
 	else
 	{
+        UiLog().err() << " command is not recognised. Check the menu definition.";
 		UserMessage::message(UserMessage::ERROR, true, std::string("command ") +   commandToString(cmd) + " is not recognised. Check the menu definition.");
 	}
+}
+
+// convenience function
+void ServerHandler::command(const std::string& fullPath, const std::string&cmd)
+{
+    std::vector<std::string> paths;
+    std::vector<std::string> commands;
+
+    paths.push_back(fullPath);
+    ecf::Str::split(cmd, commands);
+
+    command(paths, commands);
 }
 
 
@@ -749,14 +777,15 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 //This slot is called when a node changes.
 void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type> aspect)
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeChanged - node: ") + nc->name());
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+    UiLog(this).dbg() << "ServerHandler::slotNodeChanged - node: " + nc->name();
+
+    //for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    //UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
 	//This can happen if we initiated a reset while we sync in the thread
 	if(vRoot_->isEmpty())
 	{
-		UserMessage::message(UserMessage::DBG, false, " --> no change - tree is empty");
+        UiLog(this).dbg() << " tree is empty - no change applied!";
 		return;
 	}
 
@@ -772,7 +801,7 @@ void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type
 	//TODO: what about the infopanel or breadcrumbs??????
 	if(change.ignore_)
 	{
-		UserMessage::message(UserMessage::DBG, false," --> Update ignored");
+        UiLog(this).dbg() << " update ignored";
 		return;
 	}
 	else
@@ -786,7 +815,7 @@ void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type
 		//Notify the observers
 		broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
 
-		UserMessage::message(UserMessage::DBG, false," --> Update applied");
+        UiLog(this).dbg() << " update applied";
 	}
 }
 
@@ -828,12 +857,12 @@ void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vecto
 //This slot is called when the Defs change.
 void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect)
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotDefsChanged"));
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+    UiLog().dbg() << "ServerHandler::slotDefsChanged -->";
+    //for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    //	UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
 	//Begin update for the VNode
-	VNodeChange change;
+    //VNodeChange change;
 	vRoot_->beginUpdate(aspect);
 
 	//Notify the observers
@@ -858,7 +887,7 @@ void ServerHandler::addServerObserver(ServerObserver *obs)
 	{
         serverObservers_.push_back(obs);
 #ifdef __UI_SERVEROBSERVER_DEBUG
-        UserMessage::debug("ServerHandler::addServerObserver -->  " + boost::lexical_cast<std::string>(obs));
+        UiLog(this).dbg() << "ServerHandler::addServerObserver -->  " << obs;
 #endif
 	}
 }
@@ -870,7 +899,7 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 	{
 		serverObservers_.erase(it);
 #ifdef __UI_SERVEROBSERVER_DEBUG
-        UserMessage::debug("ServerHandler::removeServerObserver --> " + boost::lexical_cast<std::string>(obs));
+        UiLog(this).dbg() << "ServerHandler::removeServerObserver --> " << obs;
 #endif
 	}
 }
@@ -913,7 +942,7 @@ void ServerHandler::slotRescanNeed()
 
 void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverReply)
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::clientTaskFinished"));
+    UiLog(this).dbg() << "ServerHandler::clientTaskFinished -->";
 
 	//See which type of task finished. What we do now will depend on that.
 	switch(task->type())
@@ -924,7 +953,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			// any updates on the server (there should have been, because we
 			// just did something!)
 
-			UserMessage::message(UserMessage::DBG, false, std::string(" --> COMMAND finished"));
+            UiLog(this).dbg() << " command finished - send SYNC command";
 			//comQueue_->addNewsTask();
 			comQueue_->addSyncTask();
 			break;
@@ -938,7 +967,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				case ServerReply::NO_NEWS:
 				{
 					// no news, nothing to do
-					UserMessage::message(UserMessage::DBG, false, std::string(" --> No news from server"));
+                    UiLog(this).dbg() << " NO_NEWS";
 
 					//If we just regained the connection we need to reset
 					if(connectionGained())
@@ -953,7 +982,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 					// yes, something's changed - synchronise with the server
 
 					//If we just regained the connection we need to reset
-					UserMessage::message(UserMessage::DBG, false, std::string(" --> News from server - send SYNC command"));
+                    UiLog(this).dbg() << " NEWS - send SYNC command";
 					if(connectionGained())
 					{
 						reset();
@@ -967,9 +996,8 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
 				case ServerReply::DO_FULL_SYNC:
 				{
-					// yes, a lot of things have changed - we need to reset!!!!!!
-
-					UserMessage::message(UserMessage::DBG, false, std::string(" --> DO_FULL_SYNC from server"));
+					// yes, a lot of things have changed - we need to reset!!!!!!                       
+                    UiLog(this).dbg() << " DO_FULL_SYNC - will reset";
 					connectionGained();
 					reset();
 					break;
@@ -984,12 +1012,12 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 		case VTask::SyncTask:
 		{
-			UserMessage::message(UserMessage::DBG, false, std::string(" --> Sync finished"));
+            UiLog(this).dbg() << " sync finished";
 
 			//This typically happens when a suite is added/removed
 			if(serverReply.full_sync() || vRoot_->isEmpty())
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" --> Full sync requested --> rescanTree"));
+                UiLog(this).dbg() << " full sync requested - rescanTree";
 
 				//This will update the suites
 				rescanTree();
@@ -998,10 +1026,6 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			{
 				broadcast(&ServerObserver::notifyEndServerSync);
 			}
-
-			//UserMessage::message(UserMessage::DBG, false, std::string(" --> Update suite filter after sync"));
-			//comQueue_->addSuiteListTask();
-
 			break;
 		}
 
@@ -1066,13 +1090,12 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 		case VTask::ScriptSubmitTask:
 		{
-			UserMessage::message(UserMessage::DBG, false, std::string(" --> Script submit  finished"));
+            UiLog(this).dbg() << " script submit finished - send NEWS command";
 
 			task->reply()->text(serverReply.get_string());
 			task->status(VTask::FINISHED);
 
-			//Submitting the task was successful - we should now get updates from the server
-			UserMessage::message(UserMessage::DBG, false, std::string(" --> Send NEWS command"));
+			//Submitting the task was successful - we should now get updates from the server			
 			comQueue_->addNewsTask();
 			break;
 		}
@@ -1104,10 +1127,9 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
 void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 {
-	//UserMessage::message(UserMessage::DBG, false, std::string("Client task finished"));
+    UiLog(this).dbg() << "ServerHandler::clientTaskFailed -->";
 
 	//TODO: suite filter  + ci_ observers
-
 
 	//See which type of task finished. What we do now will depend on that.
 	switch(task->type())
@@ -1189,7 +1211,7 @@ void ServerHandler::connectServer()
 
 void ServerHandler::reset()
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::reset"));
+    UiLog(this).dbg() << "ServerHandler::reset -->";
 
 	//---------------------------------
 	// First part of reset: clearing
@@ -1214,7 +1236,7 @@ void ServerHandler::reset()
 	}
 	else
 	{
-		UserMessage::message(UserMessage::DBG, false, " --> skip reset");
+        UiLog(this).dbg() << " skip reset";
 	}
 }
 
@@ -1296,7 +1318,7 @@ void ServerHandler::resetFailed(const std::string& errMsg)
 
 void ServerHandler::clearTree()
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::clearTree --  begin"));
+    UiLog(this).dbg() << "ServerHandler::clearTree -->";
 
 	if(!vRoot_->isEmpty())
 	{
@@ -1310,13 +1332,13 @@ void ServerHandler::clearTree()
         broadcast(&ServerObserver::notifyEndServerClear);
 	}
 
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::clearTree --  end"));
+    UiLog(this).dbg() << " <-- clearTree";
 }
 
 
 void ServerHandler::rescanTree()
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::rescanTree -- begin"));
+    UiLog(this).dbg() << "ServerHandler::rescanTree -->";
 
 	setActivity(RescanActivity);
 
@@ -1367,7 +1389,7 @@ void ServerHandler::rescanTree()
 
 	setActivity(NoActivity);
 
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::rescanTree -- end"));
+    UiLog(this).dbg() << "<-- rescanTree";
 }
 
 //====================================================
@@ -1506,13 +1528,13 @@ void ServerHandler::loadConf()
 
 void ServerHandler::searchBegan()
 {
-	UserMessage::message(UserMessage::DBG, false,"(" + name() + ") ServerHandler::searchBegan -- suspend queue");
+    UiLog(this).dbg() << "ServerHandler::searchBegan --> suspend queue";
 	comQueue_->suspend(true);
 }
 
 void ServerHandler::searchFinished()
 {
-	UserMessage::message(UserMessage::DBG, false, "(" + name() + ") ServerHandler::searchFinished -- start queue");
+    UiLog(this).dbg() << "ServerHandler::searchFinished --> start queue";
 	comQueue_->start();
 
 }

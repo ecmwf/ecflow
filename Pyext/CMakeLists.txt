@@ -128,6 +128,16 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
 endif()
 
 
+# =============================================================================
+# Configure __init__.py to add __version__
+# =============================================================================
+
+set(INIT_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
+set(INIT_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
+
+configure_file(${INIT_PY_IN} ${INIT_PY_OUT} )
+
+
 # ==========================================================================
 # install
 #    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
@@ -150,8 +160,13 @@ if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INST
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
       set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
       
-      install( TARGETS ecflow              DESTINATION ${PYTHON_DEST}  RENAME ecflow.so COMPONENT python )
-      install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST}                   COMPONENT python )
+      install( TARGETS ecflow                 DESTINATION ${PYTHON_DEST}  RENAME ecflow.so COMPONENT python )
+      install( FILES   ecflow/__init__.py     DESTINATION ${PYTHON_DEST}                   COMPONENT python )
+      
+      # Install files that Axel has asked for. 
+      # These are example of what Axel uses as a layer over ecflow api, for operations
+      install( FILES   samples/api/ecf.py     DESTINATION ${PYTHON_DEST}                COMPONENT python )
+      install( FILES   samples/api/sms2ecf.py DESTINATION ${PYTHON_DEST}                COMPONENT python )
       
 else()
 	  message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")

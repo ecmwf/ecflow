@@ -25,6 +25,7 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "VConfig.hpp"
+#include "WidgetNameProvider.hpp"
 
 static bool firstShowSysSyncLogW=true;
 
@@ -312,6 +313,9 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
     {
         sysSyncLogTb->setEnabled(false);
     }
+
+    //Assign name to each object
+    WidgetNameProvider::nameChildren(this);
 }
 
 ServerListDialog::~ServerListDialog()

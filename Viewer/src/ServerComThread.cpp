@@ -17,16 +17,11 @@
 #include "ServerComQueue.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <algorithm>
-#include <sstream>
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include <QDebug>
+#define _UI_SERVERCOMTHREAD_DEBUG
 
 ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		server_(server),
@@ -37,6 +32,7 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		autoAddNewSuites_(false),
 		maxLineNum_(-1)
 {
+    assert(server_);
 }
 
 ServerComThread::~ServerComThread()
@@ -46,11 +42,11 @@ ServerComThread::~ServerComThread()
 
 void ServerComThread::task(VTask_ptr task)
 {
-	// do not execute thread if already running
+    //do not execute thread if already running
 
-	if (isRunning())
+    if(isRunning())
 	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("ServerComThread::sendCommand - thread already running, will not execute command"));
+        UiLog(serverName_).err() << "ComThread::task - thread already running, will not execute command";
 	}
 	else
 	{
@@ -59,7 +55,8 @@ void ServerComThread::task(VTask_ptr task)
 
 		//We set the parameters needed to run the task. These members are not protected by
 		//a mutex, because apart from this function only run() can access them!!
-		command_=task->command();
+        serverName_=server_->longName();
+        command_=task->command();
 		params_=task->params();
 		contents_=task->contents();
 		vars_=task->vars();
@@ -83,11 +80,8 @@ void ServerComThread::task(VTask_ptr task)
 }
 
 void ServerComThread::run()
-{
-	//Can we use it? We are in the thread!!!
-	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
-
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::run path: ") + nodePath_);
+{	
+    UiLog(serverName_).dbg() << "ComThread::run --> path="  <<  nodePath_;
 
     //Init flags
     rescanNeed_=false;
@@ -99,10 +93,11 @@ void ServerComThread::run()
 			case VTask::CommandTask:
 			{
 				// call the client invoker with the saved command
-				UserMessage::message(UserMessage::DBG, false, std::string(" COMMAND"));
+                UiLog(serverName_).dbg() << " COMMAND";
 				ArgvCreator argvCreator(command_);
-				//UserMessage::message(UserMessage::DBG, false, argvCreator.toString());
-
+#ifdef _UI_SERVERCOMTHREAD_DEBUG
+                UiLog(serverName_).dbg() << " args="  << argvCreator.toString();
+#endif
 				ci_->invoke(argvCreator.argc(), argvCreator.argv());
 
 				/*ci_->news_local();
@@ -121,14 +116,14 @@ void ServerComThread::run()
 
 			case VTask::NewsTask:
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" NEWS"));
+                UiLog(serverName_).dbg() << " NEWS";
 				ci_->news_local(); // call the server
 				break;
 			}
 
 			case VTask::SyncTask:
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" SYNC"));
+                UiLog(serverName_).dbg() << " SYNC";
 				sync_local();
 				break;
 			}
@@ -136,7 +131,7 @@ void ServerComThread::run()
 			//This is called during reset
 			case VTask::ResetTask:
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" RESET"));
+                UiLog(serverName_).dbg() << " SYNC";
 				reset();
 				break;
 			}
@@ -146,7 +141,7 @@ void ServerComThread::run()
 			case VTask::ScriptTask:
 			case VTask::OutputTask:
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" FILE"));
+                UiLog(serverName_).dbg() << " FILE" << " " << params_["clientPar"];
 				if(maxLineNum_ < 0)
 					ci_->file(nodePath_,params_["clientPar"]);
 				else
@@ -157,49 +152,49 @@ void ServerComThread::run()
 
 			case VTask::MessageTask:
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" EDIT HISTORY"));
+                UiLog(serverName_).dbg() << " EDIT HISTORY";
 				ci_->edit_history(nodePath_);
 				break;
 			}
 
 			case VTask::StatsTask:
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" STATS"));
+                UiLog(serverName_).dbg() << " STATS";
 				ci_->stats();
 				break;
 			}
 
 			case VTask::HistoryTask:
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" HISTORY"));
+                UiLog(serverName_).dbg() << " SERVER LOG";
 				ci_->getLog(100);
 				break;
 			}
 
 			case VTask::ScriptPreprocTask:
-				UserMessage::message(UserMessage::DBG, false, std::string(" SCRIP PREPROCESS"));
+                UiLog(serverName_).dbg() << " SCRIP PREPROCESS";
 				ci_->edit_script_preprocess(nodePath_);
 				break;
 
 			case VTask::ScriptEditTask:
-				UserMessage::message(UserMessage::DBG, false, std::string(" SCRIP EDIT"));
+                UiLog(serverName_).dbg() << " SCRIP EDIT";
 				ci_->edit_script_edit(nodePath_);
 				break;
 
 			case VTask::ScriptSubmitTask:
-				UserMessage::message(UserMessage::DBG, false, std::string(" SCRIP SUBMIT"));
+                UiLog(serverName_).dbg() << " SCRIP SUBMIT";
 				ci_->edit_script_submit(nodePath_, vars_, contents_,
 						(params_["alias"]=="1")?true:false,
 						(params_["run"] == "1")?true:false);
 				break;
 
 			case VTask::SuiteListTask:
-				UserMessage::message(UserMessage::DBG, false, std::string(" SUITES"));
+                UiLog(serverName_).dbg() << " SUITES";
 				ci_->suites();
 				break;
 
 			case VTask::SuiteAutoRegisterTask:
-				UserMessage::message(UserMessage::DBG, false, std::string(" SUITE AUTO REGISTER"));
+                UiLog(serverName_).dbg() << " SUITE AUTO REGISTER";
 				if(hasSuiteFilter_)
 				{
 					ci_->ch1_auto_add(autoAddNewSuites_);
@@ -207,12 +202,12 @@ void ServerComThread::run()
 				break;
 
 			case VTask::ZombieListTask:
-				UserMessage::message(UserMessage::DBG, false, std::string(" ZOMBIES"));
+                UiLog(serverName_).dbg() << " ZOMBIES";
 				ci_->zombieGet();
 				break;
 
 			case VTask::LogOutTask:
-				UserMessage::message(UserMessage::DBG, false, std::string(" LOGOUT"));
+                UiLog(serverName_).dbg() << " LOGOUT";
                 detach();
                 if(ci_->client_handle() > 0)
 				{
@@ -230,9 +225,8 @@ void ServerComThread::run()
 		// because we can't call Qt widgets from a worker thread
 
 		std::string errorString = e.what();
-		Q_EMIT failed(errorString);
-
-		UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run failed: ") + errorString);
+        UiLog(serverName_).dbg() << " thread failed: " <<  errorString;
+        Q_EMIT failed(errorString);
 
         //Reset flags
         rescanNeed_=false;
@@ -255,9 +249,9 @@ void ServerComThread::sync_local()
 	{
 		ServerDefsAccess defsAccess(server_);
 
-		UserMessage::message(UserMessage::DBG, false, "ServerComThread::sync -- begin");
+        UiLog(serverName_).dbg() << "ComThread::sync_local --> sync begin";
 		ci_->sync_local();
-		UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::sync -- end"));
+        UiLog(serverName_).dbg() << " sync end";
 
 		//If a rescan or fullscan is needed we have either added/remove nodes or deleted the defs.
 		//So there were significant changes.
@@ -270,7 +264,7 @@ void ServerComThread::sync_local()
 
 		if(rescanNeed_ || ci_->server_reply().full_sync())
 		{
-			UserMessage::message(UserMessage::DBG, false, std::string("   --> rescan needed!"));
+            UiLog(serverName_).dbg() << " rescan needed!";
 			detach(defsAccess.defs());
 			attach(defsAccess.defs());
 		}
@@ -279,7 +273,7 @@ void ServerComThread::sync_local()
 
 void ServerComThread::reset()
 {
-	UserMessage::message(UserMessage::DBG, false,"ServerComThread::reset -- begin");
+    UiLog(serverName_).dbg() << "ComThread::reset -->";
 
 	//Lock the mutex on defs
 	ServerDefsAccess defsAccess(server_);
@@ -297,7 +291,7 @@ void ServerComThread::reset()
 		}
 		catch (std::exception &e)
 		{
-			UserMessage::message(UserMessage::DBG, false, std::string("no drop possible") + e.what());
+            UiLog(serverName_).warn() << " cannot drop handle: " << e.what();
 		}
 	}
 
@@ -308,7 +302,7 @@ void ServerComThread::reset()
 
 		if(!filteredSuites_.empty())
 		{
-			UserMessage::message(UserMessage::DBG, false, std::string(" REGISTER SUITES"));
+            UiLog(serverName_).dbg() << " register suites";
 
 			//This will add a new handle to the client
 			ci_->ch_register(autoAddNewSuites_, filteredSuites_);
@@ -319,7 +313,7 @@ void ServerComThread::reset()
             //Registering with empty set would lead to retrieve all server content,
             //opposite of expected result. So we just register a dummy suite
             //to achive the our goal: for an empty suite filter no suites are retrieved.
-            UserMessage::message(UserMessage::DBG, false, std::string(" REGISTER EMPTY SUITE LIST"));
+            UiLog(serverName_).dbg() << " register empty suite list";
 
             std::vector<std::string> fsl;
             fsl.push_back(SuiteFilter::dummySuite());
@@ -332,14 +326,14 @@ void ServerComThread::reset()
 		ci_->reset();
 	}
 
-	UserMessage::message(UserMessage::DBG, false, std::string(" INIT SYNC"));
+    UiLog(serverName_).dbg() << " sync begin";
 	ci_->sync_local();
-	UserMessage::message(UserMessage::DBG, false, std::string(" INIT SYNC FINISHED"));
+    UiLog(serverName_).dbg() << " sync end";
 
     //Attach the nodes to the observer
 	attach(defsAccess.defs());
 
-	UserMessage::message(UserMessage::DBG, false,"ServerComThread::reset -- end");
+    UiLog(serverName_).dbg() << "<-- ComThread::reset";
 }
 
 //This is an observer notification method!!
@@ -348,22 +342,18 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	//This function can only be called during a SYNC_LOCAl task!!!!
 	assert(taskType_ == VTask::SyncTask);
 
-	std::vector<ecf::Aspect::Type> typesCopy=types;
+    std::vector<ecf::Aspect::Type> typesCopy=types;
 
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - node: ") + node->name());
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
-	{
-		int i=*it;
-		std::stringstream ss;
-		ss << i;
-		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ss.str());
-	}
+    UiLog(serverName_).dbg() << "ComThread::update --> node: " << node->name();
+    std::stringstream ss;
+    aspectToStr(ss,types);
+    UiLog(serverName_).dbg() << " aspects: " << ss.str();
 
     //If a node was already requested to be added/deleted in the thread we do not go further. At the end of the sync
 	//we will regenerate everything (the tree as well in ServerHandle).
     if(rescanNeed_)
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
+        UiLog(serverName_).dbg() << " rescanNeed already set";
 		return;
 	}
 
@@ -371,7 +361,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
     if((std::find(types.begin(),types.end(),ecf::Aspect::ADD_REMOVE_NODE) != types.end()) ||
        (std::find(types.begin(),types.end(),ecf::Aspect::ORDER)           != types.end()))
     {
-		UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
+        UiLog(serverName_).dbg() << " emit rescanNeed()";
 		rescanNeed_=true;
 
 		//We notify ServerHandler about the radical changes. When ServerHandler receives this signal
@@ -383,7 +373,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	}
 
     //This will notify SeverHandler
-	UserMessage::message(UserMessage::DBG, false, std::string(" -->  nodeChanged() emitted"));
+    UiLog(serverName_).dbg() << " emit nodeChanged()";
 	Q_EMIT nodeChanged(node,types);
 }
 
@@ -392,27 +382,23 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 {
 	std::vector<ecf::Aspect::Type> typesCopy=types;
 
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - defs: "));
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
-	{
-		int i=*it;
-		std::stringstream ss;
-		ss << i;
-		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ss.str());
-	}
+    UiLog(serverName_).dbg() << "ComThread::update --> defs";
+    std::stringstream ss;
+    aspectToStr(ss,types);
+    UiLog(serverName_).dbg() << " aspects: " << ss.str();
 
     //If anything was requested to be deleted in the thread we do not go further
     //because it will trigger a full rescan in ServerHandler!
     if(rescanNeed_)
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
+        UiLog(serverName_).dbg() << " rescanNeed already set";
 	    return;
 	}
 
     //This is a radical change
     if(std::find(types.begin(),types.end(),ecf::Aspect::ORDER) != types.end())
     {
-        UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
+        UiLog(serverName_).dbg() << " emit rescanNeed()";
         rescanNeed_=true;
 
         //We notify ServerHandler about the radical changes. When ServerHandler receives this signal
@@ -424,7 +410,7 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
     }
 
     //This will notify SeverHandler
-	UserMessage::message(UserMessage::DBG, false, std::string(" -->  defsChanged() emitted"));
+    UiLog(serverName_).dbg() << " emit defsChanged()";
 	Q_EMIT defsChanged(typesCopy);
 }
 
@@ -432,14 +418,13 @@ void ServerComThread::update_delete(const Node* nc)
 {
 	Node *n=const_cast<Node*>(nc);
 	n->detach(this);
-    //UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
 }
 
 //This only be called when ComThread is running or from the ComThread desctructor. So it is safe to set
 //rescanNeed in it.
 void ServerComThread::update_delete(const Defs* dc)
 {
-    UserMessage::message(UserMessage::DBG, false, std::string("Update defs delete: "));
+    UiLog(serverName_).dbg() << "ServerComThread::update_delete -->";
 
     Defs *d=const_cast<Defs*>(dc);
     d->detach(this);
@@ -537,4 +522,14 @@ void ServerComThread::detach(Node *node)
 	{
 		detach((*it).get());
 	}
+}
+
+void ServerComThread::aspectToStr(std::stringstream& ss,const std::vector<ecf::Aspect::Type>& t) const
+{
+    for(std::vector<ecf::Aspect::Type>::const_iterator it=t.begin(); it != t.end(); ++it)
+    {
+        if(!ss.str().empty())
+            ss << ",";
+        ss << *it;
+    }
 }

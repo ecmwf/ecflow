@@ -156,6 +156,9 @@ BOOST_AUTO_TEST_CASE( test_limit_decrement )
    BOOST_CHECK_MESSAGE( limit.state_change_no() == expected_state_change_no,"Expected no change to state change no, expected " << expected_state_change_no << " but found " <<  limit.state_change_no());
 
    Ecf::set_server(false); // needed to test state_change_numbers
+   // reset, to avoid effecting downstream tests
+   Ecf::set_state_change_no(0);
+   Ecf::set_modify_change_no(0);
 }
 
 

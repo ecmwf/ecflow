@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
 //
 // Note: To test HPUX->Linux, invoke serve on (Linux/HPUX) and the client cmds on other system
-//       On the client side set ECF_NODE to machine name. To allow further testing if ECF_NODE
+//       On the client side set ECF_HOST to machine name. To allow further testing if ECF_HOST
 //       is specified then *don't* shutdown the server
 // ************************************************************************************
 
@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE( test_client_lifecyle )
 {
    // *******************************************************************************************
    // This test will *ONLY* work when testing with new server invocation, since it relies
-   // on disabling job generation. Hence ignore test if ECF_NODE has been defined
+   // on disabling job generation. Hence ignore test if ECF_HOST has been defined
    // *******************************************************************************************
    std::string host = ClientEnvironment::hostSpecified();
    if (!host.empty()) {
       // Server allready started, since we cant disable job generation ignore this test
-      std::cout << "Client:: ...test_client_lifecycle, ignoring test when ECF_NODE specified..." << endl;
+      std::cout << "Client:: ...test_client_lifecycle, ignoring test when ECF_HOST specified..." << endl;
       return;
    }
 

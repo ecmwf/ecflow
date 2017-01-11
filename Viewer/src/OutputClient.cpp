@@ -48,7 +48,7 @@ void OutputClient::connectToHost(std::string host,int port)
 	soc_->abort();
 	soc_->connectToHost(QString::fromStdString(host),port);
 
-	//We cannot change the temout through the qt api so we need this hack.
+    //We cannot change the timeout through the qt api so we need this hack.
 	QTimer::singleShot(timeout_, this, SLOT(slotCheckTimeout()));
 }
 

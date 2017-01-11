@@ -6,7 +6,7 @@ print(os.environ['PYTHONPATH'].split(os.pathsep))
 
 print("Creating Client")
 ci = ecflow.Client()
-ci.set_host_port("%ECF_NODE%","%ECF_PORT%")
+ci.set_host_port("%ECF_HOST%","%ECF_PORT%")
 ci.set_child_pid(os.getpid())
 ci.set_child_path("%ECF_NAME%")
 ci.set_child_password("%ECF_PASS%")

@@ -17,6 +17,7 @@
 #include "TreeView.hpp"
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <QCloseEvent>
 #include <QDebug>
@@ -135,6 +136,8 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	grad_.setFinalStop(0,1);
 
 	readSettings();
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 ChangeNotifyDialog::~ChangeNotifyDialog()

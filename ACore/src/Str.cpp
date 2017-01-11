@@ -50,6 +50,7 @@ const std::string& Str::ECF_TRYNO()      { static std::string ECF_TRYNO = "ECF_T
 const std::string& Str::ECF_TRIES()      { static std::string ECF_TRIES = "ECF_TRIES"; return ECF_TRIES;}
 const std::string& Str::ECF_NAME()       { static std::string ECF_NAME = "ECF_NAME"; return ECF_NAME; }
 const std::string& Str::ECF_NODE()       { static std::string ECF_NODE = "ECF_NODE"; return ECF_NODE;}
+const std::string& Str::ECF_HOST()       { static std::string ECF_HOST = "ECF_HOST"; return ECF_HOST;}
 const std::string& Str::ECF_PASS()       { static std::string ECF_PASS = "ECF_PASS";return ECF_PASS;}
 const std::string& Str::ECF_JOB()        { static std::string ECF_JOB = "ECF_JOB"; return ECF_JOB;}
 const std::string& Str::ECF_JOBOUT()     { static std::string ECF_JOBOUT = "ECF_JOBOUT"; return ECF_JOBOUT;}
@@ -71,6 +72,7 @@ const std::string& Str::ECF_LOG()     { static std::string ECF_LOG = "ECF_LOG"; 
 
 
 const std::string& Str::WHITE_LIST_FILE() { static std::string WHITE_LIST_FILE = "ecf.lists"; return WHITE_LIST_FILE;}
+const std::string& Str::ECF_PASSWD() { static std::string ECF_PASSWD = "ecf.passwd"; return ECF_PASSWD;}
 
 const std::string& Str::ALPHANUMERIC_UNDERSCORE()
 {

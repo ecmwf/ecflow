@@ -1,5 +1,6 @@
 suite suiteName
-   clock real 1.10.2009  # need to define a date , otherwise we start at current time, and hence test will vary
+   clock real 1.10.2009 # need to define a date , otherwise we start at current time, and hence test will vary
+   endclock  2.10.2009  # End time, otherwise will simulate for a year, when we have time dependencies
    task t1
       today 15:00                   
       verify complete:1  

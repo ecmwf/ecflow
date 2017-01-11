@@ -38,24 +38,6 @@ std::string Passwd::generate()
 	return std::string (pw);
 }
 
-//std::string Passwd::doCrypt( const std::string& passwd ) {
-//	/**************************************************************************
-//	 ?  Crypt the passwd.
-//	 =  Crypted password in static area.
-//	 ************************************o*************************************/
-//	char salt[3];
-//
-//	for (int i = 0; i < 2; i++) {
-//		salt[i] = 64.0 * ecf_drand48() + '.';
-//		if ( salt[i] > '9' ) salt[i] += 7;
-//		if ( salt[i] > 'Z' ) salt[i] += 6;
-//	}
-//	salt[2] = '\0';
-//
-//	return std::string( crypt( passwd.c_str(), salt ));
-//}
-
-
 double ecf_drand48()
 /**************************************************************************
  ?  Random number with time dependent seed.

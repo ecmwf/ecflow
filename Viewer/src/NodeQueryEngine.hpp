@@ -82,7 +82,7 @@ public:
 	explicit NodeFilterEngine(NodeFilter*);
 	~NodeFilterEngine();
 
-	void runQuery(ServerHandler*);
+    void runQuery(ServerHandler*);
 	void setQuery(NodeQuery*);
 
 private:

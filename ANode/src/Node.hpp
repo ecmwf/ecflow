@@ -297,6 +297,11 @@ public:
    virtual bool hasTimeDependencies() const { return (time_dep_attrs_) ? true : false; }
    bool isTimeFree() const { return (time_dep_attrs_) ? time_dep_attrs_->timeDependenciesFree() : false;}
 
+   /// If no time dependencies then we have a resolution of 1 hour.
+   /// If we have just day/date then we have a resolution of 1 hour
+   /// Otherwise if we have time/today/cron with minutes, then resolution is 1 minute
+   void get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const;
+   void get_max_simulation_duration(boost::posix_time::time_duration& resol) const;
 
    /// A hierarchical function
    virtual bool hasAutoCancel() const { return (autoCancel_) ? true : false;}
@@ -622,6 +627,7 @@ public:
    void notify(const std::vector<ecf::Aspect::Type>& aspects);
    void attach(AbstractObserver*);
    void detach(AbstractObserver*);
+   bool is_observed(AbstractObserver*) const ; // return true if we have this observer in our list
 
 private:
    void why(std::vector<std::string>& theReasonWhy) const;
@@ -660,7 +666,6 @@ private: // alow simulator access
    friend class ecf::Simulator;
    std::vector<Meter>&  ref_meters();// allow simulator set meter value
    std::vector<Event>&  ref_events();// allow simulator set event value
-   Repeat& ref_repeat()              { return repeat_;} // allow simulator to modify repeat
 
    /// Note: If the complete expression evaluation fails. we should continue resolving dependencies
    ///       If the complete expression evaluation evaluates, then we set node to complete

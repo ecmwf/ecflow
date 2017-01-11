@@ -25,9 +25,9 @@ public:
 
     static void setEchoToCout(bool toggle) {echoToCout_ = toggle;}
     static void message(MessageType type, bool popup, const std::string& message);
+    static bool confirm(const std::string& message);
 
     static void debug(const std::string& message);
-    static void qdebug(QString message);
     static std::string toString(int);
 
 private:

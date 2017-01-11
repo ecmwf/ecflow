@@ -94,7 +94,7 @@ echo "User \"$username\" attempting to stop ecf server on $host:$port_number"
 echo "";
 echo "Checking if the server is running on $host:$port_number" 
 
-export ECF_NODE=$host
+export ECF_HOST=$host
 
 ecflow_client --ping 
 if [ $? -eq 1 ]; then

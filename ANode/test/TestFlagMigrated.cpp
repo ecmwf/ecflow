@@ -14,7 +14,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
-#include "ServerToClientCmdContext.hpp"
 #include "Ecf.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -31,7 +30,7 @@ BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 BOOST_AUTO_TEST_CASE( test_flag_migrated )
 {
    cout << "ANode:: ...test_flag_migrated\n" ;
-   // This will test that when the migrate flag is set, and ServerToClientCmdContext is on
+   // This will test that when the migrate flag is set
    // we do not persist the children of Suites and families.
    // However we should always persist when check-pointing
 
@@ -68,18 +67,30 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated )
       s->flag().set(ecf::Flag::MIGRATED);
 
       {
-         // Will not persist children of migrate node
-         ServerToClientCmdContext cmd;
          defs.save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+         fs::remove(file_name);
+      }
+      {
+         std::string the_string;
+         defs.save_checkpt_as_string(the_string);
+         Defs restored_defs; restored_defs.restore_from_string(the_string);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+      }
+      {
+         defs.save_as_filename(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==1,"expected 1 nodes but found " << all_nodes.size());
+         fs::remove(file_name);
       }
 
-      Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
-
-      std::vector<node_ptr> all_nodes;
-      restored_defs.get_all_nodes(all_nodes);
-      BOOST_CHECK_MESSAGE(all_nodes.size()==1,"expected 1 nodes but found " << all_nodes.size());
-
-      fs::remove(file_name);
       s->flag().clear(ecf::Flag::MIGRATED);
    }
 
@@ -88,38 +99,61 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated )
       f1->flag().set(ecf::Flag::MIGRATED);
 
       {
-         // Will not persist children of migrate node
-         ServerToClientCmdContext cmd;
          defs.save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+         fs::remove(file_name);
+      }
+      {
+         std::string the_string;
+         defs.save_checkpt_as_string(the_string);
+         Defs restored_defs; restored_defs.restore_from_string(the_string);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+      }
+      {
+         defs.save_as_filename(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==2,"expected 2 nodes but found " << all_nodes.size());
+         fs::remove(file_name);
       }
 
-      Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
-
-      std::vector<node_ptr> all_nodes;
-      restored_defs.get_all_nodes(all_nodes);
-      BOOST_CHECK_MESSAGE(all_nodes.size()==2,"expected 2 nodes but found " << all_nodes.size());
-
-      fs::remove(file_name);
       f1->flag().clear(ecf::Flag::MIGRATED);
    }
 
    {
-      // this time we only expect 4 node
+      // this time expected_all_nodes
       t2->flag().set(ecf::Flag::MIGRATED);
 
       {
-         // Will not persist children of migrate node
-         ServerToClientCmdContext cmd;
          defs.save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+         fs::remove(file_name);
       }
-
-      Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
-
-      std::vector<node_ptr> all_nodes;
-      restored_defs.get_all_nodes(all_nodes);
-      BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
-
-      fs::remove(file_name);
+      {
+         std::string the_string;
+         defs.save_checkpt_as_string(the_string);
+         Defs restored_defs; restored_defs.restore_from_string(the_string);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+      }
+      {
+         defs.save_as_filename(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+         fs::remove(file_name);
+      }
    }
 }
 
@@ -134,6 +168,8 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated_with_reque )
    family_ptr f1 = s->add_family("f1");
    f1->add_task("t1");
    task_ptr t2 = f1->add_task("t2");
+   size_t expected_all_nodes = 4;
+
    defs.beginAll();
 
    // Remove host dependent variables from server state, so that we can run on other platforms
@@ -147,34 +183,59 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated_with_reque )
       s->flag().set(ecf::Flag::MIGRATED);
 
       {
-         // Will not persist children of migrate node
-         ServerToClientCmdContext cmd;
          defs.save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+         fs::remove(file_name);
+      }
+      {
+         std::string the_string;
+         defs.save_checkpt_as_string(the_string);
+         Defs restored_defs; restored_defs.restore_from_string(the_string);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
       }
 
-      Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
-      std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
-      BOOST_CHECK_MESSAGE(all_nodes.size()==1,"expected 1 nodes but found " << all_nodes.size());
-
-      fs::remove(file_name);
+      {
+         defs.save_as_filename(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==1,"expected 1 nodes but found " << all_nodes.size());
+         fs::remove(file_name);
+      }
    }
 
    {
+      // Reque means migrate flag was cleared, hence we expect full set of nodes.
       defs.requeue(); // this should clear the migrate flag
 
       BOOST_CHECK_MESSAGE(!s->get_flag().is_set(ecf::Flag::MIGRATED),"Expected migrate flag to be cleared");
 
       {
-         // Reque means migrate flag was cleared, hence we expect full set of nodes.
-         ServerToClientCmdContext cmd;
          defs.save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+         fs::remove(file_name);
+      }
+      {
+         std::string the_string;
+         defs.save_checkpt_as_string(the_string);
+         Defs restored_defs; restored_defs.restore_from_string(the_string);
+         std::vector<node_ptr> all_nodes;
+         restored_defs.get_all_nodes(all_nodes);
+         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
       }
 
-      Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
-      std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
-      BOOST_CHECK_MESSAGE(all_nodes.size()==4,"expected 4 nodes but found " << all_nodes.size());
-
-      fs::remove(file_name);
+      {
+          defs.save_as_filename(file_name);
+          Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+          std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
+          BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
+          fs::remove(file_name);
+       }
    }
 }
 BOOST_AUTO_TEST_SUITE_END()

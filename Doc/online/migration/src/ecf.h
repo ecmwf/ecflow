@@ -9,7 +9,7 @@ case $ECF_PORT in
      
    ECF_NAME=%ECF_NAME:0% 
    ECF_PASS=%ECF_PASS:0% 
-   ECF_NODE=%ECF_NODE:0% 
+   ECF_HOST=%ECF_HOST:0%
    ECF_TRYNO=%ECF_TRYNO:0% 
    ECF_HOSTFILE=$HOME/.ecfhostfile 
    ECF_JOBOUT=%ECF_JOBOUT:0%

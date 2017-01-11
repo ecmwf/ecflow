@@ -16,8 +16,6 @@
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
 
-#include <QDebug>
-
 #include <fstream>
 
 #include <boost/filesystem/operations.hpp>
@@ -186,8 +184,6 @@ void LogProvider::slotLinesAppend(QStringList lst)
 	{
 		owner_->infoFailed(reply_);
 	}
-
-    //qDebug() << "LogProvider::slotLinesAppend()" << lst;
 
 	std::vector<std::string> vec;
 	Q_FOREACH(QString s,lst)

@@ -33,9 +33,10 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 bool Node::findParentVariableValue(const std::string& name, std::string& theValue) const
 {
-   if (findVariableValue(name,theValue)) return true;
-   const Repeat& repeat = findRepeat(name);
-   if (!repeat.empty())  { theValue = repeat.valueAsString(); return true; }
+   if (!varVec_.empty() && findVariableValue(name,theValue)) return true;
+   if (!repeat_.empty() && repeat_.name() == name) {
+      theValue = repeat_.valueAsString(); return true;
+   }
    if (findGenVariableValue(name,theValue)) return true;
 
 
@@ -43,8 +44,10 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
    while (theParent) {
 
       if (theParent->findVariableValue(name,theValue)) return true;
-      const Repeat& repeatVar = theParent->findRepeat(name);
-      if (!repeatVar.empty()) { theValue = repeatVar.valueAsString(); return true; }
+      const Repeat& rep = theParent->repeat();
+      if (!rep.empty() && rep.name() == name) {
+         theValue = rep.valueAsString(); return true;
+      }
       if (theParent->findGenVariableValue(name,theValue)) return true;
 
       theParent =  theParent->parent();
@@ -53,7 +56,7 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
    // If all else fails search defs environment, returns empty string if match not found
    // The defs environment is constructed via:
    //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
-   //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_NODE
+   //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_HOST
    //   o/ These values are updated from the server environment when the BEGIN cmd is called.
    Defs* the_defs = defs();
    if ( the_defs ) {
@@ -76,7 +79,7 @@ bool Node::find_parent_gen_variable_value(const std::string& name, std::string& 
     // If all else fails search defs environment, returns empty string if match not found
     // The defs environment is constructed via:
     //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
-    //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_NODE
+    //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_HOST
     //   o/ These values are updated from the server environment when the BEGIN cmd is called.
     Defs* the_defs = defs();
     if ( the_defs ) {
@@ -152,6 +155,8 @@ bool Node::user_variable_exists(const std::string& name) const
 
 const Variable& Node::findVariable(const std::string& name) const
 {
+   if (varVec_.empty())  return Variable::EMPTY();
+
    size_t theSize = varVec_.size();
    for(size_t i = 0; i < theSize; i++) {
       if (varVec_[i].name() == name) {
@@ -325,6 +330,9 @@ bool Node::findExprVariable( const std::string& name)
    const Variable& gen_variable = findGenVariable( name );
    if (!gen_variable.empty()) return true;
 
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) return true;
+
    return false;
 }
 
@@ -355,6 +363,10 @@ int Node::findExprVariableValue( const std::string& name) const
 
    const Variable& gen_variable =  findGenVariable( name );
    if ( !gen_variable.empty() )  return gen_variable.value();
+
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) return limit->value();
+
    return 0;
 }
 
@@ -385,6 +397,10 @@ int Node::findExprVariableValueAndPlus(const std::string& name, int val) const
 
    const Variable& gen_variable =  findGenVariable( name );
    if ( !gen_variable.empty() )  return (gen_variable.value()+val);
+
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) return (limit->value() + val);
+
    return val;
 }
 
@@ -415,6 +431,10 @@ int Node::findExprVariableValueAndMinus(const std::string& name, int val) const
 
    const Variable& gen_variable = findGenVariable( name );
    if ( !gen_variable.empty() )  return (gen_variable.value() - val);
+
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) return (limit->value() - val);
+
    return -val;
 }
 
@@ -445,6 +465,12 @@ int Node::findExprVariableValueAndType( const std::string& name, std::string& va
       varType = "gen-variable";
       return gen_variable.value();
    }
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) {
+      varType = "limit";
+      return limit->value();
+   }
+
    varType = "variable-not-found";
    return 0;
 }
@@ -474,6 +500,11 @@ void Node::findExprVariableAndPrint( const std::string& name, ostream& os) const
    const Variable& gen_variable = findGenVariable( name );
    if ( !gen_variable.empty() )  {
       os << "GEN-VARIABLE " << gen_variable.dump();
+      return;
+   }
+   limit_ptr limit = find_limit( name );
+   if (limit.get()) {
+      os << limit->toString() << " value(" << limit->value() << ")";
       return;
    }
 }

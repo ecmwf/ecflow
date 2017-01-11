@@ -1,0 +1,11 @@
+suite suite
+  clock hybrid 5.1.2017
+  family family
+    task t1
+      date  05.01.2017
+      date  06.01.2017
+      time 10:00
+      time 11:00
+      verify complete:2  # because hybrid will be for 24 hrs only
+  endfamily
+endsuite

@@ -17,6 +17,7 @@
 #include "NodeObserver.hpp"
 #include "ServerFilter.hpp"
 #include "ServerObserver.hpp"
+#include "VInfo.hpp"
 
 class Node;
 class VNode;
@@ -31,6 +32,7 @@ class ServerHandler;
 class TableNodeFilter;
 class TreeNodeFilter;
 class VParamSet;
+class VAttribute;
 class VAttributeType;
 class VTreeServer;
 class VTableServer;
@@ -105,8 +107,11 @@ public:
      VTree* tree() const {return tree_;}
      VTreeServer* treeServer() const {return const_cast<VTreeServer*>(this);}
      void attrFilterChanged();
+     void setForceShowNode(const VNode* node);
+     void setForceShowAttribute(const VAttribute* node);
+     void clearForceShow(const VItem*);
 
-     //From ServerObserver
+    //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
      void notifyServerDelete(ServerHandler*);
 	 void notifyBeginServerClear(ServerHandler* server);
@@ -136,6 +141,8 @@ Q_SIGNALS:
      void endFilterUpdateInsertTop(VTreeServer*,int);
 
 private:
+     void updateFilter(const std::vector<VNode*>& suitesChanged);
+
      VTree* tree_;
      VTreeChangeInfo* changeInfo_;
      AttributeFilter *attrFilter_;
@@ -156,6 +163,9 @@ public:
      int indexOf(const VNode* node) const;
      NodeFilter* filter() const;
      VTableServer* tableServer() const {return const_cast<VTableServer*>(this);}
+     void setForceShowNode(const VNode* node);
+     void setForceShowAttribute(const VAttribute* node);
+     void clearForceShow(const VItem*);
 
 	 //From ServerObserver
      void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
@@ -210,6 +220,7 @@ public:
 	int indexOfServer(ServerHandler* s) const;
 	int numOfNodes(int) const;
     bool isFilterComplete() const;
+    bool isFilterNull() const;
 
 	//From ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*);

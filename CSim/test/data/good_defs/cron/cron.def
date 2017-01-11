@@ -1,10 +1,10 @@
-suite cron
-                         # use real clock otherwise the date wont change
+suite cron              # use real clock otherwise the date will change
    clock real 1.1.2006  # need to define a date otherwise log file content varies according to the time 
+   endclock   2.1.2006  # When to finish.
    family cronFamily
 		task t
   			 cron 10:00 20:00 01:00  
-  			 verify complete:11       # verify tasks complete 11 times. 		
+  			 verify complete:11      # verify tasks complete 11 times. 		
    endfamily
 endsuite
 

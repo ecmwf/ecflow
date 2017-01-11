@@ -53,11 +53,9 @@ cd /var/tmp/ma0/workspace/metabuilder
 ./regenerate.sh ecflow
 
 # =======================================================================
-# Start the viewer's
+# Start the GUI
 # =======================================================================
 cd $SCRATCH
-ecflowview &
-
 module swap ecflow/dev
 ecflow_ui &
 

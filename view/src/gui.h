@@ -53,6 +53,8 @@ public:
 	static GC         blackGC();
 	static GC         blueGC();
 	static GC         redGC();
+	static GC         orangeGC();
+	static GC         greenGC();
 
 	static XmFontList smallfont();
 	static XmFontList fontlist();

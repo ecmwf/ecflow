@@ -21,12 +21,13 @@
 #include <map>
 
 #include "VNode.hpp"
-#include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "VFilter.hpp"
 #include "VRepeat.hpp"
 #include "VAttribute.hpp"
+#include "UiLog.hpp"
+#include "UIDebug.hpp"
 
 std::map<std::string,VAttributeType*> VAttributeType::typesMap_;
 std::vector<VAttributeType*> VAttributeType::types_;
@@ -84,17 +85,22 @@ int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
 
     int total=0;
     for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
-    {
-        if(!filter || filter->isSet(it->second))
+    {        
+        if(!filter || filter->isSet(it->second) )
         {
             total+=it->second->num(vnode);
+        }
+        //If the filter contains a forceShow item
+        else if(filter->matchForceShowAttr(vnode,it->second))
+        {
+            total+=1;
         }
     }
 
     return total;
 }
 
-VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilter *filter)
+VAttributeType* VAttributeType::getType(const VNode *vnode,int absRowInFilter,AttributeFilter *filter)
 {
     if(!vnode)
         return NULL;
@@ -105,7 +111,16 @@ VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilt
         if(!filter || filter->isSet(it->second))
         {
             int size=it->second->num(vnode);
-            if(row-totalRow >=0 && row-totalRow < size)
+            if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
+            {
+                return it->second;
+            }
+            totalRow+=size;
+        }
+        else if(filter && filter->matchForceShowAttr(vnode,it->second))
+        {
+            int size=1;
+            if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
             {
                 return it->second;
             }
@@ -116,7 +131,7 @@ VAttributeType* VAttributeType::getType(const VNode *vnode,int row,AttributeFilt
     return NULL;
 }
 
-bool VAttributeType::getData(VNode *vnode,int row,VAttributeType* &type,QStringList& data,AttributeFilter *filter)
+bool VAttributeType::getData(VNode *vnode,int absRowInFilter,VAttributeType* &type,QStringList& data,AttributeFilter *filter)
 {
     type=0;
 
@@ -129,33 +144,41 @@ bool VAttributeType::getData(VNode *vnode,int row,VAttributeType* &type,QStringL
         if(!filter || filter->isSet(it->second))
         {
             int size=0;
-            if(it->second->getData(vnode,row-totalRow,size,data))
+            if(it->second->getData(vnode,absRowInFilter-totalRow,size,data))
             {
                 type=it->second;
                 return true;
             }
             totalRow+=size;
         }
-    }
-
-    return false;
-}
-
-bool VAttributeType::getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter)
-{
-    if(VAttributeType* va=find(type))
-    {
-        if(!filter || filter->isSet(va))
+        else if(filter && filter->matchForceShowAttr(vnode,it->second))
         {
-            int size=0;
-            return va->getData(vnode,row,size,data);
+            if(absRowInFilter == totalRow)
+            {
+                VAttribute* a=filter->forceShowAttr();
+                Q_ASSERT(a);
+                data=a->data();
+                type=it->second;
+                return true;
+            }
+            totalRow+=1;
         }
     }
+
     return false;
 }
 
+bool VAttributeType::getData(const std::string& type,VNode* vnode,int rowInType,QStringList& data)
+{
+    if(VAttributeType* va=find(type))
+    {       
+        int size=0;
+        return va->getData(vnode,rowInType,size,data);
+    }
+    return false;
+}
 
-int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filter)
+int VAttributeType::getLineNum(const VNode *vnode,int absRowInFilter,AttributeFilter *filter)
 {
     if(!vnode)
         return 1;
@@ -166,17 +189,20 @@ int VAttributeType::getLineNum(const VNode *vnode,int row,AttributeFilter *filte
         if(!filter || filter->isSet(it->second))
         {
             int size=it->second->num(vnode);
-            if(row-totalRow >=0 && row-totalRow < size)
+            if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
             {
-                return it->second->lineNum(vnode,row-totalRow);
+                return it->second->lineNum(vnode,absRowInFilter-totalRow);
             }
             totalRow+=size;
         }
     }
 
+    //TODO:: add forceShowAttr
+
     return 1;
 }
 
+#if 0
 int VAttributeType::getRow(const VNode *vnode,int row,AttributeFilter *filter)
 {
     if(!vnode)
@@ -207,31 +233,41 @@ int VAttributeType::getRow(const VNode *vnode,int row,AttributeFilter *filter)
 
     return -1;
 }
+#endif
 
-bool VAttributeType::findByAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter,VAttributeType* &type,int& indexInType)
+VItemTmp_ptr VAttributeType::itemForAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter) //,VAttributeType* &type,int& indexInType)
 {
     if(!vnode)
-        return false;
+        return VItemTmp_ptr();
 
     int totalNum=0;
     for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
     {
         if(!filter || filter->isSet(it->second))
         {
-            int size=it->second->num(vnode);;
+            int size=it->second->num(vnode);
             if(absIndex-totalNum >=0 && absIndex-totalNum < size)
             {
-                indexInType=absIndex-totalNum;
-                type=it->second;
-                return true;
+                int indexInType=absIndex-totalNum;
+                return VItemTmp::create(new VAttribute(const_cast<VNode*>(vnode),it->second,indexInType));
+            }
+            totalNum+=size;
+        }
+        else if(filter && filter->matchForceShowAttr(vnode,it->second))
+        {
+            int size=1;
+            if(absIndex-totalNum >=0 && absIndex-totalNum < size)
+            {
+                VAttribute* a=filter->forceShowAttr();
+                Q_ASSERT(a);
+                return VItemTmp::create(a->clone());
             }
             totalNum+=size;
         }
     }
 
-    return false;
+    return VItemTmp_ptr();
 }
-
 
 //Returns the absolute index of the given attribute within the whole list of attributes of a given node.
 int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
@@ -243,7 +279,8 @@ int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
     if(!vnode)
         return -1;
 
-    if(filter && !filter->isSet(a->type()))
+    if(filter && !filter->isSet(a->type()) &&
+       a->sameContents(filter->forceShowAttr()) == false)
         return -1;
 
     int absIndex=-1;
@@ -251,8 +288,13 @@ int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
     {
         if(a->type() == it->second)
         {
-           int idx=it->second->indexOf(a);
-           return (idx != -1)?(absIndex+idx+1):-1;
+            int idx=-1;
+            if(filter && a->sameContents(filter->forceShowAttr()))
+                idx=0;
+            else
+                idx=it->second->indexOf(a);
+
+            return (idx != -1)?(absIndex+idx+1):-1;
         }
 
         if(!filter || filter->isSet(it->second))
@@ -260,6 +302,10 @@ int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
             int size=it->second->num(vnode);
             if(size > 0)
                 absIndex+=size;
+        }
+        else if(filter->matchForceShowAttr(vnode,it->second))
+        {
+            absIndex+=1;
         }
     }
 
@@ -365,6 +411,7 @@ VMeterAttribute::VMeterAttribute(const std::string& n) :
     dataCount_=6;
     searchKeyToData_["meter_name"]=NameIndex;
     searchKeyToData_["meter_value"]=ValueIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VMeterAttribute::num(const VNode *vnode)
@@ -386,21 +433,21 @@ bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VMeterAttribute::getData -->");
+    UiLog().dbg() << "VMeterAttribute::getData -->";
 #endif
     const std::vector<Meter>&  v=node->meters();
     if(row >=0 && row < v.size())
     {
         getData(v[row],data);
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  data=" + data.join(",").toStdString());
+    UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
 
     size=v.size();
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
     return false;
 }
@@ -507,6 +554,7 @@ VLabelAttribute::VLabelAttribute(const std::string& n) :
     dataCount_=3;
     searchKeyToData_["label_name"]=NameIndex;
     searchKeyToData_["label_value"]=ValueIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VLabelAttribute::num(const VNode *vnode)
@@ -528,21 +576,21 @@ bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VLabelAttribute::getData -->");
+    UiLog().dbg() << "VLabelAttribute::getData -->";
 #endif
     const std::vector<Label>&  v=node->labels();
     if(row >=0 && row < v.size())
     {
         getData(v[row],data);
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  data=" + data.join(",").toStdString());
+    UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
     size=v.size();
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
 
     return false;
@@ -630,7 +678,7 @@ bool VLabelAttribute::itemData(const VNode* vnode,int index,QStringList& data)
         return false;
 
     const std::vector<Label>& v=node->labels();
-    assert(index >=0 && index < v.size());
+    UI_ASSERT(index >=0 && index < v.size(), "Index: " << UIDebug::longToString(index) << " v.size: " << v.size());
     getData(v[index],data);
     return true;
 }
@@ -676,6 +724,7 @@ VEventAttribute::VEventAttribute(const std::string& n) :
     dataCount_=3;
     searchKeyToData_["event_name"]=NameIndex;
     searchKeyToData_["event_value"]=ValueIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VEventAttribute::num(const VNode *vnode)
@@ -697,7 +746,7 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
             return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VEventAttribute::getData -->");
+    UiLog().dbg() << "VEventAttribute::getData -->";
 #endif
     const std::vector<Event>& v=node->events();
     if(row >=0 && row < v.size())
@@ -711,13 +760,13 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 #endif
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  data=" + data.join(",").toStdString());
+    UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
     size=v.size();
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
 
     return false;
@@ -784,7 +833,7 @@ bool VEventAttribute::itemData(const VNode* vnode,int index,QStringList& data)
         return false;
 
     const std::vector<Event>& v=node->events();
-    assert(index >=0 && index < v.size());
+    UI_ASSERT(index >=0 && index < v.size(), "Index: " << UIDebug::longToString(index) << " v.size: " << v.size());
     getData(v[index],data);
     return true;
 }
@@ -822,6 +871,7 @@ VGenvarAttribute::VGenvarAttribute(const std::string& n) : VAttributeType(n)
     searchKeyToData_["var_name"]=NameIndex;
     searchKeyToData_["var_value"]=ValueIndex;
     searchKeyToData_["var_type"]=TypeIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VGenvarAttribute::num(const VNode *vnode)
@@ -832,7 +882,7 @@ int VGenvarAttribute::num(const VNode *vnode)
 bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VGenvarAttribute::getData -->");
+    UiLog().dbg() << "VGenvarAttribute::getData -->";
 #endif
 
     std::vector<Variable> genV;
@@ -845,14 +895,14 @@ bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         //        QString::fromStdString(genV.at(row).name()) <<
         //        QString::fromStdString(genV.at(row).theValue());
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  data=" + data.join(",").toStdString());
+    UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
     size=genV.size();
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
     return false;
 }
@@ -925,6 +975,7 @@ VVarAttribute::VVarAttribute(const std::string& n) : VAttributeType(n)
     searchKeyToData_["var_name"]=NameIndex;
     searchKeyToData_["var_value"]=ValueIndex;
     searchKeyToData_["var_type"]=TypeIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VVarAttribute::num(const VNode *vnode)
@@ -935,7 +986,7 @@ int VVarAttribute::num(const VNode *vnode)
 bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VVarAttribute::getData -->");
+    UiLog().dbg() << "VVarAttribute::getData -->";
 #endif
 
     if(vnode->isServer())
@@ -946,12 +997,12 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         {
             getData(v[row],data);
 #ifdef _UI_ATTR_DEBUG
-            UserMessage::debug("  data=" + data.join(",").toStdString());
+            UiLog().dbg() << "  data=" << data.join(",");
 #endif
             return true;
         }
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  size=" + QString::number(size).toStdString());
+        UiLog().dbg() << "  size=" << size;
 #endif
         size=v.size();
     }
@@ -966,12 +1017,12 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         {
             getData(v[row],data);
 #ifdef _UI_ATTR_DEBUG
-            UserMessage::debug("  data=" + data.join(",").toStdString());
+            UiLog().dbg() << "  data=" << data.join(",");
 #endif
             return true;
         }
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  size=" + QString::number(size).toStdString());
+        UiLog().dbg() << "  size=" << size;
 #endif
         size=v.size();
     }
@@ -1092,6 +1143,7 @@ VLimitAttribute::VLimitAttribute(const std::string& n) : VAttributeType(n)
     searchKeyToData_["limit_name"]=NameIndex;
     searchKeyToData_["limit_value"]=ValueIndex;
     searchKeyToData_["limit_max"]=MaxIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VLimitAttribute::num(const VNode *vnode)
@@ -1113,7 +1165,7 @@ bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VLimitAttribute::getData -->");
+    UiLog().dbg() << "VLimitAttribute::getData -->";
 #endif
 
     const std::vector<limit_ptr>& v=node->limits();
@@ -1121,14 +1173,14 @@ bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     {
         getData(v[row],data);
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  data=" + data.join(",").toStdString());
+        UiLog().dbg() << "  data=" << data.join(",");
 #endif
 
         return true;
     }
     size=v.size();
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
 
     return false;
@@ -1194,7 +1246,7 @@ bool VLimitAttribute::itemData(const VNode* vnode,int index,QStringList& data)
         return false;
 
     const std::vector<limit_ptr>& v=node->limits();
-    assert(index >=0 && index < v.size()); 
+    UI_ASSERT(index >=0 && index < v.size(), "index = " << UIDebug::longToString(index) << " v.size: " << UIDebug::longToString(v.size()));
     getData(v[index],data);
     return true;
 }
@@ -1232,6 +1284,7 @@ VLimiterAttribute::VLimiterAttribute(const std::string& n) : VAttributeType(n)
     dataCount_=3;
     searchKeyToData_["limiter_name"]=NameIndex;
     searchKeyToData_["limiter_path"]=PathIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VLimiterAttribute::num(const VNode *vnode)
@@ -1253,20 +1306,20 @@ bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VLimiterAttribute::getData -->");
+    UiLog().dbg() << "VLimiterAttribute::getData -->";
 #endif
     const std::vector<InLimit>& v=node->inlimits();
     if(row >=0 && row < v.size())
     {
         getData(v[row],data);
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  data=" + data.join(",").toStdString());
+        UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
     size=v.size();
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
     return false;
 }
@@ -1368,6 +1421,7 @@ VTriggerAttribute::VTriggerAttribute(const std::string& n) : VAttributeType(n)
     dataCount_=3;
     searchKeyToData_["trigger_type"]=CompleteIndex;
     searchKeyToData_["trigger_expression"]=ExprIndex;
+    searchKeyToData_["name"]=CompleteIndex;
 }
 
 int VTriggerAttribute::num(const VNode *vnode)
@@ -1393,7 +1447,7 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VTriggerAttribute::getData -->");
+    UiLog().dbg() << "VTriggerAttribute::getData -->";
 #endif
 
     Expression* eT=node->get_trigger();
@@ -1417,7 +1471,7 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
         data << qName_;
         data << "0" << QString::fromStdString(eT->expression());
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  data=" + data.join(",").toStdString());
+        UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
@@ -1426,7 +1480,7 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
         data << qName_;
         data << "1" << QString::fromStdString(eC->expression());
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  data=" + data.join(",").toStdString());
+        UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
@@ -1435,7 +1489,7 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
     size+=(eC)?1:0;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
     return false;
 }
@@ -1560,6 +1614,7 @@ VTimeAttribute::VTimeAttribute(const std::string& n) : VAttributeType(n)
 {
     dataCount_=2;
     searchKeyToData_["time_name"]=NameIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VTimeAttribute::num(const VNode *vnode)
@@ -1581,7 +1636,7 @@ bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VTimeAttribute::getData -->");
+    UiLog().dbg() << "VTimeAttribute::getData -->";
 #endif
 
     const std::vector<ecf::TimeAttr>& tV=node->timeVec();
@@ -1598,14 +1653,14 @@ bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
             getData(cV[row-tV.size()-tdV.size()],data);
 
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  data=" + data.join(",").toStdString());
+        UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
 
     size=tV.size()+tdV.size()+ cV.size();
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
     return false;
 }
@@ -1755,6 +1810,7 @@ VDateAttribute::VDateAttribute(const std::string& n) : VAttributeType(n)
 {
     dataCount_=2;
     searchKeyToData_["date_name"]=NameIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VDateAttribute::num(const VNode *vnode)
@@ -1776,7 +1832,7 @@ bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VDateAttribute::getData -->");
+    UiLog().dbg() << "VDateAttribute::getData -->";
 #endif
 
     const std::vector<DateAttr>& dV=node->dates();
@@ -1790,14 +1846,14 @@ bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
             getData(dayV[row-dV.size()],data);
 
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  data=" + data.join(",").toStdString());
+        UiLog().dbg() << "  data=" << data.join(",");
 #endif
 
         return true;
     }
     size=dV.size()+dayV.size();
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
     return false;
 }
@@ -1928,6 +1984,7 @@ VRepeatAttribute::VRepeatAttribute(const std::string& n) : VAttributeType(n)
     dataCount_=7;
     searchKeyToData_["repeat_name"]=NameIndex;
     searchKeyToData_["repeat_value"]=ValueIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VRepeatAttribute::num(const VNode *vnode)
@@ -1949,7 +2006,7 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VRepeatAttribute::getData -->");
+    UiLog().dbg() << "VRepeatAttribute::getData -->";
 #endif
 
     const Repeat& r=node->repeat();
@@ -1957,13 +2014,13 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     {
         getData(r,data);
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  data=" + data.join(",").toStdString());
+        UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
     size=(r.empty())?0:1;
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
     return false;
 }
@@ -2084,7 +2141,10 @@ private:
 
 VLateAttribute::VLateAttribute(const std::string& n) : VAttributeType(n)
 {
-    dataCount_=2;
+    dataCount_=2;   
+    searchKeyToData_["late_name"]=NameIndex;
+    searchKeyToData_["late_type"]=TypeIndex;
+    searchKeyToData_["name"]=NameIndex;
 }
 
 int VLateAttribute::num(const VNode *vnode)
@@ -2106,7 +2166,7 @@ bool VLateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("VLateAttribute::getData -->");
+    UiLog().dbg() << "VLateAttribute::getData -->";
 #endif
 
     ecf::LateAttr *late=node->get_late();
@@ -2114,13 +2174,13 @@ bool VLateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
     {
         getData(late,data);
 #ifdef _UI_ATTR_DEBUG
-        UserMessage::debug("  data=" + data.join(",").toStdString());
+        UiLog().dbg() << "  data=" << data.join(",");
 #endif
         return true;
     }
     size=(late)?1:0;
 #ifdef _UI_ATTR_DEBUG
-    UserMessage::debug("  size=" + QString::number(size).toStdString());
+    UiLog().dbg() << "  size=" << size;
 #endif
     return false;
 }

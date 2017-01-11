@@ -25,7 +25,6 @@
 #include "Signal.hpp"
 #include "System.hpp"
 #include "SuiteChanged.hpp"
-#include "JobProfiler.hpp"
 
 using namespace ecf;
 using namespace std;

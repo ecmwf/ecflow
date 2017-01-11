@@ -228,7 +228,8 @@ public:
    /// if  createNodesAsNeeded = true, and the path does not exist on this defs
    /// then the missing path nodes are created.
    /// In both the client and this defs the trigger references and cleared first.
-   bool replaceChild(const std::string& path,
+   /// Returns the changed node, or NULL and error message set.
+   node_ptr replaceChild(const std::string& path,
             const defs_ptr& clientDef,
             bool createNodesAsNeeded,
             bool force,
@@ -246,10 +247,14 @@ public:
    void save_as_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
    void save_checkpt_as_string(std::string& check_pt) const;
 
+   void save_as_filename(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
+   void save_as_string(std::string&) const;
+
    /// Function to restore the defs from a check point file.
    /// If the Defs file has content, this is deleted first, i.e. suites, externs,
    /// Can throw an exception
    void restore_from_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive());
+   void restore_from_string(const std::string& );
 
    /// Delete suites, externs, client handles, reset suspended, and locate state
    /// etc but Server environment left as is:
@@ -355,6 +360,7 @@ public:
    void notify(const std::vector<ecf::Aspect::Type>& aspects);
    void attach(AbstractObserver*);
    void detach(AbstractObserver*);
+   bool is_observed(AbstractObserver*) const; // return true if we have this observer in our list
    bool in_notification() const { return in_notification_;}
 
 private:

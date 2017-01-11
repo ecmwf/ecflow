@@ -9,7 +9,6 @@
 # nor does it submit to any jurisdiction.
 #============================================================================
 
-
 # Environment variables from the configuration step
 ECFLOWUI_BT=@UI_BACKTRACE@
 ECFLOWUI_BT_EMAIL_ADDRESSES=@UI_BACKTRACE_EMAIL_ADDRESSES@
@@ -32,7 +31,6 @@ cleanup(){
         exec 2>&6
     fi
 
-
     if [ "$status" -eq "0" ]
     then
         echo "$(basename $0): $1 (OK) (line $2), exit status $status, starting 'cleanup'"
@@ -42,6 +40,7 @@ cleanup(){
         if [ -e $ECFLOWUI_LOGFILE ] ; then
 
             TAILNUM=50
+            UI_TAILNUM=50
 
             if [ $ECFLOWUI_BT != "no" ] ; then
                 # find the backtrace tag if there
@@ -69,6 +68,13 @@ cleanup(){
                 echo ""                                          >> $EFLOWUI_LOGTAIL
                 tail -$TAILNUM $ECFLOWUI_LOGFILE                 >> $EFLOWUI_LOGTAIL
 
+                #Add the last lines from the user interaction log file
+                if [ -e $ECFLOWUI_UI_LOGFILE ] ; then
+                    echo ""                                      >> $EFLOWUI_LOGTAIL
+                    echo "Last $UI_TAILNUM lines of user interaction log file:" >> $EFLOWUI_LOGTAIL
+                    tail -${UI_TAILNUM} $ECFLOWUI_UI_LOGFILE     >> $EFLOWUI_LOGTAIL
+                fi
+
                 addr=$(echo $ECFLOWUI_BT_EMAIL_ADDRESSES | sed 's/,/ /g')
                 mail -s "$ecfuimsg"  $addr < $EFLOWUI_LOGTAIL
                 rm -f $EFLOWUI_LOGTAIL
@@ -76,8 +82,14 @@ cleanup(){
             else
                 echo "Last $TAILNUM lines of log file:"
                 tail -$TAILNUM $ECFLOWUI_LOGFILE
-            fi
 
+                #Add the last lines from the user interaction log file
+                if [ -e $ECFLOWUI_UI_LOGFILE ] ; then
+                    echo ""
+                    echo "Last $UI_TAILNUM lines of user interaction log file:"
+                    tail -${UI_TAILNUM} $ECFLOWUI_UI_LOGFILE
+                fi
+            fi
         fi
     fi
 
@@ -127,6 +139,11 @@ do
 			fi
 			echo "Starting a temporary session: host=$ECFUI_TEMP_SESSION_HOST, port=$ECFUI_TEMP_SESSION_PORT"
 			shift 2
+			;;
+
+		-title)
+			export ECFUI_TITLE=$2
+            shift
 			;;
 
 		-h)
@@ -217,8 +234,10 @@ fi
 
 
 # Where to write the log file to
-ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
+export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
 
+# Where to write the user interaction log file to
+export ECFLOWUI_UI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 
 #-----------------------------------------------------------
 # Close tty and redirect stdout to a file?

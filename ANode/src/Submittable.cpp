@@ -317,9 +317,10 @@ EcfFile Submittable::locatedEcfFile() const
       return EcfFile( const_cast<Submittable*>(this), genvar_ecfscript.theValue() );
    }
    else {
-      std::stringstream ss; ss << "   ECF_SCRIPT(" << genvar_ecfscript.theValue() << ") does not exist:\n";
-      reasonEcfFileNotFound += ss.str();
-   }
+      reasonEcfFileNotFound += "   ECF_SCRIPT(";
+      reasonEcfFileNotFound += genvar_ecfscript.theValue();
+      reasonEcfFileNotFound += ") does not exist:\n";
+    }
 
    // Caution: This is not used in operations or research, equally is has not been tested.
    std::string ecf_fetch_cmd;
@@ -332,8 +333,9 @@ EcfFile Submittable::locatedEcfFile() const
          return EcfFile( const_cast<Submittable*>(this), ecf_fetch_cmd, EcfFile::ECF_FETCH_CMD);
       }
       else {
-         std::stringstream ss; ss << "   Variable ECF_FETCH(" << ecf_fetch_cmd << ") defined, but variable substitution has failed:\n";
-         reasonEcfFileNotFound += ss.str();
+         reasonEcfFileNotFound += "   Variable ECF_FETCH(";
+         reasonEcfFileNotFound +=  ecf_fetch_cmd;
+         reasonEcfFileNotFound +=  ") defined, but variable substitution has failed:\n";
          throw std::runtime_error( reasonEcfFileNotFound ) ;
       }
    }
@@ -351,8 +353,9 @@ EcfFile Submittable::locatedEcfFile() const
          return EcfFile( const_cast<Submittable*>(this), ecf_script_cmd, EcfFile::ECF_SCRIPT_CMD);
       }
       else {
-         std::stringstream ss; ss << "   Variable ECF_SCRIPT_CMD(" << ecf_script_cmd << ") defined, but variable substitution has failed:\n";
-         reasonEcfFileNotFound += ss.str();
+         reasonEcfFileNotFound += "   Variable ECF_SCRIPT_CMD(";
+         reasonEcfFileNotFound += ecf_script_cmd;
+         reasonEcfFileNotFound += ") defined, but variable substitution has failed:\n";
          throw std::runtime_error( reasonEcfFileNotFound ) ;
       }
    }
@@ -371,8 +374,9 @@ EcfFile Submittable::locatedEcfFile() const
          // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
          std::string searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
          if ( searchResult.empty()) {
-            std::stringstream ss; ss << "   Search of directory ECF_FILES(" << ecf_filesDirectory << ") failed:\n";
-            reasonEcfFileNotFound += ss.str();
+            reasonEcfFileNotFound += "   Search of directory ECF_FILES(";
+            reasonEcfFileNotFound += ecf_filesDirectory;
+            reasonEcfFileNotFound += ") failed:\n";
          }
          else  return EcfFile(const_cast<Submittable*>(this), searchResult);
       }
@@ -390,12 +394,13 @@ EcfFile Submittable::locatedEcfFile() const
             }
             else return EcfFile(const_cast<Submittable*>(this), searchResult);
          }
-
-         std::stringstream ss;
-         ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
-         if (original_ecf_filesDirectory != ecf_filesDirectory )
-            ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") after variable substitution does not exist:\n";
-         reasonEcfFileNotFound += ss.str();
+         else {
+            std::stringstream ss;
+            ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
+            if (original_ecf_filesDirectory != ecf_filesDirectory )
+               ss << "   Directory ECF_FILES(" << ecf_filesDirectory << ") after variable substitution does not exist:\n";
+            reasonEcfFileNotFound += ss.str();
+         }
       }
    }
    else {
@@ -411,22 +416,26 @@ EcfFile Submittable::locatedEcfFile() const
       // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
       std::string searchResult = File::backwardSearch( ecf_home, theAbsNodePath, script_extension() );
       if ( searchResult.empty()) {
-         std::stringstream ss; ss << "   Search of directory ECF_HOME(" << ecf_home << ") failed:\n";
-         reasonEcfFileNotFound += ss.str();
+         reasonEcfFileNotFound += "   Search of directory ECF_HOME(";
+         reasonEcfFileNotFound += ecf_home;
+         reasonEcfFileNotFound += ") failed:\n";
       }
       else {
          return EcfFile(const_cast<Submittable*>(this), searchResult);
       }
    }
    else {
-      std::stringstream ss; ss << "   Directory ECF_HOME(" << ecf_home << ") does not exist:\n";
-      reasonEcfFileNotFound += ss.str();
+      reasonEcfFileNotFound += "   Directory ECF_HOME(";
+      reasonEcfFileNotFound += ecf_home;
+      reasonEcfFileNotFound += ") does not exist:\n";
    }
 
    // failed to find  .ecf file
-   std::stringstream ss;
-   ss << "   Script for " << theAbsNodePath << " can not be found:\n" << reasonEcfFileNotFound;
-   throw std::runtime_error( ss.str() ) ;
+   std::string error_msg = "   Script for ";
+   error_msg += theAbsNodePath;
+   error_msg += " can not be found:\n";
+   error_msg += reasonEcfFileNotFound;
+   throw std::runtime_error( error_msg ) ;
 }
 
 void Submittable::set_jobs_password(const std::string& p)
@@ -511,14 +520,16 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam)
 {
    try {
       // Locate the ecf files corresponding to the task.
-      EcfFile ecf_file = locatedEcfFile();
+      // Assign lifetime of EcfFile to JobsParam.
+      // Minimise memory allocation/deallocation with Job lines and allow include file caching
+      jobsParam.set_ecf_file( locatedEcfFile() );
 
       // Pre-process ecf file (i.e expand includes, remove comments,manual) and perform
       // variable substitution. This will then form the '.job' files.
       // If the job file already exist it is overridden
       // The job file SHOULD be referenced in ECF_JOB_CMD
       try {
-         const std::string& job_size = ecf_file.create_job( jobsParam );
+         const std::string& job_size = jobsParam.ecf_file().create_job( jobsParam );
 
          //... make sure ECF_PASS is set on the task, This is substituted in <head.h> file
          //... and hence must be done before variable substitution in ECF_/JOB file
@@ -561,7 +572,7 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam)
 bool Submittable::non_script_based_job_submission(JobsParam& jobsParam)
 {
    // No script(i.e .ecf file), hence it is assumed the ECF_JOB_CMD will call:
-   //  ECF_PASS=%ECF_PASS%;ECF_PORT=%ECF_PORT%;ECF_NODE=%ECF_NODE%;ECF_NAME=%ECF_NAME%;ECF_TRYNO=%ECF_TRYNO%;
+   //  ECF_PASS=%ECF_PASS%;ECF_PORT=%ECF_PORT%;ECF_HOST=%ECF_HOST%;ECF_NAME=%ECF_NAME%;ECF_TRYNO=%ECF_TRYNO%;
    //  ecflow_client --init %%;
    //     . some user script, or in-line command, should use full path.;
    //     ecflow_client (--meter,--event,--label);
@@ -914,14 +925,15 @@ void Submittable::set_genvar_ecfrid(const std::string& value)
 // Check the variable names. i.e we know they are valid
 SubGenVariables::SubGenVariables(const Submittable* sub)
 : submittable_(sub),
-  genvar_task_("TASK", "", false),
-  genvar_ecfrid_(Str::ECF_RID(), "", false),
-  genvar_ecftryno_(Str::ECF_TRYNO(), "", false),
-  genvar_ecfname_(Str::ECF_NAME(), "", false),
-  genvar_ecfpass_(Str::ECF_PASS(), "", false),
   genvar_ecfjob_(Str::ECF_JOB(), "", false),
   genvar_ecfjobout_(Str::ECF_JOBOUT(), "", false),
-  genvar_ecfscript_(Str::ECF_SCRIPT(), "", false) {}
+  genvar_ecftryno_(Str::ECF_TRYNO(), "", false),
+  genvar_task_("TASK", "", false),
+  genvar_ecfpass_(Str::ECF_PASS(), "", false),
+  genvar_ecfscript_(Str::ECF_SCRIPT(), "", false),
+  genvar_ecfname_(Str::ECF_NAME(), "", false),
+  genvar_ecfrid_(Str::ECF_RID(), "", false)
+  {}
 
 void SubGenVariables::update_generated_variables() const
 {
@@ -997,14 +1009,14 @@ void SubGenVariables::update_dynamic_generated_variables(const std::string& ecf_
 
 const Variable& SubGenVariables::findGenVariable(const std::string& name) const
 {
-   if (genvar_task_.name() == name) return genvar_task_;
-   if (genvar_ecftryno_.name() == name) return genvar_ecftryno_;
-   if (genvar_ecfjob_.name() == name) return genvar_ecfjob_;
-   if (genvar_ecfscript_.name() == name) return genvar_ecfscript_;
-   if (genvar_ecfjobout_.name() == name) return genvar_ecfjobout_;
-   if (genvar_ecfrid_.name() == name) return genvar_ecfrid_;
-   if (genvar_ecfname_.name() == name) return genvar_ecfname_;
-   if (genvar_ecfpass_.name() == name) return genvar_ecfpass_;
+   if (genvar_ecfjob_.name() == name)     return genvar_ecfjob_;
+   if (genvar_ecfjobout_.name() == name)  return genvar_ecfjobout_;
+   if (genvar_ecftryno_.name() == name)   return genvar_ecftryno_;
+   if (genvar_ecfname_.name() == name)    return genvar_ecfname_;
+   if (genvar_task_.name() == name)       return genvar_task_;
+   if (genvar_ecfpass_.name() == name)    return genvar_ecfpass_;
+   if (genvar_ecfscript_.name() == name)  return genvar_ecfscript_;
+   if (genvar_ecfrid_.name() == name)     return genvar_ecfrid_;
    return Variable::EMPTY();
 }
 

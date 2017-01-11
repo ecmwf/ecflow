@@ -2,12 +2,12 @@
 <span class="k">case</span> <span class="nv">$ECF_PORT</span> in
 0 <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;sms is leading&quot;</span>
     <span class="k">if</span> <span class="o">[[</span> <span class="nv">$ECF_FOLLOW</span> <span class="o">=</span> ECF <span class="o">]]</span> ; <span class="k">then </span>
-<span class="k">    </span><span class="nv">ECF_NAME</span><span class="o">=</span><span class="nv">$SMSNAME</span>; <span class="nv">ECF_NODE</span><span class="o">=</span><span class="nv">$SMSNODE</span>; <span class="nv">ECF_PASS</span><span class="o">=</span><span class="nv">$SMSPASS</span>; <span class="nv">ECF_PORT</span><span class="o">=</span>%ECF_PORT:0%
+<span class="k">    </span><span class="nv">ECF_NAME</span><span class="o">=</span><span class="nv">$SMSNAME</span>; <span class="nv">ECF_HOST</span><span class="o">=</span><span class="nv">$SMSNODE</span>; <span class="nv">ECF_PASS</span><span class="o">=</span><span class="nv">$SMSPASS</span>; <span class="nv">ECF_PORT</span><span class="o">=</span>%ECF_PORT:0%
     <span class="k">fi</span>
 ;;
 * <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;welcome into ecflow world&quot;</span>
    <span class="nv">PATH</span><span class="o">=</span>/usr/local/apps/current/bin:<span class="nv">$PATH</span> <span class="c"># or call &quot;use ecflow&quot;</span>
-   <span class="nv">ECF_NAME</span><span class="o">=</span>%ECF_NAME:0%; <span class="nv">ECF_NODE</span><span class="o">=</span>%ECF_NODE:0%; <span class="nv">ECF_PASS</span><span class="o">=</span>%ECF_PASS:0%
+   <span class="nv">ECF_NAME</span><span class="o">=</span>%ECF_NAME:0%; <span class="nv">ECF_HOST</span><span class="o">=</span>%ECF_HOST:0%; <span class="nv">ECF_PASS</span><span class="o">=</span>%ECF_PASS:0%
    <span class="nv">ECF_TRYNO</span><span class="o">=</span>%ECF_TRYNO:0% 
    <span class="nv">ECF_HOSTFILE</span><span class="o">=</span><span class="nv">$HOME</span>/.ecfhostfile 
    <span class="nv">ECF_JOBOUT</span><span class="o">=</span>%ECF_JOBOUT:0%
@@ -16,7 +16,7 @@
    <span class="k">if</span> <span class="o">[[</span> <span class="nv">$ECF_FOLLOW</span> !<span class="o">=</span> SMS <span class="o">]]</span> ; <span class="k">then </span>
 <span class="k">     </span><span class="nb">export </span><span class="nv">NO_SMS</span><span class="o">=</span>1 <span class="nv">NOSMS</span><span class="o">=</span>1; 
    <span class="k">else</span>
-<span class="k">     </span><span class="nv">SMSNODE</span><span class="o">=</span><span class="nv">$ECF_NODE</span> <span class="nv">SMSPASS</span><span class="o">=</span>ECF_PASS <span class="nv">SMS_PROG</span><span class="o">=</span>314159
+<span class="k">     </span><span class="nv">SMSNODE</span><span class="o">=</span><span class="nv">$ECF_HOST</span> <span class="nv">SMSPASS</span><span class="o">=</span>ECF_PASS <span class="nv">SMS_PROG</span><span class="o">=</span>314159
    <span class="k">fi</span>
    <span class="c"># export ECF_DEBUG_CLIENT=1</span>
 <span class="k">function  </span>smsabort <span class="o">{</span> 

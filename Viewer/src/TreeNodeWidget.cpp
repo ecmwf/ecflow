@@ -21,6 +21,7 @@
 #include "VFilter.hpp"
 #include "VConfig.hpp"
 #include "VSettings.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include "FilterWidget.hpp"
 
@@ -98,6 +99,8 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	//The node status filter is exposed via a menu. So we need a reference to it.
 	states_=filterDef_->nodeState();
 
+    viewHolder_->setObjectName("h");
+    WidgetNameProvider::nameChildren(this);
 }
 
 TreeNodeWidget::~TreeNodeWidget()

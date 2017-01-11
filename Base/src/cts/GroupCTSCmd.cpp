@@ -176,12 +176,28 @@ void GroupCTSCmd::addChild(Cmd_ptr childCmd)
 	cmdVec_.push_back(childCmd);
 }
 
+void GroupCTSCmd::setup_user_authentification(const std::string& user, const std::string& passwd)
+{
+   UserCmd::setup_user_authentification(user,passwd);
+ 	for(size_t i = 0; i < cmdVec_.size(); i++) {
+ 		cmdVec_[i]->setup_user_authentification(user,passwd);
+ 	}
+}
+
+void GroupCTSCmd::setup_user_authentification(AbstractClientEnv& env)
+{
+   UserCmd::setup_user_authentification(env);
+   for(size_t i = 0; i < cmdVec_.size(); i++) {
+      cmdVec_[i]->setup_user_authentification(env);
+   }
+}
+
 void GroupCTSCmd::setup_user_authentification()
 {
    UserCmd::setup_user_authentification();
- 	for(size_t i = 0; i < cmdVec_.size(); i++) {
- 		cmdVec_[i]->setup_user_authentification();
- 	}
+   for(size_t i = 0; i < cmdVec_.size(); i++) {
+      cmdVec_[i]->setup_user_authentification();
+   }
 }
 
 bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const

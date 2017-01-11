@@ -85,6 +85,7 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
    init(argc,argv,"server_environment.cfg");
+   if (debug_) std::cout << dump() << "\n";
 }
 
 // This is ONLY used in test
@@ -106,6 +107,7 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& 
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
    init(argc,argv,path_to_config_file);
+   if (debug_) std::cout << dump() << "\n";
 }
 
 void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_config_file)
@@ -146,6 +148,8 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
    assert(!ecf_backup_checkpt_file_.empty());   // expect name of form "ecf.check.b"
    assert(!log_file_name.empty());              // expect name of form "ecf.log"
    assert(!ecf_white_list_file_.empty());       // expect name of form "ecf.lists"
+   assert(!ecf_passwd_file_.empty());           // expect name of form "ecf.passwd"
+
    std::string port = boost::lexical_cast<std::string>(serverPort_);
 
    // If path is absolute leave as is
@@ -171,6 +175,9 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
 
    if (ecf_white_list_file_ == Str::WHITE_LIST_FILE())
       ecf_white_list_file_ = host_name_.prefix_host_and_port(port,ecf_white_list_file_);
+
+   if (ecf_passwd_file_ == Str::ECF_PASSWD())
+      ecf_passwd_file_ = host_name_.prefix_host_and_port(port,ecf_passwd_file_);
 
    // Change directory to ECF_HOME and check thats its accessible
    change_dir_to_ecf_home_and_check_accesibility();
@@ -304,6 +311,20 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
  		return false;
 	}
 
+#ifdef ECF_SECURE_USER
+ 	if (!ecf_passwd_file_.empty() && fs::exists(ecf_passwd_file_)) {
+	   if (!passwd_file_.load(ecf_passwd_file_, debug(), errorMsg)) {
+ 	      std::cout << "Error: could not parse ECF_PASSWD file " << ecf_passwd_file_ << "\n" << errorMsg << "\n";
+ 	      return false;
+ 	   }
+ 	   if (!passwd_file_.check_at_least_one_user_with_host_and_port(serverHost_,the_port())) {
+         std::cout << "Error: password file " << ecf_passwd_file_;
+         std::cout << " does not contain any users, which match the host and port of this server\n";
+         return false;
+ 	   }
+ 	}
+#endif
+
 	// If the white list file is empty or does not exist, *ON* server start, its perfectly valid
 	// i.e any user is free to access the server
 	if (ecf_white_list_file_.empty()) return true;
@@ -336,7 +357,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	   // The server sets these variable for use by the client. i.e when creating the jobs
 	   // The clients then uses them to communicate back with the server.
   	theRetVec.push_back( std::make_pair(Str::ECF_PORT(), the_port()) );
-	theRetVec.push_back( std::make_pair(std::string("ECF_NODE"), serverHost_) );
+   theRetVec.push_back( std::make_pair(Str::ECF_HOST(), serverHost_) );
+   theRetVec.push_back( std::make_pair(Str::ECF_NODE(), "%ECF_HOST%") );
 
 	theRetVec.push_back( std::make_pair(Str::ECF_HOME(), ecfHome_) );
 	if (Log::instance()) theRetVec.push_back( std::make_pair(std::string("ECF_LOG"), Log::instance()->path()) );
@@ -350,6 +372,9 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	// ECF_CHECKINTERVAL
 
    theRetVec.push_back( std::make_pair(std::string("ECF_LISTS"), ecf_white_list_file_) ); // read only variable, changing it has no effect
+#ifdef ECF_SECURE_USER
+   theRetVec.push_back( std::make_pair(std::string("ECF_PASSWD"), ecf_passwd_file_) );    // read only variable, changing it has no effect
+#endif
 
 	// variables that can be overridden, in the suite definition
 	theRetVec.push_back( std::make_pair(std::string("ECF_JOB_CMD"), ecf_cmd_) );
@@ -385,18 +410,48 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 	return white_list_file_.load(ecf_white_list_file_, debug(), errorMsg );
 }
 
-
-bool ServerEnvironment::authenticateReadAccess(const std::string& user) const
+bool ServerEnvironment::reloadPasswdFile(std::string& errorMsg)
 {
+   if (debug()) cout << "ServerEnvironment::reloadPasswdFile:(" << ecf_passwd_file_ << ") CWD(" << fs::current_path().string() << ")\n";
+   if (ecf_passwd_file_.empty()) {
+      errorMsg += "The ECF_PASSWD file ";
+      errorMsg += ecf_passwd_file_;
+      errorMsg += " has not been specified.";
+      return false;
+   }
+   if (!fs::exists(ecf_passwd_file_)) {
+      errorMsg += "The ECF_PASSWD file ";
+      errorMsg += ecf_passwd_file_;
+      errorMsg += " does not exist. Server CWD : " + fs::current_path().string();
+      return false;
+   }
+
+   // Only override valid users if we successfully opened and parsed file
+   return passwd_file_.load(ecf_passwd_file_, debug(), errorMsg );
+}
+
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd) const
+{
+#ifdef ECF_SECURE_USER
+   if (!passwd_file_.authenticate(user,passwd)) return false;
+#endif
 	// if *NO* users specified then all users are valid
 	return white_list_file_.verify_read_access(user);
 }
-bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& path) const
+
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path) const
 {
+#ifdef ECF_SECURE_USER
+   if (!passwd_file_.authenticate(user,passwd)) return false;
+#endif
    return white_list_file_.verify_read_access(user,path);
 }
-bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::vector<std::string>& paths) const
+
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths) const
 {
+#ifdef ECF_SECURE_USER
+   if (!passwd_file_.authenticate(user,passwd)) return false;
+#endif
    return white_list_file_.verify_read_access(user,paths);
 }
 
@@ -445,8 +500,9 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
          ("ECF_URL_BASE",  po::value<std::string>(&urlBase_)->default_value(Ecf::URL_BASE()), "Defines url base.")
          ("ECF_URL",       po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
          ("ECF_MICRODEF",  po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
-         ("ECF_LISTS",     po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and thier access rights")
-         ("ECF_TASK_THRESHOLD",po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()),"The defaults thresholfs when profiling job generation")
+         ("ECF_LISTS",     po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and their access rights")
+         ("ECF_PASSWD",    po::value<std::string>(&ecf_passwd_file_)->default_value(Str::ECF_PASSWD()), "Path name to passwd file")
+         ("ECF_TASK_THRESHOLD",po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()),"The defaults thresholds when profiling job generation")
          ;
 
       ifstream ifs(path_to_config_file.c_str());
@@ -517,6 +573,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 	char* smsWhiteListFile = getenv("ECF_LISTS");
 	if (smsWhiteListFile) ecf_white_list_file_ = smsWhiteListFile;
 
+   char* passwd = getenv("ECF_PASSWD");
+   if (passwd) ecf_passwd_file_ = passwd;
+
 	if (getenv("ECF_DEBUG_SERVER")) {
 		debug_ = true; // can also be enabled via --debug option
 	}
@@ -583,6 +642,9 @@ std::string ServerEnvironment::dump() const
    ss << "check pt save time alarm " << checkpt_save_time_alarm_ << "\n";
    ss << "Job generation " << jobGeneration_ << "\n";
    ss << "Server host name " << serverHost_ << "\n";
+#ifdef ECF_SECURE_USER
+   ss << "ECF_PASSWD = " << ecf_passwd_file_ << "\n";
+#endif
 #ifdef ECFLOW_MT
    ss << "No of threads used by server " << threads_ << "\n";
 #endif

@@ -18,7 +18,7 @@
 #include <QVBoxLayout>
 
 #include "IconProvider.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <map>
 #include <assert.h>
@@ -220,7 +220,7 @@ void MessageLabel::progress(QString text,int value)
     progBar_->setValue(value);
     progLabel_->setText(text);
 
-    //UserMessage::debug("MessageLabel::progress --> " + QString::number(value).toStdString() + "%");
+    //UiLog().dbg() << "MessageLabel::progress --> " << value << "%";
 }
 
 void MessageLabel::setShowTypeTitle(bool b)

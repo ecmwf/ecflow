@@ -24,7 +24,7 @@ For a full list of available commands type::
 
 * Default host and port is **localhost**:**3141**
 
-* These defaults are overridden by ECF_NODE and ECF_PORT environment variables
+* These defaults are overridden by ECF_HOST and ECF_PORT environment variables
 
 * | This can be further overridden by using --port and --host options
   | and can be used for any of shell level command shown with --help option.
@@ -49,7 +49,7 @@ Client Python Interface
 **What to do:**
 
 | If your :term:`ecflow_server` was started with **ecf_start.sh** and you want to use the shell
-| interface, then set ECF_NODE and ECF_PORT environment variables.
+| interface, then set ECF_HOST and ECF_PORT environment variables.
  
 | It should be noted that, if the server was started with :file:`ecf_start.sh` script
 | then the default "localhost:3141" will be incorrect. If the server was started

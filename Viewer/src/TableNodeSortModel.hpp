@@ -29,7 +29,8 @@ public:
 
 	VInfo_ptr nodeInfo(const QModelIndex&);
 	QModelIndex infoToIndex(VInfo_ptr);
-	QModelIndex nodeToIndex(const VNode *node);
+    QModelIndex nodeToIndex(const VNode *node);
+    void selectionChanged(QModelIndexList lst);
 
 protected:
     bool lessThan(const QModelIndex &left,

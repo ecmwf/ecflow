@@ -320,8 +320,6 @@ BOOST_AUTO_TEST_CASE( test_repeat )
  		Repeat day2 = day;
       BOOST_CHECK_MESSAGE(day == day2,"Copy construction failed");
 
- 		BOOST_CHECK_MESSAGE(day.makeInfiniteInValid(),"Should return true");
- 		BOOST_CHECK_MESSAGE(!day.valid(),"Should return false after makeInfiniteInValid");
 		day.reset();
  		BOOST_CHECK_MESSAGE(day.valid(),"Should return true after reset");
 	}

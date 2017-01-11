@@ -10,8 +10,8 @@
 # =====================================================================
 set -x
 ECF_PORT=$(($(id -u) + 1500))
-ECF_NODE=$(uname -n)
-ECF_LOG=${ECF_NODE}.${ECF_PORT}.log
+ECF_HOST=$(uname -n)
+ECF_LOG=${ECF_HOST}.${ECF_PORT}.log
 ECF_HOME=
 USAGE="$0 -p <ecf_port> -n <ecf_node> -h <ecf_home> -l <ecf_log> -v <viewer>"
 SSH="ssh"
@@ -23,31 +23,31 @@ do
    case $option in
        h) ECF_HOME=$OPTARG;;
        l) ECF_LOG=$OPTARG;;
-       n) ECF_NODE=$OPTARG;;
+       n) ECF_HOST=$OPTARG;;
        p) ECF_PORT=$OPTARG;;
        v) VIEWER=$OPTARG;;
        \? | *) echo $USAGE; exit 2;;
    esac
 done
 
-client="ecflow_client --host=$ECF_NODE --port=$ECF_PORT"
+client="ecflow_client --host=$ECF_HOST --port=$ECF_PORT"
 which ecflow_client || module load ecflow
 if [[ -f $ECF_LOG ]]; then
     ecflow_client --server_load=$ECF_LOG
 elif [[ "$ECF_LOG" = /* ]]; then
-    $SSH $ECF_NODE $O -p $ECF_PORT -l $ECF_LOG -n $ECF_NODE -h $ECF_HOME
+    $SSH $ECF_HOST $O -p $ECF_PORT -l $ECF_LOG -n $ECF_HOST -h $ECF_HOME
 elif [[ -f $ECF_HOME/$ECF_LOG ]]; then
     ecflow_client --server_load=$ECF_HOME/$ECF_LOG
 elif ! `$client --ping`; then
     echo "server is not responding"
     exit 1
-elif [[ $ECF_NODE != $(uname -n) ]]; then # try remote
-    $SSH $ECF_NODE $O -p $ECF_PORT -l $ECF_LOG -n $ECF_NODE -h $ECF_HOME
+elif [[ $ECF_HOST != $(uname -n) ]]; then # try remote
+    $SSH $ECF_HOST $O -p $ECF_PORT -l $ECF_LOG -n $ECF_HOST -h $ECF_HOME
 else
     $client --server_load || $client --server_load=$ECF_LOG || $client --server_load=$ECF_HOME/$ECF_LOG 
 fi
 
-$VIEWER ${ECF_NODE}.${ECF_PORT}.png
+$VIEWER ${ECF_HOST}.${ECF_PORT}.png
 
 echoxx() {
 echo """

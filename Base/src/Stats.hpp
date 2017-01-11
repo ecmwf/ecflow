@@ -59,6 +59,9 @@ struct Stats {
 	unsigned int shutdown_server_;
 	unsigned int halt_server_;
  	unsigned int reload_white_list_file_;
+#ifdef ECF_SECURE_USER
+ 	unsigned int reload_passwd_file_;
+#endif
    unsigned int ping_;
    unsigned int debug_server_on_;
    unsigned int debug_server_off_;
@@ -150,6 +153,9 @@ private:
 		ar & shutdown_server_;
 		ar & halt_server_;
  		ar & reload_white_list_file_;
+#ifdef ECF_SECURE_USER
+ 		ar & reload_passwd_file_;
+#endif
  		ar & ping_;
  	   ar & debug_server_on_;
  	   ar & debug_server_off_;

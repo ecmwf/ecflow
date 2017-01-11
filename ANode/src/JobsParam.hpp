@@ -18,6 +18,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
+#include "EcfFile.hpp"
 
 // Used as a utility class for controlling job creation.
 // Collates data during the node tree traversal
@@ -62,11 +63,18 @@ public:
    void set_next_poll_time(const boost::posix_time::ptime& next_poll_time) { next_poll_time_ = next_poll_time;}
    const boost::posix_time::ptime&  next_poll_time() const { return next_poll_time_;}
    const boost::posix_time::ptime&  time_out_time() const { return time_out_time_;}
+
+   // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
+   // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
+   // Should allow greater child/user command communication.
    void set_timed_out_of_job_generation(const boost::posix_time::ptime& t) { time_out_time_ = t; timed_out_of_job_generation_ = true;}
    bool timed_out_of_job_generation() const { return timed_out_of_job_generation_; }
 
    // ensure that we avoid job generation close the server poll time.
    bool check_for_job_generation_timeout();
+
+   void set_ecf_file(const EcfFile& ecf_file) { ecf_file_ = ecf_file;}
+   EcfFile& ecf_file() { return ecf_file_;}
 
 private:
    bool timed_out_of_job_generation_;
@@ -80,5 +88,6 @@ private:
 	NameValueMap user_edit_variables_;          // Used for User edit
 	boost::posix_time::ptime next_poll_time_;   // Aid early exit from job generation, if it takes to long
 	boost::posix_time::ptime time_out_time_;    // When we actually timed out must >= next_poll_time_
+	EcfFile ecf_file_;                          // keep for lifetime, to optimise memory and cache include file
 };
 #endif

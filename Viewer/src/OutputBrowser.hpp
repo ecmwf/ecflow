@@ -49,6 +49,8 @@ public:
     void clear();
     void loadFile(VFile_ptr file);
     void loadText(QString text,QString fileName,bool resetFile=true);
+    bool isFileLoaded();
+    void saveCurrentFile(QString &fileNameToSaveTo);
 	void adjustHighlighter(QString fileName);
 	void setFontProperty(VProperty* p);
 	void updateFont();

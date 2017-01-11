@@ -167,7 +167,7 @@ host::host( const std::string& name, const std::string& host, int number )
 	 , connected_(false)
 	 , after_command_(true)
 	 , passwd_("-none-")
-	 , timeout_(this, "timeout", 5)
+	 , timeout_(this, "timeout", 30)
 	 , maximum_(this, "maximum", 60)
 	 , drift_(this, "drift", true)
 	 , connect_(this, "connect", false)
@@ -198,8 +198,8 @@ host::host( const std::string& name, const std::string& host, int number )
       gui::add_host(name);
    }
 
-   if (timeout_ < 1) timeout_ = 1;
-   if (maximum_ < 1) maximum_ = 1;
+   if (timeout_ < 30) timeout_ = 30;
+   if (maximum_ < 30) maximum_ = 30;
 
    frequency(timeout_);
 }
@@ -579,12 +579,14 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
    gui::message("%s: fetching file list", this->name());
    std::string content;
    std::auto_ptr<ecf_dir> dir(new ecf_dir());
+   std::string job = n.variable("ECF_JOB");
    // if (use_ecf_out_cmd(n, path, dir.get(), content)) { l.scan(dir.get()); }   else 
-   if (loghost_ != ecf_node::none()) {
+   std::cout << n.full_name() << "\n" << path << "\n";
+   if (n.isCmdFailed()) { // so that local dir content is displayed with .sub file
+     path = job.c_str();
+   } else if (loghost_ != ecf_node::none()) {
       logsvr log_server(loghost_, logport_);
-
       if (log_server.ok()) {
-	// std::auto_ptr<ecf_dir> 
 	std::auto_ptr<ecf_dir> rdir(log_server.getdir(path));
 	if (rdir.get()) {
 	  l.scan(rdir.get());
@@ -593,10 +595,8 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
    }
 
    if (path && direct_read_) {
-
       const char* p = path;
       const char* q = 0;
-
       while ( *p ) {
          if (*p == '/') q = p;
          p++;
@@ -1320,6 +1320,7 @@ void ehost::login()
           }
       }
       else {
+	if (0)  // activate when an new release introduces loss of compat
          if (!check_version(server_version, ecf::Version::raw())) {
             if (!confirm::ask(
 		     false,
@@ -1368,6 +1369,7 @@ tmp_file ehost::file(node& n, std::string name)
 {
   std::string error;
   bool read = direct_read_;
+  std::string no_script = n.variable("ECF_NO_SCRIPT");
   name.erase(std::unique(name.begin(), name.end(), dup_slash()), name.end()); // INT-74
 
   if (name == "ECF_SCRIPT") {
@@ -1375,27 +1377,35 @@ tmp_file ehost::file(node& n, std::string name)
       "check ECF_FILES or ECF_HOME directories, for read access\n"
       "check for file presence and read access below files directory\n"
       "or this may be a 'dummy' task.\n";    
-
+    if (no_script != ecf_node::none())
+      error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
   } else if (name == "ECF_JOB") {
     std::string filename = n.variable(name);
     if (read && (access(filename.c_str(), R_OK) == 0))
       return tmp_file(filename.c_str(), false);
-
-    if (std::string::npos != filename.find(".job0")) {
-	error = "job0: no job to be generated yet!";
-	return tmp_file(error);
-      } else 
-	  error = "no script!\n"
-      "check ECF_HOME,directory for read/write access\n"
-      "check for file presence and read access below\n"
-      "The file may have been deleted\n"
-      "or this may be a 'dummy' task.\n";    
+    else if (no_script != ecf_node::none()) {
+      error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
+    } else if (std::string::npos != filename.find(".job0")) {
+      error = "job0: no job to be generated yet!";
+	// return tmp_file(error);
+    } else 
+      error = "no script!\n"
+	"check ECF_HOME,directory for read/write access\n"
+	"check for file presence and read access below\n"
+	"The file may have been deleted\n"
+	"or this may be a 'dummy' task.\n";    
 
   } else if (boost::algorithm::ends_with(name, ".0")) {
     error = "no output to be expected when TRYNO is 0!\n";
-    return tmp_file(error);
+    // return tmp_file(error);
 
   } else if (name != ecf_node::none()) { // Try logserver
+    if (n.isCmdFailed()) {
+      error = "Submission command Failed! check .sub file, ssh, or queueing system error";
+      // return tmp_file(error);      
+    } else if (no_script != ecf_node::none()) {
+      error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
+    } else {
       std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
       std::string content;
       if (use_ecf_out_cmd(n, name, NULL, content)) {
@@ -1408,6 +1418,7 @@ tmp_file ehost::file(node& n, std::string name)
             if (access(tmp.c_str(), R_OK) == 0) return tmp;
          }
       }
+    }
    }
    if (read && (access(name.c_str(), R_OK) == 0)) {
       return tmp_file(name.c_str(), false);
@@ -1420,11 +1431,11 @@ tmp_file ehost::file(node& n, std::string name)
 	   client_.file(n.full_name(), "job", 
 			boost::lexical_cast<std::string>(jobfile_length_));
 	 }
-         else if (name == "ECF_JOBOUT")
+         else // if (name == "ECF_JOBOUT")
             client_.file(n.full_name(), "jobout");
-         else {
-            client_.file(n.full_name(), "jobout");
-         }
+         //else {
+         //   client_.file(n.full_name(), "jobout");
+         //}
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
          // in the case of job output the string could be several megabytes.
@@ -1436,12 +1447,15 @@ tmp_file ehost::file(node& n, std::string name)
          gui::message("host::file-error: %s", e.what());
       }
    }
-
+   if (n.isCmdFailed()) {
+      error = "Submission command Failed! check .sub file, ssh, or queueing system error";
+   }
    return tmp_file(error);
 }
 
 tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
-{
+{  
+   std::string no_script = n.variable("ECF_NO_SCRIPT");
    gui::message("%s: fetching source", this->name());
    try {
       if (preproc)
@@ -1469,7 +1483,10 @@ tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
 "client must be capable to create temporary file:\n"
 "\tcheck /tmp directory with write access, and space available,\n"
 "or preprocessed file may be truncated beyond some size.\n";
-   return tmp_file(error);
+  if (no_script != ecf_node::none()) {
+    error = "ECF_NO_SCRIPT! no script to be found, look at ECF_JOB_CMD";
+  }
+  return tmp_file(error);
 }
 
 tmp_file host::manual( node& n )

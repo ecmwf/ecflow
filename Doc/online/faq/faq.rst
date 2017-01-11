@@ -193,7 +193,7 @@
    ::
    
      try:
-         ci = Client()                       # use default host(ECF_NODE) & port(ECF_PORT)
+         ci = Client()                       # use default host(ECF_HOST) & port(ECF_PORT)
          ci.sync_local()                     # Very first call gets the full Defs
          client_defs = ci.get_defs()         # End user access to the returned Defs
              ... after a period of time
@@ -215,7 +215,7 @@
    ::
    
       try:
-         ci = Client()         # use default host(ECF_NODE) & port(ECF_PORT)
+         ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)
          ci.get_server_defs()  # retrieve definition from the server and store on 'ci'
          print ci.get_defs()   # print out definition stored in the client
        except RuntimeError, e:

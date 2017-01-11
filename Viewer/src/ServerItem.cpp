@@ -70,6 +70,11 @@ void ServerItem::setSystem(bool b)
     //broadcastChanged();
 }
 
+std::string ServerItem::longName() const
+{
+    return host_ + "@" + port_;
+}
+
 //===========================================================
 // Register the usage of the server. Create and destroys the
 // the ServerHandler.

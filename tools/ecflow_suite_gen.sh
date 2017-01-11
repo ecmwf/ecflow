@@ -113,7 +113,7 @@ suite $SUITE_NAME
 
 usage() {
 echo <<EOF
-$0 -p <ECF_PORT> -n <ECF_NODE> -s <suite_name> -r <path>
+$0 -p <ECF_PORT> -n <ECF_HOST> -s <suite_name> -r <path>
    -l: load
    -r: replace path
    -t: test suite generated
@@ -128,7 +128,7 @@ do
 case $option in
     d) DEBUG=1; set -eux;;
     l) LOAD=1;;
-    n) ECF_NODE=$OPTARG;; # NODE HOST
+    n) ECF_HOST=$OPTARG;; # NODE HOST
     p) ECF_PORT=$OPTARG;; # PORT
     r) REPL=$OPTARG;;
     s) SUITE_NAME=$OPTARG;;
@@ -146,11 +146,11 @@ else
   exit 2
 fi
 
-CLIENT="ecflow_client --port ${ECF_PORT:=31415} --host ${ECF_NODE:=localhost}"
+CLIENT="ecflow_client --port ${ECF_PORT:=31415} --host ${ECF_HOST:=localhost}"
 if [[ $REPL != 0 ]]; then
   $CLIENT --replace $REPL $sdef
   echo "#MSG: node $REPL was replaced as defined in $sdef" \
-       " on ${ECF_NODE:=localhost} ${ECF_PORT:=31415}"
+       " on ${ECF_HOST:=localhost} ${ECF_PORT:=31415}"
 elif [[ $LOAD != 0 ]]; then
   $CLIENT --load $sdef
 else

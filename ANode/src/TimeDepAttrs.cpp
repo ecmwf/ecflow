@@ -84,34 +84,33 @@ void TimeDepAttrs::calendarChanged(const ecf::Calendar& c )
    // (Otherwise we will end up running the task at Monday Midnight
    //  and not Monday at 10.00)
    //
-   bool have_day = false;
-   bool at_least_one_day_free = false;
-   for(size_t i = 0; i < days_.size(); i++){
-      have_day = true;
-      days_[i].calendarChanged(c);
-      if (!at_least_one_day_free) at_least_one_day_free = days_[i].isFree(c);
-   }
 
-   bool have_date = false;
-   bool at_least_one_date_free = false;
-   for(size_t i = 0; i < dates_.size(); i++) {
-      have_date = true;
-      dates_[i].calendarChanged(c);
-      if (!at_least_one_date_free) at_least_one_date_free = dates_[i].isFree(c);
-   }
+   if (days_.empty() && dates_.empty() ) {
 
-   if (have_day || have_date ) {
-      if ( at_least_one_day_free || at_least_one_date_free)  {
-         for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
-         for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
-         for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
-      }
+      // No Day or Date, If time matches  calendarChanged(c) will free time dependencies
+      for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
+      for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
+      for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
    }
    else {
-      // No Day or Date, If time matches  calendarChanged(c) will free time dependencies
-      for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
-      for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
-      for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
+
+      bool at_least_one_day_free = false;
+      for(size_t i = 0; i < days_.size(); i++){
+         days_[i].calendarChanged(c);
+         if (!at_least_one_day_free) at_least_one_day_free = days_[i].isFree(c);
+      }
+
+      bool at_least_one_date_free = false;
+      for(size_t i = 0; i < dates_.size(); i++) {
+         dates_[i].calendarChanged(c);
+         if (!at_least_one_date_free) at_least_one_date_free = dates_[i].isFree(c);
+      }
+
+      if ( at_least_one_day_free || at_least_one_date_free)  {
+         for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
+         for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
+         for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
+      }
    }
 }
 
@@ -881,3 +880,41 @@ bool TimeDepAttrs::set_memento( const NodeDateMemento* memento,std::vector<ecf::
    return false;
 }
 
+void TimeDepAttrs::get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const
+{
+   for(size_t i = 0; i < timeVec_.size(); i++){
+      const TimeSeries& time_series = timeVec_[i].time_series();
+      if (time_series.start().minute() != 0 )  { resol = minutes(1); return; }
+      if (time_series.hasIncrement()) {
+         if (time_series.finish().minute() != 0 ) { resol = minutes(1); return; }
+         if (time_series.incr().minute() != 0 )   { resol = minutes(1); return; }
+      }
+   }
+
+   for(size_t i = 0; i < todayVec_.size(); i++){
+      const TimeSeries& time_series = todayVec_[i].time_series();
+      if (time_series.start().minute() != 0 )     { resol = minutes(1); return; }
+      if (time_series.hasIncrement()) {
+         if (time_series.finish().minute() != 0 ) { resol = minutes(1); return; }
+         if (time_series.incr().minute() != 0 )   { resol = minutes(1); return; }
+      }
+   }
+
+   for(size_t i = 0; i < crons_.size(); i++){
+      const TimeSeries& time_series = crons_[i].time_series();
+      if (time_series.start().minute() != 0 )     { resol = minutes(1); return; }
+      if (time_series.hasIncrement()) {
+         if (time_series.finish().minute() != 0 ) { resol = minutes(1); return; }
+         if (time_series.incr().minute() != 0 )   { resol = minutes(1); return; }
+      }
+   }
+}
+
+void TimeDepAttrs::get_max_simulation_duration(boost::posix_time::time_duration& duration) const
+{
+   // don't override a higher value of duration
+   if ((!timeVec_.empty() || !todayVec_.empty()) && duration < hours(24)) duration = hours(24); // day
+   if (!days_.empty()  && duration < hours(168))     duration = hours(168);                     // week
+   if (!dates_.empty() && duration < hours(24*7*31)) duration = hours(24*7*31);                 // month
+   if (!crons_.empty()) duration = hours(8760);                                                 // year
+}

@@ -19,6 +19,7 @@
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 #include <QApplication>
@@ -30,6 +31,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QWidgetAction>
+#include <QFileDialog>
 
 int OutputItemWidget::updateDirTimeout_=1000*60;
 
@@ -194,7 +196,7 @@ void OutputItemWidget::getCurrentFile()
     if(info_)
 	{
 		std::string fullName=currentFullName();
-        UserMessage::message(UserMessage::DBG,false,"output selected: " + fullName);
+        UiLog().dbg()  << "output selected: " << fullName;
 		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
 		op->file(fullName);
 	}
@@ -486,7 +488,7 @@ void OutputItemWidget::setCurrentInDir(const std::string& fullName)
 
 void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 {
-    UserMessage::debug("OutputItemWidget::updateDir -->");
+    UiLog().dbg() << "OutputItemWidget::updateDir -->";
 
     if(restartTimer)
 		updateDirTimer_->stop();
@@ -512,7 +514,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 
         }
 
-        UserMessage::qdebug("  dir item count=" + QString::number(dirModel_->rowCount()));
+        UiLog().dbg() << " dir item count=" << dirModel_->rowCount();
 
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;
@@ -606,6 +608,27 @@ void OutputItemWidget::on_fontSizeDownTb__clicked()
 	//We need to call a custom slot here instead of "zoomOut"!!!
 	browser_->zoomOut();
 }
+
+//-----------------------------------------
+// Save local copy of file
+//-----------------------------------------
+
+void OutputItemWidget::on_saveFileAsTb__clicked()
+{
+	if (browser_->isFileLoaded())
+	{
+		QString fileName = QFileDialog::getSaveFileName(this);
+		if (fileName.isEmpty())
+			return;
+
+		browser_->saveCurrentFile(fileName);
+	}
+	else
+	{
+        UserMessage::message(UserMessage::INFO,true,"No file loaded!");
+	}
+}
+
 
 //-------------------------
 // Update

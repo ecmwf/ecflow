@@ -21,8 +21,6 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
-#include <QDebug>
-
 #include "MainWindow.hpp"
 
 #include "AboutDialog.hpp"
@@ -40,10 +38,12 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VSettings.hpp"
+#include "Version.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -58,21 +58,18 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
 {
     setupUi(this);
     
+    //Assigns name to each object
+    setObjectName("win_" + QString::number(windows_.count()));
+
     setAttribute(Qt::WA_DeleteOnClose);
 
-    // add the name of the session to the title bar?
-    std::string sessionName = SessionHandler::instance()->current()->name();
-    if (sessionName == "default")
-        sessionName = "";
-    else
-        sessionName = " (session: " + sessionName + ")";
-
-    setWindowTitle(QString::fromStdString(VConfig::instance()->appLongName()) + "  -  Preview version" + QString::fromStdString(sessionName));
+    constructWindowTitle();
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
     layout->setContentsMargins(0,0,0,0);
     QWidget *w=new QWidget(this);
+    w->setObjectName("c");
     w->setLayout(layout);
     setCentralWidget(w);
 
@@ -136,12 +133,15 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
+    //Assigns name to each object
+    WidgetNameProvider::nameChildren(this);
+
     //actionSearch->setVisible(false);
 }
 
 MainWindow::~MainWindow()
 {
-	qDebug() << "exit";
+    UiLog().dbg() << "MainWindow --> desctutor";
 	serverFilterMenu_->aboutToDestroy();
 }
 
@@ -161,8 +161,9 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 	   if((*it)->show().find("toolbar") != std::string::npos)
 	   {
 		   QAction *ac=toolbar->addAction(QString::fromStdString((*it)->label()));
-		   QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
-		   ac->setIcon(QIcon(pix));
+           QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
+           ac->setObjectName(QString::fromStdString((*it)->label()));
+           ac->setIcon(QIcon(pix));
 		   ac->setData(QString::fromStdString((*it)->name()));
 		   ac->setToolTip(QString::fromStdString((*it)->tooltip()));
 
@@ -173,6 +174,24 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 	   }
    }
 }
+
+
+void MainWindow::constructWindowTitle()
+{
+    char *userTitle = getenv("ECFUI_TITLE");
+    std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
+                                                : VConfig::instance()->appLongName();
+
+    // add the name of the session to the title bar?
+    std::string sessionName = SessionHandler::instance()->current()->name();
+    if (sessionName == "default")
+        sessionName = "";
+    else
+        sessionName = " (session: " + sessionName + ")";
+
+    setWindowTitle(QString::fromStdString(mainTitle) + "  -  Preview version" + QString::fromStdString(sessionName));
+}
+
 
 //==============================================================
 //
@@ -459,10 +478,19 @@ void MainWindow::closeEvent(QCloseEvent* event)
 	}
 }
 
-//void MainWindow::slotQuit()
-//{
-//	 MainWindow::aboutToQuit(this);
-//}
+//On quitting we need to call the destructor of all the servers shown in the gui.
+//This will guarantee that the server log out is properly done.
+//Unfortunately when we quit qt does not call the destructor of the mainwindows.
+//We tried to explicitely delete the mainwindows here but it caused a crash on the
+//leap42 system. So here we only delete the nodePanel in the mainwindow. This panel
+//contains all the tabs. Each tab contains a serverfilter and when the serverfilters
+//get deleted in the end the destructors of the servers will be called.
+void MainWindow::cleanUpOnQuit()
+{
+    Q_ASSERT(quitStarted_==true);
+    serverFilterMenu_->aboutToDestroy();
+    delete nodePanel_;
+}
 
 //====================================================
 //
@@ -578,6 +606,12 @@ void MainWindow::hideServerSyncNotify(MainWindow*)
         win->hideServerSyncNotify();
 }
 
+void MainWindow::cleanUpOnQuit(MainWindow*)
+{
+    Q_FOREACH(MainWindow *win,windows_)
+        win->cleanUpOnQuit();
+}
+
 //Return true if close is allowed, false otherwise
 bool MainWindow::aboutToClose(MainWindow* win)
 {
@@ -642,6 +676,9 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 				SessionHandler::destroyInstance();
 			}
 		}
+
+        //Ensure the ServerHandler destructors are called
+        MainWindow::cleanUpOnQuit(topWin);
 
 		//Exit ecFlowView
 		QApplication::quit();

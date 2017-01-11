@@ -16,6 +16,7 @@
 #include <QObject>
 #include <QStringList>
 
+#include "VInfo.hpp"
 #include "VParam.hpp"
 
 #include "Node.hpp"
@@ -24,6 +25,9 @@ class NodeQuery;
 class NodeFilterEngine;
 class ServerFilter;
 class ServerHandler;
+class VAttribute;
+class VAttributeType;
+class VInfo;
 class VNode;
 class VSettings;
 class VTree;
@@ -75,6 +79,13 @@ class AttributeFilter : public VParamSet
 {
 public:
 	AttributeFilter();
+    bool matchForceShowAttr(const VNode*,VAttributeType*) const;
+    void setForceShowAttr(const VAttribute* a);
+    void clearForceShowAttr();
+    VAttribute* forceShowAttr() const;
+
+private:
+    VInfo_ptr forceShowAttr_;
 };
 
 class IconFilter : public VParamSet
@@ -137,11 +148,15 @@ public:
     NodeFilter(NodeFilterDef* def,ServerHandler*);
 	virtual ~NodeFilter();
 
-    virtual void clear()=0;
+    virtual void clear();
     virtual bool isNull()=0;
     virtual bool isComplete()=0;
     virtual int  matchCount() const = 0;
     virtual bool update()=0;
+
+    VNode* forceShowNode() const {return forceShowNode_;}
+    void setForceShowNode(VNode*);
+    void clearForceShowNode();
 
 protected:
     NodeFilterDef* def_;
@@ -150,6 +165,7 @@ protected:
     MatchMode matchMode_;
     std::vector<VNode*> match_;
     ServerHandler * server_;
+    VNode* forceShowNode_;
 };
 
 class TreeNodeFilter : public NodeFilter

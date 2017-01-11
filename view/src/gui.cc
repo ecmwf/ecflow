@@ -34,6 +34,8 @@ static resource* gui_resources[] = {
 	new option<str>(globals::instance(),"color_black","black"),
 	new option<str>(globals::instance(),"color_blue","blue"),
 	new option<str>(globals::instance(),"color_red","red"),
+	new option<str>(globals::instance(),"color_orange","orange"),
+	new option<str>(globals::instance(),"color_green","green"),
 
 	new option<str>(globals::instance(),"color_unknown",   "grey"),
 	new option<str>(globals::instance(),"color_suspended", "orange"),
@@ -182,8 +184,8 @@ Pixel gui::pixel(const char* name)
 static GC makegc(Pixel p)
 {
 	XGCValues values;
-	XtGCMask  valuemask  = GCForeground;
-	values.foreground     = p;
+	XtGCMask  valuemask = GCForeground;
+	values.foreground   = p;
 
 	Widget w = gui::top();
 	return XCreateGC(XtDisplay(w),XtWindow(w),valuemask,&values);
@@ -229,11 +231,12 @@ inline GC makegc(const char* p)
 
 static Pixel *status_colors = 0;
 
-char *ecf_colors_name[]
-= { (char*)"unknown", (char*)"suspended", (char*)"complete", (char*)"queued", (char*)"submitted", (char*)"active",
-    (char*)"aborted", (char*)"shutdown",  (char*)"halted"  ,  
-    (char*)"meter_low",(char*)"threshold"  ,   (char*)"event"  ,  
-    NULL };
+char *ecf_colors_name[] = { 
+  (char*)"unknown", (char*)"suspended", (char*)"complete", 
+  (char*)"queued", (char*)"submitted", (char*)"active",
+  (char*)"aborted", (char*)"shutdown", (char*)"halted",  
+  (char*)"meter_low",(char*)"threshold", (char*)"event",  
+  NULL };
 
 Pixel gui::colors(unsigned int n)
 {
@@ -286,6 +289,18 @@ GC gui::blueGC(void)
 GC gui::redGC(void)
 {
 	static GC gc = makegc("red");
+	return gc;
+}
+
+GC gui::orangeGC(void)
+{
+	static GC gc = makegc("orange");
+	return gc;
+}
+
+GC gui::greenGC(void)
+{
+	static GC gc = makegc("green");
 	return gc;
 }
 

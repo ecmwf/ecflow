@@ -19,6 +19,9 @@
 #include "TextEditSearchLine.hpp"
 #include "TextPager/TextPagerSearchInterface.hpp"
 #include "TextPagerWidget.hpp"
+#include "DirectoryHandler.hpp"
+#include "UserMessage.hpp"
+
 
 int OutputBrowser::minPagerTextSize_=1*1024*1024;
 int OutputBrowser::minPagerSparseSize_=30*1024*1024;
@@ -173,8 +176,10 @@ void OutputBrowser::loadFile(QString fileName)
 
 void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
 {
-    if(resetFile)
-       file_.reset();
+    // prior to the ability to save local copies of files, we reset the file_ member here;
+    // but now we need to keep it so that we can save a copy of it
+    //if(resetFile)
+       //file_.reset();
 
     //We estimate the size in bytes
 	qint64 txtSize=txt.size()*2;
@@ -194,6 +199,44 @@ void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
     //Set the cursor position from the cache
     updateCursorFromCache(fileName.toStdString());
 }
+
+void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)
+{
+    assert(file_);
+
+    if (file_->storageMode() == VFile::DiskStorage)
+    {
+        // if we have the file on disk, then just copy it to the new location
+        std::string to = fileNameToSaveTo.toStdString();
+        std::string errorMessage;
+        bool ok = DirectoryHandler::copyFile(file_->path(), to, errorMessage);
+        if (!ok)
+        {
+            UserMessage::message(UserMessage::ERROR,true,"Failed to copy file. Reason:\n " + errorMessage);
+        }
+    }
+    else
+    {
+        // file in memory - just dump it to file
+        QFile file(fileNameToSaveTo);
+        if (file.open(QFile::WriteOnly | QFile::Text))
+        {
+            QTextStream out(&file);
+            QString s(file_->data());
+            out << s;
+        }
+        else
+        {
+            UserMessage::message(UserMessage::ERROR,true,"Failed to save file to  " + fileNameToSaveTo.toStdString());
+        }
+    }
+}
+
+bool OutputBrowser::isFileLoaded()
+{
+    return (file_ != 0);
+}
+
 
 void OutputBrowser::updateCursorFromCache(const std::string& sourcePath)
 {

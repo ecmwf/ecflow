@@ -20,6 +20,7 @@
 #include "Log.hpp"
 #include "AbstractServer.hpp"
 #include "boost_archive.hpp" // collates boost archive includes
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace boost;
@@ -48,31 +49,7 @@ void FullServerDefsCache::update_cache_if_state_changed(defs_ptr defs)
          cout << ": *updating* cache";
 #endif
          // Update cache
-         std::ostringstream archive_stream;
-
-#if defined(BINARY_ARCHIVE)
-         boost::archive::binary_oarchive archive( archive_stream );
-         archive << defs;
-         full_server_defs_as_string_ = archive_stream.str();
-         // std::cout << "async_write BINARY " << outbound_data_ << "\n";
-
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-         portable_binary_oarchive archive( archive_stream );
-         archive << defs;
-         full_server_defs_as_string_ = archive_stream.str();
-         // std::cout << "async_write PORTABLE_BINARY " << outbound_data_ << "\n";
-
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-         eos::portable_oarchive archive( archive_stream );
-         archive << defs;
-         full_server_defs_as_string_ = archive_stream.str();
-         // std::cout << "async_write EOS_PORTABLE_BINARY " << outbound_data_ << "\n";
-#else
-         boost::archive::text_oarchive archive( archive_stream );
-         archive << defs;
-         full_server_defs_as_string_ = archive_stream.str();
-         // std::cout << "async_write TEXT " << outbound_data_ << "\n";
-#endif
+         ecf::save_as_string(full_server_defs_as_string_,defs);
       }
       catch (const boost::archive::archive_exception& ae ) {
          // Unable to decode data. Something went wrong, inform the caller.
@@ -98,28 +75,9 @@ defs_ptr FullServerDefsCache::restore_defs_from_string(const std::string& archiv
 #endif
    defs_ptr defs;
    try {
-      std::istringstream archive_stream(archive_data);
 
-#if defined(BINARY_ARCHIVE)
-      // std::cout << "handle_read_data Archive BINARY\n";
-      boost::archive::binary_iarchive archive( archive_stream );
-      archive >> defs;
+      ecf::restore_from_string(archive_data,defs);
 
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-      // std::cout << "handle_read_data Archive PORTABLE_BINARY\n";
-      portable_binary_iarchive archive( archive_stream );
-      archive >> defs;
-
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-      // std::cout << "handle_read_data Archive EOS_PORTABLE_BINARY\n";
-      eos::portable_iarchive archive( archive_stream );
-      archive >> defs;
-
-#else
-       // std::cout << "handle_read_data Archive TEXT\n";
-      boost::archive::text_iarchive archive( archive_stream );
-      archive >> defs;
-#endif
    } catch (const boost::archive::archive_exception& ae ) {
       // Unable to decode data.
       ecf::LogToCout logToCout;
@@ -186,7 +144,7 @@ void SSyncCmd::init(
    reset_data_members(client_state_change_no);
 
    // After ECFLOW-182 server will always have a defs, hence we should never return ServerReply::NO_DEFS
-   // We have kept no_defs_ to allow compatibility. To allow new client(ecflowview) deal with reply from old server
+   // We have kept no_defs_ to allow compatibility. To allow new client(GUI) deal with reply from old server
    // Hence from release >= 4.0.7 no_defs_ will always be false
    //   if ( ! as->defs().get() ) {
    //#ifdef DEBUG_SERVER_SYNC

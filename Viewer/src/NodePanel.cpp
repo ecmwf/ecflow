@@ -22,7 +22,9 @@ NodePanel::NodePanel(QWidget* parent) :
   TabWidget(parent)
 
 {
-	connect(this,SIGNAL(currentIndexChanged(int)),
+    setObjectName("p");
+
+    connect(this,SIGNAL(currentIndexChanged(int)),
 		    this,SLOT(slotCurrentWidgetChanged(int)));
 
 	connect(this,SIGNAL(newTabRequested()),

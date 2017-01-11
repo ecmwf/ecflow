@@ -190,6 +190,8 @@ public:
     
     virtual void why(std::vector<std::string>& theReasonWhy) const;
     const std::string&  abortedReason() const;
+    void statusChangeTime(QString&) const;
+    uint statusChangeTime() const;
 
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
@@ -201,6 +203,10 @@ public:
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VItem* n);
 
+    static void setNodeMarkedForMove(std::string serverAlias, std::string relPath);
+    static void clearNodeMarkedForMove();
+    static std::string nodeMarkedForMoveRelPath()         {return nodeMarkedForMoveRelPath_;}
+    static std::string nodeMarkedForMoveServerAlias()     {return nodeMarkedForMoveServerAlias_;}
 
 protected:
     void clear();
@@ -229,6 +235,8 @@ protected:
 #endif
     int index_;
     VNodeTriggerData* data_;
+    static std::string nodeMarkedForMoveRelPath_;
+    static std::string nodeMarkedForMoveServerAlias_;
 };
 
 class VSuiteNode : public VNode

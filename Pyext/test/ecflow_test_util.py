@@ -14,12 +14,27 @@
 #
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 from socket import gethostname 
-import os
+import os,fnmatch
 import fcntl
 import shutil   # used to remove directory tree
 
 from ecflow import Client, debug_build, File
 
+def all_files(root, patterns='*', single_level=False, yield_folders=False):
+    """Expand patterns from semi-colon separated string to list"""
+    patterns = patterns.split(';')
+    for path, subdirs, files in os.walk(root):
+        if yield_folders:
+            files.extend(subdirs)
+        files.sort()
+        for name in files:
+            for pattern in patterns:
+                if fnmatch.fnmatch(name,pattern):
+                    yield os.path.join(path, name)
+                    break
+        if single_level:
+            break    
+        
 # Enable to stop data being deleted, and stop server from being terminated
 def debugging() : return False
 

@@ -73,6 +73,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE)));
+	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS_RESET)));
@@ -139,6 +140,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER))  );
 	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::SERVER_LOAD))  );
 	theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND,"EmptySuite"))  );
 	theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::RESUME,"EmptySuite"))  );
@@ -222,7 +224,8 @@ static void test_persistence(const Defs& theFixtureDefs )
 			BOOST_CHECK_MESSAGE(theCmd->task_cmd(),"Currently only tasks commands, are allowed to connect to different servers");
 		}
 
-		const ClientToServerRequest cmd_request(theCmd); // MUST be const to avoid AIX compiler warning
+		ClientToServerRequest cmd_request;
+		cmd_request.set_cmd(theCmd);
 		{
 			if (theCmd.get()->handleRequestIsTestable()) {
 				// test handleRequest while were at it.

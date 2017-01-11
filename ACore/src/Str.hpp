@@ -122,6 +122,7 @@ public:
    static const std::string& ECF_TRIES();
    static const std::string& ECF_NAME();
    static const std::string& ECF_NODE();
+   static const std::string& ECF_HOST();
    static const std::string& ECF_PASS();
    static const std::string& ECF_JOB();
    static const std::string& ECF_JOBOUT();
@@ -141,7 +142,8 @@ public:
    static const std::string& ECF_EXTN();
    static const std::string& ECF_LOG();
 
-	static const std::string& WHITE_LIST_FILE();
+   static const std::string& WHITE_LIST_FILE();
+   static const std::string& ECF_PASSWD();
 private:
 	Str(){}
 };

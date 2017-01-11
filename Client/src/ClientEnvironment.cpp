@@ -19,6 +19,8 @@
 #include <stdlib.h> // for getenv()
 
 #include "boost/foreach.hpp"
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include "ClientEnvironment.hpp"
 #include "ClientToServerCmd.hpp"
@@ -28,7 +30,11 @@
 #include "boost_archive.hpp"
 #include "TimeStamp.hpp"
 #include "Version.hpp"
+#ifdef ECF_SECURE_USER
+#include "PasswdFile.hpp"
+#endif
 
+namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
 using namespace boost;
@@ -179,9 +185,9 @@ std::string ClientEnvironment::toString() const
 {
 	std::stringstream ss;
 	ss << TimeStamp::now() << Version::description() << "\n";
-	if (host_vec_.empty()) ss << "   ECF_NODE =\n   ";
+	if (host_vec_.empty()) ss << "   ECF_HOST =\n   ";
 	else  {
-		ss << "   ECF_NODE : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
+		ss << "   ECF_HOST : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
 		std::pair<std::string,std::string> i;
 		BOOST_FOREACH(i, host_vec_) { ss << "   " << i.first << Str::COLON() << i.second << "\n";}
   	}
@@ -209,10 +215,10 @@ std::string ClientEnvironment::toString() const
 
 std::string ClientEnvironment::hostSpecified()
 {
+   char* the_host = getenv(Str::ECF_HOST().c_str());
+   if (the_host)  return std::string(the_host);
 	char* theEnv = getenv(Str::ECF_NODE().c_str());
-	if (theEnv) {
-		return std::string(theEnv);
- 	}
+	if (theEnv)  return std::string(theEnv);
 	return std::string();
 }
 
@@ -224,7 +230,6 @@ std::string ClientEnvironment::portSpecified()
  	}
 	return Str::DEFAULT_PORT_NUMBER();
 }
-
 
 void ClientEnvironment::read_environment_variables()
 {
@@ -268,7 +273,7 @@ void ClientEnvironment::read_environment_variables()
  		host_vec_.push_back(std::make_pair(host,port));
 	}
 
-	// Add the ECF_NODE host into list of hosts. Make sure its first in host_vec_
+	// Add the ECF_HOST host into list of hosts. Make sure its first in host_vec_
 	// as we want environment setting to take priority.
  	string env_host = hostSpecified();
 	if (!env_host.empty()) {
@@ -391,4 +396,37 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 	}
 
 	return true;
+}
+
+
+const std::string& ClientEnvironment::get_user_password() const
+{
+#ifdef ECF_SECURE_USER
+   //cout << "ClientEnvironment::get_user_password() ECF_SECURE_USER passwd_(" << passwd_ << ")\n";
+   if (!passwd_.empty()) {
+      //cout << "  ClientEnvironment::get_user_password() CACHED returning " << passwd_ << "\n";
+      return passwd_;
+   }
+
+   char* file = getenv("ECF_PASSWD");
+   if (file) {
+      std::string user_passwd_file = file;
+      //cout << "  ClientEnvironment::get_user_password() ECF_PASSWD " << user_passwd_file  << "\n";
+      if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
+         //cout << "  ClientEnvironment::get_user_password() LOADING password file\n";
+         PasswdFile passwd_file;
+         std::string errorMsg;
+         if (!passwd_file.load(user_passwd_file,debug(),errorMsg)) {
+            std::stringstream ss; ss << "Could not parse ECF_PASSWD file. " << errorMsg;
+            throw std::runtime_error(ss.str());
+         }
+         //std::cout << "ClientEnvironment::get_user_password() PasswdFile.dump()\n" << passwd_file.dump() << "\n";
+         passwd_ = passwd_file.get_passwd(UserCmd::get_user(), host(), port());
+         //cout << "  ClientEnvironment::get_user_password() returning " << passwd_ << "\n";
+         return passwd_;
+      }
+   }
+#endif
+   //cout << "  ClientEnvironment::get_user_password() returning EMPTY \n";
+   return Str::EMPTY();
 }

@@ -1,0 +1,11 @@
+4.5.0  # comment
+
+# comment
+fred host 3141  x12ggg # comment
+fred host3 3143 passwd
+fred host4 3145 x12ggg
+# comment
+
+jake host 3141  x12ggg
+tom host3 3143    x12ggg # sdsdsd
+ 

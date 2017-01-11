@@ -76,6 +76,7 @@ protected:
 	TableNodeHeader* header_;
 	bool needItemsLayout_;
 	PropertyMapper* prop_;
+    bool setCurrentIsRunning_;
 };
 
 class TableNodeHeaderButton

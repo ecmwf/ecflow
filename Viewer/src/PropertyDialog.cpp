@@ -20,6 +20,7 @@
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "WidgetNameProvider.hpp"
 
 VProperty* PropertyDialog::prop_=0;
 
@@ -54,6 +55,9 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 
 	if(list_->count() >0 && list_->currentRow() == -1)
 		list_->setCurrentRow(0);
+
+    //Assign name to each object
+    WidgetNameProvider::nameChildren(this);
 }
 
 void PropertyDialog::closeEvent(QCloseEvent * event)
@@ -84,6 +88,7 @@ void PropertyDialog::build()
               }    
 
               PropertyEditor* ed=new PropertyEditor(this);
+              ed->setObjectName(vPage->param("label"));
               ed->edit(vPage,edPix);
 
               addPage(ed,pix,vPage->param("label"));

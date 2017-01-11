@@ -23,6 +23,7 @@
 #include "TableNodeView.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <QHBoxLayout>
 
@@ -90,6 +91,8 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
 
 	//The node status filter is exposed via a menu. So we need a reference to it.
 	states_=filterDef_->nodeState();
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 TableNodeWidget::~TableNodeWidget()

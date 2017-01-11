@@ -25,7 +25,6 @@ class ClientToServerRequest : private boost::noncopyable {
 public:
 
    ClientToServerRequest() {}
-   ClientToServerRequest(const Cmd_ptr& cmd) : cmd_(cmd) { cmd_->setup_user_authentification();}
    ~ClientToServerRequest() {}
 
    void set_cmd(const Cmd_ptr& cmd) { cmd_ = cmd; cmd_->setup_user_authentification(); }

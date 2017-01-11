@@ -21,7 +21,7 @@
 #include "TextPagerCursor_p.hpp"
 #include "TextPagerDocument_p.hpp"
 #include "TextPagerSearchHighlighter.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 
 #include <cmath>
@@ -325,11 +325,11 @@ bool TextPagerEdit::load(const QString &file, TextPagerDocument::DeviceMode mode
     }
 #endif
 
-    UserMessage::message(UserMessage::DBG,false,"TextPagerEdit::load fileName" + file.toStdString());
+    UiLog().dbg() << "TextPagerEdit::load fileName" << file;
     //we have to check to font here because the initial setting in setFontProperty doe not have any effect
     updateFont();
     bool ret=d->document->load(file, mode, codec);
-    UserMessage::message(UserMessage::DBG,false,"  cursor: " + QString::number(textCursor().position()).toStdString());
+    UiLog().dbg() << "  cursor: " << textCursor().position();
     return ret;
 }
 
@@ -1140,8 +1140,8 @@ void TextEditPrivate::onCharactersAddedOrRemoved(int from, int count)
     if(textCursor.position() > document->documentSize())
         textCursor.setPosition(0);
 
-    UserMessage::message(UserMessage::DBG,false,
-              "TextEditPrivate::onCharactersAddedOrRemoved --> textCursor: " + QString::number(textCursor.position()).toStdString());
+    UiLog().dbg() <<
+              "TextEditPrivate::onCharactersAddedOrRemoved --> textCursor: " << textCursor.position();
 
     /*if (from > qMin(bufferPosition + buffer.size(), layoutEnd)) {
         return;

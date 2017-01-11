@@ -32,7 +32,7 @@ public:
     VAttribute(VNode *parent,VAttributeType* type,int indexInType);
     ~VAttribute();
 
-    VAttribute* clone();
+    VAttribute* clone() const;
     VServer* root() const;
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
     VAttributeType* type() const;
@@ -51,6 +51,7 @@ public:
 
     static VAttribute* make(VNode* n,const std::string& type,const std::string& name);
     static VAttribute* makeFromId(VNode*,int);
+    static VAttribute* make(VNode *parent,QStringList data);
 
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,
@@ -69,10 +70,8 @@ protected:
     static VAttributeType* idToType(int id);
     static int idToTypeIndex(int id);
 
-    //VAttributeType* type_;
     int id_;
 };
-
 
 #endif // VATTRIBUTE_HPP
 

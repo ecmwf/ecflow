@@ -15,6 +15,7 @@
 #include "NodeSearchDialog.hpp"
 #include "SessionHandler.hpp"
 #include "VConfig.hpp"
+#include "WidgetNameProvider.hpp"
 
 NodeSearchDialog::NodeSearchDialog(QWidget *parent) :
     QDialog(parent)
@@ -32,6 +33,8 @@ NodeSearchDialog::NodeSearchDialog(QWidget *parent) :
 
     //Read the qt settings
     readSettings();
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 NodeSearchDialog::~NodeSearchDialog()

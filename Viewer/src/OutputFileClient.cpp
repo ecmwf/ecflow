@@ -10,9 +10,9 @@
 
 #include "OutputFileClient.hpp"
 
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
-//#define _UI_OUTPUTFILECLIENT_DEBUG
+#define _UI_OUTPUTFILECLIENT_DEBUG
 
 OutputFileClient::OutputFileClient(const std::string& host,const std::string& portStr,QObject* parent) :
 	OutputClient(host,portStr,parent),
@@ -174,18 +174,18 @@ void OutputFileClient::estimateExpectedSize()
     }
 
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
-    UserMessage::debug("OutputFileClient::estimateExpectedSize -->");
+    UiLog().dbg() << "OutputFileClient::estimateExpectedSize -->";
 #endif
     for(unsigned int i=0; i < dir_->count(); i++)
     {
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
-        UserMessage::debug("file: " + dir_->fullName(i));
+        UiLog().dbg() << "file: " << dir_->fullName(i);
 #endif
         if(dir_->fullName(i) == remoteFile_)
         {
             expected_=dir_->items().at(i)->size_;
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
-            UserMessage::debug("  expected size=" + QString::number(expected_).toStdString());
+            UiLog().dbg() << "  expected size=" << expected_;
 #endif
             return;
         }
@@ -193,6 +193,6 @@ void OutputFileClient::estimateExpectedSize()
 
     expected_=0;
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
-    UserMessage::debug("  expected size=" + QString::number(expected_).toStdString());
+    UiLog().dbg() << "  expected size=" << QString::number(expected_);
 #endif
 }

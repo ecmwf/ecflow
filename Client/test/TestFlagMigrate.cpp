@@ -37,10 +37,10 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_flag_migrate )
 {
-   // This test relies on a NEW server invocation. Hence if ECF_NODE/remote server is used
+   // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
    // the test will will invalid. hence ignore.
    if (!ClientEnvironment::hostSpecified().empty()) {
-      cout << "Client:: ...test_flag_migrate: ignoring test when ECF_NODE specified\n";
+      cout << "Client:: ...test_flag_migrate: ignoring test when ECF_HOST specified\n";
       return;
    }
 
@@ -79,6 +79,18 @@ BOOST_AUTO_TEST_CASE( test_flag_migrate )
 
    // set suite as migrated. The children of the suite should not be persisted, but still check pointed
    BOOST_REQUIRE_MESSAGE( theClient.alter("/suite1","set_flag","migrated") == 0,"Expected alter to succeed\n" << theClient.errorMsg());
+
+   // INCREMENTAL SYNC
+   BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0,"Expected sync to succeed\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.defs() && theClient.defs()->suiteVec().size() == 1,"Expected defs with 1 suite\n" << theClient.errorMsg());
+   {
+      std::vector<node_ptr> all_nodes;
+      theClient.defs()->get_all_nodes(all_nodes);
+      BOOST_REQUIRE_MESSAGE(all_nodes.size() == 1  ,"Expected 1 nodes but found " << all_nodes.size());
+   }
+
+   // FULL sync
+   theClient.reset();
    BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0,"Expected sync to succeed\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.defs() && theClient.defs()->suiteVec().size() == 1,"Expected defs with 1 suite\n" << theClient.errorMsg());
    {
@@ -109,7 +121,17 @@ BOOST_AUTO_TEST_CASE( test_flag_migrate )
    // Clear migrate flag
    BOOST_REQUIRE_MESSAGE( theClient.alter("/suite1","clear_flag","migrated") == 0,"Expected alter to succeed\n" << theClient.errorMsg());
 
-   // ensure that recovered checkpoint still has the expected_nodes.
+   // ensure that recovered checkpoint still has the expected_nodes, with increment and *FULL* sync
+   BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0,"Expected sync to succeed\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.defs() && theClient.defs()->suiteVec().size() == 1,"Expected defs with 1 suite\n" << theClient.errorMsg());
+   {
+      std::vector<node_ptr> all_nodes;
+      theClient.defs()->get_all_nodes(all_nodes);
+      BOOST_REQUIRE_MESSAGE(all_nodes.size() == expected_nodes  ,"Expected "  << expected_nodes << " nodes but found " << all_nodes.size());
+   }
+
+   // FULL sync
+   theClient.reset();
    BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0,"Expected sync to succeed\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.defs() && theClient.defs()->suiteVec().size() == 1,"Expected defs with 1 suite\n" << theClient.errorMsg());
    {

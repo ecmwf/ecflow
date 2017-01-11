@@ -16,7 +16,7 @@
 
 #include "DirectoryHandler.hpp"
 #include "VFile.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <boost/lexical_cast.hpp>
 
@@ -71,13 +71,13 @@ VFile::~VFile()
 {
 	close();
 
-    UserMessage::message(UserMessage::DBG,false,"VFile::~VFile -->");
+    UiLog().dbg() << "VFile::~VFile -->";
     print();
 
 	if(data_)
     {
         delete [] data_;
-        UserMessage::debug("  memory released");
+        UiLog().dbg() << " memory released";
     }
 
     //TODO: add further/better checks
@@ -85,14 +85,14 @@ VFile::~VFile()
        exists() && !path_.empty() && path_ != "/" && path_.size() > 4)
     {
         unlink(path_.c_str());
-        UserMessage::debug("  file deleted from disk");
+        UiLog().dbg() << " file deleted from disk";
     }
     else if(!path_.empty() && exists())
     {
-        UserMessage::debug("  file was kept on disk");
+        UiLog().dbg() << " file was kept on disk";
     }
 
-    UserMessage::debug("<-- VFile::~VFile");
+    UiLog().dbg() << "<-- ~VFile";
 }
 
 bool VFile::exists() const
@@ -147,7 +147,7 @@ void VFile::setStorageMode(StorageMode mode)
 
 bool VFile::write(const std::string& buf,std::string& err)
 {
-    return write(buf.c_str(),buf.size(),err);
+	return write(buf.c_str(),buf.size(),err);
 }
 
 bool VFile::write(const char *buf,size_t len,std::string& err)
@@ -194,6 +194,7 @@ bool VFile::write(const char *buf,size_t len,std::string& err)
 		    fclose(fp_);
 		    return false;
 		}
+		fflush(fp_);
 	}
 
 	return true;
@@ -261,6 +262,6 @@ void VFile::print()
         str+="disk path: " + path_;
     }
 
-    UserMessage::message(UserMessage::DBG,false,str);
+    UiLog().dbg() << str;
 }
 

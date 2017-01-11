@@ -40,6 +40,7 @@
 #include "Version.hpp"
 #include "Indentor.hpp"
 #include "AbstractObserver.hpp"
+#include "CheckPtContext.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -931,7 +932,7 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
 	return false;
 }
 
-bool Defs::replaceChild(const std::string& path,
+node_ptr Defs::replaceChild(const std::string& path,
 	               const defs_ptr& clientDefs,
 	               bool createNodesAsNeeded,
 	               bool force,
@@ -941,7 +942,7 @@ bool Defs::replaceChild(const std::string& path,
 	if (! clientNode.get() ) {
 		errorMsg = "Can not replace node since path "; errorMsg += path;
 		errorMsg += " does not exist on the client definition";
-		return false;
+		return node_ptr();
 	}
 
 	node_ptr serverNode = findAbsNode( path ) ;
@@ -955,8 +956,8 @@ bool Defs::replaceChild(const std::string& path,
 			std::stringstream ss;
 			ss << "Can not replace node " << serverNode->debugNodePath() << " because it has " << count << " tasks which are active or submitted\n";
 			ss << "Please use the 'force' option to bypass this check, at the expense of creating zombies\n";
-			errorMsg += ss.str();
-			return false;
+			errorMsg = ss.str();
+			return node_ptr();
  		}
 	}
 
@@ -966,7 +967,7 @@ bool Defs::replaceChild(const std::string& path,
 		if (! serverNode.get() ) {
 			errorMsg = "Can not replace child since path "; errorMsg += path;
 			errorMsg += " does not exist on the server definition. Please use <parent> option";
-			return false;
+			return node_ptr();
 		}
 		// HAVE a FULL match in the server
 
@@ -991,10 +992,7 @@ bool Defs::replaceChild(const std::string& path,
 	 	LOG_ASSERT(addOk,"");
 
 	 	client_node_to_add->set_most_significant_state_up_node_tree();
-
-	 	// The changes have been made, do a sanity test, check trigger expressions
-	 	std::string warning_msg;
-	 	return client_node_to_add->suite()->check(errorMsg,warning_msg);
+	 	return client_node_to_add;
  	}
 
 
@@ -1019,11 +1017,9 @@ bool Defs::replaceChild(const std::string& path,
       node_ptr client_suite_to_add = clientNode->suite()->remove();
  		bool addOk = addChild( client_suite_to_add  );
  		LOG_ASSERT( addOk ,"");
- 		client_suite_to_add->set_most_significant_state_up_node_tree();
 
-      // The changes have been made, do a sanity test, check trigger expressions
- 	   std::string warning_msg;
- 	   return client_suite_to_add->suite()->check(errorMsg,warning_msg);
+ 		client_suite_to_add->set_most_significant_state_up_node_tree();
+ 		return client_suite_to_add;
 	}
 
 
@@ -1059,13 +1055,14 @@ bool Defs::replaceChild(const std::string& path,
 	LOG_ASSERT( addOk,"" );
 	client_node_to_add->set_most_significant_state_up_node_tree();
 
-   // The changes have been made, do a sanity test, check trigger expressions
-	std::string warning_msg;
-	return client_node_to_add->suite()->check(errorMsg,warning_msg);
+	return client_node_to_add;
 }
 
 void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
 {
+   // Save NodeContainer children even if ecf::Flag::MIGRATED set
+   CheckPtContext checkpt_context;
+
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
 
@@ -1075,9 +1072,23 @@ void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at
 
 void Defs::save_checkpt_as_string(std::string& output) const
 {
+   // Save NodeContainer children even if ecf::Flag::MIGRATED set
+   CheckPtContext checkpt_context;
+
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
 
+   ecf::save_as_string(output,*this);
+}
+
+void Defs::save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
+{
+   /// Can throw archive exception
+   ecf::save(the_fileName,*this,at);
+}
+
+void Defs::save_as_string(std::string& output) const
+{
    ecf::save_as_string(output,*this);
 }
 
@@ -1097,6 +1108,20 @@ void Defs::restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Ty
    modify_change_no_ = Ecf::modify_change_no();
 
 //	cout << "Restored: " << suiteVec_.size() << " suites\n";
+}
+
+void Defs::restore_from_string(const std::string& rest)
+{
+   if (rest.empty()) return;
+
+   // deleting existing content first. *** Note: Server environment left as is ****
+   clear();
+
+   ecf::restore_from_string(rest,*this);
+
+   // Reset the state and modify numbers, **After the restore**
+   state_change_no_ = Ecf::state_change_no();
+   modify_change_no_ = Ecf::modify_change_no();
 }
 
 void Defs::clear()
@@ -1509,6 +1534,15 @@ void Defs::detach(AbstractObserver* obs)
    }
 }
 
+bool Defs::is_observed(AbstractObserver* obs) const
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+       if (observers_[i] == obs) {
+          return true;
+       }
+    }
+   return false;
+}
 // =====================================================================================
 
 std::ostream& operator<<(std::ostream& os, const Defs* d)

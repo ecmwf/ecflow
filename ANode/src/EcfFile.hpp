@@ -14,9 +14,26 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include "NodeFwd.hpp"
 #include <boost/noncopyable.hpp>
-#include <set>
+#include "boost/filesystem/path.hpp"
+#include <boost/shared_ptr.hpp>
+#include <fstream>
+#include "NodeFwd.hpp"
+
+// This class is used to minimise file I/0.
+// When job processing the same include file can be opened and closed many time
+// This cache serves to open the include file only once. It halves the job processing time.
+class IncludeFileCache : private boost::noncopyable {
+public:
+   IncludeFileCache(const std::string& path);
+   ~IncludeFileCache();
+   const std::string& path() const { return path_;}
+   bool lines(std::vector<std::string>&);
+private:
+   std::string path_;
+   std::ifstream fp_;   // is not copy constructable
+   size_t no_of_lines_;
+};
 
 /// This class is used in the pre-processing of files( .ecf or .usr or .man typically)
 /// It is used to to create the job file.
@@ -35,6 +52,9 @@ public:
                      ECF_FETCH_CMD, // pre-process output of ECF_FETCH,     all %includes use same command
                      ECF_SCRIPT_CMD // pre-process output of ECF_SCRIPT_CMD, uses default algorithm to find %includes
              };
+
+   EcfFile();
+	EcfFile& operator=(const EcfFile& rhs);
 
 	/// use default copy constructor, assignment, destructor
 	/// ECF_FETCH  is used obtain the script from running a command  i.e.
@@ -85,6 +105,7 @@ private:
 	static std::string fileType(EcfFile::Type);
 
 	bool open_script_file(const std::string& file, EcfFile::Type, std::vector<std::string>& lines, std::string& errormsg) const;
+	bool open_include_file(const std::string& file,std::vector<std::string>& lines,std::string& errormsg) const;
 
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
  	void variableSubstitution(JobsParam&);
@@ -116,6 +137,7 @@ private:
 	mutable std::string  job_size_;      // to be placed in log file during job submission
 	EcfFile::ScriptType    script_type_; // get script from a file, or from running a command
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
+	mutable std::vector< boost::shared_ptr<IncludeFileCache> > include_file_cache_; // only open include file once
 };
 
 
@@ -154,9 +176,8 @@ private:
    std::vector<std::string>& jobLines_;
    std::vector<std::string> tokens_;       // re-use to save memory
 
-   typedef std::map<std::string, int > my_map;
-   my_map globalIncludedFileSet_;          // test for recursive includes, <no _of times it was included>
-   std::set<std::string> include_once_set_;
+   std::vector<std::pair<std::string,int> > globalIncludedFileSet_;// test for recursive includes, <no _of times it was included>
+   std::vector<std::string> include_once_set_;
 };
 
 #endif

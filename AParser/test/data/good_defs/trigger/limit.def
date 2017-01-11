@@ -1,0 +1,27 @@
+extern /limits:c1a
+extern /limits:linux_cluster
+
+suite suiteName
+    limit sg1  100
+    limit mars 100
+endsuite
+
+suite obs
+    inlimit /limits:c1a
+    family limits
+        limit hpcd 20
+    endfamily
+    
+    family anon    
+        inlimit limits:hpcd       
+        task t1
+            inlimit /suiteName:sg1        # another suite limit
+            trigger /suiteName:sg1 < 30
+        task t2
+            inlimit /obs/limits:hpcd      # This suite limit
+            trigger /obs/limits:hpcd > 10
+        task t3
+            inlimit /limits:c1a           # extern suite limit
+            trigger /limits:c1a > 10
+    endfamily
+endsuite

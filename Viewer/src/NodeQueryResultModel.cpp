@@ -13,6 +13,8 @@
 #include "ModelColumn.hpp"
 #include "NodeQueryResult.hpp"
 #include "ServerHandler.hpp"
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VNode.hpp"
 
 #include <QDebug>
@@ -211,14 +213,24 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
 		{
 			if(d->node_)
 			{
+                //server
 				if(d->node_->isServer())
 				{
 					return VInfoServer::create(s);
 				}
-				else
+                //node
+                else if(!d->hasAttribute())
 				{
 					return VInfoNode::create(d->node_);
 				}
+                //attribute
+                else
+                {
+                    if(VAttribute* a=VAttribute::make(d->node_,d->attr_))
+                        return VInfoAttribute::create(a);
+                    else
+                        return VInfoNode::create(d->node_);
+                }
 			}
 		}
 	}
