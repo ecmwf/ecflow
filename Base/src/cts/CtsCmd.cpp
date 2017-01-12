@@ -297,8 +297,11 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
          desc.add_options()( CtsApi::reloadwsfileArg(),
                "Reload the white list file.\n"
                "The white list file is used to authenticate 'user' commands.\n"
-               "File path is specified by ECF_LISTS environment, read by the server on startup.\n"
-               "If ECF_LISTS is not specified, then by default it will open <host>.<port>.ecf.lists\n"
+               "File path is specified by ECF_LISTS environment, read by the server on *startup*.\n"
+               "Hence the contents of the file can be changed but not the location\n"
+               "If ECF_LISTS is not specified, or is specified and is 'ecf.lists' then by default\n"
+               "it will open <host>.<port>.ecf.lists.If a path like /var/tmp/ecf.lists was specified\n"
+               "for ECF_LISTS, then this is the path used for reloading the white list file\n"
                "On startup, if the file is not present or is present but is empty (i.e just contains the version number)\n"
                "then all users have read/write access\n"
                "However on reload it will raises an error if file does not exist, or fails to parse\n"
