@@ -258,8 +258,6 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 		}
 #endif
 
-      // any state change should be followed with a job submission
-      t->complete();  // mark task as complete
 
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
@@ -297,6 +295,9 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 				meter.set_value(meter.max());
  			}
 		}
+
+      // any state change should be followed with a job submission
+      t->complete();  // mark task as complete
 	}
 
 	level_--;
