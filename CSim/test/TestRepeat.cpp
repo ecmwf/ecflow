@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
       task_ptr task_finish = family_plot->add_task("finish");
 		task_finish->add_trigger(  "1 == 0");
 		task_finish->add_complete( "checkdata:done or checkdata == complete" );
-		task_finish->addVerify( VerifyAttr(NState::COMPLETE,8) );
+		task_finish->addVerify( VerifyAttr(NState::COMPLETE,4) );
 
       task_ptr task_checkdata = family_plot->add_task("checkdata");
 		task_checkdata->addEvent( Event(1,"done"));

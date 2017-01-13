@@ -1,0 +1,14 @@
+suite test_repeat_defstatus
+  clock real 04.12.2016             
+  defstatus complete       # this should cause node state complete down the hierarchy  
+  repeat integer VAR 0 1 1           
+  edit SLEEPTIME 1
+  edit ECF_INCLUDE $ECF_HOME/includes
+  verify complete:1
+  family family
+     verify complete:1
+     repeat integer VAR 0 2 1        
+     task t1
+       verify complete:1
+  endfamily
+endsuite

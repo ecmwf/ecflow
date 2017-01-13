@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( test_complete )
 
       task_ptr task_check = fam->add_task("check");
  		task_check->addEvent( Event(1,eventName) );
- 		task_check->addVerify( VerifyAttr(NState::COMPLETE,4) );
+ 		task_check->addVerify( VerifyAttr(NState::COMPLETE,2) );
 
       task_ptr task_t1 = fam->add_task("t1");
 		task_t1->add_trigger( "check == complete");

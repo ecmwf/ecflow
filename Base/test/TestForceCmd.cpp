@@ -63,6 +63,7 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
    BOOST_CHECK_MESSAGE(!s1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be NOT set");
 
 
+   the_defs->requeue();
    TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new ForceCmd(s1->absNodePath(),"complete",true /*recursive */, false /* set Repeat to last value */)));
    TestHelper::test_state(s1,NState::COMPLETE);
    TestHelper::test_state(f1,NState::COMPLETE);
@@ -411,8 +412,10 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot )
    BOOST_CHECK_MESSAGE( !t1->timeVec().back().time_series().is_valid(),"Expected 10:00 time slot to have expired");
    BOOST_CHECK_MESSAGE( t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
 
-   // call again should, should be do difference
-   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
+   // call again should, should be do difference, EXPECT no change, if its complete, seting complete, avoids another state change
+   TestHelper::invokeRequest(&the_defs,
+          Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)),
+          false/*dont Check change numbers*/);
    TestHelper::test_state(t1,NState::COMPLETE);
    BOOST_CHECK_MESSAGE( !t1->timeVec().back().time_series().is_valid(),"Expected 10:00 time slot to have expired");
    BOOST_CHECK_MESSAGE( t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
