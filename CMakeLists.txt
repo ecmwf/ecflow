@@ -309,7 +309,7 @@ endif()
 # =========================================================================================
 
 ecbuild_dont_pack( DIRS 
-                   	ACore/doc ANattr/doc ANode/doc Client/doc Pyext/doc Server/doc
+                   	ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
                    	ecbuild
                     SCRATCH
                     CUSTOMER 
