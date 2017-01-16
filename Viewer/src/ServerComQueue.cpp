@@ -16,7 +16,7 @@
 
 #include "Log.hpp"
 
-//#define _UI_SERVERCOMQUEUE_DEBUG
+#define _UI_SERVERCOMQUEUE_DEBUG
 
 // This class manages the tasks to be sent to the ServerComThread, which controls
 // the communication with the ClientInvoker. The ClientInvoker is hidden from the
@@ -355,6 +355,7 @@ void ServerComQueue::slotRun()
         UiLog(server_).dbg() << "  task: " << (*it)->typeString();
     }
 #endif
+
     if(tasks_.empty() && !current_)
 	{
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
@@ -364,6 +365,60 @@ void ServerComQueue::slotRun()
 		return;
 	}
 
+    //If a task was sent to the thread but the queue did not get the
+    //notification about the thread's start there is a PROBLEM!
+    //Note: when the thread starts it emits a signal to the queue
+    //and the queue sets taskStarted_ to true. Since this is a queued communication
+    //there can be a time lag between the two events. We set a timeout for it!
+    //If we pass the timeout we stop the thread and try to resend the task!
+    if(current_ && !taskStarted_ && taskTime_.elapsed() > taskTimeout_)
+    {
+        bool rerun=false;
+        bool r=comThread_->isRunning();
+
+        //So if we are here:
+        //-the thread did not emit a notification about its start
+        //-the elapsed time since we sent the task to the thread past the timeout.
+
+        //Problem 1:
+        //-the thread is running
+        if(r)
+        {
+            UiLog(server_).dbg() << " It seems that the thread started but it is in a bad state. Try to run task again.";
+            rerun=true;
+            assert(false);
+        }
+
+        //Problem 2:
+        //-the thread is not running
+        else if(!r)
+        {
+            UiLog(server_).dbg() << " It seems that the thread could not start. Try to run task again.";
+            rerun=true;
+        }
+
+        if(rerun)
+        {
+            comThread_->wait();
+
+            if(current_->status() != VTask::CANCELLED &&
+               current_->status() != VTask::ABORTED )
+            {
+                startCurrentTask();
+                return;
+            }
+            else
+            {
+    #ifdef _UI_SERVERCOMQUEUE_DEBUG
+                UiLog(server_).dbg() << "  current_ aborted or cancelled. Reset current_ !";
+    #endif
+                current_.reset();
+            }
+        }
+    }
+
+
+#if 0
     //If the thread could not start up for the current task.
     if(current_ && !taskStarted_ && !comThread_->isRunning() &&
        taskTime_.elapsed() > taskTimeout_)
@@ -385,6 +440,7 @@ void ServerComQueue::slotRun()
             current_.reset();
         }
     }
+#endif
 
 	if(current_)
 	{
