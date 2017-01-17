@@ -14,6 +14,7 @@
 
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
+#include "GraphNodeView.hpp"
 #include "NodePathWidget.hpp"
 #include "NodeViewBase.hpp"
 #include "TreeNodeModel.hpp"
@@ -49,11 +50,26 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
-    TreeNodeView *tv=new TreeNodeView((TreeNodeModel*)model_,filterDef_,this);
-	hb->addWidget(tv);
 
-	//Store the pointer to the (non-QObject) base class of the view!!!
-	view_=tv;
+    bool compact=false;
+    if(VProperty* prop=VConfig::instance()->find("view.tree.layoutStyle"))
+    {
+        compact=(prop->value() == "compact");
+    }
+    if(compact)
+    {
+        GraphNodeView* gv=new GraphNodeView((TreeNodeModel*)model_,filterDef_,this);
+        hb->addWidget(gv);
+        //Store the pointer to the (non-QObject) base class of the view!!!
+        view_=gv;
+    }
+    else
+    {
+        TreeNodeView *tv=new TreeNodeView((TreeNodeModel*)model_,filterDef_,this);
+        hb->addWidget(tv);
+        //Store the pointer to the (non-QObject) base class of the view!!!
+        view_=tv;
+    }
 
 	//Signals-slots
 	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),

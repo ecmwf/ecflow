@@ -40,6 +40,7 @@ set(viewer_srcs
     FileWatcher.cpp
     FilterWidget.cpp
     GotoLineDialog.cpp
+    GraphNodeView.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
     IconProvider.cpp

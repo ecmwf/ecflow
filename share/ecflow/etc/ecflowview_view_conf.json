@@ -21,7 +21,12 @@
                   } 
             },
             "tree": {
-            	
+                "layoutStyle" : {
+                    "label" : "Tree layout style",
+                    "default" : "compact",
+                    "values"  : "standard/compact",
+                    "values_label" : "Standard tree view/Compact tree view"
+                },
                 "nodeFont" : {
 					"label" : "Nodes",
 					"default": "font(,)"

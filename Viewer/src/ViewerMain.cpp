@@ -147,7 +147,9 @@ int main(int argc, char **argv)
 
 	if (startMainWindow)
 	{
-		//Build the GUI
+        SessionHandler::instance()->current(SessionHandler::instance()->find("compact"));
+
+        //Build the GUI
 		MainWindow::init();
 
 		//Show all the windows
