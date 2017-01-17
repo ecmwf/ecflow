@@ -57,7 +57,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     if(!ecfVersionTxt.isEmpty())
     {
         logoTxt+="<p>ecflow version: <b>" + ecfVersionTxt + "</b><br>";
-        logoTxt+="<i>Copyright 2009-2016 ECMWF</i><p>";
+        logoTxt+="<i>Copyright 2009-2017 ECMWF</i><p>";
     }
 
     logoTxt+="</td></tr></table>";
