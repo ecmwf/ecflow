@@ -93,10 +93,14 @@ BOOST_AUTO_TEST_CASE( test_server )
 {
    cout << "Server:: ...test_server\n";
 
-   // Create a unique port number, allowing debug and release,gun,cland,intil to run at the same time
-   // Hence the lock file is not sufficient. Hence we will make a client server call.
+   // Create a unique port number, allowing debug and release,gnu,clang,intel to run at the same time
+   // Hence the lock file is not always sufficient.
+   // TEST_ECF_PORT should be unique among  gnu,clang,intel, etc
    std::string the_port1 = "3144" ;
+   char* test_ecf_port = getenv("TEST_ECF_PORT");  // from metabuilder, allow parallel tests
+   if ( test_ecf_port ) the_port1 = test_ecf_port;
    cout << "Find free port to start server, starting with port " << the_port1 << "\n";
+
    int the_port = boost::lexical_cast<int>(the_port1);
    while (!EcfPortLock::is_free(the_port)) the_port++;
    std::string port = boost::lexical_cast<std::string>(the_port);
