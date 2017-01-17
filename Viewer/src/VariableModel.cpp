@@ -12,6 +12,7 @@
 #include <QColor>
 
 #include "ServerHandler.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VariableModelData.hpp"
 
@@ -236,109 +237,6 @@ bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& valu
 	}
 
 	return false;
-}
-
-bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString value)
-{
-#ifdef _UI_VARIABLEMODEL_DEBUG
-    UiLog().dbg() << "VariableModel::alterVariable --> " <<  index  << " name=" <<
-                     name << " value=" <<  value;
-#endif
-
-    if(data_->count() > 0)
-    {
-        //This will call the ServerComThread  so we
-        //do not know if it was successful or not. The model will be
-        //updated through the observer when the value will actually
-        //change.
-        data_->data(0)->alter(name.toStdString(),value.toStdString());
-    }
-
-#if 0
-    int block;
-    int row;
-
-    identify(index,block,row);
-
-#ifdef _UI_VARIABLEMODEL_DEBUG
-    UiLog().dbg() << "   block=" <<  block << " row=" << row;
-#endif
-
-    if(block == -1 || row == -1)
-        return false;
-
-    if(block >=0 && block < data_->count())
-    {
-        //This will call the ServerComThread  so we
-        //do not know if it was successful or not. The model will be
-        //updated through the observer when the value will actually
-        //change.
-        data_->data(block)->alter(name.toStdString(),value.toStdString());
-    }
-#endif
-
-#ifdef _UI_VARIABLEMODEL_DEBUG
-    UiLog().dbg() << "<-- alterVariable";
-#endif
-    return false;
-}
-
-bool VariableModel::setVariable(const QModelIndex& index, QString name,QString value)
-{
-    int block;
-    int row;
-    
-    identify(index,block,row);
-    
-    if(block == -1 || row == -1)
-        return false;
-    
-    if(block >=0 && block < data_->count())
-    {
-        //double check
-        if(data_->data(block)->name(row) != name.toStdString())
-        {
-            assert(0);
-            return false;
-        }    
-                
-        //This will call the ServerComThread  so we 
-        //do not know if it was successful or not. The model will be
-        //updated through the observer when the value will actually
-        //change.
-        data_->data(block)->setValue(row,value.toStdString());
-    }
-    
-    return false;
-}
-
-bool VariableModel::removeVariable(const QModelIndex& index, QString name,QString value)
-{
-    int block;
-    int row;
-
-    identify(index,block,row);
-
-    if(block == -1 || row == -1)
-        return false;
-
-    if(block >=0 && block < data_->count())
-    {
-        //double check
-        if(data_->data(block)->name(row) != name.toStdString())
-        {
-            assert(0);
-            return false;
-        }
-
-        //This will call the ServerComThread  so we
-        //do not know if it was succesful. The model will be
-        //updated through the observer when the value will actually
-        //change.
-        data_->data(block)->remove(row,name.toStdString());
-    }
-
-    return false;
 }
 
 QVariant VariableModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
