@@ -1,9 +1,9 @@
-## Copyright 2009-2016 ECMWF. 
-## This software is licensed under the terms of the Apache Licence version 2.0 
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-## In applying this licence, ECMWF does not waive the privileges and immunities 
-## granted to it by virtue of its status as an intergovernmental organisation 
-## nor does it submit to any jurisdiction. 
+## Copyright 2009-2017 ECMWF.
+## This software is licensed under the terms of the Apache Licence version 2.0
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+## In applying this licence, ECMWF does not waive the privileges and immunities
+## granted to it by virtue of its status as an intergovernmental organisation
+## nor does it submit to any jurisdiction.
 
 #
 # Client
@@ -36,10 +36,10 @@ lib pthread  ;
 #
 lib libclient : [ glob src/*.cpp : src/*Main.cpp ]
               : <include>../ACore/src
-                <include>../ANattr/src 
-                <include>../ANode/src 
-                <include>../Base/src 
-                <include>../AParser/src 
+                <include>../ANattr/src
+                <include>../ANode/src
+                <include>../Base/src
+                <include>../AParser/src
                 <include>../Client/src
                 <variant>debug:<define>DEBUG
                 <link>static
@@ -52,10 +52,10 @@ lib libclient : [ glob src/*.cpp : src/*Main.cpp ]
              	<use>/site-config//boost_filesystem
              	<use>/site-config//boost_program_options
              	<use>/site-config//boost_datetime
-         :  
-         : <include>../Client/src         
-         ;               
-         
+         :
+         : <include>../Client/src
+         ;
+
 #
 # client. This Just pulls in src/ClientMain.cpp
 #
@@ -75,12 +75,12 @@ exe ecflow_client : [ glob src/*Main.cpp ]
            : <variant>debug:<define>DEBUG
              [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
            ;
- 
+
 #
-# Tests for client. All test source code, by pulling in libclient we avoid 
+# Tests for client. All test source code, by pulling in libclient we avoid
 # linking with ClientMain.cpp
 #
-exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cpp ]  
+exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cpp ]
 	       pthread
            /theCore//core
            /theNodeAttr//nodeattr
@@ -94,12 +94,12 @@ exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cp
            /site-config//boost_program_options
            /site-config//boost_datetime
            /site-config//boost_test
-         : <include>../ANode/test 
-           <include>../Base/test 
+         : <include>../ANode/test
+           <include>../Base/test
            <variant>debug:<define>DEBUG
            [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
 	     ;
-	     
+
 exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPort.cpp  ]
            /theCore//core
            /theNodeAttr//nodeattr
@@ -114,12 +114,12 @@ exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPor
            /site-config//boost_program_options
            /site-config//boost_datetime
            /site-config//boost_test
-         : <include>../ANode/test 
-           <include>../Base/test 
+         : <include>../ANode/test
+           <include>../Base/test
            <variant>debug:<define>DEBUG
            [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
          ;
-         
+
 exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp  ]
            /theCore//core
            /theNodeAttr//nodeattr
@@ -134,8 +134,8 @@ exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp
            /site-config//boost_program_options
            /site-config//boost_datetime
            /site-config//boost_test
-         : <include>../ANode/test 
-           <include>../Base/test 
+         : <include>../ANode/test
+           <include>../Base/test
            <variant>debug:<define>DEBUG
            [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
          ;

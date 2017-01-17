@@ -1,9 +1,9 @@
-## Copyright 2009-2016 ECMWF. 
-## This software is licensed under the terms of the Apache Licence version 2.0 
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-## In applying this licence, ECMWF does not waive the privileges and immunities 
-## granted to it by virtue of its status as an intergovernmental organisation 
-## nor does it submit to any jurisdiction. 
+## Copyright 2009-2017 ECMWF.
+## This software is licensed under the terms of the Apache Licence version 2.0
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+## In applying this licence, ECMWF does not waive the privileges and immunities
+## granted to it by virtue of its status as an intergovernmental organisation
+## nor does it submit to any jurisdiction.
 
 project ecflow_top ;
 
@@ -29,7 +29,7 @@ feature.compose <ssl>on : <define>ECF_OPENSSL ;
 # ===============================================================================
 # To clean all the sub projects just use: bjam --clean
 #
-path-constant TOP : . ;     # After that, the TOP variable can be used in every Jamfile. 
+path-constant TOP : . ;     # After that, the TOP variable can be used in every Jamfile.
 
 build-project ACore ;
 build-project ANattr ;
@@ -54,11 +54,11 @@ if $(ARCH) in $(build_gui) {
 # Some user do no want python: They must define ECF_NO_PYTHON
 NO_PYTHON = [ os.environ ECF_NO_PYTHON ] ;
 #echo "NO_PYTHON =  $(NO_PYTHON)" ;
-if ! $(NO_PYTHON) { 
-   # echo "building python" ; 
-   build-project Pyext ; 
+if ! $(NO_PYTHON) {
+   # echo "building python" ;
+   build-project Pyext ;
 }
- 
+
 # ==================== INSTALL ==========================================================
 
 local dest_dir = [ os.environ ECFLOW_DESTDIR ] ;
@@ -67,11 +67,11 @@ constant ECFLOW_DESTDIR : $(dest_dir) ;
 
 local ECFLOW_VERSION = [ SHELL "cd $(TOP); ./version.sh" ] ;
 local install_dir = [ os.environ ECFLOW_INSTALL_DIR ] ;
-install_dir default = "/usr/local/apps/ecflow/$(ECFLOW_VERSION)" ; 
+install_dir default = "/usr/local/apps/ecflow/$(ECFLOW_VERSION)" ;
 constant ECFLOW_INSTALL_DIR : $(install_dir) ;
 
 local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
-python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ; 
+python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ;
 constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 
 # Used for ecflowview files
@@ -86,7 +86,7 @@ constant ECFLOW_SHARED_DIR : $(ECFLOW_DESTDIR)$(ECFLOW_INSTALL_DIR)/share/ecflow
 #
 # Allow the installation directory be be defined externally, by the environment variable ECFLOW_INSTALL_DIR
 #
-# However we want this to be explicit, as we dont need it on a day to day basis. 
+# However we want this to be explicit, as we dont need it on a day to day basis.
 # Usage:
 #	bjam install variant=release
 #
@@ -98,7 +98,7 @@ constant ECFLOW_SHARED_DIR : $(ECFLOW_DESTDIR)$(ECFLOW_INSTALL_DIR)/share/ecflow
 #
 # Note: if you find that the install has started to create directories
 #       of name install-server,install-client,,install-py
-#       Then *ensure* you have set the environment variables ECFLOW_INSTALL_DIR, 
+#       Then *ensure* you have set the environment variables ECFLOW_INSTALL_DIR,
 #
 # Note: Not all system have XLib, hence install ecFlowview manually by using:
 #      bjam -d2 install-viewer
@@ -106,7 +106,7 @@ constant ECFLOW_SHARED_DIR : $(ECFLOW_DESTDIR)$(ECFLOW_INSTALL_DIR)/share/ecflow
 # Make sure for ECMWF that ECFLOW_INSTALL_DIR leaf directory encompasses version number
 # that ties up with $WK/VERSION.cmake
 #
- 
+
 # Do no call this on the command line, prefer bjam install-all || install-viewer
 # If this is called in isolation ldd will show the referenced shared lib as missing
 install install-view
@@ -123,16 +123,16 @@ install install-view64
 	: view//ecflowview
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
 	  <dll-path>$(ECFLOW_INSTALL_DIR)/lib64
-	;	
+	;
 
 install install-view-files
     : [ glob view/servers ]
       [ glob view/src/ecflowview.menu ]
     : <location>$(ECFLOW_SHARED_DIR)
     ;
-    
+
 install install-server
-	: Server//ecflow_server 
+	: Server//ecflow_server
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
 	;
 
@@ -148,10 +148,10 @@ install install-tools
 	;
 
 install install-doc
-        : [ glob Doc/user-manual/client_*.docx ] 
+        : [ glob Doc/user-manual/client_*.docx ]
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/doc/ecflow
 	;
- 
+
 # Fix bugs associated with the output of old version of ecflow_client --migrate
 install install-migrate
 	: [ glob Pyext/migrate/ecflow_migrate.py ]
@@ -162,15 +162,15 @@ install install-migrate
 
 # Use this for a non-python install
 alias install-base :
-	install-server 
-	install-client 
-	install-tools 
+	install-server
+	install-client
+	install-tools
 	install-doc
    install-migrate
 	;
-alias install : 
+alias install :
 	install-base
-	Pyext//install-py 
+	Pyext//install-py
  	Pyext//install-py1
 	;
 alias install-viewer :
