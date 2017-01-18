@@ -74,6 +74,7 @@ protected:
 
 	PropertyMapper* prop_;
 	QFont font_;
+    int fontHeight_;
 	QFont attrFont_;
 	int iconSize_;
 	int iconGap_;

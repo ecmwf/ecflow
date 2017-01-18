@@ -134,6 +134,8 @@ void TreeNodeViewDelegate::updateSettings()
     	if(font_ != newFont )
     	{
     		font_=newFont;
+            QFontMetrics fm(font_);
+            fontHeight_=fm.height();
     		serverInfoFont_=font_;
     		serverNumFont_.setFamily(font_.family());
             serverNumFont_.setPointSize(font_.pointSize()-1);
@@ -178,9 +180,10 @@ void TreeNodeViewDelegate::updateSettings()
     updateBaseSettings();
 }
 
-QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
+QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIndex & index ) const
 {
-	QSize size=QStyledItemDelegate::sizeHint(option,index);
+    //QSize size=QStyledItemDelegate::sizeHint(option,index);
+    QSize size(100,fontHeight_+8);
 
 	int attLineNum=0;
 	if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 0)
@@ -199,9 +202,7 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const 
 		}
 	}
 
-	QFontMetrics fm(font_);
-	int h=fm.height();
-	return QSize(size.width(),h+8);
+    return size;
 }
 
 

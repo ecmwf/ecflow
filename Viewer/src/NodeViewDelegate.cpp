@@ -40,6 +40,9 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
 
     updateSettings();*/
 
+    QFontMetrics fm(font_);
+    fontHeight_=fm.height();
+
 	hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));
 	selectPen_=QPen(QColor(125,162,206));
@@ -175,10 +178,7 @@ void NodeViewDelegate::updateBaseSettings()
 QSize NodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
-
-	QFontMetrics fm(font_);
-	int h=fm.height();
-	return QSize(size.width(),h+8);
+    return QSize(size.width(),fontHeight_+8);
 }
 
 void NodeViewDelegate::adjustIconSize()
