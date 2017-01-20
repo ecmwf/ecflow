@@ -59,7 +59,9 @@ public:
 
 	/// Configure to using command line interface
 	/// This affect commands like ping, log & file, so that, output is written to standard out
-	void set_cli(bool f) { cli_ =  f; }
+	/// Can also be used to check argument arguments
+	void set_cli(bool f) { clientEnv_.set_cli(f); }
+	bool cli() const { return clientEnv_.get_cli(); }
 
 	/// This will override the environment setting.
 	/// In particular setting host explicitly will avoid cycling through server list,
@@ -325,7 +327,6 @@ private:
    friend class RequestLogger;
 private:
 	bool on_error_throw_exception_;
-	bool cli_;                             // Command Line Interface. Controls whether output written to standard out
 	bool test_;                            // used in testing only
 	bool testInterface_;                   // used in testing only
 	unsigned int connection_attempts_;     // No of attempts to establish connection with the server

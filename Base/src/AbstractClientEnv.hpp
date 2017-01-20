@@ -29,9 +29,12 @@
 
 class AbstractClientEnv : private boost::noncopyable {
 protected:
- 	AbstractClientEnv() {}
+ 	AbstractClientEnv() : cli_(false) {}
 public:
  	virtual ~AbstractClientEnv() {}
+
+ 	void set_cli(bool f) { cli_ = f ;}
+ 	bool get_cli() const { return cli_;}
 
  	/// For all tasks/child based commands we require taskPath and password and optional Remote ID
  	/// When the jobs use a queueing system the remote id (ECF_RID) is used to
@@ -66,5 +69,8 @@ public:
 	/// when testing the client interface we want to avoid opening the log file.
 	virtual void set_test() = 0;
 	virtual bool under_test() const = 0;
+
+private:
+   bool cli_;  // Command Line Interface. Controls whether output written to standard out, and argument checking
 };
 #endif

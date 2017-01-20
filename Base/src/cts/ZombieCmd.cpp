@@ -226,6 +226,20 @@ void ZombieCmd::create( Cmd_ptr& cmd,
 		throw std::runtime_error("ZombieCmd::create: expects at least one argument. path to task");
 	}
 
+   if (ace->get_cli()) {
+      // We are using command line, only a single path argument is acceptable
+      if (!process_or_remote_id.empty()) {
+         throw std::runtime_error("ZombieCmd::create: expects one argument. path to task, i.e /path/to/task");
+      }
+      if (!password.empty()) {
+         throw std::runtime_error("ZombieCmd::create: expects one argument. path to task, i.e /path/to/task");
+      }
+   }
+
+   if (path.find('/') == std::string::npos) {
+      throw std::runtime_error("ZombieCmd::create: Not a valid path. Expects one argument. path to task, i.e /path/to/task");
+   }
+
 	cmd = Cmd_ptr(new ZombieCmd(user_action_, path, process_or_remote_id, password ));
 }
 

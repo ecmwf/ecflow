@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.begin_all_suites() == 0,CtsApi::begin() << " should return 0\n" << theClient.errorMsg());
 
 
-   Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"path_to_task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1);
+   Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"/path/to/task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1);
    BOOST_REQUIRE_MESSAGE( theClient.zombieGet() == 0,CtsApi::zombieGet() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieFob(z) == 0,    " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieFail(z) == 0,   " should return 0\n" << theClient.errorMsg());
@@ -86,12 +86,12 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.zombieBlock(z) == 0, " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieRemove(z) == 0, " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieKill(z) == 0, " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieFobCli("path_to_task") == 0,    " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieFailCli("path_to_task") == 0,   " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieAdoptCli("path_to_task") == 0,  " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieBlockCli("path_to_task") == 0, " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieRemoveCli("path_to_task") == 0, " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieKillCli("path_to_task") == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieFobCli("/path/to/task") == 0,    " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieFailCli("/path/to/task") == 0,   " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieAdoptCli("/path/to/task") == 0,  " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieBlockCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieRemoveCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieKillCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
 
    BOOST_REQUIRE_MESSAGE( theClient.job_gen("") == 0,CtsApi::job_gen("") << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.job_gen("/s") == 0,CtsApi::job_gen("/s") << " should return 0\n" << theClient.errorMsg());
