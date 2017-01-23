@@ -386,7 +386,7 @@ void ServerComQueue::slotRun()
         {
             UiLog(server_).dbg() << " It seems that the thread started but it is in a bad state. Try to run task again.";
             rerun=true;
-            assert(false);
+            //assert(false);
         }
 
         //Problem 2:
