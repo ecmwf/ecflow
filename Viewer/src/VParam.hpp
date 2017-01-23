@@ -21,6 +21,7 @@ public:
 		explicit VParam(const std::string& name);
         ~VParam();
 
+        uint id() const {return id_;}
 		QString name() const {return qName_;}
 		const std::string& strName() const {return name_;}
 
@@ -30,7 +31,6 @@ public:
         QColor typeColour() const {return typeColour_;}
 
 		void setProperty(VProperty*);
-		
 		void notifyChange(VProperty*);
 
 		/*
@@ -68,6 +68,7 @@ protected:
 		QString colourPropName_;
         QString fontColourPropName_;
         QString typeColourPropName_;
+        int id_;
 };
 
 #endif

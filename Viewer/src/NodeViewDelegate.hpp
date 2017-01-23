@@ -74,9 +74,10 @@ protected:
 
 	PropertyMapper* prop_;
 	QFont font_;
+    QFont attrFont_;
     int fontHeight_;
-	QFont attrFont_;
-	int iconSize_;
+    int attrFontHeight_;
+    int iconSize_;
 	int iconGap_;
 
 	bool useStateGrad_;

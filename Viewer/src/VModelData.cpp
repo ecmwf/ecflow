@@ -879,7 +879,8 @@ void VTableServer::clearForceShow(const VItem* item)
 
 VModelData::VModelData(NodeFilterDef *filterDef,AbstractNodeModel* model) :
 		QObject(model),
-		serverFilter_(0),
+        serverNum_(0),
+        serverFilter_(0),
 		filterDef_(filterDef),
         model_(model),
         active_(false)
@@ -946,7 +947,6 @@ void VModelData::reset(ServerFilter* serverFilter)
 {
 	clear();
 	serverFilter_=serverFilter;
-
 	init();
 }
 
@@ -956,11 +956,17 @@ void VModelData::init()
 
 	for(unsigned int i=0; i < serverFilter_->items().size(); i++)
 	{
-		if(ServerHandler *server=serverFilter_->items().at(i)->serverHandler())
+        if(ServerHandler *server=serverFilter_->items().at(i)->serverHandler())
 		{
 			add(server);
 		}
 	}
+}
+
+void VModelData::addToServers(VModelServer* s)
+{
+    servers_.push_back(s);
+    serverNum_=servers_.size();
 }
 
 void VModelData::clear()
@@ -976,10 +982,11 @@ void VModelData::clear()
 
 	for(int i=0; i < servers_.size(); i++)
 	{
-		delete servers_.at(i);
+        delete servers_[i];
 	}
 
 	servers_.clear();
+    serverNum_=0;
 
 #ifdef _UI_VMODELDATA_DEBUG
     UiLog().dbg() << "<-- clear";
@@ -988,18 +995,18 @@ void VModelData::clear()
 
 VModelServer* VModelData::server(int n) const
 {
-	return (n >=0 && n < servers_.size())?servers_.at(n):0;
+    return (n >=0 && n < servers_.size())?servers_[n]:0;
 }
 
 ServerHandler* VModelData::serverHandler(int n) const
 {
-	return (n >=0 && n < servers_.size())?servers_.at(n)->server_:0;
+    return (n >=0 && n < servers_.size())?servers_[n]->server_:0;
 }
 
 int VModelData::indexOfServer(void* idPointer) const
 {
 	for(unsigned int i=0; i < servers_.size(); i++)
-		if(servers_.at(i) == idPointer)
+        if(servers_[i] == idPointer)
 			return i;
 
 	return -1;
@@ -1007,36 +1014,36 @@ int VModelData::indexOfServer(void* idPointer) const
 
 ServerHandler* VModelData::serverHandler(void* idPointer) const
 {
-	for(unsigned int i=0; i < servers_.size(); i++)
-		if(servers_.at(i) == idPointer)
-			return servers_.at(i)->server_;
+    for(unsigned int i=0; i < serverNum_; i++)
+        if(servers_[i] == idPointer)
+            return servers_[i]->server_;
 
 	return NULL;
 }
 
 VModelServer* VModelData::server(const void* idPointer) const
 {
-	for(unsigned int i=0; i < servers_.size(); i++)
-		if(servers_.at(i) == idPointer)
-			return servers_.at(i);
+    for(unsigned int i=0; i < serverNum_; i++)
+        if(servers_[i] == idPointer)
+            return servers_[i];
 
 	return NULL;
 }
 
 VModelServer* VModelData::server(const std::string& name) const
 {
-    for(unsigned int i=0; i < servers_.size(); i++)
-        if(servers_.at(i)->server_->name()  == name)
-            return servers_.at(i);
+    for(unsigned int i=0; i < serverNum_; i++)
+        if(servers_[i]->server_->name()  == name)
+            return servers_[i];
 
     return NULL;
 }
 
 VModelServer* VModelData::server(ServerHandler* s) const
 {
-    for(unsigned int i=0; i < servers_.size(); i++)
-        if(servers_.at(i)->server_ == s)
-            return servers_.at(i);
+    for(unsigned int i=0; i < serverNum_; i++)
+        if(servers_[i]->server_ == s)
+            return servers_[i];
 
     return NULL;
 }
@@ -1044,8 +1051,8 @@ VModelServer* VModelData::server(ServerHandler* s) const
 
 int VModelData::indexOfServer(ServerHandler* s) const
 {
-	for(unsigned int i=0; i < servers_.size(); i++)
-		if(servers_.at(i)->server_ == s)
+    for(unsigned int i=0; i < serverNum_; i++)
+        if(servers_[i]->server_ == s)
 			return i;
 	return -1;
 }
@@ -1107,6 +1114,7 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
 
 			delete *it;
 			servers_.erase(it);
+            serverNum_=servers_.size();
 
 #ifdef _UI_VMODELDATA_DEBUG
             UiLog().dbg() << " emit serverRemoveEnd()";
@@ -1177,9 +1185,9 @@ void VModelData::reload(bool broadcast)
     if(broadcast)
         Q_EMIT filterChangeBegun();
 
-    for(unsigned int i=0; i < servers_.size(); i++)
+    for(unsigned int i=0; i < serverNum_; i++)
     {
-        servers_.at(i)->reload();
+        servers_[i]->reload();
     }
 
     if(broadcast)
@@ -1202,9 +1210,9 @@ void VModelData::slotFilterDefChanged()
 
 bool VModelData::isFilterComplete() const
 {
-    for(unsigned int i=0; i < servers_.size(); i++)
+    for(unsigned int i=0; i < serverNum_; i++)
     {      
-        return servers_.at(i)->filter()->isComplete();
+        return servers_[i]->filter()->isComplete();
     }
 
     return true;
@@ -1212,9 +1220,9 @@ bool VModelData::isFilterComplete() const
 
 bool VModelData::isFilterNull() const
 {
-    for(unsigned int i=0; i < servers_.size(); i++)
+    for(unsigned int i=0; i < serverNum_; i++)
     {
-        return servers_.at(i)->filter()->isNull();
+        return servers_[i]->filter()->isNull();
     }
 
     return true;
@@ -1287,7 +1295,7 @@ void VTreeModelData::add(ServerHandler *server)
 
     connectToModel(d);
 
-	servers_.push_back(d);
+    VModelData::addToServers(d);
 
     if(active_)
         reload(true);
@@ -1297,9 +1305,9 @@ void VTreeModelData::slotAttrFilterChanged()
 {
     Q_EMIT filterChangeBegun();
 
-    for(unsigned int i=0; i < servers_.size(); i++)
+    for(unsigned int i=0; i < serverNum_; i++)
     {
-        servers_.at(i)->treeServer()->attrFilterChanged();
+        servers_[i]->treeServer()->attrFilterChanged();
     }
 
     Q_EMIT filterChangeEnded();
@@ -1335,7 +1343,7 @@ void VTableModelData::add(ServerHandler *server)
 
     connectToModel(d);
 
-	servers_.push_back(d);
+    VModelData::addToServers(d);
 
     if(active_)
         reload(false);
@@ -1349,9 +1357,9 @@ int VTableModelData::position(VTableServer* server)
 	if(server)
 	{
 		start=0;
-		for(unsigned int i=0; i < servers_.size(); i++)
+        for(unsigned int i=0; i < serverNum_; i++)
 		{
-			if(servers_.at(i) == server)
+            if(servers_[i] == server)
 			{
                 return start;
 			}          
@@ -1374,13 +1382,13 @@ bool VTableModelData::position(VTableServer* server,int& start,int& count)
 		{          
             count=server->nodeNum();
 			start=0;
-			for(unsigned int i=0; i < servers_.size(); i++)
+            for(unsigned int i=0; i < serverNum_; i++)
 			{
-				if(servers_.at(i) == server)
+                if(servers_[i] == server)
 				{
 					return true;
 				}
-                start+=servers_.at(i)->nodeNum();
+                start+=servers_[i]->nodeNum();
 			}
 		}
 	}
@@ -1395,7 +1403,7 @@ int VTableModelData::position(VTableServer* server,const VNode *node) const
 	if(server)
 	{
 		int totalRow=0;
-		for(unsigned int i=0; i < servers_.size(); i++)
+        for(unsigned int i=0; i < serverNum_; i++)
 		{
             if(servers_[i] == server)
 			{				
@@ -1437,7 +1445,7 @@ VNode* VTableModelData::nodeAt(int totalRow)
 	if(totalRow < 0)
 		return NULL;
 
-	for(unsigned int i=0; i < servers_.size(); i++)
+    for(unsigned int i=0; i < serverNum_; i++)
 	{
 		int pos=totalRow-cnt;
         if(pos < servers_[i]->nodeNum())

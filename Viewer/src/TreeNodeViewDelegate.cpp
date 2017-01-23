@@ -27,7 +27,6 @@ static QColor typeFgColourClassic=QColor(Qt::white);
 static QColor typeBgColourClassic=QColor(150,150,150);
 static QColor childCountColour=QColor(90,91,92);
 
-
 struct NodeShape
 {
     QColor col_;
@@ -62,10 +61,15 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 {
     drawAttrSelectionRect_=true;
 
+    nodeSizeHintCache_=QSize(100,fontHeight_+8);
+
     attrFont_=font_;
 	attrFont_.setPointSize(8);
+    QFontMetrics fm(attrFont_);
+    attrFontHeight_=fm.height();
+    attrSizeHintCache_=QSize(100,attrFontHeight_+6);
 
-	serverInfoFont_=font_;
+    serverInfoFont_=font_;
 
 	serverInfoFont_=font_;
     //serverNumFont_.setBold(true);
@@ -136,6 +140,7 @@ void TreeNodeViewDelegate::updateSettings()
     		font_=newFont;
             QFontMetrics fm(font_);
             fontHeight_=fm.height();
+            nodeSizeHintCache_=QSize(100,fontHeight_+8);
     		serverInfoFont_=font_;
     		serverNumFont_.setFamily(font_.family());
             serverNumFont_.setPointSize(font_.pointSize()-1);
@@ -157,7 +162,10 @@ void TreeNodeViewDelegate::updateSettings()
     	if(attrFont_ != newFont)
     	{
     		attrFont_=newFont;
-    		Q_EMIT sizeHintChangedGlobal();
+            QFontMetrics fm(attrFont_);
+            attrFontHeight_=fm.height();
+            attrSizeHintCache_=QSize(100,attrFontHeight_+6);
+            Q_EMIT sizeHintChangedGlobal();
     	}
     }
 
@@ -188,21 +196,20 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIn
 	int attLineNum=0;
 	if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 0)
 	{
-		QFontMetrics fm(attrFont_);
-		int h=fm.height();
 		if(attLineNum==1)
-			return QSize(size.width(),h+6);
+            return attrSizeHintCache_;
 		else
 		{
-			QStringList lst;
+            QFontMetrics fm(attrFont_);
+            QStringList lst;
 			for(int i=0; i < attLineNum; i++)
 				lst << "1";
 
-			return QSize(size.width(),fm.size(0,lst.join(QString('\n'))).height()+6);
+            return QSize(100,fm.size(0,lst.join(QString('\n'))).height()+6);
 		}
 	}
 
-    return size;
+    return nodeSizeHintCache_;
 }
 
 

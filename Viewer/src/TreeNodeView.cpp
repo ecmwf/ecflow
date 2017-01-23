@@ -299,11 +299,18 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 		if(idx.isValid())
 		{
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-		QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+            QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-		expandAll(idx);
+#ifdef _UI_TREENODEVIEW_DEBUG
+            QTime t;
+            t.start();
+#endif
+            expandAll(idx);
+#ifdef _UI_TREENODEVIEW_DEBUG
+            UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
+#endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-		QGuiApplication::restoreOverrideCursor();
+            QGuiApplication::restoreOverrideCursor();
 #endif
 
 		}
@@ -313,7 +320,7 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 		QModelIndex idx=model_->infoToIndex(info);
 		if(idx.isValid())
 		{
-				collapseAll(idx);
+            collapseAll(idx);
 		}
 	}
 

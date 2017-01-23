@@ -39,7 +39,6 @@ VAttributeType::VAttributeType(const std::string& name) :
         dataCount_(0),
         id_(types_.size())
 {
-    //items_.push_back(this);
     typesMap_[name]=this;
     types_.push_back(this);
 }
@@ -47,10 +46,8 @@ VAttributeType::VAttributeType(const std::string& name) :
 std::vector<VParam*> VAttributeType::filterItems()
 {
     std::vector<VParam*> v;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
-    {
-        v.push_back(it->second);
-    }
+    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
+        v.push_back(*it);
 
     return v;
 }
@@ -62,14 +59,6 @@ VAttributeType* VAttributeType::find(const std::string& name)
             return it->second;
 
     return 0;
-
-    /*		for(std::vector<VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
-    {
-        if((*it)->stdName() == name)
-                return *it;
-    }
-
-    return NULL;*/
 }
 
 VAttributeType* VAttributeType::find(int id)
@@ -84,14 +73,14 @@ int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
         return 0;
 
     int total=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
+    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
     {        
-        if(!filter || filter->isSet(it->second) )
+        if(!filter || filter->isComplete() || filter->isSet(*it) )
         {
-            total+=it->second->num(vnode);
+            total+=(*it)->num(vnode);
         }
         //If the filter contains a forceShow item
-        else if(filter->matchForceShowAttr(vnode,it->second))
+        else if(filter->matchForceShowAttr(vnode,*it))
         {
             total+=1;
         }
@@ -106,23 +95,23 @@ VAttributeType* VAttributeType::getType(const VNode *vnode,int absRowInFilter,At
         return NULL;
 
     int totalRow=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
+    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
     {
-        if(!filter || filter->isSet(it->second))
+        if(!filter || filter->isSet(*it))
         {
-            int size=it->second->num(vnode);
+            int size=(*it)->num(vnode);
             if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
             {
-                return it->second;
+                return *it;
             }
             totalRow+=size;
         }
-        else if(filter && filter->matchForceShowAttr(vnode,it->second))
+        else if(filter && filter->matchForceShowAttr(vnode,*it))
         {
             int size=1;
             if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
             {
-                return it->second;
+                return *it;
             }
             totalRow+=size;
         }
@@ -139,26 +128,26 @@ bool VAttributeType::getData(VNode *vnode,int absRowInFilter,VAttributeType* &ty
         return false;
 
     int totalRow=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
+    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
     {
-        if(!filter || filter->isSet(it->second))
+        if(!filter || filter->isSet(*it))
         {
             int size=0;
-            if(it->second->getData(vnode,absRowInFilter-totalRow,size,data))
+            if((*it)->getData(vnode,absRowInFilter-totalRow,size,data))
             {
-                type=it->second;
+                type=*it;
                 return true;
             }
             totalRow+=size;
         }
-        else if(filter && filter->matchForceShowAttr(vnode,it->second))
+        else if(filter && filter->matchForceShowAttr(vnode,*it))
         {
             if(absRowInFilter == totalRow)
             {
                 VAttribute* a=filter->forceShowAttr();
                 Q_ASSERT(a);
                 data=a->data();
-                type=it->second;
+                type=*it;
                 return true;
             }
             totalRow+=1;
@@ -178,28 +167,27 @@ bool VAttributeType::getData(const std::string& type,VNode* vnode,int rowInType,
     return false;
 }
 
+
+//This has to be very fast so we had to optimise it.
+//getLineNum() gives 1 for all attributes but the
+//labels. So we must guarantee that labels come first in the attribute vector
+//and this vector do not check the other attributes.
 int VAttributeType::getLineNum(const VNode *vnode,int absRowInFilter,AttributeFilter *filter)
 {
     if(!vnode)
         return 1;
 
-    int totalRow=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
+    VAttributeType *t=types_[0];
+    if(!filter || filter->isComplete() || filter->isSet(t))
     {
-        if(!filter || filter->isSet(it->second))
+        if(absRowInFilter < t->num(vnode))
         {
-            int size=it->second->num(vnode);
-            if(absRowInFilter-totalRow >=0 && absRowInFilter-totalRow < size)
-            {
-                return it->second->lineNum(vnode,absRowInFilter-totalRow);
-            }
-            totalRow+=size;
+            return t->lineNum(vnode,absRowInFilter);
         }
     }
 
-    //TODO:: add forceShowAttr
-
     return 1;
+    //TODO:: add forceShowAtt
 }
 
 #if 0
@@ -241,19 +229,19 @@ VItemTmp_ptr VAttributeType::itemForAbsIndex(const VNode *vnode,int absIndex,Att
         return VItemTmp_ptr();
 
     int totalNum=0;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
+    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
     {
-        if(!filter || filter->isSet(it->second))
+        if(!filter || filter->isSet(*it))
         {
-            int size=it->second->num(vnode);
+            int size=(*it)->num(vnode);
             if(absIndex-totalNum >=0 && absIndex-totalNum < size)
             {
                 int indexInType=absIndex-totalNum;
-                return VItemTmp::create(new VAttribute(const_cast<VNode*>(vnode),it->second,indexInType));
+                return VItemTmp::create(new VAttribute(const_cast<VNode*>(vnode),*it,indexInType));
             }
             totalNum+=size;
         }
-        else if(filter && filter->matchForceShowAttr(vnode,it->second))
+        else if(filter && filter->matchForceShowAttr(vnode,*it))
         {
             int size=1;
             if(absIndex-totalNum >=0 && absIndex-totalNum < size)
@@ -284,26 +272,26 @@ int VAttributeType::absIndexOf(const VAttribute* a,AttributeFilter *filter)
         return -1;
 
     int absIndex=-1;
-    for(std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.begin(); it != typesMap_.end(); ++it)
+    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
     {
-        if(a->type() == it->second)
+        if(a->type() == *it)
         {
             int idx=-1;
             if(filter && a->sameContents(filter->forceShowAttr()))
                 idx=0;
             else
-                idx=it->second->indexOf(a);
+                idx=(*it)->indexOf(a);
 
             return (idx != -1)?(absIndex+idx+1):-1;
         }
 
-        if(!filter || filter->isSet(it->second))
+        if(!filter || filter->isSet(*it))
         {
-            int size=it->second->num(vnode);
+            int size=(*it)->num(vnode);
             if(size > 0)
                 absIndex+=size;
         }
-        else if(filter->matchForceShowAttr(vnode,it->second))
+        else if(filter->matchForceShowAttr(vnode,*it))
         {
             absIndex+=1;
         }
@@ -562,8 +550,7 @@ int VLabelAttribute::num(const VNode *vnode)
     if(vnode->isServer())
         return 0;
 
-    node_ptr node=vnode->node();
-    return (node.get())?static_cast<int>(node->labels().size()):0;
+    return vnode->labelNum();
 }
 
 bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
@@ -601,22 +588,7 @@ int VLabelAttribute::lineNum(const VNode* vnode,int row)
     if(vnode->isServer())
         return 1;
 
-    node_ptr node=vnode->node();
-    if(!node.get())
-        return 1;
-
-    const std::vector<Label>&  v=node->labels();
-    if(row >=0 && row < v.size())
-    {
-        std::string val=v[row].new_value();
-        if(val.empty() || val == " ")
-        {
-            val=v[row].value();
-        }
-        return std::count(val.begin(), val.end(), '\n')+1;
-    }
-
-    return 1;
+    return vnode->labelLineNum(row);
 }
 
 QString VLabelAttribute::toolTip(QStringList d) const
@@ -733,7 +705,7 @@ int VEventAttribute::num(const VNode *vnode)
         return 0;
 
     node_ptr node=vnode->node();
-    return (node.get())? static_cast<int>(node->events().size()):0;
+    return (node)? static_cast<int>(node->events().size()):0;
 }
 
 bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
@@ -742,8 +714,8 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
     node_ptr node=vnode->node();
-    if(!node.get())
-            return false;
+    if(node)
+        return false;
 
 #ifdef _UI_ATTR_DEBUG
     UiLog().dbg() << "VEventAttribute::getData -->";
@@ -2255,11 +2227,14 @@ void VLateAttribute::getData(ecf::LateAttr *late,QStringList& data)
         data << qName_ << QString::fromStdString(late->name());
 }
 
+//The order below must not be changed. LABEL has to come first: it is
+//necessary for getLineNum(). Genvar should always come last: it is
+//the slowest to access.
+static VLabelAttribute labelAttr("label");
 static VMeterAttribute meterAttr("meter");
 static VEventAttribute eventAttr("event");
 static VRepeatAttribute repeatAttr("repeat");
 static VTriggerAttribute triggerAttr("trigger");
-static VLabelAttribute labelAttr("label");
 static VTimeAttribute timeAttr("time");
 static VDateAttribute dateAttr("date");
 static VLimitAttribute limitAttr("limit");

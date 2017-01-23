@@ -244,10 +244,12 @@ Q_SIGNALS:
 
 protected:
 	void init();
-	virtual void add(ServerHandler*)=0;
+    void addToServers(VModelServer* s);
+    virtual void add(ServerHandler*)=0;
     virtual void connectToModel(VModelServer* d);
 
 	std::vector<VModelServer*> servers_;
+    int serverNum_; //we cachec servers_.size() for performance reasons
 	ServerFilter *serverFilter_;
 	NodeFilterDef* filterDef_;
 	AbstractNodeModel* model_;

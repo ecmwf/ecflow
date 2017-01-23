@@ -216,7 +216,7 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 	{
 		VIcon *v=*it;
 
-        if(!filter || filter->current().find(v) != filter->current().end())
+        if(!filter || filter->isSet(v))
         {
        	   if(v->show(vnode))
            {
@@ -240,7 +240,7 @@ QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
 	{
 	   VIcon *v=*it;
 
-       if(!filter || filter->current().find(v) != filter->current().end())
+       if(!filter || filter->isSet(v))
        {
       	   if(v->show(vnode))
       	   {

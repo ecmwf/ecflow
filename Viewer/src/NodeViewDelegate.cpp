@@ -42,6 +42,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
 
     QFontMetrics fm(font_);
     fontHeight_=fm.height();
+    attrFontHeight_=fm.height();
 
 	hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));

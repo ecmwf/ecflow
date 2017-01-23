@@ -71,6 +71,7 @@ protected:
     virtual int num(const VNode* vnode)=0;
     virtual int lineNum(const VNode* vnode,int row) {return 1;}
 
+    typedef std::vector<VAttributeType*>::const_iterator TypeIterator;
     std::map<std::string,int> keyToData_;
     std::map<std::string,int> searchKeyToData_;
     int dataCount_;

@@ -14,13 +14,16 @@
 
 #include "VProperty.hpp"
 
+static uint idCounter=0;
+
 VParam::VParam(const std::string& name) :
    name_(name),
    qName_(QString::fromStdString(name)),
    prop_(0),
    colourPropName_("fill_colour"),
    fontColourPropName_("font_colour"),
-   typeColourPropName_("type_colour")
+   typeColourPropName_("type_colour"),
+   id_(idCounter++)
 {
 }
 

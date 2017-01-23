@@ -457,7 +457,7 @@ int VNode::variablesNum() const
 
 int VNode::genVariablesNum() const
 {
-	std::vector<Variable> gv;
+    std::vector<Variable> gv;
 
     if(node_)
 	{
@@ -792,6 +792,30 @@ const std::string& VNode::abortedReason() const
 	static std::string emptyStr;
 	return emptyStr;
 
+}
+
+int VNode::labelNum() const
+{
+    return (!node_)?node_->labels().size():0;
+}
+
+int VNode::labelLineNum(int row) const
+{
+    if(!node_)
+        return 1;
+
+    const std::vector<Label>&  v=node_->labels();
+    if(row >=0 && row < v.size())
+    {
+        std::string val=v[row].new_value();
+        if(val.empty() || val == " ")
+        {
+            val=v[row].value();
+        }
+        return std::count(val.begin(), val.end(), '\n')+1;
+    }
+
+    return 1;
 }
 
 void VNode::statusChangeTime(QString& sct) const

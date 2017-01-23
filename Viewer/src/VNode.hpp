@@ -190,6 +190,8 @@ public:
     
     virtual void why(std::vector<std::string>& theReasonWhy) const;
     const std::string&  abortedReason() const;
+    int labelNum() const;
+    int labelLineNum(int row) const;
     void statusChangeTime(QString&) const;
     uint statusChangeTime() const;
 

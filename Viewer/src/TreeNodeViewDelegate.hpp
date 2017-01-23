@@ -85,6 +85,9 @@ protected:
 	QFont abortedReasonFont_;
     QFont typeFont_;
     QColor bgCol_;
+
+    QSize nodeSizeHintCache_;
+    QSize attrSizeHintCache_;
 };
 
 #endif

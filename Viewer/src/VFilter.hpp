@@ -42,15 +42,15 @@ public:
 	VParamSet();
     virtual ~VParamSet() {}
 
-	const std::set<VParam*>& current() const {return current_;}
-	void setCurrent(const std::set<VParam*>&);
-	QStringList currentAsList() const;
-	void current(const std::set<std::string>&);
-	void setCurrent(QStringList);
-	const std::set<VParam*>& all() const {return all_;}
+    const std::vector<VParam*>& all() const {return all_;}
+    const std::vector<VParam*>& current() const {return current_;}
+    QStringList currentAsList() const;
+    void setCurrent(const std::vector<VParam*>&,bool broadcast=true);
+    void setCurrent(const std::vector<std::string>&,bool broadcast=true);
+    void setCurrent(QStringList,bool broadcast=true);
 
-	bool isEmpty() const {return current_.empty();}
-	bool isComplete() const { return all_.size() == current_.size();}
+    bool isEmpty() const {return empty_;}
+    bool isComplete() const { return complete_;}
 	bool isSet(const std::string&) const;
 	bool isSet(VParam*) const;
 
@@ -62,11 +62,19 @@ Q_SIGNALS:
 
 protected:
 	void init(const std::vector<VParam*>& items);
+    void addToCurrent(VParam*);
 
-	std::set<VParam*> all_;
-	std::set<VParam*> current_;
+    std::vector<VParam*> all_;
+    std::vector<VParam*> current_;
     std::string settingsId_;
     std::string settingsIdV0_;
+
+private:
+     void clearCurrent();
+
+     std::vector<int> currentCache_; //we use to speed up the check in isSet()
+     bool empty_;
+     bool complete_;
 };
 
 class NodeStateFilter : public VParamSet
