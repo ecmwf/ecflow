@@ -11,6 +11,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "VTaskObserver.hpp"
+#include "Zombie.hpp"
 
 VTask::VTask(Type t,VTaskObserver* obs) :
 	type_(t),
@@ -97,6 +98,12 @@ void VTask::status(Status s, bool broadcastIt)
 	if(broadcastIt)
 		broadcast();
 }
+
+void VTask::setZombie(const Zombie& z)
+{
+    zombie_=z;
+}
+
 void VTask::removeObserver(VTaskObserver* o)
 {
     std::vector<VTaskObserver*>::iterator it=std::find(observers_.begin(), observers_.end(),o);

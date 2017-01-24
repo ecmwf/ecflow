@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -78,6 +78,7 @@ private:
 	std::map<std::string,std::string> params_;
 	std::vector<std::string> contents_;
 	NameValueVec vars_;
+    Zombie zombie_;
 	std::string nodePath_;
 	bool rescanNeed_;	
     bool hasSuiteFilter_;

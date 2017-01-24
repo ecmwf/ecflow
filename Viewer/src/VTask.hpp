@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "NodeFwd.hpp"
+#include "Zombie.hpp"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -39,7 +40,7 @@ public:
 	enum Type {NoTask,CommandTask,OverviewTask,WhyTask,ManualTask,ScriptTask,
 		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,ResetTask,SuiteAutoRegisterTask,
 			   SuiteListTask,ScriptEditTask,ScriptPreprocTask,ScriptSubmitTask,HistoryTask,LogOutTask,
-			   ZombieListTask};
+               ZombieListTask,ZombieCommandTask};
 	enum Status {NOSTATUS,QUEUED,RUNNING,FINISHED,CANCELLED,ABORTED,REJECTED};
 
 	virtual ~VTask();
@@ -56,11 +57,13 @@ public:
 	const std::vector<std::string>& contents() const {return contents_;}
 	const NameValueVec& vars() const {return vars_;}
 	VReply* reply() const {return reply_;}
+    const Zombie& zombie() const {return zombie_;}
 
 	void param(const std::string& key,const std::string& val) {params_[key]=val;}
 	void command(const std::vector<std::string>& cmd) {command_=cmd;}
 	void contents(const std::vector<std::string>& c) {contents_=c;}
 	void vars(const NameValueVec& v) {vars_=v;}
+    void setZombie(const Zombie&);
 
 	//When it is called the observers are notified about the change in status.
 	void status(Status s,bool broadcast=true);
@@ -86,6 +89,7 @@ protected:
 	VNode *node_;
 	std::vector<VTaskObserver*> observers_;
 	VReply*  reply_;
+    Zombie zombie_;
 };
 
 #endif
