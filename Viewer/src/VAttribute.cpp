@@ -30,9 +30,9 @@ VAttribute::VAttribute(VNode *parent,VAttributeType* type,int indexInType) :
     totalAttrNum++;
 }        
 
-VAttribute::VAttribute(VNode *parent,int id) :
+VAttribute::VAttribute(VNode *parent,int index) :
     VItem(parent),
-    id_(id)
+    index_(index)
 {
     totalAttrNum++;
 }
@@ -170,6 +170,18 @@ bool VAttribute::isValid(VNode* parent,QStringList data)
 
 bool VAttribute::value(const std::string& key,std::string& val) const
 {
+    int idx=type()->searchKeyToDataIndex(key);
+    if(idx != -1)
+    {
+        QStringList d=data();
+        val=d[idx].toStdString();
+        return true;
+    }
+    return false;
+
+
+#if 0
+
     QStringList d=data();
     VAttributeType* t=type();
     if(d.isEmpty() || !t)
@@ -189,6 +201,8 @@ bool VAttribute::value(const std::string& key,std::string& val) const
         return true;
     }
     return false;
+#endif
+
 }
 
 VAttribute* VAttribute::make(VNode* n,const std::string& type,const std::string& name)
@@ -248,4 +262,154 @@ int VAttribute::idToTypeIndex(int id)
     return id-(id/10000)*10000;
 }
 
+//==============================================
+//
+// Label
+//
+//==============================================
 
+#if 0
+VAttributeType* VLabel::type_=0;
+VAttributeType* VMeter::type_=0;
+VAttributeType* VEvent::type_=0;
+
+VLabel::VLabel(VNode *parent,const Label& label, int index) : VAttribute(parent,index)
+{
+    name_=label.name();
+    if(type_ == 0)
+        type_=VAttributeType::find("label");
+}
+
+int VLabel::lineNum() const
+{
+    return parent_->labelLineNum(index_);
+}
+
+VAttributeType* VLabel::type() const
+{
+    return VAttributeType::find("label");
+}
+
+QStringList VLabel::data() const
+{
+    QStringList s;
+    if(node_ptr node=parent_->node())
+    {
+        const std::vector<Label>& v=node->labels();
+        encode(v[index_],s);
+    }
+    return s;
+}
+
+void VLabel::encode(const Label& label,QStringList& data)
+{
+    std::string val=label.new_value();
+    if(val.empty() || val == " ")
+    {
+        val=label.value();
+    }
+
+    data << "label" <<
+                QString::fromStdString(label.name()) <<
+                QString::fromStdString(val);
+}
+
+void VLabel::scan(VNode* vnode,std::vector<VAttribute*>& vec)
+{
+    if(node_ptr node=vnode->node())
+    {
+        const std::vector<Label>& v=node->labels();
+        int n=v.size();
+        for(size_t i=0; i < n; i++)
+        {
+            vec.push_back(new VLabel(vnode,v[i],i));
+        }
+    }
+}
+#endif
+
+
+#if 0
+
+
+//==============================================
+//
+// Meter
+//
+//==============================================
+
+VMeter::VMeter(VNode *parent,const Meter& meter, int index) : VAttribute(parent,index)
+{
+    name_=meter.name();
+}
+
+VAttributeType* VMeter::type() const
+{
+    return VAttributeType::find("meter");
+}
+
+QStringList VMeter::data() const
+{
+    QStringList s;
+    if(node_ptr node=parent_->node())
+    {
+        const std::vector<Meter>& v=node->meters();
+        encode(v[index_],s);
+    }
+    return s;
+}
+
+void VMeter::scan(VNode* vnode,std::vector<VAttribute*>& vec)
+{
+     if(node_ptr node=vnode->node())
+    {
+        const std::vector<Meter>& v=node->meters();
+        int n=v.size();
+        for(size_t i=0; i < n; i++)
+        {
+            vec.push_back(new VMeter(vnode,v[i],i));
+        }
+    }
+}
+
+//==============================================
+//
+// Event
+//
+//==============================================
+
+VEvent::VEvent(VNode *parent,const Event& e, int index) : VAttribute(parent,index)
+{
+    name_=e.name_or_number();
+}
+
+VAttributeType* VEvent::type() const
+{
+    return VAttributeType::find("event");
+}
+
+QStringList VEvent::data() const
+{
+    QStringList s;
+    if(node_ptr node=parent_->node())
+    {
+        const std::vector<Event>& v=node->events();
+        encode(v[index_],s);
+    }
+    return s;
+}
+
+void VEvent::scan(VNode* vnode,std::vector<VAttribute*>& vec)
+{
+     if(node_ptr node=vnode->node())
+    {
+        const std::vector<Event>& v=node->events();
+        int n=v.size();
+        for(size_t i=0; i < n; i++)
+        {
+            vec.push_back(new VEvent(vnode,v[i],i));
+        }
+    }
+}
+
+#endif

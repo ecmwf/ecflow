@@ -373,8 +373,10 @@ VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att
 
 VInfoAttribute::~VInfoAttribute()
 {
+#if 0
     if(attr_)
         delete attr_;
+#endif
 }
 
 bool VInfoAttribute::hasData() const

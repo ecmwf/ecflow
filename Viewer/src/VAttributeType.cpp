@@ -67,6 +67,17 @@ VAttributeType* VAttributeType::find(int id)
     return types_[id];
 }
 
+#if 0
+void VAttributeType::scan(VNode* vnode,std::vector<VAttribute*>& vec)
+{
+    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
+    {
+        (*it)->scan(vnode,vec);
+    }
+}
+#endif
+
+
 int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
 {
     if(!vnode)
@@ -377,6 +388,7 @@ VItemTmp_ptr VAttributeType::item(const VNode* vnode,const std::string& name)
 // Meters
 //================================
 
+#if 0
 class VMeterAttribute : public VAttributeType
 {
 public:
@@ -514,10 +526,13 @@ void VMeterAttribute::getData(const Meter& m,QStringList& data) const
                     QString::number(m.colorChange());
 }
 
+#endif
+
 //================================
 // Labels
 //================================
 
+#if 0
 class VLabelAttribute : public VAttributeType
 {
 public:
@@ -542,7 +557,7 @@ VLabelAttribute::VLabelAttribute(const std::string& n) :
     dataCount_=3;
     searchKeyToData_["label_name"]=NameIndex;
     searchKeyToData_["label_value"]=ValueIndex;
-    searchKeyToData_["name"]=NameIndex;
+    searchKeyToData_["name"]=NameIndex;   
 }
 
 int VLabelAttribute::num(const VNode *vnode)
@@ -668,10 +683,12 @@ void VLabelAttribute::getData(const Label& label,QStringList& data)
                 QString::fromStdString(val);
 }
 
+#endif
+
 //================================
 // Events
 //================================
-
+#if 0
 
 class VEventAttribute : public VAttributeType
 {
@@ -817,7 +834,7 @@ void VEventAttribute::getData(const Event& e,QStringList& data)
               QString::number((e.value()==true)?1:0);
 }
 
-
+#endif
 //================================
 //Generated Variables
 //================================
@@ -2230,9 +2247,12 @@ void VLateAttribute::getData(ecf::LateAttr *late,QStringList& data)
 //The order below must not be changed. LABEL has to come first: it is
 //necessary for getLineNum(). Genvar should always come last: it is
 //the slowest to access.
-static VLabelAttribute labelAttr("label");
-static VMeterAttribute meterAttr("meter");
-static VEventAttribute eventAttr("event");
+
+//static VConcreteAttributeType<VLabel> labelAttr("label");
+
+//static VLabelAttribute labelAttr("label");
+//static VMeterAttribute meterAttr("meter");
+//static VEventAttribute eventAttr("event");
 static VRepeatAttribute repeatAttr("repeat");
 static VTriggerAttribute triggerAttr("trigger");
 static VTimeAttribute timeAttr("time");

@@ -99,10 +99,10 @@ int VTreeNode::attrRow(int row,AttributeFilter *filter) const
 
 int VTreeNode::attrNum(AttributeFilter *filter) const
 {
-    if(!isAttrInitialised())
+    if(isAttrInitialised() == false)
         attrNum_=vnode_->attrNum(filter);
 
-    return attrNum_;
+    return attrNum_;   
 }
 
 void VTreeNode::updateAttrNum(AttributeFilter *filter)
@@ -147,8 +147,6 @@ int VTreeNode::totalNumOfChildren() const
     countChildren(num);
     return num;
 }
-
-
 
 VTreeSuiteNode::VTreeSuiteNode(VNode* n,VTreeNode* parent) : VTreeNode(n,parent), num_(0)
 {

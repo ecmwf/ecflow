@@ -23,7 +23,11 @@
 #include "TriggeredScanner.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "VEvent.hpp"
 #include "VFileInfo.hpp"
+#include "VFilter.hpp"
+#include "VLabel.hpp"
+#include "VMeter.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VTaskNode.hpp"
@@ -39,7 +43,7 @@ std::string VNode::nodeMarkedForMoveServerAlias_;
 
 
 //For a given node this class stores all the nodes that this node itself triggers.
-//For memory efficiency we only store the index of the nodes not the pointers themselves.
+//For memory efficiency we only store the AttributeFilterindex of the nodes not the pointers themselves.
 class VNodeTriggerData
 {
 public:
@@ -95,7 +99,7 @@ public:
             tc->add(triggered,nullItem,TriggerCollector::Normal);
         }
     }
-
+AttributeFilter
     void add(VItem* n)
     {
         assert(n);
@@ -138,12 +142,17 @@ VNode::VNode(VNode* parent,node_ptr node) :
 
 	if(node_)
 		node_->set_graphic_ptr(this);
+
+    scanAttr();
 }
 
 VNode::~VNode()
 {
     if(data_)
         delete data_;
+
+    for(size_t i=0; i < attr_.size(); i++)
+        delete attr_[i];
 }
 
 VServer* VNode::root() const
@@ -220,9 +229,40 @@ short VNode::cachedAttrNum() const
 }
 #endif
 
+
+
+void VNode::scanAttr()
+{
+    VLabel::scan(this,attr_);
+    VMeter::scan(this,attr_);
+    VEvent::scan(this,attr_);
+}
+
+void VNode::rescanAttr()
+{
+    for(size_t i=0; i < attr_.size(); i++)
+        delete attr_[i];
+
+    attr_.clear();
+    scanAttr();
+}
+
 int VNode::attrNum(AttributeFilter *filter) const
 {     
-    return VAttributeType::totalNum(this,filter);
+    if(filter)
+    {
+        int n=0;
+        for(size_t i=0; i < attr_.size(); i++)
+        {
+            if(filter->isSet(attr_[i]->type()))
+                n++;
+        }
+        return n;
+    }
+
+    return attr_.size();
+
+    //return VAttributeType::totalNum(this,filter);
 
 #if 0
     //If if was not initialised we get its value
@@ -246,19 +286,61 @@ short VNode::currentAttrNum() const
 }
 #endif
 
+VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
+{
+    assert(row>=0);
+
+    if(filter)
+    {
+        int n=0;
+        int cnt=attr_.size();
+        if(row >= cnt)
+            return 0;
+
+        for(size_t i=0; i < cnt; i++)
+        {
+            if(filter->isSet(attr_[i]->type()))
+            {
+                if(n == row)
+                {
+                    return attr_[i];
+                }
+                n++;
+            }
+        }
+    }
+    else if(row < attr_.size())
+    {
+        return attr_[row];
+    }
+
+    return 0;
+}
+
+
 QStringList VNode::getAttributeData(int row,VAttributeType*& type)
 {
-	QStringList lst;
+    return attr_[row]->data();
+#if 0
+    QStringList lst;
     VAttributeType::getData(this,row,type,lst);
 	return lst;
+#endif
 }
 
 QStringList VNode::getAttributeData(int row,AttributeFilter *filter)
 {
+    if(VAttribute *a=attribute(row,filter))
+        return a->data();
+
+    return QStringList();
+
+#if 0
     VAttributeType* type;
     QStringList lst;
     VAttributeType::getData(this,row,type,lst,filter);
     return lst;
+#endif
 }
 
 #if 0
@@ -270,20 +352,30 @@ VAttributeType* VNode::getAttributeType(int row)
 
 bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
 {
+#if 0
     return VAttributeType::getData(type,this,row,data);
+#endif
 }
 
 int VNode::getAttributeLineNum(int row,AttributeFilter *filter)
 {
-    return VAttributeType::getLineNum(this,row,filter);
+    return attr_[row]->lineNum();
+    //return VAttributeType::getLineNum(this,row,filter);
 }
 
 QString VNode::attributeToolTip(int row,AttributeFilter *filter)
 {
+    if(VAttribute *a=attribute(row,filter))
+        return a->toolTip();
+
+    return QString();
+
+#if 0
     VAttributeType* type;
     QStringList lst;
     VAttributeType::getData(this,row,type,lst,filter);
     return (type)?(type->toolTip(lst)):QString();
+#endif
 }
 
 void VNode::addChild(VNode* vn)
@@ -1523,7 +1615,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
 
-	//Update the generated variables. There is no notification about their change so we have to to do it!!!
+    //Update the generated variables. There is no notification about their change so we have to do it!!!
 	if(node->node())
 	{
 		Suite *s=NULL;
@@ -1548,6 +1640,12 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 #endif
     bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+
+    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+    if(attrNumCh)
+    {
+       node->rescanAttr();
+    }
 
 	//----------------------------------------------------------------------
 	// The number of attributes changed but the number of nodes did not
