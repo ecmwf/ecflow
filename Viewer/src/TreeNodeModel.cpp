@@ -134,7 +134,8 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role ) const
         {
             if(VTreeNode* node=indexToAttrParentNode(index))
             {
-                VAttributeType::getLineNum(node->vnode(),index.row(),atts_);
+                return 1;
+                //VAttributeType::getLineNum(node->vnode(),index.row(),atts_);
             }
             return 0;
         }
@@ -965,7 +966,24 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 
 	//Otherwise the internal pointer points to the parent node
     else if(VTreeNode *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
-	{
+	{       
+        //Attribute
+        if(VAttribute* a=parentNode->vnode()->attribute(index.row(),atts_))
+        {
+            VInfo_ptr p=VInfoAttribute::create(a);
+            return p;
+
+        }
+        //Node
+        else
+        {
+            int attNum=parentNode->attrNum(atts_);
+            VNode *n=parentNode->childAt(index.row()-attNum)->vnode();
+            return VInfoNode::create(n);
+        }
+    }
+
+#if 0
         int attNum=parentNode->attrNum(atts_);
 
         //It is a node
@@ -988,6 +1006,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
             }
 		}
 	}
+#endif
 
     VInfo_ptr res;
 	return res;

@@ -122,9 +122,12 @@ public:
 
     int attrNum(AttributeFilter* filter=0) const;
 
+    const std::vector<VAttribute*> attr() const {return attr_;}
     QStringList getAttributeData(int,VAttributeType*&);
     QStringList getAttributeData(int,AttributeFilter *filter=0);
     bool getAttributeData(const std::string& type,int row, QStringList&);
+    VAttribute* attribute(int,AttributeFilter *filter=0) const;
+
 #if 0
     VAttributeType* getAttributeType(int);
 #endif
@@ -212,6 +215,9 @@ protected:
     void clear();
     void addChild(VNode*);
     void removeChild(VNode*);
+    void scanAttr();
+    void rescanAttr();
+
 #if 0
     short currentAttrNum() const;
     bool isAttrNumInitialised() const {return attrNum_!=-1;}
@@ -229,6 +235,7 @@ protected:
     node_ptr node_;
     //VNode* parent_;
     std::vector<VNode*> children_;
+    std::vector<VAttribute*> attr_;
 #if 0
     mutable short attrNum_;
     mutable short cachedAttrNum_;

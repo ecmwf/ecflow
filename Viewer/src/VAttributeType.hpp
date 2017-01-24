@@ -52,13 +52,13 @@ public:
 
     static int absIndexOf(const VAttribute*,AttributeFilter *filter=0);
     int indexOf(const VAttribute*);
-    virtual int indexOf(const VNode* vnode,QStringList data) const=0;
+    virtual int indexOf(const VNode* vnode,QStringList data) const {return -1;}
     bool exists(const VNode* vnode,QStringList data) { return (indexOf(vnode,data) != -1); }
 
     void items(const VNode* vnode,QList<VItemTmp_ptr>& lst);
     static void items(const std::string& type,const VNode* vnode,QList<VItemTmp_ptr>& lst);
     VItemTmp_ptr item(const VNode*,const std::string&);
-    virtual bool itemData(const VNode*,int index,QStringList&)=0;
+    virtual bool itemData(const VNode*,int index,QStringList&) {return false;}
 
     int typeId() const {return typeId_;}
     int keyToDataIndex(const std::string& key) const;
@@ -66,9 +66,9 @@ public:
     QStringList searchKeys() const;
 
 protected:
-    virtual void itemNames(const VNode* node,std::vector<std::string>&)=0;
-    virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
-    virtual int num(const VNode* vnode)=0;
+    virtual void itemNames(const VNode* node,std::vector<std::string>&) {}
+    virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data) {return false;}
+    virtual int num(const VNode* vnode) {return -1;}
     virtual int lineNum(const VNode* vnode,int row) {return 1;}
 
     typedef std::vector<VAttributeType*>::const_iterator TypeIterator;

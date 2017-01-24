@@ -206,11 +206,36 @@ void NodeQueryEngine::runRecursively(VNode *node)
     //Execute the node part
     if(parser_->execute(node))
     {
+        //Then execute the attribute part
         if(!attrParser_.isEmpty())
         {
             QMap<VAttributeType*,BaseNodeCondition*>::const_iterator it = attrParser_.constBegin();
             while (it != attrParser_.constEnd())
-            {        
+            {
+                //Process a given attribute type
+                const std::vector<VAttribute*>& av=node->attr();
+                bool hasType=false;
+                for(size_t i=0; i < av.size(); i++)
+                {
+                    if(av[i]->type() == it.key())
+                    {
+                        hasType=true;
+                        if(it.value()->execute(av[i]))
+                        {
+                            broadcastFind(node,av[i]->data());
+                            scanCnt_++;
+                         }
+                    }
+                    //The the attribute vector elements are grouped by type.
+                    //So we leave the loop when we reach the next type group
+                    else if(hasType)
+                    {
+                        break;
+                    }
+                }
+                ++it;
+
+#if 0
                 QList<VItemTmp_ptr> aLst;
                 it.key()->items(node,aLst);
 
@@ -225,6 +250,7 @@ void NodeQueryEngine::runRecursively(VNode *node)
                     }
                 }
                 ++it;
+#endif
             }
 
 

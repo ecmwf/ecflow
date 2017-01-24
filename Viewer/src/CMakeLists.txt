@@ -157,6 +157,7 @@ set(viewer_srcs
     VAttributeType.cpp
     VConfig.cpp   
     VDir.cpp
+    VEvent.cpp
     VFilter.cpp
     VIcon.cpp
     VInfo.cpp
@@ -165,6 +166,8 @@ set(viewer_srcs
     VItem.cpp
     VItemPathParser.cpp
     VItemTmp.cpp
+    VLabel.cpp
+    VMeter.cpp
     VModelData.cpp
     VNode.cpp
     VNodeList.cpp
