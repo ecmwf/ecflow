@@ -218,7 +218,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 		   // First look for .man files in ECF_FILES and then ECF_HOME
          std::string ecf_files;
          node->findParentUserVariableValue( Str::ECF_FILES(), ecf_files);
-         if ( !ecf_files.empty() && fs::exists( ecf_files ) && fs::is_directory( ecf_files ) ) {
+         if ( !ecf_files.empty() && fs::is_directory( ecf_files ) ) {
 
             std::string manFile = File::backwardSearch( ecf_files, node->absNodePath(), File::MAN_EXTN());
             if (!manFile.empty()) {
@@ -231,7 +231,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
             // Try under ECF_HOME
             std::string ecf_home;
             node->findParentUserVariableValue( Str::ECF_HOME(), ecf_home);
-            if ( !ecf_home.empty() && fs::exists( ecf_home ) && fs::is_directory( ecf_home ) ) {
+            if ( !ecf_home.empty() && fs::is_directory( ecf_home ) ) {
 
                std::string manFile = File::backwardSearch( ecf_home, node->absNodePath(), File::MAN_EXTN());
                EcfFile the_file(node.get(), manFile);

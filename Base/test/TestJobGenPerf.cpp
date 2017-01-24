@@ -38,6 +38,19 @@ namespace fs = boost::filesystem;
 //
 // The defs is in /var/tmp/ma0/ECFLOW_TEST/TestJobGenPerf
 //
+// Timing for /var/tmp/ma0/DEFS/metabuilder.def
+// First/base point: real:10.15  user: 5.58  sys: 1.62
+// After ECFLOW-846: real: 4.46  user: 3.72  sys: 0.74  # Only open/close include file once
+// After ECFLOW-864: real: 4.36  user: 3.68  sys: 0.68  # minimise stat calls
+//
+//     strace -c ./Base/bin/gcc-4.8/release/perf_job_gen ./metabuilder.def
+//
+//                            % time     seconds  usecs/call     calls    errors syscall
+//                            ------ ----------- ----------- --------- --------- ----------------
+//   Before ECFLOW-864:        22.77    0.001159           0    132329     50737 stat
+//   After  ECFLOW-864:        21.35    0.001097           0    125644     50737 stat
+//
+
 int main(int argc, char* argv[])
 {
    if (argc != 2) {

@@ -93,7 +93,9 @@ void File::replaceExt(std::string& file, const std::string& newExt)
 bool File::splitFileIntoLines(const std::string& filename, std::vector<std::string>& lines,bool ignoreEmptyLine)
 {
    std::ifstream the_file(filename.c_str(),std::ios_base::in);
-  	if ( !the_file )  return false;
+  	if ( !the_file ) {
+  	   return false;
+  	}
 	lines.reserve(lines.size() + 100);
 
 	// Note if we use: while( getline( theEcfFile, line)), then we will miss the *last* *empty* line

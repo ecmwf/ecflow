@@ -369,7 +369,7 @@ EcfFile Submittable::locatedEcfFile() const
 #ifdef DEBUG_TASK_LOCATION
       std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_FILES = '" << ecf_filesDirectory << "' backwards\n";
 #endif
-      if ( !ecf_filesDirectory.empty() && fs::exists( ecf_filesDirectory ) && fs::is_directory( ecf_filesDirectory ) )
+      if ( !ecf_filesDirectory.empty() && fs::is_directory( ecf_filesDirectory ) )
       {
          // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
          std::string searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
@@ -384,7 +384,7 @@ EcfFile Submittable::locatedEcfFile() const
          // Before failing try again but with variable Subsitution. ECFLOW-788
          std::string original_ecf_filesDirectory = ecf_filesDirectory;
          variableSubsitution(ecf_filesDirectory);
-         if ( !ecf_filesDirectory.empty() && fs::exists(ecf_filesDirectory) && fs::is_directory(ecf_filesDirectory))
+         if ( !ecf_filesDirectory.empty() && fs::is_directory(ecf_filesDirectory))
          {
             // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
             std::string searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
@@ -411,7 +411,7 @@ EcfFile Submittable::locatedEcfFile() const
 #ifdef DEBUG_TASK_LOCATION
    std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_HOME = '" << ecf_home << "' backwards\n";
 #endif
-   if ( !ecf_home.empty() && fs::exists( ecf_home ) && fs::is_directory( ecf_home ) )
+   if ( !ecf_home.empty() && fs::is_directory( ecf_home ) )
    {
       // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
       std::string searchResult = File::backwardSearch( ecf_home, theAbsNodePath, script_extension() );
