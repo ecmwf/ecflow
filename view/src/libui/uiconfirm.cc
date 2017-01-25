@@ -55,7 +55,6 @@ void confirm_shell_c::create (Widget parent, char *widget_name)
 	XmMessageBoxGetChild ( form_, XmDIALOG_OK_BUTTON );
 	XtSetArg(al[ac], XmNsensitive, FALSE); ac++;
 	XtSetValues ( button21,al, ac );
-	ac = 0;
 	XtAddCallback (form_, XmNhelpCallback,&confirm_shell_c:: helpCB, (XtPointer) this);
 	XtAddCallback (form_, XmNcancelCallback,&confirm_shell_c:: cancelCB, (XtPointer) this);
 	XtAddCallback (form_, XmNokCallback,&confirm_shell_c:: okCB, (XtPointer) this);

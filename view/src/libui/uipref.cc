@@ -88,7 +88,6 @@ void pref_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = tab_;
 	children[ac++] = menuBar1;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void pref_shell_c::mapCB( Widget widget, XtPointer client_data, XtPointer call_data )

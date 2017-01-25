@@ -103,7 +103,6 @@ void job_form_c::create (Widget parent, char *widget_name)
 	children[ac++] = name_;
 	children[ac++] = tools_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void job_form_c::searchCB( Widget widget, XtPointer client_data, XtPointer call_data )

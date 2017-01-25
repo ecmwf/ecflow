@@ -112,7 +112,7 @@ bool Jobs::generate() const
 		LOG_ASSERT( defs != NULL ,"node_->defs() == NULL");
 	}
 
-	if (defs->server().get_state() == SState::RUNNING) {
+	if (defs && defs->server().get_state() == SState::RUNNING) {
 	   LOG_ASSERT( defs->server().jobSubmissionInterval() != 0 ,"");
 	   JobsParam jobsParam( defs->server().jobSubmissionInterval(), defs->server().jobGeneration() );
 #ifdef DEBUG_JOB_SUBMISSION

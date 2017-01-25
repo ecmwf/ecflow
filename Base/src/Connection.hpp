@@ -284,8 +284,8 @@ private:
 
 private:
 
-	void log_error(const char* msg) const;
-   void log_archive_error(const char* msg,const boost::archive::archive_exception& ae) const;
+	static void log_error(const char* msg);
+   static void log_archive_error(const char* msg,const boost::archive::archive_exception& ae);
 
 private:
    int allow_new_client_old_server_;

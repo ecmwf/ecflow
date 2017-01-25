@@ -110,7 +110,6 @@ void edit_limit_form_c::create (Widget parent, char *widget_name)
 	children[ac++] = tools_;
 	children[ac++] = rowcol2;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void edit_limit_form_c::browseCB( Widget widget, XtPointer client_data, XtPointer call_data )

@@ -30,7 +30,7 @@ ArgvCreator::ArgvCreator( const std::vector<std::string>& theArgs)
 	assert(argv_ != NULL);
 
 	for(size_t i = 0; i < theArgs.size(); i++) {
-		argv_[i] = (char*) malloc (sizeof (char *) * (theArgs[i].size() + 1)); // allow +1 for \0
+		argv_[i] = (char*) malloc (sizeof(char) * (theArgs[i].size() + 1)); // allow +1 for \0
 	   strcpy (argv_[i], theArgs[i].c_str() );
 	}
 	argv_[argc_] = NULL;

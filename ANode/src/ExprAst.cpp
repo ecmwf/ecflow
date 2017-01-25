@@ -151,11 +151,14 @@ void AstRoot::addChild( Ast* n )
 }
 
 std::ostream& AstRoot::print( std::ostream& os ) const {
-	if (left_->isRoot()) {
-		Indentor in;
- 		left_->print( os );
-	}
-	else left_->print( os );
+   // left_ should not be NULL, but keep clang static analyser happy
+   if (left_) {
+      if (left_->isRoot()) {
+         Indentor in;
+         left_->print( os );
+      }
+      else left_->print( os );
+   }
 
 	if (right_) { // right_ is empty for Not
 		if (right_->isRoot()) {

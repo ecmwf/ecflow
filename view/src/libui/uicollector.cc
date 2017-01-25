@@ -151,7 +151,6 @@ void collector_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = command_;
 	children[ac++] = menuBar1;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void collector_shell_c::stopCB( Widget widget, XtPointer client_data, XtPointer call_data )

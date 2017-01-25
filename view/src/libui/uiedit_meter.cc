@@ -100,7 +100,6 @@ void edit_meter_form_c::create (Widget parent, char *widget_name)
 	children[ac++] = rowcol1;
 	children[ac++] = tools_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void edit_meter_form_c::changedCB( Widget widget, XtPointer client_data, XtPointer call_data )

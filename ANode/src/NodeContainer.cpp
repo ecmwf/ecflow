@@ -972,7 +972,7 @@ bool NodeContainer::operator==(const NodeContainer& rhs) const
             }
 
             Family* family = nodeVec_[i]->isFamily(); LOG_ASSERT( family, "" );
-            if ( !( *family == *rhs_family )) {
+            if ( family/*keep clang happy*/ && !( *family == *rhs_family )) {
 #ifdef DEBUG
                if (Ecf::debug_equality()) {
                   std::cout << "NodeContainer::operator==  if ( !( *family == *rhs_family )) " << absNodePath() << "\n";

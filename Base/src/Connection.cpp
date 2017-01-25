@@ -70,7 +70,7 @@ connection::connection(boost::asio::io_service& io_service)
 #endif
 
 
-void connection::log_error(const char* msg) const
+void connection::log_error(const char* msg)
 {
    const char* in_context = ", in client";
    if (Ecf::server()) in_context = ", in server";
@@ -78,7 +78,7 @@ void connection::log_error(const char* msg) const
    LOG(ecf::Log::ERR, msg << in_context);
 }
 
-void connection::log_archive_error(const char* msg,const boost::archive::archive_exception& ae) const
+void connection::log_archive_error(const char* msg,const boost::archive::archive_exception& ae)
 {
    const char* in_context = ", in client";
    if (Ecf::server()) in_context = ", in server";

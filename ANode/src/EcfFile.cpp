@@ -1308,7 +1308,6 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    if (!fnd_includenopp) {
       fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
       if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
-      fnd_include = (script_line.find(T_INCLUDE) == 1);
    }
    if (!fnd_include && !fnd_includenopp && !fnd_includeonce) return;
 
