@@ -8,30 +8,37 @@
 //
 //============================================================================
 
-#ifndef VEVENT_HPP
-#define VEVENT_HPP
+#ifndef VDATE_HPP
+#define VDATE_HPP
 
 #include "VAttribute.hpp"
 
 #include <QStringList>
-#include <string>
 #include <vector>
 
 class AttributeFilter;
 class VAttributeType;
 class VNode;
 
-class Event;
+class DateAttr;
+class DayAttr;
 
-class VEvent : public VAttribute
+class VDateAttr : public VAttribute
 {
+
 public:
-    VEvent(VNode *parent,const Event&,int index);
+    enum DataType {DateData,DayData};
+
+    VDateAttr(VNode *parent,const DateAttr&,int index);
+    VDateAttr(VNode *parent,const DayAttr&,int index);
 
     VAttributeType* type() const;
     QStringList data() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+
+protected:
+    DataType dataType_;
 };
 
-#endif // VEVENT_HPP
+#endif // VDATE_HPP

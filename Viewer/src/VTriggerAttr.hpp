@@ -8,31 +8,32 @@
 //
 //============================================================================
 
-#ifndef VMETER_HPP
-#define VMETER_HPP
+#ifndef VTRIGGERATTR_HPP
+#define VTRIGGERATTR_HPP
 
 #include "VAttribute.hpp"
 
 #include <QStringList>
-#include <string>
 #include <vector>
 
 class AttributeFilter;
 class VAttributeType;
 class VNode;
 
-class Meter;
+class Expression;
 
-class VMeter : public VAttribute
+class VTriggerAttr : public VAttribute
 {
 
 public:
-    VMeter(VNode *parent,const Meter&,int index);
+    VTriggerAttr(VNode *parent,Expression*, int index);
 
     VAttributeType* type() const;
     QStringList data() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+
 };
 
-#endif // VMETER_HPP
+#endif // VTRIGGERATTR_HPP
+
