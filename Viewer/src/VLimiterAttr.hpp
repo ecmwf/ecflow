@@ -8,8 +8,8 @@
 //
 //============================================================================
 
-#ifndef VLABEL_HPP
-#define VLABEL_HPP
+#ifndef VLIMITERATTR_HPP
+#define VLIMITERATTR_HPP
 
 #include "VAttribute.hpp"
 
@@ -21,18 +21,19 @@ class AttributeFilter;
 class VAttributeType;
 class VNode;
 
-class Label;
+class InLimit;
 
-class VLabel : public VAttribute
+class VLimiterAttr : public VAttribute
 {
-public:
-    VLabel(VNode *parent,const Label&,int index);
 
-    int lineNum() const;
+public:
+    VLimiterAttr(VNode *parent,const InLimit&,int index);
+
     VAttributeType* type() const;
     QStringList data() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };
 
-#endif // VLABEL_HPP
+#endif // VLIMITERATTR_HPP
+

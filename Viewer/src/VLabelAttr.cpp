@@ -8,20 +8,20 @@
 //
 //============================================================================
 
-#include "VLabel.hpp"
+#include "VLabelAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
 #include "NodeAttr.hpp"
 
 //================================
-// VLabelType
+// VLabelAttrType
 //================================
 
-class VLabelType : public VAttributeType
+class VLabelAttrType : public VAttributeType
 {
 public:
-    explicit VLabelType();
+    explicit VLabelAttrType();
     QString toolTip(QStringList d) const;
     void encode(const Label& label,QStringList& data) const;
 
@@ -30,7 +30,7 @@ private:
 };
 
 
-VLabelType::VLabelType() : VAttributeType("label")
+VLabelAttrType::VLabelAttrType() : VAttributeType("label")
 {
     dataCount_=3;
     searchKeyToData_["label_name"]=NameIndex;
@@ -38,7 +38,7 @@ VLabelType::VLabelType() : VAttributeType("label")
     searchKeyToData_["name"]=NameIndex;
 }
 
-QString VLabelType::toolTip(QStringList d) const
+QString VLabelAttrType::toolTip(QStringList d) const
 {
     QString t="<b>Type:</b> Label<br>";
     if(d.count() == dataCount_)
@@ -49,7 +49,7 @@ QString VLabelType::toolTip(QStringList d) const
     return t;
 }
 
-void VLabelType::encode(const Label& label,QStringList& data) const
+void VLabelAttrType::encode(const Label& label,QStringList& data) const
 {
     std::string val=label.new_value();
     if(val.empty() || val == " ")
@@ -62,30 +62,30 @@ void VLabelType::encode(const Label& label,QStringList& data) const
                 QString::fromStdString(val);
 }
 
-static VLabelType atype;
+static VLabelAttrType atype;
 
 //=====================================================
 //
-// VLabel
+// VLabelAttr
 //
 //=====================================================
 
-VLabel::VLabel(VNode *parent,const Label& label, int index) : VAttribute(parent,index)
+VLabelAttr::VLabelAttr(VNode *parent,const Label& label, int index) : VAttribute(parent,index)
 {
     name_=label.name();
 }
 
-int VLabel::lineNum() const
+int VLabelAttr::lineNum() const
 {
     return parent_->labelLineNum(index_);
 }
 
-VAttributeType* VLabel::type() const
+VAttributeType* VLabelAttr::type() const
 {
     return &atype;
 }
 
-QStringList VLabel::data() const
+QStringList VLabelAttr::data() const
 {
     QStringList s;
     if(node_ptr node=parent_->node())
@@ -96,7 +96,7 @@ QStringList VLabel::data() const
     return s;
 }
 
-void VLabel::scan(VNode* vnode,std::vector<VAttribute*>& vec)
+void VLabelAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
     if(node_ptr node=vnode->node())
     {
@@ -104,7 +104,7 @@ void VLabel::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         int n=v.size();
         for(size_t i=0; i < n; i++)
         {
-            vec.push_back(new VLabel(vnode,v[i],i));
+            vec.push_back(new VLabelAttr(vnode,v[i],i));
         }
     }
 }

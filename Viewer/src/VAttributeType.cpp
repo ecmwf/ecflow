@@ -1110,6 +1110,8 @@ void VVarAttribute::getData(const Variable& v,QStringList& data)
 // Limits
 //================================
 
+#if 0
+
 class VLimitAttribute : public VAttributeType
 {
 public:
@@ -1248,9 +1250,13 @@ void VLimitAttribute::getData(limit_ptr lim,QStringList& data)
         QString::number(lim->theLimit());
 }
 
+#endif
+
 //================================
 //Limiters
 //================================
+
+#if 0
 
 class VLimiterAttribute : public VAttributeType
 {
@@ -1386,10 +1392,12 @@ void VLimiterAttribute::getData(const InLimit& lim,QStringList& data)
            QString::fromStdString(lim.pathToNode());
 }
 
+#endif
 //================================
 //Triggers
 //================================
 
+#if 0
 class VTriggerAttribute : public VAttributeType
 {
 public:
@@ -1577,10 +1585,13 @@ QString VTriggerAttribute::toolTip(QStringList d) const
     return t;
 }
 
+#endif
+
 //================================
 //Times
 //================================
 
+#if 0
 class VTimeAttribute : public VAttributeType
 {
 public:
@@ -1947,6 +1958,8 @@ void VDateAttribute::getData(const DayAttr& d,QStringList& data)
     data << qName_ << QString::fromStdString(d.name());
 }
 
+#endif
+
 //================================
 //Repeat
 //================================
@@ -2111,6 +2124,8 @@ void VRepeatAttribute::getData(const Repeat& r,QStringList& data)
 //Late
 //================================
 
+#if 0
+
 class VLateAttribute : public VAttributeType
 {
 public:
@@ -2244,6 +2259,8 @@ void VLateAttribute::getData(ecf::LateAttr *late,QStringList& data)
         data << qName_ << QString::fromStdString(late->name());
 }
 
+#endif
+
 //The order below must not be changed. LABEL has to come first: it is
 //necessary for getLineNum(). Genvar should always come last: it is
 //the slowest to access.
@@ -2254,12 +2271,12 @@ void VLateAttribute::getData(ecf::LateAttr *late,QStringList& data)
 //static VMeterAttribute meterAttr("meter");
 //static VEventAttribute eventAttr("event");
 static VRepeatAttribute repeatAttr("repeat");
-static VTriggerAttribute triggerAttr("trigger");
-static VTimeAttribute timeAttr("time");
-static VDateAttribute dateAttr("date");
-static VLimitAttribute limitAttr("limit");
-static VLimiterAttribute limiterAttr("limiter");
-static VLateAttribute lateAttr("late");
+//static VTriggerAttribute triggerAttr("trigger");
+//static VTimeAttribute timeAttr("time");
+//static VDateAttribute dateAttr("date");
+//static VLimitAttribute limitAttr("limit");
+//static VLimiterAttribute limiterAttr("limiter");
+//static VLateAttribute lateAttr("late");
 static VVarAttribute varAttr("var");
 static VGenvarAttribute genvarAttr("genvar");
 

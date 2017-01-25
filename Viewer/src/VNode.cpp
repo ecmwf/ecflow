@@ -23,18 +23,24 @@
 #include "TriggeredScanner.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
-#include "VEvent.hpp"
+#include "VDateAttr.hpp"
+#include "VEventAttr.hpp"
 #include "VFileInfo.hpp"
 #include "VFilter.hpp"
-#include "VLabel.hpp"
-#include "VMeter.hpp"
+#include "VLabelAttr.hpp"
+#include "VLateAttr.hpp"
+#include "VLimitAttr.hpp"
+#include "VLimiterAttr.hpp"
+#include "VMeterAttr.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VTaskNode.hpp"
+#include "VTimeAttr.hpp"
+#include "VTriggerAttr.hpp"
 
 #include <boost/algorithm/string.hpp>
 
-#define _UI_VNODE_DEBUG
+#define _UI_VNODE_DEBUGconst std::vector<Meter>& v=node->meters();
 
 
 // static member of VNode
@@ -230,12 +236,17 @@ short VNode::cachedAttrNum() const
 #endif
 
 
-
 void VNode::scanAttr()
 {
-    VLabel::scan(this,attr_);
-    VMeter::scan(this,attr_);
-    VEvent::scan(this,attr_);
+    VLabelAttr::scan(this,attr_);
+    VMeterAttr::scan(this,attr_);
+    VEventAttr::scan(this,attr_);
+    VTriggerAttr::scan(this,attr_);
+    VLimitAttr::scan(this,attr_);
+    VLimiterAttr::scan(this,attr_);
+    VLateAttr::scan(this,attr_);
+    VTimeAttr::scan(this,attr_);
+    VDateAttr::scan(this,attr_);
 }
 
 void VNode::rescanAttr()

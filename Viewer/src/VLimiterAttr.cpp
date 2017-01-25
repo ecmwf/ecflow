@@ -8,94 +8,93 @@
 //
 //============================================================================
 
-#include "VEvent.hpp"
+#include "VLimiterAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
-#include "NodeAttr.hpp"
+#include "InLimit.hpp"
 
 //================================
-// VEventType
+// VLimiterAttrType
 //================================
 
-class VEventType : public VAttributeType
+class VLimiterAttrType : public VAttributeType
 {
 public:
-    explicit VEventType();
+    explicit VLimiterAttrType();
     QString toolTip(QStringList d) const;
-    void encode(const Event&,QStringList&) const;
+    void encode(const InLimit&,QStringList&) const;
 
 private:
-     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+    enum DataIndex {TypeIndex=0,NameIndex=1,PathIndex=2};
 };
 
 
-VEventType::VEventType() : VAttributeType("event")
+VLimiterAttrType::VLimiterAttrType() : VAttributeType("limiter")
 {
     dataCount_=3;
-    searchKeyToData_["event_name"]=NameIndex;
-    searchKeyToData_["event_value"]=ValueIndex;
+    searchKeyToData_["limiter_name"]=NameIndex;
+    searchKeyToData_["limiter_path"]=PathIndex;
     searchKeyToData_["name"]=NameIndex;
 }
 
-QString VEventType::toolTip(QStringList d) const
+QString VLimiterAttrType::toolTip(QStringList d) const
 {
-    QString t="<b>Type:</b> Event<br>";
+    QString t="<b>Type:</b> Limiter<br>";
     if(d.count() == dataCount_)
     {
-        t+="<b>Name:</b> " + d[NameIndex] + "<br>";
-        t+="<b>Status:</b> ";
-        t+=(d[ValueIndex] == "1")?"set (true)":"clear (false)";
+        t+="<b>Limit:</b> " + d[NameIndex] + "<br>";
+        t+="<b>Node:</b> " + d[PathIndex];
 
     }
     return t;
 }
 
-void VEventType::encode(const Event& e,QStringList& data) const
+void VLimiterAttrType::encode(const InLimit& lim,QStringList& data) const
 {
     data << qName_ <<
-              QString::fromStdString(e.name_or_number()) <<
-              QString::number((e.value()==true)?1:0);
+           QString::fromStdString(lim.name()) <<
+           QString::fromStdString(lim.pathToNode());
 }
 
-static VEventType atype;
+static VLimiterAttrType atype;
 
 //=====================================================
 //
-// VEvent
+// VLimiterAttr
 //
 //=====================================================
 
-VEvent::VEvent(VNode *parent,const Event& e, int index) : VAttribute(parent,index)
+VLimiterAttr::VLimiterAttr(VNode *parent,const InLimit& lim, int index) : VAttribute(parent,index)
 {
-    name_=e.name_or_number();
+    name_=lim.name();
 }
 
-VAttributeType* VEvent::type() const
+VAttributeType* VLimiterAttr::type() const
 {
     return &atype;
 }
 
-QStringList VEvent::data() const
+QStringList VLimiterAttr::data() const
 {
     QStringList s;
     if(node_ptr node=parent_->node())
     {
-        const std::vector<Event>& v=node->events();
+        const std::vector<InLimit>& v=node->inlimits();
         atype.encode(v[index_],s);
     }
     return s;
 }
 
-void VEvent::scan(VNode* vnode,std::vector<VAttribute*>& vec)
+void VLimiterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
     if(node_ptr node=vnode->node())
     {
-        const std::vector<Event>& v=node->events();
+        const std::vector<InLimit>& v=node->inlimits();
         int n=v.size();
         for(size_t i=0; i < n; i++)
         {
-            vec.push_back(new VEvent(vnode,v[i],i));
+            vec.push_back(new VLimiterAttr(vnode,v[i],i));
         }
     }
 }
