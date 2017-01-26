@@ -796,7 +796,7 @@ const std::string& VNode::abortedReason() const
 
 int VNode::labelNum() const
 {
-    return (!node_)?node_->labels().size():0;
+    return (node_)?node_->labels().size():0;
 }
 
 int VNode::labelLineNum(int row) const
