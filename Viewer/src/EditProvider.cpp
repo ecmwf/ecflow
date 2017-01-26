@@ -28,6 +28,7 @@ void EditProvider::visit(VInfoNode* info)
 	if(!info)
  	{
        	owner_->infoFailed(reply_);
+        return;
    	}
 
 	ServerHandler* server=info_->server();
@@ -36,6 +37,7 @@ void EditProvider::visit(VInfoNode* info)
     if(!n || !n->node())
    	{
        	owner_->infoFailed(reply_);
+        return;
    	}
 
     if (preproc_)

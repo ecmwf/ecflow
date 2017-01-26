@@ -46,6 +46,7 @@ void OutputDirProvider::visit(VInfoNode* info)
 	if(!info)
  	{
        	owner_->infoFailed(reply_);
+        return;
    	}
 
 	ServerHandler* server=info_->server();
@@ -54,6 +55,7 @@ void OutputDirProvider::visit(VInfoNode* info)
     if(!n || !n->node())
    	{
        	owner_->infoFailed(reply_);
+        return;
    	}
 
     fetchDir(server,n);
@@ -67,7 +69,15 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
 	{
 		reply_->setDirectory(dir);
 		owner_->infoFailed(reply_);
+        return;
 	}
+
+    if(!n)
+    {
+        reply_->setDirectory(dir);
+        owner_->infoFailed(reply_);
+        return;
+    }
 
 	//Get the jobout name
 	std::string fileName=n->findVariable("ECF_JOBOUT",true);
@@ -80,7 +90,6 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
 	{
 		reply_->setDirectory(dir);
 		owner_->infoFailed(reply_);
-
 		return;
 	}
 

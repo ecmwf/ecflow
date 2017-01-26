@@ -221,19 +221,8 @@ CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
 
 CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
 {
-    CustomCommand *item;
-    //int index = findIndex(name);
-
-    //if (index == -1)  // not already in the list
-    {
-        item=new CustomCommand(name, command, context);
-        items_.push_back(item);
-    }
-    //else  // already in the list - just update it
-    //{
-    //    item = items_[index];
-    //    item->set(name, command, context);
-    //}
+    CustomCommand *item=new CustomCommand(name, command, context);
+    items_.push_back(item);
 
     if (saveSettings)
         writeSettings();

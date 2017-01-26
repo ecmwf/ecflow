@@ -261,14 +261,15 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
 void MenuHandler::refreshCustomMenuCommands()
 {
-    BaseNodeCondition *trueCond  = new TrueNodeCondition();
-    BaseNodeCondition *falseCond = new FalseNodeCondition();
     CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
     CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
 
     Menu *menu = findMenu("Custom");
-    if (menu)
+    if(menu)
     {
+        BaseNodeCondition *trueCond  = new TrueNodeCondition();
+        BaseNodeCondition *falseCond = new FalseNodeCondition();
+
         menu->clearFixedList();
 
         // create the 'compulsary' menu items

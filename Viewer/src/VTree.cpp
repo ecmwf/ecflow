@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -277,8 +277,8 @@ void VTree::remove(VTreeNode* node)
     {
         removeChildren(node);
         p->children_.erase(it);
-        delete node;
         nodeVec_[node->vnode()->index()]=NULL;
+        delete node;
         totalNum_--;
         assert(totalNum_ >=0);
     }

@@ -33,10 +33,7 @@ void ConfigListDelegate::paint(QPainter *painter,const QStyleOptionViewItem &opt
                    const QModelIndex& index) const
 {
     QStyleOptionViewItemV4 vopt(option);
-    initStyleOption(&vopt, index);
-
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
+    initStyleOption(&vopt, index);   
 
     QPixmap pix=index.data(Qt::DecorationRole).value<QPixmap>();
 

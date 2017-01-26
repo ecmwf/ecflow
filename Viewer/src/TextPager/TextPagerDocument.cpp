@@ -469,20 +469,16 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
     } else {
         it.setMaxBoundary(limit);
     }
-    const QLatin1Char newline('\n');
-    int last = pos;
+    const QLatin1Char newline('\n');   
     bool ok = true;
     int progressInterval = 0;
-    int lastProgress = pos;
-    const int initialPos = pos;
-    int maxFindLength = 0;
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
     QTime lastProgressTime;
     if (flags & FindAllowInterrupt) {
         progressInterval = qMax<int>(1, (reverse
                                          ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
                                          : (static_cast<qreal>(d->documentSize) - static_cast<qreal>(pos)) / 100.0));
-        maxFindLength = (reverse ? pos : d->documentSize - pos);
+        //maxFindLength = (reverse ? pos : d->documentSize - pos);
         lastProgressTime.start();
     }
 
@@ -672,18 +668,14 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
 
     bool ok = true;
     QChar ch = it.current();
-    int wordIndex = 0;
-    int progressInterval = 0;
-    int lastProgress = pos;
-    const int initialPos = pos;
-    int maxFindLength = 0;
+    int progressInterval = 0; 
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
     QTime lastProgressTime;
     if (flags & FindAllowInterrupt) {
         progressInterval = qMax<int>(1, (reverse
                                          ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
                                          : (static_cast<qreal>(d->documentSize) - static_cast<qreal>(pos)) / 100.0));
-        maxFindLength = (reverse ? pos : d->documentSize - pos);
+        //maxFindLength = (reverse ? pos : d->documentSize - pos);
         lastProgressTime.start();
     }
 
