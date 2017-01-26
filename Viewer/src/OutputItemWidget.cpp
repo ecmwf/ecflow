@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,6 +19,7 @@
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 #include <QApplication>
@@ -195,7 +196,7 @@ void OutputItemWidget::getCurrentFile()
     if(info_)
 	{
 		std::string fullName=currentFullName();
-        UserMessage::message(UserMessage::DBG,false,"output selected: " + fullName);
+        UiLog().dbg()  << "output selected: " << fullName;
 		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
 		op->file(fullName);
 	}
@@ -487,7 +488,7 @@ void OutputItemWidget::setCurrentInDir(const std::string& fullName)
 
 void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 {
-    UserMessage::debug("OutputItemWidget::updateDir -->");
+    UiLog().dbg() << "OutputItemWidget::updateDir -->";
 
     if(restartTimer)
 		updateDirTimer_->stop();
@@ -513,7 +514,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 
         }
 
-        UserMessage::qdebug("  dir item count=" + QString::number(dirModel_->rowCount()));
+        UiLog().dbg() << " dir item count=" << dirModel_->rowCount();
 
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;
@@ -624,7 +625,7 @@ void OutputItemWidget::on_saveFileAsTb__clicked()
 	}
 	else
 	{
-		UserMessage::message(UserMessage::INFO,true,"No file loaded!");
+        UserMessage::message(UserMessage::INFO,true,"No file loaded!");
 	}
 }
 

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -34,6 +34,7 @@
 #include "Jobs.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "CmdContext.hpp"
+#include "Str.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -127,19 +128,24 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	time_duration calendarIncrement =  simiVisitor.calendarIncrement();
  	boost::posix_time::time_duration max_simulation_period = simiVisitor.maxSimulationPeriod();
 
-#ifdef DEBUG_LONG_RUNNING_SUITES
- 	cout << defs_filename << " time dependency(" <<  simiVisitor.hasTimeDependencies()
+ 	std::stringstream ss;
+ 	ss << " time dependency(" <<  simiVisitor.hasTimeDependencies()
 		<< ") max_simulation_period(" << to_simple_string(max_simulation_period)
-		<< ") calendarIncrement(" << to_simple_string(calendarIncrement) << ")" << "\n";
+		<< ") calendarIncrement(" << to_simple_string(calendarIncrement) << ")";
+ 	std::string msg = ss.str();
+ 	log(Log::MSG,msg);
+#ifdef DEBUG_LONG_RUNNING_SUITES
+ 	cout << defs_filename << msg << "\n";
 #endif
 
  	// Do we have autocancel, must be done before.
    int hasAutoCancel = 0;
    BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->hasAutoCancel()) hasAutoCancel++; }
 
-
+   // ==================================================================================
 	// Start simulation ...
- 	// Assume: simulation has taken into account autocancel end time.
+ 	// Assume: User has taken into account autocancel end time.
+   // ==================================================================================
  	CalendarUpdateParams calUpdateParams( calendarIncrement );
 	boost::posix_time::time_duration duration(0,0,0,0);
  	while (duration <= max_simulation_period) {
@@ -161,47 +167,54 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	// ==================================================================================
  	// END of simulation
  	// ==================================================================================
- 	if ( !theDefs.checkInvariants(errorMsg) )  {
+ 	if ( !theDefs.checkInvariants(errorMsg)) {
  	   return false;
  	}
 
    // Cater for suite, with no verify attributes, but which are not complete. testAnalysis.cpp
  	// Ignore suites with crons as they will never complete
- 	if (!simiVisitor.foundCrons()) {
+ 	// Ignore suites with autocancel, as suite may get deleted
+ 	if (!simiVisitor.foundCrons() && (hasAutoCancel == 0)) {
  	   size_t completeSuiteCnt = 0;
  	   BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->state() == NState::COMPLETE) completeSuiteCnt++; }
- 	   if ( (theDefs.suiteVec().size() != completeSuiteCnt) && (hasAutoCancel == 0)) {
+
+ 	   if ( (theDefs.suiteVec().size() != completeSuiteCnt)) {
  	      std::stringstream ss; ss << "Defs file " << defs_filename << "\n";
  	      BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) {
  	         ss << "  suite '/" << s->name() << " has not completed\n";
  	      }
  	      errorMsg += ss.str();
+
+ 	      run_analyser(theDefs,errorMsg);
  	      return false;
  	   }
  	}
 
- 	if ( theDefs.verification(errorMsg)) {
+ 	if (theDefs.verification(errorMsg)) {
  	   return true;
  	}
 
- 	Analyser analyser;
- 	analyser.run(theDefs);
- 	errorMsg += "Please see files .flat and .depth for analysis\n";
-
- 	PrintStyle::setStyle(PrintStyle::MIGRATE);
- 	std::stringstream ss;
- 	ss << theDefs;
- 	errorMsg += ss.str();
+ 	run_analyser(theDefs,errorMsg);
  	return false;
+}
+
+void Simulator::run_analyser(Defs& theDefs,std::string& errorMsg ) const
+{
+   Analyser analyser;
+   analyser.run(theDefs);
+   errorMsg += "Please see files .flat and .depth for analysis\n";
+
+   PrintStyle::setStyle(PrintStyle::MIGRATE);
+   std::stringstream ss;
+   ss << theDefs;
+   errorMsg += ss.str();
 }
 
 bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 {
-	// For the simulation we ensure job submission takes less than 2 seconds
-	int submitJobsInterval = 10;
-
+	// For the simulation we ensure job submission takes less than 10 seconds
 	// Resolve dependencies and submit jobs
-	JobsParam jobsParam(submitJobsInterval, false /*create jobs*/); // spawn jobs *will* be set to false
+	JobsParam jobsParam(10 /*submitJobsInterval */, false /*create jobs*/); // spawn jobs *will* be set to false
 	Jobs jobs(&theDefs);
 	if (!jobs.generate(jobsParam)) {
 		ecf::log(Log::ERR, jobsParam.getErrorMsg());
@@ -246,14 +259,26 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 		}
 #endif
 
-      // any state change should be followed with a job submission
-      t->complete();  // mark task as complete
 
+
+#ifdef DEBUG_LONG_RUNNING_SUITES
+      cout << t->debugNodePath() << " completes at " << t->suite()->calendar().toString() << " level " << level_ << " parent state:" <<  endl;
+#endif
 
 		// If the task has any event used in the trigger expressions, then update event.
+      std::string msg;
  		BOOST_FOREACH(Event& event, t->ref_events()) {
- 			if (event.usedInTrigger()) { // event used in triger/complete expression
+ 			if (event.usedInTrigger()) { // event used in trigger/complete expression
  				event.set_value(true);
+
+ 				msg.clear();
+ 				msg += Str::CHILD_CMD();
+ 				msg += "event ";
+ 				msg += event.name_or_number();
+ 				msg += " ";
+ 				msg += t->absNodePath();
+ 				log(Log::MSG,msg);
+
   				if (!doJobSubmission(theDefs,errorMsg))  {
   					level_--;
   					return false;
@@ -270,6 +295,15 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
  			if (meter.usedInTrigger()) { // meter used in trigger/complete expression
  				while (meter.value() < meter.max()) {
  					meter.set_value(meter.value()+1);
+
+ 	            msg.clear();
+ 	            msg += Str::CHILD_CMD();
+ 	            msg += "meter ";
+ 	            msg += meter.name();
+ 	            msg += " ";
+ 	            msg += t->absNodePath();
+ 	            log(Log::MSG,msg);
+
   					if (!doJobSubmission(theDefs,errorMsg)) {
   						level_--;
   						return false;
@@ -282,15 +316,8 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
  			}
 		}
 
-#ifdef DEBUG_LONG_RUNNING_SUITES
-		cout << t->debugNodePath() << " completes at " << t->suite()->calendar().toString() << " level " << level_ << " parent state:" <<  endl;
-#endif
-
-	   // for autocancel and trigger expressions
-		if (!doJobSubmission(theDefs,errorMsg)) {
-			level_--;
-			return false;
-		}
+      // any state change should be followed with a job submission
+      t->complete();  // mark task as complete
 	}
 
 	level_--;

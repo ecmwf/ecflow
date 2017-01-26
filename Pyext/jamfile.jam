@@ -1,4 +1,4 @@
-## Copyright 2009-2016 ECMWF. 
+## Copyright 2009-2017 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,9 +18,11 @@
 #    next alternative: required properties: <python>2.7 <target-os>linux
 #        matched
 # 
+# Note: ./bootstrap.sh will create a project-config.jam
+#
 # Please check if you have more than one 'using python' in configuration files.
 # Please check site-config.jam, user-config.jam and project-config.jam and 
-# remove duplicated 'using python'
+# remove duplicated 'using python'. Typically will remove 'using python' from project-config.jam
 #
 # When installing BOOST-python libs, make sure to call module load python *FIRST*
 # Otherwise it will pick the python specified in project-config.jam, which make not be correct

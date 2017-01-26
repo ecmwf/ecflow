@@ -1,8 +1,0 @@
-   suite suite
-      clock hybrid 6.11.2009 +54190
-      family family
-         task t
-            verify complete:3
-            time +00:01 00:03 00:01
-      endfamily
-   endsuite

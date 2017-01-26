@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -54,6 +54,7 @@ TabWidget::TabWidget(QWidget* parent) :
 
 	//Tab bar
     bar_ = new QTabBar(this);
+    bar_->setObjectName("bar");
 	hb->addWidget(bar_, 1);
 
     bar_->setProperty("nodePanel","1");
@@ -68,6 +69,7 @@ TabWidget::TabWidget(QWidget* parent) :
 
 	//Add tab button on the right
 	addTb_ = new QToolButton(this);
+    addTb_->setObjectName("addTb");
 	addTb_->setAutoRaise(true);
 	addTb_->setIcon(QPixmap(":/viewer/add_tab.svg"));
 	addTb_->setToolTip(tr("Open a new tab"));
@@ -75,6 +77,7 @@ TabWidget::TabWidget(QWidget* parent) :
 
     //Tab list menu
     tabListTb_=new QToolButton(this);
+    tabListTb_->setObjectName("tabListTb");
     tabListTb_->setAutoRaise(true);
     tabListTb_->setIcon(QPixmap(":/viewer/menu_arrow_down.svg"));
     tabListTb_->setToolTip(tr("List all tabs"));
@@ -82,6 +85,7 @@ TabWidget::TabWidget(QWidget* parent) :
 
     //Stacked widget to store the actual tab widgets
 	stacked_ = new QStackedWidget(this);
+    stacked_->setObjectName("stacked");
 	stacked_->setMinimumHeight(1);
 	stacked_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 	layout->addWidget(stacked_);

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -52,6 +52,9 @@ public:
 	virtual QModelIndex infoToIndex(VInfo_ptr,int column=0) const;
 	virtual QModelIndex nodeToIndex(const VNode*,int column=0) const=0;
     virtual QModelIndex attributeToIndex(const VAttribute* a, int column=0) const=0;
+
+    virtual QModelIndex forceShowNode(const VNode*) const=0;
+    virtual QModelIndex forceShowAttribute(const VAttribute*) const=0;
 
 Q_SIGNALS:
 	void changed();

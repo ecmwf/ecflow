@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #51 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,10 +18,6 @@
 // Simulation: Simulation must not affect the real job submission in the server.
 //  o Infinite repeats cause problems with simulation, hence we have
 //    a mechanism to stop this, when reset is called, via server this is disabled
-//  o The other problem is long repeats. The current solution truncates the
-//    repeats. However this is not acceptable and has been commented out,
-//    until we can find a better way. (i.e need a simulation mode, where
-//    we can truncate a length, this would be ignored in the server)
 //============================================================================
 
 #include <ostream>
@@ -98,9 +94,6 @@ public:
 
    /// Simulator functions:
    virtual bool isInfinite() const  = 0;
-   virtual bool makeInfiniteInValid() { return false;}
-   //	virtual int length() const  = 0;
-   //	virtual void truncate(int length) = 0;
 
    virtual bool is_repeat_day() const { return false; }
 
@@ -156,8 +149,6 @@ public:
 
    /// Simulator functions:
    virtual bool isInfinite() const { return false;}
-   //	virtual int length() const; // for use by simulator
-   //	virtual void truncate(int); // for use by simulator
 
 private:
    RepeatDate( const std::string& name, int start, int end, int delta, long value)
@@ -210,8 +201,6 @@ public:
 
    /// Simulator functions:
    virtual bool isInfinite() const { return false;}
-   //	virtual int length() const { return std::abs( (end_-start_)+1/delta_ ) ;}
-   //	virtual void truncate(int);
 
 private:
    RepeatInteger( const std::string& name, int start, int end, int delta, long value)
@@ -267,8 +256,6 @@ public:
 
    /// Simulator functions:
    virtual bool isInfinite() const { return false;}
-   //	virtual int length() const { return static_cast<int>(theEnums_.size());}  // for use by simulator
-   //	virtual void truncate(int);     // for use by simulator
 
 private:
    RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums, int index)
@@ -317,8 +304,6 @@ public:
 
    /// Simulator functions:
    virtual bool isInfinite() const { return false;}
-   //	virtual int length() const { return static_cast<int>(theStrings_.size());}
-   //	virtual void truncate(int);
 
 private:
    RepeatString( const std::string& variable, const std::vector<std::string>& theEnums, int index)
@@ -386,9 +371,6 @@ public:
 
    /// Simulator functions:
    virtual bool isInfinite() const { return true;}
-   virtual bool makeInfiniteInValid() { valid_ = false; return true;}
-   //	virtual int length() const { return 0;}    // because its infinite for use by simulator
-   //	virtual void truncate(int) {}
 
    virtual bool is_repeat_day() const { return true; }
 
@@ -450,11 +432,8 @@ public:
    std::string dump() const                     { return (repeatType_) ? repeatType_->dump() : std::string();} // additional state
    unsigned int state_change_no() const         { return (repeatType_) ? repeatType_->state_change_no() : 0; }
 
-   /// simulator functions: Note: any flags set by makeInfiniteInValid() are reset by reset()
+   /// simulator functions:
    bool isInfinite() const                      { return (repeatType_) ? repeatType_->isInfinite() : false;}
-   bool makeInfiniteInValid()                   { return (repeatType_) ? repeatType_->makeInfiniteInValid() : false; } // for simulator only
-   //	int length() const                           { return (repeatType_) ? repeatType_->length() : 0;}   // for simulator only
-   //	void truncate(int length)                    { if (repeatType_) repeatType_->truncate(length);}     // for simulator only
 
    // Allows Repeat's to be returned by reference
    static const Repeat& EMPTY();

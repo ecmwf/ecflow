@@ -1,0 +1,11 @@
+suite suite
+  clock real 8.1.2017    # sunday
+  family family
+     task t1
+        day  monday      # day means simulator will run for a 1 week unless endclock used
+        day  tuesday
+        time 09:00
+        time 10:00
+        verify complete:4
+  endfamily
+endsuite

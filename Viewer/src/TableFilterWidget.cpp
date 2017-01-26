@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,7 +18,7 @@
 #include "NodeQuery.hpp"
 #include "NodeQueryOption.hpp"
 #include "ServerFilter.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VFilter.hpp"
 
 #include <assert.h>
@@ -51,7 +51,7 @@ void TableFilterWidget::slotEdit()
 	if(d.exec() == QDialog::Accepted)
 	{
 		filterDef_->setQuery(d.query());
-		UserMessage::message(UserMessage::DBG,false,"new table query: " + filterDef_->query()->query().toStdString());
+        UiLog().dbg() << "new table query: " << filterDef_->query()->query();
 	}
 }
 

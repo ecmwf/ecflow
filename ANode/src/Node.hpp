@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #251 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -666,7 +666,6 @@ private: // alow simulator access
    friend class ecf::Simulator;
    std::vector<Meter>&  ref_meters();// allow simulator set meter value
    std::vector<Event>&  ref_events();// allow simulator set event value
-   Repeat& ref_repeat()              { return repeat_;} // allow simulator to modify repeat
 
    /// Note: If the complete expression evaluation fails. we should continue resolving dependencies
    ///       If the complete expression evaluation evaluates, then we set node to complete

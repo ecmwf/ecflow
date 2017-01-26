@@ -117,7 +117,7 @@ set -x # echo script lines as they are executed
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild/2.4.0
+module load ecbuild/2.6.0
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
@@ -270,7 +270,7 @@ $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
-            -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
+            -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable" \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
@@ -283,7 +283,7 @@ $ecbuild $source_dir \
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
-            #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'"
+            #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated'"
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then

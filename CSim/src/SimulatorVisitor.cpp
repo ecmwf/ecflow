@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -26,8 +26,6 @@ using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-//#define DEBUG_VISITOR 1
-
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,12 +43,8 @@ void SimulatorVisitor::visitDefs( Defs* d) {
 	BOOST_FOREACH(suite_ptr s, d->suiteVec()) { s->acceptVisitTraversor(*this); }
 }
 
-void SimulatorVisitor::visitSuite( Suite* s)   {
-
-#ifdef DEBUG_VISITOR
-	cout << "SimulatorVisitor::visitSuite " << s->debugNodePath() << "\n";
-#endif
-
+void SimulatorVisitor::visitSuite( Suite* s)
+{
 	/// begin , will cause creation of generated variables. The generated variables
 	/// are use in client scripts and used to locate the ecf files.
 	s->begin();
@@ -86,16 +80,8 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc)
 
    if (!nc->crons().empty()) {
       foundCrons_ = true;
-      cout << defs_filename_ << ": Found crons on NodeContainer\n";
-   }
-
-   // If suite has repeat day attribute( a infinite repeat), it will run forever, hence disable this for simulation purposes
-   /// reset will clear the invalid flag., when doing a real job submission.
-   /// *** this must be placed after begin() since begin() will reset all attributes() *****
-   if (nc->ref_repeat().makeInfiniteInValid()) {
-      cout << defs_filename_ << ": Disabling '" << nc->repeat().dump()
-           << "' attribute of " << nc->debugNodePath()
-           << ". This will allow simulation to complete earlier.\n";
+      std::stringstream ss; ss  << defs_filename_ << ": Found crons on NodeContainer\n";
+      log(Log::MSG,ss.str());
    }
 
 	BOOST_FOREACH(node_ptr t, nc->nodeVec()) { t->acceptVisitTraversor(*this);}
@@ -110,7 +96,6 @@ void SimulatorVisitor::visitTask( Task* t )
 
    if (!t->crons().empty()) {
       foundCrons_ = true;
-      // cout << defs_filename_ << ": Found crons on task\n";
    }
 }
 

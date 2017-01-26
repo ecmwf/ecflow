@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,7 +15,7 @@
 
 #include "DirectoryHandler.hpp"
 #include "ServerItem.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -338,7 +338,7 @@ bool ServerList::hasSystemFile() const
 void ServerList::syncSystemFile()
 {
 #ifdef _UI_SERVERLIST_DEBUG
-    UserMessage::debug("ServerList::syncSystemFile -->");
+    UiLog().dbg() << "ServerList::syncSystemFile -->";
 #endif
 
     std::vector<ServerListTmpItem> sysVec;
@@ -377,7 +377,7 @@ void ServerList::syncSystemFile()
 
 #ifdef _UI_SERVERLIST_DEBUG
     for(unsigned int i=0; i < sysVec.size(); i++)
-        UserMessage::debug(sysVec[i].name() + "\t" + sysVec[i].host() + "\t" + sysVec[i].port());
+        UiLog().dbg() << sysVec[i].name() << "\t" + sysVec[i].host() << "\t" + sysVec[i].port();
 #endif
 
     bool changed=false;
@@ -387,7 +387,7 @@ void ServerList::syncSystemFile()
     for(unsigned int i=0; i < sysVec.size(); i++)
     {
 #ifdef _UI_SERVERLIST_DEBUG
-        UserMessage::debug(sysVec[i].name() + "\t" + sysVec[i].host() + "\t" + sysVec[i].port());
+        UiLog().dbg() << sysVec[i].name() << "\t" + sysVec[i].host() << "\t" + sysVec[i].port();
 #endif
         ServerItem *item=0;
 
@@ -399,7 +399,7 @@ void ServerList::syncSystemFile()
             if(!item->isSystem())
             {
 #ifdef _UI_SERVERLIST_DEBUG
-                UserMessage::debug("  already in list (same name, host, port) -> mark as system");
+                UiLog().dbg() << "  already in list (same name, host, port) -> mark as system";
 #endif
                 changed=true;
                 syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],sysVec[i],
@@ -414,7 +414,7 @@ void ServerList::syncSystemFile()
         if(!item)
         {
 #ifdef _UI_SERVERLIST_DEBUG
-            UserMessage::debug("  name not in list -> import as system");
+            UiLog().dbg() << "  name not in list -> import as system";
 #endif
             changed=true;
             item=add(sysVec[i].name(),sysVec[i].host(),sysVec[i].port(), false, false);
@@ -427,7 +427,7 @@ void ServerList::syncSystemFile()
         else
         {
 #ifdef _UI_SERVERLIST_DEBUG
-            UserMessage::debug("  name in list with different port or/and host");
+            UiLog().dbg() << "  name in list with different port or/and host";
 #endif
             changed=true;
             needBrodcast=true;
@@ -479,7 +479,7 @@ void ServerList::syncSystemFile()
         broadcastChanged();
 
 #ifdef _UI_SERVERLIST_DEBUG
-    UserMessage::debug("<-- ServerList::syncSystemFile");
+    UiLog().dbg() << "<-- syncSystemFile";
 #endif
 }
 

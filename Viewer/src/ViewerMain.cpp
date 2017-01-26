@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -22,6 +22,7 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "InfoPanelHandler.hpp"
+#include "InputEventLog.hpp"
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
 #include "NodeQueryHandler.hpp"
@@ -33,6 +34,7 @@
 #include "VServerSettings.hpp"
 #include "SessionHandler.hpp"
 #include "SessionDialog.hpp"
+#include "UiLog.hpp"
 
 int main(int argc, char **argv)
 {
@@ -150,6 +152,12 @@ int main(int argc, char **argv)
 
 		//Show all the windows
 		MainWindow::showWindows();
+
+        //Start input event logging
+        InputEventLog::instance()->start();
+
+        //Enable (daily) truncation for ui log
+        UiLog::enableTruncation();
 
 		return app.exec();
 	}

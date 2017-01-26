@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,7 +11,7 @@
 #include "VInfo.hpp"
 
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VItemPathParser.hpp"
@@ -39,7 +39,7 @@ VInfo::VInfo(ServerHandler* server,VNode* node,VAttribute* attr) :
 VInfo::~VInfo()
 {
 #ifdef _UI_VINFO_DEBUG
-    UserMessage::debug("VInfo::~VInfo() -->  \n" + boost::lexical_cast<std::string>(this));
+    UiLog().dbg() << "VInfo::~VInfo() --> " << this;
 #endif
     if(server_)
 		server_->removeServerObserver(this);
@@ -48,7 +48,7 @@ VInfo::~VInfo()
 		(*it)->notifyDelete(this);
 
 #ifdef _UI_VINFO_DEBUG
-    UserMessage::debug("<-- VInfo::~VInfo()");
+    UiLog().dbg() << "<-- ~VInfo()";
 #endif
 }
 
@@ -278,6 +278,11 @@ std::string VInfoServer::path()
     return name() + "://";
 }
 
+VItem* VInfoServer::item() const
+{
+    return node_;
+}
+
 //=========================================
 //
 // VInfoNode
@@ -347,7 +352,10 @@ std::string VInfoNode::relativePath()
     return p;
 }
 
-
+VItem* VInfoNode::item() const
+{
+    return node_;
+}
 
 //=========================================
 //
@@ -396,9 +404,8 @@ std::string VInfoAttribute::path()
     std::string p;
     if(server_)
        p=server_->name();
-
-    if(node_ && node_->node())
-        p+=":/" + node_->absNodePath();
+    if(attr_)
+        p+=attr_->fullPath();
 
     return p;
 }
@@ -408,6 +415,10 @@ std::string VInfoAttribute::name()
     return (attr_)?attr_->strName():std::string();
 }
 
+VItem* VInfoAttribute::item() const
+{
+    return attr_;
+}
 
 
 

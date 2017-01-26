@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,6 +15,7 @@
 #include <boost/foreach.hpp>
 
 #include "NodeExpression.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 InfoPanelHandler* InfoPanelHandler::instance_=0;
@@ -66,7 +67,7 @@ void InfoPanelHandler::init(const std::string &configFile)
     {
         if (itTopLevel->first == "info_panel")
         {
-            UserMessage::message(UserMessage::DBG, false, std::string("Panels:"));
+            UiLog().dbg() << "Panels:";
 
             ptree const &panelsPt = itTopLevel->second;
 
@@ -77,7 +78,7 @@ void InfoPanelHandler::init(const std::string &configFile)
 
                 std::string cname = panelPt.get("name", "");
 
-                UserMessage::message(UserMessage::DBG, false, std::string("  ") + cname);
+                UiLog().dbg() <<  "  " << cname;
 
                 InfoPanelDef* def= new InfoPanelDef(cname);
 

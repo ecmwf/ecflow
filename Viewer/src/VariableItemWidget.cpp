@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,6 +11,7 @@
 
 #include <QClipboard>
 #include <QDebug>
+#include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QMessageBox>
 #include <QPushButton>
@@ -20,12 +21,14 @@
 #include "IconProvider.hpp"
 #include "LineEdit.hpp"
 #include "SessionHandler.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VariableModel.hpp"
 #include "VariableModelData.hpp"
 #include "VariableSearchLine.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
+#include "WidgetNameProvider.hpp"
 
 #define _UI_VARIABLEITEMWIDGET_DEBUG
 
@@ -109,12 +112,14 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     messageLabel_->hide();
 
     readSettings();
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 VariablePropDialog::~VariablePropDialog()
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UserMessage::debug("VariablePropDialog::~VariablePropDialog -->");
+    UiLog().dbg() << "VariablePropDialog::~VariablePropDialog -->";
 #endif
     Q_ASSERT(data_);
     data_->removeObserver(this);
@@ -340,6 +345,8 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *par
     nameEdit_->setFocus();
 
     readSettings();
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name, QString value,QWidget *parent) :
@@ -599,6 +606,13 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) : shadowProp_(0)
     varView->setSelectionBehavior(QAbstractItemView::SelectRows);
     varView->setSelectionMode(QAbstractItemView::SingleSelection);
 
+    //varView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    varView->header()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
+    varView->header()->setStretchLastSection(false);
+#endif
+
     //Shadowed variables
     bool showShadowed = true;
     //We do not want to observe it!
@@ -724,7 +738,7 @@ void VariableItemWidget::clearContents()
 void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx)
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UserMessage::debug("VariableItemWidget::slotItemSelected -->");
+    UiLog().dbg() << "VariableItemWidget::slotItemSelected -->";
     qDebug() << "  current:" << idx << "prev:" << prevIdx;
     qDebug() << "  in view:" << varView->currentIndex();
 #endif
@@ -823,7 +837,7 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 	bool genVar;
 
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UserMessage::debug("VariableItemWidget::editItem -->");
+    UiLog().dbg() << "VariableItemWidget::editItem -->";
     qDebug() << "   index:" << index;
 #endif
 
@@ -837,7 +851,7 @@ void VariableItemWidget::editItem(const QModelIndex& index)
     VariableModelData* data=model_->indexToData(vIndex,block);
 
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UserMessage::qdebug("   block=" + QString::number(block));
+    UiLog().dbg() << "   block=" << block;
 #endif
 
     //Get the data from the model
@@ -860,7 +874,7 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 	}
 
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UserMessage::debug("<-- VariableItemWidget::editItem");
+    UiLog().dbg() << "<-- editItem";
 #endif
 
 }
@@ -1060,14 +1074,14 @@ void VariableItemWidget::toClipboard(QString txt) const
 void VariableItemWidget::slotFilterTextChanged(QString text)
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UserMessage::debug("VariableItemWidget::slotFilterTextChanged -->");
+    UiLog().dbg() << "VariableItemWidget::slotFilterTextChanged -->";
     qDebug() << "selected before:" <<   varView->currentIndex();
 #endif
     sortModel_->setMatchText(text);
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     qDebug() << "selected after:" <<   varView->currentIndex();
     qDebug() << sortModel_->data(varView->currentIndex());
-    //UserMessage::debug("<-- VariableItemWidget::slotFilterTextChanged");
+    //UiLog().dbg() << "<-- slotFilterTextChanged";
 #endif
 }
 
@@ -1075,7 +1089,7 @@ void VariableItemWidget::slotFilterTextChanged(QString text)
 void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {                
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UserMessage::debug("VariableItemWidget::nodeChanged -->");
+    UiLog().dbg() << "VariableItemWidget::nodeChanged -->";
     qDebug() << "selected before:" <<   varView->currentIndex();
 #endif
 
@@ -1084,34 +1098,34 @@ void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
     if(data_->nodeChanged(node,aspect))
     {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-        UserMessage::debug("   reselect currentIndex!");
+        UiLog().dbg() << " reselect currentIndex!";
 #endif
         //After any change we need to reselect the current row. See issue ECFLOW-613.
         reselectCurrent();
     }
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     qDebug() << "selected after:" <<   varView->currentIndex();
-    UserMessage::debug("<-- VariableItemWidget::nodeChanged");
+    UiLog().dbg() << "<-- nodeChanged";
 #endif
 }
 
 void VariableItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UserMessage::debug("VariableItemWidget::defsChanged -->");
+    UiLog().dbg() << "VariableItemWidget::defsChanged -->";
     qDebug() << "selected before:" <<   varView->currentIndex();
 #endif
     if(data_->defsChanged(aspect))
     {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-        UserMessage::debug("   reselect currentIndex!");
+        UiLog().dbg() << " reselect currentIndex!";
 #endif
         //After any change we need to reselect the current row. See issue ECFLOW-613.
         reselectCurrent();
     }
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     qDebug() << "selected after:" <<   varView->currentIndex();
-    UserMessage::debug("<-- VariableItemWidget::defsChanged");
+    UiLog().dbg() << "<-- defsChanged";
 #endif
 }
 

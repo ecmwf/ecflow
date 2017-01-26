@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,7 +15,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -211,7 +211,7 @@ VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path)
         std::string msg;
         msg+="No access to path on disk! error: " + std::string(e.what());
         reply_->appendErrorText(msg);
-        UserMessage::message(UserMessage::WARN,false,"fetchLocalDir failed:" + std::string(e.what()));
+        UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
 	}
 
 	return res;

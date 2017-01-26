@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -23,7 +23,10 @@
 //==========================================
 
 
-VTreeNode::VTreeNode(VNode* n,VTreeNode* parent) : vnode_(n), parent_(parent), attrNum_(-1)
+VTreeNode::VTreeNode(VNode* n,VTreeNode* parent) :
+    vnode_(n),
+    parent_(parent),
+    attrNum_(-1)
 {
     if(parent_)
         parent_->addChild(this);
@@ -87,10 +90,12 @@ bool VTreeNode::isAttrInitialised() const
     return (attrNum_ != -1);
 }
 
+#if 0
 int VTreeNode::attrRow(int row,AttributeFilter *filter) const
 {
     return VAttributeType::getRow(vnode_,row,filter);
 }
+#endif
 
 int VTreeNode::attrNum(AttributeFilter *filter) const
 {
@@ -104,6 +109,15 @@ void VTreeNode::updateAttrNum(AttributeFilter *filter)
 {
     attrNum_=vnode_->attrNum(filter);
 }
+
+#if 0
+void VTreeNode::updateAttrNum(AttributeFilter *filter,bool showOneMore)
+{
+    attrNum_=vnode_->attrNum(filter);
+    if(showOneMore)
+        attrNum_++;
+}
+#endif
 
 void VTreeNode::resetAttrNum()
 {
@@ -157,7 +171,9 @@ int VTreeSuiteNode::totalNumOfChildren() const
 //
 //========================================================
 
-VTree::VTree(VTreeServer* server) : VTreeNode(server->realServer()->vRoot(),0), server_(server)
+VTree::VTree(VTreeServer* server) :
+    VTreeNode(server->realServer()->vRoot(),0),
+    server_(server)
 {
 
 }

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -162,20 +162,24 @@ QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
         else if(info->isNode())
         {
             VNode* n=info->node();
-			return nodeToIndex(n);
+            QModelIndex idx=nodeToIndex(n);
+            if(!idx.isValid())
+            {
+                return forceShowNode(n);
+            }
+            return idx;
         }
         else if(info->isAttribute())
         {
             VAttribute* a=info->attribute();
-            return attributeToIndex(a);
+            QModelIndex idx=attributeToIndex(a);
+            if(!idx.isValid())
+            {
+                return forceShowAttribute(a);
+            }
+            return idx;
         }
 	}
 
 	return QModelIndex();
 }
-
-
-
-
-
-

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #66 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,11 +14,12 @@
 //============================================================================
 #include <sstream>
 #include <sys/stat.h>
+#include <iostream>
 
 #include "boost/foreach.hpp"
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/make_shared.hpp>
 
 #include "EcfFile.hpp"
 #include "Log.hpp"
@@ -64,6 +65,23 @@ static void vector_to_string(const std::vector<std::string>& vec, std::string& s
       str += vec[i];
       str += "\n";
    }
+}
+
+EcfFile::EcfFile()
+: node_(NULL), script_type_(EcfFile::ECF_SCRIPT_CMD)
+{
+}
+
+EcfFile& EcfFile::operator=(const EcfFile& rhs)
+{
+   // assign in order or declaration
+   node_ = rhs.node_;
+   ecfMicroCache_ = rhs.ecfMicroCache_;
+   script_path_or_cmd_ = rhs.script_path_or_cmd_;
+   job_size_.clear();
+   script_type_ = rhs.script_type_;
+   jobLines_.resize(0);  // the most expensive
+   return *this;
 }
 
 // ==================================================================================
@@ -339,8 +357,6 @@ void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,const s
    }
 }
 
-
-
 bool EcfFile::open_script_file(
          const std::string& file_or_cmd,
          EcfFile::Type type,
@@ -359,6 +375,9 @@ bool EcfFile::open_script_file(
 
    switch (script_type_) {
       case ECF_FILE: {
+         if (type == EcfFile::INCLUDE) {
+            return open_include_file(file_or_cmd,lines,errormsg);
+         }
          if ( ! File::splitFileIntoLines(file_or_cmd, lines) ) {
             std::stringstream ss; ss  << "Could not open " <<  fileType(type) << " file:" << file_or_cmd;
             errormsg += ss.str();
@@ -388,7 +407,7 @@ bool EcfFile::open_script_file(
                if (!do_popen(file_or_cmd,type,lines,errormsg)) return false;
                break;
             }
-            case EcfFile::INCLUDE:
+            case EcfFile::INCLUDE: return open_include_file(file_or_cmd,lines,errormsg); break;
             case EcfFile::MANUAL:
             case EcfFile::COMMENT:
                if ( ! File::splitFileIntoLines(file_or_cmd, lines) ) {
@@ -401,6 +420,49 @@ bool EcfFile::open_script_file(
          break;
       }
    }
+   return true;
+}
+
+#define USE_INCLUDE_CACHE  1
+//  max open files allowed is:
+//     VM:       cat /proc/sys/fs/file-max:  188086
+//     Desk top: cat /proc/sys/fs/file-max: 3270058
+//  Desktop:
+//     Without cache: real:10.15  user: 5.58  sys: 1.62
+//     With cache:    real: 4.46  user: 3.72  sys: 0.74  Only open/close include file once.
+//  TODO: Could sort
+bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>& lines,std::string& errormsg) const
+{
+#ifdef USE_INCLUDE_CACHE
+   size_t include_file_cache_size = include_file_cache_.size();
+   for(size_t i = 0; i < include_file_cache_size; i++) {
+      if (include_file_cache_[i]->path() == file) {
+         // cout << "found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
+         if (!include_file_cache_[i]->lines(lines)) {
+            std::stringstream ss; ss  << "Could not open include file: " << file;
+            errormsg += ss.str();
+            return false;
+         }
+         return true;
+      }
+   }
+
+   boost::shared_ptr<IncludeFileCache> ptr = boost::make_shared<IncludeFileCache>(file);
+   include_file_cache_.push_back( ptr );
+   //cout << "NOT found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
+
+   if (!ptr->lines(lines)) {
+      std::stringstream ss; ss  << "Could not open include file: " << file;
+      errormsg += ss.str();
+      return false;
+   }
+#else
+   if ( ! File::splitFileIntoLines(file, lines) ) {
+       std::stringstream ss; ss  << "Could not open include file:" << file;
+       errormsg += ss.str();
+       return false;
+    }
+#endif
    return true;
 }
 
@@ -508,8 +570,6 @@ void EcfFile::variableSubstitution(JobsParam& jobsParam)
    bool nopp =  false;
    size_t jobLines_size = jobLines_.size();
    for(size_t i=0; i < jobLines_size; ++i) {
-
-      if (jobLines_[i].empty()) continue;
 
       // take into account micro char during variable substitution
       string::size_type ecfmicro_pos = jobLines_[i].find(ecfMicro);
@@ -751,6 +811,7 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const
       // record job size, for placement into log files
       size_t job_output_size = 0;
       size_t jobLines_size = jobLines_.size();
+      //cout << " jobLines_.size() " << jobLines_size << " jobLines_.capacity() " << jobLines_.capacity() << "\n";
       for(size_t i = 0; i < jobLines_size; ++i)  job_output_size += jobLines_[i].size();
       job_output_size += jobLines_size; // take into account new lines for each line of output
       job_size_ = "job_size:";
@@ -1247,7 +1308,6 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    if (!fnd_includenopp) {
       fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
       if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
-      fnd_include = (script_line.find(T_INCLUDE) == 1);
    }
    if (!fnd_include && !fnd_includenopp && !fnd_includeonce) return;
 
@@ -1264,33 +1324,40 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    if (!error_msg_.empty()) return;
 
    // handle %include || %includeonce  of include that was specified as %includeonce
-   if (include_once_set_.find(includedFile) != include_once_set_.end() ) {
+   if (std::find(include_once_set_.begin(),include_once_set_.end(),includedFile) != include_once_set_.end() ) {
       return; // Already processed once ignore
    }
    if (fnd_includeonce) {
-      include_once_set_.insert(includedFile);
+      include_once_set_.push_back(includedFile);
    }
 
 #ifdef DEBUG_PRE_PROCESS
    cout << "EcfFile::preProcess processing " << includedFile  << "\n";
 #endif
 
-   my_map::iterator it = globalIncludedFileSet_.find(includedFile);
-   if ( it == globalIncludedFileSet_.end()) {
-      globalIncludedFileSet_.insert( std::make_pair(includedFile,0) );
-   }
-   else {
-      // Check for recursive includes. some includes like %include <endt.h>
-      // are included many times, but the include is not recursive.
-      // To get round this will use a simple count.
-      if ( (*it).second > 100) {
-         std::stringstream ss;
-         ss << "Recursive include of file " << includedFile << " for " << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
-         return;
+
+   // Check for recursive includes. some includes like %include <endt.h>
+   // are included many times, but the include is not recursive.
+   // To get round this will use a simple count.
+   // replace map with vector
+   bool fnd = false;
+   for(size_t i = 0; i < globalIncludedFileSet_.size(); ++i) {
+      if (globalIncludedFileSet_[i].first == includedFile) {
+         fnd = true;
+         if ( globalIncludedFileSet_[i].second > 100) {
+            std::stringstream ss;
+            ss << "Recursive include of file " << includedFile << " for " << ecfile_->script_path_or_cmd_;
+            error_msg_ += ss.str();
+            return;
+         }
+         globalIncludedFileSet_[i].second++;
+         break;
       }
-      (*it).second++;
    }
+   if (!fnd) {
+      globalIncludedFileSet_.push_back( std::make_pair(includedFile,0) );
+   }
+
 
    std::vector<std::string> include_lines;
    if (fnd_includenopp) include_lines.push_back(ecf_micro_ + T_NOOP);
@@ -1467,4 +1534,27 @@ std::string PreProcessor::getIncludedFilePath(
    // File either has an absolute pathname or is in the current working dir.
    // include file name as is, from current working directory
    return includedFile;
+}
+
+// **********************************************************************************
+
+IncludeFileCache::IncludeFileCache(const std::string& path) : path_(path), fp_(path.c_str(), std::ios_base::in),no_of_lines_(0) {}
+
+IncludeFileCache::~IncludeFileCache() { fp_.close(); }
+
+bool IncludeFileCache::lines(std::vector<std::string>& lns) {
+   if ( !fp_ ) return false;
+
+   if (no_of_lines_ != 0 ) {
+      lns.reserve(no_of_lines_);
+      fp_.seekg(0);               // Using cache, reset pos back to 0
+   }
+
+   // Note if we use: while( getline( theEcfFile, line)), then we will miss the *last* *empty* line
+   string line;
+   while ( std::getline(fp_,line) ) { lns.push_back(line); }
+   fp_.clear();               // eol fp_ will be in bad state reset. So we can re-use
+   no_of_lines_ = lns.size(); // cache for next time
+
+   return true;
 }

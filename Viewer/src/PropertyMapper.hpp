@@ -1,4 +1,4 @@
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 
 #ifndef PROPERTYMAPPER_INC_
 #define PROPERTYMAPPER_INC_

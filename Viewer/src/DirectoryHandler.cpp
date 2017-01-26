@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,6 +17,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "DirectoryHandler.hpp"
+#include "File.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 std::string DirectoryHandler::shareDir_;
@@ -24,6 +26,8 @@ std::string DirectoryHandler::etcDir_;
 std::string DirectoryHandler::configDir_;
 std::string DirectoryHandler::rcDir_;
 std::string DirectoryHandler::tmpDir_;
+std::string DirectoryHandler::uiLogFile_;
+std::string DirectoryHandler::uiEventLogFile_;
 
 static bool firstStartUp=false;
 
@@ -121,24 +125,24 @@ void DirectoryHandler::init(const std::string& exeStr)
         tmpDir_=std::string(h);
         boost::filesystem::path tmp(tmpDir_);
         tmp /= "eclow_ui.tmp";
+        tmpDir_=tmp.string();
         if(!boost::filesystem::exists(tmp))
         {
-            UserMessage::message(UserMessage::WARN, false,
-                "ECFLOWUI_TMPDIR env variable is not defined. ecFlowUI creates its tmp direcoty in TMPDIR as "  + tmp.string());
+            UiLog().warn() << "ECFLOWUI_TMPDIR env variable is not defined. ecFlowUI creates its tmp direcoty in TMPDIR as "  <<
+                              tmp.string();
 
             try
             {
                 if(boost::filesystem::create_directory(tmp))
-                {
-                    tmpDir_=tmp.string();
-                    UserMessage::debug("Tmp dir created: " + tmpDir_);
+                {                   
+                    UiLog().dbg() << "Tmp dir created: " << tmpDir_;
                 }
             }
             catch (const boost::filesystem::filesystem_error& e)
             {
                 UserMessage::message(UserMessage::ERROR,true,"Creating tmp directory failed:" + std::string(e.what()));
             }
-        }
+        }        
     }
     else
     {
@@ -146,6 +150,25 @@ void DirectoryHandler::init(const std::string& exeStr)
             "Neither of ECFLOWUI_TMPDIR and TMPDIR are defined. ecflowUI cannot be started up!");
         exit(1);
     }
+
+    //Ui log. The ui logging either goes into the stdout or into a
+    //file. The startup script desides on it.
+    if(char *h=getenv("ECFLOWUI_LOGFILE"))
+    {
+        uiLogFile_=std::string(h);
+    }
+
+    //Ui event log file. Ui event logging always goes into a file
+    if(char *h=getenv("ECFLOWUI_UI_LOGFILE"))
+    {
+        uiEventLogFile_=std::string(h);
+    }
+    else
+    {
+        boost::filesystem::path tmp(tmpDir_);
+        tmp /= "ecflowui_uilog.txt";
+        uiEventLogFile_=tmp.string();
+     }
 }
 
 
@@ -229,8 +252,7 @@ std::string DirectoryHandler::tmpFileName()
         }
         catch(const boost::filesystem::filesystem_error& err)
         {
-            UserMessage::message(UserMessage::WARN, false,
-                std::string("Could not generate tmp filename! Reason: ") + err.what());
+            UiLog().warn() << "Could not generate tmp filename! Reason: " << err.what();
         }
     }
 
@@ -387,3 +409,20 @@ bool DirectoryHandler::removeFile(const std::string &path, std::string &errorMes
     return true;
 }
 
+bool DirectoryHandler::truncateFile(const std::string &path,int lastLineNum,std::string &errorMessage)
+{
+    std::string s=ecf::File::get_last_n_lines(path,lastLineNum,errorMessage);
+    if(!errorMessage.empty())
+    {
+        errorMessage="Could not truncate file " + path + "; reason: " + errorMessage;
+        return false;
+    }
+
+    if(!ecf::File::create(path,s,errorMessage))
+    {
+        errorMessage="Could not truncate file " + path + "; reason: " + errorMessage;
+        return false;
+    }
+
+    return true;
+}

@@ -1,4 +1,4 @@
-## Copyright 2009-2016 ECMWF. 
+## Copyright 2009-2017 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -52,7 +52,7 @@ lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
 #
 lib pthread ;
 
-exe u_base : [ glob test/*.cpp  ]
+exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
@@ -69,3 +69,21 @@ exe u_base : [ glob test/*.cpp  ]
            [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
            <variant>debug:<define>DEBUG
 	     ;
+	     
+#
+# Tests job generation performance, relies on python (Pyext/samples/TestJobGenPerf.py) to setup data
+#
+exe perf_job_gen : test/TestJobGenPerf.cpp   
+           pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /theParser//libparser
+           base
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_datetime
+         : <include>../ANode/test 
+           <variant>debug:<define>DEBUG
+        ;

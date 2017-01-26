@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #26 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -29,6 +29,7 @@
 
 class Server;
 class ServerEnvironment;
+//#define DEBUG_TRAVERSER 1
 
 class NodeTreeTraverser : private boost::noncopyable {
 public:
@@ -78,7 +79,9 @@ private:
 	boost::posix_time::ptime last_time_;        // ensure poll is in sync
 	boost::posix_time::ptime next_poll_time_;   // Keep as sync as possible with hard real times
 	boost::posix_time::time_duration interval_; // Job submission interval
+#ifdef DEBUG_TRAVERSER
  	int count_;
+#endif
  	bool firstTime_;
  	bool running_;
 };

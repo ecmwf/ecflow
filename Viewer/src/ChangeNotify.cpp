@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,7 +14,7 @@
 #include "ChangeNotifyModel.hpp"
 #include "ChangeNotifyWidget.hpp"
 #include "Sound.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VNode.hpp"
@@ -267,7 +267,7 @@ void ChangeNotify::load(VProperty* group)
 {
 	if(group->name() == "notification")
 	{
-		UserMessage::message(UserMessage::DBG, false,"ChangeNotify:load() -- > notification");
+        UiLog().dbg() << "ChangeNotify:load() -- > notification";
 
 		for(int i=0; i < group->children().size(); i++)
 		{
@@ -306,10 +306,10 @@ void ChangeNotify::load(VProperty* group)
 
 void ChangeNotify::loadServerSettings()
 {
-	UserMessage::message(UserMessage::DBG, false,"ChangeNotify::loadServerSettings() --> " + id_);
+    UiLog().dbg() << "ChangeNotify::loadServerSettings() --> " << id_;
 
 	std::string v("server.notification." + id_ + ".enabled");
-	UserMessage::message(UserMessage::DBG, false," property: " +  v);
+    UiLog().dbg() << " property: " <<  v;
 
 	if(VProperty *p=VConfig::instance()->find(v))
 	{
@@ -317,8 +317,7 @@ void ChangeNotify::loadServerSettings()
 	}
 	else
 	{
-		UserMessage::message(UserMessage::ERROR, false,
-			std::string("  Error!  Unable to find property: " + v));
+        UiLog().err() << "  Error!  Unable to find property: " << v;
 	}
 }
 

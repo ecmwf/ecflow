@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -42,6 +42,7 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
    	VInfo_ptr nodeInfo(const QModelIndex&);
+    void selectionChanged(QModelIndexList lst);
 
    	VModelData* data() const;
     ModelColumn* columns() const {return columns_;}
@@ -85,6 +86,9 @@ protected:
     QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
 
 	QVariant nodeData(const QModelIndex& index,int role) const;
+
+    QModelIndex forceShowNode(const VNode* node) const;
+    QModelIndex forceShowAttribute(const VAttribute* a) const;
 
 	VTableModelData* data_;
 	ModelColumn* columns_;

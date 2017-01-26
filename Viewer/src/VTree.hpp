@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,6 +15,7 @@
 #include <QStringList>
 
 class VNode;
+class VAttribute;
 class VAttributeType;
 class AttributeFilter;
 class VTreeServer;
@@ -38,7 +39,9 @@ public:
     virtual VTree* root() const;
     virtual VTreeServer* server() const;
 
+#if 0
     int attrRow(int row,AttributeFilter *filter) const;
+#endif
     int attrNum(AttributeFilter* filter) const;
     bool isAttrInitialised() const;
     void updateAttrNum(AttributeFilter* filter=0);
@@ -104,7 +107,7 @@ protected:
      VTreeNode* makeBranch(const std::vector<VNode*>& filter,VTreeNode* parentNode);
      void replaceWithBranch(VTreeNode* node,VTreeNode* branch);
      VTreeNode* makeTopLevelBranch(const std::vector<VNode*>& filter,VNode* suite);
-     void insertTopLevelBranch(VTreeNode* branch,int index);
+     void insertTopLevelBranch(VTreeNode* branch,int index);   
 
 private:
      bool build(VTreeNode* parent,VNode* vnode,const std::vector<VNode*>& filter);

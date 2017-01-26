@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,7 +10,7 @@
 
 #include "OutputCache.hpp"
 
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 OutputCache* OutputCache::instance_=NULL;
 
@@ -81,7 +81,7 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
         return NULL;
 
 #ifdef _UI_OUTPUTCACHE_DEBUG
-    UserMessage::debug("OutputCache::add --> file");
+    UiLog().dbg() << "OutputCache::add --> file";
     file->print();
     print();
 #endif
@@ -104,15 +104,15 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
             
             items_[id]=item;
 #ifdef _UI_OUTPUTCACHE_DEBUG
-            UserMessage::debug("  add item:" + id);
+            UiLog().dbg() << "  add item:" << id;
             print();
-            UserMessage::debug("<-- OutputCache::add");
+            UiLog().dbg() << "<-- OutputCache::add";
 #endif
             return item;
         }
     }
 #ifdef _UI_OUTPUTCACHE_DEBUG
-    UserMessage::debug("<-- OutputCache::add");
+    UiLog().dbg() << "<-- OutputCache::add";
 #endif
 
     return NULL;
@@ -123,12 +123,12 @@ void OutputCache::detach(OutputCacheItem* item)
     if(item)
     {
 #ifdef _UI_OUTPUTCACHE_DEBUG
-        UserMessage::debug("OutputCache::detach -->");
+        UiLog().dbg() << "OutputCache::detach -->";
         print();
-        UserMessage::debug("  detach item: " + item->id_);
+        UiLog().dbg() << "  detach item: " << item->id_;
         item->detach();
         print();
-        UserMessage::debug("<-- OutputCache::detach");
+        UiLog().dbg() << "<-- detach";
 #endif
     }
 }
@@ -138,7 +138,7 @@ void OutputCache::removeItem()
     if(OutputCacheItem* item=static_cast<OutputCacheItem*>(sender()))
     {
 #ifdef _UI_OUTPUTCACHE_DEBUG
-        UserMessage::debug("OutputCache::removeItem --> file");
+        UiLog().dbg() << "OutputCache::removeItem --> file";
         item->file_->print();
         print();
 #endif
@@ -148,9 +148,9 @@ void OutputCache::removeItem()
             if(it.value() == item)
             {            
 #ifdef _UI_OUTPUTCACHE_DEBUG
-                UserMessage::debug("  remove item --> ref_count:" +
-                                     QString::number(it.value()->file_.use_count()).toStdString() +
-                                     " item:" + it.key());
+                UiLog().dbg() << "  remove item --> ref_count:" <<
+                                     it.value()->file_.use_count() <<
+                                     " item:" << it.key();
 #endif
                 //assert(item->file_.use_count() == 1);
                 //The ref count is not necessarily 1 here
@@ -158,7 +158,7 @@ void OutputCache::removeItem()
                 item->deleteLater();
 #ifdef _UI_OUTPUTCACHE_DEBUG
                 print();
-                UserMessage::debug("<-- OutputCache::removeItem");
+                UiLog().dbg() << "<-- OutputCache::removeItem";
 #endif
                 return;
             }
@@ -187,14 +187,14 @@ OutputCacheItem* OutputCache::use(VInfo_ptr info,const std::string& sourcePath)
 
 void OutputCache::print()
 {
-    UserMessage::debug("  OutputCache contents -->");
+    UiLog().dbg() << "  OutputCache contents -->";
     QMap<std::string, OutputCacheItem*>::iterator it = items_.begin();
     while (it != items_.end() )
     {
-        UserMessage::debug("  item:" + it.key() + " tmp:" +
-                             it.value()->file_->path() + " countdown:" +
-                             ((it.value()->isActive())?"on":"off"));
+        UiLog().dbg() << "  item:" + it.key() << " tmp:" <<
+                             it.value()->file_->path() << " countdown:" <<
+                             ((it.value()->isActive())?"on":"off");
         ++it;
     }
-    UserMessage::debug("  <-- OutputCache contents");
+    UiLog().dbg() << "  <-- OutputCache contents";
 }

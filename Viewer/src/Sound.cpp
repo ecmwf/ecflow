@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,7 +11,7 @@
 #include "Sound.hpp"
 
 #include "DirectoryHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
@@ -36,7 +36,7 @@ Sound* Sound::instance_=NULL;
     {
         const char *soundCmd = "play -q /usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav";
         if (system(soundCmd))
-            UserMessage::message(UserMessage::DBG, false,"ChangeNotify:add() could not play sound alert");
+            UiLog().dbg() << "ChangeNotify:add() could not play sound alert";
 */
 //#ifdef ECFLOW_QT5
 //  QSoundEffect effect(dialog_);
@@ -99,7 +99,7 @@ void Sound::play(const std::string& fName,int loopCount)
 		boost::replace_first(cmd,"%REPEAT%",boost::lexical_cast<std::string>(loopCount-1));
 		if(system(cmd.c_str()))
 		{
-			UserMessage::message(UserMessage::DBG, false,"Sound::play() could not play sound alert. Command: " +  cmd);
+            UiLog().dbg() << "Sound::play() could not play sound alert. Command: " <<  cmd;
 		}
 	}
 
@@ -129,11 +129,11 @@ bool Sound::isSoundFile(const std::string& fName) const
 
 void Sound::load(VProperty* prop)
 {
-	UserMessage::message(UserMessage::DBG, false,"Sound:load() -- > begin");
+    UiLog().dbg() << "Sound:load() -- > begin";
 
 	if(prop->name() != "sound")
 	{
-		UserMessage::message(UserMessage::ERROR, false,"Sound:load() -- > no property found!");
+        UiLog().err() << "Sound:load() -- > no property found!";
 		return;
 	}
     
@@ -152,7 +152,7 @@ void Sound::load(VProperty* prop)
     	Sound::instance_->setCurrentPlayer(pp->valueAsString());
     }
 
-    UserMessage::message(UserMessage::DBG, false,"Sound:load() -- > end");
+    UiLog().dbg() << "Sound:load() -- > end";
 }
 
 static SimpleLoader<Sound> loaderSound("sound");

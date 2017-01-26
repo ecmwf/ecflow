@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #7 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -81,6 +81,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer  )
  	Simulator simulator;
  	std::string errorMsg;
  	BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_integer.def"),errorMsg),errorMsg << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_integer.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_integer_relative  )
@@ -123,6 +127,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer_relative  )
    Simulator simulator;
 	std::string errorMsg;
 	BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_integer_relative.def"),errorMsg),errorMsg << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_integer_relative.def") + ".log";
+   fs::remove(logFileName);
 }
 
 
@@ -161,6 +169,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_date  )
    Simulator simulator;
 	std::string errorMsg;
 	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_date.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_date_2  )
@@ -198,6 +210,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_2  )
    Simulator simulator;
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_date.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop  )
@@ -240,6 +256,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop  )
    Simulator simulator;
 	std::string errorMsg;
 	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop.def"), errorMsg),errorMsg << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_date_for_loop.def") + ".log";
+   fs::remove(logFileName);
 }
 
 
@@ -285,6 +305,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
    Simulator simulator;
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop2.def"), errorMsg),errorMsg << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_date_for_loop2.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
@@ -331,7 +355,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
       task_ptr task_finish = family_plot->add_task("finish");
 		task_finish->add_trigger(  "1 == 0");
 		task_finish->add_complete( "checkdata:done or checkdata == complete" );
-		task_finish->addVerify( VerifyAttr(NState::COMPLETE,8) );
+		task_finish->addVerify( VerifyAttr(NState::COMPLETE,4) );
 
       task_ptr task_checkdata = family_plot->add_task("checkdata");
 		task_checkdata->addEvent( Event(1,"done"));
@@ -347,6 +371,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
    Simulator simulator;
 	std::string errorMsg;
 	BOOST_REQUIRE_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_with_cron.def"), errorMsg),errorMsg << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_with_cron.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_enumerated )
@@ -396,6 +424,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated )
       BOOST_REQUIRE_MESSAGE(repeat.value() == 3,"Expected to find repeat with value 3 but found " << repeat.value() );
       BOOST_REQUIRE_MESSAGE(repeat.last_valid_value() == 2,"Expected to find repeat with last valid value 2 but found " << repeat.last_valid_value() );
    }
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_enumerated.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_string )
@@ -430,7 +462,6 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
  	Simulator simulator;
  	std::string errorMsg;
  	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_string.def"), errorMsg),errorMsg << "\n" << theDefs);
- 	//	cout << theDefs << "\n";
 
  	std::vector<Task*> theServerTasks;
  	theDefs.getAllTasks(theServerTasks);
@@ -445,6 +476,10 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
  	}
 
    PrintStyle::setStyle(PrintStyle::DEFS);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_string.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

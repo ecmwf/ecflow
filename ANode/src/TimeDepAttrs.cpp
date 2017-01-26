@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #281 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -84,34 +84,33 @@ void TimeDepAttrs::calendarChanged(const ecf::Calendar& c )
    // (Otherwise we will end up running the task at Monday Midnight
    //  and not Monday at 10.00)
    //
-   bool have_day = false;
-   bool at_least_one_day_free = false;
-   for(size_t i = 0; i < days_.size(); i++){
-      have_day = true;
-      days_[i].calendarChanged(c);
-      if (!at_least_one_day_free) at_least_one_day_free = days_[i].isFree(c);
-   }
 
-   bool have_date = false;
-   bool at_least_one_date_free = false;
-   for(size_t i = 0; i < dates_.size(); i++) {
-      have_date = true;
-      dates_[i].calendarChanged(c);
-      if (!at_least_one_date_free) at_least_one_date_free = dates_[i].isFree(c);
-   }
+   if (days_.empty() && dates_.empty() ) {
 
-   if (have_day || have_date ) {
-      if ( at_least_one_day_free || at_least_one_date_free)  {
-         for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
-         for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
-         for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
-      }
+      // No Day or Date, If time matches  calendarChanged(c) will free time dependencies
+      for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
+      for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
+      for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
    }
    else {
-      // No Day or Date, If time matches  calendarChanged(c) will free time dependencies
-      for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
-      for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
-      for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
+
+      bool at_least_one_day_free = false;
+      for(size_t i = 0; i < days_.size(); i++){
+         days_[i].calendarChanged(c);
+         if (!at_least_one_day_free) at_least_one_day_free = days_[i].isFree(c);
+      }
+
+      bool at_least_one_date_free = false;
+      for(size_t i = 0; i < dates_.size(); i++) {
+         dates_[i].calendarChanged(c);
+         if (!at_least_one_date_free) at_least_one_date_free = dates_[i].isFree(c);
+      }
+
+      if ( at_least_one_day_free || at_least_one_date_free)  {
+         for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
+         for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
+         for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
+      }
    }
 }
 

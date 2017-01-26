@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -42,6 +42,16 @@ QModelIndex TableNodeSortModel::nodeToIndex(const VNode *node)
 {
 	return mapFromSource(nodeModel_->nodeToIndex(node));
 }
+
+void TableNodeSortModel::selectionChanged(QModelIndexList lst)
+{
+    QModelIndexList lstm;
+    Q_FOREACH(QModelIndex idx,lst)
+        lstm << mapToSource(idx);
+
+    nodeModel_->selectionChanged(lstm);
+}
+
 
 bool TableNodeSortModel::lessThan(const QModelIndex &left,
                                   const QModelIndex &right) const

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #25 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -52,8 +52,16 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 // **************************************************************************
 BOOST_AUTO_TEST_CASE( test_complete )
 {
+   // Added since in 4.6.0 no longer sets state if it has not changed.
+   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+      std::cout << "\n    Disable test_complete for old server ,re-enable when 4.6.0 is minimum version\n";
+      return;
+   }
+
 	DurationTimer timer;
 	cout << "Test:: ...test_complete " << flush;
+
+
    TestClean clean_at_start_and_end;
 
 	// Create the defs file corresponding to the text below
@@ -88,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_complete )
 
       task_ptr task_check = fam->add_task("check");
  		task_check->addEvent( Event(1,eventName) );
- 		task_check->addVerify( VerifyAttr(NState::COMPLETE,4) );
+ 		task_check->addVerify( VerifyAttr(NState::COMPLETE,2) );
 
       task_ptr task_t1 = fam->add_task("t1");
 		task_t1->add_trigger( "check == complete");

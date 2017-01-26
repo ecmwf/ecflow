@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -24,6 +24,7 @@
 class ServerHandler;
 class VAttribute;
 class VNode;
+class VItem;
 
 class VInfoObserver;
 class VInfoVisitor;
@@ -55,6 +56,7 @@ public:
     ServerHandler* server() const {return server_;}
     VNode* node() const {return node_;}
     VAttribute* attribute() const {return attr_;}
+    virtual VItem* item() const=0;
 
 	virtual std::string name()=0;
     virtual std::string path()=0;
@@ -103,6 +105,7 @@ public:
 	bool isServer() {return true;}
     bool isEmpty() {return false;}
     bool hasData() const;
+    VItem* item() const;
 
     void accept(VInfoVisitor*);   
     std::string name();
@@ -126,7 +129,9 @@ public:
 	std::string name();	
 	std::string serverAlias();
 	std::string relativePath();
-	static VInfo_ptr create(VNode*);
+    VItem* item() const;
+
+    static VInfo_ptr create(VNode*);
 
 protected:
 	VInfoNode(ServerHandler*,VNode*);
@@ -145,6 +150,7 @@ public:
     void accept(VInfoVisitor*);
     std::string name();
     std::string path();
+    VItem* item() const;
 
     static VInfo_ptr create(VAttribute*);
 

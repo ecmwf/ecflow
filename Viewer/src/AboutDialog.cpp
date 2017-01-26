@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,6 +11,7 @@
 #include "AboutDialog.hpp"
 
 #include "Version.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <QDate>
 #include <QRegExp>
@@ -18,7 +19,6 @@
 AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 {
     setupUi(this);
-
 
     QString title="EcflowUI";
     QString ecfVersionTxt=QString::fromStdString(ecf::Version::raw());
@@ -57,7 +57,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     if(!ecfVersionTxt.isEmpty())
     {
         logoTxt+="<p>ecflow version: <b>" + ecfVersionTxt + "</b><br>";
-        logoTxt+="<i>Copyright 2009-2016 ECMWF</i><p>";
+        logoTxt+="<i>Copyright 2009-2017 ECMWF</i><p>";
     }
 
     logoTxt+="</td></tr></table>";
@@ -73,4 +73,6 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     licenseText+=" nor does it submit to any jurisdiction.";
 
     licenseLabel_->setText(licenseText);
+
+    WidgetNameProvider::nameChildren(this);
 }

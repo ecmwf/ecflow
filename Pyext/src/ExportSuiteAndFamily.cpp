@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #85 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -40,6 +40,7 @@ family_ptr add_family(NodeContainer* self,family_ptr f){ self->addFamily(f); ret
 task_ptr add_task(NodeContainer* self,task_ptr t){ self->addTask(t); return t;}
 
 suite_ptr add_clock(suite_ptr self, const ClockAttr& clk) { self->addClock(clk); return self;}
+suite_ptr add_end_clock(suite_ptr self, const ClockAttr& clk) { self->add_end_clock(clk); return self;}
 
 // Context management, Only used to provide indentation
 suite_ptr suite_enter(suite_ptr self) { return self;}
@@ -90,6 +91,8 @@ void export_SuiteAndFamily()
    .def("__exit__",  &suite_exit)        // allow with statement, hence indentation support
    .def("add_clock", &add_clock)
    .def("get_clock", &Suite::clockAttr,"Returns the :term:`suite` :term:`clock`")
+   .def("add_end_clock", &add_end_clock,"End clock, used to mark end of simulation")
+   .def("get_end_clock", &Suite::clock_end_attr,"Return the suite's end clock. Can be NULL")
    .def("begun",     &Suite::begun, "Returns true if the :term:`suite` has begun, false otherwise")
    ;
 }

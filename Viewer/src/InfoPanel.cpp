@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,8 +18,9 @@
 #include "InfoPanelItem.hpp"
 #include "InfoPanelHandler.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VSettings.hpp"
+#include "WidgetNameProvider.hpp"
 
 //==============================================
 //
@@ -69,6 +70,8 @@ InfoPanel::InfoPanel(QWidget* parent) :
 	//Initialise action state
 	actionBreadcrumbs_->setChecked(bcWidget_->active());
 	actionFrozen_->setChecked(false);
+
+    WidgetNameProvider::nameChildren(this);
 }
 
 InfoPanel::~InfoPanel()
@@ -179,7 +182,7 @@ void InfoPanel::reset(VInfo_ptr info)
 {
     if(info_ && info)
     {
-        //UserMessage::debug("path: " + info_->path() + " " + info->path());
+        //UiLog().dbg() << "path: " << info_->path() << " " << info->path();
 
         if(*(info_.get()) == *(info.get()))
             return;
@@ -305,7 +308,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 
 	for(int i=0; i < ids.size(); i++)
 	{
-		UserMessage::message(UserMessage::DBG,false,std::string("InfoPanel --> tab: ") + ids[i]->name());
+        UiLog().dbg() << "InfoPanel --> tab: " << ids[i]->name();
 	}
 
 	int match=0;
@@ -431,6 +434,7 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 {
     if(InfoPanelItem *iw=InfoPanelItemFactory::create(def->name()))
 	{
+        WidgetNameProvider::nameChildren(iw->realWidget());
         iw->setOwner(this);
         iw->setFrozen(frozen());
 		iw->setDetached(detached());

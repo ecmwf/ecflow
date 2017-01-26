@@ -4,7 +4,7 @@ suite cron3              # use real clock otherwise the date wont change
    family cronFamily
 		task t
   			 cron -d 10,11,12   10:00 11:00 01:00   # run  10,11,12 of the month at 10am and 11 am		
-             verify complete:6                         # task should complete 16 times 
+             verify complete:6                      # task should complete 6 times 
    endfamily
 endsuite
 

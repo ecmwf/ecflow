@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -56,14 +56,14 @@ using namespace boost::posix_time;
 // ==================================================================================
 // class ClientInvoker
 ClientInvoker::ClientInvoker()
-: on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
+: on_error_throw_exception_(true), test_(false),testInterface_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
 	if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 1=================start=================\n";
 }
 
 ClientInvoker::ClientInvoker(const std::string& host_port)
-: on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
+: on_error_throw_exception_(true), test_(false),testInterface_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 2=================start=================\n";
@@ -76,7 +76,7 @@ ClientInvoker::ClientInvoker(const std::string& host_port)
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
-: on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
+: on_error_throw_exception_(true), test_(false),testInterface_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
@@ -84,7 +84,7 @@ ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, int port)
-: on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
+: on_error_throw_exception_(true), test_(false),testInterface_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
@@ -298,7 +298,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					/// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
 					/// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
 					/// However this is only done, if we are not using the Command Level Interface(cli)
-					server_reply_.clear_for_invoke(cli_);
+					server_reply_.clear_for_invoke(cli());
 
 					cts_cmd->setup_user_authentification( clientEnv_ );
 
@@ -805,7 +805,7 @@ int ClientInvoker::replace( const std::string& absNodePath, const std::string& p
 
    /// *Note* server_reply_.client_handle_ is kept until the next call to register_client_handle
    /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
-   server_reply_.clear_for_invoke(cli_);
+   server_reply_.clear_for_invoke(cli());
 
    /// Handle command constructors that can throw
    Cmd_ptr cts_cmd;
@@ -832,7 +832,7 @@ int ClientInvoker::replace_1(const std::string& absNodePath, defs_ptr client_def
 {
    /// *Note* server_reply_.client_handle_ is kept until the next call to register_client_handle
    /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
-   server_reply_.clear_for_invoke(cli_);
+   server_reply_.clear_for_invoke(cli());
 
    /// Handle command constructors that can throw
    Cmd_ptr cts_cmd;
@@ -1179,7 +1179,7 @@ int ClientInvoker::load_in_memory_defs( const defs_ptr& clientDefs, bool force) 
 {
    /// *Note* server_reply_.client_handle_ is kept until the next call to register_client_handle
    /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
-   server_reply_.clear_for_invoke(cli_);
+   server_reply_.clear_for_invoke(cli());
 
    if ( !clientDefs.get() ) {
       server_reply_.set_error_msg("The client definition is empty.");
@@ -1311,7 +1311,7 @@ RequestLogger::~RequestLogger() {
          rtt(ss.str());
       }
 
-      if (ci_->cli_ && cmd_->ping_cmd() && ci_->server_reply_.error_msg().empty()) {
+      if (ci_->cli() && cmd_->ping_cmd() && ci_->server_reply_.error_msg().empty()) {
          cout << "ping server(" << ci_->client_env_host_port() << ") succeeded in " << to_simple_string(ci_->rtt_) << "  ~" << ci_->rtt_.total_milliseconds() << " milliseconds\n";
       }
    }

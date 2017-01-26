@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #204 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -444,7 +444,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
  	// from the children, hence we can't use the same same algorithm for containers nodes and leaf
  	// nodes like task.
 	NState::State task_state = state();
-	if ( task_state == NState::ACTIVE || task_state == NState::SUBMITTED || task_state == NState::UNKNOWN || task_state == NState::COMPLETE) {
+	if ( task_state == NState::COMPLETE || task_state == NState::ACTIVE || task_state == NState::SUBMITTED || task_state == NState::UNKNOWN ) {
 #ifdef DEBUG_DEPENDENCIES
 		LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " is not valid for job submission" );
 #endif

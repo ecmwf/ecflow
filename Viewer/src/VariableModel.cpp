@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,10 +10,9 @@
 #include "VariableModel.hpp"
 
 #include <QColor>
-#include <QDebug>
 
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VariableModelData.hpp"
 
 QColor VariableModel::varCol_=QColor(40,41,42);
@@ -242,7 +241,7 @@ bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& valu
 bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString value)
 {
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    qDebug() << "DEBUG :" << "VariableModel::alterVariable --> index" <<  index  << " name=" <<
+    UiLog().dbg() << "VariableModel::alterVariable --> " <<  index  << " name=" <<
                      name << " value=" <<  value;
 #endif
 
@@ -262,7 +261,7 @@ bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString
     identify(index,block,row);
 
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    qDebug() << "   block=" <<  block << " row=" << row;
+    UiLog().dbg() << "   block=" <<  block << " row=" << row;
 #endif
 
     if(block == -1 || row == -1)
@@ -279,7 +278,7 @@ bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString
 #endif
 
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    UserMessage::debug("<-- VariableModel::alterVariable");
+    UiLog().dbg() << "<-- alterVariable";
 #endif
     return false;
 }
@@ -530,13 +529,13 @@ void VariableModel::slotAddRemoveEnd(int diff)
 void VariableModel::slotDataChanged(int block)
 {
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    UserMessage::debug("VariableModel::slotDataChanged -->");
+    UiLog().dbg() << "VariableModel::slotDataChanged -->";
 #endif
     QModelIndex blockIndex0=index(block,0);
 	QModelIndex blockIndex1=index(block,1);
 
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    qDebug() << "   emit dataChanged:" << blockIndex0 << blockIndex1;
+    UiLog().dbg() << " emit dataChanged:" << " " << blockIndex0 << " " << blockIndex1;
 #endif
 	Q_EMIT dataChanged(blockIndex0,blockIndex1);
 
@@ -544,7 +543,7 @@ void VariableModel::slotDataChanged(int block)
     Q_EMIT filterChanged();
 
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    UserMessage::debug("<-- VariableModel::slotDataChanged");
+    UiLog().dbg() << "<-- slotDataChanged";
 #endif
 }
 
@@ -591,28 +590,19 @@ void VariableSortModel::setMatchText(QString txt)
 
 	if(matchMode_ == FilterMode)
 	{
-#ifdef _UI_VARIABLEMODEL_DEBUG
-        //qDebug() << "before";
-        //print(QModelIndex());
-#endif
 		//reload the filter model
 		invalidate();
-#ifdef _UI_VARIABLEMODEL_DEBUG
-        //qDebug() << "after";
-        //print(QModelIndex());
-#endif
-
 	}
 }
 
 void VariableSortModel::print(const QModelIndex idx)
 {
     if(rowCount(idx) > 0)
-        qDebug() << "-->" << idx << mapToSource(idx) << data(idx);
+        UiLog().dbg() << "--> " << idx << " " << mapToSource(idx) << " " << data(idx);
     else
-        qDebug() << idx << mapToSource(idx) << data(idx);
+        UiLog().dbg() << idx << " " << mapToSource(idx) << " " << data(idx);
 
-    if(rowCount(idx) > 0) qDebug() << "children:";
+    if(rowCount(idx) > 0)  UiLog().dbg() << "children: ";
     for(int i=0; i < rowCount(idx); i++)
     {
         print(index(i,0,idx));
@@ -628,7 +618,7 @@ void VariableSortModel::slotFilterChanged()
 void VariableSortModel::slotRerunFilter()
 {
 #ifdef _UI_VARIABLEMODEL_DEBUG
-   UserMessage::debug("VariableSortModel::slotRerunFilter-->");
+   UiLog().dbg() << "VariableSortModel::slotRerunFilter-->";
 #endif
    invalidate();
 }
@@ -704,9 +694,7 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
     {
         int col2=(idx.column()==0)?1:0;
         QModelIndex idx2=index(idx.row(),col2,idx.parent());
-            
-        //qDebug() << idx << idx2;
-        
+
         if(matchLst_.contains(idx) || matchLst_.contains(idx2))
             return QColor(169,210,176);
     }

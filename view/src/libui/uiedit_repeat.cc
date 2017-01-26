@@ -109,7 +109,6 @@ void edit_repeat_form_c::create (Widget parent, char *widget_name)
 	children[ac++] = tools_;
 	children[ac++] = form1;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void edit_repeat_form_c::applyCB( Widget widget, XtPointer client_data, XtPointer call_data )

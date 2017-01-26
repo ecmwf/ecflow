@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -39,6 +39,7 @@ public:
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
 	const std::string& port() const {return port_;}
+    std::string longName() const;
 	bool isFavourite() const {return favourite_;}
     bool isSystem() const {return system_;}
 

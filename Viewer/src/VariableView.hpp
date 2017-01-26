@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -26,7 +26,7 @@ class VariableDelegate : public QStyledItemDelegate
     friend class VariableView;
 
 public:
-    explicit VariableDelegate(QWidget *parent=0);
+    explicit VariableDelegate(QTreeView *parent);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
@@ -39,6 +39,8 @@ protected:
     QPixmap lockPix_;
     int genVarPixId_;
     int shadowGenVarPixId_;
+    QTreeView* view_;
+
 };
 
 class VariableView : public TreeView
@@ -48,6 +50,7 @@ public:
 
 protected:
     void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const;
+
     VariableDelegate *delegate_;
 };
 

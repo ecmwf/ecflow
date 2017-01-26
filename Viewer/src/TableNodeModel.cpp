@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,12 +9,11 @@
 
 #include "TableNodeModel.hpp"
 
-#include <QDebug>
 #include <QMetaMethod>
 
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VAttribute.hpp"
 #include "VFilter.hpp"
 #include "VIcon.hpp"
@@ -280,6 +279,49 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
     return QModelIndex();
 }
 
+QModelIndex TableNodeModel::forceShowNode(const VNode* node) const
+{
+    if(!node)
+        return QModelIndex();
+
+    Q_ASSERT(node);
+    Q_ASSERT(!node->isServer());
+    Q_ASSERT(node->server());
+
+    if(VModelServer *mserver=data_->server(node->server()))
+    {
+        VTableServer* server=mserver->tableServer();
+        server->setForceShowNode(node);
+        return nodeToIndex(node);
+    }
+
+    return QModelIndex();
+}
+
+QModelIndex TableNodeModel::forceShowAttribute(const VAttribute* a) const
+{
+    Q_ASSERT(a);
+    VNode* node=a->parent();
+    Q_ASSERT(node);
+
+    return forceShowNode(const_cast<VNode*>(node));
+}
+
+void TableNodeModel::selectionChanged(QModelIndexList lst)
+{
+    Q_FOREACH(QModelIndex idx,lst)
+    {
+        VInfo_ptr info=nodeInfo(idx);
+
+        for(int i=0; i < data_->count(); i++)
+        {
+           VTableServer *ts=data_->server(i)->tableServer();
+           Q_ASSERT(ts);
+           ts->clearForceShow(info->item());
+        }
+    }
+}
+
 VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 {
 	VNode *n=indexToNode(index);
@@ -291,7 +333,6 @@ VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 	VInfo_ptr info;
 	return info;
 }
-
 
 //Server is about to be added
 void TableNodeModel::slotServerAddBegin(int /*row*/)
@@ -351,7 +392,8 @@ void TableNodeModel::slotBeginServerScan(VModelServer* server,int num)
     Q_ASSERT(server);
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("TableNodeModel::slotBeginServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+     UiLog().dbg() << "TableNodeModel::slotBeginServerScan --> " << server->realServer()->name() <<
+                      " " << num;
 #endif
 
 	if(num >0)
@@ -367,7 +409,8 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 	assert(active_ == true);
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("TableNodeModel::slotEndServerScan --> " + server->realServer()->name() + " " + QString::number(num).toStdString());
+     UiLog().dbg() << "TableNodeModel::slotEndServerScan --> " << server->realServer()->name() <<
+                      " " << num;
      QTime t;
      t.start();
 #endif
@@ -376,8 +419,8 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 		endInsertRows();
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
-     UserMessage::debug("  elapsed: " + QString::number(t.elapsed()).toStdString() + " ms");
-     UserMessage::debug("<-- TableNodeModel::slotEndServerScan");
+     UiLog().dbg() << "  elapsed: " << t.elapsed() << " ms";
+     UiLog().dbg() << "<-- slotEndServerScan";
 
      //qDebug() << "hit" << hitCount;
 #endif

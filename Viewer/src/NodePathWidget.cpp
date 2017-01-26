@@ -1,6 +1,6 @@
 /***************************** LICENSE START ***********************************
 
- Copyright 2014 ECMWF and INPE. This software is distributed under the terms
+ Copyright 2009-2017 ECMWF and INPE. This software is distributed under the terms
  of the Apache License version 2.0. In applying this license, ECMWF does not
  waive the privileges and immunities granted to it by virtue of its status as
  an Intergovernmental Organization or submit itself to any jurisdiction.
@@ -24,7 +24,7 @@
 #include "VProperty.hpp"
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VSettings.hpp"
@@ -142,7 +142,7 @@ void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
 void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("BcWidget::reset -->");
+    UiLog().dbg() << "BcWidget::reset -->";
     qDebug()  << "   maxWidth" << maxWidth;
 #endif
 
@@ -437,7 +437,7 @@ void BcWidget::crePixmap()
     if(items_.count() == 0)
     {
         painter.setPen(Qt::black);
-        qDebug() << "crePixmap" << emptyRect_ << emptyText_;
+        //qDebug() << "crePixmap" << emptyRect_ << emptyText_;
         painter.drawText(emptyRect_,Qt::AlignHCenter | Qt::AlignVCenter, emptyText_);
     }
     else
@@ -956,7 +956,7 @@ void NodePathWidget::setPath(QString)
 void NodePathWidget::setPath(VInfo_ptr info)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("NodePathWidget::setPath -->");
+    UiLog().dbg() << "NodePathWidget::setPath -->";
 #endif
 
     setEnabled(true);
@@ -1005,7 +1005,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 		VNode *n=lst.at(i);
 		col=n->stateColour(); 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-        UserMessage::debug("   state=" + n->stateName().toStdString());
+        UiLog().dbg() << "   state=" << n->stateName();
 #endif
 		QColor fontCol=n->stateFontColour();
 		name=n->name();
@@ -1025,7 +1025,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
     bc_->reset(nodeItems_,bcWidth());
 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("<-- NodePathWidget::setPath");
+    UiLog().dbg() << "<-- setPath";
 #endif
 }
 
@@ -1062,7 +1062,7 @@ void  NodePathWidget::slotMenuSelected(int idx,QPoint bcPos)
 VInfo_ptr NodePathWidget::nodeAt(int idx)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("NodePathWidget::nodeAt idx=" + boost::lexical_cast<std::string>(idx));
+    UiLog().dbg() << "NodePathWidget::nodeAt idx=" << idx;
 #endif
 	ServerHandler* server=info_->server();
 
@@ -1099,7 +1099,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 		if(acLst.count() > 0)
 		{
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-            UserMessage::message(UserMessage::DBG,false,"NodePathWidget::loadMenu");
+            UiLog().info() << "NodePathWidget::loadMenu";
 #endif
             
             if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
@@ -1167,7 +1167,7 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>& aspect)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("NodePathWidget::notifyDefsChanged -->");
+    UiLog().dbg() << "NodePathWidget::notifyDefsChanged -->";
 #endif
 
     if(!active_)
@@ -1184,7 +1184,7 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
             if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::SERVER_STATE)
             {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-                UserMessage::debug("   update server item");
+                UiLog().dbg() << "   update server item";
 #endif
                 if(nodeItems_.count() > 0)
                 {
@@ -1197,7 +1197,7 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
         }
 	}
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("<-- NodePathWidget::notifyDefsChanged");
+    UiLog().dbg() << "<-- notifyDefsChanged";
 #endif
 }
 
@@ -1205,7 +1205,7 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
 void NodePathWidget::notifyBeginServerClear(ServerHandler* server)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("NodePathWidget::notifyBeginServerClear -->");
+    UiLog().dbg() << "NodePathWidget::notifyBeginServerClear -->";
 #endif
     if(info_)
     {
@@ -1215,7 +1215,7 @@ void NodePathWidget::notifyBeginServerClear(ServerHandler* server)
         }
     }
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("<-- NodePathWidget::notifyBeginServerClear");
+    UiLog().dbg() << "<-- notifyBeginServerClear";
 #endif
 }
 
@@ -1223,7 +1223,7 @@ void NodePathWidget::notifyBeginServerClear(ServerHandler* server)
 void NodePathWidget::notifyEndServerScan(ServerHandler* server)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("NodePathWidget::notifyEndServerScan -->");
+    UiLog().dbg() << "NodePathWidget::notifyEndServerScan -->";
 #endif
 
     if(info_)
@@ -1231,13 +1231,13 @@ void NodePathWidget::notifyEndServerScan(ServerHandler* server)
         if(info_->server() && info_->server() == server)
         {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-            UserMessage::debug("   setEnabled(true)");
+            UiLog().dbg() << "   setEnabled(true)";
 #endif
 
             setEnabled(true);
 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-            UserMessage::debug("   regainData");
+            UiLog().dbg() << "   regainData";
 #endif
             //We try to ressurect the info. We have to do it explicitly because it is not guaranteed that
             //notifyEndServerScan() will be first called on the VInfo then on the breadcrumbs. So it
@@ -1252,14 +1252,14 @@ void NodePathWidget::notifyEndServerScan(ServerHandler* server)
             Q_ASSERT(info_->server() && info_->node());
 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-            UserMessage::debug("   reset");
+            UiLog().dbg() << "   reset";
 #endif
             reset();
         }
     }
 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("<-- NodePathWidget::notifyEndServerScan");
+    UiLog().dbg() << "<-- notifyEndServerScan";
 #endif
 }
 
@@ -1290,17 +1290,17 @@ void NodePathWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
 void NodePathWidget::notifyDataLost(VInfo* info)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("NodePathWidget::notifyDataLost -->");
+    UiLog().dbg() << "NodePathWidget::notifyDataLost -->";
 #endif
     if(info_ && info_.get() == info)
     {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-        UserMessage::debug("   clear(true)");
+        UiLog().dbg() << "   clear(true)";
 #endif
         clear(true);
     }
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-    UserMessage::debug("<-- NodePathWidget::notifyDataLost");
+    UiLog().dbg() << "<-- notifyDataLost";
 #endif
 }
 

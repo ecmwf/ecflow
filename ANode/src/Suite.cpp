@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #128 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -760,7 +760,7 @@ void SuiteGenVariables::update_generated_variables() const
    // The following generated variable need only be updated if NULL or if day changed
    // Under: HYBRID the day will never change, hence a one time update
    // **********************************************************************
-   if (genvar_yyyy_.theValue().empty() || suite_->calendar_.dayChanged() || force_update_) {
+   if (suite_->calendar_.dayChanged() || genvar_yyyy_.theValue().empty() || force_update_) {
 
       force_update_ = false;
       genvar_yyyy_.set_value(boost::lexical_cast<std::string>(suite_->calendar_.year()));

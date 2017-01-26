@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #16 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -320,8 +320,6 @@ BOOST_AUTO_TEST_CASE( test_repeat )
  		Repeat day2 = day;
       BOOST_CHECK_MESSAGE(day == day2,"Copy construction failed");
 
- 		BOOST_CHECK_MESSAGE(day.makeInfiniteInValid(),"Should return true");
- 		BOOST_CHECK_MESSAGE(!day.valid(),"Should return false after makeInfiniteInValid");
 		day.reset();
  		BOOST_CHECK_MESSAGE(day.valid(),"Should return true after reset");
 	}

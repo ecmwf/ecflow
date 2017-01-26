@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -92,6 +92,7 @@ void PropertyEditor::build()
 	assert(holder_==NULL);
 
 	holder_=new QWidget(scAreaContents_);
+    holder_->setObjectName("h");
 	QVBoxLayout *vb=new QVBoxLayout(holder_);
 	vb->setContentsMargins(0,0,0,0);
 	vBox_->addWidget(holder_);
@@ -484,6 +485,7 @@ void PropertyEditor::addTabs(VProperty* vProp,QVBoxLayout *layout,QWidget* paren
         return;
     
     QTabWidget *t=new QTabWidget(parent);
+    t->setObjectName("tab");
     layout->addWidget(t);
    
     int col=1;

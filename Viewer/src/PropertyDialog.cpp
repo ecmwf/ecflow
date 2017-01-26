@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -20,6 +20,7 @@
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "WidgetNameProvider.hpp"
 
 VProperty* PropertyDialog::prop_=0;
 
@@ -54,6 +55,9 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 
 	if(list_->count() >0 && list_->currentRow() == -1)
 		list_->setCurrentRow(0);
+
+    //Assign name to each object
+    WidgetNameProvider::nameChildren(this);
 }
 
 void PropertyDialog::closeEvent(QCloseEvent * event)
@@ -84,6 +88,7 @@ void PropertyDialog::build()
               }    
 
               PropertyEditor* ed=new PropertyEditor(this);
+              ed->setObjectName(vPage->param("label"));
               ed->edit(vPage,edPix);
 
               addPage(ed,pix,vPage->param("label"));

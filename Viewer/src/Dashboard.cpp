@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,9 +19,10 @@
 #include "ServerFilter.hpp"
 #include "TableNodeWidget.hpp"
 #include "TreeNodeWidget.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -41,6 +42,8 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 	//to dock all the component widgets!
 	setWindowFlags(Qt::Widget);
 
+    setObjectName("db");
+
 	//The serverfilter. It holds the list of servers displayed by this dashboard.
 	serverFilter_=new ServerFilter();
 	serverFilter_->addObserver(this);
@@ -50,7 +53,8 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 	//Central widget - we need to create it but we do not
 	//use it. So we can hide it!
 	QWidget *w=new QLabel("centre",this);
-	setCentralWidget(w);
+    w->setObjectName("dbc");
+    setCentralWidget(w);
 	w->hide();
 
 	layout()->setContentsMargins(0,0,0,0);
@@ -139,7 +143,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 	//Get a unique dockId stored as objectName
 	QString dockId=uniqueDockId();
 
-	DashboardWidget*w=addWidget(type,dockId.toStdString());
+    DashboardWidget* w=addWidget(type,dockId.toStdString());
 
 	//At this point the widgets can be inactive. Reload will make them active!!!
 	w->reload();
@@ -415,7 +419,7 @@ void Dashboard::readSettings(VComboSettings* vs)
 
 	Q_FOREACH(QWidget* w,findChildren<QDockWidget*>())
 	{
-		UserMessage::message(UserMessage::DBG,false,std::string("DashBoard::readSettings() dock: ") +  w->objectName().toStdString());
+        UiLog().dbg() << "DashBoard::readSettings() dock: " <<  w->objectName();
 	}
 
 	//Read the information about the dashboard widgets.

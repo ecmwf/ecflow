@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -32,12 +32,14 @@ public:
 
     static VAttributeType* getType(const VNode *vnode,int row,AttributeFilter *filter=0);
     static bool getData(VNode* vnode,int row,VAttributeType* &type,QStringList& data,AttributeFilter *filter=0);
-    static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data,AttributeFilter *filter=0);
+    static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data);
     static int totalNum(const VNode *vnode,AttributeFilter *filter=0);
     static void init(const std::string& parFile);
     static int getLineNum(const VNode *vnode,int row,AttributeFilter *filter=0);
+#if 0
     static int getRow(const VNode *vnode,int row,AttributeFilter *filter=0);
-    static bool findByAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter,VAttributeType* &type,int& indexInType);
+#endif
+    static VItemTmp_ptr itemForAbsIndex(const VNode *vnode,int absIndex,AttributeFilter *filter);
 
     static VAttributeType* find(const std::string& name);
     static VAttributeType* find(int id);

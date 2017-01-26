@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,7 +16,7 @@
 #include "VFilter.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VFilter.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
@@ -673,6 +673,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
             VTreeServer* server=mserver->treeServer();
             Q_ASSERT(server);
 
+            //the node is displayed in the tree
             if(VTreeNode* tn=server->tree()->find(node))
             {
                 int row=tn->indexInParent();
@@ -812,6 +813,63 @@ QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) con
     return QModelIndex();
 }
 
+QModelIndex TreeNodeModel::forceShowNode(const VNode* node) const
+{
+    if(data_->isFilterNull())
+        return QModelIndex();
+
+    Q_ASSERT(node);
+    Q_ASSERT(!node->isServer());
+    Q_ASSERT(node->server());
+
+    if(VModelServer *mserver=data_->server(node->server()))
+    {
+        VTreeServer* server=mserver->treeServer();
+        Q_ASSERT(server);
+        server->setForceShowNode(node);
+        return nodeToIndex(node);
+    }
+
+    return QModelIndex();
+}
+
+QModelIndex TreeNodeModel::forceShowAttribute(const VAttribute* a) const
+{
+    VNode* node=a->parent();
+    Q_ASSERT(node);
+    //Q_ASSERT(!node->isServer());
+    Q_ASSERT(node->server());
+
+    if(VModelServer *mserver=data_->server(node->server()))
+    {
+        VTreeServer* server=mserver->treeServer();
+        Q_ASSERT(server);        
+        server->setForceShowAttribute(a);
+        return attributeToIndex(a);
+    }
+
+    return QModelIndex();
+}
+
+
+void TreeNodeModel::selectionChanged(QModelIndexList lst)
+{
+    if(data_->isFilterNull())
+        return;
+
+    Q_FOREACH(QModelIndex idx,lst)
+    {
+        VInfo_ptr info=nodeInfo(idx);
+
+        for(int i=0; i < data_->count(); i++)
+        {
+           VTreeServer *ts=data_->server(i)->treeServer();
+           Q_ASSERT(ts);
+           ts->clearForceShow(info->item());
+        }
+    }
+}
+
 
 //------------------------------------------------------------------
 // Create info object to index. It is used to identify nodes in
@@ -871,24 +929,13 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		{
             VNode *n=parentNode->vnode();
             Q_ASSERT(n);
-            VAttributeType* type=NULL;
-            int indexInType=-1;
-            if(VAttributeType::findByAbsIndex(n,index.row(),atts_,type,indexInType))
+            VItemTmp_ptr atmp=VAttributeType::itemForAbsIndex(n,index.row(),atts_);
+            if(atmp->attribute())
             {
-                Q_ASSERT(indexInType >= 0);
-                VInfo_ptr p=VInfoAttribute::create(new VAttribute(n,type,indexInType));
-                qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
+                //VInfo will take charge of the attribute!
+                VInfo_ptr p=VInfoAttribute::create(atmp->attribute()->clone());
                 return p;
             }
-
-#if 0
-            int realAttrRow=parentNode->attrRow(index.row(),atts_);
-            Q_ASSERT(realAttrRow >= 0);
-
-            VInfo_ptr p=VInfoAttribute::create(parentNode->vnode(),realAttrRow);
-            qDebug() << p->isAttribute() << p->attribute() << p->server() << p->node();
-            return p;
-#endif
 		}
 	}
 
@@ -916,14 +963,14 @@ void TreeNodeModel::slotServerAddEnd()
 void TreeNodeModel::slotServerRemoveBegin(VModelServer* server,int /*nodeNum*/)
 {
 #ifdef _UI_TREENODEMODEL_DEBUG
-    UserMessage::debug("TreeNodeModel::slotServerRemoveBegin -->");
+    UiLog().dbg() << "TreeNodeModel::slotServerRemoveBegin -->";
 #endif
 
     int row=data_->indexOfServer(server);
     Q_ASSERT(row >= 0);
 
 #ifdef _UI_TREENODEMODEL_DEBUG
-    UserMessage::debug("  row: " + QString::number(row).toStdString());
+    UiLog().dbg() << "  row: " << row;
 #endif
 	beginRemoveRows(QModelIndex(),row,row);
 }
@@ -932,7 +979,7 @@ void TreeNodeModel::slotServerRemoveBegin(VModelServer* server,int /*nodeNum*/)
 void TreeNodeModel::slotServerRemoveEnd(int /*nodeNum*/)
 {
 #ifdef _UI_TREENODEMODEL_DEBUG
-    UserMessage::debug("TreeNodeModel::slotServerRemoveEnd -->");
+    UiLog().dbg() << "TreeNodeModel::slotServerRemoveEnd -->";
 #endif
 
     endRemoveRows();

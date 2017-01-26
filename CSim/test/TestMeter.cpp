@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #4 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -99,6 +99,10 @@ BOOST_AUTO_TEST_CASE( test_meter )
 		}
 	}
 	BOOST_REQUIRE_MESSAGE(found_task ,"Failed to find task fc ");
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_meter.def") + ".log";
+   fs::remove(logFileName);
 
 	/// Destroy System singleton to avoid valgrind from complaining
 	System::destroy();

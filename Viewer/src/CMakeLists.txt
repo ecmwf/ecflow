@@ -47,6 +47,7 @@ set(viewer_srcs
     InfoPanelItem.cpp   
     InfoPanelHandler.cpp
     InfoProvider.cpp
+    InputEventLog.cpp
     JobItemWidget.cpp
     LabelEditor.cpp
     LimitEditor.cpp
@@ -55,6 +56,7 @@ set(viewer_srcs
     LogModel.cpp
     LogProvider.cpp
     LogServer.cpp
+    LogTruncator.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
     MenuConfigDialog.cpp
@@ -149,6 +151,7 @@ set(viewer_srcs
     TriggerView.cpp
     TriggeredScanner.cpp
     UIDebug.cpp
+    UiLog.cpp
     UpdateTimer.cpp
     UserMessage.cpp
     VAttribute.cpp
@@ -184,6 +187,7 @@ set(viewer_srcs
     VariableView.cpp
     VConfigLoader.cpp
     WhyItemWidget.cpp
+    WidgetNameProvider.cpp
     ZombieItemWidget.cpp
     ZombieModel.cpp
     TextPager/TextPagerCursor.cpp
@@ -230,10 +234,12 @@ set(viewer_moc_files AbstractNodeModel.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     InfoPanel.hpp
+    InputEventLog.hpp
     LabelEditor.hpp
     LimitEditor.hpp
     LineEdit.hpp
     LogProvider.hpp
+    LogTruncator.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
     MeterEditor.hpp

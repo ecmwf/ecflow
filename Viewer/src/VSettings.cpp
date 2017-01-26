@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,6 +11,7 @@
 #include "VSettings.hpp"
 
 #include "DirectoryHandler.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 #include <QDebug>
@@ -261,7 +262,7 @@ VComboSettings::VComboSettings(const std::string& file,const std::string& qsFile
 	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
 	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
 #ifdef _UI_SETTINGS_DEBUG
-    UserMessage::message(UserMessage::DBG,false,"VComboSettings --> fileName=" + qs_.fileName().toStdString());
+    UiLog().dbg() << "VComboSettings --> fileName=" << qs_.fileName();
 #endif
 }
 

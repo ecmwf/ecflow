@@ -119,7 +119,6 @@ void mail_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = menuBar1;
 	children[ac++] = input_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void mail_shell_c::closeCB( Widget widget, XtPointer client_data, XtPointer call_data )

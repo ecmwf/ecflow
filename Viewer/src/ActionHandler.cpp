@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -29,6 +29,7 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "CustomCommandDialog.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 
 #define _UI_ACTIONHANDLER_DEBUG
@@ -56,7 +57,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     {
 
 #ifdef _UI_ACTIONHANDLER_DEBUG
-        UserMessage::debug("ActionHandler::contextMenu --> item=" + item->name());
+        UiLog().dbg() << "ActionHandler::contextMenu --> item=" + item->name();
 #endif
     	if(item->handler() == "info_panel")
     	{

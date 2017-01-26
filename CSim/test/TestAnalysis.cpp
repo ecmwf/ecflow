@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #7 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,6 +18,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include "Simulator.hpp"
 
@@ -31,6 +32,8 @@
 
 using namespace std;
 using namespace ecf;
+
+namespace fs = boost::filesystem;
 
 
 BOOST_AUTO_TEST_SUITE( SimulatorTestSuite )
@@ -62,7 +65,6 @@ BOOST_AUTO_TEST_CASE( test_analysys )
 
       task_ptr task2 = fam->add_task("t2");
       task2->add_trigger( "t1 == complete" );
-
       //		cout << theDefs << "\n";
    }
 
@@ -73,6 +75,10 @@ BOOST_AUTO_TEST_CASE( test_analysys )
    //	cout << theDefs << "\n";
    boost::filesystem::remove("defs.depth");
    boost::filesystem::remove("defs.flat");
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_analysys.def") + ".log";
+   fs::remove(logFileName);
 
    /// Destroy singleton's to avoid valgrind from complaining
    System::destroy();

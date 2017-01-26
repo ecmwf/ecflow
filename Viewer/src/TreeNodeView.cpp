@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -27,9 +27,12 @@
 #include "PropertyMapper.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
+#include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VModelData.hpp"
 #include "VTree.hpp"
+
+#define _UI_TREENODEVIEW_DEBUG
 
 TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
 	QTreeView(parent),
@@ -37,9 +40,12 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
     model_(model),
     needItemsLayout_(false),
 	defaultIndentation_(indentation()),
-	prop_(NULL)
+    prop_(NULL),
+    setCurrentIsRunning_(false),
+    setCurrentFromExpand_(false)
 {
-	setProperty("style","nodeView");
+    setObjectName("view");
+    setProperty("style","nodeView");
 	setProperty("view","tree");
 
     expandState_=new ExpandState(this,model_);
@@ -166,15 +172,25 @@ QModelIndexList TreeNodeView::selectedList()
 void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
     QModelIndexList lst=selectedIndexes();
-    if(lst.count() > 0)
-    {
+    //When the selection was triggered from restoring (expanding) the nodes
+    //we do not want to broadcast it
+    if(lst.count() > 0 && !setCurrentFromExpand_)
+    {            
         VInfo_ptr info=model_->nodeInfo(lst.front());
         if(info && !info->isEmpty())
         {
+#ifdef _UI_TREENODEVIEW_DEBUG
+            UiLog().dbg() << "TreeNodeView::selectionChanged --> emit=" << info->path();
+#endif
             Q_EMIT selectionChanged(info);
         }
     }
+
     QTreeView::selectionChanged(selected, deselected);
+
+    //The model has to know about the selection in order to manage the
+    //nodes that are forced to be shown
+    model_->selectionChanged(lst);
 }
 
 VInfo_ptr TreeNodeView::currentSelection()
@@ -189,11 +205,35 @@ VInfo_ptr TreeNodeView::currentSelection()
 
 void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 {
-	QModelIndex idx=model_->infoToIndex(info);
+    //While the current is being selected we do not allow
+    //another setCurrent call go through
+    if(!info || setCurrentIsRunning_)
+        return;
+
+    setCurrentIsRunning_=true;
+    QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
 	{          
+#ifdef _UI_TREENODEVIEW_DEBUG
+        UiLog().dbg() << "TreeNodeView::setCurrentSelection --> " << info->path();
+#endif
         setCurrentIndex(idx);
 	}
+    setCurrentIsRunning_=false;
+}
+
+void TreeNodeView::setCurrentSelectionFromExpand(VInfo_ptr info)
+{
+    if(!info || setCurrentFromExpand_)
+        return;
+
+#ifdef _UI_TREENODEVIEW_DEBUG
+        UiLog().dbg() << "TreeNodeView::setCurrentSelectionFromExpand --> " << info->path();
+#endif
+
+    setCurrentFromExpand_=true;
+    setCurrentSelection(info);
+    setCurrentFromExpand_=false;
 }
 
 void TreeNodeView::selectFirstServer()
@@ -524,7 +564,7 @@ void TreeNodeView::slotRestoreExpand()
             }
             else
             {
-                setCurrentSelection(expandState_->selection_);
+                setCurrentSelectionFromExpand(expandState_->selection_);
             }
         }
     }
@@ -547,7 +587,7 @@ void TreeNodeView::slotSaveExpand(const VTreeNode* node)
     es->save(node);
 }
 
-//Save the expand state for the given node (it can be a server as well)
+//Restore the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
 {
     Q_FOREACH(ExpandStateTree* es,expandState_->items())
@@ -568,7 +608,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
                     }
                     else if(node->server()->realServer() == expandState_->selection_->server())
                     {
-                        setCurrentSelection(expandState_->selection_);
+                        setCurrentSelectionFromExpand(expandState_->selection_);
                         expandState_->selection_.reset();
                     }
                 }
@@ -578,103 +618,3 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         }
     }
 }
-
-
-#if 0
-
-//Save the expand state for the given node (it can be a server as well)
-void TreeNodeView::slotSaveExpand(const VNode* node)
-{
-    assert(node);
-
-    expandState_->clear();
-
-    VInfo_ptr s=currentSelection();
-    if(s)
-    {
-        if(node->server() == s->server())
-          expandState_->selection_=s;
-    }
-
-	QModelIndex idx=model_->nodeToIndex(node);
-	if(isExpanded(idx))
-	{
-		expandState_->setRoot(node->strName());
-		saveExpand(expandState_->root(),idx);
-	}
-}
-
-void TreeNodeView::saveExpand(ExpandNode *parentExpand,const QModelIndex& idx)
-{
-	for(int i=0; i < model_->rowCount(idx); i++)
-	{
-		QModelIndex chIdx=model_->index(i, 0, idx);
-
-		if(!isExpanded(chIdx))
-	        continue;
-		else
-		{
-			ExpandNode* expand=parentExpand->add(chIdx.data(Qt::DisplayRole).toString().toStdString());
-			saveExpand(expand,chIdx);
-		}
-	}
-}
-
-//Save the expand state for the given node (it can be a server as well)
-void TreeNodeView::slotRestoreExpand(const VNode* node)
-{
-	if(!expandState_->root())
-		return;
-
-	if(node->strName() != expandState_->root()->name_)
-	{
-		expandState_->clear();
-		return;
-	}
-
-	restoreExpand(expandState_->root(),node);
-
-    if(expandState_->selection_)
-    {
-        VInfo_ptr s=currentSelection();
-        if(!s)
-        {
-            expandState_->selection_->regainData();
-            currentSelection(expandState_->selection_);
-        }
-    }
-
-    expandState_->clear();
-}
-
-void TreeNodeView::restoreExpand(ExpandNode *expand,const VNode* node)
-{
-	//Lookup the mnode in the model
-	QModelIndex nodeIdx=model_->nodeToIndex(node);
-	if(nodeIdx != QModelIndex())
-	{
-		setExpanded(nodeIdx,true);
-	}
-	else
-	{
-		return;
-	}
-
-	for(int i=0; i < expand->children_.size(); i++)
-	{
-		ExpandNode *chExpand=expand->children_.at(i);
-		std::string name=chExpand->name_;
-
-		if(VNode *chNode=node->findChild(name))
-		{
-			QModelIndex chIdx=model_->nodeToIndex(chNode);
-			if(chIdx != QModelIndex())
-			{
-				//setExpanded(chIdx,true);
-				restoreExpand(chExpand,chNode);
-			}
-		}
-	}
-}
-
-#endif

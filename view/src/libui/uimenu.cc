@@ -188,7 +188,6 @@ void menu_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	children[ac++] = form_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void menu_form_c::updateCB( Widget widget, XtPointer client_data, XtPointer call_data )

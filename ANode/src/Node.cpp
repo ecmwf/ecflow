@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #305 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -201,6 +201,9 @@ void Node::suspend()
 
 void Node::begin()
 {
+   // record effect of defstatus for node changes, for verify attributes
+   if (misc_attrs_) misc_attrs_->begin();
+
    // Set the state without causing any side effects
    initState(0);
 
@@ -212,7 +215,6 @@ void Node::begin()
 
    if (lateAttr_) lateAttr_->reset();
    if (child_attrs_) child_attrs_->begin();
-   if (misc_attrs_) misc_attrs_->begin();
    for(size_t i = 0; i < limitVec_.size(); i++)   { limitVec_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
@@ -776,6 +778,10 @@ void Node::set_state(NState::State s, bool force, const std::string& additional_
 
 void Node::setStateOnly(NState::State newState, bool force, const std::string& additional_info_to_log)
 {
+   if (state_.first.state() == newState) {
+      return; // if old and new state the same dont do anything
+   }
+
    Suite* theSuite =  suite();
    const Calendar& calendar = theSuite->calendar();
 
@@ -1021,6 +1027,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       size_t secondPercentPos = cmd.find( micro, firstPercentPos + 1 );
       if ( secondPercentPos == string::npos ) break;
 
+      pos = 0;
       if ( secondPercentPos - firstPercentPos <= 1 ) {
          // handle %% with no characters in between, skip over
          // i.e to handle "printf %%02d %HOUR:00%" --> "printf %02d 00"   i.e if HOUR not defined
@@ -1028,7 +1035,6 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
          double_micro_found = true;
          continue;
       }
-      else pos = 0;
 
       string percentVar( cmd.begin() + firstPercentPos+1, cmd.begin() + secondPercentPos );
 #ifdef DEBUG_S
@@ -1045,13 +1051,13 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       bool generated_variable = false;
       if ( percentVar.find("ECF_") != std::string::npos) {
          if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_JOB())     != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_JOBOUT())  != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_PORT())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NODE())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_HOST())    != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_JOB())     != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_JOBOUT())  != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
       }
 
       // First search user variable (*ONLY* set user edit's the script)
@@ -1060,7 +1066,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       // If we fail to find the variable we return false.
       // Note: When a variable is found, it can have an empty value  which is still valid
       std::string varValue;
-      if (search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
+      if (!user_edit_variables.empty() && search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
       else if (generated_variable && find_parent_gen_variable_value(percentVar,varValue)) {
@@ -1081,7 +1087,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
             cout << "   var " << var << "\n";
 #endif
 
-            if (search_user_edit_variables(var,varValue,user_edit_variables)) {
+            if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
 #ifdef DEBUG_S
                cout << "   user var value = " << varValue << "\n";
 #endif
@@ -1245,6 +1251,11 @@ bool Node::variable_dollar_subsitution(std::string& cmd)
       }
 
       cmd.replace( firstPos, secondPos - firstPos , envValue );
+
+      if (envValue.find(env) != std::string::npos) {
+         // infinite loop
+         break;
+      }
    }
    return true;
 }
@@ -1435,7 +1446,7 @@ std::ostream& Node::print(std::ostream& os) const
          }
       }
    }
-   repeat_.print(os);
+   repeat_.print(os);  // if repeat is empty print(..) does nothing
 
    BOOST_FOREACH(const Variable& v, varVec_ )       { v.print(os); }
 
@@ -1941,7 +1952,6 @@ size_t Node::position() const
    return std::numeric_limits<std::size_t>::max();
 }
 
-
 void Node::gen_variables(std::vector<Variable>& vec) const
 {
    if (!repeat_.empty()) {
@@ -1957,9 +1967,7 @@ const Variable& Node::findGenVariable(const std::string& name) const
 
 void Node::update_repeat_genvar() const
 {
-   if (!repeat_.empty()) {
-      repeat_.update_repeat_genvar();
-   }
+   repeat_.update_repeat_genvar();  // if repeat_ is empty update_repeat_genvar() does nothing
 }
 
 void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const

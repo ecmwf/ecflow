@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,14 +13,13 @@
 #include <QDebug>
 
 #include "NodeQueryOption.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VAttributeType.hpp"
 #include "VSettings.hpp"
 
 int NodeQuery::defaultMaxNum_=50000;
 
-#define _UI_NODEQUERY_DEBUG
-
+//#define _UI_NODEQUERY_DEBUG
  
 QString NodeQueryAttrGroup::query() const
 {
@@ -56,7 +55,7 @@ bool NodeQueryVarAttrGroup::hasType(VAttributeType* t) const
             {
                 QString v=op->valueAsString();
 #ifdef _UI_NODEQUERY_DEBUG
-                UserMessage::qdebug("NodeQueryVarAttrGroup::hasType  var_type=" + v);
+                UiLog().dbg() << "NodeQueryVarAttrGroup::hasType  var_type=" << v.toStdString();
 #endif
                 if(v == "any")
                     return true;
@@ -80,7 +79,7 @@ NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
 {
 
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("NodeQuery::NodeQuery -->");
+    UiLog().dbg() << "NodeQuery::NodeQuery -->";
 #endif
 
     //Build options from defs. Options store the actual query settings. They are
@@ -92,7 +91,7 @@ NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
 #endif
 
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("<-- NodeQuery::NodeQuery");
+    UiLog().dbg() << "<-- NodeQuery";
 #endif
 }
 
@@ -140,7 +139,7 @@ void  NodeQuery::setName(const std::string& name)
 bool NodeQuery::hasServer(const std::string& name) const
 {
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("NodeQuery::hasServer -->");
+    UiLog().dbg() << "NodeQuery::hasServer -->";
     qDebug() << "   servers=" << servers_;
 #endif
 
@@ -257,7 +256,7 @@ NodeQueryListOption* NodeQuery::stateOption() const
 void NodeQuery::buildQueryString()
 {
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("NodeQuery::buildQueryString -->");
+    UiLog().dbg() << "NodeQuery::buildQueryString -->";
 #endif
 
     extQuery_.clear();
@@ -403,7 +402,7 @@ void NodeQuery::buildQueryString()
 
 
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("<-- NodeQuery::buildQueryString");
+    UiLog().dbg() << "<-- buildQueryString";
 #endif
 }
 

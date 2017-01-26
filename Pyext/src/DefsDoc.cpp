@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #73 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -766,23 +766,42 @@ const char* DefsDoc::check()
             ;
 }
 
-const char* DefsDoc::simulate()
-{
+const char* DefsDoc::simulate() {
    return
-            "Simulates a :term:`suite definition` for 1 year:\n\n"
-            "Will disable infinite repeats at the suite level. i.e repeat day\n"
-            "This allows simulation to progress faster.\n"
-            "By default will run simulation for a year. If the simulation does not complete\n"
-            "creates  .flat and .depth files. This provides clues as to the state of the definition\n"
-            "at the end of the simulation\n"
-            "\nUsage::\n\n"
-            "   defs = Defs('my.def')        # specify the defs we want to simulate\n"
-            "   ....\n"
-            "   theResults = defs.simulate()\n"
-            "   print theResults\n"
-            ;
+         "Simulates a suite definition, allowing you predict/verify the behaviour of your suite in few seconds\n\n"
+         "The simulator will analyse the definition, and simulate the ecflow server.\n"
+         "Allowing time dependencies that span several months, to be simulated in a few seconds.\n"
+         "Ecflow allows the use of verify attributes. This example show how we can verify the number of times\n"
+         "a task should run, given a start(optional) and end time(optional).\n"
+         "\n"
+         "suite cron3             # use real clock otherwise clock starts when the simulations starts.\n"
+         "  clock real  1.1.2006  # define a start date for deterministic behaviour\n"
+         "  endclock   13.1.2006  # When to finish. end clock is *only* used for the simulator\n"
+         "  family cronFamily\n"
+         "    task t\n"
+         "      cron -d 10,11,12   10:00 11:00 01:00  # run on 10,11,12 of the month at 10am and 11am\n"
+         "      verify complete:6                     # task should complete 6 times between 1.1.2006 -> 13.1.2006\n"
+         "  endfamily\n"
+         "endsuite\n\n"
+         "Please note, for deterministic behaviour, the start and end clock should be specified.\n"
+         "However if no 'endclock' is specified the simulation will assume the following defaults.\n"
+         "    No time dependencies: 24 hours\n"
+         "    time || today       : 24 hours\n"
+         "    day                 : 1 week\n"
+         "    date                : 1 month\n"
+         "    cron                : 1 year\n"
+         "    repeat              : 1 year\n"
+         "If there no time dependencies with an minute resolution, then the simulator will by default\n"
+         "use 1 hour resolution. This needs to be taken into account when specifying the verify attribute\n"
+         "If the simulation does not complete it creates  defs.flat and  defs.depth files.\n"
+         "This provides clues as to the state of the definition at the end of the simulation\n"
+         "\nUsage::\n\n"
+         "   defs = Defs('my.def')        # specify the defs we want to simulate\n"
+         "   ....\n"
+         "   theResults = defs.simulate()\n"
+         "   print theResults\n"
+         ;
 }
-
 
 const char* DefsDoc::get_server_state()
 {

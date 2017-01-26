@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #6 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -81,6 +81,10 @@ BOOST_AUTO_TEST_CASE( test_today )
    bool result = simulator.run(theDefs, TestUtil::testDataLocation("test_today.def"), errorMsg);
 
    BOOST_CHECK_MESSAGE(result,errorMsg);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_today.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_today_time_series )
@@ -114,6 +118,10 @@ BOOST_AUTO_TEST_CASE( test_today_time_series )
    Simulator simulator;
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_today_time_series.def") , errorMsg),errorMsg);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_today_time_series.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_today_time_and_date )
@@ -153,6 +161,10 @@ BOOST_AUTO_TEST_CASE( test_today_time_and_date )
    Simulator simulator;
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_today_time_and_date.def"),errorMsg),errorMsg);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_today_time_and_date.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

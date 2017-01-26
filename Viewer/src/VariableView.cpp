@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,6 +14,7 @@
 #include <QImageReader>
 #include <QItemSelectionModel>
 #include <QPainter>
+#include <QHeaderView>
 
 #include "IconProvider.hpp"
 #include "VariableModel.hpp"
@@ -25,7 +26,7 @@
 //
 //========================================================
 
-VariableDelegate::VariableDelegate(QWidget *parent) : QStyledItemDelegate(parent)
+VariableDelegate::VariableDelegate(QTreeView *parent) : QStyledItemDelegate(parent), view_(parent)
 {
     selectPen_=QPen(QColor(8,117,182));
     selectBrush_=QBrush(QColor(65,139,212));
@@ -78,6 +79,8 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     	{
             painter->fillRect(bgRect,bg);
     	}
+        //alternating row colour?
+        else {}
     }
 
     //Paint selection. This should be transparent.
@@ -87,12 +90,12 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         QRect selectRect;
         if(hasChild)
         {
-            selectRect=option.rect.adjusted(0,1,0,-1);
+            selectRect=bgRect.adjusted(0,1,0,-1);
             painter->fillRect(selectRect,selectBrushBlock_);
         }
         else
         {
-            selectRect=option.rect.adjusted(0,1,0,-1);
+            selectRect=bgRect.adjusted(0,1,0,-1);
 
             //For the first column we extend the selection
             //rect to left edge.
@@ -253,6 +256,14 @@ QSize VariableDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 
 	size+=QSize(0,2);
 
+    //We need to starcth the second column to the right edge of the viewport
+    if(index.column() == 1)
+    {
+        int w1=view_->header()->sectionSize(0);
+        int w=view_->viewport()->size().width();
+        if(w1+size.width() < w)
+            size.setWidth(w-w1+1);
+    }
     return size;
 }
 
@@ -272,7 +283,7 @@ VariableView::VariableView(QWidget* parent) : TreeView(parent)
 	setRootIsDecorated(true);
 	setAllColumnsShowFocus(true);
 	setUniformRowHeights(true);
-	setAlternatingRowColors(true);
+    //setAlternatingRowColors(true);
     setSortingEnabled(true);
 
 	//Context menu
@@ -302,16 +313,3 @@ void VariableView::drawBranches(QPainter* painter,const QRect& rect,const QModel
 		QTreeView::drawBranches(painter,rect,index);
 	}
 }
-
-/*
-void VariableView::slotSelectItem(const QModelIndex&)
-{
-
-}
-
-void VariableView::reload(VInfo_ptr info)
-{
-	//model_->setData(info);
-	//expandAll();
-}
-*/

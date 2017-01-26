@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #135 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -972,7 +972,7 @@ bool NodeContainer::operator==(const NodeContainer& rhs) const
             }
 
             Family* family = nodeVec_[i]->isFamily(); LOG_ASSERT( family, "" );
-            if ( !( *family == *rhs_family )) {
+            if ( family/*keep clang happy*/ && !( *family == *rhs_family )) {
 #ifdef DEBUG
                if (Ecf::debug_equality()) {
                   std::cout << "NodeContainer::operator==  if ( !( *family == *rhs_family )) " << absNodePath() << "\n";

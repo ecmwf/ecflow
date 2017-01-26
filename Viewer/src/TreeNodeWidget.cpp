@@ -1,6 +1,6 @@
 /***************************** LICENSE START ***********************************
 
- Copyright 2015 ECMWF and INPE. This software is distributed under the terms
+ Copyright 2009-2017 ECMWF and INPE. This software is distributed under the terms
  of the Apache License version 2.0. In applying this license, ECMWF does not
  waive the privileges and immunities granted to it by virtue of its status as
  an Intergovernmental Organization or submit itself to any jurisdiction.
@@ -21,6 +21,7 @@
 #include "VFilter.hpp"
 #include "VConfig.hpp"
 #include "VSettings.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include "FilterWidget.hpp"
 
@@ -98,6 +99,8 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	//The node status filter is exposed via a menu. So we need a reference to it.
 	states_=filterDef_->nodeState();
 
+    viewHolder_->setObjectName("h");
+    WidgetNameProvider::nameChildren(this);
 }
 
 TreeNodeWidget::~TreeNodeWidget()

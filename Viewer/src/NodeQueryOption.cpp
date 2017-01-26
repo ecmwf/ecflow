@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,7 +16,7 @@
 #include <QDebug>
 
 #include "NodeQuery.hpp"
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 #include "VAttributeType.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
@@ -97,21 +97,21 @@ NodeQueryOption::NodeQueryOption(VProperty* p) : ignoreIfAny_(false)
 void NodeQueryOption::build(NodeQuery* query)
 {
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("NodeQuery::build -->");
+    UiLog().dbg() << "NodeQueryOption::build -->";
 #endif
 
     //Node query part
     VProperty* prop=VConfig::instance()->find("node_query");
     Q_ASSERT(prop);
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("   load node_query");
+    UiLog().dbg() << " load node_query";
 #endif
     for(int i=0; i < prop->children().size(); i++)
     {
         VProperty *p=prop->children().at(i);
         QString type=p->param("type");
 #ifdef _UI_NODEQUERY_DEBUG
-        UserMessage::qdebug("   name=" + p->name() + " type=" + type);
+        UiLog().dbg() << "  name=" << p->strName() << " type=" << type.toStdString();
 #endif
         NodeQueryOption* op=NodeQueryOptionFactory::create(p);
         Q_ASSERT(op);
@@ -122,7 +122,7 @@ void NodeQueryOption::build(NodeQuery* query)
     prop=VConfig::instance()->find("attribute_query");
     Q_ASSERT(prop);
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("   load attribute_query");
+    UiLog().dbg() << " load attribute_query";
 #endif
     for(int i=0; i < prop->children().size(); i++)
     {
@@ -134,7 +134,7 @@ void NodeQueryOption::build(NodeQuery* query)
         else
         {
 #ifdef _UI_NODEQUERY_DEBUG
-            UserMessage::qdebug("   name=" + p->name());
+            UiLog().dbg() << "  name=" << p->strName();
 #endif
             //Q_ASSERT(def_["attribute"]->values().contains(p->name()));
 
@@ -163,7 +163,7 @@ void NodeQueryOption::build(NodeQuery* query)
             Q_FOREACH(VProperty* ch,p->children())
             {
 #ifdef _UI_NODEQUERY_DEBUG
-                UserMessage::qdebug("   option: name=" + ch->name() + " type=" + ch->param("type"));
+                UiLog().dbg() << "  option: name=" << ch->strName() << " type=" << ch->param("type").toStdString();
 #endif
                 NodeQueryOption *op=NodeQueryOptionFactory::create(ch);
                 query->options_[ch->name()]=op;
@@ -179,7 +179,7 @@ void NodeQueryOption::build(NodeQuery* query)
 
 
 #ifdef _UI_NODEQUERY_DEBUG
-    UserMessage::debug("<-- NodeQueryOption::build");
+    UiLog().dbg() << "<-- build";
 #endif
 }
 

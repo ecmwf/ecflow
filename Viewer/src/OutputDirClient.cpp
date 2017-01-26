@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,7 +12,7 @@
 
 #include <QDebug>
 
-#include "UserMessage.hpp"
+#include "UiLog.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -44,8 +44,8 @@ void OutputDirClient::slotCheckTimeout()
 
 void OutputDirClient::slotConnected()
 {
-    UserMessage::message(UserMessage::DBG,false,"OutputDirClient::slotConnected() connected to " +
-                         soc_->peerName().toStdString());
+    UiLog().dbg() << "OutputDirClient::slotConnected() connected to " <<
+                         soc_->peerName();
 
 	soc_->write("list ",5);
 	soc_->write(remoteFile_.c_str(),remoteFile_.size());
@@ -55,7 +55,7 @@ void OutputDirClient::slotConnected()
 void OutputDirClient::slotError(QAbstractSocket::SocketError err)
 {
 #ifdef _UI_OUTPUTDIRCLIENT_DEBUG
-    UserMessage::debug("OutputDirClient::slotError --> " + soc_->errorString().toStdString());
+    UiLog().dbg() << "OutputDirClient::slotError --> " << soc_->errorString();
 #endif
 	switch(err)
 	{
@@ -63,14 +63,14 @@ void OutputDirClient::slotError(QAbstractSocket::SocketError err)
     case QAbstractSocket::RemoteHostClosedError:
 
 #ifdef _UI_OUTPUTDIRCLIENT_DEBUG
-        UserMessage::debug("   RemoteHostClosedError ");
+        UiLog().dbg() << "   RemoteHostClosedError ";
 #endif
         //qDebug() << "remote host closed";
         //If no data was transferred we think it is a real error.
         if(data_.isEmpty())
         {
 #ifdef _UI_OUTPUTDIRCLIENT_DEBUG
-            UserMessage::debug("   --> data is empty: file transfer failed");
+            UiLog().dbg() << "   --> data is empty: file transfer failed";
 #endif
             break;
         }
@@ -78,7 +78,7 @@ void OutputDirClient::slotError(QAbstractSocket::SocketError err)
         else
         {
 #ifdef _UI_OUTPUTDIRCLIENT_DEBUG
-            UserMessage::debug("   --> has data: file transfer succeeded");
+            UiLog().dbg() << "   --> has data: file transfer succeeded";
 #endif
             if(dir_)
             {

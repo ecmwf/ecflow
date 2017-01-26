@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #57 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -151,11 +151,14 @@ void AstRoot::addChild( Ast* n )
 }
 
 std::ostream& AstRoot::print( std::ostream& os ) const {
-	if (left_->isRoot()) {
-		Indentor in;
- 		left_->print( os );
-	}
-	else left_->print( os );
+   // left_ should not be NULL, but keep clang static analyser happy
+   if (left_) {
+      if (left_->isRoot()) {
+         Indentor in;
+         left_->print( os );
+      }
+      else left_->print( os );
+   }
 
 	if (right_) { // right_ is empty for Not
 		if (right_->isRoot()) {

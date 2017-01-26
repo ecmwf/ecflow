@@ -1,0 +1,72 @@
+
+Often we will have suite definitions where it not easy to verify how many times a Node will run. Also at other times we can end up creating suites with impossible triggers.
+To allow you too verify your understanding of how a suite should behave, ecflow allows simulation of a suite definition. For the simulation to work, we need to
+add some verification attributes. When the simulation completes it checks the numbers of times the node completes against the verification attributes.
+Here are a few examples. Notice that these example use a clock when dealing with time based attributes.
+This allows allows a known starting point, allowing for a deterministic behaviour.(Otherwise suite clock is started, at simulation run time)
+
+
+suite suite
+  clock real 12.10.2009        # 12 October 2009 was a Monday. When the simulation starts
+  family family
+     task t                     
+       time 00:30 23:59 04:00  # should run 6 times 00:30 4:30 8:30 12:30 16:30 20:30
+       verify complete:6       # Verify that task t to completes 6 times.
+  endfamily
+endsuite
+
+suite suite
+  clock real 5.1.2017
+  family family
+    task t
+      date 05.01.2017     
+      date 06.01.2017
+      time 00:30 23:59 04:00  
+      verify complete:12
+  endfamily
+endsuite
+
+suite cron             
+  clock real  1.1.2006 # Define a start date for deterministic simulation 
+  family cronFamily
+    task t
+      cron -d 15,16  -m 1 10:00 11:00 01:00  # run 15,16 January at 10 and 11am    
+      verify complete:4    
+   endfamily
+endsuite
+
+suite dead_lock
+  family family
+    task t1
+       trigger t2 == complete
+       verify complete:1   
+    task t2
+       trigger t1 == complete
+       verify complete:1   
+  endfamily
+endsuite
+
+
+The simulator is only available with the ecflow python api.
+
+The example above showed how to add a verify attribute using the Text method. To add the verify attribute using python you can use:
+
+task.add_verify( ecflow.Verify(ecflow.State.complete, 6) ) # this is equivalent to  'verify complete:6'
+
+Take the suite definition examples above and paste into a file. (say tmp.def).  Then create a file simulate.py and run it. If your your simulation worked as expected there will be no output.
+
+import ecflow
+defs = ecflow.Defs("tmp.def")
+print defs.simulate()
+
+
+For more information on the simulator see the user manual( Debugging definition files)
+What to do
+
+    Play with the simulator with the examples above. When happens when we simulate the example with the deadlock.
+    In the previous example, we used repeat. Work out how many times the task should run. ( comment out the other families i.e. f1,f2,f3)
+    Add the verify attributes . How many times should the task complete.
+
+    Invoke the simulator, to verify it behaved as expected. Note: you can directly call the simulator using your existing python code.  Simply add
+
+    print defs.simulate()

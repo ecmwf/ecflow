@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -42,7 +42,7 @@ VAttribute::~VAttribute()
     totalAttrNum--;
 }
 
-VAttribute* VAttribute::clone()
+VAttribute* VAttribute::clone() const
 {
     return new VAttribute(parent_,id_);
 }
@@ -141,11 +141,17 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
 
 QString VAttribute::name() const
 {
+    std::string s;
+    value("name",s);
+    return QString::fromStdString(s);
+
+#if 0
     QStringList d=data();
     if(d.count() >= 2)
        return d[1];
 
     return QString();
+#endif
 }
 
 std::string VAttribute::strName() const
@@ -203,6 +209,26 @@ VAttribute* VAttribute::makeFromId(VNode* n,int id)
     int idx=idToTypeIndex(id);
     return NULL;
     //return t->getSearchData(n,idx,d);
+}
+
+VAttribute* VAttribute::make(VNode *parent,QStringList data)
+{
+    assert(parent);
+    if(data.count() >=2)
+    {
+        std::string type=data[0].toStdString();
+        VAttributeType *t=VAttributeType::find(type);
+        assert(t);
+
+        int idx=t->searchKeyToDataIndex("name");
+        if(idx != -1 && idx < data.count())
+        {
+            std::string name=data[idx].toStdString();
+            VItemTmp_ptr item=t->item(parent,name);
+            return (item)?item->attribute()->clone():NULL;
+        }
+    }
+    return 0;
 }
 
 int VAttribute::indexToId(VAttributeType* t,int idx)

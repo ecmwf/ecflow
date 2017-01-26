@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #5 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -110,6 +110,10 @@ BOOST_AUTO_TEST_CASE( test_autocancel_ast_node_reset )
       theDefs.getAllAstNodes(theSet);
       BOOST_CHECK_MESSAGE(theSet.empty(),"Expected to have 0 AST nodes in trigger/complete expressions but found " << theSet.size());
    }
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_autocancel_ast_node_reset.def") + ".log";
+   fs::remove(logFileName);
 }
 
 
@@ -155,6 +159,10 @@ BOOST_AUTO_TEST_CASE( test_autocancel_suite )
 
    // make sure autocancel deletes the suite.
    BOOST_CHECK_MESSAGE(theDefs.suiteVec().size() == 0,"Expected to have 0 suites but found " << theDefs.suiteVec().size());
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_autocancel_suite.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_autocancel_family_and_task )
@@ -214,6 +222,10 @@ BOOST_AUTO_TEST_CASE( test_autocancel_family_and_task )
    std::vector<Family*> famVec;
    theDefs.getAllFamilies(famVec);
    BOOST_CHECK_MESSAGE(famVec.size() == 0,"Expected to have 0 families but found " << famVec.size() << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_autocancel_family_and_task.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_autocancel_task )
@@ -267,6 +279,10 @@ BOOST_AUTO_TEST_CASE( test_autocancel_task )
 
    BOOST_CHECK_MESSAGE(famVec.size() == 3,"Expected to have 3 families but found " << famVec.size());
    BOOST_CHECK_MESSAGE(task_vec.size() == 0,"Expected to have 0 tasks but found " << task_vec.size());
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_autocancel_task.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_two_autocancel_in_hierarchy )
@@ -300,6 +316,10 @@ BOOST_AUTO_TEST_CASE( test_two_autocancel_in_hierarchy )
 
    BOOST_CHECK_MESSAGE(famVec.size() == 0,"Expected to have 0 families but found " << famVec.size());
    BOOST_CHECK_MESSAGE(task_vec.size() == 0,"Expected to have 0 tasks but found " << task_vec.size());
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_two_autocancel_in_hierarchy.def") + ".log";
+   fs::remove(logFileName);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

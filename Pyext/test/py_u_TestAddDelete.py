@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2016 ECMWF.
+# Copyright 2009-2017 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -479,6 +479,27 @@ if __name__ == "__main__":
     s0.add_clock(ecflow.Clock(1, 1, 2010, False))
     assert s0.get_clock() != None, "Expected clock"
 
+    #===========================================================================
+    # end clock, used in simulator only, not persisted
+    #===========================================================================
+    clock = ecflow.Clock(1, 1, 2010, False)     # day,month, year, hybrid
+    clock.set_gain(1, 10, True)                 # True means positive gain
+    suite = ecflow.Suite("suite")
+    suite.add_end_clock(clock)
+    
+    clock = ecflow.Clock(1, 1, 2011, True)       # day,month, year, hybrid
+    clock.set_gain_in_seconds(12, True)
+    s1 = ecflow.Suite("s1")
+    s1.add_end_clock(clock)
+    
+    print("#===========================================================================")
+    print("# get end clock")
+    print("#===========================================================================")
+    s0 = ecflow.Suite("s0")
+    assert s0.get_end_clock() == None, "Expected no end clock"
+    
+    s0.add_end_clock(ecflow.Clock(1, 1, 2010, False))
+    assert s0.get_end_clock() != None, "Expected end clock"
     #===========================================================================
     # Add zombie. Note we can *NOT* add two zombie attributes of the same ZombieType
     #===========================================================================
