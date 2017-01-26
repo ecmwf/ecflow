@@ -27,9 +27,15 @@ const int boxSize = 3;
 
 namespace status {
 const char *status_name[10]= { 
-  (char*)"unknown", (char*)"suspended", (char*)"complete", (char*)"queued",
-  (char*)"submitted", (char*)"active", (char*)"aborted", (char*)"shutdown",  
-  (char*)"halted"  ,  NULL };
+  (char*)"unknown", 
+  (char*)"suspended", 
+  (char*)"complete", 
+  (char*)"queued",
+  (char*)"submitted", 
+  (char*)"active", 
+  (char*)"aborted", 
+  (char*)"shutdown",  
+  (char*)"halted",  NULL };
 }
 
 static event_sorter* sorter = 0;
@@ -184,7 +190,7 @@ void log_event::size(Widget,XRectangle* r)
 
 void log_event::draw(Widget w,XRectangle* r)
 {
-	GC gc  = gui::blackGC();
+	GC gc = gui::blackGC();
 	XFillRectangles(XtDisplay(w), XtWindow(w), gc, r, 1); // was comment
 	XDrawLine(XtDisplay(w), XtWindow(w), gc,
 		r->x,
@@ -210,8 +216,9 @@ class status_event : public log_event {
 	virtual int status() { return status_; }
 
 public:
-	status_event(node* n,const DateTime& time,int status):
-		log_event(n,time), status_(status) {}
+  status_event(node* n,const DateTime& time,int status)
+    : log_event(n,time), status_(status)
+  {}
 };
 
 char* status_event::text(char* buf)
@@ -241,12 +248,12 @@ char* event_event::text(char* buf)
 //===========================================
 void event_event::draw(Widget w,XRectangle* r)
 {
-	if(set_)
-		XFillRectangles(XtDisplay(w),XtWindow(w),
-			gui::blueGC(),r,1);
-	else
-		XDrawRectangles(XtDisplay(w),XtWindow(w),
-			gui::blueGC(),r,1);
+  if(set_)
+    XFillRectangles(XtDisplay(w),XtWindow(w),
+		    gui::blueGC(),r,1);
+  else
+    XDrawRectangles(XtDisplay(w),XtWindow(w),
+		    gui::blueGC(),r,1);
 }
 
 //===========================================

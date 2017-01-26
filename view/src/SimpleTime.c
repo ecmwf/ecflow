@@ -291,7 +291,6 @@ static void Initialize(SimpleTimeWidget request, SimpleTimeWidget new)
 	new->simpletime.arcs       = 0;
 
 	time_out(new,0);
-
 }
 
 static void Destroy(SimpleTimeWidget w)
@@ -305,12 +304,11 @@ static Boolean SetValues(SimpleTimeWidget current,SimpleTimeWidget request,
 	SimpleTimeWidget  new)
 {
 	int       redraw = FALSE;
-
 	/*
-  * If the minimum spacing has changed, recalculate the
-  * simpletime layout. new_layout() does a redraw, so we don't
-  * need SetValues to do another one.
-  */
+	 * If the minimum spacing has changed, recalculate the
+	 * simpletime layout. new_layout() does a redraw, so we don't
+	 * need SetValues to do another one.
+	 */
 
 	if (new->simpletime.v_min_space != current->simpletime.v_min_space ||
 	    new->simpletime.second_per_pixel != current->simpletime.second_per_pixel )
@@ -345,9 +343,9 @@ static void line_in(SimpleTimeWidget w,int x1,int y1,int x2,int y2)
 
 /*static void line_out(SimpleTimeWidget w,int x1,int y1,int x2,int y2)
 {
-	XDrawLine(XtDisplay(w), XtWindow(w), w->simpletime.gc,
-	    x1,y1,x2,y2);
-	    } */
+XDrawLine(XtDisplay(w), XtWindow(w), w->simpletime.gc,
+x1,y1,x2,y2);
+} */
 
 static void Redisplay (SimpleTimeWidget w, XEvent *event, Region region)
 {
@@ -728,11 +726,11 @@ void TimeShowTime(Widget _w,DateTime dt,XEvent* ev)
 
 void TimeEventTime(Widget _w,XEvent* e,DateTime *dt)
 {
-	int x = e->xbutton.x;
-	int d,t;
-	time_of((SimpleTimeWidget)_w,x,&d,&t);
-	dt->date = julian_to_date(d);
-	dt->time = sec_to_time(t);
+  int x = e->xbutton.x;
+  int d,t;
+  time_of((SimpleTimeWidget)_w,x,&d,&t);
+  dt->date = julian_to_date(d);
+  dt->time = sec_to_time(t);
 }
 
 int TimeDiff(DateTime dt1,DateTime dt2)
@@ -752,16 +750,16 @@ int TimeDiff(DateTime dt1,DateTime dt2)
 
 void *TimeFindByY(Widget _w,XEvent *ev)
 {
-	SimpleBaseWidget w = (SimpleBaseWidget)_w;
-	int i;
-	for(i = 0; i < w->simplebase.count;i++)
-	{
-		NodeStruct *n = w->simplebase.nodes + i;
-		if(n->managed)
-			if(
-			/* ev->xbutton.x >= n->r.x && ev->xbutton.x <= n->r.x + n->r.width && */
-			    ev->xbutton.y >= n->r.y && ev->xbutton.y <= n->r.y + n->r.height)
-				return n->user_data;
-	}
-	return NULL;
+  SimpleBaseWidget w = (SimpleBaseWidget)_w;
+  int i;
+  for(i = 0; i < w->simplebase.count;i++)
+    {
+      NodeStruct *n = w->simplebase.nodes + i;
+      if(n->managed)
+	if(
+	   /* ev->xbutton.x >= n->r.x && ev->xbutton.x <= n->r.x + n->r.width && */
+	   ev->xbutton.y >= n->r.y && ev->xbutton.y <= n->r.y + n->r.height)
+	  return n->user_data;
+    }
+  return NULL;
 }

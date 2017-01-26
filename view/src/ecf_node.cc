@@ -341,7 +341,6 @@ void ecf_concrete_node<Alias>::make_subtree()
 template<>
 void ecf_concrete_node<Node>::make_subtree()
 {
-
    if (!owner_) return;
    Node* n = owner_;
 
@@ -788,7 +787,6 @@ void ecf_concrete_node<Suite>::update( const Node* n, const std::vector<ecf::Asp
    const_cast<Node*>(n)->set_graphic_ptr(xnode()); /* ??? */
 
    if (is_reset(aspect)) {
-
       Updating::set_full_redraw();
       return;
    }

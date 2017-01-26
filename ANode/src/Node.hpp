@@ -593,7 +593,7 @@ protected:
    friend class Defs;
    friend class Family;
    friend class NodeContainer;
-   virtual bool doDeleteChild(Node* child) { return false;}
+   virtual bool doDeleteChild(Node* ) { return false;}
 
 
    /// This function is called as a part of handling state change.

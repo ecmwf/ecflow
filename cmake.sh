@@ -287,7 +287,8 @@ $ecbuild $source_dir \
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
-	$make_arg
+	$make_arg 
+	# $make_arg VERBOSE=1
 	exit 0
 fi
 

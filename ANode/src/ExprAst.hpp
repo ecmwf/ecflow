@@ -47,7 +47,7 @@ public:
 	virtual bool evaluate() const { assert(false); return false;}
 	virtual bool empty() const { return true; }
    virtual int value() const { assert(false); return 0;} // only valid for leaf or operators
-   virtual bool check(std::string& error_msg) const { return true; } // check divide or modulo by zero
+   virtual bool check(std::string& ) const { return true; } // check divide or modulo by zero
 
    virtual std::ostream& print(std::ostream&) const = 0;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const = 0;    // used for test

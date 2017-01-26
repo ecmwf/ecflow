@@ -62,7 +62,8 @@ public:
  	virtual node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const;
    virtual node_ptr find_node_up_the_tree(const std::string& name) const;
 
-	virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode);
+	virtual node_ptr
+ find_relative_node(const std::vector<std::string>& pathToNode);
 	void find_closest_matching_node( const std::vector< std::string >& pathToNode, int indexIntoPathNode, node_ptr& closest_matching_node );
 
 	family_ptr findFamily(const std::string& familyName) const;

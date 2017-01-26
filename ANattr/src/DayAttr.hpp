@@ -83,8 +83,8 @@ private:
 };
 
 // This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(DayAttr, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(DayAttr,boost::serialization::track_never);
+BOOST_CLASS_IMPLEMENTATION(DayAttr, boost::serialization::object_serializable)
+BOOST_CLASS_TRACKING(DayAttr,boost::serialization::track_never)
 
 
 #endif

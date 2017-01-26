@@ -375,7 +375,7 @@ public:
    virtual bool compare(RepeatBase*) const;
    virtual bool valid() const { return valid_;}
    virtual std::string valueAsString() const { return std::string(); } ;
-   virtual std::string value_as_string(int index) const { return std::string(); }
+   virtual std::string value_as_string(int ) const { return std::string(); }
    virtual void setToLastValue() { /* do nothing  ?? */ }
    virtual void reset() {  valid_ = true;  }
    virtual void change(const std::string& /*newValue*/) { /* do nothing */ }
