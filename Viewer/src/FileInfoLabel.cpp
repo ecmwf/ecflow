@@ -45,7 +45,10 @@ FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent)
 void FileInfoLabel::update(VReply* reply,QString extraText)
 {
 	if(!reply)
-		clear();
+    {
+        clear();
+        return;
+    }
 
 	QString labelText;
 	QString ttText;
@@ -70,8 +73,6 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	//Name
 	labelText="<b><font color=" + col.name() + ">File: </font></b>";
 	labelText+="<font color=" +colText.name() + ">" + fileName + "</font>";
-
-	//VFileInfo f(fileName);
 
 	s="";
 

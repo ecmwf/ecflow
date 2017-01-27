@@ -266,8 +266,11 @@ void VParamFilterMenu::reload()
 
 void VParamFilterMenu::checkActionState()
 {
-    selectAllAc_->setEnabled(!filter_->isComplete());
-    unselectAllAc_->setEnabled(!filter_->isEmpty());
+    if(filter_)
+    {
+        selectAllAc_->setEnabled(!filter_->isComplete());
+        unselectAllAc_->setEnabled(!filter_->isEmpty());
+    }
 }
 
 //===========================================

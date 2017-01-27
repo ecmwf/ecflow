@@ -354,7 +354,8 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
     painter->setBrush(QColor(230,230,230));
     painter->drawRect(progRect.adjusted(0,0,-progRect.width()*0.4,0));
 #endif
-	int currentRight=itemRect.left();
+
+    int currentRight=itemRect.left();
 
     NodeShape stateShape;
     stateShape.col_=index.data(Qt::BackgroundRole).value<QColor>();

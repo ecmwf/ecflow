@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -47,7 +47,7 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
 
 	//Build context menu
 	zombieView->addAction(actionRescue);
-	zombieView->addAction(actionFoboff);
+    zombieView->addAction(actionFoboff);
 	zombieView->addAction(actionKill);
 	zombieView->addAction(actionTerminate);
 	zombieView->addAction(actionDelete);
@@ -110,48 +110,6 @@ void ZombieItemWidget::updateState(const FlagSet<ChangeFlag>&)
 {
     checkActionState();
 }
-
-/*
-void ZombieItemWidget::saveSelection()
-{
-	QModelIndexList lst=zombieView->selectionModel()->selectedRows(0);
-	lastSelection_.clear();
-
-	if(!lst.isEmpty())
-	{
-		std::vector<std::string> paths;
-		Q_FOREACH(QModelIndex idx,lst)
-		{
-			lastSelection_.push_back(model_->data(idx,Qt::DisplayRole).toString().toStdString());
-		}
-	}
-}
-
-void ZombieItemWidget::resetSelection()
-{
-	Q_FOREACH(QString s,lastSelection_)
-	{
-
-
-			QModelIndex idx,lst)
-	{
-		lastSelection_.push_back(model_->data(idx,Qt::DisplayRole).toString().toStdString());
-	}
-
-
-	QModelIndexList lst=zombieView->selectionModel()->selectedRows(0);
-	lastSelection_.clear();
-
-	if(!lst.isEmpty())
-	{
-		std::vector<std::string> paths;
-		Q_FOREACH(QModelIndex idx,lst)
-		{
-			lastSelection_.push_back(model_->data(idx,Qt::DisplayRole).toString().toStdString());
-		}
-	}
-}
-*/
 
 
 void ZombieItemWidget::infoReady(VReply* reply)
@@ -225,21 +183,24 @@ void ZombieItemWidget::command(const std::string& cmdName)
         QModelIndexList lst=zombieView->selectionModel()->selectedRows(0);
 
 		if(!lst.isEmpty())
-		{
-			std::vector<std::string> paths;
-			Q_FOREACH(QModelIndex idx,lst)
-			{
-				paths.push_back(model_->data(sortModel_->mapToSource(idx),Qt::DisplayRole).toString().toStdString());
-			}
+		{           
+            QList<Zombie> zLst;
+            Q_FOREACH(QModelIndex idx,lst)
+            {
+                zLst <<model_->indexToZombie(sortModel_->mapToSource(idx));
+            }
 
-			std::vector<std::string> cmd;
-			cmd.push_back("ecflow_client");
-			cmd.push_back("--" + cmdName);
-			cmd.push_back("<full_name>");
-
-			commandSent_=true;
-
-			info_->server()->command(paths,cmd);
+            Q_FOREACH(Zombie z,zLst)
+            {
+                if(z.empty() == false)
+                {
+                    VTask_ptr t=VTask::create(VTask::ZombieCommandTask);
+                    t->setZombie(z);
+                    t->param("command",cmdName);
+                    info_->server()->run(t);
+                    commandSent_=true;
+                }
+            }
 		}
 	}
 }

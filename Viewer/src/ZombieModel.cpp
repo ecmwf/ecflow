@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -130,30 +130,30 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
 	if(role == Qt::DisplayRole)
 	{
 		if(id == "path")
-			return QString::fromStdString(data_.at(row).path_to_task());
+            return QString::fromStdString(data_[row].path_to_task());
 		else if(id == "type")
-			return QString::fromStdString(data_.at(row).type_str());
+            return QString::fromStdString(data_[row].type_str());
 		else if(id == "tryno")
-			return data_.at(row).try_no();
+            return data_[row].try_no();
 		else if(id == "duration")
-			return QString::number(data_.at(row).duration()) + " s";
+            return QString::number(data_[row].duration()) + " s";
 		else if(id == "creation")
 		{
-			const boost::posix_time::ptime& t=  data_.at(row).creation_time();
+            const boost::posix_time::ptime& t=  data_[row].creation_time();
 			return QString::fromStdString(boost::posix_time::to_simple_string(t));
 		}
 		else if(id == "allowed")
-			return QString::number(data_.at(row).allowed_age()) + " s";
+            return QString::number(data_[row].allowed_age()) + " s";
 		else if(id == "calls")
-			return data_.at(row).calls();
+            return data_[row].calls();
 		else if(id == "action")
-			return QString::fromStdString(data_.at(row).user_action_str());
+            return QString::fromStdString(data_[row].user_action_str());
 		else if(id == "password")
-			return QString::fromStdString(data_.at(row).jobs_password());
+            return QString::fromStdString(data_[row].jobs_password());
 		else if(id == "child")
-			return QString::fromStdString(ecf::Child::to_string(data_.at(row).last_child_cmd()));
+            return QString::fromStdString(ecf::Child::to_string(data_[row].last_child_cmd()));
 		else if(id == "pid")
-			return QString::fromStdString(data_.at(row).process_or_remote_id());
+            return QString::fromStdString(data_[row].process_or_remote_id());
 		else
 			return QVariant();
 	}
@@ -194,4 +194,15 @@ QModelIndex ZombieModel::index( int row, int column, const QModelIndex & parent 
 QModelIndex ZombieModel::parent(const QModelIndex &child) const
 {
 	return QModelIndex();
+}
+
+Zombie ZombieModel::indexToZombie(const QModelIndex& idx) const
+{
+    if(idx.isValid() && hasData())
+    {
+        int row=idx.row();
+        if(row >= 0 || row < data_.size())
+            return data_[row];
+    }
+    return Zombie();
 }

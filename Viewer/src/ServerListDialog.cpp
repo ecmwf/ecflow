@@ -726,9 +726,9 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
         case PortColumn: return QString::fromStdString(item->port());
         case UseColumn:
 		{
-			int i=item->useCnt();
-			if(item->useCnt() > 0)
-                return "loaded (" + QString::number(item->useCnt()) + ")";
+            int n=item->useCnt();
+            if(n > 0)
+                return "loaded (" + QString::number(n) + ")";
 
 			return QVariant();
 		}
@@ -849,7 +849,6 @@ bool ServerListModel::setData(const QModelIndex& idx, const QVariant & value, in
 {
 	if(filter_ && idx.column() == LoadColumn && role == Qt::CheckStateRole)
 	{
-		int row=idx.row();
 		if(ServerItem* item=ServerList::instance()->itemAt(idx.row()))
 		{
 			bool checked=(value.toInt() == Qt::Checked)?true:false;

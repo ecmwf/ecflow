@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -223,8 +223,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
 		//The number of nodes the server has
 		else if(role == NodeNumRole)
-		{
-			ConnectState* st=server->connectState();
+		{			
 			if(server->activity() != ServerHandler::LoadActivity)
 			{
 				return server->vRoot()->totalNum();

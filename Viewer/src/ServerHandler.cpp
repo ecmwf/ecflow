@@ -435,7 +435,8 @@ void ServerHandler::run(VTask_ptr task)
 	case VTask::ScriptEditTask:
 	case VTask::ScriptSubmitTask:
 	case VTask::SuiteListTask:
-	case VTask::ZombieListTask:
+    case VTask::ZombieListTask:
+    case VTask::ZombieCommandTask:
 		comQueue_->addTask(task);
 		break;
 	default:

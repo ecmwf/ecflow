@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -45,7 +45,7 @@ protected Q_SLOTS:
 	void on_actionRescue_triggered();
 	void on_actionFoboff_triggered();
 	void on_actionDelete_triggered();
-	void on_actionKill_triggered();
+    void on_actionKill_triggered();
 	void on_reloadTb__clicked(bool);
 	void slotItemSelected(QModelIndex,QModelIndex);
 
