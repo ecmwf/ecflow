@@ -24,7 +24,7 @@
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "VFilter.hpp"
-#include "VRepeat.hpp"
+#include "VRepeatAttr.hpp"
 #include "VAttribute.hpp"
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
@@ -320,15 +320,33 @@ int VAttributeType::indexOf(const VAttribute* a)
     return -1;
 }
 
+//Load the attributes parameter file
 void VAttributeType::load(VProperty* group)
 {
+    //We set some extra information on each type and also
+    //try to reorder the types according to the order defined in the
+    //parameter file. This order is very important:
+    // -it defines the rendering order
+    // -defines the order of the attribute items in the attribute filter
+    std::vector<VAttributeType*> v;
     Q_FOREACH(VProperty* p,group->children())
     {
          if(VAttributeType* obj=VAttributeType::find(p->strName()))
          {
             obj->setProperty(p);
+            v.push_back(obj);
+         }
+         else
+         {
+             UI_ASSERT(0,"Unknown attribute type is read from parameter file: " << p->strName());
          }
     }
+
+    UI_ASSERT(v.size() == types_.size(),"types size=" << types_.size() << "loaded size=" << v.size());
+
+    //non debug version
+    if(v.size() == types_.size())
+        types_=v;
 }
 
 int VAttributeType::keyToDataIndex(const std::string& key) const
@@ -839,6 +857,7 @@ void VEventAttribute::getData(const Event& e,QStringList& data)
 //Generated Variables
 //================================
 
+#if 0
 class VGenvarAttribute : public VAttributeType
 {
 public:
@@ -939,10 +958,14 @@ void VGenvarAttribute::getData(const Variable& v,QStringList& data)
             QString::fromStdString(v.theValue());
 }
 
+#endif
+
+
 //================================
 //Variables
 //================================
 
+#if 0
 class VVarAttribute : public VAttributeType
 {
 public:
@@ -1105,6 +1128,9 @@ void VVarAttribute::getData(const Variable& v,QStringList& data)
             QString::fromStdString(v.name()) <<
             QString::fromStdString(v.theValue());
 }
+
+
+#endif
 
 //================================
 // Limits
@@ -1964,6 +1990,7 @@ void VDateAttribute::getData(const DayAttr& d,QStringList& data)
 //Repeat
 //================================
 
+#if 0
 class VRepeatAttribute : public VAttributeType
 {
 public:
@@ -2119,7 +2146,7 @@ void VRepeatAttribute::getData(const Repeat& r,QStringList& data)
          QString::number(r.step());
 }
 
-
+#endif
 //================================
 //Late
 //================================
@@ -2270,14 +2297,14 @@ void VLateAttribute::getData(ecf::LateAttr *late,QStringList& data)
 //static VLabelAttribute labelAttr("label");
 //static VMeterAttribute meterAttr("meter");
 //static VEventAttribute eventAttr("event");
-static VRepeatAttribute repeatAttr("repeat");
+//static VRepeatAttribute repeatAttr("repeat");
 //static VTriggerAttribute triggerAttr("trigger");
 //static VTimeAttribute timeAttr("time");
 //static VDateAttribute dateAttr("date");
 //static VLimitAttribute limitAttr("limit");
 //static VLimiterAttribute limiterAttr("limiter");
 //static VLateAttribute lateAttr("late");
-static VVarAttribute varAttr("var");
-static VGenvarAttribute genvarAttr("genvar");
+//static VVarAttribute varAttr("var");
+//static VGenvarAttribute genvarAttr("genvar");
 
 static SimpleLoader<VAttributeType> loader("attribute");

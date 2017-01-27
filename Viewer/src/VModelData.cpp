@@ -535,7 +535,7 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     VTreeNode* node=tree_->find(vnode);
 
     UI_ASSERT(!node || !attrFilter_->isSet(a->type()),
-              "Attr=" << a->name().toStdString() << " type=" << a->typeName());
+              "node=" << node << " Attr=" << a->name().toStdString() << " type=" << a->typeName());
 
     //Clear
     clearForceShow(a);

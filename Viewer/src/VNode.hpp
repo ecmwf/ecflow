@@ -127,6 +127,7 @@ public:
     QStringList getAttributeData(int,AttributeFilter *filter=0);
     bool getAttributeData(const std::string& type,int row, QStringList&);
     VAttribute* attribute(int,AttributeFilter *filter=0) const;
+    int attributeIndex(const VAttribute* a, AttributeFilter *filter) const;
 
 #if 0
     VAttributeType* getAttributeType(int);
