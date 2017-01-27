@@ -40,9 +40,8 @@ public:
     ~VAttribute();
 
     virtual VAttributeType* type() const;
+    virtual const std::string& subType() const;
     virtual int lineNum() const {return 1;}
-
-
 
     VAttribute* clone() const;
     VServer* root() const;

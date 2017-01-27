@@ -75,6 +75,12 @@ const std::string& VAttribute::typeName() const
     return (t)?(t->strName()):e;
 }
 
+const std::string& VAttribute::subType() const
+{
+    static std::string e;
+    return e;
+}
+
 std::string VAttribute::fullPath() const
 {
     return (parent_)?(parent_->fullPath() + ":" + strName()):"";

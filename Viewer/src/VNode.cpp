@@ -37,6 +37,8 @@
 #include "VTaskNode.hpp"
 #include "VTimeAttr.hpp"
 #include "VTriggerAttr.hpp"
+#include "VGenVarAttr.hpp"
+#include "VUserVarAttr.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -247,6 +249,8 @@ void VNode::scanAttr()
     VLateAttr::scan(this,attr_);
     VTimeAttr::scan(this,attr_);
     VDateAttr::scan(this,attr_);
+    VUserVarAttr::scan(this,attr_);
+    VGenVarAttr::scan(this,attr_);
 }
 
 void VNode::rescanAttr()
@@ -328,6 +332,36 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
     return 0;
 }
 
+int VNode::attributeIndex(const VAttribute* a, AttributeFilter *filter) const
+{
+    if(filter)
+    {
+        int n=0;
+        int cnt=attr_.size();
+        for(size_t i=0; i < cnt; i++)
+        {
+            if(filter->isSet(attr_[i]->type()))
+            {
+                if(a==attr_[i])
+                    return n;
+
+                n++;
+            }
+        }
+    }
+    else
+    {
+        int n=0;
+        int cnt=attr_.size();
+        for(size_t i=0; i < cnt; i++)
+        {
+            if(a==attr_[i])
+                return i;
+        }
+    }
+
+    return -1;
+}
 
 QStringList VNode::getAttributeData(int row,VAttributeType*& type)
 {

@@ -19,7 +19,7 @@
 class QModelIndex;
 class QStringList;
 class QStringListModel;
-class VRepeat;
+class VRepeatAttr;
 class RepeatEditor;
 
 class RepeatEditorWidget :  public QWidget, protected Ui::RepeatEditorWidget
@@ -46,14 +46,14 @@ protected Q_SLOTS:
     void slotSelectedInView(const QModelIndex&);
 
 protected:
-    void buildList();
+    void buildList(VRepeatAttr *rep);
     bool isListMode() const;   
     virtual void setValue(QString)=0;
     void readSettings();
     void writeSettings();
 
     RepeatEditorWidget* w_;
-    VRepeat* repeat_;
+    //VRepeat* repeat_;
     QStringListModel* model_;
     QStringList modelData_;
     QString oriVal_;

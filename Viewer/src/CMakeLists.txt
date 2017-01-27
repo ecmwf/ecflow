@@ -179,7 +179,7 @@ set(viewer_srcs
     VNState.cpp
     VParam.cpp
     VProperty.cpp   
-    VRepeat.cpp
+    VRepeatAttr.cpp
     VReply.cpp
     VServerSettings.cpp
     VSettings.cpp
@@ -189,6 +189,8 @@ set(viewer_srcs
     VTimeAttr.cpp
     VTree.cpp
     VTriggerAttr.cpp
+    VGenVarAttr.cpp
+    VUserVarAttr.cpp
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp

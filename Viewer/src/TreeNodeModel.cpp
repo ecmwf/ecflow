@@ -845,7 +845,7 @@ QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) con
     VTreeServer* server=mserver->treeServer();
     Q_ASSERT(server);
 
-    int row=a->absIndex(atts_);
+    int row=node->attributeIndex(a,atts_);
     if(row != -1)
     {
         //This is a server!!!
