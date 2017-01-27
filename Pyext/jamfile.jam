@@ -22,7 +22,7 @@
 #
 # Please check if you have more than one 'using python' in configuration files.
 # Please check site-config.jam, user-config.jam and project-config.jam and 
-# remove duplicated 'using python'. Typically will remove 'using python' from project-config.jam
+# remove duplicated 'using python'.  
 #
 # When installing BOOST-python libs, make sure to call module load python *FIRST*
 # Otherwise it will pick the python specified in project-config.jam, which make not be correct
@@ -30,7 +30,7 @@
 # ==========================================================================================
 # PYTHON3:
 # Build:
-#   1/ module load python3
+#   1/ module load python3, this update the $PATH
 #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
 #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
 #
@@ -40,9 +40,9 @@
 #       : /usr/local/apps/python3/3.5.1-01/include/python3.5m # include directory
 #       ; 
 #       ...
-#     option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
+#      option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
 #
-#     i.e cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
+#     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
 #     python 2.7 and 3.5, YUK, took ages to debug
 #
 # Check:
@@ -84,7 +84,7 @@ if ! [ python.configured ]
 {
     ECHO "notice: no Python configured in *user-config.jam*" ;
     ECHO "notice: will use default configuration" ;
-    # We will typically place this in user-config/site-config.jam/$BOOST_ROOT/project-config.jam
+    # We will typically place this in user-config || site-config.jam || $BOOST_ROOT/project-config.jam
     #using python
     #     :  # version
     #     :  # cmd-or-prefix
