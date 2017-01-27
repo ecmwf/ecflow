@@ -714,7 +714,7 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         return false;
 
     node_ptr node=vnode->node();
-    if(node)
+    if(!node)
         return false;
 
 #ifdef _UI_ATTR_DEBUG
