@@ -75,7 +75,7 @@ def simulate_deadlock():
     os.remove("defs.flat")
 
 def test_time_series():
-    print "Simulator:: ...test_time_series";
+    print ("Simulator:: ...test_time_series")
 
     # suite suite
     #  clock real <sunday>
@@ -117,9 +117,9 @@ if __name__ == "__main__":
     # traverse the CSim test data, make sure python simulation matches c++
     workspace_dir = Test.get_root_source_dir()
     csim_test_data = workspace_dir + "/CSim/test/data/good_defs"
-    print csim_test_data
+    print (csim_test_data)
     for path in Test.all_files(csim_test_data,'*.def'):
-        print path
+        print (path)
         theDefs = ecflow.Defs(path)
         theResult = theDefs.simulate()
         assert len(theResult) == 0,  "Expected simulation to return without any errors, but found:\n" + theResult

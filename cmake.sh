@@ -13,6 +13,7 @@ show_error_and_exit() {
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
    echo "  "
    echo "   make           - run make after cmake"
+   echo "   python3        - build with python3"
    echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
    echo "   install        - install to /usr/local/apps/eflow.  defaults is /var/tmp/$USER/install/cmake/ecflow"
    echo "   test           - run all the tests"
@@ -151,17 +152,10 @@ fi
 if [[ "$python3_arg" = python3 ]] ; then
     # Need to wait for ecbuild to fix print error, meanwhile use local ecbuild to test python3
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
+    cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0.python3"
 fi
 
-# ===================================================================================
-# boost
-# if OS_VERSION not defined , default to empty string
-: ${OS_VERSION:=""}
-
-if [[ "$OS_VERSION" = "leap42" ]] ; then
-    module load boost/1.53.0
-fi
-
+ 
 # ====================================================================================  
 cmake_build_type=
 if [[ $mode_arg = debug ]] ; then
