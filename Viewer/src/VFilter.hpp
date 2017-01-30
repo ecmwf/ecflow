@@ -88,7 +88,7 @@ class AttributeFilter : public VParamSet
 public:
 	AttributeFilter();
     bool matchForceShowAttr(const VNode*,VAttributeType*) const;
-    void setForceShowAttr(const VAttribute* a);
+    void setForceShowAttr(VAttribute* a);
     void clearForceShowAttr();
     VAttribute* forceShowAttr() const;
 

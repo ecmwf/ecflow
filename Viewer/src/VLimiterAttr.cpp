@@ -23,7 +23,9 @@ class VLimiterAttrType : public VAttributeType
 public:
     explicit VLimiterAttrType();
     QString toolTip(QStringList d) const;
-    void encode(const InLimit&,QStringList&) const;
+    void encode(const InLimit&,QStringList&) const;    
+    void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    int totalNum(VNode* vnode);
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,PathIndex=2};
@@ -36,6 +38,7 @@ VLimiterAttrType::VLimiterAttrType() : VAttributeType("limiter")
     searchKeyToData_["limiter_name"]=NameIndex;
     searchKeyToData_["limiter_path"]=PathIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VLimiterAttr::scan;
 }
 
 QString VLimiterAttrType::toolTip(QStringList d) const
@@ -57,6 +60,10 @@ void VLimiterAttrType::encode(const InLimit& lim,QStringList& data) const
            QString::fromStdString(lim.pathToNode());
 }
 
+static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+static int totalNum(VNode* vnode);
+
+
 static VLimiterAttrType atype;
 
 //=====================================================
@@ -67,7 +74,7 @@ static VLimiterAttrType atype;
 
 VLimiterAttr::VLimiterAttr(VNode *parent,const InLimit& lim, int index) : VAttribute(parent,index)
 {
-    name_=lim.name();
+    //name_=lim.name();
 }
 
 VAttributeType* VLimiterAttr::type() const
@@ -78,23 +85,42 @@ VAttributeType* VLimiterAttr::type() const
 QStringList VLimiterAttr::data() const
 {
     QStringList s;
-    if(node_ptr node=parent_->node())
+    if(parent_->node_)
     {
-        const std::vector<InLimit>& v=node->inlimits();
+        const std::vector<InLimit>& v=parent_->node_->inlimits();
         atype.encode(v[index_],s);
     }
     return s;
 }
 
+std::string VLimiterAttr::strName() const
+{
+    if(parent_->node_)
+    {
+        const std::vector<InLimit>& v=parent_->node_->inlimits();
+        return v[index_].name();
+    }
+    return std::string();
+}
+
 void VLimiterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
-    if(node_ptr node=vnode->node())
+    if(vnode->node_)
     {
-        const std::vector<InLimit>& v=node->inlimits();
+        const std::vector<InLimit>& v=vnode->node_->inlimits();
         int n=v.size();
         for(size_t i=0; i < n; i++)
         {
             vec.push_back(new VLimiterAttr(vnode,v[i],i));
         }
     }
+}
+
+int VLimiterAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        return vnode->node_->inlimits().size();
+    }
+    return 0;
 }

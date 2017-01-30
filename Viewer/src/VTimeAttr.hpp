@@ -36,8 +36,10 @@ public:
 
     VAttributeType* type() const;
     QStringList data() const;
+    std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static int totalNum(VNode* vnode);
 
 protected:
     DataType dataType_;

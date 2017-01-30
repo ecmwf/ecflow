@@ -541,7 +541,7 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     clearForceShow(a);
 
     //Tell the attribute filter that this attribute must always be visible
-    attrFilter_->setForceShowAttr(a);
+    attrFilter_->setForceShowAttr(const_cast<VAttribute*>(a));
 
     //Tell the tree that this node must always be visible
     filter_->setForceShowNode(const_cast<VNode*>(vnode));

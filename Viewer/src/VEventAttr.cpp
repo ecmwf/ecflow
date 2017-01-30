@@ -36,6 +36,7 @@ VEventAttrType::VEventAttrType() : VAttributeType("event")
     searchKeyToData_["event_name"]=NameIndex;
     searchKeyToData_["event_value"]=ValueIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VEventAttr::scan;
 }
 
 QString VEventAttrType::toolTip(QStringList d) const
@@ -68,7 +69,7 @@ static VEventAttrType atype;
 
 VEventAttr::VEventAttr(VNode *parent,const Event& e, int index) : VAttribute(parent,index)
 {
-    name_=e.name_or_number();
+    //name_=e.name_or_number();
 }
 
 VAttributeType* VEventAttr::type() const
@@ -79,23 +80,42 @@ VAttributeType* VEventAttr::type() const
 QStringList VEventAttr::data() const
 {
     QStringList s;
-    if(node_ptr node=parent_->node())
+    if(node_ptr node=parent_->node_)
     {
-        const std::vector<Event>& v=node->events();
+        const std::vector<Event>& v=parent_->node_->events();
         atype.encode(v[index_],s);
     }
     return s;
 }
 
+std::string VEventAttr::strName() const
+{
+    if(parent_->node_)
+    {
+        const std::vector<Event>& v=parent_->node_->events();
+        return v[index_].name_or_number();
+    }
+    return std::string();
+}
+
 void VEventAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
-    if(node_ptr node=vnode->node())
+    if(vnode->node_)
     {
-        const std::vector<Event>& v=node->events();
+        const std::vector<Event>& v=vnode->node_->events();
         int n=v.size();
         for(size_t i=0; i < n; i++)
         {
             vec.push_back(new VEventAttr(vnode,v[i],i));
         }
     }
+}
+
+int VEventAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        return vnode->node_->events().size();
+    }
+    return 0;
 }

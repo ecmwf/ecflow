@@ -32,7 +32,8 @@ public:
     QStringList data() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
-
+    static void expressions(const VNode* vnode,std::string& trigger, std::string& complete);
+    static int totalNum(VNode* vnode);
 };
 
 #endif // VTRIGGERATTR_HPP

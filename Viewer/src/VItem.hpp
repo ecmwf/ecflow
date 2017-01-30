@@ -14,7 +14,6 @@
 #include <cstdlib>
 #include <QString>
 
-
 class ServerHandler;
 class VNode;
 class VServer;

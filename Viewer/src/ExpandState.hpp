@@ -16,8 +16,6 @@
 
 #include <QList>
 
-#include "VInfo.hpp"
-
 class TreeNodeModel;
 class QModelIndex;
 class QTreeView;
@@ -79,7 +77,6 @@ public:
 protected:
     QTreeView* view_;
     TreeNodeModel* model_;
-    VInfo_ptr selection_;
     QList<ExpandStateTree*> items_;
 
 };

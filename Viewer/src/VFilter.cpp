@@ -274,9 +274,9 @@ bool AttributeFilter::matchForceShowAttr(const VNode *n,VAttributeType* t) const
     return false;
 }
 
-void AttributeFilter::setForceShowAttr(const VAttribute* a)
+void AttributeFilter::setForceShowAttr(VAttribute* a)
 {
-    forceShowAttr_=VInfoAttribute::create(a->clone());
+    forceShowAttr_=VInfoAttribute::create(a);
 }
 
 VAttribute* AttributeFilter::forceShowAttr() const

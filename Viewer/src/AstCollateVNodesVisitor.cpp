@@ -16,9 +16,23 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
-//AstCollateVNodesVisitor::AstCollateVNodesVisitor( std::set<VItem*>& s) : theSet_(s) {}
+static std::vector<VAttributeType*> attrTypes;
 
-AstCollateVNodesVisitor::AstCollateVNodesVisitor(std::vector<VItemTmp_ptr>& s) : items_(s) {}
+AstCollateVNodesVisitor::AstCollateVNodesVisitor(std::vector<VItem*>& s) : items_(s)
+{
+    if(attrTypes.empty())
+    {
+        QStringList types;
+        types << "event" << "meter" << "var" << "genvar";
+        Q_FOREACH(QString name,types)
+        {
+            VAttributeType *t=VAttributeType::find(name.toStdString());
+            Q_ASSERT(t);
+            attrTypes.push_back(t);
+
+        }
+   }
+}
 
 AstCollateVNodesVisitor::~AstCollateVNodesVisitor() {}
 
@@ -31,62 +45,42 @@ void AstCollateVNodesVisitor::visitNode(AstNode* astNode)
     if(Node* referencedNode = astNode->referencedNode())
     {
         if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
-        {
-            //theSet_.insert(n);
-            items_.push_back(VItemTmp::create(n));
+        {           
+            items_.push_back(n);
         }
     }
 }
 
 void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar)
 {
-
-#if 0
     if(Node* referencedNode = astVar->referencedNode())
     {
         if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
         {
-            QStringList types;
-            types << "event" << "meter" << "var" << "genvar";
-            Q_FOREACH(QString tName,types)
-            {                               
-                QList<VAttribute*> lst;
-                VAttributeType::getSearchData(tName.toStdString(),n,lst);
-                Q_FOREACH(VAttribute *a,lst)
+            int nType=attrTypes.size();
+            int nItem=items_.size();
+            for(size_t i=0; i < nType; i++)
+            {
+                if(VAttribute *a=n->findAttribute(attrTypes[i],astVar->name()))
                 {
-                    bool hasIt=false;
-                    for(std::set<VItem*>::iterator it = theSet_.begin();
-                        it != theSet_.end(); ++it)
+                    for(size_t k=0; k < nItem; k++)
                     {
-                        if(a->sameContents(*it))
-                        {
-                            hasIt=true;
+                        if(a == items_[k])
                             return;
-                        }
                     }
 
-                    if(!hasIt && a->strName() == astVar->name())
-                    {
-                        theSet_.insert(a);
+                    items_.push_back(a);
                         return;
-                    }
-                    else
-                        delete a;
                 }
             }
-        }
-    }
-#endif
 
-    if(Node* referencedNode = astVar->referencedNode())
-    {
-        if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
-        {
+#if 0
             QStringList types;
             types << "event" << "meter" << "var" << "genvar";
             Q_FOREACH(QString tName,types)
             {
                 QList<VItemTmp_ptr> lst;
+
                 VAttributeType::items(tName.toStdString(),n,lst);
                 Q_FOREACH(VItemTmp_ptr aItem,lst)
                 {
@@ -106,7 +100,10 @@ void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar)
                         return;
                     }
                 }
+
             }
+#endif
+
         }
     }
 

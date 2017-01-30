@@ -30,25 +30,12 @@ public:
     int step() const;
     virtual std::string value(int index) const=0;    
 
-    //ValyeType valueType() const {return valueType_;}
-
-    //static VRepeat* make(const Repeat& r);
-    //static const std::string& type(const Repeat& r);
-    //static const std::string& repeatType(VNode*);
-
     VAttributeType* type() const;
     QStringList data() const;
+    std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
-
-
-protected:
-    //VRepeat(const Repeat& r,const std::string& type,ValyeType t) : repeat_(r), type_(type), valueType_(t) {}
-
-    //const Repeat& repeat_;
-    //std::string type_;
-    //ValyeType valueType_;
-    //static std::map<std::string,std::string> typeNames_;
+    static int totalNum(VNode* vnode); 
 };
 
 class VRepeatDateAttr : public VRepeatAttr

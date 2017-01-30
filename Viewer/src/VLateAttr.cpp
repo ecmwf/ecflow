@@ -23,7 +23,7 @@ class VLateAttrType : public VAttributeType
 public:
     explicit VLateAttrType();
     QString toolTip(QStringList d) const;
-    void encode(ecf::LateAttr* late,QStringList& data) const;
+    void encode(ecf::LateAttr* late,QStringList& data) const;   
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1};
@@ -36,6 +36,7 @@ VLateAttrType::VLateAttrType() : VAttributeType("late")
     searchKeyToData_["late_name"]=NameIndex;
     searchKeyToData_["late_type"]=TypeIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VLateAttr::scan;
 }
 
 QString VLateAttrType::toolTip(QStringList d) const
@@ -65,7 +66,7 @@ static VLateAttrType atype;
 VLateAttr::VLateAttr(VNode *parent,const std::string& name) :
     VAttribute(parent,0)
 {
-    name_=name;
+    //name_=name;
 }
 
 VAttributeType* VLateAttr::type() const
@@ -94,4 +95,13 @@ void VLateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
             vec.push_back(new VLateAttr(vnode,late->name()));
         }
     }
+}
+
+int VLateAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        return (vnode->node_->get_late())?1:0;
+    }
+    return 0;
 }

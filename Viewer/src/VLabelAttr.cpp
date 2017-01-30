@@ -29,13 +29,13 @@ private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
 };
 
-
 VLabelAttrType::VLabelAttrType() : VAttributeType("label")
 {
     dataCount_=3;
     searchKeyToData_["label_name"]=NameIndex;
     searchKeyToData_["label_value"]=ValueIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VLabelAttr::scan;
 }
 
 QString VLabelAttrType::toolTip(QStringList d) const
@@ -72,7 +72,7 @@ static VLabelAttrType atype;
 
 VLabelAttr::VLabelAttr(VNode *parent,const Label& label, int index) : VAttribute(parent,index)
 {
-    name_=label.name();
+    //name_=label.name();
 }
 
 int VLabelAttr::lineNum() const
@@ -88,23 +88,42 @@ VAttributeType* VLabelAttr::type() const
 QStringList VLabelAttr::data() const
 {
     QStringList s;
-    if(node_ptr node=parent_->node())
+    if(parent_->node_)
     {
-        const std::vector<Label>& v=node->labels();
+        const std::vector<Label>& v=parent_->node_->labels();
         atype.encode(v[index_],s);
     }
     return s;
 }
 
+std::string VLabelAttr::strName() const
+{
+    if(parent_->node_)
+    {
+        const std::vector<Label>& v=parent_->node_->labels();
+        return v[index_].name();
+    }
+    return std::string();
+}
+
 void VLabelAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
-    if(node_ptr node=vnode->node())
+    if(vnode->node_)
     {
-        const std::vector<Label>& v=node->labels();
+        const std::vector<Label>& v=vnode->node_->labels();
         int n=v.size();
         for(size_t i=0; i < n; i++)
         {
             vec.push_back(new VLabelAttr(vnode,v[i],i));
         }
     }
+}
+
+int VLabelAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        return vnode->node_->labels().size();
+    }
+    return 0;
 }

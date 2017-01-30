@@ -86,6 +86,18 @@ public:
 class VNode : public VItem
 {
 friend class VServer;
+friend class VLabelAttr;
+friend class VMeterAttr;
+friend class VEventAttr;
+friend class VRepeatAttr;
+friend class VTriggerAttr;
+friend class VLimitAttr;
+friend class VLimiterAttr;
+friend class VLateAttr;
+friend class VTimeAttr;
+friend class VDateAttr;
+friend class VGenVarAttr;
+friend class VUserVarAttr;
 
 public:
 	VNode(VNode* parent,node_ptr);
@@ -128,6 +140,10 @@ public:
     bool getAttributeData(const std::string& type,int row, QStringList&);
     VAttribute* attribute(int,AttributeFilter *filter=0) const;
     int attributeIndex(const VAttribute* a, AttributeFilter *filter) const;
+    VAttribute* findAttribute(QStringList aData);
+    VAttribute* findAttribute(const std::string& typeName,const std::string& name);
+    VAttribute* findAttribute(VAttributeType* type,const std::string& name);
+    void attributes(VAttributeType*,std::vector<VAttribute*>& v);
 
 #if 0
     VAttributeType* getAttributeType(int);
@@ -228,7 +244,7 @@ protected:
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
-    VItemTmp_ptr findLimit(const std::string& path, const std::string& name);
+    VAttribute* findLimit(const std::string& path, const std::string& name);
     static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
     //static void scanForTriggered(VNode *n);
     static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
@@ -352,7 +368,7 @@ private:
     void updateCache(defs_ptr defs);
 
     ServerHandler* server_;
-    int totalNum_;
+    int totalNum_;   
     std::vector<int> totalNumInChild_;
     std::vector<VNode*> nodes_;
     bool triggeredScanned_;

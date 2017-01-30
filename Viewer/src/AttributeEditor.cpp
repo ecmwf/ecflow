@@ -230,7 +230,9 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
 #endif
             VAttribute* a=info_->attribute();
             Q_ASSERT(a);
-            if(!a->isValid(info_->node(),attrData_))
+            if(1)
+            //if(info->node()->isValidAttribute(a) == false)
+            //if(!a->isValid(info_->node(),attrData_))
             {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
                 UiLog().dbg() << " attribute does not exist";

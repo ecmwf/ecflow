@@ -927,6 +927,12 @@ void TreeNodeModel::selectionChanged(QModelIndexList lst)
 // the tree all over in the programme outside the view.
 //------------------------------------------------------------------
 
+//WARNING: if we are in the middle of an attribute filter change it will not give
+//correct results, because atts_ contains the new filter state, but the whole VTree still
+//base on the previous atts_ state.!! However we can assume that the index vas visible in
+//the tree so attrNum() is cached on the tree nodes so we get correct results for nodes.
+//Attributes however cannot be identified correctly.
+
 VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 {
 	//For invalid index no info is created.
@@ -942,7 +948,6 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		return VInfoServer::create(s);
 	}
 
-
 	//If the internal pointer is a server it is either a server attribute or a
 	//top level node (suite)
     if(VModelServer *mserver=data_->server(index.internalPointer()))
@@ -950,6 +955,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
         VTreeServer *server=mserver->treeServer();
         Q_ASSERT(server);
 
+        //If the attrNum is cached it is correct!
         int serverAttNum=server->tree()->attrNum(atts_);
 
 		//It is a top level node
@@ -967,19 +973,27 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 	//Otherwise the internal pointer points to the parent node
     else if(VTreeNode *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
 	{       
-        //Attribute
-        if(VAttribute* a=parentNode->vnode()->attribute(index.row(),atts_))
-        {
-            VInfo_ptr p=VInfoAttribute::create(a);
-            return p;
+        //If the attrNum is cached it is correct!
+        int attNum=parentNode->attrNum(atts_);
 
-        }
-        //Node
-        else
+        //It is a node
+        if(index.row() >= attNum)
         {
-            int attNum=parentNode->attrNum(atts_);
             VNode *n=parentNode->childAt(index.row()-attNum)->vnode();
             return VInfoNode::create(n);
+        }
+        //It is an attribute
+        else
+        {
+            //This wil not work properly if we are in the middle of an attribute
+            //filter change! atts_ is the new filter state, but index.row() is based on
+            //the previous filter state!!
+            if(VAttribute* a=parentNode->vnode()->attribute(index.row(),atts_))
+            {
+                VInfo_ptr p=VInfoAttribute::create(a);
+                return p;
+
+            }
         }
     }
 

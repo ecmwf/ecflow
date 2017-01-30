@@ -21,6 +21,7 @@
 
 static unsigned int totalAttrNum=0;
 
+#if 0
 VAttribute::VAttribute(VNode *parent,VAttributeType* type,int indexInType) :
     VItem(parent)
 {
@@ -29,6 +30,7 @@ VAttribute::VAttribute(VNode *parent,VAttributeType* type,int indexInType) :
     id_=indexToId(type,indexInType);
     totalAttrNum++;
 }        
+#endif
 
 VAttribute::VAttribute(VNode *parent,int index) :
     VItem(parent),
@@ -44,7 +46,8 @@ VAttribute::~VAttribute()
 
 VAttribute* VAttribute::clone() const
 {
-    return new VAttribute(parent_,id_);
+    return 0;
+    //return new VAttribute(parent_,id_);
 }
 
 unsigned int VAttribute::totalNum()
@@ -63,14 +66,17 @@ QString VAttribute::toolTip() const
     return (t)?(t->toolTip(data())):QString();
 }
 
+#if 0
 VAttributeType* VAttribute::type() const
 {
-    return idToType(id_);
+    //return idToType(id_);
 }
+#endif
 
 const std::string& VAttribute::typeName() const
 {
     VAttributeType* t=type();
+    assert(t);
     static std::string e;
     return (t)?(t->strName()):e;
 }
@@ -92,11 +98,13 @@ bool VAttribute::sameContents(VItem* item) const
         return false;
 
     if(VAttribute *a=item->isAttribute())
-    {    return a->parent() == parent() && a->id_ == id_;
+    {    return a->parent() == parent() && a->name() == name();
     }
     return false;
 }
 
+
+#if 0
 QStringList VAttribute::data() const
 {
     QStringList d;
@@ -107,11 +115,14 @@ QStringList VAttribute::data() const
     t->itemData(parent(),idx,d);
     return d;
 }
+#endif
 
+#if 0
 int VAttribute::absIndex(AttributeFilter *filter) const
 {
     return VAttributeType::absIndexOf(this,filter);
 }
+#endif
 
 void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
                                     const std::string& action, const std::string& type,
@@ -146,10 +157,14 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
 }
 
 QString VAttribute::name() const
-{
+{  
+   return QString::fromStdString(strName());
+
+#if 0
     std::string s;
     value("name",s);
     return QString::fromStdString(s);
+#endif
 
 #if 0
     QStringList d=data();
@@ -162,9 +177,11 @@ QString VAttribute::name() const
 
 std::string VAttribute::strName() const
 {
-    return name().toStdString();
+    static std::string eStr;
+    return eStr;
 }
 
+#if 0
 bool VAttribute::isValid(VNode* parent,QStringList data)
 {
     if(VAttributeType* t=type())
@@ -173,6 +190,7 @@ bool VAttribute::isValid(VNode* parent,QStringList data)
     }
     return false;
 }
+#endif
 
 bool VAttribute::value(const std::string& key,std::string& val) const
 {
@@ -211,6 +229,25 @@ bool VAttribute::value(const std::string& key,std::string& val) const
 
 }
 
+bool VAttribute::sameAs(QStringList d) const
+{
+    if(d.count() >=2)
+    {
+        VAttributeType* t=type();
+
+        if(t->name() == d[0])
+        {
+            int idx=t->searchKeyToDataIndex("name");
+            if(idx != -1 && idx < d.count())
+            {
+                return name() == d[idx];
+            }
+        }
+    }
+    return false;
+}
+
+#if 0
 VAttribute* VAttribute::make(VNode* n,const std::string& type,const std::string& name)
 {
     if(!n) return NULL;
@@ -269,155 +306,5 @@ int VAttribute::idToTypeIndex(int id)
     if(id < 0) return -1;
     return id-(id/10000)*10000;
 }
-
-//==============================================
-//
-// Label
-//
-//==============================================
-
-#if 0
-VAttributeType* VLabel::type_=0;
-VAttributeType* VMeter::type_=0;
-VAttributeType* VEvent::type_=0;
-
-VLabel::VLabel(VNode *parent,const Label& label, int index) : VAttribute(parent,index)
-{
-    name_=label.name();
-    if(type_ == 0)
-        type_=VAttributeType::find("label");
-}
-
-int VLabel::lineNum() const
-{
-    return parent_->labelLineNum(index_);
-}
-
-VAttributeType* VLabel::type() const
-{
-    return VAttributeType::find("label");
-}
-
-QStringList VLabel::data() const
-{
-    QStringList s;
-    if(node_ptr node=parent_->node())
-    {
-        const std::vector<Label>& v=node->labels();
-        encode(v[index_],s);
-    }
-    return s;
-}
-
-void VLabel::encode(const Label& label,QStringList& data)
-{
-    std::string val=label.new_value();
-    if(val.empty() || val == " ")
-    {
-        val=label.value();
-    }
-
-    data << "label" <<
-                QString::fromStdString(label.name()) <<
-                QString::fromStdString(val);
-}
-
-void VLabel::scan(VNode* vnode,std::vector<VAttribute*>& vec)
-{
-    if(node_ptr node=vnode->node())
-    {
-        const std::vector<Label>& v=node->labels();
-        int n=v.size();
-        for(size_t i=0; i < n; i++)
-        {
-            vec.push_back(new VLabel(vnode,v[i],i));
-        }
-    }
-}
 #endif
 
-
-#if 0
-
-
-//==============================================
-//
-// Meter
-//
-//==============================================
-
-VMeter::VMeter(VNode *parent,const Meter& meter, int index) : VAttribute(parent,index)
-{
-    name_=meter.name();
-}
-
-VAttributeType* VMeter::type() const
-{
-    return VAttributeType::find("meter");
-}
-
-QStringList VMeter::data() const
-{
-    QStringList s;
-    if(node_ptr node=parent_->node())
-    {
-        const std::vector<Meter>& v=node->meters();
-        encode(v[index_],s);
-    }
-    return s;
-}
-
-void VMeter::scan(VNode* vnode,std::vector<VAttribute*>& vec)
-{
-     if(node_ptr node=vnode->node())
-    {
-        const std::vector<Meter>& v=node->meters();
-        int n=v.size();
-        for(size_t i=0; i < n; i++)
-        {
-            vec.push_back(new VMeter(vnode,v[i],i));
-        }
-    }
-}
-
-//==============================================
-//
-// Event
-//
-//==============================================
-
-VEvent::VEvent(VNode *parent,const Event& e, int index) : VAttribute(parent,index)
-{
-    name_=e.name_or_number();
-}
-
-VAttributeType* VEvent::type() const
-{
-    return VAttributeType::find("event");
-}
-
-QStringList VEvent::data() const
-{
-    QStringList s;
-    if(node_ptr node=parent_->node())
-    {
-        const std::vector<Event>& v=node->events();
-        encode(v[index_],s);
-    }
-    return s;
-}
-
-void VEvent::scan(VNode* vnode,std::vector<VAttribute*>& vec)
-{
-     if(node_ptr node=vnode->node())
-    {
-        const std::vector<Event>& v=node->events();
-        int n=v.size();
-        for(size_t i=0; i < n; i++)
-        {
-            vec.push_back(new VEvent(vnode,v[i],i));
-        }
-    }
-}
-
-#endif

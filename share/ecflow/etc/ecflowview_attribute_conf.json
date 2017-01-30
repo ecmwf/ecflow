@@ -32,12 +32,12 @@
         "limiter" : {
               "label" : "Limiters"
         },
-        "date" : {
-             "label" : "Dates"
-        },
         "time" : {
              "label" : "Times"
         },
+        "date" : {
+             "label" : "Dates"
+        },      
         "late" : {
               "label" : "Late"
         },

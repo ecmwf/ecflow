@@ -58,7 +58,7 @@ void VInfo::notifyServerDelete(ServerHandler* /*server*/)
 
     server_=0;
     node_=0;
-    if(attr_) delete attr_;
+    //if(attr_) delete attr_;
     attr_=0;
 
 	dataLost();
@@ -80,7 +80,7 @@ void VInfo::notifyBeginServerClear(ServerHandler* server)
 {    
     assert(server_==server);
     node_=0;
-    if(attr_) delete attr_;
+    //if(attr_) delete attr_;
     attr_=0;
 }
 
@@ -106,38 +106,42 @@ void VInfo::regainData()
         return;
     }
 
-    if(node_)
-        return;
-
-    if(isServer())
+    if(!node_)
     {
-        node_=server_->vRoot();
-        return;
-    }
-    else if(isNode())
-    {        
-        VItemPathParser p(storedPath_);
-        if(p.itemType() == VItemPathParser::NodeType)
+        if(isServer())
         {
-            node_=server_->vRoot()->find(p.node());
-            if(node_)
-                return;
-        }
-        if(!node_)
-        {
-            dataLost();
+            node_=server_->vRoot();
             return;
         }
-    }
-    else if(isAttribute())
-    {
-         VItemPathParser p(storedPath_);
-         if(p.itemType() == VItemPathParser::AttributeType)
-         {
-            node_=server_->vRoot()->find(p.node());
+        else if(isNode())
+        {
+            VItemPathParser p(storedPath_);
+            if(p.itemType() == VItemPathParser::NodeType)
+            {
+                node_=server_->vRoot()->find(p.node());
+                if(node_)
+                    return;
+            }
+            if(!node_)
+            {
+                dataLost();
+                return;
+            }
+        }
+     }
+
+     if(isAttribute())
+     {
+        VItemPathParser p(storedPath_);
+        if(p.itemType() == VItemPathParser::AttributeType)
+        {
+            if(!node_)
+            {
+                node_=server_->vRoot()->find(p.node());
+            }
             if(node_)
             {
-                attr_=VAttribute::make(node_,p.type(),p.attribute());
+                attr_=node_->findAttribute(p.type(),p.attribute());
             }
             if(!node_ || !attr_)
             {
@@ -206,6 +210,7 @@ VInfo_ptr VInfo::createParent(VInfo_ptr info)
     return VInfo_ptr();
 }
 
+
 VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
 {
     if(!s || path.empty())
@@ -227,12 +232,11 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
     {
         if(VNode* n=s->vRoot()->find(p.node()))
         {
-            if(VAttribute* a=VAttribute::make(n,p.type(),p.attribute()))
+            if(VAttribute* a=n->findAttribute(p.type(),p.attribute()))
             {
                 return VInfoAttribute::create(a);
             }           
         }
-
     }
 
     return VInfo_ptr();
