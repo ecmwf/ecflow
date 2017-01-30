@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -184,6 +184,7 @@ void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemS
 #endif
             Q_EMIT selectionChanged(info);
         }
+        lastSelection_=info;
     }
 
     QTreeView::selectionChanged(selected, deselected);
@@ -219,6 +220,10 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 #endif
         setCurrentIndex(idx);
 	}
+    else
+    {
+        lastSelection_.reset();
+    }
     setCurrentIsRunning_=false;
 }
 
@@ -524,7 +529,6 @@ void TreeNodeView::expandTo(const QModelIndex& idxTo)
     }
 }
 
-
 //Save all
 void TreeNodeView::slotSaveExpand()
 {
@@ -536,13 +540,6 @@ void TreeNodeView::slotSaveExpand()
         ExpandStateTree* es=expandState_->add();
         es->save(ts->tree());
     }
-
-    VInfo_ptr s=currentSelection();
-    if(s)
-    {
-       expandState_->selection_=s;
-    }
-
 }
 
 void TreeNodeView::slotRestoreExpand()
@@ -559,37 +556,13 @@ void TreeNodeView::slotRestoreExpand()
         }
     }
 
-    if(expandState_->selection_)
-    {
-        VInfo_ptr s=currentSelection();
-        if(!s)
-        {
-            expandState_->selection_->regainData();
-            if(!expandState_->selection_->hasData())
-            {
-                expandState_->selection_.reset();
-            }
-            else
-            {
-                setCurrentSelectionFromExpand(expandState_->selection_);
-            }
-        }
-    }
-
     expandState_->clear();
+    regainSelectionFromExpand();
 }
 
 //Save the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotSaveExpand(const VTreeNode* node)
 {
-    VInfo_ptr s=currentSelection();
-    if(s)
-    {
-        if(node->server()->realServer() == s->server())
-            expandState_->selection_=s;
-    }
-
-
     ExpandStateTree* es=expandState_->add();
     es->save(node);
 }
@@ -602,26 +575,29 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         if(es->rootSameAs(node->vnode()->strName()))
         {
             es->restore(node);
-
-            if(expandState_->selection_)
-            {
-                VInfo_ptr s=currentSelection();
-                if(!s)
-                {
-                    expandState_->selection_->regainData();
-                    if(!expandState_->selection_->hasData())
-                    {
-                        expandState_->selection_.reset();
-                    }
-                    else if(node->server()->realServer() == expandState_->selection_->server())
-                    {
-                        setCurrentSelectionFromExpand(expandState_->selection_);
-                        expandState_->selection_.reset();
-                    }
-                }
-            }
-
             expandState_->remove(es);
+        }
+    }
+
+    regainSelectionFromExpand();
+}
+
+void TreeNodeView::regainSelectionFromExpand()
+{
+    VInfo_ptr s=currentSelection();
+    if(!s)
+    {
+        if(lastSelection_)
+        {
+            lastSelection_->regainData();
+            if(!lastSelection_->hasData())
+            {
+                lastSelection_.reset();
+            }
+            else
+            {
+                setCurrentSelectionFromExpand(lastSelection_);
+            }
         }
     }
 }

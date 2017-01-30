@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -27,6 +27,7 @@
 #include "VRepeatAttr.hpp"
 #include "VAttribute.hpp"
 #include "UiLog.hpp"
+#include "UserMessage.hpp"
 #include "UIDebug.hpp"
 
 std::map<std::string,VAttributeType*> VAttributeType::typesMap_;
@@ -56,7 +57,7 @@ VAttributeType* VAttributeType::find(const std::string& name)
 {
     std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.find(name);
     if(it != typesMap_.end())
-            return it->second;
+        return it->second;
 
     return 0;
 }
@@ -66,6 +67,15 @@ VAttributeType* VAttributeType::find(int id)
     assert(id >=0  && id < types_.size());
     return types_[id];
 }
+
+void VAttributeType::scan(VNode* vnode,std::vector<VAttribute*>& v)
+{
+    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
+    {
+        (*it)->scanProc()(vnode,v);
+    }
+}
+
 
 #if 0
 void VAttributeType::scan(VNode* vnode,std::vector<VAttribute*>& vec)
@@ -78,6 +88,7 @@ void VAttributeType::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 #endif
 
 
+#if 0
 int VAttributeType::totalNum(const VNode *vnode, AttributeFilter *filter)
 {
     if(!vnode)
@@ -319,6 +330,7 @@ int VAttributeType::indexOf(const VAttribute* a)
 
     return -1;
 }
+#endif
 
 //Load the attributes parameter file
 void VAttributeType::load(VProperty* group)
@@ -338,15 +350,24 @@ void VAttributeType::load(VProperty* group)
          }
          else
          {
-             UI_ASSERT(0,"Unknown attribute type is read from parameter file: " << p->strName());
+             UserMessage::message(UserMessage::ERROR,true,
+                        "Unknown attribute type=" + p->strName() + " is loaded from parameter file!");
+             exit(1);
+             //UI_ASSERT(0,"Unknown attribute type is read from parameter file: " << p->strName());
          }
     }
 
-    UI_ASSERT(v.size() == types_.size(),"types size=" << types_.size() << "loaded size=" << v.size());
+    //UI_ASSERT(v.size() == types_.size(),"types size=" << types_.size() << "loaded size=" << v.size());
 
-    //non debug version
     if(v.size() == types_.size())
         types_=v;
+    else
+    {
+        UserMessage::message(UserMessage::ERROR,true,
+                   "The number attributes loaded from parameter file do not match expected number! loaded=" +
+                   UserMessage::toString(v.size()) + " expected=" + UserMessage::toString(types_.size()));
+        exit(1);
+    }
 }
 
 int VAttributeType::keyToDataIndex(const std::string& key) const
@@ -377,6 +398,7 @@ QStringList VAttributeType::searchKeys() const
     return lst;
 }
 
+#if 0
 void VAttributeType::items(const VNode* vnode,QList<VItemTmp_ptr>& lst)
 {
     int cnt=num(vnode);
@@ -401,6 +423,7 @@ VItemTmp_ptr VAttributeType::item(const VNode* vnode,const std::string& name)
 
     return VItemTmp_ptr();
 }
+#endif
 
 //================================
 // Meters

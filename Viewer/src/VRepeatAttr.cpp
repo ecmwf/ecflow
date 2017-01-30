@@ -15,8 +15,6 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
-//std::map<std::string,std::string> VRepeatAttr::typeNames_;
-
 std::string VRepeatDateAttr::subType_("repeat date");
 std::string VRepeatIntAttr::subType_("repeat integer");
 std::string VRepeatStringAttr::subType_("repeat string");
@@ -97,42 +95,6 @@ long ecf_repeat_date_to_julian(long ddate)
     return j1;
 }
 
-#if 0
-const std::string& VRepeatAttr::type(const Repeat& r)
-{
-    if(typeNames_.empty())
-    {
-        typeNames_["repeat date"]="date";
-        typeNames_["repeat integer"]="integer";
-        typeNames_["repeat string"]="string";
-        typeNames_["repeat enumerated"]="enumerated";
-        typeNames_["repeat day"]="day";
-    }
-
-    static std::string noTypeName="";
-
-    std::string t=r.toString();
-    for(std::map<std::string,std::string>::const_iterator it=typeNames_.begin(); it != typeNames_.end(); ++it)
-    {
-        if(t.find(it->first) == 0)
-            return it->second;
-    }
-
-    return noTypeName;
-}
-
-const std::string& VRepeat::type(VNode* n)
-{
-    if(n && n->node())
-    {
-        return VRepeat::type(n->node()->repeat());
-    }
-    static std::string noTypeName="";
-    return noTypeName;
-}
-
-#endif
-
 //================================
 // VRepeatAttrType
 //================================
@@ -155,6 +117,7 @@ VRepeatAttrType::VRepeatAttrType() : VAttributeType("repeat")
     searchKeyToData_["repeat_name"]=NameIndex;
     searchKeyToData_["repeat_value"]=ValueIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VRepeatAttr::scan;
 }
 
 QString VRepeatAttrType::toolTip(QStringList d) const
@@ -226,19 +189,30 @@ int VRepeatAttr::step() const
 QStringList VRepeatAttr::data() const
 {
     QStringList s;
-    if(node_ptr node=parent_->node())
+    if(parent_->node_)
     {
-        const Repeat& r=node->repeat();
+        const Repeat& r=parent_->node_->repeat();
         atype.encode(r,s,subType());
     }
     return s;
 }
 
+std::string VRepeatAttr::strName() const
+{
+    if(parent_->node_)
+    {
+        const Repeat& r=parent_->node_->repeat();
+        if(r.empty() == false)
+            return r.name();
+    }
+    return std::string();
+}
+
 void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
-    if(node_ptr node=vnode->node())
+    if(vnode->node_)
     {
-        const Repeat& r=node->repeat();
+        const Repeat& r=vnode->node_->repeat();
         if(r.empty() == false)
         {
             std::string t=r.toString();
@@ -261,6 +235,16 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         }
     }
 }
+
+int VRepeatAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        return (vnode->node_->repeat().empty())?0:1;
+    }
+    return 0;
+}
+
 
 //=====================================================
 //

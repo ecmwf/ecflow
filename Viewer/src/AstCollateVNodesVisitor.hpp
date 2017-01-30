@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,17 +13,14 @@
 
 #include "ExprAstVisitor.hpp"
 
-//#include <set>
 #include <vector>
 
 class VItem;
 
-#include "VItemTmp.hpp"
-
 class AstCollateVNodesVisitor : public ecf::ExprAstVisitor
 {
 public:
-  AstCollateVNodesVisitor(std::vector<VItemTmp_ptr>& );
+  AstCollateVNodesVisitor(std::vector<VItem*>& );
   virtual ~AstCollateVNodesVisitor();
 
   virtual void visitTop(AstTop*){}
@@ -51,8 +48,7 @@ public:
   virtual void visitVariable(AstVariable*);
 
 private:
-  //std::set<VItem*>& theSet_;
-  std::vector<VItemTmp_ptr>& items_;
+  std::vector<VItem*>& items_;
 };
 
 #endif // ASTCOLLATEVNODESVISITOR_HPP

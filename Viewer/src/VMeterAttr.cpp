@@ -36,6 +36,7 @@ VMeterAttrType::VMeterAttrType() : VAttributeType("meter")
     searchKeyToData_["meter_name"]=NameIndex;
     searchKeyToData_["meter_value"]=ValueIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VMeterAttr::scan;
 }
 
 QString VMeterAttrType::toolTip(QStringList d) const
@@ -69,7 +70,7 @@ static VMeterAttrType atype;
 
 VMeterAttr::VMeterAttr(VNode *parent,const Meter& m, int index) : VAttribute(parent,index)
 {
-    name_=m.name();
+    //name_=m.name();
 }
 
 VAttributeType* VMeterAttr::type() const
@@ -80,23 +81,42 @@ VAttributeType* VMeterAttr::type() const
 QStringList VMeterAttr::data() const
 {
     QStringList s;
-    if(node_ptr node=parent_->node())
+    if(parent_->node_)
     {
-        const std::vector<Meter>& v=node->meters();
+        const std::vector<Meter>& v=parent_->node_->meters();
         atype.encode(v[index_],s);
     }
     return s;
 }
 
+std::string VMeterAttr::strName() const
+{
+    if(parent_->node_)
+    {
+        const std::vector<Meter>& v=parent_->node_->meters();
+        return v[index_].name();
+    }
+    return std::string();
+}
+
 void VMeterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
-    if(node_ptr node=vnode->node())
+    if(vnode->node_)
     {
-        const std::vector<Meter>& v=node->meters();
+        const std::vector<Meter>& v=vnode->node_->meters();
         int n=v.size();
         for(size_t i=0; i < n; i++)
         {
             vec.push_back(new VMeterAttr(vnode,v[i],i));
         }
     }
+}
+
+int VMeterAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        return vnode->node_->meters().size();
+    }
+    return 0;
 }

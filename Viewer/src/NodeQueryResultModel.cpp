@@ -226,7 +226,7 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
                 //attribute
                 else
                 {
-                    if(VAttribute* a=VAttribute::make(d->node_,d->attr_))
+                    if(VAttribute* a=d->node_->findAttribute(d->attr_))
                         return VInfoAttribute::create(a);
                     else
                         return VInfoNode::create(d->node_);

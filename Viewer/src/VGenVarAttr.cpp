@@ -37,6 +37,7 @@ VGenVarAttrType::VGenVarAttrType() : VAttributeType("genvar")
     searchKeyToData_["var_value"]=ValueIndex;
     searchKeyToData_["var_type"]=TypeIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VGenVarAttr::scan;
 }
 
 QString VGenVarAttrType::toolTip(QStringList d) const
@@ -61,7 +62,7 @@ static VGenVarAttrType atype;
 
 VGenVarAttr::VGenVarAttr(VNode *parent,const Variable& v, int index) : VAttribute(parent,index)
 {
-    name_=v.name();
+    //name_=v.name();
 }
 
 VAttributeType* VGenVarAttr::type() const
@@ -81,6 +82,17 @@ QStringList VGenVarAttr::data() const
     return s;
 }
 
+std::string VGenVarAttr::strName() const
+{
+    if(parent_->isServer() == 0)
+    {
+        std::vector<Variable> v;
+        parent_->genVariables(v);
+        return v[index_].name();
+    }
+    return std::string();
+}
+
 void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
     if(vnode->isServer() == 0)
@@ -95,4 +107,14 @@ void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     }
 }
 
+int VGenVarAttr::totalNum(VNode* vnode)
+{
+    if(vnode->isServer() == 0)
+    {
+        std::vector<Variable> v;
+        vnode->genVariables(v);
+        return v.size();
+    }
+    return 0;
+}
 

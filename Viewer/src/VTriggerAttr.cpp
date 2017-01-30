@@ -37,6 +37,7 @@ VTriggerAttrType::VTriggerAttrType() : VAttributeType("trigger")
     searchKeyToData_["trigger_type"]=CompleteIndex;
     searchKeyToData_["trigger_expression"]=ExprIndex;
     searchKeyToData_["name"]=CompleteIndex;
+    scanProc_=VTriggerAttr::scan;
 }
 
 QString VTriggerAttrType::toolTip(QStringList d) const
@@ -114,4 +115,32 @@ void VTriggerAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         if(eC)
             vec.push_back(new VTriggerAttr(vnode,eC,1));
     }
+}
+
+void VTriggerAttr::expressions(const VNode* vnode,std::string& trigger, std::string& complete)
+{
+    if(node_ptr node=vnode->node())
+    {
+        Expression* eT=node->get_trigger();
+        Expression* eC=node->get_complete();
+
+        if(eT)
+            trigger=eT->expression();
+
+        if(eC)
+            complete=eC->expression();
+    }
+}
+
+int VTriggerAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        int n=0;
+        if(Expression* eT=vnode->node_->get_trigger()) n++;
+        if(Expression* eC=vnode->node_->get_complete()) n++;
+
+        return n;
+    }
+    return 0;
 }

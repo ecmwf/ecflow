@@ -37,6 +37,7 @@ VUserVarAttrType::VUserVarAttrType() : VAttributeType("var")
     searchKeyToData_["var_value"]=ValueIndex;
     searchKeyToData_["var_type"]=TypeIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VUserVarAttr::scan;
 }
 
 QString VUserVarAttrType::toolTip(QStringList d) const
@@ -61,7 +62,7 @@ static VUserVarAttrType atype;
 
 VUserVarAttr::VUserVarAttr(VNode *parent,const Variable& v, int index) : VAttribute(parent,index)
 {
-    name_=v.name();
+    //name_=v.name();
 }
 
 VAttributeType* VUserVarAttr::type() const
@@ -76,9 +77,9 @@ QStringList VUserVarAttr::data() const
     //Node
     if(parent_->isServer() == 0)
     {
-        if(node_ptr node=parent_->node())
+        if(parent_->node_)
         {
-            const std::vector<Variable>& v=node->variables();
+            const std::vector<Variable>& v=parent_->node_->variables();
             atype.encode(v[index_],s);
         }
     }
@@ -93,14 +94,35 @@ QStringList VUserVarAttr::data() const
     return s;
 }
 
+std::string VUserVarAttr::strName() const
+{
+    //Node
+    if(parent_->isServer() == 0)
+    {
+        if(parent_->node_)
+        {
+            const std::vector<Variable>& v=parent_->node_->variables();
+            return v[index_].name();
+        }
+    }
+    //Server
+    else
+    {
+        std::vector<Variable> v;
+        parent_->variables(v);
+        return v[index_].name();
+    }
+    return std::string();
+}
+
 void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
     //Node
     if(vnode->isServer() == 0)
     {
-        if(node_ptr node=vnode->node())
+        if(vnode->node_)
         {
-            const std::vector<Variable>& v=node->variables();
+            const std::vector<Variable>& v=vnode->node_->variables();
             int n=v.size();
             for(size_t i=0; i < n; i++)
             {
@@ -121,4 +143,22 @@ void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     }
 }
 
-
+int VUserVarAttr::totalNum(VNode* vnode)
+{
+    //Node
+    if(vnode->isServer() == 0)
+    {
+        if(vnode->node_)
+        {
+            return vnode->node_->variables().size();
+        }
+    }
+    //Server
+    else
+    {
+        std::vector<Variable> v;
+        vnode->variables(v);
+        return v.size();
+    }
+    return 0;
+}

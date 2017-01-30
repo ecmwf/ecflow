@@ -22,6 +22,7 @@ public:
     QStringList data() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static int totalNum(VNode* vnode);
 };
 
 #endif // VLATE_HPP

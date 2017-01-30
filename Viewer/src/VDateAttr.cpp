@@ -37,6 +37,7 @@ VDateAttrType::VDateAttrType() : VAttributeType("date")
     dataCount_=2;
     searchKeyToData_["date_name"]=NameIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VDateAttr::scan;
 }
 
 QString VDateAttrType::toolTip(QStringList d) const
@@ -71,14 +72,14 @@ VDateAttr::VDateAttr(VNode *parent,const DateAttr& t, int index) :
     VAttribute(parent,index),
     dataType_(DateData)
 {
-    name_=t.name();
+    //name_=t.name();
 }
 
 VDateAttr::VDateAttr(VNode *parent,const DayAttr& t, int index) :
     VAttribute(parent,index),
     dataType_(DayData)
 {
-    name_=t.name();
+    //name_=t.name();
 }
 
 VAttributeType* VDateAttr::type() const
@@ -89,17 +90,17 @@ VAttributeType* VDateAttr::type() const
 QStringList VDateAttr::data() const
 {
     QStringList s;
-    if(node_ptr node=parent_->node())
+    if(parent_->node_)
     {
         if(dataType_ == DateData)
         {
-            const std::vector<DateAttr>& v=node->dates();
+            const std::vector<DateAttr>& v=parent_->node_->dates();
             if(index_ < v.size())
                 atype.encode(v[index_],s);
         }
         else if(dataType_ == DayData)
         {
-            const std::vector<DayAttr>& v=node->days();
+            const std::vector<DayAttr>& v=parent_->node_->days();
             if(index_ < v.size())
                 atype.encode(v[index_],s);
         }
@@ -107,12 +108,32 @@ QStringList VDateAttr::data() const
     return s;
 }
 
+std::string VDateAttr::strName() const
+{
+    if(parent_->node_)
+    {
+        if(dataType_ == DateData)
+        {
+            const std::vector<DateAttr>& v=parent_->node_->dates();
+            if(index_ < v.size())
+                return v[index_].name();
+        }
+        else if(dataType_ == DayData)
+        {
+            const std::vector<DayAttr>& v=parent_->node_->days();
+            if(index_ < v.size())
+                return v[index_].name();
+        }
+    }
+    return std::string();
+}
+
 void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
-    if(node_ptr node=vnode->node())
+    if(vnode->node_)
     {
-        const std::vector<DateAttr>& dateV=node->dates();
-        const std::vector<DayAttr>& dayV=node->days();
+        const std::vector<DateAttr>& dateV=vnode->node_->dates();
+        const std::vector<DayAttr>& dayV=vnode->node_->days();
 
         int n=dateV.size();
         for(size_t i=0; i < n; i++)
@@ -126,4 +147,14 @@ void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
             vec.push_back(new VDateAttr(vnode,dayV[i],i));
         }
     }
+}
+
+int VDateAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        return vnode->node_->dates().size() +
+            vnode->node_->days().size();
+    }
+    return 0;
 }

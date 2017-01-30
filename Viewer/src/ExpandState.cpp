@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -85,15 +85,6 @@ void ExpandStateTree::save(const VTreeNode *root)
 
     clear();
 
-#if 0
-    VInfo_ptr s=currentSelection();
-    if(s)
-    {
-        if(node->server() == s->server())
-          expandState_->selection_=s;
-    }
-#endif
-
     QModelIndex rootIdx=model_->nodeToIndex(root);
     if(view_->isExpanded(rootIdx))
     {
@@ -133,19 +124,6 @@ void ExpandStateTree::restore(const VTreeNode* node)
     }
 
     restore(root_,node);
-
-#if 0
-    if(expandState_->selection_)
-    {
-        VInfo_ptr s=currentSelection();
-        if(!s)
-        {
-            expandState_->selection_->regainData();
-            currentSelection(expandState_->selection_);
-        }
-    }
-#endif
-
     clear();
 }
 
@@ -213,5 +191,4 @@ void ExpandState::clear()
         delete et;
     }
     items_.clear();
-    selection_.reset();
 }

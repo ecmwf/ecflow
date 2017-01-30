@@ -37,6 +37,7 @@ VLimitAttrType::VLimitAttrType() : VAttributeType("limit")
     searchKeyToData_["limit_value"]=ValueIndex;
     searchKeyToData_["limit_max"]=MaxIndex;
     searchKeyToData_["name"]=NameIndex;
+    scanProc_=VLimitAttr::scan;
 }
 
 QString VLimitAttrType::toolTip(QStringList d) const
@@ -69,7 +70,7 @@ static VLimitAttrType atype;
 
 VLimitAttr::VLimitAttr(VNode *parent,limit_ptr lim, int index) : VAttribute(parent,index)
 {
-    name_=lim->name();
+    //name_=lim->name();
 }
 
 VAttributeType* VLimitAttr::type() const
@@ -80,23 +81,42 @@ VAttributeType* VLimitAttr::type() const
 QStringList VLimitAttr::data() const
 {
     QStringList s;
-    if(node_ptr node=parent_->node())
+    if(parent_->node_)
     {
-        const std::vector<limit_ptr>& v=node->limits();
+        const std::vector<limit_ptr>& v=parent_->node_->limits();
         atype.encode(v[index_],s);
     }
     return s;
 }
 
+std::string VLimitAttr::strName() const
+{
+    if(parent_->node_)
+    {
+        const std::vector<limit_ptr>& v=parent_->node_->limits();
+        return v[index_]->name();
+    }
+    return std::string();
+}
+
 void VLimitAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
-    if(node_ptr node=vnode->node())
+    if(vnode->node_)
     {
-        const std::vector<limit_ptr>& v=node->limits();
+        const std::vector<limit_ptr>& v=vnode->node_->limits();
         int n=v.size();
         for(size_t i=0; i < n; i++)
         {
             vec.push_back(new VLimitAttr(vnode,v[i],i));
         }
     }
+}
+
+int VLimitAttr::totalNum(VNode* vnode)
+{
+    if(vnode->node_)
+    {
+        return vnode->node_->limits().size();
+    }
+    return 0;
 }
