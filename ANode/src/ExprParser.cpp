@@ -204,7 +204,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         {
           nodename
                 = leaf_node_d[
-                          lexeme_d [ (alnum_p || ch_p('_')) >> *(alnum_p || ch_p('_'))  ]
+                          lexeme_d [ (alnum_p || ch_p('_')) >> *(alnum_p || ch_p('_') || ch_p('.'))  ]
                              ]
                 ;
 
