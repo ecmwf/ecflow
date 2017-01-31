@@ -2010,9 +2010,18 @@ void Node::notify_delete()
 #endif
 }
 
+void Node::notify_start(const std::vector<ecf::Aspect::Type>& aspects)
+{
+   size_t observers_size = observers_.size();
+   for(size_t i = 0; i < observers_size; i++) {
+      observers_[i]->update_start(this,aspects);
+   }
+}
+
 void Node::notify(const std::vector<ecf::Aspect::Type>& aspects)
 {
-   for(size_t i = 0; i < observers_.size(); i++) {
+   size_t observers_size = observers_.size();
+   for(size_t i = 0; i < observers_size; i++) {
       observers_[i]->update(this,aspects);
    }
 }

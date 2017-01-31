@@ -447,27 +447,27 @@ public:
    virtual void collateChanges(DefsDelta& ) const = 0;
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
 
-   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeDefStatusDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const SuspendedMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeTriggerMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeCompleteMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeRepeatMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeLimitMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeInLimitMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeVariableMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeLateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeTodayMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeTimeMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeDayMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeCronMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeDateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeZombieMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeVerifyMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeDefStatusDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const SuspendedMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeTriggerMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeCompleteMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeRepeatMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeLimitMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeInLimitMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeVariableMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeLateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeTodayMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeTimeMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeDayMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeCronMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeDateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeZombieMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeVerifyMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
 
    // Find functions: ============================================================
    // Will search for a node by name(ie not a path) first on siblings, then on a parent
@@ -624,6 +624,7 @@ protected:
    void check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr*);
 
 public:
+   void notify_start(const std::vector<ecf::Aspect::Type>& aspects);
    void notify(const std::vector<ecf::Aspect::Type>& aspects);
    void attach(AbstractObserver*);
    void detach(AbstractObserver*);

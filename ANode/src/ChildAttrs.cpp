@@ -522,33 +522,51 @@ const Label& ChildAttrs::find_label(const std::string& name) const
 }
 
 
-void ChildAttrs::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeEventMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
 
+   if (aspect_only) {
+      const Event& ev = findEventByNameOrNumber(memento->event_.name_or_number());
+      if (!ev.empty()) {
+         aspects.push_back(ecf::Aspect::EVENT);
+         return;
+      }
+      // Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      return;
+   }
+
    if (set_event(memento->event_.name_or_number(),  memento->event_.value())) {
-      aspects.push_back(ecf::Aspect::EVENT);
       return;
    }
    addEvent( memento->event_);
 }
 
-void ChildAttrs::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeMeterMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
 
+   if (aspect_only) {
+      const Meter& met = findMeter(memento->meter_.name());
+      if (!met.empty()) {
+         aspects.push_back(ecf::Aspect::METER);
+         return;
+      }
+      // Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      return;
+   }
+
    if (set_meter(memento->meter_.name(), memento->meter_.value())) {
-      aspects.push_back(ecf::Aspect::METER);
       return;
    }
    addMeter(memento->meter_);
 }
 
-void ChildAttrs::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeLabelMemento* memento) " << node_->debugNodePath() << "\n";
@@ -557,10 +575,19 @@ void ChildAttrs::set_memento( const NodeLabelMemento* memento,std::vector<ecf::A
    size_t theSize = labels_.size();
    for(size_t i = 0; i < theSize; i++) {
       if (labels_[i].name() == memento->label_.name()) {
+         if (aspect_only) {
+            aspects.push_back(ecf::Aspect::LABEL);
+            return;
+         }
+
          labels_[i] = memento->label_;
-         aspects.push_back(ecf::Aspect::LABEL);
          return;
       }
+   }
+
+   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+   if (aspect_only) {
+      return;
    }
    addLabel(memento->label_);
 }

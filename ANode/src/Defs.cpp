@@ -1392,41 +1392,49 @@ unsigned int Defs::defs_only_max_state_change_no() const
    return max_change_no;
 }
 
-void Defs::set_memento(const StateMemento* memento,std::vector<ecf::Aspect::Type>& aspects) {
-
+void Defs::set_memento(const StateMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Defs::set_memento(const StateMemento* memento)\n";
 #endif
-   aspects.push_back(ecf::Aspect::STATE);
-	set_state( memento->state_ );
+
+	if (aspect_only) aspects.push_back(ecf::Aspect::STATE);
+	else             set_state( memento->state_ );
 }
 
-void Defs::set_memento( const ServerStateMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Defs::set_memento( const ServerStateMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Defs::set_memento(const ServerStateMemento* memento)\n";
 #endif
-   aspects.push_back(ecf::Aspect::SERVER_STATE);
-	server_.set_state( memento->state_ );
+
+	if (aspect_only) aspects.push_back(ecf::Aspect::SERVER_STATE);
+	else             server_.set_state( memento->state_ );
 }
 
-void Defs::set_memento( const ServerVariableMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Defs::set_memento( const ServerVariableMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const ServerVariableMemento* memento)\n";
 #endif
 
-   if (server_.user_variables().size() != memento->serverEnv_.size()) {
-      aspects.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
+   if (aspect_only) {
+      if (server_.user_variables().size() != memento->serverEnv_.size()) {
+         aspects.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
+      }
+      aspects.push_back(ecf::Aspect::SERVER_VARIABLE);
+      return;
    }
-
-   aspects.push_back(ecf::Aspect::SERVER_VARIABLE);
 
    server_.set_user_variables( memento->serverEnv_);
 }
 
-void Defs::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Defs::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const OrderMemento* memento)\n";
 #endif
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::ORDER);
+      return;
+   }
+   
    // Order the suites
 
    // Order nodeVec_ according to memento ordering
@@ -1450,17 +1458,19 @@ void Defs::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Typ
        std::cout << "Defs::set_memento could not find all the names\n";
        return;
    }
-   aspects.push_back(ecf::Aspect::ORDER);
+
+
    suiteVec_ = vec;
 }
 
-void Defs::set_memento( const FlagMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Defs::set_memento( const FlagMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const FlagMemento* memento)\n";
 #endif
-   aspects.push_back(ecf::Aspect::FLAG);
-   flag_.set_flag( memento->flag_.flag() );
+
+   if (aspect_only) aspects.push_back(ecf::Aspect::FLAG);
+   else             flag_.set_flag( memento->flag_.flag() );
 }
 
 // =====================================================================
@@ -1510,6 +1520,13 @@ void Defs::notify_delete()
    /// call detach in the case where the graphical tree is destroyed by user
    /// In this case the Subject/Node is being deleted.
    assert(observers_.empty());
+}
+
+void Defs::notify_start(const std::vector<ecf::Aspect::Type>& aspects)
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      observers_[i]->update_start(this,aspects);
+   }
 }
 
 void Defs::notify(const std::vector<ecf::Aspect::Type>& aspects)

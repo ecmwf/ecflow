@@ -34,6 +34,9 @@ public:
       if (node_) node_->detach(this);
    }
 
+   virtual void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) {}
+   virtual void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) {}
+
    virtual void update(const Node*, const std::vector<ecf::Aspect::Type>&){update_count_++;}
    virtual void update(const Defs*, const std::vector<ecf::Aspect::Type>&){update_count_++;}
 
