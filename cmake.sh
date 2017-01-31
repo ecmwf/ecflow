@@ -13,6 +13,7 @@ show_error_and_exit() {
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
    echo "  "
    echo "   make           - run make after cmake"
+   echo "   python3        - build with python3"
    echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
    echo "   install        - install to /usr/local/apps/eflow.  defaults is /var/tmp/$USER/install/cmake/ecflow"
    echo "   test           - run all the tests"
@@ -117,7 +118,7 @@ set -x # echo script lines as they are executed
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild/2.4.0
+module load ecbuild/2.6.0
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
@@ -151,17 +152,10 @@ fi
 if [[ "$python3_arg" = python3 ]] ; then
     # Need to wait for ecbuild to fix print error, meanwhile use local ecbuild to test python3
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
+    cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0.python3"
 fi
 
-# ===================================================================================
-# boost
-# if OS_VERSION not defined , default to empty string
-: ${OS_VERSION:=""}
-
-if [[ "$OS_VERSION" = "leap42" ]] ; then
-    module load boost/1.53.0
-fi
-
+ 
 # ====================================================================================  
 cmake_build_type=
 if [[ $mode_arg = debug ]] ; then
@@ -270,7 +264,7 @@ $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
-            -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
+            -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable" \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
@@ -283,11 +277,12 @@ $ecbuild $source_dir \
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
-            #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-deprecated'"
+            #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated'"
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
-	$make_arg
+	$make_arg 
+	# $make_arg VERBOSE=1
 	exit 0
 fi
 

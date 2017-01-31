@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #28 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -75,8 +75,11 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
          "  This is then compared with list of users in the ecf.lists file.\n"
          "  If this file is empty, then no authentication is done.\n"
          "  Each server can potentially have a different list.\n"
-         "  The default is <host>.<port>.ecf.lists\n"
-         "  Note: Any settings will be prepended with <host>.<port>.\n"
+         "  The default is <host>.<port>.ecf.lists if no ECF_LISTS is specified.\n"
+         "  Note: If the path to a ecf.lists is specified as i.e /var/tmp/ecflow/ecf.lists\n"
+         "        then no prefix is added, the path is kept as is.\n"
+         "        However if 'ECF_LISTS=ecf.lists' then this matches the default, and the\n"
+         "        server will expect <host>.<port>.ecf.lists \n"
          "ECF_TASK_THRESHOLD:\n"
          "  The Job generation process is expected to take less than 60 seconds\n"
          "  This is used to aid debugging of task tasking excessive times for job generation\n"

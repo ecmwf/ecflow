@@ -103,7 +103,6 @@ void tree_c::create (Widget parent, char *widget_name)
         ac = 0;
         children[ac++] = why_label_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void tree_c::hideOtherCB( Widget widget, XtPointer client_data, XtPointer call_data )

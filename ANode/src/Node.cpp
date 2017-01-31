@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #305 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -201,6 +201,9 @@ void Node::suspend()
 
 void Node::begin()
 {
+   // record effect of defstatus for node changes, for verify attributes
+   if (misc_attrs_) misc_attrs_->begin();
+
    // Set the state without causing any side effects
    initState(0);
 
@@ -212,7 +215,6 @@ void Node::begin()
 
    if (lateAttr_) lateAttr_->reset();
    if (child_attrs_) child_attrs_->begin();
-   if (misc_attrs_) misc_attrs_->begin();
    for(size_t i = 0; i < limitVec_.size(); i++)   { limitVec_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
@@ -776,6 +778,10 @@ void Node::set_state(NState::State s, bool force, const std::string& additional_
 
 void Node::setStateOnly(NState::State newState, bool force, const std::string& additional_info_to_log)
 {
+   if (state_.first.state() == newState) {
+      return; // if old and new state the same dont do anything
+   }
+
    Suite* theSuite =  suite();
    const Calendar& calendar = theSuite->calendar();
 

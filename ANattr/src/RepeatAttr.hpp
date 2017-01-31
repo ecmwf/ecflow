@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #51 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -360,7 +360,7 @@ public:
    virtual bool compare(RepeatBase*) const;
    virtual bool valid() const { return valid_;}
    virtual std::string valueAsString() const { return std::string(); } ;
-   virtual std::string value_as_string(int index) const { return std::string(); }
+   virtual std::string value_as_string(int ) const { return std::string(); }
    virtual void setToLastValue() { /* do nothing  ?? */ }
    virtual void reset() {  valid_ = true;  }
    virtual void change(const std::string& /*newValue*/) { /* do nothing */ }

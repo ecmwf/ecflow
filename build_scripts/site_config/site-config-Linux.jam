@@ -1,9 +1,9 @@
-## Copyright 2009-2016 ECMWF. 
-## This software is licensed under the terms of the Apache Licence version 2.0 
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-## In applying this licence, ECMWF does not waive the privileges and immunities 
-## granted to it by virtue of its status as an intergovernmental organisation 
-## nor does it submit to any jurisdiction. 
+## Copyright 2009-2017 ECMWF.
+## This software is licensed under the terms of the Apache Licence version 2.0
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+## In applying this licence, ECMWF does not waive the privileges and immunities
+## granted to it by virtue of its status as an intergovernmental organisation
+## nor does it submit to any jurisdiction.
 
 # ===================================================================
 # site-config.jam file for Linux/gcc
@@ -18,7 +18,7 @@ local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 
 #
 # --layout=system    -> libboost_system.a (default)
-# --layout=tagged    -> libboost_system-mt-d.a(debug)          libboost_system-mt.a(release) 
+# --layout=tagged    -> libboost_system-mt-d.a(debug)          libboost_system-mt.a(release)
 # --layout=versioned -> libboost_system-xlc-mt-d-1.42(debug)   libboost_system-xlc-mt-1_42.a(release)
 #
 # Boost libraries referenced in client/server programs
@@ -63,8 +63,8 @@ lib boost_python_static   : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 #  	a/ Not all tests require it
 #  	b/ Can cause links errors
 # Hence left to individual projects/test
-project site-config 
-	: requirements <include>$(BOOST_ROOT)  
+project site-config
+	: requirements <include>$(BOOST_ROOT)
  	;
 
 # using syntax:
@@ -77,7 +77,7 @@ using testing ;
 # ==================== ECFLOWVIEW =======================================================
 
 local motif_library = [ os.environ MOTIF_LIBRARY ] ;
-motif_library default = "/usr/lib64" ; 
-constant MOTIF_LIBRARY : $(motif_library) ; 
+motif_library default = "/usr/lib64" ;
+constant MOTIF_LIBRARY : $(motif_library) ;
 
 MOTIF_LIBRARY default = /usr/lib ;

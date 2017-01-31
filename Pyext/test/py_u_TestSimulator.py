@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2016 ECMWF.
+# Copyright 2009-2017 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http:#www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -75,7 +75,7 @@ def simulate_deadlock():
     os.remove("defs.flat")
 
 def test_time_series():
-    print "Simulator:: ...test_time_series";
+    print ("Simulator:: ...test_time_series")
 
     # suite suite
     #  clock real <sunday>
@@ -117,9 +117,9 @@ if __name__ == "__main__":
     # traverse the CSim test data, make sure python simulation matches c++
     workspace_dir = Test.get_root_source_dir()
     csim_test_data = workspace_dir + "/CSim/test/data/good_defs"
-    print csim_test_data
+    print (csim_test_data)
     for path in Test.all_files(csim_test_data,'*.def'):
-        print path
+        print (path)
         theDefs = ecflow.Defs(path)
         theResult = theDefs.simulate()
         assert len(theResult) == 0,  "Expected simulation to return without any errors, but found:\n" + theResult

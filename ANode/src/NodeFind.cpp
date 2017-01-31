@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #53 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -33,9 +33,10 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 bool Node::findParentVariableValue(const std::string& name, std::string& theValue) const
 {
-   if (findVariableValue(name,theValue)) return true;
-   const Repeat& repeat = findRepeat(name);
-   if (!repeat.empty())  { theValue = repeat.valueAsString(); return true; }
+   if (!varVec_.empty() && findVariableValue(name,theValue)) return true;
+   if (!repeat_.empty() && repeat_.name() == name) {
+      theValue = repeat_.valueAsString(); return true;
+   }
    if (findGenVariableValue(name,theValue)) return true;
 
 
@@ -43,8 +44,10 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
    while (theParent) {
 
       if (theParent->findVariableValue(name,theValue)) return true;
-      const Repeat& repeatVar = theParent->findRepeat(name);
-      if (!repeatVar.empty()) { theValue = repeatVar.valueAsString(); return true; }
+      const Repeat& rep = theParent->repeat();
+      if (!rep.empty() && rep.name() == name) {
+         theValue = rep.valueAsString(); return true;
+      }
       if (theParent->findGenVariableValue(name,theValue)) return true;
 
       theParent =  theParent->parent();
@@ -152,6 +155,8 @@ bool Node::user_variable_exists(const std::string& name) const
 
 const Variable& Node::findVariable(const std::string& name) const
 {
+   if (varVec_.empty())  return Variable::EMPTY();
+
    size_t theSize = varVec_.size();
    for(size_t i = 0; i < theSize; i++) {
       if (varVec_[i].name() == name) {

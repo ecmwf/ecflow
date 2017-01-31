@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #31 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -43,7 +43,6 @@ std::ostream& ClientHandleCmd::print(std::ostream& os) const
       case ClientHandleCmd::DROP_USER:{
          if (drop_user_.empty()) return user_cmd(os,CtsApi::ch_drop_user(user()));
          return user_cmd(os,CtsApi::ch_drop_user(drop_user_));
-         break;
       }
 		case ClientHandleCmd::ADD:      return user_cmd(os,CtsApi::to_string(CtsApi::ch_add(client_handle_,suites_))); break;
 		case ClientHandleCmd::REMOVE:   return user_cmd(os,CtsApi::to_string(CtsApi::ch_remove(client_handle_,suites_))); break;
@@ -129,7 +128,6 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 
       case ClientHandleCmd::SUITES: {
          return PreAllocatedReply::client_handle_suites_cmd(as) ;
-         break;
       }
 
 		default: assert(false); break;

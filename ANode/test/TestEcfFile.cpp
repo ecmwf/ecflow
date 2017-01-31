@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -550,8 +550,9 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_ECFLOW_274 )
    std::string job_file_contents;
    BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
 
-   /// Remove all the generated files
-   boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
+   /// Remove all the generated files. This occasionally fails on ecgb/lxg ???
+   try { boost::filesystem::remove_all( ecf_home + suite->absNodePath() ); }
+   catch (...) {  cout << "Could not remove directory " << ecf_home + suite->absNodePath() << "\n";}
 }
 
 
