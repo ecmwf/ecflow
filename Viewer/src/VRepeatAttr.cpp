@@ -236,16 +236,6 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     }
 }
 
-int VRepeatAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        return (vnode->node_->repeat().empty())?0:1;
-    }
-    return 0;
-}
-
-
 //=====================================================
 //
 // VRepeatDateAttr

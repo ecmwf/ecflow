@@ -77,7 +77,18 @@ VLabelAttr::VLabelAttr(VNode *parent,const Label& label, int index) : VAttribute
 
 int VLabelAttr::lineNum() const
 {
-    return parent_->labelLineNum(index_);
+    if(parent_->node_)
+    {
+        const std::vector<Label>&  v=parent_->node_->labels();
+        std::string val=v[index_].new_value();
+        if(val.empty() || val == " ")
+        {
+            val=v[index_].value();
+        }
+        return std::count(val.begin(), val.end(), '\n')+1;
+    }
+
+    return 1;
 }
 
 VAttributeType* VLabelAttr::type() const
@@ -117,13 +128,4 @@ void VLabelAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
             vec.push_back(new VLabelAttr(vnode,v[i],i));
         }
     }
-}
-
-int VLabelAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        return vnode->node_->labels().size();
-    }
-    return 0;
 }

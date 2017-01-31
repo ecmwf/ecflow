@@ -96,12 +96,3 @@ void VLateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         }
     }
 }
-
-int VLateAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        return (vnode->node_->get_late())?1:0;
-    }
-    return 0;
-}

@@ -115,12 +115,3 @@ void VLimiterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         }
     }
 }
-
-int VLimiterAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        return vnode->node_->inlimits().size();
-    }
-    return 0;
-}

@@ -20,7 +20,6 @@
 #include "Node.hpp"
 
 #include "VItem.hpp"
-#include "VItemTmp.hpp"
 
 class AttributeFilter;
 class IconFilter;
@@ -108,50 +107,20 @@ public:
     VServer *root() const;
     virtual ServerHandler* server() const;
     virtual VNode* suite() const;
-    node_ptr node() const {return node_;}
-
-    //VServer* isServer() const {return NULL;}
+    node_ptr node() const {return node_;}  
     VNode* isNode() const {return const_cast<VNode*>(this);}
-    //VSuiteNode* isSuite() const {return NULL;}
-    //VFamilyNode* isFamily() const {return NULL;}
-    //VTaskNode* isTask() const {return NULL;}
-    //VAliasNode* isAlias() const {return NULL;}
-    //virtual VAttribute* isAttribute() const {return NULL;}
-
     bool isTopLevel() const;
-    //bool isServer() const {return false;}
 
-    /*bool isSuite() const {return isTopLevel();}
-    bool isFamily() const;
-    bool isTask() const {return false;}
-    bool isAlias() const;*/
-
-#if 0
-    void beginUpdateAttrNum();
-    void endUpdateAttrNum();
-    short cachedAttrNum() const;
-#endif
-
-    int attrNum(AttributeFilter* filter=0) const;
-
+    //Attributes
     const std::vector<VAttribute*> attr() const {return attr_;}
-    QStringList getAttributeData(int,VAttributeType*&);
-    QStringList getAttributeData(int,AttributeFilter *filter=0);
-    bool getAttributeData(const std::string& type,int row, QStringList&);
+    int attrNum(AttributeFilter* filter=0) const;
     VAttribute* attribute(int,AttributeFilter *filter=0) const;
-    int attributeIndex(const VAttribute* a, AttributeFilter *filter) const;
+    VAttribute* attributeForType(int,VAttributeType*) const;
+    int indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const;
     VAttribute* findAttribute(QStringList aData);
     VAttribute* findAttribute(const std::string& typeName,const std::string& name);
     VAttribute* findAttribute(VAttributeType* type,const std::string& name);
-    void attributes(VAttributeType*,std::vector<VAttribute*>& v);
 
-#if 0
-    VAttributeType* getAttributeType(int);
-#endif
-    int getAttributeLineNum(int row,AttributeFilter *filter=0);
-    QString attributeToolTip(int row,AttributeFilter *filter=0);
-
-    //VNode* parent() const {return parent_;}
     int numOfChildren() const { return static_cast<int>(children_.size());}
     VNode* childAt(int index) const;
     int indexOfChild(const VNode* vn) const;
@@ -195,7 +164,6 @@ public:
     virtual void internalState(VNodeInternalState&) {}
 
     bool hasAccessed() const;
-    //bool isAncestor(const VNode* n) const;
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
 
@@ -204,13 +172,10 @@ public:
     int index() const {return index_;}
 
     const std::string& nodeType();
-    //const std::string& typeStr() const;
     virtual QString toolTip();
     
     virtual void why(std::vector<std::string>& theReasonWhy) const;
-    const std::string&  abortedReason() const;
-    int labelNum() const;
-    int labelLineNum(int row) const;
+    const std::string&  abortedReason() const;  
     void statusChangeTime(QString&) const;
     uint statusChangeTime() const;
 
@@ -234,11 +199,8 @@ protected:
     void removeChild(VNode*);
     void scanAttr();
     void rescanAttr();
+    void findAttributes(VAttributeType*,std::vector<VAttribute*>& v);
 
-#if 0
-    short currentAttrNum() const;
-    bool isAttrNumInitialised() const {return attrNum_!=-1;}
-#endif
     VNode* find(const std::vector<std::string>& pathVec);
     virtual void check(VServerSettings* conf,bool) {}
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
@@ -246,17 +208,11 @@ protected:
 
     VAttribute* findLimit(const std::string& path, const std::string& name);
     static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
-    //static void scanForTriggered(VNode *n);
     static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
 
     node_ptr node_;
-    //VNode* parent_;
     std::vector<VNode*> children_;
     std::vector<VAttribute*> attr_;
-#if 0
-    mutable short attrNum_;
-    mutable short cachedAttrNum_;
-#endif
     int index_;
     VNodeTriggerData* data_;
     static std::string nodeMarkedForMoveRelPath_;

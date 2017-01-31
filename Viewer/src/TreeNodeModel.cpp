@@ -374,12 +374,18 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role,VTreeN
         return (vnode->server()->connectState()->state() == ConnectState::Lost)?0:1;
 	}
 	else if(role == Qt::DisplayRole)
-	{                  
-        return vnode->getAttributeData(index.row(),atts_);
+    {
+        if(VAttribute* a=vnode->attribute(index.row(),atts_))
+            return a->data();
+        else
+            return QStringList();
 	}
     else if(role ==  Qt::ToolTipRole)
     {
-        return vnode->attributeToolTip(index.row(),atts_);
+        if(VAttribute* a=vnode->attribute(index.row(),atts_))
+            return a->toolTip();
+        else
+            return QString();
     }
 
 	return QVariant();
@@ -844,7 +850,7 @@ QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) con
     VTreeServer* server=mserver->treeServer();
     Q_ASSERT(server);
 
-    int row=node->attributeIndex(a,atts_);
+    int row=node->indexOfAttribute(a,atts_);
     if(row != -1)
     {
         //This is a server!!!
@@ -997,31 +1003,6 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
         }
     }
 
-#if 0
-        int attNum=parentNode->attrNum(atts_);
-
-        //It is a node
-        if(index.row() >= attNum)
-		{
-            VNode *n=parentNode->childAt(index.row()-attNum)->vnode();
-			return VInfoNode::create(n);
-		}
-		//It is an attribute
-		else
-		{
-            VNode *n=parentNode->vnode();
-            Q_ASSERT(n);
-            VItemTmp_ptr atmp=VAttributeType::itemForAbsIndex(n,index.row(),atts_);
-            if(atmp->attribute())
-            {
-                //VInfo will take charge of the attribute!
-                VInfo_ptr p=VInfoAttribute::create(atmp->attribute()->clone());
-                return p;
-            }
-		}
-	}
-#endif
-
     VInfo_ptr res;
 	return res;
 }
@@ -1170,7 +1151,7 @@ void TreeNodeModel::slotEndAddRemoveAttributes(VTreeServer* server,const VTreeNo
 	//We need to update all the attributes to reflect the change!
 	//(Since we do not have information about what attribute was actually added
 	//we always add or remove attributes at the end of the attribute list!!! Then the
-	//call below will update all the attributes of the node in the tree).
+    //slot below will update all the attributes of the node in the tree).
 	slotAttributesChanged(server,node);
 }
 

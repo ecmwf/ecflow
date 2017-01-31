@@ -44,13 +44,11 @@
 
 #include <boost/algorithm/string.hpp>
 
-#define _UI_VNODE_DEBUGconst std::vector<Meter>& v=node->meters();
-
+#define _UI_VNODE_DEBUG
 
 // static member of VNode
 std::string VNode::nodeMarkedForMoveRelPath_;
 std::string VNode::nodeMarkedForMoveServerAlias_;
-
 
 //For a given node this class stores all the nodes that this node itself triggers.
 //For memory efficiency we only store the AttributeFilterindex of the nodes not the pointers themselves.
@@ -214,30 +212,9 @@ bool VNode::hasAccessed() const
 	return true; //!name_.empty();
 }
 
-#if 0
-//At the beginning of the update we get the current number of attributes
-void VNode::beginUpdateAttrNum()
-{
-	//if(attrNum_ != -1)
-	//{
-	//	attrNum_=cachedAttrNum_;
-	//}
-
-	//attrNum_=VAttribute::totalNum(node_);
-}
-
-//At the end of the update we set the cached value to the current number of attributes
-void VNode::endUpdateAttrNum()
-{
-	cachedAttrNum_=attrNum_;
-    attrNum_=VAttributeType::totalNum(this);
-}
-
-short VNode::cachedAttrNum() const
-{
-	return cachedAttrNum_;
-}
-#endif
+//------------------------
+// Attributes
+//------------------------
 
 void VNode::scanAttr()
 {  
@@ -265,37 +242,14 @@ int VNode::attrNum(AttributeFilter *filter) const
         int n=0;
         for(size_t i=0; i < attr_.size(); i++)
         {
-            if(filter->isSet(attr_[i]->type()))
+            if(filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i])
                 n++;
         }
         return n;
     }
 
     return attr_.size();
-
-    //return VAttributeType::totalNum(this,filter);
-
-#if 0
-    //If if was not initialised we get its value
-	if(attrNum_==-1)
-	{
-        attrNum_=VAttributeType::totalNum(this);
-
-		if(cachedAttrNum_ == -1)
-			cachedAttrNum_=attrNum_;
-	}
-
-	return attrNum_;
-#endif
-
 }
-
-#if 0
-short VNode::currentAttrNum() const
-{
-    return VAttributeType::totalNum(this);
-}
-#endif
 
 VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
 {
@@ -310,13 +264,13 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
 
         for(size_t i=0; i < cnt; i++)
         {
-            if(filter->isSet(attr_[i]->type()))
+            if(filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i] )
             {
                 if(n == row)
                 {
                     return attr_[i];
                 }
-                n++;
+                n++;               
             }
         }
     }
@@ -328,7 +282,38 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
     return 0;
 }
 
-int VNode::attributeIndex(const VAttribute* a, AttributeFilter *filter) const
+VAttribute* VNode::attributeForType(int row,VAttributeType *t) const
+{
+    assert(row>=0);
+
+    int n=0;
+    int cnt=attr_.size();
+    if(row >= cnt)
+        return 0;
+
+    bool hasIt=false;
+    int rowCnt=0;
+    for(size_t i=0; i < cnt; i++)
+    {
+        if(attr_[i]->type() == t)
+        {
+            if(rowCnt == row)
+            {
+                return attr_[i];
+            }
+            rowCnt++;
+            hasIt=true;
+        }
+        else if(hasIt)
+        {
+            return 0;
+        }
+    }
+
+    return 0;
+}
+
+int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
 {
     if(filter)
     {
@@ -336,7 +321,7 @@ int VNode::attributeIndex(const VAttribute* a, AttributeFilter *filter) const
         int cnt=attr_.size();
         for(size_t i=0; i < cnt; i++)
         {
-            if(filter->isSet(attr_[i]->type()))
+            if(filter->isSet(attr_[i]->type())  || filter->forceShowAttr() == attr_[i]  )
             {
                 if(a==attr_[i])
                     return n;
@@ -351,14 +336,13 @@ int VNode::attributeIndex(const VAttribute* a, AttributeFilter *filter) const
         int cnt=attr_.size();
         for(size_t i=0; i < cnt; i++)
         {
-            if(a==attr_[i])
+            if(a == attr_[i])
                 return i;
         }
     }
 
     return -1;
 }
-
 
 VAttribute* VNode::findAttribute(const std::string& typeName,const std::string& name)
 {
@@ -399,80 +383,20 @@ VAttribute* VNode::findAttribute(QStringList aData)
     return 0;
 }
 
-void VNode::attributes(VAttributeType *t,std::vector<VAttribute*>& v)
+void VNode::findAttributes(VAttributeType *t,std::vector<VAttribute*>& v)
 {
     int cnt=attr_.size();
-    bool hasIt=false;
+    bool hasType=false;
     for(size_t i=0; i < cnt; i++)
     {
         if(attr_[i]->type() == t)
         {
             v.push_back(attr_[i]);
-            hasIt=true;
+            hasType=true;
         }
-        else if(hasIt)
+        else if(hasType)
             return;
     }
-}
-
-QStringList VNode::getAttributeData(int row,VAttributeType*& type)
-{
-    return attr_[row]->data();
-#if 0
-    QStringList lst;
-    VAttributeType::getData(this,row,type,lst);
-	return lst;
-#endif
-}
-
-QStringList VNode::getAttributeData(int row,AttributeFilter *filter)
-{
-    if(VAttribute *a=attribute(row,filter))
-        return a->data();
-
-    return QStringList();
-
-#if 0
-    VAttributeType* type;
-    QStringList lst;
-    VAttributeType::getData(this,row,type,lst,filter);
-    return lst;
-#endif
-}
-
-#if 0
-VAttributeType* VNode::getAttributeType(int row)
-{
-    return VAttributeType::getType(this,row);
-}
-#endif
-
-bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
-{
-#if 0
-    return VAttributeType::getData(type,this,row,data);
-#endif
-}
-
-int VNode::getAttributeLineNum(int row,AttributeFilter *filter)
-{
-    return attr_[row]->lineNum();
-    //return VAttributeType::getLineNum(this,row,filter);
-}
-
-QString VNode::attributeToolTip(int row,AttributeFilter *filter)
-{
-    if(VAttribute *a=attribute(row,filter))
-        return a->toolTip();
-
-    return QString();
-
-#if 0
-    VAttributeType* type;
-    QStringList lst;
-    VAttributeType::getData(this,row,type,lst,filter);
-    return (type)?(type->toolTip(lst)):QString();
-#endif
 }
 
 void VNode::addChild(VNode* vn)
@@ -939,30 +863,6 @@ const std::string& VNode::abortedReason() const
 
 }
 
-int VNode::labelNum() const
-{
-    return (node_)?node_->labels().size():0;
-}
-
-int VNode::labelLineNum(int row) const
-{
-    if(!node_)
-        return 1;
-
-    const std::vector<Label>&  v=node_->labels();
-    if(row >=0 && row < v.size())
-    {
-        std::string val=v[row].new_value();
-        if(val.empty() || val == " ")
-        {
-            val=v[row].value();
-        }
-        return std::count(val.begin(), val.end(), '\n')+1;
-    }
-
-    return 1;
-}
-
 void VNode::statusChangeTime(QString& sct) const
 {
     if(node_)
@@ -1053,7 +953,7 @@ void VNode::triggers(TriggerCollector* tlc)
 
         //Limiters
         std::vector<VAttribute*> limiterVec;
-        attributes(VAttributeType::find("limiter"),limiterVec);
+        findAttributes(VAttributeType::find("limiter"),limiterVec);
         int n=limiterVec.size();
         for(size_t i=0; i < n; i++)
         {
@@ -1074,7 +974,7 @@ void VNode::triggers(TriggerCollector* tlc)
 
         //Date
         std::vector<VAttribute*> dateVec;
-        attributes(VAttributeType::find("date"),dateVec);
+        findAttributes(VAttributeType::find("date"),dateVec);
         n=dateVec.size();
         for(size_t i=0; i < n; i++)
         {
@@ -1083,7 +983,7 @@ void VNode::triggers(TriggerCollector* tlc)
 
         //Time
         std::vector<VAttribute*> timeVec;
-        attributes(VAttributeType::find("time"),timeVec);
+        findAttributes(VAttributeType::find("time"),timeVec);
         n=timeVec.size();
         for(size_t i=0; i < n; i++)
         {
@@ -1205,7 +1105,7 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
 
     //Find the matching limit in the node
     std::vector<VAttribute*> limit;
-    n->attributes(VAttributeType::find("limit"),limit);
+    n->findAttributes(VAttributeType::find("limit"),limit);
     int limitNum=limit.size();
     for(size_t i=0; i < limitNum; i++)
     {       

@@ -90,6 +90,7 @@ public:
     bool matchForceShowAttr(const VNode*,VAttributeType*) const;
     void setForceShowAttr(VAttribute* a);
     void clearForceShowAttr();
+    void updateForceShowAttr();
     VAttribute* forceShowAttr() const;
 
 private:

@@ -73,37 +73,6 @@ void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar)
                         return;
                 }
             }
-
-#if 0
-            QStringList types;
-            types << "event" << "meter" << "var" << "genvar";
-            Q_FOREACH(QString tName,types)
-            {
-                QList<VItemTmp_ptr> lst;
-
-                VAttributeType::items(tName.toStdString(),n,lst);
-                Q_FOREACH(VItemTmp_ptr aItem,lst)
-                {
-                    VAttribute *a=aItem->attribute();
-                    assert(a);
-                    for(std::vector<VItemTmp_ptr>::iterator it = items_.begin();it != items_.end(); ++it)
-                    {
-                        if(a->sameContents((*it)->item()))
-                        {
-                             return;
-                        }
-                    }
-
-                    if(a->strName() == astVar->name())
-                    {
-                        items_.push_back(aItem);
-                        return;
-                    }
-                }
-
-            }
-#endif
-
         }
     }
 

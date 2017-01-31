@@ -132,15 +132,3 @@ void VTriggerAttr::expressions(const VNode* vnode,std::string& trigger, std::str
     }
 }
 
-int VTriggerAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        int n=0;
-        if(Expression* eT=vnode->node_->get_trigger()) n++;
-        if(Expression* eC=vnode->node_->get_complete()) n++;
-
-        return n;
-    }
-    return 0;
-}

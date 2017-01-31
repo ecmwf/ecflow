@@ -234,23 +234,6 @@ void NodeQueryEngine::runRecursively(VNode *node)
                     }
                 }
                 ++it;
-
-#if 0
-                QList<VItemTmp_ptr> aLst;
-                it.key()->items(node,aLst);
-
-                Q_FOREACH(VItemTmp_ptr aItem,aLst)
-                {
-                    VAttribute* a=aItem->attribute();
-                    Q_ASSERT(a);
-                    if(it.value()->execute(a))
-                    {
-                        broadcastFind(node,a->data());
-                        scanCnt_++;
-                    }
-                }
-                ++it;
-#endif
             }
 
 

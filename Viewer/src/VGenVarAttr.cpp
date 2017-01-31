@@ -107,14 +107,3 @@ void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     }
 }
 
-int VGenVarAttr::totalNum(VNode* vnode)
-{
-    if(vnode->isServer() == 0)
-    {
-        std::vector<Variable> v;
-        vnode->genVariables(v);
-        return v.size();
-    }
-    return 0;
-}
-
