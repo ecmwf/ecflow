@@ -30,10 +30,10 @@ public:
     
     static VConfig* instance();
     
-    const std::string& appName() {return appName_;}
-    const std::string& appLongName() {return appLongName_;}
+    const std::string& appName() const {return appName_;}
+    const std::string& appLongName() const {return appLongName_;}
     void init(const std::string& parDir);
-    const std::vector<VProperty*>& groups() {return groups_;}
+    const std::vector<VProperty*>& groups() const {return groups_;}
     VProperty* find(const std::string& path);
 
     VProperty* cloneServerGui(VProperty *linkTarget);

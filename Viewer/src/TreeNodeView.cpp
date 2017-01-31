@@ -14,6 +14,7 @@
 #include <QHeaderView>
 #include <QPalette>
 #include <QScrollBar>
+#include <QTime>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>

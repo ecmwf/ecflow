@@ -60,7 +60,7 @@ public:
     VItemTmp_ptr item(const VNode*,const std::string&);
     virtual bool itemData(const VNode*,int index,QStringList&)=0;
 
-    int id() const {return id_;}
+    int typeId() const {return typeId_;}
     int keyToDataIndex(const std::string& key) const;
     int searchKeyToDataIndex(const std::string& key) const;
     QStringList searchKeys() const;
@@ -75,7 +75,7 @@ protected:
     std::map<std::string,int> keyToData_;
     std::map<std::string,int> searchKeyToData_;
     int dataCount_;
-    int id_;
+    int typeId_;
 
 private:
     static std::map<std::string,VAttributeType*> typesMap_;

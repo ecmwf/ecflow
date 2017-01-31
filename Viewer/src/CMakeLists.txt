@@ -55,7 +55,7 @@ set(viewer_srcs
     #LogEvent.cpp
     LogModel.cpp
     LogProvider.cpp
-    LogServer.cpp
+    #LogServer.cpp
     LogTruncator.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 

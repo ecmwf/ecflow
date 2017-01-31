@@ -32,10 +32,10 @@ class ServerListTmpItem
 {
 public:
     ServerListTmpItem() {}
-    ServerListTmpItem(const std::string name,const std::string& host, const std::string& port) :
+    ServerListTmpItem(const std::string& name,const std::string& host, const std::string& port) :
         name_(name), host_(host), port_(port) {}
     explicit ServerListTmpItem(ServerItem* item);
-    ServerListTmpItem(const ServerListTmpItem& o) {name_=o.name_; host_=o.host_; port_=o.port_;}
+    ServerListTmpItem(const ServerListTmpItem& o) : name_(o.name_), host_(o.host_), port_(o.port_) {}
 
     const std::string& name() const {return name_;}
     const std::string& host() const {return host_;}
@@ -67,7 +67,7 @@ public:
 class ServerList
 {
 public:
-	int count() {return static_cast<int>(items_.size());}
+    int count() const {return static_cast<int>(items_.size());}
 	ServerItem* itemAt(int);
 	ServerItem* find(const std::string& name);
 	ServerItem* find(const std::string& name, const std::string& host, const std::string& port);

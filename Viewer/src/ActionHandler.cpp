@@ -203,7 +203,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 if (customCommandDialog->exec() == QDialog::Accepted)
                 {
                     // the user could have changed the node selection within the custom editor
-                    std::vector<VInfo_ptr> selectedNodes = customCommandDialog->selectedNodes();
+                    customCommandDialog->selectedNodes();
 
                     // the dialogue contains a 'fake' menu item created from the custom command
                     item = &(customCommandDialog->menuItem());

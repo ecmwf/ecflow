@@ -162,7 +162,7 @@ void DashboardTitle::updateTitle()
     QList<QColor> fillColors;
     QList<QColor> textColors;
 
-    const std::vector<ServerItem*> items=filter_->items();
+    const std::vector<ServerItem*>& items=filter_->items();
     for(std::vector<ServerItem*>::const_iterator it=items.begin(); it != items.end(); ++it)
     {
         //Get text
@@ -196,8 +196,7 @@ void DashboardTitle::updateTitle()
     Q_ASSERT(num>0);
 
     {
-        const int marginX=0;
-        const int marginY=0;
+        const int marginX=0;      
         const int gap=1;
 
         int maxBandH=2;

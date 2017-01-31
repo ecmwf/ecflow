@@ -37,7 +37,7 @@ std::vector<VAttributeType*> VAttributeType::types_;
 VAttributeType::VAttributeType(const std::string& name) :
         VParam(name),
         dataCount_(0),
-        id_(types_.size())
+        typeId_(types_.size())
 {
     typesMap_[name]=this;
     types_.push_back(this);

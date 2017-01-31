@@ -235,7 +235,7 @@ VAttribute* VAttribute::make(VNode *parent,QStringList data)
 
 int VAttribute::indexToId(VAttributeType* t,int idx)
 {
-    return (idx >=0)?(t->id()*10000+idx):-1;
+    return (idx >=0)?(t->typeId()*10000+idx):-1;
 }
 
 VAttributeType* VAttribute::idToType(int id)

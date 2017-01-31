@@ -605,32 +605,6 @@ QColor  VNode::typeFontColour() const
     return VNState::toTypeColour(this);
 }
 
-LogServer_ptr VNode::logServer()
-{
-	LogServer_ptr lsv;
-
-	if(!node_)
-		return lsv;
-
-	std::string logHost=findInheritedVariable("ECF_LOGHOST",true);
-	std::string logPort=findInheritedVariable("ECF_LOGPORT");
-	//if(logHost.empty())
-	//{
-	//	logHost=findInheritedVariable("LOGHOST",true);
-	//	logPort=findInheritedVariable("LOGPORT");
-	//}
-
-	std::string micro=findInheritedVariable("ECF_MICRO");
-	if(!logHost.empty() && !logPort.empty() &&
-	  (micro.empty() || logHost.find(micro) ==  std::string::npos))
-	{
-		lsv=LogServer_ptr(new LogServer(logHost,logPort));
-		return lsv;
-	}
-
-	return lsv;
-}
-
 bool VNode::logServer(std::string& host,std::string& port)
 {
 	if(!node_)
@@ -653,24 +627,6 @@ bool VNode::logServer(std::string& host,std::string& port)
 
 	return false;
 }
-
-#if 0
-bool VNode::isAncestor(const VNode* n)
-{
-	if(n == this)
-		return true;
-
-    VNode* nd=parent();
-    while(nd)
-    {
-    	if(n == nd)
-           return true;
-
-    	nd=nd->parent();
-    }
-    return false;
-}
-#endif
 
 std::vector<VNode*> VNode::ancestors(SortMode sortMode)
 {

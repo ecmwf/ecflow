@@ -11,7 +11,6 @@
 
 #include "NodeFwd.hpp"
 
-#include "LogServer.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"

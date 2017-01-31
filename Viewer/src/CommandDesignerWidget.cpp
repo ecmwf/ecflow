@@ -207,12 +207,11 @@ void CommandDesignerWidget::on_nodeSelectionChanged()
 }
 
 
-std::vector<VInfo_ptr> &CommandDesignerWidget::selectedNodes()
+std::vector<VInfo_ptr>& CommandDesignerWidget::selectedNodes()
 {
 	nodeSelectionView_->getListOfSelectedNodes(nodes_);
 	return nodes_;
 }
-
 
 void CommandDesignerWidget::addClientCommandsToComponentList()
 {

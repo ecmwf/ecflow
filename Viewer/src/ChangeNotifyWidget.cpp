@@ -208,7 +208,7 @@ void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
 
 void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 {
-	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); it++)
+    for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); ++it)
 	{
 		if(ChangeNotifyButton* tb=(*it)->findButton(id))
 		{
@@ -219,7 +219,7 @@ void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 
 void ChangeNotifyWidget::updateSettings(const std::string& id)
 {
-	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); it++)
+    for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); ++it)
 	{
 		if(ChangeNotifyButton* tb=(*it)->findButton(id))
 		{
