@@ -289,6 +289,18 @@ void AttributeFilter::clearForceShowAttr()
     forceShowAttr_.reset();
 }
 
+void AttributeFilter::updateForceShowAttr()
+{
+    if(forceShowAttr_)
+    {
+        forceShowAttr_->regainData();
+        if(forceShowAttr_->hasData())
+        {
+            forceShowAttr_.reset();
+        }
+    }
+}
+
 //==============================================
 //
 // IconFilter

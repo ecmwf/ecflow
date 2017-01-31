@@ -167,7 +167,6 @@ set(viewer_srcs
     VFileInfo.cpp
     VItem.cpp
     VItemPathParser.cpp
-    VItemTmp.cpp
     VLabelAttr.cpp
     VLateAttr.cpp
     VLimitAttr.cpp

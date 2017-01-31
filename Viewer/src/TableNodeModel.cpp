@@ -15,6 +15,7 @@
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VFilter.hpp"
 #include "VIcon.hpp"
 #include "VModelData.hpp"
@@ -24,6 +25,17 @@
 //#define _UI_TABLENODEMODEL_DEBUG
 
 //static int hitCount=0;
+
+static std::map<TableNodeModel::ColumnType,VAttributeType*> attrTypes;
+static VAttributeType* columnToAttrType(TableNodeModel::ColumnType ct);
+
+VAttributeType* columnToAttrType(TableNodeModel::ColumnType ct)
+{
+    std::map<TableNodeModel::ColumnType,VAttributeType*>::const_iterator it=
+       attrTypes.find(ct);
+    return (it != attrTypes.end())?it->second:0;
+}
+
 
 //=======================================================
 //
@@ -50,6 +62,18 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
     Q_ASSERT(columns_->id(EventColumn) == "event");
     Q_ASSERT(columns_->id(MeterColumn) == "meter");
     Q_ASSERT(columns_->id(StatusChangeColumn) == "statusChange");
+
+    if(attrTypes.empty())
+    {
+        QList<ColumnType> ctLst;
+        ctLst << TriggerColumn << LabelColumn << EventColumn << MeterColumn;
+        Q_FOREACH(ColumnType ct,ctLst)
+        {
+            VAttributeType* t=VAttributeType::find(columns_->id(ct).toStdString());
+            Q_ASSERT(t);
+            attrTypes[ct]=t;
+        }
+    }
 
 	//Create the data handler for the model.
 	data_=new VTableModelData(filterDef,this);
@@ -131,7 +155,8 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
         //QString id=columns_->id(index.column());
 
         if(id == PathColumn)
-        {   return QString::fromStdString(vnode->absNodePath());
+        {
+            return QString::fromStdString(vnode->absNodePath());
         }
         else if(id == StatusColumn)
 			return vnode->stateName();
@@ -142,11 +167,10 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
         else if(id == EventColumn || id == LabelColumn || id == MeterColumn ||
                 id == TriggerColumn)
 		{
-			QStringList lst;
-            if(vnode->getAttributeData(columns_->id(index.column()).toStdString(),0,lst))
-				return lst;
-			else
-				return QVariant();
+            if(VAttribute* a=vnode->attributeForType(index.column(),columnToAttrType(id)))
+                return a->data();
+            else
+                return QVariant();
 		}
 
         else if(id == StatusChangeColumn)

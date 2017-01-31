@@ -142,23 +142,3 @@ void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         }
     }
 }
-
-int VUserVarAttr::totalNum(VNode* vnode)
-{
-    //Node
-    if(vnode->isServer() == 0)
-    {
-        if(vnode->node_)
-        {
-            return vnode->node_->variables().size();
-        }
-    }
-    //Server
-    else
-    {
-        std::vector<Variable> v;
-        vnode->variables(v);
-        return v.size();
-    }
-    return 0;
-}

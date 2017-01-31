@@ -112,11 +112,3 @@ void VMeterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     }
 }
 
-int VMeterAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        return vnode->node_->meters().size();
-    }
-    return 0;
-}

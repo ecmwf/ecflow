@@ -112,11 +112,3 @@ void VLimitAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     }
 }
 
-int VLimitAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        return vnode->node_->limits().size();
-    }
-    return 0;
-}

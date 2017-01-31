@@ -227,6 +227,10 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
         //The first access to the attributes makes them initialised in the tree node.
         if(node->isAttrInitialised())
         {
+            //Update the forceshow attribute in the filter because
+            //it might have been deleted/reallocated
+            attrFilter_->updateForceShowAttr();
+
             //This is the already updated attribute num
             int currentNum=vnode->attrNum(attrFilter_);
 

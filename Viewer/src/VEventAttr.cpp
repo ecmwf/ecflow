@@ -110,12 +110,3 @@ void VEventAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         }
     }
 }
-
-int VEventAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        return vnode->node_->events().size();
-    }
-    return 0;
-}

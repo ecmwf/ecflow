@@ -149,12 +149,3 @@ void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     }
 }
 
-int VDateAttr::totalNum(VNode* vnode)
-{
-    if(vnode->node_)
-    {
-        return vnode->node_->dates().size() +
-            vnode->node_->days().size();
-    }
-    return 0;
-}

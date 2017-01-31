@@ -37,7 +37,6 @@ public:
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
-    static int totalNum(VNode* vnode);
 
 protected:
     DataType dataType_;

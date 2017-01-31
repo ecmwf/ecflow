@@ -58,7 +58,6 @@ void VInfo::notifyServerDelete(ServerHandler* /*server*/)
 
     server_=0;
     node_=0;
-    //if(attr_) delete attr_;
     attr_=0;
 
 	dataLost();
@@ -80,15 +79,13 @@ void VInfo::notifyBeginServerClear(ServerHandler* server)
 {    
     assert(server_==server);
     node_=0;
-    //if(attr_) delete attr_;
     attr_=0;
 }
 
 void VInfo::notifyEndServerClear(ServerHandler* server)
 {
     assert(server_==server);
-    node_=0;
-    if(attr_) delete attr_;
+    node_=0;   
     attr_=0;
 }
 
@@ -377,10 +374,6 @@ VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att
 
 VInfoAttribute::~VInfoAttribute()
 {
-#if 0
-    if(attr_)
-        delete attr_;
-#endif
 }
 
 bool VInfoAttribute::hasData() const
