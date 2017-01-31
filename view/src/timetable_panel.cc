@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #7 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -125,65 +125,63 @@ public:
 	virtual bool change_fold() {  return false; }
 };
 
-timetable_node::timetable_node(Widget w,timetable_panel& o,log_event* e): 
-	xnode(e->get_node()), owner_(o), event_(e) 
+timetable_node::timetable_node(Widget w,timetable_panel& o,log_event* e)
+  : xnode(e->get_node()), owner_(o), event_(e) 
 { 
-	event_->attach();
+  event_->attach();
 }
 
 timetable_node::~timetable_node()
 {
-	event_->detach();
+  event_->detach();
 }
 
 //====================================================================
 
 class time_event_node : public timetable_node {
 protected:
-
-	void draw(Widget w,XRectangle* r) { event_->draw(w,r); }
-	void size(Widget w,XRectangle* r) { event_->size(w,r); }
-	
+  void draw(Widget w,XRectangle* r) { event_->draw(w,r); }
+  void size(Widget w,XRectangle* r) { event_->size(w,r); }
+  
 public:
-	time_event_node(Widget w,timetable_panel&,log_event*);
-	~time_event_node() {}
+  time_event_node(Widget w,timetable_panel&,log_event*);
+  ~time_event_node() {}
 };
 
-time_event_node::time_event_node(Widget w,timetable_panel& o,log_event* e):
-	timetable_node(w,o,e)
+time_event_node::time_event_node(Widget w,timetable_panel& o,log_event* e)
+  : timetable_node(w,o,e)
 {
-	TimeSetTime(w,getBox(w),e->time());
+  TimeSetTime(w,getBox(w),e->time());
 }
 
 //====================================================================
 
 class time_name_node : public timetable_node {
-	bool fold_;
-    void draw(Widget w,XRectangle* r);
-	void size(Widget w,XRectangle* r);
+  bool fold_;
+  void draw(Widget w,XRectangle* r);
+  void size(Widget w,XRectangle* r);
 public:
-	time_name_node(Widget w,timetable_panel&,log_event*);
-	~time_name_node() {}
-	virtual char* text(char* b) { 
-	  strcpy(b,node_->full_name().c_str());return b; }
-	virtual bool is_name() { return true; }
-	virtual bool change_fold() {  fold_ = !fold_; redraw(); return fold_; }
+  time_name_node(Widget w,timetable_panel&,log_event*);
+  ~time_name_node() {}
+  virtual char* text(char* b) { 
+    strcpy(b,node_->full_name().c_str());return b; }
+  virtual bool is_name() { return true; }
+  virtual bool change_fold() {  fold_ = !fold_; redraw(); return fold_; }
 };
 
-time_name_node::time_name_node(Widget w,timetable_panel& o,log_event* e):
-	timetable_node(w,o,e),
-	fold_(false)
+time_name_node::time_name_node(Widget w,timetable_panel& o,log_event* e)
+  : timetable_node(w,o,e)
+  , fold_(false)
 { 
-	node_ = e->owner();
-	getBox(w);
+  node_ = e->owner();
+  getBox(w);
 }
 
 void time_name_node::draw(Widget w,XRectangle* r)
 {
   xmstring s(node_->full_name().c_str(),fold_?"bold":"normal");
-
-	XmFontList f = gui::tinyfont();
-    XmStringDraw(XtDisplay(w),XtWindow(w),
+  XmFontList f = gui::tinyfont();
+  XmStringDraw(XtDisplay(w),XtWindow(w),
         f,
         s,
         gui::blackGC(),
@@ -298,7 +296,6 @@ void timetable_panel::next(log_event* n)
 
 	t->visibility(true);
 	nodes_.add(t);
-
 }
 
 Boolean timetable_panel::enabled(node& n)
@@ -601,12 +598,10 @@ timetable_node* timetable_panel::main(timetable_node* t)
 
 void timetable_panel::range(timetable_node* z,DateTime& dt1,DateTime& dt2)
 {	
-
 	dt1 = dt2 = z->event()->time();
 
 	if(z->is_name())
 	{
-
 		node *m = z->get_node();
 
 		for(int i = 0; i < nodes_.count(); i++)
@@ -617,23 +612,18 @@ void timetable_panel::range(timetable_node* z,DateTime& dt1,DateTime& dt2)
 				if(t > dt2) dt2 = t;
 			}
 	}
-
 }
 	
 void timetable_panel::raw_click3(XEvent* e,xnode* x)
 {
 	char buf[1024];
-
-
 	timetable_node* z = (timetable_node*)x;
-
 	xmstring s("-");
 	static xmstring cr("\n");
 
 	XtUnmanageChild(set_both_);
 	XtManageChild(set_to_);
 	XtManageChild(set_from_);
-
 
 	if(z) {
 

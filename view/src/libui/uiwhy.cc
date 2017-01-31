@@ -70,7 +70,6 @@ void why_form_c::create (Widget parent, char *widget_name)
 	XmScrolledWindowSetAreas(scrolledWin1, scrollbar25, scrollbar26, text_ );
 	children[ac++] = scrolledWin1;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void why_form_c::hyperCB( Widget widget, XtPointer client_data, XtPointer call_data )

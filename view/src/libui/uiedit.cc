@@ -125,7 +125,6 @@ void edit_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	children[ac++] = form1;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void edit_form_c::searchCB( Widget widget, XtPointer client_data, XtPointer call_data )

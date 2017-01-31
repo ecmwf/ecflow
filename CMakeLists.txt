@@ -171,18 +171,18 @@ ecbuild_info("")
 if(ENABLE_GUI)
   find_package( X11 )
 #  if ( X11_FOUND )
-#	debug_var( X11_INCLUDE_DIR )
-#	debug_var( X11_LIBRARIES )  
-#	debug_var( X11_Xt_INCLUDE_PATH )
-#	debug_var( X11_Xt_LIB )
-#	debug_var( X11_Xpm_INCLUDE_PATH )
-#	debug_var( X11_Xpm_LIB )
+#	   ecbuild_debug_var( X11_INCLUDE_DIR )
+#	   ecbuild_debug_var( X11_LIBRARIES )  
+#	   ecbuild_debug_var( X11_Xt_INCLUDE_PATH )
+#	   ecbuild_debug_var( X11_Xt_LIB )
+#	   ecbuild_debug_var( X11_Xpm_INCLUDE_PATH )
+#	   ecbuild_debug_var( X11_Xpm_LIB )
 #  endif()
 
   find_package( Motif )
 #  if ( MOTIF_FOUND )
-#	debug_var( MOTIF_INCLUDE_DIR )
-#	debug_var( MOTIF_LIBRARIES )  
+#	   ecbuild_debug_var( MOTIF_INCLUDE_DIR )
+#	   ecbuild_debug_var( MOTIF_LIBRARIES )  
 #  endif()
 endif()
  
@@ -284,8 +284,8 @@ endif()
 
 if (ENABLE_PYTHON)
     ecbuild_find_python( VERSION 2.6 REQUIRED )
-    #debug_var(PYTHON_LIBRARIES)
-    #debug_var(PYTHON_INCLUDE_DIR)
+    # ecbuild_debug_var(PYTHON_LIBRARIES)
+    # ecbuild_debug_var(PYTHON_INCLUDE_DIR)
     
     if( NOT PYTHON_FOUND )
         ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
@@ -309,7 +309,7 @@ endif()
 # =========================================================================================
 
 ecbuild_dont_pack( DIRS 
-                   	ACore/doc ANattr/doc ANode/doc Client/doc Pyext/doc Server/doc
+                   	ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
                    	ecbuild
                     SCRATCH
                     CUSTOMER 

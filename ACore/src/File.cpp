@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #70 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -93,7 +93,9 @@ void File::replaceExt(std::string& file, const std::string& newExt)
 bool File::splitFileIntoLines(const std::string& filename, std::vector<std::string>& lines,bool ignoreEmptyLine)
 {
    std::ifstream the_file(filename.c_str(),std::ios_base::in);
-  	if ( !the_file )  return false;
+  	if ( !the_file ) {
+  	   return false;
+  	}
 	lines.reserve(lines.size() + 100);
 
 	// Note if we use: while( getline( theEcfFile, line)), then we will miss the *last* *empty* line

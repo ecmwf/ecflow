@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #27 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -83,8 +83,8 @@ private:
 };
 
 // This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(DayAttr, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(DayAttr,boost::serialization::track_never);
+BOOST_CLASS_IMPLEMENTATION(DayAttr, boost::serialization::object_serializable)
+BOOST_CLASS_TRACKING(DayAttr,boost::serialization::track_never)
 
 
 #endif

@@ -124,7 +124,6 @@ void edit_label_form_c::create (Widget parent, char *widget_name)
 	children[ac++] = tools_;
 	children[ac++] = form1;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void edit_label_form_c::changedCB( Widget widget, XtPointer client_data, XtPointer call_data )

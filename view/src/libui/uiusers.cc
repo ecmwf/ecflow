@@ -65,7 +65,6 @@ void users_form_c::create (Widget parent, char *widget_name)
 	XtManageChild(list_);
 	children[ac++] = form2;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void users_form_c::sendCB( Widget widget, XtPointer client_data, XtPointer call_data )

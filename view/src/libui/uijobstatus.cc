@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #1 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -127,7 +127,6 @@ void jobstatus_form_c::create (Widget parent, char *widget_name)
 	children[ac++] = name_;
 	children[ac++] = tools_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void jobstatus_form_c::searchCB( Widget widget, XtPointer client_data, XtPointer call_data )
