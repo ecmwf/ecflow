@@ -316,13 +316,15 @@ void Node::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect:
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeEventMemento* memento) " << debugNodePath() << "\n";
 #endif
-	if (child_attrs_) {
-	   child_attrs_->set_memento(memento,aspects,aspect_only);
-	   return;
-	}
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR 
-	if (aspect_only) {
+   if (aspect_only) {
+      // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::EVENT);
+      return;
+   }
+
+	if (child_attrs_) {
+	   child_attrs_->set_memento(memento);
 	   return;
 	}
 	addEvent( memento->event_);
@@ -333,13 +335,15 @@ void Node::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect:
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeMeterMemento* memento) " << debugNodePath() << "\n";
 #endif
-   if (child_attrs_) {
-      child_attrs_->set_memento(memento,aspects,aspect_only);
+
+   if (aspect_only) {
+      // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::METER);
       return;
    }
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR 
-   if (aspect_only) {
+   if (child_attrs_) {
+      child_attrs_->set_memento(memento);
       return;
    }
 	addMeter(memento->meter_);
@@ -350,15 +354,17 @@ void Node::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect:
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeLabelMemento* memento) " << debugNodePath() << "\n";
 #endif
-	if (child_attrs_) {
-	   child_attrs_->set_memento(memento,aspects,aspect_only);
-	   return;
-	}
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR 
    if (aspect_only) {
+      // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::LABEL);
       return;
    }
+
+	if (child_attrs_) {
+	   child_attrs_->set_memento(memento);
+	   return;
+	}
 	addLabel(memento->label_);
 }
 
@@ -368,22 +374,17 @@ void Node::set_memento( const NodeTriggerMemento* memento,std::vector<ecf::Aspec
 	std::cout << "Node::set_memento(const NodeTriggerMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-	if (triggerExpr_) {
-	   if (aspect_only) {
-	      aspects.push_back(ecf::Aspect::EXPR_TRIGGER);
-	      return;
-	   }
+	if (aspect_only) {
+	   // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+	   aspects.push_back(ecf::Aspect::EXPR_TRIGGER);
+	   return;
+	}
 
+	if (triggerExpr_) {
 		if (memento->exp_.isFree()) freeTrigger();
 		else                        clearTrigger();
 		return;
 	}
-
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR 
-	// ADD_REMOVE_ATTR aspect
-   if (aspect_only) {
-      return;
-   }
 	add_trigger_expression( memento->exp_);
 }
 
@@ -393,21 +394,16 @@ void Node::set_memento( const NodeCompleteMemento* memento,std::vector<ecf::Aspe
 	std::cout << "Node::set_memento(const NodeCompleteMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-	if (completeExpr_) {
-	   if (aspect_only) {
-	      aspects.push_back(ecf::Aspect::EXPR_COMPLETE);
-	      return;
-	   }
+	if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+	   aspects.push_back(ecf::Aspect::EXPR_COMPLETE);
+	   return;
+	}
 
+	if (completeExpr_) {
 		if (memento->exp_.isFree()) freeComplete();
 		else                        clearComplete();
 		return;
-	}
-
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
-   // ADD_REMOVE_ATTR aspect
-	if (aspect_only) {
-	   return;
 	}
 	add_complete_expression( memento->exp_);
 }
@@ -418,11 +414,13 @@ void Node::set_memento( const NodeRepeatMemento* memento,std::vector<ecf::Aspect
 	std::cout << "Node::set_memento(const NodeRepeatMemento* memento) " << debugNodePath() << "\n";
 #endif
 
+	if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+	   aspects.push_back(ecf::Aspect::REPEAT);
+	   return;
+	}
+
 	if (!repeat_.empty()) {
-	   if (aspect_only) {
-	      aspects.push_back(ecf::Aspect::REPEAT);
-	      return;
-	   }
 
       // Note: the node is incremented one past, the last value
       // In Node we increment() then check for validity
@@ -436,11 +434,6 @@ void Node::set_memento( const NodeRepeatMemento* memento,std::vector<ecf::Aspect
  		return;
 	}
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
-	// ADD_REMOVE_ATTR aspect
-	if (aspect_only) {
-	   return;
-	}
 	addRepeat(memento->repeat_);
 }
 
@@ -450,22 +443,17 @@ void Node::set_memento( const NodeLimitMemento* memento,std::vector<ecf::Aspect:
 	std::cout << "Node::set_memento(const NodeLimitMemento* memento) " << debugNodePath() << "  " << memento->limit_.toString() << "\n";
 #endif
 
-	limit_ptr limit = find_limit(memento->limit_.name());
-	if (limit.get())  {
-	   if (aspect_only) {
-	      aspects.push_back(ecf::Aspect::LIMIT);
-	      return;
-	   }
-
-	   limit->set_state(  memento->limit_.theLimit(), memento->limit_.value(), memento->limit_.paths() );
-		return;
+	if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+	   aspects.push_back(ecf::Aspect::LIMIT);
+	   return;
 	}
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR 
-   // ADD_REMOVE_ATTR aspect
-   if (aspect_only) {
-      return;
-   }
+	limit_ptr limit = find_limit(memento->limit_.name());
+	if (limit.get())  {
+	   limit->set_state( memento->limit_.theLimit(), memento->limit_.value(), memento->limit_.paths() );
+		return;
+	}
 	addLimit(memento->limit_);
 }
 
@@ -475,11 +463,12 @@ void Node::set_memento( const NodeInLimitMemento* memento,std::vector<ecf::Aspec
 	std::cout << "Node::set_memento(const NodeInLimitMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR 
-   // ADD_REMOVE_ATTR aspect only, since no state
    if (aspect_only) {
+      // ADD_REMOVE_ATTR aspect only, since no state
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
       return;
    }
+
 	addInLimit(memento->inlimit_);
 }
 
@@ -489,24 +478,19 @@ void Node::set_memento( const NodeVariableMemento* memento,std::vector<ecf::Aspe
 	std::cout << "Node::set_memento(const NodeVariableMemento* memento) " << debugNodePath() << "\n";
 #endif
 
+	// If we have added/delete variables then ecf::Aspect::ADD_REMOVE_ATTR has already been added to aspects
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::NODE_VARIABLE);
+      return;
+   }
+
 	size_t theSize = varVec_.size();
 	for(size_t i = 0; i < theSize; i++) {
 		if (varVec_[i].name() == memento->var_.name()) {
-		   if (aspect_only) {
-		      aspects.push_back(ecf::Aspect::NODE_VARIABLE);
-		      return;
-		   }
-
 			varVec_[i].set_value( memento->var_.theValue() );
 			return;
 		}
  	}
-
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
-	// ADD_REMOVE_ATTR aspect
-   if (aspect_only) {
-      return;
-   }
  	addVariable(memento->var_);
 }
 
@@ -516,20 +500,15 @@ void Node::set_memento( const NodeLateMemento* memento,std::vector<ecf::Aspect::
 	std::cout << "Node::set_memento(const NodeLateMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-	if (lateAttr_) {
-	   if (aspect_only) {
-	      aspects.push_back(ecf::Aspect::LATE);
-	      return;
-	   }
-
-		lateAttr_->setLate(memento->late_.isLate());
-		return;
+	if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+	   aspects.push_back(ecf::Aspect::LATE);
+	   return;
 	}
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
-   // ADD_REMOVE_ATTR aspect
-	if (aspect_only) {
-      return;
+	if (lateAttr_) {
+		lateAttr_->setLate(memento->late_.isLate());
+		return;
 	}
 	addLate(memento->late_);
 }
@@ -540,13 +519,13 @@ void Node::set_memento( const NodeTodayMemento* memento,std::vector<ecf::Aspect:
 	std::cout << "Node::set_memento(const NodeTodayMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects,aspect_only) ) {
+   if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::TODAY);
       return;
    }
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
-   // ADD_REMOVE_ATTR aspect
-   if (aspect_only) {
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
       return;
    }
 	addToday(memento->attr_);
@@ -558,13 +537,13 @@ void Node::set_memento( const NodeTimeMemento* memento,std::vector<ecf::Aspect::
 	std::cout << "Node::set_memento(const NodeTimeMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects,aspect_only) ) {
+   if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::TIME);
       return;
    }
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
-   // ADD_REMOVE_ATTR aspect
-   if (aspect_only) {
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
       return;
    }
 	addTime(memento->attr_);
@@ -576,13 +555,13 @@ void Node::set_memento( const NodeDayMemento* memento,std::vector<ecf::Aspect::T
 	std::cout << "Node::set_memento(const NodeDayMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects,aspect_only) ) {
+   if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::DAY);
       return;
    }
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR 
-   // ADD_REMOVE_ATTR aspect
-   if (aspect_only) {
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
       return;
    }
 	addDay(memento->attr_);
@@ -594,13 +573,13 @@ void Node::set_memento( const NodeDateMemento* memento,std::vector<ecf::Aspect::
    std::cout << "Node::set_memento(const NodeDateMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects,aspect_only) ) {
+   if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::DATE);
       return;
    }
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR 
-   // ADD_REMOVE_ATTR aspect
-   if (aspect_only) {
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
       return;
    }
    addDate(memento->attr_);
@@ -612,14 +591,13 @@ void Node::set_memento( const NodeCronMemento* memento,std::vector<ecf::Aspect::
 	std::cout << "Node::set_memento(const NodeCronMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects,aspect_only) ) {
+   if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
       aspects.push_back(ecf::Aspect::CRON);
       return;
    }
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
-   // ADD_REMOVE_ATTR aspect
-   if (aspect_only) {
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
       return;
    }
 	addCron(memento->attr_);
@@ -630,6 +608,7 @@ void Node::set_memento( const FlagMemento* memento,std::vector<ecf::Aspect::Type
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const FlagMemento* memento) " << debugNodePath() << "\n";
 #endif
+
 	if (aspect_only)  aspects.push_back(ecf::Aspect::FLAG);
 	else              flag_.set_flag( memento->flag_.flag() );
 }
@@ -640,9 +619,9 @@ void Node::set_memento( const NodeZombieMemento* memento,std::vector<ecf::Aspect
    std::cout << "Node::set_memento(const NodeZombieMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
-   // ADD_REMOVE_ATTR aspect
    if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      // No state, only ADD_REMOVE_ATTR aspect
       return;
    }
 
@@ -661,8 +640,8 @@ void Node::set_memento( const NodeVerifyMemento* memento,std::vector<ecf::Aspect
 	std::cout << "Node::set_memento(const NodeVerifyMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   // Should have already added ecf::Aspect::ADD_REMOVE_ATTR
    if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
       return;
    }
 

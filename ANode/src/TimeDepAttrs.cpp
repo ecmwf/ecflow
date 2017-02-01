@@ -792,8 +792,7 @@ void TimeDepAttrs::delete_cron(const ecf::CronAttr& attr)
 
 // =================================================================================
 
-
-bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento ,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
+bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeTodayMemento* memento) " << node_->debugNodePath() << "\n";
@@ -803,12 +802,6 @@ bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento ,std::vector<ecf
       // We need to ignore state changes in TodayAttr, (ie we don't use equality operator)
       // otherwise today will never compare
       if ( todayVec_[i].structureEquals(memento->attr_) ) {
-
-         if (aspect_only) {
-            aspects.push_back(ecf::Aspect::TODAY);
-            return true;
-         }
-
          todayVec_[i] = memento->attr_;  // need to copy over time series state
          return true;
       }
@@ -816,7 +809,7 @@ bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento ,std::vector<ecf
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
+bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeTimeMemento* memento) " << node_->debugNodePath() << "\n";
@@ -826,12 +819,6 @@ bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento,std::vector<ecf::
       // We need to ignore state changes in TimeAttr, (ie we don't use equality operator)
       // otherwise time will never compare
       if ( timeVec_[i].structureEquals(memento->attr_) ) {
-
-         if (aspect_only) {
-            aspects.push_back(ecf::Aspect::TIME);
-            return true;
-         }
-
          timeVec_[i] = memento->attr_;    // need to copy over time series state
          return true;
       }
@@ -839,7 +826,7 @@ bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeCronMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
+bool TimeDepAttrs::set_memento( const NodeCronMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeCronMemento* memento) " << node_->debugNodePath() << "\n";
@@ -849,12 +836,6 @@ bool TimeDepAttrs::set_memento( const NodeCronMemento* memento,std::vector<ecf::
       // We need to ignore state changes (ie we don't use equality operator)
       // otherwise attributes will never compare
       if ( crons_[i].structureEquals(memento->attr_) ) {
-
-         if (aspect_only) {
-            aspects.push_back(ecf::Aspect::CRON);
-            return true;
-         }
-
          crons_[i] = memento->attr_;   // need to copy over time series state
          return true;
       }
@@ -862,7 +843,7 @@ bool TimeDepAttrs::set_memento( const NodeCronMemento* memento,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeDayMemento* memento ,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
+bool TimeDepAttrs::set_memento( const NodeDayMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeDayMemento* memento) " << node_->debugNodePath() << "\n";
@@ -872,12 +853,6 @@ bool TimeDepAttrs::set_memento( const NodeDayMemento* memento ,std::vector<ecf::
       // We need to ignore state changes (ie we don't use equality operator)
       // otherwise attributes will never compare
       if ( days_[i].structureEquals(memento->attr_) ) {
-
-         if (aspect_only) {
-            aspects.push_back(ecf::Aspect::DAY);
-            return true;
-         }
-
          if (memento->attr_.isSetFree()) days_[i].setFree();
          else                            days_[i].clearFree();
          return true;
@@ -886,7 +861,7 @@ bool TimeDepAttrs::set_memento( const NodeDayMemento* memento ,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeDateMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
+bool TimeDepAttrs::set_memento( const NodeDateMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeDateMemento* memento) " << node_->debugNodePath() << "\n";
@@ -896,12 +871,6 @@ bool TimeDepAttrs::set_memento( const NodeDateMemento* memento,std::vector<ecf::
       // We need to ignore state changes (ie we don't use equality operator)
       // otherwise attributes will never compare
       if ( dates_[i].structureEquals(memento->attr_) ) {
-
-         if (aspect_only) {
-            aspects.push_back(ecf::Aspect::DATE);
-            return true;
-         }
-
          if (memento->attr_.isSetFree()) dates_[i].setFree();
          else                            dates_[i].clearFree();
          return true;

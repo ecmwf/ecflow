@@ -79,9 +79,9 @@ public:
    bool clear_event( const std::string& event_name_or_number);
 
    // mementos functions:
-   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
-   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
-   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeEventMemento*);
+   void set_memento(const NodeMeterMemento*);
+   void set_memento(const NodeLabelMemento*);
 
    // Find functions: ============================================================
    bool findLabel(const std::string& name) const;

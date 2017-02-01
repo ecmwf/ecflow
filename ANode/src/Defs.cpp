@@ -1458,8 +1458,6 @@ void Defs::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Typ
        std::cout << "Defs::set_memento could not find all the names\n";
        return;
    }
-
-
    suiteVec_ = vec;
 }
 
