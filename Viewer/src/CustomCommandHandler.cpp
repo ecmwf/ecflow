@@ -18,11 +18,9 @@
 #include "VSettings.hpp"
 
 
-CustomCommand::CustomCommand(const std::string &name, const std::string &command, bool context)
+CustomCommand::CustomCommand(const std::string &name, const std::string &command, bool context) :
+    name_(name), command_(command), inContextMenu_(context)
 {
-    name_          = name;
-    command_       = command;
-    inContextMenu_ = context;
 }
 
 
@@ -34,27 +32,21 @@ void CustomCommand::set(const std::string &name, const std::string &command, boo
 }
 
 
-void CustomCommand::save(VSettings *vs)
+void CustomCommand::save(VSettings *vs) const
 {
     vs->put("name",    name());
     vs->put("command", command());
     vs->put("context", contextString());
 }
 
-
-
 CustomCommandHandler::CustomCommandHandler()
 {
 }
-
 
 void CustomCommandHandler::init()
 {
     readSettings();
 }
-
-
-
 
 CustomCommand* CustomCommandHandler::replace(int index, const std::string& name, const std::string& command, bool context)
 {
@@ -168,11 +160,7 @@ void CustomCommandHandler::writeSettings()
 }
 
 void CustomCommandHandler::readSettings()
-{
-    std::vector<VSettings> vsItems;
-    std::string dummyFileName="dummy";
-    std::string key="commands";
-
+{   
     std::string settingsFilePath = settingsFile();
     VSettings vs(settingsFilePath);
 
@@ -263,12 +251,11 @@ CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance()
 
 CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
 {
-    CustomCommand *item;
     int index = findIndexFromName(name);
 
     if (index == -1)  // not already in the list
     {
-        item=new CustomCommand(name, command, context);
+        CustomCommand *item=new CustomCommand(name, command, context);
         items_.push_front(item);  // add it to the front
 
         if (items_.size() > maxCommands_)  // too many commands?

@@ -230,7 +230,7 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 
 QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
 {
-	if(filter->isEmpty())
+    if(!filter || filter->isEmpty())
 		return QString();
 
 	int iconSize=16;

@@ -32,7 +32,7 @@ public:
 
 	MenuItem &menuItem();
 	void setNodes(std::vector<VInfo_ptr> &nodes);
-	std::vector<VInfo_ptr> &selectedNodes();
+    std::vector<VInfo_ptr>& selectedNodes();
 
 
 

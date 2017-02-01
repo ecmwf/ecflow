@@ -30,7 +30,7 @@ public:
     static VAttributeType* find(const std::string& name);
     static VAttributeType* find(int id);
     static const std::vector<VAttributeType*>& types() {return types_;}   
-    int id() const {return id_;}
+    int typeId() const {return typeId_;}
     int keyToDataIndex(const std::string& key) const;
     int searchKeyToDataIndex(const std::string& key) const;
     QStringList searchKeys() const;
@@ -50,7 +50,7 @@ protected:
     std::map<std::string,int> keyToData_;
     std::map<std::string,int> searchKeyToData_;
     int dataCount_;
-    int id_;
+    int typeId_;
     ScanProc scanProc_;
 
 private:

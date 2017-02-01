@@ -176,7 +176,7 @@ void ChangeNotify::setProperty(VProperty* prop)
 
 		QStringList lst;
 		const std::vector<std::string>& vals=Sound::instance()->sysSounds();
-		for(std::vector<std::string>::const_iterator it=vals.begin(); it != vals.end(); it++)
+        for(std::vector<std::string>::const_iterator it=vals.begin(); it != vals.end(); ++it)
 		{
 			lst << QString::fromStdString(*it);
 		}

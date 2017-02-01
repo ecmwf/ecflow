@@ -87,8 +87,6 @@ void ComboMulti::slotChecked()
     QString s;
     selection_.clear();
 
-    int cnt=0;
-
     for(int i=0; i < model()->rowCount(); i++)
     {
         if(model()->data(model()->index(i,0),Qt::CheckStateRole).toBool())

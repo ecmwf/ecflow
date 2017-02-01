@@ -101,7 +101,7 @@ public:
 
     void setOperands(std::vector<BaseNodeCondition *> ops) {operands_ = ops;}
     bool containsAttributeSearch();
-    bool delayUnwinding() {return delayUnwinding_;}
+    bool delayUnwinding() const {return delayUnwinding_;}
 
 protected:
     virtual bool searchInAttributes() {return false;}
@@ -280,7 +280,7 @@ private:
 class StateNodeCondition : public BaseNodeCondition
 {
 public:
-    explicit StateNodeCondition(QString stateName) {stateName_ = stateName;}
+    explicit StateNodeCondition(QString stateName) : stateName_(stateName) {}
     ~StateNodeCondition() {}
 
     bool execute(VItem* node);
@@ -299,7 +299,7 @@ private:
 class UserLevelCondition : public BaseNodeCondition
 {
 public:
-    explicit UserLevelCondition(QString userLevelName) {userLevelName_ = userLevelName;}
+    explicit UserLevelCondition(QString userLevelName) : userLevelName_(userLevelName) {}
     ~UserLevelCondition() {}
 
     bool execute(VItem*);
@@ -318,7 +318,7 @@ private:
 class UIStateCondition : public BaseNodeCondition
 {
 public:
-    explicit UIStateCondition(std::string uiStateName) {uiStateName_ = uiStateName;}
+    explicit UIStateCondition(const std::string& uiStateName) : uiStateName_(uiStateName) {}
     ~UIStateCondition() {}
 
     bool execute(VItem*);
@@ -338,7 +338,7 @@ private:
 class NodeAttributeCondition : public BaseNodeCondition
 {
 public:
-    explicit NodeAttributeCondition(QString nodeAttrName) {nodeAttrName_ = nodeAttrName;}
+    explicit NodeAttributeCondition(QString nodeAttrName) : nodeAttrName_(nodeAttrName) {}
     ~NodeAttributeCondition() {}
 
     bool execute(VItem*);
@@ -357,7 +357,7 @@ private:
 class NodeFlagCondition : public BaseNodeCondition
 {
 public:
-    explicit NodeFlagCondition(QString nodeFlagName) {nodeFlagName_ = nodeFlagName;}
+    explicit NodeFlagCondition(QString nodeFlagName) : nodeFlagName_(nodeFlagName) {}
     ~NodeFlagCondition() {}
 
     bool execute(VItem*);
@@ -378,16 +378,15 @@ public:
     explicit WhatToSearchInOperand(std::string what, bool &attr);
     ~WhatToSearchInOperand();
 
-    std::string name() {return what_;}
-    bool execute(VItem* node) {return false;} // not called
+    const std::string& name() const {return what_;}
+    bool execute(VItem* node)  {return false;} // not called
     std::string print() {return what_;}
-    std::string what() {return what_;}
+    const std::string& what() const {return what_;}
 
 private:
     std::string what_;  // TODO XXX: optimise - we should store an enum here
     bool searchInAttributes_;
 
-    void searchInAttributes(bool attr) {searchInAttributes_ = attr;}
     bool searchInAttributes() {return searchInAttributes_;}
 };
 
@@ -396,7 +395,7 @@ private:
 class WhatToSearchForOperand : public BaseNodeCondition
 {
 public:
-    explicit WhatToSearchForOperand(std::string what) {what_ = what;}
+    explicit WhatToSearchForOperand(const std::string& what) : what_(what) {}
     ~WhatToSearchForOperand();
 
     std::string name() {return what_;}
@@ -435,7 +434,7 @@ private:
 class AttributeStateCondition : public BaseNodeCondition
 {
 public:
-    explicit AttributeStateCondition(QString attrState) {attrState_ = attrState;}
+    explicit AttributeStateCondition(QString attrState) : attrState_(attrState) {}
     ~AttributeStateCondition() {}
 
     bool execute(VItem*);

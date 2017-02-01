@@ -31,7 +31,7 @@ public:
 	const std::string& shortErrorMessage() const {return shortErrMsg_;}
 
 protected:
-	void init();
+    static void init();
 	void logConnect();
 	void logFailed();
 	void logDisconnect();

@@ -10,7 +10,6 @@
 
 #include "TriggerProvider.hpp"
 
-#include "LogServer.hpp"
 #include "OutputDirClient.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"

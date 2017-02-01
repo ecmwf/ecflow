@@ -9,7 +9,6 @@
 
 #include "OutputFileProvider.hpp"
 
-#include "LogServer.hpp"
 #include "OutputFileClient.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"

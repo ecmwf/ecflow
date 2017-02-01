@@ -171,7 +171,8 @@ int VTreeSuiteNode::totalNumOfChildren() const
 
 VTree::VTree(VTreeServer* server) :
     VTreeNode(server->realServer()->vRoot(),0),
-    server_(server)
+    server_(server),
+    totalNum_(0)
 {
 
 }

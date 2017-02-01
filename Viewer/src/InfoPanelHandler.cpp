@@ -22,10 +22,10 @@ InfoPanelHandler* InfoPanelHandler::instance_=0;
 
 
 InfoPanelDef::InfoPanelDef(const std::string& name) :
-	name_(name),
+    name_(name),
+    hidden_(false),
 	visibleCondition_(0),
-	enabledCondition_(0),
-	hidden_(false)
+    enabledCondition_(0)
 {
 
 }

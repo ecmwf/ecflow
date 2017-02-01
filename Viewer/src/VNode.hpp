@@ -17,7 +17,6 @@
 #include <QStringList>
 
 #include "Aspect.hpp"
-#include "LogServer.hpp"
 #include "Node.hpp"
 
 #include "VItem.hpp"
@@ -180,7 +179,6 @@ public:
     void statusChangeTime(QString&) const;
     uint statusChangeTime() const;
 
-    LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
 
     void triggerExpr(std::string&,std::string&) const;

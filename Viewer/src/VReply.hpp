@@ -37,9 +37,9 @@ public:
 	const std::string& text() const {return text_;}
 	const std::vector<std::string>& textVec() const {return textVec_;}
 	Status status() const {return status_;}
-	const std::string fileName() const {return fileName_;}
+    const std::string& fileName() const {return fileName_;}
 	FileReadMode fileReadMode() const {return readMode_;}
-	const std::string fileReadMethod() {return readMethod_;}
+    const std::string& fileReadMethod() {return readMethod_;}
 	VFile_ptr tmpFile() const {return tmpFile_;}
 	VDir_ptr directory() const {return dir_;}
 	const std::vector<Zombie>& zombies() const {return zombies_;}

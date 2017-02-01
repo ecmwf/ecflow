@@ -156,7 +156,7 @@ void MainWindow::init(MainWindow *win)
 void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 {
    for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
-		   it != InfoPanelHandler::instance()->panels().end(); it++)
+           it != InfoPanelHandler::instance()->panels().end(); ++it)
    {
 	   if((*it)->show().find("toolbar") != std::string::npos)
 	   {
@@ -361,7 +361,7 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 
 		std::string name=ac->data().toString().toStdString();
 
-		for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); it++)
+        for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); ++it)
 		{
 			 if((*it)->name() == name)
 			 {

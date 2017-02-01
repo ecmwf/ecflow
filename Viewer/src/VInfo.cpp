@@ -174,7 +174,7 @@ bool VInfo::operator ==(const VInfo& other)
             storedPath_ == other.storedPath_)
     {
         if((!attr_ && other.attr_) ||
-           (attr_ && !attr_))
+           (attr_ && !other.attr_))
             return false;
 
         else if(attr_ && other.attr_)
