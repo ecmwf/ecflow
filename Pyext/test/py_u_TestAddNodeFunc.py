@@ -16,7 +16,6 @@ def create_defs_sequentially():
     local_defs = Defs()
     suite = local_defs.add_suite("s1")
     suite.add_variable("Var","value")
-    suite.add_trigger("t1 == complete")
     suite.add_meter( "metername3", 0, 100, 50 )
     suite.add_event( 2 )
     suite.add_event( 3 )
@@ -41,7 +40,7 @@ def create_defs_functionally():
     f_defs = Defs()
     suite = f_defs.add_suite("s1")
     suite.add_variable("Var","value").add_family("f1").add_family("f1").add_task("t1").add_variable("fred","jones")
-    suite.add_trigger("t1 == complete").add_family("f2").add_family("f1").add_task("t1").add_variable("fred","jones")
+    suite.add_family("f2").add_family("f1").add_task("t1").add_variable("fred","jones")
     suite.add_meter( "metername3", 0, 100, 50 ).add_family("f3").add_task("t1").add_variable("fred","jones")
     suite.add_event( 2 ).add_event( 3 ).add_task("t1").add_variable("fred","jones")
     return f_defs
