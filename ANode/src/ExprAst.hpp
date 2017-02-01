@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #42 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -47,7 +47,7 @@ public:
 	virtual bool evaluate() const { assert(false); return false;}
 	virtual bool empty() const { return true; }
    virtual int value() const { assert(false); return 0;} // only valid for leaf or operators
-   virtual bool check(std::string& error_msg) const { return true; } // check divide or modulo by zero
+   virtual bool check(std::string& ) const { return true; } // check divide or modulo by zero
 
    virtual std::ostream& print(std::ostream&) const = 0;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const = 0;    // used for test

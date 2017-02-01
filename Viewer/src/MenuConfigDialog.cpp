@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -67,7 +67,10 @@ void MenuConfigDialog::updateMenuTree(Menu *menu)
 
 void MenuConfigDialog::addChildrenToMenuTree(Menu *menu, QTreeWidgetItem *parent)
 {
-	std::vector<MenuItem *>&items = menu->items();
+    if(!menu)
+        return;
+
+    std::vector<MenuItem *>&items = menu->items();
 
 	for (std::vector<MenuItem*>::iterator itItems = items.begin(); itItems != items.end(); ++itItems)
 	{
@@ -78,7 +81,7 @@ void MenuConfigDialog::addChildrenToMenuTree(Menu *menu, QTreeWidgetItem *parent
 		if ((*itItems)->isSubMenu())
 		{
 			Menu *submenu = MenuHandler::findMenu((*itItems)->name());
-			if (menu)
+            if(menu)
 			{
 				addChildrenToMenuTree(submenu, item);
 			}

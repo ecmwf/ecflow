@@ -50,12 +50,13 @@ python $WK/build_scripts/nightly/load.py
 # ecflow metabuilder
 # ======================================================================
 cd /var/tmp/ma0/workspace/metabuilder
+git checkout develop
 ./regenerate.sh ecflow
+git checkout master
 
 # =======================================================================
 # Start the GUI
 # =======================================================================
 cd $SCRATCH
-module swap ecflow/dev
+module load ecflow/dev
 ecflow_ui &
-

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -147,8 +147,6 @@ ChangeNotifyDialog::~ChangeNotifyDialog()
 
 void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
 {
-	const std::string& id=notifier->id();
-
 	ChangeNotifyDialogWidget* w=new ChangeNotifyDialogWidget(this);
 	w->init(notifier);
 
@@ -261,13 +259,8 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
 	numF.setPointSize(f.pointSize()-1);
 	QFontMetrics numFm(numF);
 
-	int w;
 	int h=2*margin+textH+4;
-	if(!numText.isEmpty())
-		//w=2*margin+textW + 3 + numFm.width(numText) + 3;
-		w=2*margin+textW;
-	else
-		w=2*margin+textW;
+    int w=2*margin+textW;
 
 	QPixmap pix(w,h);
 	pix.fill(Qt::transparent);

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -43,28 +43,28 @@ public:
     //void addValidType(std::string type);
     //void addValidState(std::string type);
     void setHandler(const std::string &handler);
-    void setViews(const std::vector<std::string> &views) {views_=views;};
+    void setViews(const std::vector<std::string> &views) {views_=views;}
     void setQuestion(const std::string &question) {question_=question;}
     void setIcon(const std::string &icon);
     void setStatustip(const std::string &statustip) {statustip_=statustip;}
     void setHidden(bool b) {hidden_=b;}
-    void setAsSubMenu() {isSubMenu_ = true;};
-    void setVisibleCondition(BaseNodeCondition *cond)  {visibleCondition_  = cond;};
-    void setEnabledCondition(BaseNodeCondition *cond)  {enabledCondition_  = cond;};
-    void setQuestionCondition(BaseNodeCondition *cond) {questionCondition_ = cond;};
-    void setCustom(bool b) {isCustom_ = b;};
-    BaseNodeCondition *visibleCondition()  {return visibleCondition_;};
-    BaseNodeCondition *enabledCondition()  {return enabledCondition_;};
-    BaseNodeCondition *questionCondition() {return questionCondition_;};
+    void setAsSubMenu() {isSubMenu_ = true;}
+    void setVisibleCondition(BaseNodeCondition *cond)  {visibleCondition_  = cond;}
+    void setEnabledCondition(BaseNodeCondition *cond)  {enabledCondition_  = cond;}
+    void setQuestionCondition(BaseNodeCondition *cond) {questionCondition_ = cond;}
+    void setCustom(bool b) {isCustom_ = b;}
+    BaseNodeCondition *visibleCondition() const {return visibleCondition_;}
+    BaseNodeCondition *enabledCondition() const  {return enabledCondition_;}
+    BaseNodeCondition *questionCondition() const {return questionCondition_;}
     bool shouldAskQuestion(std::vector<VInfo_ptr> &nodes);
-    bool isSubMenu()      {return isSubMenu_;};
-    bool isDivider()      {return isDivider_;};
-    bool isCustom()       {return isCustom_;};
-    std::string &name()   {return name_;};
-    const std::string handler() const {return handler_;}
+    bool isSubMenu() const {return isSubMenu_;}
+    bool isDivider() const {return isDivider_;}
+    bool isCustom()  const {return isCustom_;}
+    const std::string& name() const {return name_;}
+    const std::string& handler() const {return handler_;}
     bool isValidView(const std::string&) const;
-    const std::string command() const {return command_;}
-    const std::string question() const {return question_;}
+    const std::string& command() const {return command_;}
+    const std::string& question() const {return question_;}
     bool hidden() const {return hidden_;}
     int id() const {return id_;}
     QAction* createAction(QWidget* parent);

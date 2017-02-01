@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -60,7 +60,7 @@ public:
     VItemTmp_ptr item(const VNode*,const std::string&);
     virtual bool itemData(const VNode*,int index,QStringList&)=0;
 
-    int id() const {return id_;}
+    int typeId() const {return typeId_;}
     int keyToDataIndex(const std::string& key) const;
     int searchKeyToDataIndex(const std::string& key) const;
     QStringList searchKeys() const;
@@ -71,10 +71,11 @@ protected:
     virtual int num(const VNode* vnode)=0;
     virtual int lineNum(const VNode* vnode,int row) {return 1;}
 
+    typedef std::vector<VAttributeType*>::const_iterator TypeIterator;
     std::map<std::string,int> keyToData_;
     std::map<std::string,int> searchKeyToData_;
     int dataCount_;
-    int id_;
+    int typeId_;
 
 private:
     static std::map<std::string,VAttributeType*> typesMap_;

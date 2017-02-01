@@ -495,7 +495,6 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = drawingArea2;
 	children[ac++] = form1;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void search_shell_c::specialCB( Widget widget, XtPointer client_data, XtPointer call_data )

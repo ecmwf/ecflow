@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,11 +18,9 @@
 #include "VSettings.hpp"
 
 
-CustomCommand::CustomCommand(const std::string &name, const std::string &command, bool context)
+CustomCommand::CustomCommand(const std::string &name, const std::string &command, bool context) :
+    name_(name), command_(command), inContextMenu_(context)
 {
-    name_          = name;
-    command_       = command;
-    inContextMenu_ = context;
 }
 
 
@@ -34,27 +32,21 @@ void CustomCommand::set(const std::string &name, const std::string &command, boo
 }
 
 
-void CustomCommand::save(VSettings *vs)
+void CustomCommand::save(VSettings *vs) const
 {
     vs->put("name",    name());
     vs->put("command", command());
     vs->put("context", contextString());
 }
 
-
-
 CustomCommandHandler::CustomCommandHandler()
 {
 }
-
 
 void CustomCommandHandler::init()
 {
     readSettings();
 }
-
-
-
 
 CustomCommand* CustomCommandHandler::replace(int index, const std::string& name, const std::string& command, bool context)
 {
@@ -168,11 +160,7 @@ void CustomCommandHandler::writeSettings()
 }
 
 void CustomCommandHandler::readSettings()
-{
-    std::vector<VSettings> vsItems;
-    std::string dummyFileName="dummy";
-    std::string key="commands";
-
+{   
     std::string settingsFilePath = settingsFile();
     VSettings vs(settingsFilePath);
 
@@ -221,19 +209,8 @@ CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
 
 CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
 {
-    CustomCommand *item;
-    //int index = findIndex(name);
-
-    //if (index == -1)  // not already in the list
-    {
-        item=new CustomCommand(name, command, context);
-        items_.push_back(item);
-    }
-    //else  // already in the list - just update it
-    //{
-    //    item = items_[index];
-    //    item->set(name, command, context);
-    //}
+    CustomCommand *item=new CustomCommand(name, command, context);
+    items_.push_back(item);
 
     if (saveSettings)
         writeSettings();
@@ -274,12 +251,11 @@ CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance()
 
 CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
 {
-    CustomCommand *item;
     int index = findIndexFromName(name);
 
     if (index == -1)  // not already in the list
     {
-        item=new CustomCommand(name, command, context);
+        CustomCommand *item=new CustomCommand(name, command, context);
         items_.push_front(item);  // add it to the front
 
         if (items_.size() > maxCommands_)  // too many commands?

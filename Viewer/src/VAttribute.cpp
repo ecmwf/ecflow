@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -202,13 +202,15 @@ VAttribute* VAttribute::make(VNode* n,const std::string& type,const std::string&
 
 VAttribute* VAttribute::makeFromId(VNode* n,int id)
 {
+    return NULL;
+#if 0
     if(id ==-1) return NULL;
     VAttributeType *t=idToType(id);
     assert(t);
     QStringList d;
     int idx=idToTypeIndex(id);
-    return NULL;
-    //return t->getSearchData(n,idx,d);
+    return t->getSearchData(n,idx,d);
+#endif
 }
 
 VAttribute* VAttribute::make(VNode *parent,QStringList data)
@@ -233,7 +235,7 @@ VAttribute* VAttribute::make(VNode *parent,QStringList data)
 
 int VAttribute::indexToId(VAttributeType* t,int idx)
 {
-    return (idx >=0)?(t->id()*10000+idx):-1;
+    return (idx >=0)?(t->typeId()*10000+idx):-1;
 }
 
 VAttributeType* VAttribute::idToType(int id)

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -48,7 +48,7 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString titl
 	menu_->addAction(acSep);
 
 	//Param name must be unique
-	for(std::set<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); ++it)
+    for(std::vector<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); ++it)
 	{
 		addAction((*it)->label(),
 				  (*it)->name());
@@ -236,18 +236,18 @@ void VParamFilterMenu::slotUnselectAll(bool)
 
 void VParamFilterMenu::slotChanged(bool)
 {
-	std::set<std::string> items;
+    std::vector<std::string> items;
 	Q_FOREACH(QAction* ac,menu_->actions())
 	{
 		if(!ac->isSeparator() &&
 			ac->isCheckable() && ac->isChecked())
 		{
-			items.insert(ac->data().toString().toStdString());
+            items.push_back(ac->data().toString().toStdString());
 		}
 	}
 
 	if(filter_)
-		filter_->current(items);
+        filter_->setCurrent(items);
 
    checkActionState();
 }
@@ -266,8 +266,11 @@ void VParamFilterMenu::reload()
 
 void VParamFilterMenu::checkActionState()
 {
-    selectAllAc_->setEnabled(!filter_->isComplete());
-    unselectAllAc_->setEnabled(!filter_->isEmpty());
+    if(filter_)
+    {
+        selectAllAc_->setEnabled(!filter_->isComplete());
+        unselectAllAc_->setEnabled(!filter_->isEmpty());
+    }
 }
 
 //===========================================

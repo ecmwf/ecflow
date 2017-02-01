@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -457,7 +457,7 @@ int VNode::variablesNum() const
 
 int VNode::genVariablesNum() const
 {
-	std::vector<Variable> gv;
+    std::vector<Variable> gv;
 
     if(node_)
 	{
@@ -605,32 +605,6 @@ QColor  VNode::typeFontColour() const
     return VNState::toTypeColour(this);
 }
 
-LogServer_ptr VNode::logServer()
-{
-	LogServer_ptr lsv;
-
-	if(!node_)
-		return lsv;
-
-	std::string logHost=findInheritedVariable("ECF_LOGHOST",true);
-	std::string logPort=findInheritedVariable("ECF_LOGPORT");
-	//if(logHost.empty())
-	//{
-	//	logHost=findInheritedVariable("LOGHOST",true);
-	//	logPort=findInheritedVariable("LOGPORT");
-	//}
-
-	std::string micro=findInheritedVariable("ECF_MICRO");
-	if(!logHost.empty() && !logPort.empty() &&
-	  (micro.empty() || logHost.find(micro) ==  std::string::npos))
-	{
-		lsv=LogServer_ptr(new LogServer(logHost,logPort));
-		return lsv;
-	}
-
-	return lsv;
-}
-
 bool VNode::logServer(std::string& host,std::string& port)
 {
 	if(!node_)
@@ -653,24 +627,6 @@ bool VNode::logServer(std::string& host,std::string& port)
 
 	return false;
 }
-
-#if 0
-bool VNode::isAncestor(const VNode* n)
-{
-	if(n == this)
-		return true;
-
-    VNode* nd=parent();
-    while(nd)
-    {
-    	if(n == nd)
-           return true;
-
-    	nd=nd->parent();
-    }
-    return false;
-}
-#endif
 
 std::vector<VNode*> VNode::ancestors(SortMode sortMode)
 {
@@ -792,6 +748,30 @@ const std::string& VNode::abortedReason() const
 	static std::string emptyStr;
 	return emptyStr;
 
+}
+
+int VNode::labelNum() const
+{
+    return (node_)?node_->labels().size():0;
+}
+
+int VNode::labelLineNum(int row) const
+{
+    if(!node_)
+        return 1;
+
+    const std::vector<Label>&  v=node_->labels();
+    if(row >=0 && row < v.size())
+    {
+        std::string val=v[row].new_value();
+        if(val.empty() || val == " ")
+        {
+            val=v[row].value();
+        }
+        return std::count(val.begin(), val.end(), '\n')+1;
+    }
+
+    return 1;
 }
 
 void VNode::statusChangeTime(QString& sct) const

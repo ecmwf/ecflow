@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #88 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -62,7 +62,8 @@ public:
  	virtual node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const;
    virtual node_ptr find_node_up_the_tree(const std::string& name) const;
 
-	virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode);
+	virtual node_ptr
+ find_relative_node(const std::vector<std::string>& pathToNode);
 	void find_closest_matching_node( const std::vector< std::string >& pathToNode, int indexIntoPathNode, node_ptr& closest_matching_node );
 
 	family_ptr findFamily(const std::string& familyName) const;

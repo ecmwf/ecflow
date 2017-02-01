@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -244,10 +244,12 @@ Q_SIGNALS:
 
 protected:
 	void init();
-	virtual void add(ServerHandler*)=0;
+    void addToServers(VModelServer* s);
+    virtual void add(ServerHandler*)=0;
     virtual void connectToModel(VModelServer* d);
 
 	std::vector<VModelServer*> servers_;
+    int serverNum_; //we cachec servers_.size() for performance reasons
 	ServerFilter *serverFilter_;
 	NodeFilterDef* filterDef_;
 	AbstractNodeModel* model_;

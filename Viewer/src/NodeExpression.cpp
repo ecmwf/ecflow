@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -240,17 +240,15 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
 
     // short-circuit - if empty, then return a True condition
 
-    if (tokens_.size() == 0)
+    if(tokens_.size() == 0)
     {
-        result = new TrueNodeCondition();
+        result=new TrueNodeCondition();
     }
-
 
     while (!returnEarly && i_ != tokens_.end())
     {
         bool tokenOk = true;
         bool updatedOperands = false;
-
 
         if (i_ != tokens_.end())
         {
@@ -440,7 +438,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
         if(operandStack.size() >= funcStack.back()->numOperands())
         {
             std::vector<BaseNodeCondition *> operands;
-            result = funcStack.back();  // last function is the current result
+            result = funcStack.back();  // last function is the current result           
             operands = popLastNOperands(operandStack, result->numOperands());  // pop its operands off the stack
             result->setOperands(operands);
             funcStack.pop_back(); // remove the last function from the stack
@@ -449,7 +447,8 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
     }
 
 
-    UiLog().dbg() << "    " <<  result->print();
+    if(result)
+        UiLog().dbg() << "    " <<  result->print();
 
     return result;
 }

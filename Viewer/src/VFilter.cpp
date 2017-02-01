@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,6 +11,7 @@
 
 #include "NodeQuery.hpp"
 #include "NodeQueryEngine.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNState.hpp"
 #include "VAttribute.hpp"
@@ -37,31 +38,53 @@
 //
 //==============================================
 
-VParamSet::VParamSet()
+VParamSet::VParamSet() : empty_(true), complete_(false)
 {
 }
 
 void VParamSet::init(const std::vector<VParam*>& items)
 {
-	for(std::vector<VParam*>::const_iterator it=items.begin(); it != items.end(); ++it)
-	{
-		all_.insert((*it));
-	}
+    all_=items;
 
-    current_=all_;
+    int maxId=0;
+    for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+    {
+        if(static_cast<int>((*it)->id()) > maxId)
+            maxId=(*it)->id();
+    }
+
+    if(maxId > 0)
+    {
+        currentCache_.resize(maxId+1,0);
+        for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+        {
+            currentCache_[(*it)->id()]=1;
+        }
+    }
+
+    setCurrent(all_,false);
 }
 
+//This has to be very fast. Called a millions of times!
 bool VParamSet::isSet(VParam* p) const
 {
-	if(!p)
-		return false;
+    //assert(p);
+    //return (current_.find(p) != current_.end());
+    //return std::find(current_.begin(),current_.end(),p) != current_.end();
 
-	return (current_.find(p) != current_.end());
+    //for(size_t i=0; i < current_.size(); i++)
+    //    if(current_[i] == p)
+    //        return true;
+
+    //return true;
+    return (currentCache_[p->id()]==0)?false:true;
+
+    //return false;
 }
 
 bool VParamSet::isSet(const std::string &name) const
 {
-	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
+    for(std::vector<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
 	{
 		if((*it)->strName() == name)
 				return true;
@@ -72,47 +95,78 @@ bool VParamSet::isSet(const std::string &name) const
 QStringList VParamSet::currentAsList() const
 {
 	QStringList lst;
-	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
+    for(std::vector<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
 	{
 		lst << QString::fromStdString((*it)->strName());
 	}
 	return lst;
 }
 
-void VParamSet::setCurrent(const std::set<VParam*>& items)
+void VParamSet::clearCurrent()
 {
-	current_.clear();
-	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
-	{
-		if(items.find(*it) != items.end())
-			current_.insert(*it);
-	}
-
-	Q_EMIT changed();
+    current_.clear();
+    std::fill(currentCache_.begin(), currentCache_.end(), 0);
+    empty_=true;
+    complete_=false;
 }
 
-void VParamSet::current(const std::set<std::string>& names)
+void VParamSet::addToCurrent(VParam* p)
 {
-	current_.clear();
-	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
-	{
-			if(names.find((*it)->strName()) != names.end())
-				current_.insert(*it);
-	}
-
-	Q_EMIT changed();
+    current_.push_back(p);
+    uint id=p->id();
+    UI_ASSERT(id >=0 && id < currentCache_.size(),"id=" << id
+              << " currentCache_.size()=" << currentCache_.size());
+    currentCache_[id]=1;
+    empty_=false;
+    complete_=(current_.size() == all_.size());
 }
 
-void VParamSet::setCurrent(QStringList names)
+void VParamSet::setCurrent(const std::vector<VParam*>& items,bool broadcast)
 {
-	current_.clear();
-	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+    clearCurrent();
+
+    for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
 	{
-			if(names.contains(QString::fromStdString((*it)->strName())))
-				current_.insert(*it);
+        if(std::find(all_.begin(),all_.end(),*it) != all_.end())
+        {
+            addToCurrent(*it);
+        }
+    }
+
+    if(broadcast)
+        Q_EMIT changed();
+}
+
+void VParamSet::setCurrent(const std::vector<std::string>& names,bool broadcast)
+{
+    clearCurrent();
+
+    for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+	{
+        if(std::find(names.begin(),names.end(),(*it)->strName()) != names.end())
+        {
+            addToCurrent(*it);
+        }
 	}
 
-	Q_EMIT changed();
+    if(broadcast)
+        Q_EMIT changed();
+}
+
+void VParamSet::setCurrent(QStringList names,bool broadcast)
+{
+    clearCurrent();
+
+    for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+	{
+        if(names.contains(QString::fromStdString((*it)->strName())))
+        {
+            addToCurrent(*it);
+        }
+	}
+
+    if(broadcast)
+        Q_EMIT changed();
 }
 
 
@@ -126,7 +180,7 @@ void VParamSet::writeSettings(VSettings *vs)
     }
     else
     {
-        for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
+        for(std::vector<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
         {
             array.push_back((*it)->strName());
         }
@@ -137,7 +191,7 @@ void VParamSet::writeSettings(VSettings *vs)
 
 void VParamSet::readSettings(VSettings* vs)
 {
-	current_.clear();
+    clearCurrent();
 
 	std::vector<std::string> array;
 
@@ -148,7 +202,7 @@ void VParamSet::readSettings(VSettings* vs)
         vs->get(settingsIdV0_,array);
         if(array.empty())
         {
-            current_=all_;
+            setCurrent(all_,false);
             return;
         }
     }
@@ -163,14 +217,14 @@ void VParamSet::readSettings(VSettings* vs)
 		std::string name=*it;
         if(name == "_ALL_")
         {
-            current_=all_;
+            setCurrent(all_,false);
             return;
         }
 
-        for(std::set<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
+        for(std::vector<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
 		{
 			if((*itA)->strName() == name)
-                current_.insert(*itA);
+                addToCurrent(*itA);
 		}
 	}
 }
@@ -247,7 +301,6 @@ IconFilter::IconFilter() : VParamSet()
     settingsIdV0_="icon";
 	std::vector<VParam*> v=VIcon::filterItems();
 	init(v);
-	current_=all_;
 }
 
 void IconFilter::readSettings(VSettings* vs)
@@ -268,17 +321,17 @@ void IconFilter::readSettings(VSettings* vs)
         //It could be only a one-time problem for users who already set theit icon filter.
         if(lastNames.empty())
         {
-            current_=all_;
+            setCurrent(all_,false);
         }
         else
         {
             //Check which icons are not in lastNames
-            for(std::set<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
+            for(std::vector<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
             {
                 //The item is not in lastNames so it must be a newly added icon type. We add it to the filter list
                 if(std::find(lastNames.begin(),lastNames.end(),(*itA)->strName()) == lastNames.end())
                 {
-                    current_.insert(*itA);
+                    addToCurrent(*itA);
                 }
             }
         }

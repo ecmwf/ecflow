@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -726,9 +726,9 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
         case PortColumn: return QString::fromStdString(item->port());
         case UseColumn:
 		{
-			int i=item->useCnt();
-			if(item->useCnt() > 0)
-                return "loaded (" + QString::number(item->useCnt()) + ")";
+            int n=item->useCnt();
+            if(n > 0)
+                return "loaded (" + QString::number(n) + ")";
 
 			return QVariant();
 		}
@@ -849,7 +849,6 @@ bool ServerListModel::setData(const QModelIndex& idx, const QVariant & value, in
 {
 	if(filter_ && idx.column() == LoadColumn && role == Qt::CheckStateRole)
 	{
-		int row=idx.row();
 		if(ServerItem* item=ServerList::instance()->itemAt(idx.row()))
 		{
 			bool checked=(value.toInt() == Qt::Checked)?true:false;

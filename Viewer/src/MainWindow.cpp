@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -156,7 +156,7 @@ void MainWindow::init(MainWindow *win)
 void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 {
    for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
-		   it != InfoPanelHandler::instance()->panels().end(); it++)
+           it != InfoPanelHandler::instance()->panels().end(); ++it)
    {
 	   if((*it)->show().find("toolbar") != std::string::npos)
 	   {
@@ -361,7 +361,7 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 
 		std::string name=ac->data().toString().toStdString();
 
-		for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); it++)
+        for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); ++it)
 		{
 			 if((*it)->name() == name)
 			 {

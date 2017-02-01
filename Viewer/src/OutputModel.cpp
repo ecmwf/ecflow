@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -38,7 +38,7 @@ void OutputModel::setData(VDir_ptr dir,const std::string& jobout)
 
     if(dir_)
     {
-        for(int i; i < dir_->count(); i++)
+        for(int i=0; i < dir_->count(); i++)
         {
             if(dir_->fullName(i) == jobout)
             {

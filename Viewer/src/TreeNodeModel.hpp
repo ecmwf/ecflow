@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -100,8 +100,9 @@ protected:
     QModelIndex forceShowAttribute(const VAttribute* a) const;
 
 private:
-	bool isServer(const QModelIndex & index) const;
-	bool isNode(const QModelIndex & index) const;
+    bool isServer(const QModelIndex& index) const;
+    bool isServerForValid(const QModelIndex& index) const;
+    bool isNode(const QModelIndex & index) const;
 	bool isAttribute(const QModelIndex & index) const;
 
     ServerHandler* indexToServerHandler(const QModelIndex & index) const;
@@ -110,10 +111,11 @@ private:
 
     QModelIndex nodeToIndex(VTreeServer*,const VTreeNode*,int column=0) const;
     VTreeNode* indexToNode( const QModelIndex & index) const;
-
+    VTreeNode* indexToAttrParentNode(const QModelIndex & index) const;
+    VTreeNode* indexToAttrParentOrNode(const QModelIndex & index,bool &itIsANode) const;
 	QVariant serverData(const QModelIndex& index,int role) const;
-	QVariant nodeData(const QModelIndex& index,int role) const;
-	QVariant attributesData(const QModelIndex& index,int role) const;
+    QVariant nodeData(const QModelIndex& index,int role,VTreeNode*) const;
+    QVariant attributesData(const QModelIndex& index,int role,VTreeNode*) const;
 
 
 	//Attribute filter

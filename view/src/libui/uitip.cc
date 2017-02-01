@@ -65,7 +65,6 @@ void tip_shell_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	children[ac++] = label_;
 	XtManageChildren(children, ac);
-	ac = 0;
 	XtManageChild ( form_);
 }
 

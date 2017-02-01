@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -162,7 +162,7 @@ void DashboardTitle::updateTitle()
     QList<QColor> fillColors;
     QList<QColor> textColors;
 
-    const std::vector<ServerItem*> items=filter_->items();
+    const std::vector<ServerItem*>& items=filter_->items();
     for(std::vector<ServerItem*>::const_iterator it=items.begin(); it != items.end(); ++it)
     {
         //Get text
@@ -196,8 +196,7 @@ void DashboardTitle::updateTitle()
     Q_ASSERT(num>0);
 
     {
-        const int marginX=0;
-        const int marginY=0;
+        const int marginX=0;      
         const int gap=1;
 
         int maxBandH=2;

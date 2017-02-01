@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -216,7 +216,7 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 	{
 		VIcon *v=*it;
 
-        if(!filter || filter->current().find(v) != filter->current().end())
+        if(!filter || filter->isSet(v))
         {
        	   if(v->show(vnode))
            {
@@ -230,7 +230,7 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 
 QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
 {
-	if(filter->isEmpty())
+    if(!filter || filter->isEmpty())
 		return QString();
 
 	int iconSize=16;
@@ -240,7 +240,7 @@ QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
 	{
 	   VIcon *v=*it;
 
-       if(!filter || filter->current().find(v) != filter->current().end())
+       if(!filter || filter->isSet(v))
        {
       	   if(v->show(vnode))
       	   {

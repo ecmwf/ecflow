@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -79,7 +79,7 @@ void LogModel::setData(const std::vector<std::string>& data)
 
 	data_.clear();
 
-	for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); it++)
+    for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); ++it)
 	{
 		QString s=QString::fromStdString(*it);
 		if(!s.simplified().isEmpty())
@@ -94,7 +94,7 @@ void LogModel::appendData(const std::vector<std::string>& data)
 {
 	int num=0;
 
-	for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); it++)
+    for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); ++it)
 	{
 		QString s=QString::fromStdString(*it);
 		if(!s.simplified().isEmpty())
@@ -107,7 +107,7 @@ void LogModel::appendData(const std::vector<std::string>& data)
 	{
 		beginInsertRows(QModelIndex(),rowCount(),rowCount()+num-1);
 
-		for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); it++)
+        for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); ++it)
 		{
 			QString s=QString::fromStdString(*it);
 			if(!s.simplified().isEmpty())

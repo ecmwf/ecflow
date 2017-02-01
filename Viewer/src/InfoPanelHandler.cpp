@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,10 +22,10 @@ InfoPanelHandler* InfoPanelHandler::instance_=0;
 
 
 InfoPanelDef::InfoPanelDef(const std::string& name) :
-	name_(name),
+    name_(name),
+    hidden_(false),
 	visibleCondition_(0),
-	enabledCondition_(0),
-	hidden_(false)
+    enabledCondition_(0)
 {
 
 }

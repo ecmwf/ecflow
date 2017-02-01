@@ -18,8 +18,11 @@ Process
 
 0/ Create the tarball using cmake, in the build directory with  
    This can be done using:
+   *make sure ecbuild in cmake.sh matches the metabuilder*
    
-   $WK/cmake.sh package_source
+   cd $WK
+   rm -rf ../bdir               # *REMOVE* build tree
+   ./cmake.sh package_source
 
 0/ Inform user support, allows user support to test rpm
    
@@ -78,16 +81,10 @@ Process
          or try with emos  and password.
          scp -r 4.5.0 emos@sappb:/usr/local/apps/ecflow/.
          
-   VIRTUAL Machines: These should treated like regular machines. 
-         - These are based on lxop_dev, hence we need top copy over exe for this
-         - For a list of machines see view/server.od( vsms1,vmsm2,vsms3,vali)
-         - to show kernel version: uname -a
-         - to show os version:     lsb_release -a
-         
-         - ssh lxop_dev, su emos;
-         - scp -r 4.5.0 emos@<virtual machine>:/usr/local/apps/ecflow/.
-         
-         
+   VIRTUAL Machines:
+         - The virtual machines are out sync with lxop_dev.(due to python unicode)
+           We now build on via metabuilder ecflow-metab directly.
+          
   *Make* sure destination has a trailing '/.' otherwise you
   can end up renaming.
 
@@ -105,7 +102,7 @@ Process
         ~rdx/ecflow/servers.config
         
    # as an emergency we can copy from lxop_dev
-   - ssh lxop_dev, su emos;
+   - ssh ecflow-metab, su emos;
    - scp -r 4.5.0 emos@vecfrdda1:/usr/local/apps/ecflow/.
         
 
@@ -132,9 +129,6 @@ Process
    mail group:  ecflow_int@lists.ecmwf.int 
    Use: Release-Anouncement.txt
   
-0/ Tag the release, This should now be automatic when using git flow:
-       git flow release finish 4.5.0
-  
 0/ AFTER the release 
    o increment the version number in $WK/VERSION.cmake THEN, run:
      sh -x $WK/cmake.sh debug
@@ -144,4 +138,7 @@ Process
      
      Then check this file in for, for the other platforms.
      
-0/ Reset metabuilder ecflow git_tag, back to develop
+0/ Reset metabuilder and ecflow git_tag, back to develop
+
+0/ ** Check the security level of Jira issues for the release.
+      If there is nothing sensitive, then set security level to None

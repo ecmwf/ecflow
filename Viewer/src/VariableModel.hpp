@@ -36,9 +36,6 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
 	bool variable(const QModelIndex& index, QString& name,QString& value,bool& genVar) const;
-    bool alterVariable(const QModelIndex& index,QString name,QString value);
-    bool setVariable(const QModelIndex& index,QString name,QString value);
-	bool removeVariable(const QModelIndex& index,QString name,QString value);
 
     VariableModelData* indexToData(const QModelIndex& index) const;
     VariableModelData* indexToData(const QModelIndex& index,int& block) const;

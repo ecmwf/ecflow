@@ -49,7 +49,6 @@ void history_form_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
 	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
 	XtSetValues ( scrolledList9,al, ac );
-	ac = 0;
 	XtAddCallback (list_, XmNbrowseSelectionCallback,&history_form_c:: browseCB, (XtPointer) this);
 	XtManageChild(list_);
 }

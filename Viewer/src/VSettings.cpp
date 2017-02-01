@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -143,7 +143,7 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	boost::property_tree::ptree array;
 	for(std::vector<std::string>::const_iterator it=val.begin(); it != val.end(); ++it)
 	{
-		array.push_back(std::make_pair("",(*it)));
+		array.push_back(std::make_pair("",boost::property_tree::ptree((*it))));
 	}
 	pt_.put_child(path_.path(key),array);
 }
@@ -155,7 +155,7 @@ void VSettings::put(const std::string& key,const std::vector<int>& val)
     {
         std::stringstream ss;
         ss << (*it);
-        array.push_back(std::make_pair("",ss.str()));
+        array.push_back(std::make_pair("",boost::property_tree::ptree(ss.str())));
     }
     pt_.put_child(path_.path(key),array);
 }

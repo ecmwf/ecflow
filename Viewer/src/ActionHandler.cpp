@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -203,7 +203,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 if (customCommandDialog->exec() == QDialog::Accepted)
                 {
                     // the user could have changed the node selection within the custom editor
-                    std::vector<VInfo_ptr> selectedNodes = customCommandDialog->selectedNodes();
+                    customCommandDialog->selectedNodes();
 
                     // the dialogue contains a 'fake' menu item created from the custom command
                     item = &(customCommandDialog->menuItem());

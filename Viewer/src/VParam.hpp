@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -21,6 +21,7 @@ public:
 		explicit VParam(const std::string& name);
         ~VParam();
 
+        uint id() const {return id_;}
 		QString name() const {return qName_;}
 		const std::string& strName() const {return name_;}
 
@@ -30,7 +31,6 @@ public:
         QColor typeColour() const {return typeColour_;}
 
 		void setProperty(VProperty*);
-		
 		void notifyChange(VProperty*);
 
 		/*
@@ -68,6 +68,7 @@ protected:
 		QString colourPropName_;
         QString fontColourPropName_;
         QString typeColourPropName_;
+        int id_;
 };
 
 #endif

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -30,10 +30,10 @@ public:
     
     static VConfig* instance();
     
-    const std::string& appName() {return appName_;}
-    const std::string& appLongName() {return appLongName_;}
+    const std::string& appName() const {return appName_;}
+    const std::string& appLongName() const {return appLongName_;}
     void init(const std::string& parDir);
-    const std::vector<VProperty*>& groups() {return groups_;}
+    const std::vector<VProperty*>& groups() const {return groups_;}
     VProperty* find(const std::string& path);
 
     VProperty* cloneServerGui(VProperty *linkTarget);

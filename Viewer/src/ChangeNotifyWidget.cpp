@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -208,7 +208,7 @@ void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
 
 void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 {
-	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); it++)
+    for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); ++it)
 	{
 		if(ChangeNotifyButton* tb=(*it)->findButton(id))
 		{
@@ -219,7 +219,7 @@ void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 
 void ChangeNotifyWidget::updateSettings(const std::string& id)
 {
-	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); it++)
+    for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); ++it)
 	{
 		if(ChangeNotifyButton* tb=(*it)->findButton(id))
 		{

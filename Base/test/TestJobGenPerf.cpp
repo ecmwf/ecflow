@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,6 +18,7 @@
 #include "boost/filesystem/path.hpp"
 
 #include "Defs.hpp"
+#include "Task.hpp"
 #include "Str.hpp"
 #include "File.hpp"
 #include "Log.hpp"
@@ -37,6 +38,19 @@ namespace fs = boost::filesystem;
 //
 // The defs is in /var/tmp/ma0/ECFLOW_TEST/TestJobGenPerf
 //
+// Timing for /var/tmp/ma0/DEFS/metabuilder.def
+// First/base point: real:10.15  user: 5.58  sys: 1.62
+// After ECFLOW-846: real: 4.46  user: 3.72  sys: 0.74  # Only open/close include file once
+// After ECFLOW-864: real: 4.36  user: 3.68  sys: 0.68  # minimise stat calls
+//
+//     strace -c ./Base/bin/gcc-4.8/release/perf_job_gen ./metabuilder.def
+//
+//                            % time     seconds  usecs/call     calls    errors syscall
+//                            ------ ----------- ----------- --------- --------- ----------------
+//   Before ECFLOW-864:        22.77    0.001159           0    132329     50737 stat
+//   After  ECFLOW-864:        21.35    0.001097           0    125644     50737 stat
+//
+
 int main(int argc, char* argv[])
 {
    if (argc != 2) {
@@ -76,6 +90,7 @@ int main(int argc, char* argv[])
 //      if (suite) suite->remove();
 //   }
 //   cout << defs ;
+//   exit(0);
 
    // Check number of tasks, if the submitted output below is too low
    std::vector<Task*> tasks;
@@ -115,6 +130,16 @@ int main(int argc, char* argv[])
    if (!job.generate( jobParam )) cout << " generate failed: " << jobParam.getErrorMsg();
    cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
 
+//   for(size_t i = 0; i < tasks.size(); i++) {
+//      if (tasks[i]->state() != NState::SUBMITTED) {
+//         cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
+//         Node* parent = tasks[i]->parent();
+//         while (parent) {
+//            cout << "node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
+//            parent = parent->parent();
+//         }
+//      }
+//   }
    // fs::remove(log_path);
    return 0;
 }

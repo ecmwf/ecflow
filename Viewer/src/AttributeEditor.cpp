@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -28,7 +28,7 @@
 static QList<AttributeEditor*> editors;
 #endif
 
-AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : QDialog(parent), info_(info), type_(type), form_(0)
+AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : QDialog(parent), info_(info), form_(0), type_(type)
 {    
     setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);

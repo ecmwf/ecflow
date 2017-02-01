@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -26,7 +26,6 @@ static std::vector<std::string> propVec;
 static QColor typeFgColourClassic=QColor(Qt::white);
 static QColor typeBgColourClassic=QColor(150,150,150);
 static QColor childCountColour=QColor(90,91,92);
-
 
 struct NodeShape
 {
@@ -62,10 +61,15 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 {
     drawAttrSelectionRect_=true;
 
+    nodeSizeHintCache_=QSize(100,fontHeight_+8);
+
     attrFont_=font_;
 	attrFont_.setPointSize(8);
+    QFontMetrics fm(attrFont_);
+    attrFontHeight_=fm.height();
+    attrSizeHintCache_=QSize(100,attrFontHeight_+6);
 
-	serverInfoFont_=font_;
+    serverInfoFont_=font_;
 
 	serverInfoFont_=font_;
     //serverNumFont_.setBold(true);
@@ -134,6 +138,9 @@ void TreeNodeViewDelegate::updateSettings()
     	if(font_ != newFont )
     	{
     		font_=newFont;
+            QFontMetrics fm(font_);
+            fontHeight_=fm.height();
+            nodeSizeHintCache_=QSize(100,fontHeight_+8);
     		serverInfoFont_=font_;
     		serverNumFont_.setFamily(font_.family());
             serverNumFont_.setPointSize(font_.pointSize()-1);
@@ -155,7 +162,10 @@ void TreeNodeViewDelegate::updateSettings()
     	if(attrFont_ != newFont)
     	{
     		attrFont_=newFont;
-    		Q_EMIT sizeHintChangedGlobal();
+            QFontMetrics fm(attrFont_);
+            attrFontHeight_=fm.height();
+            attrSizeHintCache_=QSize(100,attrFontHeight_+6);
+            Q_EMIT sizeHintChangedGlobal();
     	}
     }
 
@@ -178,30 +188,28 @@ void TreeNodeViewDelegate::updateSettings()
     updateBaseSettings();
 }
 
-QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
+QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIndex & index ) const
 {
-	QSize size=QStyledItemDelegate::sizeHint(option,index);
+    //QSize size=QStyledItemDelegate::sizeHint(option,index);
+    QSize size(100,fontHeight_+8);
 
 	int attLineNum=0;
 	if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 0)
 	{
-		QFontMetrics fm(attrFont_);
-		int h=fm.height();
 		if(attLineNum==1)
-			return QSize(size.width(),h+6);
+            return attrSizeHintCache_;
 		else
 		{
-			QStringList lst;
+            QFontMetrics fm(attrFont_);
+            QStringList lst;
 			for(int i=0; i < attLineNum; i++)
 				lst << "1";
 
-			return QSize(size.width(),fm.size(0,lst.join(QString('\n'))).height()+6);
+            return QSize(100,fm.size(0,lst.join(QString('\n'))).height()+6);
 		}
 	}
 
-	QFontMetrics fm(font_);
-	int h=fm.height();
-	return QSize(size.width(),h+8);
+    return nodeSizeHintCache_;
 }
 
 
@@ -346,7 +354,8 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
     painter->setBrush(QColor(230,230,230));
     painter->drawRect(progRect.adjusted(0,0,-progRect.width()*0.4,0));
 #endif
-	int currentRight=itemRect.left();
+
+    int currentRight=itemRect.left();
 
     NodeShape stateShape;
     stateShape.col_=index.data(Qt::BackgroundRole).value<QColor>();

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -213,6 +213,32 @@ bool VariableModelData::hasName(const std::string& n) const
 
 }
 
+int VariableModelData::indexOf(const std::string& varName,bool genVar) const
+{
+    int idx=-1;
+    for(std::vector<Variable>::const_iterator it=vars_.begin(); it != vars_.end(); ++it)
+    {
+        idx++;
+        if(!genVar && (*it).name() == varName)
+        {
+            return idx;
+        }
+    }
+
+    if(!genVar)
+        return -1;
+
+    for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); ++it)
+    {
+        if((*it).name() == varName)
+        {
+            return idx;
+        }
+    }
+
+    return -1;
+}
+
 void VariableModelData::buildAlterCommand(std::vector<std::string>& cmd,
 		                            const std::string& action, const std::string& type,
 		                            const std::string& name,const std::string& value)
@@ -273,15 +299,11 @@ void VariableModelData::add(const std::string& name,const std::string& val)
 	ServerHandler::command(info_,cmd);
 }
 
-void VariableModelData::remove(int index,const std::string& varName)
+void VariableModelData::remove(const std::string& varName)
 {
-	if(varName == name(index))
-	{
-		std::vector<std::string> cmd;
-		buildAlterCommand(cmd,"delete","variable",varName,"");
-
-		ServerHandler::command(info_,cmd);
-	}
+    std::vector<std::string> cmd;
+    buildAlterCommand(cmd,"delete","variable",varName,"");
+    ServerHandler::command(info_,cmd);
 }
 
 bool VariableModelData::isGenVar(int index) const
@@ -827,6 +849,26 @@ const std::string& VariableModelDataHandler::value(const std::string& node,const
 
     return defaultStr;
 }
+
+void VariableModelDataHandler::findVariable(const std::string& name,const std::string& nodePath,
+                                            bool genVar,int& block,int& row) const
+{
+    block=-1;
+    row=-1;
+    for(size_t i=0; i < data_.size(); i++)
+    {
+        if(data_[i]->fullPath() == nodePath)
+        {
+            block=i;
+            row=data_[i]->indexOf(name,genVar);
+            return;
+        }
+    }
+}
+
+
+
+
 
 void VariableModelDataHandler::addObserver(VariableModelDataObserver* o)
 {

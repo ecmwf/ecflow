@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,13 +14,16 @@
 
 #include "VProperty.hpp"
 
+static uint idCounter=0;
+
 VParam::VParam(const std::string& name) :
    name_(name),
    qName_(QString::fromStdString(name)),
    prop_(0),
    colourPropName_("fill_colour"),
    fontColourPropName_("font_colour"),
-   typeColourPropName_("type_colour")
+   typeColourPropName_("type_colour"),
+   id_(idCounter++)
 {
 }
 

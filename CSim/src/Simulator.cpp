@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -34,6 +34,7 @@
 #include "Jobs.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "CmdContext.hpp"
+#include "Str.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -258,8 +259,6 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 		}
 #endif
 
-      // any state change should be followed with a job submission
-      t->complete();  // mark task as complete
 
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
@@ -267,9 +266,19 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 #endif
 
 		// If the task has any event used in the trigger expressions, then update event.
+      std::string msg;
  		BOOST_FOREACH(Event& event, t->ref_events()) {
  			if (event.usedInTrigger()) { // event used in trigger/complete expression
  				event.set_value(true);
+
+ 				msg.clear();
+ 				msg += Str::CHILD_CMD();
+ 				msg += "event ";
+ 				msg += event.name_or_number();
+ 				msg += " ";
+ 				msg += t->absNodePath();
+ 				log(Log::MSG,msg);
+
   				if (!doJobSubmission(theDefs,errorMsg))  {
   					level_--;
   					return false;
@@ -286,6 +295,15 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
  			if (meter.usedInTrigger()) { // meter used in trigger/complete expression
  				while (meter.value() < meter.max()) {
  					meter.set_value(meter.value()+1);
+
+ 	            msg.clear();
+ 	            msg += Str::CHILD_CMD();
+ 	            msg += "meter ";
+ 	            msg += meter.name();
+ 	            msg += " ";
+ 	            msg += t->absNodePath();
+ 	            log(Log::MSG,msg);
+
   					if (!doJobSubmission(theDefs,errorMsg)) {
   						level_--;
   						return false;
@@ -297,6 +315,9 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 				meter.set_value(meter.max());
  			}
 		}
+
+      // any state change should be followed with a job submission
+      t->complete();  // mark task as complete
 	}
 
 	level_--;

@@ -1,9 +1,9 @@
-## Copyright 2009-2016 ECMWF. 
-## This software is licensed under the terms of the Apache Licence version 2.0 
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-## In applying this licence, ECMWF does not waive the privileges and immunities 
-## granted to it by virtue of its status as an intergovernmental organisation 
-## nor does it submit to any jurisdiction. 
+## Copyright 2009-2017 ECMWF.
+## This software is licensed under the terms of the Apache Licence version 2.0
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+## In applying this licence, ECMWF does not waive the privileges and immunities
+## granted to it by virtue of its status as an intergovernmental organisation
+## nor does it submit to any jurisdiction.
 
 #
 # This file should be changed depending on the new system
@@ -43,7 +43,7 @@ lib boost_python_static   : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib rtc : :  <variant>debug <file>/opt/langtools/lib/hpux32/librtc.so ;
 
 
-# project wide settings. Please disable requirements <variant>debug:<linkflags>+check=all 
+# project wide settings. Please disable requirements <variant>debug:<linkflags>+check=all
 # for release build.
 # Note: _XOPEN_SOURCE_EXTENDED is only needed for Client/Server categories
 #       assuming its no harm to define everywhere
@@ -52,23 +52,23 @@ lib rtc : :  <variant>debug <file>/opt/langtools/lib/hpux32/librtc.so ;
 # hence use of BOOST_THREAD_DONT_USE_CHRONO, See http://www.boost.org/doc/libs/1_51_0/doc/html/thread/build.html
 # Even with this boost thread/chrono does not compile. Kept in case fixed in the future
 #
-project site-config 
+project site-config
 	: requirements <include>$(BOOST_ROOT)
-	: requirements <threading>multi 
-	: requirements <define>HPUX 
-   : requirements <define>_XOPEN_SOURCE_EXTENDED 
-   : requirements <define>BOOST_THREAD_DONT_USE_CHRONO 
-#	: requirements <library>rtc 
-#	: requirements <variant>debug:<linkflags>+check=all 
+	: requirements <threading>multi
+	: requirements <define>HPUX
+   : requirements <define>_XOPEN_SOURCE_EXTENDED
+   : requirements <define>BOOST_THREAD_DONT_USE_CHRONO
+#	: requirements <library>rtc
+#	: requirements <variant>debug:<linkflags>+check=all
 	;
-	
-	
+
+
 # STATIC: Additional Lint type checks.Will drastically slow down compiles, hence optional
 #
 # use <compileflags>+w for additional lint style checking
 # Suppress the most prevalent boost warnings, this allows us to see lint
 # checks in our own code
-# 
+#
 # suppress - warning #2261-D: controlling expression is constant
 #          - warning #2236-D: controlling expression is constant
 #          - remark #4296-D: arithmetic operation on boolean type
@@ -107,5 +107,5 @@ project site-config
 #
 using acc : : : <compileflags>+W2236,2461,2191,2815,4232,4189
           ;
-          
+
 using testing ;

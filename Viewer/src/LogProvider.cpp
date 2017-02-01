@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,7 +11,6 @@
 #include "LogProvider.hpp"
 
 #include "FileWatcher.hpp"
-#include "LogServer.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
@@ -123,7 +122,6 @@ void LogProvider::fetchFile(ServerHandler *server,const std::string& fileName)
 
     		//Try to track the changes in the log file
     		watchFile(fileName,size);
-
     		return;
     	}
     }
@@ -137,10 +135,11 @@ void LogProvider::fetchFile(ServerHandler *server,const std::string& fileName)
     //Run the task in the server. When it finish taskFinished() is called. The text returned
     //in the reply will be prepended to the string we generated above.
     server->run(task_);
-    return;
 
+#if 0
     //If we are we could not get the file
-    owner_->infoFailed(reply_);
+    //owner_->infoFailed(reply_);
+#endif
 }
 
 void LogProvider::watchFile(const std::string& fileName,size_t offset)
@@ -210,7 +209,7 @@ std::string LogProvider::readLastLines(const std::string& filename,int last_n_li
    size = static_cast<size_t>( source.tellg() );
    std::vector<char> buffer;
    int newlineCount = 0;
-   while ( source
+   while (source
            && buffer.size() != size
            && newlineCount < last_n_lines ) {
        buffer.resize( std::min( buffer.size() + granularity, size ) );

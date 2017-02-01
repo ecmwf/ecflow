@@ -1,4 +1,4 @@
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 
 #include "PropertyMapper.hpp"
 

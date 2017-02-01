@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,6 +14,7 @@
 #include <QHeaderView>
 #include <QPalette>
 #include <QScrollBar>
+#include <QTime>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
@@ -299,11 +300,18 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 		if(idx.isValid())
 		{
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-		QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+            QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-		expandAll(idx);
+#ifdef _UI_TREENODEVIEW_DEBUG
+            QTime t;
+            t.start();
+#endif
+            expandAll(idx);
+#ifdef _UI_TREENODEVIEW_DEBUG
+            UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
+#endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-		QGuiApplication::restoreOverrideCursor();
+            QGuiApplication::restoreOverrideCursor();
 #endif
 
 		}
@@ -313,7 +321,7 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 		QModelIndex idx=model_->infoToIndex(info);
 		if(idx.isValid())
 		{
-				collapseAll(idx);
+            collapseAll(idx);
 		}
 	}
 

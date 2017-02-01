@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -521,11 +521,11 @@ bool VConfig::readRcFile(const std::string& rcFile,boost::property_tree::ptree& 
 				else if(par[0] == "suites")
 				{
 					boost::property_tree::ptree suites;
-					suites.push_back(std::make_pair("",par[1]));
+					suites.push_back(std::make_pair(std::string(""),boost::property_tree::ptree(par[1])));
 
 					for(unsigned int j=1; j < vec.size(); j++)
 					{
-						suites.push_back(std::make_pair("",vec.at(j)));
+						suites.push_back(std::make_pair(std::string(""),boost::property_tree::ptree(vec.at(j))));
 					}
 
 					pt.put_child("suite_filter.suites",suites);

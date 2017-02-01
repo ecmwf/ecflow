@@ -63,7 +63,6 @@ void ask_shell_c::create (Widget parent, char *widget_name)
 	XtAddCallback (form_, XmNhelpCallback,&ask_shell_c:: helpCB, (XtPointer) this);
 	children[ac++] = value_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void ask_shell_c::helpCB( Widget widget, XtPointer client_data, XtPointer call_data )
