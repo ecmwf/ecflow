@@ -15,16 +15,20 @@
 #include "VInfo.hpp"
 #include "VProperty.hpp"
 
-#include <QAbstractItemView>
+#include <QGraphicsView>
 #include <QMap>
+#include <QModelIndex>
 
 class ActionHandler;
 class ExpandState;
 class PropertyMapper;
 class TreeNodeModel;
+class GraphNodeViewItem;
 
-class GraphNodeView : public QAbstractItemView, public NodeViewBase, public VPropertyObserver
+class GraphNodeView : public QGraphicsView, public NodeViewBase, public VPropertyObserver
 {
+Q_OBJECT
+
 public:
     explicit GraphNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
     ~GraphNodeView();
@@ -41,17 +45,17 @@ public:
     void readSettings(VSettings* vs) {}
     void writeSettings(VSettings* vs) {}
 
-    QModelIndex indexAt(const QPoint & point) const {return QModelIndex();}
-    void scrollTo(const QModelIndex & index, ScrollHint hint = EnsureVisible) {}
-    QRect visualRect(const QModelIndex & index) const {return QRect();}
+public Q_SLOTS:
+    void reset();
+
+protected Q_SLOTS:
+   void rowsInserted(QModelIndex,int,int);
 
 protected:
-    int	horizontalOffset() const {return 0;}
-    bool isIndexHidden(const QModelIndex& index) const {return false;}
-    QModelIndex	moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) {return QModelIndex();}
-    void setSelection(const QRect & rect, QItemSelectionModel::SelectionFlags flags) {}
-    int	verticalOffset() const {return 0;}
-    QRegion	visualRegionForSelection(const QItemSelection & selection) const {return QRegion();}
+    void mousePressEvent(QMouseEvent* event);
+
+    void attachModel();
+    void insertItems(const QModelIndex& parent,GraphNodeViewItem *p=0);
 
     TreeNodeModel* model_;
     ActionHandler* actionHandler_;

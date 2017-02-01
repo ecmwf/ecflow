@@ -233,7 +233,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     FileWatcher.hpp
     FilterWidget.hpp
     GotoLineDialog.hpp
-    HistoryItemWidget.hpp              
+    GraphNodeView.hpp
+    HistoryItemWidget.hpp
     InfoPanel.hpp
     InputEventLog.hpp
     LabelEditor.hpp
