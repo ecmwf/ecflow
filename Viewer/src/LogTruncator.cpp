@@ -9,6 +9,7 @@
 
 #include "LogTruncator.hpp"
 
+#include <QtGlobal>
 #include <QFileInfo>
 #include <QTime>
 #include <QTimer>
@@ -25,7 +26,11 @@ LogTruncator::LogTruncator(QString path, int timeout,int sizeLimit,int lineNum,Q
 {
     timer_=new QTimer(this);
     connect(timer_,SIGNAL(timeout()),this,SLOT(truncate()));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     int secToM=86400-QTime::currentTime().msecsSinceStartOfDay()/1000;
+#else
+    int secToM=86400-QTime(0,0).secsTo(QTime::currentTime());
+#endif
     if(secToM > 5*60)
         timer_->start(secToM*1000);
     else
