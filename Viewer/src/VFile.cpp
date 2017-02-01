@@ -31,6 +31,7 @@ VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 	fp_(0),
     fetchMode_(NoFetchMode),
 	transferDuration_(0),
+    truncatedTo_(0),
     cached_(false)
 {
 	std::ofstream f(path_.c_str());
@@ -50,6 +51,7 @@ VFile::VFile(const std::string& name,bool deleteFile) :
 	fp_(0),
     fetchMode_(NoFetchMode),
     transferDuration_(0),
+    truncatedTo_(0),
     cached_(false)
 {
 }
@@ -63,6 +65,7 @@ VFile::VFile(bool deleteFile) :
 	fp_(0),
     fetchMode_(NoFetchMode),
     transferDuration_(0),
+    truncatedTo_(0),
     cached_(false)
 {
 }

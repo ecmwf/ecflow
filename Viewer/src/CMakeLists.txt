@@ -54,8 +54,7 @@ set(viewer_srcs
     LineEdit.cpp
     #LogEvent.cpp
     LogModel.cpp
-    LogProvider.cpp
-    #LogServer.cpp
+    LogProvider.cpp  
     LogTruncator.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 

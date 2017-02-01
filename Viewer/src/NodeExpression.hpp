@@ -387,7 +387,6 @@ private:
     std::string what_;  // TODO XXX: optimise - we should store an enum here
     bool searchInAttributes_;
 
-    void searchInAttributes(bool attr) {searchInAttributes_ = attr;}
     bool searchInAttributes() {return searchInAttributes_;}
 };
 

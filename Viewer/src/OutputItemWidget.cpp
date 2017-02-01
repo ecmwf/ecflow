@@ -445,7 +445,7 @@ void OutputItemWidget::infoFailed(VReply* reply)
 
         QColor col(70,71,72);
         QString s="<b><font color=\'" + col.name() +  "\'>Output directory</font></b>: ";
-        const std::vector<std::string> et=reply->errorTextVec();
+        const std::vector<std::string>& et=reply->errorTextVec();
         if(et.size() > 1)
         {
             for(size_t i=0; i < et.size(); i++)
