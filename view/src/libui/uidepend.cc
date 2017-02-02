@@ -93,7 +93,6 @@ void depend_shell_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
 	XtSetArg(al[ac], XmNrightOffset, 4); ac++;
 	XtSetValues ( button_close,al, ac );
-	ac = 0;
 
 	XmScrolledWindowSetAreas(scrolledWin1, scrollbar1, scrollbar2, hyper_ );
 	XtAddCallback (button_close, XmNactivateCallback,&depend_shell_c:: closeCB, (XtPointer) this);

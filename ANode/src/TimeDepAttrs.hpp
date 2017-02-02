@@ -94,11 +94,11 @@ public:
 
    // mementos functions:
    /// Collect all the state changes, so that only small subset is returned to client
-   bool set_memento(const NodeTodayMemento* ,std::vector<ecf::Aspect::Type>& aspects);
-   bool set_memento(const NodeTimeMemento* ,std::vector<ecf::Aspect::Type>& aspects);
-   bool set_memento(const NodeDayMemento* ,std::vector<ecf::Aspect::Type>& aspects);
-   bool set_memento(const NodeCronMemento* ,std::vector<ecf::Aspect::Type>& aspects);
-   bool set_memento(const NodeDateMemento* ,std::vector<ecf::Aspect::Type>& aspects);
+   bool set_memento(const NodeTodayMemento*);
+   bool set_memento(const NodeTimeMemento*);
+   bool set_memento(const NodeDayMemento*);
+   bool set_memento(const NodeCronMemento*);
+   bool set_memento(const NodeDateMemento*);
 
    void why(std::vector<std::string>& theReasonWhy,const std::string& prefix) const;
    bool testTimeDependenciesForRequeue() const;

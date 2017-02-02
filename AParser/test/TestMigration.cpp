@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
       // Use memento to modify task state
       SubmittableMemento memento( "Jobs_password","the_rid","the abort  reason with spaces",12);
       std::vector<ecf::Aspect::Type> aspects;
-      t1->set_memento(&memento,aspects);
+      t1->set_memento(&memento,aspects,false);
 
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Add one task failed: " << helper.errorMsg());
 
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
       // Use memento to modify alias state
       SubmittableMemento memento( "Jobs_password","the_rid","the abort  reason with spaces",12);
       std::vector<ecf::Aspect::Type> aspects;
-      t1->set_memento(&memento,aspects);
+      t1->set_memento(&memento,aspects,false);
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Add one alias failed: " << helper.errorMsg());
 
       // Test multiple

@@ -11,7 +11,7 @@ umask 0022
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
-   echo "  "
+   echo ""
    echo "   make           - run make after cmake"
    echo "   python3        - build with python3"
    echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
@@ -19,6 +19,7 @@ show_error_and_exit() {
    echo "   test           - run all the tests"
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
+   echo "   clang          - build with clang compiler"
    echo "   san            - is short for clang thread sanitiser"
    echo "   no_gui         - Don't build the gui"
    echo "   ssl            - build using openssl"
@@ -27,6 +28,9 @@ show_error_and_exit() {
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
    echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
+   echo "\nTo Build with system boost, just call:"
+   echo " 'module load boost/1.53.0' "
+   echo "first"
    exit 1
 }
 
@@ -114,6 +118,15 @@ echo "no_gui_arg=$no_gui_arg"
 echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
 
+# ==================== compiler flags ========================================
+# 
+# GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
+# GNU 5.3  -Wno-unused-variable         -> get round warning in boost headers
+# GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
+# CLANG    -ftemplate-depth=512
+#
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable"
+
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
@@ -124,12 +137,14 @@ cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
 	module load clang
-	cmake_extra_options="-DCMAKE_CXX_FLAGS=-ftemplate-depth=512"
+	CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined"
+	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
 fi
 if [[ "$clang_sanitiser_arg" = san ]] ; then
 	module unload gnu
 	module load clang
-	cmake_extra_options="$cmake_extra_options -DCMAKE_C_FLAGS=-fsanitize=thread"
+	CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined -fsanitize=thread"
+    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
 fi
 if [[ "$ARCH" = cray ]] ; then
 
@@ -154,9 +169,9 @@ if [[ "$python3_arg" = python3 ]] ; then
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
     cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0.python3"
 fi
-
  
-# ====================================================================================  
+# ====================================================================================
+# default to Release  
 cmake_build_type=
 if [[ $mode_arg = debug ]] ; then
     cmake_build_type=Debug
@@ -172,12 +187,14 @@ minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed
 
 # ====================================================================================
 # clean up source before packaging, do this after deleting ecbuild
+#
 if [[ $package_source_arg = package_source ]] ; then
 	source build_scripts/clean.sh
 fi
 
 # =======================================================================================
 # Change directory
+#
 source_dir=$(pwd)
 workspace=$(pwd)/..
 
@@ -188,8 +205,9 @@ fi
 mkdir -p ../bdir/$mode_arg/ecflow
 cd ../bdir/$mode_arg/ecflow
 
-
 # =============================================================================================
+# ctest
+#
 if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
 	ctest -R ^u_
 	ctest -R c_
@@ -204,8 +222,6 @@ if [[ $test_arg = test ]] ; then
 	ctest -R py_s
 	exit 0
 fi
-
-# ctest 
 if [[ "$ctest_arg" != "" ]] ; then
 	$ctest_arg
 	exit 0
@@ -222,8 +238,6 @@ fi
 # -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #   *AND* for testing python install to local directory
 #
-# GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
-# GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 
 ssl_options=
 if [[ $ssl_arg = ssl ]] ; then
@@ -264,7 +278,7 @@ $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
-            -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable" \
+            -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
@@ -276,8 +290,7 @@ $ecbuild $source_dir \
             #-DENABLE_ALL_TESTS=ON
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
-            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor \
-            #-DCMAKE_CXX_FLAGS="'-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated'"
+            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor 
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then

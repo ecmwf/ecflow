@@ -1004,7 +1004,6 @@ void option_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	children[ac++] = form_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void option_form_c::useCB( Widget widget, XtPointer client_data, XtPointer call_data )

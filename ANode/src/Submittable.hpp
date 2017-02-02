@@ -123,7 +123,7 @@ public:
 
 // Memento functions:
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
-   void set_memento(const SubmittableMemento*,std::vector<ecf::Aspect::Type>& aspects);
+   void set_memento(const SubmittableMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f);
 
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 protected:
