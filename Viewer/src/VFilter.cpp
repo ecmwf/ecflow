@@ -776,9 +776,9 @@ bool TableNodeFilter::update()
      }
 
 #ifdef _UI_VFILTER_DEBUG
-    UiLog(server_).dbg() << " elapsed time: " + timer.elapsed() << " ms";
-    UiLog(server_).dbg() << " filter size: " + match_.size();
-    UiLog(server_).dbg() << " capacity: " + match_.capacity();
+    UiLog(server_).dbg() << " elapsed time: " << timer.elapsed() << " ms";
+    UiLog(server_).dbg() << " filter size: " << match_.size();
+    UiLog(server_).dbg() << " capacity: " << match_.capacity();
 #endif
 
     return true;
