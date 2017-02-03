@@ -26,7 +26,7 @@ echo "BOOST_ROOT=$BOOST_ROOT"
 #
 SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/v2/site-config.jam
 BOOST_VERSION="$(basename $BOOST_ROOT)"
-if [ "$BOOST_VERSION" = boost_1_56_0 -o "$BOOST_VERSION" = boost_1_57_0 -o "$BOOST_VERSION" = boost_1_58_0 -o "$BOOST_VERSION" = boost_1_61_0 ] ; then
+if [ "$BOOST_VERSION" = boost_1_56_0 -o "$BOOST_VERSION" = boost_1_57_0 -o "$BOOST_VERSION" = boost_1_58_0 -o "$BOOST_VERSION" = boost_1_61_0 -o "$BOOST_VERSION" = boost_1_63_0 ] ; then
    SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/src/site-config.jam
 fi
 
@@ -79,7 +79,6 @@ if test_uname Linux ; then
        fi
     else
       if [ $tool = gcc ] ; then
-  
   
       		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
       		

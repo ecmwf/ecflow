@@ -21,7 +21,7 @@ Log file
 ================================================================
 The log file, is automatically flushed for every write.
 o We could consider only flushing, at the end of each command.
-o Flush in NodeTreeObserver, CheclPt saver.
+o Flush in NodeTreeObserver, CheckPt saver.
 
 
 Trigger Parsing
