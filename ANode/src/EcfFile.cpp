@@ -428,8 +428,9 @@ bool EcfFile::open_script_file(
 //     VM:       cat /proc/sys/fs/file-max:  188086
 //     Desk top: cat /proc/sys/fs/file-max: 3270058
 //  Desktop:
-//     Without cache: real:10.15  user: 5.58  sys: 1.62
-//     With cache:    real: 4.46  user: 3.72  sys: 0.74  Only open/close include file once.
+//     Without cache: real:10.15  user: 5.58  sys: 1.62                                     # opensuse131
+//     With cache:    real: 4.46  user: 3.72  sys: 0.74  Only open/close include file once. # opensuse131
+//     With cache:    real: 3.82  user: 3.22  sys: 0.59  Only open/close include file once. # leap42
 //  TODO: Could sort
 bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>& lines,std::string& errormsg) const
 {
