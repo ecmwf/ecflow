@@ -622,30 +622,33 @@ void Suite::collateChanges(DefsDelta& changes) const
    }
 }
 
-void Suite::set_memento( const SuiteClockMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Suite::set_memento( const SuiteClockMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteClockMemento*) " << debugNodePath() << "\n";
 #endif
-   aspects.push_back(ecf::Aspect::SUITE_CLOCK);
 
- 	changeClock(memento->clockAttr_);
+	if (aspect_only) aspects.push_back(ecf::Aspect::SUITE_CLOCK);
+	else             changeClock(memento->clockAttr_);
 }
 
-void Suite::set_memento( const SuiteBeginDeltaMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Suite::set_memento( const SuiteBeginDeltaMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteBeginDeltaMemento* ) " << debugNodePath() << "\n";
 #endif
-   aspects.push_back(ecf::Aspect::SUITE_BEGIN);
 
-	begun_ = memento->begun_;
+	if (aspect_only) aspects.push_back(ecf::Aspect::SUITE_BEGIN);
+	else             begun_ = memento->begun_;
 }
 
-void Suite::set_memento( const SuiteCalendarMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Suite::set_memento( const SuiteCalendarMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteCalendarMemento* ) " << debugNodePath() << "\n";
 #endif
 
-   aspects.push_back(ecf::Aspect::SUITE_CALENDAR);
+	if (aspect_only) {
+	   aspects.push_back(ecf::Aspect::SUITE_CALENDAR);
+	   return;
+	}
 
 	// The calendar does *NOT* persist the calendar type (hybrid/real) since we can derive this for clock attribute
 	// Hence make sure calendar/clock are in sync. part of the suite invariants

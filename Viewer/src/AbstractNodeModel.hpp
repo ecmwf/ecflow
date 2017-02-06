@@ -34,13 +34,13 @@ public:
    	virtual ~AbstractNodeModel();
 
    	enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
-   		                 ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4,
-   						 InfoRole = Qt::UserRole+5, LoadRole = Qt::UserRole+6,
-   						 ConnectionRole = Qt::UserRole+7, ServerDataRole = Qt::UserRole+8,
-   						 NodeDataRole = Qt::UserRole+9, AttributeRole = Qt::UserRole+10,
-						 AttributeLineRole = Qt::UserRole+11, AbortedReasonRole = Qt::UserRole + 12,
-                         NodeTypeRole = Qt::UserRole + 13, NodeTypeForegroundRole = Qt::UserRole + 14,
-                         ServerPointerRole = Qt::UserRole + 15, SortRole = Qt::UserRole + 16};
+			     ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4,
+			     InfoRole = Qt::UserRole+5, LoadRole = Qt::UserRole+6,
+			     ConnectionRole = Qt::UserRole+7, ServerDataRole = Qt::UserRole+8,
+			     NodeDataRole = Qt::UserRole+9, AttributeRole = Qt::UserRole+10,
+			     AttributeLineRole = Qt::UserRole+11, AbortedReasonRole = Qt::UserRole + 12,
+			     NodeTypeRole = Qt::UserRole + 13, NodeTypeForegroundRole = Qt::UserRole + 14,
+			     ServerPointerRole = Qt::UserRole + 15, SortRole = Qt::UserRole + 16};
 
 	void dataIsAboutToChange();
 	virtual VInfo_ptr nodeInfo(const QModelIndex& index)=0;
@@ -51,10 +51,10 @@ public:
 	virtual VModelData* data() const = 0;
 	virtual QModelIndex infoToIndex(VInfo_ptr,int column=0) const;
 	virtual QModelIndex nodeToIndex(const VNode*,int column=0) const=0;
-    virtual QModelIndex attributeToIndex(const VAttribute* a, int column=0) const=0;
+        virtual QModelIndex attributeToIndex(const VAttribute* a, int column=0) const=0;
 
-    virtual QModelIndex forceShowNode(const VNode*) const=0;
-    virtual QModelIndex forceShowAttribute(const VAttribute*) const=0;
+        virtual QModelIndex forceShowNode(const VNode*) const=0;
+        virtual QModelIndex forceShowAttribute(const VAttribute*) const=0;
 
 Q_SIGNALS:
 	void changed();
@@ -67,8 +67,8 @@ public Q_SLOTS:
 
 	virtual void slotServerAddBegin(int row)=0;
 	virtual void slotServerAddEnd()=0;
-    virtual void slotServerRemoveBegin(VModelServer*,int)=0;
-    virtual void slotServerRemoveEnd(int)=0;
+        virtual void slotServerRemoveBegin(VModelServer*,int)=0;
+        virtual void slotServerRemoveEnd(int)=0;
 
 	virtual void slotDataChanged(VModelServer*)=0;
 	virtual void slotBeginServerScan(VModelServer* server,int)=0;

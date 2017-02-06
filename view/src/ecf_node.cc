@@ -682,7 +682,8 @@ int redraw_kids( node* node_, const std::vector<ecf::Aspect::Type>& aspect )
             break;
          case ecf::Aspect::REPEAT:
             kind = NODE_REPEAT;
-            // node_->update(-1, -1, -1); node_->redraw(); break;
+            // node_->update(-1, -1, -1); node_->redraw(); 
+	    break;
          case ecf::Aspect::STATE:
             node_->update(-1, -1, -1);
             node_->redraw();

@@ -1,0 +1,6 @@
+suite suite_with_trigger_should_fail
+  trigger 1 == 0
+endsuite
+suite suite_with_complete_should_fail
+  complete 1 == 0
+endsuite

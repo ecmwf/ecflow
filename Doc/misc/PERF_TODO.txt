@@ -12,6 +12,45 @@ o Client/bin/gcc-4.2.1/release/perf_test_large_defs
    
 o ecrcp -r /var/tmp/ma0/BIG_DEFS/ %REMOTE_HOST%:$ROOT_DIR/$ECFLOW/BIG_DEFS
 
+o test job processing
+  cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
+  Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  
+  # Show system call overhead,as a summary.
+  strace -c Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  
+  # Show page faults, data and instruction cache misses use:
+  perf stat -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  
+  # For more detail and higher level overview, compile debug, -g means record stack traces
+  perf record -g Base/bin/gcc-5.3.0/debug/perf_job_gen ./metabuilder.def
+  perf report --sort comm,dso  # high level overview
+  
+  # for a graphical display, you can use flame graphs. This *ONLY* works properly with debug builds
+  # and you must use -g (collect stack traces)
+  # assume you have down loaded Flamegraph, git clone https://github.com/brendangregg/FlameGraph
+  # The wider the graph the more time is spent.
+  perf record -g Base/bin/gcc-5.3.0/debug/perf_job_gen ./metabuilder.def
+  perf script | $HOME/FlameGraph/stackcollapse-perf.pl > out.perf-folded
+  cat out.perf-folded | $HOME/FlameGraph/flamegraph.pl > my_perf.svg
+  display my_perf.svg
+
+Log file
+================================================================
+The log file, is automatically flushed for every write.
+We could consider only flushing:
+    o At the end of each command
+    o NodeTreeObserver, CheckPt saver
+This should cover all the cases.
+Could also just flush on Log::ERR ?
+
+To see the affect of buffering before/after run:
+
+    strace -c Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+    
+This will show the cost of the writes, and how much time is spent.
+
+
 Trigger Parsing
 =================================================================
 Currently use spirit classic for parsing trigger expressions:
@@ -33,7 +72,7 @@ with the simplest expressions.
    
 Cacheing
 ==================================================================
-Currently when ever a user request the full defs, the desearlistion 
+Currently when ever a user request the full defs, the deserealisation
 is cached. i.e if another user also request the full defs , we can just
 return the string.
 These could have been an oppertunity to also use/update the cache 
@@ -44,9 +83,18 @@ between the two.
   
 Over time time the edit-history could be significant. This is download-able
 as a separate command.
-If this issue could be resolved there there can be huge savings, for
-both syncing and check pointing. Since the periodic check-pt would
-automatically update the cache, like syncing would also update the cache.
+
+Note: also when check pointing, we always save hidden children.
+i.e  when ecf::Flag::MIGRATED is set on suite/family.
+
+Hence check pointing has diverged from syncing.
+(The original thinking was if edit history issue could be resolved 
+there can be huge savings, for both syncing and check pointing. 
+Since the periodic check-pt would automatically update the cache, 
+like syncing would also update the cache.
+However the ecf::Flag::MIGRATED has thrown a spanner in the works.)
+
+On reflection leave as is.)
 
 (Note: cache is only updated when there is data model/defs tree change)
 
@@ -119,6 +167,7 @@ The log file shows that on systems with poor disk performance.
 interfere with job scheduling.
 
 Should investigate check pointing on a separate thread.
+May require a copy of defs(memory intensive) or mutex ?
 
 
    
@@ -266,6 +315,13 @@ o Skeleton body/level
        
 ========================== SUCCESS ===============================================================
 
+Server<DONE> ECFLOW-846
+   When job processing the same head/tail or any include can be opened/closed many times.
+   We now cache the file, this so we only open/close once.
+   This was highlighted when  job processing, where hundreds of tasks were submitted
+   at the same time.
+   See test: Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+   
 Client<DONE>
    When using the class ClientInvoker, most of the user commands, end
    up using Program Options. This was done for a consistent interface.

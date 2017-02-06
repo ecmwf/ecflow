@@ -271,11 +271,11 @@ public:
 
    /// Memento functions:
    void collateChanges(unsigned int client_handle,DefsDelta&) const;
-   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const ServerStateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const ServerVariableMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const ServerStateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const ServerVariableMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
 
    /// Find the max state change number for defs only. This includes:
    ///   o the Defs state.
@@ -357,6 +357,7 @@ private:
    friend class ChangeStartNotification;
    void notify_delete();
 public:
+   void notify_start(const std::vector<ecf::Aspect::Type>& aspects);
    void notify(const std::vector<ecf::Aspect::Type>& aspects);
    void attach(AbstractObserver*);
    void detach(AbstractObserver*);

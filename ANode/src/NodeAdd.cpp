@@ -75,6 +75,8 @@ void Node::add_trigger_expression(const Expression& t)
 		ss << "to add large triggers use multiple calls to Node::add_part_trigger( PartExpression('t1 == complete') )";
  		throw std::runtime_error( ss.str() );
 	}
+	if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
+
   	triggerExpr_ = new Expression(t);
    state_change_no_ = Ecf::incr_state_change_no();
 }
@@ -87,18 +89,24 @@ void Node::add_complete_expression(const Expression& t)
 		ss << "to add large complete expressions use multiple calls to Node::add_part_complete( PartExpression('t1 == complete') )";
  		throw std::runtime_error( ss.str() );
 	}
+   if (isSuite())  throw std::runtime_error( "Can not add complete trigger on a suite" );
+
   	completeExpr_ = new Expression(t);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::add_part_trigger(const PartExpression& part)
 {
+   if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
+
 	if (!triggerExpr_) triggerExpr_ = new Expression();
 	triggerExpr_->add( part );
    state_change_no_ = Ecf::incr_state_change_no();
 }
 void Node::add_part_complete(const PartExpression& part)
 {
+   if (isSuite())  throw std::runtime_error( "Can not add complete trigger on a suite" );
+
 	if (!completeExpr_) completeExpr_ = new Expression();
 	completeExpr_->add( part );
    state_change_no_ = Ecf::incr_state_change_no();

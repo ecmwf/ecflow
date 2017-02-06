@@ -223,11 +223,15 @@ void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_pt
    Node::incremental_changes(changes, comp);
 }
 
-void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
    std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
-
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::ORDER);
+      return;
+   }
+   
    // Order nodeVec_ according to memento ordering
    const std::vector<std::string>& order = memento->order_;
    if (order.size() != nodeVec_.size()) {
@@ -251,18 +255,20 @@ void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::As
        return;
    }
 
-   aspects.push_back(ecf::Aspect::ORDER);
    nodeVec_ = vec;
 }
 
-void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
    std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
-   aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
-   nodeVec_ = memento->children_;
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
+      return;
+   }
 
    // setup child parent pointers
+   nodeVec_ = memento->children_;
    size_t node_vec_size = nodeVec_.size();
    for(size_t t = 0; t < node_vec_size; t++)   {
       nodeVec_[t]->set_parent(this);
@@ -272,7 +278,7 @@ void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf:
 
 void NodeContainer::collateChanges(DefsDelta& changes) const
 {
-   /// There no point in traversing children of we have added/removed children
+   /// Theres no point in traversing children if we have added/removed children
    /// since ChildrenMemento will copy all children.
    if (add_remove_state_change_no_ > changes.client_state_change_no()) {
       return;

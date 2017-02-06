@@ -846,13 +846,16 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
    Node::incremental_changes(changes,comp);
 }
 
-void Submittable::set_memento(const SubmittableMemento* memento,std::vector<ecf::Aspect::Type>& aspects)
+void Submittable::set_memento(const SubmittableMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only)
 {
 #ifdef DEBUG_MEMENTO
    std::cout << "Submittable::set_memento(const SubmittableMemento*) " << debugNodePath() << "\n";
 #endif
 
-   aspects.push_back(ecf::Aspect::SUBMITTABLE);
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::SUBMITTABLE);
+      return;
+   }
 
    jobsPassword_ = memento->jobsPassword_;
    process_or_remote_id_ = memento->process_or_remote_id_;

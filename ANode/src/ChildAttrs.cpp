@@ -522,33 +522,31 @@ const Label& ChildAttrs::find_label(const std::string& name) const
 }
 
 
-void ChildAttrs::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeEventMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeEventMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
 
    if (set_event(memento->event_.name_or_number(),  memento->event_.value())) {
-      aspects.push_back(ecf::Aspect::EVENT);
       return;
    }
    addEvent( memento->event_);
 }
 
-void ChildAttrs::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeMeterMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeMeterMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
 
    if (set_meter(memento->meter_.name(), memento->meter_.value())) {
-      aspects.push_back(ecf::Aspect::METER);
       return;
    }
    addMeter(memento->meter_);
 }
 
-void ChildAttrs::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeLabelMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeLabelMemento* memento) " << node_->debugNodePath() << "\n";
@@ -558,7 +556,6 @@ void ChildAttrs::set_memento( const NodeLabelMemento* memento,std::vector<ecf::A
    for(size_t i = 0; i < theSize; i++) {
       if (labels_[i].name() == memento->label_.name()) {
          labels_[i] = memento->label_;
-         aspects.push_back(ecf::Aspect::LABEL);
          return;
       }
    }

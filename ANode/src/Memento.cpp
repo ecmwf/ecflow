@@ -39,38 +39,61 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
 #ifdef DEBUG_MEMENTO
  		cout << "CompoundMemento::incremental_sync: ROOT_PATH   changed_nodes.size()=" << changed_nodes.size() << "\n";
 #endif
+ 		//
+      // Notify observers what aspect is going to change, before make-ing data model changes
+ 		//
  		BOOST_FOREACH(memento_ptr m, vec_) {
-  			m->do_incremental_defs_sync( client_def.get(), aspects_);
+  			m->do_incremental_defs_sync( client_def.get(), aspects_,true/* collect aspects only, don't make any changes*/);
  		}
+ 		size_t aspect_size = aspects_.size();
+      client_def->notify_start( aspects_);
 
+
+      /// make data model change.
  		/// Notify any interested parties incremental changes
       /// Aspects records the kind of changes.
- 		client_def->notify( aspects_);
+      BOOST_FOREACH(memento_ptr m, vec_) {
+          m->do_incremental_defs_sync( client_def.get(), aspects_,false/*Data model changes only*/);
+      }
+      assert(aspect_size == aspects_.size()); // aspect size should not change, when making data model changes
+ 		client_def->notify(aspects_);
 	}
  	else {
 
 #ifdef DEBUG_MEMENTO
  		cout << "CompoundMemento::incremental_sync: " << node->debugNodePath() << "  changed_nodes.size()=" << changed_nodes.size() << "\n";
 #endif
-
- 		if (clear_attributes_) {
- 		   aspects_.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
- 			node->clear();
- 		}
-
+ 		// Notify observers what aspect, is going to change.
       Task* task = node->isTask();
       Alias* alias = node->isAlias();
       Suite* suite = node->isSuite();
       Family* family = node->isFamily();
 
+ 		if (clear_attributes_)  aspects_.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
+
  		BOOST_FOREACH(memento_ptr m, vec_) {
-// 		std::cout << "memento = " << typeid(*m.get()).name() << "\n";
- 			if (task)        m->do_incremental_task_sync( task, aspects_ );
-         else if (alias)  m->do_incremental_alias_sync( alias, aspects_ );
-         else if (suite)  m->do_incremental_suite_sync( suite , aspects_);
- 			else if (family) m->do_incremental_family_sync( family, aspects_ );
- 			m->do_incremental_node_sync( node.get(), aspects_ );
+ 			if (task)        m->do_incremental_task_sync( task, aspects_,true/* collect aspects only, don't make any changes*/ );
+         else if (alias)  m->do_incremental_alias_sync( alias, aspects_,true/* collect aspects only, don't make any changes*/ );
+         else if (suite)  m->do_incremental_suite_sync( suite , aspects_,true/* collect aspects only, don't make any changes*/);
+ 			else if (family) m->do_incremental_family_sync( family, aspects_,true/* collect aspects only, don't make any changes*/ );
+ 			m->do_incremental_node_sync( node.get(), aspects_,true/* collect aspects only, don't make any changes*/ );
  		}
+      size_t aspect_size = aspects_.size();
+      node->notify_start( aspects_ );
+
+      //
+      // data model changes only, aspects should not change
+      //
+      if (clear_attributes_) node->clear();
+
+      BOOST_FOREACH(memento_ptr m, vec_) {
+         if (task)        m->do_incremental_task_sync( task, aspects_, false/*Data model changes only*/);
+         else if (alias)  m->do_incremental_alias_sync( alias, aspects_,false/*Data model changes only*/);
+         else if (suite)  m->do_incremental_suite_sync( suite , aspects_,false/*Data model changes only*/);
+         else if (family) m->do_incremental_family_sync( family, aspects_,false/*Data model changes only*/);
+         m->do_incremental_node_sync( node.get(), aspects_,false/*Data model changes only*/);
+      }
+      assert(aspect_size == aspects_.size()); // aspect size should not change, when making data model changes
 
  		/// Notify any interested parties that Node has made incremental changes
  		/// Aspects records the kind of changes.

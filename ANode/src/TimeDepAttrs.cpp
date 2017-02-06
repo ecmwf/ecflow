@@ -792,8 +792,7 @@ void TimeDepAttrs::delete_cron(const ecf::CronAttr& attr)
 
 // =================================================================================
 
-
-bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento ,std::vector<ecf::Aspect::Type>& aspects) {
+bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeTodayMemento* memento) " << node_->debugNodePath() << "\n";
@@ -810,7 +809,7 @@ bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento ,std::vector<ecf
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeTimeMemento* memento) " << node_->debugNodePath() << "\n";
@@ -827,7 +826,7 @@ bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeCronMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+bool TimeDepAttrs::set_memento( const NodeCronMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeCronMemento* memento) " << node_->debugNodePath() << "\n";
@@ -844,7 +843,7 @@ bool TimeDepAttrs::set_memento( const NodeCronMemento* memento,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeDayMemento* memento ,std::vector<ecf::Aspect::Type>& aspects) {
+bool TimeDepAttrs::set_memento( const NodeDayMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeDayMemento* memento) " << node_->debugNodePath() << "\n";
@@ -862,7 +861,7 @@ bool TimeDepAttrs::set_memento( const NodeDayMemento* memento ,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeDateMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+bool TimeDepAttrs::set_memento( const NodeDateMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeDateMemento* memento) " << node_->debugNodePath() << "\n";
