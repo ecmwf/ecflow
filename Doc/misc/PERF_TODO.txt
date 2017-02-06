@@ -16,26 +16,8 @@ o test job processing
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
   Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
   
-  # Show system call overhead,as a summary.
-  strace -c Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
-  
-  # Show page faults, data and instruction cache misses use:
-  perf stat -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
-  
-  # For more detail and higher level overview, compile debug, -g means record stack traces
-  perf record -g Base/bin/gcc-5.3.0/debug/perf_job_gen ./metabuilder.def
-  perf report --sort comm,dso  # high level overview
-  
-  # for a graphical display, you can use flame graphs. This *ONLY* works properly with debug builds
-  # and you must use -g (collect stack traces)
-  # assume you have down loaded Flamegraph, git clone https://github.com/brendangregg/FlameGraph
-  # The wider the graph the more time is spent.
-  perf record -g Base/bin/gcc-5.3.0/debug/perf_job_gen ./metabuilder.def
-  perf script | $HOME/FlameGraph/stackcollapse-perf.pl > out.perf-folded
-  cat out.perf-folded | $HOME/FlameGraph/flamegraph.pl > my_perf.svg
-  display my_perf.svg
 
-Log file
+Log file<TODO>
 ================================================================
 The log file, is automatically flushed for every write.
 We could consider only flushing:
@@ -51,7 +33,7 @@ To see the affect of buffering before/after run:
 This will show the cost of the writes, and how much time is spent.
 
 
-Trigger Parsing
+Trigger Parsing <TODO>
 =================================================================
 Currently use spirit classic for parsing trigger expressions:
 Trigger expression parsing happens during:
@@ -69,35 +51,7 @@ Need to replace with spirit qi: for the following reason:
    
 I assume we can intermix the 2 spirit lib's, hence first step may be to use it
 with the simplest expressions.
-   
-Cacheing
-==================================================================
-Currently when ever a user request the full defs, the deserealisation
-is cached. i.e if another user also request the full defs , we can just
-return the string.
-These could have been an oppertunity to also use/update the cache 
-when check pointing. However there is small but significant difference
-between the two.
-  Check-pointing: Saves the edit history.
-  Syncing       : No edit history.
-  
-Over time time the edit-history could be significant. This is download-able
-as a separate command.
-
-Note: also when check pointing, we always save hidden children.
-i.e  when ecf::Flag::MIGRATED is set on suite/family.
-
-Hence check pointing has diverged from syncing.
-(The original thinking was if edit history issue could be resolved 
-there can be huge savings, for both syncing and check pointing. 
-Since the periodic check-pt would automatically update the cache, 
-like syncing would also update the cache.
-However the ecf::Flag::MIGRATED has thrown a spanner in the works.)
-
-On reflection leave as is.)
-
-(Note: cache is only updated when there is data model/defs tree change)
-
+ 
 
 DISK IO
 =====================================================================
@@ -115,12 +69,6 @@ Need a test case before starting.
    (if check pt is made async' we should show significant performance
      improvement)      
    
-   o  Compare performance of writing checkpt to a string, with
-      writing to file directly. (It is far more efficient to write 
-      a few large writes than many smaller writes.)
-      Hence this should be more efficient even *WITHOUT* memory mapped files.
-      (DONE: saving of about 0.5-1sec on very large files)
-      
    o/ Investigate use of memory mapped file for writing checkpt file.
       
    o/ Investigate asyncronous  disk IO for writing check point file
@@ -270,10 +218,39 @@ BEST* so far Client/test/TestPerfForLargeDefs::=================================
                                                               Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
                                                               Download(FULL):1, 0, 0, 0, 0 Avg:0.2
     
-==========================================================================================================
+======================== TOO MUCH EFFORT ========================================================
 
-o Return Nodes depending on the level.
+Cacheing
+==================================================================
+Currently when ever a user request the full defs, the deserealisation
+is cached. i.e if another user also request the full defs , we can just
+return the string.
+These could have been an oppertunity to also use/update the cache 
+when check pointing. However there is small but significant difference
+between the two.
+  Check-pointing: Saves the edit history.
+  Syncing       : No edit history.
+  
+Over time time the edit-history could be significant. This is download-able
+as a separate command.
 
+Note: also when check pointing, we always save hidden children.
+i.e  when ecf::Flag::MIGRATED is set on suite/family.
+
+Hence check pointing has diverged from syncing.
+(The original thinking was if edit history issue could be resolved 
+there can be huge savings, for both syncing and check pointing. 
+Since the periodic check-pt would automatically update the cache, 
+like syncing would also update the cache.
+However the ecf::Flag::MIGRATED has thrown a spanner in the works.)
+
+On reflection leave as is.)
+
+(Note: cache is only updated when there is data model/defs tree change)
+
+
+Return Nodes depending on the level
+===========================================================================
   i.e level 0: Just return defs & server state
       level 1: return defs & suites only
       level 2: return defs & suite, and first suite children
@@ -281,7 +258,9 @@ o Return Nodes depending on the level.
    This can be done by, just modify NodeContainer serialisation.
    Each node has a level, this is compared with the requested level
 
-o Server comms, encode,protocol, outside of the message.
+Server comms, encode,protocol, outside of the message
+===========================================================================
+
   This allows Portable binary archive to be used in conjunction
   with text archive. Could have HTML, in future.
   - Update command so that each request client->server 
@@ -293,13 +272,14 @@ o Server comms, encode,protocol, outside of the message.
     (Make sure all platforms still cope, NOTE: the singleton cost is much higher)
   - AIX(TEXT), linux(TEXT & portable binary, must be able to choose)
 
- 
-o Make all attributes children of Node.
+Make all attributes children of Node
+===========================================================================
   All derived from the same base class.
   Hence we only take hit for those attributes that are used.
   Too big a change ?????
   
-o Skeleton body/level
+Skeleton body/level
+===========================================================================
   First request returns the skeleton
   Subsequent request return the body, but for
   a cut down node tree.
@@ -313,6 +293,7 @@ o Skeleton body/level
                           Skeleton: load    ~9 seconds
                                    download ~3 seconds
        
+       
 ========================== SUCCESS ===============================================================
 
 Server<DONE> ECFLOW-846
@@ -322,6 +303,13 @@ Server<DONE> ECFLOW-846
    at the same time.
    See test: Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
    
+Checkpt<DONE>
+      Compare performance of writing checkpt to a string, with
+      writing to file directly. (It is far more efficient to write 
+      a few large writes than many smaller writes.)
+      Hence this should be more efficient even *WITHOUT* memory mapped files.
+      (DONE: saving of about 0.5-1sec on very large files)
+      
 Client<DONE>
    When using the class ClientInvoker, most of the user commands, end
    up using Program Options. This was done for a consistent interface.
@@ -332,12 +320,11 @@ Client<DONE>
    Hence for critical speed sensitive request we should bypass.
    i.e we call the Client to server command directly.
 
-o Incremental sync:
+o Incremental sync: <DONE>
   Make sure we only update change number when a data model change is made.
   The flags were being set/cleared, with out making any changes (i.e same value)
   but change number was still incremented, causing unneccessary memento's.
-  <DONE>
-
+ 
 o Minimise system level calls made by the server
   To record all system level calls we call:
   strace -p <server pid> -o output_file.txt

@@ -15,24 +15,20 @@ Update file(s):
 
 o $HOME/.user_kshrc
 o Change $WK/build_scripts/nightly/build.py
-o Change $WK/build_scripts/install_ecflow.sh  
-o boost_cp.sh,boost_untar.sh,cp_ecflow,tar_incr_ecflow.sh
 
 
 Updating version number
 ======================================================
 
-When changing the version change:
-    - Create a new shell, since new shell will parse $WK/Core/src/Version.cpp to extract version
-    - $WK/build_scripts/install_ecflow.sh
-    - $WK/ACore/src/Version.cpp
-    - $WK/cmake.version
+- change version in $WK/VERSION.cmake
+- run  $WK/cmake.sh
+- check in the generated files.
 
 
 Making a release
 ====================================================
 
-opensuse103: Do NOT link on your local machine, use the nightly build
+Do NOT link on your local machine, use the nightly build
 otherwise the embedded paths in ecflow.so  will be wrong.
 We use embedded paths to avoid user having to set LD_LIBRARY_PATH
 
