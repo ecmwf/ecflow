@@ -1123,7 +1123,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 }
 
 //-------------------------------------------------------------------
-// This slot is called when the comThread finished the given task!!
+// This slot is called when the comThread failed the given task!!
 //-------------------------------------------------------------------
 
 void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
@@ -1151,11 +1151,17 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 			connectionLost(errMsg);
 			break;
 		}
+		case VTask::CommandTask:
+		{
+			task->reply()->setErrorText(errMsg);
+			task->status(VTask::ABORTED);
+			UserMessage::message(UserMessage::WARN, true, errMsg);
+			break;
+		}
 		default:
 			task->reply()->setErrorText(errMsg);
 			task->status(VTask::ABORTED);
 			break;
-
 	}
 }
 
