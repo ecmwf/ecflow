@@ -1,5 +1,5 @@
 
-Use of perf
+Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
   Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
