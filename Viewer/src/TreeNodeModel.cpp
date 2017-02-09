@@ -134,7 +134,8 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role ) const
         {
             if(VTreeNode* node=indexToAttrParentNode(index))
             {
-                VAttributeType::getLineNum(node->vnode(),index.row(),atts_);
+                return 1;
+                //VAttributeType::getLineNum(node->vnode(),index.row(),atts_);
             }
             return 0;
         }
@@ -373,12 +374,18 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role,VTreeN
         return (vnode->server()->connectState()->state() == ConnectState::Lost)?0:1;
 	}
 	else if(role == Qt::DisplayRole)
-	{                  
-        return vnode->getAttributeData(index.row(),atts_);
+    {
+        if(VAttribute* a=vnode->attribute(index.row(),atts_))
+            return a->data();
+        else
+            return QStringList();
 	}
     else if(role ==  Qt::ToolTipRole)
     {
-        return vnode->attributeToolTip(index.row(),atts_);
+        if(VAttribute* a=vnode->attribute(index.row(),atts_))
+            return a->toolTip();
+        else
+            return QString();
     }
 
 	return QVariant();
@@ -843,7 +850,7 @@ QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) con
     VTreeServer* server=mserver->treeServer();
     Q_ASSERT(server);
 
-    int row=a->absIndex(atts_);
+    int row=node->indexOfAttribute(a,atts_);
     if(row != -1)
     {
         //This is a server!!!
@@ -926,6 +933,12 @@ void TreeNodeModel::selectionChanged(QModelIndexList lst)
 // the tree all over in the programme outside the view.
 //------------------------------------------------------------------
 
+//WARNING: if we are in the middle of an attribute filter change it will not give
+//correct results, because atts_ contains the new filter state, but the whole VTree still
+//base on the previous atts_ state.!! However we can assume that the index vas visible in
+//the tree so attrNum() is cached on the tree nodes so we get correct results for nodes.
+//Attributes however cannot be identified correctly.
+
 VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 {
 	//For invalid index no info is created.
@@ -941,7 +954,6 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		return VInfoServer::create(s);
 	}
 
-
 	//If the internal pointer is a server it is either a server attribute or a
 	//top level node (suite)
     if(VModelServer *mserver=data_->server(index.internalPointer()))
@@ -949,6 +961,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
         VTreeServer *server=mserver->treeServer();
         Q_ASSERT(server);
 
+        //If the attrNum is cached it is correct!
         int serverAttNum=server->tree()->attrNum(atts_);
 
 		//It is a top level node
@@ -965,29 +978,30 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 
 	//Otherwise the internal pointer points to the parent node
     else if(VTreeNode *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
-	{
+	{       
+        //If the attrNum is cached it is correct!
         int attNum=parentNode->attrNum(atts_);
 
         //It is a node
         if(index.row() >= attNum)
-		{
+        {
             VNode *n=parentNode->childAt(index.row()-attNum)->vnode();
-			return VInfoNode::create(n);
-		}
-		//It is an attribute
-		else
-		{
-            VNode *n=parentNode->vnode();
-            Q_ASSERT(n);
-            VItemTmp_ptr atmp=VAttributeType::itemForAbsIndex(n,index.row(),atts_);
-            if(atmp->attribute())
+            return VInfoNode::create(n);
+        }
+        //It is an attribute
+        else
+        {
+            //This wil not work properly if we are in the middle of an attribute
+            //filter change! atts_ is the new filter state, but index.row() is based on
+            //the previous filter state!!
+            if(VAttribute* a=parentNode->vnode()->attribute(index.row(),atts_))
             {
-                //VInfo will take charge of the attribute!
-                VInfo_ptr p=VInfoAttribute::create(atmp->attribute()->clone());
+                VInfo_ptr p=VInfoAttribute::create(a);
                 return p;
+
             }
-		}
-	}
+        }
+    }
 
     VInfo_ptr res;
 	return res;
@@ -1137,7 +1151,7 @@ void TreeNodeModel::slotEndAddRemoveAttributes(VTreeServer* server,const VTreeNo
 	//We need to update all the attributes to reflect the change!
 	//(Since we do not have information about what attribute was actually added
 	//we always add or remove attributes at the end of the attribute list!!! Then the
-	//call below will update all the attributes of the node in the tree).
+    //slot below will update all the attributes of the node in the tree).
 	slotAttributesChanged(server,node);
 }
 

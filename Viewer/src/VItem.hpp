@@ -14,7 +14,6 @@
 #include <cstdlib>
 #include <QString>
 
-
 class ServerHandler;
 class VNode;
 class VServer;
@@ -32,8 +31,6 @@ public:
     virtual ~VItem() {}
 
     VNode* parent() const {return parent_;}
-    //virtual ServerHandler* server() const;
-    //node_ptr node() const {return node_;}
     virtual VServer* isServer() const {return NULL;}
     virtual VNode* isNode() const {return NULL;}
     virtual VSuiteNode* isSuite() const {return NULL;}

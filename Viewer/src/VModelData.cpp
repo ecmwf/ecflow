@@ -227,6 +227,10 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
         //The first access to the attributes makes them initialised in the tree node.
         if(node->isAttrInitialised())
         {
+            //Update the forceshow attribute in the filter because
+            //it might have been deleted/reallocated
+            attrFilter_->updateForceShowAttr();
+
             //This is the already updated attribute num
             int currentNum=vnode->attrNum(attrFilter_);
 
@@ -535,13 +539,13 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     VTreeNode* node=tree_->find(vnode);
 
     UI_ASSERT(!node || !attrFilter_->isSet(a->type()),
-              "Attr=" << a->name().toStdString() << " type=" << a->typeName());
+              "node=" << node << " Attr=" << a->name().toStdString() << " type=" << a->typeName());
 
     //Clear
     clearForceShow(a);
 
     //Tell the attribute filter that this attribute must always be visible
-    attrFilter_->setForceShowAttr(a);
+    attrFilter_->setForceShowAttr(const_cast<VAttribute*>(a));
 
     //Tell the tree that this node must always be visible
     filter_->setForceShowNode(const_cast<VNode*>(vnode));

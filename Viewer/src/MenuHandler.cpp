@@ -30,7 +30,6 @@
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
-#include "NodeExpression.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "CustomCommandHandler.hpp"
@@ -39,6 +38,9 @@ int MenuItem::idCnt_=0;
 
 std::vector<Menu *> MenuHandler::menus_;
 MenuHandler::ConfirmationMap MenuHandler::commandsWhichRequireConfirmation_;
+TrueNodeCondition  MenuHandler::trueCond_;
+FalseNodeCondition MenuHandler::falseCond_;
+
 
 MenuHandler::MenuHandler()
 {
@@ -267,26 +269,23 @@ void MenuHandler::refreshCustomMenuCommands()
     Menu *menu = findMenu("Custom");
     if(menu)
     {
-        BaseNodeCondition *trueCond  = new TrueNodeCondition();
-        BaseNodeCondition *falseCond = new FalseNodeCondition();
-
         menu->clearFixedList();
 
         // create the 'compulsary' menu items
         MenuItem *item1 = new MenuItem("Manage commands...");
         item1->setCommand("custom");
         addItemToMenu(item1, "Custom");
-        item1->setEnabledCondition(trueCond);
-        item1->setVisibleCondition(trueCond);
-        item1->setQuestionCondition(falseCond);
+        item1->setEnabledCondition(&trueCond_);
+        item1->setVisibleCondition(&trueCond_);
+        item1->setQuestionCondition(&falseCond_);
         item1->setIcon("configure.svg");
 
         // Saved commands
         MenuItem *item2 = new MenuItem("-");
         addItemToMenu(item2, "Custom");
-        item2->setEnabledCondition(trueCond);
-        item2->setVisibleCondition(trueCond);
-        item2->setQuestionCondition(falseCond);
+        item2->setEnabledCondition(&trueCond_);
+        item2->setVisibleCondition(&trueCond_);
+        item2->setQuestionCondition(&falseCond_);
 
         int numSavedCommands = customSavedCmds->numCommands();
 
@@ -297,9 +296,9 @@ void MenuHandler::refreshCustomMenuCommands()
             {
                 MenuItem *item = new MenuItem(cmd->name());
                 item->setCommand(cmd->command());
-                item->setEnabledCondition(trueCond);
-                item->setVisibleCondition(trueCond);
-                item->setQuestionCondition(trueCond);
+                item->setEnabledCondition(&trueCond_);
+                item->setVisibleCondition(&trueCond_);
+                item->setQuestionCondition(&trueCond_);
                 item->setCustom(true);
                 item->setStatustip("__cmd__");
                 addItemToMenu(item, "Custom");
@@ -310,15 +309,15 @@ void MenuHandler::refreshCustomMenuCommands()
         // Recently executed commands
         MenuItem *item3 = new MenuItem("-");
         addItemToMenu(item3, "Custom");
-        item3->setEnabledCondition(trueCond);
-        item3->setVisibleCondition(trueCond);
-        item3->setQuestionCondition(falseCond);
+        item3->setEnabledCondition(&trueCond_);
+        item3->setVisibleCondition(&trueCond_);
+        item3->setQuestionCondition(&falseCond_);
 
         MenuItem *item4 = new MenuItem("Recent");
         addItemToMenu(item4, "Custom");
-        item4->setEnabledCondition(falseCond);
-        item4->setVisibleCondition(trueCond);
-        item4->setQuestionCondition(falseCond);
+        item4->setEnabledCondition(&falseCond_);
+        item4->setVisibleCondition(&trueCond_);
+        item4->setQuestionCondition(&falseCond_);
 
         int numRecentCommands = customRecentCmds->numCommands();
 
@@ -328,9 +327,9 @@ void MenuHandler::refreshCustomMenuCommands()
 
             MenuItem *item = new MenuItem(cmd->name());
             item->setCommand(cmd->command());
-            item->setEnabledCondition(trueCond);
-            item->setVisibleCondition(trueCond);
-            item->setQuestionCondition(trueCond);
+            item->setEnabledCondition(&trueCond_);
+            item->setVisibleCondition(&trueCond_);
+            item->setQuestionCondition(&trueCond_);
             item->setCustom(true);
             item->setStatustip("__cmd__");
             addItemToMenu(item, "Custom");

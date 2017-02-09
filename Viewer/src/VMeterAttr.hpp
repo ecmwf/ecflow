@@ -8,31 +8,32 @@
 //
 //============================================================================
 
-#ifndef VITEMTMP_HPP
-#define VITEMTMP_HPP
+#ifndef VMETERATTR_HPP
+#define VMETERATTR_HPP
 
-#include <boost/shared_ptr.hpp>
+#include "VAttribute.hpp"
 
-class VAttribute;
-class VItem;
+#include <QStringList>
+#include <string>
+#include <vector>
 
-class VItemTmp;
-typedef boost::shared_ptr<VItemTmp> VItemTmp_ptr;
+class AttributeFilter;
+class VAttributeType;
+class VNode;
 
-class VItemTmp
+class Meter;
+
+class VMeterAttr : public VAttribute
 {
+
 public:
-    ~VItemTmp();
+    VMeterAttr(VNode *parent,const Meter&,int index);
 
-    VItem* item() const {return item_;}
-    VAttribute* attribute() const;
-    static VItemTmp_ptr create(VItem* item) {return VItemTmp_ptr(new VItemTmp(item));}
+    VAttributeType* type() const;
+    QStringList data() const;
+    std::string strName() const;
 
-private:
-    VItemTmp(VItem* item) : item_(item) {}
-    VItem* item_;
-
+    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };
 
-#endif // VITEMTMP_HPP
-
+#endif // VMETER_HPP

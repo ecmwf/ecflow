@@ -8,17 +8,31 @@
 //
 //============================================================================
 
-#include "VItem.hpp"
-#include "VItemTmp.hpp"
+#ifndef VEVENT_HPP
+#define VEVENT_HPP
+
 #include "VAttribute.hpp"
 
-VItemTmp::~VItemTmp()
-{
-    if(item_ && item_->isAttribute())
-    delete item_;
-}
+#include <QStringList>
+#include <string>
+#include <vector>
 
-VAttribute* VItemTmp::attribute() const
+class AttributeFilter;
+class VAttributeType;
+class VNode;
+
+class Event;
+
+class VEventAttr : public VAttribute
 {
-    return (item_)?item_->isAttribute():NULL;
-}
+public:
+    VEventAttr(VNode *parent,const Event&,int index);
+
+    VAttributeType* type() const;
+    QStringList data() const;
+    std::string strName() const;
+
+    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+};
+
+#endif // VEVENT_HPP

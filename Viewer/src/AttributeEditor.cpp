@@ -17,7 +17,7 @@
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
-#include "VRepeat.hpp"
+#include "VRepeatAttr.hpp"
 
 #include <QPushButton>
 
@@ -83,9 +83,9 @@ void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
 
     //For repeats we create an editor for each type
     std::string typeStr=a->type()->strName();
-    if(a->type()->name() == "repeat")
-    {
-        typeStr+="_" + VRepeat::type(info->node());
+    if(a->type() == VAttributeType::find("repeat"))
+    {        
+        typeStr+="_" + a->subType();
     }
 
     //The edtior will be automatically deleted on close (Qt::WA_DeleteOnClose is set)
@@ -230,7 +230,9 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
 #endif
             VAttribute* a=info_->attribute();
             Q_ASSERT(a);
-            if(!a->isValid(info_->node(),attrData_))
+            if(1)
+            //if(info->node()->isValidAttribute(a) == false)
+            //if(!a->isValid(info_->node(),attrData_))
             {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
                 UiLog().dbg() << " attribute does not exist";

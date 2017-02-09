@@ -157,7 +157,9 @@ set(viewer_srcs
     VAttribute.cpp
     VAttributeType.cpp
     VConfig.cpp   
+    VDateAttr.cpp
     VDir.cpp
+    VEventAttr.cpp
     VFilter.cpp
     VIcon.cpp
     VInfo.cpp
@@ -165,21 +167,29 @@ set(viewer_srcs
     VFileInfo.cpp
     VItem.cpp
     VItemPathParser.cpp
-    VItemTmp.cpp
+    VLabelAttr.cpp
+    VLateAttr.cpp
+    VLimitAttr.cpp
+    VLimiterAttr.cpp
+    VMeterAttr.cpp
     VModelData.cpp
     VNode.cpp
     VNodeList.cpp
     VNState.cpp
     VParam.cpp
     VProperty.cpp   
-    VRepeat.cpp
+    VRepeatAttr.cpp
     VReply.cpp
     VServerSettings.cpp
     VSettings.cpp
     VSState.cpp
     VTask.cpp
     VTaskNode.cpp
+    VTimeAttr.cpp
     VTree.cpp
+    VTriggerAttr.cpp
+    VGenVarAttr.cpp
+    VUserVarAttr.cpp
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp

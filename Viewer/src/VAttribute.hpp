@@ -17,41 +17,31 @@
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 class AttributeFilter;
 class VAttributeType;
 class VNode;
-
 class VAttribute;
-typedef boost::shared_ptr<VAttribute> VAttribute_ptr;
 
 class VAttribute : public VItem
 {
 public:
-    VAttribute(VNode *parent,VAttributeType* type,int indexInType);
+    VAttribute(VNode *parent,int index);
     ~VAttribute();
 
-    VAttribute* clone() const;
+    virtual VAttributeType* type() const=0;
+    virtual const std::string& subType() const;
+    virtual int lineNum() const {return 1;}
     VServer* root() const;
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
-    VAttributeType* type() const;
-    QStringList data() const;
     QString toolTip() const;
     QString name() const;
     std::string strName() const;
     const std::string& typeName() const;
     std::string fullPath() const;
+    virtual QStringList data() const=0;
+    bool sameAs(QStringList d) const;
     bool sameContents(VItem*) const;
-    int id() const {return id_;}
-    int absIndex(AttributeFilter *filter) const;
-
-    bool isValid(VNode* parent,QStringList);
     bool value(const std::string& key,std::string& val) const;
-
-    static VAttribute* make(VNode* n,const std::string& type,const std::string& name);
-    static VAttribute* makeFromId(VNode*,int);
-    static VAttribute* make(VNode *parent,QStringList data);
 
     static void buildAlterCommand(std::vector<std::string>& cmd,
                          const std::string& action, const std::string& type,
@@ -61,16 +51,10 @@ public:
                          const std::string& action, const std::string& type,
                          const std::string& value);
 
-    static unsigned int totalNum();
 
 protected:
-    VAttribute(VNode *parent,int id);
 
-    static int indexToId(VAttributeType* t,int idx);
-    static VAttributeType* idToType(int id);
-    static int idToTypeIndex(int id);
-
-    int id_;
+    int index_;
 };
 
 #endif // VATTRIBUTE_HPP

@@ -310,6 +310,49 @@ if __name__ == "__main__":
     assert test_passed,"Adding day at the suite level should fail"    
     print("check adding day at the suite level: RuntimeError: ")
 
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_trigger("1 == 0")
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding a trigger at suite level should fail"    
+    print("check adding trigger at the suite level: RuntimeError: ")
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_part_trigger("1 == 0")
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding a part trigger at suite level should fail"    
+    print("check adding part trigger at the suite level: RuntimeError: ")
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_complete("1 == 0")
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding a complete trigger at suite level should fail"    
+    print("check adding complete trigger at the suite level: RuntimeError: ")
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_part_complete("1 == 0")
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding a part complete trigger at suite level should fail"    
+    print("check adding part complete trigger at the suite level: RuntimeError: ")
 
     # =================================================================================
     print("check duplicate family not allowed")

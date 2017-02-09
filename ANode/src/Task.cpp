@@ -786,11 +786,15 @@ void Task::collateChanges(DefsDelta& changes) const
    for(size_t t = 0; t < vec_size; t++)   { aliases_[t]->collateChanges(changes); }
 }
 
-void Task::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Task::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Task::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
-
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::ORDER);
+      return;
+   }
+   
    // Order aliases_ according to memento ordering
    const std::vector<std::string>& order = memento->order_;
    if (order.size() != aliases_.size()) {
@@ -814,30 +818,35 @@ void Task::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Typ
        return;
    }
 
-   aspects.push_back(ecf::Aspect::ORDER);
    aliases_ = vec;
 }
 
-void Task::set_memento( const AliasChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Task::set_memento( const AliasChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Task::set_memento( const AliasChildrenMemento* ) " << debugNodePath() << "\n";
 #endif
 
-   aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
-   aliases_ = memento->children_;
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
+      return;
+   }
 
    // set up alias parent pointers. since they are *NOT* serialised.
+   aliases_ = memento->children_;
    size_t vec_size = aliases_.size();
    for(size_t i = 0; i < vec_size; i++) {
       aliases_[i]->set_parent(this);
    }
 }
 
-void Task::set_memento( const AliasNumberMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void Task::set_memento( const AliasNumberMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Task::set_memento( const AliasNumberMemento* ) " << debugNodePath() << "\n";
 #endif
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::ALIAS_NUMBER);
+      return;
+   }
 
-   aspects.push_back(ecf::Aspect::ALIAS_NUMBER);
    alias_no_ = memento->alias_no_;
 }

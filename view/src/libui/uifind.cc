@@ -200,7 +200,6 @@ void find_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = menuBar1;
 	children[ac++] = drawingArea1;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void find_shell_c::entryCB( Widget widget, XtPointer client_data, XtPointer call_data )

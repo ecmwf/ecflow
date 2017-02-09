@@ -274,9 +274,9 @@ bool AttributeFilter::matchForceShowAttr(const VNode *n,VAttributeType* t) const
     return false;
 }
 
-void AttributeFilter::setForceShowAttr(const VAttribute* a)
+void AttributeFilter::setForceShowAttr(VAttribute* a)
 {
-    forceShowAttr_=VInfoAttribute::create(a->clone());
+    forceShowAttr_=VInfoAttribute::create(a);
 }
 
 VAttribute* AttributeFilter::forceShowAttr() const
@@ -287,6 +287,18 @@ VAttribute* AttributeFilter::forceShowAttr() const
 void AttributeFilter::clearForceShowAttr()
 {
     forceShowAttr_.reset();
+}
+
+void AttributeFilter::updateForceShowAttr()
+{
+    if(forceShowAttr_)
+    {
+        forceShowAttr_->regainData();
+        if(forceShowAttr_->hasData())
+        {
+            forceShowAttr_.reset();
+        }
+    }
 }
 
 //==============================================
@@ -776,9 +788,9 @@ bool TableNodeFilter::update()
      }
 
 #ifdef _UI_VFILTER_DEBUG
-    UiLog(server_).dbg() << " elapsed time: " + timer.elapsed() << " ms";
-    UiLog(server_).dbg() << " filter size: " + match_.size();
-    UiLog(server_).dbg() << " capacity: " + match_.capacity();
+    UiLog(server_).dbg() << " elapsed time: " << timer.elapsed() << " ms";
+    UiLog(server_).dbg() << " filter size: " << match_.size();
+    UiLog(server_).dbg() << " capacity: " << match_.capacity();
 #endif
 
     return true;

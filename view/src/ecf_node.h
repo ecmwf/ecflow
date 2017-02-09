@@ -422,6 +422,12 @@ public:
       return typeid(owner_).name();
    }
 
+   virtual void update_start(const Node*, const std::vector<ecf::Aspect::Type>&)
+   {
+   }
+   virtual void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&)
+   {
+   }
    virtual void update( const Node* n, const std::vector<ecf::Aspect::Type>& asp )
    {
       if (!owner_) return;

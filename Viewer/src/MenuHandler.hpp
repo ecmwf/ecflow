@@ -18,6 +18,7 @@
 #include <QPoint>
 
 #include "VInfo.hpp"
+#include "NodeExpression.hpp"
 
 class QMenu;
 class QAction;
@@ -166,6 +167,8 @@ private:
 
     static std::vector<Menu *> menus_;
     static ConfirmationMap commandsWhichRequireConfirmation_;
+    static TrueNodeCondition trueCond_;
+    static FalseNodeCondition falseCond_;
     //static std::vector<MenuItem> items_;
 
 };

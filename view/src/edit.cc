@@ -45,9 +45,9 @@ edit::edit(panel_window& w):
 	tmp_(0), kStart(0x0), kEnd(0x0)
 {
   if (kStart==NULL) 
-    kStart=(char*)calloc(1024, sizeof(char*));
+    kStart=(char*)calloc(1024, sizeof(char));
   if (kEnd==NULL)   
-    kEnd=(char*)calloc(1024, sizeof(char*));
+    kEnd=(char*)calloc(1024, sizeof(char));
 }
 
 edit::~edit()
