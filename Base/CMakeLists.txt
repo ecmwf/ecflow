@@ -93,7 +93,7 @@ list( APPEND test_srcs
    test/TestECFLOW-189.cpp
    test/TestForceCmd.cpp
    test/TestFreeDepCmd.cpp
-   test/TestLimit.cpp
+   test/TestInLimitAndLimit.cpp
    test/TestLogCmd.cpp
    test/TestMeterCmd.cpp
    test/TestProgramOptions.cpp

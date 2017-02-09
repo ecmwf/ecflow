@@ -934,9 +934,9 @@ bool Node::check_in_limit_up_node_tree() const
    return true;
 }
 
-void Node::incrementInLimit(std::set<Limit*>& limitSet) const
+void Node::incrementInLimit(std::set<Limit*>& limitSet)
 {
-   //	cout << "Node::incrementInLimit " << absNodePath() << endl;
+   //cout << "Node::incrementInLimit " << absNodePath() << endl;
    std::string the_abs_node_path = absNodePath();
    inLimitMgr_.incrementInLimit(limitSet,the_abs_node_path);
 
@@ -947,9 +947,9 @@ void Node::incrementInLimit(std::set<Limit*>& limitSet) const
    }
 }
 
-void Node::decrementInLimit(std::set<Limit*>& limitSet) const
+void Node::decrementInLimit(std::set<Limit*>& limitSet)
 {
-   //	cout << "Node::decrementInLimit " << absNodePath() << endl;
+   //cout << "Node::decrementInLimit " << absNodePath() << endl;
    std::string the_abs_node_path = absNodePath();
    inLimitMgr_.decrementInLimit(limitSet,the_abs_node_path);
 

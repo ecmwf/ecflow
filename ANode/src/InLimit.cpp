@@ -29,8 +29,8 @@ using namespace ecf;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-InLimit::InLimit(const std::string& name, const std::string& pathToNode, int tokens)
-: name_(name),pathToNode_(pathToNode),tokens_(tokens)
+InLimit::InLimit(const std::string& name, const std::string& pathToNode, int tokens,bool limit_this_node_only)
+: name_(name),pathToNode_(pathToNode),tokens_(tokens),limit_this_node_only_(limit_this_node_only),incremented_(false)
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("InLimit::InLimit: Invalid InLimit name: " + name);
@@ -40,21 +40,34 @@ InLimit::InLimit(const std::string& name, const std::string& pathToNode, int tok
 bool InLimit::operator==( const InLimit& rhs ) const
 {
    if ( pathToNode_ != rhs.pathToNode_ ) {
-      //#ifdef DEBUG
-      //    std::cout << "InLimit::operator==   pathToNode_ != rhs.pathToNode_\n";
-      //#endif
+#ifdef DEBUG
+      if (Ecf::debug_equality())   std::cout << "InLimit::operator==   pathToNode_ != rhs.pathToNode_\n";
+#endif
       return false;
    }
    if ( name_ != rhs.name_ ) {
-      //#ifdef DEBUG
-      //    std::cout << "InLimit::operator==     name_ != rhs.name_\n";
-      //#endif
+#ifdef DEBUG
+      if (Ecf::debug_equality())  std::cout << "InLimit::operator==     name_ != rhs.name_\n";
+#endif
       return false;
    }
    if ( tokens_ != rhs.tokens_ ) {
-      //#ifdef DEBUG
-      //    std::cout << "InLimit::operator==    tokens_(" << tokens_  << ") != rhs.tokens_(" << rhs.tokens_ << ") \n";
-      //#endif
+#ifdef DEBUG
+      if (Ecf::debug_equality()) std::cout << "InLimit::operator==    tokens_(" << tokens_  << ") != rhs.tokens_(" << rhs.tokens_ << ")\n";
+#endif
+      return false;
+   }
+
+   if ( limit_this_node_only_ != rhs.limit_this_node_only_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality())std::cout << "InLimit::operator==    limit_this_node_only_(" << limit_this_node_only_  << ") != rhs.limit_this_node_only_(" << rhs.limit_this_node_only_ << ")\n";
+#endif
+      return false;
+   }
+   if ( incremented_ != rhs.incremented_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality())std::cout << "InLimit::operator==    incremented_(" << incremented_  << ") != rhs.incremented_(" << rhs.incremented_ << ")\n";
+#endif
       return false;
    }
 
@@ -65,19 +78,30 @@ bool InLimit::operator==( const InLimit& rhs ) const
 std::ostream& InLimit::print( std::ostream& os ) const {
    Indentor in;
    Indentor::indent( os ) << toString();
-   if ( PrintStyle::getStyle() == PrintStyle::STATE) {
-      if ( limit() )
-         os << " # referenced limit(value) " << limit()->theLimit() << "(" << limit()->value() << ")";
+
+   if (!PrintStyle::defsStyle()) {
+
+      // write state; See InlimitParser::doParse for read state part
+      if (incremented_) {
+         os << " # incremented:" << incremented_;
+      }
+
+      if ( PrintStyle::getStyle() == PrintStyle::STATE) {
+         if ( limit() )
+            os << " # referenced limit(value) " << limit()->theLimit() << "(" << limit()->value() << ")";
+      }
    }
+
    os << "\n";
    return os;
 }
 
 std::string InLimit::toString() const {
    std::stringstream ss;
-   if ( pathToNode_.empty() )  ss << "inlimit " << name_;
-   else                        ss << "inlimit " << pathToNode_ << Str::COLON() << name_;
-   if ( tokens_ != 1 )         ss << " " << tokens_;
+   ss << "inlimit ";
+   if (limit_this_node_only_) ss << "-n ";
+   if ( pathToNode_.empty() ) ss << name_;
+   else                       ss << pathToNode_ << Str::COLON() << name_;
+   if ( tokens_ != 1 )        ss << " " << tokens_;
    return ss.str();
 }
-

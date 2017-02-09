@@ -216,24 +216,34 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
       }
    }
    {
-       Defs defs;
-       suite_ptr suite = defs.add_suite("s1");
-       task_ptr t1 = suite->add_task("t1");
-       task_ptr t2 = suite->add_task("t2");
-       task_ptr t3 = suite->add_task("t3");
-       task_ptr t4 = suite->add_task("t4");
-       Limit limit("limit",10);
-       limit.increment(1,t1->absNodePath());
-       limit.increment(1,t2->absNodePath());
-       limit.increment(1,t3->absNodePath());
-       limit.increment(1,t4->absNodePath());
-       suite->addLimit(limit);
-//       PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
-       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Limit state: failed: " << helper.errorMsg());
-    }
+      Defs defs;
+      suite_ptr suite = defs.add_suite("s1");
+      task_ptr t1 = suite->add_task("t1");
+      task_ptr t2 = suite->add_task("t2");
+      task_ptr t3 = suite->add_task("t3");
+      task_ptr t4 = suite->add_task("t4");
+      Limit limit("limit",10);
+      limit.increment(1,t1->absNodePath());
+      limit.increment(1,t2->absNodePath());
+      limit.increment(1,t3->absNodePath());
+      limit.increment(1,t4->absNodePath());
+      suite->addLimit(limit);
+      //       PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Limit state: failed: " << helper.errorMsg());
+   }
+   {
+      Defs defs;
+      suite_ptr suite = defs.add_suite("s1");
+      task_ptr t1 = suite->add_task("t1");
+      InLimit inlimit1("limit","/s1",10,true);   // limit has state when 'limit this node only' is set
+      inlimit1.set_incremented(true);            // the state
+      InLimit inlimit2("limit2","/s1",10);
+      t1->addInLimit(inlimit1);
+      t1->addInLimit(inlimit2);
 
-   // **** Note InLimit does not have any changeable state
-
+      //       PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "InLimit state: failed: " << helper.errorMsg());
+   }
    {
         Defs defs;
         suite_ptr suite = defs.add_suite("s1");

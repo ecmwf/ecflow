@@ -1,0 +1,37 @@
+extern /limits:c1a
+extern /limits:linux_cluster
+extern /limits:pdb
+extern /limits:q2diss
+
+suite suiteName
+    limit sg1  10
+    limit mars 10
+endsuite
+
+suite obs
+    limit fred 1000
+    inlimit -n /limits:c1a
+    
+    family limits
+        limit hpcd 20
+    endfamily
+    
+    family X
+        inlimit -n fred 3
+        task t1
+    endfamily
+    
+    family anon    
+        inlimit -n fred      
+        task t1
+            inlimit -n /suiteName:sg1 3      # another suite limit
+            inlimit -n /obs/limits:hpcd      # This suite limit
+            inlimit -n /limits:c1a           # extern suite limit
+        task t2
+            inlimit -n /obs/limits:hpcd      # This suite limit
+        task t3
+            inlimit -n /limits:c1a           # extern suite limit
+        task t4
+            inlimit -n /limits:c1a  10       # extern suite limit
+    endfamily
+endsuite

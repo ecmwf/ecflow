@@ -27,6 +27,7 @@
 #include "JobsParam.hpp"
 #include "Jobs.hpp"
 #include "System.hpp"
+#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -661,6 +662,333 @@ BOOST_AUTO_TEST_CASE( test_limits_after_requeue_task_ECFLOW_196 )
          BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_X_limit->value());
       }
    }
+}
+
+BOOST_AUTO_TEST_CASE( test_inlimit_with_family_ECFLOW_878 )
+{
+   cout << "Base:: ...test_inlimit_with_family_ECFLOW_878\n";
+
+   // This test places a limit on the families. Should ignore the tasks
+   // With this test only 1 family can start at a time
+   //
+   // Create the following def. with inlimit -n, we limit node only
+   // suite s0
+   //   limit X 1   # Only allow one family at a time to start
+   // suite s1
+   //   family f1
+   //     inlimit -n X
+   //     task t1
+   //     task t2
+   //   family f2
+   //     inlimit -n X
+   //     task t1
+   //     task t2
+   //   family f3
+   //     inlimit -n X
+   //     task t1
+   //     task t2
+
+   Defs defs;
+   suite_ptr s0 =  defs.add_suite("s0");
+   s0->addLimit(Limit("X",1));
+
+   suite_ptr s1 =  defs.add_suite("s1");
+   family_ptr f1 = s1->add_family("f1");
+   f1->addInLimit(InLimit("X","/s0",1,true));
+   task_ptr f1_t1 = f1->add_task("t1");
+   task_ptr f1_t2 = f1->add_task("t2");
+   family_ptr f2 = s1->add_family("f2");
+   f2->addInLimit(InLimit("X","/s0",1,true));
+   task_ptr f2_t1 = f2->add_task("t1");
+   task_ptr f2_t2 = f2->add_task("t2");
+   family_ptr f3 = s1->add_family("f3");
+   f3->addInLimit(InLimit("X","/s0",1,true));
+   task_ptr f3_t1 = f3->add_task("t1");
+   task_ptr f3_t2 = f3->add_task("t2");
+
+   //cout << defs;
+   limit_ptr the_X_limit = s0->find_limit("X");
+   BOOST_CHECK_MESSAGE( the_X_limit, "Could not find limits");
+
+   // Create a request to begin suite
+   // make sure chosen suite can begin to resolve dependencies.
+   // beginning the suite will:
+   //     1/ set all children to the QUEUED state
+   //     2/ Begin job submission, and hence changes state to ACTIVE for submitted jobs
+   //
+   //  Resolve dependencies. Only 2 task should start
+   {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new BeginCmd("/s1")));
+
+//      PrintStyle::setStyle(PrintStyle::MIGRATE);
+//      cout << defs;
+
+      BOOST_CHECK_MESSAGE( s1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t2->state()));
+      BOOST_CHECK_MESSAGE( f3->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3->state()));
+      BOOST_CHECK_MESSAGE( f3_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t1->state()));
+      BOOST_CHECK_MESSAGE( f3_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t2->state()));
+
+      int expected_limit_value = 1;
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
+
+      // should only have 1 path, and it should be path to family f1
+      const std::set<std::string>& x_limit_paths =  the_X_limit->paths();
+      BOOST_CHECK_MESSAGE( x_limit_paths.size()==1 , "Expected one path in limit but found " <<  x_limit_paths.size());
+      BOOST_CHECK_MESSAGE( x_limit_paths.find(f1->absNodePath()) != x_limit_paths.end(), "Expected to find path " << f1->absNodePath() );
+
+//      // why f2_t1 is queued
+//      cout << "why ============================================";
+//      std::vector<std::string> vec;
+//      f2_t1->bottom_up_why(vec);
+//      for(size_t i =0; i < vec.size(); i++) {
+//         cout << "why:" << i << " " << vec[i] << "\n";
+//      }
+   }
+
+   // Now set tasks f1_t1, f1_t2 to complete, this should release the limit, so that next family can run
+   {
+      std::vector<std::string> task_paths;
+      task_paths.push_back(f1_t1->absNodePath());
+      task_paths.push_back(f1_t2->absNodePath());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ForceCmd(task_paths,"complete",true /*recursive */, false /* set Repeat to last value */)));
+
+      BOOST_CHECK_MESSAGE( f1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t2->state()));
+      BOOST_CHECK_MESSAGE( f3->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3->state()));
+      BOOST_CHECK_MESSAGE( f3_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t1->state()));
+      BOOST_CHECK_MESSAGE( f3_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t2->state()));
+
+      int expected_limit_value = 1;
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
+
+      // Paths should be empty
+      // should only have 1 path, and it should be path to family f1
+      const std::set<std::string>& x_limit_paths = the_X_limit->paths();
+      BOOST_CHECK_MESSAGE( x_limit_paths.size()==1 , "Expected one path in limit but found " <<  x_limit_paths.size());
+      BOOST_CHECK_MESSAGE( x_limit_paths.find(f2->absNodePath()) != x_limit_paths.end(), "Expected to find path " << f2->absNodePath() );
+   }
+
+   // Now set tasks f2_t1, f2_t2 to complete, this should release the limit, so that next family can run
+   {
+      std::vector<std::string> task_paths;
+      task_paths.push_back(f2_t1->absNodePath());
+      task_paths.push_back(f2_t2->absNodePath());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ForceCmd(task_paths,"complete",true /*recursive */, false /* set Repeat to last value */)));
+
+      BOOST_CHECK_MESSAGE( f1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2_t2->state()));
+      BOOST_CHECK_MESSAGE( f3->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f3->state()));
+      BOOST_CHECK_MESSAGE( f3_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f3_t1->state()));
+      BOOST_CHECK_MESSAGE( f3_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f3_t2->state()));
+
+      int expected_limit_value = 1;
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
+
+      // should only have 1 path, and it should be path to family f3
+      const std::set<std::string>& x_limit_paths = the_X_limit->paths();
+      BOOST_CHECK_MESSAGE( x_limit_paths.size()==1 , "Expected one path in limit but found " <<  x_limit_paths.size());
+      BOOST_CHECK_MESSAGE( x_limit_paths.find(f3->absNodePath()) != x_limit_paths.end(), "Expected to find path " << f3->absNodePath() );
+   }
+
+   // Now set tasks f3_t1, f3_t2 to complete, this should release the limit
+   {
+      std::vector<std::string> task_paths;
+      task_paths.push_back(f3_t1->absNodePath());
+      task_paths.push_back(f3_t2->absNodePath());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ForceCmd(task_paths,"complete",true /*recursive */, false /* set Repeat to last value */)));
+
+      BOOST_CHECK_MESSAGE( f1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2_t2->state()));
+      BOOST_CHECK_MESSAGE( f3->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f3->state()));
+      BOOST_CHECK_MESSAGE( f3_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f3_t1->state()));
+      BOOST_CHECK_MESSAGE( f3_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f3_t2->state()));
+
+      int expected_limit_value = 0;
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
+
+      // Paths should be empty
+      const std::set<std::string>& x_limit_paths = the_X_limit->paths();
+      BOOST_CHECK_MESSAGE( the_X_limit->paths().empty() , "Expected no paths, but found" <<  x_limit_paths.size());
+   }
+
+//   PrintStyle::setStyle(PrintStyle::MIGRATE);
+//   cout << defs;
+}
+
+BOOST_AUTO_TEST_CASE( test_inlimit_ECFLOW_878 )
+{
+   cout << "Base:: ...test_inlimit_ECFLOW_878\n";
+
+   // This test places a limit on the families. Should ignore the tasks
+   // With this test only 1 family can start at a time.
+   // However we *ALSO* want to constrain the tasks, to only 1 task at a time
+   //
+   // Create the following def. with inlimit -n, we limit node only
+   // suite s0
+   //   limit X 1   # Only allow one family at a time to start
+   //   limit T 1   # Only allow one task at a time to start
+   // suite s1
+   //   family f1
+   //     inlimit -n X
+   //     inlimit T
+   //     task t1
+   //     task t2
+   //   family f2
+   //     inlimit -n X
+   //     inlimit T
+   //     task t1
+   //     task t2
+   //   family f3
+   //     inlimit -n X
+   //     inlimit T
+   //     task t1
+   //     task t2
+
+   Defs defs;
+   suite_ptr s0 =  defs.add_suite("s0");
+   s0->addLimit(Limit("X",1));
+   s0->addLimit(Limit("T",1));
+
+   suite_ptr s1 =  defs.add_suite("s1");
+   family_ptr f1 = s1->add_family("f1");
+   f1->addInLimit(InLimit("X","/s0",1,true));
+   f1->addInLimit(InLimit("T","/s0",1));
+   task_ptr f1_t1 = f1->add_task("t1");
+   task_ptr f1_t2 = f1->add_task("t2");
+   family_ptr f2 = s1->add_family("f2");
+   f2->addInLimit(InLimit("X","/s0",1,true));
+   f2->addInLimit(InLimit("T","/s0",1));
+   task_ptr f2_t1 = f2->add_task("t1");
+   task_ptr f2_t2 = f2->add_task("t2");
+   family_ptr f3 = s1->add_family("f3");
+   f3->addInLimit(InLimit("X","/s0",1,true));
+   f3->addInLimit(InLimit("T","/s0",1));
+   task_ptr f3_t1 = f3->add_task("t1");
+   task_ptr f3_t2 = f3->add_task("t2");
+
+   //cout << defs;
+   limit_ptr the_X_limit = s0->find_limit("X");
+   limit_ptr the_T_limit = s0->find_limit("T");
+   BOOST_CHECK_MESSAGE( the_X_limit && the_T_limit, "Could not find limits");
+
+   // Create a request to begin suite
+   // make sure chosen suite can begin to resolve dependencies.
+   // beginning the suite will:
+   //     1/ set all children to the QUEUED state
+   //     2/ Begin job submission, and hence changes state to ACTIVE for submitted jobs
+   //
+   //  Resolve dependencies. Only 1 task should start
+   {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new BeginCmd("/s1")));
+
+      //PrintStyle::setStyle(PrintStyle::MIGRATE);
+      //cout << defs;
+
+      BOOST_CHECK_MESSAGE( s1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t2->state()));
+      BOOST_CHECK_MESSAGE( f3->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3->state()));
+      BOOST_CHECK_MESSAGE( f3_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t1->state()));
+      BOOST_CHECK_MESSAGE( f3_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t2->state()));
+
+      int expected_limit_value = 1;
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
+
+      // should only have 1 path, and it should be path to family f1
+      const std::set<std::string>& x_limit_paths =  the_X_limit->paths();
+      BOOST_CHECK_MESSAGE( x_limit_paths.size()==1 , "Expected one path in limit but found " <<  x_limit_paths.size());
+      BOOST_CHECK_MESSAGE( x_limit_paths.find(f1->absNodePath()) != x_limit_paths.end(), "Expected to find path " << f1->absNodePath() );
+
+      const std::set<std::string>& t_limit_paths =  the_T_limit->paths();
+      BOOST_CHECK_MESSAGE( t_limit_paths.size()==1 , "Expected one path in limit but found " <<  t_limit_paths.size());
+
+//      // why f2_t1 is queued
+//      cout << "why ============================================";
+//      std::vector<std::string> vec;
+//      f2_t1->bottom_up_why(vec);
+//      for(size_t i =0; i < vec.size(); i++) {
+//         cout << "why:" << i << " " << vec[i] << "\n";
+//      }
+   }
+
+   // Now set tasks f1_t1 complete, this should release  t1_t2
+   {
+      std::vector<std::string> task_paths; task_paths.push_back(f1_t1->absNodePath());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ForceCmd(task_paths,"complete",true /*recursive */, false /* set Repeat to last value */)));
+
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t2->state()));
+      BOOST_CHECK_MESSAGE( f3->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3->state()));
+      BOOST_CHECK_MESSAGE( f3_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t1->state()));
+      BOOST_CHECK_MESSAGE( f3_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t2->state()));
+
+      int expected_limit_value = 1;
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
+
+      // should only have 1 path, and it should be path to family f1
+      const std::set<std::string>& x_limit_paths =  the_X_limit->paths();
+      BOOST_CHECK_MESSAGE( x_limit_paths.size()==1 , "Expected one path in limit but found " <<  x_limit_paths.size());
+      BOOST_CHECK_MESSAGE( x_limit_paths.find(f1->absNodePath()) != x_limit_paths.end(), "Expected to find path " << f1->absNodePath() );
+
+      const std::set<std::string>& t_limit_paths =  the_T_limit->paths();
+      BOOST_CHECK_MESSAGE( t_limit_paths.size()==1 , "Expected one path in limit but found " <<  t_limit_paths.size());
+   }
+
+   // Now set tasks f1_t2 complete, this should release  f2_1
+   {
+      std::vector<std::string> task_paths; task_paths.push_back(f1_t2->absNodePath());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ForceCmd(task_paths,"complete",true /*recursive */, false /* set Repeat to last value */)));
+
+      BOOST_CHECK_MESSAGE( f1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t2->state()));
+      BOOST_CHECK_MESSAGE( f3->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3->state()));
+      BOOST_CHECK_MESSAGE( f3_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t1->state()));
+      BOOST_CHECK_MESSAGE( f3_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f3_t2->state()));
+
+      int expected_limit_value = 1;
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
+
+      // should only have 1 path, and it should be path to family f2
+      const std::set<std::string>& x_limit_paths =  the_X_limit->paths();
+      BOOST_CHECK_MESSAGE( x_limit_paths.size()==1 , "Expected one path in limit but found " <<  x_limit_paths.size());
+      BOOST_CHECK_MESSAGE( x_limit_paths.find(f2->absNodePath()) != x_limit_paths.end(), "Expected to find path " << f2->absNodePath() );
+
+      const std::set<std::string>& t_limit_paths =  the_T_limit->paths();
+      BOOST_CHECK_MESSAGE( t_limit_paths.size()==1 , "Expected one path in limit but found " <<  t_limit_paths.size());
+   }
+
+   //PrintStyle::setStyle(PrintStyle::MIGRATE);
+   //cout << defs;
 
    /// Destroy System singleton to avoid valgrind from complaining
    System::destroy();

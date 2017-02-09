@@ -579,11 +579,11 @@ protected:
 
    /// After job submission we need to increment the in limit, to indicate that a
    /// resource is consumed. The set ensure we only update once during a traversal
-   void incrementInLimit(std::set<Limit*>& limitSet) const;
+   void incrementInLimit(std::set<Limit*>& limitSet);
 
    /// After job aborts or completes we need to decrement the in limit, to indicate that
    /// additional resource is available. The set ensure we only update once during a traversal
-   void decrementInLimit(std::set<Limit*>& limitSet) const;
+   void decrementInLimit(std::set<Limit*>& limitSet);
 
    friend class InLimitMgr;
    bool check_in_limit() const { return inLimitMgr_.inLimit(); }
