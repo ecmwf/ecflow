@@ -85,7 +85,6 @@ public:
    // The constructor is *called* in the server.
    // This will collate the incremental changes made so far relative to the client_state_change_no.
    // For large scale change we use client_modify_change_no this will require a full update
-   // *THIS* constructor is used for *TEST* only
    SSyncCmd(unsigned int client_handle,           // a reference to a set of suites used by client
             unsigned int client_state_change_no,
             unsigned int client_modify_change_no,
