@@ -113,9 +113,9 @@ if __name__ == "__main__":
     # add and delete inlimits
     #===========================================================================
     suite.add_inlimit(ecflow.InLimit("limitName1", "/s1/f1", 2))
-    suite.add_inlimit(ecflow.InLimit("limitName2", "/s1/f1", 2))
+    suite.add_inlimit(ecflow.InLimit("limitName2", "/s1/f1", 2, True))
     suite.add_inlimit("limitName3", "/s1/f1", 2)
-    suite.add_inlimit("limitName4", "/s1/f1", 2)
+    suite.add_inlimit("limitName4", "/s1/f1", 2, True)
     assert len(list(suite.inlimits)) == 4, "Expected 4 inLimits"
     
     suite_copy = copy.copy(suite)

@@ -66,7 +66,7 @@ node_ptr add_label(node_ptr self,const std::string& name, const std::string& val
 node_ptr add_label_1(node_ptr self,const Label& label) { self->addLabel(label); return self; }
 node_ptr add_limit(node_ptr self,const std::string& name, int limit)                { self->addLimit(Limit(name,limit)); return self;}
 node_ptr add_limit_1(node_ptr self,const Limit& limit)                { self->addLimit(limit); return self;}
-node_ptr add_in_limit(node_ptr self,const std::string& name,const std::string& pathToNode,int tokens) { self->addInLimit(InLimit(name,pathToNode,tokens)); return self;}
+node_ptr add_in_limit(node_ptr self,const std::string& name,const std::string& pathToNode,int tokens,bool limit_this_node_only){self->addInLimit(InLimit(name,pathToNode,tokens,limit_this_node_only));return self;}
 node_ptr add_in_limit_1(node_ptr self,const InLimit& inlimit) { self->addInLimit(inlimit); return self;}
 node_ptr add_time(node_ptr self,int hour, int minute)                    { self->addTime(ecf::TimeAttr(hour,minute));return self; }
 node_ptr add_time_1(node_ptr self,int hour, int minute, bool relative)   { self->addTime(ecf::TimeAttr(hour,minute,relative)); return self;}
@@ -241,7 +241,7 @@ void export_Node()
    .def("add_label",        &add_label_1)
    .def("add_limit",        &add_limit,                  DefsDoc::add_limit_doc())
    .def("add_limit",        &add_limit_1)
-   .def("add_inlimit",      &add_in_limit,(bp::arg("limit_name"),bp::arg("path_to_node_containing_limit")="",bp::arg("tokens")=1),DefsDoc::add_inlimit_doc())
+   .def("add_inlimit",      &add_in_limit,(bp::arg("limit_name"),bp::arg("path_to_node_containing_limit")="",bp::arg("tokens")=1,bp::arg("limit_this_node_only")=false),DefsDoc::add_inlimit_doc())
    .def("add_inlimit",      &add_in_limit_1)
    .def("add_event",        &add_event,                  DefsDoc::add_event_doc())
    .def("add_event",        &add_event_1)

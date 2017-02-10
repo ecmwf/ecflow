@@ -56,10 +56,10 @@ if __name__ == "__main__":
     suite.delete_limit("");           assert len(list(suite.limits)) == 0,"Expected 0 limits since we just deleted all of them"
 
 
-    # add and delete inlimits
-    suite.add_inlimit( InLimit("limitName1","/s1/f1",2) )\
+    # add and delete in-limits
+    suite.add_inlimit( InLimit("limitName1","/s1/f1",2,True) )\
         .add_inlimit( InLimit("limitName2","/s1/f1",2))\
-        .add_inlimit( "limitName3","/s1/f1",2)\
+        .add_inlimit( "limitName3","/s1/f1",2,True)\
         .add_inlimit( "limitName4","/s1/f1",2)
     assert len(list(suite.inlimits)) == 4,"Expected 4 inLimits"
     suite.delete_inlimit("limitName1"); assert len(list(suite.inlimits)) == 3,"Expected 3 inlimits since we just deleted one limitName1" 
