@@ -214,8 +214,8 @@ private:
    std::string ecf_white_list_file_;
    mutable WhiteListFile white_list_file_;
 
-   std::string ecf_passwd_file_;      // Only used if ECF_SECURE_USER defined
-   mutable PasswdFile passwd_file_;   // Only used if ECF_SECURE_USER defined
+   std::string ecf_passwd_file_;
+   mutable PasswdFile passwd_file_;
 
 	boost::asio::ip::tcp tcp_protocol_;      // defaults to IPv4 TCP protocol
 	friend class ServerOptions;

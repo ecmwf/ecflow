@@ -127,48 +127,53 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
 //#endif
 
    if (user.empty()) {
-//#ifdef DEBUG_ME
-//      cout << "      PasswdFile::authenticate FALSE user empty.\n";
-//#endif
+      //#ifdef DEBUG_ME
+      //      cout << "      PasswdFile::authenticate: user empty:  FAIL\n";
+      //#endif
       return false;
    }
 
+   // no password specified, and password file is empty
+   if (passwd.empty() && vec_.empty()) {
+      //#ifdef DEBUG_ME
+      //      cout << "      PasswdFile::authenticate no password and password file empty: PASS\n";
+      //#endif
+      return true;
+   }
+
    // Only fail if user exists in the passwd file
-   bool user_found  = false;
    size_t vec_size = vec_.size();
    for (size_t i = 0; i < vec_size; i++) {
       if (vec_[i].user() == user) {
-         user_found = true;
          if (vec_[i].passwd() == passwd) {
-//#ifdef DEBUG_ME
-//            cout << "      PasswdFile::authenticate TRUE \n";
-//#endif
+            //#ifdef DEBUG_ME
+            //            cout << "      PasswdFile::authenticate user and password match: PASS\n";
+            //#endif
             return true;
+         }
+         else {
+            //#ifdef DEBUG_ME
+            //      cout << "      PasswdFile::authenticate: user found but passwd did not match: FAIL\n";
+            //#endif
+            return false;
          }
       }
    }
 
-   // User found in password file and passwd did not match
-   if (user_found) {
-//#ifdef DEBUG_ME
-//      cout << "      PasswdFile::authenticate FALSE, user found but passwd did not match\n";
-//#endif
+   // Will ONLY reach here if user not found
+
+   // User not found, but if passwd is not empty, then fail.
+   if (!passwd.empty()) {
+      //#ifdef DEBUG_ME
+      //         cout << "      PasswdFile::authenticate: user NOT found, passwd is NOT EMPTY: FAIL\n";
+      //#endif
       return false;
-   }
-   else {
-      // User not found, but if passwd is not empty, then fail.
-      if (!passwd.empty()) {
-//#ifdef DEBUG_ME
-//         cout << "      PasswdFile::authenticate FALSE, user NOT found, passwd is NOT EMPTY\n";
-//#endif
-         return false;
-      }
    }
 
    // Server has a password file, but user not found and passwd is empty.
    if (vec_.empty()) {
 //#ifdef DEBUG_ME
-//    cout << "      PasswdFile::authenticate true, user NOT found, and passwd EMPTY, and password file EMPTY\n";
+//    cout << "      PasswdFile::authenticate: true, user NOT found, and passwd EMPTY, and password file EMPTY\n";
 //#endif
       return true;
    }

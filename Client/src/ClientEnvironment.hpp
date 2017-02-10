@@ -103,7 +103,6 @@ public:
    virtual bool under_test() const { return under_test_; }
 
 private:
-
  	std::string task_path_;             // ECF_NAME = /aSuit/aFam/aTask
 	std::string jobs_password_;         // ECF_PASS jobs password
 	std::string remote_id_;             // ECF_RID process id of running job
@@ -124,8 +123,7 @@ private:
 	int allow_new_client_old_server_;   // the boost archive version of old server, allow new client--> old server communication
 	std::string env_ecf_new_client_old_server_;
 
-
-   mutable std::string passwd_;                  // Only used when ECF_SECURE_USER defined
+   mutable std::string passwd_;
 
 	/// The option read from the command line.
  	friend class ClientOptions;

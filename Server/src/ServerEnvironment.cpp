@@ -311,7 +311,6 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
  		return false;
 	}
 
-#ifdef ECF_SECURE_USER
  	if (!ecf_passwd_file_.empty() && fs::exists(ecf_passwd_file_)) {
 	   if (!passwd_file_.load(ecf_passwd_file_, debug(), errorMsg)) {
  	      std::cout << "Error: could not parse ECF_PASSWD file " << ecf_passwd_file_ << "\n" << errorMsg << "\n";
@@ -323,7 +322,6 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
          return false;
  	   }
  	}
-#endif
 
 	// If the white list file is empty or does not exist, *ON* server start, its perfectly valid
 	// i.e any user is free to access the server
@@ -372,9 +370,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	// ECF_CHECKINTERVAL
 
    theRetVec.push_back( std::make_pair(std::string("ECF_LISTS"), ecf_white_list_file_) ); // read only variable, changing it has no effect
-#ifdef ECF_SECURE_USER
    theRetVec.push_back( std::make_pair(std::string("ECF_PASSWD"), ecf_passwd_file_) );    // read only variable, changing it has no effect
-#endif
 
 	// variables that can be overridden, in the suite definition
 	theRetVec.push_back( std::make_pair(std::string("ECF_JOB_CMD"), ecf_cmd_) );
@@ -432,26 +428,21 @@ bool ServerEnvironment::reloadPasswdFile(std::string& errorMsg)
 
 bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd) const
 {
-#ifdef ECF_SECURE_USER
    if (!passwd_file_.authenticate(user,passwd)) return false;
-#endif
-	// if *NO* users specified then all users are valid
+
+   // if *NO* users specified then all users are valid
 	return white_list_file_.verify_read_access(user);
 }
 
 bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path) const
 {
-#ifdef ECF_SECURE_USER
    if (!passwd_file_.authenticate(user,passwd)) return false;
-#endif
    return white_list_file_.verify_read_access(user,path);
 }
 
 bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths) const
 {
-#ifdef ECF_SECURE_USER
    if (!passwd_file_.authenticate(user,passwd)) return false;
-#endif
    return white_list_file_.verify_read_access(user,paths);
 }
 
@@ -642,9 +633,7 @@ std::string ServerEnvironment::dump() const
    ss << "check pt save time alarm " << checkpt_save_time_alarm_ << "\n";
    ss << "Job generation " << jobGeneration_ << "\n";
    ss << "Server host name " << serverHost_ << "\n";
-#ifdef ECF_SECURE_USER
    ss << "ECF_PASSWD = " << ecf_passwd_file_ << "\n";
-#endif
 #ifdef ECFLOW_MT
    ss << "No of threads used by server " << threads_ << "\n";
 #endif

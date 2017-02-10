@@ -40,9 +40,7 @@ Stats::Stats() :
 	shutdown_server_(0),
 	halt_server_(0),
  	reload_white_list_file_(0),
-#ifdef ECF_SECURE_USER
  	reload_passwd_file_(0),
-#endif
    ping_(0),
    debug_server_on_(0),
    debug_server_off_(0),
@@ -166,9 +164,7 @@ void Stats::reset()
    shutdown_server_ = 0;
    halt_server_ = 0;
    reload_white_list_file_ = 0;
-#ifdef ECF_SECURE_USER
    reload_passwd_file_ = 0;
-#endif
    ping_ = 0;
    debug_server_on_ = 0;
    debug_server_off_ = 0;
@@ -298,9 +294,7 @@ void Stats::show(std::ostream& os) const
        node_resume_ || node_kill_ || node_status_ || node_edit_history_ || log_cmd_ || log_msg_cmd_ || order_node_ || run_node_ || replace_ ||
        force_ || free_dep_ || suites_ || edit_script_ || alter_cmd_ || ch_cmd_ || plug_ || move_ || group_cmd_ ||
        reload_white_list_file_ || server_load_cmd_ ||  stats_ || check_
-#ifdef ECF_SECURE_USER
        || reload_passwd_file_
-#endif
        )  os << "\n";
    if (load_defs_ != 0)         os << left << setw(width) << "   Load definition " << load_defs_ << "\n";
    if (begin_cmd_ != 0)         os << left << setw(width) << "   Begin " << begin_cmd_ << "\n";
@@ -331,9 +325,7 @@ void Stats::show(std::ostream& os) const
    if (stats_ != 0)             os << left << setw(width) << "   stats cmd " << stats_ << "\n";
    if (check_ != 0)             os << left << setw(width) << "   checks " << check_ << "\n";
    if (reload_white_list_file_ != 0) os << left << setw(width) << "   Reload white list file " << reload_white_list_file_ << "\n";
-#ifdef ECF_SECURE_USER
    if (reload_passwd_file_ != 0)     os << left << setw(width) << "   Reload password file " << reload_passwd_file_ << "\n";
-#endif
    if (file_ecf_ || file_job_ || file_jobout_ || file_manual_ || file_cmdout_)  os << "\n";
    if (file_ecf_ != 0)    os << left << setw(width) << "   File ECF " << file_ecf_ << "\n";
    if (file_job_ != 0) os << left << setw(width) << "   File job " << file_job_ << "\n";

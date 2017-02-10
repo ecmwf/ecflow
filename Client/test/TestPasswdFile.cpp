@@ -27,7 +27,6 @@ namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-#ifdef ECF_SECURE_USER
 BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 // ************************************************************************************
@@ -170,4 +169,3 @@ BOOST_AUTO_TEST_CASE( test_loading_of_passwd_fail )
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

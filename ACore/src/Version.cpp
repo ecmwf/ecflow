@@ -78,9 +78,6 @@ std::string Version::description()
    ss << "TEXT_ARCHIVE)";
 #endif
 
-#ifdef ECF_SECURE_USER
-   ss << " secure_user";
-#endif
 #ifdef ECF_OPENSSL
    ss << " openssl";
 #endif

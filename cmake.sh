@@ -23,7 +23,6 @@ show_error_and_exit() {
    echo "   san            - is short for clang thread sanitiser"
    echo "   no_gui         - Don't build the gui"
    echo "   ssl            - build using openssl"
-   echo "   secure_user    - enable password for client server"
    echo "   log            - enable debug output"
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
@@ -52,7 +51,6 @@ clean_arg=
 no_gui_arg=
 python3_arg=
 ssl_arg=
-secure_user_arg=
 log_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
@@ -75,7 +73,6 @@ while [[ "$#" != 0 ]] ; do
       break
    elif [[ "$1" = no_gui ]] ; then no_gui_arg=$1 ;
    elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
-   elif [[ "$1" = secure_user ]]   ; then secure_user_arg=$1 ;
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
    elif [[ "$1" = install ]] ; then install_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
@@ -244,11 +241,6 @@ if [[ $ssl_arg = ssl ]] ; then
     ssl_options="-DENABLE_SSL=ON"
 fi
 
-secure_user_options=
-if [[ $secure_user_arg = secure_user ]] ; then
-    secure_user_options="-DENABLE_SECURE_USER=ON"
-fi
-
 log_options=
 if [[ $log_arg = log ]] ; then
     log_options="-DECBUILD_LOG_LEVEL=DEBUG"
@@ -285,7 +277,6 @@ $ecbuild $source_dir \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \
-            ${secure_user_options} \
             ${log_options}
             #-DENABLE_ALL_TESTS=ON
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    

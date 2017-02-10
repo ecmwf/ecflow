@@ -30,9 +30,7 @@
 #include "boost_archive.hpp"
 #include "TimeStamp.hpp"
 #include "Version.hpp"
-#ifdef ECF_SECURE_USER
 #include "PasswdFile.hpp"
-#endif
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -401,8 +399,7 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 
 const std::string& ClientEnvironment::get_user_password() const
 {
-#ifdef ECF_SECURE_USER
-   //cout << "ClientEnvironment::get_user_password() ECF_SECURE_USER passwd_(" << passwd_ << ")\n";
+   //cout << "ClientEnvironment::get_user_password() passwd_(" << passwd_ << ")\n";
    if (!passwd_.empty()) {
       //cout << "  ClientEnvironment::get_user_password() CACHED returning " << passwd_ << "\n";
       return passwd_;
@@ -426,7 +423,7 @@ const std::string& ClientEnvironment::get_user_password() const
          return passwd_;
       }
    }
-#endif
+
    //cout << "  ClientEnvironment::get_user_password() returning EMPTY \n";
    return Str::EMPTY();
 }

@@ -154,9 +154,7 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          break;
       }
       case CtsCmd::RELOAD_PASSWD_FILE: {
-#ifdef ECF_SECURE_USER
          as->update_stats().reload_passwd_file_++;
-#endif
          std::string errorMsg;
          if (!as->reloadPasswdFile(errorMsg)) {
             throw std::runtime_error( errorMsg ) ;

@@ -147,7 +147,6 @@ ecbuild_info( "ENABLE_UI                : ${ENABLE_UI}" )
 ecbuild_info( "ENABLE_ALL_TESTS         : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS : ${ENABLE_STATIC_BOOST_LIBS}" )
 ecbuild_info( "ENABLE_SSL               : ${ENABLE_SSL}" )
-ecbuild_info( "ENABLE_SECURE_USER       : ${ENABLE_SECURE_USER}" )
 
 
 if (ENABLE_UI)
@@ -244,14 +243,6 @@ if (ENABLE_SSL)
     include_directories( ${OPENSSL_INCLUDE_DIR} )
     add_definitions( -DECF_OPENSSL )
 endif()
-
-# =======================================================================
-# SECURE_USER
-# =======================================================================
-if (ENABLE_SECURE_USER)
-    add_definitions( -DECF_SECURE_USER )
-endif()
-
 
 # =========================================================================================
 # debug

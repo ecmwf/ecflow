@@ -95,7 +95,7 @@ public:
    /// for authentication. *However* task based commands have their own authentication
    /// mechanism, and don't need setup_user_authentification().
    virtual void setup_user_authentification(const std::string& user, const std::string& passwd) = 0; // Used by PlugCmd
-   virtual void setup_user_authentification(AbstractClientEnv&) = 0; // set user and passwd(ECF_SECURE_USER)
+   virtual void setup_user_authentification(AbstractClientEnv&) = 0; // set user and passwd
    virtual void setup_user_authentification() = 0;                   // if user empty setup.
 
    /// Allow control over connection to different servers/hosts if the main server is down
@@ -529,21 +529,24 @@ protected:
 
 private:
    std::string user_;
-   std::string passwd_;     // only valid with ECF_SECURE_USER
-   std::string hostname_;   // only valid with ECF_SECURE_USER, not used at the moment
+   std::string passwd_;
+   std::string hostname_;
 
    friend class boost::serialization::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+   void serialize( Archive & ar, const unsigned int version ) {
       ar & boost::serialization::base_object< ClientToServerCmd >( *this );
       ar & user_;
-#ifdef ECF_SECURE_USER
-      ar & passwd_;
-      ar & hostname_;
-#endif
+      if (version >= 1) {
+         ar & passwd_;
+         ar & hostname_;
+      }
    }
 };
 
+// 5.0.0, may not work, new client -> old server , don't pass passwd and hostname
+// Remove when the last ecflow 4.x.x release is removed.
+BOOST_CLASS_VERSION(UserCmd, 1)
 
 // ========================================================================
 // This Command should NEVER be changed
