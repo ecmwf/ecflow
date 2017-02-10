@@ -129,38 +129,86 @@ bool InLimitMgr::inLimit() const
 {
 	// Check in we are in limit.
 	// ** WE need to do a lookahead. hence we pass down inlimit tokens **
-	// In the case we have multiple inlimits
-	// then we are only in limit if _ALL_ are in limit. This is like
-	// a logical AND.
- 	if (!inLimitVec_.empty()) {
+	// In the case we have multiple inlimits then we are only in limit if _ALL_ are in limit.
+   // This is like a logical AND.
 
- 		resolveInLimitReferences();
+   if (inLimitVec_.empty()) return true;
 
- 		int inlimitsWithLimits = 0;
-		int inlimitCount = 0;
-		size_t theSize = inLimitVec_.size();
-		for(size_t i = 0; i < theSize; i++ ) {
- 			Limit* limit = inLimitVec_[i].limit();
-			if (limit) {
-				inlimitsWithLimits++;
-				if (limit->inLimit( inLimitVec_[i].tokens() )) {
-					inlimitCount++;
- 				}
+   resolveInLimitReferences();
+
+   int inlimitsWithLimits = 0;
+   int inlimitCount = 0;
+   size_t theSize = inLimitVec_.size();
+   for(size_t i = 0; i < theSize; i++ ) {
+      if (inLimitVec_[i].limit_this_node_only() ) {
+         if (inLimitVec_[i].incremented()) {
+            continue; // Effectively, this inlimit no longer constrains any tasks, allowing them to run.
+         }
+      }
+      Limit* limit = inLimitVec_[i].limit();
+      if (limit) {
+         inlimitsWithLimits++;
+         if (limit->inLimit( inLimitVec_[i].tokens() )) {
+            inlimitCount++;
+         }
+      }
+   }
+
+   return  (inlimitsWithLimits == inlimitCount ) ;
+}
+
+void InLimitMgr::incrementInLimit( std::set<Limit*>& limitSet,const std::string& task_path)
+{
+	//cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << endl;
+
+	// *NOTE* each limit is incremented if within LIMIT, and that
+	//        has not previously been updated.
+	//  we could have the same in limit at the task and family level.
+	//  in this case the task takes priority.
+	//  suite suite
+	//    family family
+	//       inlimit limitname 12
+	//       task t1
+ 	//          inlimit limitname 4
+	//    endfamily
+	//  endsuite
+	//
+	// In this case the limit <limitname> is incremented by 4 _only_
+	//
+	// Note: It is illegal for a node to have the same inlimit but with
+	//       different tokens:
+	//
+	//       task t1
+ 	//          inlimit limitname 4
+ 	//          inlimit limitname 2    // illegal and trapped by parser
+
+   if (inLimitVec_.empty()) return;
+
+	resolveInLimitReferences();
+
+	BOOST_FOREACH(InLimit& inlimit, inLimitVec_) {
+		Limit* limit = inlimit.limit();
+		if (limit && limitSet.find(limit) == limitSet.end()) {
+			limitSet.insert(limit);
+
+ 			// cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << " LIMIT incremented " << endl;
+			if (inlimit.limit_this_node_only()) {
+			   if (!inlimit.incremented()) {
+			      // Can only increment this once, Notice we pass down this node path, i.e since this node is being limited
+	            limit->increment( inlimit.tokens(), node_->absNodePath()); // node could suite || family || task
+	            inlimit.set_incremented(true);
+			   }
+			}
+			else {
+			   limit->increment( inlimit.tokens(), task_path);
 			}
 		}
-
-		return  (inlimitsWithLimits == inlimitCount ) ;
 	}
-
- 	return true;
 }
 
-void InLimitMgr::incrementInLimit( std::set<Limit*>& limitSet,const std::string& task_path) const
+void InLimitMgr::decrementInLimit( std::set<Limit*>& limitSet,const std::string& task_path)
 {
-//	cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << endl;
-
-	// *NOTE* each limit is incremented if within LIMIT, and that
-	//        has not previously been updated.
+	// *NOTE* each limit is incremented if within LIMIT, and that has not previously been updated.
 	//  we could have the same in limit at the task and family level.
 	//  in this case the task takes priority.
 	//  suite suite
@@ -173,55 +221,40 @@ void InLimitMgr::incrementInLimit( std::set<Limit*>& limitSet,const std::string&
 	//
 	// In this case the limit <limitname> is incremented by 4 _only_
 	//
-	// Note: It is illegal for a node to have the same inlimit but with
-	//       different tokens:
-	//
+	// Note: It is illegal for a node to have the same inlimit but with different tokens:
 	//       task t1
  	//          inlimit limitname 4
  	//          inlimit limitname 2    // illegal and trapped by parser
 
-	resolveInLimitReferences();
+   if (inLimitVec_.empty()) return;
 
-	BOOST_FOREACH(const InLimit& inlimit, inLimitVec_) {
+   resolveInLimitReferences();
+
+	std::vector<task_ptr> task_vec;
+	BOOST_FOREACH(InLimit& inlimit, inLimitVec_) {
 		Limit* limit = inlimit.limit();
 		if (limit && limitSet.find(limit) == limitSet.end()) {
 			limitSet.insert(limit);
- 			// cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << " LIMIT incremented " << endl;
-			limit->increment( inlimit.tokens(), task_path);
-		}
-	}
-}
+ 			// cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << " LIMIT decremented " << endl;
 
-void InLimitMgr::decrementInLimit( std::set<Limit*>& limitSet,const std::string& task_path) const
-{
-	// *NOTE* each limit is incremented if within LIMIT, and that
-	//        has not previously been updated.
-	//  we could have the same in limit at the task and family level.
-	//  in this case the task takes priority.
-	//  suite suite
-	//    family family
-	//       inlimit limitname 12
-	//       task t1
- 	//          inlimit limitname 4
-	//    endfamily
-	//  endsuite
-	//
-	// In this case the limit <limitname> is incremented by 4 _only_
-	//
-	// Note: It is illegal for a node to have the same inlimit but with
-	//       different tokens:
-	//
-	//       task t1
- 	//          inlimit limitname 4
- 	//          inlimit limitname 2    // illegal and trapped by parser
-	resolveInLimitReferences();
+         if (inlimit.limit_this_node_only()) {
+            if (inlimit.incremented()) {
 
-	BOOST_FOREACH(const InLimit& inlimit, inLimitVec_) {
-		Limit* limit = inlimit.limit();
-		if (limit && limitSet.find(limit) == limitSet.end()) {
-			limitSet.insert(limit);
- 			// cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << " LIMIT incremented " << endl;
-			limit->decrement( inlimit.tokens(), task_path);
+               // Can only decrement this once, i.e when all child tasks are completed or aborted or queued or unknown
+               bool at_least_one_active = false;
+               if (task_vec.empty()) node_->get_all_tasks(task_vec); // Get tasks once, inside for loop
+               BOOST_FOREACH(task_ptr task,task_vec) {
+                  if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) { at_least_one_active = true; break;}
+               }
+               if (at_least_one_active) continue;
+
+               limit->decrement( inlimit.tokens(), node_->absNodePath());
+               inlimit.set_incremented(false);
+            }
+         }
+         else {
+            limit->decrement( inlimit.tokens(), task_path);
+         }
 		}
 	}
 }
@@ -443,4 +476,3 @@ void InLimitMgr::resolveInLimitReferences() const
       }
    }
 }
-

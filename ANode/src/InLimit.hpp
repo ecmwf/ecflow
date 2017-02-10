@@ -23,22 +23,21 @@
 
 #include "LimitFwd.hpp"
 
-
 // Inlimit. Multiple inlimits on same Node are logically ANDED
 //    inlimit    limitName     // This will consume one token in the limit <limitName>
 //    inlimit    limitName 10  // This will consume 10 tokens in the limit <limitName>
-//    inlimit -n limitName     // Only applicable to a family, does not matter how many tasks
+//    inlimit -n limitName     // Only applicable to a Suite/family, does not matter how many tasks
 //                             // the family has, will only consume one token in the family
-//                             // This is like showing that family is active/ has at least
-//                             // one task that is submitted <<<<NOT SUPPORTED YET>>>>>>
+//                             // Can control number of active families.
 //
 // Inlimit of the same name specified on a task take priority over the family
 class InLimit {
 public:
-   InLimit(const std::string& name,
-           const std::string& pathToNode = std::string(),
-           int tokens = 1);
-   InLimit() : tokens_(1)    {}
+   InLimit(const std::string& limit_name,                                         // referenced limit
+           const std::string& path_to_node_with_referenced_limit = std::string(), // if empty, search for limit up parent hierarchy
+           int tokens = 1,                                                        // tokens to consume in the Limit
+           bool limit_this_node_only = false);                                    // if true limit this node only
+   InLimit() : tokens_(1),limit_this_node_only_(false),incremented_(false) {}
 
    std::ostream& print(std::ostream&) const;
    bool operator==(const InLimit& rhs) const;
@@ -46,6 +45,10 @@ public:
    const std::string& name() const { return  name_;}             // must be defined
    const std::string& pathToNode() const { return  pathToNode_;} // can be empty,the node referenced by the In-Limit, this should hold the Limit.
    int tokens() const { return tokens_;}
+
+   bool limit_this_node_only() const { return limit_this_node_only_;}
+   bool incremented() const { return incremented_;} // only used with limit_this_node_only
+   void set_incremented(bool f) { incremented_ = f;}
 
    std::string toString() const;
 
@@ -55,18 +58,27 @@ private:
    friend class InLimitMgr;
 
 private:
-   std::string          name_;
-   std::string          pathToNode_;
-   int                  tokens_;
-   boost::weak_ptr<Limit>  limit_;     // NOT persisted since computed on the fly
+   std::string            name_;
+   std::string            pathToNode_;
+   int                    tokens_;
+   bool                   limit_this_node_only_;  // default is false,if True, will consume one token(s) only, regardless of number of children
+   bool                   incremented_;           // state
+   boost::weak_ptr<Limit> limit_;                 // NOT persisted since computed on the fly
 
    friend class boost::serialization::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, const unsigned int version) {
       ar & name_;
       ar & pathToNode_; // can be empty
       ar & tokens_;
+      if (version > 0) {
+         ar & limit_this_node_only_; // 5.0.0
+         ar & incremented_;          // 5.0.0
+      }
    }
 };
+
+// 5.0.0
+BOOST_CLASS_VERSION(InLimit, 1)
 
 #endif

@@ -196,16 +196,23 @@ void export_NodeAttr()
    .def("node_paths",&wrap_set_of_strings,"List of nodes(paths) that have consumed a limit")
  	;
 
-	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc(),init<std::string,  std::string, optional<int> >())
-	.def( init<std::string,std::string> () )
-	.def( init<std::string> () )
-	.def(self == self )                                  // __eq__
-	.def("__str__",     &InLimit::toString)              // __str__
-   .def("__copy__",   copyObject<InLimit>)              // __copy__ uses copy constructor
-	.def("name",        &InLimit::name,       return_value_policy<copy_const_reference>(), "Return the :term:`inlimit` name as string")
-	.def("path_to_node",&InLimit::pathToNode, return_value_policy<copy_const_reference>(), "Path to the node that holds the limit, can be empty")
-	.def("tokens",      &InLimit::tokens,                                                  "The number of token to consume from the Limit")
-	;
+
+//   InLimit(const std::string& limit_name,                                         // referenced limit
+//           const std::string& path_to_node_with_referenced_limit = std::string(), // if empty, search for limit up parent hierarchy
+//           int tokens = 1,                                                        // tokens to consume in the Limit
+//           bool limit_this_node_only = false);                                    // if true limit this node only
+	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc(),init<std::string,std::string,optional<int> >())
+         .def( init<std::string,std::string,int,bool> () )
+         .def( init<std::string,std::string> () )
+         .def( init<std::string> () )
+         .def(self == self )                                  // __eq__
+         .def("__str__",     &InLimit::toString)              // __str__
+         .def("__copy__",   copyObject<InLimit>)              // __copy__ uses copy constructor
+         .def("name",        &InLimit::name,       return_value_policy<copy_const_reference>(), "Return the :term:`inlimit` name as string")
+         .def("path_to_node",&InLimit::pathToNode, return_value_policy<copy_const_reference>(), "Path to the node that holds the limit, can be empty")
+         .def("tokens",      &InLimit::tokens,                                                  "The number of token to consume from the Limit")
+         .def("limit_this_node_only",&InLimit::limit_this_node_only, "Return true, if this only this node is limited")
+         ;
 
 	class_<Event>("Event",NodeAttrDoc::event_doc(), init<int, optional<std::string> >())
    .def( init<std::string> () )

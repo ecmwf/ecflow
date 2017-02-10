@@ -152,8 +152,10 @@ private:
  		lateAttr.addActive( ecf::TimeSlot(3,12) );
  		lateAttr.addComplete( ecf::TimeSlot(4,12), true);
 
-		std::string suiteLimit = "suiteLimit";
-		suite->addLimit( Limit(suiteLimit,10) );
+      std::string suiteLimit = "suiteLimit";
+      std::string suiteLimit2 = "suiteLimit2";
+      suite->addLimit( Limit(suiteLimit,10) );
+      suite->addLimit( Limit(suiteLimit2,10) );
 
       std::vector<std::string> stringList; stringList.reserve(3);
       stringList.push_back("10");
@@ -197,6 +199,7 @@ private:
          fam->addTime( ecf::TimeAttr(ecf::TimeSlot(0,0),ecf::TimeSlot(10,1),ecf::TimeSlot(0,1),true) );
          fam->addLimit( Limit(limitName,20) );
          fam->addLate( lateAttr );
+         fam->addInLimit( InLimit(suiteLimit2,"/" + sname,2,true/*limit this node only*/ ));
 
          task_ptr task = fam->add_task( tname );
 			task->addDate( DateAttr(1,2,2009) );

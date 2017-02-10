@@ -89,7 +89,7 @@ public:
  	void incrementInLimit(
  	         std::set<Limit*>& limitSet,   // The set ensure we only update once
  	         const std::string& task_path  // The task that was submitted, and hence caused Limit to increment
- 	) const;
+ 	);
 
 	/// After job aborts or completes we need to decrement the in limit, to indicate that
 	/// additional resource is available.
@@ -97,7 +97,7 @@ public:
  	void decrementInLimit(
  	         std::set<Limit*>& limitSet,  // The set ensure we only update once
  	         const std::string& task_path // The task that completed or aborted. Gives up the token
- 	) const;
+ 	);
 
  	/// Check to see if inlimit's can reference their Limits
  	void check(std::string& errorMsg, std::string& warningMsg,bool reportErrors, bool reportWarnings) const;
