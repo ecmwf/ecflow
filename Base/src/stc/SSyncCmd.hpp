@@ -90,7 +90,7 @@ public:
             unsigned int client_modify_change_no,
             AbstractServer* as);
 
-   SSyncCmd() : ServerToClientCmd(), full_defs_(false), no_defs_(false), incremental_changes_(0) {}
+   SSyncCmd() : ServerToClientCmd(), full_defs_(false), incremental_changes_(0) {}
 
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ServerToClientCmd*) const;
@@ -121,16 +121,20 @@ private:
 private:
 
    bool      full_defs_;
-   bool      no_defs_;
    DefsDelta incremental_changes_;
    defs_ptr  server_defs_;         // for returning a subset of the suites
    std::string full_server_defs_as_string_;
 
    friend class boost::serialization::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+   void serialize( Archive & ar, const unsigned int version ) {
+
       ar & boost::serialization::base_object< ServerToClientCmd >( *this );
-      ar & no_defs_;                 // inform user defs does not exist.
+      if (version == 0) {
+         // 4.*.* release returned a bool, that server has no defs. See ECFLOW-182
+         bool no_defs;
+         ar & no_defs; // ignore
+      }
       ar & full_defs_;               // returning full defs as a string
       ar & incremental_changes_;     // state changes, small scale changes
 
@@ -155,5 +159,9 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const SSyncCmd&);
+
+// 5.0.0, backward compatibility  old server (4.*.*) -> new client, no_defs_ not used in new client.
+// This can be deleted when the last of ecflow 4.*.* releases is removed.
+BOOST_CLASS_VERSION(SSyncCmd, 1)
 
 #endif

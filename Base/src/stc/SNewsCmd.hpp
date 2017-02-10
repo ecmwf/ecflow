@@ -47,8 +47,6 @@ public:
    virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
 
 private:
-   // After ECFLOW-182, ServerReply::NO_DEFS no longer used, however kept, to ensure client/server compatibility
-   // ie. for new client(viewer) must process this from old server, which could return NO_DEFS
    ServerReply::News_t news_;
 
    friend class boost::serialization::access;

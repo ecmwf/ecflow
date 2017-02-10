@@ -1694,10 +1694,6 @@ int ehost::update()
             reset(true);
             return 0;
             break;
-         case ServerReply::NO_DEFS:
-            reset(true);
-            return 0;
-            break;
          case ServerReply::NEWS:
             // there were some kind of changes in the server
             // request the changes from the server & sync with

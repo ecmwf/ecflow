@@ -110,8 +110,7 @@ SSyncCmd::SSyncCmd(
          unsigned int client_modify_change_no,
          AbstractServer* as
 )
-: full_defs_(false),no_defs_(false),
-  incremental_changes_(client_state_change_no)
+: full_defs_(false), incremental_changes_(client_state_change_no)
 {
    init(client_handle, client_state_change_no, client_modify_change_no, false, as);
 }
@@ -119,7 +118,6 @@ SSyncCmd::SSyncCmd(
 void SSyncCmd::reset_data_members(unsigned int client_state_change_no)
 {
    full_defs_ = false;
-   no_defs_ = false;
    incremental_changes_.init(client_state_change_no); // persisted, used for returning INCREMENTAL changes
    server_defs_ = defs_ptr();                         // persisted, used for returning FULL definition
    full_server_defs_as_string_.clear();               // semi-persisted, i.e on load & not on saving
@@ -142,17 +140,6 @@ void SSyncCmd::init(
 
    // Reset all data members since this command can be re-used
    reset_data_members(client_state_change_no);
-
-   // After ECFLOW-182 server will always have a defs, hence we should never return ServerReply::NO_DEFS
-   // We have kept no_defs_ to allow compatibility. To allow new client(GUI) deal with reply from old server
-   // Hence from release >= 4.0.7 no_defs_ will always be false
-   //   if ( ! as->defs().get() ) {
-   //#ifdef DEBUG_SERVER_SYNC
-   //      cout << ": *NO* defs\n";
-   //#endif
-   //      no_defs_ = true;
-   //      return;
-   //   }
 
    // explicit request
    if (do_full_sync) {
@@ -344,19 +331,6 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
    // ****************************************************
    // On the client side
    // ****************************************************
-   if (no_defs_) {
-#ifdef DEBUG_CLIENT_SYNC
-      std::cout << "SSyncCmd::do_sync: No defs in the server. Reset client caches\n";
-#endif
-      if (debug) std::cout << "  SSyncCmd::do_sync:: No defs in the server. Reset client caches\n";
-      server_reply.client_handle_ = 0;
-      server_reply.client_defs_ = defs_ptr();
-      server_reply.client_node_ = node_ptr();
-      server_reply.set_sync( true );
-      server_reply.set_full_sync( true );
-      return true;
-   }
-
    if (server_defs_.get()) {
        // *FULL* sync
        // to keep pace with the state changes. Passed back later on, get further changes
