@@ -50,7 +50,7 @@ public:
 
 private:
 	std::string host_port_prefix(const std::string& port) const;
-	void get_host_name();
+	void get_host_name(); // will cache host name, to avoid multiple sysm calls
 	std::string the_host_name_;
 };
 }

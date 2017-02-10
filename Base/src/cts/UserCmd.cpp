@@ -29,6 +29,7 @@
 #include "AbstractClientEnv.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
+#include "Host.hpp"
 
 using namespace std;
 using namespace boost;
@@ -140,6 +141,10 @@ void UserCmd::setup_user_authentification(const std::string& user, const std::st
 {
    user_ = user;
    passwd_ = passwd;
+
+   Host host;
+   hostname_ = host.name(); // host name is cached.
+
    assert(!user_.empty());
 }
 
@@ -150,8 +155,9 @@ void UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv)
 
 void UserCmd::setup_user_authentification()
 {
-   if (user_.empty())  user_ = UserCmd::get_user();
-   assert(!user_.empty());
+   if (user_.empty()) {
+      setup_user_authentification(UserCmd::get_user(),Str::EMPTY());
+   }
 }
 
 std::string UserCmd::get_user()
@@ -183,7 +189,6 @@ std::string UserCmd::get_user()
    return the_user_name;
 }
 
-
 void UserCmd::prompt_for_confirmation(const std::string& prompt)
 {
    cout << prompt;
@@ -196,7 +201,7 @@ void UserCmd::prompt_for_confirmation(const std::string& prompt)
 
 std::ostream& UserCmd::user_cmd(std::ostream& os, const std::string& the_cmd) const
 {
-   return os << the_cmd << " :" << user_;
+   return os << the_cmd << " :" << user_<< "@" << hostname_;
 }
 
 //#define DEBUG_ME 1

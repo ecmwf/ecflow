@@ -537,16 +537,10 @@ private:
    void serialize( Archive & ar, const unsigned int version ) {
       ar & boost::serialization::base_object< ClientToServerCmd >( *this );
       ar & user_;
-      if (version >= 1) {
-         ar & passwd_;
-         ar & hostname_;
-      }
+      ar & passwd_;
+      ar & hostname_;
    }
 };
-
-// 5.0.0, may not work, new client -> old server , don't pass passwd and hostname
-// Remove when the last ecflow 4.x.x release is removed.
-BOOST_CLASS_VERSION(UserCmd, 1)
 
 // ========================================================================
 // This Command should NEVER be changed

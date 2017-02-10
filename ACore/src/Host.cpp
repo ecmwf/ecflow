@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <unistd.h>  // for gethostname
+#include <assert.h>
 #include <stdexcept>
 #include "Host.hpp"
 #include "Str.hpp"
@@ -35,14 +36,20 @@ Host::Host(const std::string& host)
    }
 }
 
-void Host::get_host_name() {
-   char  hostNameArray[255];
-   if (gethostname(hostNameArray,255) != -1) {
-      the_host_name_ = string(hostNameArray);
+void Host::get_host_name()
+{
+   static std::string the_host_name;
+   if ( the_host_name.empty()) {
+      char  hostNameArray[255];
+      if (gethostname(hostNameArray,255) != -1) {
+         the_host_name = string(hostNameArray);
+      }
+      else {
+         std::runtime_error("Host::Host() failed, could not get host name?\n");
+      }
    }
-   else {
-      std::runtime_error("Host::Host() failed, could not get host name?\n");
-   }
+   the_host_name_ = the_host_name;
+   assert(!the_host_name_.empty());
 }
 
 std::string Host::name() const { return the_host_name_; }
