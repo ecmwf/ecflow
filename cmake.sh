@@ -291,6 +291,8 @@ $ecbuild $source_dir \
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor 
+            #-DENABLE_PROFILING=ON 
+            #-DECBUILD_GPROF_FLAGS
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
