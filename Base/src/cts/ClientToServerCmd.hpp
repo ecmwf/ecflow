@@ -576,7 +576,7 @@ private:
 // *** then ensure to place a DUMMY enum in its place.
 // *** This will allow a *newer* development client to still send message to a older server.
 // *** i.e like terminating the server
-// *** IMPORTANT: For any new commands, must be added to the end.
+// *** IMPORTANT: For any new commands, must be added to the end, for each major release
 // *** - STATS_RESET was introduced in release 4.0.5
 // =========================================================================
 class CtsCmd : public UserCmd {
@@ -587,8 +587,9 @@ public:
       FORCE_DEP_EVAL,
       PING, GET_ZOMBIES, STATS, SUITES,
       DEBUG_SERVER_ON, DEBUG_SERVER_OFF,
-      SERVER_LOAD, STATS_RESET
-      ,RELOAD_PASSWD_FILE
+      SERVER_LOAD, STATS_RESET,
+      RELOAD_PASSWD_FILE,
+      STATS_SERVER
      };
 
    CtsCmd(Api a) : api_(a) {}

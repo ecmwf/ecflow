@@ -20,8 +20,11 @@
 class AbstractServer;
 
 //================================================================================
-// Paired with CtsCmd(STATS)
-// Client---(CtsCmd(STATS))---->Server-----(SStatsCmd)--->client:
+// Paired with CtsCmd(SERVER_STATS)
+// Client---(CtsCmd(SERVER_STATS))---->Server-----(SStatsCmd)--->client:
+// ****** Used in Test ONLY, since Stats is subject to change for each release
+// ****** see ECFLOW-880, we use CtsCmd(STATS) to return server stats as a string
+// ****** this allows the format to change in the server(with out affecting protocol)
 //================================================================================
 class SStatsCmd : public ServerToClientCmd {
 public:

@@ -552,6 +552,11 @@ int ClientInvoker::stats() const
    if (testInterface_) return invoke(CtsApi::stats());
    return invoke(Cmd_ptr(new CtsCmd(CtsCmd::STATS)));
 }
+int ClientInvoker::stats_server() const
+{
+   if (testInterface_) return invoke(CtsApi::stats_server());
+   return invoke(Cmd_ptr(new CtsCmd(CtsCmd::STATS_SERVER)));
+}
 int ClientInvoker::stats_reset() const
 {
    if (testInterface_) return invoke(CtsApi::stats_reset());

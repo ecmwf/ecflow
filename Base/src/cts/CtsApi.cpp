@@ -58,9 +58,10 @@ std::string CtsApi::migrate(const std::string& absNodePath) {
 }
 const char* CtsApi::migrate_arg() { return "migrate"; }
 
-std::string CtsApi::stats()     { return "--stats"; }
-const char* CtsApi::statsArg()  { return "stats"; }
-
+std::string CtsApi::stats()        { return "--stats"; }
+const char* CtsApi::statsArg()     { return "stats"; }
+std::string CtsApi::stats_server() { return "--stats_server"; }
+const char* CtsApi::stats_server_arg() { return "stats_server"; }
 std::string CtsApi::stats_reset()     { return "--stats_reset"; }
 const char* CtsApi::stats_reset_arg()  { return "stats_reset"; }
 

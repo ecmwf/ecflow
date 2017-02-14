@@ -46,6 +46,7 @@ std::ostream& CtsCmd::print(std::ostream& os) const
       case CtsCmd::FORCE_DEP_EVAL:             return user_cmd(os,CtsApi::forceDependencyEval()); break;
       case CtsCmd::PING:                       return user_cmd(os,CtsApi::pingServer()); break;
       case CtsCmd::STATS:                      return user_cmd(os,CtsApi::stats()); break;
+      case CtsCmd::STATS_SERVER:               return user_cmd(os,CtsApi::stats_server()); break;
       case CtsCmd::STATS_RESET:                return user_cmd(os,CtsApi::stats_reset()); break;
       case CtsCmd::SUITES:                     return user_cmd(os,CtsApi::suites()); break;
       case CtsCmd::DEBUG_SERVER_ON:            return user_cmd(os,CtsApi::debug_server_on()); break;
@@ -79,6 +80,7 @@ bool CtsCmd::isWrite() const
       case CtsCmd::FORCE_DEP_EVAL:   return true; break;       // requires write privilege
       case CtsCmd::PING:             return false; break;      // read only
       case CtsCmd::STATS:            return false; break;      // read only
+      case CtsCmd::STATS_SERVER:     return false; break;      // read only
       case CtsCmd::STATS_RESET:      return true; break;       // requires write privilege
       case CtsCmd::SUITES:           return false; break;      // read only
       case CtsCmd::DEBUG_SERVER_ON:  return false; break;      // read only
@@ -111,6 +113,7 @@ const char* CtsCmd::theArg() const
       case CtsCmd::FORCE_DEP_EVAL:   return CtsApi::forceDependencyEvalArg(); break;
       case CtsCmd::PING:             return CtsApi::pingServerArg(); break;
       case CtsCmd::STATS:            return CtsApi::statsArg(); break;
+      case CtsCmd::STATS_SERVER:     return CtsApi::stats_server_arg(); break;
       case CtsCmd::STATS_RESET:      return CtsApi::stats_reset_arg(); break;
       case CtsCmd::SUITES:           return CtsApi::suitesArg(); break;
       case CtsCmd::DEBUG_SERVER_ON:  return CtsApi::debug_server_on_arg(); break;
@@ -170,7 +173,16 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          break;
       }
       case CtsCmd::PING:         as->update_stats().ping_++; break;
-      case CtsCmd::STATS:        as->update_stats().stats_++;  return PreAllocatedReply::stats_cmd( as ); break;
+      case CtsCmd::STATS: {
+         as->update_stats().stats_++;
+         std::stringstream ss;
+         as->stats().show(ss);  // ECFLOW-880, allow stats to be changed in server, by only returning string
+         return PreAllocatedReply::string_cmd(ss.str()); break;
+      }
+      case CtsCmd::STATS_SERVER: {
+         as->update_stats().stats_++;
+         return PreAllocatedReply::stats_cmd(as); break; // Only to be used in test, as subject to change.
+      }
       case CtsCmd::STATS_RESET:  as->update_stats().reset(); break; // we could have done as->update_stats().stats_++, to honor reset, we dont
       case CtsCmd::SUITES: as->update_stats().suites_++; return PreAllocatedReply::suites_cmd( as ); break;
       case CtsCmd::DEBUG_SERVER_ON:  as->update_stats().debug_server_on_++;  as->debug_server_on(); break;

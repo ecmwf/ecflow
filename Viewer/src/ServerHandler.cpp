@@ -1075,9 +1075,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
 		case VTask::StatsTask:
 		{
-			std::stringstream ss;
-			serverReply.stats().show(ss);
-			task->reply()->text(ss.str());
+			task->reply()->text( serverReply.get_string() );
 			task->status(VTask::FINISHED);
 			break;
 		}

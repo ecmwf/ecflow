@@ -194,8 +194,9 @@ public:
    int server_load(const std::string& path_to_log_file = "") const { return invoke(CtsApi::server_load(path_to_log_file)); }
    int debug_server_on() const;
    int debug_server_off() const;
-   int stats() const;
+   int stats() const;        // returns stats as string, server does formatting, & hence is free to change ECFLOW-880
    int stats_reset() const;
+   int stats_server() const; // for test only, as stats returned may change for each release ECFLOW-880
    int server_version() const;
 
 	int suites() const;

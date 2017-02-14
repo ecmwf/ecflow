@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_defs_cmd )
 	BOOST_REQUIRE_MESSAGE(fs::file_size(invokeServer.ecf_backup_checkpt_file()) !=0,"Expected backup check point file(" << invokeServer.ecf_backup_checkpt_file() << "), to have file size > 0");
 
 	// Check the defaults for mode , interval and alarm time before making any changes
-   BOOST_REQUIRE_MESSAGE(theClient.stats() == 0,CtsApi::stats() << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.stats_server() == 0,CtsApi::stats_server() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::ON_TIME, " Expected default check pt mode to be ON_TIME");
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_interval_ == CheckPt::default_interval(), " Expected default check pt interval of " << CheckPt::default_interval() << " but found " << theClient.server_reply().stats().checkpt_interval_);
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_save_time_alarm_ == CheckPt::default_save_time_alarm(), " Expected default check pt alarm time of " << CheckPt::default_save_time_alarm() << " but found " << theClient.server_reply().stats().checkpt_save_time_alarm_);
@@ -72,30 +72,30 @@ BOOST_AUTO_TEST_CASE( test_check_pt_defs_cmd )
 
 	// Test change of check_pt interval and mode and alarm
    BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::NEVER) == 0,CtsApi::checkPtDefs(ecf::CheckPt::NEVER) << " failed should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.stats() == 0,CtsApi::stats() << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.stats_server() == 0,CtsApi::stats_server() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::NEVER, " Expected check pt mode of NEVER");
 
    BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::ON_TIME) == 0,CtsApi::checkPtDefs(ecf::CheckPt::ON_TIME) << " failed should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.stats() == 0,CtsApi::stats() << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.stats_server() == 0,CtsApi::stats_server() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::ON_TIME, " Expected check pt mode of ON_TIME");
 
    BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::ALWAYS) == 0,CtsApi::checkPtDefs(ecf::CheckPt::ALWAYS) << " failed should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.stats() == 0,CtsApi::stats() << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.stats_server() == 0,CtsApi::stats_server() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::ALWAYS, " Expected check pt mode of ALWAYS");
 
    BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::ON_TIME,30) == 0,CtsApi::checkPtDefs(ecf::CheckPt::ON_TIME,30) << " failed should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.stats() == 0,CtsApi::stats() << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.stats_server() == 0,CtsApi::stats_server() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::ON_TIME, " Expected check pt mode of ON_TIME");
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_interval_ == 30, " Expected check pt interval of 30 but found " << theClient.server_reply().stats().checkpt_interval_);
 
    BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::UNDEFINED,56) == 0,CtsApi::checkPtDefs(ecf::CheckPt::UNDEFINED,56) << " failed should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.stats() == 0,CtsApi::stats() << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.stats_server() == 0,CtsApi::stats_server() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::ON_TIME, " Expected check pt mode of ON_TIME");
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_interval_ == 56, " Expected check pt interval of 56 but found " << theClient.server_reply().stats().checkpt_interval_);
 
    // Mode and interval should remain unchanged only the alarm time should be changed
    BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::UNDEFINED,0,10) == 0,CtsApi::checkPtDefs(ecf::CheckPt::UNDEFINED,0,10) << " failed should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.stats() == 0,CtsApi::stats() << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.stats_server() == 0,CtsApi::stats_server() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::ON_TIME, " Expected check pt mode of ON_TIME");
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_interval_ == 56, " Expected check pt interval of 56 but found " << theClient.server_reply().stats().checkpt_interval_);
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_save_time_alarm_ == 10, " Expected check pt alarm time of 10 but found " << theClient.server_reply().stats().checkpt_save_time_alarm_);
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_defs_cmd )
    BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::UNDEFINED,0,CheckPt::default_save_time_alarm()) == 0,CtsApi::checkPtDefs(ecf::CheckPt::ON_TIME) << " failed should return 0\n" << theClient.errorMsg());
 
    // check defaults were set
-   BOOST_REQUIRE_MESSAGE(theClient.stats() == 0,CtsApi::stats() << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.stats_server() == 0,CtsApi::stats_server() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::ON_TIME, " Expected default check pt mode to be ON_TIME");
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_interval_ == CheckPt::default_interval(), " Expected default check pt interval of " << CheckPt::default_interval() << " but found " << theClient.server_reply().stats().checkpt_interval_);
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_save_time_alarm_ == CheckPt::default_save_time_alarm(), " Expected default check pt alarm time of " << CheckPt::default_save_time_alarm() << " but found " << theClient.server_reply().stats().checkpt_save_time_alarm_);

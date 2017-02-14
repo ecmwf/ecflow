@@ -1897,7 +1897,7 @@ void ehost::stats( std::ostream& buf )
    gui::message("%s: fetching stats", this->name());
    try {
       client_.stats();
-      client_.server_reply().stats().show(buf);
+      buf << client_.server_reply().get_string();
    }
    catch ( std::exception& e ) {
    }

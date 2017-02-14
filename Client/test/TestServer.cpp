@@ -240,6 +240,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       BOOST_REQUIRE_MESSAGE( theClient.news_local() == 0, " new local failed should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.stats() == 0,CtsApi::stats() << " should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.stats_server() == 0,CtsApi::stats_server() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.suites() == 0,CtsApi::suites() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.server_version() == 0,CtsApi::server_version() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.debug_server_off() == 0,CtsApi::debug_server_off() << " should return 0\n" << theClient.errorMsg());
@@ -320,7 +321,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       BOOST_REQUIRE_MESSAGE( theClient.defs().get(),"Server returned a NULL defs");
       BOOST_REQUIRE_MESSAGE( theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
    }
-   cout << " Server handled " << load * 74
+   cout << " Server handled " << load * 75
         << " requests in boost_timer(" << boost_timer.elapsed()
         << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
         << ")" << endl;

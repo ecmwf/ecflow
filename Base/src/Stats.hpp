@@ -25,8 +25,8 @@
 /// commands processed by the server. Uses default copy constructor
 struct Stats {
 
-	Stats();
-  void show(std::ostream& os = std::cout) const;
+   Stats();
+   void show(std::ostream& os = std::cout) const;
 
    void update() { request_count_++; }
    void update_stats(int poll_interval);
