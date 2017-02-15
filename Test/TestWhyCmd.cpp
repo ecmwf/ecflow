@@ -49,7 +49,7 @@ static unsigned int waitForWhy(const std::string& path, const std::string& why, 
    while (1) {
 
       /// Why command relies on the Suite serializing the calendar. If this is changed we need to get the full defs
-      BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local(true/*sync suite clock*/) == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
       defs_ptr server_defs = TestFixture::client().defs();
       updateCalendarCount = server_defs->updateCalendarCount();
 
