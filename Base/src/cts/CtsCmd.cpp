@@ -181,10 +181,10 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
       }
       case CtsCmd::STATS_SERVER: {
          as->update_stats().stats_++;
-         return PreAllocatedReply::stats_cmd(as); break; // Only to be used in test, as subject to change.
+         return PreAllocatedReply::stats_cmd(as); break; // Only to be used in test, as subject to change, returns Stats struct
       }
-      case CtsCmd::STATS_RESET:  as->update_stats().reset(); break; // we could have done as->update_stats().stats_++, to honor reset, we dont
-      case CtsCmd::SUITES: as->update_stats().suites_++; return PreAllocatedReply::suites_cmd( as ); break;
+      case CtsCmd::STATS_RESET:      as->update_stats().reset(); break; // we could have done as->update_stats().stats_++, to honor reset, we dont
+      case CtsCmd::SUITES:           as->update_stats().suites_++; return PreAllocatedReply::suites_cmd( as ); break;
       case CtsCmd::DEBUG_SERVER_ON:  as->update_stats().debug_server_on_++;  as->debug_server_on(); break;
       case CtsCmd::DEBUG_SERVER_OFF: as->update_stats().debug_server_off_++; as->debug_server_off(); break;
       case CtsCmd::SERVER_LOAD: {    as->update_stats().server_load_cmd_++;
@@ -379,6 +379,12 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       case CtsCmd::STATS:{
          desc.add_options()( CtsApi::statsArg(),
                   "Returns the server statistics."
+         );
+         break;
+      }
+      case CtsCmd::STATS_SERVER:{
+         desc.add_options()( CtsApi::stats_server_arg(),
+                  "Returns the server statistics as a struct and string. For test use only."
          );
          break;
       }
