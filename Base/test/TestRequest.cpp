@@ -76,10 +76,12 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS_SERVER)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS_RESET)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::SUITES)));
 	cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::NEWS,0,0,0)));
    cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC,0,0,0)));
+   cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC_CLOCK,0,0,0)));
    cmd_vec.push_back( Cmd_ptr( new CSyncCmd(0))); // SYNC_FULL
 	cmd_vec.push_back( Cmd_ptr( new RequeueNodeCmd("/suiteName",RequeueNodeCmd::NO_OPTION)));
 	cmd_vec.push_back( Cmd_ptr( new OrderNodeCmd("/suiteName",NOrder::ALPHA)));

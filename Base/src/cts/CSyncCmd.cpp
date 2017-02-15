@@ -31,18 +31,13 @@ std::ostream& CSyncCmd::print(std::ostream& os) const
    /// client_handle_  > 0  state/modify numbers will be for a set of registered suites,
    /// client_handle_ == 0  state/modify numbers is global i.e. for all suites.
    std::stringstream ss;
-   if (api_ == CSyncCmd::NEWS) {
-      ss << CtsApi::to_string(CtsApi::news(client_handle_,client_state_change_no_,client_modify_change_no_));
-      return user_cmd(os,ss.str());
+   switch (api_) {
+      case CSyncCmd::NEWS:      ss << CtsApi::to_string(CtsApi::news(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
+      case CSyncCmd::SYNC:      ss << CtsApi::to_string(CtsApi::sync(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
+      case CSyncCmd::SYNC_FULL: ss << CtsApi::sync_full(client_handle_); break;
+      case CSyncCmd::SYNC_CLOCK:ss << CtsApi::to_string(CtsApi::sync_clock(client_handle_,client_state_change_no_,client_modify_change_no_));break;
    }
-
-	if (api_ == CSyncCmd::SYNC) {
-	   ss << CtsApi::to_string(CtsApi::sync(client_handle_,client_state_change_no_,client_modify_change_no_));
-	   return user_cmd(os,ss.str());
- 	}
-
-	ss <<  CtsApi::sync_full(client_handle_);
-	return user_cmd(os,ss.str());
+   return user_cmd(os,ss.str());
 }
 
 bool CSyncCmd::equals(ClientToServerCmd* rhs) const
@@ -58,14 +53,19 @@ bool CSyncCmd::equals(ClientToServerCmd* rhs) const
 
 const char* CSyncCmd::theArg() const
 {
-   if (api_ == CSyncCmd::NEWS) return CtsApi::newsArg();
-   if (api_ == CSyncCmd::SYNC) return CtsApi::syncArg();
-	return CtsApi::sync_full_arg();
+   switch (api_) {
+      case CSyncCmd::NEWS:       return CtsApi::newsArg();
+      case CSyncCmd::SYNC:       return CtsApi::syncArg();
+      case CSyncCmd::SYNC_FULL:  return CtsApi::sync_full_arg();
+      case CSyncCmd::SYNC_CLOCK: return CtsApi::sync_clock_arg();
+   }
+   // should never get here:
+   return CtsApi::syncArg();
 }
 
 int CSyncCmd::timeout() const
 {
-   if (api_ == CSyncCmd::SYNC || api_ == CSyncCmd::SYNC_FULL) {
+   if (api_ == CSyncCmd::SYNC || api_ == CSyncCmd::SYNC_FULL || CSyncCmd::SYNC_CLOCK) {
       return time_out_for_load_sync_and_get();
    }
    return 20; // CSyncCmd::NEWS
@@ -93,16 +93,27 @@ void CSyncCmd::do_log(AbstractServer* as) const
 STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const
 {
 	// If no defs not loaded, SSyncCmd and SNewsCmd do nothing. This is a valid state, hence don't error for this request
-	if (api_ == CSyncCmd::NEWS)  {
-	   as->update_stats().news_++;
-	   return PreAllocatedReply::news_cmd(client_handle_, client_state_change_no_, client_modify_change_no_,as);
- 	}
-	if (api_ == CSyncCmd::SYNC) {
-      as->update_stats().sync_++;
-		return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_,as);
-	}
-   as->update_stats().sync_++;
-   return PreAllocatedReply::sync_full_cmd(client_handle_,as);
+   switch (api_) {
+      case CSyncCmd::NEWS: {
+         as->update_stats().news_++;
+         return PreAllocatedReply::news_cmd(client_handle_, client_state_change_no_, client_modify_change_no_,as);
+      }
+      case CSyncCmd::SYNC: {
+         as->update_stats().sync_++;
+         return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_,as);
+      }
+      case CSyncCmd::SYNC_FULL: {
+         as->update_stats().sync_++;
+         return PreAllocatedReply::sync_full_cmd(client_handle_,as);
+      }
+      case CSyncCmd::SYNC_CLOCK: {
+         as->update_stats().sync_++;
+         return PreAllocatedReply::sync_clock_cmd(client_handle_, client_state_change_no_, client_modify_change_no_,as);
+      }
+   }
+
+   // should never get here:
+   return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_,as);
 }
 
 void CSyncCmd::addOption(boost::program_options::options_description& desc) const
@@ -130,6 +141,19 @@ void CSyncCmd::addOption(boost::program_options::options_description& desc) cons
       return;
    }
 
+   if (api_ == CSyncCmd::SYNC_CLOCK)  {
+      desc.add_options()(CtsApi::sync_clock_arg(),po::value< vector<unsigned int> >()->multitoken(),
+               "Incrementally synchronise the local definition with the one in the server.\n"
+               "*Important* for use with c++/python interface only.\n"
+               "Same as sync, but will *always* sync with suite clock if it has changed.\n"
+               "Preference should be given to this method as only the changes are returned.\n"
+               "This reduces the network bandwidth required to keep in sync with the server\n"
+               "Requires a client handle, change and modify number, to get the incremental changes from server.\n"
+               "The change in server state is then and merged with the client definition."
+      );
+      return;
+   }
+
    desc.add_options()(CtsApi::sync_full_arg(),po::value<  unsigned int >(),
             "Returns the full definition from the server.\n"
             "*Important* for use with c++/python interface only.\n"
@@ -143,9 +167,9 @@ void CSyncCmd::create( 	Cmd_ptr& cmd,
 {
 	if (ac->debug()) cout << "  CSyncCmd::create api = '" << api_ << "'.\n";
 
-	if (api_ == CSyncCmd::NEWS || api_ == CSyncCmd::SYNC){
+	if (api_ == CSyncCmd::NEWS || api_ == CSyncCmd::SYNC || api_ == CSyncCmd::SYNC_CLOCK){
 	   vector<unsigned int> args = vm[ theArg() ].as< vector<unsigned int> >();
-	   if (args.size() != 3) throw std::runtime_error("CSyncCmd::create(SYNC/NEWS) expects 3 integer arguments, Client handle, state change number, and modify change number");
+	   if (args.size() != 3) throw std::runtime_error("CSyncCmd::create(SYNC/SYN_CLOCK/NEWS) expects 3 integer arguments, Client handle, state change number, and modify change number");
 	   unsigned int client_handle    = args[0];
 	   unsigned int state_change_no  = args[1];
 	   unsigned int modify_change_no = args[2];

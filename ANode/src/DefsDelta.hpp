@@ -35,12 +35,16 @@ public:
    ///=========================================================================
 	/// *Server side*
 	DefsDelta(unsigned int client_state_change_no)
-	: client_state_change_no_(client_state_change_no),
+	: sync_suite_clock_(false),
+	  client_state_change_no_(client_state_change_no),
 	  server_state_change_no_(0),
 	  server_modify_change_no_(0) {}
 
 	/// This class can be re-used hence init() should reset all data members
- 	void init(unsigned int client_state_change_no);
+ 	void init(unsigned int client_state_change_no, bool sync_suite_clock);
+
+ 	// ECFLOW-631, allow the suite calendar to be sync'ed, even if there are no other changes
+ 	bool sync_suite_clock() const { return sync_suite_clock_;}
 
 	/// Add the compound memento, ie. store all memento's for a *given* node.
  	void add(compound_memento_ptr);
@@ -66,6 +70,7 @@ public:
 	size_t size() const { return compound_mementos_.size(); }
 
 private:
+	bool sync_suite_clock_;                // *no* need to persist since only used on server side
 	unsigned int client_state_change_no_;  // *no* need to persist since only used on server side
 
    unsigned int server_state_change_no_;

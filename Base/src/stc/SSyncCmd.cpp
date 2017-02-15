@@ -103,6 +103,7 @@ defs_ptr FullServerDefsCache::restore_defs_from_string()
    return restore_defs_from_string(full_server_defs_as_string_);
 }
 
+// ===============================================================================================
 
 SSyncCmd::SSyncCmd(
          unsigned int client_handle,
@@ -112,13 +113,13 @@ SSyncCmd::SSyncCmd(
 )
 : full_defs_(false), incremental_changes_(client_state_change_no)
 {
-   init(client_handle, client_state_change_no, client_modify_change_no, false, as);
+   init(client_handle, client_state_change_no, client_modify_change_no, false, false, as);
 }
 
-void SSyncCmd::reset_data_members(unsigned int client_state_change_no)
+void SSyncCmd::reset_data_members(unsigned int client_state_change_no, bool sync_suite_clock)
 {
    full_defs_ = false;
-   incremental_changes_.init(client_state_change_no); // persisted, used for returning INCREMENTAL changes
+   incremental_changes_.init(client_state_change_no,sync_suite_clock); // persisted, used for returning INCREMENTAL changes
    server_defs_ = defs_ptr();                         // persisted, used for returning FULL definition
    full_server_defs_as_string_.clear();               // semi-persisted, i.e on load & not on saving
 }
@@ -128,6 +129,7 @@ void SSyncCmd::init(
    unsigned int    client_state_change_no,
    unsigned int    client_modify_change_no,
    bool            do_full_sync,
+   bool            sync_suite_clock,
    AbstractServer* as
 )
 {
@@ -139,7 +141,7 @@ void SSyncCmd::init(
 #endif
 
    // Reset all data members since this command can be re-used
-   reset_data_members(client_state_change_no);
+   reset_data_members(client_state_change_no,sync_suite_clock);
 
    // explicit request
    if (do_full_sync) {

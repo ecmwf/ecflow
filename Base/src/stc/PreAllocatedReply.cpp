@@ -164,14 +164,24 @@ STC_Cmd_ptr PreAllocatedReply::sync_cmd(unsigned int client_handle,
 										AbstractServer* as)
 {
 	SSyncCmd* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
-	cmd->init(client_handle,client_state_change_no,client_modify_change_no,false,as);
+	cmd->init(client_handle,client_state_change_no,client_modify_change_no,false/*full sync*/,false/*sync suite clock*/,as);
 	return sync_cmd_;
+}
+
+STC_Cmd_ptr PreAllocatedReply::sync_clock_cmd(unsigned int client_handle,
+                              unsigned int client_state_change_no,
+                              unsigned int client_modify_change_no,
+                              AbstractServer* as)
+{
+   SSyncCmd* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
+   cmd->init(client_handle,client_state_change_no,client_modify_change_no,false/*full sync*/,true/*sync suite clock*/,as);
+   return sync_cmd_;
 }
 
 STC_Cmd_ptr PreAllocatedReply::sync_full_cmd(unsigned int client_handle,AbstractServer* as)
 {
    SSyncCmd* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get()); // can reuse the same command
-   cmd->init(client_handle,0,0,true,as);
+   cmd->init(client_handle,0,0,true/*full sync*/,false/*sync suite clock*/,as);
    return sync_cmd_;
 }
 

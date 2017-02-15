@@ -30,6 +30,7 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
 	vec_.push_back( boost::make_shared<CSyncCmd>(CSyncCmd::NEWS,0,0,0));
    vec_.push_back( boost::make_shared<CSyncCmd>(CSyncCmd::SYNC,0,0,0));
    vec_.push_back( boost::make_shared<CSyncCmd>(0)); // SYNC_FULL
+   vec_.push_back( boost::make_shared<CSyncCmd>(CSyncCmd::SYNC_CLOCK,0,0,0));
    vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::GET));
    vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::GET_STATE));
    vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::MIGRATE));
@@ -44,6 +45,7 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
 	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::RELOAD_PASSWD_FILE));
 	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::FORCE_DEP_EVAL));
    vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::STATS));
+   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::STATS_SERVER));
    vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::STATS_RESET));
    vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_ON));
    vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_OFF));

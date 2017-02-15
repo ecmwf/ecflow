@@ -177,7 +177,7 @@ public:
  	int load( const defs_ptr& defs, bool force  = false /*true means overwrite suite of same name*/) const
  	       { return load_in_memory_defs(defs,force); }
 	int sync(defs_ptr& client_defs) const;
-	int sync_local() const;
+   int sync_local(bool sync_suite_clock = false) const;
 	int news(defs_ptr& client_defs) const;
 	int news_local() const;
 

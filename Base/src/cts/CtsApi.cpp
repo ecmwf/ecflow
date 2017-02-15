@@ -150,6 +150,18 @@ std::vector<std::string> CtsApi::sync(unsigned int client_handle,unsigned int st
 }
 const char* CtsApi::syncArg()  { return "sync"; }
 
+std::vector<std::string> CtsApi::sync_clock(unsigned int client_handle,unsigned int state_change_no, unsigned int modify_change_no )
+{
+   std::vector<std::string> retVec; retVec.reserve(3);
+   std::string ret = "--sync_clock=";
+   ret += boost::lexical_cast<std::string>( client_handle );
+   retVec.push_back(ret);
+   retVec.push_back(boost::lexical_cast<std::string>( state_change_no ));
+   retVec.push_back(boost::lexical_cast<std::string>( modify_change_no ));
+   return retVec;
+}
+const char* CtsApi::sync_clock_arg()  { return "sync_clock"; }
+
 std::string CtsApi::sync_full(unsigned int client_handle) {
    std::string ret = "--sync_full=";
    ret += boost::lexical_cast<std::string>( client_handle );

@@ -22,8 +22,9 @@ using namespace std;
 // DefsDelta
 
 /// Defs delta can be re-used. reset all data members
-void DefsDelta::init(unsigned int client_state_change_no)
+void DefsDelta::init(unsigned int client_state_change_no,bool sync_suite_clock)
 {
+   sync_suite_clock_ = sync_suite_clock;
 	client_state_change_no_ = client_state_change_no;
 
 	server_state_change_no_ = 0;

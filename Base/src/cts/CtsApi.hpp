@@ -38,6 +38,7 @@ public:
    static std::string get_state(const std::string& absNodePath = "");
    static std::string migrate(const std::string& absNodePath = "");
    static std::vector<std::string> sync(unsigned int client_handle, unsigned int state_change_no, unsigned int modify_change_no );
+   static std::vector<std::string> sync_clock(unsigned int client_handle, unsigned int state_change_no, unsigned int modify_change_no );
    static std::string sync_full(unsigned int client_handle);
 	static std::vector<std::string> news(unsigned int client_handle, unsigned int state_change_no, unsigned int modify_change_no );
 
@@ -180,6 +181,7 @@ public:
    static const char* get_state_arg();
    static const char* migrate_arg();
    static const char* syncArg();
+   static const char* sync_clock_arg();
    static const char* sync_full_arg();
 	static const char* newsArg();
 	static const char* loadDefsArg();

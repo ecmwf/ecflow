@@ -110,19 +110,20 @@ private:
             unsigned int client_state_change_no,
             unsigned int client_modify_change_no,
             bool full_sync,
+            bool sync_suite_clock,
             AbstractServer* as);
 
    /// For use when doing a full sync
    void init(unsigned int client_handle,AbstractServer* as);
 
-   void reset_data_members(unsigned int client_state_change_no);
+   void reset_data_members(unsigned int client_state_change_no, bool sync_suite_clock);
    void full_sync(unsigned int client_handle,AbstractServer* as);
 
 private:
 
    bool      full_defs_;
    DefsDelta incremental_changes_;
-   defs_ptr  server_defs_;         // for returning a subset of the suites
+   defs_ptr  server_defs_;                  // for returning a subset of the suites
    std::string full_server_defs_as_string_;
 
    friend class boost::serialization::access;
@@ -130,11 +131,6 @@ private:
    void serialize( Archive & ar, const unsigned int version ) {
 
       ar & boost::serialization::base_object< ServerToClientCmd >( *this );
-      if (version == 0) {
-         // 4.*.* release returned a bool, that server has no defs. See ECFLOW-182
-         bool no_defs;
-         ar & no_defs; // ignore
-      }
       ar & full_defs_;               // returning full defs as a string
       ar & incremental_changes_;     // state changes, small scale changes
 
@@ -159,9 +155,5 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const SSyncCmd&);
-
-// 5.0.0, backward compatibility  old server (4.*.*) -> new client, no_defs_ not used in new client.
-// This can be deleted when the last of ecflow 4.*.* releases is removed.
-BOOST_CLASS_VERSION(SSyncCmd, 1)
 
 #endif

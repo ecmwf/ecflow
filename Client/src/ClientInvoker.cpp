@@ -475,10 +475,9 @@ int ClientInvoker::sync(defs_ptr& client_defs) const
    return res;
 }
 
-int ClientInvoker::sync_local() const
+int ClientInvoker::sync_local(bool sync_suite_clock) const
 {
    defs_ptr defs = server_reply_.client_defs();
-
    if (defs.get()) {
 
       // Prevent infinite loops in change observers.
@@ -488,8 +487,12 @@ int ClientInvoker::sync_local() const
          return 0;
       }
 
-      if (testInterface_) return invoke(CtsApi::sync(server_reply_.client_handle(),defs->state_change_no(), defs->modify_change_no()));
-      return invoke( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC,server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no() ) ) );
+      if (testInterface_) {
+         if (sync_suite_clock) return invoke(CtsApi::sync_clock(server_reply_.client_handle(),defs->state_change_no(),defs->modify_change_no()));
+         return invoke(CtsApi::sync(server_reply_.client_handle(),defs->state_change_no(), defs->modify_change_no()));
+      }
+      if (sync_suite_clock) return invoke( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC_CLOCK,server_reply_.client_handle(),defs->state_change_no(),defs->modify_change_no())));
+      return invoke( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC,server_reply_.client_handle(),defs->state_change_no(),defs->modify_change_no())));
    }
    // If we have a handle return the defs, with the registered suites, else returns the full defs
    if (testInterface_) return invoke(CtsApi::sync_full(server_reply_.client_handle()));

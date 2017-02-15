@@ -583,6 +583,8 @@ void Suite::collateChanges(DefsDelta& changes) const
 	//    They should however not be recognised as state change.
 	//    + This fixes the problem, and the regression test will also work
 	//    This is the solution that has been implemented
+	//
+	//    + ECFLOW-631 updated, to allow client to sync clock, before calling why cmd.
 
 	// ********************************************************************
 	// Note: we separate determining incremental changes from the traversal
@@ -609,13 +611,14 @@ void Suite::collateChanges(DefsDelta& changes) const
 	NodeContainer::collateChanges(changes);
 
 	/// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
+	/// *OR* if it has been specifically requested. see ECFLOW-631
 	/// Additionally calendar_change_no_ updates should not register as a state change, i.e for tests
-   /// SuiteCalendarMemento is need so that WhyCmd can work on the client side.
+   /// SuiteCalendarMemento is needed so that WhyCmd can work on the client side.
    /// Need to use new compound since the suite may not have change, but it children may have.
 	/// Hence as side affect why command with reference to time will only be accurate
-	/// after some kind of state change. Discussed with Axel, who was happy with this.
+	/// after some kind of state change. Fixed with ECFLOW-631 (Client must do sync_clock, before calling why)
    size_t after = changes.size();
-   if (before != after && calendar_change_no_ > changes.client_state_change_no()) {
+   if ((before != after || changes.sync_suite_clock() ) && calendar_change_no_ > changes.client_state_change_no() ) {
       compound_memento_ptr compound_ptr =  boost::make_shared<CompoundMemento>(absNodePath());
       compound_ptr->add( boost::make_shared<SuiteCalendarMemento>( calendar_ ) );
       changes.add( compound_ptr );

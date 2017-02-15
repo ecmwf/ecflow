@@ -49,6 +49,9 @@ public:
 	static STC_Cmd_ptr sync_cmd(unsigned int client_handle,
 							          unsigned int client_state_change_no,
 			                      unsigned int client_modify_change_no, AbstractServer* as);
+   static STC_Cmd_ptr sync_clock_cmd(unsigned int client_handle,
+                               unsigned int client_state_change_no,
+                               unsigned int client_modify_change_no, AbstractServer* as);
    static STC_Cmd_ptr sync_full_cmd(unsigned int client_handle,AbstractServer* as);
 private:
 

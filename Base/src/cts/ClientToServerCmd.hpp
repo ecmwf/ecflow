@@ -664,10 +664,11 @@ private:
 
 // Client---(CSyncCmd::SYNC_FULL)---->Server-----(SSyncCmd)--->client:
 // Client---(CSyncCmd::SYNC)--------->Server-----(SSyncCmd)--->client:
+// Client---(CSyncCmd::SYNC_CLOCK)--->Server-----(SSyncCmd)--->client:
 // Client---(CSyncCmd::NEWS)--------->Server-----(SNewsCmd)--->client:
 class CSyncCmd : public UserCmd {
 public:
-   enum Api { NEWS, SYNC , SYNC_FULL};
+   enum Api { NEWS, SYNC, SYNC_FULL, SYNC_CLOCK};
 
    CSyncCmd(Api a, unsigned int client_handle,unsigned int client_state_change_no, unsigned int client_modify_change_no)
    : api_(a),
