@@ -52,8 +52,8 @@ std::ostream& CtsCmd::print(std::ostream& os) const
       case CtsCmd::DEBUG_SERVER_ON:            return user_cmd(os,CtsApi::debug_server_on()); break;
       case CtsCmd::DEBUG_SERVER_OFF:           return user_cmd(os,CtsApi::debug_server_off()); break;
       case CtsCmd::SERVER_LOAD:                return user_cmd(os,CtsApi::server_load("")); break;
-      case CtsCmd::NO_CMD:                     assert(false); break;
-      default: assert(false); break;
+      case CtsCmd::NO_CMD:                     assert(false); os << "CtsCmdCtsCmd::NO_CMD  !!!!"; break;
+      default: assert(false); os << "CtsCmd did not match api_ !!!!"; break;
    }
    return os;
 }
