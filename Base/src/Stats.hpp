@@ -64,7 +64,9 @@ struct Stats {
    unsigned int debug_server_on_;
    unsigned int debug_server_off_;
 	unsigned int get_defs_;
-	unsigned int sync_;
+   unsigned int sync_;
+   unsigned int sync_full_;
+   unsigned int sync_clock_;
 	unsigned int news_;
 
    unsigned int node_job_gen_;
@@ -157,7 +159,9 @@ private:
  	   ar & debug_server_off_;
 
 		ar & get_defs_;
-		ar & sync_;
+      ar & sync_;
+      ar & sync_full_;
+      ar & sync_clock_;
 		ar & news_;
 
       ar & node_job_gen_;

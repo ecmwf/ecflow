@@ -45,7 +45,9 @@ Stats::Stats() :
    debug_server_on_(0),
    debug_server_off_(0),
 	get_defs_(0),
-	sync_(0),
+   sync_(0),
+   sync_full_(0),
+   sync_clock_(0),
 	news_(0),
 
    node_job_gen_(0),
@@ -170,6 +172,8 @@ void Stats::reset()
    debug_server_off_ = 0;
    get_defs_ = 0;
    sync_ = 0;
+   sync_full_ = 0;
+   sync_clock_ = 0;
    news_ = 0;
 
    node_job_gen_ = 0;
@@ -257,7 +261,7 @@ void Stats::show(std::ostream& os) const
    os << left << setw(width) << "   Request's per 1,5,15,30,60 min " <<  request_stats_ << "\n";
 
    if (checkpt_ || restore_defs_from_checkpt_ || server_version_ || restart_server_ || shutdown_server_ || halt_server_ || 
-       ping_ || debug_server_on_ || debug_server_off_ || get_defs_ || sync_ || news_)  os << "\n";
+       ping_ || debug_server_on_ || debug_server_off_ || get_defs_ || sync_ || sync_full_ || sync_clock_ || news_)  os << "\n";
    if (!locked_by_user_.empty()) os << left << setw(width) << "   Locked by user " << locked_by_user_ << "\n";
    if (checkpt_ != 0)                   os << left << setw(width) << "   Check points " << checkpt_ << "\n";
    if (restore_defs_from_checkpt_ != 0) os << left << setw(width) << "   Restore from Check point " << restore_defs_from_checkpt_ << "\n";
@@ -270,6 +274,8 @@ void Stats::show(std::ostream& os) const
    if (get_defs_ != 0)         os << left << setw(width) << "   Get full definition " << get_defs_ << "\n";
    if (server_version_ != 0)   os << left << setw(width) << "   Server version " << server_version_ << "\n";
    if (sync_ != 0)             os << left << setw(width) << "   Sync " << sync_ << "\n";
+   if (sync_full_ != 0)        os << left << setw(width) << "   Sync full " << sync_full_ << "\n";
+   if (sync_clock_ != 0)       os << left << setw(width) << "   Sync suite clock " << sync_clock_ << "\n";
    if (news_ != 0)             os << left << setw(width) << "   News " << news_ << "\n";
    
    if (task_init_ || task_complete_ || task_wait_ || task_abort_ || task_event_ || task_meter_ || task_label_)  os << "\n";

@@ -103,11 +103,11 @@ STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const
          return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_,as);
       }
       case CSyncCmd::SYNC_FULL: {
-         as->update_stats().sync_++;
+         as->update_stats().sync_full_++;
          return PreAllocatedReply::sync_full_cmd(client_handle_,as);
       }
       case CSyncCmd::SYNC_CLOCK: {
-         as->update_stats().sync_++;
+         as->update_stats().sync_clock_++;
          return PreAllocatedReply::sync_clock_cmd(client_handle_, client_state_change_no_, client_modify_change_no_,as);
       }
    }
