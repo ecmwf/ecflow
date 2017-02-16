@@ -20,21 +20,25 @@
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
+#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
 namespace fs = boost::filesystem;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE( TestSuite )
-
 
 BOOST_AUTO_TEST_CASE( test_clk_sync )
 {
@@ -78,6 +82,58 @@ BOOST_AUTO_TEST_CASE( test_clk_sync )
    // The test harness will create corresponding directory structure & default ecf file
    ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_clk_sync.def"));
+
+   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+}
+
+BOOST_AUTO_TEST_CASE( test_suite_calendar_sync )
+{
+   DurationTimer timer;
+   cout << "Test:: ...test_suite_calendar_sync "<< flush;
+   TestClean clean_at_start_and_end;
+
+   // Test that sync_local(true), sync's the suite clock/calendar.
+   Defs theDefs;
+   {
+      boost::posix_time::ptime today = Calendar::second_clock_time();
+      suite_ptr suite  = theDefs.add_suite("test_suite_calendar_sync" ) ;
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task( "t1" );
+
+      // Don't use hybrid for day dependency as that will force node to complete if days is not the same
+      ClockAttr clockAttr(today, false);
+      suite->addClock( clockAttr );
+
+      // ** add tomorrow days so that node stays queued **
+      task->addDay( DayAttr( today.date() +  boost::gregorian::date_duration(1 ) ) );
+   }
+
+   ServerTestHarness serverTestHarness;
+   serverTestHarness.run(theDefs,
+                         ServerTestHarness::testDataDefsLocation("test_suite_calendar_sync.def"),
+                         1/*timeout*/,
+                         false /* waitForTestCompletion*/);
+
+   // Get full defs, so that next sync_local does incremental update
+   BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
+
+   for(size_t i=0; i < 3; i++) {
+      //cout << "\nstart count: " << i << "\n";
+      sleep(TestFixture::job_submission_interval());
+
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local(true/*sync suite clock*/) == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
+      boost::posix_time::ptime sync_clock_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
+      //cout << " sync_clock: suite time: " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
+
+      // suiteVec is now invalidated
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
+      boost::posix_time::ptime sync_full_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
+      //cout << " sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
+
+      BOOST_REQUIRE_MESSAGE(sync_clock_suiteTime == sync_full_suiteTime,
+                  "Sync clock suite time :" << to_simple_string(sync_clock_suiteTime)
+               << "\nSync full suite time:" << to_simple_string(sync_full_suiteTime) );
+   }
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }

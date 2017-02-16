@@ -137,7 +137,7 @@ void SSyncCmd::init(
    // This is called in the server
    // ********************************************************
 #ifdef DEBUG_SERVER_SYNC
-      cout << "SSyncCmd::init: client(" << client_state_change_no << "," << client_modify_change_no << ") server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ")";
+      cout << "SSyncCmd::init: client(" << client_state_change_no << "," << client_modify_change_no << ") server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") sync_suite_clock(" << sync_suite_clock << ")";
 #endif
 
    // Reset all data members since this command can be re-used

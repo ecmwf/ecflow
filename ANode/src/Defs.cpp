@@ -1320,13 +1320,11 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
       // ******** We must trap all child changes under the suite. See class SuiteChanged
       // ******** otherwise some attribute sync's will be missed
       size_t theSuiteVecSize = suiteVec_.size();
-      for(size_t s = 0; s <  theSuiteVecSize; s++) {
-         if (suiteVec_[s]->state_change_no() > incremental_changes.client_state_change_no()  ) {
-            //   *IF* node/attribute change no > client_state_change_no
-            //   *THEN*
-            //       Create a memento, and store in incremental_changes_
-            suiteVec_[s]->collateChanges(incremental_changes);
-         }
+      for(size_t s = 0; s < theSuiteVecSize; s++) {
+         //   *IF* node/attribute change no > client_state_change_no
+         //   *THEN*
+         //       Create a memento, and store in incremental_changes_
+         suiteVec_[s]->collateChanges(incremental_changes);
       }
    }
    else {

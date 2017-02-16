@@ -549,12 +549,7 @@ bool Suite::checkInvariants(std::string& errorMsg) const
 void Suite::collateChanges(DefsDelta& changes) const
 {
 	/// The suite hold the max state change no, for all its children and attributes
-#ifdef DEBUG_MEMENTO
-	std::cout << "Suite::collateChanges() changes.client_state_change_no("
-	          << changes.client_state_change_no() << ") state_change_no("
-	          << state_change_no() << ") "
-	          << debugNodePath() << "\n";
-#endif
+
 	// Optimising updates:
 	// Problem:
 	//    User has requested 1 second updated in the viewer. We used add SuiteCalendarMemento
@@ -590,39 +585,52 @@ void Suite::collateChanges(DefsDelta& changes) const
 	// Note: we separate determining incremental changes from the traversal
 	// ********************************************************************
 
-	// *TREAT* All changes to *a* Node, in a single compound_memento_ptr
-   size_t before = changes.size();
+#ifdef DEBUG_MEMENTO
+      std::cout << "Suite::collateChanges()\n";
+      std::cout << "  " << debugNodePath() << "\n";
+      std::cout << "  client_state_change_no(" << changes.client_state_change_no() << ")\n";
+      std::cout << "  suite state_change_no (" << state_change_no() << ")\n";
+      std::cout << "  calendar_change_no_   (" << calendar_change_no_ << ")\n";
+      std::cout << "  sync_suite_clock      (" << changes.sync_suite_clock() << ")\n";
+#endif
 
- 	compound_memento_ptr suite_compound_mememto;
-	if (clockAttr_.get() && clockAttr_->state_change_no() > changes.client_state_change_no()) {
-		if (!suite_compound_mememto.get()) suite_compound_mememto = boost::make_shared<CompoundMemento>(absNodePath());
-		suite_compound_mememto->add( boost::make_shared<SuiteClockMemento>(  *clockAttr_ ) );
+	if (state_change_no() > changes.client_state_change_no() ||
+	      (changes.sync_suite_clock() && calendar_change_no_ > changes.client_state_change_no() ) ) {
+
+	   // *TREAT* All changes to *a* Node, in a single compound_memento_ptr
+	   size_t before = changes.size();
+
+	   compound_memento_ptr suite_compound_mememto;
+	   if (clockAttr_.get() && clockAttr_->state_change_no() > changes.client_state_change_no()) {
+	      if (!suite_compound_mememto.get()) suite_compound_mememto = boost::make_shared<CompoundMemento>(absNodePath());
+	      suite_compound_mememto->add( boost::make_shared<SuiteClockMemento>(  *clockAttr_ ) );
+	   }
+	   if (begun_change_no_ > changes.client_state_change_no()) {
+	      if (!suite_compound_mememto.get()) suite_compound_mememto = boost::make_shared<CompoundMemento>(absNodePath());
+	      suite_compound_mememto->add( boost::make_shared<SuiteBeginDeltaMemento>( begun_) );
+	   }
+
+	   /// Collate NodeContainer and Node changes into *SAME* compound_memento_ptr
+	   NodeContainer::incremental_changes(changes, suite_compound_mememto);
+
+	   // Traversal, we have finished with this node:
+	   // Traverse children : *SEPARATE* compound_memento_ptr created on demand
+	   NodeContainer::collateChanges(changes);
+
+	   /// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
+	   /// *OR* if it has been specifically requested. see ECFLOW-631
+	   /// Additionally calendar_change_no_ updates should not register as a state change, i.e for tests
+	   /// SuiteCalendarMemento is needed so that WhyCmd can work on the client side.
+	   /// Need to use new compound since the suite may not have change, but it children may have.
+	   /// Hence as side affect why command with reference to time will only be accurate
+	   /// after some kind of state change. Fixed with ECFLOW-631 (Client must do sync_clock, before calling why)
+	   size_t after = changes.size();
+	   if ((before != after || changes.sync_suite_clock() ) && calendar_change_no_ > changes.client_state_change_no() ) {
+	      compound_memento_ptr compound_ptr =  boost::make_shared<CompoundMemento>(absNodePath());
+	      compound_ptr->add( boost::make_shared<SuiteCalendarMemento>( calendar_ ) );
+	      changes.add( compound_ptr );
+	   }
 	}
-	if (begun_change_no_ > changes.client_state_change_no()) {
- 		if (!suite_compound_mememto.get()) suite_compound_mememto = boost::make_shared<CompoundMemento>(absNodePath());
-		suite_compound_mememto->add( boost::make_shared<SuiteBeginDeltaMemento>( begun_) );
-	}
-
-	/// Collate NodeContainer and Node changes into *SAME* compound_memento_ptr
-	NodeContainer::incremental_changes(changes, suite_compound_mememto);
-
-	// Traversal, we have finished with this node:
-	// Traverse children : *SEPARATE* compound_memento_ptr created on demand
-	NodeContainer::collateChanges(changes);
-
-	/// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
-	/// *OR* if it has been specifically requested. see ECFLOW-631
-	/// Additionally calendar_change_no_ updates should not register as a state change, i.e for tests
-   /// SuiteCalendarMemento is needed so that WhyCmd can work on the client side.
-   /// Need to use new compound since the suite may not have change, but it children may have.
-	/// Hence as side affect why command with reference to time will only be accurate
-	/// after some kind of state change. Fixed with ECFLOW-631 (Client must do sync_clock, before calling why)
-   size_t after = changes.size();
-   if ((before != after || changes.sync_suite_clock() ) && calendar_change_no_ > changes.client_state_change_no() ) {
-      compound_memento_ptr compound_ptr =  boost::make_shared<CompoundMemento>(absNodePath());
-      compound_ptr->add( boost::make_shared<SuiteCalendarMemento>( calendar_ ) );
-      changes.add( compound_ptr );
-   }
 }
 
 void Suite::set_memento( const SuiteClockMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
