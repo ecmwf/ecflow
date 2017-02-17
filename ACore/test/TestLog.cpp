@@ -14,7 +14,6 @@
 //============================================================================
 #include <iostream>
 #include <fstream>
-#include <stdlib.h> // for getenv()
 #include <string>
 
 #include <boost/test/unit_test.hpp>

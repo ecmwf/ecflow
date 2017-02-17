@@ -15,7 +15,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>    // for getenv()
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -229,18 +228,6 @@ bool verify_attribute_verification()
    // This meant that when we run the migration tests, i.e new client with old server (with new test)
    // It would fail some the test, during verify attribute verification. ie. where we count the number of times
    // a node completes. To enable these tests to still run, we will disable verify attribute verification
-   static bool allow_verification = true;
-
-   if (!allow_verification) {
-      //std::cout << "Disable verify attribute verification ------------------------------------------\n";
-      return false;
-   }
-   char* the_env = getenv("DISABLE_VERIFY_ATTRIBUTE_VERIFICATION");
-   if (the_env) {
-      std::cout << "Disable verify attribute verification *************************************************************\n";
-      allow_verification= false;
-      return false;
-   }
    return true;
 }
 

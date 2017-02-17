@@ -52,16 +52,8 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 // **************************************************************************
 BOOST_AUTO_TEST_CASE( test_complete )
 {
-   // Added since in 4.6.0 no longer sets state if it has not changed.
-   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
-      std::cout << "\n    Disable test_complete for old server ,re-enable when 4.6.0 is minimum version\n";
-      return;
-   }
-
 	DurationTimer timer;
 	cout << "Test:: ...test_complete " << flush;
-
-
    TestClean clean_at_start_and_end;
 
 	// Create the defs file corresponding to the text below

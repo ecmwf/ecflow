@@ -92,11 +92,6 @@ BOOST_AUTO_TEST_CASE( test_triggers_and_meters )
 
 BOOST_AUTO_TEST_CASE( test_triggers_with_limits )
 {
-   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
-      std::cout << "\n    Disable test_triggers_with_limits for old server ************************************************\n";
-      return;
-   }
-
    // One family is in the limits, another is without. Bit of hack
    // But shows use of limits in triggers
    DurationTimer timer;
