@@ -8,8 +8,8 @@
 //
 //============================================================================
 
-#ifndef TreeNodeViewDelegate_HPP_
-#define TreeNodeViewDelegate_HPP_
+#ifndef COMPACTNODEVIEWDELEGATE_HPP
+#define COMPACTNODEVIEWDELEGATE_HPP
 
 #include <QBrush>
 #include <QMap>
@@ -27,19 +27,18 @@ class NodeShape;
 class NodeText;
 class ServerUpdateData;
 
-class TreeNodeViewDelegate : public NodeViewDelegate
+class CompactNodeViewDelegate : public NodeViewDelegate
 {
 Q_OBJECT
 
 public:
-	explicit TreeNodeViewDelegate(QWidget *parent=0);
-	~TreeNodeViewDelegate();
+    explicit CompactNodeViewDelegate(QWidget *parent=0);
+    ~CompactNodeViewDelegate();
 
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;
-    void sizeHint(const QModelIndex& index,int& w,int& h) const;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 
     void setIndentation(int o) {indentation_=o;}
 
@@ -50,10 +49,10 @@ Q_SIGNALS:
 protected:
     void updateSettings();
 
-	void renderServer(QPainter *painter,const QModelIndex& index,
+    void renderServer(QPainter *painter,const QModelIndex& index,
                         const QStyleOptionViewItem& option,QString text) const;
 
-	void renderNode(QPainter *painter,const QModelIndex& index,
+    void renderNode(QPainter *painter,const QModelIndex& index,
                     const QStyleOptionViewItem& option,QString text) const;
 
     void renderServerCell(QPainter *painter,const NodeShape& stateShape,
@@ -66,27 +65,24 @@ protected:
     void renderTimer(QPainter *painter,QRect target, int remaining, int total) const;
     void renderServerUpdate(QPainter* painter,const ServerUpdateData&) const;
 
-    void widthHintServer(const QModelIndex& index,int& itemWidth,QString text) const;
-    void widthHintNode(const QModelIndex& index,int& itemWidth,QString text) const;
-
     QString formatTime(int timeInSec) const;
     QColor interpolate(QColor c1,QColor c2,float r) const;
 
     enum NodeStyle {ClassicNodeStyle,BoxAndTextNodeStyle};
-                    
+
     AnimationHandler* animation_;
 
     int nodeRectRad_;
-	bool drawChildCount_;
+    bool drawChildCount_;
     NodeStyle nodeStyle_;
     int indentation_;
     bool drawNodeType_;
     QColor typeBgCol_;
 
     QFont serverNumFont_;
-	QFont suiteNumFont_;
-	QFont serverInfoFont_;
-	QFont abortedReasonFont_;
+    QFont suiteNumFont_;
+    QFont serverInfoFont_;
+    QFont abortedReasonFont_;
     QFont typeFont_;
     QColor bgCol_;
 
@@ -94,7 +90,7 @@ protected:
     QSize attrSizeHintCache_;
 };
 
-#endif
+#endif // COMPACTNODEVIEWDELEGATE_HPP
 
 
 

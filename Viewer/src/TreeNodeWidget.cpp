@@ -58,7 +58,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
     }
     if(compact)
     {
-        GraphNodeView* gv=new GraphNodeView((TreeNodeModel*)model_,filterDef_,this);
+        CompactNodeView* gv=new CompactNodeView((TreeNodeModel*)model_,filterDef_,this);
         hb->addWidget(gv);
         //Store the pointer to the (non-QObject) base class of the view!!!
         view_=gv;

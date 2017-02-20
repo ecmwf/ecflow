@@ -212,12 +212,49 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIn
     return nodeSizeHintCache_;
 }
 
+void TreeNodeViewDelegate::sizeHint(const QModelIndex& index,int& w,int& h) const
+{
+    QVariant tVar=index.data(Qt::DisplayRole);
+
+    h=fontHeight_+8;
+
+    if(tVar.type() == QVariant::String)
+    {
+        QString text=index.data(Qt::DisplayRole).toString();
+        if(index.data(AbstractNodeModel::ServerRole).toInt() ==0)
+        {
+            widthHintServer(index,w,text);
+        }
+        else
+        {
+            widthHintNode(index,w,text);
+        }
+    }
+    //Render attributes
+    else if(tVar.type() == QVariant::StringList)
+    {
+        h=attrSizeHintCache_.height();
+
+        /*QStringList lst=tVar.toStringList();
+        if(lst.count() > 0)
+        {
+            QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
+            if(it != attrRenderers_.end())
+            {
+                AttributeRendererProc a=it.value();
+                (this->*a)(painter,lst,vopt);
+            }
+        }*/
+        w=50;
+        h=20;
+    }
+}
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 		           const QModelIndex& index) const
 {
 	//Background
-	QStyleOptionViewItemV4 vopt(option);
+    QStyleOptionViewItem vopt(option);
 	initStyleOption(&vopt, index);
 
 	//Both the plastique and fusion styles render the tree expand indicator in the middle of the
@@ -271,9 +308,7 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 	//First column (nodes)
 	if(index.column() == 0)
 	{
-		QVariant tVar=index.data(Qt::DisplayRole);
-		QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-
+		QVariant tVar=index.data(Qt::DisplayRole);		
 		painter->setFont(font_);
 
 		if(tVar.type() == QVariant::String)
@@ -303,16 +338,7 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 			}
 
 		}
-	}
-	//rest of the columns
-	else if(index.column() < 3)
-	{
-		QString text=index.data(Qt::DisplayRole).toString();
-		QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-		painter->setPen(Qt::black);
-		painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-	}
+    }
 
 	painter->restore();
 
@@ -322,7 +348,7 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 
 
 void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
-		                                   const QStyleOptionViewItemV4& option,QString text) const
+                                           const QStyleOptionViewItem& option,QString text) const
 {
     ServerHandler* server=static_cast<ServerHandler*>(index.data(AbstractNodeModel::ServerPointerRole).value<void*>());
     Q_ASSERT(server);
@@ -584,7 +610,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 
 void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
-        							const QStyleOptionViewItemV4& option,QString text) const
+                                    const QStyleOptionViewItem& option,QString text) const
 {
 	
     bool selected=option.state & QStyle::State_Selected;
@@ -1038,6 +1064,316 @@ void TreeNodeViewDelegate::renderServerUpdate(QPainter* painter,const ServerUpda
         painter->drawRect(r);
     }
 }
+
+void TreeNodeViewDelegate::widthHintServer(const QModelIndex& index,int& itemWidth, QString text) const
+{
+    ServerHandler* server=static_cast<ServerHandler*>(index.data(AbstractNodeModel::ServerPointerRole).value<void*>());
+    Q_ASSERT(server);
+
+    //bool selected=option.state & QStyle::State_Selected;
+    int offset=4;
+
+    QFontMetrics fm(font_);
+
+
+    //The initial filled rect (we will adjust its  width)
+    QRect itemRect(2*offset,0,10,10);
+
+    int currentRight=itemRect.left();
+
+    NodeShape stateShape;
+
+    NodeText nodeText;
+    nodeText.text_=text;
+    int textWidth=fm.width(text);
+
+    if(nodeStyle_ == BoxAndTextNodeStyle)
+    {
+        stateShape.shape_=QPolygon(QRect(itemRect.x(),itemRect.y(),itemRect.height(),itemRect.height()));
+        currentRight=stateShape.shape_.boundingRect().right()+offset;
+        nodeText.br_=QRect(currentRight+offset,itemRect.y(),textWidth, itemRect.height());
+        currentRight=nodeText.br_.right();
+    }
+    else
+    {
+        stateShape.shape_=QPolygon(QRect(itemRect.x(),itemRect.y(),textWidth+2*offset+1,itemRect.height()));
+        nodeText.br_=QRect(itemRect.x()+offset,itemRect.y(),textWidth, itemRect.height());
+        currentRight=stateShape.shape_.boundingRect().right()+offset;
+    }
+
+    //Icons area
+    QList<QPixmap> pixLst;
+    QList<QRect> pixRectLst;
+
+    QVariant va=index.data(AbstractNodeModel::IconRole);
+    if(va.type() == QVariant::List)
+    {
+        QVariantList lst=va.toList();
+        int xp=currentRight+5;
+        for(int i=0; i < lst.count(); i++)
+        {
+            int id=lst[i].toInt();
+            if(id != -1)
+            {
+                xp+=iconSize_+iconGap_;
+            }
+        }
+        currentRight=xp;
+    }
+
+    //The info rectangle (optional)
+    QRect infoRect;
+    QString infoTxt=index.data(AbstractNodeModel::InfoRole).toString();
+    bool hasInfo=(infoTxt.isEmpty() == false);
+
+    if(hasInfo)
+    {
+        //infoFont.setBold(true);
+        fm=QFontMetrics(serverInfoFont_);
+
+        int infoWidth=fm.width(infoTxt);
+        infoRect = nodeText.br_;
+        infoRect.setLeft(currentRight+fm.width('A'));
+        infoRect.setWidth(infoWidth);
+        currentRight=infoRect.right();
+    }
+
+#if 0
+    //The load icon (optional)
+    QRect loadRect;
+    bool hasLoad=index.data(AbstractNodeModel::LoadRole).toBool();
+    Animation* an=0;
+
+    //Update load animation
+    if(hasLoad)
+    {
+        an=animation_->find(Animation::ServerLoadType,true);
+
+        loadRect = QRect(currentRight+fm.width('A'),
+                        itemRect.top()+(itemRect.height()-an->scaledSize().height())/2,
+                        an->scaledSize().width(),
+                        an->scaledSize().height());
+
+        currentRight=loadRect.right();
+
+        //Add this index to the animations
+        //There is no guarantee that this index will be valid in the future!!!
+        an->addTarget(server->vRoot());
+    }
+    //Stops load animation
+    else
+    {
+        if((an=animation_->find(Animation::ServerLoadType,false)) != NULL)
+            an->removeTarget(server->vRoot());
+    }
+#endif
+
+    //The node number (optional)
+    QRect numRect;
+    QString numTxt;
+    bool hasNum=false;
+
+    if(drawChildCount_)
+    {
+        QVariant va=index.data(AbstractNodeModel::NodeNumRole);
+        hasNum=(va.isNull() == false);
+        if(hasNum)
+        {
+            numTxt="(" + QString::number(va.toInt()) + ")";
+
+            QFontMetrics fmNum(serverNumFont_);
+
+            int numWidth=fmNum.width(numTxt);
+            numRect = nodeText.br_;
+            numRect.setLeft(currentRight+fmNum.width('A'));
+            numRect.setWidth(numWidth);
+            currentRight=numRect.right();
+        }
+    }
+
+
+    itemWidth=currentRight+1;
+}
+
+void TreeNodeViewDelegate::widthHintNode(const QModelIndex& index,int& itemWidth,QString text) const
+{
+    //bool selected=option.state & QStyle::State_Selected;
+    int offset=4;
+
+    QFontMetrics fm(font_);
+    //int deltaH=(option.rect.height()-(fm.height()+4))/2;
+
+    //The initial filled rect (we will adjust its  width)
+    QRect itemRect(2*offset,0,10,10);
+
+    NodeShape stateShape;
+    NodeShape realShape;
+    NodeText  nodeText;
+    NodeText  typeText;
+
+    //get the colours
+    QVariant bgVa=index.data(Qt::BackgroundRole);
+    bool hasRealBg=false;
+    if(bgVa.type() == QVariant::List)
+    {
+        QVariantList lst=bgVa.toList();
+        if(lst.count() ==  2)
+        {
+            hasRealBg=true;
+            stateShape.col_=lst[0].value<QColor>();
+            realShape.col_=lst[1].value<QColor>();
+        }
+    }
+    else
+    {
+        stateShape.col_=bgVa.value<QColor>();
+    }
+
+    int currentRight=itemRect.left();
+
+    //Node type
+    QFontMetrics fmType(typeFont_);
+    int typeWidth=fmType.width(" S");
+
+    if(drawNodeType_)
+    {
+        int nodeType=index.data(AbstractNodeModel::NodeTypeRole).toInt();
+        switch(nodeType)
+        {
+        case 0: typeText.text_="S"; break;
+        case 1: typeText.text_="F"; break;
+        case 2: typeText.text_="T"; break;
+        case 3: typeText.text_="A"; break;
+        default: break;
+        }
+    }
+
+    //The text rectangle
+    nodeText.text_=text;
+    int textWidth=fm.width(text);
+
+    if(nodeStyle_ == BoxAndTextNodeStyle)
+    {
+        int realW=itemRect.height()/4;
+
+        QRect r1(currentRight,itemRect.y(),itemRect.height(),itemRect.height());
+        if(hasRealBg)
+            r1.adjust(0,0,-realW,0);
+
+        stateShape.shape_=QPolygon(r1);
+
+        if(hasRealBg)
+        {
+            QRect r2(r1.right(),r1.top(),realW+1,r1.height());
+            realShape.shape_=QPolygon(r2);
+            currentRight=r2.right()+2;
+        }
+        else
+            currentRight=r1.right()+2;
+
+        if(drawNodeType_)
+        {
+            typeText.br_=r1;
+            typeText.fgCol_=index.data(AbstractNodeModel::NodeTypeForegroundRole).value<QColor>();
+        }
+
+        nodeText.br_=QRect(currentRight+offset,r1.top(),textWidth,r1.height());
+        nodeText.fgCol_=QColor(Qt::black);
+        currentRight=nodeText.br_.right();
+
+    }
+    //Classic style
+    else
+    {
+        if(drawNodeType_)
+        {
+            typeText.br_=QRect(currentRight,itemRect.y(),typeWidth,itemRect.height());
+            typeText.fgCol_=typeFgColourClassic;
+            typeText.bgCol_=typeBgColourClassic;
+            currentRight=typeText.br_.right()+2;
+        }
+
+        QRect r1(currentRight,itemRect.y(),textWidth+2*offset+1,itemRect.height());
+        stateShape.shape_=QPolygon(r1);
+        currentRight=r1.right()+2;
+
+        nodeText.br_=QRect(r1.left()+offset,r1.top(),textWidth,r1.height());
+        nodeText.fgCol_=index.data(Qt::ForegroundRole).value<QColor>();
+
+        if(hasRealBg)
+        {
+            int realW=6;
+            QRect r2(r1.right(),r1.top(),realW+1,r1.height());
+            realShape.shape_=QPolygon(r2);
+            currentRight=r2.right()+2;
+        }
+    }
+
+    //Icons area
+    QList<QPixmap> pixLst;
+    QList<QRect> pixRectLst;
+
+    QVariant va=index.data(AbstractNodeModel::IconRole);
+    if(va.type() == QVariant::List)
+    {
+        QVariantList lst=va.toList();
+        int xp=currentRight+5;
+        for(int i=0; i < lst.count(); i++)
+        {
+            int id=lst[i].toInt();
+            if(id != -1)
+            {
+                xp+=iconSize_+iconGap_;
+            }
+        }
+
+        currentRight=xp+2;
+    }
+
+    //The node number (optional)
+    QRect numRect;
+    QString numTxt;
+    bool hasNum=false;
+
+    if(drawChildCount_)
+    {
+        va=index.data(AbstractNodeModel::NodeNumRole);
+        hasNum=(va.isNull() == false);
+
+        if(hasNum)
+        {
+            numTxt="(" + va.toString() + ")";
+            QFontMetrics fmNum(suiteNumFont_);
+
+            int numWidth=fmNum.width(numTxt);
+            numRect = nodeText.br_;
+            numRect.setLeft(currentRight+fmNum.width('A'));
+            numRect.setWidth(numWidth);
+            currentRight=numRect.right();
+        }
+    }
+
+    //The aborted reason
+    QRect reasonRect;
+    QString reasonTxt=index.data(AbstractNodeModel::AbortedReasonRole).toString();
+    if(reasonTxt.contains('\n'))
+        reasonTxt=reasonTxt.split("\n").first();
+
+    bool hasReason=(!reasonTxt.isEmpty());
+    if(hasReason)
+    {
+        QFontMetrics fmReason(abortedReasonFont_);
+        reasonRect = nodeText.br_;
+        reasonRect.setLeft(currentRight+fmReason.width('A'));
+        reasonTxt=fmReason.elidedText(reasonTxt,Qt::ElideRight,220);
+        reasonRect.setWidth(fmReason.width(reasonTxt));
+        currentRight=reasonRect.right();
+    }
+
+    //Define clipping
+    itemWidth=currentRight+1;
+}
+
 
 QString TreeNodeViewDelegate::formatTime(int timeInSec) const
 {

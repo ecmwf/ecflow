@@ -215,7 +215,7 @@ void NodeViewDelegate::renderSelectionRect(QPainter* painter,QRect r) const
 }
 
 void NodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
-                                    const QStyleOptionViewItemV4& option) const
+                                    const QStyleOptionViewItem& option) const
 {
     int offset=4;
 
@@ -279,7 +279,7 @@ void NodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
 // "meter" name  value min  max colChange
 //========================================================
 
-void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() != 6)
         return;
@@ -419,7 +419,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 // "label" name  value
 //========================================================
 
-void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() < 2)
 			return;
@@ -548,7 +548,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 // "event" name  value
 //========================================================
 
-void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() < 2)
 		return;
@@ -616,7 +616,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
 	}
 }
 
-void NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	QString text;
 
@@ -672,7 +672,7 @@ void NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyle
 	}
 }
 
-void NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	QString text;
 
@@ -728,7 +728,7 @@ void NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 	}
 }
 
-void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() != 4)
         return;
@@ -845,7 +845,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	}
 }
 
-void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() != 3)
         return;
@@ -899,7 +899,7 @@ void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QS
 	}
 }
 
-void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() !=3)
         return;
@@ -963,7 +963,7 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 	}
 }
 
-void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() != 2)
         return;
@@ -1017,7 +1017,7 @@ void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyl
 	}
 }
 
-void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() != 2)
         return;
@@ -1076,7 +1076,7 @@ void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyl
 // "repeat" name  value
 //========================================================
 
-void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
     if(data.count() !=  7)
         return;
@@ -1232,7 +1232,7 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
      }
 }
 
-void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
 	if(data.count() != 2)
         return;

@@ -14,6 +14,7 @@
 #include "ExpandState.hpp"
 #include "PropertyMapper.hpp"
 #include "TreeNodeModel.hpp"
+#include "TreeNodeViewDelegate.hpp"
 #include "UiLog.hpp"
 #include "VFilter.hpp"
 
@@ -21,7 +22,43 @@
 #include <QGraphicsScene>
 #include <QMouseEvent>
 
+#include <QScrollBar>
+
 static int XPOS=0;
+
+CompactViewItem::CompactViewItem(const QModelIndex idx,int parentId,int xp, bool leaf) :
+    index(idx), parentItem(parentId), expanded(true), x(xp)
+{
+    width=20;
+    height=20;
+
+    //if(!leaf)
+    //{
+    //    width=computeWidth();
+    //}
+}
+
+void CompactViewItem::paintItem(QPainter *p,int yp,TreeNodeViewDelegate* delegate)
+{
+    QStyleOptionViewItem option;
+    option.rect=QRect(x,yp,width+10,height);
+
+    delegate->paint(p,option,index);
+
+   // p->setPen(Qt::black);
+  //  QRect r(x,yp,width,height);
+   // p->drawRect(r);
+   // p->drawText(r,index.data().toString());
+}
+
+int CompactViewItem::computeWidth()
+{
+    QFont f;
+    QFontMetrics fm(f);
+    int w=fm.width(index.data().toString())+10;
+    return qMin(qMax(50,w),100);
+}
+
 
 #if 0
 struct GraphNodeViewItem
@@ -40,6 +77,8 @@ struct GraphNodeViewItem
 };
 #endif
 
+
+#if 0
 class GraphNodeViewItem : public QGraphicsItem
 {
 public:
@@ -211,7 +250,7 @@ void GraphNodeView::setCurrentSelection(VInfo_ptr info)
     if(idx.isValid())
     {
 #ifdef _UI_TREENODEVIEW_DEBUG
-        UiLog().dbg() << "TreeNodeView::setCurrentSelection --> " << info->path();
+        UiLog().dbg() << "GraphNodeView::setCurrentSelection --> " << info->path();
 #endif
         //setCurrentIndex(idx);
     }
@@ -366,13 +405,395 @@ void GraphNodeView::mousePressEvent(QMouseEvent* event)
 
 
 
+#endif
 
 
+CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+    QAbstractScrollArea(parent),
+    NodeViewBase(filterDef),
+    model_(model),
+    needItemsLayout_(false),
+    //defaultIndentation_(indentation()),
+    prop_(NULL),
+    setCurrentIsRunning_(false),
+    setCurrentFromExpand_(false)
+{
+    setObjectName("view");
+    setProperty("style","nodeView");
+    setProperty("view","tree");
+
+    //setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    //setDragMode(QGraphicsView::RubberBandDrag);
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
+    //Context menu
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+            this, SLOT(slotContextMenu(const QPoint &)));
+
+    //UiLog().dbg() << maximumViewportSize();
+    //UiLog().dbg()  << "scenerect" << sceneRect();
+
+    //expandState_=new ExpandState(this,model_);
+    actionHandler_=new ActionHandler(this);
+
+    delegate_=new TreeNodeViewDelegate(this);
+
+    //We attach the model because by default the view is enabled. At this point the model is empty so
+    //it is a cheap operation!!
+    attachModel();
+
+    //Properties
+    std::vector<std::string> propVec;
+    propVec.push_back("view.tree.indentation");
+    propVec.push_back("view.tree.background");
+    //propVec.push_back("view.tree.drawBranchLine");
+    propVec.push_back("view.tree.serverToolTip");
+    propVec.push_back("view.tree.nodeToolTip");
+    propVec.push_back("view.tree.attributeToolTip");
+    prop_=new PropertyMapper(propVec,this);
+
+    //Initialise indentation
+    Q_ASSERT(prop_->find("view.tree.indentation"));
+    adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
+
+    //Init stylesheet related properties
+    Q_ASSERT(prop_->find("view.tree.background"));
+    adjustBackground(prop_->find("view.tree.background")->value().value<QColor>(),false);
+    //Q_ASSERT(prop_->find("view.tree.drawBranchLine"));
+    //adjustBranchLines(prop_->find("view.tree.drawBranchLine")->value().toBool(),false);
+    //adjustStyleSheet();
+
+    //Adjust tooltip
+    Q_ASSERT(prop_->find("view.tree.serverToolTip"));
+    adjustServerToolTip(prop_->find("view.tree.serverToolTip")->value().toBool());
+
+    Q_ASSERT(prop_->find("view.tree.nodeToolTip"));
+    adjustNodeToolTip(prop_->find("view.tree.nodeToolTip")->value().toBool());
+
+    Q_ASSERT(prop_->find("view.tree.attributeToolTip"));
+    adjustAttributeToolTip(prop_->find("view.tree.attributeToolTip")->value().toBool());
+
+}
+
+CompactNodeView::~CompactNodeView()
+{
+    //delete expandState_;
+    delete actionHandler_;
+    //delete prop_;
+}
+
+QWidget* CompactNodeView::realWidget()
+{
+    return this;
+}
+
+VInfo_ptr CompactNodeView::currentSelection()
+{
+#if 0
+    QModelIndexList lst=selectedIndexes();
+    if(lst.count() > 0)
+    {
+        return model_->nodeInfo(lst.front());
+    }
+#endif
+    return VInfo_ptr();
+}
+
+void CompactNodeView::setCurrentSelection(VInfo_ptr info)
+{
+#if 0
+
+    //While the current is being selected we do not allow
+    //another setCurrent call go through
+    if(!info || setCurrentIsRunning_)
+        return;
+
+    setCurrentIsRunning_=true;
+    QModelIndex idx=model_->infoToIndex(info);
+    if(idx.isValid())
+    {
+#ifdef _UI_TREENODEVIEW_DEBUG
+        UiLog().dbg() << "GraphNodeView::setCurrentSelection --> " << info->path();
+#endif
+        //setCurrentIndex(idx);
+    }
+    setCurrentIsRunning_=false;
+#endif
+}
+
+void CompactNodeView::reload()
+{
+    //model_->reload();
+    //expandAll();
+}
+
+void CompactNodeView::rerender()
+{
+    if(needItemsLayout_)
+    {
+        //doItemsLayout();
+        needItemsLayout_=false;
+    }
+    else
+    {
+        //viewport()->update();
+    }
+}
+
+//Connect the models signal to the view
+void CompactNodeView::attachModel()
+{
+    //Standard signals from the model
+    connect(model_,SIGNAL(modelReset()),
+        this,SLOT(reset()));
+
+    connect(model_, SIGNAL(rowsInserted(QModelIndex,int,int)),
+              this, SLOT(rowsInserted(QModelIndex,int,int)));
 
 
+    connect(model_,SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
+        this,SLOT(slotDataChanged(const QModelIndex&,const QModelIndex&)));
+
+    //We need to call it to be sure that the view show the actual state of the model!!!
+    //doReset();
+}
+
+void CompactNodeView::reset()
+{
+    viewItems_.clear();
+    insertItems(QModelIndex(),-1);
+}
+
+void CompactNodeView::rowsInserted(QModelIndex,int,int)
+{
+    reset();
+}
+
+void CompactNodeView::insertItems(const QModelIndex& parent,int parentPos)
+{
+    UiLog().dbg() << "insert --> parent=" << parent.data().toString() << " rows=" << model_->rowCount(parent);
+
+    int dx=10;
+    int yp=20;
+
+    CompactViewItem* pt=0;
+    int rowNum=model_->rowCount(parent);
+    if(parentPos != -1)
+    {
+        pt=viewItems_[parentPos];
+    }
+
+    for(int i=0; i < rowNum; i++)
+    {
+        QModelIndex idx=model_->index(i,0,parent);
+
+        int xp=dx;
+        if(pt)
+        {
+            xp=pt->right()+dx;
+            UiLog().dbg() <<  "right " << pt->right();
+        }
+
+        bool leaf=!model_->hasChildren(idx);
+        CompactViewItem* item=new CompactViewItem(idx,parentPos,xp,leaf);
+        item->hasMoreSiblings=(i < rowNum-1);
+
+        int w,h;
+        delegate_->sizeHint(idx,w,h);
+        item->width=w;
+        item->height=h;
+
+        if(leaf || i > 0)
+            yp+=item->height+5;
+
+        viewItems_ << item;
+
+        insertItems(idx,viewItems_.count()-1);
+    }
+
+    verticalScrollBar()->setRange(0, yp+20);
+
+}
 
 
+void CompactNodeView::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(viewport());
+    paint(&painter,event->region());
+}
 
 
+void CompactNodeView::paint(QPainter *painter,const QRegion& region)
+{
+    UiLog().dbg() << "size=" << sizeof(CompactViewItem);
+
+    int firstVisible_=0;
+
+    int parent=-1;
+    int yp=5;
+    int xp;
+    std::vector<int> indentVec;
+    int indentNum=0;
+    for(int i=firstVisible_; i < viewItems_.count(); i++)
+    {
+        if(viewItems_[i]->expanded == 1)
+        {
+            viewItems_[i]->paintItem(painter,yp,delegate_);
+            bool leaf=!model_->hasChildren(viewItems_[i]->index);
+
+            //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
+            //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
+
+            if( viewItems_[i]->parentItem >=0)
+            {
+                CompactViewItem* pt=viewItems_[viewItems_[i]->parentItem];
+
+                int lineY=yp+pt->height/2;
+                int lineX1=pt->right()+2;
+                int lineX2=viewItems_[i]->x-2;
+                int lineX=(lineX1+lineX2)/2;
+
+                //First child
+                if(viewItems_[i]->index.row() == 0)
+                {
+                    painter->drawLine(lineX1,lineY,lineX2,lineY);
+                    indentVec.push_back(lineX);
+
+                    if(viewItems_[i]->hasMoreSiblings)
+                    {
+                        painter->drawLine(lineX,lineY,lineX,lineY+20);
+                    }
 
 
+                    //if(model_->rowCount(pt->index) > 1)
+                    //{
+                    //    painter->drawLine(pt->right()+2,yp+pt->height/2,viewItems_[i]->x-2,yp+pt->height/2);
+                    //}
+                }
+
+                else if(viewItems_[i]->hasMoreSiblings)
+                {
+                    painter->drawLine(lineX,lineY,lineX2,lineY);
+                    painter->drawLine(lineX,lineY+20,lineX,lineY-20);
+                }
+
+                else
+                {
+                    painter->drawLine(lineX,lineY,lineX2,lineY);
+                    painter->drawLine(lineX,lineY,lineX,lineY-20);
+                }
+
+            }
+
+
+            //if(leaf || viewItems_[i]->index.row() > 0)
+            if(leaf)
+            {
+                yp+=viewItems_[i]->height+5;
+            }
+
+            parent=i;
+        }
+
+    }
+}
+
+void CompactNodeView::adjustStyleSheet()
+{
+    QString sh;
+    if(styleSheet_.contains("bg"))
+       sh+=styleSheet_["bg"];
+    if(styleSheet_.contains("branch"))
+       sh+=styleSheet_["branch"];
+
+   UiLog().dbg() << "stylesheet" << sh;
+
+    setStyleSheet(sh);
+}
+
+void CompactNodeView::adjustIndentation(int offset)
+{
+    if(offset >=0)
+    {
+        //setIndentation(defaultIndentation_+offset);
+        //delegate_->setIndentation(indentation());
+    }
+}
+
+void CompactNodeView::adjustBackground(QColor col,bool adjust)
+{
+    if(col.isValid())
+    {
+        styleSheet_["bg"]="QTreeView { background : " + col.name() + ";}";
+
+        if(adjust)
+            adjustStyleSheet();
+    }
+}
+
+#if 0
+void GraphNodeView::adjustBranchLines(bool st,bool adjust)
+{
+    if(styleSheet_.contains("branch"))
+    {
+        bool oriSt=styleSheet_["branch"].contains("url(:");
+        if(oriSt == st)
+            return;
+    }
+
+    QString vline((st)?"url(:/viewer/tree_vline.png) 0":"none");
+    QString bmore((st)?"url(:/viewer/tree_branch_more.png) 0":"none");
+    QString bend((st)?"url(:/viewer/tree_branch_end.png) 0":"none");
+
+    styleSheet_["branch"]="QTreeView::branch:has-siblings:!adjoins-item { border-image: " + vline + ";}" \
+     "QTreeView::branch:!has-children:has-siblings:adjoins-item {border-image: " +  bmore + ";}" \
+     "QTreeView::branch:!has-children:!has-siblings:adjoins-item {border-image: " + bend + ";}";
+
+    if(adjust)
+        adjustStyleSheet();
+}
+#endif
+
+void CompactNodeView::adjustServerToolTip(bool st)
+{
+    model_->setEnableServerToolTip(st);
+}
+
+void CompactNodeView::adjustNodeToolTip(bool st)
+{
+    model_->setEnableNodeToolTip(st);
+}
+
+void CompactNodeView::adjustAttributeToolTip(bool st)
+{
+    model_->setEnableAttributeToolTip(st);
+}
+
+void CompactNodeView::notifyChange(VProperty* p)
+{
+    if(p->path() == "view.tree.indentation")
+    {
+        adjustIndentation(p->value().toInt());
+    }
+    else if(p->path() == "view.tree.background")
+    {
+        adjustBackground(p->value().value<QColor>());
+    }
+    else if(p->path() == "view.tree.drawBranchLine")
+    {
+        //adjustBranchLines(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.serverToolTip")
+    {
+        adjustServerToolTip(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.nodeToolTip")
+    {
+        adjustNodeToolTip(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.attributeToolTip")
+    {
+        adjustAttributeToolTip(p->value().toBool());
+    }
+}

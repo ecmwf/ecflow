@@ -328,7 +328,7 @@ void LogDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 
 	/*if(index.column()==11)
 	{
-		QStyleOptionViewItemV4 vopt(option);
+        QStyleOptionViewItem vopt(option);
 		initStyleOption(&vopt, index);
 
 		const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();

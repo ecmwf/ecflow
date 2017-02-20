@@ -72,7 +72,7 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
                    const QModelIndex& index) const
 {
     //Background
-    QStyleOptionViewItemV4 vopt(option);
+    QStyleOptionViewItem vopt(option);
     initStyleOption(&vopt, index);
 
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
@@ -170,7 +170,7 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
 
 
 void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
-        							const QStyleOptionViewItemV4& option,QString text) const
+                                    const QStyleOptionViewItem& option,QString text) const
 {
 	bool selected=option.state & QStyle::State_Selected;
 
