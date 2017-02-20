@@ -368,6 +368,7 @@ public:
    virtual std::string type() const { return stype();}
    virtual std::string expression(bool why = false) const;
    static std::string stype() { return "AstFunction";}
+   virtual void setParentNode(Node* n);
 
    Ast* arg() const { return arg_;}
    FuncType ft() const { return ft_;}

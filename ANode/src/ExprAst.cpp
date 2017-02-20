@@ -1029,6 +1029,11 @@ std::string AstFunction::expression(bool why) const
    return ss.str();
 }
 
+void AstFunction::setParentNode(Node* n)
+{
+   if (arg_) arg_->setParentNode(n);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 void AstInteger::accept(ExprAstVisitor& v)
 {
