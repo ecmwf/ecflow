@@ -559,6 +559,9 @@ BOOST_AUTO_TEST_CASE( test_parser_bad_expressions )
    // triggers that dont make sense in the operational suites.
    exprvec.push_back("../../../legA/fc/pf/01 eq complete eq complete");
 
+   exprvec.push_back("/mofc/mon/hind/14/back == complete or %s:DOW ne 5"); // ECFLOW-888
+
+
    BOOST_FOREACH(const string& expr, exprvec ) {
 
       //std::cout << "parsing expression " << expr << "\n";

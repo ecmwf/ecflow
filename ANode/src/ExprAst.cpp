@@ -84,6 +84,15 @@ void AstTop::print_flat(std::ostream& os,bool add_bracket) const
    }
 }
 
+bool AstTop::is_valid_ast(std::string& error_msg) const
+{
+   if (root_) {
+      return root_->is_valid_ast(error_msg);
+   }
+   error_msg = "AstTop: Abstract syntax tree creation failed";
+   return false;
+}
+
 //#define DEBUG_WHY 1
 bool AstTop::why(std::string& theReasonWhy) const
 {
@@ -216,6 +225,19 @@ std::ostream& AstNot::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstNot::is_valid_ast(std::string& error_msg) const
+{
+   if (right_) {
+      error_msg = "AstNot: should only have a single root";
+      return false;
+   }
+   if (!left_) {
+      error_msg = "AstNot: Does not have root";
+      return false;
+   }
+   return left_->is_valid_ast(error_msg);
+}
+
 void AstNot::print_flat( std::ostream& os,bool add_bracket) const {
    os << name_;
    if (left_) {
@@ -253,6 +275,16 @@ std::ostream& AstPlus::print( std::ostream& os ) const {
 	if (!right_) os << " # ERROR has no right_";
 	os << "\n";
 	return AstRoot::print( os );
+}
+
+bool AstPlus::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstPlus: has no left part";  return false;}
+   if (!right_) { error_msg = "AstPlus: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
 }
 
 void AstPlus::print_flat(std::ostream& os,bool add_bracket) const {
@@ -294,6 +326,16 @@ std::ostream& AstMinus::print( std::ostream& os ) const {
 	if (!right_) os << " # ERROR has no right_";
 	os << "\n";
 	return AstRoot::print( os );
+}
+
+bool AstMinus::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstMinus: has no left part"; return false;}
+   if (!right_) { error_msg = "AstMinus: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
 }
 
 void AstMinus::print_flat(std::ostream& os,bool add_bracket) const {
@@ -354,6 +396,16 @@ std::ostream& AstDivide::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstDivide::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstDivide: has no left part"; return false;}
+   if (!right_) { error_msg = "AstDivide: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstDivide::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -393,6 +445,16 @@ std::ostream& AstMultiply::print( std::ostream& os ) const {
 	if (!right_) os << " # ERROR has no right_";
 	os << "\n";
 	return AstRoot::print( os );
+}
+
+bool AstMultiply::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstMultiply: has no left part"; return false;}
+   if (!right_) { error_msg = "AstMultiply: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
 }
 
 void AstMultiply::print_flat(std::ostream& os,bool add_bracket) const {
@@ -454,6 +516,16 @@ std::ostream& AstModulo::print( std::ostream& os ) const {
    return AstRoot::print( os );
 }
 
+bool AstModulo::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstModulo: has no left part"; return false;}
+   if (!right_) { error_msg = "AstModulo: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstModulo::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -493,6 +565,16 @@ std::ostream& AstAnd::print( std::ostream& os ) const {
 	if (!right_) os << " # ERROR has no right_";
 	os << "\n";
 	return AstRoot::print( os );
+}
+
+bool AstAnd::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstAnd: has no left part"; return false;}
+   if (!right_) { error_msg = "AstAnd: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
 }
 
 void AstAnd::print_flat(std::ostream& os,bool add_bracket) const {
@@ -537,6 +619,16 @@ std::ostream& AstOr::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstOr::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstOr: has no left part"; return false;}
+   if (!right_) { error_msg = "AstOr: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstOr::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -577,6 +669,16 @@ std::ostream& AstEqual::print( std::ostream& os ) const {
 	if (!right_) os << " # ERROR has no right_";
 	os << "\n";
 	return AstRoot::print( os );
+}
+
+bool AstEqual::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstEqual: has no left part"; return false;}
+   if (!right_) { error_msg = "AstEqual: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
 }
 
 void AstEqual::print_flat(std::ostream& os,bool add_bracket) const {
@@ -620,6 +722,16 @@ std::ostream& AstNotEqual::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstNotEqual::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstNotEqual: has no left part"; return false;}
+   if (!right_) { error_msg = "AstNotEqual: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstNotEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -660,6 +772,17 @@ std::ostream& AstLessEqual::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
+bool AstLessEqual::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstLessEqual: has no left part"; return false;}
+   if (!right_) { error_msg = "AstLessEqual: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstLessEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -699,6 +822,17 @@ std::ostream& AstGreaterEqual::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
+bool AstGreaterEqual::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstGreaterEqual: has no left part"; return false;}
+   if (!right_) { error_msg = "AstGreaterEqual: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstGreaterEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -739,6 +873,17 @@ std::ostream& AstGreaterThan::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
+bool AstGreaterThan::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstGreaterThan: has no left part"; return false;}
+   if (!right_) { error_msg = "AstGreaterThan: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstGreaterThan::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -780,6 +925,17 @@ std::ostream& AstLessThan::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
+bool AstLessThan::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstLessThan: has no left part"; return false;}
+   if (!right_) { error_msg = "AstLessThan: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstLessThan::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -995,7 +1151,7 @@ Node* AstNode::referencedNode() const
 
 Node* AstNode::referencedNode(std::string& errorMsg) const
 {
-   Node* ref =  get_ref_node();
+   Node* ref = get_ref_node();
    if ( ref )  {
       return ref;
    }
