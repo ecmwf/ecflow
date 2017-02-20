@@ -109,6 +109,22 @@ int main(int argc, char **argv)
     //from the central the system server list
     ServerList::instance()->init();
 
+    // startup - via the session manager, or straight to the main window?
+    bool startMainWindow = true;
+
+    //Initialise the session. We have to call thi before VConfig::init() because
+    //some settings Vconfig loads are session-dependent.
+    if (SessionHandler::requestStartupViaSessionManager())
+    {
+        SessionDialog sessionDialog;
+        if (sessionDialog.exec() != QDialog::Accepted)
+            startMainWindow = false;
+    }
+    else
+    {
+        SessionHandler::setTemporarySessionIfReqested(); // user starts with -ts command-line switch?
+    }
+
     //Load the global configurations
     VConfig::instance()->init(DirectoryHandler::etcDir());
     
@@ -127,24 +143,10 @@ int main(int argc, char **argv)
     Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
 		      "ecflowview_palette.json")); 
 
-
     //Initialise the list containing all the icon names existed on last exit
     VIcon::initLastNames();
 
-	// startup - via the session manager, or straight to the main window?
-	bool startMainWindow = true;
-
-	if (SessionHandler::requestStartupViaSessionManager())
-	{
-		SessionDialog sessionDialog;
-		if (sessionDialog.exec() != QDialog::Accepted)
-			startMainWindow = false;
-	}
-	else
-	{
-		SessionHandler::setTemporarySessionIfReqested(); // user starts with -ts command-line switch?
-	}
-
+    //Start the GUI
 	if (startMainWindow)
 	{
 		//Build the GUI
