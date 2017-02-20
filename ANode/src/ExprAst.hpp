@@ -49,6 +49,7 @@ public:
    virtual int value() const { assert(false); return 0;} // only valid for leaf or operators
    virtual bool check(std::string& ) const { return true; } // check divide or modulo by zero
 
+   virtual bool is_valid_ast(std::string& error_msg) const = 0;
    virtual std::ostream& print(std::ostream&) const = 0;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const = 0;    // used for test
 	virtual bool why(std::string& /*theReasonWhy*/) const { return false;}
@@ -82,6 +83,8 @@ public:
 	virtual bool empty() const { return (root_) ? false : true ; }
 	virtual std::ostream& print(std::ostream&) const ;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
+
 	virtual bool why(std::string& theReasonWhy) const;
 	virtual std::string type() const { return stype();}
 	virtual void exprType(const std::string& s) { exprType_ = s;}
@@ -130,6 +133,7 @@ public:
 	virtual int value() const {  assert(!right_);     return ! left_->value();}
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
  	static std::string stype() { return "not";}
@@ -149,6 +153,7 @@ public:
 	virtual int value() const { return left_->plus(right_);}
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
  	static std::string stype() { return "plus";}
@@ -164,6 +169,7 @@ public:
 	virtual int value() const { return left_->minus(right_); }
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
  	static std::string stype() { return "minus";}
@@ -179,6 +185,7 @@ public:
 	virtual int value() const; // Log error if right hand side has value of zero
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
  	static std::string stype() { return "divide";}
@@ -193,6 +200,7 @@ public:
 	virtual int value() const { return  (left_->value() * right_->value());}
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "multiply";}
@@ -208,6 +216,7 @@ public:
    virtual int value() const; // Log error if right hand side has value of zero
    virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
    virtual std::string type() const { return stype();}
    virtual std::string expression(bool why = false) const;
    static std::string stype() { return "modulo";}
@@ -222,6 +231,7 @@ public:
 	virtual bool evaluate() const { return (left_->evaluate() && right_->evaluate());}
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "and";}
@@ -235,6 +245,7 @@ public:
 	virtual bool evaluate() const { return (left_->evaluate() || right_->evaluate());}
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "or";}
@@ -248,6 +259,7 @@ public:
 	virtual bool evaluate() const { return (left_->value() == right_->value()); }
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "equal";}
@@ -261,6 +273,7 @@ public:
 	virtual bool evaluate() const { return (left_->value() != right_->value()); }
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "not-equal";}
@@ -274,6 +287,7 @@ public:
 	virtual bool evaluate() const { return (left_->value() <= right_->value()); }
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "less-equal";}
@@ -287,6 +301,7 @@ public:
    virtual AstGreaterEqual* clone() const;
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "greater-equal";}
@@ -302,6 +317,7 @@ public:
    virtual AstGreaterThan* clone() const;
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "greater-than";}
@@ -317,6 +333,7 @@ public:
    virtual AstLessThan* clone() const;
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
 	static std::string stype() { return "less-than";}
@@ -331,6 +348,7 @@ public:
   	AstLeaf() {}
 	virtual void accept(ecf::ExprAstVisitor&);
 	virtual bool isleaf() const { return true; }
+   virtual bool is_valid_ast(std::string&) const { return true;}
 };
 
 class AstFunction : public AstLeaf {

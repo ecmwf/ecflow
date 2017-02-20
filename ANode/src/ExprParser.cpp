@@ -393,9 +393,10 @@ void print(tree_parse_info<> info,
            const std::string& expr,
            const std::map< parser_id, std::string >& rule_names);
 
-AstTop* createAst(   tree_parse_info< > info,
+AstTop* createTopAst(   tree_parse_info< > info,
                const std::string& expr,
-					const std::map< parser_id, std::string >& rule_names );
+					const std::map< parser_id, std::string >& rule_names,
+					std::string& error_msg);
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -498,9 +499,8 @@ bool ExprParser::doParse(std::string& errorMsg)
 #endif
       // Spirit has created a AST for us. However it is not use able as is
       // we will traverse the AST and create our OWN
- 		ast_.reset( createAst(info,expr_,rule_names) );
-      if (ast_->empty())  errorMsg = "Abstract syntax tree creation failed";
-      else {
+ 		ast_.reset( createTopAst(info,expr_,rule_names,errorMsg) );
+      if (ast_.get() && errorMsg.empty()) {
         ExprDuplicate::add(expr_,ast_.get());
       }
       return errorMsg.empty();
@@ -952,10 +952,11 @@ Ast* doCreateAst(  const tree_iter_t& i,
    return NULL;
 }
 
-AstTop* createAst(
+AstTop* createTopAst(
       tree_parse_info< > info,
       const std::string& expr,
-      const std::map< parser_id, std::string >& rule_names
+      const std::map< parser_id, std::string >& rule_names,
+      std::string& error_msg
 )
 {
 #if defined(PRINT_AST_TRAVERSAL)
@@ -964,6 +965,10 @@ AstTop* createAst(
 
    std::auto_ptr<AstTop> ast(new AstTop);
    (void)doCreateAst(info.trees.begin(),rule_names,ast.get() );
+
+   if (!ast->is_valid_ast(error_msg)) {
+      return NULL;
+   }
 
 #if defined(PRINT_AST)
    if (ast.get())  {
