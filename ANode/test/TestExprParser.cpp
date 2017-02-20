@@ -26,6 +26,9 @@
 #include "ExprParser.hpp"
 #include "ExprAst.hpp"
 #include "Expression.hpp"
+#include "Defs.hpp"
+#include "Suite.hpp"
+#include "Task.hpp"
 
 using namespace std;
 using namespace boost::gregorian;
@@ -406,6 +409,33 @@ BOOST_AUTO_TEST_CASE( test_trigger_functions )
    BOOST_REQUIRE_MESSAGE( parse_failure == 0 &&  ast_failure == 0,"Found failures parse_failure:" << parse_failure << " ast failure:" << ast_failure);
 }
 
+BOOST_AUTO_TEST_CASE( test_date_to_julian_with_repeat_YMD )
+{
+    std::cout <<  "ANode:: ...test_date_to_julian_with_repeat_YMD\n";
+
+    Defs theDefs;
+    suite_ptr suite = theDefs.add_suite("s1");
+    suite->addRepeat( RepeatDate("YMD",20170101,20180101,1));
+    task_ptr t1 = suite->add_task("t1");
+    t1->add_trigger("2457755 == cal::date_to_julian( /s1:YMD )");
+    theDefs.beginAll();
+
+    std::string err_msg,warn_msg;
+    theDefs.check(err_msg,warn_msg);
+    BOOST_REQUIRE_MESSAGE(err_msg.empty() && warn_msg.empty(),"Expected no errors but found " <<  err_msg << "\nexpected no warnings but found: " << warn_msg);
+
+    // make sure we can resolve /s1:YMD if this the case bottom_up_why should return vector of size 0
+    std::vector<std::string> theReasonWhy;
+    t1->bottom_up_why(theReasonWhy);
+    BOOST_CHECK_MESSAGE(theReasonWhy.empty() ,"When all is well expected empty reason vec");
+
+    // be more flexible, of vector is returned we should not get: variable-not-found
+    for(size_t i = 0; i < theReasonWhy.size(); i++) {
+       cout << theReasonWhy[i] << "\n";
+       BOOST_CHECK_MESSAGE(theReasonWhy[i].find("variable-not-found") == string::npos,"Variable YMD not found: " << theReasonWhy[i]);
+    }
+}
+
 BOOST_AUTO_TEST_CASE( test_trigger_functions_with_boost_date )
 {
    std::cout <<  "ANode:: ...test_trigger_functions_with_boost_date\n";
@@ -414,8 +444,8 @@ BOOST_AUTO_TEST_CASE( test_trigger_functions_with_boost_date )
    // value.second = result of expected evaluation
    map<string,std::pair<string,bool> > exprMap;
 
-   boost::gregorian::date startDate(2016,1,1);
-   boost::gregorian::date endDate(2016,12,31);
+   boost::gregorian::date startDate(2017,1,1);
+   boost::gregorian::date endDate(2017,12,31);
    while(startDate != endDate) {
       long julian_day = startDate.julian_day();
       std::string str_julian_day = boost::lexical_cast<std::string>(julian_day);
