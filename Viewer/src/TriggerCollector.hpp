@@ -54,6 +54,7 @@ public:
     bool scanKids() { return extended_; }
     void setDependency(bool);
     void clear();
+    size_t size() const {return items_.size();}
 
     const std::vector<TriggerListItem*>& items() const {return items_;}
 

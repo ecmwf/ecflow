@@ -42,8 +42,9 @@ protected Q_SLOTS:
     void anchorClicked(const QUrl& link);
 
 private:
-    enum TabIndex {TriggerTabIndex=0, TriggeredTabIndex=1};
+    enum TabIndex {TriggerGraphTabIndex=0, TriggerTabIndex=1, TriggeredTabIndex=2};
 
+    void loadTriggerGraphTab(bool forceLoad=false);
     void loadTriggerTab(bool forceLoad=false);
     void loadTriggeredTab(bool forceLoad=false);
     bool isTabLoaded(TabIndex idx) const;

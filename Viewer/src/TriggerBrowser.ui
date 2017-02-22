@@ -32,8 +32,22 @@
    <item>
     <widget class="QTabWidget" name="tab_">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
+     <widget class="QWidget" name="graphTab_">
+      <attribute name="title">
+       <string>Trigger graph</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="TriggerGraphWidget" name="triggerGraph_" native="true"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>Triggers of the selected node</string>
@@ -93,6 +107,12 @@
    <class>TriggerTextWidget</class>
    <extends>QTextBrowser</extends>
    <header>TriggerTextWidget.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>TriggerGraphWidget</class>
+   <extends>QWidget</extends>
+   <header>TriggerGraphWidget.hpp</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

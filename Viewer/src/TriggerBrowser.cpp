@@ -34,7 +34,7 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
 
     triggerCollector_=new TriggerListCollector(false);
 
-    Q_ASSERT(tab_->count() == 2);
+    Q_ASSERT(tab_->count() == 3);
     tab_->setCurrentIndex(tabIndexToInt(TriggerTabIndex));
 
     QFont f("Monospace");
@@ -44,6 +44,7 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
     f.setStyleStrategy(QFont::PreferAntialias);
     triggerBrowser_->setFont(f);
     triggeredBrowser_->setFont(f);
+    //selectedItemTextEdit_->setFont(f);
 
     connect(triggerBrowser_,SIGNAL(anchorClicked(const QUrl&)),
             this,SLOT(anchorClicked(const QUrl&)));
@@ -69,6 +70,7 @@ void TriggerBrowser::clear()
     loadedTabs_.clear();
     triggerBrowser_->clear();
     triggeredBrowser_->clear();
+    triggerGraph_->clear();
 }
 
 void TriggerBrowser::suspend()
@@ -90,7 +92,35 @@ void TriggerBrowser::load()
     {
         loadTriggeredTab(true);
     }
+    else if(tab_->currentIndex() == tabIndexToInt(TriggerGraphTabIndex))
+    {
+        loadTriggerGraphTab(true);
+    }
 }
+
+void TriggerBrowser::loadTriggerGraphTab(bool forceLoad)
+{
+    if(!forceLoad && isTabLoaded(TriggerGraphTabIndex))
+        return;
+
+    triggerGraph_->beginUpdate();  // ---------------- Start of model update
+
+    VNode *n=owner_->info()->node();
+    Q_ASSERT(n);
+
+    // put the trigger expression into the text box in the middle
+    std::string te,ce;
+    n->triggerExpr(te,ce);
+    triggerGraph_->setTriggerExpression(te);
+
+    // collect the list of triggers of this node
+    triggerCollector_->setDependency(owner_->dependency());
+    n->triggers(triggerCollector_);
+    triggerGraph_->setTriggerCollector(triggerCollector_);
+
+    triggerGraph_->endUpdate();  // ---------------- End of model update
+}
+
 
 void TriggerBrowser::loadTriggerTab(bool forceLoad)
 {
@@ -169,6 +199,8 @@ void TriggerBrowser::on_tab__currentChanged(int idx)
             loadTriggerTab();
         else if(idx == tabIndexToInt(TriggeredTabIndex))
             loadTriggeredTab();
+        else if(idx == tabIndexToInt(TriggerGraphTabIndex))
+            loadTriggerGraphTab();
     }
 }
 

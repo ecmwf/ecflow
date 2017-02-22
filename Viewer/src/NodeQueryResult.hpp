@@ -29,6 +29,7 @@ class NodeQueryResultItem
 	friend class NodeQueryEngine;
 	friend class NodeQueryResult;
 	friend class NodeQueryResultModel;
+	friend class TriggerGraphModel;
 
 public:
 	NodeQueryResultItem() : node_(NULL), server_(NULL) {}

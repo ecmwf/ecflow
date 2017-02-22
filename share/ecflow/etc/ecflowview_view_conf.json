@@ -164,6 +164,14 @@
         }       
     },
     
+    "trigger_graph_columns": {
+        
+        "trigger" : {
+            "label" : "Trigger",
+            "tooltip" : "Trigger"
+        }
+    },
+
     "table_columns": {
     	
     	"path" : {
