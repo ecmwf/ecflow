@@ -14,7 +14,7 @@
 
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
-#include "GraphNodeView.hpp"
+#include "CompactNodeView.hpp"
 #include "NodePathWidget.hpp"
 #include "NodeViewBase.hpp"
 #include "TreeNodeModel.hpp"
