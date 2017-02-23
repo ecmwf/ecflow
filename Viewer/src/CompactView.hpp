@@ -12,8 +12,10 @@
 #define COMPACTVIEW_HPP
 
 #include <QAbstractScrollArea>
+#include <QItemSelectionModel>
 #include <QMap>
 #include <QModelIndex>
+#include <QPointer>
 #include <QSet>
 
 class TreeNodeModel;
@@ -54,7 +56,8 @@ public:
     explicit CompactView(TreeNodeModel* model,QWidget *parent=0);
     ~CompactView();
 
-    QModelIndexList selectedIndexes() {return QModelIndexList();}
+    QModelIndex currentIndex() const;
+    QModelIndexList selectedIndexes() const;
     QModelIndex indexAt(const QPoint &point) const;
     QRect visualRect(const QModelIndex &index) const;
     bool isExpanded(const QModelIndex &index) const;
@@ -62,7 +65,7 @@ public:
 
 public Q_SLOTS:
     void reset();
-    void setCurrentIndex(const QModelIndex &index) {}
+    void setCurrentIndex(const QModelIndex &index);
     void update(const QModelIndex &index);
     void expand(const QModelIndex &index);
     void collapse(const QModelIndex &index);
@@ -70,9 +73,12 @@ public Q_SLOTS:
     void collapseAll();
 
 protected Q_SLOTS:
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     void rowsInserted(const QModelIndex&,int,int);
     void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     void rowsRemoved(const QModelIndex &parent, int start, int end);
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void currentChanged(const QModelIndex &current, const QModelIndex &previous);
 
 protected:
     void mousePressEvent(QMouseEvent* event);
@@ -94,6 +100,15 @@ protected:
 
     QModelIndex modelIndex(int i) const;
     int viewIndex(const QModelIndex& index) const;
+
+    void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command);
+    void select(const QModelIndex &topIndex, const QModelIndex &bottomIndex,
+                                  QItemSelectionModel::SelectionFlags command);
+
+    QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index,
+                                                         const QEvent *event) const;
+
+    QRegion visualRegionForSelection(const QItemSelection &selection) const;
 
     int  firstVisibleItem(int &offset) const;
     void updateScrollBars();
@@ -119,6 +134,12 @@ private:
     int rowCount_;
     mutable int lastViewedItem_;
     QModelIndex root_;
+    int expandButtonSize_;
+    enum ExpandButtonMode {Classic,Modern};
+    ExpandButtonMode expandButtonMode_;
+    QPointer<QItemSelectionModel> selectionModel_;
+    QPoint pressedPosition_;
+    QPersistentModelIndex pressedIndex_;
 
     // used when expanding and collapsing items
     QSet<QPersistentModelIndex> expandedIndexes;
@@ -135,6 +156,11 @@ private:
     {
         //We first check if the idx is a QPersistentModelIndex, because creating QPersistentModelIndex is slow
         return expandedIndexes.contains(idx);
+    }
+
+    inline QItemSelectionModel::SelectionFlags selectionBehaviorFlags() const
+    {
+        return QItemSelectionModel::NoUpdate;
     }
 };
 

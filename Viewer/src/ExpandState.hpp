@@ -8,8 +8,8 @@
 //
 //============================================================================
 
-#ifndef EXPANDNODE_HPP_
-#define EXPANDNODE_HPP_
+#ifndef EXPANDSTATE_HPP_
+#define EXPANDSTATE_HPP_
 
 #include <string>
 
@@ -46,39 +46,7 @@ protected:
     ExpandStateNode* root_;
 };
 
-//typedef ExpandState<TreeNodeView> TreeViewExpandState;
-//typedef ExpandState<CompactNodeView> CompactViewExpandState;
-
-
 #include "ExpandState.cpp"
-
-#if 0
-
-
-typedef boost::shared_ptr<TreeViewExpandStateTree> TreeViewExpandStateTree_ptr;
-
-
-template <typename Tree>
-class ExpandState
-{
-    //friend class TreeNodeView;
-
-public:
-    ExpandState() {}
-    ~ExpandState() {clear();}
-    void add(Tree*);
-    void remove(Tree*);
-    void clear();
-    QVector<Tree*> items() const {return items_;}
-
-protected:
-    QVector<Tree*> items_;
-};
-
-typedef ExpandStateTree<TreeNodeView> TreeViewExpandStateTree;
-typedef ExpandStateTree<CompactNodeView> CompactViewExpandStateTree;
-
-#endif
 
 #endif
 

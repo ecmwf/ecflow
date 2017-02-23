@@ -17,9 +17,11 @@
 #include <QtAlgorithms>
 #include <QApplication>
 #include <QDebug>
+#include <QItemSelectionRange>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QScrollBar>
+#include <QStack>
 
 #define _UI_COMPACTVIEW_DEBUG
 
@@ -29,7 +31,9 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     model_(model),
     verticalScrollMode_(ScrollPerItem),
     rowCount_(0),
-    lastViewedItem_(0)
+    lastViewedItem_(0),
+    expandButtonSize_(8),
+    expandButtonMode_(Modern)
 {
     delegate_=new TreeNodeViewDelegate(this);
 
@@ -62,12 +66,56 @@ void CompactView::attachModel()
     connect(model_,SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
         this,SLOT(slotDataChanged(const QModelIndex&,const QModelIndex&)));
 
+
+    selectionModel_ = new QItemSelectionModel(model_, this);
+    connect(model_, SIGNAL(destroyed()), selectionModel_, SLOT(deleteLater()));
+
+    connect(selectionModel_, SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(selectionChanged(QItemSelection,QItemSelection)));
+
+    connect(selectionModel_, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(currentChanged(QModelIndex,QModelIndex)));
+
+    //connect(d->selectionModel, SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
+    //                d->model, SLOT(submit()));
+
+
     //We need to call it to be sure that the view show the actual state of the model!!!
     //doReset();
 }
 
 void CompactView::mousePressEvent(QMouseEvent* event)
 {
+    QPoint pos = event->pos();
+    QPersistentModelIndex index = indexAt(pos);
+    pressedIndex_ = index;
+    //d->pressedAlreadySelected = d->selectionModel->isSelected(index);
+    //pressedIndex_ = index;
+    //    d->pressedModifiers = event->modifiers();
+
+    QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
+
+    //d->noSelectionOnMousePress = command == QItemSelectionModel::NoUpdate || !index.isValid();
+    QPoint offset;
+
+    if((command & QItemSelectionModel::Current) == 0)
+        pressedPosition_ = pos + offset;
+    else if(!indexAt(pressedPosition_).isValid())
+        pressedPosition_ = visualRect(currentIndex()).center() + offset;
+
+    if(index.isValid())
+    {
+        selectionModel_->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+        QRect rect(pressedPosition_ - offset, pos);
+        setSelection(rect, command);
+    }
+    else
+    {
+        // Forces a finalize() even if mouse is pressed, but not on a item
+        selectionModel_->select(QModelIndex(), QItemSelectionModel::Select);
+    }
+
+
     if(event->button() == Qt::MidButton)
     {
         int viewItemIndex=itemAtCoordinate(event->pos());
@@ -97,6 +145,10 @@ void CompactView::reset()
     viewItems_.clear();
     rowCount_=0;
     expandedIndexes.clear();
+    //currentIndexSet_ = false;
+    if (selectionModel_)
+            selectionModel_->reset();
+
     layout(-1);
     updateScrollBars();
 }
@@ -486,14 +538,31 @@ void CompactView::drawRow(QPainter* painter,int start,int &yp,int &itemsInRow,st
     }
 #endif
 
+    QVector<QPoint> expandButtons;
+    QVector<QPoint> collapseButtons;
     for(int i=start; i < itemsCount && !leaf; ++i )
     {
         CompactViewItem* item=&(viewItems_[i]);
         //if(item->expanded == 1)
         {
-            QStyleOptionViewItem option;
-            option.rect=QRect(item->x,yp,item->width+10,item->height);
-            delegate_->paint(painter,option,item->index);
+            QStyleOptionViewItem opt;
+
+            if(selectionModel_->isSelected(item->index))
+                opt.state |= QStyle::State_Selected;
+
+
+            opt.rect=QRect(item->x,yp,item->width+10,item->height);
+            delegate_->paint(painter,opt,item->index);
+
+            //Collect expand button positions
+            if(item->hasChildren)
+            {
+                QPoint p(item->right()+1,yp+item->height/2);
+                if(item->expanded)
+                    collapseButtons << p;
+                else
+                    expandButtons << p;
+            }
 
             leaf=(item->total == 0);
 
@@ -557,6 +626,7 @@ void CompactView::drawRow(QPainter* painter,int start,int &yp,int &itemsInRow,st
                     indentVec[item->level]=0;
                 }
 
+
             }
 
             //When we reach a leaf item we move one row down.
@@ -582,6 +652,48 @@ void CompactView::drawRow(QPainter* painter,int start,int &yp,int &itemsInRow,st
        }
     }
 
+    if(expandButtons.isEmpty() == false)
+    {
+        QBrush brushOri=painter->brush();
+        QPen penOri=painter->pen();
+        painter->setBrush(QColor(240,240,240));
+        Q_FOREACH(QPoint p,expandButtons)
+        {
+            painter->setPen(QColor(90,90,90));
+            QRect r(p.x(),p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
+            painter->drawRect(r);
+            int xc=r.left()+4;
+            int yc=r.top()+4;
+            painter->setPen(QColor(20,20,20));
+            painter->drawLine(r.left()+2,yc,r.right()-1,yc);
+            painter->drawLine(xc,r.top()+2,xc,r.bottom()-1);
+        }
+
+        painter->setBrush(brushOri);
+        painter->setPen(penOri);
+    }
+
+    if(collapseButtons.isEmpty() == false)
+    {
+        QBrush brushOri=painter->brush();
+        QPen penOri=painter->pen();
+        painter->setBrush(QColor(240,240,240));
+        Q_FOREACH(QPoint p,collapseButtons)
+        {
+            painter->setPen(QColor(90,90,90));
+            QRect r(p.x(),p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
+            painter->drawRect(r);
+            int xc=r.left()+4;
+            int yc=r.top()+4;
+            painter->setPen(QColor(20,20,20));
+            painter->drawLine(r.left()+2,yc,r.right()-1,yc);
+        }
+
+        painter->setBrush(brushOri);
+        painter->setPen(penOri);
+    }
+
+
     if(itemsInRow == 0)
        itemsInRow=1;
 }
@@ -599,6 +711,24 @@ void CompactView::update(const QModelIndex &index)
         if(viewport()->rect().intersects(rect))
             viewport()->update(rect);
     }
+}
+
+/*
+    This slot is called when items are changed in the model. The
+    changed items are those from topLeft to bottomRight
+    inclusive. If just one item is changed topLeft ==
+    bottomRight.
+*/
+void CompactView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+{
+    // Single item changed
+    if (topLeft == bottomRight && topLeft.isValid())
+    {
+        update(topLeft);
+        return;
+    }
+
+    viewport()->update();
 }
 
 int CompactView::rowHeight(int start,int forward, int &itemsInRow) const
@@ -793,7 +923,7 @@ QModelIndex CompactView::indexAt(const QPoint &point) const
     return (item>=0)?viewItems_[item].index:QModelIndex();
 }
 
-/*!
+/*
   Returns the viewport y coordinate for  item.
 */
 int CompactView::coordinateForItem(int item) const
@@ -801,6 +931,7 @@ int CompactView::coordinateForItem(int item) const
     if(verticalScrollMode_ == ScrollPerItem)
     {
         int offset = 0;
+        //firstVisibleItem must always start a row!!!!
         int topViewItemIndex=firstVisibleItem(offset);
         if (item >= topViewItemIndex)
         {
@@ -814,9 +945,10 @@ int CompactView::coordinateForItem(int item) const
             for(int height = 0, viewItemIndex = topViewItemIndex;
                 height <= viewportHeight && viewItemIndex < itemsCount; viewItemIndex+=itemsInRow)
             {
-                if(viewItemIndex == item)
+                int h=rowHeight(viewItemIndex,1,itemsInRow);
+                if(viewItemIndex <=item && item < viewItemIndex+itemsInRow)
                     return height;
-                height +=rowHeight(item,1,itemsInRow);
+                height +=h;
             }
         }
     }
@@ -1079,3 +1211,345 @@ void CompactView::collapseAll()
     expandedIndexes.clear();
     doItemsLayout();
 }
+
+//========================================================
+//
+// Selection
+//
+//========================================================
+
+/*
+    Sets the current item to be the item at a index.
+
+    Unless the current selection mode is
+    \l{QAbstractItemView::}{NoSelection}, the item is also be selected.
+    Note that this function also updates the starting position for any
+    new selections the user performs.
+
+    To set an item as the current item without selecting it, call
+
+    \c{selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);}
+
+    \sa currentIndex(), currentChanged(), selectionMode
+*/
+
+void CompactView::setCurrentIndex(const QModelIndex &index)
+{
+    if(selectionModel_ && (!index.isValid()) )
+    {
+        QItemSelectionModel::SelectionFlags command = selectionCommand(index, 0);
+        selectionModel_->setCurrentIndex(index, command);
+        //currentIndexSet_ = true;
+        QPoint offset;
+        if((command & QItemSelectionModel::Current) == 0)
+            pressedPosition_ = visualRect(currentIndex()).center() + offset;
+    }
+}
+
+/*
+    Returns the model index of the current item.
+*/
+QModelIndex CompactView::currentIndex() const
+{
+    return selectionModel_ ? selectionModel_->currentIndex() : QModelIndex();
+}
+
+
+QModelIndexList CompactView::selectedIndexes() const
+{
+    if(selectionModel_)
+        return selectionModel_->selectedIndexes();
+
+    return QModelIndexList();
+}
+
+
+/*
+  Applies the selection command to the items in or touched by the
+  rectangle rect.
+*/
+void CompactView::setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command)
+{
+    if (!selectionModel_ || rect.isNull())
+        return;
+
+    //d->executePostedLayout();
+    QPoint tl(isRightToLeft() ? qMax(rect.left(), rect.right())
+              : qMin(rect.left(), rect.right()), qMin(rect.top(), rect.bottom()));
+    QPoint br(isRightToLeft() ? qMin(rect.left(), rect.right()) :
+              qMax(rect.left(), rect.right()), qMax(rect.top(), rect.bottom()));
+
+    QModelIndex topLeft = indexAt(tl);
+    QModelIndex bottomRight = indexAt(br);
+    if (!topLeft.isValid() && !bottomRight.isValid())
+    {
+        if(command & QItemSelectionModel::Clear)
+            selectionModel_->clear();
+        return;
+    }
+    if (!topLeft.isValid() && !viewItems_.empty())
+        topLeft = viewItems_.front().index;
+    if (!bottomRight.isValid() && !viewItems_.empty())
+    {
+        const QModelIndex index = viewItems_.back().index;
+        bottomRight = index.sibling(index.row(),0);
+    }
+
+    select(topLeft, bottomRight, command);
+}
+
+void CompactView::select(const QModelIndex &topIndex, const QModelIndex &bottomIndex,
+                              QItemSelectionModel::SelectionFlags command)
+{
+    QItemSelection selection;
+    const int top = viewIndex(topIndex),
+    bottom = viewIndex(bottomIndex);
+
+#if 0
+    const QList< QPair<int, int> > colRanges = columnRanges(topIndex, bottomIndex);
+    QList< QPair<int, int> >::const_iterator it;
+    for (it = colRanges.begin(); it != colRanges.end(); ++it) {
+        const int left = (*it).first,
+            right = (*it).second;
+#endif
+
+    QModelIndex previous;
+    QItemSelectionRange currentRange;
+    QStack<QItemSelectionRange> rangeStack;
+    for(int i = top; i <= bottom; ++i)
+    {
+        QModelIndex index = modelIndex(i);
+        QModelIndex parent = index.parent();
+        QModelIndex previousParent = previous.parent();
+        if (previous.isValid() && parent == previousParent)
+        {
+            // same parent
+            if (qAbs(previous.row() - index.row()) > 1)
+            {
+                //a hole (hidden index inside a range) has been detected
+                if (currentRange.isValid())
+                {
+                    selection.append(currentRange);
+                }
+                //let's start a new range
+                currentRange = QItemSelectionRange(index.sibling(index.row(),0), index.sibling(index.row(),0));
+            }
+            else
+            {
+                QModelIndex tl = model_->index(currentRange.top(), currentRange.left(),
+                        currentRange.parent());
+                currentRange = QItemSelectionRange(tl, index.sibling(index.row(),0));
+            }
+        }
+        else if (previous.isValid() && parent == model_->index(previous.row(), 0, previousParent))
+        {
+            // item is child of previous
+            rangeStack.push(currentRange);
+            currentRange = QItemSelectionRange(index.sibling(index.row(), 0), index.sibling(index.row(),0));
+        }
+        else
+        {
+            if(currentRange.isValid())
+                selection.append(currentRange);
+            if(rangeStack.isEmpty())
+            {
+                currentRange = QItemSelectionRange(index.sibling(index.row(),0), index.sibling(index.row(),0));
+            }
+            else
+            {
+                currentRange = rangeStack.pop();
+                index = currentRange.bottomRight(); //let's resume the range
+                --i; //we process again the current item
+            }
+        }
+
+        previous = index;
+    }
+
+    if (currentRange.isValid())
+        selection.append(currentRange);
+
+    for (int i = 0; i < rangeStack.count(); ++i)
+        selection.append(rangeStack.at(i));
+
+    selectionModel_->select(selection, command);
+}
+
+
+/*
+    Returns the SelectionFlags to be used when updating a selection with
+    to include the index specified. The  event is a user input event,
+    such as a mouse or keyboard event.
+*/
+
+QItemSelectionModel::SelectionFlags CompactView::selectionCommand(
+    const QModelIndex &index, const QEvent *event) const
+{
+    Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
+    if (event) {
+        switch (event->type()) {
+        case QEvent::MouseMove: {
+            // Toggle on MouseMove
+            modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
+            if (modifiers & Qt::ControlModifier)
+                return QItemSelectionModel::ToggleCurrent|selectionBehaviorFlags();
+            break;
+        }
+        case QEvent::MouseButtonPress: {
+            modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
+            const Qt::MouseButton button = static_cast<const QMouseEvent*>(event)->button();
+            const bool rightButtonPressed = button & Qt::RightButton;
+            const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
+            const bool controlKeyPressed = modifiers & Qt::ControlModifier;
+            const bool indexIsSelected = selectionModel_->isSelected(index);
+            if ((shiftKeyPressed || controlKeyPressed) && rightButtonPressed)
+                return QItemSelectionModel::NoUpdate;
+            if (!shiftKeyPressed && !controlKeyPressed && indexIsSelected)
+                return QItemSelectionModel::NoUpdate;
+            if (!index.isValid() && !rightButtonPressed && !shiftKeyPressed && !controlKeyPressed)
+                return QItemSelectionModel::Clear;
+            if (!index.isValid())
+                return QItemSelectionModel::NoUpdate;
+            break;
+        }
+        case QEvent::MouseButtonRelease: {
+            // ClearAndSelect on MouseButtonRelease if MouseButtonPress on selected item or empty area
+            modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
+            const Qt::MouseButton button = static_cast<const QMouseEvent*>(event)->button();
+            const bool rightButtonPressed = button & Qt::RightButton;
+            const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
+            const bool controlKeyPressed = modifiers & Qt::ControlModifier;
+            if (((index == pressedIndex_ && selectionModel_->isSelected(index))
+                || !index.isValid()) //&& state != QAbstractItemView::DragSelectingState
+                && !shiftKeyPressed && !controlKeyPressed && (!rightButtonPressed || !index.isValid()))
+                return QItemSelectionModel::ClearAndSelect|selectionBehaviorFlags();
+            return QItemSelectionModel::NoUpdate;
+        }
+        case QEvent::KeyPress: {
+            // NoUpdate on Key movement and Ctrl
+            modifiers = static_cast<const QKeyEvent*>(event)->modifiers();
+            switch (static_cast<const QKeyEvent*>(event)->key()) {
+            case Qt::Key_Backtab:
+                modifiers = modifiers & ~Qt::ShiftModifier; // special case for backtab
+            case Qt::Key_Down:
+            case Qt::Key_Up:
+            case Qt::Key_Left:
+            case Qt::Key_Right:
+            case Qt::Key_Home:
+            case Qt::Key_End:
+            case Qt::Key_PageUp:
+            case Qt::Key_PageDown:
+            case Qt::Key_Tab:
+                if (modifiers & Qt::ControlModifier
+#ifdef QT_KEYPAD_NAVIGATION
+                    // Preserve historical tab order navigation behavior
+                    || QApplication::navigationMode() == Qt::NavigationModeKeypadTabOrder
+#endif
+                    )
+                    return QItemSelectionModel::NoUpdate;
+                break;
+            case Qt::Key_Select:
+                return QItemSelectionModel::Toggle|selectionBehaviorFlags();
+            case Qt::Key_Space:// Toggle on Ctrl-Qt::Key_Space, Select on Space
+                if (modifiers & Qt::ControlModifier)
+                    return QItemSelectionModel::Toggle|selectionBehaviorFlags();
+                return QItemSelectionModel::Select|selectionBehaviorFlags();
+            default:
+                break;
+            }
+        }
+        default:
+            break;
+        }
+    }
+
+    if (modifiers & Qt::ShiftModifier)
+        return QItemSelectionModel::SelectCurrent|selectionBehaviorFlags();
+    if (modifiers & Qt::ControlModifier)
+        return QItemSelectionModel::Toggle|selectionBehaviorFlags();
+    //if (state == QAbstractItemView::DragSelectingState) {
+    //    //when drag-selecting we need to clear any previous selection and select the current one
+    //    return QItemSelectionModel::Clear|QItemSelectionModel::SelectCurrent|selectionBehaviorFlags();
+    //}
+
+    return QItemSelectionModel::ClearAndSelect|selectionBehaviorFlags();
+}
+
+/*
+  Returns the rectangle from the viewport of the items in the given
+  selection.
+
+  The returned region only contains rectangles intersecting
+  (or included in) the viewport.
+*/
+QRegion CompactView::visualRegionForSelection(const QItemSelection &selection) const
+{
+    if(selection.isEmpty())
+        return QRegion();
+
+    QRegion selectionRegion;
+    const QRect &viewportRect = viewport()->rect();
+    for (int i = 0; i < selection.count(); ++i)
+    {
+        QItemSelectionRange range = selection.at(i);
+        if (!range.isValid())
+            continue;
+        QModelIndex parent = range.parent();
+        QModelIndex leftIndex = range.topLeft();
+        int columnCount = model_->columnCount(parent);
+        if (!leftIndex.isValid())
+            continue;
+        const QRect leftRect = visualRect(leftIndex);
+        int top = leftRect.top();
+        QModelIndex rightIndex = range.bottomRight();
+        if (!rightIndex.isValid())
+            continue;
+        const QRect rightRect = visualRect(rightIndex);
+        int bottom = rightRect.bottom();
+        if (top > bottom)
+            qSwap<int>(top, bottom);
+        int height = bottom - top + 1;
+
+        QRect combined = leftRect|rightRect;
+        combined.setX(range.left());
+        if (viewportRect.intersects(combined))
+                selectionRegion += combined;
+    }
+    return selectionRegion;
+}
+
+/*
+    This slot is called when the selection is changed. The previous
+    selection (which may be empty), is specified by  deselected, and the
+    new selection by selected.
+*/
+void CompactView::selectionChanged(const QItemSelection &selected,
+                                   const QItemSelection &deselected)
+{
+    if(isVisible()) // && updatesEnabled()) {
+        viewport()->update(visualRegionForSelection(deselected) | visualRegionForSelection(selected));
+}
+
+/*
+    This slot is called when a new item becomes the current item.
+    The previous current item is specified by the previous index, and the new
+    item by the current index.
+*/
+void CompactView::currentChanged(const QModelIndex &current, const QModelIndex &previous)
+{
+    if(!isVisible())
+        return;
+
+    if(previous.isValid())
+    {
+        update(previous);
+    }
+
+    if(current.isValid())
+    {
+        update(current);
+    }
+}
+
+
+
