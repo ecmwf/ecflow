@@ -29,6 +29,7 @@
 #include "TimeAttr.hpp"
 #include "TodayAttr.hpp"
 #include "VerifyAttr.hpp"
+#include "QueueAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "ZombieAttr.hpp"
 #include "NodeAttrDoc.hpp"
@@ -79,6 +80,13 @@ static boost::shared_ptr<RepeatString> create_RepeatString(const std::string& na
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
    return boost::make_shared<RepeatString>( name,vec );
+}
+
+static boost::shared_ptr<QueueAttr> create_queue(const std::string& name, const boost::python::list& list)
+{
+   std::vector<std::string> vec;
+   BoostPythonUtil::list_to_str_vec(list,vec);
+   return boost::make_shared<QueueAttr>( name, vec );
 }
 
 static boost::shared_ptr<ZombieAttr> create_ZombieAttr(
@@ -236,6 +244,17 @@ void export_NodeAttr()
 	.def("color_change",&Meter::colorChange,                                             "returns the color change")
    .def("empty",       &Meter::empty,       "Return true if the Meter is empty. Used when returning a NULL Meter, from a find")
 	;
+
+   class_<QueueAttr>("Queue",NodeAttrDoc::queue_doc())
+   .def("__init__", make_constructor(&create_queue) )
+   .def(self == self )                                  // __eq__
+   .def("__str__",     &QueueAttr::toString)            // __str__
+   .def("__copy__",   copyObject<QueueAttr>)           // __copy__ uses copy constructor
+   .def("name",        &QueueAttr::name,       return_value_policy<copy_const_reference>(), "Return the queue name as string")
+   .def("value",       &QueueAttr::value,                                                   "Return the queue current value as string")
+   .def("index",       &QueueAttr::index,                                                   "Return the queue current index as a integer")
+   .def("empty",       &QueueAttr::empty,       "Return true if the Queue is empty. Used when returning a NULL Queue, from a find")
+   ;
 
 	class_<DateAttr>("Date",NodeAttrDoc::date_doc() ,init<int,int,int>())  // day,month,year
 	.def(self == self )                                     // __eq__

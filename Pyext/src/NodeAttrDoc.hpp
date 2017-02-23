@@ -32,7 +32,8 @@ public:
  	static const char* limit_doc();
  	static const char* inlimit_doc();
  	static const char* event_doc();
- 	static const char* meter_doc();
+   static const char* meter_doc();
+   static const char* queue_doc();
  	static const char* date_doc();
    static const char* day_doc();
    static const char* days_enum_doc();

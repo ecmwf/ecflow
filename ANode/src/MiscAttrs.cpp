@@ -20,11 +20,10 @@
 #include "Str.hpp"
 #include "Log.hpp"
 #include "Ecf.hpp"
+#include "Memento.hpp"
 
 using namespace ecf;
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,12 +31,19 @@ void MiscAttrs::begin()
 {
    // reset verification
    for(size_t i = 0; i < verifys_.size(); i++)   { verifys_[i].reset(); }
+   for(size_t i = 0; i < queues_.size(); i++)    { queues_[i].reset(); }
+}
+
+void MiscAttrs::requeue()
+{
+   for(size_t i = 0; i < queues_.size(); i++)    { queues_[i].reset(); }
 }
 
 std::ostream& MiscAttrs::print(std::ostream& os) const
 {
    BOOST_FOREACH(const ZombieAttr& z, zombies_)     { z.print(os); }
    BOOST_FOREACH(const VerifyAttr& v, verifys_ )    { v.print(os);  }
+   BOOST_FOREACH(const QueueAttr& q, queues_ )     { q.print(os);  }
    return os;
 }
 
@@ -56,6 +62,25 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
             std::cout << "MiscAttrs::operator==   (!(zombies_[i] == rhs.zombies_[i]) " << node_->debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+
+   if (queues_.size() != rhs.queues_.size()) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "MiscAttrs::operator==   (queues_.size() != rhs.queues_.size()) " << node_->debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   for(unsigned i = 0; i < queues_.size(); ++i) {
+      if (!(queues_[i] == rhs.queues_[i]) ) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "MiscAttrs::operator==   (!(queues_[i] == rhs.queues_[i]) " << node_->debugNodePath() << "\n";
          }
 #endif
          return false;
@@ -82,7 +107,6 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
    }
    return true;
 }
-
 
 void MiscAttrs::verification(std::string& errorMsg) const
 {
@@ -111,7 +135,6 @@ void MiscAttrs::addZombie( const ZombieAttr& z)
 #endif
 }
 
-
 void MiscAttrs::deleteZombie(const std::string& zombie_type)
 {
    if (zombie_type.empty()) {
@@ -136,7 +159,6 @@ void MiscAttrs::delete_zombie(Child::ZombieType zt)
       }
    }
 }
-
 
 const ZombieAttr& MiscAttrs::findZombie( ecf::Child::ZombieType zombie_type) const
 {
@@ -175,4 +197,68 @@ void MiscAttrs::clear()
 {
    zombies_.clear();   // can be added/removed via AlterCmd
    verifys_.clear();
+   queues_.clear();
 }
+
+void MiscAttrs::add_queue( const QueueAttr& q)
+{
+   const QueueAttr& theFndOne = find_queue( q.name() );
+    if (!theFndOne.empty()) {
+       std::stringstream ss;
+       ss << "MiscAttrs::add_queue: Node " << node_->absNodePath() << " already has a queue attribute of name " << q.name() << "\n";
+       throw std::runtime_error(ss.str());
+    }
+    queues_.push_back( q );
+    node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
+}
+
+void MiscAttrs::delete_queue(const std::string& name)
+{
+   if (name.empty()) {
+      queues_.clear();
+      node_->state_change_no_ = Ecf::incr_state_change_no();
+      return;
+   }
+   for(size_t i = 0; i < queues_.size(); ++i) {
+      if (queues_[i].name() == name) {
+         queues_.erase( queues_.begin() + i );
+         node_->state_change_no_ = Ecf::incr_state_change_no();
+         return;
+      }
+   }
+}
+
+const QueueAttr& MiscAttrs::find_queue( const std::string& name) const
+{
+   for(size_t i = 0; i < queues_.size(); i++) {
+      if ( queues_[i].name() == name ) {
+         return queues_[i];
+      }
+   }
+   return QueueAttr::EMPTY();
+}
+
+QueueAttr& MiscAttrs::findQueue(const std::string& name)
+{
+   for(size_t i = 0; i < queues_.size(); i++) {
+      if ( queues_[i].name() == name ) {
+         return queues_[i];
+      }
+   }
+   return QueueAttr::EMPTY1();
+}
+
+void MiscAttrs::set_memento(const NodeQueueMemento* m)
+{
+   add_queue(m->queue_);
+}
+
+void MiscAttrs::set_memento(const NodeQueueIndexMemento* m )
+{
+   for(size_t i = 0; i < queues_.size(); i++) {
+      if (queues_[i].name() == m->name_) {
+         queues_[i].set_index( m->index_);
+      }
+   }
+}
+

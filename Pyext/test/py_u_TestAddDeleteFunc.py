@@ -12,7 +12,7 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, \
-                   Event, Meter, Label, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatString, \
+                   Event, Meter, Label, Queue, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatString, \
                    TimeSlot, TimeSeries, Today, Time, Date, Day, Days, Cron, Autocancel, Late, \
                    DState, Clock, ChildCmdType, ZombieType, ZombieAttr, ZombieUserActionType, Client, debug_build
         
@@ -101,6 +101,14 @@ if __name__ == "__main__":
     assert len(list(task.meters)) == 4,"Expected 4 Meters"
     task.delete_meter("");           assert len(list(task.meters)) == 0,"Expected 0 Meters"
 
+    # add and delete queue
+    queue_items = [ "001", "002"]
+    task.add_queue( Queue("q1", queue_items) )\
+        .add_queue( Queue("q2", queue_items) )\
+        .add_queue( "q3", queue_items )\
+        .add_queue( "q4", queue_items)
+    assert len(list(task.queues)) == 4,"Expected 4 Queues"
+    task.delete_queue("");           assert len(list(task.queues)) == 0,"Expected 0 Queues"
 
     # add and delete label
     task.add_label( Label("label_name1", "value") )\
@@ -109,7 +117,6 @@ if __name__ == "__main__":
         .add_label( "label_name4", "value" )
     assert len(list(task.labels)) == 4,"Expected 4 labels"
     task.delete_label("");            assert len(list(task.labels)) == 0,"Expected 0 Labels"
-
 
     # add delete Repeat
     task.add_repeat( RepeatInteger("integer", 0, 100, 2) ).add_variable("fred","j")

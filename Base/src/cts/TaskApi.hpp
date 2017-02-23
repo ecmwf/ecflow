@@ -26,7 +26,8 @@ public:
 	static std::string init(const std::string& process_id);
 	static std::string abort(const std::string& reason = "");
 	static std::string event(const std::string& eventName);
-	static std::vector<std::string> meter(const std::string& meterName,const std::string& metervalue);
+   static std::vector<std::string> meter(const std::string& meterName,const std::string& metervalue);
+   static std::vector<std::string> queue(const std::string& queueName,const std::string& path_to_node_with_queue);
 	static std::vector<std::string> label(const std::string& label_name, const std::vector<std::string>& labels );
 	static std::string complete();
 	static std::string wait(const std::string& expression);
@@ -35,7 +36,8 @@ public:
  	static const char* initArg();
 	static const char* abortArg();
 	static const char* eventArg();
-	static const char* meterArg();
+   static const char* meterArg();
+   static const char* queue_arg();
 	static const char* labelArg();
 	static const char* completeArg();
 	static const char* waitArg();

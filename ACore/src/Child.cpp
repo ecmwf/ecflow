@@ -68,7 +68,8 @@ std::string Child::to_string( Child::CmdType ct)
 		case Child::METER: return "meter"; break;
 		case Child::LABEL: return "label"; break;
 		case Child::WAIT: return "wait"; break;
-		case Child::ABORT: return "abort"; break;
+      case Child::QUEUE: return "queue"; break;
+      case Child::ABORT: return "abort"; break;
 		case Child::COMPLETE: return "complete"; break;
 	}
 	assert(false);
@@ -94,7 +95,8 @@ Child::CmdType Child::child_cmd( const std::string& s)
 	if (s == "meter") return Child::METER;
 	if (s == "label") return Child::LABEL;
 	if (s == "wait") return Child::WAIT;
-	if (s == "abort") return Child::ABORT;
+   if (s == "queue") return Child::QUEUE;
+   if (s == "abort") return Child::ABORT;
 	if (s == "complete") return Child::COMPLETE;
 	assert(false);
  	return Child::INIT;
@@ -121,7 +123,8 @@ bool Child::valid_child_cmd( const std::string& s)
 	if (s == "meter") return true;
 	if (s == "label") return true;
 	if (s == "wait") return true;
-	if (s == "abort") return true;
+   if (s == "queue") return true;
+   if (s == "abort") return true;
 	if (s == "complete") return true;
  	return false;
 }

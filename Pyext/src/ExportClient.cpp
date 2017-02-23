@@ -271,6 +271,7 @@ void export_Client()
    .def("child_meter",         &ClientInvoker::child_meter,   "Child command,notify server meter changed, requires meter name and value")
    .def("child_label",         &ClientInvoker::child_label,   "Child command,notify server label changed, requires label name, and new value")
    .def("child_wait",          &ClientInvoker::child_wait,    "Child command,wait for expression to come true")
+   .def("child_queue",         &ClientInvoker::child_queue,   "Child command,queue the next step, return the next step as a string. requires queue name, and optionally path to node with the queue")
    .def("child_complete",      &ClientInvoker::child_complete,"Child command,notify server job has complete")
 	;
 

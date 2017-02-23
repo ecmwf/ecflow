@@ -696,6 +696,7 @@ void EventCmd::create( 	Cmd_ptr& cmd,
   	                            clientEnv->task_try_no(),
   	                            event ));
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MeterCmd::equals(ClientToServerCmd* rhs) const
@@ -914,6 +915,153 @@ void LabelCmd::create( 	Cmd_ptr& cmd,
 	                            labelValue));
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool QueueCmd::equals(ClientToServerCmd* rhs) const
+{
+   QueueCmd* the_rhs = dynamic_cast<QueueCmd*>(rhs);
+   if (!the_rhs) return false;
+   if (name_ != the_rhs->name()) return false;
+   if (path_to_node_with_queue_ != the_rhs->path_to_node_with_queue()) return false;
+   return TaskCmd::equals(rhs);
+}
+
+std::ostream& QueueCmd::print(std::ostream& os) const
+{
+   return os << Str::CHILD_CMD() << TaskApi::queue_arg() << " " << name_ << " " << path_to_node_with_queue_ << " " << path_to_node();
+}
+
+STC_Cmd_ptr QueueCmd::doHandleRequest(AbstractServer* as) const
+{
+   as->update_stats().task_queue_++;
+   std::string queue_attr_value;
+
+   //////////////////////////////////////////////////////////////////////////////
+   // Return the current string value, and then increment the index
+   //////////////////////////////////////////////////////////////////////////////
+   {  // Added scope for SuiteChanged1 changed: i.e update suite change numbers before job submission
+      // submittable_ setup during authentication
+      SuiteChanged1 changed(submittable_->suite());
+
+      if (!path_to_node_with_queue_.empty()) {
+         Defs* defs = submittable_->defs();
+         if (defs) {
+            node_ptr node_with_queue = defs->findAbsNode(path_to_node_with_queue_);
+            if (node_with_queue) {
+
+               QueueAttr& queue_attr = node_with_queue->findQueue(name_);
+               if (!queue_attr.empty()) {
+                  queue_attr_value = queue_attr.value();
+                  queue_attr.increment();
+               }
+               else {
+                  std::stringstream ss; ss << "QueueCmd:: Could not find queue of name " << name_ << ", on node " << path_to_node_with_queue_;
+                  return PreAllocatedReply::error_cmd(ss.str());
+               }
+            }
+            else {
+               std::stringstream ss; ss << "QueueCmd:: Could not find node at path " << path_to_node_with_queue_;
+               return PreAllocatedReply::error_cmd(ss.str());
+            }
+         }
+      }
+      else {
+         QueueAttr& queue_attr = submittable_->findQueue(name_);
+         if (!queue_attr.empty()) {
+            queue_attr_value = queue_attr.value();
+            queue_attr.increment();
+         }
+         else {
+            Node* parent = submittable_->parent();
+            while (parent) {
+               QueueAttr& queue_attr1 = parent->findQueue(name_);
+               if (!queue_attr1.empty()) {
+                  queue_attr_value = queue_attr1.value();
+                  queue_attr1.increment();
+                  break;
+               }
+               parent = parent->parent();
+            }
+            if (queue_attr_value.empty()) {
+               std::stringstream ss; ss << "QueueCmd:: Could not find queue " << name_ << " Up the node hierarchy";
+               return PreAllocatedReply::error_cmd(ss.str());
+            }
+         }
+      }
+   }
+
+   if (queue_attr_value.empty()) {
+       std::stringstream ss; ss << "QueueCmd:: queue attribute value *empty* for "; print(ss);
+       return PreAllocatedReply::error_cmd(ss.str());
+   }
+
+   // Do job submission in case any triggers dependent on QueueAttr
+   as->increment_job_generation_count();
+   return PreAllocatedReply::string_cmd(queue_attr_value);
+}
+
+const char* QueueCmd::arg()  { return TaskApi::queue_arg();}
+const char* QueueCmd::desc() {
+   return
+         "QueueCmd. For use in the '.ecf' script file *only*\n"
+         "Hence the context is supplied via environment variables\n"
+         "  arg1(string) = queue-name\n"
+         "  arg2(string) = (optional)The path where the queue is defined\n\n"
+         "If this child command is a zombie, then the default action will be to *block*,\n"
+         "The default can be overridden by using zombie attributes."
+         "If the path to the queue is not defined, then this command will\n"
+         "search for the queue up the node hierarchy. If no queue found, command fails\n\n"
+         "Usage:\n"
+         "  ecflow_client --queue=my_queue_name\n"
+         "  ecflow_client --queue=my_queue_name /path/to/node/with/queue\n"
+         ;
+}
+
+void QueueCmd::addOption(boost::program_options::options_description& desc) const {
+   desc.add_options()( QueueCmd::arg(), po::value< vector<string> >()->multitoken(), QueueCmd::desc() );
+}
+void QueueCmd::create(  Cmd_ptr& cmd,
+                  boost::program_options::variables_map& vm,
+                  AbstractClientEnv* clientEnv ) const
+{
+   vector<string> args = vm[ arg() ].as< vector<string> >();
+
+   if (clientEnv->debug()) {
+      dumpVecArgs(QueueCmd::arg(),args);
+      cout << "  QueueCmd::create " << QueueCmd::arg()
+      << " task_path(" << clientEnv->task_path()
+      << ") password(" << clientEnv->jobs_password()
+      << ") remote_id(" << clientEnv->process_or_remote_id()
+      << ") try_no(" << clientEnv->task_try_no()
+      << ")\n";
+   }
+
+   if (args.empty() || (args.size() > 2)) {
+      std::stringstream ss;
+      ss << "QueueCmd: One or two arguments expected, found " << args.size()
+                     << " Please specify <queue-name> <path to node with queue>, ie --queue=name /path/to/node/with/queue\n"
+                     << " or --queue=name\n";
+      throw std::runtime_error( ss.str() );
+   }
+
+   std::string path_to_node_with_queue;
+   if (args.size() == 2) {
+      path_to_node_with_queue = args[1];
+   }
+
+   std::string errorMsg;
+   if ( !clientEnv->checkTaskPathAndPassword(errorMsg) ) {
+      throw std::runtime_error( "QueueCmd: " + errorMsg );
+   }
+
+   cmd = Cmd_ptr(new QueueCmd( clientEnv->task_path(),
+                               clientEnv->jobs_password(),
+                               clientEnv->process_or_remote_id(),
+                               clientEnv->task_try_no(),
+                               args[0],
+                               path_to_node_with_queue ));
+}
+
 std::ostream& operator<<(std::ostream& os, const InitCmd& c)        { return c.print(os); }
 std::ostream& operator<<(std::ostream& os, const EventCmd& c)       { return c.print(os); }
 std::ostream& operator<<(std::ostream& os, const MeterCmd& c)       { return c.print(os); }
@@ -921,3 +1069,4 @@ std::ostream& operator<<(std::ostream& os, const LabelCmd& c)       { return c.p
 std::ostream& operator<<(std::ostream& os, const AbortCmd& c)       { return c.print(os); }
 std::ostream& operator<<(std::ostream& os, const CompleteCmd& c)    { return c.print(os); }
 std::ostream& operator<<(std::ostream& os, const CtsWaitCmd& c)     { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const QueueCmd& c)       { return c.print(os); }

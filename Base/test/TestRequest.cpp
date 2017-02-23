@@ -111,14 +111,17 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1,suite_names,ClientHandleCmd::REMOVE))); // remove
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1, true)));                               // auto_add new suites
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1)));                                     // de-register/drop
+
 	cmd_vec.push_back( Cmd_ptr( new InitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1)));
 	cmd_vec.push_back( Cmd_ptr( new EventCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"eventName")));
 	cmd_vec.push_back( Cmd_ptr( new MeterCmd("suiteName/familyName/heir_familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"myMeter",100)));
 	cmd_vec.push_back( Cmd_ptr( new CompleteCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1)));
 	cmd_vec.push_back( Cmd_ptr( new AbortCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1)));
 	cmd_vec.push_back( Cmd_ptr( new CtsWaitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"1 eq 1")));
-	cmd_vec.push_back( Cmd_ptr( new LabelCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"labelName","label value")));
-	cmd_vec.push_back( Cmd_ptr( new ForceCmd("/suiteName","complete",true,true)));
+   cmd_vec.push_back( Cmd_ptr( new LabelCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"labelName","label value")));
+   cmd_vec.push_back( Cmd_ptr( new QueueCmd("/suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"queue1","/suiteName")));
+
+   cmd_vec.push_back( Cmd_ptr( new ForceCmd("/suiteName","complete",true,true)));
 	cmd_vec.push_back( Cmd_ptr( new FreeDepCmd("/suiteName")));
 	cmd_vec.push_back( Cmd_ptr( new CFileCmd("/suiteName",CFileCmd::ECF, 10)));
 	cmd_vec.push_back( Cmd_ptr( new CFileCmd("/suiteName",CFileCmd::JOB,100)));
@@ -221,7 +224,7 @@ static void test_persistence(const Defs& theFixtureDefs )
 	int groupRequest = 0;
 	BOOST_FOREACH(const Cmd_ptr& theCmd, cmd_vec) {
 
-		// std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
+		//std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
 		if (theCmd->connect_to_different_servers()) {
 			BOOST_CHECK_MESSAGE(theCmd->task_cmd(),"Currently only tasks commands, are allowed to connect to different servers");
 		}
@@ -232,7 +235,7 @@ static void test_persistence(const Defs& theFixtureDefs )
 			if (theCmd.get()->handleRequestIsTestable()) {
 				// test handleRequest while were at it.
  				// Avoid TERMINATE_SERVER cmd as this will prematurely cause an exit, wont appear as an error
-				// cerr << "cmd_request = " << cmd_request << "\n";
+				//cerr << "cmd_request = " << cmd_request << "\n";
 			   try {
 			      STC_Cmd_ptr ok_or_error_cmd = cmd_request.handleRequest(&mockServer);
 			      if (ok_or_error_cmd) {
@@ -247,8 +250,10 @@ static void test_persistence(const Defs& theFixtureDefs )
 			}
 		}
 
+      //cout << " Saving = " << cmd_request << "\n";
 		BOOST_REQUIRE_NO_THROW(ecf::save("request.txt",cmd_request));
 
+      //cout << " Restoring = " << cmd_request << "\n";
 		ClientToServerRequest restoredRequest;
 		BOOST_REQUIRE_NO_THROW(ecf::restore("request.txt", restoredRequest));
 		BOOST_REQUIRE_MESSAGE(restoredRequest == cmd_request, "restoredRequest " << restoredRequest << " cmd_request " << cmd_request);

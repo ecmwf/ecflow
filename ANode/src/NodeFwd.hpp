@@ -83,6 +83,7 @@ class NodeLabelMemento;
 class NodeTriggerMemento;
 class NodeCompleteMemento;
 class NodeRepeatMemento;
+class NodeRepeatIndexMemento;
 class NodeLimitMemento;
 class NodeInLimitMemento;
 class NodeVariableMemento;
@@ -103,5 +104,7 @@ class OrderMemento;
 class ChildrenMemento;
 class AliasChildrenMemento;
 class AliasNumberMemento;
+class NodeQueueMemento;
+class NodeQueueIndexMemento;
 
 #endif

@@ -201,6 +201,7 @@ void Node::addLabel( const Label& l)
    child_attrs_->addLabel(l);
 }
 
+
 void Node::addMeter( const Meter& m)
 {
 //   if ( isSuite() ) {
@@ -303,5 +304,15 @@ void Node::addZombie( const ZombieAttr& z)
    }
    misc_attrs_ = new MiscAttrs(this);
    misc_attrs_->addZombie(z);
-
 }
+
+void Node::add_queue( const QueueAttr& q)
+{
+   if (misc_attrs_) {
+      misc_attrs_->add_queue(q); // can throw
+      return;
+   }
+   misc_attrs_ = new MiscAttrs(this);
+   misc_attrs_->add_queue(q);
+}
+

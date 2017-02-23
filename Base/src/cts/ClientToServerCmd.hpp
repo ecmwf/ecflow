@@ -449,6 +449,7 @@ private:
    }
 };
 
+
 class LabelCmd : public TaskCmd {
 public:
    LabelCmd(const std::string& pathToTask,
@@ -488,6 +489,49 @@ private:
       ar & boost::serialization::base_object< TaskCmd >( *this );
       ar & name_;
       ar & label_;
+   }
+};
+
+class QueueCmd : public TaskCmd {
+public:
+   QueueCmd(const std::string& pathToTask,
+            const std::string& jobsPassword,
+            const std::string& process_or_remote_id,
+            int try_no,
+            const std::string& queueName,
+            const std::string& path_to_node_with_queue = "") // if empty search for queue up node tree
+   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no),
+     name_(queueName),path_to_node_with_queue_(path_to_node_with_queue) {}
+   QueueCmd() : TaskCmd() {}
+
+   const std::string& name() const { return name_; }
+   const std::string& path_to_node_with_queue() const { return path_to_node_with_queue_; }
+
+   virtual std::ostream& print(std::ostream& os) const;
+   virtual bool equals(ClientToServerCmd*) const;
+
+   virtual const char* theArg() const { return arg();}
+   virtual void addOption(boost::program_options::options_description& desc) const;
+   virtual void create(    Cmd_ptr& cmd,
+            boost::program_options::variables_map& vm,
+            AbstractClientEnv* clientEnv ) const;
+private:
+   static const char* arg();  // used for argument parsing
+   static const char* desc(); // The description of the argument as provided to user
+
+   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   virtual ecf::Child::CmdType child_type() const { return ecf::Child::QUEUE; }
+
+private:
+   std::string name_;                     // the queue name
+   std::string path_to_node_with_queue_;
+
+   friend class boost::serialization::access;
+   template<class Archive>
+   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+      ar & boost::serialization::base_object< TaskCmd >( *this );
+      ar & name_;
+      ar & path_to_node_with_queue_;
    }
 };
 
@@ -1863,6 +1907,7 @@ BOOST_CLASS_EXPORT_KEY(InitCmd)
 BOOST_CLASS_EXPORT_KEY(EventCmd)
 BOOST_CLASS_EXPORT_KEY(MeterCmd)
 BOOST_CLASS_EXPORT_KEY(LabelCmd)
+BOOST_CLASS_EXPORT_KEY(QueueCmd)
 BOOST_CLASS_EXPORT_KEY(AbortCmd)
 BOOST_CLASS_EXPORT_KEY(CtsWaitCmd)
 BOOST_CLASS_EXPORT_KEY(CompleteCmd)

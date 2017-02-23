@@ -40,6 +40,7 @@
 #include "ZombieAttrParser.hpp"
 #include "LateParser.hpp"
 #include "DefsStateParser.hpp"
+#include "QueueParser.hpp"
 #include "Stl.hpp"
 #include "Str.hpp"
 
@@ -100,6 +101,7 @@ public:
       addParser( new AutoCancelParser(p) );
       addParser( new VerifyParser(p) );
       addParser( new ZombieAttrParser(p) );
+      addParser( new QueueParser(p) );
    }
 
    virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -176,6 +178,7 @@ public:
       addParser( new ZombieAttrParser(p) );
       addParser( new AliasParser(p,this) );
       addParser( new TextParser(p) );
+      addParser( new QueueParser(p) );
    }
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -258,6 +261,7 @@ public:
       addParser( new VerifyParser(p) );
       addParser( new ZombieAttrParser(p) );
       addParser( new TextParser(p) );
+      addParser( new QueueParser(p) );
    }
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -361,6 +365,7 @@ public:
       addParser( new CalendarParser(p) );
       addParser( new MeterParser(p) );
       addParser( new EndClockParser(p) );
+      addParser( new QueueParser(p) );
  	}
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {

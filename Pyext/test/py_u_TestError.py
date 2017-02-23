@@ -14,7 +14,7 @@
 #  code for testing errors in creation of defs file in python
 
 import os
-from ecflow import Date, Meter, Event, Clock, Variable, Label, Limit, InLimit, \
+from ecflow import Date, Meter, Event, Queue, Clock, Variable, Label, Limit, InLimit, \
                    RepeatDate, RepeatEnumerated, RepeatInteger, RepeatString, \
                    Task, Family, Suite, Defs, Client, debug_build
 
@@ -28,6 +28,15 @@ def check_date(day,month,year):
 def check_meter(name,min_meter_value,max_meter_value,color_change):
     try:    
         Meter(name,min_meter_value,max_meter_value,color_change)
+        return True
+    except IndexError: 
+        return False
+    except RuntimeError: 
+        return False
+
+def check_queue(name,queue_items):
+    try:    
+        Queue(name, queue_items)
         return True
     except IndexError: 
         return False
@@ -179,6 +188,13 @@ if __name__ == "__main__":
     assert check_meter("",0,100,100) == False,     "Expected exception since no name specified"
     assert check_meter(" ",0,100,100) == False,    "Expected Exception can not have spaces for a name"
 
+    assert check_queue("m",["a"]),                 "Expected valid Queue"
+    assert check_queue("m",["a","b"]),             "Expected valid Queue"
+    assert check_queue("",["a","b"]) == False,     "Expected exception queue name is empty"
+    assert check_queue(" ",["a","b"]) == False,    "Expected Exception can not have spaces for a name"
+    assert check_queue(".",["a","b"]) == False,    "Expected Exception can not start name with a ."
+    assert check_queue("m",[]) == False,           "Expected Exception queue items list is empty"
+ 
     assert check_event(1),                            "Expected valid Event"
     assert check_event(2),                            "Expected valid Event"
     assert check_event_number_and_name(2,"fred"),     "Expected valid Event"
@@ -394,20 +410,21 @@ if __name__ == "__main__":
     except RuntimeError as e : 
         test_passed = True
         pass
-    assert test_passed,"duplicate event test failed"   
+    assert test_passed,"duplicate meter test failed"   
 
+    # =================================================================================
+    print("check duplicate queue not allowed")
     test_passed = False
     try:
         defs = Defs()
         suite = defs.add_suite("1")
-        ta = suite.add_task("a")
-        ta.add_meter(Meter("meter",0,100));
-        ta.add_meter(Meter("meter",10,100));
+        suite.add_queue("q",["a"]);
+        suite.add_queue("q",["a","b"]);
     except RuntimeError as e : 
         test_passed = True
         pass
-    assert test_passed,"duplicate meter test failed"   
-    
+    assert test_passed,"duplicate queue test failed"   
+
     # =================================================================================
     print("check duplicate event not allowed")
     test_passed = False

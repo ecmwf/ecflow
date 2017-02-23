@@ -23,18 +23,20 @@
 
 #include "ZombieAttr.hpp"
 #include "VerifyAttr.hpp"
+#include "QueueAttr.hpp"
 #include "NodeFwd.hpp"
 
 class MiscAttrs : private boost::noncopyable {
 public:
    MiscAttrs(Node* node) : node_(node) {}
-   MiscAttrs(const MiscAttrs& rhs) : node_(NULL),zombies_(rhs.zombies_),verifys_(rhs.verifys_) {}
+   MiscAttrs(const MiscAttrs& rhs) : node_(NULL),zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_) {}
    MiscAttrs() : node_(NULL) {}
 
    // needed by node serialisation
    void set_node(Node* n) { node_ = n; }
 
    void begin();
+   void requeue();
 
    // standard functions: ==============================================
    std::ostream& print(std::ostream&) const;
@@ -43,16 +45,19 @@ public:
    // Access functions: ======================================================
    const std::vector<VerifyAttr>&      verifys()  const { return verifys_;}
    const std::vector<ZombieAttr>&      zombies()  const { return zombies_; }
+   const std::vector<QueueAttr>&       queues()  const { return queues_; }
 
    // Add functions: ===============================================================
    void addVerify( const VerifyAttr& );  // for testing and verification Can throw std::runtime_error
    void addZombie( const ZombieAttr& );  // will throw std::runtime_error if duplicate
+   void add_queue( const QueueAttr& );   // will throw std::runtime_error if duplicate
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type
    // Can throw std::runtime_error of the attribute can not be found
    void delete_zombie(const ecf::Child::ZombieType);
    void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
+   void delete_queue(const std::string& name); // empty string means delete all queue's
 
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors
@@ -60,8 +65,13 @@ public:
    // Find functions: ============================================================
    bool findVerify(const VerifyAttr& ) const;
    const ZombieAttr& findZombie( ecf::Child::ZombieType ) const;
+   const QueueAttr& find_queue( const std::string& name ) const;
+   QueueAttr& findQueue(const std::string& name);
 
    void verification(std::string& errorMsg) const;
+
+   void set_memento(const NodeQueueMemento* );
+   void set_memento(const NodeQueueIndexMemento*);
 
 private:
    void clear(); /// Clear *ALL* internal attributes
@@ -70,6 +80,8 @@ private:
    std::vector<ZombieAttr>::const_iterator zombie_end() const { return zombies_.end();}
    std::vector<VerifyAttr>::const_iterator verify_begin() const { return verifys_.begin();}
    std::vector<VerifyAttr>::const_iterator verify_end() const { return verifys_.end();}
+   std::vector<QueueAttr>::const_iterator queue_begin() const { return queues_.begin();}
+   std::vector<QueueAttr>::const_iterator queue_end() const { return queues_.end();}
 
 private:
    Node*        node_; // *NOT* persisted must be set by the parent class
@@ -78,6 +90,7 @@ private:
 private:
    std::vector<ZombieAttr> zombies_;
    std::vector<VerifyAttr> verifys_;     // used for statistics and test verification
+   std::vector<QueueAttr>  queues_;      // experimental
 
 private:
    friend class boost::serialization::access;
@@ -85,6 +98,7 @@ private:
    void serialize(Archive & ar, const unsigned int /*version*/) {
       ar & zombies_;
       ar & verifys_;
+      ar & queues_;
    }
 };
 #endif

@@ -107,6 +107,9 @@ private:
 		suite->addVariable( Variable("VAR1","\"value\"") );
 		suite->addVariable( Variable("ECF_FETCH","\"smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%\"") );
 
+		std::vector<std::string> queue_items; queue_items.push_back("000"); queue_items.push_back("001");  queue_items.push_back("002");
+      suite->add_queue(QueueAttr("queue",queue_items));
+      suite->add_queue(QueueAttr("queue1",queue_items));
 		suite->add_task( "t1" );
 		suite->add_task( "t2" );
 		task_ptr suiteTask = suite->add_task( "t3" );
@@ -114,6 +117,7 @@ private:
 		suiteTask->add_part_trigger( PartExpression("t2 == complete",false) );
 		suiteTask->add_part_complete( PartExpression("t1 == complete") );
 		suiteTask->add_part_complete( PartExpression("t2 == complete",true) );
+
 
 		std::vector<ecf::Child::CmdType> child_cmds;
 		child_cmds.push_back(ecf::Child::INIT);
@@ -200,6 +204,7 @@ private:
          fam->addLimit( Limit(limitName,20) );
          fam->addLate( lateAttr );
          fam->addInLimit( InLimit(suiteLimit2,"/" + sname,2,true/*limit this node only*/ ));
+         fam->add_queue(QueueAttr("queue1",queue_items));
 
          task_ptr task = fam->add_task( tname );
 			task->addDate( DateAttr(1,2,2009) );
@@ -216,6 +221,7 @@ private:
  			task->addInLimit( InLimit(suiteLimit,"/" + sname ));
  			task->addVerify( VerifyAttr(NState::COMPLETE,3) );
  			task->addLate( lateAttr );
+         task->add_queue(QueueAttr("queue1",queue_items));
 			if (i == 2) {
 				 std::string compExpr = "../familyName" + boost::lexical_cast< std::string >( i-1 );
 				 compExpr += "/taskName" + boost::lexical_cast< std::string >( i-1 );

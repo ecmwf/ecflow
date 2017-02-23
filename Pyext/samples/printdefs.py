@@ -128,6 +128,7 @@ class DefsTraverser:
         for cron in node.crons:       self.__println(str(cron))    
         for verify in node.verifies:  self.__println(str(verify))
         for zombie in node.zombies:   self.__println(str(zombie))
+        for queue in node.queues:     self.__println(str(queue))
         
         del indent
 

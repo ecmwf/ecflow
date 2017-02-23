@@ -52,6 +52,16 @@ std::vector<std::string> TaskApi::meter(const std::string& meterName,const std::
 }
 const char* TaskApi::meterArg()     { return "meter"; }
 
+std::vector<std::string> TaskApi::queue(const std::string& queueName,const std::string& path_to_node_with_queue)
+{
+   std::vector<std::string> retVec; retVec.reserve(2);
+   std::string ret = "--queue=";ret += queueName;
+   retVec.push_back(ret);
+   if (!path_to_node_with_queue.empty()) retVec.push_back(path_to_node_with_queue);
+   return retVec;
+}
+const char* TaskApi::queue_arg() { return "queue"; }
+
 
 std::vector<std::string> TaskApi::label(const std::string& label_name, const std::vector<std::string>& labels )
 {

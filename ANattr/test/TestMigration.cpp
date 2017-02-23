@@ -29,6 +29,7 @@
 #include "NodeAttr.hpp"
 #include "Variable.hpp"
 #include "ZombieAttr.hpp"
+#include "QueueAttr.hpp"
 #include "Calendar.hpp"
 #include "SerializationTest.hpp"
 #include "TimeSeries.hpp"
@@ -74,6 +75,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con )
    doSave(file_name + "Event",Event());
    doSave(file_name + "Meter",Meter());
    doSave(file_name + "ZombieAttr",ZombieAttr());
+   doSave(file_name + "QueueAttr",QueueAttr());
 #endif
 
    do_restore<VerifyAttr>(file_name + "VerifyAttr",VerifyAttr());
@@ -93,6 +95,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con )
    do_restore<Event>(file_name + "Event",Event());
    do_restore<Meter>(file_name + "Meter",Meter());
    do_restore<ZombieAttr>(file_name + "ZombieAttr",ZombieAttr());
+   do_restore<QueueAttr>(file_name + "QueueAttr",QueueAttr());
 }
 
 BOOST_AUTO_TEST_CASE( test_migration_restore )
@@ -157,6 +160,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    doSave(file_name + "Meter",Meter("meter",10,100,100));
    doSave(file_name + "ZombieAttr",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB));
    doSave(file_name + "ZombieAttr1",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,500));
+   doSave(file_name + "QueueAttr",QueueAttr("queue",theVec));
 #endif
 
    do_restore<VerifyAttr>(file_name + "VerifyAttr",VerifyAttr(NState::COMPLETE,3));
@@ -180,6 +184,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    do_restore<Meter>(file_name + "Meter",Meter("meter",10,100,100));
    do_restore<ZombieAttr>(file_name + "ZombieAttr",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB));
    do_restore<ZombieAttr>(file_name + "ZombieAttr1",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,500));
+   do_restore<QueueAttr>(file_name + "QueueAttr",QueueAttr("queue",theVec));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

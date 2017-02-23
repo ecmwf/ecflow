@@ -563,6 +563,8 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface )
    BOOST_REQUIRE_MESSAGE( theClient.eventTask("event_name") == 0,"--event should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.meterTask("meter_name","20") == 0,"--meter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.waitTask("a == complete") == 0,"--wait should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","/path/to/node/with/queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.completeTask() == 0,"--complete should return 0\n" << theClient.errorMsg());
    std::vector<std::string> labels; labels.push_back("test_client_task_interface");
    BOOST_REQUIRE_MESSAGE( theClient.labelTask("label_name",labels) == 0,"--label should return 0\n" << theClient.errorMsg());

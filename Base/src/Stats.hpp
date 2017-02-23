@@ -88,7 +88,8 @@ struct Stats {
 	unsigned int task_abort_;
 	unsigned int task_event_;
 	unsigned int task_meter_;
-	unsigned int task_label_;
+   unsigned int task_label_;
+   unsigned int task_queue_;
 
 	unsigned int zombie_fob_;
 	unsigned int zombie_fail_;
@@ -184,6 +185,7 @@ private:
 		ar & task_event_;
 		ar & task_meter_;
 		ar & task_label_;
+		ar & task_queue_;
 
 		ar & zombie_fob_;
 		ar & zombie_fail_;

@@ -23,7 +23,7 @@ namespace ecf {
 
 class Child : private boost::noncopyable {
 public:
-	enum CmdType    { INIT, EVENT, METER, LABEL, WAIT, ABORT, COMPLETE };
+	enum CmdType    { INIT, EVENT, METER, LABEL, WAIT, QUEUE, ABORT, COMPLETE };
 
 	enum ZombieType { USER, ECF, PATH , NOT_SET };
 

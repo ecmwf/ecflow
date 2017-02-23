@@ -150,6 +150,8 @@ public:
 	   { return invoke(TaskApi::label(labelName,labels)); }
    int waitTask(const std::string& on_expression) const
       { return invoke(TaskApi::wait(on_expression)); }
+   int queueTask(const std::string& queue_name, const std::string& path_to_node_with_queue = "") const
+      { return invoke(TaskApi::queue(queue_name,path_to_node_with_queue)); }
 	int completeTask() const
 	   { return invoke(TaskApi::complete()); }
 
@@ -164,7 +166,8 @@ public:
 	void child_event(const std::string& event_name_or_number);
 	void child_meter(const std::string& meter_name, int meter_value);
 	void child_label(const std::string& label_name, const std::string& label_value);
-	void child_wait(const std::string& on_expression);
+   void child_wait(const std::string& on_expression);
+   void child_queue(const std::string& queue_name, const std::string& path_to_node_with_queue = "");
 	void child_complete();
 
 	// ********************************************************************************

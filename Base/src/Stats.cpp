@@ -69,7 +69,8 @@ Stats::Stats() :
 	task_abort_(0),
 	task_event_(0),
 	task_meter_(0),
-	task_label_(0),
+   task_label_(0),
+   task_queue_(0),
 
 	zombie_fob_(0),
 	zombie_fail_(0),
@@ -196,6 +197,7 @@ void Stats::reset()
    task_event_ = 0;
    task_meter_ = 0;
    task_label_ = 0;
+   task_queue_ = 0;
 
    zombie_fob_ = 0;
    zombie_fail_ = 0;
@@ -278,7 +280,7 @@ void Stats::show(std::ostream& os) const
    if (sync_clock_ != 0)       os << left << setw(width) << "   Sync suite clock " << sync_clock_ << "\n";
    if (news_ != 0)             os << left << setw(width) << "   News " << news_ << "\n";
    
-   if (task_init_ || task_complete_ || task_wait_ || task_abort_ || task_event_ || task_meter_ || task_label_)  os << "\n";
+   if (task_init_ || task_complete_ || task_wait_ || task_abort_ || task_event_ || task_meter_ || task_label_ || task_queue_)  os << "\n";
    if (task_init_ != 0)     os << left << setw(width) << "   Task init " << task_init_ << "\n";
    if (task_complete_ != 0) os << left << setw(width) << "   Task complete " << task_complete_ << "\n";
    if (task_wait_ != 0)     os << left << setw(width) << "   Task wait " << task_wait_ << "\n";
@@ -286,6 +288,7 @@ void Stats::show(std::ostream& os) const
    if (task_event_ != 0)    os << left << setw(width) << "   Task event " << task_event_ << "\n";
    if (task_meter_ != 0)    os << left << setw(width) << "   Task meter " << task_meter_ << "\n";
    if (task_label_ != 0)    os << left << setw(width) << "   Task label " << task_label_ << "\n";
+   if (task_queue_ != 0)    os << left << setw(width) << "   Task queue " << task_queue_ << "\n";
    
    if (zombie_fob_ || zombie_fail_ || zombie_adopt_ || zombie_remove_ || zombie_get_ || zombie_block_ || zombie_kill_)  os << "\n";
    if (zombie_fob_ != 0)     os << left << setw(width) << "   Zombie fob " << zombie_fob_ << "\n";

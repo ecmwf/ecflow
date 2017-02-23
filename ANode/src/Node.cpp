@@ -288,6 +288,7 @@ void Node::requeue(
 
    if (lateAttr_) lateAttr_->reset();
    if (child_attrs_) child_attrs_->requeue();
+   if (misc_attrs_) misc_attrs_->requeue();
 
    for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
 
@@ -2089,9 +2090,13 @@ std::vector<Label>::const_iterator Node::label_end() const {   if (child_attrs_)
 
 static std::vector<VerifyAttr> verifys_;
 static std::vector<ZombieAttr> zombies_;
-const std::vector<VerifyAttr>& Node::verifys()  const { if (misc_attrs_) return misc_attrs_->verifys(); return verifys_;}
-const std::vector<ZombieAttr>& Node::zombies()  const { if (misc_attrs_) return misc_attrs_->zombies(); return zombies_; }
+static std::vector<QueueAttr>  queues_;
+const std::vector<VerifyAttr>& Node::verifys() const { if (misc_attrs_) return misc_attrs_->verifys(); return verifys_;}
+const std::vector<ZombieAttr>& Node::zombies() const { if (misc_attrs_) return misc_attrs_->zombies(); return zombies_; }
+const std::vector<QueueAttr>& Node::queues()   const { if (misc_attrs_) return misc_attrs_->queues(); return queues_; }
 std::vector<ZombieAttr>::const_iterator Node::zombie_begin() const { if (misc_attrs_) return misc_attrs_->zombie_begin(); return zombies_.begin();}
-std::vector<ZombieAttr>::const_iterator Node::zombie_end() const {   if (misc_attrs_) return misc_attrs_->zombie_end(); return zombies_.end();}
+std::vector<ZombieAttr>::const_iterator Node::zombie_end()   const { if (misc_attrs_) return misc_attrs_->zombie_end(); return zombies_.end();}
 std::vector<VerifyAttr>::const_iterator Node::verify_begin() const { if (misc_attrs_) return misc_attrs_->verify_begin(); return verifys_.begin();}
-std::vector<VerifyAttr>::const_iterator Node::verify_end() const {   if (misc_attrs_) return misc_attrs_->verify_end(); return verifys_.end();}
+std::vector<VerifyAttr>::const_iterator Node::verify_end()   const { if (misc_attrs_) return misc_attrs_->verify_end(); return verifys_.end();}
+std::vector<QueueAttr>::const_iterator Node::queue_begin()  const { if (misc_attrs_) return misc_attrs_->queue_begin(); return queues_.begin();}
+std::vector<QueueAttr>::const_iterator Node::queue_end()    const { if (misc_attrs_) return misc_attrs_->queue_end(); return queues_.end();}

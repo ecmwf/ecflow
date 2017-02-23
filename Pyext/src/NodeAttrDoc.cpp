@@ -256,6 +256,13 @@ const char* NodeAttrDoc::meter_doc()
             ;
 }
 
+const char* NodeAttrDoc::queue_doc()
+{
+   return
+            "Queue allows specification of queue on Task, Family and Suite nodes\n\n"
+            ;
+}
+
 const char* NodeAttrDoc::date_doc()
 {
    return

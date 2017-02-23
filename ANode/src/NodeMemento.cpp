@@ -121,6 +121,9 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 
          const std::vector<ZombieAttr>& zombie_attrs = misc_attrs_->zombies();
          BOOST_FOREACH(const ZombieAttr& attr, zombie_attrs){ comp->add( boost::make_shared<NodeZombieMemento>( attr) ); }
+
+         const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
+         BOOST_FOREACH(const QueueAttr& attr, queue_attrs){ comp->add( boost::make_shared<NodeQueueMemento>( attr) ); }
 		}
 
 		BOOST_FOREACH(limit_ptr l, limitVec_ )         { comp->add( boost::make_shared<NodeLimitMemento>(  *l) ); }
@@ -218,6 +221,15 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	}
 
    if (misc_attrs_) {
+
+      const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
+      BOOST_FOREACH(const QueueAttr& attr, queue_attrs ) {
+         if (attr.state_change_no() > client_state_change_no) {
+            if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
+            comp->add( boost::make_shared<NodeQueueIndexMemento>( attr.name(), attr.index() ) );
+         }
+      }
+
       // zombies have no state that changes
       // If one verify changes then copy all. Avoids having to work out which one changed
       const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
@@ -243,7 +255,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	// determine if the repeat changed
 	if (!repeat_.empty() && repeat_.state_change_no() > client_state_change_no) {
 		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<NodeRepeatMemento>( repeat_) );
+		comp->add( boost::make_shared<NodeRepeatIndexMemento>( repeat_) );
 	}
 
 	// determine if limits changed.
@@ -368,6 +380,35 @@ void Node::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect:
 	addLabel(memento->label_);
 }
 
+void Node::set_memento(const NodeQueueMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only)
+{
+   if (aspect_only) {
+      // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::QUEUE);
+      return;
+   }
+   if (misc_attrs_) {
+      misc_attrs_->set_memento(m);
+      return;
+   }
+   add_queue(m->queue_);
+}
+
+void Node::set_memento(const NodeQueueIndexMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only )
+{
+   if (aspect_only) {
+      // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::QUEUE_INDEX);
+      return;
+   }
+
+   // The queue must exist
+   if (misc_attrs_) {
+      misc_attrs_->set_memento(m);
+      return;
+   }
+}
+
 void Node::set_memento( const NodeTriggerMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {
 
 #ifdef DEBUG_MEMENTO
@@ -435,6 +476,29 @@ void Node::set_memento( const NodeRepeatMemento* memento,std::vector<ecf::Aspect
 	}
 
 	addRepeat(memento->repeat_);
+}
+
+void Node::set_memento( const NodeRepeatIndexMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {
+
+#ifdef DEBUG_MEMENTO
+   std::cout << "Node::set_memento(const NodeRepeatIndexMemento* memento) " << debugNodePath() << "\n";
+#endif
+
+   if (aspect_only) {
+      // For attribute add/delete, should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::REPEAT_INDEX);
+      return;
+   }
+
+   if (!repeat_.empty()) {
+
+      // Note: the node is incremented one past, the last value
+      // In Node we increment() then check for validity
+      // hence the_new_value may be outside of the valid range.
+      // This can be seen when do a incremental sync,
+      // *hence* allow memento to copy the value as is.
+      repeat_.set_value(memento->index_or_value_);
+   }
 }
 
 void Node::set_memento( const NodeLimitMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {

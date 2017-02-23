@@ -322,6 +322,7 @@ private:
    }
 };
 
+
 class NodeLabelMemento : public Memento {
 public:
    NodeLabelMemento( const Label& e) : label_(e) {}
@@ -338,6 +339,46 @@ private:
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
       ar & boost::serialization::base_object<Memento>(*this);
       ar & label_;
+   }
+};
+
+class NodeQueueMemento : public Memento {
+public:
+   NodeQueueMemento(const QueueAttr& e) : queue_(e) {}
+   NodeQueueMemento() {}
+private:
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
+
+   QueueAttr queue_;
+   friend class Node;
+   friend class MiscAttrs;
+
+   friend class boost::serialization::access;
+   template<class Archive>
+   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+      ar & boost::serialization::base_object<Memento>(*this);
+      ar & queue_;
+   }
+};
+
+class NodeQueueIndexMemento : public Memento {
+public:
+   NodeQueueIndexMemento(const std::string& name, int index) : index_(index), name_(name) {}
+   NodeQueueIndexMemento() : index_(0) {}
+private:
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
+
+   int index_;
+   std::string name_;
+   friend class Node;
+   friend class MiscAttrs;
+
+   friend class boost::serialization::access;
+   template<class Archive>
+   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+      ar & boost::serialization::base_object<Memento>(*this);
+      ar & index_;
+      ar & name_;
    }
 };
 
@@ -395,6 +436,25 @@ private:
       ar & repeat_;
    }
 };
+
+class NodeRepeatIndexMemento : public Memento {
+public:
+   NodeRepeatIndexMemento( const Repeat& e ) : index_or_value_(e.index_or_value()) {}
+   NodeRepeatIndexMemento() : index_or_value_(0) {}
+private:
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
+
+   long index_or_value_;
+   friend class Node;
+
+   friend class boost::serialization::access;
+   template<class Archive>
+   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+      ar & boost::serialization::base_object<Memento>(*this);
+      ar & index_or_value_;
+   }
+};
+
 
 class NodeLimitMemento : public Memento {
 public:
@@ -721,6 +781,7 @@ BOOST_CLASS_EXPORT_KEY(NodeLabelMemento);
 BOOST_CLASS_EXPORT_KEY(NodeTriggerMemento);
 BOOST_CLASS_EXPORT_KEY(NodeCompleteMemento);
 BOOST_CLASS_EXPORT_KEY(NodeRepeatMemento);
+BOOST_CLASS_EXPORT_KEY(NodeRepeatIndexMemento);
 BOOST_CLASS_EXPORT_KEY(NodeLimitMemento);
 BOOST_CLASS_EXPORT_KEY(NodeInLimitMemento);
 BOOST_CLASS_EXPORT_KEY(NodeVariableMemento);

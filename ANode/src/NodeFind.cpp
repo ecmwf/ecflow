@@ -300,6 +300,18 @@ bool Node::findVerify(const VerifyAttr& v) const
    return false;
 }
 
+const QueueAttr& Node::find_queue(const std::string& name) const
+{
+   if (misc_attrs_) return misc_attrs_->find_queue(name);
+    return QueueAttr::EMPTY();
+}
+
+QueueAttr& Node::findQueue(const std::string& name)
+{
+   if (misc_attrs_) return misc_attrs_->findQueue(name);
+   return QueueAttr::EMPTY1();
+}
+
 const Repeat& Node::findRepeat(const std::string& name) const
 {
    if (!repeat_.empty() && repeat_.name() == name) {
@@ -367,6 +379,9 @@ int Node::findExprVariableValue( const std::string& name) const
    limit_ptr limit = find_limit( name );
    if (limit.get()) return limit->value();
 
+   const QueueAttr& queue_attr = find_queue( name );
+   if ( !queue_attr.empty() )  return queue_attr.index_or_value();
+
    return 0;
 }
 
@@ -401,6 +416,9 @@ int Node::findExprVariableValueAndPlus(const std::string& name, int val) const
    limit_ptr limit = find_limit( name );
    if (limit.get()) return (limit->value() + val);
 
+   const QueueAttr& queue_attr = find_queue( name );
+   if ( !queue_attr.empty() )  return (queue_attr.index_or_value() + val );
+
    return val;
 }
 
@@ -434,6 +452,9 @@ int Node::findExprVariableValueAndMinus(const std::string& name, int val) const
 
    limit_ptr limit = find_limit( name );
    if (limit.get()) return (limit->value() - val);
+
+   const QueueAttr& queue_attr = find_queue( name );
+   if ( !queue_attr.empty() )  return (queue_attr.index_or_value() - val );
 
    return -val;
 }
@@ -470,6 +491,11 @@ int Node::findExprVariableValueAndType( const std::string& name, std::string& va
       varType = "limit";
       return limit->value();
    }
+   const QueueAttr& queue_attr = find_queue( name );
+   if ( !queue_attr.empty() )  {
+      varType = "queue";
+      return queue_attr.index_or_value();
+   }
 
    varType = "variable-not-found";
    return 0;
@@ -505,6 +531,11 @@ void Node::findExprVariableAndPrint( const std::string& name, ostream& os) const
    limit_ptr limit = find_limit( name );
    if (limit.get()) {
       os << limit->toString() << " value(" << limit->value() << ")";
+      return;
+   }
+   const QueueAttr& queue_attr = find_queue( name );
+   if ( !queue_attr.empty() )  {
+      os << "QUEUE " << queue_attr.name() << " value(" << queue_attr.index_or_value() << ")";
       return;
    }
 }

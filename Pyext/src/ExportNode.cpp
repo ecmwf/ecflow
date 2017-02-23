@@ -62,6 +62,14 @@ node_ptr add_meter(node_ptr self,const Meter& m)                                
 node_ptr add_meter_1(node_ptr self,const std::string& meter_name, int min,int max, int color_change) { self->addMeter(Meter(meter_name,min,max,color_change)); return self;}
 node_ptr add_meter_2(node_ptr self,const std::string& meter_name, int min,int max)                   { self->addMeter(Meter(meter_name,min,max));return self; }
 
+node_ptr add_queue(node_ptr self,const QueueAttr& m) { self->add_queue(m); return self;}
+node_ptr add_queue1(node_ptr self,const std::string& name, const boost::python::list& list) {
+   std::vector<std::string> vec;
+   BoostPythonUtil::list_to_str_vec(list,vec);
+   QueueAttr queue_attr(name,vec);
+   self->add_queue(queue_attr); return self;
+}
+
 node_ptr add_label(node_ptr self,const std::string& name, const std::string& value) { self->addLabel(Label(name,value)); return self; }
 node_ptr add_label_1(node_ptr self,const Label& label) { self->addLabel(label); return self; }
 node_ptr add_limit(node_ptr self,const std::string& name, int limit)                { self->addLimit(Limit(name,limit)); return self;}
@@ -248,8 +256,10 @@ void export_Node()
    .def("add_event",        &add_event_2)
    .def("add_event",        &add_event_3)
    .def("add_meter",        &add_meter,                  DefsDoc::add_meter_doc())
-   .def("add_meter",        add_meter_1)
-   .def("add_meter",        add_meter_2)
+   .def("add_meter",        &add_meter_1)
+   .def("add_meter",        &add_meter_2)
+   .def("add_queue",        &add_queue)
+   .def("add_queue",        &add_queue1)
    .def("add_date",         &add_date,                   DefsDoc::add_date_doc() )
    .def("add_date",         &add_date_1)
    .def("add_day",          &add_day,                    DefsDoc::add_day_doc())
@@ -281,6 +291,7 @@ void export_Node()
    .def("delete_event",     &Node::deleteEvent          )
    .def("delete_meter",     &Node::deleteMeter          )
    .def("delete_label",     &Node::deleteLabel          )
+   .def("delete_queue",     &Node::delete_queue         )
    .def("delete_trigger",   &Node::deleteTrigger        )
    .def("delete_complete",  &Node::deleteComplete       )
    .def("delete_repeat",    &Node::deleteRepeat         )
@@ -310,6 +321,7 @@ void export_Node()
    .def("find_meter",       &Node::findMeter,              return_value_policy<copy_const_reference>(), "Find the :term:`meter` on the node only. Returns a object")
    .def("find_event",       &Node::findEventByNameOrNumber,return_value_policy<copy_const_reference>(), "Find the :term:`event` on the node only. Returns a object")
    .def("find_label",       &Node::find_label,             return_value_policy<copy_const_reference>(), "Find the :term:`label` on the node only. Returns a object")
+   .def("find_queue",       &Node::find_queue,             return_value_policy<copy_const_reference>(), "Find the queue on the node only. Returns a queue object")
    .def("find_limit",       &Node::find_limit  ,           "Find the :term:`limit` on the node only. returns a limit ptr" )
    .def("find_node_up_the_tree",&Node::find_node_up_the_tree  , "Search immediate node, then up the node hierarchy" )
    .def("get_state",        &Node::state , "Returns the state of the node. This excludes the suspended state")
@@ -329,6 +341,7 @@ void export_Node()
    .add_property("events",    boost::python::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of :term:`event` s")
    .add_property("variables", boost::python::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined :term:`variable` s" )
    .add_property("labels",    boost::python::range( &Node::label_begin,    &Node::label_end) ,  "Returns a list of :term:`label` s")
+   .add_property("queues",    boost::python::range( &Node::queue_begin,    &Node::queue_end) ,  "Returns a list of queues")
    .add_property("limits",    boost::python::range( &Node::limit_begin,    &Node::limit_end),   "Returns a list of :term:`limit` s" )
    .add_property("inlimits",  boost::python::range( &Node::inlimit_begin,  &Node::inlimit_end), "Returns a list of :term:`inlimit` s" )
    .add_property("verifies",  boost::python::range( &Node::verify_begin,   &Node::verify_end),  "Returns a list of Verify's" )

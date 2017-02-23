@@ -222,6 +222,20 @@ if __name__ == "__main__":
     task_copy.delete_meter("metername4"); assert len(list(task_copy.meters)) == 2, "Expected 2 Meters"
     task_copy.delete_meter("");           assert len(list(task_copy.meters)) == 0, "Expected 0 Meters"
 
+    #===========================================================================
+    # add and delete queue
+    #===========================================================================
+    queue_items = [ "a", "b"]
+    task.add_queue(ecflow.Queue("q1", queue_items ))
+    task.add_queue(ecflow.Queue("q2", queue_items))
+    task.add_queue("q3", [ "a", "b"])
+    task.add_queue("q4",  [ "a", "b"])
+    
+    task_copy = copy.copy(task)
+    assert len(list(task_copy.queues)) == 4, "Expected 4 queues"
+    task_copy.delete_queue("q1"); assert len(list(task_copy.queues)) == 3, "Expected 3 queues"
+    task_copy.delete_queue("q2"); assert len(list(task_copy.queues)) == 2, "Expected 2 queues"
+    task_copy.delete_queue("");   assert len(list(task_copy.queues)) == 0, "Expected 0 queues"
 
     #===========================================================================
     # add and delete label

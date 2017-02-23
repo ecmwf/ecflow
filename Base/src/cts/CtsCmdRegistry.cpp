@@ -84,7 +84,8 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
 	vec_.push_back( boost::make_shared<CtsWaitCmd>());
 	vec_.push_back( boost::make_shared<EventCmd>());
 	vec_.push_back( boost::make_shared<MeterCmd>());
-	vec_.push_back( boost::make_shared<LabelCmd>());
+   vec_.push_back( boost::make_shared<LabelCmd>());
+   vec_.push_back( boost::make_shared<QueueCmd>());
 	vec_.push_back( boost::make_shared<RequeueNodeCmd>());
 	vec_.push_back( boost::make_shared<OrderNodeCmd>());
 	vec_.push_back( boost::make_shared<RunNodeCmd>());
