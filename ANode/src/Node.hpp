@@ -674,8 +674,9 @@ private: // alow simulator access
    friend class ecf::FlatAnalyserVisitor;
    friend class ecf::SimulatorVisitor;
    friend class ecf::Simulator;
-   std::vector<Meter>&  ref_meters();// allow simulator set meter value
-   std::vector<Event>&  ref_events();// allow simulator set event value
+   std::vector<Meter>& ref_meters();    // allow simulator set meter value
+   std::vector<Event>& ref_events();    // allow simulator set event value
+   std::vector<QueueAttr>& ref_queues();// allow simulator set event value
 
    /// Note: If the complete expression evaluation fails. we should continue resolving dependencies
    ///       If the complete expression evaluation evaluates, then we set node to complete

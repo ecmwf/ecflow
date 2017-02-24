@@ -464,6 +464,24 @@ void ServerTestHarness::createDirAndEcfFiles(
    }
 }
 
+static void add_queue(std::string& content,const std::vector<QueueAttr>& queues)
+{
+   BOOST_FOREACH(const QueueAttr& queue, queues) {
+      content += "\n";
+      content += "for i in";
+      const std::vector<std::string>& queue_list = queue.list();
+      for(size_t i = 0; i < queue_list.size(); i++) {
+         content += " ";
+         content += queue_list[i];
+      }
+      content += "\n";
+      content += "do\n";
+      content += "   step=$(%ECF_CLIENT_EXE_PATH% --queue=" + queue.name() + ")\n";
+      content += "   echo $step\n";
+      content += "   sleep %SLEEPTIME%\n";
+      content += "done\n";
+   }
+}
 
 std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const
 {
@@ -504,7 +522,16 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const
          templateEcfFile += "%ECF_CLIENT_EXE_PATH% --label=" + label.name() + " " + label.value() + "\n";
       }
    }
-   if (add_default_sleep_time_ && t->events().empty() && t->meters().empty()) {
+
+   /// Queues
+   add_queue(templateEcfFile,t->queues());
+   Node* parent = t->parent();
+   while(parent) {
+      add_queue(templateEcfFile,parent->queues());
+      parent = parent->parent();
+   }
+
+   if (add_default_sleep_time_ && t->events().empty() && t->meters().empty() && t->queues().empty()) {
       templateEcfFile += "\n# SLEEPTIME is defined the Client Defs.def file. Test variable substitution\n";
       templateEcfFile += "sleep %SLEEPTIME%\n";
    }

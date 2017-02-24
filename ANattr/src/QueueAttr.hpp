@@ -29,7 +29,7 @@
 class QueueAttr {
 public:
    QueueAttr(const std::string& name,const std::vector<std::string>& theQueue);
-   QueueAttr() : currentIndex_(0),state_change_no_(0) {}
+   QueueAttr() : used_in_trigger_(false),currentIndex_(0),state_change_no_(0) {}
    ~QueueAttr();
 
    std::ostream& print(std::ostream&) const;
@@ -41,6 +41,7 @@ public:
    int index_or_value() const;
    int index() const { return currentIndex_;}
    bool empty() const { return name_.empty();}
+   const std::vector<std::string>& list() const { return theQueue_;}
 
    std::string toString() const;
    std::string dump() const;
@@ -48,6 +49,8 @@ public:
    // Mutators
    void reset();
    void increment();
+   void set_used_in_trigger(bool f) { used_in_trigger_ = f;} // used by simulator only
+   bool used_in_trigger() const { return used_in_trigger_; }
 
    static void parse( QueueAttr&, const std::string& line, std::vector<std::string >& lineTokens, bool parse_state );
    void set_name( const std::string& name);
@@ -62,6 +65,7 @@ public:
 private:
    void incr_state_change_no();
 
+   bool used_in_trigger_;      // *not* persisted, used by simulator only
    int currentIndex_;
    unsigned int state_change_no_;  // *not* persisted, only used on server side
    std::string name_;

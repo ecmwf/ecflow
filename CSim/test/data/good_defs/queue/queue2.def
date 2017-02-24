@@ -1,0 +1,18 @@
+suite test_queue
+   task t1
+      queue q1 1 2 3 4
+      verify complete:1  
+   task t2
+      trigger /test_queue/t1:q1 == 4
+        verify complete:1  
+   family f1
+      queue q2 1 2 3 4
+      task t1
+        verify complete:1  
+   endfamily
+   family f2
+      task t1
+        verify complete:1  
+        trigger /test_queue/f1:q2 > 3
+   endfamily  
+endsuite

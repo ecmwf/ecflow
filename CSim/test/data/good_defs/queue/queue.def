@@ -1,0 +1,8 @@
+suite test_queue
+   queue q1 1 2 3 4
+   task t1
+      verify complete:1  
+   task t2
+      trigger /test_queue:q1 == 4
+      verify complete:1  
+endsuite

@@ -25,6 +25,7 @@ using namespace std;
 using namespace boost;
 namespace fs = boost::filesystem;
 
+
 namespace ecf {
 
 TaskScriptGenerator::TaskScriptGenerator(const Task* task)
@@ -123,6 +124,25 @@ void TaskScriptGenerator::generate(const std::map<std::string,std::string>& over
    std::cout << "Generated script file " << ecf_file_path << "\n";
 }
 
+static void add_queue(std::string& content,const std::string& client_exe, const std::string& sleep,const std::vector<QueueAttr>& queues)
+{
+   BOOST_FOREACH(const QueueAttr& queue, queues) {
+      content += "\n";
+      content += "for i in";
+      const std::vector<std::string>& queue_list = queue.list();
+      for(size_t i = 0; i < queue_list.size(); i++) {
+         content += " ";
+         content += queue_list[i];
+      }
+      content += "\n";
+      content += "do\n";
+      content += "   step=$(" + client_exe + "--queue=" + queue.name() + ")\n";
+      content += "   echo $step\n";
+      content += "   " + sleep;
+      content += "done\n";
+   }
+}
+
 std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const
 {
    std::string content;
@@ -184,14 +204,23 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const
       content += sleep;
    }
 
+   /// Queues
+   add_queue(content,client_exe,sleep,task_->queues());
+   Node* parent = task_->parent();
+   while(parent) {
+      add_queue(content,client_exe,sleep,parent->queues());
+      parent = parent->parent();
+   }
+
    content += "\n";
-   if (task_->events().empty() && task_->meters().empty()) {
+   if (task_->events().empty() && task_->meters().empty() && task_->queues().empty()) {
        content += sleep;
    }
    content += "\necho end of job\n";
    content += "\n%include <tail.h>\n";
    return content;
 }
+
 
 void TaskScriptGenerator::generate_head_file() const
 {

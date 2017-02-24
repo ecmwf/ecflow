@@ -34,7 +34,7 @@ const QueueAttr& QueueAttr::EMPTY() { static const QueueAttr queueAttr = QueueAt
 QueueAttr& QueueAttr::EMPTY1() { static QueueAttr queueAttr = QueueAttr(); return queueAttr; }
 
 QueueAttr::QueueAttr(const std::string& name,const std::vector<std::string>& theQueue)
-  : currentIndex_(0),state_change_no_(0),name_(name),theQueue_(theQueue)
+  : used_in_trigger_(false),currentIndex_(0),state_change_no_(0),name_(name),theQueue_(theQueue)
 {
    string msg;
    if ( !Str::valid_name( name, msg ) ) {

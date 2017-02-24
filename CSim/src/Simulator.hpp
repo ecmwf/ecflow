@@ -20,6 +20,9 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <string>
 #include <map>
+#include <vector>
+#include "QueueAttr.hpp"
+
 class Defs;
 class Task;
 class Submittable;
@@ -54,6 +57,8 @@ private:
 
 	bool doJobSubmission(Defs&, std::string& errorMsg) const;
 	void run_analyser(Defs& theDefs,std::string& errorMsg ) const;
+
+	bool update_for_queues(Submittable* t,std::string& msg, std::vector<QueueAttr>& queues,Defs& theDefs, std::string& errormsg) const;
 
 	mutable std::map<Submittable*,int> taskIntMap_;
 	mutable int level_;

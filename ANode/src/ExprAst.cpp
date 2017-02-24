@@ -1346,7 +1346,7 @@ VariableHelper::VariableHelper(const AstVariable* astVariable, std::string& erro
 	ss << "From expression Variable " << astVariable_->nodePath() << Str::COLON() << astVariable_->name() ;
 	ss << " the referenced node is " << theReferenceNode_->debugNodePath() << "\n";
 	errorMsg += ss.str();
-	errorMsg += "Could not find event, meter, variable, repeat, generated variable, or limit of name('";
+	errorMsg += "Could not find event, meter, variable, repeat, generated variable, limit or queue of name('";
 	errorMsg += astVariable_->name();
 	errorMsg += "') on node ";
 	errorMsg += theReferenceNode_->debugNodePath();

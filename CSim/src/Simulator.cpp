@@ -316,12 +316,44 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
  			}
 		}
 
+ 		if (!update_for_queues(t,msg, t->ref_queues(), theDefs, errorMsg)) return false;
+ 		Node* parent = t->parent();
+ 		while(parent) {
+ 	      if (!update_for_queues(t,msg, parent->ref_queues(), theDefs, errorMsg)) return false;
+ 	      parent = parent->parent();
+ 		}
+
       // any state change should be followed with a job submission
       t->complete();  // mark task as complete
 	}
 
 	level_--;
 	return true;
+}
+
+bool Simulator::update_for_queues(Submittable* t,std::string& msg, std::vector<QueueAttr>& queues,Defs& theDefs, std::string& errorMsg) const
+{
+   BOOST_FOREACH(QueueAttr& queue, queues) {
+      const std::vector<std::string>& queue_list = queue.list();
+      for(size_t i = 0; i < queue_list.size(); i++) {
+         queue.increment();
+         if (queue.used_in_trigger()) {
+            msg.clear();
+            msg += Str::CHILD_CMD();
+            msg += "queue ";
+            msg += queue.name();
+            msg += " ";
+            msg += t->absNodePath();
+            log(Log::MSG,msg);
+
+            if (!doJobSubmission(theDefs,errorMsg)) {
+               level_--;
+               return false;
+            }
+         }
+      }
+   }
+   return true;
 }
 
 }

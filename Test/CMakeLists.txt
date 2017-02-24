@@ -43,7 +43,8 @@ if (ENABLE_ALL_TESTS)
 	./TestKillCmd.cpp
 	./TestLate.cpp
 	./TestLimit.cpp
-	./TestOrderCmd.cpp
+    ./TestOrderCmd.cpp
+    ./TestQueueCmd.cpp
 	./TestRepeat.cpp
 	./TestRequeueNode.cpp
 	./TestRunner.cpp

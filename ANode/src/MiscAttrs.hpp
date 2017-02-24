@@ -43,9 +43,10 @@ public:
    bool operator==(const MiscAttrs& ) const;
 
    // Access functions: ======================================================
-   const std::vector<VerifyAttr>&      verifys()  const { return verifys_;}
-   const std::vector<ZombieAttr>&      zombies()  const { return zombies_; }
+   const std::vector<VerifyAttr>&      verifys() const { return verifys_;}
+   const std::vector<ZombieAttr>&      zombies() const { return zombies_; }
    const std::vector<QueueAttr>&       queues()  const { return queues_; }
+   std::vector<QueueAttr>&             ref_queues()    { return queues_; } //allow simulator access
 
    // Add functions: ===============================================================
    void addVerify( const VerifyAttr& );  // for testing and verification Can throw std::runtime_error

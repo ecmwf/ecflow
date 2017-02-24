@@ -345,6 +345,12 @@ bool Node::findExprVariable( const std::string& name)
    limit_ptr limit = find_limit( name );
    if (limit.get()) return true;
 
+   QueueAttr& queue_attr = findQueue( name );
+   if (!queue_attr.empty()) {
+      queue_attr.set_used_in_trigger(true);
+      return true;
+   }
+
    return false;
 }
 
