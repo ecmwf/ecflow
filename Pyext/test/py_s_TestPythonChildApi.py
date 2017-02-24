@@ -46,6 +46,7 @@ def create_defs(name,the_port):
     task.add_event("event_fred")
     task.add_meter("meter", 0, 100)
     task.add_label("label_name", "value")
+    task.add_queue("q1",["1","2","3"])
 
     family.add_task("t2")  # test wait
  
@@ -56,7 +57,7 @@ def test_client_run(ci):
     print("\ntest_client_run " + ci.get_host() + ":" + str(ci.get_port()))
     print(" ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")")
     print(" ECF_INCLUDES(" + ecf_includes() + ")")
-    ci.delete_all()     
+    ci.delete_all(True)     
     defs = create_defs("test_client_run",ci.get_port())  
     suite = defs.find_suite("test_client_run")
     suite.add_defstatus(DState.suspended)
@@ -87,8 +88,15 @@ def test_client_run(ci):
     contents += "    ci.child_event('event_fred')\n"
     contents += "    ci.child_meter('meter',100)\n"
     contents += "    ci.child_label('label_name','100')\n"
+    contents += "    print('start ci.child_queue() ****************************** ')\n"
+    contents += "    dir(ecflow.Client)\n"
+    contents += "    ci.child_queue('q1')\n"
+    contents += "    ci.child_queue('q1')\n"
+    contents += "    ci.child_queue('q1')\n"
+    contents += "    print('end ci.child_queue() *********************************')\n"
     contents += "    print('Finished event,meter and label child commands')\n"
-    contents += "except:\n"
+    contents += "except Exception as e:\n"
+    contents += "    print('Exception',e)\n"
     contents += "    ci.child_abort()\n\n"
     contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
@@ -105,10 +113,10 @@ def test_client_run(ci):
     contents += "    ci.child_abort()\n\n"
     contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
-    print((" Created file " , file))
-      
+    print(" Created file " + file)
+          
     ci.restart_server()
-    ci.load(defs)           
+    ci.load(defs)          
     ci.begin_all_suites()
     ci.run("/test_client_run", False)
     print(" Running the test, wait for suite to complete ...")  
@@ -138,9 +146,12 @@ def test_client_run(ci):
 if __name__ == "__main__":
     print("####################################################################")
     print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    try: print("PYTHONPATH:",os.environ['PYTHONPATH'].split(os.pathsep))
+    except KeyError: print("Could not get PYTHONPATH")
     print("####################################################################")
 
     with Test.Server() as ci:
+        #ci = Client("localhost","3141")
         PrintStyle.set_style( Style.STATE ) # show node state 
         test_client_run(ci)  
         print("\nAll Tests pass ======================================================================")    

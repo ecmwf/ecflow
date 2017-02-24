@@ -928,6 +928,8 @@ bool QueueCmd::equals(ClientToServerCmd* rhs) const
 
 std::ostream& QueueCmd::print(std::ostream& os) const
 {
+   if (path_to_node_with_queue_.empty())
+      return os << Str::CHILD_CMD() << TaskApi::queue_arg() << " " << name_ << " " << path_to_node();
    return os << Str::CHILD_CMD() << TaskApi::queue_arg() << " " << name_ << " " << path_to_node_with_queue_ << " " << path_to_node();
 }
 

@@ -103,7 +103,7 @@ void suspend(ClientInvoker* self, const std::string& path)               { self-
 void suspends(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->suspend(paths);}
 void resume(ClientInvoker* self, const std::string& path)          { self->resume(path);}
 void resumes(ClientInvoker* self,const boost::python::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->resume(paths);}
-void status(ClientInvoker* self, const std::string& path)          { self->status(path);}
+void the_status(ClientInvoker* self, const std::string& path)      { self->status(path);}
 void statuss(ClientInvoker* self,const boost::python::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->status(paths);}
 void do_kill(ClientInvoker* self, const std::string& path)         { self->kill(path);}
 void do_kills(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->kill(paths);}
@@ -240,7 +240,7 @@ void export_Client()
    .def("check" ,           &checks, return_value_policy<copy_const_reference>())
    .def("kill" ,            &do_kill,         ClientDoc::kill())
    .def("kill" ,            &do_kills)
-   .def("status" ,          &status,          ClientDoc::status())
+   .def("status" ,          &the_status,          ClientDoc::status())
    .def("status" ,          &statuss)
    .def("suspend" ,         &suspend,         ClientDoc::suspend())
    .def("suspend" ,         &suspends)
@@ -271,7 +271,7 @@ void export_Client()
    .def("child_meter",         &ClientInvoker::child_meter,   "Child command,notify server meter changed, requires meter name and value")
    .def("child_label",         &ClientInvoker::child_label,   "Child command,notify server label changed, requires label name, and new value")
    .def("child_wait",          &ClientInvoker::child_wait,    "Child command,wait for expression to come true")
-   .def("child_queue",         &ClientInvoker::child_queue,   "Child command,queue the next step, return the next step as a string. requires queue name, and optionally path to node with the queue")
+   .def("child_queue",         &ClientInvoker::child_queue,(bp::arg("queue_name"),bp::arg("path_to_node_with_queue")=""),"Child command,queue the next step, return the next step as a string. requires queue name, and optionally path to node with the queue")
    .def("child_complete",      &ClientInvoker::child_complete,"Child command,notify server job has complete")
 	;
 

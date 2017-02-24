@@ -2,10 +2,15 @@ import os
 import ecflow
 
 print("PYTHONPATH=====================================================")
-print(os.environ['PYTHONPATH'].split(os.pathsep))
+try:
+    print(os.environ['PYTHONPATH'].split(os.pathsep))
+except KeyError:
+    print("Could not get PYTHONPATH")
 
 print("Creating Client")
 ci = ecflow.Client()
+print("Running ecflow version " + ci.version())
+
 ci.set_host_port("%ECF_HOST%","%ECF_PORT%")
 ci.set_child_pid(os.getpid())
 ci.set_child_path("%ECF_NAME%")
