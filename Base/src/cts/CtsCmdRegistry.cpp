@@ -25,7 +25,7 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
 
    /// The order dictates how the --help is shown *BUT* Since we traverse this list.
    /// Place the command which require the fastest response first.
-   vec_.reserve(70);
+   vec_.reserve(90);
 
 	vec_.push_back( boost::make_shared<CSyncCmd>(CSyncCmd::NEWS,0,0,0));
    vec_.push_back( boost::make_shared<CSyncCmd>(CSyncCmd::SYNC,0,0,0));
