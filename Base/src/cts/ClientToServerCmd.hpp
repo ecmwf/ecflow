@@ -23,7 +23,6 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/assume_abstract.hpp>
 #include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/export.hpp>   // explicit code for exports (place last) , needed for BOOST_CLASS_EXPORT
 
 #include "PrintStyle.hpp"
 #include "Cmd.hpp"
@@ -1891,6 +1890,8 @@ std::ostream& operator<<(std::ostream& os, const AlterCmd&);
 std::ostream& operator<<(std::ostream& os, const MoveCmd&);
 std::ostream& operator<<(std::ostream& os, const GroupCTSCmd&);
 
+
+#include <boost/serialization/export.hpp>   // explicit code for exports (place last) , needed for BOOST_CLASS_EXPORT
 BOOST_CLASS_EXPORT_KEY(ServerVersionCmd)
 BOOST_CLASS_EXPORT_KEY(CtsCmd)
 BOOST_CLASS_EXPORT_KEY(CSyncCmd)

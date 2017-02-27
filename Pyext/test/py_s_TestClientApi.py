@@ -1585,14 +1585,19 @@ def test_ECFLOW_199(ci):
 
 
 if __name__ == "__main__":
+    client_version = Client().version();
     print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print("Running ecflow client version " + client_version + " debug build(" + str(debug_build()) +")")
     print("####################################################################")
 
     # server independent tests
     test_set_host_port();
     
     with Test.Server() as ci:
+        server_version = ci.server_version();
+        print("Running ecflow server version " + server_version)
+        assert client_version == server_version, " Client version not same as server version"
+        
         global the_port
         the_port = ci.get_port();
         test_version(ci)

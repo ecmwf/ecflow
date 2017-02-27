@@ -7,9 +7,15 @@ try:
 except KeyError:
     print("Could not get PYTHONPATH")
 
+print("LD_LIBRARY_PATH=====================================================")
+try:
+    print(os.environ['LD_LIBRARY_PATH'].split(os.pathsep))
+except KeyError:
+    print("Could not get LD_LIBRARY_PATH")
+    
 print("Creating Client")
 ci = ecflow.Client()
-print("Running ecflow version " + ci.version())
+print("Running ecflow client version " + ci.version())
 
 ci.set_host_port("%ECF_HOST%","%ECF_PORT%")
 ci.set_child_pid(os.getpid())

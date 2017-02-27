@@ -36,7 +36,7 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
             break    
         
 # Enable to stop data being deleted, and stop server from being terminated
-def debugging() : return False
+def debugging() : return True
 
 def ecf_home(port): 
     # debug_build() is defined for ecflow. Used in test to distinguish debug/release ecflow
@@ -171,14 +171,12 @@ class Server(object):
     time, by generating a unique port each time"""
     def __init__(self):
         print("Server:__init__: Starting server")      
-        if not debugging():
-            seed_port = 3153
-            if debug_build(): seed_port = 3152
-            self.lock_file = EcfPortLock()
-            self.the_port = self.lock_file.find_free_port(seed_port)   
-        else:
-            self.the_port = "3152"
-     
+        seed_port = 3153
+        if debug_build(): seed_port = 3152
+        self.lock_file = EcfPortLock()
+        self.the_port = self.lock_file.find_free_port(seed_port)   
+        print("   Server:__init__: Starting server on port " + self.the_port)      
+
         # Only worth doing this test, if the server is running
         # ON HPUX, having only one connection attempt, sometimes fails
         #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
@@ -200,7 +198,7 @@ class Server(object):
             assert len(server_exe) != 0, "Could not locate the server executable"
         
             server_exe += " --port=" + self.the_port + " --ecfinterval=4 &"
-            print("   TestClient.py: Starting server ", server_exe)
+            print("   TestClient.py: Starting server " + server_exe)
             os.system(server_exe) 
         
             print("   Allow time for server to start")
@@ -210,6 +208,8 @@ class Server(object):
                 print("   Server failed to start after 60 second !!!!!!")
                 assert False , "Server failed to start after 60 second !!!!!!"
             
+        server_version = self.ci.server_version()
+        print("   Server version is : " + server_version)
         print("   Run the tests, leaving Server:__enter__:") 
 
         # return the Client, that can call to the server
@@ -228,11 +228,11 @@ class Server(object):
         print("   Terminate server OK =================================================")
         print("   Remove lock file")
         self.lock_file.remove(self.the_port)
-        clean_up_server(str(self.the_port))
+        if not debugging():
+            clean_up_server(str(self.the_port))
         
         # Do not clean up data, if an assert was raised. This allow debug
-        if exctype == None:
+        if exctype == None and not debugging():
             clean_up_data(str(self.the_port))
         return False
         
-  

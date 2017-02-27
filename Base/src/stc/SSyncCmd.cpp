@@ -19,8 +19,7 @@
 #include "Ecf.hpp"
 #include "Log.hpp"
 #include "AbstractServer.hpp"
-#include "boost_archive.hpp" // collates boost archive includes
-#include "Serialization.hpp"
+#include "Serialization.hpp" // also collates boost archive includes
 
 using namespace std;
 using namespace boost;
@@ -409,3 +408,4 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
 }
 
 std::ostream& operator<<(std::ostream& os, const SSyncCmd& c)  { return c.print(os); }
+
