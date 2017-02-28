@@ -571,9 +571,9 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
    {   // test add limit
       TestStateChanged changed(s);
-      s->addLimit( Limit("limit",10) );
-      s->addLimit( Limit("limit1",10) );
-      s->addLimit( Limit("limit2",10) );
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit","10")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit1","10")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit2","10")));
       BOOST_CHECK_MESSAGE( s->limits().size() == 3, "expected 3  but found " <<  s->limits().size());
 
       // test delete limit
@@ -601,6 +601,21 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LIMIT_PATH,"limit_name","made_up_path")));
       limit_ptr lm = s->find_limit("limit_name");
       BOOST_CHECK_MESSAGE( lm.get() && lm->paths().empty(), "Expected no paths but found " << lm->paths().size());
+   }
+
+   {   // test add inlimit
+       TestStateChanged changed(s);
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"limit_name")));
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"limit_name1","11")));
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit:limit_name2")));
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit:limit_name3","10")));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 4, "expected 4  but found " <<  s->inlimits().size());
+
+       // test delete limit
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"limit_name")));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 3, "expected 3 but found " <<  s->inlimits().size());
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT)));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 0, "expected 0  but found " <<  s->inlimits().size());
    }
 
    {   // test add repeat
@@ -818,6 +833,14 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_PID","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_VERSION","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_LISTS","a")));
+
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit")));      // no limit value
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit","xx"))); // value not convertible to integer
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,".1","10")));    // not a valid name
+
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"")));           // no inlimit value
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/limit")));     // limit path, but no name
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/tolimit:limit","xx"))); // tokens must be convertible to an integer
    }
 
    /// Destroy singleton's to avoid valgrind from complaining

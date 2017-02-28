@@ -239,6 +239,12 @@ void Node::addLimit(const Limit& l )
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
+void Node::addInLimit(const InLimit& l)
+{
+   inLimitMgr_.addInLimit(l);
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+
 static void throwIfRepeatAllreadyExists(Node* node)
 {
 	if (!node->repeat().empty()) {
