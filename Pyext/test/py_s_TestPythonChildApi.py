@@ -51,6 +51,7 @@ def create_defs(name,the_port):
     task.add_queue("q1",["1","2","3"])
 
     family.add_task("t2")  # test wait
+    family.add_task("t3").add_trigger(task.get_abs_node_path() + ":q1 >= 3") # wait on queue q1
  
     return defs;
     
@@ -76,9 +77,7 @@ def test_client_run(ci):
     print("\ntest_client_run " + ci.get_host() + ":" + str(ci.get_port()))
     print(" ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")")
     print(" ECF_INCLUDES(" + ecf_includes() + ")")
-    ci.sync_local()
     ci.delete_all(True)     
-    ci.sync_local()
     defs = create_defs("test_client_run",ci.get_port())  
     suite = defs.find_suite("test_client_run")
     suite.add_defstatus(DState.suspended)
@@ -105,51 +104,50 @@ def test_client_run(ci):
     server_version = ci.server_version()
     file = dir + "/t1.ecf"
     contents = "%include <head.py>\n\n"
-    contents += "print('doing some work')\n"
-    contents += "try:\n"
+    contents += "with Client() as ci:\n"
+    contents += "    print('doing some work: t1.ecf')\n"
     contents += "    if ci.version() != '" + server_version + "':\n"
-    contents += "        print('Client and server versions different',e)\n"
-    contents += "        ci.child_abort()\n"
+    contents += "        assert False, 'Client and server versions different'\n"
     contents += "    ci.child_event('event_fred')\n"
     contents += "    ci.child_meter('meter',100)\n"
     contents += "    ci.child_label('label_name','100')\n"
-    contents += "    ci.child_queue('q1')\n"
-    contents += "    #ci.child_queue('q1')\n"
-    contents += "    #ci.child_queue('q1')\n"
+    contents += "    step = ci.child_queue('q1')\n"
+    contents += "    assert step == '1','expected first step to be 1'\n"
+    contents += "    step = ci.child_queue('q1')\n"
+    contents += "    assert step == '2','expected second step to be 2'\n"
+    contents += "    step = ci.child_queue('q1')\n"
+    contents += "    assert step == '3','expected third step to be 3'\n"
+    contents += "    step = ci.child_queue('q1')\n"
+    contents += "    assert step == '<NULL>','expected <NULL? for end of queue'\n"
     contents += "    print('Finished event,meter,label and queue child commands')\n"
-    contents += "except Exception as e:\n"
-    contents += "    print('Exception',e)\n"
-    contents += "    ci.child_abort()\n\n"
-    contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
     print(" Created file " + file)
       
     # create the ecf file /test_client_run/f1/t2
     file = dir + "/t2.ecf"
     contents = "%include <head.py>\n\n"
-    contents += "print('Waiting for /test_client_run/f1/t1 == complete')\n"
-    contents += "try:\n"
+    contents += "with Client() as ci:\n"
+    contents += "    print('Waiting for /test_client_run/f1/t1 == complete')\n"
     contents += "    ci.child_wait('/test_client_run/f1/t1 == complete')\n"
     contents += "    print('Finished waiting')\n"
-    contents += "except:\n"
-    contents += "    ci.child_abort()\n\n"
-    contents += "%include <tail.py>\n"
+    open(file,'w').write(contents)
+    print(" Created file " + file)
+    
+    # create the ecf file /test_client_run/f1/t3
+    file = dir + "/t3.ecf"
+    contents = "%include <head.py>\n\n"
+    contents += "with Client() as ci:\n"
+    contents += "    print('Running t3.ecf')\n"
     open(file,'w').write(contents)
     print(" Created file " + file)
         
-    ci.sync_local()  
     ci.restart_server()
-    ci.sync_local()  
     ci.load(defs)          
-    ci.sync_local()  
     ci.begin_all_suites()
-    ci.sync_local()  
     print(" Running the test, wait for suite to complete ...")  
     ci.run("/test_client_run", False)
-    ci.sync_local()  
 
     wait_for_suite_to_complete(ci,"test_client_run");
-    ci.sync_local()  
     
     if not Test.debugging():
         dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_client_run"
@@ -167,7 +165,6 @@ if __name__ == "__main__":
     try: print("LD_LIBRARY_PATH:",os.environ['LD_LIBRARY_PATH'].split(os.pathsep))
     except KeyError: print("Could not get LD_LIBRARY_PATH")    
     print("####################################################################")
-    sys.stdout.flush()
 
     #ci = Client("localhost","3141")
     with Test.Server() as ci:

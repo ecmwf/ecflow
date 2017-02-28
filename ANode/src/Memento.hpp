@@ -778,6 +778,8 @@ BOOST_CLASS_EXPORT_KEY(ServerVariableMemento);
 BOOST_CLASS_EXPORT_KEY(NodeEventMemento);
 BOOST_CLASS_EXPORT_KEY(NodeMeterMemento);
 BOOST_CLASS_EXPORT_KEY(NodeLabelMemento);
+BOOST_CLASS_EXPORT_KEY(NodeQueueMemento);
+BOOST_CLASS_EXPORT_KEY(NodeQueueIndexMemento);
 BOOST_CLASS_EXPORT_KEY(NodeTriggerMemento);
 BOOST_CLASS_EXPORT_KEY(NodeCompleteMemento);
 BOOST_CLASS_EXPORT_KEY(NodeRepeatMemento);

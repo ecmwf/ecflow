@@ -36,7 +36,7 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
             break    
         
 # Enable to stop data being deleted, and stop server from being terminated
-def debugging() : return True
+def debugging() : return False
 
 def ecf_home(port): 
     # debug_build() is defined for ecflow. Used in test to distinguish debug/release ecflow
