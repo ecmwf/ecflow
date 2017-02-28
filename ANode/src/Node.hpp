@@ -379,8 +379,8 @@ public:
    void addDay( const DayAttr& );
    void addCron( const ecf::CronAttr& );
 
-   void addLimit(const Limit& );        // will throw std::runtime_error if duplicate
-   void addInLimit(const InLimit& l)         { inLimitMgr_.addInLimit(l);}   // will throw std::runtime_error if duplicate
+   void addLimit(const Limit& );         // will throw std::runtime_error if duplicate
+   void addInLimit(const InLimit& l);    // will throw std::runtime_error if duplicate
    void auto_add_inlimit_externs(Defs* defs) { inLimitMgr_.auto_add_inlimit_externs(defs);}
    void addEvent( const Event& );       // will throw std::runtime_error if duplicate
    void addMeter( const Meter& );       // will throw std::runtime_error if duplicate
