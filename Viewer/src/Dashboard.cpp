@@ -24,6 +24,7 @@
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
+#include <QContextMenuEvent>
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -557,6 +558,13 @@ void Dashboard::notifyServerFilterDelete()
 {
 	//if(!settingsAreRead_)
 	//	Q_EMIT contentsChanged();
+}
+
+//We need to do this in order to prevent the dock window context menu from popping up.
+//See ECFLOW-894
+void Dashboard::contextMenuEvent(QContextMenuEvent * e)
+{
+    e->accept();
 }
 
 

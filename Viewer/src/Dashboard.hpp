@@ -72,6 +72,9 @@ protected Q_SLOTS:
     //void slotInfoPanelSelection(VInfo_ptr);
     void slotSelectionChanged(VInfo_ptr info);
 
+protected:
+   void contextMenuEvent(QContextMenuEvent* e);
+
 private:
 	DashboardWidget* addWidgetCore(const std::string& type);
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
