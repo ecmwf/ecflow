@@ -132,7 +132,7 @@ private:
 	int duration_;                         // How long zombie been alive
 	int calls_;                            // Number of times we have communicated with server.
 	ecf::Child::ZombieType zombie_type_;   // [ ecf, path, user ]
-	ecf::Child::CmdType last_child_cmd_;   // [ init | event | meter | label | wait | abort | complete ]
+	ecf::Child::CmdType last_child_cmd_;   // [ init | event | meter | label | wait | queue | abort | complete ]
   	std::string path_to_task_;             // set on construction
 	std::string jobs_password_;            // set on construction
 	std::string process_or_remote_id_;     // set on construction
