@@ -787,6 +787,7 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
 
 void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const
 {
+<<<<<<< HEAD
     // options[0] = change
     // options[1] = variable | clock_type | clock_gain | clock_date | clock_sync | event | meter | label | trigger | complete | repeat | limit_max | limit_value | defstatus | late ]
     // options[2] = name
@@ -959,6 +960,180 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
         Label check(name,value); // Check name , by creating
         break; }
+=======
+	// options[0] = change
+	// options[1] = variable | clock_type | clock_gain | clock_date | clock_sync | event | meter | label | trigger | complete | repeat | limit_max | limit_value | defstatus | late ]
+	// options[2] = name
+	// options[3] = value
+
+	std::stringstream ss;
+
+	AlterCmd::Change_attr_type theAttrType = changeAttrType(options[1]);
+	if (theAttrType == AlterCmd::CHANGE_ATTR_ND) {
+		ss << "AlterCmd: change: The third argument(" << options[1] << ") must be one of [ ";
+		std::vector<std::string> valid;
+		validChangeAttr(valid);
+		for(size_t i = 0; i < valid.size(); ++i) {
+			if (i != 0) ss << " | ";
+			ss << valid[i];
+		}
+		ss << "]\n" <<  AlterCmd::desc();
+		throw std::runtime_error( ss.str() );
+	}
+
+	std::string name, value;
+	switch (theAttrType) {
+	case AlterCmd::VARIABLE: {
+		if (options.size() == 3 && paths.size() > 1) {
+			// The variable value may be a path, and hence it will be paths and not options parameter
+			options.push_back(paths[0]);
+			paths.erase(paths.begin()); // remove first path, since it has been added to options
+		}
+		if (options.size() != 4 ) {
+			ss << "AlterCmd: change: expected 5 args : change variable <variable_name> <new_value> <path_to_node>";
+			ss << " but found only " << (options.size() + paths.size()) << " arguments. The value should be quoted if there are spaces\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		value = options[3];
+		break;}
+
+	case AlterCmd::CLOCK_TYPE: {
+		if (options.size() != 3) {
+			ss << "AlterCmd: change: expected at least four args i.e. change clock_type [ hybrid | real ] <path_to_suite>";
+			ss << " but found only " << (options.size() + paths.size()) << " arguments\n"
+					<< dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		if (name != "hybrid" && name != "real") {
+			ss << "AlterCmd: change clock_type: expected third argument to be one of [ hybrid | real ]";
+			ss << " but found " << name << "\n" << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		break;}
+
+	case AlterCmd::CLOCK_DATE: {
+		if (options.size() != 3) {
+			ss << "AlterCmd: change clock_date : expected at least four args :  change clock_date day.month.year <path_to_suite>";
+			ss << " but found only " << (options.size() + paths.size()) << " arguments\n" << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+
+		// Check date is in correct format:
+		try {
+			int day,month,year;
+			DateAttr::getDate(name,day,month,year);
+			DateAttr::checkDate(day,month,year,false /* for clocks we don't allow wild carding */);
+		}
+		catch ( std::exception& e) {
+			ss << "AlterCmd:change  clock_date " << name << " is not valid. " << e.what();
+			throw std::runtime_error( ss.str() );
+		}
+		break;}
+
+	case AlterCmd::CLOCK_GAIN: {
+		if (options.size() != 3) {
+			ss << "AlterCmd: change clock_gain : expected four args i.e. change clock_gain <int> <path_to_suite> ";
+			ss << " but found " << (options.size() + paths.size()) << " arguments. The actual gain must be convertible to an integer\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		try { boost::lexical_cast< int >( name ); }
+		catch ( boost::bad_lexical_cast& ) {
+			ss << "AlterCmd: " << options[0] << " " << options[1] << " " << options[2] << " " << paths[0];
+			ss << " expected '" << name << "' to be convertible to an integer\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		break; }
+
+	case AlterCmd::CLOCK_SYNC: {
+		if (options.size() != 2) {
+			ss << "AlterCmd: change clock_sync : expected three args i.e. change clock_sync  <path_to_suite> ";
+			ss << " but found " << (options.size() + paths.size()) << " arguments.\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		break; }
+
+	case AlterCmd::EVENT: {
+		if (options.size() != 3 && options.size() != 4) {
+			ss << "AlterCmd: Change event : expected four/five args:  change event <name_or_number> <[set | clear | <nothing>]> <path_to_node>";
+			ss << " but found only " << (options.size() + paths.size()) << " arguments\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		if ( options.size() == 4) {
+			value =  options[3];
+			if (value != Event::SET() && value != Event::CLEAR()) {
+				ss << "AlterCmd: Change event : expected four/five args:  change event <name_or_number> <[set | clear | <nothing>]> <path_to_node>";
+				ss << " but found only " << (options.size() + paths.size()) << " arguments\n";
+				ss << dump_args(options,paths) << "\n";
+				throw std::runtime_error( ss.str() );
+			}
+		}
+		// The name could be an integer
+		try { boost::lexical_cast< int >( name ); }
+		catch ( boost::bad_lexical_cast& ) {
+			// name is not an integer, check name is valid
+			Event check_name(name); // will throw if name is not valid
+		}
+		break; }
+
+	case AlterCmd::METER: {
+		if (options.size() != 4) {
+			ss << "AlterCmd: change: expected five args: change meter meter_name meter_value  <path_to_node>";
+			ss << " but found only " << (options.size() + paths.size()) << " arguments. The meter value must be convertible to an integer\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		Meter check(name,0,100); // Check meter name , by creating a meter
+
+		value = options[3];
+		try { boost::lexical_cast< int >( value );}
+		catch ( boost::bad_lexical_cast& ) {
+			ss << "AlterCmd: " << options[0] << " " << options[1] << " " << options[2] << " " << options[3] << " " << paths[0]
+			                                                                                                                << " expected " << value << " to be convertible to an integer\n";
+			throw std::runtime_error( ss.str() );
+		}
+
+		break; }
+
+	case AlterCmd::LABEL: {
+	   if (options.size() == 3 && paths.size() == 1) {
+	      // ECFLOW-648 allow label value to be empty
+	      // HOWEVER , we can not cope multiple paths, and setting value to empty.
+	      // since empty quotes are removed by boost program options, hence if we have a label value which is path, and multiple paths
+	      value.clear();
+	   }
+	   else {
+	      // ECFLOW-480 take into account label values that is a path, adding quotes around the value does not help:
+	      // Note boost program options will remove the quotes around the value
+	      //      hence its difficult to say what is an option and what is a path.
+	      //      However since we expect 4(change,label,<label_name>,<label_value>) options, work around the problem
+	      if (options.size() == 3  && paths.size() > 1) {
+	         options.push_back(paths[0]);
+	         paths.erase(paths.begin());  // remove first path, since it has been added to options
+	      }
+	      if (options.size() != 4) {
+	         ss << "AlterCmd: change label expected at least five args : change label <label_name> <label_value> <path_to_node> ";
+	         ss << " but found  " << (options.size() + paths.size()) << " arguments. the label value should be quoted\n";
+	         ss << dump_args(options,paths) << "\n";
+	         throw std::runtime_error( ss.str() );
+	      }
+	      value = options[3];
+	   }
+	   name = options[2];
+
+		Label check(name,value); // Check name , by creating
+		break; }
+>>>>>>> ECFLOW-892 update failing tests
 
    case AlterCmd::LATE: {
       if (options.size() != 3) {
@@ -971,6 +1146,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
       (void) LateAttr::create(name); // Check we can create the late
       break; }
 
+<<<<<<< HEAD
     case AlterCmd::TRIGGER: {
         if (options.size() != 3) {
             ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
@@ -1080,6 +1256,117 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
     }
 
     cmd = Cmd_ptr( new AlterCmd(paths,theAttrType, name, value  ) );
+=======
+	case AlterCmd::TRIGGER: {
+		if (options.size() != 3) {
+			ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
+			ss << " but found " << (options.size() + paths.size()) << " arguments. The trigger expression must be quoted\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+
+		// Parse the expression
+		PartExpression exp(name);
+		string parseErrorMsg;
+		std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
+		if (!ast.get()) {
+			ss << "AlterCmd: change trigger: Failed to parse expression '" << name << "'.  " << parseErrorMsg << "\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		break; }
+
+	case AlterCmd::COMPLETE: {
+		if (options.size() != 3) {
+			ss << "AlterCmd: change complete: expected four args: change complete 'expression'  <path_to_node> ";
+			ss << " but found " << (options.size() + paths.size()) << " arguments. The expression must be quoted\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+
+		// Parse the expression
+		PartExpression exp(name);
+		string parseErrorMsg;
+		std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
+		if (!ast.get()) {
+			ss << "AlterCmd: change complete: Failed to parse expression '" << name << "'.  " << parseErrorMsg << "\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		break;}
+
+	case AlterCmd::REPEAT: {
+		// *NOTE* a Node can only have *ONE* repeat, hence no need to provide name
+		if (options.size() != 3) {
+			ss << "AlterCmd: change repeat: expected four arg's : change repeat [ integer | string ] <path_to_node>";
+			ss << " but found only " << (options.size() + paths.size()) << " arguments.\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		break; }
+
+	case AlterCmd::LIMIT_MAX: {
+		if (options.size() != 4) {
+			ss << "AlterCmd: change: limit_max: : expected five arguments : change limit_max <limit_name> <int> <path_to_node>";
+			ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		value = options[3];
+		int limit = 0;
+		try { limit = boost::lexical_cast< int >( value );}
+		catch ( boost::bad_lexical_cast& ) {
+			ss << "AlterCmd: change: limit-max: " << options[0] << " " << options[1] << " " << options[2] << " " << options[3] << " " << paths[0]
+			                                                                                                                                   << " expected " <<  value << " to be convertible to an integer\n";
+			throw std::runtime_error( ss.str() );
+		}
+		Limit check(name,limit); // Check name , by creating
+		break; }
+
+	case AlterCmd::LIMIT_VAL: {
+		if (options.size() != 4) {
+			ss << "AlterCmd: change: limit-value: expected five arguments : change limit_value <limit_name> <int> <path_to_node>";
+			ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		value = options[3];
+		try { boost::lexical_cast< int >( value );}
+		catch ( boost::bad_lexical_cast& ) {
+			ss << "AlterCmd: change: limit_value: " << options[0] << " " << options[1] << " " << options[2] << " " << options[3] << " " << paths[0]
+			                                                                                                                                     << " expected " <<  value << " to be convertible to an integer\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		Limit check(name,10); // Check name, by creating
+		break;}
+
+	case AlterCmd::DEFSTATUS: {
+		if (options.size() != 3) {
+			ss << "AlterCmd: change defstatus expected four args : change defstatus [ queued | complete | unknown | aborted | suspended ] <path_to_node>";
+			ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
+			ss << dump_args(options,paths) << "\n";
+			throw std::runtime_error( ss.str() );
+		}
+		name = options[2];
+		if (!DState::isValid(name)) {
+			ss << "AlterCmd: " << options[0] << " " << options[1] << " " << options[2] << " " << paths[0]
+			                                                                                           << "an expected " <<  name << " to be a valid state,  i.e one of [ queued | complete | unknown | aborted | suspended ]\n";
+			throw std::runtime_error( ss.str() );
+		}
+		break; }
+
+	case AlterCmd::CHANGE_ATTR_ND:    break;
+	default: break;
+	}
+
+	cmd = Cmd_ptr( new AlterCmd(paths,theAttrType, name, value  ) );
+>>>>>>> ECFLOW-892 update failing tests
 }
 
 void AlterCmd::create_flag( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const
