@@ -568,7 +568,8 @@ protected:
    static void split_args_to_options_and_paths(
             const std::vector<std::string>& args,
             std::vector<std::string>& options,
-            std::vector<std::string>& paths);
+            std::vector<std::string>& paths,
+            bool treat_colon_in_path_as_path = false);
 
 private:
    std::string user_;

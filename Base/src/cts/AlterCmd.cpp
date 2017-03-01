@@ -453,7 +453,7 @@ const char* AlterCmd::desc() {
          "             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
          "             the change to take effect fully.\n"
          "         For add:\n"
-         "           [ variable | time | today | date | day | zombie | late | limit ]\n"
+         "           [ variable | time | today | date | day | zombie | late | limit | inlimit ]\n"
          "         For set_flag and clear_flag:\n"
          "           [ force_aborted | user_edit | task_aborted | edit_failed |\n"
          "             ecfcmd_failed | no_script | killed | migrated | late |\n"
@@ -607,13 +607,8 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
       case AlterCmd::ADD_INLIMIT: {  // inlimit /obs/limits:hpcd 2 name=hpcd, path=/obs/limits, tokens=2(optional)
          // options[0]  - add
          // options[1]  - [ inlimit ]
-         // options[2]  - [ path_to_limit ]
+         // options[2]  - [ path_to_limit:limit_name ]
          // options[3]  - integer (optional)
-         if (options.size() == 2 && paths.size() > 1) {
-            // limit name will be a path, hence it will be in the paths parameter
-            options.push_back(paths[0] );
-            paths.erase( paths.begin() );
-         }
          if (options.size() < 3 ) {
             ss << "AlterCmd: add: Expected 'add inlimit <path-to-limit:limit_name> <int>(optional) <paths>. Not enough arguments\n" << dump_args(options,paths) << "\n";
             throw std::runtime_error( ss.str() );
@@ -936,17 +931,15 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
 		break; }
 
-
 	case AlterCmd::LABEL: {
-
 	   if (options.size() == 3 && paths.size() == 1) {
 	      // ECFLOW-648 allow label value to be empty
 	      // HOWEVER , we can not cope multiple paths, and setting value to empty.
-	      // since empty quotes are removed by boost program options, hence if we have a lavel value which is path, and multiple paths
+	      // since empty quotes are removed by boost program options, hence if we have a label value which is path, and multiple paths
 	      value.clear();
 	   }
 	   else {
-	      // ECFLOW-480 take into account label values that is a path, add ing quotes around the value does not help:
+	      // ECFLOW-480 take into account label values that is a path, adding quotes around the value does not help:
 	      // Note boost program options will remove the quotes around the value
 	      //      hence its difficult to say what is an option and what is a path.
 	      //      However since we expect 4(change,label,<label_name>,<label_value>) options, work around the problem
@@ -979,17 +972,6 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
       break; }
 
 	case AlterCmd::TRIGGER: {
-		// ECFLOW-137, if the expression contains a leading '/' and *no* spaces,
-		//             then it will get treated as a path and not an option
-		// i.e     change trigger 'expression'    <path_to_node>
-		//         change trigger "/suite/task:a" /path/to/a/node
-		// Note boost program options will remove the quotes around the expression
-		//      hence its difficult to say what is an option and what is a path.
-		//      However since we expect 3 options, work around the problem
-		if (options.size() == 2 && paths.size() == 2) {
-			options.push_back(paths[0]);
-			paths.erase(paths.begin()); // remove first path, since it has been added to options
-		}
 		if (options.size() != 3) {
 			ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
 			ss << " but found " << (options.size() + paths.size()) << " arguments. The trigger expression must be quoted\n";
@@ -1010,10 +992,6 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 		break; }
 
 	case AlterCmd::COMPLETE: {
-		if (options.size() == 2 && paths.size() == 2) {
-			options.push_back(paths[0]);
-			paths.erase(paths.begin()); // remove first path, since it has been added to options
-		}
 		if (options.size() != 3) {
 			ss << "AlterCmd: change complete: expected four args: change complete 'expression'  <path_to_node> ";
 			ss << " but found " << (options.size() + paths.size()) << " arguments. The expression must be quoted\n";

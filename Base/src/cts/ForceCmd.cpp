@@ -206,7 +206,7 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
 	}
 
 	std::vector<std::string> options,paths;
-   split_args_to_options_and_paths(args,options,paths); // relative order is still preserved
+   split_args_to_options_and_paths(args,options,paths,true/*treat_colon_in_path_as_path*/); // relative order is still preserved
    if (paths.empty()) {
       std::stringstream ss;
       ss << "ForceCmd: No paths specified. Paths must begin with a leading '/' character\n" << ForceCmd::desc() << "\n";
