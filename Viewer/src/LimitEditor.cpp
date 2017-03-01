@@ -46,7 +46,7 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
     w_->maxSpin_->setValue(oriMax_);
 
     w_->valueSpin_->setRange(0,10000);
-    w_->maxSpin_->setRange(1,10000);
+    w_->maxSpin_->setRange(0,10000);
 
     w_->valueSpin_->setFocus();
 
