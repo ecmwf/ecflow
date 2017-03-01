@@ -127,7 +127,7 @@ public:
 
 private:
 
-	ecf::User::Action user_action_;        // [ fob, fail, remove, adopt, block ]
+	ecf::User::Action user_action_;        // [ fob, fail, remove, adopt, block, kill ]
  	int try_no_;                           // task try number, set on construction
 	int duration_;                         // How long zombie been alive
 	int calls_;                            // Number of times we have communicated with server.
