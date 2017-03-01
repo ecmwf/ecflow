@@ -768,13 +768,16 @@ bool Node::evaluateTrigger() const
 
 const std::string& Node::abortedReason() const { return Str::EMPTY(); }
 
-void Node::set_state(NState::State s, bool force, const std::string& additional_info_to_log)
+void Node::set_state(NState::State newState, bool force, const std::string& additional_info_to_log)
 {
-   setStateOnly(s,false,additional_info_to_log);
+   if (state_.first.state() != newState) {
 
-   // Handle any state change specific functionality. This will update any repeats
-   // This is a virtual function, since we want different behaviour during state change
-   handleStateChange();
+      setStateOnly(newState,false,additional_info_to_log);
+
+      // Handle any state change specific functionality. This will update any repeats
+      // This is a virtual function, since we want different behaviour during state change
+      handleStateChange();
+   }
 }
 
 void Node::setStateOnly(NState::State newState, bool force, const std::string& additional_info_to_log)
