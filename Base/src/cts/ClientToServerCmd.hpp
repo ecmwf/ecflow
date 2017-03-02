@@ -184,9 +184,13 @@ protected:
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
             int try_no)
-   : submittable_(0),path_to_submittable_(pathToSubmittable),
+   : submittable_(0),
+     password_missmatch_(false), pid_missmatch_(false),
+     path_to_submittable_(pathToSubmittable),
      jobs_password_(jobsPassword),process_or_remote_id_(process_or_remote_id), try_no_(try_no){}
-   TaskCmd() : submittable_(0),try_no_(0) {}
+
+   TaskCmd() : submittable_(0), password_missmatch_(false), pid_missmatch_(false), try_no_(0) {}
+
 public:
 
    virtual bool isWrite() const { return true; }
@@ -202,6 +206,9 @@ public:
    virtual bool task_cmd() const { return true; }
    virtual bool connect_to_different_servers() const { return true; }
 
+   bool password_missmatch() const { return password_missmatch_;}
+   bool pid_missmatch() const { return pid_missmatch_;}
+
 protected:
    /// Overridden to do nothing since Task based commands don't need _user_ based authentication
    virtual void setup_user_authentification(const std::string& user, const std::string& passwd){}
@@ -213,6 +220,10 @@ protected:
 
 protected:
    mutable Submittable* submittable_; // stored during authentication and re-used handle request, not persisted, server side only
+
+private:
+   mutable bool password_missmatch_; // stored during authentication and re-used handle request, not persisted, server side only
+   mutable bool pid_missmatch_;      // stored during authentication and re-used handle request, not persisted, server side only
 
 private:
    std::string path_to_submittable_;

@@ -32,6 +32,7 @@
 #include "QueueAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "ZombieAttr.hpp"
+#include "Zombie.hpp"
 #include "NodeAttrDoc.hpp"
 #include "BoostPythonUtil.hpp"
 
@@ -127,9 +128,12 @@ static boost::python::list wrap_set_of_strings(Limit* limit)
 void export_NodeAttr()
 {
 	enum_<Child::ZombieType>("ZombieType", NodeAttrDoc::zombie_type_doc())
-	.value("ecf",   Child::ECF)
-	.value("user",  Child::USER)
-	.value("path",  Child::PATH)
+         .value("ecf",            Child::ECF)
+         .value("ecf_pid",        Child::ECF_PID)
+         .value("ecf_pid_passwd", Child::ECF_PID_PASSWD)
+         .value("ecf_passwd",     Child::ECF_PASSWD)
+         .value("user",           Child::USER)
+         .value("path",           Child::PATH)
 	;
 
 	enum_<User::Action>("ZombieUserActionType",NodeAttrDoc::zombie_user_action_type_doc())
@@ -152,19 +156,50 @@ void export_NodeAttr()
 	.value("complete",Child::COMPLETE)
  	;
 
-	// 	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime);
- 	class_<ZombieAttr>("ZombieAttr",NodeAttrDoc::zombie_doc())
+   //    ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime);
+   class_<ZombieAttr>("ZombieAttr",NodeAttrDoc::zombie_doc())
    .def("__init__",make_constructor(&create_ZombieAttr) )
    .def("__init__",make_constructor(&create_ZombieAttr1) )
- 	.def("__str__",    &ZombieAttr::toString)              // __str__
+   .def("__str__",    &ZombieAttr::toString)              // __str__
    .def("__copy__",   copyObject<ZombieAttr>)             // __copy__ uses copy constructor
- 	.def(self == self )                                    // __eq__
- 	.def("empty",          &ZombieAttr::empty,          "Return true if the attribute is empty")
- 	.def("zombie_type",    &ZombieAttr::zombie_type,    "Returns the :term:`zombie type`")
- 	.def("user_action",    &ZombieAttr::action,         "The automated action to invoke, when zombies arise")
- 	.def("zombie_lifetime",&ZombieAttr::zombie_lifetime,"Returns the lifetime in seconds of :term:`zombie` in the server")
+   .def(self == self )                                    // __eq__
+   .def("empty",          &ZombieAttr::empty,          "Return true if the attribute is empty")
+   .def("zombie_type",    &ZombieAttr::zombie_type,    "Returns the :term:`zombie type`")
+   .def("user_action",    &ZombieAttr::action,         "The automated action to invoke, when zombies arise")
+   .def("zombie_lifetime",&ZombieAttr::zombie_lifetime,"Returns the lifetime in seconds of :term:`zombie` in the server")
    .add_property( "child_cmds",boost::python::range(&ZombieAttr::child_begin,&ZombieAttr::child_end),"The list of child commands. If empty action applies to all child cmds")
    ;
+
+   class_<std::vector<Zombie> >("ZombieVec", "Hold a list of zombies")
+   .def(vector_indexing_suite<std::vector<Zombie> , true >()) ;
+
+   class_<Zombie>("Zombie","Represent a zombie process stored by the server")
+   .def("__str__",    &Zombie::to_string)             // __str__
+   .def("__copy__",   copyObject<Zombie>)             // __copy__ uses copy constructor
+   .def(self == self )                                // __eq__
+   .def("empty", &Zombie::empty)
+   .def("manual_user_action", &Zombie::manual_user_action)
+   .def("fob", &Zombie::fob)
+   .def("fail", &Zombie::fail)
+   .def("adopt", &Zombie::adopt)
+   .def("block", &Zombie::block)
+   .def("remove", &Zombie::remove)
+   .def("kill", &Zombie::kill)
+   .def("type", &Zombie::type)
+   .def("type_str", &Zombie::type_str)
+   .def("last_child_cmd", &Zombie::last_child_cmd)
+   .def("attr", &Zombie::attr,return_value_policy<copy_const_reference>())
+   .def("calls", &Zombie::calls)
+   .def("jobs_password", &Zombie::jobs_password,return_value_policy<copy_const_reference>())
+   .def("path_to_task", &Zombie::path_to_task,return_value_policy<copy_const_reference>())
+   .def("process_or_remote_id", &Zombie::process_or_remote_id,return_value_policy<copy_const_reference>())
+   .def("try_no", &Zombie::try_no)
+   .def("duration", &Zombie::duration)
+   .def("user_action", &Zombie::user_action)
+   .def("user_action_str", &Zombie::user_action_str)
+   .def("allowed_age", &Zombie::allowed_age)
+   ;
+
 
  	class_<Variable>("Variable",NodeAttrDoc::variable_doc(),init<std::string, std::string>())
  	.def("__str__",    &Variable::toString)                // __str__

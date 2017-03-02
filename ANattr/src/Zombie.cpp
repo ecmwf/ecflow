@@ -56,6 +56,28 @@ Zombie::Zombie()
   user_action_set_(false)
 {}
 
+bool Zombie::operator==(const Zombie& rhs) const
+{  // for python interface only
+   if (zombie_type_ != rhs.zombie_type_) return false;
+   if (user_action_ != rhs.user_action_) return false;
+   if (try_no_ != rhs.try_no_) return false;
+   if (duration_ != rhs.duration_) return false;
+   if (calls_ != rhs.calls_) return false;
+   if (last_child_cmd_ != rhs.last_child_cmd_) return false;
+   if (path_to_task_ != rhs.path_to_task_) return false;
+   if (jobs_password_ != rhs.jobs_password_) return false;
+   if (process_or_remote_id_ != rhs.process_or_remote_id_) return false;
+   if (user_action_set_ != rhs.user_action_set_) return false;
+   if (!(attr_ == rhs.attr_)) return false;
+   return true;
+}
+
+std::string Zombie::to_string() const
+{  // for python interface only
+   std::vector<Zombie> vec; vec.push_back(*this);
+   return Zombie::pretty_print(vec,1);
+}
+
 std::string Zombie::type_str() const
 {
 	return Child::to_string(zombie_type_);

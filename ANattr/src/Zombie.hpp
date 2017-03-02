@@ -49,7 +49,7 @@
 #include "ZombieAttr.hpp"
 
 /// Use default copy constructor ,assignment operator and destructor
-class Zombie  {
+class Zombie {
 public:
  	Zombie( ecf::Child::ZombieType zombie_type,     // The kind of zombie
  	        ecf::Child::CmdType child_cmd,          // The Child command, that lead to this zombie
@@ -60,6 +60,9 @@ public:
 	        int try_no
      );
 	Zombie();
+
+   bool operator==(const Zombie& rhs) const; // for python only
+	std::string to_string() const;            // for python only
 
 /// accessors
    // distinguish between manual and automatic user action. manual take precedence
@@ -131,7 +134,7 @@ private:
  	int try_no_;                           // task try number, set on construction
 	int duration_;                         // How long zombie been alive
 	int calls_;                            // Number of times we have communicated with server.
-	ecf::Child::ZombieType zombie_type_;   // [ ecf, path, user ]
+	ecf::Child::ZombieType zombie_type_;   // [ ecf, ecf_pid, ecf_pid_passwd, ecf_passwd, path, user ]
 	ecf::Child::CmdType last_child_cmd_;   // [ init | event | meter | label | wait | queue | abort | complete ]
   	std::string path_to_task_;             // set on construction
 	std::string jobs_password_;            // set on construction

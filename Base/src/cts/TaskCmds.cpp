@@ -119,14 +119,14 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
    bool submittable_allready_aborted = false;
    bool submittable_allready_active = false;
    bool submittable_allready_complete = false;
-   bool password_missmatch = false;
-   bool pid_missmatch = false;
+   password_missmatch_ = false;
+   pid_missmatch_ = false;
 
    if ( submittable_->jobsPassword() != jobs_password_) {
 #ifdef DEBUG_ZOMBIE
       std::cout << ": submittable pass(" << submittable_->jobsPassword() << ") != jobs_password_(" << jobs_password_ << ")";
 #endif
-      password_missmatch = true;
+      password_missmatch_ = true;
    }
 
    /// *** See Note above: Not all child commands pass a process_id. ***
@@ -136,7 +136,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #ifdef DEBUG_ZOMBIE
       std::cout << ":task pid(" << submittable_->process_or_remote_id() << ") != process pid(" << process_or_remote_id_ << ")";
 #endif
-      pid_missmatch = true;
+      pid_missmatch_ = true;
    }
 
    if ((child_type() == Child::INIT) && (submittable_->state() == NState::ACTIVE)) {
@@ -145,7 +145,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #endif
 
       // If ECF_NONSTRICT_ZOMBIES be more forgiving
-      if (!password_missmatch && !pid_missmatch ) {
+      if (!password_missmatch_ && !pid_missmatch_ ) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
             std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already active : action taken( fob )";
             log(Log::WAR, ss.str() );
@@ -166,8 +166,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       if (child_type() == Child::COMPLETE) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
             std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
-            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
+            if (password_missmatch_) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
+            if (pid_missmatch_)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
             ss << " : already complete : action taken( fob )";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
@@ -188,8 +188,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       if (child_type() == Child::ABORT) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
             std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
-            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
+            if (password_missmatch_) ss << " : password miss-match[ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
+            if (pid_missmatch_)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
             ss << " : already aborted : action taken( fob )";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
@@ -205,7 +205,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
     std::cout << "\n";
 #endif
 
-  	if (password_missmatch || pid_missmatch || submittable_allready_active || submittable_allready_complete || submittable_allready_aborted){
+  	if (password_missmatch_ || pid_missmatch_ || submittable_allready_active || submittable_allready_complete || submittable_allready_aborted){
 		/// If the task has adopted we return true, and carry on as normal
       std::string action_taken;
   		if (!as->zombie_ctrl().handle_zombie(submittable_,this,action_taken,theReply)) {
@@ -220,8 +220,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
          if (submittable_allready_active)   ss << " : already active";
          if (submittable_allready_complete) ss << " : already complete";
          if (submittable_allready_aborted)  ss << " : already aborted";
-         if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
-         if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
+         if (password_missmatch_) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
+         if (pid_missmatch_)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
          ss << " : action taken(" << action_taken << ")";
          log(Log::ERR,ss.str());
   			return false;

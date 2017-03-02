@@ -124,6 +124,9 @@ bool ZombieCtrl::handle_zombie(
  	/// Create Zombie:
  	/// *** ECF *** Zombies is created with: process path, process password, and process id/rid , process try_no ***
 	Child::ZombieType zombie_type = Child::ECF;
+	if (task_cmd->pid_missmatch() && task_cmd->password_missmatch()) zombie_type = Child::ECF_PID_PASSWD;
+	else if (task_cmd->pid_missmatch() ) zombie_type = Child::ECF_PID;
+	else if (task_cmd->password_missmatch()) zombie_type = Child::ECF_PASSWD;
 	ZombieAttr attr = ZombieAttr::get_default_attr( zombie_type );
 
 	/// Look for any Zombie attribute up node tree, use this to construct & configure zombie

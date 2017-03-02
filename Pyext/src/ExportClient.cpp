@@ -148,6 +148,11 @@ void alter(ClientInvoker* self,
 
 void set_child_pid(ClientInvoker* self,int pid) { self->set_child_pid( boost::lexical_cast<std::string>(pid)); }
 
+const std::vector<Zombie>& zombieGet(ClientInvoker* self,int pid) {
+   self->zombieGet();
+   return self->server_reply().zombies();
+}
+
 
 void export_Client()
 {
@@ -252,6 +257,7 @@ void export_Client()
    .def("debug_server_on",  &ClientInvoker::debug_server_on,  "Enable server debug, Will dump to standard out on server host.")
    .def("debug_server_off", &ClientInvoker::debug_server_off, "Disable server debug")
 
+   .def("zombie_get",       &zombieGet, return_value_policy<copy_const_reference>())
    .def("zombie_fob",       &ClientInvoker::zombieFobCli )
    .def("zombie_fail",      &ClientInvoker::zombieFailCli )
    .def("zombie_adopt",     &ClientInvoker::zombieAdoptCli )

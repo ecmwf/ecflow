@@ -23,19 +23,25 @@ namespace ecf {
 std::string Child::to_string(Child::ZombieType zt)
 {
 	switch (zt) {
-		case Child::USER: return "user"; break;
-		case Child::PATH: return "path"; break;
-		case Child::ECF: return "ecf"; break;
-		case Child::NOT_SET: return "not_set"; break;
+		case Child::USER:           return "user"; break;
+		case Child::PATH:           return "path"; break;
+      case Child::ECF:            return "ecf"; break;
+      case Child::ECF_PID:        return "ecf_pid"; break;
+      case Child::ECF_PID_PASSWD: return "ecf_pid_passwd"; break;
+      case Child::ECF_PASSWD:     return "ecf_passwd"; break;
+		case Child::NOT_SET:        return "not_set"; break;
 	}
 	return std::string();
 }
 
 Child::ZombieType Child::zombie_type(const std::string& s)
 {
-	if (s == "user") return Child::USER;
-	if (s == "ecf") return Child::ECF;
-	if (s == "path") return Child::PATH;
+	if (s == "user")           return Child::USER;
+   if (s == "ecf")            return Child::ECF;
+   if (s == "ecf_pid")        return Child::ECF_PID;
+   if (s == "ecf_pid_passwd") return Child::ECF_PID_PASSWD;
+   if (s == "ecf_passwd")     return Child::ECF_PASSWD;
+	if (s == "path")           return Child::PATH;
 	return Child::NOT_SET;
 }
 

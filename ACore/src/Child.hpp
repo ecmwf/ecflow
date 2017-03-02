@@ -25,7 +25,15 @@ class Child : private boost::noncopyable {
 public:
 	enum CmdType    { INIT, EVENT, METER, LABEL, WAIT, QUEUE, ABORT, COMPLETE };
 
-	enum ZombieType { USER, ECF, PATH , NOT_SET };
+	enum ZombieType {
+	   USER,
+	   ECF,
+	   ECF_PID,
+	   ECF_PASSWD,
+	   ECF_PID_PASSWD,
+	   PATH,
+	   NOT_SET
+	};
 
 	static std::string to_string(ZombieType);
 	static bool valid_zombie_type( const std::string& );

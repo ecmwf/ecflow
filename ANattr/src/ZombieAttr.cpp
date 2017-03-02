@@ -232,9 +232,12 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse)
 ZombieAttr ZombieAttr::get_default_attr(ecf::Child::ZombieType zt)
 {
 	switch (zt) {
-		case Child::USER: return ZombieAttr(Child::USER,std::vector<ecf::Child::CmdType>(), User::BLOCK, user_zombie_life_time); break;
-		case Child::PATH: return ZombieAttr(Child::PATH,std::vector<ecf::Child::CmdType>(), User::BLOCK, path_zombie_life_time); break;
-		case Child::ECF:  return ZombieAttr(Child::ECF, std::vector<ecf::Child::CmdType>(), User::BLOCK, ecf_zombie_life_time); break;
+		case Child::USER:          return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, user_zombie_life_time); break;
+		case Child::PATH:          return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, path_zombie_life_time); break;
+      case Child::ECF:           return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, ecf_zombie_life_time); break;
+      case Child::ECF_PID:       return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, ecf_zombie_life_time); break;
+      case Child::ECF_PID_PASSWD:return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, ecf_zombie_life_time); break;
+      case Child::ECF_PASSWD:    return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, ecf_zombie_life_time); break;
 		case Child::NOT_SET: break;
 	}
 	return ZombieAttr(Child::ECF, std::vector<ecf::Child::CmdType>(), User::BLOCK, ecf_zombie_life_time);
