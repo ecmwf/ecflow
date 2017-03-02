@@ -105,6 +105,10 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	         node->miss_next_time_slot();
  	      }
 
+ 	      if ( new_state != NState::ACTIVE && new_state != NState::SUBMITTED) {
+ 	         as->zombie_ctrl().add_user_zombies(node);
+ 	      }
+
  	      if (recursive_) node->set_state_hierarchically( new_state, true /* force */ );
  	      else            node->set_state( new_state, true /* force */  );
  	   }
