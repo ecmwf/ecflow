@@ -517,11 +517,11 @@ if __name__ == "__main__":
     #===========================================================================
     zombie_life_time_in_server = 800
     child_list = [ ecflow.ChildCmdType.init, ecflow.ChildCmdType.event, ecflow.ChildCmdType.meter, ecflow.ChildCmdType.label, ecflow.ChildCmdType.wait, ecflow.ChildCmdType.abort, ecflow.ChildCmdType.complete ]
-    zombie_type_list = [ ecflow.ZombieType.ecf, ecflow.ZombieType.user, ecflow.ZombieType.path ]
+    zombie_type_list = [ ecflow.ZombieType.ecf, ecflow.ZombieType.ecf_pid, ecflow.ZombieType.ecf_pid_passwd, ecflow.ZombieType.ecf_passwd, ecflow.ZombieType.user, ecflow.ZombieType.path ]
     for zombie_type in zombie_type_list:
         zombie_attr = ecflow.ZombieAttr(zombie_type, child_list, ecflow.ZombieUserActionType.block, zombie_life_time_in_server)
         s1.add_zombie(zombie_attr)
-    assert len(list(s1.zombies)) == 3, "Expected 3 zombie attributes but found " + str(len(list(s1.zombies)))
+    assert len(list(s1.zombies)) == 6, "Expected 6 zombie attributes but found " + str(len(list(s1.zombies)))
     
     # delete all the zombies
     s1.delete_zombie("")
@@ -531,14 +531,13 @@ if __name__ == "__main__":
     for zombie_type in zombie_type_list:
         zombie_attr = ecflow.ZombieAttr(zombie_type, child_list, ecflow.ZombieUserActionType.block)
         s1.add_zombie(zombie_attr)
-    assert len(list(s1.zombies)) == 3, "Expected 3 zombie attributes but found " + str(len(list(s1.zombies)))
+    assert len(list(s1.zombies)) == 6, "Expected 6 zombie attributes but found " + str(len(list(s1.zombies)))
 
     s1.delete_zombie("")
     assert len(list(s1.zombies)) == 0, "Expected zero zombie attributes but found " + str(len(list(s1.zombies)))
 
     # repeat the the test with empty child list. Empty child list means apply to all child commands
-    child_list = [ ]
-    zombie_type_list = [ ecflow.ZombieType.ecf, ecflow.ZombieType.user, ecflow.ZombieType.path ]
+    child_list = []
     for zombie_type in zombie_type_list:
         zombie_attr = ecflow.ZombieAttr(zombie_type, child_list, ecflow.ZombieUserActionType.block, zombie_life_time_in_server)
         s1.add_zombie(zombie_attr)

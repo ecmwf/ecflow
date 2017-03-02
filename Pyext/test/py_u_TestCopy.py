@@ -467,12 +467,12 @@ if __name__ == "__main__":
     s1 = ecflow.Task("s1")
     zombie_life_time_in_server = 800
     child_list = [ ecflow.ChildCmdType.init, ecflow.ChildCmdType.event, ecflow.ChildCmdType.meter, ecflow.ChildCmdType.label, ecflow.ChildCmdType.wait, ecflow.ChildCmdType.abort, ecflow.ChildCmdType.complete ]
-    zombie_type_list = [ ecflow.ZombieType.ecf, ecflow.ZombieType.user, ecflow.ZombieType.path ]
+    zombie_type_list = [ ecflow.ZombieType.ecf, ecflow.ZombieType.ecf_pid, ecflow.ZombieType.ecf_pid_passwd, ecflow.ZombieType.ecf_passwd, ecflow.ZombieType.user, ecflow.ZombieType.path ]
     for zombie_type in zombie_type_list:
         zombie_attr = ecflow.ZombieAttr(zombie_type, child_list, ecflow.ZombieUserActionType.block, zombie_life_time_in_server)
         s1.add_zombie(zombie_attr)
     task_copy = copy.copy(s1)
-    assert len(list(task_copy.zombies)) == 3, "Expected 3 zombie attributes but found " + str(len(list(task_copy.zombies)))
+    assert len(list(task_copy.zombies)) == 6, "Expected 6 zombie attributes but found " + str(len(list(task_copy.zombies)))
     
     # delete all the zombies
     s1.delete_zombie("")
@@ -483,7 +483,7 @@ if __name__ == "__main__":
         zombie_attr = ecflow.ZombieAttr(zombie_type, child_list, ecflow.ZombieUserActionType.block)
         s1.add_zombie(zombie_attr)
     task_copy = copy.copy(s1)
-    assert len(list(task_copy.zombies)) == 3, "Expected 3 zombie attributes but found " + str(len(list(task_copy.zombies)))
+    assert len(list(task_copy.zombies)) == 6, "Expected 6 zombie attributes but found " + str(len(list(task_copy.zombies)))
 
     s1.delete_zombie("")
     assert len(list(s1.zombies)) == 0, "Expected zero zombie attributes but found " + str(len(list(s1.zombies)))
