@@ -68,7 +68,7 @@ namespace fs = boost::filesystem;
 //#define DO_TEST10 1 Need to make reliable
 #define DO_TEST11 1
 
-static bool ecf_debug_enabled = false; // allow environment to enable debug
+static bool ecf_debug_enabled = false; // allow ECF_DEBUG_ZOMBIES environment to enable debug
 
 
 BOOST_GLOBAL_FIXTURE( TestFixture );

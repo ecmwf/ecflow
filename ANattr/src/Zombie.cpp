@@ -176,12 +176,13 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
    string path("task-path");
    string type("type");
    string password("password");
-   string rid("process-id");
-   string duration("duration");
+   string rid("pid");
+   string duration("age(s)");
    string calls("calls");
    string try_no("try_no");
    string user_action("action");
    string child_type("child");
+   string explanation("explanation");
 
    size_t path_width = path.size();
    size_t type_width = type.size();
@@ -189,9 +190,18 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
    size_t password_width = password.size();
    size_t tryno_width = try_no.size();
    size_t rid_width = rid.size();
-   size_t user_action_width = 13;  // max of FOB,FAIL,ADOPT,BLOCK,REMOVE + (manual- | auto- )
-   size_t child_type_width = 8;    // max of INIT,COMPLETE,EVENT,METER,LABEL,WAIT,ABORT
+   size_t user_action_width = user_action.size();  // max of FOB,FAIL,ADOPT,BLOCK,REMOVE + (manual- | auto- )
+   size_t child_type_width = child_type.size();
    size_t calls_width = calls.size();
+   size_t explanation_width = explanation.size();
+
+   std::string ecf_expl =            "Two init commands or task complete or aborted but receives another child cmd";
+   std::string ecf_pid_expl =        "Process id miss-match, but password matches";
+   std::string ecf_pid_passwd_expl = "Both process-id and password miss-match";
+   std::string ecf_passwd_expl =     "Password miss-match, process id matches";
+   std::string ecf_user =            "Created by user action";
+   std::string ecf_path =            "Task not found";
+   std::string exp;
 
    BOOST_FOREACH(const Zombie& z, zombies) {
       path_width = std::max(path_width,z.path_to_task().size());
@@ -203,6 +213,19 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
 
       std::string try_no_int = boost::lexical_cast<std::string>(z.try_no());
       tryno_width = std::max(tryno_width,try_no_int.size());
+      child_type_width = std::max(child_type_width,Child::to_string(z.last_child_cmd()).size());
+      user_action_width = std::max(user_action_width,z.user_action_str().size());
+
+      switch (z.type()) {
+         case Child::USER:           exp = ecf_user; break;
+         case Child::PATH:           exp = ecf_path ; break;
+         case Child::ECF:            exp = ecf_expl ; break;
+         case Child::ECF_PID:        exp = ecf_pid_expl ; break;
+         case Child::ECF_PID_PASSWD: exp = ecf_pid_passwd_expl ; break;
+         case Child::ECF_PASSWD:     exp = ecf_passwd_expl ; break;
+         case Child::NOT_SET:        break;
+      }
+      explanation_width = std::max(explanation_width,exp.size());
    }
 
    std::stringstream ss;
@@ -215,14 +238,26 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
             << setw(tryno_width) << try_no << " "
             << setw(user_action_width) << user_action << " "
             << setw(child_type_width) << child_type << " "
-            << setw(calls_width) << calls
-     ;
+            << setw(calls_width) << calls << " "
+            << setw(explanation_width) << explanation
+   ;
 
    list.push_back(ss.str());
 
    BOOST_FOREACH(const Zombie& z, zombies) {
      std::stringstream ss;
      if (indent != 0) for(int i = 0; i < indent; i++) ss << " ";
+
+      switch (z.type()) {
+         case Child::USER:           exp = ecf_user; break;
+         case Child::PATH:           exp = ecf_path ; break;
+         case Child::ECF:            exp = ecf_expl ; break;
+         case Child::ECF_PID:        exp = ecf_pid_expl ; break;
+         case Child::ECF_PID_PASSWD: exp = ecf_pid_passwd_expl ; break;
+         case Child::ECF_PASSWD:     exp = ecf_passwd_expl ; break;
+         case Child::NOT_SET:        break;
+      }
+
       ss << left << setw(path_width)         << z.path_to_task() << " "
                 << setw(type_width)          << z.type_str() << " "
                 << setw(duration_width)      << z.duration() << " "
@@ -231,8 +266,8 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
                 << setw(tryno_width)         << z.try_no() << " "
                 << setw(user_action_width)   << z.user_action_str() << " "
                 << setw(child_type_width)    << Child::to_string(z.last_child_cmd())  << " "
-  	        << setw(calls_width)         << z.calls()
-	;
+                << setw(calls_width)         << z.calls() << " "
+                << setw(explanation_width)   << exp ;
       list.push_back(ss.str());
    }
 }
