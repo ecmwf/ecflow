@@ -15,11 +15,11 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
-std::string VRepeatDateAttr::subType_("repeat date");
-std::string VRepeatIntAttr::subType_("repeat integer");
-std::string VRepeatStringAttr::subType_("repeat string");
-std::string VRepeatEnumAttr::subType_("repeat enumerated");
-std::string VRepeatDayAttr::subType_("repeat date");
+std::string VRepeatDateAttr::subType_("date");
+std::string VRepeatIntAttr::subType_("integer");
+std::string VRepeatStringAttr::subType_("string");
+std::string VRepeatEnumAttr::subType_("enumerated");
+std::string VRepeatDayAttr::subType_("day");
 
 static long ecf_repeat_date_to_julian(long ddate);
 static long ecf_repeat_julian_to_date(long jdate);

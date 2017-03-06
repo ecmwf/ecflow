@@ -799,7 +799,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
 
 	//Draw value
-    if(val < maxVal)
+    if(val <= maxVal)
         painter->setPen(Qt::black);
     else
         painter->setPen(Qt::red);
