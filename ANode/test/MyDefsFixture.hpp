@@ -124,18 +124,25 @@ private:
 		child_cmds.push_back(ecf::Child::EVENT);
 		child_cmds.push_back(ecf::Child::METER);
 		child_cmds.push_back(ecf::Child::LABEL);
-		child_cmds.push_back(ecf::Child::WAIT);
+      child_cmds.push_back(ecf::Child::WAIT);
+      child_cmds.push_back(ecf::Child::QUEUE);
 		child_cmds.push_back(ecf::Child::ABORT);
 		child_cmds.push_back(ecf::Child::COMPLETE);
 		suiteTask->addZombie( ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10) );
-		suiteTask->addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL,100) );
 		suiteTask->addZombie( ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK,100) );
+      suiteTask->addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL,100) );
+      suiteTask->addZombie( ZombieAttr(ecf::Child::ECF_PID, child_cmds, ecf::User::FAIL,100) );
+      suiteTask->addZombie( ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::User::FAIL,100) );
+      suiteTask->addZombie( ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::User::FAIL,100) );
 
 
 		task_ptr suiteTask4 = suite->add_task( "t4" );
 		suiteTask4->addZombie( ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::ADOPT,10) );
-		suiteTask4->addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::REMOVE,100) );
 		suiteTask4->addZombie( ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK,100) );
+		suiteTask4->addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::REMOVE,100) );
+		suiteTask4->addZombie( ZombieAttr(ecf::Child::ECF_PID, child_cmds, ecf::User::KILL,100) );
+		suiteTask4->addZombie( ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::User::FOB,100) );
+		suiteTask4->addZombie( ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::User::BLOCK,100) );
 
 
  		ecf::CronAttr cronAttr;

@@ -1,20 +1,32 @@
 suite suiteName
    zombie ecf:fob:init:100
+   zombie ecf_pid:fob:init:100
+   zombie ecf_pid_passwd:fob:init:100
+   zombie ecf_passwd:fob:init:100
    zombie path:fail:init:100
    zombie user:adopt:meter:100
 
    task t1
      zombie ecf:remove::
+     zombie ecf_pid:remove::
+     zombie ecf_pid_passwd:remove::
+     zombie ecf_passwd:remove::
      zombie path:block:wait:
      zombie user:fob:complete:
 
    task t2
      zombie ecf:fob::
+     zombie ecf_pid:kill::
+     zombie ecf_pid_passwd:block::
+     zombie ecf_passwd:adopt::
      zombie path:fail::
      zombie user:adopt::
     
    task t3
-     zombie ecf:remove:init,event,meter,label,wait,complete:2000     # comment
+     zombie ecf:remove:init,event,meter,label,wait,queue,complete:2000     # comment
+     zombie ecf_pid:remove:init,event,meter,label,wait,queue,complete:2000     # comment
+     zombie ecf_pid_passwd:remove:init,event,meter,label,wait,queue,complete:2000     # comment
+     zombie ecf_passwd:remove:init,event,meter,label,wait,queue,complete:2000     # comment
      zombie path:::0
      zombie user:::0
 endsuite

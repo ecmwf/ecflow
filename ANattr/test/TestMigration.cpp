@@ -130,6 +130,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    child_cmds.push_back(ecf::Child::METER);
    child_cmds.push_back(ecf::Child::LABEL);
    child_cmds.push_back(ecf::Child::WAIT);
+   child_cmds.push_back(ecf::Child::QUEUE);
    child_cmds.push_back(ecf::Child::ABORT);
    child_cmds.push_back(ecf::Child::COMPLETE);
 

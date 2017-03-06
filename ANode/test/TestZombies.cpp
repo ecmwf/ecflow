@@ -38,6 +38,9 @@ BOOST_AUTO_TEST_CASE( test_zombies )
       BOOST_REQUIRE_MESSAGE(s->zombies().size() == 0, "Expected 0 zombies but found " << s->zombies().size());
       BOOST_REQUIRE_MESSAGE(s->findZombie(ecf::Child::USER).empty(), "Expected no zombies");
       BOOST_REQUIRE_MESSAGE(s->findZombie(ecf::Child::ECF).empty(), "Expected no zombies");
+      BOOST_REQUIRE_MESSAGE(s->findZombie(ecf::Child::ECF_PID).empty(), "Expected no zombies");
+      BOOST_REQUIRE_MESSAGE(s->findZombie(ecf::Child::ECF_PASSWD).empty(), "Expected no zombies");
+      BOOST_REQUIRE_MESSAGE(s->findZombie(ecf::Child::ECF_PID_PASSWD).empty(), "Expected no zombies");
       BOOST_REQUIRE_MESSAGE(s->findZombie(ecf::Child::PATH).empty(), "Expected no zombies");
       ZombieAttr attr;
       BOOST_REQUIRE_MESSAGE(!t->findParentZombie(ecf::Child::PATH,attr) && attr.empty(), "Expected to NOT find PATH zombies on parent");
@@ -50,6 +53,7 @@ BOOST_AUTO_TEST_CASE( test_zombies )
    child_cmds.push_back(ecf::Child::METER);
    child_cmds.push_back(ecf::Child::LABEL);
    child_cmds.push_back(ecf::Child::WAIT);
+   child_cmds.push_back(ecf::Child::QUEUE);
    child_cmds.push_back(ecf::Child::ABORT);
    child_cmds.push_back(ecf::Child::COMPLETE);
    {
@@ -57,20 +61,32 @@ BOOST_AUTO_TEST_CASE( test_zombies )
       BOOST_REQUIRE_MESSAGE(s->zombies().size() == 1, "Expected 1 zombie but found " << s->zombies().size());
       s->addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL,100) );
       BOOST_REQUIRE_MESSAGE(s->zombies().size() == 2, "Expected 2 zombie but found " << s->zombies().size());
-      s->addZombie( ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK,100) );
+      s->addZombie( ZombieAttr(ecf::Child::ECF_PID, child_cmds, ecf::User::FAIL,100) );
       BOOST_REQUIRE_MESSAGE(s->zombies().size() == 3, "Expected 3 zombie but found " << s->zombies().size());
+      s->addZombie( ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::User::FAIL,100) );
+      BOOST_REQUIRE_MESSAGE(s->zombies().size() == 4, "Expected 4 zombie but found " << s->zombies().size());
+      s->addZombie( ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::User::FAIL,100) );
+      BOOST_REQUIRE_MESSAGE(s->zombies().size() == 5, "Expected 5 zombie but found " << s->zombies().size());
+      s->addZombie( ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK,100) );
+      BOOST_REQUIRE_MESSAGE(s->zombies().size() == 6, "Expected 6 zombie but found " << s->zombies().size());
    }
 
    // FIND
    BOOST_REQUIRE_MESSAGE(!s->findZombie(ecf::Child::USER).empty(), "Expected to find USER zombies");
    BOOST_REQUIRE_MESSAGE(!s->findZombie(ecf::Child::ECF).empty(), "Expected to find ECF zombies");
+   BOOST_REQUIRE_MESSAGE(!s->findZombie(ecf::Child::ECF_PID).empty(), "Expected to find ECF_PID zombies");
+   BOOST_REQUIRE_MESSAGE(!s->findZombie(ecf::Child::ECF_PID_PASSWD).empty(), "Expected to find ECF_PID_PASSWD zombies");
+   BOOST_REQUIRE_MESSAGE(!s->findZombie(ecf::Child::ECF_PASSWD).empty(), "Expected to find ECF_PASSWD zombies");
    BOOST_REQUIRE_MESSAGE(!s->findZombie(ecf::Child::PATH).empty(), "Expected to find PATH zombies");
 
    // FIND on parent
    {
-      ZombieAttr path_z,ecf_z,user_z;
+      ZombieAttr path_z,ecf_z,ecf_pid_z,ecf_pid_passwd_z,ecf_passwd_z,user_z;
       BOOST_REQUIRE_MESSAGE(t->findParentZombie(ecf::Child::PATH,path_z) && !path_z.empty(), "Expected to find PATH zombies on parent");
       BOOST_REQUIRE_MESSAGE(t->findParentZombie(ecf::Child::ECF,ecf_z) && !ecf_z.empty(), "Expected to find ECF zombies on parent");
+      BOOST_REQUIRE_MESSAGE(t->findParentZombie(ecf::Child::ECF_PID,ecf_pid_z) && !ecf_pid_z.empty(), "Expected to find ECF_PID zombies on parent");
+      BOOST_REQUIRE_MESSAGE(t->findParentZombie(ecf::Child::ECF_PID_PASSWD,ecf_pid_passwd_z) && !ecf_pid_passwd_z.empty(), "Expected to find ECF_PID_PASSWD zombies on parent");
+      BOOST_REQUIRE_MESSAGE(t->findParentZombie(ecf::Child::ECF_PASSWD,ecf_passwd_z) && !ecf_passwd_z.empty(), "Expected to find ECF_PASSWD zombies on parent");
       BOOST_REQUIRE_MESSAGE(t->findParentZombie(ecf::Child::USER,user_z) && !user_z.empty(), "Expected to find USER zombies on parent");
    }
 

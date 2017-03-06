@@ -48,7 +48,10 @@ Child::ZombieType Child::zombie_type(const std::string& s)
 bool Child::valid_zombie_type( const std::string& s)
 {
 	if (s == "user") return true;
-	if (s == "ecf") return true;
+   if (s == "ecf") return true;
+   if (s == "ecf_pid") return true;
+   if (s == "ecf_pid_passwd") return true;
+   if (s == "ecf_passwd") return true;
 	if (s == "path") return true;
 	return false;
 }

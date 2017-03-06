@@ -26,12 +26,12 @@ public:
 	enum CmdType    { INIT, EVENT, METER, LABEL, WAIT, QUEUE, ABORT, COMPLETE };
 
 	enum ZombieType {
-	   USER,
-	   ECF,
-	   ECF_PID,
-	   ECF_PASSWD,
-	   ECF_PID_PASSWD,
-	   PATH,
+	   USER,           // zombie created by user action
+	   ECF,            // two init commands, or aborted and complete, and received any other child command
+	   ECF_PID,        // pid miss-match, but password matches,  -> same job submitted twice |
+	   ECF_PASSWD,     // password miss-match, but pid matches   -> WTF, user edited ECF_PASS in job file ?
+	   ECF_PID_PASSWD, // pid and password missmatch             -> Job re-queued and submitted again
+	   PATH,           // zombie, because path to task does not exist in the server
 	   NOT_SET
 	};
 

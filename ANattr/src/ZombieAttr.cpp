@@ -42,9 +42,12 @@ ZombieAttr::ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::C
    /// zombie_lifetime_ is 60 seconds
 	if (zombie_lifetime_ <= 59) {
  		switch (zombie_type_) {
-			case Child::USER: zombie_lifetime_ = user_zombie_life_time; break;
-			case Child::PATH: zombie_lifetime_ = path_zombie_life_time; break;
-			case Child::ECF:  zombie_lifetime_ = ecf_zombie_life_time; break;
+			case Child::USER:          zombie_lifetime_ = user_zombie_life_time; break;
+			case Child::PATH:          zombie_lifetime_ = path_zombie_life_time; break;
+         case Child::ECF:           zombie_lifetime_ = ecf_zombie_life_time; break;
+         case Child::ECF_PID:       zombie_lifetime_ = ecf_zombie_life_time; break;
+         case Child::ECF_PID_PASSWD:zombie_lifetime_ = ecf_zombie_life_time; break;
+         case Child::ECF_PASSWD:    zombie_lifetime_ = ecf_zombie_life_time; break;
 			case Child::NOT_SET: assert(false); break;
 		}
 	}
@@ -200,14 +203,14 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse)
 	//std::cout << "   zombie_type = " << str_zombie_type << "   user_action = " << action_str <<  "   child_cmds = " << child_cmds<< "   zombie_lifetime = " << lifetime << "\n";
 
 	if (!Child::valid_zombie_type(str_zombie_type))
-		throw std::runtime_error("ZombieAttr::create failed: Invalid zombie type, expected one of [ user | ecf | path ] but found " + str_zombie_type + string(":") + string_to_parse);
+		throw std::runtime_error("ZombieAttr::create failed: Invalid zombie type, expected one of [ user | ecf | ecf_pid | ecf_pid_passed | ecf_passwd | path ] but found " + str_zombie_type + string(":") + string_to_parse);
 
 	if ( !action_str.empty() && !User::valid_user_action(action_str)) {
 		throw std::runtime_error("ZombieAttr::create failed: Invalid user action, expected one of [ fob | fail | remove | block | adopt | kill ] but found " + action_str + string(":") + string_to_parse);
 	}
 
 	if ( !child_cmds.empty() && !Child::valid_child_cmds(child_cmds)) {
-		throw std::runtime_error("ZombieAttr::create failed: Invalid child type, expected one or more of [ init,event,meter,label,wait,abort,complete] but found " + tokens[2] + string(":") + string_to_parse);
+		throw std::runtime_error("ZombieAttr::create failed: Invalid child type, expected one or more of [ init,event,meter,label,wait,queue,abort,complete] but found " + tokens[2] + string(":") + string_to_parse);
 	}
 
 	int zombie_lifetime = -1;
