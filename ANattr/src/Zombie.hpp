@@ -57,7 +57,8 @@ public:
 	        const std::string& pathToTask,          // from child ipc
 	        const std::string& jobsPassword,        // from child ipc
 	        const std::string& process_or_remote_id,// from child ipc
-	        int try_no
+	        int try_no,
+	        const std::string& user_cmd = ""        // user cmd that created this zombie
      );
 	Zombie();
 
@@ -82,7 +83,8 @@ public:
 	std::string type_str() const;
 	const std::string& jobs_password() const { return jobs_password_; }
 	const std::string& path_to_task() const { return path_to_task_; }
-	const std::string& process_or_remote_id() const { return process_or_remote_id_; }
+   const std::string& process_or_remote_id() const { return process_or_remote_id_; }
+   const std::string& user_cmd() const { return user_cmd_; }
  	int try_no() const { return try_no_; }
 	int duration() const { return duration_; }
 	ecf::User::Action user_action() const;
@@ -139,7 +141,7 @@ private:
   	std::string path_to_task_;             // set on construction
 	std::string jobs_password_;            // set on construction
 	std::string process_or_remote_id_;     // set on construction
-
+   std::string user_cmd_;                 // user cmd that created this zombie, empty otherwise
  	bool user_action_set_;                   // Differentiate manual from automated, response, manual take precedence
 	ZombieAttr attr_;                        // Default or attribute obtained from node tree.
  	boost::posix_time::ptime  creation_time_;// When zombie was created. Needed to control lifetime
@@ -157,6 +159,7 @@ private:
  		ar & path_to_task_;
 		ar & jobs_password_;
 		ar & process_or_remote_id_;
+		ar & user_cmd_;
 		ar & user_action_set_;
 		ar & attr_;
    	}

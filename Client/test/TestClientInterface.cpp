@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
 
    ClientInvoker theClient ;
    theClient.testInterface(); // stops submission to server
-   std::vector<std::string> paths; paths.push_back("/s1"); paths.push_back("/s2");
+   std::vector<std::string> paths; paths.push_back("/s1/t1"); paths.push_back("/s2/t2");
 
    BOOST_REQUIRE_MESSAGE( theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
@@ -93,6 +93,12 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.zombieBlockCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieRemoveCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieKillCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieFobCliPaths(paths) == 0,    " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieFailCliPaths(paths) == 0,   " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieAdoptCliPaths(paths) == 0,  " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieBlockCliPaths(paths) == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieRemoveCliPaths(paths) == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieKillCliPaths(paths) == 0, " should return 0\n" << theClient.errorMsg());
 
    BOOST_REQUIRE_MESSAGE( theClient.job_gen("") == 0,CtsApi::job_gen("") << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.job_gen("/s") == 0,CtsApi::job_gen("/s") << " should return 0\n" << theClient.errorMsg());

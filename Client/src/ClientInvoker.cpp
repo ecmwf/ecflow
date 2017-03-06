@@ -666,64 +666,90 @@ int ClientInvoker::zombieGet() const
 }
 int ClientInvoker::zombieFob( const Zombie& z ) const
 {
-   if (testInterface_) return invoke(CtsApi::zombieFob(z.path_to_task(), z.process_or_remote_id(), z.jobs_password()));
-   return invoke(Cmd_ptr(new ZombieCmd(User::FOB, z.path_to_task(), z.process_or_remote_id(), z.jobs_password() )));
+   if (testInterface_) return invoke(CtsApi::zombieFob(std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+   return invoke(Cmd_ptr(new ZombieCmd(User::FOB, std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password() )));
 }
 int ClientInvoker::zombieFail( const Zombie& z ) const
 {
-   if (testInterface_) return invoke(CtsApi::zombieFail(z.path_to_task(), z.process_or_remote_id(), z.jobs_password()));
-   return invoke(Cmd_ptr(new ZombieCmd(User::FAIL, z.path_to_task(), z.process_or_remote_id(), z.jobs_password() )));
+   if (testInterface_) return invoke(CtsApi::zombieFail(std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+   return invoke(Cmd_ptr(new ZombieCmd(User::FAIL, std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password() )));
 }
 int ClientInvoker::zombieAdopt( const Zombie& z ) const
 {
-   if (testInterface_) return invoke(CtsApi::zombieAdopt(z.path_to_task(), z.process_or_remote_id(), z.jobs_password()));
-   return invoke(Cmd_ptr(new ZombieCmd(User::ADOPT, z.path_to_task(), z.process_or_remote_id(), z.jobs_password() )));
+   if (testInterface_) return invoke(CtsApi::zombieAdopt(std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+   return invoke(Cmd_ptr(new ZombieCmd(User::ADOPT, std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password() )));
 }
 int ClientInvoker::zombieBlock( const Zombie& z ) const
 {
-   if (testInterface_) return invoke(CtsApi::zombieBlock(z.path_to_task(), z.process_or_remote_id(), z.jobs_password()));
-   return invoke(Cmd_ptr(new ZombieCmd(User::BLOCK, z.path_to_task(), z.process_or_remote_id(), z.jobs_password() )));
+   if (testInterface_) return invoke(CtsApi::zombieBlock(std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+   return invoke(Cmd_ptr(new ZombieCmd(User::BLOCK, std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password() )));
 }
 int ClientInvoker::zombieRemove( const Zombie& z ) const
 {
-   if (testInterface_) return invoke(CtsApi::zombieRemove(z.path_to_task(), z.process_or_remote_id(), z.jobs_password()));
-   return invoke(Cmd_ptr(new ZombieCmd(User::REMOVE, z.path_to_task(), z.process_or_remote_id(), z.jobs_password() )));
+   if (testInterface_) return invoke(CtsApi::zombieRemove(std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+   return invoke(Cmd_ptr(new ZombieCmd(User::REMOVE, std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password() )));
 }
 int ClientInvoker::zombieKill( const Zombie& z ) const
 {
-   if (testInterface_) return invoke(CtsApi::zombieKill(z.path_to_task(), z.process_or_remote_id(), z.jobs_password()));
-   return invoke(Cmd_ptr(new ZombieCmd(User::KILL, z.path_to_task(), z.process_or_remote_id(), z.jobs_password() )));
+   if (testInterface_) return invoke(CtsApi::zombieKill(std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+   return invoke(Cmd_ptr(new ZombieCmd(User::KILL, std::vector<std::string>(1,z.path_to_task()), z.process_or_remote_id(), z.jobs_password() )));
 }
 int ClientInvoker::zombieFobCli( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::zombieFobCli(absNodePath));
-   return invoke(Cmd_ptr(new ZombieCmd(User::FOB, absNodePath,"","")));
+   return invoke(Cmd_ptr(new ZombieCmd(User::FOB, std::vector<std::string>(1,absNodePath),"","")));
 }
 int ClientInvoker::zombieFailCli( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::zombieFailCli(absNodePath));
-   return invoke(Cmd_ptr(new ZombieCmd(User::FAIL, absNodePath,"","" )));
+   return invoke(Cmd_ptr(new ZombieCmd(User::FAIL, std::vector<std::string>(1,absNodePath),"","" )));
 }
 int ClientInvoker::zombieAdoptCli( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::zombieAdoptCli(absNodePath));
-   return invoke(Cmd_ptr(new ZombieCmd(User::ADOPT, absNodePath,"","" )));
+   return invoke(Cmd_ptr(new ZombieCmd(User::ADOPT, std::vector<std::string>(1,absNodePath),"","" )));
 }
 int ClientInvoker::zombieBlockCli( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::zombieBlockCli(absNodePath));
-   return invoke(Cmd_ptr(new ZombieCmd(User::BLOCK, absNodePath,"","" )));
+   return invoke(Cmd_ptr(new ZombieCmd(User::BLOCK, std::vector<std::string>(1,absNodePath),"","" )));
 }
 int ClientInvoker::zombieRemoveCli( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::zombieRemoveCli(absNodePath));
-   return invoke(Cmd_ptr(new ZombieCmd(User::REMOVE, absNodePath,"","" )));
+   return invoke(Cmd_ptr(new ZombieCmd(User::REMOVE, std::vector<std::string>(1,absNodePath),"","" )));
 }
 int ClientInvoker::zombieKillCli( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::zombieKillCli(absNodePath));
-   return invoke(Cmd_ptr(new ZombieCmd(User::KILL, absNodePath,"","" )));
+   return invoke(Cmd_ptr(new ZombieCmd(User::KILL, std::vector<std::string>(1,absNodePath),"","" )));
 }
+
+int ClientInvoker::zombieFobCliPaths(const std::vector<std::string>& paths) const {
+   if (testInterface_) return invoke(CtsApi::zombieFobCli(paths));
+   return invoke(Cmd_ptr(new ZombieCmd(User::FOB, paths,"","")));
+}
+int ClientInvoker::zombieFailCliPaths(const std::vector<std::string>& paths) const {
+   if (testInterface_) return invoke(CtsApi::zombieFailCli(paths));
+   return invoke(Cmd_ptr(new ZombieCmd(User::FAIL, paths,"","" )));
+}
+int ClientInvoker::zombieAdoptCliPaths(const std::vector<std::string>& paths) const {
+   if (testInterface_) return invoke(CtsApi::zombieAdoptCli(paths));
+   return invoke(Cmd_ptr(new ZombieCmd(User::ADOPT, paths,"","" )));
+}
+int ClientInvoker::zombieBlockCliPaths(const std::vector<std::string>& paths) const {
+   if (testInterface_) return invoke(CtsApi::zombieBlockCli(paths));
+   return invoke(Cmd_ptr(new ZombieCmd(User::BLOCK, paths,"","" )));
+}
+int ClientInvoker::zombieRemoveCliPaths(const std::vector<std::string>& paths) const {
+   if (testInterface_) return invoke(CtsApi::zombieRemoveCli(paths));
+   return invoke(Cmd_ptr(new ZombieCmd(User::REMOVE, paths,"","" )));
+}
+int ClientInvoker::zombieKillCliPaths(const std::vector<std::string>& paths) const {
+   if (testInterface_) return invoke(CtsApi::zombieKillCli(paths));
+   return invoke(Cmd_ptr(new ZombieCmd(User::KILL, paths,"","" )));
+}
+
 
 // ======================================================================================================
 

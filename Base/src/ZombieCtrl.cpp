@@ -377,7 +377,7 @@ bool ZombieCtrl::handle_user_actions(
 }
 
 
-void ZombieCtrl::do_add_user_zombies(const std::vector<Submittable*>& tasks)
+void ZombieCtrl::do_add_user_zombies(const std::vector<Submittable*>& tasks,const std::string& user_cmd)
 {
  	size_t taskVecSize = tasks.size();
 	for(size_t i = 0; i < taskVecSize; i++) {
@@ -394,7 +394,7 @@ void ZombieCtrl::do_add_user_zombies(const std::vector<Submittable*>& tasks)
   				ZombieAttr attr = ZombieAttr::get_default_attr(Child::USER); // get the default USER zombie attribute
   				t->findParentZombie(Child::USER, attr );                     // Override default from the node tree
 
- 				zombies_.push_back(Zombie(Child::USER,Child::INIT,attr,t->absNodePath(),t->jobsPassword(),t->process_or_remote_id(),t->try_no()));
+ 				zombies_.push_back(Zombie(Child::USER,Child::INIT,attr,t->absNodePath(),t->jobsPassword(),t->process_or_remote_id(),t->try_no(),user_cmd));
 
  		 	  	/// Mark task as zombie for xcdp
  		 	  	t->flag().set(ecf::Flag::ZOMBIE);
@@ -403,28 +403,28 @@ void ZombieCtrl::do_add_user_zombies(const std::vector<Submittable*>& tasks)
 	}
 }
 
-void ZombieCtrl::add_user_zombies( node_ptr node)
+void ZombieCtrl::add_user_zombies( node_ptr node,const std::string& user_cmd)
 {
 	if (!node.get()) return;
 	std::vector<Submittable*> tasks;
 	node->get_all_active_submittables(tasks);
-	do_add_user_zombies(tasks);
+	do_add_user_zombies(tasks,user_cmd);
 }
 
-void ZombieCtrl::add_user_zombies( suite_ptr suite)
+void ZombieCtrl::add_user_zombies( suite_ptr suite,const std::string& user_cmd)
 {
 	if (!suite.get()) return;
 	std::vector<Submittable*> tasks;
 	suite->get_all_active_submittables(tasks);
-	do_add_user_zombies(tasks);
+	do_add_user_zombies(tasks,user_cmd);
 }
 
-void ZombieCtrl::add_user_zombies( defs_ptr defs)
+void ZombieCtrl::add_user_zombies( defs_ptr defs,const std::string& user_cmd)
 {
 	if (!defs.get()) return;
 	std::vector<Submittable*> tasks;
 	defs->get_all_active_submittables(tasks);
-	do_add_user_zombies(tasks);
+	do_add_user_zombies(tasks,user_cmd);
 }
 
 /// Returns the list of zombies, **updated** with seconds since creation

@@ -115,7 +115,7 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
 	   }
 
 	   if (force_) {
-	      as->zombie_ctrl().add_user_zombies( as->defs()->findAbsNode( pathToNode_ ) );
+	      as->zombie_ctrl().add_user_zombies( as->defs()->findAbsNode( pathToNode_), CtsApi::replace_arg() );
 	   }
 
 	   // If we return a node_ptr then we have changed the data model, and therefore must flag node as changed.

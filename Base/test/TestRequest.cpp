@@ -101,11 +101,11 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET,"")));  // return the full defs
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET_STATE,"")));
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::MIGRATE,"")));
-	cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::FOB,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
-	cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::FAIL,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
-	cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::ADOPT,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
-   cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::REMOVE,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
-   cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::KILL,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+	cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::FOB,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+	cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::FAIL,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+	cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::ADOPT,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+   cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::REMOVE,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+   cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::KILL,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(suite_names,true)));                      // register
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1,suite_names,ClientHandleCmd::ADD)));    // add
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1,suite_names,ClientHandleCmd::REMOVE))); // remove
@@ -154,10 +154,12 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET_STATE,"EmptySuite"))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::MIGRATE,"EmptySuite"))  );
    theGroupCmd->addChild(  Cmd_ptr( new ShowCmd()));
-	theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::FOB,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
-	theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::FAIL,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
-	theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::ADOPT,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
-	theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::REMOVE,"suiteName/familyName/taskName",Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+	theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::FOB,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+	theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::FAIL,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+	theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::ADOPT,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+   theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::REMOVE,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+   theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::KILL,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
+   theGroupCmd->addChild(  Cmd_ptr( new ZombieCmd(ecf::User::BLOCK,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
 	theGroupCmd->addChild(  Cmd_ptr( new RequeueNodeCmd("/suiteName",RequeueNodeCmd::NO_OPTION))  );
 	theGroupCmd->addChild(  Cmd_ptr( new OrderNodeCmd("/suiteName",NOrder::ALPHA))  );
 	theGroupCmd->addChild(  Cmd_ptr( new RunNodeCmd("/suiteName",true/*force for test*/, true /* for test */))  );

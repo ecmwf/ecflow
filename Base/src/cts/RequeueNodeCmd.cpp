@@ -133,7 +133,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	   }
 	   else if ( option_ == RequeueNodeCmd::FORCE) {
 
-	      as->zombie_ctrl().add_user_zombies(theNodeToRequeue);
+	      as->zombie_ctrl().add_user_zombies(theNodeToRequeue,CtsApi::requeueArg());
 
 	      // Please note: that if any tasks under theNodeToRequeue are in
 	      // active or submitted states, then we will have created zombie jobs

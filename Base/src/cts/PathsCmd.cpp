@@ -170,7 +170,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
          if ( paths_.empty() ) {
             if (!force_) check_for_active_or_submitted_tasks(as,node_ptr());
-            else         as->zombie_ctrl().add_user_zombies(as->defs());
+            else         as->zombie_ctrl().add_user_zombies(as->defs(),CtsApi::delete_node_arg());
             as->clear_defs();
          }
          else {
@@ -188,7 +188,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
                add_node_path_for_edit_history(paths_[i]);
 
                if (!force_) check_for_active_or_submitted_tasks(as,theNodeToDelete);
-               else         as->zombie_ctrl().add_user_zombies(theNodeToDelete);
+               else         as->zombie_ctrl().add_user_zombies(theNodeToDelete,CtsApi::delete_node_arg());
 
                if (!as->defs()->deleteChild( theNodeToDelete.get() )) {
                   std::string errorMsg = "Delete: Can not delete node " + theNodeToDelete->debugNodePath();

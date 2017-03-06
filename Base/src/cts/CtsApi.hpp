@@ -83,18 +83,24 @@ public:
 
 	static std::string why(const std::string& absNodePath);
 	static std::string zombieGet();
-	static std::vector<std::string> zombieFob(const std::string& task_path,const std::string& process_id, const std::string& password);
-	static std::vector<std::string> zombieFail(const std::string& task_path,const std::string& process_id, const std::string& password);
-	static std::vector<std::string> zombieAdopt(const std::string& task_path,const std::string& process_id, const std::string& password);
-	static std::vector<std::string> zombieRemove(const std::string& task_path,const std::string& process_id, const std::string& password);
-   static std::vector<std::string> zombieBlock(const std::string& task_path,const std::string& process_id, const std::string& password);
-   static std::vector<std::string> zombieKill(const std::string& task_path,const std::string& process_id, const std::string& password);
+	static std::vector<std::string> zombieFob(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password);
+	static std::vector<std::string> zombieFail(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password);
+	static std::vector<std::string> zombieAdopt(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password);
+	static std::vector<std::string> zombieRemove(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password);
+   static std::vector<std::string> zombieBlock(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password);
+   static std::vector<std::string> zombieKill(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password);
 	static std::string zombieFobCli(const std::string& task_path);
 	static std::string zombieFailCli(const std::string& task_path);
 	static std::string zombieAdoptCli(const std::string& task_path);
 	static std::string zombieRemoveCli(const std::string& task_path);
    static std::string zombieBlockCli(const std::string& task_path);
    static std::string zombieKillCli(const std::string& task_path);
+   static std::vector<std::string> zombieFobCli(const std::vector<std::string>& paths);
+   static std::vector<std::string> zombieFailCli(const std::vector<std::string>& paths);
+   static std::vector<std::string> zombieAdoptCli(const std::vector<std::string>& paths);
+   static std::vector<std::string> zombieRemoveCli(const std::vector<std::string>& paths);
+   static std::vector<std::string> zombieBlockCli(const std::vector<std::string>& paths);
+   static std::vector<std::string> zombieKillCli(const std::vector<std::string>& paths);
 
 	static std::vector<std::string> replace(  const std::string& absNodePath,
 	                                              const std::string& path_to_client_defs,

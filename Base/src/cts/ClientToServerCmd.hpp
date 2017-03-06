@@ -1072,11 +1072,11 @@ private:
 
 class ZombieCmd : public UserCmd {
 public:
-   ZombieCmd(ecf::User::Action uc, const std::string& path, const std::string& process_id, const std::string& password)
-   : user_action_(uc), path_(path), process_id_(process_id), password_(password) {}
+   ZombieCmd(ecf::User::Action uc, const std::vector<std::string>& paths, const std::string& process_id, const std::string& password)
+   : user_action_(uc), process_id_(process_id), password_(password),paths_(paths) {}
    ZombieCmd(ecf::User::Action uc = ecf::User::BLOCK) : user_action_(uc) {}
 
-   const std::string& path_to_task() const { return path_;}
+   const std::vector<std::string>& paths() const { return paths_;}
    const std::string& process_or_remote_id() const { return process_id_;}
    const std::string& password() const { return password_;}
 
@@ -1088,23 +1088,23 @@ public:
    virtual void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const;
-private:
 
+private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
    ecf::User::Action user_action_;
-   std::string path_;
-   std::string process_id_;
-   std::string password_;
+   std::string process_id_;         // should be empty for multiple paths and when using CLI
+   std::string password_;           // should be empty for multiple paths and when using CLI
+   std::vector<std::string> paths_;
 
    friend class boost::serialization::access;
    template<class Archive>
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
       ar & boost::serialization::base_object< UserCmd >( *this );
       ar & user_action_;
-      ar & path_;
       ar & process_id_;
       ar & password_;
+      ar & paths_;
    }
 };
 

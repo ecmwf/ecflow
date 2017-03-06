@@ -30,7 +30,8 @@ Zombie::Zombie( ecf::Child::ZombieType zombie_type,
                 const std::string& pathToTask,
                 const std::string& jobsPassword,
                 const std::string& process_or_remote_id,
-                int try_no
+                int try_no,
+                const std::string& user_cmd
 )
 : user_action_(User::BLOCK),
   try_no_(try_no),
@@ -41,6 +42,7 @@ Zombie::Zombie( ecf::Child::ZombieType zombie_type,
   path_to_task_(pathToTask),
   jobs_password_(jobsPassword),
   process_or_remote_id_(process_or_remote_id),
+  user_cmd_(user_cmd),
   user_action_set_(false),
   attr_(attr),
   creation_time_( Calendar::second_clock_time() )
@@ -67,6 +69,7 @@ bool Zombie::operator==(const Zombie& rhs) const
    if (path_to_task_ != rhs.path_to_task_) return false;
    if (jobs_password_ != rhs.jobs_password_) return false;
    if (process_or_remote_id_ != rhs.process_or_remote_id_) return false;
+   if (user_cmd_ != rhs.user_cmd_) return false;
    if (user_action_set_ != rhs.user_action_set_) return false;
    if (!(attr_ == rhs.attr_)) return false;
    return true;
@@ -199,7 +202,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
    std::string ecf_pid_expl =        "Process id miss-match, but password matches";
    std::string ecf_pid_passwd_expl = "Both process-id and password miss-match";
    std::string ecf_passwd_expl =     "Password miss-match, process id matches";
-   std::string ecf_user =            "Created by user action";
+   std::string ecf_user =            "Created by user action(";
    std::string ecf_path =            "Task not found";
    std::string exp;
 
@@ -217,7 +220,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
       user_action_width = std::max(user_action_width,z.user_action_str().size());
 
       switch (z.type()) {
-         case Child::USER:           exp = ecf_user; break;
+         case Child::USER:           exp = ecf_user; exp += z.user_cmd(); exp += ")"; break;
          case Child::PATH:           exp = ecf_path ; break;
          case Child::ECF:            exp = ecf_expl ; break;
          case Child::ECF_PID:        exp = ecf_pid_expl ; break;
@@ -249,7 +252,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
      if (indent != 0) for(int i = 0; i < indent; i++) ss << " ";
 
       switch (z.type()) {
-         case Child::USER:           exp = ecf_user; break;
+         case Child::USER:           exp = ecf_user; exp += z.user_cmd(); exp += ")"; break;
          case Child::PATH:           exp = ecf_path ; break;
          case Child::ECF:            exp = ecf_expl ; break;
          case Child::ECF_PID:        exp = ecf_pid_expl ; break;

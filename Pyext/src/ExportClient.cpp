@@ -153,6 +153,12 @@ const std::vector<Zombie>& zombieGet(ClientInvoker* self,int pid) {
    return self->server_reply().zombies();
 }
 
+void zombieFobCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieFobCliPaths(paths);}
+void zombieFailCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieFailCliPaths(paths);}
+void zombieAdoptCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieAdoptCliPaths(paths);}
+void zombieBlockCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieBlockCliPaths(paths);}
+void zombieRemoveCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieRemoveCliPaths(paths);}
+void zombieKillCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieKillCliPaths(paths);}
 
 void export_Client()
 {
@@ -264,6 +270,12 @@ void export_Client()
    .def("zombie_block",     &ClientInvoker::zombieBlockCli )
    .def("zombie_remove",    &ClientInvoker::zombieRemoveCli )
    .def("zombie_kill",      &ClientInvoker::zombieKillCli )
+   .def("zombie_fob",       &zombieFobCli )
+   .def("zombie_fail",      &zombieFailCli )
+   .def("zombie_adopt",     &zombieAdoptCli )
+   .def("zombie_block",     &zombieBlockCli )
+   .def("zombie_remove",    &zombieRemoveCli )
+   .def("zombie_kill",      &zombieKillCli )
 
    .def("set_child_path",      &ClientInvoker::set_child_path ,   "Set the path to the task, obtained from server using %ECF_NAME%")
    .def("set_child_password",  &ClientInvoker::set_child_password,"Set the password, needed for authentication, provided by the server using %ECF_PASS%")

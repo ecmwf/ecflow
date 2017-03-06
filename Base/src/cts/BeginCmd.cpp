@@ -68,7 +68,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const
 		}
 		else {
 			for(size_t s = 0; s < theSuiteVecSize; s++) {
-				as->zombie_ctrl().add_user_zombies(suiteVec[s]);
+				as->zombie_ctrl().add_user_zombies(suiteVec[s],CtsApi::beginArg());
 			}
 
 			// Force should *only* be used for test
@@ -89,7 +89,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const
 		/// check_suite_can_begin will throw if suite can't begin
  		if (!force_) defs->check_suite_can_begin(suite);
 		else  {
-		   as->zombie_ctrl().add_user_zombies(suite);
+		   as->zombie_ctrl().add_user_zombies(suite,CtsApi::beginArg());
 
          // Force should *only* be used for test
 		   suite->reset_begin();

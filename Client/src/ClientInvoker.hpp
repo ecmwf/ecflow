@@ -231,6 +231,12 @@ public:
  	int zombieBlockCli(const std::string& absNodePath) const;
    int zombieRemoveCli(const std::string& absNodePath) const;
    int zombieKillCli(const std::string& absNodePath) const;
+   int zombieFobCliPaths(const std::vector<std::string>& paths) const;
+   int zombieFailCliPaths(const std::vector<std::string>& paths) const;
+   int zombieAdoptCliPaths(const std::vector<std::string>& paths) const;
+   int zombieBlockCliPaths(const std::vector<std::string>& paths) const;
+   int zombieRemoveCliPaths(const std::vector<std::string>& paths) const;
+   int zombieKillCliPaths(const std::vector<std::string>& paths) const;
 
    int job_gen(const std::string& absNodePath)  const;
 

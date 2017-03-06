@@ -50,9 +50,9 @@ public:
 	/// We deliberately ignore aliases (This was requested by Axel)
 	/// Then add as 'USER' zombies. This should be called when commands like, delete, requeue,
 	/// run, are using the force option, and will create zombies.
-	void add_user_zombies(node_ptr);
-	void add_user_zombies(suite_ptr);
-	void add_user_zombies(defs_ptr);
+	void add_user_zombies(node_ptr,const std::string& user_cmd);
+	void add_user_zombies(suite_ptr,const std::string& user_cmd);
+	void add_user_zombies(defs_ptr,const std::string& user_cmd);
 
 	/// Returns the list of zombies, **updated** with seconds since creation
 	/// To avoid sending attr to client, we copy over its setting, if in effect
@@ -133,7 +133,7 @@ private:
 	Zombie& find_zombie(const std::string& path_to_task, const std::string& process_or_remote_id, const std::string& password);
 	Zombie& find(Submittable*);
 	const Zombie& find(Submittable*) const;
-	void do_add_user_zombies(const std::vector<Submittable*>& tasks);
+	void do_add_user_zombies(const std::vector<Submittable*>& tasks,const std::string& user_cmd);
 	Zombie& find_by_path(const std::string& path_to_task);
 
 	bool remove_by_path(const std::string& path_to_task);

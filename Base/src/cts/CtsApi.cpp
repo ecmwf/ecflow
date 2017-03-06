@@ -397,77 +397,129 @@ const char* CtsApi::whyArg() { return "why";}
 std::string CtsApi::zombieGet()    { return "--zombie_get"; }
 const char* CtsApi::zombieGetArg() { return "zombie_get"; }
 
-std::vector<std::string> CtsApi::zombieFob(const std::string& task_path,const std::string& process_id, const std::string& password)
+std::vector<std::string> CtsApi::zombieFob(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password)
 {
-   std::vector<std::string> retVec; retVec.reserve(3);
-   std::string ret = "--zombie_fob="; ret += task_path;
+   std::string ret = "--zombie_fob=";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+3);
+   if (!paths.empty()) ret += paths[0];
    retVec.push_back(ret);
-   retVec.push_back(process_id); // Note: order is important, even if empty
-   retVec.push_back(password);   // Note: order is important, even if empty
+   for(size_t i=1; i < paths.size(); i++)  retVec.push_back(paths[i]);
+   if (!process_id.empty()) retVec.push_back(process_id); // Note: order is important, even if empty
+   if (!password.empty()) retVec.push_back(password);     // Note: order is important, even if empty
    return retVec;
 }
 std::string CtsApi::zombieFobCli(const std::string& path) { std::string ret = "--zombie_fob="; ret += path; return ret;}
+std::vector<std::string> CtsApi::zombieFobCli(const std::vector<std::string>& paths) {
+   std::string ret = "--zombie_fob";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+ 1);
+   retVec.push_back(ret);
+   std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
+   return retVec;
+}
 const char* CtsApi::zombieFobArg() { return "zombie_fob";}
 
-std::vector<std::string> CtsApi::zombieFail(const std::string& task_path,const std::string& process_id, const std::string& password)
+std::vector<std::string> CtsApi::zombieFail(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password)
 {
-   std::vector<std::string> retVec; retVec.reserve(3);
-   std::string ret = "--zombie_fail="; ret += task_path;
+   std::string ret = "--zombie_fail=";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+3);
+   if (!paths.empty()) ret += paths[0];
    retVec.push_back(ret);
-   retVec.push_back(process_id);  // Note: order is important, even if empty
-   retVec.push_back(password);    // Note: order is important, even if empty
+   for(size_t i=1; i < paths.size(); i++)  retVec.push_back(paths[i]);
+   if (!process_id.empty()) retVec.push_back(process_id); // Note: order is important, even if empty
    return retVec;
 }
 std::string CtsApi::zombieFailCli(const std::string& path) { std::string ret = "--zombie_fail="; ret += path; return ret;}
+std::vector<std::string> CtsApi::zombieFailCli(const std::vector<std::string>& paths) {
+   std::string ret = "--zombie_fail";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+ 1);
+   retVec.push_back(ret);
+   std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
+   return retVec;
+}
 const char* CtsApi::zombieFailArg() { return "zombie_fail";}
 
-std::vector<std::string> CtsApi::zombieAdopt(const std::string& task_path,const std::string& process_id, const std::string& password)
+std::vector<std::string> CtsApi::zombieAdopt(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password)
 {
-   std::vector<std::string> retVec; retVec.reserve(3);
-   std::string ret = "--zombie_adopt="; ret += task_path;
+   std::string ret = "--zombie_adopt=";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+3);
+   if (!paths.empty()) ret += paths[0];
    retVec.push_back(ret);
-   retVec.push_back(process_id);  // Note: order is important, even if empty
-   retVec.push_back(password);    // Note: order is important, even if empty
+   for(size_t i=1; i < paths.size(); i++)  retVec.push_back(paths[i]);
+   if (!process_id.empty()) retVec.push_back(process_id); // Note: order is important, even if empty
+   if (!password.empty()) retVec.push_back(password);     // Note: order is important, even if empty
    return retVec;
 }
 std::string CtsApi::zombieAdoptCli(const std::string& path) { std::string ret = "--zombie_adopt="; ret += path; return ret;}
+std::vector<std::string> CtsApi::zombieAdoptCli(const std::vector<std::string>& paths) {
+   std::string ret = "--zombie_adopt";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+ 1);
+   retVec.push_back(ret);
+   std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
+   return retVec;
+}
 const char* CtsApi::zombieAdoptArg() { return "zombie_adopt";}
 
-std::vector<std::string> CtsApi::zombieRemove(const std::string& task_path,const std::string& process_id, const std::string& password)
+std::vector<std::string> CtsApi::zombieRemove(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password)
 {
-   std::vector<std::string> retVec; retVec.reserve(3);
-   std::string ret = "--zombie_remove="; ret += task_path;
+   std::string ret = "--zombie_remove=";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+3);
+   if (!paths.empty()) ret += paths[0];
    retVec.push_back(ret);
-   retVec.push_back(process_id); // Note: order is important, even if empty
-   retVec.push_back(password);   // Note: order is important, even if empty
+   for(size_t i=1; i < paths.size(); i++)  retVec.push_back(paths[i]);
+   if (!process_id.empty()) retVec.push_back(process_id); // Note: order is important, even if empty
+   if (!password.empty()) retVec.push_back(password);     // Note: order is important, even if empty
    return retVec;
 }
 std::string CtsApi::zombieRemoveCli(const std::string& path) { std::string ret = "--zombie_remove="; ret += path; return ret;}
+std::vector<std::string> CtsApi::zombieRemoveCli(const std::vector<std::string>& paths) {
+   std::string ret = "--zombie_remove";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+ 1);
+   retVec.push_back(ret);
+   std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
+   return retVec;
+}
 const char* CtsApi::zombieRemoveArg() { return "zombie_remove";}
 
-std::vector<std::string> CtsApi::zombieBlock(const std::string& task_path,const std::string& process_id, const std::string& password)
+std::vector<std::string> CtsApi::zombieBlock(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password)
 {
-   std::vector<std::string> retVec; retVec.reserve(3);
-   std::string ret = "--zombie_block="; ret += task_path;
+   std::string ret = "--zombie_block=";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+3);
+   if (!paths.empty()) ret += paths[0];
    retVec.push_back(ret);
-   retVec.push_back(process_id); // Note: order is important, even if empty
-   retVec.push_back(password);   // Note: order is important, even if empty
+   for(size_t i=1; i < paths.size(); i++)  retVec.push_back(paths[i]);
+   if (!process_id.empty()) retVec.push_back(process_id); // Note: order is important, even if empty
+   if (!password.empty()) retVec.push_back(password);     // Note: order is important, even if empty
    return retVec;
 }
 std::string CtsApi::zombieBlockCli(const std::string& path) { std::string ret = "--zombie_block="; ret += path; return ret;}
+std::vector<std::string> CtsApi::zombieBlockCli(const std::vector<std::string>& paths) {
+   std::string ret = "--zombie_block";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+ 1);
+   retVec.push_back(ret);
+   std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
+   return retVec;
+}
 const char* CtsApi::zombieBlockArg() { return "zombie_block";}
 
-
-std::vector<std::string> CtsApi::zombieKill(const std::string& task_path,const std::string& process_id, const std::string& password)
+std::vector<std::string> CtsApi::zombieKill(const std::vector<std::string>& paths,const std::string& process_id, const std::string& password)
 {
-   std::vector<std::string> retVec; retVec.reserve(3);
-   std::string ret = "--zombie_kill="; ret += task_path;
+   std::string ret = "--zombie_kill=";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+3);
+   if (!paths.empty()) ret += paths[0];
    retVec.push_back(ret);
-   retVec.push_back(process_id);  // Note: order is important, even if empty
-   retVec.push_back(password);    // Note: order is important, even if empty
+   for(size_t i=1; i < paths.size(); i++)  retVec.push_back(paths[i]);
+   if (!process_id.empty()) retVec.push_back(process_id); // Note: order is important, even if empty
+   if (!password.empty()) retVec.push_back(password);     // Note: order is important, even if empty
    return retVec;
 }
 std::string CtsApi::zombieKillCli(const std::string& path) { std::string ret = "--zombie_kill="; ret += path; return ret;}
+std::vector<std::string> CtsApi::zombieKillCli(const std::vector<std::string>& paths) {
+   std::string ret = "--zombie_kill";
+   std::vector<std::string> retVec; retVec.reserve(paths.size()+ 1);
+   retVec.push_back(ret);
+   std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
+   return retVec;
+}
 const char* CtsApi::zombieKillArg() { return "zombie_kill";}
 
 

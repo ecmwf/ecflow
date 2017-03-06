@@ -106,7 +106,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      }
 
  	      if ( new_state != NState::ACTIVE && new_state != NState::SUBMITTED) {
- 	         as->zombie_ctrl().add_user_zombies(node);
+ 	         as->zombie_ctrl().add_user_zombies(node,CtsApi::forceArg());
  	      }
 
  	      if (recursive_) node->set_state_hierarchically( new_state, true /* force */ );
