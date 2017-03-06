@@ -81,7 +81,7 @@ void CompactView::attachModel()
 
 
     //We need to call it to be sure that the view show the actual state of the model!!!
-    //doReset();
+    reset();
 }
 
 void CompactView::mousePressEvent(QMouseEvent* event)
@@ -243,6 +243,9 @@ void CompactView::doItemsLayout(bool hasRemovedItems)
 
 void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized)
 {
+    if(parentId == -1)
+        rowCount_=0;
+
     int dx=10;
     QModelIndex parentIndex = (parentId < 0) ? root_ : modelIndex(parentId);
 
@@ -506,7 +509,7 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
         {
             drawRow(painter,i,y,itemsInRow,indentVec);
 #ifdef _UI_COMPACTVIEW_DEBUG
-            UiLog().dbg() << " drawRow " << i << " " << y << " " << itemsInRow;
+//            UiLog().dbg() << " drawRow " << i << " " << y << " " << itemsInRow;
 #endif
         }
     }
@@ -828,6 +831,25 @@ int CompactView::firstVisibleItem(int &offset) const
     return -1;
 }
 
+void CompactView::resizeEvent(QResizeEvent *event)
+{
+    QAbstractScrollArea::resizeEvent(event);
+    updateScrollBars();
+    viewport()->update();
+}
+
+void CompactView::updateRowCount()
+{
+    rowCount_=0;
+    const int itemsCount = static_cast<int>(viewItems_.size());
+    int itemsInRow=0;
+    for (int i=0; i < itemsCount; i+=itemsInRow)
+    {
+        itemsInRow=itemCountInRow(i);
+        rowCount_++;
+    }
+}
+
 void CompactView::updateScrollBars()
 {
 #ifdef _UI_COMPACTVIEW_DEBUG
@@ -846,6 +868,9 @@ void CompactView::updateScrollBars()
     int itemsInViewport = 0;
 
     const std::size_t itemsCount = viewItems_.size();
+    if(itemsCount ==0)
+        return;
+
     const int viewportHeight = viewportSize.height();
     int itemsInRow=1;
     for(std::size_t height = 0, item = itemsCount - 1; item >= 0; item-=itemsInRow)
@@ -1165,6 +1190,7 @@ void CompactView::expand(const QModelIndex &index)
     if (i != -1) // is visible
     {
         expand(i);
+        updateRowCount();
         updateScrollBars();
         viewport()->update();
     }
@@ -1175,6 +1201,7 @@ void CompactView::collapse(const QModelIndex &index)
     int i = viewIndex(index);
     if (i != -1) // is visible
     {
+        updateRowCount();
         collapse(i);
         updateScrollBars();
         viewport()->update();

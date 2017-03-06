@@ -245,7 +245,7 @@ void TreeNodeViewDelegate::sizeHint(const QModelIndex& index,int& w,int& h) cons
                 (this->*a)(painter,lst,vopt);
             }
         }*/
-        w=50;
+        w=200;
         h=20;
     }
 }

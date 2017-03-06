@@ -28,7 +28,10 @@
 
 AttributeFilter* TreeNodeWidget::lastAtts_=NULL;
 
-TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : NodeWidget("tree",serverFilter,parent)
+TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
+    NodeWidget("tree",serverFilter,parent),
+    layoutProp_(0),
+    viewLayoutMode_(StandardLayoutMode)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -51,11 +54,19 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
 
-    bool compact=false;
-    if(VProperty* prop=VConfig::instance()->find("view.tree.layoutStyle"))
+    layoutProp_=VConfig::instance()->find("view.tree.layoutStyle");
+    Q_ASSERT(layoutProp_);
+    layoutProp_->addObserver(this);
+
+    if(layoutProp_->value() == "compact")
     {
-        compact=(prop->value() == "compact");
+        viewLayoutMode_=CompactLayoutMode;
     }
+
+    Q_ASSERT(view_==0);
+    setViewLayoutMode(viewLayoutMode_);
+
+#if 0
     if(compact)
     {
         CompactNodeView* gv=new CompactNodeView((TreeNodeModel*)model_,filterDef_,this);
@@ -81,9 +92,11 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
 			this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
+#endif
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),            
             this,SLOT(slotSelectionChangedInBc(VInfo_ptr)));
 
+#if 0
     connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
             view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
 
@@ -105,6 +118,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
     connect(model_,SIGNAL(filterUpdateAddEnded(const VTreeNode*)),
             view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
 
+#endif
     connect(atts_,SIGNAL(changed()),
 		   this,SLOT(slotAttsChanged()));
 
@@ -121,6 +135,69 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 
 TreeNodeWidget::~TreeNodeWidget()
 {
+}
+
+void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
+{
+    if(view_ && viewLayoutMode_ == mode)
+        return;
+
+    viewLayoutMode_ = mode;
+
+    if(view_)
+    {
+        viewHolder_->layout()->removeWidget(view_->realWidget());
+        delete view_;
+        view_=0;
+    }
+
+    if(viewLayoutMode_ == CompactLayoutMode)
+    {
+        CompactNodeView* gv=new CompactNodeView((TreeNodeModel*)model_,filterDef_,this);
+        viewHolder_->layout()->addWidget(gv);
+        //Store the pointer to the (non-QObject) base class of the view!!!
+        view_=gv;
+    }
+    else
+    {
+        TreeNodeView *tv=new TreeNodeView((TreeNodeModel*)model_,filterDef_,this);
+        viewHolder_->layout()->addWidget(tv);
+        //Store the pointer to the (non-QObject) base class of the view!!!
+        view_=tv;
+    }
+
+
+    //Signals-slots
+    connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+        this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
+
+    connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+        this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
+
+    connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+        this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+
+    connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
+        view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+
+    connect(model_,SIGNAL(scanEnded(const VTreeNode*)),
+        view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+
+    connect(model_,SIGNAL(rerender()),
+        view_->realWidget(),SLOT(slotRerender()));
+
+    connect(model_,SIGNAL(filterChangeBegun()),
+        view_->realWidget(),SLOT(slotSaveExpand()));
+
+    connect(model_,SIGNAL(filterChangeEnded()),
+        view_->realWidget(),SLOT(slotRestoreExpand()));
+
+    connect(model_,SIGNAL(filterUpdateRemoveBegun(const VTreeNode*)),
+        view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+
+    connect(model_,SIGNAL(filterUpdateAddEnded(const VTreeNode*)),
+        view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+
 }
 
 void TreeNodeWidget::initAtts()
@@ -221,6 +298,21 @@ bool TreeNodeWidget::selectFirstServerInView()
 void TreeNodeWidget::slotAttsChanged()
 {
 	lastAtts_->setCurrent(atts_->current());
+}
+
+void TreeNodeWidget::notifyChange(VProperty* p)
+{
+    if(p == layoutProp_)
+    {
+        if(layoutProp_->value() == "compact")
+        {
+            setViewLayoutMode(CompactLayoutMode);
+        }
+        else
+        {
+            setViewLayoutMode(StandardLayoutMode);
+        }
+    }
 }
 
 void TreeNodeWidget::writeSettings(VSettings* vs)

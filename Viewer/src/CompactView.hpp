@@ -83,6 +83,7 @@ protected Q_SLOTS:
 protected:
     void mousePressEvent(QMouseEvent* event);
     void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent *event);
 
     void attachModel();
     void insertItems(const QModelIndex& parent, int);
@@ -111,6 +112,7 @@ protected:
     QRegion visualRegionForSelection(const QItemSelection &selection) const;
 
     int  firstVisibleItem(int &offset) const;
+    void updateRowCount();
     void updateScrollBars();
 
     enum ScrollMode {
