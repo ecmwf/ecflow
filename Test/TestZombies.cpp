@@ -52,7 +52,7 @@ namespace fs = boost::filesystem;
 //   ??Note sure why?? This can be seen by enabling debug in TaskCmds which
 //   shows that the Task INIT command was never received ???
 // Updated these test to detect STALE *user* zombies & remove them
-// i.e. where we have created a user Zombie but there is associated process ??
+// i.e. where we have created a user Zombie but there is no associated process ??
 // *******************************************************************
 
 //#define DEBUG_ZOMBIE 1
@@ -65,8 +65,9 @@ namespace fs = boost::filesystem;
 #define DO_TEST7 1
 #define DO_TEST8 1
 #define DO_TEST9 1
-//#define DO_TEST10 1 Need to make reliable
+#define DO_TEST10 1  # Need to make reliable
 #define DO_TEST11 1
+#define DO_TEST12 1
 
 static bool ecf_debug_enabled = false; // allow ECF_DEBUG_ZOMBIES environment to enable debug
 
@@ -79,18 +80,27 @@ enum WaitType { SINGLE, ALL };
 static int timeout = 30;
 static int NUM_OF_TASKS = 5;
 
+static void dump_tasks(const vector<Task*>& tasks) {
+   cout << "     task status\n";
+   BOOST_FOREACH(const Task* task, tasks) {
+      std::cout << "     " << task->absNodePath() << " " << NState::toString(task->state()) << " passwd:" << task->jobsPassword() << " pid:" << task->process_or_remote_id() << "\n";
+   }
+   std::cout << "\n";
+}
+
+static void dump_task_status() {
+   TestFixture::client().sync_local();
+   defs_ptr defs = TestFixture::client().defs();
+   vector<Task*> tasks; defs->getAllTasks(tasks);
+   dump_tasks(tasks);
+}
+
 static void dump_zombies()
 {
    TestFixture::client().zombieGet();
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
    std::cout <<  Zombie::pretty_print( zombies , 3);
-}
-
-static void dump_tasks(const vector<Task*>& tasks) {
-   BOOST_FOREACH(const Task* task, tasks) {
-      std::cout << "    " << task->absNodePath() << " " << NState::toString(task->state()) << " " << task->jobsPassword() << " " << task->process_or_remote_id() << "\n";
-   }
-   std::cout << "\n";
+   dump_task_status();
 }
 
 static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState::State state2, int max_time_to_wait)
@@ -139,7 +149,6 @@ static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState:
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          if (ecf_debug_enabled) {
             dump_zombies();
-            dump_tasks(tasks);
             std::cout << "waitForTaskState " << wait_type_str << " reach state " << NState::toString(state1) << " || " << NState::toString(state2)
                   << " Test taking longer than time constraint of " << assertTimer.timeConstraint() <<  " returning false\n";
          }
@@ -212,27 +221,24 @@ static void remove_stale_zombies()
    }
 }
 
-static void wait_for_path_zombies(int no_of_tasks, int max_time_to_wait)
+static void wait_for_zombies_of_type(Child::ZombieType zt, int no_of_tasks, int max_time_to_wait)
 {
-   if (ecf_debug_enabled) cout << "\n   wait_for_path_zombies\n";
+   if (ecf_debug_enabled)  cout << "\n   wait_for_zombies_of_type " << Child::to_string(zt) << "\n";
 
-   int no_of_path_zombies = 0;
+   int no_of_zombies = 0;
    std::vector<Zombie> zombies;
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
       zombies = TestFixture::client().server_reply().zombies();
-      BOOST_FOREACH(const Zombie& z, zombies) {
-         if (z.type() == Child::PATH ) {
-            no_of_path_zombies++;
-         }
-      }
-      if (no_of_path_zombies >= no_of_tasks) break;
+      BOOST_FOREACH(const Zombie& z, zombies) { if (z.type() == zt )  no_of_zombies++; }
+      if (no_of_zombies >= no_of_tasks) break;
+
       // make sure test does not take too long.
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          // BOOST_WARN_MESSAGE(assertTimer.duration() <  assertTimer.timeConstraint(),
-         std::cout << "remove_user_zombies_and_wait_for_path_zombies. Expected "
-                            << no_of_tasks << " PATH zombies, but found " << no_of_path_zombies
+         std::cout << "wait_for_zombies_of_type. Expected "
+                            << no_of_tasks << " " << Child::to_string(zt) << " zombies, but found " << no_of_zombies
                             << "\nTest taking longer than time constraint of " << assertTimer.timeConstraint()
                             << "\n"
                             << Zombie::pretty_print( zombies , 6) << "\n... breaking out\n";
@@ -241,7 +247,10 @@ static void wait_for_path_zombies(int no_of_tasks, int max_time_to_wait)
       sleep(1);
    }
 
-   if (ecf_debug_enabled) cout << Zombie::pretty_print( zombies , 6) << "\n";
+   if (ecf_debug_enabled) {
+      cout << Zombie::pretty_print( zombies , 6) << "\n";
+      dump_task_status();
+   }
 }
 
 
@@ -387,7 +396,6 @@ static void populate_defs(Defs& theDefs,const std::string& suite_name) {
    suite->add_variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL","_any_");
 }
 
-
 static void create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::string& create_zombies_with) {
    if (ecf_debug_enabled) {
       std::cout << "\n\n=============================================================================\n";
@@ -481,6 +489,9 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
          }
       }
    }
+   if (ecf_debug_enabled) {
+      dump_task_status();
+   }
 }
 
 static void create_and_start_test(const std::string& suite_name, const std::string& create_zombies_with) {
@@ -522,7 +533,7 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation)
    // *Note* in test environment the client invoker will try connecting to the server
    // ****** for 5 seconds, after that an error is returned. This will cause the
    // ****** job to abort.
-   wait_for_path_zombies(NUM_OF_TASKS,timeout);
+   wait_for_zombies_of_type(Child::PATH,NUM_OF_TASKS,timeout);
 
    // Fob all the zombies. This will UNBLOCK the child commands allowing them to complete
    // Fobing does *NOT* alter node tree state, however COMPLETE should auto delete the zombie
@@ -822,6 +833,9 @@ BOOST_AUTO_TEST_CASE( test_zombie_inheritance )
    suite_ptr suite = theDefs.findSuite(suite_name);
    suite->addZombie( ZombieAttr(ecf::Child::USER, std::vector<ecf::Child::CmdType>(), ecf::User::FOB,-1) );
    suite->addZombie( ZombieAttr(ecf::Child::ECF, std::vector<ecf::Child::CmdType>(), ecf::User::FOB,-1) );
+   suite->addZombie( ZombieAttr(ecf::Child::ECF_PID, std::vector<ecf::Child::CmdType>(), ecf::User::FOB,-1) );
+   suite->addZombie( ZombieAttr(ecf::Child::ECF_PID_PASSWD, std::vector<ecf::Child::CmdType>(), ecf::User::FOB,-1) );
+   suite->addZombie( ZombieAttr(ecf::Child::ECF_PASSWD, std::vector<ecf::Child::CmdType>(), ecf::User::FOB,-1) );
    suite->addZombie( ZombieAttr(ecf::Child::PATH, std::vector<ecf::Child::CmdType>(), ecf::User::FOB,-1) );
 
    create_and_start_test(theDefs,suite_name,"complete" );
@@ -946,6 +960,66 @@ BOOST_AUTO_TEST_CASE( test_zombie_kill )
    (void) ZombieUtil::do_zombie_user_action(User::REMOVE,NUM_OF_TASKS, timeout,false);
 
    wait_for_no_zombies(timeout);
+
+   cout << timer.duration() << "\n";
+}
+#endif
+
+#ifdef DO_TEST12
+
+static void remove_all_user_zombies()
+{
+   /// return the number of zombies set to user action;
+    if (ecf_debug_enabled)  cout << "\n   remove_all_user_zombies\n";
+
+    int removed_count = 0;
+    AssertTimer assertTimer(timeout,false); // Bomb out after n seconds, fall back if test fail
+    while(removed_count < NUM_OF_TASKS) {
+       TestFixture::client().zombieGet();
+       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
+       BOOST_FOREACH(const Zombie& z, zombies) {
+          if (z.type() == ecf::Child::USER) {
+             TestFixture::client().zombieRemove(z);  // This should be immediate, and is not remembered
+             removed_count++;
+          }
+       }
+       // make sure test does not take too long.
+       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
+           BOOST_REQUIRE_MESSAGE(false,"aborting test_zombies_types_for_begin waiting to remove all zombies of type USER\n" << Zombie::pretty_print( zombies , 6));
+       }
+       sleep(1);
+    }
+    if (ecf_debug_enabled)  dump_task_status();
+}
+BOOST_AUTO_TEST_CASE( test_zombies_types_for_begin )
+{
+   DurationTimer timer;
+   cout << "Test:: ...test_zombies_types_for_begin " << flush;
+   TestClean clean_at_start_and_end;
+
+   // This command creates user zombies up front, these may not have a pid, if task in submitted state
+   create_and_start_test("test_zombies_types_for_begin","begin");
+
+   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
+   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
+
+
+   // wait and remove all user zombies.
+   remove_all_user_zombies();
+
+   // wait of at least one user zombie of type ecf
+   wait_for_zombies_of_type(Child::ECF,NUM_OF_TASKS,timeout);
+
+   int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
+   BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0,"Expected  some fobed zombies but found none ?");
+
+   // Fobing does *NOT* alter node tree state, however child COMPLETE should auto delete the zombie
+   if (!wait_for_zombie_termination(timeout)) {
+      remove_stale_zombies();  // see notes above
+   }
+
+   // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was received
+   check_expected_no_of_zombies(0);
 
    cout << timer.duration() << "\n";
 }

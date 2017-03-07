@@ -122,6 +122,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
    password_missmatch_ = false;
    pid_missmatch_ = false;
 
+   /// *** In complete state, the password is empty.
    if ( submittable_->jobsPassword() != jobs_password_) {
 #ifdef DEBUG_ZOMBIE
       std::cout << ": submittable pass(" << submittable_->jobsPassword() << ") != jobs_password_(" << jobs_password_ << ")";
@@ -132,6 +133,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
    /// *** See Note above: Not all child commands pass a process_id. ***
    /// *** Hence this test for zombies is ONLY valid if process sets the process_or_remote_id_ ****
    /// *** User should really set ECF_RID in the scripts
+   /// *** In submitted state, the pid is empty. hence clear pid_missmatch_ below
+   /// *** In complete state, the pid is empty.  hence clear pid_missmatch_ below
    if (!submittable_->process_or_remote_id().empty() && !process_or_remote_id_.empty() && submittable_->process_or_remote_id() != process_or_remote_id_) {
 #ifdef DEBUG_ZOMBIE
       std::cout << ":task pid(" << submittable_->process_or_remote_id() << ") != process pid(" << process_or_remote_id_ << ")";
@@ -139,66 +142,83 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       pid_missmatch_ = true;
    }
 
-   if ((child_type() == Child::INIT) && (submittable_->state() == NState::ACTIVE)) {
-#ifdef DEBUG_ZOMBIE
-      std::cout << ":(child_type() == Child::INIT) && submittable_->state() == NState::ACTIVE)";
-#endif
-
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
-      if (!password_missmatch_ && !pid_missmatch_ ) {
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already active : action taken( fob )";
-            log(Log::WAR, ss.str() );
-            theReply = PreAllocatedReply::ok_cmd();
-            return false;
+   switch ( submittable_->state()) {
+      case NState::SUBMITTED: {
+         // The pid on the task will be empty
+         if (child_type() != Child::INIT) {
+            std::stringstream ss; ss << path_to_submittable_ << " When a node is submitted, expected next child command to be INIT but received " <<  Child::to_string(child_type());
+            log(Log::ERR,ss.str());
          }
+         break;
       }
 
-      submittable_allready_active = true;
-   }
-
-   if ( submittable_->state() == NState::COMPLETE) {
+      case NState::ACTIVE: {
+         if (child_type() == Child::INIT) {
 #ifdef DEBUG_ZOMBIE
-      std::cout << ": submittable_->state() == NState::COMPLETE)";
+            std::cout << ":(child_type() == Child::INIT) && submittable_->state() == NState::ACTIVE)";
 #endif
-
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
-      if (child_type() == Child::COMPLETE) {
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch_) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
-            if (pid_missmatch_)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
-            ss << " : already complete : action taken( fob )";
-            log(Log::WAR, ss.str() );
-            theReply = PreAllocatedReply::ok_cmd();
-            return false;
+            // If ECF_NONSTRICT_ZOMBIES be more forgiving
+            if (!password_missmatch_ && !pid_missmatch_ ) {
+               if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
+                  std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already active : action taken( fob )";
+                  log(Log::WAR, ss.str() );
+                  theReply = PreAllocatedReply::ok_cmd();
+                  return false;
+               }
+            }
+            submittable_allready_active = true;
          }
+         break;
       }
 
-      // If Task state is complete, and we receive **any** child command then it is a zombie
-      submittable_allready_complete = true;
-   }
+      case NState::COMPLETE: {
+#ifdef DEBUG_ZOMBIE
+         std::cout << ": submittable_->state() == NState::COMPLETE)";
+#endif
+         // The task *password* and pid should be empty
 
-   if ( submittable_->state() == NState::ABORTED) {
+         // If ECF_NONSTRICT_ZOMBIES be more forgiving
+         if (child_type() == Child::COMPLETE) {
+            if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
+               std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
+               ss << " : already complete : action taken( fob )";
+               log(Log::WAR, ss.str() );
+               theReply = PreAllocatedReply::ok_cmd();
+               return false;
+            }
+         }
+
+         // If Task state is complete, and we receive **any** child command then it is a zombie
+         submittable_allready_complete = true;
+         password_missmatch_ = false;
+         pid_missmatch_ = false;
+         break;
+      }
+
+      case NState::ABORTED: {
 #ifdef DEBUG_ZOMBIE
       std::cout << ": submittable_->state() == NState::ABORTED)";
 #endif
 
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
-      if (child_type() == Child::ABORT) {
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch_) ss << " : password miss-match[ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
-            if (pid_missmatch_)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
-            ss << " : already aborted : action taken( fob )";
-            log(Log::WAR, ss.str() );
-            theReply = PreAllocatedReply::ok_cmd();
-            return false;
-         }
-      }
+         // If ECF_NONSTRICT_ZOMBIES be more forgiving
+          if (child_type() == Child::ABORT) {
+             if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
+                std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
+                if (password_missmatch_) ss << " : password miss-match[ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
+                if (pid_missmatch_)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
+                ss << " : already aborted : action taken( fob )";
+                log(Log::WAR, ss.str() );
+                theReply = PreAllocatedReply::ok_cmd();
+                return false;
+             }
+          }
 
-      // If Task state is aborted, and we receive **any** child command then it is a zombie
-      submittable_allready_aborted = true;
+          // If Task state is aborted, and we receive **any** child command then it is a zombie
+          submittable_allready_aborted = true;
+          break;
+      }
+      case NState::QUEUED: break; // WTF
+      case NState::UNKNOWN: break; // WTF
    }
 
 #ifdef DEBUG_ZOMBIE

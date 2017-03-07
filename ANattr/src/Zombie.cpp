@@ -201,7 +201,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
    std::string ecf_expl =            "Two init commands or task complete or aborted but receives another child cmd";
    std::string ecf_pid_expl =        "Process id miss-match, but password matches";
    std::string ecf_pid_passwd_expl = "Both process-id and password miss-match";
-   std::string ecf_passwd_expl =     "Password miss-match, process id matches";
+   std::string ecf_passwd_expl =     "Password miss-match";
    std::string ecf_user =            "Created by user action(";
    std::string ecf_path =            "Task not found";
    std::string exp;
