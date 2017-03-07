@@ -279,7 +279,6 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 	   bool report_block_client_on_home_server = false;
 	   bool report_block_client_server_halted = false;
 	   bool report_block_client_zombie_detected = false;
-
 		// We do not want to loop over the sms host list indefinitely hence we use a timer.
 		// The time out period is supplied via ClientEnvironment
 		bool never_polled = true; // don't wait for the first host only subsequent ones
@@ -395,12 +394,19 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 			if (clientEnv_.debug()) { cout << "ClientInvoker: Time duration = " << duration.total_seconds() << " clientEnv_.max_child_cmd_timeout() = " << clientEnv_.max_child_cmd_timeout() << endl;}
 
 			if ( duration.total_seconds() >= clientEnv_.max_child_cmd_timeout() ) {
-				std::stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: Timed out after " << clientEnv_.max_child_cmd_timeout() << " seconds : for " << client_env_host_port() << "\n";
+				std::stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: Timed out after ECF_TIMOUT(" << clientEnv_.max_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
  				std::string msg = ss.str();
  				cout << msg;
 				server_reply_.set_error_msg(msg);
 				return 1;
 			}
+         if (server_reply_.block_client_zombie_detected() && duration.total_seconds() >= clientEnv_.max_zombie_child_cmd_timeout() ) {
+            std::stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: *ZOMBIE* Timed out after ECF_ZOMBIE_TIMEOUT(" << clientEnv_.max_zombie_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
+            std::string msg = ss.str();
+            cout << msg;
+            server_reply_.set_error_msg(msg);
+            return 1;
+         }
 
 			// The host is not playing ball, try the next host, will *restart* with home server, if end reached
 			// *get_next_host* *only* returns false if host exists, and parsing it fails
@@ -1256,6 +1262,10 @@ void ClientInvoker::set_child_try_no(unsigned int try_no)
 void ClientInvoker::set_child_timeout(unsigned int seconds )
 {
    clientEnv_.set_child_cmd_timeout(seconds);
+}
+void ClientInvoker::set_zombie_child_timeout(unsigned int seconds )
+{
+   clientEnv_.set_zombie_child_cmd_timeout(seconds);
 }
 
 

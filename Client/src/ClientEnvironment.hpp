@@ -38,11 +38,19 @@ public:
 	/// typically 24 hours in a real environment. It is this long to allow operators to
 	/// recover from any crashes.
 	/// for the CHILD/task commands *ONLY*
-	/// Can be overriden by  changing environment variable ECF_TIMEOUT
+	/// Can be overridden by  changing environment variable ECF_TIMEOUT
 	long max_child_cmd_timeout() const  { return timeout_; }
 
-	/// Allow pur python jobs to override the ECF_TIMEOUT
-	void set_child_cmd_timeout(unsigned int t) { timeout_ = t; }
+   /// This controls for how long child zombie commands continue trying to connect to Server before failing.
+   /// Maximum time in seconds for client to deliver message to server/servers. This is
+   /// typically 24 hours in a real environment.
+   /// for the CHILD/task commands *ONLY*
+   /// Can be overridden by  changing environment variable ECF_ZOMBIE_TIMEOUT
+   long max_zombie_child_cmd_timeout() const  { return zombie_timeout_; }
+
+	/// Allow pure python jobs to override the ECF_TIMEOUT & ECF_ZOMBIE_TIMEOUT
+   void set_child_cmd_timeout(unsigned int t) { timeout_ = t; }
+   void set_zombie_child_cmd_timeout(unsigned int t) { zombie_timeout_ = t; }
 
    /// The timeout feature allow the client to fail gracefully in the case
    /// where the server has died/crashed. The timeout will ensure the socket is closed.
@@ -109,6 +117,7 @@ private:
  	int task_try_num_;                  // ECF_TRYNO. The task try number. The number of times we should submitted a job, if it is aborted
 	std::string host_file_;             // ECF_HOSTFILE. File that lists the backup hosts, port numbers must match
 	long timeout_;                      // ECF_TIMEOUT. Host file iteration time out
+   long zombie_timeout_;               // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, default same as ECF_TIMEOUT
 	int  connect_timeout_;              // default 0, ECF_CONNECT_TIMEOUT, connection timeout
 	bool denied_;                       // ECF_DENIED. If set ECF denies access, client will exit with failure")
  	bool no_ecf_;                       // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone

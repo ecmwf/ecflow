@@ -32,6 +32,7 @@ class Client(object):
     
         print("Only wait 20 seconds, if the server cannot be contacted (note default is 24 hours) before failing")
         self.ci.set_child_timeout(20)
+        self.ci.set_zombie_child_timeout(10)
      
         # Abort the task for the following signals
         signal.signal(signal.SIGINT,  self.signal_handler)

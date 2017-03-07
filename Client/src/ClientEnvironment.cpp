@@ -41,11 +41,13 @@ using namespace boost;
 /// The timeout is used control for how long we continue to iterate over the hosts
 /// attempting to connect to the servers.
 #ifdef DEBUG
-#define MAX_TIMEOUT        120     // Max time in seconds for client to deliver message
-#define MIN_TIMEOUT          5     // Some reasonable value
+#define MAX_TIMEOUT            120     // Max time in seconds for client to deliver message
+#define DEFAULT_ZOMBIE_TIMEOUT 120     // Max time in seconds for client to deliver message
+#define MIN_TIMEOUT              5     // Some reasonable value
 #else
-#define MAX_TIMEOUT    24*3600     // We don't try forever, only 24 hours
-#define MIN_TIMEOUT      10*60     // Some reasonable value
+#define MAX_TIMEOUT            24*3600  // We don't try forever, only 24 hours
+#define DEFAULT_ZOMBIE_TIMEOUT 12*3600  // We don't try forever, only 12 hours
+#define MIN_TIMEOUT            10*60    // Some reasonable value
 #endif
 
 //#define DEBUG_ENVIRONMENT 1
@@ -60,7 +62,7 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 ClientEnvironment::ClientEnvironment()
 : AbstractClientEnv(),
-  task_try_num_(1),timeout_(MAX_TIMEOUT),connect_timeout_(0),
+  task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),connect_timeout_(0),
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
   host_vec_index_(0),
@@ -72,7 +74,7 @@ ClientEnvironment::ClientEnvironment()
 // test constructor
 ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::string& host, const std::string& port)
 : AbstractClientEnv(),
-  task_try_num_(1),timeout_(MAX_TIMEOUT),connect_timeout_(0),
+  task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),connect_timeout_(0),
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
   host_vec_index_(0),
@@ -195,6 +197,7 @@ std::string ClientEnvironment::toString() const
  	ss << "   ECF_TRYNO = " << task_try_num_ << "\n";
 	ss << "   ECF_HOSTFILE = " << host_file_ << "\n";
    ss << "   ECF_TIMEOUT = " << timeout_ << "\n";
+   ss << "   ECF_ZOMBIE_TIMEOUT = " << zombie_timeout_ << "\n";
    ss << "   ECF_CONNECT_TIMEOUT = " << connect_timeout_ << "\n";
 	ss << "   ECF_DENIED = " << denied_ << "\n";
 	assert( host_vec_index_ >=0 && host_vec_index_ <  static_cast<int>(host_vec_.size()));
@@ -244,6 +247,10 @@ void ClientEnvironment::read_environment_variables()
 	if (getenv("ECF_TIMEOUT"))  timeout_ = atoi(getenv("ECF_TIMEOUT"));  // host file timeout
 	if( timeout_ > MAX_TIMEOUT ) timeout_ = MAX_TIMEOUT;
 	if( timeout_ < MIN_TIMEOUT )  timeout_ = MIN_TIMEOUT;
+
+   if (getenv("ECF_ZOMBIE_TIMEOUT"))  zombie_timeout_ = atoi(getenv("ECF_ZOMBIE_TIMEOUT"));  // time out for zombies
+   if( zombie_timeout_ > MAX_TIMEOUT ) zombie_timeout_ = MAX_TIMEOUT;
+   if( zombie_timeout_ < MIN_TIMEOUT )  zombie_timeout_ = MIN_TIMEOUT;
 
    if (getenv("ECF_CONNECT_TIMEOUT"))  connect_timeout_ = atoi(getenv("ECF_CONNECT_TIMEOUT")); // for test only
 

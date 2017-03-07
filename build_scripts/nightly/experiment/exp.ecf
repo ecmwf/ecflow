@@ -15,6 +15,7 @@ def create_client():
    
    print "Only wait 20 seconds, if the server cannot be contacted (note default is 24 hours) before failing"
    ci.set_child_timeout(20) 
+   ci.set_zombie_child_timeout(20) 
    return ci
    
 def signal_handler(signum, frame):
