@@ -62,6 +62,7 @@ const std::string& Str::ECF_FILES()      { static std::string ECF_FILES = "ECF_F
 const std::string& Str::ECF_FETCH()      { static std::string ECF_FETCH = "ECF_FETCH"; return ECF_FETCH;}
 const std::string& Str::ECF_KILL_CMD()   { static std::string ECF_KILL_CMD = "ECF_KILL_CMD"; return ECF_KILL_CMD;}
 const std::string& Str::ECF_STATUS_CMD() { static std::string ECF_STATUS_CMD = "ECF_STATUS_CMD"; return ECF_STATUS_CMD;}
+const std::string& Str::ECF_NONSTRICT_ZOMBIES(){static std::string ECF_NONSTRICT_ZOMBIES = "ECF_NONSTRICT_ZOMBIES"; return ECF_NONSTRICT_ZOMBIES;}
 
 const std::string& Str::ECF_HOME()    { static std::string ECF_HOME = "ECF_HOME"; return ECF_HOME;}
 const std::string& Str::ECF_INCLUDE() { static std::string ECF_INCLUDE = "ECF_INCLUDE"; return ECF_INCLUDE;}

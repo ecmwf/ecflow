@@ -159,9 +159,9 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #endif
             // If ECF_NONSTRICT_ZOMBIES be more forgiving
             if (!password_missmatch_ && !pid_missmatch_ ) {
-               if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-                  std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already active : action taken( fob )";
-                  log(Log::WAR, ss.str() );
+               if (submittable_->user_variable_exists(Str::ECF_NONSTRICT_ZOMBIES())) {
+                  string ret = "zombie(ECF_NONSTRICT_ZOMBIES) : "; ret += path_to_submittable_; ret += " : already active : action taken( fob )";
+                  log(Log::WAR, ret );
                   theReply = PreAllocatedReply::ok_cmd();
                   return false;
                }
@@ -179,10 +179,9 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
          // If ECF_NONSTRICT_ZOMBIES be more forgiving
          if (child_type() == Child::COMPLETE) {
-            if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-               std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-               ss << " : already complete : action taken( fob )";
-               log(Log::WAR, ss.str() );
+            if (submittable_->user_variable_exists(Str::ECF_NONSTRICT_ZOMBIES())) {
+               string ret = "zombie(ECF_NONSTRICT_ZOMBIES) : "; ret += path_to_submittable_; ret += " : already complete : action taken( fob )";
+               log(Log::WAR, ret );
                theReply = PreAllocatedReply::ok_cmd();
                return false;
             }
