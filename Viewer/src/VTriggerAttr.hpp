@@ -30,6 +30,7 @@ public:
 
     VAttributeType* type() const;
     QStringList data() const;
+    std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
     static void expressions(const VNode* vnode,std::string& trigger, std::string& complete);

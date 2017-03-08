@@ -9,7 +9,6 @@
 
 #include "TreeNodeModel.hpp"
 
-#include <QDebug>
 #include <QMetaMethod>
 
 #include "ConnectState.hpp"
@@ -71,8 +70,6 @@ int TreeNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 
 int TreeNodeModel::rowCount( const QModelIndex& parent) const
 {
-	//qDebug() << "rowCount" << parent;
-
 	//There is no data at all
 	if(!hasData())
 	{
@@ -409,8 +406,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 	{
 		//For the server the internal pointer is NULL
 		if(row < data_->count())
-		{
-			//qDebug() << "SERVER" << parent;
+		{			
 			return createIndex(row,column,(void*)NULL);
 		}
 	}
@@ -421,25 +417,17 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 		//If "parent" is a server this index refers to a topLevel node (suite).
 		//We set the server as an internal pointer
         if(VTreeServer* server=indexToServer(parent))
-		{
-			//qDebug() << "NODE1" << parent << server->realServer()->name().c_str();
+		{			
 			return createIndex(row,column,server);
 		}
 
         //If "parent" is not a server it must be a tree node. The internal pointer is the parent tree node.
         else if(VTreeNode* parentNode=indexToNode(parent))
-		{
-			//qDebug() << "NODE2" << parent << parentNode->name().c_str() << VAttribute::totalNum(parentNode);
-			//qDebug() << "NODE2" << parent << parentNode->node()->name().c_str();
+		{			
 			return createIndex(row,column,parentNode);
 		}
-
-		//qDebug() << "BAD" << parent;
 	}
-
-	//qDebug() << "EMPTY" << parent;
 	return QModelIndex();
-
 }
 
 QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
@@ -472,26 +460,12 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 
             int serverAttrNum=root->attrNum(atts_);
             return createIndex(serverAttrNum+row,0,ts);
-
-#if 0
-            VModelServer *server=NULL;
-			row=-1;
-		    if(data_->identifyTopLevelNode(parentNode,&server,row))
-			{
-				int serverAttrNum=server->attrNum();
-
-		    	//qDebug() << "PARENT 1" << child << server->realServer()->name().c_str();
-		    	return createIndex(serverAttrNum+row,0,server);
-			}
-#endif
 		}
 		//The parent is a non topLevel node (non-suite): its internal pointer
 		//is its parent (i.e.. the grandparent)
         else if(VTreeNode *grandParentNode=parentNode->parent())
 		{
-            int num=grandParentNode->attrNum(atts_)+grandParentNode->indexOfChild(parentNode);
-
-			//qDebug() << "PARENT 2" << child << grandParentNode->node()->name().c_str() << num;
+            int num=grandParentNode->attrNum(atts_)+grandParentNode->indexOfChild(parentNode);		
 			return createIndex(num,0,grandParentNode);
 		}
 	}

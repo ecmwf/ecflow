@@ -12,7 +12,6 @@
 
 #include <QtGlobal>
 #include <QCloseEvent>
-#include <QDebug>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
@@ -522,8 +521,7 @@ void ServerListDialog::on_sysSyncLogTb_toggled(bool b)
         firstShowSysSyncLogW=false;
 
         //Set the initial splitter sizes
-        QList<int> sList=splitter_->sizes();
-        qDebug() << "SPLITTER" << sList << splitter_->height();;
+        QList<int> sList=splitter_->sizes();       
         Q_ASSERT(sList.count()==2);
         int h=sList[0]+sList[1];
         if(h==0)

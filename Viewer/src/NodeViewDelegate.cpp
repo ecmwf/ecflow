@@ -75,6 +75,12 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     meterThresholdBrush_=QBrush(QColor(0,0,255));
     limitFillBrush_=QBrush(QColor(0,255,0));
     limitExtraFillBrush_=QBrush(QColor(0,0,255));
+    triggerBgBrush_=QBrush(QColor(230,230,230));
+    triggerBorderPen_=QPen(QColor(150,150,150));
+    triggerFontPen_=QPen(QColor(0,0,0));
+    completeBgBrush_=QBrush(QColor(230,230,230));
+    completeBorderPen_=QPen(QColor(150,150,150));
+    completeFontPen_=QPen(QColor(0,0,255));
 
 	attrRenderers_["meter"]=&NodeViewDelegate::renderMeter;
 	attrRenderers_["label"]=&NodeViewDelegate::renderLabel;
@@ -109,6 +115,12 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
     propVec.push_back("view.attribute.meterThresholdColour");
     propVec.push_back("view.attribute.limitFillColour");
     propVec.push_back("view.attribute.limitExtraFillColour");
+    propVec.push_back("view.attribute.triggerBackground");
+    propVec.push_back("view.attribute.triggerBorderColour");
+    propVec.push_back("view.attribute.triggerFontColour");
+    propVec.push_back("view.attribute.completeBackground");
+    propVec.push_back("view.attribute.completeBorderColour");
+    propVec.push_back("view.attribute.completeFontColour");
 }
 
 void NodeViewDelegate::updateBaseSettings()
@@ -150,6 +162,30 @@ void NodeViewDelegate::updateBaseSettings()
     if(VProperty* p=prop_->find("view.attribute.limitExtraFillColour"))
     {
         limitExtraFillBrush_=QBrush(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.triggerBackground"))
+    {
+        triggerBgBrush_=QBrush(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.triggerBorderColour"))
+    {
+        triggerBorderPen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.triggerFontColour"))
+    {
+        triggerFontPen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.completeBackground"))
+    {
+        completeBgBrush_=QBrush(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.completeBorderColour"))
+    {
+        completeBorderPen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.completeFontColour"))
+    {
+        completeFontPen_=QPen(p->value().value<QColor>());
     }
 
     //limit pixmaps
@@ -938,15 +974,23 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 	}
 
 	//draw rect
-	painter->setBrush(QColor(230,230,230));
-	painter->setPen(QColor(150,150,150));
-	painter->drawRect(fillRect);
+    if(triggerType==0)
+    {
+        painter->setBrush(triggerBgBrush_);
+        painter->setPen(triggerBorderPen_);
+    }
+    else
+    {
+        painter->setBrush(completeBgBrush_);
+        painter->setPen(completeBorderPen_);
+    }
+    painter->drawRect(fillRect);
 
 	//Draw text
     if(triggerType==0)
-        painter->setPen(Qt::black);
+        painter->setPen(triggerFontPen_);
     else
-        painter->setPen(Qt::blue);
+        painter->setPen(completeFontPen_);
 
     painter->setFont(font);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);

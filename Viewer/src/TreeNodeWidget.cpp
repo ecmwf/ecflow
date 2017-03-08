@@ -9,7 +9,6 @@
 
 #include "TreeNodeWidget.hpp"
 
-#include <QDebug>
 #include <QHBoxLayout>
 
 #include "AbstractNodeModel.hpp"
@@ -210,7 +209,6 @@ void TreeNodeWidget::initAtts()
 		}
 		else if(VProperty *propDef=VConfig::instance()->find("view.tree.defaultAttributes"))
 		{
-            //qDebug() << "atts" << propDef->value().toString() << propDef->value().toString().split("/");
 			atts_->setCurrent(propDef->value().toString().split("/"));
 		}
 	}

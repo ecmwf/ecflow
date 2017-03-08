@@ -11,7 +11,6 @@
 
 #include <QtAlgorithms>
 #include <QApplication>
-#include <QDebug>
 #include <QHeaderView>
 #include <QPalette>
 #include <QScrollBar>
@@ -278,9 +277,7 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
 {
   	//Node actions
   	if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
-	{
-        //qDebug() << "context menu" << indexClicked;
-
+	{    
   		std::vector<VInfo_ptr> nodeLst;
 		for(int i=0; i < indexLst.count(); i++)
 		{
@@ -393,8 +390,6 @@ void TreeNodeView::adjustStyleSheet()
        sh+=styleSheet_["bg"];
     if(styleSheet_.contains("branch"))
        sh+=styleSheet_["branch"];
-
-    qDebug() << "stylesheet" << sh;
 
     setStyleSheet(sh);
 }
@@ -514,20 +509,15 @@ void TreeNodeView::expandTo(const QModelIndex& idxTo)
     QModelIndex idx=model_->parent(idxTo);
     QModelIndexList lst;
 
-    qDebug() << idxTo << idx;
-
     while(idx.isValid())
     {
         lst.push_front(idx);
         idx=idx.parent();
     }
 
-    qDebug() << lst;
-
     Q_FOREACH(QModelIndex d,lst)
     {
         expand(d);
-        qDebug() << "expand" << d << isExpanded(d);
     }
 }
 

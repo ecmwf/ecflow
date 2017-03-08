@@ -149,17 +149,36 @@
                 },
                 "tab" : {
 
+                    "prefix" : "view.attribute",
                     "label"  : "Attributes",
+                    "adjustLineLabel" : "25",
 
                     "group" : {
-                        "title" : "Options",
+                        "title" : "Events",
                         "prefix" : "view.attribute",
-
-                        "line" : "eventFillColour",
+                        "line" : "eventFillColour"
+                    },
+                    "group" : {
+                        "title" : "Meters",
+                        "prefix" : "view.attribute",
                         "line" : "meterFillColour",
-                        "line" : "meterThresholdColour",
+                        "line" : "meterThresholdColour"
+                    },
+                    "group" : {
+                        "title" : "Limits",
+                        "prefix" : "view.attribute",
                         "line" : "limitFillColour",
-                        "line" : "limitExtraFillColour"
+                        "line" : "limitExtraFillColour"    
+                    },
+                    "group" : {
+                        "title" : "Triggers",
+                        "prefix" : "view.attribute",
+                        "line" : "triggerBackground",
+                        "line" : "triggerBorderColour",
+                        "line" : "triggerFontColour",
+                        "line" : "completeBackground",
+                        "line" : "completeBorderColour",
+                        "line" : "completeFontColour"
                     }
                 }
             }

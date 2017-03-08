@@ -9,7 +9,6 @@
 
 #include "TabWidget.hpp"
 
-#include <QDebug>
 #include <QAction>
 #include <QLabel>
 #include <QMenu>
@@ -29,13 +28,10 @@ void IconTabBar::paintEvent(QPaintEvent *e)
     {
         QStyleOptionTabV2 option;
         initStyleOption(&option, i);
-        qDebug() << i << option.iconSize;
         painter.drawItemPixmap(option.rect, Qt::AlignTop|Qt::AlignHCenter, option.icon.pixmap(option.iconSize));
         //painter.drawItemText(option.rect, Qt::AlignBottom|Qt::AlignHCenter, palette(), 1, option.text);
-
     }
 }
-
 
 TabWidget::TabWidget(QWidget* parent) :
 		QWidget(parent),

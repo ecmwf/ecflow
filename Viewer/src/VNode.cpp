@@ -10,8 +10,6 @@
 
 #include "VNode.hpp"
 
-#include <QDebug>
-
 #include "Node.hpp"
 #include "Variable.hpp"
 
@@ -941,10 +939,6 @@ void VNode::triggers(TriggerCollector* tlc)
             //Add the found items to the collector
             for(std::vector<VItem*>::iterator it = theVec.begin(); it != theVec.end(); ++it)
             {
-#ifdef _UI_VNODE_DEBUG
-                //if((*it)->parent() && (*it)->parent()->absNodePath() == "/e_41r2_peter/main")
-                //    qDebug() << "trigger ast:" << (*it)->name() << *it;
-#endif
                 tlc->add(*it,nullItem, TriggerCollector::Normal);
             }
         }
@@ -965,7 +959,7 @@ void VNode::triggers(TriggerCollector* tlc)
                 if(VAttribute* n = findLimit(val, a->strName()))
                 {
 #ifdef _UI_VNODE_DEBUG
-                    //qDebug() << "trigger limit:" << n->name();
+                    UiLog().dbg() << "trigger limit: " << n->name();
 #endif                   
                     tlc->add(n,nullItem, TriggerCollector::Normal);
                 }

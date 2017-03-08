@@ -10,7 +10,6 @@
 
 #include "VProperty.hpp"
 
-#include <QDebug>
 #include <QRegExp>
 
 #include "Sound.hpp"
@@ -100,8 +99,6 @@ void VProperty::setDefaultValue(const std::string& val)
     
     if(value_.isNull())
         value_=defaultValue_;
-    
-    //qDebug() << "Prop:" << name_ << defaultValue_ << value_.value<QColor>();
 }
 
 void VProperty::setValue(const std::string& val)
@@ -496,9 +493,6 @@ QFont VProperty::toFont(const std::string& name)
 
 		if(size >=1 && size < 200)
 			f.setPointSize(size);
-
-        //qDebug() << family << size
-		//f.fromString(rx.cap(1));
 	}
 
 	return f;

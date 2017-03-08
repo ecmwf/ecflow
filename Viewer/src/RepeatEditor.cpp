@@ -12,6 +12,7 @@
 
 #include <QtGlobal>
 #include <QIntValidator>
+#include <QItemSelectionModel>
 #include <QStringListModel>
 #include <QSettings>
 
@@ -130,8 +131,11 @@ void RepeatEditor::buildList(VRepeatAttr *rep)
         w_->valueView_->setModel(model_);
         w_->valueView_->setCurrentIndex(model_->index(current,0));
 
-        connect(w_->valueView_,SIGNAL(activated(const QModelIndex&)),
-           this,SLOT(slotSelectedInView(const QModelIndex&)));
+        connect(w_->valueView_->selectionModel(),
+              SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+              this, SLOT(slotSelectedInView(QModelIndex,QModelIndex)));
+
+        w_->valueView_->setFocus(Qt::MouseFocusReason);
     }
     else
     {
@@ -139,9 +143,9 @@ void RepeatEditor::buildList(VRepeatAttr *rep)
     }
 }
 
-void RepeatEditor::slotSelectedInView(const QModelIndex& idx)
+void RepeatEditor::slotSelectedInView(const QModelIndex &current, const QModelIndex &previous)
 {
-    setValue(idx.data().toString());
+    setValue(current.data().toString());
     checkButtonStatus();
 }
 

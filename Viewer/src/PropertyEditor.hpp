@@ -58,6 +58,7 @@ private:
     QList<PropertyLine*> lineItems_;
     QString serverName_;
     QWidget* holder_;
+    int lineLabelLen_;
 };
 
 
