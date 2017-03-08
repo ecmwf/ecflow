@@ -1324,11 +1324,11 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    std::string includedFile = getIncludedFilePath(tokens_[1], script_line, error_msg_);
    if (!error_msg_.empty()) return;
 
-   // handle %include || %includeonce  of include that was specified as %includeonce
-   if (std::find(include_once_set_.begin(),include_once_set_.end(),includedFile) != include_once_set_.end() ) {
-      return; // Already processed once ignore
-   }
+   // handle %includeonce
    if (fnd_includeonce) {
+      if (std::find(include_once_set_.begin(),include_once_set_.end(),includedFile) != include_once_set_.end() ) {
+         return; // Already processed once ignore
+      }
       include_once_set_.push_back(includedFile);
    }
 
