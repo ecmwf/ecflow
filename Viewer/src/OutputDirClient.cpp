@@ -10,8 +10,6 @@
 
 #include "OutputDirClient.hpp"
 
-#include <QDebug>
-
 #include "UiLog.hpp"
 
 #include <boost/filesystem/operations.hpp>
@@ -64,8 +62,7 @@ void OutputDirClient::slotError(QAbstractSocket::SocketError err)
 
 #ifdef _UI_OUTPUTDIRCLIENT_DEBUG
         UiLog().dbg() << "   RemoteHostClosedError ";
-#endif
-        //qDebug() << "remote host closed";
+#endif       
         //If no data was transferred we think it is a real error.
         if(data_.isEmpty())
         {

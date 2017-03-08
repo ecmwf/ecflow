@@ -10,8 +10,6 @@
 
 #include "NodeQuery.hpp"
 
-#include <QDebug>
-
 #include "NodeQueryOption.hpp"
 #include "UiLog.hpp"
 #include "VAttributeType.hpp"
@@ -19,7 +17,7 @@
 
 int NodeQuery::defaultMaxNum_=50000;
 
-//#define _UI_NODEQUERY_DEBUG
+#define _UI_NODEQUERY_DEBUG
  
 QString NodeQueryAttrGroup::query() const
 {
@@ -87,10 +85,6 @@ NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
     NodeQueryOption::build(this);
 
 #ifdef _UI_NODEQUERY_DEBUG
-    qDebug() << options_;
-#endif
-
-#ifdef _UI_NODEQUERY_DEBUG
     UiLog().dbg() << "<-- NodeQuery";
 #endif
 }
@@ -140,7 +134,6 @@ bool NodeQuery::hasServer(const std::string& name) const
 {
 #ifdef _UI_NODEQUERY_DEBUG
     UiLog().dbg() << "NodeQuery::hasServer -->";
-    qDebug() << "   servers=" << servers_;
 #endif
 
 	if(servers_.empty())
@@ -340,10 +333,6 @@ void NodeQuery::buildQueryString()
 
 	if(!opPart.isEmpty())
 		extQuery_["options"]=opPart;
-
-#ifdef _UI_NODEQUERY_DEBUG
-    qDebug() << extQuery_;
-#endif
 
     //SQL-like query
     sqlQuery_.clear();
