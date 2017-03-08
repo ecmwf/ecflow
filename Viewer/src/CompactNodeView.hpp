@@ -60,6 +60,9 @@ public Q_SLOTS:
     void slotRerender();
     void slotSizeHintChangedGlobal();
 
+protected Q_SLOTS:
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
     void infoPanelCommand(VInfo_ptr,QString);
@@ -74,7 +77,6 @@ protected:
     void expandAll(const QModelIndex& idx);
     void collapseAll(const QModelIndex& idx);
     void expandTo(const QModelIndex& idxTo);
-    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCurrentSelectionFromExpand(VInfo_ptr info);
     void regainSelectionFromExpand();
 

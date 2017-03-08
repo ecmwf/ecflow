@@ -17,10 +17,12 @@
 #include <QModelIndex>
 #include <QPointer>
 #include <QSet>
+#include <QStyleOptionViewItem>
 
 class TreeNodeModel;
 class GraphNodeViewItem;
 class TreeNodeViewDelegate;
+class QStyledItemDelegate;
 
 //Struct representing visible items in the view. When an item is collapsed
 //all its children will be removed from viewItems.
@@ -77,13 +79,14 @@ protected Q_SLOTS:
     void rowsInserted(const QModelIndex&,int,int);
     void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     void rowsRemoved(const QModelIndex &parent, int start, int end);
-    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    virtual void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void currentChanged(const QModelIndex &current, const QModelIndex &previous);
 
 protected:
     void mousePressEvent(QMouseEvent* event);
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
+    bool viewportEvent(QEvent *event);
 
     void attachModel();
     void insertItems(const QModelIndex& parent, int);
@@ -94,6 +97,7 @@ protected:
     void layout(int parentId, bool recursiveExpanding = false,bool afterIsUninitialized = false);
 
     int itemCountInRow(int start) const;
+    void rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const;
     int rowHeight(int start,int forward,int &itemsInRow) const;
     int coordinateForItem(int item) const;
     int itemAtCoordinate(const QPoint& coordinate) const;
@@ -130,6 +134,10 @@ private:
     void insertViewItems(int pos, int count, const CompactViewItem &viewItem);
     void removeViewItems(int pos, int count);
 
+    int connectorPos(CompactViewItem* item, CompactViewItem* parent) const;
+
+    QStyleOptionViewItem viewOptions() const;
+
     typedef std::vector<CompactViewItem>::iterator ViewItemIterator;
     ScrollMode verticalScrollMode_;
     mutable std::vector<CompactViewItem> viewItems_;
@@ -142,6 +150,7 @@ private:
     QPointer<QItemSelectionModel> selectionModel_;
     QPoint pressedPosition_;
     QPersistentModelIndex pressedIndex_;
+    QStyledItemDelegate* itemDelegate_;
 
     // used when expanding and collapsing items
     QSet<QPersistentModelIndex> expandedIndexes;

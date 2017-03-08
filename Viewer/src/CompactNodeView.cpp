@@ -12,6 +12,7 @@
 
 #include <QMouseEvent>
 #include <QScrollBar>
+#include <QTime>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
@@ -29,7 +30,7 @@
 #include "VModelData.hpp"
 #include "VTree.hpp"
 
-#define _UI_COMPACTVIEW_DEBUG
+#define _UI_COMPACTNODEVIEW_DEBUG
 
 CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
     CompactView(model,parent),
@@ -111,22 +112,44 @@ QModelIndexList CompactNodeView::selectedList()
     return lst;
 }
 
+// reimplement virtual function from CompactView - called when the selection is changed
+void CompactNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    QModelIndexList lst=selectedIndexes();
+    //When the selection was triggered from restoring (expanding) the nodes
+    //we do not want to broadcast it
+    if(lst.count() > 0 && !setCurrentFromExpand_)
+    {
+        VInfo_ptr info=model_->nodeInfo(lst.front());
+        if(info && !info->isEmpty())
+        {
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
+            UiLog().dbg() << "CompactNodeView::selectionChanged --> emit=" << info->path();
+#endif
+            Q_EMIT selectionChanged(info);
+        }
+        lastSelection_=info;
+    }
+
+    CompactView::selectionChanged(selected, deselected);
+
+    //The model has to know about the selection in order to manage the
+    //nodes that are forced to be shown
+    model_->selectionChanged(lst);
+}
+
 VInfo_ptr CompactNodeView::currentSelection()
 {
-#if 0
     QModelIndexList lst=selectedIndexes();
     if(lst.count() > 0)
     {
         return model_->nodeInfo(lst.front());
     }
-#endif
     return VInfo_ptr();
 }
 
 void CompactNodeView::setCurrentSelection(VInfo_ptr info)
 {
-#if 0
-
     //While the current is being selected we do not allow
     //another setCurrent call go through
     if(!info || setCurrentIsRunning_)
@@ -136,13 +159,12 @@ void CompactNodeView::setCurrentSelection(VInfo_ptr info)
     QModelIndex idx=model_->infoToIndex(info);
     if(idx.isValid())
     {
-#ifdef _UI_TREENODEVIEW_DEBUG
-        UiLog().dbg() << "GraphNodeView::setCurrentSelection --> " << info->path();
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
+        UiLog().dbg() << "CompactNodeView::setCurrentSelection --> " << info->path();
 #endif
         //setCurrentIndex(idx);
     }
     setCurrentIsRunning_=false;
-#endif
 }
 
 
@@ -151,8 +173,8 @@ void CompactNodeView::setCurrentSelectionFromExpand(VInfo_ptr info)
     if(!info || setCurrentFromExpand_)
         return;
 
-#ifdef _UI_TREENODEVIEW_DEBUG
-        UiLog().dbg() << "TreeNodeView::setCurrentSelectionFromExpand --> " << info->path();
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
+        UiLog().dbg() << "CompactNodeView::setCurrentSelectionFromExpand --> " << info->path();
 #endif
 
     setCurrentFromExpand_=true;
@@ -215,12 +237,12 @@ void CompactNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
             QTime t;
             t.start();
 #endif
             expandAll(idx);
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
             UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -449,7 +471,7 @@ void CompactNodeView::adjustBackground(QColor col,bool adjust)
 {
     if(col.isValid())
     {
-        styleSheet_["bg"]="QTreeView { background : " + col.name() + ";}";
+        styleSheet_["bg"]="QWidget { background : " + col.name() + ";}";
 
         if(adjust)
             adjustStyleSheet();

@@ -12,6 +12,7 @@
 
 #include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 
 #include <QtAlgorithms>
@@ -22,9 +23,10 @@
 #include <QMouseEvent>
 #include <QScrollBar>
 #include <QStack>
+#include <QStyledItemDelegate>
+#include <QToolTip>
 
 #define _UI_COMPACTVIEW_DEBUG
-
 
 CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     QAbstractScrollArea(parent),
@@ -36,6 +38,10 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     expandButtonMode_(Modern)
 {
     delegate_=new TreeNodeViewDelegate(this);
+
+    itemDelegate_=new QStyledItemDelegate(this);
+
+    viewport()->setBackgroundRole(QPalette::Base);
 
     //We attach the model because by default the view is enabled. At this point the model is empty so
     //it is a cheap operation!!
@@ -64,7 +70,7 @@ void CompactView::attachModel()
             this, SLOT(rowsRemoved(QModelIndex,int,int)));
 
     connect(model_,SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
-        this,SLOT(slotDataChanged(const QModelIndex&,const QModelIndex&)));
+        this,SLOT(dataChanged(const QModelIndex&,const QModelIndex&)));
 
 
     selectionModel_ = new QItemSelectionModel(model_, this);
@@ -138,6 +144,61 @@ void CompactView::mousePressEvent(QMouseEvent* event)
         }
     }
 
+}
+
+bool CompactView::viewportEvent(QEvent *event)
+{
+    if(event->type() == QEvent::ToolTip)
+    {
+        QHelpEvent *he = static_cast<QHelpEvent*>(event);
+        const QModelIndex index = indexAt(he->pos());
+
+        //see qbatractitemdelegate::helpEvent()
+        QVariant tooltip = index.data(Qt::ToolTipRole);
+        if(tooltip.canConvert<QString>())
+        {
+              QToolTip::showText(he->globalPos(),tooltip.toString(),this);
+              return true;
+        }
+        return false;
+    }
+    return QAbstractScrollArea::viewportEvent(event);
+}
+
+QStyleOptionViewItem CompactView::viewOptions() const
+{
+    QStyleOptionViewItem option;
+    option.init(this);
+    option.state &= ~QStyle::State_MouseOver;
+    option.font = font();
+
+#ifndef Q_WS_MAC
+    // On mac the focus appearance follows window activation
+    // not widget activation
+    if (!hasFocus())
+        option.state &= ~QStyle::State_Active;
+#endif
+
+    option.state &= ~QStyle::State_HasFocus;
+    //if (d->iconSize.isValid()) {
+    //    option.decorationSize = d->iconSize;
+    //} else {
+
+        int pm = style()->pixelMetric(QStyle::PM_SmallIconSize, 0, this);
+        option.decorationSize = QSize(pm, pm);
+   // }
+    option.decorationPosition = QStyleOptionViewItem::Left;
+    option.decorationAlignment = Qt::AlignCenter;
+    option.displayAlignment = Qt::AlignLeft|Qt::AlignVCenter;
+    //option.textElideMode = d->textElideMode;
+    option.rect = QRect();
+    option.showDecorationSelected = style()->styleHint(QStyle::SH_ItemView_ShowDecorationSelected, 0, this);
+    //if (d->wrapItemText)
+    //    option.features = QStyleOptionViewItem::WrapText;
+    option.locale = locale();
+    option.locale.setNumberOptions(QLocale::OmitGroupSeparator);
+    option.widget = this;
+    return option;
 }
 
 void CompactView::reset()
@@ -251,21 +312,13 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 
     if(parentId >=0 && !parentIndex.isValid())
     {
-           //modelIndex() should never return something invalid for the real items.
-           //This can happen if columncount has been set to 0.
-           //To avoid infinite loop we stop here.
+        //modelIndex() should never return something invalid for the real items.
+        //This can happen if columncount has been set to 0.
+        //To avoid infinite loop we stop here.
         return;
     }
 
-    CompactViewItem* parentItem=0;
     int count=model_->rowCount(parentIndex);
-
-    //If there is a parent (e.i. non-root)
-    if(parentId > -1)
-    {
-        parentItem=&(viewItems_[parentId]);
-    }
-
     bool expanding=true;
 
     //This is the root item. viewItems must be empty at this point.
@@ -276,7 +329,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         afterIsUninitialized = true;
     }
     //The count of the
-    else if(parentItem->total != (uint)count)
+    else if(viewItems_[parentId].total != (uint)count)
     {
         //Expand
         if(!afterIsUninitialized)
@@ -293,7 +346,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     int first = parentId + 1;
     int last = 0;
     int children = 0;
-    int level=(parentItem)?parentItem->level+1:0;
+    int level=(parentId >=0?viewItems_[parentId].level+1:0);
     CompactViewItem *item=0;
 
     //Iterate through the direct children of parent item. At this point all the items
@@ -317,11 +370,10 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         item->height=h;
 
         int xp=dx;
-        if(parentItem)
+        if(parentId >=0)
         {
-            xp=parentItem->right()+dx;
-            item->x=xp;
-            UiLog().dbg() <<  "right " << parentItem->right();
+            xp=viewItems_[parentId].right()+dx;
+            item->x=xp;          
         }
 
         //We need to expand the item
@@ -345,7 +397,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
             item->hasChildren = model_->hasChildren(currentIndex);
         }
 
-        //When we reach a leaf node we reache the end of a row as well.
+        //When we reach a leaf node we reach the end of a row as well.
         if(item->total == 0)
             rowCount_++;
     }
@@ -361,140 +413,80 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     }
 }
 
-#if 0
-void CompactView::insertItems(const QModelIndex& parent,int parentPos)
-{
-    UiLog().dbg() << "insert --> parent=" << parent.data().toString() << " rows=" << model_->rowCount(parent);
-
-    int dx=10;
-
-    CompactViewItem* pt=0;
-    int rowNum=model_->rowCount(parent);
-    if(parentPos != -1)
-    {
-        pt=&(viewItems_[parentPos]);
-    }
-
-    for(int i=0; i < rowNum; i++)
-    {
-        QModelIndex idx=model_->index(i,0,parent);
-
-        int xp=dx;
-        if(pt)
-        {
-            xp=pt->right()+dx;
-            UiLog().dbg() <<  "right " << pt->right();
-        }
-
-        bool leaf=!model_->hasChildren(idx);
-        CompactViewItem item(idx,parentPos,xp,leaf);
-        item.hasMoreSiblings=(i < rowNum-1);
-
-        if(pt)
-            item.level=pt->level+1;
-
-        int w,h;
-        delegate_->sizeHint(idx,w,h);
-        item.width=w;
-        item.height=h;
-
-        if(leaf) // || i > 0)
-        {
-            rowCount_++;
-        }
-
-        viewItems_.push_back(item);
-
-        insertItems(idx,viewItems_.size()-1);
-    }
-
-    int pp=parentPos;
-    while (pp > -1)
-    {
-        viewItems_[pp].total += rowNum;
-        pp = viewItems_[pp].parentItem;
-    }
-
-
-
-    //verticalScrollBar()->setRange(0, yp+20);
-
-}
-#endif
-
 void CompactView::paintEvent(QPaintEvent *event)
 {
     QPainter painter(viewport());
     paint(&painter,event->region());
 }
 
-
+//Paint the rows intersecting with the given region
 void CompactView::paint(QPainter *painter,const QRegion& region)
 {
 #ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::paint -->";
+    UiLog().dbg() << "sizeof(CompactViewItem)=" << sizeof(CompactViewItem);
+    UiLog().dbg() << "region=" << region;
 #endif
 
-    UiLog().dbg() << "size=" << sizeof(CompactViewItem);
-
-    UiLog().dbg() << "region=" << region;
-
     int firstVisibleOffset=0;
-    int firstVisible=firstVisibleItem(firstVisibleOffset);
 
+    //The first visible item at the top of the viewport
+    int firstVisible=firstVisibleItem(firstVisibleOffset);
 #ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "firstVisible " << firstVisible;
 #endif
 
-    if(firstVisible <0)
+    if(firstVisible<0)
         return;
 
-
-    std::vector<int> indentVec(1000,0);
-    if(firstVisible >0)
-    {
-        CompactViewItem* item=&viewItems_[firstVisible];
-        int level=item->level;
-        while(item->parentItem >= 0 && level >0)
-        {
-            CompactViewItem* pt=&viewItems_[item->parentItem];
-            if(item->hasMoreSiblings)
-            {
-                indentVec[item->level]=(pt->right()+2+item->x-2)/2;
-            }
-            Q_ASSERT(pt->level == level-1);
-            item=pt;
-            level--;
-        }
-    }
-
-    const std::size_t itemsCount = viewItems_.size();
+    const int itemsCount = viewItems_.size();
     const int viewportWidth = viewport()->width();
     QVector<QRect> rects = region.rects();
     QVector<int> drawn;
     bool multipleRects = (rects.size() > 1);
-    for (int a = 0; a < rects.size(); ++a)
+
+    //Iterate through the rectangles in the region
+    for(int a = 0; a < rects.size(); ++a)
     {
         const QRect area = (multipleRects
                             ? QRect(0, rects.at(a).y(), viewportWidth, rects.at(a).height())
                             : rects.at(a));
 
-        //d->leftAndRight = d->startAndEndColumns(area);
+        //Initialise indentVec. For each indentation level it tells us if
+        //a connector line is to be drawn. Here we scan up to the
+        //toplevel item in the firstVisible item's branch.
+        std::vector<int> indentVec(1000,0);
+        if(firstVisible >0)
+        {
+            CompactViewItem* item=&viewItems_[firstVisible];
+            int level=item->level;
+            while(item->parentItem >= 0 && level >0)
+            {
+                CompactViewItem* pt=&viewItems_[item->parentItem];
+                if(item->hasMoreSiblings)
+                {
+                    indentVec[item->level]=connectorPos(item,pt);
+                }
+                Q_ASSERT(pt->level == level-1);
+                item=pt;
+                level--;
+            }
+        }
 
-        std::size_t i = firstVisible; // the first item at the top of the viewport
+        int i = firstVisible; // the first item at the top of the viewport
         int y = firstVisibleOffset; // we may only see part of the first item
 
-        //start at the top of the viewport  and iterate down to the update area
+        //start at the top of the viewport  and iterate down through the update area
         int itemsInRow=1;
         for (; i < itemsCount; i+=itemsInRow)
         {
-            const int itemHeight=rowHeight(i,1,itemsInRow);
+            int itemHeight;
+            rowProperties(i,itemHeight,itemsInRow,indentVec);
 
 #ifdef _UI_COMPACTVIEW_DEBUG
             UiLog().dbg() << "row: " << i << " " << itemHeight << " " << itemsInRow;
 #endif
-
-            //const int itemHeight = viewItems_[i]->height;
+            //Try to find the first item int the current rect
             if(y + itemHeight > area.top())
                 break;
             y += itemHeight;
@@ -504,9 +496,10 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
         UiLog().dbg() << "y: " << y << " " << area.bottom();
 #endif
 
-        //paint the visible rows
+        //Paint the visible rows in the current rect
         for (; i < itemsCount && y <= area.bottom(); i+=itemsInRow)
-        {
+        {           
+            //Draw a whole row. It will update y,itemsInRow and indentVec!!
             drawRow(painter,i,y,itemsInRow,indentVec);
 #ifdef _UI_COMPACTVIEW_DEBUG
 //            UiLog().dbg() << " drawRow " << i << " " << y << " " << itemsInRow;
@@ -515,144 +508,123 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
     }
 }
 
-void CompactView::drawRow(QPainter* painter,int start,int &yp,int &itemsInRow,std::vector<int>& indentVec)
+//Draw a whole row staring at item start.
+void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,std::vector<int>& indentVec)
 {
     itemsInRow=0;
     bool leaf=false;
     const int itemsCount = static_cast<int>(viewItems_.size());
 
-   // std::vector<int> indentVec(1000,0);
     int rh=0;
     int firstLevel=0;
 
-#if 0
-    if(start >0)
-    {
-        CompactViewItem* item=viewItems_[start];
-        int level=item->level;
-        while(item->parentItem >= 0 && level >0)
-        {
-            CompactViewItem* pt=viewItems_[item->parentItem];
-            indentVec[item->level]=(pt->right()+2+item->x-2)/2;
-            Q_ASSERT(pt->level == level-1);
-            item=pt;
-            level--;
-        }
-    }
-#endif
-
     QVector<QPoint> expandButtons;
     QVector<QPoint> collapseButtons;
+
+    //We iterate through the items in the row
     for(int i=start; i < itemsCount && !leaf; ++i )
     {
         CompactViewItem* item=&(viewItems_[i]);
-        //if(item->expanded == 1)
+
+        //Init style option
+        QStyleOptionViewItem opt;
+        if(selectionModel_->isSelected(item->index))
+            opt.state |= QStyle::State_Selected;
+
+        opt.rect=QRect(item->x,yp,item->width+10,item->height);
+
+        //Draw the item with the delegate
+        delegate_->paint(painter,opt,item->index);
+
+        //Collect expand/collapse button positions
+        if(item->hasChildren)
         {
-            QStyleOptionViewItem opt;
+            QPoint p(item->right()+1,yp+item->height/2);
+            if(item->expanded)
+                collapseButtons << p;
+            else
+                expandButtons << p;
+        }
 
-            if(selectionModel_->isSelected(item->index))
-                opt.state |= QStyle::State_Selected;
+        leaf=(item->total == 0);
 
+        //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
+        //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
 
-            opt.rect=QRect(item->x,yp,item->width+10,item->height);
-            delegate_->paint(painter,opt,item->index);
+        //Get the rowheight
+        if(rh == 0)
+        {
+            int iir=0;
+            rh=rowHeight(i,1,iir);
+        }
 
-            //Collect expand button positions
-            if(item->hasChildren)
+        //Find out the first indentation level in the row
+        if(firstLevel==0)
+            firstLevel=item->level;
+
+        //If not the root
+        if(item->parentItem >=0)
+        {
+            //The parent item. It is always a node.
+            CompactViewItem* pt=&(viewItems_[item->parentItem]);
+
+            //The horizontal line connecting the item to its parent
+            int lineY=yp+pt->height/2;
+            int lineX1=pt->right()+2;
+            int lineX2=item->x-2;
+            int lineX=connectorPos(item,pt); //lineX1+lineX2)/2;
+
+            //First child - in the same row as its parent
+            if(item->index.row() == 0)
             {
-                QPoint p(item->right()+1,yp+item->height/2);
-                if(item->expanded)
-                    collapseButtons << p;
-                else
-                    expandButtons << p;
-            }
+                //horizontal line to the parent
+                painter->drawLine(lineX1,lineY,lineX2,lineY);
 
-            leaf=(item->total == 0);
-
-            //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
-            //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
-
-            //Get the rowheight. There are three kinds of row heights.
-            // 1. nodes (fixed height)
-            // 2. attributes (fixed height)
-            // 3. multiline label attributes (variable height!!!)
-            if(rh == 0)
-            {
-                int iir=0;
-                rh=rowHeight(i,1,iir);
-            }
-
-            //Finds out the first indentation level in the row
-            if(firstLevel==0)
-                firstLevel=item->level;
-
-            if(item->parentItem >=0)
-            {
-                //The parent item. It is always a node.
-                CompactViewItem* pt=&(viewItems_[item->parentItem]);
-
-                //The horizontal line connecting the item to its parent
-                int lineY=yp+pt->height/2;
-                int lineX1=pt->right()+2;
-                int lineX2=item->x-2;
-                int lineX=(lineX1+lineX2)/2;
-
-                //First child - in the same row as its parent
-                if(item->index.row() == 0)
+                //line towards the siblings  - downwards
+                if(item->hasMoreSiblings)
                 {
-                    //Line to the parent
-                    painter->drawLine(lineX1,lineY,lineX2,lineY);
-
-                    //line towards the siblings  - downwards
-                    if(item->hasMoreSiblings)
-                    {
-                        painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
-                    }
-
+                    painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
                     indentVec[item->level]=lineX;
                 }
-
-                //Child in the middle - has sibling both upwards and downwards
-                else if(item->hasMoreSiblings)
-                {
-                    painter->drawLine(lineX,lineY,lineX2,lineY);
-                    painter->drawLine(lineX,lineY+rh/2,lineX,lineY-rh/2);
-                    indentVec[item->level]=lineX;
-                }
-
-                //The last child - has sibling only upwards
                 else
-                {
-                    painter->drawLine(lineX,lineY,lineX2,lineY);
-                    painter->drawLine(lineX,lineY,lineX,lineY-rh/2);
-
                     indentVec[item->level]=0;
-                }
-
-
             }
-
-            //When we reach a leaf item we move one row down.
-            if(leaf)
+            //Child in the middle - has sibling both upwards and downwards
+            else if(item->hasMoreSiblings)
             {
-                //Draw the vertical connector lines for all the levels
-                //preceding the first level in the row where it is needed!
-                int level=item->level;
-                for(size_t j=0; j < firstLevel; j++)
-                {
-                    int xp=indentVec[j];
-                    if(xp != 0)
-                        painter->drawLine(xp,yp,xp,yp+rh);
-                }
-
-                yp+=rh; //+5;
-
-                rh=0;
-                firstLevel=0;
+                painter->drawLine(lineX,lineY,lineX2,lineY);
+                painter->drawLine(lineX,lineY+rh/2,lineX,lineY-rh/2);
+                indentVec[item->level]=lineX;
             }
 
-            itemsInRow++;
-       }
+            //The last child - has sibling only upwards
+            else
+            {
+                painter->drawLine(lineX,lineY,lineX2,lineY);
+                painter->drawLine(lineX,lineY,lineX,lineY-rh/2);
+                indentVec[item->level]=0;
+            }
+        }
+
+        //When we reach a leaf item we move one row down.
+        if(leaf)
+        {
+            //Draw the vertical connector lines for all the levels
+            //preceding the first level in the row!
+            int level=item->level;
+            for(size_t j=0; j < firstLevel; j++)
+            {
+                int xp=indentVec[j];
+                if(xp != 0)
+                    painter->drawLine(xp,yp,xp,yp+rh);
+            }
+
+            yp+=rh;
+            rh=0;
+            firstLevel=0;
+        }
+
+        itemsInRow++;
     }
 
     if(expandButtons.isEmpty() == false)
@@ -701,6 +673,10 @@ void CompactView::drawRow(QPainter* painter,int start,int &yp,int &itemsInRow,st
        itemsInRow=1;
 }
 
+int CompactView::connectorPos(CompactViewItem* item, CompactViewItem* parent) const
+{
+    return (parent->right()+2+item->x-2)/2;
+}
 
 //Updates the area occupied by the given index.
 void CompactView::update(const QModelIndex &index)
@@ -734,6 +710,49 @@ void CompactView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bot
     viewport()->update();
 }
 
+//Get the rowheight. There are three kinds of row heights.
+// 1. nodes (fixed height)
+// 2. attributes (fixed height)
+// 3. multiline label attributes (variable height!!!)
+void CompactView::rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const
+{
+    rowHeight=0;
+    itemsInRow=0;
+    const int itemsCount = static_cast<int>(viewItems_.size());
+
+    for(int i=start; i < itemsCount; i++)
+    {
+        CompactViewItem* item=&(viewItems_[i]);
+        rowHeight=qMax(rowHeight,static_cast<int>(item->height));
+        itemsInRow++;
+        if(item->total == 0)
+        {
+            indentVec[item->level]=0;
+            break;
+        }
+
+        if(item->parentItem >=0)
+        {
+            //The parent item. It is always a node.
+            CompactViewItem* pt=&(viewItems_[item->parentItem]);
+
+            if(item->hasMoreSiblings)
+            {
+                int lineX1=pt->right()+2;
+                int lineX2=item->x-2;
+                int lineX=(lineX1+lineX2)/2;
+                indentVec[item->level]=lineX;
+            }
+            else
+            {
+                indentVec[item->level]=0;
+            }
+        }
+    }
+
+    Q_ASSERT(itemsInRow > 0);
+}
+
 int CompactView::rowHeight(int start,int forward, int &itemsInRow) const
 {
     uint rh=0;
@@ -752,6 +771,9 @@ int CompactView::rowHeight(int start,int forward, int &itemsInRow) const
     }
     else
     {
+        Q_ASSERT(start >= 0);
+        UI_ASSERT(start >= 0,"start=" << start << " total=" << viewItems_.size());
+        UI_ASSERT(start < viewItems_.size(),"start=" << start << " total=" << viewItems_.size());
         rh=qMax(rh,viewItems_[start].height);
         itemsInRow++;
         for(int i=start-1; i >= 0; i--)
@@ -867,14 +889,15 @@ void CompactView::updateScrollBars()
 
     int itemsInViewport = 0;
 
-    const std::size_t itemsCount = viewItems_.size();
+    const int itemsCount = viewItems_.size();
     if(itemsCount ==0)
         return;
 
     const int viewportHeight = viewportSize.height();
     int itemsInRow=1;
-    for(std::size_t height = 0, item = itemsCount - 1; item >= 0; item-=itemsInRow)
+    for(int height = 0, item = itemsCount - 1; item >= 0; item-=itemsInRow)
     {
+        //UiLog().dbg() << "item=" << item;
         height +=rowHeight(item,-1,itemsInRow);
         if(height > viewportHeight)
             break;
