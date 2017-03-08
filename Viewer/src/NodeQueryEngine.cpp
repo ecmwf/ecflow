@@ -260,8 +260,7 @@ void NodeQueryEngine::broadcastFind(VNode* node,QStringList attr)
     if(!attr.isEmpty())
     {
         NodeQueryResultTmp_ptr d(new NodeQueryResultTmp(node,attr));
-        res_ << d;
-        //qDebug() << "RES" << attr;
+        res_ << d;       
     }
     else
     {

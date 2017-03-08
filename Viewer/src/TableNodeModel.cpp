@@ -94,7 +94,7 @@ int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 int TableNodeModel::rowCount( const QModelIndex& parent) const
 {
 #ifdef _UI_TABLENODEMODEL_DEBUG
-    //qDebug() << "rowCount" << parent;
+    UiLog().dbg() << "rowCount=" << parent;
 #endif
 
 	//There are no servers
@@ -118,7 +118,7 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
                 cnt+=data_->numOfNodes(i);
 		}
 #ifdef _UI_TABLENODEMODEL_DEBUG
-        //qDebug() << "table count" << cnt;
+        //UiLog().dbg() << "table count " << cnt;
 #endif
 		return cnt;
 	}
@@ -445,8 +445,6 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 #ifdef _UI_TABLENODEMODEL_DEBUG
      UiLog().dbg() << "  elapsed: " << t.elapsed() << " ms";
      UiLog().dbg() << "<-- slotEndServerScan";
-
-     //qDebug() << "hit" << hitCount;
 #endif
 }
 

@@ -9,7 +9,6 @@
 
 #include "NodePathWidget.hpp"
 
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QMenu>
 #include <QMouseEvent>
@@ -143,7 +142,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "BcWidget::reset -->";
-    qDebug()  << "   maxWidth" << maxWidth;
+    UiLog().dbg() << "   maxWidth=" << maxWidth;
 #endif
 
     maxWidth_=maxWidth;
@@ -202,7 +201,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
         width_=xp+NodePathItem::triLen_+hMargin_;
 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-        qDebug() << "   full width" << width_;
+        UiLog().dbg() << "   full width=" << width_;
 #endif
 
         //maxWidth-=2*hMargin_;
@@ -213,7 +212,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
         if(width_ > maxWidth)
         {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-            qDebug() << "   try elided text";
+            UiLog().dbg() << "   try elided text";
 #endif
             //Try different elided text lenghts
             for(int i=20; i >= 3; i--)
@@ -254,8 +253,8 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
         if(width_ > maxWidth)
         {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-            qDebug() << "   insert ellipsis to front + remove items";
-            qDebug() << "     redTextLen=" << redTextLen;
+            UiLog().dbg() << "   insert ellipsis to front + remove items";
+            UiLog().dbg() << "     redTextLen=" << redTextLen;
 #endif
             Q_ASSERT(elided_==false);
 
@@ -273,11 +272,11 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
                 xp=xpAfterEllipsis;
                 items_[i]->visible_=false;
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-                qDebug() << "     omit item" << i;          
+                UiLog().dbg() << "     omit item " << i;
 #endif
                 estWidth=estimateWidth(i+1,xp,redTextLen);
 #ifdef _UI_NODEPATHWIDGET_DEBUG
-                qDebug() << "     estWidth" << estWidth;          
+                UiLog().dbg() << "     estWidth " << estWidth;
 #endif                
                 if(estWidth  < maxWidth)
                 {
@@ -437,7 +436,6 @@ void BcWidget::crePixmap()
     if(items_.count() == 0)
     {
         painter.setPen(Qt::black);
-        //qDebug() << "crePixmap" << emptyRect_ << emptyText_;
         painter.drawText(emptyRect_,Qt::AlignHCenter | Qt::AlignVCenter, emptyText_);
     }
     else
@@ -1176,7 +1174,7 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
     //Check if there is data in info
     if(info_ && info_->server()  && info_->server() == server)
 	{
-        qDebug() << "Server change";
+        UiLog().dbg() << "Server change";
 
         //State changed
         for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
