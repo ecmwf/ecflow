@@ -21,7 +21,6 @@ std::ostream& StcCmd::print(std::ostream& os) const
 		case StcCmd::OK:                          return os << "cmd:Ok"; break;
 		case StcCmd::BLOCK_CLIENT_SERVER_HALTED:  return os << "cmd:Server_halted"; break;
 		case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: return os << "cmd:Wait"; break;
-		case StcCmd::BLOCK_CLIENT_ZOMBIE:         return os << "cmd:Zombie"; break;
 		default: assert(false); break;
  	}
 	assert(false); // unknown command
@@ -46,11 +45,6 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
 		case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: {
 			if (debug) std::cout << "  StcCmd::handle_server_response BLOCK_CLIENT_ON_HOME_SERVER\n";
 			server_reply.set_block_client_on_home_server(); // requires further work, by ClientInvoker
-			break;
- 		}
-		case StcCmd::BLOCK_CLIENT_ZOMBIE: {
-			if (debug) std::cout << "  StcCmd::handle_server_response BLOCK_CLIENT_ZOMBIE\n";
-			server_reply.set_block_client_zombie_detected(); // requires further work, by ClientInvoker
 			break;
  		}
 		default: assert(false); break;

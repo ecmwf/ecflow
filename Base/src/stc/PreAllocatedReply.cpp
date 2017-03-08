@@ -30,6 +30,7 @@
 #include "SClientHandleCmd.hpp"
 #include "SClientHandleSuitesCmd.hpp"
 #include "ZombieGetCmd.hpp"
+#include "BlockClientZombieCmd.hpp"
 
 STC_Cmd_ptr PreAllocatedReply::stc_cmd_                  = STC_Cmd_ptr( new StcCmd() );
 STC_Cmd_ptr PreAllocatedReply::defs_cmd_                 = STC_Cmd_ptr( new DefsCmd() );
@@ -45,6 +46,8 @@ STC_Cmd_ptr PreAllocatedReply::string_vec_cmd_           = STC_Cmd_ptr( new SStr
 STC_Cmd_ptr PreAllocatedReply::server_load_cmd_          = STC_Cmd_ptr( new SServerLoadCmd() );
 STC_Cmd_ptr PreAllocatedReply::news_cmd_                 = STC_Cmd_ptr( new SNewsCmd() );
 STC_Cmd_ptr PreAllocatedReply::sync_cmd_                 = STC_Cmd_ptr( new SSyncCmd() );
+STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd_  = STC_Cmd_ptr( new BlockClientZombieCmd() );
+
 
 STC_Cmd_ptr PreAllocatedReply::ok_cmd()
 {
@@ -64,11 +67,12 @@ STC_Cmd_ptr PreAllocatedReply::block_client_on_home_server_cmd()
 	cmd->init(StcCmd::BLOCK_CLIENT_ON_HOME_SERVER);
 	return stc_cmd_;
 }
-STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd()
+
+STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd(ecf::Child::ZombieType zt)
 {
-	StcCmd* cmd = dynamic_cast<StcCmd*>(stc_cmd_.get());
-	cmd->init(StcCmd::BLOCK_CLIENT_ZOMBIE);
-	return stc_cmd_;
+   BlockClientZombieCmd* cmd = dynamic_cast<BlockClientZombieCmd*>(block_client_zombie_cmd_.get());
+	cmd->init(zt);
+	return block_client_zombie_cmd_;
 }
 
 STC_Cmd_ptr PreAllocatedReply::defs_cmd(AbstractServer* as,bool save_edit_history)
@@ -209,3 +213,4 @@ BOOST_CLASS_EXPORT(SSuitesCmd)
 BOOST_CLASS_EXPORT(SClientHandleCmd)
 BOOST_CLASS_EXPORT(SClientHandleSuitesCmd)
 BOOST_CLASS_EXPORT(ZombieGetCmd)
+BOOST_CLASS_EXPORT(BlockClientZombieCmd)

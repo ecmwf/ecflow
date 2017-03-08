@@ -177,7 +177,7 @@ bool ZombieCtrl::handle_existing_zombie(
 )
 {
 #ifdef DEBUG_ZOMBIE
-	std::cout << " handle_existing_zombie: Updating child_type: ";
+	std::cout << " handle_existing_zombie: ";
 #endif
 	// If we have no task, then change the zombie type to PATH
 	if (!task) {
@@ -347,13 +347,13 @@ bool ZombieCtrl::handle_user_actions(
 		std::cout << " >>>REMOVE<<< zombies_.size(" << zombies_.size() << ") : BLOCKING ";
 		if (!remove_ok)  std::cout << " >>>ERROR<<<< Remove failed ";
 #endif
-	   theReply = PreAllocatedReply::block_client_zombie_cmd();
+	   theReply = PreAllocatedReply::block_client_zombie_cmd(theZombie.type());
 	   return false;
 	}
 
 	// *DEFAULT*:
-	//       Label,event,meter       : fob
-	//       init,complete,abort,wait: block
+	//       Label,event,meter             : fob
+	//       init,complete,abort,queue,wait: block
 	if (task_cmd->child_type() == Child::LABEL ||
 	    task_cmd->child_type() == Child::EVENT ||
 	    task_cmd->child_type() == Child::METER) {
@@ -372,7 +372,7 @@ bool ZombieCtrl::handle_user_actions(
 #endif
 	// i.e it will make several attempts , and then start contacting servers in the hosts file.
    action_taken += "block";
-	theReply = PreAllocatedReply::block_client_zombie_cmd();
+	theReply = PreAllocatedReply::block_client_zombie_cmd(theZombie.type());
 	return false;
 }
 

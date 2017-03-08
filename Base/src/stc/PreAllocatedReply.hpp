@@ -18,6 +18,7 @@
 #include <boost/noncopyable.hpp>
 #include "Cmd.hpp"
 #include "NodeFwd.hpp"
+#include "Child.hpp"
 class AbstractServer;
 
 // class PreAllocatedReply:
@@ -30,7 +31,7 @@ public:
  	static STC_Cmd_ptr ok_cmd();
  	static STC_Cmd_ptr block_client_server_halted_cmd();
  	static STC_Cmd_ptr block_client_on_home_server_cmd();
- 	static STC_Cmd_ptr block_client_zombie_cmd();
+ 	static STC_Cmd_ptr block_client_zombie_cmd(ecf::Child::ZombieType zt);
 
    static STC_Cmd_ptr defs_cmd(AbstractServer*, bool save_edit_history);
    static STC_Cmd_ptr node_cmd(AbstractServer*,node_ptr);
@@ -68,7 +69,8 @@ private:
    static STC_Cmd_ptr string_vec_cmd_;
    static STC_Cmd_ptr server_load_cmd_;
 	static STC_Cmd_ptr news_cmd_;
-	static STC_Cmd_ptr sync_cmd_;
+   static STC_Cmd_ptr sync_cmd_;
+   static STC_Cmd_ptr block_client_zombie_cmd_;
 };
 
 #endif

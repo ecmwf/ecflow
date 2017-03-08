@@ -30,6 +30,7 @@
 #include "GroupSTCCmd.hpp"
 #include "SSyncCmd.hpp"
 #include "SNewsCmd.hpp"
+#include "BlockClientZombieCmd.hpp"
 #include "System.hpp"
 
 using namespace std;
@@ -192,7 +193,8 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	stc_cmd_vec.push_back( STC_Cmd_ptr( new ErrorCmd("The error")));
  	stc_cmd_vec.push_back( STC_Cmd_ptr( new StcCmd(StcCmd::OK)));
  	stc_cmd_vec.push_back( STC_Cmd_ptr( new StcCmd(StcCmd::BLOCK_CLIENT_SERVER_HALTED)));
- 	stc_cmd_vec.push_back( STC_Cmd_ptr( new StcCmd(StcCmd::BLOCK_CLIENT_ON_HOME_SERVER)));
+   stc_cmd_vec.push_back( STC_Cmd_ptr( new StcCmd(StcCmd::BLOCK_CLIENT_ON_HOME_SERVER)));
+   stc_cmd_vec.push_back( STC_Cmd_ptr( new BlockClientZombieCmd(ecf::Child::ECF)));
    stc_cmd_vec.push_back( STC_Cmd_ptr( new SStringCmd("Dummy contents")));
    stc_cmd_vec.push_back( STC_Cmd_ptr( new SServerLoadCmd("/path/to/log_file")));
  	stc_cmd_vec.push_back( STC_Cmd_ptr( new SSyncCmd(0,0,0,mock_server )));
@@ -205,6 +207,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new StcCmd(StcCmd::OK))  );
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new StcCmd(StcCmd::BLOCK_CLIENT_SERVER_HALTED))  );
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new StcCmd(StcCmd::BLOCK_CLIENT_ON_HOME_SERVER))  );
+	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new BlockClientZombieCmd(ecf::Child::ECF)));
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new SStringCmd())  );
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new SServerLoadCmd())  );
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new DefsCmd(mock_server)));

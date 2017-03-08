@@ -9,6 +9,7 @@
  src/Client.cpp
  src/ServerReply.cpp
  src/Connection.cpp
+ src/stc/BlockClientZombieCmd.cpp
  src/stc/DefsCmd.cpp
  src/stc/PreAllocatedReply.cpp
  src/stc/SStringVecCmd.cpp
