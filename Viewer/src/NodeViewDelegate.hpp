@@ -84,15 +84,22 @@ protected:
 	mutable QLinearGradient grad_;
 	static int lighter_;
     bool drawAttrSelectionRect_;
-    QBrush eventFillBrush_;
-    QBrush eventBgBrush_;
-    QBrush meterFillBrush_;
-    QBrush meterThresholdBrush_;
-    QBrush limitFillBrush_;
-    QBrush limitExtraFillBrush_;
+    QBrush  eventFillBrush_;
+    QBrush  eventBgBrush_;
+    QBrush  meterFillBrush_;
+    QBrush  meterThresholdBrush_;
+    QBrush  limitFillBrush_;
+    QBrush  limitExtraFillBrush_;
     QPixmap limitFillPix_;
     QPixmap limitEmptyPix_;
     QPixmap limitExtraFillPix_;
+    QBrush  triggerBgBrush_;
+    QPen    triggerBorderPen_;
+    QPen    triggerFontPen_;
+    QBrush  completeBgBrush_;
+    QPen    completeBorderPen_;
+    QPen    completeFontPen_;
+
 };
 
 #endif
