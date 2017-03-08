@@ -86,6 +86,22 @@ Defs::Defs(const Defs& rhs) :
    // std::vector<AbstractObserver*> observers_;
 }
 
+void Defs::copy_defs_state_only(defs_ptr server_defs)
+{
+   if ( !server_defs ) return;
+
+   // Initialise the defs state. We need to reflect the real state.
+   set_state( server_defs->state() );
+
+   // initialise flag
+   flag_ = server_defs->get_flag();
+
+   // Initialise the server state
+   set_server().set_state(     server_defs->server().get_state() );
+   set_server().set_user_variables( server_defs->server().user_variables() );
+   set_server().set_server_variables( server_defs->server().server_variables() );
+}
+
 Defs& Defs::operator=(const Defs& rhs)
 {
    if (this != &rhs) {

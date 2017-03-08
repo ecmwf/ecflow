@@ -59,6 +59,7 @@ public:
 
    ~Defs();
 
+   void copy_defs_state_only(defs_ptr defs); // needed when creating defs for client handles
    bool operator==(const Defs& rhs) const;
    std::ostream& print(std::ostream&) const ;
 
