@@ -94,6 +94,7 @@ public:
 
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ServerToClientCmd*) const;
+   virtual bool hasDefs() const { return true; }
 
    // Client side functions:
    virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
