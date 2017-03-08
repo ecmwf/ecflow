@@ -130,6 +130,9 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       password_missmatch_ = true;
    }
 
+   /// When state is in SUBMITTED, its process/remote_id is EMPTY. It will be set by the INIT child command.
+   /// Hence we can *NOT* mark it as pid_missmatch.
+   ///
    /// *** See Note above: Not all child commands pass a process_id. ***
    /// *** Hence this test for zombies is ONLY valid if process sets the process_or_remote_id_ ****
    /// *** User should really set ECF_RID in the scripts
