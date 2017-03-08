@@ -103,7 +103,7 @@
                     "default" : "rgb(0,0,255)"
                 },
                 "meterFillColour"  : {
-                    "label"   : "Meter colour",
+                    "label"   : "Meter progress colour",
                     "default" : "rgb(0,0,255)"
                 },
                 "meterThresholdColour"  : {
@@ -111,14 +111,38 @@
                     "default" : "rgb(0,0,255)"
                 },
                 "limitFillColour"  : {
-                    "label"   : "Limit colour",
+                    "label"   : "Limit fill colour",
                     "default" : "rgb(0,255,0)"
                 },
                 "limitExtraFillColour"  : {
                     "label"   : "Limit exceed colour",
                     "default" : "rgb(0,0,255)"
-            }
-            },
+                },
+                "triggerBackground"  : {
+                    "label"   : "Trigger background colour",
+                    "default" : "rgb(230,230,230)"
+                },
+                "triggerBorderColour"  : {
+                    "label"   : "Trigger border colour",
+                    "default" : "rgb(150,150,150)"
+                },
+                "triggerFontColour"  : {
+                    "label"   : "Trigger font colour",
+                    "default" : "rgb(0,0,0)"
+                },
+                "completeBackground"  : {
+                    "label"   : "Complete background colour",
+                    "default" : "rgb(230,230,230)"
+                },
+                "completeBorderColour"  : {
+                    "label"   : "Complete border colour",
+                    "default" : "rgb(150,150,150)"
+                },
+                "completeFontColour"  : {
+                    "label"   : "Complete font colour",
+                    "default" : "rgb(0,0,255)"
+                }
+           },
 
            "textEdit" : {
 			     
