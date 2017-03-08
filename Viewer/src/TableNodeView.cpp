@@ -11,7 +11,6 @@
 
 #include <QtGlobal>
 #include <QComboBox>
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMenu>
