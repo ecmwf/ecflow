@@ -1327,7 +1327,7 @@ BOOST_AUTO_TEST_CASE( test_includeonce )
    ecf_file += "%includeonce <simple_tail.h>\n";
    ecf_file += "%include <simple_tail.h>\n";
 
-   std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
+   std::string expected_job_file_contents = "#head.h\n#head.h\n#body\n#tail.h\n#tail.h";
 
    basic_test_template("test_includeonce",ecf_file,expected_job_file_contents);
 }
