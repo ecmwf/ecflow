@@ -217,6 +217,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
           // If Task state is aborted, and we receive **any** child command then it is a zombie
           submittable_allready_aborted = true;
+          password_missmatch_ = false;
+          pid_missmatch_ = false;
           break;
       }
       case NState::QUEUED: break; // WTF
