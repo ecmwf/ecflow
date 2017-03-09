@@ -12,6 +12,7 @@
 #include "ClientInvoker.hpp"
 #include "ServerComThread.hpp"
 #include "ServerHandler.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 
 #include "Log.hpp"
@@ -384,7 +385,7 @@ void ServerComQueue::slotRun()
         //-the thread is running
         if(r)
         {
-            UiLog(server_).dbg() << " It seems that the thread started but it is in a bad state. Try to run task again.";
+            UiLog(server_).warn() << " It seems that the ServerCom thread started but it is in a bad state. Try to run task again.";
             rerun=true;
             //assert(false);
         }
@@ -393,13 +394,29 @@ void ServerComQueue::slotRun()
         //-the thread is not running
         else if(!r)
         {
-            UiLog(server_).dbg() << " It seems that the thread could not start. Try to run task again.";
+            UiLog(server_).warn() << " It seems that the ServerCom thread could not start. Try to run task again.";
             rerun=true;
         }
 
         if(rerun)
         {
-            comThread_->wait();
+            if(comThread_->wait(taskTimeout_) == false)
+            {
+                UiLog(server_).err() << "  Calling wait() on the ServerCom thread failed. Try to terminate it.";
+                comThread_->terminate();
+                if(comThread_->wait(taskTimeout_) == false)
+                {
+                    UiLog(server_).err() << "  Calling wait() after terminate() on the ServerCom thread failed.";
+                    UI_ASSERT(0,"Cannot stop ServerCom thread that is in a bad state");
+                    exit(1);
+                }
+                else
+                {
+                    UiLog(server_).dbg() << "  Terminating ServerCom thread succeeded.";
+                }
+            }
+
+            Q_ASSERT(comThread_->isRunning() == false);
 
             if(current_->status() != VTask::CANCELLED &&
                current_->status() != VTask::ABORTED )
