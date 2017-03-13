@@ -165,7 +165,7 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
            ac->setObjectName(QString::fromStdString((*it)->label()));
            ac->setIcon(QIcon(pix));
 		   ac->setData(QString::fromStdString((*it)->name()));
-		   ac->setToolTip(QString::fromStdString((*it)->tooltip()));
+           ac->setToolTip(QString::fromStdString((*it)->buttonTooltip()));
 
 		   connect(ac,SIGNAL(triggered()),
 				   this,SLOT(slotOpenInfoPanel()));

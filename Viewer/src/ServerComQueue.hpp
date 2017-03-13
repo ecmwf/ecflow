@@ -34,7 +34,7 @@ class ServerComQueue : public QObject
 Q_OBJECT
 
 public:
-	ServerComQueue(ServerHandler *server,ClientInvoker* client,ServerComThread* comThread);
+    ServerComQueue(ServerHandler *server,ClientInvoker* client);
 	~ServerComQueue();
 
 	enum State {NoState,RunningState,SuspendedState,ResetState,DisabledState};
@@ -61,6 +61,7 @@ protected Q_SLOTS:
 	void slotTaskFailed(std::string);
 
 protected:
+    void createThread();
     void startCurrentTask();
     void endReset();
 	bool hasTask(VTask::Type t) const;

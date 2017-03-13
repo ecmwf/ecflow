@@ -13,6 +13,9 @@
 
 #include "Node.hpp"
 
+#include "InfoProvider.hpp"
+#include "ServerHandler.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
@@ -23,23 +26,37 @@
 //
 //========================================================
 
-WhyItemWidget::WhyItemWidget(QWidget *parent) : CodeItemWidget(parent)
+WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
 {
 	messageLabel_->hide();
 	fileLabel_->hide();
-	textEdit_->setShowLineNumbers(false);
-    textEdit_->setHyperlinkEnabled(true);
 
-	//Editor font
-	textEdit_->setFontProperty(VConfig::instance()->find("panel.why.font"));
+    //Will be used for ECFLOW-901
+    infoProvider_=new WhyProvider(this);
+
+    textEdit_->setProperty("trigger","1");
+    textEdit_->setFontProperty(VConfig::instance()->find("panel.why.font"));
 
     //Set css for the text formatting
-    QString cssDoc="a:link { text-decoration:none; color: #0645AD;}";
+    QString cssDoc;
+    QFile f(":/viewer/trigger.css");
+    //QTextStream in(&f);
+    if(f.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        cssDoc=QString(f.readAll());
+    }
+    f.close();
     textEdit_->document()->setDefaultStyleSheet(cssDoc);
 
 
-    connect(textEdit_,SIGNAL(hyperlinkActivated(QString)),
-            this,SLOT(anchorClicked(QString)));
+#if 0
+    //Set css for the text formatting
+    QString cssDoc="a:link { text-decoration:none; color: #0645AD;}";
+    textEdit_->document()->setDefaultStyleSheet(cssDoc);
+#endif
+
+    connect(textEdit_,SIGNAL(anchorClicked(QUrl)),
+            this,SLOT(anchorClicked(QUrl)));
 }
 
 WhyItemWidget::~WhyItemWidget()
@@ -63,10 +80,9 @@ void WhyItemWidget::reload(VInfo_ptr info)
 	info_=info;
 
     if(info_)
-	{
-        //textEdit_->setPlainText(why());
-        textEdit_->appendHtml(why());
-	}
+    {
+        textEdit_->insertHtml(why());
+    }
 }
 
 void WhyItemWidget::clearContents()
@@ -79,24 +95,54 @@ QString WhyItemWidget::why() const
 {
 	QString s;
 
-	std::vector<std::string> theReasonWhy;
+    std::vector<std::string> bottomUpWhy,topDownWhy;
 
-	if(info_ && info_.get())
+    if(info_ && info_->server())
 	{
-		if(info_->isServer())
+        //This stops the queue on the serverhandler so that no update
+        //could happen while we generate the why? information
+        info_->server()->searchBegan();
+
+        if(info_->isServer())
 		{
-			info_->node()->why(theReasonWhy);
+            info_->node()->why(topDownWhy);
 		}
 		else if(info_->isNode() && info_->node())
 		{
-			info_->node()->why(theReasonWhy);
+            info_->node()->why(bottomUpWhy,topDownWhy);
 		}
+
+        //Resume the queue on the serverhandler
+        info_->server()->searchFinished();
 	}
 
-    s=makeHtml(theReasonWhy);
+    s=makeHtml(bottomUpWhy,topDownWhy);
     return s;
 }
 
+QString WhyItemWidget::makeHtml(const std::vector<std::string>& bottomUpTxt,
+                                const std::vector<std::string>& topDownTxt) const
+{
+    if(bottomUpTxt.empty() && topDownTxt.empty())
+        return QString();
+
+    QString s="<table width=\'100%\'>";
+
+    if(!topDownTxt.empty())
+    {
+        s+="<tr><td class=\'direct_title\'>Top-down why? - through the children</td></tr>";
+        s+=makeHtml(topDownTxt);
+    }
+
+    if(!bottomUpTxt.empty())
+    {
+        s+="<tr><td class=\'direct_title\'>Bottom-up why? - through the parents</td></tr>";
+        s+=makeHtml(bottomUpTxt);
+    }
+
+    s+="</table>";
+    return s;
+}
 
 QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
 {
@@ -141,14 +187,14 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
 
 
 
-        s+=line+"<br>";
+        s+="<tr><td width=\'100%\'>" + line + "</td></tr>";
     }
     return s;
 }
 
-void WhyItemWidget::anchorClicked(QString link)
+void WhyItemWidget::anchorClicked(const QUrl& link)
 {
-    linkSelected(link.toStdString());
+    linkSelected(link.path().toStdString());
 }
 
 static InfoPanelItemMaker<WhyItemWidget> maker1("why");
