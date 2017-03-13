@@ -11,7 +11,7 @@
             "icon"	  : "overview.svg",
             "dock_icon"	  : "overview.svg",
             "show"    : "toolbar",
-            "tooltip" : "Open <b>info</b> tab in a new Info Panel dialog",
+            "button_tooltip" : "Open <b>info</b> tab in a new Info Panel dialog",
             "visible_for" : "server or node"
         },
 
@@ -21,7 +21,7 @@
             "icon"    : "manual.svg",
             "dock_icon"    : "manual_dock.svg",
             "show"    : "toolbar",
-            "tooltip" : "Open <b>manual</b> tab in a new Info Panel dialog",
+            "button_tooltip" : "Open <b>manual</b> tab in a new Info Panel dialog",
             "visible_for" : "node"            
         },    
        
@@ -31,7 +31,7 @@
             "icon"    : "script.svg",
             "dock_icon"    : "script_dock.svg",
             "show"    : "toolbar",
-            "tooltip" : "Open <b>script</b> tab in a new Info Panel dialog",
+            "button_tooltip" : "Open <b>script</b> tab in a new Info Panel dialog",
             "visible_for" : "task or alias"            
         }, 
         
@@ -41,7 +41,7 @@
             "icon"	  : "job.svg",
             "dock_icon"	  : "job_dock.svg",
             "show"    : "toolbar", 
-            "tooltip" : "Open <b>job</b> tab in a new Info Panel dialog",
+            "button_tooltip" : "Open <b>job</b> tab in a new Info Panel dialog",
             "visible_for" : "task or alias"            
         },    
         
@@ -51,7 +51,7 @@
             "icon"    : "output.svg",
             "dock_icon"    : "output_dock.svg",
             "show"    : "toolbar",
-            "tooltip" : "Open <b>output</b> tab in a new Info Panel dialog",
+            "button_tooltip" : "Open <b>output</b> tab in a new Info Panel dialog",
             "visible_for" : "task or alias"            
         },    
         
@@ -61,7 +61,7 @@
             "icon"    : "why.svg",
             "dock_icon"    : "why_dock.svg",
             "show" : "toolbar",
-            "tooltip" : "Open <b>why</b> tab in a new Info Panel dialog",
+            "button_tooltip" : "Open <b>why</b> tab in a new Info Panel dialog",
             "visible_for" : "server or node"            
         },  
         
@@ -70,7 +70,7 @@
             "label"   : "Triggers",
             "icon"    : "trigger.svg",
             "show"    : "toolbar",
-            "tooltip" : "Open <b>triggers</b> tab in a new Info Panel dialog",
+            "button_tooltip" : "Open <b>triggers</b> tab in a new Info Panel dialog",
             "visible_for" : "node"
         },  
         
@@ -87,7 +87,7 @@
              "icon"   : "variable.svg",
              "dock_icon"   : "variable_dock.svg",
              "show"   : "toolbar",
-             "tooltip" : "Open <b>variables</b> tab in a new Info Panel dialog",
+             "button_tooltip" : "Open <b>variables</b> tab in a new Info Panel dialog",
              "visible_for" : "server or node"
              
         },  
@@ -98,7 +98,7 @@
             "icon"    : "edit.svg",
             "dock_icon"   : "edit.svg",
             "show"    : "toolbar",
-            "tooltip" : "Open <b>edit</b> tab in a new Info Panel dialog",            
+            "button_tooltip" : "Open <b>edit</b> tab in a new Info Panel dialog",
             "visible_for" : "task or alias"            
         } ,           
         
@@ -108,7 +108,7 @@
              "icon"	  : "server_log.svg",
              "dock_icon"	  : "log.svg",
              "show"   : "toolbar",
-             "tooltip" : "Open <b>server log</b> tab in a new Info Panel dialog",
+             "button_tooltip" : "Open <b>server log</b> tab in a new Info Panel dialog",
              "visible_for" : "server"
              
         },  
@@ -118,7 +118,7 @@
             "label"   : "Node log",
             "icon"	  : "node_log.svg",          
             "show"    : "toolbar",
-            "tooltip" : "Open <b>Node log</b> tab in a new Info Panel dialog",                
+            "button_tooltip" : "Open <b>Node log</b> tab in a new Info Panel dialog",
             "visible_for" : "server or node"
              
         },     
@@ -129,7 +129,7 @@
             "icon"	  : "zombie.svg",
             "dock_icon"	  : "zombie_dock.svg",
             "show" 	  : "toolbar",
-            "tooltip" : "Open <b>zombies</b> tab in a new Info Panel dialog",  
+            "button_tooltip" : "Open <b>zombies</b> tab in a new Info Panel dialog",
             "visible_for" : "server"
              
         },     

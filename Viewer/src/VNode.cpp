@@ -841,12 +841,17 @@ bool VNode::isFlagSet(ecf::Flag::Type f) const
 	return false;
 }
 
-void VNode::why(std::vector<std::string>& theReasonWhy) const
+void VNode::why(std::vector<std::string>& bottomUp,
+                std::vector<std::string>& topDown) const
 {
     if(node_)
 	{
-		node_->bottom_up_why(theReasonWhy);
-	}
+        node_->bottom_up_why(bottomUp);
+        if(isFamily() || isSuite())
+        {
+           node_->top_down_why(topDown);
+        }
+    }
 }
 
 const std::string& VNode::abortedReason() const
@@ -1734,7 +1739,6 @@ void VServer::why(std::vector<std::string>& theReasonWhy) const
 
 	defs->why(theReasonWhy);
 }
-
 
 
 bool VServer::isFlagSet(ecf::Flag::Type f) const
