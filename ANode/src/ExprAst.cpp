@@ -1251,6 +1251,7 @@ std::string AstNodeState::expression() const
 
 std::string AstNodeState::why_expression(bool html) const
 {
+   if (html) return DState::to_html(state_);
    return DState::toString(state_);
 }
 
@@ -1438,23 +1439,31 @@ std::string AstVariable::why_expression(bool html) const
 {
    VariableHelper varHelper(this);
    std::string ret;
-   if (html) ret = Node::path_href_attribute(nodePath_);
-   else      ret = nodePath_;
-
-   if ( !varHelper.theReferenceNode() )  ret += "(?)";
-   ret += Str::COLON();
-   ret += name_;
-   ret += "(";
-
    std::string varType;
-   int theValue;
+   int theValue=0;
    varHelper.varTypeAndValue(varType,theValue);
 
-   std::stringstream ss; ss << "type:" << varType << " value:" << theValue;
-   ret += ss.str();
-
-   ret += ")";
-
+   if (html) {
+      // ecflow_ui expects: [attribute_type]attribute_path:attribute_name
+      // i.e                [limit]/suite/family/task:my_limit
+      std::stringstream ss;
+      ss << "[" << varType << "]" << nodePath_ << ":" << name_;
+      ret = Node::path_href_attribute(ss.str());
+      if ( !varHelper.theReferenceNode() )  ret += "(?)";
+      ret += "(value:";
+      ret += boost::lexical_cast<std::string>(theValue);
+      ret += ")";
+   }
+   else {
+      ret = nodePath_;
+      if ( !varHelper.theReferenceNode() )  ret += "(?)";
+      ret += Str::COLON();
+      ret += name_;
+      ret += "(";
+      std::stringstream ss; ss << "type:" << varType << " value:" << theValue;
+      ret += ss.str();
+      ret += ")";
+   }
    return ret;
 }
 
