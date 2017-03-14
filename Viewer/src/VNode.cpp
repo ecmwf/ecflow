@@ -846,10 +846,10 @@ void VNode::why(std::vector<std::string>& bottomUp,
 {
     if(node_)
 	{
-        node_->bottom_up_why(bottomUp);
+        node_->bottom_up_why(bottomUp,1);
         if(isFamily() || isSuite())
         {
-           node_->top_down_why(topDown);
+           node_->top_down_why(topDown,1);
         }
     }
 }
@@ -1737,7 +1737,7 @@ void VServer::why(std::vector<std::string>& theReasonWhy) const
 	if (!defs)
 		return;
 
-	defs->why(theReasonWhy);
+    defs->why(theReasonWhy,1);
 }
 
 
