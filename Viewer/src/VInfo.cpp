@@ -221,8 +221,8 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
     }
     else if(p.itemType() ==  VItemPathParser::NodeType)
     {
-        VNode* n=s->vRoot()->find(p.node());
-        return VInfoNode::create(n);
+        if(VNode* n=s->vRoot()->find(p.node()))
+            return VInfoNode::create(n);
 
     }
     else if(p.itemType() ==  VItemPathParser::AttributeType)
