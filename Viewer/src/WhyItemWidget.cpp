@@ -151,6 +151,8 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
     {
         QString line=QString::fromStdString(*it);
 
+        UiLog().dbg() << line;
+
 #if 0
         QRegExp rxExpr("expression (.+) does not evaluate");
         if(rxExpr.indexIn(line) > -1 && rxExpr.captureCount() == 1)
@@ -160,6 +162,7 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
         }
 #endif
 
+#if 0
         QRegExp rx("'\\S+:(\\S+)'");
         if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
         {
@@ -194,6 +197,7 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
                 line.replace(path,"<a href=\'" + anchor  + "\'>" + path +"</a>");
             }
         }
+#endif
 
         s+="<tr><td width=\'100%\'>" + line + "</td></tr>";
     }
