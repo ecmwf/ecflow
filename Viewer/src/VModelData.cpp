@@ -478,7 +478,7 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
                  UiLog(server_).dbg() << "  tree node to update: "  << tn->vnode()->absNodePath();
 #endif
                 //First, we remove the branch contents
-                if(tn->numOfChildren())
+                if(tn->numOfChildren() >0)
                 {
                     int totalRows=tn->attrNum(attrFilter_) + tn->numOfChildren();
                     Q_EMIT beginFilterUpdateRemove(this,tn,totalRows);
@@ -506,10 +506,15 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
     }
 }
 
+
 //Set the forceShowNode and rerun the filter. The forceShowNode is a node that
 //has to be visible even if it does not match the status filter.
 void VTreeServer::setForceShowNode(const VNode* node)
 {
+#ifdef _UI_VMODELDATA_DEBUG
+    UiLog(server_).dbg()  << "setForceShowNode -->";
+#endif
+
     if(filter_->isNull() || tree_->find(node))
     {
         clearForceShow(node);
@@ -532,6 +537,10 @@ void VTreeServer::setForceShowNode(const VNode* node)
 
 void VTreeServer::setForceShowAttribute(const VAttribute* a)
 {
+#ifdef _UI_VMODELDATA_DEBUG
+    UiLog().dbg() << "setForceShowAttribute";
+#endif
+
     Q_ASSERT(a);
     VNode* vnode=a->parent();
     Q_ASSERT(vnode);
@@ -594,9 +603,13 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     }
 }
 
-void VTreeServer::clearForceShow(const VItem* item)
+void VTreeServer::clearForceShow(const VItem* itemCurrent)
 {
-    if(!item)
+#ifdef _UI_VMODELDATA_DEBUG
+    UiLog().dbg() << "clearForceShow -->";
+#endif
+
+    if(!itemCurrent)
         return;
 
     //filter_ is unique for each VTreeServer while attrFilter_ is
@@ -625,37 +638,36 @@ void VTreeServer::clearForceShow(const VItem* item)
     //currently store because in this case there is nothing to do.
 
     //The server matches
-    if(item->parent()->server() == server_)
+    //TODO: what if it is the ROOT?
+    if(itemCurrent->parent()->server() == server_)
     {
         //Item is a node and it is the same as we store
-        if(VNode *itn=item->isNode())
+        if(VNode *itn=itemCurrent->isNode())
         {
             if(itn == vnPrev && !aPrev)
                 return;
         }
-        //Item is an attribute and it is the same as we store
-        if(VAttribute *ita=item->isAttribute())
+        //Item is an attribute
+        if(VAttribute *ita=itemCurrent->isAttribute())
         {
-            if(aPrev && aPrev->sameContents(ita))
+            if(aPrev)
             {
-                return;
+                //The attribute is in the current branch or
+                if(ita->parent() == aPrev->parent() &&
+                   attrFilter_->isSet(aPrev->type()) && attrFilter_->isSet(ita->type()))
+                {
+                    return;
+                }
+                //the attribute is the same as before
+                if(aPrev->sameContents(ita))
+                {
+                    return;
+                }
             }
         }
     }
 
-    //Reload the node status filter
-    filter_->clearForceShowNode();
-
-    VNode* s=vnPrev->suite();
-    Q_ASSERT(s->isTopLevel());
-    Q_ASSERT(s);
-
-    std::vector<VNode*> sv;
-    sv.push_back(s);
-
-    updateFilter(sv);
-
-    //Need to handle the attribute if the tree node is still visible
+    //Need to handle the attribute if the tree node is visible
     if(aPrev)
     {
         attrFilter_->clearForceShowAttr();
@@ -665,13 +677,13 @@ void VTreeServer::clearForceShow(const VItem* item)
         {
             Q_ASSERT(node->isAttrInitialised());
 
+            //This is the actual num with the current filter
             int currentNum=vnPrev->attrNum(attrFilter_);
 
             //This is the attribute num we store in the tree node
             //(and display in the tree).
             int cachedNum=node->attrNum(attrFilter_);
             Q_ASSERT(cachedNum >= 0);
-
             Q_ASSERT(currentNum <= cachedNum);
 
             Q_EMIT beginAddRemoveAttributes(this,node,currentNum,cachedNum);
@@ -685,6 +697,19 @@ void VTreeServer::clearForceShow(const VItem* item)
 
         }
     }
+
+    //Reload the node status filter
+    filter_->clearForceShowNode();
+
+    VNode* s=vnPrev->suite();
+    Q_ASSERT(s->isTopLevel());
+    Q_ASSERT(s);
+
+    std::vector<VNode*> sv;
+    sv.push_back(s);
+
+    //!!!!This can call clearForceShow again!!!
+    updateFilter(sv);
 }
 
 //==========================================
