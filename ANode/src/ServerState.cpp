@@ -472,8 +472,9 @@ void ServerState::setup_default_server_variables(std::vector<Variable>&  server_
 }
 
 /// determines why the node is not running.
-void ServerState::why(std::vector<std::string>& theReasonWhy) const
+bool ServerState::why(std::vector<std::string>& theReasonWhy) const
 {
-   if (server_state_ == SState::HALTED)   theReasonWhy.push_back("The server is halted");
-   if (server_state_ == SState::SHUTDOWN) theReasonWhy.push_back("The server is shutdown");
+   if (server_state_ == SState::HALTED)   { theReasonWhy.push_back("The server is halted"); return true;}
+   if (server_state_ == SState::SHUTDOWN) { theReasonWhy.push_back("The server is shutdown"); return true;}
+   return false;
 }

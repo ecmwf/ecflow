@@ -99,7 +99,7 @@ public:
    unsigned int variable_state_change_no() const { return variable_state_change_no_; }
 
    /// determines why the node is not running.
-   void why(std::vector<std::string>& theReasonWhy) const;
+   bool why(std::vector<std::string>& theReasonWhy) const; // return true if why found
 
    /// Used in test
    static void setup_default_server_variables(std::vector<Variable>&  server_variables, const std::string& port);
