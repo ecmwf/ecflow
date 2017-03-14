@@ -52,11 +52,12 @@ public:
    virtual bool is_valid_ast(std::string& error_msg) const = 0;
    virtual std::ostream& print(std::ostream&) const = 0;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const = 0;    // used for test
-	virtual bool why(std::string& /*theReasonWhy*/) const { return false;}
+	virtual bool why(std::string& /*theReasonWhy*/,bool html = false) const { return false;}
 	virtual std::string type() const = 0;
 	virtual void exprType(const std::string&) {}
-	std::string name() { return expression(false); } /* ABO */
-	virtual std::string expression(bool why = false) const = 0; // recreate expression from AST, if why show additional state
+	std::string name() { return expression(); } /* ABO */
+   virtual std::string expression() const = 0;                      // recreate expression from AST
+   virtual std::string why_expression(bool html = false) const = 0; // recreate expression from AST for why command
 
 	// Use for data arithmetic for REPEAT Date, Use default implementation for others
 	// Currently *ONLY* works if repeat variable in on LHS
@@ -85,11 +86,12 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 
-	virtual bool why(std::string& theReasonWhy) const;
+	virtual bool why(std::string& theReasonWhy,bool html = false) const;
 	virtual std::string type() const { return stype();}
 	virtual void exprType(const std::string& s) { exprType_ = s;}
 	static std::string stype() { return "top";}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	virtual void setParentNode(Node*);
 
 private:
@@ -112,7 +114,7 @@ public:
  	virtual Ast* left() const { return left_;}
  	virtual Ast* right() const { return right_;}
 	virtual std::ostream& print(std::ostream& os) const;
-	virtual bool why(std::string& theReasonWhy) const;
+	virtual bool why(std::string& theReasonWhy,bool html = false) const;
 	virtual bool empty() const { return (left_ && right_) ? false : true ; }
 	virtual void setParentNode(Node*);
 
@@ -135,7 +137,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
  	static std::string stype() { return "not";}
    virtual void set_root_name(const std::string& n) { name_ = n;}
 private:
@@ -155,7 +158,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
  	static std::string stype() { return "plus";}
 };
 
@@ -171,7 +175,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
  	static std::string stype() { return "minus";}
 };
 
@@ -187,7 +192,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
  	static std::string stype() { return "divide";}
 };
 
@@ -202,7 +208,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "multiply";}
 };
 
@@ -218,7 +225,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
    virtual std::string type() const { return stype();}
-   virtual std::string expression(bool why = false) const;
+   virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
    static std::string stype() { return "modulo";}
 };
 
@@ -233,7 +241,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "and";}
 };
 
@@ -247,7 +256,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "or";}
 };
 
@@ -261,7 +271,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "equal";}
 };
 
@@ -275,7 +286,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "not-equal";}
 };
 
@@ -289,7 +301,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "less-equal";}
 };
 
@@ -303,7 +316,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "greater-equal";}
 };
 
@@ -319,7 +333,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "greater-than";}
 };
 
@@ -335,7 +350,8 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual bool is_valid_ast(std::string& error_msg) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "less-than";}
 };
 
@@ -366,7 +382,8 @@ public:
    virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual std::string type() const { return stype();}
-   virtual std::string expression(bool why = false) const;
+   virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
    static std::string stype() { return "AstFunction";}
    virtual void setParentNode(Node* n);
 
@@ -391,7 +408,8 @@ public:
  	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "integer";}
 private:
 	int value_;
@@ -408,7 +426,8 @@ public:
  	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "node-state";}
 private:
 	DState::State state_;
@@ -424,7 +443,8 @@ public:
  	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
 	static std::string stype() { return "event-state";}
 private:
 	bool state_;
@@ -450,7 +470,8 @@ public:
   	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+   virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
  	virtual void setParentNode(Node* n) { parentNode_ = n; }
 	static std::string stype() { return "node";}
 
@@ -494,7 +515,8 @@ public:
  	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
 	virtual std::string type() const { return stype();}
-	virtual std::string expression(bool why = false) const;
+	virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
  	virtual void setParentNode(Node* n) { parentNode_ = n; }
 
    virtual int minus(Ast* right) const;

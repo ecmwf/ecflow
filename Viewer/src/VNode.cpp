@@ -734,7 +734,7 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 {
     if(node_)
 	{
-		node_->bottom_up_why(theReasonWhy);
+		node_->bottom_up_why(theReasonWhy,true /*html_tags*/);
 	}
 }
 

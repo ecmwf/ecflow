@@ -240,8 +240,8 @@ public:
    void order(Node* immediateChild, NOrder::Order);
 
    /// determines why the node is not running.
-   void top_down_why(std::vector<std::string>& theReasonWhy) const;
-   void why(std::vector<std::string>& theReasonWhy) const;
+   void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   void why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
 
    /// Function to save the defs as a checkpoint file. File saved to the file name
    /// Can throw exception
