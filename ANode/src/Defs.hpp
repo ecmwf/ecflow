@@ -241,7 +241,7 @@ public:
 
    /// determines why the node is not running.
    void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
-   void why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const; // return true if why found
 
    /// Function to save the defs as a checkpoint file. File saved to the file name
    /// Can throw exception

@@ -1296,16 +1296,19 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 
 void Defs::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   why(theReasonWhy,html_tags);
-	size_t theSuiteVecSize = suiteVec_.size();
-	for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->top_down_why(theReasonWhy,html_tags);}
+   bool why_found = why(theReasonWhy,html_tags);
+   if (!why_found) {
+      size_t theSuiteVecSize = suiteVec_.size();
+      for(size_t s = 0; s < theSuiteVecSize; s++) { (void)suiteVec_[s]->top_down_why(theReasonWhy,html_tags);}
+   }
 }
 
-void Defs::why(std::vector<std::string>& theReasonWhy,bool html) const
+bool Defs::why(std::vector<std::string>& theReasonWhy,bool html) const
 {
    if (isSuspended()) {
       std::string the_reason = "The server is *not* RUNNING.";
       theReasonWhy.push_back(the_reason);
+      return true;
    }
    else if (state() != NState::QUEUED && state() != NState::ABORTED) {
       std::stringstream ss;
@@ -1313,7 +1316,7 @@ void Defs::why(std::vector<std::string>& theReasonWhy,bool html) const
       else       ss << "The definition state(" << NState::toString(state()) << ") is not queued or aborted.";
       theReasonWhy.push_back(ss.str());
    }
-   server_.why(theReasonWhy);
+   return server_.why(theReasonWhy);
 }
 
 std::string Defs::toString() const

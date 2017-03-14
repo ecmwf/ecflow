@@ -166,7 +166,7 @@ public:
    virtual bool run(JobsParam& jobsParam, bool force) = 0;
 
    /// Recursively determines why the node is not running.
-   virtual void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   virtual bool top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
    void bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
 
    void freeTrigger() const;
@@ -643,7 +643,7 @@ public:
    bool is_observed(AbstractObserver*) const ; // return true if we have this observer in our list
 
 private:
-   void why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
    /// Function used as a part of trigger and complete expressions.
    /// The search pattern is event,meter,user-variable,repeat, generated-variable
    int findExprVariableValue( const std::string& name) const;

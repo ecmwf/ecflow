@@ -40,7 +40,7 @@ public:
 	virtual bool run(JobsParam& jobsParam, bool force);
 	virtual void kill(const std::string& zombie_pid = "");
 	virtual void status();
-	virtual void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+	virtual bool top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
 	virtual void collateChanges(DefsDelta&) const;
    void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
    void set_memento(const ChildrenMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
