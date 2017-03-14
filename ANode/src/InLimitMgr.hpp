@@ -74,7 +74,7 @@ public:
  	bool findInLimitByNameAndPath(const InLimit& ) const;  // use name,path,token,
 
 // Why:
- 	void why(std::vector<std::string>& vec) const;
+ 	void why(std::vector<std::string>& vec,bool html = false) const;
 
 // Limit functions:
 
