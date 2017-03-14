@@ -1251,6 +1251,7 @@ std::string AstNodeState::expression() const
 
 std::string AstNodeState::why_expression(bool html) const
 {
+   if (html) return DState::to_html(state_);
    return DState::toString(state_);
 }
 
