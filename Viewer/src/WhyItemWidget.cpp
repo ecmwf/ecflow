@@ -19,6 +19,7 @@
 #include "VConfig.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
+#include "VNState.hpp"
 
 //========================================================
 //
@@ -46,6 +47,14 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
         cssDoc=QString(f.readAll());
     }
     f.close();
+
+    QMap<QString,QString> stateMap;
+    std::vector<VParam*> states=VNState::filterItems();
+    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    {
+       cssDoc+="font." + (*it)->name() + " {background-color: " + (*it)->colour().name() + ";}";
+    }
+
     textEdit_->document()->setDefaultStyleSheet(cssDoc);
 
 
@@ -128,16 +137,16 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& bottomUpTxt,
 
     QString s="<table width=\'100%\'>";
 
-    if(!topDownTxt.empty())
-    {
-        s+="<tr><td class=\'direct_title\'>Top-down why? - through the children</td></tr>";
-        s+=makeHtml(topDownTxt);
-    }
-
     if(!bottomUpTxt.empty())
     {
         s+="<tr><td class=\'direct_title\'>Bottom-up why? - through the parents</td></tr>";
         s+=makeHtml(bottomUpTxt);
+    }
+
+    if(!topDownTxt.empty())
+    {
+        s+="<tr><td class=\'direct_title\'>Top-down why? - through the children</td></tr>";
+        s+=makeHtml(topDownTxt);
     }
 
     s+="</table>";
@@ -146,6 +155,13 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& bottomUpTxt,
 
 QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
 {
+    QMap<QString,QString> stateMap;
+    std::vector<VParam*> states=VNState::filterItems();
+    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    {
+       stateMap["<state>" + (*it)->name() + "</state>"]="<font class=\'"+ (*it)->name() + "\'>" + (*it)->name() + "</font>";
+    }
+
     QString s;
     for(std::vector<std::string>::const_iterator it=rawTxt.begin(); it != rawTxt.end(); ++it)
     {
