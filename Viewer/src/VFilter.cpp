@@ -437,6 +437,10 @@ void NodeFilter::clear()
 void NodeFilter::setForceShowNode(VNode* n)
 {
     forceShowNode_=n;
+#ifdef _UI_VFILTER_DEBUG
+    if(forceShowNode_)
+        UiLog(server_).dbg() << "NodeFilter::setForceShowNode --> "  << forceShowNode_->absNodePath();
+#endif
 }
 
 void NodeFilter::clearForceShowNode()
