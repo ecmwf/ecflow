@@ -538,7 +538,7 @@ void VTreeServer::setForceShowNode(const VNode* node)
 void VTreeServer::setForceShowAttribute(const VAttribute* a)
 {
 #ifdef _UI_VMODELDATA_DEBUG
-    UiLog().dbg() << "setForceShowAttribute";
+    UiLog(server_).dbg() << "setForceShowAttribute";
 #endif
 
     Q_ASSERT(a);
@@ -547,14 +547,24 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
 
     VTreeNode* node=tree_->find(vnode);
 
+#ifdef _UI_VMODELDATA_DEBUG
+    UiLog(server_).dbg() << "  node=" << node << " Attr=" << a->name() << " type=" << a->typeName();
+#endif
+
     UI_ASSERT(!node || !attrFilter_->isSet(a->type()),
               "node=" << node << " Attr=" << a->name().toStdString() << " type=" << a->typeName());
-
     //Clear
     clearForceShow(a);
 
+#ifdef _UI_VMODELDATA_DEBUG
+    UiLog(server_).dbg() << "  node after clear=" << node;
+#endif
+
+    //clearForce might remove node, so we need to find it again!
+    node=tree_->find(vnode);
+
     //Tell the attribute filter that this attribute must always be visible
-    attrFilter_->setForceShowAttr(const_cast<VAttribute*>(a));
+    //attrFilter_->setForceShowAttr(const_cast<VAttribute*>(a));
 
     //Tell the tree that this node must always be visible
     filter_->setForceShowNode(const_cast<VNode*>(vnode));
@@ -564,6 +574,10 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     //and will result in displaying the right attributes as well.
     if(!node)
     {
+#ifdef _UI_VMODELDATA_DEBUG
+    UiLog(server_).dbg() << "  node does not exist -->" << node;
+#endif
+
         //find the suite
         VNode* s=vnode->suite();
         Q_ASSERT(s->isTopLevel());
@@ -572,33 +586,58 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
         std::vector<VNode*> sv;
         sv.push_back(s);
 
+        //Tell the attribute filter that this attribute must always be visible
+        attrFilter_->setForceShowAttr(const_cast<VAttribute*>(a));
+
         updateFilter(sv);
     }
     //The attribute is not visible (its type is not filtered)
     else if(!attrFilter_->isSet(a->type()))
     {
+#ifdef _UI_VMODELDATA_DEBUG
+        UiLog(server_).dbg() << "  attribute type is not filtered -->";
+#endif
+
         //We only need to handle this case. When the attributes are not yet initialised
         //the selection in the view will trigger the attribute initialisation. This
         //will use the filter that we already set to use the attribute (as forceShowAttr).
         if(node->isAttrInitialised())
         {
+            //This is the attribute num we store in the tree node
+            //(and display in the tree).
+            int cachedNum=node->attrNum(attrFilter_);
+
+            //Tell the attribute filter that this attribute must always be visible
+            attrFilter_->setForceShowAttr(const_cast<VAttribute*>(a));
+
             //This is the current attribute num using the modified attribute filter
             int currentNum=vnode->attrNum(attrFilter_);
 
             //This is the attribute num we store in the tree node
             //(and display in the tree).
-            int cachedNum=node->attrNum(attrFilter_);
+            //int cachedNum=node->attrNum(attrFilter_);
             Q_ASSERT(cachedNum >= 0);
             Q_ASSERT(currentNum >= cachedNum);
 
-            Q_EMIT beginAddRemoveAttributes(this,node,currentNum,cachedNum);
+#ifdef _UI_VMODELDATA_DEBUG
+            UiLog(server_).dbg() << "  currentNum=" << currentNum << " cachedNum=" << cachedNum;
+#endif
+            if(currentNum != cachedNum)
+            {
+                Q_EMIT beginAddRemoveAttributes(this,node,currentNum,cachedNum);
 
-            //We update the attribute num in the tree node
-            node->updateAttrNum(attrFilter_);
+                //We update the attribute num in the tree node
+                node->updateAttrNum(attrFilter_);
 
-            //This will trigger rerendering the attributes of the given node
-            //even if currentNum and cachedNum are the same.
-            Q_EMIT endAddRemoveAttributes(this,node,currentNum,cachedNum);
+                //This will trigger rerendering the attributes
+                Q_EMIT endAddRemoveAttributes(this,node,currentNum,cachedNum);
+            }
+            //This will trigger rerendering the attributes of the given node when
+            //currentNum and cachedNum are the same.
+            else
+            {
+                Q_EMIT attributesChanged(this,node);
+            }
         }
     }
 }
