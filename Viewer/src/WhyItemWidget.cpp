@@ -104,40 +104,40 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
     for(std::vector<std::string>::const_iterator it=rawTxt.begin(); it != rawTxt.end(); ++it)
     {
         QString line=QString::fromStdString(*it);
-        QRegExp rx("'\\S+:(\\S+)'");
-        if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-        {
-            QString path=rx.cap(1);
-            rx=QRegExp("'(\\S+):");
-            QString type,typeOri;
-            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-            {
-                typeOri=rx.cap(1);
-                type=typeOri.toLower();
-            }
-
-            QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
-            line.replace("\'" + typeOri + ":"," " + typeOri + " ");
-            line.replace(path + "'","<a href=\'" + anchor  + "\'>" + path +"</a>");
-
-        }
-        else
-        {
-            rx=QRegExp("\\s+(/\\S+)\\b");
-            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-            {
-                QString path=rx.cap(1);
-                rx=QRegExp("(SUITE|FAMILY|TASK|ALIAS)");
-                QString type;
-                if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-                {
-                    type=rx.cap(1);
-                }
-
-                QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
-                line.replace(path,"<a href=\'" + anchor  + "\'>" + path +"</a>");
-            }
-        }
+//        QRegExp rx("'\\S+:(\\S+)'");
+//        if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
+//        {
+//            QString path=rx.cap(1);
+//            rx=QRegExp("'(\\S+):");
+//            QString type,typeOri;
+//            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
+//            {
+//                typeOri=rx.cap(1);
+//                type=typeOri.toLower();
+//            }
+//
+//            QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
+//            line.replace("\'" + typeOri + ":"," " + typeOri + " ");
+//            line.replace(path + "'","<a href=\'" + anchor  + "\'>" + path +"</a>");
+//
+//        }
+//        else
+//        {
+//            rx=QRegExp("\\s+(/\\S+)\\b");
+//            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
+//            {
+//                QString path=rx.cap(1);
+//                rx=QRegExp("(SUITE|FAMILY|TASK|ALIAS)");
+//                QString type;
+//                if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
+//                {
+//                    type=rx.cap(1);
+//                }
+//
+//                QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
+//                line.replace(path,"<a href=\'" + anchor  + "\'>" + path +"</a>");
+//            }
+//        }
 
 
 

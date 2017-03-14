@@ -67,7 +67,7 @@ void trigger_node::info(std::ostream& f)
 {
   const AstTop *ast = get();
   if (ast) {
-    std::string str = ast->expression(true);
+    std::string str = ast->why_expression();
     f << str << "\n";
   }
 }

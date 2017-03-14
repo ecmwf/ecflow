@@ -94,7 +94,7 @@ bool AstTop::is_valid_ast(std::string& error_msg) const
 }
 
 //#define DEBUG_WHY 1
-bool AstTop::why(std::string& theReasonWhy) const
+bool AstTop::why(std::string& theReasonWhy,bool html) const
 {
 	if (evaluate()) {
 #ifdef DEBUG_WHY
@@ -102,17 +102,27 @@ bool AstTop::why(std::string& theReasonWhy) const
 #endif
 		return false;
 	}
-	return root_->why(theReasonWhy);
+	return root_->why(theReasonWhy,html);
 }
 
-std::string AstTop::expression(bool why) const
+std::string AstTop::expression() const
 {
-	std::string ret =  exprType_;
+	std::string ret = exprType_;
 	if (root_) {
 		ret += " ";
-		ret += root_->expression(why);
+		ret += root_->expression();
 	}
 	return ret;
+}
+
+std::string AstTop::why_expression(bool html) const
+{
+   std::string ret = exprType_;
+   if (root_) {
+      ret += " ";
+      ret += root_->why_expression(html);
+   }
+   return ret;
 }
 
 void AstTop::setParentNode(Node* p)
@@ -179,7 +189,7 @@ std::ostream& AstRoot::print( std::ostream& os ) const {
 	return os;
 }
 
-bool AstRoot::why(std::string& theReasonWhy) const
+bool AstRoot::why(std::string& theReasonWhy,bool html) const
 {
 	if (evaluate()) {
 #ifdef DEBUG_WHY
@@ -189,7 +199,7 @@ bool AstRoot::why(std::string& theReasonWhy) const
 	}
 
 	theReasonWhy = "expression ";
-	theReasonWhy += expression(true); // provide additional state
+	theReasonWhy += why_expression(html); // provide additional state
 	theReasonWhy += " does not evaluate";
 #ifdef DEBUG_WHY
  	std::cout << "    AstRoot::why  reason = " << theReasonWhy << "\n";
@@ -247,11 +257,18 @@ void AstNot::print_flat( std::ostream& os,bool add_bracket) const {
    }
 }
 
-std::string AstNot::expression(bool why) const
+std::string AstNot::expression() const
 {
  	std::string ret =  "NOT ";
- 	ret += left_->expression(why);
+ 	ret += left_->expression();
 	return ret;
+}
+
+std::string AstNot::why_expression(bool html) const
+{
+   std::string ret =  "NOT ";
+   ret += left_->why_expression(html);
+   return ret;
 }
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -295,13 +312,22 @@ void AstPlus::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstPlus::expression(bool why) const
+std::string AstPlus::expression() const
 {
  	std::string ret;
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " + ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
  	return ret;
+}
+
+std::string AstPlus::why_expression(bool html) const
+{
+   std::string ret;
+   if (left_) ret += left_->why_expression(html);
+   ret  += " + ";
+   if (right_) ret += right_->why_expression(html);
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -346,13 +372,22 @@ void AstMinus::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstMinus::expression(bool why) const
+std::string AstMinus::expression() const
 {
  	std::string ret;
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " - ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
  	return ret;
+}
+
+std::string AstMinus::why_expression(bool html) const
+{
+   std::string ret;
+   if (left_) ret += left_->why_expression(html);
+   ret  += " - ";
+   if (right_) ret += right_->why_expression(html);
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -414,13 +449,22 @@ void AstDivide::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstDivide::expression(bool why) const
+std::string AstDivide::expression() const
 {
  	std::string ret;
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " / ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
  	return ret;
+}
+
+std::string AstDivide::why_expression(bool html) const
+{
+   std::string ret;
+   if (left_) ret += left_->why_expression(html);
+   ret  += " / ";
+   if (right_) ret += right_->why_expression(html);
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -465,13 +509,22 @@ void AstMultiply::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstMultiply::expression(bool why) const
+std::string AstMultiply::expression() const
 {
  	std::string ret;
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " * ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
  	return ret;
+}
+
+std::string AstMultiply::why_expression(bool html) const
+{
+   std::string ret;
+   if (left_) ret += left_->why_expression(html);
+   ret  += " * ";
+   if (right_) ret += right_->why_expression(html);
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -534,12 +587,21 @@ void AstModulo::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstModulo::expression(bool why) const
+std::string AstModulo::expression() const
 {
    std::string ret;
-   if (left_) ret += left_->expression(why);
+   if (left_) ret += left_->expression();
    ret  += " % ";
-   if (right_) ret += right_->expression(why);
+   if (right_) ret += right_->expression();
+   return ret;
+}
+
+std::string AstModulo::why_expression(bool html) const
+{
+   std::string ret;
+   if (left_) ret += left_->why_expression(html);
+   ret  += " % ";
+   if (right_) ret += right_->why_expression(html);
    return ret;
 }
 
@@ -585,14 +647,24 @@ void AstAnd::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstAnd::expression(bool why) const
+std::string AstAnd::expression() const
 {
  	std::string ret("(");
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " AND ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
 	ret += ")";
  	return ret;
+}
+
+std::string AstAnd::why_expression(bool html) const
+{
+   std::string ret("(");
+   if (left_) ret += left_->why_expression(html);
+   ret  += " AND ";
+   if (right_) ret += right_->why_expression(html);
+   ret += ")";
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -637,14 +709,24 @@ void AstOr::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstOr::expression(bool why) const
+std::string AstOr::expression() const
 {
  	std::string ret("(");
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " OR ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
 	ret += ")";
  	return ret;
+}
+
+std::string AstOr::why_expression(bool html) const
+{
+   std::string ret("(");
+   if (left_) ret += left_->why_expression(html);
+   ret  += " OR ";
+   if (right_) ret += right_->why_expression(html);
+   ret += ")";
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -689,14 +771,24 @@ void AstEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstEqual::expression(bool why) const
+std::string AstEqual::expression() const
 {
  	std::string ret("(");
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " == ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
 	ret += ")";
  	return ret;
+}
+
+std::string AstEqual::why_expression(bool html) const
+{
+   std::string ret("(");
+   if (left_) ret += left_->why_expression(html);
+   ret  += " == ";
+   if (right_) ret += right_->why_expression(html);
+   ret += ")";
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -740,14 +832,24 @@ void AstNotEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstNotEqual::expression(bool why) const
+std::string AstNotEqual::expression() const
 {
  	std::string ret("(");
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " != ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
 	ret += ")";
  	return ret;
+}
+
+std::string AstNotEqual::why_expression(bool html) const
+{
+   std::string ret("(");
+   if (left_) ret += left_->why_expression(html);
+   ret  += " != ";
+   if (right_) ret += right_->why_expression(html);
+   ret += ")";
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -790,14 +892,25 @@ void AstLessEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (right_) right_->print_flat(os,add_bracket);
    if (add_bracket) os << ")";
 }
-std::string AstLessEqual::expression(bool why) const
+
+std::string AstLessEqual::expression() const
 {
  	std::string ret("(");
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " <= ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
 	ret += ")";
  	return ret;
+}
+
+std::string AstLessEqual::why_expression(bool html) const
+{
+   std::string ret("(");
+   if (left_) ret += left_->why_expression(html);
+   ret  += " <= ";
+   if (right_) ret += right_->why_expression(html);
+   ret += ")";
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -841,14 +954,24 @@ void AstGreaterEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstGreaterEqual::expression(bool why) const
+std::string AstGreaterEqual::expression() const
 {
  	std::string ret("(");
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " >= ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
 	ret += ")";
  	return ret;
+}
+
+std::string AstGreaterEqual::why_expression(bool html) const
+{
+   std::string ret("(");
+   if (left_) ret += left_->why_expression(html);
+   ret  += " >= ";
+   if (right_) ret += right_->why_expression(html);
+   ret += ")";
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -892,14 +1015,24 @@ void AstGreaterThan::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstGreaterThan::expression(bool why) const
+std::string AstGreaterThan::expression() const
 {
  	std::string ret("(");
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " > ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
 	ret += ")";
  	return ret;
+}
+
+std::string AstGreaterThan::why_expression(bool html) const
+{
+   std::string ret("(");
+   if (left_) ret += left_->why_expression(html);
+   ret  += " > ";
+   if (right_) ret += right_->why_expression(html);
+   ret += ")";
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -943,14 +1076,25 @@ void AstLessThan::print_flat(std::ostream& os,bool add_bracket) const {
    if (right_) right_->print_flat(os,add_bracket);
    if (add_bracket) os << ")";
 }
-std::string AstLessThan::expression(bool why) const
+
+std::string AstLessThan::expression() const
 {
  	std::string ret("(");
-	if (left_) ret += left_->expression(why);
+	if (left_) ret += left_->expression();
 	ret  += " < ";
-	if (right_) ret += right_->expression(why);
+	if (right_) ret += right_->expression();
 	ret += ")";
  	return ret;
+}
+
+std::string AstLessThan::why_expression(bool html) const
+{
+   std::string ret("(");
+   if (left_) ret += left_->why_expression(html);
+   ret  += " < ";
+   if (right_) ret += right_->why_expression(html);
+   ret += ")";
+   return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1018,12 +1162,23 @@ void AstFunction::print_flat(std::ostream& os,bool add_brackets) const {
    }
 }
 
-std::string AstFunction::expression(bool why) const
+std::string AstFunction::expression() const
 {
    std::stringstream ss;
    switch (ft_) {
-      case AstFunction::DATE_TO_JULIAN: ss << "date_to_julian( arg:" << arg_->expression(why) << ") = " << value(); break;
-      case AstFunction::JULIAN_TO_DATE: ss << "julian_to_date( arg:" << arg_->expression(why) << ") = " << value(); break;
+      case AstFunction::DATE_TO_JULIAN: ss << "date_to_julian( arg:" << arg_->expression() << ") = " << value(); break;
+      case AstFunction::JULIAN_TO_DATE: ss << "julian_to_date( arg:" << arg_->expression() << ") = " << value(); break;
+      default: assert(false);
+   }
+   return ss.str();
+}
+
+std::string AstFunction::why_expression(bool html) const
+{
+   std::stringstream ss;
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: ss << "date_to_julian( arg:" << arg_->why_expression(html) << ") = " << value(); break;
+      case AstFunction::JULIAN_TO_DATE: ss << "julian_to_date( arg:" << arg_->why_expression(html) << ") = " << value(); break;
       default: assert(false);
    }
    return ss.str();
@@ -1055,11 +1210,16 @@ void AstInteger::print_flat(std::ostream& os,bool /*add_bracket*/) const {
    os << value_;
 }
 
-std::string AstInteger::expression(bool /*why*/) const
+std::string AstInteger::expression() const
 {
 	std::stringstream ss;
 	ss << value();
 	return ss.str();
+}
+
+std::string AstInteger::why_expression(bool /*html*/) const
+{
+   return expression();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1084,9 +1244,14 @@ void AstNodeState::print_flat(std::ostream& os,bool /*add_bracket*/) const {
    os <<  DState::toString( state_ ) ;
 }
 
-std::string AstNodeState::expression(bool why) const
+std::string AstNodeState::expression() const
 {
 	return DState::toString(state_);
+}
+
+std::string AstNodeState::why_expression(bool html) const
+{
+   return DState::toString(state_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1111,10 +1276,15 @@ void AstEventState::print_flat(std::ostream& os,bool /*add_bracket*/) const {
    else        os << Event::CLEAR();
 }
 
-std::string AstEventState::expression(bool /*why*/) const
+std::string AstEventState::expression() const
 {
 	if (state_)  return Event::SET();
 	return Event::CLEAR();
+}
+
+std::string AstEventState::why_expression(bool /*html*/) const
+{
+   return expression();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1187,28 +1357,36 @@ void AstNode::print_flat(std::ostream& os,bool /*add_bracket*/) const {
    os << nodePath_;
 }
 
-std::string AstNode::expression(bool why) const
+std::string AstNode::expression() const
 {
-	if (why) {
-		Node* refNode = referencedNode(); // Only call once
-		std::string ret = nodePath_;
-		if ( refNode ) {
-			ret += "(";
-			ret += DState::toString(  refNode->dstate()  );
-			ret += ")";
-			return ret;
- 		}
-		else {
-			ret += "(?";
-			ret += DState::toString( DState::UNKNOWN  );
-			ret += ")";
- 		}
-		return ret;
-	}
 	return  nodePath_;
 }
 
+std::string AstNode::why_expression(bool html) const
+{
+   Node* refNode = referencedNode(); // Only call once
+   std::string ret;
+   if (html) {
+      if (refNode) ret = Node::path_href_attribute(refNode->absNodePath(),nodePath_);
+      else ret = Node::path_href_attribute(nodePath_);
+   }
+   else ret = nodePath_;
 
+   if ( refNode ) {
+      ret += "(";
+      if (html) ret += DState::to_html(  refNode->dstate());
+      else      ret += DState::toString( refNode->dstate());
+      ret += ")";
+      return ret;
+   }
+   else {
+      ret += "(?";
+      if (html) ret += DState::to_html(  DState::UNKNOWN);
+      else      ret += DState::toString( DState::UNKNOWN);
+      ret += ")";
+   }
+   return ret;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -1251,27 +1429,33 @@ void AstVariable::print_flat(std::ostream& os,bool /*add_bracket*/) const
    os << nodePath_ << Str::COLON() << name_;
 }
 
-std::string AstVariable::expression(bool why) const
+std::string AstVariable::expression() const
 {
-	if (why) {
-		VariableHelper varHelper(this);
-		std::string ret = nodePath_;
-		if ( !varHelper.theReferenceNode() )  ret += "(?)";
-		ret += Str::COLON();
-		ret += name_;
-		ret += "(";
-
-		std::string varType;
-		int theValue;
-		varHelper.varTypeAndValue(varType,theValue);
-
-		std::stringstream ss; ss << "<type=" << varType << "> <value=" << theValue << ">";
-		ret += ss.str();
-
-		ret += ")";
-		return ret;
-	}
 	return nodePath_ + Str::COLON() + name_;
+}
+
+std::string AstVariable::why_expression(bool html) const
+{
+   VariableHelper varHelper(this);
+   std::string ret;
+   if (html) ret = Node::path_href_attribute(nodePath_);
+   else      ret = nodePath_;
+
+   if ( !varHelper.theReferenceNode() )  ret += "(?)";
+   ret += Str::COLON();
+   ret += name_;
+   ret += "(";
+
+   std::string varType;
+   int theValue;
+   varHelper.varTypeAndValue(varType,theValue);
+
+   std::stringstream ss; ss << "type:" << varType << " value:" << theValue;
+   ret += ss.str();
+
+   ret += ")";
+
+   return ret;
 }
 
 Node* AstVariable::referencedNode() const

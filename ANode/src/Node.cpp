@@ -1718,12 +1718,12 @@ bool Node::operator==(const Node& rhs) const
 
 //#define DEBUG_WHY 1
 
-void Node::top_down_why(std::vector<std::string>& theReasonWhy) const
+void Node::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   why(theReasonWhy);
+   why(theReasonWhy,html_tags);
 }
 
-void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
+void Node::bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
    defs()->why(theReasonWhy);
 
@@ -1736,24 +1736,32 @@ void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
    }
    vector<Node*>::reverse_iterator r_end = vec.rend();
    for(vector<Node*>::reverse_iterator r = vec.rbegin(); r!=r_end; ++r) {
-      (*r)->why(theReasonWhy);
+      (*r)->why(theReasonWhy,html_tags);
    }
 }
 
-void Node::why(std::vector<std::string>& vec) const
+void Node::why(std::vector<std::string>& vec,bool html) const
 {
 #ifdef DEBUG_WHY
    std::cout << "Node::why " << debugNodePath() << " (" << NState::toString(state()) << ")\n";
 #endif
    if (isSuspended()) {
-      std::string theReasonWhy = "The node '";
-      theReasonWhy += debugNodePath();
-      theReasonWhy += "' is suspended.";
+      std::string theReasonWhy = "The node ";
+      if (html) {
+         theReasonWhy += path_href();
+         theReasonWhy += " is ";
+         theReasonWhy += DState::to_html(DState::SUSPENDED);
+      }
+      else {
+         theReasonWhy += debugNodePath();
+         theReasonWhy += " is suspended";
+      }
       vec.push_back(theReasonWhy);
    }
    else if (state() != NState::QUEUED && state() != NState::ABORTED) {
       std::stringstream ss;
-      ss << "The node '" << debugNodePath() << "' (" << NState::toString(state()) << ") is not queued or aborted.";
+      if (html) ss << "The node " << path_href()     << " (" << NState::to_html(state()) << ") is not queued or aborted";
+      else      ss << "The node " << debugNodePath() << " (" << NState::toString(state()) << ") is not queued or aborted";
       vec.push_back(ss.str());
 
       // When task is active/submitted no point, going any further.
@@ -1762,14 +1770,16 @@ void Node::why(std::vector<std::string>& vec) const
    }
 
    // Check  limits using in limit manager
-   inLimitMgr_.why(vec);
+   inLimitMgr_.why(vec,html);
 
    // Prefix <node-type> <path> <state>
    std::string prefix = debugType();
    prefix += " ";
-   prefix += absNodePath();
+   if (html) prefix += path_href_attribute(absNodePath());
+   else      prefix += absNodePath();
    prefix += " (";
-   prefix += NState::toString(state());
+   if (html) prefix += NState::to_html(state());
+   else      prefix += NState::toString(state());
    prefix += ") ";
 
    if (time_dep_attrs_) {
@@ -1796,7 +1806,7 @@ void Node::why(std::vector<std::string>& vec) const
          std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
          std::string postFix;
-         if (theTriggerAst->why(postFix)) { vec.push_back(prefix + postFix); }
+         if (theTriggerAst->why(postFix,html)) { vec.push_back(prefix + postFix); }
       }
    }
 }
@@ -1852,6 +1862,34 @@ std::string Node::debugNodePath() const
    std::string ret = debugType();
    ret += Str::COLON();
    ret += absNodePath();
+   return ret;
+}
+
+std::string Node::path_href_attribute(const std::string& path)
+{
+   std::string ret = "<a href=\"";
+   ret += path;
+   ret += "\">";
+   ret += path;
+   ret += "</a>";
+   return ret;
+}
+
+std::string Node::path_href_attribute(const std::string& path,const std::string& path2)
+{
+   std::string ret = "<a href=\"";
+   ret += path;
+   ret += "\">";
+   ret += path2;
+   ret += "</a>";
+   return ret;
+}
+
+std::string Node::path_href() const
+{
+   std::string ret = debugType();
+   ret += " ";
+   ret += path_href_attribute(absNodePath());
    return ret;
 }
 
