@@ -1442,21 +1442,29 @@ std::string AstVariable::why_expression(bool html) const
    std::string varType;
    int theValue=0;
    varHelper.varTypeAndValue(varType,theValue);
+   Node* ref_node = varHelper.theReferenceNode();
 
    if (html) {
       // ecflow_ui expects: [attribute_type]attribute_path:attribute_name
       // i.e                [limit]/suite/family/task:my_limit
-      std::stringstream ss;
-      ss << "[" << varType << "]" << nodePath_ << ":" << name_;
-      ret = Node::path_href_attribute(ss.str());
-      if ( !varHelper.theReferenceNode() )  ret += "(?)";
+      std::stringstream display_ss; display_ss << "[" << varType << "]" << nodePath_ << ":" << name_;
+      std::string display_str = display_ss.str();
+      std::string ref_str;
+      if (ref_node) {
+         std::stringstream ref_ss; ref_ss << "[" << varType << "]" << ref_node->absNodePath() << ":" << name_;
+         ref_str = ref_ss.str();
+      }
+      else ref_str = display_str;
+
+      ret = Node::path_href_attribute(ref_str,display_str);
+      if ( !ref_node )  ret += "(?)";
       ret += "(value:";
       ret += boost::lexical_cast<std::string>(theValue);
       ret += ")";
    }
    else {
       ret = nodePath_;
-      if ( !varHelper.theReferenceNode() )  ret += "(?)";
+      if ( !ref_node )  ret += "(?)";
       ret += Str::COLON();
       ret += name_;
       ret += "(";
