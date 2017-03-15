@@ -266,6 +266,8 @@ std::string AstNot::expression() const
 
 std::string AstNot::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret =  "NOT ";
    ret += left_->why_expression(html);
    return ret;
@@ -659,6 +661,8 @@ std::string AstAnd::expression() const
 
 std::string AstAnd::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
    ret  += " AND ";
@@ -721,6 +725,8 @@ std::string AstOr::expression() const
 
 std::string AstOr::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
    ret  += " OR ";
@@ -783,6 +789,8 @@ std::string AstEqual::expression() const
 
 std::string AstEqual::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
    ret  += " == ";
@@ -844,6 +852,8 @@ std::string AstNotEqual::expression() const
 
 std::string AstNotEqual::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
    ret  += " != ";
@@ -905,6 +915,8 @@ std::string AstLessEqual::expression() const
 
 std::string AstLessEqual::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
    ret  += " <= ";
@@ -966,6 +978,8 @@ std::string AstGreaterEqual::expression() const
 
 std::string AstGreaterEqual::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
    ret  += " >= ";
@@ -1027,6 +1041,8 @@ std::string AstGreaterThan::expression() const
 
 std::string AstGreaterThan::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
    ret  += " > ";
@@ -1089,6 +1105,8 @@ std::string AstLessThan::expression() const
 
 std::string AstLessThan::why_expression(bool html) const
 {
+   if (evaluate()) return "true";
+
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
    ret  += " < ";
