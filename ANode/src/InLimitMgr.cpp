@@ -275,7 +275,7 @@ static void add_consumed_paths(Limit* limit, std::stringstream& ss)
    ss << ")";
 }
 
-bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const
+bool InLimitMgr::why(std::vector<std::string>& vec, bool top_down, bool html) const
 {
 #ifdef DEBUG_WHY
 	std::cout << "InLimitMgr::why " << node_->debugNodePath() << "\n";
@@ -287,6 +287,10 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const
 #ifdef DEBUG_WHY
  		std::cout << "   Node   " << node_->debugNodePath() << " is *in limit*, checking parent\n";
 #endif
+
+ 		// When traversing top down, no need to look up the hierarchy
+ 		if (top_down) return why_found;
+
  		Node* theParent = node_->parent();
  		while( theParent ) {
 
@@ -303,8 +307,12 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const
  						if ( theParent->inlimits()[i].pathToNode().empty())
  							ss << "limit " << limit->name() << " is full";
  						else {
- 						   if (html) ss << "limit " << Node::path_href_attribute(theParent->inlimits()[i].pathToNode()) << Str::COLON() << limit->name() << " is full";
- 						   else      ss << "limit " << theParent->inlimits()[i].pathToNode()                            << Str::COLON() << limit->name() << " is full";
+ 						   if (html) {
+ 						      std::stringstream s;
+ 						      s << "[limit]" << theParent->inlimits()[i].pathToNode() << Str::COLON() << limit->name();
+ 						      ss << Node::path_href_attribute(s.str()) << " is full";
+ 						   }
+ 						   else ss << "limit " << theParent->inlimits()[i].pathToNode() << Str::COLON() << limit->name() << " is full";
  						}
 
  						// show node paths that have consumed a limit, Only show first 5, Otherwise string may be too long
@@ -326,13 +334,17 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const
 	 		Limit* limit = inLimitVec_[i].limit();
 			if (limit &&  !limit->inLimit(inLimitVec_[i].tokens())) {
 				std::stringstream ss;
-				if (  inLimitVec_[i].pathToNode().empty())
+				if (  inLimitVec_[i].pathToNode().empty()) {
 					ss << "limit " << limit->name() << " is full";
-
-            else {
-               if (html) ss << "limit " <<  Node::path_href_attribute(inLimitVec_[i].pathToNode()) << Str::COLON() << limit->name() << " is full";
-               else      ss << "limit " <<  inLimitVec_[i].pathToNode()                            << Str::COLON() << limit->name() << " is full";
-            }
+				}
+				else {
+				   if (html) {
+				      std::stringstream s;
+				      s << "[limit]" << inLimitVec_[i].pathToNode() << Str::COLON() << limit->name();
+				      ss << Node::path_href_attribute(s.str()) << " is full";
+				   }
+				   else ss << "limit " <<  inLimitVec_[i].pathToNode() << Str::COLON() << limit->name() << " is full";
+				}
 
             // show node paths that have consumed a limit, Only show first 5, Otherwise string may be too long
             add_consumed_paths(limit,ss);
