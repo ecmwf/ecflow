@@ -1769,6 +1769,7 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
       // When task is active/submitted no point, going any further.
       // However for FAMILY/SUITE we still need to proceed
       if (isTask()) return why_found;
+      why_found = true ; // return true if why found
    }
 
    // Check limits using in limit manager

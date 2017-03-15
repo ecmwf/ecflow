@@ -268,7 +268,7 @@ std::string AstNot::why_expression(bool html) const
 {
    if (evaluate()) return "true";
 
-   std::string ret =  "NOT ";
+   std::string ret =  "not ";
    ret += left_->why_expression(html);
    return ret;
 }
@@ -665,7 +665,7 @@ std::string AstAnd::why_expression(bool html) const
 
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
-   ret  += " AND ";
+   ret  += " and ";
    if (right_) ret += right_->why_expression(html);
    ret += ")";
    return ret;
@@ -729,7 +729,7 @@ std::string AstOr::why_expression(bool html) const
 
    std::string ret("(");
    if (left_) ret += left_->why_expression(html);
-   ret  += " OR ";
+   ret  += " or ";
    if (right_) ret += right_->why_expression(html);
    ret += ")";
    return ret;
