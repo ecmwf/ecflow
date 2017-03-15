@@ -556,20 +556,21 @@ bool TimeDepAttrs::operator==(const TimeDepAttrs& rhs) const
 
 
 //#define DEBUG_WHY 1
-void TimeDepAttrs::why(std::vector<std::string>& vec,const std::string& prefix) const
+bool TimeDepAttrs::why(std::vector<std::string>& vec,const std::string& prefix) const
 {
 #ifdef DEBUG_WHY
    std::cout << "   TimeDepAttrs::why " << node_->debugNodePath() << " checking time dependencies\n";
 #endif
    // postfix  = <attr-type dependent> <next run time > < optional current state>
+   bool why_found = false;
    std::string postFix;
    const Calendar& c = node_->suite()->calendar();
-   for(size_t i = 0; i < days_.size(); i++)    { postFix.clear(); if (days_[i].why(c,postFix))   { vec.push_back(prefix + postFix); }}
-   for(size_t i = 0; i < dates_.size(); i++)   { postFix.clear(); if (dates_[i].why(c,postFix))  { vec.push_back(prefix + postFix); }}
-   for(size_t i = 0; i < todayVec_.size(); i++){ postFix.clear(); if (todayVec_[i].why(c,postFix)){ vec.push_back(prefix + postFix); }}
-   for(size_t i = 0; i < timeVec_.size(); i++) { postFix.clear(); if (timeVec_[i].why(c,postFix)) { vec.push_back(prefix + postFix); }}
-   for(size_t i = 0; i < crons_.size(); i++)   { postFix.clear(); if (crons_[i].why(c,postFix))  { vec.push_back(prefix + postFix); }}
-
+   for(size_t i = 0; i < days_.size(); i++)    { postFix.clear(); if (days_[i].why(c,postFix))    { vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < dates_.size(); i++)   { postFix.clear(); if (dates_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < todayVec_.size(); i++){ postFix.clear(); if (todayVec_[i].why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < timeVec_.size(); i++) { postFix.clear(); if (timeVec_[i].why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < crons_.size(); i++)   { postFix.clear(); if (crons_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+   return why_found;
 }
 
 bool TimeDepAttrs::checkInvariants(std::string& errorMsg) const
