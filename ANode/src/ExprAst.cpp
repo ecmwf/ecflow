@@ -207,6 +207,49 @@ bool AstRoot::why(std::string& theReasonWhy,bool html) const
 	return true;
 }
 
+std::string AstRoot::do_why_expression(const std::string& root,bool html) const
+{
+   std::string ret;
+   if (left_) ret += left_->why_expression(html);
+   ret  += root;
+   if (right_) ret += right_->why_expression(html);
+   return ret;
+}
+
+std::string AstRoot::do_bracket_why_expression(const std::string& root,bool html) const
+{
+   std::string ret = "(";
+   ret += do_why_expression(root,html);
+   ret += ")";
+   return ret;
+}
+
+std::string AstRoot::do_false_bracket_why_expression(const std::string& root,bool html) const
+{
+   std::string ret;
+   if (html) ret += "<false>";  // still need guard with html for ecflowview
+   ret += do_bracket_why_expression(root,html);
+   if (html) ret += "</false>";
+   return ret;
+}
+
+std::string AstRoot::do_expression(const std::string& root ) const
+{
+   std::string ret;
+   if (left_) ret += left_->expression();
+   ret  += root;
+   if (right_) ret += right_->expression();
+   return ret;
+}
+
+std::string AstRoot::do_bracket_expression(const std::string& root ) const
+{
+   std::string ret = "(";
+   ret += do_expression(root);
+   ret += ")";
+   return ret;
+}
+
 void AstRoot::setParentNode(Node* p)
 {
 	if (left_) left_->setParentNode(p);
@@ -268,8 +311,11 @@ std::string AstNot::why_expression(bool html) const
 {
    if (evaluate()) return "true";
 
-   std::string ret =  "not ";
+   std::string ret;
+   if (html) ret += "<false>";
+   ret += "not ";
    ret += left_->why_expression(html);
+   if (html) ret += "</false>";
    return ret;
 }
 ////////////////////////////////////////////////////////////////////////////////////
@@ -316,20 +362,12 @@ void AstPlus::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstPlus::expression() const
 {
- 	std::string ret;
-	if (left_) ret += left_->expression();
-	ret  += " + ";
-	if (right_) ret += right_->expression();
- 	return ret;
+   return do_expression(" + ");
 }
 
 std::string AstPlus::why_expression(bool html) const
 {
-   std::string ret;
-   if (left_) ret += left_->why_expression(html);
-   ret  += " + ";
-   if (right_) ret += right_->why_expression(html);
-   return ret;
+   return do_why_expression(" + ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -376,20 +414,12 @@ void AstMinus::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstMinus::expression() const
 {
- 	std::string ret;
-	if (left_) ret += left_->expression();
-	ret  += " - ";
-	if (right_) ret += right_->expression();
- 	return ret;
+   return do_expression(" - ");
 }
 
 std::string AstMinus::why_expression(bool html) const
 {
-   std::string ret;
-   if (left_) ret += left_->why_expression(html);
-   ret  += " - ";
-   if (right_) ret += right_->why_expression(html);
-   return ret;
+   return do_why_expression(" - ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -453,20 +483,12 @@ void AstDivide::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstDivide::expression() const
 {
- 	std::string ret;
-	if (left_) ret += left_->expression();
-	ret  += " / ";
-	if (right_) ret += right_->expression();
- 	return ret;
+   return do_expression(" / ");
 }
 
 std::string AstDivide::why_expression(bool html) const
 {
-   std::string ret;
-   if (left_) ret += left_->why_expression(html);
-   ret  += " / ";
-   if (right_) ret += right_->why_expression(html);
-   return ret;
+   return do_why_expression(" / ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -513,20 +535,12 @@ void AstMultiply::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstMultiply::expression() const
 {
- 	std::string ret;
-	if (left_) ret += left_->expression();
-	ret  += " * ";
-	if (right_) ret += right_->expression();
- 	return ret;
+   return do_expression(" * ");
 }
 
 std::string AstMultiply::why_expression(bool html) const
 {
-   std::string ret;
-   if (left_) ret += left_->why_expression(html);
-   ret  += " * ";
-   if (right_) ret += right_->why_expression(html);
-   return ret;
+   return do_why_expression(" * ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -591,20 +605,12 @@ void AstModulo::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstModulo::expression() const
 {
-   std::string ret;
-   if (left_) ret += left_->expression();
-   ret  += " % ";
-   if (right_) ret += right_->expression();
-   return ret;
+   return do_expression(" % ");
 }
 
 std::string AstModulo::why_expression(bool html) const
 {
-   std::string ret;
-   if (left_) ret += left_->why_expression(html);
-   ret  += " % ";
-   if (right_) ret += right_->why_expression(html);
-   return ret;
+   return do_why_expression(" % ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -651,24 +657,13 @@ void AstAnd::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstAnd::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression();
-	ret  += " AND ";
-	if (right_) ret += right_->expression();
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" AND ");
 }
 
 std::string AstAnd::why_expression(bool html) const
 {
    if (evaluate()) return "true";
-
-   std::string ret("(");
-   if (left_) ret += left_->why_expression(html);
-   ret  += " and ";
-   if (right_) ret += right_->why_expression(html);
-   ret += ")";
-   return ret;
+   return do_false_bracket_why_expression(" and ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -715,24 +710,13 @@ void AstOr::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstOr::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression();
-	ret  += " OR ";
-	if (right_) ret += right_->expression();
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" OR ");
 }
 
 std::string AstOr::why_expression(bool html) const
 {
    if (evaluate()) return "true";
-
-   std::string ret("(");
-   if (left_) ret += left_->why_expression(html);
-   ret  += " or ";
-   if (right_) ret += right_->why_expression(html);
-   ret += ")";
-   return ret;
+   return do_false_bracket_why_expression(" or ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -779,24 +763,13 @@ void AstEqual::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstEqual::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression();
-	ret  += " == ";
-	if (right_) ret += right_->expression();
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" == ");
 }
 
 std::string AstEqual::why_expression(bool html) const
 {
    if (evaluate()) return "true";
-
-   std::string ret("(");
-   if (left_) ret += left_->why_expression(html);
-   ret  += " == ";
-   if (right_) ret += right_->why_expression(html);
-   ret += ")";
-   return ret;
+   return do_false_bracket_why_expression(" == ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -842,24 +815,13 @@ void AstNotEqual::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstNotEqual::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression();
-	ret  += " != ";
-	if (right_) ret += right_->expression();
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" != ");
 }
 
 std::string AstNotEqual::why_expression(bool html) const
 {
    if (evaluate()) return "true";
-
-   std::string ret("(");
-   if (left_) ret += left_->why_expression(html);
-   ret  += " != ";
-   if (right_) ret += right_->why_expression(html);
-   ret += ")";
-   return ret;
+   return do_false_bracket_why_expression(" != ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -905,24 +867,13 @@ void AstLessEqual::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstLessEqual::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression();
-	ret  += " <= ";
-	if (right_) ret += right_->expression();
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" <= ");
 }
 
 std::string AstLessEqual::why_expression(bool html) const
 {
    if (evaluate()) return "true";
-
-   std::string ret("(");
-   if (left_) ret += left_->why_expression(html);
-   ret  += " <= ";
-   if (right_) ret += right_->why_expression(html);
-   ret += ")";
-   return ret;
+   return do_false_bracket_why_expression(" <= ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -968,24 +919,13 @@ void AstGreaterEqual::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstGreaterEqual::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression();
-	ret  += " >= ";
-	if (right_) ret += right_->expression();
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" >= ");
 }
 
 std::string AstGreaterEqual::why_expression(bool html) const
 {
    if (evaluate()) return "true";
-
-   std::string ret("(");
-   if (left_) ret += left_->why_expression(html);
-   ret  += " >= ";
-   if (right_) ret += right_->why_expression(html);
-   ret += ")";
-   return ret;
+   return do_false_bracket_why_expression(" >= ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1031,24 +971,13 @@ void AstGreaterThan::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstGreaterThan::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression();
-	ret  += " > ";
-	if (right_) ret += right_->expression();
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" > ");
 }
 
 std::string AstGreaterThan::why_expression(bool html) const
 {
    if (evaluate()) return "true";
-
-   std::string ret("(");
-   if (left_) ret += left_->why_expression(html);
-   ret  += " > ";
-   if (right_) ret += right_->why_expression(html);
-   ret += ")";
-   return ret;
+   return do_false_bracket_why_expression(" > ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1095,24 +1024,14 @@ void AstLessThan::print_flat(std::ostream& os,bool add_bracket) const {
 
 std::string AstLessThan::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression();
-	ret  += " < ";
-	if (right_) ret += right_->expression();
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" < ");
 }
 
 std::string AstLessThan::why_expression(bool html) const
 {
    if (evaluate()) return "true";
-
-   std::string ret("(");
-   if (left_) ret += left_->why_expression(html);
-   ret  += " < ";
-   if (right_) ret += right_->why_expression(html);
-   ret += ")";
-   return ret;
+   // Using ' < ' seems to mess up html
+   return do_false_bracket_why_expression(" lt ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

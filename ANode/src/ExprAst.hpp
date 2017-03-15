@@ -120,6 +120,14 @@ public:
 
 	virtual void set_root_name(const std::string&) {}
 protected:
+   std::string do_why_expression(const std::string& root,bool html) const;
+   std::string do_bracket_why_expression(const std::string& root,bool html) const;
+   std::string do_false_bracket_why_expression(const std::string& root,bool html) const;
+
+   std::string do_expression(const std::string& root ) const;
+   std::string do_bracket_expression(const std::string& root ) const;
+
+protected:
 	Ast* left_;
 	Ast* right_;
 };
