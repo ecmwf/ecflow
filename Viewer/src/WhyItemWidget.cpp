@@ -52,7 +52,9 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
     std::vector<VParam*> states=VNState::filterItems();
     for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
     {
-       cssDoc+="font." + (*it)->name() + " {background-color: " + (*it)->colour().name() + ";}";
+       //cssDoc+="font." + (*it)->name() + " {background-color: " + (*it)->colour().name() + ";}";
+       cssDoc+="font." + (*it)->name() + " {border-color: " + (*it)->colour().name() + ";}";
+
     }
 
     textEdit_->document()->setDefaultStyleSheet(cssDoc);
