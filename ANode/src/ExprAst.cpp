@@ -1458,7 +1458,7 @@ std::string AstVariable::why_expression(bool html) const
 
       ret = Node::path_href_attribute(ref_str,display_str);
       if ( !ref_node )  ret += "(?)";
-      ret += "(value:";
+      ret += "(";
       ret += boost::lexical_cast<std::string>(theValue);
       ret += ")";
    }

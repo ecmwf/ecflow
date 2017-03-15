@@ -193,7 +193,7 @@ void NodeContainer::status()
 
 bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   bool why_found = Node::why(theReasonWhy,html_tags);
+   bool why_found = Node::why(theReasonWhy,true/*top down*/,html_tags);
    if (!why_found) {
       size_t node_vec_size = nodeVec_.size();
       for(size_t t = 0; t < node_vec_size; t++)   {

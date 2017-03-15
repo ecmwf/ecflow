@@ -1775,7 +1775,7 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
    prefix += " ";
    if (html) prefix += path_href_attribute(absNodePath());
    else      prefix += absNodePath();
-   prefix += " (";
+   prefix += "(";
    if (html) prefix += NState::to_html(state());
    else      prefix += NState::toString(state());
    prefix += ") ";
