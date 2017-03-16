@@ -44,6 +44,8 @@ private:
     QString why() const;
     QString makeHtml(const std::vector<std::string>&,const std::vector<std::string>&) const;
     QString makeHtml(const std::vector<std::string>&) const;
+
+    QMap<QString,QString> stateMap_;
 };
 
 #endif

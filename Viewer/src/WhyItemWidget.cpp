@@ -38,7 +38,7 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
     textEdit_->setProperty("trigger","1");
     textEdit_->setFontProperty(VConfig::instance()->find("panel.why.font"));
 
-    //Set css for the text formatting
+    //Read css for the text formatting
     QString cssDoc;
     QFile f(":/viewer/trigger.css");
     //QTextStream in(&f);
@@ -48,26 +48,34 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
     }
     f.close();
 
-    QMap<QString,QString> stateMap;
+    //Add css for state names
     std::vector<VParam*> states=VNState::filterItems();
     for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
-    {
-       //cssDoc+="font." + (*it)->name() + " {background-color: " + (*it)->colour().name() + ";}";
-       cssDoc+="font." + (*it)->name() + " {border-color: " + (*it)->colour().name() + ";}";
+    {     
+       cssDoc+="font." + (*it)->name() +
+               " {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " +
+               (*it)->colour().lighter(120).name() + ", stop: 1 " +  (*it)->colour().name() +
+               "); color: " +  (*it)->typeColour().name() + ";}";
 
     }
 
-    textEdit_->document()->setDefaultStyleSheet(cssDoc);
+    //Add css for false statements
+    QColor falseCol(218,219,219);
+    cssDoc+="font.false {background-color: " + falseCol.name() + ";}";
 
-
-#if 0
-    //Set css for the text formatting
-    QString cssDoc="a:link { text-decoration:none; color: #0645AD;}";
     textEdit_->document()->setDefaultStyleSheet(cssDoc);
-#endif
 
     connect(textEdit_,SIGNAL(anchorClicked(QUrl)),
             this,SLOT(anchorClicked(QUrl)));
+
+    //Define the mapping for <state>stateName</state> tag replacement with
+    //<font class='stateName'>stateName</font>
+    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    {
+       stateMap_["<state>" + (*it)->name() + "</state>"]="<font class=\'"+ (*it)->name() + "\'>" + (*it)->name() + "</font>";
+    }
+
+
 }
 
 WhyItemWidget::~WhyItemWidget()
@@ -156,76 +164,25 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& bottomUpTxt,
 }
 
 QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
-{
-    QMap<QString,QString> stateMap;
-    std::vector<VParam*> states=VNState::filterItems();
-    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
-    {
-       stateMap["<state>" + (*it)->name() + "</state>"]="<font class=\'"+ (*it)->name() + "\'>" + (*it)->name() + "</font>";
-    }
-
+{ 
     QString s;
     for(std::vector<std::string>::const_iterator it=rawTxt.begin(); it != rawTxt.end(); ++it)
     {
         QString line=QString::fromStdString(*it);
 
-        UiLog().dbg() << line;
+        //UiLog().dbg() << line;
 
-        QMap<QString,QString>::const_iterator stIt = stateMap.constBegin();
-        while (stIt != stateMap.constEnd())
+        QMap<QString,QString>::const_iterator stIt = stateMap_.constBegin();
+        while (stIt != stateMap_.constEnd())
         {
             line.replace(stIt.key(),stIt.value());
             ++stIt;
         }
 
+        line.replace("<false>","<font class=\'false\'>");
+        line.replace("</false>","</font>");
 
-#if 0
-        QRegExp rxExpr("expression (.+) does not evaluate");
-        if(rxExpr.indexIn(line) > -1 && rxExpr.captureCount() == 1)
-        {
-            QString ori=rxExpr.cap(1);
-            line.replace(ori,"<font color=\'" + exprCol.name() + "\'>" + ori + "</font>");
-        }
-#endif
-
-#if 0
-        QRegExp rx("'\\S+:(\\S+)'");
-        if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-        {
-            QString path=rx.cap(1);
-            rx=QRegExp("'(\\S+):");
-            QString type,typeOri;
-            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-            {
-                typeOri=rx.cap(1);
-                type=typeOri.toLower();
-            }
-
-            QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
-            line.replace("\'" + typeOri + ":"," " + typeOri + " ");
-            line.replace(path + "'","<a href=\'" + anchor  + "\'>" + path +"</a>");
-
-        }
-        else
-        {
-            rx=QRegExp("\\s+(/\\S+)\\b");
-            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-            {
-                QString path=rx.cap(1);
-                rx=QRegExp("(SUITE|FAMILY|TASK|ALIAS)");
-                QString type;
-                if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-                {
-                    type=rx.cap(1);
-                }
-
-                QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
-                line.replace(path,"<a href=\'" + anchor  + "\'>" + path +"</a>");
-            }
-        }
-#endif
-
-        UiLog().dbg() << " -->" << line;
+        //UiLog().dbg() << " -->" << line;
         s+="<tr><td width=\'100%\'>" + line + "</td></tr>";
     }
     return s;
