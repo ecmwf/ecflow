@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QModelIndex>
 #include <QRegion>
+#include <QRect>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
@@ -137,6 +138,15 @@ std::ostream&  operator <<(std::ostream &stream,const QStringList &lst)
 }
 
 std::ostream&  operator <<(std::ostream &stream,const QRegion &r)
+{
+    QString s;
+    QDebug ts(&s);
+    ts << r;
+    stream << s.toStdString();
+    return stream;
+}
+
+std::ostream&  operator <<(std::ostream &stream,const QRect &r)
 {
     QString s;
     QDebug ts(&s);

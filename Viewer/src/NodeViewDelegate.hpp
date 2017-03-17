@@ -23,6 +23,28 @@
 
 class PropertyMapper;
 
+struct NodeDelegateBox
+{
+    NodeDelegateBox() : height(10) {}
+    void adjust(int fontHeight) {
+        height=fontHeight+topPadding+bottomPadding;
+        fullHeight=height+topMargin+bottomMargin;
+        sizeHintCache=QSize(100,fullHeight);
+    }
+
+    int height;
+    int fullHeight;
+    int topMargin;
+    int bottomMargin;
+    int leftMargin;
+    int rightMargin;
+    int topPadding;
+    int bottomPadding;
+    int leftPadding;
+    int rightPadding;
+    QSize sizeHintCache;
+};
+
 class NodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
 {
 public:
@@ -44,20 +66,20 @@ protected:
 	virtual void renderStatus(QPainter *painter,const QModelIndex& index,
                               const QStyleOptionViewItem& option) const;
 
-    typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    typedef int (NodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
 
-    virtual void renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
-    virtual void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
+    virtual int renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
 
 	QPen hoverPen_;
 	QBrush hoverBrush_;
@@ -80,6 +102,9 @@ protected:
     int iconSize_;
 	int iconGap_;
 
+    NodeDelegateBox nodeBox_;
+    NodeDelegateBox attrBox_;
+
 	bool useStateGrad_;
 	mutable QLinearGradient grad_;
 	static int lighter_;
@@ -99,7 +124,6 @@ protected:
     QBrush  completeBgBrush_;
     QPen    completeBorderPen_;
     QPen    completeFontPen_;
-
 };
 
 #endif

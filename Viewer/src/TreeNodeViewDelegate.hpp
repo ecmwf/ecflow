@@ -27,6 +27,31 @@ class NodeShape;
 class NodeText;
 class ServerUpdateData;
 
+struct NodeShape
+{
+    QColor col_;
+    QPolygon shape_;
+};
+
+struct NodeText
+{
+    QColor fgCol_;
+    QColor bgCol_;
+    QRect br_;
+    QString text_;
+};
+
+struct ServerUpdateData
+{
+    QRect br_;
+    int prevTime_;
+    int nextTime_;
+    QString prevText_;
+    QString nextText_;
+    float prog_;
+};
+
+
 class TreeNodeViewDelegate : public NodeViewDelegate
 {
 Q_OBJECT
@@ -38,11 +63,8 @@ public:
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;
-    void sizeHint(const QModelIndex& index,int& w,int& h) const;
-
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;   
     void setIndentation(int o) {indentation_=o;}
-
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();
@@ -50,10 +72,10 @@ Q_SIGNALS:
 protected:
     void updateSettings();
 
-	void renderServer(QPainter *painter,const QModelIndex& index,
+    int renderServer(QPainter *painter,const QModelIndex& index,
                         const QStyleOptionViewItem& option,QString text) const;
 
-	void renderNode(QPainter *painter,const QModelIndex& index,
+    int renderNode(QPainter *painter,const QModelIndex& index,
                     const QStyleOptionViewItem& option,QString text) const;
 
     void renderServerCell(QPainter *painter,const NodeShape& stateShape,
@@ -66,9 +88,6 @@ protected:
     void renderTimer(QPainter *painter,QRect target, int remaining, int total) const;
     void renderServerUpdate(QPainter* painter,const ServerUpdateData&) const;
 
-    void widthHintServer(const QModelIndex& index,int& itemWidth,QString text) const;
-    void widthHintNode(const QModelIndex& index,int& itemWidth,QString text) const;
-
     QString formatTime(int timeInSec) const;
     QColor interpolate(QColor c1,QColor c2,float r) const;
 
@@ -80,6 +99,17 @@ protected:
 	bool drawChildCount_;
     NodeStyle nodeStyle_;
     int indentation_;
+
+    /*int nodeHeight_;
+    int nodeTopMargin_;
+    int nodeBottomMargin_;
+    int nodeLeftMargin_;
+    int nodeRightMargin_;
+    int nodeTopPadding_;
+    int nodeBottomPadding_;
+    int nodeLeftPadding_;
+    int nodeRightPadding_;*/
+
     bool drawNodeType_;
     QColor typeBgCol_;
 

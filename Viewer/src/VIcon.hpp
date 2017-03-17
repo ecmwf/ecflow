@@ -33,6 +33,7 @@ public:
 
 	static std::vector<VParam*> filterItems();
 	static QVariantList pixmapList(VNode *vnode,VParamSet *filter);
+    static int pixmapNum(VNode *vnode,VParamSet *filter);
 	static QString toolTip(VNode *vnode,VParamSet *filter);
 	static VIcon* find(const std::string& name);
     static void names(std::vector<std::string>&);

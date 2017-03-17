@@ -87,6 +87,8 @@ public Q_SLOTS:
 	void slotBeginServerClear(VModelServer* server,int);
 	void slotEndServerClear(VModelServer* server,int);
 
+    int iconNum(VNode*) const;
+
 Q_SIGNALS:
     void clearBegun(const VTreeNode*);
     void scanEnded(const VTreeNode*);
@@ -116,7 +118,6 @@ private:
 	QVariant serverData(const QModelIndex& index,int role) const;
     QVariant nodeData(const QModelIndex& index,int role,VTreeNode*) const;
     QVariant attributesData(const QModelIndex& index,int role,VTreeNode*) const;
-
 
 	//Attribute filter
 	VTreeModelData* data_;

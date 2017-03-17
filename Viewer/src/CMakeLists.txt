@@ -21,6 +21,7 @@ set(viewer_srcs
     CommandDesignerWidget.cpp
     CompactView.cpp
     CompactNodeView.cpp
+    CompactNodeViewDelegate.cpp
     ConfigListDelegate.cpp
     ConnectState.cpp
     CustomCommandDialog.cpp

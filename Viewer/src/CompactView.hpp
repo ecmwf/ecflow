@@ -21,7 +21,7 @@
 
 class TreeNodeModel;
 class GraphNodeViewItem;
-class TreeNodeViewDelegate;
+class CompactNodeViewDelegate;
 class QStyledItemDelegate;
 
 //Struct representing visible items in the view. When an item is collapsed
@@ -99,7 +99,7 @@ protected:
     int itemCountInRow(int start) const;
     void rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const;
     int rowHeight(int start,int forward,int &itemsInRow) const;
-    int coordinateForItem(int item) const;
+    void coordinateForItem(int item,int& itemY,int& itemRowHeight) const;
     int itemAtCoordinate(const QPoint& coordinate) const;
     int itemAtRowCoordinate(int start,int count,int xPos) const;
 
@@ -118,6 +118,7 @@ protected:
     int  firstVisibleItem(int &offset) const;
     void updateRowCount();
     void updateScrollBars();
+    void shiftItems(int start);
 
     enum ScrollMode {
           ScrollPerItem,
@@ -125,7 +126,7 @@ protected:
       };
 
     TreeNodeModel* model_;
-    TreeNodeViewDelegate* delegate_;
+    CompactNodeViewDelegate* delegate_;
 
 private:
     void expand(int item);
@@ -144,6 +145,9 @@ private:
     int rowCount_;
     mutable int lastViewedItem_;
     QModelIndex root_;
+    int topMargin_;
+    int leftMargin_;
+    int itemGap_;
     int expandButtonSize_;
     enum ExpandButtonMode {Classic,Modern};
     ExpandButtonMode expandButtonMode_;

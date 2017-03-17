@@ -228,6 +228,29 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 	return lst;
 }
 
+//Create the pixmap containing all the relevant icons for the given node according to the filter.
+int VIcon::pixmapNum(VNode *vnode,VParamSet *filter)
+{
+    if(!vnode)
+        return 0;
+
+    int ret=0;
+
+    for(std::vector<VIcon*>::const_iterator it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
+    {
+        VIcon *v=*it;
+        if(!filter || filter->isSet(v))
+        {
+           if(v->show(vnode))
+           {
+               ret++;
+           }
+        }
+    }
+    return ret;
+}
+
+
 QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
 {
     if(!filter || filter->isEmpty())

@@ -11,7 +11,7 @@
 #include "CompactView.hpp"
 
 #include "TreeNodeModel.hpp"
-#include "TreeNodeViewDelegate.hpp"
+#include "CompactNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
@@ -34,10 +34,13 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     verticalScrollMode_(ScrollPerItem),
     rowCount_(0),
     lastViewedItem_(0),
+    topMargin_(4),
+    leftMargin_(4),
+    itemGap_(20),
     expandButtonSize_(8),
     expandButtonMode_(Modern)
 {
-    delegate_=new TreeNodeViewDelegate(this);
+    delegate_=new CompactNodeViewDelegate(model_,this);
 
     itemDelegate_=new QStyledItemDelegate(this);
 
@@ -307,7 +310,6 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     if(parentId == -1)
         rowCount_=0;
 
-    int dx=10;
     QModelIndex parentIndex = (parentId < 0) ? root_ : modelIndex(parentId);
 
     if(parentId >=0 && !parentIndex.isValid())
@@ -369,12 +371,14 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         item->width=w;
         item->height=h;
 
-        int xp=dx;
+        int xp=leftMargin_;
         if(parentId >=0)
         {
-            xp=viewItems_[parentId].right()+dx;
-            item->x=xp;          
+            xp=viewItems_[parentId].right()+itemGap_;
         }
+
+        item->x=xp;
+        //UiLog().dbg() << "layout --> " << item->index.data().toString() << " x=" << item->x;
 
         //We need to expand the item
         if(recursiveExpanding || isIndexExpanded(currentIndex))
@@ -515,7 +519,13 @@ void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,st
     bool leaf=false;
     const int itemsCount = static_cast<int>(viewItems_.size());
 
-    int rh=0;
+    //Get the rowheight
+    int iir=0;
+    int rh=rowHeight(start,1,iir);
+
+    //See if there are no multiline items in this row
+    bool singleRow=delegate_->isSingleHeight(rh);
+
     int firstLevel=0;
 
     QVector<QPoint> expandButtons;
@@ -526,43 +536,59 @@ void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,st
     {
         CompactViewItem* item=&(viewItems_[i]);
 
+        UiLog().dbg() << "item=" << i << " " << item->index.data().toString();
+
+        leaf=(item->total == 0);
+
         //Init style option
         QStyleOptionViewItem opt;
         if(selectionModel_->isSelected(item->index))
             opt.state |= QStyle::State_Selected;
 
         opt.rect=QRect(item->x,yp,item->width+10,item->height);
+        opt.rect=QRect(item->x,yp,2000,item->height);
+        //For single rows we center items halfway through the rowHeight
+        if(singleRow)
+        {
+            if(item->height < rh)
+            {
+                opt.rect.moveTop(yp+(rh-item->height)/2);
+            }
+        }
 
         //Draw the item with the delegate
-        delegate_->paint(painter,opt,item->index);
+        int paintedWidth=delegate_->paintItem(painter,opt,item->index);
+
+        if(paintedWidth != item->width)
+        {
+            item->width=paintedWidth;
+            if(item->parentItem >=0 && item->total > 0)
+                shiftItems(i);
+        }
+
+        //we have to know if the item width is the same that we exepcted
+        QRect rr=opt.rect;
+        rr.setWidth(item->width);
+        painter->drawRect(rr);
 
         //Collect expand/collapse button positions
         if(item->hasChildren)
         {
-            QPoint p(item->right()+1,yp+item->height/2);
+            QPoint p(item->right()+itemGap_/2,yp+item->height/2);
             if(item->expanded)
-                collapseButtons << p;
+                collapseButtons << QPoint(item->right()+itemGap_/2,yp+item->height/2);
             else
-                expandButtons << p;
+                expandButtons << QPoint(item->right()+expandButtonSize_/2+1,yp+item->height/2);;
         }
-
-        leaf=(item->total == 0);
 
         //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
         //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
-
-        //Get the rowheight
-        if(rh == 0)
-        {
-            int iir=0;
-            rh=rowHeight(i,1,iir);
-        }
 
         //Find out the first indentation level in the row
         if(firstLevel==0)
             firstLevel=item->level;
 
-        //If not the root
+        //If not a top level item (e.i. not a server)
         if(item->parentItem >=0)
         {
             //The parent item. It is always a node.
@@ -572,7 +598,11 @@ void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,st
             int lineY=yp+pt->height/2;
             int lineX1=pt->right()+2;
             int lineX2=item->x-2;
-            int lineX=connectorPos(item,pt); //lineX1+lineX2)/2;
+            int lineX=(pt->right()+item->x)/2;
+                    //connectorPos(item,pt); //lineX1+lineX2)/2;
+            UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item,pt);
+
+            Q_ASSERT(lineX==connectorPos(item,pt));
 
             //First child - in the same row as its parent
             if(item->index.row() == 0)
@@ -635,7 +665,7 @@ void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,st
         Q_FOREACH(QPoint p,expandButtons)
         {
             painter->setPen(QColor(90,90,90));
-            QRect r(p.x(),p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
+            QRect r(p.x()-expandButtonSize_/2,p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
             painter->drawRect(r);
             int xc=r.left()+4;
             int yc=r.top()+4;
@@ -656,7 +686,7 @@ void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,st
         Q_FOREACH(QPoint p,collapseButtons)
         {
             painter->setPen(QColor(90,90,90));
-            QRect r(p.x(),p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
+            QRect r(p.x()-expandButtonSize_/2,p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
             painter->drawRect(r);
             int xc=r.left()+4;
             int yc=r.top()+4;
@@ -673,9 +703,22 @@ void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,st
        itemsInRow=1;
 }
 
+void CompactView::shiftItems(int start)
+{
+    int n=start+viewItems_[start].total;
+    int w=0, h=0;
+    for(int i=start+1; i < n; i++)
+    {
+        delegate_->sizeHint(viewItems_[i].index,w,h);
+        viewItems_[i].width=w;
+        int pt=viewItems_[i].parentItem;
+        viewItems_[i].x=viewItems_[pt].right()+itemGap_;
+    }
+}
+
 int CompactView::connectorPos(CompactViewItem* item, CompactViewItem* parent) const
 {
-    return (parent->right()+2+item->x-2)/2;
+    return (parent->right()+item->x)/2;
 }
 
 //Updates the area occupied by the given index.
@@ -957,10 +1000,12 @@ QRect CompactView::visualRect(const QModelIndex &index) const
     if (vi < 0)
         return QRect();
 
-    int y = coordinateForItem(vi);
+    int y = -1;
+    int rh=0;
+    coordinateForItem(vi,y,rh);
     if(y >=0)
     {
-        return QRect(viewItems_[vi].x, y, viewItems_[vi].width, viewItems_[vi].height);
+        return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
     }
     return QRect();
 }
@@ -974,8 +1019,9 @@ QModelIndex CompactView::indexAt(const QPoint &point) const
 /*
   Returns the viewport y coordinate for  item.
 */
-int CompactView::coordinateForItem(int item) const
+void CompactView::coordinateForItem(int item,int& itemY,int& itemRowHeight) const
 {
+    itemY=-1;
     if(verticalScrollMode_ == ScrollPerItem)
     {
         int offset = 0;
@@ -995,7 +1041,11 @@ int CompactView::coordinateForItem(int item) const
             {
                 int h=rowHeight(viewItemIndex,1,itemsInRow);
                 if(viewItemIndex <=item && item < viewItemIndex+itemsInRow)
-                    return height;
+                {
+                    itemY=height;
+                    itemRowHeight=h;
+                    return;
+                }
                 height +=h;
             }
         }
@@ -1014,8 +1064,6 @@ int CompactView::coordinateForItem(int item) const
         }
     }
 #endif
-
-    return -1;
 }
 
 int CompactView::itemAtCoordinate(const QPoint& coordinate) const
