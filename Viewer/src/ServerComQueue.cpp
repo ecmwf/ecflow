@@ -443,7 +443,11 @@ void ServerComQueue::slotRun()
         {
             if(comThread_->wait(taskTimeout_) == false)
             {
-                UiLog(server_).err() << "  Calling wait() on the ServerCom thread failed. Try to terminate it.";
+                //We exit here because when we tried to call terminate() it just hung!!
+                UiLog(server_).err() << "  Calling wait() on the ServerCom thread failed.";
+                UI_ASSERT(0,"Cannot stop ServerCom thread, which is in a bad state");
+                exit(1);
+#if 0
                 comThread_->terminate();
                 if(comThread_->wait(taskTimeout_) == false)
                 {
@@ -451,11 +455,13 @@ void ServerComQueue::slotRun()
                     UiLog(server_).dbg() << "Delete the current ComThread and create a new one.";
                     createThread();
                     UI_ASSERT(0,"Cannot stop ServerCom thread that is in a bad state");
+
                 }
                 else
                 {
                     UiLog(server_).dbg() << "  Terminating ServerCom thread succeeded.";
                 }
+#endif
             }
 
             Q_ASSERT(comThread_->isRunning() == false);
