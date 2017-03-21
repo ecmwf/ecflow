@@ -44,9 +44,11 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
 
     itemDelegate_=new QStyledItemDelegate(this);
 
-    viewport()->setBackgroundRole(QPalette::Base);
+    //setAutoFillBackground(true);
 
-    //We attach the model because by default the view is enabled. At this point the model is empty so
+    viewport()->setBackgroundRole(QPalette::Window);
+
+    //We attach the model. At this point the model is empty so
     //it is a cheap operation!!
     attachModel();
 }
@@ -142,6 +144,7 @@ void CompactView::mousePressEvent(QMouseEvent* event)
             {
                 expand(viewItemIndex);
             }
+            updateRowCount();
             updateScrollBars();
             viewport()->update();
         }
@@ -366,6 +369,8 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         item->expanded = false;
         item->total = 0;
 
+        //We compute the size of the item. For attributes we delay the width computation until we
+        //actually paint them and we set their width to 300.
         int w,h;
         delegate_->sizeHint(currentIndex,w,h);
         item->width=w;
@@ -402,7 +407,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         }
 
         //When we reach a leaf node we reach the end of a row as well.
-        if(item->total == 0)
+        if((i != first || parentId == -1) && item->total == 0)
             rowCount_++;
     }
 
@@ -426,10 +431,27 @@ void CompactView::paintEvent(QPaintEvent *event)
 //Paint the rows intersecting with the given region
 void CompactView::paint(QPainter *painter,const QRegion& region)
 {
+    //Even though the viewport palette is set correctly at the
+    //beginning something sets it to another value. Here we try
+    //to detect it and correct the palette with right colour.
+    if(expectedBg_.isValid())
+    {
+        QPalette p=viewport()->palette();
+        if(p.color(QPalette::Window) != expectedBg_)
+        {
+            p.setColor(QPalette::Window,expectedBg_);
+            viewport()->setPalette(p);
+            viewport()->update();
+            expectedBg_=QColor();
+            return;
+        }
+    }
+
 #ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::paint -->";
     UiLog().dbg() << "sizeof(CompactViewItem)=" << sizeof(CompactViewItem);
     UiLog().dbg() << "region=" << region;
+    qDebug() << painter->pen() << painter->brush();
 #endif
 
     int firstVisibleOffset=0;
@@ -559,17 +581,22 @@ void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,st
         //Draw the item with the delegate
         int paintedWidth=delegate_->paintItem(painter,opt,item->index);
 
+        //we have to know if the item width is the same that we exepcted
         if(paintedWidth != item->width)
         {
             item->width=paintedWidth;
             if(item->parentItem >=0 && item->total > 0)
+            {
                 shiftItems(i);
+                viewport()->update();
+            }
         }
 
-        //we have to know if the item width is the same that we exepcted
+#if 0
         QRect rr=opt.rect;
         rr.setWidth(item->width);
         painter->drawRect(rr);
+#endif
 
         //Collect expand/collapse button positions
         if(item->hasChildren)
@@ -705,7 +732,7 @@ void CompactView::drawRow(QPainter* painter,int start,int& yp,int& itemsInRow,st
 
 void CompactView::shiftItems(int start)
 {
-    int n=start+viewItems_[start].total;
+    int n=start+viewItems_[start].total+1;
     int w=0, h=0;
     for(int i=start+1; i < n; i++)
     {
@@ -1261,7 +1288,7 @@ void CompactView::expand(const QModelIndex &index)
     if (i != -1) // is visible
     {
         expand(i);
-        updateRowCount();
+        //updateRowCount();
         updateScrollBars();
         viewport()->update();
     }
@@ -1272,8 +1299,9 @@ void CompactView::collapse(const QModelIndex &index)
     int i = viewIndex(index);
     if (i != -1) // is visible
     {
-        updateRowCount();
+        //updateRowCount();
         collapse(i);
+        updateRowCount();
         updateScrollBars();
         viewport()->update();
     }

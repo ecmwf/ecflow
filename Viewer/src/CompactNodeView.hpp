@@ -80,10 +80,7 @@ protected:
     void setCurrentSelectionFromExpand(VInfo_ptr info);
     void regainSelectionFromExpand();
 
-    void adjustIndentation(int);
-    void adjustBackground(QColor col,bool asjustStyleSheet=true);
-    //void adjustBranchLines(bool,bool asjustStyleSheet=true);
-    void adjustStyleSheet();
+    void adjustBackground(QColor col);
     void adjustServerToolTip(bool);
     void adjustNodeToolTip(bool);
     void adjustAttributeToolTip(bool);
@@ -99,6 +96,7 @@ protected:
 
     typedef ExpandState<CompactNodeView> CompactViewExpandState;
     QVector<CompactViewExpandState*> expandStates_;
+    bool inStartUp_;
 };
 
 

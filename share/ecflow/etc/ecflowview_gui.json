@@ -108,11 +108,17 @@
                     "label"  : "Tree view",
 
                     "group" : {
-                        "title" : "Options",
+                        "title" : "Style",
                         "prefix" : "view",
 
                         "line" : "common.node_style",
-                        "line" : "tree.layoutStyle",
+                        "line" : "tree.layoutStyle"
+                    },
+
+                    "group" : {
+                        "title" : "Options",
+                        "prefix" : "view",
+
                         "line" : "tree.displayNodeType",
                         "line" : "tree.display_child_count",
                         "line" : "tree.indentation",

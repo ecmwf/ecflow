@@ -10,6 +10,7 @@
 
 #include "CompactNodeView.hpp"
 
+#include <QDebug>
 #include <QMouseEvent>
 #include <QScrollBar>
 #include <QTime>
@@ -39,7 +40,8 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
     //defaultIndentation_(indentation()),
     prop_(NULL),
     setCurrentIsRunning_(false),
-    setCurrentFromExpand_(false)
+    setCurrentFromExpand_(false),
+    inStartUp_(true)
 {
     setObjectName("view");
     setProperty("style","nodeView");
@@ -59,7 +61,6 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
 
     //Properties
     std::vector<std::string> propVec;
-    propVec.push_back("view.tree.indentation");
     propVec.push_back("view.tree.background");
     //propVec.push_back("view.tree.drawBranchLine");
     propVec.push_back("view.tree.serverToolTip");
@@ -67,16 +68,9 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
     propVec.push_back("view.tree.attributeToolTip");
     prop_=new PropertyMapper(propVec,this);
 
-    //Initialise indentation
-    Q_ASSERT(prop_->find("view.tree.indentation"));
-    adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
-
     //Init stylesheet related properties
     Q_ASSERT(prop_->find("view.tree.background"));
-    adjustBackground(prop_->find("view.tree.background")->value().value<QColor>(),false);
-    //Q_ASSERT(prop_->find("view.tree.drawBranchLine"));
-    //adjustBranchLines(prop_->find("view.tree.drawBranchLine")->value().toBool(),false);
-    //adjustStyleSheet();
+    adjustBackground(prop_->find("view.tree.background")->value().value<QColor>());
 
     //Adjust tooltip
     Q_ASSERT(prop_->find("view.tree.serverToolTip"));
@@ -88,6 +82,7 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
     Q_ASSERT(prop_->find("view.tree.attributeToolTip"));
     adjustAttributeToolTip(prop_->find("view.tree.attributeToolTip")->value().toBool());
 
+    inStartUp_=false;
 }
 
 CompactNodeView::~CompactNodeView()
@@ -445,61 +440,21 @@ void CompactNodeView::regainSelectionFromExpand()
 // Property handling
 //==============================================
 
-void CompactNodeView::adjustStyleSheet()
-{
-    QString sh;
-    if(styleSheet_.contains("bg"))
-       sh+=styleSheet_["bg"];
-    if(styleSheet_.contains("branch"))
-       sh+=styleSheet_["branch"];
-
-   UiLog().dbg() << "stylesheet" << sh;
-
-   setStyleSheet(sh);
-}
-
-void CompactNodeView::adjustIndentation(int offset)
-{
-    if(offset >=0)
-    {
-        //setIndentation(defaultIndentation_+offset);
-        //delegate_->setIndentation(indentation());
-    }
-}
-
-void CompactNodeView::adjustBackground(QColor col,bool adjust)
+void CompactNodeView::adjustBackground(QColor col)
 {
     if(col.isValid())
-    {
-        styleSheet_["bg"]="QWidget { background : " + col.name() + ";}";
+    {        
+        QPalette p=viewport()->palette();
+        p.setColor(QPalette::Window,col);
+        viewport()->setPalette(p);
 
-        if(adjust)
-            adjustStyleSheet();
+        //When we set the palette on startup something resets the palette
+        //before the first paint event happens. So we set the expected bg colour
+        //so that the view should know what bg colour it should use.
+        if(inStartUp_)
+            setExpectedBg(col);
     }
 }
-
-#if 0
-void GraphNodeView::adjustBranchLines(bool st,bool adjust)
-{
-    if(styleSheet_.contains("branch"))
-    {
-        bool oriSt=styleSheet_["branch"].contains("url(:");
-        if(oriSt == st)
-            return;
-    }
-
-    QString vline((st)?"url(:/viewer/tree_vline.png) 0":"none");
-    QString bmore((st)?"url(:/viewer/tree_branch_more.png) 0":"none");
-    QString bend((st)?"url(:/viewer/tree_branch_end.png) 0":"none");
-
-    styleSheet_["branch"]="QTreeView::branch:has-siblings:!adjoins-item { border-image: " + vline + ";}" \
-     "QTreeView::branch:!has-children:has-siblings:adjoins-item {border-image: " +  bmore + ";}" \
-     "QTreeView::branch:!has-children:!has-siblings:adjoins-item {border-image: " + bend + ";}";
-
-    if(adjust)
-        adjustStyleSheet();
-}
-#endif
 
 void CompactNodeView::adjustServerToolTip(bool st)
 {
@@ -517,18 +472,10 @@ void CompactNodeView::adjustAttributeToolTip(bool st)
 }
 
 void CompactNodeView::notifyChange(VProperty* p)
-{
-    if(p->path() == "view.tree.indentation")
-    {
-        adjustIndentation(p->value().toInt());
-    }
-    else if(p->path() == "view.tree.background")
+{   
+    if(p->path() == "view.tree.background")
     {
         adjustBackground(p->value().value<QColor>());
-    }
-    else if(p->path() == "view.tree.drawBranchLine")
-    {
-        //adjustBranchLines(p->value().toBool());
     }
     else if(p->path() == "view.tree.serverToolTip")
     {

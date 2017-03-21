@@ -95,7 +95,7 @@ void CompactNodeViewDelegate::sizeHint(const QModelIndex& index,int& w,int& h) c
                 (this->*a)(painter,lst,vopt);
             }
         }*/
-        w=200;
+        w=300;
         //h=20;
     }
 }
@@ -148,9 +148,10 @@ int CompactNodeViewDelegate::paintItem(QPainter *painter,const QStyleOptionViewI
             if(it != attrRenderers_.end())
             {
                 AttributeRendererProc a=it.value();
-                (this->*a)(painter,lst,vopt);
+                width=(this->*a)(painter,lst,vopt);
             }
-            width=200;
+            //if(width==0)
+            //    width=300;
         }
 
     }

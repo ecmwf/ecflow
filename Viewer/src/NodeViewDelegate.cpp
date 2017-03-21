@@ -334,20 +334,16 @@ int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyl
 
     QString name=data.at(1) + ":";
     QString valStr=data.at(2);
-
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
-
-    UiLog().dbg() << "METER " << fillRect << " " << option.rect;
-
-
     QFontMetrics fm(attrFont_);
+
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
     //The status rectangle
     int stHeight=static_cast<int>(static_cast<float>(fm.ascent())*0.8);
-    int stHeightDiff=(fillRect.height()-stHeight)/2;
+    int stHeightDiff=(contRect.height()-stHeight)/2;
 
-    QRect stRect=fillRect.adjusted(attrBox_.leftPadding,stHeightDiff,0,-stHeightDiff);
+    QRect stRect=contRect.adjusted(attrBox_.leftPadding,stHeightDiff,0,-stHeightDiff);
     stRect.setWidth(50);
 
 	//The text rectangle
@@ -355,7 +351,7 @@ int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyl
 	nameFont.setBold(true);
     fm=QFontMetrics(nameFont);
 	int nameWidth=fm.width(name);
-    QRect nameRect = fillRect;
+    QRect nameRect = contRect;
     nameRect.setLeft(stRect.x()+stRect.width()+fm.width('A'));
 	nameRect.setWidth(nameWidth);
 
@@ -364,12 +360,12 @@ int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyl
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(valStr);
     QRect valRect = nameRect;
-    valRect.setLeft(nameRect.x()+nameRect.width()+fm.width('A')/2);
+    valRect.setX(nameRect.x()+nameRect.width()+fm.width('A')/2);
 	valRect.setWidth(valWidth);
 
 	//Define clipping
-    int rightPos=valRect.x()+valRect.width()+1;
-    totalWidth=rightPos;
+    int rightPos=valRect.x()+valRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
+    totalWidth=rightPos-option.rect.x();
     const bool setClipRect = rightPos > option.rect.right();
     if(setClipRect)
 	{
@@ -435,8 +431,8 @@ int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyl
 
     if(selected && drawAttrSelectionRect_)
     {       
-        QRect sr=fillRect.adjusted(0,0,0,1);
-        sr.setRight(rightPos);
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -465,20 +461,14 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
 	if(data.count() > 2)
 		val=data.at(2);
 
-    //int frontOffset=8;
     int offset=2;
 
     bool selected=option.state & QStyle::State_Selected;
 
 	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
-    int currentRight=fillRect.x();
-
-   // QRect fillRect=option.rect.adjusted(frontOffset,1,0,-1);
-   // if(selected)
-   //     fillRect.adjust(0,1,0,-1);
-
+    int currentRight=contRect.x();
 	int multiCnt=val.count('\n');
 
 	QRect nameRect;
@@ -495,7 +485,7 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
 		//The text rectangle
 		QFontMetrics fm(nameFont);
 		int nameWidth=fm.width(name);
-        nameRect = fillRect.adjusted(attrBox_.leftPadding,0,0,0);
+        nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 		nameRect.setWidth(nameWidth);
 
 		//The value rectangle
@@ -519,7 +509,7 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
 		//The text rectangle
 		QFontMetrics fm(nameFont);
 		int nameWidth=fm.width(name);
-        nameRect = fillRect.adjusted(attrBox_.leftPadding,0,0,0);
+        nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 		nameRect.setWidth(nameWidth);
         nameRect.setHeight(fm.height());
 
@@ -535,11 +525,11 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
 		multiValRect = QRect(nameRect.x(),
 				nameRect.bottom()+offset/2,
 				fm.width(multiVal),
-				fillRect.bottom()-(nameRect.bottom()+offset));
+                contRect.bottom()-(nameRect.bottom()+offset));
 	}
 
 	//Define clipping
-    int rightPos=currentRight+1;
+    int rightPos=currentRight+attrBox_.rightPadding+attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.left();
 	const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -582,8 +572,8 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
 
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=fillRect.adjusted(0,0,0,1);
-        sr.setRight(rightPos);
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -611,34 +601,27 @@ int NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyl
 	bool val=false;
 	if(data.count() > 2) val=(data.at(2) == "1");
 
-    //int frontOffset=8;
-    int offset=2;
-
     bool selected=option.state & QStyle::State_Selected;
 
 	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
-
-    /*QRect fillRect=option.rect.adjusted(frontOffset,1,0,-1);
-    if(selected)
-        fillRect.adjust(0,1,0,-1);*/
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The control rect
-	int ch=(fillRect.height()-4 < 10)?(fillRect.height()-4):8;
-    QRect cRect=fillRect.adjusted(attrBox_.leftPadding,(fillRect.height()-ch)/2,
-			                       0,-(fillRect.height()-ch)/2);
+    int ch=(contRect.height()-4 < 10)?(contRect.height()-4):8;
+    QRect cRect=contRect.adjusted(attrBox_.leftPadding,(contRect.height()-ch)/2,
+                                   0,-(contRect.height()-ch)/2);
 	cRect.setWidth(cRect.height());
 
 	//The text rectangle
 	QFont font=attrFont_;
 	QFontMetrics fm(font);
 	int nameWidth=fm.width(name);
-    QRect nameRect = fillRect;
+    QRect nameRect = contRect;
     nameRect.setX(cRect.x()+cRect.width()+fm.width('a'));
 	nameRect.setWidth(nameWidth);
 
 	//Define clipping
-    int rightPos=nameRect.x()+nameRect.width()+1;
+    int rightPos=nameRect.x()+nameRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.left();
     const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -657,19 +640,10 @@ int NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyl
 	painter->setFont(font);
 	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
 
-#if 0
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=cRect;
-        sr.setRight(nameRect.right());
-        renderSelectionRect(painter,sr.adjusted(-3,-3,2,4));
-    }
-#endif
-
-    if(selected && drawAttrSelectionRect_)
-    {
-        QRect sr=fillRect.adjusted(0,0,0,1);
-        sr.setRight(rightPos);
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -691,30 +665,21 @@ int NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleO
 	if(data.count() > 2)
 		text+=data.at(2);
 
-    //int offset=2;
-    //int frontOffset=8;
-
     bool selected=option.state & QStyle::State_Selected;
 
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
-
-    //QRect fillRect=option.rect.adjusted(frontOffset,1,0,-1);
-    //if(selected)
-    //    fillRect.adjust(0,1,0,-1);
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The text rectangle
 	QFont font=attrFont_;
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
-    QRect textRect = fillRect.adjusted(attrBox_.leftPadding,0,0,0);
+    QRect textRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 	textRect.setWidth(textWidth);
 
-	//Adjust the filled rect width
-    //fillRect.setRight(textRect.right()+offset);
 
 	//Define clipping
-    int rightPos=textRect.x()+textRect.width()+1;
+    int rightPos=textRect.x()+textRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.left();
 	const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -728,17 +693,10 @@ int NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleO
 	painter->setFont(font);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
-#if 0
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=textRect;
-        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
-    }
-#endif
-    if(selected && drawAttrSelectionRect_)
-    {
-        QRect sr=option.rect;
-        sr.setRight(rightPos+1);
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -761,31 +719,21 @@ int  NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 	if(data.count() > 2)
 		text+=data.at(2);
 
-    //int offset=2;
-    //int frontOffset=8;
-
     bool selected=option.state & QStyle::State_Selected;
 
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
-
-   /* QRect fillRect=option.rect.adjusted(frontOffset,1,0,-1);
-    if(selected)
-        fillRect.adjust(0,1,0,-1);*/
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The text rectangle
 	QFont font=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
-    QRect textRect = fillRect;
+    QRect textRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 	textRect.setWidth(textWidth);
 
-	//Adjust the filled rect width
-    //fillRect.setRight(textRect.right()+offset);
-
 	//Define clipping
-    int rightPos=textRect.x()+textRect.width()+1;
+    int rightPos=textRect.x()+textRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
 	const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
 	{
@@ -798,18 +746,10 @@ int  NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 	painter->setFont(font);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
-#if 0
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=textRect;
-        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
-    }
-#endif
-
-    if(selected && drawAttrSelectionRect_)
-    {
-        QRect sr=option.rect;
-        sr.setRight(rightPos+1);
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -835,8 +775,6 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
     bool drawItem=(maxVal < 51);
 
 	QFontMetrics fm(attrFont_);
-    //int offset=2;
-    //int frontOffset=8;
 
     int itemOffset=0;
 	int gap=fm.width('A');
@@ -844,20 +782,15 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
 
     bool selected=option.state & QStyle::State_Selected;
 
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
-
-    /*QRect fillRect=option.rect.adjusted(frontOffset,1,0,-1);
-    if(selected)
-        fillRect.adjust(0,1,0,-1);*/
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The text rectangle
 	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
 	fm=QFontMetrics(nameFont);
 	int nameWidth=fm.width(name);
-    QRect nameRect = fillRect;
-    //nameRect.setLeft(fillRect.left());
+    QRect nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
     nameRect.setWidth(nameWidth);
 
 	//The value rectangle
@@ -873,13 +806,14 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
     if(drawItem)
 	{
         xItem=valRect.x()+valRect.width()+gap;
-        rightPos=xItem+maxVal*(itemSize+itemOffset)+itemOffset+1;
+        rightPos=xItem+maxVal*(itemSize+itemOffset)+itemOffset;
 	}
 	else
 	{		
-        rightPos=valRect.x()+valRect.width()+1;
+        rightPos=valRect.x()+valRect.width();
 	}
 
+    rightPos+=attrBox_.rightPadding + attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.x();
 
 	//Define clipping
@@ -931,10 +865,9 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
 
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=nameRect;
-        sr.setRight(valRect.x()+valRect.width());
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
-        //renderSelectionRect(painter,sr.adjusted(-3,-1,3,1));
     }
 
 	if(setClipRect || drawItem)
@@ -952,29 +885,21 @@ int NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QSt
         return totalWidth;
 
 	QString name="inlimit " + data.at(2) +":" +data.at(1);
-
-    //int offset=2;
-    //int frontOffset=8;
-
     bool selected=option.state & QStyle::State_Selected;
 
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
-
-    //QRect fillRect=option.rect.adjusted(frontOffset,1,0,-1);
-    //if(selected)
-    //		fillRect.adjust(0,1,0,-1);
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The text rectangle
 	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
-    QRect nameRect = fillRect;
+    QRect nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 	nameRect.setWidth(nameWidth);
 
 	//Define clipping
-    int rightPos=nameRect.x()+nameRect.width()+1;
+    int rightPos=nameRect.x()+nameRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.x();
     const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -990,8 +915,8 @@ int NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QSt
 
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=option.rect;
-        sr.setWidth(rightPos-option.rect.x());
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -1010,30 +935,21 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
         return totalWidth;
 
     int triggerType=data[1].toInt();
-
-	QString	text=data.at(2);
-
-    //int offset=2;
-    //int frontOffset=8;
-
+	QString	text=data.at(2);   
     bool selected=option.state & QStyle::State_Selected;
 
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
-
-    //QRect fillRect=option.rect.adjusted(frontOffset,2,0,-2);
-    //if(selected)
-    //	fillRect.adjust(0,1,0,-1);
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The text rectangle
 	QFont font=attrFont_;
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
-    QRect textRect = fillRect;
+    QRect textRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 	textRect.setWidth(textWidth);
 
 	//Define clipping
-    int rightPos=textRect.x()+textRect.width()+1;
+    int rightPos=textRect.x()+textRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.x();
     const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -1053,7 +969,7 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
         painter->setBrush(completeBgBrush_);
         painter->setPen(completeBorderPen_);
     }
-    painter->drawRect(fillRect);
+    painter->drawRect(textRect);
 
 	//Draw text
     if(triggerType==0)
@@ -1066,8 +982,8 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
 
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=option.rect;
-        sr.setWidth(rightPos-option.rect.x());
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -1086,25 +1002,21 @@ int NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyle
         return totalWidth;
 
 	QString name=data.at(1);
-
-    //int offset=2;
-    //int frontOffset=8;
-
     bool selected=option.state & QStyle::State_Selected;
 
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The text rectangle
 	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
-    QRect nameRect = fillRect;
+    QRect nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 	nameRect.setWidth(nameWidth);
 
 	//Define clipping
-    int rightPos=nameRect.x()+nameRect.width()+1;
+    int rightPos=nameRect.x()+nameRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.x();
     const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -1120,8 +1032,8 @@ int NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyle
 
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=option.rect;
-        sr.setWidth(rightPos-option.rect.x());
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -1140,25 +1052,21 @@ int NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyle
         return totalWidth;
 
 	QString name=data.at(1);
-
-    //int offset=2;
-    //int frontOffset=8;
-
     bool selected=option.state & QStyle::State_Selected;
 
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The text rectangle
 	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
-    QRect nameRect = fillRect;
+    QRect nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 	nameRect.setWidth(nameWidth);
 
 	//Define clipping
-    int rightPos=nameRect.x()+nameRect.width()+1;
+    int rightPos=nameRect.x()+nameRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.x();
     const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -1174,8 +1082,8 @@ int NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyle
 
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=option.rect;
-        sr.setWidth(rightPos-option.rect.x());
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 
@@ -1205,13 +1113,10 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
     QString end=data.at(5);
     QString step=data.at(6);
 
-    int offset=2;
-    int frontOffset=8;
-
     bool selected=option.state & QStyle::State_Selected;
 
-	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
+    //The contents rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
     if(type == "day")
     {
@@ -1219,11 +1124,11 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
         QFontMetrics fm(nameFont);
         name="day=" + step;
         int nameWidth=fm.width(name);
-        QRect nameRect = fillRect;
+        QRect nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
         nameRect.setWidth(nameWidth);
 
         //Define clipping
-        int rightPos=nameRect.x()+nameRect.width()+1;
+        int rightPos=nameRect.x()+nameRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
         totalWidth=rightPos-option.rect.x();
         const bool setClipRect = rightPos > option.rect.right();
         if(setClipRect)
@@ -1239,8 +1144,8 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
 
         if(selected && drawAttrSelectionRect_)
         {
-            QRect sr=option.rect;
-            sr.setWidth(rightPos-option.rect.x());
+            QRect sr=contRect.adjusted(0,0,0,1);
+            sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
             renderSelectionRect(painter,sr);
         }
 
@@ -1272,7 +1177,7 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
         QFont nameFont=attrFont_;
         QFontMetrics fm(nameFont);
         int nameWidth=fm.width(name);
-        QRect nameRect = fillRect;
+        QRect nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
         nameRect.setWidth(nameWidth);
 
         //The value rectangle
@@ -1303,7 +1208,7 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
         }
 
         //Define clipping
-        rightPos+=1;
+        rightPos+=+attrBox_.rightPadding+attrBox_.rightMargin;
         totalWidth=rightPos-option.rect.x();
         const bool setClipRect = rightPos > option.rect.right();
         if(setClipRect)
@@ -1332,8 +1237,8 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
 
         if(selected && drawAttrSelectionRect_)
         {
-            QRect sr=option.rect;
-            sr.setWidth(rightPos-option.rect.x());
+            QRect sr=contRect.adjusted(0,0,0,1);
+            sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
             renderSelectionRect(painter,sr);
         }
 
@@ -1353,24 +1258,20 @@ int NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyle
         return totalWidth;
 
 	QString name="late: " + data.at(1);
-
-    //int offset=2;
-    //int frontOffset=8;
-
     bool selected=option.state & QStyle::State_Selected;
 
 	//The border rect (we will adjust its  width)
-    QRect fillRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
+    QRect contRect=option.rect.adjusted(attrBox_.leftMargin,attrBox_.topMargin,0,-attrBox_.bottomMargin);
 
 	//The text rectangle
 	QFont nameFont=attrFont_;
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
-    QRect nameRect = fillRect;
+    QRect nameRect = contRect.adjusted(attrBox_.leftPadding,0,0,0);
 	nameRect.setWidth(nameWidth);
 
 	//Define clipping
-    int rightPos=nameRect.x()+nameRect.width()+1;
+    int rightPos=nameRect.x()+nameRect.width()+attrBox_.rightPadding+attrBox_.rightMargin;
     totalWidth=rightPos-option.rect.x();
     const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -1386,8 +1287,8 @@ int NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyle
 
     if(selected && drawAttrSelectionRect_)
     {
-        QRect sr=option.rect;
-        sr.setWidth(rightPos-option.rect.x());
+        QRect sr=contRect.adjusted(0,0,0,1);
+        sr.setWidth(rightPos-sr.x()-attrBox_.rightMargin);
         renderSelectionRect(painter,sr);
     }
 

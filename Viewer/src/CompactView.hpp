@@ -120,6 +120,8 @@ protected:
     void updateScrollBars();
     void shiftItems(int start);
 
+    void setExpectedBg(QColor c) {expectedBg_=c;}
+
     enum ScrollMode {
           ScrollPerItem,
           ScrollPerPixel
@@ -155,6 +157,7 @@ private:
     QPoint pressedPosition_;
     QPersistentModelIndex pressedIndex_;
     QStyledItemDelegate* itemDelegate_;
+    QColor expectedBg_;
 
     // used when expanding and collapsing items
     QSet<QPersistentModelIndex> expandedIndexes;
