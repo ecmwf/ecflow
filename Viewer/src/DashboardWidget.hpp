@@ -34,7 +34,7 @@ public:
     virtual void populateDialog()=0;
     virtual void reload()=0;
 	virtual void rerender()=0;
-    virtual bool selectFirstServerInView() {return false;}
+    virtual bool initialSelectionInView() {return false;}
 	virtual VInfo_ptr currentSelection() {return VInfo_ptr(); }
     QAction* detachedAction() const {return detachedAction_;}
     virtual QList<QAction*> dockTitleActions() {return QList<QAction*>();}

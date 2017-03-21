@@ -63,8 +63,9 @@ public:
     virtual std::string serverAlias() {return "";}
     virtual std::string relativePath() {return "";}
     std::string storedNodePath() const;
+    const std::string& storedPath() const {return storedPath_;}
 
-	virtual void accept(VInfoVisitor*)=0;
+    virtual void accept(VInfoVisitor*)=0;
 
     void regainData();
 	void addObserver(VInfoObserver*);
@@ -85,6 +86,7 @@ public:
 
     static VInfo_ptr createParent(VInfo_ptr);
     static VInfo_ptr createFromPath(ServerHandler*,const std::string&);
+    static VInfo_ptr createFromPath(const std::string& path);
 
 protected:
     VInfo(ServerHandler* server,VNode* node,VAttribute* attr=0);
