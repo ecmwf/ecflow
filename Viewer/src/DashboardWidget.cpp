@@ -17,7 +17,8 @@ static QString tooltipChk("This panel is <b>detached</b> and will not respond to
 DashboardWidget::DashboardWidget(const std::string& type, QWidget* parent) :
     QWidget(parent),
     type_(type),
-    acceptSetCurrent_(false)
+    acceptSetCurrent_(false),
+    bcWidget_(0)
 {
     detachedAction_=new QAction("Detached",this);
     QIcon ic(QPixmap(":viewer/dock_chain_closed.svg"));

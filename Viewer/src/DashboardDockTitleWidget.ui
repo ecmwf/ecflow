@@ -25,7 +25,7 @@
   <property name="autoFillBackground">
    <bool>true</bool>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0">
+  <layout class="QHBoxLayout" name="mainLayout" stretch="0,0,0,0,0,0,0">
    <property name="spacing">
     <number>2</number>
    </property>
@@ -45,7 +45,7 @@
     <number>2</number>
    </property>
    <item>
-    <spacer name="horizontalSpacer">
+    <spacer name="firstSpacer_">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -54,7 +54,7 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>15</width>
+       <width>2</width>
        <height>20</height>
       </size>
      </property>
@@ -113,7 +113,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset>
+      <iconset resource="viewer.qrc">
        <normaloff>:/viewer/images/dock_float.svg</normaloff>:/viewer/images/dock_float.svg</iconset>
      </property>
      <property name="checkable">
@@ -133,7 +133,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset>
+      <iconset resource="viewer.qrc">
        <normaloff>:/viewer/dock_config.svg</normaloff>:/viewer/dock_config.svg</iconset>
      </property>
      <property name="checkable">
@@ -168,7 +168,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset>
+      <iconset resource="viewer.qrc">
        <normaloff>:/viewer/images/dock_close.svg</normaloff>:/viewer/images/dock_close.svg</iconset>
      </property>
      <property name="iconSize">
@@ -184,6 +184,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

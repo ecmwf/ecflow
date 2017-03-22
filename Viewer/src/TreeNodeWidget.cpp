@@ -39,6 +39,8 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 
 	initAtts();
 
+    bcWidget_=new NodePathWidget(this);
+
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
 	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::NodeStateScope);
 
@@ -92,14 +94,12 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
     connect(model_,SIGNAL(filterUpdateAddEnded(const VTreeNode*)),
             view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
 
-
-
     connect(atts_,SIGNAL(changed()),
 		   this,SLOT(slotAttsChanged()));
 
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state
-	actionBreadcrumbs->setChecked(bcWidget_->active());
+    actionBreadcrumbs->setChecked(bcWidget_->isGuiMode());
 
 	//The node status filter is exposed via a menu. So we need a reference to it.
 	states_=filterDef_->nodeState();
@@ -152,9 +152,9 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	//Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
 
-	//Sets the title
-    tw->slotUpdateTitle("<b>Tree</b>");
-    
+    //Add the bc to the titlebar
+    tw->setBcWidget(bcWidget_);
+
     QList<QAction*> acLst;
 
     QAction* acState=new QAction(this);
@@ -183,14 +183,13 @@ void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
 
 void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 {
-	if(b)
+    if(b)
 	{
-		bcWidget_->active(true);
-        bcWidget_->setPath(view_->currentSelection());
+        bcWidget_->setMode(NodePathWidget::GuiMode);
 	}
 	else
 	{
-		bcWidget_->active(false);
+        bcWidget_->setMode(NodePathWidget::TextMode);
 	}
 }
 
@@ -280,7 +279,7 @@ void TreeNodeWidget::readSettings(VSettings* vs)
 
 	//Synchronise the action and the breadcrumbs state
 	//This will not emit the trigered signal of the action!!
-	actionBreadcrumbs->setChecked(bcWidget_->active());
+    actionBreadcrumbs->setChecked(bcWidget_->isGuiMode());
 
 	attrFilterMenu_->reload();
 	iconFilterMenu_->reload();

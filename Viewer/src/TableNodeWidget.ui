@@ -17,17 +17,23 @@
    <property name="spacing">
     <number>0</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="">
      <property name="spacing">
       <number>1</number>
      </property>
-     <item>
-      <widget class="NodePathWidget" name="bcWidget_" native="true"/>
-     </item>
     </layout>
    </item>
    <item>
@@ -58,20 +64,12 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>NodePathWidget</class>
-   <extends>QWidget</extends>
-   <header>NodePathWidget.hpp</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>TableFilterWidget</class>
    <extends>QWidget</extends>
    <header>TableFilterWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
