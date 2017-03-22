@@ -218,7 +218,7 @@ void CompactNodeViewDelegate::widthHintServer(const QModelIndex& index,int& item
     if(hasLoad)
     {
         an=animation_->find(Animation::ServerLoadType,true);
-        currentRight=fm.width('A')+an->scaledSize().width();
+        currentRight+=fm.width('A')+an->scaledSize().width();
     }
     //Stops load animation
     else
