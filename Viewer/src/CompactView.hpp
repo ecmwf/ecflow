@@ -98,6 +98,8 @@ protected:
     void doItemsLayout(bool hasRemovedItems=false);
     void layout(int parentId, bool recursiveExpanding = false,bool afterIsUninitialized = false);
 
+    void scrollTo(const QModelIndex &index);
+    int itemRow(int item) const;
     int itemCountInRow(int start) const;
     void rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const;
     int rowHeight(int start,int forward,int &itemsInRow) const;

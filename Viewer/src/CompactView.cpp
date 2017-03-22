@@ -915,7 +915,7 @@ int CompactView::itemCountInRow(int start) const
     for(int i=start; i < itemsCount; i++)
     {
         itemsInRow++;
-        if(!model_->hasChildren(viewItems_[i].index))
+        if(viewItems_[i].total == 0)
             return itemsInRow;
     }
 
@@ -923,6 +923,21 @@ int CompactView::itemCountInRow(int start) const
     return itemsInRow;
 }
 
+int CompactView::itemRow(int item) const
+{
+    if(item < 0 || item >= viewItems_.size())
+       return -1;
+
+    int row=-1;
+    int itemsInRow=0;
+    for(int i=0; i <= item; i+=itemsInRow)
+    {
+        row++;
+        itemsInRow=itemCountInRow(i);
+    }
+
+    return row;
+}
 
 int CompactView::firstVisibleItem(int &offset) const
 {
@@ -1078,6 +1093,108 @@ void CompactView::doDelayedWidthAdjustment()
 int CompactView::translation() const
 {
     return horizontalScrollBar()->value();
+}
+
+void CompactView::scrollTo(const QModelIndex &index)
+{
+    if(!index.isValid())
+        return;
+
+    //d->executePostedLayout();
+    updateScrollBars();
+
+    // Expand all parents if the parent(s) of the node are not expanded.
+    QList<QModelIndex> parentLst;
+    QModelIndex parent = index.parent();
+    while(parent.isValid())
+    {
+        parentLst.prepend(parent);
+        parent = model_->parent(parent);
+    }
+
+    Q_FOREACH(QModelIndex parent,parentLst)
+    {
+        if(!isExpanded(parent))
+            expand(parent);
+    }
+
+#if 0
+    while(parent.isValid())
+    {
+        if(!isExpanded(parent))
+            expand(parent);
+        parent = model_->parent(parent);
+    }
+#endif
+
+    int item = viewIndex(index);
+    if (item < 0)
+        return;
+
+    //QRect area = viewport()->rect();
+
+    //vertical
+    //hint == EnsureVisible
+
+    if (verticalScrollMode_ == ScrollPerItem)
+    {
+        int row=itemRow(item);
+
+        int top = verticalScrollBar()->value();
+        int bottom = top + verticalScrollBar()->pageStep();
+
+        if (row >= top && row < bottom)
+        {
+            // nothing to do
+        }
+        else if(row < top)
+        {
+            verticalScrollBar()->setValue(item);
+        }
+        else
+        {
+            verticalScrollBar()->setValue(item);
+#if 0
+            const int currentItemHeight = viewItem_[item].height;
+            int y = area.height();
+            if (y > currentItemHeight)
+            {
+                while (item >= 0)
+                {
+                    y -= viewItem_[item].height;
+                    if (y < 0)
+                    { //there is no more space left
+                        item++;
+                        break;
+                    }
+                    item--;
+                }
+            }
+            verticalScrollBar()->setValue(item);
+#endif
+        }
+    }
+    else // ScrollPerPixel
+    {
+
+    }
+
+    // horizontal
+    int viewportWidth = viewport()->width();
+    int xp=viewItems_[item].x;
+    int horizontalPosition=xp-horizontalScrollBar()->value();
+
+    if( horizontalPosition< 0)
+    {
+        xp-=10;
+        if(xp < 0) xp=0;
+        horizontalScrollBar()->setValue(xp);
+    }
+    else if(horizontalPosition > viewportWidth)
+    {
+        xp-=10;
+        horizontalScrollBar()->setValue(xp);
+    }
 }
 
 /*
@@ -1741,6 +1858,7 @@ void CompactView::currentChanged(const QModelIndex &current, const QModelIndex &
 
     if(current.isValid())
     {
+        scrollTo(current);
         update(current);
     }
 }
