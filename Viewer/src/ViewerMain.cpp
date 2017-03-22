@@ -125,9 +125,6 @@ int main(int argc, char **argv)
         SessionHandler::setTemporarySessionIfReqested(); // user starts with -ts command-line switch?
     }
 
-    //TODO: Temporary solution for testing!!
-    SessionHandler::instance()->current(SessionHandler::instance()->find("compact"));
-
     //Load the global configurations
     VConfig::instance()->init(DirectoryHandler::etcDir());
     
