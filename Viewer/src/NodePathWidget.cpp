@@ -51,7 +51,7 @@ BcWidget::BcWidget(QWidget* parent) :
     itemHeight_(0),
     text_("No selection"),
     textCol_(Qt::white),
-    textDisabledCol_(QColor(230,230,230)),
+    textDisabledCol_(QColor(220,220,220)),
     useGrad_(true),
     gradLighter_(150),
     hovered_(-1),
@@ -844,7 +844,7 @@ void NodePathWidget::useTransparentBg(bool b)
     {
         pal.setColor(QPalette::Window,Qt::transparent);
         bc_->setTextColour(Qt::white);
-        bc_->setTextDisabledColour(QColor(230,230,230));
+        bc_->setTextDisabledColour(QColor(220,220,220));
     }
     else
     {
