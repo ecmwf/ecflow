@@ -1429,7 +1429,7 @@ void CompactView::collapseAll()
 
 void CompactView::setCurrentIndex(const QModelIndex &index)
 {
-    if(selectionModel_ && (!index.isValid()) )
+    if(selectionModel_ && index.isValid())
     {
         QItemSelectionModel::SelectionFlags command = selectionCommand(index, 0);
         selectionModel_->setCurrentIndex(index, command);
