@@ -19,6 +19,7 @@
 #include "VInfo.hpp"
 
 class DashboardDockTitleWidget;
+class NodePathWidget;
 class ServerFilter;
 class VSettings;
 
@@ -65,6 +66,7 @@ protected:
 	std::string type_;
 	bool acceptSetCurrent_;
     QAction *detachedAction_;
+    NodePathWidget* bcWidget_;
 };
 
 

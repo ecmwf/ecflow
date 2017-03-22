@@ -16,7 +16,8 @@
 #include "DashboardWidget.hpp"
 
 DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
-		QWidget(parent)
+        QWidget(parent),
+        titleBc_(0)
 {
 	setupUi(this);
 
@@ -33,25 +34,32 @@ DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
 	p.setBrush(QPalette::Window,gr);
 	setPalette(p);
 
+    //We do not use the title label at the moment!
 	p=titleLabel_->palette();
 	p.setColor(QPalette::WindowText,Qt::white);
 	titleLabel_->setPalette(p);
+    titleLabel_->hide();
 
     detachedTb_->setProperty("docktitle","1");
     optionsTb_->setProperty("docktitle","1");
     closeTb_->setProperty("docktitle","1");
+}
 
-#if 0
-	//Set the initial state of the float tool button
-	if(QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget()))
-	{
-		if(!dw->features().testFlag(QDockWidget::DockWidgetFloatable))
-		{
-            //floatTb_->setEnabled(false);
-            floatTb_->hide();
-		}
-	}
-#endif
+void DashboardDockTitleWidget::setBcWidget(QWidget *w)
+{
+    for(int i=0; i < mainLayout->count(); i++)
+    {
+        if(QLayoutItem* item=mainLayout->itemAt(i))
+        {
+            if(item->widget() == titleLabel_)
+            {
+                titleBc_=w;
+                mainLayout->insertWidget(i+1,titleBc_,1);
+                return;
+            }
+        }
+    }
+    Q_ASSERT(titleBc_);
 }
 
 void DashboardDockTitleWidget::setDetachedAction(QAction *ac)
@@ -70,12 +78,9 @@ void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
          tb->setPopupMode(QToolButton::InstantPopup);
          //tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-
          QPalette p=tb->palette();
          p.setColor(QPalette::ButtonText,Qt::white);
          tb->setPalette(p);
-
-
 
          actionLayout_->addWidget(tb);
 
@@ -173,8 +178,10 @@ DashboardDock::DashboardDock(DashboardWidget *dw,QWidget * parent) :
     dt->setDetachedAction(dw->detachedAction());
 	dt->addActions(dw->dockTitleActions());
 
-	connect(dw,SIGNAL(titleUpdated(QString)),
-			dt,SLOT(slotUpdateTitle(QString)));
+#if 0
+    connect(dw,SIGNAL(titleUpdated(QString)),
+            dt,SLOT(slotUpdateTitle(QString)));
+#endif
 
     dw->populateDockTitleBar(dt);
 

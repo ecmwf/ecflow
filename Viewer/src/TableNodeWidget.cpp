@@ -34,6 +34,8 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
 	//Init qt-creator form
 	setupUi(this);
 
+    bcWidget_=new NodePathWidget(this);
+
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
 	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::GeneralScope);
 
@@ -87,7 +89,7 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
 
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state
-	actionBreadcrumbs->setChecked(bcWidget_->active());
+    actionBreadcrumbs->setChecked(bcWidget_->isGuiMode());
 
 	//The node status filter is exposed via a menu. So we need a reference to it.
 	states_=filterDef_->nodeState();
@@ -121,8 +123,11 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     //Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
 
+    //Add the bc to the titlebar
+    tw->setBcWidget(bcWidget_);
+
 	//Sets the title
-	tw->slotUpdateTitle("<b>Table</b>");
+    //tw->slotUpdateTitle("<b>Table</b>");
 
     QList<QAction*> acLst;
     QAction* acFilterEdit=new QAction(this);
@@ -147,15 +152,14 @@ void TableNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
 
 void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 {
-	if(b)
-	{
-		bcWidget_->active(true);
-        bcWidget_->setPath(view_->currentSelection());
-	}
-	else
-	{
-		bcWidget_->active(false);
-	}
+    if(b)
+    {
+        bcWidget_->setMode(NodePathWidget::GuiMode);
+    }
+    else
+    {
+        bcWidget_->setMode(NodePathWidget::TextMode);
+    }
 }
 
 void TableNodeWidget::rerender()
@@ -205,7 +209,7 @@ void TableNodeWidget::readSettings(VSettings* vs)
 
 	//Synchronise the action and the breadcrumbs state
 	//This will not emit the trigered signal of the action!!
-	actionBreadcrumbs->setChecked(bcWidget_->active());
+    actionBreadcrumbs->setChecked(bcWidget_->isGuiMode());
 
     view_->readSettings(vs);
 

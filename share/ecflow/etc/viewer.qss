@@ -94,17 +94,6 @@ QTabBar[notify="1"]::tab {
 }
 
 /*----------------------------
-  Icon folder view
-------------------------------*/
-
-/* QGraphicsview cannot be set from qss, only its 
-baseclass QFrame. So we need to set QFrame here! */
-QFrame[breadcrumbs="1"] {
-	background: rgb(252, 252, 252);
-	border: 0; 
-}
-
-/*----------------------------
   TreeNodeView
 ------------------------------*/
 
