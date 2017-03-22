@@ -45,6 +45,7 @@ set(viewer_srcs
     GotoLineDialog.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
+    HtmlItemWidget.cpp
     IconProvider.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp   
@@ -55,7 +56,6 @@ set(viewer_srcs
     LabelEditor.cpp
     LimitEditor.cpp
     LineEdit.cpp
-    #LogEvent.cpp
     LogModel.cpp
     LogProvider.cpp  
     LogTruncator.cpp
@@ -138,6 +138,9 @@ set(viewer_srcs
     TableNodeView.cpp
     TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
+    RichTextEdit.cpp
+    RichTextSearchInterface.cpp
+    RichTextSearchLine.cpp
     TextEditSearchLine.cpp
     TimeItemWidget.cpp    
     TriggerBrowser.cpp
@@ -246,7 +249,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     FileWatcher.hpp
     FilterWidget.hpp
     GotoLineDialog.hpp
-    HistoryItemWidget.hpp
+    HistoryItemWidget.hpp              
+    HtmlItemWidget.hpp
     InfoPanel.hpp
     InputEventLog.hpp
     LabelEditor.hpp
@@ -285,6 +289,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     PropertyLine.hpp
     SaveSessionAsDialog.hpp
     RepeatEditor.hpp
+    RichTextEdit.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
     ServerHandler.hpp
@@ -343,7 +348,8 @@ set(viewer_wrap_ui_files
     EditItemWidget.ui
     GotoLineDialog.ui
     HistoryItemWidget.ui
-    InfoPanel.ui    
+    HtmlItemWidget.ui
+    InfoPanel.ui
     LabelEditorWidget.ui
     LimitEditorWidget.ui
     MainWindow.ui

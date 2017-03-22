@@ -59,6 +59,7 @@ public:
 
    ~Defs();
 
+   void copy_defs_state_only(defs_ptr defs); // needed when creating defs for client handles
    bool operator==(const Defs& rhs) const;
    std::ostream& print(std::ostream&) const ;
 
@@ -239,8 +240,8 @@ public:
    void order(Node* immediateChild, NOrder::Order);
 
    /// determines why the node is not running.
-   void top_down_why(std::vector<std::string>& theReasonWhy) const;
-   void why(std::vector<std::string>& theReasonWhy) const;
+   void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const; // return true if why found
 
    /// Function to save the defs as a checkpoint file. File saved to the file name
    /// Can throw exception

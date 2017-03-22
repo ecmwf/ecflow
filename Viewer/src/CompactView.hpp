@@ -12,6 +12,7 @@
 #define COMPACTVIEW_HPP
 
 #include <QAbstractScrollArea>
+#include <QBasicTimer>
 #include <QItemSelectionModel>
 #include <QMap>
 #include <QModelIndex>
@@ -87,11 +88,12 @@ protected:
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
     bool viewportEvent(QEvent *event);
+    void timerEvent(QTimerEvent *event);
 
     void attachModel();
     void insertItems(const QModelIndex& parent, int);
     void paint(QPainter *painter,const QRegion& region);
-    void drawRow(QPainter* painter,int start,int &yp,int &itemsInRow,std::vector<int>&);
+    void drawRow(QPainter* painter,int start,int xOffset,int &yp,int &itemsInRow,std::vector<int>&);
 
     void doItemsLayout(bool hasRemovedItems=false);
     void layout(int parentId, bool recursiveExpanding = false,bool afterIsUninitialized = false);
@@ -121,6 +123,7 @@ protected:
     void shiftItems(int start);
 
     void setExpectedBg(QColor c) {expectedBg_=c;}
+    void setConnectorColour(QColor c) {connectorColour_=c;}
 
     enum ScrollMode {
           ScrollPerItem,
@@ -137,7 +140,11 @@ private:
     void insertViewItems(int pos, int count, const CompactViewItem &viewItem);
     void removeViewItems(int pos, int count);
 
+    void doDelayedWidthAdjustment();
+
     int connectorPos(CompactViewItem* item, CompactViewItem* parent) const;
+    int translation() const;
+
 
     QStyleOptionViewItem viewOptions() const;
 
@@ -145,6 +152,7 @@ private:
     ScrollMode verticalScrollMode_;
     mutable std::vector<CompactViewItem> viewItems_;
     int rowCount_;
+    int maxRowWidth_;
     mutable int lastViewedItem_;
     QModelIndex root_;
     int topMargin_;
@@ -158,6 +166,9 @@ private:
     QPersistentModelIndex pressedIndex_;
     QStyledItemDelegate* itemDelegate_;
     QColor expectedBg_;
+    QColor connectorColour_;
+    QBasicTimer delayedWidth_;
+    int delayedTimeout_;
 
     // used when expanding and collapsing items
     QSet<QPersistentModelIndex> expandedIndexes;

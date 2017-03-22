@@ -44,8 +44,8 @@ public:
 	void task(VTask_ptr);
 
 	//From AbstractObserver
-   virtual void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) {}
-   virtual void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) {}
+    virtual void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) {}
+    virtual void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) {}
 	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
 	void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
 	void update_delete(const Node*);

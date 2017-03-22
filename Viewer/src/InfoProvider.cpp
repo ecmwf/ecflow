@@ -282,6 +282,10 @@ ZombieProvider::ZombieProvider(InfoPresenter* owner) :
 
 }
 
+WhyProvider::WhyProvider(InfoPresenter* owner) :
+        InfoProvider(owner,VTask::WhyTask)
+{
 
+}
 
 

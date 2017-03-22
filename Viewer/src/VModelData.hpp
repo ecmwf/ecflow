@@ -110,6 +110,7 @@ public:
      void setForceShowNode(const VNode* node);
      void setForceShowAttribute(const VAttribute* node);
      void clearForceShow(const VItem*);
+     bool isFirstScan() const {return firstScan_;}
 
     //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
@@ -142,11 +143,15 @@ Q_SIGNALS:
 
 private:
      void updateFilter(const std::vector<VNode*>& suitesChanged);
+     void adjustFirstScan();
 
      VTree* tree_;
      VTreeChangeInfo* changeInfo_;
      AttributeFilter *attrFilter_;
      TreeNodeFilter* filter_;
+     bool firstScan_;
+     int firstScanTryNo_;
+     int maxFirstScanTry_;
 };
 
 class VTableServer : public VModelServer

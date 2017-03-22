@@ -166,8 +166,8 @@ public:
    virtual bool run(JobsParam& jobsParam, bool force) = 0;
 
    /// Recursively determines why the node is not running.
-   virtual void top_down_why(std::vector<std::string>& theReasonWhy) const;
-   void bottom_up_why(std::vector<std::string>& theReasonWhy) const;
+   virtual bool top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   void bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
 
    void freeTrigger() const;
    void clearTrigger() const;
@@ -291,6 +291,9 @@ public:
 
    /// returns abs node path preceded by the type of the node
    std::string debugNodePath() const;
+   static std::string path_href_attribute(const std::string& path);
+   static std::string path_href_attribute(const std::string& path,const std::string& path2);
+   std::string path_href() const;
 
    /// returns true if this node OR any of its children
    /// has cron,time,day,date or today time dependencies
@@ -379,8 +382,8 @@ public:
    void addDay( const DayAttr& );
    void addCron( const ecf::CronAttr& );
 
-   void addLimit(const Limit& );        // will throw std::runtime_error if duplicate
-   void addInLimit(const InLimit& l)         { inLimitMgr_.addInLimit(l);}   // will throw std::runtime_error if duplicate
+   void addLimit(const Limit& );         // will throw std::runtime_error if duplicate
+   void addInLimit(const InLimit& l);    // will throw std::runtime_error if duplicate
    void auto_add_inlimit_externs(Defs* defs) { inLimitMgr_.auto_add_inlimit_externs(defs);}
    void addEvent( const Event& );       // will throw std::runtime_error if duplicate
    void addMeter( const Meter& );       // will throw std::runtime_error if duplicate
@@ -631,7 +634,7 @@ public:
    bool is_observed(AbstractObserver*) const ; // return true if we have this observer in our list
 
 private:
-   void why(std::vector<std::string>& theReasonWhy) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool top_down = false,bool html_tags = false) const;
    /// Function used as a part of trigger and complete expressions.
    /// The search pattern is event,meter,user-variable,repeat, generated-variable
    int findExprVariableValue( const std::string& name) const;

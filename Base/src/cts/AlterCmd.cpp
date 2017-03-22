@@ -25,6 +25,7 @@
 #include "ExprAst.hpp"
 #include "SuiteChanged.hpp"
 #include "Log.hpp"
+#include "Extract.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -123,6 +124,8 @@ static AlterCmd::Add_attr_type addAttrType(const std::string& s)
 	if (s == "zombie") return AlterCmd::ADD_ZOMBIE;
    if (s == "variable") return AlterCmd::ADD_VARIABLE;
    if (s == "late") return AlterCmd::ADD_LATE;
+   if (s == "limit") return AlterCmd::ADD_LIMIT;
+   if (s == "inlimit") return AlterCmd::ADD_INLIMIT;
 	return AlterCmd::ADD_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Add_attr_type a) {
@@ -134,13 +137,15 @@ static std::string to_string(AlterCmd::Add_attr_type a) {
 	case AlterCmd::ADD_ZOMBIE:  return "zombie"; break;
    case AlterCmd::ADD_VARIABLE:return "variable"; break;
    case AlterCmd::ADD_LATE:    return "late"; break;
-	case AlterCmd::ADD_ATTR_ND:  break;
+   case AlterCmd::ADD_LIMIT:   return "limit"; break;
+   case AlterCmd::ADD_INLIMIT: return "inlimit"; break;
+	case AlterCmd::ADD_ATTR_ND: break;
 	}
 	return string();
 }
 static void validAddAttr(std::vector<std::string>& vec)
 {
-	vec.reserve(7);
+	vec.reserve(8);
 	vec.push_back("time");
 	vec.push_back("today");
 	vec.push_back("date");
@@ -148,6 +153,7 @@ static void validAddAttr(std::vector<std::string>& vec)
 	vec.push_back("zombie");
    vec.push_back("variable");
    vec.push_back("late");
+   vec.push_back("limit");
 }
 
 
@@ -372,6 +378,33 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 			case AlterCmd::ADD_ZOMBIE:  node->addZombie( ZombieAttr::create(name_) ); break;
          case AlterCmd::ADD_VARIABLE:node->add_variable( name_, value_); break;
          case AlterCmd::ADD_LATE:    node->addLate( LateAttr::create(name_)); break;
+         case AlterCmd::ADD_LIMIT: {
+             int int_value = 0;
+             try { int_value = boost::lexical_cast< int >( value_ ); }
+             catch ( boost::bad_lexical_cast& ) {
+                std::stringstream ss; ss << "AlterCmd: add_limit " << name_ << " " << value_ << " failed. Expected '" <<  value_ << "' to be convertible to an integer";
+                throw std::runtime_error( ss.str() );
+             }
+            node->addLimit( Limit(name_, int_value));
+            break;
+         }
+         case AlterCmd::ADD_INLIMIT: {
+            string path_to_limit; // This can be empty
+            string limitName;
+            if ( !Extract::pathAndName( name_, path_to_limit, limitName ) ) {
+               throw std::runtime_error( "AlterCmd::ADD_INLIMIT: Invalid inlimit : " + name_);
+            }
+            int token_value = 1;
+            if (!value_.empty()) {
+               try { token_value = boost::lexical_cast< int >( value_ ); }
+               catch ( boost::bad_lexical_cast& ) {
+                  ss << "AlterCmd: add_inlimit expected '" << value_ << "' to be convertible to an integer";
+                  throw std::runtime_error( ss.str() );
+               }
+            }
+            node->addInLimit( InLimit( limitName, path_to_limit, token_value ) ); // will throw if not valid
+            break;
+         }
 			case AlterCmd::ADD_ATTR_ND:  break;
 			}
 		}
@@ -420,7 +453,7 @@ const char* AlterCmd::desc() {
          "             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
          "             the change to take effect fully.\n"
          "         For add:\n"
-         "           [ variable | time | today | date | day | zombie | late ]\n"
+         "           [ variable | time | today | date | day | zombie | late | limit | inlimit ]\n"
          "         For set_flag and clear_flag:\n"
          "           [ force_aborted | user_edit | task_aborted | edit_failed |\n"
          "             ecfcmd_failed | no_script | killed | migrated | late |\n"
@@ -502,8 +535,8 @@ void AlterCmd::create( 	Cmd_ptr& cmd,
 void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths ) const
 {
 	// options[0]  - add
-	// options[1]  - [ time | date | day | zombie | variable ]
-	// options[2]  - [ time_string | date_string | day_string | zombie_string | variable_name ]
+	// options[1]  - [ time | date | day | zombie | variable | limit | inlimit ]
+	// options[2]  - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name | path_to_limit ]
 	// options[3]  - variable_value
 	std::stringstream ss;
 
@@ -553,6 +586,54 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
 			Variable check(name,value);
 			break;
 		}
+      case AlterCmd::ADD_LIMIT: {  // inlimit /obs/limits:hpcd
+         if (options.size() < 4 ) {
+            ss << "AlterCmd: add: Expected 'add inlimit <name> <paths>. Not enough arguments\n" << dump_args(options,paths) << "\n";
+            throw std::runtime_error( ss.str() );
+         }
+         value = options[3];
+
+         int int_value = 0;
+         try { int_value = boost::lexical_cast< int >( value ); }
+         catch ( boost::bad_lexical_cast& ) {
+            ss << "AlterCmd: " << options[0] << " " << options[1] << " " << options[2] << " " << options[3] << paths[0];
+            ss << " expected '" << value << "' to be convertible to an integer\n";
+            ss << dump_args(options,paths) << "\n";
+            throw std::runtime_error( ss.str() );
+         }
+         Limit check(name,int_value); // will throw if not valid
+         break;
+      }
+      case AlterCmd::ADD_INLIMIT: {  // inlimit /obs/limits:hpcd 2 name=hpcd, path=/obs/limits, tokens=2(optional)
+         // options[0]  - add
+         // options[1]  - [ inlimit ]
+         // options[2]  - [ path_to_limit:limit_name ]
+         // options[3]  - integer (optional)
+         if (options.size() < 3 ) {
+            ss << "AlterCmd: add: Expected 'add inlimit <path-to-limit:limit_name> <int>(optional) <paths>. Not enough arguments\n" << dump_args(options,paths) << "\n";
+            throw std::runtime_error( ss.str() );
+         }
+
+         string path_to_limit; // This can be empty
+         string limitName;
+         if ( !Extract::pathAndName( options[2], path_to_limit, limitName ) ) {
+            throw std::runtime_error( "AlterCmd::ADD_INLIMIT: Invalid inlimit : " +   options[2] );
+         }
+
+         int token_value = 1;
+         if (options.size() == 4) {
+            value = options[3];
+            try { token_value = boost::lexical_cast< int >( options[3] ); }
+            catch ( boost::bad_lexical_cast& ) {
+               ss << "AlterCmd: " << options[0] << " " << options[1] << " " << options[2] << " " << options[3] << paths[0];
+               ss << " expected '" << options[3] << "' to be convertible to an integer\n";
+               ss << dump_args(options,paths) << "\n";
+               throw std::runtime_error( ss.str() );
+            }
+         }
+         InLimit inlimit( limitName, path_to_limit, token_value ); // will throw if not valid
+         break;
+      }
 		case AlterCmd::ADD_ATTR_ND:break;
 		}
 	}
@@ -850,17 +931,15 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
 		break; }
 
-
 	case AlterCmd::LABEL: {
-
 	   if (options.size() == 3 && paths.size() == 1) {
 	      // ECFLOW-648 allow label value to be empty
 	      // HOWEVER , we can not cope multiple paths, and setting value to empty.
-	      // since empty quotes are removed by boost program options, hence if we have a lavel value which is path, and multiple paths
+	      // since empty quotes are removed by boost program options, hence if we have a label value which is path, and multiple paths
 	      value.clear();
 	   }
 	   else {
-	      // ECFLOW-480 take into account label values that is a path, add ing quotes around the value does not help:
+	      // ECFLOW-480 take into account label values that is a path, adding quotes around the value does not help:
 	      // Note boost program options will remove the quotes around the value
 	      //      hence its difficult to say what is an option and what is a path.
 	      //      However since we expect 4(change,label,<label_name>,<label_value>) options, work around the problem
@@ -893,17 +972,6 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
       break; }
 
 	case AlterCmd::TRIGGER: {
-		// ECFLOW-137, if the expression contains a leading '/' and *no* spaces,
-		//             then it will get treated as a path and not an option
-		// i.e     change trigger 'expression'    <path_to_node>
-		//         change trigger "/suite/task:a" /path/to/a/node
-		// Note boost program options will remove the quotes around the expression
-		//      hence its difficult to say what is an option and what is a path.
-		//      However since we expect 3 options, work around the problem
-		if (options.size() == 2 && paths.size() == 2) {
-			options.push_back(paths[0]);
-			paths.erase(paths.begin()); // remove first path, since it has been added to options
-		}
 		if (options.size() != 3) {
 			ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
 			ss << " but found " << (options.size() + paths.size()) << " arguments. The trigger expression must be quoted\n";
@@ -924,10 +992,6 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 		break; }
 
 	case AlterCmd::COMPLETE: {
-		if (options.size() == 2 && paths.size() == 2) {
-			options.push_back(paths[0]);
-			paths.erase(paths.begin()); // remove first path, since it has been added to options
-		}
 		if (options.size() != 3) {
 			ss << "AlterCmd: change complete: expected four args: change complete 'expression'  <path_to_node> ";
 			ss << " but found " << (options.size() + paths.size()) << " arguments. The expression must be quoted\n";

@@ -54,6 +54,34 @@ const char* NState::toString( NState::State s ) {
 	return NULL;
 }
 
+
+const char* NState::to_html( NState::State s ) {
+   switch ( s ) {
+      case NState::UNKNOWN:
+         return "<state>unknown</state>";
+         break;
+      case NState::COMPLETE:
+         return "<state>complete</state>";
+         break;
+      case NState::QUEUED:
+         return "<state>queued</state>";
+         break;
+      case NState::ABORTED:
+         return "<state>aborted</state>";
+         break;
+      case NState::SUBMITTED:
+         return "<state>submitted</state>";
+         break;
+      case NState::ACTIVE:
+         return "<state>active</state>";
+         break;
+      default:
+         assert(false); break;
+   }
+   assert(false);
+   return NULL;
+}
+
 NState::State NState::toState( const std::string& str ) {
 	if ( str == "complete" )
 		return NState::COMPLETE;

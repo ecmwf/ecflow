@@ -70,6 +70,36 @@ const char* DState::toString( DState::State s ) {
 	return NULL;
 }
 
+const char* DState::to_html( DState::State s ) {
+   switch ( s ) {
+      case DState::UNKNOWN:
+         return "<state>unknown</state>";
+         break;
+      case DState::COMPLETE:
+         return "<state>complete</state>";
+         break;
+      case DState::QUEUED:
+         return "<state>queued</state>";
+         break;
+      case DState::ABORTED:
+         return "<state>aborted</state>";
+         break;
+      case DState::SUBMITTED:
+         return "<state>submitted</state>";
+         break;
+      case DState::SUSPENDED:
+         return "<state>suspended</state>";
+         break;
+      case DState::ACTIVE:
+         return "<state>active</state>";
+         break;
+      default:
+         assert(false);break;
+   }
+   assert(false);
+   return NULL;
+}
+
 DState::State DState::toState( const std::string& str ) {
 	if ( str == "complete" )
 		return DState::COMPLETE;

@@ -64,12 +64,15 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
    defs_ptr defs = server_reply.client_defs();
    node_ptr node = server_reply.client_node();
 
-	if ( cts_cmd->get_cmd() && (defs.get() || node.get())) {
-		if (debug) std::cout << "   GroupSTCCmd::handle_server_response *get* was called\n";
+	if (  defs.get() || node.get() ) {
+		if (debug) std::cout << "   GroupSTCCmd::handle_server_response *get* | *sync* | *sync_full* called\n";
 
 		/// client --group="get; show"         # where get will call DefsCmd will return defs, from the server
       /// client --group="get; show state"   # where get will call DefsCmd will return defs, from the server
       /// client --group="get /s1; show state"   # where get will call DefsCmd will return defs, from the server
+      /// client --group="sync_full; show"       # similar to get return defs, from the server
+      /// client --group="sync 1 0 0; show"      # where sync will call SyncCmd will return defs, from the server
+		///                                        # will return those suites with handle 1
 
 		// Print out the data that was received from server. as a part of get request.
 		// The server can not do a show, it MUST be done at the Client side

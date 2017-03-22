@@ -123,6 +123,7 @@
                         "line" : "tree.display_child_count",
                         "line" : "tree.indentation",
                         "line" : "tree.drawBranchLine",
+                        "line" : "tree.branchLineColour",
                         "line" : "tree.background"
                     },
                     "group" : {

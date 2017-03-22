@@ -105,6 +105,10 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	         node->miss_next_time_slot();
  	      }
 
+ 	      if ( new_state != NState::ACTIVE && new_state != NState::SUBMITTED) {
+ 	         as->zombie_ctrl().add_user_zombies(node);
+ 	      }
+
  	      if (recursive_) node->set_state_hierarchically( new_state, true /* force */ );
  	      else            node->set_state( new_state, true /* force */  );
  	   }
@@ -206,7 +210,7 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
 	}
 
 	std::vector<std::string> options,paths;
-   split_args_to_options_and_paths(args,options,paths); // relative order is still preserved
+   split_args_to_options_and_paths(args,options,paths,true/*treat_colon_in_path_as_path*/); // relative order is still preserved
    if (paths.empty()) {
       std::stringstream ss;
       ss << "ForceCmd: No paths specified. Paths must begin with a leading '/' character\n" << ForceCmd::desc() << "\n";

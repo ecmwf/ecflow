@@ -204,25 +204,46 @@ std::ostream& UserCmd::user_cmd(std::ostream& os, const std::string& the_cmd) co
 void UserCmd::split_args_to_options_and_paths(
           const std::vector<std::string>& args,
           std::vector<std::string>& options,
-          std::vector<std::string>& paths)
+          std::vector<std::string>& paths,
+          bool treat_colon_in_path_as_path)
 {
    // ** ECFLOW-137 **, if the trigger expression have a leading '/' then it gets parsed into the paths
    //                   vector and not options
    // This is because boost program options does *NOT* seem to preserve the leading quotes around the
    // trigger/complete expression,  i.e "/suite/t2 == complete"   is read as /suite/t2 == complete
-   // However in paths  we do expect to see any spaces
+   // However in paths we do expect to see any spaces
 
+   // Note: Node names are not allowed ':', hence ':' in a node path is always to reference a node attribute, event,limit in this case
+   // However we need to deal with special situations:
+   //   o --alter add inlimit /path/to/node/withlimit:limit_name 10  /s1  # TREAT /path/to/node/withlimit:limit_name as a OPTION
+   //   o --change trigger "/suite/task:a" /path/to/a/node                # TREAT "/suite/task:a" as a OPTION
+   //   o --force=clear /suite/task:ev                                    # TREAT /suite/task:ev as a PATH
+   // We need to distinguish between the two, hence use treat_colon_in_path_as_path
    size_t vec_size = args.size();
-   for(size_t i = 0; i < vec_size; i++) {
-      if (args[i].empty()) continue;
-      if (args[i][0] == '/' && args[i].find(" ") == std::string::npos) {
-         paths.push_back(args[i]);
-      }
-      else {
-         options.push_back(args[i]);
+   if (treat_colon_in_path_as_path ) {
+      for(size_t i = 0; i < vec_size; i++) {
+         if (args[i].empty()) continue;
+         if (args[i][0] == '/' && args[i].find(" ") == std::string::npos) {
+            // --force=clear /suite/task:ev  -> treat '/suite/task:ev' as a path
+            paths.push_back(args[i]);
+         }
+         else {
+            options.push_back(args[i]);
+         }
       }
    }
-
+   else {
+      // Treat ':' is path as a option, TREAT '/path/to/node/withlimit:limit_name' as a option
+      for(size_t i = 0; i < vec_size; i++) {
+         if (args[i].empty()) continue;
+         if (args[i][0] == '/' && args[i].find(" ") == std::string::npos && args[i].find(":") == std::string::npos) {
+            paths.push_back(args[i]);
+         }
+         else {
+            options.push_back(args[i]);
+         }
+      }
+   }
 #ifdef DEBUG_ME
    std::cout << "split_args_to_options_and_paths\n";
    for(size_t i = 0; i < args.size(); ++i) { std::cout << "args[" << i << "]=" <<args[i] << "\n"; }

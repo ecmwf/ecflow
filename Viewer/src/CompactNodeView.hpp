@@ -81,6 +81,7 @@ protected:
     void regainSelectionFromExpand();
 
     void adjustBackground(QColor col);
+    void adjustBranchLineColour(QColor col);
     void adjustServerToolTip(bool);
     void adjustNodeToolTip(bool);
     void adjustAttributeToolTip(bool);

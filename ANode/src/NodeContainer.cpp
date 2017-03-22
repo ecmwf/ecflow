@@ -191,11 +191,18 @@ void NodeContainer::status()
 	for(size_t t = 0; t < node_vec_size; t++)   {     nodeVec_[t]->status(); }
 }
 
-void NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy) const
+bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-	Node::why(theReasonWhy);
- 	size_t node_vec_size = nodeVec_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   {     nodeVec_[t]->top_down_why(theReasonWhy); }
+   bool why_found = Node::why(theReasonWhy,true/*top down*/,html_tags);
+   if (!why_found) {
+      size_t node_vec_size = nodeVec_.size();
+      for(size_t t = 0; t < node_vec_size; t++)   {
+         if (nodeVec_[t]->top_down_why(theReasonWhy,html_tags)) {
+            why_found = true;
+         }
+      }
+   }
+   return why_found;
 }
 
 void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) const

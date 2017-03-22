@@ -20,7 +20,7 @@ class NodeStateFilter;
 class ServerFilter;
 class VParamFilterMenu;
 class VSettings;
-
+class VTreeServer;
 class TreeNodeWidget : public NodeWidget, public VPropertyObserver, protected Ui::TreeNodeWidget
 {
 Q_OBJECT
@@ -32,7 +32,7 @@ public:
 	void populateDockTitleBar(DashboardDockTitleWidget* tw);
 
 	void rerender();
-	bool selectFirstServerInView();
+    bool initialSelectionInView();
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 
@@ -42,6 +42,7 @@ protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
 	void slotSelectionChangedInView(VInfo_ptr info);
 	void slotAttsChanged();
+    void firstScanEnded(const VTreeServer*);
 
 protected:
     enum ViewLayoutMode {StandardLayoutMode,CompactLayoutMode};
@@ -58,6 +59,8 @@ protected:
     VProperty* layoutProp_;
 
 	static AttributeFilter* lastAtts_;
+
+    std::string firstSelectionPath_;
 };
 
 #endif

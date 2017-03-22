@@ -825,7 +825,8 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
 		painter->setClipRect(option.rect);
 	}
 
-	//Draw name	painter->setPen(Qt::black);
+    //Draw name
+    painter->setPen(Qt::black);
 	painter->setFont(nameFont);
 	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
 

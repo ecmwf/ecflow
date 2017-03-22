@@ -251,8 +251,11 @@ void InfoPanelItem::linkSelected(const std::string& path)
     {
         VInfo_ptr info=VInfo::createFromPath(info_->server(),path);
 
-        assert(owner_);
-        owner_->linkSelected(info);
+        if(info)
+        {
+            assert(owner_);
+            owner_->linkSelected(info);
+        }
     }
 }
 

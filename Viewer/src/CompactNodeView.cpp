@@ -26,6 +26,7 @@
 #include "PropertyMapper.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VFilter.hpp"
 #include "VModelData.hpp"
@@ -62,25 +63,42 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
     //Properties
     std::vector<std::string> propVec;
     propVec.push_back("view.tree.background");
-    //propVec.push_back("view.tree.drawBranchLine");
+    propVec.push_back("view.tree.branchLineColour");
     propVec.push_back("view.tree.serverToolTip");
     propVec.push_back("view.tree.nodeToolTip");
     propVec.push_back("view.tree.attributeToolTip");
     prop_=new PropertyMapper(propVec,this);
 
+    VProperty *prop=0;
+    std::string propName;
+
     //Init stylesheet related properties
-    Q_ASSERT(prop_->find("view.tree.background"));
-    adjustBackground(prop_->find("view.tree.background")->value().value<QColor>());
+    propName="view.tree.background";
+    prop=prop_->find(propName);
+    UI_ASSERT(prop,"Could not find property=" + propName);
+    adjustBackground(prop->value().value<QColor>());
+
+    //Init stylesheet related properties
+    propName="view.tree.branchLineColour";
+    prop=prop_->find(propName);
+    UI_ASSERT(prop,"Could not find property=" + propName);
+    adjustBranchLineColour(prop->value().value<QColor>());
 
     //Adjust tooltip
-    Q_ASSERT(prop_->find("view.tree.serverToolTip"));
-    adjustServerToolTip(prop_->find("view.tree.serverToolTip")->value().toBool());
+    propName="view.tree.serverToolTip";
+    prop=prop_->find(propName);
+    UI_ASSERT(prop,"Could not find property=" + propName);
+    adjustServerToolTip(prop->value().toBool());
 
-    Q_ASSERT(prop_->find("view.tree.nodeToolTip"));
-    adjustNodeToolTip(prop_->find("view.tree.nodeToolTip")->value().toBool());
+    propName="view.tree.nodeToolTip";
+    prop=prop_->find(propName);
+    UI_ASSERT(prop,"Could not find property=" + propName);
+    adjustNodeToolTip(prop->value().toBool());
 
-    Q_ASSERT(prop_->find("view.tree.attributeToolTip"));
-    adjustAttributeToolTip(prop_->find("view.tree.attributeToolTip")->value().toBool());
+    propName="view.tree.attributeToolTip";
+    prop=prop_->find(propName);
+    UI_ASSERT(prop,"Could not find property=" + propName);
+    adjustAttributeToolTip(prop->value().toBool());
 
     inStartUp_=false;
 }
@@ -157,7 +175,7 @@ void CompactNodeView::setCurrentSelection(VInfo_ptr info)
 #ifdef _UI_COMPACTNODEVIEW_DEBUG
         UiLog().dbg() << "CompactNodeView::setCurrentSelection --> " << info->path();
 #endif
-        //setCurrentIndex(idx);
+        setCurrentIndex(idx);
     }
     setCurrentIsRunning_=false;
 }
@@ -456,6 +474,11 @@ void CompactNodeView::adjustBackground(QColor col)
     }
 }
 
+void CompactNodeView::adjustBranchLineColour(QColor col)
+{
+    setConnectorColour(col);
+}
+
 void CompactNodeView::adjustServerToolTip(bool st)
 {
     model_->setEnableServerToolTip(st);
@@ -476,6 +499,10 @@ void CompactNodeView::notifyChange(VProperty* p)
     if(p->path() == "view.tree.background")
     {
         adjustBackground(p->value().value<QColor>());
+    }
+    else if(p->path() == "view.tree.branchLineColour")
+    {
+        adjustBranchLineColour(p->value().value<QColor>());
     }
     else if(p->path() == "view.tree.serverToolTip")
     {

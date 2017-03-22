@@ -96,6 +96,7 @@ Q_SIGNALS:
     void filterUpdateAddEnded(const VTreeNode*);
     void filterChangeBegun();
     void filterChangeEnded();
+    void firstScanEnded(const VTreeServer*);
 
 protected:
     QModelIndex forceShowNode(const VNode* node) const;

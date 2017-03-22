@@ -20,6 +20,7 @@
 #include "TreeNodeView.hpp"
 #include "VFilter.hpp"
 #include "VConfig.hpp"
+#include "VModelData.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
@@ -65,6 +66,10 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
     Q_ASSERT(view_==0);
     setViewLayoutMode(viewLayoutMode_);
 
+    connect(model_,SIGNAL(firstScanEnded(const VTreeServer*)),
+           this,SLOT(firstScanEnded(const VTreeServer*)));
+
+
 #if 0
     if(compact)
     {
@@ -101,6 +106,9 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
 
     connect(model_,SIGNAL(scanEnded(const VTreeNode*)),
             view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+
+    connect(model_,SIGNAL(firstScanEnded(const VTreeServer*)),
+            this,SLOT(firstScanEnded(const VTreeServer*)));
 
 	connect(model_,SIGNAL(rerender()),
 	        view_->realWidget(),SLOT(slotRerender()));
@@ -287,10 +295,28 @@ void TreeNodeWidget::rerender()
 	view_->rerender();
 }
 
-bool TreeNodeWidget::selectFirstServerInView()
+
+bool TreeNodeWidget::initialSelectionInView()
 {
-	view_->selectFirstServer();
-	return true;
+    //Seeting the initail selection is probably unsuccessful because at
+    //this point the servers are probably not fully loaded
+    VInfo_ptr selInfo=VInfo::createFromPath(firstSelectionPath_);
+    if(selInfo)
+        view_->setCurrentSelection(selInfo);
+    else
+        view_->selectFirstServer();
+
+    return true;
+}
+
+//When the first successful scan ended we try to set the initial selection
+void TreeNodeWidget::firstScanEnded(const VTreeServer* s)
+{
+    VInfo_ptr selInfo=VInfo::createFromPath(firstSelectionPath_);
+    if(selInfo && selInfo->server() == s->realServer())
+    {
+        view_->setCurrentSelection(selInfo);
+    }
 }
 
 void TreeNodeWidget::slotAttsChanged()
@@ -318,6 +344,12 @@ void TreeNodeWidget::writeSettings(VSettings* vs)
 	vs->put("type",type_);
 	vs->put("dockId",id_);
 
+    VInfo_ptr sel=currentSelection();
+    if(sel)
+    {
+        vs->put("selection",sel->storedPath());
+    }
+
 	bcWidget_->writeSettings(vs);
 
 	states_->writeSettings(vs);
@@ -332,6 +364,9 @@ void TreeNodeWidget::readSettings(VSettings* vs)
 	std::string type=vs->get<std::string>("type","");
 	if(type != type_)
 		return;
+
+    //The selection on last exit. We will use it later when the server is fully loaded.
+    firstSelectionPath_=vs->get<std::string>("selection","");
 
 	//This will not emit the changed signal. So the "observers" will
 	//not notice the change.

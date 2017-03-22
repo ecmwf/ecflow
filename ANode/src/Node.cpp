@@ -1714,14 +1714,14 @@ bool Node::operator==(const Node& rhs) const
 
 //#define DEBUG_WHY 1
 
-void Node::top_down_why(std::vector<std::string>& theReasonWhy) const
+bool Node::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   why(theReasonWhy);
+   return why(theReasonWhy,true/* top down */,html_tags);
 }
 
-void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
+void Node::bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   defs()->why(theReasonWhy);
+   defs()->why(theReasonWhy,html_tags);
 
    std::vector<Node*> vec;
    vec.push_back(const_cast<Node*>(this));
@@ -1732,40 +1732,53 @@ void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
    }
    vector<Node*>::reverse_iterator r_end = vec.rend();
    for(vector<Node*>::reverse_iterator r = vec.rbegin(); r!=r_end; ++r) {
-      (*r)->why(theReasonWhy);
+      (void)(*r)->why(theReasonWhy,false,html_tags);
    }
 }
 
-void Node::why(std::vector<std::string>& vec) const
+bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
 {
 #ifdef DEBUG_WHY
    std::cout << "Node::why " << debugNodePath() << " (" << NState::toString(state()) << ")\n";
 #endif
+   bool why_found = false;
    if (isSuspended()) {
-      std::string theReasonWhy = "The node '";
-      theReasonWhy += debugNodePath();
-      theReasonWhy += "' is suspended.";
+      std::string theReasonWhy;
+      if (html) {
+         theReasonWhy = path_href();
+         theReasonWhy += " is ";
+         theReasonWhy += DState::to_html(DState::SUSPENDED);
+      }
+      else {
+         theReasonWhy = debugNodePath();
+         theReasonWhy += " is suspended";
+      }
       vec.push_back(theReasonWhy);
+      why_found = true ; // return true if why found
    }
    else if (state() != NState::QUEUED && state() != NState::ABORTED) {
       std::stringstream ss;
-      ss << "The node '" << debugNodePath() << "' (" << NState::toString(state()) << ") is not queued or aborted.";
+      if (html) ss << path_href()     << " (" << NState::to_html(state()) << ") is not queued or aborted";
+      else      ss << debugNodePath() << " (" << NState::toString(state()) << ") is not queued or aborted";
       vec.push_back(ss.str());
 
       // When task is active/submitted no point, going any further.
       // However for FAMILY/SUITE we still need to proceed
-      if (isTask()) return;
+      if (isTask()) return why_found;
+      why_found = true ; // return true if why found
    }
 
-   // Check  limits using in limit manager
-   inLimitMgr_.why(vec);
+   // Check limits using in limit manager
+   if (inLimitMgr_.why(vec,top_down,html)) why_found = true ; // return true if why found
 
    // Prefix <node-type> <path> <state>
    std::string prefix = debugType();
    prefix += " ";
-   prefix += absNodePath();
-   prefix += " (";
-   prefix += NState::toString(state());
+   if (html) prefix += path_href_attribute(absNodePath());
+   else      prefix += absNodePath();
+   prefix += "(";
+   if (html) prefix += NState::to_html(state());
+   else      prefix += NState::toString(state());
    prefix += ") ";
 
    if (time_dep_attrs_) {
@@ -1773,7 +1786,7 @@ void Node::why(std::vector<std::string>& vec) const
       std::cout << "   Node::why " << debugNodePath() << " checking time dependencies\n";
 #endif
       // postfix  = <attr-type dependent> <next run time > < optional current state>
-      time_dep_attrs_->why(vec,prefix);
+      if (time_dep_attrs_->why(vec,prefix)) why_found = true ; // return true if why found
    }
 
    // **************************************************************************************
@@ -1792,9 +1805,13 @@ void Node::why(std::vector<std::string>& vec) const
          std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
          std::string postFix;
-         if (theTriggerAst->why(postFix)) { vec.push_back(prefix + postFix); }
+         if (theTriggerAst->why(postFix,html)) {
+            vec.push_back(prefix + postFix);
+            why_found = true ; // return true if why found
+         }
       }
    }
+   return why_found; // no why found
 }
 
 bool Node::checkInvariants(std::string& errorMsg) const
@@ -1848,6 +1865,34 @@ std::string Node::debugNodePath() const
    std::string ret = debugType();
    ret += Str::COLON();
    ret += absNodePath();
+   return ret;
+}
+
+std::string Node::path_href_attribute(const std::string& path)
+{
+   std::string ret = "<a href=\"";
+   ret += path;
+   ret += "\">";
+   ret += path;
+   ret += "</a>";
+   return ret;
+}
+
+std::string Node::path_href_attribute(const std::string& path,const std::string& path2)
+{
+   std::string ret = "<a href=\"";
+   ret += path;
+   ret += "\">";
+   ret += path2;
+   ret += "</a>";
+   return ret;
+}
+
+std::string Node::path_href() const
+{
+   std::string ret = debugType();
+   ret += " ";
+   ret += path_href_attribute(absNodePath());
    return ret;
 }
 
