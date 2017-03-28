@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -8,24 +8,27 @@
 //
 //============================================================================
 
-#ifndef TreeNodeViewDelegate_HPP_
-#define TreeNodeViewDelegate_HPP_
+#ifndef FONTMETRICS_HPP
+#define FONTMETRICS_HPP
 
-#include "TreeNodeViewDelegateBase.hpp"
+#include <QFontMetrics>
 
-class TreeNodeViewDelegate : public TreeNodeViewDelegateBase
+class FontMetrics : public QFontMetrics
 {
 public:
-    explicit TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent=0);
-	~TreeNodeViewDelegate();
+    FontMetrics(const QFont &font);
+    int realHeight() const {return realHeight_;}
+    int topPaddingForCentre() const {return topPadding_;}
+    int bottomPaddingForCentre() const {return bottomPadding_;}
 
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
+protected:
+    int realHeight_;
+    int topPadding_;
+    int bottomPadding_;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;   
+private:
+    void computeRealHeight(QFont f);
 };
 
-#endif
 
-
-
+#endif // FONTMETRICS_HPP

@@ -919,6 +919,9 @@ void VTableServer::reload()
 //has to be visible even if it does not match the filter.
 void VTableServer::setForceShowNode(const VNode* node)
 {
+    if(inScan_)
+        return;
+
     if(filter_->indexOf(node) != -1)
     {
         clearForceShow(node);

@@ -17,21 +17,29 @@
 #include <QPen>
 #include <QStyledItemDelegate>
 
+#include "FontMetrics.hpp"
 #include "VProperty.hpp"
 
 #include <string>
 
 class PropertyMapper;
 
-struct NodeDelegateBox
+//Base class for the node/attr renderer properties
+struct BaseNodeDelegateBox
 {
-    NodeDelegateBox() : height(10) {}
-    void adjust(int fontHeight) {
-        height=fontHeight+topPadding+bottomPadding;
-        fullHeight=height+topMargin+bottomMargin;
-        sizeHintCache=QSize(100,fullHeight);
+    BaseNodeDelegateBox() : fontHeight(10), height(10), fullHeight(10), topMargin(0), bottomMargin(0),
+       leftMargin(0), rightMargin(0), topPadding(0), bottomPadding(0),
+       leftPadding(0), rightPadding(0), sizeHintCache(QSize(10,10)), spacing(2) {}
+
+    virtual void adjust(const QFont& f)=0;
+    virtual QRect adjustTextRect(const QRect& rIn) const { QRect r=rIn; return r;}
+    virtual QRect adjustSelectionRect(const QRect& optRect) const {
+        QRect r=optRect;
+        r.adjust(leftMargin,1,-1,-1);
+        return r;
     }
 
+    int fontHeight;
     int height;
     int fullHeight;
     int topMargin;
@@ -41,8 +49,55 @@ struct NodeDelegateBox
     int topPadding;
     int bottomPadding;
     int leftPadding;
-    int rightPadding;
+    int rightPadding;  
     QSize sizeHintCache;
+    int spacing;
+};
+
+//Node renderer properties
+struct NodeDelegateBox : public BaseNodeDelegateBox
+{
+    NodeDelegateBox() : iconSize(16), iconPreGap(2),
+       iconGap(2) {}
+
+    int iconSize;
+    int iconPreGap;
+    int iconGap;
+
+    void adjust(const QFont& f) {
+         QFontMetrics fm(f);
+         fontHeight=fm.height();
+         height=fontHeight+topPadding+bottomPadding;
+         fullHeight=height+topMargin+bottomMargin;
+         sizeHintCache=QSize(100,fullHeight);
+         spacing=fm.width('A')*3/4;
+
+         int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
+         iconSize=h;
+         if(iconSize % 2 == 1)
+             iconSize+=1;
+
+         iconGap=1;
+         if(iconSize > 16)
+             iconGap=2;
+
+         iconPreGap=fm.width('A')/2;
+     }
+};
+
+//Attr renderer properties
+struct AttrDelegateBox : public BaseNodeDelegateBox
+{
+    AttrDelegateBox() {}
+
+    void adjust(const QFont& f) {
+         QFontMetrics fm(f);
+         fontHeight=fm.height();
+         height=fontHeight+topPadding+bottomPadding;
+         fullHeight=height+topMargin+bottomMargin;
+         sizeHintCache=QSize(100,fullHeight);
+         spacing=fm.width('A')*3/4;
+     }
 };
 
 class NodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
@@ -51,12 +106,9 @@ public:
 	explicit NodeViewDelegate(QWidget *parent=0);
 	~NodeViewDelegate();
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
-
 	void notifyChange(VProperty*);
 
 protected:
-	void adjustIconSize();
 	virtual void updateSettings()=0;
     void addBaseSettings(std::vector<std::string>&);
     void updateBaseSettings();
@@ -97,13 +149,8 @@ protected:
 	PropertyMapper* prop_;
 	QFont font_;
     QFont attrFont_;
-    int fontHeight_;
-    int attrFontHeight_;
-    int iconSize_;
-	int iconGap_;
-
-    NodeDelegateBox nodeBox_;
-    NodeDelegateBox attrBox_;
+    NodeDelegateBox* nodeBox_;
+    AttrDelegateBox* attrBox_;
 
 	bool useStateGrad_;
 	mutable QLinearGradient grad_;

@@ -22,6 +22,7 @@
 #include "ActionHandler.hpp"
 #include "Animation.hpp"
 #include "AttributeEditor.hpp"
+#include "CompactNodeViewDelegate.hpp"
 #include "ExpandState.hpp"
 #include "PropertyMapper.hpp"
 #include "TreeNodeModel.hpp"
@@ -59,6 +60,9 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
 
     //expandState_=new ExpandState(this,model_);
     actionHandler_=new ActionHandler(this);
+
+    connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
+            this,SLOT(slotSizeHintChangedGlobal()));
 
     //Properties
     std::vector<std::string> propVec;

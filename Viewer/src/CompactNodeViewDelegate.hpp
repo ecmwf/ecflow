@@ -11,15 +11,16 @@
 #ifndef COMPACTNODEVIEWDELEGATE_HPP
 #define COMPACTNODEVIEWDELEGATE_HPP
 
-#include "TreeNodeViewDelegate.hpp"
+#include "TreeNodeViewDelegateBase.hpp"
 
-class TreeNodeModel;
-
-class CompactNodeViewDelegate : public TreeNodeViewDelegate
+class CompactNodeViewDelegate : public TreeNodeViewDelegateBase
 {
 public:
     explicit CompactNodeViewDelegate(TreeNodeModel* model,QWidget *parent=0);
     ~CompactNodeViewDelegate();
+
+    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const {}
 
     int paintItem(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
@@ -27,11 +28,6 @@ public:
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;
     void sizeHint(const QModelIndex& index,int& w,int& h) const;
     bool isSingleHeight(int h) const;
-
-protected:
-    void widthHintServer(const QModelIndex& index,int& itemWidth,QString text) const;
-    int nodeWidth(const QModelIndex& index,QString text) const;
-    TreeNodeModel* model_;
 };
 
 #endif // COMPACTNODEVIEWDELEGATE_HPP

@@ -160,6 +160,7 @@ private:
     int topMargin_;
     int leftMargin_;
     int itemGap_;
+    int connectorGap_;
     int expandButtonSize_;
     enum ExpandButtonMode {Classic,Modern};
     ExpandButtonMode expandButtonMode_;

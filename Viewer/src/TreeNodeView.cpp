@@ -56,7 +56,7 @@ TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget
 	setModel(model_);
 
 	//Create delegate to the view
-	delegate_=new TreeNodeViewDelegate(this);
+    delegate_=new TreeNodeViewDelegate(model_,this);
 	setItemDelegate(delegate_);
 
 	connect(delegate_,SIGNAL(sizeHintChangedGlobal()),

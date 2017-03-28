@@ -27,7 +27,10 @@
 #include <QTimerEvent>
 #include <QToolTip>
 
-#define _UI_COMPACTVIEW_DEBUG
+//#define _UI_COMPACTVIEW_DEBUG
+
+
+
 
 CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     QAbstractScrollArea(parent),
@@ -38,9 +41,10 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     lastViewedItem_(0),
     topMargin_(4),
     leftMargin_(4),
-    itemGap_(20),
+    itemGap_(12),
+    connectorGap_(1),
     expandButtonSize_(8),
-    expandButtonMode_(Modern),
+    expandButtonMode_(Classic),
     connectorColour_(Qt::black)
 {
     delegate_=new CompactNodeViewDelegate(model_,this);
@@ -590,9 +594,9 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
     for(int i=start; i < itemsCount && !leaf; ++i )
     {
         CompactViewItem* item=&(viewItems_[i]);
-
+#ifdef _UI_COMPACTVIEW_DEBUG
         UiLog().dbg() << "item=" << i << " " << item->index.data().toString();
-
+#endif
         leaf=(item->total == 0);
 
         //Init style option
@@ -637,21 +641,20 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             }
         }
 
-#if 0
-        QRect rr=opt.rect;
-        rr.setWidth(item->width);
-        painter->drawRect(rr);
-#endif
+        //QRect rr=opt.rect;
+        //rr.setWidth(item->width);
+        //painter->drawRect(rr);
 
         //Collect expand/collapse button positions
         if(item->hasChildren)
         {
-            QPoint p(item->right()+itemGap_/2,yp+item->height/2);
-            if(item->expanded)
-                collapseButtons << QPoint(item->right()+itemGap_/2,yp+item->height/2);
-            else
-                expandButtons << QPoint(item->right()+expandButtonSize_/2+1,yp+item->height/2);;
-        }
+
+                QPoint p(item->right()+itemGap_/2,yp+item->height/2);
+                if(item->expanded)
+                    collapseButtons << QPoint(item->right()+itemGap_/2,yp+item->height/2);
+                else
+                    expandButtons << QPoint(item->right()+expandButtonSize_/2+1,yp+item->height/2);
+           }
 
         //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
         //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
@@ -668,19 +671,21 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             //The parent item. It is always a node.
             CompactViewItem* pt=&(viewItems_[item->parentItem]);
 
-            //The horizontal line connecting the item to its parent
-            int lineY=yp+pt->height/2;
-            int lineX1=pt->right()+2;
-            int lineX2=item->x-2;
+            //The horizontal line connecting the item to its parent           
+            int lineX1=pt->right()+connectorGap_;
+            int lineX2=item->x-connectorGap_;
             int lineX=(pt->right()+item->x)/2;
-                    //connectorPos(item,pt); //lineX1+lineX2)/2;
-            UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item,pt);
 
+#ifdef _UI_COMPACTVIEW_DEBUG
+            UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item,pt);
+#endif
             Q_ASSERT(lineX==connectorPos(item,pt));
 
             //First child - in the same row as its parent
             if(item->index.row() == 0)
             {
+                int lineY=yp+pt->height/2;
+
                 //horizontal line to the parent
                 painter->drawLine(lineX1,lineY,lineX2,lineY);
 
@@ -696,6 +701,8 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             //Child in the middle - has sibling both upwards and downwards
             else if(item->hasMoreSiblings)
             {
+                int lineY=yp+item->height/2;
+
                 painter->drawLine(lineX,lineY,lineX2,lineY);
                 painter->drawLine(lineX,lineY+rh/2,lineX,lineY-rh/2);
                 indentVec[item->level]=lineX;
@@ -704,9 +711,23 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             //The last child - has sibling only upwards
             else
             {
+                int lineY=yp+item->height/2;
                 painter->drawLine(lineX,lineY,lineX2,lineY);
                 painter->drawLine(lineX,lineY,lineX,lineY-rh/2);
                 indentVec[item->level]=0;
+            }
+        }
+
+        if(expandButtonMode_ == Classic)
+        {
+            if(item->hasChildren && !item->expanded)
+            {
+                int lineY=yp+item->height/2;
+                int lineX=item->right()+connectorGap_;
+                QPen oriPen=painter->pen();
+                painter->setPen(QPen(connectorColour_,1,Qt::DashLine));
+                painter->drawLine(lineX,lineY,lineX+itemGap_-2*connectorGap_,lineY);
+                painter->setPen(oriPen);
             }
         }
 
@@ -731,47 +752,49 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
         itemsInRow++;
     }
 
-    if(expandButtons.isEmpty() == false)
+    if(expandButtonMode_ == Modern)
     {
-        QBrush brushOri=painter->brush();
-        QPen penOri=painter->pen();
-        painter->setBrush(QColor(250,250,250));
-        Q_FOREACH(QPoint p,expandButtons)
+        if(expandButtons.isEmpty() == false)
         {
-            painter->setPen(QColor(90,90,90));
-            QRect r(p.x()-expandButtonSize_/2,p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);           
-            painter->drawRect(r);
-            int xc=r.left()+4;
-            int yc=r.top()+4;
-            painter->setPen(QColor(20,20,20));
-            painter->drawLine(r.left()+2,yc,r.right()-1,yc);
-            painter->drawLine(xc,r.top()+2,xc,r.bottom()-1);
+            QBrush brushOri=painter->brush();
+            QPen penOri=painter->pen();
+            painter->setBrush(QColor(250,250,250));
+            Q_FOREACH(QPoint p,expandButtons)
+            {
+                painter->setPen(connectorColour_);
+                QRect r(p.x()-expandButtonSize_/2,p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
+                painter->drawRect(r);
+                int xc=r.left()+4;
+                int yc=r.top()+4;
+                //painter->setPen(QColor(20,20,20));
+                painter->drawLine(r.left()+2,yc,r.right()-1,yc);
+                painter->drawLine(xc,r.top()+2,xc,r.bottom()-1);
+            }
+
+            painter->setBrush(brushOri);
+            painter->setPen(penOri);
         }
 
-        painter->setBrush(brushOri);
-        painter->setPen(penOri);
-    }
-
-    if(collapseButtons.isEmpty() == false)
-    {
-        QBrush brushOri=painter->brush();
-        QPen penOri=painter->pen();
-        painter->setBrush(QColor(250,250,250));
-        Q_FOREACH(QPoint p,collapseButtons)
+        if(collapseButtons.isEmpty() == false)
         {
-            painter->setPen(QColor(90,90,90));
-            QRect r(p.x()-expandButtonSize_/2,p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);            
-            painter->drawRect(r);
-            int xc=r.left()+4;
-            int yc=r.top()+4;
-            painter->setPen(QColor(20,20,20));
-            painter->drawLine(r.left()+2,yc,r.right()-1,yc);
+            QBrush brushOri=painter->brush();
+            QPen penOri=painter->pen();
+            painter->setBrush(QColor(250,250,250));
+            Q_FOREACH(QPoint p,collapseButtons)
+            {
+                painter->setPen(connectorColour_);
+                QRect r(p.x()-expandButtonSize_/2,p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
+                painter->drawRect(r);
+                int xc=r.left()+4;
+                int yc=r.top()+4;
+                //painter->setPen(QColor(20,20,20));
+                painter->drawLine(r.left()+2,yc,r.right()-1,yc);
+            }
+
+            painter->setBrush(brushOri);
+            painter->setPen(penOri);
         }
-
-        painter->setBrush(brushOri);
-        painter->setPen(penOri);
     }
-
 
     if(itemsInRow == 0)
        itemsInRow=1;

@@ -42,6 +42,7 @@ set(viewer_srcs
     FileInfoLabel.cpp
     FileWatcher.cpp
     FilterWidget.cpp
+    FontMetrics.cpp
     GotoLineDialog.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
@@ -150,6 +151,7 @@ set(viewer_srcs
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
+    TreeNodeViewDelegateBase.cpp
     TreeNodeWidget.cpp
     TreeView.cpp
     TriggerCollector.cpp
@@ -309,7 +311,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextEditSearchLine.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp           
-    TreeNodeViewDelegate.hpp
+    TreeNodeViewDelegateBase.hpp
     TreeNodeWidget.hpp
     TriggerBrowser.hpp
     TriggerEditor.hpp
