@@ -19,6 +19,7 @@
 #include <limits>
 #include "Node.hpp"
 #include "CheckPtContext.hpp"
+#include "MigrateContext.hpp"
 
 class NodeContainer : public Node {
 protected:
@@ -151,7 +152,8 @@ private:
 	   // When check-pointing we always need to save the children
 	   if (Archive::is_saving::value &&
 	         get_flag().is_set(ecf::Flag::MIGRATED) &&
-	         ! ecf::CheckPtContext::in_checkpt()
+	         ! ecf::CheckPtContext::in_checkpt() &&
+	         ! ecf::MigrateContext::in_migrate()
 	       ) {
 
 	      std::vector<node_ptr> nodeVec;

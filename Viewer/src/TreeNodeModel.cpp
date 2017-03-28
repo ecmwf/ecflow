@@ -1160,6 +1160,9 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server,int num)
     VTreeServer *ts=server->treeServer();
     Q_ASSERT(ts);
     Q_EMIT scanEnded(ts->tree());
+
+    if(ts->isFirstScan())
+        Q_EMIT firstScanEnded(ts);
 }
 
 //The server clear has started. It well remove all the nodes except the root node.

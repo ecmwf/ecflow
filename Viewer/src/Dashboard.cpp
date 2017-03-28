@@ -454,7 +454,7 @@ void Dashboard::readSettings(VComboSettings* vs)
 		restoreState(vs->getQs("state").toByteArray());
 	}
 
-	selectFirstServerInView();
+    initialSelectionInView();
 
 	settingsAreRead_=false;
 }
@@ -467,11 +467,11 @@ void Dashboard::slotInfoPanelSelection(VInfo_ptr info)
 #endif
 
 
-void Dashboard::selectFirstServerInView()
+void Dashboard::initialSelectionInView()
 {
 	Q_FOREACH(DashboardWidget* w,widgets_)
 	{
-		if(w->selectFirstServerInView())
+        if(w->initialSelectionInView())
 		{
 			return;
 		}

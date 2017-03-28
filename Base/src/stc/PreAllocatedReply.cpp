@@ -75,10 +75,10 @@ STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd(ecf::Child::ZombieType zt
 	return block_client_zombie_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::defs_cmd(AbstractServer* as,bool save_edit_history)
+STC_Cmd_ptr PreAllocatedReply::defs_cmd(AbstractServer* as,bool migrate)
 {
 	DefsCmd* cmd = dynamic_cast<DefsCmd*>(defs_cmd_.get());
-	cmd->init(as,save_edit_history);
+	cmd->init(as,migrate); // save edit history and children even if hidden
 	return defs_cmd_;
 }
 

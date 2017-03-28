@@ -76,7 +76,10 @@ int VModelServer::totalNodeNum() const
 VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,AttributeFilter* attrFilter) :
    VModelServer(server),
    changeInfo_(new VTreeChangeInfo()),
-   attrFilter_(attrFilter)
+   attrFilter_(attrFilter),
+   firstScan_(true),
+   firstScanTryNo_(0),
+   maxFirstScanTry_(10)
 {
     tree_=new VTree(this);
     filter_=new TreeNodeFilter(filterDef,server_,tree_);
@@ -99,6 +102,25 @@ NodeFilter* VTreeServer::filter() const
 int VTreeServer::nodeNum() const
 {
     return tree_->totalNum();
+}
+
+void VTreeServer::adjustFirstScan()
+{
+    if(firstScan_)
+    {
+        if(nodeNum() > 0)
+        {
+            firstScan_=false;
+        }
+        else
+        {
+            firstScanTryNo_++;
+            if(firstScanTryNo_ == maxFirstScanTry_)
+            {
+                firstScan_=false;
+            }
+        }
+    }
 }
 
 //--------------------------------------------------
@@ -156,6 +178,8 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
     inScan_=false;
     //Notifies the model that the scan finished. The model can now relayout its new contents.
     Q_EMIT endServerScan(this, num);
+
+    adjustFirstScan();
 }
 
 void VTreeServer::notifyBeginServerClear(ServerHandler* server)
@@ -361,6 +385,8 @@ void VTreeServer::reload()
     Q_EMIT beginServerScan(this, tree_->attrNum(attrFilter_)+tree_->numOfChildren());
     inScan_=false;
     Q_EMIT endServerScan(this, tree_->attrNum(attrFilter_)+tree_->numOfChildren());
+
+    adjustFirstScan();
 }
 
 

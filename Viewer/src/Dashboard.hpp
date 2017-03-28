@@ -42,7 +42,7 @@ public:
 	ServerFilter* serverFilter() const {return serverFilter_;}
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
-	void selectFirstServer();
+    //void selectFirstServer();
     bool selectInTreeView(VInfo_ptr);
     void addSearchDialog();
     DashboardTitle* titleHandler() const {return titleHandler_;}
@@ -80,7 +80,7 @@ private:
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);
-	void selectFirstServerInView();
+    void initialSelectionInView();
 	VInfo_ptr currentSelectionInView();
 	void addSearchDialog(VInfo_ptr);
 

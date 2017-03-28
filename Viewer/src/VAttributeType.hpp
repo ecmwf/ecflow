@@ -29,7 +29,7 @@ public:
     static std::vector<VParam*> filterItems();
     static VAttributeType* find(const std::string& name);
     static VAttributeType* find(int id);
-    static const std::vector<VAttributeType*>& types() {return types_;}
+    static const std::vector<VAttributeType*>& types() {return types_;}   
     int typeId() const {return typeId_;}
     int keyToDataIndex(const std::string& key) const;
     int searchKeyToDataIndex(const std::string& key) const;
