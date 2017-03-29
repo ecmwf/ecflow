@@ -80,8 +80,8 @@ public:
    static std::vector<std::string> status(const std::vector<std::string>& paths);
    static std::vector<std::string> edit_history(const std::vector<std::string>& paths);
    static std::vector<std::string> edit_history(const std::string& absNodePath);
-   static std::vector<std::string> archive(const std::vector<std::string>& paths);
-   static std::vector<std::string> archive(const std::string& absNodePath);
+   static std::vector<std::string> archive(const std::vector<std::string>& paths,bool force = false);
+   static std::vector<std::string> archive(const std::string& absNodePath,bool force = false);
    static std::vector<std::string> restore(const std::vector<std::string>& paths);
    static std::vector<std::string> restore(const std::string& absNodePath);
 

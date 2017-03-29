@@ -1077,14 +1077,25 @@ void NodeContainer::update_limits()
    for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->update_limits(); }
 }
 
-void NodeContainer::archive()
+
+std::string NodeContainer::archive_path() const
 {
    std::string path;
-   if (!findParentVariableValue( Str::ECF_HOME() , path )) {
-      throw std::runtime_error("NodeContainer::archive() can not find ECF_HOME");
+   if (!findParentUserVariableValue( Str::ECF_HOME() , path )) {
+      throw std::runtime_error("NodeContainer::archive_path() can not find ECF_HOME");
    }
-   path += absNodePath();
+
+   std::string the_path = absNodePath();
+   Str::replaceall(the_path,"/",":"); // we use ':' since they are not allowed in the node names
+   the_path[0] = '/';
+
+   path += the_path;
    path += ".check";
+   return path;
+}
+void NodeContainer::archive()
+{
+   if (nodeVec_.empty()) return; // nothing to archive
 
    // make a clone of this node DEEP COPY
    node_ptr this_clone = clone();
@@ -1114,13 +1125,16 @@ void NodeContainer::archive()
    }
 
    // save the created defs, to disk
-   archive_defs->save_as_checkpt(path);
+   archive_defs->save_as_checkpt(archive_path());
 
    // flag as archived
-   flag().set_flag(ecf::Flag::ARCHIVED);
+   flag().set(ecf::Flag::ARCHIVED);
 
    // delete the child nodes
    nodeVec_.clear();
+
+   // reclaim vector memory
+   std::vector<node_ptr>().swap(nodeVec_);
 
    // For sync
    add_remove_state_change_no_ = Ecf::incr_state_change_no();
@@ -1147,31 +1161,23 @@ void NodeContainer::restore()
       throw std::runtime_error(ss.str());
    }
 
-   std::string path;
-   if (!findParentVariableValue( Str::ECF_HOME() , path )) {
-      std::stringstream ss; ss << "NodeContainer::restore() Node " << absNodePath() << " can not find ECF_HOME";
-      throw std::runtime_error(ss.str());
-   }
-   path += absNodePath();
-   path += ".check";
-
-   // Open the archived file. This can throw a exception
    defs_ptr archive_defs = Defs::create();
-   try { archive_defs->restore_from_checkpt(path);}
+   std::string the_archive_path = archive_path();
+   try { archive_defs->restore_from_checkpt(the_archive_path);}
    catch(std::exception& e) {
-       std::stringstream ss; ss << "NodeContainer::restore() Node " << absNodePath() << " could not restore file at  " << path << "  : " << e.what();
+       std::stringstream ss; ss << "NodeContainer::restore() Node " << absNodePath() << " could not restore file at  " << the_archive_path << "  : " << e.what();
        throw std::runtime_error(ss.str());
    }
 
    // find the same node in the defs.
    node_ptr archived_node = archive_defs->findAbsNode(absNodePath());
    if (!archived_node) {
-      std::stringstream ss; ss << "NodeContainer::restore() could not find " << absNodePath() << " in the archived file " << path;
+      std::stringstream ss; ss << "NodeContainer::restore() could not find " << absNodePath() << " in the archived file " << the_archive_path;
       throw std::runtime_error(ss.str());
    }
    NodeContainer* archived_node_container = archived_node->isNodeContainer();
    if (!archived_node_container) {
-       std::stringstream ss; ss << "NodeContainer::restore() The node at " << absNodePath() << " recovered from " << path << " is not a container(suite/family)";
+       std::stringstream ss; ss << "NodeContainer::restore() The node at " << absNodePath() << " recovered from " << the_archive_path << " is not a container(suite/family)";
        throw std::runtime_error(ss.str());
    }
 
@@ -1185,7 +1191,7 @@ void NodeContainer::restore()
    add_remove_state_change_no_ = Ecf::incr_state_change_no();
 
    // remove the file
-   fs::remove(path);
+   fs::remove(the_archive_path);
 }
 
 

@@ -88,6 +88,7 @@ target_link_libraries(base debug ${Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG}   ${Boos
 
 list( APPEND test_srcs
    test/TestAlterCmd.cpp
+   test/TestArchiveAndRestoreCmd.cpp
    test/TestClientHandleCmd.cpp
    test/TestCmd.cpp
    test/TestDeleteNodeCmd.cpp

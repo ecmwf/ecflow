@@ -384,16 +384,17 @@ std::vector<std::string> CtsApi::edit_history(const std::string& path)
 }
 const char* CtsApi::edit_history_arg() { return "edit_history";}
 
-std::vector<std::string> CtsApi::archive(const std::vector<std::string>& paths){
-   std::vector<std::string> retVec; retVec.reserve(1 + paths.size());
+std::vector<std::string> CtsApi::archive(const std::vector<std::string>& paths, bool force){
+   std::vector<std::string> retVec; retVec.reserve(2 + paths.size());
    retVec.push_back("--archive");
+   if (force) retVec.push_back("force");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
-std::vector<std::string> CtsApi::archive(const std::string& path){
-   return CtsApi::archive(std::vector<std::string>(1,path));
+std::vector<std::string> CtsApi::archive(const std::string& path,bool force){
+   return CtsApi::archive(std::vector<std::string>(1,path),force);
 }
-const char* CtsApi::archive_arg() { return "arhive";}
+const char* CtsApi::archive_arg() { return "archive";}
 
 std::vector<std::string> CtsApi::restore(const std::vector<std::string>& paths){
    std::vector<std::string> retVec; retVec.reserve(1 + paths.size());

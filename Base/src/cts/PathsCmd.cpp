@@ -303,6 +303,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             NodeContainer* container = theNode->isNodeContainer();
             if (!container) continue;
 
+            if (!force_) check_for_active_or_submitted_tasks(as,theNode);
+            else         as->zombie_ctrl().add_user_zombies(theNode,CtsApi::archive_arg());
+
             bool unique = true;
             Node* parent = theNode->parent();
             while(parent) {
@@ -476,23 +479,29 @@ const char* resume_desc(){
 }
 const char* archive_desc(){
    return
-            "Archives suite or family nodes. Saves the suite/family nodes to disk, and then removes then from the definition\n"
-            "This saves memory in the server, when dealing with huge definitions that are not needed.\n"
-            "If the node is re-queued or begun, it is automatically restored\n"
-            "Use --restore to reload the archived nodes manually\n"
-            "The nodes are saved to ECF_HOME/ECF_NAME.check\n"
-            "Usage::\n"
-            "   --archive=/s1        # archive suite s1\n"
-            "   --archive=/s1/f1 /s2 # archive family /s1/f1 and suite /s2\n"
-            ;
+         "Archives suite or family nodes *IF* they have child nodes, otherwise does nothing.\n"
+         "Saves the suite/family nodes to disk, and then removes then from the definition\n"
+         "This saves memory in the server, when dealing with huge definitions that are not needed.\n"
+         "If the node is re-queued or begun, it is automatically restored\n"
+         "Use --restore to reload the archived nodes manually\n"
+         "The nodes are saved to ECF_HOME/ECF_NAME.check, where '/' has been replace with ':' in ECF_NAME\n"
+         "Usage::\n"
+         "   --archive=/s1           # archive suite s1\n"
+         "   --archive=/s1/f1 /s2    # archive family /s1/f1 and suite /s2\n"
+         "   --archive=force /s1 /s2 # archive suites /s1,/s2 even if they have active tasks\n"
+         ;
 }
 const char* restore_desc(){
    return
-            "Restore archived nodes.\n"
-            "Usage::\n"
-            "   --restore=/s1/f1   # restore family /s1/f1\n"
-            "   --restore=/s1 /s2   # restore suites /s1 and /s2\n"
-            ;
+         "Restore archived nodes.\n"
+         "Restore will fail if:\n"
+         "  - Node has not been archived\n"
+         "  - Node has children, i.e as a part of replace\n"
+         "  - If the file ECF_HOME/ECF_NAME.check does not exist\n"
+         "Usage::\n"
+         "   --restore=/s1/f1   # restore family /s1/f1\n"
+         "   --restore=/s1 /s2  # restore suites /s1 and /s2\n"
+         ;
 }
 
 void PathsCmd::addOption(boost::program_options::options_description& desc) const

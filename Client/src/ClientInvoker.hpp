@@ -255,8 +255,8 @@ public:
    int delete_nodes(const std::vector<std::string>& paths,bool force = false) const;
    int delete_node(const std::string& absNodePath,bool force = false) const;
  	int delete_all(bool force = false) const;
-   int archive(const std::vector<std::string>& paths) const;
-   int archive(const std::string& absNodePath) const;
+   int archive(const std::vector<std::string>& paths,bool force = false) const;
+   int archive(const std::string& absNodePath,bool force = false) const;
    int restore(const std::vector<std::string>& paths) const;
    int restore(const std::string& absNodePath) const;
 

@@ -107,6 +107,7 @@ public:
 
    void archive();
    void restore();
+   std::string archive_path() const; //can throw if ECF_HOME not defined
 
 private:
    virtual size_t child_position(const Node*) const;
