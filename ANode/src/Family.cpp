@@ -46,6 +46,11 @@ Family& Family::operator=(const Family& rhs)
    return *this;
 }
 
+node_ptr Family::clone() const
+{
+   return boost::make_shared<Family>( *this );
+}
+
 Family::~Family()
 {
    if (!Ecf::server()) {

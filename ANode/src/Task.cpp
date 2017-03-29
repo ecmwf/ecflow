@@ -68,6 +68,11 @@ Task::Task(const Task& rhs)
    copy(rhs);
 }
 
+node_ptr Task::clone() const
+{
+   return boost::make_shared<Task>( *this );
+}
+
 Task& Task::operator=(const Task& rhs)
 {
    if (this != &rhs) {

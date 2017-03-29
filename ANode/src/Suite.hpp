@@ -47,6 +47,7 @@ public:
 
    Suite( const Suite&);
    Suite& operator=(const Suite&);
+   virtual node_ptr clone() const;
 
    virtual ~Suite();
 

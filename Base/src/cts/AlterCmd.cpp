@@ -457,7 +457,7 @@ const char* AlterCmd::desc() {
          "         For set_flag and clear_flag:\n"
          "           [ force_aborted | user_edit | task_aborted | edit_failed |\n"
          "             ecfcmd_failed | no_script | killed | migrated | late |\n"
-         "             message | complete | queue_limit | task_waiting | locked | zombie ]\n"
+         "             message | complete | queue_limit | task_waiting | locked | zombie | archived ]\n"
          "  arg3 = name/value\n"
          "         when changing, attributes like variable,meter,event,label,limits,late\n"
          "         we expect arguments to be quoted\n"

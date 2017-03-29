@@ -58,6 +58,9 @@ Stats::Stats() :
 	node_kill_(0),
 	node_status_(0),
 	node_edit_history_(0),
+   node_archive_(0),
+   node_restore_(0),
+
 
 	log_cmd_(0),
 	log_msg_cmd_(0),
@@ -185,6 +188,9 @@ void Stats::reset()
    node_kill_ = 0;
    node_status_ = 0;
    node_edit_history_ = 0;
+   node_archive_ = 0;
+   node_restore_ = 0;
+
 
    log_cmd_ = 0;
    log_msg_cmd_ = 0;
@@ -303,8 +309,9 @@ void Stats::show(std::ostream& os) const
        node_resume_ || node_kill_ || node_status_ || node_edit_history_ || log_cmd_ || log_msg_cmd_ || order_node_ || run_node_ || replace_ ||
        force_ || free_dep_ || suites_ || edit_script_ || alter_cmd_ || ch_cmd_ || plug_ || move_ || group_cmd_ ||
        reload_white_list_file_ || server_load_cmd_ ||  stats_ || check_
-       || reload_passwd_file_
+       || reload_passwd_file_ || node_archive_ || node_restore_
        )  os << "\n";
+
    if (load_defs_ != 0)         os << left << setw(width) << "   Load definition " << load_defs_ << "\n";
    if (begin_cmd_ != 0)         os << left << setw(width) << "   Begin " << begin_cmd_ << "\n";
    if (requeue_node_ != 0)      os << left << setw(width) << "   Requeue " << requeue_node_ << "\n";
@@ -316,6 +323,8 @@ void Stats::show(std::ostream& os) const
    if (node_kill_ != 0)         os << left << setw(width) << "   Node kill " << node_kill_ << "\n";
    if (node_status_ != 0)       os << left << setw(width) << "   Node status " << node_status_ << "\n";
    if (node_edit_history_ != 0) os << left << setw(width) << "   Node edit history " << node_edit_history_ << "\n";
+   if (node_archive_ != 0)      os << left << setw(width) << "   Node archive " << node_archive_ << "\n";
+   if (node_restore_ != 0)      os << left << setw(width) << "   Node restore " << node_restore_ << "\n";
    if (log_cmd_ != 0)           os << left << setw(width) << "   Log cmd " << log_cmd_ << "\n";
    if (log_msg_cmd_ != 0)       os << left << setw(width) << "   Log message " << log_msg_cmd_ << "\n";
    if (order_node_ != 0)        os << left << setw(width) << "   Order " << order_node_ << "\n";

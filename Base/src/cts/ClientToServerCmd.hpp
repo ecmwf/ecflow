@@ -907,7 +907,7 @@ private:
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
 class PathsCmd : public UserCmd {
 public:
-   enum Api { NO_CMD,  DELETE, SUSPEND, RESUME, KILL, STATUS, CHECK, EDIT_HISTORY };
+   enum Api { NO_CMD,  DELETE, SUSPEND, RESUME, KILL, STATUS, CHECK, EDIT_HISTORY, ARCHIVE, RESTORE };
 
    PathsCmd(Api api,const std::vector<std::string>& paths, bool force = false)
    : api_(api),force_(force),paths_(paths){}

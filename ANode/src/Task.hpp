@@ -36,6 +36,8 @@ public:
    Task(const Task& rhs);
    Task& operator=(const Task&);
 
+   node_ptr clone() const;
+
 	virtual ~Task();
 
 	static task_ptr create(const std::string& name);

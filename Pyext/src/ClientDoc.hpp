@@ -84,7 +84,9 @@ public:
    static const char* resume();
    static const char* job_gen();
 	static const char* delete_node();
-	static const char* delete_all();
+   static const char* delete_all();
+   static const char* archive();
+   static const char* restore();
 
 private:
 	ClientDoc(){}

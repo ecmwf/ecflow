@@ -74,9 +74,7 @@ public:
    /// The Parent Must set the parent pointer. For a Suite however this will be NULL
    void set_parent(Node* p) { parent_ = p; }
 
-   /// Both these function can throw
-   bool archive(std::string& error_msg);
-   bool restore(std::string& error_msg);
+   virtual node_ptr clone() const = 0;
 
    // Server called functions:
    /// Required when we have time attributes, when time related attribute are free they stay free

@@ -59,6 +59,8 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
    vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::STATUS));
    vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::CHECK));
    vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::EDIT_HISTORY));
+   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::ARCHIVE));
+   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::RESTORE));
 	vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::FOB));
 	vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::FAIL));
 	vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::ADOPT));

@@ -65,7 +65,8 @@ public:
       LOCKED        = 13,  // Server                                 ( NOT USED currently)
       ZOMBIE        = 14,  // task*  Set/cleared but never queried ? ( NOT USED currently )
       NO_REQUE_IF_SINGLE_TIME_DEP = 15,  //
-      NOT_SET       = 16
+      ARCHIVED      = 16,  // Container*
+      NOT_SET       = 17
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }

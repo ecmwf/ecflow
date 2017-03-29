@@ -80,6 +80,10 @@ public:
    static std::vector<std::string> status(const std::vector<std::string>& paths);
    static std::vector<std::string> edit_history(const std::vector<std::string>& paths);
    static std::vector<std::string> edit_history(const std::string& absNodePath);
+   static std::vector<std::string> archive(const std::vector<std::string>& paths);
+   static std::vector<std::string> archive(const std::string& absNodePath);
+   static std::vector<std::string> restore(const std::vector<std::string>& paths);
+   static std::vector<std::string> restore(const std::string& absNodePath);
 
 	static std::string why(const std::string& absNodePath);
 	static std::string zombieGet();
@@ -201,6 +205,8 @@ public:
 	static const char* kill_arg();
    static const char* statusArg();
    static const char* edit_history_arg();
+   static const char* archive_arg();
+   static const char* restore_arg();
 	static const char* whyArg();
 	static const char* zombieGetArg();
 	static const char* zombieFobArg();

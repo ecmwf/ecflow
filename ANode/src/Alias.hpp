@@ -22,6 +22,7 @@ public:
    Alias();
    Alias(const Alias&);
    Alias& operator=(const Alias&);
+   virtual node_ptr clone() const;
 
    virtual ~Alias();
 

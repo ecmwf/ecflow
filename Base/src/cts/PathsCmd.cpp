@@ -62,6 +62,8 @@ std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>
       case PathsCmd::STATUS:             return user_cmd(os,CtsApi::to_string(CtsApi::status(paths))); break;
       case PathsCmd::CHECK:              return user_cmd(os,CtsApi::to_string(CtsApi::check(paths))); break;
       case PathsCmd::EDIT_HISTORY:       return user_cmd(os,CtsApi::to_string(CtsApi::edit_history(paths))); break;
+      case PathsCmd::ARCHIVE:            return user_cmd(os,CtsApi::to_string(CtsApi::archive(paths))); break;
+      case PathsCmd::RESTORE:            return user_cmd(os,CtsApi::to_string(CtsApi::restore(paths))); break;
       case PathsCmd::NO_CMD:       break;
       default: assert(false);break;
    }
@@ -88,6 +90,8 @@ bool PathsCmd::isWrite() const
       case PathsCmd::STATUS:            return false; break; // read only
       case PathsCmd::CHECK:             return false; break; // read only
       case PathsCmd::EDIT_HISTORY:      return false; break; // read only
+      case PathsCmd::ARCHIVE:           return true;  break; // requires write privilege
+      case PathsCmd::RESTORE:           return true;  break; // requires write privilege
       case PathsCmd::NO_CMD: break;
       default: break;
    }
@@ -105,6 +109,8 @@ const char* PathsCmd::theArg() const
       case PathsCmd::STATUS:             return CtsApi::statusArg(); break;
       case PathsCmd::CHECK:              return CtsApi::check_arg(); break;
       case PathsCmd::EDIT_HISTORY:       return CtsApi::edit_history_arg(); break;
+      case PathsCmd::ARCHIVE:            return CtsApi::archive_arg(); break;
+      case PathsCmd::RESTORE:            return CtsApi::restore_arg(); break;
       case PathsCmd::NO_CMD: break;
       default: break;
    }
@@ -281,6 +287,62 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          return PreAllocatedReply::string_vec_cmd(vec);
       }
 
+      case PathsCmd::ARCHIVE: {
+         as->update_stats().node_archive_++;
+         if (paths_.empty()) throw std::runtime_error( "No paths specified for archive") ;
+
+         // make sure paths don't overlap, Should not find same path up the hierarchy, which is also in paths_
+         std::vector<NodeContainer*> containers_to_archive; containers_to_archive.reserve(paths_.size());
+         for(size_t i = 0; i < paths_.size(); i++) {
+            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+            if (!theNode.get()) {
+               ss << "PathsCmd:ARCHIVE: Could not find node at path '" << paths_[i] << "'\n";
+               LOG(Log::ERR,"ARCHIVE: Could not find node at path " << paths_[i]);
+               continue;
+            }
+            NodeContainer* container = theNode->isNodeContainer();
+            if (!container) continue;
+
+            bool unique = true;
+            Node* parent = theNode->parent();
+            while(parent) {
+               std::string abs_node_path = parent->absNodePath();
+               if (find(paths_.begin(),paths_.end(),abs_node_path) != paths_.end()) {
+                  unique = false; break; // parent also in paths, so don't archive child
+               }
+               parent = parent->parent();
+            }
+            if (unique) containers_to_archive.push_back(container);
+         }
+
+         size_t vec_size = containers_to_archive.size();
+         for(size_t i = 0; i < vec_size; i++) {
+            NodeContainer* the_container = containers_to_archive[i];
+            SuiteChanged1 changed(the_container->suite());
+            the_container->archive();  // this can throw std::runtime_error
+         }
+         break;
+      }
+
+      case PathsCmd::RESTORE: {
+         as->update_stats().node_restore_++;
+         if (paths_.empty()) throw std::runtime_error( "No paths specified for restore");
+         size_t vec_size = paths_.size();
+         for(size_t i = 0; i < vec_size; i++) {
+            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+            if (!theNode.get()) {
+               ss << "PathsCmd:RESTORE: Could not find node at path '" << paths_[i] << "'\n";
+               LOG(Log::ERR,"RESTORE: Could not find node at path " << paths_[i]);
+               continue;
+            }
+            NodeContainer* container = theNode->isNodeContainer();
+            if (!container) continue;
+
+            SuiteChanged1 changed(container->suite());
+            container->restore();  // this can throw std::runtime_error
+         }
+         break;
+      }
       case PathsCmd::NO_CMD: assert(false); break;
 
       default: assert(false); break;
@@ -412,6 +474,26 @@ const char* resume_desc(){
             "   --resume=/s1 /s2     # resume suites /s1 and /s2\n"
             ;
 }
+const char* archive_desc(){
+   return
+            "Archives suite or family nodes. Saves the suite/family nodes to disk, and then removes then from the definition\n"
+            "This saves memory in the server, when dealing with huge definitions that are not needed.\n"
+            "If the node is re-queued or begun, it is automatically restored\n"
+            "Use --restore to reload the archived nodes manually\n"
+            "The nodes are saved to ECF_HOME/ECF_NAME.check\n"
+            "Usage::\n"
+            "   --archive=/s1        # archive suite s1\n"
+            "   --archive=/s1/f1 /s2 # archive family /s1/f1 and suite /s2\n"
+            ;
+}
+const char* restore_desc(){
+   return
+            "Restore archived nodes.\n"
+            "Usage::\n"
+            "   --restore=/s1/f1   # restore family /s1/f1\n"
+            "   --restore=/s1 /s2   # restore suites /s1 and /s2\n"
+            ;
+}
 
 void PathsCmd::addOption(boost::program_options::options_description& desc) const
 {
@@ -444,6 +526,14 @@ void PathsCmd::addOption(boost::program_options::options_description& desc) cons
          desc.add_options()( CtsApi::edit_history_arg(), po::value< vector<string> >()->multitoken(), get_edit_history_desc());
          break;
       }
+      case PathsCmd::ARCHIVE: {
+         desc.add_options()( CtsApi::archive_arg(), po::value< vector<string> >()->multitoken(), archive_desc());
+         break;
+      }
+      case PathsCmd::RESTORE: {
+          desc.add_options()( CtsApi::restore_arg(), po::value< vector<string> >()->multitoken(), restore_desc());
+          break;
+       }
       case PathsCmd::NO_CMD:  assert(false); break;
       default: assert(false); break;
    }

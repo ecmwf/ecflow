@@ -77,6 +77,8 @@ struct Stats {
 	unsigned int node_kill_;
    unsigned int node_status_;
    unsigned int node_edit_history_;
+   unsigned int node_archive_;
+   unsigned int node_restore_;
 
 	unsigned int log_cmd_;
 	unsigned int log_msg_cmd_;
@@ -173,6 +175,8 @@ private:
 		ar & node_kill_;
 		ar & node_status_;
 		ar & node_edit_history_;
+	   ar & node_archive_;
+	   ar & node_restore_;
 
 		ar & log_cmd_;
 		ar & log_msg_cmd_;

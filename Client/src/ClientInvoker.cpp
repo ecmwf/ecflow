@@ -835,6 +835,26 @@ int ClientInvoker::delete_all( bool force) const
    if (testInterface_) return invoke(CtsApi::delete_node(std::vector<std::string>(),force));
    return invoke(Cmd_ptr(new PathsCmd( PathsCmd::DELETE, std::vector<std::string>(),force)));
 }
+int ClientInvoker::archive(const std::vector<std::string>& paths) const
+{
+   if (testInterface_) return invoke(CtsApi::archive(paths));
+   return invoke(Cmd_ptr(new PathsCmd( PathsCmd::ARCHIVE, paths)));
+}
+int ClientInvoker::archive(const std::string& absNodePath) const
+{
+   if (testInterface_) return invoke(CtsApi::archive(absNodePath));
+   return invoke(Cmd_ptr(new PathsCmd( PathsCmd::ARCHIVE, absNodePath)));
+}
+int ClientInvoker::restore(const std::vector<std::string>& paths) const
+{
+   if (testInterface_) return invoke(CtsApi::restore(paths));
+    return invoke(Cmd_ptr(new PathsCmd( PathsCmd::RESTORE, paths)));
+}
+int ClientInvoker::restore(const std::string& absNodePath) const
+{
+   if (testInterface_) return invoke(CtsApi::restore(absNodePath));
+   return invoke(Cmd_ptr(new PathsCmd( PathsCmd::RESTORE, absNodePath)));
+}
 
 // ======================================================================================================
 

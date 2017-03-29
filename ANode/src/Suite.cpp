@@ -65,6 +65,11 @@ Suite::Suite(const Suite& rhs)
    calendar_ = rhs.calendar_;
 }
 
+node_ptr Suite::clone() const
+{
+   return boost::make_shared<Suite>(*this );
+}
+
 Suite& Suite::operator=(const Suite& rhs)
 {
    // defs_ not set

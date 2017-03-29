@@ -18,6 +18,8 @@
 #include <sstream>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include "NodeContainer.hpp"
 #include "Family.hpp"
@@ -37,6 +39,7 @@
 #include "DefsDelta.hpp"
 #include "Str.hpp"
 
+namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
 
@@ -642,6 +645,18 @@ void NodeContainer::addFamily(family_ptr f,size_t position)
 	add_family_only( f, position );
 }
 
+void NodeContainer::add_child(node_ptr child,size_t position)
+{
+   if (child->isTask()) {
+      task_ptr task_child = boost::dynamic_pointer_cast<Task>( child );
+      addTask(task_child,position);
+   }
+   else if (child->isFamily()) {
+       family_ptr family_child = boost::dynamic_pointer_cast<Family>( child );
+       addFamily(family_child,position);
+   }
+}
+
 node_ptr NodeContainer::findImmediateChild(const std::string& theName, size_t& child_pos) const
 {
  	size_t node_vec_size = nodeVec_.size();
@@ -1061,6 +1076,118 @@ void NodeContainer::update_limits()
    size_t node_vec_size = nodeVec_.size();
    for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->update_limits(); }
 }
+
+void NodeContainer::archive()
+{
+   std::string path;
+   if (!findParentVariableValue( Str::ECF_HOME() , path )) {
+      throw std::runtime_error("NodeContainer::archive() can not find ECF_HOME");
+   }
+   path += absNodePath();
+   path += ".check";
+
+   // make a clone of this node DEEP COPY
+   node_ptr this_clone = clone();
+
+   // re-create node tree up to the def. Do *NOT* clone we just need a SHALLOW hierarchy
+   defs_ptr archive_defs = Defs::create();
+   if (isSuite()) {
+      suite_ptr suite_clone = boost::dynamic_pointer_cast<Suite>(this_clone);
+      archive_defs->addSuite(suite_clone);
+   }
+   else {
+      Node* parent_ptr = parent();
+      while(parent_ptr) {
+         if (parent_ptr->isSuite()) {
+            suite_ptr parent_suite = Suite::create(parent_ptr->name());
+            parent_suite->addChild(this_clone);
+            archive_defs->addSuite(parent_suite);
+            break;
+         }
+         else {
+            family_ptr parent_family = Family::create(parent_ptr->name());
+            parent_family->addChild(this_clone);
+            this_clone = parent_family;
+         }
+         parent_ptr = parent_ptr->parent();
+      }
+   }
+
+   // save the created defs, to disk
+   archive_defs->save_as_checkpt(path);
+
+   // flag as archived
+   flag().set_flag(ecf::Flag::ARCHIVED);
+
+   // delete the child nodes
+   nodeVec_.clear();
+
+   // For sync
+   add_remove_state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void NodeContainer::swap(NodeContainer& rhs)
+{
+   std::swap(nodeVec_,rhs.nodeVec_);
+   size_t theSize = nodeVec_.size();
+   for(size_t s = 0; s < theSize; s++) {
+      nodeVec_[s]->set_parent(this);
+   }
+}
+
+void NodeContainer::restore()
+{
+   if (!flag().is_set(ecf::Flag::ARCHIVED)) {
+      std::stringstream ss; ss << "NodeContainer::restore() Node " << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set";
+      throw std::runtime_error(ss.str());
+   }
+
+   if (!nodeVec_.empty()) {
+      std::stringstream ss; ss << "NodeContainer::restore() Node " << absNodePath() << " can't restore, Container already has children ?";
+      throw std::runtime_error(ss.str());
+   }
+
+   std::string path;
+   if (!findParentVariableValue( Str::ECF_HOME() , path )) {
+      std::stringstream ss; ss << "NodeContainer::restore() Node " << absNodePath() << " can not find ECF_HOME";
+      throw std::runtime_error(ss.str());
+   }
+   path += absNodePath();
+   path += ".check";
+
+   // Open the archived file. This can throw a exception
+   defs_ptr archive_defs = Defs::create();
+   try { archive_defs->restore_from_checkpt(path);}
+   catch(std::exception& e) {
+       std::stringstream ss; ss << "NodeContainer::restore() Node " << absNodePath() << " could not restore file at  " << path << "  : " << e.what();
+       throw std::runtime_error(ss.str());
+   }
+
+   // find the same node in the defs.
+   node_ptr archived_node = archive_defs->findAbsNode(absNodePath());
+   if (!archived_node) {
+      std::stringstream ss; ss << "NodeContainer::restore() could not find " << absNodePath() << " in the archived file " << path;
+      throw std::runtime_error(ss.str());
+   }
+   NodeContainer* archived_node_container = archived_node->isNodeContainer();
+   if (!archived_node_container) {
+       std::stringstream ss; ss << "NodeContainer::restore() The node at " << absNodePath() << " recovered from " << path << " is not a container(suite/family)";
+       throw std::runtime_error(ss.str());
+   }
+
+   // swap the children, and set parent pointers
+   swap(*archived_node_container);
+
+   // clear flag
+   flag().clear(ecf::Flag::ARCHIVED);
+
+   // For sync
+   add_remove_state_change_no_ = Ecf::incr_state_change_no();
+
+   // remove the file
+   fs::remove(path);
+}
+
 
 bool NodeContainer::doDeleteChild(Node* child)
 {

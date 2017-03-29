@@ -147,6 +147,7 @@ void export_Node()
          "LOCKED        - Server\n"
          "ZOMBIE        - task*\n"
          "NO_REQUE      - task\n"
+         "ARCHIVED      - Server/Family\n"
          "NOT_SET\n"
    )
          .value("force_abort",  Flag::FORCE_ABORT)
@@ -165,6 +166,7 @@ void export_Node()
          .value("locked",       Flag::LOCKED)
          .value("zombie",       Flag::ZOMBIE)
          .value("no_reque",     Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
+         .value("archived",     Flag::ARCHIVED)
          .value("not_set",      Flag::NOT_SET)
          ;
 

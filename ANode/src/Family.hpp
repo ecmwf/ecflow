@@ -25,6 +25,7 @@ public:
    Family() : fam_gen_variables_(NULL)  {}
    Family(const Family& rhs) : NodeContainer(rhs), fam_gen_variables_(NULL) {}
    Family& operator=(const Family&);
+   virtual node_ptr clone() const;
 
 	virtual ~Family();
 

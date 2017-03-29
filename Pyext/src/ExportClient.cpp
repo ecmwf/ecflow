@@ -103,6 +103,10 @@ void suspend(ClientInvoker* self, const std::string& path)               { self-
 void suspends(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->suspend(paths);}
 void resume(ClientInvoker* self, const std::string& path)          { self->resume(path);}
 void resumes(ClientInvoker* self,const boost::python::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->resume(paths);}
+void archive(ClientInvoker* self, const std::string& path)         { self->archive(path);}
+void archives(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->archive(paths);}
+void restore(ClientInvoker* self, const std::string& path)         { self->restore(path);}
+void restores(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->restore(paths);}
 void the_status(ClientInvoker* self, const std::string& path)      { self->status(path);}
 void statuss(ClientInvoker* self,const boost::python::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->status(paths);}
 void do_kill(ClientInvoker* self, const std::string& path)         { self->kill(path);}
@@ -257,6 +261,10 @@ void export_Client()
    .def("suspend" ,         &suspends)
    .def("resume" ,          &resume,          ClientDoc::resume())
    .def("resume" ,          &resumes)
+   .def("archive" ,         &archive,          ClientDoc::archive())
+   .def("archive" ,         &archives)
+   .def("restore" ,         &restore,          ClientDoc::restore())
+   .def("restore" ,         &restores)
    .def("delete" ,          &ClientInvoker::delete_node,     (bp::arg("abs_node_path"),bp::arg("force")=false), ClientDoc::delete_node())
    .def("delete" ,          &delete_node,                    (bp::arg("paths"),bp::arg("force")=false))
    .def("delete_all",       &ClientInvoker::delete_all,      (bp::arg("force")=false),                          ClientDoc::delete_all())

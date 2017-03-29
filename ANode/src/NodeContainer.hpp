@@ -56,6 +56,7 @@ public:
    family_ptr add_family(const std::string& family_name);
  	void addTask( task_ptr , size_t position = std::numeric_limits<std::size_t>::max());
  	void addFamily( family_ptr, size_t position = std::numeric_limits<std::size_t>::max());
+ 	void add_child(node_ptr,size_t position = std::numeric_limits<std::size_t>::max());
 
 	virtual void immediateChildren(std::vector<node_ptr>&) const;
  	virtual void allChildren(std::set<Node*>&) const;
@@ -104,6 +105,9 @@ public:
 	virtual void set_state_hierarchically(NState::State s, bool force);
    virtual void update_limits();
 
+   void archive();
+   void restore();
+
 private:
    virtual size_t child_position(const Node*) const;
    void add_task_only( task_ptr ,size_t position = std::numeric_limits<std::size_t>::max());
@@ -133,6 +137,7 @@ protected:
 
 private:
    void copy(const NodeContainer& rhs);
+   void swap(NodeContainer& rhs);
 	friend class boost::serialization::access;
 
 	// distinguish between check-pointing and server->client comm's

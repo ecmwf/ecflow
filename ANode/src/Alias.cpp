@@ -54,6 +54,11 @@ Alias::Alias()
    set_state_only(NState::QUEUED);
 }
 
+node_ptr Alias::clone() const
+{
+   return boost::make_shared<Alias>( *this );
+}
+
 Alias::~Alias()
 {
    if (!Ecf::server()) {

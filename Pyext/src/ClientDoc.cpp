@@ -1420,3 +1420,46 @@ const char* ClientDoc::check()
             "       print str(e)\n"
             ;
 }
+
+const char* ClientDoc::archive()
+{
+   return
+         "Archives suite or family nodes. Saves the suite/family nodes to disk, and then removes then from the definition\n"
+         "This saves memory in the server, when dealing with huge definitions that are not needed.\n"
+         "If the node is re-queued or begun, it is automatically restored\n"
+         "Use --restore to reload the archived nodes manually\n"
+         "The nodes are saved to ECF_HOME/ECF_NAME.check\n"
+         "Usage::\n\n"
+         "   string archive(\n"
+         "      list paths # List of paths.\n"
+         "   )\n"
+         "   string archive(\n"
+         "      string absolute_node_path\n"
+         "   )\n"
+         "\nUsage::\n\n"
+         "   try:\n"
+         "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
+         "       print ci.archive('/suite1')\n"
+         "   except RuntimeError, e:\n"
+         "       print str(e)\n"
+         ;
+}
+const char* ClientDoc::restore()
+{
+   return
+         "Restore archived nodes.\n"
+         "Usage::\n"
+         "   string restore(\n"
+         "      list paths # List of paths.\n"
+         "   )\n"
+         "   string restore(\n"
+         "      string absolute_node_path\n"
+         "   )\n"
+         "\nUsage::\n\n"
+         "   try:\n"
+         "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
+         "       print ci.restore('/suite1')\n"
+         "   except RuntimeError, e:\n"
+         "       print str(e)\n"
+         ;
+}
