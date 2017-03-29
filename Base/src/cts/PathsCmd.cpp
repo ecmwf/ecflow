@@ -62,7 +62,7 @@ std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>
       case PathsCmd::STATUS:             return user_cmd(os,CtsApi::to_string(CtsApi::status(paths))); break;
       case PathsCmd::CHECK:              return user_cmd(os,CtsApi::to_string(CtsApi::check(paths))); break;
       case PathsCmd::EDIT_HISTORY:       return user_cmd(os,CtsApi::to_string(CtsApi::edit_history(paths))); break;
-      case PathsCmd::ARCHIVE:            return user_cmd(os,CtsApi::to_string(CtsApi::archive(paths))); break;
+      case PathsCmd::ARCHIVE:            return user_cmd(os,CtsApi::to_string(CtsApi::archive(paths,force_))); break;
       case PathsCmd::RESTORE:            return user_cmd(os,CtsApi::to_string(CtsApi::restore(paths))); break;
       case PathsCmd::NO_CMD:       break;
       default: assert(false);break;
@@ -480,9 +480,9 @@ const char* resume_desc(){
 const char* archive_desc(){
    return
          "Archives suite or family nodes *IF* they have child nodes, otherwise does nothing.\n"
-         "Saves the suite/family nodes to disk, and then removes then from the definition\n"
+         "Saves the suite/family nodes to disk, and then removes the child nodes from the definition\n"
          "This saves memory in the server, when dealing with huge definitions that are not needed.\n"
-         "If the node is re-queued or begun, it is automatically restored\n"
+         "If the node is re-queued or begun, the child nodes are automatically restored\n"
          "Use --restore to reload the archived nodes manually\n"
          "The nodes are saved to ECF_HOME/ECF_NAME.check, where '/' has been replace with ':' in ECF_NAME\n"
          "Usage::\n"
