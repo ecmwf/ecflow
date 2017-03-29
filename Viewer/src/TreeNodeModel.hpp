@@ -88,6 +88,8 @@ public Q_SLOTS:
 	void slotEndServerClear(VModelServer* server,int);
 
     int iconNum(VNode*) const;
+    bool isNode(const QModelIndex & index) const;
+    bool isAttribute(const QModelIndex & index) const;
 
 Q_SIGNALS:
     void clearBegun(const VTreeNode*);
@@ -105,8 +107,6 @@ protected:
 private:
     bool isServer(const QModelIndex& index) const;
     bool isServerForValid(const QModelIndex& index) const;
-    bool isNode(const QModelIndex & index) const;
-	bool isAttribute(const QModelIndex & index) const;
 
     ServerHandler* indexToServerHandler(const QModelIndex & index) const;
     QModelIndex serverToIndex(VModelServer* server) const;

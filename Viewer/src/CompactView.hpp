@@ -29,13 +29,14 @@ class QStyledItemDelegate;
 //all its children will be removed from viewItems.
 struct CompactViewItem
 {
-    CompactViewItem() : parentItem(-1), total(0), expanded(0), hasChildren(0),
+    CompactViewItem() : parentItem(-1), total(0), widestInSiblings(0), expanded(0), hasChildren(0),
                       hasMoreSiblings(0), level(0), width(0), height(0), x(0) {}
 
     QModelIndex index; //the model index represented by the item.
                        //We remove items whenever the indexes are invalidated
     int parentItem; // parent item index in viewItems
     uint total; // total number of visible children in the view
+    uint widestInSiblings;
     uint expanded : 1; //the item expanded
     uint hasChildren : 1; // if the item has children in the model (it is
                           // independent of the expanded/collapsed state)
@@ -46,6 +47,7 @@ struct CompactViewItem
     uint x: 16;
 
     int right() const {return x+width;}
+    int alignedRight() const {return x+widestInSiblings;}
     bool isFirstChild() const {return index.row() ==0;}
     bool isLeaf() const {return total == 0;}
 };
@@ -122,7 +124,9 @@ protected:
     int  firstVisibleItem(int &offset) const;
     void updateRowCount();
     void updateScrollBars();
-    void shiftItems(int start);
+    void adjustWidthInParent(int start);
+    //void shiftItems(int start);
+    //void shiftItems(int start,int diff);
 
     void setExpectedBg(QColor c) {expectedBg_=c;}
     void setConnectorColour(QColor c) {connectorColour_=c;}

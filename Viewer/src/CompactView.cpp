@@ -29,9 +29,6 @@
 
 //#define _UI_COMPACTVIEW_DEBUG
 
-
-
-
 CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     QAbstractScrollArea(parent),
     model_(model),
@@ -374,6 +371,30 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     int level=(parentId >=0?viewItems_[parentId].level+1:0);
     CompactViewItem *item=0;
 
+    std::vector<int> itemWidthVec;
+    std::vector<int> itemHeightVec;
+    int widest=0;
+    for(int i=first; i < first+count; i++)
+    {
+        int w,h;
+        QModelIndex currentIndex=model_->index(i-first,0,parentIndex);
+        delegate_->sizeHint(currentIndex,w,h);
+        itemWidthVec.push_back(w);
+        itemHeightVec.push_back(h);
+
+        if(parentId >=0 && !model_->isAttribute(currentIndex))
+            if(w > widest) widest=w;
+#ifdef _UI_COMPACTVIEW_DEBUG
+        UiLog().dbg() << "  item=" << currentIndex.data().toString() << " w=" << w;
+#endif
+    }
+
+#ifdef _UI_COMPACTVIEW_DEBUG
+    if(parentId >=0)
+        UiLog().dbg() << "layout parent=" << viewItems_[parentId].index.data().toString() <<
+                         " widest child=" << widest;
+#endif
+
     //Iterate through the direct children of parent item. At this point all the items
     //needed in the loop below are pre-allocated but not yet initialised.
     for(int i=first; i < first+count; i++)
@@ -388,9 +409,11 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         item->level=level;
         item->expanded = false;
         item->total = 0;
+        item->widestInSiblings=widest;
 
         //We compute the size of the item. For attributes we delay the width computation until we
         //actually paint them and we set their width to 300.
+#if 0
         int w,h;
         delegate_->sizeHint(currentIndex,w,h);
         item->width=w;
@@ -398,7 +421,27 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 
         if(item->right() > maxRowWidth_)
             maxRowWidth_=item->right();
+#endif
+        item->width=itemWidthVec[i-first];
+        item->height=itemHeightVec[i-first];
 
+        int xp=leftMargin_;
+        if(parentId >=0)
+        {
+            item->widestInSiblings=widest;
+            xp=viewItems_[parentId].alignedRight()+itemGap_;
+        }
+        else
+        {
+            item->widestInSiblings=item->width;
+        }
+
+        item->x=xp;
+
+        if(item->alignedRight() > maxRowWidth_)
+            maxRowWidth_=item->alignedRight();
+
+#if 0
         int xp=leftMargin_;
         if(parentId >=0)
         {
@@ -410,6 +453,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 
         if(item->right() > maxRowWidth_)
             maxRowWidth_=item->right();
+#endif
 
         //We need to expand the item
         if(recursiveExpanding || isIndexExpanded(currentIndex))
@@ -436,6 +480,28 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         if((i != first || parentId == -1) && item->total == 0)
             rowCount_++;
     }
+
+#if 0
+    if(widest > 0)
+    {
+        children=0;
+        for(int i=first; i < first+count; i++)
+        {
+            //QModelIndex currentIndex=model_->index(i-first,0,parentIndex);
+
+            last = i + children;
+            item = &viewItems_[last];
+
+            int diff=widest-item->right();
+            if(diff >0)
+            {
+                shiftItems(last,diff);
+            }
+            children+=item->total;
+        }
+
+    }
+#endif
 
     if(!expanding)
         return; // nothing changed
@@ -587,9 +653,6 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
 
     int firstLevel=0;
 
-    QVector<QPoint> expandButtons;
-    QVector<QPoint> collapseButtons;
-
     //We iterate through the items in the row
     for(int i=start; i < itemsCount && !leaf; ++i )
     {
@@ -624,14 +687,27 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
         //we have to know if the item width is the same that we exepcted
         if(paintedWidth != item->width)
         {
+            bool sameAsWidest=(item->width == item->widestInSiblings);
             item->width=paintedWidth;
-            //For non-leaf nodes we have to shift the children
-            if(item->parentItem >=0 && item->total > 0)
+
+            //servers
+            if(item->parentItem ==-1)
             {
-                shiftItems(i);
+                adjustWidthInParent(i);
                 doDelayedWidthAdjustment();
             }
-            else if(item->total == 0)
+            //Nodes
+            else if(model_->isNode(item->index))
+            {
+                //widestInSiblings has to be adjusted
+                if(sameAsWidest || paintedWidth  > item->widestInSiblings)
+                {
+                    adjustWidthInParent(i);
+                    doDelayedWidthAdjustment();
+                }
+            }
+            //Attributes
+            else
             {
                 if(item->right() > maxRowWidth_)
                 {
@@ -644,17 +720,6 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
         //QRect rr=opt.rect;
         //rr.setWidth(item->width);
         //painter->drawRect(rr);
-
-        //Collect expand/collapse button positions
-        if(item->hasChildren)
-        {
-
-                QPoint p(item->right()+itemGap_/2,yp+item->height/2);
-                if(item->expanded)
-                    collapseButtons << QPoint(item->right()+itemGap_/2,yp+item->height/2);
-                else
-                    expandButtons << QPoint(item->right()+expandButtonSize_/2+1,yp+item->height/2);
-           }
 
         //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
         //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
@@ -748,58 +813,96 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             rh=0;
             firstLevel=0;
         }
-
         itemsInRow++;
-    }
-
-    if(expandButtonMode_ == Modern)
-    {
-        if(expandButtons.isEmpty() == false)
-        {
-            QBrush brushOri=painter->brush();
-            QPen penOri=painter->pen();
-            painter->setBrush(QColor(250,250,250));
-            Q_FOREACH(QPoint p,expandButtons)
-            {
-                painter->setPen(connectorColour_);
-                QRect r(p.x()-expandButtonSize_/2,p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
-                painter->drawRect(r);
-                int xc=r.left()+4;
-                int yc=r.top()+4;
-                //painter->setPen(QColor(20,20,20));
-                painter->drawLine(r.left()+2,yc,r.right()-1,yc);
-                painter->drawLine(xc,r.top()+2,xc,r.bottom()-1);
-            }
-
-            painter->setBrush(brushOri);
-            painter->setPen(penOri);
-        }
-
-        if(collapseButtons.isEmpty() == false)
-        {
-            QBrush brushOri=painter->brush();
-            QPen penOri=painter->pen();
-            painter->setBrush(QColor(250,250,250));
-            Q_FOREACH(QPoint p,collapseButtons)
-            {
-                painter->setPen(connectorColour_);
-                QRect r(p.x()-expandButtonSize_/2,p.y()-expandButtonSize_/2,expandButtonSize_,expandButtonSize_);
-                painter->drawRect(r);
-                int xc=r.left()+4;
-                int yc=r.top()+4;
-                //painter->setPen(QColor(20,20,20));
-                painter->drawLine(r.left()+2,yc,r.right()-1,yc);
-            }
-
-            painter->setBrush(brushOri);
-            painter->setPen(penOri);
-        }
     }
 
     if(itemsInRow == 0)
        itemsInRow=1;
 }
 
+void CompactView::adjustWidthInParent(int start)
+{
+    //The parent index of the start item
+    int parentItem=viewItems_[start].parentItem;
+
+    //The current max width in the start item's siblings
+    int prevWidest=viewItems_[start].widestInSiblings;
+
+    //If the parent is not the root ie the start item is not a server
+    if(parentItem >=0)
+    {
+        int w=0, h=0, widest=0;
+        QModelIndex parentIndex=viewItems_[parentItem].index;
+
+        //Determine the max width in the siblings of the start
+        //item, ie in the children of the parent item
+        int rowCount=model_->rowCount(parentIndex);
+        for(int i=0; i < rowCount; i++)
+        {
+            QModelIndex idx=model_->index(i,0,parentIndex);
+            if(model_->isNode(idx))
+            {
+                delegate_->sizeHint(idx,w,h);
+                if(w >widest) widest=w;
+            }
+        }
+
+        //If there is a new max width we need to adjust all the children of
+        //the parent item
+        int delta=widest-prevWidest;
+        if(delta != 0)
+        {
+            int n=parentItem+viewItems_[parentItem].total;
+            for(int i=parentItem+1; i <= n; i++)
+            {
+                //For a direct child of the parent item we just
+                //set the max width to its new value
+                if(viewItems_[i].parentItem == parentItem)
+                {
+                    viewItems_[i].widestInSiblings = widest;
+                }
+                //The other items are shifted
+                else
+                {
+                    viewItems_[i].x+=delta;
+                }
+
+                //Check if the total width changed
+                if(viewItems_[i].right() > maxRowWidth_)
+                    maxRowWidth_=viewItems_[i].right();
+            }
+        }
+    }
+
+    //If the parent is the root ie the start item is a server
+    else
+    {
+        //Determine the diff between the current and the previous width
+        int delta=viewItems_[start].width-prevWidest;
+
+        //for server widestInSiblings is set to the width
+        viewItems_[start].widestInSiblings=viewItems_[start].width;
+
+        //Shift all the children with the diff
+        if(delta != 0)
+        {
+            int n=start+viewItems_[start].total;
+            for(int i=start+1; i <= n; i++)
+            {
+                //shifted
+                viewItems_[i].x+=delta;
+
+                //Check if the total width changed
+                if(viewItems_[i].right() > maxRowWidth_)
+                    maxRowWidth_=viewItems_[i].right();
+            }
+        }
+    }
+
+}
+
+
+#if 0
 void CompactView::shiftItems(int start)
 {
     int n=start+viewItems_[start].total+1;
@@ -814,6 +917,23 @@ void CompactView::shiftItems(int start)
             maxRowWidth_=viewItems_[i].right();
     }
 }
+
+void CompactView::shiftItems(int start,int delta)
+{
+    int n=start+viewItems_[start].total+1;
+    int w=0, h=0;
+    for(int i=start+1; i < n; i++)
+    {
+        //delegate_->sizeHint(viewItems_[i].index,w,h);
+        //viewItems_[i].width=w;
+        //int pt=viewItems_[i].parentItem;
+        viewItems_[i].x+=delta;
+        if(viewItems_[i].right() > maxRowWidth_)
+            maxRowWidth_=viewItems_[i].right();
+    }
+}
+#endif
+
 
 int CompactView::connectorPos(CompactViewItem* item, CompactViewItem* parent) const
 {
@@ -1135,10 +1255,10 @@ void CompactView::scrollTo(const QModelIndex &index)
         parent = model_->parent(parent);
     }
 
-    Q_FOREACH(QModelIndex parent,parentLst)
+    Q_FOREACH(QModelIndex pt,parentLst)
     {
-        if(!isExpanded(parent))
-            expand(parent);
+        if(!isExpanded(pt))
+            expand(pt);
     }
 
 #if 0

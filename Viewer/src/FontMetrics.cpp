@@ -34,8 +34,6 @@ void FontMetrics::computeRealHeight(QFont f)
     p.setFont(f);
     p.drawText(QRect(0,0,img.width(),img.height()),Qt::AlignCenter,txt);
 
-    img.save("/var/tmp/cgr/font.png");
-
     int minRow=img.height()+100;
     int maxRow=-1;
     for(int i=0; i < img.height(); i++)
