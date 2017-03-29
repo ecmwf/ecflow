@@ -58,5 +58,5 @@ git checkout master
 # Start the GUI
 # =======================================================================
 cd $SCRATCH
-module load ecflow/dev
+module swap ecflow/new
 ecflow_ui &
