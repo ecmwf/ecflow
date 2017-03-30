@@ -16,6 +16,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "ServerToClientCmd.hpp"
+#include "MigrateContext.hpp"
 class AbstractServer;
 
 //================================================================================
@@ -24,10 +25,10 @@ class AbstractServer;
 //================================================================================
 class DefsCmd : public ServerToClientCmd {
 public:
-  	DefsCmd(AbstractServer* as, bool save_edit_history = false);
-	DefsCmd() {}
+  	DefsCmd(AbstractServer* as, bool migrate = false);
+	DefsCmd(): migrate_(false) {}
 
-	void init(AbstractServer* as, bool save_edit_history);
+	void init(AbstractServer* as, bool migrate);
 
    defs_ptr defs() const { return defs_; }
 
@@ -37,13 +38,21 @@ public:
 	virtual bool equals(ServerToClientCmd*) const;
 
 private:
+
  	defs_ptr defs_;
+ 	bool migrate_;   // not persisted, save edit history and children even if hidden
 
 	friend class boost::serialization::access;
 	template<class Archive>
 	void serialize( Archive & ar, const unsigned int /*version*/ ) {
  		ar & boost::serialization::base_object< ServerToClientCmd >( *this );
-      ar & defs_;
+ 		if (migrate_) {
+ 		   ecf::MigrateContext migrate_context; // save edit history and children even if hidden
+         ar & defs_;
+ 		}
+ 		else {
+ 		   ar & defs_;
+ 		}
   	}
 };
 
