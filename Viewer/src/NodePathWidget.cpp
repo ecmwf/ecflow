@@ -22,6 +22,7 @@
 
 #include "VNode.hpp"
 #include "VProperty.hpp"
+#include "Palette.hpp"
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
@@ -726,7 +727,7 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
     {
         border=borderCol_;
         bg=bgCol_;
-        fontCol=fontCol_;
+        fontCol=fontCol_;        
     }
     else
     {
@@ -735,13 +736,13 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
         fontCol=disabledFontCol_;
     }
 
-    painter->setPen(QPen(border,0));
-    
-    QBrush bgBrush;
-       
+    QBrush bgBrush;       
     if(useGrad)
-    {
-        QColor bgLight=bg.lighter(lighter);
+    {        
+        QColor bgLight;
+        Palette::statusColours(bg,bgLight,border);
+
+        //QColor bgLight=bg.lighter(lighter);
         grad_.setColorAt(0,bgLight);
         grad_.setColorAt(1,bg);
         bgBrush=QBrush(grad_);
@@ -749,6 +750,7 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
     else
         bgBrush=QBrush(bg);
     
+    painter->setPen(QPen(border,0));
     painter->setBrush(bgBrush);
     painter->drawPolygon(shape_);
 

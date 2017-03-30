@@ -19,6 +19,7 @@
 #include "Animation.hpp"
 #include "FontMetrics.hpp"
 #include "IconProvider.hpp"
+#include "Palette.hpp"
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
 #include "TreeNodeModel.hpp"
@@ -811,13 +812,8 @@ void TreeNodeViewDelegateBase::renderNodeShape(QPainter* painter,const NodeShape
         return;
 
     QColor bg=shape.col_;
-    QColor bgLight;
-    if(bg.value() < 235)
-        bgLight=bg.lighter(130);
-    else
-        bgLight=bg.lighter(lighter_);
-
-    QColor borderCol=bg.darker(150); //125
+    QColor bgLight, borderCol;
+    Palette::statusColours(bg,bgLight,borderCol);
 
     QBrush bgBrush;
     if(useStateGrad_)

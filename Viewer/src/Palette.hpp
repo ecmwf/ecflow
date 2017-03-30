@@ -12,12 +12,15 @@
 #define VIEWER_SRC_PALETTE_HPP_
 
 #include <string>
+#include <QColor>
 
 class Palette
 {
 public:
 	Palette();
 	static void load(const std::string& parFile);
+    static void statusColours(QColor bg,QColor &bgLight,QColor &border);
+
 };
 
 
