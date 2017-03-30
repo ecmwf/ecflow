@@ -133,6 +133,9 @@ protected:
     virtual int renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
     virtual int renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const;
 
+    void labelSize(QStringList data,int& totalWidth,int& totalHeight) const;
+    int labelHeight(int) const;
+
 	QPen hoverPen_;
 	QBrush hoverBrush_;
 	QPen selectPen_;

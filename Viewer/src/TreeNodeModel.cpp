@@ -131,8 +131,12 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role ) const
         {
             if(VTreeNode* node=indexToAttrParentNode(index))
             {
-                return 1;
-                //VAttributeType::getLineNum(node->vnode(),index.row(),atts_);
+                VNode *vnode=node->vnode();
+                Q_ASSERT(vnode);
+                if(VAttribute* a=vnode->attribute(index.row(),atts_))
+                {
+                    return a->lineNum();
+                }
             }
             return 0;
         }

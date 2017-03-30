@@ -185,12 +185,14 @@ QSize CompactNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QMode
     return nodeBox_->sizeHintCache;
 }
 
+//This has to be extremely fast
 void CompactNodeViewDelegate::sizeHint(const QModelIndex& index,int& w,int& h) const
 {
     QVariant tVar=index.data(Qt::DisplayRole);
 
     h=nodeBox_->fullHeight;
 
+    //For nodes we compute the exact size of visual rect
     if(tVar.type() == QVariant::String)
     {
         QString text=index.data(Qt::DisplayRole).toString();
@@ -203,23 +205,23 @@ void CompactNodeViewDelegate::sizeHint(const QModelIndex& index,int& w,int& h) c
             w=nodeWidth(index,text);
         }
     }
-    //Render attributes
+    //For attributes we do not need the exact width since they do not have children so
+    //there is nothing on their right in the view. We compute their proper size when
+    //they are first rendered. However the exact height must be known at this stage!
     else if(tVar.type() == QVariant::StringList)
     {
+        //Each attribute has this height except the multiline labels
         h=attrBox_->fullHeight;
 
-        /*QStringList lst=tVar.toStringList();
-        if(lst.count() > 0)
-        {
-            QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
-            if(it != attrRenderers_.end())
-            {
-                AttributeRendererProc a=it.value();
-                (this->*a)(painter,lst,vopt);
-            }
-        }*/
+        //It is a big enough hint for the width.
         w=300;
-        //h=20;
+
+        //For multiline labels we need to cimpute the height
+        int attLineNum=0;
+        if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 1)
+        {
+            h=labelHeight(attLineNum);
+        }
     }
 }
 

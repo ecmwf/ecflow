@@ -427,12 +427,9 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
     bool selected=option.state & QStyle::State_Selected;
 
 	//The border rect (we will adjust its  width)
-    //QRect contRect=option.rect.adjusted(attrBox_->leftMargin,attrBox_->topMargin,0,-attrBox_->bottomMargin);
-
     QRect contRect=option.rect.adjusted(attrBox_->leftMargin,
                                         attrBox_->topMargin+attrBox_->topPadding,0,
                                         -attrBox_->bottomMargin-attrBox_->bottomPadding);
-
 
     int currentRight=contRect.x();
 	int multiCnt=val.count('\n');
@@ -465,34 +462,26 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
         currentRight=valRect.x()+valRect.width();
 	}
 	else
-	{
-		QStringList vals=val.split('\n');
-		val=vals[0];
-		vals.removeFirst();
-
-		multiVal=vals.join(QString('\n'));
-
+	{      
 		//The text rectangle
 		QFontMetrics fm(nameFont);
 		int nameWidth=fm.width(name);
         nameRect = contRect.adjusted(attrBox_->leftPadding,0,0,0);
 		nameRect.setWidth(nameWidth);
-        nameRect.setHeight(fm.height());
+        nameRect.setHeight(attrBox_->height-attrBox_->topPadding-attrBox_->bottomPadding);
 
 		//The value rectangle
 		fm=QFontMetrics(valFont);
-		int valWidth=fm.width(val);
-		valRect = nameRect;
-        valRect.setX(nameRect.x()+nameRect.width()+attrBox_->spacing);
-		valRect.setWidth(valWidth);
-        valRect.setHeight(fm.height()+offset);
+        QSize valSize=fm.size(0,val);
 
 		//Multiple line
-		multiValRect = QRect(nameRect.x(),
-				nameRect.bottom()+offset/2,
-				fm.width(multiVal),
-                contRect.bottom()-(nameRect.bottom()+offset));
+        valRect = QRect(nameRect.x(),
+                nameRect.y()+nameRect.height()+2,
+                valSize.width(),valSize.height());
+
+        currentRight=valRect.x()+qMax(nameWidth,valSize.width());
 	}
+
 
 	//Define clipping
     int rightPos=currentRight+attrBox_->rightPadding+attrBox_->rightMargin;
@@ -509,32 +498,10 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
 	painter->setFont(nameFont);
     painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
-	//Draw value
-	painter->setPen(Qt::black);
-	painter->setFont(valFont);
-    painter->drawText(attrBox_->adjustTextRect(valRect),Qt::AlignLeft | Qt::AlignVCenter,val);
-
-	if(multiCnt > 0)
-	{
-		painter->setFont(valFont);
-		painter->drawText(multiValRect,Qt::AlignLeft | Qt::AlignTop,multiVal);
-	}
-
-#if 0
-    if(selected && drawAttrSelectionRect_)
-    {
-        QRect sr=nameRect;
-        sr.setWidth(currentRight.-nameRect.x());
-        if(multiCnt > 0)
-        {
-            sr.setRight(multiValRect.right());
-            sr.setBottom(multiValRect.bottom());
-        }
-
-        renderSelectionRect(painter,sr.adjusted(-3,0,2,0));
-
-    }
-#endif
+	//Draw value   
+    painter->setPen(Qt::black);
+    painter->setFont(valFont);
+    painter->drawText(valRect,Qt::AlignLeft | Qt::AlignVCenter,val);
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -542,7 +509,6 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
         sr.setWidth(rightPos-sr.x());
         renderSelectionRect(painter,attrBox_->adjustSelectionRect(sr));
     }
-
 
     if(setClipRect)
 	{
@@ -552,6 +518,78 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
     return totalWidth;
 }
 
+void NodeViewDelegate::labelSize(QStringList data,int& totalWidth,int& totalHeight) const
+{
+    if(data.count() < 2)
+       return;
+
+    QString name=data.at(1) + ":";
+    QString val;
+    if(data.count() > 2)
+        val=data.at(2);
+
+    int currentRight=attrBox_->leftMargin;
+    int currentBottom=attrBox_->topMargin+attrBox_->topPadding;
+
+    int multiCnt=val.count('\n');
+    QFont nameFont=attrFont_;
+    nameFont.setBold(true);
+    QFont valFont=attrFont_;
+
+    if(multiCnt ==0 )
+    {
+        //The text rectangle
+        QFontMetrics fm(nameFont);
+        int nameWidth=fm.width(name);
+        currentRight+=attrBox_->leftPadding+nameWidth;
+        currentBottom+=attrBox_->height-attrBox_->topPadding-attrBox_->bottomPadding;
+
+        //The value rectangle
+        fm=QFontMetrics(valFont);
+        int valWidth=fm.width(val);
+        currentRight+=attrBox_->spacing+valWidth;
+    }
+
+    else
+    {
+        //The text rectangle
+        QFontMetrics fm(nameFont);
+        int nameWidth=fm.width(name);
+        currentRight+=attrBox_->leftPadding+nameWidth;
+        currentBottom+=attrBox_->height-attrBox_->topPadding-attrBox_->bottomPadding;
+
+        //The value rectangle
+        fm=QFontMetrics(valFont);
+        QSize valSize=fm.size(0,val);
+        currentRight+=qMax(nameWidth,valSize.width());
+        currentBottom+=2+valSize.height();
+    }
+
+    totalWidth=currentRight+attrBox_->rightPadding+attrBox_->rightMargin;
+    totalHeight=currentBottom+attrBox_->bottomPadding+attrBox_->bottomMargin;
+}
+
+int NodeViewDelegate::labelHeight(int lineNum) const
+{
+    if(lineNum <=1)
+        return attrBox_->sizeHintCache.height();
+
+    int currentBottom=attrBox_->topMargin+attrBox_->topPadding;
+
+    //text rect
+    currentBottom+=attrBox_->height-attrBox_->topPadding-attrBox_->bottomPadding;
+
+    //value rect
+    QStringList lst;
+    for(int i=0; i < lineNum; i++)
+        lst << "1";
+
+    QFontMetrics fm(attrFont_);
+    QSize valSize=fm.size(0,lst.join(QString('\n')));
+    currentBottom+=2+valSize.height();
+
+    return currentBottom+attrBox_->bottomPadding+attrBox_->bottomMargin;
+}
 
 //========================================================
 // data is encoded as a QStringList as follows:
