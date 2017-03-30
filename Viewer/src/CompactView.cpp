@@ -130,11 +130,10 @@ void CompactView::mousePressEvent(QMouseEvent* event)
         selectionModel_->select(QModelIndex(), QItemSelectionModel::Select);
     }
 
-
     if(event->button() == Qt::MidButton)
     {
         int viewItemIndex=itemAtCoordinate(event->pos());
-        if(viewItemIndex != -1)
+        if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)
         {
 #ifdef _UI_COMPACTVIEW_DEBUG
             UiLog().dbg() << "CompactNodeView::mousePressEvent " << viewItemIndex << " name=" <<
@@ -153,6 +152,52 @@ void CompactView::mousePressEvent(QMouseEvent* event)
             viewport()->update();
         }
     }
+}
+
+void CompactView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        int viewItemIndex=itemAtCoordinate(event->pos());
+        if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)
+        {
+#ifdef _UI_COMPACTVIEW_DEBUG
+            UiLog().dbg() << "CompactNodeView::mousePressEvent " << viewItemIndex << " name=" <<
+                               viewItems_[viewItemIndex].index.data().toString();
+#endif
+            if(viewItems_[viewItemIndex].expanded)
+            {
+                collapse(viewItemIndex);
+            }
+            else
+            {
+                expand(viewItemIndex);
+            }
+            updateRowCount();
+            updateScrollBars();
+            viewport()->update();
+        }
+    }
+}
+
+void CompactView::keyPressEvent(QKeyEvent *event)
+{
+    QModelIndex current = currentIndex();
+
+    if (current.isValid())
+    {
+        switch(event->key())
+        {
+        case Qt::Key_Plus:
+            expand(current);
+            break;
+        case Qt::Key_Minus:
+            collapse(current);
+            break;
+        }
+    }
+
+    QAbstractScrollArea::keyPressEvent(event);
 }
 
 bool CompactView::viewportEvent(QEvent *event)
@@ -1634,6 +1679,58 @@ void CompactView::collapse(const QModelIndex &index)
         viewport()->update();
     }
 }
+
+void CompactView::collapseAll(const QModelIndex &index)
+{
+    //identify item
+    int item = viewIndex(index);
+
+    //check if there is nothing to do
+    if (item == -1 || expandedIndexes.isEmpty())
+        return;
+
+    //check if the item is expanded
+    QSet<QPersistentModelIndex>::iterator it = expandedIndexes.find(index);
+    if (it == expandedIndexes.end() || viewItems_.at(item).expanded == false)
+           return;
+
+    //remove all the children of the item
+    viewItems_[item].expanded = false;
+    int total=viewItems_[item].total;
+    int parentItem = item;
+    while (parentItem > -1)
+    {
+        viewItems_[parentItem].total-=total;
+        parentItem = viewItems_[parentItem].parentItem;
+    }
+    removeViewItems(item + 1, total);
+
+    //recursivel remove the indexes related to the deleted items from the expanded set
+    removeAllFromExpanded(index);
+
+    updateRowCount();
+    updateScrollBars();
+    viewport()->update();
+}
+
+void CompactView::removeAllFromExpanded(const QModelIndex &index)
+{
+    if(expandedIndexes.isEmpty())
+        return;
+
+    QSet<QPersistentModelIndex>::iterator it = expandedIndexes.find(index);
+    if(it == expandedIndexes.end())
+       return;
+
+    expandedIndexes.erase(it);
+
+    for(int i=0; i < model_->rowCount(index); i++)
+    {
+        QModelIndex chIdx=model_->index(i, 0, index);
+        removeAllFromExpanded(chIdx);
+    }
+}
+
 
 bool CompactView::isExpanded(const QModelIndex &index) const
 {

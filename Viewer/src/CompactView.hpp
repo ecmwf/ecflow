@@ -67,6 +67,7 @@ public:
     QRect visualRect(const QModelIndex &index) const;
     bool isExpanded(const QModelIndex &index) const;
     void setExpanded(const QModelIndex &index, bool expanded);
+    void collapseAll(const QModelIndex &index);
 
 public Q_SLOTS:
     void reset();
@@ -87,6 +88,8 @@ protected Q_SLOTS:
 
 protected:
     void mousePressEvent(QMouseEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
+    void keyPressEvent(QKeyEvent *event);
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
     bool viewportEvent(QEvent *event);
@@ -111,6 +114,8 @@ protected:
 
     QModelIndex modelIndex(int i) const;
     int viewIndex(const QModelIndex& index) const;
+
+    void removeAllFromExpanded(const QModelIndex &index);
 
     void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command);
     void select(const QModelIndex &topIndex, const QModelIndex &bottomIndex,

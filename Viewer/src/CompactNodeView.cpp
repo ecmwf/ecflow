@@ -348,6 +348,7 @@ void CompactNodeView::expandAll(const QModelIndex& idx)
     }
 }
 
+#if 0
 void CompactNodeView::collapseAll(const QModelIndex& idx)
 {
     collapse(idx);
@@ -358,6 +359,7 @@ void CompactNodeView::collapseAll(const QModelIndex& idx)
         collapseAll(chIdx);
     }
 }
+#endif
 
 void CompactNodeView::expandTo(const QModelIndex& idxTo)
 {
