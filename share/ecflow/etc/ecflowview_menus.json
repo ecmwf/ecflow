@@ -481,6 +481,14 @@
 
         {
             "menu"           : "Special",
+            "name"           : "Clear late (=slow write) flag",
+            "visible_for"    : "server",
+            "command"        : "ecflow_client --alter clear_flag late /",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "Clear killed flag",
             "visible_for"    : "(task or alias)",
             "command"        : "ecflow_client --alter clear_flag killed <full_name>",
