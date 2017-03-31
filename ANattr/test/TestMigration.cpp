@@ -26,6 +26,7 @@
 #include "CronAttr.hpp"
 #include "ClockAttr.hpp"
 #include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
 #include "NodeAttr.hpp"
 #include "Variable.hpp"
 #include "ZombieAttr.hpp"
@@ -70,6 +71,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con )
    doSave(file_name + "CronAttr",CronAttr());
    doSave(file_name + "ClockAttr",ClockAttr());
    doSave(file_name + "AutoCancelAttr",AutoCancelAttr());
+   doSave(file_name + "AutoArchiveAttr",AutoArchiveAttr());
    doSave(file_name + "Label",Label());
    doSave(file_name + "Variable",Variable());
    doSave(file_name + "Event",Event());
@@ -90,6 +92,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con )
    do_restore<DateAttr>(file_name + "DateAttr",DateAttr());
    do_restore<CronAttr>(file_name + "CronAttr",CronAttr());
    do_restore<AutoCancelAttr>(file_name + "AutoCancelAttr",AutoCancelAttr());
+   do_restore<AutoArchiveAttr>(file_name + "AutoArchiveAttr",AutoArchiveAttr());
    do_restore<Label>(file_name + "Label",Label());
    do_restore<Variable>(file_name + "Variable",Variable());
    do_restore<Event>(file_name + "Event",Event());
@@ -153,6 +156,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    doSave(file_name + "ClockAttr",clock_attr);
    doSave(file_name + "AutoCancelAttr",AutoCancelAttr(100));
    doSave(file_name + "AutoCancelAttr_1",AutoCancelAttr(TimeSlot(10,12),true));
+   doSave(file_name + "AutoArchiveAttr",AutoArchiveAttr(100));
+   doSave(file_name + "AutoArchiveAttr_1",AutoArchiveAttr(TimeSlot(10,12),true));
    doSave(file_name + "Label",label);
 //   doSave(file_name + "Limit",limit);
    doSave(file_name + "Variable",Variable("var_name","var_value"));
@@ -178,6 +183,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    do_restore<ClockAttr>(file_name + "ClockAttr",clock_attr);
    do_restore<AutoCancelAttr>(file_name + "AutoCancelAttr",AutoCancelAttr(100));
    do_restore<AutoCancelAttr>(file_name + "AutoCancelAttr_1",AutoCancelAttr(TimeSlot(10,12),true));
+   do_restore<AutoArchiveAttr>(file_name + "AutoArchiveAttr",AutoArchiveAttr(100));
+   do_restore<AutoArchiveAttr>(file_name + "AutoArchiveAttr_1",AutoArchiveAttr(TimeSlot(10,12),true));
    do_restore<Label>(file_name + "Label",label);
    do_restore<Variable>(file_name + "Variable",Variable("var_name","var_value"));
    do_restore<Event>(file_name + "Event_1",Event(1));

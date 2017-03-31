@@ -94,6 +94,9 @@ class DefsTraverser:
             
         autocancel = node.get_autocancel()
         if autocancel: self.__writeln(str(autocancel))
+
+        autoarchive = node.get_autoarchive()
+        if autoarchive: self.__writeln(str(autoarchive))
         
         repeat = node.get_repeat()
         if not repeat.empty(): self.__writeln(str(repeat)  + " # value: " + str(repeat.value()))

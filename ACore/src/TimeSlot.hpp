@@ -26,7 +26,7 @@ namespace ecf {
 // Use compiler , generated destructor, assignment,  copy constructor
 // *relative* times can extend to a maximum of 99 hours and 59 seconds
 //
-// TimeSlot is used in many other attributes, i.e. like AutoCancelAttr
+// TimeSlot is used in many other attributes, i.e. like AutoCancelAttr,AutoArchiveAttr
 // in this case user can specify days, which we convert to hours, hence it
 // is possible for a TimeSlot hour to have any integer value
 class TimeSlot {

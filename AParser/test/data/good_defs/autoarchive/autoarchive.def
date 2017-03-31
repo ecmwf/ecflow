@@ -1,0 +1,14 @@
+suite s
+ family f1
+    autoarchive +01:00 # archive one hour after complete
+ endfamily
+ family f2
+     autoarchive 01:00 # archive at 1 am in morning after complete
+ endfamily
+ family f3
+    autoarchive 10     # archive 10 days after complete
+ endfamily
+ family f4
+    autoarchive 0      # archive immediately after complete
+ endfamily
+endsuite

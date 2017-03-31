@@ -49,6 +49,7 @@
 #include "LateAttr.hpp"
 #include "RepeatAttr.hpp"
 #include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
 #include "Expression.hpp"
 #include "InLimitMgr.hpp"
 #include "TimeDepAttrs.hpp"
@@ -78,7 +79,10 @@ public:
 
    // Server called functions:
    /// Required when we have time attributes, when time related attribute are free they stay free
-   virtual void calendarChanged(const ecf::Calendar&, std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late);
+   virtual void calendarChanged(const ecf::Calendar&,
+         std::vector<node_ptr>& auto_cancelled_nodes,
+         std::vector<node_ptr>& auto_archive_nodes,
+         const ecf::LateAttr* inherited_late);
 
    /// resolving dependencies means we look at day,date,time and triggers and check to
    /// to see if a node is free or still holding. When a node if free of its dependencies and limits
@@ -329,6 +333,7 @@ public:
    TimeDepAttrs*  get_time_dep_attrs() const { return time_dep_attrs_;} // can be NULL
    ecf::LateAttr* get_late() const { return lateAttr_;}
    ecf::AutoCancelAttr*  get_autocancel() const { return autoCancel_;}
+   ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_;}
    ecf::Flag&       flag()           { return flag_;}
    const ecf::Flag& get_flag() const { return flag_;}
 
@@ -388,6 +393,7 @@ public:
    void addMeter( const Meter& );       // will throw std::runtime_error if duplicate
    void addLabel( const Label& );       // will throw std::runtime_error if duplicate
    void addAutoCancel( const ecf::AutoCancelAttr& );
+   void add_autoarchive( const ecf::AutoArchiveAttr& );
    void addLate( const ecf::LateAttr& );
    void addRepeat( const Repeat& );      // will throw std::runtime_error if duplicate
    void addZombie( const ZombieAttr& );  // will throw std::runtime_error if duplicate
@@ -653,6 +659,7 @@ private:
 
 private:
    bool checkForAutoCancel(const ecf::Calendar& c) const;
+   bool check_for_auto_archive(const ecf::Calendar& c) const;
 
    void add_trigger_expression(const Expression&);     // Can throw std::runtime_error
    void add_complete_expression(const Expression&);    // Can throw std::runtime_error
@@ -738,6 +745,7 @@ private:
 
    ecf::LateAttr*              lateAttr_;     // Can only have one late attribute per node
    ecf::AutoCancelAttr*        autoCancel_;   // Can only have 1 auto cancel per node
+   ecf::AutoArchiveAttr*       auto_archive_; // Can only have 1 auto archive per node
    TimeDepAttrs*               time_dep_attrs_;
    ChildAttrs*                 child_attrs_;  // event meter & lables
    MiscAttrs*                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
@@ -775,6 +783,7 @@ private:
       ar & triggerExpr_;
       ar & lateAttr_;
       ar & autoCancel_;
+      ar & auto_archive_;
       ar & time_dep_attrs_;
       ar & child_attrs_;
       ar & misc_attrs_;    // VerifyAttr & Zombies

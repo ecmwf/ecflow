@@ -102,7 +102,7 @@ private:
       clockAttr.startStopWithServer(true);
       suite->addClock( clockAttr );
 
- 		suite->addAutoCancel( ecf::AutoCancelAttr(2) );
+      suite->addAutoCancel( ecf::AutoCancelAttr(2) );
  		suite->addVariable( Variable("VAR","value") );
 		suite->addVariable( Variable("VAR1","\"value\"") );
 		suite->addVariable( Variable("ECF_FETCH","\"smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%\"") );
@@ -250,6 +250,7 @@ private:
 				family_ptr hierFam = fam->add_family( heirFamily );
 				hierFam->addVariable( Variable("VAR1","value") );
 				hierFam->addRepeat( RepeatString("aString",stringList));
+				hierFam->add_autoarchive( ecf::AutoArchiveAttr( ecf::TimeSlot(1,0), true));
 
 				task_ptr task1 = hierFam->add_task( tname );
 				task1->addVariable( Variable("VAR1","value") );

@@ -31,6 +31,7 @@
 #include "VerifyAttr.hpp"
 #include "QueueAttr.hpp"
 #include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
 #include "ZombieAttr.hpp"
 #include "Zombie.hpp"
 #include "NodeAttrDoc.hpp"
@@ -388,6 +389,20 @@ void export_NodeAttr()
 	.def("relative",&AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
 	.def("days",    &AutoCancelAttr::days,     "Returns a boolean true if time was specified in days")
   	;
+
+   class_<AutoArchiveAttr, boost::shared_ptr<AutoArchiveAttr> >(
+         "Autoarchive",NodeAttrDoc::autocancel_doc() ,
+         init<int,int,bool >()                             // hour, minute, relative
+   )
+   .def( init<int>())                                        // days
+   .def( init<TimeSlot, bool>())
+   .def(self == self )                                       // __eq__
+   .def("__str__", &AutoArchiveAttr::toString)               // __str__
+   .def("__copy__",copyObject<AutoArchiveAttr>)              // __copy__ uses copy constructor
+   .def("time",    &AutoArchiveAttr::time, return_value_policy<copy_const_reference>(), "returns archive time as a TimeSlot")
+   .def("relative",&AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
+   .def("days",    &AutoArchiveAttr::days,     "Returns a boolean true if time was specified in days")
+   ;
 
 
 	class_<RepeatDate >("RepeatDate",NodeAttrDoc::repeat_date_doc() ,init< std::string, int, int, optional<int> >()) // name, start, end , delta

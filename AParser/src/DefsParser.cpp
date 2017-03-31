@@ -19,6 +19,7 @@
 #include "DefsParser.hpp"
 #include "ExternParser.hpp"
 #include "AutoCancelParser.hpp"
+#include "AutoArchiveParser.hpp"
 #include "RepeatParser.hpp"
 #include "ClockParser.hpp"
 #include "CalendarParser.hpp"
@@ -262,6 +263,7 @@ public:
       addParser( new ZombieAttrParser(p) );
       addParser( new TextParser(p) );
       addParser( new QueueParser(p) );
+      addParser( new AutoArchiveParser(p) );
    }
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -366,6 +368,7 @@ public:
       addParser( new MeterParser(p) );
       addParser( new EndClockParser(p) );
       addParser( new QueueParser(p) );
+      addParser( new AutoArchiveParser(p) );
  	}
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {

@@ -214,7 +214,11 @@ void Suite::requeue_calendar()
 }
 
 
-void Suite::updateCalendar( const ecf::CalendarUpdateParams & calParams, std::vector<node_ptr>& auto_cancelled_nodes )
+void Suite::updateCalendar(
+      const ecf::CalendarUpdateParams & calParams,
+      std::vector<node_ptr>& auto_cancelled_nodes,
+      std::vector<node_ptr>& auto_archive_nodes
+      )
 {
 	if (begun_) {
 
@@ -237,7 +241,7 @@ void Suite::updateCalendar( const ecf::CalendarUpdateParams & calParams, std::ve
 
 		update_generated_variables();
 
- 		calendarChanged(calendar_,auto_cancelled_nodes,get_late());
+ 		calendarChanged(calendar_,auto_cancelled_nodes,auto_archive_nodes,get_late());
 	}
 }
 

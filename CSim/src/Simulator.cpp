@@ -179,9 +179,9 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	   BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->state() == NState::COMPLETE) completeSuiteCnt++; }
 
  	   if ( (theDefs.suiteVec().size() != completeSuiteCnt)) {
- 	      std::stringstream ss; ss << "Defs file " << defs_filename << "\n";
+ 	      std::stringstream ss; ss << "\nDefs file " << defs_filename << "\n";
  	      BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) {
- 	         ss << "  suite '/" << s->name() << " has not completed\n";
+ 	         if (s->state() != NState::COMPLETE) ss << "  suite '/" << s->name() << "' has not completed\n";
  	      }
  	      errorMsg += ss.str();
 

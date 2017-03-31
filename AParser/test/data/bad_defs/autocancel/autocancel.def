@@ -1,0 +1,6 @@
+suite s
+ family f1
+    autocancel +01:00  # cancel one hour after complete
+    autoarchive +01:00 # archive one hour after complete
+ endfamily
+endsuite

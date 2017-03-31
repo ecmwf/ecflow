@@ -154,9 +154,13 @@ void Submittable::requeue(bool resetRepeats, int clear_suspended_in_child_nodes,
 }
 
 
-void Submittable::calendarChanged(const ecf::Calendar& c, std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late)
+void Submittable::calendarChanged(
+      const ecf::Calendar& c,
+      std::vector<node_ptr>& auto_cancelled_nodes,
+      std::vector<node_ptr>& auto_archive_nodes,
+      const ecf::LateAttr* inherited_late)
 {
-   Node::calendarChanged(c,auto_cancelled_nodes,NULL);
+   Node::calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,NULL);
 
    // Late flag should ONLY be set on Submittable
    check_for_lateness(c,inherited_late);

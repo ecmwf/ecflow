@@ -48,7 +48,10 @@ public:
    virtual void order(Node* immediateChild, NOrder::Order);
 
 	virtual bool hasAutoCancel() const;
- 	virtual void calendarChanged(const ecf::Calendar&,std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late);
+   virtual void calendarChanged(const ecf::Calendar&,
+         std::vector<node_ptr>& auto_cancelled_nodes,
+         std::vector<node_ptr>& auto_archive_nodes,
+         const ecf::LateAttr* inherited_late);
  	virtual bool resolveDependencies(JobsParam& );
  	virtual bool check(std::string& errorMsg, std::string& warningMsg) const;
 

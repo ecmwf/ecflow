@@ -39,7 +39,7 @@ class Meter;
 class Repeat;
 class Variable;
 
-namespace ecf { class LateAttr; class AutoCancelAttr; } // forward declare class
+namespace ecf { class LateAttr; class AutoCancelAttr; class AutoArchiveAttr; } // forward declare class
 
 typedef boost::shared_ptr<Memento> memento_ptr;
 typedef boost::shared_ptr<CompoundMemento> compound_memento_ptr;

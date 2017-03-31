@@ -268,12 +268,33 @@ void Node::addRepeat( const Repeat& r ){
 
 void Node::addAutoCancel( const AutoCancelAttr& ac)
 {
+   if (auto_archive_) {
+      std::stringstream ss;
+      ss << "Node::addAutoCancel: Can not add autocancel and autoarchive on the same node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
 	if (autoCancel_) {
 		std::stringstream ss;
-		ss << "Node::addAutoCancel: A node can only have one Autocancel, see node " << debugNodePath();
+		ss << "Node::addAutoCancel: A node can only have one autocancel, see node " << debugNodePath();
 		throw std::runtime_error( ss.str() );
 	}
 	autoCancel_ = new ecf::AutoCancelAttr(ac);
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void Node::add_autoarchive( const AutoArchiveAttr& ac)
+{
+   if (autoCancel_) {
+      std::stringstream ss;
+      ss << "Node::add_autoarchive: Can not add autocancel and autoarchive on the same node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   if (auto_archive_) {
+      std::stringstream ss;
+      ss << "Node::add_autoarchive: A node can only have one autoarchive, see node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   auto_archive_ = new ecf::AutoArchiveAttr(ac);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 

@@ -382,16 +382,21 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 void NodeContainer::calendarChanged(
          const ecf::Calendar& c,
          std::vector<node_ptr>& auto_cancelled_nodes,
+         std::vector<node_ptr>& auto_archive_nodes,
          const ecf::LateAttr* inherited_late)
 {
-   // A node that is migrate should not allow any change of state.
+   // A node that is migrate should not allow any change of state. ????
    if (get_flag().is_set(ecf::Flag::MIGRATED)) {
       return;
    }
 
-   // The late attribute is inherited, we only set late on the task/alias
-	Node::calendarChanged(c,auto_cancelled_nodes,NULL);
+   // A node that is archived should not allow any change of state. ????
+   if (get_flag().is_set(ecf::Flag::ARCHIVED)) {
+      return;
+   }
 
+   // The late attribute is inherited, we only set late on the task/alias
+	Node::calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,NULL);
 
 	LateAttr overridden_late;
    if (inherited_late && !inherited_late->isNull()) {
@@ -401,10 +406,9 @@ void NodeContainer::calendarChanged(
 	   overridden_late.override_with(lateAttr_);
 	}
 
-
  	size_t node_vec_size = nodeVec_.size();
 	for(size_t t = 0; t < node_vec_size; t++) {
-	   nodeVec_[t]->calendarChanged(c,auto_cancelled_nodes,&overridden_late);
+	   nodeVec_[t]->calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,&overridden_late);
 	}
 }
 
@@ -1085,7 +1089,8 @@ std::string NodeContainer::archive_path() const
 {
    std::string path;
    if (!findParentUserVariableValue( Str::ECF_HOME() , path )) {
-      throw std::runtime_error("NodeContainer::archive_path() can not find ECF_HOME");
+      std::stringstream ss; ss << "NodeContainer::archive_path: can not find ECF_HOME from " << debugNodePath();
+      throw std::runtime_error(ss.str());
    }
 
    std::string the_path = absNodePath();
@@ -1133,7 +1138,9 @@ void NodeContainer::archive()
    // flag as archived
    flag().set(ecf::Flag::ARCHIVED);
 
-   // delete the child nodes
+   // delete the child nodes, set parent to null first.
+   size_t node_vec_size = nodeVec_.size();
+   for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->set_parent(NULL); }
    nodeVec_.clear();
 
    // reclaim vector memory

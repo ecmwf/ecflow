@@ -28,6 +28,7 @@
 #include "CronAttr.hpp"
 #include "ClockAttr.hpp"
 #include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
 #include "NodeAttr.hpp"
 #include "Variable.hpp"
 #include "ZombieAttr.hpp"
@@ -61,7 +62,8 @@ BOOST_AUTO_TEST_CASE( test_AttrDefaultConstructor_serialisation )
 	doSaveAndRestore<DateAttr>(fileName);
 	doSaveAndRestore<CronAttr>(fileName);
 	doSaveAndRestore<ClockAttr>(fileName);
-	doSaveAndRestore<AutoCancelAttr>(fileName);
+   doSaveAndRestore<AutoCancelAttr>(fileName);
+   doSaveAndRestore<AutoArchiveAttr>(fileName);
 	doSaveAndRestore<Label>(fileName);
 	doSaveAndRestore<Variable>(fileName);
 	doSaveAndRestore<Event>(fileName);
@@ -238,6 +240,19 @@ BOOST_AUTO_TEST_CASE( test_AutoCancelAttr_serialisation )
 		AutoCancelAttr saved( TimeSlot(12,10), true) ;
 		doSaveAndRestore(fileName,saved);
 	}
+}
+
+BOOST_AUTO_TEST_CASE( test_AutoArchiveAttr_serialisation )
+{
+   cout << "ANattr:: ...test_AutoArchiveAttr_serialisation\n";
+   {
+      AutoArchiveAttr saved(100);
+      doSaveAndRestore(fileName,saved);
+   }
+   {
+      AutoArchiveAttr saved( TimeSlot(12,10), true) ;
+      doSaveAndRestore(fileName,saved);
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_Label_serialisation )

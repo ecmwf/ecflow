@@ -76,7 +76,7 @@ public:
    virtual const Variable& findGenVariable(const std::string& name) const;
    virtual void gen_variables(std::vector<Variable>&) const;
 
-   void updateCalendar( const ecf::CalendarUpdateParams &, std::vector<node_ptr>& auto_cancelled_nodes);
+   void updateCalendar( const ecf::CalendarUpdateParams &, std::vector<node_ptr>& auto_cancelled_nodes,std::vector<node_ptr>& auto_archive_nodes);
 
    virtual const std::string& debugType() const;
 
