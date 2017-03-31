@@ -111,5 +111,17 @@ void Palette::load(const std::string& parFile)
 	qApp->setPalette(palette);
 }
 
+void Palette::statusColours(QColor bg,QColor &bgLight,QColor &border)
+{
+    int lighter=150;
+    if(bg.value() < 235)
+        bgLight=bg.lighter(130);
+    else
+        bgLight=bg.lighter(lighter);
 
+    //if(bg.hsvHue() < 58 && bg.hsvHue() > 50)
+    //    bgLight=bg.lighter(170);
+
+    border=bg.darker(120); //125 150
+}
 

@@ -39,7 +39,7 @@ VariableDelegate::VariableDelegate(QTreeView *parent) : QStyledItemDelegate(pare
 void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
-    QStyleOptionViewItemV4 vopt(option);
+    QStyleOptionViewItem vopt(option);
     initStyleOption(&vopt, index);
 
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();

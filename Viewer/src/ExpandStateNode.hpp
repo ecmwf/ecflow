@@ -8,20 +8,28 @@
 //
 //============================================================================
 
-#ifndef VIEWER_SRC_PALETTE_HPP_
-#define VIEWER_SRC_PALETTE_HPP_
+#ifndef EXPANDSTATENODE_HPP
+#define EXPANDSTATENODE_HPP
 
 #include <string>
-#include <QColor>
+#include <vector>
 
-class Palette
+class ExpandStateNode
 {
+    friend class TreeNodeView;
+    friend class CompactNodeView;
+
 public:
-	Palette();
-	static void load(const std::string& parFile);
-    static void statusColours(QColor bg,QColor &bgLight,QColor &border);
+    explicit ExpandStateNode(const std::string& name) : name_(name) {}
+    ExpandStateNode() : name_("") {}
+    ~ExpandStateNode();
+
+    void clear();
+    ExpandStateNode* add(const std::string&);
+
+    std::vector<ExpandStateNode*> children_;
+    std::string name_;
 
 };
 
-
-#endif /* VIEWER_SRC_PALETTE_HPP_ */
+#endif // EXPANDSTATENODE_HPP

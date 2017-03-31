@@ -21,7 +21,12 @@
                   } 
             },
             "tree": {
-            	
+                "layoutStyle" : {
+                    "label" : "Tree layout style",
+                    "default" : "compact",
+                    "values"  : "standard/compact",
+                    "values_label" : "Standard tree view/Compact tree view"
+                },
                 "nodeFont" : {
 					"label" : "Nodes",
 					"default": "font(,)"
@@ -34,29 +39,34 @@
 				
 				"display_child_count" : {
 					"label" : "Display number of children for servers/suites",
-					"default": "true"
+                    "default": "false"
 				}, 
 
                 "displayNodeType" : {
                     "label" : "Display node type",
-                    "default": "true"
+                    "default": "false"
                 },
 
 				"background"  : {
 				    "label"   :  "Background colour",
-				    "default" : "rgb(250,250,250)"
+                    "default" : "rgb(242,242,242)"
 				},
                 "indentation" : {
-                    "label" : "Indentation",
+                    "label" : "Indentation for standard tree",
                     "suffix" : "pixels",
                     "default" : "10",
                     "min" : "0",
                     "max" : "100"  
                  },
                  "drawBranchLine" : {
-                     "label" : "Draw branch lines",
+                     "label" : "Draw branch lines for standard tree",
                      "default": "false"
                   },
+                 "branchLineColour" : {
+                      "label" : "Branch line colour",
+                      "default": "rgb(137,137,137)"
+                   },
+
                  "defaultAttributes" : {
                     "label" : "Default visible attributes",
                     "default" : "meter/event/repeat/trigger/label/time/date/limit/limiter/late",

@@ -28,6 +28,7 @@ public:
     QSize sizeHint() const;
 	QSize minimumSizeHint() const;
 	QToolButton* optionsTb() const;
+    void setBcWidget(QWidget *w);
 	void addActions(QList<QAction*> lst);
     void setDetachedAction(QAction *ac);
 
@@ -46,6 +47,7 @@ Q_SIGNALS:
 
 protected:
     QList<QToolButton*> actionTbList_;
+    QWidget* titleBc_;
 };
 
 class DashboardDock : public QDockWidget

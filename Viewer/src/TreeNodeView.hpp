@@ -15,18 +15,22 @@
 
 #include "NodeViewBase.hpp"
 
+#include "ExpandState.hpp"
 #include "VInfo.hpp"
 #include "VProperty.hpp"
 
 class ActionHandler;
 class Animation;
 class ExpandNode;
-class ExpandState;
 class TableNodeSortModel;
 class PropertyMapper;
 class TreeNodeModel;
 class TreeNodeViewDelegate;
+//class TreeViewExpandState;
 class VTreeNode;
+
+//class TreeNodeView;
+//typedef ExpandState<TreeNodeView> TreeViewExpandState;
 
 class TreeNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver
 {
@@ -62,6 +66,9 @@ public Q_SLOTS:
 	void slotRerender();
 	void slotSizeHintChangedGlobal();
 
+protected Q_SLOTS:
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 	void infoPanelCommand(VInfo_ptr,QString);
@@ -71,8 +78,7 @@ protected:
     void resizeEvent(QResizeEvent*);
     QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
-	void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
-	void restoreExpand(ExpandNode *expand,const VNode* node);
+
 	void adjustIndentation(int);
     void adjustBackground(QColor col,bool asjustStyleSheet=true);
     void adjustBranchLines(bool,bool asjustStyleSheet=true);
@@ -80,17 +86,16 @@ protected:
     void adjustServerToolTip(bool);
     void adjustNodeToolTip(bool);
     void adjustAttributeToolTip(bool);
+
     void expandAll(const QModelIndex& idx);
 	void collapseAll(const QModelIndex& idx);
     void expandTo(const QModelIndex& idxTo);
-    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCurrentSelectionFromExpand(VInfo_ptr info);
     void regainSelectionFromExpand();
 
     TreeNodeModel* model_;
 	ActionHandler* actionHandler_;
-    ExpandState *expandState_;
-	bool needItemsLayout_;
+    bool needItemsLayout_;
 	int defaultIndentation_;
 	TreeNodeViewDelegate* delegate_;
 	PropertyMapper* prop_;
@@ -98,6 +103,9 @@ protected:
     bool setCurrentIsRunning_;
     bool setCurrentFromExpand_;
     VInfo_ptr lastSelection_;
+
+    typedef ExpandState<TreeNodeView> TreeViewExpandState;
+    QVector<TreeViewExpandState*> expandStates_;
 };
 
 #endif

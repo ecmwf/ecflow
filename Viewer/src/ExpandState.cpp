@@ -7,55 +7,25 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "ExpandState.hpp"
-
-#include <QTreeView>
-
+#include "ExpandStateNode.hpp"
 #include "TreeNodeModel.hpp"
 #include "VNode.hpp"
 #include "VTree.hpp"
 
-//-------------------------------------
-// ExapandStateNode
-//-------------------------------------
-
-ExpandStateNode::~ExpandStateNode()
-{
-	clear();
-}
-
-void ExpandStateNode::clear()
-{
-	name_.clear();
-	for(unsigned int i=0; i < children_.size(); i++)
-	{
-		delete children_.at(i);
-	}
-	children_.clear();
-}
-
-ExpandStateNode* ExpandStateNode::add(const std::string& name)
-{
-    ExpandStateNode *n=new ExpandStateNode(name);
-	children_.push_back(n);
-	return n;
-}
-
-//-------------------------------------
-// ExapandStateTree
-//-------------------------------------
-
-ExpandStateTree::ExpandStateTree(QTreeView * view,TreeNodeModel* model) :
+template <typename View>
+ExpandState<View>::ExpandState(View * view,TreeNodeModel* model) :
     view_(view), model_(model), root_(0)
 {
 }
 
-ExpandStateTree::~ExpandStateTree()
+template <typename View>
+ExpandState<View>::~ExpandState()
 {
 	clear();
 }
 
-void ExpandStateTree::clear()
+template <typename View>
+void ExpandState<View>::clear()
 {
 	if(root_)
 		delete root_;
@@ -63,12 +33,14 @@ void ExpandStateTree::clear()
 	root_=0;
 }
 
-bool ExpandStateTree::rootSameAs(const std::string& name) const
+template <typename View>
+bool ExpandState<View>::rootSameAs(const std::string& name) const
 {
     return (root_ && root_->name_ == name);
 }
 
-ExpandStateNode* ExpandStateTree::setRoot(const std::string& name)
+template <typename View>
+ExpandStateNode* ExpandState<View>::setRoot(const std::string& name)
 {
 	if(root_)
 		clear();
@@ -79,7 +51,8 @@ ExpandStateNode* ExpandStateTree::setRoot(const std::string& name)
 
 
 //Save the expand state for the given node (it can be a server as well)
-void ExpandStateTree::save(const VTreeNode *root)
+template <typename View>
+void ExpandState<View>::save(const VTreeNode *root)
 {
     assert(root);
 
@@ -93,7 +66,8 @@ void ExpandStateTree::save(const VTreeNode *root)
     }
 }
 
-void ExpandStateTree::save(ExpandStateNode *parentExpand,const QModelIndex& parentIdx)
+template <typename View>
+void ExpandState<View>::save(ExpandStateNode *parentExpand,const QModelIndex& parentIdx)
 {
     for(int i=0; i < model_->rowCount(parentIdx); i++)
     {
@@ -109,10 +83,9 @@ void ExpandStateTree::save(ExpandStateNode *parentExpand,const QModelIndex& pare
     }
 }
 
-
-
 //Save the expand state for the given node (it can be a server as well)
-void ExpandStateTree::restore(const VTreeNode* node)
+template <typename View>
+void ExpandState<View>::restore(const VTreeNode* node)
 {
     if(!root_)
         return;
@@ -127,7 +100,8 @@ void ExpandStateTree::restore(const VTreeNode* node)
     clear();
 }
 
-void ExpandStateTree::restore(ExpandStateNode *expand,const VTreeNode* node)
+template <typename View>
+void ExpandState<View>::restore(ExpandStateNode *expand,const VTreeNode* node)
 {
     //Lookup the node in the model
     QModelIndex nodeIdx=model_->nodeToIndex(node);
@@ -155,40 +129,4 @@ void ExpandStateTree::restore(ExpandStateNode *expand,const VTreeNode* node)
             }
         }
     }
-}
-//-------------------------------------
-// ExapandState
-//-------------------------------------
-
-ExpandState::ExpandState(QTreeView* view,TreeNodeModel* model) : view_(view), model_(model)
-{
-
-}
-
-
-ExpandState::~ExpandState()
-{
-    clear();
-}
-
-ExpandStateTree* ExpandState::add()
-{
-    ExpandStateTree* et=new ExpandStateTree(view_,model_);
-    items_ << et;
-    return et;
-}
-
-void ExpandState::remove(ExpandStateTree* es)
-{
-    items_.removeOne(es);
-    delete es;
-}
-
-void ExpandState::clear()
-{
-    Q_FOREACH(ExpandStateTree* et,items_)
-    {
-        delete et;
-    }
-    items_.clear();
 }

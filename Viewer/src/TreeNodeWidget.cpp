@@ -13,6 +13,7 @@
 
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
+#include "CompactNodeView.hpp"
 #include "NodePathWidget.hpp"
 #include "NodeViewBase.hpp"
 #include "TreeNodeModel.hpp"
@@ -27,7 +28,10 @@
 
 AttributeFilter* TreeNodeWidget::lastAtts_=NULL;
 
-TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : NodeWidget("tree",serverFilter,parent)
+TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
+    NodeWidget("tree",serverFilter,parent),
+    layoutProp_(0),
+    viewLayoutMode_(StandardLayoutMode)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -39,6 +43,9 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 
 	initAtts();
 
+    //Create the breadcrumbs (it will be reparented)
+    bcWidget_=new NodePathWidget(this);
+
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
 	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::NodeStateScope);
 
@@ -49,57 +56,31 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
-    TreeNodeView *tv=new TreeNodeView((TreeNodeModel*)model_,filterDef_,this);
-	hb->addWidget(tv);
 
-	//Store the pointer to the (non-QObject) base class of the view!!!
-	view_=tv;
+    layoutProp_=VConfig::instance()->find("view.tree.layoutStyle");
+    Q_ASSERT(layoutProp_);
+    layoutProp_->addObserver(this);
 
-	//Signals-slots
-	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-            this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
+    if(layoutProp_->value() == "compact")
+    {
+        viewLayoutMode_=CompactLayoutMode;
+    }
 
-	connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
-	        this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
+    Q_ASSERT(view_==0);
+    setViewLayoutMode(viewLayoutMode_);
 
-	connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
-			this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+    connect(model_,SIGNAL(firstScanEnded(const VTreeServer*)),
+           this,SLOT(firstScanEnded(const VTreeServer*)));
 
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),            
             this,SLOT(slotSelectionChangedInBc(VInfo_ptr)));
-
-    connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
-            view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
-
-    connect(model_,SIGNAL(scanEnded(const VTreeNode*)),
-            view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
-
-    connect(model_,SIGNAL(firstScanEnded(const VTreeServer*)),
-            this,SLOT(firstScanEnded(const VTreeServer*)));
-
-	connect(model_,SIGNAL(rerender()),
-	        view_->realWidget(),SLOT(slotRerender()));
-
-    connect(model_,SIGNAL(filterChangeBegun()),
-            view_->realWidget(),SLOT(slotSaveExpand()));
-
-    connect(model_,SIGNAL(filterChangeEnded()),
-            view_->realWidget(),SLOT(slotRestoreExpand()));
-
-    connect(model_,SIGNAL(filterUpdateRemoveBegun(const VTreeNode*)),
-            view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
-
-    connect(model_,SIGNAL(filterUpdateAddEnded(const VTreeNode*)),
-            view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
-
-
 
     connect(atts_,SIGNAL(changed()),
 		   this,SLOT(slotAttsChanged()));
 
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state
-	actionBreadcrumbs->setChecked(bcWidget_->active());
+    actionBreadcrumbs->setChecked(bcWidget_->isGuiMode());
 
 	//The node status filter is exposed via a menu. So we need a reference to it.
 	states_=filterDef_->nodeState();
@@ -110,6 +91,68 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 
 TreeNodeWidget::~TreeNodeWidget()
 {
+}
+
+void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
+{
+    if(view_ && viewLayoutMode_ == mode)
+        return;
+
+    viewLayoutMode_ = mode;
+
+    if(view_)
+    {
+        viewHolder_->layout()->removeWidget(view_->realWidget());
+        delete view_;
+        view_=0;
+    }
+
+    if(viewLayoutMode_ == CompactLayoutMode)
+    {
+        CompactNodeView* gv=new CompactNodeView((TreeNodeModel*)model_,filterDef_,this);
+        viewHolder_->layout()->addWidget(gv);
+        //Store the pointer to the (non-QObject) base class of the view!!!
+        view_=gv;
+    }
+    else
+    {
+        TreeNodeView *tv=new TreeNodeView((TreeNodeModel*)model_,filterDef_,this);
+        viewHolder_->layout()->addWidget(tv);
+        //Store the pointer to the (non-QObject) base class of the view!!!
+        view_=tv;
+    }
+
+    //Signals-slots
+    connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+        this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
+
+    connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+        this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
+
+    connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+        this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+
+    connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
+        view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+
+    connect(model_,SIGNAL(scanEnded(const VTreeNode*)),
+        view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+
+    connect(model_,SIGNAL(rerender()),
+        view_->realWidget(),SLOT(slotRerender()));
+
+    connect(model_,SIGNAL(filterChangeBegun()),
+        view_->realWidget(),SLOT(slotSaveExpand()));
+
+    connect(model_,SIGNAL(filterChangeEnded()),
+        view_->realWidget(),SLOT(slotRestoreExpand()));
+
+    connect(model_,SIGNAL(filterUpdateRemoveBegun(const VTreeNode*)),
+        view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+
+    connect(model_,SIGNAL(filterUpdateAddEnded(const VTreeNode*)),
+        view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+
 }
 
 void TreeNodeWidget::initAtts()
@@ -152,9 +195,9 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	//Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
 
-	//Sets the title
-    tw->slotUpdateTitle("<b>Tree</b>");
-    
+    //Add the bc to the titlebar (bc will have a new parent)
+    tw->setBcWidget(bcWidget_);
+
     QList<QAction*> acLst;
 
     QAction* acState=new QAction(this);
@@ -183,14 +226,13 @@ void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
 
 void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 {
-	if(b)
+    if(b)
 	{
-		bcWidget_->active(true);
-        bcWidget_->setPath(view_->currentSelection());
+        bcWidget_->setMode(NodePathWidget::GuiMode);
 	}
 	else
 	{
-		bcWidget_->active(false);
+        bcWidget_->setMode(NodePathWidget::TextMode);
 	}
 }
 
@@ -227,6 +269,21 @@ void TreeNodeWidget::firstScanEnded(const VTreeServer* s)
 void TreeNodeWidget::slotAttsChanged()
 {
 	lastAtts_->setCurrent(atts_->current());
+}
+
+void TreeNodeWidget::notifyChange(VProperty* p)
+{
+    if(p == layoutProp_)
+    {
+        if(layoutProp_->value() == "compact")
+        {
+            setViewLayoutMode(CompactLayoutMode);
+        }
+        else
+        {
+            setViewLayoutMode(StandardLayoutMode);
+        }
+    }
 }
 
 void TreeNodeWidget::writeSettings(VSettings* vs)
@@ -280,7 +337,7 @@ void TreeNodeWidget::readSettings(VSettings* vs)
 
 	//Synchronise the action and the breadcrumbs state
 	//This will not emit the trigered signal of the action!!
-	actionBreadcrumbs->setChecked(bcWidget_->active());
+    actionBreadcrumbs->setChecked(bcWidget_->isGuiMode());
 
 	attrFilterMenu_->reload();
 	iconFilterMenu_->reload();

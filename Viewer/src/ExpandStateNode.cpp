@@ -5,23 +5,29 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef VIEWER_SRC_PALETTE_HPP_
-#define VIEWER_SRC_PALETTE_HPP_
+#include "ExpandStateNode.hpp"
 
-#include <string>
-#include <QColor>
 
-class Palette
+ExpandStateNode::~ExpandStateNode()
 {
-public:
-	Palette();
-	static void load(const std::string& parFile);
-    static void statusColours(QColor bg,QColor &bgLight,QColor &border);
+    clear();
+}
 
-};
+void ExpandStateNode::clear()
+{
+    name_.clear();
+    for(unsigned int i=0; i < children_.size(); i++)
+    {
+        delete children_.at(i);
+    }
+    children_.clear();
+}
 
-
-#endif /* VIEWER_SRC_PALETTE_HPP_ */
+ExpandStateNode* ExpandStateNode::add(const std::string& name)
+{
+    ExpandStateNode *n=new ExpandStateNode(name);
+    children_.push_back(n);
+    return n;
+}

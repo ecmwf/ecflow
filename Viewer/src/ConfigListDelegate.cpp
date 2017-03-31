@@ -32,7 +32,7 @@ ConfigListDelegate::ConfigListDelegate(int iconSize,int maxWidth,QWidget *parent
 void ConfigListDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
-    QStyleOptionViewItemV4 vopt(option);
+    QStyleOptionViewItem vopt(option);
     initStyleOption(&vopt, index);   
 
     QPixmap pix=index.data(Qt::DecorationRole).value<QPixmap>();

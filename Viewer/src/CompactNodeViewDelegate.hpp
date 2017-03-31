@@ -8,24 +8,29 @@
 //
 //============================================================================
 
-#ifndef TreeNodeViewDelegate_HPP_
-#define TreeNodeViewDelegate_HPP_
+#ifndef COMPACTNODEVIEWDELEGATE_HPP
+#define COMPACTNODEVIEWDELEGATE_HPP
 
 #include "TreeNodeViewDelegateBase.hpp"
 
-class TreeNodeViewDelegate : public TreeNodeViewDelegateBase
+class CompactNodeViewDelegate : public TreeNodeViewDelegateBase
 {
 public:
-    explicit TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent=0);
-	~TreeNodeViewDelegate();
+    explicit CompactNodeViewDelegate(TreeNodeModel* model,QWidget *parent=0);
+    ~CompactNodeViewDelegate();
 
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const {}
+
+    int paintItem(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;   
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;
+    void sizeHint(const QModelIndex& index,int& w,int& h) const;
+    bool isSingleHeight(int h) const;
 };
 
-#endif
+#endif // COMPACTNODEVIEWDELEGATE_HPP
 
 
 

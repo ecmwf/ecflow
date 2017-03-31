@@ -167,7 +167,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
         else if(id == EventColumn || id == LabelColumn || id == MeterColumn ||
                 id == TriggerColumn)
 		{
-            if(VAttribute* a=vnode->attributeForType(index.column(),columnToAttrType(id)))
+            if(VAttribute* a=vnode->attributeForType(0,columnToAttrType(id)))
                 return a->data();
             else
                 return QVariant();

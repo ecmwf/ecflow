@@ -131,8 +131,12 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role ) const
         {
             if(VTreeNode* node=indexToAttrParentNode(index))
             {
-                return 1;
-                //VAttributeType::getLineNum(node->vnode(),index.row(),atts_);
+                VNode *vnode=node->vnode();
+                Q_ASSERT(vnode);
+                if(VAttribute* a=vnode->attribute(index.row(),atts_))
+                {
+                    return a->lineNum();
+                }
             }
             return 0;
         }
@@ -275,9 +279,10 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role,VTreeNode* t
 	if(!vnode || !vnode->node())
 		return QVariant();
 
+    if(role == NodePointerRole)
+        return qVariantFromValue((void *) vnode);
 
-    //The colour of the server node
-    if(role == ConnectionRole)
+    else if(role == ConnectionRole)
     {
         return (vnode->server()->connectState()->state() == ConnectState::Lost)?0:1;
     }
@@ -1291,4 +1296,13 @@ void TreeNodeModel::slotEndFilterUpdateInsertTop(VTreeServer* server,int)
 {
     Q_ASSERT(server);
     endInsertRows();
+}
+
+
+int TreeNodeModel::iconNum(VNode* n) const
+{
+    if(icons_->isEmpty())
+        return 0;
+    else
+        return VIcon::pixmapNum(n,icons_);
 }

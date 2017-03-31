@@ -31,6 +31,7 @@ public:
     explicit TableNodeViewDelegate(QWidget *parent=0);
     ~TableNodeViewDelegate();
 
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 
@@ -41,7 +42,7 @@ protected:
     void updateSettings();
 
     void renderNode(QPainter *painter,const QModelIndex& index,
-            							const QStyleOptionViewItemV4& option,QString text) const;
+                                        const QStyleOptionViewItem& option,QString text) const;
 
     ModelColumn* columns_;
     QPen borderPen_;

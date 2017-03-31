@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -8,20 +8,27 @@
 //
 //============================================================================
 
-#ifndef VIEWER_SRC_PALETTE_HPP_
-#define VIEWER_SRC_PALETTE_HPP_
+#ifndef FONTMETRICS_HPP
+#define FONTMETRICS_HPP
 
-#include <string>
-#include <QColor>
+#include <QFontMetrics>
 
-class Palette
+class FontMetrics : public QFontMetrics
 {
 public:
-	Palette();
-	static void load(const std::string& parFile);
-    static void statusColours(QColor bg,QColor &bgLight,QColor &border);
+    FontMetrics(const QFont &font);
+    int realHeight() const {return realHeight_;}
+    int topPaddingForCentre() const {return topPadding_;}
+    int bottomPaddingForCentre() const {return bottomPadding_;}
 
+protected:
+    int realHeight_;
+    int topPadding_;
+    int bottomPadding_;
+
+private:
+    void computeRealHeight(QFont f);
 };
 
 
-#endif /* VIEWER_SRC_PALETTE_HPP_ */
+#endif // FONTMETRICS_HPP
