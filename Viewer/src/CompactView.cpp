@@ -1405,7 +1405,8 @@ QRect CompactView::visualRect(const QModelIndex &index) const
     coordinateForItem(vi,y,rh);
     if(y >=0)
     {
-        return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
+        //return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
+        return QRect(viewItems_[vi].x-1, y-1, viewItems_[vi].width+2,rh+2);
     }
     return QRect();
 }
@@ -1769,21 +1770,6 @@ void CompactView::collapseAll()
 //
 //========================================================
 
-/*
-    Sets the current item to be the item at a index.
-
-    Unless the current selection mode is
-    \l{QAbstractItemView::}{NoSelection}, the item is also be selected.
-    Note that this function also updates the starting position for any
-    new selections the user performs.
-
-    To set an item as the current item without selecting it, call
-
-    \c{selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);}
-
-    \sa currentIndex(), currentChanged(), selectionMode
-*/
-
 void CompactView::setCurrentIndex(const QModelIndex &index)
 {
     if(selectionModel_ && index.isValid())
@@ -1797,14 +1783,10 @@ void CompactView::setCurrentIndex(const QModelIndex &index)
     }
 }
 
-/*
-    Returns the model index of the current item.
-*/
 QModelIndex CompactView::currentIndex() const
 {
     return selectionModel_ ? selectionModel_->currentIndex() : QModelIndex();
 }
-
 
 QModelIndexList CompactView::selectedIndexes() const
 {
@@ -1856,6 +1838,8 @@ void CompactView::select(const QModelIndex &topIndex, const QModelIndex &bottomI
     const int top = viewIndex(topIndex),
     bottom = viewIndex(bottomIndex);
 
+    UiLog().dbg() << "select top=" << top << " bottom=" << bottom;
+
 #if 0
     const QList< QPair<int, int> > colRanges = columnRanges(topIndex, bottomIndex);
     QList< QPair<int, int> >::const_iterator it;
@@ -1872,9 +1856,11 @@ void CompactView::select(const QModelIndex &topIndex, const QModelIndex &bottomI
         QModelIndex index = modelIndex(i);
         QModelIndex parent = index.parent();
         QModelIndex previousParent = previous.parent();
+
+        //same parent as previous
         if (previous.isValid() && parent == previousParent)
         {
-            // same parent
+            //same parent
             if (qAbs(previous.row() - index.row()) > 1)
             {
                 //a hole (hidden index inside a range) has been detected
@@ -1883,28 +1869,32 @@ void CompactView::select(const QModelIndex &topIndex, const QModelIndex &bottomI
                     selection.append(currentRange);
                 }
                 //let's start a new range
-                currentRange = QItemSelectionRange(index.sibling(index.row(),0), index.sibling(index.row(),0));
+                currentRange = QItemSelectionRange(index, index);
             }
+
             else
             {
-                QModelIndex tl = model_->index(currentRange.top(), currentRange.left(),
+                QModelIndex tl = model_->index(currentRange.top(),0,
                         currentRange.parent());
-                currentRange = QItemSelectionRange(tl, index.sibling(index.row(),0));
+                currentRange = QItemSelectionRange(tl, index);
             }
         }
-        else if (previous.isValid() && parent == model_->index(previous.row(), 0, previousParent))
-        {
-            // item is child of previous
+
+        //The current parent is the previous item
+        else if(previous.isValid() &&
+                parent == model_->index(previous.row(), 0, previousParent))
+        {            
             rangeStack.push(currentRange);
-            currentRange = QItemSelectionRange(index.sibling(index.row(), 0), index.sibling(index.row(),0));
+            currentRange = QItemSelectionRange(index, index);
         }
+
         else
         {
             if(currentRange.isValid())
                 selection.append(currentRange);
             if(rangeStack.isEmpty())
             {
-                currentRange = QItemSelectionRange(index.sibling(index.row(),0), index.sibling(index.row(),0));
+                currentRange = QItemSelectionRange(index, index);
             }
             else
             {
@@ -2040,17 +2030,58 @@ QRegion CompactView::visualRegionForSelection(const QItemSelection &selection) c
 
     QRegion selectionRegion;
     const QRect &viewportRect = viewport()->rect();
-    for (int i = 0; i < selection.count(); ++i)
-    {
+    for(int i = 0; i < selection.count(); ++i)
+    { 
         QItemSelectionRange range = selection.at(i);
         if (!range.isValid())
             continue;
-        QModelIndex parent = range.parent();
+
         QModelIndex leftIndex = range.topLeft();
-        int columnCount = model_->columnCount(parent);
         if (!leftIndex.isValid())
             continue;
+
+        QModelIndex rightIndex = range.bottomRight();
+        if (!rightIndex.isValid())
+            continue;
+
+        //UiLog().dbg() << "selection";
+
+        int left=100000000,right=0;
+        Q_FOREACH(QModelIndex idx,range.indexes())
+        {
+            const QRect r = visualRect(idx);
+            //UiLog().dbg() << r << " " << idx << " " << idx.data().toString();
+            if(r.x() < left)
+                left=r.x();
+            if(r.right()+1 > right)
+                right=r.right()+1;
+        }
+
+        const QRect topRect = visualRect(leftIndex);
+        const QRect bottomRect = visualRect(rightIndex);
+
+        int top=topRect.top();
+        int bottom=bottomRect.bottom();
+
+        if (top > bottom)
+            qSwap<int>(top, bottom);
+
+        top-=1;
+        bottom+=1;
+
+        QRect combined(left,top,right-left+1,bottom-top+1);
+
+        //UiLog().dbg() << "combined " << combined;
+
+#if 0
+        QModelIndex parent = range.parent();
+        QModelIndex leftIndex = range.topLeft();
+
+        if (!leftIndex.isValid())
+            continue;
+
         const QRect leftRect = visualRect(leftIndex);
+
         int top = leftRect.top();
         QModelIndex rightIndex = range.bottomRight();
         if (!rightIndex.isValid())
@@ -2063,6 +2094,8 @@ QRegion CompactView::visualRegionForSelection(const QItemSelection &selection) c
 
         QRect combined = leftRect|rightRect;
         combined.setX(range.left());
+
+#endif
         if (viewportRect.intersects(combined))
                 selectionRegion += combined;
     }
