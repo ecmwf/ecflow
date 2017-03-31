@@ -18,7 +18,8 @@ DashboardWidget::DashboardWidget(const std::string& type, QWidget* parent) :
     QWidget(parent),
     type_(type),
     acceptSetCurrent_(false),
-    bcWidget_(0)
+    bcWidget_(0),
+    inDialog_(false)
 {
     detachedAction_=new QAction("Detached",this);
     QIcon ic(QPixmap(":viewer/dock_chain_closed.svg"));
@@ -50,6 +51,17 @@ void DashboardWidget::setDetached(bool b)
 bool DashboardWidget::detached() const
 {
     return detachedAction_->isChecked();
+}
+
+void DashboardWidget::setInDialog(bool b)
+{
+    if(inDialog_ != b)
+    {
+        inDialog_=b;
+        QIcon ic(QPixmap(":viewer/chain_closed.svg"));
+        ic.addPixmap(QPixmap(":viewer/chain_open.svg"),QIcon::Normal,QIcon::On);
+        detachedAction_->setIcon(ic);
+    }
 }
 
 void DashboardWidget::writeSettings(VSettings* vs)

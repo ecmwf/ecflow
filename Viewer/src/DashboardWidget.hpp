@@ -42,9 +42,12 @@ public:
 
     bool detached() const;
     void setDetached(bool b);
+    bool isInDialog() const {return inDialog_;}
 
     virtual void writeSettings(VSettings*);
     virtual void readSettings(VSettings*);
+    virtual void writeSettingsForDialog() {}
+    virtual void readSettingsForDialog() {}
 
 	const std::string type() const {return type_;}
 	void id(const std::string& id) {id_=id;}
@@ -61,12 +64,16 @@ protected Q_SLOTS:
 
 protected:
     virtual void detachedChanged()=0;
+    void setInDialog(bool);
 
     std::string id_;
 	std::string type_;
 	bool acceptSetCurrent_;
     QAction *detachedAction_;
     NodePathWidget* bcWidget_;
+
+private:
+    bool inDialog_;
 };
 
 

@@ -19,6 +19,7 @@
 #include "InfoPanelHandler.hpp"
 #include "NodePathWidget.hpp"
 #include "ServerHandler.hpp"
+#include "SessionHandler.hpp"
 #include "UiLog.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
@@ -54,8 +55,7 @@ void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 InfoPanel::InfoPanel(QWidget* parent) :
   DashboardWidget("info",parent),
   tabBeingCleared_(false),
-  tabBeingAdjusted_(false),
-  inDialog_(false)
+  tabBeingAdjusted_(false)
 {
 	setupUi(this);
 
@@ -114,7 +114,7 @@ void InfoPanel::populateDockTitleBar(DashboardDockTitleWidget* tw)
 //When the infopanel is in a dialog we need to add the optionsTb to the dialog.
 void InfoPanel::populateDialog()
 {
-    inDialog_=true;
+    setInDialog(true);
 
     //Add the bcWidget_ to the top of the dialogue
     bcWidget_->useTransparentBg(false);
@@ -122,17 +122,26 @@ void InfoPanel::populateDialog()
 
     QMenu *menu=buildOptionsMenu();
 
-    detachedAction_->setIcon(QIcon());
-    menu->addAction(detachedAction_);
+    QWidget *cornerW=new QWidget(this);
+    QHBoxLayout *hb=new QHBoxLayout(cornerW);
+    hb->setContentsMargins(0,0,0,0);
+    hb->setSpacing(1);
+
+    QToolButton *detachedTb=new QToolButton(this);
+    detachedTb->setAutoRaise(true);
+    detachedTb->setDefaultAction(detachedAction_);
+    hb->addWidget(detachedTb);
+    setDetached(true); //by default a dialog is detached!
 
     QToolButton* optionsTb=new QToolButton(this);
     optionsTb->setAutoRaise(true);
-    optionsTb->setIcon(QPixmap(":/viewer/configure.svg"));
+    optionsTb->setIcon(QPixmap(":/viewer/cogwheel.svg"));
     optionsTb->setPopupMode(QToolButton::InstantPopup);
     optionsTb->setToolTip(tr("Options"));
     optionsTb->setMenu(menu);
+    hb->addWidget(optionsTb);
 
-    tab_->setCornerWidget(optionsTb);
+    tab_->setCornerWidget(cornerW);
 
     //This will set the dialog title
     updateTitle();
@@ -513,7 +522,7 @@ void InfoPanel::detachedChanged()
 
 void InfoPanel::on_actionBreadcrumbs__toggled(bool b)
 {
-    if(inDialog_)
+    if(isInDialog())
     {
         bcWidget_->setVisible(b);
     }
@@ -546,24 +555,13 @@ bool InfoPanel::frozen() const
 
 void InfoPanel::updateTitle()
 {
-    QString baseTxt="<b>Info panel</b>";
-
 	QString txt;
 	if(frozen())
-		txt+="frozen";
-
-	if(!txt.isEmpty())
-	{
-		txt=baseTxt + " (" + txt + ")";
-	}
-	else
-	{
-		txt=baseTxt;
-	}
+        txt+="(frozen) ";
 
     if(info_)
     {
-        txt+=" - " + QString::fromStdString(info_->path());
+        txt+=QString::fromStdString(info_->path());
     }
 
     Q_EMIT titleUpdated(txt);
@@ -766,3 +764,28 @@ void InfoPanel::readSettings(VSettings* vs)
     }
 }
 
+void InfoPanel::writeSettingsForDialog()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    assert(cs);
+    VSettings vs(cs->infoPanelDialogFile());
+
+    vs.putAsBool("breadcrumbs",bcWidget_->isVisible());
+    vs.putAsBool("frozen",frozen());
+    vs.putAsBool("detached",detached());
+    vs.write();
+}
+
+void InfoPanel::readSettingsForDialog()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    assert(cs);
+    VSettings vs(cs->infoPanelDialogFile());
+    vs.read(false);
+
+    actionBreadcrumbs_->setChecked(vs.getAsBool("breadcrumbs",true));
+    bcWidget_->setVisible(actionBreadcrumbs_->isChecked());
+
+    actionFrozen_->setChecked(vs.getAsBool("frozen",frozen()));
+    detachedAction_->setChecked(vs.getAsBool("detached",detached()));
+}
