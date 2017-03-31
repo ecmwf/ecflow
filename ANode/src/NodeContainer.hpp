@@ -110,6 +110,8 @@ public:
    std::string archive_path() const; //can throw if ECF_HOME not defined
 
 private:
+   void restore_on_begin_or_requeue();
+
    virtual size_t child_position(const Node*) const;
    void add_task_only( task_ptr ,size_t position = std::numeric_limits<std::size_t>::max());
    void add_family_only( family_ptr ,size_t position = std::numeric_limits<std::size_t>::max());

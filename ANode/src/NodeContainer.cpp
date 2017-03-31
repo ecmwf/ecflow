@@ -110,6 +110,7 @@ void NodeContainer::acceptVisitTraversor(ecf::NodeTreeVisitor& v)
 
 void NodeContainer::begin()
 {
+   restore_on_begin_or_requeue();
 	Node::begin();
  	size_t node_vec_size = nodeVec_.size();
  	for(size_t t = 0; t < node_vec_size; t++)   { nodeVec_[t]->begin(); }
@@ -123,6 +124,8 @@ void NodeContainer::requeue(
 )
 {
 //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
+
+   restore_on_begin_or_requeue();
 
    // Node::requeue(..) will clear ecf::Flag::MIGRATED,
    // this should cause children to be added in client def's, provided we force a sync
@@ -1146,6 +1149,19 @@ void NodeContainer::swap(NodeContainer& rhs)
    size_t theSize = nodeVec_.size();
    for(size_t s = 0; s < theSize; s++) {
       nodeVec_[s]->set_parent(this);
+   }
+}
+
+void NodeContainer::restore_on_begin_or_requeue()
+{
+   if (!flag().is_set(ecf::Flag::ARCHIVED)) return;
+   if (!nodeVec_.empty()) return;
+   if (!fs::exists(archive_path())) return;
+
+   try { restore(); }
+   catch(std::exception&  e) {
+      std::stringstream ss; ss << "NodeContainer::restore_on_begin_or_requeue(): failed : " << e.what();
+      log(Log::ERR,ss.str());
    }
 }
 

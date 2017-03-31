@@ -1457,6 +1457,37 @@ def test_client_delete_node_multiple_paths(ci):
         node = ci.get_defs().find_abs_node(task.get_abs_node_path()) 
         assert node == None , "Expected not to find task " + task.get_abs_node_path()  + " as it should have been deleted:\n" + str(ci.get_defs())   
     
+def test_client_archive_and_restore(ci):
+    suite_name = "test_client_archive_and_restore"
+    print(suite_name)
+    ci.delete_all()     
+    defs = create_defs(suite_name)  
+    suite = defs.find_suite(suite_name)
+    suite_path = suite.get_abs_node_path();
+     
+    ci.restart_server()
+    ci.load(defs)  
+     
+    ci.sync_local() # get the changes, synced with local defs
+    node_vec = ci.get_defs().get_all_nodes()
+    assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
+ 
+    ci.archive(suite_path)
+    ci.sync_local() # get the changes, synced with local defs
+    node_vec = ci.get_defs().get_all_nodes()
+    assert len(node_vec) == 1, "Expected 1 nodes, but found " + str(len(node_vec))
+    the_suite = ci.get_defs().find_suite(suite_name)
+    assert the_suite != None, "Expected to find suite"
+    assert the_suite.get_flag().is_set(FlagType.archived), " expected archive flag to be set"
+ 
+    ci.restore(suite_path)
+    ci.sync_local() # get the changes, synced with local defs
+    node_vec = ci.get_defs().get_all_nodes()
+    assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
+    the_restored_suite = defs.find_suite(suite_name)
+    assert the_restored_suite != None, "Expected to find suite"
+    assert not the_restored_suite.get_flag().is_set(FlagType.archived), "expected archive flag to be cleared"
+    
 
 def test_client_check_defstatus(ci):            
     print("test_client_check_defstatus")
@@ -1655,6 +1686,7 @@ if __name__ == "__main__":
         test_client_resume_multiple_paths(ci)             
         test_client_delete_node(ci)             
         test_client_delete_node_multiple_paths(ci)             
+        test_client_archive_and_restore(ci)             
    
         test_client_check(ci)  
         test_client_check_defstatus(ci)  
