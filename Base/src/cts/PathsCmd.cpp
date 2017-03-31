@@ -479,11 +479,13 @@ const char* resume_desc(){
 }
 const char* archive_desc(){
    return
-         "Archives suite or family nodes *IF* they have child nodes, otherwise does nothing.\n"
+         "Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).\n"
          "Saves the suite/family nodes to disk, and then removes the child nodes from the definition\n"
          "This saves memory in the server, when dealing with huge definitions that are not needed.\n"
+         "It improves time taken to checkpoint and reduces network bandwidth\n"
          "If the node is re-queued or begun, the child nodes are automatically restored\n"
          "Use --restore to reload the archived nodes manually\n"
+         "Care must be taken if you have trigger reference to the archived nodes\n"
          "The nodes are saved to ECF_HOME/ECF_NAME.check, where '/' has been replace with ':' in ECF_NAME\n"
          "Usage::\n"
          "   --archive=/s1           # archive suite s1\n"
