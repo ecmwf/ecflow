@@ -695,18 +695,19 @@ bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const
 bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const
 {
    if ( auto_archive_ && state() == NState::COMPLETE) {
-      if (auto_archive_->isFree(calendar,state_.second)) {
+      if (!isSuspended() && auto_archive_->isFree(calendar,state_.second)) {
+         if (!isParentSuspended()) {
 
-         /// *Only* delete this node if we don't create zombies
-         /// anywhere for our children
-         vector<Task*> taskVec;
-         getAllTasks(taskVec);
-         BOOST_FOREACH(Task* t, taskVec) {
-            if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
-               return false;
+            /// *Only* archive this node if we don't create zombies anywhere for our children
+            vector<Task*> taskVec;
+            getAllTasks(taskVec);
+            BOOST_FOREACH(Task* t, taskVec) {
+               if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+                  return false;
+               }
             }
+            return true;
          }
-         return true;
       }
    }
    return false;

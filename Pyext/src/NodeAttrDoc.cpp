@@ -423,11 +423,12 @@ const char* NodeAttrDoc::autoarchive_doc()
 {
    return
          "Provides a way to automatically archive a suite/family which has completed\n\n"
-         "This is required when dealing with super large suite/families, then can be archived off, and then restored later\n"
-         "This reduced the time to checkpoint the definition and reduces network band width\n"
-         "The archived node is written to disk, as ECF_HOME/ECF_NAME.check, where '/' is replaced with ':' in ECF_NAME\n"
-         "The archived node can be recovered using 'autorestore', begin,re-queue and manually via ecflow_client --restore\n"
-         "See :term:`autocancel`\n"
+         "This is required when dealing with super large suite/families, they can be archived off, and then restored later.\n"
+         "This reduced the time to checkpoint the definition and reduces network band width.\n"
+         "The archived node is written to disk, as ECF_HOME/ECF_NAME.check, where '/' is replaced with ':' in ECF_NAME.\n"
+         "The node can be recovered using 'autorestore', begin,re-queue and manually via ecflow_client --restore.\n"
+         "The archiving is never immediate. The nodes are checked one a minute, and expired autoarchive nodes are archived.\n"
+         "If the node is suspended or any of its parent are suspended then then the archive does not happen.\n"
          "\nConstructor::\n\n"
          "   AutoArchive(TimeSlot,relative)\n"
          "      TimeSlot     : A time\n"
