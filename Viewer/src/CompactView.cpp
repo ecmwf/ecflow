@@ -42,13 +42,12 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     connectorGap_(1),
     expandButtonSize_(8),
     expandButtonMode_(Classic),
+    noSelectionOnMousePress_(false),
     connectorColour_(Qt::black)
 {
     delegate_=new CompactNodeViewDelegate(model_,this);
 
     itemDelegate_=new QStyledItemDelegate(this);
-
-    //setAutoFillBackground(true);
 
     viewport()->setBackgroundRole(QPalette::Window);
 
@@ -81,7 +80,7 @@ void CompactView::attachModel()
     connect(model_,SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
         this,SLOT(dataChanged(const QModelIndex&,const QModelIndex&)));
 
-
+    //The selection model
     selectionModel_ = new QItemSelectionModel(model_, this);
     connect(model_, SIGNAL(destroyed()), selectionModel_, SLOT(deleteLater()));
 
@@ -90,10 +89,6 @@ void CompactView::attachModel()
 
     connect(selectionModel_, SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(currentChanged(QModelIndex,QModelIndex)));
-
-    //connect(d->selectionModel, SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
-    //                d->model, SLOT(submit()));
-
 
     //We need to call it to be sure that the view show the actual state of the model!!!
     reset();
@@ -104,13 +99,10 @@ void CompactView::mousePressEvent(QMouseEvent* event)
     QPoint pos = event->pos();
     QPersistentModelIndex index = indexAt(pos);
     pressedIndex_ = index;
-    //d->pressedAlreadySelected = d->selectionModel->isSelected(index);
-    //pressedIndex_ = index;
-    //    d->pressedModifiers = event->modifiers();
 
     QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
 
-    //d->noSelectionOnMousePress = command == QItemSelectionModel::NoUpdate || !index.isValid();
+    noSelectionOnMousePress_ = command == QItemSelectionModel::NoUpdate || !index.isValid();
     QPoint offset;
 
     if((command & QItemSelectionModel::Current) == 0)
@@ -151,6 +143,18 @@ void CompactView::mousePressEvent(QMouseEvent* event)
             updateScrollBars();
             viewport()->update();
         }
+    }
+}
+
+void CompactView::mouseReleaseEvent(QMouseEvent *event)
+{
+    QPoint pos = event->pos();
+    QPersistentModelIndex index = indexAt(pos);
+
+    if(selectionModel_ && noSelectionOnMousePress_)
+    {
+        noSelectionOnMousePress_ = false;
+        selectionModel_->select(index, selectionCommand(index, event));
     }
 }
 
@@ -285,16 +289,6 @@ void CompactView::reset()
 */
 void CompactView::rowsInserted(const QModelIndex& parent,int start,int end)
 {
-#if 0
-    const int parentRowCount = model_->rowCount(parent);
-    const int delta = end - start + 1;
-    if(parent != root_ && !isIndexExpanded(parent) && parentRowCount > delta)
-    {
-        //QAbstractItemView::rowsInserted(parent, start, end);
-        return;
-    }
-#endif
-
     const int parentItem = viewIndex(parent);
 
     //If the item is expanded we need to relayout the whole tree
@@ -526,28 +520,6 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
             rowCount_++;
     }
 
-#if 0
-    if(widest > 0)
-    {
-        children=0;
-        for(int i=first; i < first+count; i++)
-        {
-            //QModelIndex currentIndex=model_->index(i-first,0,parentIndex);
-
-            last = i + children;
-            item = &viewItems_[last];
-
-            int diff=widest-item->right();
-            if(diff >0)
-            {
-                shiftItems(last,diff);
-            }
-            children+=item->total;
-        }
-
-    }
-#endif
-
     if(!expanding)
         return; // nothing changed
 
@@ -585,7 +557,7 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
     }
 
 #ifdef _UI_COMPACTVIEW_DEBUG
-    UiLog().dbg() << "CompactNodeView::paint -->";
+    UiLog().dbg() << "CompactView::paint -->";
     UiLog().dbg() << "sizeof(CompactViewItem)=" << sizeof(CompactViewItem);
     UiLog().dbg() << "region=" << region;
     qDebug() << painter->pen() << painter->brush();
@@ -946,40 +918,6 @@ void CompactView::adjustWidthInParent(int start)
 
 }
 
-
-#if 0
-void CompactView::shiftItems(int start)
-{
-    int n=start+viewItems_[start].total+1;
-    int w=0, h=0;
-    for(int i=start+1; i < n; i++)
-    {
-        delegate_->sizeHint(viewItems_[i].index,w,h);
-        viewItems_[i].width=w;
-        int pt=viewItems_[i].parentItem;
-        viewItems_[i].x=viewItems_[pt].right()+itemGap_;
-        if(viewItems_[i].right() > maxRowWidth_)
-            maxRowWidth_=viewItems_[i].right();
-    }
-}
-
-void CompactView::shiftItems(int start,int delta)
-{
-    int n=start+viewItems_[start].total+1;
-    int w=0, h=0;
-    for(int i=start+1; i < n; i++)
-    {
-        //delegate_->sizeHint(viewItems_[i].index,w,h);
-        //viewItems_[i].width=w;
-        //int pt=viewItems_[i].parentItem;
-        viewItems_[i].x+=delta;
-        if(viewItems_[i].right() > maxRowWidth_)
-            maxRowWidth_=viewItems_[i].right();
-    }
-}
-#endif
-
-
 int CompactView::connectorPos(CompactViewItem* item, CompactViewItem* parent) const
 {
     return (parent->right()+item->x)/2;
@@ -1160,18 +1098,6 @@ int CompactView::firstVisibleItem(int &offset) const
         //return (value < 0 || value >= viewItems_.count()) ? -1 : value;
     }
 
-#if 0
-    int y = 0;
-    for(int i = 0; i < viewItems_.count(); ++i)
-    {
-        y += itemHeight(i); // the height value is cached
-        if (y > value) {
-            if (offset)
-                *offset = y - value - itemHeight(i);
-            return i;
-        }
-    }
-#endif
     return -1;
 }
 
@@ -1242,19 +1168,7 @@ void CompactView::updateScrollBars()
     }
     else
     {
-#if 0
-        // scroll per pixel
-        int contentsHeight = 0;
-        if (uniformRowHeights) {
-            contentsHeight = defaultItemHeight * viewItems.count();
-        } else { // ### optimize (spans or caching)
-            for (int i = 0; i < viewItems.count(); ++i)
-                contentsHeight += itemHeight(i);
-        }
-        vbar->setRange(0, contentsHeight - viewportSize.height());
-        vbar->setPageStep(viewportSize.height());
-        vbar->setSingleStep(qMax(viewportSize.height() / (itemsInViewport + 1), 2));
-#endif
+        // scroll per pixel       
     }
 
     //Horizontal scrollbar
@@ -1306,23 +1220,9 @@ void CompactView::scrollTo(const QModelIndex &index)
             expand(pt);
     }
 
-#if 0
-    while(parent.isValid())
-    {
-        if(!isExpanded(parent))
-            expand(parent);
-        parent = model_->parent(parent);
-    }
-#endif
-
     int item = viewIndex(index);
     if (item < 0)
         return;
-
-    //QRect area = viewport()->rect();
-
-    //vertical
-    //hint == EnsureVisible
 
     if (verticalScrollMode_ == ScrollPerItem)
     {
@@ -1451,20 +1351,6 @@ void CompactView::coordinateForItem(int item,int& itemY,int& itemRowHeight) cons
             }
         }
     }
-#if 0
-    else if(verticalScrollMode_ == ScrollPerPixel)
-    {
-        // ### optimize (spans or caching)
-        int y = 0;
-        const int itemsSize= viewItems_.size();
-        for(int i = 0; i < itemsSize; ++i)
-        {
-            if (i == item)
-                return y - verticalScrollBar()->value();
-            y += itemHeight(i);
-        }
-    }
-#endif
 }
 
 int CompactView::itemAtCoordinate(const QPoint& coordinate) const
@@ -1495,24 +1381,6 @@ int CompactView::itemAtCoordinate(const QPoint& coordinate) const
                 }
             }
         }
-#if 0
-        else
-        {
-            // the coordinate is above the viewport
-            int viewItemCoordinate = 0;
-            int itemsInRow=0;
-            for (int viewItemIndex = topViewItemIndex; viewItemIndex >= 0; viewItemIndex-=itemsInRow)
-            {
-                if (viewItemCoordinate <= coordinate.y())
-                {
-                    viewItemIndex=itemAtRowCoordinate(viewItemIndex,itemsInRow,coordinate.x());
-                    return (viewItemIndex >= itemCount ? -1 : viewItemIndex);
-                }
-                viewItemCoordinate -= rowHeight(viewItemIndex,1,itemsInRow);
-            }
-        }
-#endif
-
     }
 
     return -1;
@@ -1527,6 +1395,7 @@ int CompactView::itemAtRowCoordinate(int start,int count,int logicalXPos) const
     }
     return -1;
 }
+
 
 QModelIndex CompactView::modelIndex(int i) const
 {
@@ -1783,6 +1652,7 @@ void CompactView::setCurrentIndex(const QModelIndex &index)
     }
 }
 
+
 QModelIndex CompactView::currentIndex() const
 {
     return selectionModel_ ? selectionModel_->currentIndex() : QModelIndex();
@@ -1806,22 +1676,32 @@ void CompactView::setSelection(const QRect &rect, QItemSelectionModel::Selection
     if (!selectionModel_ || rect.isNull())
         return;
 
-    //d->executePostedLayout();
     QPoint tl(isRightToLeft() ? qMax(rect.left(), rect.right())
               : qMin(rect.left(), rect.right()), qMin(rect.top(), rect.bottom()));
     QPoint br(isRightToLeft() ? qMin(rect.left(), rect.right()) :
               qMax(rect.left(), rect.right()), qMax(rect.top(), rect.bottom()));
 
+
+    tl=QPoint(rect.x(),rect.y());
+    br=QPoint(rect.x()+rect.width(),rect.y()+rect.height());
+
+    if(tl.y() > br.y())
+        qSwap(tl,br);
+
+
     QModelIndex topLeft = indexAt(tl);
     QModelIndex bottomRight = indexAt(br);
+
     if (!topLeft.isValid() && !bottomRight.isValid())
     {
         if(command & QItemSelectionModel::Clear)
             selectionModel_->clear();
         return;
     }
+
     if (!topLeft.isValid() && !viewItems_.empty())
         topLeft = viewItems_.front().index;
+
     if (!bottomRight.isValid() && !viewItems_.empty())
     {
         const QModelIndex index = viewItems_.back().index;
@@ -1838,14 +1718,10 @@ void CompactView::select(const QModelIndex &topIndex, const QModelIndex &bottomI
     const int top = viewIndex(topIndex),
     bottom = viewIndex(bottomIndex);
 
-    UiLog().dbg() << "select top=" << top << " bottom=" << bottom;
-
-#if 0
-    const QList< QPair<int, int> > colRanges = columnRanges(topIndex, bottomIndex);
-    QList< QPair<int, int> >::const_iterator it;
-    for (it = colRanges.begin(); it != colRanges.end(); ++it) {
-        const int left = (*it).first,
-            right = (*it).second;
+#ifdef _UI_COMPACTVIEW_DEBUG
+    UiLog().dbg() << "CompactView::select -->";
+    UiLog().dbg() << "top=" << top << " " << topIndex.data().toString() <<
+                     " bottom=" << bottom << " " << bottomIndex.data().toString();
 #endif
 
     QModelIndex previous;
@@ -1928,6 +1804,7 @@ QItemSelectionModel::SelectionFlags CompactView::selectionCommand(
 {
     Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
     if (event) {
+
         switch (event->type()) {
         case QEvent::MouseMove: {
             // Toggle on MouseMove
@@ -2044,58 +1921,21 @@ QRegion CompactView::visualRegionForSelection(const QItemSelection &selection) c
         if (!rightIndex.isValid())
             continue;
 
-        //UiLog().dbg() << "selection";
-
-        int left=100000000,right=0;
+        int left=100000000,right=0,top=1000000000, bottom=0;
         Q_FOREACH(QModelIndex idx,range.indexes())
         {
             const QRect r = visualRect(idx);
             //UiLog().dbg() << r << " " << idx << " " << idx.data().toString();
-            if(r.x() < left)
-                left=r.x();
-            if(r.right()+1 > right)
-                right=r.right()+1;
+            if(r.x() < left) left=r.x();
+            if(r.right()+1 > right) right=r.right()+1;
+            if(r.y() < top) top=r.y();
+            if(r.bottom()+1 > bottom ) bottom=r.bottom()+1;
         }
-
-        const QRect topRect = visualRect(leftIndex);
-        const QRect bottomRect = visualRect(rightIndex);
-
-        int top=topRect.top();
-        int bottom=bottomRect.bottom();
-
-        if (top > bottom)
-            qSwap<int>(top, bottom);
 
         top-=1;
         bottom+=1;
 
         QRect combined(left,top,right-left+1,bottom-top+1);
-
-        //UiLog().dbg() << "combined " << combined;
-
-#if 0
-        QModelIndex parent = range.parent();
-        QModelIndex leftIndex = range.topLeft();
-
-        if (!leftIndex.isValid())
-            continue;
-
-        const QRect leftRect = visualRect(leftIndex);
-
-        int top = leftRect.top();
-        QModelIndex rightIndex = range.bottomRight();
-        if (!rightIndex.isValid())
-            continue;
-        const QRect rightRect = visualRect(rightIndex);
-        int bottom = rightRect.bottom();
-        if (top > bottom)
-            qSwap<int>(top, bottom);
-        int height = bottom - top + 1;
-
-        QRect combined = leftRect|rightRect;
-        combined.setX(range.left());
-
-#endif
         if (viewportRect.intersects(combined))
                 selectionRegion += combined;
     }
@@ -2111,7 +1951,18 @@ void CompactView::selectionChanged(const QItemSelection &selected,
                                    const QItemSelection &deselected)
 {
     if(isVisible()) // && updatesEnabled()) {
-        viewport()->update(visualRegionForSelection(deselected) | visualRegionForSelection(selected));
+    {
+        QRegion des=visualRegionForSelection(deselected);
+        QRegion sel=visualRegionForSelection(selected);
+
+#ifdef _UI_COMPACTVIEW_DEBUG
+        UiLog().dbg() << "CompactView::selectionChanged -->";
+        UiLog().dbg() << "  deselect=" << des.boundingRect() << " select=" << sel.boundingRect();
+        QRegion un=des | sel;
+        UiLog().dbg() << "  union=" << un.boundingRect();
+#endif
+        viewport()->update(des | sel);
+    }
 }
 
 /*
