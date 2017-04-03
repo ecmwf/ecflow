@@ -28,12 +28,13 @@
 
 class MiscAttrs : private boost::noncopyable {
 public:
-   MiscAttrs(Node* node) : node_(node) {}
-   MiscAttrs(const MiscAttrs& rhs) : node_(NULL),zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_) {}
-   MiscAttrs() : node_(NULL) {}
+   MiscAttrs(Node* node) : node_(node),auto_restore_attr_(NULL) {}
+   MiscAttrs(const MiscAttrs& rhs);
+   MiscAttrs() : node_(NULL),auto_restore_attr_(NULL) {}
+   ~MiscAttrs();
 
    // needed by node serialisation
-   void set_node(Node* n) { node_ = n; }
+   void set_node(Node* n);
 
    void begin();
    void requeue();
@@ -49,9 +50,15 @@ public:
    std::vector<QueueAttr>&             ref_queues()    { return queues_; } //allow simulator access
 
    // Add functions: ===============================================================
-   void addVerify( const VerifyAttr& );  // for testing and verification Can throw std::runtime_error
-   void addZombie( const ZombieAttr& );  // will throw std::runtime_error if duplicate
-   void add_queue( const QueueAttr& );   // will throw std::runtime_error if duplicate
+   void addVerify( const VerifyAttr& );                  // for testing and verification Can throw std::runtime_error
+   void addZombie( const ZombieAttr& );                  // will throw std::runtime_error if duplicate
+   void add_queue( const QueueAttr& );                   // will throw std::runtime_error if duplicate
+
+   // Auto restore: =====================================================================================
+   ecf::AutoRestoreAttr* auto_restore_attr() const { return auto_restore_attr_;}
+   void add_auto_restore( const ecf::AutoRestoreAttr& ); // will throw std::runtime_error if duplicate
+   void delete_auto_restore();
+   void do_auto_restore();
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type
@@ -59,6 +66,8 @@ public:
    void delete_zombie(const ecf::Child::ZombieType);
    void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
    void delete_queue(const std::string& name); // empty string means delete all queue's
+   /// Check to see if auto_restore can reference the nodes
+   bool check(std::string& errorMsg) const;
 
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors
@@ -89,6 +98,7 @@ private:
    friend class Node;
 
 private:
+   ecf::AutoRestoreAttr*   auto_restore_attr_;
    std::vector<ZombieAttr> zombies_;
    std::vector<VerifyAttr> verifys_;     // used for statistics and test verification
    std::vector<QueueAttr>  queues_;      // experimental
@@ -97,6 +107,7 @@ private:
    friend class boost::serialization::access;
    template<class Archive>
    void serialize(Archive & ar, const unsigned int /*version*/) {
+      ar & auto_restore_attr_;
       ar & zombies_;
       ar & verifys_;
       ar & queues_;

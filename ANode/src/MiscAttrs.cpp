@@ -21,11 +21,29 @@
 #include "Log.hpp"
 #include "Ecf.hpp"
 #include "Memento.hpp"
+#include "AutoRestoreAttr.hpp"
 
 using namespace ecf;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
+
+MiscAttrs::MiscAttrs(const MiscAttrs& rhs) : node_(NULL),auto_restore_attr_(NULL),zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_)
+{
+   if (rhs.auto_restore_attr_) auto_restore_attr_= new AutoRestoreAttr(*rhs.auto_restore_attr_);
+}
+
+MiscAttrs::~MiscAttrs()
+{
+   delete auto_restore_attr_;
+}
+
+// needed by node serialisation
+void MiscAttrs::set_node(Node* n)
+{
+   node_ = n;
+   if (auto_restore_attr_) auto_restore_attr_->set_node(n);
+}
 
 void MiscAttrs::begin()
 {
@@ -39,8 +57,20 @@ void MiscAttrs::requeue()
    for(size_t i = 0; i < queues_.size(); i++)    { queues_[i].reset(); }
 }
 
+void MiscAttrs::do_auto_restore()
+{
+   if ( auto_restore_attr_ ) auto_restore_attr_->do_auto_restore();
+}
+
+bool MiscAttrs::check(std::string& errorMsg) const
+{
+   if ( auto_restore_attr_ ) return auto_restore_attr_->check(errorMsg);
+   return true;
+}
+
 std::ostream& MiscAttrs::print(std::ostream& os) const
 {
+   if (auto_restore_attr_) auto_restore_attr_->print(os);
    BOOST_FOREACH(const ZombieAttr& z, zombies_)     { z.print(os); }
    BOOST_FOREACH(const VerifyAttr& v, verifys_ )    { v.print(os);  }
    BOOST_FOREACH(const QueueAttr& q, queues_ )     { q.print(os);  }
@@ -49,6 +79,35 @@ std::ostream& MiscAttrs::print(std::ostream& os) const
 
 bool MiscAttrs::operator==(const MiscAttrs& rhs) const
 {
+   if (auto_restore_attr_ && rhs.auto_restore_attr_) {
+      if (*auto_restore_attr_ == *rhs.auto_restore_attr_) {
+         return true;
+      }
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "MiscAttrs::operator== auto_restore_attr_ && rhs.auto_restore_attr_   " << node_->debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   else if ( !auto_restore_attr_ && rhs.auto_restore_attr_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "MiscAttrs::operator==  !auto_restore_attr_ && rhs.auto_restore_attr_ " << node_->debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   else if ( auto_restore_attr_ && !rhs.auto_restore_attr_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "MiscAttrs::operator==  auto_restore_attr_ && !rhs.auto_restore_attr_  " << node_->debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+
+
    if (zombies_.size() != rhs.zombies_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
@@ -193,8 +252,27 @@ bool MiscAttrs::findVerify(const VerifyAttr& v) const
    return false;
 }
 
+void MiscAttrs::add_auto_restore( const ecf::AutoRestoreAttr& auto_restore)
+{
+   if (auto_restore_attr_) {
+      std::stringstream ss;
+       ss << "MiscAttrs::add_auto_restore: Can only have one autorestore per node " << node_->debugNodePath();
+       throw std::runtime_error( ss.str() );
+   }
+   auto_restore_attr_ =  new ecf::AutoRestoreAttr(auto_restore);
+   auto_restore_attr_->set_node(node_);
+   node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
+}
+
+void MiscAttrs::delete_auto_restore()
+{
+   delete auto_restore_attr_; auto_restore_attr_ = NULL;
+   if (node_) node_->state_change_no_ = Ecf::incr_state_change_no();
+}
+
 void MiscAttrs::clear()
 {
+   delete auto_restore_attr_; auto_restore_attr_ = NULL;
    zombies_.clear();   // can be added/removed via AlterCmd
    verifys_.clear();
    queues_.clear();
