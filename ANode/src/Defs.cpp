@@ -105,7 +105,7 @@ void Defs::copy_defs_state_only(defs_ptr server_defs)
 Defs& Defs::operator=(const Defs& rhs)
 {
    if (this != &rhs) {
-      Defs tmp(rhs);
+      Defs tmp(rhs);  // does *NOT* use Suite::operator=(const Suite& rhs), we use copy/swap
 
       std::swap(state_,tmp.state_);
       std::swap(server_,tmp.server_);

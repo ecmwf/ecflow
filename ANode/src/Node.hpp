@@ -698,6 +698,7 @@ private: // alow simulator access
 private: // All mementos access
    friend class CompoundMemento;
    void clear(); /// Clear *ALL* internal attributes
+   void delete_attributes();
 
 private: /// For use by python interface,
    friend void export_Node();
