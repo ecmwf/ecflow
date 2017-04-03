@@ -15,15 +15,20 @@
 // Description :
 //============================================================================
 
-#include "NodeFwd.hpp"
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/level.hpp>
+#include <boost/serialization/tracking.hpp>
+#include <boost/serialization/vector.hpp>         // no need to include <vector>
+
+class Node;
 
 namespace ecf {
 
-// Use compiler ,  destructor, assignment, copy constructor
+// Use compiler, destructor
 class AutoRestoreAttr  {
 public:
-   AutoRestoreAttr(Node* n) : node_(n) {}
    AutoRestoreAttr(const AutoRestoreAttr& rhs) : node_(NULL),nodes_to_restore_(rhs.nodes_to_restore_)  {}
+   AutoRestoreAttr(const std::vector<std::string>& nodes_to_restore) : node_(NULL),nodes_to_restore_(nodes_to_restore) {}
    AutoRestoreAttr() : node_(NULL) {}
 
    // needed by node copy constructor and persistence
@@ -31,13 +36,11 @@ public:
 
    std::ostream& print(std::ostream&) const;
    bool operator==(const AutoRestoreAttr& rhs) const;
-
    std::string toString() const;
 
-   void do_auto_restore();
-   void add_nodes_to_restore( const std::vector<std::string>& nr ) { nodes_to_restore_ = nr;}
-   std::vector<std::string>& nodes_to_restore() const { return nodes_to_restore; }
-   bool check(std::string& errorMsg) const; // check auto restore can reference the nodes
+   void do_autorestore();
+   const std::vector<std::string>& nodes_to_restore() const { return nodes_to_restore_; }
+   void check(std::string& errorMsg) const; // check auto restore can reference the nodes
 
 private:
    Node* node_;                                // Not persisted, constructor will always set this up.

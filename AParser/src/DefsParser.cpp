@@ -20,6 +20,7 @@
 #include "ExternParser.hpp"
 #include "AutoCancelParser.hpp"
 #include "AutoArchiveParser.hpp"
+#include "AutoRestoreParser.hpp"
 #include "RepeatParser.hpp"
 #include "ClockParser.hpp"
 #include "CalendarParser.hpp"
@@ -180,6 +181,7 @@ public:
       addParser( new AliasParser(p,this) );
       addParser( new TextParser(p) );
       addParser( new QueueParser(p) );
+      addParser( new AutoRestoreParser(p) );
    }
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -264,6 +266,7 @@ public:
       addParser( new TextParser(p) );
       addParser( new QueueParser(p) );
       addParser( new AutoArchiveParser(p) );
+      addParser( new AutoRestoreParser(p) );
    }
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -369,6 +372,7 @@ public:
       addParser( new EndClockParser(p) );
       addParser( new QueueParser(p) );
       addParser( new AutoArchiveParser(p) );
+      addParser( new AutoRestoreParser(p) );
  	}
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {

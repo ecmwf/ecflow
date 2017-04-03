@@ -57,15 +57,14 @@ void MiscAttrs::requeue()
    for(size_t i = 0; i < queues_.size(); i++)    { queues_[i].reset(); }
 }
 
-void MiscAttrs::do_auto_restore()
+void MiscAttrs::do_autorestore()
 {
-   if ( auto_restore_attr_ ) auto_restore_attr_->do_auto_restore();
+   if ( auto_restore_attr_ ) auto_restore_attr_->do_autorestore();
 }
 
-bool MiscAttrs::check(std::string& errorMsg) const
+void MiscAttrs::check(std::string& errorMsg) const
 {
-   if ( auto_restore_attr_ ) return auto_restore_attr_->check(errorMsg);
-   return true;
+   if ( auto_restore_attr_ ) auto_restore_attr_->check(errorMsg);
 }
 
 std::ostream& MiscAttrs::print(std::ostream& os) const
@@ -252,19 +251,19 @@ bool MiscAttrs::findVerify(const VerifyAttr& v) const
    return false;
 }
 
-void MiscAttrs::add_auto_restore( const ecf::AutoRestoreAttr& auto_restore)
+void MiscAttrs::add_autorestore( const ecf::AutoRestoreAttr& auto_restore)
 {
    if (auto_restore_attr_) {
       std::stringstream ss;
-       ss << "MiscAttrs::add_auto_restore: Can only have one autorestore per node " << node_->debugNodePath();
-       throw std::runtime_error( ss.str() );
+      ss << "MiscAttrs::add_auto_restore: Can only have one autorestore per node " << node_->debugNodePath();
+      throw std::runtime_error( ss.str() );
    }
    auto_restore_attr_ =  new ecf::AutoRestoreAttr(auto_restore);
    auto_restore_attr_->set_node(node_);
    node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
 }
 
-void MiscAttrs::delete_auto_restore()
+void MiscAttrs::delete_autorestore()
 {
    delete auto_restore_attr_; auto_restore_attr_ = NULL;
    if (node_) node_->state_change_no_ = Ecf::incr_state_change_no();

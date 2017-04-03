@@ -55,10 +55,10 @@ public:
    void add_queue( const QueueAttr& );                   // will throw std::runtime_error if duplicate
 
    // Auto restore: =====================================================================================
-   ecf::AutoRestoreAttr* auto_restore_attr() const { return auto_restore_attr_;}
-   void add_auto_restore( const ecf::AutoRestoreAttr& ); // will throw std::runtime_error if duplicate
-   void delete_auto_restore();
-   void do_auto_restore();
+   ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_attr_;}
+   void add_autorestore( const ecf::AutoRestoreAttr& ); // will throw std::runtime_error if duplicate
+   void delete_autorestore();
+   void do_autorestore();
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type
@@ -67,7 +67,7 @@ public:
    void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
    void delete_queue(const std::string& name); // empty string means delete all queue's
    /// Check to see if auto_restore can reference the nodes
-   bool check(std::string& errorMsg) const;
+   void check(std::string& errorMsg) const;
 
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors

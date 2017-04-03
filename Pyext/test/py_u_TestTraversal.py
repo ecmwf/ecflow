@@ -97,6 +97,9 @@ class DefsTraverser:
 
         autoarchive = node.get_autoarchive()
         if autoarchive: self.__writeln(str(autoarchive))
+
+        autorestore = node.get_autorestore()
+        if autorestore: self.__writeln(str(autorestore))
         
         repeat = node.get_repeat()
         if not repeat.empty(): self.__writeln(str(repeat)  + " # value: " + str(repeat.value()))

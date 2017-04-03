@@ -32,6 +32,7 @@
 #include "QueueAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoArchiveAttr.hpp"
+#include "AutoRestoreAttr.hpp"
 #include "ZombieAttr.hpp"
 #include "Zombie.hpp"
 #include "NodeAttrDoc.hpp"
@@ -82,6 +83,12 @@ static boost::shared_ptr<RepeatString> create_RepeatString(const std::string& na
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
    return boost::make_shared<RepeatString>( name,vec );
+}
+static boost::shared_ptr<AutoRestoreAttr> create_AutoRestoreAttr(const boost::python::list& list)
+{
+   std::vector<std::string> vec;
+   BoostPythonUtil::list_to_str_vec(list,vec);
+   return boost::make_shared<AutoRestoreAttr>( vec );
 }
 
 static boost::shared_ptr<QueueAttr> create_queue(const std::string& name, const boost::python::list& list)
@@ -402,6 +409,14 @@ void export_NodeAttr()
    .def("time",    &AutoArchiveAttr::time, return_value_policy<copy_const_reference>(), "returns archive time as a TimeSlot")
    .def("relative",&AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
    .def("days",    &AutoArchiveAttr::days,     "Returns a boolean true if time was specified in days")
+   ;
+
+   class_<AutoRestoreAttr, boost::shared_ptr<AutoRestoreAttr> >( "Autorestore",NodeAttrDoc::autocancel_doc())
+   .def("__init__",make_constructor(&create_AutoRestoreAttr) )
+   .def(self == self )                                       // __eq__
+   .def("__str__", &AutoRestoreAttr::toString)               // __str__
+   .def("__copy__",copyObject<AutoRestoreAttr>)              // __copy__ uses copy constructor
+   .def("nodes_to_restore",&AutoRestoreAttr::nodes_to_restore, return_value_policy<copy_const_reference>(), "returns archive time as a TimeSlot")
    ;
 
 

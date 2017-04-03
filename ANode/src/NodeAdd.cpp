@@ -298,6 +298,17 @@ void Node::add_autoarchive( const AutoArchiveAttr& ac)
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
+void Node::add_autorestore( const ecf::AutoRestoreAttr& ar)
+{
+   if (misc_attrs_) {
+      misc_attrs_->add_autorestore(ar); // can throw
+      return;
+   }
+   misc_attrs_ = new MiscAttrs(this);
+   misc_attrs_->add_autorestore(ar);
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+
 void Node::addLate( const ecf::LateAttr& l )
 {
 	if (! lateAttr_) {

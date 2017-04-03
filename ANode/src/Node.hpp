@@ -50,6 +50,7 @@
 #include "RepeatAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoArchiveAttr.hpp"
+#include "AutoRestoreAttr.hpp"
 #include "Expression.hpp"
 #include "InLimitMgr.hpp"
 #include "TimeDepAttrs.hpp"
@@ -334,6 +335,7 @@ public:
    ecf::LateAttr* get_late() const { return lateAttr_;}
    ecf::AutoCancelAttr*  get_autocancel() const { return autoCancel_;}
    ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_;}
+   ecf::AutoRestoreAttr* get_autorestore() const;
    ecf::Flag&       flag()           { return flag_;}
    const ecf::Flag& get_flag() const { return flag_;}
 
@@ -394,6 +396,7 @@ public:
    void addLabel( const Label& );       // will throw std::runtime_error if duplicate
    void addAutoCancel( const ecf::AutoCancelAttr& );
    void add_autoarchive( const ecf::AutoArchiveAttr& );
+   void add_autorestore( const ecf::AutoRestoreAttr& );
    void addLate( const ecf::LateAttr& );
    void addRepeat( const Repeat& );      // will throw std::runtime_error if duplicate
    void addZombie( const ZombieAttr& );  // will throw std::runtime_error if duplicate

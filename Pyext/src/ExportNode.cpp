@@ -95,6 +95,9 @@ node_ptr add_autocancel_2(node_ptr self,const TimeSlot& ts,bool relative){ self-
 node_ptr add_autocancel_3(node_ptr self, const ecf::AutoCancelAttr& attr){ self->addAutoCancel(attr); return self;}
 node_ptr add_zombie(node_ptr self, const ZombieAttr& attr){ self->addZombie(attr); return self;}
 
+node_ptr add_autorestore(node_ptr self, const ecf::AutoRestoreAttr& attr){ self->add_autorestore(attr); return self;}
+node_ptr add_autorestore1(node_ptr self, const boost::python::list& list){ std::vector<std::string> vec;BoostPythonUtil::list_to_str_vec(list,vec);self->add_autorestore(ecf::AutoRestoreAttr(vec)); return self;}
+
 node_ptr add_cron(node_ptr self,const ecf::CronAttr& attr)      { self->addCron(attr); return self; }
 node_ptr add_late(node_ptr self,const ecf::LateAttr& attr)      { self->addLate(attr); return self; }
 std::string get_state_change_time(node_ptr self,const std::string& format)
@@ -281,6 +284,8 @@ void export_Node()
    .def("add_autocancel",   &add_autocancel_1)
    .def("add_autocancel",   &add_autocancel_2)
    .def("add_autocancel",   &add_autocancel_3)
+   .def("add_autorestore",  &add_autorestore)
+   .def("add_autorestore",  &add_autorestore1)
    .def("add_verify",       &Node::addVerify,            DefsDoc::add_verify_doc())
    .def("add_repeat",       &add_repeat_date,            DefsDoc::add_repeat_date_doc())
    .def("add_repeat",       &add_repeat_integer,         DefsDoc::add_repeat_integer_doc())
@@ -334,6 +339,7 @@ void export_Node()
    .def("get_late",         &Node::get_late,return_internal_reference<>() )
    .def("get_autocancel",   &Node::get_autocancel, return_internal_reference<>())
    .def("get_autoarchive",  &Node::get_autoarchive, return_internal_reference<>())
+   .def("get_autorestore",  &Node::get_autorestore, return_internal_reference<>())
    .def("get_trigger",      &Node::get_trigger, return_internal_reference<>() )
    .def("get_complete",     &Node::get_complete, return_internal_reference<>() )
    .def("get_defs",         get_defs,   return_internal_reference<>() )

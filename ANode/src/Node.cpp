@@ -1400,6 +1400,9 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    bool reportWarnings = true;
    inLimitMgr_.check(errorMsg,warningMsg,reportErrors, reportWarnings);
 
+   /// Check that the references to nodes in autorestore resolve
+   if (misc_attrs_) misc_attrs_->check(errorMsg);
+
    return errorMsg.empty();
 }
 
@@ -2207,6 +2210,7 @@ const std::vector<VerifyAttr>& Node::verifys() const { if (misc_attrs_) return m
 const std::vector<ZombieAttr>& Node::zombies() const { if (misc_attrs_) return misc_attrs_->zombies(); return zombies_; }
 const std::vector<QueueAttr>& Node::queues()   const { if (misc_attrs_) return misc_attrs_->queues(); return queues_; }
 std::vector<QueueAttr>& Node::ref_queues()           { if (misc_attrs_) return misc_attrs_->ref_queues(); return queues_; }
+ecf::AutoRestoreAttr* Node::get_autorestore() const  { if (misc_attrs_) return misc_attrs_->get_autorestore(); }
 std::vector<ZombieAttr>::const_iterator Node::zombie_begin() const { if (misc_attrs_) return misc_attrs_->zombie_begin(); return zombies_.begin();}
 std::vector<ZombieAttr>::const_iterator Node::zombie_end()   const { if (misc_attrs_) return misc_attrs_->zombie_end(); return zombies_.end();}
 std::vector<VerifyAttr>::const_iterator Node::verify_begin() const { if (misc_attrs_) return misc_attrs_->verify_begin(); return verifys_.begin();}
