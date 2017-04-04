@@ -117,14 +117,28 @@ Node::Node(const Node& rhs)
    }
 }
 
+void Node::delete_attributes() {
+   delete completeExpr_;
+   delete triggerExpr_;
+   delete lateAttr_;
+   delete autoCancel_;
+   delete time_dep_attrs_;
+   delete child_attrs_;
+   delete misc_attrs_;
+}
+
 Node& Node::operator=(const Node& rhs)
 {
+   // Note:: Defs assignment operator use copy/swap, hence this assignemnt note used
    // parent must set parent_
    if (this != &rhs) {
       name_ = rhs.name_;
       suspended_ = rhs.suspended_;
       state_ =  rhs.state_;
       defStatus_ = rhs.defStatus_;
+
+      delete_attributes();
+
       completeExpr_ =  (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL  ;
       triggerExpr_ =   (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL  ;
       lateAttr_ = (rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL ;
@@ -147,6 +161,7 @@ Node& Node::operator=(const Node& rhs)
       if ( child_attrs_ )    child_attrs_->set_node(this);
       if ( misc_attrs_ )     misc_attrs_->set_node(this);
 
+      limitVec_.clear();
       for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
          limit_ptr the_limit = boost::make_shared<Limit>( *rhs.limitVec_[l]);
          the_limit->set_node(this);
@@ -157,13 +172,7 @@ Node& Node::operator=(const Node& rhs)
 }
 
 Node::~Node() {
-   delete completeExpr_;
-   delete triggerExpr_;
-   delete lateAttr_;
-   delete autoCancel_;
-   delete time_dep_attrs_;
-   delete child_attrs_;
-   delete misc_attrs_;
+   delete_attributes();
 }
 
 bool Node::isParentSuspended() const
@@ -1588,7 +1597,7 @@ bool Node::operator==(const Node& rhs) const
    if (limitVec_.size() != rhs.limitVec_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (limitVec_.size() != rhs.limitVec_.size()) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (limitVec_.size(" << limitVec_.size() << ") != rhs.limitVec_.size(" << rhs.limitVec_.size() << ")) " << debugNodePath() << "\n";
       }
 #endif
       return false;
