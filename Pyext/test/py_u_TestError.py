@@ -500,4 +500,36 @@ if __name__ == "__main__":
         pass    
     assert test_passed,"Can't add same task to two different containers"   
 
+    test_passed = False
+    try :
+        defs4 = Defs();
+        suite = defs4.add_suite("s1")
+        suite.add_autocancel(3)
+        suite.add_autocancel(4)
+    except RuntimeError as e : 
+        test_passed = True
+        pass    
+    assert test_passed,"Can't add two autocancel on same node" 
+    
+    test_passed = False
+    try :
+        defs4 = Defs();
+        suite = defs4.add_suite("s1")
+        suite.add_autoarchive(3)
+        suite.add_autocancel(4)
+    except RuntimeError as e : 
+        test_passed = True
+        pass    
+    assert test_passed,"Can't add autocancel and autoarchive on same node"  
+    
+    test_passed = False
+    try :
+        defs4 = Defs();
+        suite = defs4.add_suite("s1")
+        suite.add_autorestore(["/s1"])
+        suite.add_autorestore(["/s1"])
+    except RuntimeError as e : 
+        test_passed = True
+        pass    
+    assert test_passed,"Can't add two autorestore on same node"  
     print("All Tests pass")

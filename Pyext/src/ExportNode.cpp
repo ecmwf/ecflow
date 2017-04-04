@@ -89,10 +89,17 @@ node_ptr add_date_1(node_ptr self,const DateAttr& d)                     { self-
 node_ptr add_day(node_ptr self,DayAttr::Day_t day )                      { self->addDay(DayAttr(day)); return self;}
 node_ptr add_day_1(node_ptr self,const std::string& day )                { self->addDay(DayAttr(DayAttr::getDay(day))); return self;}
 node_ptr add_day_2(node_ptr self,const DayAttr& day )                    { self->addDay(day); return self;}
+
 node_ptr add_autocancel(node_ptr self,int days )                         { self->addAutoCancel(ecf::AutoCancelAttr(days)); return self;}
 node_ptr add_autocancel_1(node_ptr self,int hour, int min,bool relative) { self->addAutoCancel(ecf::AutoCancelAttr(hour,min,relative)); return self;}
 node_ptr add_autocancel_2(node_ptr self,const TimeSlot& ts,bool relative){ self->addAutoCancel(ecf::AutoCancelAttr(ts,relative)); return self;}
 node_ptr add_autocancel_3(node_ptr self, const ecf::AutoCancelAttr& attr){ self->addAutoCancel(attr); return self;}
+
+node_ptr add_autoarchive(node_ptr self,int days )                         { self->add_autoarchive(ecf::AutoArchiveAttr(days)); return self;}
+node_ptr add_autoarchive_1(node_ptr self,int hour, int min,bool relative) { self->add_autoarchive(ecf::AutoArchiveAttr(hour,min,relative)); return self;}
+node_ptr add_autoarchive_2(node_ptr self,const TimeSlot& ts,bool relative){ self->add_autoarchive(ecf::AutoArchiveAttr(ts,relative)); return self;}
+node_ptr add_autoarchive_3(node_ptr self, const ecf::AutoArchiveAttr& attr){ self->add_autoarchive(attr); return self;}
+
 node_ptr add_zombie(node_ptr self, const ZombieAttr& attr){ self->addZombie(attr); return self;}
 
 node_ptr add_autorestore(node_ptr self, const ecf::AutoRestoreAttr& attr){ self->add_autorestore(attr); return self;}
@@ -284,6 +291,10 @@ void export_Node()
    .def("add_autocancel",   &add_autocancel_1)
    .def("add_autocancel",   &add_autocancel_2)
    .def("add_autocancel",   &add_autocancel_3)
+   .def("add_autoarchive",  &add_autoarchive,             DefsDoc::add_autocancel_doc())
+   .def("add_autoarchive",  &add_autoarchive_1)
+   .def("add_autoarchive",  &add_autoarchive_2)
+   .def("add_autoarchive",  &add_autoarchive_3)
    .def("add_autorestore",  &add_autorestore)
    .def("add_autorestore",  &add_autorestore1)
    .def("add_verify",       &Node::addVerify,            DefsDoc::add_verify_doc())

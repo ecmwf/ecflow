@@ -1,0 +1,8 @@
+suite s
+ family f1
+    autorestore ./f2 /s/f2   # multiple reference to same node
+ endfamily
+ family f2
+    task t1
+ endfamily
+endsuite

@@ -434,6 +434,50 @@ if __name__ == "__main__":
     print(str(t5.get_autocancel()))
     
     #===========================================================================
+    # add autoarchive
+    #===========================================================================
+    print("test add autoarchive")
+    f1 = ecflow.Family("f1")
+    assert f1.get_autoarchive() == None, " Expected no autoarchive"
+    f1.add_autoarchive(3)                       # 3 days
+    assert f1.get_autoarchive() != None, " Expected autoarchive"
+    print(str(f1.get_autoarchive()))
+
+    f3 = ecflow.Family("f3")
+    f3.add_autoarchive(20, 10, True)              # hour,minutes,relative
+    print(str(f3.get_autoarchive()))
+    
+    f4 = ecflow.Family("f4")
+    f4.add_autoarchive(ecflow.TimeSlot(10, 10), True)    # hour,minutes,relative
+    print(str(t4.get_autoarchive()))
+
+    f5 = ecflow.Family("f5")
+    f5.add_autocancel(ecflow.Autocancel(1, 10, True))   # hour,minutes,relative
+    print(str(f5.get_autoarchive()))
+    
+    #===========================================================================
+    # add autorestore
+    #===========================================================================
+    print("test add autorestore")
+    t1 = ecflow.Task("f1")
+    assert t1.get_autorestore() == None, " Expected no autorestore"
+    t1.add_autorestore(["/s1/f2"])                       
+    assert t1.get_autorestore() != None, " Expected autorestore"
+    print(str(t1.get_autorestore()))
+
+    f5 = ecflow.Family("f5")
+    assert f5.get_autorestore() == None, " Expected no autorestore"
+    f5.add_autorestore(["/s1/f2","/s2","/s3"])                       
+    assert f5.get_autorestore() != None, " Expected autorestore"
+    print(str(f5.get_autoarchive()))
+    
+    f6 = ecflow.Family("f6")
+    assert f6.get_autorestore() == None, " Expected no autorestore"
+    f6.add_autorestore(ecflow.Autorestore(["/s1/f2","/s2","/s3"]))                       
+    assert f6.get_autorestore() != None, " Expected autorestore"
+    print(str(f6.get_autoarchive()))
+    
+    #===========================================================================
     # add late
     #===========================================================================
     late = ecflow.Late()

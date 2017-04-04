@@ -1,0 +1,12 @@
+suite s
+ family f1
+    task t1
+        autorestore ../f2 ../f3  # autorestore
+ endfamily
+ family f2
+    task t1   
+ endfamily
+ family f3
+    task t1   
+ endfamily
+endsuite

@@ -92,6 +92,7 @@ void AutoRestoreAttr::do_autorestore()
 
 void AutoRestoreAttr::check(std::string& errorMsg) const
 {
+   std::vector<NodeContainer*> vec;
    string warning_message;
    for(size_t i =0; i < nodes_to_restore_.size(); i++) {
 
@@ -119,6 +120,14 @@ void AutoRestoreAttr::check(std::string& errorMsg) const
           std::stringstream ss;
           ss << "Error: autorestore on node " << node_->debugType() << " references a node '" << nodes_to_restore_[i]  << "' which is a task. restore only works with suites or family nodes";
           errorMsg += ss.str();
+      }
+
+      // Check for duplicate references
+      if (find(vec.begin(),vec.end(),nc) == vec.end()) vec.push_back(nc);
+      else {
+         std::stringstream ss;
+         ss << "Error: autorestore on node " << node_->debugType() << ", duplicate references to node '" << nodes_to_restore_[i]  << "'";
+         errorMsg += ss.str();
       }
    }
 }

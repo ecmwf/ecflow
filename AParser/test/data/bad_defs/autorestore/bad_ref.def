@@ -1,0 +1,8 @@
+suite s
+ family f1
+    autorestore /s/f4   # reference to non existing node
+ endfamily
+ family f2
+    task t1
+ endfamily
+endsuite

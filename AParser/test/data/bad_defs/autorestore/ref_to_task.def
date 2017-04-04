@@ -1,0 +1,8 @@
+suite s
+ family f1
+    autorestore /s/f2/t1   # restore can only restore suite/family and not task
+ endfamily
+ family f2
+    task t1
+ endfamily
+endsuite

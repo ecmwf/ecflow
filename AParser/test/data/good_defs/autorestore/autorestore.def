@@ -1,0 +1,24 @@
+extern /s4
+extern /s4/f1
+extern /s4/f2
+
+suite s
+ family f1
+    autorestore ./f1 ./f2 ./f3 ./f4 # autorestore
+ endfamily
+ family f2
+     autorestore /s/f1 /s/f3 /s/f4 # autorestore
+ endfamily
+ family f3
+    autorestore /s/f1  # autorestore
+    task t1
+ endfamily
+ family f4
+    autorestore /s 
+    task t1
+ endfamily
+ family f5
+    autorestore /s4 /s4/f1 /s4/f2 # this is an extern so allow
+    task t1
+ endfamily
+endsuite
