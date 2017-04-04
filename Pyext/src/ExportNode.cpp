@@ -177,6 +177,7 @@ void export_Node()
          .value("zombie",       Flag::ZOMBIE)
          .value("no_reque",     Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
          .value("archived",     Flag::ARCHIVED)
+         .value("restored",     Flag::RESTORED)
          .value("not_set",      Flag::NOT_SET)
          ;
 

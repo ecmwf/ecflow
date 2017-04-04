@@ -741,6 +741,8 @@ void Task::handleStateChange()
 	// This will recurse up the node tree, causing repeats to increment, at the parent
 	// level and resetting repeats in the children. To mimic nested loops.
  	requeueOrSetMostSignificantStateUpNodeTree();
+
+   Node::handleStateChange(); // may do a autorestore, if state is COMPLETE
 }
 
 const std::string& Task::script_extension() const

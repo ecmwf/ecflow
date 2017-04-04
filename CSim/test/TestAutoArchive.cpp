@@ -99,9 +99,13 @@ BOOST_AUTO_TEST_CASE( test_autoarchive_suite )
    s1->restore();
    s2->restore();
    s3->restore();
+
    BOOST_CHECK_MESSAGE(!s1->get_flag().is_set(ecf::Flag::ARCHIVED),"Expected suite " << s1->absNodePath() << " to be restored");
    BOOST_CHECK_MESSAGE(!s2->get_flag().is_set(ecf::Flag::ARCHIVED),"Expected suite " << s2->absNodePath() << " to be restored");
    BOOST_CHECK_MESSAGE(!s3->get_flag().is_set(ecf::Flag::ARCHIVED),"Expected suite " << s3->absNodePath() << " to be restored");
+   BOOST_CHECK_MESSAGE(s1->get_flag().is_set(ecf::Flag::RESTORED),"Expected suite " << s1->absNodePath() << " to be restored");
+   BOOST_CHECK_MESSAGE(s2->get_flag().is_set(ecf::Flag::RESTORED),"Expected suite " << s2->absNodePath() << " to be restored");
+   BOOST_CHECK_MESSAGE(s3->get_flag().is_set(ecf::Flag::RESTORED),"Expected suite " << s3->absNodePath() << " to be restored");
 
    BOOST_CHECK_MESSAGE(!fs::exists(s1->archive_path()),"Expected file " << s1->archive_path() << " to be removed");
    BOOST_CHECK_MESSAGE(!fs::exists(s2->archive_path()),"Expected file " << s2->archive_path() << " to be removed");
@@ -146,7 +150,7 @@ BOOST_AUTO_TEST_CASE( test_autoarchive_ast_node_reset )
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
       suite_s2= theDefs.add_suite("s2");
       suite_s2->addClock( clockAttr );
-      suite_s2->add_autoarchive( ecf::AutoArchiveAttr( ecf::TimeSlot(1,0), false));
+      suite_s2->add_autoarchive( ecf::AutoArchiveAttr( 0 )); // archive on next calendar update
       suite_s2->add_family("family")->add_task("t");
    }
    {
@@ -154,7 +158,7 @@ BOOST_AUTO_TEST_CASE( test_autoarchive_ast_node_reset )
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
       suite_s3 = theDefs.add_suite("s3");
       suite_s3->addClock( clockAttr );
-      suite_s3->add_autoarchive( ecf::AutoArchiveAttr( ecf::TimeSlot(1,0), false));
+      suite_s3->add_autoarchive( ecf::AutoArchiveAttr(0)); // archive on next calendar update
       suite_s3->add_family("family")->add_task("t");
    }
 
@@ -246,6 +250,7 @@ BOOST_AUTO_TEST_CASE( test_autoarchive_family )
       BOOST_CHECK_MESSAGE(f->nodeVec().empty(),"Expected family " << f->absNodePath() << " to be empty");
 
       f->restore();
+      BOOST_CHECK_MESSAGE(f->get_flag().is_set(ecf::Flag::RESTORED),"Expected family " << f->absNodePath() << " to be restored");
       BOOST_CHECK_MESSAGE(!f->get_flag().is_set(ecf::Flag::ARCHIVED),"Expected family " << f->absNodePath() << " to be restored");
       BOOST_CHECK_MESSAGE(!fs::exists(f->archive_path()),"Expected file " << f->absNodePath() << " to be removed");
       BOOST_CHECK_MESSAGE(!f->nodeVec().empty(),"Expected family " << f->absNodePath() << " to be restored");

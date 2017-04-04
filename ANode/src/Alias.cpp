@@ -139,6 +139,8 @@ bool Alias::isAddChildOk( Node* alias, std::string& errorMsg) const
 
 void Alias::handleStateChange()
 {
+   Node::handleStateChange();
+
    /// Increment/decrement limits based on the current state
    update_limits();
 

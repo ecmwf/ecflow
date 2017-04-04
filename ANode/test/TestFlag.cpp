@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE( test_node_flags )
 	cout << "ANode:: ...test_node_flags\n";
 
 	Flag flag;
-	std::string expected_flags = "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,no_script,killed,migrated,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived";
+	std::string expected_flags = "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,no_script,killed,migrated,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived,restored";
 
 	/// Set the flags
 	std::vector<Flag::Type> flag_list =  Flag::list();

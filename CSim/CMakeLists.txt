@@ -21,6 +21,9 @@ ecbuild_add_library( TARGET   libsimu
 
 
 list( APPEND test_srcs
+   test/TestAutoArchive.cpp
+   test/TestAutoCancel.cpp
+   test/TestAutoRestore.cpp
    test/TestMeter.cpp
    test/TestTime.cpp
    test/TestUtil.cpp

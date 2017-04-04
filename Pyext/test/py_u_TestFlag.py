@@ -43,7 +43,8 @@ if __name__ == "__main__":
                      ecflow.FlagType.locked ,
                      ecflow.FlagType.zombie ,
                      ecflow.FlagType.no_reque,
-                     ecflow.FlagType.archived 
+                     ecflow.FlagType.archived,
+                     ecflow.FlagType.restored 
                    ]
     print("Flag list:")
     for flg in flag_list: print("flag ",flag.type_to_string(flg))
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     for flg in my_flag_list: print("flag ",flag.type_to_string(flg))
 
     assert len(flag_list) == len(my_flag_list), "expected flag list have changed"
-    expected_flags = "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,no_script,killed,migrated,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived";
+    expected_flags = "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,no_script,killed,migrated,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived,restored";
 
     #Set *ALL* the flags
     for flg in flag_list:

@@ -558,6 +558,8 @@ void NodeContainer::handleStateChange()
 {
 	// Increment any repeats & requeue
 	requeueOrSetMostSignificantStateUpNodeTree();
+
+   Node::handleStateChange(); // may do a autorestore, if state is COMPLETE
 }
 
 size_t NodeContainer::child_position(const Node* child) const
@@ -1135,19 +1137,18 @@ void NodeContainer::archive()
    // save the created defs, to disk
    archive_defs->save_as_checkpt(archive_path());
 
-   // flag as archived
-   flag().set(ecf::Flag::ARCHIVED);
+   flag().set(ecf::Flag::ARCHIVED);    // flag as archived
+   flag().clear(ecf::Flag::RESTORED);
 
    // delete the child nodes, set parent to null first.
    size_t node_vec_size = nodeVec_.size();
    for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->set_parent(NULL); }
    nodeVec_.clear();
 
-   // reclaim vector memory
-   std::vector<node_ptr>().swap(nodeVec_);
-
-   // For sync
-   add_remove_state_change_no_ = Ecf::incr_state_change_no();
+   std::vector<node_ptr>().swap(nodeVec_);                    // reclaim vector memory
+   add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
+   string msg = "autoarchive "; msg += debugNodePath();
+   ecf::log(Log::MSG,msg);
 }
 
 void NodeContainer::swap(NodeContainer& rhs)
@@ -1204,17 +1205,11 @@ void NodeContainer::restore()
        throw std::runtime_error(ss.str());
    }
 
-   // swap the children, and set parent pointers
-   swap(*archived_node_container);
-
-   // clear flag
-   flag().clear(ecf::Flag::ARCHIVED);
-
-   // For sync
-   add_remove_state_change_no_ = Ecf::incr_state_change_no();
-
-   // remove the file
-   fs::remove(the_archive_path);
+   swap(*archived_node_container);                           // swap the children, and set parent pointers
+   flag().clear(ecf::Flag::ARCHIVED);                        // clear flag archived
+   flag().set(ecf::Flag::RESTORED);                          // set restored flag, to stop automatic autoarchive
+   add_remove_state_change_no_ = Ecf::incr_state_change_no();// For sync
+   fs::remove(the_archive_path);                             // remove the file
 }
 
 

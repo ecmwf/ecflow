@@ -380,7 +380,8 @@ void Node::calendarChanged(
       auto_cancelled_nodes.push_back(shared_from_this());
    }
 
-   if (check_for_auto_archive(c)) {
+   // Avoid automatically archiving a restored node. Wait till begin/re-queue
+   if (!flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
       auto_archive_nodes.push_back(shared_from_this());
    }
 }
@@ -816,6 +817,13 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
       // Handle any state change specific functionality. This will update any repeats
       // This is a virtual function, since we want different behaviour during state change
       handleStateChange();
+   }
+}
+
+void Node::handleStateChange()
+{
+   if (state() == NState::COMPLETE) {
+      if (misc_attrs_) misc_attrs_->do_autorestore();
    }
 }
 

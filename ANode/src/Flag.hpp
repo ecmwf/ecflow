@@ -66,7 +66,8 @@ public:
       ZOMBIE        = 14,  // task*  Set/cleared but never queried ? ( NOT USED currently )
       NO_REQUE_IF_SINGLE_TIME_DEP = 15,  //
       ARCHIVED      = 16,  // Container*
-      NOT_SET       = 17
+      RESTORED      = 17,  // Container*, Avoid re-archiving node that is restored, until it is re-queued again
+      NOT_SET       = 18
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }

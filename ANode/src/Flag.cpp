@@ -46,7 +46,7 @@ void Flag::reset() {
 
 std::vector<Flag::Type> Flag::list()
 {
-   std::vector<Flag::Type> ret; ret.reserve(17);
+   std::vector<Flag::Type> ret; ret.reserve(18);
    ret.push_back(Flag::FORCE_ABORT);
    ret.push_back(Flag::USER_EDIT);
    ret.push_back(Flag::TASK_ABORTED);
@@ -64,6 +64,7 @@ std::vector<Flag::Type> Flag::list()
    ret.push_back(Flag::ZOMBIE);
    ret.push_back(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
    ret.push_back(Flag::ARCHIVED);
+   ret.push_back(Flag::RESTORED);
    return ret;
 }
 
@@ -87,6 +88,7 @@ std::string Flag::enum_to_string(Flag::Type flag) {
       case Flag::ZOMBIE:       return "zombie"; break;
       case Flag::NO_REQUE_IF_SINGLE_TIME_DEP: return "no_reque"; break;
       case Flag::ARCHIVED:     return "archived"; break;
+      case Flag::RESTORED:     return "restored"; break;
       case Flag::NOT_SET:      return "not_set"; break;
       default: break;
    };
@@ -113,12 +115,13 @@ Flag::Type Flag::string_to_flag_type(const std::string& s)
    if (s == "zombie") return Flag::ZOMBIE;
    if (s == "no_reque") return Flag::NO_REQUE_IF_SINGLE_TIME_DEP;
    if (s == "archived") return Flag::ARCHIVED;
+   if (s == "restored") return Flag::RESTORED;
    return Flag::NOT_SET;
 }
 
 void Flag::valid_flag_type(std::vector<std::string>& vec)
 {
-   vec.reserve(17);
+   vec.reserve(18);
    vec.push_back("force_aborted");
    vec.push_back("user_edit");
    vec.push_back("task_aborted");
@@ -136,6 +139,7 @@ void Flag::valid_flag_type(std::vector<std::string>& vec)
    vec.push_back("zombie");
    vec.push_back("no_reque");
    vec.push_back("archived");
+   vec.push_back("restored");
 }
 
 std::string Flag::to_string() const

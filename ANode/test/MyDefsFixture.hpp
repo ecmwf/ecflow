@@ -229,6 +229,8 @@ private:
  			task->addVerify( VerifyAttr(NState::COMPLETE,3) );
  			task->addLate( lateAttr );
          task->add_queue(QueueAttr("queue1",queue_items));
+         std::vector<std::string> nodes_to_restore; nodes_to_restore.push_back("/EmptySuite");
+         task->add_autorestore(ecf::AutoRestoreAttr(nodes_to_restore));
 			if (i == 2) {
 				 std::string compExpr = "../familyName" + boost::lexical_cast< std::string >( i-1 );
 				 compExpr += "/taskName" + boost::lexical_cast< std::string >( i-1 );

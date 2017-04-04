@@ -278,14 +278,11 @@ void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
    // Archive any nodes with auto archive attribute, Must be suite/family
    if ( !auto_archive_nodes.empty() ) {
       std::vector<node_ptr>::iterator theNodeEnd = auto_archive_nodes.end();
-      string msg;
       for(std::vector<node_ptr>::iterator n = auto_archive_nodes.begin(); n != theNodeEnd; ++n) {
          // If we have two auto archive in the hierarchy, with same attributes. Then
          // By checking we can still reach the Defs we know we are not detached
          NodeContainer* nc = (*n)->isNodeContainer();
          if (nc && nc->defs()) {
-            msg.clear(); msg = "autoarchive "; msg += nc->debugNodePath();
-            ecf::log(Log::MSG,msg);
             nc->archive();
          }
       }
