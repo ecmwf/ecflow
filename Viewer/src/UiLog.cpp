@@ -154,3 +154,12 @@ std::ostream&  operator <<(std::ostream &stream,const QRect &r)
     stream << s.toStdString();
     return stream;
 }
+
+std::ostream&  operator <<(std::ostream &stream,const QPoint &p)
+{
+    QString s;
+    QDebug ts(&s);
+    ts << p;
+    stream << s.toStdString();
+    return stream;
+}

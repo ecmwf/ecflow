@@ -17,6 +17,7 @@ class QString;
 class QModelIndex;
 class QStringList;
 class QVariant;
+class QPoint;
 class QRegion;
 class QRect;
 
@@ -59,6 +60,7 @@ std::ostream&  operator <<(std::ostream&,const QVariant&);
 std::ostream&  operator <<(std::ostream&,const QStringList&);
 std::ostream&  operator <<(std::ostream&,const QRegion&);
 std::ostream&  operator <<(std::ostream&,const QRect&);
+std::ostream&  operator <<(std::ostream&,const QPoint&);
 
 #endif // UILOG_HPP
 

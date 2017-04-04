@@ -100,15 +100,23 @@ void CompactView::mousePressEvent(QMouseEvent* event)
     QPersistentModelIndex index = indexAt(pos);
     pressedIndex_ = index;
 
+    //Get the selection flags
     QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
 
     noSelectionOnMousePress_ = command == QItemSelectionModel::NoUpdate || !index.isValid();
-    QPoint offset;
+    QPoint offset(0,0);
+
+    UiLog().dbg() << "CompactView::mousePressEvent --> current=" << currentIndex().data().toString() <<
+                     " pressed=" << pressedIndex_.data().toString() <<
+                     " pos=" << pos;
 
     if((command & QItemSelectionModel::Current) == 0)
         pressedPosition_ = pos + offset;
     else if(!indexAt(pressedPosition_).isValid())
         pressedPosition_ = visualRect(currentIndex()).center() + offset;
+
+    UiLog().dbg() << " pressedPosition=" << pressedPosition_ << " visrect=" << visualRect(currentIndex()) <<
+                     " center=" << visualRect(currentIndex()).center() << " pressed=" << indexAt(pressedPosition_).data().toString();
 
     if(index.isValid())
     {
@@ -1311,6 +1319,7 @@ QRect CompactView::visualRect(const QModelIndex &index) const
     return QRect();
 }
 
+//point is in viewport coordinates
 QModelIndex CompactView::indexAt(const QPoint &point) const
 {
     int item=itemAtCoordinate(point);
@@ -1353,6 +1362,7 @@ void CompactView::coordinateForItem(int item,int& itemY,int& itemRowHeight) cons
     }
 }
 
+//coordinate is in viewport coordinates
 int CompactView::itemAtCoordinate(const QPoint& coordinate) const
 {
     const std::size_t itemCount = viewItems_.size();
@@ -1676,6 +1686,8 @@ void CompactView::setSelection(const QRect &rect, QItemSelectionModel::Selection
     if (!selectionModel_ || rect.isNull())
         return;
 
+    UiLog().dbg() << "CompactView::setSelection --> rect=" << rect;
+
     QPoint tl(isRightToLeft() ? qMax(rect.left(), rect.right())
               : qMin(rect.left(), rect.right()), qMin(rect.top(), rect.bottom()));
     QPoint br(isRightToLeft() ? qMin(rect.left(), rect.right()) :
@@ -1718,11 +1730,11 @@ void CompactView::select(const QModelIndex &topIndex, const QModelIndex &bottomI
     const int top = viewIndex(topIndex),
     bottom = viewIndex(bottomIndex);
 
-#ifdef _UI_COMPACTVIEW_DEBUG
-    UiLog().dbg() << "CompactView::select -->";
+//#ifdef _UI_COMPACTVIEW_DEBUG
+    UiLog().dbg() << "CompactView::select --> command="  << command;
     UiLog().dbg() << "top=" << top << " " << topIndex.data().toString() <<
                      " bottom=" << bottom << " " << bottomIndex.data().toString();
-#endif
+//#endif
 
     QModelIndex previous;
     QItemSelectionRange currentRange;
