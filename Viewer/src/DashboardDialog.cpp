@@ -57,16 +57,23 @@ void DashboardDialog::add(DashboardWidget* dw)
             this,SLOT(slotUpdateTitle(QString)));
 
     dw_->populateDialog();
+    dw_->readSettingsForDialog();
 }
 
 void DashboardDialog::reject()
 {
-	writeSettings();
+    if(dw_)
+        dw_->writeSettingsForDialog();
+
+    writeSettings();
 	QDialog::reject();
 }
 
 void DashboardDialog::closeEvent(QCloseEvent * event)
 {
+    if(dw_)
+        dw_->writeSettingsForDialog();
+
     Q_EMIT aboutToClose();
     event->accept();
 	writeSettings();

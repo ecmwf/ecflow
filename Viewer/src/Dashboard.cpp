@@ -311,7 +311,7 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
 	{
 		if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
 		{
-            ip->setDetached(true);
+            //ip->setDetached(true);
             ip->slotReload(info);
             ip->setCurrent(name.toStdString());
 		}

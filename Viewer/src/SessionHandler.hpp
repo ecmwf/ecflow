@@ -31,14 +31,15 @@ public:
 	std::string recentCustomCommandsFile() const ;
 	std::string savedCustomCommandsFile() const ;
 	std::string serverFile(const std::string& serverName) const;
+    std::string infoPanelDialogFile() const;
 	std::string qtDir() const;
-	std::string qtSettingsFile(const std::string name) const;
-	void temporary(bool t) {isTemporary_ = t;};
-	bool temporary() {return isTemporary_;};
-	void temporaryServerAlias(const std::string &alias) {temporaryServerAlias_ = alias;};
-	std::string temporaryServerAlias() {return temporaryServerAlias_;};
-	void askToPreserveTemporarySession(bool a) {askToPreserveTemporarySession_ = a;};
-	bool askToPreserveTemporarySession() {return askToPreserveTemporarySession_;};
+	std::string qtSettingsFile(const std::string name) const;   
+    void temporary(bool t) {isTemporary_ = t;}
+    bool temporary() const {return isTemporary_;}
+    void temporaryServerAlias(const std::string &alias) {temporaryServerAlias_ = alias;}
+    std::string temporaryServerAlias() const {return temporaryServerAlias_;}
+    void askToPreserveTemporarySession(bool a) {askToPreserveTemporarySession_ = a;}
+    bool askToPreserveTemporarySession() {return askToPreserveTemporarySession_;}
 
 protected:
 	void checkDir();
@@ -65,17 +66,17 @@ public:
 	SessionItem* current();
 	void save();
 	void load();
-	int numSessions() {return sessions_.size();};
+    int numSessions() {return sessions_.size();}
 	SessionItem *find(const std::string&);
-	int          indexFromName(const std::string&);
-	SessionItem *sessionFromIndex(int i) {return sessions_[i];};
+    int          indexFromName(const std::string&);
+    SessionItem *sessionFromIndex(int i) {return sessions_[i];}
 	SessionItem *copySession(SessionItem* source, std::string &destName);
 	SessionItem *copySession(std::string &source, std::string &destName);
 	bool         createSessionDirWithTemplate(const std::string &sessionName, const std::string &templateFile);
 	void         saveLastSessionName();
 	void         removeLastSessionName();
 	bool         loadLastSessionAtStartup();
-	std::string  lastSessionName() {return lastSessionName_;};
+    std::string  lastSessionName() {return lastSessionName_;}
 
 
 	const std::vector<SessionItem*>& sessions() const {return sessions_;}
@@ -89,7 +90,7 @@ public:
 
 protected:
 	void readSessionListFromDisk();
-	std::string defaultSessionName() {return "default";};
+    std::string defaultSessionName() {return "default";}
 	void readLastSessionName();
 
 	static SessionHandler* instance_;

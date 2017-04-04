@@ -68,6 +68,8 @@ public:
 	void rerender();
     void writeSettings(VSettings*);
 	void readSettings(VSettings*);
+    void writeSettingsForDialog();
+    void readSettingsForDialog();
 
 	//From VInfoObserver
     void notifyDelete(VInfo*) {}
@@ -117,7 +119,6 @@ private:
 	VInfo_ptr info_;
 	bool tabBeingCleared_;
 	bool tabBeingAdjusted_;
-    bool inDialog_;
 };
 
 #endif

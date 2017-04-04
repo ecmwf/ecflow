@@ -88,6 +88,7 @@ protected Q_SLOTS:
 
 protected:
     void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void paintEvent(QPaintEvent *event);
@@ -107,13 +108,14 @@ protected:
     int itemRow(int item) const;
     int itemCountInRow(int start) const;
     void rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const;
-    int rowHeight(int start,int forward,int &itemsInRow) const;
+    int rowHeight(int start,int forward,int &itemsInRow) const;   
     void coordinateForItem(int item,int& itemY,int& itemRowHeight) const;
     int itemAtCoordinate(const QPoint& coordinate) const;
     int itemAtRowCoordinate(int start,int count,int xPos) const;
 
     QModelIndex modelIndex(int i) const;
     int viewIndex(const QModelIndex& index) const;
+
 
     void removeAllFromExpanded(const QModelIndex &index);
 
@@ -176,6 +178,7 @@ private:
     QPointer<QItemSelectionModel> selectionModel_;
     QPoint pressedPosition_;
     QPersistentModelIndex pressedIndex_;
+    bool noSelectionOnMousePress_;
     QStyledItemDelegate* itemDelegate_;
     QColor expectedBg_;
     QColor connectorColour_;
