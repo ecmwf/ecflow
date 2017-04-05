@@ -55,8 +55,6 @@ Node::Node(const std::string& n)
   completeExpr_(NULL),
   triggerExpr_(NULL),
   lateAttr_(NULL),
-  autoCancel_(NULL),
-  auto_archive_(NULL),
   time_dep_attrs_(NULL),
   child_attrs_(NULL),
   misc_attrs_(NULL),
@@ -77,8 +75,6 @@ Node::Node()
   completeExpr_(NULL),
   triggerExpr_(NULL),
   lateAttr_(NULL),
-  autoCancel_(NULL),
-  auto_archive_(NULL),
   time_dep_attrs_(NULL),
   child_attrs_(NULL),
   misc_attrs_(NULL),
@@ -96,8 +92,6 @@ Node::Node(const Node& rhs)
   completeExpr_( (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL ),
   triggerExpr_(  (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL ),
   lateAttr_((rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL),
-  autoCancel_( (rhs.autoCancel_) ? new ecf::AutoCancelAttr(*rhs.autoCancel_) : NULL),
-  auto_archive_( (rhs.auto_archive_) ? new ecf::AutoArchiveAttr(*rhs.auto_archive_) : NULL),
   time_dep_attrs_((rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL),
   child_attrs_((rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL),
   misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
@@ -124,7 +118,6 @@ void Node::delete_attributes() {
    delete completeExpr_;
    delete triggerExpr_;
    delete lateAttr_;
-   delete autoCancel_;
    delete time_dep_attrs_;
    delete child_attrs_;
    delete misc_attrs_;
@@ -145,8 +138,6 @@ Node& Node::operator=(const Node& rhs)
       completeExpr_ =  (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL  ;
       triggerExpr_ =   (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL  ;
       lateAttr_ = (rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL ;
-      autoCancel_ =    (rhs.autoCancel_) ? new ecf::AutoCancelAttr(*rhs.autoCancel_) : NULL ;
-      auto_archive_ =  (rhs.auto_archive_) ? new ecf::AutoArchiveAttr(*rhs.auto_archive_) : NULL ;
       time_dep_attrs_ = (rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL ;
       child_attrs_ = (rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL ;
       misc_attrs_ = (rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL;
@@ -376,13 +367,16 @@ void Node::calendarChanged(
       time_dep_attrs_->calendarChanged(c);
    }
 
-   if (checkForAutoCancel(c)) {
-      auto_cancelled_nodes.push_back(shared_from_this());
-   }
+   if (misc_attrs_) {
 
-   // Avoid automatically archiving a restored node. Wait till begin/re-queue
-   if (!flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
-      auto_archive_nodes.push_back(shared_from_this());
+      if (misc_attrs_->checkForAutoCancel(c)) {
+         auto_cancelled_nodes.push_back(shared_from_this());
+      }
+
+      // Avoid automatically archiving a restored node. Wait till begin/re-queue
+      if (!flag().is_set(ecf::Flag::RESTORED) && misc_attrs_->check_for_auto_archive(c)) {
+         auto_archive_nodes.push_back(shared_from_this());
+      }
    }
 }
 
@@ -581,9 +575,9 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
 #endif
 
    // A node that is migrated/archived should not allow any change of state.
-   if (get_flag().is_set(ecf::Flag::MIGRATED)) {
-      return false;
-   }
+   if (get_flag().is_set(ecf::Flag::ARCHIVED)) return false;
+   if (get_flag().is_set(ecf::Flag::MIGRATED)) return false;
+
 
    // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
    if (lateAttr_ && isSubmittable()) {
@@ -679,47 +673,6 @@ void Node::freeHoldingDateDependencies()
 void Node::freeHoldingTimeDependencies()
 {
    if (time_dep_attrs_) time_dep_attrs_->freeHoldingTimeDependencies();
-}
-
-bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const
-{
-   if ( autoCancel_ && state() == NState::COMPLETE) {
-      if (autoCancel_->isFree(calendar,state_.second)) {
-
-         /// *Only* delete this node if we don't create zombies
-         /// anywhere for our children
-         vector<Task*> taskVec;
-         getAllTasks(taskVec);
-         BOOST_FOREACH(Task* t, taskVec) {
-            if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
-               return false;
-            }
-         }
-         return true;
-      }
-   }
-   return false;
-}
-
-bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const
-{
-   if ( auto_archive_ && state() == NState::COMPLETE) {
-      if (!isSuspended() && auto_archive_->isFree(calendar,state_.second)) {
-         if (!isParentSuspended()) {
-
-            /// *Only* archive this node if we don't create zombies anywhere for our children
-            vector<Task*> taskVec;
-            getAllTasks(taskVec);
-            BOOST_FOREACH(Task* t, taskVec) {
-               if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
-                  return false;
-               }
-            }
-            return true;
-         }
-      }
-   }
-   return false;
 }
 
 bool Node::evaluateComplete() const
@@ -922,7 +875,7 @@ void Node::setStateOnly(NState::State newState, bool force, const std::string& a
    ecf::log(Log::LOG,log_state_change);  // Note: log type, must be same for debug & release for test, i.e for log file verification
 
    state_.first.setState(newState);      // this will update state_change_no
-   state_.second = calendar.duration();  // record state change duration for late, autocancel,etc
+   state_.second = calendar.duration();  // record state change duration for late, autocancel,autoarchive,etc
 
    // Record state changes for verification
    if (misc_attrs_) {
@@ -1517,8 +1470,6 @@ std::ostream& Node::print(std::ostream& os) const
    if (child_attrs_) child_attrs_->print(os);
    if (time_dep_attrs_) time_dep_attrs_->print(os);
    if (misc_attrs_) misc_attrs_->print(os);
-   if (autoCancel_) autoCancel_->print(os);
-   if (auto_archive_) auto_archive_->print(os);
 
    return os;
 }
@@ -1710,55 +1661,6 @@ bool Node::operator==(const Node& rhs) const
       return false;
    }
 
-   if (autoCancel_ && !rhs.autoCancel_) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  if (autoCancel_ && !rhs.autoCancel_)  " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
-   if (!autoCancel_ && rhs.autoCancel_) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  if (!autoCancel_ && rhs.autoCancel_)  " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
-   if (autoCancel_ && rhs.autoCancel_ && !(*autoCancel_ == *rhs.autoCancel_)) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (autoCancel_ && rhs.autoCancel_ && !(*autoCancel_ == *rhs.autoCancel_)) " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
-
-   if (auto_archive_ && !rhs.auto_archive_) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  if (auto_archive_ && !rhs.auto_archive_)  " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
-   if (!auto_archive_ && rhs.auto_archive_) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  if (!auto_archive_ && rhs.auto_archive_)  " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
-   if (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
 
    if (!(repeat_ == rhs.repeat_)) {
 #ifdef DEBUG
@@ -1789,7 +1691,6 @@ bool Node::operator==(const Node& rhs) const
 
    return true;
 }
-
 
 //#define DEBUG_WHY 1
 
@@ -2218,7 +2119,12 @@ const std::vector<VerifyAttr>& Node::verifys() const { if (misc_attrs_) return m
 const std::vector<ZombieAttr>& Node::zombies() const { if (misc_attrs_) return misc_attrs_->zombies(); return zombies_; }
 const std::vector<QueueAttr>& Node::queues()   const { if (misc_attrs_) return misc_attrs_->queues(); return queues_; }
 std::vector<QueueAttr>& Node::ref_queues()           { if (misc_attrs_) return misc_attrs_->ref_queues(); return queues_; }
+
 ecf::AutoRestoreAttr* Node::get_autorestore() const  { if (misc_attrs_) return misc_attrs_->get_autorestore(); return NULL;}
+ecf::AutoCancelAttr*  Node::get_autocancel() const   { if (misc_attrs_) return misc_attrs_->get_autocancel(); return NULL;}
+ecf::AutoArchiveAttr* Node::get_autoarchive() const  { if (misc_attrs_) return misc_attrs_->get_autoarchive(); return NULL;}
+bool Node::hasAutoCancel() const { if (misc_attrs_) return misc_attrs_->has_auto_cancel(); return false;}
+
 std::vector<ZombieAttr>::const_iterator Node::zombie_begin() const { if (misc_attrs_) return misc_attrs_->zombie_begin(); return zombies_.begin();}
 std::vector<ZombieAttr>::const_iterator Node::zombie_end()   const { if (misc_attrs_) return misc_attrs_->zombie_end(); return zombies_.end();}
 std::vector<VerifyAttr>::const_iterator Node::verify_begin() const { if (misc_attrs_) return misc_attrs_->verify_begin(); return verifys_.begin();}

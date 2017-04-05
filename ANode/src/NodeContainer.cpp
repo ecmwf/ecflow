@@ -385,12 +385,12 @@ void NodeContainer::calendarChanged(
          std::vector<node_ptr>& auto_archive_nodes,
          const ecf::LateAttr* inherited_late)
 {
-   // A node that is migrate should not allow any change of state. ????
+   // A node that hidden its children should not allow any change of state. ????
    if (get_flag().is_set(ecf::Flag::MIGRATED)) {
       return;
    }
 
-   // A node that is archived should not allow any change of state. ????
+   // A node that is archived should not allow any change of state.
    if (get_flag().is_set(ecf::Flag::ARCHIVED)) {
       return;
    }

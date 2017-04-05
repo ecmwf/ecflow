@@ -22,90 +22,149 @@
 #include "Ecf.hpp"
 #include "Memento.hpp"
 #include "AutoRestoreAttr.hpp"
+#include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
 
 using namespace ecf;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-MiscAttrs::MiscAttrs(const MiscAttrs& rhs) : node_(NULL),auto_restore_attr_(NULL),zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_)
+MiscAttrs::MiscAttrs(const MiscAttrs& rhs)
+: node_(NULL),auto_cancel_(NULL),auto_archive_(NULL),auto_restore_(NULL),
+  zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_)
 {
-   if (rhs.auto_restore_attr_) auto_restore_attr_= new AutoRestoreAttr(*rhs.auto_restore_attr_);
+   if (rhs.auto_cancel_) auto_cancel_= new AutoCancelAttr(*rhs.auto_cancel_);
+   if (rhs.auto_archive_) auto_archive_= new AutoArchiveAttr(*rhs.auto_archive_);
+   if (rhs.auto_restore_) auto_restore_= new AutoRestoreAttr(*rhs.auto_restore_);
 }
 
 MiscAttrs::~MiscAttrs()
 {
-   delete auto_restore_attr_;
+   delete auto_cancel_;
+   delete auto_archive_;
+   delete auto_restore_;
 }
 
 // needed by node serialisation
 void MiscAttrs::set_node(Node* n)
 {
    node_ = n;
-   if (auto_restore_attr_) auto_restore_attr_->set_node(n);
+   if (auto_restore_) auto_restore_->set_node(n);
 }
 
 void MiscAttrs::begin()
 {
    // reset verification
-   for(size_t i = 0; i < verifys_.size(); i++)   { verifys_[i].reset(); }
-   for(size_t i = 0; i < queues_.size(); i++)    { queues_[i].reset(); }
+   for(size_t i = 0; i < verifys_.size(); i++) { verifys_[i].reset(); }
+   for(size_t i = 0; i < queues_.size(); i++)  { queues_[i].reset(); }
 }
 
 void MiscAttrs::requeue()
 {
-   for(size_t i = 0; i < queues_.size(); i++)    { queues_[i].reset(); }
+   for(size_t i = 0; i < queues_.size(); i++) { queues_[i].reset(); }
 }
 
 void MiscAttrs::do_autorestore()
 {
-   if ( auto_restore_attr_ ) auto_restore_attr_->do_autorestore();
+   if ( auto_restore_ ) auto_restore_->do_autorestore();
 }
 
 void MiscAttrs::check(std::string& errorMsg) const
 {
-   if ( auto_restore_attr_ ) auto_restore_attr_->check(errorMsg);
+   if ( auto_restore_ ) auto_restore_->check(errorMsg);
 }
 
 std::ostream& MiscAttrs::print(std::ostream& os) const
 {
-   if (auto_restore_attr_) auto_restore_attr_->print(os);
-   BOOST_FOREACH(const ZombieAttr& z, zombies_)     { z.print(os); }
-   BOOST_FOREACH(const VerifyAttr& v, verifys_ )    { v.print(os);  }
-   BOOST_FOREACH(const QueueAttr& q, queues_ )     { q.print(os);  }
+   if (auto_cancel_) auto_cancel_->print(os);
+   if (auto_archive_) auto_archive_->print(os);
+   if (auto_restore_) auto_restore_->print(os);
+   BOOST_FOREACH(const ZombieAttr& z, zombies_) { z.print(os); }
+   BOOST_FOREACH(const VerifyAttr& v, verifys_ ){ v.print(os);  }
+   BOOST_FOREACH(const QueueAttr& q, queues_ )  { q.print(os);  }
    return os;
 }
 
 bool MiscAttrs::operator==(const MiscAttrs& rhs) const
 {
-   if (auto_restore_attr_ && rhs.auto_restore_attr_) {
-      if (*auto_restore_attr_ == *rhs.auto_restore_attr_) {
+   if (auto_restore_ && rhs.auto_restore_) {
+      if (*auto_restore_ == *rhs.auto_restore_) {
          return true;
       }
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "MiscAttrs::operator== auto_restore_attr_ && rhs.auto_restore_attr_   " << node_->debugNodePath() << "\n";
+         std::cout << "MiscAttrs::operator== auto_restore_ && rhs.auto_restore_   " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   else if ( !auto_restore_attr_ && rhs.auto_restore_attr_) {
+   else if ( !auto_restore_ && rhs.auto_restore_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "MiscAttrs::operator==  !auto_restore_attr_ && rhs.auto_restore_attr_ " << node_->debugNodePath() << "\n";
+         std::cout << "MiscAttrs::operator==  !auto_restore_ && rhs.auto_restore_ " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   else if ( auto_restore_attr_ && !rhs.auto_restore_attr_ ) {
+   else if ( auto_restore_ && !rhs.auto_restore_ ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "MiscAttrs::operator==  auto_restore_attr_ && !rhs.auto_restore_attr_  " << node_->debugNodePath() << "\n";
+         std::cout << "MiscAttrs::operator==  auto_restore_ && !rhs.auto_restore_  " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
    }
 
+   if (auto_cancel_ && !rhs.auto_cancel_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  if (auto_cancel_ && !rhs.auto_cancel_)  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if (!auto_cancel_ && rhs.auto_cancel_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  if (!auto_cancel_ && rhs.auto_cancel_)  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if (auto_cancel_ && rhs.auto_cancel_ && !(*auto_cancel_ == *rhs.auto_cancel_)) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  (auto_cancel_ && rhs.auto_cancel_ && !(*auto_cancel_ == *rhs.auto_cancel_)) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+
+   if (auto_archive_ && !rhs.auto_archive_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  if (auto_archive_ && !rhs.auto_archive_)  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if (!auto_archive_ && rhs.auto_archive_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  if (!auto_archive_ && rhs.auto_archive_)  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
 
    if (zombies_.size() != rhs.zombies_.size()) {
 #ifdef DEBUG
@@ -253,25 +312,52 @@ bool MiscAttrs::findVerify(const VerifyAttr& v) const
 
 void MiscAttrs::add_autorestore( const ecf::AutoRestoreAttr& auto_restore)
 {
-   if (auto_restore_attr_) {
+   if (auto_restore_) {
       std::stringstream ss;
       ss << "MiscAttrs::add_auto_restore: Can only have one autorestore per node " << node_->debugNodePath();
       throw std::runtime_error( ss.str() );
    }
-   auto_restore_attr_ =  new ecf::AutoRestoreAttr(auto_restore);
-   auto_restore_attr_->set_node(node_);
+   auto_restore_ =  new ecf::AutoRestoreAttr(auto_restore);
+   auto_restore_->set_node(node_);
    node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
 }
 
-void MiscAttrs::delete_autorestore()
+void MiscAttrs::add_autocancel( const AutoCancelAttr& ac)
 {
-   delete auto_restore_attr_; auto_restore_attr_ = NULL;
-   if (node_) node_->state_change_no_ = Ecf::incr_state_change_no();
+   if (auto_archive_) {
+      std::stringstream ss;
+      ss << "Node::addAutoCancel: Can not add autocancel and autoarchive on the same node " << node_->debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   if (auto_cancel_) {
+      std::stringstream ss;
+      ss << "Node::addAutoCancel: A node can only have one autocancel, see node " << node_->debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   auto_cancel_ = new ecf::AutoCancelAttr(ac);
+   node_->state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void MiscAttrs::clear()
+void MiscAttrs::add_autoarchive( const AutoArchiveAttr& ac)
 {
-   delete auto_restore_attr_; auto_restore_attr_ = NULL;
+   if (auto_cancel_) {
+      std::stringstream ss;
+      ss << "Node::add_autoarchive: Can not add autocancel and autoarchive on the same node " << node_->debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   if (auto_archive_) {
+      std::stringstream ss;
+      ss << "Node::add_autoarchive: A node can only have one autoarchive, see node " << node_->debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   auto_archive_ = new ecf::AutoArchiveAttr(ac);
+   node_->state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void MiscAttrs::clear_attributes_with_state()
+{
+   // Used during incremental sync, i.e node attributes added/deleted
+   // clear attributes that have memento's, the auto_* have no state, hence no need to clear
    zombies_.clear();   // can be added/removed via AlterCmd
    verifys_.clear();
    queues_.clear();
@@ -337,5 +423,47 @@ void MiscAttrs::set_memento(const NodeQueueIndexMemento* m )
          queues_[i].set_index( m->index_);
       }
    }
+}
+
+
+bool MiscAttrs::checkForAutoCancel(const ecf::Calendar& calendar) const
+{
+   if ( auto_cancel_ && node_->state() == NState::COMPLETE) {
+      if (auto_cancel_->isFree(calendar,node_->get_state().second)) {
+
+         /// *Only* delete this node if we don't create zombies
+         /// anywhere for our children
+         vector<Task*> taskVec;
+         node_->getAllTasks(taskVec);
+         BOOST_FOREACH(Task* t, taskVec) {
+            if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+               return false;
+            }
+         }
+         return true;
+      }
+   }
+   return false;
+}
+
+bool MiscAttrs::check_for_auto_archive(const ecf::Calendar& calendar) const
+{
+   if ( auto_archive_ && node_->state() == NState::COMPLETE) {
+      if (!node_->isSuspended() && auto_archive_->isFree(calendar,node_->get_state().second)) {
+         if (!node_->isParentSuspended()) {
+
+            /// *Only* archive this node if we don't create zombies anywhere for our children
+            vector<Task*> taskVec;
+            node_->getAllTasks(taskVec);
+            BOOST_FOREACH(Task* t, taskVec) {
+               if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+                  return false;
+               }
+            }
+            return true;
+         }
+      }
+   }
+   return false;
 }
 

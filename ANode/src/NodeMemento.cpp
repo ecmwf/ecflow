@@ -25,7 +25,7 @@ using namespace std;
 
 //#define DEBUG_MEMENTO 1
 
-/// CompoundMemento relies all clearing all attributes
+/// CompoundMemento relies all clearing all attributes with state
 void Node::clear()
 {
    delete lateAttr_; lateAttr_ = NULL;
@@ -33,13 +33,14 @@ void Node::clear()
    delete triggerExpr_; triggerExpr_ = NULL;
 
  	// ************************************************************
- 	// Note: auto cancel does not have any changeable state
- 	//       Hence it is not cleared. Hence no need for memento
+ 	// Note: auto cancel, auto restore, auto archive does not have any
+   //       changeable state, Hence it is not cleared.
+   //       Hence no need for memento
   	// ************************************************************
 
    if (time_dep_attrs_) time_dep_attrs_->clear();
    if (child_attrs_) child_attrs_->clear();
-   if (misc_attrs_) misc_attrs_->clear();    // zombies can be added/removed via AlterCmd
+   if (misc_attrs_) misc_attrs_->clear_attributes_with_state();    // zombies can be added/removed via AlterCmd
   	repeat_.clear();
 	varVec_.clear();
 	limitVec_.clear();

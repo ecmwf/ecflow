@@ -310,7 +310,7 @@ public:
    void get_max_simulation_duration(boost::posix_time::time_duration& resol) const;
 
    /// A hierarchical function
-   virtual bool hasAutoCancel() const { return (autoCancel_) ? true : false;}
+   virtual bool hasAutoCancel() const;
 
 
    // Access functions: ======================================================
@@ -333,8 +333,8 @@ public:
    const std::vector<QueueAttr>&       queues()  const;
    TimeDepAttrs*  get_time_dep_attrs() const { return time_dep_attrs_;} // can be NULL
    ecf::LateAttr* get_late() const { return lateAttr_;}
-   ecf::AutoCancelAttr*  get_autocancel() const { return autoCancel_;}
-   ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_;}
+   ecf::AutoCancelAttr*  get_autocancel() const;
+   ecf::AutoArchiveAttr* get_autoarchive() const;
    ecf::AutoRestoreAttr* get_autorestore() const;
    ecf::Flag&       flag()           { return flag_;}
    const ecf::Flag& get_flag() const { return flag_;}
@@ -661,9 +661,6 @@ private:
    friend class VariableHelper;
 
 private:
-   bool checkForAutoCancel(const ecf::Calendar& c) const;
-   bool check_for_auto_archive(const ecf::Calendar& c) const;
-
    void add_trigger_expression(const Expression&);     // Can throw std::runtime_error
    void add_complete_expression(const Expression&);    // Can throw std::runtime_error
    const Event& findEventByNumber(int number) const;
@@ -748,8 +745,6 @@ private:
    mutable Expression*         triggerExpr_;  // can only have one trigger expression
 
    ecf::LateAttr*              lateAttr_;     // Can only have one late attribute per node
-   ecf::AutoCancelAttr*        autoCancel_;   // Can only have 1 auto cancel per node
-   ecf::AutoArchiveAttr*       auto_archive_; // Can only have 1 auto archive per node
    TimeDepAttrs*               time_dep_attrs_;
    ChildAttrs*                 child_attrs_;  // event meter & lables
    MiscAttrs*                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
@@ -786,11 +781,9 @@ private:
       ar & completeExpr_;
       ar & triggerExpr_;
       ar & lateAttr_;
-      ar & autoCancel_;
-      ar & auto_archive_;
       ar & time_dep_attrs_;
       ar & child_attrs_;
-      ar & misc_attrs_;    // VerifyAttr & Zombies
+      ar & misc_attrs_;    // VerifyAttr & Zombies * auto attrs
       ar & repeat_;
       ar & varVec_;
       ar & limitVec_;
