@@ -513,7 +513,7 @@ bool VMigratedIcon::show(VNode *n)
 {
     if(n && (n->isSuite() || n->isFamily()))
     {
-        return n->isFlagSet(ecf::Flag::MIGRATED);
+        return n->isFlagSet(ecf::Flag::ARCHIVED);
     }
     return false;
 }

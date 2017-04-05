@@ -39,7 +39,6 @@ test/TestExprParser.cpp
 test/TestExprRepeatDateArithmetic.cpp
 test/TestFindAbsNodePath.cpp
 test/TestFlag.cpp
-test/TestFlagMigrated.cpp
 test/TestHistoryParser.cpp
 test/TestInLimit.cpp
 test/TestJobCreator.cpp

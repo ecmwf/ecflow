@@ -416,11 +416,6 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
       if (flag_type_ != Flag::NOT_SET) {
          if (flag_) node->flag().set(flag_type_);
          else       node->flag().clear(flag_type_);
-
-         if (flag_type_ == ecf::Flag::MIGRATED) {
-            // This should force client to sync since suite/family have added or deleted its children
-            node->force_sync();
-         }
       }
    }
 
@@ -455,9 +450,9 @@ const char* AlterCmd::desc() {
          "         For add:\n"
          "           [ variable | time | today | date | day | zombie | late | limit | inlimit ]\n"
          "         For set_flag and clear_flag:\n"
-         "           [ force_aborted | user_edit | task_aborted | edit_failed |\n"
-         "             ecfcmd_failed | no_script | killed | migrated | late |\n"
-         "             message | complete | queue_limit | task_waiting | locked | zombie | archived | restored]\n"
+         "           [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script |\n"
+         "             killed  | late | message | complete | queue_limit | task_waiting | locked | zombie |\n"
+         "             archived | restored]\n"
          "  arg3 = name/value\n"
          "         when changing, attributes like variable,meter,event,label,limits,late\n"
          "         we expect arguments to be quoted\n"
@@ -1085,7 +1080,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 void AlterCmd::create_flag( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const
 {
    // options[0] = set_flag | clear_flag
-   // options[1] = [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed | migrated | late | message | complete | queue_limit | task_waiting | locked | zombie ]
+   // options[1] = [ force_aborted ....]
 
    Flag::Type theFlagType = Flag::string_to_flag_type(options[1]);
    if (theFlagType == Flag::NOT_SET) {

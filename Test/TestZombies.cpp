@@ -55,7 +55,6 @@ namespace fs = boost::filesystem;
 // i.e. where we have created a user Zombie but there is no associated process ??
 // *******************************************************************
 
-//#define DEBUG_ZOMBIE 1
 #define DO_TEST1 1
 #define DO_TEST2 1
 #define DO_TEST3 1

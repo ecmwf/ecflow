@@ -18,8 +18,6 @@
 
 #include <limits>
 #include "Node.hpp"
-#include "CheckPtContext.hpp"
-#include "MigrateContext.hpp"
 
 class NodeContainer : public Node {
 protected:
@@ -146,10 +144,6 @@ private:
    void swap(NodeContainer& rhs);
 	friend class boost::serialization::access;
 
-	// distinguish between check-pointing and server->client comm's
-	// *when* handling Flag::MIGRATED.
-	// Check-pointing should always persist nodeVec_
-	// Flag::MIGRATED should not persist nodeVec_ when in server->client command context
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int /*version*/)
 	{
@@ -158,21 +152,7 @@ private:
 
 	   // serialise base class information
 	   ar & boost::serialization::base_object<Node>(*this);
-
-	   // Handle ecf::Flag::MIGRATED, don't save nodeVec_
-	   // When check-pointing we always need to save the children
-	   if (Archive::is_saving::value &&
-	         get_flag().is_set(ecf::Flag::MIGRATED) &&
-	         ! ecf::CheckPtContext::in_checkpt() &&
-	         ! ecf::MigrateContext::in_migrate()
-	       ) {
-
-	      std::vector<node_ptr> nodeVec;
-	      ar & nodeVec;
-	   }
-	   else {
-	      ar & nodeVec_;
-	   }
+	   ar & nodeVec_;
 
       // Setup the parent pointers. Since they are not serialised
       if (Archive::is_loading::value) {

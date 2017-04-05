@@ -338,42 +338,9 @@ static bool change_server_variable(defs_ptr defs) {
 }
 
 
-static bool s1_set_migrate_flag(defs_ptr defs) {
-
-   // suite s1 is *NOT* in the handle, hence expect no change
-   suite_ptr s1 = defs->findSuite("s1");
-   MockSuiteChangedServer mockServer(s1);   // Increment suite state/modify change number
-   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(s1->absNodePath(),ecf::Flag::MIGRATED,true)));
-   return false;                            // expect no changes
-}
-
-static bool s1_f_set_migrate_flag(defs_ptr defs) {
-   // suite s1 is *NOT* in the handle, hence expect no change
-   suite_ptr s1 = defs->findSuite("s1");
-   MockSuiteChangedServer mockServer(s1);    // Increment suite state/modify change number
-   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd("/s1/f",ecf::Flag::MIGRATED,true)));
-   return false;                             // expect no changes
-}
-
 // ===============================================================================
 // The modifiers, do this for suite s0 which is in a handle
 // ===============================================================================
-
-static bool s0_set_migrate_flag(defs_ptr defs) {
-   // suite s0 in the handle
-   suite_ptr s0 = defs->findSuite("s0");
-   MockSuiteChangedServer mockServer(s0);      // Increment suite state/modify change number
-   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(s0->absNodePath(),ecf::Flag::MIGRATED,true)));
-   return true;                                // expect changes
-}
-
-static bool s0_f_set_migrate_flag(defs_ptr defs) {
-   // suite s0 in the handle
-   suite_ptr s0 = defs->findSuite("s0");
-   MockSuiteChangedServer mockServer(s0); // Increment suite state/modify change number
-   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd("/s0/f",ecf::Flag::MIGRATED,true)));
-   return true;                                // expect changes
-}
 
 static bool s0_delete_some_attributes(defs_ptr defs) {
    /// Ok now make state change to s4, which **is** in the handle
@@ -584,11 +551,6 @@ BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
    test_sync_scaffold(delete_task_on_suite_s4,"delete_task_on_suite_s4");
    test_sync_scaffold(delete_family_on_suite_s4,"delete_family_on_suite_s4");
    test_sync_scaffold(delete_suite_s4,"delete_suite_s4", true /* expect a full sync */);
-
-   test_sync_scaffold(s1_set_migrate_flag,"s1_set_migrate_flag");     // s1   *NOT* in handle
-   test_sync_scaffold(s1_f_set_migrate_flag,"s1_f_set_migrate_flag"); // s1/f *NOT* in handle
-   test_sync_scaffold(s0_set_migrate_flag,"s0_set_migrate_flag");     // s0   is in handle
-   test_sync_scaffold(s0_f_set_migrate_flag,"s0_set_migrate_flag");  // s0/f is in handle
 
    test_sync_scaffold(s0_delete_some_attributes,"s0_delete_some_attributes");
    test_sync_scaffold(s0_add_some_attributes,"s0_add_some_attributes");

@@ -283,11 +283,13 @@ void Node::requeue(
       time_dep_attrs_->markHybridTimeDependentsAsComplete();
    }
 
-
+   // Should *NOT* clear, archived flag, as this is done via autorestore or --restore
    // reset the flags, however remember if edit were made
    bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
+   bool archived_set = flag().is_set(ecf::Flag::ARCHIVED);
    flag_.reset();   // will CLEAR NO_REQUE_IF_SINGLE_TIME_DEP
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
+   if (archived_set)     flag().set(ecf::Flag::ARCHIVED);
 
 
    if (lateAttr_) lateAttr_->reset();
@@ -574,9 +576,8 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
    LOG(Log::DBG,"   " << debugNodePath() << "::resolveDependencies " << NState::toString(state()) << " AT " << suite()->calendar().toString());
 #endif
 
-   // A node that is migrated/archived should not allow any change of state.
+   // A node that is archived should not allow any change of state.
    if (get_flag().is_set(ecf::Flag::ARCHIVED)) return false;
-   if (get_flag().is_set(ecf::Flag::MIGRATED)) return false;
 
 
    // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality

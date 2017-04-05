@@ -1120,41 +1120,6 @@ def test_client_alter_flag(ci):
         assert not task_flag.is_set( flg ),"expected flag %r NOT to be set" % task_flag.type_to_string(flg)
 
 
-def test_client_flag_migrated(ci):
-    print("test_client_flag_migrated")
-    ci.delete_all() 
-    defs =create_defs("test_client_flag_migrated")   
-    s1 = "/test_client_flag_migrated"
-  
-    ci.load(defs)   
-    ci.sync_local()
-
-    node_vec = ci.get_defs().get_all_nodes()
-    assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
-
-    ci.alter(s1,"set_flag","migrated")   
-    ci.sync_local()
-    node_vec = ci.get_defs().get_all_nodes()
-    assert len(node_vec) == 1, "Expected 1 nodes, but found " + str(len(node_vec))
-
-    ci.checkpt()  # checkpoint after setting flag migrated, need to prove nodes still persisted
-    
-    ci.alter(s1,"clear_flag","migrated")   
-    ci.sync_local()
-    node_vec = ci.get_defs().get_all_nodes()
-    assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
-
-    ci.delete_all() 
-    
-    ci.halt_server()  # server must be halted, otherwise restore_from_checkpt will throw
-    ci.restore_from_checkpt()
-    ci.alter(s1,"clear_flag","migrated")   
-    ci.sync_local() 
-    node_vec = ci.get_defs().get_all_nodes()
-    assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
-    ci.restart_server()   
-
-
     # ISSUES:
     # o Currently we can only change clock attr if we have one.
     # o Even when we have a clock attr, it only makes sense to apply clock attr changes
@@ -1670,7 +1635,6 @@ if __name__ == "__main__":
         test_client_alter_delete(ci) 
         test_client_alter_change(ci) 
         test_client_alter_flag(ci) 
-        test_client_flag_migrated(ci) 
  
         test_client_force(ci)             
         test_client_replace(ci,False)             

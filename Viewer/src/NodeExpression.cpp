@@ -806,7 +806,7 @@ bool NodeFlagCondition::execute(VItem* item)
             return vnode->isFlagSet(ecf::Flag::WAIT);
 
         else if(nodeFlagName_ == "is_migrated")
-            return vnode->isFlagSet(ecf::Flag::MIGRATED);
+            return vnode->isFlagSet(ecf::Flag::ARCHIVED);
 
 	}
 

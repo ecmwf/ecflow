@@ -54,7 +54,6 @@ std::vector<Flag::Type> Flag::list()
    ret.push_back(Flag::JOBCMD_FAILED);
    ret.push_back(Flag::NO_SCRIPT);
    ret.push_back(Flag::KILLED);
-   ret.push_back(Flag::MIGRATED);
    ret.push_back(Flag::LATE);
    ret.push_back(Flag::MESSAGE);
    ret.push_back(Flag::BYRULE);
@@ -78,7 +77,6 @@ std::string Flag::enum_to_string(Flag::Type flag) {
       case Flag::JOBCMD_FAILED:return "ecfcmd_failed"; break;
       case Flag::NO_SCRIPT:    return "no_script"; break;
       case Flag::KILLED:       return "killed"; break;
-      case Flag::MIGRATED:     return "migrated"; break;
       case Flag::LATE:         return "late"; break;
       case Flag::MESSAGE:      return "message"; break;
       case Flag::BYRULE:       return "by_rule"; break;
@@ -105,7 +103,6 @@ Flag::Type Flag::string_to_flag_type(const std::string& s)
    if (s == "ecfcmd_failed") return Flag::JOBCMD_FAILED;
    if (s == "no_script") return Flag::NO_SCRIPT;
    if (s == "killed") return Flag::KILLED;
-   if (s == "migrated") return Flag::MIGRATED;
    if (s == "late") return Flag::LATE;
    if (s == "message") return Flag::MESSAGE;
    if (s == "by_rule") return Flag::BYRULE;
@@ -129,7 +126,6 @@ void Flag::valid_flag_type(std::vector<std::string>& vec)
    vec.push_back("ecfcmd_failed");
    vec.push_back("no_script");
    vec.push_back("killed");
-   vec.push_back("migrated");
    vec.push_back("late");
    vec.push_back("message");
    vec.push_back("by_rule");
@@ -161,6 +157,8 @@ void Flag::set_flag(const std::string& flags)
    Str::split(flags,the_flags_vec,",");
 
    for(size_t i =0; i < the_flags_vec.size(); i++) {
+      if (the_flags_vec[i] == "migrated") continue; // 4.4.x release had migrated ignore. REMOVE when 5.0.0 is default
+
       Flag::Type ft = string_to_flag_type(the_flags_vec[i]);
       if (ft == Flag::NOT_SET) {
          throw std::runtime_error("Flag::set_flag: Unknown flag types found: " + the_flags_vec[i]);

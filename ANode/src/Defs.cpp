@@ -40,7 +40,6 @@
 #include "Version.hpp"
 #include "Indentor.hpp"
 #include "AbstractObserver.hpp"
-#include "CheckPtContext.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -1089,9 +1088,6 @@ node_ptr Defs::replaceChild(const std::string& path,
 
 void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
 {
-   // Save NodeContainer children even if ecf::Flag::MIGRATED set
-   CheckPtContext checkpt_context;
-
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
 
@@ -1101,9 +1097,6 @@ void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at
 
 void Defs::save_checkpt_as_string(std::string& output) const
 {
-   // Save NodeContainer children even if ecf::Flag::MIGRATED set
-   CheckPtContext checkpt_context;
-
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
 

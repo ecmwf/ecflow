@@ -148,7 +148,6 @@ void export_Node()
          "JOBCMD_FAILED - task*\n"
          "NO_SCRIPT     - task*\n"
          "KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
-         "MIGRATED      - Node\n"
          "LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
          "MESSAGE       - Node\n"
          "BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
@@ -167,7 +166,6 @@ void export_Node()
          .value("jobcmd_failed",Flag::JOBCMD_FAILED)
          .value("no_script",    Flag::NO_SCRIPT)
          .value("killed",       Flag::KILLED)
-         .value("migrated",     Flag::MIGRATED)
          .value("late",         Flag::LATE)
          .value("message",      Flag::MESSAGE)
          .value("byrule",       Flag::BYRULE)

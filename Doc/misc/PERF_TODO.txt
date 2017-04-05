@@ -234,15 +234,16 @@ between the two.
 Over time time the edit-history could be significant. This is download-able
 as a separate command.
 
-Note: also when check pointing, we always save hidden children.
-i.e  when ecf::Flag::MIGRATED is set on suite/family.
+For release 4.4.0 -> 4.x.x
+  Note: also when check pointing, we always save hidden children.
+  i.e  when ecf::Flag::MIGRATED is set on suite/family.
 
-Hence check pointing has diverged from syncing.
-(The original thinking was if edit history issue could be resolved 
-there can be huge savings, for both syncing and check pointing. 
-Since the periodic check-pt would automatically update the cache, 
-like syncing would also update the cache.
-However the ecf::Flag::MIGRATED has thrown a spanner in the works.)
+  Hence check pointing has diverged from syncing.
+  (The original thinking was if edit history issue could be resolved 
+  there can be huge savings, for both syncing and check pointing. 
+  Since the periodic check-pt would automatically update the cache, 
+  like syncing would also update the cache.
+  However the ecf::Flag::MIGRATED has thrown a spanner in the works.)
 
 On reflection leave as is.)
 

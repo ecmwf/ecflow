@@ -56,18 +56,17 @@ public:
       JOBCMD_FAILED =  4,  // task*
       NO_SCRIPT     =  5,  // task*
       KILLED        =  6,  // task* do not run when try_no > ECF_TRIES, and task killed by user
-      MIGRATED      =  7,  // Node,defs set during --get_state,--migrate, reused on replace cmd , to preserver state
-      LATE          =  8,  // Node attribute, Task is late, or Defs checkpt takes to long
-      MESSAGE       =  9,  // Node
-      BYRULE        = 10,  // Node*, set if node is set to complete by complete trigger expression
-      QUEUELIMIT    = 11,  // Node                                   ( NOT USED currently)
-      WAIT          = 12,  // task*  Set/cleared but never queried ? ( NOT USED currently )
-      LOCKED        = 13,  // Server                                 ( NOT USED currently)
-      ZOMBIE        = 14,  // task*  Set/cleared but never queried ? ( NOT USED currently )
-      NO_REQUE_IF_SINGLE_TIME_DEP = 15,  //
-      ARCHIVED      = 16,  // Container*
-      RESTORED      = 17,  // Container*, Avoid re-archiving node that is restored, until it is re-queued again
-      NOT_SET       = 18
+      LATE          =  7,  // Node attribute, Task is late, or Defs checkpt takes to long
+      MESSAGE       =  8,  // Node
+      BYRULE        =  9,  // Node*, set if node is set to complete by complete trigger expression
+      QUEUELIMIT    = 10,  // Node                                   ( NOT USED currently)
+      WAIT          = 11,  // task*  Set/cleared but never queried ? ( NOT USED currently )
+      LOCKED        = 12,  // Server                                 ( NOT USED currently)
+      ZOMBIE        = 13,  // task*  Set/cleared but never queried ? ( NOT USED currently )
+      NO_REQUE_IF_SINGLE_TIME_DEP = 14,  //
+      ARCHIVED      = 15,  // Container*
+      RESTORED      = 16,  // Container*, Avoid re-archiving node that is restored, until it is re-queued again
+      NOT_SET       = 17
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }

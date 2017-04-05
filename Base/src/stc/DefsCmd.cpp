@@ -27,21 +27,19 @@ using namespace boost;
 //=====================================================================================
 // The defs command returns the full definition back to the client
 
-DefsCmd::DefsCmd(AbstractServer* as,bool migrate)
+DefsCmd::DefsCmd(AbstractServer* as,bool save_edit_history)
 {
-	init(as,migrate); // save edit history and children even if hidden
+	init(as,save_edit_history); // save edit history
 }
 
-void DefsCmd::init(AbstractServer* as,bool migrate)
+void DefsCmd::init(AbstractServer* as,bool save_edit_history)
 {
-   migrate_ = migrate; // save edit history and children even if hidden
-
    defs_ = as->defs();
    /// Return the current value of the state change no. So the that
    /// the next call to get the SSYncCmd , we need only return what's changed
    defs_->set_state_change_no( Ecf::state_change_no() );
    defs_->set_modify_change_no( Ecf::modify_change_no() );
-   defs_->save_edit_history(migrate);
+   defs_->save_edit_history(save_edit_history);
 }
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const
