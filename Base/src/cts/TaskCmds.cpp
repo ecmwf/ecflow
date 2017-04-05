@@ -160,14 +160,13 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #ifdef DEBUG_ZOMBIE
             std::cout << ":(child_type() == Child::INIT) && submittable_->state() == NState::ACTIVE)";
 #endif
-            // If ECF_NONSTRICT_ZOMBIES be more forgiving
+            // *IF* password and pid matches be more forgiving. How can this case arise:
+            // i.e server is heavily overloaded, client calls init, which times out because server is busy
+            // Client then sends init again. In this case rather than treating it as a zombie, we will let it through
+            // providing the password and pid matches.
             if (!password_missmatch_ && !pid_missmatch_ ) {
-               if (submittable_->user_variable_exists(Str::ECF_NONSTRICT_ZOMBIES())) {
-                  string ret = "zombie(ECF_NONSTRICT_ZOMBIES) : "; ret += path_to_submittable_; ret += " : already active : action taken( fob )";
-                  log(Log::WAR, ret );
-                  theReply = PreAllocatedReply::ok_cmd();
-                  return false;
-               }
+               theReply = PreAllocatedReply::ok_cmd();
+               return false;
             }
             submittable_allready_active = true;
          }
