@@ -126,11 +126,6 @@ void NodeContainer::requeue(
 //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
 
    restore_on_begin_or_requeue();
-
-   // Node::requeue(...) will clear ecf::Flag::RESTORED,
-   // this should cause children to be added in client def's, provided we force a sync
-   if (get_flag().is_set(ecf::Flag::RESTORED)) force_sync();
-
    Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
 
 	// For negative numbers, do nothing, i.e do not clear
@@ -1145,6 +1140,7 @@ void NodeContainer::restore_on_begin_or_requeue()
    if (!nodeVec_.empty()) return;
    if (!fs::exists(archive_path())) return;
 
+   // Node::requeue(...) will clear ecf::Flag::RESTORED, set in restore()
    try { restore(); }
    catch(std::exception&  e) {
       std::stringstream ss; ss << "NodeContainer::restore_on_begin_or_requeue(): failed : " << e.what();
