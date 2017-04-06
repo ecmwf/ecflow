@@ -26,6 +26,7 @@
 #include "Task.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
+#include "Host.hpp"
 #include "JobsParam.hpp"
 #include "NodeTreeVisitor.hpp"
 
@@ -1063,20 +1064,30 @@ void NodeContainer::update_limits()
 
 std::string NodeContainer::archive_path() const
 {
-   std::string path;
-   if (!findParentUserVariableValue( Str::ECF_HOME() , path )) {
+   std::string the_archive_path;
+   if (!findParentUserVariableValue( Str::ECF_HOME() , the_archive_path )) {
       std::stringstream ss; ss << "NodeContainer::archive_path: can not find ECF_HOME from " << debugNodePath();
       throw std::runtime_error(ss.str());
    }
 
-   std::string the_path = absNodePath();
-   Str::replaceall(the_path,"/",":"); // we use ':' since they are not allowed in the node names
-   the_path[0] = '/';
+   std::string the_archive_file_name = absNodePath();
+   Str::replaceall(the_archive_file_name,"/",":"); // we use ':' since its not allowed in the node names
+   the_archive_file_name += ".check";
 
-   path += the_path;
-   path += ".check";
-   return path;
+   std::string port = Str::DEFAULT_PORT_NUMBER();
+   Defs* the_defs = defs();
+   if ( the_defs ) {
+      port = the_defs->server().find_variable(Str::ECF_PORT());
+      if ( port.empty() ) port = Str::DEFAULT_PORT_NUMBER();
+   }
+   Host host;
+   the_archive_file_name = host.prefix_host_and_port(port,the_archive_file_name);
+
+   the_archive_path += "/";
+   the_archive_path += the_archive_file_name;
+   return the_archive_path;
 }
+
 void NodeContainer::archive()
 {
    if (nodeVec_.empty()) return; // nothing to archive
@@ -1121,7 +1132,7 @@ void NodeContainer::archive()
 
    std::vector<node_ptr>().swap(nodeVec_);                    // reclaim vector memory
    add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
-   string msg = "autoarchive "; msg += debugNodePath();
+   string msg = "autoarchive "; msg += debugNodePath();       // inform user via log
    ecf::log(Log::MSG,msg);
 }
 

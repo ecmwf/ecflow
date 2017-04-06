@@ -62,6 +62,7 @@ BOOST_AUTO_TEST_CASE( test_archive_and_restore_suite )
    //cout << theDefs << "\n";
 
    TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::RESTORE,suite->absNodePath())));
+   BOOST_CHECK_MESSAGE(suite->flag().is_set(ecf::Flag::RESTORED),"Restored flag not set");
    BOOST_CHECK_MESSAGE(!suite->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not *cleared");
    BOOST_CHECK_MESSAGE(!fs::exists(suite->archive_path()),"Archived file has not been deleted after restore");
    BOOST_CHECK_MESSAGE(!suite->nodeVec().empty(),"Children are not restored");
@@ -107,6 +108,7 @@ BOOST_AUTO_TEST_CASE( test_archive_and_restore_family )
    BOOST_CHECK_MESSAGE( f3->nodeVec().empty(),"Children not removed");
 
    TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::RESTORE,f3->absNodePath())));
+   BOOST_CHECK_MESSAGE(f3->flag().is_set(ecf::Flag::RESTORED),"restored flag not set");
    BOOST_CHECK_MESSAGE(!f3->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not *cleared");
    BOOST_CHECK_MESSAGE(!fs::exists(f3->archive_path()),"Archived file has not been deleted after restore");
    BOOST_CHECK_MESSAGE(!f3->nodeVec().empty(),"Children are not restored");
@@ -114,6 +116,7 @@ BOOST_AUTO_TEST_CASE( test_archive_and_restore_family )
    // Archive again but restore via begin
    TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::ARCHIVE,f3->absNodePath())));
    BOOST_CHECK_MESSAGE(f3->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not set");
+   BOOST_CHECK_MESSAGE(!f3->flag().is_set(ecf::Flag::RESTORED),"Restored flag not cleared");
    BOOST_CHECK_MESSAGE(fs::exists(f3->archive_path()),"Archive path" << suite->archive_path() << " not created");
    BOOST_CHECK_MESSAGE( f3->nodeVec().empty(),"Children not removed");
 
