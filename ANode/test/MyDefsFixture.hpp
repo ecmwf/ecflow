@@ -189,6 +189,15 @@ private:
       task_ptr t9 = suite->add_task( "t9" );
       t9->addRepeat( RepeatDay(2) );
 
+      family_ptr f1 = suite->add_family("f1");
+      f1->add_autoarchive( ecf::AutoArchiveAttr( ecf::TimeSlot(1,0), true));
+      family_ptr f2 = suite->add_family("f2");
+      f2->add_autoarchive( ecf::AutoArchiveAttr( 5,22, true));
+      family_ptr f3 = suite->add_family("f3");
+      f3->add_autoarchive( ecf::AutoArchiveAttr( 4));
+      family_ptr f4 = suite->add_family("f4");
+      f4->add_autoarchive( ecf::AutoArchiveAttr( 0));
+
 
  		for (int i = 0; i < 3; ++i) {
 			std::string fname = "familyName";

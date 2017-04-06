@@ -37,7 +37,7 @@ bool AutoArchiveParser::doParse( const std::string& line, std::vector<std::strin
       // autoarchive 0         # archive immediately after complete
       int days = Extract::theInt(lineTokens[1],"invalid autoarchive " + line) ;
 
-      nodeStack_top()->addAutoCancel( AutoCancelAttr( days ) ) ;
+      nodeStack_top()->add_autoarchive( AutoArchiveAttr( days ) ) ;
    }
    else {
       // Must be of the form:
