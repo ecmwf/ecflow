@@ -25,8 +25,13 @@ echo "BOOST_ROOT=$BOOST_ROOT"
 # From boost 1.56 > the location of site-config.jam location has changed
 #
 SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/v2/site-config.jam
-BOOST_VERSION="$(basename $BOOST_ROOT)"
-if [ "$BOOST_VERSION" = boost_1_56_0 -o "$BOOST_VERSION" = boost_1_57_0 -o "$BOOST_VERSION" = boost_1_58_0 -o "$BOOST_VERSION" = boost_1_61_0 -o "$BOOST_VERSION" = boost_1_63_0 ] ; then
+BOOST_VERSION="$(basename $BOOST_ROOT)"                           # boost_1_53_0
+BOOST_MAJOR_VERSION=$(echo $BOOST_VERSION | cut -d_ -f2)          # 1
+BOOST_MINOR_VERSION=$(echo $BOOST_VERSION | cut -d_ -f3)          # 53
+BOOST_PATCH_VERSION=$(echo $BOOST_VERSION | cut -d_ -f4)          # 0
+BOOST_NUMERIC_VERSION=$(( 1000*BOOST_MAJOR_VERSION + 10*BOOST_MINOR_VERSION + BOOST_PATCH_VERSION ))
+
+if [[ ${BOOST_NUMERIC_VERSION} -ge 1570 ]] ; then
    SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/src/site-config.jam
 fi
 
