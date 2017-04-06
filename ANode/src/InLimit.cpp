@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <sstream>
 #include <stdexcept>
+#include <iostream>
 
 #include "InLimit.hpp"
 #include "Limit.hpp"
