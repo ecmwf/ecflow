@@ -156,7 +156,8 @@ void export_Node()
          "LOCKED        - Server\n"
          "ZOMBIE        - task*\n"
          "NO_REQUE      - task\n"
-         "ARCHIVED      - Server/Family\n"
+         "ARCHIVED      - Suite/Family\n"
+         "RESTORED      - Family/Family\n"
          "NOT_SET\n"
    )
          .value("force_abort",  Flag::FORCE_ABORT)

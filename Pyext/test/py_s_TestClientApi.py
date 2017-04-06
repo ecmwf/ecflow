@@ -1449,8 +1449,9 @@ def test_client_archive_and_restore(ci):
     ci.sync_local() # get the changes, synced with local defs
     node_vec = ci.get_defs().get_all_nodes()
     assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
-    the_restored_suite = defs.find_suite(suite_name)
+    the_restored_suite = ci.get_defs().find_suite(suite_name)
     assert the_restored_suite != None, "Expected to find suite"
+    assert the_restored_suite.get_flag().is_set(FlagType.restored), " expected restored flag to be set"
     assert not the_restored_suite.get_flag().is_set(FlagType.archived), "expected archive flag to be cleared"
     
 
