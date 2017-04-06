@@ -119,7 +119,7 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
    if (auto_cancel_ && !rhs.auto_cancel_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  if (auto_cancel_ && !rhs.auto_cancel_)  " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  if (auto_cancel_ && !rhs.auto_cancel_)  " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -127,7 +127,7 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
    if (!auto_cancel_ && rhs.auto_cancel_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  if (!auto_cancel_ && rhs.auto_cancel_)  " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  if (!auto_cancel_ && rhs.auto_cancel_)  " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -135,7 +135,7 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
    if (auto_cancel_ && rhs.auto_cancel_ && !(*auto_cancel_ == *rhs.auto_cancel_)) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (auto_cancel_ && rhs.auto_cancel_ && !(*auto_cancel_ == *rhs.auto_cancel_)) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (auto_cancel_ && rhs.auto_cancel_ && !(*auto_cancel_ == *rhs.auto_cancel_)) " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -144,7 +144,7 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
    if (auto_archive_ && !rhs.auto_archive_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  if (auto_archive_ && !rhs.auto_archive_)  " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  if (auto_archive_ && !rhs.auto_archive_)  " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -152,7 +152,7 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
    if (!auto_archive_ && rhs.auto_archive_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  if (!auto_archive_ && rhs.auto_archive_)  " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  if (!auto_archive_ && rhs.auto_archive_)  " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -160,7 +160,7 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
    if (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) " << node_->debugNodePath() << "\n";
       }
 #endif
       return false;
