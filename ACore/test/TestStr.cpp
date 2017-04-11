@@ -116,11 +116,22 @@ static void check(const std::string& line,
                   const std::vector<std::string>& expected )
 {
  	BOOST_CHECK_MESSAGE(result.size() == expected.size(),"expected size " << expected.size() << " but found " << result.size() << " for '" << line << "'");
-	BOOST_CHECK_MESSAGE(result == expected,"Str::split failed for '" << line  << "'");
+	BOOST_CHECK_MESSAGE(result == expected,"failed for '" << line  << "'");
 	if (result != expected) {
 		cout << "Actual  :"; BOOST_FOREACH(const string& t, result)   { cout << "'" << t << "'"; } cout << "\n";
 		cout << "Expected:"; BOOST_FOREACH(const string& t, expected) { cout << "'" << t << "'"; } cout << "\n";
  	}
+}
+
+static void check(const std::string& line,
+                  const std::vector<boost::string_ref>& result2,
+                  const std::vector<std::string>& expected )
+{
+   std::vector<std::string> result;
+   for(size_t i =0; i < result2.size(); ++i) {
+      boost::string_ref ref = result2[i]; result.push_back(string(ref.begin(),ref.end()));
+   }
+   check(line,result,expected);
 }
 
 static void check(const std::string& line,
@@ -130,120 +141,93 @@ static void check(const std::string& line,
    std::vector<std::string> result;
    typedef boost::split_iterator<std::string::const_iterator> split_iter_t;
    for(; res!= split_iter_t(); res++)  result.push_back(boost::copy_range<std::string>(*res));
-
-   BOOST_CHECK_MESSAGE(result.size() == expected.size(),"expected size " << expected.size() << " but found " << result.size() << " for '" << line << "'");
-   BOOST_CHECK_MESSAGE(result == expected,"Str::split failed for '" << line  << "'");
-   if (result != expected) {
-      cout << "Actual  :"; BOOST_FOREACH(const string& t, result)   { cout << "'" << t << "'"; } cout << "\n";
-      cout << "Expected:"; BOOST_FOREACH(const string& t, expected) { cout << "'" << t << "'"; } cout << "\n";
-   }
+   check(line,result,expected);
 }
-
-//BOOST_AUTO_TEST_CASE( test_boost_str_split )
-//{
-//	cout << "ACore:: ...test_boost_str_split\n";
-//
-//	std::string line = "This is a string  ";
-//	std::vector<std::string> expected;
-//	expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");
-//	expected.push_back(""); expected.push_back("");
-//
-//	std::vector<std::string> result;
-//	boost::algorithm::split(result, line, std::bind2nd(std::equal_to<char>(), ' ')); // default is compress off, preserve empty tokens
-//	check(line,result,expected);
-//
-//	expected.pop_back();
-//	result.clear();
-//	boost::algorithm::split(result, line, std::bind2nd(std::equal_to<char>(), ' '),boost::algorithm::token_compress_on);
-//	check(line,result,expected);
-//
-//	// boost::split(v, s, boost::lambda::_1 == ' ');
-//}
-
 
 BOOST_AUTO_TEST_CASE( test_str_split )
 {
 	cout << "ACore:: ...test_str_split\n";
 
-	std::string line = "This is a string";
 	std::vector<std::string> expected;
+   std::vector<std::string> result;
+   std::vector<boost::string_ref> result2;
+
+	std::string line = "This is a string";
 	expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");
-	std::vector<std::string> result;
-	Str::split(line,result);
-	check(line,result,expected);
+   Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = "  ";
- 	Str::split(line,result);
-	check(line,result,expected);
+ 	Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = "a";
 	expected.push_back("a");
- 	Str::split(line,result);
-	check(line,result,expected);
+ 	Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
 	// Some implementation fail this test
-	expected.clear(); result.clear();
+	expected.clear(); result.clear();result2.clear();
 	line = "\n";
 	expected.push_back("\n");
-  	Str::split(line,result);
-	check(line,result,expected);
+  	Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = "a ";
 	expected.push_back("a");
- 	Str::split(line,result);
-	check(line,result,expected);
+ 	Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = " a";
 	expected.push_back("a");
- 	Str::split(line,result);
-	check(line,result,expected);
+ 	Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = "	a"; // check tabs
 	expected.push_back("a");
- 	Str::split(line,result);
-	check(line,result,expected);
+ 	Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = "		a		"; // check sequential tabs
 	expected.push_back("a");
- 	Str::split(line,result);
-	check(line,result,expected);
+ 	Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = " a ";
-	expected.push_back("a");
- 	Str::split(line,result);
-	check(line,result,expected);
+	expected.push_back("a"); result2.clear();
+ 	Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = "        a     b     c       d        ";
 	expected.push_back("a"); expected.push_back("b"); expected.push_back("c"); expected.push_back("d");
-  	Str::split(line,result);
-	check(line,result,expected);
+  	Str::split(line,result); check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = " - !   $ % ^ & * ( ) - + ?";
 	expected.push_back("-"); expected.push_back("!");  expected.push_back("$");
 	expected.push_back("%"); expected.push_back("^"); expected.push_back("&"); expected.push_back("*");
 	expected.push_back("("); expected.push_back(")"); expected.push_back("-"); expected.push_back("+");
 	expected.push_back("?");
-  	Str::split(line,result);
-	check(line,result,expected);
+  	Str::split(line,result); check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 
 	// Check tabs
-	expected.clear(); result.clear();
+	expected.clear(); result.clear(); result2.clear();
 	line = "		 verify complete:8		                # 4 sundays in october hence expect 8 task completions";
 	expected.push_back("verify");expected.push_back("complete:8");expected.push_back("#");expected.push_back("4");
 	expected.push_back("sundays");expected.push_back("in");expected.push_back("october");expected.push_back("hence");
 	expected.push_back("expect");expected.push_back("8");expected.push_back("task");expected.push_back("completions");
-   	Str::split(line,result);
-	check(line,result,expected);
+   Str::split(line,result);  check(line,result,expected);
+   Str::split(line,result2); check(line,result2,expected);
 }
 
 BOOST_AUTO_TEST_CASE( test_str_split_make_split_iterator )

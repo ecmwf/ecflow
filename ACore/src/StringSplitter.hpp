@@ -39,6 +39,7 @@ public:
    boost::string_ref next() const;
    bool finished() const;
    void reset();
+
 };
 
 }
