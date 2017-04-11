@@ -38,4 +38,10 @@ boost::string_ref StringSplitter::next() const
    return rem_;
 }
 
+void StringSplitter::reset() {
+   rem_ = src_;
+   finished_ = false;
+}
+
+
 }

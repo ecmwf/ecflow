@@ -26,7 +26,6 @@
 #include <algorithm>
 
 #include "Str.hpp"
-#include "StringSplitter.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -132,24 +131,6 @@ static void check(const std::string& line,
    typedef boost::split_iterator<std::string::const_iterator> split_iter_t;
    for(; res!= split_iter_t(); res++)  result.push_back(boost::copy_range<std::string>(*res));
 
-   BOOST_CHECK_MESSAGE(result.size() == expected.size(),"expected size " << expected.size() << " but found " << result.size() << " for '" << line << "'");
-   BOOST_CHECK_MESSAGE(result == expected,"Str::split failed for '" << line  << "'");
-   if (result != expected) {
-      cout << "Actual  :"; BOOST_FOREACH(const string& t, result)   { cout << "'" << t << "'"; } cout << "\n";
-      cout << "Expected:"; BOOST_FOREACH(const string& t, expected) { cout << "'" << t << "'"; } cout << "\n";
-   }
-}
-
-static void check(const std::string& line,
-                  const StringSplitter& string_splitter,
-                  const std::vector<std::string>& expected )
-{
-   std::vector<std::string> result;
-   while (!string_splitter.finished()) {
-      boost::string_ref ref = string_splitter.next();
-      //std::cout << "ref:'" << ref << "'\n";
-      result.push_back(std::string(ref.begin(),ref.end()));
-   }
    BOOST_CHECK_MESSAGE(result.size() == expected.size(),"expected size " << expected.size() << " but found " << result.size() << " for '" << line << "'");
    BOOST_CHECK_MESSAGE(result == expected,"Str::split failed for '" << line  << "'");
    if (result != expected) {
@@ -346,87 +327,6 @@ BOOST_AUTO_TEST_CASE( test_str_split_make_split_iterator )
    expected.push_back("sundays");expected.push_back("in");expected.push_back("october");expected.push_back("hence");
    expected.push_back("expect");expected.push_back("8");expected.push_back("task");expected.push_back("completions");
    check(line,Str::make_split_iterator(line),expected);
-}
-
-BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
-{
-   cout << "ACore:: ...test_str_split_StringSplitter\n";
-
-   // If end is delimeter, then preserved as empty token
-
-   std::string line = "This is a string";
-   std::vector<std::string> expected;
-
-   expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");
-   check(line, StringSplitter(line),expected);
-
-   expected.clear(); expected.push_back("");
-   line = "";
-   check(line,StringSplitter(line),expected);
-
-   expected.clear(); expected.push_back("");
-   line = "  ";
-   check(line,StringSplitter(line),expected);
-
-   expected.clear();
-   line = "a";
-   expected.push_back("a");
-   check(line,StringSplitter(line),expected);
-
-   // Some implementation fail this test
-   expected.clear();
-   line = "\n";
-   expected.push_back("\n");
-   check(line,StringSplitter(line),expected);
-
-   expected.clear();
-   line = "a ";
-   expected.push_back("a");expected.push_back(""); // delimeter at end preserved, as empty token
-   check(line,StringSplitter(line),expected);
-
-   expected.clear(); expected.push_back("a");
-   line = " a";
-   check(line,StringSplitter(line),expected);
-
-   expected.clear();
-   line = " a"; // check tabs
-   expected.push_back("a");                       // delimeter at  end preserved, as empty token
-   check(line,StringSplitter(line),expected);
-
-   expected.clear();
-   line = "  a  "; // check sequential tabs
-   expected.push_back("a");                        // delimeter at end preserved, as empty token
-   expected.push_back("");
-   check(line,StringSplitter(line),expected);
-
-   expected.clear();
-   line = " a ";
-   expected.push_back("a");                        // delimeter at end preserved, as empty token
-   expected.push_back("");
-   check(line,StringSplitter(line),expected);
-
-   expected.clear();
-   line = "        a     b     c       d        ";
-   expected.push_back("a"); expected.push_back("b"); expected.push_back("c"); expected.push_back("d");
-   expected.push_back("");
-   check(line,StringSplitter(line),expected);
-
-   expected.clear();
-   line = " - !   $ % ^  & * ( ) - + ? ";
-   expected.push_back("-"); expected.push_back("!");  expected.push_back("$");
-   expected.push_back("%"); expected.push_back("^"); expected.push_back("&"); expected.push_back("*");
-   expected.push_back("("); expected.push_back(")"); expected.push_back("-"); expected.push_back("+");
-   expected.push_back("?");
-   expected.push_back("");                         // delimeter at end preserved, as empty token
-   check(line,StringSplitter(line),expected);
-
-   // Check tabs
-   expected.clear();
-   line = "     verify complete:8                      # 4 sundays in october hence expect 8 task completions";
-   expected.push_back("verify");expected.push_back("complete:8");expected.push_back("#");expected.push_back("4");
-   expected.push_back("sundays");expected.push_back("in");expected.push_back("october");expected.push_back("hence");
-   expected.push_back("expect");expected.push_back("8");expected.push_back("task");expected.push_back("completions");
-   check(line,StringSplitter(line),expected);
 }
 
 static void test_replace( std::string& testStr, const std::string& find, const std::string& replace, const std::string& expected)

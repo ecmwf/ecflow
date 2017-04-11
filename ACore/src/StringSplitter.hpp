@@ -28,14 +28,16 @@ namespace ecf {
 //    boost::string_ref    1.42
 
 class StringSplitter {
+   boost::string_ref src_;
    mutable boost::string_ref rem_;
    boost::string_ref sep_;
    mutable bool finished_;
 
 public:
-   StringSplitter(boost::string_ref src, boost::string_ref sep = " \t") : rem_(src), sep_(sep),finished_(false) {}
+   StringSplitter(boost::string_ref src, boost::string_ref sep = " \t") : src_(src),rem_(src), sep_(sep),finished_(false) {}
    boost::string_ref next() const;
    bool finished() const { return finished_; }
+   void reset();
 };
 
 }

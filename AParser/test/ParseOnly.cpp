@@ -23,6 +23,12 @@
 using namespace std;
 using namespace ecf;
 
+// leap42 boost_1_64_0 gcc-5.3.0 release mode
+//    time bin/gcc-5.3.0/release/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+//    real    0m2.79s
+//    user    0m2.59s
+//    sys     0m0.18s
+
 int main(int argc, char* argv[])
 {
 //   cout << "argc = " << argc << "\n";
