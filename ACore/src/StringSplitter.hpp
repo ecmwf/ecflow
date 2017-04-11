@@ -15,6 +15,7 @@
 // Description :
 //============================================================================
 
+#include <vector>
 #include <boost/utility/string_ref.hpp>
 
 namespace ecf {
@@ -40,6 +41,9 @@ public:
    bool finished() const;
    void reset();
 
+   static void split(const std::string& str,
+                     std::vector< boost::string_ref >& lineTokens,
+                     boost::string_ref delimiters = " \t");
 };
 
 }

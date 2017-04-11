@@ -26,6 +26,7 @@
 #include <algorithm>
 
 #include "Str.hpp"
+#include "StringSplitter.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -154,62 +155,62 @@ BOOST_AUTO_TEST_CASE( test_str_split )
 
 	std::string line = "This is a string";
 	expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");
-   Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+   Str::split(line,result);             check(line,result,expected);
+   StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "  ";
  	Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+ 	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "a";
 	expected.push_back("a");
  	Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+ 	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	// Some implementation fail this test
 	expected.clear(); result.clear();result2.clear();
 	line = "\n";
 	expected.push_back("\n");
   	Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "a ";
 	expected.push_back("a");
  	Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+ 	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = " a";
 	expected.push_back("a");
  	Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+ 	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "	a"; // check tabs
 	expected.push_back("a");
  	Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+ 	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "		a		"; // check sequential tabs
 	expected.push_back("a");
  	Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+ 	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = " a ";
 	expected.push_back("a"); result2.clear();
  	Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+ 	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "        a     b     c       d        ";
 	expected.push_back("a"); expected.push_back("b"); expected.push_back("c"); expected.push_back("d");
   	Str::split(line,result); check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = " - !   $ % ^ & * ( ) - + ?";
@@ -218,7 +219,7 @@ BOOST_AUTO_TEST_CASE( test_str_split )
 	expected.push_back("("); expected.push_back(")"); expected.push_back("-"); expected.push_back("+");
 	expected.push_back("?");
   	Str::split(line,result); check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	// Check tabs
 	expected.clear(); result.clear(); result2.clear();
@@ -227,7 +228,7 @@ BOOST_AUTO_TEST_CASE( test_str_split )
 	expected.push_back("sundays");expected.push_back("in");expected.push_back("october");expected.push_back("hence");
 	expected.push_back("expect");expected.push_back("8");expected.push_back("task");expected.push_back("completions");
    Str::split(line,result);  check(line,result,expected);
-   Str::split(line,result2); check(line,result2,expected);
+   StringSplitter::split(line,result2); check(line,result2,expected);
 }
 
 BOOST_AUTO_TEST_CASE( test_str_split_make_split_iterator )

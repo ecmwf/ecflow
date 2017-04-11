@@ -49,5 +49,12 @@ void StringSplitter::reset() {
    finished_ = false;
 }
 
+void StringSplitter::split(const std::string& str, std::vector< boost::string_ref >& lineTokens, boost::string_ref delimiters)
+{
+   StringSplitter string_splitter(str,delimiters);
+   while( !string_splitter.finished() ) {
+      lineTokens.push_back(string_splitter.next());
+   }
+}
 
 }

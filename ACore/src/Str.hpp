@@ -22,7 +22,6 @@
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
-#include <boost/utility/string_ref.hpp>
 
 namespace ecf {
 
@@ -63,11 +62,6 @@ public:
 	static void split(const std::string& str,
 	                  std::vector< std::string >& lineTokens,
 	                  const std::string& delimiters = " \t");
-
-	/// More efficient splitter. However for best performance use raw StringSplitter traversal. i.e no vector
-   static void split(const std::string& str,
-                     std::vector< boost::string_ref >& lineTokens,
-                     boost::string_ref delimiters = " \t");
 
 	// Uses boost::make_split_iterator will remove
 	// consecutive delimiters in the middle of the string

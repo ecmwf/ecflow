@@ -18,7 +18,6 @@
 #include <boost/lexical_cast.hpp>
 
 #include "Str.hpp"
-#include "StringSplitter.hpp"
 
 using namespace std;
 
@@ -206,15 +205,6 @@ void Str::split(const std::string& line, std::vector< std::string >& tokens,cons
 //	 }
 }
 
-void Str::split(const std::string& str,
-      std::vector< boost::string_ref >& lineTokens,
-      boost::string_ref delimiters)
-{
-   StringSplitter string_splitter(str,delimiters);
-   while( !string_splitter.finished() ) {
-      lineTokens.push_back(string_splitter.next());
-   }
-}
 
 boost::split_iterator<std::string::const_iterator> Str::make_split_iterator(const std::string& line,const std::string& delimiters)
 {
