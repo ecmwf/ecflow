@@ -20,6 +20,9 @@
 #include <limits>
 #include <boost/noncopyable.hpp>
 
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+
 namespace ecf {
 
 class Str : private boost::noncopyable {
@@ -59,6 +62,24 @@ public:
 	static void split(const std::string& str,
 	                  std::vector< std::string >& lineTokens,
 	                  const std::string& delimiters = " \t");
+
+	// Uses boost::make_split_iterator will remove
+	// consecutive delimiters in the middle of the string
+	// ** However preserves leading and trailing empty tokens *IF* delimiters at start/end
+	//
+	// Usage:
+	//    boost::split_iterator<std::string::const_iterator> tokens = Str::make_split_iterator(str);
+   //    for(; !tokens.eof(); ++tokens ) {
+   //       boost::iterator_range<string::const_iterator> range = *tokens;
+   //       std::string the_string(range.begin(), range.end()) ;
+   //    }
+	//
+	//    std::vector<std::string> vec;
+	//    typedef boost::split_iterator<std::string::const_iterator> split_iter_t;
+	//    for(split_iter_t i = Str::split(s,delim); i != split_iter_t(); i++) {
+	//       vec.push_back(boost::copy_range<std::string>(*i));
+	//    }
+	static boost::split_iterator<std::string::const_iterator> make_split_iterator(const std::string& str,const std::string& delimiters = " \t");
 
 	/// case in sensitive string comparison
 	static bool caseInsCompare( const std::string& str1, const std::string& str2);

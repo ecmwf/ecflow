@@ -13,7 +13,8 @@
 //
 // Description : This class is used as a helper class
 //============================================================================
-#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string.hpp>
+
 #include <boost/lexical_cast.hpp>
 
 #include "Str.hpp"
@@ -202,6 +203,11 @@ void Str::split(const std::string& line, std::vector< std::string >& tokens,cons
 //	    if (token.empty()) continue;
 //		tokens.push_back(token);
 //	 }
+}
+
+boost::split_iterator<std::string::const_iterator> Str::make_split_iterator(const std::string& line,const std::string& delimiters)
+{
+   return boost::make_split_iterator(line, boost::algorithm::token_finder(boost::is_any_of(delimiters),boost::algorithm::token_compress_on));
 }
 
 static bool caseInsCharCompare(char a, char b) { return  (toupper(a) == toupper(b)); }
