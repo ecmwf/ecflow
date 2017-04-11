@@ -52,13 +52,11 @@ BOOST_AUTO_TEST_CASE( test_StringSplitter )
    std::string line = "This is a string please split me";
    std::vector<std::string> expected;
 
-   cout << "1111111111111111\n";
    expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");
    expected.push_back("please"); expected.push_back("split"); expected.push_back("me");
    StringSplitter string_splitter(line);
    check(line, string_splitter,expected);
 
-   cout << "after reset\n";
    // reset
    string_splitter.reset();
    check(line, string_splitter,expected);
@@ -77,11 +75,11 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");
    check(line, StringSplitter(line),expected);
 
-   expected.clear(); expected.push_back("");
+   expected.clear();
    line = "";
    check(line,StringSplitter(line),expected);
 
-   expected.clear(); expected.push_back("");
+   expected.clear();
    line = "  ";
    check(line,StringSplitter(line),expected);
 
@@ -98,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
 
    expected.clear();
    line = "a ";
-   expected.push_back("a");expected.push_back(""); // delimeter at end preserved, as empty token
+   expected.push_back("a");
    check(line,StringSplitter(line),expected);
 
    expected.clear(); expected.push_back("a");
@@ -107,25 +105,22 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
 
    expected.clear();
    line = " a"; // check tabs
-   expected.push_back("a");                       // delimeter at  end preserved, as empty token
+   expected.push_back("a");
    check(line,StringSplitter(line),expected);
 
    expected.clear();
    line = "  a  "; // check sequential tabs
-   expected.push_back("a");                        // delimeter at end preserved, as empty token
-   expected.push_back("");
+   expected.push_back("a");
    check(line,StringSplitter(line),expected);
 
    expected.clear();
    line = " a ";
-   expected.push_back("a");                        // delimeter at end preserved, as empty token
-   expected.push_back("");
+   expected.push_back("a");
    check(line,StringSplitter(line),expected);
 
    expected.clear();
    line = "        a     b     c       d        ";
    expected.push_back("a"); expected.push_back("b"); expected.push_back("c"); expected.push_back("d");
-   expected.push_back("");
    check(line,StringSplitter(line),expected);
 
    expected.clear();
@@ -134,7 +129,6 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    expected.push_back("%"); expected.push_back("^"); expected.push_back("&"); expected.push_back("*");
    expected.push_back("("); expected.push_back(")"); expected.push_back("-"); expected.push_back("+");
    expected.push_back("?");
-   expected.push_back("");                         // delimeter at end preserved, as empty token
    check(line,StringSplitter(line),expected);
 
    // Check tabs
@@ -150,7 +144,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    line = "/a";
    check(line,StringSplitter(line,"/"),expected);
 
-   expected.clear();expected.push_back("");
+   expected.clear();
    line = "";
    check(line,StringSplitter(line,"/"),expected);
 
@@ -166,7 +160,6 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
 
    expected.clear();
    expected.push_back("a");expected.push_back("b");expected.push_back("c");expected.push_back("c");expected.push_back("e");
-   expected.push_back("");
    line = "//a/b/c/c//e/";
    check(line,StringSplitter(line,"/"),expected);
 

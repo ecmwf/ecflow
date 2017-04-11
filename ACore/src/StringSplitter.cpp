@@ -17,20 +17,26 @@
 
 namespace ecf {
 
+bool StringSplitter::finished() const
+{
+   first_not_of_ = rem_.find_first_not_of( sep_); // Skip delimiters at beginning.
+   if (first_not_of_ == boost::string_ref::npos)  finished_ = true;
+   return finished_;
+}
+
 boost::string_ref StringSplitter::next() const
 {
-   boost::string_ref::size_type lastPos = rem_.find_first_not_of( sep_); // Skip delimiters at beginning.
-   if (lastPos == boost::string_ref::npos) {
-      finished_ = true;
-      return boost::string_ref();
-   }
-
-   if (lastPos != 0) rem_ = rem_.substr(lastPos);
+   if (first_not_of_ != 0) rem_ = rem_.substr(first_not_of_);
 
    boost::string_ref::size_type pos = rem_.find_first_of( sep_ );        // Find first "non-delimiter".
    if (pos != boost::string_ref::npos) {
       boost::string_ref ret = rem_.substr(0,pos);
       rem_ = rem_.substr(pos+1);   // skip over separator
+
+      // if separator is at the end, lose the last empty tokens
+      if ( rem_.find_first_not_of( sep_) == boost::string_ref::npos) {
+         finished_ = true;
+      }
       return ret;
    }
 

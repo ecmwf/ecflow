@@ -131,18 +131,18 @@ BOOST_AUTO_TEST_CASE( test_extractHostPort )
 //{
 //	cout << "ACore:: ...test_NodePath_perf \n";
 //
-//	// Using
-//	// boost tokenizer timing: 9.73
-//	// Str::split            : 5.15
+//	// Timing using:
+//	//    StringSplitter : 6.35
+//	//    Str::split     : 8.64
+//	// See: NodePath::split
 //	boost::timer timer;  // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
-//	int n= 1000000 ;
+//	int n= 10000000 ;
+//	std::vector<std::string> thePath;thePath.reserve(20);
 //	for(int i = 0; i < n; i++) {
-//		std::vector<std::string> thePath;
-//		NodePath::split("/this/is/a/test/string/that/will/be/usedto/check/perf",thePath);
+//	   thePath.clear();
+//		NodePath::split("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction",thePath);
 //	}
-//
 //	cout << "Timing for " << n << " NodePath is  " << timer.elapsed() << endl;
 //}
-
 
 BOOST_AUTO_TEST_SUITE_END()

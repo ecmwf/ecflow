@@ -18,20 +18,25 @@
 
 #include "NodePath.hpp"
 #include "Str.hpp"
+#include "StringSplitter.hpp"
 
 using namespace ecf;
 
-void NodePath::split( const std::string& path, std::vector<std::string>&  thePath)
+void NodePath::split( const std::string& path, std::vector<std::string>& thePath)
 {
-	/// The path is of the form "/suite/family/task"
-	Str::split(path,thePath,Str::PATH_SEPERATOR());
+   // Timing using:
+   //    StringSplitter : 6.35
+   //    Str::split     : 8.64
+   // See: test_NodePath_perf
 
-	//  This is the original implementation, found to be a lot slower
-	// See timing tests at the end of TestNodePathextractor.cpp
-	//    typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
-	//    boost::char_separator<char> sep("/");
-	//    tokenizer tokens(path_, sep);
-	//    copy(tokens.begin(), tokens.end(), back_inserter(thePath));
+	/// The path is of the form "/suite/family/task"
+	//Str::split(path,thePath,Str::PATH_SEPERATOR());
+
+	StringSplitter string_splitter(path,Str::PATH_SEPERATOR());
+	while(!string_splitter.finished()) {
+	   boost::string_ref ref = string_splitter.next();
+	   thePath.push_back(std::string(ref.begin(),ref.end()));
+	}
 }
 
 bool NodePath::extractHostPort(const std::string& path,std::string& host, std::string& port)

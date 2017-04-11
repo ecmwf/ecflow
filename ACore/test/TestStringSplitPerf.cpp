@@ -12,18 +12,12 @@
 //
 // Description :
 //============================================================================
-#include <string>
 #include <iostream>
-#include <iomanip>
 #include <fstream>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/timer.hpp>
 #include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/bind.hpp>
-#include <boost/algorithm/string.hpp>
-#include <algorithm>
 
 #include "Str.hpp"
 #include "StringSplitter.hpp"
@@ -35,18 +29,17 @@ using namespace boost;
 
 //#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
 
-
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
+#ifdef STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_
 BOOST_AUTO_TEST_CASE( test_str_split_perf )
 {
-#ifdef STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_
    cout << "ACore:: ...test_str_split_perf\n";
    // Method:              time
-   // boost::split:        4.06
-   // Str::split:          2.33
-   // make_split_iterator  4.07
-   // boost::string_ref    1.42
+   // boost::split:        4.34
+   // Str::split:          2.47
+   // make_split_iterator  4.13
+   // boost::string_ref    1.86
    std::vector<std::string> result;
    std::string line = "This is a long string that is going to be used to test the performance of splitting with different Implementations   extra   empty tokens   ";
    size_t times = 1000000;
@@ -84,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
       boost::timer timer;
       for (size_t i = 0; i < times; i++) {
 
-         split_iter_t tokens = boost::make_split_iterator(line, boost::algorithm::token_finder(boost::is_any_of(" \t"),boost::algorithm::token_compress_on));
+         split_iter_t tokens = Str::make_split_iterator(line);
 
          std::stringstream ss;
          for(; !tokens.eof(); ++tokens ) {
@@ -109,13 +102,15 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
       }
       cout << "Time for boost::split_ref " << times << " times = " << timer.elapsed() << "\n";
    }
-#endif
 }
 
 BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
 {
-#ifdef STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_
    cout << "ACore:: ...test_str_split_perf_with_file\n";
+//   Time for boost::split 2001774 times =               3.71848
+//   Time for Str::split 2001774 times =                 2.06476
+//   Time for boost::make_split_iterator 2001774 times = 4.24187
+//   Time for boost::split_ref 2001774 times =           1.66037
 
    // Now test performance of splitting with a big DEFS file
    std::string path = "/var/tmp/ma0/BIG_DEFS/vsms2.31415.def";
@@ -156,7 +151,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
             result.clear();
 
             std::stringstream ss;
-            split_iter_t tokens = Str::split(file_contents[i]);
+            split_iter_t tokens = Str::make_split_iterator(file_contents[i]);
 
             for(; !tokens.eof(); ++tokens ) {
                 boost::iterator_range<string::const_iterator> range = *tokens;
@@ -181,8 +176,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
          cout << "Time for boost::split_ref " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
    }
-#endif
 }
-
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

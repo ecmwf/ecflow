@@ -32,11 +32,12 @@ class StringSplitter {
    mutable boost::string_ref rem_;
    boost::string_ref sep_;
    mutable bool finished_;
+   mutable boost::string_ref::size_type first_not_of_;
 
 public:
-   StringSplitter(boost::string_ref src, boost::string_ref sep = " \t") : src_(src),rem_(src), sep_(sep),finished_(false) {}
+   StringSplitter(boost::string_ref src, boost::string_ref sep = " \t") : src_(src),rem_(src), sep_(sep),finished_(false),first_not_of_(0) {}
    boost::string_ref next() const;
-   bool finished() const { return finished_; }
+   bool finished() const;
    void reset();
 };
 
