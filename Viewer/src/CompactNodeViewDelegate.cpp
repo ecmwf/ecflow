@@ -19,6 +19,7 @@
 #include "Animation.hpp"
 #include "IconProvider.hpp"
 #include "PropertyMapper.hpp"
+#include "RectMetrics.hpp"
 #include "ServerHandler.hpp"
 #include "TreeNodeModel.hpp"
 #include "UiLog.hpp"
@@ -101,7 +102,7 @@ public:
          topPadding=0;
          bottomPadding=0;
          leftPadding=1;
-         rightPadding=2;
+         rightPadding=2;  
      }
 
      int realFontHeight;
@@ -132,7 +133,7 @@ public:
 
      QRect adjustSelectionRect(const QRect& optRect) const {
          QRect r=optRect;
-         return r;
+         return r.adjusted(0,-selectRm.topOffset(),0,-selectRm.bottomOffset());
      }
 };
 

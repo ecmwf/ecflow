@@ -86,6 +86,9 @@ protected Q_SLOTS:
     virtual void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void currentChanged(const QModelIndex &current, const QModelIndex &previous);
 
+Q_SIGNALS:
+    void doubleClicked(const QModelIndex&);
+
 protected:
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent *event);

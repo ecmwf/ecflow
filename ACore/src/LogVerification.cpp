@@ -35,7 +35,7 @@ bool LogVerification::extractNodePathAndState(	const std::string& logfile,
 	// Open log file, and collate of the node paths and corresponding states
 	std::vector<std::string> lines;
 	if (!File::splitFileIntoLines(logfile,lines)) {
-		errorMsg = "Could not open log file " + logfile + " for test verification";
+		errorMsg = "Could not open log file " + logfile + " for test verification (" + strerror(errno) + ")";
 		return false;
 	}
 

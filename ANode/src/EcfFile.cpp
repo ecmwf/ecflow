@@ -162,7 +162,7 @@ void EcfFile::script(std::string& theScript) const
    if ( script_type_ == EcfFile::ECF_FILE) {
       if (!File::open(script_path_or_cmd_,theScript)) {
          std::stringstream ss;
-         ss << "EcfFile::script: Could not open script for task/alias " << node_->absNodePath() << " at path " << script_path_or_cmd_;
+         ss << "EcfFile::script: Could not open script for task/alias " << node_->absNodePath() << " at path " << script_path_or_cmd_ << " (" << strerror(errno) << ")";
          throw std::runtime_error(ss.str());
       }
       return;
@@ -379,7 +379,7 @@ bool EcfFile::open_script_file(
             return open_include_file(file_or_cmd,lines,errormsg);
          }
          if ( ! File::splitFileIntoLines(file_or_cmd, lines) ) {
-            std::stringstream ss; ss  << "Could not open " <<  fileType(type) << " file:" << file_or_cmd;
+            std::stringstream ss; ss << "Could not open " << fileType(type) << " file:" << file_or_cmd << " (" << strerror(errno) << ")";
             errormsg += ss.str();
             return false;
          }
@@ -411,7 +411,7 @@ bool EcfFile::open_script_file(
             case EcfFile::MANUAL:
             case EcfFile::COMMENT:
                if ( ! File::splitFileIntoLines(file_or_cmd, lines) ) {
-                   std::stringstream ss; ss  << "Could not open " <<  fileType(type) << " file:" << file_or_cmd;
+                   std::stringstream ss; ss  << "Could not open " <<  fileType(type) << " file:" << file_or_cmd << " (" << strerror(errno) << ")";
                    errormsg += ss.str();
                    return false;
                }
@@ -459,7 +459,7 @@ bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>
    }
 #else
    if ( ! File::splitFileIntoLines(file, lines) ) {
-       std::stringstream ss; ss  << "Could not open include file:" << file;
+       std::stringstream ss; ss  << "Could not open include file:" << file << " (" << strerror(errno) << ")";
        errormsg += ss.str();
        return false;
     }

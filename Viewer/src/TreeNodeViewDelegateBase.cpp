@@ -528,6 +528,24 @@ int TreeNodeViewDelegateBase::renderNode(QPainter *painter,const QModelIndex& in
         nodeText.fgCol_=QColor(Qt::black);
         currentRight=nodeText.br_.x() + nodeText.br_.width();
 
+#if 0
+        if(nodeStyle_ == BoxAndTextNodeStyle)
+        {
+            int realW=itemRect.height()/4;
+
+            //state box
+            currentRight+=itemRect.height();
+            if(hasRealBg)
+            {
+                currentRight+=1;
+            }
+            currentRight+=2;
+
+            //node name
+            currentRight+=textWidth+nodeBox_->leftPadding;
+        }
+#endif
+
     }
     //Classic style
     else
@@ -737,7 +755,7 @@ void TreeNodeViewDelegateBase::renderNodeCell(QPainter *painter,const NodeShape&
             if(!realShape.shape_.isEmpty())
                 sel=sel.united(realShape.shape_);
 
-            sel=sel.united(QPolygon(nodeText.br_.adjusted(0,0,2,0)));
+            sel=sel.united(QPolygon(nodeText.br_.adjusted(0,0,0,0)));
         }
         else
         {

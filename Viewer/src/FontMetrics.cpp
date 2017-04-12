@@ -56,4 +56,3 @@ void FontMetrics::computeRealHeight(QFont f)
         bottomPadding_=img.height()-1-maxRow;
     }
 }
-
