@@ -20,6 +20,10 @@
 
 namespace ecf {
 
+// ****************************************************************************
+// IMPORTANT: boost::string_ref is a *READ ONLY* REFERENCE to an existing string
+// HENCE:     the reference string *MUST* not change, and its lifetime must EXCEED string_ref
+//
 // Will split a string. Will return a empty boost::string_ref if there a separator at the end.
 // This shows the fastest split for a string.
 //    Method:              time
