@@ -973,5 +973,24 @@ std::string File::root_build_dir()
    return std::string();
 }
 
+int File::max_open_file_allowed()
+{
+#ifdef OPEN_MAX
+   return OPEN_MAX;
+#else
+   static int max_open_file_allowed_ = -1;
+   if (max_open_file_allowed_ != -1) return max_open_file_allowed_;
+
+   max_open_file_allowed_ = sysconf(_SC_OPEN_MAX);
+   if (max_open_file_allowed_ < 0) {
+      ecf::LogToCout logToCout;
+      std::string msg = "sysconf (_SC_OPEN_MAX) failed ";
+      msg += " ("; msg += strerror(errno); msg += ")";
+      log(Log::ERR,msg);
+   }
+   return max_open_file_allowed_;
+#endif
+}
+
 
 }

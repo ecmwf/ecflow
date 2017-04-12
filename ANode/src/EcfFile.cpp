@@ -424,6 +424,13 @@ bool EcfFile::open_script_file(
 }
 
 #define USE_INCLUDE_CACHE  1
+//  ulimit -Hn            # hard limit, of number of open files allowed
+//  ulimit -Sn            # soft limit
+//  ulimit -n <new-limit> # takes affect on current shell only
+//
+//  Check limit of running process:
+//     ps aux | grep process-name
+//     cat /proc/XXX/limits
 //  max open files allowed is:
 //     VM:       cat /proc/sys/fs/file-max:  188086
 //     Desk top: cat /proc/sys/fs/file-max: 3270058
@@ -431,16 +438,17 @@ bool EcfFile::open_script_file(
 //     Without cache: real:10.15  user: 5.58  sys: 1.62                                     # opensuse131
 //     With cache:    real: 4.46  user: 3.72  sys: 0.74  Only open/close include file once. # opensuse131
 //     With cache:    real: 3.82  user: 3.22  sys: 0.59  Only open/close include file once. # leap42
-//  TODO: Could sort
+//
 bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>& lines,std::string& errormsg) const
 {
 #ifdef USE_INCLUDE_CACHE
+   // SEARCH THE CACHE
    size_t include_file_cache_size = include_file_cache_.size();
    for(size_t i = 0; i < include_file_cache_size; i++) {
       if (include_file_cache_[i]->path() == file) {
-         // cout << "found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
+         //cout << "found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
          if (!include_file_cache_[i]->lines(lines)) {
-            std::stringstream ss; ss  << "Could not open include file: " << file;
+            std::stringstream ss; ss  << "Could not open include file: " << file << " (" << strerror(errno) << ") : include file cache size:" << include_file_cache_.size();
             errormsg += ss.str();
             return false;
          }
@@ -448,12 +456,28 @@ bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>
       }
    }
 
+   // CHECK max open file will not be exceed. Extreme corner case: Otherwise open file without adding to file open cache
+   //       re create by using ulimit -n <lower-limit>
+   int diff = File::max_open_file_allowed() - include_file_cache_.size();
+   if (diff < 20) {
+      //cout << "File::max_open_file_allowed: " << File::max_open_file_allowed();
+      //cout << " opening include file cache size: " << include_file_cache_.size();
+      //cout << " opening include file without cache\n";
+      if ( ! File::splitFileIntoLines(file, lines) ) {
+         std::stringstream ss; ss  << "Could not open include file:" << file << " (" << strerror(errno) << ")";
+         errormsg += ss.str();
+         return false;
+      }
+      return true;
+   }
+
+   // ADD to cache
    boost::shared_ptr<IncludeFileCache> ptr = boost::make_shared<IncludeFileCache>(file);
    include_file_cache_.push_back( ptr );
    //cout << "NOT found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
-
    if (!ptr->lines(lines)) {
-      std::stringstream ss; ss  << "Could not open include file: " << file;
+      std::stringstream ss;
+      ss << "Could not open include file: " << file << " (" << strerror(errno) << ") include file cache size:" << include_file_cache_.size() ;
       errormsg += ss.str();
       return false;
    }
