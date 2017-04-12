@@ -18,7 +18,7 @@
 
 #include "NodePath.hpp"
 #include "Str.hpp"
-#include "StringSplitter.hpp"
+//#include "StringSplitter.hpp"
 
 using namespace ecf;
 
@@ -29,14 +29,16 @@ void NodePath::split( const std::string& path, std::vector<std::string>& thePath
    //    Str::split     : 8.64
    // See: test_NodePath_perf
 
-	/// The path is of the form "/suite/family/task"
-	//Str::split(path,thePath,Str::PATH_SEPERATOR());
+   // SWITCH to StringSplitter when we have upgraded to boost 1.64
 
-	StringSplitter string_splitter(path,Str::PATH_SEPERATOR());
-	while(!string_splitter.finished()) {
-	   boost::string_ref ref = string_splitter.next();
-	   thePath.push_back(std::string(ref.begin(),ref.end()));
-	}
+	/// The path is of the form "/suite/family/task"
+	Str::split(path,thePath,Str::PATH_SEPERATOR());
+
+//	StringSplitter string_splitter(path,Str::PATH_SEPERATOR());
+//	while(!string_splitter.finished()) {
+//	   boost::string_ref ref = string_splitter.next();
+//	   thePath.push_back(std::string(ref.begin(),ref.end()));
+//	}
 }
 
 bool NodePath::extractHostPort(const std::string& path,std::string& host, std::string& port)
