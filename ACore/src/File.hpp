@@ -134,7 +134,6 @@ public:
 	// Remove a directory recursively ****
 	static bool removeDir( const boost::filesystem::path& p);
 
-
 	// Locate the path to the server exe
 	static std::string find_ecf_server_path();
 
@@ -147,6 +146,10 @@ public:
 	// return root source
 	static std::string root_source_dir();
 	static std::string root_build_dir();
+
+
+   static int max_open_file_allowed();
+
 };
 
 }
