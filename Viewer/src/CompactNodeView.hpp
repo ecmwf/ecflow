@@ -49,7 +49,6 @@ public:
     void writeSettings(VSettings* vs) {}
 
 public Q_SLOTS:
-    //void slotDoubleClickItem(const QModelIndex&);
     void slotContextMenu(const QPoint &position);
     void slotViewCommand(VInfo_ptr,QString);
     void slotSaveExpand();
@@ -61,6 +60,7 @@ public Q_SLOTS:
     void slotSizeHintChangedGlobal();
 
 protected Q_SLOTS:
+    void slotDoubleClickItem(const QModelIndex&);
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
 Q_SIGNALS:

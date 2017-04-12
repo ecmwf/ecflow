@@ -18,6 +18,7 @@
 #include <QStyledItemDelegate>
 
 #include "FontMetrics.hpp"
+#include "RectMetrics.hpp"
 #include "VProperty.hpp"
 
 #include <string>
@@ -29,7 +30,7 @@ struct BaseNodeDelegateBox
 {
     BaseNodeDelegateBox() : fontHeight(10), height(10), fullHeight(10), topMargin(0), bottomMargin(0),
        leftMargin(0), rightMargin(0), topPadding(0), bottomPadding(0),
-       leftPadding(0), rightPadding(0), sizeHintCache(QSize(10,10)), spacing(2) {}
+       leftPadding(0), rightPadding(0), sizeHintCache(QSize(10,10)), spacing(2), selectRm(2) {}
 
     virtual void adjust(const QFont& f)=0;
     virtual QRect adjustTextRect(const QRect& rIn) const { QRect r=rIn; return r;}
@@ -52,6 +53,7 @@ struct BaseNodeDelegateBox
     int rightPadding;  
     QSize sizeHintCache;
     int spacing;
+    RectMetrics selectRm;
 };
 
 //Node renderer properties

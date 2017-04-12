@@ -501,7 +501,11 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
 	//Draw value   
     painter->setPen(Qt::black);
     painter->setFont(valFont);
-    painter->drawText(valRect,Qt::AlignLeft | Qt::AlignVCenter,val);
+
+    if(multiCnt ==0 )
+        painter->drawText(attrBox_->adjustTextRect(valRect),Qt::AlignLeft | Qt::AlignVCenter,val);
+    else
+        painter->drawText(valRect,Qt::AlignLeft | Qt::AlignVCenter,val);
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -696,7 +700,7 @@ int NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleO
 	//Draw text
 	painter->setPen(Qt::black);
 	painter->setFont(font);
-	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+    painter->drawText(attrBox_->adjustTextRect(textRect),Qt::AlignLeft | Qt::AlignVCenter,text);
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -749,7 +753,7 @@ int  NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 	//Draw text
 	painter->setPen(Qt::blue);
 	painter->setFont(font);
-	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+    painter->drawText(attrBox_->adjustTextRect(textRect),Qt::AlignLeft | Qt::AlignVCenter,text);
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -823,7 +827,7 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
 	//Define clipping
 	const bool setClipRect = rightPos > option.rect.right();
 
-	if(setClipRect || drawItem)
+    if(setClipRect)
 	{
 		painter->save();
 		painter->setClipRect(option.rect);
@@ -875,7 +879,7 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
         renderSelectionRect(painter,attrBox_->adjustSelectionRect(sr));
     }
 
-	if(setClipRect || drawItem)
+    if(setClipRect)
 	{
 		painter->restore();
 	}
@@ -916,7 +920,7 @@ int NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QSt
 	//Draw name
 	painter->setPen(Qt::black);
 	painter->setFont(nameFont);
-	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
+    painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -974,7 +978,10 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
         painter->setBrush(completeBgBrush_);
         painter->setPen(completeBorderPen_);
     }
-    painter->drawRect(textRect);
+
+    QRect borderRect=option.rect;
+    borderRect.setWidth(rightPos-borderRect.x());
+    painter->drawRect(borderRect);
 
 	//Draw text
     if(triggerType==0)
@@ -983,7 +990,7 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
         painter->setPen(completeFontPen_);
 
     painter->setFont(font);
-    painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
+    painter->drawText(attrBox_->adjustTextRect(textRect),Qt::AlignHCenter | Qt::AlignVCenter,text);
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -1033,7 +1040,7 @@ int NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyle
 	//Draw name
 	painter->setPen(Qt::black);
 	painter->setFont(nameFont);
-	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
+    painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -1083,7 +1090,7 @@ int NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyle
 	//Draw name
 	painter->setPen(Qt::black);
 	painter->setFont(nameFont);
-	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
+    painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -1145,7 +1152,7 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
         //Draw name
         painter->setPen(Qt::black);
         painter->setFont(nameFont);
-        painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
+        painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
         if(selected && drawAttrSelectionRect_)
         {
@@ -1225,19 +1232,19 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
         //Draw name
         painter->setPen(Qt::black);
         painter->setFont(nameFont);
-        painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
+        painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
         //Draw value
         painter->setPen(Qt::black);
         painter->setFont(valFont);
-        painter->drawText(valRect,Qt::AlignLeft | Qt::AlignVCenter,val);
+        painter->drawText(attrBox_->adjustTextRect(valRect),Qt::AlignLeft | Qt::AlignVCenter,val);
 
         //Draw end dots
         if(!endDot.isEmpty())
         {
             painter->setPen(Qt::black);
             painter->setFont(nameFont);
-            painter->drawText(dotRect,Qt::AlignLeft | Qt::AlignVCenter,"...");
+            painter->drawText(attrBox_->adjustTextRect(dotRect),Qt::AlignLeft | Qt::AlignVCenter,"...");
         }
 
         if(selected && drawAttrSelectionRect_)
@@ -1288,7 +1295,7 @@ int NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyle
 	//Draw name
 	painter->setPen(Qt::black);
 	painter->setFont(nameFont);
-	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
+    painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
     if(selected && drawAttrSelectionRect_)
     {

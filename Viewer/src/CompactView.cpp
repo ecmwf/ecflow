@@ -171,24 +171,31 @@ void CompactView::mouseDoubleClickEvent(QMouseEvent *event)
     if(event->button() == Qt::LeftButton)
     {
         int viewItemIndex=itemAtCoordinate(event->pos());
-        if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)
+        if(viewItemIndex != -1)
         {
+            if(viewItems_[viewItemIndex].hasChildren)
+            {
 #ifdef _UI_COMPACTVIEW_DEBUG
-            UiLog().dbg() << "CompactNodeView::mousePressEvent " << viewItemIndex << " name=" <<
+                UiLog().dbg() << "CompactNodeView::mousePressEvent " << viewItemIndex << " name=" <<
                                viewItems_[viewItemIndex].index.data().toString();
 #endif
-            if(viewItems_[viewItemIndex].expanded)
-            {
-                collapse(viewItemIndex);
+                if(viewItems_[viewItemIndex].expanded)
+                {
+                    collapse(viewItemIndex);
+                }
+                else
+                {
+                    expand(viewItemIndex);
+                }
+                updateRowCount();
+                updateScrollBars();
+                viewport()->update();
             }
             else
             {
-                expand(viewItemIndex);
+                Q_EMIT doubleClicked(viewItems_[viewItemIndex].index);
             }
-            updateRowCount();
-            updateScrollBars();
-            viewport()->update();
-        }
+       }
     }
 }
 
@@ -566,9 +573,8 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
 
 #ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactView::paint -->";
-    UiLog().dbg() << "sizeof(CompactViewItem)=" << sizeof(CompactViewItem);
-    UiLog().dbg() << "region=" << region;
-    qDebug() << painter->pen() << painter->brush();
+    //UiLog().dbg() << "sizeof(CompactViewItem)=" << sizeof(CompactViewItem);
+    //UiLog().dbg() << "region=" << region;
 #endif
 
     int firstVisibleOffset=0;
@@ -605,6 +611,9 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
         const QRect area = (multipleRects
                             ? QRect(0, rects.at(a).y(), viewportWidth, rects.at(a).height())
                             : rects.at(a));
+#ifdef _UI_COMPACTVIEW_DEBUG
+        UiLog().dbg() << " area=" << area;
+#endif
 
         //Initialise indentVec. For each indentation level it tells us if
         //a connector line is to be drawn. Here we scan up to the
@@ -652,12 +661,27 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
 
         //Paint the visible rows in the current rect
         for (; i < itemsCount && y <= area.bottom(); i+=itemsInRow)
-        {           
-            //Draw a whole row. It will update y,itemsInRow and indentVec!!
-            drawRow(painter,i,xOffset,y,itemsInRow,indentVec);
+        {                     
+            if(!multipleRects || !drawn.contains(i))
+            {
+                //Draw a whole row. It will update y,itemsInRow and indentVec!!
+                drawRow(painter,i,xOffset,y,itemsInRow,indentVec);
+
 #ifdef _UI_COMPACTVIEW_DEBUG
-//            UiLog().dbg() << " drawRow " << i << " " << y << " " << itemsInRow;
+                UiLog().dbg() << " row rendered - item=" << i << " y=" << y << " itemsInRow=" << itemsInRow;
 #endif
+            }
+            else
+            {
+                int rh=rowHeight(i,1,itemsInRow);
+                y+=rh;
+#ifdef _UI_COMPACTVIEW_DEBUG
+                UiLog().dbg() << " row skipped  - item=" << i << " y=" << y << " itemsInRow=" << itemsInRow;
+#endif
+            }
+
+            if(multipleRects)
+               drawn.append(i);
         }
     }
 }
@@ -683,7 +707,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
     {
         CompactViewItem* item=&(viewItems_[i]);
 #ifdef _UI_COMPACTVIEW_DEBUG
-        UiLog().dbg() << "item=" << i << " " << item->index.data().toString();
+        UiLog().dbg() << "  item=" << i << " " << item->index.data().toString();
 #endif
         leaf=(item->total == 0);
 
@@ -705,6 +729,14 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                 opt.rect.moveTop(yp+(rh-item->height)/2);
             }
         }
+
+        //QRect vr=visualRect(item->index);
+        //painter->fillRect(vr,QColor(120,120,120,120));
+
+//#ifdef _UI_COMPACTVIEW_DEBUG
+//        UiLog().dbg() << "  optRect=" << opt.rect << " visRect=" << vr;
+//#endif
+
 
         //Draw the item with the delegate
         int paintedWidth=delegate_->paintItem(painter,opt,item->index);
@@ -728,6 +760,11 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                 if(sameAsWidest || paintedWidth  > item->widestInSiblings)
                 {
                     adjustWidthInParent(i);
+                    doDelayedWidthAdjustment();
+                }
+                //we just need to update the item
+                else if( paintedWidth < item->widestInSiblings)
+                {
                     doDelayedWidthAdjustment();
                 }
             }
@@ -937,11 +974,14 @@ void CompactView::update(const QModelIndex &index)
     if (index.isValid())
     {
         const QRect rect = visualRect(index);
-        //this test is important for peformance reason
+        //this test is important for peformance reasons
         //For example in dataChanged if we simply update all the cells without checking
         //it can be a major bottleneck to update rects that aren't even part of the viewport
         if(viewport()->rect().intersects(rect))
+        {
+            UiLog().dbg() << "update -->" << index.data().toString() << " rect=" << rect;
             viewport()->update(rect);
+        }
     }
 }
 
@@ -1314,7 +1354,7 @@ QRect CompactView::visualRect(const QModelIndex &index) const
     if(y >=0)
     {
         //return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
-        return QRect(viewItems_[vi].x-1, y-1, viewItems_[vi].width+2,rh+2);
+        return QRect(viewItems_[vi].x-1, y, viewItems_[vi].width+2,rh);
     }
     return QRect();
 }

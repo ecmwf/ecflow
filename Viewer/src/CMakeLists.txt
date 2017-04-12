@@ -109,6 +109,7 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
+    RectMetrics.cpp
     RepeatEditor.cpp
     SaveSessionAsDialog.cpp
     ScriptItemWidget.cpp

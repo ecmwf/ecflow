@@ -55,6 +55,13 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
             this, SLOT(slotContextMenu(const QPoint &)));
 
+    //Selection
+    connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
+            this,SLOT(slotDoubleClickItem(const QModelIndex)));
+
+    //expandAll();
+
+
     //UiLog().dbg() << maximumViewportSize();
     //UiLog().dbg()  << "scenerect" << sceneRect();
 
@@ -241,6 +248,15 @@ void CompactNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList
     //Desktop actions
     else
     {
+    }
+}
+
+void CompactNodeView::slotDoubleClickItem(const QModelIndex& idx)
+{
+    VInfo_ptr info=model_->nodeInfo(idx);
+    if(info && info->isAttribute())
+    {
+        slotViewCommand(info,"edit");
     }
 }
 
