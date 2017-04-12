@@ -141,7 +141,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 		      submittable->findParentVariableValue(Str::ECF_JOB(), ecf_job_file);
 				if (!File::open(ecf_job_file,fileContents)) {
 					std::stringstream ss;
-					ss << "CFileCmd::doHandleRequest: Failed to open the job file('" << ecf_job_file << "') for task " << pathToNode_;
+					ss << "CFileCmd::doHandleRequest: Failed to open the job file('" << ecf_job_file << "') for task " << pathToNode_<< " (" << strerror(errno) << ")";
 					throw std::runtime_error( ss.str() ) ;
  				}
 				break;}
@@ -170,7 +170,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 				         std::stringstream ss;
 				         ss << "CFileCmd::doHandleRequest: Failed to open the job-out(ECF_JOBOUT=ECF_OUT/ECF_NAME.ECF_TRYNO) file('"
 				               << ecf_jobout_gen_var.theValue() << "') *AND* at location (ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO)('"
-				               << backup_jobout << "') for task " << pathToNode_;
+				               << backup_jobout << "') for task " << pathToNode_ << " (" << strerror(errno) << ")";
 				         throw std::runtime_error( ss.str() ) ;
 				      }
 				   }
@@ -191,7 +191,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
             std::string file = ecf_job_file + ".kill";
             if (!File::open(file,fileContents)) {
                std::stringstream ss;
-               ss << "CFileCmd::doHandleRequest: Failed to open the kill output file('" << file << "') for task " << pathToNode_;
+               ss << "CFileCmd::doHandleRequest: Failed to open the kill output file('" << file << "') for task " << pathToNode_<< " (" << strerror(errno) << ")";
                throw std::runtime_error( ss.str() ) ;
             }
             break; }
@@ -202,7 +202,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
             std::string file = ecf_job_file + ".stat";
             if (!File::open(file,fileContents)) {
                std::stringstream ss;
-               ss << "CFileCmd::doHandleRequest: Failed to open the status output file('" << file << "') for task " << pathToNode_;
+               ss << "CFileCmd::doHandleRequest: Failed to open the status output file('" << file << "') for task " << pathToNode_<< " (" << strerror(errno) << ")";
                throw std::runtime_error( ss.str() ) ;
             }
             break; }

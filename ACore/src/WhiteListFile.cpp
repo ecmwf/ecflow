@@ -204,7 +204,9 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
 
  	errorMsg += "Could not open file specified by ECF_LISTS ";
  	errorMsg += white_list_file_;
- 	errorMsg += "\n";
+   errorMsg += " (";
+   errorMsg += strerror(errno);
+   errorMsg += ")";
    if (debug)  std::cout << dump_valid_users() << "\n";
  	return false;
 }
