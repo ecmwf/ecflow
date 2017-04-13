@@ -24,6 +24,8 @@
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
+//#define _UI_INFOPANEL_DEBUG
+
 //==============================================
 //
 // InfoPanelItemHandler
@@ -331,10 +333,12 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	std::vector<InfoPanelDef*> ids;
 	InfoPanelHandler::instance()->visible(info,ids);
 
+#ifdef _UI_INFOPANEL_DEBUG
 	for(int i=0; i < ids.size(); i++)
 	{
         UiLog().dbg() << "InfoPanel --> tab: " << ids[i]->name();
 	}
+#endif
 
 	int match=0;
 	for(int i=0; i < tab_->count(); i++)

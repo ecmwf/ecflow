@@ -175,12 +175,12 @@ private:
     int leftMargin_;
     int itemGap_;
     int connectorGap_;
-    int expandButtonSize_;
-    enum ExpandButtonMode {Classic,Modern};
-    ExpandButtonMode expandButtonMode_;
+    int expandConnectorLenght_;
+
     QPointer<QItemSelectionModel> selectionModel_;
     QPoint pressedPosition_;
     QPersistentModelIndex pressedIndex_;
+    QPersistentModelIndex pressedRefIndex_;
     bool noSelectionOnMousePress_;
     QStyledItemDelegate* itemDelegate_;
     QColor expectedBg_;

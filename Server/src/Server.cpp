@@ -152,7 +152,7 @@ std::string Server::get_password() const
       }
       else {
          std::stringstream ss;
-         ss << "Server::get_password file " << passwd_file << " exists, but can't be opened (" << strerror(errno) << ")"
+         ss << "Server::get_password file " << passwd_file << " exists, but can't be opened (" << strerror(errno) << ")";
          throw std::runtime_error(ss.str());
       }
    }
