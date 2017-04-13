@@ -40,8 +40,7 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     leftMargin_(4),
     itemGap_(12),
     connectorGap_(1),
-    expandButtonSize_(8),
-    expandButtonMode_(Classic),
+    expandConnectorLenght_(20),
     noSelectionOnMousePress_(false),
     connectorColour_(Qt::black)
 {
@@ -49,10 +48,11 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
 
     itemDelegate_=new QStyledItemDelegate(this);
 
+    expandConnectorLenght_=itemGap_-2*connectorGap_;
+
     viewport()->setBackgroundRole(QPalette::Window);
 
-    //We attach the model. At this point the model is empty so
-    //it is a cheap operation!!
+    //We attach the model.
     attachModel();
 }
 
@@ -104,29 +104,40 @@ void CompactView::mousePressEvent(QMouseEvent* event)
     QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
 
     noSelectionOnMousePress_ = command == QItemSelectionModel::NoUpdate || !index.isValid();
-    QPoint offset(0,0);
 
+#ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactView::mousePressEvent --> current=" << currentIndex().data().toString() <<
                      " pressed=" << pressedIndex_.data().toString() <<
-                     " pos=" << pos;
+                     " pos=" << pos << " pressedRef=" << pressedRefIndex_.data().toString();
+#endif
 
     if((command & QItemSelectionModel::Current) == 0)
-        pressedPosition_ = pos + offset;
-    else if(!indexAt(pressedPosition_).isValid())
-        pressedPosition_ = visualRect(currentIndex()).center() + offset;
+        pressedRefIndex_ = index;
+    else if(!pressedRefIndex_.isValid())
+        pressedRefIndex_ = currentIndex();
 
-    UiLog().dbg() << " pressedPosition=" << pressedPosition_ << " visrect=" << visualRect(currentIndex()) <<
-                     " center=" << visualRect(currentIndex()).center() << " pressed=" << indexAt(pressedPosition_).data().toString();
+    QPoint pressedRefPosition=visualRect(pressedRefIndex_).center();
+
+
+#ifdef _UI_COMPACTVIEW_DEBUG
+    UiLog().dbg() << " pressedRefPosition=" << pressedRefPosition << " visrect=" << visualRect(currentIndex()) <<
+                     " center=" << visualRect(currentIndex()).center() << " pressedRef=" << indexAt(pressedRefPosition).data().toString() <<
+                     " pressedRef=" << pressedRefIndex_.data().toString();
+#endif
 
     if(index.isValid())
     {
-        selectionModel_->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
-        QRect rect(pressedPosition_ - offset, pos);
+        selectionModel_->setCurrentIndex(index, QItemSelectionModel::NoUpdate);               
+        QPoint p1=pressedRefPosition;
+        QRect rect(p1,QSize(pos.x()-p1.x(),pos.y()-p1.y()));
+#ifdef _UI_COMPACTVIEW_DEBUG
+        UiLog().dbg() << " rect=" << rect << " p1=" << p1 << " p2=" << pos ;
+#endif
         setSelection(rect, command);
     }
     else
     {
-        // Forces a finalize() even if mouse is pressed, but not on a item
+        //Forces a finalize even if mouse is pressed, but not on a item
         selectionModel_->select(QModelIndex(), QItemSelectionModel::Select);
     }
 
@@ -136,7 +147,7 @@ void CompactView::mousePressEvent(QMouseEvent* event)
         if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)
         {
 #ifdef _UI_COMPACTVIEW_DEBUG
-            UiLog().dbg() << "CompactNodeView::mousePressEvent " << viewItemIndex << " name=" <<
+            UiLog().dbg() << " midbutton index=" << viewItemIndex << " name=" <<
                                viewItems_[viewItemIndex].index.data().toString();
 #endif
             if(viewItems_[viewItemIndex].expanded)
@@ -701,6 +712,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
     bool singleRow=delegate_->isSingleHeight(rh);
 
     int firstLevel=0;
+    const int viewportWidth = viewport()->width();
 
     //We iterate through the items in the row
     for(int i=start; i < itemsCount && !leaf; ++i )
@@ -710,6 +722,10 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
         UiLog().dbg() << "  item=" << i << " " << item->index.data().toString();
 #endif
         leaf=(item->total == 0);
+
+        //Find out the first indentation level in the row
+        if(firstLevel==0)
+            firstLevel=item->level;
 
         //Init style option
         QStyleOptionViewItem opt;
@@ -721,139 +737,146 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             optWidth=item->width;
         opt.rect=QRect(item->x,yp,optWidth,item->height);
 
-        //For single rows we center items halfway through the rowHeight
-        if(singleRow)
+        //We do not render the item if it is outisde the viewport and
+        //its parent's right is also outside the viewport. Here we considered that
+        //the connector line is always drawn from the child to the parent.
+        bool needToDraw=true;
+        if(item->parentItem >=0)
         {
-            if(item->height < rh)
-            {
-                opt.rect.moveTop(yp+(rh-item->height)/2);
-            }
+            if(viewItems_[item->parentItem].right() >= translation() + viewportWidth)
+                needToDraw=false;
         }
 
-        //QRect vr=visualRect(item->index);
-        //painter->fillRect(vr,QColor(120,120,120,120));
+        if(needToDraw)
+        {
+            //For single rows we center items halfway through the rowHeight
+            if(singleRow)
+            {
+                if(item->height < rh)
+                {
+                    opt.rect.moveTop(yp+(rh-item->height)/2);
+                }
+            }
+
+            //QRect vr=visualRect(item->index);
+            //painter->fillRect(vr,QColor(120,120,120,120));
 
 //#ifdef _UI_COMPACTVIEW_DEBUG
-//        UiLog().dbg() << "  optRect=" << opt.rect << " visRect=" << vr;
+//          UiLog().dbg() << "  optRect=" << opt.rect << " visRect=" << vr;
 //#endif
 
 
-        //Draw the item with the delegate
-        int paintedWidth=delegate_->paintItem(painter,opt,item->index);
+            //Draw the item with the delegate
+            int paintedWidth=delegate_->paintItem(painter,opt,item->index);
 
-        //we have to know if the item width is the same that we exepcted
-        if(paintedWidth != item->width)
-        {
-            bool sameAsWidest=(item->width == item->widestInSiblings);
-            item->width=paintedWidth;
+            //we have to know if the item width is the same that we exepcted
+            if(paintedWidth != item->width)
+            {
+                bool sameAsWidest=(item->width == item->widestInSiblings);
+                item->width=paintedWidth;
 
-            //servers
-            if(item->parentItem ==-1)
-            {
-                adjustWidthInParent(i);
-                doDelayedWidthAdjustment();
-            }
-            //Nodes
-            else if(model_->isNode(item->index))
-            {
-                //widestInSiblings has to be adjusted
-                if(sameAsWidest || paintedWidth  > item->widestInSiblings)
+                //servers
+                if(item->parentItem ==-1)
                 {
                     adjustWidthInParent(i);
                     doDelayedWidthAdjustment();
                 }
-                //we just need to update the item
-                else if( paintedWidth < item->widestInSiblings)
+                //Nodes
+                else if(model_->isNode(item->index))
                 {
-                    doDelayedWidthAdjustment();
+                    //widestInSiblings has to be adjusted
+                    if(sameAsWidest || paintedWidth  > item->widestInSiblings)
+                    {
+                        adjustWidthInParent(i);
+                        doDelayedWidthAdjustment();
+                    }
+                    //we just need to update the item
+                    else if( paintedWidth < item->widestInSiblings)
+                    {
+                        doDelayedWidthAdjustment();
+                    }
+                }
+                //Attributes
+                else
+                {
+                    if(item->right() > maxRowWidth_)
+                    {
+                        maxRowWidth_=item->right();
+                        doDelayedWidthAdjustment();
+                    }
                 }
             }
-            //Attributes
-            else
+
+            //QRect rr=opt.rect;
+            //rr.setWidth(item->width);
+            //painter->drawRect(rr);
+
+            //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
+            //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
+
+            painter->setPen(connectorColour_);
+
+            //If not a top level item (e.i. not a server)
+            if(item->parentItem >=0)
             {
-                if(item->right() > maxRowWidth_)
-                {
-                    maxRowWidth_=item->right();
-                    doDelayedWidthAdjustment();
-                }
-            }
-        }
+                //The parent item. It is always a node.
+                CompactViewItem* pt=&(viewItems_[item->parentItem]);
 
-        //QRect rr=opt.rect;
-        //rr.setWidth(item->width);
-        //painter->drawRect(rr);
-
-        //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
-        //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
-
-        //Find out the first indentation level in the row
-        if(firstLevel==0)
-            firstLevel=item->level;
-
-        painter->setPen(connectorColour_);
-
-        //If not a top level item (e.i. not a server)
-        if(item->parentItem >=0)
-        {          
-            //The parent item. It is always a node.
-            CompactViewItem* pt=&(viewItems_[item->parentItem]);
-
-            //The horizontal line connecting the item to its parent           
-            int lineX1=pt->right()+connectorGap_;
-            int lineX2=item->x-connectorGap_;
-            int lineX=(pt->right()+item->x)/2;
+                //The horizontal line connecting the item to its parent
+                int lineX1=pt->right()+connectorGap_;
+                int lineX2=item->x-connectorGap_;
+                int lineX=(pt->right()+item->x)/2;
 
 #ifdef _UI_COMPACTVIEW_DEBUG
-            UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item,pt);
+                UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item,pt);
 #endif
-            Q_ASSERT(lineX==connectorPos(item,pt));
+                Q_ASSERT(lineX==connectorPos(item,pt));
 
-            //First child - in the same row as its parent
-            if(item->index.row() == 0)
-            {
-                int lineY=yp+pt->height/2;
-
-                //horizontal line to the parent
-                painter->drawLine(lineX1,lineY,lineX2,lineY);
-
-                //line towards the siblings  - downwards
-                if(item->hasMoreSiblings)
+                //First child - in the same row as its parent
+                if(item->index.row() == 0)
                 {
-                    painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
+                    int lineY=yp+pt->height/2;
+
+                    //horizontal line to the parent
+                    painter->drawLine(lineX1,lineY,lineX2,lineY);
+
+                    //line towards the siblings  - downwards
+                    if(item->hasMoreSiblings)
+                    {
+                        painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
+                        indentVec[item->level]=lineX;
+                    }
+                    else
+                        indentVec[item->level]=0;
+                }
+                //Child in the middle - has sibling both upwards and downwards
+                else if(item->hasMoreSiblings)
+                {
+                    int lineY=yp+item->height/2;
+
+                    painter->drawLine(lineX,lineY,lineX2,lineY);
+                    painter->drawLine(lineX,lineY+rh/2,lineX,lineY-rh/2);
                     indentVec[item->level]=lineX;
                 }
+
+                //The last child - has sibling only upwards
                 else
+                {
+                    int lineY=yp+item->height/2;
+                    painter->drawLine(lineX,lineY,lineX2,lineY);
+                    painter->drawLine(lineX,lineY,lineX,lineY-rh/2);
                     indentVec[item->level]=0;
-            }
-            //Child in the middle - has sibling both upwards and downwards
-            else if(item->hasMoreSiblings)
-            {
-                int lineY=yp+item->height/2;
-
-                painter->drawLine(lineX,lineY,lineX2,lineY);
-                painter->drawLine(lineX,lineY+rh/2,lineX,lineY-rh/2);
-                indentVec[item->level]=lineX;
+                }
             }
 
-            //The last child - has sibling only upwards
-            else
-            {
-                int lineY=yp+item->height/2;
-                painter->drawLine(lineX,lineY,lineX2,lineY);
-                painter->drawLine(lineX,lineY,lineX,lineY-rh/2);
-                indentVec[item->level]=0;
-            }
-        }
-
-        if(expandButtonMode_ == Classic)
-        {
+            //indicate if a node is exandable
             if(item->hasChildren && !item->expanded)
             {
                 int lineY=yp+item->height/2;
                 int lineX=item->right()+connectorGap_;
                 QPen oriPen=painter->pen();
                 painter->setPen(QPen(connectorColour_,1,Qt::DashLine));
-                painter->drawLine(lineX,lineY,lineX+itemGap_-2*connectorGap_,lineY);
+                painter->drawLine(lineX,lineY,lineX+expandConnectorLenght_,lineY);
                 painter->setPen(oriPen);
             }
         }
@@ -862,8 +885,8 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
         if(leaf)
         {            
             //Draw the vertical connector lines for all the levels
-            //preceding the first level in the row!
-            int level=item->level;
+            //preceding the first level in the row!           
+            painter->setPen(connectorColour_);
             for(size_t j=0; j < firstLevel; j++)
             {
                 int xp=indentVec[j];
@@ -1354,7 +1377,7 @@ QRect CompactView::visualRect(const QModelIndex &index) const
     if(y >=0)
     {
         //return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
-        return QRect(viewItems_[vi].x-1, y, viewItems_[vi].width+2,rh);
+        return QRect(viewItems_[vi].x-1-translation(), y, viewItems_[vi].width+2,rh);
     }
     return QRect();
 }
@@ -1366,9 +1389,7 @@ QModelIndex CompactView::indexAt(const QPoint &point) const
     return (item>=0)?viewItems_[item].index:QModelIndex();
 }
 
-/*
-  Returns the viewport y coordinate for  item.
-*/
+//Returns the viewport y coordinate for  item.
 void CompactView::coordinateForItem(int item,int& itemY,int& itemRowHeight) const
 {
     itemY=-1;
@@ -1436,16 +1457,23 @@ int CompactView::itemAtCoordinate(const QPoint& coordinate) const
     return -1;
 }
 
+//return the item index at the absolute x coordinate (i.e. not viewport x coordinate)
 int CompactView::itemAtRowCoordinate(int start,int count,int logicalXPos) const
 {
     for(int i=start; i < start+count; i++)
     {
-        if(viewItems_[i].x <= logicalXPos && viewItems_[i].right() >= logicalXPos)
+        int left=viewItems_[i].x-1;
+        int right=viewItems_[i].right()+2;
+        if(!viewItems_[i].expanded && viewItems_[i].hasChildren)
+            right=viewItems_[i].right()+connectorGap_+expandConnectorLenght_+3;
+
+        if(left <= logicalXPos && right >= logicalXPos)
+        {
             return i;
+        }
     }
     return -1;
 }
-
 
 QModelIndex CompactView::modelIndex(int i) const
 {
@@ -1698,7 +1726,8 @@ void CompactView::setCurrentIndex(const QModelIndex &index)
         //currentIndexSet_ = true;
         QPoint offset;
         if((command & QItemSelectionModel::Current) == 0)
-            pressedPosition_ = visualRect(currentIndex()).center() + offset;
+            //pressedPosition_ = visualRect(currentIndex()).center() + offset;
+            pressedRefIndex_=currentIndex();
     }
 }
 
@@ -1726,23 +1755,23 @@ void CompactView::setSelection(const QRect &rect, QItemSelectionModel::Selection
     if (!selectionModel_ || rect.isNull())
         return;
 
+#ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactView::setSelection --> rect=" << rect;
+#endif
 
-    QPoint tl(isRightToLeft() ? qMax(rect.left(), rect.right())
-              : qMin(rect.left(), rect.right()), qMin(rect.top(), rect.bottom()));
-    QPoint br(isRightToLeft() ? qMin(rect.left(), rect.right()) :
-              qMax(rect.left(), rect.right()), qMax(rect.top(), rect.bottom()));
-
-
-    tl=QPoint(rect.x(),rect.y());
-    br=QPoint(rect.x()+rect.width(),rect.y()+rect.height());
+    QPoint tl=QPoint(rect.x(),rect.y());
+    QPoint br=QPoint(rect.x()+rect.width(),rect.y()+rect.height());
 
     if(tl.y() > br.y())
         qSwap(tl,br);
 
-
     QModelIndex topLeft = indexAt(tl);
     QModelIndex bottomRight = indexAt(br);
+
+#ifdef _UI_COMPACTVIEW_DEBUG
+    UiLog().dbg() << " tl=" << tl  << " " << topLeft.data().toString() <<
+                     " br=" << br  << " " << bottomRight.data().toString();
+#endif
 
     if (!topLeft.isValid() && !bottomRight.isValid())
     {
@@ -1770,11 +1799,11 @@ void CompactView::select(const QModelIndex &topIndex, const QModelIndex &bottomI
     const int top = viewIndex(topIndex),
     bottom = viewIndex(bottomIndex);
 
-//#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactView::select --> command="  << command;
     UiLog().dbg() << "top=" << top << " " << topIndex.data().toString() <<
                      " bottom=" << bottom << " " << bottomIndex.data().toString();
-//#endif
+#endif
 
     QModelIndex previous;
     QItemSelectionRange currentRange;
