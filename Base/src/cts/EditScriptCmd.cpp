@@ -369,7 +369,7 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 			throw std::runtime_error(ss.str());
 		}
 	 	if (!File::splitFileIntoLines(path_to_script, script_lines)) {
- 			ss << "Could not open script file " << path_to_script;
+ 			ss << "Could not open script file " << path_to_script << " (" << strerror(errno) << ")";
 			throw std::runtime_error(ss.str());
 	 	}
 

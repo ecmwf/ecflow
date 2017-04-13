@@ -162,7 +162,10 @@ std::string File::get_last_n_lines(const std::string& filename,int last_n_lines,
    std::ifstream source( filename.c_str(), std::ios_base::in );
    if (!source) {
       error_msg = "File::get_last_n_lines: Could not open file " + filename;
-      return string();
+      error_msg += " (";
+      error_msg += strerror(errno);
+      error_msg += ")";
+     return string();
    }
 
    size_t const granularity = 100 * last_n_lines;
@@ -202,6 +205,9 @@ std::string File::get_first_n_lines(const std::string& filename,int n_lines, std
    std::ifstream source( filename.c_str(), std::ios_base::in );
    if (!source) {
       error_msg = "File::get_first_n_lines: Could not open file " + filename;
+      error_msg += " (";
+      error_msg += strerror(errno);
+      error_msg += ")";
       return string();
    }
 
@@ -230,12 +236,6 @@ bool File::open(const std::string& filePath, std::string& contents)
  	contents = temp.str();
 	return true;
 }
-
-//std::string File::tmpFile(std::string& contents)
-//{
-//
-//}
-
 
 bool File::create(const std::string& filename,const std::vector<std::string>& lines, std::string& errorMsg)
 {
@@ -564,11 +564,11 @@ std::string File::diff(const std::string& file,
 	std::vector<std::string> file2Lines;
 
 	if (!splitFileIntoLines(file, fileLines, ignoreBlanksLine)) {
-		errorMsg += "First argument File " + file + " could not be opened";
+		errorMsg += "First argument File " + file + " could not be opened : " + strerror(errno);
 		return std::string();
 	}
 	if (!splitFileIntoLines(file2, file2Lines, ignoreBlanksLine)) {
-		errorMsg += "Second argument File " + file2 + " could not be opened";
+		errorMsg += "Second argument File " + file2 + " could not be opened : " + strerror(errno);
 		return std::string();
 	}
 
@@ -971,6 +971,25 @@ std::string File::root_build_dir()
 
    throw std::runtime_error("File::root_build_dir() failed to find root build directory");
    return std::string();
+}
+
+int File::max_open_file_allowed()
+{
+#ifdef OPEN_MAX
+   return OPEN_MAX;
+#else
+   static int max_open_file_allowed_ = -1;
+   if (max_open_file_allowed_ != -1) return max_open_file_allowed_;
+
+   max_open_file_allowed_ = sysconf(_SC_OPEN_MAX);
+   if (max_open_file_allowed_ < 0) {
+      ecf::LogToCout logToCout;
+      std::string msg = "sysconf (_SC_OPEN_MAX) failed ";
+      msg += " ("; msg += strerror(errno); msg += ")";
+      log(Log::ERR,msg);
+   }
+   return max_open_file_allowed_;
+#endif
 }
 
 

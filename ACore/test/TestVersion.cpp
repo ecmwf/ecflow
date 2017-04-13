@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_version_against_VERSION_cmake )
    // Open the file VERSION.cmake
    std::string version_cmake_file = File::root_source_dir() + "/VERSION.cmake";
    std::vector<std::string> lines;
-   BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(version_cmake_file,lines,true/* impore empty lines */),"Failed to open file " << version_cmake_file);
+   BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(version_cmake_file,lines,true/* impore empty lines */),"Failed to open file " << version_cmake_file<< " (" << strerror(errno) << ")");
    BOOST_REQUIRE_MESSAGE(!lines.empty(),"File " << version_cmake_file << " does not contain version info ??");
 
    // Expecting lines like:
