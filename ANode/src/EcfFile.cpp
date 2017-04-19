@@ -15,6 +15,7 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <iostream>
+#include <cerrno>
 
 #include "boost/foreach.hpp"
 #include "boost/filesystem/operations.hpp"
@@ -456,30 +457,33 @@ bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>
       }
    }
 
-   // CHECK max open file will not be exceed. Extreme corner case: Otherwise open file without adding to file open cache
-   //       re create by using ulimit -n <lower-limit>
-   int diff = File::max_open_file_allowed() - include_file_cache_.size();
-   if (diff < 20) {
-      //cout << "File::max_open_file_allowed: " << File::max_open_file_allowed();
-      //cout << " opening include file cache size: " << include_file_cache_.size();
-      //cout << " opening include file without cache\n";
-      if ( ! File::splitFileIntoLines(file, lines) ) {
-         std::stringstream ss; ss  << "Could not open include file:" << file << " (" << strerror(errno) << ")";
-         errormsg += ss.str();
-         return false;
-      }
-      return true;
-   }
+   //cout << "NOT found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
 
    // ADD to cache
    boost::shared_ptr<IncludeFileCache> ptr = boost::make_shared<IncludeFileCache>(file);
    include_file_cache_.push_back( ptr );
-   //cout << "NOT found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
+
    if (!ptr->lines(lines)) {
-      std::stringstream ss;
-      ss << "Could not open include file: " << file << " (" << strerror(errno) << ") include file cache size:" << include_file_cache_.size() ;
-      errormsg += ss.str();
-      return false;
+      if ( errno == EMFILE/*Too many open files*/) {
+
+         log(Log::WAR,"EcfFile::open_include_file: Too many files open(errno=EMFILE), Clearing cache, and trying again. Check limits with ulimit -Sn");
+         include_file_cache_.clear();
+
+         boost::shared_ptr<IncludeFileCache> a_ptr = boost::make_shared<IncludeFileCache>(file);
+         include_file_cache_.push_back( a_ptr );
+         if (!a_ptr->lines(lines)) {
+            std::stringstream ss;
+            ss << "Could not open include file: " << file << " (" << strerror(errno) << ") include file cache size:" << include_file_cache_.size() ;
+            errormsg += ss.str();
+            return false;
+         }
+      }
+      else {
+         std::stringstream ss;
+         ss << "Could not open include file: " << file << " (" << strerror(errno) << ") include file cache size:" << include_file_cache_.size() ;
+         errormsg += ss.str();
+         return false;
+      }
    }
 #else
    if ( ! File::splitFileIntoLines(file, lines) ) {
@@ -496,7 +500,7 @@ bool EcfFile::do_popen(const std::string& the_cmd, EcfFile::Type type, std::vect
    FILE *fp = popen(the_cmd.c_str(),"r");
    if (!fp) {
       std::stringstream ss;
-      ss  << "Could not open " <<  fileType(type) << " via cmd " << the_cmd << " for task " << node_->absNodePath() << " ";
+      ss  << "Could not open " <<  fileType(type) << " via cmd " << the_cmd << " for task " << node_->absNodePath() << " (" << strerror(errno) << ") ";
       errormsg += ss.str();
       return false;
    }
@@ -814,7 +818,7 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const
 
       if (!File::createMissingDirectories(ecf_job)) {
          std::stringstream ss;
-         ss << "EcfFile::doCreateJobFile: Could not create missing directories for ECF_JOB " << ecf_job << " File system full?";
+         ss << "EcfFile::doCreateJobFile: Could not create missing directories for ECF_JOB " << ecf_job << " (" << strerror(errno) << ")";
          throw std::runtime_error(ss.str());
       }
 
@@ -822,14 +826,30 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const
       std::string error_msg;
       if (!File::create(ecf_job, jobLines_,error_msg)) {
          std::stringstream ss;
-         ss << "EcfFile::doCreateJobFile: Could not create job file " << ecf_job << " " << error_msg << " File system full?";
-         throw std::runtime_error(ss.str());
+         if ( errno == EMFILE/*Too many open files*/) {
+            // CLEAR cache and try again. Can test with ulimit -n 60, (Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def)
+            LogToCout log_to_cout;
+            ss << "EcfFile::doCreateJobFile: Too many files open(errno=EMFILE), include file cache size(" << include_file_cache_.size() << ") Clearing cache. Check limits with ulimit -Sn";
+            log(Log::WAR,ss.str());
+
+            include_file_cache_.clear();
+
+            error_msg.clear();
+            if (!File::create(ecf_job, jobLines_,error_msg)) {
+               ss << "EcfFile::doCreateJobFile: Could not create job file : " << error_msg << " (" << strerror(errno) << ")";
+               throw std::runtime_error(ss.str());
+            }
+         }
+         else {
+            ss << "EcfFile::doCreateJobFile: Could not create job file : " << error_msg << " (" << strerror(errno) << ")";
+            throw std::runtime_error(ss.str());
+         }
       }
 
       // make the job file executable
       if ( chmod( ecf_job.c_str(), 0755 ) != 0 ) {
          std::stringstream ss;
-         ss << "EcfFile::doCreateJobFile: Could not make job file " << ecf_job << "  executable by using chmod";
+         ss << "EcfFile::doCreateJobFile: Could not make job file " << ecf_job << "  executable by using chmod (" << strerror(errno) << ")";
          throw std::runtime_error(ss.str());
       }
 

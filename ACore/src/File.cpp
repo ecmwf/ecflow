@@ -244,7 +244,7 @@ bool File::create(const std::string& filename,const std::vector<std::string>& li
 	FILE * theFile = fopen (filename.c_str(),"w");
 	if (theFile==NULL) {
 		std::stringstream ss;
-		ss << "Could not create file '" << filename << "'\n";
+		ss << "Could not create file '" << filename << " (" << strerror(errno) << "'\n";
 		errorMsg += ss.str();
 		return false;
 	}
@@ -253,7 +253,7 @@ bool File::create(const std::string& filename,const std::vector<std::string>& li
 		if (i != 0) {
 		   if (fputs("\n",theFile) == EOF) {
 		      std::stringstream ss;
-		      ss << "Could not write to file '" << filename << "'\n";
+		      ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
 		      errorMsg += ss.str();
 		      fclose (theFile);
 		      return false;
@@ -261,7 +261,7 @@ bool File::create(const std::string& filename,const std::vector<std::string>& li
 		}
 		if (fputs(lines[i].c_str(),theFile) == EOF) {
          std::stringstream ss;
-         ss << "Could not write to file '" << filename << "'\n";
+         ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
          errorMsg += ss.str();
          fclose (theFile);
          return false;
@@ -299,7 +299,7 @@ bool File::create(const std::string& filename, const std::string& contents, std:
 	std::ofstream theFile( filename.c_str() );
 	if ( !theFile ) {
  		std::stringstream ss;
-		ss << "Could not create file '" << filename << "'\n";
+		ss << "Could not create file '" << filename << "' (" << strerror(errno) << ")\n";
 		errorMsg += ss.str();
 		return false;
 	}
@@ -307,7 +307,7 @@ bool File::create(const std::string& filename, const std::string& contents, std:
 	theFile << contents;
 	if (!theFile.good()) {
 	   std::stringstream ss;
-	   ss << "Could not write to file '" << filename << "'\n";
+	   ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
 	   errorMsg += ss.str();
 	   theFile.close();
 	   return false;
