@@ -948,7 +948,8 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
     bool selected=option.state & QStyle::State_Selected;
 
     //The contents rect (we will adjust its  width)
-    QRect contRect=option.rect.adjusted(attrBox_->leftMargin,attrBox_->topMargin,0,-attrBox_->bottomMargin);
+    QRect contRect=option.rect.adjusted(attrBox_->leftMargin,attrBox_->topMargin,
+                                        0,-attrBox_->bottomMargin);
 
 	//The text rectangle
 	QFont font=attrFont_;
@@ -979,9 +980,9 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
         painter->setPen(completeBorderPen_);
     }
 
-    QRect borderRect=option.rect;
-    borderRect.setWidth(rightPos-borderRect.x());
-    painter->drawRect(borderRect);
+    //QRect borderRect=option.rect;
+    //borderRect.setWidth(rightPos-borderRect.x());
+    painter->drawRect(attrBox_->adjustTextBgRect(textRect));
 
 	//Draw text
     if(triggerType==0)
@@ -995,7 +996,9 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
     if(selected && drawAttrSelectionRect_)
     {
         QRect sr=option.rect;
-        sr.setWidth(rightPos-sr.x());
+        sr.setX(textRect.x());
+        sr.setWidth(textRect.width());
+        //sr.setWidth(rightPos-sr.x());
         renderSelectionRect(painter,attrBox_->adjustSelectionRect(sr));
     }
 
