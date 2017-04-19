@@ -307,6 +307,7 @@ void CompactView::reset()
             selectionModel_->reset();
 
     layout(-1);
+    updateRowCount();
     updateScrollBars();
 }
 
@@ -375,6 +376,7 @@ void CompactView::doItemsLayout(bool hasRemovedItems)
     {
         layout(-1);
     }
+    updateRowCount();
     updateScrollBars();
     viewport()->update();
 }
@@ -494,15 +496,6 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 
         //We compute the size of the item. For attributes we delay the width computation until we
         //actually paint them and we set their width to 300.
-#if 0
-        int w,h;
-        delegate_->sizeHint(currentIndex,w,h);
-        item->width=w;
-        item->height=h;
-
-        if(item->right() > maxRowWidth_)
-            maxRowWidth_=item->right();
-#endif
         item->width=itemWidthVec[i-first];
         item->height=itemHeightVec[i-first];
 
@@ -521,20 +514,6 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 
         if(item->alignedRight() > maxRowWidth_)
             maxRowWidth_=item->alignedRight();
-
-#if 0
-        int xp=leftMargin_;
-        if(parentId >=0)
-        {
-            xp=viewItems_[parentId].right()+itemGap_;
-        }
-
-        item->x=xp;
-        //UiLog().dbg() << "layout --> " << item->index.data().toString() << " x=" << item->x;
-
-        if(item->right() > maxRowWidth_)
-            maxRowWidth_=item->right();
-#endif
 
         //We need to expand the item
         if(recursiveExpanding || isIndexExpanded(currentIndex))
@@ -563,10 +542,6 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         {
             item->hasChildren = model_->hasChildren(currentIndex);
         }
-
-        //When we reach a leaf node we reach the end of a row as well.
-        if((i != first || parentId == -1) && item->total == 0)
-            rowCount_++;
     }
 
     if(!expanding)
@@ -1212,16 +1187,20 @@ void CompactView::resizeEvent(QResizeEvent *event)
     viewport()->update();
 }
 
+//This has to be very quick. Called after each collapse/expand.
 void CompactView::updateRowCount()
 {
     rowCount_=0;
     const int itemsCount = static_cast<int>(viewItems_.size());
-    int itemsInRow=0;
-    for (int i=0; i < itemsCount; i+=itemsInRow)
+    for(int i=0; i < itemsCount; i++)
     {
-        itemsInRow=itemCountInRow(i);
-        rowCount_++;
+        if(viewItems_[i].total == 0)
+            rowCount_++;
     }
+
+//#ifdef _UI_COMPACTVIEW_DEBUG
+    UiLog().dbg() << "CompactNodeView::updateRowCount --> " << rowCount_;
+//#endif
 }
 
 void CompactView::updateScrollBars()
@@ -1255,10 +1234,10 @@ void CompactView::updateScrollBars()
             break;
         itemsInViewport++;
     }
-#ifdef _UI_COMPACTVIEW_DEBUG
+//#ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "  itemsCount=" << itemsCount << " rowCount=" << rowCount_;
     UiLog().dbg() << "  itemsInViewport " << itemsInViewport;
-#endif
+//#endif
 
     if(verticalScrollMode_ == ScrollPerItem)
     {
@@ -1628,7 +1607,7 @@ void CompactView::expand(const QModelIndex &index)
     if (i != -1) // is visible
     {
         expand(i);
-        //updateRowCount();
+        updateRowCount();
         updateScrollBars();
         viewport()->update();
     }
@@ -1667,7 +1646,9 @@ void CompactView::expandAll(const QModelIndex& idx)
             if (viewItems_[i].parentItem >= item)
                 viewItems_[i].parentItem += count;
 
+
         //update the scrollbars and rerender the viewport
+        updateRowCount();
         updateScrollBars();
         viewport()->update();
     }
@@ -1703,7 +1684,6 @@ void CompactView::collapse(const QModelIndex &index)
     int i = viewIndex(index);
     if (i != -1) // is visible
     {
-        //updateRowCount();
         collapse(i);
         updateRowCount();
         updateScrollBars();
@@ -1740,7 +1720,6 @@ bool CompactView::collapseAllCore(const QModelIndex &index)
     removeAllFromExpanded(index);
 
     updateRowCount();
-
     return true;
 }
 
@@ -1792,6 +1771,7 @@ void CompactView::expandAll()
     expandedIndexes.clear();
     //d->interruptDelayedItemsLayout();
     layout(-1, true);
+    updateRowCount();
     updateScrollBars();
     viewport()->update();
 }
