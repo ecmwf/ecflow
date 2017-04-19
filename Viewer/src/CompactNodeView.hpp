@@ -73,9 +73,7 @@ protected:
     void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 
     void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
-    void restoreExpand(ExpandNode *expand,const VNode* node);
-    void expandAll(const QModelIndex& idx);
-    //void collapseAll(const QModelIndex& idx);
+    void restoreExpand(ExpandNode *expand,const VNode* node);   
     void expandTo(const QModelIndex& idxTo);
     void setCurrentSelectionFromExpand(VInfo_ptr info);
     void regainSelectionFromExpand();

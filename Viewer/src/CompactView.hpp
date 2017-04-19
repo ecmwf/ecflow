@@ -67,6 +67,7 @@ public:
     QRect visualRect(const QModelIndex &index) const;
     bool isExpanded(const QModelIndex &index) const;
     void setExpanded(const QModelIndex &index, bool expanded);
+    void expandAll(const QModelIndex &index);
     void collapseAll(const QModelIndex &index);
 
 public Q_SLOTS:
@@ -150,8 +151,10 @@ protected:
     CompactNodeViewDelegate* delegate_;
 
 private:
+    int  totalNumOfChildren(const QModelIndex& idx,int& num) const;
     void expand(int item);
     void collapse(int item);
+    bool collapseAllCore(const QModelIndex &index);
 
     void insertViewItems(int pos, int count, const CompactViewItem &viewItem);
     void removeViewItems(int pos, int count);
@@ -193,7 +196,7 @@ private:
 
     inline bool storeExpanded(const QPersistentModelIndex &idx)
     {
-        if(expandedIndexes.contains(idx))
+       if(expandedIndexes.contains(idx))
             return false;
         expandedIndexes.insert(idx);
             return true;
