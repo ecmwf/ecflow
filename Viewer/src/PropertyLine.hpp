@@ -86,15 +86,17 @@ public:
 	PropertyLine(VProperty*,bool addLabel,QWidget* parent=0);
 	virtual ~PropertyLine();
 
-	QLabel* label() {return label_;};
-	QLabel* suffixLabel() {return suffixLabel_;};
+    QLabel* label() {return label_;}
+    QLabel* suffixLabel() {return suffixLabel_;}
 	virtual QWidget* item()=0;
 	virtual QWidget* button()=0;
-	QToolButton* defaultTb() {return defaultTb_;};
-	QToolButton* masterTb() {return masterTb_;};
+    QToolButton* defaultTb() {return defaultTb_;}
+    QToolButton* masterTb() {return masterTb_;}
 	VProperty* property() const {return prop_;}
 	VProperty* guiProperty() const {return guiProp_;}
-	virtual bool canExpand() const {return false;}
+    VProperty* ruleProperty();
+    void addRuleLine(PropertyLine*);
+    virtual bool canExpand() const {return false;}
 
 	void addHelper(PropertyLine*);
 
@@ -111,6 +113,7 @@ protected Q_SLOTS:
 	void slotResetToDefault(bool);
 	void slotMaster(bool b);
 	void checkState();
+    void slotRule();
 
 Q_SIGNALS:
 	void changed(QVariant);
@@ -132,6 +135,8 @@ protected:
 	QVariant oriVal_;
 	bool doNotEmitChange_;
 	QMap<QString,PropertyLine*> helpers_;
+    PropertyLine* ruleLine_;
+    QString ruleValue_;
 };
 
 //-------------------------------------

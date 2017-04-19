@@ -25,7 +25,7 @@
                     "label" : "Tree layout style",
                     "default" : "compact",
                     "values"  : "standard/compact",
-                    "values_label" : "Standard tree view/Compact tree view"
+                    "values_label" : "Standard/Compact"
                 },
                 "nodeFont" : {
 					"label" : "Nodes",
@@ -52,19 +52,22 @@
                     "default" : "rgb(242,242,242)"
 				},
                 "indentation" : {
-                    "label" : "Indentation for standard tree",
+                    "label" : "Indentation",
                     "suffix" : "pixels",
                     "default" : "10",
                     "min" : "0",
-                    "max" : "100"  
+                    "max" : "100",
+                    "disabledRule" : "layoutStyle=compact"
                  },
                  "drawBranchLine" : {
-                     "label" : "Draw branch lines for standard tree",
-                     "default": "false"
+                     "label" : "Draw branch lines",
+                     "default": "false",
+                     "disabledRule" : "layoutStyle=compact"
                   },
                  "branchLineColour" : {
                       "label" : "Branch line colour",
-                      "default": "rgb(137,137,137)"
+                      "default": "rgb(137,137,137)",
+                      "disabledRule" : "layoutStyle=standard"
                    },
 
                  "defaultAttributes" : {

@@ -104,8 +104,28 @@ void PropertyEditor::build()
         addItem(vProp,vb,holder_);
     }
 
+    addRules();
     addHelpers();
 }
+
+void PropertyEditor::addRules()
+{
+    Q_FOREACH(PropertyLine* line,lineItems_)
+    {
+        if(VProperty* ruleProp=line->ruleProperty())
+        {
+            Q_FOREACH(PropertyLine* ll,lineItems_)
+            {
+                if(ll->property() == ruleProp)
+                {
+                    line->addRuleLine(ll);
+                    break;
+                }
+            }
+        }
+    }
+}
+
 
 void PropertyEditor::addHelpers()
 {
