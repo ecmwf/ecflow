@@ -559,16 +559,19 @@ bool InfoPanel::frozen() const
 
 void InfoPanel::updateTitle()
 {
-	QString txt;
-	if(frozen())
-        txt+="(frozen) ";
-
-    if(info_)
+    if(isInDialog())
     {
-        txt+=QString::fromStdString(info_->path());
-    }
+        QString txt;
+        if(frozen())
+            txt+="(frozen) ";
 
-    Q_EMIT titleUpdated(txt);
+        if(info_)
+        {
+            txt+=QString::fromStdString(info_->path());
+        }
+
+        Q_EMIT titleUpdated(txt);
+    }
 }
 
 void InfoPanel::notifyDataLost(VInfo* info)

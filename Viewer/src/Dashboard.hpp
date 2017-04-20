@@ -42,10 +42,11 @@ public:
 	ServerFilter* serverFilter() const {return serverFilter_;}
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
-    //void selectFirstServer();
     bool selectInTreeView(VInfo_ptr);
     void addSearchDialog();
     DashboardTitle* titleHandler() const {return titleHandler_;}
+    bool hasMaximised() const;
+    bool hasMaximisedApplied() const;
 
 	void notifyServerFilterAdded(ServerItem* item);
 	void notifyServerFilterRemoved(ServerItem* item);
@@ -69,8 +70,8 @@ protected Q_SLOTS:
     void slotDialogFinished(int);
     void slotDialogClosed();
     void slotPopInfoPanel(QString);
-    //void slotInfoPanelSelection(VInfo_ptr);
     void slotSelectionChanged(VInfo_ptr info);
+    void slotMaximisedChanged(DashboardWidget* w);
 
 protected:
    void contextMenuEvent(QContextMenuEvent* e);
@@ -83,12 +84,15 @@ private:
     void initialSelectionInView();
 	VInfo_ptr currentSelectionInView();
 	void addSearchDialog(VInfo_ptr);
+    void resetMaximised();
+    void checkMaximisedState();
 
 	ServerFilter* serverFilter_;
 	DashboardTitle* titleHandler_;
     QList<DashboardWidget*> widgets_;
     QList<DashboardWidget*> popupWidgets_;
-	bool settingsAreRead_;
+    QByteArray savedDockState_;
+    bool settingsAreRead_;
 	static int maxWidgetNum_;
 };
 
