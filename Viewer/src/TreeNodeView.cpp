@@ -554,6 +554,7 @@ void TreeNodeView::slotRestoreExpand()
     }
 
     qDeleteAll(expandStates_);
+    expandStates_.clear();
     regainSelectionFromExpand();
 }
 
