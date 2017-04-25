@@ -55,6 +55,7 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
    vec.push_back("a:value > 10");
    vec.push_back("a:value < 10");
    vec.push_back("1 == 1");
+   vec.push_back("1 == 0");
    vec.push_back("a:event_name == set");
    vec.push_back("a:event_name != set");
    vec.push_back("a:event_name == clear");
@@ -88,11 +89,19 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
       std::auto_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
       BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse\n" << vec[i] << "  " << parseErrorMsg);
 
-
       std::stringstream s2;
       ast->print_flat(s2);
       std::string ast_expr = s2.str();
       BOOST_CHECK_MESSAGE(vec[i]==ast_expr," Failed\n'" << vec[i] << "' != '" << ast_expr << "'" );
+
+      std::string why; ast->why(why);
+      //cout << "why: " << vec[i] << " -> " << why << "\n";
+      if (ast->evaluate()) {
+         BOOST_CHECK_MESSAGE(why.empty(),"Expected why to be empty when expression evaluates: " << vec[i]);
+      }
+      else {
+         BOOST_CHECK_MESSAGE(!why.empty(),"When ast does not evaluate we expect to find why: " << vec[i]);
+      }
    }
 }
 
@@ -127,6 +136,15 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic_with_brackets )
       ast->print_flat(s2,true/*add_brackets*/);
       std::string ast_expr = s2.str();
       BOOST_CHECK_MESSAGE(vec[i]==ast_expr," Failed '" << vec[i] << "' != '" << ast_expr << "'" );
+
+      std::string why; ast->why(why);
+      //cout << "why: " << vec[i] << " -> " << why << "\n";
+      if (ast->evaluate()) {
+         BOOST_CHECK_MESSAGE(why.empty(),"Expected why to be empty when expression evaluates: " << vec[i]);
+      }
+      else {
+         BOOST_CHECK_MESSAGE(!why.empty(),"When ast does not evaluate we expect to find why: " << vec[i]);
+      }
    }
 }
 
@@ -322,6 +340,18 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
 
    exprMap["comp == complete and notready == complete"] = std::make_pair(AstAnd::stype(),false);
 
+   exprMap["/s/f/t<flag>late"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["./s<flag>late"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["../s/f/t<flag>late"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["/s/f/t<flag>late == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["0 == /s/f/t<flag>late"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["/s/f/t<flag>late and /s/f/t<flag>late"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["! /s/f/t<flag>late and ! /s/f/t<flag>late"] = std::make_pair(AstAnd::stype(),true);
+   exprMap["! /s/f/t<flag>late"] = std::make_pair(AstNot::stype(),true);
+   exprMap["/s/f/t<flag>late + 2 >= 2"] = std::make_pair(AstGreaterEqual::stype(),true);
+   exprMap["(/s/f/t<flag>late or 1)"] = std::make_pair(AstOr::stype(),true);
+   exprMap["/<flag>late"] = std::make_pair(AstFlag::stype(),false);
+
    int parse_failure = 0;
    int ast_failure = 0;
    std::pair<string, std::pair<string,bool> > p;
@@ -343,13 +373,23 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
          BOOST_CHECK_MESSAGE( top ,"No abstract syntax tree "+ p.first);
          if (top) {
             BOOST_CHECK_MESSAGE( top->left() ,"No root created "+ p.first);
-            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
+            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_attribute() ,"First child of top should be a root or attribute " + p.first);
             BOOST_CHECK_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
             BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type '" << expectedRootType << "' or 'variable' but found '" << top->left()->type() << "' " << p.first);
             BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << *top);
 
             std::string error_msg;
             BOOST_CHECK_MESSAGE(  top->check(error_msg),error_msg << ":  Check failed for " << *top);
+
+
+            std::string why; top->why(why);
+            //cout << "why: " << p.first << " -> " << why << "\n";
+            if (top->evaluate()) {
+               BOOST_CHECK_MESSAGE(why.empty(),"Expected why to be empty when expression evaluates: " << p.first);
+            }
+            else {
+               BOOST_CHECK_MESSAGE(!why.empty(),"When ast does not evaluate we expect to find why: " << p.first);
+            }
          }
       }
    }
@@ -396,13 +436,23 @@ BOOST_AUTO_TEST_CASE( test_trigger_functions )
          BOOST_CHECK_MESSAGE( top ,"No abstract syntax tree "+ p.first);
          if (top) {
             BOOST_CHECK_MESSAGE( top->left() ,"No root created "+ p.first);
-            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
+            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_attribute() ,"First child of top should be a root or attribute " + p.first);
             BOOST_CHECK_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
             BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type '" << expectedRootType << "' or 'variable' but found '" << top->left()->type() << "' " << p.first);
             BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << *top);
 
             std::string error_msg;
             BOOST_CHECK_MESSAGE(  top->check(error_msg),error_msg << ":  Check failed for " << *top);
+
+
+            std::string why; top->why(why);
+            //cout << "why: " << p.first << " -> " << why << "\n";
+            if (top->evaluate()) {
+               BOOST_CHECK_MESSAGE(why.empty(),"Expected why to be empty when expression evaluates: " << p.first);
+            }
+            else {
+               BOOST_CHECK_MESSAGE(!why.empty(),"When ast does not evaluate we expect to find why: " << p.first);
+            }
          }
       }
    }
@@ -483,7 +533,7 @@ BOOST_AUTO_TEST_CASE( test_trigger_functions_with_boost_date )
          BOOST_CHECK_MESSAGE( top ,"No abstract syntax tree "+ p.first);
          if (top) {
             BOOST_CHECK_MESSAGE( top->left() ,"No root created "+ p.first);
-            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_variable() ,"First child of top should be a root or variable " + p.first);
+            BOOST_CHECK_MESSAGE( top->left()->isRoot() || top->left()->is_attribute() ,"First child of top should be a root or attribute " + p.first);
             BOOST_CHECK_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
             BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type '" << expectedRootType << "' or 'variable' but found '" << top->left()->type() << "' " << p.first);
             BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << *top);

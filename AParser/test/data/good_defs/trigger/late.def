@@ -1,0 +1,13 @@
+suite obs
+    family f1
+        task t
+        task t1
+            event event
+    endfamily
+    family anon    
+        task t1
+           trigger /obs/f1/t<flag>late
+        task t2
+           trigger /obs/f1/t1:event
+    endfamily
+endsuite

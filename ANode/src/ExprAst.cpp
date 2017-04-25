@@ -31,6 +31,26 @@ using namespace std;
 
 Ast::~Ast() {}
 
+//#define DEBUG_WHY 1
+
+bool Ast::why(std::string& theReasonWhy,bool html) const
+{
+   if (evaluate()) {
+#ifdef DEBUG_WHY
+      std::cout << "   Ast::why evaluates returning\n";
+#endif
+      return false;
+   }
+
+   theReasonWhy = "expression ";
+   theReasonWhy += why_expression(html); // provide additional state
+   theReasonWhy += " does not evaluate";
+#ifdef DEBUG_WHY
+   std::cout << "    Ast::why  reason = " << theReasonWhy << "\n";
+#endif
+   return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 AstTop::~AstTop() { delete root_;}
@@ -69,7 +89,7 @@ bool AstTop::check(std::string& error_msg) const
 std::ostream& AstTop::print(std::ostream& os) const
 {
 	Indentor in;
-	Indentor::indent(os) << "# AST\n";
+	Indentor::indent(os) << "# AstTop\n";
  	if (root_) {
 		Indentor in;
 		return root_->print(os);
@@ -93,12 +113,11 @@ bool AstTop::is_valid_ast(std::string& error_msg) const
    return false;
 }
 
-//#define DEBUG_WHY 1
 bool AstTop::why(std::string& theReasonWhy,bool html) const
 {
 	if (evaluate()) {
 #ifdef DEBUG_WHY
- 		std::cout << "   AstTop::why evaluate returning\n";
+ 		std::cout << "   AstTop::why evaluates returning\n";
 #endif
 		return false;
 	}
@@ -187,24 +206,6 @@ std::ostream& AstRoot::print( std::ostream& os ) const {
 		else right_->print( os ); ;
 	}
 	return os;
-}
-
-bool AstRoot::why(std::string& theReasonWhy,bool html) const
-{
-	if (evaluate()) {
-#ifdef DEBUG_WHY
- 		std::cout << "   AstRoot::why evaluates returning\n";
-#endif
-		return false;
-	}
-
-	theReasonWhy = "expression ";
-	theReasonWhy += why_expression(html); // provide additional state
-	theReasonWhy += " does not evaluate";
-#ifdef DEBUG_WHY
- 	std::cout << "    AstRoot::why  reason = " << theReasonWhy << "\n";
-#endif
-	return true;
 }
 
 std::string AstRoot::do_why_expression(const std::string& root,bool html) const
@@ -1318,10 +1319,137 @@ std::string AstNode::why_expression(bool html) const
       return ret;
    }
    else {
-      ret += "(?";
+      ret += "?(";
       if (html) ret += DState::to_html(  DState::UNKNOWN);
       else      ret += DState::toString( DState::UNKNOWN);
       ret += ")";
+   }
+   return ret;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+void AstFlag::accept(ExprAstVisitor& v)
+{
+   v.visitFlag(this);  // Not calling base
+}
+
+AstFlag* AstFlag::clone() const
+{
+   return new AstFlag(nodePath_,flag_);
+}
+
+int AstFlag::value() const
+{
+   Node* node = referencedNode();
+   if (node && node->flag().is_set(flag_)) return 1;
+   return 0;
+}
+
+Node* AstFlag::referencedNode() const
+{
+   Node* ref = get_ref_node();
+   if ( ref )  {
+      return ref;
+   }
+   if ( parentNode_ ) {
+      std::string errorMsg;
+      ref_node_ = parentNode_->findReferencedNode( nodePath_, errorMsg );
+      return get_ref_node(); // can be NULL
+   }
+   return NULL;
+}
+
+Node* AstFlag::referencedNode(std::string& errorMsg) const
+{
+   Node* ref = get_ref_node();
+   if ( ref )  {
+      return ref;
+   }
+   if ( parentNode_ ) {
+      ref_node_ = parentNode_->findReferencedNode( nodePath_, errorMsg );
+      return get_ref_node(); // can be NULL
+   }
+   return NULL;
+}
+
+std::ostream& AstFlag::print( std::ostream& os ) const {
+
+   Node* refNode = referencedNode(); // Only call once
+   Indentor in;
+
+   if ( refNode ) {
+      Indentor::indent( os ) << "# LEAF_FLAG_NODE node_(Found) nodePath_('" << nodePath_ << "') ";
+      os << ecf::Flag::enum_to_string( flag_ ) << "(" << static_cast<int>( refNode->flag().is_set(flag_)) << ")\n";
+   }
+   else {
+      Indentor::indent( os ) << "# LEAF_FLAG_NODE node_(NULL) nodePath_('" << nodePath_ << "') ";
+      os << ecf::Flag::enum_to_string( flag_ ) << "(0)\n";
+   }
+   return os;
+}
+
+void AstFlag::print_flat(std::ostream& os,bool /*add_bracket*/) const {
+   os << expression();
+}
+
+std::string AstFlag::expression() const
+{
+   string ret = nodePath_;
+   ret += "<flag>";
+   ret += ecf::Flag::enum_to_string( flag_ );
+   return ret;
+}
+
+std::string AstFlag::why_expression(bool html) const
+{
+   if (evaluate()) {
+#ifdef DEBUG_WHY
+      cout << " AstFlag::why_expression evaluates returning\n";
+#endif
+      return "true";
+   }
+
+#ifdef DEBUG_WHY
+   cout << " AstFlag::why_expression html " << html << "\n";
+#endif
+
+   Node* ref_node = referencedNode(); // Only call once
+   std::string ret;
+   if (html) {
+      // ecflow_ui expects: [attribute_type]attribute_path:attribute_name(value)
+      // i.e                [limit]/suite/family/task:my_limit(value)
+      // i.e                [flag]/suite/family/task:late(value)
+      std::stringstream display_ss; display_ss << "[flag:" << ecf::Flag::enum_to_string(flag_) << "]" << nodePath_ ;
+      std::string display_str = display_ss.str();
+
+      std::string ref_str;
+      if (ref_node) {
+         std::stringstream ref_ss; ref_ss << "[flag:" << ecf::Flag::enum_to_string(flag_) << "]" << ref_node->absNodePath();
+         ref_str = ref_ss.str();
+      }
+      else ref_str = display_str;
+
+      ret = Node::path_href_attribute(ref_str,display_str);
+      if ( !ref_node )  ret += "(?)";
+      else {
+         ret += "(";
+         ret += boost::lexical_cast<std::string>(ref_node->flag().is_set(flag_) );
+         ret += ")";
+      }
+   }
+   else {
+      ret = nodePath_;
+      if ( !ref_node )  ret += "(?)";
+      ret += "<flag>";
+      ret += ecf::Flag::enum_to_string( flag_ );
+      if (!ref_node) ret += "(?)";
+      else {
+         ret += "(";
+         std::stringstream ss; ss << ref_node->flag().is_set(flag_) ;
+         ret += ss.str();
+         ret += ")";
+      }
    }
    return ret;
 }
@@ -1570,3 +1698,4 @@ std::ostream& operator<<( std::ostream& os, const AstNodeState& d)  {return d.pr
 std::ostream& operator<<( std::ostream& os, const AstEventState& d) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstNode& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstVariable& d ) {return d.print( os );}
+std::ostream& operator<<( std::ostream& os, const AstFlag& d ) {return d.print( os );}
