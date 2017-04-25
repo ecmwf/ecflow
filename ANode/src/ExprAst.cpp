@@ -20,6 +20,7 @@
 #include "Indentor.hpp"
 #include "ExprAstVisitor.hpp"
 #include "Node.hpp"
+#include "Defs.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
 #include "Cal.hpp"
@@ -1329,6 +1330,11 @@ std::string AstNode::why_expression(bool html) const
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+std::string AstFlag::name() const
+{
+   return ecf::Flag::enum_to_string( flag_ );
+}
+
 void AstFlag::accept(ExprAstVisitor& v)
 {
    v.visitFlag(this);  // Not calling base
@@ -1343,6 +1349,10 @@ int AstFlag::value() const
 {
    Node* node = referencedNode();
    if (node && node->flag().is_set(flag_)) return 1;
+   if (parentNode_ && nodePath_ == "/") {
+      Defs* the_defs = parentNode_->defs();
+      if (the_defs && the_defs->flag().is_set(flag_)) return 1;
+   }
    return 0;
 }
 
@@ -1353,6 +1363,7 @@ Node* AstFlag::referencedNode() const
       return ref;
    }
    if ( parentNode_ ) {
+      if (nodePath_ == "/") return NULL; // reference to defs
       std::string errorMsg;
       ref_node_ = parentNode_->findReferencedNode( nodePath_, errorMsg );
       return get_ref_node(); // can be NULL
@@ -1367,7 +1378,8 @@ Node* AstFlag::referencedNode(std::string& errorMsg) const
       return ref;
    }
    if ( parentNode_ ) {
-      ref_node_ = parentNode_->findReferencedNode( nodePath_, errorMsg );
+      if (nodePath_ == "/") return NULL; // reference to defs
+      ref_node_ = parentNode_->findReferencedNode( nodePath_, ecf::Flag::enum_to_string( flag_ ), errorMsg );
       return get_ref_node(); // can be NULL
    }
    return NULL;

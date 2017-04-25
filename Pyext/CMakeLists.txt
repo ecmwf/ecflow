@@ -78,6 +78,7 @@ list( APPEND u_tests
         py_u_TestAddDelete   
         py_u_TestAddDeleteFunc 
         py_u_TestAddNodeFunc  
+        py_u_TestAutoAddExtern  
         py_u_TestCopy        
         py_u_TestDefs         
         py_u_TestDefsCheck    

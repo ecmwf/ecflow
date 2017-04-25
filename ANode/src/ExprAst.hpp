@@ -55,7 +55,7 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const = 0;    // used for test
 	virtual std::string type() const = 0;
 	virtual void exprType(const std::string&) {}
-	std::string name() { return expression(); } /* ABO */
+	virtual std::string name() const { return expression(); } /* ABO */
    virtual std::string expression() const = 0;                      // recreate expression from AST
 	virtual bool why(std::string& /*theReasonWhy*/,bool html = false) const;
    virtual std::string why_expression(bool html = false) const = 0; // recreate expression from AST for why command
@@ -500,6 +500,8 @@ class AstFlag : public AstLeaf {
 public:
    AstFlag(const std::string& n,ecf::Flag::Type ft) : flag_(ft),parentNode_(NULL), nodePath_(n){}
 
+   virtual std::string name() const;
+
    virtual bool is_attribute() const { return true; }
    // although AstFlag is leaf, However allow to evaluate to cope with
    //     ( ../family1/<flag>:late != 0 and ../family1/a:myEvent)
@@ -545,6 +547,7 @@ public:
 	AstVariable(const std::string& nodePath, const std::string& variablename)
 	: parentNode_(NULL), nodePath_(nodePath), name_(variablename)  {}
 
+	virtual std::string name() const { return name_;}
    virtual bool is_attribute() const { return true; }
 
 	// although AstVariable is leaf, However allow to evaluate to cope with
@@ -572,7 +575,6 @@ public:
 
 	static std::string stype() { return "variable";}
 	const std::string& nodePath() const { return nodePath_;}
-	const std::string& name() const { return name_;}
 
 private:
 	Node* get_ref_node() const { return ref_node_.lock().get(); }

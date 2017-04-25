@@ -9,5 +9,7 @@ suite obs
            trigger /obs/f1/t<flag>late
         task t2
            trigger /obs/f1/t1:event
+         task t3
+           trigger /<flag>late  # late flag set on Defs. Since defs is alawys there, does not need extern
     endfamily
 endsuite
