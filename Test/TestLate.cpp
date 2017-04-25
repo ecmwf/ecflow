@@ -63,6 +63,8 @@ BOOST_AUTO_TEST_CASE( test_late )
       lateAttr.addComplete( ecf::TimeSlot(0,1), true);
 
       task->addLate( lateAttr );
+
+      suite->add_task("t2")->add_trigger(task->absNodePath() + "<flag>late");
    }
 
    ServerTestHarness serverTestHarness;
@@ -73,11 +75,15 @@ BOOST_AUTO_TEST_CASE( test_late )
    BOOST_CHECK_MESSAGE( TestFixture::client().defs(),"Expected defs");
 
    node_ptr node = TestFixture::client().defs()->findAbsNode("/test_late/t1");
-   BOOST_CHECK_MESSAGE( node,"Expected task to be found");
+   BOOST_REQUIRE_MESSAGE( node,"Expected task to be found");
 
    ecf::LateAttr* late = node->get_late();
    BOOST_CHECK_MESSAGE( late->isLate(),"Expected late to be set");
    BOOST_CHECK_MESSAGE( node->flag().is_set(ecf::Flag::LATE),"Expected late flag to be set");
+
+   node_ptr t2 = TestFixture::client().defs()->findAbsNode("/test_late/t2");
+   BOOST_REQUIRE_MESSAGE( t2,"Expected task to be found");
+   BOOST_CHECK_MESSAGE( t2->state() == NState::COMPLETE,"Expected late trigger to work");
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
