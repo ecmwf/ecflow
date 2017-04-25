@@ -38,10 +38,14 @@ public:
     virtual bool initialSelectionInView() {return false;}
 	virtual VInfo_ptr currentSelection() {return VInfo_ptr(); }
     QAction* detachedAction() const {return detachedAction_;}
+    QAction* maximisedAction() const {return maximisedAction_;}
     virtual QList<QAction*> dockTitleActions() {return QList<QAction*>();}
 
     bool detached() const;
     void setDetached(bool b);
+    bool isMaximised() const;
+    void resetMaximised();
+    void setEnableMaximised(bool st);
     bool isInDialog() const {return inDialog_;}
 
     virtual void writeSettings(VSettings*);
@@ -56,11 +60,13 @@ public Q_SLOTS:
 	virtual void setCurrentSelection(VInfo_ptr)=0;
 
 Q_SIGNALS:
-    void titleUpdated(QString);
+    void titleUpdated(QString,QString type=QString());
     void selectionChanged(VInfo_ptr);
+    void maximisedChanged(DashboardWidget*);
 
 protected Q_SLOTS:
     void slotDetachedToggled(bool);
+    void slotMaximisedToggled(bool);
 
 protected:
     virtual void detachedChanged()=0;
@@ -70,6 +76,8 @@ protected:
 	std::string type_;
 	bool acceptSetCurrent_;
     QAction *detachedAction_;
+    QAction *maximisedAction_;
+    bool ignoreMaximisedChange_;
     NodePathWidget* bcWidget_;
 
 private:

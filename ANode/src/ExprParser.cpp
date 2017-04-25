@@ -130,12 +130,18 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
    static const int cal_date_to_julian_ID   = 54;
    static const int cal_julian_to_date_ID   = 55;
-   static const int cal_argument_ID   = 56;
+   static const int cal_argument_ID         = 56;
+
+   static const int flag_path_ID     = 57;
+   static const int flag_late_ID     = 58;
+   static const int flag_zombie_ID   = 59;
+   static const int flag_ID          = 60;
+   static const int root_path_ID     = 61;
 
     template <typename ScannerT>
     struct definition {
-       rule<ScannerT,parser_tag<cal_date_to_julian_ID> > cal_date_to_julian;
-       rule<ScannerT,parser_tag<cal_julian_to_date_ID> > cal_julian_to_date;
+        rule<ScannerT,parser_tag<cal_date_to_julian_ID> > cal_date_to_julian;
+        rule<ScannerT,parser_tag<cal_julian_to_date_ID> > cal_julian_to_date;
         rule<ScannerT,parser_tag<cal_argument_ID> > cal_argument;
 
         rule<ScannerT,parser_tag<integer_ID> > integer;
@@ -177,6 +183,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         rule<ScannerT,parser_tag<dot_path_ID> >      dotpath;
         rule<ScannerT,parser_tag<dot_dot_path_ID> >  dotdotpath;
         rule<ScannerT,parser_tag<absolute_path_ID> > absolutepath;
+        rule<ScannerT,parser_tag<root_path_ID> > root_path;
 
         rule<ScannerT,parser_tag<node_path_state_ID> >  nodepathstate;
 
@@ -190,6 +197,11 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         rule<ScannerT,parser_tag<calc_subexpression_ID> >   calc_subexpression;
         rule<ScannerT,parser_tag<basic_variable_path_ID> >   basic_variable_path;
         rule<ScannerT,parser_tag<compare_expression_ID> >   compare_expression;
+
+        rule<ScannerT,parser_tag<flag_path_ID> >   flag_path;
+        rule<ScannerT,parser_tag<flag_late_ID> >   flag_late;
+        rule<ScannerT,parser_tag<flag_zombie_ID> >   flag_zombie;
+        rule<ScannerT,parser_tag<flag_ID> >   flag;
 
         rule<ScannerT> not_r,less_than_comparable,expression,andExpr,operators;
         rule<ScannerT> nodestate, equality_comparible, and_or, nodepath ;
@@ -209,6 +221,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                 ;
 
           // Can be /suite/family/task ||  family/task ||   family
+
           absolutepath
              =    leaf_node_d[
                         !(str_p("/")) >> nodename
@@ -228,6 +241,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                                )
                             ]
               ;
+
           dotpath = leaf_node_d[ str_p(".") >> +( str_p("/") >> nodename) ];
           nodepath =  absolutepath | dotdotpath | dotpath  ;
 
@@ -293,10 +307,17 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                 | node_state_unknown
                 ;
 
+          flag_late = root_node_d[ str_p("late") ];
+          flag_zombie = root_node_d[ str_p("zombie") ];
+          flag = flag_late | flag_zombie;
+
           variable = leaf_node_d [ nodename ];
           basic_variable_path = nodepath >> discard_node_d[ ch_p(':') ] >> variable ;
 
-          cal_argument = basic_variable_path | integer  ;
+          root_path = leaf_node_d[ (str_p("/")) ] ;
+          flag_path = ( nodepath | root_path) >> discard_node_d[ str_p("<flag>") ] >> flag ;
+
+          cal_argument = basic_variable_path | integer ;
           cal_date_to_julian
              = str_p("cal::date_to_julian")
                 >>  discard_node_d[ ch_p('(')]
@@ -314,6 +335,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                = integer
                  | basic_variable_path
                  | discard_node_d[ ch_p('(') ] >>  calc_expression >> discard_node_d[ ch_p(')') ]
+                 | flag_path
                  | root_node_d[operators] >>  calc_factor
                  | cal_date_to_julian
                  | cal_julian_to_date
@@ -377,6 +399,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
           BOOST_SPIRIT_DEBUG_NODE(event_state);
           BOOST_SPIRIT_DEBUG_NODE(variable);
           BOOST_SPIRIT_DEBUG_NODE(basic_variable_path);
+          BOOST_SPIRIT_DEBUG_NODE(flag_path);
           BOOST_SPIRIT_DEBUG_NODE(calc_factor);
           BOOST_SPIRIT_DEBUG_NODE(calc_expression);
           BOOST_SPIRIT_DEBUG_NODE(calc_term);
@@ -442,6 +465,7 @@ static void populate_rule_names()
       rule_names[ExpressionGrammer::base_trigger_ID  ] = "BASE_TRIGGER";
       rule_names[ExpressionGrammer::sub_expression_ID  ] = "SUB_EXPRESSION";
       rule_names[ExpressionGrammer::node_path_state_ID  ] = "NODE_PATH_STATE";
+      rule_names[ExpressionGrammer::flag_path_ID  ] = "FLAG_PATH";
 
       rule_names[ExpressionGrammer::event_state_ID  ]   = "STRING";
       rule_names[ExpressionGrammer::variable_ID  ]      = "VARIABLE";
@@ -775,7 +799,19 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
 
       return new AstFunction(AstFunction::JULIAN_TO_DATE, createAst( i->children.begin()+1 , rule_names)  );
    }
+   else if ( i->value.id() == ExpressionGrammer::flag_path_ID) {
 
+      LOG_ASSERT((i->children.size() == 2), "");
+      tree_iter_t theNodePathIter = i->children.begin();
+      tree_iter_t theFlagIter = i->children.begin()+1;
+
+      string nodePath( theNodePathIter->value.begin(), theNodePathIter->value.end() );
+      string flag( theFlagIter->value.begin(), theFlagIter->value.end() );
+      boost::algorithm::trim(nodePath); // don't know why we get leading/trailing spaces
+      boost::algorithm::trim(flag);     // don't know why we get leading/trailing spaces
+
+      return new AstFlag( nodePath, ecf::Flag::string_to_flag_type(flag) );
+   }
    return NULL;
 }
 
@@ -803,7 +839,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
       // child 2: root(i.e ==,!=)    +1
       // child 3: right              +2
 
-      //cout << "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG\n";
+      //cout << "i->children.size() == 3 ======================== \n";
       AstRoot* someRoot = createRootNode(  i->children.begin() + 1, rule_names  );
       if (someRoot ) {
          Ast* left  = doCreateAst(  i->children.begin(), rule_names, someRoot);
@@ -817,7 +853,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
    }
    else if ( is_root_node(i) && i->children.size() == 2) {
 
-      //cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n";
+      //cout << "is_root_node(i) && i->children.size() == 2\n";
       AstRoot* someRoot = createRootNode(  i, rule_names  );
 
       Ast* left  = doCreateAst(  i->children.begin() , rule_names    ,someRoot  );
@@ -836,7 +872,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
       // Create as:         someRoot
       //              notRoot          right
       //      notChild
-      //cout << "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n";
+      //cout << "(i->children.size() == 4 && is_not(i->children.begin()))\n";
 
       LOG_ASSERT(is_not(i->children.begin()),"");
       AstRoot* notRoot = createRootNode(  i->children.begin(), rule_names  );
@@ -861,7 +897,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
       // Create as:         someRoot
       //              child          notRoot
       //                                    notChild
-      //cout << "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\n";
+      //cout << "(i->children.size() == 4 && is_root_node(i->children.begin()+1) && is_not(i->children.begin()+2)  )\n";
       AstRoot* someRoot = createRootNode(  i->children.begin()+1, rule_names  );
       Ast* varPath = doCreateAst(  i->children.begin(), rule_names, someRoot/*top*/);
       if (varPath) someRoot->addChild(varPath); //left
@@ -878,7 +914,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
    else if (i->children.size() == 2 && is_not(i->children.begin()) ) {
       // child 1: not     0
       // child 2: left   +1
-      //cout << "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH\n";
+      //cout << "(i->children.size() == 2 && is_not(i->children.begin()) )\n";
 
       AstRoot* notRoot = createRootNode(  i->children.begin(), rule_names  );
 
@@ -899,6 +935,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
       //     !a and b
       //      a and !b
       // We always treat the not as *child*
+      //cout << "(i->children.size() >=5 ) \n";
       stack<Ast*> childs;
       stack<Ast*> parents;
       Ast* not_ast = NULL;

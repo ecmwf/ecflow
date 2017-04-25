@@ -75,6 +75,10 @@ void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar)
             }
         }
     }
+}
 
+void AstCollateVNodesVisitor::visitFlag(AstFlag* astVar)
+{
+   // ???
 }
 

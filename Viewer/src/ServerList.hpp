@@ -80,7 +80,7 @@ public:
 
 	std::string uniqueName(const std::string&);
 
-	void init();
+    void init();
 	void save();
 	void rescan();
     void syncSystemFile();
@@ -104,6 +104,8 @@ protected:
 	bool readRcFile();
     //bool readSystemFile();
     void clearSyncChange();
+    bool checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,
+                        bool checkDuplicate,std::string& errStr);
 
 	void broadcastChanged();
 	void broadcastChanged(ServerItem*);

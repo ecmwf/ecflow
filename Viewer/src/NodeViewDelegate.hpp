@@ -34,6 +34,7 @@ struct BaseNodeDelegateBox
 
     virtual void adjust(const QFont& f)=0;
     virtual QRect adjustTextRect(const QRect& rIn) const { QRect r=rIn; return r;}
+    virtual QRect adjustTextBgRect(const QRect& rIn) const { QRect r=rIn; return r;}
     virtual QRect adjustSelectionRect(const QRect& optRect) const {
         QRect r=optRect;
         r.adjust(leftMargin,1,-1,-1);

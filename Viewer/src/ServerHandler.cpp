@@ -75,7 +75,17 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	conf_=new VServerSettings(this);
 
 	//Create the client invoker. At this point it is empty.
-	client_=new ClientInvoker(host,port);
+    try
+    {
+        client_=new ClientInvoker(host,port);
+    }
+    catch(std::exception& e)
+    {
+        UiLog().err() << "Could not create ClientInvoker for host=" << host <<
+                         " port= " << port << ". " <<  e.what();
+        client_=0;
+    }
+
 	client_->set_retry_connection_period(1);
 	client_->set_throw_on_error(true);
 
@@ -264,7 +274,13 @@ void ServerHandler::setActivity(Activity ac)
 ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port)
 {
 	ServerHandler* sh=new ServerHandler(name,host,port);
-	return sh;
+    //Without the clinetinvoker we cannot use the serverhandler
+    if(!sh->client_)
+    {
+        delete sh;
+        sh=0;
+    }
+    return sh;
 }
 
 void ServerHandler::removeServer(ServerHandler* server)

@@ -131,6 +131,12 @@ public:
          return r;
      }
 
+     QRect adjustTextBgRect(const QRect& rIn) const
+     {
+         QRect r=rIn;
+         return r.adjusted(0,-1,0,1);
+     }
+
      QRect adjustSelectionRect(const QRect& optRect) const {
          QRect r=optRect;
          return r.adjusted(0,-selectRm.topOffset(),0,-selectRm.bottomOffset());

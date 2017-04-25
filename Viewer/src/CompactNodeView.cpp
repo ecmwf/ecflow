@@ -59,12 +59,6 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
     connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
             this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
-    //expandAll();
-
-
-    //UiLog().dbg() << maximumViewportSize();
-    //UiLog().dbg()  << "scenerect" << sceneRect();
-
     //expandState_=new ExpandState(this,model_);
     actionHandler_=new ActionHandler(this);
 
@@ -353,6 +347,7 @@ void CompactNodeView::slotSizeHintChangedGlobal()
 // Expand state management
 //====================================================
 
+#if 0
 void CompactNodeView::expandAll(const QModelIndex& idx)
 {
     expand(idx);
@@ -363,6 +358,7 @@ void CompactNodeView::expandAll(const QModelIndex& idx)
         expandAll(chIdx);
     }
 }
+#endif
 
 #if 0
 void CompactNodeView::collapseAll(const QModelIndex& idx)

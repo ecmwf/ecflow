@@ -29,7 +29,7 @@ public:
 
 public Q_SLOTS:	
 	void reject();
-    void slotUpdateTitle(QString);
+    void slotUpdateTitle(QString,QString);
     void slotOwnerDelete();
 	
 Q_SIGNALS:

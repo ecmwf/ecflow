@@ -1697,11 +1697,18 @@ bool Node::operator==(const Node& rhs) const
 
 bool Node::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
+#ifdef DEBUG_WHY
+   cout << "Node::top_down_why\n";
+#endif
    return why(theReasonWhy,true/* top down */,html_tags);
 }
 
 void Node::bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
+#ifdef DEBUG_WHY
+   cout << "Node::bottom_up_why\n";
+#endif
+
    defs()->why(theReasonWhy,html_tags);
 
    std::vector<Node*> vec;
@@ -1720,7 +1727,7 @@ void Node::bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags) 
 bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
 {
 #ifdef DEBUG_WHY
-   std::cout << "Node::why " << debugNodePath() << " (" << NState::toString(state()) << ")\n";
+   std::cout << "Node::why " << debugNodePath() << " (" << NState::toString(state()) << ") top_down(" << top_down << ") html(" << html << ")\n";
 #endif
    bool why_found = false;
    if (isSuspended()) {
@@ -1792,6 +1799,10 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
          }
       }
    }
+
+#ifdef DEBUG_WHY
+   std::cout << "   Node::why " << debugNodePath() << " why found(" << why_found << ")\n";
+#endif
    return why_found; // no why found
 }
 

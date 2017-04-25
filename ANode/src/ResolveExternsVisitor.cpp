@@ -113,6 +113,21 @@ void AstResolveExternVisitor::visitVariable(AstVariable* astVar)
 	addExtern(astVar->nodePath(),astVar->name());
 }
 
+void AstResolveExternVisitor::visitFlag(AstFlag* astVar)
+{
+   //std::cout << "AstResolveExternVisitor::visitFlag " << triggerNode_->debugNodePath() << "\n";
+
+   astVar->setParentNode(triggerNode_);
+
+   // See if can reference the path, on the AstFlag, if we can't, it should be added as an extern
+   std::string errorMsg;
+   Node* theReferencedNode = astVar->referencedNode( errorMsg );
+   if ( !theReferencedNode ) {
+      addExtern(astVar->nodePath(),astVar->name()); // return flag:late
+      return;
+   }
+}
+
 void AstResolveExternVisitor::addExtern(const std::string& absNodePath, const std::string& var)
 {
 	string ext = absNodePath;

@@ -40,6 +40,13 @@ public:
 
    static void enableTruncation();
 
+   static std::string toString(int i) {
+        std::stringstream ss;
+        ss << i;
+        return ss.str();
+   }
+
+
 protected:
    void output(const std::string& msg);
    void appendType(std::string& s,Type t) const;

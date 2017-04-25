@@ -32,8 +32,8 @@ public:
 class VPropertyVisitor
 {
 public:
-	VPropertyVisitor() {};
-	virtual ~VPropertyVisitor() {};
+    VPropertyVisitor() {}
+    virtual ~VPropertyVisitor() {}
 	virtual void visit(VProperty*)=0;
 };
 

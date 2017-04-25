@@ -100,7 +100,8 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	defaultTb_(0),
 	masterTb_(0),
 	enabled_(true),
-	doNotEmitChange_(false)
+    doNotEmitChange_(false),
+    ruleLine_(0)
 {
 	prop_=guiProp_->link();
 	assert(prop_);
@@ -144,7 +145,6 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
     	connect(masterTb_,SIGNAL(toggled(bool)),
     			this,SLOT(slotMaster(bool)));
     }
-
 }
 
 PropertyLine::~PropertyLine()
@@ -269,6 +269,47 @@ void PropertyLine::addHelper(PropertyLine* line)
 	if(line)
 		helpers_[line->property()->name()]=line;
 }
+
+//A simple dependency on other properties' values
+
+VProperty* PropertyLine::ruleProperty()
+{
+    if(!prop_->master())
+    {
+        QStringList disabledFor=prop_->param("disabledRule").split("=");
+        if(disabledFor.count() == 2)
+        {
+            QString key=disabledFor[0].simplified();
+            QString val=disabledFor[1].simplified();
+            if(key.isEmpty() == false && prop_->parent())
+            {
+                if(VProperty* rp=prop_->parent()->findChild(key))
+                {
+                    ruleValue_=val;
+                    return rp;
+                }
+            }
+        }
+    }
+}
+
+void PropertyLine::addRuleLine(PropertyLine *r)
+{
+    ruleLine_=r;
+    Q_ASSERT(ruleLine_);
+    connect(ruleLine_,SIGNAL(changed()),
+            this,SLOT(slotRule()));
+
+    //init
+    slotRule();
+}
+
+void PropertyLine::slotRule()
+{
+    Q_ASSERT(ruleLine_);
+    slotEnabled(ruleLine_->currentValue().toString() != ruleValue_);
+}
+
 
 //=========================================================================
 //

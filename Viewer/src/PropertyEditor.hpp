@@ -40,6 +40,7 @@ Q_SIGNALS:
 private:
     void clear();
     void build();
+    void addRules();
     void addHelpers();
 
     void addItem(VProperty*,QVBoxLayout*,QWidget*);

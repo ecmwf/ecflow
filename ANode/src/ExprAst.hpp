@@ -23,6 +23,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "DState.hpp"
+#include "Flag.hpp"
 #include "NodeFwd.hpp"
 namespace ecf { class ExprAstVisitor;} // forward declare class
 
@@ -34,7 +35,7 @@ public:
 
 	virtual void accept(ecf::ExprAstVisitor&) = 0;
    virtual Ast* clone() const = 0;
-   virtual bool is_variable() const { return false; }
+   virtual bool is_attribute() const { return false; }
    virtual bool is_not() const { return false; }
    virtual bool isleaf() const { return false; }
 	virtual bool isRoot() const { return false; }
@@ -52,11 +53,11 @@ public:
    virtual bool is_valid_ast(std::string& error_msg) const = 0;
    virtual std::ostream& print(std::ostream&) const = 0;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const = 0;    // used for test
-	virtual bool why(std::string& /*theReasonWhy*/,bool html = false) const { return false;}
 	virtual std::string type() const = 0;
 	virtual void exprType(const std::string&) {}
-	std::string name() { return expression(); } /* ABO */
+	virtual std::string name() const { return expression(); } /* ABO */
    virtual std::string expression() const = 0;                      // recreate expression from AST
+	virtual bool why(std::string& /*theReasonWhy*/,bool html = false) const;
    virtual std::string why_expression(bool html = false) const = 0; // recreate expression from AST for why command
 
 	// Use for data arithmetic for REPEAT Date, Use default implementation for others
@@ -114,7 +115,6 @@ public:
  	virtual Ast* left() const { return left_;}
  	virtual Ast* right() const { return right_;}
 	virtual std::ostream& print(std::ostream& os) const;
-	virtual bool why(std::string& theReasonWhy,bool html = false) const;
 	virtual bool empty() const { return (left_ && right_) ? false : true ; }
 	virtual void setParentNode(Node*);
 
@@ -496,6 +496,44 @@ private:
  	mutable weak_node_ptr ref_node_;
 };
 
+class AstFlag : public AstLeaf {
+public:
+   AstFlag(const std::string& n,ecf::Flag::Type ft) : flag_(ft),parentNode_(NULL), nodePath_(n){}
+
+   virtual std::string name() const;
+
+   virtual bool is_attribute() const { return true; }
+   // although AstFlag is leaf, However allow to evaluate to cope with
+   //     ( ../family1/<flag>:late != 0 and ../family1/a:myEvent)
+   // Treat this like an integer
+   virtual bool is_evaluateable() const { return true; }
+   virtual bool evaluate() const { return value() != 0 ? true: false; }
+
+   virtual void accept(ecf::ExprAstVisitor&);
+   virtual AstFlag* clone() const;
+   virtual int value() const;
+   virtual std::ostream& print(std::ostream& os) const;
+   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual std::string type() const { return stype();}
+   virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
+   virtual void setParentNode(Node* n) { parentNode_ = n; }
+   static std::string stype() { return "flag";}
+
+   const std::string& nodePath() const { return nodePath_;}
+   Node* referencedNode() const;
+   Node* referencedNode(std::string& errorMsg) const;
+   Node* parentNode() const { return parentNode_; }
+
+private:
+   Node* get_ref_node() const { return ref_node_.lock().get(); }
+   ecf::Flag::Type flag_;
+   Node* parentNode_;                 // should always be non null, before evaluate.
+   std::string nodePath_;
+   mutable weak_node_ptr ref_node_;
+};
+
+
 /// A variable: This can reference in the CURRENT order:
 ///     event,
 ///     meter,
@@ -509,7 +547,8 @@ public:
 	AstVariable(const std::string& nodePath, const std::string& variablename)
 	: parentNode_(NULL), nodePath_(nodePath), name_(variablename)  {}
 
-   virtual bool is_variable() const { return true; }
+	virtual std::string name() const { return name_;}
+   virtual bool is_attribute() const { return true; }
 
 	// although AstVariable is leaf, However allow to evaluate to cope with
    //     ( ../family1/a:myMeter >= 20 and ../family1/a:myEvent)
@@ -536,7 +575,6 @@ public:
 
 	static std::string stype() { return "variable";}
 	const std::string& nodePath() const { return nodePath_;}
-	const std::string& name() const { return name_;}
 
 private:
 	Node* get_ref_node() const { return ref_node_.lock().get(); }
@@ -592,5 +630,6 @@ std::ostream& operator<<(std::ostream& os, const AstNodeState&);
 std::ostream& operator<<(std::ostream& os, const AstEventState&);
 std::ostream& operator<<(std::ostream& os, const AstNode&);
 std::ostream& operator<<(std::ostream& os, const AstVariable&);
+std::ostream& operator<<(std::ostream& os, const AstFlag&);
 
 #endif

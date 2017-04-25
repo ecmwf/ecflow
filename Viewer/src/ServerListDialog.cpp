@@ -400,8 +400,16 @@ void ServerListDialog::addItem()
 	if(d.exec() == QDialog::Accepted)
 	{
 		model_->dataIsAboutToChange();
-		ServerItem* item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),false);
-		model_->dataChangeFinished();
+        ServerItem* item=0;
+        try {
+            item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),false);
+        }
+        catch(std::exception& e)
+        {
+
+        }
+
+        model_->dataChangeFinished();
 		if(d.addToView() && filter_)
 		{
 			filter_->addServer(item);

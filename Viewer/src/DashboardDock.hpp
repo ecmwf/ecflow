@@ -31,9 +31,10 @@ public:
     void setBcWidget(QWidget *w);
 	void addActions(QList<QAction*> lst);
     void setDetachedAction(QAction *ac);
+    void setMaximisedAction(QAction *ac);
 
 public Q_SLOTS:
-	void slotUpdateTitle(QString txt);
+    void slotUpdateTitle(QString txt,QString type);
 
 protected Q_SLOTS:
 #if 0
@@ -48,6 +49,7 @@ Q_SIGNALS:
 protected:
     QList<QToolButton*> actionTbList_;
     QWidget* titleBc_;
+    QPixmap warnPix_;
 };
 
 class DashboardDock : public QDockWidget
