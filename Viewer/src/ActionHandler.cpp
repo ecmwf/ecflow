@@ -50,8 +50,38 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 
 void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 {
+    // deal with tricky cases - if the user selects a combination of 'normal' nodes
+    // and attribute nodes, we want to ignore the attribute nodes, so we will remove
+    // them from the list here and pretend they were not selected
+
+    // count how many attributes and non-attributes are selected
+    long numAttrs=0, numNonAttrNodes=0;
+    for (std::vector<VInfo_ptr>::iterator itNodes = nodesLst.begin(); itNodes != nodesLst.end(); ++itNodes)
+    {
+        if ((*itNodes)->isAttribute())
+            numAttrs++;
+        else
+            numNonAttrNodes++;
+    }
+
+    std::vector<VInfo_ptr> filteredNodes;
+    if (numAttrs > 0 && numNonAttrNodes > 0)  // just keep the non-attribute nodes
+    {
+        for (std::vector<VInfo_ptr>::iterator itNodes = nodesLst.begin(); itNodes != nodesLst.end(); ++itNodes)
+        {
+            if (!((*itNodes)->isAttribute()))
+                filteredNodes.push_back(*itNodes);
+        }
+    }
+    else  // keep all the nodes
+    {
+        filteredNodes = nodesLst;
+    }
+
+
+
     std::string view=parent_->property("view").toString().toStdString();
-    MenuItem* item=MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_,view);
+    MenuItem* item=MenuHandler::invokeMenu("Node", filteredNodes, pos,  parent_,view);
 
     if(item)
     {
@@ -61,28 +91,28 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 #endif
     	if(item->handler() == "info_panel")
     	{
-    		Q_EMIT infoPanelCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+            Q_EMIT infoPanelCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;
     	}
     	else if(item->handler() == "dashboard")
     	{
-    		Q_EMIT dashboardCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+            Q_EMIT dashboardCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;
     	}
     	else if(item->handler() == "tree")
     	{
-    		Q_EMIT viewCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+            Q_EMIT viewCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;
     	}
 
     	/*if(action->iconText() == "Set as root")
         {
-            //Q_EMIT viewCommand(nodesLst,"set_as_root");
+            //Q_EMIT viewCommand(filteredNodes,"set_as_root");
         }*/
     	else if(item->command() == "copy")
     	{
     		 QString txt;
-    		 for(std::vector<VInfo_ptr>::const_iterator it=nodesLst.begin(); it != nodesLst.end(); ++it)
+             for(std::vector<VInfo_ptr>::const_iterator it=filteredNodes.begin(); it != filteredNodes.end(); ++it)
     		 {
     			 if(*it)
     			 {
@@ -104,13 +134,13 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
         else if(item->command() == "mark_for_move")
         {
-            if (nodesLst.size() > 1)
+            if (filteredNodes.size() > 1)
             {
                 UserMessage::message(UserMessage::ERROR, true, "Only one node can be marked for move at a time");
                 return;
             }
 
-            VNode::setNodeMarkedForMove(nodesLst[0]->serverAlias(), nodesLst[0]->relativePath());
+            VNode::setNodeMarkedForMove(filteredNodes[0]->serverAlias(), filteredNodes[0]->relativePath());
 
 
             // suspend if not already suspended
@@ -130,7 +160,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
         else if(item->command() == "move_marked")
         {
-            if (nodesLst.size() > 1)
+            if (filteredNodes.size() > 1)
             {
                 UserMessage::message(UserMessage::ERROR, true, "Only one destination node should be selected");
                 return;
@@ -138,7 +168,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
             // if same server, then error
             // NO - ecflowview had this restriction, but it does not seem to be necessary
-            //if (nodesLst[0]->serverAlias() == aliasOfMarkedServer)
+            //if (filteredNodes[0]->serverAlias() == aliasOfMarkedServer)
             //{
             //    UserMessage::message(UserMessage::ERROR, true, "Cannot move node to the same server");
             //    return;
@@ -173,17 +203,17 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             }
 
             // tell the user what we're about to do
-            ServerHandler *shDest = nodesLst[0]->server();
+            ServerHandler *shDest = filteredNodes[0]->server();
             bool ok = UserMessage::confirm("About to move node " +
                                            pathOfMarkedNode + " from server " +
                                            aliasOfMarkedServer + " (" + shSource->host() + ":" + shSource->port() + ") to " +
-                                           nodesLst[0]->serverAlias() + " (" + shDest->host() + ":" + shDest->port() + ") "
-                                           "/" + nodesLst[0]->relativePath() +  ". Ok?");
+                                           filteredNodes[0]->serverAlias() + " (" + shDest->host() + ":" + shDest->port() + ") "
+                                           "/" + filteredNodes[0]->relativePath() +  ". Ok?");
             // do it (?)
             if (ok)
             {
                 std::string plugCommand;
-                plugCommand = "ecflow_client --plug <full_name> " + shDest->host() + ":" + shDest->port() + nodesLst[0]->relativePath();
+                plugCommand = "ecflow_client --plug <full_name> " + shDest->host() + ":" + shDest->port() + filteredNodes[0]->relativePath();
                 shSource->command(pathOfMarkedNode, plugCommand);
                 shDest->reset();  // the dest server will have a big update, and we don't want to wait for the next sync to see it
                 VNode::clearNodeMarkedForMove();
@@ -199,7 +229,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             {
                 // invoke the custom command dialogue
                 customCommandDialog = new CustomCommandDialog(0);
-                customCommandDialog->setNodes(nodesLst);
+                customCommandDialog->setNodes(filteredNodes);
                 if (customCommandDialog->exec() == QDialog::Accepted)
                 {
                     // the user could have changed the node selection within the custom editor
@@ -220,31 +250,31 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             if (item->isCustom())
                 MenuHandler::interceptCommandsThatNeedConfirmation(item);
 
-            if(item && !item->question().empty() && item->shouldAskQuestion(nodesLst))
+            if(item && !item->question().empty() && item->shouldAskQuestion(filteredNodes))
         	{
                 std::string fullNames("<ul>");
                 std::string nodeNames("<ul>");
-                if (nodesLst.size() == 1)
+                if (filteredNodes.size() == 1)
                 {
-                    fullNames = nodesLst[0]->path();
-                    nodeNames = "<b>" + nodesLst[0]->name() + "</b>";
+                    fullNames = filteredNodes[0]->path();
+                    nodeNames = "<b>" + filteredNodes[0]->name() + "</b>";
                 }
                 else
                 {                    
-                    int numNodes = nodesLst.size();
+                    int numNodes = filteredNodes.size();
                     int numItemsToList = std::min(numNodes, 5);
 
                     for(int i=0; i < numItemsToList; i++)
                     {
                         fullNames += "<li><b>";
-                        fullNames += nodesLst[i]->path();
+                        fullNames += filteredNodes[i]->path();
                         fullNames += "</b></li>";
 
                         nodeNames += "<li><b>";
-                        nodeNames += nodesLst[i]->name();
+                        nodeNames += filteredNodes[i]->name();
                         nodeNames += "</b></li>";                    
                     }
-                    if(numItemsToList < nodesLst.size())
+                    if(numItemsToList < filteredNodes.size())
                     {                  
                         std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
 
@@ -274,8 +304,8 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             }
 
             if(ok)
-                ServerHandler::command(nodesLst,item->command());
-                //ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
+                ServerHandler::command(filteredNodes,item->command());
+                //ServerHandler::command(filteredNodes,action->iconText().toStdString(), true);
 
             if (customCommandDialog)
                    delete customCommandDialog;
@@ -301,10 +331,10 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
 		if(res->iconText() == "Set as root")
 		{
-			emit viewCommand(nodesLst,"set_as_root");
+			emit viewCommand(filteredNodes,"set_as_root");
 		}
 		else
-			ServerHandler::command(nodesLst,res->iconText().toStdString());
+			ServerHandler::command(filteredNodes,res->iconText().toStdString());
 	}
 
 	delete menu;
