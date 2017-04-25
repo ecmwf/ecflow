@@ -40,6 +40,11 @@ struct BaseNodeDelegateBox
         r.adjust(leftMargin,1,-1,-1);
         return r;
     }
+    virtual QRect adjustSelectionRectNonOpt(const QRect& optRect) const {
+        QRect r=optRect;
+        r.adjust(0,1,-1,-1);
+        return r;
+    }
 
     int fontHeight;
     int height;

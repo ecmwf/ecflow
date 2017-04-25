@@ -999,7 +999,7 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
         sr.setX(textRect.x());
         sr.setWidth(textRect.width());
         //sr.setWidth(rightPos-sr.x());
-        renderSelectionRect(painter,attrBox_->adjustSelectionRect(sr));
+        renderSelectionRect(painter,attrBox_->adjustSelectionRectNonOpt(sr));
     }
 
 	if(setClipRect)
