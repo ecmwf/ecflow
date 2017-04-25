@@ -46,6 +46,7 @@ public:
   virtual void visitEventState(AstEventState*);
   virtual void visitNode(AstNode*);
   virtual void visitVariable(AstVariable*);
+  virtual void visitFlag(AstFlag*);
 
 private:
   std::vector<VItem*>& items_;

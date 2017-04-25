@@ -54,7 +54,8 @@ public:
  	virtual void visitNodeState(AstNodeState*);
  	virtual void visitEventState(AstEventState*);
  	virtual void visitNode(AstNode*);
-  	virtual void visitVariable(AstVariable*);
+   virtual void visitVariable(AstVariable*);
+   virtual void visitFlag(AstFlag*);
 
 private:
 	std::set<Node*> dependentNodes_;

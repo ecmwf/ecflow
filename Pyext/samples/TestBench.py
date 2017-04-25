@@ -24,9 +24,46 @@
 # =============================================================================
 import ecflow
 import os       # for getenv
+import sys
 import shutil   # used to remove directory tree
 import argparse # for argument parsing     
 
+def get_root_source_dir():
+    cwd = os.getcwd()
+    #print "get_root_source_dir from: " + cwd
+    while (1):
+        # Get to directory that has ecflow
+        head, tail = os.path.split(cwd)
+        #print "   head:" + head
+        #print "   tail:" + tail
+        if tail.find("ecflow") != -1 :
+            
+            # bjam, already at the source directory
+            if os.path.exists(cwd + "/VERSION.cmake"): 
+                print("   Found VERSION.cmake in " + cwd)
+                return cwd
+        
+        if tail != "Pyext" and tail != "migrate":
+            # in cmake, we may be in the build directory, hence we need to determine source directory
+            file = cwd + "/CTestTestfile.cmake"
+            #print "   searching for " + file
+            if os.path.exists(file):
+                # determine path by looking into this file:
+                for line in open(file):
+                    ## Source directory: /tmp/ma0/workspace/ecflow/Acore
+                    if line.find("Source directory"):
+                        tokens = line.split()
+                        if len(tokens) == 4:
+                            #print "   returning root_source_dir:", tokens[3]
+                            return tokens[3]
+                raise RuntimeError("ERROR could not find Source directory in CTestTestfile.cmake")
+            else:
+                raise RuntimeError("ERROR could not find file CTestTestfile.cmake in " + cwd)
+                
+        cwd = head
+    return cwd
+
+    
 def delete_variables_affecting_job_generation(node): 
     """delete customer related ECF variables, these will point to directories
        that don't exist. Its ok we will regenerate our own local ones"""
@@ -77,8 +114,18 @@ if __name__ == "__main__":
               a test server **
             o All suites are put into a suspended state. This allows the GUI to resume them
             o The server is restarted and suites are begun
-            This programs assumes that ecflow module is accessible.
+            This programs assumes that ecflow module is accessible
+
+            example:
+                python Pyext/samples/TestBench.py --port=3141 --verbose=True AParser/test/data/good_defs/trigger/late.def
             """    
+            
+    print("####################################################################")
+    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
+    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
+    print("sys.path:   " + str(sys.path))
+    print("####################################################################")
+ 
     PARSER = argparse.ArgumentParser(description=DESC,  
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     PARSER.add_argument('defs_file', 
@@ -98,21 +145,23 @@ if __name__ == "__main__":
     print ARGS    
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
-    if not ARGS.ecf_home:
-        if os.getenv("WK") == None:
-            print "No ecf_home specified. Please specify a writable directory"
-            exit(1)
-        ARGS.ecf_home = os.getenv("WK") + "/Pyext/test/data/CUSTOMER/ECF_HOME"
+    using_workspace = False;
+    ecflow_source_dir = ""
+    try:
+        ecflow_source_dir = get_root_source_dir();
+        ARGS.ecf_home = ecflow_source_dir + "/Pyext/test/data/CUSTOMER/ECF_HOME"
+        using_workspace = True
         if ARGS.verbose:
-            print "Workspace is defined" 
-            print "using /Client/bin/gcc\-4.8/debug/ecflow_client"
-
+            print "Workspace is defined ecflow_source_dir: ",ecflow_source_dir
+    except:
+        pass
+    
     if ARGS.verbose:
         print "Using ECF_HOME=" + ARGS.ecf_home
          
-    if ARGS.verbose: 
-        print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
     try:
+        if ARGS.verbose: 
+            print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
         DEFS = ecflow.Defs(ARGS.defs_file)
     except RuntimeError, ex:
         print "   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex)
@@ -131,29 +180,22 @@ if __name__ == "__main__":
     for suite in DEFS.suites:
         traverse_container(suite)
   
-    if ARGS.verbose: 
-        print "add variables required for script generation, for all suites\n"
     DEFS.add_variable("ECF_HOME", ARGS.ecf_home)
-    if os.getenv("WK") != None: 
-        debug_path = os.getenv("WK") + "/Client/bin/gcc-4.8/debug/ecflow_client"
-        release_path = os.getenv("WK") + "/Client/bin/gcc-4.8/debug/ecflow_client"
-        if os.path.exists( debug_path ):
-            DEFS.add_variable("ECF_CLIENT_EXE_PATH", debug_path )
-        else:
-            if os.path.exists( release_path ):
-                DEFS.add_variable("ECF_CLIENT_EXE_PATH", release_path )
- 
+    
+    if using_workspace: 
+        path_to_ecflow_client = ecflow.File.find_client()
+        if os.path.exists( path_to_ecflow_client ):
+            DEFS.add_variable("ECF_CLIENT_EXE_PATH", path_to_ecflow_client )
+            if ARGS.verbose: print "Adding ECF_CLIENT_EXE_PATH:",path_to_ecflow_client
+
     DEFS.add_variable("SLEEP", "10")  # not strictly required since default is 1 second
     DEFS.add_variable("ECF_INCLUDE", ARGS.ecf_home + "/includes")
 
-
-    if ARGS.verbose: 
-        print "Place all suites into suspended state, so they can be started by the GUI\n"  
     for suite in DEFS.suites:
         suite.add_defstatus(ecflow.DState.suspended)
     
-    # ecflow.PrintStyle.set_style(ecflow.Style.STATE)
     if ARGS.verbose: 
+        #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
         print DEFS
 
     if ARGS.verbose: 
