@@ -536,7 +536,6 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 #endif
             children+=item->total;
             item->hasChildren = item->total > 0;
-            last = i + children;
         }
         else
         {

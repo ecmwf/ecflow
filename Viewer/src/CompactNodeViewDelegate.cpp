@@ -241,9 +241,6 @@ int CompactNodeViewDelegate::paintItem(QPainter *painter,const QStyleOptionViewI
     QStyleOptionViewItem vopt(option);
     initStyleOption(&vopt, index);
 
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
-
     //Save painter state
     painter->save();
 
