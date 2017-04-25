@@ -14,7 +14,7 @@
    height="32"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.91 r13725"
    sodipodi:docname="server_log.svg">
   <defs
      id="defs4">
@@ -25,7 +25,7 @@
          offset="0"
          id="stop3847" />
       <stop
-         style="stop-color:#c5c7cd;stop-opacity:1"
+         style="stop-color:#c7cfd2;stop-opacity:1"
          offset="1"
          id="stop3849" />
     </linearGradient>
@@ -35,10 +35,10 @@
        id="linearGradient4793"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(1.0757737,0,0,1.0996622,0.50954173,-2.3823021)"
-       x1="27.831085"
-       y1="31.597303"
-       x2="-9.200532"
-       y2="-2.410116" />
+       x1="21.901278"
+       y1="19.844648"
+       x2="-5.2729979"
+       y2="12.130029" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -48,16 +48,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="12.070612"
-     inkscape:cx="21.954017"
-     inkscape:cy="-0.91100472"
+     inkscape:cx="5.5091176"
+     inkscape:cy="13.185734"
      inkscape:document-units="px"
      inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:snap-grids="false"
      inkscape:window-width="1693"
-     inkscape:window-height="1376"
-     inkscape:window-x="230"
-     inkscape:window-y="152"
+     inkscape:window-height="1007"
+     inkscape:window-x="98"
+     inkscape:window-y="86"
      inkscape:window-maximized="0"
      inkscape:snap-to-guides="false">
     <inkscape:grid
