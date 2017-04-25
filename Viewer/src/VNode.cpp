@@ -832,9 +832,14 @@ bool VNode::isAlias() const
 }
 #endif
 
+std::string VNode::flagsAsStr() const
+{
+    return (node_)?node_->flag().to_string():std::string();
+}
+
 bool VNode::isFlagSet(ecf::Flag::Type f) const
 {
-	if(node_ && node_.get())
+    if(node_)
 	{
 		return node_->flag().is_set(f);
 	}
@@ -1740,6 +1745,11 @@ void VServer::why(std::vector<std::string>& theReasonWhy) const
     defs->why(theReasonWhy,1);
 }
 
+
+std::string VServer::flagsAsStr() const
+{
+    return cache_.flag_.to_string();
+}
 
 bool VServer::isFlagSet(ecf::Flag::Type f) const
 {
