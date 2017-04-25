@@ -305,6 +305,7 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
 
 QModelIndex TableNodeModel::forceShowNode(const VNode* node) const
 {
+#if 0
     if(!node)
         return QModelIndex();
 
@@ -318,21 +319,25 @@ QModelIndex TableNodeModel::forceShowNode(const VNode* node) const
         server->setForceShowNode(node);
         return nodeToIndex(node);
     }
-
+#endif
     return QModelIndex();
 }
 
 QModelIndex TableNodeModel::forceShowAttribute(const VAttribute* a) const
 {
+#if 0
     Q_ASSERT(a);
     VNode* node=a->parent();
     Q_ASSERT(node);
 
     return forceShowNode(const_cast<VNode*>(node));
+#endif
+    return QModelIndex();
 }
 
 void TableNodeModel::selectionChanged(QModelIndexList lst)
 {
+#if 0
     Q_FOREACH(QModelIndex idx,lst)
     {
         VInfo_ptr info=nodeInfo(idx);
@@ -344,6 +349,7 @@ void TableNodeModel::selectionChanged(QModelIndexList lst)
            ts->clearForceShow(info->item());
         }
     }
+#endif
 }
 
 VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
