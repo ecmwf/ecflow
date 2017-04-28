@@ -84,10 +84,12 @@ void SimulatorVisitor::visitSuite( Suite* s)
  	// If we have cron/time with calendar increment of 1 hour, where calendar start time is in minutes
  	// we will miss the time/cron based attributes, hence use 1 minute resolution
  	if ((foundCrons_ || foundTime_) && ci_ == hours(1)) {
- 	   boost::posix_time::time_duration start_time = s->calendar().begin_time().time_of_day();
+ 	   // simulation has not started so, suiteTime same as start time.
+ 	   boost::posix_time::time_duration start_time = s->calendar().suiteTime().time_of_day();
  	   if (start_time.minutes() != 0) {
+ 	      // cout << " start_time " << start_time << "   " << defs_filename_ << "\n";
  	      log(Log::WAR,"Found cron or time based attributes, with 1 hour resolution, however suite calendar start time has minute resolution, reverting to minute resolution for simulation.");
- 	      log(Log::WAR,"To speed up resolution use suite calendar with hour setting only, i.e minutes is zero");
+ 	      log(Log::WAR,"To speed up resolution use suite calendar with hour setting only, i.e where minutes is zero");
  	      ci_ = minutes(1);
  	   }
  	}
