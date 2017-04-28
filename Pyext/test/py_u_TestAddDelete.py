@@ -16,6 +16,7 @@
 import ecflow
 import sys
 import os
+import copy
  
 if __name__ == "__main__":
     
@@ -94,6 +95,22 @@ if __name__ == "__main__":
     assert len(list(suite.limits)) == 4, "Expected 4 Limits"
     suite.delete_limit("limitName1"); assert len(list(suite.limits)) == 3, "Expected 3 limits since we just deleted one limitName1" 
     suite.delete_limit("");           assert len(list(suite.limits)) == 0, "Expected 0 limits since we just deleted all of them"
+
+    # The following will fail, since the iterators are essentially read only, 
+    # This is because we are using C++ vector iterators, hence we can't delete the vectors items, whilst traversing 
+    #    for limit in suite.limits: suite.delete_limit(limit.name())
+    # We can get round this by copy the limits first
+    suite.add_limit(ecflow.Limit("limitName1", 10))
+    suite.add_limit(ecflow.Limit("limitName2", 10))
+    suite.add_limit("limitName3", 10)
+    suite.add_limit("limitName4", 10)
+    limit_names = []
+    for limit in suite.limits:
+        limit_names.append(limit.name())
+    for limit in limit_names:
+        suite.delete_limit(limit)
+    assert len(list(suite.limits)) == 0, "Expected 0 Limits,since we just deleted all of them, via iteration"
+
 
     #===========================================================================
     # Test Limit and node paths, ECFLOW-518
