@@ -45,6 +45,7 @@
 #include "Suite.hpp"
 #include "CheckPt.hpp"
 #include "Archive.hpp"
+#include "Attr.hpp"
 
 class Limit;
 class AbstractObserver;
@@ -169,6 +170,10 @@ public:
 
    /// returns true if defs has cron,time,day,date or today time dependencies
    bool hasTimeDependencies() const;
+
+   /// recursively sort the attributes
+   // expect one attr to be [ event | meter | label | limits | variable ]
+   void sort_attributes(ecf::Attr::Type attr, bool recursive = true);
 
    /// This function is called when ALL definition has been parsed successfully
    /// Client Side:: The client side has externs, hence any references to node paths

@@ -20,6 +20,7 @@
 #include "TestHelper.hpp"
 #include "Str.hpp"
 #include "System.hpp"
+#include "Ecf.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -808,6 +809,101 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LATE)));
       BOOST_CHECK_MESSAGE( !s->get_late(), "expected late to be deleted");
    }
+}
+
+
+void add_sortable_attributes(Node* node) {
+   node->add_variable("varz","-");
+   node->add_variable("vary","-");
+   node->add_variable("vara","-");
+   node->addEvent(Event("zevent"));
+   node->addEvent(Event("aevent"));
+   node->addEvent(Event(1));
+   node->addEvent(Event(2));
+   node->addMeter(Meter("zmeter",1,100));
+   node->addMeter(Meter("ameter",1,100));
+   node->addLabel(Label("zlabel","-"));
+   node->addLabel(Label("alabel","-"));
+   node->addLimit(Limit("zlimit",10));
+   node->addLimit(Limit("ylimit",10));
+   node->addLimit(Limit("xlimit",10));
+}
+void add_sorted_attributes(Node* node) {
+   node->add_variable("vara","-");
+   node->add_variable("vary","-");
+   node->add_variable("varz","-");
+   node->addEvent(Event(1));
+   node->addEvent(Event(2));
+   node->addEvent(Event("aevent"));
+   node->addEvent(Event("zevent"));
+   node->addMeter(Meter("ameter",1,100));
+   node->addMeter(Meter("zmeter",1,100));
+   node->addLabel(Label("alabel","-"));
+   node->addLabel(Label("zlabel","-"));
+   node->addLimit(Limit("xlimit",10));
+   node->addLimit(Limit("ylimit",10));
+   node->addLimit(Limit("zlimit",10));
+}
+
+BOOST_AUTO_TEST_CASE( test_alter_sort_attributes )
+{
+   cout << "Base:: ...test_alter_sort_attributes\n";
+
+   Defs defs;
+   defs.set_server().add_or_update_user_variables("z","z");
+   defs.set_server().add_or_update_user_variables("y","y");
+   defs.set_server().add_or_update_user_variables("x","x");
+   suite_ptr s = defs.add_suite("suite"); add_sortable_attributes(s.get());
+   family_ptr f1 = s->add_family("f1");   add_sortable_attributes(f1.get());
+   task_ptr t1 = f1->add_task("t1");      add_sortable_attributes(t1.get());
+
+   Defs sorted_defs;sorted_defs.flag().set(ecf::Flag::MESSAGE); // take into account alter
+   sorted_defs.set_server().add_or_update_user_variables("x","x");
+   sorted_defs.set_server().add_or_update_user_variables("y","y");
+   sorted_defs.set_server().add_or_update_user_variables("z","z");
+   suite_ptr ss = sorted_defs.add_suite("suite"); add_sorted_attributes(ss.get());
+   family_ptr sf1 = ss->add_family("f1");         add_sorted_attributes(sf1.get());
+   task_ptr st1 = sf1->add_task("t1");            add_sorted_attributes(st1.get());
+
+   {
+      TestDefsStateChanged chenged(&defs);
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","event","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","meter","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","label","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","limit","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","variable","recursive")));
+      Ecf::set_debug_equality(true);
+      BOOST_CHECK_MESSAGE(defs == sorted_defs,"Sort failed expected\n" << sorted_defs << "\nbut found\n" << defs);
+      Ecf::set_debug_equality(false);
+    }
+}
+
+BOOST_AUTO_TEST_CASE( test_alter_sort_attributes_for_task )
+{
+   cout << "Base:: ...test_alter_sort_attributes_for_task\n";
+
+   Defs defs;
+   suite_ptr s = defs.add_suite("suite"); add_sortable_attributes(s.get());
+   family_ptr f1 = s->add_family("f1");   add_sortable_attributes(f1.get());
+   task_ptr t1 = f1->add_task("t1");      add_sortable_attributes(t1.get());
+
+   Defs sorted_defs;//sorted_defs.flag().set(ecf::Flag::MESSAGE); // take into account alter
+   suite_ptr ss = sorted_defs.add_suite("suite");  add_sortable_attributes(ss.get());
+   family_ptr sf1 = ss->add_family("f1");          add_sortable_attributes(sf1.get());
+   task_ptr st1 = sf1->add_task("t1");             add_sorted_attributes(st1.get());
+   st1->flag().set(ecf::Flag::MESSAGE);
+   {
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"event","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"meter","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"label","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"limit","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"variable","recursive")));
+      Ecf::set_debug_equality(true);
+      BOOST_CHECK_MESSAGE(defs == sorted_defs,"Sort failed expected\n" << sorted_defs << "\nbut found\n" << defs);
+      Ecf::set_debug_equality(false);
+    }
 }
 
 BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )

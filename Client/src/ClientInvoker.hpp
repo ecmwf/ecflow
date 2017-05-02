@@ -279,6 +279,12 @@ public:
              const std::string& attrType,
              const std::string& name = "",
              const std::string& value = "") const { return invoke(CtsApi::alter(path,alterType,attrType,name,value)); }
+   int alter_sort(const std::vector<std::string>& paths,
+              const std::string& sortable_attribute_name,
+              bool recursive = true) const { return invoke(CtsApi::alter_sort(paths,sortable_attribute_name,recursive)); }
+   int alter_sort(const std::string& path,
+              const std::string& sortable_attribute_name,
+              bool recursive = true) const { return invoke(CtsApi::alter_sort(std::vector<std::string>(1,path),sortable_attribute_name,recursive)); }
 
 	int reloadwsfile() const;
 	int reloadpasswdfile() const;
