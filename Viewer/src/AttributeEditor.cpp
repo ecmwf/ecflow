@@ -61,7 +61,7 @@ AttributeEditor::~AttributeEditor()
 #ifdef _USE_MODELESS_ATTRIBUTEDITOR
     editors.removeOne(this);
 #endif
-}    
+}
 
 void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
 {
@@ -360,4 +360,19 @@ void AttributeEditor::notifyServerConnectState(ServerHandler* server)
             break;
         }
     }
+}
+
+void AttributeEditor::doNotUseReset()
+{
+    if(QPushButton *resetPb=buttonBox_->button(QDialogButtonBox::Reset))
+    {
+        resetPb->setEnabled(false);
+        resetPb->hide();
+    }
+}
+
+void AttributeEditor::disableCancel()
+{
+    if(QPushButton *cancelPb=buttonBox_->button(QDialogButtonBox::Cancel))
+        cancelPb->hide();
 }

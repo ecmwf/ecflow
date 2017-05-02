@@ -60,6 +60,8 @@ protected:
     void setSuspended(bool);
     void addForm(QWidget* w);
     void hideForm();
+    void doNotUseReset();
+    void disableCancel();
     virtual void apply()=0;
     virtual void resetValue()=0;
     virtual bool isValueChanged()=0;
