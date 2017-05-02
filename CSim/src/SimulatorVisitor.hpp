@@ -64,6 +64,7 @@ private:
 	std::string error_msg_;
 	bool foundTasks_;
 	bool foundCrons_;
+	bool foundTime_;
 	bool hasTimeDependencies_;
 	bool has_end_clock_;
 	boost::posix_time::time_duration max_length_;

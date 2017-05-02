@@ -14,6 +14,8 @@
 //============================================================================
 
 #include <iostream>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include "SimulatorVisitor.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -28,11 +30,20 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
+// Please note: we can speed up simulation, by using a calendar increment of 1 hour
+// However this will *ONLY* work *IF*
+//   o All the time based attributes time,today,cron have no minutes, i.e only i hour resolution
+//   o The calendar start time, must also have hour resolution, otherwise time/cron based attributes
+//     will be missed. i.e we increment calendar start time , with calendar increment
+//     If calendar start time is minutes based, and increment in hour based, time attributes will be missed
+//     Note: today is different, to time/cron, as it does not require a exact match
+
 ///////////////////////////////////////////////////////////////////////////////
 SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename)
 : defs_filename_(defs_filename),
   foundTasks_(false),
   foundCrons_(false),
+  foundTime_(false),
   hasTimeDependencies_(false),
   has_end_clock_(false),
   max_length_(hours(24)),
@@ -56,7 +67,7 @@ void SimulatorVisitor::visitSuite( Suite* s)
 
 	if ( s->clockAttr() && s->clock_end_attr()) {
 	   max_length_ = s->clock_end_attr()->ptime() - s->clockAttr()->ptime();
-	   has_end_clock_ = true; // no need to determine max_length, user specfied
+	   has_end_clock_ = true; // no need to determine max_length, user specified
 	}
 
  	visitNodeContainer(s);
@@ -68,6 +79,19 @@ void SimulatorVisitor::visitSuite( Suite* s)
       s->set_state(NState::COMPLETE);
       std::stringstream ss; ss <<  "The defs file " <<  defs_filename_ << " has a suite '/" << s->suite()->name() << "' which has no tasks. Ignoring \n";
  	   log(Log::WAR,ss.str());
+ 	}
+
+ 	// If we have cron/time with calendar increment of 1 hour, where calendar start time is in minutes
+ 	// we will miss the time/cron based attributes, hence use 1 minute resolution
+ 	if ((foundCrons_ || foundTime_) && ci_ == hours(1)) {
+ 	   // simulation has not started so, suiteTime same as start time.
+ 	   boost::posix_time::time_duration start_time = s->calendar().suiteTime().time_of_day();
+ 	   if (start_time.minutes() != 0) {
+ 	      // cout << " start_time " << start_time << "   " << defs_filename_ << "\n";
+ 	      log(Log::WAR,"Found cron or time based attributes, with 1 hour resolution, however suite calendar start time has minute resolution, reverting to minute resolution for simulation.");
+ 	      log(Log::WAR,"To speed up resolution use suite calendar with hour setting only, i.e where minutes is zero");
+ 	      ci_ = minutes(1);
+ 	   }
  	}
 }
 
@@ -84,6 +108,10 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc)
       log(Log::MSG,ss.str());
    }
 
+   if (!nc->timeVec().empty()) {
+      foundTime_= true;
+   }
+
 	BOOST_FOREACH(node_ptr t, nc->nodeVec()) { t->acceptVisitTraversor(*this);}
 }
 
@@ -96,6 +124,9 @@ void SimulatorVisitor::visitTask( Task* t )
 
    if (!t->crons().empty()) {
       foundCrons_ = true;
+   }
+   if (!t->timeVec().empty()) {
+      foundTime_= true;
    }
 }
 
