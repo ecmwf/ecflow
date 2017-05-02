@@ -164,9 +164,6 @@ private:
     int connectorPos(CompactViewItem* item, CompactViewItem* parent) const;
     int translation() const;
 
-
-    QStyleOptionViewItem viewOptions() const;
-
     typedef std::vector<CompactViewItem>::iterator ViewItemIterator;
     ScrollMode verticalScrollMode_;
     mutable std::vector<CompactViewItem> viewItems_;

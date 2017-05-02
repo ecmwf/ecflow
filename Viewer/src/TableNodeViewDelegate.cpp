@@ -9,6 +9,7 @@
 
 #include "TableNodeViewDelegate.hpp"
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QDebug>
 #include <QImageReader>
@@ -116,7 +117,12 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
                    const QModelIndex& index) const
 {
     //Background
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QStyleOptionViewItem vopt(option);
+#else
+    QStyleOptionViewItemV4 vopt(option);
+#endif
+
     initStyleOption(&vopt, index);
 
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
@@ -160,7 +166,7 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     else
     {
     	QString text=index.data(Qt::DisplayRole).toString();
-    	QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
     	painter->setFont(font_);
     	painter->setPen(Qt::black);
     	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);

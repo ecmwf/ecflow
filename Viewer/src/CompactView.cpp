@@ -259,42 +259,6 @@ void CompactView::timerEvent(QTimerEvent *event)
     }
 }
 
-QStyleOptionViewItem CompactView::viewOptions() const
-{
-    QStyleOptionViewItem option;
-    option.init(this);
-    option.state &= ~QStyle::State_MouseOver;
-    option.font = font();
-
-#ifndef Q_WS_MAC
-    // On mac the focus appearance follows window activation
-    // not widget activation
-    if (!hasFocus())
-        option.state &= ~QStyle::State_Active;
-#endif
-
-    option.state &= ~QStyle::State_HasFocus;
-    //if (d->iconSize.isValid()) {
-    //    option.decorationSize = d->iconSize;
-    //} else {
-
-        int pm = style()->pixelMetric(QStyle::PM_SmallIconSize, 0, this);
-        option.decorationSize = QSize(pm, pm);
-   // }
-    option.decorationPosition = QStyleOptionViewItem::Left;
-    option.decorationAlignment = Qt::AlignCenter;
-    option.displayAlignment = Qt::AlignLeft|Qt::AlignVCenter;
-    //option.textElideMode = d->textElideMode;
-    option.rect = QRect();
-    option.showDecorationSelected = style()->styleHint(QStyle::SH_ItemView_ShowDecorationSelected, 0, this);
-    //if (d->wrapItemText)
-    //    option.features = QStyleOptionViewItem::WrapText;
-    option.locale = locale();
-    option.locale.setNumberOptions(QLocale::OmitGroupSeparator);
-    option.widget = this;
-    return option;
-}
-
 void CompactView::reset()
 {
     viewItems_.clear();
