@@ -125,17 +125,17 @@
                 },
                 "limitShape"  : {
                     "label"   : "Limit shape",
-                    "default" : "rectangle",
+                    "default" : "circle",
                     "values"  : "rectangle/circle",
                     "values_label" : "rectangle/circle"
                 },
                 "limitFillColour"  : {
                     "label"   : "Limit fill colour",
-                    "default" : "rgb(0,255,0)"
+                    "default" : "rgb(11,234,11)"
                 },
                 "limitExtraFillColour"  : {
                     "label"   : "Limit exceed colour",
-                    "default" : "rgb(0,0,255)"
+                    "default" : "rgb(254,3,0)"
                 },
                 "triggerBackground"  : {
                     "label"   : "Trigger background colour",

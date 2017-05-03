@@ -29,7 +29,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     attrBox_(0),
     useStateGrad_(true),
     drawAttrSelectionRect_(false),
-    limitShape_(CircleLimitShape)
+    limitShape_(RectLimitShape)
 {
 	hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));
@@ -157,7 +157,7 @@ void NodeViewDelegate::updateBaseSettings()
         else if(shape == "circle")
             limitShape_=CircleLimitShape;
         else
-            limitShape_=RectLimitShape;
+            limitShape_=CircleLimitShape;
     }
     if(VProperty* p=prop_->find("view.attribute.limitFillColour"))
     {
@@ -196,26 +196,33 @@ void NodeViewDelegate::updateBaseSettings()
     if(limitShape_ == CircleLimitShape)
     {
         QFontMetrics fm(attrFont_);
-        int itemSize=static_cast<int>(static_cast<float>(fm.ascent())*0.9);
+        int itemSize=static_cast<int>(static_cast<float>(fm.ascent())*0.8);
 
         QImage img(itemSize,itemSize,QImage::Format_ARGB32_Premultiplied);
         img.fill(Qt::transparent);
         QPainter painter(&img);
-        //painter.setRenderHint(QPainter::Antialiasing,true);
-        painter.setPen(QPen(QColor(70,70,70),0));
+        painter.setRenderHint(QPainter::Antialiasing,true);
+
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor(70,70,70));
+        painter.drawEllipse(1,1,itemSize-1,itemSize-1);
         painter.setBrush(limitFillBrush_);
         painter.drawEllipse(1,1,itemSize-2,itemSize-2);
         limitFillPix_=QPixmap::fromImage(img);
 
         painter.fillRect(QRect(QPoint(0,0),img.size()),Qt::transparent);
-        painter.setBrush(QColor(240,240,240));
-        painter.drawEllipse(1,1,itemSize-2,itemSize-2);
-        limitEmptyPix_=QPixmap::fromImage(img);
-
-        painter.fillRect(QRect(QPoint(0,0),img.size()),Qt::transparent);
+        painter.setBrush(QColor(70,70,70));
+        painter.drawEllipse(1,1,itemSize-1,itemSize-1);
         painter.setBrush(limitExtraFillBrush_);
         painter.drawEllipse(1,1,itemSize-2,itemSize-2);
         limitExtraFillPix_=QPixmap::fromImage(img);
+
+        painter.fillRect(QRect(QPoint(0,0),img.size()),Qt::transparent);
+        painter.setBrush(QColor(130,130,130));
+        painter.drawEllipse(1,1,itemSize-1,itemSize-1);
+        painter.setBrush(QColor(240,240,240));
+        painter.drawEllipse(1,1,itemSize-2,itemSize-2);
+        limitEmptyPix_=QPixmap::fromImage(img);
     }
 }
 
@@ -874,70 +881,51 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
         int yItem=option.rect.y()+(option.rect.height()-itemHeight)/2;
         painter->setRenderHint(QPainter::Antialiasing,false);
 
-        painter->setPen(QPen(QColor(130,130,130),0));
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(limitFillBrush_);
 
-        QRect valRect(xItem,yItem,qMin(val,maxVal)*itemWidth,itemHeight);
-        painter->fillRect(valRect,limitFillBrush_);
-
-        if(val > maxVal)
+        for(int i=0; i < totalVal; i++)
         {
-            QRect extraRect(xItem+maxVal*itemWidth,yItem,(val-maxVal)*itemWidth,itemHeight);
-            painter->fillRect(extraRect,limitExtraFillBrush_);
-        }
+            QRect r(xItem,yItem,itemWidth,itemHeight);
 
-        //Frame
-        painter->setBrush(Qt::NoBrush);
-        QRect fullRect(xItem,yItem,totalVal*itemWidth,itemHeight);
-        painter->drawRect(fullRect);
-
-            //painter->setBrush(limitFillBrush_);
-
-        for(int i=0; i < totalVal-1; i++)
-        {
-                //QRect r(xItem,yItem,itemWidth,itemHeight);
-
-                //if(i ==val)
-            //{
-                painter->setBrush(Qt::NoBrush);
-            //    //painter->setPen(QPen(QColor(170,170,170),0));
-            //}
-
-            painter->drawLine(xItem+itemWidth,yItem,xItem+itemWidth,yItem+itemHeight);
-
-                //painter->drawRect(r);
-                //xItem+=itemOffset+itemWidth;
-                xItem+=itemWidth;
-
-        }
-            /*for(int i=maxVal; i < val; i++)
+            if(i == val && i < maxVal)
             {
-                QRect r(xItem,yItem,itemWidth,itemHeight);
+                painter->setPen(QPen(QColor(190,190,190),0));
+                painter->setBrush(Qt::NoBrush);
+            }
+            else if( i == maxVal)
                 painter->setBrush(limitExtraFillBrush_);
-                painter->drawRect(r);
-                xItem+=itemOffset+itemWidth;
-            }*/
+
+            painter->drawRect(r);
+
+            if(i < val)
+            {
+                painter->setPen(painter->brush().color().darker(120));
+                painter->drawLine(xItem,yItem,xItem+itemWidth,yItem);
+                painter->drawLine(xItem,yItem,xItem,yItem+itemHeight);
+
+                painter->setPen(painter->brush().color().darker(170));
+                painter->drawLine(xItem+itemWidth,yItem,xItem+itemWidth,yItem+itemHeight);
+                painter->drawLine(xItem,yItem+itemHeight,xItem+itemWidth,yItem+itemHeight);
+            }
+
+            xItem+=itemOffset+itemWidth;
+        }
     }
     else
     {
         int yItem=option.rect.y()+(option.rect.height()-itemHeight)/2;
-        for(int i=0; i < maxVal; i++)
+        for(int i=0; i < totalVal; i++)
 		{	 
-            if(i >= val)
-			{
+            if(i >= maxVal)
+               painter->drawPixmap(xItem,yItem,itemWidth,itemHeight,limitExtraFillPix_);
+            else if(i >= val)
                 painter->drawPixmap(xItem,yItem,itemWidth,itemHeight,limitEmptyPix_);
-			}
-            else
-            {              
+            else                        
                 painter->drawPixmap(xItem,yItem,itemHeight,itemWidth,limitFillPix_);
-            }
 
             xItem+=itemOffset+itemHeight;
-        }
-        for(int i=maxVal; i < val; i++)
-        {
-            painter->drawPixmap(xItem,yItem,itemWidth,itemHeight,limitExtraFillPix_);
-            xItem+=itemOffset+itemWidth;
-        }
+        }       
 	}
 
     if(selected && drawAttrSelectionRect_)
