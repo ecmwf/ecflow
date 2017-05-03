@@ -153,14 +153,14 @@ void CompactView::mousePressEvent(QMouseEvent* event)
             if(viewItems_[viewItemIndex].expanded)
             {
                 collapse(viewItemIndex);
+                updateRowCount();
+                updateScrollBars();
+                viewport()->update();
             }
             else
             {
                 expand(viewItemIndex);
-            }
-            updateRowCount();
-            updateScrollBars();
-            viewport()->update();
+            }            
         }
     }
 }
@@ -270,7 +270,7 @@ void CompactView::reset()
     if (selectionModel_)
             selectionModel_->reset();
 
-    layout(-1);
+    layout(-1,false,false,false);
     updateRowCount();
     updateScrollBars();
 }
@@ -338,7 +338,7 @@ void CompactView::doItemsLayout(bool hasRemovedItems)
     QModelIndex parent = root_;
     if(model_->hasChildren(parent))
     {
-        layout(-1);
+        layout(-1,false,false,false);
     }
     updateRowCount();
     updateScrollBars();
@@ -352,7 +352,7 @@ void CompactView::doItemsLayout(bool hasRemovedItems)
 // afterIsUninitialized: when we recurse from layout(-1) it indicates
 // the items after 'i' are not yet initialized and need not to be moved
 
-void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized)
+void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated)
 {
     //This is the root item.
     if(parentId == -1)
@@ -378,6 +378,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     if(parentId == -1)
     {
         Q_ASSERT(viewItems_.empty());
+        Q_ASSERT(preAllocated == false);
         viewItems_.resize(count);
         afterIsUninitialized = true; //It can only be true when we expand from the root!
     }
@@ -389,8 +390,9 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         {
             //We called expandall for a non-root item. All the new items need must be
             //already instered at this point. This is the duty of the caller routine.
-            const int itemsCount = viewItems_.size();
-            if(recursiveExpanding)
+            //const int itemsCount = viewItems_.size();
+            //if(recursiveExpanding)
+            if(preAllocated)
             {
                 //We called expandAll() for a non-root item. All the needed items need must already be
                 //inserted at this point. This is the duty of the caller routine!
@@ -491,7 +493,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
             UiLog().dbg() <<  "  before " <<  item->index.data().toString() <<  " total=" << item->total;
 #endif
             //Add the children to the layout
-            layout(last,recursiveExpanding,afterIsUninitialized);
+            layout(last,recursiveExpanding,afterIsUninitialized,preAllocated);
 
             item = &viewItems_[last];
 
@@ -1551,29 +1553,61 @@ int CompactView::totalNumOfChildren(const QModelIndex& idx,int& num) const
     }
 }
 
-void CompactView::expand(int item)
+int CompactView::totalNumOfExpandedChildren(const QModelIndex& idx,int& num) const
 {
-    if (item == -1 || viewItems_[item].expanded)
-        return;
-
-    //q->setState(QAbstractItemView::ExpandingState);
-    const QModelIndex index = viewItems_[item].index;
-    storeExpanded(index);
-    viewItems_[item].expanded = true;
-    layout(item);
-    //q->setState(stateBeforeAnimation);
+    int count=model_->rowCount(idx);
+    num+=count;
+    for(int i=0; i < count; i++)
+    {
+        QModelIndex chIdx=model_->index(i,0,idx);
+        if(isIndexExpanded(chIdx))
+        {
+            totalNumOfExpandedChildren(chIdx,num);
+        }
+    }
 }
 
-void CompactView::expand(const QModelIndex &index)
+void CompactView::expand(int item)
 {
-    int i = viewIndex(index);
-    if (i != -1) // is visible
+    if(item != -1 || viewItems_[item].expanded)
     {
-        expand(i);
+        QModelIndex idx=viewItems_[item].index;
+
+        //mark the item as expanded
+        storeExpanded(idx);
+        viewItems_[item].expanded = true;
+
+        //The total number items to be inserted
+        int total=0;
+        totalNumOfExpandedChildren(idx,total);
+
+        //Insert the required number items
+        ViewItemIterator it=viewItems_.begin();
+        viewItems_.insert(it+item+1,total,CompactViewItem());
+
+        //recursively relayout the item
+        layout(item,false,false,true);
+
+        //We need to update the parentItem in the items after the insertion.
+        //When layout() is called with the given arguments it is delayed to
+        //this point to gain performance!
+        const int itemsCount=static_cast<int>(viewItems_.size());
+        int count=viewItems_[item].total;
+        for(int i = item + count+1; i < itemsCount; i++)
+            if (viewItems_[i].parentItem >= item)
+                viewItems_[i].parentItem += count;
+
+        //update the scrollbars and rerender the viewport
         updateRowCount();
         updateScrollBars();
         viewport()->update();
     }
+}
+
+void CompactView::expand(const QModelIndex &idx)
+{
+    int item=viewIndex(idx);
+    expand(item);
 }
 
 void CompactView::expandAll(const QModelIndex& idx)
@@ -1598,7 +1632,7 @@ void CompactView::expandAll(const QModelIndex& idx)
         viewItems_.insert(it+item+1,total,CompactViewItem());
 
         //recursively relayout the item
-        layout(item,true);
+        layout(item,true,false,true);
 
         //We need to update the parentItem in the items after the insertion.
         //When layout() is called with the given arguments it is delayed to
@@ -1733,7 +1767,7 @@ void CompactView::expandAll()
     viewItems_.clear();
     expandedIndexes.clear();
     //d->interruptDelayedItemsLayout();
-    layout(-1, true);
+    layout(-1, true,false,false);
     updateRowCount();
     updateScrollBars();
     viewport()->update();
