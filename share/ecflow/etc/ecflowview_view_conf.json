@@ -123,6 +123,12 @@
                     "label"   : "Meter threshold colour",
                     "default" : "rgb(0,0,255)"
                 },
+                "limitShape"  : {
+                    "label"   : "Limit shape",
+                    "default" : "rectangle",
+                    "values"  : "rectangle/circle",
+                    "values_label" : "rectangle/circle"
+                },
                 "limitFillColour"  : {
                     "label"   : "Limit fill colour",
                     "default" : "rgb(0,255,0)"

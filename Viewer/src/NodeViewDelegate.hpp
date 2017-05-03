@@ -176,6 +176,8 @@ protected:
     QPixmap limitFillPix_;
     QPixmap limitEmptyPix_;
     QPixmap limitExtraFillPix_;
+    enum LimitShape {RectLimitShape,CircleLimitShape};
+    LimitShape  limitShape_;
     QBrush  triggerBgBrush_;
     QPen    triggerBorderPen_;
     QPen    triggerFontPen_;
