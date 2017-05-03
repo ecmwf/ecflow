@@ -651,6 +651,21 @@ std::vector<std::string> CtsApi::alter(
 {
    return CtsApi::alter(std::vector<std::string>(1,path),alterType,attrType,name,value);
 }
+
+std::vector<std::string> CtsApi::alter_sort(
+       const std::vector<std::string>& paths,
+       const std::string& sortable_attribute_name,
+       bool recursive)
+{
+   std::vector<std::string> retVec; retVec.reserve(2 + paths.size());
+
+   retVec.push_back("--alter");
+   retVec.push_back("sort");
+   retVec.push_back(sortable_attribute_name);
+   if ( recursive ) retVec.push_back("recursive");
+   std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
+   return retVec;
+}
 const char* CtsApi::alterArg() { return "alter"; }
 
 

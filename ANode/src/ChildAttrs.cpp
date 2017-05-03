@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <assert.h>
+#include <boost/bind.hpp>
 
 #include "ChildAttrs.hpp"
 #include "Str.hpp"
@@ -55,6 +56,31 @@ void ChildAttrs::requeue_labels()
 {
    // ECFLOW-195, clear labels before a task is run.
    for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
+}
+
+void ChildAttrs::sort_attributes( ecf::Attr::Type attr)
+{
+   switch ( attr ) {
+      case Attr::EVENT:
+         sort(events_.begin(),events_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Event::name_or_number,_1),
+                                   boost::bind(&Event::name_or_number,_2)));
+         break;
+      case Attr::METER:
+         sort(meters_.begin(),meters_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Meter::name,_1),
+                                   boost::bind(&Meter::name,_2)));
+         break;
+      case Attr::LABEL:
+         sort(labels_.begin(),labels_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Label::name,_1),
+                                   boost::bind(&Label::name,_2)));
+         break;
+      case Attr::LIMIT:    break;
+      case Attr::VARIABLE: break;
+      case Attr::UNKNOWN:  break;
+      default:             break;
+   }
 }
 
 void ChildAttrs::clear()

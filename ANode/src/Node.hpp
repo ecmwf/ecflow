@@ -57,6 +57,7 @@
 #include "NodeFwd.hpp"
 #include "Flag.hpp"
 #include "Aspect.hpp"
+#include "Attr.hpp"
 
 class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
@@ -393,6 +394,9 @@ public:
    void addRepeat( const Repeat& );      // will throw std::runtime_error if duplicate
    void addZombie( const ZombieAttr& );  // will throw std::runtime_error if duplicate
 
+   // sort
+   // expect one attr to be [ event | meter | label | limits | variable ]
+   virtual void sort_attributes( ecf::Attr::Type at, bool recursive);
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type

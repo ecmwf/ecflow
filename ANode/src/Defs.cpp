@@ -41,6 +41,7 @@
 #include "Indentor.hpp"
 #include "AbstractObserver.hpp"
 #include "CheckPtContext.hpp"
+#include "SuiteChanged.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -522,6 +523,18 @@ void Defs::requeue()
    set_most_significant_state();
 }
 
+void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive)
+{
+   if (attr == ecf::Attr::VARIABLE) server_.sort_variables();
+
+   if (recursive) {
+      size_t theSuiteVecSize = suiteVec_.size();
+      for(size_t s = 0; s < theSuiteVecSize; s++) {
+         SuiteChanged changed(suiteVec_[s]);
+         suiteVec_[s]->sort_attributes(attr,recursive);
+      }
+   }
+}
 
 void Defs::check_suite_can_begin(suite_ptr suite) const
 {

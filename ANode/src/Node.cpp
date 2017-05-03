@@ -2116,6 +2116,29 @@ bool Node::is_observed(AbstractObserver* obs) const
    return false;
 }
 
+void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
+{
+   state_change_no_ = Ecf::incr_state_change_no();
+   switch ( attr ) {
+      case Attr::EVENT: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
+      case Attr::METER: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
+      case Attr::LABEL: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
+      case Attr::LIMIT:
+         sort(limitVec_.begin(),limitVec_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Limit::name,_1),
+                                   boost::bind(&Limit::name,_2)));
+         break;
+      case Attr::VARIABLE:
+         sort(varVec_.begin(),varVec_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Variable::name,_1),
+                                   boost::bind(&Variable::name,_2)));
+         break;
+      case Attr::UNKNOWN: break;
+      default:            break;
+   }
+}
+
+
 static std::vector<ecf::TimeAttr>  timeVec_;
 static std::vector<ecf::TodayAttr> todayVec_;
 static std::vector<DateAttr>       dates_;

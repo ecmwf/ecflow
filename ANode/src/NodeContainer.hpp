@@ -103,6 +103,7 @@ public:
 	virtual void setStateOnlyHierarchically(NState::State s,bool force = false);
 	virtual void set_state_hierarchically(NState::State s, bool force);
    virtual void update_limits();
+   virtual void sort_attributes(ecf::Attr::Type attr,bool recursive);
 
 private:
    virtual size_t child_position(const Node*) const;

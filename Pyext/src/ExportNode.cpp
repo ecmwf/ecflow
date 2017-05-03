@@ -115,6 +115,16 @@ node_ptr add_part_complete_2(node_ptr self,const std::string& expression, bool a
 bool evaluate_trigger(node_ptr self) { Ast* t = self->triggerAst(); if (t) return t->evaluate();return false;}
 bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) return t->evaluate();return false;}
 
+void sort_attributes(node_ptr self,const std::string& attribute_name, bool recursive){
+   std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
+   ecf::Attr::Type attr = Attr::to_attr(attribute_name);
+   if (attr == ecf::Attr::UNKNOWN) {
+      std::stringstream ss;  ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
+      throw std::runtime_error(ss.str());
+   }
+   self->sort_attributes(attr,recursive);
+}
+
 static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<JobCreationCtrl>();}
 
 std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
@@ -300,6 +310,8 @@ void export_Node()
    .def("delete_zombie",    &Node::delete_zombie        )
    .def("change_trigger",   &Node::changeTrigger        )
    .def("change_complete",  &Node::changeComplete       )
+   .def("sort_attributes",  &Node::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
+   .def("sort_attributes",  &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
    .def("get_abs_node_path",    &Node::absNodePath, DefsDoc::abs_node_path_doc())
    .def("has_time_dependencies",      &Node::hasTimeDependencies)
    .def("update_generated_variables", &Node::update_generated_variables)

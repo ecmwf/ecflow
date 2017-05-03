@@ -148,6 +148,17 @@ defs_ptr add_variable_dict(defs_ptr self,const boost::python::dict& dict) {
 void delete_variable(defs_ptr self,const std::string& name) { self->set_server().delete_user_variable(name);}
 
 
+void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recursive){
+   std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
+   ecf::Attr::Type attr = Attr::to_attr(attribute_name);
+   if (attr == ecf::Attr::UNKNOWN) {
+      std::stringstream ss;  ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
+      throw std::runtime_error(ss.str());
+   }
+   self->sort_attributes(attr,recursive);
+}
+
+
 void export_Defs()
 {
 	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))
@@ -165,6 +176,8 @@ void export_Defs()
    .def("add_variable",          &add_variable_int)
    .def("add_variable",          &add_variable_var)
    .def("add_variable",          &add_variable_dict)
+   .def("sort_attributes",       &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
+   .def("sort_attributes",       &Defs::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
    .def("delete_variable",       &delete_variable,"An empty string will delete all user variables")
 	.def("find_suite",            &Defs::findSuite,"Given a name, find the corresponding :term:`suite`")
    .def("find_abs_node",         &Defs::findAbsNode,"Given a path, find the the :term:`node`")
