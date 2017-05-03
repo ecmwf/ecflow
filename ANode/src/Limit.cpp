@@ -149,6 +149,7 @@ void Limit::increment( int tokens , const std::string& abs_node_path) {
 void Limit::setValue( int v )
 {
    value_ = v;
+   if (value_ == 0) paths_.clear();
    update_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
    std::cout << "   Limit::setValue() value_ = " << value_ << "\n";
