@@ -14,6 +14,8 @@
 #include <QSettings>
 #include <QStringListModel>
 
+#include "Aspect.hpp"
+
 #include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
@@ -27,6 +29,8 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
     removeTb_->setDefaultAction(actionRemove_);
     removeAllTb_->setDefaultAction(actionRemoveAll_);
     pathView_->addAction(actionRemove_);
+    pathView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"limit",parent), model_(0)
@@ -188,29 +192,48 @@ void LimitEditor::remove(bool all)
     Q_ASSERT(lim);
 
     if(all)
-        lim->resetPaths();
+    {
+        std::vector<std::string> valCmd;
+        VAttribute::buildAlterCommand(valCmd,"change","limit_value",a->strName(),"0");
+        ServerHandler::command(info_,valCmd);
+    }
     else
     {
         std::vector<std::string> paths;
         Q_FOREACH(QModelIndex idx,w_->pathView_->selectionModel()->selectedRows())
         {
-            paths.push_back(model_->data(idx,Qt::DisplayRole).toString().toStdString());
+            std::vector<std::string> valCmd;
+            VAttribute::buildAlterCommand(valCmd,"delete","limit_path",a->strName(),
+                                          model_->data(idx,Qt::DisplayRole).toString().toStdString());
+            ServerHandler::command(info_,valCmd);
         }
-        lim->removePaths(paths);
     }
 
-    //Update gui with th new state
-    QStringList aData=a->data();
-    if(aData.count() < 4)
-       return;
-
-    oriVal_=aData[2].toInt();
-    w_->valueLabel_->setText(QString::number(oriVal_));
-    modelData_.clear();
-    modelData_=lim->paths();
-    model_->setStringList(modelData_);
+    //Updating the gui with the new state will happen later
+    //because command() is asynchronous
 }
 
+void LimitEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect)
+{
+    bool limitCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::LIMIT) != aspect.end());
+    if(limitCh && info_)
+    {
+        VAttribute* a=info_->attribute();
+        Q_ASSERT(a);
+        VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+        Q_ASSERT(lim);
+
+        QStringList aData=a->data();
+        if(aData.count() < 4)
+           return;
+
+        oriVal_=aData[2].toInt();
+        w_->valueLabel_->setText(QString::number(oriVal_));
+        modelData_.clear();
+        modelData_=lim->paths();
+        model_->setStringList(modelData_);
+    }
+}
 
 void LimitEditor::writeSettings()
 {
@@ -241,7 +264,7 @@ void LimitEditor::readSettings()
     }
     else
     {
-        resize(QSize(310,200));
+        resize(QSize(420,400));
     }
 
     settings.endGroup();

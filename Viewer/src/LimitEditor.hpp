@@ -46,6 +46,7 @@ protected:
     bool isValueChanged();
     void buildList(VAttribute *a);
     void remove(bool all);
+    void nodeChanged(const std::vector<ecf::Aspect::Type>& a);
     void readSettings();
     void writeSettings();
 

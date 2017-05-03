@@ -136,7 +136,11 @@
     </layout>
    </item>
    <item>
-    <widget class="QListView" name="pathView_"/>
+    <widget class="QListView" name="pathView_">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
    </item>
   </layout>
   <action name="actionRemove_">
