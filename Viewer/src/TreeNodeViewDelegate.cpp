@@ -120,9 +120,6 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
         //vopt.rect.setLeft(vopt.rect.x()-indentation_/2 + 10);
         vopt.rect.setLeft(vopt.rect.x()-indentation_/2 + 5);
 
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-	const QWidget* widget = vopt.widget;
-
 	//Save painter state
 	painter->save();
 

@@ -61,6 +61,17 @@
        id="linearGradient7198"
        xlink:href="#linearGradient3845-2"
        inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient3786-4">
+      <stop
+         id="stop3788-7"
+         offset="0"
+         style="stop-color:#ffffff;stop-opacity:1;" />
+      <stop
+         id="stop3790-8"
+         offset="1"
+         style="stop-color:#96b0ba;stop-opacity:1" />
+    </linearGradient>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -70,15 +81,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="21.072033"
-     inkscape:cx="6.8027477"
-     inkscape:cy="14.110451"
+     inkscape:cx="20.501136"
+     inkscape:cy="17.558393"
      inkscape:document-units="px"
      inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:snap-grids="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1144"
-     inkscape:window-x="0"
+     inkscape:window-height="1175"
+     inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:snap-to-guides="true"
@@ -146,14 +157,6 @@
      id="layer3"
      inkscape:label="first"
      style="display:inline">
-    <ellipse
-       style="fill:#8badb5;fill-opacity:1;stroke:#6f8a91;stroke-width:1.36205304;stroke-opacity:1"
-       id="path8398"
-       transform="matrix(-0.29437333,-0.95569051,0.95569077,-0.29437248,0,0)"
-       cx="-8.5917816"
-       cy="-20.452623"
-       rx="15.184913"
-       ry="15.184934" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:28px;line-height:125%;font-family:Courier;-inkscape-font-specification:'Courier Bold';letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
@@ -190,17 +193,22 @@
          sodipodi:role="line">N</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:42.5091362px;line-height:125%;font-family:Courier;-inkscape-font-specification:'Courier Bold';letter-spacing:0px;word-spacing:0px;display:inline;fill:#497599;fill-opacity:1;stroke:none"
-       x="3.9559932"
-       y="27.820236"
-       id="text4156"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:17.06431961px;line-height:125%;font-family:Courier;-inkscape-font-specification:'Courier Bold';letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+       x="11.372865"
+       y="49.23735"
+       id="text7062-1-9"
        sodipodi:linespacing="125%"
-       transform="scale(0.98805752,1.0120868)"><tspan
+       transform="scale(1.0069104,0.99313703)"><tspan
          sodipodi:role="line"
-         id="tspan4158"
-         x="3.9559932"
-         y="27.820236"
-         style="font-weight:bold;font-size:42.5091362px;-inkscape-font-specification:'Courier Bold';fill:#497599;fill-opacity:1">N</tspan></text>
+         id="tspan7064-6-9"
+         x="11.372865"
+         y="49.23735"
+         style="font-weight:bold;font-size:17.06431961px;-inkscape-font-specification:'Courier Bold';fill:#ffffff;fill-opacity:1">N</tspan></text>
+    <path
+       style="fill:#a2a5bf;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 0.34121685,28.080791 31.885264,28.17389 15.997695,1.5464848 Z"
+       id="path8050"
+       inkscape:connector-curvature="0" />
   </g>
   <g
      inkscape:groupmode="layer"

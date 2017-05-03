@@ -59,7 +59,8 @@ void ScriptItemWidget::reload(VInfo_ptr info)
 
     //Info must be a node
     if(info_ && info_->isNode() && info_->node())
-    {
+    {          
+        reloadTb_->setEnabled(false);
         infoProvider_->info(info_);
     }
 }
@@ -70,6 +71,7 @@ void ScriptItemWidget::clearContents()
     fileLabel_->clear();
     textEdit_->clear();
     messageLabel_->hide();
+    reloadTb_->setEnabled(true);
 }
 
 void ScriptItemWidget::infoReady(VReply* reply)
@@ -89,7 +91,7 @@ void ScriptItemWidget::infoReady(VReply* reply)
     }
 
     fileLabel_->update(reply);
-
+    reloadTb_->setEnabled(true);
 }
 
 void ScriptItemWidget::infoProgress(VReply* reply)
@@ -103,7 +105,36 @@ void ScriptItemWidget::infoFailed(VReply* reply)
     QString s=QString::fromStdString(reply->errorText());
     //textEdit_->setPlainText(s);   
     messageLabel_->showError(s);
+    reloadTb_->setEnabled(true);
 }
 
+void ScriptItemWidget::reloadRequested()
+{
+    reload(info_);
+}
+
+void ScriptItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(SuspendedChanged))
+    {
+        //Suspend
+        if(suspended_)
+        {
+            reloadTb_->setEnabled(false);
+        }
+        //Resume
+        else
+        {
+            if(info_ && info_->node())
+            {
+                reloadTb_->setEnabled(true);
+            }
+            else
+            {
+                clearContents();
+            }
+        }
+    }
+}
 
 static InfoPanelItemMaker<ScriptItemWidget> maker1("script");

@@ -1506,34 +1506,41 @@ public:
       TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC, LATE };
 
    enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND, ADD_LATE, ADD_LIMIT, ADD_INLIMIT };
-
+   // add
    AlterCmd(const std::string& path, Add_attr_type  attr,  const std::string& name, const std::string& value = "" )
    : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(attr),
      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
    AlterCmd(const std::vector<std::string>& paths, Add_attr_type  attr,  const std::string& name, const std::string& value = "" )
    : paths_(paths), name_(name), value_(value), add_attr_type_(attr),
      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
-
+   // delete
    AlterCmd(const std::string& path,  Delete_attr_type  del, const std::string& name = "" , const std::string& value = "")
    : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(ADD_ATTR_ND),
      del_attr_type_(del), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
    AlterCmd(const std::vector<std::string>& paths,  Delete_attr_type  del, const std::string& name = "" , const std::string& value = "")
    : paths_(paths), name_(name), value_(value), add_attr_type_(ADD_ATTR_ND),
      del_attr_type_(del), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
-
+   // change
    AlterCmd(const std::string& path, Change_attr_type  attr, const std::string& name, const std::string& value = "")
    : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(ADD_ATTR_ND),
      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(attr),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
    AlterCmd(const std::vector<std::string>& paths, Change_attr_type  attr, const std::string& name, const std::string& value = "")
    : paths_(paths), name_(name), value_(value), add_attr_type_(ADD_ATTR_ND),
      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(attr),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
-
+   // flag
    AlterCmd(const std::string& path, ecf::Flag::Type ft,  bool flag)
    : paths_(std::vector<std::string>(1,path)), add_attr_type_(ADD_ATTR_ND),
      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ft), flag_(flag) {}
    AlterCmd(const std::vector<std::string>& paths, ecf::Flag::Type ft,  bool flag)
    : paths_(paths), add_attr_type_(ADD_ATTR_ND),
      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ft), flag_(flag) {}
+   // sort
+   AlterCmd(const std::string& path, const std::string& name,const std::string& value)
+    : paths_(std::vector<std::string>(1,path)), name_(name),value_(value),add_attr_type_(ADD_ATTR_ND),
+      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false)  {}
+   AlterCmd(const std::vector<std::string>& paths, const std::string& name,const std::string& value)
+    : paths_(paths), name_(name),value_(value),add_attr_type_(ADD_ATTR_ND),
+      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false)  {}
 
    AlterCmd()
    : add_attr_type_(ADD_ATTR_ND), del_attr_type_(DELETE_ATTR_ND),
@@ -1571,6 +1578,7 @@ private:
    void createDelete( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const;
    void createChange( Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
    void create_flag(  Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const;
+   void create_sort_attributes(Cmd_ptr& cmd,const std::vector<std::string>& options,const std::vector<std::string>& paths ) const;
 
    std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
 

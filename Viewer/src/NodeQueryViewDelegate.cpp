@@ -10,6 +10,7 @@
 
 #include "NodeQueryViewDelegate.hpp"
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QDebug>
 #include <QImageReader>
@@ -99,7 +100,12 @@ void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
                    const QModelIndex& index) const
 {
     //Background
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QStyleOptionViewItem vopt(option);
+#else
+    QStyleOptionViewItemV4 vopt(option);
+#endif
+
     initStyleOption(&vopt, index);
 
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
@@ -143,7 +149,7 @@ void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     else
     {
     	QString text=index.data(Qt::DisplayRole).toString();
-    	QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
     	painter->setPen(Qt::black);
 
     	int rightPos=textRect.right()+1;

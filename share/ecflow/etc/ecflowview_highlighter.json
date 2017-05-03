@@ -2,7 +2,7 @@
         "info"  : {
 
         		"main" : {
-                        "pattern" : "^\\s*(name|type|status|at|aborted reason)\\s+:",
+                        "pattern" : "^\\s*(name|type|status|flags|at|aborted reason)\\s+:",
                         "colour"  : "rgb(0,0,128)",
                         "bold"    : "true"                               
                 },

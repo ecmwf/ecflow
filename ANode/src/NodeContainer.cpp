@@ -1199,6 +1199,15 @@ void NodeContainer::restore()
 }
 
 
+void NodeContainer::sort_attributes(ecf::Attr::Type attr,bool recursive)
+{
+   Node::sort_attributes(attr,recursive);
+   if (recursive) {
+      size_t node_vec_size = nodeVec_.size();
+      for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->sort_attributes(attr,recursive); }
+   }
+}
+
 bool NodeContainer::doDeleteChild(Node* child)
 {
 	SuiteChanged1 changed(suite());

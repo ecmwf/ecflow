@@ -414,6 +414,14 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
       BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","set_flag",flag_types[i]) == 0,"--alter should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","clear_flag",flag_types[i]) == 0,"--alter should return 0\n" << theClient.errorMsg());
    }
+
+   // sort
+   std::vector<std::string> sortable_attributes = Attr::all_attrs();
+   BOOST_REQUIRE_MESSAGE(!sortable_attributes.empty(),"Expected to find attributes");
+   for(size_t i = 0; i <  sortable_attributes.size(); i++) {
+      BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attributes[i],true) == 0,"--alter should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attributes[i],false) == 0,"--alter should return 0\n" << theClient.errorMsg());
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )

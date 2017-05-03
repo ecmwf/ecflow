@@ -167,6 +167,7 @@ public:
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
 
+    virtual std::string flagsAsStr() const;
     virtual bool isFlagSet(ecf::Flag::Type f) const;
 
     int index() const {return index_;}
@@ -307,6 +308,7 @@ public:
 	std::string findVariable(const std::string& key,bool substitute=false) const;
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
+    std::string flagsAsStr() const;
 	bool isFlagSet(ecf::Flag::Type f) const;
 
 	void why(std::vector<std::string>& theReasonWhy) const;

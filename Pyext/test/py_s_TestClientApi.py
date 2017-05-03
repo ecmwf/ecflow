@@ -773,6 +773,87 @@ def test_client_get_file(ci):
 def test_client_plug(ci):
     pass
            
+def test_client_alter_sort(ci):
+    print("test_client_alter_sort")
+    ci.delete_all()   
+    
+    defs = create_defs("test_client_alter_sort")
+    t1 = "/test_client_alter_sort/f1/t1"
+    task_t1 = defs.find_abs_node(t1)
+    task_t1.add_variable("z","value").add_variable("y","value").add_variable("x","value")
+    task_t1.add_event("z").add_event("y").add_event("x")
+    task_t1.add_meter("z",0,100,100).add_meter("y",0,100,100).add_meter("x",0,100,100)
+    task_t1.add_label("z","name").add_label("y","name").add_label("x","name")
+    task_t1.add_limit("z",10).add_limit("y",10).add_limit("x",10)
+    
+    ci.load(defs)   
+    
+    ci.sort_attributes(t1,"variable")
+    ci.sort_attributes(t1,"event")
+    ci.sort_attributes(t1,"meter")
+    ci.sort_attributes(t1,"label")
+    ci.sort_attributes(t1,"limit")
+
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    assert( len(list(task_t1.variables))) == 3 ,"Expected 3 variable :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.events))) == 3 ,"Expected 3 events :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.meters))) == 3 ,"Expected 3 meters :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.labels))) == 3 ,"Expected 3 labels :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.limits))) == 3 ,"Expected 3 limits :\n" + str(ci.get_defs())
+    expected = ['x','y','z']; vactual = []; eactual = []; mactual = []; lactual = []; liactual = [];
+    for v in task_t1.variables: vactual.append(v.name())
+    for v in task_t1.events: eactual.append(v.name())
+    for v in task_t1.meters: mactual.append(v.name())
+    for v in task_t1.labels: lactual.append(v.name())
+    for v in task_t1.limits: liactual.append(v.name())
+    assert expected == vactual, "variable Attributes not sorted, expected:" + str(expected) + " but found:" + str(vactual)
+    assert expected == eactual, "event Attributes not sorted, expected:" + str(expected) + " but found:" + str(eactual)
+    assert expected == mactual, "meter Attributes not sorted, expected:" + str(expected) + " but found:" + str(mactual)
+    assert expected == lactual, "label Attributes not sorted, expected:" + str(expected) + " but found:" + str(lactual)
+    assert expected == liactual,"limit Attributes not sorted, expected:" + str(expected) + " but found:" + str(liactual)
+
+def test_client_alter_sort_defs(ci):
+    print("test_client_alter_sort_defs")
+    ci.delete_all()   
+    
+    defs = create_defs("test_client_alter_sort_defs")
+    t1 = "/test_client_alter_sort_defs/f1/t1"
+    task_t1 = defs.find_abs_node(t1)
+    task_t1.add_variable("z","value").add_variable("y","value").add_variable("x","value")
+    task_t1.add_event("z").add_event("y").add_event("x")
+    task_t1.add_meter("z",0,100,100).add_meter("y",0,100,100).add_meter("x",0,100,100)
+    task_t1.add_label("z","name").add_label("y","name").add_label("x","name")
+    task_t1.add_limit("z",10).add_limit("y",10).add_limit("x",10)
+    
+    ci.load(defs)   
+    
+    ci.sort_attributes("/","variable",True)
+    ci.sort_attributes("/","event",True)
+    ci.sort_attributes("/","meter",True)
+    ci.sort_attributes("/","label",True)
+    ci.sort_attributes("/","limit",True)
+
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    assert( len(list(task_t1.variables))) == 3 ,"Expected 3 variable :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.events))) == 3 ,"Expected 3 events :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.meters))) == 3 ,"Expected 3 meters :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.labels))) == 3 ,"Expected 3 labels :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.limits))) == 3 ,"Expected 3 limits :\n" + str(ci.get_defs())
+    expected = ['x','y','z']; vactual = []; eactual = []; mactual = []; lactual = []; liactual = [];
+    for v in task_t1.variables: vactual.append(v.name())
+    for v in task_t1.events: eactual.append(v.name())
+    for v in task_t1.meters: mactual.append(v.name())
+    for v in task_t1.labels: lactual.append(v.name())
+    for v in task_t1.limits: liactual.append(v.name())
+    assert expected == vactual, "variable Attributes not sorted, expected:" + str(expected) + " but found:" + str(vactual)
+    assert expected == eactual, "event Attributes not sorted, expected:" + str(expected) + " but found:" + str(eactual)
+    assert expected == mactual, "meter Attributes not sorted, expected:" + str(expected) + " but found:" + str(mactual)
+    assert expected == lactual, "label Attributes not sorted, expected:" + str(expected) + " but found:" + str(lactual)
+    assert expected == liactual,"limit Attributes not sorted, expected:" + str(expected) + " but found:" + str(liactual)
+ 
+           
 def test_client_alter_add(ci):
     print("test_client_alter_add")
     ci.delete_all()     
@@ -1632,6 +1713,8 @@ if __name__ == "__main__":
               
         test_client_get_file(ci)             
         #test_client_plug(ci)             
+        test_client_alter_sort(ci) 
+        test_client_alter_sort_defs(ci) 
         test_client_alter_add(ci) 
         test_client_alter_delete(ci) 
         test_client_alter_change(ci) 

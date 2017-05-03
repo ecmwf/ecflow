@@ -138,6 +138,9 @@ public:
                                          const std::string& attrType,
                                          const std::string& name = "",
                                          const std::string& value = "");
+   static std::vector<std::string> alter_sort(const std::vector<std::string>& paths,
+                                         const std::string& sortable_attribute_name,
+                                         bool recursive);
 
 	static std::string reloadwsfile();
    static std::string reloadpasswdfile();

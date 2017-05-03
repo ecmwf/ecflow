@@ -292,7 +292,14 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
       else       as->defs()->flag().clear(flag_type_);
    }
 
-   return doJobSubmission( as );
+	// sort
+	ecf::Attr::Type attr = Attr::to_attr(name_);
+	if ( attr != ecf::Attr::UNKNOWN) {
+	   bool recursive = (value_ == "recursive") ? true: false;
+	   as->defs()->sort_attributes(attr,recursive);
+	}
+
+	return doJobSubmission( as );
 }
 
 
@@ -417,6 +424,13 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
          if (flag_) node->flag().set(flag_type_);
          else       node->flag().clear(flag_type_);
       }
+
+      	// sort
+	   ecf::Attr::Type attr = Attr::to_attr(name_);
+	   if ( attr != ecf::Attr::UNKNOWN) {
+	      bool recursive = (value_ == "recursive") ? true: false;
+	      node->sort_attributes(attr,recursive);
+	   }
    }
 
    std::string error_msg = ss.str();
@@ -437,94 +451,102 @@ const char* AlterCmd::desc() {
    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
    return  "Alter the node according to the options.\n"
          "To add/delete/change server variables use '/' for the path.\n"
-         "  arg1 = [ delete | change | add | set_flag | clear_flag]\n"
-         "           one option must be specified\n"
-         "  arg2 = For delete:\n"
-         "           [ variable | time | today | date  | day | cron | event | meter | late |\n"
-         "             label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
-         "         For change:\n"
-         "           [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-         "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late ]\n"
-         "             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
-         "             the change to take effect fully.\n"
-         "         For add:\n"
-         "           [ variable | time | today | date | day | zombie | late | limit | inlimit ]\n"
-         "         For set_flag and clear_flag:\n"
-         "           [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script |\n"
-         "             killed  | late | message | complete | queue_limit | task_waiting | locked | zombie |\n"
+         "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]\n"
+         "         one option must be specified\n"
+         "arg2 = For delete:\n"
+         "         [ variable | time | today | date  | day | cron | event | meter | late |\n"
+         "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
+         "       For change:\n"
+         "         [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
+         "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late ]\n"
+         "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
+         "         the change to take effect fully.\n"
+         "       For add:\n"
+         "         [ variable | time | today | date | day | zombie | late | limit | inlimit ]\n"
+         "       For set_flag and clear_flag:\n"
+         "         [ force_aborted | user_edit | task_aborted | edit_failed |\n"
+         "           ecfcmd_failed | no_script | killed | migrated | late |\n"
+         "           message | complete | queue_limit | task_waiting | locked | zombie ]\n"
          "             archived | restored]\n"
-         "  arg3 = name/value\n"
-         "         when changing, attributes like variable,meter,event,label,limits,late\n"
-         "         we expect arguments to be quoted\n"
-         "  arg4 = new_value\n"
-         "         specifies the new value only used for 'change'\n"
-         "         values with spaces must be quoted\n"
-         "  arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
+         "       For sort:\n"
+         "         [ event | meter | label | variable| limit ]\n"
+         "arg3 = name/value\n"
+         "       when changing, attributes like variable,meter,event,label,limits,late\n"
+         "       we expect arguments to be quoted. For sort this argument can be called 'recursive'\n"
+         "arg4 = new_value\n"
+         "       specifies the new value only used for 'change'\n"
+         "       values with spaces must be quoted\n"
+         "arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
          ;
 }
 
 void AlterCmd::addOption(boost::program_options::options_description& desc) const {
-   desc.add_options()( AlterCmd::arg(),po::value< vector<string> >()->multitoken(), AlterCmd::desc() );
+	desc.add_options()( AlterCmd::arg(),po::value< vector<string> >()->multitoken(), AlterCmd::desc() );
 }
 void AlterCmd::create(  Cmd_ptr& cmd,
       boost::program_options::variables_map& vm,
       AbstractClientEnv* ac) const
 {
-   vector<string> args = vm[  arg() ].as< vector<string> >();
+	vector<string> args = vm[  arg() ].as< vector<string> >();
 
-   if (ac->debug()) dumpVecArgs(AlterCmd::arg(),args);
+	if (ac->debug()) dumpVecArgs(AlterCmd::arg(),args);
 
-   std::vector<std::string> options,paths;
-   split_args_to_options_and_paths(args,options,paths); // relative order is still preserved
-   if (paths.empty()) {
-      std::stringstream ss;
-      ss << "AlterCmd: No paths specified. Paths must begin with a leading '/' character\n" << dump_args(options,paths) << "\n";
-      throw std::runtime_error( ss.str() );
-   }
-   if (options.empty()) {
-      std::stringstream ss;
-      ss << "AlterCmd: Invalid argument list:\n" << dump_args(options,paths)  << "\n";
-      throw std::runtime_error( ss.str() );
-   }
-   if (options.size() < 2 ) {
-      std::stringstream ss;
-      ss << "Alter: At least three arguments expected. Found " << args.size() << "\n" << dump_args(options,paths) << "\n";
-      throw std::runtime_error( ss.str() );
-   }
+	std::vector<std::string> options,paths;
+	split_args_to_options_and_paths(args,options,paths); // relative order is still preserved
+	if (paths.empty()) {
+		std::stringstream ss;
+		ss << "AlterCmd: No paths specified. Paths must begin with a leading '/' character\n" << dump_args(options,paths) << "\n";
+		throw std::runtime_error( ss.str() );
+	}
+	if (options.empty()) {
+		std::stringstream ss;
+		ss << "AlterCmd: Invalid argument list:\n" << dump_args(options,paths)  << "\n";
+		throw std::runtime_error( ss.str() );
+	}
+	if (options.size() < 2 ) {
+		std::stringstream ss;
+		ss << "Alter: At least three arguments expected. Found " << args.size() << "\n" << dump_args(options,paths) << "\n";
+		throw std::runtime_error( ss.str() );
+	}
 
-   // arg[0] should one of [ add | delete | change | set_flag | clear_flag  ]
-   std::string alterType = options[0];
+	// arg[0] should one of [ add | delete | change | set_flag | clear_flag | sort ]
+	std::string alterType = options[0];
 
-   if ( alterType == "add") {
+	if ( alterType == "add") {
 
-      createAdd(cmd,options,paths);
+		createAdd(cmd,options,paths);
+		return;
+	}
+	else if ( alterType == "change") {
+
+		createChange(cmd,options,paths);
+		return;
+	}
+	else if ( alterType == "delete") {
+
+		createDelete(cmd,options,paths);
+		return;
+	}
+	else if ( alterType == "set_flag") {
+
+		create_flag(cmd,options,paths, true /*set */);
+		return;
+	}
+	else if ( alterType == "clear_flag") {
+
+		create_flag(cmd,options,paths, false /*clear */);
+		return;
+	}
+   else if ( alterType == "sort") {
+
+      create_sort_attributes(cmd,options,paths);
       return;
    }
-   else if ( alterType == "change") {
 
-      createChange(cmd,options,paths);
-      return;
-   }
-   else if ( alterType == "delete") {
-
-      createDelete(cmd,options,paths);
-      return;
-   }
-   else if ( alterType == "set_flag") {
-
-      create_flag(cmd,options,paths, true /*set */);
-      return;
-   }
-   else if ( alterType == "clear_flag") {
-
-      create_flag(cmd,options,paths, false /*clear */);
-      return;
-   }
-
-   std::stringstream ss;
-   ss << "Alter: The first argument must be one of [ change | delete | add | set_flag | clear_flag ] but found '"
-         << alterType << "'\n" << dump_args(options,paths)  << "\n";
-   throw std::runtime_error( ss.str() );
+	std::stringstream ss;
+	ss << "Alter: The first argument must be one of [ change | delete | add | set_flag | clear_flag | sort ] but found '"
+			<< alterType << "'\n" << dump_args(options,paths)  << "\n";
+	throw std::runtime_error( ss.str() );
 }
 
 void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths ) const
@@ -1094,6 +1116,43 @@ void AlterCmd::create_flag( Cmd_ptr& cmd, const std::vector<std::string>& option
    }
 
    cmd = Cmd_ptr( new AlterCmd(paths,theFlagType, flag  ) );
+}
+
+void AlterCmd::create_sort_attributes(Cmd_ptr& cmd,const std::vector<std::string>& options,const std::vector<std::string>& paths) const
+{
+   // options[0]  - sort
+   // options[1]  - [ event | meter | label | limit | variable ]
+   // options[2]  - recursive
+   std::stringstream ss;
+
+   if (options.size() < 2 ) {
+      ss << "AlterCmd: add: At least three arguments expected. Found " << (options.size() + paths.size()) << "\n" << dump_args(options,paths) << "\n";
+      throw std::runtime_error( ss.str() );
+   }
+
+   ecf::Attr::Type theAttrType = Attr::to_attr(options[1]);
+   if (theAttrType == Attr::UNKNOWN) {
+      ss << "AlterCmd: sort: The second argument must be one of [ ";
+      std::vector<std::string> valid = Attr::all_attrs();
+      for(size_t i = 0; i < valid.size(); ++i) {
+         if (i != 0) ss << " | ";
+         ss << valid[i];
+      }
+      ss << "] but found " << options[1] << "\n" << AlterCmd::desc();
+      throw std::runtime_error( ss.str() );
+   }
+   std::string name = options[1];
+
+   std::string value;
+   if (options.size() == 3) {
+      if (options[2] != "recursive") {
+         ss << "AlterCmd: sort: Expected third argument to be 'recursive' but found '" << options[2] << "\n" << AlterCmd::desc();
+         throw std::runtime_error( ss.str() );
+      }
+      value = "recursive";
+   }
+
+   cmd = Cmd_ptr( new AlterCmd(paths, name,value) );
 }
 
 std::ostream& operator<<(std::ostream& os, const AlterCmd& c) { return c.print(os); }

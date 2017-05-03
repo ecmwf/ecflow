@@ -440,12 +440,17 @@ void CompactNodeView::slotSaveExpand(const VTreeNode* node)
 //Restore the expand state for the given node (it can be a server as well)
 void CompactNodeView::slotRestoreExpand(const VTreeNode* node)
 {
-    Q_FOREACH(CompactViewExpandState* es,expandStates_)
+    for(int i=0; i < expandStates_.count(); i++)
     {
-        if(es->rootSameAs(node->vnode()->strName()))
+        CompactViewExpandState* es=expandStates_[i];
         {
-            es->restore(node);
-            expandStates_.removeOne(es);
+            if(es->rootSameAs(node->vnode()->strName()))
+            {
+                es->restore(node);
+                expandStates_.remove(i);
+                delete es;
+                break;
+            }
         }
     }
 

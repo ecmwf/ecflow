@@ -28,12 +28,14 @@ protected Q_SLOTS:
 	void on_gotoLineTb__clicked();
 	void on_fontSizeUpTb__clicked();
 	void on_fontSizeDownTb__clicked();
+    void on_reloadTb__clicked();
 
 Q_SIGNALS:
 	void editorFontSizeChanged();
 
 protected:
 	void removeSpacer();
+    virtual void reloadRequested()=0;
 };
 
 #endif

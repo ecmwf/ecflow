@@ -572,13 +572,17 @@ void TreeNodeView::slotSaveExpand(const VTreeNode* node)
 //Restore the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
 {
-    Q_FOREACH(TreeViewExpandState* es,expandStates_)
+    for(int i=0; i < expandStates_.count(); i++)
     {
-        if(es->rootSameAs(node->vnode()->strName()))
+        TreeViewExpandState* es=expandStates_[i];
         {
-            es->restore(node);
-            expandStates_.removeOne(es);
-            delete es;
+            if(es->rootSameAs(node->vnode()->strName()))
+            {
+                es->restore(node);
+                expandStates_.remove(i);
+                delete es;
+                break;
+            }
         }
     }
 

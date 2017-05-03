@@ -13,6 +13,7 @@
 
 #include <QDialog>
 #include <QLinearGradient>
+#include <QSettings>
 #include <QWidget>
 
 #include "ui_ChangeNotifyDialog.h"
@@ -36,6 +37,8 @@ public:
 	void init(ChangeNotify*);
 	void update(ChangeNotify*);
 	ChangeNotify* notifier() const {return notifier_;}
+    void writeSettings(QSettings& settings);
+    void readSettings(const QSettings& settings);
 
 public Q_SLOTS:
 	void slotAppend();
@@ -86,6 +89,7 @@ protected:
 	void closeEvent(QCloseEvent*);
 	void writeSettings();
 	void readSettings();
+    void readTabSettings(int tabIndex);
 
 	QList<ChangeNotifyDialogWidget*> tabWidgets_;
 	bool ignoreCurrentChange_;

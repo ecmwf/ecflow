@@ -103,8 +103,7 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
 
 RepeatEditor::~RepeatEditor()
 {
-    //if(repeat_)
-    //    delete repeat_;
+    writeSettings();
 }
 
 void RepeatEditor::buildList(VRepeatAttr *rep)

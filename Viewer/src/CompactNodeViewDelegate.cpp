@@ -141,6 +141,10 @@ public:
          QRect r=optRect;
          return r.adjusted(0,-selectRm.topOffset(),0,-selectRm.bottomOffset());
      }
+
+     QRect adjustSelectionRectNonOpt(const QRect& optRect) const {
+         return adjustSelectionRect(optRect);
+     }
 };
 
 CompactNodeViewDelegate::CompactNodeViewDelegate(TreeNodeModel* model,QWidget *parent) :
@@ -240,9 +244,6 @@ int CompactNodeViewDelegate::paintItem(QPainter *painter,const QStyleOptionViewI
     //Background
     QStyleOptionViewItem vopt(option);
     initStyleOption(&vopt, index);
-
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
 
     //Save painter state
     painter->save();

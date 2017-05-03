@@ -535,11 +535,6 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     //qmenu->setWindowFlags(Qt::Tool);
     //qmenu->setWindowTitle("my title");
 
-    // add an inactive action(!) to the top of the menu in order to show which
-    // node has been selected
-
-    buildMenuTitle(nodes,qmenu);
-
     //TypeNodeCondition  typeCondFamily   (MenuItem::FAMILY);
     //TypeNodeCondition  typeCondTask     (MenuItem::TASK);
     //StateNodeCondition stateCondUnknown ("unknown");
@@ -553,6 +548,27 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     //{
     //    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse condition: " + condString));
     //}
+
+
+
+
+    // add an inactive action(!) to the top of the menu in order to show which
+    // node has been selected
+
+    buildMenuTitle(nodes, qmenu);
+
+
+
+    // if multiple attributes are selected, then tell the user we can't help them
+    // NOTE that ActionHandler.cpp ensures that we cannot have a mix of attr and non-attr nodes
+    if (nodes[0]->isAttribute() && nodes.size() > 1)
+    {
+        QAction *noAction = new QAction("No action for multiple attributes", parent);
+        noAction->setEnabled(false);
+        qmenu->addAction(noAction);
+        return qmenu;
+    }
+
 
 
     // merge the fixed menu items (from the config file) with the dynamic ones
@@ -655,7 +671,12 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 {
 	QLabel *nodeLabel = NULL;
 
-	if (nodes.size() == 1)
+
+	// we will only create a multiple-entry context menu if we have multiple non-attribute nodes
+	// it is already ensured that if we have multiple nodes, they will be non-attribute nodes
+	bool multiple = (nodes.size() > 1);
+
+	if (!multiple)
 	{
 		VNode *node=nodes.at(0)->node();
 
@@ -716,7 +737,7 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 	nodeLabel->setParent(titleW);
 
 	QWidgetAction *wAction = new QWidgetAction(qmenu);
-    wAction->setObjectName("title");
+	wAction->setObjectName("title");
 	//Qt doc says: the ownership of the widget is passed to the widgetaction.
 	//So when the action is deleted it will be deleted as well.
 	wAction->setDefaultWidget(titleW);

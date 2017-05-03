@@ -48,6 +48,8 @@ public:
    /// This does compare server variables. Used in testing
    bool compare(const ServerState& rhs) const;
 
+   void sort_variables();
+
    /// The server variable: are automatically added by the server
    /// on STARTUP and when a checkpoint file is reloaded.
    /// The variable are required by Job creation & needed in creation of generated variables

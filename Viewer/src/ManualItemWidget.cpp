@@ -54,6 +54,7 @@ void ManualItemWidget::reload(VInfo_ptr info)
     //Info must be a node
     if(info_ && info_->isNode() && info_->node())
     {
+        reloadTb_->setEnabled(false);
         infoProvider_->info(info_);
     }
 }
@@ -63,7 +64,7 @@ void ManualItemWidget::clearContents()
     InfoPanelItem::clear();
     textEdit_->clear();
     messageLabel_->hide();
-
+    reloadTb_->setEnabled(true);
 }
 
 void ManualItemWidget::infoReady(VReply* reply)
@@ -85,6 +86,7 @@ void ManualItemWidget::infoReady(VReply* reply)
     }
 
     fileLabel_->update(reply);
+    reloadTb_->setEnabled(true);
 }
 
 void ManualItemWidget::infoProgress(VReply* reply)
@@ -97,7 +99,38 @@ void ManualItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
     messageLabel_->showError(s);
+    reloadTb_->setEnabled(true);
 }
+
+void ManualItemWidget::reloadRequested()
+{
+    reload(info_);
+}
+
+void ManualItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(SuspendedChanged))
+    {
+        //Suspend
+        if(suspended_)
+        {
+            reloadTb_->setEnabled(false);
+        }
+        //Resume
+        else
+        {
+            if(info_ && info_->node())
+            {
+                reloadTb_->setEnabled(true);
+            }
+            else
+            {
+                clearContents();
+            }
+        }
+    }
+}
+
 
 static InfoPanelItemMaker<ManualItemWidget> maker1("manual");
 

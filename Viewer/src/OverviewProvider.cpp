@@ -133,12 +133,16 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 
 	std::string typeName="server";
 	std::string nodeName=server->name();
-	std::string statusName(VSState::toName(server).toStdString());
+	std::string statusName(VSState::toName(server).toStdString());    
+    std::string flags(snode->flagsAsStr());
 
-	//Header
+    //Header
 	f << "name    : " << nodeName << "\n";
 	f << "type    : " << typeName << "\n";
-	f << "status   : " << statusName << "\n";
+    f << "status  : " << statusName << "\n";
+
+    if(!flags.empty())
+        f << "flags   : " << flags << "\n";
 
     f << "----------\n";
     //Start block: Type, name
@@ -189,11 +193,15 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	std::string typeName=node->nodeType();
 	std::string nodeName(node->name().toStdString());
 	std::string statusName(node->stateName().toStdString());
+    std::string flags(node->flagsAsStr());
 
 	//Header
 	f << "name    : " << nodeName << "\n";
 	f << "type    : " << typeName << "\n";
 	f << "status  : " << statusName << "\n";
+
+    if(!flags.empty())
+        f << "flags   : " << flags << "\n";
 
 	node_ptr nn=node->node();
 
