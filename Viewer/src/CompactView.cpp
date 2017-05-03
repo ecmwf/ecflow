@@ -332,9 +332,17 @@ void CompactView::doItemsLayout(bool hasRemovedItems)
             else
                 ++it;
         }
+        //??
+        if(selectionModel_)
+        {
+        }
     }
 
     viewItems_.clear(); // prepare for new layout
+    rowCount_=0;
+    maxRowWidth_=0;
+    pressedRefIndex_=QPersistentModelIndex(QModelIndex());
+
     QModelIndex parent = root_;
     if(model_->hasChildren(parent))
     {
@@ -1569,7 +1577,7 @@ int CompactView::totalNumOfExpandedChildren(const QModelIndex& idx,int& num) con
 
 void CompactView::expand(int item)
 {
-    if(item != -1 || viewItems_[item].expanded)
+    if(item != -1 && !viewItems_[item].expanded)
     {
         QModelIndex idx=viewItems_[item].index;
 
