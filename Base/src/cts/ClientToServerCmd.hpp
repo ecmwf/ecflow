@@ -1482,7 +1482,7 @@ public:
    : paths_(paths), add_attr_type_(ADD_ATTR_ND),
      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ft), flag_(flag) {}
    // sort
-   AlterCmd(const std::string path, const std::string& name,const std::string& value)
+   AlterCmd(const std::string& path, const std::string& name,const std::string& value)
     : paths_(std::vector<std::string>(1,path)), name_(name),value_(value),add_attr_type_(ADD_ATTR_ND),
       del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false)  {}
    AlterCmd(const std::vector<std::string>& paths, const std::string& name,const std::string& value)
