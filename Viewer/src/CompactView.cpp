@@ -1294,11 +1294,11 @@ void CompactView::scrollTo(const QModelIndex &index)
         }
         else if(row < top)
         {
-            verticalScrollBar()->setValue(item);
+            verticalScrollBar()->setValue(row);
         }
         else
         {
-            verticalScrollBar()->setValue(item);
+            verticalScrollBar()->setValue(row);
 #if 0
             const int currentItemHeight = viewItem_[item].height;
             int y = area.height();
