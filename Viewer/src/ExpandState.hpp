@@ -13,6 +13,8 @@
 
 #include <string>
 
+#include <QPersistentModelIndex>
+
 class TreeNodeModel;
 class QModelIndex;
 class VTreeNode;
@@ -34,12 +36,16 @@ public:
     void save(const VTreeNode*);
     void restore(const VTreeNode*);
 
+    void collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>&);
+
 protected:
 	void clear();
     ExpandStateNode* setRoot(const std::string&);
     ExpandStateNode* root() const {return root_;}
     void save(ExpandStateNode*,const QModelIndex&);
     void restore(ExpandStateNode*,const VTreeNode*);
+    void collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
+                 const QModelIndex& nodeIdx,QSet<QPersistentModelIndex>& theSet);
 
     View* view_;
     TreeNodeModel* model_;

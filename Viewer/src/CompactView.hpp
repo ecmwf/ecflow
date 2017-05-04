@@ -120,7 +120,7 @@ protected:
     QModelIndex modelIndex(int i) const;
     int viewIndex(const QModelIndex& index) const;
 
-
+    void restoreExpand(const QModelIndex& idx);
     void removeAllFromExpanded(const QModelIndex &index);
 
     void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command);
@@ -149,6 +149,9 @@ protected:
 
     TreeNodeModel* model_;
     CompactNodeViewDelegate* delegate_;
+
+    // used when expanding and collapsing items
+    QSet<QPersistentModelIndex> expandedIndexes;
 
 private:
     int totalNumOfChildren(const QModelIndex& idx,int& num) const;
@@ -188,9 +191,6 @@ private:
     QColor connectorColour_;
     QBasicTimer delayedWidth_;
     int delayedTimeout_;
-
-    // used when expanding and collapsing items
-    QSet<QPersistentModelIndex> expandedIndexes;
 
     inline bool storeExpanded(const QPersistentModelIndex &idx)
     {

@@ -49,6 +49,7 @@ public:
     QModelIndex nodeToIndex(const VNode*,int column=0) const;
     VTreeServer* indexToServer(const QModelIndex & index) const;
     VTreeServer* nameToServer(const std::string&) const;
+    VTreeNode* indexToNode( const QModelIndex & index) const;
 
     QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
 
@@ -113,7 +114,6 @@ private:
 	QModelIndex serverToIndex(ServerHandler*) const;
 
     QModelIndex nodeToIndex(VTreeServer*,const VTreeNode*,int column=0) const;
-    VTreeNode* indexToNode( const QModelIndex & index) const;
     VTreeNode* indexToAttrParentNode(const QModelIndex & index) const;
     VTreeNode* indexToAttrParentOrNode(const QModelIndex & index,bool &itIsANode) const;
 	QVariant serverData(const QModelIndex& index,int role) const;

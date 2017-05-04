@@ -10,6 +10,7 @@
 
 #include "CompactView.hpp"
 
+#include "ExpandState.hpp"
 #include "TreeNodeModel.hpp"
 #include "CompactNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
@@ -1663,6 +1664,12 @@ void CompactView::expandAll(const QModelIndex& idx)
         updateScrollBars();
         viewport()->update();
     }
+}
+
+void CompactView::restoreExpand(const QModelIndex& idx)
+{
+    //expandedIndexed now contains all the indexes to expand
+    expand(idx);
 }
 
 void CompactView::collapse(int item)
