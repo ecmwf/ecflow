@@ -58,7 +58,7 @@ class Tester(object) :
             return os.getcwd() + "/test_gui/data/ecf_home_debug_" + str(self.port_)
         return os.getcwd() + "/test_gui/data/ecf_home_release_" + str(self.port_)
 
-    def ecf_includes(self) :  return os.getcwd() + "Pyext/test/data/includes"
+    def ecf_includes(self) :  return os.getcwd() + "/Pyext/test/data/includes"
     def log_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.log"
     def checkpt_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.check"
     def backup_checkpt_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.check.b"
