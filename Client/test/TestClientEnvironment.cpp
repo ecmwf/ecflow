@@ -42,8 +42,11 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_parsing )
    std::string good_host_file = File::test_data("Client/test/data/good_hostfile","Client");
 
 	// local host should be implicitly added to internal host list
+   std::string host_env_specified = ClientEnvironment::hostSpecified();
+   if (host_env_specified.empty()) host_env_specified = Str::LOCALHOST();
+
 	std::vector<std::string> expectedHost;
-	expectedHost.push_back(Str::LOCALHOST());
+	expectedHost.push_back(host_env_specified);
 	expectedHost.push_back("host1");
 	expectedHost.push_back("host2");
 	expectedHost.push_back("host3");
