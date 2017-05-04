@@ -203,7 +203,9 @@ void ServerHandler::startRefreshTimer()
 
     if(!refreshTimer_->isActive())
 	{
-        refreshTimer_->setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
+        int rate=conf_->intValue(VServerSettings::UpdateRate);
+        if(rate <=0) rate=1;
+        refreshTimer_->setInterval(rate*1000);
         refreshTimer_->start();
 	}
 
@@ -227,12 +229,16 @@ void ServerHandler::updateRefreshTimer()
 	if(connectState_->state() == ConnectState::Disconnected)
 		return;
 
+    int rate=conf_->intValue(VServerSettings::UpdateRate);
+    if(rate <=0) rate=1;
+
     if(refreshTimer_->isActive())
 	{
         refreshTimer_->stop();
-        refreshTimer_->setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
-        refreshTimer_->start();
-	}
+    }
+
+    refreshTimer_->setInterval(rate*1000);
+    refreshTimer_->start();
 
 #ifdef __UI_SERVERUPDATE_DEBUG
     UiLog(this).dbg() << " refreshTimer interval: " << refreshTimer_->interval();
