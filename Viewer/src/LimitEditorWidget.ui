@@ -117,10 +117,6 @@
        <property name="text">
         <string>Remove</string>
        </property>
-       <property name="icon">
-        <iconset resource="viewer.qrc">
-         <normaloff>:/viewer/remove.svg</normaloff>:/viewer/remove.svg</iconset>
-       </property>
        <property name="toolButtonStyle">
         <enum>Qt::ToolButtonTextBesideIcon</enum>
        </property>
@@ -144,15 +140,11 @@
    </item>
   </layout>
   <action name="actionRemove_">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/remove.svg</normaloff>:/viewer/remove.svg</iconset>
-   </property>
    <property name="text">
     <string>Remove</string>
    </property>
    <property name="toolTip">
-    <string>Remove selected nodes</string>
+    <string>Remove selected node paths</string>
    </property>
   </action>
   <action name="actionRemoveAll_">
@@ -160,12 +152,10 @@
     <string>Reset</string>
    </property>
    <property name="toolTip">
-    <string>Remove all nodes and resetting the limit value to &lt;b&gt;zero&lt;/b&gt;</string>
+    <string>Remove all node paths and reset the limit value to &lt;b&gt;zero&lt;/b&gt;</string>
    </property>
   </action>
  </widget>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
