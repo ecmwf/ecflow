@@ -111,8 +111,8 @@
                         "title" : "Style",
                         "prefix" : "view",
 
-                        "line" : "common.node_style",
-                        "line" : "tree.layoutStyle"
+                        "line" : "tree.layoutStyle",
+                        "line" : "common.node_style"
                     },
 
                     "group" : {

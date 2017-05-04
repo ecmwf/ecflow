@@ -23,7 +23,7 @@
             "tree": {
                 "layoutStyle" : {
                     "label" : "Tree layout style",
-                    "default" : "compact",
+                    "default" : "standard",
                     "values"  : "standard/compact",
                     "values_label" : "Standard/Compact"
                 },
