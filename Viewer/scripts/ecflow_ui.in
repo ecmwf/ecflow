@@ -35,7 +35,8 @@ cleanup(){
     then
         echo "$(basename $0): $1 (OK) (line $2), exit status $status, starting 'cleanup'"
     else
-        echo "$(basename $0): $1 on ERROR (line $2), exit status $status, starting 'cleanup'"
+        status_message="$(basename $0): $1 on ERROR (line $2), exit status $status, starting 'cleanup'"
+        echo $status_message
 
         if [ -e $ECFLOWUI_LOGFILE ] ; then
 
@@ -67,6 +68,7 @@ cleanup(){
                     echo "start time         : $ECFLOWUI_STARTTIME"  >> $EFLOWUI_LOGTAIL
                     echo "stop time          : $(date)"              >> $EFLOWUI_LOGTAIL
                     echo ""                                          >> $EFLOWUI_LOGTAIL
+                    echo $status_message                             >> $EFLOWUI_LOGTAIL
                     tail -$TAILNUM $ECFLOWUI_LOGFILE                 >> $EFLOWUI_LOGTAIL
 
                     #Add the last lines from the user interaction log file
