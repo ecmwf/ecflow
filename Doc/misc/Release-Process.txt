@@ -22,6 +22,7 @@ Process
    
    cd $WK
    rm -rf ../bdir               # *REMOVE* build tree
+   git pull
    ./cmake.sh package_source
 
 0/ Inform user support, allows user support to test rpm
