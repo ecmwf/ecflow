@@ -104,6 +104,7 @@ class VRepeatAttrType : public VAttributeType
 public:
     explicit VRepeatAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(const Repeat&,QStringList&,const std::string&) const;
 
 private:
@@ -141,6 +142,28 @@ QString VRepeatAttrType::toolTip(QStringList d) const
         }
     }
 
+    return t;
+}
+
+QString VRepeatAttrType::definition(QStringList d) const
+{
+    QString t="repeat";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[SubtypeIndex];
+
+        if(d[SubtypeIndex] != "day")
+        {
+            t+=" " + d[NameIndex];
+            t+=" " + d[StartIndex];
+            t+=" " + d[EndIndex];
+            t+=" " + d[StepIndex];
+        }
+        else
+        {
+            t+=" " + d[StepIndex];
+        }
+    }
     return t;
 }
 

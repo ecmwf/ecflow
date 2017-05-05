@@ -39,6 +39,7 @@ public:
     const std::string& typeName() const;
     std::string fullPath() const;
     virtual QStringList data() const=0;
+    QString definition() const;
     bool sameAs(QStringList d) const;
     bool sameContents(VItem*) const;
     bool value(const std::string& key,std::string& val) const;

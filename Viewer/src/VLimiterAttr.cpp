@@ -23,7 +23,8 @@ class VLimiterAttrType : public VAttributeType
 public:
     explicit VLimiterAttrType();
     QString toolTip(QStringList d) const;
-    void encode(const InLimit&,QStringList&) const;    
+    QString definition(QStringList d) const;
+    void encode(const InLimit&,QStringList&) const;
     void scan(VNode* vnode,std::vector<VAttribute*>& vec);
     int totalNum(VNode* vnode);
 
@@ -49,6 +50,16 @@ QString VLimiterAttrType::toolTip(QStringList d) const
         t+="<b>Limit:</b> " + d[NameIndex] + "<br>";
         t+="<b>Node:</b> " + d[PathIndex];
 
+    }
+    return t;
+}
+
+QString VLimiterAttrType::definition(QStringList d) const
+{
+    QString t="inlimit";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex];
     }
     return t;
 }

@@ -23,6 +23,7 @@ class VTriggerAttrType : public VAttributeType
 public:
     explicit VTriggerAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encodeTrigger(Expression*,QStringList&) const;
     void encodeComplete(Expression*,QStringList&) const;
 
@@ -53,6 +54,21 @@ QString VTriggerAttrType::toolTip(QStringList d) const
             return t;
 
         t+="<b>Expression:</b> " + d[ExprIndex];
+    }
+    return t;
+}
+
+QString VTriggerAttrType::definition(QStringList d) const
+{
+    QString t;
+    if(d.count() == dataCount_)
+    {
+        if(d[CompleteIndex] == "0")
+            t+="trigger";
+        else if(d[CompleteIndex] == "1")
+            t+="complete";
+
+        t+=" " + d[ExprIndex];
     }
     return t;
 }

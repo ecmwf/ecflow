@@ -21,6 +21,7 @@ class VTimeAttrType : public VAttributeType
 public:
     explicit VTimeAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(const ecf::TimeAttr& d,QStringList& data);
     void encode(const ecf::TodayAttr& d,QStringList& data);
     void encode(const ecf::CronAttr& d,QStringList& data);
@@ -44,6 +45,16 @@ QString VTimeAttrType::toolTip(QStringList d) const
     if(d.count() == dataCount_)
     {
         t+="<b>Name:</b> " + d[NameIndex];
+    }
+    return t;
+}
+
+QString VTimeAttrType::definition(QStringList d) const
+{
+    QString t;
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex];
     }
     return t;
 }

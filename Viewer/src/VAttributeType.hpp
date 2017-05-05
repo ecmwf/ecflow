@@ -35,6 +35,7 @@ public:
     int searchKeyToDataIndex(const std::string& key) const;
     QStringList searchKeys() const;
     virtual QString toolTip(QStringList d) const {return QString();}
+    virtual QString definition(QStringList d) const {return QString();}
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& v);
     typedef void (*ScanProc) (VNode* vnode,std::vector<VAttribute*>& vec);

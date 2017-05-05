@@ -23,6 +23,7 @@ class VLimitAttrType : public VAttributeType
 public:
     explicit VLimitAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(limit_ptr,QStringList&) const;
 
 private:
@@ -48,6 +49,16 @@ QString VLimitAttrType::toolTip(QStringList d) const
         t+="<b>Name:</b> " + d[NameIndex] + "<br>";
         t+="<b>Value:</b> " + d[ValueIndex] + "<br>";
         t+="<b>Maximum:</b> " + d[MaxIndex];
+    }
+    return t;
+}
+
+QString VLimitAttrType::definition(QStringList d) const
+{
+    QString t="limit";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex] + " " + d[MaxIndex];
     }
     return t;
 }

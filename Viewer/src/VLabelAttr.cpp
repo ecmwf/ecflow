@@ -23,6 +23,7 @@ class VLabelAttrType : public VAttributeType
 public:
     explicit VLabelAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(const Label& label,QStringList& data) const;
 
 private:
@@ -45,6 +46,16 @@ QString VLabelAttrType::toolTip(QStringList d) const
     {
         t+="<b>Name:</b> " + d[NameIndex] + "<br>";
         t+="<b>Value:</b> " + d[ValueIndex];
+    }
+    return t;
+}
+
+QString VLabelAttrType::definition(QStringList d) const
+{
+    QString t="label";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex] + " '" + d[ValueIndex] + "'";
     }
     return t;
 }

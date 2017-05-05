@@ -23,6 +23,7 @@ class VEventAttrType : public VAttributeType
 public:
     explicit VEventAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(const Event&,QStringList&) const;
 
 private:
@@ -48,6 +49,16 @@ QString VEventAttrType::toolTip(QStringList d) const
         t+="<b>Status:</b> ";
         t+=(d[ValueIndex] == "1")?"set (true)":"clear (false)";
 
+    }
+    return t;
+}
+
+QString VEventAttrType::definition(QStringList d) const
+{
+    QString t="event";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex];
     }
     return t;
 }

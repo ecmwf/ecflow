@@ -24,6 +24,7 @@ class VDateAttrType : public VAttributeType
 public:
     explicit VDateAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(const DateAttr& d,QStringList& data);
     void encode(const DayAttr& d,QStringList& data);
 
@@ -46,6 +47,16 @@ QString VDateAttrType::toolTip(QStringList d) const
     if(d.count() == dataCount_)
     {
         t+="<b>Name:</b> " + d[NameIndex];
+    }
+    return t;
+}
+
+QString VDateAttrType::definition(QStringList d) const
+{
+    QString t;
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex];
     }
     return t;
 }

@@ -23,6 +23,7 @@ class VLateAttrType : public VAttributeType
 public:
     explicit VLateAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(ecf::LateAttr* late,QStringList& data) const;   
 
 private:
@@ -45,6 +46,16 @@ QString VLateAttrType::toolTip(QStringList d) const
     if(d.count() == dataCount_)
     {
         t+="<b>Name:</b> " + d[NameIndex];
+    }
+    return t;
+}
+
+QString VLateAttrType::definition(QStringList d) const
+{
+    QString t="late";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex];
     }
     return t;
 }

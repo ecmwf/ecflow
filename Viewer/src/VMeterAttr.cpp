@@ -23,6 +23,7 @@ class VMeterAttrType : public VAttributeType
 public:
     explicit VMeterAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(const Meter&,QStringList&) const;
 
 private:
@@ -48,6 +49,16 @@ QString VMeterAttrType::toolTip(QStringList d) const
         t+="<b>Value:</b> " + d[ValueIndex]+ "<br>";
         t+="<b>Minimum:</b> " + d[MinIndex] + "<br>";
         t+="<b>Maximum:</b> " + d[MaxIndex];
+    }
+    return t;
+}
+
+QString VMeterAttrType::definition(QStringList d) const
+{
+    QString t="meter";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex] + " " + d[MinIndex] + " " + d[MaxIndex] + " " + d[ThresholdIndex];
     }
     return t;
 }

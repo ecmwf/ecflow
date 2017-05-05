@@ -112,7 +112,7 @@ public:
     bool isTopLevel() const;
 
     //Attributes
-    const std::vector<VAttribute*> attr() const {return attr_;}
+    const std::vector<VAttribute*>& attr() const {return attr_;}
     int attrNum(AttributeFilter* filter=0) const;
     VAttribute* attribute(int,AttributeFilter *filter=0) const;
     VAttribute* attributeForType(int,VAttributeType*) const;
