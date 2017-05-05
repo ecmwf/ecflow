@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #6 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -20,6 +20,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
+#include "PrintStyle.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -139,10 +140,12 @@ BOOST_AUTO_TEST_CASE( test_today_time_and_date )
    //endsuite
    Defs theDefs;
    {
+      // To speed up simulation: start calendar with hour increment AND time attributes with hours only
+      //
       // Task will only run if all time dependencies are satisfied
-      boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
+      boost::posix_time::ptime   theLocalTime = ptime(date(2010,2,10),hours(15));  ;
       boost::gregorian::date todaysDate = theLocalTime.date();
-      boost::posix_time::ptime   time_plus_minute =  theLocalTime +  minutes(1);
+      boost::posix_time::ptime   time_plus_hour =  theLocalTime +  hours(1);
 
       suite_ptr suite = theDefs.add_suite( "test_today_time_and_date" );
       ClockAttr clockAttr(theLocalTime,false/*false means use real clock*/);
@@ -151,8 +154,8 @@ BOOST_AUTO_TEST_CASE( test_today_time_and_date )
       family_ptr fam = suite->add_family( "family" );
       task_ptr task = fam->add_task( "t" );
       task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
-      task->addTime( ecf::TimeAttr( TimeSlot(time_plus_minute.time_of_day()) ) );
-      task->addToday( ecf::TodayAttr( TimeSlot(time_plus_minute.time_of_day()) ) );
+      task->addTime( ecf::TimeAttr( TimeSlot(time_plus_hour.time_of_day()) ) );
+      task->addToday( ecf::TodayAttr( TimeSlot(time_plus_hour.time_of_day()) ) );
 
       task->addVerify( VerifyAttr(NState::COMPLETE,1) );
       //  	cout << theDefs << "\n";
@@ -161,6 +164,9 @@ BOOST_AUTO_TEST_CASE( test_today_time_and_date )
    Simulator simulator;
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_today_time_and_date.def"),errorMsg),errorMsg);
+
+//   PrintStyle::setStyle(PrintStyle::MIGRATE);
+//   cout << theDefs;
 
    // remove generated log file. Comment out to debug
    std::string logFileName = TestUtil::testDataLocation("test_today_time_and_date.def") + ".log";

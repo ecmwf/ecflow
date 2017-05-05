@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -38,6 +38,7 @@ public:
 	const std::string& name(int index) const;
     const std::string& value(int index) const;
     const std::string& value(const std::string name,bool&) const;
+    int indexOf(const std::string& varName,bool genVar) const;
     bool isGenVar(const std::string& varName) const;
     bool isGenVar(int index) const;
 	bool isReadOnly(int index) const;
@@ -55,7 +56,7 @@ public:
 	void setValue(int index,const std::string& val);
     void alter(const std::string& name,const std::string& val);
 	void add(const std::string& name,const std::string& val);
-	void remove(int index,const std::string& val);
+    void remove(const std::string& val);
 
     //const std::vector<Variable>& vars() const {return vars_;}
     //const std::vector<Variable>& genVars() const {return genVars_;}
@@ -91,6 +92,8 @@ public:
 	int count() const {return static_cast<int>(data_.size());}
 	int varNum(int index) const;
 	VariableModelData* data(int index) const;
+    void findVariable(const std::string& name,const std::string& nodePath,
+                                                bool genVar,int& block,int& row) const;
     bool nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
     bool defsChanged(const std::vector<ecf::Aspect::Type>&);
     const std::string& value(const std::string& node,const std::string& name,bool&) const;

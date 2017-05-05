@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,6 +14,8 @@
 
 #include <QDebug>
 #include <QModelIndex>
+#include <QRegion>
+#include <QRect>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
@@ -133,4 +135,31 @@ std::ostream&  operator <<(std::ostream &stream,const QStringList &lst)
    ts << lst;
    stream << s.toStdString();
    return stream;
+}
+
+std::ostream&  operator <<(std::ostream &stream,const QRegion &r)
+{
+    QString s;
+    QDebug ts(&s);
+    ts << r;
+    stream << s.toStdString();
+    return stream;
+}
+
+std::ostream&  operator <<(std::ostream &stream,const QRect &r)
+{
+    QString s;
+    QDebug ts(&s);
+    ts << r;
+    stream << s.toStdString();
+    return stream;
+}
+
+std::ostream&  operator <<(std::ostream &stream,const QPoint &p)
+{
+    QString s;
+    QDebug ts(&s);
+    ts << p;
+    stream << s.toStdString();
+    return stream;
 }

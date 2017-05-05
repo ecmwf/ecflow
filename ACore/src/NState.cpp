@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #20 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -52,6 +52,34 @@ const char* NState::toString( NState::State s ) {
 	}
 	assert(false);
 	return NULL;
+}
+
+
+const char* NState::to_html( NState::State s ) {
+   switch ( s ) {
+      case NState::UNKNOWN:
+         return "<state>unknown</state>";
+         break;
+      case NState::COMPLETE:
+         return "<state>complete</state>";
+         break;
+      case NState::QUEUED:
+         return "<state>queued</state>";
+         break;
+      case NState::ABORTED:
+         return "<state>aborted</state>";
+         break;
+      case NState::SUBMITTED:
+         return "<state>submitted</state>";
+         break;
+      case NState::ACTIVE:
+         return "<state>active</state>";
+         break;
+      default:
+         assert(false); break;
+   }
+   assert(false);
+   return NULL;
 }
 
 NState::State NState::toState( const std::string& str ) {

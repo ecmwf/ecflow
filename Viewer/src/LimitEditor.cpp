@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,20 +10,30 @@
 
 #include "LimitEditor.hpp"
 
+#include <QItemSelectionModel>
 #include <QSettings>
+#include <QStringListModel>
+
+#include "Aspect.hpp"
 
 #include "AttributeEditorFactory.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "VLimitAttr.hpp"
 #include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 
 LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
 {
     setupUi(this);
+    removeTb_->setDefaultAction(actionRemove_);
+    removeAllTb_->setDefaultAction(actionRemoveAll_);
+    pathView_->addAction(actionRemove_);
+    pathView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"limit",parent)
+LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"limit",parent), model_(0)
 {
     w_=new LimitEditorWidget(this);
     addForm(w_);
@@ -33,44 +43,80 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
     Q_ASSERT(a);
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "limit");
+    QStringList aData=a->data();
 
-    if(a->data().count() < 4)
+    if(aData.count() < 4)
        return;
 
-    QString name=a->data().at(1);
-    oriVal_=a->data().at(2).toInt();
-    oriMax_=a->data().at(3).toInt();
+    QString name=aData[1];
+    oriVal_=aData[2].toInt();
+    oriMax_=aData[3].toInt();
 
     w_->nameLabel_->setText(name);
-    w_->valueSpin_->setValue(oriVal_);
+    w_->valueLabel_->setText(QString::number(oriVal_));
     w_->maxSpin_->setValue(oriMax_);
 
-    w_->valueSpin_->setRange(0,10000);
-    w_->maxSpin_->setRange(1,10000);
+    w_->maxSpin_->setRange(0,10000);
+    w_->maxSpin_->setFocus();
 
-    w_->valueSpin_->setFocus();
-
-    if(a->data().at(2).isEmpty() || a->data().at(3).isEmpty())
+    if(aData[2].isEmpty() || aData[3].isEmpty())
     {
         return;
     }
 
-    connect(w_->valueSpin_,SIGNAL(valueChanged(int)),
-            this,SLOT(slotValueChanged(int)));
+    buildList(a);
 
     connect(w_->maxSpin_,SIGNAL(valueChanged(int)),
             this,SLOT(slotMaxChanged(int)));
+
+    connect(w_->actionRemove_,SIGNAL(triggered()),
+            this,SLOT(slotRemove()));
+
+    connect(w_->actionRemoveAll_,SIGNAL(triggered()),
+            this,SLOT(slotRemoveAll()));
 
     header_->setInfo(QString::fromStdString(info_->path()),"Limit");
 
     checkButtonStatus();
 
     readSettings();
+
+    //No reset button is allowed because we can perform irreversible changes!
+    doNotUseReset();
+}
+
+LimitEditor::~LimitEditor()
+{
+    writeSettings();
+}
+
+void LimitEditor::buildList(VAttribute *a)
+{
+    VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+    Q_ASSERT(lim);
+
+    modelData_.clear();
+    modelData_=lim->paths();
+
+    if(modelData_.count() > 0)
+    {
+        model_=new QStringListModel(this);
+        model_->setStringList(modelData_);
+
+        w_->pathView_->setModel(model_);
+        w_->pathView_->setCurrentIndex(model_->index(0,0));
+        w_->pathView_->setFocus(Qt::MouseFocusReason);
+    }
+    else
+    {
+        w_->actionRemove_->setEnabled(false);
+        w_->actionRemoveAll_->setEnabled(false);
+    }
 }
 
 void LimitEditor::apply()
 {
-    int intVal=w_->valueSpin_->value();
+    int intVal=w_->valueLabel_->text().toInt();
     int intMax=w_->maxSpin_->value();
     std::string val=QString::number(intVal).toStdString();
     std::string max=QString::number(intMax).toStdString();
@@ -108,14 +154,6 @@ void LimitEditor::apply()
 
 void LimitEditor::resetValue()
 {
-    w_->valueSpin_->setValue(oriVal_);
-    w_->maxSpin_->setValue(oriMax_);
-    checkButtonStatus();
-}
-
-void LimitEditor::slotValueChanged(int)
-{
-    checkButtonStatus();
 }
 
 void LimitEditor::slotMaxChanged(int)
@@ -125,7 +163,76 @@ void LimitEditor::slotMaxChanged(int)
 
 bool LimitEditor::isValueChanged()
 {
-    return (oriVal_ != w_->valueSpin_->value() || oriMax_ != w_->maxSpin_->value());
+    return (oriVal_ != w_->valueLabel_->text().toInt() || oriMax_ != w_->maxSpin_->value());
+}
+
+void LimitEditor::slotRemove()
+{
+    remove(false);
+}
+
+void LimitEditor::slotRemoveAll()
+{
+    remove(true);
+}
+
+void LimitEditor::remove(bool all)
+{
+    if(!info_)
+        return;
+
+    //We cannot cancle the setting after remove is callled
+    disableCancel();
+
+    Q_ASSERT(model_);
+
+    VAttribute* a=info_->attribute();
+    Q_ASSERT(a);
+    VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+    Q_ASSERT(lim);
+
+    if(all)
+    {
+        std::vector<std::string> valCmd;
+        VAttribute::buildAlterCommand(valCmd,"change","limit_value",a->strName(),"0");
+        ServerHandler::command(info_,valCmd);
+    }
+    else
+    {
+        std::vector<std::string> paths;
+        Q_FOREACH(QModelIndex idx,w_->pathView_->selectionModel()->selectedRows())
+        {
+            std::vector<std::string> valCmd;
+            VAttribute::buildAlterCommand(valCmd,"delete","limit_path",a->strName(),
+                                          model_->data(idx,Qt::DisplayRole).toString().toStdString());
+            ServerHandler::command(info_,valCmd);
+        }
+    }
+
+    //Updating the gui with the new state will happen later
+    //because command() is asynchronous
+}
+
+void LimitEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect)
+{
+    bool limitCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::LIMIT) != aspect.end());
+    if(limitCh && info_)
+    {
+        VAttribute* a=info_->attribute();
+        Q_ASSERT(a);
+        VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+        Q_ASSERT(lim);
+
+        QStringList aData=a->data();
+        if(aData.count() < 4)
+           return;
+
+        oriVal_=aData[2].toInt();
+        w_->valueLabel_->setText(QString::number(oriVal_));
+        modelData_.clear();
+        modelData_=lim->paths();
+        model_->setStringList(modelData_);
+    }
 }
 
 void LimitEditor::writeSettings()
@@ -157,7 +264,7 @@ void LimitEditor::readSettings()
     }
     else
     {
-        resize(QSize(310,200));
+        resize(QSize(420,400));
     }
 
     settings.endGroup();

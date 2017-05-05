@@ -89,7 +89,6 @@ void jobcheck_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	children[ac++] = tools_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void jobcheck_form_c::refreshCB( Widget widget, XtPointer client_data, XtPointer call_data )

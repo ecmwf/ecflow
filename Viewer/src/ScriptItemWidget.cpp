@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -59,7 +59,8 @@ void ScriptItemWidget::reload(VInfo_ptr info)
 
     //Info must be a node
     if(info_ && info_->isNode() && info_->node())
-    {
+    {          
+        reloadTb_->setEnabled(false);
         infoProvider_->info(info_);
     }
 }
@@ -70,6 +71,7 @@ void ScriptItemWidget::clearContents()
     fileLabel_->clear();
     textEdit_->clear();
     messageLabel_->hide();
+    reloadTb_->setEnabled(true);
 }
 
 void ScriptItemWidget::infoReady(VReply* reply)
@@ -89,7 +91,7 @@ void ScriptItemWidget::infoReady(VReply* reply)
     }
 
     fileLabel_->update(reply);
-
+    reloadTb_->setEnabled(true);
 }
 
 void ScriptItemWidget::infoProgress(VReply* reply)
@@ -103,7 +105,36 @@ void ScriptItemWidget::infoFailed(VReply* reply)
     QString s=QString::fromStdString(reply->errorText());
     //textEdit_->setPlainText(s);   
     messageLabel_->showError(s);
+    reloadTb_->setEnabled(true);
 }
 
+void ScriptItemWidget::reloadRequested()
+{
+    reload(info_);
+}
+
+void ScriptItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(SuspendedChanged))
+    {
+        //Suspend
+        if(suspended_)
+        {
+            reloadTb_->setEnabled(false);
+        }
+        //Resume
+        else
+        {
+            if(info_ && info_->node())
+            {
+                reloadTb_->setEnabled(true);
+            }
+            else
+            {
+                clearContents();
+            }
+        }
+    }
+}
 
 static InfoPanelItemMaker<ScriptItemWidget> maker1("script");

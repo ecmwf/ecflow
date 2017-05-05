@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #85 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -146,6 +146,15 @@ void alter(ClientInvoker* self,
           const std::string& name = "",
           const std::string& value = "") { self->alter(path,alterType,attrType,name,value);  }
 
+void alter_sorts(ClientInvoker* self,
+          const boost::python::list& list,
+          const std::string& attribute_name,
+          bool recursive = true) {std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->check(paths);self->alter_sort(paths,attribute_name,recursive); }
+void alter_sort(ClientInvoker* self,
+          const std::string& path,
+          const std::string& attribute_name,
+          bool recursive = true) {self->alter_sort(std::vector<std::string>(1,path),attribute_name,recursive );  }
+
 void set_child_pid(ClientInvoker* self,int pid) { self->set_child_pid( boost::lexical_cast<std::string>(pid)); }
 
 
@@ -219,6 +228,8 @@ void export_Client()
 	.def("plug" ,            &ClientInvoker::plug,            ClientDoc::plug())
    .def("alter" ,           &alters,(bp::arg("paths"),bp::arg("alter_type"),bp::arg("attribute_type"),bp::arg("name")="",bp::arg("value")=""), ClientDoc::alter())
    .def("alter" ,           &alter,(bp::arg("abs_node_path"),bp::arg("alter_type"),bp::arg("attribute_type"),bp::arg("name")="",bp::arg("value")=""))
+   .def("sort_attributes" , &alter_sort,(bp::arg("abs_node_path"),bp::arg("attribute_name"),bp::arg("recursive")=true))
+   .def("sort_attributes" , &alter_sorts,(bp::arg("paths"),bp::arg("attribute_name"),bp::arg("recursive")=true))
    .def("force_event" ,     &force_event,                    ClientDoc::force_event())
    .def("force_event" ,     &force_events)
    .def("force_state" ,     &force_state,                    ClientDoc::force_state())

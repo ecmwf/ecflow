@@ -57,7 +57,6 @@ void fsb_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = button42; /* 20150819 */
 	children[ac++] = button44; /* 20150819 */
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void fsb_shell_c::helpCB( Widget widget, XtPointer client_data, XtPointer call_data )

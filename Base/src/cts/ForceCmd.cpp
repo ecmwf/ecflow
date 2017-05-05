@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #36 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -103,6 +103,10 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      NState::State new_state = NState::toState(stateOrEvent_);
  	      if (new_state == NState::COMPLETE)  {
  	         node->miss_next_time_slot();
+ 	      }
+
+ 	      if ( new_state != NState::ACTIVE && new_state != NState::SUBMITTED) {
+ 	         as->zombie_ctrl().add_user_zombies(node);
  	      }
 
  	      if (recursive_) node->set_state_hierarchically( new_state, true /* force */ );
@@ -206,7 +210,7 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
 	}
 
 	std::vector<std::string> options,paths;
-   split_args_to_options_and_paths(args,options,paths); // relative order is still preserved
+   split_args_to_options_and_paths(args,options,paths,true/*treat_colon_in_path_as_path*/); // relative order is still preserved
    if (paths.empty()) {
       std::stringstream ss;
       ss << "ForceCmd: No paths specified. Paths must begin with a leading '/' character\n" << ForceCmd::desc() << "\n";

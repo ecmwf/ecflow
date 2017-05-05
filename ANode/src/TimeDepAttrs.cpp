@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #281 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -556,20 +556,21 @@ bool TimeDepAttrs::operator==(const TimeDepAttrs& rhs) const
 
 
 //#define DEBUG_WHY 1
-void TimeDepAttrs::why(std::vector<std::string>& vec,const std::string& prefix) const
+bool TimeDepAttrs::why(std::vector<std::string>& vec,const std::string& prefix) const
 {
 #ifdef DEBUG_WHY
    std::cout << "   TimeDepAttrs::why " << node_->debugNodePath() << " checking time dependencies\n";
 #endif
    // postfix  = <attr-type dependent> <next run time > < optional current state>
+   bool why_found = false;
    std::string postFix;
    const Calendar& c = node_->suite()->calendar();
-   for(size_t i = 0; i < days_.size(); i++)    { postFix.clear(); if (days_[i].why(c,postFix))   { vec.push_back(prefix + postFix); }}
-   for(size_t i = 0; i < dates_.size(); i++)   { postFix.clear(); if (dates_[i].why(c,postFix))  { vec.push_back(prefix + postFix); }}
-   for(size_t i = 0; i < todayVec_.size(); i++){ postFix.clear(); if (todayVec_[i].why(c,postFix)){ vec.push_back(prefix + postFix); }}
-   for(size_t i = 0; i < timeVec_.size(); i++) { postFix.clear(); if (timeVec_[i].why(c,postFix)) { vec.push_back(prefix + postFix); }}
-   for(size_t i = 0; i < crons_.size(); i++)   { postFix.clear(); if (crons_[i].why(c,postFix))  { vec.push_back(prefix + postFix); }}
-
+   for(size_t i = 0; i < days_.size(); i++)    { postFix.clear(); if (days_[i].why(c,postFix))    { vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < dates_.size(); i++)   { postFix.clear(); if (dates_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < todayVec_.size(); i++){ postFix.clear(); if (todayVec_[i].why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < timeVec_.size(); i++) { postFix.clear(); if (timeVec_[i].why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < crons_.size(); i++)   { postFix.clear(); if (crons_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+   return why_found;
 }
 
 bool TimeDepAttrs::checkInvariants(std::string& errorMsg) const
@@ -792,8 +793,7 @@ void TimeDepAttrs::delete_cron(const ecf::CronAttr& attr)
 
 // =================================================================================
 
-
-bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento ,std::vector<ecf::Aspect::Type>& aspects) {
+bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeTodayMemento* memento) " << node_->debugNodePath() << "\n";
@@ -810,7 +810,7 @@ bool TimeDepAttrs::set_memento( const NodeTodayMemento* memento ,std::vector<ecf
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeTimeMemento* memento) " << node_->debugNodePath() << "\n";
@@ -827,7 +827,7 @@ bool TimeDepAttrs::set_memento( const NodeTimeMemento* memento,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeCronMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+bool TimeDepAttrs::set_memento( const NodeCronMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeCronMemento* memento) " << node_->debugNodePath() << "\n";
@@ -844,7 +844,7 @@ bool TimeDepAttrs::set_memento( const NodeCronMemento* memento,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeDayMemento* memento ,std::vector<ecf::Aspect::Type>& aspects) {
+bool TimeDepAttrs::set_memento( const NodeDayMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeDayMemento* memento) " << node_->debugNodePath() << "\n";
@@ -862,7 +862,7 @@ bool TimeDepAttrs::set_memento( const NodeDayMemento* memento ,std::vector<ecf::
    return false;
 }
 
-bool TimeDepAttrs::set_memento( const NodeDateMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+bool TimeDepAttrs::set_memento( const NodeDateMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "TimeDepAttrs::set_memento(const NodeDateMemento* memento) " << node_->debugNodePath() << "\n";

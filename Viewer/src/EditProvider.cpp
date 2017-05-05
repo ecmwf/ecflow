@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,7 +11,6 @@
 
 #include "NodeFwd.hpp"
 
-#include "LogServer.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
@@ -28,6 +27,7 @@ void EditProvider::visit(VInfoNode* info)
 	if(!info)
  	{
        	owner_->infoFailed(reply_);
+        return;
    	}
 
 	ServerHandler* server=info_->server();
@@ -36,6 +36,7 @@ void EditProvider::visit(VInfoNode* info)
     if(!n || !n->node())
    	{
        	owner_->infoFailed(reply_);
+        return;
    	}
 
     if (preproc_)

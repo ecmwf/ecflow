@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #9 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -54,6 +54,20 @@ void AstResolveVisitor::visitVariable(AstVariable* astVar)
  	}
 }
 
+void AstResolveVisitor::visitFlag(AstFlag* ast)
+{
+   if (  errorMsg_.empty()) {
+
+      ast->setParentNode(const_cast<Node*>(triggerNode_));
+      Node* node = ast->referencedNode( errorMsg_ );
+      if ( !node ) {
+         // A node can be NULL when its a extern path. In this case errorMsg should be empty
+         return ;
+      }
+      LOG_ASSERT(errorMsg_.empty(),""); // found Node, make sure errorMsg is empty
+   }
+}
+
 //===========================================================================================================
 
 AstCollateNodesVisitor::AstCollateNodesVisitor( std::set<Node*>& s) : theSet_(s) {}
@@ -69,6 +83,12 @@ void AstCollateNodesVisitor::visitVariable(AstVariable* astVar)
 {
 	Node* referencedNode = astVar->referencedNode(); // could be expensive, hence don't call twice
 	if ( referencedNode ) theSet_.insert(referencedNode);
+}
+
+void AstCollateNodesVisitor::visitFlag(AstFlag* ast)
+{
+   Node* referencedNode = ast->referencedNode(); // could be expensive, hence don't call twice
+   if ( referencedNode ) theSet_.insert(referencedNode);
 }
 
 }

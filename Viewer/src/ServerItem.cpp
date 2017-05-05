@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -82,10 +82,11 @@ std::string ServerItem::longName() const
 
 void ServerItem::registerUsageBegin()
 {
-	useCnt_++;
 	if(!handler_)
 	{
 		handler_=ServerHandler::addServer(name_,host_,port_);
+        if(handler_)
+            useCnt_++;
 	}
 }
 
@@ -107,9 +108,11 @@ void ServerItem::addObserver(ServerItemObserver* o)
 {
 	std::vector<ServerItemObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
 	if(it == observers_.end())
-	{
-		observers_.push_back(o);
+	{	
 		registerUsageBegin();
+        //We might not be able to create the handle
+        if(handler_)
+            observers_.push_back(o);
 	}
 }
 

@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #7 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -46,7 +46,8 @@ public:
 
 	static DState::State default_state() { return DState::QUEUED; }
 	static NState::State convert(DState::State);
-	static const char* toString(DState::State s);
+   static const char* toString(DState::State s);
+   static const char* to_html(DState::State s);
 	static const char* toString(const DState& ns) { return toString(ns.state());}
 	static DState::State toState(const std::string& state);
 	static bool isValid(const std::string& state);

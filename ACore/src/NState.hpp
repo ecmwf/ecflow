@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #16 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -43,7 +43,8 @@ public:
 	bool operator==(State s) const { return s == state_;}
 	bool operator!=(State s) const { return s != state_;}
 
- 	static const char* toString(NState::State s);
+   static const char* toString(NState::State s);
+   static const char* to_html(NState::State s);
 	static const char* toString(const NState& ns) { return toString(ns.state());}
 	static NState::State toState(const std::string& state);
 	static bool isValid(const std::string& state);

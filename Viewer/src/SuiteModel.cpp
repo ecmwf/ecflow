@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -8,8 +8,6 @@
 //============================================================================
 
 #include "SuiteModel.hpp"
-
-#include <QDebug>
 
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
@@ -153,7 +151,6 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 	//{
 	//	return QVariant();
 	//}
-	//qDebug() << "data" << index << role;
 
 	int row=index.row();
 	if(row < 0 || row >= data_->count())

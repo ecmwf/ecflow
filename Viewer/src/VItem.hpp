@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,7 +13,6 @@
 
 #include <cstdlib>
 #include <QString>
-
 
 class ServerHandler;
 class VNode;
@@ -32,8 +31,6 @@ public:
     virtual ~VItem() {}
 
     VNode* parent() const {return parent_;}
-    //virtual ServerHandler* server() const;
-    //node_ptr node() const {return node_;}
     virtual VServer* isServer() const {return NULL;}
     virtual VNode* isNode() const {return NULL;}
     virtual VSuiteNode* isSuite() const {return NULL;}

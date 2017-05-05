@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -204,7 +204,9 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
 
  	errorMsg += "Could not open file specified by ECF_LISTS ";
  	errorMsg += white_list_file_;
- 	errorMsg += "\n";
+   errorMsg += " (";
+   errorMsg += strerror(errno);
+   errorMsg += ")";
    if (debug)  std::cout << dump_valid_users() << "\n";
  	return false;
 }

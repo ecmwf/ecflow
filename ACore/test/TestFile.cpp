@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #24 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( test_splitFileIntoLines )
       }
 
       std::vector<std::string> lines;
-      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path);
+      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path << " (" << strerror(errno) << ")");
       BOOST_CHECK_MESSAGE( lines.size() == 1," Expected 1 line but found " << lines.size());
 
       fs::remove(path); // Remove the file. Comment out for debugging
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( test_splitFileIntoLines )
       }
 
       std::vector<std::string> lines;
-      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path);
+      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path << " (" << strerror(errno) << ")");
       BOOST_CHECK_MESSAGE( lines.size() == 1," Expected 1 line but found " << lines.size());
 
       fs::remove(path); // Remove the file. Comment out for debugging
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_splitFileIntoLines )
       }
 
       std::vector<std::string> lines;
-      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path);
+      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path << " (" << strerror(errno) << ")");
       BOOST_CHECK_MESSAGE( lines.size() == 2," Expected 2 line but found " << lines.size());
 
       fs::remove(path); // Remove the file. Comment out for debugging
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( test_splitFileIntoLines )
       }
 
       std::vector<std::string> lines;
-      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path);
+      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path<< " (" << strerror(errno) << ")");
       BOOST_CHECK_MESSAGE( lines.size() == 3," Expected 3 line but found " << lines.size());
 
       fs::remove(path); // Remove the file. Comment out for debugging
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE( test_splitFileIntoLines )
       }
 
       std::vector<std::string> lines;
-      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path);
+      BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path<< " (" << strerror(errno) << ")");
       BOOST_CHECK_MESSAGE( lines.size() == 3," Expected 3 line but found " << lines.size());
 
       fs::remove(path); // Remove the file. Comment out for debugging
@@ -133,14 +133,14 @@ BOOST_AUTO_TEST_CASE( test_file_tokenizer )
 	}
 	{
 		std::vector<std::string> lines;
-		BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines,true/*ignore empty lines*/)," Failed to open file " << path);
+		BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines,true/*ignore empty lines*/)," Failed to open file " << path<< " (" << strerror(errno) << ")");
 		BOOST_CHECK_MESSAGE( lines.size() == linesWithText,"Expected " << linesWithText << " but found " <<  lines.size());
 		BOOST_CHECK_MESSAGE( lines[0] == theText,"Expected '" << theText << "' but found " <<  lines[0]);
 		BOOST_CHECK_MESSAGE( lines[linesWithText-1] == theText,"Expected '" << theText << "' but found " <<  lines[linesWithText-1]);
 
 		lines.clear();
 		size_t totalLines = 151;
-		BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path);
+		BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path<< " (" << strerror(errno) << ")");
 		BOOST_CHECK_MESSAGE( lines.size() == totalLines-1,"Expected " << totalLines-1 << " but found " <<  lines.size());
 		BOOST_CHECK_MESSAGE( lines[0] == "","Expected empty string  but found " <<  lines[0]);
 		BOOST_CHECK_MESSAGE( lines[1] == theText,"Expected '" << theText << "' but found " <<  lines[1]);
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE( test_file_tokenizer )
 	 	boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
  		for (size_t i = 0; i < openFileNTimes; i++) {
 			std::vector<std::string> lines;
-			BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path);
+			BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path<< " (" << strerror(errno) << ")");
   		}
 		cout << "Time for opening file " << openFileNTimes << " times = " << timer.elapsed() << "\n";
 	}

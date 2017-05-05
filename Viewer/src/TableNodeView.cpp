@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,7 +11,6 @@
 
 #include <QtGlobal>
 #include <QComboBox>
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMenu>
@@ -218,7 +217,7 @@ void TableNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList i
 	//Node actions
 	  	if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
 		{
-		  	qDebug() << "context menu" << indexClicked;
+            UiLog().dbg()  << "context menu " << indexClicked;
 
 	  		std::vector<VInfo_ptr> nodeLst;
 			for(int i=0; i < indexLst.count(); i++)
@@ -245,7 +244,7 @@ void TableNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
 
 	if(cmd == "set_as_root")
 	{
-		qDebug() << "set as root";
+        UiLog().dbg() << "set as root";
 		//model_->setRootNode(nodeLst.at(0)->node());
 		//expandAll();
 	}
@@ -651,7 +650,7 @@ void TableNodeHeader::mousePressEvent(QMouseEvent *event)
 	{
 		if(it.value().rect_.contains(event->pos()))
 		{
-			qDebug() << "header" << it.key() << "clicked";
+            UiLog().dbg() << "header " << it.key() << " clicked";
 			Q_EMIT customButtonClicked(it.value().id(),event->globalPos());
 		}
 	     ++it;

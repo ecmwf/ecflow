@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -226,7 +226,7 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
                 //attribute
                 else
                 {
-                    if(VAttribute* a=VAttribute::make(d->node_,d->attr_))
+                    if(VAttribute* a=d->node_->findAttribute(d->attr_))
                         return VInfoAttribute::create(a);
                     else
                         return VInfoNode::create(d->node_);

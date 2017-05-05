@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -133,12 +133,16 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 
 	std::string typeName="server";
 	std::string nodeName=server->name();
-	std::string statusName(VSState::toName(server).toStdString());
+	std::string statusName(VSState::toName(server).toStdString());    
+    std::string flags(snode->flagsAsStr());
 
-	//Header
+    //Header
 	f << "name    : " << nodeName << "\n";
 	f << "type    : " << typeName << "\n";
-	f << "status   : " << statusName << "\n";
+    f << "status  : " << statusName << "\n";
+
+    if(!flags.empty())
+        f << "flags   : " << flags << "\n";
 
     f << "----------\n";
     //Start block: Type, name
@@ -189,11 +193,15 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	std::string typeName=node->nodeType();
 	std::string nodeName(node->name().toStdString());
 	std::string statusName(node->stateName().toStdString());
+    std::string flags(node->flagsAsStr());
 
 	//Header
 	f << "name    : " << nodeName << "\n";
 	f << "type    : " << typeName << "\n";
 	f << "status  : " << statusName << "\n";
+
+    if(!flags.empty())
+        f << "flags   : " << flags << "\n";
 
 	node_ptr nn=node->node();
 

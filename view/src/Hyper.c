@@ -3,7 +3,7 @@
 /* Author      : B.Raoult                                                                      */
 /* Revision    : $Revision: #5 $                                                                    */
 /*                                                                                             */
-/* Copyright 2009-2016 ECMWF.                                                                  */
+/* Copyright 2009-2017 ECMWF.                                                                  */
 /* This software is licensed under the terms of the Apache Licence version 2.0                 */
 /* which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.                        */
 /* In applying this licence, ECMWF does not waive the privileges and immunities                */
@@ -844,7 +844,7 @@ int            n_args;
   GetValues(swin);
   
   {	
-    Position        x_parent,y_parent;	Position x,y;
+    Position        x_parent=0,y_parent=0;	Position x=0,y=0;
     int min= 0, max= 80, value= 0, slider_size = 80, inc = 10, page_inc = 100;
     int arg = atoi(args[0]);
     /* SetArg(XmNminimum,&min);

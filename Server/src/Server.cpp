@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #173 $
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -151,7 +151,8 @@ std::string Server::get_password() const
          return contents;
       }
       else {
-         std::stringstream ss; ss << "Server::get_password file " << passwd_file << " exists, but can't be opened";
+         std::stringstream ss;
+         ss << "Server::get_password file " << passwd_file << " exists, but can't be opened (" << strerror(errno) << ")";
          throw std::runtime_error(ss.str());
       }
    }

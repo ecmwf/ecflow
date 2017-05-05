@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -125,13 +125,19 @@ void ChangeNotifyButton::updateIcon()
 	f.setBold(true);
 	f.setPointSize(f.pointSize());
 	QFontMetrics fm(f);
+
+    QFont fNum;
+    fNum.setBold(true);
+    fNum.setPointSize(f.pointSize()-1);
+    QFontMetrics fmNum(fNum);
+
 	int w;
 	if(!numText.isEmpty())
 		w=fm.width(text) + 6 + fm.width(numText) + 2;
 	else
 		w=fm.width(text) + 6;
 
-	int h=fm.height()+6;
+    int h=fm.height()+2;
 
 	QPixmap pix(w,h);
 	pix.fill(QColor(255,255,255,0));
@@ -146,7 +152,7 @@ void ChangeNotifyButton::updateIcon()
 	grad_.setColorAt(1,bgCol);
 
 	painter.setBrush(QBrush(grad_));
-	painter.setPen(border);
+    painter.setPen(bgCol.darker(150));
 	painter.drawRoundedRect(textRect,2,2);
 	painter.setPen(fgCol);
 	painter.setFont(f);
@@ -154,11 +160,11 @@ void ChangeNotifyButton::updateIcon()
 
 	if(!numText.isEmpty())
 	{
-		QRect numRect(textRect.right()-1,0,fm.width(numText)+4,fm.ascent()+4);
+        QRect numRect(textRect.right()-1,0,fmNum.width(numText)+4,fmNum.ascent()+2);
 		painter.setBrush(countBgCol);
 		painter.setPen(countFgCol);
 		painter.drawRoundedRect(numRect,4,4);
-		painter.setFont(f);
+        painter.setFont(fNum);
 		painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);
 	}
 
@@ -208,7 +214,7 @@ void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
 
 void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 {
-	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); it++)
+    for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); ++it)
 	{
 		if(ChangeNotifyButton* tb=(*it)->findButton(id))
 		{
@@ -219,7 +225,7 @@ void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 
 void ChangeNotifyWidget::updateSettings(const std::string& id)
 {
-	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); it++)
+    for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); ++it)
 	{
 		if(ChangeNotifyButton* tb=(*it)->findButton(id))
 		{

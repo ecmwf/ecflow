@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #285 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <assert.h>
+#include <boost/bind.hpp>
 
 #include "ChildAttrs.hpp"
 #include "Str.hpp"
@@ -55,6 +56,31 @@ void ChildAttrs::requeue_labels()
 {
    // ECFLOW-195, clear labels before a task is run.
    for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
+}
+
+void ChildAttrs::sort_attributes( ecf::Attr::Type attr)
+{
+   switch ( attr ) {
+      case Attr::EVENT:
+         sort(events_.begin(),events_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Event::name_or_number,_1),
+                                   boost::bind(&Event::name_or_number,_2)));
+         break;
+      case Attr::METER:
+         sort(meters_.begin(),meters_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Meter::name,_1),
+                                   boost::bind(&Meter::name,_2)));
+         break;
+      case Attr::LABEL:
+         sort(labels_.begin(),labels_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Label::name,_1),
+                                   boost::bind(&Label::name,_2)));
+         break;
+      case Attr::LIMIT:    break;
+      case Attr::VARIABLE: break;
+      case Attr::UNKNOWN:  break;
+      default:             break;
+   }
 }
 
 void ChildAttrs::clear()
@@ -522,33 +548,31 @@ const Label& ChildAttrs::find_label(const std::string& name) const
 }
 
 
-void ChildAttrs::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeEventMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeEventMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
 
    if (set_event(memento->event_.name_or_number(),  memento->event_.value())) {
-      aspects.push_back(ecf::Aspect::EVENT);
       return;
    }
    addEvent( memento->event_);
 }
 
-void ChildAttrs::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeMeterMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeMeterMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
 
    if (set_meter(memento->meter_.name(), memento->meter_.value())) {
-      aspects.push_back(ecf::Aspect::METER);
       return;
    }
    addMeter(memento->meter_);
 }
 
-void ChildAttrs::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void ChildAttrs::set_memento( const NodeLabelMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeLabelMemento* memento) " << node_->debugNodePath() << "\n";
@@ -558,7 +582,6 @@ void ChildAttrs::set_memento( const NodeLabelMemento* memento,std::vector<ecf::A
    for(size_t i = 0; i < theSize; i++) {
       if (labels_[i].name() == memento->label_.name()) {
          labels_[i] = memento->label_;
-         aspects.push_back(ecf::Aspect::LABEL);
          return;
       }
    }

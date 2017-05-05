@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #37 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -369,7 +369,7 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 			throw std::runtime_error(ss.str());
 		}
 	 	if (!File::splitFileIntoLines(path_to_script, script_lines)) {
- 			ss << "Could not open script file " << path_to_script;
+ 			ss << "Could not open script file " << path_to_script << " (" << strerror(errno) << ")";
 			throw std::runtime_error(ss.str());
 	 	}
 

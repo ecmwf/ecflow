@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,8 +9,6 @@
 //============================================================================
 
 #include "VNode.hpp"
-
-#include <QDebug>
 
 #include "Node.hpp"
 #include "Variable.hpp"
@@ -23,23 +21,35 @@
 #include "TriggeredScanner.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "VDateAttr.hpp"
+#include "VEventAttr.hpp"
 #include "VFileInfo.hpp"
+#include "VFilter.hpp"
+#include "VLabelAttr.hpp"
+#include "VLateAttr.hpp"
+#include "VLimitAttr.hpp"
+#include "VLimiterAttr.hpp"
+#include "VMeterAttr.hpp"
+#include "VRepeatAttr.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VTaskNode.hpp"
+#include "VTimeAttr.hpp"
+#include "VTriggerAttr.hpp"
+#include "VGenVarAttr.hpp"
+#include "VUserVarAttr.hpp"
+#include "UiLog.hpp"
 
 #include <boost/algorithm/string.hpp>
 
 #define _UI_VNODE_DEBUG
 
-
 // static member of VNode
 std::string VNode::nodeMarkedForMoveRelPath_;
 std::string VNode::nodeMarkedForMoveServerAlias_;
 
-
 //For a given node this class stores all the nodes that this node itself triggers.
-//For memory efficiency we only store the index of the nodes not the pointers themselves.
+//For memory efficiency we only store the AttributeFilterindex of the nodes not the pointers themselves.
 class VNodeTriggerData
 {
 public:
@@ -48,11 +58,11 @@ public:
     void get(VNode* node ,TriggerCollector* tc)
     {
         VServer* s=node->root();
-        for(size_t i=0; i < data_.size(); i++)
+        int num=data_.size();
+        for(size_t i=0; i < num; i++)
         {
-            VItemTmp_ptr triggered(VItemTmp::create(s->nodeAt(data_[i])));
-            VItemTmp_ptr nullItem;
-            tc->add(triggered,nullItem,TriggerCollector::Normal);
+            VItem* triggered=s->nodeAt(data_[i]);
+            tc->add(triggered,0,TriggerCollector::Normal);
         }
     }
     void add(VItem* n)
@@ -95,7 +105,7 @@ public:
             tc->add(triggered,nullItem,TriggerCollector::Normal);
         }
     }
-
+AttributeFilter
     void add(VItem* n)
     {
         assert(n);
@@ -138,12 +148,17 @@ VNode::VNode(VNode* parent,node_ptr node) :
 
 	if(node_)
 		node_->set_graphic_ptr(this);
+
+    scanAttr();
 }
 
 VNode::~VNode()
 {
     if(data_)
         delete data_;
+
+    for(size_t i=0; i < attr_.size(); i++)
+        delete attr_[i];
 }
 
 VServer* VNode::root() const
@@ -195,95 +210,191 @@ bool VNode::hasAccessed() const
 	return true; //!name_.empty();
 }
 
-#if 0
-//At the beginning of the update we get the current number of attributes
-void VNode::beginUpdateAttrNum()
-{
-	//if(attrNum_ != -1)
-	//{
-	//	attrNum_=cachedAttrNum_;
-	//}
+//------------------------
+// Attributes
+//------------------------
 
-	//attrNum_=VAttribute::totalNum(node_);
+void VNode::scanAttr()
+{  
+    std::vector<VAttribute*> v;
+    VAttributeType::scan(this,v);
+    int n=v.size();
+    attr_.reserve(n);
+    for(size_t i=0; i < n; i++)
+        attr_.push_back(v[i]);
 }
 
-//At the end of the update we set the cached value to the current number of attributes
-void VNode::endUpdateAttrNum()
+void VNode::rescanAttr()
 {
-	cachedAttrNum_=attrNum_;
-    attrNum_=VAttributeType::totalNum(this);
-}
+    for(size_t i=0; i < attr_.size(); i++)
+        delete attr_[i];
 
-short VNode::cachedAttrNum() const
-{
-	return cachedAttrNum_;
+    attr_=std::vector<VAttribute*>();
+    scanAttr();
 }
-#endif
 
 int VNode::attrNum(AttributeFilter *filter) const
 {     
-    return VAttributeType::totalNum(this,filter);
+    if(filter)
+    {
+        int n=0;
+        for(size_t i=0; i < attr_.size(); i++)
+        {
+            if(filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i])
+                n++;
+        }
+        return n;
+    }
 
-#if 0
-    //If if was not initialised we get its value
-	if(attrNum_==-1)
-	{
-        attrNum_=VAttributeType::totalNum(this);
-
-		if(cachedAttrNum_ == -1)
-			cachedAttrNum_=attrNum_;
-	}
-
-	return attrNum_;
-#endif
-
+    return attr_.size();
 }
 
-#if 0
-short VNode::currentAttrNum() const
+VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
 {
-    return VAttributeType::totalNum(this);
-}
-#endif
+    assert(row>=0);
 
-QStringList VNode::getAttributeData(int row,VAttributeType*& type)
-{
-	QStringList lst;
-    VAttributeType::getData(this,row,type,lst);
-	return lst;
-}
+    if(filter)
+    {
+        int n=0;
+        int cnt=attr_.size();
+        if(row >= cnt)
+            return 0;
 
-QStringList VNode::getAttributeData(int row,AttributeFilter *filter)
-{
-    VAttributeType* type;
-    QStringList lst;
-    VAttributeType::getData(this,row,type,lst,filter);
-    return lst;
-}
+        for(size_t i=0; i < cnt; i++)
+        {
+            if(filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i] )
+            {
+                if(n == row)
+                {
+                    return attr_[i];
+                }
+                n++;               
+            }
+        }
+    }
+    else if(row < attr_.size())
+    {
+        return attr_[row];
+    }
 
-#if 0
-VAttributeType* VNode::getAttributeType(int row)
-{
-    return VAttributeType::getType(this,row);
-}
-#endif
-
-bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
-{
-    return VAttributeType::getData(type,this,row,data);
+    return 0;
 }
 
-int VNode::getAttributeLineNum(int row,AttributeFilter *filter)
+VAttribute* VNode::attributeForType(int row,VAttributeType *t) const
 {
-    return VAttributeType::getLineNum(this,row,filter);
+    assert(row>=0);
+
+    int n=0;
+    int cnt=attr_.size();
+    if(row >= cnt)
+        return 0;
+
+    bool hasIt=false;
+    int rowCnt=0;
+    for(size_t i=0; i < cnt; i++)
+    {
+        if(attr_[i]->type() == t)
+        {
+            if(rowCnt == row)
+            {
+                return attr_[i];
+            }
+            rowCnt++;
+            hasIt=true;
+        }
+        else if(hasIt)
+        {
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
-QString VNode::attributeToolTip(int row,AttributeFilter *filter)
+int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
 {
-    VAttributeType* type;
-    QStringList lst;
-    VAttributeType::getData(this,row,type,lst,filter);
-    return (type)?(type->toolTip(lst)):QString();
+    if(filter)
+    {
+        int n=0;
+        int cnt=attr_.size();
+        for(size_t i=0; i < cnt; i++)
+        {
+            if(filter->isSet(attr_[i]->type())  || filter->forceShowAttr() == attr_[i]  )
+            {
+                if(a==attr_[i])
+                    return n;
+
+                n++;
+            }
+        }
+    }
+    else
+    {
+        int n=0;
+        int cnt=attr_.size();
+        for(size_t i=0; i < cnt; i++)
+        {
+            if(a == attr_[i])
+                return i;
+        }
+    }
+
+    return -1;
+}
+
+VAttribute* VNode::findAttribute(const std::string& typeName,const std::string& name)
+{
+    VAttributeType *t=VAttributeType::find(typeName);
+    Q_ASSERT(t);
+    return (t)?findAttribute(t,name):0;
+}
+
+VAttribute* VNode::findAttribute(VAttributeType *t,const std::string& name)
+{
+    Q_ASSERT(t);
+
+    int cnt=attr_.size();
+    bool hasType=false;
+    for(size_t i=0; i < cnt; i++)
+    {
+        if(attr_[i]->type() == t)
+        {
+            if(attr_[i]->strName() == name)
+                return attr_[i];
+            hasType=true;
+        }
+        else if(hasType)
+            return 0;
+    }
+    return 0;
+}
+
+
+VAttribute* VNode::findAttribute(QStringList aData)
+{
+    int cnt=attr_.size();
+    for(size_t i=0; i < cnt; i++)
+    {
+        if(attr_[i]->sameAs(aData))
+            return attr_[i];
+    }
+    return 0;
+}
+
+void VNode::findAttributes(VAttributeType *t,std::vector<VAttribute*>& v)
+{
+    int cnt=attr_.size();
+    bool hasType=false;
+    for(size_t i=0; i < cnt; i++)
+    {
+        if(attr_[i]->type() == t)
+        {
+            v.push_back(attr_[i]);
+            hasType=true;
+        }
+        else if(hasType)
+            return;
+    }
 }
 
 void VNode::addChild(VNode* vn)
@@ -457,7 +568,7 @@ int VNode::variablesNum() const
 
 int VNode::genVariablesNum() const
 {
-	std::vector<Variable> gv;
+    std::vector<Variable> gv;
 
     if(node_)
 	{
@@ -605,32 +716,6 @@ QColor  VNode::typeFontColour() const
     return VNState::toTypeColour(this);
 }
 
-LogServer_ptr VNode::logServer()
-{
-	LogServer_ptr lsv;
-
-	if(!node_)
-		return lsv;
-
-	std::string logHost=findInheritedVariable("ECF_LOGHOST",true);
-	std::string logPort=findInheritedVariable("ECF_LOGPORT");
-	//if(logHost.empty())
-	//{
-	//	logHost=findInheritedVariable("LOGHOST",true);
-	//	logPort=findInheritedVariable("LOGPORT");
-	//}
-
-	std::string micro=findInheritedVariable("ECF_MICRO");
-	if(!logHost.empty() && !logPort.empty() &&
-	  (micro.empty() || logHost.find(micro) ==  std::string::npos))
-	{
-		lsv=LogServer_ptr(new LogServer(logHost,logPort));
-		return lsv;
-	}
-
-	return lsv;
-}
-
 bool VNode::logServer(std::string& host,std::string& port)
 {
 	if(!node_)
@@ -653,24 +738,6 @@ bool VNode::logServer(std::string& host,std::string& port)
 
 	return false;
 }
-
-#if 0
-bool VNode::isAncestor(const VNode* n)
-{
-	if(n == this)
-		return true;
-
-    VNode* nd=parent();
-    while(nd)
-    {
-    	if(n == nd)
-           return true;
-
-    	nd=nd->parent();
-    }
-    return false;
-}
-#endif
 
 std::vector<VNode*> VNode::ancestors(SortMode sortMode)
 {
@@ -765,21 +832,31 @@ bool VNode::isAlias() const
 }
 #endif
 
+std::string VNode::flagsAsStr() const
+{
+    return (node_)?node_->flag().to_string():std::string();
+}
+
 bool VNode::isFlagSet(ecf::Flag::Type f) const
 {
-	if(node_ && node_.get())
+    if(node_)
 	{
 		return node_->flag().is_set(f);
 	}
 	return false;
 }
 
-void VNode::why(std::vector<std::string>& theReasonWhy) const
+void VNode::why(std::vector<std::string>& bottomUp,
+                std::vector<std::string>& topDown) const
 {
     if(node_)
 	{
-		node_->bottom_up_why(theReasonWhy);
-	}
+        node_->bottom_up_why(bottomUp,1);
+        if(isFamily() || isSuite())
+        {
+           node_->top_down_why(topDown,1);
+        }
+    }
 }
 
 const std::string& VNode::abortedReason() const
@@ -846,35 +923,20 @@ QString VNode::toolTip()
 
 void VNode::triggerExpr(std::string& trigger, std::string& complete) const
 {
-    if(node_)
-    {
-        QList<VItemTmp_ptr> v;
-        VAttributeType::items("trigger",this,v);
-        Q_FOREACH(VItemTmp_ptr aItem,v)
-        {
-            VAttribute* a=aItem->attribute();
-            assert(a);
-            std::string t;
-            a->value("trigger_type",t);
-            if(t=="0")
-                a->value("trigger_expression",trigger);
-            else if(t=="1")
-                a->value("trigger_expression",complete);
-        }       
-    }
+    VTriggerAttr::expressions(this,trigger,complete);
 }
 
 //Collect the information about all the triggers triggering this node
 void VNode::triggers(TriggerCollector* tlc)
 {
-    VItemTmp_ptr nullItem;
+    VItem* nullItem=0;
     //Check the node itself
     //if(tlr.self())
     {
         //find nodes, event, meters and variables triggering this node
         if(node_ && !node_->isSuite())
         {
-            std::vector<VItemTmp_ptr> theVec;
+            std::vector<VItem*> theVec;
             AstCollateVNodesVisitor astVisitor(theVec);
 
             //Collect the nodes from ast
@@ -885,12 +947,8 @@ void VNode::triggers(TriggerCollector* tlc)
                 node_->triggerAst()->accept(astVisitor);
 
             //Add the found items to the collector
-            for(std::vector<VItemTmp_ptr>::iterator it = theVec.begin(); it != theVec.end(); ++it)
+            for(std::vector<VItem*>::iterator it = theVec.begin(); it != theVec.end(); ++it)
             {
-#ifdef _UI_VNODE_DEBUG
-                //if((*it)->parent() && (*it)->parent()->absNodePath() == "/e_41r2_peter/main")
-                //    qDebug() << "trigger ast:" << (*it)->name() << *it;
-#endif
                 tlc->add(*it,nullItem, TriggerCollector::Normal);
             }
         }
@@ -898,19 +956,20 @@ void VNode::triggers(TriggerCollector* tlc)
         //Check other attributes
 
         //Limiters
-        QList<VItemTmp_ptr> limiterLst;
-        VAttributeType::items("limiter",this,limiterLst);
-        Q_FOREACH(VItemTmp_ptr aItem, limiterLst)
+        std::vector<VAttribute*> limiterVec;
+        findAttributes(VAttributeType::find("limiter"),limiterVec);
+        int n=limiterVec.size();
+        for(size_t i=0; i < n; i++)
         {
-            VAttribute* a=aItem->attribute();
+            VAttribute *a=limiterVec[i];
             assert(a);
-            std::string v;
-            if(a->value("limiter_path",v))
+            std::string val;
+            if(a->value("limiter_path",val))
             {
-                if(VItemTmp_ptr n = findLimit(v, a->strName()))
+                if(VAttribute* n = findLimit(val, a->strName()))
                 {
 #ifdef _UI_VNODE_DEBUG
-                    //qDebug() << "trigger limit:" << n->name();
+                    UiLog().dbg() << "trigger limit: " << n->name();
 #endif                   
                     tlc->add(n,nullItem, TriggerCollector::Normal);
                 }
@@ -918,19 +977,21 @@ void VNode::triggers(TriggerCollector* tlc)
         }
 
         //Date
-        QList<VItemTmp_ptr> dateLst;
-        VAttributeType::items("date",this,dateLst);
-        Q_FOREACH(VItemTmp_ptr a, dateLst)
-        {            
-            tlc->add(a,nullItem,TriggerCollector::Normal);
+        std::vector<VAttribute*> dateVec;
+        findAttributes(VAttributeType::find("date"),dateVec);
+        n=dateVec.size();
+        for(size_t i=0; i < n; i++)
+        {
+            tlc->add(dateVec[i],nullItem,TriggerCollector::Normal);
         }
 
         //Time
-        QList<VItemTmp_ptr> timeLst;
-        VAttributeType::items("time",this,timeLst);
-        Q_FOREACH(VItemTmp_ptr a, timeLst)
+        std::vector<VAttribute*> timeVec;
+        findAttributes(VAttributeType::find("time"),timeVec);
+        n=timeVec.size();
+        for(size_t i=0; i < n; i++)
         {
-             tlc->add(a,nullItem,TriggerCollector::Normal);
+            tlc->add(timeVec[i],nullItem,TriggerCollector::Normal);
         }
 
     }
@@ -986,10 +1047,10 @@ void VNode::triggered(TriggerCollector* tlc,TriggeredScanner* scanner)
 {
     if(scanner && !root()->triggeredScanned())
     {
-        unsigned int aNum=VAttribute::totalNum();
+        //unsigned int aNum=VAttribute::totalNum();
         scanner->start(root());
         root()->setTriggeredScanned(true);
-        assert(aNum == VAttribute::totalNum());
+        //assert(aNum == VAttribute::totalNum());
     }
 
     //Get the nodes directly triggered by this node
@@ -1023,10 +1084,10 @@ void VNode::triggeredByChildren(VNode *n,VNode* p,TriggerCollector* tlc)
     }
 }
 
-VItemTmp_ptr VNode::findLimit(const std::string& path, const std::string& name)
+VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
 {
    // if (!strncmp("/", path.c_str(), 1))
-   VItemTmp_ptr nullItem;
+   VAttribute* nullItem=0;
 
 #if 0
    if(!path.empty() && path[0] == '/')
@@ -1047,23 +1108,22 @@ VItemTmp_ptr VNode::findLimit(const std::string& path, const std::string& name)
     }
 
     //Find the matching limit in the node
-    QList<VItemTmp_ptr> limit;
-    VAttributeType::items("limit",n,limit);
-    Q_FOREACH(VItemTmp_ptr aItem, limit)
-    {
-       assert(aItem);
-       assert(aItem->item());
-       assert(aItem->item()->isAttribute());
-       if(aItem->item()->strName() == name)
+    std::vector<VAttribute*> limit;
+    n->findAttributes(VAttributeType::find("limit"),limit);
+    int limitNum=limit.size();
+    for(size_t i=0; i < limitNum; i++)
+    {       
+       if(limit[i]->strName() == name)
        {
-           return aItem;
+           return limit[i];
        }
     }
 
     //Find the matching limit in the ancestors
     VNode* p=n->parent();
     Q_ASSERT(p);
-    for(int i=0; i < p->numOfChildren(); i++)
+    int chNum= p->numOfChildren();
+    for(int i=0; i < chNum; i++)
     {
         VNode* ch=p->childAt(i);
         if (ch->strName() == path.substr(0, ch->name().size()))
@@ -1499,7 +1559,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
 
-	//Update the generated variables. There is no notification about their change so we have to to do it!!!
+    //Update the generated variables. There is no notification about their change so we have to do it!!!
 	if(node->node())
 	{
 		Suite *s=NULL;
@@ -1524,6 +1584,12 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 #endif
     bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+
+    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+    if(attrNumCh)
+    {
+       node->rescanAttr();
+    }
 
 	//----------------------------------------------------------------------
 	// The number of attributes changed but the number of nodes did not
@@ -1676,10 +1742,14 @@ void VServer::why(std::vector<std::string>& theReasonWhy) const
 	if (!defs)
 		return;
 
-	defs->why(theReasonWhy);
+    defs->why(theReasonWhy,1);
 }
 
 
+std::string VServer::flagsAsStr() const
+{
+    return cache_.flag_.to_string();
+}
 
 bool VServer::isFlagSet(ecf::Flag::Type f) const
 {

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #42 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -141,7 +141,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 		      submittable->findParentVariableValue(Str::ECF_JOB(), ecf_job_file);
 				if (!File::open(ecf_job_file,fileContents)) {
 					std::stringstream ss;
-					ss << "CFileCmd::doHandleRequest: Failed to open the job file('" << ecf_job_file << "') for task " << pathToNode_;
+					ss << "CFileCmd::doHandleRequest: Failed to open the job file('" << ecf_job_file << "') for task " << pathToNode_<< " (" << strerror(errno) << ")";
 					throw std::runtime_error( ss.str() ) ;
  				}
 				break;}
@@ -170,7 +170,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 				         std::stringstream ss;
 				         ss << "CFileCmd::doHandleRequest: Failed to open the job-out(ECF_JOBOUT=ECF_OUT/ECF_NAME.ECF_TRYNO) file('"
 				               << ecf_jobout_gen_var.theValue() << "') *AND* at location (ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO)('"
-				               << backup_jobout << "') for task " << pathToNode_;
+				               << backup_jobout << "') for task " << pathToNode_ << " (" << strerror(errno) << ")";
 				         throw std::runtime_error( ss.str() ) ;
 				      }
 				   }
@@ -191,7 +191,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
             std::string file = ecf_job_file + ".kill";
             if (!File::open(file,fileContents)) {
                std::stringstream ss;
-               ss << "CFileCmd::doHandleRequest: Failed to open the kill output file('" << file << "') for task " << pathToNode_;
+               ss << "CFileCmd::doHandleRequest: Failed to open the kill output file('" << file << "') for task " << pathToNode_<< " (" << strerror(errno) << ")";
                throw std::runtime_error( ss.str() ) ;
             }
             break; }
@@ -202,7 +202,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
             std::string file = ecf_job_file + ".stat";
             if (!File::open(file,fileContents)) {
                std::stringstream ss;
-               ss << "CFileCmd::doHandleRequest: Failed to open the status output file('" << file << "') for task " << pathToNode_;
+               ss << "CFileCmd::doHandleRequest: Failed to open the status output file('" << file << "') for task " << pathToNode_<< " (" << strerror(errno) << ")";
                throw std::runtime_error( ss.str() ) ;
             }
             break; }
@@ -218,7 +218,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 		   // First look for .man files in ECF_FILES and then ECF_HOME
          std::string ecf_files;
          node->findParentUserVariableValue( Str::ECF_FILES(), ecf_files);
-         if ( !ecf_files.empty() && fs::exists( ecf_files ) && fs::is_directory( ecf_files ) ) {
+         if ( !ecf_files.empty() && fs::is_directory( ecf_files ) ) {
 
             std::string manFile = File::backwardSearch( ecf_files, node->absNodePath(), File::MAN_EXTN());
             if (!manFile.empty()) {
@@ -231,7 +231,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
             // Try under ECF_HOME
             std::string ecf_home;
             node->findParentUserVariableValue( Str::ECF_HOME(), ecf_home);
-            if ( !ecf_home.empty() && fs::exists( ecf_home ) && fs::is_directory( ecf_home ) ) {
+            if ( !ecf_home.empty() && fs::is_directory( ecf_home ) ) {
 
                std::string manFile = File::backwardSearch( ecf_home, node->absNodePath(), File::MAN_EXTN());
                EcfFile the_file(node.get(), manFile);

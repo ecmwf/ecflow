@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -59,7 +59,9 @@ public:
 
 	/// Configure to using command line interface
 	/// This affect commands like ping, log & file, so that, output is written to standard out
-	void set_cli(bool f) { cli_ =  f; }
+	/// Can also be used to check argument arguments
+	void set_cli(bool f) { clientEnv_.set_cli(f); }
+	bool cli() const { return clientEnv_.get_cli(); }
 
 	/// This will override the environment setting.
 	/// In particular setting host explicitly will avoid cycling through server list,
@@ -277,6 +279,12 @@ public:
              const std::string& attrType,
              const std::string& name = "",
              const std::string& value = "") const { return invoke(CtsApi::alter(path,alterType,attrType,name,value)); }
+   int alter_sort(const std::vector<std::string>& paths,
+              const std::string& sortable_attribute_name,
+              bool recursive = true) const { return invoke(CtsApi::alter_sort(paths,sortable_attribute_name,recursive)); }
+   int alter_sort(const std::string& path,
+              const std::string& sortable_attribute_name,
+              bool recursive = true) const { return invoke(CtsApi::alter_sort(std::vector<std::string>(1,path),sortable_attribute_name,recursive)); }
 
 	int reloadwsfile() const;
 	int reloadpasswdfile() const;
@@ -325,7 +333,6 @@ private:
    friend class RequestLogger;
 private:
 	bool on_error_throw_exception_;
-	bool cli_;                             // Command Line Interface. Controls whether output written to standard out
 	bool test_;                            // used in testing only
 	bool testInterface_;                   // used in testing only
 	unsigned int connection_attempts_;     // No of attempts to establish connection with the server

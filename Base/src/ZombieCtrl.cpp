@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #41 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -531,22 +531,13 @@ void ZombieCtrl::adoptCli( const std::string& path_to_task,  Submittable* task) 
 		throw std::runtime_error("ZombieCtrl::adoptCli: Can't adopt zombie, there is no corresponding task!");
 	}
 
-	/// Try to determine the real zombie. (not 100% precise) by comparing its password with zombie
-	/// If zombie password does *NOT* match then this is the real zombie.
-	size_t zombieVecSize = zombies_.size();
-	for(size_t i = 0 ; i < zombieVecSize; i++) {
-	   if (zombies_[i].path_to_task() == path_to_task && zombies_[i].jobs_password() != task->jobsPassword()) {
-	      zombies_[i].set_adopt();
-	      return;
-	   }
-	}
-
    /// ***************************************************************************************
    /// IMPORTANT: We should *NEVER* adopt a zombie, when the process id are different
    /// This can end up, with two process running, Will mess up job output, as well as corruption caused
-	/// but running the same job twice. Better to kill both and re-queue.
+   /// but running the same job twice. Better to kill both and re-queue.
    /// Note: PBS can create two process, i.e same password, different PID's
    /// ***************************************************************************************
+   size_t zombieVecSize = zombies_.size();
    for(size_t i = 0 ; i < zombieVecSize; i++) {
       if (zombies_[i].path_to_task() == path_to_task && zombies_[i].process_or_remote_id() != task->process_or_remote_id()) {
          std::stringstream ss;
@@ -556,6 +547,15 @@ void ZombieCtrl::adoptCli( const std::string& path_to_task,  Submittable* task) 
          throw std::runtime_error(ss.str());
       }
    }
+
+	/// Try to determine the real zombie. (not 100% precise) by comparing its password with zombie
+	/// If zombie password does *NOT* match then this is the real zombie.
+	for(size_t i = 0 ; i < zombieVecSize; i++) {
+	   if (zombies_[i].path_to_task() == path_to_task && zombies_[i].jobs_password() != task->jobsPassword()) {
+	      zombies_[i].set_adopt();
+	      return;
+	   }
+	}
 }
 
 void ZombieCtrl::block( const std::string& path_to_task, const std::string& process_or_remote_id, const std::string& password ) {

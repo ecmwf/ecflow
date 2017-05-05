@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #21 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( test_log_append )
 
 	// Load the log file into a vector, of strings, and test content
     std::vector<std::string> lines;
- 	BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(path,lines,true/*IGNORE EMPTY LINE AT THE END*/),"Failed to open log file");
+ 	BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(path,lines,true/*IGNORE EMPTY LINE AT THE END*/),"Failed to open log file"<< " (" << strerror(errno) << ")");
  	BOOST_REQUIRE(lines.size() != 0);
 	BOOST_CHECK_MESSAGE(lines.size() == 10," Expected 10 lines in log, but found " << lines.size() << "\n");
 	BOOST_CHECK_MESSAGE(lines[0].find("First Message") != string::npos,"Expected first line to contain 'First Message' but found " << lines[0] << "\n");

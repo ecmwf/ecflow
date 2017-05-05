@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -20,12 +20,12 @@ class CustomCommand
 {
 public:
 	CustomCommand(const std::string &name, const std::string &command, bool context);
-	std::string name()    const {return name_;};
-	std::string command() const {return command_;};
-	bool inContextMenu()  const {return inContextMenu_;};
-	std::string contextString() const {return (inContextMenu_ ? "yes" : "no");};
+    const std::string& name()    const {return name_;}
+    const std::string& command() const {return command_;}
+    bool inContextMenu()  const {return inContextMenu_;}
+    std::string contextString() const {return (inContextMenu_ ? "yes" : "no");}
 	void set(const std::string &name, const std::string &command, bool context);
-	void save(VSettings *vs);
+    void save(VSettings *vs) const;
 
 
 private:
@@ -55,7 +55,7 @@ public:
 	//const std::vector<NodeQuery*>& items() const {return items_;}
 	CustomCommand* find(const std::string& name) const;
 	int findIndexFromName(const std::string& name) const;
-	int numCommands() {return items_.size();};
+    int numCommands() const {return items_.size();}
 	CustomCommand *commandFromIndex(int i) {return items_[i];};
 	bool stringToBool(std::string &str);
 	void swapCommandsByIndex(int i1, int i2);

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #53 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -33,6 +33,7 @@
 #include "ZombieAttr.hpp"
 #include "NodeAttrDoc.hpp"
 #include "BoostPythonUtil.hpp"
+#include "Attr.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -143,6 +144,14 @@ void export_NodeAttr()
 	.value("complete",Child::COMPLETE)
  	;
 
+   enum_<Attr::Type>("AttrType", "Sortable attribute type, currently [event | meter | label | limit | variable ]")
+   .value("event",   Attr::EVENT)
+   .value("meter",   Attr::METER)
+   .value("label",   Attr::LABEL)
+   .value("limit",   Attr::LIMIT)
+   .value("variable",Attr::VARIABLE)
+   ;
+
 	// 	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime);
  	class_<ZombieAttr>("ZombieAttr",NodeAttrDoc::zombie_doc())
    .def("__init__",make_constructor(&create_ZombieAttr) )
@@ -214,7 +223,8 @@ void export_NodeAttr()
    .def("__copy__",   copyObject<Event>)                // __copy__ uses copy constructor
 	.def("name",        &Event::name,       return_value_policy<copy_const_reference>(), "Return the Events name as string. If number supplied name may be empty.")
 	.def("number",      &Event::number,     "Return events number as a integer. if not specified return max integer value")
-	.def("value",       &Event::value,      "Return events current value")
+   .def("name_or_number",&Event::name_or_number,"returns name or number as an integer")
+   .def("value",       &Event::value,      "Return events current value")
    .def("empty",       &Event::empty,      "Return true if the Event is empty. Used when returning a NULL Event, from a find")
 	;
 

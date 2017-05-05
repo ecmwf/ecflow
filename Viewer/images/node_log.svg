@@ -14,7 +14,7 @@
    height="32"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.91 r13725"
    sodipodi:docname="node_log.svg">
   <defs
      id="defs4">
@@ -57,10 +57,10 @@
        id="linearGradient4793"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(1.1496437,0,0,1.0974014,-0.68181471,-2.5135733)"
-       x1="29.836605"
-       y1="18.129137"
-       x2="-6.005146"
-       y2="5.2368469" />
+       x1="22.501528"
+       y1="19.172001"
+       x2="-4.6953111"
+       y2="12.207575" />
     <linearGradient
        id="linearGradient3786-4">
       <stop
@@ -70,7 +70,7 @@
       <stop
          id="stop3790-8"
          offset="1"
-         style="stop-color:#e4eef2;stop-opacity:1;" />
+         style="stop-color:#c7cfd2;stop-opacity:1" />
     </linearGradient>
     <linearGradient
        inkscape:collect="always"
@@ -131,17 +131,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="32.390762"
-     inkscape:cx="11.822327"
-     inkscape:cy="17.211211"
+     inkscape:zoom="16.601987"
+     inkscape:cx="23.49321"
+     inkscape:cy="15.829171"
      inkscape:document-units="px"
      inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:snap-grids="false"
      inkscape:window-width="1693"
      inkscape:window-height="1132"
-     inkscape:window-x="52"
-     inkscape:window-y="100"
+     inkscape:window-x="1083"
+     inkscape:window-y="9"
      inkscape:window-maximized="0"
      inkscape:snap-to-guides="false">
     <inkscape:grid
@@ -229,29 +229,19 @@
        sodipodi:end="4.5518387"
        transform="matrix(-0.27864429,-0.2293023,-0.50135483,0.12744222,6.6798023,4.727201)"
        sodipodi:open="true" />
-    <path
-       sodipodi:type="arc"
-       style="fill:#769ea7;fill-opacity:1;stroke:#6f8a91;stroke-width:1.01176022999999993;stroke-opacity:1;display:inline"
-       id="path8398"
-       sodipodi:cx="16.552216"
-       sodipodi:cy="21.301931"
-       sodipodi:rx="11.112521"
-       sodipodi:ry="11.57878"
-       d="m 27.664737,21.301931 a 11.112521,11.57878 0 1 1 -22.2250426,0 11.112521,11.57878 0 1 1 22.2250426,0 z"
-       transform="matrix(-0.24413564,-0.78633963,0.76067738,-0.23245588,5.9236104,33.281366)" />
     <text
        xml:space="preserve"
-       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Courier;-inkscape-font-specification:Courier Bold"
-       x="12.506907"
-       y="20.468391"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:20.88545036px;line-height:125%;font-family:Courier;-inkscape-font-specification:'Courier Bold';letter-spacing:0px;word-spacing:0px;display:inline;fill:#002c5f;fill-opacity:1;stroke:none;"
+       x="12.554404"
+       y="20.187334"
        id="text7062-1"
        sodipodi:linespacing="125%"
-       transform="scale(1.009838,0.99025785)"><tspan
+       transform="scale(0.96825171,1.0327893)"><tspan
          sodipodi:role="line"
          id="tspan7064-6"
-         x="12.506907"
-         y="20.468391"
-         style="font-size:18px;font-weight:bold;fill:#ffffff;fill-opacity:1;-inkscape-font-specification:Courier Bold">N</tspan></text>
+         x="12.554404"
+         y="20.187334"
+         style="font-weight:bold;font-size:20.88545036px;-inkscape-font-specification:'Courier Bold';fill:#002c5f;fill-opacity:1;">N</tspan></text>
     <path
        sodipodi:open="true"
        transform="matrix(-0.27864429,-0.2293023,-0.50135483,0.12744222,6.8694669,22.176344)"

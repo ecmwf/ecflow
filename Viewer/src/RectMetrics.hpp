@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -8,17 +8,22 @@
 //
 //============================================================================
 
-#include "VItem.hpp"
-#include "VItemTmp.hpp"
-#include "VAttribute.hpp"
+#ifndef RECTMETRICS_HPP
+#define RECTMETRICS_HPP
 
-VItemTmp::~VItemTmp()
+class RectMetrics
 {
-    if(item_ && item_->isAttribute())
-    delete item_;
-}
+public:
+    RectMetrics(int penWidth);
+    int topOffset() const {return topOffset_;}
+    int bottomOffset() const {return bottomOffset_;}
 
-VAttribute* VItemTmp::attribute() const
-{
-    return (item_)?item_->isAttribute():NULL;
-}
+protected:
+    int topOffset_;
+    int bottomOffset_;
+
+private:
+    void compute(int);
+};
+
+#endif // RECTMETRICS_HPP

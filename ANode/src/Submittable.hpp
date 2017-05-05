@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #16 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -123,7 +123,7 @@ public:
 
 // Memento functions:
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
-   void set_memento(const SubmittableMemento*,std::vector<ecf::Aspect::Type>& aspects);
+   void set_memento(const SubmittableMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f);
 
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 protected:

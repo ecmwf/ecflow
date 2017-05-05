@@ -39,7 +39,7 @@ QToolButton#pathNameTb:hover{
 	    background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #deebf6, stop: 1 #bed8ee);
         border: 1px solid rgb(160, 160, 160);
      	border-radius: 0px;
-        padding: 0px; 		
+        padding: 0px;
  }
 
 QToolButton#pathIconTb{
@@ -91,17 +91,6 @@ QToolButton[notify="1"] {
 
 QTabBar[notify="1"]::tab {
     padding : 2px;
-}
-
-/*----------------------------
-  Icon folder view
-------------------------------*/
-
-/* QGraphicsview cannot be set from qss, only its 
-baseclass QFrame. So we need to set QFrame here! */
-QFrame[breadcrumbs="1"] {
-	background: rgb(252, 252, 252);
-	border: 0; 
 }
 
 /*----------------------------

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,11 +12,12 @@
 #include "ClientInvoker.hpp"
 #include "ServerComThread.hpp"
 #include "ServerHandler.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 
 #include "Log.hpp"
 
-//#define _UI_SERVERCOMQUEUE_DEBUG
+#define _UI_SERVERCOMQUEUE_DEBUG
 
 // This class manages the tasks to be sent to the ServerComThread, which controls
 // the communication with the ClientInvoker. The ClientInvoker is hidden from the
@@ -24,11 +25,11 @@
 // ServerComQueue, which then passes it on to the ClientInvoker. When a task is finished
 // ServerComQueue notifies the ServerHandler about it.
 
-ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, ServerComThread *comThread) :
+ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client) :
 	QObject(server),
 	server_(server),
 	client_(client),
-	comThread_(comThread),
+    comThread_(0),
 	timeout_(5),
     taskTimeout_(500),
 	state_(NoState), //the queue is enabled but not running
@@ -42,6 +43,10 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	connect(timer_,SIGNAL(timeout()),
 			this,SLOT(slotRun()));
 
+
+    createThread();
+
+#if 0
     //When the ServerComThread starts it emits a signal that
     //is connected to the queue.
     connect(comThread_, SIGNAL(started()),
@@ -56,6 +61,7 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	//failed() signal that is connected to the queue.
 	connect(comThread_, SIGNAL(failed(std::string)),
 			this, SLOT(slotTaskFailed(std::string)));
+#endif
 }
 
 ServerComQueue::~ServerComQueue()
@@ -84,6 +90,42 @@ ServerComQueue::~ServerComQueue()
 
 	delete comThread_;
 }
+
+void ServerComQueue::createThread()
+{
+    if(comThread_)
+        delete comThread_;
+
+    //We create a ServerComThread here. At this point the thread is not doing anything.
+    comThread_=new ServerComThread(server_,client_);
+
+    //When the ServerComThread starts it emits a signal that
+    //is connected to the queue.
+    connect(comThread_, SIGNAL(started()),
+            this, SLOT(slotTaskStarted()));
+
+    //When the ServerComThread finishes it emits a signal that
+    //is connected to the queue.
+    connect(comThread_, SIGNAL(finished()),
+            this, SLOT(slotTaskFinished()));
+
+    //When there is an error in ServerComThread it emits the
+    //failed() signal that is connected to the queue.
+    connect(comThread_, SIGNAL(failed(std::string)),
+            this, SLOT(slotTaskFailed(std::string)));
+
+    //The ServerComThread is observing the actual server and its nodes. When there is a change it
+    //emits a signal to notify the ServerHandler about it.
+    connect(comThread_,SIGNAL(nodeChanged(const Node*, std::vector<ecf::Aspect::Type>)),
+                 server_,SLOT(slotNodeChanged(const Node*, std::vector<ecf::Aspect::Type>)));
+
+    connect(comThread_,SIGNAL(defsChanged(std::vector<ecf::Aspect::Type>)),
+                 server_,SLOT(slotDefsChanged(std::vector<ecf::Aspect::Type>)));
+
+    connect(comThread_,SIGNAL(rescanNeed()),
+                 server_,SLOT(slotRescanNeed()));
+}
+
 
 void ServerComQueue::enable()
 {
@@ -355,6 +397,7 @@ void ServerComQueue::slotRun()
         UiLog(server_).dbg() << "  task: " << (*it)->typeString();
     }
 #endif
+
     if(tasks_.empty() && !current_)
 	{
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
@@ -364,6 +407,83 @@ void ServerComQueue::slotRun()
 		return;
 	}
 
+    //If a task was sent to the thread but the queue did not get the
+    //notification about the thread's start there is a PROBLEM!
+    //Note: when the thread starts it emits a signal to the queue
+    //and the queue sets taskStarted_ to true. Since this is a queued communication
+    //there can be a time lag between the two events. We set a timeout for it!
+    //If we pass the timeout we stop the thread and try to resend the task!
+    if(current_ && !taskStarted_ && taskTime_.elapsed() > taskTimeout_)
+    {
+        bool rerun=false;
+        bool r=comThread_->isRunning();
+
+        //So if we are here:
+        //-the thread did not emit a notification about its start
+        //-the elapsed time since we sent the task to the thread past the timeout.
+
+        //Problem 1:
+        //-the thread is running
+        if(r)
+        {
+            UiLog(server_).warn() << " It seems that the ServerCom thread started but it is in a bad state. Try to run task again.";
+            rerun=true;
+            //assert(false);
+        }
+
+        //Problem 2:
+        //-the thread is not running
+        else if(!r)
+        {
+            UiLog(server_).warn() << " It seems that the ServerCom thread could not start. Try to run task again.";
+            rerun=true;
+        }
+
+        if(rerun)
+        {
+            if(comThread_->wait(taskTimeout_) == false)
+            {
+                //We exit here because when we tried to call terminate() it just hung!!
+                UiLog(server_).err() << "  Calling wait() on the ServerCom thread failed.";
+                UI_ASSERT(0,"Cannot stop ServerCom thread, which is in a bad state");
+                exit(1);
+#if 0
+                comThread_->terminate();
+                if(comThread_->wait(taskTimeout_) == false)
+                {
+                    UiLog(server_).err() << "  Calling wait() after terminate() on the ServerCom thread failed";
+                    UiLog(server_).dbg() << "Delete the current ComThread and create a new one.";
+                    createThread();
+                    UI_ASSERT(0,"Cannot stop ServerCom thread that is in a bad state");
+
+                }
+                else
+                {
+                    UiLog(server_).dbg() << "  Terminating ServerCom thread succeeded.";
+                }
+#endif
+            }
+
+            Q_ASSERT(comThread_->isRunning() == false);
+
+            if(current_->status() != VTask::CANCELLED &&
+               current_->status() != VTask::ABORTED )
+            {
+                startCurrentTask();
+                return;
+            }
+            else
+            {
+    #ifdef _UI_SERVERCOMQUEUE_DEBUG
+                UiLog(server_).dbg() << "  current_ aborted or cancelled. Reset current_ !";
+    #endif
+                current_.reset();
+            }
+        }
+    }
+
+
+#if 0
     //If the thread could not start up for the current task.
     if(current_ && !taskStarted_ && !comThread_->isRunning() &&
        taskTime_.elapsed() > taskTimeout_)
@@ -385,6 +505,7 @@ void ServerComQueue::slotRun()
             current_.reset();
         }
     }
+#endif
 
 	if(current_)
 	{

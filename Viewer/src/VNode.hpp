@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -17,11 +17,9 @@
 #include <QStringList>
 
 #include "Aspect.hpp"
-#include "LogServer.hpp"
 #include "Node.hpp"
 
 #include "VItem.hpp"
-#include "VItemTmp.hpp"
 
 class AttributeFilter;
 class IconFilter;
@@ -87,6 +85,18 @@ public:
 class VNode : public VItem
 {
 friend class VServer;
+friend class VLabelAttr;
+friend class VMeterAttr;
+friend class VEventAttr;
+friend class VRepeatAttr;
+friend class VTriggerAttr;
+friend class VLimitAttr;
+friend class VLimiterAttr;
+friend class VLateAttr;
+friend class VTimeAttr;
+friend class VDateAttr;
+friend class VGenVarAttr;
+friend class VUserVarAttr;
 
 public:
 	VNode(VNode* parent,node_ptr);
@@ -97,42 +107,20 @@ public:
     VServer *root() const;
     virtual ServerHandler* server() const;
     virtual VNode* suite() const;
-    node_ptr node() const {return node_;}
-
-    //VServer* isServer() const {return NULL;}
+    node_ptr node() const {return node_;}  
     VNode* isNode() const {return const_cast<VNode*>(this);}
-    //VSuiteNode* isSuite() const {return NULL;}
-    //VFamilyNode* isFamily() const {return NULL;}
-    //VTaskNode* isTask() const {return NULL;}
-    //VAliasNode* isAlias() const {return NULL;}
-    //virtual VAttribute* isAttribute() const {return NULL;}
-
     bool isTopLevel() const;
-    //bool isServer() const {return false;}
 
-    /*bool isSuite() const {return isTopLevel();}
-    bool isFamily() const;
-    bool isTask() const {return false;}
-    bool isAlias() const;*/
-
-#if 0
-    void beginUpdateAttrNum();
-    void endUpdateAttrNum();
-    short cachedAttrNum() const;
-#endif
-
+    //Attributes
+    const std::vector<VAttribute*> attr() const {return attr_;}
     int attrNum(AttributeFilter* filter=0) const;
+    VAttribute* attribute(int,AttributeFilter *filter=0) const;
+    VAttribute* attributeForType(int,VAttributeType*) const;
+    int indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const;
+    VAttribute* findAttribute(QStringList aData);
+    VAttribute* findAttribute(const std::string& typeName,const std::string& name);
+    VAttribute* findAttribute(VAttributeType* type,const std::string& name);
 
-    QStringList getAttributeData(int,VAttributeType*&);
-    QStringList getAttributeData(int,AttributeFilter *filter=0);
-    bool getAttributeData(const std::string& type,int row, QStringList&);
-#if 0
-    VAttributeType* getAttributeType(int);
-#endif
-    int getAttributeLineNum(int row,AttributeFilter *filter=0);
-    QString attributeToolTip(int row,AttributeFilter *filter=0);
-
-    //VNode* parent() const {return parent_;}
     int numOfChildren() const { return static_cast<int>(children_.size());}
     VNode* childAt(int index) const;
     int indexOfChild(const VNode* vn) const;
@@ -176,24 +164,26 @@ public:
     virtual void internalState(VNodeInternalState&) {}
 
     bool hasAccessed() const;
-    //bool isAncestor(const VNode* n) const;
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
 
+    virtual std::string flagsAsStr() const;
     virtual bool isFlagSet(ecf::Flag::Type f) const;
 
     int index() const {return index_;}
 
     const std::string& nodeType();
-    //const std::string& typeStr() const;
     virtual QString toolTip();
     
-    virtual void why(std::vector<std::string>& theReasonWhy) const;
-    const std::string&  abortedReason() const;
+    virtual void why(std::vector<std::string>& bottomUp,
+                     std::vector<std::string>& topDown) const;
+
+    virtual void why(std::vector<std::string>& theReasonWhy) const {}
+
+    const std::string&  abortedReason() const;  
     void statusChangeTime(QString&) const;
     uint statusChangeTime() const;
 
-    LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);
 
     void triggerExpr(std::string&,std::string&) const;
@@ -212,27 +202,22 @@ protected:
     void clear();
     void addChild(VNode*);
     void removeChild(VNode*);
-#if 0
-    short currentAttrNum() const;
-    bool isAttrNumInitialised() const {return attrNum_!=-1;}
-#endif
+    void scanAttr();
+    void rescanAttr();
+    void findAttributes(VAttributeType*,std::vector<VAttribute*>& v);
+
     VNode* find(const std::vector<std::string>& pathVec);
     virtual void check(VServerSettings* conf,bool) {}
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
-    VItemTmp_ptr findLimit(const std::string& path, const std::string& name);
+    VAttribute* findLimit(const std::string& path, const std::string& name);
     static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
-    //static void scanForTriggered(VNode *n);
     static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
 
     node_ptr node_;
-    //VNode* parent_;
     std::vector<VNode*> children_;
-#if 0
-    mutable short attrNum_;
-    mutable short cachedAttrNum_;
-#endif
+    std::vector<VAttribute*> attr_;
     int index_;
     VNodeTriggerData* data_;
     static std::string nodeMarkedForMoveRelPath_;
@@ -323,6 +308,7 @@ public:
 	std::string findVariable(const std::string& key,bool substitute=false) const;
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
+    std::string flagsAsStr() const;
 	bool isFlagSet(ecf::Flag::Type f) const;
 
 	void why(std::vector<std::string>& theReasonWhy) const;
@@ -344,7 +330,7 @@ private:
     void updateCache(defs_ptr defs);
 
     ServerHandler* server_;
-    int totalNum_;
+    int totalNum_;   
     std::vector<int> totalNumInChild_;
     std::vector<VNode*> nodes_;
     bool triggeredScanned_;

@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #53 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -598,6 +598,7 @@ public:
   virtual void visitEventState(AstEventState*);
   virtual void visitNode(AstNode*);
   virtual void visitVariable(AstVariable*);
+  virtual void visitFlag(AstFlag*);
   
 private:
   std::set<node*>& theSet_;
@@ -630,6 +631,7 @@ void AstCollateXNodesVisitor::visitVariable(AstVariable* astVar)
     int type;
     node* run;
     for (run = xnode->kids(); 0 != run; run = run->next()) {
+      //std::cout << "run->name() " << run->name() << "\n";
       if (run->name() == astVar->name()) {
         type = run->type();
         if (type == NODE_EVENT 
@@ -640,6 +642,26 @@ void AstCollateXNodesVisitor::visitVariable(AstVariable* astVar)
       }
     }
   }
+}
+
+void AstCollateXNodesVisitor::visitFlag(AstFlag* astVar)
+{
+   Node* referencedNode = astVar->referencedNode();
+   if (referencedNode) {
+     simple_node* xnode = (simple_node*) referencedNode->graphic_ptr();
+     if (0 == xnode) return;
+
+     int type;
+     node* run;
+     for (run = xnode->kids(); 0 != run; run = run->next()) {
+       if (run->name() == astVar->name()) {
+         type = run->type();
+         if (type == NODE_LATE ) {
+           theSet_.insert(run);
+         }
+       }
+     }
+   }
 }
 
 void simple_node::triggers(trigger_lister& tlr)

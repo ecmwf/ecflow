@@ -3,7 +3,7 @@
 // Author      : 
 // Revision    : $Revision: #13 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -45,9 +45,9 @@ edit::edit(panel_window& w):
 	tmp_(0), kStart(0x0), kEnd(0x0)
 {
   if (kStart==NULL) 
-    kStart=(char*)calloc(1024, sizeof(char*));
+    kStart=(char*)calloc(1024, sizeof(char));
   if (kEnd==NULL)   
-    kEnd=(char*)calloc(1024, sizeof(char*));
+    kEnd=(char*)calloc(1024, sizeof(char));
 }
 
 edit::~edit()

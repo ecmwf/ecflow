@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -38,7 +38,7 @@ protected:
     void updateSettings();
 
     void renderNode(QPainter *painter,const QModelIndex& index,
-            							const QStyleOptionViewItemV4& option,QString text) const;
+                                        const QStyleOptionViewItem& option,QString text) const;
 
     ModelColumn* columns_;
     QPen borderPen_;

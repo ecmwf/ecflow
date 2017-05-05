@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #305 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -117,14 +117,28 @@ Node::Node(const Node& rhs)
    }
 }
 
+void Node::delete_attributes() {
+   delete completeExpr_;
+   delete triggerExpr_;
+   delete lateAttr_;
+   delete autoCancel_;
+   delete time_dep_attrs_;
+   delete child_attrs_;
+   delete misc_attrs_;
+}
+
 Node& Node::operator=(const Node& rhs)
 {
+   // Note:: Defs assignment operator use copy/swap, hence this assignemnt note used
    // parent must set parent_
    if (this != &rhs) {
       name_ = rhs.name_;
       suspended_ = rhs.suspended_;
       state_ =  rhs.state_;
       defStatus_ = rhs.defStatus_;
+
+      delete_attributes();
+
       completeExpr_ =  (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL  ;
       triggerExpr_ =   (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL  ;
       lateAttr_ = (rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL ;
@@ -147,6 +161,7 @@ Node& Node::operator=(const Node& rhs)
       if ( child_attrs_ )    child_attrs_->set_node(this);
       if ( misc_attrs_ )     misc_attrs_->set_node(this);
 
+      limitVec_.clear();
       for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
          limit_ptr the_limit = boost::make_shared<Limit>( *rhs.limitVec_[l]);
          the_limit->set_node(this);
@@ -157,13 +172,7 @@ Node& Node::operator=(const Node& rhs)
 }
 
 Node::~Node() {
-   delete completeExpr_;
-   delete triggerExpr_;
-   delete lateAttr_;
-   delete autoCancel_;
-   delete time_dep_attrs_;
-   delete child_attrs_;
-   delete misc_attrs_;
+   delete_attributes();
 }
 
 bool Node::isParentSuspended() const
@@ -201,6 +210,9 @@ void Node::suspend()
 
 void Node::begin()
 {
+   // record effect of defstatus for node changes, for verify attributes
+   if (misc_attrs_) misc_attrs_->begin();
+
    // Set the state without causing any side effects
    initState(0);
 
@@ -212,7 +224,6 @@ void Node::begin()
 
    if (lateAttr_) lateAttr_->reset();
    if (child_attrs_) child_attrs_->begin();
-   if (misc_attrs_) misc_attrs_->begin();
    for(size_t i = 0; i < limitVec_.size(); i++)   { limitVec_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
@@ -776,6 +787,10 @@ void Node::set_state(NState::State s, bool force, const std::string& additional_
 
 void Node::setStateOnly(NState::State newState, bool force, const std::string& additional_info_to_log)
 {
+   if (state_.first.state() == newState) {
+      return; // if old and new state the same dont do anything
+   }
+
    Suite* theSuite =  suite();
    const Calendar& calendar = theSuite->calendar();
 
@@ -1582,7 +1597,7 @@ bool Node::operator==(const Node& rhs) const
    if (limitVec_.size() != rhs.limitVec_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (limitVec_.size() != rhs.limitVec_.size()) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (limitVec_.size(" << limitVec_.size() << ") != rhs.limitVec_.size(" << rhs.limitVec_.size() << ")) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1708,14 +1723,21 @@ bool Node::operator==(const Node& rhs) const
 
 //#define DEBUG_WHY 1
 
-void Node::top_down_why(std::vector<std::string>& theReasonWhy) const
+bool Node::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   why(theReasonWhy);
+#ifdef DEBUG_WHY
+   cout << "Node::top_down_why\n";
+#endif
+   return why(theReasonWhy,true/* top down */,html_tags);
 }
 
-void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
+void Node::bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   defs()->why(theReasonWhy);
+#ifdef DEBUG_WHY
+   cout << "Node::bottom_up_why\n";
+#endif
+
+   defs()->why(theReasonWhy,html_tags);
 
    std::vector<Node*> vec;
    vec.push_back(const_cast<Node*>(this));
@@ -1726,40 +1748,53 @@ void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
    }
    vector<Node*>::reverse_iterator r_end = vec.rend();
    for(vector<Node*>::reverse_iterator r = vec.rbegin(); r!=r_end; ++r) {
-      (*r)->why(theReasonWhy);
+      (void)(*r)->why(theReasonWhy,false,html_tags);
    }
 }
 
-void Node::why(std::vector<std::string>& vec) const
+bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
 {
 #ifdef DEBUG_WHY
-   std::cout << "Node::why " << debugNodePath() << " (" << NState::toString(state()) << ")\n";
+   std::cout << "Node::why " << debugNodePath() << " (" << NState::toString(state()) << ") top_down(" << top_down << ") html(" << html << ")\n";
 #endif
+   bool why_found = false;
    if (isSuspended()) {
-      std::string theReasonWhy = "The node '";
-      theReasonWhy += debugNodePath();
-      theReasonWhy += "' is suspended.";
+      std::string theReasonWhy;
+      if (html) {
+         theReasonWhy = path_href();
+         theReasonWhy += " is ";
+         theReasonWhy += DState::to_html(DState::SUSPENDED);
+      }
+      else {
+         theReasonWhy = debugNodePath();
+         theReasonWhy += " is suspended";
+      }
       vec.push_back(theReasonWhy);
+      why_found = true ; // return true if why found
    }
    else if (state() != NState::QUEUED && state() != NState::ABORTED) {
       std::stringstream ss;
-      ss << "The node '" << debugNodePath() << "' (" << NState::toString(state()) << ") is not queued or aborted.";
+      if (html) ss << path_href()     << " (" << NState::to_html(state()) << ") is not queued or aborted";
+      else      ss << debugNodePath() << " (" << NState::toString(state()) << ") is not queued or aborted";
       vec.push_back(ss.str());
 
       // When task is active/submitted no point, going any further.
       // However for FAMILY/SUITE we still need to proceed
-      if (isTask()) return;
+      if (isTask()) return why_found;
+      why_found = true ; // return true if why found
    }
 
-   // Check  limits using in limit manager
-   inLimitMgr_.why(vec);
+   // Check limits using in limit manager
+   if (inLimitMgr_.why(vec,top_down,html)) why_found = true ; // return true if why found
 
    // Prefix <node-type> <path> <state>
    std::string prefix = debugType();
    prefix += " ";
-   prefix += absNodePath();
-   prefix += " (";
-   prefix += NState::toString(state());
+   if (html) prefix += path_href_attribute(absNodePath());
+   else      prefix += absNodePath();
+   prefix += "(";
+   if (html) prefix += NState::to_html(state());
+   else      prefix += NState::toString(state());
    prefix += ") ";
 
    if (time_dep_attrs_) {
@@ -1767,7 +1802,7 @@ void Node::why(std::vector<std::string>& vec) const
       std::cout << "   Node::why " << debugNodePath() << " checking time dependencies\n";
 #endif
       // postfix  = <attr-type dependent> <next run time > < optional current state>
-      time_dep_attrs_->why(vec,prefix);
+      if (time_dep_attrs_->why(vec,prefix)) why_found = true ; // return true if why found
    }
 
    // **************************************************************************************
@@ -1786,9 +1821,17 @@ void Node::why(std::vector<std::string>& vec) const
          std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
          std::string postFix;
-         if (theTriggerAst->why(postFix)) { vec.push_back(prefix + postFix); }
+         if (theTriggerAst->why(postFix,html)) {
+            vec.push_back(prefix + postFix);
+            why_found = true ; // return true if why found
+         }
       }
    }
+
+#ifdef DEBUG_WHY
+   std::cout << "   Node::why " << debugNodePath() << " why found(" << why_found << ")\n";
+#endif
+   return why_found; // no why found
 }
 
 bool Node::checkInvariants(std::string& errorMsg) const
@@ -1842,6 +1885,34 @@ std::string Node::debugNodePath() const
    std::string ret = debugType();
    ret += Str::COLON();
    ret += absNodePath();
+   return ret;
+}
+
+std::string Node::path_href_attribute(const std::string& path)
+{
+   std::string ret = "<a href=\"";
+   ret += path;
+   ret += "\">";
+   ret += path;
+   ret += "</a>";
+   return ret;
+}
+
+std::string Node::path_href_attribute(const std::string& path,const std::string& path2)
+{
+   std::string ret = "<a href=\"";
+   ret += path;
+   ret += "\">";
+   ret += path2;
+   ret += "</a>";
+   return ret;
+}
+
+std::string Node::path_href() const
+{
+   std::string ret = debugType();
+   ret += " ";
+   ret += path_href_attribute(absNodePath());
    return ret;
 }
 
@@ -2004,9 +2075,18 @@ void Node::notify_delete()
 #endif
 }
 
+void Node::notify_start(const std::vector<ecf::Aspect::Type>& aspects)
+{
+   size_t observers_size = observers_.size();
+   for(size_t i = 0; i < observers_size; i++) {
+      observers_[i]->update_start(this,aspects);
+   }
+}
+
 void Node::notify(const std::vector<ecf::Aspect::Type>& aspects)
 {
-   for(size_t i = 0; i < observers_.size(); i++) {
+   size_t observers_size = observers_.size();
+   for(size_t i = 0; i < observers_size; i++) {
       observers_[i]->update(this,aspects);
    }
 }
@@ -2035,6 +2115,29 @@ bool Node::is_observed(AbstractObserver* obs) const
    }
    return false;
 }
+
+void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
+{
+   state_change_no_ = Ecf::incr_state_change_no();
+   switch ( attr ) {
+      case Attr::EVENT: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
+      case Attr::METER: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
+      case Attr::LABEL: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
+      case Attr::LIMIT:
+         sort(limitVec_.begin(),limitVec_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Limit::name,_1),
+                                   boost::bind(&Limit::name,_2)));
+         break;
+      case Attr::VARIABLE:
+         sort(varVec_.begin(),varVec_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Variable::name,_1),
+                                   boost::bind(&Variable::name,_2)));
+         break;
+      case Attr::UNKNOWN: break;
+      default:            break;
+   }
+}
+
 
 static std::vector<ecf::TimeAttr>  timeVec_;
 static std::vector<ecf::TodayAttr> todayVec_;

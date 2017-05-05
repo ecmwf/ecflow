@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+  <layout class="QVBoxLayout" name="verticalLayout_" stretch="0,1">
    <property name="spacing">
     <number>1</number>
    </property>
@@ -29,9 +29,6 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
-    <widget class="NodePathWidget" name="bcWidget_" native="true"/>
-   </item>
    <item>
     <widget class="MessageLabel" name="messageLabel_" native="true"/>
    </item>
@@ -70,15 +67,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>NodePathWidget</class>
-   <extends>QWidget</extends>
-   <header>NodePathWidget.hpp</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MessageLabel</class>
    <extends>QWidget</extends>
-   <header location="global">MessageLabel.hpp</header>
+   <header>MessageLabel.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

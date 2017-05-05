@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #41 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -134,7 +134,6 @@ public:
 	// Remove a directory recursively ****
 	static bool removeDir( const boost::filesystem::path& p);
 
-
 	// Locate the path to the server exe
 	static std::string find_ecf_server_path();
 
@@ -147,6 +146,10 @@ public:
 	// return root source
 	static std::string root_source_dir();
 	static std::string root_build_dir();
+
+
+   static int max_open_file_allowed();
+
 };
 
 }

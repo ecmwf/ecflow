@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #23 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_version_against_VERSION_cmake )
    // Open the file VERSION.cmake
    std::string version_cmake_file = File::root_source_dir() + "/VERSION.cmake";
    std::vector<std::string> lines;
-   BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(version_cmake_file,lines,true/* impore empty lines */),"Failed to open file " << version_cmake_file);
+   BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(version_cmake_file,lines,true/* impore empty lines */),"Failed to open file " << version_cmake_file<< " (" << strerror(errno) << ")");
    BOOST_REQUIRE_MESSAGE(!lines.empty(),"File " << version_cmake_file << " does not contain version info ??");
 
    // Expecting lines like:

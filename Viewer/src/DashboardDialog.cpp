@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -53,26 +53,33 @@ void DashboardDialog::add(DashboardWidget* dw)
 
 	layout_->insertWidget(0,dw_,1);
 
-    connect(dw_,SIGNAL(titleUpdated(QString)),
-            this,SLOT(slotUpdateTitle(QString)));
+    connect(dw_,SIGNAL(titleUpdated(QString,QString)),
+            this,SLOT(slotUpdateTitle(QString,QString)));
 
     dw_->populateDialog();
+    dw_->readSettingsForDialog();
 }
 
 void DashboardDialog::reject()
 {
-	writeSettings();
+    if(dw_)
+        dw_->writeSettingsForDialog();
+
+    writeSettings();
 	QDialog::reject();
 }
 
 void DashboardDialog::closeEvent(QCloseEvent * event)
 {
+    if(dw_)
+        dw_->writeSettingsForDialog();
+
     Q_EMIT aboutToClose();
     event->accept();
 	writeSettings();
 }
 
-void DashboardDialog::slotUpdateTitle(QString txt)
+void DashboardDialog::slotUpdateTitle(QString txt,QString /*type*/)
 {
     setWindowTitle(txt.remove("<b>").remove("</b>"));
 }

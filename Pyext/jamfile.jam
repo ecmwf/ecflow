@@ -1,4 +1,4 @@
-## Copyright 2009-2016 ECMWF. 
+## Copyright 2009-2017 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,13 +18,38 @@
 #    next alternative: required properties: <python>2.7 <target-os>linux
 #        matched
 # 
+# Note: ./bootstrap.sh will create a project-config.jam
+#
 # Please check if you have more than one 'using python' in configuration files.
 # Please check site-config.jam, user-config.jam and project-config.jam and 
-# remove duplicated 'using python'
+# remove duplicated 'using python'.  
 #
 # When installing BOOST-python libs, make sure to call module load python *FIRST*
 # Otherwise it will pick the python specified in project-config.jam, which make not be correct
 #
+# ==========================================================================================
+# PYTHON3:
+# Build:
+#   1/ module load python3, this update the $PATH
+#   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
+#   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
+#
+#      using python 
+#       : 3.5 
+#       : /usr/local/apps/python3/3.5.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
+#       : /usr/local/apps/python3/3.5.1-01/include/python3.5m # include directory
+#       ; 
+#       ...
+#      option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
+#
+#     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
+#     python 2.7 and 3.5, YUK, took ages to debug
+#
+# Check:
+#   To check the build make sure we don't have symbol pulled in from python2 libs
+#   cd $BOOST_ROOT/stage/lib
+#   nm -D *python* | grep PyClass_Type                                                # PyClass_Type is a symbol *ONLY* used in python2.x
+#   nm -D /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
 # ===============================================================================
         
 #
@@ -54,13 +79,12 @@ use-project theSimulator : ../CSim ;
 
 # Make the definition of the python-extension rule available
 import python ;
-# using python : 3.5.1 : /usr/local/apps/python3/3.5.1-01/ ; 
 
 if ! [ python.configured ]
 {
     ECHO "notice: no Python configured in *user-config.jam*" ;
     ECHO "notice: will use default configuration" ;
-    # We will typically place this in user-config/site-config.jam
+    # We will typically place this in user-config || site-config.jam || $BOOST_ROOT/project-config.jam
     #using python
     #     :  # version
     #     :  # cmd-or-prefix
@@ -69,7 +93,7 @@ if ! [ python.configured ]
     #     :  # condition
     #     ;
     #using python ;
-    #using python : 3.5 : python3 : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;
+    #using python : 3.5 : /usr/local/apps/python3/3.5.1-01/bin/python3 : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;
 }
 
 # Specify the path to the Boost project.  If you move this project,
@@ -79,7 +103,6 @@ local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 use-project boost
   : $(BOOST_ROOT) ;
 
-
 # ======================== libs ============================================
 # HPUX:  ADD standard libs. They don't get added by default ?
 #        Also on HPUX the shared libs appears reversed, and don't appear
@@ -88,7 +111,6 @@ use-project boost
 #        but only for HPUX/acc toolset
 # <ALL>: It appears the pthread lib is automatically added. i.e >lib pthread ;
 #
-
 lib std_v2 ;
 lib stream ;
 lib Csup ;
@@ -128,7 +150,6 @@ python-extension ecflow : [ glob src/*.cpp ]
 # - Picks up latest changes
 install ecflow/ : ecflow  ;
 
-
 # ========================================================================
 # INSTALLATION:
 # ========================================================================
@@ -152,7 +173,6 @@ install install-py
 # make install explicit, otherwise we end installing for all calls to bjam
 explicit install-py1 ;
 explicit install-py  ;
-
 
 # ========================================================================
 # TESTING: unit-tests and test for python fragments in online tutorial
@@ -195,6 +215,7 @@ run-test TestRemove            : ecflow [ glob test/py_u_TestRemove.py ] ;
 run-test TestGeneratedVariable : ecflow [ glob test/py_u_TestGeneratedVariable.py ] ;
 run-test TestEcf               : ecflow [ glob test/py_u_TestEcf.py ] ;
 run-test TestFlag              : ecflow [ glob test/py_u_TestFlag.py ] ;
+run-test TestAutoAddExtern     : ecflow [ glob test/py_u_TestAutoAddExtern.py ] ;
 
 # A target that runs all the tests. 
 # Note test_embed & test_embed_ecf commented out since we dont use this functionality
@@ -202,7 +223,7 @@ alias test-all
  :  TestUserManual TestJobGeneration  TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable  TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag TestCopy
+    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern
     # test_embed test_embed_ecf 
     ;
    
@@ -211,7 +232,7 @@ explicit test-all
     TestUserManual TestJobGeneration TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag TestCopy
+    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern
     # test_embed test_embed_ecf 
     ;
  

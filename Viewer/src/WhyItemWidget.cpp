@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,9 +13,13 @@
 
 #include "Node.hpp"
 
+#include "InfoProvider.hpp"
+#include "ServerHandler.hpp"
+#include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
+#include "VNState.hpp"
 
 //========================================================
 //
@@ -23,23 +27,55 @@
 //
 //========================================================
 
-WhyItemWidget::WhyItemWidget(QWidget *parent) : CodeItemWidget(parent)
+WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
 {
 	messageLabel_->hide();
 	fileLabel_->hide();
-	textEdit_->setShowLineNumbers(false);
-    textEdit_->setHyperlinkEnabled(true);
 
-	//Editor font
-	textEdit_->setFontProperty(VConfig::instance()->find("panel.why.font"));
+    //Will be used for ECFLOW-901
+    infoProvider_=new WhyProvider(this);
 
-    //Set css for the text formatting
-    QString cssDoc="a:link { text-decoration:none; color: #0645AD;}";
+    textEdit_->setProperty("trigger","1");
+    textEdit_->setFontProperty(VConfig::instance()->find("panel.why.font"));
+
+    //Read css for the text formatting
+    QString cssDoc;
+    QFile f(":/viewer/trigger.css");
+    //QTextStream in(&f);
+    if(f.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        cssDoc=QString(f.readAll());
+    }
+    f.close();
+
+    //Add css for state names
+    std::vector<VParam*> states=VNState::filterItems();
+    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    {     
+       cssDoc+="font." + (*it)->name() +
+               " {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " +
+               (*it)->colour().lighter(120).name() + ", stop: 1 " +  (*it)->colour().name() +
+               "); color: " +  (*it)->typeColour().name() + ";}";
+
+    }
+
+    //Add css for false statements
+    QColor falseCol(218,219,219);
+    cssDoc+="font.false {background-color: " + falseCol.name() + ";}";
+
     textEdit_->document()->setDefaultStyleSheet(cssDoc);
 
+    connect(textEdit_,SIGNAL(anchorClicked(QUrl)),
+            this,SLOT(anchorClicked(QUrl)));
 
-    connect(textEdit_,SIGNAL(hyperlinkActivated(QString)),
-            this,SLOT(anchorClicked(QString)));
+    //Define the mapping for <state>stateName</state> tag replacement with
+    //<font class='stateName'>stateName</font>
+    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    {
+       stateMap_["<state>" + (*it)->name() + "</state>"]="<font class=\'"+ (*it)->name() + "\'>" + (*it)->name() + "</font>";
+    }
+
+
 }
 
 WhyItemWidget::~WhyItemWidget()
@@ -63,10 +99,9 @@ void WhyItemWidget::reload(VInfo_ptr info)
 	info_=info;
 
     if(info_)
-	{
-        //textEdit_->setPlainText(why());
-        textEdit_->appendHtml(why());
-	}
+    {
+        textEdit_->insertHtml(why());
+    }
 }
 
 void WhyItemWidget::clearContents()
@@ -79,76 +114,83 @@ QString WhyItemWidget::why() const
 {
 	QString s;
 
-	std::vector<std::string> theReasonWhy;
+    std::vector<std::string> bottomUpWhy,topDownWhy;
 
-	if(info_ && info_.get())
+    if(info_ && info_->server())
 	{
-		if(info_->isServer())
+        //This stops the queue on the serverhandler so that no update
+        //could happen while we generate the why? information
+        info_->server()->searchBegan();
+
+        if(info_->isServer())
 		{
-			info_->node()->why(theReasonWhy);
+            info_->node()->why(topDownWhy);
 		}
 		else if(info_->isNode() && info_->node())
 		{
-			info_->node()->why(theReasonWhy);
+            info_->node()->why(bottomUpWhy,topDownWhy);
 		}
+
+        //Resume the queue on the serverhandler
+        info_->server()->searchFinished();
 	}
 
-    s=makeHtml(theReasonWhy);
+    s=makeHtml(bottomUpWhy,topDownWhy);
     return s;
 }
 
+QString WhyItemWidget::makeHtml(const std::vector<std::string>& bottomUpTxt,
+                                const std::vector<std::string>& topDownTxt) const
+{
+    if(bottomUpTxt.empty() && topDownTxt.empty())
+        return QString();
+
+    QString s="<table width=\'100%\'>";
+
+    if(!bottomUpTxt.empty())
+    {
+        s+="<tr><td class=\'direct_title\'>Bottom-up why? - through the parents</td></tr>";
+        s+=makeHtml(bottomUpTxt);
+    }
+
+    if(!topDownTxt.empty())
+    {
+        s+="<tr><td class=\'direct_title\'>Top-down why? - through the children</td></tr>";
+        s+=makeHtml(topDownTxt);
+    }
+
+    s+="</table>";
+    return s;
+}
 
 QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
-{
+{ 
     QString s;
     for(std::vector<std::string>::const_iterator it=rawTxt.begin(); it != rawTxt.end(); ++it)
     {
         QString line=QString::fromStdString(*it);
-        QRegExp rx("'\\S+:(\\S+)'");
-        if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
+
+        //UiLog().dbg() << line;
+
+        QMap<QString,QString>::const_iterator stIt = stateMap_.constBegin();
+        while (stIt != stateMap_.constEnd())
         {
-            QString path=rx.cap(1);
-            rx=QRegExp("'(\\S+):");
-            QString type,typeOri;
-            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-            {
-                typeOri=rx.cap(1);
-                type=typeOri.toLower();
-            }
-
-            QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
-            line.replace("\'" + typeOri + ":"," " + typeOri + " ");
-            line.replace(path + "'","<a href=\'" + anchor  + "\'>" + path +"</a>");
-
-        }
-        else
-        {
-            rx=QRegExp("\\s+(/\\S+)\\b");
-            if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-            {
-                QString path=rx.cap(1);
-                rx=QRegExp("(SUITE|FAMILY|TASK|ALIAS)");
-                QString type;
-                if(rx.indexIn(line) > -1 && rx.captureCount() == 1)
-                {
-                    type=rx.cap(1);
-                }
-
-                QString anchor=QString::fromStdString(VItemPathParser::encode(path.toStdString(),type.toStdString()));
-                line.replace(path,"<a href=\'" + anchor  + "\'>" + path +"</a>");
-            }
+            line.replace(stIt.key(),stIt.value());
+            ++stIt;
         }
 
+        line.replace("<false>","<font class=\'false\'>");
+        line.replace("</false>","</font>");
 
-
-        s+=line+"<br>";
+        //UiLog().dbg() << " -->" << line;
+        s+="<tr><td width=\'100%\'>" + line + "</td></tr>";
     }
     return s;
 }
 
-void WhyItemWidget::anchorClicked(QString link)
+void WhyItemWidget::anchorClicked(const QUrl& link)
 {
-    linkSelected(link.toStdString());
+    linkSelected(link.path().toStdString());
 }
 
 static InfoPanelItemMaker<WhyItemWidget> maker1("why");

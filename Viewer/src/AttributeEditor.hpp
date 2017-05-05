@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -60,9 +60,12 @@ protected:
     void setSuspended(bool);
     void addForm(QWidget* w);
     void hideForm();
+    void doNotUseReset();
+    void disableCancel();
     virtual void apply()=0;
     virtual void resetValue()=0;
     virtual bool isValueChanged()=0;
+    virtual void nodeChanged(const std::vector<ecf::Aspect::Type>& a) {}
 
     VInfo_ptr info_;
     QStringList attrData_;

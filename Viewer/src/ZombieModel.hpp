@@ -30,6 +30,7 @@ public:
 	bool updateData(const std::vector<Zombie>&);
     void clearData();
     bool hasData() const;
+    Zombie indexToZombie(const QModelIndex&) const;
 
 protected:
 	std::vector<Zombie> data_;

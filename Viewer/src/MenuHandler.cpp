@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -30,7 +30,6 @@
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
-#include "NodeExpression.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "CustomCommandHandler.hpp"
@@ -39,6 +38,9 @@ int MenuItem::idCnt_=0;
 
 std::vector<Menu *> MenuHandler::menus_;
 MenuHandler::ConfirmationMap MenuHandler::commandsWhichRequireConfirmation_;
+TrueNodeCondition  MenuHandler::trueCond_;
+FalseNodeCondition MenuHandler::falseCond_;
+
 
 MenuHandler::MenuHandler()
 {
@@ -261,13 +263,11 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
 void MenuHandler::refreshCustomMenuCommands()
 {
-    BaseNodeCondition *trueCond  = new TrueNodeCondition();
-    BaseNodeCondition *falseCond = new FalseNodeCondition();
     CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
     CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
 
     Menu *menu = findMenu("Custom");
-    if (menu)
+    if(menu)
     {
         menu->clearFixedList();
 
@@ -275,17 +275,17 @@ void MenuHandler::refreshCustomMenuCommands()
         MenuItem *item1 = new MenuItem("Manage commands...");
         item1->setCommand("custom");
         addItemToMenu(item1, "Custom");
-        item1->setEnabledCondition(trueCond);
-        item1->setVisibleCondition(trueCond);
-        item1->setQuestionCondition(falseCond);
+        item1->setEnabledCondition(&trueCond_);
+        item1->setVisibleCondition(&trueCond_);
+        item1->setQuestionCondition(&falseCond_);
         item1->setIcon("configure.svg");
 
         // Saved commands
         MenuItem *item2 = new MenuItem("-");
         addItemToMenu(item2, "Custom");
-        item2->setEnabledCondition(trueCond);
-        item2->setVisibleCondition(trueCond);
-        item2->setQuestionCondition(falseCond);
+        item2->setEnabledCondition(&trueCond_);
+        item2->setVisibleCondition(&trueCond_);
+        item2->setQuestionCondition(&falseCond_);
 
         int numSavedCommands = customSavedCmds->numCommands();
 
@@ -296,9 +296,9 @@ void MenuHandler::refreshCustomMenuCommands()
             {
                 MenuItem *item = new MenuItem(cmd->name());
                 item->setCommand(cmd->command());
-                item->setEnabledCondition(trueCond);
-                item->setVisibleCondition(trueCond);
-                item->setQuestionCondition(trueCond);
+                item->setEnabledCondition(&trueCond_);
+                item->setVisibleCondition(&trueCond_);
+                item->setQuestionCondition(&trueCond_);
                 item->setCustom(true);
                 item->setStatustip("__cmd__");
                 addItemToMenu(item, "Custom");
@@ -309,15 +309,15 @@ void MenuHandler::refreshCustomMenuCommands()
         // Recently executed commands
         MenuItem *item3 = new MenuItem("-");
         addItemToMenu(item3, "Custom");
-        item3->setEnabledCondition(trueCond);
-        item3->setVisibleCondition(trueCond);
-        item3->setQuestionCondition(falseCond);
+        item3->setEnabledCondition(&trueCond_);
+        item3->setVisibleCondition(&trueCond_);
+        item3->setQuestionCondition(&falseCond_);
 
         MenuItem *item4 = new MenuItem("Recent");
         addItemToMenu(item4, "Custom");
-        item4->setEnabledCondition(falseCond);
-        item4->setVisibleCondition(trueCond);
-        item4->setQuestionCondition(falseCond);
+        item4->setEnabledCondition(&falseCond_);
+        item4->setVisibleCondition(&trueCond_);
+        item4->setQuestionCondition(&falseCond_);
 
         int numRecentCommands = customRecentCmds->numCommands();
 
@@ -327,9 +327,9 @@ void MenuHandler::refreshCustomMenuCommands()
 
             MenuItem *item = new MenuItem(cmd->name());
             item->setCommand(cmd->command());
-            item->setEnabledCondition(trueCond);
-            item->setVisibleCondition(trueCond);
-            item->setQuestionCondition(trueCond);
+            item->setEnabledCondition(&trueCond_);
+            item->setVisibleCondition(&trueCond_);
+            item->setQuestionCondition(&trueCond_);
             item->setCustom(true);
             item->setStatustip("__cmd__");
             addItemToMenu(item, "Custom");
@@ -535,11 +535,6 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     //qmenu->setWindowFlags(Qt::Tool);
     //qmenu->setWindowTitle("my title");
 
-    // add an inactive action(!) to the top of the menu in order to show which
-    // node has been selected
-
-    buildMenuTitle(nodes,qmenu);
-
     //TypeNodeCondition  typeCondFamily   (MenuItem::FAMILY);
     //TypeNodeCondition  typeCondTask     (MenuItem::TASK);
     //StateNodeCondition stateCondUnknown ("unknown");
@@ -553,6 +548,27 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     //{
     //    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse condition: " + condString));
     //}
+
+
+
+
+    // add an inactive action(!) to the top of the menu in order to show which
+    // node has been selected
+
+    buildMenuTitle(nodes, qmenu);
+
+
+
+    // if multiple attributes are selected, then tell the user we can't help them
+    // NOTE that ActionHandler.cpp ensures that we cannot have a mix of attr and non-attr nodes
+    if (nodes[0]->isAttribute() && nodes.size() > 1)
+    {
+        QAction *noAction = new QAction("No action for multiple attributes", parent);
+        noAction->setEnabled(false);
+        qmenu->addAction(noAction);
+        return qmenu;
+    }
+
 
 
     // merge the fixed menu items (from the config file) with the dynamic ones
@@ -655,7 +671,12 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 {
 	QLabel *nodeLabel = NULL;
 
-	if (nodes.size() == 1)
+
+	// we will only create a multiple-entry context menu if we have multiple non-attribute nodes
+	// it is already ensured that if we have multiple nodes, they will be non-attribute nodes
+	bool multiple = (nodes.size() > 1);
+
+	if (!multiple)
 	{
 		VNode *node=nodes.at(0)->node();
 
@@ -716,7 +737,7 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 	nodeLabel->setParent(titleW);
 
 	QWidgetAction *wAction = new QWidgetAction(qmenu);
-    wAction->setObjectName("title");
+	wAction->setObjectName("title");
 	//Qt doc says: the ownership of the widget is passed to the widgetaction.
 	//So when the action is deleted it will be deleted as well.
 	wAction->setDefaultWidget(titleW);

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #135 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -191,11 +191,18 @@ void NodeContainer::status()
 	for(size_t t = 0; t < node_vec_size; t++)   {     nodeVec_[t]->status(); }
 }
 
-void NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy) const
+bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-	Node::why(theReasonWhy);
- 	size_t node_vec_size = nodeVec_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   {     nodeVec_[t]->top_down_why(theReasonWhy); }
+   bool why_found = Node::why(theReasonWhy,true/*top down*/,html_tags);
+   if (!why_found) {
+      size_t node_vec_size = nodeVec_.size();
+      for(size_t t = 0; t < node_vec_size; t++)   {
+         if (nodeVec_[t]->top_down_why(theReasonWhy,html_tags)) {
+            why_found = true;
+         }
+      }
+   }
+   return why_found;
 }
 
 void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) const
@@ -223,11 +230,15 @@ void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_pt
    Node::incremental_changes(changes, comp);
 }
 
-void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
    std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
-
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::ORDER);
+      return;
+   }
+   
    // Order nodeVec_ according to memento ordering
    const std::vector<std::string>& order = memento->order_;
    if (order.size() != nodeVec_.size()) {
@@ -251,18 +262,20 @@ void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::As
        return;
    }
 
-   aspects.push_back(ecf::Aspect::ORDER);
    nodeVec_ = vec;
 }
 
-void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
+void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
    std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
-   aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
-   nodeVec_ = memento->children_;
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
+      return;
+   }
 
    // setup child parent pointers
+   nodeVec_ = memento->children_;
    size_t node_vec_size = nodeVec_.size();
    for(size_t t = 0; t < node_vec_size; t++)   {
       nodeVec_[t]->set_parent(this);
@@ -272,7 +285,7 @@ void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf:
 
 void NodeContainer::collateChanges(DefsDelta& changes) const
 {
-   /// There no point in traversing children of we have added/removed children
+   /// Theres no point in traversing children if we have added/removed children
    /// since ChildrenMemento will copy all children.
    if (add_remove_state_change_no_ > changes.client_state_change_no()) {
       return;
@@ -972,7 +985,7 @@ bool NodeContainer::operator==(const NodeContainer& rhs) const
             }
 
             Family* family = nodeVec_[i]->isFamily(); LOG_ASSERT( family, "" );
-            if ( !( *family == *rhs_family )) {
+            if ( family/*keep clang happy*/ && !( *family == *rhs_family )) {
 #ifdef DEBUG
                if (Ecf::debug_equality()) {
                   std::cout << "NodeContainer::operator==  if ( !( *family == *rhs_family )) " << absNodePath() << "\n";
@@ -1047,6 +1060,15 @@ void NodeContainer::update_limits()
    /// Only tasks can affect the limits, hence no point calling locally
    size_t node_vec_size = nodeVec_.size();
    for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->update_limits(); }
+}
+
+void NodeContainer::sort_attributes(ecf::Attr::Type attr,bool recursive)
+{
+   Node::sort_attributes(attr,recursive);
+   if (recursive) {
+      size_t node_vec_size = nodeVec_.size();
+      for(size_t t = 0; t < node_vec_size; t++) { nodeVec_[t]->sort_attributes(attr,recursive); }
+   }
 }
 
 bool NodeContainer::doDeleteChild(Node* child)

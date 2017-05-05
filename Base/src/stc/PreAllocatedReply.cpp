@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #24 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -71,10 +71,10 @@ STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd()
 	return stc_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::defs_cmd(AbstractServer* as,bool save_edit_history)
+STC_Cmd_ptr PreAllocatedReply::defs_cmd(AbstractServer* as,bool migrate)
 {
 	DefsCmd* cmd = dynamic_cast<DefsCmd*>(defs_cmd_.get());
-	cmd->init(as,save_edit_history);
+	cmd->init(as,migrate); // save edit history and children even if hidden
 	return defs_cmd_;
 }
 

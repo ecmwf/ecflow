@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -17,10 +17,14 @@
 #include "DashboardDock.hpp"
 #include "InfoPanelItem.hpp"
 #include "InfoPanelHandler.hpp"
+#include "NodePathWidget.hpp"
 #include "ServerHandler.hpp"
+#include "SessionHandler.hpp"
 #include "UiLog.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
+
+//#define _UI_INFOPANEL_DEBUG
 
 //==============================================
 //
@@ -57,6 +61,8 @@ InfoPanel::InfoPanel(QWidget* parent) :
 {
 	setupUi(this);
 
+    bcWidget_=new NodePathWidget(this);
+
     connect(tab_,SIGNAL(currentChanged(int)),
             this,SLOT(slotCurrentWidgetChanged(int)));
 
@@ -68,7 +74,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
     messageLabel_->hide();	
 
 	//Initialise action state
-	actionBreadcrumbs_->setChecked(bcWidget_->active());
+    actionBreadcrumbs_->setChecked(bcWidget_->isGuiMode());
 	actionFrozen_->setChecked(false);
 
     WidgetNameProvider::nameChildren(this);
@@ -76,7 +82,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 InfoPanel::~InfoPanel()
 {
-	clear();
+    localClear();
 
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 		delete d;
@@ -102,26 +108,42 @@ void InfoPanel::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	//Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
 
-	//This will set the title
-	updateTitle();
+    //Add the bc to the titlebar. This will reparent the bcWidget!!! So we must not
+    //access it in the destructor!!!
+    tw->setBcWidget(bcWidget_);
 }
 
 //When the infopanel is in a dialog we need to add the optionsTb to the dialog.
 void InfoPanel::populateDialog()
 {
+    setInDialog(true);
+
+    //Add the bcWidget_ to the top of the dialogue
+    bcWidget_->useTransparentBg(false);
+    verticalLayout_->insertWidget(0,bcWidget_);
+
     QMenu *menu=buildOptionsMenu();
 
-    detachedAction_->setIcon(QIcon());
-    menu->addAction(detachedAction_);
+    QWidget *cornerW=new QWidget(this);
+    QHBoxLayout *hb=new QHBoxLayout(cornerW);
+    hb->setContentsMargins(0,0,0,0);
+    hb->setSpacing(1);
+
+    QToolButton *detachedTb=new QToolButton(this);
+    detachedTb->setAutoRaise(true);
+    detachedTb->setDefaultAction(detachedAction_);
+    hb->addWidget(detachedTb);
+    setDetached(true); //by default a dialog is detached!
 
     QToolButton* optionsTb=new QToolButton(this);
     optionsTb->setAutoRaise(true);
-    optionsTb->setIcon(QPixmap(":/viewer/configure.svg"));
+    optionsTb->setIcon(QPixmap(":/viewer/cogwheel.svg"));
     optionsTb->setPopupMode(QToolButton::InstantPopup);
     optionsTb->setToolTip(tr("Options"));
     optionsTb->setMenu(menu);
+    hb->addWidget(optionsTb);
 
-    tab_->setCornerWidget(optionsTb);
+    tab_->setCornerWidget(cornerW);
 
     //This will set the dialog title
     updateTitle();
@@ -143,6 +165,15 @@ void InfoPanel::setCurrent(const std::string& name)
 }
 
 void InfoPanel::clear()
+{
+    localClear();
+
+    //Clear the breadcrumbs
+    bcWidget_->clear();
+}
+
+//This is safe to call from the destructor
+void InfoPanel::localClear()
 {
     messageLabel_->hide();
     messageLabel_->clear();
@@ -172,9 +203,6 @@ void InfoPanel::clear()
 	}
 	//Clear the tabs
 	clearTab();
-
-	//Clear the breadcrumbs
-	bcWidget_->clear();
 }
 
 //TODO: It should be the slot
@@ -232,7 +260,6 @@ void InfoPanel::slotReload(VInfo_ptr info)
         reset(info);
     }
 }
-
 
 void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 {
@@ -306,10 +333,12 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	std::vector<InfoPanelDef*> ids;
 	InfoPanelHandler::instance()->visible(info,ids);
 
+#ifdef _UI_INFOPANEL_DEBUG
 	for(int i=0; i < ids.size(); i++)
 	{
         UiLog().dbg() << "InfoPanel --> tab: " << ids[i]->name();
 	}
+#endif
 
 	int match=0;
 	for(int i=0; i < tab_->count(); i++)
@@ -497,15 +526,21 @@ void InfoPanel::detachedChanged()
 
 void InfoPanel::on_actionBreadcrumbs__toggled(bool b)
 {
-	if(b)
-	{
-		bcWidget_->active(true);
-		bcWidget_->setPath(info_);
-	}
-	else
-	{
-		bcWidget_->active(false);
-	}
+    if(isInDialog())
+    {
+        bcWidget_->setVisible(b);
+    }
+    else
+    {
+        if(b)
+        {
+            bcWidget_->setMode(NodePathWidget::GuiMode);
+        }
+        else
+        {
+            bcWidget_->setMode(NodePathWidget::TextMode);
+        }
+    }
 }
 
 void InfoPanel::on_actionFrozen__toggled(bool b)
@@ -524,27 +559,19 @@ bool InfoPanel::frozen() const
 
 void InfoPanel::updateTitle()
 {
-	QString baseTxt="<b>Info panel</b>";
-
-	QString txt;
-	if(frozen())
-		txt+="frozen";
-
-	if(!txt.isEmpty())
-	{
-		txt=baseTxt + " (" + txt + ")";
-	}
-	else
-	{
-		txt=baseTxt;
-	}
-
-    if(info_ && info_.get())
+    if(isInDialog())
     {
-        txt+=" - " + QString::fromStdString(info_->path());
-    }
+        QString txt;
+        if(frozen())
+            txt+="(frozen) ";
 
-	Q_EMIT titleUpdated(txt);
+        if(info_)
+        {
+            txt+=QString::fromStdString(info_->path());
+        }
+
+        Q_EMIT titleUpdated(txt);
+    }
 }
 
 void InfoPanel::notifyDataLost(VInfo* info)
@@ -731,7 +758,7 @@ void InfoPanel::readSettings(VSettings* vs)
 
 	//Synchronise the action and the breadcrumbs state
 	//This will not emit the trigered signal of the action!!
-	actionBreadcrumbs_->setChecked(bcWidget_->active());
+    actionBreadcrumbs_->setChecked(bcWidget_->isGuiMode());
 
 	actionFrozen_->setChecked(vs->getAsBool("frozen",frozen()));
 
@@ -744,3 +771,28 @@ void InfoPanel::readSettings(VSettings* vs)
     }
 }
 
+void InfoPanel::writeSettingsForDialog()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    assert(cs);
+    VSettings vs(cs->infoPanelDialogFile());
+
+    vs.putAsBool("breadcrumbs",bcWidget_->isVisible());
+    vs.putAsBool("frozen",frozen());
+    vs.putAsBool("detached",detached());
+    vs.write();
+}
+
+void InfoPanel::readSettingsForDialog()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    assert(cs);
+    VSettings vs(cs->infoPanelDialogFile());
+    vs.read(false);
+
+    actionBreadcrumbs_->setChecked(vs.getAsBool("breadcrumbs",true));
+    bcWidget_->setVisible(actionBreadcrumbs_->isChecked());
+
+    actionFrozen_->setChecked(vs.getAsBool("frozen",frozen()));
+    detachedAction_->setChecked(vs.getAsBool("detached",detached()));
+}

@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #165 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -45,6 +45,7 @@
 #include "Suite.hpp"
 #include "CheckPt.hpp"
 #include "Archive.hpp"
+#include "Attr.hpp"
 
 class Limit;
 class AbstractObserver;
@@ -59,6 +60,7 @@ public:
 
    ~Defs();
 
+   void copy_defs_state_only(defs_ptr defs); // needed when creating defs for client handles
    bool operator==(const Defs& rhs) const;
    std::ostream& print(std::ostream&) const ;
 
@@ -169,6 +171,10 @@ public:
    /// returns true if defs has cron,time,day,date or today time dependencies
    bool hasTimeDependencies() const;
 
+   /// recursively sort the attributes
+   // expect one attr to be [ event | meter | label | limits | variable ]
+   void sort_attributes(ecf::Attr::Type attr, bool recursive = true);
+
    /// This function is called when ALL definition has been parsed successfully
    /// Client Side:: The client side has externs, hence any references to node paths
    ///               in the triggers expression, that are un-resolved and not in
@@ -239,8 +245,8 @@ public:
    void order(Node* immediateChild, NOrder::Order);
 
    /// determines why the node is not running.
-   void top_down_why(std::vector<std::string>& theReasonWhy) const;
-   void why(std::vector<std::string>& theReasonWhy) const;
+   void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const; // return true if why found
 
    /// Function to save the defs as a checkpoint file. File saved to the file name
    /// Can throw exception
@@ -271,11 +277,11 @@ public:
 
    /// Memento functions:
    void collateChanges(unsigned int client_handle,DefsDelta&) const;
-   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const ServerStateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const ServerVariableMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const ServerStateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const ServerVariableMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
 
    /// Find the max state change number for defs only. This includes:
    ///   o the Defs state.
@@ -357,6 +363,7 @@ private:
    friend class ChangeStartNotification;
    void notify_delete();
 public:
+   void notify_start(const std::vector<ecf::Aspect::Type>& aspects);
    void notify(const std::vector<ecf::Aspect::Type>& aspects);
    void attach(AbstractObserver*);
    void detach(AbstractObserver*);

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Copyright 2009-2016 ECMWF. 
+## Copyright 2009-2017 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -25,8 +25,13 @@ echo "BOOST_ROOT=$BOOST_ROOT"
 # From boost 1.56 > the location of site-config.jam location has changed
 #
 SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/v2/site-config.jam
-BOOST_VERSION="$(basename $BOOST_ROOT)"
-if [ "$BOOST_VERSION" = boost_1_56_0 -o "$BOOST_VERSION" = boost_1_57_0 -o "$BOOST_VERSION" = boost_1_58_0 -o "$BOOST_VERSION" = boost_1_61_0 ] ; then
+BOOST_VERSION="$(basename $BOOST_ROOT)"                           # boost_1_53_0
+BOOST_MAJOR_VERSION=$(echo $BOOST_VERSION | cut -d_ -f2)          # 1
+BOOST_MINOR_VERSION=$(echo $BOOST_VERSION | cut -d_ -f3)          # 53
+BOOST_PATCH_VERSION=$(echo $BOOST_VERSION | cut -d_ -f4)          # 0
+BOOST_NUMERIC_VERSION=$(( 1000*BOOST_MAJOR_VERSION + 10*BOOST_MINOR_VERSION + BOOST_PATCH_VERSION ))
+
+if [[ ${BOOST_NUMERIC_VERSION} -ge 1570 ]] ; then
    SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/src/site-config.jam
 fi
 
@@ -79,7 +84,6 @@ if test_uname Linux ; then
        fi
     else
       if [ $tool = gcc ] ; then
-  
   
       		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
       		

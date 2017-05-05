@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -36,7 +36,7 @@ SessionItem::~SessionItem()
 	if (isTemporary_)
 	{
 		std::string msg;
-		bool ok = DirectoryHandler::removeDir(dirPath_, msg);
+        DirectoryHandler::removeDir(dirPath_, msg);
 	}
 }
 
@@ -77,6 +77,11 @@ std::string SessionItem::savedCustomCommandsFile() const
 std::string SessionItem::serverFile(const std::string& serverName) const
 {
 	return DirectoryHandler::concatenate(dirPath_, serverName + ".conf.json");
+}
+
+std::string SessionItem::infoPanelDialogFile() const
+{
+    return DirectoryHandler::concatenate(dirPath_, "info_panel_dialog.json");
 }
 
 std::string SessionItem::qtDir() const
@@ -328,13 +333,12 @@ void SessionHandler::setTemporarySessionIfReqested()
 
 			// does this exact server already exist in the user's list?
 			std::string host(sh);
-			std::string port(sp);
-			ServerItem *serverItem = ServerList::instance()->find(alias, host, port);
-			if (!serverItem)
+            std::string port(sp);
+            if(ServerList::instance()->find(alias, host, port) == 0)
 			{
 				// no - add it, and make sure it's got a unique alias
 				std::string uniqueName = ServerList::instance()->uniqueName(alias);
-				serverItem = ServerList::instance()->add(uniqueName, host, port, false, true);
+                ServerList::instance()->add(uniqueName, host, port, false, true);
 			}
 		}
 	}

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #8 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -111,6 +111,21 @@ void AstResolveExternVisitor::visitVariable(AstVariable* astVar)
 
  	// Can't find name, in event, meter, user variable, repeat, generated variable, add as extern
 	addExtern(astVar->nodePath(),astVar->name());
+}
+
+void AstResolveExternVisitor::visitFlag(AstFlag* astVar)
+{
+   //std::cout << "AstResolveExternVisitor::visitFlag " << triggerNode_->debugNodePath() << "\n";
+
+   astVar->setParentNode(triggerNode_);
+
+   // See if can reference the path, on the AstFlag, if we can't, it should be added as an extern
+   std::string errorMsg;
+   Node* theReferencedNode = astVar->referencedNode( errorMsg );
+   if ( !theReferencedNode ) {
+      addExtern(astVar->nodePath(),astVar->name()); // return flag:late
+      return;
+   }
 }
 
 void AstResolveExternVisitor::addExtern(const std::string& absNodePath, const std::string& var)

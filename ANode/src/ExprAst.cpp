@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #57 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -20,6 +20,7 @@
 #include "Indentor.hpp"
 #include "ExprAstVisitor.hpp"
 #include "Node.hpp"
+#include "Defs.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
 #include "Cal.hpp"
@@ -30,6 +31,26 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////////
 
 Ast::~Ast() {}
+
+//#define DEBUG_WHY 1
+
+bool Ast::why(std::string& theReasonWhy,bool html) const
+{
+   if (evaluate()) {
+#ifdef DEBUG_WHY
+      std::cout << "   Ast::why evaluates returning\n";
+#endif
+      return false;
+   }
+
+   theReasonWhy = "expression ";
+   theReasonWhy += why_expression(html); // provide additional state
+   theReasonWhy += " does not evaluate";
+#ifdef DEBUG_WHY
+   std::cout << "    Ast::why  reason = " << theReasonWhy << "\n";
+#endif
+   return true;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +90,7 @@ bool AstTop::check(std::string& error_msg) const
 std::ostream& AstTop::print(std::ostream& os) const
 {
 	Indentor in;
-	Indentor::indent(os) << "# AST\n";
+	Indentor::indent(os) << "# AstTop\n";
  	if (root_) {
 		Indentor in;
 		return root_->print(os);
@@ -84,26 +105,44 @@ void AstTop::print_flat(std::ostream& os,bool add_bracket) const
    }
 }
 
-//#define DEBUG_WHY 1
-bool AstTop::why(std::string& theReasonWhy) const
+bool AstTop::is_valid_ast(std::string& error_msg) const
+{
+   if (root_) {
+      return root_->is_valid_ast(error_msg);
+   }
+   error_msg = "AstTop: Abstract syntax tree creation failed";
+   return false;
+}
+
+bool AstTop::why(std::string& theReasonWhy,bool html) const
 {
 	if (evaluate()) {
 #ifdef DEBUG_WHY
- 		std::cout << "   AstTop::why evaluate returning\n";
+ 		std::cout << "   AstTop::why evaluates returning\n";
 #endif
 		return false;
 	}
-	return root_->why(theReasonWhy);
+	return root_->why(theReasonWhy,html);
 }
 
-std::string AstTop::expression(bool why) const
+std::string AstTop::expression() const
 {
-	std::string ret =  exprType_;
+	std::string ret = exprType_;
 	if (root_) {
 		ret += " ";
-		ret += root_->expression(why);
+		ret += root_->expression();
 	}
 	return ret;
+}
+
+std::string AstTop::why_expression(bool html) const
+{
+   std::string ret = exprType_;
+   if (root_) {
+      ret += " ";
+      ret += root_->why_expression(html);
+   }
+   return ret;
 }
 
 void AstTop::setParentNode(Node* p)
@@ -151,11 +190,14 @@ void AstRoot::addChild( Ast* n )
 }
 
 std::ostream& AstRoot::print( std::ostream& os ) const {
-	if (left_->isRoot()) {
-		Indentor in;
- 		left_->print( os );
-	}
-	else left_->print( os );
+   // left_ should not be NULL, but keep clang static analyser happy
+   if (left_) {
+      if (left_->isRoot()) {
+         Indentor in;
+         left_->print( os );
+      }
+      else left_->print( os );
+   }
 
 	if (right_) { // right_ is empty for Not
 		if (right_->isRoot()) {
@@ -167,22 +209,47 @@ std::ostream& AstRoot::print( std::ostream& os ) const {
 	return os;
 }
 
-bool AstRoot::why(std::string& theReasonWhy) const
+std::string AstRoot::do_why_expression(const std::string& root,bool html) const
 {
-	if (evaluate()) {
-#ifdef DEBUG_WHY
- 		std::cout << "   AstRoot::why evaluates returning\n";
-#endif
-		return false;
-	}
+   std::string ret;
+   if (left_) ret += left_->why_expression(html);
+   ret  += root;
+   if (right_) ret += right_->why_expression(html);
+   return ret;
+}
 
-	theReasonWhy = "expression ";
-	theReasonWhy += expression(true); // provide additional state
-	theReasonWhy += " does not evaluate";
-#ifdef DEBUG_WHY
- 	std::cout << "    AstRoot::why  reason = " << theReasonWhy << "\n";
-#endif
-	return true;
+std::string AstRoot::do_bracket_why_expression(const std::string& root,bool html) const
+{
+   std::string ret = "(";
+   ret += do_why_expression(root,html);
+   ret += ")";
+   return ret;
+}
+
+std::string AstRoot::do_false_bracket_why_expression(const std::string& root,bool html) const
+{
+   std::string ret;
+   if (html) ret += "<false>";  // still need guard with html for ecflowview
+   ret += do_bracket_why_expression(root,html);
+   if (html) ret += "</false>";
+   return ret;
+}
+
+std::string AstRoot::do_expression(const std::string& root ) const
+{
+   std::string ret;
+   if (left_) ret += left_->expression();
+   ret  += root;
+   if (right_) ret += right_->expression();
+   return ret;
+}
+
+std::string AstRoot::do_bracket_expression(const std::string& root ) const
+{
+   std::string ret = "(";
+   ret += do_expression(root);
+   ret += ")";
+   return ret;
 }
 
 void AstRoot::setParentNode(Node* p)
@@ -213,6 +280,19 @@ std::ostream& AstNot::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstNot::is_valid_ast(std::string& error_msg) const
+{
+   if (right_) {
+      error_msg = "AstNot: should only have a single root";
+      return false;
+   }
+   if (!left_) {
+      error_msg = "AstNot: Does not have root";
+      return false;
+   }
+   return left_->is_valid_ast(error_msg);
+}
+
 void AstNot::print_flat( std::ostream& os,bool add_bracket) const {
    os << name_;
    if (left_) {
@@ -222,11 +302,23 @@ void AstNot::print_flat( std::ostream& os,bool add_bracket) const {
    }
 }
 
-std::string AstNot::expression(bool why) const
+std::string AstNot::expression() const
 {
  	std::string ret =  "NOT ";
- 	ret += left_->expression(why);
+ 	ret += left_->expression();
 	return ret;
+}
+
+std::string AstNot::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+
+   std::string ret;
+   if (html) ret += "<false>";
+   ret += "not ";
+   ret += left_->why_expression(html);
+   if (html) ret += "</false>";
+   return ret;
 }
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -252,6 +344,16 @@ std::ostream& AstPlus::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstPlus::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstPlus: has no left part";  return false;}
+   if (!right_) { error_msg = "AstPlus: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstPlus::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -260,13 +362,14 @@ void AstPlus::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstPlus::expression(bool why) const
+std::string AstPlus::expression() const
 {
- 	std::string ret;
-	if (left_) ret += left_->expression(why);
-	ret  += " + ";
-	if (right_) ret += right_->expression(why);
- 	return ret;
+   return do_expression(" + ");
+}
+
+std::string AstPlus::why_expression(bool html) const
+{
+   return do_why_expression(" + ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -293,6 +396,16 @@ std::ostream& AstMinus::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstMinus::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstMinus: has no left part"; return false;}
+   if (!right_) { error_msg = "AstMinus: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstMinus::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -301,13 +414,14 @@ void AstMinus::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstMinus::expression(bool why) const
+std::string AstMinus::expression() const
 {
- 	std::string ret;
-	if (left_) ret += left_->expression(why);
-	ret  += " - ";
-	if (right_) ret += right_->expression(why);
- 	return ret;
+   return do_expression(" - ");
+}
+
+std::string AstMinus::why_expression(bool html) const
+{
+   return do_why_expression(" - ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -351,6 +465,16 @@ std::ostream& AstDivide::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstDivide::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstDivide: has no left part"; return false;}
+   if (!right_) { error_msg = "AstDivide: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstDivide::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -359,13 +483,14 @@ void AstDivide::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstDivide::expression(bool why) const
+std::string AstDivide::expression() const
 {
- 	std::string ret;
-	if (left_) ret += left_->expression(why);
-	ret  += " / ";
-	if (right_) ret += right_->expression(why);
- 	return ret;
+   return do_expression(" / ");
+}
+
+std::string AstDivide::why_expression(bool html) const
+{
+   return do_why_expression(" / ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -392,6 +517,16 @@ std::ostream& AstMultiply::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstMultiply::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstMultiply: has no left part"; return false;}
+   if (!right_) { error_msg = "AstMultiply: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstMultiply::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -400,13 +535,14 @@ void AstMultiply::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstMultiply::expression(bool why) const
+std::string AstMultiply::expression() const
 {
- 	std::string ret;
-	if (left_) ret += left_->expression(why);
-	ret  += " * ";
-	if (right_) ret += right_->expression(why);
- 	return ret;
+   return do_expression(" * ");
+}
+
+std::string AstMultiply::why_expression(bool html) const
+{
+   return do_why_expression(" * ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -451,6 +587,16 @@ std::ostream& AstModulo::print( std::ostream& os ) const {
    return AstRoot::print( os );
 }
 
+bool AstModulo::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstModulo: has no left part"; return false;}
+   if (!right_) { error_msg = "AstModulo: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstModulo::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -459,13 +605,14 @@ void AstModulo::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstModulo::expression(bool why) const
+std::string AstModulo::expression() const
 {
-   std::string ret;
-   if (left_) ret += left_->expression(why);
-   ret  += " % ";
-   if (right_) ret += right_->expression(why);
-   return ret;
+   return do_expression(" % ");
+}
+
+std::string AstModulo::why_expression(bool html) const
+{
+   return do_why_expression(" % ",html);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -492,6 +639,16 @@ std::ostream& AstAnd::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstAnd::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstAnd: has no left part"; return false;}
+   if (!right_) { error_msg = "AstAnd: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstAnd::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -500,14 +657,15 @@ void AstAnd::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstAnd::expression(bool why) const
+std::string AstAnd::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression(why);
-	ret  += " AND ";
-	if (right_) ret += right_->expression(why);
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" AND ");
+}
+
+std::string AstAnd::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+   return do_false_bracket_why_expression(" and ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -534,6 +692,16 @@ std::ostream& AstOr::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstOr::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstOr: has no left part"; return false;}
+   if (!right_) { error_msg = "AstOr: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstOr::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -542,14 +710,15 @@ void AstOr::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstOr::expression(bool why) const
+std::string AstOr::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression(why);
-	ret  += " OR ";
-	if (right_) ret += right_->expression(why);
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" OR ");
+}
+
+std::string AstOr::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+   return do_false_bracket_why_expression(" or ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -576,6 +745,16 @@ std::ostream& AstEqual::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstEqual::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstEqual: has no left part"; return false;}
+   if (!right_) { error_msg = "AstEqual: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -584,14 +763,15 @@ void AstEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstEqual::expression(bool why) const
+std::string AstEqual::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression(why);
-	ret  += " == ";
-	if (right_) ret += right_->expression(why);
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" == ");
+}
+
+std::string AstEqual::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+   return do_false_bracket_why_expression(" == ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -617,6 +797,16 @@ std::ostream& AstNotEqual::print( std::ostream& os ) const {
 	return AstRoot::print( os );
 }
 
+bool AstNotEqual::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstNotEqual: has no left part"; return false;}
+   if (!right_) { error_msg = "AstNotEqual: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstNotEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -625,14 +815,15 @@ void AstNotEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstNotEqual::expression(bool why) const
+std::string AstNotEqual::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression(why);
-	ret  += " != ";
-	if (right_) ret += right_->expression(why);
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" != ");
+}
+
+std::string AstNotEqual::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+   return do_false_bracket_why_expression(" != ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -657,6 +848,17 @@ std::ostream& AstLessEqual::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
+bool AstLessEqual::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstLessEqual: has no left part"; return false;}
+   if (!right_) { error_msg = "AstLessEqual: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstLessEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -664,14 +866,16 @@ void AstLessEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (right_) right_->print_flat(os,add_bracket);
    if (add_bracket) os << ")";
 }
-std::string AstLessEqual::expression(bool why) const
+
+std::string AstLessEqual::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression(why);
-	ret  += " <= ";
-	if (right_) ret += right_->expression(why);
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" <= ");
+}
+
+std::string AstLessEqual::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+   return do_false_bracket_why_expression(" <= ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -696,6 +900,17 @@ std::ostream& AstGreaterEqual::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
+bool AstGreaterEqual::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstGreaterEqual: has no left part"; return false;}
+   if (!right_) { error_msg = "AstGreaterEqual: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstGreaterEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -704,14 +919,15 @@ void AstGreaterEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstGreaterEqual::expression(bool why) const
+std::string AstGreaterEqual::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression(why);
-	ret  += " >= ";
-	if (right_) ret += right_->expression(why);
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" >= ");
+}
+
+std::string AstGreaterEqual::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+   return do_false_bracket_why_expression(" >= ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -736,6 +952,17 @@ std::ostream& AstGreaterThan::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
+bool AstGreaterThan::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstGreaterThan: has no left part"; return false;}
+   if (!right_) { error_msg = "AstGreaterThan: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstGreaterThan::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -744,14 +971,15 @@ void AstGreaterThan::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << ")";
 }
 
-std::string AstGreaterThan::expression(bool why) const
+std::string AstGreaterThan::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression(why);
-	ret  += " > ";
-	if (right_) ret += right_->expression(why);
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" > ");
+}
+
+std::string AstGreaterThan::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+   return do_false_bracket_why_expression(" > ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -777,6 +1005,17 @@ std::ostream& AstLessThan::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
+bool AstLessThan::is_valid_ast(std::string& error_msg) const
+{
+   if (!left_)  { error_msg = "AstLessThan: has no left part"; return false;}
+   if (!right_) { error_msg = "AstLessThan: has no right part"; return false;}
+   if ( left_->is_valid_ast(error_msg) && right_->is_valid_ast(error_msg) ) {
+      return true;
+   }
+   return false;
+}
+
 void AstLessThan::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -784,14 +1023,17 @@ void AstLessThan::print_flat(std::ostream& os,bool add_bracket) const {
    if (right_) right_->print_flat(os,add_bracket);
    if (add_bracket) os << ")";
 }
-std::string AstLessThan::expression(bool why) const
+
+std::string AstLessThan::expression() const
 {
- 	std::string ret("(");
-	if (left_) ret += left_->expression(why);
-	ret  += " < ";
-	if (right_) ret += right_->expression(why);
-	ret += ")";
- 	return ret;
+   return do_bracket_expression(" < ");
+}
+
+std::string AstLessThan::why_expression(bool html) const
+{
+   if (evaluate()) return "true";
+   // Using ' < ' seems to mess up html
+   return do_false_bracket_why_expression(" lt ",html); // false - allows GUI to colour the false expression part
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -859,15 +1101,31 @@ void AstFunction::print_flat(std::ostream& os,bool add_brackets) const {
    }
 }
 
-std::string AstFunction::expression(bool why) const
+std::string AstFunction::expression() const
 {
    std::stringstream ss;
    switch (ft_) {
-      case AstFunction::DATE_TO_JULIAN: ss << "date_to_julian( arg:" << arg_->expression(why) << ") = " << value(); break;
-      case AstFunction::JULIAN_TO_DATE: ss << "julian_to_date( arg:" << arg_->expression(why) << ") = " << value(); break;
+      case AstFunction::DATE_TO_JULIAN: ss << "date_to_julian( arg:" << arg_->expression() << ") = " << value(); break;
+      case AstFunction::JULIAN_TO_DATE: ss << "julian_to_date( arg:" << arg_->expression() << ") = " << value(); break;
       default: assert(false);
    }
    return ss.str();
+}
+
+std::string AstFunction::why_expression(bool html) const
+{
+   std::stringstream ss;
+   switch (ft_) {
+      case AstFunction::DATE_TO_JULIAN: ss << "date_to_julian( arg:" << arg_->why_expression(html) << ") = " << value(); break;
+      case AstFunction::JULIAN_TO_DATE: ss << "julian_to_date( arg:" << arg_->why_expression(html) << ") = " << value(); break;
+      default: assert(false);
+   }
+   return ss.str();
+}
+
+void AstFunction::setParentNode(Node* n)
+{
+   if (arg_) arg_->setParentNode(n);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -891,11 +1149,16 @@ void AstInteger::print_flat(std::ostream& os,bool /*add_bracket*/) const {
    os << value_;
 }
 
-std::string AstInteger::expression(bool /*why*/) const
+std::string AstInteger::expression() const
 {
 	std::stringstream ss;
 	ss << value();
 	return ss.str();
+}
+
+std::string AstInteger::why_expression(bool /*html*/) const
+{
+   return expression();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -920,9 +1183,15 @@ void AstNodeState::print_flat(std::ostream& os,bool /*add_bracket*/) const {
    os <<  DState::toString( state_ ) ;
 }
 
-std::string AstNodeState::expression(bool why) const
+std::string AstNodeState::expression() const
 {
 	return DState::toString(state_);
+}
+
+std::string AstNodeState::why_expression(bool html) const
+{
+   if (html) return DState::to_html(state_);
+   return DState::toString(state_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -947,10 +1216,15 @@ void AstEventState::print_flat(std::ostream& os,bool /*add_bracket*/) const {
    else        os << Event::CLEAR();
 }
 
-std::string AstEventState::expression(bool /*why*/) const
+std::string AstEventState::expression() const
 {
 	if (state_)  return Event::SET();
 	return Event::CLEAR();
+}
+
+std::string AstEventState::why_expression(bool /*html*/) const
+{
+   return expression();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -992,7 +1266,7 @@ Node* AstNode::referencedNode() const
 
 Node* AstNode::referencedNode(std::string& errorMsg) const
 {
-   Node* ref =  get_ref_node();
+   Node* ref = get_ref_node();
    if ( ref )  {
       return ref;
    }
@@ -1023,28 +1297,174 @@ void AstNode::print_flat(std::ostream& os,bool /*add_bracket*/) const {
    os << nodePath_;
 }
 
-std::string AstNode::expression(bool why) const
+std::string AstNode::expression() const
 {
-	if (why) {
-		Node* refNode = referencedNode(); // Only call once
-		std::string ret = nodePath_;
-		if ( refNode ) {
-			ret += "(";
-			ret += DState::toString(  refNode->dstate()  );
-			ret += ")";
-			return ret;
- 		}
-		else {
-			ret += "(?";
-			ret += DState::toString( DState::UNKNOWN  );
-			ret += ")";
- 		}
-		return ret;
-	}
 	return  nodePath_;
 }
 
+std::string AstNode::why_expression(bool html) const
+{
+   Node* refNode = referencedNode(); // Only call once
+   std::string ret;
+   if (html) {
+      if (refNode) ret = Node::path_href_attribute(refNode->absNodePath(),nodePath_);
+      else ret = Node::path_href_attribute(nodePath_);
+   }
+   else ret = nodePath_;
 
+   if ( refNode ) {
+      ret += "(";
+      if (html) ret += DState::to_html(  refNode->dstate());
+      else      ret += DState::toString( refNode->dstate());
+      ret += ")";
+      return ret;
+   }
+   else {
+      ret += "?(";
+      if (html) ret += DState::to_html(  DState::UNKNOWN);
+      else      ret += DState::toString( DState::UNKNOWN);
+      ret += ")";
+   }
+   return ret;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+std::string AstFlag::name() const
+{
+   return ecf::Flag::enum_to_string( flag_ );
+}
+
+void AstFlag::accept(ExprAstVisitor& v)
+{
+   v.visitFlag(this);  // Not calling base
+}
+
+AstFlag* AstFlag::clone() const
+{
+   return new AstFlag(nodePath_,flag_);
+}
+
+int AstFlag::value() const
+{
+   Node* node = referencedNode();
+   if (node && node->flag().is_set(flag_)) return 1;
+   if (parentNode_ && nodePath_ == "/") {
+      Defs* the_defs = parentNode_->defs();
+      if (the_defs && the_defs->flag().is_set(flag_)) return 1;
+   }
+   return 0;
+}
+
+Node* AstFlag::referencedNode() const
+{
+   Node* ref = get_ref_node();
+   if ( ref )  {
+      return ref;
+   }
+   if ( parentNode_ ) {
+      if (nodePath_ == "/") return NULL; // reference to defs
+      std::string errorMsg;
+      ref_node_ = parentNode_->findReferencedNode( nodePath_, errorMsg );
+      return get_ref_node(); // can be NULL
+   }
+   return NULL;
+}
+
+Node* AstFlag::referencedNode(std::string& errorMsg) const
+{
+   Node* ref = get_ref_node();
+   if ( ref )  {
+      return ref;
+   }
+   if ( parentNode_ ) {
+      if (nodePath_ == "/") return NULL; // reference to defs
+      ref_node_ = parentNode_->findReferencedNode( nodePath_, ecf::Flag::enum_to_string( flag_ ), errorMsg );
+      return get_ref_node(); // can be NULL
+   }
+   return NULL;
+}
+
+std::ostream& AstFlag::print( std::ostream& os ) const {
+
+   Node* refNode = referencedNode(); // Only call once
+   Indentor in;
+
+   if ( refNode ) {
+      Indentor::indent( os ) << "# LEAF_FLAG_NODE node_(Found) nodePath_('" << nodePath_ << "') ";
+      os << ecf::Flag::enum_to_string( flag_ ) << "(" << static_cast<int>( refNode->flag().is_set(flag_)) << ")\n";
+   }
+   else {
+      Indentor::indent( os ) << "# LEAF_FLAG_NODE node_(NULL) nodePath_('" << nodePath_ << "') ";
+      os << ecf::Flag::enum_to_string( flag_ ) << "(0)\n";
+   }
+   return os;
+}
+
+void AstFlag::print_flat(std::ostream& os,bool /*add_bracket*/) const {
+   os << expression();
+}
+
+std::string AstFlag::expression() const
+{
+   string ret = nodePath_;
+   ret += "<flag>";
+   ret += ecf::Flag::enum_to_string( flag_ );
+   return ret;
+}
+
+std::string AstFlag::why_expression(bool html) const
+{
+   if (evaluate()) {
+#ifdef DEBUG_WHY
+      cout << " AstFlag::why_expression evaluates returning\n";
+#endif
+      return "true";
+   }
+
+#ifdef DEBUG_WHY
+   cout << " AstFlag::why_expression html " << html << "\n";
+#endif
+
+   Node* ref_node = referencedNode(); // Only call once
+   std::string ret;
+   if (html) {
+      // ecflow_ui expects: [attribute_type]attribute_path:attribute_name(value)
+      // i.e                [limit]/suite/family/task:my_limit(value)
+      // i.e                [flag]/suite/family/task:late(value)
+      std::stringstream display_ss; display_ss << "[flag:" << ecf::Flag::enum_to_string(flag_) << "]" << nodePath_ ;
+      std::string display_str = display_ss.str();
+
+      std::string ref_str;
+      if (ref_node) {
+         std::stringstream ref_ss; ref_ss << "[flag:" << ecf::Flag::enum_to_string(flag_) << "]" << ref_node->absNodePath();
+         ref_str = ref_ss.str();
+      }
+      else ref_str = display_str;
+
+      ret = Node::path_href_attribute(ref_str,display_str);
+      if ( !ref_node )  ret += "(?)";
+      else {
+         ret += "(";
+         ret += boost::lexical_cast<std::string>(ref_node->flag().is_set(flag_) );
+         ret += ")";
+      }
+   }
+   else {
+      ret = nodePath_;
+      if ( !ref_node )  ret += "(?)";
+      ret += "<flag>";
+      ret += ecf::Flag::enum_to_string( flag_ );
+      if (!ref_node) ret += "(?)";
+      else {
+         ret += "(";
+         std::stringstream ss; ss << ref_node->flag().is_set(flag_) ;
+         ret += ss.str();
+         ret += ")";
+      }
+   }
+   return ret;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -1087,27 +1507,49 @@ void AstVariable::print_flat(std::ostream& os,bool /*add_bracket*/) const
    os << nodePath_ << Str::COLON() << name_;
 }
 
-std::string AstVariable::expression(bool why) const
+std::string AstVariable::expression() const
 {
-	if (why) {
-		VariableHelper varHelper(this);
-		std::string ret = nodePath_;
-		if ( !varHelper.theReferenceNode() )  ret += "(?)";
-		ret += Str::COLON();
-		ret += name_;
-		ret += "(";
-
-		std::string varType;
-		int theValue;
-		varHelper.varTypeAndValue(varType,theValue);
-
-		std::stringstream ss; ss << "<type=" << varType << "> <value=" << theValue << ">";
-		ret += ss.str();
-
-		ret += ")";
-		return ret;
-	}
 	return nodePath_ + Str::COLON() + name_;
+}
+
+std::string AstVariable::why_expression(bool html) const
+{
+   VariableHelper varHelper(this);
+   std::string ret;
+   std::string varType;
+   int theValue=0;
+   varHelper.varTypeAndValue(varType,theValue);
+   Node* ref_node = varHelper.theReferenceNode();
+
+   if (html) {
+      // ecflow_ui expects: [attribute_type]attribute_path:attribute_name
+      // i.e                [limit]/suite/family/task:my_limit
+      std::stringstream display_ss; display_ss << "[" << varType << "]" << nodePath_ << ":" << name_;
+      std::string display_str = display_ss.str();
+      std::string ref_str;
+      if (ref_node) {
+         std::stringstream ref_ss; ref_ss << "[" << varType << "]" << ref_node->absNodePath() << ":" << name_;
+         ref_str = ref_ss.str();
+      }
+      else ref_str = display_str;
+
+      ret = Node::path_href_attribute(ref_str,display_str);
+      if ( !ref_node )  ret += "(?)";
+      ret += "(";
+      ret += boost::lexical_cast<std::string>(theValue);
+      ret += ")";
+   }
+   else {
+      ret = nodePath_;
+      if ( !ref_node )  ret += "(?)";
+      ret += Str::COLON();
+      ret += name_;
+      ret += "(";
+      std::stringstream ss; ss << "type:" << varType << " value:" << theValue;
+      ret += ss.str();
+      ret += ")";
+   }
+   return ret;
 }
 
 Node* AstVariable::referencedNode() const
@@ -1268,3 +1710,4 @@ std::ostream& operator<<( std::ostream& os, const AstNodeState& d)  {return d.pr
 std::ostream& operator<<( std::ostream& os, const AstEventState& d) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstNode& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstVariable& d ) {return d.print( os );}
+std::ostream& operator<<( std::ostream& os, const AstFlag& d ) {return d.print( os );}

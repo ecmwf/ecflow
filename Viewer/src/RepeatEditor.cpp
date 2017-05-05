@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,6 +12,7 @@
 
 #include <QtGlobal>
 #include <QIntValidator>
+#include <QItemSelectionModel>
 #include <QStringListModel>
 #include <QSettings>
 
@@ -23,7 +24,7 @@
 #include "SessionHandler.hpp"
 #include "VInfo.hpp"
 #include "VNode.hpp"
-#include "VRepeat.hpp"
+#include "VRepeatAttr.hpp"
 
 RepeatEditorWidget::RepeatEditorWidget(QWidget* parent) : QWidget(parent)
 {
@@ -46,7 +47,6 @@ void RepeatEditorWidget::hideRow(QWidget* w)
 
 RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     AttributeEditor(info,"repeat",parent),
-    repeat_(0),
     model_(0)
 {
     w_=new RepeatEditorWidget(this);
@@ -58,6 +58,9 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "repeat");
 
+    VRepeatAttr *rep=static_cast<VRepeatAttr*>(a);
+
+#if 0
     if(a->data().count() < 7)
         return;
 
@@ -67,6 +70,8 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     Q_ASSERT(node);
     const Repeat& r=node->repeat();
     repeat_=VRepeat::make(r);
+#endif
+
 
     oriVal_=a->data().at(3);
 
@@ -79,7 +84,7 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     //Value will be initailised in the subclasses
     oriVal_=a->data().at(3);
 
-    buildList();
+    buildList(rep);
 
 #if 0
     QIntValidator *validator=new QIntValidator(this);
@@ -91,23 +96,22 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     valueLe_->setValidator(validator);
 #endif
 
-    header_->setInfo(QString::fromStdString(info_->path()),"Repeat " + QString::fromStdString(repeat_->type()));
+    header_->setInfo(QString::fromStdString(info_->path()),"Repeat " + QString::fromStdString(rep->subType()));
 
     readSettings();
 }
 
 RepeatEditor::~RepeatEditor()
 {
-    if(repeat_)
-        delete repeat_;
+    writeSettings();
 }
 
-void RepeatEditor::buildList()
+void RepeatEditor::buildList(VRepeatAttr *rep)
 {
-    int start=repeat_->startIndex();
-    int end=repeat_->endIndex();
-    int step=repeat_->step();
-    int current=repeat_->currentIndex();
+    int start=rep->startIndex();
+    int end=rep->endIndex();
+    int step=rep->step();
+    int current=rep->currentIndex();
 
     if(step<=0 || end <= start)
     {
@@ -116,18 +120,21 @@ void RepeatEditor::buildList()
 
     modelData_.clear();
     int cnt=end-start;
-    if(cnt >1 && cnt < 100)
+    if(cnt >1)
     {
-        for(size_t i=start; i <= end; i++)
-            modelData_ << QString::fromStdString(repeat_->value(i));
+        for(size_t i=start; i < end; i++)
+            modelData_ << QString::fromStdString(rep->value(i));
 
         model_=new QStringListModel(this);
         model_->setStringList(modelData_);
         w_->valueView_->setModel(model_);
         w_->valueView_->setCurrentIndex(model_->index(current,0));
 
-        connect(w_->valueView_,SIGNAL(activated(const QModelIndex&)),
-           this,SLOT(slotSelectedInView(const QModelIndex&)));
+        connect(w_->valueView_->selectionModel(),
+              SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+              this, SLOT(slotSelectedInView(QModelIndex,QModelIndex)));
+
+        w_->valueView_->setFocus(Qt::MouseFocusReason);
     }
     else
     {
@@ -135,9 +142,9 @@ void RepeatEditor::buildList()
     }
 }
 
-void RepeatEditor::slotSelectedInView(const QModelIndex& idx)
+void RepeatEditor::slotSelectedInView(const QModelIndex &current, const QModelIndex &previous)
 {
-    setValue(idx.data().toString());
+    setValue(current.data().toString());
     checkButtonStatus();
 }
 
@@ -190,8 +197,8 @@ void RepeatEditor::readSettings()
 RepeatIntEditor::RepeatIntEditor(VInfo_ptr info,QWidget* parent) :
     RepeatEditor(info,parent)
 {
-    if(!repeat_)
-        return;
+    //if(!repeat_)
+    //    return;
 
     w_->hideRow(w_->valueLe_);
     w_->valueSpin_->setValue(oriVal_.toInt());
@@ -257,8 +264,8 @@ void RepeatIntEditor::apply()
 RepeatStringEditor::RepeatStringEditor(VInfo_ptr info,QWidget* parent) :
     RepeatEditor(info,parent)
 {
-    if(!repeat_)
-        return;
+    //if(!repeat_)
+    //    return;
 
     w_->hideRow(w_->valueSpin_);
     w_->hideRow(w_->stepLabel_);
@@ -324,8 +331,8 @@ void RepeatStringEditor::apply()
 RepeatDateEditor::RepeatDateEditor(VInfo_ptr info,QWidget* parent) :
     RepeatEditor(info,parent)
 {
-    if(!repeat_)
-        return;
+    //if(!repeat_)
+    //    return;
 
     w_->hideRow(w_->valueSpin_);
     w_->valueLe_->setText(oriVal_);

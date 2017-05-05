@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #35 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -182,16 +182,7 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const
 
    // Create defs to be sent to the client, with the registered suites.
    defs_ptr newly_created_defs = Defs::create();
-   {
-      // Initialise the defs state. We need to reflect the real state.
-      newly_created_defs->set_state( server_defs->state() );
-
-      // Initialise the server state
-      newly_created_defs->set_server().set_state(     server_defs->server().get_state() );
-      newly_created_defs->set_server().set_user_variables( server_defs->server().user_variables() );
-      newly_created_defs->set_server().set_server_variables( server_defs->server().server_variables() );
-   }
-
+   newly_created_defs->copy_defs_state_only(server_defs);
 
    // Store the state/modify change number to the newly created defs *over* the objects that have changed
    unsigned int the_max_state_change_no = server_defs->defs_only_max_state_change_no();

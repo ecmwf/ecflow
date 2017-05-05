@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -7,55 +7,25 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "ExpandState.hpp"
-
-#include <QTreeView>
-
+#include "ExpandStateNode.hpp"
 #include "TreeNodeModel.hpp"
 #include "VNode.hpp"
 #include "VTree.hpp"
 
-//-------------------------------------
-// ExapandStateNode
-//-------------------------------------
-
-ExpandStateNode::~ExpandStateNode()
-{
-	clear();
-}
-
-void ExpandStateNode::clear()
-{
-	name_.clear();
-	for(unsigned int i=0; i < children_.size(); i++)
-	{
-		delete children_.at(i);
-	}
-	children_.clear();
-}
-
-ExpandStateNode* ExpandStateNode::add(const std::string& name)
-{
-    ExpandStateNode *n=new ExpandStateNode(name);
-	children_.push_back(n);
-	return n;
-}
-
-//-------------------------------------
-// ExapandStateTree
-//-------------------------------------
-
-ExpandStateTree::ExpandStateTree(QTreeView * view,TreeNodeModel* model) :
+template <typename View>
+ExpandState<View>::ExpandState(View * view,TreeNodeModel* model) :
     view_(view), model_(model), root_(0)
 {
 }
 
-ExpandStateTree::~ExpandStateTree()
+template <typename View>
+ExpandState<View>::~ExpandState()
 {
 	clear();
 }
 
-void ExpandStateTree::clear()
+template <typename View>
+void ExpandState<View>::clear()
 {
 	if(root_)
 		delete root_;
@@ -63,12 +33,14 @@ void ExpandStateTree::clear()
 	root_=0;
 }
 
-bool ExpandStateTree::rootSameAs(const std::string& name) const
+template <typename View>
+bool ExpandState<View>::rootSameAs(const std::string& name) const
 {
     return (root_ && root_->name_ == name);
 }
 
-ExpandStateNode* ExpandStateTree::setRoot(const std::string& name)
+template <typename View>
+ExpandStateNode* ExpandState<View>::setRoot(const std::string& name)
 {
 	if(root_)
 		clear();
@@ -79,20 +51,12 @@ ExpandStateNode* ExpandStateTree::setRoot(const std::string& name)
 
 
 //Save the expand state for the given node (it can be a server as well)
-void ExpandStateTree::save(const VTreeNode *root)
+template <typename View>
+void ExpandState<View>::save(const VTreeNode *root)
 {
     assert(root);
 
     clear();
-
-#if 0
-    VInfo_ptr s=currentSelection();
-    if(s)
-    {
-        if(node->server() == s->server())
-          expandState_->selection_=s;
-    }
-#endif
 
     QModelIndex rootIdx=model_->nodeToIndex(root);
     if(view_->isExpanded(rootIdx))
@@ -102,7 +66,8 @@ void ExpandStateTree::save(const VTreeNode *root)
     }
 }
 
-void ExpandStateTree::save(ExpandStateNode *parentExpand,const QModelIndex& parentIdx)
+template <typename View>
+void ExpandState<View>::save(ExpandStateNode *parentExpand,const QModelIndex& parentIdx)
 {
     for(int i=0; i < model_->rowCount(parentIdx); i++)
     {
@@ -118,10 +83,9 @@ void ExpandStateTree::save(ExpandStateNode *parentExpand,const QModelIndex& pare
     }
 }
 
-
-
 //Save the expand state for the given node (it can be a server as well)
-void ExpandStateTree::restore(const VTreeNode* node)
+template <typename View>
+void ExpandState<View>::restore(const VTreeNode* node)
 {
     if(!root_)
         return;
@@ -133,23 +97,11 @@ void ExpandStateTree::restore(const VTreeNode* node)
     }
 
     restore(root_,node);
-
-#if 0
-    if(expandState_->selection_)
-    {
-        VInfo_ptr s=currentSelection();
-        if(!s)
-        {
-            expandState_->selection_->regainData();
-            currentSelection(expandState_->selection_);
-        }
-    }
-#endif
-
     clear();
 }
 
-void ExpandStateTree::restore(ExpandStateNode *expand,const VTreeNode* node)
+template <typename View>
+void ExpandState<View>::restore(ExpandStateNode *expand,const VTreeNode* node)
 {
     //Lookup the node in the model
     QModelIndex nodeIdx=model_->nodeToIndex(node);
@@ -178,40 +130,55 @@ void ExpandStateTree::restore(ExpandStateNode *expand,const VTreeNode* node)
         }
     }
 }
-//-------------------------------------
-// ExapandState
-//-------------------------------------
 
-ExpandState::ExpandState(QTreeView* view,TreeNodeModel* model) : view_(view), model_(model)
+template <typename View>
+void ExpandState<View>::collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>& theSet)
 {
+    if(!root_)
+        return;
 
-}
+    if(node->vnode()->strName() != root_->name_)
+    {
+        clear();
+        return;
+    }
 
-
-ExpandState::~ExpandState()
-{
+    QModelIndex nodeIdx=model_->nodeToIndex(node);
+    collectExpanded(root_,node,nodeIdx,theSet);
     clear();
 }
 
-ExpandStateTree* ExpandState::add()
-{
-    ExpandStateTree* et=new ExpandStateTree(view_,model_);
-    items_ << et;
-    return et;
-}
 
-void ExpandState::remove(ExpandStateTree* es)
+template <typename View>
+void ExpandState<View>::collectExpanded(ExpandStateNode *expand,const VTreeNode* node,const QModelIndex& nodeIdx,
+                                QSet<QPersistentModelIndex>& theSet)
 {
-    items_.removeOne(es);
-    delete es;
-}
-
-void ExpandState::clear()
-{
-    Q_FOREACH(ExpandStateTree* et,items_)
+    //Lookup the node in the model
+    //QModelIndex nodeIdx=model_->nodeToIndex(node);
+    if(nodeIdx != QModelIndex())
     {
-        delete et;
+        theSet.insert(nodeIdx);
+        //view_->setExpanded(nodeIdx,true);
     }
-    items_.clear();
-    selection_.reset();
+    else
+    {
+        return;
+    }
+
+    for(int i=0; i < expand->children_.size(); i++)
+    {
+        ExpandStateNode *chExpand=expand->children_[i];
+        std::string name=chExpand->name_;
+
+        if(VTreeNode *chNode=node->findChild(name))
+        {
+            QModelIndex chIdx=model_->nodeToIndex(chNode);
+            if(chIdx != QModelIndex())
+            {
+                //setExpanded(chIdx,true);
+                collectExpanded(chExpand,chNode,chIdx,theSet);
+            }
+        }
+    }
 }
+

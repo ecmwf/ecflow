@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,7 +19,7 @@
 class QModelIndex;
 class QStringList;
 class QStringListModel;
-class VRepeat;
+class VRepeatAttr;
 class RepeatEditor;
 
 class RepeatEditorWidget :  public QWidget, protected Ui::RepeatEditorWidget
@@ -43,17 +43,17 @@ public:
     ~RepeatEditor();
 
 protected Q_SLOTS:
-    void slotSelectedInView(const QModelIndex&);
+    void slotSelectedInView(const QModelIndex&,const QModelIndex&);
 
 protected:
-    void buildList();
+    void buildList(VRepeatAttr *rep);
     bool isListMode() const;   
     virtual void setValue(QString)=0;
     void readSettings();
     void writeSettings();
 
     RepeatEditorWidget* w_;
-    VRepeat* repeat_;
+    //VRepeat* repeat_;
     QStringListModel* model_;
     QStringList modelData_;
     QString oriVal_;

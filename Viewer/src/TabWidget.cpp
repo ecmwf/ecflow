@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,7 +9,6 @@
 
 #include "TabWidget.hpp"
 
-#include <QDebug>
 #include <QAction>
 #include <QLabel>
 #include <QMenu>
@@ -29,13 +28,10 @@ void IconTabBar::paintEvent(QPaintEvent *e)
     {
         QStyleOptionTabV2 option;
         initStyleOption(&option, i);
-        qDebug() << i << option.iconSize;
         painter.drawItemPixmap(option.rect, Qt::AlignTop|Qt::AlignHCenter, option.icon.pixmap(option.iconSize));
         //painter.drawItemText(option.rect, Qt::AlignBottom|Qt::AlignHCenter, palette(), 1, option.text);
-
     }
 }
-
 
 TabWidget::TabWidget(QWidget* parent) :
 		QWidget(parent),

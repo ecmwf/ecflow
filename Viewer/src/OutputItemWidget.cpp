@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -445,7 +445,7 @@ void OutputItemWidget::infoFailed(VReply* reply)
 
         QColor col(70,71,72);
         QString s="<b><font color=\'" + col.name() +  "\'>Output directory</font></b>: ";
-        const std::vector<std::string> et=reply->errorTextVec();
+        const std::vector<std::string>& et=reply->errorTextVec();
         if(et.size() > 1)
         {
             for(size_t i=0; i < et.size(); i++)

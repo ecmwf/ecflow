@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,8 +13,6 @@
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
-
-#include <QDebug>
 
 #include <sstream>
 
@@ -143,7 +141,7 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	boost::property_tree::ptree array;
 	for(std::vector<std::string>::const_iterator it=val.begin(); it != val.end(); ++it)
 	{
-		array.push_back(std::make_pair("",(*it)));
+		array.push_back(std::make_pair("",boost::property_tree::ptree((*it))));
 	}
 	pt_.put_child(path_.path(key),array);
 }
@@ -155,7 +153,7 @@ void VSettings::put(const std::string& key,const std::vector<int>& val)
     {
         std::stringstream ss;
         ss << (*it);
-        array.push_back(std::make_pair("",ss.str()));
+        array.push_back(std::make_pair("",boost::property_tree::ptree(ss.str())));
     }
     pt_.put_child(path_.path(key),array);
 }
@@ -295,7 +293,7 @@ void VComboSettings::putQs(const std::string& key,QVariant val)
 QVariant  VComboSettings::getQs(const std::string& key)
 {
 #ifdef _UI_SETTINGS_DEBUG
-    qDebug() << "qt group" << qs_.group();
+    UiLog().dbg() << "qt group " << qs_.group();
 #endif
 	return qs_.value(QString::fromStdString(key));
 }
@@ -305,7 +303,7 @@ void VComboSettings::beginGroup(const std::string &id)
 	VSettings::beginGroup(id);
 	qs_.beginGroup(QString::fromStdString(id));
 #ifdef _UI_SETTINGS_DEBUG
-	qDebug() << "qt group" << qs_.group();
+    UiLog().dbg() << "qt group " << qs_.group();
 #endif
 }
 

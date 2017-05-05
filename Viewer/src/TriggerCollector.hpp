@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,8 +16,8 @@
 #include <stdio.h>
 
 class TriggerListItem;
+class VItem;
 
-#include "VItemTmp.hpp"
 #include "VNode.hpp"
 
 class TriggerCollector
@@ -32,7 +32,7 @@ public:
                 Hierarchy = 3    // Through child
     };
 
-    virtual bool add(VItemTmp_ptr, VItemTmp_ptr,Mode) = 0;
+    virtual bool add(VItem*, VItem*,Mode) = 0;
     virtual bool scanParents() { return false; }
     virtual bool scanKids()    { return false; }
     virtual bool scanSelf()    { return true; }
@@ -49,7 +49,7 @@ public:
         extended_(extended) {}
 
     ~TriggerListCollector();
-    bool add(VItemTmp_ptr, VItemTmp_ptr,Mode);
+    bool add(VItem*, VItem*,Mode);
     bool scanParents() { return extended_; }
     bool scanKids() { return extended_; }
     void setDependency(bool);
@@ -66,13 +66,13 @@ class TriggerChildCollector : public TriggerCollector
 {
 public:
     TriggerChildCollector(VItem *n,VItem* child,TriggerCollector* collector) :
-        node_(VItemTmp::create(n)), child_(VItemTmp::create(child)), collector_(collector) {}
+        node_(n), child_(child), collector_(collector) {}
 
-    bool add(VItemTmp_ptr, VItemTmp_ptr,Mode);
+    bool add(VItem*, VItem*,Mode);
 
 private:
-  VItemTmp_ptr node_;
-  VItemTmp_ptr child_;
+  VItem* node_;
+  VItem* child_;
   TriggerCollector* collector_;
 };
 
@@ -80,12 +80,12 @@ class TriggerParentCollector : public TriggerCollector
 {
 public:
     TriggerParentCollector(VItem* parent,TriggerCollector* collector) :
-        parent_(VItemTmp::create(parent)), collector_(collector) {}
+        parent_(parent), collector_(collector) {}
 
-    bool add(VItemTmp_ptr, VItemTmp_ptr,Mode);
+    bool add(VItem*, VItem*,Mode);
 
 private:
-  VItemTmp_ptr parent_;
+  VItem* parent_;
   TriggerCollector* collector_;
 };
 
@@ -93,26 +93,26 @@ class TriggeredCollector : public TriggerListCollector
 {
 public:
     TriggeredCollector(VNode* n) :
-        TriggerListCollector(false), node_(VItemTmp::create(n)) {}
-    bool add(VItemTmp_ptr, VItemTmp_ptr,Mode);
+        TriggerListCollector(false), node_(n) {}
+    bool add(VItem*, VItem*,Mode);
 
 private:
-  VItemTmp_ptr node_;
+  VItem* node_;
 };
 
 class TriggerListItem
 {
 public:
-    TriggerListItem(VItemTmp_ptr t,VItemTmp_ptr dep,TriggerCollector::Mode mode) :
+    TriggerListItem(VItem* t,VItem* dep,TriggerCollector::Mode mode) :
         t_(t), dep_(dep), mode_(mode) {}
 
-    VItem* item() const {return (t_)?t_->item():NULL;}
-    VItem* dep()  const {return (dep_)?dep_->item():NULL;}
+    VItem* item() const {return t_;}
+    VItem* dep()  const {return dep_;}
     TriggerCollector::Mode mode() const {return mode_;}
 
 protected:
-    VItemTmp_ptr t_; //trigger or triggered
-    VItemTmp_ptr dep_;
+    VItem* t_; //trigger or triggered
+    VItem* dep_;
     TriggerCollector::Mode mode_;
 };
 

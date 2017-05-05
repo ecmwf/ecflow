@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -68,6 +68,36 @@ const char* DState::toString( DState::State s ) {
 	}
 	assert(false);
 	return NULL;
+}
+
+const char* DState::to_html( DState::State s ) {
+   switch ( s ) {
+      case DState::UNKNOWN:
+         return "<state>unknown</state>";
+         break;
+      case DState::COMPLETE:
+         return "<state>complete</state>";
+         break;
+      case DState::QUEUED:
+         return "<state>queued</state>";
+         break;
+      case DState::ABORTED:
+         return "<state>aborted</state>";
+         break;
+      case DState::SUBMITTED:
+         return "<state>submitted</state>";
+         break;
+      case DState::SUSPENDED:
+         return "<state>suspended</state>";
+         break;
+      case DState::ACTIVE:
+         return "<state>active</state>";
+         break;
+      default:
+         assert(false);break;
+   }
+   assert(false);
+   return NULL;
 }
 
 DState::State DState::toState( const std::string& str ) {

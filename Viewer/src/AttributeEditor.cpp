@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -17,7 +17,7 @@
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
-#include "VRepeat.hpp"
+#include "VRepeatAttr.hpp"
 
 #include <QPushButton>
 
@@ -28,7 +28,7 @@
 static QList<AttributeEditor*> editors;
 #endif
 
-AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : QDialog(parent), info_(info), type_(type), form_(0)
+AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : QDialog(parent), info_(info), form_(0), type_(type)
 {    
     setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -61,7 +61,7 @@ AttributeEditor::~AttributeEditor()
 #ifdef _USE_MODELESS_ATTRIBUTEDITOR
     editors.removeOne(this);
 #endif
-}    
+}
 
 void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
 {
@@ -83,9 +83,9 @@ void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
 
     //For repeats we create an editor for each type
     std::string typeStr=a->type()->strName();
-    if(a->type()->name() == "repeat")
-    {
-        typeStr+="_" + VRepeat::type(info->node());
+    if(a->type() == VAttributeType::find("repeat"))
+    {        
+        typeStr+="_" + a->subType();
     }
 
     //The edtior will be automatically deleted on close (Qt::WA_DeleteOnClose is set)
@@ -230,7 +230,9 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
 #endif
             VAttribute* a=info_->attribute();
             Q_ASSERT(a);
-            if(!a->isValid(info_->node(),attrData_))
+            if(1)
+            //if(info->node()->isValidAttribute(a) == false)
+            //if(!a->isValid(info_->node(),attrData_))
             {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
                 UiLog().dbg() << " attribute does not exist";
@@ -241,8 +243,8 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
             }
         }
         else
-        {
-            //TODO: figure ot what to do when the edited attribute changed
+        {          
+            nodeChanged(aspect);
         }
     }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
@@ -358,4 +360,19 @@ void AttributeEditor::notifyServerConnectState(ServerHandler* server)
             break;
         }
     }
+}
+
+void AttributeEditor::doNotUseReset()
+{
+    if(QPushButton *resetPb=buttonBox_->button(QDialogButtonBox::Reset))
+    {
+        resetPb->setEnabled(false);
+        resetPb->hide();
+    }
+}
+
+void AttributeEditor::disableCancel()
+{
+    if(QPushButton *cancelPb=buttonBox_->button(QDialogButtonBox::Cancel))
+        cancelPb->hide();
 }

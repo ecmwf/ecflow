@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -63,6 +63,7 @@ void ServerComThread::task(VTask_ptr task)
 		nodePath_.clear();
 		taskType_=task->type();
 		nodePath_=task->targetPath();
+        zombie_=task->zombie();
 
 		//Suite filter
 		hasSuiteFilter_=server_->suiteFilter()->isEnabled();
@@ -200,6 +201,26 @@ void ServerComThread::run()
 					ci_->ch1_auto_add(autoAddNewSuites_);
 				}
 				break;
+
+            case VTask::ZombieCommandTask:
+            {
+                std::string cmd=params_["command"];
+                UiLog(serverName_).dbg() << " ZOMBIE COMMAND " << cmd << " path=" << zombie_.path_to_task();
+                if(cmd == "zombie_fob")
+                    ci_->zombieFob(zombie_);
+                else if(cmd == "zombie_fail")
+                    ci_->zombieFail(zombie_);
+                else if(cmd == "zombie_adopt")
+                    ci_->zombieAdopt(zombie_);
+                else if(cmd == "zombie_block")
+                    ci_->zombieBlock(zombie_);
+                else if(cmd == "zombie_remove")
+                    ci_->zombieRemove(zombie_);
+                else if(cmd == "zombie_kill")
+                    ci_->zombieKill(zombie_);
+
+                break;
+            }
 
 			case VTask::ZombieListTask:
                 UiLog(serverName_).dbg() << " ZOMBIES";

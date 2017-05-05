@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,6 +11,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "VTaskObserver.hpp"
+#include "Zombie.hpp"
 
 VTask::VTask(Type t,VTaskObserver* obs) :
 	type_(t),
@@ -97,6 +98,12 @@ void VTask::status(Status s, bool broadcastIt)
 	if(broadcastIt)
 		broadcast();
 }
+
+void VTask::setZombie(const Zombie& z)
+{
+    zombie_=z;
+}
+
 void VTask::removeObserver(VTaskObserver* o)
 {
     std::vector<VTaskObserver*>::iterator it=std::find(observers_.begin(), observers_.end(),o);

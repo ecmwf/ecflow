@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -17,6 +17,9 @@ class QString;
 class QModelIndex;
 class QStringList;
 class QVariant;
+class QPoint;
+class QRegion;
+class QRect;
 
 class ServerHandler;
 
@@ -37,6 +40,13 @@ public:
 
    static void enableTruncation();
 
+   static std::string toString(int i) {
+        std::stringstream ss;
+        ss << i;
+        return ss.str();
+   }
+
+
 protected:
    void output(const std::string& msg);
    void appendType(std::string& s,Type t) const;
@@ -55,6 +65,9 @@ std::ostream&  operator <<(std::ostream&,const QString &);
 std::ostream&  operator <<(std::ostream&,const QModelIndex&);
 std::ostream&  operator <<(std::ostream&,const QVariant&);
 std::ostream&  operator <<(std::ostream&,const QStringList&);
+std::ostream&  operator <<(std::ostream&,const QRegion&);
+std::ostream&  operator <<(std::ostream&,const QRect&);
+std::ostream&  operator <<(std::ostream&,const QPoint&);
 
 #endif // UILOG_HPP
 

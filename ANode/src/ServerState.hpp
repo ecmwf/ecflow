@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #18 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -47,6 +47,8 @@ public:
 
    /// This does compare server variables. Used in testing
    bool compare(const ServerState& rhs) const;
+
+   void sort_variables();
 
    /// The server variable: are automatically added by the server
    /// on STARTUP and when a checkpoint file is reloaded.
@@ -99,7 +101,7 @@ public:
    unsigned int variable_state_change_no() const { return variable_state_change_no_; }
 
    /// determines why the node is not running.
-   void why(std::vector<std::string>& theReasonWhy) const;
+   bool why(std::vector<std::string>& theReasonWhy) const; // return true if why found
 
    /// Used in test
    static void setup_default_server_variables(std::vector<Variable>&  server_variables, const std::string& port);

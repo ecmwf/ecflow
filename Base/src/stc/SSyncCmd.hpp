@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #25 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -85,7 +85,6 @@ public:
    // The constructor is *called* in the server.
    // This will collate the incremental changes made so far relative to the client_state_change_no.
    // For large scale change we use client_modify_change_no this will require a full update
-   // *THIS* constructor is used for *TEST* only
    SSyncCmd(unsigned int client_handle,           // a reference to a set of suites used by client
             unsigned int client_state_change_no,
             unsigned int client_modify_change_no,
@@ -95,6 +94,7 @@ public:
 
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ServerToClientCmd*) const;
+   virtual bool hasDefs() const { return true; }
 
    // Client side functions:
    virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;

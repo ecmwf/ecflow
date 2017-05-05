@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #6 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -35,7 +35,7 @@ bool LogVerification::extractNodePathAndState(	const std::string& logfile,
 	// Open log file, and collate of the node paths and corresponding states
 	std::vector<std::string> lines;
 	if (!File::splitFileIntoLines(logfile,lines)) {
-		errorMsg = "Could not open log file " + logfile + " for test verification";
+		errorMsg = "Could not open log file " + logfile + " for test verification (" + strerror(errno) + ")";
 		return false;
 	}
 

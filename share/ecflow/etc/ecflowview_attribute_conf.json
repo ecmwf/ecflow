@@ -22,30 +22,30 @@
         },
         "repeat" : {
              "label" : "Repeats"
+        },      
+        "trigger" : {
+              "label" : "Triggers"
+        },
+        "limit" : {
+              "label" : "Limits"
+        },
+        "limiter" : {
+              "label" : "Limiters"
         },
         "time" : {
              "label" : "Times"
         },
         "date" : {
              "label" : "Dates"
-        },
-        "trigger" : {
-              "label" : "Triggers"
+        },      
+        "late" : {
+              "label" : "Late"
         },
         "var" : {
              "label" : "Variables"
         },
         "genvar" : {
               "label" : "Generated variables"
-        },
-        "late" : {
-              "label" : "Late"
-        },
-        "limit" : {
-              "label" : "Limits"
-        },
-        "limiter" : {
-               "label" : "Limiters"
         }
 	}
 }

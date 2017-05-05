@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #22 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -32,7 +32,7 @@ public:
  	static STC_Cmd_ptr block_client_on_home_server_cmd();
  	static STC_Cmd_ptr block_client_zombie_cmd();
 
-   static STC_Cmd_ptr defs_cmd(AbstractServer*, bool save_edit_history);
+   static STC_Cmd_ptr defs_cmd(AbstractServer*, bool migrate); // save edit history and children even if hidden
    static STC_Cmd_ptr node_cmd(AbstractServer*,node_ptr);
 	static STC_Cmd_ptr stats_cmd(AbstractServer*);
 	static STC_Cmd_ptr suites_cmd(AbstractServer*);

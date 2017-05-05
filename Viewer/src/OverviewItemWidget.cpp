@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -63,6 +63,7 @@ void OverviewItemWidget::reload(VInfo_ptr info)
     //Info must be a node
     if(info_)
     {
+        reloadTb_->setEnabled(false);
         infoProvider_->info(info_);
     }
 }
@@ -73,6 +74,7 @@ void OverviewItemWidget::reload()
 	lastScrollPos_=textEdit_->verticalScrollBar()->value();
 
 	textEdit_->clear();
+    reloadTb_->setEnabled(false);
 	infoProvider_->info(info_);
 }
 
@@ -80,6 +82,7 @@ void OverviewItemWidget::clearContents()
 {
 	InfoPanelItem::clear();
 	textEdit_->clear();
+    reloadTb_->setEnabled(true);
 }
 
 void OverviewItemWidget::infoReady(VReply* reply)
@@ -89,6 +92,8 @@ void OverviewItemWidget::infoReady(VReply* reply)
 
 	//Restore the vertical scrollbar pos
 	textEdit_->verticalScrollBar()->setValue(lastScrollPos_);
+
+    reloadTb_->setEnabled(true);
 }
 
 void OverviewItemWidget::infoProgress(VReply* reply)
@@ -101,6 +106,8 @@ void OverviewItemWidget::infoFailed(VReply* reply)
 {
 	QString s=QString::fromStdString(reply->errorText());
 	textEdit_->setPlainText(s);
+
+    reloadTb_->setEnabled(true);
 }
 
 //At this point we can be sure that the node is handled by this item.
@@ -141,6 +148,36 @@ void OverviewItemWidget::connectStateChanged()
 			return;
 
 	reload();
+}
+
+
+void OverviewItemWidget::reloadRequested()
+{
+    reload();
+}
+
+void OverviewItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(SuspendedChanged))
+    {
+        //Suspend
+        if(suspended_)
+        {
+            reloadTb_->setEnabled(false);
+        }
+        //Resume
+        else
+        {
+            if(info_ && info_->node())
+            {
+                reloadTb_->setEnabled(true);
+            }
+            else
+            {
+                clearContents();
+            }
+        }
+    }
 }
 
 static InfoPanelItemMaker<OverviewItemWidget> maker1("overview");

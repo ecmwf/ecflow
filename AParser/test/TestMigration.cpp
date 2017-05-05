@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
       // Use memento to modify task state
       SubmittableMemento memento( "Jobs_password","the_rid","the abort  reason with spaces",12);
       std::vector<ecf::Aspect::Type> aspects;
-      t1->set_memento(&memento,aspects);
+      t1->set_memento(&memento,aspects,false);
 
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Add one task failed: " << helper.errorMsg());
 
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
       // Use memento to modify alias state
       SubmittableMemento memento( "Jobs_password","the_rid","the abort  reason with spaces",12);
       std::vector<ecf::Aspect::Type> aspects;
-      t1->set_memento(&memento,aspects);
+      t1->set_memento(&memento,aspects,false);
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Add one alias failed: " << helper.errorMsg());
 
       // Test multiple

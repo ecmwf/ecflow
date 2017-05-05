@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -207,12 +207,11 @@ void CommandDesignerWidget::on_nodeSelectionChanged()
 }
 
 
-std::vector<VInfo_ptr> &CommandDesignerWidget::selectedNodes()
+std::vector<VInfo_ptr>& CommandDesignerWidget::selectedNodes()
 {
 	nodeSelectionView_->getListOfSelectedNodes(nodes_);
 	return nodes_;
 }
-
 
 void CommandDesignerWidget::addClientCommandsToComponentList()
 {
@@ -444,7 +443,7 @@ void CommandDesignerWidget::on_saveAsNewButton__clicked()
 
 	if (validSaveName(name))
 	{
-		CustomCommand *cmd = CustomSavedCommandHandler::instance()->add(name, command, context, true);
+        CustomSavedCommandHandler::instance()->add(name, command, context, true);
 		refreshSavedCommandList();
 		currentCommandSaved_ = true;
 		updateSaveButtonStatus();
@@ -466,7 +465,7 @@ void CommandDesignerWidget::on_overwriteButton__clicked()
 
 	if (validSaveName(name))
 	{
-		CustomCommand *cmd = CustomSavedCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
+        CustomSavedCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
 		savedCommandsTable_->setEnabled(true);  // to show that we are no longer busy editing an entry
 		inCommandEditMode_ = false;
 		refreshSavedCommandList();

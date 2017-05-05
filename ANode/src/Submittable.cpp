@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #37 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -369,7 +369,7 @@ EcfFile Submittable::locatedEcfFile() const
 #ifdef DEBUG_TASK_LOCATION
       std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_FILES = '" << ecf_filesDirectory << "' backwards\n";
 #endif
-      if ( !ecf_filesDirectory.empty() && fs::exists( ecf_filesDirectory ) && fs::is_directory( ecf_filesDirectory ) )
+      if ( !ecf_filesDirectory.empty() && fs::is_directory( ecf_filesDirectory ) )
       {
          // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
          std::string searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
@@ -384,7 +384,7 @@ EcfFile Submittable::locatedEcfFile() const
          // Before failing try again but with variable Subsitution. ECFLOW-788
          std::string original_ecf_filesDirectory = ecf_filesDirectory;
          variableSubsitution(ecf_filesDirectory);
-         if ( !ecf_filesDirectory.empty() && fs::exists(ecf_filesDirectory) && fs::is_directory(ecf_filesDirectory))
+         if ( !ecf_filesDirectory.empty() && fs::is_directory(ecf_filesDirectory))
          {
             // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
             std::string searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
@@ -411,7 +411,7 @@ EcfFile Submittable::locatedEcfFile() const
 #ifdef DEBUG_TASK_LOCATION
    std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_HOME = '" << ecf_home << "' backwards\n";
 #endif
-   if ( !ecf_home.empty() && fs::exists( ecf_home ) && fs::is_directory( ecf_home ) )
+   if ( !ecf_home.empty() && fs::is_directory( ecf_home ) )
    {
       // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
       std::string searchResult = File::backwardSearch( ecf_home, theAbsNodePath, script_extension() );
@@ -846,13 +846,16 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
    Node::incremental_changes(changes,comp);
 }
 
-void Submittable::set_memento(const SubmittableMemento* memento,std::vector<ecf::Aspect::Type>& aspects)
+void Submittable::set_memento(const SubmittableMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only)
 {
 #ifdef DEBUG_MEMENTO
    std::cout << "Submittable::set_memento(const SubmittableMemento*) " << debugNodePath() << "\n";
 #endif
 
-   aspects.push_back(ecf::Aspect::SUBMITTABLE);
+   if (aspect_only) {
+      aspects.push_back(ecf::Aspect::SUBMITTABLE);
+      return;
+   }
 
    jobsPassword_ = memento->jobsPassword_;
    process_or_remote_id_ = memento->process_or_remote_id_;

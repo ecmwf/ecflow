@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -39,7 +39,12 @@ VariableDelegate::VariableDelegate(QTreeView *parent) : QStyledItemDelegate(pare
 void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QStyleOptionViewItem vopt(option);
+#else
     QStyleOptionViewItemV4 vopt(option);
+#endif
+
     initStyleOption(&vopt, index);
 
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
@@ -120,7 +125,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     //Display text
     QString text=index.data(Qt::DisplayRole).toString();
-    QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);   
+    QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
     QFont f;
     QFontMetrics fm(f);
     textRect.setWidth(fm.width(text));

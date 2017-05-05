@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -92,7 +92,9 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
 
    errorMsg += "Could not open file specified by ECF_PASSWD ";
    errorMsg += passwd_file_;
-   errorMsg += "\n";
+   errorMsg += " (";
+   errorMsg += strerror(errno);
+   errorMsg += ")";
    if (debug)  std::cout << dump() << "\n";
    return false;
 }
@@ -309,6 +311,9 @@ bool PasswdFile::clear(
       return true;
    }
    errorMsg += "PasswdFile::clear: Could not open file ";
-   errorMsg += errorMsg;
+   errorMsg += pathToFile;
+   errorMsg += " (";
+   errorMsg += strerror(errno);
+   errorMsg += ")";
    return false;
 }

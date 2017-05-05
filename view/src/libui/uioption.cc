@@ -223,7 +223,6 @@ void option_form_c::create (Widget parent, char *widget_name)
         jobfile_length = XmCreateTextField ( form21, "jobfile_length", al, ac );
         XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         label21 = XmCreateLabel ( form21, "lines", al, ac );
-        ac = 0;
         /* */
 
         ac = 0;
@@ -1005,7 +1004,6 @@ void option_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	children[ac++] = form_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void option_form_c::useCB( Widget widget, XtPointer client_data, XtPointer call_data )

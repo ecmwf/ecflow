@@ -135,7 +135,6 @@ void node_alert_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = drawingArea1;
 	children[ac++] = label_;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void node_alert_shell_c::collectCB( Widget widget, XtPointer client_data, XtPointer call_data )

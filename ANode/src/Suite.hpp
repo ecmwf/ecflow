@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #73 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -100,11 +100,11 @@ public:
 
    // Memento functions
    virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const SuiteClockMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const SuiteBeginDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const SuiteCalendarMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const OrderMemento* m,std::vector<ecf::Aspect::Type>& aspects) { NodeContainer::set_memento(m,aspects); }
-   void set_memento(const ChildrenMemento* m,std::vector<ecf::Aspect::Type>& aspects) { NodeContainer::set_memento(m,aspects); }
+   void set_memento(const SuiteClockMemento*,std::vector<ecf::Aspect::Type>& aspects,bool);
+   void set_memento(const SuiteBeginDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects,bool);
+   void set_memento(const SuiteCalendarMemento*,std::vector<ecf::Aspect::Type>& aspects,bool);
+   void set_memento(const OrderMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool f) { NodeContainer::set_memento(m,aspects,f); }
+   void set_memento(const ChildrenMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool f) { NodeContainer::set_memento(m,aspects,f); }
 
    void set_state_change_no( unsigned int x )  { state_change_no_ = x;}
    unsigned int state_change_no() const        { return state_change_no_; }

@@ -250,11 +250,11 @@
 
         {
             "menu"           : "Node",
-            "name"           : "Cancel",
-            "visible_for"    : "suite and (oper or admin)",
+            "name"           : "Remove",
+            "visible_for"    : "(suite or family or task) and (oper or admin)",
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --delete=yes <full_name>",
-            "question"       : "Do you really want to cancel suite <full_name> ?",
+            "question"       : "Do you really want to remove <full_name> ?",
             "default_answer" : "No",
             "status_tip"     : "__cmd__"
         },
@@ -476,6 +476,14 @@
             "name"           : "Clear late flag",
             "visible_for"    : "(task or alias)",
             "command"        : "ecflow_client --alter clear_flag late <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Clear late (=slow write) flag",
+            "visible_for"    : "server",
+            "command"        : "ecflow_client --alter clear_flag late /",
             "status_tip"     : "__cmd__"
         },
 

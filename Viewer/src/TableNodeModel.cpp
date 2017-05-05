@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,6 +15,7 @@
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VFilter.hpp"
 #include "VIcon.hpp"
 #include "VModelData.hpp"
@@ -24,6 +25,17 @@
 //#define _UI_TABLENODEMODEL_DEBUG
 
 //static int hitCount=0;
+
+static std::map<TableNodeModel::ColumnType,VAttributeType*> attrTypes;
+static VAttributeType* columnToAttrType(TableNodeModel::ColumnType ct);
+
+VAttributeType* columnToAttrType(TableNodeModel::ColumnType ct)
+{
+    std::map<TableNodeModel::ColumnType,VAttributeType*>::const_iterator it=
+       attrTypes.find(ct);
+    return (it != attrTypes.end())?it->second:0;
+}
+
 
 //=======================================================
 //
@@ -51,6 +63,18 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
     Q_ASSERT(columns_->id(MeterColumn) == "meter");
     Q_ASSERT(columns_->id(StatusChangeColumn) == "statusChange");
 
+    if(attrTypes.empty())
+    {
+        QList<ColumnType> ctLst;
+        ctLst << TriggerColumn << LabelColumn << EventColumn << MeterColumn;
+        Q_FOREACH(ColumnType ct,ctLst)
+        {
+            VAttributeType* t=VAttributeType::find(columns_->id(ct).toStdString());
+            Q_ASSERT(t);
+            attrTypes[ct]=t;
+        }
+    }
+
 	//Create the data handler for the model.
 	data_=new VTableModelData(filterDef,this);
 
@@ -70,7 +94,7 @@ int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 int TableNodeModel::rowCount( const QModelIndex& parent) const
 {
 #ifdef _UI_TABLENODEMODEL_DEBUG
-    //qDebug() << "rowCount" << parent;
+    UiLog().dbg() << "rowCount=" << parent;
 #endif
 
 	//There are no servers
@@ -94,7 +118,7 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
                 cnt+=data_->numOfNodes(i);
 		}
 #ifdef _UI_TABLENODEMODEL_DEBUG
-        //qDebug() << "table count" << cnt;
+        //UiLog().dbg() << "table count " << cnt;
 #endif
 		return cnt;
 	}
@@ -131,7 +155,8 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
         //QString id=columns_->id(index.column());
 
         if(id == PathColumn)
-        {   return QString::fromStdString(vnode->absNodePath());
+        {
+            return QString::fromStdString(vnode->absNodePath());
         }
         else if(id == StatusColumn)
 			return vnode->stateName();
@@ -142,11 +167,10 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
         else if(id == EventColumn || id == LabelColumn || id == MeterColumn ||
                 id == TriggerColumn)
 		{
-			QStringList lst;
-            if(vnode->getAttributeData(columns_->id(index.column()).toStdString(),0,lst))
-				return lst;
-			else
-				return QVariant();
+            if(VAttribute* a=vnode->attributeForType(0,columnToAttrType(id)))
+                return a->data();
+            else
+                return QVariant();
 		}
 
         else if(id == StatusChangeColumn)
@@ -281,6 +305,7 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
 
 QModelIndex TableNodeModel::forceShowNode(const VNode* node) const
 {
+#if 0
     if(!node)
         return QModelIndex();
 
@@ -294,21 +319,25 @@ QModelIndex TableNodeModel::forceShowNode(const VNode* node) const
         server->setForceShowNode(node);
         return nodeToIndex(node);
     }
-
+#endif
     return QModelIndex();
 }
 
 QModelIndex TableNodeModel::forceShowAttribute(const VAttribute* a) const
 {
+#if 0
     Q_ASSERT(a);
     VNode* node=a->parent();
     Q_ASSERT(node);
 
     return forceShowNode(const_cast<VNode*>(node));
+#endif
+    return QModelIndex();
 }
 
 void TableNodeModel::selectionChanged(QModelIndexList lst)
 {
+#if 0
     Q_FOREACH(QModelIndex idx,lst)
     {
         VInfo_ptr info=nodeInfo(idx);
@@ -320,6 +349,7 @@ void TableNodeModel::selectionChanged(QModelIndexList lst)
            ts->clearForceShow(info->item());
         }
     }
+#endif
 }
 
 VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
@@ -421,8 +451,6 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 #ifdef _UI_TABLENODEMODEL_DEBUG
      UiLog().dbg() << "  elapsed: " << t.elapsed() << " ms";
      UiLog().dbg() << "<-- slotEndServerScan";
-
-     //qDebug() << "hit" << hitCount;
 #endif
 }
 

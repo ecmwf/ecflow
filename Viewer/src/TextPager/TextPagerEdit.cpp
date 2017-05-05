@@ -43,6 +43,7 @@ TextPagerEdit::TextPagerEdit(QWidget *parent) :
    QAbstractScrollArea(parent),
    d(new TextEditPrivate(this)),
    useSearchHighlight_(false),
+   showLineNum_(false),
    lineNumArea_(0),
    fontProp_(NULL)
 {
@@ -501,7 +502,8 @@ void TextPagerEdit::mousePressEvent(QMouseEvent *e)
         e->accept();
 
         //The cursor changed so wee need to update the selected line number
-        lineNumArea_->update();
+        if(lineNumArea_ && showLineNum_)
+            lineNumArea_->update();
     }
     else {
         QAbstractScrollArea::mousePressEvent(e);
@@ -570,7 +572,8 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent *e)
             setCursorPosition(pos, TextPagerCursor::KeepAnchor);
 
             //The cursor changed so wee need to update the selected line number
-            lineNumArea_->update();
+            if(lineNumArea_ && showLineNum_)
+                lineNumArea_->update();
 
             return;
         }
@@ -805,7 +808,8 @@ void TextPagerEdit::changeEvent(QEvent *e)
       
         d->adjustVerticalScrollBar();
         
-        lineNumArea_->updateWidth();
+        if(lineNumArea_ && showLineNum_)
+            lineNumArea_->updateWidth();
 
         d->layoutDirty = true;
         viewport()->update();
@@ -1785,6 +1789,17 @@ void TextPagerEdit::notifyChange(VProperty* p)
 	}
 }
 
+void TextPagerEdit::setShowLineNumbers(bool b)
+{
+    showLineNum_=b;
+    if(lineNumArea_)
+    {
+        lineNumArea_->setVisible(b);
+        //Initialise the width
+        lineNumArea_->updateWidth();
+    }
+}
+
 void TextPagerEdit::setLineNumberArea(TextPagerLineNumberArea *a)
 {
 	lineNumArea_=a;
@@ -1797,7 +1812,7 @@ void TextPagerEdit::setLineNumberArea(TextPagerLineNumberArea *a)
 
 void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent *e)
 {
-    if(!lineNumArea_)
+    if(!lineNumArea_ || !showLineNum_)
     	return;
 
     QPainter painter(lineNumArea_);

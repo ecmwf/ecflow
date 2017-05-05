@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #41 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -56,12 +56,12 @@ public:
    virtual ~Memento();
 private:
    /// Applies the mementos to the client side defs. Can raise std::runtime_error
-   virtual void do_incremental_node_sync(Node*,std::vector<ecf::Aspect::Type>& aspects) const {}
-   virtual void do_incremental_task_sync(Task*,std::vector<ecf::Aspect::Type>& aspects) const {}
-   virtual void do_incremental_alias_sync(Alias*,std::vector<ecf::Aspect::Type>& aspects) const {}
-   virtual void do_incremental_suite_sync(Suite*,std::vector<ecf::Aspect::Type>& aspects) const {}
-   virtual void do_incremental_family_sync(Family*,std::vector<ecf::Aspect::Type>& aspects) const {}
-   virtual void do_incremental_defs_sync(Defs*,std::vector<ecf::Aspect::Type>& aspects) const {}
+   virtual void do_incremental_node_sync(Node*,std::vector<ecf::Aspect::Type>& aspects,bool) const {}
+   virtual void do_incremental_task_sync(Task*,std::vector<ecf::Aspect::Type>& aspects,bool) const {}
+   virtual void do_incremental_alias_sync(Alias*,std::vector<ecf::Aspect::Type>& aspects,bool) const {}
+   virtual void do_incremental_suite_sync(Suite*,std::vector<ecf::Aspect::Type>& aspects,bool) const {}
+   virtual void do_incremental_family_sync(Family*,std::vector<ecf::Aspect::Type>& aspects,bool) const {}
+   virtual void do_incremental_defs_sync(Defs*,std::vector<ecf::Aspect::Type>& aspects,bool) const {}
    friend class CompoundMemento;
 
 private:
@@ -110,8 +110,8 @@ public:
    StateMemento(NState::State state) : state_(state) {}
    StateMemento() : state_(NState::UNKNOWN) {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects)    const { n->set_memento(this,aspects);}
-   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects) const { defs->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f)    const { n->set_memento(this,aspects,f);}
+   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects,bool f) const { defs->set_memento(this,aspects,f);}
 
    NState::State state_;
    friend class Node;
@@ -130,10 +130,10 @@ public:
    OrderMemento(const std::vector<std::string>& order) : order_(order) {}
    OrderMemento() {}
 private:
-   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects) const { defs->set_memento(this,aspects);}
-   virtual void do_incremental_suite_sync(Suite* s,std::vector<ecf::Aspect::Type>& aspects) const { s->set_memento(this,aspects);}
-   virtual void do_incremental_family_sync(Family* f,std::vector<ecf::Aspect::Type>& aspects) const { f->set_memento(this,aspects);}
-   virtual void do_incremental_task_sync(Task* t,std::vector<ecf::Aspect::Type>& aspects) const { t->set_memento(this,aspects);}
+   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects,bool f) const { defs->set_memento(this,aspects,f);}
+   virtual void do_incremental_suite_sync(Suite* s,std::vector<ecf::Aspect::Type>& aspects,bool f) const { s->set_memento(this,aspects,f);}
+   virtual void do_incremental_family_sync(Family* f,std::vector<ecf::Aspect::Type>& aspects,bool ff) const { f->set_memento(this,aspects,ff);}
+   virtual void do_incremental_task_sync(Task* t,std::vector<ecf::Aspect::Type>& aspects,bool f) const { t->set_memento(this,aspects,f);}
 
    std::vector<std::string> order_;
    friend class NodeContainer;
@@ -153,8 +153,8 @@ public:
    ChildrenMemento(const std::vector<node_ptr>& children) : children_(children) {}
    ChildrenMemento() {}
 private:
-   virtual void do_incremental_suite_sync(Suite* s,std::vector<ecf::Aspect::Type>& aspects) const { s->set_memento(this,aspects);}
-   virtual void do_incremental_family_sync(Family* f,std::vector<ecf::Aspect::Type>& aspects) const { f->set_memento(this,aspects);}
+   virtual void do_incremental_suite_sync(Suite* s,std::vector<ecf::Aspect::Type>& aspects,bool f) const { s->set_memento(this,aspects,f);}
+   virtual void do_incremental_family_sync(Family* f,std::vector<ecf::Aspect::Type>& aspects,bool ff) const { f->set_memento(this,aspects,ff);}
 
    std::vector<node_ptr> children_;
    friend class NodeContainer;
@@ -176,7 +176,7 @@ public:
    AliasChildrenMemento(const std::vector<alias_ptr>& children) : children_(children) {}
    AliasChildrenMemento() {}
 private:
-   virtual void do_incremental_task_sync(Task* t,std::vector<ecf::Aspect::Type>& aspects) const { t->set_memento(this,aspects);}
+   virtual void do_incremental_task_sync(Task* t,std::vector<ecf::Aspect::Type>& aspects,bool f) const { t->set_memento(this,aspects,f);}
 
    std::vector<alias_ptr> children_;
    friend class Task;
@@ -197,7 +197,7 @@ public:
    AliasNumberMemento(unsigned int alias_no ) : alias_no_(alias_no) {}
    AliasNumberMemento() : alias_no_(0) {}
 private:
-   virtual void do_incremental_task_sync(Task* t,std::vector<ecf::Aspect::Type>& aspects) const { t->set_memento(this,aspects);}
+   virtual void do_incremental_task_sync(Task* t,std::vector<ecf::Aspect::Type>& aspects,bool f) const { t->set_memento(this,aspects,f);}
 
    unsigned int alias_no_;
    friend class Task;
@@ -216,7 +216,7 @@ public:
    SuspendedMemento(bool suspended) : suspended_(suspended) {}
    SuspendedMemento() : suspended_(false) {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects)    const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f)    const { n->set_memento(this,aspects,f);}
 
    bool suspended_;
    friend class Node;
@@ -235,7 +235,7 @@ public:
    ServerStateMemento(SState::State s) : state_(s) {}
    ServerStateMemento() : state_(SState::HALTED) {}
 private:
-   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects) const { defs->set_memento(this,aspects);}
+   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects,bool f) const { defs->set_memento(this,aspects,f);}
 
    SState::State state_;
    friend class Defs;
@@ -253,7 +253,7 @@ public:
    ServerVariableMemento(const std::vector<Variable>& vec) : serverEnv_(vec) {}
    ServerVariableMemento() {}
 private:
-   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects) const { defs->set_memento(this,aspects);}
+   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects,bool f) const { defs->set_memento(this,aspects,f);}
 
    std::vector<Variable>  serverEnv_;
    friend class Defs;
@@ -271,7 +271,7 @@ public:
    NodeDefStatusDeltaMemento(DState::State state) : state_(state) {}
    NodeDefStatusDeltaMemento() : state_(DState::UNKNOWN) {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    DState::State state_;
    friend class Node;
@@ -289,7 +289,7 @@ public:
    NodeEventMemento( const Event& e) : event_(e) {}
    NodeEventMemento(){}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    Event event_;
    friend class Node;
@@ -308,7 +308,7 @@ public:
    NodeMeterMemento(const Meter& e) : meter_(e) {}
    NodeMeterMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    Meter meter_;
    friend class Node;
@@ -327,7 +327,7 @@ public:
    NodeLabelMemento( const Label& e) : label_(e) {}
    NodeLabelMemento(){}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    Label label_;
    friend class Node;
@@ -347,7 +347,7 @@ public:
    NodeTriggerMemento(const Expression& e) : exp_(e) {}
    NodeTriggerMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    Expression exp_;
    friend class Node;
@@ -365,7 +365,7 @@ public:
    NodeCompleteMemento(const Expression& e) : exp_(e) {}
    NodeCompleteMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    Expression exp_;
    friend class Node;
@@ -383,7 +383,7 @@ public:
    NodeRepeatMemento( const Repeat& e ) : repeat_(e) {}
    NodeRepeatMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    Repeat repeat_;
    friend class Node;
@@ -401,7 +401,7 @@ public:
    NodeLimitMemento( const Limit& e) : limit_( e ) {}
    NodeLimitMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    Limit limit_;
    friend class Node;
@@ -419,7 +419,7 @@ public:
    NodeInLimitMemento( const InLimit& e) : inlimit_( e ) {}
    NodeInLimitMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    InLimit inlimit_;
    friend class Node;
@@ -438,7 +438,7 @@ public:
    NodeVariableMemento( const Variable& e) : var_(e) {}
    NodeVariableMemento(){}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    Variable var_;
    friend class Node;
@@ -456,7 +456,7 @@ public:
    NodeLateMemento( const ecf::LateAttr& e) : late_(e) {}
    NodeLateMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    ecf::LateAttr late_;
    friend class Node;
@@ -474,8 +474,8 @@ public:
    FlagMemento( const ecf::Flag& e) : flag_(e) {}
    FlagMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
-   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects) const { defs->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
+   virtual void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects,bool f) const { defs->set_memento(this,aspects,f);}
 
    ecf::Flag flag_;
    friend class Node;
@@ -494,7 +494,7 @@ public:
    NodeTodayMemento( const ecf::TodayAttr& attr) : attr_(attr) {}
    NodeTodayMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    ecf::TodayAttr attr_;
    friend class Node;
@@ -513,7 +513,7 @@ public:
    NodeTimeMemento( const ecf::TimeAttr& attr) : attr_(attr) {}
    NodeTimeMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    ecf::TimeAttr attr_;
    friend class Node;
@@ -532,7 +532,7 @@ public:
    NodeDayMemento( const DayAttr& attr) : attr_(attr) {}
    NodeDayMemento(){}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    DayAttr attr_;
    friend class Node;
@@ -551,7 +551,7 @@ public:
    NodeCronMemento( const ecf::CronAttr& attr) : attr_(attr) {}
    NodeCronMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    ecf::CronAttr attr_;
    friend class Node;
@@ -570,7 +570,7 @@ public:
    NodeDateMemento( const DateAttr& attr) : attr_(attr) {}
    NodeDateMemento()  {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    DateAttr attr_;
    friend class Node;
@@ -589,7 +589,7 @@ public:
    NodeZombieMemento(const ZombieAttr& attr) : attr_(attr) {}
    NodeZombieMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    ZombieAttr attr_;
    friend class Node;
@@ -608,7 +608,7 @@ public:
    NodeVerifyMemento(const std::vector<VerifyAttr>& attr) : verifys_(attr) {}
    NodeVerifyMemento() {}
 private:
-   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    std::vector<VerifyAttr> verifys_;
    friend class Node;
@@ -635,8 +635,8 @@ public:
       tryNo_( tryNo ) {}
    SubmittableMemento() : tryNo_(0) {}
 private:
-   virtual void do_incremental_task_sync(Task* n,std::vector<ecf::Aspect::Type>& aspects)   const { n->set_memento(this,aspects);}
-   virtual void do_incremental_alias_sync(Alias* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_task_sync(Task* n,std::vector<ecf::Aspect::Type>& aspects,bool f)   const { n->set_memento(this,aspects,f);}
+   virtual void do_incremental_alias_sync(Alias* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    std::string  jobsPassword_;
    std::string  process_or_remote_id_;
@@ -660,7 +660,7 @@ public:
    SuiteClockMemento( const ClockAttr& c ) :   clockAttr_(c) {}
    SuiteClockMemento() {}
 private:
-   virtual void do_incremental_suite_sync(Suite* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_suite_sync(Suite* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    ClockAttr  clockAttr_;
    friend class Suite;
@@ -678,7 +678,7 @@ public:
    SuiteBeginDeltaMemento(bool begun) : begun_(begun) {}
    SuiteBeginDeltaMemento() : begun_(false) {}
 private:
-   virtual void do_incremental_suite_sync(Suite* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_suite_sync(Suite* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    bool begun_;
    friend class Suite;
@@ -696,7 +696,7 @@ public:
    SuiteCalendarMemento(const ecf::Calendar& cal) : calendar_(cal) {}
    SuiteCalendarMemento() {}
 private:
-   virtual void do_incremental_suite_sync(Suite* n,std::vector<ecf::Aspect::Type>& aspects) const { n->set_memento(this,aspects);}
+   virtual void do_incremental_suite_sync(Suite* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    ecf::Calendar  calendar_;          // *Only* persisted since used by the why() on client side
    friend class Suite;

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,6 +13,7 @@
 
 #include <QDialog>
 #include <QLinearGradient>
+#include <QSettings>
 #include <QWidget>
 
 #include "ui_ChangeNotifyDialog.h"
@@ -36,6 +37,8 @@ public:
 	void init(ChangeNotify*);
 	void update(ChangeNotify*);
 	ChangeNotify* notifier() const {return notifier_;}
+    void writeSettings(QSettings& settings);
+    void readSettings(const QSettings& settings);
 
 public Q_SLOTS:
 	void slotAppend();
@@ -86,6 +89,7 @@ protected:
 	void closeEvent(QCloseEvent*);
 	void writeSettings();
 	void readSettings();
+    void readTabSettings(int tabIndex);
 
 	QList<ChangeNotifyDialogWidget*> tabWidgets_;
 	bool ignoreCurrentChange_;

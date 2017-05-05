@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #88 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -19,6 +19,7 @@
 #include <limits>
 #include "Node.hpp"
 #include "CheckPtContext.hpp"
+#include "MigrateContext.hpp"
 
 class NodeContainer : public Node {
 protected:
@@ -40,10 +41,10 @@ public:
 	virtual bool run(JobsParam& jobsParam, bool force);
 	virtual void kill(const std::string& zombie_pid = "");
 	virtual void status();
-	virtual void top_down_why(std::vector<std::string>& theReasonWhy) const;
+	virtual bool top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
 	virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const ChildrenMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const ChildrenMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
    virtual void order(Node* immediateChild, NOrder::Order);
 
 	virtual bool hasAutoCancel() const;
@@ -62,7 +63,8 @@ public:
  	virtual node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const;
    virtual node_ptr find_node_up_the_tree(const std::string& name) const;
 
-	virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode);
+	virtual node_ptr
+ find_relative_node(const std::vector<std::string>& pathToNode);
 	void find_closest_matching_node( const std::vector< std::string >& pathToNode, int indexIntoPathNode, node_ptr& closest_matching_node );
 
 	family_ptr findFamily(const std::string& familyName) const;
@@ -101,6 +103,7 @@ public:
 	virtual void setStateOnlyHierarchically(NState::State s,bool force = false);
 	virtual void set_state_hierarchically(NState::State s, bool force);
    virtual void update_limits();
+   virtual void sort_attributes(ecf::Attr::Type attr,bool recursive);
 
 private:
    virtual size_t child_position(const Node*) const;
@@ -150,7 +153,8 @@ private:
 	   // When check-pointing we always need to save the children
 	   if (Archive::is_saving::value &&
 	         get_flag().is_set(ecf::Flag::MIGRATED) &&
-	         ! ecf::CheckPtContext::in_checkpt()
+	         ! ecf::CheckPtContext::in_checkpt() &&
+	         ! ecf::MigrateContext::in_migrate()
 	       ) {
 
 	      std::vector<node_ptr> nodeVec;

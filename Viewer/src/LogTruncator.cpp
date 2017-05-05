@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,6 +9,7 @@
 
 #include "LogTruncator.hpp"
 
+#include <QtGlobal>
 #include <QFileInfo>
 #include <QTime>
 #include <QTimer>
@@ -25,7 +26,11 @@ LogTruncator::LogTruncator(QString path, int timeout,int sizeLimit,int lineNum,Q
 {
     timer_=new QTimer(this);
     connect(timer_,SIGNAL(timeout()),this,SLOT(truncate()));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     int secToM=86400-QTime::currentTime().msecsSinceStartOfDay()/1000;
+#else
+    int secToM=86400-QTime(0,0).secsTo(QTime::currentTime());
+#endif
     if(secToM > 5*60)
         timer_->start(secToM*1000);
     else

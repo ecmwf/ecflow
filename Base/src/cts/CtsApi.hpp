@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #74 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -127,6 +127,9 @@ public:
                                          const std::string& attrType,
                                          const std::string& name = "",
                                          const std::string& value = "");
+   static std::vector<std::string> alter_sort(const std::vector<std::string>& paths,
+                                         const std::string& sortable_attribute_name,
+                                         bool recursive);
 
 	static std::string reloadwsfile();
    static std::string reloadpasswdfile();

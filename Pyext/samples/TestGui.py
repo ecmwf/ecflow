@@ -4,7 +4,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2016 ECMWF.
+# Copyright 2009-2017 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -58,7 +58,7 @@ class Tester(object) :
             return os.getcwd() + "/test_gui/data/ecf_home_debug_" + str(self.port_)
         return os.getcwd() + "/test_gui/data/ecf_home_release_" + str(self.port_)
 
-    def ecf_includes(self) :  return os.getcwd() + "Pyext/test/data/includes"
+    def ecf_includes(self) :  return os.getcwd() + "/Pyext/test/data/includes"
     def log_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.log"
     def checkpt_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.check"
     def backup_checkpt_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.check.b"

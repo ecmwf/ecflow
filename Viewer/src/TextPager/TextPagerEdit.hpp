@@ -140,6 +140,7 @@ public:
     void zoomIn();
     void zoomOut();
 
+    void setShowLineNumbers(bool b);
     void setLineNumberArea(TextPagerLineNumberArea *a);
 
     enum ActionType {
@@ -189,6 +190,7 @@ private:
     TextPagerSearchHighlighter* searchHighlight_;
     bool useSearchHighlight_;
 
+    bool showLineNum_;
     TextPagerLineNumberArea* lineNumArea_;
     VProperty* fontProp_;
 };

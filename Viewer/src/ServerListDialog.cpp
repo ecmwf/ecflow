@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,7 +12,6 @@
 
 #include <QtGlobal>
 #include <QCloseEvent>
-#include <QDebug>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
@@ -401,8 +400,16 @@ void ServerListDialog::addItem()
 	if(d.exec() == QDialog::Accepted)
 	{
 		model_->dataIsAboutToChange();
-		ServerItem* item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),false);
-		model_->dataChangeFinished();
+        ServerItem* item=0;
+        try {
+            item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),false);
+        }
+        catch(std::exception& e)
+        {
+
+        }
+
+        model_->dataChangeFinished();
 		if(d.addToView() && filter_)
 		{
 			filter_->addServer(item);
@@ -522,8 +529,7 @@ void ServerListDialog::on_sysSyncLogTb_toggled(bool b)
         firstShowSysSyncLogW=false;
 
         //Set the initial splitter sizes
-        QList<int> sList=splitter_->sizes();
-        qDebug() << "SPLITTER" << sList << splitter_->height();;
+        QList<int> sList=splitter_->sizes();       
         Q_ASSERT(sList.count()==2);
         int h=sList[0]+sList[1];
         if(h==0)
@@ -726,9 +732,9 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
         case PortColumn: return QString::fromStdString(item->port());
         case UseColumn:
 		{
-			int i=item->useCnt();
-			if(item->useCnt() > 0)
-                return "loaded (" + QString::number(item->useCnt()) + ")";
+            int n=item->useCnt();
+            if(n > 0)
+                return "loaded (" + QString::number(n) + ")";
 
 			return QVariant();
 		}
@@ -849,7 +855,6 @@ bool ServerListModel::setData(const QModelIndex& idx, const QVariant & value, in
 {
 	if(filter_ && idx.column() == LoadColumn && role == Qt::CheckStateRole)
 	{
-		int row=idx.row();
 		if(ServerItem* item=ServerList::instance()->itemAt(idx.row()))
 		{
 			bool checked=(value.toInt() == Qt::Checked)?true:false;

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,6 +10,7 @@
 
 #include "NodeQueryViewDelegate.hpp"
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QDebug>
 #include <QImageReader>
@@ -25,9 +26,45 @@
 
 static std::vector<std::string> propVec;
 
+//Define node renderer properties
+struct QueryNodeDelegateBox : public NodeDelegateBox
+{
+    QueryNodeDelegateBox() {
+        topMargin=2;
+        bottomMargin=2;
+        leftMargin=3;
+        rightMargin=0;
+        topPadding=0;
+        bottomPadding=0;
+        leftPadding=2;
+        rightPadding=1;
+      }
+};
+
+//Define attribute renderer properties
+struct QueryAttrDelegateBox : public AttrDelegateBox
+{
+    QueryAttrDelegateBox() {
+        topMargin=2;
+        bottomMargin=2;
+        leftMargin=1;
+        rightMargin=0;
+        topPadding=0;
+        bottomPadding=0;
+        leftPadding=0;
+        rightPadding=0;
+      }
+};
+
 NodeQueryViewDelegate::NodeQueryViewDelegate(QWidget *parent)
 {
-	borderPen_=QPen(QColor(230,230,230));
+    nodeBox_=new QueryNodeDelegateBox;
+    attrBox_=new QueryAttrDelegateBox;
+
+    nodeBox_->adjust(font_);
+    attrBox_->adjust(attrFont_);
+
+    borderPen_=QPen(QColor(230,230,230));
 
 	columns_=ModelColumn::def("query_columns");
 
@@ -56,17 +93,19 @@ void NodeQueryViewDelegate::updateSettings()
 QSize NodeQueryViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
-
-	QFontMetrics fm(font_);
-	int h=fm.height();
-	return QSize(size.width(),h+4);
+    return QSize(size.width(),nodeBox_->sizeHintCache.height());
 }
 
 void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
     //Background
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QStyleOptionViewItem vopt(option);
+#else
     QStyleOptionViewItemV4 vopt(option);
+#endif
+
     initStyleOption(&vopt, index);
 
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
@@ -74,39 +113,6 @@ void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
 
     //Save painter state
     painter->save();
-
-    //Selection - we only do it once
-    /*if(index.column() == 0)
-    {
-        QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
-
-        if(option.state & QStyle::State_Selected)
-        {
-            //QRect fillRect=option.rect.adjusted(0,1,-1,-textRect.height()-1);
-            painter->fillRect(fullRect,selectBrush_);
-            painter->setPen(selectPen_);
-            painter->drawLine(fullRect.topLeft(),fullRect.topRight());
-            painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
-        }
-        else if(option.state & QStyle::State_MouseOver)
-        {
-            //QRect fillRect=option.rect.adjusted(0,1,-1,-1);
-            painter->fillRect(fullRect,hoverBrush_);
-            painter->setPen(hoverPen_);
-            painter->drawLine(fullRect.topLeft(),fullRect.topRight());
-            painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
-        }
-    }*/
-
-    //Different background for lost connection?
-   /* if(index.data(AbstractNodeModel::ConnectionRole).toInt() == 0)
-    {
-        QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
-        painter->fillRect(fullRect,lostConnectBgBrush_);
-        QRect bandRect=QRect(0,option.rect.y(),5,option.rect.height());
-        painter->fillRect(bandRect,lostConnectBandBrush_);
-
-    }*/
 
     QString id=columns_->id(index.column());
 
@@ -143,7 +149,7 @@ void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     else
     {
     	QString text=index.data(Qt::DisplayRole).toString();
-    	QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
     	painter->setPen(Qt::black);
 
     	int rightPos=textRect.right()+1;
@@ -174,58 +180,53 @@ void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     painter->setPen(borderPen_);
     painter->drawLine(bgRect.topLeft(),bgRect.topRight());
 
-
     painter->restore();
 }
 
 void NodeQueryViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
-        							const QStyleOptionViewItemV4& option,QString text) const
+                                    const QStyleOptionViewItem& option,QString text) const
 {
 	bool selected=option.state & QStyle::State_Selected;
-	int offset=4;
+    QFontMetrics fm(font_);
 
-	QFontMetrics fm(font_);
-	int deltaH=(option.rect.height()-(fm.height()+2))/2;
-
-	//The initial filled rect (we will adjust its  width)
-	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
-	if(selected)
-		fillRect.adjust(0,1,0,0);
+    QRect itemRect=option.rect.adjusted(nodeBox_->leftMargin,nodeBox_->topMargin,0,-nodeBox_->bottomMargin);
 
 	//The text rectangle
-	QRect textRect = fillRect.adjusted(offset,0,0,0);
+    QRect textRect = itemRect;
 
 	int textWidth=fm.width(text);
-	textRect.setWidth(textWidth);
+    textRect.setWidth(textWidth+nodeBox_->leftPadding+nodeBox_->rightPadding);
 
-	//Adjust the filled rect width
-	fillRect.setRight(textRect.right()+offset);
+    int currentRight=textRect.x()+textRect.width();
 
-	int currentRight=fillRect.right();
+    QList<QPixmap> pixLst;
+    QList<QRect> pixRectLst;
 
-	//Icons area
-	QList<QPixmap> pixLst;
-	QList<QRect> pixRectLst;
-	QVariant va=index.data(AbstractNodeModel::IconRole);
-	if(va.type() == QVariant::List)
-	{
-		QVariantList lst=va.toList();
-		int xp=currentRight+5;
-		int yp=textRect.center().y()-iconSize_/2;
-		for(int i=0; i < lst.count(); i++)
-		{
-			int id=lst[i].toInt();
-			if(id != -1)
-			{
-				pixLst << IconProvider::pixmap(id,iconSize_);
-				pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
-				xp+=pixLst.back().width();
-			}
-		}
+    QVariant va=index.data(AbstractNodeModel::IconRole);
+    if(va.type() == QVariant::List)
+    {
+        QVariantList lst=va.toList();
+        if(lst.count() >0)
+        {
+            int xp=currentRight+nodeBox_->iconPreGap;
+            int yp=itemRect.center().y()+1-nodeBox_->iconSize/2;
+            for(int i=0; i < lst.count(); i++)
+            {
+                int id=lst[i].toInt();
+                if(id != -1)
+                {
+                    pixLst << IconProvider::pixmap(id,nodeBox_->iconSize);
+                    pixRectLst << QRect(xp,yp,nodeBox_->iconSize,nodeBox_->iconSize);
+                    xp+=nodeBox_->iconSize+nodeBox_->iconGap;
+                }
+            }
 
-		if(!pixRectLst.isEmpty())
-			currentRight=pixRectLst.back().right();
-	}
+            if(!pixLst.isEmpty())
+            {
+                currentRight=xp-nodeBox_->iconGap;
+            }
+        }
+    }
 
 	//Define clipping
 	int rightPos=currentRight+1;
@@ -239,14 +240,14 @@ void NodeQueryViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	//Draw text
 	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
 	painter->setPen(fg);
-	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+    painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
 
-	if(selected)
-	{
-		painter->setPen(nodeSelectPen_);
-		QRect selRect=textRect.adjusted(-2,0,2,0);
-		painter->drawRect(selRect);
-	}
+    if(selected)
+    {
+        QRect sr=textRect;
+        sr.setX(option.rect.x()+nodeBox_->leftMargin);
+        renderSelectionRect(painter,sr);
+    }
 
 	//Draw icons
 	for(int i=0; i < pixLst.count(); i++)

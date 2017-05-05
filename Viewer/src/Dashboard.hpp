@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -42,10 +42,11 @@ public:
 	ServerFilter* serverFilter() const {return serverFilter_;}
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
-	void selectFirstServer();
     bool selectInTreeView(VInfo_ptr);
     void addSearchDialog();
     DashboardTitle* titleHandler() const {return titleHandler_;}
+    bool hasMaximised() const;
+    bool hasMaximisedApplied() const;
 
 	void notifyServerFilterAdded(ServerItem* item);
 	void notifyServerFilterRemoved(ServerItem* item);
@@ -69,23 +70,29 @@ protected Q_SLOTS:
     void slotDialogFinished(int);
     void slotDialogClosed();
     void slotPopInfoPanel(QString);
-    //void slotInfoPanelSelection(VInfo_ptr);
     void slotSelectionChanged(VInfo_ptr info);
+    void slotMaximisedChanged(DashboardWidget* w);
+
+protected:
+   void contextMenuEvent(QContextMenuEvent* e);
 
 private:
 	DashboardWidget* addWidgetCore(const std::string& type);
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);
-	void selectFirstServerInView();
+    void initialSelectionInView();
 	VInfo_ptr currentSelectionInView();
 	void addSearchDialog(VInfo_ptr);
+    void resetMaximised();
+    void checkMaximisedState();
 
 	ServerFilter* serverFilter_;
 	DashboardTitle* titleHandler_;
     QList<DashboardWidget*> widgets_;
     QList<DashboardWidget*> popupWidgets_;
-	bool settingsAreRead_;
+    QByteArray savedDockState_;
+    bool settingsAreRead_;
 	static int maxWidgetNum_;
 };
 

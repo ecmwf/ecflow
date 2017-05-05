@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -28,12 +28,10 @@ ServerFilter::ServerFilter()
 ServerFilter::~ServerFilter()
 {
 	std::vector<ServerFilterObserver*> obsCopy=observers_;
-
 	for(std::vector<ServerFilterObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
 	{
 		(*it)->notifyServerFilterDelete();
 	}
-
 
 	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{

@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2016 ECMWF.
+# Copyright 2009-2017 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -310,6 +310,49 @@ if __name__ == "__main__":
     assert test_passed,"Adding day at the suite level should fail"    
     print("check adding day at the suite level: RuntimeError: ")
 
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_trigger("1 == 0")
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding a trigger at suite level should fail"    
+    print("check adding trigger at the suite level: RuntimeError: ")
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_part_trigger("1 == 0")
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding a part trigger at suite level should fail"    
+    print("check adding part trigger at the suite level: RuntimeError: ")
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_complete("1 == 0")
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding a complete trigger at suite level should fail"    
+    print("check adding complete trigger at the suite level: RuntimeError: ")
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_part_complete("1 == 0")
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding a part complete trigger at suite level should fail"    
+    print("check adding part complete trigger at the suite level: RuntimeError: ")
 
     # =================================================================================
     print("check duplicate family not allowed")

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -36,18 +36,22 @@ class NodePathEllipsisItem;
 
 class BcWidget : public QWidget, public VPropertyObserver
 {
-    
+
 Q_OBJECT
 
 public:
     explicit BcWidget(QWidget *parent=0);
     ~BcWidget();
     
+    void reset(QString txt, int maxWidth);
     void reset(QList<NodePathItem*>,int);
     void reset(int idx,QString text,QColor bgCol,QColor fontCol);
     void clear();
     void adjustSize(int);
-    
+    QFont font() const {return font_;}
+    void setTextColour(QColor c) {textCol_=c;}
+    void setTextDisabledColour(QColor c) {textDisabledCol_=c;}
+
     void notifyChange(VProperty*);
 
 Q_SIGNALS:
@@ -59,7 +63,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent* event);
     void changeEvent(QEvent* event);
-    
+
     void updateSettings();
     void reset(int);
     void resetBorder(int);
@@ -79,8 +83,10 @@ protected:
     int maxWidth_;
     int height_;
     int itemHeight_;
-    QString emptyText_;
-    QRect emptyRect_;
+    QString text_;
+    QRect textRect_;
+    QColor textCol_;
+    QColor textDisabledCol_;
     QList<NodePathItem*> items_;
     NodePathEllipsisItem* ellipsisItem_;
     
@@ -97,7 +103,7 @@ class NodePathItem
 friend class BcWidget;    
     
 public:
-    NodePathItem(int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current);
+    NodePathItem(BcWidget* owner,int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current);
     void setCurrent(bool);
     virtual void draw(QPainter*,bool,int);
     int adjust(int xp,int yp, int elidedLen=0);
@@ -105,12 +111,13 @@ public:
     void resetBorder(bool hovered);
     void reset(QString text,QColor bgCol,QColor fontCol,bool hovered);
     int textLen() const;
-    static int height();
+    static int height(QFont);
 
 protected:
     virtual void makeShape(int xp,int yp,int len);
     virtual int rightPos(int xp,int len) const;
 
+    BcWidget* owner_;
     int index_;
     QString text_;
     QString elidedText_;
@@ -119,6 +126,7 @@ protected:
     QColor fontCol_;
     QPolygon shape_;
     QRect textRect_;
+    QFont font_;
 
     bool current_;
     bool hasMenu_;
@@ -141,8 +149,8 @@ class NodePathServerItem : public NodePathItem
 friend class BcWidget;
 
 public:
-    NodePathServerItem(int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current) :
-         NodePathItem(index,text,bgCol,fontCol,hasMenu,current) {}
+    NodePathServerItem(BcWidget* owner,int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current) :
+         NodePathItem(owner,index,text,bgCol,fontCol,hasMenu,current) {}
 protected:
     void makeShape(int xp,int yp,int len);
     int rightPos(int xp,int len) const;
@@ -155,9 +163,8 @@ class NodePathEllipsisItem : public NodePathItem
 friend class BcWidget;
 
 public:
-    NodePathEllipsisItem();
+    NodePathEllipsisItem(BcWidget* owner);
 };
-
 
 
 class NodePathWidget : public QWidget, public NodeObserver, public ServerObserver, public VInfoObserver
@@ -168,9 +175,12 @@ public:
 	explicit NodePathWidget(QWidget* parent=0);
 	~NodePathWidget();
 
-	bool active() const {return active_;}
-	void active(bool);
+    enum Mode {TextMode,GuiMode};
+
 	void clear(bool detachObservers=true);
+    void setMode(Mode mode);
+    bool isGuiMode() const {return mode_==GuiMode;}
+    void useTransparentBg(bool b);
 
 	//From NodeObserver
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -196,7 +206,6 @@ public:
 	void readSettings(VSettings *vs);
 
 public Q_SLOTS:
-	void setPath(QString);
 	void setPath(VInfo_ptr);
 
 protected Q_SLOTS:
@@ -207,6 +216,7 @@ protected Q_SLOTS:
 
 Q_SIGNALS:
 	void selected(VInfo_ptr);
+    void activeStateChanged();
 
 protected:
 	void clearItems();
@@ -225,15 +235,8 @@ protected:
 	QHBoxLayout* layout_;
 	VInfo_ptr info_;
 	VInfo_ptr infoFull_;
-#if 0
-    QToolButton* reloadTb_;
-#endif
-    BcWidget* bc_;
-   
-   
-	//When active_ is "true" the widget is visible and can receive and display data. When it
-	//is "false" the widget is hidden and cannot hold any data.
-	bool active_;
+    BcWidget* bc_;     
+    Mode mode_;
 };
 
 #endif

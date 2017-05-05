@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -37,9 +37,9 @@ public:
 	const std::string& text() const {return text_;}
 	const std::vector<std::string>& textVec() const {return textVec_;}
 	Status status() const {return status_;}
-	const std::string fileName() const {return fileName_;}
+    const std::string& fileName() const {return fileName_;}
 	FileReadMode fileReadMode() const {return readMode_;}
-	const std::string fileReadMethod() {return readMethod_;}
+    const std::string& fileReadMethod() {return readMethod_;}
 	VFile_ptr tmpFile() const {return tmpFile_;}
 	VDir_ptr directory() const {return dir_;}
 	const std::vector<Zombie>& zombies() const {return zombies_;}

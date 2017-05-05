@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #58 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -470,6 +470,12 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
          else if (create_zombies_with == "delete") {
             BOOST_CHECK_MESSAGE(z.type() == Child::USER || z.type() == Child::PATH,"Creating zombies via delete, Expected 'user | path' zombie type but got: " << z);
          }
+         else if (create_zombies_with == "complete") {
+            BOOST_CHECK_MESSAGE(z.type() == Child::USER,"Expected 'user' zombie type but got: " << z);
+         }
+         else if (create_zombies_with == "aborted") {
+             BOOST_CHECK_MESSAGE(z.type() == Child::USER,"Expected 'user' zombie type but got: " << z);
+         }
          else {
             BOOST_CHECK_MESSAGE(z.type() == Child::ECF,"Expected 'ecf' zombie type but got: " << z);
          }
@@ -750,10 +756,10 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
 
 
 #ifdef DO_TEST8
-BOOST_AUTO_TEST_CASE( test_ecf_zombie_creation_via_complete )
+BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_complete )
 {
    DurationTimer timer;
-   std::string suite_name  = "test_ecf_zombie_creation_via_complete";
+   std::string suite_name  = "test_user_zombie_creation_via_complete";
    cout << "Test:: ..." << suite_name << " " << flush;
    TestClean clean_at_start_and_end;
 
@@ -776,10 +782,10 @@ BOOST_AUTO_TEST_CASE( test_ecf_zombie_creation_via_complete )
 #endif
 
 #ifdef DO_TEST9
-BOOST_AUTO_TEST_CASE( test_ecf_zombie_creation_via_abort )
+BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_abort )
 {
    DurationTimer timer;
-   std::string suite_name  = "test_ecf_zombie_creation_via_abort";
+   std::string suite_name  = "test_user_zombie_creation_via_abort";
    cout << "Test:: ..." << suite_name << " " << flush;
    TestClean clean_at_start_and_end;
 

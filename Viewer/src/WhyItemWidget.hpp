@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,12 +14,12 @@
 #include <QPlainTextEdit>
 
 #include "InfoPanelItem.hpp"
-#include "CodeItemWidget.hpp"
+#include "HtmlItemWidget.hpp"
 #include "VInfo.hpp"
 
 class VNode;
 
-class WhyItemWidget : public CodeItemWidget, public InfoPanelItem
+class WhyItemWidget : public HtmlItemWidget, public InfoPanelItem
 {
 Q_OBJECT
 
@@ -35,14 +35,17 @@ public:
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
-    void anchorClicked(QString link);
+    void anchorClicked(const QUrl& link);
 
 protected:
     void updateState(const ChangeFlags&) {}
 
 private:
     QString why() const;
+    QString makeHtml(const std::vector<std::string>&,const std::vector<std::string>&) const;
     QString makeHtml(const std::vector<std::string>&) const;
+
+    QMap<QString,QString> stateMap_;
 };
 
 #endif

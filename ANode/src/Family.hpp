@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #37 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -50,8 +50,8 @@ public:
 	bool operator==(const Family& rhs) const;
 
 	virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const OrderMemento* m,std::vector<ecf::Aspect::Type>& aspects) { NodeContainer::set_memento(m,aspects); }
-   void set_memento(const ChildrenMemento* m,std::vector<ecf::Aspect::Type>& aspects) { NodeContainer::set_memento(m,aspects); }
+   void set_memento(const OrderMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool f) { NodeContainer::set_memento(m,aspects,f); }
+   void set_memento(const ChildrenMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool f) { NodeContainer::set_memento(m,aspects,f); }
 
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 private:

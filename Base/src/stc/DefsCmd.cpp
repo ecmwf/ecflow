@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #27 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -27,19 +27,21 @@ using namespace boost;
 //=====================================================================================
 // The defs command returns the full definition back to the client
 
-DefsCmd::DefsCmd(AbstractServer* as,bool save_edit_history)
+DefsCmd::DefsCmd(AbstractServer* as,bool migrate)
 {
-	init(as,save_edit_history);
+	init(as,migrate); // save edit history and children even if hidden
 }
 
-void DefsCmd::init(AbstractServer* as,bool save_edit_history)
+void DefsCmd::init(AbstractServer* as,bool migrate)
 {
+   migrate_ = migrate; // save edit history and children even if hidden
+
    defs_ = as->defs();
    /// Return the current value of the state change no. So the that
    /// the next call to get the SSYncCmd , we need only return what's changed
    defs_->set_state_change_no( Ecf::state_change_no() );
    defs_->set_modify_change_no( Ecf::modify_change_no() );
-   defs_->save_edit_history(save_edit_history);
+   defs_->save_edit_history(migrate);
 }
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const

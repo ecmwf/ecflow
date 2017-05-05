@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #231 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -94,13 +94,13 @@ public:
 
    // mementos functions:
    /// Collect all the state changes, so that only small subset is returned to client
-   bool set_memento(const NodeTodayMemento* ,std::vector<ecf::Aspect::Type>& aspects);
-   bool set_memento(const NodeTimeMemento* ,std::vector<ecf::Aspect::Type>& aspects);
-   bool set_memento(const NodeDayMemento* ,std::vector<ecf::Aspect::Type>& aspects);
-   bool set_memento(const NodeCronMemento* ,std::vector<ecf::Aspect::Type>& aspects);
-   bool set_memento(const NodeDateMemento* ,std::vector<ecf::Aspect::Type>& aspects);
+   bool set_memento(const NodeTodayMemento*);
+   bool set_memento(const NodeTimeMemento*);
+   bool set_memento(const NodeDayMemento*);
+   bool set_memento(const NodeCronMemento*);
+   bool set_memento(const NodeDateMemento*);
 
-   void why(std::vector<std::string>& theReasonWhy,const std::string& prefix) const;
+   bool why(std::vector<std::string>& theReasonWhy,const std::string& prefix) const; // return true if why found
    bool testTimeDependenciesForRequeue() const;
    void resetRelativeDuration();
 

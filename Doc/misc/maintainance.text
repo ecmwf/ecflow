@@ -15,24 +15,20 @@ Update file(s):
 
 o $HOME/.user_kshrc
 o Change $WK/build_scripts/nightly/build.py
-o Change $WK/build_scripts/install_ecflow.sh  
-o boost_cp.sh,boost_untar.sh,cp_ecflow,tar_incr_ecflow.sh
 
 
 Updating version number
 ======================================================
 
-When changing the version change:
-    - Create a new shell, since new shell will parse $WK/Core/src/Version.cpp to extract version
-    - $WK/build_scripts/install_ecflow.sh
-    - $WK/ACore/src/Version.cpp
-    - $WK/cmake.version
+- change version in $WK/VERSION.cmake
+- run  $WK/cmake.sh
+- check in the generated files.
 
 
 Making a release
 ====================================================
 
-opensuse103: Do NOT link on your local machine, use the nightly build
+Do NOT link on your local machine, use the nightly build
 otherwise the embedded paths in ecflow.so  will be wrong.
 We use embedded paths to avoid user having to set LD_LIBRARY_PATH
 
@@ -52,24 +48,24 @@ correctly appear in the generated documentation.
 
 Migration
 ======================================================================
-The migration from 2.0.30 to 3.0.1 is very limited.
-If the check pt & back up check pt file do not load
-automatically when the server is started. 
-They should be removed.
- 
-The release number has the format <release>.<major.<minor>
+The release number has the format <release>.<major>.<minor>
 Change in major and minor numbers means that the check point
 file are compatible.
 
 From 3.0.1 we have provides a mechanism to migrate to all future version.
 irrespective of check point files.  
 
-    3.0.1/bin/ecflow_client --migrate > defs_with_state.def
+    ecflow_client --migrate > defs_with_state.def
 
 The file 'def_with_state.def' is normal ascii definition file, where
 all the state information is written as comments. This can then
 be loaded in a future release by calling:
 
-   4.0.1/bin/ecflow_client --load defs_with_state.def
+   ecflow_client --load defs_with_state.def
    
+If there are problems with 'defs_with_state.def', (See ecflow_migrate.py)
+these can be handled with ecflow_migrate.py :
+    
+   python  4.5.0/bin/ecflow_migrate.py/ecflow_migrate.py --d  ./defs_with_state.def # -> defs_with_state.def.mig
+   ecflow_client --load defs_with_state.def.mig
    

@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #234 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -25,6 +25,7 @@
 #include "NodeAttr.hpp"
 #include "NodeFwd.hpp"
 #include "Aspect.hpp"
+#include "Attr.hpp"
 
 class ChildAttrs :  private boost::noncopyable {
 public:
@@ -39,6 +40,7 @@ public:
    void begin();
    void requeue();
    void requeue_labels();
+   void sort_attributes( ecf::Attr::Type at);
 
    // standard functions: ==============================================
    std::ostream& print(std::ostream&) const;
@@ -79,9 +81,9 @@ public:
    bool clear_event( const std::string& event_name_or_number);
 
    // mementos functions:
-   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeEventMemento*);
+   void set_memento(const NodeMeterMemento*);
+   void set_memento(const NodeLabelMemento*);
 
    // Find functions: ============================================================
    bool findLabel(const std::string& name) const;

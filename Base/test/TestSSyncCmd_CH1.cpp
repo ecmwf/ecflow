@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #18 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -135,6 +135,7 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
       the_client_defs = server_defs->client_suite_mgr().create_defs(client_handle,server_defs);
       Ecf::set_debug_equality(true);
       BOOST_CHECK_MESSAGE( server_defs->server().compare(the_client_defs->server() ), test_name << ": Server state does not match");
+      BOOST_CHECK_MESSAGE( server_defs->get_flag() == the_client_defs->get_flag(), test_name << ": Server flags do not match");
       Ecf::set_debug_equality(false);
    }
 
@@ -184,6 +185,12 @@ static bool set_server_state_shutdown(defs_ptr defs) {
 }
 static bool set_server_state_running(defs_ptr defs) {
    defs->set_server().set_state( SState::RUNNING );
+   return true; // expect changes
+}
+
+static bool set_defs_flag(defs_ptr defs) {
+   defs->flag().set( ecf::Flag::BYRULE );
+   defs->flag().set( ecf::Flag::EDIT_FAILED );
    return true; // expect changes
 }
 
@@ -552,6 +559,7 @@ BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
       // The default server state is HALTED, hence setting to halted will not show a change
       test_sync_scaffold(set_server_state_shutdown,"set_server_state_shutdown");
       test_sync_scaffold(set_server_state_running,"set_server_state_running");
+      test_sync_scaffold(set_defs_flag,"set_defs_flag");
 
       test_sync_scaffold(add_server_variable,"add_server_variable");
       test_sync_scaffold(change_server_variable,"change_server_variable");

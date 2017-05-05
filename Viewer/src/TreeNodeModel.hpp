@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -49,6 +49,7 @@ public:
     QModelIndex nodeToIndex(const VNode*,int column=0) const;
     VTreeServer* indexToServer(const QModelIndex & index) const;
     VTreeServer* nameToServer(const std::string&) const;
+    VTreeNode* indexToNode( const QModelIndex & index) const;
 
     QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
 
@@ -87,6 +88,10 @@ public Q_SLOTS:
 	void slotBeginServerClear(VModelServer* server,int);
 	void slotEndServerClear(VModelServer* server,int);
 
+    int iconNum(VNode*) const;
+    bool isNode(const QModelIndex & index) const;
+    bool isAttribute(const QModelIndex & index) const;
+
 Q_SIGNALS:
     void clearBegun(const VTreeNode*);
     void scanEnded(const VTreeNode*);
@@ -94,27 +99,26 @@ Q_SIGNALS:
     void filterUpdateAddEnded(const VTreeNode*);
     void filterChangeBegun();
     void filterChangeEnded();
+    void firstScanEnded(const VTreeServer*);
 
 protected:
     QModelIndex forceShowNode(const VNode* node) const;
     QModelIndex forceShowAttribute(const VAttribute* a) const;
 
 private:
-	bool isServer(const QModelIndex & index) const;
-	bool isNode(const QModelIndex & index) const;
-	bool isAttribute(const QModelIndex & index) const;
+    bool isServer(const QModelIndex& index) const;
+    bool isServerForValid(const QModelIndex& index) const;
 
     ServerHandler* indexToServerHandler(const QModelIndex & index) const;
     QModelIndex serverToIndex(VModelServer* server) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 
     QModelIndex nodeToIndex(VTreeServer*,const VTreeNode*,int column=0) const;
-    VTreeNode* indexToNode( const QModelIndex & index) const;
-
+    VTreeNode* indexToAttrParentNode(const QModelIndex & index) const;
+    VTreeNode* indexToAttrParentOrNode(const QModelIndex & index,bool &itIsANode) const;
 	QVariant serverData(const QModelIndex& index,int role) const;
-	QVariant nodeData(const QModelIndex& index,int role) const;
-	QVariant attributesData(const QModelIndex& index,int role) const;
-
+    QVariant nodeData(const QModelIndex& index,int role,VTreeNode*) const;
+    QVariant attributesData(const QModelIndex& index,int role,VTreeNode*) const;
 
 	//Attribute filter
 	VTreeModelData* data_;

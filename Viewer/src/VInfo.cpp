@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -58,7 +58,6 @@ void VInfo::notifyServerDelete(ServerHandler* /*server*/)
 
     server_=0;
     node_=0;
-    if(attr_) delete attr_;
     attr_=0;
 
 	dataLost();
@@ -80,15 +79,13 @@ void VInfo::notifyBeginServerClear(ServerHandler* server)
 {    
     assert(server_==server);
     node_=0;
-    if(attr_) delete attr_;
     attr_=0;
 }
 
 void VInfo::notifyEndServerClear(ServerHandler* server)
 {
     assert(server_==server);
-    node_=0;
-    if(attr_) delete attr_;
+    node_=0;   
     attr_=0;
 }
 
@@ -106,38 +103,42 @@ void VInfo::regainData()
         return;
     }
 
-    if(node_)
-        return;
-
-    if(isServer())
+    if(!node_)
     {
-        node_=server_->vRoot();
-        return;
-    }
-    else if(isNode())
-    {        
-        VItemPathParser p(storedPath_);
-        if(p.itemType() == VItemPathParser::NodeType)
+        if(isServer())
         {
-            node_=server_->vRoot()->find(p.node());
-            if(node_)
-                return;
-        }
-        if(!node_)
-        {
-            dataLost();
+            node_=server_->vRoot();
             return;
         }
-    }
-    else if(isAttribute())
-    {
-         VItemPathParser p(storedPath_);
-         if(p.itemType() == VItemPathParser::AttributeType)
-         {
-            node_=server_->vRoot()->find(p.node());
+        else if(isNode())
+        {
+            VItemPathParser p(storedPath_);
+            if(p.itemType() == VItemPathParser::NodeType)
+            {
+                node_=server_->vRoot()->find(p.node());
+                if(node_)
+                    return;
+            }
+            if(!node_)
+            {
+                dataLost();
+                return;
+            }
+        }
+     }
+
+     if(isAttribute())
+     {
+        VItemPathParser p(storedPath_);
+        if(p.itemType() == VItemPathParser::AttributeType)
+        {
+            if(!node_)
+            {
+                node_=server_->vRoot()->find(p.node());
+            }
             if(node_)
             {
-                attr_=VAttribute::make(node_,p.type(),p.attribute());
+                attr_=node_->findAttribute(p.type(),p.attribute());
             }
             if(!node_ || !attr_)
             {
@@ -173,7 +174,7 @@ bool VInfo::operator ==(const VInfo& other)
             storedPath_ == other.storedPath_)
     {
         if((!attr_ && other.attr_) ||
-           (attr_ && !attr_))
+           (attr_ && !other.attr_))
             return false;
 
         else if(attr_ && other.attr_)
@@ -219,22 +220,37 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
     }
     else if(p.itemType() ==  VItemPathParser::NodeType)
     {
-        VNode* n=s->vRoot()->find(p.node());
-        return VInfoNode::create(n);
+        if(VNode* n=s->vRoot()->find(p.node()))
+            return VInfoNode::create(n);
 
     }
     else if(p.itemType() ==  VItemPathParser::AttributeType)
     {
         if(VNode* n=s->vRoot()->find(p.node()))
         {
-            if(VAttribute* a=VAttribute::make(n,p.type(),p.attribute()))
+            if(VAttribute* a=n->findAttribute(p.type(),p.attribute()))
             {
                 return VInfoAttribute::create(a);
             }           
         }
-
     }
 
+    return VInfo_ptr();
+}
+
+VInfo_ptr VInfo::createFromPath(const std::string& path)
+{
+    if(path.empty())
+        return VInfo_ptr();
+
+    VItemPathParser p(path);
+    if(!p.server().empty())
+    {
+        if(ServerHandler* s=ServerHandler::find(p.server()))
+        {
+            return createFromPath(s,path);
+        }
+    }
     return VInfo_ptr();
 }
 
@@ -249,7 +265,7 @@ VInfoServer::VInfoServer(ServerHandler *server) : VInfo(server,NULL)
 	if(server_)
 	{
 		node_=server_->vRoot();
-        storedPath_="";
+        storedPath_=VItemPathParser::encodeWithServer(server_->name(),"/","server");
 	}
 }
 
@@ -293,7 +309,10 @@ VItem* VInfoServer::item() const
 VInfoNode::VInfoNode(ServerHandler* server,VNode* node) : VInfo(server,node)
 {
     if(node_)
-        storedPath_=VItemPathParser::encode(node_->absNodePath(),"node");
+    {
+        assert(server_);
+        storedPath_=VItemPathParser::encodeWithServer(server_->name(),node_->absNodePath(),"node");
+    }
 }
 
 VInfo_ptr VInfoNode::create(VNode *node)
@@ -368,13 +387,15 @@ VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att
         VInfo(server,node,attr)
 {
     if(attr_)
-        storedPath_=VItemPathParser::encode(attr_->fullPath(),attr_->typeName());
+    {
+        assert(server_);
+        storedPath_=VItemPathParser::encodeWithServer(server_->name(),
+                                                      attr_->fullPath(),attr_->typeName());
+    }
 }
 
 VInfoAttribute::~VInfoAttribute()
 {
-    if(attr_)
-        delete attr_;
 }
 
 bool VInfoAttribute::hasData() const

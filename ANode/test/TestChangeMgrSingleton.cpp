@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -33,6 +33,9 @@ public:
       if (defs_) defs_->detach(this);
       if (node_) node_->detach(this);
    }
+
+   virtual void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) {}
+   virtual void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) {}
 
    virtual void update(const Node*, const std::vector<ecf::Aspect::Type>&){update_count_++;}
    virtual void update(const Defs*, const std::vector<ecf::Aspect::Type>&){update_count_++;}

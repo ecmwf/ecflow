@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #251 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -57,6 +57,7 @@
 #include "NodeFwd.hpp"
 #include "Flag.hpp"
 #include "Aspect.hpp"
+#include "Attr.hpp"
 
 class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
@@ -166,8 +167,8 @@ public:
    virtual bool run(JobsParam& jobsParam, bool force) = 0;
 
    /// Recursively determines why the node is not running.
-   virtual void top_down_why(std::vector<std::string>& theReasonWhy) const;
-   void bottom_up_why(std::vector<std::string>& theReasonWhy) const;
+   virtual bool top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   void bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
 
    void freeTrigger() const;
    void clearTrigger() const;
@@ -291,6 +292,9 @@ public:
 
    /// returns abs node path preceded by the type of the node
    std::string debugNodePath() const;
+   static std::string path_href_attribute(const std::string& path);
+   static std::string path_href_attribute(const std::string& path,const std::string& path2);
+   std::string path_href() const;
 
    /// returns true if this node OR any of its children
    /// has cron,time,day,date or today time dependencies
@@ -379,8 +383,8 @@ public:
    void addDay( const DayAttr& );
    void addCron( const ecf::CronAttr& );
 
-   void addLimit(const Limit& );        // will throw std::runtime_error if duplicate
-   void addInLimit(const InLimit& l)         { inLimitMgr_.addInLimit(l);}   // will throw std::runtime_error if duplicate
+   void addLimit(const Limit& );         // will throw std::runtime_error if duplicate
+   void addInLimit(const InLimit& l);    // will throw std::runtime_error if duplicate
    void auto_add_inlimit_externs(Defs* defs) { inLimitMgr_.auto_add_inlimit_externs(defs);}
    void addEvent( const Event& );       // will throw std::runtime_error if duplicate
    void addMeter( const Meter& );       // will throw std::runtime_error if duplicate
@@ -390,6 +394,9 @@ public:
    void addRepeat( const Repeat& );      // will throw std::runtime_error if duplicate
    void addZombie( const ZombieAttr& );  // will throw std::runtime_error if duplicate
 
+   // sort
+   // expect one attr to be [ event | meter | label | limits | variable ]
+   virtual void sort_attributes( ecf::Attr::Type at, bool recursive);
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type
@@ -447,27 +454,27 @@ public:
    virtual void collateChanges(DefsDelta& ) const = 0;
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
 
-   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeDefStatusDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const SuspendedMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeTriggerMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeCompleteMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeRepeatMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeLimitMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeInLimitMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeVariableMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeLateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeTodayMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeTimeMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeDayMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeCronMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeDateMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeZombieMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const NodeVerifyMemento*,std::vector<ecf::Aspect::Type>& aspects );
-   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeDefStatusDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const SuspendedMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeTriggerMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeCompleteMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeRepeatMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeLimitMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeInLimitMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeVariableMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeLateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeTodayMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeTimeMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeDayMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeCronMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeDateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeZombieMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeVerifyMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
 
    // Find functions: ============================================================
    // Will search for a node by name(ie not a path) first on siblings, then on a parent
@@ -593,7 +600,7 @@ protected:
    friend class Defs;
    friend class Family;
    friend class NodeContainer;
-   virtual bool doDeleteChild(Node* child) { return false;}
+   virtual bool doDeleteChild(Node* ) { return false;}
 
 
    /// This function is called as a part of handling state change.
@@ -624,13 +631,14 @@ protected:
    void check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr*);
 
 public:
+   void notify_start(const std::vector<ecf::Aspect::Type>& aspects);
    void notify(const std::vector<ecf::Aspect::Type>& aspects);
    void attach(AbstractObserver*);
    void detach(AbstractObserver*);
    bool is_observed(AbstractObserver*) const ; // return true if we have this observer in our list
 
 private:
-   void why(std::vector<std::string>& theReasonWhy) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool top_down = false,bool html_tags = false) const;
    /// Function used as a part of trigger and complete expressions.
    /// The search pattern is event,meter,user-variable,repeat, generated-variable
    int findExprVariableValue( const std::string& name) const;
@@ -679,6 +687,7 @@ private: // alow simulator access
 private: // All mementos access
    friend class CompoundMemento;
    void clear(); /// Clear *ALL* internal attributes
+   void delete_attributes();
 
 private: /// For use by python interface,
    friend void export_Node();

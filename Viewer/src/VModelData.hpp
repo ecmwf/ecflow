@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2015 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -110,6 +110,7 @@ public:
      void setForceShowNode(const VNode* node);
      void setForceShowAttribute(const VAttribute* node);
      void clearForceShow(const VItem*);
+     bool isFirstScan() const {return firstScan_;}
 
     //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
@@ -142,11 +143,15 @@ Q_SIGNALS:
 
 private:
      void updateFilter(const std::vector<VNode*>& suitesChanged);
+     void adjustFirstScan();
 
      VTree* tree_;
      VTreeChangeInfo* changeInfo_;
      AttributeFilter *attrFilter_;
      TreeNodeFilter* filter_;
+     bool firstScan_;
+     int firstScanTryNo_;
+     int maxFirstScanTry_;
 };
 
 class VTableServer : public VModelServer
@@ -244,10 +249,12 @@ Q_SIGNALS:
 
 protected:
 	void init();
-	virtual void add(ServerHandler*)=0;
+    void addToServers(VModelServer* s);
+    virtual void add(ServerHandler*)=0;
     virtual void connectToModel(VModelServer* d);
 
 	std::vector<VModelServer*> servers_;
+    int serverNum_; //we cachec servers_.size() for performance reasons
 	ServerFilter *serverFilter_;
 	NodeFilterDef* filterDef_;
 	AbstractNodeModel* model_;

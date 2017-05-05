@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #75 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.begin_all_suites() == 0,CtsApi::begin() << " should return 0\n" << theClient.errorMsg());
 
 
-   Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"path_to_task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1);
+   Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"/path/to/task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1);
    BOOST_REQUIRE_MESSAGE( theClient.zombieGet() == 0,CtsApi::zombieGet() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieFob(z) == 0,    " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieFail(z) == 0,   " should return 0\n" << theClient.errorMsg());
@@ -86,12 +86,12 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.zombieBlock(z) == 0, " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieRemove(z) == 0, " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieKill(z) == 0, " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieFobCli("path_to_task") == 0,    " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieFailCli("path_to_task") == 0,   " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieAdoptCli("path_to_task") == 0,  " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieBlockCli("path_to_task") == 0, " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieRemoveCli("path_to_task") == 0, " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.zombieKillCli("path_to_task") == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieFobCli("/path/to/task") == 0,    " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieFailCli("/path/to/task") == 0,   " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieAdoptCli("/path/to/task") == 0,  " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieBlockCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieRemoveCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.zombieKillCli("/path/to/task") == 0, " should return 0\n" << theClient.errorMsg());
 
    BOOST_REQUIRE_MESSAGE( theClient.job_gen("") == 0,CtsApi::job_gen("") << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.job_gen("/s") == 0,CtsApi::job_gen("/s") << " should return 0\n" << theClient.errorMsg());
@@ -302,6 +302,12 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-c +02:00 -a 20:00  -s +00:15") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-s 00:02 -c +00:05") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","late","-s 00:01 -a 14:30 -c +00:01") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","limit","limit_name","10") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","inlimit","limit_name") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","inlimit","limit_name","10") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","inlimit","/path/to/limit:limit_name2") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","inlimit","/path/to/limit:limit_name2","10") == 0,"--alter should return 0\n" << theClient.errorMsg());
+
 
    std::vector<std::string> validDays = DayAttr::allDays(); // HPUX barfs if use DayAttr::allDays() directly in BOOST_FOREACH
    BOOST_FOREACH(const string& day, validDays) {
@@ -394,6 +400,14 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    for(size_t i = 0; i <  flag_types.size(); i++) {
       BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","set_flag",flag_types[i]) == 0,"--alter should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","clear_flag",flag_types[i]) == 0,"--alter should return 0\n" << theClient.errorMsg());
+   }
+
+   // sort
+   std::vector<std::string> sortable_attributes = Attr::all_attrs();
+   BOOST_REQUIRE_MESSAGE(!sortable_attributes.empty(),"Expected to find attributes");
+   for(size_t i = 0; i <  sortable_attributes.size(); i++) {
+      BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attributes[i],true) == 0,"--alter should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attributes[i],false) == 0,"--alter should return 0\n" << theClient.errorMsg());
    }
 }
 

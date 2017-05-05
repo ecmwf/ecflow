@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2016 ECMWF.
+# Copyright 2009-2017 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,8 @@
 import ecflow
 import sys
 import os
+import copy
+import unittest # for assertItemsEqual
  
 if __name__ == "__main__":
     
@@ -26,16 +28,26 @@ if __name__ == "__main__":
     print("####################################################################")
  
     #===========================================================================
-    # Defs: add and delete *USER* variables
+    # Defs: add, delete and sort *USER* variables, use set(a).intersection(b) to compare lists
     #===========================================================================
     defs = ecflow.Defs()
-    defs.add_variable("FRED", "/tmp/")
-    defs.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
-    defs.add_variable("ECF_URL_BASE", "http://www.ecmwf.int")
-    defs.add_variable("ECF_URL", "publications/manuals/sms")
+    defs.add_variable("ZFRED", "/tmp/")
+    defs.add_variable("YECF_URL_CMD", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    defs.add_variable("XECF_URL_BASE", "http://www.ecmwf.int")
+    defs.add_variable("AECF_URL", "publications/manuals/sms")
     assert len(list(defs.user_variables)) == 4, "Expected *user* 4 variable"    
-    defs.delete_variable("FRED");     assert len(list(defs.user_variables)) == 3, "Expected 3 variables since we just delete FRED"
-    defs.delete_variable("");         assert len(list(defs.user_variables)) == 0, "Expected 0 variables since we should have deleted all"
+    
+    # sort
+    expected = ['AECF_URL','XECF_URL_BASE','YECF_URL_CMD','ZFRED']
+    actual = []
+    defs.sort_attributes("variable");
+    defs.sort_attributes(ecflow.AttrType.variable);
+    for v in defs.user_variables: actual.append(v.name())
+    assert actual == expected,"Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+    
+    
+    defs.delete_variable("ZFRED");assert len(list(defs.user_variables)) == 3, "Expected 3 variables since we just delete FRED"
+    defs.delete_variable("");     assert len(list(defs.user_variables)) == 0, "Expected 0 variables since we should have deleted all"
     
     a_dict = { "name":"value", "name2":"value2", "name3":"value3", "name4":"value4" }
     defs.add_variable(a_dict)
@@ -48,14 +60,23 @@ if __name__ == "__main__":
     assert len(list(defs.user_variables)) == 0, "Expected zero variables"    
     
     #===========================================================================
-    # Suite: add and delete variables
+    # Suite: add,delete and sort variables
     #===========================================================================
     suite = ecflow.Suite("s1")
     suite.add_variable(ecflow.Variable("ECF_HOME", "/tmp/"))
-    suite.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
-    suite.add_variable("ECF_URL_BASE", "http://www.ecmwf.int")
-    suite.add_variable("ECF_URL", "publications/manuals/sms")
+    suite.add_variable("ZZZZZZ", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    suite.add_variable("YYYYY", "http://www.ecmwf.int")
+    suite.add_variable("aaaa", "publications/manuals/sms")
     assert len(list(suite.variables)) == 4, "Expected 4 variable"    
+    
+    # sort
+    expected = ['aaaa','ECF_HOME','YYYYY','ZZZZZZ']
+    actual = []
+    suite.sort_attributes("variable");
+    suite.sort_attributes(ecflow.AttrType.variable);
+    for v in suite.variables: actual.append(v.name())
+    assert set(expected).intersection(actual), "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+
     suite.delete_variable("ECF_HOME"); assert len(list(suite.variables)) == 3, "Expected 3 variable since we just delete ECF_HOME"
     suite.delete_variable("");         assert len(list(suite.variables)) == 0, "Expected 0 variable since we should have deleted all"
     
@@ -85,15 +106,39 @@ if __name__ == "__main__":
 
 
     #===========================================================================
-    # add and delete limits
+    # add,delete and sort limits
     #===========================================================================
+    suite.add_limit(ecflow.Limit("zlimitName1", 10))
+    suite.add_limit(ecflow.Limit("ylimitName2", 10))
+    suite.add_limit("xlimitName3", 10)
+    suite.add_limit("alimitName4", 10)
+    assert len(list(suite.limits)) == 4, "Expected 4 Limits"
+    
+    # sort
+    expected = ['alimitName4','xlimitName3','ylimitName2','zlimitName1']
+    actual = []
+    suite.sort_attributes(ecflow.AttrType.limit);
+    suite.sort_attributes("limit");
+    for v in suite.limits: actual.append(v.name())
+    assert expected == actual, "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+
+    suite.delete_limit("zlimitName1"); assert len(list(suite.limits)) == 3, "Expected 3 limits since we just deleted one limitName1" 
+    suite.delete_limit("");            assert len(list(suite.limits)) == 0, "Expected 0 limits since we just deleted all of them"
+
+    # The following will fail, since the iterators are essentially read only, 
+    # This is because we are using C++ vector iterators, hence we can't delete the vectors items, whilst traversing 
+    #    for limit in suite.limits: suite.delete_limit(limit.name())
+    # We can get round this by copy the limits first
     suite.add_limit(ecflow.Limit("limitName1", 10))
     suite.add_limit(ecflow.Limit("limitName2", 10))
     suite.add_limit("limitName3", 10)
     suite.add_limit("limitName4", 10)
-    assert len(list(suite.limits)) == 4, "Expected 4 Limits"
-    suite.delete_limit("limitName1"); assert len(list(suite.limits)) == 3, "Expected 3 limits since we just deleted one limitName1" 
-    suite.delete_limit("");           assert len(list(suite.limits)) == 0, "Expected 0 limits since we just deleted all of them"
+    limit_names = []
+    for limit in suite.limits:
+        limit_names.append(limit.name())
+    for limit in limit_names:
+        suite.delete_limit(limit)
+    assert len(list(suite.limits)) == 0, "Expected 0 Limits,since we just deleted all of them, via iteration"
 
     #===========================================================================
     # Test Limit and node paths, ECFLOW-518
@@ -182,6 +227,14 @@ if __name__ == "__main__":
     task.add_event(10, "Eventname2")               
     task.add_event("fred")                         
     
+    # sort
+    expected = ['1','2','Eventname','Eventname2','fred']
+    actual = []
+    task.sort_attributes("event");
+    task.sort_attributes(ecflow.AttrType.event);
+    for v in task.events: actual.append(v.name_or_number())
+    assert expected == actual, "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+     
     # test find
     event = task.find_event("EVENT")
     assert(event.empty()),"Expected to not to find event"
@@ -227,28 +280,44 @@ if __name__ == "__main__":
     #===========================================================================
     # add and delete meter
     #===========================================================================
-    task.add_meter(ecflow.Meter("metername1", 0, 100, 50))
-    task.add_meter(ecflow.Meter("metername2", 0, 100))
-    task.add_meter("metername3", 0, 100, 50)
-    task.add_meter("metername4", 0, 100)
+    task.add_meter(ecflow.Meter("zzzz", 0, 100, 50))
+    task.add_meter(ecflow.Meter("yyyy", 0, 100))
+    task.add_meter("bbbb", 0, 100, 50)
+    task.add_meter("aaaa", 0, 100)
     assert len(list(task.meters)) == 4, "Expected 4 Meters"
-    task.delete_meter("metername1"); assert len(list(task.meters)) == 3, "Expected 3 Meters"
-    task.delete_meter("metername4"); assert len(list(task.meters)) == 2, "Expected 2 Meters"
-    task.delete_meter("");           assert len(list(task.meters)) == 0, "Expected 0 Meters"
-
+    
+    # sort
+    expected = ['aaaa','bbbb','yyyy','zzzz']
+    actual = []
+    task.sort_attributes(ecflow.AttrType.meter);
+    task.sort_attributes("meter");
+    for v in task.meters: actual.append(v.name())
+    assert expected == actual, "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+ 
+    task.delete_meter("zzzz"); assert len(list(task.meters)) == 3, "Expected 3 Meters"
+    task.delete_meter("yyyy"); assert len(list(task.meters)) == 2, "Expected 2 Meters"
+    task.delete_meter("");     assert len(list(task.meters)) == 0, "Expected 0 Meters"
 
     #===========================================================================
     # add and delete label
     #===========================================================================
-    task.add_label(ecflow.Label("label_name1", "value"))
-    task.add_label(ecflow.Label("label_name2", "value"))
-    task.add_label("label_name3", "value")
-    task.add_label("label_name4", "value")
+    task.add_label(ecflow.Label("labela", "value"))
+    task.add_label(ecflow.Label("labelb", "value"))
+    task.add_label("labelc", "value")
+    task.add_label("labeld", "value")
     assert len(list(task.labels)) == 4, "Expected 4 labels"
-    task.delete_label("label_name1"); assert len(list(task.labels)) == 3, "Expected 3 Labels"
-    task.delete_label("label_name4"); assert len(list(task.labels)) == 2, "Expected 2 Labels"
-    task.delete_label("");            assert len(list(task.labels)) == 0, "Expected 0 Labels"
-
+    
+    # sort
+    expected = ['labela','labelb','labelc','labeld']
+    actual = []
+    task.sort_attributes("label");
+    task.sort_attributes(ecflow.AttrType.label);
+    for v in task.labels: actual.append(v.name())
+    assert expected == actual, "Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+    
+    task.delete_label("labela"); assert len(list(task.labels)) == 3, "Expected 3 Labels"
+    task.delete_label("labelb"); assert len(list(task.labels)) == 2, "Expected 2 Labels"
+    task.delete_label("");       assert len(list(task.labels)) == 0, "Expected 0 Labels"
 
     #===========================================================================
     # add delete Repeat

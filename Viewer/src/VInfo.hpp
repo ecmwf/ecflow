@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -63,8 +63,9 @@ public:
     virtual std::string serverAlias() {return "";}
     virtual std::string relativePath() {return "";}
     std::string storedNodePath() const;
+    const std::string& storedPath() const {return storedPath_;}
 
-	virtual void accept(VInfoVisitor*)=0;
+    virtual void accept(VInfoVisitor*)=0;
 
     void regainData();
 	void addObserver(VInfoObserver*);
@@ -85,6 +86,7 @@ public:
 
     static VInfo_ptr createParent(VInfo_ptr);
     static VInfo_ptr createFromPath(ServerHandler*,const std::string&);
+    static VInfo_ptr createFromPath(const std::string& path);
 
 protected:
     VInfo(ServerHandler* server,VNode* node,VAttribute* attr=0);

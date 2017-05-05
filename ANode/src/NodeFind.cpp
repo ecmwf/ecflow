@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #53 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -560,8 +560,13 @@ node_ptr Node::findReferencedNode(const std::string& nodePath, std::string& erro
 {
    return findReferencedNode(nodePath,Str::EMPTY(),errorMsg);
 }
+
+//#define DEBUG_FIND_REFERENCED_NODE 1
 node_ptr Node::findReferencedNode(const std::string& nodePath, const std::string& extern_obj, std::string& errorMsg) const
 {
+#ifdef DEBUG_FIND_REFERENCED_NODE
+   cout << "Node::findReferencedNode path:" << nodePath << " extern_obj:" << extern_obj << "\n";
+#endif
    Defs* theDefs = defs();
    if (!theDefs) {
       // In the case where we have a stand alone Node. i.e no parent set. The Defs will be NULL.

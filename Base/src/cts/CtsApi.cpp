@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #76 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -650,6 +650,21 @@ std::vector<std::string> CtsApi::alter(
          const std::string& value)
 {
    return CtsApi::alter(std::vector<std::string>(1,path),alterType,attrType,name,value);
+}
+
+std::vector<std::string> CtsApi::alter_sort(
+       const std::vector<std::string>& paths,
+       const std::string& sortable_attribute_name,
+       bool recursive)
+{
+   std::vector<std::string> retVec; retVec.reserve(2 + paths.size());
+
+   retVec.push_back("--alter");
+   retVec.push_back("sort");
+   retVec.push_back(sortable_attribute_name);
+   if ( recursive ) retVec.push_back("recursive");
+   std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
+   return retVec;
 }
 const char* CtsApi::alterArg() { return "alter"; }
 

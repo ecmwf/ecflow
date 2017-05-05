@@ -129,7 +129,6 @@ void triggers_menu_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	XtSetArg(al[ac], XmNsubMenuId, menu2); ac++;
 	XtSetValues ( triggers_menu, al, ac );
-	ac = 0;
 }
 
 void triggers_menu_c::reachCB( Widget widget, XtPointer client_data, XtPointer call_data )
@@ -269,7 +268,6 @@ void triggers_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	children[ac++] = form2;
 	XtManageChildren(children, ac);
-	ac = 0;
 }
 
 void triggers_form_c::linkCB( Widget widget, XtPointer client_data, XtPointer call_data )

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2016 ECMWF.
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -206,22 +206,31 @@ void NodeQueryEngine::runRecursively(VNode *node)
     //Execute the node part
     if(parser_->execute(node))
     {
+        //Then execute the attribute part
         if(!attrParser_.isEmpty())
         {
             QMap<VAttributeType*,BaseNodeCondition*>::const_iterator it = attrParser_.constBegin();
             while (it != attrParser_.constEnd())
-            {        
-                QList<VItemTmp_ptr> aLst;
-                it.key()->items(node,aLst);
-
-                Q_FOREACH(VItemTmp_ptr aItem,aLst)
+            {
+                //Process a given attribute type
+                const std::vector<VAttribute*>& av=node->attr();
+                bool hasType=false;
+                for(size_t i=0; i < av.size(); i++)
                 {
-                    VAttribute* a=aItem->attribute();
-                    Q_ASSERT(a);
-                    if(it.value()->execute(a))
+                    if(av[i]->type() == it.key())
                     {
-                        broadcastFind(node,a->data());
-                        scanCnt_++;
+                        hasType=true;
+                        if(it.value()->execute(av[i]))
+                        {
+                            broadcastFind(node,av[i]->data());
+                            scanCnt_++;
+                         }
+                    }
+                    //The the attribute vector elements are grouped by type.
+                    //So we leave the loop when we reach the next type group
+                    else if(hasType)
+                    {
+                        break;
                     }
                 }
                 ++it;
@@ -251,8 +260,7 @@ void NodeQueryEngine::broadcastFind(VNode* node,QStringList attr)
     if(!attr.isEmpty())
     {
         NodeQueryResultTmp_ptr d(new NodeQueryResultTmp(node,attr));
-        res_ << d;
-        //qDebug() << "RES" << attr;
+        res_ << d;       
     }
     else
     {

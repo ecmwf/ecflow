@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #4 $ 
 //
-// Copyright 2009-2016 ECMWF. 
+// Copyright 2009-2017 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -69,7 +69,8 @@ public:
  	virtual void visitNodeState(AstNodeState*){}
  	virtual void visitEventState(AstEventState*){}
  	virtual void visitNode(AstNode*);
-  	virtual void visitVariable(AstVariable*);
+   virtual void visitVariable(AstVariable*);
+   virtual void visitFlag(AstFlag*);
 
 private:
 	void addExtern(const std::string& absNodePath, const std::string& var = "");

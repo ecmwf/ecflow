@@ -146,7 +146,6 @@ void panel_top_c::create (Widget parent, char *widget_name)
 	children[ac++] = tab_;
 	children[ac++] = menubar_;
 	XtManageChildren(children, ac);
-	ac = 0;
 	XtManageChild ( form_);
 }
 

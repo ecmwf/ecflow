@@ -934,7 +934,6 @@ XtSetArg(al[ac],XmNmnemonic,'m'); ac++;        /* mnemonic */
 	children[ac++] = menu_bar;
 	children[ac++] = separator5;
 	XtManageChildren(children, ac);
-	ac = 0;
 	XtManageChild ( form_);
 }
 
