@@ -68,3 +68,8 @@ void CodeItemWidget::on_fontSizeDownTb__clicked()
 	//We need to call a custom slot here instead of "zoomOut"!!!
 	textEdit_->slotZoomOut();
 }
+
+void CodeItemWidget::on_reloadTb__clicked()
+{
+    reloadRequested();
+}

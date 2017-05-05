@@ -45,6 +45,7 @@
 #include "Suite.hpp"
 #include "CheckPt.hpp"
 #include "Archive.hpp"
+#include "Attr.hpp"
 
 class Limit;
 class AbstractObserver;
@@ -59,6 +60,7 @@ public:
 
    ~Defs();
 
+   void copy_defs_state_only(defs_ptr defs); // needed when creating defs for client handles
    bool operator==(const Defs& rhs) const;
    std::ostream& print(std::ostream&) const ;
 
@@ -169,6 +171,10 @@ public:
    /// returns true if defs has cron,time,day,date or today time dependencies
    bool hasTimeDependencies() const;
 
+   /// recursively sort the attributes
+   // expect one attr to be [ event | meter | label | limits | variable ]
+   void sort_attributes(ecf::Attr::Type attr, bool recursive = true);
+
    /// This function is called when ALL definition has been parsed successfully
    /// Client Side:: The client side has externs, hence any references to node paths
    ///               in the triggers expression, that are un-resolved and not in
@@ -239,8 +245,8 @@ public:
    void order(Node* immediateChild, NOrder::Order);
 
    /// determines why the node is not running.
-   void top_down_why(std::vector<std::string>& theReasonWhy) const;
-   void why(std::vector<std::string>& theReasonWhy) const;
+   void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const; // return true if why found
 
    /// Function to save the defs as a checkpoint file. File saved to the file name
    /// Can throw exception

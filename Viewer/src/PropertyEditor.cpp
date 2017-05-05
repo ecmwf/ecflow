@@ -27,7 +27,8 @@
 PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent), 
     group_(0),
     currentGrid_(0),
-	holder_(0)
+    holder_(0),
+    lineLabelLen_(-1)
 {
     setupUi(this);
 
@@ -103,8 +104,28 @@ void PropertyEditor::build()
         addItem(vProp,vb,holder_);
     }
 
+    addRules();
     addHelpers();
 }
+
+void PropertyEditor::addRules()
+{
+    Q_FOREACH(PropertyLine* line,lineItems_)
+    {
+        if(VProperty* ruleProp=line->ruleProperty())
+        {
+            Q_FOREACH(PropertyLine* ll,lineItems_)
+            {
+                if(ll->property() == ruleProp)
+                {
+                    line->addRuleLine(ll);
+                    break;
+                }
+            }
+        }
+    }
+}
+
 
 void PropertyEditor::addHelpers()
 {
@@ -193,7 +214,18 @@ PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout,Q
 
         if(lw)
         {
-        	gridLayout->addWidget(lw,row,0,Qt::AlignLeft);
+            //If lineLabelLen_ is set we adjust the size of the
+            //line labels so that the editor widgets could be aligned
+            if(lineLabelLen_ > 0)
+            {
+                QFont f;
+                QFontMetrics fm(f);
+                QString s;
+                s=s.leftJustified(lineLabelLen_,'A');
+                lw->setMinimumWidth(fm.width(s));
+            }
+
+            gridLayout->addWidget(lw,row,0,Qt::AlignLeft);
 
             if(slw)
             {
@@ -509,6 +541,14 @@ void PropertyEditor::addTab(VProperty* vProp,QTabWidget* tab)
     
     tab->addTab(w,vProp->param("label"));
     
+
+    if(!vProp->param("adjustLineLabel").isEmpty())
+    {
+        lineLabelLen_=vProp->param("adjustLineLabel").toInt();
+        if(lineLabelLen_ <= 0 || lineLabelLen_ > 300)
+            lineLabelLen_=-1;
+    }
+
     Q_FOREACH(VProperty* chProp,vProp->children())
     {
         addItem(chProp,vb,w);

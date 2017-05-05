@@ -56,7 +56,7 @@ public:
     explicit InfoPanel(QWidget* parent=0);
 	virtual ~InfoPanel();
 	bool frozen() const;
-	void clear();
+    void clear();
 	void setCurrent(const std::string& name);
     void linkSelected(VInfo_ptr);
 
@@ -68,6 +68,8 @@ public:
 	void rerender();
     void writeSettings(VSettings*);
 	void readSettings(VSettings*);
+    void writeSettingsForDialog();
+    void readSettingsForDialog();
 
 	//From VInfoObserver
     void notifyDelete(VInfo*) {}
@@ -101,7 +103,8 @@ protected:
     void detachedChanged();
 
 private:
-	void reset(VInfo_ptr node);
+    void localClear();
+    void reset(VInfo_ptr node);
 	void adjustInfo(VInfo_ptr node);
     void adjustTabs(VInfo_ptr node);
 	InfoPanelItemHandler* findHandler(QWidget* w);

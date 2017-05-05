@@ -110,7 +110,7 @@ bool DayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 {
 	if (isFree(c))  return false;
 
-	theReasonWhy += " is day  dependent ( next run on ";
+	theReasonWhy += " is day dependent ( next run on ";
 	theReasonWhy += theDay(day_);
 	theReasonWhy += " the current day is ";
 	theReasonWhy += theDay(static_cast<DayAttr::Day_t>(c.day_of_week()));

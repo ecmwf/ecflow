@@ -46,7 +46,8 @@ public:
 
 	static DState::State default_state() { return DState::QUEUED; }
 	static NState::State convert(DState::State);
-	static const char* toString(DState::State s);
+   static const char* toString(DState::State s);
+   static const char* to_html(DState::State s);
 	static const char* toString(const DState& ns) { return toString(ns.state());}
 	static DState::State toState(const std::string& state);
 	static bool isValid(const std::string& state);

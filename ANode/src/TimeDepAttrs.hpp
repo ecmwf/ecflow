@@ -100,7 +100,7 @@ public:
    bool set_memento(const NodeCronMemento*);
    bool set_memento(const NodeDateMemento*);
 
-   void why(std::vector<std::string>& theReasonWhy,const std::string& prefix) const;
+   bool why(std::vector<std::string>& theReasonWhy,const std::string& prefix) const; // return true if why found
    bool testTimeDependenciesForRequeue() const;
    void resetRelativeDuration();
 

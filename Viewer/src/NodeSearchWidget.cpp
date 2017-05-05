@@ -25,7 +25,6 @@
 
 #include <QtGlobal>
 #include <QCloseEvent>
-#include <QDebug>
 #include <QMessageBox>
 #include <QPalette>
 #include <QVBoxLayout>
@@ -185,7 +184,7 @@ void NodeSearchWidget::slotFind()
     }
 
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
-    qDebug() << engine_->isRunning();
+    UiLog().dbg() << " isRunning=" << engine_->isRunning();
 #endif
 
 	adjustColumns();
@@ -272,7 +271,7 @@ void NodeSearchWidget::slotQueryFinished()
     elapsed_=QTime();
 
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
-    qDebug() << engine_->isRunning();
+    UiLog().dbg() << " isRunning=" << engine_->isRunning();
     UiLog().dbg() << "<-- NodeSearchWidget::slotQueryFinished";
 #endif
 }

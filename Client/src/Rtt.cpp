@@ -73,7 +73,7 @@ std::string Rtt::analyis(const std::string& filename)
 {
    std::vector<std::string> lines;
    if (!File::splitFileIntoLines(filename,lines)) {
-      std::cout << "Rtt::analyis: could not open file " << filename << "\n";
+      std::cout << "Rtt::analyis: could not open file " << filename << " (" << strerror(errno) << ")\n";
       return string();
    }
 

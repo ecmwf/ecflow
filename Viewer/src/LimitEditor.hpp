@@ -16,7 +16,10 @@
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
+#include <QStringList>
+
 class LimitEditor;
+class QStringListModel;
 
 class LimitEditorWidget :  public QWidget, protected Ui::LimitEditorWidget
 {
@@ -30,21 +33,28 @@ class LimitEditor : public AttributeEditor
 Q_OBJECT
 public:
     LimitEditor(VInfo_ptr,QWidget* parent=0);
+    ~LimitEditor();
 
 protected Q_SLOTS:
-    void slotValueChanged(int);
     void slotMaxChanged(int);
+    void slotRemove();
+    void slotRemoveAll();
 
 protected:
     void resetValue();
     void apply();
     bool isValueChanged();
+    void buildList(VAttribute *a);
+    void remove(bool all);
+    void nodeChanged(const std::vector<ecf::Aspect::Type>& a);
     void readSettings();
     void writeSettings();
 
     LimitEditorWidget* w_;
     int oriVal_;
     int oriMax_;
+    QStringListModel* model_;
+    QStringList modelData_;
 };
 
 #endif // LIMITEDITOR_HPP

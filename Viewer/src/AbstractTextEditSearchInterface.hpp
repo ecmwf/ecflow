@@ -22,7 +22,7 @@ class AbstractTextEditSearchInterface
 {
 public:
 	AbstractTextEditSearchInterface();
-	virtual ~AbstractTextEditSearchInterface() {};
+    virtual ~AbstractTextEditSearchInterface() {}
 
 	virtual bool findString (QString str, bool highlightAll, QTextDocument::FindFlags findFlags,
 							 QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode)=0;

@@ -32,7 +32,7 @@ public:
  	static STC_Cmd_ptr block_client_on_home_server_cmd();
  	static STC_Cmd_ptr block_client_zombie_cmd();
 
-   static STC_Cmd_ptr defs_cmd(AbstractServer*, bool save_edit_history);
+   static STC_Cmd_ptr defs_cmd(AbstractServer*, bool migrate); // save edit history and children even if hidden
    static STC_Cmd_ptr node_cmd(AbstractServer*,node_ptr);
 	static STC_Cmd_ptr stats_cmd(AbstractServer*);
 	static STC_Cmd_ptr suites_cmd(AbstractServer*);

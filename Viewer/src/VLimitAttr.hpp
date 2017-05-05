@@ -31,6 +31,9 @@ public:
     VAttributeType* type() const;
     QStringList data() const;
     std::string strName() const;
+    QStringList paths() const;
+    void removePaths(const std::vector<std::string>& paths);
+    void resetPaths();
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };

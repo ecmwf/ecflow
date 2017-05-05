@@ -13,15 +13,15 @@
 #include "ui_TreeNodeWidget.h"
 
 #include "NodeWidget.hpp"
+#include "VProperty.hpp"
 
 class AttributeFilter;
 class NodeStateFilter;
 class ServerFilter;
 class VParamFilterMenu;
 class VSettings;
-
-
-class TreeNodeWidget : public NodeWidget, protected Ui::TreeNodeWidget
+class VTreeServer;
+class TreeNodeWidget : public NodeWidget, public VPropertyObserver, protected Ui::TreeNodeWidget
 {
 Q_OBJECT
 
@@ -32,24 +32,35 @@ public:
 	void populateDockTitleBar(DashboardDockTitleWidget* tw);
 
 	void rerender();
-	bool selectFirstServerInView();
+    bool initialSelectionInView();
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
+
+    void notifyChange(VProperty*);
 
 protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
 	void slotSelectionChangedInView(VInfo_ptr info);
 	void slotAttsChanged();
+    void firstScanEnded(const VTreeServer*);
 
 protected:
-	void initAtts();
+    enum ViewLayoutMode {StandardLayoutMode,CompactLayoutMode};
+
+    void initAtts();
     void detachedChanged() {}
+    void setViewLayoutMode(ViewLayoutMode);
 
 	VParamFilterMenu *stateFilterMenu_;
 	VParamFilterMenu *attrFilterMenu_;
 	VParamFilterMenu *iconFilterMenu_;
 
+    ViewLayoutMode viewLayoutMode_;
+    VProperty* layoutProp_;
+
 	static AttributeFilter* lastAtts_;
+
+    std::string firstSelectionPath_;
 };
 
 #endif

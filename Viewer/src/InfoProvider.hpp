@@ -103,4 +103,10 @@ public:
 	 explicit ZombieProvider(InfoPresenter* owner);
 };
 
+class WhyProvider : public InfoProvider
+{
+public:
+     explicit WhyProvider(InfoPresenter* owner);
+};
+
 #endif

@@ -12,6 +12,11 @@
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+# 
+# Handle bugs, produced by old versions of ecflow_client --migrate
+#   - Mostly to do with handling newlines
+#
+
 import os          # for getenv
 import shutil      # used to remove directory tree
 #import argparse   # requires python 2.7

@@ -21,7 +21,12 @@
                   } 
             },
             "tree": {
-            	
+                "layoutStyle" : {
+                    "label" : "Tree layout style",
+                    "default" : "standard",
+                    "values"  : "standard/compact",
+                    "values_label" : "Standard/Compact"
+                },
                 "nodeFont" : {
 					"label" : "Nodes",
 					"default": "font(,)"
@@ -34,29 +39,37 @@
 				
 				"display_child_count" : {
 					"label" : "Display number of children for servers/suites",
-					"default": "true"
+                    "default": "false"
 				}, 
 
                 "displayNodeType" : {
                     "label" : "Display node type",
-                    "default": "true"
+                    "default": "false"
                 },
 
 				"background"  : {
 				    "label"   :  "Background colour",
-				    "default" : "rgb(250,250,250)"
+                    "default" : "rgb(242,242,242)"
 				},
                 "indentation" : {
                     "label" : "Indentation",
                     "suffix" : "pixels",
                     "default" : "10",
                     "min" : "0",
-                    "max" : "100"  
+                    "max" : "100",
+                    "disabledRule" : "layoutStyle=compact"
                  },
                  "drawBranchLine" : {
                      "label" : "Draw branch lines",
-                     "default": "false"
+                     "default": "false",
+                     "disabledRule" : "layoutStyle=compact"
                   },
+                 "branchLineColour" : {
+                      "label" : "Branch line colour",
+                      "default": "rgb(137,137,137)",
+                      "disabledRule" : "layoutStyle=standard"
+                   },
+
                  "defaultAttributes" : {
                     "label" : "Default visible attributes",
                     "default" : "meter/event/repeat/trigger/label/time/date/limit/limiter/late",
@@ -103,22 +116,52 @@
                     "default" : "rgb(0,0,255)"
                 },
                 "meterFillColour"  : {
-                    "label"   : "Meter colour",
+                    "label"   : "Meter progress colour",
                     "default" : "rgb(0,0,255)"
                 },
                 "meterThresholdColour"  : {
                     "label"   : "Meter threshold colour",
                     "default" : "rgb(0,0,255)"
                 },
+                "limitShape"  : {
+                    "label"   : "Limit shape",
+                    "default" : "circle",
+                    "values"  : "rectangle/circle",
+                    "values_label" : "rectangle/circle"
+                },
                 "limitFillColour"  : {
-                    "label"   : "Limit colour",
-                    "default" : "rgb(0,255,0)"
+                    "label"   : "Limit fill colour",
+                    "default" : "rgb(11,234,11)"
                 },
                 "limitExtraFillColour"  : {
                     "label"   : "Limit exceed colour",
+                    "default" : "rgb(254,3,0)"
+                },
+                "triggerBackground"  : {
+                    "label"   : "Trigger background colour",
+                    "default" : "rgb(230,230,230)"
+                },
+                "triggerBorderColour"  : {
+                    "label"   : "Trigger border colour",
+                    "default" : "rgb(150,150,150)"
+                },
+                "triggerFontColour"  : {
+                    "label"   : "Trigger font colour",
+                    "default" : "rgb(0,0,0)"
+                },
+                "completeBackground"  : {
+                    "label"   : "Complete background colour",
+                    "default" : "rgb(230,230,230)"
+                },
+                "completeBorderColour"  : {
+                    "label"   : "Complete border colour",
+                    "default" : "rgb(150,150,150)"
+                },
+                "completeFontColour"  : {
+                    "label"   : "Complete font colour",
                     "default" : "rgb(0,0,255)"
-            }
-            },
+                }
+           },
 
            "textEdit" : {
 			     

@@ -41,6 +41,7 @@
 #include "Indentor.hpp"
 #include "AbstractObserver.hpp"
 #include "CheckPtContext.hpp"
+#include "SuiteChanged.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -86,10 +87,26 @@ Defs::Defs(const Defs& rhs) :
    // std::vector<AbstractObserver*> observers_;
 }
 
+void Defs::copy_defs_state_only(defs_ptr server_defs)
+{
+   if ( !server_defs ) return;
+
+   // Initialise the defs state. We need to reflect the real state.
+   set_state( server_defs->state() );
+
+   // initialise flag
+   flag_ = server_defs->get_flag();
+
+   // Initialise the server state
+   set_server().set_state(     server_defs->server().get_state() );
+   set_server().set_user_variables( server_defs->server().user_variables() );
+   set_server().set_server_variables( server_defs->server().server_variables() );
+}
+
 Defs& Defs::operator=(const Defs& rhs)
 {
    if (this != &rhs) {
-      Defs tmp(rhs);
+      Defs tmp(rhs);  // does *NOT* use Suite::operator=(const Suite& rhs), we use copy/swap
 
       std::swap(state_,tmp.state_);
       std::swap(server_,tmp.server_);
@@ -506,6 +523,18 @@ void Defs::requeue()
    set_most_significant_state();
 }
 
+void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive)
+{
+   if (attr == ecf::Attr::VARIABLE) server_.sort_variables();
+
+   if (recursive) {
+      size_t theSuiteVecSize = suiteVec_.size();
+      for(size_t s = 0; s < theSuiteVecSize; s++) {
+         SuiteChanged changed(suiteVec_[s]);
+         suiteVec_[s]->sort_attributes(attr,recursive);
+      }
+   }
+}
 
 void Defs::check_suite_can_begin(suite_ptr suite) const
 {
@@ -1278,25 +1307,29 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 	}
 }
 
-void Defs::top_down_why(std::vector<std::string>& theReasonWhy) const
+void Defs::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   why(theReasonWhy);
-	size_t theSuiteVecSize = suiteVec_.size();
-	for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->top_down_why(theReasonWhy);}
+   bool why_found = why(theReasonWhy,html_tags);
+   if (!why_found) {
+      size_t theSuiteVecSize = suiteVec_.size();
+      for(size_t s = 0; s < theSuiteVecSize; s++) { (void)suiteVec_[s]->top_down_why(theReasonWhy,html_tags);}
+   }
 }
 
-void Defs::why(std::vector<std::string>& theReasonWhy) const
+bool Defs::why(std::vector<std::string>& theReasonWhy,bool html) const
 {
    if (isSuspended()) {
       std::string the_reason = "The server is *not* RUNNING.";
       theReasonWhy.push_back(the_reason);
+      return true;
    }
    else if (state() != NState::QUEUED && state() != NState::ABORTED) {
       std::stringstream ss;
-      ss << "The definition state(" << NState::toString(state()) << ") is not queued or aborted.";
+      if (html)  ss << "The definition state(" << NState::to_html(state()) << ") is not queued or aborted.";
+      else       ss << "The definition state(" << NState::toString(state()) << ") is not queued or aborted.";
       theReasonWhy.push_back(ss.str());
    }
-   server_.why(theReasonWhy);
+   return server_.why(theReasonWhy);
 }
 
 std::string Defs::toString() const

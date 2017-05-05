@@ -92,7 +92,9 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
 
    errorMsg += "Could not open file specified by ECF_PASSWD ";
    errorMsg += passwd_file_;
-   errorMsg += "\n";
+   errorMsg += " (";
+   errorMsg += strerror(errno);
+   errorMsg += ")";
    if (debug)  std::cout << dump() << "\n";
    return false;
 }
@@ -309,6 +311,9 @@ bool PasswdFile::clear(
       return true;
    }
    errorMsg += "PasswdFile::clear: Could not open file ";
-   errorMsg += errorMsg;
+   errorMsg += pathToFile;
+   errorMsg += " (";
+   errorMsg += strerror(errno);
+   errorMsg += ")";
    return false;
 }

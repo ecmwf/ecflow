@@ -14,6 +14,8 @@
 //============================================================================
 #include <assert.h>
 #include <iostream>
+#include <boost/bind.hpp>
+
 #include "ServerState.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
@@ -23,6 +25,7 @@
 
 using namespace ecf;
 using namespace std;
+using namespace boost;
 
 // When a Defs is loaded into a server:
 //       	o the jobSubmissionInterval_ is set
@@ -130,6 +133,20 @@ bool ServerState::compare(const ServerState& rhs) const
    }
    return true;
 }
+
+void ServerState::sort_variables()
+{
+   variable_state_change_no_ = Ecf::incr_state_change_no();
+
+   sort(user_variables_.begin(),user_variables_.end(),boost::bind(Str::caseInsLess,
+                              boost::bind(&Variable::name,_1),
+                              boost::bind(&Variable::name,_2)));
+
+   sort(server_variables_.begin(),server_variables_.end(),boost::bind(Str::caseInsLess,
+                              boost::bind(&Variable::name,_1),
+                              boost::bind(&Variable::name,_2)));
+}
+
 
 // server variable can NOT be modified or deleted, only overridden
 void ServerState::add_or_update_server_variables( const NameValueVec& env)
@@ -472,8 +489,9 @@ void ServerState::setup_default_server_variables(std::vector<Variable>&  server_
 }
 
 /// determines why the node is not running.
-void ServerState::why(std::vector<std::string>& theReasonWhy) const
+bool ServerState::why(std::vector<std::string>& theReasonWhy) const
 {
-   if (server_state_ == SState::HALTED)   theReasonWhy.push_back("The server is halted");
-   if (server_state_ == SState::SHUTDOWN) theReasonWhy.push_back("The server is shutdown");
+   if (server_state_ == SState::HALTED)   { theReasonWhy.push_back("The server is halted"); return true;}
+   if (server_state_ == SState::SHUTDOWN) { theReasonWhy.push_back("The server is shutdown"); return true;}
+   return false;
 }

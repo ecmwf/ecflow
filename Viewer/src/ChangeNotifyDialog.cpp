@@ -25,6 +25,8 @@
 #include <QSettings>
 #include <QVariant>
 
+Q_DECLARE_METATYPE(QList<int>)
+
 ChangeNotifyDialogWidget::ChangeNotifyDialogWidget(QWidget *parent) :
     QWidget(parent),
 	notifier_(0)
@@ -111,6 +113,46 @@ void ChangeNotifyDialogWidget::slotDoubleClickItem(const QModelIndex&)
 
 }
 
+void ChangeNotifyDialogWidget::writeSettings(QSettings& settings)
+{
+    QList<int> wVec;
+    for(int i=0; i < tree_->model()->columnCount(QModelIndex()); i++)
+    {
+        wVec.push_back(tree_->columnWidth(i));
+    }
+    settings.setValue("colWidth",QVariant::fromValue(wVec));
+}
+
+void ChangeNotifyDialogWidget::readSettings(const QSettings& settings)
+{
+    QList<int> wVec;
+    if(settings.contains("colWidth"))
+    {
+       wVec=settings.value("colWidth").value<QList<int> >();
+       if(wVec.count() >0 && wVec[0] < 1)
+           wVec.clear();
+    }
+
+    if(!wVec.isEmpty())
+    {
+        for(int i=0; i < tree_->model()->columnCount(QModelIndex()); i++)
+        {
+            if(wVec.count() > i && wVec[i] > 0)
+                tree_->setColumnWidth(i,wVec[i]);
+        }
+    }
+    else
+    {
+        if(tree_->model()->columnCount(QModelIndex()) > 1)
+        {
+            QFont f;
+            QFontMetrics fm(f);
+            tree_->setColumnWidth(0,fm.width("serverserverserver"));
+            tree_->setColumnWidth(1,fm.width("/suite1/family1/family2/family3/family4/task"));
+        }
+    }
+}
+
 //===========================================================
 //
 // ChangeNotifyDialog
@@ -167,6 +209,8 @@ void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
 		updateStyleSheet(notifier->prop());
 
 	decorateTab(idx,notifier);
+
+    readTabSettings(tab_->count()-1);
 }
 
 void ChangeNotifyDialog::slotContentsChanged()
@@ -459,7 +503,14 @@ void ChangeNotifyDialog::writeSettings()
 	settings.beginGroup("main");
 	settings.setValue("size",size());
 	settings.setValue("clearOnClose",clearOnCloseCb_->isChecked());
-	settings.endGroup();
+    settings.endGroup();
+
+    for(int i=0; i < tab_->count(); i++)
+    {
+        settings.beginGroup("tab_" + QString::number(i));
+        tabWidgets_[i]->writeSettings(settings);
+        settings.endGroup();
+    }
 }
 
 void ChangeNotifyDialog::readSettings()
@@ -476,7 +527,7 @@ void ChangeNotifyDialog::readSettings()
 	}
 	else
 	{
-	  	resize(QSize(440,380));
+        resize(QSize(540,460));
 	}
 
 	if(settings.contains("clearOnClose"))
@@ -485,4 +536,19 @@ void ChangeNotifyDialog::readSettings()
 	}
 
 	settings.endGroup();
+
+    //The tab settings are read when the actual tabs are created later.
+}
+
+void ChangeNotifyDialog::readTabSettings(int tabIndex)
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("ChangeNotifyDialog")),
+                   QSettings::NativeFormat);
+
+    settings.beginGroup("tab_" + QString::number(tabIndex));
+    Q_ASSERT(tab_->count() > tabIndex);
+    tabWidgets_[tabIndex]->readSettings(settings);
+    settings.endGroup();
 }

@@ -22,7 +22,6 @@
 #include "NodeObserver.hpp"
 #include "SessionHandler.hpp"
 #include "ServerComQueue.hpp"
-#include "ServerComThread.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerObserver.hpp"
 #include "SuiteFilter.hpp"
@@ -76,7 +75,17 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	conf_=new VServerSettings(this);
 
 	//Create the client invoker. At this point it is empty.
-	client_=new ClientInvoker(host,port);
+    try
+    {
+        client_=new ClientInvoker(host,port);
+    }
+    catch(std::exception& e)
+    {
+        UiLog().err() << "Could not create ClientInvoker for host=" << host <<
+                         " port= " << port << ". " <<  e.what();
+        client_=0;
+    }
+
 	client_->set_retry_connection_period(1);
 	client_->set_throw_on_error(true);
 
@@ -108,26 +117,9 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	// issues; another strategy would be to create threads on demand, only
 	// when server communication is about to start.
 
-	//We create a ServerComThread here. It is not a member, because we will
-	//pass its ownership on to ServerComQueue. At this point the thread is not doing anything.
-	ServerComThread* comThread=new ServerComThread(this,client_);
-
-	//The ServerComThread is observing the actual server and its nodes. When there is a change it
-	//emits a signal to notify the ServerHandler about it.
-	connect(comThread,SIGNAL(nodeChanged(const Node*, std::vector<ecf::Aspect::Type>)),
-					 this,SLOT(slotNodeChanged(const Node*, std::vector<ecf::Aspect::Type>)));
-
-	connect(comThread,SIGNAL(defsChanged(std::vector<ecf::Aspect::Type>)),
-				     this,SLOT(slotDefsChanged(std::vector<ecf::Aspect::Type>)));
-
-	connect(comThread,SIGNAL(rescanNeed()),
-					 this,SLOT(slotRescanNeed()));
-
-
 	//Create the queue for the tasks to be sent to the client (via the ServerComThread)! It will
-	//take ownership of the ServerComThread. At this point the queue has not started yet.
-	comQueue_=new ServerComQueue (this,client_,comThread);
-
+    //create and take ownership of the ServerComThread. At this point the queue has not started yet.
+    comQueue_=new ServerComQueue (this,client_);
 
 	//Load settings
 	loadConf();
@@ -211,7 +203,9 @@ void ServerHandler::startRefreshTimer()
 
     if(!refreshTimer_->isActive())
 	{
-        refreshTimer_->setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
+        int rate=conf_->intValue(VServerSettings::UpdateRate);
+        if(rate <=0) rate=1;
+        refreshTimer_->setInterval(rate*1000);
         refreshTimer_->start();
 	}
 
@@ -235,12 +229,16 @@ void ServerHandler::updateRefreshTimer()
 	if(connectState_->state() == ConnectState::Disconnected)
 		return;
 
+    int rate=conf_->intValue(VServerSettings::UpdateRate);
+    if(rate <=0) rate=1;
+
     if(refreshTimer_->isActive())
 	{
         refreshTimer_->stop();
-        refreshTimer_->setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
-        refreshTimer_->start();
-	}
+    }
+
+    refreshTimer_->setInterval(rate*1000);
+    refreshTimer_->start();
 
 #ifdef __UI_SERVERUPDATE_DEBUG
     UiLog(this).dbg() << " refreshTimer interval: " << refreshTimer_->interval();
@@ -282,7 +280,13 @@ void ServerHandler::setActivity(Activity ac)
 ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port)
 {
 	ServerHandler* sh=new ServerHandler(name,host,port);
-	return sh;
+    //Without the clinetinvoker we cannot use the serverhandler
+    if(!sh->client_)
+    {
+        delete sh;
+        sh=0;
+    }
+    return sh;
 }
 
 void ServerHandler::removeServer(ServerHandler* server)

@@ -79,6 +79,11 @@ std::string SessionItem::serverFile(const std::string& serverName) const
 	return DirectoryHandler::concatenate(dirPath_, serverName + ".conf.json");
 }
 
+std::string SessionItem::infoPanelDialogFile() const
+{
+    return DirectoryHandler::concatenate(dirPath_, "info_panel_dialog.json");
+}
+
 std::string SessionItem::qtDir() const
 {
     return qtPath_;

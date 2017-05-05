@@ -17,10 +17,13 @@ set(viewer_srcs
     ChangeNotifyModel.cpp
     ChangeNotifyWidget.cpp
     CodeItemWidget.cpp
-    ConnectState.cpp
     ComboMulti.cpp
     CommandDesignerWidget.cpp
+    CompactView.cpp
+    CompactNodeView.cpp
+    CompactNodeViewDelegate.cpp
     ConfigListDelegate.cpp
+    ConnectState.cpp
     CustomCommandDialog.cpp
     CustomCommandHandler.cpp
     CustomListWidget.cpp
@@ -34,14 +37,16 @@ set(viewer_srcs
     EditItemWidget.cpp
     EditProvider.cpp
     EditorInfoLabel.cpp
-    ExpandState.cpp
+    ExpandStateNode.cpp
     FlagSet.hpp
     FileInfoLabel.cpp
     FileWatcher.cpp
     FilterWidget.cpp
+    FontMetrics.cpp
     GotoLineDialog.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
+    HtmlItemWidget.cpp
     IconProvider.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp   
@@ -52,7 +57,6 @@ set(viewer_srcs
     LabelEditor.cpp
     LimitEditor.cpp
     LineEdit.cpp
-    #LogEvent.cpp
     LogModel.cpp
     LogProvider.cpp  
     LogTruncator.cpp
@@ -105,6 +109,7 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
+    RectMetrics.cpp
     RepeatEditor.cpp
     SaveSessionAsDialog.cpp
     ScriptItemWidget.cpp
@@ -135,6 +140,9 @@ set(viewer_srcs
     TableNodeView.cpp
     TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
+    RichTextEdit.cpp
+    RichTextSearchInterface.cpp
+    RichTextSearchLine.cpp
     TextEditSearchLine.cpp
     TimeItemWidget.cpp    
     TriggerBrowser.cpp
@@ -146,6 +154,7 @@ set(viewer_srcs
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
+    TreeNodeViewDelegateBase.cpp
     TreeNodeWidget.cpp
     TreeView.cpp
     TriggerCollector.cpp
@@ -229,9 +238,11 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
     ChangeNotifyWidget.hpp
-    ComboMulti.hpp
-    CommandDesignerWidget.hpp
     CodeItemWidget.hpp
+    ComboMulti.hpp
+    CommandDesignerWidget.hpp    
+    CompactView.hpp
+    CompactNodeView.hpp
     CustomCommandDialog.hpp
     CustomListWidget.hpp
     Dashboard.hpp
@@ -244,6 +255,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     FilterWidget.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
+    HtmlItemWidget.hpp
     InfoPanel.hpp
     InputEventLog.hpp
     LabelEditor.hpp
@@ -282,6 +294,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     PropertyLine.hpp
     SaveSessionAsDialog.hpp
     RepeatEditor.hpp
+    RichTextEdit.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
     ServerHandler.hpp
@@ -301,7 +314,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextEditSearchLine.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp           
-    TreeNodeViewDelegate.hpp
+    TreeNodeViewDelegateBase.hpp
     TreeNodeWidget.hpp
     TriggerBrowser.hpp
     TriggerEditor.hpp
@@ -342,7 +355,8 @@ set(viewer_wrap_ui_files
     EditItemWidget.ui
     GotoLineDialog.ui
     HistoryItemWidget.ui
-    InfoPanel.ui    
+    HtmlItemWidget.ui
+    InfoPanel.ui
     LabelEditorWidget.ui
     LimitEditorWidget.ui
     MainWindow.ui

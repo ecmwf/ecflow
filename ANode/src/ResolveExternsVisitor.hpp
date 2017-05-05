@@ -69,7 +69,8 @@ public:
  	virtual void visitNodeState(AstNodeState*){}
  	virtual void visitEventState(AstEventState*){}
  	virtual void visitNode(AstNode*);
-  	virtual void visitVariable(AstVariable*);
+   virtual void visitVariable(AstVariable*);
+   virtual void visitFlag(AstFlag*);
 
 private:
 	void addExtern(const std::string& absNodePath, const std::string& var = "");

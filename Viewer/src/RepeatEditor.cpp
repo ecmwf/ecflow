@@ -12,6 +12,7 @@
 
 #include <QtGlobal>
 #include <QIntValidator>
+#include <QItemSelectionModel>
 #include <QStringListModel>
 #include <QSettings>
 
@@ -102,8 +103,7 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
 
 RepeatEditor::~RepeatEditor()
 {
-    //if(repeat_)
-    //    delete repeat_;
+    writeSettings();
 }
 
 void RepeatEditor::buildList(VRepeatAttr *rep)
@@ -120,9 +120,9 @@ void RepeatEditor::buildList(VRepeatAttr *rep)
 
     modelData_.clear();
     int cnt=end-start;
-    if(cnt >1 && cnt < 100)
+    if(cnt >1)
     {
-        for(size_t i=start; i <= end; i++)
+        for(size_t i=start; i < end; i++)
             modelData_ << QString::fromStdString(rep->value(i));
 
         model_=new QStringListModel(this);
@@ -130,8 +130,11 @@ void RepeatEditor::buildList(VRepeatAttr *rep)
         w_->valueView_->setModel(model_);
         w_->valueView_->setCurrentIndex(model_->index(current,0));
 
-        connect(w_->valueView_,SIGNAL(activated(const QModelIndex&)),
-           this,SLOT(slotSelectedInView(const QModelIndex&)));
+        connect(w_->valueView_->selectionModel(),
+              SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+              this, SLOT(slotSelectedInView(QModelIndex,QModelIndex)));
+
+        w_->valueView_->setFocus(Qt::MouseFocusReason);
     }
     else
     {
@@ -139,9 +142,9 @@ void RepeatEditor::buildList(VRepeatAttr *rep)
     }
 }
 
-void RepeatEditor::slotSelectedInView(const QModelIndex& idx)
+void RepeatEditor::slotSelectedInView(const QModelIndex &current, const QModelIndex &previous)
 {
-    setValue(idx.data().toString());
+    setValue(current.data().toString());
     checkButtonStatus();
 }
 

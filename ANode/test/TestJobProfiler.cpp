@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
 
    // Check the log file, has the profiling
    std::string log_file_contents;
-   BOOST_CHECK_MESSAGE(File::open(log_path,log_file_contents), "Could not open log file at " << log_path);
+   BOOST_CHECK_MESSAGE(File::open(log_path,log_file_contents), "Could not open log file at " << log_path<< " (" << strerror(errno) << ")");
    BOOST_CHECK_MESSAGE(!log_file_contents.empty(),"log file is is empty ?");
    BOOST_CHECK_MESSAGE(log_file_contents.find("Exceeds ECF_TASK_THRESHOLD") != std::string::npos, "Exceeds ECF_TASK_THRESHOLD  not in profile");
 

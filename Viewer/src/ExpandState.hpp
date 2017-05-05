@@ -8,47 +8,35 @@
 //
 //============================================================================
 
-#ifndef EXPANDNODE_HPP_
-#define EXPANDNODE_HPP_
+#ifndef EXPANDSTATE_HPP_
+#define EXPANDSTATE_HPP_
 
 #include <string>
-#include <vector>
 
-#include <QList>
+#include <QPersistentModelIndex>
 
 class TreeNodeModel;
 class QModelIndex;
-class QTreeView;
 class VTreeNode;
+class ExpandStateNode;
 
-class ExpandStateNode
+template <typename View> class ExpandState;
+
+template <typename View>
+class ExpandState
 {
-	friend class TreeNodeView;
+    friend class TreeNodeView;
+    friend class CompactNodeView;
 
 public:
-    explicit ExpandStateNode(const std::string& name) : name_(name) {}
-    ExpandStateNode() : name_("") {}
-    ~ExpandStateNode();
-
-	void clear();
-    ExpandStateNode* add(const std::string&);
-
-    std::vector<ExpandStateNode*> children_;
-	std::string name_;
-
-};
-
-class ExpandStateTree
-{
-	friend class TreeNodeView;
-
-public:
-    explicit ExpandStateTree(QTreeView*,TreeNodeModel*);
-    ~ExpandStateTree();
+    explicit ExpandState(View*,TreeNodeModel*);
+    ~ExpandState();
 
     bool rootSameAs(const std::string&) const;
     void save(const VTreeNode*);
     void restore(const VTreeNode*);
+
+    void collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>&);
 
 protected:
 	void clear();
@@ -56,30 +44,15 @@ protected:
     ExpandStateNode* root() const {return root_;}
     void save(ExpandStateNode*,const QModelIndex&);
     void restore(ExpandStateNode*,const VTreeNode*);
+    void collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
+                 const QModelIndex& nodeIdx,QSet<QPersistentModelIndex>& theSet);
 
-    QTreeView* view_;
+    View* view_;
     TreeNodeModel* model_;
     ExpandStateNode* root_;
 };
 
-class ExpandState
-{
-    friend class TreeNodeView;
-
-public:
-    ExpandState(QTreeView*,TreeNodeModel*);
-    ~ExpandState();
-    ExpandStateTree* add();
-    void remove(ExpandStateTree*);
-    void clear();
-    QList<ExpandStateTree*> items() const {return items_;}
-
-protected:
-    QTreeView* view_;
-    TreeNodeModel* model_;
-    QList<ExpandStateTree*> items_;
-
-};
+#include "ExpandState.cpp"
 
 #endif
 

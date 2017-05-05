@@ -149,7 +149,7 @@ int main(int argc, char **argv)
     //Start the GUI
 	if (startMainWindow)
 	{
-		//Build the GUI
+        //Build the GUI
 		MainWindow::init();
 
 		//Show all the windows

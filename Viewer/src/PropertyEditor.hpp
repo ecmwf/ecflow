@@ -40,6 +40,7 @@ Q_SIGNALS:
 private:
     void clear();
     void build();
+    void addRules();
     void addHelpers();
 
     void addItem(VProperty*,QVBoxLayout*,QWidget*);
@@ -58,6 +59,7 @@ private:
     QList<PropertyLine*> lineItems_;
     QString serverName_;
     QWidget* holder_;
+    int lineLabelLen_;
 };
 
 

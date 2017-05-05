@@ -24,6 +24,7 @@
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
+#include <QContextMenuEvent>
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -113,6 +114,9 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
     {
         connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
                 this,SLOT(slotSelectionChanged(VInfo_ptr)));
+
+        connect(w,SIGNAL(maximisedChanged(DashboardWidget*)),
+                this,SLOT(slotMaximisedChanged(DashboardWidget*)));
     }
 
 	return w;
@@ -142,6 +146,11 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 {
 	//Get a unique dockId stored as objectName
 	QString dockId=uniqueDockId();
+
+    if(hasMaximised())
+    {
+        resetMaximised();
+    }
 
     DashboardWidget* w=addWidget(type,dockId.toStdString());
 
@@ -189,6 +198,8 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 
     connect(dw,SIGNAL(closeRequested()),
     		this,SLOT(slotDockClose()));
+
+    checkMaximisedState();
 
     return w;
 }
@@ -274,8 +285,15 @@ void Dashboard::slotDockClose()
 		{
 			widgets_.removeOne(dw);
 			disconnect(this,0,dw,0);
-			dw->deleteLater();
+
+            if(dw->isMaximised())
+                resetMaximised();
+
+            checkMaximisedState();
+
+            dw->deleteLater();
 		}
+        dock->deleteLater();
 	}
 }
 
@@ -310,7 +328,7 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
 	{
 		if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
 		{
-            ip->setDetached(true);
+            //ip->setDetached(true);
             ip->slotReload(info);
             ip->setCurrent(name.toStdString());
 		}
@@ -328,6 +346,88 @@ void Dashboard::slotCommand(VInfo_ptr info,QString cmd)
 	{
 		addSearchDialog(info);
 	}
+}
+
+//-------------------------------
+// Maximise panel
+//-------------------------------
+
+void Dashboard::slotMaximisedChanged(DashboardWidget* w)
+{
+    QList<DashboardDock*> dLst=findChildren<DashboardDock*>(QString());
+
+    //maximise the given panel
+    if(w->isMaximised())
+    {
+        bool hasMaxApp=hasMaximisedApplied();
+        //nothing can be maximised in practice at this point
+        Q_ASSERT(hasMaxApp == false);
+        savedDockState_=saveState();
+
+        Q_FOREACH(DashboardDock* d,dLst)
+        {
+            if(d->widget() == w)
+                d->setVisible(true);
+            else
+            {
+                DashboardWidget* dw=static_cast<DashboardWidget*>(d->widget());
+                Q_ASSERT(dw);
+                dw->resetMaximised();
+                d->setVisible(false);
+            }
+        }
+    }
+    //restore the previous state
+    else
+    {
+        resetMaximised();
+    }
+}
+
+bool Dashboard::hasMaximised() const
+{
+    for(int i=0; i < widgets_.count(); i++)
+    {
+        if(widgets_[i]->isMaximised())
+            return true;
+    }
+    return false;
+}
+
+bool Dashboard::hasMaximisedApplied() const
+{
+    QList<DashboardDock*> dLst=findChildren<DashboardDock*>(QString());
+    Q_FOREACH(DashboardDock* d,dLst)
+    {
+        if(d->isVisible() == false)
+            return true;
+    }
+    return false;
+}
+
+void Dashboard::resetMaximised()
+{
+    QList<DashboardDock*> dLst=findChildren<DashboardDock*>(QString());
+    Q_FOREACH(DashboardDock* d,dLst)
+    {
+        DashboardWidget* dw=static_cast<DashboardWidget*>(d->widget());
+        Q_ASSERT(dw);
+        dw->resetMaximised();
+        d->setVisible(true);
+    }
+
+    if(!savedDockState_.isEmpty())
+    {
+        restoreState(savedDockState_);
+        savedDockState_.clear();
+    }
+}
+
+void Dashboard::checkMaximisedState()
+{
+    bool st=(widgets_.count() > 1);
+    for(int i=0; i < widgets_.count(); i++)
+        widgets_.at(i)->setEnableMaximised(st);
 }
 
 //------------------------
@@ -394,7 +494,10 @@ void Dashboard::writeSettings(VComboSettings* vs)
 	serverFilter_->writeSettings(vs);
 
 	//Qt settings
-	vs->putQs("state",saveState());
+    if(savedDockState_.isEmpty() == false)
+        vs->putQs("state",savedDockState_);
+    else
+        vs->putQs("state",saveState());
 
 	//Other setting
 	vs->put("widgetCount",findChildren<QDockWidget*>().count());
@@ -453,7 +556,7 @@ void Dashboard::readSettings(VComboSettings* vs)
 		restoreState(vs->getQs("state").toByteArray());
 	}
 
-	selectFirstServerInView();
+    initialSelectionInView();
 
 	settingsAreRead_=false;
 }
@@ -466,11 +569,11 @@ void Dashboard::slotInfoPanelSelection(VInfo_ptr info)
 #endif
 
 
-void Dashboard::selectFirstServerInView()
+void Dashboard::initialSelectionInView()
 {
 	Q_FOREACH(DashboardWidget* w,widgets_)
 	{
-		if(w->selectFirstServerInView())
+        if(w->initialSelectionInView())
 		{
 			return;
 		}
@@ -557,6 +660,13 @@ void Dashboard::notifyServerFilterDelete()
 {
 	//if(!settingsAreRead_)
 	//	Q_EMIT contentsChanged();
+}
+
+//We need to do this in order to prevent the dock window context menu from popping up.
+//See ECFLOW-894
+void Dashboard::contextMenuEvent(QContextMenuEvent * e)
+{
+    e->accept();
 }
 
 

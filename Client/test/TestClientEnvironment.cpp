@@ -42,8 +42,11 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_parsing )
    std::string good_host_file = File::test_data("Client/test/data/good_hostfile","Client");
 
 	// local host should be implicitly added to internal host list
+   std::string the_host = ClientEnvironment::hostSpecified();
+   if (the_host.empty()) the_host = Str::LOCALHOST();
+
 	std::vector<std::string> expectedHost;
-	expectedHost.push_back(Str::LOCALHOST());
+	expectedHost.push_back(the_host);
 	expectedHost.push_back("host1");
 	expectedHost.push_back("host2");
 	expectedHost.push_back("host3");
@@ -171,31 +174,27 @@ BOOST_AUTO_TEST_CASE( test_client_environment_errors )
       putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
    }
 
+   std::string the_host = ClientEnvironment::hostSpecified();
+   if (the_host.empty()) the_host = Str::LOCALHOST();
+
    {
       // ONLY run this test if enviroment variable ECF_PORT not defined
       std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
-      env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":xx";
+      env += the_host; env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":xx";
       BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
       BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
       putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
    }
    {
       std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
-      env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += "xx";
-      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
-      BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
-      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
-   }
-   {
-      std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
-      env += Str::LOCALHOST(); env += Str::DEFAULT_PORT_NUMBER(); env += "12";
+      env += the_host; env += Str::DEFAULT_PORT_NUMBER(); env += "12";
       BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
       BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
       putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
    }
    {
       std::stringstream ss;
-      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222," << Str::LOCALHOST() << ":" << Str::DEFAULT_PORT_NUMBER() << ":xx";
+      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222," << the_host << ":" << Str::DEFAULT_PORT_NUMBER() << ":xx";
       std::string env = ss.str();
       BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
       BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
@@ -215,9 +214,13 @@ BOOST_AUTO_TEST_CASE( test_client_environment )
    }
 
    std::cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER" << endl;
+
+   std::string the_host = ClientEnvironment::hostSpecified();
+   if (the_host.empty()) the_host = Str::LOCALHOST();
+
    {
       std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
-      env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":11";
+      env += the_host; env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":11";
       BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
       ClientEnvironment client_env;
       BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==11,"Expected 11 but found " << client_env.allow_new_client_old_server() << " for env " << env);
@@ -225,7 +228,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment )
    }
    {
       std::stringstream ss;
-      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222," << Str::LOCALHOST() << ":" << Str::DEFAULT_PORT_NUMBER() << ":" << 33;
+      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222," << the_host << ":" << Str::DEFAULT_PORT_NUMBER() << ":" << 33;
       std::string env = ss.str();
       BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
       ClientEnvironment client_env;
@@ -252,6 +255,4 @@ BOOST_AUTO_TEST_CASE( test_client_environment )
    }
 }
 
-
 BOOST_AUTO_TEST_SUITE_END()
-

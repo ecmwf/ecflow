@@ -66,3 +66,10 @@ std::string VItemPathParser::encode(const std::string& path,const std::string& t
     return "[" + type + "]" + path;
 }
 
+std::string VItemPathParser::encodeWithServer(const std::string& server,const std::string& path,const std::string& type)
+{
+    if(type.empty())
+        return path;
+
+    return "[" + type + "]" + server + ":/" + path;
+}

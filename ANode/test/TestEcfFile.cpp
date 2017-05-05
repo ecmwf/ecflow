@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
 
    // Open the job file/
    std::string job_file_contents;
-   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location << " (" << strerror(errno) << ")");
 
    std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
    BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n" <<expected_job_file_contents << "' but found \n" <<  job_file_contents << "'");
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_495 )
 
    // Open the job file and check job file contents match what we expected
    std::string job_file_contents;
-   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
 
    std::string expected_job_file_contents = "#a.h\n#b.h\nparallel --gnu --verbose -j $PAR_THR ${run:-0} ::: $(seq 0 50)";
    BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n'" << expected_job_file_contents << "' but found \n'" <<  job_file_contents << "'");
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
 
       // Open the job file and check contents
       std::string job_file_contents;
-      BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+      BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
       std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
       BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n'" <<expected_job_file_contents << "' but found:\n'" <<  job_file_contents << "'");
    }
@@ -386,7 +386,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_file )
 
    // Open the job file/
    std::string job_file_contents;
-   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
 
    /// Remove all the generated files
    boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
@@ -462,7 +462,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_multi_paths_ECFLOW_261 )
 
    // Open the job file
    std::string job_file_contents;
-   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
 
    /// Remove all the generated files
    boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
@@ -548,7 +548,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_ECFLOW_274 )
 
    // Open the job file
    std::string job_file_contents;
-   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
 
    /// Remove all the generated files. This occasionally fails on ecgb/lxg ???
    try { boost::filesystem::remove_all( ecf_home + suite->absNodePath() ); }
@@ -914,7 +914,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
 
     // Open the job file/
     std::string job_file_contents;
-    BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+    BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
 
     // Test the contents of the job file.
 //    cout << "\n" << job_file_contents << "\n";
@@ -1004,7 +1004,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_includenoop )
    // Open the job file and check the contents
    BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected job File " << job_file_location << " to exist");
    std::string job_file_contents;
-   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
 
    // Test the contents of the job file. We expect includenopp to be expanded
    // The contents should be left as is: i.e no pre_processing,hence expect to find %manual %comment, %VARIABLES%
@@ -1094,7 +1094,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_override_ECF_JOB )
    // Open the job file and check the contents
    BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected job File " << job_file_location << " to exist");
    std::string job_file_contents;
-   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+   BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
    BOOST_CHECK_MESSAGE( !job_file_contents.empty(),"Job should not be empty");
 
    // Remove all the generated files
@@ -1305,7 +1305,7 @@ static void basic_test_template(
 
       // Open the job file, make sure it matches our expected file
       std::string job_file_contents;
-      BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+      BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
       BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n" <<expected_job_file_contents << "' but found \n" <<  job_file_contents << "'");
    }
    else {
@@ -1327,7 +1327,7 @@ BOOST_AUTO_TEST_CASE( test_includeonce )
    ecf_file += "%includeonce <simple_tail.h>\n";
    ecf_file += "%include <simple_tail.h>\n";
 
-   std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
+   std::string expected_job_file_contents = "#head.h\n#head.h\n#body\n#tail.h\n#tail.h";
 
    basic_test_template("test_includeonce",ecf_file,expected_job_file_contents);
 }

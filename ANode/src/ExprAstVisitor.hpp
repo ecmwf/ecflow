@@ -44,6 +44,7 @@ class AstNodeState;
 class AstEventState;
 class AstNode;
 class AstVariable;
+class AstFlag;
 
 namespace ecf {
 
@@ -73,7 +74,8 @@ public:
  	virtual void visitNodeState(AstNodeState*) = 0;
  	virtual void visitEventState(AstEventState*) = 0;
  	virtual void visitNode(AstNode*) = 0;
- 	virtual void visitVariable(AstVariable*) = 0;
+   virtual void visitVariable(AstVariable*) = 0;
+   virtual void visitFlag(AstFlag*) = 0;
 };
 
 class AstResolveVisitor : public ExprAstVisitor {
@@ -105,7 +107,8 @@ public:
  	virtual void visitNodeState(AstNodeState*){}
  	virtual void visitEventState(AstEventState*){}
  	virtual void visitNode(AstNode*);
-  	virtual void visitVariable(AstVariable*);
+   virtual void visitVariable(AstVariable*);
+   virtual void visitFlag(AstFlag*);
 
 private:
 	const Node* triggerNode_;
@@ -139,7 +142,8 @@ public:
  	virtual void visitNodeState(AstNodeState*){}
  	virtual void visitEventState(AstEventState*){}
  	virtual void visitNode(AstNode*);
-  	virtual void visitVariable(AstVariable*);
+   virtual void visitVariable(AstVariable*);
+   virtual void visitFlag(AstFlag*);
 
 private:
  	std::set<Node*>& theSet_;

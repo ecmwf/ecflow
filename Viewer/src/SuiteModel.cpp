@@ -9,8 +9,6 @@
 
 #include "SuiteModel.hpp"
 
-#include <QDebug>
-
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "VNode.hpp"
@@ -153,7 +151,6 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 	//{
 	//	return QVariant();
 	//}
-	//qDebug() << "data" << index << role;
 
 	int row=index.row();
 	if(row < 0 || row >= data_->count())

@@ -55,4 +55,8 @@ void AstAnalyserVisitor::visitNode(AstNode* astNode)
 
 void AstAnalyserVisitor::visitVariable(AstVariable* astVar){}
 
+void AstAnalyserVisitor::visitFlag(AstFlag* astVar)
+{
+}
+
 }

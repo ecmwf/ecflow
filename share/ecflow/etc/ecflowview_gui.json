@@ -108,14 +108,22 @@
                     "label"  : "Tree view",
 
                     "group" : {
+                        "title" : "Style",
+                        "prefix" : "view",
+
+                        "line" : "tree.layoutStyle",
+                        "line" : "common.node_style"
+                    },
+
+                    "group" : {
                         "title" : "Options",
                         "prefix" : "view",
 
-                        "line" : "common.node_style",
                         "line" : "tree.displayNodeType",
                         "line" : "tree.display_child_count",
                         "line" : "tree.indentation",
                         "line" : "tree.drawBranchLine",
+                        "line" : "tree.branchLineColour",
                         "line" : "tree.background"
                     },
                     "group" : {
@@ -148,17 +156,37 @@
                 },
                 "tab" : {
 
+                    "prefix" : "view.attribute",
                     "label"  : "Attributes",
+                    "adjustLineLabel" : "25",
 
                     "group" : {
-                        "title" : "Options",
+                        "title" : "Events",
                         "prefix" : "view.attribute",
-
-                        "line" : "eventFillColour",
+                        "line" : "eventFillColour"
+                    },
+                    "group" : {
+                        "title" : "Meters",
+                        "prefix" : "view.attribute",
                         "line" : "meterFillColour",
-                        "line" : "meterThresholdColour",
+                        "line" : "meterThresholdColour"
+                    },
+                    "group" : {
+                        "title" : "Limits",
+                        "prefix" : "view.attribute",
+                        "line" : "limitShape",
                         "line" : "limitFillColour",
-                        "line" : "limitExtraFillColour"
+                        "line" : "limitExtraFillColour"    
+                    },
+                    "group" : {
+                        "title" : "Triggers",
+                        "prefix" : "view.attribute",
+                        "line" : "triggerBackground",
+                        "line" : "triggerBorderColour",
+                        "line" : "triggerFontColour",
+                        "line" : "completeBackground",
+                        "line" : "completeBorderColour",
+                        "line" : "completeFontColour"
                     }
                 }
             }

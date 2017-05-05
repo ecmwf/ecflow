@@ -20,6 +20,7 @@
 #include "TestHelper.hpp"
 #include "Str.hpp"
 #include "System.hpp"
+#include "Ecf.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -571,9 +572,9 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
    {   // test add limit
       TestStateChanged changed(s);
-      s->addLimit( Limit("limit",10) );
-      s->addLimit( Limit("limit1",10) );
-      s->addLimit( Limit("limit2",10) );
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit","10")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit1","10")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit2","10")));
       BOOST_CHECK_MESSAGE( s->limits().size() == 3, "expected 3  but found " <<  s->limits().size());
 
       // test delete limit
@@ -601,6 +602,21 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LIMIT_PATH,"limit_name","made_up_path")));
       limit_ptr lm = s->find_limit("limit_name");
       BOOST_CHECK_MESSAGE( lm.get() && lm->paths().empty(), "Expected no paths but found " << lm->paths().size());
+   }
+
+   {   // test add inlimit
+       TestStateChanged changed(s);
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"limit_name")));
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"limit_name1","11")));
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit:limit_name2")));
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit:limit_name3","10")));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 4, "expected 4  but found " <<  s->inlimits().size());
+
+       // test delete limit
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"limit_name")));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 3, "expected 3 but found " <<  s->inlimits().size());
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT)));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 0, "expected 0  but found " <<  s->inlimits().size());
    }
 
    {   // test add repeat
@@ -795,6 +811,101 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
    }
 }
 
+
+void add_sortable_attributes(Node* node) {
+   node->add_variable("varz","-");
+   node->add_variable("vary","-");
+   node->add_variable("vara","-");
+   node->addEvent(Event("zevent"));
+   node->addEvent(Event("aevent"));
+   node->addEvent(Event(1));
+   node->addEvent(Event(2));
+   node->addMeter(Meter("zmeter",1,100));
+   node->addMeter(Meter("ameter",1,100));
+   node->addLabel(Label("zlabel","-"));
+   node->addLabel(Label("alabel","-"));
+   node->addLimit(Limit("zlimit",10));
+   node->addLimit(Limit("ylimit",10));
+   node->addLimit(Limit("xlimit",10));
+}
+void add_sorted_attributes(Node* node) {
+   node->add_variable("vara","-");
+   node->add_variable("vary","-");
+   node->add_variable("varz","-");
+   node->addEvent(Event(1));
+   node->addEvent(Event(2));
+   node->addEvent(Event("aevent"));
+   node->addEvent(Event("zevent"));
+   node->addMeter(Meter("ameter",1,100));
+   node->addMeter(Meter("zmeter",1,100));
+   node->addLabel(Label("alabel","-"));
+   node->addLabel(Label("zlabel","-"));
+   node->addLimit(Limit("xlimit",10));
+   node->addLimit(Limit("ylimit",10));
+   node->addLimit(Limit("zlimit",10));
+}
+
+BOOST_AUTO_TEST_CASE( test_alter_sort_attributes )
+{
+   cout << "Base:: ...test_alter_sort_attributes\n";
+
+   Defs defs;
+   defs.set_server().add_or_update_user_variables("z","z");
+   defs.set_server().add_or_update_user_variables("y","y");
+   defs.set_server().add_or_update_user_variables("x","x");
+   suite_ptr s = defs.add_suite("suite"); add_sortable_attributes(s.get());
+   family_ptr f1 = s->add_family("f1");   add_sortable_attributes(f1.get());
+   task_ptr t1 = f1->add_task("t1");      add_sortable_attributes(t1.get());
+
+   Defs sorted_defs;sorted_defs.flag().set(ecf::Flag::MESSAGE); // take into account alter
+   sorted_defs.set_server().add_or_update_user_variables("x","x");
+   sorted_defs.set_server().add_or_update_user_variables("y","y");
+   sorted_defs.set_server().add_or_update_user_variables("z","z");
+   suite_ptr ss = sorted_defs.add_suite("suite"); add_sorted_attributes(ss.get());
+   family_ptr sf1 = ss->add_family("f1");         add_sorted_attributes(sf1.get());
+   task_ptr st1 = sf1->add_task("t1");            add_sorted_attributes(st1.get());
+
+   {
+      TestDefsStateChanged chenged(&defs);
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","event","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","meter","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","label","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","limit","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","variable","recursive")));
+      Ecf::set_debug_equality(true);
+      BOOST_CHECK_MESSAGE(defs == sorted_defs,"Sort failed expected\n" << sorted_defs << "\nbut found\n" << defs);
+      Ecf::set_debug_equality(false);
+    }
+}
+
+BOOST_AUTO_TEST_CASE( test_alter_sort_attributes_for_task )
+{
+   cout << "Base:: ...test_alter_sort_attributes_for_task\n";
+
+   Defs defs;
+   suite_ptr s = defs.add_suite("suite"); add_sortable_attributes(s.get());
+   family_ptr f1 = s->add_family("f1");   add_sortable_attributes(f1.get());
+   task_ptr t1 = f1->add_task("t1");      add_sortable_attributes(t1.get());
+
+   Defs sorted_defs;//sorted_defs.flag().set(ecf::Flag::MESSAGE); // take into account alter
+   suite_ptr ss = sorted_defs.add_suite("suite");  add_sortable_attributes(ss.get());
+   family_ptr sf1 = ss->add_family("f1");          add_sortable_attributes(sf1.get());
+   task_ptr st1 = sf1->add_task("t1");             add_sorted_attributes(st1.get());
+   st1->flag().set(ecf::Flag::MESSAGE);
+   {
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"event","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"meter","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"label","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"limit","recursive")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"variable","recursive")));
+      Ecf::set_debug_equality(true);
+      BOOST_CHECK_MESSAGE(defs == sorted_defs,"Sort failed expected\n" << sorted_defs << "\nbut found\n" << defs);
+      Ecf::set_debug_equality(false);
+    }
+}
+
 BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
 {
    cout << "Base:: ...test_alter_cmd_errors\n";
@@ -818,6 +929,14 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_PID","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_VERSION","a")));
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd("/",AlterCmd::ADD_VARIABLE,"ECF_LISTS","a")));
+
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit")));      // no limit value
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,"limit","xx"))); // value not convertible to integer
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LIMIT,".1","10")));    // not a valid name
+
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"")));           // no inlimit value
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/limit")));     // limit path, but no name
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/tolimit:limit","xx"))); // tokens must be convertible to an integer
    }
 
    /// Destroy singleton's to avoid valgrind from complaining

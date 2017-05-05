@@ -10,8 +10,6 @@
 
 #include "VNode.hpp"
 
-#include <QDebug>
-
 #include "Node.hpp"
 #include "Variable.hpp"
 
@@ -834,21 +832,31 @@ bool VNode::isAlias() const
 }
 #endif
 
+std::string VNode::flagsAsStr() const
+{
+    return (node_)?node_->flag().to_string():std::string();
+}
+
 bool VNode::isFlagSet(ecf::Flag::Type f) const
 {
-	if(node_ && node_.get())
+    if(node_)
 	{
 		return node_->flag().is_set(f);
 	}
 	return false;
 }
 
-void VNode::why(std::vector<std::string>& theReasonWhy) const
+void VNode::why(std::vector<std::string>& bottomUp,
+                std::vector<std::string>& topDown) const
 {
     if(node_)
 	{
-		node_->bottom_up_why(theReasonWhy);
-	}
+        node_->bottom_up_why(bottomUp,1);
+        if(isFamily() || isSuite())
+        {
+           node_->top_down_why(topDown,1);
+        }
+    }
 }
 
 const std::string& VNode::abortedReason() const
@@ -941,10 +949,6 @@ void VNode::triggers(TriggerCollector* tlc)
             //Add the found items to the collector
             for(std::vector<VItem*>::iterator it = theVec.begin(); it != theVec.end(); ++it)
             {
-#ifdef _UI_VNODE_DEBUG
-                //if((*it)->parent() && (*it)->parent()->absNodePath() == "/e_41r2_peter/main")
-                //    qDebug() << "trigger ast:" << (*it)->name() << *it;
-#endif
                 tlc->add(*it,nullItem, TriggerCollector::Normal);
             }
         }
@@ -965,7 +969,7 @@ void VNode::triggers(TriggerCollector* tlc)
                 if(VAttribute* n = findLimit(val, a->strName()))
                 {
 #ifdef _UI_VNODE_DEBUG
-                    //qDebug() << "trigger limit:" << n->name();
+                    UiLog().dbg() << "trigger limit: " << n->name();
 #endif                   
                     tlc->add(n,nullItem, TriggerCollector::Normal);
                 }
@@ -1738,10 +1742,14 @@ void VServer::why(std::vector<std::string>& theReasonWhy) const
 	if (!defs)
 		return;
 
-	defs->why(theReasonWhy);
+    defs->why(theReasonWhy,1);
 }
 
 
+std::string VServer::flagsAsStr() const
+{
+    return cache_.flag_.to_string();
+}
 
 bool VServer::isFlagSet(ecf::Flag::Type f) const
 {

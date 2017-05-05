@@ -24,7 +24,6 @@ UserMessage::UserMessage()
 
 void UserMessage::message(MessageType type, bool popup, const std::string& message)
 {
-
     if (echoToCout_)
     {
 #if 0
@@ -53,15 +52,16 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
     if (popup)
     {
         QMessageBox::Icon icon;
+        QString title;
         switch (type)
         {
-            case INFO:  icon = QMessageBox::Information; break;
-            case WARN:  icon = QMessageBox::Warning;     break;
-            case ERROR: icon = QMessageBox::Critical;    break;
-            case DBG:   icon = QMessageBox::NoIcon;      break;
-            default:    icon = QMessageBox::NoIcon;      break;
+            case INFO:  icon = QMessageBox::Information; title="Info"; break;
+            case WARN:  icon = QMessageBox::Warning;     title="Warning";    break;
+            case ERROR: icon = QMessageBox::Critical;    title="Error";   break;
+            case DBG:   icon = QMessageBox::NoIcon;      title="Debug";   break;
+            default:    icon = QMessageBox::NoIcon;      title="Info";     break;
         }
-        QString title("EcFlowUI");
+        title="ecFlowUI - " + title;
         QString qmsg = QString::fromStdString(message);
 
         QMessageBox box(icon, title, qmsg);

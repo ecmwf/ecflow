@@ -43,7 +43,7 @@ public:
     ~RepeatEditor();
 
 protected Q_SLOTS:
-    void slotSelectedInView(const QModelIndex&);
+    void slotSelectedInView(const QModelIndex&,const QModelIndex&);
 
 protected:
     void buildList(VRepeatAttr *rep);

@@ -10,7 +10,6 @@
 #include "VariableItemWidget.hpp"
 
 #include <QClipboard>
-#include <QDebug>
 #include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QMessageBox>
@@ -739,8 +738,8 @@ void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelInd
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     UiLog().dbg() << "VariableItemWidget::slotItemSelected -->";
-    qDebug() << "  current:" << idx << "prev:" << prevIdx;
-    qDebug() << "  in view:" << varView->currentIndex();
+    UiLog().dbg() << "  current: " << idx << " prev: " << prevIdx;
+    UiLog().dbg() << "  in view: " << varView->currentIndex();
 #endif
 
     checkActionState();

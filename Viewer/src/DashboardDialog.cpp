@@ -53,26 +53,33 @@ void DashboardDialog::add(DashboardWidget* dw)
 
 	layout_->insertWidget(0,dw_,1);
 
-    connect(dw_,SIGNAL(titleUpdated(QString)),
-            this,SLOT(slotUpdateTitle(QString)));
+    connect(dw_,SIGNAL(titleUpdated(QString,QString)),
+            this,SLOT(slotUpdateTitle(QString,QString)));
 
     dw_->populateDialog();
+    dw_->readSettingsForDialog();
 }
 
 void DashboardDialog::reject()
 {
-	writeSettings();
+    if(dw_)
+        dw_->writeSettingsForDialog();
+
+    writeSettings();
 	QDialog::reject();
 }
 
 void DashboardDialog::closeEvent(QCloseEvent * event)
 {
+    if(dw_)
+        dw_->writeSettingsForDialog();
+
     Q_EMIT aboutToClose();
     event->accept();
 	writeSettings();
 }
 
-void DashboardDialog::slotUpdateTitle(QString txt)
+void DashboardDialog::slotUpdateTitle(QString txt,QString /*type*/)
 {
     setWindowTitle(txt.remove("<b>").remove("</b>"));
 }

@@ -15,6 +15,8 @@
 
 #include "DirectoryHandler.hpp"
 #include "ServerItem.hpp"
+#include "UserMessage.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 
 #include <algorithm>
@@ -22,6 +24,8 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
+
+#include <boost/lexical_cast.hpp>
 
 ServerList* ServerList::instance_=0;
 
@@ -70,14 +74,19 @@ ServerItem* ServerList::find(const std::string& name, const std::string& host, c
 	return 0;
 }
 
-ServerItem* ServerList::add(const std::string& name,const std::string& host,const std::string& port,bool favourite,bool saveIt)
+ServerItem* ServerList::add(const std::string& name,const std::string& host,
+                            const std::string& port,bool favourite,bool saveIt)
 {
-    //Check if there is an item with the same name. Names have to be unique!
-	if(find(name))
-		return 0;
+    std::string errStr;
+    if(!checkItemToAdd(name,host,port,true,errStr))
+    {
+        throw std::runtime_error(errStr);
+        return 0;
+    }
 
-	ServerItem* item=new ServerItem(name,host,port,favourite);
-	items_.push_back(item);
+    ServerItem* item=new ServerItem(name,host,port,favourite);
+
+    items_.push_back(item);
 
 	if(saveIt)
 		save();
@@ -175,6 +184,40 @@ void ServerList::rescan()
 
 }
 
+bool ServerList::checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,bool checkDuplicate,std::string& errStr)
+{
+    if(name.empty())
+    {
+        errStr="Empty server name";
+        return false;
+    }
+    else if(host.empty())
+    {
+        errStr="Empty server host";
+        return false;
+    }
+    else if(port.empty())
+    {
+        errStr="Empty server port";
+        return false;
+    }
+
+    try { boost::lexical_cast<int>(port); }
+    catch ( boost::bad_lexical_cast& e)
+    {
+        errStr="Invalid port number: " + port;
+        return false;
+    }
+
+    if(checkDuplicate && find(name))
+    {
+        errStr="Duplicated server name: " + name;
+        return false;
+    }
+
+    return true;
+}
+
 //===========================================================
 // Initialisation
 //===========================================================
@@ -195,17 +238,25 @@ void ServerList::init()
 
 bool ServerList::load()
 {
+    UiLog().dbg() << "ServerList::load() -->";
+
     std::ifstream in(localFile_.c_str());
 	if(!in.good())
 		return false;
 
+    std::string errStr;
+
 	std::string line;
+    int lineCnt=1;
 	while(getline(in,line))
 	{
 		//We ignore comment lines
 		std::string buf=boost::trim_left_copy(line);
 		if(buf.size() > 0 && buf.at(0) == '#')
-			continue;
+        {
+            lineCnt++;
+            continue;
+        }
 
 		std::vector<std::string> sv;
 		boost::split(sv,line,boost::is_any_of(","));
@@ -219,13 +270,38 @@ bool ServerList::load()
             sys=(sv[4]=="1")?true:false;
 
         if(sv.size() >= 3)
-		{
-            ServerItem* item=add(sv[0],sv[1],sv[2],favourite,false);
-            item->setSystem(sys);
+		{           
+            std::string name=sv[0], host=sv[1], port=sv[2];
+            ServerItem* item=0;
+            try
+            {
+                item=add(name,host,port,favourite,false);
+                UI_ASSERT(item != 0,"name=" << name << " host=" << host << " port=" << port);
+                item->setSystem(sys);
+            }
+            catch(std::exception& e)
+            {
+                std::string err=e.what();
+                err+=" [name=" + name + ",host=" + host + ",port=" + port + "]";
+                errStr+=err + " (in line " + UiLog::toString(lineCnt) + ")<br>";
+                UiLog().err() << "  " << err << " (in line " << lineCnt << ")";
+            }
 		}
+
+        lineCnt++;
 	}
 
 	in.close();
+
+    if(!errStr.empty())
+    {
+        errStr="Cound not parse the <b>server list file</b> (servers.txt) properly. The \
+                    following errors occured:<br><br>" +
+                errStr + "<br><i>Note</i>: ecFlowUi will carry on but not all the speciefied servers will be available!";
+        UserMessage::setEchoToCout(false);
+        UserMessage::message(UserMessage::ERROR,true,errStr);
+        UserMessage::setEchoToCout(true);
+    }
 
 	if(count() == 0)
 		return false;
@@ -238,7 +314,7 @@ void ServerList::save()
 	std::ofstream out;
     out.open(localFile_.c_str());
 	if(!out.good())
-		  	return;
+        return;
 
     out << "#Name Host Port Favourite System" << std::endl;
 
@@ -251,11 +327,12 @@ void ServerList::save()
 	out.close();    
 }
 
-
 bool ServerList::readRcFile()
 {
-	std::string path(DirectoryHandler::concatenate(DirectoryHandler::rcDir(), "servers"));
+    UiLog().dbg() << "ServerList::readRcFile -->";
+    std::string path(DirectoryHandler::concatenate(DirectoryHandler::rcDir(), "servers"));
 
+    UiLog().dbg() << " Read servers from ecflowview rcfile: " << path;
 	std::ifstream in(path.c_str());
 
 	if(in.good())
@@ -276,8 +353,19 @@ bool ServerList::readRcFile()
 			}
 
 			if(vec.size() >= 3)
-			{
-				add(vec[0],vec[1],vec[2],false,false);
+			{				
+                std::string name=vec[0], host=vec[1], port=vec[2];
+                ServerItem* item=0;
+                try
+                {
+                    add(name,host,port,false,false);
+                }
+                catch(std::exception& e)
+                {
+                    std::string err=e.what();
+                    UiLog().err() << " Failed to read server (name=" << name << ",host=" << host <<
+                                     ",port=" << port << "). " << err;
+                }
 			}
 		}
 	}
@@ -288,46 +376,6 @@ bool ServerList::readRcFile()
 
 	return true;
 }
-
-#if 0
-bool ServerList::readSystemFile()
-{
-	std::string path(DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers"));
-    std::ifstream in(path.c_str());
-
-	if(in.good())
-	{
-		std::string line;
-		while(getline(in,line))
-		{
-			std::string buf=boost::trim_left_copy(line);
-			if(buf.size() >0 && buf.at(0) == '#')
-					continue;
-
-			std::stringstream ssdata(line);
-			std::vector<std::string> vec;
-
-			while(ssdata >> buf)
-			{
-				vec.push_back(buf);
-			}
-
-			if(vec.size() >= 3)
-			{
-                ServerItem *item=add(vec[0],vec[1],vec[2],false,false);
-                item->setSystem(true);
-			}
-		}
-	}
-	else
-		return false;
-
-	in.close();
-
-	return true;
-}
-#endif
-
 
 bool ServerList::hasSystemFile() const
 {
@@ -337,9 +385,7 @@ bool ServerList::hasSystemFile() const
 
 void ServerList::syncSystemFile()
 {
-#ifdef _UI_SERVERLIST_DEBUG
     UiLog().dbg() << "ServerList::syncSystemFile -->";
-#endif
 
     std::vector<ServerListTmpItem> sysVec;
     std::ifstream in(systemFile_.c_str());
@@ -366,7 +412,11 @@ void ServerList::syncSystemFile()
 
             if(vec.size() >= 3)
             {
-                sysVec.push_back(ServerListTmpItem(vec[0],vec[1],vec[2]));
+                std::string errStr,name=vec[0], host=vec[1], port=vec[2];
+                if(checkItemToAdd(name,host,port,false,errStr))
+                {
+                    sysVec.push_back(ServerListTmpItem(vec[0],vec[1],vec[2]));
+                }
             }
         }
     }
@@ -417,10 +467,22 @@ void ServerList::syncSystemFile()
             UiLog().dbg() << "  name not in list -> import as system";
 #endif
             changed=true;
-            item=add(sysVec[i].name(),sysVec[i].host(),sysVec[i].port(), false, false);
-            item->setSystem(true);
-            syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],sysVec[i],
-                                     ServerListSyncChangeItem::AddedChange));
+            std::string name=sysVec[i].name(),host=sysVec[i].host(), port=sysVec[i].port();
+            try
+            {
+                item=add(name,host,port,false,false);
+                UI_ASSERT(item != 0,"name=" << name << " host=" << host
+                          << " port=" << port);
+                item->setSystem(true);
+                syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],sysVec[i],
+                                         ServerListSyncChangeItem::AddedChange));
+            }
+            catch(std::exception& e)
+            {
+                std::string err=e.what();
+                UiLog().err() << "  Could not sync server (name=" << name << ",host=" << host <<
+                                 "port=" << port << "). " << err;
+            }
             continue;
         }
         //There is a server with the same name but with different host or/and port

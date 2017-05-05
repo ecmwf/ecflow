@@ -25,7 +25,7 @@ public:
 
 private:
 	//The interface is set internally
-	void setSearchInterface(AbstractTextSearchInterface*) {};
+    void setSearchInterface(AbstractTextSearchInterface*) {}
 
 };
 

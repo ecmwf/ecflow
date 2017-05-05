@@ -22,11 +22,13 @@ public:
 
     ItemType  itemType() const {return itemType_;}
     const std::string type() const {return type_;}
-    const std::string server() const {return type_;}
+    const std::string server() const {return server_;}
     const std::string node() const {return node_;}
     const std::string attribute() const {return attribute_;}
 
     static std::string encode(const std::string& path,const std::string& type);
+    static std::string encodeWithServer(const std::string& server,const std::string& path,
+                                        const std::string& type);
 
 protected:
     ItemType itemType_;

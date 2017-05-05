@@ -36,7 +36,7 @@ VTriggerAttrType::VTriggerAttrType() : VAttributeType("trigger")
     dataCount_=3;
     searchKeyToData_["trigger_type"]=CompleteIndex;
     searchKeyToData_["trigger_expression"]=ExprIndex;
-    searchKeyToData_["name"]=CompleteIndex;
+    searchKeyToData_["name"]=TypeIndex;
     scanProc_=VTriggerAttr::scan;
 }
 
@@ -100,6 +100,11 @@ QStringList VTriggerAttr::data() const
         }
     }
     return s;
+}
+
+std::string VTriggerAttr::strName() const
+{
+    return std::string("trigger");
 }
 
 void VTriggerAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

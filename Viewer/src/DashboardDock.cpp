@@ -14,9 +14,11 @@
 #include <QPalette>
 
 #include "DashboardWidget.hpp"
+#include "IconProvider.hpp"
 
 DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
-		QWidget(parent)
+        QWidget(parent),
+        titleBc_(0)
 {
 	setupUi(this);
 
@@ -33,30 +35,54 @@ DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
 	p.setBrush(QPalette::Window,gr);
 	setPalette(p);
 
+    //Add warning icon
+    IconProvider::add(":viewer/warning.svg","warning");
+
+    //Title icon + text
 	p=titleLabel_->palette();
 	p.setColor(QPalette::WindowText,Qt::white);
 	titleLabel_->setPalette(p);
+    titleLabel_->hide();
+    titleIconLabel_->hide();
 
     detachedTb_->setProperty("docktitle","1");
+    maxTb_->setProperty("docktitle","1");
     optionsTb_->setProperty("docktitle","1");
     closeTb_->setProperty("docktitle","1");
+}
 
+void DashboardDockTitleWidget::setBcWidget(QWidget *w)
+{
+    Q_ASSERT(mainLayout->count() > 1);
+    Q_ASSERT(w);
+    titleBc_=w;
+    mainLayout->insertWidget(1,titleBc_,1);
 #if 0
-	//Set the initial state of the float tool button
-	if(QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget()))
-	{
-		if(!dw->features().testFlag(QDockWidget::DockWidgetFloatable))
-		{
-            //floatTb_->setEnabled(false);
-            floatTb_->hide();
-		}
-	}
+    for(int i=0; i < mainLayout->count(); i++)
+    {
+        if(QLayoutItem* item=mainLayout->itemAt(i))
+        {
+            if(item->widget() == titleIconLabel_)
+            {
+                titleBc_=w;
+                mainLayout->insertWidget(i,titleBc_,1);
+                return;
+            }
+        }
+    }
 #endif
+
+    Q_ASSERT(titleBc_);
 }
 
 void DashboardDockTitleWidget::setDetachedAction(QAction *ac)
 {
     detachedTb_->setDefaultAction(ac);
+}
+
+void DashboardDockTitleWidget::setMaximisedAction(QAction *ac)
+{
+    maxTb_->setDefaultAction(ac);
 }
 
 void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
@@ -70,12 +96,9 @@ void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
          tb->setPopupMode(QToolButton::InstantPopup);
          //tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-
          QPalette p=tb->palette();
          p.setColor(QPalette::ButtonText,Qt::white);
          tb->setPalette(p);
-
-
 
          actionLayout_->addWidget(tb);
 
@@ -150,9 +173,30 @@ void DashboardDockTitleWidget::on_closeTb__clicked(bool)
 	}
 }
 
-void DashboardDockTitleWidget::slotUpdateTitle(QString txt)
+void DashboardDockTitleWidget::slotUpdateTitle(QString txt,QString type)
 {
-	titleLabel_->setText(txt);
+    if(txt.isEmpty())
+    {
+       titleLabel_->hide();
+       titleIconLabel_->hide();
+    }
+    else
+    {
+        if(type == "warning")
+        {
+            titleIconLabel_->setPixmap(IconProvider::pixmap("warning",16));
+            titleIconLabel_->show();
+            txt.prepend(" ");
+            txt.append("  ");
+        }
+        else
+        {
+            titleIconLabel_->show();
+        }
+
+        titleLabel_->show();
+        titleLabel_->setText(txt);
+    }
 }
 
 //============================================================
@@ -171,10 +215,11 @@ DashboardDock::DashboardDock(DashboardWidget *dw,QWidget * parent) :
 	setTitleBarWidget(dt);
 
     dt->setDetachedAction(dw->detachedAction());
+    dt->setMaximisedAction(dw->maximisedAction());
 	dt->addActions(dw->dockTitleActions());
 
-	connect(dw,SIGNAL(titleUpdated(QString)),
-			dt,SLOT(slotUpdateTitle(QString)));
+    connect(dw,SIGNAL(titleUpdated(QString,QString)),
+            dt,SLOT(slotUpdateTitle(QString,QString)));
 
     dw->populateDockTitleBar(dt);
 

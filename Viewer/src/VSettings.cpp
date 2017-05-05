@@ -14,8 +14,6 @@
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 
-#include <QDebug>
-
 #include <sstream>
 
 #include <boost/algorithm/string/join.hpp>
@@ -295,7 +293,7 @@ void VComboSettings::putQs(const std::string& key,QVariant val)
 QVariant  VComboSettings::getQs(const std::string& key)
 {
 #ifdef _UI_SETTINGS_DEBUG
-    qDebug() << "qt group" << qs_.group();
+    UiLog().dbg() << "qt group " << qs_.group();
 #endif
 	return qs_.value(QString::fromStdString(key));
 }
@@ -305,7 +303,7 @@ void VComboSettings::beginGroup(const std::string &id)
 	VSettings::beginGroup(id);
 	qs_.beginGroup(QString::fromStdString(id));
 #ifdef _UI_SETTINGS_DEBUG
-	qDebug() << "qt group" << qs_.group();
+    UiLog().dbg() << "qt group " << qs_.group();
 #endif
 }
 

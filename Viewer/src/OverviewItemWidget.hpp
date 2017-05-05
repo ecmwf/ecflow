@@ -35,7 +35,8 @@ public:
 
 protected:
 	void reload();
-    void updateState(const ChangeFlags&) {}
+    void updateState(const ChangeFlags&);
+    void reloadRequested();
 
 	int lastScrollPos_;
 };

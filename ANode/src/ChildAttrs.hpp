@@ -25,6 +25,7 @@
 #include "NodeAttr.hpp"
 #include "NodeFwd.hpp"
 #include "Aspect.hpp"
+#include "Attr.hpp"
 
 class ChildAttrs :  private boost::noncopyable {
 public:
@@ -39,6 +40,7 @@ public:
    void begin();
    void requeue();
    void requeue_labels();
+   void sort_attributes( ecf::Attr::Type at);
 
    // standard functions: ==============================================
    std::ostream& print(std::ostream&) const;

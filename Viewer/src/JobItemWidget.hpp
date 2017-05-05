@@ -36,7 +36,8 @@ public:
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected:
-    void updateState(const ChangeFlags&) {}
+    void updateState(const ChangeFlags&);
+    void reloadRequested();
 };
 
 #endif

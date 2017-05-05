@@ -207,7 +207,6 @@ VInfo_ptr VInfo::createParent(VInfo_ptr info)
     return VInfo_ptr();
 }
 
-
 VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
 {
     if(!s || path.empty())
@@ -221,8 +220,8 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
     }
     else if(p.itemType() ==  VItemPathParser::NodeType)
     {
-        VNode* n=s->vRoot()->find(p.node());
-        return VInfoNode::create(n);
+        if(VNode* n=s->vRoot()->find(p.node()))
+            return VInfoNode::create(n);
 
     }
     else if(p.itemType() ==  VItemPathParser::AttributeType)
@@ -239,6 +238,22 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
     return VInfo_ptr();
 }
 
+VInfo_ptr VInfo::createFromPath(const std::string& path)
+{
+    if(path.empty())
+        return VInfo_ptr();
+
+    VItemPathParser p(path);
+    if(!p.server().empty())
+    {
+        if(ServerHandler* s=ServerHandler::find(p.server()))
+        {
+            return createFromPath(s,path);
+        }
+    }
+    return VInfo_ptr();
+}
+
 //=========================================
 //
 // VInfoServer
@@ -250,7 +265,7 @@ VInfoServer::VInfoServer(ServerHandler *server) : VInfo(server,NULL)
 	if(server_)
 	{
 		node_=server_->vRoot();
-        storedPath_="";
+        storedPath_=VItemPathParser::encodeWithServer(server_->name(),"/","server");
 	}
 }
 
@@ -294,7 +309,10 @@ VItem* VInfoServer::item() const
 VInfoNode::VInfoNode(ServerHandler* server,VNode* node) : VInfo(server,node)
 {
     if(node_)
-        storedPath_=VItemPathParser::encode(node_->absNodePath(),"node");
+    {
+        assert(server_);
+        storedPath_=VItemPathParser::encodeWithServer(server_->name(),node_->absNodePath(),"node");
+    }
 }
 
 VInfo_ptr VInfoNode::create(VNode *node)
@@ -369,7 +387,11 @@ VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att
         VInfo(server,node,attr)
 {
     if(attr_)
-        storedPath_=VItemPathParser::encode(attr_->fullPath(),attr_->typeName());
+    {
+        assert(server_);
+        storedPath_=VItemPathParser::encodeWithServer(server_->name(),
+                                                      attr_->fullPath(),attr_->typeName());
+    }
 }
 
 VInfoAttribute::~VInfoAttribute()
