@@ -130,3 +130,55 @@ void ExpandState<View>::restore(ExpandStateNode *expand,const VTreeNode* node)
         }
     }
 }
+
+template <typename View>
+void ExpandState<View>::collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>& theSet)
+{
+    if(!root_)
+        return;
+
+    if(node->vnode()->strName() != root_->name_)
+    {
+        clear();
+        return;
+    }
+
+    QModelIndex nodeIdx=model_->nodeToIndex(node);
+    collectExpanded(root_,node,nodeIdx,theSet);
+    clear();
+}
+
+
+template <typename View>
+void ExpandState<View>::collectExpanded(ExpandStateNode *expand,const VTreeNode* node,const QModelIndex& nodeIdx,
+                                QSet<QPersistentModelIndex>& theSet)
+{
+    //Lookup the node in the model
+    //QModelIndex nodeIdx=model_->nodeToIndex(node);
+    if(nodeIdx != QModelIndex())
+    {
+        theSet.insert(nodeIdx);
+        //view_->setExpanded(nodeIdx,true);
+    }
+    else
+    {
+        return;
+    }
+
+    for(int i=0; i < expand->children_.size(); i++)
+    {
+        ExpandStateNode *chExpand=expand->children_[i];
+        std::string name=chExpand->name_;
+
+        if(VTreeNode *chNode=node->findChild(name))
+        {
+            QModelIndex chIdx=model_->nodeToIndex(chNode);
+            if(chIdx != QModelIndex())
+            {
+                //setExpanded(chIdx,true);
+                collectExpanded(chExpand,chNode,chIdx,theSet);
+            }
+        }
+    }
+}
+

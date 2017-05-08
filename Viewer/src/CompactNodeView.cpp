@@ -419,7 +419,13 @@ void CompactNodeView::slotRestoreExpand()
             VTreeServer* ts=model_->nameToServer(es->root()->name_);
             if(ts)
             {
-                es->restore(ts->tree());
+                QModelIndex idx=model_->nodeToIndex(ts->tree());
+                if(idx.isValid())
+                {
+                    collapse(idx);
+                    es->collectExpanded(ts->tree(),expandedIndexes);
+                    expand(idx);
+                }
             }
         }
     }
@@ -446,7 +452,14 @@ void CompactNodeView::slotRestoreExpand(const VTreeNode* node)
         {
             if(es->rootSameAs(node->vnode()->strName()))
             {
-                es->restore(node);
+                //es->restore(node);
+                QModelIndex idx=model_->nodeToIndex(node);
+                if(idx.isValid())
+                {
+                    collapse(idx);
+                    es->collectExpanded(node,expandedIndexes);
+                    expand(idx);
+                }
                 expandStates_.remove(i);
                 delete es;
                 break;

@@ -106,7 +106,7 @@ protected:
     void drawRow(QPainter* painter,int start,int xOffset,int &yp,int &itemsInRow,std::vector<int>&);
 
     void doItemsLayout(bool hasRemovedItems=false);
-    void layout(int parentId, bool recursiveExpanding = false,bool afterIsUninitialized = false);
+    void layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated);
 
     void scrollTo(const QModelIndex &index);
     int itemRow(int item) const;
@@ -120,7 +120,7 @@ protected:
     QModelIndex modelIndex(int i) const;
     int viewIndex(const QModelIndex& index) const;
 
-
+    void restoreExpand(const QModelIndex& idx);
     void removeAllFromExpanded(const QModelIndex &index);
 
     void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command);
@@ -150,8 +150,12 @@ protected:
     TreeNodeModel* model_;
     CompactNodeViewDelegate* delegate_;
 
+    // used when expanding and collapsing items
+    QSet<QPersistentModelIndex> expandedIndexes;
+
 private:
-    int  totalNumOfChildren(const QModelIndex& idx,int& num) const;
+    int totalNumOfChildren(const QModelIndex& idx,int& num) const;
+    int totalNumOfExpandedChildren(const QModelIndex& idx,int& num) const;
     void expand(int item);
     void collapse(int item);
     bool collapseAllCore(const QModelIndex &index);
@@ -187,9 +191,6 @@ private:
     QColor connectorColour_;
     QBasicTimer delayedWidth_;
     int delayedTimeout_;
-
-    // used when expanding and collapsing items
-    QSet<QPersistentModelIndex> expandedIndexes;
 
     inline bool storeExpanded(const QPersistentModelIndex &idx)
     {

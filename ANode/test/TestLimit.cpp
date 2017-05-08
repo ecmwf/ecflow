@@ -161,6 +161,25 @@ BOOST_AUTO_TEST_CASE( test_limit_decrement )
    Ecf::set_modify_change_no(0);
 }
 
+BOOST_AUTO_TEST_CASE( test_limit_set_value )
+{
+   cout << "ANode:: ...test_limit_set_value\n";
+
+   Limit limit("name",10);      // Limit of 10
+   limit.increment(1,"path");   // consume 1 token
+   limit.increment(1,"path2");  // consume 1 token
+
+   BOOST_CHECK_MESSAGE(limit.value() == 2,"Expected increment to consume 2 token but it has consumed " << limit.value());
+   BOOST_CHECK_MESSAGE(limit.paths().size() == 2,"Expected 2 task paths but found " << limit.paths().size());
+
+   limit.setValue(4);
+   BOOST_CHECK_MESSAGE(limit.value() == 4,"Expected setValue(4) but value found is: " << limit.value());
+   BOOST_CHECK_MESSAGE(limit.paths().size() == 2,"Expected 2 task paths but found " << limit.paths().size());
+
+   limit.setValue(0);
+   BOOST_CHECK_MESSAGE(limit.value() == 0,"Expected setValue(0) but found " << limit.value());
+   BOOST_CHECK_MESSAGE(limit.paths().empty(),"Setting value to zero should clear the paths, but found " << limit.paths().size());
+}
 
 // Globals used throughout the test
 static std::string fileName = "testLimit.txt";

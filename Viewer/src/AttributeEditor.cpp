@@ -243,8 +243,8 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
             }
         }
         else
-        {
-            //TODO: figure ot what to do when the edited attribute changed
+        {          
+            nodeChanged(aspect);
         }
     }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
