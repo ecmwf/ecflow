@@ -551,8 +551,8 @@ void VTreeServer::setForceShowNode(const VNode* node)
 
     //find the suite
     VNode* s=node->suite();
-    Q_ASSERT(s->isTopLevel());
     Q_ASSERT(s);
+    Q_ASSERT(s->isTopLevel());
 
     std::vector<VNode*> sv;
     sv.push_back(s);
@@ -704,8 +704,14 @@ void VTreeServer::clearForceShow(const VItem* itemCurrent)
 
     //The server matches
     //TODO: what if it is the ROOT?
-    if(itemCurrent->parent()->server() == server_)
-    {
+    ServerHandler *sh=0;
+    if(VNode *parent=itemCurrent->parent())
+        sh=parent->server();
+    else if(VServer* vs=itemCurrent->isServer())
+        sh=vs->server();
+
+    if(sh == server_)
+    {        
         //Item is a node and it is the same as we store
         if(VNode *itn=itemCurrent->isNode())
         {
