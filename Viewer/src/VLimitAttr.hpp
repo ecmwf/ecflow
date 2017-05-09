@@ -42,7 +42,7 @@ public:
     VLimitAttr(VNode *parent,limit_ptr,int index);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
     QStringList paths() const;
     void removePaths(const std::vector<std::string>& paths);

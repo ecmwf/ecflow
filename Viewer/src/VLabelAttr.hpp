@@ -29,7 +29,7 @@ class VLabelAttrType : public VAttributeType
 public:
     explicit VLabelAttrType();
     QString toolTip(QStringList d) const;
-    void encode(const Label& label,QStringList& data) const;
+    void encode(const Label& label,QStringList& data,bool firstLine) const;
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
@@ -42,7 +42,7 @@ public:
 
     int lineNum() const;
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

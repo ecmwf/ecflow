@@ -57,7 +57,7 @@ VAttributeType* VUserVarAttr::type() const
     return atype;
 }
 
-QStringList VUserVarAttr::data() const
+QStringList VUserVarAttr::data(bool /*firstLine*/) const
 {
     static VUserVarAttrType* atype=static_cast<VUserVarAttrType*>(type());
     QStringList s;

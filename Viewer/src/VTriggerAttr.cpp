@@ -86,7 +86,7 @@ VAttributeType* VTriggerAttr::type() const
     return atype;
 }
 
-QStringList VTriggerAttr::data() const
+QStringList VTriggerAttr::data(bool /*firstLine*/) const
 {
     static VTriggerAttrType* atype=static_cast<VTriggerAttrType*>(type());
     QStringList s;

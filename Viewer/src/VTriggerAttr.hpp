@@ -43,7 +43,7 @@ public:
     VTriggerAttr(VNode *parent,Expression*, int index);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

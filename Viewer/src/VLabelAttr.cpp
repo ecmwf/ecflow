@@ -38,12 +38,22 @@ QString VLabelAttrType::toolTip(QStringList d) const
     return t;
 }
 
-void VLabelAttrType::encode(const Label& label,QStringList& data) const
+void VLabelAttrType::encode(const Label& label,QStringList& data,bool firstLine) const
 {
     std::string val=label.new_value();
     if(val.empty() || val == " ")
     {
         val=label.value();
+    }
+
+    if(firstLine)
+    {
+        std::size_t pos=val.find("\n");
+        if(pos != std::string::npos)
+        {
+            if(pos > 0) pos--;
+            val=val.substr(0,pos);
+        }
     }
 
     data << qName_ <<
@@ -84,14 +94,14 @@ VAttributeType* VLabelAttr::type() const
     return atype;
 }
 
-QStringList VLabelAttr::data() const
+QStringList VLabelAttr::data(bool firstLine) const
 {
     static VLabelAttrType* atype=static_cast<VLabelAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
         const std::vector<Label>& v=parent_->node_->labels();
-        atype->encode(v[index_],s);
+        atype->encode(v[index_],s,firstLine);
     }
     return s;
 }

@@ -75,7 +75,7 @@ VAttributeType* VMeterAttr::type() const
     return atype;
 }
 
-QStringList VMeterAttr::data() const
+QStringList VMeterAttr::data(bool /*firstLine*/) const
 {
     static VMeterAttrType* atype=static_cast<VMeterAttrType*>(type());
     QStringList s;

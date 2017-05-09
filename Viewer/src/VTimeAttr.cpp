@@ -92,7 +92,7 @@ VAttributeType* VTimeAttr::type() const
     return atype;
 }
 
-QStringList VTimeAttr::data() const
+QStringList VTimeAttr::data(bool /*firstLine*/) const
 {
     static VTimeAttrType* atype=static_cast<VTimeAttrType*>(type());
     QStringList s;

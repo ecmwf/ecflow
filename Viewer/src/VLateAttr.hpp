@@ -34,7 +34,7 @@ public:
     VLateAttr(VNode *parent,const std::string&);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };

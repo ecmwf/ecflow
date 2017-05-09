@@ -74,7 +74,7 @@ VAttributeType* VEventAttr::type() const
     return atype;
 }
 
-QStringList VEventAttr::data() const
+QStringList VEventAttr::data(bool /*firstLine*/) const
 {
     static VEventAttrType* atype=static_cast<VEventAttrType*>(type());
     QStringList s;

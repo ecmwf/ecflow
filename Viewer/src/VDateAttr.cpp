@@ -83,7 +83,7 @@ VAttributeType* VDateAttr::type() const
     return atype;
 }
 
-QStringList VDateAttr::data() const
+QStringList VDateAttr::data(bool /*firstLine*/) const
 {
     static VDateAttrType* atype=static_cast<VDateAttrType*>(type());
     QStringList s;

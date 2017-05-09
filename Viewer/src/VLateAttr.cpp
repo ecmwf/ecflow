@@ -71,7 +71,7 @@ VAttributeType* VLateAttr::type() const
     return atype;
 }
 
-QStringList VLateAttr::data() const
+QStringList VLateAttr::data(bool /*firstLine*/) const
 {
     static VLateAttrType* atype=static_cast<VLateAttrType*>(type());
     QStringList s;

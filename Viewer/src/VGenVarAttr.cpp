@@ -57,7 +57,7 @@ VAttributeType* VGenVarAttr::type() const
     return atype;
 }
 
-QStringList VGenVarAttr::data() const
+QStringList VGenVarAttr::data(bool /*firstLine*/) const
 {
     static VGenVarAttrType* atype=static_cast<VGenVarAttrType*>(type());
     QStringList s;

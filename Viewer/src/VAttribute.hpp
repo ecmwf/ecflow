@@ -38,7 +38,7 @@ public:
     std::string strName() const;
     const std::string& typeName() const;
     std::string fullPath() const;
-    virtual QStringList data() const=0;
+    virtual QStringList data(bool firstLine=false) const=0;
     QString definition() const;
     bool sameAs(QStringList d) const;
     bool sameContents(VItem*) const;

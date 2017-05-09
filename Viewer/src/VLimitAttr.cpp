@@ -75,7 +75,7 @@ VAttributeType* VLimitAttr::type() const
     return atype;
 }
 
-QStringList VLimitAttr::data() const
+QStringList VLimitAttr::data(bool /*firstLine*/) const
 {
     static VLimitAttrType* atype=static_cast<VLimitAttrType*>(type());
     QStringList s;

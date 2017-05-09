@@ -42,7 +42,7 @@ public:
     VEventAttr(VNode *parent,const Event&,int index);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
