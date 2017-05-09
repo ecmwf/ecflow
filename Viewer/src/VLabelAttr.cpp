@@ -38,6 +38,16 @@ QString VLabelAttrType::toolTip(QStringList d) const
     return t;
 }
 
+QString VLabelAttrType::definition(QStringList d) const
+{
+    QString t="label";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex] + " '" + d[ValueIndex] + "'";
+    }
+    return t;
+}
+
 void VLabelAttrType::encode(const Label& label,QStringList& data,bool firstLine) const
 {
     std::string val=label.new_value();

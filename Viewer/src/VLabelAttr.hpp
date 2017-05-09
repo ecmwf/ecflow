@@ -29,6 +29,7 @@ class VLabelAttrType : public VAttributeType
 public:
     explicit VLabelAttrType();
     QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
     void encode(const Label& label,QStringList& data,bool firstLine) const;
 
 private:
