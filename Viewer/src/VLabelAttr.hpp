@@ -12,6 +12,7 @@
 #define VLABEL_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <string>
@@ -22,6 +23,17 @@ class VAttributeType;
 class VNode;
 
 class Label;
+
+class VLabelAttrType : public VAttributeType
+{
+public:
+    explicit VLabelAttrType();
+    QString toolTip(QStringList d) const;
+    void encode(const Label& label,QStringList& data) const;
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+};
 
 class VLabelAttr : public VAttribute
 {

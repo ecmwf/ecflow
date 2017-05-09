@@ -12,6 +12,7 @@
 #define VTIME_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <vector>
@@ -23,6 +24,20 @@
 class AttributeFilter;
 class VAttributeType;
 class VNode;
+
+class VTimeAttrType : public VAttributeType
+{
+public:
+    explicit VTimeAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(const ecf::TimeAttr& d,QStringList& data);
+    void encode(const ecf::TodayAttr& d,QStringList& data);
+    void encode(const ecf::CronAttr& d,QStringList& data);
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1};
+};
 
 class VTimeAttr : public VAttribute
 {

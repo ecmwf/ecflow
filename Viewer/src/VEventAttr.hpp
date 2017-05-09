@@ -12,6 +12,7 @@
 #define VEVENT_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <string>
@@ -22,6 +23,18 @@ class VAttributeType;
 class VNode;
 
 class Event;
+
+class VEventAttrType : public VAttributeType
+{
+public:
+    explicit VEventAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(const Event&,QStringList&) const;
+
+private:
+     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+};
 
 class VEventAttr : public VAttribute
 {

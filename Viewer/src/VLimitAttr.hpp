@@ -17,10 +17,23 @@
 
 #include "LimitFwd.hpp"
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
 class VNode;
+
+class VLimitAttrType : public VAttributeType
+{
+public:
+    explicit VLimitAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(limit_ptr,QStringList&) const;
+
+private:
+     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MaxIndex=3};
+};
 
 class VLimitAttr : public VAttribute
 {

@@ -18,18 +18,6 @@
 // VUserVarAttrType
 //================================
 
-class VUserVarAttrType : public VAttributeType
-{
-public:
-    explicit VUserVarAttrType();
-    QString toolTip(QStringList d) const;
-    void encode(const Variable&,QStringList&) const;
-
-private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
-};
-
-
 VUserVarAttrType::VUserVarAttrType() : VAttributeType("var")
 {
     dataCount_=3;
@@ -52,8 +40,6 @@ void VUserVarAttrType::encode(const Variable& v,QStringList& data) const
             QString::fromStdString(v.theValue());
 }
 
-static VUserVarAttrType atype;
-
 //=====================================================
 //
 // VUserVarAttr
@@ -67,11 +53,13 @@ VUserVarAttr::VUserVarAttr(VNode *parent,const Variable& v, int index) : VAttrib
 
 VAttributeType* VUserVarAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("var");
+    return atype;
 }
 
 QStringList VUserVarAttr::data() const
 {
+    static VUserVarAttrType* atype=static_cast<VUserVarAttrType*>(type());
     QStringList s;
 
     //Node
@@ -80,7 +68,7 @@ QStringList VUserVarAttr::data() const
         if(parent_->node_)
         {
             const std::vector<Variable>& v=parent_->node_->variables();
-            atype.encode(v[index_],s);
+            atype->encode(v[index_],s);
         }
     }
     //Server
@@ -88,7 +76,7 @@ QStringList VUserVarAttr::data() const
     {
         std::vector<Variable> v;
         parent_->variables(v);
-        atype.encode(v[index_],s);
+        atype->encode(v[index_],s);
     }
 
     return s;

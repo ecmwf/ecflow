@@ -18,19 +18,6 @@
 // VEventAttrType
 //================================
 
-class VEventAttrType : public VAttributeType
-{
-public:
-    explicit VEventAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
-    void encode(const Event&,QStringList&) const;
-
-private:
-     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
-};
-
-
 VEventAttrType::VEventAttrType() : VAttributeType("event")
 {
     dataCount_=3;
@@ -70,8 +57,6 @@ void VEventAttrType::encode(const Event& e,QStringList& data) const
               QString::number((e.value()==true)?1:0);
 }
 
-static VEventAttrType atype;
-
 //=====================================================
 //
 // VEventAttr
@@ -85,16 +70,18 @@ VEventAttr::VEventAttr(VNode *parent,const Event& e, int index) : VAttribute(par
 
 VAttributeType* VEventAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("event");
+    return atype;
 }
 
 QStringList VEventAttr::data() const
 {
+    static VEventAttrType* atype=static_cast<VEventAttrType*>(type());
     QStringList s;
     if(node_ptr node=parent_->node_)
     {
         const std::vector<Event>& v=parent_->node_->events();
-        atype.encode(v[index_],s);
+        atype->encode(v[index_],s);
     }
     return s;
 }

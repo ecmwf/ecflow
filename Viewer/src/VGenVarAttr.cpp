@@ -18,18 +18,6 @@
 // VGenVarAttrType
 //================================
 
-class VGenVarAttrType : public VAttributeType
-{
-public:
-    explicit VGenVarAttrType();
-    QString toolTip(QStringList d) const;
-    void encode(const Variable&,QStringList&) const;
-
-private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
-};
-
-
 VGenVarAttrType::VGenVarAttrType() : VAttributeType("genvar")
 {
     dataCount_=3;
@@ -52,8 +40,6 @@ void VGenVarAttrType::encode(const Variable& v,QStringList& data) const
             QString::fromStdString(v.theValue());
 }
 
-static VGenVarAttrType atype;
-
 //=====================================================
 //
 // VGenVarAttr
@@ -67,17 +53,19 @@ VGenVarAttr::VGenVarAttr(VNode *parent,const Variable& v, int index) : VAttribut
 
 VAttributeType* VGenVarAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("genvar");
+    return atype;
 }
 
 QStringList VGenVarAttr::data() const
 {
+    static VGenVarAttrType* atype=static_cast<VGenVarAttrType*>(type());
     QStringList s;
     if(parent_->isServer() == 0)
     {
         std::vector<Variable> v;
         parent_->genVariables(v);
-        atype.encode(v[index_],s);
+        atype->encode(v[index_],s);
     }
     return s;
 }

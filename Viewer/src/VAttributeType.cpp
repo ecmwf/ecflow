@@ -141,4 +141,33 @@ void VAttributeType::load(VProperty* group)
     }
 }
 
+
 static SimpleLoader<VAttributeType> loader("attribute");
+
+//Initialise attribute types
+
+#include "VLabelAttr.hpp"
+#include "VMeterAttr.hpp"
+#include "VEventAttr.hpp"
+#include "VLimitAttr.hpp"
+#include "VLimiterAttr.hpp"
+#include "VRepeatAttr.hpp"
+#include "VTriggerAttr.hpp"
+#include "VDateAttr.hpp"
+#include "VTimeAttr.hpp"
+#include "VLateAttr.hpp"
+#include "VGenVarAttr.hpp"
+#include "VUserVarAttr.hpp"
+
+static VLabelAttrType labelAttrType;
+static VMeterAttrType meterAttType;
+static VEventAttrType eventAttrType;
+static VLimitAttrType limitAttrType;
+static VLimiterAttrType limiterAttrType;
+static VRepeatAttrType repeatAttrType;
+static VTriggerAttrType triggerAttrType;
+static VDateAttrType dateAttrType;
+static VTimeAttrType timeAttrType;
+static VLateAttrType lateAttrType;
+static VGenVarAttrType genvarAttrType;
+static VUserVarAttrType uservarAttrType;

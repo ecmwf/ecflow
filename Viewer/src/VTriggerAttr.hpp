@@ -12,6 +12,7 @@
 #define VTRIGGERATTR_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <vector>
@@ -21,6 +22,19 @@ class VAttributeType;
 class VNode;
 
 class Expression;
+
+class VTriggerAttrType : public VAttributeType
+{
+public:
+    explicit VTriggerAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encodeTrigger(Expression*,QStringList&) const;
+    void encodeComplete(Expression*,QStringList&) const;
+
+private:
+    enum DataIndex {TypeIndex=0,CompleteIndex=1,ExprIndex=2};
+};
 
 class VTriggerAttr : public VAttribute
 {

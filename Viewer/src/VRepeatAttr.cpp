@@ -99,19 +99,6 @@ long ecf_repeat_date_to_julian(long ddate)
 // VRepeatAttrType
 //================================
 
-class VRepeatAttrType : public VAttributeType
-{
-public:
-    explicit VRepeatAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
-    void encode(const Repeat&,QStringList&,const std::string&) const;
-
-private:
-    enum DataIndex {TypeIndex=0,SubtypeIndex=1,NameIndex=2,ValueIndex=3,StartIndex=4,EndIndex=5,StepIndex=6};
-};
-
-
 VRepeatAttrType::VRepeatAttrType() : VAttributeType("repeat")
 {
     dataCount_=7;
@@ -181,8 +168,6 @@ void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string
 
 }
 
-static VRepeatAttrType atype;
-
 //=====================================================
 //
 // VRepeatAttr
@@ -196,7 +181,8 @@ VRepeatAttr::VRepeatAttr(VNode *parent) : VAttribute(parent,0)
 
 VAttributeType* VRepeatAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("repeat");
+    return atype;
 }
 
 int VRepeatAttr::step() const
@@ -211,11 +197,12 @@ int VRepeatAttr::step() const
 
 QStringList VRepeatAttr::data() const
 {
+    static VRepeatAttrType* atype=static_cast<VRepeatAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
         const Repeat& r=parent_->node_->repeat();
-        atype.encode(r,s,subType());
+        atype->encode(r,s,subType());
     }
     return s;
 }

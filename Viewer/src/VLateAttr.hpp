@@ -2,6 +2,9 @@
 #define VLATE_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
+
+#include "LateAttr.hpp"
 
 #include <QStringList>
 #include <string>
@@ -12,6 +15,18 @@ class VAttributeType;
 class VNode;
 
 class Label;
+
+class VLateAttrType : public VAttributeType
+{
+public:
+    explicit VLateAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(ecf::LateAttr* late,QStringList& data) const;
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1};
+};
 
 class VLateAttr : public VAttribute
 {

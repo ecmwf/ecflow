@@ -19,20 +19,6 @@
 // VDateAttrType
 //================================
 
-class VDateAttrType : public VAttributeType
-{
-public:
-    explicit VDateAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
-    void encode(const DateAttr& d,QStringList& data);
-    void encode(const DayAttr& d,QStringList& data);
-
-private:
-    enum DataIndex {TypeIndex=0,NameIndex=1};
-};
-
-
 VDateAttrType::VDateAttrType() : VAttributeType("date")
 {
     dataCount_=2;
@@ -71,8 +57,6 @@ void VDateAttrType::encode(const DayAttr& d,QStringList& data)
     data << qName_ << QString::fromStdString(d.name());
 }
 
-static VDateAttrType atype;
-
 //=====================================================
 //
 // VDateAttr
@@ -95,11 +79,13 @@ VDateAttr::VDateAttr(VNode *parent,const DayAttr& t, int index) :
 
 VAttributeType* VDateAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("date");
+    return atype;
 }
 
 QStringList VDateAttr::data() const
 {
+    static VDateAttrType* atype=static_cast<VDateAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
@@ -107,13 +93,13 @@ QStringList VDateAttr::data() const
         {
             const std::vector<DateAttr>& v=parent_->node_->dates();
             if(index_ < v.size())
-                atype.encode(v[index_],s);
+                atype->encode(v[index_],s);
         }
         else if(dataType_ == DayData)
         {
             const std::vector<DayAttr>& v=parent_->node_->days();
             if(index_ < v.size())
-                atype.encode(v[index_],s);
+                atype->encode(v[index_],s);
         }
     }
     return s;

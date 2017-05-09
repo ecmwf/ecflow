@@ -12,6 +12,7 @@
 #define VGENVARATTR_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <string>
@@ -21,6 +22,17 @@ class AttributeFilter;
 class VAttributeType;
 class VNode;
 class Variable;
+
+class VGenVarAttrType : public VAttributeType
+{
+public:
+    explicit VGenVarAttrType();
+    QString toolTip(QStringList d) const;
+    void encode(const Variable&,QStringList&) const;
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+};
 
 class VGenVarAttr : public VAttribute
 {

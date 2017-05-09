@@ -18,20 +18,6 @@
 // VTriggerAttrType
 //================================
 
-class VTriggerAttrType : public VAttributeType
-{
-public:
-    explicit VTriggerAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
-    void encodeTrigger(Expression*,QStringList&) const;
-    void encodeComplete(Expression*,QStringList&) const;
-
-private:
-    enum DataIndex {TypeIndex=0,CompleteIndex=1,ExprIndex=2};
-};
-
-
 VTriggerAttrType::VTriggerAttrType() : VAttributeType("trigger")
 {
     dataCount_=3;
@@ -83,8 +69,6 @@ void VTriggerAttrType::encodeComplete(Expression *e,QStringList& data) const
     data << qName_ << "1" << QString::fromStdString(e->expression());
 }
 
-static VTriggerAttrType atype;
-
 //=====================================================
 //
 // VTriggerAttr
@@ -98,21 +82,23 @@ VTriggerAttr::VTriggerAttr(VNode *parent,Expression* e, int index) :
 
 VAttributeType* VTriggerAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("trigger");
+    return atype;
 }
 
 QStringList VTriggerAttr::data() const
 {
+    static VTriggerAttrType* atype=static_cast<VTriggerAttrType*>(type());
     QStringList s;
     if(node_ptr node=parent_->node())
     {
         if(index_ == 0)
         {
-            atype.encodeTrigger(node->get_trigger(),s);
+            atype->encodeTrigger(node->get_trigger(),s);
         }
         else
         {
-            atype.encodeComplete(node->get_complete(),s);
+            atype->encodeComplete(node->get_complete(),s);
         }
     }
     return s;

@@ -18,18 +18,6 @@
 // VLabelAttrType
 //================================
 
-class VLabelAttrType : public VAttributeType
-{
-public:
-    explicit VLabelAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
-    void encode(const Label& label,QStringList& data) const;
-
-private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
-};
-
 VLabelAttrType::VLabelAttrType() : VAttributeType("label")
 {
     dataCount_=3;
@@ -50,16 +38,6 @@ QString VLabelAttrType::toolTip(QStringList d) const
     return t;
 }
 
-QString VLabelAttrType::definition(QStringList d) const
-{
-    QString t="label";
-    if(d.count() == dataCount_)
-    {
-        t+=" " + d[NameIndex] + " '" + d[ValueIndex] + "'";
-    }
-    return t;
-}
-
 void VLabelAttrType::encode(const Label& label,QStringList& data) const
 {
     std::string val=label.new_value();
@@ -72,8 +50,6 @@ void VLabelAttrType::encode(const Label& label,QStringList& data) const
                 QString::fromStdString(label.name()) <<
                 QString::fromStdString(val);
 }
-
-static VLabelAttrType atype;
 
 //=====================================================
 //
@@ -104,16 +80,18 @@ int VLabelAttr::lineNum() const
 
 VAttributeType* VLabelAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("label");
+    return atype;
 }
 
 QStringList VLabelAttr::data() const
 {
+    static VLabelAttrType* atype=static_cast<VLabelAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
         const std::vector<Label>& v=parent_->node_->labels();
-        atype.encode(v[index_],s);
+        atype->encode(v[index_],s);
     }
     return s;
 }

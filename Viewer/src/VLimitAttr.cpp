@@ -18,19 +18,6 @@
 // VLimitAttrType
 //================================
 
-class VLimitAttrType : public VAttributeType
-{
-public:
-    explicit VLimitAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
-    void encode(limit_ptr,QStringList&) const;
-
-private:
-     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MaxIndex=3};
-};
-
-
 VLimitAttrType::VLimitAttrType() : VAttributeType("limit")
 {
     dataCount_=4;
@@ -71,8 +58,6 @@ void VLimitAttrType::encode(limit_ptr lim,QStringList& data) const
         QString::number(lim->theLimit());
 }
 
-static VLimitAttrType atype;
-
 //=====================================================
 //
 // VLimitAttr
@@ -86,16 +71,18 @@ VLimitAttr::VLimitAttr(VNode *parent,limit_ptr lim, int index) : VAttribute(pare
 
 VAttributeType* VLimitAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("limit");
+    return atype;
 }
 
 QStringList VLimitAttr::data() const
 {
+    static VLimitAttrType* atype=static_cast<VLimitAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
         const std::vector<limit_ptr>& v=parent_->node_->limits();
-        atype.encode(v[index_],s);
+        atype->encode(v[index_],s);
     }
     return s;
 }
