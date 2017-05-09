@@ -201,6 +201,7 @@ void Expression::createAST( Node* node, const std::string& exprType, std::string
          ss << "Failed to parse " << vec_[i].toString(exprType) << " at " << node->debugNodePath()
 			            << " because " << localErrorMsg << "\n\n";
          errorMsg += ss.str();
+         break;
       }
    }
 
