@@ -40,7 +40,6 @@
 #include "Version.hpp"
 #include "Indentor.hpp"
 #include "AbstractObserver.hpp"
-#include "CheckPtContext.hpp"
 #include "SuiteChanged.hpp"
 
 using namespace ecf;
