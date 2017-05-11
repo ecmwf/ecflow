@@ -211,7 +211,7 @@ def test_client_load_from_disk(ci):
     print("test_client_load_from_disk")
     ci.delete_all() # start fresh
     defs = create_defs();
-    defs_file = "test_client_load_from_disk.def"
+    defs_file = "test_client_load_from_disk_" + str(os.getpid()) + ".def"
     defs.save_as_defs(defs_file)     
     assert os.path.exists(defs_file), "Expected file " + defs_file + " to exist after defs.save_as_defs()"
     ci.load(defs_file) # open and parse defs file, and load into server.\n"
@@ -548,7 +548,7 @@ def test_client_check(ci):
     # SERVER side check
     ci.load(defs)
     server_check = ci.check("") # empty string means check the whole defs, otherwise a node path can be specified.
-    # print server_check
+    # print(server_check)
     assert len(server_check) > 0, "Expected defs to fail, since no externs in server "
     
 def test_client_suites(ci):
@@ -1341,11 +1341,12 @@ def test_client_replace(ci,on_disk):
     #   f2
     #     t1
     #     t2
+    test_client_replace_def_file = "test_client_replace_" + str(os.getpid()) + ".def"
     client_def = create_defs("s1")
     client_def.find_suite("s1").add_family("f2").add_task("t1")
     if on_disk:
-        client_def.save_as_defs("test_client_replace.def")
-        client_def = "test_client_replace.def"
+        client_def.save_as_defs(test_client_replace_def_file)
+        client_def = test_client_replace_def_file
     
     ci.replace("/s1/f2",client_def,True,False)  # True means create parents as needed, False means don't bypass checks/zombies
     ci.get_server_defs()
@@ -1359,8 +1360,8 @@ def test_client_replace(ci,on_disk):
     client_def = Defs()
     client_def.add_suite("s1")    # should only have the suite
     if on_disk:
-        client_def.save_as_defs("test_client_replace.def")
-        client_def = "test_client_replace.def"
+        client_def.save_as_defs(test_client_replace_def_file)
+        client_def = test_client_replace_def_file
 
     ci.replace("/s1",client_def)   
     ci.get_server_defs()
@@ -1374,8 +1375,8 @@ def test_client_replace(ci,on_disk):
     client_def = Defs();
     client_def.add_suite("s2")
     if on_disk:
-        client_def.save_as_defs("test_client_replace.def")
-        client_def = "test_client_replace.def"
+        client_def.save_as_defs(test_client_replace_def_file)
+        client_def = test_client_replace_def_file
 
     ci.replace("/s2",client_def,True,False)  # True means create parents as needed, False means don't bypass checks/zombies
     ci.get_server_defs()
@@ -1386,8 +1387,8 @@ def test_client_replace(ci,on_disk):
     client_def = Defs();
     client_def.add_suite("s2").add_task("t1")
     if on_disk:
-        client_def.save_as_defs("test_client_replace.def")
-        client_def = "test_client_replace.def"
+        client_def.save_as_defs(test_client_replace_def_file)
+        client_def = test_client_replace_def_file
 
     ci.replace("/s2",client_def) 
         
@@ -1395,7 +1396,7 @@ def test_client_replace(ci,on_disk):
     assert len(list(ci.get_defs().suites)) == 2 ," Expected two suites:\n" + str(ci.get_defs())
     assert ci.get_defs().find_abs_node("/s2/t1") != None, "Expected to find task /s2/t1\n" + str(ci.get_defs())
     if on_disk:
-        os.remove(client_def)
+        os.remove(test_client_replace_def_file)
 
 def test_client_kill(ci):
     pass
@@ -1564,7 +1565,7 @@ def test_client_check_defstatus(ci):
     ci.begin_all_suites()
      
     ci.sync_local() # get the changes, synced with local defs
-    #print ci.get_defs();
+    #print(ci.get_defs())
     task_t1 = ci.get_defs().find_abs_node(t1)
     task_t2 = ci.get_defs().find_abs_node(t2)
     assert task_t1 != None,"Could not find t1"
@@ -1599,7 +1600,7 @@ def test_ECFLOW_189(ci):
     ci.begin_all_suites()
     
     ci.sync_local() # get the changes, synced with local defs
-    #print ci.get_defs();
+    #print(ci.get_defs())
     task_t1 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t1")
     task_t2 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t2")
     assert task_t1 != None,"Could not find /test_ECFLOW_189/f1/t1"
@@ -1616,7 +1617,7 @@ def test_ECFLOW_189(ci):
      
     time.sleep(3)
     ci.sync_local() # get the changes, synced with local defs
-    #print ci.get_defs();
+    #print(ci.get_defs())
     task_t1 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t1")
     task_t2 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t2")
     assert task_t1.get_state() == State.queued, "Expected state queued but found " + str(task_t1.get_state())
@@ -1647,7 +1648,7 @@ def test_ECFLOW_199(ci):
     ci.begin_all_suites()
     
     ci.sync_local() # get the changes, synced with local defs
-    #print ci.get_defs();
+    #print(ci.get_defs())
     assert len(list(ci.changed_node_paths)) == 0, "Expected first call to sync_local, to have no changed paths but found " + str(len(list(ci.changed_node_paths)))
     
     # ok now resume t1/t2, they should remain queued, since the Suite is still suspended
