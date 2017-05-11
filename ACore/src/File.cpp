@@ -865,12 +865,9 @@ std::string File::find_ecf_client_path()
 
 std::string File::test_data(const std::string& rel_path, const std::string& dir)
 {
-   cout << "File::test_data: rel_path:" << rel_path << " dir:" << dir << "\n";
-
    std::string test_file;
    char* work_space = getenv("WK"); // for ecbuild
    if (work_space != NULL ) {
-      cout << "File::test_data: test_file: using work_space " << work_space << "\n";
       test_file = std::string(work_space);
       if (!rel_path.empty() && rel_path[0] != '/' ) test_file += "/";
       test_file += rel_path;
@@ -878,14 +875,12 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
    else {
       std::string work_space = root_source_dir();
       if (!work_space.empty()) {
-         cout << "File::test_data: test_file: using root_source_dir() " << work_space << "\n";
          test_file = work_space;
          if (!rel_path.empty() && rel_path[0] != '/' ) test_file += "/";
          test_file += rel_path;
       }
       else {
          fs::path current_path = fs::current_path();
-         cout << "File::test_data: test_file: using current_path  " << current_path << "\n";
          if (current_path.stem() == dir ) {
 
             // remove first path, expecting "dir/path/path1" remove dir
@@ -902,9 +897,6 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
          }
       }
    }
-
-   cout << "File::test_data: test_file:" << test_file << "\n";
-
    return test_file;
 }
 
@@ -912,18 +904,14 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
 std::string File::root_source_dir()
 {
 #ifdef CMAKE
-   cout << "File::root_source_dir() CMAKE\n";
    return CMAKE_ECFLOW_SOURCE_DIR;
 #endif
-
-   cout << "File::root_source_dir() bjam\n";
 
    // bjam
    fs::path current_path = fs::current_path();
    std::string the_current_path = current_path.string();
    std::string version_cmake = the_current_path + "/VERSION.cmake";
    if (fs::exists(version_cmake)) {
-      cout << "File::root_source_dir() version_cmake bjam " << the_current_path << "\n";
       return the_current_path;
    }
 
@@ -936,7 +924,6 @@ std::string File::root_source_dir()
       std::string version_cmake = std::string(current_path.string()) + "/VERSION.cmake";
       if (fs::exists(version_cmake)) {
          std::string the_root_source_dir = current_path.string();  // cos current_path.string() is returned by reference
-         cout << "File::root_source_dir() bjam  the_root_source_dir " << the_root_source_dir << "\n";
          return the_root_source_dir;
       }
 
@@ -945,7 +932,6 @@ std::string File::root_source_dir()
       if (count == 1000) break;
    }
 
-   cout << "File::root_source_dir() bjam EMPTY\n";
    return string();
 }
 
