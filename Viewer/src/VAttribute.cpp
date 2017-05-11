@@ -40,6 +40,12 @@ QString VAttribute::toolTip() const
     return (t)?(t->toolTip(data())):QString();
 }
 
+QString VAttribute::definition() const
+{
+    VAttributeType* t=type();
+    return (t)?(t->definition(data())):QString();
+}
+
 const std::string& VAttribute::typeName() const
 {
     VAttributeType* t=type();

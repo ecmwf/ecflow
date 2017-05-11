@@ -12,6 +12,7 @@
 #define VEVENT_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <string>
@@ -23,13 +24,25 @@ class VNode;
 
 class Event;
 
+class VEventAttrType : public VAttributeType
+{
+public:
+    explicit VEventAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(const Event&,QStringList&) const;
+
+private:
+     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+};
+
 class VEventAttr : public VAttribute
 {
 public:
     VEventAttr(VNode *parent,const Event&,int index);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

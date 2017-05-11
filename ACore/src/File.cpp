@@ -931,6 +931,7 @@ std::string File::root_source_dir()
       count++;
       if (count == 1000) break;
    }
+
    return string();
 }
 

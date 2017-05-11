@@ -12,6 +12,7 @@
 #define VDATE_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <vector>
@@ -23,6 +24,19 @@ class VNode;
 class DateAttr;
 class DayAttr;
 
+class VDateAttrType : public VAttributeType
+{
+public:
+    explicit VDateAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(const DateAttr& d,QStringList& data);
+    void encode(const DayAttr& d,QStringList& data);
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1};
+};
+
 class VDateAttr : public VAttribute
 {
 
@@ -33,7 +47,7 @@ public:
     VDateAttr(VNode *parent,const DayAttr&,int index);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

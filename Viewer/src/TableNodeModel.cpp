@@ -168,7 +168,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
                 id == TriggerColumn)
 		{
             if(VAttribute* a=vnode->attributeForType(0,columnToAttrType(id)))
-                return a->data();
+                return a->data(true);
             else
                 return QVariant();
 		}

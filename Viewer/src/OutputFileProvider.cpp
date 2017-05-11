@@ -165,7 +165,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     {
         if(n->isSubmitted())
             reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>), but \
-                  beacuse the node status is <b>submitted</b> it may contain the ouput from a previous run!");
+                  because the node status is <b>submitted</b> it may contain the ouput from a previous run!");
         else
             reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
     }
