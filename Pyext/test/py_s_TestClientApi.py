@@ -116,12 +116,13 @@ def test_client_get_server_defs(ci):
 
 def test_client_new_log(ci, port):
     print("test_client_new_log")
-    try : os.remove("./test_client_new_log.log") # delete file if it exists
+    new_log_file_name = "./test_client_new_log_" + str(os.getpid()) + ".log"
+    try : os.remove(new_log_file_name) # delete file if it exists
     except: pass
     
-    ci.new_log("./test_client_new_log.log") 
+    ci.new_log(new_log_file_name) 
     ci.flush_log() # close log file and force write to disk
-    assert os.path.exists("./test_client_new_log.log"), "New log does not exist"
+    assert os.path.exists(new_log_file_name), "New log does not exist"
     
     # reset new log to original
     ci.new_log(Test.log_file_path(port)) 
@@ -131,7 +132,8 @@ def test_client_new_log(ci, port):
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("--ping") != -1, "Expected to find --ping in log file"
-    try: os.remove("./test_client_new_log.log")
+ 
+    try: os.remove(new_log_file_name)
     except: pass
 
 
