@@ -295,12 +295,13 @@ bool ServerList::load()
 
     if(!errStr.empty())
     {
-        errStr="Cound not parse the <b>server list file</b> (servers.txt) properly. The \
+        errStr="<b>Could not parse</b> the server list file <u>" + localFile_ + "</u>. The \
                     following errors occured:<br><br>" +
-                errStr + "<br><i>Note</i>: ecFlowUi will carry on but not all the speciefied servers will be available!";
+                errStr + "<br>Please <b>correct the errors</b> in the server list file and restart ecFlowUI!";
         UserMessage::setEchoToCout(false);
         UserMessage::message(UserMessage::ERROR,true,errStr);
         UserMessage::setEchoToCout(true);
+        exit(1);
     }
 
 	if(count() == 0)
