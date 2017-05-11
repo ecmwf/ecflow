@@ -865,8 +865,6 @@ std::string File::find_ecf_client_path()
 
 std::string File::test_data(const std::string& rel_path, const std::string& dir)
 {
-   cout << "File::test_data: rel_path:" << rel_path << " dir:" << dir << "\n";
-
    std::string test_file;
    char* work_space = getenv("WK"); // for ecbuild
    if (work_space != NULL ) {
@@ -899,9 +897,6 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
          }
       }
    }
-
-   cout << "File::test_data: test_file:" << test_file << "\n";
-
    return test_file;
 }
 
@@ -936,6 +931,7 @@ std::string File::root_source_dir()
       count++;
       if (count == 1000) break;
    }
+
    return string();
 }
 
