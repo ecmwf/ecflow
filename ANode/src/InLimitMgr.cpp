@@ -468,7 +468,7 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit, std::string& errorMsg, 
    if ( inLimit.tokens() > referencedLimit->theLimit() ) {
       if (reportWarnings) {
          // in limit exceeds the LIMIT value
-         std::stringstream ss;
+         std::stringstream ss; ss << "Warning: ";
          ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString() << " reference\n";
          ss << " with value '" << inLimit.tokens() << "' which exceeds '" << referencedLimit->theLimit() << "' defined on the Limit\n";
          warningMsg += ss.str();

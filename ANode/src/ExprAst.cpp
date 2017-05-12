@@ -443,7 +443,7 @@ AstDivide* AstDivide::clone() const
 bool AstDivide::check(std::string& error_msg) const
 {
    if (right_ && right_->value() == 0) {
-      error_msg = "Divide by zero in trigger expression";
+      error_msg = "Error: Divide by zero in trigger expression";
       return false;
    }
    return true;
@@ -564,7 +564,7 @@ AstModulo* AstModulo::clone() const
 bool AstModulo::check(std::string& error_msg) const
 {
    if (right_ && right_->value() == 0) {
-      error_msg = "Modulo by zero in trigger expression";
+      error_msg = "Error: Modulo by zero in trigger expression";
       return false;
    }
    return true;
