@@ -18,19 +18,6 @@
 // VTriggerAttrType
 //================================
 
-class VTriggerAttrType : public VAttributeType
-{
-public:
-    explicit VTriggerAttrType();
-    QString toolTip(QStringList d) const;
-    void encodeTrigger(Expression*,QStringList&) const;
-    void encodeComplete(Expression*,QStringList&) const;
-
-private:
-    enum DataIndex {TypeIndex=0,CompleteIndex=1,ExprIndex=2};
-};
-
-
 VTriggerAttrType::VTriggerAttrType() : VAttributeType("trigger")
 {
     dataCount_=3;
@@ -57,6 +44,21 @@ QString VTriggerAttrType::toolTip(QStringList d) const
     return t;
 }
 
+QString VTriggerAttrType::definition(QStringList d) const
+{
+    QString t;
+    if(d.count() == dataCount_)
+    {
+        if(d[CompleteIndex] == "0")
+            t+="trigger";
+        else if(d[CompleteIndex] == "1")
+            t+="complete";
+
+        t+=" " + d[ExprIndex];
+    }
+    return t;
+}
+
 void VTriggerAttrType::encodeTrigger(Expression *e,QStringList& data) const
 {
     data << qName_ << "0" << QString::fromStdString(e->expression());
@@ -66,8 +68,6 @@ void VTriggerAttrType::encodeComplete(Expression *e,QStringList& data) const
 {
     data << qName_ << "1" << QString::fromStdString(e->expression());
 }
-
-static VTriggerAttrType atype;
 
 //=====================================================
 //
@@ -82,21 +82,23 @@ VTriggerAttr::VTriggerAttr(VNode *parent,Expression* e, int index) :
 
 VAttributeType* VTriggerAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("trigger");
+    return atype;
 }
 
-QStringList VTriggerAttr::data() const
+QStringList VTriggerAttr::data(bool /*firstLine*/) const
 {
+    static VTriggerAttrType* atype=static_cast<VTriggerAttrType*>(type());
     QStringList s;
     if(node_ptr node=parent_->node())
     {
         if(index_ == 0)
         {
-            atype.encodeTrigger(node->get_trigger(),s);
+            atype->encodeTrigger(node->get_trigger(),s);
         }
         else
         {
-            atype.encodeComplete(node->get_complete(),s);
+            atype->encodeComplete(node->get_complete(),s);
         }
     }
     return s;

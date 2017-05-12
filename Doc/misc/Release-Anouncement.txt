@@ -1,17 +1,18 @@
  ======================================================================================
 Subject: New release of ecFlow now available  
 
-A new version of the ecFlow(4.1.0) has been released:
+A new version of the ecFlow(4.6.0) has been released:
 
-This release is accessible from: /usr/local/apps/ecflow/4.1.0
+This release is accessible from: /usr/local/apps/ecflow/4.6.0
 on the following platforms:
 
    o linux 11.3                (lxop-dev)
    o linux 13.1                (opensuse131)
    o redhat/RHEL 6.4           (ecgb,sappb)
+   o leap42                    (leap42)
    o linux cluster             (lxop-test/lxc/lxop)
    o virtual machines          (vsms1 -> operational and research VM are linked to this)
-   o cca/ccb/cct               (cray) 
+   o cca/ccb/cct/cck           (cray) 
  
 The release includes the following changes:
 
@@ -22,9 +23,9 @@ Note: The GUI(ecflowview) is only available on linux
 
    module avail ecflow
    module unload ecflow 
-   module load ecflow/4.1.0
+   module load ecflow/4.6.0
       
-The new GUI(ecflow_ui) is available from vsms1,ecgb,lxop-dev,lxc,opensuse131
+The new GUI(ecflow_ui) is available from vsms1,ecgb,lxop-dev,lxc,opensuse131,leap42
             
 Compatibility
 ========================================================================
@@ -32,7 +33,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   module load ecflow/4.1.0
+   module load ecflow/4.6.0
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
 the server variable %ECF_VERSION% to locate the executable, this ensures

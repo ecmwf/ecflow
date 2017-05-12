@@ -12,6 +12,7 @@
 #define VLIMITERATTR_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <string>
@@ -23,6 +24,20 @@ class VNode;
 
 class InLimit;
 
+class VLimiterAttrType : public VAttributeType
+{
+public:
+    explicit VLimiterAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(const InLimit&,QStringList&) const;
+    void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    int totalNum(VNode* vnode);
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,PathIndex=2};
+};
+
 class VLimiterAttr : public VAttribute
 {
 
@@ -30,7 +45,7 @@ public:
     VLimiterAttr(VNode *parent,const InLimit&,int index);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

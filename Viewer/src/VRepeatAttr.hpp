@@ -12,12 +12,26 @@
 #define VREPEATATTR_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
+
 #include <string>
 #include <QStringList>
 
 class VAttributeType;
 class VNode;
 class Repeat;
+
+class VRepeatAttrType : public VAttributeType
+{
+public:
+    explicit VRepeatAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(const Repeat&,QStringList&,const std::string&) const;
+
+private:
+    enum DataIndex {TypeIndex=0,SubtypeIndex=1,NameIndex=2,ValueIndex=3,StartIndex=4,EndIndex=5,StepIndex=6};
+};
 
 class VRepeatAttr : public VAttribute
 {
@@ -31,7 +45,7 @@ public:
     virtual std::string value(int index) const=0;    
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

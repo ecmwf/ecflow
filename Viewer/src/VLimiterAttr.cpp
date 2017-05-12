@@ -18,20 +18,6 @@
 // VLimiterAttrType
 //================================
 
-class VLimiterAttrType : public VAttributeType
-{
-public:
-    explicit VLimiterAttrType();
-    QString toolTip(QStringList d) const;
-    void encode(const InLimit&,QStringList&) const;    
-    void scan(VNode* vnode,std::vector<VAttribute*>& vec);
-    int totalNum(VNode* vnode);
-
-private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,PathIndex=2};
-};
-
-
 VLimiterAttrType::VLimiterAttrType() : VAttributeType("limiter")
 {
     dataCount_=3;
@@ -53,18 +39,22 @@ QString VLimiterAttrType::toolTip(QStringList d) const
     return t;
 }
 
+QString VLimiterAttrType::definition(QStringList d) const
+{
+    QString t="inlimit";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex];
+    }
+    return t;
+}
+
 void VLimiterAttrType::encode(const InLimit& lim,QStringList& data) const
 {
     data << qName_ <<
            QString::fromStdString(lim.name()) <<
            QString::fromStdString(lim.pathToNode());
 }
-
-static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
-static int totalNum(VNode* vnode);
-
-
-static VLimiterAttrType atype;
 
 //=====================================================
 //
@@ -79,16 +69,18 @@ VLimiterAttr::VLimiterAttr(VNode *parent,const InLimit& lim, int index) : VAttri
 
 VAttributeType* VLimiterAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("limiter");
+    return atype;
 }
 
-QStringList VLimiterAttr::data() const
+QStringList VLimiterAttr::data(bool /*firstLine*/) const
 {
+    static VLimiterAttrType* atype=static_cast<VLimiterAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
         const std::vector<InLimit>& v=parent_->node_->inlimits();
-        atype.encode(v[index_],s);
+        atype->encode(v[index_],s);
     }
     return s;
 }

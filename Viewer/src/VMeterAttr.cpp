@@ -18,18 +18,6 @@
 // VMeterAttrType
 //================================
 
-class VMeterAttrType : public VAttributeType
-{
-public:
-    explicit VMeterAttrType();
-    QString toolTip(QStringList d) const;
-    void encode(const Meter&,QStringList&) const;
-
-private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MinIndex=3, MaxIndex=4,ThresholdIndex=5};
-};
-
-
 VMeterAttrType::VMeterAttrType() : VAttributeType("meter")
 {
     dataCount_=6;
@@ -52,6 +40,16 @@ QString VMeterAttrType::toolTip(QStringList d) const
     return t;
 }
 
+QString VMeterAttrType::definition(QStringList d) const
+{
+    QString t="meter";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex] + " " + d[MinIndex] + " " + d[MaxIndex] + " " + d[ThresholdIndex];
+    }
+    return t;
+}
+
 void VMeterAttrType::encode(const Meter& m,QStringList& data) const
 {
     data << qName_ <<
@@ -59,8 +57,6 @@ void VMeterAttrType::encode(const Meter& m,QStringList& data) const
                     QString::number(m.value()) << QString::number(m.min()) << QString::number(m.max()) <<
                     QString::number(m.colorChange());
 }
-
-static VMeterAttrType atype;
 
 //=====================================================
 //
@@ -75,16 +71,18 @@ VMeterAttr::VMeterAttr(VNode *parent,const Meter& m, int index) : VAttribute(par
 
 VAttributeType* VMeterAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("meter");
+    return atype;
 }
 
-QStringList VMeterAttr::data() const
+QStringList VMeterAttr::data(bool /*firstLine*/) const
 {
+    static VMeterAttrType* atype=static_cast<VMeterAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
         const std::vector<Meter>& v=parent_->node_->meters();
-        atype.encode(v[index_],s);
+        atype->encode(v[index_],s);
     }
     return s;
 }

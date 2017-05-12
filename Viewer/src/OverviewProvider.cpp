@@ -11,6 +11,7 @@
 
 #include "ConnectState.hpp"
 #include "ServerHandler.hpp"
+#include "VAttribute.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
@@ -278,6 +279,14 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	{
 		f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
 	}
+
+    //Other attributes
+    const std::vector<VAttribute*>& attr=node->attr();
+    for(std::vector<VAttribute*>::const_iterator it=attr.begin(); it != attr.end(); ++it)
+    {
+        if((*it)->typeName() != "var" && (*it)->typeName() != "genvar")
+            f << inc << (*it)->definition().toStdString() << "\n";
+    }
 
 	//Print children
 	for(unsigned int i=0; i < node->numOfChildren(); i++)

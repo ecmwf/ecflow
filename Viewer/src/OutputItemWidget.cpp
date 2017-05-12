@@ -289,7 +289,7 @@ void OutputItemWidget::infoReady(VReply* reply)
             hasMessage=true;
             submittedWarning_=true;
             messageLabel_->showWarning("This is the current job output (as defined by variable ECF_JOBOUT), but \
-                   beacuse the node status is <b>submitted</b> it may contain the ouput from a previous run!");
+                   because the node status is <b>submitted</b> it may contain the ouput from a previous run!");
         }
         else
         {

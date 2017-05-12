@@ -1300,7 +1300,7 @@ bool Node::check_expressions(Ast* ast,const std::string& expr,bool trigger, std:
       ast->accept(astVisitor);
 
       if ( !astVisitor.errorMsg().empty() ) {
-         errorMsg += "Expression node tree references failed for '";
+         errorMsg += "Error: Expression node tree references failed for '";
          if ( trigger ) errorMsg += "trigger ";
          else           errorMsg += "complete ";
          errorMsg += expr;
@@ -1361,7 +1361,7 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
 
    // check inLimit references to limits.
    // Client: Unresolved references, which are not in the externs reported as errors/warnings
-   // Server: There are no exerns, all unresolved references reported as errors
+   // Server: There are no externs, all unresolved references reported as errors
    bool reportErrors = true;
    bool reportWarnings = true;
    inLimitMgr_.check(errorMsg,warningMsg,reportErrors, reportWarnings);
