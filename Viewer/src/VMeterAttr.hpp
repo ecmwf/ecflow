@@ -12,6 +12,7 @@
 #define VMETERATTR_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <string>
@@ -23,6 +24,18 @@ class VNode;
 
 class Meter;
 
+class VMeterAttrType : public VAttributeType
+{
+public:
+    explicit VMeterAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(const Meter&,QStringList&) const;
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MinIndex=3, MaxIndex=4,ThresholdIndex=5};
+};
+
 class VMeterAttr : public VAttribute
 {
 
@@ -30,7 +43,7 @@ public:
     VMeterAttr(VNode *parent,const Meter&,int index);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

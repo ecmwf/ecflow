@@ -824,7 +824,8 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                     //line towards the siblings  - downwards
                     if(item->hasMoreSiblings)
                     {
-                        painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
+                        //painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
+                        painter->drawLine(lineX,lineY,lineX,yp+rh);
                         indentVec[item->level]=lineX;
                     }
                     else
@@ -836,7 +837,8 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                     int lineY=yp+item->height/2;
 
                     painter->drawLine(lineX,lineY,lineX2,lineY);
-                    painter->drawLine(lineX,lineY+rh/2,lineX,lineY-rh/2);
+                    //painter->drawLine(lineX,lineY+rh/2,lineX,lineY-rh/2);
+                    painter->drawLine(lineX,yp,lineX,yp+rh);
                     indentVec[item->level]=lineX;
                 }
 
@@ -845,7 +847,8 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                 {
                     int lineY=yp+item->height/2;
                     painter->drawLine(lineX,lineY,lineX2,lineY);
-                    painter->drawLine(lineX,lineY,lineX,lineY-rh/2);
+                    //painter->drawLine(lineX,lineY,lineX,lineY-rh/2);
+                    painter->drawLine(lineX,lineY,lineX,yp);
                     indentVec[item->level]=0;
                 }
             }

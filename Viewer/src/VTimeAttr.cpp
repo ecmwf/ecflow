@@ -16,20 +16,6 @@
 // VTimeAttrType
 //================================
 
-class VTimeAttrType : public VAttributeType
-{
-public:
-    explicit VTimeAttrType();
-    QString toolTip(QStringList d) const;
-    void encode(const ecf::TimeAttr& d,QStringList& data);
-    void encode(const ecf::TodayAttr& d,QStringList& data);
-    void encode(const ecf::CronAttr& d,QStringList& data);
-
-private:
-    enum DataIndex {TypeIndex=0,NameIndex=1};
-};
-
-
 VTimeAttrType::VTimeAttrType() : VAttributeType("time")
 {
     dataCount_=2;
@@ -48,6 +34,16 @@ QString VTimeAttrType::toolTip(QStringList d) const
     return t;
 }
 
+QString VTimeAttrType::definition(QStringList d) const
+{
+    QString t;
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex];
+    }
+    return t;
+}
+
 void VTimeAttrType::encode(const ecf::TimeAttr& d,QStringList& data)
 {
     data << qName_ << QString::fromStdString(d.name());
@@ -62,8 +58,6 @@ void VTimeAttrType::encode(const ecf::CronAttr& d,QStringList& data)
 {
     data << qName_ << QString::fromStdString(d.name());
 }
-
-static VTimeAttrType atype;
 
 //=====================================================
 //
@@ -94,11 +88,13 @@ VTimeAttr::VTimeAttr(VNode *parent,const ecf::CronAttr& t, int index) :
 
 VAttributeType* VTimeAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("time");
+    return atype;
 }
 
-QStringList VTimeAttr::data() const
+QStringList VTimeAttr::data(bool /*firstLine*/) const
 {
+    static VTimeAttrType* atype=static_cast<VTimeAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
@@ -106,19 +102,19 @@ QStringList VTimeAttr::data() const
         {
             const std::vector<ecf::TimeAttr>& v=parent_->node_->timeVec();
             if(index_ < v.size())
-                atype.encode(v[index_],s);
+                atype->encode(v[index_],s);
         }
         else if(dataType_ == TodayData)
         {
             const std::vector<ecf::TodayAttr>& v=parent_->node_->todayVec();
             if(index_ < v.size())
-                atype.encode(v[index_],s);
+                atype->encode(v[index_],s);
         }
         else if(dataType_ == CronData)
         {
             const std::vector<ecf::CronAttr>& v=parent_->node_->crons();
             if(index_ < v.size())
-                atype.encode(v[index_],s);
+                atype->encode(v[index_],s);
         }
     }
     return s;

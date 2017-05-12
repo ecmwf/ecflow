@@ -18,18 +18,6 @@
 // VLateAttrType
 //================================
 
-class VLateAttrType : public VAttributeType
-{
-public:
-    explicit VLateAttrType();
-    QString toolTip(QStringList d) const;
-    void encode(ecf::LateAttr* late,QStringList& data) const;   
-
-private:
-    enum DataIndex {TypeIndex=0,NameIndex=1};
-};
-
-
 VLateAttrType::VLateAttrType() : VAttributeType("late")
 {
     dataCount_=2;
@@ -49,13 +37,21 @@ QString VLateAttrType::toolTip(QStringList d) const
     return t;
 }
 
+QString VLateAttrType::definition(QStringList d) const
+{
+    QString t="late";
+    if(d.count() == dataCount_)
+    {
+        t+=" " + d[NameIndex];
+    }
+    return t;
+}
+
 void VLateAttrType::encode(ecf::LateAttr* late,QStringList& data) const
 {
     if(late)
         data << qName_ << QString::fromStdString(late->name());
 }
-
-static VLateAttrType atype;
 
 //=====================================================
 //
@@ -71,16 +67,18 @@ VLateAttr::VLateAttr(VNode *parent,const std::string& name) :
 
 VAttributeType* VLateAttr::type() const
 {
-    return &atype;
+    static VAttributeType* atype=VAttributeType::find("late");
+    return atype;
 }
 
-QStringList VLateAttr::data() const
+QStringList VLateAttr::data(bool /*firstLine*/) const
 {
+    static VLateAttrType* atype=static_cast<VLateAttrType*>(type());
     QStringList s;
     if(node_ptr node=parent_->node())
     {
         ecf::LateAttr *late=node->get_late();
-        atype.encode(late,s);
+        atype->encode(late,s);
     }
     return s;
 }

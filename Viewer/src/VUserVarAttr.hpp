@@ -12,6 +12,7 @@
 #define VUSERVARATTR_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <string>
@@ -22,13 +23,24 @@ class VAttributeType;
 class VNode;
 class Variable;
 
+class VUserVarAttrType : public VAttributeType
+{
+public:
+    explicit VUserVarAttrType();
+    QString toolTip(QStringList d) const;
+    void encode(const Variable&,QStringList&) const;
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+};
+
 class VUserVarAttr : public VAttribute
 {
 public:
     VUserVarAttr(VNode *parent,const Variable&,int index);
 
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

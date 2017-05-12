@@ -12,6 +12,7 @@
 #define VLABEL_HPP
 
 #include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 #include <QStringList>
 #include <string>
@@ -23,6 +24,18 @@ class VNode;
 
 class Label;
 
+class VLabelAttrType : public VAttributeType
+{
+public:
+    explicit VLabelAttrType();
+    QString toolTip(QStringList d) const;
+    QString definition(QStringList d) const;
+    void encode(const Label& label,QStringList& data,bool firstLine) const;
+
+private:
+    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+};
+
 class VLabelAttr : public VAttribute
 {
 public:
@@ -30,7 +43,7 @@ public:
 
     int lineNum() const;
     VAttributeType* type() const;
-    QStringList data() const;
+    QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

@@ -14,7 +14,7 @@
                 }, 
                 
                 "keyword" : {
-                    "pattern" : "(edit|cron|label|event|defstatus)",                       
+                    "pattern" : "^\\s*(edit|cron|date|day|inlimit|label|late|limit|meter|event|repeat|time|today|trigger|complete|defstatus)\\s+",
                     "colour"  : "rgb(136,0,136)",               
                     "bold"    : "true"
                 }, 
