@@ -26,6 +26,10 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
 {
     setupUi(this);
 
+    Highlighter* ih=new Highlighter(triggerTe_->document(),"trigger");
+    triggerTe_->setReadOnly(true);
+    triggerTe_->setBackgroundVisible(true);
+
     //We use this plaintextedit to generate the syntax highligted html text for
     //the trigger expression.
     exprTe_=new QPlainTextEdit(this);
@@ -34,8 +38,13 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
 
     triggerCollector_=new TriggerListCollector(false);
 
-    Q_ASSERT(tab_->count() == 3);
-    tab_->setCurrentIndex(tabIndexToInt(TriggerTabIndex));
+    Q_ASSERT(stacked_->count() == 2);
+    stacked_->setCurrentIndex(panelIndexToInt(TablePanelIndex));
+
+    //tab_->hide();
+
+    //Q_ASSERT(tab_->count() == 3);
+    //tab_->setCurrentIndex(tabIndexToInt(TriggerTabIndex));
 
     QFont f("Monospace");
     f.setStyleHint(QFont::TypeWriter);
@@ -43,18 +52,19 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
     f.setPointSize(10);
     f.setStyleStrategy(QFont::PreferAntialias);
     triggerBrowser_->setFont(f);
-    triggeredBrowser_->setFont(f);
+    //triggeredBrowser_->setFont(f);
     //selectedItemTextEdit_->setFont(f);
 
     connect(triggerBrowser_,SIGNAL(anchorClicked(const QUrl&)),
             this,SLOT(anchorClicked(const QUrl&)));
 
-    connect(triggeredBrowser_,SIGNAL(anchorClicked(const QUrl&)),
-            this,SLOT(anchorClicked(const QUrl&)));
+    //connect(triggeredBrowser_,SIGNAL(anchorClicked(const QUrl&)),
+    //        this,SLOT(anchorClicked(const QUrl&)));
 }
 
 TriggerBrowser::~TriggerBrowser()
 {
+    clear();
     delete triggerCollector_;
 }
 
@@ -65,23 +75,31 @@ void TriggerBrowser::setOwner(TriggerItemWidget* owner)
 }
 
 void TriggerBrowser::clear()
-{
-    triggerCollector_->clear();
-    loadedTabs_.clear();
+{   
+    loadedPanels_.clear();
     triggerBrowser_->clear();
-    triggeredBrowser_->clear();
+    //triggeredBrowser_->clear();
     triggerGraph_->clear();
+
+    //It is safre to clear it after the graph is cleared!
+    triggerCollector_->clear();
 }
 
 void TriggerBrowser::suspend()
 {
-    triggerCollector_->clear();
+    //triggerCollector_->clear();
 }
 
 void TriggerBrowser::load()
 {    
     Q_ASSERT(owner_);
 
+    loadedPanels_.clear();
+
+    loadTriggerTab(true);
+    loadTriggerGraphTab(true);
+
+#if 0
     loadedTabs_.clear();
 
     if(tab_->currentIndex() == tabIndexToInt(TriggerTabIndex))
@@ -96,14 +114,21 @@ void TriggerBrowser::load()
     {
         loadTriggerGraphTab(true);
     }
+#endif
 }
 
 void TriggerBrowser::loadTriggerGraphTab(bool forceLoad)
 {
-    if(!forceLoad && isTabLoaded(TriggerGraphTabIndex))
+    //if(!forceLoad && isTabLoaded(TriggerGraphTabIndex))
+    //    return;
+
+    if(!forceLoad && isPanelLoaded(TablePanelIndex))
         return;
 
-    triggerGraph_->beginUpdate();  // ---------------- Start of model update
+    //Q_EMIT triggerUpdateBegin();
+
+
+    triggerGraph_->beginTriggerUpdate();
 
     VNode *n=owner_->info()->node();
     Q_ASSERT(n);
@@ -113,18 +138,25 @@ void TriggerBrowser::loadTriggerGraphTab(bool forceLoad)
     n->triggerExpr(te,ce);
     triggerGraph_->setTriggerExpression(te);
 
-    // collect the list of triggers of this node
+    triggerTe_->setPlainText(QString::fromStdString(te));
+
+    // collect the list of triggers of this node        
     triggerCollector_->setDependency(owner_->dependency());
     n->triggers(triggerCollector_);
     triggerGraph_->setTriggerCollector(triggerCollector_);
 
-    triggerGraph_->endUpdate();  // ---------------- End of model update
+    triggerGraph_->endTriggerUpdate();
+
+    //Q_EMIT triggerUpdateEnd();
+
+    loadedPanels_.insert(TablePanelIndex);
 }
 
 
 void TriggerBrowser::loadTriggerTab(bool forceLoad)
 {
-    if(!forceLoad && isTabLoaded(TriggerTabIndex))
+    //if(!forceLoad && isTabLoaded(TriggerTabIndex))
+    if(!forceLoad && isPanelLoaded(TextPanelIndex))
         return;
 
     VNode *n=owner_->info()->node();
@@ -169,11 +201,12 @@ void TriggerBrowser::loadTriggerTab(bool forceLoad)
     QGuiApplication::restoreOverrideCursor();
 #endif
 
-    loadedTabs_.insert(TriggerTabIndex);
+    loadedPanels_.insert(TextPanelIndex);
 }
 
 void TriggerBrowser::loadTriggeredTab(bool forceLoad)
 {
+#if 0
     if(!forceLoad && isTabLoaded(TriggeredTabIndex))
         return;
 
@@ -188,9 +221,11 @@ void TriggerBrowser::loadTriggeredTab(bool forceLoad)
     s+="</table>";
     triggeredBrowser_->setHtml(s);
 
-    loadedTabs_.insert(TriggeredTabIndex);
+    //loadedPanels_.insert(TriggeredTabIndex);
+#endif
 }
 
+#if 0
 void TriggerBrowser::on_tab__currentChanged(int idx)
 {
     if(owner_ && !owner_->isSuspended())
@@ -203,13 +238,34 @@ void TriggerBrowser::on_tab__currentChanged(int idx)
             loadTriggerGraphTab();
     }
 }
-
-bool TriggerBrowser::isTabLoaded(TabIndex idx) const
+#endif
+void TriggerBrowser::on_stacked__currentChanged(int idx)
 {
-    return (loadedTabs_.find(idx) != loadedTabs_.end());
+    if(owner_ && !owner_->isSuspended())
+    {
+        if(idx == panelIndexToInt(TablePanelIndex))
+            loadTriggerGraphTab();
+        else if(idx == panelIndexToInt(TextPanelIndex))
+            loadTriggerTab();
+    }
 }
 
-int TriggerBrowser::tabIndexToInt(TabIndex idx) const
+void TriggerBrowser::setTextMode()
+{
+    stacked_->setCurrentIndex(TextPanelIndex);
+}
+
+void TriggerBrowser::setTableMode()
+{
+    stacked_->setCurrentIndex(TablePanelIndex);
+}
+
+bool TriggerBrowser::isPanelLoaded(PanelIndex idx) const
+{
+    return (loadedPanels_.find(idx) != loadedPanels_.end());
+}
+
+int TriggerBrowser::panelIndexToInt(PanelIndex idx) const
 {
     return static_cast<int>(idx);
 }
@@ -217,8 +273,8 @@ int TriggerBrowser::tabIndexToInt(TabIndex idx) const
 //Updates the trigger list if the right type of change happened
 void TriggerBrowser::nodeChanged(const VNode* n)
 {
-    if(!isTabLoaded(TriggerTabIndex))
-        return;
+    //if(!isTabLoaded(TriggerTabIndex))
+    //   return;
 
     VNode *node=owner_->info()->node();
     Q_ASSERT(node);
@@ -248,7 +304,7 @@ void TriggerBrowser::nodeChanged(const VNode* n)
 void TriggerBrowser::anchorClicked(const QUrl& link)
 {
     owner_->linkSelected(link.toString().toStdString());
-    tab_->setCurrentIndex(TriggerTabIndex);
+    //tab_->setCurrentIndex(TriggerTabIndex);
 }
 
 QString TriggerBrowser::makeHtml(TriggerListCollector *tc,QString directTitle,QString modeText) const

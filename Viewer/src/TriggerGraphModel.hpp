@@ -38,7 +38,8 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-    void setTriggerCollector(TriggerListCollector *tc) {tc_ = tc;}
+    TriggerListCollector* triggerCollector() const {return tc_;}
+    void setTriggerCollector(TriggerListCollector *tc);
 
     //TriggerListCollector *triggers() const {return tc_;}
    	void clearData();

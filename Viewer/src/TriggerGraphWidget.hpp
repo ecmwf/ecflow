@@ -14,7 +14,9 @@
 #include <QDialog>
 
 #include "ui_TriggerGraphWidget.h"
-#include "TriggerGraphModel.hpp"
+
+class TriggerGraphModel;
+class TriggerListCollector;
 
 class TriggerGraphWidget : public QWidget, private Ui::triggerGraphWidget
 {
@@ -25,19 +27,17 @@ public:
 	~TriggerGraphWidget();
 
 	void setTriggerExpression(std::string &exp);
-	void setTriggerCollector(TriggerListCollector *tc) {model_->setTriggerCollector(tc);}
+    void setTriggerCollector(TriggerListCollector *tc);
 	void clear();
-	void beginUpdate();
-	void endUpdate();
-
+    void beginTriggerUpdate();
+    void endTriggerUpdate();
 
 public Q_SLOTS:
 
 
 private:
-
-	TriggerGraphModel *model_;
+    TriggerGraphModel *triggerModel_;
+    TriggerGraphModel *triggeredModel_;
 };
-
 
 #endif

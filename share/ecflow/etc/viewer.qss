@@ -221,6 +221,17 @@ QLabel[editorInfo="1"] {
      background: rgb(242, 242, 242);
 }
 
+/*----------------------------
+  Triggers
+-----------------------------*/
+
+QLabel[trigger="1"] {
+     /*border: 1px solid rgb(206,209,196);/*
+     /*background: rgb(252, 241, 219);  */
+     color: rgb(255,255,255);
+     background: rgb(95, 110, 149);
+}
+
 
 /*----------------------------
   Property editor

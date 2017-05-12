@@ -36,23 +36,25 @@ public:
     void load();
     void suspend();
     void nodeChanged(const VNode*);
+    void setTextMode();
+    void setTableMode();
 
 protected Q_SLOTS:
-    void on_tab__currentChanged(int idx);
+    void on_stacked__currentChanged(int idx);
     void anchorClicked(const QUrl& link);
 
 private:
-    enum TabIndex {TriggerGraphTabIndex=0, TriggerTabIndex=1, TriggeredTabIndex=2};
+    enum PanelIndex {TablePanelIndex=0, TextPanelIndex=1};
 
     void loadTriggerGraphTab(bool forceLoad=false);
     void loadTriggerTab(bool forceLoad=false);
-    void loadTriggeredTab(bool forceLoad=false);
-    bool isTabLoaded(TabIndex idx) const;
-    int tabIndexToInt(TabIndex idx) const;
+    void loadTriggeredTab(bool forceLoad=false);   
+    bool isPanelLoaded(PanelIndex idx) const;
+    int panelIndexToInt(PanelIndex idx) const;
     QString makeHtml(TriggerListCollector *tc,QString,QString) const;
 
-    TriggerItemWidget* owner_;
-    std::set<TabIndex> loadedTabs_;
+    TriggerItemWidget* owner_;   
+    std::set<PanelIndex> loadedPanels_;
     QPlainTextEdit* exprTe_;
     Highlighter* exprHighlight_;
     TriggerListCollector* triggerCollector_;

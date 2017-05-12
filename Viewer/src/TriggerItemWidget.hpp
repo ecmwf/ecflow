@@ -18,6 +18,7 @@
 
 #include "ui_TriggerItemWidget.h"
 
+class QActionGroup;
 class TriggeredScanner;
 
 class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::TriggerItemWidget
@@ -43,6 +44,7 @@ public:
 
 protected Q_SLOTS:
     void on_dependTb__toggled(bool);
+    void slotViewMode(QAction*);
     void scanStarted();
     void scanFinished();
     void scanProgressed(int);
@@ -54,6 +56,7 @@ protected:
     void checkActionState();
 
     TriggeredScanner *scanner_;
+    QActionGroup* modeAg_;
 };
 
 #endif

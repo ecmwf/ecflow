@@ -145,20 +145,21 @@ set(viewer_srcs
     RichTextSearchLine.cpp
     TextEditSearchLine.cpp
     TimeItemWidget.cpp    
-    TriggerBrowser.cpp
-    TriggerEditor.cpp
-    TriggerGraphWidget.cpp
-    TriggerGraphModel.cpp
-    TriggerItemWidget.cpp
-    TriggerTextWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
     TreeNodeViewDelegateBase.cpp
     TreeNodeWidget.cpp
     TreeView.cpp
+    TriggerBrowser.cpp
+    TriggerEditor.cpp
+    TriggerGraphWidget.cpp
+    TriggerGraphModel.cpp
+    TriggerItemWidget.cpp
+    TriggerTextWidget.cpp    
     TriggerCollector.cpp
     TriggerView.cpp
+    TriggerViewDelegate.cpp
     TriggeredScanner.cpp
     UIDebug.cpp
     UiLog.cpp

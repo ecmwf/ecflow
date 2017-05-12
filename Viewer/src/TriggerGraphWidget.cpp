@@ -9,13 +9,36 @@
 
 #include "TriggerGraphWidget.hpp"
 
+#include "Highlighter.hpp"
+#include "TriggerGraphModel.hpp"
+#include "TriggerViewDelegate.hpp"
 
 TriggerGraphWidget::TriggerGraphWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	model_ = new TriggerGraphModel(this);
-	triggerItemsTreeView_->setModel(model_);
+    //Highlighter* ih=new Highlighter(triggerTextEdit_->document(),"trigger");
+    //triggerTextEdit_->setReadOnly(true);
+    //triggerTextEdit_->setBackgroundVisible(true);
+
+    triggerLabel_->setProperty("trigger","1");
+    triggeredLabel_->setProperty("trigger","1");
+
+    triggerModel_ = new TriggerGraphModel(this);
+    triggerView_->setModel(triggerModel_);
+
+    triggerView_->setHeaderHidden(true);
+    triggerView_->setRootIsDecorated(false);
+    triggerView_->setSortingEnabled(false);
+    triggerView_->setAllColumnsShowFocus(true);
+    triggerView_->setUniformRowHeights(true);
+    triggerView_->setMouseTracking(true);
+    triggerView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    triggerView_->setItemDelegate(new TriggerViewDelegate(triggerView_));
+
+    triggeredModel_ = new TriggerGraphModel(this);
+    triggeredView_->setModel(triggeredModel_);
 }
 
 TriggerGraphWidget::~TriggerGraphWidget()
@@ -24,21 +47,27 @@ TriggerGraphWidget::~TriggerGraphWidget()
 
 void TriggerGraphWidget::setTriggerExpression(std::string &exp)
 {
-	selectedNodeTextEdit_->setPlainText(QString::fromStdString(exp));
+    //triggerTextEdit_->setPlainText(QString::fromStdString(exp));
 }
 
 void TriggerGraphWidget::clear()
 {
-	model_->clearData();
+    triggerModel_->clearData();
 }
 
-void TriggerGraphWidget::beginUpdate()
+void TriggerGraphWidget::beginTriggerUpdate()
 {
-	model_->beginUpdate();
+    triggerModel_->beginUpdate();
 }
 
-void TriggerGraphWidget::endUpdate()
+void TriggerGraphWidget::endTriggerUpdate()
 {
-	model_->endUpdate();
+    triggerModel_->endUpdate();
 
 }
+
+void TriggerGraphWidget::setTriggerCollector(TriggerListCollector *tc)
+{
+    triggerModel_->setTriggerCollector(tc);
+}
+

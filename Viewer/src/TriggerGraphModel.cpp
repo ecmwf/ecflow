@@ -70,10 +70,9 @@ TriggerGraphModel::~TriggerGraphModel()
 
 void TriggerGraphModel::clearData()
 {
-	beginUpdate();
-	if (tc_)
-		tc_->clear();
-	endUpdate();
+    beginResetModel();
+    tc_=0;
+    endResetModel();
 }
 
 void TriggerGraphModel::beginUpdate()
@@ -87,9 +86,16 @@ void TriggerGraphModel::endUpdate()
 }
 
 
+void TriggerGraphModel::setTriggerCollector(TriggerListCollector *tc)
+{
+    beginResetModel();
+    tc_ = tc;
+    endResetModel();
+}
+
 bool TriggerGraphModel::hasData() const
 {
-	if (tc_)
+    if(tc_)
 		return tc_->size() > 0;
 	else
 		return false;
@@ -97,7 +103,7 @@ bool TriggerGraphModel::hasData() const
 
 int TriggerGraphModel::columnCount( const QModelIndex& /*parent */) const
 {
-	 return columns_->count();
+     return 1 ;//columns_->count();
 }
 
 int TriggerGraphModel::rowCount( const QModelIndex& parent) const
@@ -131,14 +137,40 @@ QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
 	if(row < 0 || row >= tc_->size())
 		return QVariant();
 
-	QString id=columns_->id(index.column());
+    //QString id=columns_->id(index.column());
 
 	const std::vector<TriggerListItem*>& items=tc_->items();
 	VItem *t=items[row]->item();
+    Q_ASSERT(t);
 
-	if(role == Qt::DisplayRole)
-	{
-		if(id == "path")
+    if(VAttribute* a=t->isAttribute())
+    {
+        if(role == Qt::DisplayRole)
+            return a->data();
+    }
+    else if(VNode* vnode=t->isNode())
+    {
+        if(role == Qt::DisplayRole)
+        {
+            return QString::fromStdString(vnode->absNodePath());
+        }
+        else if(role == Qt::BackgroundRole)
+        {
+            if(vnode->isSuspended())
+            {
+                QVariantList lst;
+                lst << vnode->stateColour() << vnode->realStateColour();
+                return lst;
+            }
+            else
+                return vnode->stateColour() ;
+        }
+        else if(role == Qt::ForegroundRole)
+            return vnode->stateFontColour();
+    }
+
+#if 0
+        if(id == "path")
 			return "PATH"; //d->pathStr();
 		else if(id == "server")
 			return "SERVER"; //d->serverStr();
@@ -152,21 +184,17 @@ QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
             return QString::fromStdString(t->fullPath());
 
         return QVariant();
-	}
-	else if(role == Qt::BackgroundRole)
+#endif
+
+#if 0
+    else if(role == Qt::BackgroundRole)
 	{
 		//if(id == "status")
 		//	return d->stateColour();
 
 		return QVariant();
 	}
-	else if(role == Qt::TextAlignmentRole)
-	{
-		if(id == "status" || id == "type")
-			return Qt::AlignCenter;
-
-		return QVariant();
-	}
+#endif
 
 	return QVariant();
 }
@@ -176,6 +204,7 @@ QVariant TriggerGraphModel::headerData( const int section, const Qt::Orientation
 	if ( orient != Qt::Horizontal)
       		  return QAbstractItemModel::headerData( section, orient, role );
 
+#if 0
 	QString id=columns_->id(section);
 
 	if(role == Qt::DisplayRole)
@@ -189,7 +218,7 @@ QVariant TriggerGraphModel::headerData( const int section, const Qt::Orientation
 		if(id == "status" || id == "type")
 			return Qt::AlignCenter;
 	}
-
+#endif
 	return QVariant();
 }
 

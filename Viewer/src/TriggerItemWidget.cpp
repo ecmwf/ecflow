@@ -14,6 +14,8 @@
 #include "VNode.hpp"
 #include "VSettings.hpp"
 
+#include <QActionGroup>
+
 //========================================================
 //
 // TriggerItemWidget
@@ -27,8 +29,19 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     messageLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
 
-    textTb_->hide();
-    graphTb_->hide();
+    //View mode
+    modeAg_=new QActionGroup(this);
+    modeAg_->addAction(actionTextMode_);
+    modeAg_->addAction(actionTableMode_);
+
+    textTb_->setDefaultAction(actionTextMode_);
+    tableTb_->setDefaultAction(actionTableMode_);
+
+    connect(modeAg_,SIGNAL(triggered(QAction*)),
+            this,SLOT(slotViewMode(QAction*)));
+
+    //textTb_->hide();
+    //graphTb_->hide();
     triggerView_->hide();
 
     //Dependencies
@@ -36,6 +49,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 
     //Scanner
     scanner_=new TriggeredScanner(this);
+
 
     connect(scanner_,SIGNAL(scanStarted()),
             this,SLOT(scanStarted()));
@@ -112,6 +126,18 @@ void TriggerItemWidget::checkActionState()
 void TriggerItemWidget::on_dependTb__toggled(bool)
 {   
     load();
+}
+
+void TriggerItemWidget::slotViewMode(QAction* ac)
+{
+    if(ac == actionTextMode_)
+    {
+        textBrowser_->setTextMode();
+    }
+    else if(ac == actionTableMode_)
+    {
+        textBrowser_->setTableMode();
+    }
 }
 
 bool TriggerItemWidget::dependency() const
