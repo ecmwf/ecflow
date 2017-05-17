@@ -15,7 +15,7 @@ ecbuild_add_library( TARGET   libsimu
                               ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
-                              ../AParser/src
+                              ../ANode/parser/src
                               ../Base/src
                     )
 

@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
    }
 
    // delete the log file if it exists.
-   std::string log_path = File::test_data("Base/test/TestJobGenPerf.log","AParser");
+   std::string log_path = File::test_data("Base/test/TestJobGenPerf.log","Base");
    fs::remove(log_path);
    std::string path = argv[1];
 

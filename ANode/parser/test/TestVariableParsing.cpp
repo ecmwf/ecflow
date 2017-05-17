@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs ) {
 
 	cout << "AParser:: ...test_variable  \n";
 
-   std::string path = File::test_data("AParser/test/data/good_defs/edit/edit.def","AParser");
+   std::string path = File::test_data("ANode/parser/test/data/good_defs/edit/edit.def","parser");
 
 	Defs defs;
 	DefsStructureParser checkPtParser( &defs, path );

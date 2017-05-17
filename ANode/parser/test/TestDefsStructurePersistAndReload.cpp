@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( test_defs_structure_persistence_and_reload )
 {
 	cout << "AParser:: ...test_defs_structure_persistence_and_reload\n";
 
-   std::string checkPtFile = File::test_data("AParser/test/generated_defs_file.txt","AParser");
+   std::string checkPtFile = File::test_data("ANode/parser/test/generated_defs_file.txt","parser");
 
 	MyDefsFixture theDefsFixture(checkPtFile);
 

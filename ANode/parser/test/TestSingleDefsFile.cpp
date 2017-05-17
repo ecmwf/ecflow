@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
 {
    DurationTimer duration_timer;
 
-   std::string path = File::test_data("AParser/test/data/single_defs/mega.def","AParser");
+   std::string path = File::test_data("ANode/parser/test/data/single_defs/mega.def","parser");
    size_t mega_file_size = fs::file_size(path);
    cout << "AParser:: ...test_single_defs " << path << " file_size(" << mega_file_size << ")\n";
 

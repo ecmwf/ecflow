@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( test_parsing_for_good_defs )
 {
 	cout << "AParser:: ...test_parsing_for_good_defs\n";
 
-   std::string path = File::test_data("AParser/test/data/good_defs","AParser");
+   std::string path = File::test_data("ANode/parser/test/data/good_defs","parser");
 
 	// All the defs in this directory are expected to pass
 	test_defs(path, true);
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE( test_parsing_for_bad_defs )
 {
 	cout << "AParser:: ...test_parsing_for_bad_defs\n";
 
-   std::string path = File::test_data("AParser/test/data/bad_defs","AParser");
+   std::string path = File::test_data("ANode/parser/test/data/bad_defs","parser");
 
 	// All the defs in this directory are expected to fail
 	test_defs(path, false);
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE( test_parsing_for_good_defs_state )
 {
    cout << "AParser:: ...test_parsing_for_good_defs_state\n";
 
-   std::string path = File::test_data("AParser/test/data/good_defs_state","AParser");
+   std::string path = File::test_data("ANode/parser/test/data/good_defs_state","parser");
 
    // All the defs in this directory are expected to pass
    test_defs(path, true);

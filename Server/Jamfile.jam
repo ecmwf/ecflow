@@ -15,9 +15,8 @@ project theServer ;
 #
 use-project theCore     : ../ACore ;
 use-project theNodeAttr : ../ANattr ;
-use-project theNode     : ../ANode ;
+use-project theParser   : ../ANode/parser ;  # seems to automatically pick up theNode
 use-project theBase     : ../Base ;
-use-project theParser   : ../AParser ;
 
 lib pthread ;
 
@@ -34,7 +33,7 @@ lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src 
                 <include>../ANode/src 
-                <include>../AParser/src 
+                <include>../ANode/parser/src 
                 <include>../Base/src 
                 <include>../Server/src
                 <variant>debug:<define>DEBUG

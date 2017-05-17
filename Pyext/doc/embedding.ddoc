@@ -17,7 +17,7 @@
 #    <include>../ACore/src
 #    <include>../ANattr/src 
 #    <include>../ANode/src 
-#    <include>../AParser/src 
+#    <include>../ANode/parser/src 
 #    <include>../Base/src 
 #    <include>../Client/src
 #    <include>../CSim/src

@@ -12,8 +12,7 @@ project theTest ;
 #
 use-project theCore     : ../ACore ;
 use-project theNodeAttr : ../ANattr ;
-use-project theNode     : ../ANode ;
-use-project theParser   : ../AParser ;
+use-project theParser   : ../ANode/parser ; # seems to automatically pick up theNode
 use-project theBase     : ../Base ;
 use-project theServer   : ../Server ;
 use-project theClient   : ../Client ;
@@ -30,7 +29,7 @@ lib libharness : [ glob src/*.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src 
                 <include>../ANode/src 
-                <include>../AParser/src 
+                <include>../ANode/parser/src 
                 <include>../Base/src 
           	    <include>../Base/test 
                 <include>../Client/src 

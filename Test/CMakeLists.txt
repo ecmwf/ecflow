@@ -16,7 +16,7 @@ ecbuild_add_library( TARGET   libharness
                               ../ANattr/src
                               ../ANode/src
                               ../ANode/test
-                              ../AParser/src
+                              ../ANode/parser/src
                               ../Base/src
                               ../Base/src/cts
                               ../Base/src/stc

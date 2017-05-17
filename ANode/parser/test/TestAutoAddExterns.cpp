@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_SUITE( ParserTestSuite )
 // Test that automatic add of externs
 BOOST_AUTO_TEST_CASE( test_auto_add_externs )
 {
-   std::string path = File::test_data("AParser/test/data/single_defs/test_auto_add_extern.def","AParser");
+   std::string path = File::test_data("ANode/parser/test/data/single_defs/test_auto_add_extern.def","parser");
 
 	size_t mega_file_size = fs::file_size(path);
 	cout << "AParser:: ...test_auto_add_externs " << path << " file_size(" << mega_file_size << ")\n";

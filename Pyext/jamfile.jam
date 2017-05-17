@@ -71,8 +71,7 @@ project thePyext ;
 
 use-project theCore      : ../ACore ;
 use-project theNodeAttr  : ../ANattr ;
-use-project theNode      : ../ANode ;
-use-project theParser    : ../AParser ;
+use-project theParser    : ../ANode/parser ;  # seems to automatically pick up theNode
 use-project theBase      : ../Base ;
 use-project theClient    : ../Client ;
 use-project theSimulator : ../CSim ;

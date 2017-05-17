@@ -10,11 +10,9 @@
 #
 project theBase ;
 
-
 use-project theCore     : ../ACore ;
 use-project theNodeAttr : ../ANattr ;
-use-project theNode     : ../ANode ;
-use-project theParser   : ../AParser ;
+use-project theParser   : ../ANode/parser ; # seems to automatically pick up theNode
 
 # The <include> means we will automatically add this directory to the include path
 # of any other target that uses this lib
@@ -22,8 +20,8 @@ use-project theParser   : ../AParser ;
 lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
          : <include>../ACore/src
            <include>../ANattr/src
-           <include>../AParser/src 
            <include>../ANode/src
+           <include>../ANode/parser/src 
            <include>../Base/src
            <include>../Base/src/cts
            <include>../Base/src/stc
@@ -31,8 +29,8 @@ lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
            <variant>debug:<define>DEBUG
            <use>/theCore//core
            <use>/theNodeAttr//nodeattr
-           <use>/theParser//libparser
            <use>/theNode//node
+           <use>/theParser//libparser
            <use>/site-config//boost_system
            <use>/site-config//boost_serialization
            <use>/site-config//boost_filesystem

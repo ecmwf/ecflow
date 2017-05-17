@@ -10,14 +10,14 @@ ecbuild_add_library( TARGET   libparser
                      SOURCES  ${srcs}
                      LIBS     node nodeattr core     
                      INCLUDES src
-                              ../ACore/src 
-                              ../ANattr/src
-                              ../ANode/src
+                              ../../ACore/src 
+                              ../../ANattr/src
+                              ../src                # ANode/src
                      )
 
 # ===================================================================
 # Use following to populate list: 
-#  cd $WK/AParser                      
+#  cd $WK/ANode/parser                      
 #  find test -name \*.cpp | sort   
 list( APPEND test_srcs
    test/PersistHelper.cpp
@@ -31,7 +31,7 @@ ecbuild_add_test( TARGET       u_aparser
                   BOOST
                   SOURCES      ${test_srcs}
                   LIBS         libparser 
-                  INCLUDES     ../ANode/test
+                  INCLUDES     ../test       # ANode/test
                   TEST_DEPENDS u_anode
                 )
 
@@ -55,7 +55,7 @@ if (ENABLE_ALL_TESTS)
                       ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                       SOURCES  ${t3_src}
                       LIBS     libparser 
-                      INCLUDES ../ANode/test
+                      INCLUDES ../test   # ANode/test
                                ${Boost_INCLUDE_DIRS} 
                     )
 
@@ -68,7 +68,7 @@ if (ENABLE_ALL_TESTS)
                       ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                       SOURCES  ${t4_src}
                       LIBS     libparser
-                      INCLUDES ../ANode/test
+                      INCLUDES ../test    # ANode/test
                                ${Boost_INCLUDE_DIRS} 
                    )
 endif()

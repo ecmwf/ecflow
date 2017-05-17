@@ -14,6 +14,8 @@ ecbuild_add_library( TARGET   node
                               ../ANattr/src
                     )
 
+add_subdirectory( parser )
+
 # Use following to populate list: 
 #  cd $WK/ANode                      
 #  find test -name \*.cpp | sort      
@@ -79,4 +81,5 @@ if (ENABLE_ALL_TESTS)
                       TEST_DEPENDS u_anattr
                     )
 endif()
+
 

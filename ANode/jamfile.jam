@@ -62,3 +62,5 @@ exe u_anode_stest : test/TestSingleExprParse.cpp
            /site-config//boost_test
          : <variant>debug:<define>DEBUG
  	     ;
+
+build-project parser ;

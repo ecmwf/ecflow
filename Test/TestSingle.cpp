@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE( test_mega_def )
    DurationTimer timer;
 
    // location to mega.def and left over log file
-   std::string log_file = File::test_data("AParser/test/data/single_defs/mega.def_log","AParser");
-   std::string path = File::test_data("AParser/test/data/single_defs/mega.def","AParser");
+   std::string log_file = File::test_data("ANode/parser/test/data/single_defs/mega.def_log","parser");
+   std::string path = File::test_data("ANode/parser/test/data/single_defs/mega.def","parser");
 
    cout << "Test:: ..." << path << " log file: " << log_file << flush;
 

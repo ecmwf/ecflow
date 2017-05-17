@@ -12,7 +12,7 @@ project ecflowview ;
 
 use-project theCore      : ../ACore ;
 use-project theNodeAttr  : ../ANattr ;
-use-project theNode      : ../ANode ;
+use-project theParser    : ../ANode/parser ; # seems to automatically pick up theNode
 use-project theBase      : ../Base ;
 use-project theClient    : ../Client ;
 use-project theTest      : ../Test ;
@@ -119,4 +119,3 @@ exe test-view : [ glob test/*.cpp  ]
            [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
 #  	   <variant>release:<cxxflags>-O1
         ;
-# bjam -j8 release c++-template-depth=512

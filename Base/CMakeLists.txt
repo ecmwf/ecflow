@@ -76,7 +76,7 @@ ecbuild_add_library( TARGET   base
                               ../ACore/src
                               ../ANattr/src
                               ../ANode/src
-                              ../AParser/src
+                              ../ANode/parser/src
                               ../Base/src
                               ../Base/src/cts
                               ../Base/src/stc

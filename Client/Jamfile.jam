@@ -12,8 +12,7 @@ project theClient ;
 
 use-project theCore      : ../ACore ;
 use-project theNodeAttr  : ../ANattr ;
-use-project theNode      : ../ANode ;
-use-project theParser    : ../AParser ;
+use-project theParser    : ../ANode/parser ; # this will load project from ANode as well
 use-project theBase      : ../Base ;
 
 #
@@ -21,7 +20,7 @@ use-project theBase      : ../Base ;
 # however if this is done, it will not link since, lpthread appears twice
 # on the link line
 #
-lib pthread  ;
+lib pthread ;
 
 #
 # define DEBUG_CLIENT for additional debug
@@ -38,8 +37,8 @@ lib libclient : [ glob src/*.cpp : src/*Main.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src
                 <include>../ANode/src
+                <include>../ANode/parser/src
                 <include>../Base/src
-                <include>../AParser/src
                 <include>../Client/src
                 <variant>debug:<define>DEBUG
                 <link>static

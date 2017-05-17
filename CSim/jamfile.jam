@@ -17,8 +17,7 @@ project theSimulator ;
 #
 use-project theCore     : ../ACore ;
 use-project theNodeAttr : ../ANattr ;
-use-project theNode     : ../ANode ;
-use-project theParser   : ../AParser ;
+use-project theParser   : ../ANode/parser ; # seems to automatically pick up theNode
 use-project theBase     : ../Base ;
 
 lib pthread ;
@@ -33,7 +32,7 @@ lib libsimu : [ glob src/*.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src 
                 <include>../ANode/src 
-                <include>../AParser/src 
+                <include>../ANode/parser/src 
                 <include>../Base/src 
                 <variant>debug:<define>DEBUG
                 <link>static
@@ -51,7 +50,6 @@ lib libsimu : [ glob src/*.cpp ]
               : <include>../CSim/src         
               ;
             
-
 #
 # Test for simulator
 # IMPORTANT: server *MUST* not link with client or include any of the client code
