@@ -250,17 +250,17 @@ public:
 
    /// Function to save the defs as a checkpoint file. File saved to the file name
    /// Can throw exception
-   void save_as_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
-   void save_checkpt_as_string(std::string& check_pt) const;
+   void boost_save_as_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
+   void boost_save_checkpt_as_string(std::string& check_pt) const;
 
-   void save_as_filename(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
-   void save_as_string(std::string&) const;
+   void boost_save_as_filename(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
+   void boost_save_as_string(std::string&) const;
 
    /// Function to restore the defs from a check point file.
    /// If the Defs file has content, this is deleted first, i.e. suites, externs,
    /// Can throw an exception
-   void restore_from_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive());
-   void restore_from_string(const std::string& );
+   void boost_restore_from_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive());
+   void boost_restore_from_string(const std::string& );
 
    /// Delete suites, externs, client handles, reset suspended, and locate state
    /// etc but Server environment left as is:

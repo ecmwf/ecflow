@@ -510,7 +510,7 @@ bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
       LOG(Log::MSG, "Loading check point file " << filename << " port = " << serverEnv_.port());
 
       try {
-         defs_->restore_from_checkpt(filename);   // this can throw
+         defs_->boost_restore_from_checkpt(filename);   // this can throw
          update_defs_server_state();              // works on def_
          //cout << "Server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
          return true;

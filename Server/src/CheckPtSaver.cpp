@@ -136,10 +136,10 @@ void CheckPtSaver::explicitSave(bool from_server) const
 			//
 			// To optimise check pointing, we minimise system calls, i.e we can write check point as a string,
 			// and save string to a file with a single write. This is faster than calling:
-			//    server_->defs_->save_as_checkpt( serverEnv_->checkPtFilename() );
+			//    server_->defs_->boost_save_as_checkpt( serverEnv_->checkPtFilename() );
 			// This solution however does require *MORE* memory.
 			std::string checkpt_as_string,error_msg;
-			server_->defs_->save_checkpt_as_string(checkpt_as_string);
+			server_->defs_->boost_save_checkpt_as_string(checkpt_as_string);
 			if (!File::create(serverEnv_->checkPtFilename(),checkpt_as_string,error_msg)) {
             throw std::runtime_error(error_msg);
 			}

@@ -191,11 +191,11 @@ bool PersistHelper::reload_from_checkpt_file(const Defs& theInMemoryDefs,
 #else
    std::string tmpCheckPt_file = "tmp.check";
 #endif
-   theInMemoryDefs.save_as_checkpt(tmpCheckPt_file,at);
+   theInMemoryDefs.boost_save_as_checkpt(tmpCheckPt_file,at);
 
    try  {
       // Parse the file we just persisted and load the defs file into memory.
-      reloaded_defs.restore_from_checkpt(tmpCheckPt_file,at);
+      reloaded_defs.boost_restore_from_checkpt(tmpCheckPt_file,at);
 
       if (do_compare ) {
          // Make sure the checkpoint file file we just parsed match's the one we persisted

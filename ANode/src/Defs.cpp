@@ -1087,7 +1087,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 	return client_node_to_add;
 }
 
-void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
+void Defs::boost_save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
 {
    // Save NodeContainer children even if ecf::Flag::MIGRATED set
    CheckPtContext checkpt_context;
@@ -1099,7 +1099,7 @@ void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at
  	ecf::save(the_fileName,*this,at);
 }
 
-void Defs::save_checkpt_as_string(std::string& output) const
+void Defs::boost_save_checkpt_as_string(std::string& output) const
 {
    // Save NodeContainer children even if ecf::Flag::MIGRATED set
    CheckPtContext checkpt_context;
@@ -1110,20 +1110,20 @@ void Defs::save_checkpt_as_string(std::string& output) const
    ecf::save_as_string(output,*this);
 }
 
-void Defs::save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
+void Defs::boost_save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
 {
    /// Can throw archive exception
    ecf::save(the_fileName,*this,at);
 }
 
-void Defs::save_as_string(std::string& output) const
+void Defs::boost_save_as_string(std::string& output) const
 {
    ecf::save_as_string(output,*this);
 }
 
-void Defs::restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Type at)
+void Defs::boost_restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Type at)
 {
-//	cout << "Defs::restore_from_checkpt " << the_fileName << "\n";
+//	cout << "Defs::boost_restore_from_checkpt " << the_fileName << "\n";
 
 	if (the_fileName.empty())  return;
 
@@ -1139,7 +1139,7 @@ void Defs::restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Ty
 //	cout << "Restored: " << suiteVec_.size() << " suites\n";
 }
 
-void Defs::restore_from_string(const std::string& rest)
+void Defs::boost_restore_from_string(const std::string& rest)
 {
    if (rest.empty()) return;
 

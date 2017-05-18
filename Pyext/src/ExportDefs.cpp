@@ -83,12 +83,12 @@ std::string check_defs(defs_ptr defs)
 
 void save_as_checkpt(defs_ptr defs, const std::string& file_name)
 {
-   defs->save_as_checkpt(file_name); // use default ARCHIVE
+   defs->boost_save_as_checkpt(file_name); // use default ARCHIVE
 }
 
 void restore_from_checkpt(defs_ptr defs, const std::string& file_name)
 {
-   defs->restore_from_checkpt(file_name); // use default ARCHIVE
+   defs->boost_restore_from_checkpt(file_name); // use default ARCHIVE
 }
 
 std::string simulate(defs_ptr defs)

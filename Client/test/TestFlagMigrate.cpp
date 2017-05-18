@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE( test_flag_migrate )
    BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs() == 0,CtsApi::checkPtDefs() << " failed should return 0\n" << theClient.errorMsg());
    {
       Defs defs;
-      defs.restore_from_checkpt(invokeServer.ecf_checkpt_file()); // make a data model change
+      defs.boost_restore_from_checkpt(invokeServer.ecf_checkpt_file()); // make a data model change
       std::vector<node_ptr> all_nodes; defs.get_all_nodes(all_nodes);
       BOOST_REQUIRE_MESSAGE(all_nodes.size() == expected_nodes  ,"Expected "  << expected_nodes << " nodes but found " << all_nodes.size());
    }
