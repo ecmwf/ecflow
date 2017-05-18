@@ -420,9 +420,11 @@ void ServerComQueue::slotRun()
             //-the thread did not emit a notification about its start
             //-the elapsed time since we sent the task to the thread past the timeout.
 
+            bool running=comThread_->isRunning();
+
             //Problem 1:
             //-the thread is running
-            if(comThread_->isRunning())
+            if(running)
             {
                 UiLog(server_).warn() << " It seems that the ServerCom thread started but it is in a bad state. Try to run task again.";
             }
@@ -435,9 +437,19 @@ void ServerComQueue::slotRun()
             }
 
             if(comThread_->wait(ctStartWaitTimeout_) == false)
-            {
+            {              
+                UiLog(server_).warn() << "  Calling wait() on the ServerCom thread failed.";
+
+                //The thread started to run in the meantime. We check its status again at the next slotRun call.
+                if(!running && comThread_->isRunning())
+                {
+                    UiLog(server_).warn() << "  It seems that in the meantime the thread started to run.\
+                                   We will check its state again";
+                    return;
+                }
+
+                //Otherwise there is nothing to do!!
                 //We exit here because when we tried to call terminate() it just hung!!
-                UiLog(server_).err() << "  Calling wait() on the ServerCom thread failed.";
                 UI_ASSERT(0,"Cannot stop ServerCom thread, which is in a bad state");
                 exit(1);
 #if 0
