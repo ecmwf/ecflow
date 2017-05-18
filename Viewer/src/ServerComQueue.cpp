@@ -410,6 +410,9 @@ void ServerComQueue::slotRun()
     {      
         if(startTimeoutTryCnt_ < ctMaxStartTimeoutTryCnt_)
         {
+            UiLog(server_).warn() << " ServerCom thread does not seem to have started within the timeout. \
+                          startTimeoutTryCnt_=" << startTimeoutTryCnt_;
+
             startTimeoutTryCnt_++;
         }
         else
@@ -419,6 +422,7 @@ void ServerComQueue::slotRun()
             //So if we are here:
             //-the thread did not emit a notification about its start
             //-the elapsed time since we sent the task to the thread past the timeout.
+            //-since the timeout was passed slotRun() has been was called at least startTimeoutTryCnt_ times
 
             bool running=comThread_->isRunning();
 
@@ -468,6 +472,8 @@ void ServerComQueue::slotRun()
                 }
 #endif
             }
+
+            UiLog(server_).warn() << "  Calling wait() on the ServerCom thread succeeded.";
 
             Q_ASSERT(comThread_->isRunning() == false);
 
