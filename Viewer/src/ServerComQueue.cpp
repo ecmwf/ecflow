@@ -410,7 +410,7 @@ void ServerComQueue::slotRun()
     {      
         if(startTimeoutTryCnt_ < ctMaxStartTimeoutTryCnt_)
         {
-            UiLog(server_).warn() << " ServerCom thread does not seem to have started within the timeout. \
+            UiLog(server_).warn() << " ServerCom thread does not seem to have started within the allocated timeout. \
                           startTimeoutTryCnt_=" << startTimeoutTryCnt_;
 
             startTimeoutTryCnt_++;
