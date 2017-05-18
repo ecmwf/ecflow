@@ -24,7 +24,6 @@
 #include "Suite.hpp"
 #include "PrintStyle.hpp"
 #include "File.hpp"
-#include "DefsStructureParser.hpp"
 #include "JobCreationCtrl.hpp"
 #include "Simulator.hpp"
 #include "BoostPythonUtil.hpp"
@@ -60,9 +59,8 @@ static defs_ptr create_defs(const std::string& file_name)
 {
    defs_ptr defs = Defs::create();
 
-   DefsStructureParser checkPtParser( defs.get(), file_name );
    std::string errorMsg,warningMsg;
-   if (!checkPtParser.doParse(errorMsg,warningMsg)) {
+   if (!defs->restore(file_name,errorMsg,warningMsg)) {
       throw std::runtime_error(errorMsg);
    }
    if (!warningMsg.empty()) std::cerr << warningMsg;

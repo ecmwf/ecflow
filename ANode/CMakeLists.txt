@@ -2,16 +2,18 @@
 # If new src or test cpp files are added make sure you touch this file
 #
 
-file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" )
+file( GLOB srcs       RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp"  )
+file( GLOB parser_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "parser/src/*.cpp"  )
 
 ecbuild_add_library( TARGET   node
                      NOINSTALL
                      TYPE     STATIC
-                     SOURCES  ${srcs}
+                     SOURCES  ${srcs} ${parser_src}
                      LIBS     nodeattr core
-                     INCLUDES src
-                              ../ACore/src 
+                     INCLUDES ../ACore/src 
                               ../ANattr/src
+                              src
+                              parser/src
                     )
 
 add_subdirectory( parser )

@@ -12,7 +12,7 @@ project theTest ;
 #
 use-project theCore     : ../ACore ;
 use-project theNodeAttr : ../ANattr ;
-use-project theParser   : ../ANode/parser ; # seems to automatically pick up theNode
+use-project theNode     : ../ANode  ;  
 use-project theBase     : ../Base ;
 use-project theServer   : ../Server ;
 use-project theClient   : ../Client ;
@@ -29,7 +29,6 @@ lib libharness : [ glob src/*.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src 
                 <include>../ANode/src 
-                <include>../ANode/parser/src 
                 <include>../Base/src 
           	    <include>../Base/test 
                 <include>../Client/src 
@@ -40,7 +39,6 @@ lib libharness : [ glob src/*.cpp ]
                 <use>/theNodeAttr//nodeattr
                 <use>/theNode//node
                 <use>/theBase//base
-                <use>/theParser//libparser
            	    <use>/theClient//libclient
             	<use>/site-config//boost_system
              	<use>/site-config//boost_serialization
@@ -57,7 +55,6 @@ exe s_test : [ glob Test*.cpp : TestSingle.cpp TestZombies.cpp ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            /theClient//libclient
            libharness
@@ -78,7 +75,6 @@ exe s_test_zombies : [ glob TestZombies.cpp  ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            /theClient//libclient
            libharness
@@ -99,7 +95,6 @@ exe singletest : [ glob TestSingle.cpp  ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            /theClient//libclient
            libharness

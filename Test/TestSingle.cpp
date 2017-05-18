@@ -33,7 +33,6 @@
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
-#include "DefsStructureParser.hpp"
 #include "AssertTimer.hpp"
 #include "File.hpp"
 
@@ -66,9 +65,8 @@ BOOST_AUTO_TEST_CASE( test_mega_def )
 
    // parse in file
    Defs theDefs;
-   DefsStructureParser checkPtParser( &theDefs, path);
    std::string errorMsg,warningMsg;
-   BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),errorMsg);
+   BOOST_REQUIRE_MESSAGE(theDefs.restore(path,errorMsg,warningMsg),errorMsg);
 
    ServerTestHarness serverTestHarness;
    serverTestHarness.check_task_duration_less_than_server_poll(false); // Add variable CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL

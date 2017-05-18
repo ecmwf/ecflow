@@ -12,7 +12,7 @@ project theClient ;
 
 use-project theCore      : ../ACore ;
 use-project theNodeAttr  : ../ANattr ;
-use-project theParser    : ../ANode/parser ; # this will load project from ANode as well
+use-project theNode      : ../ANode ;  
 use-project theBase      : ../Base ;
 
 #
@@ -37,14 +37,12 @@ lib libclient : [ glob src/*.cpp : src/*Main.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src
                 <include>../ANode/src
-                <include>../ANode/parser/src
                 <include>../Base/src
                 <include>../Client/src
                 <variant>debug:<define>DEBUG
                 <link>static
                 <use>/theCore//core
                 <use>/theNode//node
-                <use>/theParser//libparser
                 <use>/theBase//base
             	<use>/site-config//boost_system
              	<use>/site-config//boost_serialization
@@ -62,7 +60,6 @@ exe ecflow_client : [ glob src/*Main.cpp ]
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node
-             /theParser//libparser
              /theBase//base
              libclient
              /site-config//boost_system
@@ -84,7 +81,6 @@ exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cp
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            libclient
            /site-config//boost_system
@@ -103,7 +99,6 @@ exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPor
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            libclient
            pthread
@@ -123,7 +118,6 @@ exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            libclient
            pthread

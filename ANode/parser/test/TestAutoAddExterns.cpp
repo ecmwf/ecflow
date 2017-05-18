@@ -22,7 +22,6 @@
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 #include <boost/test/unit_test.hpp>
 
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "NodeContainer.hpp"
 #include "Suite.hpp"
@@ -47,9 +46,8 @@ BOOST_AUTO_TEST_CASE( test_auto_add_externs )
 	cout << "AParser:: ...test_auto_add_externs " << path << " file_size(" << mega_file_size << ")\n";
 
 	Defs defs;
-	DefsStructureParser checkPtParser( &defs, path);
 	std::string errorMsg,warningMsg;
-  	BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),errorMsg);
+  	BOOST_REQUIRE_MESSAGE(defs.restore(path,errorMsg,warningMsg),errorMsg);
    BOOST_REQUIRE_MESSAGE(warningMsg.empty(),"Expected no warnings but found:\n" << warningMsg);
 
    // Check number of extrens read in: Duplicate should be ignore

@@ -23,7 +23,6 @@
 #include <boost/timer.hpp>
 
 #include "Defs.hpp"
-#include "DefsStructureParser.hpp"
 #include "NodeAttr.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
@@ -69,9 +68,8 @@ BOOST_AUTO_TEST_CASE( test_jobgenonly )
 
 	// Load the defs file 'jobgenonly.def'
 	Defs theDefs;
- 	DefsStructureParser checkPtParser( &theDefs, defsFile );
 	std::string errorMsg,warningMsg;
-	BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),errorMsg);
+	BOOST_REQUIRE_MESSAGE(theDefs.restore(defsFile,errorMsg,warningMsg),errorMsg);
 
 	// Override ECF_HOME. ECF_HOME is needed to locate to the .ecf files
 	theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);

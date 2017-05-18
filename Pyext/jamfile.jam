@@ -71,7 +71,7 @@ project thePyext ;
 
 use-project theCore      : ../ACore ;
 use-project theNodeAttr  : ../ANattr ;
-use-project theParser    : ../ANode/parser ;  # seems to automatically pick up theNode
+use-project theNode      : ../ANode ;   
 use-project theBase      : ../Base ;
 use-project theClient    : ../Client ;
 use-project theSimulator : ../CSim ;
@@ -124,7 +124,6 @@ python-extension ecflow : [ glob src/*.cpp ]
     /theCore//core
     /theNodeAttr//nodeattr
     /theNode//node
-    /theParser//libparser
     /theBase//base
     /theClient//libclient
     /theSimulator//libsimu

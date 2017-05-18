@@ -12,7 +12,7 @@ project theBase ;
 
 use-project theCore     : ../ACore ;
 use-project theNodeAttr : ../ANattr ;
-use-project theParser   : ../ANode/parser ; # seems to automatically pick up theNode
+use-project theNode     : ../ANode ;  
 
 # The <include> means we will automatically add this directory to the include path
 # of any other target that uses this lib
@@ -21,7 +21,6 @@ lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
          : <include>../ACore/src
            <include>../ANattr/src
            <include>../ANode/src
-           <include>../ANode/parser/src 
            <include>../Base/src
            <include>../Base/src/cts
            <include>../Base/src/stc
@@ -30,7 +29,6 @@ lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
            <use>/theCore//core
            <use>/theNodeAttr//nodeattr
            <use>/theNode//node
-           <use>/theParser//libparser
            <use>/site-config//boost_system
            <use>/site-config//boost_serialization
            <use>/site-config//boost_filesystem
@@ -54,7 +52,6 @@ exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            base
            /site-config//boost_system
            /site-config//boost_serialization
@@ -76,7 +73,6 @@ exe perf_job_gen : test/TestJobGenPerf.cpp
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            base
            /site-config//boost_system
            /site-config//boost_serialization

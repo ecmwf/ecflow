@@ -22,7 +22,6 @@ include_directories(
                      ../ACore/src 
                      ../ANattr/src
                      ../ANode/src
-                     ../ANode/parser/src
                      ../Base/src
                      ../Base/src/cts
                      ../Base/src/stc
@@ -40,7 +39,7 @@ ecbuild_add_library( TARGET    ecflow
                      TYPE      MODULE
                      SOURCES   ${srcs}
 					 CONDITION PYTHONLIBS_FOUND
-                     LIBS      libclient libsimu base libparser node nodeattr core
+                     LIBS      libclient libsimu base node nodeattr core
                                ${PYTHON_LIBRARIES} ${OPENSSL_LIBRARIES}
                      INCLUDES 
                                ${Boost_INCLUDE_DIRS}

@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( test_defs_structure_persistence_and_reload )
 	MyDefsFixture theDefsFixture(checkPtFile);
 
 	PersistHelper helper;
- 	BOOST_CHECK_MESSAGE( helper.test_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
+ 	BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
 
    // Note: Aliases are *NOT* written in the defs file.
  	// Hence in order for this test to pass, we must delete the alias first & reset task alias_no

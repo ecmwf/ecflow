@@ -17,7 +17,6 @@
 #    <include>../ACore/src
 #    <include>../ANattr/src 
 #    <include>../ANode/src 
-#    <include>../ANode/parser/src 
 #    <include>../Base/src 
 #    <include>../Client/src
 #    <include>../CSim/src
@@ -25,7 +24,6 @@
 #    <use>/theCore//core
 #    <use>/theNodeAttr//nodeattr
 #    <use>/theNode//node
-#    <use>/theParser//libparser
 #    <use>/theBase//base
 #    <use>/theClient//libclient
 #    <use>/theSimulator//libsimu
@@ -65,7 +63,6 @@
 #             /theCore//core
 #             /theNodeAttr//nodeattr
 #             /theNode//node
-#             /theParser//libparser
 #             /theBase//base
 #             /theClient//libclient
 #             /theSimulator//libsimu

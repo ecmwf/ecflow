@@ -46,6 +46,7 @@
 #include "CheckPt.hpp"
 #include "Archive.hpp"
 #include "Attr.hpp"
+#include "PrintStyle.hpp"
 
 class Limit;
 class AbstractObserver;
@@ -248,19 +249,23 @@ public:
    void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
    bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const; // return true if why found
 
-   /// Function to save the defs as a checkpoint file. File saved to the file name
-   /// Can throw exception
+   /// Function to save the defs as a checkpoint file. Can throw exception
    void boost_save_as_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
    void boost_save_checkpt_as_string(std::string& check_pt) const;
+   void boost_save_as_filename(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const; // used in test only
 
-   void boost_save_as_filename(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
-   void boost_save_as_string(std::string&) const;
 
    /// Function to restore the defs from a check point file.
-   /// If the Defs file has content, this is deleted first, i.e. suites, externs,
-   /// Can throw an exception
+   /// If the Defs file has content, this is deleted first, i.e. suites, externs, Can throw an exception
    void boost_restore_from_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive());
-   void boost_restore_from_string(const std::string& );
+   void boost_restore_from_string(const std::string& );         // used in test only
+
+   // defs format
+   void save_as_checkpt(const std::string& fileName) const;
+   void save_as_filename(const std::string& fileName,PrintStyle::Type_t = PrintStyle::MIGRATE) const; // used in test only
+   void restore(const std::string& fileName); // will throw
+   bool restore(const std::string& fileName,std::string& errorMsg, std::string& warningMsg);
+
 
    /// Delete suites, externs, client handles, reset suspended, and locate state
    /// etc but Server environment left as is:

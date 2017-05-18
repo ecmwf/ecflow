@@ -17,8 +17,10 @@ use-project theNodeAttr : ../ANattr ;
 # The <include> means we will automatically add this directory to the include path
 # of any other target that uses this lib
 #
-lib node : [ glob src/*.cpp ]
+lib node : [ glob src/*.cpp parser/src/*.cpp ]
          : <link>static
+           <include>../ANode/src
+           <include>../ANode/parser/src
            <variant>debug:<define>DEBUG
            <use>/theCore//core
            <use>/theNodeAttr//nodeattr
@@ -28,9 +30,9 @@ lib node : [ glob src/*.cpp ]
            <use>/site-config//boost_datetime
            <use>/site-config//boost_test
          :
-         : <include>../ANode/src         
+         :  <include>../ANode/src  
+            <include>../ANode/parser/src 
          ;
-
 
 #
 # This is *ONLY* required when the define ECFLOW_MT is used, (used by Signal.cpp)

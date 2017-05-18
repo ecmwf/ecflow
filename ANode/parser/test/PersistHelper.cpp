@@ -40,11 +40,8 @@ bool PersistHelper::test_persist_and_reload( const Defs& theInMemoryDefs, PrintS
 	std::string tmpFilename = "tmp.def";
 #endif
 	{
-	   // The file MUST be written in the *SAME* form that it was read
-	   // Otherwise they will not compare:
-	   PrintStyle style(file_type_on_disk);
-		std::ofstream ofs( tmpFilename.c_str() );
-		ofs << theInMemoryDefs;
+	   // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
+	   theInMemoryDefs.save_as_filename(tmpFilename,file_type_on_disk);
 	}
 
 	// Reload the file we just persisted and compare with in memory defs
@@ -53,16 +50,15 @@ bool PersistHelper::test_persist_and_reload( const Defs& theInMemoryDefs, PrintS
 }
 
 
-bool PersistHelper::test_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare, ecf::Archive::Type at)
+bool PersistHelper::test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare, ecf::Archive::Type at)
 {
  	errorMsg_.clear();
  	file_size_ = 0;
 
    // Save in memory defs as a check pt file, then restore and compare
  	Defs reloaded_defs;
- 	return reload_from_checkpt_file(theInMemoryDefs,reloaded_defs,do_compare,at);
+ 	return reload_from_boost_checkpt_file(theInMemoryDefs,reloaded_defs,do_compare,at);
 }
-
 
 bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theInMemoryDefs )
 {
@@ -76,11 +72,8 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
    std::string tmpFilename = "tmp.def";
 #endif
    {
-      // The file MUST be written in the *SAME* form that it was read
-      // Otherwise they will not compare:
-      PrintStyle style(PrintStyle::MIGRATE); // will save edit history
-      std::ofstream ofs( tmpFilename.c_str() );
-      ofs << theInMemoryDefs;
+      // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
+      theInMemoryDefs.save_as_filename(tmpFilename,PrintStyle::MIGRATE);  // will save edit history
    }
 
    // Reload the file we just persisted and compare with in memory defs
@@ -91,7 +84,7 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
 
    // Save in memory defs as a check pt file, then restore and compare
    Defs reloaded_checkPt_defs;
-   if (!reload_from_checkpt_file(theInMemoryDefs,reloaded_checkPt_defs,true,ecf::Archive::default_archive())) {
+   if (!reload_from_boost_checkpt_file(theInMemoryDefs,reloaded_checkPt_defs,true,ecf::Archive::default_archive())) {
       return false;
    }
 
@@ -135,9 +128,7 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
 bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs, Defs& reloaded_defs, const std::string& tmpFilename )
 {
    std::string warningMsg;
-   DefsStructureParser defsParser( &reloaded_defs, tmpFilename );
-   bool theParse = defsParser.doParse(errorMsg_,warningMsg);
-   if (!theParse) {
+   if (!reloaded_defs.restore(tmpFilename,errorMsg_,warningMsg)) {
       std::stringstream ss;
       ss << "RE-PARSE failed for " << tmpFilename << "\n";
       errorMsg_ += ss.str();
@@ -180,7 +171,7 @@ bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs, Defs& rel
 }
 
 
-bool PersistHelper::reload_from_checkpt_file(const Defs& theInMemoryDefs,
+bool PersistHelper::reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
                                              Defs& reloaded_defs,
                                              bool do_compare ,
                                              ecf::Archive::Type at)
@@ -202,7 +193,7 @@ bool PersistHelper::reload_from_checkpt_file(const Defs& theInMemoryDefs,
          bool match = reloaded_defs == theInMemoryDefs;
          if (!match) {
             std::stringstream ss;
-            ss << "\nPersistHelper::reload_from_checkpt_file\n";
+            ss << "\nPersistHelper::reload_from_boost_checkpt_file\n";
             ss << "In memory and reloaded def's don't match\n";
             ss << "+++++++++++++ Saved/reloaded check pt file ++++++++++++++++++++++++++++\n";
             PrintStyle style(PrintStyle::STATE);
@@ -214,7 +205,7 @@ bool PersistHelper::reload_from_checkpt_file(const Defs& theInMemoryDefs,
          else {
             if (compare_edit_history_ && !reloaded_defs.compare_edit_history(theInMemoryDefs)) {
                std::stringstream ss;
-               ss << "\nPersistHelper::reload_from_checkpt_file  compare_edit_history_\n";
+               ss << "\nPersistHelper::reload_from_boost_checkpt_file  compare_edit_history_\n";
                ss << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n";
                ss << "+++++++++++++ Saved/reloaded check pt file ++++++++++++++++++++++++++++\n";
                PrintStyle style(PrintStyle::MIGRATE);
@@ -227,7 +218,7 @@ bool PersistHelper::reload_from_checkpt_file(const Defs& theInMemoryDefs,
       }
    }
    catch (std::exception& e) {
-      errorMsg_ =  "PersistHelper::reload_from_checkpt_file: " + string(e.what());
+      errorMsg_ =  "PersistHelper::reload_from_boost_checkpt_file: " + string(e.what());
    }
 
    file_size_ = fs::file_size(tmpCheckPt_file);

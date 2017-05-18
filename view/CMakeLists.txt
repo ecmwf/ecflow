@@ -195,7 +195,6 @@ include_directories( src
                      ../ACore/src 
                      ../ANattr/src
                      ../ANode/src
-                     ../ANode/parser/src
                      ../Base/src
                      ../Base/src/cts
                      ../Base/src/stc
@@ -230,7 +229,7 @@ ecbuild_add_executable( TARGET    ecflowview
 						CONDITION 
 						          MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                         LIBS      
-                                  ecflow_view libclient base libparser node nodeattr core
+                                  ecflow_view libclient base node nodeattr core
                                   ${CMAKE_THREAD_LIBS_INIT} 
                                   ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
                                   ${CMATH_LIBRARIES}

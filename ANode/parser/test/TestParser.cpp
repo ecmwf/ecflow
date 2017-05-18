@@ -73,7 +73,7 @@ void test_defs(const std::string& directory, bool pass)
  					// Write parsed file to a temporary file on disk, and reload, then compare defs, should be the same
  					PersistHelper helper;
 					BOOST_CHECK_MESSAGE( helper.test_persist_and_reload(defs,parser.get_file_type()), relPath.string() << " " << helper.errorMsg());
-					BOOST_CHECK_MESSAGE( helper.test_checkpt_and_reload(defs), relPath.string() << " " << helper.errorMsg());
+					BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs), relPath.string() << " " << helper.errorMsg());
 
 					// test copy constructor
 				   Ecf::set_debug_equality(true);
