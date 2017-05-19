@@ -25,7 +25,7 @@ namespace ecf {
 // HENCE:     the reference string *MUST* not change, and its lifetime must EXCEED string_ref
 //
 // Will split a string. Will return a empty boost::string_ref if there a separator at the end.
-// This shows the fastest split for a string.
+// This shows the fastest split for a string. **** Based on boost 1.64 ****
 //    Method:              time
 //    boost::split:        4.06
 //    Str::split:          2.33
