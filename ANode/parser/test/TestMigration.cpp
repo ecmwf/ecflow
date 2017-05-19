@@ -22,11 +22,9 @@
 #include "boost/filesystem/path.hpp"
 #include "boost/progress.hpp"
 
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-#include "PrintStyle.hpp"
 #include "PersistHelper.hpp"
 #include "Flag.hpp"
 #include "Memento.hpp"

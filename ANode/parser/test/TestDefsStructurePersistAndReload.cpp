@@ -22,7 +22,6 @@
 #include <boost/foreach.hpp>
 
 #include "PersistHelper.hpp"
-#include "DefsStructureParser.hpp"
 #include "PrintStyle.hpp"
 #include "MyDefsFixture.hpp"
 #include "File.hpp"

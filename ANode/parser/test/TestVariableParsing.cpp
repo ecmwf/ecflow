@@ -20,7 +20,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "File.hpp"
@@ -38,9 +37,8 @@ BOOST_AUTO_TEST_CASE( test_single_defs ) {
    std::string path = File::test_data("ANode/parser/test/data/good_defs/edit/edit.def","parser");
 
 	Defs defs;
-	DefsStructureParser checkPtParser( &defs, path );
 	std::string errorMsg,warningMsg;
-  	BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),errorMsg);
+  	BOOST_REQUIRE_MESSAGE(defs.restore(path,errorMsg,warningMsg),errorMsg);
 
 //  	suite edit
 //  		edit ECF_INCLUDE /home/ma/map/sms/example/x                  # comment line

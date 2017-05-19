@@ -130,9 +130,8 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    Defs defs;
    {
       timer.restart();
-      DefsStructureParser checkPtParser( &defs, path);
       std::string errorMsg,warningMsg;
-      BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),errorMsg);
+      BOOST_REQUIRE_MESSAGE(defs.restore(path,errorMsg,warningMsg),errorMsg);
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForParse,"Performance regression, expected < " << expectedTimeForParse << " seconds for parse/node tree creation but found " << timer.elapsed());
       std::cout << " Parsing Node tree and AST creation time = " << timer.elapsed() << " < limit(" << expectedTimeForParse << ")" << endl;
    }
