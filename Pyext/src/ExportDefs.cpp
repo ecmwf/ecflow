@@ -86,6 +86,13 @@ void save_as_checkpt(defs_ptr defs, const std::string& file_name)
 
 void restore_from_checkpt(defs_ptr defs, const std::string& file_name)
 {
+   // Temp, until default ecflow version is 4.7.0, ECFLOW-939
+   try {
+      defs->restore(file_name);
+      return;
+   }
+   catch(...){}
+
    defs->boost_restore_from_checkpt(file_name); // use default ARCHIVE
 }
 

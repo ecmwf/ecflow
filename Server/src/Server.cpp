@@ -512,7 +512,7 @@ bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
       try {
          defs_->restore(filename);      // this can throw
          update_defs_server_state();    // works on def_
-         LOG(Log::MSG, "Loaded of *DEFS* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
+         LOG(Log::MSG, "Loading of *DEFS* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
          return true;
       }
       catch (exception& e) {
@@ -522,8 +522,8 @@ bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
 
       try {
          defs_->boost_restore_from_checkpt(filename);   // this can throw
-         update_defs_server_state();              // works on def_
-         LOG(Log::MSG, "Loaded of *BOOST* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
+         update_defs_server_state();                    // works on def_
+         LOG(Log::MSG, "Loading of *BOOST* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
          return true;
       }
       catch (exception& e) {

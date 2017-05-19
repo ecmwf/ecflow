@@ -1099,16 +1099,7 @@ void Defs::boost_save_as_checkpt(const std::string& the_fileName,ecf::Archive::T
 	/// Can throw archive exception
  	ecf::save(the_fileName,*this,at);
 }
-void Defs::boost_save_checkpt_as_string(std::string& output) const
-{
-   // Save NodeContainer children even if ecf::Flag::MIGRATED set
-   CheckPtContext checkpt_context;
 
-   // only_save_edit_history_when_check_pointing or if explicitly requested
-   save_edit_history_ = true;   // this is reset after edit_history is saved
-
-   ecf::save_as_string(output,*this);
-}
 void Defs::boost_save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
 {
    /// Can throw archive exception
@@ -1134,24 +1125,9 @@ void Defs::boost_restore_from_checkpt(const std::string& the_fileName,ecf::Archi
 //	cout << "Restored: " << suiteVec_.size() << " suites\n";
 }
 
-void Defs::boost_restore_from_string(const std::string& rest)
-{
-   if (rest.empty()) return;
-
-   // deleting existing content first. *** Note: Server environment left as is ****
-   clear();
-
-   ecf::restore_from_string(rest,*this);
-
-   // Reset the state and modify numbers, **After the restore**
-   state_change_no_ = Ecf::state_change_no();
-   modify_change_no_ = Ecf::modify_change_no();
-}
-
 void Defs::save_as_checkpt(const std::string& the_fileName) const
 {
-   // Save NodeContainer children even if ecf::Flag::MIGRATED set
-   CheckPtContext checkpt_context;
+   // Save as defs will always save children, hence no need for CheckPtContext
 
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
