@@ -24,7 +24,6 @@
 #include "Simulator.hpp"
 #include "Analyser.hpp"
 #include "SimulatorVisitor.hpp"
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -62,9 +61,8 @@ bool Simulator::run(const std::string& theDefsFile,std::string& errorMsg) const
 #endif
 
    Defs theDefs;
-   DefsStructureParser checkPtParser( &theDefs , theDefsFile );
    std::string warningMsg;
-   if (!checkPtParser.doParse(errorMsg,warningMsg))  return false;
+   if (!theDefs.restore(theDefsFile,errorMsg,warningMsg))  return false;
    //cout << theDefs << "\n";
    return run(theDefs,theDefsFile,errorMsg, false /* don't do check, allready done */);
 }

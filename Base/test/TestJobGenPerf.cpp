@@ -24,7 +24,6 @@
 #include "Log.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "DefsStructureParser.hpp"
 #include "JobProfiler.hpp"
 
 using namespace std;
@@ -60,7 +59,7 @@ int main(int argc, char* argv[])
    }
 
    // delete the log file if it exists.
-   std::string log_path = File::test_data("Base/test/TestJobGenPerf.log","AParser");
+   std::string log_path = File::test_data("Base/test/TestJobGenPerf.log","Base");
    fs::remove(log_path);
    std::string path = argv[1];
 
@@ -68,9 +67,8 @@ int main(int argc, char* argv[])
    cout << "Loading file " << path << " log file " << log_path  << "\n";
 #endif
    Defs defs;
-   DefsStructureParser checkPtParser( &defs, path);
    std::string errorMsg,warningMsg;
-   if (!checkPtParser.doParse(errorMsg,warningMsg)) {
+   if (!defs.restore(path,errorMsg,warningMsg)) {
       cout << errorMsg << "\n";
       cout << warningMsg << "\n";
       return 1;

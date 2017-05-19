@@ -2,22 +2,9 @@
 # If new src or test cpp files are added make sure you touch this file
 #
 
-file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" )
-
-ecbuild_add_library( TARGET   libparser
-                     NOINSTALL
-                     TYPE     STATIC
-                     SOURCES  ${srcs}
-                     LIBS     node nodeattr core     
-                     INCLUDES src
-                              ../ACore/src 
-                              ../ANattr/src
-                              ../ANode/src
-                     )
-
 # ===================================================================
 # Use following to populate list: 
-#  cd $WK/AParser                      
+#  cd $WK/ANode/parser                      
 #  find test -name \*.cpp | sort   
 list( APPEND test_srcs
    test/PersistHelper.cpp
@@ -30,8 +17,12 @@ list( APPEND test_srcs
 ecbuild_add_test( TARGET       u_aparser
                   BOOST
                   SOURCES      ${test_srcs}
-                  LIBS         libparser 
-                  INCLUDES     ../ANode/test
+                  LIBS         node nodeattr core
+                  INCLUDES     src 
+                               ../../ACore/src 
+                               ../../ANattr/src 
+                               ../test       # ANode/test
+                               ../src        # ANode/src
                   TEST_DEPENDS u_anode
                 )
 
@@ -44,7 +35,12 @@ if (ENABLE_ALL_TESTS)
 	ecbuild_add_test( TARGET   perf_aparser
                       BOOST
                       SOURCES  ${t2_src}
-                      LIBS     libparser
+                      LIBS     node nodeattr core
+                      INCLUDES src 
+                               ../../ACore/src 
+                               ../../ANattr/src 
+                               ../test       # ANode/test
+                               ../src        # ANode/src
                     )
 
 	#
@@ -54,8 +50,12 @@ if (ENABLE_ALL_TESTS)
     ecbuild_add_test( TARGET   perf_aparser_timer
                       ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                       SOURCES  ${t3_src}
-                      LIBS     libparser 
-                      INCLUDES ../ANode/test
+                      LIBS     node nodeattr core 
+                      INCLUDES src 
+                               ../../ACore/src 
+                               ../../ANattr/src 
+                               ../src        # ANode/src
+                               ../test       # ANode/test
                                ${Boost_INCLUDE_DIRS} 
                     )
 
@@ -67,8 +67,12 @@ if (ENABLE_ALL_TESTS)
 	ecbuild_add_test( TARGET   perf_aparser_only
                       ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                       SOURCES  ${t4_src}
-                      LIBS     libparser
-                      INCLUDES ../ANode/test
+                      LIBS     node nodeattr core
+                      INCLUDES src 
+                               ../../ACore/src 
+                               ../../ANattr/src 
+                               ../src        # ANode/src
+                               ../test       # ANode/test
                                ${Boost_INCLUDE_DIRS} 
                    )
 endif()

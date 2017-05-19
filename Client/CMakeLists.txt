@@ -18,13 +18,12 @@ ecbuild_add_library( TARGET libclient
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     base libparser node nodeattr core 
+                     LIBS     base node nodeattr core 
                               pthread
                      INCLUDES src
                               ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
-                              ../AParser/src
                               ../Base/src
                               ../Base/src/cts
                               ../Base/src/stc

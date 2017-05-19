@@ -38,7 +38,6 @@ project thePyext ;
 use-project theCore      : ../ACore ;
 use-project theNodeAttr  : ../ANattr ;
 use-project theNode      : ../ANode ;
-use-project theParser    : ../AParser ;
 use-project theBase      : ../Base ;
 use-project theClient    : ../Client ;
 use-project theSimulator : ../CSim ;
@@ -129,7 +128,6 @@ python-extension ecflow : [ glob src/*.cpp ]
     /theCore//core
     /theNodeAttr//nodeattr
     /theNode//node
-    /theParser//libparser
     /theBase//base
     /theClient//libclient
     /theSimulator//libsimu

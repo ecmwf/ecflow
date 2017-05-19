@@ -85,9 +85,8 @@ int main(int argc, char* argv[])
    Defs defs;
    {
       timer.restart();
-      DefsStructureParser checkPtParser( &defs, path);
       std::string errorMsg,warningMsg;
-      bool result = checkPtParser.doParse(errorMsg,warningMsg);
+      bool result = defs.restore(path,errorMsg,warningMsg);
       std::cout << " Parsing Node tree and AST creation time = " << timer.elapsed() << " parse(" << result << ")" << endl;
    }
 
@@ -133,7 +132,7 @@ int main(int argc, char* argv[])
       bool do_compare = false;
       timer.restart();
       PersistHelper helper;
-      bool result = helper.test_checkpt_and_reload(defs, do_compare,ecf::Archive::BINARY);
+      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare,ecf::Archive::BINARY);
       cout << " Checkpt(BINARY_ARCHIVE) and reload , time taken   = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
@@ -142,7 +141,7 @@ int main(int argc, char* argv[])
       bool do_compare = false;
       timer.restart();
       PersistHelper helper;
-      bool result = helper.test_checkpt_and_reload(defs, do_compare, ecf::Archive::PORTABLE_BINARY);
+      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare, ecf::Archive::PORTABLE_BINARY);
       cout << " Checkpt(PORTABLE_BINARY_ARCHIVE) and reload , time taken   = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
@@ -151,7 +150,7 @@ int main(int argc, char* argv[])
       bool do_compare = false;
       timer.restart();
       PersistHelper helper;
-      bool result = helper.test_checkpt_and_reload(defs, do_compare, ecf::Archive::EOS_PORTABLE_BINARY);
+      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare, ecf::Archive::EOS_PORTABLE_BINARY);
       cout << " Checkpt(EOS_PORTABLE_BINARY_ARCHIVE) and reload , time taken   = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
@@ -160,7 +159,7 @@ int main(int argc, char* argv[])
       bool do_compare = false;
       timer.restart();
       PersistHelper helper;
-      bool result = helper.test_checkpt_and_reload(defs, do_compare, ecf::Archive::TEXT);
+      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare, ecf::Archive::TEXT);
       cout << " Checkpt(TEXT_ARCHIVE) and reload , time taken   = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
@@ -169,7 +168,7 @@ int main(int argc, char* argv[])
 //      timer.restart();
 //      PersistHelper helper;
 //      for(int i = 0; i < 5; i++) {
-//         bool result = helper.test_checkpt_and_reload(defs, do_compare, ecf::Archive::TEXT);
+//         bool result = helper.test_boost_checkpt_and_reload(defs, do_compare, ecf::Archive::TEXT);
 //         if (!helper.errorMsg().empty())  cout << " result(" << result << ") msg(" << helper.errorMsg() << ")\n";
 //      }
 //      cout << " Checkpt(TEXT_ARCHIVE) and reload 5 times: Average time taken = ";

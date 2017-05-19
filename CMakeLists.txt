@@ -260,11 +260,9 @@ endif()
 # =========================================================================================
 # build source code
 # =========================================================================================
-
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
 add_subdirectory( ANode )
-add_subdirectory( AParser )
 add_subdirectory( Base )
 add_subdirectory( CSim )
 add_subdirectory( Client )

@@ -31,10 +31,10 @@ BOOST_FIXTURE_TEST_SUITE( NodeTestSuite, MyDefsFixture )
 static void testPersistence(const Defs& fixtureDefs,ecf::Archive::Type at)
 {
 	std::string check_pt_file = "fixture_defs.check";
-	fixtureDefs.save_as_checkpt(check_pt_file,at);
+	fixtureDefs.boost_save_as_checkpt(check_pt_file,at);
 
 	Defs restoredDefs;
-	restoredDefs.restore_from_checkpt(check_pt_file,at);
+	restoredDefs.boost_restore_from_checkpt(check_pt_file,at);
 
 	bool theyCompare = (restoredDefs == fixtureDefs);
 	if (!theyCompare) {

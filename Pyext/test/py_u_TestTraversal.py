@@ -216,13 +216,13 @@ if __name__ == "__main__":
     # Traverse all the good defs in the Parser directory
     newpath = ""
     if os.path.basename(cwd) == "Pyext":
-        newpath = os.path.join( os.path.dirname(cwd),"AParser/test/data/good_defs" )
+        newpath = os.path.join( os.path.dirname(cwd),"ANode/parser/test/data/good_defs" )
     
     #print newpath
     for path_to_defs_file in all_files(newpath, '*.def;*.txt'):
         check_traversal(path_to_defs_file)
         
     # try the mega_def. Commented out since it takes to long
-    #mega_def = os.path.join( os.path.dirname(cwd), "AParser/test/data/single_defs/mega.def")
+    #mega_def = os.path.join( os.path.dirname(cwd), "ANode/parser/test/data/single_defs/mega.def")
     #check_traversal(mega_def)
     print("All Tests pass")    

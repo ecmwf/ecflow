@@ -17,8 +17,7 @@ project theSimulator ;
 #
 use-project theCore     : ../ACore ;
 use-project theNodeAttr : ../ANattr ;
-use-project theNode     : ../ANode ;
-use-project theParser   : ../AParser ;
+use-project theNode     : ../ANode ;  
 use-project theBase     : ../Base ;
 
 lib pthread ;
@@ -33,7 +32,6 @@ lib libsimu : [ glob src/*.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src 
                 <include>../ANode/src 
-                <include>../AParser/src 
                 <include>../Base/src 
                 <variant>debug:<define>DEBUG
                 <link>static
@@ -41,7 +39,6 @@ lib libsimu : [ glob src/*.cpp ]
                 <use>/theNodeAttr//nodeattr
                 <use>/theNode//node
                 <use>/theBase//base
-                <use>/theParser//libparser
             	<use>/site-config//boost_system
              	<use>/site-config//boost_serialization
              	<use>/site-config//boost_filesystem
@@ -51,7 +48,6 @@ lib libsimu : [ glob src/*.cpp ]
               : <include>../CSim/src         
               ;
             
-
 #
 # Test for simulator
 # IMPORTANT: server *MUST* not link with client or include any of the client code
@@ -61,7 +57,6 @@ exe c_csim : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node
-             /theParser//libparser
              /theBase//base
              libsimu
              /site-config//boost_system
@@ -82,7 +77,6 @@ exe c_csim_single : [ glob test/TestSingleSimulator.cpp test/TestUtil.cpp ]
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node
-             /theParser//libparser
              /theBase//base
              libsimu
              /site-config//boost_system

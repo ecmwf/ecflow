@@ -20,7 +20,6 @@
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "DefsStructureParser.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -62,9 +61,8 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
   clientDefs_(Defs::create())
 {
    // Parse the file and load the defs file into memory.
-   DefsStructureParser checkPtParser( clientDefs_.get(), path_to_defs );
    std::string errMsg, warningMsg;
-   if ( ! checkPtParser.doParse( errMsg , warningMsg) ) {
+   if ( ! clientDefs_->restore(path_to_defs, errMsg , warningMsg) ) {
       std::stringstream ss;
       ss << "ReplaceNodeCmd::ReplaceNodeCmd: Could not parse file " << path_to_defs << " : " << errMsg;
       throw std::runtime_error( ss.str() );
