@@ -581,6 +581,7 @@ std::ostream& Defs::print(std::ostream& os) const
 	   os << write_state();
 	}
 	if (PrintStyle::getStyle() == PrintStyle::STATE) {
+      os << "# server state: " << SState::to_string(server().get_state()) << "\n";
 	   os << "# server variable\n";
 	   const std::vector<Variable>& server_variables = server().server_variables();
 	   BOOST_FOREACH(const Variable& var, server_variables) { var.print_generated(os);}
