@@ -13,7 +13,8 @@
 // Description :
 //============================================================================
 
-#include "AutoArchiveParser.hpp"
+#include "../../ANode/parser/src/AutoArchiveParser.hpp"
+
 #include "TimeSeries.hpp"
 #include "Extract.hpp"
 #include "Node.hpp"

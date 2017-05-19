@@ -13,7 +13,8 @@
 // Description :
 //============================================================================
 
-#include "QueueParser.hpp"
+#include "../../ANode/parser/src/QueueParser.hpp"
+
 #include "QueueAttr.hpp"
 #include "PrintStyle.hpp"
 #include "DefsStructureParser.hpp"

@@ -13,7 +13,8 @@
 // Description :
 //============================================================================
 
-#include "AutoRestoreParser.hpp"
+#include "../../ANode/parser/src/AutoRestoreParser.hpp"
+
 #include "AutoRestoreAttr.hpp"
 #include "TimeSeries.hpp"
 #include "Extract.hpp"

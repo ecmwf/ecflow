@@ -1173,7 +1173,7 @@ void NodeContainer::restore()
 
    defs_ptr archive_defs = Defs::create();
    std::string the_archive_path = archive_path();
-   try { archive_defs->restore_from_checkpt(the_archive_path);}
+   try { archive_defs->restore(the_archive_path);}
    catch(std::exception& e) {
        std::stringstream ss; ss << "NodeContainer::restore() Node " << absNodePath() << " could not restore file at  " << the_archive_path << "  : " << e.what();
        throw std::runtime_error(ss.str());
