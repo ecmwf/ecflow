@@ -10,6 +10,7 @@ list( APPEND test_srcs
    test/PersistHelper.cpp
    test/TestAutoAddExterns.cpp
    test/TestDefsStructurePersistAndReload.cpp
+   test/TestMementoPersistAndReload.cpp
    test/TestMigration.cpp
    test/TestParser.cpp
    test/TestVariableParsing.cpp
