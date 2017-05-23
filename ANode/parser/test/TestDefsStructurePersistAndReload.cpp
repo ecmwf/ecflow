@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_SUITE( ParserTestSuite )
 // and the parse it back in. As we add different types to our defs fixture
 // we can automatically check that what we save can be parsed back in.
 // Specifically written to test the parser.
-// Note: Aliases are *NOT* written in the defs file.
+// Note: Aliases are *NOT* written in the defs file BUT are when in MIGRATE
 BOOST_AUTO_TEST_CASE( test_defs_structure_persistence_and_reload )
 {
 	cout << "AParser:: ...test_defs_structure_persistence_and_reload\n";
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( test_defs_structure_persistence_and_reload )
 	PersistHelper helper;
  	BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
 
-   // Note: Aliases are *NOT* written in the defs file.
+   // Note: Aliases are *NOT* written in PrintStyle::DEFS file
  	// Hence in order for this test to pass, we must delete the alias first & reset task alias_no
    std::vector<alias_ptr> alias_vec;
    theDefsFixture.defsfile_.get_all_aliases(alias_vec);
@@ -58,6 +58,17 @@ BOOST_AUTO_TEST_CASE( test_defs_structure_persistence_and_reload )
       al->remove();
    }
  	BOOST_CHECK_MESSAGE( helper.test_persist_and_reload(theDefsFixture.defsfile_, PrintStyle::DEFS), helper.errorMsg());
+}
+
+BOOST_AUTO_TEST_CASE( test_defs_checkpt_persistence_and_reload )
+{
+   cout << "AParser:: ...test_defs_checkpt_persistence_and_reload\n";
+
+   std::string checkPtFile = File::test_data("ANode/parser/test/generated_defs_file.txt","parser");
+   MyDefsFixture theDefsFixture(checkPtFile);
+   PersistHelper helper;
+   BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
+   BOOST_CHECK_MESSAGE( helper.test_persist_and_reload(theDefsFixture.defsfile_, PrintStyle::MIGRATE), helper.errorMsg());
 }
 
 
