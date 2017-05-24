@@ -20,7 +20,6 @@
 #include "boost/progress.hpp"
 #include <boost/test/unit_test.hpp>
 
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -43,9 +42,8 @@ BOOST_AUTO_TEST_CASE( test_node_tree_lifecycle )
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
 	Defs defs;
-	DefsStructureParser checkPtParser( &defs, path );
 	std::string errorMsg,warningMsg;
-	bool parse = checkPtParser.doParse(errorMsg,warningMsg);
+	bool parse = defs.restore(path,errorMsg,warningMsg);
 	if (!parse)  std::cerr << errorMsg;
 	BOOST_CHECK(parse);
 

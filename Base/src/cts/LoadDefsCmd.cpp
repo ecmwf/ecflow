@@ -21,7 +21,6 @@
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
-#include "DefsStructureParser.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -38,13 +37,12 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force)
    }
 
    // At the end of the parse check the trigger/complete expressions and resolve in-limits
-   DefsStructureParser checkPtParser( defs_.get(), defs_filename_ );
    std::string errMsg, warningMsg;
-   if ( checkPtParser.doParse( errMsg , warningMsg) ) {
+   if (defs_->restore(defs_filename_, errMsg , warningMsg) ) {
       // Dump out the in memory Node tree
       // std::cout << defs_.get();
 
-      // Out put any warning to standard output
+      // Output any warning to standard output
       cout << warningMsg;
    }
    else {

@@ -10,23 +10,9 @@
 #
 project theParser ;
 
-use-project theCore     : ../ACore ;
-use-project theNodeAttr : ../ANattr ;
-use-project theNode     : ../ANode ;
-
-#
-# Having a library avoid compile objects shared between client and test having
-# differing compilation properties
-#
-lib libparser : [ glob src/*.cpp ]
-              : <include>../ACore/src
-                <include>../ANattr/src 
-                <include>../ANode/src 
-                <variant>debug:<define>DEBUG
-                <link>static
-         	 :
-             : <include>../AParser/src         
-             ;              
+use-project theCore     : ../../ACore ;
+use-project theNodeAttr : ../../ANattr ;
+use-project theNode     : ../ ;
 
 #
 # This is *ONLY* required when the define ECFLOW_MT is used,(used by Signal.cpp)
@@ -45,13 +31,12 @@ exe u_aparser : [ glob test/*.cpp :
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           libparser
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_test
-         : <include>../ANode/test 
+         : <include>../test              # ANode/test
            <variant>debug:<define>DEBUG
  	     ;
  	     
@@ -63,13 +48,12 @@ exe perf_aparser : test/TestSingleDefsFile.cpp test/PersistHelper.cpp
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           libparser
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_test
-         : <include>../ANode/test 
+         : <include>../test                # ANode/test
            <variant>debug:<define>DEBUG
  	     ;
  	     
@@ -81,14 +65,13 @@ exe perf_aparser_timer : test/ParseTimer.cpp  test/PersistHelper.cpp
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           libparser
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
-         : <include>../ANode/test 
+         : <include>../test                 # ANode/test
            <variant>debug:<define>DEBUG
-        ;
+         ;
         
 #
 # Tests parser for a single defs file.  
@@ -98,13 +81,11 @@ exe perf_aparser_only : test/ParseOnly.cpp
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           libparser
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
-         : <include>../ANode/test 
+         : <include>../test             # ANode/test
            <variant>debug:<define>DEBUG
-        ;
+         ;
         
-	     

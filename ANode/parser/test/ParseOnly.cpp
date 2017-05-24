@@ -16,7 +16,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "PrintStyle.hpp"
 
@@ -38,9 +37,8 @@ int main(int argc, char* argv[])
    std::string path = argv[1];
 
    Defs defs;
-   DefsStructureParser checkPtParser( &defs, path);
    std::string errorMsg,warningMsg;
-   if (!checkPtParser.doParse(errorMsg,warningMsg)) {
+   if (!defs.restore(path,errorMsg,warningMsg)) {
       cout << errorMsg << "\n";
       cout << warningMsg << "\n";
       return 1;

@@ -18,7 +18,7 @@
 #   ECF_ variables, we need to remove them and inject our own.
 #
 #   This test was created aid the performance testing of job generation
-#   It is tied to AParser/test/TestJobGenPerf.cpp
+#   It is tied to ANode/parser/test/TestJobGenPerf.cpp
 # =============================================================================
 import ecflow
 import os       # for getenv

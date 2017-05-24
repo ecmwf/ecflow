@@ -12,8 +12,7 @@ project theClient ;
 
 use-project theCore      : ../ACore ;
 use-project theNodeAttr  : ../ANattr ;
-use-project theNode      : ../ANode ;
-use-project theParser    : ../AParser ;
+use-project theNode      : ../ANode ;  
 use-project theBase      : ../Base ;
 
 #
@@ -21,7 +20,7 @@ use-project theBase      : ../Base ;
 # however if this is done, it will not link since, lpthread appears twice
 # on the link line
 #
-lib pthread  ;
+lib pthread ;
 
 #
 # define DEBUG_CLIENT for additional debug
@@ -39,13 +38,11 @@ lib libclient : [ glob src/*.cpp : src/*Main.cpp ]
                 <include>../ANattr/src
                 <include>../ANode/src
                 <include>../Base/src
-                <include>../AParser/src
                 <include>../Client/src
                 <variant>debug:<define>DEBUG
                 <link>static
                 <use>/theCore//core
                 <use>/theNode//node
-                <use>/theParser//libparser
                 <use>/theBase//base
             	<use>/site-config//boost_system
              	<use>/site-config//boost_serialization
@@ -63,7 +60,6 @@ exe ecflow_client : [ glob src/*Main.cpp ]
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node
-             /theParser//libparser
              /theBase//base
              libclient
              /site-config//boost_system
@@ -85,7 +81,6 @@ exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cp
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            libclient
            /site-config//boost_system
@@ -104,7 +99,6 @@ exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPor
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            libclient
            pthread
@@ -124,7 +118,6 @@ exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            libclient
            pthread

@@ -34,7 +34,6 @@ path-constant TOP : . ;     # After that, the TOP variable can be used in every 
 build-project ACore ;
 build-project ANattr ;
 build-project ANode ;
-build-project AParser ;
 build-project Base ;
 build-project Client ;
 build-project CSim ;

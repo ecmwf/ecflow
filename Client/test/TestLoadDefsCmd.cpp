@@ -20,7 +20,6 @@
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -55,9 +54,8 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 	// Load the FIRST file with a set of unresolved extrens
 	defs_ptr firstDefs =  Defs::create();
  	{
-		DefsStructureParser checkPtParser( firstDefs.get(), firstDef );
 		std::string errorMsg,warningMsg;
-		bool parse = checkPtParser.doParse(errorMsg,warningMsg);
+		bool parse = firstDefs->restore(firstDef,errorMsg,warningMsg);
  		BOOST_CHECK_MESSAGE(parse,"Parse failed. " << errorMsg);
 	}
 	size_t noOfSuites = firstDefs->suiteVec().size();
@@ -68,9 +66,8 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
    std::string secondDef = File::test_data("Client/test/data/second.def","Client");
 	Defs secondDefs;
 	{
-		DefsStructureParser checkPtParser( &secondDefs , secondDef);
 		std::string errorMsg,warningMsg;
-		bool parse = checkPtParser.doParse(errorMsg,warningMsg);
+		bool parse = secondDefs.restore(secondDef,errorMsg,warningMsg);
  		BOOST_CHECK_MESSAGE(parse,"Parse failed. " << errorMsg);
 	}
 	noOfSuites += secondDefs.suiteVec().size();

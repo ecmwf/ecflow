@@ -17,7 +17,7 @@ from ecflow import Suite, Family, Task, Defs, Client, debug_build
 
 def check_then_auto_add_extern(defs):
     error_msg = defs.check() 
-    print error_msg
+    print(error_msg)
     assert len(error_msg) !=0,"Expect error in checks\n" + str(defs)
     
     defs.auto_add_externs(True)

@@ -114,9 +114,9 @@ if test_uname Linux ; then
    ACore/bin/$exe_path/u_acore      --log_level=message $TEST_OPTS
    ANattr/bin/$exe_path/u_anattr    --log_level=message $TEST_OPTS
    ANode/bin/$exe_path/u_anode      --log_level=message $TEST_OPTS
-   AParser/bin/$exe_path/u_aparser  --log_level=message $TEST_OPTS
+   ANode/parser/bin/$exe_path/u_aparser  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      AParser/bin/$exe_path/perf_aparser --log_level=message $TEST_OPTS
+      ANode/parser/bin/$exe_path/perf_aparser --log_level=message $TEST_OPTS
    fi
    Base/bin/$exe_path/u_base         --log_level=message $TEST_OPTS
    
@@ -147,9 +147,9 @@ elif test_uname HP-UX ; then
    ACore/bin/acc/$mode/threading-multi/u_acore  --log_level=message $TEST_OPTS
    ANattr/bin/acc/$mode/threading-multi/u_anattr  --log_level=message $TEST_OPTS
    ANode/bin/acc/$mode/threading-multi/u_anode  --log_level=message $TEST_OPTS
-   AParser/bin/acc/$mode/threading-multi/u_aparser  --log_level=message $TEST_OPTS
+   ANode/parser/bin/acc/$mode/threading-multi/u_aparser  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      AParser/bin/acc/$mode/threading-multi/perf_aparser  --log_level=message $TEST_OPTS
+      ANode/parser/bin/acc/$mode/threading-multi/perf_aparser  --log_level=message $TEST_OPTS
    fi
    Base/bin/acc/$mode/threading-multi/u_base  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
@@ -174,9 +174,9 @@ elif test_uname AIX ; then
    ACore/bin/vacpp/$mode/threading-multi/u_acore  --log_level=message $TEST_OPTS
    ANattr/bin/vacpp/$mode/threading-multi/u_anattr  --log_level=message $TEST_OPTS
    ANode/bin/vacpp/$mode/threading-multi/u_anode  --log_level=message $TEST_OPTS
-   AParser/bin/vacpp/$mode/threading-multi/u_aparser  --log_level=message $TEST_OPTS
+   ANode/parser/bin/vacpp/$mode/threading-multi/u_aparser  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      AParser/bin/vacpp/$mode/threading-multi/perf_aparser  --log_level=message $TEST_OPTS
+      ANode/parser/bin/vacpp/$mode/threading-multi/perf_aparser  --log_level=message $TEST_OPTS
    fi
    Base/bin/vacpp/$mode/threading-multi/u_base  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then

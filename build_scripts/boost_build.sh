@@ -182,10 +182,56 @@ else
    #
    # To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
    #
+   
+    # ===============================================================================
+    # Error to watch out for:
+    # 1/ error: No best alternative for /python_for_extensions
+    #    next alternative: required properties: <python>2.7 <target-os>linux
+    #        matched
+    #    next alternative: required properties: <python>2.7 <target-os>linux
+    #        matched
+    # 2/ pyconfig.h cant find include file:
+    #
+    # Note: ./bootstrap.sh will create a project-config.jam
+    #
+    # For both errors: Please check if you have more than one 'using python' in configuration files.
+    # Please check site-config.jam, user-config.jam and project-config.jam and 
+    # remove duplicated 'using python'.  Typically we remove $HOME/user-config.jam is using python is defined in it.
+    # for 2/ use    
+    #    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/apps/python/2.7.12-01/include/python2.7/"
+    # *ONLY* if first soultion fails ???
+    # 
+    #
+    # When installing BOOST-python libs, make sure to call module load python *FIRST*
+    # Otherwise it will pick the python specified in project-config.jam, which make not be correct
+    #
+    # ==========================================================================================
+    # PYTHON3:
+    # Build:
+    #   1/ module load python3, this update the $PATH
+    #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
+    #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
+    #
+    #      using python 
+    #       : 3.5 
+    #       : /usr/local/apps/python3/3.5.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
+    #       : /usr/local/apps/python3/3.5.1-01/include/python3.5m # include directory
+    #       ; 
+    #       ...
+    #      option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
+    #
+    #     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
+    #     python 2.7 and 3.5, YUK, took ages to debug
+    #
+    # Check:
+    #   To check the build make sure we don't have symbol pulled in from python2 libs
+    #   cd $BOOST_ROOT/stage/lib
+    #   nm -D *python* | grep PyClass_Type                                                # PyClass_Type is a symbol *ONLY* used in python2.x
+    #   nm -D /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
+    # ===============================================================================
+               
    ./bjam toolset=$tool link=shared variant=debug   "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
    ./bjam toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
    ./bjam toolset=$tool link=static variant=debug   "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
    ./bjam toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
-
- 

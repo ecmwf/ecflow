@@ -133,20 +133,10 @@ void CheckPtSaver::explicitSave(bool from_server) const
 			}
 
 			// write to ecf_checkpt_file, if file system is full this could result in an empty file. ?
-			//
-			// To optimise check pointing, we minimise system calls, i.e we can write check point as a string,
-			// and save string to a file with a single write. This is faster than calling:
-			//    server_->defs_->save_as_checkpt( serverEnv_->checkPtFilename() );
-			// This solution however does require *MORE* memory.
-			std::string checkpt_as_string,error_msg;
-			server_->defs_->save_checkpt_as_string(checkpt_as_string);
-			if (!File::create(serverEnv_->checkPtFilename(),checkpt_as_string,error_msg)) {
-            throw std::runtime_error(error_msg);
-			}
+			server_->defs_->save_as_checkpt(serverEnv_->checkPtFilename());
 
 			state_change_no_ = Ecf::state_change_no();    // For periodic update only save checkPt if it has changed
 			modify_change_no_ = Ecf::modify_change_no();  // For periodic update only save checkPt if it has changed
-
 
          if (from_server) {
             // Create new time stamp otherwise we end up using the time stamp from the last command
