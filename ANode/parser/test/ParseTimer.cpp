@@ -90,42 +90,44 @@ int main(int argc, char* argv[])
       std::cout << " Parsing Node tree and AST creation time = " << timer.elapsed() << " parse(" << result << ")" << endl;
    }
 
-   //   {
-   //      Defs local_defs;
-   //      timer.restart();
-   //      TestDefsStructureParser checkPtParser( &local_defs, path);
-   //      std::string errorMsg;
-   //      bool result = checkPtParser.do_parse_only(errorMsg);
-   //      std::cout << " Parsing Node tree *only* time           = " << timer.elapsed() << " parse(" << result << ")" << endl;
-   //   }
+   {
+      Defs local_defs;
+      timer.restart();
+      TestDefsStructureParser checkPtParser( &local_defs, path);
+      std::string errorMsg;
+      bool result = checkPtParser.do_parse_only(errorMsg);
+      std::cout << " Parsing Node tree *only* time           = " << timer.elapsed() << " parse(" << result << ")" << endl;
+   }
 
+   {
+      // Test time for persisting to defs file only
+      std::string tmpFilename = "tmp.def";
 
-   //   {
-   //      timer.restart();
-   //      BOOST_FOREACH(suite_ptr s, defs.suiteVec()) { test_find_task_using_path(s.get(),defs); }
-   //      cout << " Test all paths can be found. time taken = " << timer.elapsed() << endl;
-   //   }
-   //
-   //   {
-   //      // Test time for persisting to defs file only
-   //      std::string tmpFilename = "tmp.def";
-   //
-   //      timer.restart();
-   //      PrintStyle style(PrintStyle::DEFS);
-   //      std::ofstream ofs( tmpFilename.c_str() );  ofs << defs;
-   //      cout << " Persist only, time taken                                   = " << timer.elapsed()  << endl;
-   //
-   //      std::remove(tmpFilename.c_str());
-   //   }
+      timer.restart();
+      defs.save_as_checkpt(tmpFilename);
+      cout << " Save as DEFS checkpoint, time taken                                   = " << timer.elapsed()  << endl;
 
-   //   {
-   //      // may need to comment out output for large differences. Will double the time.
-   //      timer.restart();
-   //      PersistHelper helper;
-   //      bool result = helper.test_persist_and_reload(defs);
-   //      cout << " Persist and reload(DEFS) and compare, time taken           = "
-   //               << timer.elapsed()  << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
-   //   }
+      std::remove(tmpFilename.c_str());
+   }
+   {
+      // Test time for persisting to BOOST checkpoint file only
+      std::string tmpFilename = "tmp.def";
+
+      timer.restart();
+      defs.boost_save_as_checkpt(tmpFilename);
+      cout << " Save as BOOST checkpoint, time taken                                  = " << timer.elapsed()  << endl;
+
+      std::remove(tmpFilename.c_str());
+   }
+
+   {
+      // may need to comment out output for large differences. Will double the time.
+      timer.restart();
+      PersistHelper helper;
+      bool result = helper.test_persist_and_reload(defs,PrintStyle::MIGRATE);
+      cout << " Checkpt(DEFS) and reload, time taken            = "
+            << timer.elapsed()  << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
+   }
 
 #if defined(BINARY_ARCHIVE)
    {
@@ -176,48 +178,52 @@ int main(int argc, char* argv[])
 //   }
 #endif
 
-//   {
-//      // Time how long it takes for job submission. Must call begin on all suites first.
-//      timer.restart();
-//      defs.beginAll();
-//      int count = 10;
-//      JobsParam jobsParam; // default is not to create jobs, hence only used in testing
-//      Jobs jobs(&defs);
-//      for (int i = 0; i < count; i++) {jobs.generate(jobsParam);}
-//      cout << " time for " << count << " jobSubmissions:" << timer.elapsed() << "s jobs:" << jobsParam.submitted().size() << endl;
-//   }
-//
-//   {
-//      // Time how long it takes for post process
-//      timer.restart();
-//      string errorMsg,warningMsg;
-//      bool result = defs.check(errorMsg,warningMsg);
-//      cout << " time for Defs::check (  inlimit resolution) = " << timer.elapsed() <<  " result(" << result << ") msg(" << errorMsg << ")" << endl;
-//   }
+   {
+      timer.restart();
+      BOOST_FOREACH(suite_ptr s, defs.suiteVec()) { test_find_task_using_path(s.get(),defs); }
+      cout << " Test all paths can be found. time taken = " << timer.elapsed() << endl;
+   }
+   {
+      // Time how long it takes for job submission. Must call begin on all suites first.
+      timer.restart();
+      defs.beginAll();
+      int count = 10;
+      JobsParam jobsParam; // default is not to create jobs, hence only used in testing
+      Jobs jobs(&defs);
+      for (int i = 0; i < count; i++) {jobs.generate(jobsParam);}
+      cout << " time for " << count << " jobSubmissions          = " << timer.elapsed() << "s jobs:" << jobsParam.submitted().size() << endl;
+   }
+   {
+      // Time how long it takes for post process
+      timer.restart();
+      string errorMsg,warningMsg;
+      bool result = defs.check(errorMsg,warningMsg);
+      cout << " Time for Defs::check (  inlimit resolution)      = " << timer.elapsed() <<  " result(" << result << ")" << endl;
+   }
 
-//   {
-//      // Time how long it takes to delete all nodes/ references. Delete all tasks and then suites/families.
-//      timer.restart();
-//      std::vector<Task*> tasks;
-//      defs.getAllTasks(tasks);
-//      BOOST_FOREACH(Task* t, tasks) {
-//         if (!defs.deleteChild(t)) cout << "Failed to delete task\n";
-//      }
-//      tasks.clear(); defs.getAllTasks(tasks);
-//      if (!tasks.empty()) cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";
-//
-//      std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators
-//      BOOST_FOREACH(suite_ptr s, vec) {
-//         std::vector<node_ptr> familyVec = s->nodeVec(); // make a copy, to avoid invalidating iterators
-//         BOOST_FOREACH(node_ptr f, familyVec) {
-//            if (!defs.deleteChild(f.get())) cout << "Failed to delete family\n";
-//         }
-//         if (!s->nodeVec().empty()) cout << "Expected all Families to be deleted but found " << s->nodeVec().size() << "\n";
-//         if (!defs.deleteChild(s.get())) cout << "Failed to delete suite\n";
-//      }
-//      if (!defs.suiteVec().empty()) cout << "Expected all Suites to be deleted but found " << defs.suiteVec().size() << "\n";
-//
-//      cout << " time for deleting all nodes = " << timer.elapsed() << endl;
-//   }
+   {
+      // Time how long it takes to delete all nodes/ references. Delete all tasks and then suites/families.
+      timer.restart();
+      std::vector<Task*> tasks;
+      defs.getAllTasks(tasks);
+      BOOST_FOREACH(Task* t, tasks) {
+         if (!defs.deleteChild(t)) cout << "Failed to delete task\n";
+      }
+      tasks.clear(); defs.getAllTasks(tasks);
+      if (!tasks.empty()) cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";
+
+      std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators
+      BOOST_FOREACH(suite_ptr s, vec) {
+         std::vector<node_ptr> familyVec = s->nodeVec(); // make a copy, to avoid invalidating iterators
+         BOOST_FOREACH(node_ptr f, familyVec) {
+            if (!defs.deleteChild(f.get())) cout << "Failed to delete family\n";
+         }
+         if (!s->nodeVec().empty()) cout << "Expected all Families to be deleted but found " << s->nodeVec().size() << "\n";
+         if (!defs.deleteChild(s.get())) cout << "Failed to delete suite\n";
+      }
+      if (!defs.suiteVec().empty()) cout << "Expected all Suites to be deleted but found " << defs.suiteVec().size() << "\n";
+
+      cout << " time for deleting all nodes                   = " << timer.elapsed() << endl;
+   }
    cout << " Total elapsed time = " << duration_timer.duration() << " seconds\n";
 }
