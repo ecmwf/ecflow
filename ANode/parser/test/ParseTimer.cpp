@@ -122,9 +122,10 @@ int main(int argc, char* argv[])
 
    {
       // may need to comment out output for large differences. Will double the time.
+      bool do_compare = false;
       timer.restart();
       PersistHelper helper;
-      bool result = helper.test_persist_and_reload(defs,PrintStyle::MIGRATE);
+      bool result = helper.test_persist_and_reload(defs,PrintStyle::MIGRATE,do_compare);
       cout << " Checkpt(DEFS) and reload, time taken            = "
             << timer.elapsed()  << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
@@ -165,23 +166,12 @@ int main(int argc, char* argv[])
       cout << " Checkpt(TEXT_ARCHIVE) and reload , time taken   = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
-//   {
-//      bool do_compare = false;
-//      timer.restart();
-//      PersistHelper helper;
-//      for(int i = 0; i < 5; i++) {
-//         bool result = helper.test_boost_checkpt_and_reload(defs, do_compare, ecf::Archive::TEXT);
-//         if (!helper.errorMsg().empty())  cout << " result(" << result << ") msg(" << helper.errorMsg() << ")\n";
-//      }
-//      cout << " Checkpt(TEXT_ARCHIVE) and reload 5 times: Average time taken = ";
-//      cout << timer.elapsed()/5 << " : file_size(" << helper.file_size() << ")\n";
-//   }
 #endif
 
    {
       timer.restart();
       BOOST_FOREACH(suite_ptr s, defs.suiteVec()) { test_find_task_using_path(s.get(),defs); }
-      cout << " Test all paths can be found. time taken = " << timer.elapsed() << endl;
+      cout << " Test all paths can be found. time taken         = " << timer.elapsed() << endl;
    }
    {
       // Time how long it takes for job submission. Must call begin on all suites first.
@@ -191,16 +181,15 @@ int main(int argc, char* argv[])
       JobsParam jobsParam; // default is not to create jobs, hence only used in testing
       Jobs jobs(&defs);
       for (int i = 0; i < count; i++) {jobs.generate(jobsParam);}
-      cout << " time for " << count << " jobSubmissions          = " << timer.elapsed() << "s jobs:" << jobsParam.submitted().size() << endl;
+      cout << " time for 10 jobSubmissions                      = " << timer.elapsed() << "s jobs:" << jobsParam.submitted().size() << endl;
    }
    {
       // Time how long it takes for post process
       timer.restart();
       string errorMsg,warningMsg;
       bool result = defs.check(errorMsg,warningMsg);
-      cout << " Time for Defs::check (  inlimit resolution)      = " << timer.elapsed() <<  " result(" << result << ")" << endl;
+      cout << " Time for Defs::check(inlimit resolution)        = " << timer.elapsed() <<  " result(" << result << ")" << endl;
    }
-
    {
       // Time how long it takes to delete all nodes/ references. Delete all tasks and then suites/families.
       timer.restart();
@@ -223,7 +212,7 @@ int main(int argc, char* argv[])
       }
       if (!defs.suiteVec().empty()) cout << "Expected all Suites to be deleted but found " << defs.suiteVec().size() << "\n";
 
-      cout << " time for deleting all nodes                   = " << timer.elapsed() << endl;
+      cout << " time for deleting all nodes                     = " << timer.elapsed() << endl;
    }
    cout << " Total elapsed time = " << duration_timer.duration() << " seconds\n";
 }

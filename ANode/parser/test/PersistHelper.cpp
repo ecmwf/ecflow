@@ -26,7 +26,7 @@ namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-bool PersistHelper::test_persist_and_reload( const Defs& theInMemoryDefs, PrintStyle::Type_t file_type_on_disk)
+bool PersistHelper::test_persist_and_reload( const Defs& theInMemoryDefs, PrintStyle::Type_t file_type_on_disk,bool do_compare)
 {
  	// Write parsed file to disk, and reload, then compare defs, they should be the same
 	errorMsg_.clear();
@@ -44,7 +44,7 @@ bool PersistHelper::test_persist_and_reload( const Defs& theInMemoryDefs, PrintS
 
 	// Reload the file we just persisted and compare with in memory defs
 	Defs savedDef;
-	return reload_from_defs_file(theInMemoryDefs,savedDef,tmpFilename);
+	return reload_from_defs_file(theInMemoryDefs,savedDef,tmpFilename,do_compare);
 }
 
 
@@ -123,7 +123,7 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
 }
 
 
-bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs, Defs& reloaded_defs, const std::string& tmpFilename )
+bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs, Defs& reloaded_defs, const std::string& tmpFilename,bool do_compare )
 {
    std::string warningMsg;
    if (!reloaded_defs.restore(tmpFilename,errorMsg_,warningMsg)) {
@@ -133,33 +133,35 @@ bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs, Defs& rel
       return false;
    }
 
-   // Make sure the file we just parsed match's the one we persisted
-   Ecf::set_debug_equality(true);
-   bool match = reloaded_defs == theInMemoryDefs;
-   Ecf::set_debug_equality(false);
+   if (do_compare) {
+      // Make sure the file we just parsed match's the one we persisted
+      Ecf::set_debug_equality(true);
+      bool match = reloaded_defs == theInMemoryDefs;
+      Ecf::set_debug_equality(false);
 
-   if (!match) {
-      std::stringstream ss;
-      ss << "\nPersistHelper::reload_from_defs_file\n";
-      ss << "In memory and reloaded def's don't match\n";
-      ss << "+++++++++++++ Saved/reloaded_defs  ++++++++++++++++++++++++++++\n";
-      PrintStyle style(PrintStyle::STATE);
-      ss << reloaded_defs;
-      ss << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n";
-      ss << theInMemoryDefs;
-      errorMsg_ += ss.str();
-   }
-   else {
-      if (compare_edit_history_ && !reloaded_defs.compare_edit_history(theInMemoryDefs)) {
+      if (!match) {
          std::stringstream ss;
-         ss << "\nPersistHelper::reload_from_defs_file compare_edit_history_\n";
+         ss << "\nPersistHelper::reload_from_defs_file\n";
          ss << "In memory and reloaded def's don't match\n";
          ss << "+++++++++++++ Saved/reloaded_defs  ++++++++++++++++++++++++++++\n";
-         PrintStyle style(PrintStyle::MIGRATE);
+         PrintStyle style(PrintStyle::STATE);
          ss << reloaded_defs;
          ss << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n";
          ss << theInMemoryDefs;
          errorMsg_ += ss.str();
+      }
+      else {
+         if (compare_edit_history_ && !reloaded_defs.compare_edit_history(theInMemoryDefs)) {
+            std::stringstream ss;
+            ss << "\nPersistHelper::reload_from_defs_file compare_edit_history_\n";
+            ss << "In memory and reloaded def's don't match\n";
+            ss << "+++++++++++++ Saved/reloaded_defs  ++++++++++++++++++++++++++++\n";
+            PrintStyle style(PrintStyle::MIGRATE);
+            ss << reloaded_defs;
+            ss << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n";
+            ss << theInMemoryDefs;
+            errorMsg_ += ss.str();
+         }
       }
    }
 
