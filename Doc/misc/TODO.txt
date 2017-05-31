@@ -1,4 +1,8 @@
 
+Add archive version:
+ERR:[17:19:27 30.5.2017] Connection::handle_read_data, boost::archive::archive_exception unsupported version, in server
+
+
 JIRA ISSUES:
 ==============================================================================================
 ECFLOW-136 Label, event. meter child commands persisting if node not found in server
