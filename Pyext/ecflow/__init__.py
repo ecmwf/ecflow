@@ -1,4 +1,4 @@
-from ecflow import *
+from .ecflow import *
 
 # Name        :
 # Author      : Avi

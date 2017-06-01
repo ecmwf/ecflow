@@ -458,7 +458,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 	else if (task_state == NState::ABORTED) {
 
 	   /// If we have been forcibly aborted by the user. Do not resubmit jobs, until *begin* or *re-queue*. ECFLOW-344
-	   if (flag().is_set(ecf::Flag::FORCE_ABORT)) {
+	   if (get_flag().is_set(ecf::Flag::FORCE_ABORT)) {
 #ifdef DEBUG_DEPENDENCIES
 	      LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " has been forcibly aborted." );
 #endif
@@ -466,7 +466,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 	   }
 
       /// If we have been killed by the user. Do not resubmit jobs, until *begin* or *re-queue*
-      if (flag().is_set(ecf::Flag::KILLED)) {
+      if (get_flag().is_set(ecf::Flag::KILLED)) {
 #ifdef DEBUG_DEPENDENCIES
          LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " has been killed." );
 #endif
@@ -502,7 +502,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 
    /// If we have been forcibly aborted by the user. Do not resubmit jobs, until *begin* or *re-queue*
 	/// This can be set via ALTER, so independent of state.
-   if (flag().is_set(ecf::Flag::FORCE_ABORT)) {
+   if (get_flag().is_set(ecf::Flag::FORCE_ABORT)) {
 #ifdef DEBUG_DEPENDENCIES
       LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " has been forcibly aborted." );
 #endif

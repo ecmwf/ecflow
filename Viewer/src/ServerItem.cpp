@@ -85,9 +85,9 @@ void ServerItem::registerUsageBegin()
 	if(!handler_)
 	{
 		handler_=ServerHandler::addServer(name_,host_,port_);
-        if(handler_)
-            useCnt_++;
-	}
+    }
+    if(handler_)
+        useCnt_++;
 }
 
 void ServerItem::registerUsageEnd()

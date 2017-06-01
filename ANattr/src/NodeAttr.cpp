@@ -173,7 +173,7 @@ void Meter::set_value( int v ) {
 
    if (!isValidValue( v )) {
       std::stringstream ss;
-      ss << "Meter::set_value(int): The meter(" << name_ << ") value must be in the range[" << min() << "-" << max() << "] but found '" << v << "'";
+      ss << "Meter::set_value(int): The meter(" << name_ << ") value must be in the range[" << min() << "->" << max() << "] but found '" << v << "'";
       throw std::runtime_error( ss.str() );
    }
 
