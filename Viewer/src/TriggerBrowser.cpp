@@ -155,7 +155,6 @@ void TriggerBrowser::loadTriggerGraphTab(bool forceLoad)
 
 void TriggerBrowser::loadTriggerTab(bool forceLoad)
 {
-    //if(!forceLoad && isTabLoaded(TriggerTabIndex))
     if(!forceLoad && isPanelLoaded(TextPanelIndex))
         return;
 
@@ -167,6 +166,8 @@ void TriggerBrowser::loadTriggerTab(bool forceLoad)
 
     QString s="<table width=\'100%\'>";
 
+
+#if 0
     //Trigger expression
     if(!te.empty())
     {
@@ -187,6 +188,7 @@ void TriggerBrowser::loadTriggerTab(bool forceLoad)
         s+="<tr><td colspan=\'2\' class=\'trigger_title\'>Trigger expression</td></tr><tr><td colspan=\'2\' class=\'trigger\'> <p>" +
                  tb + "</p></td></tr>";
     }
+#endif
 
     triggerCollector_->setDependency(owner_->dependency());
 
