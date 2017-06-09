@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
 {
    DurationTimer duration_timer;
 
-   std::string path = File::test_data("AParser/test/data/single_defs/mega.def","AParser");
+   std::string path = File::test_data("ANode/parser/test/data/single_defs/mega.def","parser");
    size_t mega_file_size = fs::file_size(path);
    cout << "AParser:: ...test_single_defs " << path << " file_size(" << mega_file_size << ")\n";
 
@@ -130,9 +130,8 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    Defs defs;
    {
       timer.restart();
-      DefsStructureParser checkPtParser( &defs, path);
       std::string errorMsg,warningMsg;
-      BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),errorMsg);
+      BOOST_REQUIRE_MESSAGE(defs.restore(path,errorMsg,warningMsg),errorMsg);
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForParse,"Performance regression, expected < " << expectedTimeForParse << " seconds for parse/node tree creation but found " << timer.elapsed());
       std::cout << " Parsing Node tree and AST creation time = " << timer.elapsed() << " < limit(" << expectedTimeForParse << ")" << endl;
    }
@@ -207,7 +206,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    {
       timer.restart();
       PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_checkpt_and_reload(defs,true,ecf::Archive::BINARY), helper.errorMsg());
+      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true,ecf::Archive::BINARY), helper.errorMsg());
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
       cout << " Checkpt(BINARY_ARCHIVE) and reload and compare, time taken  = ";
       cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;
@@ -216,7 +215,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    {
       timer.restart();
       PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_checkpt_and_reload(defs,true,ecf::Archive::PORTABLE_BINARY), helper.errorMsg());
+      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true,ecf::Archive::PORTABLE_BINARY), helper.errorMsg());
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
       cout << " Checkpt(PORTABLE_BINARY) and reload and compare, time taken = ";
       cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;
@@ -225,7 +224,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    {
       timer.restart();
       PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_checkpt_and_reload(defs,true,ecf::Archive::EOS_PORTABLE_BINARY), helper.errorMsg());
+      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true,ecf::Archive::EOS_PORTABLE_BINARY), helper.errorMsg());
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
       cout << " Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = ";
       cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;
@@ -234,7 +233,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    {
       timer.restart();
       PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_checkpt_and_reload(defs,true,ecf::Archive::TEXT), helper.errorMsg());
+      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true,ecf::Archive::TEXT), helper.errorMsg());
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
       cout << " Checkpt(TEXT_ARCHIVE) and reload and compare, time taken   = ";
       cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;

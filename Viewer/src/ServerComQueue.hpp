@@ -62,6 +62,7 @@ protected Q_SLOTS:
 
 protected:
     void createThread();
+    void stopTimer();
     void startCurrentTask();
     void endReset();
 	bool hasTask(VTask::Type t) const;
@@ -72,11 +73,14 @@ protected:
 	ServerComThread *comThread_;
 	QTimer* timer_;
     int timeout_;
-    QTime taskTime_;
-    int taskTimeout_;
+    QTime ctStartTime_;
+    int ctStartTimeout_;
+    int ctStartWaitTimeout_;
+    int startTimeoutTryCnt_;
+    int ctMaxStartTimeoutTryCnt_;
 	std::deque<VTask_ptr> tasks_;
 	VTask_ptr current_;
-	State state_;
+	State state_;  
     bool taskStarted_;
     bool taskIsBeingFinished_;
 	bool taskIsBeingFailed_;

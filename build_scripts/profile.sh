@@ -18,42 +18,42 @@ compiler=gcc-$(gcc -dumpversion)
 echo "gprof: variant=profile compiler=$compiler"
 
 #
-cd ACore
+cd $WK/ACore
 bin/$compiler/profile/u_acore
 gprof bin/$compiler/profile/u_acore   gmon.out   >   gprof.out
 
-cd ../ANattr
+cd $WK/ANattr
 bin/$compiler/profile/u_anattr
 gprof bin/$compiler/profile/u_anattr gmon.out   >   gprof.out
 
-cd ../ANode
+cd $WK/ANode
 bin/$compiler/profile/u_anode
 gprof bin/$compiler/profile/u_anode gmon.out   >   gprof.out
 
-cd ../AParser
+cd $WK/ANode/parser
 bin/$compiler/profile/u_aparser
 gprof bin/$compiler/profile/u_aparser gmon.out   >   gprof.out
 
-cd ../Base
+cd $WK/Base
 bin/$compiler/profile/u_base
 gprof bin/$compiler/profile/u_base gmon.out   >   gprof.out
 
-cd ../Client
+cd $WK/Client
 bin/$compiler/profile/s_client
 gprof bin/$compiler/profile/s_client gmon.out   >   gprof.out
 
-cd ../Server
+cd $WK/Server
 bin/$compiler/profile/u_server
 gprof bin/$compiler/profile/u_server gmon.out   >   gprof.out
 
-cd ../Test
+cd $WK/Test
 bin/$compiler/profile/test
 gprof bin/$compiler/profile/test gmon.out   >   gprof.out
 
-cd ../Simulator
+cd $WK/CSim
 bin/$compiler/profile/c_csim
 gprof bin/$compiler/profile/c_csim gmon.out   >   gprof.out
 
-cd ../AParser
+cd $WK/ANode/parser
 bin/$compiler/profile/perf_aparser
 gprof bin/$compiler/profile/perf_aparser gmon.out   >   gprof.out

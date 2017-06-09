@@ -23,11 +23,11 @@ echo "valgrind: variant=$mode compiler=$compiler"
 valgrind --tool=massif ACore/bin/$compiler/$mode/u_acore
 valgrind --tool=massif ANattr/bin/$compiler/$mode/u_anattr
 valgrind --tool=massif ANode/bin/$compiler/$mode/u_anode
-valgrind --tool=massif AParser/bin/$compiler/$mode/u_aparser
+valgrind --tool=massif ANode/parser/bin/$compiler/$mode/u_aparser
 valgrind --tool=massif Base/bin/$compiler/$mode/u_base
 valgrind --tool=massif Client/bin/$compiler/$mode/s_client
 valgrind --tool=massif Server/bin/$compiler/$mode/u_server
 valgrind --tool=massif Test/bin/$compiler/$mode/s_test
 valgrind --tool=massif Simulator/bin/$compiler/$mode/c_csim
-#valgrind --tool=massif AParser/bin/$compiler/$mode/perf_aparser
+#valgrind --tool=massif ANode/parser/bin/$compiler/$mode/perf_aparser
 

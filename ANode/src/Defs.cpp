@@ -23,7 +23,6 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Log.hpp"
-#include "PrintStyle.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
@@ -42,6 +41,8 @@
 #include "AbstractObserver.hpp"
 #include "CheckPtContext.hpp"
 #include "SuiteChanged.hpp"
+#include "DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
+#include "File.hpp"  
 
 using namespace ecf;
 using namespace std;
@@ -580,6 +581,7 @@ std::ostream& Defs::print(std::ostream& os) const
 	   os << write_state();
 	}
 	if (PrintStyle::getStyle() == PrintStyle::STATE) {
+      os << "# server state: " << SState::to_string(server().get_state()) << "\n";
 	   os << "# server variable\n";
 	   const std::vector<Variable>& server_variables = server().server_variables();
 	   BOOST_FOREACH(const Variable& var, server_variables) { var.print_generated(os);}
@@ -1087,7 +1089,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 	return client_node_to_add;
 }
 
-void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
+void Defs::boost_save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
 {
    // Save NodeContainer children even if ecf::Flag::MIGRATED set
    CheckPtContext checkpt_context;
@@ -1099,31 +1101,16 @@ void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at
  	ecf::save(the_fileName,*this,at);
 }
 
-void Defs::save_checkpt_as_string(std::string& output) const
-{
-   // Save NodeContainer children even if ecf::Flag::MIGRATED set
-   CheckPtContext checkpt_context;
-
-   // only_save_edit_history_when_check_pointing or if explicitly requested
-   save_edit_history_ = true;   // this is reset after edit_history is saved
-
-   ecf::save_as_string(output,*this);
-}
-
-void Defs::save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
+void Defs::boost_save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
 {
    /// Can throw archive exception
    ecf::save(the_fileName,*this,at);
 }
 
-void Defs::save_as_string(std::string& output) const
-{
-   ecf::save_as_string(output,*this);
-}
 
-void Defs::restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Type at)
+void Defs::boost_restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Type at)
 {
-//	cout << "Defs::restore_from_checkpt " << the_fileName << "\n";
+//	cout << "Defs::boost_restore_from_checkpt " << the_fileName << "\n";
 
 	if (the_fileName.empty())  return;
 
@@ -1139,18 +1126,63 @@ void Defs::restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Ty
 //	cout << "Restored: " << suiteVec_.size() << " suites\n";
 }
 
-void Defs::restore_from_string(const std::string& rest)
+void Defs::save_as_checkpt(const std::string& the_fileName) const
 {
-   if (rest.empty()) return;
+   // Save as defs will always save children, hence no need for CheckPtContext
+
+   // only_save_edit_history_when_check_pointing or if explicitly requested
+   save_edit_history_ = true;   // this is reset after edit_history is saved
+
+   save_as_filename(the_fileName,PrintStyle::MIGRATE);
+}
+
+void Defs::save_as_filename(const std::string& the_fileName,PrintStyle::Type_t p_style) const
+{
+   PrintStyle printStyle(p_style);
+
+   std::ofstream ofs( the_fileName.c_str() );
+   ofs << this;
+
+   if (!ofs.good()) {
+      std::stringstream ss; ss << "Defs::save_as_filename: path(" << the_fileName << ") failed";
+      throw std::runtime_error(ss.str());
+   }
+}
+
+void Defs::restore(const std::string& the_fileName)
+{
+   if (the_fileName.empty())  return;
+
+   /// *************************************************************************
+   /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+   /// *************************************************************************
+   std::string errorMsg,warningMsg;
+   if (!restore(the_fileName,errorMsg,warningMsg)) {
+      std::stringstream e; e << "Defs::defs_restore_from_checkpt: " << errorMsg;
+      throw std::runtime_error(e.str());
+   }
+}
+
+bool Defs::restore(const std::string& the_fileName,std::string& errorMsg, std::string& warningMsg)
+{
+   if (the_fileName.empty()) {
+      errorMsg = "Defs::defs_restore: the filename string is empty";
+      return false;
+   }
 
    // deleting existing content first. *** Note: Server environment left as is ****
    clear();
 
-   ecf::restore_from_string(rest,*this);
+   /// *************************************************************************
+   /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+   /// *************************************************************************
+   DefsStructureParser parser( this, the_fileName );
+   bool ret = parser.doParse(errorMsg,warningMsg);
 
    // Reset the state and modify numbers, **After the restore**
    state_change_no_ = Ecf::state_change_no();
    modify_change_no_ = Ecf::modify_change_no();
+   return ret;
 }
 
 void Defs::clear()

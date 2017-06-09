@@ -71,12 +71,11 @@ ecbuild_add_library( TARGET   base
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     libparser node nodeattr core
+                     LIBS     node nodeattr core
                      INCLUDES src
                               ../ACore/src
                               ../ANattr/src
                               ../ANode/src
-                              ../AParser/src
                               ../Base/src
                               ../Base/src/cts
                               ../Base/src/stc

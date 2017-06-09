@@ -8,7 +8,7 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 
 module unload ecflow
-module load ecflow/4.6.0
+module load ecflow/4.6.1
 
 # =======================================================================
 # Create build scripts files. Must be before python $WK/build_scripts/nightly/build.py
@@ -61,5 +61,4 @@ git checkout master
 # Start the GUI
 # =======================================================================
 cd $SCRATCH
-module swap ecflow/4.6.0
 ecflow_ui &

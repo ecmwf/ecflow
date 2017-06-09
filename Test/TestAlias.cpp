@@ -37,7 +37,6 @@
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
-#include "DefsStructureParser.hpp"
 #include "AssertTimer.hpp"
 #include "Str.hpp"
 #include "NOrder.hpp"

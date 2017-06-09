@@ -31,8 +31,11 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client) :
 	client_(client),
     comThread_(0),
 	timeout_(5),
-    taskTimeout_(500),
-	state_(NoState), //the queue is enabled but not running
+    ctStartTimeout_(1000),
+    ctStartWaitTimeout_(500), //wait() is a blocking call, so it should be short
+    startTimeoutTryCnt_(0),
+    ctMaxStartTimeoutTryCnt_(4),
+    state_(NoState), //the queue is enabled but not running
     taskStarted_(false),
     taskIsBeingFinished_(false),
 	taskIsBeingFailed_(false)
@@ -45,23 +48,6 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client) :
 
 
     createThread();
-
-#if 0
-    //When the ServerComThread starts it emits a signal that
-    //is connected to the queue.
-    connect(comThread_, SIGNAL(started()),
-            this, SLOT(slotTaskStarted()));
-
-    //When the ServerComThread finishes it emits a signal that
-	//is connected to the queue.
-	connect(comThread_, SIGNAL(finished()),
-			this, SLOT(slotTaskFinished()));
-
-	//When there is an error in ServerComThread it emits the
-	//failed() signal that is connected to the queue.
-	connect(comThread_, SIGNAL(failed(std::string)),
-			this, SLOT(slotTaskFailed(std::string)));
-#endif
 }
 
 ServerComQueue::~ServerComQueue()
@@ -85,7 +71,7 @@ ServerComQueue::~ServerComQueue()
 	VTask_ptr task=VTask::create(VTask::LogOutTask);
 	comThread_->task(task);
 
-	//Wait unit the logout finishes
+    //Wait until the logout finishes
 	comThread_->wait();
 
 	delete comThread_;
@@ -146,7 +132,7 @@ void ServerComQueue::disable()
 	tasks_.clear();
 
 	//Stop the timer
-	timer_->stop();
+    stopTimer();
 
 	//If the comthread is running we need to wait
 	//until it finishes its task.
@@ -169,7 +155,7 @@ bool ServerComQueue::prepareReset()
 		return false;
 
 	//Stop the timer
-	timer_->stop();
+    stopTimer();
 
 	//Remove all tasks
 	tasks_.clear();
@@ -232,6 +218,7 @@ void ServerComQueue::start()
         //assert(taskIsBeingFailed_==false);
         //assert(!current_);
 
+        startTimeoutTryCnt_=0;
         taskStarted_=false;
 
 		//If the comthread is running we need to wait
@@ -258,8 +245,8 @@ void ServerComQueue::suspend(bool wait)
 	   state_ != SuspendedState)
 	{
 		state_=SuspendedState;
-		timer_->stop();
-		if(wait)
+        stopTimer();
+        if(wait)
 		{
 			comThread_->wait();
 		}
@@ -268,6 +255,12 @@ void ServerComQueue::suspend(bool wait)
         //assert(taskIsBeingFailed_==false);
         //assert(!current_);
 	}
+}
+
+void ServerComQueue::stopTimer()
+{
+    timer_->stop();
+    startTimeoutTryCnt_=0;
 }
 
 bool ServerComQueue::hasTask(VTask::Type t) const
@@ -364,7 +357,7 @@ void ServerComQueue::addSuiteAutoRegisterTask()
 void ServerComQueue::startCurrentTask()
 {
     taskStarted_=false;
-    taskTime_.start();
+    ctStartTime_.start();
     comThread_->task(current_);
 }
 
@@ -413,38 +406,54 @@ void ServerComQueue::slotRun()
     //and the queue sets taskStarted_ to true. Since this is a queued communication
     //there can be a time lag between the two events. We set a timeout for it!
     //If we pass the timeout we stop the thread and try to resend the task!
-    if(current_ && !taskStarted_ && taskTime_.elapsed() > taskTimeout_)
-    {
-        bool rerun=false;
-        bool r=comThread_->isRunning();
-
-        //So if we are here:
-        //-the thread did not emit a notification about its start
-        //-the elapsed time since we sent the task to the thread past the timeout.
-
-        //Problem 1:
-        //-the thread is running
-        if(r)
+    if(current_ && !taskStarted_ && ctStartTime_.elapsed() > ctStartTimeout_)
+    {      
+        if(startTimeoutTryCnt_ < ctMaxStartTimeoutTryCnt_)
         {
-            UiLog(server_).warn() << " It seems that the ServerCom thread started but it is in a bad state. Try to run task again.";
-            rerun=true;
-            //assert(false);
+            UiLog(server_).warn() << " ServerCom thread does not seem to have started within the allocated timeout. \
+                          startTimeoutTryCnt_=" << startTimeoutTryCnt_;
+
+            startTimeoutTryCnt_++;
         }
-
-        //Problem 2:
-        //-the thread is not running
-        else if(!r)
+        else
         {
-            UiLog(server_).warn() << " It seems that the ServerCom thread could not start. Try to run task again.";
-            rerun=true;
-        }
+            startTimeoutTryCnt_=0;
 
-        if(rerun)
-        {
-            if(comThread_->wait(taskTimeout_) == false)
+            //So if we are here:
+            //-the thread did not emit a notification about its start
+            //-the elapsed time since we sent the task to the thread past the timeout.
+            //-since the timeout was passed slotRun() has been was called at least startTimeoutTryCnt_ times
+
+            bool running=comThread_->isRunning();
+
+            //Problem 1:
+            //-the thread is running
+            if(running)
             {
+                UiLog(server_).warn() << " It seems that the ServerCom thread started but it is in a bad state. Try to run task again.";
+            }
+
+            //Problem 2:
+            //-the thread is not running
+            else
+            {
+                UiLog(server_).warn() << " It seems that the ServerCom thread could not start. Try to run task again.";
+            }
+
+            if(comThread_->wait(ctStartWaitTimeout_) == false)
+            {              
+                UiLog(server_).warn() << "  Calling wait() on the ServerCom thread failed.";
+
+                //The thread started to run in the meantime. We check its status again at the next slotRun call.
+                if(!running && comThread_->isRunning())
+                {
+                    UiLog(server_).warn() << "  It seems that in the meantime the thread started to run.\
+                                   We will check its state again";
+                    return;
+                }
+
+                //Otherwise there is nothing to do!!
                 //We exit here because when we tried to call terminate() it just hung!!
-                UiLog(server_).err() << "  Calling wait() on the ServerCom thread failed.";
                 UI_ASSERT(0,"Cannot stop ServerCom thread, which is in a bad state");
                 exit(1);
 #if 0
@@ -464,6 +473,8 @@ void ServerComQueue::slotRun()
 #endif
             }
 
+            UiLog(server_).warn() << "  Calling wait() on the ServerCom thread succeeded.";
+
             Q_ASSERT(comThread_->isRunning() == false);
 
             if(current_->status() != VTask::CANCELLED &&
@@ -482,35 +493,10 @@ void ServerComQueue::slotRun()
         }
     }
 
-
-#if 0
-    //If the thread could not start up for the current task.
-    if(current_ && !taskStarted_ && !comThread_->isRunning() &&
-       taskTime_.elapsed() > taskTimeout_)
-    {
-        UiLog(server_).dbg() << " It seems that the thread could not start. Try to run task again.";
-        comThread_->wait();
-
-        if(current_->status() != VTask::CANCELLED &&
-           current_->status() != VTask::ABORTED )
-        {
-            startCurrentTask();
-            return;
-        }
-        else
-        {
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
-            UiLog(server_).dbg() << "  current_ aborted or cancelled. Reset current_ !";
-#endif
-            current_.reset();
-        }
-    }
-#endif
-
 	if(current_)
 	{
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
-        UiLog(server_).dbg() << " still processing reply from previous task";
+        //UiLog(server_).dbg() << " still processing reply from previous task";
 #endif
         return;
 	}
@@ -562,6 +548,7 @@ void ServerComQueue::slotTaskFinished()
 {
     taskStarted_=false;
     taskIsBeingFinished_=true;
+    startTimeoutTryCnt_=0;
 
     UiLog(server_).dbg() << "ComQueue::slotTaskFinished -->";
 
@@ -593,6 +580,7 @@ void ServerComQueue::slotTaskFailed(std::string msg)
 {
     taskStarted_=false;
     taskIsBeingFailed_=true;
+    startTimeoutTryCnt_=0;
 
     UiLog(server_).dbg() << "ComQueue::slotTaskFailed -->";
 #ifdef _UI_SERVERCOMQUEUE_DEBUG

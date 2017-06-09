@@ -64,7 +64,6 @@ boost_root=os.getenv("BOOST_ROOT")
 include_dirs = [ "/tmp/ma0/workspace/ecflow/Pyext/../ACore/src", 
                  "/tmp/ma0/workspace/ecflow/Pyext/../ANattr/src", 
                  "/tmp/ma0/workspace/ecflow/Pyext/../ANode/src",
-                 "/tmp/ma0/workspace/ecflow/Pyext/../AParser/src",
                  "/tmp/ma0/workspace/ecflow/Pyext/../Base/src",
                  "/tmp/ma0/workspace/ecflow/Pyext/../Base/src/cts",
                  "/tmp/ma0/workspace/ecflow/Pyext/../Base/src/stc",
@@ -80,7 +79,6 @@ boost_lib_dir = boost_root + "/stage/lib/"
 library_dirs = ['/tmp/ma0/workspace/ecflow/build/ACore',
                 '/tmp/ma0/workspace/ecflow/build/ANattr/',
                 '/tmp/ma0/workspace/ecflow/build/ANode/',
-                '/tmp/ma0/workspace/ecflow/build/AParser/', 
                 '/tmp/ma0/workspace/ecflow/build/Base/', 
                 '/tmp/ma0/workspace/ecflow/build/CSim/', 
                 '/tmp/ma0/workspace/ecflow/build/Client/', 
@@ -88,7 +86,7 @@ library_dirs = ['/tmp/ma0/workspace/ecflow/build/ACore',
                ]
 
 # define the libraries to link with this includes the boost lib
-libraries = [ 'core' , 'nodeattr', 'node', 'libparser', 'base', 'libsimu', 'libclient',
+libraries = [ 'core' , 'nodeattr', 'node', 'base', 'libsimu', 'libclient',
               'boost_system-mt',
               'boost_serialization-mt',
               'boost_filesystem-mt',

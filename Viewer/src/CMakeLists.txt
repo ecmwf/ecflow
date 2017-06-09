@@ -433,7 +433,7 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
      TextPager    
      ${Boost_INCLUDE_DIRS} 
      ${CMAKE_CURRENT_BINARY_DIR}
-    LIBS core nodeattr node libparser base libclient 
+    LIBS core nodeattr node base libclient 
          pthread  
          m dl
          ${ECFLOW_QT_LIBRARIES}
@@ -462,7 +462,7 @@ if(${build_ecflow_ui_log})
          ../../Client/src     
          ${Boost_INCLUDE_DIRS} 
          ${CMAKE_CURRENT_BINARY_DIR}
-        LIBS core nodeattr node libparser base libclient 
+        LIBS core nodeattr node base libclient 
              pthread  
              m 
              ${ECFLOW_QT_LIBRARIES}
