@@ -182,7 +182,7 @@ void TriggerItemWidget::checkActionState()
 {
     if(suspended_)
     {
-         dependTb_->setEnabled(false);
+         dependTb_->setEnabled(false);         
          return;
     }
 
