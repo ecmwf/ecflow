@@ -11,17 +11,13 @@
 
 #include "Highlighter.hpp"
 #include "TriggerCollector.hpp"
-#include "TriggerView.hpp"
 #include "TriggeredScanner.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
 
-#include <QActionGroup>
-
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
 #endif
-
 
 //========================================================
 //
