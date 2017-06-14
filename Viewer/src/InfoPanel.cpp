@@ -574,6 +574,16 @@ void InfoPanel::updateTitle()
     }
 }
 
+void InfoPanel::relayInfoPanelCommand(VInfo_ptr info,QString cmd)
+{
+    Q_EMIT popInfoPanel(info,cmd);
+}
+
+void InfoPanel::relayDashboardCommand(VInfo_ptr info,QString cmd)
+{
+    Q_EMIT dashboardCommand(info,cmd);
+}
+
 void InfoPanel::notifyDataLost(VInfo* info)
 {
 	if(info_ && info_.get() == info)

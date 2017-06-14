@@ -165,6 +165,7 @@ public:
     void clear();
     size_t size() const {return items_.size();}
 
+    bool contains(TriggerTableItem*) const;
     const std::vector<TriggerTableItem*>& items() const {return items_;}
 
 protected:

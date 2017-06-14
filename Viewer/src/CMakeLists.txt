@@ -321,7 +321,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TriggerTableModel.hpp
     TriggerTableView.hpp
     TriggerTableWidget.hpp
-    TriggerTextWidget.hpp
     TriggeredScanner.hpp
     VariableItemWidget.hpp
     VariableModel.hpp

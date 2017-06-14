@@ -18,6 +18,7 @@
 #include "VTaskObserver.hpp"
 
 #include <string>
+#include <QString>
 
 class QWidget;
 class InfoPanel;
@@ -25,6 +26,8 @@ class InfoProvider;
 class VSettings;
 
 //This is the (abstract) base class to represent one tab in the info panel.
+//It cannot be inheried from QObject beacuse we would end up with double inheritance since
+//all the derived calsses are inherited from QObject!!
 
 class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver
 {
@@ -76,9 +79,13 @@ public:
 
 protected:
 	void adjust(VInfo_ptr);
+    void linkSelected(const std::string& path);
+    void linkSelected(VInfo_ptr);
+    void relayInfoPanelCommand(VInfo_ptr info,QString cmd);
+    void relayDashboardCommand(VInfo_ptr info,QString cmd);
+
     virtual void clear();
     virtual void updateState(const ChangeFlags&)=0;
-    void linkSelected(const std::string& path);
 
 	//Notifications about the server changes
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;

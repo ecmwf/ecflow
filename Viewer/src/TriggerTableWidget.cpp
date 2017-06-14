@@ -14,13 +14,11 @@
 #include "TriggerTableModel.hpp"
 #include "TriggerViewDelegate.hpp"
 
-TriggerTableWidget::TriggerTableWidget(QWidget *parent) : QWidget(parent)
+TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
+    QWidget(parent),
+    lastSelectedItem_(0)
 {
 	setupUi(this);
-
-    //The collectors
-    triggerCollector_=new TriggerTableCollector(false);
-    triggeredCollector_=new TriggerTableCollector(false);
 
     depInfoCloseTb_->setProperty("triggertitle","1");
     depInfoCloseTb_->parent()->setProperty("triggertitle","1");
@@ -30,7 +28,7 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) : QWidget(parent)
     triggeredLabel_->setProperty("triggertitle","1");
     depLabel_->setProperty("triggertitle","1");
 
-    depLabelText_=tr("Dependency details");
+    depLabelText_=tr("&nbsp;Dependency details");
     depLabel_->setText(depLabelText_);
 
     //Trigger - model + view
@@ -41,11 +39,36 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) : QWidget(parent)
     triggeredModel_ = new TriggerTableModel(TriggerTableModel::TriggeredMode,this);
     triggeredView_->setModel(triggeredModel_);
 
+    //normal selection
     connect(triggerView_,SIGNAL(selectionChanged(TriggerTableItem*)),
             this,SLOT(slotTriggerSelection(TriggerTableItem*)));
 
     connect(triggeredView_,SIGNAL(selectionChanged(TriggerTableItem*)),
             this,SLOT(slotTriggeredSelection(TriggerTableItem*)));
+
+    //lookup selection
+    connect(triggerView_,SIGNAL(linkSelected(VInfo_ptr)),
+            this,SIGNAL(linkSelected(VInfo_ptr)));
+
+    connect(triggeredView_,SIGNAL(linkSelected(VInfo_ptr)),
+            this,SIGNAL(linkSelected(VInfo_ptr)));
+
+    //relay commands
+    connect(triggerView_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+
+    connect(triggerView_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+            this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+
+    connect(triggeredView_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+
+    connect(triggeredView_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+            this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+
+    //anchor clicked in text browser
+    connect(depBrowser_,SIGNAL(anchorClicked(const QUrl&)),
+            this,SLOT(anchorClicked(const QUrl&)));
 }
 
 TriggerTableWidget::~TriggerTableWidget()
@@ -55,8 +78,13 @@ TriggerTableWidget::~TriggerTableWidget()
 void TriggerTableWidget::clear()
 {
     info_.reset();
+    lastSelectedItem_=0;
+
     triggerModel_->clearData();
     triggeredModel_->clearData();
+
+    depLabel_->setText(depLabelText_);
+    depBrowser_->clear();
 }
 
 void TriggerTableWidget::setInfo(VInfo_ptr info)
@@ -66,6 +94,10 @@ void TriggerTableWidget::setInfo(VInfo_ptr info)
 
 void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
 {
+    lastSelectedItem_=item;
+    if(!depInfoWidget_->isVisible())
+        return;
+
     QString txt=tr("&nbsp;The parents/children of <CTYPE> <CITEM> that <TGTYPE> <TG> triggers");
     QString tgName,tgType;
     QColor col(255,255,255);
@@ -98,6 +130,10 @@ void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
 
 void TriggerTableWidget::slotTriggeredSelection(TriggerTableItem* item)
 {
+    lastSelectedItem_=item;
+    if(!depInfoWidget_->isVisible())
+        return;
+
     QString txt=tr("&nbsp;The parents/children of <CTYPE> <CITEM> that triggers <TYPE> <ITEM>");
     QString tgType,tgName;
     QColor col(255,255,255);
@@ -131,12 +167,41 @@ void TriggerTableWidget::slotTriggeredSelection(TriggerTableItem* item)
 void TriggerTableWidget::slotShowDependencyInfo(bool b)
 {
     depInfoWidget_->setVisible(b);
+
+    //When the depinfo panel becomes visible we need to update
+    //its contents
+    if(b && lastSelectedItem_)
+    {
+        if(TriggerTableCollector *tc=triggerModel_->triggerCollector())
+        {
+            if(tc->contains(lastSelectedItem_))
+            {
+                slotTriggerSelection(lastSelectedItem_);
+                return;
+            }
+        }
+        else if(TriggerTableCollector *tc=triggeredModel_->triggerCollector())
+        {
+            if(tc->contains(lastSelectedItem_))
+            {
+                slotTriggeredSelection(lastSelectedItem_);
+                return;
+            }
+        }
+    }
 }
 
 void TriggerTableWidget::on_depInfoCloseTb__clicked()
 {
     if(depInfoWidget_->isVisible())
         Q_EMIT  depInfoWidgetClosureRequested();
+}
+
+void TriggerTableWidget::anchorClicked(const QUrl& link)
+{
+    VInfo_ptr info=VInfo::createFromPath(info_->server(),link.toString().toStdString());
+    if(info)
+        Q_EMIT linkSelected(info);
 }
 
 void TriggerTableWidget::beginTriggerUpdate()

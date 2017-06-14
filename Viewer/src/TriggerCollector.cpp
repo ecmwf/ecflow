@@ -14,6 +14,8 @@
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
 
+#include <algorithm>
+
 #define _UI_TRIGGERCOLLECTOR_DEBUG
 
 TriggerListCollector::~TriggerListCollector()
@@ -137,7 +139,10 @@ void TriggerTableCollector::clear()
     items_.clear();
 }
 
-
+bool TriggerTableCollector::contains(TriggerTableItem* item) const
+{
+    return (std::find(items_.begin(),items_.end(), item) != items_.end());
+}
 
 #if 0
 void next_node(node& n,node* p,int mode,node* t) {

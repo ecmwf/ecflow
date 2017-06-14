@@ -30,7 +30,7 @@ TriggerTableView::TriggerTableView(QWidget* parent) :
     model_(NULL),
     needItemsLayout_(false)
 {
-    setProperty("view","query");
+    setProperty("view","trigger");
 
     actionHandler_=new ActionHandler(this);
 
@@ -83,12 +83,7 @@ void TriggerTableView::setModel(TriggerTableModel* model)
 {
     Q_ASSERT(model_==0);
     model_=model;
-    QTreeView::setModel(model);
-
-    //Set the width of the first column
-    QFont f;
-    QFontMetrics fm(f);
-    setColumnWidth(0,fm.width("TTT"));
+    QTreeView::setModel(model);  
 }
 
 void TriggerTableView::enableContextMenu(bool enable)
@@ -202,8 +197,13 @@ void TriggerTableView::getListOfSelectedNodes(std::vector<VInfo_ptr> &nodeList)
 }
 #endif
 
-void TriggerTableView::slotDoubleClickItem(const QModelIndex&)
-{
+void TriggerTableView::slotDoubleClickItem(const QModelIndex& index)
+{    
+    VInfo_ptr info=model_->nodeInfo(index);
+    if(info)
+    {
+        Q_EMIT linkSelected(info);
+    }
 }
 
 void TriggerTableView::slotContextMenu(const QPoint &position)
@@ -238,17 +238,12 @@ void TriggerTableView::handleContextMenu(QModelIndex indexClicked,QModelIndexLis
     }
 }
 
-void TriggerTableView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
+void TriggerTableView::slotViewCommand(VInfo_ptr info,QString cmd)
 {
-
-    if(nodeLst.size() == 0)
-        return;
-
-    /*if(cmd == "set_as_root")
+    if(cmd == "lookup")
     {
-        model_->setRootNode(nodeLst.at(0)->node());
-        expandAll();
-    }*/
+        Q_EMIT linkSelected(info);
+    }
 }
 
 void TriggerTableView::reload()

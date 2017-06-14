@@ -59,6 +59,8 @@ public:
     void clear();
 	void setCurrent(const std::string& name);
     void linkSelected(VInfo_ptr);
+    void relayInfoPanelCommand(VInfo_ptr info,QString cmd);
+    void relayDashboardCommand(VInfo_ptr info,QString cmd);
 
     void populateDialog();
 

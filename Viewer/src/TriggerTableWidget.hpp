@@ -21,7 +21,6 @@ class TriggerTableModel;
 class TriggerTableCollector;
 class TriggerItemWidget;
 
-
 class TriggerTableWidget : public QWidget, private Ui::triggerTableWidget
 {
 	Q_OBJECT
@@ -43,16 +42,19 @@ protected Q_SLOTS:
     void slotTriggerSelection(TriggerTableItem* item);
     void slotTriggeredSelection(TriggerTableItem* item);
     void on_depInfoCloseTb__clicked();
+    void anchorClicked(const QUrl& link);
 
 Q_SIGNALS:
+    void linkSelected(VInfo_ptr);
+    void infoPanelCommand(VInfo_ptr,QString);
+    void dashboardCommand(VInfo_ptr,QString);
     void depInfoWidgetClosureRequested();
 
 private:
     VInfo_ptr info_;
-    TriggerTableCollector* triggerCollector_;
-    TriggerTableCollector* triggeredCollector_;
     TriggerTableModel *triggerModel_;
     TriggerTableModel *triggeredModel_;
+    TriggerTableItem* lastSelectedItem_;
     QString depLabelText_;
 };
 

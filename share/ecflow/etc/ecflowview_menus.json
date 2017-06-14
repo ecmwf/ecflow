@@ -49,6 +49,18 @@
     "menu_items" :
     [
 
+        {
+            "menu"           : "Node",
+            "name"           : "Lookup in tree",
+            "command"        : "lookup",
+            "handler"        : "trigger",
+            "view"           : "trigger"
+        },
+
+        {
+             "menu"           : "Node",
+             "name"           : "-"
+        },
 
         {
             "menu"           : "Node",

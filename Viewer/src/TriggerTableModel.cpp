@@ -147,28 +147,6 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
 	VItem *t=items[row]->item();
     Q_ASSERT(t);
 
-#if 0
-    if(index.column() == 0)
-    {
-        if(role == Qt::DisplayRole)
-        {
-            const std::set<TriggerCollector::Mode>&  modes=items[row]->modes();
-            std::string s;
-            s+=(modes.find(TriggerCollector::Normal) != modes.end())?"d":"";
-            s+=(modes.find(TriggerCollector::Parent) != modes.end())?"p":"";
-            s+=(modes.find(TriggerCollector::Child) != modes.end())?"c":"";
-            return QString::fromStdString(s);
-        }
-        else if (role == Qt::ForegroundRole)
-        {
-            return QColor(90,90,90);
-        }
-        else if (role == Qt::ToolTipRole)
-        {
-            return QVariant();
-        }
-    }
-#endif
     if(index.column() == 0)
     {
         if(VAttribute* a=t->isAttribute())
@@ -239,17 +217,9 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
         const std::set<TriggerCollector::Mode>&  modes=items[row]->modes();
         if(modes.find(TriggerCollector::Normal) != modes.end())
             return QVariant();
-#if 0
-        else if(modes.find(TriggerCollector::Parent) != modes.end())
-            //return QColor(244,252,255);
-            return QColor(251,250,250);
-        else if(modes.find(TriggerCollector::Child) != modes.end())
-            //return QColor(237,249,255);
-#endif
         else
             return QColor(239,240,240);
     }
-
 
 	return QVariant();
 }

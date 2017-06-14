@@ -18,6 +18,11 @@
 
 #include <QActionGroup>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#endif
+
+
 //========================================================
 //
 // TriggerItemWidget
@@ -30,20 +35,6 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 
     messageLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
-
-    //View mode
-    modeAg_=new QActionGroup(this);
-    modeAg_->addAction(actionTextMode_);
-    modeAg_->addAction(actionTableMode_);
-
-    //textTb_->setDefaultAction(actionTextMode_);
-    //tableTb_->setDefaultAction(actionTableMode_);
-
-    connect(modeAg_,SIGNAL(triggered(QAction*)),
-            this,SLOT(slotViewMode(QAction*)));
-
-    //textTb_->hide();
-    //graphTb_->hide();
 
     dependInfoTb_->setChecked(false);
     on_dependInfoTb__toggled(false);
@@ -68,9 +59,18 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     connect(triggerTable_,SIGNAL(depInfoWidgetClosureRequested()),
             this,SLOT(slotHandleDefInfoWidgetClosure()));
 
+    connect(triggerTable_,SIGNAL(linkSelected(VInfo_ptr)),
+            this,SLOT(slotLinkSelected(VInfo_ptr)));
+
+    connect(triggerTable_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+        this,SLOT(slotInfoPanelCommand(VInfo_ptr,QString)));
+
+    connect(triggerTable_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+        this,SLOT(slotDashboardCommand(VInfo_ptr,QString)));
+
     //The collectors
-    tgCollector_=new TriggerTableCollector(false);
-    tgdCollector_=new TriggerTableCollector(false);
+    triggerCollector_=new TriggerTableCollector(false);
+    triggeredCollector_=new TriggerTableCollector(false);
 
     //Scanner
     scanner_=new TriggeredScanner(this);
@@ -83,9 +83,13 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 
     connect(scanner_,SIGNAL(scanProgressed(int)),
             this,SLOT(scanProgressed(int)));
+}
 
-   //textBrowser_->setOwner(this);
-   // textBrowser_->hide();
+TriggerItemWidget::~TriggerItemWidget()
+{
+    clearContents();
+    delete triggerCollector_;
+    delete triggeredCollector_;
 }
 
 QWidget* TriggerItemWidget::realWidget()
@@ -110,21 +114,18 @@ void TriggerItemWidget::reload(VInfo_ptr info)
 
     //Info must be a node
     load();
-
-#if 0
-    if(info_ && info_->isNode() && info_->node())
-    {
-        textBrowser_->load();
-    }
-#endif
 }
 
 void TriggerItemWidget::load()
 {
     if(info_ && info_->isNode() && info_->node())
     {
-        VNode *n=info_->node();
+        VNode* n=info_->node();
         Q_ASSERT(n);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
 
         //Display trigger expression
         std::string te,ce;
@@ -137,14 +138,18 @@ void TriggerItemWidget::load()
         triggerTable_->beginTriggerUpdate();
 
         //collect the list of triggers of this node
-        tgCollector_->setDependency(dependency());
-        n->triggers(tgCollector_);
+        triggerCollector_->setDependency(dependency());
+        n->triggers(triggerCollector_);
 
-        tgdCollector_->setDependency(dependency());
-        n->triggered(tgdCollector_,triggeredScanner());
+        triggeredCollector_->setDependency(dependency());
+        n->triggered(triggeredCollector_,triggeredScanner());
 
-        triggerTable_->setTriggerCollector(tgCollector_,tgdCollector_);
+        triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
         triggerTable_->endTriggerUpdate();
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
     }
 }
 
@@ -152,7 +157,10 @@ void TriggerItemWidget::clearContents()
 {
     InfoPanelItem::clear();
     triggerTable_->clear();
-    //textBrowser_->clear();
+
+    //At this point the tables are cleared so it is safe to clear the collectors
+    triggerCollector_->clear();
+    triggeredCollector_->clear();
 }
 
 void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
@@ -198,22 +206,27 @@ void TriggerItemWidget::on_exprTb__toggled(bool b)
     exprTe_->setVisible(b);
 }
 
-void TriggerItemWidget::slotViewMode(QAction* ac)
-{
-    /*if(ac == actionTextMode_)
-    {
-        textBrowser_->setTextMode();
-    }
-    else if(ac == actionTableMode_)
-    {
-        textBrowser_->setTableMode();
-    }*/
-}
-
 bool TriggerItemWidget::dependency() const
 {
     return dependTb_->isChecked();
 }
+
+
+void TriggerItemWidget::slotLinkSelected(VInfo_ptr info)
+{
+   InfoPanelItem::linkSelected(info);
+}
+
+void TriggerItemWidget::slotInfoPanelCommand(VInfo_ptr info,QString cmd)
+{
+    InfoPanelItem::relayInfoPanelCommand(info,cmd);
+}
+
+void TriggerItemWidget::slotDashboardCommand(VInfo_ptr info,QString cmd)
+{
+    InfoPanelItem::relayDashboardCommand(info,cmd);
+}
+
 #if 0
 void TriggerItemWidget::infoProgressStart(const std::string& text,int max)
 {

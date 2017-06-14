@@ -45,7 +45,7 @@ public Q_SLOTS:
     void slotSelectItem(const QModelIndex&);
     void slotDoubleClickItem(const QModelIndex&);
     void slotContextMenu(const QPoint &position);
-    void slotViewCommand(std::vector<VInfo_ptr>,QString);
+    void slotViewCommand(VInfo_ptr,QString);
     void slotSetCurrent(VInfo_ptr);
     void slotRerender();
     void slotSizeHintChangedGlobal();
@@ -53,9 +53,10 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void selectionChanged(TriggerTableItem*);
-    void selectionChanged(VInfo_ptr);
+    void linkSelected(VInfo_ptr);
     void selectionChanged();
     void infoPanelCommand(VInfo_ptr,QString);
+    void dashboardCommand(VInfo_ptr,QString);
 
 protected:
     QModelIndexList selectedList();

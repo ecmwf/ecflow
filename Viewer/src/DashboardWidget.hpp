@@ -63,6 +63,8 @@ Q_SIGNALS:
     void titleUpdated(QString,QString type=QString());
     void selectionChanged(VInfo_ptr);
     void maximisedChanged(DashboardWidget*);
+    void popInfoPanel(VInfo_ptr,QString);
+    void dashboardCommand(VInfo_ptr,QString);
 
 protected Q_SLOTS:
     void slotDetachedToggled(bool);
