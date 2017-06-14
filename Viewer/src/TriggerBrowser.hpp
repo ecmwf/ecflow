@@ -22,6 +22,7 @@ class QPlainTextEdit;
 class Highlighter;
 class TriggerItemWidget;
 class TriggerListCollector;
+class TriggerTableCollector;
 
 class TriggerBrowser : public QWidget, protected Ui::TriggerBrowser
 {
@@ -58,6 +59,8 @@ private:
     QPlainTextEdit* exprTe_;
     Highlighter* exprHighlight_;
     TriggerListCollector* triggerCollector_;
+    TriggerTableCollector* tgCollector_;
+    TriggerTableCollector* tgdCollector_;
 };
 
 #endif // TRIGGERBROWSER_HPP

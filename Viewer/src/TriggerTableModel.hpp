@@ -8,8 +8,8 @@
 //
 //============================================================================
 
-#ifndef VIEWER_SRC_TRIGGERGRAPHMODEL_HPP_
-#define VIEWER_SRC_TRIGGERGRAPHMODEL_HPP_
+#ifndef VIEWER_SRC_TRIGGERTABLEMODEL_HPP_
+#define VIEWER_SRC_TRIGGERTABLEMODEL_HPP_
 
 #include <QAbstractItemModel>
 #include <QColor>
@@ -20,13 +20,21 @@
 class ModelColumn;
 class NodeQueryResult;
 
-class TriggerGraphModel : public QAbstractItemModel
+class TriggerTableModel : public QAbstractItemModel
 {
 Q_OBJECT
 
 public:
-    explicit TriggerGraphModel(QObject *parent=0);
-    ~TriggerGraphModel();
+    enum Mode {TriggerMode,TriggeredMode};
+
+    explicit TriggerTableModel(Mode mode,QObject *parent=0);
+    ~TriggerTableModel();
+
+    //The custom roles must be the same value as in AbstractNodeModel.hpp because the
+    //core delegate was written to handle the custom roles it defines!
+    enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
+                         NodeTypeRole = Qt::UserRole + 13,
+                         NodeTypeForegroundRole = Qt::UserRole + 14};
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -38,8 +46,8 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-    TriggerListCollector* triggerCollector() const {return tc_;}
-    void setTriggerCollector(TriggerListCollector *tc);
+    TriggerTableCollector* triggerCollector() const {return tc_;}
+    void setTriggerCollector(TriggerTableCollector *tc);
 
     //TriggerListCollector *triggers() const {return tc_;}
    	void clearData();
@@ -49,6 +57,7 @@ public:
     void beginUpdate();
     void endUpdate();
 
+    TriggerTableItem* indexToItem(const QModelIndex&) const;
     VInfo_ptr nodeInfo(const QModelIndex&);
     QModelIndex infoToIndex(VInfo_ptr);
 
@@ -66,8 +75,9 @@ public Q_SLOTS:
     void slotStateChanged(const VNode*,int,int);
 
 protected:
-	TriggerListCollector* tc_;
+    TriggerTableCollector* tc_;
 	ModelColumn* columns_;
+    Mode mode_;
 };
 
-#endif /* VIEWER_SRC_TRIGGERGRAPHMODEL_HPP_ */
+#endif /* VIEWER_SRC_TRIGGERTABLEMODEL_HPP_ */

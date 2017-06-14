@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
    <property name="spacing">
     <number>1</number>
    </property>
@@ -26,19 +26,25 @@
    <property name="rightMargin">
     <number>0</number>
    </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QToolButton" name="tableTb_">
+      <widget class="QToolButton" name="exprTb_">
+       <property name="toolTip">
+        <string>Show trigger expression</string>
+       </property>
        <property name="text">
         <string>graphics</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="textTb_">
-       <property name="text">
-        <string>Text</string>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/expression.svg</normaloff>:/viewer/expression.svg</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -57,8 +63,35 @@
      </item>
      <item>
       <widget class="QToolButton" name="dependTb_">
+       <property name="toolTip">
+        <string>Show dependencies (with darker background)</string>
+       </property>
        <property name="text">
         <string>Dependencies</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/dependency.svg</normaloff>:/viewer/dependency.svg</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="dependInfoTb_">
+       <property name="toolTip">
+        <string>Show dependency details</string>
+       </property>
+       <property name="text">
+        <string>Text</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/dependency_detail.svg</normaloff>:/viewer/dependency_detail.svg</iconset>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -71,10 +104,10 @@
     <widget class="MessageLabel" name="messageLabel_" native="true"/>
    </item>
    <item>
-    <widget class="TriggerBrowser" name="textBrowser_" native="true"/>
+    <widget class="QPlainTextEdit" name="exprTe_"/>
    </item>
    <item>
-    <widget class="TriggerView" name="triggerView_"/>
+    <widget class="TriggerTableWidget" name="triggerTable_" native="true"/>
    </item>
   </layout>
   <action name="actionTextMode_">
@@ -102,17 +135,14 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>TriggerView</class>
-   <extends>QGraphicsView</extends>
-   <header>TriggerView.hpp</header>
-  </customwidget>
-  <customwidget>
-   <class>TriggerBrowser</class>
+   <class>TriggerTableWidget</class>
    <extends>QWidget</extends>
-   <header>TriggerBrowser.hpp</header>
+   <header>TriggerTableWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

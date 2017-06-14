@@ -79,3 +79,119 @@ bool TriggeredCollector::add(VItem* trigger, VItem*,Mode)
     //    trigger->parent()->addTriggeredData(node_,trigger);
 }
 
+const std::set<TriggerCollector::Mode>& TriggerTableItem::modes() const
+{
+    if(modes_.empty())
+    {
+        for(std::size_t i=0; i < deps_.size(); i++)
+        {
+            modes_.insert(deps_[i].mode());
+        }
+    }
+    return modes_;
+}
+
+//=====================================
+// TriggerTableCollector
+//=====================================
+
+TriggerTableCollector::~TriggerTableCollector()
+{
+    clear();
+}
+
+bool TriggerTableCollector::add(VItem* trigger, VItem* dep,Mode mode)
+{
+    TriggerTableItem *item=0;
+    for(std::size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i]->item() == trigger)
+        {
+            item=items_[i];
+            break;
+        }
+    }
+
+    if(!item)
+    {
+        item=new TriggerTableItem(trigger) ;
+        items_.push_back(item);
+    }
+
+    item->addDependency(dep,mode);
+    return true;
+}
+
+void TriggerTableCollector::setDependency(bool b)
+{
+    extended_=b;
+    clear();
+}
+
+void TriggerTableCollector::clear()
+{
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        delete items_[i];
+    }
+    items_.clear();
+}
+
+
+
+#if 0
+void next_node(node& n,node* p,int mode,node* t) {
+    t_.relation(&n,g_,p,mode,t);
+    n_++;
+}
+
+void graph_layout::relation(node* from, node* to,
+                node* through, int mode,node *trigger)
+{
+  graph_node* from_g    = get_graph_node(from);
+  graph_node* to_g      = get_graph_node(to);
+
+  from_g->relation(to_g);
+
+  node_relation* n = (node_relation*)from_g->relation_data(to_g);
+  while(n)
+    {
+      if(n->trigger_ == trigger &&
+     n->through_ == through &&
+     n->mode_    == mode)
+    break;
+
+      n = n->next_;
+    }
+
+  if(n == 0) {
+
+    n = new node_relation(trigger,through,mode);
+    relations_.add(n);
+
+    void* x = from_g->relation_data(to_g,n);
+        if(x) n->next_ = (node_relation*)x;
+  }
+
+  switch(mode)
+    {
+    case trigger_lister::normal:
+      break;
+
+    case trigger_lister::child:
+      /* from_g->relation_gc(to_g,gui::colorGC(STATUS_SUBMITTED)); */
+      from_g->relation_gc(to_g,gui::blueGC());
+      break;
+
+    case trigger_lister::parent:
+      //from_g->relation_gc(to_g,gui::colorGC(STATUS_COMPLETE));
+      from_g->relation_gc(to_g,gui::blueGC());
+      break;
+
+    case trigger_lister::hierarchy:
+      from_g->relation_gc(to_g,gui::colorGC(STATUS_ABORTED));
+      break;
+    }
+}
+
+#endif

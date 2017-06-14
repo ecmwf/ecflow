@@ -20,6 +20,7 @@
 
 class QActionGroup;
 class TriggeredScanner;
+class TriggerTableCollector;
 
 class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::TriggerItemWidget
 {
@@ -44,10 +45,13 @@ public:
 
 protected Q_SLOTS:
     void on_dependTb__toggled(bool);
+    void on_dependInfoTb__toggled(bool b);
+    void on_exprTb__toggled(bool b);
     void slotViewMode(QAction*);
     void scanStarted();
     void scanFinished();
     void scanProgressed(int);
+    void slotHandleDefInfoWidgetClosure();
 
 protected:
     void load();
@@ -55,8 +59,10 @@ protected:
     TriggeredScanner* triggeredScanner() const {return scanner_;}
     void checkActionState();
 
+    TriggerTableCollector* tgCollector_;
+    TriggerTableCollector* tgdCollector_;
     TriggeredScanner *scanner_;
-    QActionGroup* modeAg_;
+    QActionGroup* modeAg_;   
 };
 
 #endif

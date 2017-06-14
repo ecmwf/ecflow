@@ -9,6 +9,8 @@
 
 #include "TriggerItemWidget.hpp"
 
+#include "Highlighter.hpp"
+#include "TriggerCollector.hpp"
 #include "TriggerView.hpp"
 #include "TriggeredScanner.hpp"
 #include "VNode.hpp"
@@ -34,22 +36,44 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     modeAg_->addAction(actionTextMode_);
     modeAg_->addAction(actionTableMode_);
 
-    textTb_->setDefaultAction(actionTextMode_);
-    tableTb_->setDefaultAction(actionTableMode_);
+    //textTb_->setDefaultAction(actionTextMode_);
+    //tableTb_->setDefaultAction(actionTableMode_);
 
     connect(modeAg_,SIGNAL(triggered(QAction*)),
             this,SLOT(slotViewMode(QAction*)));
 
     //textTb_->hide();
     //graphTb_->hide();
-    triggerView_->hide();
+
+    dependInfoTb_->setChecked(false);
+    on_dependInfoTb__toggled(false);
+
+    //Expression
+    exprTb_->setChecked(true);
+
+    Highlighter* ih=new Highlighter(exprTe_->document(),"trigger");
+    exprTe_->setReadOnly(true);
+    exprTe_->setBackgroundVisible(true);
+
+    //Set the height of the trigger expression display area
+    QFont fTe;
+    fTe.setBold(true);
+    QFontMetrics fm(fTe);
+    exprTe_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    exprTe_->setFixedHeight(fm.size(0,"A\nA\nA").height()+fm.height()/2);
 
     //Dependencies
     dependTb_->setChecked(false);
 
+    connect(triggerTable_,SIGNAL(depInfoWidgetClosureRequested()),
+            this,SLOT(slotHandleDefInfoWidgetClosure()));
+
+    //The collectors
+    tgCollector_=new TriggerTableCollector(false);
+    tgdCollector_=new TriggerTableCollector(false);
+
     //Scanner
     scanner_=new TriggeredScanner(this);
-
 
     connect(scanner_,SIGNAL(scanStarted()),
             this,SLOT(scanStarted()));
@@ -60,7 +84,8 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     connect(scanner_,SIGNAL(scanProgressed(int)),
             this,SLOT(scanProgressed(int)));
 
-    textBrowser_->setOwner(this);
+   //textBrowser_->setOwner(this);
+   // textBrowser_->hide();
 }
 
 QWidget* TriggerItemWidget::realWidget()
@@ -78,35 +103,64 @@ void TriggerItemWidget::reload(VInfo_ptr info)
     clearContents();
 
     info_=info;
+
+    triggerTable_->setInfo(info_);
+
     //messageLabel_->hide();
 
     //Info must be a node
+    load();
+
+#if 0
     if(info_ && info_->isNode() && info_->node())
     {
         textBrowser_->load();
     }
+#endif
 }
 
 void TriggerItemWidget::load()
 {
     if(info_ && info_->isNode() && info_->node())
-    {        
-        textBrowser_->load();
+    {
+        VNode *n=info_->node();
+        Q_ASSERT(n);
+
+        //Display trigger expression
+        std::string te,ce;
+        n->triggerExpr(te,ce);
+        QString txt=QString::fromStdString(te);
+        if(txt.isEmpty()) txt=tr("No trigger expression is available for the selected node!");
+        exprTe_->setPlainText(txt);
+
+        //Load table
+        triggerTable_->beginTriggerUpdate();
+
+        //collect the list of triggers of this node
+        tgCollector_->setDependency(dependency());
+        n->triggers(tgCollector_);
+
+        tgdCollector_->setDependency(dependency());
+        n->triggered(tgdCollector_,triggeredScanner());
+
+        triggerTable_->setTriggerCollector(tgCollector_,tgdCollector_);
+        triggerTable_->endTriggerUpdate();
     }
 }
 
 void TriggerItemWidget::clearContents()
 {
     InfoPanelItem::clear();
-    textBrowser_->clear();
+    triggerTable_->clear();
+    //textBrowser_->clear();
 }
 
 void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
     if(flags.isSet(SuspendedChanged))
     {
-        if(suspended_)
-           textBrowser_->suspend();
+        //if(suspended_)
+        //   textBrowser_->suspend();
     }
 
     checkActionState();
@@ -128,16 +182,32 @@ void TriggerItemWidget::on_dependTb__toggled(bool)
     load();
 }
 
+void TriggerItemWidget::on_dependInfoTb__toggled(bool b)
+{
+    triggerTable_->slotShowDependencyInfo(b);
+}
+
+void TriggerItemWidget::slotHandleDefInfoWidgetClosure()
+{
+    dependInfoTb_->setChecked(false);
+}
+
+
+void TriggerItemWidget::on_exprTb__toggled(bool b)
+{
+    exprTe_->setVisible(b);
+}
+
 void TriggerItemWidget::slotViewMode(QAction* ac)
 {
-    if(ac == actionTextMode_)
+    /*if(ac == actionTextMode_)
     {
         textBrowser_->setTextMode();
     }
     else if(ac == actionTableMode_)
     {
         textBrowser_->setTableMode();
-    }
+    }*/
 }
 
 bool TriggerItemWidget::dependency() const
@@ -209,7 +279,7 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
         if(*it == ecf::Aspect::ADD_REMOVE_ATTR || *it == ecf::Aspect::NODE_VARIABLE ||
             *it == ecf::Aspect::EXPR_TRIGGER || *it == ecf::Aspect::EXPR_COMPLETE)
         {
-            textBrowser_->nodeChanged(n);
+            //textBrowser_->nodeChanged(n);
             return;
         }
     }

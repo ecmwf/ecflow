@@ -254,6 +254,27 @@ VInfo_ptr VInfo::createFromPath(const std::string& path)
     return VInfo_ptr();
 }
 
+VInfo_ptr VInfo::createFromItem(VItem* item)
+{
+    if(!item)
+        return VInfo_ptr();
+
+    if(VServer* s=item->isServer())
+    {
+        return VInfoServer::create(s->server());
+    }
+    else if(VNode* n=item->isNode())
+    {
+        return VInfoNode::create(n);
+    }
+    else if(VAttribute* a=item->isAttribute())
+    {
+        return VInfoAttribute::create(a);
+    }
+
+    return VInfo_ptr();
+}
+
 //=========================================
 //
 // VInfoServer

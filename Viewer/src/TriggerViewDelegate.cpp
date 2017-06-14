@@ -62,7 +62,8 @@ struct TriggerAttrDelegateBox : public AttrDelegateBox
 TriggerViewDelegate::TriggerViewDelegate(QWidget *parent) :
     TreeNodeViewDelegateBase(0,parent)
 {
-    borderPen_=QPen(QColor(230,230,230));
+    //borderPen_=QPen(QColor(230,230,230));
+    borderPen_=QPen(QColor(220,220,220));
 
     nodeBox_=new TriggerNodeDelegateBox;
     attrBox_=new TriggerAttrDelegateBox;
@@ -119,42 +120,82 @@ QSize TriggerViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelInd
 void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
-    //Background
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QStyleOptionViewItem vopt(option);
+#else
+    QStyleOptionViewItemV4 vopt(option);
+#endif
+
     initStyleOption(&vopt, index);
+
+    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
+    const QWidget* widget = vopt.widget;
 
     //Save painter state
     painter->save();
 
-    QVariant tVar=index.data(Qt::DisplayRole);
-    painter->setFont(font_);
+    //Background
+    QColor bgcol=index.data(Qt::UserRole).value<QColor>();
+    if(bgcol.isValid())
+        painter->fillRect(vopt.rect,bgcol);
 
-    //Node
-    if(tVar.type() == QVariant::String)
+    if(index.column() == 0)
     {
-        QString text=index.data(Qt::DisplayRole).toString();
+        QVariant tVar=index.data(Qt::DisplayRole);
+        painter->setFont(font_);
+
+        //Node
+        if(tVar.type() == QVariant::String)
+        {
+            QString text=index.data(Qt::DisplayRole).toString();
         //if(index.data(AbstractNodeModel::ServerRole).toInt() ==0)
         //{
         //    //renderServer(painter,index,vopt,text);
         //}
         //else
         //{
-            renderNode(painter,index,vopt,text);
+                renderNode(painter,index,vopt,text);
        // }
+        }
+
+        //Render attributes
+        else if(tVar.type() == QVariant::StringList)
+        {
+            QStringList lst=tVar.toStringList();
+            if(lst.count() > 0)
+            {
+                QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
+                if(it != attrRenderers_.end())
+                {
+                    AttributeRendererProc a=it.value();
+                        (this->*a)(painter,lst,vopt);
+                }
+            }
+        }
     }
 
-    //Render attributes
-    else if(tVar.type() == QVariant::StringList)
+    //rest of the columns
+    else
     {
-        QStringList lst=tVar.toStringList();
-        if(lst.count() > 0)
+        QString text=index.data(Qt::DisplayRole).toString();
+        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
+        textRect.adjust(2,0,0,0);
+        QColor tcol=index.data(Qt::ForegroundRole).value<QColor>();
+        painter->setPen(tcol);
+
+        int rightPos=textRect.right()+1;
+        const bool setClipRect = rightPos > option.rect.right();
+        if(setClipRect)
         {
-            QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
-            if(it != attrRenderers_.end())
-            {
-                AttributeRendererProc a=it.value();
-                (this->*a)(painter,lst,vopt);
-            }
+            painter->save();
+            painter->setClipRect(option.rect);
+        }
+
+        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+        if(setClipRect)
+        {
+            painter->restore();
         }
     }
 
@@ -166,8 +207,5 @@ void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &op
     painter->drawLine(bgRect.topLeft(),bgRect.topRight());
 
     painter->restore();
-
-    //else
-    //	QStyledItemDelegate::paint(painter,option,index);
 }
 

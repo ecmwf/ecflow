@@ -12,10 +12,20 @@
 
 #include <QTextBrowser>
 
+class TriggerTableItem;
+
 class TriggerTextWidget : public QTextBrowser
 {
+Q_OBJECT
+
 public:
     explicit TriggerTextWidget(QWidget *parent=0);
+
+public Q_SLOTS:
+    void reload(TriggerTableItem* item);
+
+private:
+    QString makeHtml(TriggerTableItem *ti,QString directTitle,QString modeText) const;
 };
 
 #endif

@@ -26,6 +26,7 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
 {
     setupUi(this);
 
+#if 0
     Highlighter* ih=new Highlighter(triggerTe_->document(),"trigger");
     triggerTe_->setReadOnly(true);
     triggerTe_->setBackgroundVisible(true);
@@ -36,7 +37,18 @@ TriggerBrowser::TriggerBrowser(QWidget *parent) : QWidget(parent), owner_(0)
     exprTe_->hide();
     exprHighlight_=new Highlighter(exprTe_->document(),"trigger");
 
+    //Set the height of the trigger expression display area
+    QFont fTe;
+    fTe.setBold(true);
+    QFontMetrics fm(fTe);
+    triggerTe_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    triggerTe_->setFixedHeight(fm.size(0,"A\nA\nA").height()+fm.height()/2);
+
+#endif
     triggerCollector_=new TriggerListCollector(false);
+
+    tgCollector_=new TriggerTableCollector(false);
+    tgdCollector_=new TriggerTableCollector(false);
 
     Q_ASSERT(stacked_->count() == 2);
     stacked_->setCurrentIndex(panelIndexToInt(TablePanelIndex));
@@ -66,6 +78,8 @@ TriggerBrowser::~TriggerBrowser()
 {
     clear();
     delete triggerCollector_;
+    delete tgCollector_;
+    delete tgdCollector_;
 }
 
 void TriggerBrowser::setOwner(TriggerItemWidget* owner)
@@ -127,23 +141,27 @@ void TriggerBrowser::loadTriggerGraphTab(bool forceLoad)
 
     //Q_EMIT triggerUpdateBegin();
 
-
-    triggerGraph_->beginTriggerUpdate();
-
     VNode *n=owner_->info()->node();
     Q_ASSERT(n);
 
     // put the trigger expression into the text box in the middle
     std::string te,ce;
     n->triggerExpr(te,ce);
-    triggerGraph_->setTriggerExpression(te);
+    //triggerGraph_->setTriggerExpression(te);
 
+#if 0
     triggerTe_->setPlainText(QString::fromStdString(te));
+#endif
+    triggerGraph_->beginTriggerUpdate();
 
     // collect the list of triggers of this node        
-    triggerCollector_->setDependency(owner_->dependency());
-    n->triggers(triggerCollector_);
-    triggerGraph_->setTriggerCollector(triggerCollector_);
+    tgCollector_->setDependency(owner_->dependency());
+    n->triggers(tgCollector_);
+
+    tgdCollector_->setDependency(owner_->dependency());
+    n->triggered(tgdCollector_,owner_->triggeredScanner());
+
+    triggerGraph_->setTriggerCollector(tgCollector_,tgdCollector_);
 
     triggerGraph_->endTriggerUpdate();
 

@@ -969,7 +969,7 @@ void VNode::triggers(TriggerCollector* tlc)
                 if(VAttribute* n = findLimit(val, a->strName()))
                 {
 #ifdef _UI_VNODE_DEBUG
-                    UiLog().dbg() << "trigger limit: " << n->name();
+                    //UiLog().dbg() << "trigger limit: " << n->name();
 #endif                   
                     tlc->add(n,nullItem, TriggerCollector::Normal);
                 }
