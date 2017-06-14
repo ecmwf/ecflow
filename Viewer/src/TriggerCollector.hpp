@@ -166,6 +166,7 @@ public:
     size_t size() const {return items_.size();}
 
     bool contains(TriggerTableItem*) const;
+    bool contains(const VNode*,bool attrParents=true) const;
     const std::vector<TriggerTableItem*>& items() const {return items_;}
 
 protected:

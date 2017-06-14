@@ -10,6 +10,7 @@
 #include "TriggerCollector.hpp"
 
 #include "UiLog.hpp"
+#include "VAttribute.hpp"
 #include "VItem.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
@@ -144,59 +145,22 @@ bool TriggerTableCollector::contains(TriggerTableItem* item) const
     return (std::find(items_.begin(),items_.end(), item) != items_.end());
 }
 
-#if 0
-void next_node(node& n,node* p,int mode,node* t) {
-    t_.relation(&n,g_,p,mode,t);
-    n_++;
-}
-
-void graph_layout::relation(node* from, node* to,
-                node* through, int mode,node *trigger)
+bool TriggerTableCollector::contains(const VNode* node,bool attrParents) const
 {
-  graph_node* from_g    = get_graph_node(from);
-  graph_node* to_g      = get_graph_node(to);
-
-  from_g->relation(to_g);
-
-  node_relation* n = (node_relation*)from_g->relation_data(to_g);
-  while(n)
+    for(size_t i=0; i < items_.size(); i++)
     {
-      if(n->trigger_ == trigger &&
-     n->through_ == through &&
-     n->mode_    == mode)
-    break;
+        if(VItem* it=items_[i]->item())
+        {
+            if(VNode *n=it->isNode())
+                if(n == node)
+                    return true;
+            else if(attrParents)
+                if (VAttribute *a=it->isAttribute())
+                    if(a->parent() == node)
+                        return true;
+        }
 
-      n = n->next_;
     }
 
-  if(n == 0) {
-
-    n = new node_relation(trigger,through,mode);
-    relations_.add(n);
-
-    void* x = from_g->relation_data(to_g,n);
-        if(x) n->next_ = (node_relation*)x;
-  }
-
-  switch(mode)
-    {
-    case trigger_lister::normal:
-      break;
-
-    case trigger_lister::child:
-      /* from_g->relation_gc(to_g,gui::colorGC(STATUS_SUBMITTED)); */
-      from_g->relation_gc(to_g,gui::blueGC());
-      break;
-
-    case trigger_lister::parent:
-      //from_g->relation_gc(to_g,gui::colorGC(STATUS_COMPLETE));
-      from_g->relation_gc(to_g,gui::blueGC());
-      break;
-
-    case trigger_lister::hierarchy:
-      from_g->relation_gc(to_g,gui::colorGC(STATUS_ABORTED));
-      break;
-    }
+    return false;
 }
-
-#endif

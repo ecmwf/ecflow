@@ -301,7 +301,7 @@ void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<e
 		if(info_->isNode())
 		{
 			//Check if the updated node is handled by the item
-            if(info_->node() == node ||
+            if(handleAnyChange_ || info_->node() == node ||
               (useAncestors_ && info_->node()->isAncestor(node)))
             {
 			    //We call the method implemented in the concrete class 

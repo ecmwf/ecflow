@@ -36,7 +36,7 @@ friend class InfoPanel;
 public:
     InfoPanelItem() : owner_(0), active_(false), selected_(false), suspended_(false),
                       frozen_(false), detached_(false), unselectedFlags_(KeepContents),
-                      useAncestors_(false) {}
+                      useAncestors_(false),handleAnyChange_(false) {}
 	virtual ~InfoPanelItem();
 
     enum ChangeFlag {ActiveChanged=1,SelectedChanged=2,SuspendedChanged=4,FrozenChanged=8,DetachedChanged=16};
@@ -104,6 +104,7 @@ protected:
     bool detached_;
     UnselectedFlags unselectedFlags_;
     bool useAncestors_;
+    bool handleAnyChange_;
 };
 
 class InfoPanelItemFactory

@@ -17,21 +17,20 @@
 #include "VInfo.hpp"
 #include "TriggerCollector.hpp"
 
-class ModelColumn;
+#include "Aspect.hpp"
+
 class NodeQueryResult;
 
 class TriggerTableModel : public QAbstractItemModel
 {
-Q_OBJECT
-
 public:
     enum Mode {TriggerMode,TriggeredMode};
 
     explicit TriggerTableModel(Mode mode,QObject *parent=0);
     ~TriggerTableModel();
 
-    //The custom roles must be the same value as in AbstractNodeModel.hpp because the
-    //core delegate was written to handle the custom roles it defines!
+    //The custom roles must have the same numerical value as in AbstractNodeModel.hpp because the
+    //core delegate was written to only handle the custom roles it defines!
     enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
                          NodeTypeRole = Qt::UserRole + 13,
                          NodeTypeForegroundRole = Qt::UserRole + 14};
@@ -49,11 +48,9 @@ public:
     TriggerTableCollector* triggerCollector() const {return tc_;}
     void setTriggerCollector(TriggerTableCollector *tc);
 
-    //TriggerListCollector *triggers() const {return tc_;}
    	void clearData();
     bool hasData() const;
-    //void addDataStart();
-    //void addDataEnd();
+
     void beginUpdate();
     void endUpdate();
 
@@ -61,22 +58,10 @@ public:
     VInfo_ptr nodeInfo(const QModelIndex&);
     QModelIndex infoToIndex(VInfo_ptr);
 
-public Q_SLOTS:
-    void slotBeginAppendRow();
-    void slotEndAppendRow();
-    void slotBeginAppendRows(int);
-    void slotEndAppendRows(int);
-    void slotBeginRemoveRow(int);
-    void slotEndRemoveRow(int);
-    void slotBeginRemoveRows(int,int);
-    void slotEndRemoveRows(int,int);
-    void slotBeginReset();
-    void slotEndReset();
-    void slotStateChanged(const VNode*,int,int);
+    void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
 
 protected:
     TriggerTableCollector* tc_;
-	ModelColumn* columns_;
     Mode mode_;
 };
 

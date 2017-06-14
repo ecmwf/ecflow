@@ -14,6 +14,8 @@
 #include <QDialog>
 #include "VInfo.hpp"
 
+#include "Aspect.hpp"
+
 #include "ui_TriggerTableWidget.h"
 
 class TriggerTableItem;
@@ -34,6 +36,7 @@ public:
 	void clear();
     void beginTriggerUpdate();
     void endTriggerUpdate();
+    void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
 
 public Q_SLOTS:
     void slotShowDependencyInfo(bool);

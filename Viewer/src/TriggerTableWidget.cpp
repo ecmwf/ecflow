@@ -28,7 +28,7 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
     triggeredLabel_->setProperty("triggertitle","1");
     depLabel_->setProperty("triggertitle","1");
 
-    depLabelText_=tr("&nbsp;Dependency details");
+    depLabelText_=tr(" Dependency details");
     depLabel_->setText(depLabelText_);
 
     //Trigger - model + view
@@ -220,4 +220,10 @@ void TriggerTableWidget::setTriggerCollector(TriggerTableCollector *tc1,TriggerT
 {
     triggerModel_->setTriggerCollector(tc1);
     triggeredModel_->setTriggerCollector(tc2);
+}
+
+void TriggerTableWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+{
+    triggerModel_->nodeChanged(node,aspect);
+    triggeredModel_->nodeChanged(node,aspect);
 }

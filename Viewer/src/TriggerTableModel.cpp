@@ -11,7 +11,6 @@
 #include "TriggerTableModel.hpp"
 
 #include "IconProvider.hpp"
-#include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
@@ -22,48 +21,9 @@
 
 TriggerTableModel::TriggerTableModel(Mode mode,QObject *parent) :
           QAbstractItemModel(parent),
-          tc_(0),
-          columns_(0),
+          tc_(0),      
           mode_(mode)
 {
-    columns_=ModelColumn::def("trigger_graph_columns");
-    assert(columns_);
-/*
-	data_=new NodeQueryResult(this);
-
-	connect(data_,SIGNAL(beginAppendRow()),
-			this,SLOT(slotBeginAppendRow()));
-
-	connect(data_,SIGNAL(endAppendRow()),
-			this,SLOT(slotEndAppendRow()));
-
-	connect(data_,SIGNAL(beginAppendRows(int)),
-			this,SLOT(slotBeginAppendRows(int)));
-
-	connect(data_,SIGNAL(endAppendRows(int)),
-			this,SLOT(slotEndAppendRows(int)));
-
-	connect(data_,SIGNAL(beginRemoveRow(int)),
-			this,SLOT(slotBeginRemoveRow(int)));
-
-	connect(data_,SIGNAL(endRemoveRow(int)),
-			this,SLOT(slotEndRemoveRow(int)));
-
-	connect(data_,SIGNAL(beginRemoveRows(int,int)),
-			this,SLOT(slotBeginRemoveRows(int,int)));
-
-	connect(data_,SIGNAL(endRemoveRows(int,int)),
-			this,SLOT(slotEndRemoveRows(int,int)));
-
-	connect(data_,SIGNAL(beginReset()),
-			this,SLOT(slotBeginReset()));
-
-	connect(data_,SIGNAL(endReset()),
-			this,SLOT(slotEndReset()));
-
-	connect(data_,SIGNAL(stateChanged(const VNode*,int,int)),
-			this,SLOT(slotStateChanged(const VNode*,int,int)));
-*/
 }
 
 TriggerTableModel::~TriggerTableModel()
@@ -306,75 +266,33 @@ TriggerTableItem* TriggerTableModel::indexToItem(const QModelIndex& index) const
     return items[row];
 }
 
-void  TriggerTableModel::slotBeginAppendRow()
+void TriggerTableModel::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&)
 {
-	int num=tc_->items().size();
-	Q_EMIT beginInsertRows(QModelIndex(),num,num);
+    if(!hasData())
+        return;
 
+    int num=tc_->items().size();
+    for(int i=0; i < num; i++)
+    {
+        if(VItem* item=tc_->items()[i]->item())
+        {
+            if(VNode* n=item->isNode())
+            {
+                if(n == node)
+                {
+                    QModelIndex idx=index(i,0);
+                    Q_EMIT dataChanged(idx,idx);
+                }
+            }
 
-	Q_EMIT endInsertRows();
-}
-
-void  TriggerTableModel::slotEndAppendRow()
-{
-	Q_EMIT endInsertRows();
-}
-
-void  TriggerTableModel::slotBeginAppendRows(int n)
-{
-	if(n <= 0)
-		return;
-
-	int num=tc_->items().size();
-	Q_EMIT beginInsertRows(QModelIndex(),num,num+n-1);
-}
-
-void  TriggerTableModel::slotEndAppendRows(int n)
-{
-	if(n <= 0)
-		return;
-	Q_EMIT endInsertRows();
-}
-
-void TriggerTableModel::slotBeginRemoveRow(int row)
-{
-	beginRemoveRows(QModelIndex(),row,row);
-}
-
-void TriggerTableModel::slotEndRemoveRow(int row)
-{
-	endRemoveRows();
-}
-
-void TriggerTableModel::slotBeginRemoveRows(int rowStart,int rowEnd)
-{
-	beginRemoveRows(QModelIndex(),rowStart,rowEnd);
-}
-
-void TriggerTableModel::slotEndRemoveRows(int,int)
-{
-	endRemoveRows();
-}
-
-void TriggerTableModel::slotBeginReset()
-{
-	beginResetModel();
-}
-
-void TriggerTableModel::slotEndReset()
-{
-	endResetModel();
-}
-
-void TriggerTableModel::slotStateChanged(const VNode*,int pos,int cnt)
-{
-	int col=columns_->indexOf("status");
-
-	if(col != -1)
-	{
-		QModelIndex fromIdx=index(pos,col);
-		QModelIndex toIdx=index(pos+cnt-1,col);
-
-		Q_EMIT dataChanged(fromIdx,toIdx);
-	}
+            else if(VAttribute* a=item->isAttribute())
+            {
+                if(a->parent() == node)
+                {                                                                              
+                    QModelIndex idx=index(i,0);
+                    Q_EMIT dataChanged(idx,idx);
+                }
+            }
+        }
+    }
 }

@@ -318,7 +318,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeWidget.hpp    
     TriggerEditor.hpp
     TriggerItemWidget.hpp
-    TriggerTableModel.hpp
     TriggerTableView.hpp
     TriggerTableWidget.hpp
     TriggeredScanner.hpp

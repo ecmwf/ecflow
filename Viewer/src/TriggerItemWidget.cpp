@@ -31,6 +31,9 @@
 
 TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 {
+    //This item will listen to any changes in nodes
+    handleAnyChange_=true;
+
     setupUi(this);
 
     messageLabel_->hide();
@@ -106,7 +109,8 @@ void TriggerItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
-    info_=info;
+    //set the info
+    adjust(info);
 
     triggerTable_->setInfo(info_);
 
@@ -286,16 +290,24 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     if(!info_ || !info_->isNode())
         return;
 
-    //Changes in the nodes
+    //For certain changes we need to rescan the triggers
+    bool checked=false;
     for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
     {
         if(*it == ecf::Aspect::ADD_REMOVE_ATTR || *it == ecf::Aspect::NODE_VARIABLE ||
             *it == ecf::Aspect::EXPR_TRIGGER || *it == ecf::Aspect::EXPR_COMPLETE)
         {
-            //textBrowser_->nodeChanged(n);
-            return;
+            if(triggerCollector_->contains(n,true) || triggeredCollector_->contains(n,true))
+            {
+                load();
+                return;
+            }
+            break;
         }
     }
+
+    //See if there is a change in the collected items
+    triggerTable_->nodeChanged(n,aspect);
 }
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");
