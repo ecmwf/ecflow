@@ -33,8 +33,8 @@ public:
 
 	void rerender();
     bool initialSelectionInView();
-	void writeSettings(VSettings*);
-	void readSettings(VSettings*);
+    void writeSettings(VComboSettings*);
+    void readSettings(VComboSettings*);
 
     void notifyChange(VProperty*);
 

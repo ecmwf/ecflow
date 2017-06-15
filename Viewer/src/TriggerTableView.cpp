@@ -138,16 +138,15 @@ void TriggerTableView::selectionChanged(const QItemSelection &selected, const QI
 void TriggerTableView::slotSelectItem(const QModelIndex&)
 {
     QModelIndexList lst=selectedIndexes();
-#if 0
+
     if(lst.count() > 0)
     {
-        VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(lst.front()));
-        if(info)
+        TriggerTableItem* item=model_->indexToItem(lst.front());
+        if(item && item->item())
         {
-            Q_EMIT selectionChanged(info);
+            Q_EMIT clicked(item);
         }
     }
-#endif
 }
 
 VInfo_ptr TriggerTableView::currentSelection()

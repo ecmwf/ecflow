@@ -23,7 +23,7 @@
 class QWidget;
 class InfoPanel;
 class InfoProvider;
-class VSettings;
+class VComboSettings;
 
 //This is the (abstract) base class to represent one tab in the info panel.
 //It cannot be inheried from QObject beacuse we would end up with double inheritance since
@@ -74,8 +74,8 @@ public:
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) {}
 
-    virtual void writeSettings(VSettings* vs) {}
-    virtual void readSettings(VSettings* vs) {}
+    virtual void writeSettings(VComboSettings* vs) {}
+    virtual void readSettings(VComboSettings* vs) {}
 
 protected:
 	void adjust(VInfo_ptr);

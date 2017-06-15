@@ -13,6 +13,7 @@
 #include "TriggerItemWidget.hpp"
 #include "TriggerTableModel.hpp"
 #include "TriggerViewDelegate.hpp"
+#include "VSettings.hpp"
 
 TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
     QWidget(parent),
@@ -43,8 +44,14 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
     connect(triggerView_,SIGNAL(selectionChanged(TriggerTableItem*)),
             this,SLOT(slotTriggerSelection(TriggerTableItem*)));
 
+    connect(triggerView_,SIGNAL(clicked(TriggerTableItem*)),
+            this,SLOT(slotTriggerClicked(TriggerTableItem*)));
+
     connect(triggeredView_,SIGNAL(selectionChanged(TriggerTableItem*)),
             this,SLOT(slotTriggeredSelection(TriggerTableItem*)));
+
+    connect(triggeredView_,SIGNAL(clicked(TriggerTableItem*)),
+            this,SLOT(slotTriggeredClicked(TriggerTableItem*)));
 
     //lookup selection
     connect(triggerView_,SIGNAL(linkSelected(VInfo_ptr)),
@@ -92,6 +99,14 @@ void TriggerTableWidget::setInfo(VInfo_ptr info)
     info_=info;
 }
 
+void TriggerTableWidget::slotTriggerClicked(TriggerTableItem* item)
+{
+    if(lastSelectedItem_ == item)
+        return;
+    else
+       slotTriggerSelection(item);
+}
+
 void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
 {
     lastSelectedItem_=item;
@@ -126,6 +141,15 @@ void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
 
     depLabel_->setText(txt);
     depBrowser_->reload(item);
+}
+
+
+void TriggerTableWidget::slotTriggeredClicked(TriggerTableItem* item)
+{
+    if(lastSelectedItem_ == item)
+        return;
+    else
+       slotTriggeredSelection(item);
 }
 
 void TriggerTableWidget::slotTriggeredSelection(TriggerTableItem* item)
@@ -226,4 +250,27 @@ void TriggerTableWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 {
     triggerModel_->nodeChanged(node,aspect);
     triggeredModel_->nodeChanged(node,aspect);
+}
+
+
+void TriggerTableWidget::writeSettings(VComboSettings* vs)
+{
+    vs->beginGroup("triggerTable");
+    vs->putQs("splitter1",splitter1_->saveState());
+    vs->putQs("splitter2",splitter2_->saveState());
+    vs->endGroup();
+}
+
+void TriggerTableWidget::readSettings(VComboSettings* vs)
+{
+    vs->beginGroup("triggerTable");
+    if(vs->containsQs("splitter1"))
+    {
+        splitter1_->restoreState(vs->getQs("splitter1").toByteArray());
+    }
+    if(vs->containsQs("splitter2"))
+    {
+        splitter2_->restoreState(vs->getQs("splitter2").toByteArray());
+    }
+    vs->endGroup();
 }

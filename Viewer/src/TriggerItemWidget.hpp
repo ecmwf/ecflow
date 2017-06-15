@@ -41,8 +41,8 @@ public:
 
     bool dependency() const;
 
-    void writeSettings(VSettings* vs);
-    void readSettings(VSettings* vs);
+    void writeSettings(VComboSettings* vs);
+    void readSettings(VComboSettings* vs);
 
 protected Q_SLOTS:
     void on_dependTb__toggled(bool);

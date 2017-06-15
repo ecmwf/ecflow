@@ -22,6 +22,7 @@ class TriggerTableItem;
 class TriggerTableModel;
 class TriggerTableCollector;
 class TriggerItemWidget;
+class VComboSettings;
 
 class TriggerTableWidget : public QWidget, private Ui::triggerTableWidget
 {
@@ -37,13 +38,17 @@ public:
     void beginTriggerUpdate();
     void endTriggerUpdate();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
+    void writeSettings(VComboSettings* vs);
+    void readSettings(VComboSettings* vs);
 
 public Q_SLOTS:
     void slotShowDependencyInfo(bool);
 
 protected Q_SLOTS:
     void slotTriggerSelection(TriggerTableItem* item);
+    void slotTriggerClicked(TriggerTableItem*);
     void slotTriggeredSelection(TriggerTableItem* item);
+    void slotTriggeredClicked(TriggerTableItem*);
     void on_depInfoCloseTb__clicked();
     void anchorClicked(const QUrl& link);
 

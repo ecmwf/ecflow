@@ -259,22 +259,25 @@ void TriggerItemWidget::scanProgressed(int value)
     messageLabel_->progress(QString::fromStdString(text),value);
 }
 
-void TriggerItemWidget::writeSettings(VSettings* vs)
+void TriggerItemWidget::writeSettings(VComboSettings* vs)
 {
-#if 0
     vs->beginGroup("triggers");
     vs->putAsBool("dependency",dependency());
+    vs->putAsBool("dependencyInfo",dependInfoTb_->isChecked());
+    vs->putAsBool("expression",exprTb_->isChecked());
+
+    triggerTable_->writeSettings(vs);
     vs->endGroup();
-#endif
 }
 
-void TriggerItemWidget::readSettings(VSettings* vs)
+void TriggerItemWidget::readSettings(VComboSettings* vs)
 {
-#if 0
     vs->beginGroup("triggers");
     dependTb_->setChecked(vs->getAsBool("dependency",dependency()));
+    dependInfoTb_->setChecked(vs->getAsBool("dependencyInfo",dependInfoTb_->isChecked()));
+    exprTb_->setChecked(vs->getAsBool("expression",exprTb_->isChecked()));
+    triggerTable_->readSettings(vs);
     vs->endGroup();
-#endif
 }
 
 //-------------------------
@@ -286,19 +289,22 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     if(!info_ || !info_->isNode())
         return;
 
-    //For certain changes we need to rescan the triggers
-    bool checked=false;
+    //For certain changes we need to reload the triggers
     for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
     {
-        if(*it == ecf::Aspect::ADD_REMOVE_ATTR || *it == ecf::Aspect::NODE_VARIABLE ||
-            *it == ecf::Aspect::EXPR_TRIGGER || *it == ecf::Aspect::EXPR_COMPLETE)
+        if(*it == ecf::Aspect::ADD_REMOVE_ATTR || *it == ecf::Aspect::EXPR_TRIGGER)
         {
-            if(triggerCollector_->contains(n,true) || triggeredCollector_->contains(n,true))
-            {
-                load();
-                return;
-            }
-            break;
+            load();
+            return;
+        }
+        else if(*it == ecf::Aspect::NODE_VARIABLE || *it == ecf::Aspect::METER || *it == ecf::Aspect::LIMIT ||
+                *it == ecf::Aspect::EVENT)
+        {
+           if(triggerCollector_->contains(n,true) || triggeredCollector_->contains(n,true))
+           {
+               load();
+               return;
+           }
         }
     }
 

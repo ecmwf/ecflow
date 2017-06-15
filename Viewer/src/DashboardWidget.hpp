@@ -21,7 +21,7 @@
 class DashboardDockTitleWidget;
 class NodePathWidget;
 class ServerFilter;
-class VSettings;
+class VComboSettings;
 
 class DashboardWidget : public QWidget
 {
@@ -48,8 +48,8 @@ public:
     void setEnableMaximised(bool st);
     bool isInDialog() const {return inDialog_;}
 
-    virtual void writeSettings(VSettings*);
-    virtual void readSettings(VSettings*);
+    virtual void writeSettings(VComboSettings*);
+    virtual void readSettings(VComboSettings*);
     virtual void writeSettingsForDialog() {}
     virtual void readSettingsForDialog() {}
 

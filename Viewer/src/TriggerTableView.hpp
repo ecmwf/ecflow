@@ -53,6 +53,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void selectionChanged(TriggerTableItem*);
+    void clicked(TriggerTableItem*);
     void linkSelected(VInfo_ptr);
     void selectionChanged();
     void infoPanelCommand(VInfo_ptr,QString);

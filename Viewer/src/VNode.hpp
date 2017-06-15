@@ -190,6 +190,7 @@ public:
 
     void triggers(TriggerCollector*);   
     void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=0);
+    void clearTriggerData();
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VItem* n);
 
@@ -319,6 +320,7 @@ protected:
 	void endScan();
     bool triggeredScanned() const {return triggeredScanned_;}
     void setTriggeredScanned(bool b) {triggeredScanned_=b;}
+    void clearNodeTriggerData();
 
 private:
 	void clear();

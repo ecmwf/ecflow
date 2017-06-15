@@ -68,8 +68,8 @@ public:
     void populateDockTitleBar(DashboardDockTitleWidget*);
     void reload() {}
 	void rerender();
-    void writeSettings(VSettings*);
-	void readSettings(VSettings*);
+    void writeSettings(VComboSettings*);
+    void readSettings(VComboSettings*);
     void writeSettingsForDialog();
     void readSettingsForDialog();
 
