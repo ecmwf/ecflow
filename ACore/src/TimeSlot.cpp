@@ -63,14 +63,14 @@ std::ostream& TimeSlot::print(std::ostream& os) const
 
 std::string TimeSlot::toString() const
 {
-	std::stringstream ss;
-	if (hour_ < 10) ss << "0" << hour_;
-	else            ss << hour_;
+   std::string ret;
+	if (hour_ < 10)  ret += "0";
+	ret += boost::lexical_cast<std::string>(hour_);
 
-	ss << Str::COLON();
-	if (minute_ < 10) ss << "0" << minute_;
-	else              ss << minute_;
-	return ss.str();
+	ret += Str::COLON();
+	if (minute_ < 10) ret += "0";
+	ret += boost::lexical_cast<std::string>(minute_);
+	return ret;
 }
 
 boost::posix_time::time_duration TimeSlot::duration() const

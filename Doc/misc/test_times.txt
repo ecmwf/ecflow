@@ -1,4 +1,32 @@
 
+June 2017
+======================================================================================================
++ ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+ Parsing Node tree and AST creation time = 1.21944 parse(1)
+ Parsing Node tree *only* time           = 0.974118 parse(1)
+ Save as DEFS checkpoint, time taken                                   = 1.0922
+ Save as BOOST checkpoint, time taken                                  = 1.67235
+ Checkpt(DEFS) and reload, time taken            = 2.23993 file_size(59634835)  result(1) msg()
+ Checkpt(TEXT_ARCHIVE) and reload , time taken   = 3.49163 file_size(55961156)  result(1) msg()
+ Test all paths can be found. time taken         = 0.622837
+ time for 10 jobSubmissions                      = 0.277161s jobs:4
+ Time for Defs::check(inlimit resolution)        = 0.065262 result(1)
+ time for deleting all nodes                     = 0.291091
+ Total elapsed time = 12 seconds
++ ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+ Parsing Node tree and AST creation time = 2.4445 parse(1)
+ Parsing Node tree *only* time           = 2.43399 parse(1)
+ Save as DEFS checkpoint, time taken                                   = 1.60097
+ Save as BOOST checkpoint, time taken                                  = 2.43781
+ Checkpt(DEFS) and reload, time taken            = 4.27616 file_size(153530533)  result(1) msg()
+ Checkpt(TEXT_ARCHIVE) and reload , time taken   = 5.21677 file_size(148518127)  result(1) msg()
+ Test all paths can be found. time taken         = 0.991768
+ time for 10 jobSubmissions                      = 0.096336s jobs:0
+ Time for Defs::check(inlimit resolution)        = 0.737693 result(0)
+ time for deleting all nodes                     = 0.385109
+ Total elapsed time = 20 seconds
+ 
+ 
 Feb 2017  (TEXT_ARCHIVE) RELEASE 4.6.0, leap42
 ============================================================================================
 

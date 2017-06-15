@@ -124,11 +124,14 @@ std::ostream& Event::print( std::ostream& os ) const {
 }
 
 std::string Event::toString() const {
-   std::stringstream ss;
-   if ( number_ == std::numeric_limits< int >::max() )
-      ss << "event " << name_;
-   else ss << "event " << number_ << " " << name_;
-   return ss.str();
+   std::string ret = "event ";
+   if ( number_ == std::numeric_limits< int >::max() )  ret += name_;
+   else {
+      ret += boost::lexical_cast<std::string>(number_);
+      ret += " ";
+      ret += name_;
+   }
+   return ret;
 }
 
 std::string Event::dump() const {
@@ -215,9 +218,12 @@ std::ostream& Meter::print( std::ostream& os ) const {
 }
 
 std::string Meter::toString() const {
-   std::stringstream ss;
-   ss << "meter " << name_ << " " << min_ << " " << max_ << " " << colorChange_;
-   return ss.str();
+   std::string ret = "meter ";
+   ret += name_; ret += " ";
+   ret += boost::lexical_cast<std::string>(min_); ret += " ";
+   ret += boost::lexical_cast<std::string>(max_); ret += " ";
+   ret += boost::lexical_cast<std::string>(colorChange_);
+   return ret;
 }
 
 std::string Meter::dump() const {

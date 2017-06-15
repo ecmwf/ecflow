@@ -167,9 +167,9 @@ std::string Submittable::write_state() const
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
-   std::stringstream ss;
-   if ( !jobsPassword_.empty() && jobsPassword_!= Submittable::DUMMY_JOBS_PASSWORD())  ss << " passwd:" << jobsPassword_;
-   if ( !process_or_remote_id_.empty() )  ss << " rid:" << process_or_remote_id_;
+   std::string ret;
+   if ( !jobsPassword_.empty() && jobsPassword_!= Submittable::DUMMY_JOBS_PASSWORD()) { ret += " passwd:"; ret += jobsPassword_;}
+   if ( !process_or_remote_id_.empty() )  { ret += " rid:"; ret += process_or_remote_id_; }
 
    // The abortedReason_, can contain user generated messages, including \n and ;, hence remove these
    // as they can mess up the parsing on reload.
@@ -177,11 +177,11 @@ std::string Submittable::write_state() const
       std::string the_abort_reason = abortedReason_;
       Str::replaceall(the_abort_reason,"\n","\\n");
       Str::replaceall(the_abort_reason,";"," ");
-      ss << " abort<:" << the_abort_reason << ">abort";
+      ret += " abort<:"; ret += the_abort_reason; ret += ">abort";
    }
-   if ( tryNo_ != 0)  ss << " try:" << tryNo_;
-   ss << Node::write_state();
-   return ss.str();
+   if ( tryNo_ != 0) { ret += " try:"; ret += boost::lexical_cast<std::string>(tryNo_); }
+   ret += Node::write_state();
+   return ret;
 }
 
 void Submittable::read_state(const std::string& line,const std::vector<std::string>& lineTokens)

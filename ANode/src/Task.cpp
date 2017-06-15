@@ -130,10 +130,10 @@ std::string Task::write_state() const
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
-   std::stringstream ss;
-   if (alias_no_ != 0) ss << " alias_no:" << alias_no_;
-   ss << Submittable::write_state();
-   return ss.str();
+   std::string ret;
+   if (alias_no_ != 0) { ret += " alias_no:"; ret += boost::lexical_cast<std::string>(alias_no_);}
+   ret += Submittable::write_state();
+   return ret;
 }
 
 void Task::read_state(const std::string& line, const std::vector<std::string>& lineTokens) {

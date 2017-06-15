@@ -87,35 +87,34 @@ std::ostream& CronAttr::print(std::ostream& os) const
 
 std::string CronAttr::toString() const
 {
-	std::stringstream ss;
-	ss << "cron ";
+	std::string ret = "cron ";
 	if (!weekDays_.empty()) {
-		ss << "-w ";
+		ret += "-w ";
 		for(size_t i=0; i<weekDays_.size();++i) {
-			ss << weekDays_[i];
-			if (i !=weekDays_.size()-1) ss << ",";
+			ret += boost::lexical_cast<std::string>(weekDays_[i]);
+			if (i !=weekDays_.size()-1) ret += ",";
 		}
-		ss << " ";
+		ret += " ";
 	}
 	if (!daysOfMonth_.empty()) {
-		ss << "-d ";
+		ret += "-d ";
 		for(size_t i=0; i<daysOfMonth_.size();++i) {
-			ss << daysOfMonth_[i];
-			if (i !=daysOfMonth_.size()-1) ss << ",";
+			ret += boost::lexical_cast<std::string>(daysOfMonth_[i]);
+			if (i !=daysOfMonth_.size()-1) ret += ",";
 		}
-		ss << " ";
+		ret += " ";
 	}
 	if (!months_.empty()) {
-		ss << "-m ";
+		ret += "-m ";
 		for(size_t i=0; i<months_.size();++i) {
-			ss << months_[i];
-			if (i !=months_.size()-1) ss << ",";
+			ret += boost::lexical_cast<std::string>(months_[i]);
+			if (i !=months_.size()-1) ret += ",";
 		}
-		ss << " ";
+		ret += " ";
 	}
 
-	ss << timeSeries_.toString(); // no new line added, up to caller
- 	return ss.str();
+	ret += timeSeries_.toString(); // no new line added, up to caller
+ 	return ret;
 }
 
 std::string CronAttr::dump() const
