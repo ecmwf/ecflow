@@ -371,7 +371,7 @@ namespace eos {
 			typedef typename fp::detail::fp_traits<T>::type traits;
 
 			// if the no_infnan flag is set we must throw here
-			if (get_flags() & no_infnan && !fp::isfinite(t))
+			if ((get_flags() & no_infnan) && !fp::isfinite(t))
 				throw portable_archive_exception(t);
 
 			// if you end here there are three possibilities:
