@@ -39,15 +39,11 @@
        <property name="text">
         <string>Expression</string>
        </property>
-       <property name="icon">
-        <iconset resource="viewer.qrc">
-         <normaloff>:/viewer/expression.svg</normaloff>:/viewer/expression.svg</iconset>
-       </property>
        <property name="checkable">
         <bool>true</bool>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
+        <enum>Qt::ToolButtonTextOnly</enum>
        </property>
       </widget>
      </item>
@@ -72,15 +68,11 @@
        <property name="text">
         <string>Dependencies</string>
        </property>
-       <property name="icon">
-        <iconset resource="viewer.qrc">
-         <normaloff>:/viewer/dependency.svg</normaloff>:/viewer/dependency.svg</iconset>
-       </property>
        <property name="checkable">
         <bool>true</bool>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
+        <enum>Qt::ToolButtonTextOnly</enum>
        </property>
       </widget>
      </item>
@@ -94,7 +86,7 @@
        </property>
        <property name="icon">
         <iconset resource="viewer.qrc">
-         <normaloff>:/viewer/dependency_detail.svg</normaloff>:/viewer/dependency_detail.svg</iconset>
+         <normaloff>:/viewer/dependency.svg</normaloff>:/viewer/dependency.svg</iconset>
        </property>
        <property name="checkable">
         <bool>true</bool>
