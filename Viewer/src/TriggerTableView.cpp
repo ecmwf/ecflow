@@ -13,6 +13,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QHeaderView>
+#include <QItemSelectionModel>
 #include <QPalette>
 #include <QScrollBar>
 
@@ -154,10 +155,10 @@ void TriggerTableView::setCurrentItem(TriggerTableItem* item)
     QModelIndex idx=model_->itemToIndex(item);
     if(idx.isValid())
     {
-        setCurrentIndex(idx);        
+        setCurrentIndex(idx);
+        viewport()->update();
     }
 }
-
 
 void TriggerTableView::slotDoubleClickItem(const QModelIndex& index)
 {    

@@ -272,9 +272,9 @@ void TriggerTableWidget::setTriggerCollector(TriggerTableCollector *tc1,TriggerT
         lastSelectedItem_->regainData();
         if(lastSelectedItem_->hasData())
         {
-            if(TriggerTableItem* ti=tc1->find(lastSelectedItem_->item()))
+            if(TriggerTableItem* ti=tc1->findByContents(lastSelectedItem_->item()))
                 triggerView_->setCurrentItem(ti);
-            else if(TriggerTableItem* ti=tc2->find(lastSelectedItem_->item()))
+            else if(TriggerTableItem* ti=tc2->findByContents(lastSelectedItem_->item()))
                 triggeredView_->setCurrentItem(ti);
         }
         else

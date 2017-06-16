@@ -176,3 +176,18 @@ TriggerTableItem* TriggerTableCollector::find(const VItem* item) const
     }
     return 0;
 }
+
+TriggerTableItem* TriggerTableCollector::findByContents(const VItem* item) const
+{
+    if(!item)
+        return 0;
+
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(item->sameContents(items_[i]->item()))
+        {
+            return items_[i];
+        }
+    }
+    return 0;
+}
