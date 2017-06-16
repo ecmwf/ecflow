@@ -112,8 +112,6 @@ void TriggerItemWidget::reload(VInfo_ptr info)
     //set the info
     adjust(info);
 
-    triggerTable_->setInfo(info_);
-
     //messageLabel_->hide();
 
     //Info must be a node
@@ -140,6 +138,8 @@ void TriggerItemWidget::load()
         if(txt.isEmpty()) txt=tr("No trigger expression is available for the selected node!");
         exprTe_->setPlainText(txt);
 
+        triggerTable_->setInfo(info_);
+
         //Load table
         triggerTable_->beginTriggerUpdate();
 
@@ -152,6 +152,8 @@ void TriggerItemWidget::load()
 
         triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
         triggerTable_->endTriggerUpdate();
+
+        triggerTable_->resumeSelection();
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::restoreOverrideCursor();

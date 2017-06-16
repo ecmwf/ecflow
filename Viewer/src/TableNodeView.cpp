@@ -190,8 +190,8 @@ void TableNodeView::setCurrentSelection(VInfo_ptr info)
     if(idx.isValid())
     {
 #ifdef _UI_TABLENODEVIEW_DEBUG
-    if(info)
-        UiLog().dbg() << "TableNodeView::setCurrentSelection --> " <<  info->path();
+        if(info)
+            UiLog().dbg() << "TableNodeView::setCurrentSelection --> " <<  info->path();
 #endif
         setCurrentIndex(idx);
     }

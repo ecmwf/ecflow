@@ -37,7 +37,7 @@
         <string>Show trigger expression</string>
        </property>
        <property name="text">
-        <string>graphics</string>
+        <string>Expression</string>
        </property>
        <property name="icon">
         <iconset resource="viewer.qrc">
@@ -45,6 +45,9 @@
        </property>
        <property name="checkable">
         <bool>true</bool>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
        </property>
       </widget>
      </item>

@@ -13,16 +13,15 @@
 #include <QApplication>
 #include <QDebug>
 #include <QHeaderView>
-#include <QItemSelectionModel>
 #include <QPalette>
 #include <QScrollBar>
-
 
 #include "ActionHandler.hpp"
 #include "NodeQueryResultModel.hpp"
 #include "NodeQueryViewDelegate.hpp"
 #include "TriggerTableModel.hpp"
 #include "TriggerViewDelegate.hpp"
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 
@@ -156,7 +155,6 @@ void TriggerTableView::setCurrentItem(TriggerTableItem* item)
     if(idx.isValid())
     {
         setCurrentIndex(idx);
-        viewport()->update();
     }
 }
 

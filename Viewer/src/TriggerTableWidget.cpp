@@ -225,7 +225,7 @@ void TriggerTableWidget::slotShowDependencyInfo(bool b)
                 return;
             }
         }
-        else if(TriggerTableCollector *tc=triggeredModel_->triggerCollector())
+        if(TriggerTableCollector *tc=triggeredModel_->triggerCollector())
         {
             if(TriggerTableItem *ti=tc->find(lastSelectedItem_->item()))
             {
@@ -265,17 +265,33 @@ void TriggerTableWidget::setTriggerCollector(TriggerTableCollector *tc1,TriggerT
 {
     triggerModel_->setTriggerCollector(tc1);
     triggeredModel_->setTriggerCollector(tc2);
+}
 
-    //try to reselect tha last selected item
+void TriggerTableWidget::resumeSelection()
+{
+    //try to reselect the last selected item
     if(lastSelectedItem_)
     {
         lastSelectedItem_->regainData();
         if(lastSelectedItem_->hasData())
         {
-            if(TriggerTableItem* ti=tc1->findByContents(lastSelectedItem_->item()))
-                triggerView_->setCurrentItem(ti);
-            else if(TriggerTableItem* ti=tc2->findByContents(lastSelectedItem_->item()))
-                triggeredView_->setCurrentItem(ti);
+            if(TriggerTableCollector* tc=triggerModel_->triggerCollector())
+            {
+                if(TriggerTableItem* ti=tc->findByContents(lastSelectedItem_->item()))
+                {
+                    triggerView_->setCurrentItem(ti);
+                    return;
+                }
+            }
+
+            if(TriggerTableCollector* tc=triggeredModel_->triggerCollector())
+            {
+                if(TriggerTableItem* ti=tc->findByContents(lastSelectedItem_->item()))
+                {
+                    triggeredView_->setCurrentItem(ti);
+                    return;
+                }
+            }
         }
         else
         {
