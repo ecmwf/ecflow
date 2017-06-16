@@ -13,6 +13,8 @@
 // Description :
 //============================================================================
 
+#include <boost/lexical_cast.hpp>
+
 #include <assert.h>
 #include <sstream>
 #include <stdexcept>
@@ -98,11 +100,11 @@ std::ostream& InLimit::print( std::ostream& os ) const {
 }
 
 std::string InLimit::toString() const {
-   std::stringstream ss;
-   ss << "inlimit ";
-   if (limit_this_node_only_) ss << "-n ";
-   if ( pathToNode_.empty() ) ss << name_;
-   else                       ss << pathToNode_ << Str::COLON() << name_;
-   if ( tokens_ != 1 )        ss << " " << tokens_;
-   return ss.str();
+   std::string ret = "inlimit ";
+   if (limit_this_node_only_) ret += "-n ";
+   if ( pathToNode_.empty() )  ret += name_;
+   else                      { ret += pathToNode_; ret += Str::COLON(); ret += name_; }
+   if ( tokens_ != 1 )       { ret += " "; ret += boost::lexical_cast<std::string>(tokens_); }
+   return ret;
+}
 }

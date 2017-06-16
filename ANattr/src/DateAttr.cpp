@@ -210,18 +210,17 @@ std::ostream& DateAttr::print(std::ostream& os) const
 
 std::string DateAttr::toString() const
 {
-	std::stringstream ss;
-	ss << "date ";
-	if (day_ == 0) ss << "*.";
-	else           ss << day_ << ".";
+	std::string ret = "date ";
+	if (day_ == 0) ret += "*.";
+	else         { ret += boost::lexical_cast<std::string>(day_); ret += ".";}
 
-	if (month_ == 0) ss << "*.";
-	else             ss << month_ << ".";
+	if (month_ == 0) ret += "*.";
+	else           { ret += boost::lexical_cast<std::string>(month_); ret += ".";}
 
-	if (year_ == 0) ss << "*";
-	else            ss << year_;
+	if (year_ == 0) ret += "*";
+	else            ret += boost::lexical_cast<std::string>(year_);
 
-	return ss.str();
+	return ret;
 }
 
 std::string DateAttr::dump() const

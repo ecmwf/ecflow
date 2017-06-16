@@ -226,12 +226,16 @@ void RepeatDate::reset() {
 
 std::string RepeatDate::toString() const
 {
-	std::stringstream ss;
-	ss << "repeat date " << name_ << " " << start_ << " " << end_ << " " << delta_;
+	std::string ret = "repeat date ";  ret += name_; ret += " ";
+   ret += boost::lexical_cast<std::string>(start_); ret += " ";
+   ret += boost::lexical_cast<std::string>(end_);   ret += " ";
+   ret += boost::lexical_cast<std::string>(delta_);
+
 	if (!PrintStyle::defsStyle() && (value_ != start_)) {
-	   ss << " # " << value_;
+	   ret += " # ";
+	   ret += boost::lexical_cast<std::string>(value_);
 	}
-	return ss.str();
+	return ret;
 }
 std::string RepeatDate::dump() const
 {
@@ -455,13 +459,16 @@ void RepeatInteger::setToLastValue()
 
 std::string RepeatInteger::toString() const
 {
-	std::stringstream ss;
-	ss << "repeat integer " << name_ << " " << start_ << " " << end_;
- 	if (delta_ != 1) ss << " " << delta_;
+   std::string ret = "repeat integer ";  ret += name_; ret += " ";
+   ret += boost::lexical_cast<std::string>(start_);  ret += " ";
+   ret += boost::lexical_cast<std::string>(end_);
+   if (delta_ != 1) { ret += " ";  ret += boost::lexical_cast<std::string>(delta_); }
+
    if (!PrintStyle::defsStyle() && (value_ != start_)) {
-      ss << " # " << value_;
+      ret += " # ";
+      ret += boost::lexical_cast<std::string>(value_);
    }
-	return ss.str();
+   return ret;
 }
 std::string RepeatInteger::dump() const
 {
@@ -473,18 +480,43 @@ std::string RepeatInteger::dump() const
 bool RepeatInteger::operator==(const RepeatInteger& rhs) const
 {
 	if (name_ != rhs.name_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( name_(" << name_ << ") != rhs.name_(" << rhs.name_ << "))" << "\n";
+      }
+#endif
 		return false;
 	}
 	if (start_ != rhs.start_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( start_(" << start_ << ") != rhs.start_(" << rhs.start_ << "))" << "\n";
+      }
+#endif
 		return false;
 	}
 	if (end_ != rhs.end_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( end_(" << end_ << ") != rhs.end_(" << rhs.end_ << "))" << "\n";
+      }
+#endif
 		return false;
 	}
 	if (delta_ != rhs.delta_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( delta_(" << delta_ << ") != rhs.delta_(" << rhs.delta_ << "))" << "\n";
+      }
+#endif
 		return false;
 	}
    if (value_ != rhs.value_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( value_(" << value_ << ") != rhs.value_(" << rhs.value_ << "))" << "\n";
+      }
+#endif
       return false;
    }
 	return true;
@@ -534,13 +566,13 @@ bool RepeatEnumerated::compare(RepeatBase* rb) const
 
 std::string RepeatEnumerated::toString() const
 {
-	std::stringstream ss;
- 	ss << "repeat enumerated " << name_;
- 	BOOST_FOREACH(const string& s, theEnums_) { ss << " \"" << s << "\""; }
- 	if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
- 	   ss << " # " << currentIndex_;
- 	}
-  	return ss.str();
+   std::string ret = "repeat enumerated ";  ret += name_;
+   BOOST_FOREACH(const string& s, theEnums_) { ret += " \""; ret += s; ret += "\""; }
+   if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
+      ret += " # ";
+      ret += boost::lexical_cast<std::string>(currentIndex_);
+   }
+   return ret;
 }
 std::string RepeatEnumerated::dump() const
 {
@@ -726,13 +758,13 @@ bool RepeatString::compare(RepeatBase* rb) const
 
 std::string RepeatString::toString() const
 {
-	std::stringstream ss;
-	ss << "repeat string " << name_;
- 	BOOST_FOREACH(const string& s, theStrings_) { ss << " \"" << s << "\""; }
+   std::string ret = "repeat string ";  ret += name_;
+   BOOST_FOREACH(const string& s, theStrings_) { ret += " \""; ret += s; ret += "\""; }
    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
-      ss << " # " << value();
+      ret += " # ";
+      ret += boost::lexical_cast<std::string>(value());
    }
- 	return ss.str();
+   return ret;
 }
 std::string RepeatString::dump() const
 {
@@ -852,9 +884,9 @@ bool RepeatDay::compare(RepeatBase* rb) const
 
 std::string RepeatDay::toString() const
 {
-	std::stringstream ss;
-	ss << "repeat day " << step_;
- 	return ss.str();
+   std::string ret = "repeat day ";
+   ret += boost::lexical_cast<std::string>(step_);
+   return ret;
 }
 
 std::string RepeatDay::dump() const

@@ -73,17 +73,15 @@ std::ostream& ZombieAttr::print(std::ostream& os) const
 std::string ZombieAttr::toString() const
 {
 	/// format is  zombie_type : child_cmds(optional) : action : zombie_lifetime_(optional)
-	std::stringstream ss;
-	ss << "zombie " << Child::to_string(zombie_type_)
-	   << Str::COLON()
-	   << User::to_string(action_)
-	   << Str::COLON()
-	   << Child::to_string(child_cmds_)
-	   << Str::COLON()
-       << zombie_lifetime_
-    ;
-
-  	return ss.str();
+	std::string ret = "zombie ";
+	ret += Child::to_string(zombie_type_);
+	ret += Str::COLON();
+	ret += User::to_string(action_);
+	ret += Str::COLON();
+	ret += Child::to_string(child_cmds_);
+	ret += Str::COLON();
+	ret += boost::lexical_cast<std::string>(zombie_lifetime_);
+	return ret;
 }
 
 bool ZombieAttr::fob( ecf::Child::CmdType child_cmd) const
