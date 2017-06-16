@@ -16,8 +16,7 @@
 #include "VSettings.hpp"
 
 TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
-    QWidget(parent),
-    lastSelectedItem_(0)
+    QWidget(parent)
 {
 	setupUi(this);
 
@@ -85,13 +84,17 @@ TriggerTableWidget::~TriggerTableWidget()
 void TriggerTableWidget::clear()
 {
     info_.reset();
-    lastSelectedItem_=0;
 
     triggerModel_->clearData();
     triggeredModel_->clearData();
 
     depLabel_->setText(depLabelText_);
     depBrowser_->clear();
+}
+
+void TriggerTableWidget::clearSelection()
+{
+    lastSelectedItem_.reset();
 }
 
 void TriggerTableWidget::setInfo(VInfo_ptr info)
@@ -101,15 +104,24 @@ void TriggerTableWidget::setInfo(VInfo_ptr info)
 
 void TriggerTableWidget::slotTriggerClicked(TriggerTableItem* item)
 {
-    if(lastSelectedItem_ == item)
-        return;
-    else
-       slotTriggerSelection(item);
+    Q_ASSERT(item);
+
+    if(!depBrowser_->document()->isEmpty() && lastSelectedItem_ && lastSelectedItem_->hasData())
+    {
+        if(item->item() && item->item()->sameContents(lastSelectedItem_->item()))
+            return;
+    }
+
+    slotTriggerSelection(item);
 }
 
 void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
 {
-    lastSelectedItem_=item;
+    Q_ASSERT(item);
+    Q_ASSERT(item->item());
+
+    lastSelectedItem_=VInfo::createFromItem(item->item());
+
     if(!depInfoWidget_->isVisible())
         return;
 
@@ -146,15 +158,24 @@ void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
 
 void TriggerTableWidget::slotTriggeredClicked(TriggerTableItem* item)
 {
-    if(lastSelectedItem_ == item)
-        return;
-    else
-       slotTriggeredSelection(item);
+    Q_ASSERT(item);
+
+    if(!depBrowser_->document()->isEmpty() && lastSelectedItem_ && lastSelectedItem_->hasData())
+    {
+        if(item->item() && item->item()->sameContents(lastSelectedItem_->item()))
+            return;
+    }
+
+    slotTriggeredSelection(item);
 }
 
 void TriggerTableWidget::slotTriggeredSelection(TriggerTableItem* item)
 {
-    lastSelectedItem_=item;
+    Q_ASSERT(item);
+    Q_ASSERT(item->item());
+
+    lastSelectedItem_=VInfo::createFromItem(item->item());
+
     if(!depInfoWidget_->isVisible())
         return;
 
@@ -194,21 +215,21 @@ void TriggerTableWidget::slotShowDependencyInfo(bool b)
 
     //When the depinfo panel becomes visible we need to update
     //its contents
-    if(b && lastSelectedItem_)
+    if(b && lastSelectedItem_  && lastSelectedItem_->hasData())
     {
         if(TriggerTableCollector *tc=triggerModel_->triggerCollector())
         {
-            if(tc->contains(lastSelectedItem_))
+            if(TriggerTableItem *ti=tc->find(lastSelectedItem_->item()))
             {
-                slotTriggerSelection(lastSelectedItem_);
+                slotTriggerSelection(ti);
                 return;
             }
         }
         else if(TriggerTableCollector *tc=triggeredModel_->triggerCollector())
         {
-            if(tc->contains(lastSelectedItem_))
+            if(TriggerTableItem *ti=tc->find(lastSelectedItem_->item()))
             {
-                slotTriggeredSelection(lastSelectedItem_);
+                slotTriggeredSelection(ti);
                 return;
             }
         }
@@ -244,6 +265,23 @@ void TriggerTableWidget::setTriggerCollector(TriggerTableCollector *tc1,TriggerT
 {
     triggerModel_->setTriggerCollector(tc1);
     triggeredModel_->setTriggerCollector(tc2);
+
+    //try to reselect tha last selected item
+    if(lastSelectedItem_)
+    {
+        lastSelectedItem_->regainData();
+        if(lastSelectedItem_->hasData())
+        {
+            if(TriggerTableItem* ti=tc1->find(lastSelectedItem_->item()))
+                triggerView_->setCurrentItem(ti);
+            else if(TriggerTableItem* ti=tc2->find(lastSelectedItem_->item()))
+                triggeredView_->setCurrentItem(ti);
+        }
+        else
+        {
+            lastSelectedItem_.reset();
+        }
+    }
 }
 
 void TriggerTableWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)

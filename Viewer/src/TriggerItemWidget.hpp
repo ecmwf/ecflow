@@ -61,6 +61,7 @@ protected:
     void updateState(const ChangeFlags&);
     TriggeredScanner* triggeredScanner() const {return scanner_;}
     void checkActionState();
+    void clearTriggers();
 
     TriggerTableCollector* triggerCollector_;
     TriggerTableCollector* triggeredCollector_;

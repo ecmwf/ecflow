@@ -314,11 +314,12 @@ public:
 
 	void why(std::vector<std::string>& theReasonWhy) const;
 
+    bool triggeredScanned() const {return triggeredScanned_;}
+
 protected:
 	//Clear contents and rebuild the whole tree.
 	void beginScan(VServerChange&);
 	void endScan();
-    bool triggeredScanned() const {return triggeredScanned_;}
     void setTriggeredScanned(bool b) {triggeredScanned_=b;}
     void clearNodeTriggerData();
 

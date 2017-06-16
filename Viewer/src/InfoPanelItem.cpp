@@ -299,8 +299,14 @@ void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<e
     if(info_)
 	{
 		if(info_->isNode())
-		{
-			//Check if the updated node is handled by the item
+		{                
+            //Check if updates are handled when unselected
+            if(!selected_ && !unselectedFlags_.isSet(KeepContents))
+            {
+                return;
+            }
+
+            //Check if the updated node is handled by the item
             if(handleAnyChange_ || info_->node() == node ||
               (useAncestors_ && info_->node()->isAncestor(node)))
             {

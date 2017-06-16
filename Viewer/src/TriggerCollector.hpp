@@ -167,6 +167,7 @@ public:
 
     bool contains(TriggerTableItem*) const;
     bool contains(const VNode*,bool attrParents=true) const;
+    TriggerTableItem* find(const VItem* item) const;
     const std::vector<TriggerTableItem*>& items() const {return items_;}
 
 protected:

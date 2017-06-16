@@ -33,20 +33,14 @@ public:
 
     void reload();
     void rerender();
-    VInfo_ptr currentSelection();
-    void currentSelection(VInfo_ptr n);
-    void selectFirstServer();
+    void setCurrentItem(TriggerTableItem*);
     void enableContextMenu(bool enable);
-    //void getListOfSelectedNodes(std::vector<VInfo_ptr> &nodeList);
-
-    //void readSettings(VSettings* vs) {};
 
 public Q_SLOTS:
     void slotSelectItem(const QModelIndex&);
     void slotDoubleClickItem(const QModelIndex&);
     void slotContextMenu(const QPoint &position);
     void slotViewCommand(VInfo_ptr,QString);
-    void slotSetCurrent(VInfo_ptr);
     void slotRerender();
     void slotSizeHintChangedGlobal();
     void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected);

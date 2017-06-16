@@ -233,24 +233,17 @@ VInfo_ptr TriggerTableModel::nodeInfo(const QModelIndex& index)
 	return res;
 }
 
-QModelIndex TriggerTableModel::infoToIndex(VInfo_ptr info)
+QModelIndex TriggerTableModel::itemToIndex(TriggerTableItem *item)
 {
-	/*if(info && info.get())
-	{
-		if(info->isServer())
-		{
-			if(ServerHandler *s=info->server())
-			{
-				return serverToIndex(s);
-			}
-		}
-		else if(VNode* n=info->node())
-		{
-				return nodeToIndex(n);
-		}
-	}*/
+    if(item)
+    {
+         const std::vector<TriggerTableItem*>& items=tc_->items();
+         for(std::size_t i=0; i < tc_->items().size(); i++)
+             if(tc_->items()[i] == item)
+                 return index(i,0);
+    }
 
-	return QModelIndex();
+    return QModelIndex();
 }
 
 TriggerTableItem* TriggerTableModel::indexToItem(const QModelIndex& index) const

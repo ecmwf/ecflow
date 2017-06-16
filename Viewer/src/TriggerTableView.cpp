@@ -149,52 +149,15 @@ void TriggerTableView::slotSelectItem(const QModelIndex&)
     }
 }
 
-VInfo_ptr TriggerTableView::currentSelection()
+void TriggerTableView::setCurrentItem(TriggerTableItem* item)
 {
-    QModelIndexList lst=selectedIndexes();
-    if(lst.count() > 0)
-    {
-#if 0
-        return model_->nodeInfo(sortModel_->mapToSource(lst.front()));
-#endif
-    }
-    return VInfo_ptr();
-}
-
-void TriggerTableView::currentSelection(VInfo_ptr info)
-{
-    /*QModelIndex idx=model_->infoToIndex(info);
+    QModelIndex idx=model_->itemToIndex(item);
     if(idx.isValid())
     {
-        setCurrentIndex(idx);
-        Q_EMIT selectionChanged(info);
-    }*/
-}
-
-void TriggerTableView::slotSetCurrent(VInfo_ptr info)
-{
-    /*QModelIndex idx=model_->infoToIndex(info);
-    if(idx.isValid())
-    {
-        setCurrentIndex(idx);
-        Q_EMIT selectionChanged(info);
-    }*/
-}
-
-#if 0
-void TriggerTableView::getListOfSelectedNodes(std::vector<VInfo_ptr> &nodeList)
-{
-    QModelIndexList indexList=selectedList();
-
-    nodeList.clear();
-    for(int i=0; i < indexList.count(); i++)
-    {
-        VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(indexList[i]));
-        if(info && !info->isEmpty())
-            nodeList.push_back(info);
+        setCurrentIndex(idx);        
     }
 }
-#endif
+
 
 void TriggerTableView::slotDoubleClickItem(const QModelIndex& index)
 {    

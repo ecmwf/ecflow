@@ -105,19 +105,21 @@ TriggerTableCollector::~TriggerTableCollector()
 
 bool TriggerTableCollector::add(VItem* trigger, VItem* dep,Mode mode)
 {
+    Q_ASSERT(trigger);
+
     TriggerTableItem *item=0;
     for(std::size_t i=0; i < items_.size(); i++)
     {
         if(items_[i]->item() == trigger)
-        {
+        {          
             item=items_[i];
             break;
         }
     }
 
     if(!item)
-    {
-        item=new TriggerTableItem(trigger) ;
+    {        
+        item=new TriggerTableItem(trigger);
         items_.push_back(item);
     }
 
@@ -163,4 +165,14 @@ bool TriggerTableCollector::contains(const VNode* node,bool attrParents) const
     }
 
     return false;
+}
+
+TriggerTableItem* TriggerTableCollector::find(const VItem* item) const
+{
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i]->item() == item)
+            return items_[i];
+    }
+    return 0;
 }

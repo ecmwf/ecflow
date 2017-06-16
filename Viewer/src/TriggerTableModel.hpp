@@ -56,7 +56,7 @@ public:
 
     TriggerTableItem* indexToItem(const QModelIndex&) const;
     VInfo_ptr nodeInfo(const QModelIndex&);
-    QModelIndex infoToIndex(VInfo_ptr);
+    QModelIndex itemToIndex(TriggerTableItem*);
 
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
 

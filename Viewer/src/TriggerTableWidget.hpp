@@ -35,6 +35,7 @@ public:
     void setInfo(VInfo_ptr);
     void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);
 	void clear();
+    void clearSelection();
     void beginTriggerUpdate();
     void endTriggerUpdate();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
@@ -62,7 +63,7 @@ private:
     VInfo_ptr info_;
     TriggerTableModel *triggerModel_;
     TriggerTableModel *triggeredModel_;
-    TriggerTableItem* lastSelectedItem_;
+    VInfo_ptr lastSelectedItem_;
     QString depLabelText_;
 };
 

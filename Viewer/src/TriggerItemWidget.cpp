@@ -10,6 +10,7 @@
 #include "TriggerItemWidget.hpp"
 
 #include "Highlighter.hpp"
+#include "ServerHandler.hpp"
 #include "TriggerCollector.hpp"
 #include "TriggeredScanner.hpp"
 #include "VNode.hpp"
@@ -29,6 +30,9 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 {
     //This item will listen to any changes in nodes
     handleAnyChange_=true;
+
+    //We will not keep the contents when the item becomes unselected
+    unselectedFlags_.clear();
 
     setupUi(this);
 
@@ -118,6 +122,8 @@ void TriggerItemWidget::reload(VInfo_ptr info)
 
 void TriggerItemWidget::load()
 {
+    clearTriggers();
+
     if(info_ && info_->isNode() && info_->node())
     {
         VNode* n=info_->node();
@@ -156,6 +162,20 @@ void TriggerItemWidget::load()
 void TriggerItemWidget::clearContents()
 {
     InfoPanelItem::clear();
+    exprTe_->clear();
+    triggerTable_->clear();
+
+    if(!active_)
+        triggerTable_->clearSelection();
+
+    //At this point the tables are cleared so it is safe to clear the collectors
+    triggerCollector_->clear();
+    triggeredCollector_->clear();
+}
+
+void TriggerItemWidget::clearTriggers()
+{
+    exprTe_->clear();
     triggerTable_->clear();
 
     //At this point the tables are cleared so it is safe to clear the collectors
@@ -167,9 +187,22 @@ void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
     if(flags.isSet(SuspendedChanged))
     {
-        //if(suspended_)
-        //   textBrowser_->suspend();
+        //If we are here this item is active but not selected!
+
+        //When it becomes suspended we need to clear everything since the
+        //tree is probably cleared at this point
+        if(suspended_)
+        {
+            clearTriggers();
+        }
+        //When we leave the suspended state we need to reload everything
+        else
+        {
+            load();
+        }
     }
+
+    Q_ASSERT(!flags.isSet(SelectedChanged));
 
     checkActionState();
 }
@@ -286,8 +319,20 @@ void TriggerItemWidget::readSettings(VComboSettings* vs)
 
 void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
 {
+    //We do not track changes when the item is not selected
+    if(!selected_ || !active_)
+        return;
+
     if(!info_ || !info_->isNode())
         return;
+
+    //If the triggers are not scanned there must have been a major change and
+    //we need to reload the item
+    if(!info_->node()->root()->triggeredScanned())
+    {
+        load();
+        return;
+    }
 
     //For certain changes we need to reload the triggers
     for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
@@ -297,7 +342,12 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
             load();
             return;
         }
-        else if(*it == ecf::Aspect::NODE_VARIABLE || *it == ecf::Aspect::METER || *it == ecf::Aspect::LIMIT ||
+    }
+
+    //For other changes we only reload the triggers if the change happened to an item in the collected triggers
+    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    {
+        if(*it == ecf::Aspect::NODE_VARIABLE || *it == ecf::Aspect::METER || *it == ecf::Aspect::LIMIT ||
                 *it == ecf::Aspect::EVENT)
         {
            if(triggerCollector_->contains(n,true) || triggeredCollector_->contains(n,true))
@@ -308,7 +358,7 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
         }
     }
 
-    //See if there is a change in the collected items
+    //For the rest of the changes in we rerender the collected items that might have changed
     triggerTable_->nodeChanged(n,aspect);
 }
 
