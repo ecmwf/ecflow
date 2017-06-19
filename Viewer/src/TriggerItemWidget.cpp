@@ -56,13 +56,16 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     messageLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
 
-    //Dependencies
-    dependTb_->setChecked(false);
-    on_dependTb__toggled(false);
+    //Dependency info inti must precede dependency init
+    //since they depend on each other
 
-    //dependency is off by default
+    //dependency info is off by default
     dependInfoTb_->setChecked(false);
     on_dependInfoTb__toggled(false);
+
+    //Dependency is off by default
+    dependTb_->setChecked(false);
+    on_dependTb__toggled(false);
 
     //Expression
     exprTb_->setChecked(true);
@@ -229,9 +232,18 @@ void TriggerItemWidget::on_dependTb__toggled(bool b)
 
     //when we activate the dependencies we always show the
     //dependency details as well
-    if(b && dependInfoTb_->isChecked() == false)
+    if(b)
     {
-        dependInfoTb_->setChecked(true);
+        dependInfoTb_->setEnabled(true);
+        if(dependInfoTb_->isChecked() == false)
+        {
+            dependInfoTb_->setChecked(true);
+        }
+    }
+    else
+    {
+        dependInfoTb_->setChecked(false);
+        dependInfoTb_->setEnabled(false);
     }
 }
 
@@ -317,8 +329,17 @@ void TriggerItemWidget::writeSettings(VComboSettings* vs)
 void TriggerItemWidget::readSettings(VComboSettings* vs)
 {
     vs->beginGroup("triggers");
+
     dependTb_->setChecked(vs->getAsBool("dependency",dependency()));
-    dependInfoTb_->setChecked(vs->getAsBool("dependencyInfo",dependInfoTb_->isChecked()));
+
+// dependInfoTb_ is initialised by dependTb_ !!
+#if 0
+    if(dependTb_->isChecked())
+    {
+        dependInfoTb_->setChecked(vs->getAsBool("dependencyInfo",dependInfoTb_->isChecked()));
+    }
+#endif
+
     exprTb_->setChecked(vs->getAsBool("expression",exprTb_->isChecked()));
     triggerTable_->readSettings(vs);
     vs->endGroup();

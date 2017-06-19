@@ -42,6 +42,7 @@
     <file alias="dock_chain_closed.svg">../images/dock_chain_closed.svg</file>
     <file alias="dock_chain_open.svg">../images/dock_chain_open.svg</file>
     <file alias="dock_config.svg">../images/dock_config.svg</file>
+    <file alias="dock_dependency.svg">../images/dock_dependency.svg</file>
     <file alias="dock_max.svg">../images/dock_max.svg</file>
     <file alias="dock_max_disabled.svg">../images/dock_max_disabled.svg</file>
     <file alias="dock_menu_indicator.png">../images/dock_menu_indicator.png</file>
