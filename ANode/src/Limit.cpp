@@ -101,9 +101,11 @@ std::ostream& Limit::print( std::ostream& os ) const {
 }
 
 std::string Limit::toString() const {
-   std::stringstream ss;
-   ss << "limit " << name_ << " " << theLimit_;
-   return ss.str();
+   std::string ret = "limit ";
+   ret += name_;
+   ret += " ";
+   ret += boost::lexical_cast<std::string>(theLimit_);
+   return ret;
 }
 
 void Limit::decrement( int tokens ,  const std::string& abs_node_path) {

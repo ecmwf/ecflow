@@ -311,16 +311,16 @@ std::string Calendar::write_state() const
    bool calendarIncrement__changed = (!calendarIncrement_.is_special() && calendarIncrement_.total_seconds() != 0);
 
    // cType is obtained from the suite clock attribute, and not persisted
-   std::stringstream ss;
-   ss << " initTime:" << to_simple_string(initTime_);
-   ss << " suiteTime:" << to_simple_string(suiteTime_);
-   ss << " duration:" << to_simple_string(duration_);
-   ss << " initLocalTime:" << to_simple_string(initLocalTime_);
-   ss << " lastTime:" << to_simple_string(lastTime_);
-   if (calendarIncrement__changed) ss << " calendarIncrement:" << to_simple_string(calendarIncrement_);
+   std::string ret;
+   ret += " initTime:";      ret += to_simple_string(initTime_);
+   ret += " suiteTime:";     ret += to_simple_string(suiteTime_);
+   ret += " duration:";      ret += to_simple_string(duration_);
+   ret += " initLocalTime:"; ret += to_simple_string(initLocalTime_);
+   ret += " lastTime:";      ret += to_simple_string(lastTime_);
+   if (calendarIncrement__changed) { ret += " calendarIncrement:"; ret += to_simple_string(calendarIncrement_); }
 
-   if (dayChanged_) ss << " dayChanged:" << dayChanged_;
-   return ss.str();
+   if (dayChanged_) ret += " dayChanged:1" ;
+   return ret;
 }
 
 void Calendar::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
