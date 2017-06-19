@@ -36,9 +36,31 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 
     setupUi(this);
 
+    //The collectors
+    triggerCollector_=new TriggerTableCollector(false);
+    triggeredCollector_=new TriggerTableCollector(false);
+
+    //Scanner
+    scanner_=new TriggeredScanner(this);
+
+    connect(scanner_,SIGNAL(scanStarted()),
+            this,SLOT(scanStarted()));
+
+    connect(scanner_,SIGNAL(scanFinished()),
+            this,SLOT(scanFinished()));
+
+    connect(scanner_,SIGNAL(scanProgressed(int)),
+            this,SLOT(scanProgressed(int)));
+
+    //Messages
     messageLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
 
+    //Dependencies
+    dependTb_->setChecked(false);
+    on_dependTb__toggled(false);
+
+    //dependency is off by default
     dependInfoTb_->setChecked(false);
     on_dependInfoTb__toggled(false);
 
@@ -56,9 +78,6 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     exprTe_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
     exprTe_->setFixedHeight(fm.size(0,"A\nA\nA").height()+fm.height()/2);
 
-    //Dependencies
-    dependTb_->setChecked(false);
-
     connect(triggerTable_,SIGNAL(depInfoWidgetClosureRequested()),
             this,SLOT(slotHandleDefInfoWidgetClosure()));
 
@@ -70,22 +89,6 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 
     connect(triggerTable_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
         this,SLOT(slotDashboardCommand(VInfo_ptr,QString)));
-
-    //The collectors
-    triggerCollector_=new TriggerTableCollector(false);
-    triggeredCollector_=new TriggerTableCollector(false);
-
-    //Scanner
-    scanner_=new TriggeredScanner(this);
-
-    connect(scanner_,SIGNAL(scanStarted()),
-            this,SLOT(scanStarted()));
-
-    connect(scanner_,SIGNAL(scanFinished()),
-            this,SLOT(scanFinished()));
-
-    connect(scanner_,SIGNAL(scanProgressed(int)),
-            this,SLOT(scanProgressed(int)));
 }
 
 TriggerItemWidget::~TriggerItemWidget()
@@ -220,9 +223,16 @@ void TriggerItemWidget::checkActionState()
     dependTb_->setEnabled(true);
 }
 
-void TriggerItemWidget::on_dependTb__toggled(bool)
+void TriggerItemWidget::on_dependTb__toggled(bool b)
 {   
     load();
+
+    //when we activate the dependencies we always show the
+    //dependency details as well
+    if(b && dependInfoTb_->isChecked() == false)
+    {
+        dependInfoTb_->setChecked(true);
+    }
 }
 
 void TriggerItemWidget::on_dependInfoTb__toggled(bool b)
@@ -234,7 +244,6 @@ void TriggerItemWidget::slotHandleDefInfoWidgetClosure()
 {
     dependInfoTb_->setChecked(false);
 }
-
 
 void TriggerItemWidget::on_exprTb__toggled(bool b)
 {

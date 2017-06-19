@@ -31,9 +31,18 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
+     <property name="handleWidth">
+      <number>2</number>
+     </property>
+     <property name="childrenCollapsible">
+      <bool>true</bool>
+     </property>
      <widget class="QSplitter" name="splitter2_">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="handleWidth">
+       <number>2</number>
       </property>
       <property name="childrenCollapsible">
        <bool>false</bool>
@@ -46,7 +55,7 @@
         <item>
          <widget class="QLabel" name="triggerLabel_">
           <property name="text">
-           <string> &amp;nbsp;&lt;b&gt;Triggers&lt;/b&gt; of the selected node</string>
+           <string> &amp;nbsp;&lt;b&gt;Triggers of the&lt;/b&gt; selected node</string>
           </property>
          </widget>
         </item>

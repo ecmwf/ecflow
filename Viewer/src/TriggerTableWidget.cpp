@@ -125,7 +125,7 @@ void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
     if(!depInfoWidget_->isVisible())
         return;
 
-    QString txt=tr("&nbsp;The parents/children of <CTYPE> <CITEM> that <TGTYPE> <TG> triggers");
+    QString txt=tr("&nbsp; <TGTYPE> <TG> triggers these parents/children of <CTYPE> <CITEM>");
     QString tgName,tgType;
     QColor col(255,255,255);
 
@@ -179,7 +179,7 @@ void TriggerTableWidget::slotTriggeredSelection(TriggerTableItem* item)
     if(!depInfoWidget_->isVisible())
         return;
 
-    QString txt=tr("&nbsp;The parents/children of <CTYPE> <CITEM> that triggers <TYPE> <ITEM>");
+    QString txt=tr("&nbsp; <TYPE> <ITEM> is triggered by these parents/children of <CTYPE> <CITEM>");
     QString tgType,tgName;
     QColor col(255,255,255);
 
