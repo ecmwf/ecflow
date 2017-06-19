@@ -44,6 +44,7 @@ public:
 	QString typeStr() const;
 	QString stateStr() const;
 	QColor stateColour() const;
+    QString stateChangeTime() const;
     QStringList attr() const;
     bool hasAttribute() const {return attr_.count() > 0;}
 

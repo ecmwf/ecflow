@@ -202,6 +202,10 @@
             "label" : "Type",
             "tooltip" : "Node type"
         },
+        "statusChange" : {
+            "label" : "Status changed",
+            "tooltip" : "Time of the last status change (nodes only)"
+        },
         "attribute" : {
             "label" : "Attribute"
         }       
