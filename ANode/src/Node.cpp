@@ -2019,15 +2019,12 @@ size_t Node::position() const
 
 void Node::gen_variables(std::vector<Variable>& vec) const
 {
-   if (!repeat_.empty()) {
-      vec.push_back(repeat_.gen_variable());
-   }
+    repeat_.gen_variables(vec);  // if repeat_ is empty vec is unchanged
 }
 
 const Variable& Node::findGenVariable(const std::string& name) const
 {
-   if (!repeat_.empty() && repeat_.name() == name) return repeat_.gen_variable();
-   return Variable::EMPTY();
+    return repeat_.find_gen_variable(name); // if repeat_ is empty find returns empty variable by ref
 }
 
 void Node::update_repeat_genvar() const

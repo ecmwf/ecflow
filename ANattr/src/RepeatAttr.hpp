@@ -45,12 +45,14 @@ public:
 
    /// make non virtual so that it can be in-lined. Called millions of times
    const std::string& name() const { return name_; }
-   const Variable& gen_variable() const { return var_; }
-   Variable& set_gen_variable() const { return var_; }
-
    virtual int start() const = 0;
    virtual int end() const = 0;
    virtual int step() const = 0;
+
+   // Handle generated variables
+   virtual void gen_variables(std::vector<Variable>& vec) const { vec.push_back(var_);}
+   virtual const Variable& find_gen_variable(const std::string& name) const { return name == name_ ? var_ : Variable::EMPTY(); }
+   virtual void update_repeat_genvar() const;
 
    // After Repeat expiration the last call to increment() can cause
    // value to be beyond the last valid value
@@ -120,6 +122,10 @@ public:
    RepeatDate( const std::string& variable, int start, int end, int delta = 1/* always in days*/);
    RepeatDate() :  start_(0), end_(0), delta_(0), value_(0)  {}
 
+   virtual void gen_variables(std::vector<Variable>& vec) const;
+   virtual const Variable& find_gen_variable(const std::string& name) const;
+   virtual void update_repeat_genvar() const;
+
    virtual int start() const  { return start_; }
    virtual int end() const    { return end_;   }
    virtual int step() const   { return delta_; }
@@ -159,6 +165,12 @@ private:
    int  end_;
    int  delta_;
    long value_;
+
+   mutable Variable yyyy_;         // *not* persisted
+   mutable Variable mm_;           // *not* persisted
+   mutable Variable dom_;          // *not* persisted
+   mutable Variable dow_;          // *not* persisted
+   mutable Variable julian_;       // *not* persisted
 
    friend class boost::serialization::access;
    template<class Archive>
@@ -406,8 +418,10 @@ public:
    void clear() { delete repeatType_; repeatType_ = 0;}
 
    const std::string& name() const;
-   const Variable& gen_variable() const;
-   void update_repeat_genvar() const;
+
+   void gen_variables(std::vector<Variable>& vec) const { if (repeatType_) repeatType_->gen_variables(vec);}
+   const Variable& find_gen_variable(const std::string& name) const { return (repeatType_) ? repeatType_->find_gen_variable(name) : Variable::EMPTY();}
+   void update_repeat_genvar() const { if (repeatType_) repeatType_->update_repeat_genvar();}
 
    int start() const  { return (repeatType_) ? repeatType_->start() : 0;}
    int end() const    { return (repeatType_) ? repeatType_->end()   : 0;}
