@@ -62,6 +62,8 @@ Q_SIGNALS:
 
 private:
     VInfo_ptr info_;
+    TriggerTableCollector* nodeCollector_;
+    TriggerTableModel *nodeModel_;
     TriggerTableModel *triggerModel_;
     TriggerTableModel *triggeredModel_;
     VInfo_ptr lastSelectedItem_;
