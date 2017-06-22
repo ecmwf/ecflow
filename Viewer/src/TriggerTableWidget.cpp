@@ -44,11 +44,13 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
     nodeView_->setFixedHeight(fm.size(0,"A").height()+fm.height()/3);
 
     //Set the size of the left and right arrow labels
-    leftArrowLabel_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    leftArrowLabel_->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     leftArrowLabel_->setFixedHeight(nodeView_->height());
+    leftArrowLabel_->setFixedWidth(nodeView_->height());
 
-    rightArrowLabel_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    rightArrowLabel_->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     rightArrowLabel_->setFixedHeight(nodeView_->height());
+    rightArrowLabel_->setFixedWidth(nodeView_->height());
 
     //Trigger - model + view
     triggerModel_ = new TriggerTableModel(TriggerTableModel::TriggerMode,this);
