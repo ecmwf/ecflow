@@ -11,6 +11,8 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/test/unit_test.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include <iostream>
 
 #include "Defs.hpp"
@@ -18,6 +20,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Str.hpp"
+#include "Cal.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -83,10 +86,16 @@ BOOST_AUTO_TEST_CASE( test_generated_variables )
    findParentVariableValue(t,"ECF_DATE","");
    findParentVariableValue(t,"ECF_CLOCK","");
    findParentVariableValue(t,"ECF_TIME","");
+   findParentVariableValue(t,"ECF_JULIAN","");
 
    // Test repeat generated variables
    findParentVariableValue(t,"AEnum","AA");
    findParentVariableValue(t,"YMD","20090101");
+   findParentVariableValue(t,"YMD_YYYY","2009");
+   findParentVariableValue(t,"YMD_MM","1");
+   findParentVariableValue(t,"YMD_DD","1");
+   findParentVariableValue(t,"YMD_DOW","4");
+   findParentVariableValue(t,"YMD_JULIAN",boost::lexical_cast<std::string>(Cal::date_to_julian(20090101)));
    findParentVariableValue(t,"RepeatInteger","10");
 }
 
