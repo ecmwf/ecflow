@@ -78,7 +78,6 @@ typedef struct _HyperPart {
 
     int      margin;             /* margins size */
 
-
     text_segment         *grep_seg;  /* segment where found text is */
 
     char                 *grep_txt;  /* pointer to found text */
@@ -93,8 +92,6 @@ typedef struct _HyperPart {
     text_segment        *first_seg;     /* the text segments         */
     text_segment        *last_selected; /* last selected segment     */
     text_segment        *last_cursor;   /* last under cursor segment */
-
-
     XtCallbackList activate;         /* callback list             */
 
 } HyperPart;
