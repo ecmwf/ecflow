@@ -187,8 +187,11 @@ void variables::show( node& n )
 		      (*it).name() == "ECF_PASS") 
 		    continue;
 		  const std::string& name = (*it).name();
+		  bool readOnly = name=="ECF_PASS" ||
+		    // name=="ECF_JOB" || name=="ECF_JOBOUT" ||
+		    name=="ECF_NAME";
 		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
-		    snprintf(buffer, 1024, fmt1, name.c_str(), (*it).theValue().c_str());
+		    snprintf(buffer, 1024, readOnly ? fmt3 : fmt1, name.c_str(), (*it).theValue().c_str());
 		    xec_AddFontListItem(list_, buffer, 0);
 		    shown.push_back(name); }
                }
@@ -209,9 +212,14 @@ void variables::show( node& n )
                for(it = gvar.begin(); it !=  gvar.end(); ++it) {
 		  const std::string& name = (*it).name();
 		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
-		    bool readOnly = name=="ECF_NODE" || name=="ECF_HOST" || name=="ECF_PORT" ||
+		    bool readOnly = name=="ECF_PASS" ||
+		      name=="ECF_PORT" ||
+		      name=="ECF_NODE" || 
+		      name=="ECF_HOST" || 
+		      name=="ECF_NAME" ||
 		      name=="ECF_LISTS" || // security ???
-		      name=="ECF_PID"  || name=="ECF_VERSION";
+		      name=="ECF_PID"  || 
+		      name=="ECF_VERSION";
 		    snprintf(buffer, 1024, readOnly ? fmt3 : fmt1, 
 			     name.c_str(), (*it).theValue().c_str());
 		    xec_AddFontListItem(list_, buffer, 0);

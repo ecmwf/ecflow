@@ -744,7 +744,12 @@ def test_client_get_file(ci):
     print("test_client_get_file")
     ci.delete_all()     
     defs = create_defs("test_client_get_file")  
-      
+    
+    # Also test where user has specified his OWN ECF_JOBOUT (rare)
+    t2 = defs.find_abs_node("/test_client_get_file/f1/t2")
+    t2_jobout = Test.ecf_home(the_port) + "/test_client_get_file/t2.xx"
+    t2.add_variable("ECF_JOBOUT",t2_jobout)
+    
     defs.generate_scripts();
     msg = defs.check_job_creation()
     assert len(msg) == 0, msg
@@ -765,6 +770,13 @@ def test_client_get_file(ci):
         for file_t in [ 'script', 'job', 'jobout', 'manual' ]:
             the_returned_file = ci.get_file('/test_client_get_file/f1/t1',file_t)  # make a request to the server
             assert len(the_returned_file) > 0,"Expected ci.get_file(/test_client_get_file/f1/t1," + file_t + ") to return something"
+
+        for file_t in [ 'script', 'job', 'jobout', 'manual' ]:
+            the_returned_file = ci.get_file('/test_client_get_file/f1/t2',file_t)  # make a request to the server
+            assert len(the_returned_file) > 0,"Expected ci.get_file(/test_client_get_file/f1/t2," + file_t + ") to return something"
+
+        assert os.path.exists(t2_jobout),"User specified ECF_JOBOUT file not created " + t2_jobout
+ 
     except RuntimeError as e:
         print(str(e))
 

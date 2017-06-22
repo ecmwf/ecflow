@@ -401,10 +401,11 @@ BOOST_AUTO_TEST_CASE( test_server_variable_substitution )
    }
 }
 
-BOOST_AUTO_TEST_CASE( test_generated_variable_substitution_of_ECF_OUT )
+BOOST_AUTO_TEST_CASE( test_generated_variable_substitution )
 {
    // test that if ECF_OUT is defined using %, then we perform variable substitution
-   std::cout <<  "ANode:: ...test_generated_variable_substitution_of_ECF_OUT\n";
+   // test that if ECF_JOBOUT or ECF_JOB are specified, they take priority over the generated variables
+   std::cout <<  "ANode:: ...test_generated_variable_substitution\n";
 
    Defs defs;
    suite_ptr s = defs.add_suite("suite");
@@ -417,11 +418,15 @@ BOOST_AUTO_TEST_CASE( test_generated_variable_substitution_of_ECF_OUT )
    f1->addVariable(Variable("PATH2","/fred/bill/joe2"));
    task_ptr t1 = f1->add_task("t1");
    t1->addVariable(Variable("ECF_OUT","%PATH2%"));
+   task_ptr t2 = f1->add_task("t2");
+   t2->addVariable(Variable("ECF_JOBOUT","ECFLOW-999"));
+   t2->addVariable(Variable("ECF_JOB","ECFLOW-999"));
 
    // begin_all
    defs.beginAll();
    t->update_generated_variables();
    t1->update_generated_variables();
+   t2->update_generated_variables();
 
    // cout << defs;
 
@@ -433,6 +438,15 @@ BOOST_AUTO_TEST_CASE( test_generated_variable_substitution_of_ECF_OUT )
    value.clear();
    t1->findParentVariableValue(Str::ECF_JOBOUT(),value);
    BOOST_CHECK_MESSAGE(value == "/fred/bill/joe2/suite/f1/t1.0","ECF_JOBOUT expected /fred/bill/joe/suite/f/t.0, but found " << value);
+
+
+   // ECFLOW-999  make sure that if ECF_JOBOUT or ECF_JOB are overridden, they take priority over
+   // the generated variables of the same name
+   std::string cmd = Ecf::JOB_CMD();
+   BOOST_CHECK_MESSAGE(t2->variableSubsitution(cmd)," variableSubsitution failed for " << Ecf::JOB_CMD());
+
+   std::string expected = "ECFLOW-999 1> ECFLOW-999 2>&1";
+   BOOST_CHECK_MESSAGE( cmd == expected,"variable substitution failed expected " << expected << " but found " << cmd);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

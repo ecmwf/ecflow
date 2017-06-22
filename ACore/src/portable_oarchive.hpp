@@ -66,7 +66,7 @@
  *       in binary floating point serialization as desired by some boost users.
  *       Instead we support only the most widely used IEEE 754 format and try to
  *       detect when requirements are not met and hence our approach must fail.
- *       Contributions we made by Johan Rade and Ákos Maróy.
+ *       Contributions we made by Johan Rade and ï¿½kos Marï¿½y.
  *
  * \note Version 2.0 fixes a serious bug that effectively transformed most
  *       of negative integral values into positive values! For example the two
@@ -371,7 +371,7 @@ namespace eos {
 			typedef typename fp::detail::fp_traits<T>::type traits;
 
 			// if the no_infnan flag is set we must throw here
-			if (get_flags() & no_infnan && !fp::isfinite(t))
+			if ((get_flags() & no_infnan) && !fp::isfinite(t))
 				throw portable_archive_exception(t);
 
 			// if you end here there are three possibilities:
@@ -391,7 +391,8 @@ namespace eos {
 			case FP_NAN: bits = traits::exponent | traits::mantissa; break;
 			case FP_INFINITE: bits = traits::exponent | (t<0) * traits::sign; break;
 			case FP_SUBNORMAL: assert(std::numeric_limits<T>::has_denorm); // pass
-			case FP_ZERO: // note that floats can be ±0.0
+			/* no break */
+			case FP_ZERO: // note that floats can be ï¿½0.0
 			case FP_NORMAL: traits::get_bits(t, bits); break;
 			default: throw portable_archive_exception(t);
 			}
