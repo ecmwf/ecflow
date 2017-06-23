@@ -99,7 +99,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             Q_EMIT dashboardCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;
     	}
-    	else if(item->handler() == "tree")
+        else if(item->handler() == "tree" || item->handler() == "table" || item->handler() == "trigger")
     	{
             Q_EMIT viewCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;

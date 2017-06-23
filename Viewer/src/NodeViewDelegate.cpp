@@ -302,7 +302,7 @@ int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyl
 {
     int totalWidth=0;
 
-    if(data.count() != 6)
+    if(data.count() < 6)
         return totalWidth;
 
 	//The data
@@ -314,6 +314,10 @@ int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyl
     bool selected=option.state & QStyle::State_Selected;
 
     QString name=data.at(1) + ":";
+
+    if(data.count() == 7)
+        name.prepend(data[6] + ":");
+
     QString valStr=data.at(2);
     QFontMetrics fm(attrFont_);
 
@@ -655,9 +659,15 @@ int NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyl
     if(data.count() < 2)
         return totalWidth;
 
-	QString name=data.at(1);
+    QString name=data[1];
 	bool val=false;
-	if(data.count() > 2) val=(data.at(2) == "1");
+    if(data.count() > 2) val=(data[2] == "1");
+
+    //Add full path
+    if(data.count() > 3)
+    {
+        name.prepend(data[3] + ":/");
+    }
 
     bool selected=option.state & QStyle::State_Selected;
     QFont font=attrFont_;
@@ -724,6 +734,9 @@ int NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleO
 	if(data.count() > 2)
 		text+=data.at(2);
 
+    if(data.count() == 4)
+        text.prepend(data[3] + ":");
+
     bool selected=option.state & QStyle::State_Selected;
 
     //The contents rect (we will adjust its  width)
@@ -777,6 +790,9 @@ int  NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 	if(data.count() > 2)
 		text+=data.at(2);
 
+    if(data.count() == 4)
+        text.prepend(data[3] + ":");
+
     bool selected=option.state & QStyle::State_Selected;
 
     //The contents rect (we will adjust its  width)
@@ -822,7 +838,7 @@ int  NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
     int totalWidth=0;
-    if(data.count() != 4)
+    if(data.count() < 4)
         return totalWidth;
 
 	//The data
@@ -831,6 +847,9 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
 	QString name=data.at(1) + ":";
     QString valStr=QString::number(val) + "/" + QString::number(maxVal);
     int totalVal=qMax(val,maxVal); //val can be larger than maxVal!!
+
+    if(data.count() == 5)
+        name.prepend(data[4] + ":");
 
     bool selected=option.state & QStyle::State_Selected;
 
@@ -973,10 +992,14 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
 int NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
     int totalWidth=0;
-    if(data.count() != 3)
+    if(data.count() < 3)
         return totalWidth;
 
 	QString name="inlimit " + data.at(2) +":" +data.at(1);
+
+    if(data.count() == 4)
+        name.prepend(data[3] + ":");
+
     bool selected=option.state & QStyle::State_Selected;
 
     //The contents rect (we will adjust its  width)
@@ -1096,10 +1119,14 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
 int NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
     int totalWidth=0;
-    if(data.count() != 2)
+    if(data.count() < 2)
         return totalWidth;
 
-	QString name=data.at(1);
+    QString name=data[1];
+
+    if(data.count() == 3)
+        name.prepend(data[2] + ":");
+
     bool selected=option.state & QStyle::State_Selected;
 
     //The contents rect (we will adjust its  width)
@@ -1146,10 +1173,14 @@ int NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyle
 int NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
     int totalWidth=0;
-    if(data.count() != 2)
+    if(data.count() < 2)
         return totalWidth;
 
-	QString name=data.at(1);
+    QString name=data[1];
+
+    if(data.count() == 3)
+        name.prepend(data[2] + ":");
+
     bool selected=option.state & QStyle::State_Selected;
 
     //The contents rect (we will adjust its  width)
@@ -1201,7 +1232,7 @@ int NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyle
 int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
     int totalWidth=0;
-    if(data.count() !=  7)
+    if(data.count() <  7)
          return totalWidth;
 
     QString type=data.at(1);
@@ -1210,6 +1241,9 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
     QString start=data.at(4);
     QString end=data.at(5);
     QString step=data.at(6);
+
+    if(data.count() == 8)
+        name.prepend(data[7] + ":");
 
     bool selected=option.state & QStyle::State_Selected;
 
@@ -1352,10 +1386,14 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
 int NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
 {
     int totalWidth=0;
-	if(data.count() != 2)
+    if(data.count() < 2)
         return totalWidth;
 
-	QString name="late: " + data.at(1);
+    QString name="late: " + data[1];
+
+    if(data.count() == 3)
+        name.prepend(data[2] + ":");
+
     bool selected=option.state & QStyle::State_Selected;
 
 	//The border rect (we will adjust its  width)

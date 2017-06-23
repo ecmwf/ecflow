@@ -145,18 +145,20 @@ set(viewer_srcs
     RichTextSearchLine.cpp
     TextEditSearchLine.cpp
     TimeItemWidget.cpp    
-    TriggerBrowser.cpp
-    TriggerEditor.cpp
-    TriggerItemWidget.cpp
-    TriggerTextWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
     TreeNodeViewDelegateBase.cpp
     TreeNodeWidget.cpp
     TreeView.cpp
+    TriggerEditor.cpp   
+    TriggerItemWidget.cpp
+    TriggerTextWidget.cpp    
     TriggerCollector.cpp
-    TriggerView.cpp
+    TriggerTableModel.cpp
+    TriggerTableView.cpp
+    TriggerTableWidget.cpp
+    TriggerViewDelegate.cpp
     TriggeredScanner.cpp
     UIDebug.cpp
     UiLog.cpp
@@ -313,10 +315,11 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp           
     TreeNodeViewDelegateBase.hpp
-    TreeNodeWidget.hpp
-    TriggerBrowser.hpp
+    TreeNodeWidget.hpp    
     TriggerEditor.hpp
     TriggerItemWidget.hpp
+    TriggerTableView.hpp
+    TriggerTableWidget.hpp
     TriggeredScanner.hpp
     VariableItemWidget.hpp
     VariableModel.hpp
@@ -382,9 +385,9 @@ set(viewer_wrap_ui_files
     TableNodeWidget.ui
     TimeItemWidget.ui
     TreeNodeWidget.ui
-    TriggerBrowser.ui
     TriggerEditorWidget.ui
     TriggerItemWidget.ui
+    TriggerTableWidget.ui
     VariableAddDialog.ui
     VariablePropDialog.ui
     VariableItemWidget.ui

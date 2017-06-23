@@ -71,9 +71,10 @@ bool VAttribute::sameContents(VItem* item) const
         return false;
 
     if(VAttribute *a=item->isAttribute())
-    {    return a->parent() == parent() &&
+    {
+        return a->parent() == parent() &&
                 a->type() == type() &&
-                name() == name();
+                a->name() == name();
     }
     return false;
 }

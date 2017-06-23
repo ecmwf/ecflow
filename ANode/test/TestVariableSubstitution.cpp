@@ -419,8 +419,8 @@ BOOST_AUTO_TEST_CASE( test_generated_variable_substitution )
    task_ptr t1 = f1->add_task("t1");
    t1->addVariable(Variable("ECF_OUT","%PATH2%"));
    task_ptr t2 = f1->add_task("t2");
-   t2->addVariable(Variable("ECF_JOBOUT","ECFLOW-9999"));
-   t2->addVariable(Variable("ECF_JOB","ECFLOW-9999"));
+   t2->addVariable(Variable("ECF_JOBOUT","ECFLOW-999"));
+   t2->addVariable(Variable("ECF_JOB","ECFLOW-999"));
 
    // begin_all
    defs.beginAll();
@@ -440,12 +440,12 @@ BOOST_AUTO_TEST_CASE( test_generated_variable_substitution )
    BOOST_CHECK_MESSAGE(value == "/fred/bill/joe2/suite/f1/t1.0","ECF_JOBOUT expected /fred/bill/joe/suite/f/t.0, but found " << value);
 
 
-   // ECFLOW-9999  make sure that if ECF_JOBOUT or ECF_JOB are overridden, they take priority over
+   // ECFLOW-999  make sure that if ECF_JOBOUT or ECF_JOB are overridden, they take priority over
    // the generated variables of the same name
    std::string cmd = Ecf::JOB_CMD();
    BOOST_CHECK_MESSAGE(t2->variableSubsitution(cmd)," variableSubsitution failed for " << Ecf::JOB_CMD());
 
-   std::string expected = "ECFLOW-9999 1> ECFLOW-9999 2>&1";
+   std::string expected = "ECFLOW-999 1> ECFLOW-999 2>&1";
    BOOST_CHECK_MESSAGE( cmd == expected,"variable substitution failed expected " << expected << " but found " << cmd);
 }
 

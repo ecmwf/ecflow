@@ -53,11 +53,10 @@ public:
 public Q_SLOTS:
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
-	void slotViewCommand(std::vector<VInfo_ptr>,QString);
+    void slotViewCommand(VInfo_ptr,QString);
 	void slotHeaderContextMenu(const QPoint &position);
 	void slotSizeHintChangedGlobal();
     void slotRerender();
-    void slotViewCommand(VInfo_ptr,QString) {}
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

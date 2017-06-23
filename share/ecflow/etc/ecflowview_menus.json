@@ -49,6 +49,18 @@
     "menu_items" :
     [
 
+        {
+            "menu"           : "Node",
+            "name"           : "Lookup in tree",
+            "command"        : "lookup",
+            "handler"        : "trigger",
+            "view"           : "trigger"
+        },
+
+        {
+             "menu"           : "Node",
+             "name"           : "-"
+        },
 
         {
             "menu"           : "Node",
@@ -753,7 +765,7 @@
             "visible_for"    : "label or meter or limit or trigger",
             "command"        : "edit",
             "handler"        : "tree",
-            "view"           : "tree"
+            "view"           : "tree/trigger"
         },
         {
             "menu"           : "Node",
@@ -761,7 +773,7 @@
             "visible_for"    : "repeat  and not repeat_day",
             "command"        : "edit",
             "handler"        : "tree",
-            "view"           : "tree"
+            "view"           : "tree/trigger"
         }
     ]
 

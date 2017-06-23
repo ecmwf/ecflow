@@ -286,7 +286,7 @@ void TreeNodeWidget::notifyChange(VProperty* p)
     }
 }
 
-void TreeNodeWidget::writeSettings(VSettings* vs)
+void TreeNodeWidget::writeSettings(VComboSettings* vs)
 {
 	vs->put("type",type_);
 	vs->put("dockId",id_);
@@ -306,7 +306,7 @@ void TreeNodeWidget::writeSettings(VSettings* vs)
     DashboardWidget::writeSettings(vs);
 }
 
-void TreeNodeWidget::readSettings(VSettings* vs)
+void TreeNodeWidget::readSettings(VComboSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
 	if(type != type_)
