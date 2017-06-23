@@ -121,12 +121,12 @@ void DashboardWidget::setInDialog(bool b)
     }
 }
 
-void DashboardWidget::writeSettings(VSettings* vs)
+void DashboardWidget::writeSettings(VComboSettings* vs)
 {
     vs->putAsBool("detached",detached());
 }
 
-void DashboardWidget::readSettings(VSettings* vs)
+void DashboardWidget::readSettings(VComboSettings* vs)
 {
     setDetached(vs->getAsBool("detached",detached()));
 }

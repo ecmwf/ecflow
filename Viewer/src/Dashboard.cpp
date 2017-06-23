@@ -106,7 +106,14 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 	}
 	else if(type == "info")
 	{
-		InfoPanel* ctl=new InfoPanel(this);       
+        InfoPanel* ctl=new InfoPanel(this);
+
+        connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
+                this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
+
+        connect(ctl,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+                this,SLOT(slotCommand(VInfo_ptr,QString)));
+
 		w=ctl;
 	}
 

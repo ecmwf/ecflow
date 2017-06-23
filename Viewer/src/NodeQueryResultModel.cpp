@@ -129,6 +129,8 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
 			return d->typeStr();
 		else if(id == "status")
             return d->stateStr();
+        else if(id == "statusChange")
+            return d->stateChangeTime();
         else if(id == "attribute")
             return d->attr();
 
@@ -143,7 +145,7 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
 	}
 	else if(role == Qt::TextAlignmentRole)
 	{
-		if(id == "status" || id == "type")
+        if(id == "status" || id == "type" || id == "statusChange")
 			return Qt::AlignCenter;
 
 		return QVariant();
@@ -167,7 +169,7 @@ QVariant NodeQueryResultModel::headerData( const int section, const Qt::Orientat
 		return columns_->tooltip(section);
 	else if(role == Qt::TextAlignmentRole)
 	{
-		if(id == "status" || id == "type")
+        if(id == "status" || id == "type" || id == "statusChange")
 			return Qt::AlignCenter;
 	}
 

@@ -59,6 +59,8 @@ public:
     void clear();
 	void setCurrent(const std::string& name);
     void linkSelected(VInfo_ptr);
+    void relayInfoPanelCommand(VInfo_ptr info,QString cmd);
+    void relayDashboardCommand(VInfo_ptr info,QString cmd);
 
     void populateDialog();
 
@@ -66,8 +68,8 @@ public:
     void populateDockTitleBar(DashboardDockTitleWidget*);
     void reload() {}
 	void rerender();
-    void writeSettings(VSettings*);
-	void readSettings(VSettings*);
+    void writeSettings(VComboSettings*);
+    void readSettings(VComboSettings*);
     void writeSettingsForDialog();
     void readSettingsForDialog();
 

@@ -87,6 +87,7 @@ public:
     static VInfo_ptr createParent(VInfo_ptr);
     static VInfo_ptr createFromPath(ServerHandler*,const std::string&);
     static VInfo_ptr createFromPath(const std::string& path);
+    static VInfo_ptr createFromItem(VItem*);
 
 protected:
     VInfo(ServerHandler* server,VNode* node,VAttribute* attr=0);
