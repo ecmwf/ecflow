@@ -103,7 +103,8 @@ public:
 	static void command(std::vector<VInfo_ptr>,std::string);
 
 	void searchBegan();
-	void searchFinished();
+	void searchFinished();    
+    bool updateInfo(int& basePeriod,int& currentPeriod,int &drift,int& toNext);
     int secsSinceLastRefresh() const;
     int secsTillNextRefresh() const;
 

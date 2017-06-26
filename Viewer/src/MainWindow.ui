@@ -139,9 +139,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRefreshSelected"/>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
+   <addaction name="actionRefreshSelected"/>
   </widget>
   <action name="actionClose">
    <property name="icon">

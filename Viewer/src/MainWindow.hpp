@@ -24,6 +24,7 @@ class QLabel;
 class QToolButton;
 class InfoPanel;
 class NodePanel;
+class ServerRefreshInfoWidget;
 class ServerFilterMenu;
 class SessionItem;
 class VComboSettings;
@@ -105,6 +106,7 @@ private:
     QList<QAction*> infoPanelActions_;
     VInfo_ptr selection_;
     QToolButton* serverSyncNotifyTb_;
+    ServerRefreshInfoWidget *serverComWidget_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

@@ -113,6 +113,7 @@ set(viewer_srcs
     RepeatEditor.cpp
     SaveSessionAsDialog.cpp
     ScriptItemWidget.cpp
+    ServerComInfoWidget.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
     ServerDefsAccess.cpp

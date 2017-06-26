@@ -163,6 +163,23 @@ ServerHandler::~ServerHandler()
 	delete conf_;
 }
 
+bool ServerHandler::updateInfo(int& basePeriod,int& currentPeriod,int &drift,int& toNext)
+{
+    if(!refreshTimer_->isActive())
+        return false;
+
+    toNext=secsTillNextRefresh();
+    basePeriod=conf_->intValue(VServerSettings::UpdateRate);
+    currentPeriod=refreshTimer_->interval()/1000;
+    drift=-1;
+    if(conf_->boolValue(VServerSettings::AdaptiveUpdate))
+    {
+        drift=conf_->intValue(VServerSettings::AdaptiveUpdateIncrement);
+    }
+
+    return true;
+}
+
 int ServerHandler::secsSinceLastRefresh() const
 {
     return static_cast<int>(lastRefresh_.secsTo(QDateTime::currentDateTime()));

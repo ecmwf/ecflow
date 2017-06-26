@@ -32,6 +32,7 @@
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
 #include "PropertyDialog.hpp"
+#include "ServerComInfoWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerList.hpp"
 #include "ServerListDialog.hpp"
@@ -87,10 +88,13 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
     connect(nodePanel_,SIGNAL(contentsChanged()),
-    	    this,SLOT(slotContentsChanged()));
+            this,SLOT(slotContentsChanged()));
 
     //Add temporary preview label
-   /* QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
+    serverComWidget_=new ServerRefreshInfoWidget(actionRefreshSelected,this);
+    viewToolBar->addWidget(serverComWidget_);
+
+    /* QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
     label->setAutoFillBackground(true);
     label->setProperty("previewLabel","1");
 
@@ -132,6 +136,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     //Add notification widget
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
+
+    //serverComWidget_=new ServerComLineDisplay(this);
+    //statusBar()->addPermanentWidget(serverComWidget_);
 
     //Assigns name to each object
     WidgetNameProvider::nameChildren(this);
@@ -382,6 +389,7 @@ void MainWindow::updateRefreshActions()
 		if(ServerHandler* s=selection_->server())
 		{
 			serverName=QString::fromStdString(s->name());
+            serverComWidget_->setServer(s);
 		}
 	}
 
@@ -406,7 +414,7 @@ void MainWindow::updateRefreshActions()
 
 			actionRefreshSelected->setToolTip(tnew);
 		}
-	}
+	}   
 }
 
 
