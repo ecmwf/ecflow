@@ -82,7 +82,7 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
          "        server will expect <host>.<port>.ecf.lists \n"
          "ECF_TASK_THRESHOLD:\n"
          "  The Job generation process is expected to take less than 60 seconds\n"
-         "  This is used to aid debugging of task tasking excessive times for job generation\n"
+         "  This is used to aid debugging of task taking excessive times for job generation\n"
          "  The causes can be:\n"
          "    a/ Slow disk I/0, or when server is run an a virtual machine\n"
          "    b/ Insufficient memory, when compared to the size of the scripts/definition\n"
