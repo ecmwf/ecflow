@@ -6,7 +6,7 @@ A new version of the ecFlow(4.7.0) has been released:
 ********************************************************************
 * IMPORTANT
 * The checkpoint format has changed in release 4.7.0.
-* The new format is human readable since it is the defs file format 
+* The new format is human readable since it is the defs file format,
 * with state in the comments. Hence it is not loadable as a checkpoint file,
 * in older version of ecflow.
 * If you want to revert back to an older version of the server, please use:
