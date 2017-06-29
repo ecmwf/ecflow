@@ -190,8 +190,8 @@ void TableNodeView::setCurrentSelection(VInfo_ptr info)
     if(idx.isValid())
     {
 #ifdef _UI_TABLENODEVIEW_DEBUG
-    if(info)
-        UiLog().dbg() << "TableNodeView::setCurrentSelection --> " <<  info->path();
+        if(info)
+            UiLog().dbg() << "TableNodeView::setCurrentSelection --> " <<  info->path();
 #endif
         setCurrentIndex(idx);
     }
@@ -236,18 +236,8 @@ void TableNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList i
 		}
 }
 
-void TableNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
+void TableNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 {
-
-	if(nodeLst.size() == 0)
-		return;
-
-	if(cmd == "set_as_root")
-	{
-        UiLog().dbg() << "set as root";
-		//model_->setRootNode(nodeLst.at(0)->node());
-		//expandAll();
-	}
 }
 
 void TableNodeView::rerender()

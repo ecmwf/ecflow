@@ -52,11 +52,6 @@ protected Q_SLOTS:
 	void slotInfoPanelAction();
     void slotSelectionChangedInBc(VInfo_ptr info);
 
-Q_SIGNALS:
-    //void selectionChanged(VInfo_ptr);
-	void popInfoPanel(VInfo_ptr,QString);
-	void dashboardCommand(VInfo_ptr,QString);
-
 protected:
 	explicit NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent=0);
 	virtual ~NodeWidget();

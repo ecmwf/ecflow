@@ -21,7 +21,7 @@
 class DashboardDockTitleWidget;
 class NodePathWidget;
 class ServerFilter;
-class VSettings;
+class VComboSettings;
 
 class DashboardWidget : public QWidget
 {
@@ -48,8 +48,8 @@ public:
     void setEnableMaximised(bool st);
     bool isInDialog() const {return inDialog_;}
 
-    virtual void writeSettings(VSettings*);
-    virtual void readSettings(VSettings*);
+    virtual void writeSettings(VComboSettings*);
+    virtual void readSettings(VComboSettings*);
     virtual void writeSettingsForDialog() {}
     virtual void readSettingsForDialog() {}
 
@@ -63,6 +63,8 @@ Q_SIGNALS:
     void titleUpdated(QString,QString type=QString());
     void selectionChanged(VInfo_ptr);
     void maximisedChanged(DashboardWidget*);
+    void popInfoPanel(VInfo_ptr,QString);
+    void dashboardCommand(VInfo_ptr,QString);
 
 protected Q_SLOTS:
     void slotDetachedToggled(bool);

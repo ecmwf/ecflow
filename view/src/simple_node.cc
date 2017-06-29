@@ -811,8 +811,7 @@ Boolean simple_node::visible() const
 {
   int wanted = status() - STATUS_UNKNOWN + show::unknown;
   try {
-    if(selection::current_node())
-      if (selection::current_node()->full_name() == this->full_name())
+    if(selection::current_path() == this->full_name())
 	return True;
     if(this == selection::current_node()) 
       return True;
@@ -840,7 +839,6 @@ Boolean simple_node::visible_kid() const
 {
   return visible();
 }
-
 
 const char* simple_node::status_name() const 
 {

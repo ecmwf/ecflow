@@ -259,6 +259,36 @@ void InfoPanelItem::linkSelected(const std::string& path)
     }
 }
 
+void InfoPanelItem::linkSelected(VInfo_ptr info)
+{
+    if(!suspended_ && !detached_)
+    {
+        if(info)
+        {
+            assert(owner_);
+            owner_->linkSelected(info);
+        }
+    }
+}
+
+void InfoPanelItem::relayInfoPanelCommand(VInfo_ptr info,QString cmd)
+{
+    if(info)
+    {
+        assert(owner_);
+        owner_->relayInfoPanelCommand(info,cmd);
+    }
+}
+
+void InfoPanelItem::relayDashboardCommand(VInfo_ptr info,QString cmd)
+{
+    if(info)
+    {
+        assert(owner_);
+        owner_->relayDashboardCommand(info,cmd);
+    }
+}
+
 //From NodeObserver
 void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
@@ -269,9 +299,15 @@ void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<e
     if(info_)
 	{
 		if(info_->isNode())
-		{
-			//Check if the updated node is handled by the item
-            if(info_->node() == node ||
+		{                
+            //Check if updates are handled when unselected
+            if(!selected_ && !unselectedFlags_.isSet(KeepContents))
+            {
+                return;
+            }
+
+            //Check if the updated node is handled by the item
+            if(handleAnyChange_ || info_->node() == node ||
               (useAncestors_ && info_->node()->isAncestor(node)))
             {
 			    //We call the method implemented in the concrete class 

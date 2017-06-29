@@ -969,7 +969,7 @@ void VNode::triggers(TriggerCollector* tlc)
                 if(VAttribute* n = findLimit(val, a->strName()))
                 {
 #ifdef _UI_VNODE_DEBUG
-                    UiLog().dbg() << "trigger limit: " << n->name();
+                    //UiLog().dbg() << "trigger limit: " << n->name();
 #endif                   
                     tlc->add(n,nullItem, TriggerCollector::Normal);
                 }
@@ -1022,6 +1022,13 @@ void VNode::triggersInChildren(VNode *n,VNode* p,TriggerCollector* tlc)
         p->children_[i]->triggers(&tcc);
         triggersInChildren(n,p->children_[i],tlc);
   }
+}
+
+void VNode::clearTriggerData()
+{
+    if(data_)
+        delete data_;
+    data_=0;
 }
 
 //These are called during the scan for triggered nodes
@@ -1554,7 +1561,14 @@ VNode* VServer::nodeAt(int idx) const
 
 void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange& change)
 {
-	//NOTE: when this function is called the real node (Node) has already been updated. However the
+#if 0
+    //If the number of nodes changed we need to rescan the whole server-tree
+    if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end())
+    {
+        change.rescan_=true;
+    }
+#endif
+    //NOTE: when this function is called the real node (Node) has already been updated. However the
 	//views do not know about this change. So at this point (this is the begin step of the update)
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
@@ -1580,54 +1594,28 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 			node->check(server_->conf(),stateCh);
 		}
 	}
-#if 0
-	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-#endif
-    bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
-    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-    if(attrNumCh)
+    //-------------------------------------------------------------------------
+    // The trigger relations might be changed. We need to clear the mapped
+    // trigger relations globally if:
+    //    -a trigger expression changed (the aspect is EXPR_TRIGGER)
+    //    -a trigger expression was added or removed (the aspect is ADD_REMOVE_ATTR)
+    //--------------------------------------------------------------------------
+
+    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
     {
-       node->rescanAttr();
+        if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
+        {
+            //we need to rescan the attributes belong to the node
+            node->rescanAttr();
+            clearNodeTriggerData();
+            return;
+        }
+        else if (*it == ecf::Aspect::EXPR_TRIGGER)
+        {
+            clearNodeTriggerData();
+        }
     }
-
-	//----------------------------------------------------------------------
-	// The number of attributes changed but the number of nodes did not
-	//----------------------------------------------------------------------
-
-#if 0
-	if(attrNumCh && !nodeNumCh)
-	{
-        //The attributes were never used. None of the views have ever
-		//wanted to display/access these attributes so far, so we can
-		//just ignore this update!!
-		if(!node->isAttrNumInitialised())
-		{
-			change.ignore_=true;
-		}
-		//Otherwise we just register the number of attributes before and after the update
-		else
-		{
-			node->beginUpdateAttrNum();
-
-			//This it the current number of attributes stored in the real Node. This call will not change the
-			//the number of attributes (attrNum_ stored in the VNode!!!!)
-			change.attrNum_=node->currentAttrNum();
-
-			//this is the number of attributes before the update.
-			change.cachedAttrNum_=node->cachedAttrNum();
-		}
-
-		return;
-	}
-#endif
-	//---------------------------------------------------------------------------------
-	// The number of nodes changed.
-	//---------------------------------------------------------------------------------
-    if(nodeNumCh)
-	{
-		change.rescan_=true;
-	}
 
 	//In any other cases it is just a simple update (value or status changed)
 }
@@ -1639,20 +1627,6 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 
 void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
 {
-#if 0
-    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
-
-	//--------------------------------------------------------------
-	// The number of attributes changed but the number of nodes did not
-	//-------------------------------------------------------------
-
-	if(attrNumCh && ! nodeNumCh)
-	{
-		//This call updates the number of attributes stored in the VNode
-		node->endUpdateAttrNum();
-	}
-#endif
 }
 
 void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect)
@@ -1820,3 +1794,12 @@ QString VServer::toolTip()
 	}
 	return txt;
 }
+
+void VServer::clearNodeTriggerData()
+{
+    triggeredScanned_=false;
+    std::size_t num=nodes_.size();
+    for(std::size_t i=0; i < num; i++)
+        nodes_[i]->clearTriggerData();
+}
+

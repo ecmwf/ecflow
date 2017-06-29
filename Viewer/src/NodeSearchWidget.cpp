@@ -314,8 +314,9 @@ void NodeSearchWidget::adjustColumns()
         QFontMetrics fm(f);
         resTree_->setColumnWidth(0,fm.width("serverserverserse"));
         resTree_->setColumnWidth(1,fm.width("/suite/family1/family2/longtaskname1"));
-        resTree_->setColumnWidth(2,fm.width("suspended"));
-        resTree_->setColumnWidth(3,fm.width("family"));
+        resTree_->setColumnWidth(2,fm.width("suspendedAA"));
+        resTree_->setColumnWidth(3,fm.width("familyAA"));
+        resTree_->setColumnWidth(4,fm.width("2017-Mar-07 15:45:56AA"));
 	}
 }
 
@@ -346,7 +347,7 @@ void NodeSearchWidget::readSettings(const QSettings &settings)
         for(int i=0; i < lst.count(); i++)
             resTree_->setColumnWidth(i,lst[i].toInt());
 
-        if(lst.count() >= 3)
+        if(lst.count() >= 4)
             columnsAdjusted_=true;
     }
 }

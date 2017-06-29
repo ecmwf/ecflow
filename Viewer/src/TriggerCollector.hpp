@@ -10,6 +10,7 @@
 #ifndef TRIGGERCOLLECTOR_HPP
 #define TRIGGERCOLLECTOR_HPP
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -54,6 +55,7 @@ public:
     bool scanKids() { return extended_; }
     void setDependency(bool);
     void clear();
+    size_t size() const {return items_.size();}
 
     const std::vector<TriggerListItem*>& items() const {return items_;}
 
@@ -115,6 +117,86 @@ protected:
     VItem* dep_;
     TriggerCollector::Mode mode_;
 };
+
+class TriggerDependencyItem
+{
+public:
+    TriggerDependencyItem(VItem* dep,TriggerCollector::Mode mode) :
+        dep_(dep), mode_(mode) {}
+
+    VItem* dep()  const {return dep_;}
+    TriggerCollector::Mode mode() const {return mode_;}
+
+protected:
+    VItem* dep_;
+    TriggerCollector::Mode mode_;
+};
+
+class TriggerTableItem
+{
+public:
+    TriggerTableItem(VItem* t) :t_(t){}
+
+    void addDependency(VItem* dep,TriggerCollector::Mode mode)
+            {deps_.push_back(TriggerDependencyItem(dep,mode));}
+
+    VItem* item() const {return t_;}
+    const std::vector<TriggerDependencyItem>& dependencies() const {return deps_;}
+    const std::set<TriggerCollector::Mode>& modes() const;
+
+protected:
+     VItem* t_; //trigger or triggered
+     std::vector<TriggerDependencyItem> deps_;
+     mutable std::set<TriggerCollector::Mode> modes_;
+};
+
+
+class TriggerTableCollector : public TriggerCollector
+{
+public:
+    TriggerTableCollector(bool extended) :
+        extended_(extended) {}
+
+    ~TriggerTableCollector();
+    bool add(VItem*, VItem*,Mode);
+    bool scanParents() { return extended_; }
+    bool scanKids() { return extended_; }
+    void setDependency(bool);
+    void clear();
+    size_t size() const {return items_.size();}
+
+    bool contains(TriggerTableItem*) const;
+    bool contains(const VNode*,bool attrParents=true) const;
+    TriggerTableItem* find(const VItem* item) const;
+    TriggerTableItem* findByContents(const VItem* item) const;
+    const std::vector<TriggerTableItem*>& items() const {return items_;}
+
+protected:
+    bool extended_;
+    std::vector<TriggerTableItem*> items_;
+};
+
+#if 0
+class nl1 : public trigger_lister {
+    int	    n_;
+    graph_layout&	t_;
+    node* g_;
+    bool e_;
+public:
+
+    nl1(graph_layout& t,node* g,bool e) : n_(0), t_(t), g_(g), e_(e) {}
+
+    void next_node(node& n,node* p,int mode,node* t) {
+        t_.relation(&n,g_,p,mode,t);
+        n_++;
+    }
+
+    Boolean parents() { return e_; }
+    Boolean kids() { return e_; }
+
+    int count() { return n_; }
+};
+#endif
 
 
 #endif // TRIGGERCOLLECTOR_HPP

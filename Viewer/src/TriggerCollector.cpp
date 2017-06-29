@@ -10,9 +10,12 @@
 #include "TriggerCollector.hpp"
 
 #include "UiLog.hpp"
+#include "VAttribute.hpp"
 #include "VItem.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
+
+#include <algorithm>
 
 #define _UI_TRIGGERCOLLECTOR_DEBUG
 
@@ -79,3 +82,112 @@ bool TriggeredCollector::add(VItem* trigger, VItem*,Mode)
     //    trigger->parent()->addTriggeredData(node_,trigger);
 }
 
+const std::set<TriggerCollector::Mode>& TriggerTableItem::modes() const
+{
+    if(modes_.empty())
+    {
+        for(std::size_t i=0; i < deps_.size(); i++)
+        {
+            modes_.insert(deps_[i].mode());
+        }
+    }
+    return modes_;
+}
+
+//=====================================
+// TriggerTableCollector
+//=====================================
+
+TriggerTableCollector::~TriggerTableCollector()
+{
+    clear();
+}
+
+bool TriggerTableCollector::add(VItem* trigger, VItem* dep,Mode mode)
+{
+    Q_ASSERT(trigger);
+
+    TriggerTableItem *item=0;
+    for(std::size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i]->item() == trigger)
+        {          
+            item=items_[i];
+            break;
+        }
+    }
+
+    if(!item)
+    {        
+        item=new TriggerTableItem(trigger);
+        items_.push_back(item);
+    }
+
+    item->addDependency(dep,mode);
+    return true;
+}
+
+void TriggerTableCollector::setDependency(bool b)
+{
+    extended_=b;
+    clear();
+}
+
+void TriggerTableCollector::clear()
+{
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        delete items_[i];
+    }
+    items_.clear();
+}
+
+bool TriggerTableCollector::contains(TriggerTableItem* item) const
+{
+    return (std::find(items_.begin(),items_.end(), item) != items_.end());
+}
+
+bool TriggerTableCollector::contains(const VNode* node,bool attrParents) const
+{
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(VItem* it=items_[i]->item())
+        {
+            if(VNode *n=it->isNode())
+                if(n == node)
+                    return true;
+            else if(attrParents)
+                if (VAttribute *a=it->isAttribute())
+                    if(a->parent() == node)
+                        return true;
+        }
+
+    }
+
+    return false;
+}
+
+TriggerTableItem* TriggerTableCollector::find(const VItem* item) const
+{
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i]->item() == item)
+            return items_[i];
+    }
+    return 0;
+}
+
+TriggerTableItem* TriggerTableCollector::findByContents(const VItem* item) const
+{
+    if(!item)
+        return 0;
+
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(item->sameContents(items_[i]->item()))
+        {
+            return items_[i];
+        }
+    }
+    return 0;
+}

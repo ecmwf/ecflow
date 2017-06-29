@@ -952,6 +952,7 @@ void TreeNodeViewDelegateBase::widthHintServer(const QModelIndex& index,int& ite
     }
 
     //Icons area
+    Q_ASSERT(model_);
     int pixNum=model_->iconNum(server->vRoot());
     if(pixNum > 0)
     {
@@ -1062,6 +1063,7 @@ int TreeNodeViewDelegateBase::nodeWidth(const QModelIndex& index,QString text) c
     }
 
     //Icons area
+    Q_ASSERT(model_);
     int pixNum=model_->iconNum(node);
     if(pixNum > 0)
     {

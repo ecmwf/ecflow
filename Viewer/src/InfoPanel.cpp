@@ -78,6 +78,13 @@ InfoPanel::InfoPanel(QWidget* parent) :
 	actionFrozen_->setChecked(false);
 
     WidgetNameProvider::nameChildren(this);
+
+    //Create the handler for all the possible panels!
+    for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
+        it != InfoPanelHandler::instance()->panels().end(); ++it)
+    {
+        createHandler(*it);
+    }
 }
 
 InfoPanel::~InfoPanel()
@@ -427,8 +434,8 @@ InfoPanelItem* InfoPanel::findItem(QWidget* w)
 
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
-			if(d->widget() == w)
-					return d->item();
+        if(d->widget() == w)
+            return d->item();
 	}
 
 	return 0;
@@ -441,8 +448,8 @@ InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w)
 
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
-			if(d->widget() == w)
-					return d;
+        if(d->widget() == w)
+            return d;
 	}
 
 	return 0;
@@ -452,8 +459,8 @@ InfoPanelItemHandler* InfoPanel::findHandler(InfoPanelDef* def)
 {
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
-			if(d->def() == def)
-				return d;
+        if(d->def() == def)
+            return d;
 	}
 
 	return createHandler(def);
@@ -572,6 +579,16 @@ void InfoPanel::updateTitle()
 
         Q_EMIT titleUpdated(txt);
     }
+}
+
+void InfoPanel::relayInfoPanelCommand(VInfo_ptr info,QString cmd)
+{
+    Q_EMIT popInfoPanel(info,cmd);
+}
+
+void InfoPanel::relayDashboardCommand(VInfo_ptr info,QString cmd)
+{
+    Q_EMIT dashboardCommand(info,cmd);
 }
 
 void InfoPanel::notifyDataLost(VInfo* info)
@@ -724,7 +741,7 @@ void InfoPanel::rerender()
 	bcWidget_->rerender();
 }
 
-void InfoPanel::writeSettings(VSettings* vs)
+void InfoPanel::writeSettings(VComboSettings* vs)
 {
 	vs->put("type",type_);
 	vs->put("dockId",id_);
@@ -742,7 +759,7 @@ void InfoPanel::writeSettings(VSettings* vs)
     }
 }
 
-void InfoPanel::readSettings(VSettings* vs)
+void InfoPanel::readSettings(VComboSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
 	if(type != type_)
