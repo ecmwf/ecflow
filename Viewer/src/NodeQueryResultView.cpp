@@ -32,7 +32,7 @@ NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
 	//setProperty("style","nodeView");
 	setProperty("view","query");
 
-	actionHandler_=new ActionHandler(this);
+    actionHandler_=new ActionHandler(this,this);
 
 	sortModel_=new QSortFilterProxyModel(this);
 	//sortModel_->setDynamicSortFilter(true);

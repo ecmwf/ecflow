@@ -14,21 +14,29 @@
 #include <string>
 #include <vector>
 
+class VNode;
+
+//Stores the expanded state of a node between major updates, server clears,
+//status filter changes etc...
 class ExpandStateNode
 {
-    friend class TreeNodeView;
-    friend class CompactNodeView;
+    //friend class TreeNodeView;
+    //friend class CompactNodeView;
+    friend class ExpandState;
 
 public:
-    explicit ExpandStateNode(const std::string& name) : name_(name) {}
-    ExpandStateNode() : name_("") {}
+    explicit ExpandStateNode(VNode* node,unsigned int expanded);
     ~ExpandStateNode();
 
     void clear();
-    ExpandStateNode* add(const std::string&);
+    void reserveChildren(std::size_t num);
+    ExpandStateNode* setChildAt(std::size_t index,VNode* node,unsigned int expanded);
+    void setExpanded(bool expanded) {expanded_=expanded;}
 
+protected:
     std::vector<ExpandStateNode*> children_;
     std::string name_;
+    unsigned int expanded_ : 1;
 
 };
 

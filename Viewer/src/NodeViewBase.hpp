@@ -14,10 +14,12 @@
 #include "VInfo.hpp"
 
 class QWidget;
+class QObject;
 
 class TableNodeSortModel;
 class NodeFilterDef;
 class VSettings;
+class QModelIndex;
 
 class NodeViewBase
 {
@@ -27,10 +29,12 @@ public:
 
 		virtual void reload()=0;
 		virtual void rerender()=0;
-		virtual QWidget* realWidget()=0;
+        virtual QWidget* realWidget()=0;
+        virtual QObject* realObject()=0;
         virtual VInfo_ptr currentSelection()=0;
 		virtual void selectFirstServer()=0;
         virtual void setCurrentSelection(VInfo_ptr n)=0;
+        virtual bool isNodeExpanded(const QModelIndex&) const=0;
 
         virtual void readSettings(VSettings* vs)=0;
         virtual void writeSettings(VSettings* vs)=0;

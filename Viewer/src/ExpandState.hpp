@@ -12,25 +12,28 @@
 #define EXPANDSTATE_HPP_
 
 #include <string>
+#include <vector>
 
 #include <QPersistentModelIndex>
+#include <QSet>
 
 class TreeNodeModel;
+class NodeViewBase;
 class QModelIndex;
+class VNode;
 class VTreeNode;
 class ExpandStateNode;
 
-template <typename View> class ExpandState;
+//template <typename View> class ExpandState;
 
-template <typename View>
-class ExpandState
+#if 0
+class CompactViewExpandState
 {
-    friend class TreeNodeView;
     friend class CompactNodeView;
 
 public:
-    explicit ExpandState(View*,TreeNodeModel*);
-    ~ExpandState();
+    explicit CompactViewExpandState(CompactNodeView*,TreeNodeModel*);
+    ~CompactViewExpandState();
 
     bool rootSameAs(const std::string&) const;
     void save(const VTreeNode*);
@@ -39,20 +42,50 @@ public:
     void collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>&);
 
 protected:
-	void clear();
+    void clear();
     ExpandStateNode* setRoot(const std::string&);
     ExpandStateNode* root() const {return root_;}
     void save(ExpandStateNode*,const QModelIndex&);
-    void restore(ExpandStateNode*,const VTreeNode*);
+    //void restore(ExpandStateNode*,const VTreeNode*);
     void collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
                  const QModelIndex& nodeIdx,QSet<QPersistentModelIndex>& theSet);
 
-    View* view_;
+    CompactNodeView* view_;
     TreeNodeModel* model_;
     ExpandStateNode* root_;
 };
 
-#include "ExpandState.cpp"
+#endif
+
+class ExpandState
+{
+    friend class TreeNodeView;
+    friend class CompactNodeView;
+
+public:
+    ExpandState(NodeViewBase*,TreeNodeModel*);
+    ~ExpandState();
+
+    bool rootSameAs(const std::string&) const;
+    void save(const VTreeNode*);
+    void restore(const VTreeNode*);
+    void collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>&);
+
+
+protected:
+	void clear();
+    ExpandStateNode* setRoot(VNode* root,bool expanded);
+    ExpandStateNode* root() const {return root_;}
+    void save(const VNode *,ExpandStateNode*,const QModelIndex&);
+    void restore(const VNode *,ExpandStateNode*);
+    void collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
+                 const QModelIndex& nodeIdx,QSet<QPersistentModelIndex>& theSet);
+
+    NodeViewBase* view_;
+    TreeNodeModel* model_;
+    ExpandStateNode* root_;
+};
+
 
 #endif
 

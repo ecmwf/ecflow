@@ -74,7 +74,7 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
 			this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
-	actionHandler_=new ActionHandler(this);
+    actionHandler_=new ActionHandler(this,this);
 
 	//expandAll();
 
@@ -134,6 +134,10 @@ QWidget* TableNodeView::realWidget()
 	return this;
 }
 
+QObject* TableNodeView::realObject()
+{
+    return this;
+}
 
 //Collects the selected list of indexes
 QModelIndexList TableNodeView::selectedList()

@@ -13,7 +13,8 @@
 
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
-#include "CompactNodeView.hpp"
+#include "CompactView.hpp"
+#include "StandardView.hpp"
 #include "NodePathWidget.hpp"
 #include "NodeViewBase.hpp"
 #include "TreeNodeModel.hpp"
@@ -109,49 +110,55 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
 
     if(viewLayoutMode_ == CompactLayoutMode)
     {
-        CompactNodeView* gv=new CompactNodeView((TreeNodeModel*)model_,filterDef_,this);
-        viewHolder_->layout()->addWidget(gv);
+        TreeNodeModel* realModel=static_cast<TreeNodeModel*>(model_);
+
+        TreeNodeView* gv=new TreeNodeView(new CompactView(realModel,this),
+                                          realModel,filterDef_,this);
+        viewHolder_->layout()->addWidget(gv->realWidget());
         //Store the pointer to the (non-QObject) base class of the view!!!
         view_=gv;
     }
     else
     {
-        TreeNodeView *tv=new TreeNodeView((TreeNodeModel*)model_,filterDef_,this);
-        viewHolder_->layout()->addWidget(tv);
+        TreeNodeModel* realModel=static_cast<TreeNodeModel*>(model_);
+
+        TreeNodeView *tv=new TreeNodeView(new StandardView(realModel,this),
+                                          realModel,filterDef_,this);
+        viewHolder_->layout()->addWidget(tv->realWidget());
         //Store the pointer to the (non-QObject) base class of the view!!!
         view_=tv;
     }
 
     //Signals-slots
-    connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+    connect(view_->realObject(),SIGNAL(selectionChanged(VInfo_ptr)),
         this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
 
-    connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+    connect(view_->realObject(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
         this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
 
-    connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+    connect(view_->realObject(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
         this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
     connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
-        view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+        view_->realObject(),SLOT(slotSaveExpand(const VTreeNode*)));
 
     connect(model_,SIGNAL(scanEnded(const VTreeNode*)),
-        view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+        view_->realObject(),SLOT(slotRestoreExpand(const VTreeNode*)));
 
     connect(model_,SIGNAL(rerender()),
-        view_->realWidget(),SLOT(slotRerender()));
+        view_->realObject(),SLOT(slotRerender()));
 
     connect(model_,SIGNAL(filterChangeBegun()),
-        view_->realWidget(),SLOT(slotSaveExpand()));
+        view_->realObject(),SLOT(slotSaveExpand()));
 
     connect(model_,SIGNAL(filterChangeEnded()),
-        view_->realWidget(),SLOT(slotRestoreExpand()));
+        view_->realObject(),SLOT(slotRestoreExpand()));
 
     connect(model_,SIGNAL(filterUpdateRemoveBegun(const VTreeNode*)),
-        view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+        view_->realObject(),SLOT(slotSaveExpand(const VTreeNode*)));
 
     connect(model_,SIGNAL(filterUpdateAddEnded(const VTreeNode*)),
-        view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+        view_->realObject(),SLOT(slotRestoreExpand(const VTreeNode*)));
 
 }
 

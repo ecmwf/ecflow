@@ -8,7 +8,14 @@
 //============================================================================
 
 #include "ExpandStateNode.hpp"
+#include "UIDebug.hpp"
+#include "VNode.hpp"
 
+ExpandStateNode::ExpandStateNode(VNode* node,unsigned int expanded) :
+    expanded_(expanded)
+{
+    name_=node->strName();
+}
 
 ExpandStateNode::~ExpandStateNode()
 {
@@ -18,6 +25,7 @@ ExpandStateNode::~ExpandStateNode()
 void ExpandStateNode::clear()
 {
     name_.clear();
+    expanded_=false;
     for(unsigned int i=0; i < children_.size(); i++)
     {
         delete children_.at(i);
@@ -25,9 +33,18 @@ void ExpandStateNode::clear()
     children_.clear();
 }
 
-ExpandStateNode* ExpandStateNode::add(const std::string& name)
+void ExpandStateNode::reserveChildren(std::size_t num)
 {
-    ExpandStateNode *n=new ExpandStateNode(name);
-    children_.push_back(n);
-    return n;
+    UI_ASSERT(children_.size() == 0,"children_.size()=" << children_.size());
+
+    ExpandStateNode *exn=0;
+    children_=std::vector<ExpandStateNode*>();
+    children_.resize(num,exn);
+}
+
+ExpandStateNode* ExpandStateNode::setChildAt(std::size_t index,VNode* node,unsigned int expanded)
+{
+    ExpandStateNode *exn=new ExpandStateNode(node,expanded);
+    children_[index]=exn;
+    return exn;
 }

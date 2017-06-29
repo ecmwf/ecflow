@@ -27,7 +27,6 @@ public:
 
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;
     void sizeHint(const QModelIndex& index,int& w,int& h) const;
-    bool isSingleHeight(int h) const;
 };
 
 #endif // COMPACTNODEVIEWDELEGATE_HPP

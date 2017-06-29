@@ -8,11 +8,11 @@
 //
 //============================================================================
 
-#include "CompactView.hpp"
+#include "StandardView.hpp"
 
 #include "ExpandState.hpp"
 #include "TreeNodeModel.hpp"
-#include "CompactNodeViewDelegate.hpp"
+#include "StandardNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
@@ -25,26 +25,29 @@
 #include <QStyledItemDelegate>
 #include <QTimerEvent>
 
-//#define _UI_COMPACTVIEW_DEBUG
+//#define _UI_STANDARDVIEW_DEBUG
 
-CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
-    AbstractNodeView(model,parent)
+StandardView::StandardView(TreeNodeModel* model,QWidget* parent) :
+    AbstractNodeView(model,parent),
+    indentation_(20),
+    expandIndicatorBoxWidth_(20),
+    expandIndicatorWidth_(10)
 {
     setProperty("view","tree");
 
-    delegate_=new CompactNodeViewDelegate(model_,this);
+    delegate_=new StandardNodeViewDelegate(model_,this);
 
     //we cannot call it from the constructor of the base class
     //because it calls a pure virtual method
     reset();
 }
 
-CompactView::~CompactView()
+StandardView::~StandardView()
 {
 
 }
 
-TreeNodeViewDelegateBase* CompactView::delegate()
+TreeNodeViewDelegateBase* StandardView::delegate()
 {
     return delegate_;
 }
@@ -55,7 +58,7 @@ TreeNodeViewDelegateBase* CompactView::delegate()
 // afterIsUninitialized: when we recurse from layout(-1) it indicates
 // the items after 'i' are not yet initialized and need not to be moved
 
-void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated)
+void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated)
 {
     //This is the root item.
     if(parentId == -1)
@@ -125,7 +128,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 
     std::vector<int> itemWidthVec;
     std::vector<int> itemHeightVec;
-    int widest=0;
+
     for(int i=first; i < first+count; i++)
     {
         int w,h;
@@ -134,17 +137,14 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         itemWidthVec.push_back(w);
         itemHeightVec.push_back(h);
 
-        if(parentId >=0 && !model_->isAttribute(currentIndex))
-            if(w > widest) widest=w;
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
         UiLog().dbg() << "  item=" << currentIndex.data().toString() << " w=" << w;
 #endif
     }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     if(parentId >=0)
-        UiLog().dbg() << "layout parent=" << viewItems_[parentId].index.data().toString() <<
-                         " widest child=" << widest;
+        UiLog().dbg() << "layout parent=" << viewItems_[parentId].index.data().toString();
 #endif
 
     //Iterate through the direct children of parent item. At this point all the items
@@ -161,22 +161,23 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
         item->level=level;
         item->expanded = false;
         item->total = 0;
-        item->widestInSiblings=widest;
+        //item->widestInSiblings=widest;
 
         //We compute the size of the item. For attributes we delay the width computation until we
         //actually paint them and we set their width to 300.
         item->width=itemWidthVec[i-first];
         item->height=itemHeightVec[i-first];
 
-        int xp=leftMargin_;
+        int xp=leftMargin_+expandIndicatorBoxWidth_; // no indentation for the root
+
         if(parentId >=0)
         {
-            item->widestInSiblings=widest;
-            xp=viewItems_[parentId].alignedRight()+itemGap_;
+            //item->widestInSiblings=widest;
+            xp=viewItems_[parentId].x+indentation_+expandIndicatorBoxWidth_;
         }
         else
         {
-            item->widestInSiblings=item->width;
+            //item->widestInSiblings=item->width;
         }
 
         item->x=xp;
@@ -192,7 +193,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 
             item->expanded = true;
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
             UiLog().dbg() <<  "  before " <<  item->index.data().toString() <<  " total=" << item->total;
 #endif
             //Add the children to the layout
@@ -200,7 +201,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 
             item = &viewItems_[last];
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
             UiLog().dbg() <<  "  after " <<  item->index.data().toString() <<  " total=" << item->total;
 #endif
             children+=item->total;
@@ -215,7 +216,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     if(!expanding)
         return; // nothing changed
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << " update parent total";
 #endif
 
@@ -224,7 +225,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     {
         viewItems_[pp].total += count;
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
         UiLog().dbg() <<  "  parent=" << viewItems_[pp].index.data().toString() <<
                           "  total=" << viewItems_[pp].total;
 #endif
@@ -234,7 +235,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
 }
 
 //Paint the rows intersecting with the given region
-void CompactView::paint(QPainter *painter,const QRegion& region)
+void StandardView::paint(QPainter *painter,const QRegion& region)
 {
     //Even though the viewport palette is set correctly at the
     //beginning something sets it to another value. Here we try
@@ -252,8 +253,8 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
         }
     }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
-    UiLog().dbg() << "CompactView::paint -->";
+#ifdef _UI_STANDARDVIEW_DEBUG
+    UiLog().dbg() << "StandardView::paint -->";
     //UiLog().dbg() << "sizeof(TreeNodeViewItem)=" << sizeof(TreeNodeViewItem);
     //UiLog().dbg() << "region=" << region;
 #endif
@@ -262,14 +263,14 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
 
     //The first visible item at the top of the viewport
     int firstVisible=firstVisibleItem(firstVisibleOffset);
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << "firstVisible " << firstVisible;
 #endif
 
     if(firstVisible<0)
         return;
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << "scrollX" << horizontalScrollBar()->value() << " " << viewport()->width();
 #endif
 
@@ -292,7 +293,7 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
         const QRect area = (multipleRects
                             ? QRect(0, rects.at(a).y(), viewportWidth, rects.at(a).height())
                             : rects.at(a));
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
         UiLog().dbg() << " area=" << area;
 #endif
 
@@ -321,15 +322,14 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
         int i = firstVisible; // the first item at the top of the viewport
         int y = firstVisibleOffset; // we may only see part of the first item
 
-        //start at the top of the viewport  and iterate down through the update area
-        int itemsInRow=1;
-        for (; i < itemsCount; i+=itemsInRow)
+        //start at the top of the viewport  and iterate down through the update area       
+        for (; i < itemsCount; i++)
         {
-            int itemHeight;
-            rowProperties(i,itemHeight,itemsInRow,indentVec);
+            int itemHeight=viewItems_[i].height;
+            //rowProperties(i,itemHeight,itemsInRow,indentVec);
 
-#ifdef _UI_COMPACTVIEW_DEBUG
-            UiLog().dbg() << "row: " << i << " " << itemHeight << " " << itemsInRow;
+#ifdef _UI_STANDARDVIEW_DEBUG
+            UiLog().dbg() << "row: " << i << " " << itemHeight;
 #endif
             //Try to find the first item int the current rect
             if(y + itemHeight > area.top())
@@ -337,28 +337,29 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
             y += itemHeight;
         }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
         UiLog().dbg() << "y: " << y << " " << area.bottom();
 #endif
 
         //Paint the visible rows in the current rect
-        for (; i < itemsCount && y <= area.bottom(); i+=itemsInRow)
-        {                     
+        for (; i < itemsCount && y <= area.bottom(); i++)
+        {
             if(!multipleRects || !drawn.contains(i))
             {
+                int ii=0;
                 //Draw a whole row. It will update y,itemsInRow and indentVec!!
-                drawRow(painter,i,xOffset,y,itemsInRow,indentVec);
+                drawRow(painter,i,xOffset,y,ii,indentVec);
 
-#ifdef _UI_COMPACTVIEW_DEBUG
-                UiLog().dbg() << " row rendered - item=" << i << " y=" << y << " itemsInRow=" << itemsInRow;
+#ifdef _UI_STANDARDVIEW_DEBUG
+                UiLog().dbg() << " row rendered - item=" << i << " y=" << y;
 #endif
             }
             else
             {
-                int rh=rowHeight(i,1,itemsInRow);
+                int rh=viewItems_[i].height;
                 y+=rh;
-#ifdef _UI_COMPACTVIEW_DEBUG
-                UiLog().dbg() << " row skipped  - item=" << i << " y=" << y << " itemsInRow=" << itemsInRow;
+#ifdef _UI_STANDARDVIEW_DEBUG
+                UiLog().dbg() << " row skipped  - item=" << i << " y=" << y;
 #endif
             }
 
@@ -368,16 +369,17 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
     }
 }
 
-//Draw a whole row starting at item "start".
-void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& itemsInRow,std::vector<int>& indentVec)
+//Draw a whole row
+void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& itemsInRow,std::vector<int>& indentVec)
 {
     itemsInRow=0;
     bool leaf=false;
     const int itemsCount = static_cast<int>(viewItems_.size());
 
+    TreeNodeViewItem* item=&(viewItems_[start]);
+
     //Get the rowheight
-    int iir=0;
-    int rh=rowHeight(start,1,iir);
+    int rh=item->height;
 
     //See if there are no multiline items in this row
     bool singleRow=delegate_->isSingleHeight(rh);
@@ -385,65 +387,64 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
     int firstLevel=0;
     const int viewportWidth = viewport()->width();
 
-    //We iterate through the items in the row
-    for(int i=start; i < itemsCount && !leaf; ++i )
-    {
-        TreeNodeViewItem* item=&(viewItems_[i]);
-#ifdef _UI_COMPACTVIEW_DEBUG
-        UiLog().dbg() << "  item=" << i << " " << item->index.data().toString();
+#ifdef _UI_STANDARDVIEW_DEBUG
+    UiLog().dbg() << "  item=" << i << " " << item->index.data().toString();
 #endif
-        leaf=(item->total == 0);
+    leaf=(item->total == 0);
 
-        //Find out the first indentation level in the row
-        if(firstLevel==0)
-            firstLevel=item->level;
+    //Find out the first indentation level in the row
+    firstLevel=item->level;
 
-        //Init style option
-        QStyleOptionViewItem opt;
-        if(selectionModel_->isSelected(item->index))
-            opt.state |= QStyle::State_Selected;
+    //Init style option
+    QStyleOptionViewItem opt;
+    if(selectionModel_->isSelected(item->index))
+        opt.state |= QStyle::State_Selected;
 
-        int optWidth=2000;
-        if(item->width > optWidth)
-            optWidth=item->width;
-        opt.rect=QRect(item->x,yp,optWidth,item->height);
+    int optWidth=2000;
+    if(item->width > optWidth)
+        optWidth=item->width;
+    opt.rect=QRect(item->x,yp,optWidth,item->height);
 
-        //We do not render the item if it is outisde the viewport and
-        //its parent's right is also outside the viewport. Here we considered that
-        //the connector line is always drawn from the child to the parent.
-        bool needToDraw=true;
-        if(item->parentItem >=0)
-        {
+    //We do not render the item if it is outisde the viewport and
+    //its parent's right is also outside the viewport. Here we considered that
+    //the connector line is always drawn from the child to the parent.
+    bool needToDraw=true;
+#if 0
+    if(item->parentItem >=0)
+    {
             if(viewItems_[item->parentItem].right() >= translation() + viewportWidth)
                 needToDraw=false;
         }
-
-        if(needToDraw)
+#endif
+    if(needToDraw)
+    {
+        //For single rows we center items halfway through the rowHeight
+#if 0
+        if(singleRow)
         {
-            //For single rows we center items halfway through the rowHeight
-            if(singleRow)
-            {
-                if(item->height < rh)
+           if(item->height < rh)
                 {
                     opt.rect.moveTop(yp+(rh-item->height)/2);
                 }
-            }
+        }
+#endif
 
             //QRect vr=visualRect(item->index);
             //painter->fillRect(vr,QColor(120,120,120,120));
 
-//#ifdef _UI_COMPACTVIEW_DEBUG
+//#ifdef _UI_STANDARDVIEW_DEBUG
 //          UiLog().dbg() << "  optRect=" << opt.rect << " visRect=" << vr;
 //#endif
 
 
-            //Draw the item with the delegate
-            int paintedWidth=delegate_->paintItem(painter,opt,item->index);
+        //Draw the item with the delegate
+        int paintedWidth=delegate_->paintItem(painter,opt,item->index);
 
-            //we have to know if the item width is the same that we exepcted
-            if(paintedWidth != item->width)
-            {
-                bool sameAsWidest=(item->width == item->widestInSiblings);
+#if 0
+        //we have to know if the item width is the same that we exepcted
+        if(paintedWidth != item->width)
+        {
+            bool sameAsWidest=(item->width == item->widestInSiblings);
                 item->width=paintedWidth;
 
                 //servers
@@ -477,6 +478,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                     }
                 }
             }
+#endif
 
             //QRect rr=opt.rect;
             //rr.setWidth(item->width);
@@ -485,65 +487,104 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
             //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
 
-            painter->setPen(connectorColour_);
+    //draw expand indicator
+    if(item->hasChildren)
+    {
+        //We draw a triangle into the middle of the expand indicator box
+        float indX=item->x-expandIndicatorBoxWidth_/2;
+        float indY=yp+item->height/2;
 
-            //If not a top level item (e.i. not a server)
-            if(item->parentItem >=0)
+        //painter->drawRect(QRect(indX-expandIndicatorBoxWidth_/2,indY-item->height/2,
+        //                        expandIndicatorBoxWidth_,expandIndicatorBoxWidth_));
+
+        float tw=expandIndicatorWidth_;
+        float th=tw/2.*0.95;
+
+        QPolygonF shape;
+        if(item->expanded)
+        {
+            shape << QPointF(indX-tw/2,indY-0.2*th) <<
+                     QPointF(indX+tw/2,indY-0.2*th) <<
+                     QPointF(indX,indY+0.8*th);
+        }
+        else
+        {
+             shape << QPointF(indX,indY-tw/2.) <<
+                     QPointF(indX,indY+tw/2.) <<
+                     QPointF(indX+th,indY);
+        }
+
+        QPen oriPen=painter->pen();
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor(71,71,70));
+        painter->setRenderHint(QPainter::Antialiasing,true);
+        painter->drawPolygon(shape);
+        painter->setRenderHint(QPainter::Antialiasing,false);
+        painter->setPen(oriPen);
+    }
+
+    if(1) //connector lines
+    {
+        painter->setPen(connectorColour_);
+
+        int lineX1=item->x-expandIndicatorBoxWidth_/2;
+        int lineY=yp+item->height/2;
+
+        if(item->hasMoreSiblings)
+        {
+            indentVec[item->level]=lineX1;
+        }
+        else
+            indentVec[item->level]=0;
+
+
+        //If not a top level item (e.i. not a server) and a leaf we need to draw
+        //a connector line straight to the item
+        if(item->parentItem >=0 && item->total == 0)
+        {
+            //The parent item. It is always a node.
+            //TreeNodeViewItem* pt=&(viewItems_[item->parentItem]);
+
+            //The horizontal line connecting the item to its parent
+            //int lineX1=item->x-expandIndicatorBoxWidth_/2;
+            int lineX2=item->x-connectorGap_;
+            //int lineX=(pt->right()+item->x)/2;
+
+//#ifdef _UI_STANDARDVIEW_DEBUG
+//                UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item,pt);
+//#endif
+//                UI_ASSERT(lineX==connectorPos(item,pt),"lineX=" << lineX << " i=" << i <<
+//                          " item->x=" << item->x << " connectorPos=" << connectorPos(item,pt));
+
+            //First child
+            if(item->index.row() == 0)
             {
-                //The parent item. It is always a node.
-                TreeNodeViewItem* pt=&(viewItems_[item->parentItem]);
+                //horizontal line to the parent
+                painter->drawLine(lineX1,lineY,lineX2,lineY);
 
-                //The horizontal line connecting the item to its parent
-                int lineX1=pt->right()+connectorGap_;
-                int lineX2=item->x-connectorGap_;
-                int lineX=(pt->right()+item->x)/2;
-
-#ifdef _UI_COMPACTVIEW_DEBUG
-                UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item,pt);
-#endif
-                UI_ASSERT(lineX==connectorPos(item,pt),"lineX=" << lineX << " i=" << i <<
-                          " item->x=" << item->x << " connectorPos=" << connectorPos(item,pt));
-
-                //First child - in the same row as its parent
-                if(item->index.row() == 0)
+                //line towards the siblings  - downwards
+                if(item->hasMoreSiblings)
                 {
-                    int lineY=yp+pt->height/2;
-
-                    //horizontal line to the parent
-                    painter->drawLine(lineX1,lineY,lineX2,lineY);
-
-                    //line towards the siblings  - downwards
-                    if(item->hasMoreSiblings)
-                    {
-                        //painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
-                        painter->drawLine(lineX,lineY,lineX,yp+rh);
-                        indentVec[item->level]=lineX;
-                    }
-                    else
-                        indentVec[item->level]=0;
-                }
-                //Child in the middle - has sibling both upwards and downwards
-                else if(item->hasMoreSiblings)
-                {
-                    int lineY=yp+item->height/2;
-
-                    painter->drawLine(lineX,lineY,lineX2,lineY);
-                    //painter->drawLine(lineX,lineY+rh/2,lineX,lineY-rh/2);
-                    painter->drawLine(lineX,yp,lineX,yp+rh);
-                    indentVec[item->level]=lineX;
-                }
-
-                //The last child - has sibling only upwards
-                else
-                {
-                    int lineY=yp+item->height/2;
-                    painter->drawLine(lineX,lineY,lineX2,lineY);
-                    //painter->drawLine(lineX,lineY,lineX,lineY-rh/2);
-                    painter->drawLine(lineX,lineY,lineX,yp);
-                    indentVec[item->level]=0;
+                    //painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
+                    painter->drawLine(lineX1,yp,lineX1,yp+rh);
                 }
             }
 
+            //Child in the middle - has sibling both upwards and downwards
+            else if(item->hasMoreSiblings)
+            {
+                painter->drawLine(lineX1,lineY,lineX2,lineY);
+                painter->drawLine(lineX1,yp,lineX1,yp+rh);
+            }
+
+            //The last child - has sibling only upwards
+            else
+            {
+                painter->drawLine(lineX1,lineY,lineX2,lineY);
+                painter->drawLine(lineX1,lineY,lineX1,yp);
+            }
+        }
+#if 0
             //indicate if a node is exandable
             if(item->hasChildren && !item->expanded)
             {
@@ -554,18 +595,21 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                 painter->drawLine(lineX,lineY,lineX+expandConnectorLenght_,lineY);
                 painter->setPen(oriPen);
             }
-        }
+#endif
+    }
+
+
 
         //When we reach a leaf item we move one row down.
-        if(leaf)
-        {            
+        //if(leaf)
+        {
             //Draw the vertical connector lines for all the levels
-            //preceding the first level in the row!           
+            //preceding the first level in the row!
             painter->setPen(connectorColour_);
             for(size_t j=0; j < firstLevel; j++)
             {
                 int xp=indentVec[j];
-                if(xp != 0)    
+                if(xp != 0)
                     painter->drawLine(xp,yp,xp,yp+rh);
             }
 
@@ -573,15 +617,16 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             rh=0;
             firstLevel=0;
         }
-        itemsInRow++;
+        //itemsInRow++;
     }
 
-    if(itemsInRow == 0)
-       itemsInRow=1;
+    //if(itemsInRow == 0)
+    //   itemsInRow=1;
 }
 
-void CompactView::adjustWidthInParent(int start)
+void StandardView::adjustWidthInParent(int start)
 {
+#if 0
     //The parent index of the start item
     int parentItem=viewItems_[start].parentItem;
 
@@ -658,10 +703,10 @@ void CompactView::adjustWidthInParent(int start)
             }
         }
     }
-
+#endif
 }
 
-int CompactView::connectorPos(TreeNodeViewItem* item, TreeNodeViewItem* parent) const
+int StandardView::connectorPos(TreeNodeViewItem* item, TreeNodeViewItem* parent) const
 {
     return (parent->right()+item->x)/2;
 }
@@ -671,7 +716,7 @@ int CompactView::connectorPos(TreeNodeViewItem* item, TreeNodeViewItem* parent) 
 // 1. nodes (fixed height)
 // 2. attributes (fixed height)
 // 3. multiline label attributes (variable height!!!)
-void CompactView::rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const
+void StandardView::rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const
 {
     rowHeight=0;
     itemsInRow=0;
@@ -710,7 +755,7 @@ void CompactView::rowProperties(int start,int& rowHeight,int &itemsInRow,std::ve
     UI_ASSERT(itemsInRow > 0,"itemsInRow=" << itemsInRow);
 }
 
-int CompactView::rowHeight(int start,int forward, int &itemsInRow) const
+int StandardView::rowHeight(int start,int forward, int &itemsInRow) const
 {
     uint rh=0;
     itemsInRow=0;
@@ -745,7 +790,7 @@ int CompactView::rowHeight(int start,int forward, int &itemsInRow) const
     return rh;
 }
 
-int CompactView::itemCountInRow(int start) const
+int StandardView::itemCountInRow(int start) const
 {
     const std::size_t itemsCount = viewItems_.size();
     int itemsInRow=0;
@@ -760,7 +805,7 @@ int CompactView::itemCountInRow(int start) const
     return itemsInRow;
 }
 
-int CompactView::itemRow(int item) const
+int StandardView::itemRow(int item) const
 {
     if(item < 0 || item >= viewItems_.size())
        return -1;
@@ -776,10 +821,10 @@ int CompactView::itemRow(int item) const
     return row;
 }
 
-int CompactView::firstVisibleItem(int &offset) const
+int StandardView::firstVisibleItem(int &offset) const
 {
     const int value = verticalScrollBar()->value();
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::firstVisibleItem --> value=" << value;
 #endif
 
@@ -798,7 +843,7 @@ int CompactView::firstVisibleItem(int &offset) const
         {
             if(cnt == value)
             {
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << " i=" << i << " itemsInRow=" << itemsInRow;
 #endif
                 return i;
@@ -814,7 +859,7 @@ int CompactView::firstVisibleItem(int &offset) const
 
 
 //This has to be very quick. Called after each collapse/expand.
-void CompactView::updateRowCount()
+void StandardView::updateRowCount()
 {
     rowCount_=0;
     const int itemsCount = static_cast<int>(viewItems_.size());
@@ -824,14 +869,14 @@ void CompactView::updateRowCount()
             rowCount_++;
     }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::updateRowCount --> " << rowCount_;
 #endif
 }
 
-void CompactView::updateScrollBars()
+void StandardView::updateScrollBars()
 {
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::updateScrollBars -->";
 #endif
 
@@ -860,7 +905,7 @@ void CompactView::updateScrollBars()
             break;
         itemsInViewport++;
     }
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << "  itemsCount=" << itemsCount << " rowCount=" << rowCount_;
     UiLog().dbg() << "  itemsInViewport " << itemsInViewport;
 #endif
@@ -877,7 +922,7 @@ void CompactView::updateScrollBars()
     }
     else
     {
-        // scroll per pixel       
+        // scroll per pixel
     }
 
     //Horizontal scrollbar
@@ -897,7 +942,7 @@ void CompactView::updateScrollBars()
   Returns the rectangle on the viewport occupied by the item at \a index.
   If the index is not visible or explicitly hidden, the returned rectangle is invalid.
 */
-QRect CompactView::visualRect(const QModelIndex &index) const
+QRect StandardView::visualRect(const QModelIndex &index) const
 {
     //if (!d->isIndexValid(index) || isIndexHidden(index))
     //    return QRect();
@@ -920,7 +965,7 @@ QRect CompactView::visualRect(const QModelIndex &index) const
 }
 
 //Returns the viewport y coordinate for  item.
-void CompactView::coordinateForItem(int item,int& itemY,int& itemRowHeight) const
+void StandardView::coordinateForItem(int item,int& itemY,int& itemRowHeight) const
 {
     itemY=-1;
     if(verticalScrollMode_ == ScrollPerItem)
@@ -954,7 +999,7 @@ void CompactView::coordinateForItem(int item,int& itemY,int& itemRowHeight) cons
 }
 
 //coordinate is in viewport coordinates
-int CompactView::itemAtCoordinate(const QPoint& coordinate) const
+int StandardView::itemAtCoordinate(const QPoint& coordinate) const
 {
     const std::size_t itemCount = viewItems_.size();
     if(itemCount == 0)
@@ -976,7 +1021,7 @@ int CompactView::itemAtCoordinate(const QPoint& coordinate) const
             {
                 viewItemCoordinate += rowHeight(viewItemIndex,1,itemsInRow);
                 if (viewItemCoordinate > coordinate.y())
-                {                    
+                {
                     viewItemIndex=itemAtRowCoordinate(viewItemIndex,itemsInRow,coordinate.x()+translation());
                     return (viewItemIndex >= itemCount ? -1 : viewItemIndex);
                 }
@@ -988,7 +1033,7 @@ int CompactView::itemAtCoordinate(const QPoint& coordinate) const
 }
 
 //return the item index at the absolute x coordinate (i.e. not viewport x coordinate)
-int CompactView::itemAtRowCoordinate(int start,int count,int logicalXPos) const
+int StandardView::itemAtRowCoordinate(int start,int count,int logicalXPos) const
 {
     for(int i=start; i < start+count; i++)
     {

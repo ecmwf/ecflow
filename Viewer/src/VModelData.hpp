@@ -25,6 +25,7 @@ class VServer;
 
 class AbstractNodeModel;
 class AttributeFilter;
+class ExpandState;
 class NodeFilter;
 class NodeFilterDef;
 class NodeQUery;
@@ -38,7 +39,6 @@ class VTreeServer;
 class VTableServer;
 class VTree;
 class VTreeNode;
-
 
 class VTreeChangeInfo
 {
@@ -111,6 +111,8 @@ public:
      void setForceShowAttribute(const VAttribute* node);
      void clearForceShow(const VItem*);
      bool isFirstScan() const {return firstScan_;}
+     ExpandState* expandState() const {return expandState_;}
+     void setExpandState(ExpandState*);
 
     //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
@@ -152,6 +154,7 @@ private:
      bool firstScan_;
      int firstScanTryNo_;
      int maxFirstScanTry_;
+     ExpandState* expandState_;
 };
 
 class VTableServer : public VModelServer

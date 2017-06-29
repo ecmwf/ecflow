@@ -37,6 +37,7 @@ public:
     ~TreeNodeViewDelegateBase();
 
     void setIndentation(int o) {indentation_=o;}
+    bool isSingleHeight(int h) const;
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();

@@ -34,16 +34,19 @@
 
 #define _UI_ACTIONHANDLER_DEBUG
 
-ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
+ActionHandler::ActionHandler(QObject *actionSender,QWidget* menuParent) :
+    QObject(actionSender),
+    actionSender_(actionSender),
+    menuParent_(menuParent)
 {
 	connect(this,SIGNAL(viewCommand(VInfo_ptr,QString)),
-			parent_,SLOT(slotViewCommand(VInfo_ptr,QString)));
+            actionSender_,SLOT(slotViewCommand(VInfo_ptr,QString)));
 
 	connect(this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
-			parent_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+            actionSender_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
 
 	connect(this,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
-			parent_,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+            actionSender_,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
 	//makeShortcut();
 }
@@ -80,8 +83,8 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
 
 
-    std::string view=parent_->property("view").toString().toStdString();
-    MenuItem* item=MenuHandler::invokeMenu("Node", filteredNodes, pos,  parent_,view);
+    std::string view=menuParent_->property("view").toString().toStdString();
+    MenuItem* item=MenuHandler::invokeMenu("Node", filteredNodes, pos,  menuParent_,view);
 
     if(item)
     {
