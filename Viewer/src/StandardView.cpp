@@ -309,7 +309,7 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
             while(item->parentItem >= 0 && level >0)
             {
                 TreeNodeViewItem* pt=&viewItems_[item->parentItem];
-                if(item->hasMoreSiblings && item->hasChildren)
+                if(item->hasMoreSiblings)
                 {
                     indentVec[item->level]=connectorPos(item);
                 }
@@ -329,7 +329,7 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
             int itemHeight=viewItems_[i].height;
 
             //Adjust indentVec
-            if(viewItems_[i].hasMoreSiblings && viewItems_[i].hasChildren)
+            if(viewItems_[i].hasMoreSiblings)
             {
                 indentVec[viewItems_[i].level]=connectorPos(&viewItems_[i]);
             }
@@ -535,7 +535,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
             int lineX1=item->x-expandIndicatorBoxWidth_/2;
             int lineY=yp+item->height/2;
 
-            if(item->hasMoreSiblings && item->hasChildren == 0)
+            if(item->hasMoreSiblings)
             {
                 indentVec[item->level]=lineX1;
             }
