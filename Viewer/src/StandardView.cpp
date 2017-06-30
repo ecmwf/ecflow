@@ -33,6 +33,7 @@ StandardView::StandardView(TreeNodeModel* model,QWidget* parent) :
     expandIndicatorBoxWidth_(20),
     expandIndicatorWidth_(10)
 {
+    //This is needed for making the context menu work
     setProperty("view","tree");
 
     delegate_=new StandardNodeViewDelegate(model_,this);
@@ -308,9 +309,9 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
             while(item->parentItem >= 0 && level >0)
             {
                 TreeNodeViewItem* pt=&viewItems_[item->parentItem];
-                if(item->hasMoreSiblings)
+                if(item->hasMoreSiblings && item->hasChildren)
                 {
-                    indentVec[item->level]=connectorPos(item,pt);
+                    indentVec[item->level]=connectorPos(item);
                 }
                 UI_ASSERT(pt->level == level-1, "item->parentItem=" << item->parentItem <<
                           " pt->level=" << pt->level << " level=" << level);
@@ -326,7 +327,14 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
         for (; i < itemsCount; i++)
         {
             int itemHeight=viewItems_[i].height;
-            //rowProperties(i,itemHeight,itemsInRow,indentVec);
+
+            //Adjust indentVec
+            if(viewItems_[i].hasMoreSiblings && viewItems_[i].hasChildren)
+            {
+                indentVec[viewItems_[i].level]=connectorPos(&viewItems_[i]);
+            }
+            else
+                indentVec[viewItems_[i].level]=0;
 
 #ifdef _UI_STANDARDVIEW_DEBUG
             UiLog().dbg() << "row: " << i << " " << itemHeight;
@@ -345,10 +353,9 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
         for (; i < itemsCount && y <= area.bottom(); i++)
         {
             if(!multipleRects || !drawn.contains(i))
-            {
-                int ii=0;
+            {           
                 //Draw a whole row. It will update y,itemsInRow and indentVec!!
-                drawRow(painter,i,xOffset,y,ii,indentVec);
+                drawRow(painter,i,xOffset,y,indentVec);
 
 #ifdef _UI_STANDARDVIEW_DEBUG
                 UiLog().dbg() << " row rendered - item=" << i << " y=" << y;
@@ -370,11 +377,9 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
 }
 
 //Draw a whole row
-void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& itemsInRow,std::vector<int>& indentVec)
+void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::vector<int>& indentVec)
 {
-    itemsInRow=0;
     bool leaf=false;
-    const int itemsCount = static_cast<int>(viewItems_.size());
 
     TreeNodeViewItem* item=&(viewItems_[start]);
 
@@ -384,7 +389,6 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& 
     //See if there are no multiline items in this row
     bool singleRow=delegate_->isSingleHeight(rh);
 
-    int firstLevel=0;
     const int viewportWidth = viewport()->width();
 
 #ifdef _UI_STANDARDVIEW_DEBUG
@@ -392,8 +396,8 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& 
 #endif
     leaf=(item->total == 0);
 
-    //Find out the first indentation level in the row
-    firstLevel=item->level;
+    //Find out the indentation level of the row
+    int firstLevel=item->level;
 
     //Init style option
     QStyleOptionViewItem opt;
@@ -487,122 +491,100 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& 
             //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
             //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
 
-    //draw expand indicator
-    if(item->hasChildren)
-    {
-        //We draw a triangle into the middle of the expand indicator box
-        float indX=item->x-expandIndicatorBoxWidth_/2;
-        float indY=yp+item->height/2;
-
-        //painter->drawRect(QRect(indX-expandIndicatorBoxWidth_/2,indY-item->height/2,
-        //                        expandIndicatorBoxWidth_,expandIndicatorBoxWidth_));
-
-        float tw=expandIndicatorWidth_;
-        float th=tw/2.*0.95;
-
-        QPolygonF shape;
-        if(item->expanded)
+        //draw expand indicator
+        if(item->hasChildren)
         {
-            shape << QPointF(indX-tw/2,indY-0.2*th) <<
+            //We draw a triangle into the middle of the expand indicator box
+            float indX=item->x-expandIndicatorBoxWidth_/2;
+            float indY=yp+item->height/2;
+
+            //painter->drawRect(QRect(indX-expandIndicatorBoxWidth_/2,indY-item->height/2,
+            //                        expandIndicatorBoxWidth_,expandIndicatorBoxWidth_));
+
+            float tw=expandIndicatorWidth_;
+            float th=tw/2.*0.95;
+
+            QPolygonF shape;
+            if(item->expanded)
+            {
+                shape << QPointF(indX-tw/2,indY-0.2*th) <<
                      QPointF(indX+tw/2,indY-0.2*th) <<
                      QPointF(indX,indY+0.8*th);
-        }
-        else
-        {
-             shape << QPointF(indX,indY-tw/2.) <<
+            }
+            else
+            {
+                shape << QPointF(indX,indY-tw/2.) <<
                      QPointF(indX,indY+tw/2.) <<
                      QPointF(indX+th,indY);
+            }
+
+            QPen oriPen=painter->pen();
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QColor(71,71,70));
+            painter->setRenderHint(QPainter::Antialiasing,true);
+            painter->drawPolygon(shape);
+            painter->setRenderHint(QPainter::Antialiasing,false);
+            painter->setPen(oriPen);
         }
 
-        QPen oriPen=painter->pen();
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor(71,71,70));
-        painter->setRenderHint(QPainter::Antialiasing,true);
-        painter->drawPolygon(shape);
-        painter->setRenderHint(QPainter::Antialiasing,false);
-        painter->setPen(oriPen);
-    }
-
-    if(1) //connector lines
-    {
-        painter->setPen(connectorColour_);
-
-        int lineX1=item->x-expandIndicatorBoxWidth_/2;
-        int lineY=yp+item->height/2;
-
-        if(item->hasMoreSiblings)
+        //Draw the connector lines
+        if(1)
         {
-            indentVec[item->level]=lineX1;
-        }
-        else
-            indentVec[item->level]=0;
+            painter->setPen(connectorColour_);
 
+            int lineX1=item->x-expandIndicatorBoxWidth_/2;
+            int lineY=yp+item->height/2;
 
-        //If not a top level item (e.i. not a server) and a leaf we need to draw
-        //a connector line straight to the item
-        if(item->parentItem >=0 && item->total == 0)
-        {
-            //The parent item. It is always a node.
-            //TreeNodeViewItem* pt=&(viewItems_[item->parentItem]);
-
-            //The horizontal line connecting the item to its parent
-            //int lineX1=item->x-expandIndicatorBoxWidth_/2;
-            int lineX2=item->x-connectorGap_;
-            //int lineX=(pt->right()+item->x)/2;
-
-//#ifdef _UI_STANDARDVIEW_DEBUG
-//                UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item,pt);
-//#endif
-//                UI_ASSERT(lineX==connectorPos(item,pt),"lineX=" << lineX << " i=" << i <<
-//                          " item->x=" << item->x << " connectorPos=" << connectorPos(item,pt));
-
-            //First child
-            if(item->index.row() == 0)
+            if(item->hasMoreSiblings && item->hasChildren == 0)
             {
-                //horizontal line to the parent
-                painter->drawLine(lineX1,lineY,lineX2,lineY);
+                indentVec[item->level]=lineX1;
+            }
+            else
+                indentVec[item->level]=0;
 
-                //line towards the siblings  - downwards
-                if(item->hasMoreSiblings)
+            //If not a top level item (e.i. not a server) and a leaf we need to draw
+            //a connector line straight to the item
+            if(item->parentItem >=0 && item->hasChildren == 0)
+            {
+                int lineX2=item->x-connectorGap_;
+
+                //First child
+                if(item->index.row() == 0)
                 {
-                    //painter->drawLine(lineX,lineY,lineX,lineY+rh/2);
+                    //horizontal line to the node
+                    painter->drawLine(lineX1,lineY,lineX2,lineY);
+
+                    //vertical line to the parent
+                    painter->drawLine(lineX1,lineY,lineX1,yp);
+
+                    //line towards the siblings  - downwards
+                    if(item->hasMoreSiblings)
+                    {
+                        painter->drawLine(lineX1,yp,lineX1,yp+rh);
+                    }
+                }
+
+                //Child in the middle - has sibling both upwards and downwards
+                else if(item->hasMoreSiblings)
+                {
+                    //horizontal line to the node
+                    painter->drawLine(lineX1,lineY,lineX2,lineY);
+
+                    //vertical line to the parent and sibling
                     painter->drawLine(lineX1,yp,lineX1,yp+rh);
+                }
+
+                //The last child - has sibling only upwards
+                else
+                {
+                    //horizontal line to the node
+                    painter->drawLine(lineX1,lineY,lineX2,lineY);
+
+                    //vertical line to the parent
+                    painter->drawLine(lineX1,lineY,lineX1,yp);
                 }
             }
 
-            //Child in the middle - has sibling both upwards and downwards
-            else if(item->hasMoreSiblings)
-            {
-                painter->drawLine(lineX1,lineY,lineX2,lineY);
-                painter->drawLine(lineX1,yp,lineX1,yp+rh);
-            }
-
-            //The last child - has sibling only upwards
-            else
-            {
-                painter->drawLine(lineX1,lineY,lineX2,lineY);
-                painter->drawLine(lineX1,lineY,lineX1,yp);
-            }
-        }
-#if 0
-            //indicate if a node is exandable
-            if(item->hasChildren && !item->expanded)
-            {
-                int lineY=yp+item->height/2;
-                int lineX=item->right()+connectorGap_;
-                QPen oriPen=painter->pen();
-                painter->setPen(QPen(connectorColour_,1,Qt::DashLine));
-                painter->drawLine(lineX,lineY,lineX+expandConnectorLenght_,lineY);
-                painter->setPen(oriPen);
-            }
-#endif
-    }
-
-
-
-        //When we reach a leaf item we move one row down.
-        //if(leaf)
-        {
             //Draw the vertical connector lines for all the levels
             //preceding the first level in the row!
             painter->setPen(connectorColour_);
@@ -612,16 +594,9 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& 
                 if(xp != 0)
                     painter->drawLine(xp,yp,xp,yp+rh);
             }
-
             yp+=rh;
-            rh=0;
-            firstLevel=0;
         }
-        //itemsInRow++;
     }
-
-    //if(itemsInRow == 0)
-    //   itemsInRow=1;
 }
 
 void StandardView::adjustWidthInParent(int start)
@@ -706,119 +681,14 @@ void StandardView::adjustWidthInParent(int start)
 #endif
 }
 
-int StandardView::connectorPos(TreeNodeViewItem* item, TreeNodeViewItem* parent) const
+int StandardView::connectorPos(TreeNodeViewItem* item) const
 {
-    return (parent->right()+item->x)/2;
-}
-
-
-//Get the rowheight. There are three kinds of row heights.
-// 1. nodes (fixed height)
-// 2. attributes (fixed height)
-// 3. multiline label attributes (variable height!!!)
-void StandardView::rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const
-{
-    rowHeight=0;
-    itemsInRow=0;
-    const int itemsCount = static_cast<int>(viewItems_.size());
-
-    for(int i=start; i < itemsCount; i++)
-    {
-        TreeNodeViewItem* item=&(viewItems_[i]);
-        rowHeight=qMax(rowHeight,static_cast<int>(item->height));
-        itemsInRow++;
-        if(item->total == 0)
-        {
-            indentVec[item->level]=0;
-            break;
-        }
-
-        if(item->parentItem >=0)
-        {
-            //The parent item. It is always a node.
-            TreeNodeViewItem* pt=&(viewItems_[item->parentItem]);
-
-            if(item->hasMoreSiblings)
-            {
-                int lineX1=pt->right()+2;
-                int lineX2=item->x-2;
-                int lineX=(lineX1+lineX2)/2;
-                indentVec[item->level]=lineX;
-            }
-            else
-            {
-                indentVec[item->level]=0;
-            }
-        }
-    }
-
-    UI_ASSERT(itemsInRow > 0,"itemsInRow=" << itemsInRow);
-}
-
-int StandardView::rowHeight(int start,int forward, int &itemsInRow) const
-{
-    uint rh=0;
-    itemsInRow=0;
-    const int itemsCount = static_cast<int>(viewItems_.size());
-
-    if(forward == 1)
-    {
-        for(int i=start; i < itemsCount; i++)
-        {
-           rh=qMax(rh,viewItems_[i].height);
-           itemsInRow++;
-           if(viewItems_[i].total == 0)
-                break;
-        }
-    }
-    else
-    {
-        UI_ASSERT(start >= 0,"start=" << start << " total=" << viewItems_.size());
-        UI_ASSERT(start < viewItems_.size(),"start=" << start << " total=" << viewItems_.size());
-        rh=qMax(rh,viewItems_[start].height);
-        itemsInRow++;
-        for(int i=start-1; i >= 0; i--)
-        {
-           if(viewItems_[i].total == 0)
-                break;
-           rh=qMax(rh,viewItems_[i].height);
-           itemsInRow++;
-        }
-    }
-
-    UI_ASSERT(itemsInRow > 0,"itemsInRow=" << itemsInRow);
-    return rh;
-}
-
-int StandardView::itemCountInRow(int start) const
-{
-    const std::size_t itemsCount = viewItems_.size();
-    int itemsInRow=0;
-    for(int i=start; i < itemsCount; i++)
-    {
-        itemsInRow++;
-        if(viewItems_[i].total == 0)
-            return itemsInRow;
-    }
-
-    UI_ASSERT(itemsInRow > 0,"itemsInRow=" << itemsInRow);
-    return itemsInRow;
+    return item->x-expandIndicatorBoxWidth_/2;
 }
 
 int StandardView::itemRow(int item) const
 {
-    if(item < 0 || item >= viewItems_.size())
-       return -1;
-
-    int row=-1;
-    int itemsInRow=0;
-    for(int i=0; i <= item; i+=itemsInRow)
-    {
-        row++;
-        itemsInRow=itemCountInRow(i);
-    }
-
-    return row;
+    return item;
 }
 
 int StandardView::firstVisibleItem(int &offset) const
@@ -836,15 +706,17 @@ int StandardView::firstVisibleItem(int &offset) const
         if(value <0 || value >= rowCount_)
             return -1;
 
+        return value;
+#if 0
         int cnt=0;
         int itemsInRow=0;
         const std::size_t itemsCount=viewItems_.size();
-        for (std::size_t i=0; i < itemsCount; i+=itemsInRow)
+        for (std::size_t i=0; i < itemsCount; i++)
         {
             if(cnt == value)
             {
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << " i=" << i << " itemsInRow=" << itemsInRow;
+    UiLog().dbg() << " i=" << i;
 #endif
                 return i;
             }
@@ -852,6 +724,7 @@ int StandardView::firstVisibleItem(int &offset) const
             cnt++;
         }
         //return (value < 0 || value >= viewItems_.count()) ? -1 : value;
+#endif
     }
 
     return -1;
@@ -861,13 +734,7 @@ int StandardView::firstVisibleItem(int &offset) const
 //This has to be very quick. Called after each collapse/expand.
 void StandardView::updateRowCount()
 {
-    rowCount_=0;
-    const int itemsCount = static_cast<int>(viewItems_.size());
-    for(int i=0; i < itemsCount; i++)
-    {
-        if(viewItems_[i].total == 0)
-            rowCount_++;
-    }
+    rowCount_=static_cast<int>(viewItems_.size());
 
 #ifdef _UI_STANDARDVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::updateRowCount --> " << rowCount_;
@@ -895,12 +762,11 @@ void StandardView::updateScrollBars()
     if(itemsCount ==0)
         return;
 
-    const int viewportHeight = viewportSize.height();
-    int itemsInRow=1;
-    for(int height = 0, item = itemsCount - 1; item >= 0; item-=itemsInRow)
+    const int viewportHeight = viewportSize.height();    
+    for(int height = 0, item = itemsCount - 1; item >= 0; item--)
     {
         //UiLog().dbg() << "item=" << item;
-        height +=rowHeight(item,-1,itemsInRow);
+        height +=viewItems_[item].height;
         if(height > viewportHeight)
             break;
         itemsInViewport++;
@@ -953,21 +819,18 @@ QRect StandardView::visualRect(const QModelIndex &index) const
     if (vi < 0)
         return QRect();
 
-    int y = -1;
-    int rh=0;
-    coordinateForItem(vi,y,rh);
+    int y =coordinateForItem(vi);
     if(y >=0)
     {
         //return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
-        return QRect(viewItems_[vi].x-1-translation(), y, viewItems_[vi].width+2,rh);
+        return QRect(viewItems_[vi].x-1-translation(), y, viewItems_[vi].width+2,viewItems_[vi].height);
     }
     return QRect();
 }
 
 //Returns the viewport y coordinate for  item.
-void StandardView::coordinateForItem(int item,int& itemY,int& itemRowHeight) const
+int StandardView::coordinateForItem(int item) const
 {
-    itemY=-1;
     if(verticalScrollMode_ == ScrollPerItem)
     {
         int offset = 0;
@@ -980,22 +843,22 @@ void StandardView::coordinateForItem(int item,int& itemY,int& itemRowHeight) con
 
             const int itemsCount = viewItems_.size();
             const int viewportHeight = viewport()->size().height();
-            int itemsInRow=1;
 
             for(int height = 0, viewItemIndex = topViewItemIndex;
-                height <= viewportHeight && viewItemIndex < itemsCount; viewItemIndex+=itemsInRow)
+                height <= viewportHeight && viewItemIndex < itemsCount; viewItemIndex++)
             {
-                int h=rowHeight(viewItemIndex,1,itemsInRow);
-                if(viewItemIndex <=item && item < viewItemIndex+itemsInRow)
-                {
-                    itemY=height;
-                    itemRowHeight=h;
-                    return;
+                int h=viewItems_[viewItemIndex].height;
+                if(viewItemIndex ==item)
+                {                                 
+                    return height;
                 }
                 height +=h;
             }
         }
     }
+
+
+    return -1;
 }
 
 //coordinate is in viewport coordinates
@@ -1017,12 +880,12 @@ int StandardView::itemAtCoordinate(const QPoint& coordinate) const
             // the coordinate is in or below the viewport
             int viewItemCoordinate = 0;
             int itemsInRow=0;
-            for(std::size_t viewItemIndex = topViewItemIndex; viewItemIndex < itemCount; viewItemIndex+=itemsInRow)
+            for(std::size_t viewItemIndex = topViewItemIndex; viewItemIndex < itemCount; viewItemIndex++)
             {
-                viewItemCoordinate += rowHeight(viewItemIndex,1,itemsInRow);
+                viewItemCoordinate += viewItems_[viewItemIndex].height;
                 if (viewItemCoordinate > coordinate.y())
                 {
-                    viewItemIndex=itemAtRowCoordinate(viewItemIndex,itemsInRow,coordinate.x()+translation());
+                    //viewItemIndex=itemAtRowCoordinate(viewItemIndex,itemsInRow,coordinate.x()+translation());
                     return (viewItemIndex >= itemCount ? -1 : viewItemIndex);
                 }
             }
@@ -1032,20 +895,10 @@ int StandardView::itemAtCoordinate(const QPoint& coordinate) const
     return -1;
 }
 
-//return the item index at the absolute x coordinate (i.e. not viewport x coordinate)
-int StandardView::itemAtRowCoordinate(int start,int count,int logicalXPos) const
+bool StandardView::isPointInExpandIndicator(int item,QPoint p) const
 {
-    for(int i=start; i < start+count; i++)
-    {
-        int left=viewItems_[i].x-1;
-        int right=viewItems_[i].right()+2;
-        if(!viewItems_[i].expanded && viewItems_[i].hasChildren)
-            right=viewItems_[i].right()+connectorGap_+expandConnectorLenght_+3;
-
-        if(left <= logicalXPos && right >= logicalXPos)
-        {
-            return i;
-        }
-    }
-    return -1;
+    const std::size_t itemCount = viewItems_.size();
+    return item >=0 && item < itemCount &&
+           p.x() > viewItems_[item].x-expandIndicatorBoxWidth_ &&
+           p.x() < viewItems_[item].x-2;
 }

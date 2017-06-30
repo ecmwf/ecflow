@@ -50,6 +50,7 @@ protected:
     void coordinateForItem(int item,int& itemY,int& itemRowHeight) const;
     int itemAtCoordinate(const QPoint& coordinate) const;
     int itemAtRowCoordinate(int start,int count,int xPos) const;
+    bool isPointInExpandIndicator(int,QPoint) const {return false;}
 
     int  firstVisibleItem(int &offset) const;
     void updateRowCount();

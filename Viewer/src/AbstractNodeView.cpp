@@ -102,8 +102,33 @@ void AbstractNodeView::attachModel()
 
 void AbstractNodeView::mousePressEvent(QMouseEvent* event)
 {
+    //When the expand indicataor is pressed
+    if(event->button() == Qt::LeftButton)
+    {
+        int viewItemIndex=itemAtCoordinate(event->pos());
+        if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)
+        {
+            if(isPointInExpandIndicator(viewItemIndex,event->pos()))
+            {
+                if(viewItems_[viewItemIndex].expanded)
+                {
+                    collapse(viewItemIndex);
+                    updateRowCount();
+                    updateScrollBars();
+                    viewport()->update();
+                }
+                else
+                {
+                    expand(viewItemIndex);
+                }
+            }
+            return;
+        }
+    }
+
     QPoint pos = event->pos();
     QPersistentModelIndex index = indexAt(pos);
+
     pressedIndex_ = index;
 
     //Get the selection flags

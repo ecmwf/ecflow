@@ -120,6 +120,7 @@ protected:
     virtual int itemAtCoordinate(const QPoint& coordinate) const=0;    
     QModelIndex modelIndex(int i) const;
     int viewIndex(const QModelIndex& index) const;
+    virtual bool isPointInExpandIndicator(int,QPoint) const=0;
 
     //Expand collapse
     void restoreExpand(const QModelIndex& idx);

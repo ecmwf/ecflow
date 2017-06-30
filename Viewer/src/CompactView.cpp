@@ -30,6 +30,7 @@
 CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     AbstractNodeView(model,parent)
 {
+    //This is needed for making the context menu work
     setProperty("view","tree");
 
     delegate_=new CompactNodeViewDelegate(model_,this);
