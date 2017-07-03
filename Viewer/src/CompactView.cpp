@@ -12,7 +12,7 @@
 
 #include "ExpandState.hpp"
 #include "TreeNodeModel.hpp"
-#include "CompactNodeViewDelegate.hpp"
+#include "TreeNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
@@ -33,8 +33,6 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
     //This is needed for making the context menu work
     setProperty("view","tree");
 
-    delegate_=new CompactNodeViewDelegate(model_,this);
-
     //we cannot call it from the constructor of the base class
     //because it calls a pure virtual method
     reset();
@@ -43,11 +41,6 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
 CompactView::~CompactView()
 {
 
-}
-
-TreeNodeViewDelegateBase* CompactView::delegate()
-{
-    return delegate_;
 }
 
 //Creates and initialize the viewItem structure of the children of the element
@@ -439,13 +432,14 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
 
 
             //Draw the item with the delegate
-            int paintedWidth=delegate_->paintItem(painter,opt,item->index);
+            QSize paintedSize;
+            delegate_->paint(painter,opt,item->index,paintedSize);
 
             //we have to know if the item width is the same that we exepcted
-            if(paintedWidth != item->width)
+            if(paintedSize.width() != item->width)
             {
                 bool sameAsWidest=(item->width == item->widestInSiblings);
-                item->width=paintedWidth;
+                item->width=paintedSize.width();
 
                 //servers
                 if(item->parentItem ==-1)
@@ -457,13 +451,13 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                 else if(model_->isNode(item->index))
                 {
                     //widestInSiblings has to be adjusted
-                    if(sameAsWidest || paintedWidth  > item->widestInSiblings)
+                    if(sameAsWidest || paintedSize.width()  > item->widestInSiblings)
                     {
                         adjustWidthInParent(i);
                         doDelayedWidthAdjustment();
                     }
                     //we just need to update the item
-                    else if( paintedWidth < item->widestInSiblings)
+                    else if( paintedSize.width() < item->widestInSiblings)
                     {
                         doDelayedWidthAdjustment();
                     }

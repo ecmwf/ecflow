@@ -12,7 +12,7 @@
 
 #include "ExpandState.hpp"
 #include "TreeNodeModel.hpp"
-#include "StandardNodeViewDelegate.hpp"
+#include "TreeNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
@@ -39,8 +39,6 @@ StandardView::StandardView(TreeNodeModel* model,QWidget* parent) :
     //This is needed for making the context menu work
     setProperty("view","tree");
 
-    delegate_=new StandardNodeViewDelegate(model_,this);
-
     //we cannot call it from the constructor of the base class
     //because it calls a pure virtual method
     reset();
@@ -49,11 +47,6 @@ StandardView::StandardView(TreeNodeModel* model,QWidget* parent) :
 StandardView::~StandardView()
 {
 
-}
-
-TreeNodeViewDelegateBase* StandardView::delegate()
-{
-    return delegate_;
 }
 
 //Creates and initialize the viewItem structure of the children of the element
@@ -456,12 +449,13 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
 
 
         //Draw the item with the delegate
-        int paintedWidth=delegate_->paintItem(painter,opt,item->index);
+        QSize paintedSize;
+        delegate_->paint(painter,opt,item->index,paintedSize);
 
         //we have to know if the item width is the same that we exepcted
-        if(paintedWidth != item->width)
+        if(paintedSize.width() != item->width)
         {            
-            item->width=paintedWidth;
+            item->width=paintedSize.width();
 
             if(item->right() > maxRowWidth_)
             {

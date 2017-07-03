@@ -13,7 +13,7 @@
 #include "Animation.hpp"
 #include "ExpandState.hpp"
 #include "TreeNodeModel.hpp"
-#include "CompactNodeViewDelegate.hpp"
+#include "TreeNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
@@ -60,6 +60,8 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     //We should call reset here but it has a pure virtual method,
     //so cannot be called from the constructor. We need to call it from
     //the constructor of the derived classes
+
+    delegate_=new TreeNodeViewDelegate(model_,this);
 }
 
 AbstractNodeView::~AbstractNodeView()

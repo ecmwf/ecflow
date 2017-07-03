@@ -28,16 +28,26 @@ class NodeText;
 class ServerUpdateData;
 class TreeNodeModel;
 
-class TreeNodeViewDelegateBase : public NodeViewDelegate
+class TreeNodeViewDelegate : public NodeViewDelegate
 {
 Q_OBJECT
 
 public:
-    explicit TreeNodeViewDelegateBase(TreeNodeModel* model,QWidget *parent=0);
-    ~TreeNodeViewDelegateBase();
+    explicit TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent=0);
+    ~TreeNodeViewDelegate();
 
-    void setIndentation(int o) {indentation_=o;}
     bool isSingleHeight(int h) const;
+
+    //from baseclass
+    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const {}
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;
+
+    //custom implementations
+    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index,QSize&) const;
+    void sizeHint(const QModelIndex& index,int& w,int& h) const;
+
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();
@@ -74,7 +84,6 @@ protected:
     int nodeRectRad_;
     bool drawChildCount_;
     NodeStyle nodeStyle_;
-    int indentation_;
 
     bool drawNodeType_;
     QColor typeBgCol_;

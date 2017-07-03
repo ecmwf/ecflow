@@ -29,7 +29,7 @@
 #include "PropertyMapper.hpp"
 #include "StandardView.hpp"
 #include "TreeNodeModel.hpp"
-#include "StandardNodeViewDelegate.hpp"
+#include "TreeNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"

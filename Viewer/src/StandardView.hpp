@@ -24,7 +24,6 @@
 
 class TreeNodeModel;
 class GraphNodeViewItem;
-class StandardNodeViewDelegate;
 class QStyledItemDelegate;
 
 //Implements a standard tree view (similar to QTreeView) where there is
@@ -37,7 +36,6 @@ public:
     ~StandardView();
 
     QRect visualRect(const QModelIndex &index) const;
-    TreeNodeViewDelegateBase* delegate();
 
 protected:
     void paint(QPainter *painter,const QRegion& region);
@@ -54,7 +52,6 @@ protected:
     void updateRowCount();
     void updateScrollBars();
 
-    StandardNodeViewDelegate* delegate_;
     int expandIndicatorBoxWidth_;
     int expandIndicatorWidth_;
 

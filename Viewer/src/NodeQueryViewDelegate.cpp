@@ -138,8 +138,9 @@ void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     			QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
     			if(it != attrRenderers_.end())
     			{
-    				AttributeRendererProc a=it.value();
-    				(this->*a)(painter,lst,vopt);
+                    QSize size;
+                    AttributeRendererProc a=it.value();
+                    (this->*a)(painter,lst,vopt,size);
     			}
     		}
     	}
