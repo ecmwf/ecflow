@@ -3,6 +3,7 @@ set(viewer_srcs
     ViewerMain.cpp
     AboutDialog.cpp
     AbstractNodeModel.cpp
+    AbstractNodeView.cpp
     AbstractSearchLine.cpp
     AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
@@ -20,7 +21,6 @@ set(viewer_srcs
     ComboMulti.cpp
     CommandDesignerWidget.cpp
     CompactView.cpp
-    CompactNodeView.cpp
     CompactNodeViewDelegate.cpp
     ConfigListDelegate.cpp
     ConnectState.cpp
@@ -37,6 +37,7 @@ set(viewer_srcs
     EditItemWidget.cpp
     EditProvider.cpp
     EditorInfoLabel.cpp
+    ExpandState.cpp
     ExpandStateNode.cpp
     FlagSet.hpp
     FileInfoLabel.cpp
@@ -128,6 +129,8 @@ set(viewer_srcs
     SessionRenameDialog.cpp
     SessionHandler.cpp
     Sound.cpp
+    StandardView.cpp
+    StandardNodeViewDelegate.cpp
     StringMatchCombo.cpp
     StringMatchMode.cpp
     SuiteItemWidget.cpp
@@ -148,7 +151,6 @@ set(viewer_srcs
     TimeItemWidget.cpp    
     TreeNodeModel.cpp
     TreeNodeView.cpp
-    TreeNodeViewDelegate.cpp
     TreeNodeViewDelegateBase.cpp
     TreeNodeWidget.cpp
     TreeView.cpp
@@ -230,6 +232,7 @@ endif()
 
 
 set(viewer_moc_files AbstractNodeModel.hpp
+    AbstractNodeView.hpp
     AbstractSearchLine.hpp
     ActionHandler.hpp
     Animation.hpp
@@ -242,8 +245,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CodeItemWidget.hpp
     ComboMulti.hpp
     CommandDesignerWidget.hpp    
-    CompactView.hpp
-    CompactNodeView.hpp
     CustomCommandDialog.hpp
     CustomListWidget.hpp
     Dashboard.hpp
@@ -314,7 +315,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TableNodeWidget.hpp             
     TextEditSearchLine.hpp
     TreeNodeModel.hpp
-    TreeNodeView.hpp           
+    TreeNodeView.hpp
     TreeNodeViewDelegateBase.hpp
     TreeNodeWidget.hpp    
     TriggerEditor.hpp

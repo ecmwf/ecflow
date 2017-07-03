@@ -20,6 +20,8 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
 {
 	setupUi(this);
 
+    nodeCollector_=new TriggerTableCollector(false);
+
     depInfoCloseTb_->setProperty("triggertitle","1");
     depInfoCloseTb_->parent()->setProperty("triggertitle","1");
 
@@ -30,6 +32,25 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
 
     depLabelText_=tr(" Dependency details");
     depLabel_->setText(depLabelText_);
+
+    //Node - model + view
+    nodeModel_ = new TriggerTableModel(TriggerTableModel::TriggerMode,this);
+    nodeView_->setModel(nodeModel_);
+
+    //Set the height of the node display area
+    QFont fNode;
+    QFontMetrics fm(fNode);
+    nodeView_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    nodeView_->setFixedHeight(fm.size(0,"A").height()+fm.height()/3);
+
+    //Set the size of the left and right arrow labels
+    leftArrowLabel_->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    leftArrowLabel_->setFixedHeight(nodeView_->height());
+    leftArrowLabel_->setFixedWidth(nodeView_->height());
+
+    rightArrowLabel_->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    rightArrowLabel_->setFixedHeight(nodeView_->height());
+    rightArrowLabel_->setFixedWidth(nodeView_->height());
 
     //Trigger - model + view
     triggerModel_ = new TriggerTableModel(TriggerTableModel::TriggerMode,this);
@@ -60,6 +81,12 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
             this,SIGNAL(linkSelected(VInfo_ptr)));
 
     //relay commands
+    connect(nodeView_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+            this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+
+    connect(nodeView_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+            this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+
     connect(triggerView_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
             this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
 
@@ -79,12 +106,14 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
 
 TriggerTableWidget::~TriggerTableWidget()
 {
+    delete nodeCollector_;
 }
 
 void TriggerTableWidget::clear()
 {
     info_.reset();
 
+    nodeModel_->clearData();
     triggerModel_->clearData();
     triggeredModel_->clearData();
 
@@ -100,6 +129,15 @@ void TriggerTableWidget::clearSelection()
 void TriggerTableWidget::setInfo(VInfo_ptr info)
 {
     info_=info;
+
+    nodeModel_->beginUpdate();
+    nodeCollector_->clear();
+    if(info_)
+    {
+        nodeCollector_->add(info_->item(),0,TriggerCollector::Normal);
+    }
+    nodeModel_->setTriggerCollector(nodeCollector_);
+    nodeModel_->endUpdate();
 }
 
 void TriggerTableWidget::slotTriggerClicked(TriggerTableItem* item)
@@ -302,6 +340,11 @@ void TriggerTableWidget::resumeSelection()
 
 void TriggerTableWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
+    //The node view only contains one item (=info_) so we simply rerender it to get the
+    //update
+    if(info_ && info_->node() == node)
+        nodeView_->rerender();
+
     triggerModel_->nodeChanged(node,aspect);
     triggeredModel_->nodeChanged(node,aspect);
 }

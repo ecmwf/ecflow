@@ -66,8 +66,7 @@
                   },
                  "branchLineColour" : {
                       "label" : "Branch line colour",
-                      "default": "rgb(137,137,137)",
-                      "disabledRule" : "layoutStyle=standard"
+                      "default": "rgb(137,137,137)"
                    },
 
                  "defaultAttributes" : {

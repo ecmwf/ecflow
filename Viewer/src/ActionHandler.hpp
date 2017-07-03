@@ -26,7 +26,7 @@ class ActionHandler : public QObject
 {
 Q_OBJECT
 public:
-		explicit ActionHandler(QWidget*);
+        explicit ActionHandler(QObject*,QWidget* menuParent);
 
 		void contextMenu(std::vector<VInfo_ptr>,QPoint);
 Q_SIGNALS:
@@ -35,7 +35,8 @@ Q_SIGNALS:
 	    void dashboardCommand(VInfo_ptr,QString);
 
 protected:
-		QWidget *parent_;
+        QObject *actionSender_;
+        QWidget *menuParent_;
 
 };
 

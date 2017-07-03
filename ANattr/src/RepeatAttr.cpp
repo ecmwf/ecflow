@@ -86,25 +86,6 @@ const std::string& Repeat::name() const {
    return (repeatType_) ? repeatType_->name() : Str::EMPTY();
 }
 
-const Variable& Repeat::gen_variable() const
-{
-   return (repeatType_) ? repeatType_->gen_variable() : Variable::EMPTY();
-}
-
-void Repeat::update_repeat_genvar() const
-{
-   if (repeatType_) {
-      // **** reset name since generated variables are not persisted
-      repeatType_->set_gen_variable().set_name( repeatType_->name() );
-
-      // valueAsString() use the last_valid_value() which should always be in range.
-      // Note repeat::value() can be on e past the last valid value, at expiration of Repeat loop
-      //      However Repeat::last_valid_value() will just return the last valid value.
-      repeatType_->set_gen_variable().set_value( repeatType_->valueAsString() );
-   }
-}
-
-
 std::ostream& Repeat::print( std::ostream& os ) const {
 	if (repeatType_) {
 		Indentor in;
@@ -124,6 +105,19 @@ void RepeatBase::incr_state_change_no()
 	std::cout << "RepeatBase::incr_state_change_no()\n";
 #endif
 }
+
+void  RepeatBase::update_repeat_genvar() const
+{
+   // **** reset name since generated variables are not persisted
+   var_.set_name( name_ );
+
+   // valueAsString() use the last_valid_value() which should always be in range.
+   // Note repeat::value() can be on e past the last valid value, at expiration of Repeat loop
+   //      However Repeat::last_valid_value() will just return the last valid value.
+   var_.set_value( valueAsString() );
+}
+
+// =============================================================
 
 RepeatDate::RepeatDate( const std::string& variable,
                         int start,
@@ -176,6 +170,59 @@ RepeatDate::RepeatDate( const std::string& variable,
       std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
 		throw std::runtime_error("Invalid Repeat date: The start/end is not a valid date." + ss.str());
 	}
+}
+
+void RepeatDate::gen_variables(std::vector<Variable>& vec) const
+{
+   vec.push_back(yyyy_);
+   vec.push_back(mm_);
+   vec.push_back(dom_);
+   vec.push_back(dow_);
+   vec.push_back(julian_);
+   RepeatBase::gen_variables(vec);
+}
+
+const Variable& RepeatDate::find_gen_variable(const std::string& name) const
+{
+   if (name == name_) return var_;
+   if (name == yyyy_.name()) return yyyy_;
+   if (name == mm_.name()) return mm_;
+   if (name == dom_.name()) return dom_;
+   if (name == dow_.name()) return dow_;
+   if (name == julian_.name()) return julian_;
+   return Variable::EMPTY();
+}
+
+void RepeatDate::update_repeat_genvar() const
+{
+   RepeatBase::update_repeat_genvar();
+
+   yyyy_.set_name( name_ + "_YYYY");
+   mm_.set_name( name_ + "_MM");
+   dom_.set_name( name_ + "_DD");
+   dow_.set_name( name_ + "_DOW");
+   julian_.set_name( name_ + "_JULIAN");
+
+   std::string date_as_string = valueAsString();
+   boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+   if (the_date.is_special()) {
+      cout << "RepeatDate::update_repeat_genvar(): error the_date.is_special() " << date_as_string << "\n";
+   }
+
+   //int day_of_year  = the_date.day_of_year();
+   int day_of_week  = the_date.day_of_week().as_number();
+   int day_of_month = the_date.day();
+   int month        = the_date.month();
+   int year         = the_date.year();
+
+   yyyy_.set_value(boost::lexical_cast<std::string>(year));
+   mm_.set_value(boost::lexical_cast<std::string>(month));
+   dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
+   dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
+
+   long last_value = last_valid_value();
+   long julian = Cal::date_to_julian( last_value );
+   julian_.set_value(boost::lexical_cast<std::string>(julian));
 }
 
 bool RepeatDate::compare(RepeatBase* rb) const

@@ -22,6 +22,7 @@
 #include "Calendar.hpp"
 #include "TimeSeries.hpp"
 #include "Str.hpp"
+#include "Cal.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -497,6 +498,33 @@ BOOST_AUTO_TEST_CASE( test_day_changed_for_hybrid )
       BOOST_CHECK_MESSAGE( actual_day_of_year == expected_day_of_year,"Expected day of year '" << expected_day_of_year << "' but found " << actual_day_of_year << " at hour " << hour);
       BOOST_CHECK_MESSAGE( actual_day_of_month == expected_day_of_month,"Expected day of month '" << expected_day_of_month << "' but found " << actual_day_of_month << " at hour " << hour);
 	}
+}
+
+BOOST_AUTO_TEST_CASE( test_calendar_julian )
+{
+   cout << "ACore:: ...test_calendar_julian\n";
+
+   Calendar calendar;
+   calendar.init(ptime(date(2017,1,1), minutes(0)), Calendar::REAL);
+   BOOST_CHECK_MESSAGE(!calendar.hybrid(),"calendar type should be real");
+
+   int days = 0;
+   while( calendar.year() != 2018 ) {
+
+      boost::gregorian::date cal_date = calendar.date();
+      long boost_julian = cal_date.julian_day();
+
+      std::string iso_string = to_iso_string(cal_date);
+      long date_as_long = boost::lexical_cast<long>(iso_string);
+      long ecmwf_julian = Cal::date_to_julian(date_as_long);
+
+      BOOST_CHECK_MESSAGE(boost_julian == ecmwf_julian,"boost julian " << boost_julian << " != ecmwf julian " << ecmwf_julian << " for "  << iso_string);
+
+      // Update calendar every day for a year
+      calendar.update( time_duration( hours(24) ) );
+      days++;
+   }
+   BOOST_CHECK_MESSAGE(days == 365,"expected 365 days but found " << days);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

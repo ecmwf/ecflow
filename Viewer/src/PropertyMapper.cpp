@@ -2,7 +2,9 @@
 
 #include "PropertyMapper.hpp"
 
+#include "UIDebug.hpp"
 #include "VConfig.hpp"
+
 
 PropertyMapper::PropertyMapper(const std::vector<std::string>&  names,VPropertyObserver* obs) : obs_(obs)
 {
@@ -24,13 +26,16 @@ PropertyMapper::~PropertyMapper()
 	}
 }
 
-VProperty* PropertyMapper::find(const std::string& path) const
+VProperty* PropertyMapper::find(const std::string& path,bool failOnError) const
 {
 	for(std::vector<VProperty*>::const_iterator it=props_.begin(); it != props_.end(); ++it)
 	{
 		if((*it)->path() == path)
 			return *it;
 	}
+
+    if(failOnError)
+        UI_ASSERT(0,"Could not find property=" + path);
 
 	return 0;
 }

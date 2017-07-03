@@ -10,6 +10,7 @@
 #include "VModelData.hpp"
 
 #include "AbstractNodeModel.hpp"
+#include "ExpandState.hpp"
 #include "NodeQuery.hpp"
 #include "VFilter.hpp"
 #include "ServerHandler.hpp"
@@ -79,7 +80,9 @@ VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,Attribut
    attrFilter_(attrFilter),
    firstScan_(true),
    firstScanTryNo_(0),
-   maxFirstScanTry_(10)
+   maxFirstScanTry_(10),
+   expandState_(0),
+   tmpExpandState_(0)
 {
     tree_=new VTree(this);
     filter_=new TreeNodeFilter(filterDef,server_,tree_);
@@ -92,6 +95,10 @@ VTreeServer::~VTreeServer()
     delete tree_;
     delete changeInfo_;
     delete filter_;
+    if(expandState_)
+        delete expandState_;
+    if(tmpExpandState_)
+        delete tmpExpandState_;
 }
 
 NodeFilter* VTreeServer::filter() const
@@ -781,6 +788,27 @@ void VTreeServer::clearForceShow(const VItem* itemCurrent)
 
     //!!!!This can call clearForceShow again!!!
     updateFilter(sv);
+}
+
+void VTreeServer::setExpandState(ExpandState* es)
+{
+    if(expandState_)
+        delete expandState_;
+
+    expandState_=es;
+}
+
+void VTreeServer::setTmpExpandState(ExpandState* es)
+{
+    if(tmpExpandState_)
+        delete tmpExpandState_;
+
+    tmpExpandState_=es;
+}
+
+void VTreeServer::clearTmpExpandState()
+{
+    setTmpExpandState(NULL);
 }
 
 //==========================================

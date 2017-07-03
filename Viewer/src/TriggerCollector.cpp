@@ -59,7 +59,7 @@ bool TriggerChildCollector::add(VItem* t, VItem*,Mode)
 {
     if(!t->isAncestor(node_))
     {
-        // child is a kid of n whose trigger_panel is outside its subtree
+        // child_ is a kid of node_ whose trigger is outside its subtree
         return collector_->add(t,child_,TriggerCollector::Child);
     }
     return false;

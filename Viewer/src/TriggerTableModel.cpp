@@ -51,9 +51,9 @@ void TriggerTableModel::endUpdate()
 
 void TriggerTableModel::setTriggerCollector(TriggerTableCollector *tc)
 {
-    beginResetModel();
+    //beginResetModel();
     tc_ = tc;
-    endResetModel();
+    //endResetModel();
 }
 
 bool TriggerTableModel::hasData() const

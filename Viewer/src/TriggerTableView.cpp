@@ -17,6 +17,7 @@
 #include <QScrollBar>
 
 #include "ActionHandler.hpp"
+#include "AttributeEditor.hpp"
 #include "NodeQueryResultModel.hpp"
 #include "NodeQueryViewDelegate.hpp"
 #include "TriggerTableModel.hpp"
@@ -32,7 +33,7 @@ TriggerTableView::TriggerTableView(QWidget* parent) :
 {
     setProperty("view","trigger");
 
-    actionHandler_=new ActionHandler(this);
+    actionHandler_=new ActionHandler(this,this);
 
     //Set the model
     setModel(model_);
@@ -204,6 +205,14 @@ void TriggerTableView::slotViewCommand(VInfo_ptr info,QString cmd)
     if(cmd == "lookup")
     {
         Q_EMIT linkSelected(info);
+    }
+
+    else if(cmd ==  "edit")
+    {
+        if(info && info->isAttribute())
+        {
+            AttributeEditor::edit(info,this);
+        }
     }
 }
 
