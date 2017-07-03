@@ -814,3 +814,17 @@ std::vector<std::string> CtsApi::edit_script(
 }
 const char* CtsApi::edit_script_arg() { return "edit_script";}
 
+std::vector<std::string> CtsApi::query(
+         const std::string& query_type, const std::string& path_to_attribute,
+         const std::string& attribute, const std::string& path_to_task )
+{
+   std::vector<std::string> retVec;  retVec.reserve(4);
+   std::string ret = "--query="; ret += query_type ;
+   retVec.push_back(ret);
+   retVec.push_back(path_to_attribute);
+   retVec.push_back(attribute);
+   if (!path_to_task.empty()) retVec.push_back(path_to_task);
+   return retVec;
+}
+const char* CtsApi::queryArg() { return "query";}
+

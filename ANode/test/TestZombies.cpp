@@ -47,15 +47,7 @@ BOOST_AUTO_TEST_CASE( test_zombies )
    }
 
    // ADD
-   std::vector<ecf::Child::CmdType> child_cmds;
-   child_cmds.push_back(ecf::Child::INIT);
-   child_cmds.push_back(ecf::Child::EVENT);
-   child_cmds.push_back(ecf::Child::METER);
-   child_cmds.push_back(ecf::Child::LABEL);
-   child_cmds.push_back(ecf::Child::WAIT);
-   child_cmds.push_back(ecf::Child::QUEUE);
-   child_cmds.push_back(ecf::Child::ABORT);
-   child_cmds.push_back(ecf::Child::COMPLETE);
+   std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
    {
       s->addZombie( ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10) );
       BOOST_REQUIRE_MESSAGE(s->zombies().size() == 1, "Expected 1 zombie but found " << s->zombies().size());

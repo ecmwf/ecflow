@@ -44,6 +44,8 @@ public:
 	static std::vector<Child::CmdType> child_cmds(const std::string&);
 	static Child::CmdType child_cmd(const std::string&);
 
+   static std::vector<Child::CmdType> list();
+
 	/// Expect a , separated string
 	static bool valid_child_cmds( const std::string& );
 	static bool valid_child_cmd( const std::string& );

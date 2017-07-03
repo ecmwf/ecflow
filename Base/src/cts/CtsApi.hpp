@@ -142,6 +142,7 @@ public:
                                          const std::string& sortable_attribute_name,
                                          bool recursive);
 
+
 	static std::string reloadwsfile();
    static std::string reloadpasswdfile();
 
@@ -165,7 +166,9 @@ public:
  	                                            const std::string& path_to_script = "",
  	                                            bool create_alias = false,
  	                                            bool run = true);
-
+   static std::vector<std::string> query(
+            const std::string& query_type, const std::string& path_to_attribute,
+            const std::string& attribute, const std::string& path_to_task);
 
  	// Only to be used in Cmd
    static const char* server_version_arg();
@@ -235,5 +238,6 @@ public:
 	static const char* forceDependencyEvalArg();
 	static const char* alterArg();
 	static const char* edit_script_arg();
+   static const char* queryArg();
 };
 #endif

@@ -106,7 +106,8 @@ Stats::Stats() :
    group_cmd_(0),
    server_load_cmd_(0),
    stats_(0),
-   check_(0)
+   check_(0),
+   query_(0)
 {
 }
 
@@ -237,6 +238,7 @@ void Stats::reset()
    server_load_cmd_ = 0;
    stats_ = 0;
    check_ = 0;
+   query_ = 0;
 }
 
 static string show_checkpt_mode(ecf::CheckPt::Mode m){
@@ -308,7 +310,7 @@ void Stats::show(std::ostream& os) const
    if (load_defs_ || begin_cmd_ || requeue_node_ || node_job_gen_ || node_check_job_gen_only_ || node_delete_ || node_suspend_ ||
        node_resume_ || node_kill_ || node_status_ || node_edit_history_ || log_cmd_ || log_msg_cmd_ || order_node_ || run_node_ || replace_ ||
        force_ || free_dep_ || suites_ || edit_script_ || alter_cmd_ || ch_cmd_ || plug_ || move_ || group_cmd_ ||
-       reload_white_list_file_ || server_load_cmd_ ||  stats_ || check_
+       reload_white_list_file_ || server_load_cmd_ ||  stats_ || check_ || query_
        || reload_passwd_file_ || node_archive_ || node_restore_
        )  os << "\n";
 
@@ -342,6 +344,7 @@ void Stats::show(std::ostream& os) const
    if (server_load_cmd_ != 0)   os << left << setw(width) << "   Server load cmd " << server_load_cmd_ << "\n";
    if (stats_ != 0)             os << left << setw(width) << "   stats cmd " << stats_ << "\n";
    if (check_ != 0)             os << left << setw(width) << "   checks " << check_ << "\n";
+   if (query_ != 0)             os << left << setw(width) << "   query " << query_ << "\n";
    if (reload_white_list_file_ != 0) os << left << setw(width) << "   Reload white list file " << reload_white_list_file_ << "\n";
    if (reload_passwd_file_ != 0)     os << left << setw(width) << "   Reload password file " << reload_passwd_file_ << "\n";
    if (file_ecf_ || file_job_ || file_jobout_ || file_manual_ || file_cmdout_)  os << "\n";

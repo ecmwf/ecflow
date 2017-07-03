@@ -111,6 +111,20 @@ Child::CmdType Child::child_cmd( const std::string& s)
  	return Child::INIT;
 }
 
+std::vector<Child::CmdType> Child::list()
+{
+   std::vector<ecf::Child::CmdType> child_cmds;
+   child_cmds.push_back(ecf::Child::INIT);
+   child_cmds.push_back(ecf::Child::EVENT);
+   child_cmds.push_back(ecf::Child::METER);
+   child_cmds.push_back(ecf::Child::LABEL);
+   child_cmds.push_back(ecf::Child::WAIT);
+   child_cmds.push_back(ecf::Child::QUEUE);
+   child_cmds.push_back(ecf::Child::ABORT);
+   child_cmds.push_back(ecf::Child::COMPLETE);
+   return child_cmds;
+}
+
 bool Child::valid_child_cmds( const std::string& s)
 {
 	// empty means all children

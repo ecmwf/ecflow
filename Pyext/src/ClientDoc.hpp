@@ -67,7 +67,8 @@ public:
 	static const char* ch_remove();
 	static const char* ch_auto_add();
 	static const char* get_file();
-	static const char* plug();
+   static const char* plug();
+   static const char* query();
 	static const char* alter();
    static const char* force_state();
    static const char* force_state_recursive();

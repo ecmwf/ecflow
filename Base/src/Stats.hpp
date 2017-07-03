@@ -125,6 +125,7 @@ struct Stats {
    unsigned int server_load_cmd_;
    unsigned int stats_;
    unsigned int check_;
+   unsigned int query_;
 
 private:
 
@@ -223,6 +224,7 @@ private:
       ar & server_load_cmd_;
       ar & stats_;
       ar & check_;
+      ar & query_;
    }
 };
 #endif

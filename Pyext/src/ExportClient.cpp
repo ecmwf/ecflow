@@ -44,6 +44,13 @@ void set_host_port_1(ClientInvoker* self, const std::string& host_port){
 std::string version(ClientInvoker* self) { return ecf::Version::raw();}
 std::string server_version(ClientInvoker* self) { self->server_version(); return self->get_string();}
 
+const std::string& query(ClientInvoker* self,
+                         const std::string& query_type,
+                         const std::string& path_to_attribute,
+                         const std::string& attribute,
+                         const std::string& path_to_task) {
+   self->query(query_type,path_to_attribute,attribute,path_to_task); return self->get_string();}
+
 const std::string& get_log(ClientInvoker* self) { self->getLog(); return self->get_string();}
 
 const std::string& get_file(ClientInvoker* self,
@@ -240,7 +247,8 @@ void export_Client()
    .def("stats_reset" ,     &stats_reset,                    ClientDoc::stats_reset())
    .def("get_file" ,        &get_file,                       return_value_policy<copy_const_reference>(), ClientDoc::get_file())
    .def("get_file" ,        &get_file_1,                     return_value_policy<copy_const_reference>())
-	.def("plug" ,            &ClientInvoker::plug,            ClientDoc::plug())
+   .def("plug" ,            &ClientInvoker::plug,            ClientDoc::plug())
+   .def("query" ,           &query,                          return_value_policy<copy_const_reference>(),ClientDoc::query())
    .def("alter" ,           &alters,(bp::arg("paths"),bp::arg("alter_type"),bp::arg("attribute_type"),bp::arg("name")="",bp::arg("value")=""), ClientDoc::alter())
    .def("alter" ,           &alter,(bp::arg("abs_node_path"),bp::arg("alter_type"),bp::arg("attribute_type"),bp::arg("name")="",bp::arg("value")=""))
    .def("sort_attributes" , &alter_sort,(bp::arg("abs_node_path"),bp::arg("attribute_name"),bp::arg("recursive")=true))

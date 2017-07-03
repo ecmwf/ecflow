@@ -926,6 +926,33 @@ const char* ClientDoc::plug(){
             ;
 }
 
+const char* ClientDoc::query(){
+   return
+            "Query the status of event, meter or trigger expression without blocking\n"
+            " - event return 'set' | 'clear' to standard out\n"
+            " - meter return value of the meter to standard out\n"
+            " - trigger returns 'true' if the expression is true, otherwise 'false'\n"
+            "Arguments:\n"
+            "  arg1 = [ event | meter | trigger ]\n"
+            "  arg2 = <path> | <path>:name where name is name of a event or meter\n"
+            "  arg3 = trigger expression\n\n"
+            "\n"
+            "By default throws a RuntimeError exception for errors.\n\n"
+            "Exceptions can be raised because:\n\n"
+            "- No event of the given name exists on the specified node\n"
+            "- No meter of the given name exists on the specified node\n"
+            "- trigger expression does not parse\n"
+            "\nUsage::\n\n"
+            "   try:\n"
+            "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "       res = ci.query('event','/path/to/node:event_name','/path/to/task') # returns 'SET' | 'CLEAR'\n"
+            "       res = ci.query('meter','/path/to/node:meter_name','/path/to/task') # returns meter value as a string\n"
+            "       res = ci.query('trigger','/path/to/node','/fred == complete','/path/to/task') #  return 'true' | 'false' as a string\n"
+            "   except RuntimeError, e:\n"
+            "       print str(e)\n"
+            ;
+}
+
 const char* ClientDoc::alter(){
    return
             "Alter command is used to change the attributes of a node::\n\n"

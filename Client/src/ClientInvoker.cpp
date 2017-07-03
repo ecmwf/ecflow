@@ -1029,6 +1029,12 @@ int ClientInvoker::plug( const std::string& sourcePath, const std::string& destP
    return invoke(Cmd_ptr(new PlugCmd(sourcePath, destPath)));
 }
 
+int ClientInvoker::query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute,const std::string& path_to_task)
+{
+   if (testInterface_) return invoke(CtsApi::query(query_type,path_to_attribute,attribute,path_to_task));
+   return invoke(Cmd_ptr(new QueryCmd(query_type,path_to_attribute,attribute,path_to_task)));
+}
+
 // ======================================================================================================
 
 int ClientInvoker::reloadwsfile() const

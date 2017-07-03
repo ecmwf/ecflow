@@ -284,6 +284,8 @@ public:
 
 	int plug(const std::string& sourcePath, const std::string& destPath) const;
 
+	int query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute,const std::string& path_to_task);
+
 	int alter(const std::vector<std::string>& paths,
 	          const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
 	          const std::string& attrType,

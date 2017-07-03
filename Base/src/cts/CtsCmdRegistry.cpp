@@ -97,7 +97,8 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
 	vec_.push_back( boost::make_shared<ReplaceNodeCmd>());
 	vec_.push_back( boost::make_shared<CFileCmd>());
 	vec_.push_back( boost::make_shared<EditScriptCmd>());
-	vec_.push_back( boost::make_shared<AlterCmd>());
+   vec_.push_back( boost::make_shared<AlterCmd>());
+   vec_.push_back( boost::make_shared<QueryCmd>());
 	vec_.push_back( boost::make_shared<PlugCmd>());
 	// Note: we deliberately do not add MoveCmd, as it should not appear in the public api
 	//       It is created on the fly by the PlugCmd

@@ -1825,6 +1825,52 @@ private:
    }
 };
 
+class QueryCmd : public UserCmd {
+public:
+   QueryCmd(const std::string& query_type,
+            const std::string& path_to_attribute,
+            const std::string& attribute,
+            const std::string& path_to_task )
+   : query_type_(query_type), path_to_attribute_(path_to_attribute), attribute_(attribute),path_to_task_(path_to_task) {}
+   QueryCmd() : UserCmd() {}
+   virtual ~QueryCmd();
+
+   const std::string& query_type() const { return query_type_; }
+   const std::string& path_to_attribute() const { return path_to_attribute_; }
+   const std::string& attribute() const { return attribute_; }
+   const std::string& path_to_task() const { return  path_to_task_ ;}
+
+   virtual std::ostream& print(std::ostream& os) const;
+   virtual bool equals(ClientToServerCmd*) const;
+
+   virtual const char* theArg() const { return arg();}
+   virtual void addOption(boost::program_options::options_description& desc) const;
+   virtual void  create(   Cmd_ptr& cmd,
+            boost::program_options::variables_map& vm,
+            AbstractClientEnv* clientEnv ) const;
+private:
+   static const char* arg();  // used for argument parsing
+   static const char* desc(); // The description of the argument as provided to user
+
+   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+
+private:
+   std::string query_type_;        // [ event | meter | trigger ]
+   std::string path_to_attribute_;
+   std::string attribute_;         // [ event_name | meter_name | trigger expression
+   std::string path_to_task_;      // The task the invoked this command, needed for logging
+
+   friend class boost::serialization::access;
+   template<class Archive>
+   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+      ar & boost::serialization::base_object< UserCmd >( *this );
+      ar & query_type_;
+      ar & path_to_attribute_;
+      ar & attribute_;
+      ar & path_to_task_;
+   }
+};
+
 // The group command allows a series of commands to be be executed:
 //
 // Client---(GroupCTSCmd)---->Server-----(GroupSTCCmd | StcCmd(OK) | Error )--->client:
@@ -1909,6 +1955,7 @@ std::ostream& operator<<(std::ostream& os, const PlugCmd&);
 std::ostream& operator<<(std::ostream& os, const AlterCmd&);
 std::ostream& operator<<(std::ostream& os, const MoveCmd&);
 std::ostream& operator<<(std::ostream& os, const GroupCTSCmd&);
+std::ostream& operator<<(std::ostream& os, const QueryCmd&);
 
 
 #include <boost/serialization/export.hpp>   // explicit code for exports (place last) , needed for BOOST_CLASS_EXPORT
@@ -1945,4 +1992,5 @@ BOOST_CLASS_EXPORT_KEY(AlterCmd)
 BOOST_CLASS_EXPORT_KEY(MoveCmd)
 BOOST_CLASS_EXPORT_KEY(GroupCTSCmd)
 BOOST_CLASS_EXPORT_KEY(ShowCmd)
+BOOST_CLASS_EXPORT_KEY(QueryCmd)
 #endif
