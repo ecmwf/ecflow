@@ -102,7 +102,7 @@ private:
       clockAttr.startStopWithServer(true);
       suite->addClock( clockAttr );
 
-      suite->addAutoCancel( ecf::AutoCancelAttr(2) );
+ 		suite->addAutoCancel( ecf::AutoCancelAttr(2) );
  		suite->addVariable( Variable("VAR","value") );
 		suite->addVariable( Variable("VAR1","\"value\"") );
 		suite->addVariable( Variable("ECF_FETCH","\"smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%\"") );

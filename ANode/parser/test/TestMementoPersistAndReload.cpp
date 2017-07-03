@@ -392,6 +392,7 @@ BOOST_AUTO_TEST_CASE( test_memento_persist_and_reload )
       node_ptr t = suite->add_task("t1");
 
       std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
+
       ZombieAttr attr(ecf::Child::USER, child_cmds, ecf::User::FOB,10);
 
       NodeZombieMemento memento(attr);
