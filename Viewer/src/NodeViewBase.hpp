@@ -34,7 +34,6 @@ public:
         virtual VInfo_ptr currentSelection()=0;
 		virtual void selectFirstServer()=0;
         virtual void setCurrentSelection(VInfo_ptr n)=0;
-        virtual bool isNodeExpanded(const QModelIndex&) const=0;
 
         virtual void readSettings(VSettings* vs)=0;
         virtual void writeSettings(VSettings* vs)=0;

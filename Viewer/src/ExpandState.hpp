@@ -18,44 +18,11 @@
 #include <QSet>
 
 class TreeNodeModel;
-class NodeViewBase;
+class AbstractNodeView;
 class QModelIndex;
 class VNode;
 class VTreeNode;
 class ExpandStateNode;
-
-//template <typename View> class ExpandState;
-
-#if 0
-class CompactViewExpandState
-{
-    friend class CompactNodeView;
-
-public:
-    explicit CompactViewExpandState(CompactNodeView*,TreeNodeModel*);
-    ~CompactViewExpandState();
-
-    bool rootSameAs(const std::string&) const;
-    void save(const VTreeNode*);
-    void restore(const VTreeNode*);
-
-    void collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>&);
-
-protected:
-    void clear();
-    ExpandStateNode* setRoot(const std::string&);
-    ExpandStateNode* root() const {return root_;}
-    void save(ExpandStateNode*,const QModelIndex&);
-    //void restore(ExpandStateNode*,const VTreeNode*);
-    void collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
-                 const QModelIndex& nodeIdx,QSet<QPersistentModelIndex>& theSet);
-
-    CompactNodeView* view_;
-    TreeNodeModel* model_;
-    ExpandStateNode* root_;
-};
-
-#endif
 
 class ExpandState
 {
@@ -63,12 +30,11 @@ class ExpandState
     friend class CompactNodeView;
 
 public:
-    ExpandState(NodeViewBase*,TreeNodeModel*);
+    ExpandState(AbstractNodeView*,TreeNodeModel*);
     ~ExpandState();
 
     bool rootSameAs(const std::string&) const;
     void save(const VTreeNode*);
-    void restore(const VTreeNode*);
     void collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>&);
 
 
@@ -77,15 +43,13 @@ protected:
     ExpandStateNode* setRoot(VNode* root,bool expanded);
     ExpandStateNode* root() const {return root_;}
     void save(const VNode *,ExpandStateNode*,const QModelIndex&);
-    void restore(const VNode *,ExpandStateNode*);
     void collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
                  const QModelIndex& nodeIdx,QSet<QPersistentModelIndex>& theSet);
 
-    NodeViewBase* view_;
+    AbstractNodeView* view_;
     TreeNodeModel* model_;
     ExpandStateNode* root_;
 };
-
 
 #endif
 

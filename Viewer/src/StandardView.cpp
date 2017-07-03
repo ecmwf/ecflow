@@ -130,6 +130,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
     int level=(parentId >=0?viewItems_[parentId].level+1:0);
     TreeNodeViewItem *item=0;
 
+#if 0
     std::vector<int> itemWidthVec;
     std::vector<int> itemHeightVec;
 
@@ -145,6 +146,8 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
         UiLog().dbg() << "  item=" << currentIndex.data().toString() << " w=" << w;
 #endif
     }
+#endif
+
 
 #ifdef _UI_STANDARDVIEW_DEBUG
     if(parentId >=0)
@@ -165,12 +168,13 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
         item->level=level;
         item->expanded = false;
         item->total = 0;
-        //item->widestInSiblings=widest;
 
         //We compute the size of the item. For attributes we delay the width computation until we
         //actually paint them and we set their width to 300.
-        item->width=itemWidthVec[i-first];
-        item->height=itemHeightVec[i-first];
+        int w,h;
+        delegate_->sizeHint(currentIndex,w,h);
+        item->width=w;
+        item->height=h;
 
         int xp=leftMargin_+expandIndicatorBoxWidth_; // no indentation for the root
 
@@ -187,7 +191,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
         item->x=xp;
 
         if(item->alignedRight() > maxRowWidth_)
-            maxRowWidth_=item->alignedRight();
+            maxRowWidth_=item->right();
 
         //We need to expand the item
         if(recursiveExpanding || isIndexExpanded(currentIndex))
@@ -454,52 +458,17 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
         //Draw the item with the delegate
         int paintedWidth=delegate_->paintItem(painter,opt,item->index);
 
-#if 0
         //we have to know if the item width is the same that we exepcted
         if(paintedWidth != item->width)
-        {
-            bool sameAsWidest=(item->width == item->widestInSiblings);
-                item->width=paintedWidth;
+        {            
+            item->width=paintedWidth;
 
-                //servers
-                if(item->parentItem ==-1)
-                {
-                    adjustWidthInParent(i);
-                    doDelayedWidthAdjustment();
-                }
-                //Nodes
-                else if(model_->isNode(item->index))
-                {
-                    //widestInSiblings has to be adjusted
-                    if(sameAsWidest || paintedWidth  > item->widestInSiblings)
-                    {
-                        adjustWidthInParent(i);
-                        doDelayedWidthAdjustment();
-                    }
-                    //we just need to update the item
-                    else if( paintedWidth < item->widestInSiblings)
-                    {
-                        doDelayedWidthAdjustment();
-                    }
-                }
-                //Attributes
-                else
-                {
-                    if(item->right() > maxRowWidth_)
-                    {
-                        maxRowWidth_=item->right();
-                        doDelayedWidthAdjustment();
-                    }
-                }
+            if(item->right() > maxRowWidth_)
+            {
+                maxRowWidth_=item->right();
+                doDelayedWidthAdjustment();
             }
-#endif
-
-            //QRect rr=opt.rect;
-            //rr.setWidth(item->width);
-            //painter->drawRect(rr);
-
-            //UiLog().dbg() << i << " " << viewItems_[i]->index << " " << viewItems_[i]->index.data().toString() << " "
-            //              << viewItems_[i]->x << " " << viewItems_[i]->height << " " << leaf;
+        }
 
         //draw expand indicator
         if(item->hasChildren)
@@ -608,88 +577,6 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
     }
 
     yp+=rh;
-}
-
-void StandardView::adjustWidthInParent(int start)
-{
-#if 0
-    //The parent index of the start item
-    int parentItem=viewItems_[start].parentItem;
-
-    //The current max width in the start item's siblings
-    int prevWidest=viewItems_[start].widestInSiblings;
-
-    //If the parent is not the root ie the start item is not a server
-    if(parentItem >=0)
-    {
-        int w=0, h=0, widest=0;
-        QModelIndex parentIndex=viewItems_[parentItem].index;
-
-        //Determine the max width in the siblings of the start
-        //item, ie in the children of the parent item
-        int rowCount=model_->rowCount(parentIndex);
-        for(int i=0; i < rowCount; i++)
-        {
-            QModelIndex idx=model_->index(i,0,parentIndex);
-            if(model_->isNode(idx))
-            {
-                delegate_->sizeHint(idx,w,h);
-                if(w >widest) widest=w;
-            }
-        }
-
-        //If there is a new max width we need to adjust all the children of
-        //the parent item
-        int delta=widest-prevWidest;
-        if(delta != 0)
-        {
-            int n=parentItem+viewItems_[parentItem].total;
-            for(int i=parentItem+1; i <= n; i++)
-            {
-                //For a direct child of the parent item we just
-                //set the max width to its new value
-                if(viewItems_[i].parentItem == parentItem)
-                {
-                    viewItems_[i].widestInSiblings = widest;
-                }
-                //The other items are shifted
-                else
-                {
-                    viewItems_[i].x+=delta;
-                }
-
-                //Check if the total width changed
-                if(viewItems_[i].right() > maxRowWidth_)
-                    maxRowWidth_=viewItems_[i].right();
-            }
-        }
-    }
-
-    //If the parent is the root ie the start item is a server
-    else
-    {
-        //Determine the diff between the current and the previous width
-        int delta=viewItems_[start].width-prevWidest;
-
-        //for server widestInSiblings is set to the width
-        viewItems_[start].widestInSiblings=viewItems_[start].width;
-
-        //Shift all the children with the diff
-        if(delta != 0)
-        {
-            int n=start+viewItems_[start].total;
-            for(int i=start+1; i <= n; i++)
-            {
-                //shifted
-                viewItems_[i].x+=delta;
-
-                //Check if the total width changed
-                if(viewItems_[i].right() > maxRowWidth_)
-                    maxRowWidth_=viewItems_[i].right();
-            }
-        }
-    }
-#endif
 }
 
 int StandardView::connectorPos(TreeNodeViewItem* item) const

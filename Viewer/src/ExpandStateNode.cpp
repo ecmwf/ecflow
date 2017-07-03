@@ -15,11 +15,20 @@ ExpandStateNode::ExpandStateNode(VNode* node,unsigned int expanded) :
     expanded_(expanded)
 {
     name_=node->strName();
+    reserveChildren(node->numOfChildren());
 }
 
 ExpandStateNode::~ExpandStateNode()
 {
     clear();
+}
+
+void ExpandStateNode::reset(const VNode* node,unsigned int expanded)
+{
+    clear();
+    name_=node->strName();
+    expanded_=expanded;
+    reserveChildren(node->numOfChildren());
 }
 
 void ExpandStateNode::clear()

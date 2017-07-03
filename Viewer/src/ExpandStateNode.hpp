@@ -20,20 +20,20 @@ class VNode;
 //status filter changes etc...
 class ExpandStateNode
 {
-    //friend class TreeNodeView;
-    //friend class CompactNodeView;
     friend class ExpandState;
 
 public:
     explicit ExpandStateNode(VNode* node,unsigned int expanded);
     ~ExpandStateNode();
 
+    void reset(const VNode* node,unsigned int expanded);
     void clear();
-    void reserveChildren(std::size_t num);
     ExpandStateNode* setChildAt(std::size_t index,VNode* node,unsigned int expanded);
     void setExpanded(bool expanded) {expanded_=expanded;}
 
 protected:
+    void reserveChildren(std::size_t num);
+
     std::vector<ExpandStateNode*> children_;
     std::string name_;
     unsigned int expanded_ : 1;

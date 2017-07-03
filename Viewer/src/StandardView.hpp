@@ -54,8 +54,6 @@ protected:
     void updateRowCount();
     void updateScrollBars();
 
-    void adjustWidthInParent(int start);
-
     StandardNodeViewDelegate* delegate_;
     int expandIndicatorBoxWidth_;
     int expandIndicatorWidth_;

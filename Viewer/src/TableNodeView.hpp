@@ -45,7 +45,6 @@ public:
     void setCurrentSelection(VInfo_ptr n);
 	void selectFirstServer() {}
 	void setModel(TableNodeSortModel *model);
-    bool isNodeExpanded(const QModelIndex& idx) const {return false;}
 
 	void notifyChange(VProperty* p);
 
