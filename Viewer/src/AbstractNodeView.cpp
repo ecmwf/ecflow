@@ -44,7 +44,9 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     connectorGap_(1),
     expandConnectorLenght_(20),
     noSelectionOnMousePress_(false),
-    connectorColour_(Qt::black)
+    connectorColour_(Qt::black),
+    drawConnector_(true),
+    indentation_(0)
 {  
     expandConnectorLenght_=itemGap_-2*connectorGap_;
 
@@ -102,7 +104,7 @@ void AbstractNodeView::attachModel()
 
 void AbstractNodeView::mousePressEvent(QMouseEvent* event)
 {
-    //When the expand indicataor is pressed
+    //When the expand indicator is pressed
     if(event->button() == Qt::LeftButton)
     {
         int viewItemIndex=itemAtCoordinate(event->pos());
@@ -121,8 +123,8 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
                 {
                     expand(viewItemIndex);
                 }
+                return;
             }
-            return;
         }
     }
 

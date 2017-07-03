@@ -57,7 +57,6 @@ protected:
     void adjustWidthInParent(int start);
 
     StandardNodeViewDelegate* delegate_;
-    int indentation_;
     int expandIndicatorBoxWidth_;
     int expandIndicatorWidth_;
 

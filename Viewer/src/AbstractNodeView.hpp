@@ -149,8 +149,10 @@ protected:
     virtual void updateScrollBars()=0;
     void adjustWidthInParent(int start);
 
+    void setIndentation(int i) {indentation_=i;}
     void setExpectedBg(QColor c) {expectedBg_=c;}
     void setConnectorColour(QColor c) {connectorColour_=c;}
+    void setDrawConnector(bool b) {drawConnector_=b;}
 
     void insertViewItems(int pos, int count, const TreeNodeViewItem &viewItem);
     void removeViewItems(int pos, int count);
@@ -180,6 +182,8 @@ protected:
     QPointer<QItemSelectionModel> selectionModel_;
     QColor expectedBg_;
     QColor connectorColour_;
+    bool drawConnector_;
+    int indentation_;
 
 private:
     void expand(int item);

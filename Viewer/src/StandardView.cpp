@@ -29,10 +29,13 @@
 
 StandardView::StandardView(TreeNodeModel* model,QWidget* parent) :
     AbstractNodeView(model,parent),
-    indentation_(20),
     expandIndicatorBoxWidth_(20),
     expandIndicatorWidth_(10)
 {
+    //Overwrite some base class values
+    drawConnector_=false;
+    indentation_=10;
+
     //This is needed for making the context menu work
     setProperty("view","tree");
 
@@ -297,26 +300,30 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
 #ifdef _UI_STANDARDVIEW_DEBUG
         UiLog().dbg() << " area=" << area;
 #endif
+        std::vector<int> indentVec;
 
-        //Initialise indentVec. For each indentation level it tells us if
-        //a connector line is to be drawn. Here we scan up to the
-        //toplevel item in the firstVisible item's branch.
-        std::vector<int> indentVec(1000,0);
-        if(firstVisible >0)
+        if(drawConnector_)
         {
-            TreeNodeViewItem* item=&viewItems_[firstVisible];
-            int level=item->level;
-            while(item->parentItem >= 0 && level >0)
+            //Initialise indentVec. For each indentation level it tells us if
+            //a connector line is to be drawn. Here we scan up to the
+            //toplevel item in the firstVisible item's branch.
+            indentVec=std::vector<int>(1000,0);
+            if(firstVisible >0)
             {
-                TreeNodeViewItem* pt=&viewItems_[item->parentItem];
-                if(item->hasMoreSiblings)
+                TreeNodeViewItem* item=&viewItems_[firstVisible];
+                int level=item->level;
+                while(item->parentItem >= 0 && level >0)
                 {
-                    indentVec[item->level]=connectorPos(item);
-                }
-                UI_ASSERT(pt->level == level-1, "item->parentItem=" << item->parentItem <<
+                    TreeNodeViewItem* pt=&viewItems_[item->parentItem];
+                    if(item->hasMoreSiblings)
+                    {
+                        indentVec[item->level]=connectorPos(item);
+                    }
+                    UI_ASSERT(pt->level == level-1, "item->parentItem=" << item->parentItem <<
                           " pt->level=" << pt->level << " level=" << level);
-                item=pt;
-                level--;
+                    item=pt;
+                    level--;
+                }
             }
         }
 
@@ -328,13 +335,16 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
         {
             int itemHeight=viewItems_[i].height;
 
-            //Adjust indentVec
-            if(viewItems_[i].hasMoreSiblings)
+            if(drawConnector_)
             {
-                indentVec[viewItems_[i].level]=connectorPos(&viewItems_[i]);
+                //Adjust indentVec
+                if(viewItems_[i].hasMoreSiblings)
+                {
+                    indentVec[viewItems_[i].level]=connectorPos(&viewItems_[i]);
+                }
+                else
+                    indentVec[viewItems_[i].level]=0;
             }
-            else
-                indentVec[viewItems_[i].level]=0;
 
 #ifdef _UI_STANDARDVIEW_DEBUG
             UiLog().dbg() << "row: " << i << " " << itemHeight;
@@ -528,7 +538,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
         }
 
         //Draw the connector lines
-        if(1)
+        if(drawConnector_)
         {
             painter->setPen(connectorColour_);
 
@@ -594,9 +604,10 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
                 if(xp != 0)
                     painter->drawLine(xp,yp,xp,yp+rh);
             }
-            yp+=rh;
         }
     }
+
+    yp+=rh;
 }
 
 void StandardView::adjustWidthInParent(int start)

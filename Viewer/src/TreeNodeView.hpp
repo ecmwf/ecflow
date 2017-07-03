@@ -87,6 +87,8 @@ protected:
     void regainSelectionFromExpand();
 
     void adjustBackground(QColor col);
+    void adjustIndentation(int);
+    void adjustDrawBranchLine(bool b);
     void adjustBranchLineColour(QColor col);
     void adjustServerToolTip(bool);
     void adjustNodeToolTip(bool);

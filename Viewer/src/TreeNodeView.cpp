@@ -74,42 +74,43 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilte
 
     //Properties
     std::vector<std::string> propVec;
+    propVec.push_back("view.tree.indentation");
     propVec.push_back("view.tree.background");
+    propVec.push_back("view.tree.drawBranchLine");
     propVec.push_back("view.tree.branchLineColour");
     propVec.push_back("view.tree.serverToolTip");
     propVec.push_back("view.tree.nodeToolTip");
     propVec.push_back("view.tree.attributeToolTip");
+
     prop_=new PropertyMapper(propVec,this);
 
     VProperty *prop=0;
     std::string propName;
 
-    //Init stylesheet related properties
-    propName="view.tree.background";
-    prop=prop_->find(propName);
-    UI_ASSERT(prop,"Could not find property=" + propName);
+    //Initialise indentation
+    prop=prop_->find("view.tree.indentation",true);
+    adjustIndentation(prop->value().toInt());
+
+    //Init bg colour
+    prop=prop_->find("view.tree.background",true);
     adjustBackground(prop->value().value<QColor>());
 
-    //Init stylesheet related properties
-    propName="view.tree.branchLineColour";
-    prop=prop_->find(propName);
-    UI_ASSERT(prop,"Could not find property=" + propName);
+    //Init branch line status (on/off)
+    prop=prop_->find("view.tree.drawBranchLine",true);
+    adjustDrawBranchLine(prop->value().toBool());
+
+    //Init branch line/connector colour
+    prop=prop_->find("view.tree.branchLineColour",true);
     adjustBranchLineColour(prop->value().value<QColor>());
 
     //Adjust tooltip
-    propName="view.tree.serverToolTip";
-    prop=prop_->find(propName);
-    UI_ASSERT(prop,"Could not find property=" + propName);
+    prop=prop_->find("view.tree.serverToolTip",true);
     adjustServerToolTip(prop->value().toBool());
 
-    propName="view.tree.nodeToolTip";
-    prop=prop_->find(propName);
-    UI_ASSERT(prop,"Could not find property=" + propName);
+    prop=prop_->find("view.tree.nodeToolTip",true);
     adjustNodeToolTip(prop->value().toBool());
 
-    propName="view.tree.attributeToolTip";
-    prop=prop_->find(propName);
-    UI_ASSERT(prop,"Could not find property=" + propName);
+    prop=prop_->find("view.tree.attributeToolTip",true);
     adjustAttributeToolTip(prop->value().toBool());
 
     inStartUp_=false;
@@ -542,6 +543,15 @@ void TreeNodeView::regainSelectionFromExpand()
 // Property handling
 //==============================================
 
+void TreeNodeView::adjustIndentation(int indent)
+{
+    if(indent >=0)
+    {
+        view_->setIndentation(indent);
+        needItemsLayout_=true;
+    }
+}
+
 void TreeNodeView::adjustBackground(QColor col)
 {
     if(col.isValid())
@@ -556,6 +566,11 @@ void TreeNodeView::adjustBackground(QColor col)
         if(inStartUp_)
             view_->setExpectedBg(col);
     }
+}
+
+void TreeNodeView::adjustDrawBranchLine(bool b)
+{
+    view_->setDrawConnector(b);
 }
 
 void TreeNodeView::adjustBranchLineColour(QColor col)
@@ -583,6 +598,14 @@ void TreeNodeView::notifyChange(VProperty* p)
     if(p->path() == "view.tree.background")
     {
         adjustBackground(p->value().value<QColor>());
+    }
+    else if(p->path() == "view.tree.indentation")
+    {
+        adjustIndentation(p->value().toInt());
+    }
+    else if(p->path() == "view.tree.drawBranchLine")
+    {
+        adjustDrawBranchLine(p->value().toBool());
     }
     else if(p->path() == "view.tree.branchLineColour")
     {
