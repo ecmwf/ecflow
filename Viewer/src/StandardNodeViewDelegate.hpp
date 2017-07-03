@@ -8,21 +8,25 @@
 //
 //============================================================================
 
-#ifndef TreeNodeViewDelegate_HPP_
-#define TreeNodeViewDelegate_HPP_
+#ifndef STANDARDNODEVIEWDELEGATE_HPP_
+#define STANDARDNODEVIEWDELEGATE_HPP_
 
 #include "TreeNodeViewDelegateBase.hpp"
 
-class TreeNodeViewDelegate : public TreeNodeViewDelegateBase
+class StandardNodeViewDelegate : public TreeNodeViewDelegateBase
 {
 public:
-    explicit TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent=0);
-	~TreeNodeViewDelegate();
+    explicit StandardNodeViewDelegate(TreeNodeModel* model,QWidget *parent=0);
+    ~StandardNodeViewDelegate();
 
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 
+    int paintItem(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const;
+
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;   
+    void sizeHint(const QModelIndex& index,int& w,int& h) const;
 };
 
 #endif

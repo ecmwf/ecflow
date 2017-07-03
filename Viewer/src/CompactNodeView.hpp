@@ -12,7 +12,7 @@
 #define COMPACTNODEVIEW_HPP
 
 #include "CompactView.hpp"
-#include "ExpandState.hpp"
+//#include "ExpandState.hpp"
 #include "NodeViewBase.hpp"
 #include "VInfo.hpp"
 #include "VProperty.hpp"
@@ -20,6 +20,7 @@
 #include <QMap>
 #include <QModelIndex>
 
+class AbstractNodeView;
 class ActionHandler;
 class Animation;
 class ExpandNode;
@@ -42,6 +43,7 @@ public:
     VInfo_ptr currentSelection();
     void setCurrentSelection(VInfo_ptr n);
     void selectFirstServer();
+    bool isNodeExpanded(const QModelIndex&) const;
 
     void notifyChange(VProperty* p);
 
@@ -84,6 +86,7 @@ protected:
     void adjustNodeToolTip(bool);
     void adjustAttributeToolTip(bool);
 
+    AbstractNodeView *view;
     ActionHandler* actionHandler_;
     bool needItemsLayout_;
     int defaultIndentation_;
@@ -93,8 +96,8 @@ protected:
     bool setCurrentFromExpand_;
     VInfo_ptr lastSelection_;
 
-    typedef ExpandState<CompactNodeView> CompactViewExpandState;
-    QVector<CompactViewExpandState*> expandStates_;
+    //typedef ExpandState<CompactNodeView> CompactViewExpandState;
+    //QVector<CompactViewExpandState*> expandStates_;
     bool inStartUp_;
 };
 

@@ -26,7 +26,7 @@
 #include "ExpandState.hpp"
 #include "PropertyMapper.hpp"
 #include "TreeNodeModel.hpp"
-#include "TreeNodeViewDelegate.hpp"
+#include "StandardNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VFilter.hpp"
@@ -36,7 +36,7 @@
 #define _UI_COMPACTNODEVIEW_DEBUG
 
 CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
-    CompactView(model,parent),
+    view_(new CompactView(model,parent)),
     NodeViewBase(filterDef),    
     needItemsLayout_(false),
     //defaultIndentation_(indentation()),
@@ -49,20 +49,18 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
     setProperty("style","nodeView");
     setProperty("view","tree");
 
-    setContextMenuPolicy(Qt::CustomContextMenu);
-
     //Context menu
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+    connect(view_, SIGNAL(customContextMenuRequested(const QPoint &)),
             this, SLOT(slotContextMenu(const QPoint &)));
 
     //Selection
-    connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
+    connect(view_,SIGNAL(doubleClicked(const QModelIndex&)),
             this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
     //expandState_=new ExpandState(this,model_);
     actionHandler_=new ActionHandler(this);
 
-    connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
+    connect(view_->delegate(),SIGNAL(sizeHintChangedGlobal()),
             this,SLOT(slotSizeHintChangedGlobal()));
 
     //Properties
@@ -110,21 +108,21 @@ CompactNodeView::CompactNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,Q
 
 CompactNodeView::~CompactNodeView()
 {
-    qDeleteAll(expandStates_);
+    //qDeleteAll(expandStates_);
     delete actionHandler_;
     delete prop_;
 }
 
 QWidget* CompactNodeView::realWidget()
 {
-    return this;
+    return view_;
 }
 
 //Collects the selected list of indexes
 QModelIndexList CompactNodeView::selectedList()
 {
     QModelIndexList lst;
-    Q_FOREACH(QModelIndex idx,selectedIndexes())
+    Q_FOREACH(QModelIndex idx,view_->selectedIndexes())
         if(idx.column() == 0)
             lst << idx;
     return lst;
@@ -133,7 +131,7 @@ QModelIndexList CompactNodeView::selectedList()
 // reimplement virtual function from CompactView - called when the selection is changed
 void CompactNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    QModelIndexList lst=selectedIndexes();
+    QModelIndexList lst=view_->selectedIndexes();
     //When the selection was triggered from restoring (expanding) the nodes
     //we do not want to broadcast it
     if(lst.count() > 0 && !setCurrentFromExpand_)
@@ -149,7 +147,7 @@ void CompactNodeView::selectionChanged(const QItemSelection &selected, const QIt
         lastSelection_=info;
     }
 
-    CompactView::selectionChanged(selected, deselected);
+    view_->selectionChanged(selected, deselected);
 
     //The model has to know about the selection in order to manage the
     //nodes that are forced to be shown
@@ -158,7 +156,7 @@ void CompactNodeView::selectionChanged(const QItemSelection &selected, const QIt
 
 VInfo_ptr CompactNodeView::currentSelection()
 {
-    QModelIndexList lst=selectedIndexes();
+    QModelIndexList lst=view_->selectedIndexes();
     if(lst.count() > 0)
     {
         return model_->nodeInfo(lst.front());
@@ -180,7 +178,7 @@ void CompactNodeView::setCurrentSelection(VInfo_ptr info)
 #ifdef _UI_COMPACTNODEVIEW_DEBUG
         UiLog().dbg() << "CompactNodeView::setCurrentSelection --> " << info->path();
 #endif
-        setCurrentIndex(idx);
+        view_->setCurrentIndex(idx);
     }
     setCurrentIsRunning_=false;
 }
@@ -205,7 +203,7 @@ void CompactNodeView::selectFirstServer()
     QModelIndex idx=model_->index(0,0);
     if(idx.isValid())
     {
-        setCurrentIndex(idx);
+        view_->setCurrentIndex(idx);
         VInfo_ptr info=model_->nodeInfo(idx);
         Q_EMIT selectionChanged(info);
     }
@@ -213,9 +211,9 @@ void CompactNodeView::selectFirstServer()
 
 void CompactNodeView::slotContextMenu(const QPoint &position)
 {
-    QModelIndexList lst=selectedList();
+    QModelIndexList lst=view_->selectedList();
     //QModelIndex index=indexAt(position);
-    QPoint scrollOffset(horizontalScrollBar()->value(),verticalScrollBar()->value());
+    QPoint scrollOffset(view_->horizontalScrollBar()->value(),view_->verticalScrollBar()->value());
 
     handleContextMenu(indexAt(position),lst,mapToGlobal(position),position+scrollOffset,this);
 }
@@ -283,7 +281,7 @@ void CompactNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
         QModelIndex idx=model_->infoToIndex(info);
         if(idx.isValid())
         {
-            collapseAll(idx);
+            view_->collapseAll(idx);
         }
     }
 
@@ -317,7 +315,7 @@ void CompactNodeView::rerender()
     }
     else
     {
-        viewport()->update();
+        view_->viewport()->update();
     }
 }
 
@@ -333,7 +331,7 @@ void CompactNodeView::slotRepaint(Animation* an)
 
     Q_FOREACH(VNode* n,an->targets())
     {
-        update(model_->nodeToIndex(n));
+        view_->update(model_->nodeToIndex(n));
     }
 }
 
@@ -346,6 +344,11 @@ void CompactNodeView::slotSizeHintChangedGlobal()
 //====================================================
 // Expand state management
 //====================================================
+
+bool CompactNodeView::isNodeExpanded(const QModelIndex& idx) const
+{
+    return view_->isExpanded(idx);
+}
 
 #if 0
 void CompactNodeView::expandAll(const QModelIndex& idx)
@@ -390,7 +393,7 @@ void CompactNodeView::expandTo(const QModelIndex& idxTo)
 
     Q_FOREACH(QModelIndex d,lst)
     {
-        expand(d);
+        view_->expand(d);
         //qDebug() << "expand" << d << isExpanded(d);
     }
 }
@@ -404,14 +407,40 @@ void CompactNodeView::slotSaveExpand()
         VTreeServer* ts=model_->indexToServer(serverIdx);
         Q_ASSERT(ts);
 
-        CompactViewExpandState* es=new CompactViewExpandState(this,model_);
-        expandStates_ << es;
+        ExpandState* es=ts->expandState();
+        if(!es)
+        {
+            es=new ExpandState(this,model_);
+            ts->setExpandState(es); //thre treeserver takes ownership of the expandstate
+        }
+
         es->save(ts->tree());
     }
+
+#if 0
+    for(int i=0; i < model_->rowCount(); i++)
+    {
+        QModelIndex serverIdx=model_->index(i, 0);
+        VTreeServer* ts=model_->indexToServer(serverIdx);
+        Q_ASSERT(ts);
+
+        CompactViewExpandState* es=expandStates_->find(ts);
+        if(!es)
+        {
+            es=expandStates_->add(this,model_);
+        }
+        //CompactViewExpandState* es=new CompactViewExpandState(this,model_);
+        //expandStates_ << es;
+        es->save(ts->tree());
+    }
+
+    expandStates_->removeUnused();
+#endif
 }
 
 void CompactNodeView::slotRestoreExpand()
 {
+#if 0
     Q_FOREACH(CompactViewExpandState* es,expandStates_)
     {
         if(es->root())
@@ -433,19 +462,23 @@ void CompactNodeView::slotRestoreExpand()
     qDeleteAll(expandStates_);
     expandStates_.clear();
     regainSelectionFromExpand();
+#endif
 }
 
 //Save the expand state for the given node (it can be a server as well)
 void CompactNodeView::slotSaveExpand(const VTreeNode* node)
 {
+#if 0
     CompactViewExpandState* es=new CompactViewExpandState(this,model_);
     expandStates_ << es;
     es->save(node);
+#endif
 }
 
 //Restore the expand state for the given node (it can be a server as well)
 void CompactNodeView::slotRestoreExpand(const VTreeNode* node)
 {
+#if 0
     for(int i=0; i < expandStates_.count(); i++)
     {
         CompactViewExpandState* es=expandStates_[i];
@@ -468,11 +501,12 @@ void CompactNodeView::slotRestoreExpand(const VTreeNode* node)
     }
 
     regainSelectionFromExpand();
+#endif
 }
 
 void CompactNodeView::regainSelectionFromExpand()
 {
-    VInfo_ptr s=currentSelection();
+    VInfo_ptr s=view_->currentSelection();
     if(!s)
     {
         if(lastSelection_)
@@ -498,9 +532,9 @@ void CompactNodeView::adjustBackground(QColor col)
 {
     if(col.isValid())
     {        
-        QPalette p=viewport()->palette();
+        QPalette p=view_->viewport()->palette();
         p.setColor(QPalette::Window,col);
-        viewport()->setPalette(p);
+        view_->viewport()->setPalette(p);
 
         //When we set the palette on startup something resets the palette
         //before the first paint event happens. So we set the expected bg colour

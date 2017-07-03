@@ -175,6 +175,12 @@ void TreeNodeViewDelegateBase::updateSettings()
     updateBaseSettings();
 }
 
+bool TreeNodeViewDelegateBase::isSingleHeight(int h) const
+{
+    return (h==nodeBox_->fullHeight || h == attrBox_->fullHeight);
+}
+
+
 
 int TreeNodeViewDelegateBase::renderServer(QPainter *painter,const QModelIndex& index,
                                            const QStyleOptionViewItem& option,QString text) const

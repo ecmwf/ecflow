@@ -39,7 +39,8 @@ public:
 
     void reload() {}
 	void rerender();
-	QWidget* realWidget();
+    QWidget* realWidget();
+    QObject* realObject();
 	VInfo_ptr currentSelection();
     void setCurrentSelection(VInfo_ptr n);
 	void selectFirstServer() {}
