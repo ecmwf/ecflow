@@ -115,14 +115,7 @@ private:
 		suiteTask->add_part_complete( PartExpression("t1 == complete") );
 		suiteTask->add_part_complete( PartExpression("t2 == complete",true) );
 
-		std::vector<ecf::Child::CmdType> child_cmds;
-		child_cmds.push_back(ecf::Child::INIT);
-		child_cmds.push_back(ecf::Child::EVENT);
-		child_cmds.push_back(ecf::Child::METER);
-		child_cmds.push_back(ecf::Child::LABEL);
-		child_cmds.push_back(ecf::Child::WAIT);
-		child_cmds.push_back(ecf::Child::ABORT);
-		child_cmds.push_back(ecf::Child::COMPLETE);
+	   std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 		suiteTask->addZombie( ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10) );
 		suiteTask->addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL,100) );
 		suiteTask->addZombie( ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK,100) );
