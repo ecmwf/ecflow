@@ -452,14 +452,29 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
         QSize paintedSize;
         delegate_->paint(painter,opt,item->index,paintedSize);
 
-        //we have to know if the item width is the same that we exepcted
-        if(paintedSize.width() != item->width)
+        //we have to know if the item width/height is the same that we exepcted.
+        //This can happen when:
+        // -we set a fixed initial width for the item (e.g. for an attribute)
+        //  and now we got the real width
+        // -the number of icons or additional extra information
+        //  changed for a node (so the width changed)
+        // -the number of lines changed in a multiline label (so the height changed)
+        bool wChanged=paintedSize.width() != item->width;
+        bool hChanged=paintedSize.height() != item->height;
+
+        if(wChanged || hChanged)
         {            
+            //set new size
             item->width=paintedSize.width();
+            item->height=paintedSize.height();
 
             if(item->right() > maxRowWidth_)
             {
                 maxRowWidth_=item->right();
+                doDelayedWidthAdjustment();
+            }
+            else if(hChanged)
+            {
                 doDelayedWidthAdjustment();
             }
         }
