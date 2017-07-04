@@ -447,12 +447,11 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
 //          UiLog().dbg() << "  optRect=" << opt.rect << " visRect=" << vr;
 //#endif
 
-
         //Draw the item with the delegate
         QSize paintedSize;
         delegate_->paint(painter,opt,item->index,paintedSize);
 
-        //we have to know if the item width/height is the same that we exepcted.
+        //we have to know if the item width/height is the same that we expected.
         //This can happen when:
         // -we set a fixed initial width for the item (e.g. for an attribute)
         //  and now we got the real width
@@ -523,6 +522,14 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
             int lineX1=item->x-expandIndicatorBoxWidth_/2;
             int lineY=yp+item->height/2;
 
+            //For multiline labels the connector shoudl be close to the top
+            //not in the middle. We use the parentitem's height to find the proper
+            //y position.
+            if(!singleRow && item->parentItem >=0)
+            {
+                lineY=yp+viewItems_[item->parentItem].height/2;
+            }
+
             if(item->hasMoreSiblings)
             {
                 indentVec[item->level]=lineX1;
@@ -548,7 +555,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
                     //line towards the siblings  - downwards
                     if(item->hasMoreSiblings)
                     {
-                        painter->drawLine(lineX1,yp,lineX1,yp+rh);
+                        painter->drawLine(lineX1,lineY,lineX1,yp+rh);
                     }
                 }
 
