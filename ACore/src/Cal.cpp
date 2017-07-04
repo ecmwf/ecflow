@@ -15,7 +15,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "Cal.hpp"
-
+#include <stdio.h>
 long Cal::julian_to_date(long jdate)
 {
    long x,y,d,m,e;
@@ -77,3 +77,5 @@ long Cal::date_to_julian(long ddate)
 
    return(j1);
 }
+
+// int main(int ac, char** av){ int a=Cal::date_to_julian(20170219) % 7; printf("%d", a); return 0;}

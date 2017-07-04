@@ -157,7 +157,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 			   // Typically if ECF_OUT is specified, we should only look at that location
 			   // however SMS also looked at the alternate location (and RD relied on this ECFLOW-177 )
 
-            // First try user variable, if defined this has priority ECFLOW-9999
+            // First try user variable, if defined this has priority ECFLOW-999
 			   std::stringstream ss;
             std::string user_jobout;
             if (submittable->findParentUserVariableValue(Str::ECF_JOBOUT(), user_jobout)) {

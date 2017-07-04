@@ -25,7 +25,11 @@ class Child : private boost::noncopyable {
 public:
 	enum CmdType    { INIT, EVENT, METER, LABEL, WAIT, ABORT, COMPLETE };
 
-	enum ZombieType { USER, ECF, PATH , NOT_SET };
+	enum ZombieType {
+	   USER,
+	   ECF,
+	   PATH ,
+	   NOT_SET };
 
 	static std::string to_string(ZombieType);
 	static bool valid_zombie_type( const std::string& );
@@ -39,6 +43,8 @@ public:
 	/// Expect a , separated string
 	static bool valid_child_cmds( const std::string& );
 	static bool valid_child_cmd( const std::string& );
+
+   static std::vector<Child::CmdType> list();
 
 private:
 	Child();

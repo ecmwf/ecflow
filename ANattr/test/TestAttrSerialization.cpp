@@ -280,14 +280,7 @@ BOOST_AUTO_TEST_CASE( test_zombie_attr_serialisation )
 {
    cout << "ANattr:: ...test_zombie_attr_serialisation\n";
 
-   std::vector<ecf::Child::CmdType> child_cmds;
-   child_cmds.push_back(ecf::Child::INIT);
-   child_cmds.push_back(ecf::Child::EVENT);
-   child_cmds.push_back(ecf::Child::METER);
-   child_cmds.push_back(ecf::Child::LABEL);
-   child_cmds.push_back(ecf::Child::WAIT);
-   child_cmds.push_back(ecf::Child::ABORT);
-   child_cmds.push_back(ecf::Child::COMPLETE);
+   std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 
    doSaveAndRestore(fileName,ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10));
    doSaveAndRestore(fileName,ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::FAIL,10));

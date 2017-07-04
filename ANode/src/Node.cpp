@@ -1057,7 +1057,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       //    However for job file generation we should use use the generated variables first.
       //    if the user removes ECF_PASS then we are stuck with the wrong value in the script file
       //    FREE_JOBS_PASSWORD is left for the server to deal with
-      // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitamly override these. ECFLOW-9999
+      // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitamly override these. ECFLOW-999
       bool generated_variable = false;
       if ( percentVar.find("ECF_") != std::string::npos) {
          if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
