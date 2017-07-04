@@ -11,11 +11,14 @@
 #include "ExpandStateNode.hpp"
 #include "AbstractNodeView.hpp"
 #include "TreeNodeModel.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VTree.hpp"
 
-#define _UI_EXPANDSTATE_DEBUG
+#include <boost/algorithm/string.hpp>
+
+//#define _UI_EXPANDSTATE_DEBUG
 
 ExpandState::ExpandState(AbstractNodeView* view,TreeNodeModel* model) :
     view_(view), model_(model), root_(0)
@@ -25,6 +28,11 @@ ExpandState::ExpandState(AbstractNodeView* view,TreeNodeModel* model) :
 ExpandState::~ExpandState()
 {
     clear();
+}
+
+bool ExpandState::isEmpty() const
+{
+    return  !root_ || root_->children_.size() == 0;
 }
 
 void ExpandState::clear()
@@ -159,4 +167,57 @@ void ExpandState::collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
             //}
         }
     }
+}
+
+void ExpandState::saveExpandAll(const VTreeNode* node)
+{
+    UI_ASSERT(node,"");
+    VNode* vnode=node->vnode();
+    UI_ASSERT(vnode,"");
+    if(ExpandStateNode* expand=find(vnode->absNodePath()))
+    {
+        expand->setExpandedRecursively(true);
+    }
+}
+
+void ExpandState::saveCollapseAll(const VTreeNode* node)
+{
+    UI_ASSERT(node,"");
+    VNode* vnode=node->vnode();
+    UI_ASSERT(vnode,"");
+    if(ExpandStateNode* expand=find(vnode->absNodePath()))
+    {
+        expand->setExpandedRecursively(false);
+    }
+}
+
+ExpandStateNode* ExpandState::find(const std::string& fullPath)
+{
+    if(!root_)
+        return NULL;
+
+    if(fullPath.empty())
+        return NULL;
+
+    if(fullPath == "/")
+        return root_;
+
+    std::vector<std::string> pathVec;
+    boost::split(pathVec,fullPath,boost::is_any_of("/"));
+
+    if(pathVec.size() > 0 && pathVec.at(0).empty())
+    {
+        pathVec.erase(pathVec.begin());
+    }
+
+    return root_->find(pathVec);
+}
+
+void ExpandState::print() const
+{
+    if(!root_)
+        return;
+
+    std::string indent="";
+    root_->print(indent,true);
 }

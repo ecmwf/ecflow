@@ -76,6 +76,9 @@ protected:
     void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
     void restoreExpand(ExpandNode *expand,const VNode* node);
     void expandTo(const QModelIndex& idxTo);
+    void saveExpandAll(const QModelIndex& idx);
+    void saveCollapseAll(const QModelIndex& idx);
+
     void setCurrentSelectionFromExpand(VInfo_ptr info);
     void regainSelectionFromExpand();
 

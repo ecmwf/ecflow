@@ -30,6 +30,11 @@ public:
     void clear();
     ExpandStateNode* setChildAt(std::size_t index,VNode* node,unsigned int expanded);
     void setExpanded(bool expanded) {expanded_=expanded;}
+    void setExpandedRecursively(bool expanded);
+
+    ExpandStateNode* find(const std::vector<std::string>& pathVec);
+    ExpandStateNode* findChild(const std::string& name) const;
+    void print(std::string& indent,bool recursive) const;
 
 protected:
     void reserveChildren(std::size_t num);

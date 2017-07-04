@@ -267,6 +267,7 @@ void TreeNodeView::slotDoubleClickItem(const QModelIndex& idx)
 
 void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 {
+    //Expand all the children of the given node
     if(cmd == "expand")
     {
         QModelIndex idx=model_->infoToIndex(info);
@@ -279,14 +280,18 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
             QTime t;
             t.start();
 #endif
+            //apply expand in the view
             view_->expandAll(idx);
 #ifdef _UI_COMPACTNODEVIEW_DEBUG
             UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             QGuiApplication::restoreOverrideCursor();
-#endif
 
+            //save/update the expand state object
+            saveExpandAll(idx);
+
+#endif
         }
     }
     else if(cmd == "collapse")
@@ -294,7 +299,11 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
         QModelIndex idx=model_->infoToIndex(info);
         if(idx.isValid())
         {
+            //apply expand in the view
             view_->collapseAll(idx);
+
+            //save/update the expand state object
+            saveCollapseAll(idx);
         }
     }
 
@@ -352,7 +361,6 @@ void TreeNodeView::slotSizeHintChangedGlobal()
 {
     needItemsLayout_=true;
 }
-
 
 //====================================================
 // Expand state management
@@ -487,6 +495,50 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
 
     regainSelectionFromExpand();
 }
+
+void TreeNodeView::saveExpandAll(const QModelIndex& idx)
+{
+    VTreeNode* tnode=model_->indexToNode(idx);
+    Q_ASSERT(tnode);
+    VTreeServer* ts=tnode->server();
+    Q_ASSERT(ts);
+
+    //The expand state is stored on the VTreeServer
+    //The expand state is stored on the VTreeServer
+    ExpandState* es=ts->expandState();
+    if(!es)
+    {
+        es=new ExpandState(view_,model_);
+        ts->setExpandState(es); //the treeserver takes ownership of the expandstate
+    }
+    if(es->isEmpty())
+    {
+        es->save(ts->tree());
+    }
+    es->saveExpandAll(tnode);
+}
+
+void TreeNodeView::saveCollapseAll(const QModelIndex& idx)
+{
+    VTreeNode* tnode=model_->indexToNode(idx);
+    Q_ASSERT(tnode);
+    VTreeServer* ts=tnode->server();
+    Q_ASSERT(ts);
+
+    //The expand state is stored on the VTreeServer
+    ExpandState* es=ts->expandState();
+    if(!es)
+    {
+        es=new ExpandState(view_,model_);
+        ts->setExpandState(es); //the treeserver takes ownership of the expandstate
+    }
+    if(es->isEmpty())
+    {
+        es->save(ts->tree());
+    }
+    es->saveCollapseAll(tnode);
+}
+
 
 void TreeNodeView::regainSelectionFromExpand()
 {

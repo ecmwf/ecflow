@@ -36,7 +36,10 @@ public:
     bool rootSameAs(const std::string&) const;
     void save(const VTreeNode*);
     void collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>&);
-
+    void saveExpandAll(const VTreeNode* node);
+    void saveCollapseAll(const VTreeNode* node);
+    void print() const;
+    bool isEmpty() const;
 
 protected:
 	void clear();
@@ -45,6 +48,8 @@ protected:
     void save(const VNode *,ExpandStateNode*,const QModelIndex&);
     void collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
                  const QModelIndex& nodeIdx,QSet<QPersistentModelIndex>& theSet);
+
+    ExpandStateNode* find(const std::string& fullPath);
 
     AbstractNodeView* view_;
     TreeNodeModel* model_;
