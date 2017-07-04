@@ -143,6 +143,11 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().query_++;
 
+   if (!path_to_task_.empty()) {
+      // The task which invoked the query command, used for logging, if it is defined, error if not found
+      (void) find_node(as, path_to_task_);
+   }
+
    node_ptr node = find_node(as,path_to_attribute_);
 
    if (query_type_ == "event") {
@@ -195,6 +200,11 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
       // Evaluate the expression
       if ( ast->evaluate() ) return PreAllocatedReply::string_cmd("true");
       return PreAllocatedReply::string_cmd("false");
+   }
+   else {
+        std::stringstream ss;
+        ss << "QueryCmd: unrecognised query_type " << query_type_  ;
+        throw std::runtime_error( ss.str() ) ;
    }
 
    return PreAllocatedReply::ok_cmd();
