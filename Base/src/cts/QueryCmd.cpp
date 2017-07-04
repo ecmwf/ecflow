@@ -64,31 +64,30 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
       cout << "  QueryCmd::create " << QueryCmd::arg() << " task_path(" << clientEnv->task_path() << ")\n";
    }
 
-   std::string query_cmd;
+   std::string query_type;
    std::string path_to_attribute;
    std::string attribute;
    std::string path_to_task = clientEnv->task_path(); // can be empty, when cmd called from command line
 
-   if (args.size()) query_cmd = args[0];
-   if ( query_cmd == "event" || query_cmd == "meter") {
-      // second argument must be <path>:event_or_meter
+   if (args.size()) query_type = args[0];
+   if ( query_type == "event" || query_type == "meter" || query_type == "variable") {
+      // second argument must be <path>:event_or_meter_or_variable
       if (args.size() >= 2) {
          std::string path_and_name = args[1];
          if ( !Extract::pathAndName( path_and_name , path_to_attribute, attribute  ) ) {
-            throw std::runtime_error( "QueryCmd: for event or meter second argument must <path>:event_or_meter_name\n" );
+            throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type );
          }
       }
       else {
-         throw std::runtime_error( "QueryCmd: for event or meter second argument must <path>:event_or_meter_name\n" );
+         throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type);
       }
    }
-   else if (query_cmd == "trigger") {
+   else if (query_type == "trigger") {
       if (args.size() >= 1) {
          path_to_attribute = args[1];
       }
       if (args.size() >= 2) {
          attribute = args[2];
-         // Parse expression to make sure its valid
          PartExpression exp(attribute);
          string parseErrorMsg;
          std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
@@ -100,20 +99,20 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
       }
    }
    else {
-      throw std::runtime_error( "QueryCmd: first argument must be one of [ event | meter | trigger ]" );
+      throw std::runtime_error( "QueryCmd: first argument must be one of [ event | meter | variable | trigger ] but found:" + query_type);
    }
 
    if (path_to_attribute.empty() || (!path_to_attribute.empty() &&  path_to_attribute[0] != '/')) {
-      throw std::runtime_error( "QueryCmd: invalid path to attribute\n" );
+      throw std::runtime_error( "QueryCmd: invalid path to attribute: " + path_to_attribute);
    }
 
-   //  path_to_task can be empty if invoked via the command line.
-   // However if invoked from the shell we expect the ECF_NAME to have been set
+   // path_to_task can be empty if invoked via the command line. ( used for logging, i.e identifying which task invoked this command)
+   // However if invoked from the shell/python we expect the path_to_task(ECF_NAME) to have been set
    if (! path_to_task.empty() && path_to_task[0] != '/') {
-      throw std::runtime_error( "QueryCmd: invalid path to task\n" );
+      throw std::runtime_error( "QueryCmd: invalid path to task: " +  path_to_task);
    }
 
-   cmd = Cmd_ptr(new QueryCmd( query_cmd,
+   cmd = Cmd_ptr(new QueryCmd( query_type,
                                path_to_attribute,
                                attribute,
                                path_to_task));
@@ -123,18 +122,25 @@ const char*  QueryCmd::arg() { return CtsApi::queryArg();}
 
 const char* QueryCmd::desc() {
    return
-            "Query the status of event, meter or trigger expression without blocking\n"
-            " - event return 'set' | 'clear' to standard out\n"
-            " - meter return value of the meter to standard out\n"
-            " - trigger returns 'true' if the expression is true, otherwise 'false'\n"
+            "Query the status of event, meter, variable or trigger expression without blocking\n"
+            " - event    return 'set' | 'clear' to standard out\n"
+            " - meter    return value of the meter to standard out\n"
+            " - variable return value of the variable, repeat or generated variable to standard out,\n"
+            "            will search up the node tree\n"
+            " - trigger  returns 'true' if the expression is true, otherwise 'false'\n\n"
+            "The command will fail if the node path does not exist in the definition and if:\n"
+            " - event    The event is not found\n"
+            " - meter    The meter is not found\n"
+            " - variable No user or generated variable found on node, or any of its parents\n"
+            " - trigger  Trigger does not parse, or if reference to nodes/attributes in the expression are not valid\n"
             "Arguments:\n"
-            "  arg1 = [ event | meter | trigger ]\n"
-            "  arg2 = <path> | <path>:name where name is name of a event or meter\n"
+            "  arg1 = [ event | meter | variable | trigger ]\n"
+            "  arg2 = <path> | <path>:name where name is name of a event, meter or variable\n"
             "  arg3 = trigger expression\n\n"
-            "\n"
             "Usage:\n"
             " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out\n"
             " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out\n"
+            " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out\n"
             " ecflow_client --query trigger /path/to/node/with/trigger  \"/suite/task == complete\" # return true if expression evaluates false otherwise\n"
             ;
 }
@@ -144,7 +150,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
    as->update_stats().query_++;
 
    if (!path_to_task_.empty()) {
-      // The task which invoked the query command, used for logging, if it is defined, error if not found
+      // The task which invoked the query command, used for logging, if it is defined, then error if not found
       (void) find_node(as, path_to_task_);
    }
 
@@ -169,14 +175,21 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
       return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(meter.value()));
    }
 
+   if (query_type_ == "variable") {
+      std::string the_value;
+      if (node->findParentVariableValue(attribute_,the_value)) {
+         return PreAllocatedReply::string_cmd( the_value );
+      }
+      std::stringstream ss; ss << "QueryCmd: Can not find variable, repeat or generated var' of name " << attribute_ << " on node " << path_to_attribute_ << " or its parents";
+      throw std::runtime_error(ss.str());
+   }
+
    if (query_type_ == "trigger") {
 
-      // Parse the expression
       PartExpression exp( attribute_);
       string parseErrorMsg;
       std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
       if (!ast.get()) {
-         // should NOT really, since client did check
          std::stringstream ss; ss << "QueryCmd: Failed to parse expression '" << attribute_  << "'.  " << parseErrorMsg;
          throw std::runtime_error( ss.str() ) ;
       }

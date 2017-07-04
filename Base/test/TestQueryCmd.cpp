@@ -13,10 +13,7 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
-#include <string>
 #include <iostream>
-#include <fstream>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -51,21 +48,26 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    {
       t1->addMeter( Meter(meter_name,0,100,100));
       t1->addEvent( Event(event_name));
+      t1->add_variable("var1","var1");
 
       suite_ptr s = defs.add_suite("suite");
+      s->addRepeat( RepeatDate("YMD",20090916,20090916,1) );
       family_ptr f = s->add_family("f");
+      f->add_variable("var2","var2");
       f->addTask( t1 );
       f->add_task("t2");
    }
 
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1","eventxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite",event_name,"/suite/f/t1")));
-   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1","meterxx","/suite/f/t1")));
-   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite",meter_name,"/suite/f/t1")));
-   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite","1 == ","/suite/f/t1")));
-   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("xxxxx","/suite/f/t1",event_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","xxxx/f/t1",event_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1",event_name,"xxx/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1","meterxx","/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite",meter_name,"/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite","1 == ","/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","1 == ","/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","XXXX","/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("xxxxx","/suite/f/t1",event_name,"/suite/f/t1")));
 
    // t3 does not exist
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t3 == complete","/suite/f/t1")));
@@ -74,6 +76,10 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1",event_name,"/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1",meter_name,"/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t2 == complete","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","1 == 1","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","var1","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","var2","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","YMD","/suite/f/t1")), false);
 
    /// Destroy System singleton to avoid valgrind from complaining
    System::destroy();

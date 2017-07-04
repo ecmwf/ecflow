@@ -156,6 +156,7 @@ public:
 	   { return invoke(TaskApi::complete()); }
 
 	// Support for python child commands, and python jobs
+	const std::string& get_child_path() const { return child_task_path_;}
 	void set_child_path(const std::string& path);
 	void set_child_password(const std::string& pass);
 	void set_child_pid(const std::string& pid);
