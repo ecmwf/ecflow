@@ -222,7 +222,7 @@ void NodeQueryEngine::runRecursively(VNode *node)
                         hasType=true;
                         if(it.value()->execute(av[i]))
                         {
-                            broadcastFind(node,av[i]->data());
+                            broadcastFind(node,av[i]->data(true));
                             scanCnt_++;
                          }
                     }

@@ -60,8 +60,7 @@ void VLabelAttrType::encode(const Label& label,QStringList& data,bool firstLine)
     {
         std::size_t pos=val.find("\n");
         if(pos != std::string::npos)
-        {
-            if(pos > 0) pos--;
+        {            
             val=val.substr(0,pos);
         }
     }
