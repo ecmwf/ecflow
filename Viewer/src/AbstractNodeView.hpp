@@ -22,7 +22,7 @@
 
 class Animation;
 class TreeNodeModel;
-class TreeNodeViewDelegateBase;
+class TreeNodeViewDelegate;
 
 //Struct representing visible items in the view. When an item is collapsed
 //all its children will be removed from viewItems.
@@ -70,7 +70,7 @@ public:
     void setExpanded(const QModelIndex &index, bool expanded);
     void expandAll(const QModelIndex &index);
     void collapseAll(const QModelIndex &index);
-    virtual TreeNodeViewDelegateBase* delegate()=0;
+    TreeNodeViewDelegate* delegate() const {return delegate_;}
 
 public Q_SLOTS:
     void reset();
@@ -166,6 +166,7 @@ protected:
 
 
     TreeNodeModel* model_; //The model
+    TreeNodeViewDelegate* delegate_;
     QSet<QPersistentModelIndex> expandedIndexes; // used when expanding and collapsing items
 
     typedef std::vector<TreeNodeViewItem>::iterator ViewItemIterator;

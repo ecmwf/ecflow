@@ -7,7 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "TreeNodeViewDelegateBase.hpp"
+#include "TreeNodeViewDelegate.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -57,15 +57,140 @@ struct ServerUpdateData
 };
 
 
-TreeNodeViewDelegateBase::TreeNodeViewDelegateBase(TreeNodeModel* model,QWidget *parent) :
+class TreeNodeDelegateBox : public NodeDelegateBox
+{
+public:
+
+    TreeNodeDelegateBox() : textTopCorrection(0), textBottomCorrection(0)
+     {
+         topMargin=2;
+         bottomMargin=2;
+         leftMargin=1;
+         rightMargin=2;
+         topPadding=0;
+         bottomPadding=0;
+         leftPadding=2;
+         rightPadding=2;
+     }
+
+     int realFontHeight;
+     int textTopCorrection;
+     int textBottomCorrection;
+
+     void adjust(const QFont& f)
+     {
+         FontMetrics fm(f);
+         realFontHeight=fm.realHeight();
+         textTopCorrection=fm.topPaddingForCentre();
+         textBottomCorrection=fm.bottomPaddingForCentre();
+         fontHeight=fm.height();
+
+         if(textTopCorrection > 1)
+         {
+             textTopCorrection-=2;
+             realFontHeight+=2;
+         }
+
+         height=realFontHeight+topPadding+bottomPadding;
+         fullHeight=height+topMargin+bottomMargin;
+         sizeHintCache=QSize(100,fullHeight);
+         spacing=fm.width('A')*3/4;
+
+         int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
+         iconSize=h;
+         if(iconSize % 2 == 1)
+             iconSize+=1;
+
+         iconGap=1;
+         if(iconSize > 16)
+             iconGap=2;
+
+         iconPreGap=fm.width('A')/2;
+     }
+
+     QRect adjustTextRect(const QRect& rIn) const
+     {
+         //Q_ASSERT(rIn.height() == fontHeight);
+         QRect r=rIn;
+         r.setY(r.y()-textTopCorrection);
+         r.setHeight(fontHeight);
+         return r;
+     }
+
+     QRect adjustSelectionRect(const QRect& optRect) const {
+         QRect r=optRect;
+         return r;
+     }
+};
+
+class TreeAttrDelegateBox : public AttrDelegateBox
+{
+public:
+    TreeAttrDelegateBox() : textTopCorrection(0), textBottomCorrection(0)
+     {
+         topMargin=2;
+         bottomMargin=2;
+         leftMargin=1;
+         rightMargin=2;
+         topPadding=0;
+         bottomPadding=0;
+         leftPadding=1;
+         rightPadding=2;
+     }
+
+     int realFontHeight;
+     int textTopCorrection;
+     int textBottomCorrection;
+
+     void adjust(const QFont& f)
+     {
+         FontMetrics fm(f);
+         realFontHeight=fm.realHeight();
+         textTopCorrection=fm.topPaddingForCentre();
+         textBottomCorrection=fm.bottomPaddingForCentre();
+         fontHeight=fm.height();
+
+         height=realFontHeight+topPadding+bottomPadding;
+         fullHeight=height+topMargin+bottomMargin;
+         sizeHintCache=QSize(100,fullHeight);
+         spacing=fm.width('A')*3/4;
+     }
+
+     QRect adjustTextRect(const QRect& rIn) const
+     {
+         QRect r=rIn;
+         r.setY(r.y()-textTopCorrection+1);
+         r.setHeight(fontHeight);
+         return r;
+     }
+
+     QRect adjustTextBgRect(const QRect& rIn) const
+     {
+         QRect r=rIn;
+         return r.adjusted(0,-1,0,1);
+     }
+
+     QRect adjustSelectionRect(const QRect& optRect) const {
+         QRect r=optRect;
+         return r.adjusted(0,-selectRm.topOffset(),0,-selectRm.bottomOffset());
+     }
+
+     QRect adjustSelectionRectNonOpt(const QRect& optRect) const {
+         return adjustSelectionRect(optRect);
+     }
+};
+
+
+
+TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent) :
     nodeRectRad_(0),
     drawChildCount_(true),
     nodeStyle_(ClassicNodeStyle),
-    indentation_(0),
     drawNodeType_(true),
     bgCol_(Qt::white),
     model_(model)
 {
+
     drawAttrSelectionRect_=true;
 
     attrFont_=font_;
@@ -100,14 +225,26 @@ TreeNodeViewDelegateBase::TreeNodeViewDelegateBase(TreeNodeModel* model,QWidget 
 
     //The parent must be the view!!!
     animation_=new AnimationHandler(parent);
+
+    nodeBox_=new TreeNodeDelegateBox;
+    attrBox_=new TreeAttrDelegateBox;
+
+    nodeBox_->adjust(font_);
+    attrBox_->adjust(attrFont_);
+
+    typeFont_=font_;
+    typeFont_.setBold(true);
+    typeFont_.setPointSize(font_.pointSize()-1);
+
+    updateSettings();
 }
 
-TreeNodeViewDelegateBase::~TreeNodeViewDelegateBase()
+TreeNodeViewDelegate::~TreeNodeViewDelegate()
 {
     delete animation_;
 }
 
-void TreeNodeViewDelegateBase::updateSettings()
+void TreeNodeViewDelegate::updateSettings()
 {
     Q_ASSERT(nodeBox_);
     Q_ASSERT(attrBox_);
@@ -175,14 +312,121 @@ void TreeNodeViewDelegateBase::updateSettings()
     updateBaseSettings();
 }
 
-bool TreeNodeViewDelegateBase::isSingleHeight(int h) const
+bool TreeNodeViewDelegate::isSingleHeight(int h) const
 {
     return (h==nodeBox_->fullHeight || h == attrBox_->fullHeight);
 }
 
+QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIndex & index ) const
+{
+    return nodeBox_->sizeHintCache;
+}
+
+//This has to be extremely fast
+void  TreeNodeViewDelegate::sizeHint(const QModelIndex& index,int& w,int& h) const
+{
+    QVariant tVar=index.data(Qt::DisplayRole);
+
+    h=nodeBox_->fullHeight;
+
+    //For nodes we compute the exact size of visual rect
+    if(tVar.type() == QVariant::String)
+    {
+        QString text=index.data(Qt::DisplayRole).toString();
+        if(index.data(AbstractNodeModel::ServerRole).toInt() ==0)
+        {
+            widthHintServer(index,w,text);
+        }
+        else
+        {
+            w=nodeWidth(index,text);
+        }
+    }
+    //For attributes we do not need the exact width since they do not have children so
+    //there is nothing on their right in the view. We compute their proper size when
+    //they are first rendered. However the exact height must be known at this stage!
+    else if(tVar.type() == QVariant::StringList)
+    {
+        //Each attribute has this height except the multiline labels
+        h=attrBox_->fullHeight;
+
+        //It is a big enough hint for the width.
+        w=300;
+
+        //For multiline labels we need to compute the height
+        int attLineNum=0;
+        if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 1)
+        {
+            h=labelHeight(attLineNum);
+        }
+    }
+}
+
+void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index,QSize& size) const
+{
+    size=QSize(0,0);
+
+    //Background
+    QStyleOptionViewItem vopt(option);
+    initStyleOption(&vopt, index);
+
+    //Save painter state
+    painter->save();
+
+    if(index.data(AbstractNodeModel::ConnectionRole).toInt() == 0)
+    {
+        QRect fullRect=QRect(0,vopt.rect.y(),painter->device()->width(),vopt.rect.height());
+        painter->fillRect(fullRect,lostConnectBgBrush_);
+        QRect bandRect=QRect(0,vopt.rect.y(),5,vopt.rect.height());
+        painter->fillRect(bandRect,lostConnectBandBrush_);
+    }
+
+    QVariant tVar=index.data(Qt::DisplayRole);
+    painter->setFont(font_);
+
+    if(tVar.type() == QVariant::String)
+    {
+        int width=0;
+        QString text=index.data(Qt::DisplayRole).toString();
+        if(index.data(AbstractNodeModel::ServerRole).toInt() ==0)
+        {
+            width=renderServer(painter,index,vopt,text);
+        }
+        else
+        {
+            width=renderNode(painter,index,vopt,text);
+        }
+
+        size=QSize(width,nodeBox_->fullHeight);
+    }
+    //Render attributes
+    else if(tVar.type() == QVariant::StringList)
+    {
+        QStringList lst=tVar.toStringList();
+        if(lst.count() > 0)
+        {
+            QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
+            if(it != attrRenderers_.end())
+            {
+                AttributeRendererProc a=it.value();
+                (this->*a)(painter,lst,vopt,size);
+            }
+            //if(width==0)
+            //    width=300;
+        }
+
+    }
+
+    painter->restore();
+
+    //else
+    //	QStyledItemDelegate::paint(painter,option,index);
+}
 
 
-int TreeNodeViewDelegateBase::renderServer(QPainter *painter,const QModelIndex& index,
+
+int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
                                            const QStyleOptionViewItem& option,QString text) const
 {
     ServerHandler* server=static_cast<ServerHandler*>(index.data(AbstractNodeModel::ServerPointerRole).value<void*>());
@@ -449,7 +693,7 @@ int TreeNodeViewDelegateBase::renderServer(QPainter *painter,const QModelIndex& 
     return totalWidth;
 }
 
-int TreeNodeViewDelegateBase::renderNode(QPainter *painter,const QModelIndex& index,
+int TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
                                     const QStyleOptionViewItem& option,QString text) const
 {
     int totalWidth=0;
@@ -697,7 +941,7 @@ int TreeNodeViewDelegateBase::renderNode(QPainter *painter,const QModelIndex& in
     return totalWidth;
 }
 
-void TreeNodeViewDelegateBase::renderServerCell(QPainter *painter,const NodeShape& stateShape,
+void TreeNodeViewDelegate::renderServerCell(QPainter *painter,const NodeShape& stateShape,
                                         const NodeText& text,bool selected) const
 {
     renderNodeShape(painter,stateShape);
@@ -722,7 +966,7 @@ void TreeNodeViewDelegateBase::renderServerCell(QPainter *painter,const NodeShap
     }
 }
 
-void TreeNodeViewDelegateBase::renderNodeCell(QPainter *painter,const NodeShape& stateShape,const NodeShape &realShape,
+void TreeNodeViewDelegate::renderNodeCell(QPainter *painter,const NodeShape& stateShape,const NodeShape &realShape,
                              const NodeText& nodeText,const NodeText& typeText,bool selected) const
 {
     renderNodeShape(painter,stateShape);
@@ -830,7 +1074,7 @@ void TreeNodeViewDelegateBase::renderNodeCell(QPainter *painter,const NodeShape&
 }
 
 
-void TreeNodeViewDelegateBase::renderNodeShape(QPainter* painter,const NodeShape& shape) const
+void TreeNodeViewDelegate::renderNodeShape(QPainter* painter,const NodeShape& shape) const
 {
     if(shape.shape_.isEmpty())
         return;
@@ -855,7 +1099,7 @@ void TreeNodeViewDelegateBase::renderNodeShape(QPainter* painter,const NodeShape
     painter->drawPolygon(shape.shape_);
 }
 
-void TreeNodeViewDelegateBase::renderTimer(QPainter *painter,QRect target,int remaining, int total) const
+void TreeNodeViewDelegate::renderTimer(QPainter *painter,QRect target,int remaining, int total) const
 {
     QImage img(target.width(),target.height(),QImage::Format_ARGB32_Premultiplied);
     QRect r=img.rect().adjusted(2,2,-2,-2);
@@ -882,7 +1126,7 @@ void TreeNodeViewDelegateBase::renderTimer(QPainter *painter,QRect target,int re
 }
 
 
-void TreeNodeViewDelegateBase::renderServerUpdate(QPainter* painter,const ServerUpdateData& data) const
+void TreeNodeViewDelegate::renderServerUpdate(QPainter* painter,const ServerUpdateData& data) const
 {
     QFont font(font_);
     font.setPointSize(font_.pointSize()-1);
@@ -931,7 +1175,7 @@ void TreeNodeViewDelegateBase::renderServerUpdate(QPainter* painter,const Server
     }
 }
 
-void TreeNodeViewDelegateBase::widthHintServer(const QModelIndex& index,int& itemWidth, QString text) const
+void TreeNodeViewDelegate::widthHintServer(const QModelIndex& index,int& itemWidth, QString text) const
 {
     ServerHandler* server=static_cast<ServerHandler*>(index.data(AbstractNodeModel::ServerPointerRole).value<void*>());
     Q_ASSERT(server);
@@ -1013,7 +1257,7 @@ void TreeNodeViewDelegateBase::widthHintServer(const QModelIndex& index,int& ite
     itemWidth=currentRight+1;
 }
 
-int TreeNodeViewDelegateBase::nodeWidth(const QModelIndex& index,QString text) const
+int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,QString text) const
 {
     VNode* node=static_cast<VNode*>(index.data(AbstractNodeModel::NodePointerRole).value<void*>());
     Q_ASSERT(node);
@@ -1112,7 +1356,7 @@ int TreeNodeViewDelegateBase::nodeWidth(const QModelIndex& index,QString text) c
 }
 
 
-QString TreeNodeViewDelegateBase::formatTime(int timeInSec) const
+QString TreeNodeViewDelegate::formatTime(int timeInSec) const
 {
     int h=timeInSec/3600;
     int r=timeInSec%3600;
@@ -1128,7 +1372,7 @@ QString TreeNodeViewDelegateBase::formatTime(int timeInSec) const
     return QString();
 }
 
-QColor TreeNodeViewDelegateBase::interpolate(QColor c1,QColor c2,float r) const
+QColor TreeNodeViewDelegate::interpolate(QColor c1,QColor c2,float r) const
 {
     return QColor::fromRgbF(c1.redF()+r*(c2.redF()-c1.redF()),
                   c1.greenF()+r*(c2.greenF()-c1.greenF()),

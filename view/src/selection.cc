@@ -18,7 +18,7 @@
 #include "observer.h"
 #include "host.h"
 
-class selection_observer :public observer {
+class selection_observer : public observer {
   node* n_;
   void gone(observable*);
   void adoption(observable*,observable*);
@@ -118,7 +118,7 @@ void selection::notify_selection_cleared()
   selection* w = first();
   
   current.set(0);
-  
+
   while(w)
     {
       w->selection_cleared();

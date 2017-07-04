@@ -17,14 +17,14 @@
 #include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
 
-#include "TreeNodeViewDelegateBase.hpp"
+#include "TreeNodeViewDelegate.hpp"
 #include "VProperty.hpp"
 
 #include <string>
 
 class ModelColumn;
 
-class TriggerViewDelegate : public TreeNodeViewDelegateBase
+class TriggerViewDelegate : public TreeNodeViewDelegate
 {
 public:
     explicit TriggerViewDelegate(QWidget *parent=0);

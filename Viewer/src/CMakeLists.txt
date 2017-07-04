@@ -21,7 +21,6 @@ set(viewer_srcs
     ComboMulti.cpp
     CommandDesignerWidget.cpp
     CompactView.cpp
-    CompactNodeViewDelegate.cpp
     ConfigListDelegate.cpp
     ConnectState.cpp
     CustomCommandDialog.cpp
@@ -130,7 +129,6 @@ set(viewer_srcs
     SessionHandler.cpp
     Sound.cpp
     StandardView.cpp
-    StandardNodeViewDelegate.cpp
     StringMatchCombo.cpp
     StringMatchMode.cpp
     SuiteItemWidget.cpp
@@ -151,7 +149,7 @@ set(viewer_srcs
     TimeItemWidget.cpp    
     TreeNodeModel.cpp
     TreeNodeView.cpp
-    TreeNodeViewDelegateBase.cpp
+    TreeNodeViewDelegate.cpp
     TreeNodeWidget.cpp
     TreeView.cpp
     TriggerEditor.cpp   
@@ -316,7 +314,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextEditSearchLine.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp
-    TreeNodeViewDelegateBase.hpp
+    TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp    
     TriggerEditor.hpp
     TriggerItemWidget.hpp

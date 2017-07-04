@@ -12,7 +12,7 @@
 
 #include "ExpandState.hpp"
 #include "TreeNodeModel.hpp"
-#include "StandardNodeViewDelegate.hpp"
+#include "TreeNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
@@ -39,8 +39,6 @@ StandardView::StandardView(TreeNodeModel* model,QWidget* parent) :
     //This is needed for making the context menu work
     setProperty("view","tree");
 
-    delegate_=new StandardNodeViewDelegate(model_,this);
-
     //we cannot call it from the constructor of the base class
     //because it calls a pure virtual method
     reset();
@@ -49,11 +47,6 @@ StandardView::StandardView(TreeNodeModel* model,QWidget* parent) :
 StandardView::~StandardView()
 {
 
-}
-
-TreeNodeViewDelegateBase* StandardView::delegate()
-{
-    return delegate_;
 }
 
 //Creates and initialize the viewItem structure of the children of the element
@@ -454,18 +447,33 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
 //          UiLog().dbg() << "  optRect=" << opt.rect << " visRect=" << vr;
 //#endif
 
-
         //Draw the item with the delegate
-        int paintedWidth=delegate_->paintItem(painter,opt,item->index);
+        QSize paintedSize;
+        delegate_->paint(painter,opt,item->index,paintedSize);
 
-        //we have to know if the item width is the same that we exepcted
-        if(paintedWidth != item->width)
+        //we have to know if the item width/height is the same that we expected.
+        //This can happen when:
+        // -we set a fixed initial width for the item (e.g. for an attribute)
+        //  and now we got the real width
+        // -the number of icons or additional extra information
+        //  changed for a node (so the width changed)
+        // -the number of lines changed in a multiline label (so the height changed)
+        bool wChanged=paintedSize.width() != item->width;
+        bool hChanged=paintedSize.height() != item->height;
+
+        if(wChanged || hChanged)
         {            
-            item->width=paintedWidth;
+            //set new size
+            item->width=paintedSize.width();
+            item->height=paintedSize.height();
 
             if(item->right() > maxRowWidth_)
             {
                 maxRowWidth_=item->right();
+                doDelayedWidthAdjustment();
+            }
+            else if(hChanged)
+            {
                 doDelayedWidthAdjustment();
             }
         }
@@ -514,6 +522,14 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
             int lineX1=item->x-expandIndicatorBoxWidth_/2;
             int lineY=yp+item->height/2;
 
+            //For multiline labels the connector shoudl be close to the top
+            //not in the middle. We use the parentitem's height to find the proper
+            //y position.
+            if(!singleRow && item->parentItem >=0)
+            {
+                lineY=yp+viewItems_[item->parentItem].height/2;
+            }
+
             if(item->hasMoreSiblings)
             {
                 indentVec[item->level]=lineX1;
@@ -539,7 +555,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
                     //line towards the siblings  - downwards
                     if(item->hasMoreSiblings)
                     {
-                        painter->drawLine(lineX1,yp,lineX1,yp+rh);
+                        painter->drawLine(lineX1,lineY,lineX1,yp+rh);
                     }
                 }
 
