@@ -147,7 +147,7 @@ const char* QueryCmd::desc() {
             " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out\n"
             " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out\n"
             " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out\n"
-            " ecflow_client --query trigger /path/to/node/with/trigger  \"/suite/task == complete\" # return true if expression evaluates false otherwise\n"
+            " ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if expression evaluates false otherwise\n"
             ;
 }
 
