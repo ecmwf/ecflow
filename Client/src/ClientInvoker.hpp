@@ -161,7 +161,7 @@ public:
 	void set_child_pid(const std::string& pid) { clientEnv_.set_child_pid(pid);}
 	void set_child_try_no(unsigned int try_no) { clientEnv_.set_child_try_no(try_no);}
 	void set_child_timeout(unsigned int seconds) { clientEnv_.set_child_cmd_timeout(seconds);} // ECF_TIMEOUT default is 24 hours allow python jobs to override
-   void set_zombie_child_timeout(unsigned int seconds ); // ECF_ZOMBIE_TIMEOUT default is 24 hours allow python jobs to override
+   void set_zombie_child_timeout(unsigned int seconds){clientEnv_.set_zombie_child_cmd_timeout(seconds);} // ECF_ZOMBIE_TIMEOUT default is 24 hours allow python jobs to override
 
 	void child_init();
 	void child_abort(const std::string& reason  = "");

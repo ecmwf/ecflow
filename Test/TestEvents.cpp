@@ -103,6 +103,7 @@ BOOST_AUTO_TEST_CASE( test_events )
    ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_events.def"));
 
+   TestFixture::client().set_child_path(task_a->absNodePath()); // simulate call from a job, to see logging of job/task calling TestFixture::client().query()
    BOOST_CHECK_MESSAGE(TestFixture::client().query("meter",task_a->absNodePath(),"myMeter")==0,"query command failed " << TestFixture::client().errorMsg());
    BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "100","Expected query of meter to return 100 but found " << TestFixture::client().get_string());
    BOOST_CHECK_MESSAGE(TestFixture::client().query("event",task_a->absNodePath(),"myEvent")==0,"query command failed " << TestFixture::client().errorMsg());
