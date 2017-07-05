@@ -498,7 +498,10 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
 
 void TreeNodeView::saveExpandAll(const QModelIndex& idx)
 {
-    VTreeNode* tnode=model_->indexToNode(idx);
+    if(!idx.isValid())
+        return;
+
+    VTreeNode* tnode=model_->indexToServerOrNode(idx);
     Q_ASSERT(tnode);
     VTreeServer* ts=tnode->server();
     Q_ASSERT(ts);
@@ -520,7 +523,10 @@ void TreeNodeView::saveExpandAll(const QModelIndex& idx)
 
 void TreeNodeView::saveCollapseAll(const QModelIndex& idx)
 {
-    VTreeNode* tnode=model_->indexToNode(idx);
+    if(!idx.isValid())
+        return;
+
+    VTreeNode* tnode=model_->indexToServerOrNode(idx);
     Q_ASSERT(tnode);
     VTreeServer* ts=tnode->server();
     Q_ASSERT(ts);
