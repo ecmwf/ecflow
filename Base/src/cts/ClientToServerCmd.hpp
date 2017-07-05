@@ -1852,6 +1852,7 @@ private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
+   virtual bool handleRequestIsTestable() const { return false;}
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:

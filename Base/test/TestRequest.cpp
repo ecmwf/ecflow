@@ -134,7 +134,8 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName/t1",AlterCmd::ADD_TIME,"+12:00")));
 	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName/t1",AlterCmd::ADD_TIME,"+10:00 20:00 00:30")));
 	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName/t1",AlterCmd::ADD_TODAY,"10:00 20:00 00:30")));
-	cmd_vec.push_back( Cmd_ptr( new PlugCmd()));
+   cmd_vec.push_back( Cmd_ptr( new PlugCmd()));
+   cmd_vec.push_back( Cmd_ptr( new QueryCmd("event","/suiteName/t1","event","")));
 
 	boost::shared_ptr<GroupCTSCmd>  theGroupCmd = boost::make_shared<GroupCTSCmd>();
    theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("suiteName"))  );
