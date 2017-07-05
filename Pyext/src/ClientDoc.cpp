@@ -362,8 +362,8 @@ const char* ClientDoc::sync() {
             "If the period of time between two sync() calls is too long, then the full server definition\n"
             "is returned and assigned to the client Defs.\n"
             "We can determine if the changes were applied by calling in_sync() after the call to sync_local()::\n\n"
-            "   void sync_local(bool sync_suite_clock = false);
-            # The very first call, will get the full Defs.\n"
+            "   void sync_local(bool sync_suite_clock = false);\n"
+            "# The very first call, will get the full Defs.\n"
             "                   sync_suite_clock - By default sync_local only sync with suite clock, if there are changes\n"
             "                                      This option forces sync with suite clock in the sever, provided it has changed\n"
             "                                      This is useful with the Why command\n"
