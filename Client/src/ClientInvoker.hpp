@@ -156,7 +156,6 @@ public:
 	   { return invoke(TaskApi::complete()); }
 
 	// Support for python child commands, and python jobs
-	const std::string& get_child_path() const { return child_task_path_;}
 	void set_child_path(const std::string& path);
 	void set_child_password(const std::string& pass);
 	void set_child_pid(const std::string& pid);
@@ -285,7 +284,7 @@ public:
 
 	int plug(const std::string& sourcePath, const std::string& destPath) const;
 
-	int query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute,const std::string& path_to_task);
+	int query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute);
 
 	int alter(const std::vector<std::string>& paths,
 	          const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */

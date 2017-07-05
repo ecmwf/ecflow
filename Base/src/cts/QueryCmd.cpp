@@ -106,6 +106,10 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
       throw std::runtime_error( "QueryCmd: invalid path to attribute: " + path_to_attribute);
    }
 
+   if (attribute.empty()) {
+      throw std::runtime_error( "QueryCmd: no attribute " + string(QueryCmd::desc()) );
+   }
+
    // path_to_task can be empty if invoked via the command line. ( used for logging, i.e identifying which task invoked this command)
    // However if invoked from the shell/python we expect the path_to_task(ECF_NAME) to have been set
    if (! path_to_task.empty() && path_to_task[0] != '/') {

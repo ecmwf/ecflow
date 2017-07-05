@@ -48,7 +48,7 @@ const std::string& query(ClientInvoker* self,
                          const std::string& query_type,
                          const std::string& path_to_attribute,
                          const std::string& attribute) {
-   self->query(query_type,path_to_attribute,attribute,self->get_child_path()); return self->get_string();}
+   self->query(query_type,path_to_attribute,attribute); return self->get_string();}
 
 const std::string& get_log(ClientInvoker* self) { self->getLog(); return self->get_string();}
 
