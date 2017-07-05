@@ -107,7 +107,7 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
    }
 
    if (attribute.empty()) {
-      throw std::runtime_error( "QueryCmd: no attribute " + string(QueryCmd::desc()) );
+      throw std::runtime_error( "QueryCmd: no attribute specified\n" + string(QueryCmd::desc()) );
    }
 
    // path_to_task can be empty if invoked via the command line. ( used for logging, i.e identifying which task invoked this command)

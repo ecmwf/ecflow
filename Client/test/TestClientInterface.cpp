@@ -77,10 +77,10 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.begin("/suite",true) == 0,CtsApi::begin("/suite",true) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.begin("/suite",false) == 0,CtsApi::begin("/suite",false) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.begin_all_suites() == 0,CtsApi::begin() << " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.query("event","/suite","event") == 0, std::string(CtsApi::queryArg()) << " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.query("meter","/suite","meter") == 0, std::string(CtsApi::queryArg()) << " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.query("variable","/suite","var") == 0, std::string(CtsApi::queryArg()) << " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.query("trigger","/suite","1 == 1") == 0, std::string(CtsApi::queryArg()) << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("event","/suite","event") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("meter","/suite","meter") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("variable","/suite","var") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("trigger","/suite","1 == 1") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
 
 
    Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"/path/to/task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1);

@@ -821,8 +821,13 @@ std::vector<std::string> CtsApi::query(
    std::vector<std::string> retVec;  retVec.reserve(4);
    std::string ret = "--query="; ret += query_type ;
    retVec.push_back(ret);
-   retVec.push_back(path_to_attribute);
-   retVec.push_back(attribute);
+   if (query_type == "event" || query_type == "meter" || query_type == "variable") {
+      retVec.push_back(path_to_attribute + ":" + attribute);
+   }
+   else if (query_type == "trigger") {
+      retVec.push_back(path_to_attribute);
+      retVec.push_back(attribute);
+   }
    if (!path_to_task.empty()) retVec.push_back(path_to_task);
    return retVec;
 }
