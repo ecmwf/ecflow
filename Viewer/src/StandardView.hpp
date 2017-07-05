@@ -8,8 +8,8 @@
 //
 //============================================================================
 
-#ifndef COMPACTVIEW_HPP
-#define COMPACTVIEW_HPP
+#ifndef STANDARDVIEW_HPP
+#define STANDARDVIEW_HPP
 
 #include <QAbstractScrollArea>
 #include <QBasicTimer>
@@ -26,39 +26,37 @@ class TreeNodeModel;
 class GraphNodeViewItem;
 class QStyledItemDelegate;
 
-class CompactView : public AbstractNodeView
-{
+//Implements a standard tree view (similar to QTreeView) where there is
+//one item per row
 
+class StandardView : public AbstractNodeView
+{
 public:
-    explicit CompactView(TreeNodeModel* model,QWidget *parent=0);
-    ~CompactView();
+    explicit StandardView(TreeNodeModel* model,QWidget *parent=0);
+    ~StandardView();
 
     QRect visualRect(const QModelIndex &index) const;
 
-protected:   
+protected:
     void paint(QPainter *painter,const QRegion& region);
-    void drawRow(QPainter* painter,int start,int xOffset,int &yp,int &itemsInRow,std::vector<int>&);
+    void drawRow(QPainter* painter,int start,int xOffset,int &yp,std::vector<int>&);
 
     void layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated);
 
     int itemRow(int item) const;
-    int itemCountInRow(int start) const;
-    void rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const;
-    int rowHeight(int start,int forward,int &itemsInRow) const;
-    void coordinateForItem(int item,int& itemY,int& itemRowHeight) const;
+    int coordinateForItem(int item) const;
     int itemAtCoordinate(const QPoint& coordinate) const;
-    int itemAtRowCoordinate(int start,int count,int xPos) const;
-    bool isPointInExpandIndicator(int,QPoint) const {return false;}
+    bool isPointInExpandIndicator(int,QPoint) const;
 
     int  firstVisibleItem(int &offset) const;
     void updateRowCount();
     void updateScrollBars();
 
-    void adjustWidthInParent(int start);
+    int expandIndicatorBoxWidth_;
+    int expandIndicatorWidth_;
 
 private:
-    int connectorPos(TreeNodeViewItem* item, TreeNodeViewItem* parent) const;
+    int connectorPos(TreeNodeViewItem* item) const;
 };
 
-#endif // COMPACTVIEW_HPP
-
+#endif // STANDARDVIEW_HPP

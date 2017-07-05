@@ -20,14 +20,17 @@
 #include <QGuiApplication>
 #endif
 
+#include "AbstractNodeView.hpp"
 #include "ActionHandler.hpp"
 #include "Animation.hpp"
 #include "AttributeEditor.hpp"
 #include "ExpandState.hpp"
 #include "TableNodeSortModel.hpp"
 #include "PropertyMapper.hpp"
+#include "StandardView.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VModelData.hpp"
@@ -35,152 +38,121 @@
 
 #define _UI_TREENODEVIEW_DEBUG
 
-TreeNodeView::TreeNodeView(TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
-	QTreeView(parent),
-    NodeViewBase(filterDef),
+TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+    QObject(parent),
+    view_(view),
     model_(model),
+    NodeViewBase(filterDef),
     needItemsLayout_(false),
-	defaultIndentation_(indentation()),
     prop_(NULL),
     setCurrentIsRunning_(false),
-    setCurrentFromExpand_(false)
+    setCurrentFromExpand_(false),
+    inStartUp_(true)
 {
     setObjectName("view");
     setProperty("style","nodeView");
-	setProperty("view","tree");
+    setProperty("view","tree");
+
+    //Context menu
+    connect(view_, SIGNAL(customContextMenuRequested(const QPoint &)),
+            this, SLOT(slotContextMenu(const QPoint &)));
+
+    //Selection
+    connect(view_,SIGNAL(doubleClicked(const QModelIndex&)),
+            this,SLOT(slotDoubleClickItem(const QModelIndex)));
+
+    //Selection
+    connect(view_,SIGNAL(selectionChangedInView(const QItemSelection&, const QItemSelection &)),
+            this,SLOT(selectionChanged(const QItemSelection&, const QItemSelection &)));
 
     //expandState_=new ExpandState(this,model_);
-	actionHandler_=new ActionHandler(this);
+    actionHandler_=new ActionHandler(this,view_);
 
-	//Set the model.
-	setModel(model_);
+    connect(view_->delegate(),SIGNAL(sizeHintChangedGlobal()),
+            this,SLOT(slotSizeHintChangedGlobal()));
 
-	//Create delegate to the view
-    delegate_=new TreeNodeViewDelegate(model_,this);
-	setItemDelegate(delegate_);
-
-	connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
-			this,SLOT(slotSizeHintChangedGlobal()));
-
-	//setRootIsDecorated(false);
-	setAllColumnsShowFocus(true);
-	//setUniformRowHeights(true);
-	setMouseTracking(true);
-	setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
-    header()->setStretchLastSection(false);
-    header()->setMinimumSectionSize(4096);
-#endif
-
-	//!!!!We need to do it because:
-	//The background colour between the view's left border and the nodes cannot be
-	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
-	//colour from the palette. Here we set this to transparent so that Qt could leave
-	//this area empty and we will fill it appropriately in our delegate.
-	QPalette pal=palette();
-	pal.setColor(QPalette::Highlight,QColor(128,128,128,0));//Qt::transparent);
-	setPalette(pal);
-
-	//Hide header
-    setHeaderHidden(true);
-    //header()->hide();
-
-	//Context menu
-	setContextMenuPolicy(Qt::CustomContextMenu);
-
-	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-		                this, SLOT(slotContextMenu(const QPoint &)));
-
-	//Selection
-	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
-			this,SLOT(slotDoubleClickItem(const QModelIndex)));
-
-	//expandAll();
-
-	//Properties
-	std::vector<std::string> propVec;
-	propVec.push_back("view.tree.indentation");
+    //Properties
+    std::vector<std::string> propVec;
+    propVec.push_back("view.tree.indentation");
     propVec.push_back("view.tree.background");
     propVec.push_back("view.tree.drawBranchLine");
+    propVec.push_back("view.tree.branchLineColour");
     propVec.push_back("view.tree.serverToolTip");
     propVec.push_back("view.tree.nodeToolTip");
     propVec.push_back("view.tree.attributeToolTip");
-	prop_=new PropertyMapper(propVec,this);
 
-	//Initialise indentation
-    Q_ASSERT(prop_->find("view.tree.indentation"));
-    adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
+    prop_=new PropertyMapper(propVec,this);
 
-    //Init stylesheet related properties
-    Q_ASSERT(prop_->find("view.tree.background"));
-    adjustBackground(prop_->find("view.tree.background")->value().value<QColor>(),false);
-    Q_ASSERT(prop_->find("view.tree.drawBranchLine"));
-    adjustBranchLines(prop_->find("view.tree.drawBranchLine")->value().toBool(),false);
-    adjustStyleSheet();
+    VProperty *prop=0;
+    std::string propName;
+
+    //Initialise indentation
+    prop=prop_->find("view.tree.indentation",true);
+    adjustIndentation(prop->value().toInt());
+
+    //Init bg colour
+    prop=prop_->find("view.tree.background",true);
+    adjustBackground(prop->value().value<QColor>());
+
+    //Init branch line status (on/off)
+    prop=prop_->find("view.tree.drawBranchLine",true);
+    adjustDrawBranchLine(prop->value().toBool());
+
+    //Init branch line/connector colour
+    prop=prop_->find("view.tree.branchLineColour",true);
+    adjustBranchLineColour(prop->value().value<QColor>());
 
     //Adjust tooltip
-    Q_ASSERT(prop_->find("view.tree.serverToolTip"));
-    adjustServerToolTip(prop_->find("view.tree.serverToolTip")->value().toBool());
+    prop=prop_->find("view.tree.serverToolTip",true);
+    adjustServerToolTip(prop->value().toBool());
 
-    Q_ASSERT(prop_->find("view.tree.nodeToolTip"));
-    adjustNodeToolTip(prop_->find("view.tree.nodeToolTip")->value().toBool());
+    prop=prop_->find("view.tree.nodeToolTip",true);
+    adjustNodeToolTip(prop->value().toBool());
 
-    Q_ASSERT(prop_->find("view.tree.attributeToolTip"));
-    adjustAttributeToolTip(prop_->find("view.tree.attributeToolTip")->value().toBool());
+    prop=prop_->find("view.tree.attributeToolTip",true);
+    adjustAttributeToolTip(prop->value().toBool());
+
+    inStartUp_=false;
 }
 
 TreeNodeView::~TreeNodeView()
 {
-    qDeleteAll(expandStates_);
-	delete actionHandler_;
-	delete prop_;
+    delete actionHandler_;
+    delete prop_;
 }
-
-#if 0
-void TreeNodeView::setModel(NodeFilterModel *model)
-{
-	model_= model;
-
-	//Set the model.
-	QTreeView::setModel(model_);
-}
-#endif
 
 QWidget* TreeNodeView::realWidget()
 {
-	return this;
+    return view_;
 }
 
-void TreeNodeView::resizeEvent(QResizeEvent* e)
+QObject* TreeNodeView::realObject()
 {
-    QTreeView::resizeEvent(e);
-    //resizeColumnToContents(0);
+    return this;
 }
 
 //Collects the selected list of indexes
 QModelIndexList TreeNodeView::selectedList()
 {
-  	QModelIndexList lst;
-  	Q_FOREACH(QModelIndex idx,selectedIndexes())
-	  	if(idx.column() == 0)
-		  	lst << idx;
-	return lst;
+    QModelIndexList lst;
+    Q_FOREACH(QModelIndex idx,view_->selectedIndexes())
+        if(idx.column() == 0)
+            lst << idx;
+    return lst;
 }
 
-// reimplement virtual function from QTreeView - called when the selection is changed
+// reimplement virtual function from CompactView - called when the selection is changed
 void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    QModelIndexList lst=selectedIndexes();
+    QModelIndexList lst=view_->selectedIndexes();
     //When the selection was triggered from restoring (expanding) the nodes
     //we do not want to broadcast it
     if(lst.count() > 0 && !setCurrentFromExpand_)
-    {            
+    {
         VInfo_ptr info=model_->nodeInfo(lst.front());
         if(info && !info->isEmpty())
         {
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
             UiLog().dbg() << "TreeNodeView::selectionChanged --> emit=" << info->path();
 #endif
             Q_EMIT selectionChanged(info);
@@ -188,7 +160,7 @@ void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemS
         lastSelection_=info;
     }
 
-    QTreeView::selectionChanged(selected, deselected);
+    view_->selectionChanged(selected, deselected);
 
     //The model has to know about the selection in order to manage the
     //nodes that are forced to be shown
@@ -197,12 +169,12 @@ void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemS
 
 VInfo_ptr TreeNodeView::currentSelection()
 {
-	QModelIndexList lst=selectedIndexes();
-	if(lst.count() > 0)
-	{
-		return model_->nodeInfo(lst.front());
-	}
-	return VInfo_ptr();
+    QModelIndexList lst=view_->selectedIndexes();
+    if(lst.count() > 0)
+    {
+        return model_->nodeInfo(lst.front());
+    }
+    return VInfo_ptr();
 }
 
 void TreeNodeView::setCurrentSelection(VInfo_ptr info)
@@ -214,26 +186,23 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 
     setCurrentIsRunning_=true;
     QModelIndex idx=model_->infoToIndex(info);
-	if(idx.isValid())
-	{          
-#ifdef _UI_TREENODEVIEW_DEBUG
+    if(idx.isValid())
+    {
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
         UiLog().dbg() << "TreeNodeView::setCurrentSelection --> " << info->path();
 #endif
-        setCurrentIndex(idx);
-	}
-    else
-    {
-        lastSelection_.reset();
+        view_->setCurrentIndex(idx);
     }
     setCurrentIsRunning_=false;
 }
+
 
 void TreeNodeView::setCurrentSelectionFromExpand(VInfo_ptr info)
 {
     if(!info || setCurrentFromExpand_)
         return;
 
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
         UiLog().dbg() << "TreeNodeView::setCurrentSelectionFromExpand --> " << info->path();
 #endif
 
@@ -244,15 +213,48 @@ void TreeNodeView::setCurrentSelectionFromExpand(VInfo_ptr info)
 
 void TreeNodeView::selectFirstServer()
 {
-	QModelIndex idx=model_->index(0,0);
-	if(idx.isValid())
-	{      
-        setCurrentIndex(idx);
-		VInfo_ptr info=model_->nodeInfo(idx);
-		Q_EMIT selectionChanged(info);
-	}
+    QModelIndex idx=model_->index(0,0);
+    if(idx.isValid())
+    {
+        view_->setCurrentIndex(idx);
+        VInfo_ptr info=model_->nodeInfo(idx);
+        Q_EMIT selectionChanged(info);
+    }
 }
 
+void TreeNodeView::slotContextMenu(const QPoint &position)
+{
+    QModelIndexList lst=selectedList();
+    //QModelIndex index=indexAt(position);
+    QPoint scrollOffset(view_->horizontalScrollBar()->value(),view_->verticalScrollBar()->value());
+
+    handleContextMenu(view_->indexAt(position),lst,view_->mapToGlobal(position),position+scrollOffset,view_);
+}
+
+
+void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
+{
+    //Node actions
+    if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
+    {
+        //qDebug() << "context menu" << indexClicked;
+
+        std::vector<VInfo_ptr> nodeLst;
+        for(int i=0; i < indexLst.count(); i++)
+        {
+            VInfo_ptr info=model_->nodeInfo(indexLst[i]);
+            if(info && !info->isEmpty())
+                nodeLst.push_back(info);
+        }
+
+        actionHandler_->contextMenu(nodeLst,globalPos);
+    }
+
+    //Desktop actions
+    else
+    {
+    }
+}
 
 void TreeNodeView::slotDoubleClickItem(const QModelIndex& idx)
 {
@@ -263,176 +265,344 @@ void TreeNodeView::slotDoubleClickItem(const QModelIndex& idx)
     }
 }
 
-void TreeNodeView::slotContextMenu(const QPoint &position)
-{
-	QModelIndexList lst=selectedList();
-	//QModelIndex index=indexAt(position);
-	QPoint scrollOffset(horizontalScrollBar()->value(),verticalScrollBar()->value());
-
-	handleContextMenu(indexAt(position),lst,mapToGlobal(position),position+scrollOffset,this);
-}
-
-
-void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
-{
-  	//Node actions
-  	if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
-	{    
-  		std::vector<VInfo_ptr> nodeLst;
-		for(int i=0; i < indexLst.count(); i++)
-		{
-			VInfo_ptr info=model_->nodeInfo(indexLst[i]);
-			if(info && !info->isEmpty())
-				nodeLst.push_back(info);
-		}
-
-		actionHandler_->contextMenu(nodeLst,globalPos);
-	}
-
-	//Desktop actions
-	else
-	{
-	}
-}
-
 void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 {
-	if(cmd == "expand")
-	{
-		QModelIndex idx=model_->infoToIndex(info);
-		if(idx.isValid())
-		{
+    //Expand all the children of the given node
+    if(cmd == "expand")
+    {
+        QModelIndex idx=model_->infoToIndex(info);
+        if(idx.isValid())
+        {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
             QTime t;
             t.start();
 #endif
-            expandAll(idx);
-#ifdef _UI_TREENODEVIEW_DEBUG
+            //apply expand in the view
+            view_->expandAll(idx);
+#ifdef _UI_COMPACTNODEVIEW_DEBUG
             UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             QGuiApplication::restoreOverrideCursor();
-#endif
 
-		}
-	}
-	else if(cmd == "collapse")
-	{
-		QModelIndex idx=model_->infoToIndex(info);
-		if(idx.isValid())
-		{
-            collapseAll(idx);
-		}
-	}
+            //save/update the expand state object
+            saveExpandAll(idx);
+
+#endif
+        }
+    }
+    else if(cmd == "collapse")
+    {
+        QModelIndex idx=model_->infoToIndex(info);
+        if(idx.isValid())
+        {
+            //apply expand in the view
+            view_->collapseAll(idx);
+
+            //save/update the expand state object
+            saveCollapseAll(idx);
+        }
+    }
 
     else if(cmd ==  "edit")
     {
         if(info && info->isAttribute())
         {
-            AttributeEditor::edit(info,this);
+            AttributeEditor::edit(info,view_);
         }
     }
 
-	/*if(cmd == "set_as_root")
-	{
-		model_->setRootNode(nodeLst.at(0)->node());
-		expandAll();
-	}*/
+    /*if(cmd == "set_as_root")
+    {
+        model_->setRootNode(nodeLst.at(0)->node());
+        expandAll();
+    }*/
 }
 
 void TreeNodeView::reload()
 {
-	//model_->reload();
-	//expandAll();
+    //model_->reload();
+    //expandAll();
 }
 
 void TreeNodeView::rerender()
 {
-	if(needItemsLayout_)
-	{
-		doItemsLayout();
-		needItemsLayout_=false;
-	}
-	else
-	{
-		viewport()->update();
-	}
+    if(needItemsLayout_)
+    {
+        view_->doItemsLayout();
+        needItemsLayout_=false;
+    }
+    else
+    {
+        view_->viewport()->update();
+    }
 }
 
 void TreeNodeView::slotRerender()
 {
-	rerender();
+    rerender();
 }
 
 void TreeNodeView::slotRepaint(Animation* an)
 {
-	if(!an)
-		return;
+    if(!an)
+        return;
 
     Q_FOREACH(VNode* n,an->targets())
-	{
-        update(model_->nodeToIndex(n));
-	}
+    {
+        view_->update(model_->nodeToIndex(n));
+    }
 }
 
 void TreeNodeView::slotSizeHintChangedGlobal()
 {
-	needItemsLayout_=true;
+    needItemsLayout_=true;
 }
 
-void TreeNodeView::adjustStyleSheet()
+//====================================================
+// Expand state management
+//====================================================
+
+void TreeNodeView::expandTo(const QModelIndex& idxTo)
 {
-    QString sh;
-    if(styleSheet_.contains("bg"))
-       sh+=styleSheet_["bg"];
-    if(styleSheet_.contains("branch"))
-       sh+=styleSheet_["branch"];
+    QModelIndex idx=model_->parent(idxTo);
+    QModelIndexList lst;
 
-    setStyleSheet(sh);
-}
+    //qDebug() << idxTo << idx;
 
-void TreeNodeView::adjustIndentation(int offset)
-{
-	if(offset >=0)
-	{
-		setIndentation(defaultIndentation_+offset);
-		delegate_->setIndentation(indentation());
-	}
-}
-
-void TreeNodeView::adjustBackground(QColor col,bool adjust)
-{
-	if(col.isValid())
-	{       
-        styleSheet_["bg"]="QTreeView { background : " + col.name() + ";}";
-
-        if(adjust)
-            adjustStyleSheet();
-	}
-}
-
-void TreeNodeView::adjustBranchLines(bool st,bool adjust)
-{
-    if(styleSheet_.contains("branch"))
+    while(idx.isValid())
     {
-        bool oriSt=styleSheet_["branch"].contains("url(:");
-        if(oriSt == st)
-            return;
+        lst.push_front(idx);
+        idx=idx.parent();
     }
 
-    QString vline((st)?"url(:/viewer/tree_vline.png) 0":"none");
-    QString bmore((st)?"url(:/viewer/tree_branch_more.png) 0":"none");
-    QString bend((st)?"url(:/viewer/tree_branch_end.png) 0":"none");
+    //qDebug() << lst;
 
-    styleSheet_["branch"]="QTreeView::branch:has-siblings:!adjoins-item { border-image: " + vline + ";}" \
-     "QTreeView::branch:!has-children:has-siblings:adjoins-item {border-image: " +  bmore + ";}" \
-     "QTreeView::branch:!has-children:!has-siblings:adjoins-item {border-image: " + bend + ";}";
+    Q_FOREACH(QModelIndex d,lst)
+    {
+        view_->expand(d);
+        //qDebug() << "expand" << d << isExpanded(d);
+    }
+}
 
-    if(adjust)
-        adjustStyleSheet();
+//Save all
+void TreeNodeView::slotSaveExpand()
+{
+    //For each server we save the expand state
+    for(int i=0; i < model_->rowCount(); i++)
+    {
+        QModelIndex serverIdx=model_->index(i, 0);
+        VTreeServer* ts=model_->indexToServer(serverIdx);
+        Q_ASSERT(ts);
+
+        //The expand state is stored on the VTreeServer and must survive updates and refreshes!
+        ExpandState* es=ts->expandState();
+        if(!es)
+        {
+            es=new ExpandState(view_,model_);
+            ts->setExpandState(es); //the treeserver takes ownership of the expandstate
+        }
+
+        //Save the current state
+        es->save(ts->tree());
+    }
+}
+
+void TreeNodeView::slotRestoreExpand()
+{    
+    //For each server we restore the expand state
+    for(int i=0; i < model_->rowCount(); i++)
+    {
+        QModelIndex serverIdx=model_->index(i, 0);
+        VTreeServer* ts=model_->indexToServer(serverIdx);
+        Q_ASSERT(ts);
+
+        //The expand state is stored on the VTreeServer
+        ExpandState* es=ts->expandState();
+        if(es)
+        {
+            view_->collapse(serverIdx);
+            es->collectExpanded(ts->tree(),view_->expandedIndexes);
+            view_->expand(serverIdx);
+        }
+    }
+    regainSelectionFromExpand();
+}
+
+//Save the expand state for the given node (it can be a server as well)
+void TreeNodeView::slotSaveExpand(const VTreeNode* node)
+{
+    Q_ASSERT(node);
+    ExpandState* es=0;
+    VTreeServer* ts=node->server();
+    Q_ASSERT(ts);
+
+    //for servers
+    if(node->isRoot())
+    {
+         es=ts->expandState();
+         if(!es)
+         {
+             es=new ExpandState(view_,model_);
+             ts->setExpandState(es); //the treeserver takes ownership of the expandstate
+         }
+    }
+    //for other nodes - it is just a tmp expand state
+    else
+    {
+        es=new ExpandState(view_,model_);
+        ts->setTmpExpandState(es);
+    }
+
+    Q_ASSERT(es);
+
+    //Save the current state
+    es->save(node);
+}
+
+//Restore the expand state for the given node (it can be a server as well)
+void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
+{    
+    Q_ASSERT(node);
+    ExpandState* es=0;
+    VTreeServer* ts=node->server();
+    Q_ASSERT(ts);
+
+    //For servers the expand state persists on the vtreenode, For other
+    //nodes we just store a tmop expand state on the vtreenode: it only
+    //exists for one save-restore cycle.
+    es=(node->isRoot())?ts->expandState():ts->tmpExpandState();
+
+    if(es)
+    {
+        QModelIndex idx=model_->nodeToIndex(node);
+        if(idx.isValid())
+        {
+            view_->collapse(idx);
+            es->collectExpanded(node,view_->expandedIndexes);
+            view_->expand(idx);
+        }
+
+        //we delete the tmp expand state
+        if(es == ts->tmpExpandState())
+        {
+            ts->clearTmpExpandState();
+        }
+    }
+
+    regainSelectionFromExpand();
+}
+
+void TreeNodeView::saveExpandAll(const QModelIndex& idx)
+{
+    if(!idx.isValid())
+        return;
+
+    VTreeNode* tnode=model_->indexToServerOrNode(idx);
+    Q_ASSERT(tnode);
+    VTreeServer* ts=tnode->server();
+    Q_ASSERT(ts);
+
+    //The expand state is stored on the VTreeServer
+    //The expand state is stored on the VTreeServer
+    ExpandState* es=ts->expandState();
+    if(!es)
+    {
+        es=new ExpandState(view_,model_);
+        ts->setExpandState(es); //the treeserver takes ownership of the expandstate
+    }
+    if(es->isEmpty())
+    {
+        es->save(ts->tree());
+    }
+    es->saveExpandAll(tnode);
+}
+
+void TreeNodeView::saveCollapseAll(const QModelIndex& idx)
+{
+    if(!idx.isValid())
+        return;
+
+    VTreeNode* tnode=model_->indexToServerOrNode(idx);
+    Q_ASSERT(tnode);
+    VTreeServer* ts=tnode->server();
+    Q_ASSERT(ts);
+
+    //The expand state is stored on the VTreeServer
+    ExpandState* es=ts->expandState();
+    if(!es)
+    {
+        es=new ExpandState(view_,model_);
+        ts->setExpandState(es); //the treeserver takes ownership of the expandstate
+    }
+    if(es->isEmpty())
+    {
+        es->save(ts->tree());
+    }
+    es->saveCollapseAll(tnode);
+}
+
+
+void TreeNodeView::regainSelectionFromExpand()
+{
+    VInfo_ptr s=currentSelection();
+    if(!s)
+    {
+        if(lastSelection_)
+        {
+            lastSelection_->regainData();
+            if(!lastSelection_->hasData())
+            {
+                lastSelection_.reset();
+            }
+            else
+            {
+                setCurrentSelectionFromExpand(lastSelection_);
+            }
+        }
+    }
+}
+
+//==============================================
+// Property handling
+//==============================================
+
+void TreeNodeView::adjustIndentation(int indent)
+{
+    if(indent >=0)
+    {
+        view_->setIndentation(indent);
+        needItemsLayout_=true;
+    }
+}
+
+void TreeNodeView::adjustBackground(QColor col)
+{
+    if(col.isValid())
+    {
+        QPalette p=view_->viewport()->palette();
+        p.setColor(QPalette::Window,col);
+        view_->viewport()->setPalette(p);
+
+        //When we set the palette on startup something resets the palette
+        //before the first paint event happens. So we set the expected bg colour
+        //so that the view should know what bg colour it should use.
+        if(inStartUp_)
+            view_->setExpectedBg(col);
+    }
+}
+
+void TreeNodeView::adjustDrawBranchLine(bool b)
+{
+    view_->setDrawConnector(b);
+}
+
+void TreeNodeView::adjustBranchLineColour(QColor col)
+{
+    view_->setConnectorColour(col);
 }
 
 void TreeNodeView::adjustServerToolTip(bool st)
@@ -452,17 +622,21 @@ void TreeNodeView::adjustAttributeToolTip(bool st)
 
 void TreeNodeView::notifyChange(VProperty* p)
 {
-	if(p->path() == "view.tree.indentation")
+    if(p->path() == "view.tree.background")
     {
-		adjustIndentation(p->value().toInt());
+        adjustBackground(p->value().value<QColor>());
     }
-	else if(p->path() == "view.tree.background")
-	{
-		adjustBackground(p->value().value<QColor>());
+    else if(p->path() == "view.tree.indentation")
+    {
+        adjustIndentation(p->value().toInt());
     }
     else if(p->path() == "view.tree.drawBranchLine")
     {
-        adjustBranchLines(p->value().toBool());
+        adjustDrawBranchLine(p->value().toBool());
+    }
+    else if(p->path() == "view.tree.branchLineColour")
+    {
+        adjustBranchLineColour(p->value().value<QColor>());
     }
     else if(p->path() == "view.tree.serverToolTip")
     {
@@ -475,136 +649,5 @@ void TreeNodeView::notifyChange(VProperty* p)
     else if(p->path() == "view.tree.attributeToolTip")
     {
         adjustAttributeToolTip(p->value().toBool());
-    }
-}
-
-//====================================================
-// Expand state management
-//====================================================
-
-void TreeNodeView::expandAll(const QModelIndex& idx)
-{
-	expand(idx);
-
-	for(int i=0; i < model_->rowCount(idx); i++)
-	{
-		QModelIndex chIdx=model_->index(i, 0, idx);
-		expandAll(chIdx);
-	}
-}
-
-void TreeNodeView::collapseAll(const QModelIndex& idx)
-{
-	collapse(idx);
-
-	for(int i=0; i < model_->rowCount(idx); i++)
-	{
-		QModelIndex chIdx=model_->index(i, 0, idx);
-		collapseAll(chIdx);
-	}
-}
-
-void TreeNodeView::expandTo(const QModelIndex& idxTo)
-{
-    QModelIndex idx=model_->parent(idxTo);
-    QModelIndexList lst;
-
-    while(idx.isValid())
-    {
-        lst.push_front(idx);
-        idx=idx.parent();
-    }
-
-    Q_FOREACH(QModelIndex d,lst)
-    {
-        expand(d);
-    }
-}
-
-//Save all
-void TreeNodeView::slotSaveExpand()
-{
-    for(int i=0; i < model_->rowCount(); i++)
-    {
-        QModelIndex serverIdx=model_->index(i, 0);
-        VTreeServer* ts=model_->indexToServer(serverIdx);
-        Q_ASSERT(ts);
-
-        TreeViewExpandState* es=new TreeViewExpandState(this,model_);
-        expandStates_ << es;
-        es->save(ts->tree());
-
-        //ExpandStateTree* es=expandState_->add();
-        //es->save(ts->tree());
-    }
-}
-
-void TreeNodeView::slotRestoreExpand()
-{
-    Q_FOREACH(TreeViewExpandState* es,expandStates_)
-    {
-        if(es->root())
-        {
-            VTreeServer* ts=model_->nameToServer(es->root()->name_);
-            if(ts)
-            {
-                es->restore(ts->tree());
-            }
-        }
-    }
-
-    qDeleteAll(expandStates_);
-    expandStates_.clear();
-    regainSelectionFromExpand();
-}
-
-//Save the expand state for the given node (it can be a server as well)
-void TreeNodeView::slotSaveExpand(const VTreeNode* node)
-{
-    TreeViewExpandState* es=new TreeViewExpandState(this,model_);
-    expandStates_ << es;
-    es->save(node);
-
-    //TreeViewExpandState* es=expandState_->add();
-    //es->save(node);
-}
-
-//Restore the expand state for the given node (it can be a server as well)
-void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
-{
-    for(int i=0; i < expandStates_.count(); i++)
-    {
-        TreeViewExpandState* es=expandStates_[i];
-        {
-            if(es->rootSameAs(node->vnode()->strName()))
-            {
-                es->restore(node);
-                expandStates_.remove(i);
-                delete es;
-                break;
-            }
-        }
-    }
-
-    regainSelectionFromExpand();
-}
-
-void TreeNodeView::regainSelectionFromExpand()
-{
-    VInfo_ptr s=currentSelection();
-    if(!s)
-    {
-        if(lastSelection_)
-        {
-            lastSelection_->regainData();
-            if(!lastSelection_->hasData())
-            {
-                lastSelection_.reset();
-            }
-            else
-            {
-                setCurrentSelectionFromExpand(lastSelection_);
-            }
-        }
     }
 }

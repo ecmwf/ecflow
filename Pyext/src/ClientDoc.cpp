@@ -362,7 +362,8 @@ const char* ClientDoc::sync() {
             "If the period of time between two sync() calls is too long, then the full server definition\n"
             "is returned and assigned to the client Defs.\n"
             "We can determine if the changes were applied by calling in_sync() after the call to sync_local()::\n\n"
-            "   void sync_local(bool sync_suite_clock = false);  # The very first call, will get the full Defs.\n"
+            "   void sync_local(bool sync_suite_clock = false);
+            # The very first call, will get the full Defs.\n"
             "                   sync_suite_clock - By default sync_local only sync with suite clock, if there are changes\n"
             "                                      This option forces sync with suite clock in the sever, provided it has changed\n"
             "                                      This is useful with the Why command\n"
@@ -1493,4 +1494,44 @@ const char* ClientDoc::restore()
          "   except RuntimeError, e:\n"
          "       print str(e)\n"
          ;
+}
+
+const char* ClientDoc::set_child_path()
+{
+   return   "Set the path to the task, obtained from server using %ECF_NAME%\n"
+            "By default the environment variable ECF_NAME is read for the task path\n"
+            "This can be overridden for the python child api"
+            ;
+}
+const char* ClientDoc::set_child_password()
+{
+   return   "Set the password, needed for authentication, provided by the server using %ECF_PASS%\n"
+            "By default the environment variable ECF_PASS is read for the jobs password\n"
+            "This can be overridden for the python child api"
+            ;
+}
+
+const char* ClientDoc::set_child_pid()
+{
+   return   "Set the process id of this job\n"
+            "By default the environment variable ECF_RID is read for the jobs process or remote id\n"
+            "This can be overridden for the python child api"
+            ;
+}
+
+const char* ClientDoc::set_child_try_no()
+{
+   return   "Set the try no, i.e the number of times this job has run, obtained from the server, using %ECF_TRYNO%\n"
+            "By default the environment variable ECF_TRYNO is read to record number of times job has been run\n"
+            "This can be overridden for the python child api"
+            ;
+
+}
+
+const char* ClientDoc::set_child_timeout()
+{
+   return   "Set timeout if child can not connect to server, default is 24 hours. The input is required to be in seconds\n"
+            "By default the environment variable  ECF_TIMEOUT is read to control how long child command should attempt to connect to the server\n"
+            "This can be overridden for the python child api"
+            ;
 }

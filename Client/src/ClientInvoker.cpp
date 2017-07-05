@@ -57,14 +57,14 @@ using namespace boost::posix_time;
 // class ClientInvoker
 ClientInvoker::ClientInvoker()
 : on_error_throw_exception_(true), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
+  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
 	if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 1=================start=================\n";
 }
 
 ClientInvoker::ClientInvoker(const std::string& host_port)
 : on_error_throw_exception_(true), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
+  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 2=================start=================\n";
    // assume format <host>:<port>
@@ -77,7 +77,7 @@ ClientInvoker::ClientInvoker(const std::string& host_port)
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 : on_error_throw_exception_(true), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
+  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
    set_host_port(host,port);
@@ -85,7 +85,7 @@ ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 
 ClientInvoker::ClientInvoker(const std::string& host, int port)
 : on_error_throw_exception_(true), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
+  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
    set_host_port(host, boost::lexical_cast<std::string>(port));
@@ -1263,68 +1263,39 @@ int ClientInvoker::load_in_memory_defs( const defs_ptr& clientDefs, bool force) 
 }
 
 
-// ==========================================================================
-// Python child support
-// ==========================================================================
-void ClientInvoker::set_child_path(const std::string& path)
-{
-   child_task_path_ = path;
-}
-void ClientInvoker::set_child_password(const std::string& pass)
-{
-   child_task_password_ = pass;
-}
-void ClientInvoker::set_child_pid(const std::string& pid)
-{
-   child_task_pid_ = pid;
-}
-void ClientInvoker::set_child_try_no(unsigned int try_no)
-{
-   child_task_try_no_ = try_no;
-}
-void ClientInvoker::set_child_timeout(unsigned int seconds )
-{
-   clientEnv_.set_child_cmd_timeout(seconds);
-}
-void ClientInvoker::set_zombie_child_timeout(unsigned int seconds )
-{
-   clientEnv_.set_zombie_child_cmd_timeout(seconds);
-}
-
-
 void ClientInvoker::check_child_parameters() const
 {
    if (clientEnv_.debug()) {
-      std::cout << "  child_task_path_ = '" << child_task_path_ << "'\n";
-      std::cout << "  child_task_password_ = '" << child_task_password_ << "'\n";
-      std::cout << "  child_task_pid_ = '" << child_task_pid_ << "'\n";
-      std::cout << "  child_task_try_no_ = " << child_task_try_no_ << "\n";
+      std::cout << "  child_task_path = '" << clientEnv_.task_path() << "'\n";
+      std::cout << "  child_task_password = '" << clientEnv_.jobs_password() << "'\n";
+      std::cout << "  child_task_pid = '" << clientEnv_.process_or_remote_id() << "'\n";
+      std::cout << "  child_task_try_no = " << clientEnv_.task_try_no() << "\n";
    }
-   if (child_task_path_.empty()) throw std::runtime_error("Child Path not set");
-   if (child_task_password_.empty()) throw std::runtime_error("Child password not set");
-   if (child_task_pid_.empty())  throw std::runtime_error("Child pid not set");
-   if (child_task_try_no_ == 0)  throw std::runtime_error("Child try_no not set");
+   if (clientEnv_.task_path().empty()) throw std::runtime_error("Child Path not set");
+   if (clientEnv_.jobs_password().empty()) throw std::runtime_error("Child password not set");
+   if (clientEnv_.process_or_remote_id().empty())  throw std::runtime_error("Child pid not set");
+   if (clientEnv_.task_try_no() == 0)  throw std::runtime_error("Child try_no not set");
 }
 
 void ClientInvoker::child_init()
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new InitCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_  ) ) );
+   invoke( Cmd_ptr( new InitCmd(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no()  ) ) );
 }
 
 void ClientInvoker::child_abort(const std::string& reason )
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new AbortCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_,reason  ) ) );
+   invoke( Cmd_ptr( new AbortCmd(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(),reason  ) ) );
 }
 
 void ClientInvoker::child_event(const std::string& event_name_or_number)
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new EventCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_,event_name_or_number  ) ) );
+   invoke( Cmd_ptr( new EventCmd(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(),event_name_or_number  ) ) );
 }
 
 void ClientInvoker::child_meter(const std::string& meter_name, int meter_value)
@@ -1332,7 +1303,7 @@ void ClientInvoker::child_meter(const std::string& meter_name, int meter_value)
    if (meter_name.empty())  throw std::runtime_error("Meter name not set");
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new MeterCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_,meter_name,meter_value  ) ) );
+   invoke( Cmd_ptr( new MeterCmd(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(),meter_name,meter_value  ) ) );
 }
 
 void ClientInvoker::child_label(const std::string& label_name, const std::string& label_value)
@@ -1340,14 +1311,14 @@ void ClientInvoker::child_label(const std::string& label_name, const std::string
    if (label_name.empty()) throw std::runtime_error("Label name not set");
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new LabelCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_,label_name,label_value  ) ) );
+   invoke( Cmd_ptr( new LabelCmd(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(),label_name,label_value  ) ) );
 }
 
 void ClientInvoker::child_wait(const std::string& expression)
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new CtsWaitCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_, expression ) ) );
+   invoke( Cmd_ptr( new CtsWaitCmd(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(), expression ) ) );
 }
 
 std::string ClientInvoker::child_queue(const std::string& queue_name, const std::string& path_to_node_with_queue)
@@ -1355,7 +1326,7 @@ std::string ClientInvoker::child_queue(const std::string& queue_name, const std:
    if (queue_name.empty()) throw std::runtime_error("ClientInvoker::child_queue:  Queue name not set");
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new QueueCmd(child_task_path_,child_task_password_,child_task_pid_,child_task_try_no_,queue_name,path_to_node_with_queue)));
+   invoke( Cmd_ptr( new QueueCmd(clientEnv_.task_path(),clientEnv_.jobs_password(),clientEnv_.process_or_remote_id(),clientEnv_.task_try_no(),queue_name,path_to_node_with_queue)));
    return server_reply_.get_string();
 }
 
@@ -1363,7 +1334,7 @@ void ClientInvoker::child_complete()
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new CompleteCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_  ) ) );
+   invoke( Cmd_ptr( new CompleteCmd(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no()  ) ) );
 }
 
 // ==========================================================================

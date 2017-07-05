@@ -298,12 +298,14 @@ void NodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
 // "meter" name  value min  max colChange
 //========================================================
 
-int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
 
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() < 6)
-        return totalWidth;
+        return;
 
 	//The data
 	int	val=data.at(2).toInt();
@@ -428,7 +430,7 @@ int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyl
 		painter->restore();
 	}
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }
 
 //========================================================
@@ -436,19 +438,18 @@ int NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyl
 // "label" name  value
 //========================================================
 
-int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+    size=QSize(totalWidth,attrBox_->fullHeight);
 
     if(data.count() < 2)
-       return totalWidth;
+       return;
 
 	QString name=data.at(1) + ":";
 	QString val;
 	if(data.count() > 2)
 		val=data.at(2);
-
-    int offset=2;
 
     bool selected=option.state & QStyle::State_Selected;
 
@@ -560,7 +561,7 @@ int NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyl
 		painter->restore();
 	}
 
-    return totalWidth;
+    size=QSize(totalWidth,labelHeight(multiCnt+1));
 }
 
 void NodeViewDelegate::labelSize(QStringList data,int& totalWidth,int& totalHeight) const
@@ -653,11 +654,14 @@ int NodeViewDelegate::labelHeight(int lineNum) const
 // "event" name  value
 //========================================================
 
-int NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() < 2)
-        return totalWidth;
+        return;
 
     QString name=data[1];
 	bool val=false;
@@ -721,10 +725,10 @@ int NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyl
 		painter->restore();
 	}
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }
 
-int NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
     QString text;
@@ -776,10 +780,10 @@ int NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleO
 		painter->restore();
 	}
 
-    return totalWidth;
+    size=QSize(totalWidth,attrBox_->fullHeight);
 }
 
-int  NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
 
@@ -832,14 +836,17 @@ int  NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 		painter->restore();
     }
 
-    return totalWidth;
+    size=QSize(totalWidth,attrBox_->fullHeight);
 }
 
-int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() < 4)
-        return totalWidth;
+        return;
 
 	//The data
 	int	val=data.at(2).toInt();
@@ -986,14 +993,17 @@ int NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyl
 		painter->restore();
 	}
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }
 
-int NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() < 3)
-        return totalWidth;
+        return;
 
 	QString name="inlimit " + data.at(2) +":" +data.at(1);
 
@@ -1040,14 +1050,17 @@ int NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QSt
 		painter->restore();
 	}
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }
 
-int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() !=3)
-        return totalWidth;
+        return;
 
     int triggerType=data[1].toInt();
 	QString	text=data.at(2);   
@@ -1113,14 +1126,17 @@ int NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QSt
 		painter->restore();
 	}
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }
 
-int NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() < 2)
-        return totalWidth;
+        return;
 
     QString name=data[1];
 
@@ -1167,14 +1183,17 @@ int NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyle
 		painter->restore();
 	}
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }
 
-int NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() < 2)
-        return totalWidth;
+        return;
 
     QString name=data[1];
 
@@ -1221,7 +1240,7 @@ int NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyle
 		painter->restore();
 	}
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }
 
 //========================================================
@@ -1229,11 +1248,14 @@ int NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyle
 // "repeat" name  value
 //========================================================
 
-int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() <  7)
-         return totalWidth;
+         return;
 
     QString type=data.at(1);
     QString name=data.at(2);
@@ -1380,14 +1402,17 @@ int NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSty
         }
      }
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }
 
-int NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option) const
+void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
 {
     int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
     if(data.count() < 2)
-        return totalWidth;
+        return;
 
     QString name="late: " + data[1];
 
@@ -1433,5 +1458,5 @@ int NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyle
 		painter->restore();
 	}
 
-    return totalWidth;
+    size.setWidth(totalWidth);
 }

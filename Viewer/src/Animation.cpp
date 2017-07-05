@@ -61,7 +61,7 @@ void Animation::renderFrame(int frame)
 	if(targets_.isEmpty())
 		QMovie::stop();
 
-	Q_EMIT(repaintRequest(this));
+    Q_EMIT(repaintRequest(this));
 }
 
 void Animation::notifyServerDelete(ServerHandler* server)

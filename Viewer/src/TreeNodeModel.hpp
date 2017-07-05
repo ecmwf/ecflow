@@ -50,6 +50,7 @@ public:
     VTreeServer* indexToServer(const QModelIndex & index) const;
     VTreeServer* nameToServer(const std::string&) const;
     VTreeNode* indexToNode( const QModelIndex & index) const;
+    VTreeNode* indexToServerOrNode( const QModelIndex & index) const;
 
     QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
 

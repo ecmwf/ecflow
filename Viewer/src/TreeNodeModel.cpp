@@ -649,6 +649,18 @@ VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex & index,bool
     return 0;
 }
 
+VTreeNode* TreeNodeModel::indexToServerOrNode( const QModelIndex & index) const
+{
+    VTreeNode* node=indexToNode(index);
+    if(!node)
+    {
+        if(VTreeServer* ts=indexToServer(index))
+            node=ts->tree();
+    }
+
+    return node;
+}
+
 VTreeNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 {
 	//If it is not a sever ...

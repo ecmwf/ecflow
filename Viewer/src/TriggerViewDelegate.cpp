@@ -60,7 +60,7 @@ struct TriggerAttrDelegateBox : public AttrDelegateBox
 };
 
 TriggerViewDelegate::TriggerViewDelegate(QWidget *parent) :
-    TreeNodeViewDelegateBase(0,parent)
+    TreeNodeViewDelegate(0,parent)
 {
     //borderPen_=QPen(QColor(230,230,230));
     borderPen_=QPen(QColor(220,220,220));
@@ -167,8 +167,9 @@ void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &op
                 QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
                 if(it != attrRenderers_.end())
                 {
+                    QSize size;
                     AttributeRendererProc a=it.value();
-                        (this->*a)(painter,lst,vopt);
+                    (this->*a)(painter,lst,vopt,size);
                 }
             }
         }

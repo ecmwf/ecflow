@@ -88,6 +88,11 @@ public:
    static const char* delete_all();
    static const char* archive();
    static const char* restore();
+   static const char* set_child_path();
+   static const char* set_child_password();
+   static const char* set_child_pid();
+   static const char* set_child_try_no();
+   static const char* set_child_timeout();
 
 private:
 	ClientDoc(){}

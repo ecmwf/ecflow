@@ -33,7 +33,7 @@ TriggerTableView::TriggerTableView(QWidget* parent) :
 {
     setProperty("view","trigger");
 
-    actionHandler_=new ActionHandler(this);
+    actionHandler_=new ActionHandler(this,this);
 
     //Set the model
     setModel(model_);
