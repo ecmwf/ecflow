@@ -41,7 +41,7 @@ public:
 	/// Can be overriden by  changing environment variable ECF_TIMEOUT
 	long max_child_cmd_timeout() const  { return timeout_; }
 
-	/// Allow pur python jobs to override the ECF_TIMEOUT
+	/// Allow pure python jobs to override the ECF_TIMEOUT
 	void set_child_cmd_timeout(unsigned int t) { timeout_ = t; }
 
    /// The timeout feature allow the client to fail gracefully in the case
@@ -102,12 +102,18 @@ public:
    virtual void set_test() { under_test_ = true; }
    virtual bool under_test() const { return under_test_; }
 
+   // Support for python child commands, and python jobs
+   void set_child_path(const std::string& path) { task_path_ = path;}
+   void set_child_password(const std::string& pass) { jobs_password_ = pass;}
+   void set_child_pid(const std::string& pid) { remote_id_ = pid;}
+   void set_child_try_no(unsigned int try_no) { task_try_num_ = try_no;}
+
 private:
 
  	std::string task_path_;             // ECF_NAME = /aSuit/aFam/aTask
 	std::string jobs_password_;         // ECF_PASS jobs password
 	std::string remote_id_;             // ECF_RID process id of running job
- 	int task_try_num_;                  // ECF_TRYNO. The task try number. The number of times we should submitted a job, if it is aborted
+ 	unsigned int task_try_num_;         // ECF_TRYNO. The task try number. The number of times the job has been run
 	std::string host_file_;             // ECF_HOSTFILE. File that lists the backup hosts, port numbers must match
 	long timeout_;                      // ECF_TIMEOUT. Host file iteration time out
 	int  connect_timeout_;              // default 0, ECF_CONNECT_TIMEOUT, connection timeout
