@@ -252,9 +252,10 @@ private:
             std::string archive_data(&inbound_data_[0], inbound_data_.size());
 			   int current_archive_version = ecf::boost_archive::version();
 			   int archive_version_in_data = ecf::boost_archive::extract_version(archive_data);
+            log_error(archive_data.c_str()); // ECFLOW-1025
 			   if (current_archive_version != archive_version_in_data ) {
+			      log_error("Connection::handle_read_data archive version miss-match!"); // ECFLOW-1025
 			      if (ecf::boost_archive::replace_version(archive_data,current_archive_version)) {
-
 			         try {
 			            ecf::restore_from_string(archive_data,t);
 			            // It worked
@@ -264,7 +265,6 @@ private:
 			         catch (...) {}  // fall through and return error code
 			      }
 			   }
-
 				// Unable to decode data.
 				boost::system::error_code error( boost::asio::error::invalid_argument);
 				boost::get<0>(handler)(error);
