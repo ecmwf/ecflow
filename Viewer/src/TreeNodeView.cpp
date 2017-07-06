@@ -471,7 +471,7 @@ void TreeNodeView::slotSaveExpand(const VTreeNode* node)
     //Save the current state
     es->save(node->vnode());
 
-    es->print();
+    //es->print();
 }
 
 //Restore the expand state for the given node (it can be a server as well)
@@ -504,7 +504,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         {
             ts->clearTmpExpandState();
         }
-        es->print();
+        //es->print();
     }
 
     regainSelectionFromExpand();
