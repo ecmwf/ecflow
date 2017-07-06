@@ -75,7 +75,9 @@ void ExpandStateNode::setExpandedAll()
     expandedAll_=1;
     collapsedAll_=0;
     //Set the expand state on all the descendants
-    setExpandedRecursively(1);
+    std::size_t num=children_.size();
+    for(std::size_t i=0; i < num; i++)
+        children_[i]->setExpandedRecursively(1);
 }
 
 //"Collapse all children" was called on the node
@@ -84,17 +86,19 @@ void ExpandStateNode::setCollapsedAll()
     expandedAll_=0;
     collapsedAll_=1;
     //Set the expand state on all the descendants
-    setExpandedRecursively(0);
+    std::size_t num=children_.size();
+    for(std::size_t i=0; i < num; i++)
+        children_[i]->setExpandedRecursively(0);
 }
 
 void ExpandStateNode::setExpandedRecursively(unsigned int expanded)
-{
+{   
     expanded_=expanded;
     expandedAll_=0;
     collapsedAll_=0;
     std::size_t num=children_.size();
     for(std::size_t i=0; i < num; i++)
-    {
+    {       
         children_[i]->setExpandedRecursively(expanded);
     }
 }
