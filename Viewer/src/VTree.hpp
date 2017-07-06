@@ -34,7 +34,7 @@ public:
     VTreeNode* findChild(const std::string&) const;
     int indexOfChild(const VTreeNode* vn) const;
     int indexInParent() const;
-    VTreeNode* childAt(int i) {return children_[i];}
+    VTreeNode* childAt(int i) const {return children_[i];}
     VTreeNode* parent() const {return parent_;}
     virtual VTree* root() const;
     virtual VTreeServer* server() const;
