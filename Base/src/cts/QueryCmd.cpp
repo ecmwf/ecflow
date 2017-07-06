@@ -126,7 +126,7 @@ const char*  QueryCmd::arg() { return CtsApi::queryArg();}
 
 const char* QueryCmd::desc() {
    return
-            "Query the status of event, meter, variable or trigger expression without blocking\n"
+            "Query the status of attributes i.e event, meter, variable or trigger expression without blocking\n"
             " - event    return 'set' | 'clear' to standard out\n"
             " - meter    return value of the meter to standard out\n"
             " - variable return value of the variable, repeat or generated variable to standard out,\n"
@@ -134,7 +134,7 @@ const char* QueryCmd::desc() {
             " - trigger  returns 'true' if the expression is true, otherwise 'false'\n\n"
             "If this command is called within a '.ecf' script we will additionally log the task calling this command\n"
             "This is required to aid debugging for excessive use of this command\n"
-            "The command will fail if the node path does not exist in the definition and if:\n"
+            "The command will fail if the node path to the attribute does not exist in the definition and if:\n"
             " - event    The event is not found\n"
             " - meter    The meter is not found\n"
             " - variable No user or generated variable or repeat of that name found on node, or any of its parents\n"
