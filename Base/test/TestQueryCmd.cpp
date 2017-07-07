@@ -32,6 +32,7 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    cout << "Base:: ...test_query_cmd\n";
    // Create the defs file.
    // suite suite
+   //    repeat date YMD 20090916 20200916
    //    family f
    //          task t1
    //              meter m 0 100 100
@@ -51,7 +52,7 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
       t1->add_variable("var1","var1");
 
       suite_ptr s = defs.add_suite("suite");
-      s->addRepeat( RepeatDate("YMD",20090916,20090916,1) );
+      s->addRepeat( RepeatDate("YMD",20090916,20200916,1) );
       family_ptr f = s->add_family("f");
       f->add_variable("var2","var2");
       f->addTask( t1 );
@@ -77,6 +78,11 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1",meter_name,"/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t2 == complete","/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","1 == 1","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:var1 == 0","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f:var2 == 0","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:m == 0","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:event","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite","/suite:YMD == 20090916","/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","var1","/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","var2","/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","YMD","/suite/f/t1")), false);
@@ -86,4 +92,3 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

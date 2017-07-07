@@ -88,14 +88,7 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
       }
       if (args.size() >= 2) {
          attribute = args[2];
-         PartExpression exp(attribute);
-         string parseErrorMsg;
-         std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-         if (!ast.get()) {
-            assert( !parseErrorMsg.empty() );
-            std::stringstream ss; ss << "QueryCmd : Failed to parse expression '" <<  attribute << "'.  " << parseErrorMsg;
-            throw std::runtime_error( ss.str() );
-         }
+         (void)Expression::parse(attribute,"QueryCmd:"); // will throw if expression does not parse
       }
    }
    else {
@@ -192,29 +185,14 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
 
    if (query_type_ == "trigger") {
 
-      PartExpression exp( attribute_);
-      string parseErrorMsg;
-      std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-      if (!ast.get()) {
-         std::stringstream ss; ss << "QueryCmd: Failed to parse expression '" << attribute_  << "'.  " << parseErrorMsg;
-         throw std::runtime_error( ss.str() ) ;
-      }
+       std::auto_ptr<AstTop> ast = Expression::parse(attribute_ ,"QueryCmd :"); // will throw for errors
 
-      // The complete expression have been parsed and we have created the abstract syntax tree
-      // We now need CHECK the AST for path nodes, event and meter. repeats,etc.
-      // *** This will also set the Node pointers ***
-      AstResolveVisitor astVisitor(node.get());
-      ast->accept(astVisitor);
-
-      // If the expression references paths that don't exist throw an error
-      // This be captured in the ecf script, which should then abort the task
-      // Otherwise we will end up blocking indefinitely
-      if ( !astVisitor.errorMsg().empty() ) {
-         std::stringstream ss;
-         ss << "QueryCmd: AST node tree references failed for '" << attribute_;
-         ss <<  "' at " <<  node->debugNodePath() << " : " <<  astVisitor.errorMsg();
-         throw std::runtime_error( ss.str() ) ;
-      }
+       std::string errorMsg;
+       if (!node->check_expressions(ast.get(),attribute_,true/*trigger*/,errorMsg)) {
+          std::stringstream ss;
+          ss << "QueryCmd: Failed checking. " << errorMsg ;
+          throw std::runtime_error( ss.str() );
+       }
 
       // Evaluate the expression
       if ( ast->evaluate() ) return PreAllocatedReply::string_cmd("true");
