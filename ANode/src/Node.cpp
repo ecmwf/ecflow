@@ -1319,6 +1319,18 @@ bool Node::check_expressions(Ast* ast,const std::string& expr,bool trigger, std:
    return true;
 }
 
+std::auto_ptr<AstTop> Node::parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context)
+{
+   std::auto_ptr<AstTop> ast = Expression::parse(expr,context ); // will throw for errors
+
+   std::string errorMsg;
+   if (!check_expressions(ast.get(),expr,false/*complete*/,errorMsg)) {
+      std::stringstream ss; ss << context << " "  << errorMsg ;
+      throw std::runtime_error( ss.str() );
+   }
+   return ast;
+}
+
 bool Node::check(std::string& errorMsg, std::string& warningMsg) const
 {
    //#ifdef DEBUG

@@ -99,30 +99,14 @@ void Node::changeLabel(const std::string& name,const std::string& value)
 
 void Node::changeTrigger(const std::string& expression)
 {
-   std::auto_ptr<AstTop> ast = Expression::parse(expression,"Node::changeTrigger:"); // will throw for errors
-
-	std::string errorMsg;
-   if (!check_expressions(ast.get(),expression,true/*trigger*/,errorMsg)) {
-      std::stringstream ss;
-      ss << "Node::changeTrigger: Failed checking. " << errorMsg ;
-      throw std::runtime_error( ss.str() );
-   }
-
+   (void)parse_and_check_expressions(expression,true/*trigger*/,"Node::changeTrigger:" ); // will throw for errors
 	deleteTrigger();
 	add_trigger( expression );
 }
 
 void Node::changeComplete(const std::string& expression)
 {
-   std::auto_ptr<AstTop> ast = Expression::parse(expression,"Node::changeComplete:"); // will throw for errors
-
-   std::string errorMsg;
-   if (!check_expressions(ast.get(),expression,false/*complete*/,errorMsg)) {
-      std::stringstream ss;
-      ss << "Node::changeComplete: Failed checking. " << errorMsg ;
-      throw std::runtime_error( ss.str() );
-   }
-
+   (void)parse_and_check_expressions(expression,false/*complete*/,"Node::changeComplete:" ); // will throw for errors
 	deleteComplete();
 	add_complete( expression );
 }
