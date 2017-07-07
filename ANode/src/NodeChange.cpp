@@ -99,14 +99,7 @@ void Node::changeLabel(const std::string& name,const std::string& value)
 
 void Node::changeTrigger(const std::string& expression)
 {
-	PartExpression part(expression);
- 	string parseErrorMsg;
-	std::auto_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
-	if (!ast.get()) {
-		std::stringstream ss;
-		ss << "Node::changeTrigger: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
-		throw std::runtime_error( ss.str() );
-	}
+   std::auto_ptr<AstTop> ast = Expression::parse(expression,"Node::changeTrigger:"); // will throw for errors
 
 	std::string errorMsg;
    if (!check_expressions(ast.get(),expression,true/*trigger*/,errorMsg)) {
@@ -121,14 +114,7 @@ void Node::changeTrigger(const std::string& expression)
 
 void Node::changeComplete(const std::string& expression)
 {
-	PartExpression part(expression);
- 	string parseErrorMsg;
-	std::auto_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
-	if (!ast.get()) {
-		std::stringstream ss;
-		ss << "Node::changeComplete: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
-		throw std::runtime_error( ss.str() );
-	}
+   std::auto_ptr<AstTop> ast = Expression::parse(expression,"Node::changeComplete:"); // will throw for errors
 
    std::string errorMsg;
    if (!check_expressions(ast.get(),expression,false/*complete*/,errorMsg)) {

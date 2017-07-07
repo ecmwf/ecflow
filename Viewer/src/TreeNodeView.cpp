@@ -407,7 +407,10 @@ void TreeNodeView::slotSaveExpand()
         }
 
         //Save the current state
-        es->save(ts->tree());
+        Q_ASSERT(ts->tree());
+        VNode* vnode=ts->tree()->vnode();
+        Q_ASSERT(vnode);
+        es->save(vnode);
     }
 }
 
@@ -424,9 +427,15 @@ void TreeNodeView::slotRestoreExpand()
         ExpandState* es=ts->expandState();
         if(es)
         {
+            Q_ASSERT(ts->tree());
+            VNode* vnode=ts->tree()->vnode();
+            Q_ASSERT(vnode);
+
+            bool expanded=view_->isExpanded(serverIdx);
             view_->collapse(serverIdx);
-            es->collectExpanded(ts->tree(),view_->expandedIndexes);
-            view_->expand(serverIdx);
+            es->collectExpanded(vnode,view_->expandedIndexes);
+            if(expanded)
+                view_->expand(serverIdx);
         }
     }
     regainSelectionFromExpand();
@@ -460,7 +469,9 @@ void TreeNodeView::slotSaveExpand(const VTreeNode* node)
     Q_ASSERT(es);
 
     //Save the current state
-    es->save(node);
+    es->save(node->vnode());
+
+    //es->print();
 }
 
 //Restore the expand state for the given node (it can be a server as well)
@@ -481,9 +492,11 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         QModelIndex idx=model_->nodeToIndex(node);
         if(idx.isValid())
         {
+            bool expanded=view_->isExpanded(idx);
             view_->collapse(idx);
-            es->collectExpanded(node,view_->expandedIndexes);
-            view_->expand(idx);
+            es->collectExpanded(node->vnode(),view_->expandedIndexes);
+            if(expanded)
+                view_->expand(idx);
         }
 
         //we delete the tmp expand state
@@ -491,6 +504,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         {
             ts->clearTmpExpandState();
         }
+        //es->print();
     }
 
     regainSelectionFromExpand();
@@ -505,8 +519,10 @@ void TreeNodeView::saveExpandAll(const QModelIndex& idx)
     Q_ASSERT(tnode);
     VTreeServer* ts=tnode->server();
     Q_ASSERT(ts);
+    Q_ASSERT(ts->tree());
+    VNode* vnode=ts->tree()->vnode();
+    Q_ASSERT(vnode);
 
-    //The expand state is stored on the VTreeServer
     //The expand state is stored on the VTreeServer
     ExpandState* es=ts->expandState();
     if(!es)
@@ -515,10 +531,10 @@ void TreeNodeView::saveExpandAll(const QModelIndex& idx)
         ts->setExpandState(es); //the treeserver takes ownership of the expandstate
     }
     if(es->isEmpty())
-    {
-        es->save(ts->tree());
+    {      
+        es->save(vnode);
     }
-    es->saveExpandAll(tnode);
+    es->saveExpandAll(vnode);
 }
 
 void TreeNodeView::saveCollapseAll(const QModelIndex& idx)
@@ -530,6 +546,9 @@ void TreeNodeView::saveCollapseAll(const QModelIndex& idx)
     Q_ASSERT(tnode);
     VTreeServer* ts=tnode->server();
     Q_ASSERT(ts);
+    Q_ASSERT(ts->tree());
+    VNode* vnode=ts->tree()->vnode();
+    Q_ASSERT(vnode);
 
     //The expand state is stored on the VTreeServer
     ExpandState* es=ts->expandState();
@@ -539,10 +558,10 @@ void TreeNodeView::saveCollapseAll(const QModelIndex& idx)
         ts->setExpandState(es); //the treeserver takes ownership of the expandstate
     }
     if(es->isEmpty())
-    {
-        es->save(ts->tree());
+    {     
+        es->save(vnode);
     }
-    es->saveCollapseAll(tnode);
+    es->saveCollapseAll(vnode);
 }
 
 

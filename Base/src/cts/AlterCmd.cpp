@@ -988,25 +988,22 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
       (void) LateAttr::create(name); // Check we can create the late
       break; }
 
-   case AlterCmd::TRIGGER: {
-      if (options.size() != 3) {
-         ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
-         ss << " but found " << (options.size() + paths.size()) << " arguments. The trigger expression must be quoted\n";
-         ss << dump_args(options,paths) << "\n";
-         throw std::runtime_error( ss.str() );
-      }
-      name = options[2];
+	case AlterCmd::TRIGGER: {
+	   if (options.size() != 3) {
+	      ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
+	      ss << " but found " << (options.size() + paths.size()) << " arguments. The trigger expression must be quoted\n";
+	      ss << dump_args(options,paths) << "\n";
+	      throw std::runtime_error( ss.str() );
+	   }
+	   name = options[2];
 
-      // Parse the expression
-      PartExpression exp(name);
-      string parseErrorMsg;
-      std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-      if (!ast.get()) {
-         ss << "AlterCmd: change trigger: Failed to parse expression '" << name << "'.  " << parseErrorMsg << "\n";
-         ss << dump_args(options,paths) << "\n";
-         throw std::runtime_error( ss.str() );
-      }
-      break; }
+	   std::string error_msg = "AlterCmd: change trigger:";
+	   std::auto_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
+	   if (!ast.get()) {
+	      ss << error_msg << "\n" << dump_args(options,paths) << "\n";
+	      throw std::runtime_error( ss.str() );
+	   }
+		break; }
 
    case AlterCmd::COMPLETE: {
       if (options.size() != 3) {
@@ -1017,16 +1014,13 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
       }
       name = options[2];
 
-      // Parse the expression
-      PartExpression exp(name);
-      string parseErrorMsg;
-      std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-      if (!ast.get()) {
-         ss << "AlterCmd: change complete: Failed to parse expression '" << name << "'.  " << parseErrorMsg << "\n";
-         ss << dump_args(options,paths) << "\n";
-         throw std::runtime_error( ss.str() );
-      }
-      break;}
+	   std::string error_msg = "AlterCmd: change complete:";
+	   std::auto_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
+	   if (!ast.get()) {
+	      ss << error_msg << "\n" << dump_args(options,paths) << "\n";
+	      throw std::runtime_error( ss.str() );
+	   }
+		break;}
 
    case AlterCmd::REPEAT: {
       // *NOTE* a Node can only have *ONE* repeat, hence no need to provide name

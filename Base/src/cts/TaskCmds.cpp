@@ -431,15 +431,7 @@ CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
  : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), expression_(expression)
 {
    // Parse expression to make sure its valid
-   PartExpression exp(expression);
-   string parseErrorMsg;
-   std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-   if (!ast.get()) {
-
-      assert( !parseErrorMsg.empty() );
-      std::stringstream ss; ss << "CtsWaitCmd: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
-      throw std::runtime_error( ss.str() );
-   }
+   (void)Expression::parse(expression,"CtsWaitCmd:"); // will throw for errors
 }
 
 std::ostream& CtsWaitCmd::print(std::ostream& os) const
@@ -461,39 +453,27 @@ STC_Cmd_ptr CtsWaitCmd::doHandleRequest(AbstractServer* as) const
 
 	SuiteChanged1 changed(submittable_->suite());
 
-	// Parse the expression
-	PartExpression exp(expression_);
- 	string parseErrorMsg;
-	std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-	if (!ast.get()) {
-		// should NOT really, since client did check
-		std::stringstream ss; ss << "CtsWaitCmd: Failed to parse expression '" << expression_ << "'.  " << parseErrorMsg;
-		throw std::runtime_error( ss.str() ) ;
-	}
+	// Parse the expression, should not fail since client should have already check expression parses
+	std::auto_ptr<AstTop> ast = Expression::parse(expression_,"CtsWaitCmd:"); // will throw for errors
 
 	// The complete expression have been parsed and we have created the abstract syntax tree
 	// We now need CHECK the AST for path nodes, event and meter. repeats,etc.
 	// *** This will also set the Node pointers ***
-	AstResolveVisitor astVisitor(submittable_);
-	ast->accept(astVisitor);
-
 	// If the expression references paths that don't exist throw an error
 	// This be captured in the ecf script, which should then abort the task
 	// Otherwise we will end up blocking indefinitely
-	if ( !astVisitor.errorMsg().empty() ) {
-		std::stringstream ss;
-		ss << "CtsWaitCmd: AST node tree references failed for " << expression_;
-		ss <<  " at " <<  submittable_->debugNodePath() << " : " <<  astVisitor.errorMsg();
-      throw std::runtime_error( ss.str() ) ;
+	std::string error_msg;
+	if (!submittable_->check_expressions(ast.get(),expression_,true,error_msg)) {
+	   throw std::runtime_error( "CtsWaitCmd: " +  error_msg ) ;
 	}
 
 	// Evaluate the expression
 	if ( ast->evaluate() ) {
 
-		submittable_->flag().clear(ecf::Flag::WAIT);
+	   submittable_->flag().clear(ecf::Flag::WAIT);
 
-		// expression evaluates, return OK
-		return PreAllocatedReply::ok_cmd();
+	   // expression evaluates, return OK
+	   return PreAllocatedReply::ok_cmd();
 	}
 
 	submittable_->flag().set(ecf::Flag::WAIT);
