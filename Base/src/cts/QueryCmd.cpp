@@ -185,16 +185,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
 
    if (query_type_ == "trigger") {
 
-       std::auto_ptr<AstTop> ast = Expression::parse(attribute_ ,"QueryCmd :"); // will throw for errors
-
-       std::string errorMsg;
-       if (!node->check_expressions(ast.get(),attribute_,true/*trigger*/,errorMsg)) {
-          std::stringstream ss;
-          ss << "QueryCmd: Failed checking. " << errorMsg ;
-          throw std::runtime_error( ss.str() );
-       }
-
-      // Evaluate the expression
+      std::auto_ptr<AstTop> ast = node->parse_and_check_expressions(attribute_,true,"QueryCmd:" ); // will throw for errors
       if ( ast->evaluate() ) return PreAllocatedReply::string_cmd("true");
       return PreAllocatedReply::string_cmd("false");
    }

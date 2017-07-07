@@ -1324,7 +1324,7 @@ std::auto_ptr<AstTop> Node::parse_and_check_expressions(const std::string& expr,
    std::auto_ptr<AstTop> ast = Expression::parse(expr,context ); // will throw for errors
 
    std::string errorMsg;
-   if (!check_expressions(ast.get(),expr,false/*complete*/,errorMsg)) {
+   if (!check_expressions(ast.get(),expr,trigger,errorMsg)) {
       std::stringstream ss; ss << context << " "  << errorMsg ;
       throw std::runtime_error( ss.str() );
    }
