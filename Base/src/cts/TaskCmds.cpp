@@ -434,18 +434,13 @@ STC_Cmd_ptr CtsWaitCmd::doHandleRequest(AbstractServer* as) const
 	SuiteChanged1 changed(submittable_->suite());
 
 	// Parse the expression, should not fail since client should have already check expression parses
-	std::auto_ptr<AstTop> ast = Expression::parse(expression_,"CtsWaitCmd:"); // will throw for errors
-
 	// The complete expression have been parsed and we have created the abstract syntax tree
 	// We now need CHECK the AST for path nodes, event and meter. repeats,etc.
 	// *** This will also set the Node pointers ***
 	// If the expression references paths that don't exist throw an error
-	// This be captured in the ecf script, which should then abort the task
+	// This can be captured in the ecf script, which should then abort the task
 	// Otherwise we will end up blocking indefinitely
-	std::string error_msg;
-	if (!submittable_->check_expressions(ast.get(),expression_,true,error_msg)) {
-	   throw std::runtime_error( "CtsWaitCmd: " +  error_msg ) ;
-	}
+	std::auto_ptr<AstTop> ast = submittable_->parse_and_check_expressions(expression_,true,"CtsWaitCmd:" ); // will throw for errors
 
 	// Evaluate the expression
 	if ( ast->evaluate() ) {
