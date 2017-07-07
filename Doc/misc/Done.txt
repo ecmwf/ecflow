@@ -202,8 +202,6 @@ Job submission:
       log file. This is used to trap any regression.
     o If a job is aborted for any reason, the reason is now stored and available 
       for the UI.
-    o ECF_FETCH. This is not used in research or operations. So I have
-      commented out this functionality. Remains to be tested.
     o Aded support for %includenopp
  
 Client
