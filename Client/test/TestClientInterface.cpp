@@ -622,10 +622,11 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface_for_fail )
       theClient.set_jobs_password( Submittable::DUMMY_JOBS_PASSWORD() );
       BOOST_REQUIRE_THROW( theClient.waitTask("a == "),std::runtime_error); //  --wait with a bad expression 'a == ' should fail
    }
-   {  // No Jobs password expect exception
+   {  // No Jobs password expect exception.
       ClientInvoker theClient ;
       theClient.testInterface(); // stops submission to server
       theClient.taskPath("/a/made/up/path");
+      theClient.set_jobs_password(""); // The password(ECF_PASS) will be READ from the environment. Hence set to empty here
 
       BOOST_REQUIRE_THROW( theClient.initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()),std::runtime_error);
       BOOST_REQUIRE_THROW( theClient.abortTask("reason for abort"),std::runtime_error);
@@ -640,6 +641,7 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface_for_fail )
       ClientInvoker theClient ;
       theClient.testInterface(); // stops submission to server
       theClient.set_jobs_password( Submittable::DUMMY_JOBS_PASSWORD() );
+      theClient.taskPath(""); // The task path(ECF_NAME) could read from the environment, hence clear here.
 
       BOOST_REQUIRE_THROW( theClient.initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()),std::runtime_error);
       BOOST_REQUIRE_THROW( theClient.abortTask("reason for abort"),std::runtime_error);
