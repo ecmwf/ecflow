@@ -1304,10 +1304,25 @@ void TreeNodeModel::slotBeginFilterUpdateInsertTop(VTreeServer* server,int row)
     beginInsertRows(idx,attrNum+row,attrNum+row);
 }
 
-void TreeNodeModel::slotEndFilterUpdateInsertTop(VTreeServer* server,int)
+void TreeNodeModel::slotEndFilterUpdateInsertTop(VTreeServer* server,int row)
 {
     Q_ASSERT(server);
     endInsertRows();
+
+    int attrNum=server->tree()->attrNum(atts_);
+    int chNum=server->tree()->numOfChildren();
+
+    Q_ASSERT(chNum >= row);
+    Q_ASSERT(attrNum >=0);
+    Q_ASSERT(chNum >=0);
+
+    if(row >=0)
+    {
+        const VTreeNode* topChange=server->tree()->childAt(row);
+        //when a suite becomes visible we must notify the view about it so that
+        //the expand state could be correctly set!!!
+        Q_EMIT filterUpdateAddEnded(topChange);
+    }
 }
 
 
