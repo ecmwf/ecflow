@@ -27,6 +27,36 @@
 
 static LogTruncator *truncator=0;
 
+//---------------------------------
+// UiFunctionLog
+//---------------------------------
+
+UiFunctionLog::UiFunctionLog(UiLoggable *obj,const std::string& funcName) :
+    obj_(obj),
+    funcName_(funcName)
+{
+   UiLog().dbg() << logEnter();
+}
+
+UiFunctionLog::~UiFunctionLog()
+{
+    UiLog().dbg() << logLeave();
+}
+
+std::string UiFunctionLog::logEnter() const
+{
+    return obj_->className_ + "::" + funcName_ + " -->";
+}
+
+std::string UiFunctionLog::logLeave() const
+{
+    return "<-- " + obj_->className_ + "::" + funcName_;
+}
+
+//---------------------------------
+// UiLog
+//---------------------------------
+
 UiLog::UiLog(ServerHandler* sh) :
     type_(INFO), server_(sh->longName())
 {}
@@ -100,6 +130,7 @@ void UiLog::enableTruncation()
         truncator=new LogTruncator(QString::fromStdString(DirectoryHandler::uiLogFileName()),
                                      86400*1000,10*1024*1024,1000);
 }
+
 
 //------------------------------------------
 // Overload ostringstream for qt objects

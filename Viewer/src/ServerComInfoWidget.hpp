@@ -11,42 +11,106 @@
 #ifndef SERVERCOMLINE_HPP
 #define SERVERCOMLINE_HPP
 
+#include <QBrush>
+#include <QIcon>
+#include <QPen>
 #include <QPixmap>
 #include <QWidget>
+
+#include "ServerObserver.hpp"
+#include "ServerComObserver.hpp"
+#include "UiLog.hpp"
+#include "VProperty.hpp"
 
 class QAction;
 class QPainter;
 class QTimer;
 
+class PropertyMapper;
 class ServerHandler;
 class ServerUpdateData;
 
-class ServerComLineDisplay : public QWidget
+
+class ServerRefreshInfoWidget : public QWidget, public ServerObserver, public ServerComObserver,
+                                public VPropertyObserver,public UiLoggable
 {
-//Q_OBJECT
+Q_OBJECT
 
 public:
-    explicit ServerComLineDisplay(QWidget* parent=0);
+    explicit ServerRefreshInfoWidget(QAction* refreshAction,QWidget* parent=0);
+    ~ServerRefreshInfoWidget();
 
     void setServer(ServerHandler* server);
 
+    void notifyChange(VProperty* p);
+
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
+    void notifyServerDelete(ServerHandler* server);
+    void notifyBeginServerClear(ServerHandler*);
+    void notifyEndServerScan(ServerHandler*);
+    void notifyServerActivityChanged(ServerHandler*);
+
+    void notifyRefreshTimerStarted(ServerHandler* server);
+    void notifyRefreshTimerStopped(ServerHandler* server);
+    void notifyRefreshTimerChanged(ServerHandler* server);
+    void notifyRefreshScheduled(ServerHandler* server);
+    void notifyRefreshFinished(ServerHandler* server);
+
+protected Q_SLOTS:
+    void slotTimeOut();
 
 protected:
+    void resizeEvent(QResizeEvent* event);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* e);
+    void leaveEvent(QEvent*);
     void paintEvent(QPaintEvent*);
 
-    void renderServerUpdate(QPainter* painter,const ServerUpdateData& data) const;
-    QString formatTime(int timeInSec) const;
-    QColor interpolate(QColor c1,QColor c2,float r) const;
+    void updateSettings();
+    void fetchInfo();
+    void adjustTimer(int toNext);
+    void adjustToolTip();
+    QString formatTime(int timeInSec) const;  
+    bool isInButton(const QPoint& pos) const;
+    bool isInText(const QPoint& pos) const;
+    void printStatus() const;
 
+    enum Component {ButtonComponent,TextComponent,NoComponent};
 
-    QFont font_;
-    QFontMetrics fm_;
+    QAction* refreshAction_;
     ServerHandler* server_;
-    QPixmap pix_;
+    QFont font_;
+    QFont fontTime_;
+    QFontMetrics fm_;
+    QFontMetrics fmTime_;
+    QIcon icon_;
     QTimer *timer_;
+    QBrush bgBrush_;
+    QPen borderPen_;
+    QBrush bgHoverBrush_;
+    QPen borderHoverPen_;
+    QPen arcPen_;
+    QPen textPen_;
+    QRect buttonRect_;
+    int buttonRadius2_;
+    Component currentComponent_;
+
+    PropertyMapper* prop_;
+
+    bool showCountdown_;
+    bool fastMode_;
+    bool hasInfo_;
+    bool inRefresh_;
+    QString lastRefresh_;
+    QString nextRefresh_;
+    int total_;
+    int period_;
+    int toNext_;
+
 };
 
 class ServerComActivityLine : public QWidget
+
 {
 //Q_OBJECT
 
@@ -55,7 +119,6 @@ public:
 
     void setServer(ServerHandler* server);
 
-
 protected:
     void paintEvent(QPaintEvent*);
 
@@ -66,7 +129,7 @@ protected:
     QTimer *timer_;
 };
 
-
+#if 0
 class ServerRefreshInfoWidget : public QWidget
 {
 public:
@@ -78,7 +141,7 @@ protected:
     QAction* refreshAction_;
     ServerComLineDisplay* infoW_;
 };
-
+#endif
 
 
 #endif // SERVERCOMLINE_HPP

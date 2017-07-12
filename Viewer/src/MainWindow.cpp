@@ -39,6 +39,7 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
+#include "ToolTipFormat.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
@@ -107,9 +108,10 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     viewToolBar->addWidget(spacer);
 
-    //QToolBar* ipToolBar=new QToolBar(this);
-    addInfoPanelActions(viewToolBar);
-    //addToolBar(ipToolBar);
+    addInfoPanelActions(viewToolBar);  
+
+    //Add shortcuts to action tooltips
+    Viewer::addShortCutToToolTip(viewToolBar->actions());
 
     //Actions based on selection
     actionRefreshSelected->setEnabled(false);
@@ -339,7 +341,6 @@ void MainWindow::on_actionSaveSessionAs_triggered()
     d.exec();
 }
 
-
 void MainWindow::slotCurrentChangedInPanel()
 {
 	slotSelectionChanged(nodePanel_->currentSelection());
@@ -355,13 +356,16 @@ void MainWindow::slotCurrentChangedInPanel()
 	 //updateSearchPanel();
 }
 
+//The selection changed in one of the views
 void MainWindow::slotSelectionChanged(VInfo_ptr info)
 {
 	selection_=info;
 
+    //Get the set of visible info panel tabs for the selection
 	std::vector<InfoPanelDef*> ids;
 	InfoPanelHandler::instance()->visible(selection_,ids);
 
+    //Set status of the info panel actions in the toolbar accordingly
 	Q_FOREACH(QAction* ac,infoPanelActions_)
 	{
 		ac->setEnabled(false);
@@ -378,24 +382,28 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 		}
 	}
 
+    //Update the refres action/info to the selection
 	updateRefreshActions();
 }
 
 void MainWindow::updateRefreshActions()
 {
-	QString serverName;
-	if(selection_ && selection_.get())
+    ServerHandler* s=0;
+
+    QString serverName;
+    if(selection_)
 	{
-		if(ServerHandler* s=selection_->server())
-		{
-			serverName=QString::fromStdString(s->name());
-            serverComWidget_->setServer(s);
-		}
+        s=selection_->server();
 	}
 
-	bool hasSel=(selection_ && selection_.get());
+    serverComWidget_->setServer(s);
+
+
+    bool hasSel=(selection_!= 0);
 	actionRefreshSelected->setEnabled(hasSel);
 	actionResetSelected->setEnabled(hasSel);
+
+#if 0
 
 	if(serverName.isEmpty())
 	{
@@ -414,7 +422,8 @@ void MainWindow::updateRefreshActions()
 
 			actionRefreshSelected->setToolTip(tnew);
 		}
-	}   
+    }
+#endif
 }
 
 

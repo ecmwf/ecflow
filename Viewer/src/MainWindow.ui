@@ -141,7 +141,6 @@
    </attribute>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
-   <addaction name="actionRefreshSelected"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -244,7 +243,7 @@
     <string>&amp;Manage servers ...</string>
    </property>
    <property name="toolTip">
-    <string>Manage servers&lt;br&gt;&lt;code&gt;Ctrl+N&lt;/code&gt;</string>
+    <string>Manage servers</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>

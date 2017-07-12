@@ -24,6 +24,7 @@
 #include "ServerComQueue.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerObserver.hpp"
+#include "ServerComObserver.hpp"
 #include "SuiteFilter.hpp"
 #include "UiLog.hpp"
 #include "UpdateTimer.hpp"
@@ -32,6 +33,7 @@
 #include "VSettings.hpp"
 #include "VTaskObserver.hpp"
 
+#include <QDateTime>
 #include <QDebug>
 #include <QMessageBox>
 #include <QMetaType>
@@ -48,6 +50,7 @@ std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;
 
 //#define __UI_SERVEROBSERVER_DEBUG
+//#define __UI_SERVERCOMOBSERVER_DEBUG
 #define __UI_SERVERUPDATE_DEBUG
 
 ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
@@ -163,6 +166,10 @@ ServerHandler::~ServerHandler()
 	delete conf_;
 }
 
+//-----------------------------------------------
+// Refresh/update
+//-----------------------------------------------
+
 bool ServerHandler::updateInfo(int& basePeriod,int& currentPeriod,int &drift,int& toNext)
 {
     if(!refreshTimer_->isActive())
@@ -202,6 +209,7 @@ void ServerHandler::stopRefreshTimer()
 #ifdef __UI_SERVERUPDATE_DEBUG
     UiLog(this).dbg() << "ServerHandler::stopRefreshTimer -->";
 #endif
+    broadcast(&ServerComObserver::notifyRefreshTimerStopped);
 }
 
 void ServerHandler::startRefreshTimer()
@@ -224,6 +232,7 @@ void ServerHandler::startRefreshTimer()
         if(rate <=0) rate=1;
         refreshTimer_->setInterval(rate*1000);
         refreshTimer_->start();
+        broadcast(&ServerComObserver::notifyRefreshTimerStarted);
 	}
 
 #ifdef __UI_SERVERUPDATE_DEBUG
@@ -233,9 +242,9 @@ void ServerHandler::startRefreshTimer()
 
 void ServerHandler::updateRefreshTimer()
 {
-   UiLog(this).dbg() << "ServerHandler::updateRefreshTimer -->";
+    UiLog(this).dbg() << "ServerHandler::updateRefreshTimer -->";
 
-   if(!conf_->boolValue(VServerSettings::AutoUpdate))
+    if(!conf_->boolValue(VServerSettings::AutoUpdate))
     {
         stopRefreshTimer();
         return;
@@ -256,6 +265,7 @@ void ServerHandler::updateRefreshTimer()
 
     refreshTimer_->setInterval(rate*1000);
     refreshTimer_->start();
+    broadcast(&ServerComObserver::notifyRefreshTimerChanged);
 
 #ifdef __UI_SERVERUPDATE_DEBUG
     UiLog(this).dbg() << " refreshTimer interval: " << refreshTimer_->interval();
@@ -280,12 +290,27 @@ void ServerHandler::driftRefreshTimer()
 
         refreshTimer_->drift(conf_->intValue(VServerSettings::AdaptiveUpdateIncrement),
                               conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
+
+        broadcast(&ServerComObserver::notifyRefreshTimerChanged);
     }
 
 #ifdef __UI_SERVERUPDATE_DEBUG
     UiLog(this).dbg() << "driftRefreshTimer interval: " << refreshTimer_->interval();
 #endif
 
+}
+
+//mark that a refresh request was sent to the queue
+void ServerHandler::refreshScheduled()
+{
+    lastRefresh_=QDateTime::currentDateTime();
+    broadcast(&ServerComObserver::notifyRefreshScheduled);
+}
+
+//mark that a refresh request was sent to the queue
+void ServerHandler::refreshFinished()
+{
+    broadcast(&ServerComObserver::notifyRefreshFinished);
 }
 
 void ServerHandler::setActivity(Activity ac)
@@ -504,23 +529,7 @@ void ServerHandler::manual(VTask_ptr task)
 	comQueue_->addTask(task);
 }
 
-//The user initiated a refresh
-void ServerHandler::refresh()
-{
-	//We add and refresh task to the queue. On startup this function can be called
-	//before the comQueue_ was created so we need to check if it exists.
-	if(comQueue_)
-	{
-		comQueue_->addNewsTask();
-        lastRefresh_=QDateTime::currentDateTime();
-	}
-
-    //Reset the timer to its original value (i.e. remove the drift)
-    updateRefreshTimer();
-}
-
-
-//The user initiated a refresh
+//The core refresh function. That should be the only one directly accessing the queue.
 void ServerHandler::refreshInternal()
 {
     //We add and refresh task to the queue. On startup this function can be called
@@ -528,9 +537,19 @@ void ServerHandler::refreshInternal()
     if(comQueue_)
     {
         comQueue_->addNewsTask();
-        lastRefresh_=QDateTime::currentDateTime();
     }
 }
+
+//The user initiated a refresh - using the toolbar/menu buttons or
+//called after a user command was issued
+void ServerHandler::refresh()
+{
+    refreshInternal();
+
+    //Reset the timer to its original value (i.e. remove the drift)
+    updateRefreshTimer();
+}
+
 
 //This slot is called by the timer regularly to get news from the server.
 void ServerHandler::refreshServerInfo()
@@ -942,14 +961,61 @@ void ServerHandler::broadcast(SoMethod proc)
 		if(!checkExistence || std::find(serverObservers_.begin(),serverObservers_.end(),*it) != serverObservers_.end())
 			((*it)->*proc)(this);
 	}
-
 }
+
 
 void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)
 {
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
 		((*it)->*proc)(this,ch);
 }
+
+//------------------------------------------------
+// ServerComObserver
+//------------------------------------------------
+
+void ServerHandler::addServerComObserver(ServerComObserver *obs)
+{
+    std::vector<ServerComObserver*>::iterator it=std::find(serverComObservers_.begin(),serverComObservers_.end(),obs);
+    if(it == serverComObservers_.end())
+    {
+        serverComObservers_.push_back(obs);
+#ifdef __UI_SERVERCOMOBSERVER_DEBUG
+        UiLog(this).dbg() << "ServerHandler::addServerComObserver -->  " << obs;
+#endif
+    }
+}
+
+void ServerHandler::removeServerComObserver(ServerComObserver *obs)
+{
+    std::vector<ServerComObserver*>::iterator it=std::find(serverComObservers_.begin(),serverComObservers_.end(),obs);
+    if(it != serverComObservers_.end())
+    {
+        serverComObservers_.erase(it);
+        #ifdef __UI_SERVERCOMOBSERVER_DEBUG
+            UiLog(this).dbg() << "ServerHandler::removeServerComObserver --> " << obs;
+        #endif
+    }
+}
+
+void ServerHandler::broadcast(SocMethod proc)
+{
+    bool checkExistence=true;
+
+    //When the observers are being notified (in a loop) they might
+    //want to remove themselves from the observer list. This will cause a crash. To avoid
+    //this we create a copy of the observers and use it in the notification loop.
+    std::vector<ServerComObserver*> sObsCopy=serverComObservers_;
+
+    for(std::vector<ServerComObserver*>::const_iterator it=sObsCopy.begin(); it != sObsCopy.end(); ++it)
+    {
+        //We need to check if the given observer is still in the original list. When we delete the server, due to
+        //dependencies it is possible that the observer is already deleted at this point.
+        if(!checkExistence || std::find(serverComObservers_.begin(),serverComObservers_.end(),*it) != serverComObservers_.end())
+            ((*it)->*proc)(this);
+    }
+}
+
 
 //-------------------------------------------------------------------
 // This slot is called when the comThread finished the given task!!
@@ -983,6 +1049,8 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		case VTask::NewsTask:
 		{
 			// we've just asked the server if anything has changed - has it?
+
+            refreshFinished();
 
 			switch (serverReply.get_news())
 			{
@@ -1118,7 +1186,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			task->status(VTask::FINISHED);
 
 			//Submitting the task was successful - we should now get updates from the server			
-			comQueue_->addNewsTask();
+            refresh();
 			break;
 		}
 
@@ -1167,7 +1235,12 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 			break;
 		}
 		case VTask::NewsTask:
-		case VTask::StatsTask:
+        {
+            connectionLost(errMsg);
+            refreshFinished();
+            break;
+        }
+        case VTask::StatsTask:
 		{
 			connectionLost(errMsg);
 			break;

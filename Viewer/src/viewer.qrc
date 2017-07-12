@@ -83,6 +83,7 @@
     <file alias="padlock.svg">../images/padlock.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
+    <file alias="reload_black.svg">../images/reload_black.svg</file>
     <file alias="reload_one.svg">../images/reload_one.svg</file>
     <file alias="remove.svg">../images/remove.svg</file>
     <file alias="rescue.svg">../images/rescue.svg</file>
