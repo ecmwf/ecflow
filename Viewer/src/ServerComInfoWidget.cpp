@@ -160,7 +160,7 @@ void ServerRefreshInfoWidget::updateSettings()
 void ServerRefreshInfoWidget::setServer(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-     UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+     UI_FUNCTION_LOG
 #endif
 
     if(server_ != server && server_)
@@ -207,7 +207,7 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
 void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
 #endif
 
     Q_ASSERT(server_ == server);
@@ -231,7 +231,7 @@ void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server)
 void ServerRefreshInfoWidget::notifyBeginServerClear(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
     refreshAction_->setEnabled(false);
@@ -241,7 +241,7 @@ void ServerRefreshInfoWidget::notifyBeginServerClear(ServerHandler* server)
 void ServerRefreshInfoWidget::notifyEndServerScan(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
     refreshAction_->setEnabled(true);
@@ -261,7 +261,7 @@ void ServerRefreshInfoWidget::notifyServerActivityChanged(ServerHandler* /*serve
 void ServerRefreshInfoWidget::notifyRefreshTimerStarted(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
     slotTimeOut(); //get info and rerender
@@ -270,7 +270,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerStarted(ServerHandler* server)
 void ServerRefreshInfoWidget::notifyRefreshTimerStopped(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
     slotTimeOut(); //get info and rerender
@@ -279,7 +279,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerStopped(ServerHandler* server)
 void ServerRefreshInfoWidget::notifyRefreshTimerChanged(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
     printStatus();
 #endif
     Q_ASSERT(server_ == server);
@@ -294,7 +294,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerChanged(ServerHandler* server)
 void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
     inRefresh_=true;
@@ -314,7 +314,7 @@ void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server)
 void ServerRefreshInfoWidget::notifyRefreshFinished(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
     if(!fastMode_)
@@ -346,7 +346,7 @@ void ServerRefreshInfoWidget::slotTimeOutRefreshFinished()
 void ServerRefreshInfoWidget::fetchInfo()
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    UiFunctionLog fclog(BOOST_CURRENT_FUNCTION);
+    UI_FUNCTION_LOG
     printStatus();
 #endif
 
@@ -554,7 +554,7 @@ void ServerRefreshInfoWidget::mouseMoveEvent(QMouseEvent* event)
 void ServerRefreshInfoWidget::leaveEvent(QEvent*)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-    //UiLog().dbg() << "leave";
+    //UI_FUNCTION_LOG
 #endif
     currentComponent_=NoComponent;
     update(); //rerender

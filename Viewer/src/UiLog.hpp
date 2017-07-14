@@ -23,6 +23,8 @@ class QRect;
 
 class ServerHandler;
 
+#define UI_FUNCTION_LOG UiFunctionLog __fclog(BOOST_CURRENT_FUNCTION);
+
 class UiFunctionLog
 {
 public:
