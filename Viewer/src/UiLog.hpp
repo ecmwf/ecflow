@@ -23,25 +23,16 @@ class QRect;
 
 class ServerHandler;
 
-class UiLoggable
-{
-public:
-    UiLoggable(const std::string& className) : className_(className) {}
-    std::string className_;
-};
-
 class UiFunctionLog
 {
 public:
-    UiFunctionLog(UiLoggable *obj,const std::string& funcName);
+    UiFunctionLog(const std::string& funcName);
     ~UiFunctionLog();
     std::string logEnter() const;
     std::string logLeave() const;
 
-    UiLoggable* obj_;
     std::string funcName_;
 };
-
 
 class UiLog
 {

@@ -19,7 +19,6 @@
 
 #include "ServerObserver.hpp"
 #include "ServerComObserver.hpp"
-#include "UiLog.hpp"
 #include "VProperty.hpp"
 
 class QAction;
@@ -32,7 +31,7 @@ class ServerUpdateData;
 
 
 class ServerRefreshInfoWidget : public QWidget, public ServerObserver, public ServerComObserver,
-                                public VPropertyObserver,public UiLoggable
+                                public VPropertyObserver
 {
 Q_OBJECT
 
@@ -58,6 +57,7 @@ public:
 
 protected Q_SLOTS:
     void slotTimeOut();
+    void slotTimeOutRefreshFinished();
 
 protected:
     void resizeEvent(QResizeEvent* event);
@@ -74,30 +74,42 @@ protected:
     bool isInButton(const QPoint& pos) const;
     bool isInText(const QPoint& pos) const;
     void printStatus() const;
+    bool showCountdown() const {return showCountdownArc_ || showCountdownText_;}
 
     enum Component {ButtonComponent,TextComponent,NoComponent};
 
     QAction* refreshAction_;
     ServerHandler* server_;
+    QString serverName_;
+    QString serverText_;
+    QTimer *timer_;
+
     QFont font_;
     QFont fontTime_;
+    QFont fontUpdate_;
     QFontMetrics fm_;
     QFontMetrics fmTime_;
-    QIcon icon_;
-    QTimer *timer_;
-    QBrush bgBrush_;
-    QPen borderPen_;
-    QBrush bgHoverBrush_;
-    QPen borderHoverPen_;
-    QPen arcPen_;
-    QPen textPen_;
+    QFontMetrics fmUpdate_;
+
+    static QIcon *icon_;
+    static QBrush bgBrush_;
+    static QPen borderPen_;
+    static QPen disabledBorderPen_;
+    static QBrush bgHoverBrush_;
+    static QPen borderHoverPen_;
+    static QPen arcPen_;
+    static QPen textPen_;
+    static QPen disabledTextPen_;
+
     QRect buttonRect_;
     int buttonRadius2_;
+    int timeTextLen_;
     Component currentComponent_;
 
     PropertyMapper* prop_;
 
-    bool showCountdown_;
+    bool showCountdownArc_;
+    bool showCountdownText_;
     bool fastMode_;
     bool hasInfo_;
     bool inRefresh_;

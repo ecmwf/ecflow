@@ -41,9 +41,14 @@
                 	"default": "60",
                 	"min" : "0"
                 },
-                "showUpdateCountdown" : {
-                    "label": "Show automatic update countdown in toolbar",
-                    "tooltip": "Shows the remaning time until the next automatic server upate in the <b>update button</b> in the toolbar",
+                "showUpdateCountdownArc" : {
+                    "label": "Indicate countdown to next update",
+                    "tooltip": "Draws a green arc around the <b>update button</b> in the toolbar to indicate the countdown to the next automatic update.",
+                    "default": "true"
+                },
+                "showUpdateCountdownText" : {
+                    "label": "Show remaining time to next update",
+                    "tooltip": "Shows the remaning time until the next automatic server upate in the <b>update button</b> in the toolbar.",
                     "default": "true"
                 }
             }, 

@@ -318,7 +318,7 @@
   <action name="actionRefreshSelected">
    <property name="icon">
     <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/reload_one.svg</normaloff>:/viewer/reload_one.svg</iconset>
+     <normaloff>:/viewer/reload_black.svg</normaloff>:/viewer/reload_black.svg</iconset>
    </property>
    <property name="text">
     <string>R&amp;efresh selected server</string>

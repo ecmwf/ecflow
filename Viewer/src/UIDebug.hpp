@@ -17,15 +17,11 @@
 class UIDebug
 {
 public:
-	UIDebug() {};
-   ~UIDebug() {};
-
+    UIDebug() {}
+   ~UIDebug() {}
 
 	static void uiAssert(char const* expr, char const* file, long line, const std::string& message);
 	static std::string longToString(long num);
-
-
-
 };
 
 
