@@ -58,7 +58,7 @@ public:
 
 	/// use default copy constructor, assignment, destructor
 	/// ECF_FETCH  is used obtain the script from running a command  i.e.
-	/// from the version control system. This has not been implemented yet.
+	/// from the version control system.
 	EcfFile(Node*, const std::string& path_to_script_or_fetch_cmd, EcfFile::ScriptType = ECF_FILE );
 
 	// The path to the ecf file, empty path means that ecf file could not be located

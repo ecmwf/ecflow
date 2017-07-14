@@ -1297,20 +1297,42 @@ bool Node::check_expressions(Ast* ast,const std::string& expr,bool trigger, std:
       // Also resolve references to events,meter,repeats variables.
       AstResolveVisitor astVisitor(this);
       ast->accept(astVisitor);
-
       if ( !astVisitor.errorMsg().empty() ) {
          errorMsg += "Error: Expression node tree references failed for '";
          if ( trigger ) errorMsg += "trigger ";
          else           errorMsg += "complete ";
          errorMsg += expr;
          errorMsg += "' at ";
-         errorMsg += absNodePath();
+         errorMsg += debugNodePath();
          errorMsg += "\n ";
          errorMsg += astVisitor.errorMsg();
          return false;
       }
+
+      // check divide by zero and module by zero
+      if (!ast->check(errorMsg)) {
+         errorMsg += " Error: Expression checking failed for '";
+         if ( trigger ) errorMsg += "trigger ";
+         else           errorMsg += "complete ";
+         errorMsg += expr;
+         errorMsg += "' at ";
+         errorMsg += debugNodePath();
+         return false;
+      }
    }
    return true;
+}
+
+std::auto_ptr<AstTop> Node::parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context)
+{
+   std::auto_ptr<AstTop> ast = Expression::parse(expr,context ); // will throw for errors
+
+   std::string errorMsg;
+   if (!check_expressions(ast.get(),expr,trigger,errorMsg)) {
+      std::stringstream ss; ss << context << " "  << errorMsg ;
+      throw std::runtime_error( ss.str() );
+   }
+   return ast;
 }
 
 bool Node::check(std::string& errorMsg, std::string& warningMsg) const
@@ -1329,33 +1351,17 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    /// Even if the code parses, check the expression for divide by zero, for divide and modulo operators
    AstTop* ctop = completeAst(errorMsg);
    if (ctop) {
-
-      // capture node path resolve errors
+      // capture node path resolve errors, and expression divide/module by zero
       std::string expr;
       if (completeExpr_) expr = completeExpr_->expression();
       (void)check_expressions(ctop,expr,false,errorMsg);
-
-      if (!ctop->check(errorMsg)) {
-         errorMsg += " ";
-         errorMsg += expr;
-         errorMsg += " on ";
-         errorMsg += debugNodePath();
-      }
    }
+
    AstTop* ttop = triggerAst(errorMsg);
    if (ttop) {
-
-      // capture node path resolve errors
       std::string expr;
       if (triggerExpr_) expr = triggerExpr_->expression();
       (void)check_expressions(ttop,expr,true,errorMsg);
-
-      if (!ttop->check(errorMsg)) {
-         errorMsg += " ";
-         errorMsg += expr;
-         errorMsg += " on ";
-         errorMsg += debugNodePath();
-      }
    }
 
    // check inLimit references to limits.

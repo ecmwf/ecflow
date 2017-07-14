@@ -94,6 +94,16 @@ public:
       return !operator==(rhs);
    }
 
+   /// Helper function, will parse the expression and return the abstract syntax tree
+
+   static std::auto_ptr<AstTop> parse(
+            const std::string& expression_to_parse,
+            const std::string& error_msg_context); // Will throw for parse errors
+   static std::auto_ptr<AstTop> parse_no_throw(
+            const std::string& expression_to_parse,
+            std::string& error_msg_context);
+
+
    /// User should add "trigger" or "complete" at the start.
    /// The part expression's are combined and returned as a single string
    std::string expression() const;

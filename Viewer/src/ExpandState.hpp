@@ -17,11 +17,13 @@
 #include <QPersistentModelIndex>
 #include <QSet>
 
+//Represents the expand state of a full/part VNode tree. This tree has the same structure
+//as a VNode tree and each VNode object is represented by a ExpandStateNode object.
+
 class TreeNodeModel;
 class AbstractNodeView;
 class QModelIndex;
 class VNode;
-class VTreeNode;
 class ExpandStateNode;
 
 class ExpandState
@@ -33,18 +35,24 @@ public:
     ExpandState(AbstractNodeView*,TreeNodeModel*);
     ~ExpandState();
 
-    bool rootSameAs(const std::string&) const;
-    void save(const VTreeNode*);
-    void collectExpanded(const VTreeNode* node,QSet<QPersistentModelIndex>&);
-
+    void save(const VNode*);
+    void collectExpanded(const VNode* node,QSet<QPersistentModelIndex>&);
+    void saveExpandAll(const VNode* node);
+    void saveCollapseAll(const VNode* node);
+    void print() const;
+    bool isEmpty() const;
 
 protected:
 	void clear();
-    ExpandStateNode* setRoot(VNode* root,bool expanded);
     ExpandStateNode* root() const {return root_;}
     void save(const VNode *,ExpandStateNode*,const QModelIndex&);
-    void collectExpanded(ExpandStateNode *expand,const VTreeNode* node,
+    void collectExpanded(ExpandStateNode *expand,const VNode* node,
                  const QModelIndex& nodeIdx,QSet<QPersistentModelIndex>& theSet);
+
+    bool needToExpandNewChild(ExpandStateNode* expandNode,const std::string&) const;
+    void collectParents(const std::string& fullPath,std::vector<ExpandStateNode*>& parents) const;
+
+    ExpandStateNode* find(const std::string& fullPath);
 
     AbstractNodeView* view_;
     TreeNodeModel* model_;

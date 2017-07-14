@@ -581,5 +581,48 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface )
    BOOST_REQUIRE_MESSAGE( theClient.labelTask("label_name",labels) == 0,"--label should return 0\n" << theClient.errorMsg());
 }
 
+BOOST_AUTO_TEST_CASE( test_client_task_interface_for_fail )
+{
+   std::cout << "Client:: ...test_client_task_interface_for_fail" << endl;
+
+   {
+      ClientInvoker theClient ;
+      theClient.testInterface(); // stops submission to server
+      theClient.taskPath("/a/made/up/path");
+      theClient.set_jobs_password( Submittable::DUMMY_JOBS_PASSWORD() );
+      BOOST_REQUIRE_THROW( theClient.waitTask("a == "),std::runtime_error); //  --wait with a bad expression 'a == ' should fail
+   }
+   {  // No Jobs password expect exception.
+      ClientInvoker theClient ;
+      theClient.testInterface(); // stops submission to server
+      theClient.taskPath("/a/made/up/path");
+      theClient.set_jobs_password(""); // The password(ECF_PASS) will be READ from the environment. Hence set to empty here
+
+      BOOST_REQUIRE_THROW( theClient.initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.abortTask("reason for abort"),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.eventTask("event_name"),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.meterTask("meter_name","20"),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.waitTask("a == complete"),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.completeTask(),std::runtime_error);
+      std::vector<std::string> labels; labels.push_back("test_client_task_interface");
+      BOOST_REQUIRE_THROW( theClient.labelTask("label_name",labels),std::runtime_error);
+   }
+   {  // No task path set expect exception
+      ClientInvoker theClient ;
+      theClient.testInterface(); // stops submission to server
+      theClient.set_jobs_password( Submittable::DUMMY_JOBS_PASSWORD() );
+      theClient.taskPath(""); // The task path(ECF_NAME) could read from the environment, hence clear here.
+
+      BOOST_REQUIRE_THROW( theClient.initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.abortTask("reason for abort"),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.eventTask("event_name"),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.meterTask("meter_name","20"),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.waitTask("a == complete"),std::runtime_error);
+      BOOST_REQUIRE_THROW( theClient.completeTask(),std::runtime_error);
+      std::vector<std::string> labels; labels.push_back("test_client_task_interface");
+      BOOST_REQUIRE_THROW( theClient.labelTask("label_name",labels),std::runtime_error);
+   }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
