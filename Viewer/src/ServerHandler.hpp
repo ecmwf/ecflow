@@ -40,6 +40,7 @@ class VNodeChange;
 class VServer;
 class VServerChange;
 class VSettings;
+class VSuiteNode;
 
 
 class ServerHandler : public QObject
@@ -63,6 +64,7 @@ public:
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
 
+    void setSuiteFilterWithOne(VNode*);
 	void updateSuiteFilter(SuiteFilter*);
 	void updateSuiteFilterWithDefs();
 

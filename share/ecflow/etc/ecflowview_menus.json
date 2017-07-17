@@ -562,6 +562,21 @@
             "command"        : "ecflow_client --alter clear_flag migrated <full_name>",
             "status_tip"     : "__cmd__"
         },
+
+        {
+            "menu"           : "Special",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Monitor only this suite",
+            "visible_for"    : "node",
+            "command"        : "monitorOne",
+            "handler"        : "tree",
+            "view"           : "tree"
+        },
+
         {
             "menu"           : "Force",
             "name"           : "Unknown",

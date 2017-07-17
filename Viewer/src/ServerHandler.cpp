@@ -1497,6 +1497,32 @@ void ServerHandler::rescanTree()
 // Suite filter
 //====================================================
 
+void ServerHandler::setSuiteFilterWithOne(VNode* n)
+{
+    if(n)
+    {
+        if(VNode* sn=n->suite())
+            if(VSuiteNode *suite=sn->isSuite())
+            {
+                if(suiteFilter_->isEnabled() == false)
+                {
+                    suiteFilter_->setEnabled(true);
+                    suiteFilter_->selectOnlyOne(suite->strName());
+                    //after reset the loaded suites need to be read again from the server!
+                    suiteFilter_->setLoadedInitialised(false);
+                    reset();
+                }
+                else if(suiteFilter_->isOnlyOneFiltered(suite->strName()) == false)
+                {
+                    suiteFilter_->selectOnlyOne(suite->strName());
+                    //after reset the loaded suites need to be read again from the server!
+                    suiteFilter_->setLoadedInitialised(false);
+                    reset();
+                }
+            }
+    }
+}
+
 void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 {
 	if(suiteFilter_->update(sf))
@@ -1554,7 +1580,6 @@ void ServerHandler::updateSuiteFilter()
 		suiteFilter_->setLoaded(defSuites);
 	}
 }
-
 
 bool ServerHandler::readFromDisk() const
 {
