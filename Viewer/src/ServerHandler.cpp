@@ -1591,11 +1591,12 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 	switch(par)
 	{
     case VServerSettings::AutoUpdate:
-        updateRefreshTimer();
-        break;
     case VServerSettings::UpdateRate:
-		updateRefreshTimer();
-		break;
+    case VServerSettings::AdaptiveUpdate:
+    case VServerSettings::AdaptiveUpdateIncrement:
+    //case VServerSettings::MaxAdaptiveUpdateRate:
+        updateRefreshTimer();
+        break;   
 	case VServerSettings::NotifyAbortedEnabled:
 	case VServerSettings::NotifyRestartedEnabled:
 	case VServerSettings::NotifyLateEnabled:

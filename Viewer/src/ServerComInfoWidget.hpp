@@ -15,6 +15,7 @@
 #include <QIcon>
 #include <QPen>
 #include <QPixmap>
+#include <QTime>
 #include <QWidget>
 
 #include "ServerObserver.hpp"
@@ -68,7 +69,7 @@ protected:
 
     void drawButton(QPainter*);
     void drawProgress(QPainter*);
-    void adjustGeometry();
+    void adjustGeometry(bool);
     void updateSettings();
     void reloadAll();
     void fetchInfo();
@@ -79,14 +80,17 @@ protected:
     bool isInText(const QPoint& pos) const;
     void printStatus() const;
     bool showCountdown() const {return showCountdownArc_ || showCountdownText_;}
+    bool isActionEnabled() const;
 
     enum Component {ButtonComponent,TextComponent,NoComponent};
+    enum Mode {NormalMode,FastMode,ContMode,ManualMode,NoMode};
 
     QAction* refreshAction_;
     ServerHandler* server_;
     QString serverName_;
     QString serverText_;
     QTimer *timer_;
+    QTime inRefreshElapsed_;
 
     QFont font_;
     QFont fontTime_;
@@ -113,15 +117,25 @@ protected:
     QRect buttonRect_;
     int buttonRadius2_;
     int timeTextLen_;
+    int lastTextLen_;
+    QRect serverRect_;
+    QRect timeRect_;
+    QRect progRect_;
+    QRect lastRect_;
     Component currentComponent_;
 
     PropertyMapper* prop_;
 
     bool showCountdownArc_;
     bool showCountdownText_;
+    Mode mode_;
     bool fastMode_;
+    int contModeLimit_;
+    int fastModeLimit_;
     bool hasInfo_;
     bool inRefresh_;
+    bool userInitiatedRefresh_;
+    bool showLastRefresh_;
     QString lastRefresh_;
     QString nextRefresh_;
     int total_;

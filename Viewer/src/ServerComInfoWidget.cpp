@@ -34,8 +34,9 @@ QPen ServerRefreshInfoWidget::borderPen_(QColor(167,167,167));
 QPen ServerRefreshInfoWidget::disabledBorderPen_(QColor(182,182,182));
 QBrush ServerRefreshInfoWidget::buttonBgHoverBrush_(QColor(249,248,248));
 QPen ServerRefreshInfoWidget::buttonHoverPen_(QColor(160,160,160));
-QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(219,238,246));
-QBrush ServerRefreshInfoWidget::timeBgBrush_(QColor(210,210,210));
+//QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(219,238,246));
+QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(213,222,227));
+QBrush ServerRefreshInfoWidget::timeBgBrush_(QColor(214,214,214));
 QBrush ServerRefreshInfoWidget::progBrush_(QColor(38,181,245));
 QBrush ServerRefreshInfoWidget::progBgBrush_(QColor(248,248,248));
 QPen ServerRefreshInfoWidget::buttonRefreshPen_(QColor(38,181,245),2);
@@ -84,9 +85,14 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     prop_(0),
     showCountdownArc_(true),
     showCountdownText_(true),
+    mode_(NoMode),
     fastMode_(false),
+    contModeLimit_(4),
+    fastModeLimit_(15),
     hasInfo_(false),
     inRefresh_(true),
+    userInitiatedRefresh_(false),
+    showLastRefresh_(true),
     total_(-1),
     period_(-1),
     toNext_(-1)
@@ -120,7 +126,7 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
     setMinimumSize(width_,height_);
 
-    adjustGeometry();
+    adjustGeometry(false);
 
     //timeTextLen_=qMax(fmTime_.width(" <9:59m left"),fmUpdate_.width("updating"));
     buttonRect_=QRect(1,1,height()-2,height()-2);
@@ -129,8 +135,9 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     setMouseTracking(true);
 
     std::vector<std::string> propVec;
-    propVec.push_back("server.update.showUpdateCountdownArc");
-    propVec.push_back("server.update.showUpdateCountdownText");
+    //propVec.push_back("server.update.showUpdateCountdownArc");
+    //propVec.push_back("server.update.showUpdateCountdownText");
+    propVec.push_back("server.update.blinkUpdateButtonLimit");
     prop_=new PropertyMapper(propVec,this);
     updateSettings();
 }
@@ -146,6 +153,11 @@ ServerRefreshInfoWidget::~ServerRefreshInfoWidget()
     delete prop_;
 }
 
+bool ServerRefreshInfoWidget::isActionEnabled() const
+{
+    return refreshAction_->isEnabled();
+}
+
 void ServerRefreshInfoWidget::notifyChange(VProperty* p)
 {
     updateSettings();
@@ -153,30 +165,27 @@ void ServerRefreshInfoWidget::notifyChange(VProperty* p)
 
 void ServerRefreshInfoWidget::updateSettings()
 {
-    if(VProperty* p=prop_->find("server.update.showUpdateCountdownArc"))
+    /*if(VProperty* p=prop_->find("server.update.showUpdateCountdownArc"))
     {
         showCountdownArc_=p->value().toBool();
     }
     if(VProperty* p=prop_->find("server.update.showUpdateCountdownText"))
     {
         showCountdownText_=p->value().toBool();
+    }*/
+    if(VProperty* p=prop_->find("server.update.blinkUpdateButtonLimit"))
+    {
+        bool v=p->value().toInt();
+        if(fastModeLimit_!= v)
+        {
+            fastModeLimit_=v;
+            adjustGeometry(true);
+        }
+        else
+            fastModeLimit_=v;
     }
-    reloadAll();
-}
 
-void ServerRefreshInfoWidget::adjustGeometry()
-{
-    if(server_)
-    {
-        timeTextLen_=qMax(fmTime_.width(" <9:59m"),fmUpdate_.width("updating"));
-        setFixedWidth(buttonRect_.x()+buttonRect_.width()+fm_.width(serverText_) +
-                      timeTextLen_ +6);
-    }
-    else
-    {
-        timeTextLen_=0;
-        setFixedWidth(buttonRect_.x()+buttonRect_.width()+fm_.width("AAAAA"));
-    }
+    reloadAll();
 }
 
 void ServerRefreshInfoWidget::setServer(ServerHandler* server)
@@ -204,8 +213,9 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
     }
 
     refreshAction_->setEnabled(true);
-    fastMode_=false;
+    //fastMode_=false;
     inRefresh_=false;
+    mode_=NoMode;
 
     //Cache some data
     serverName_.clear();
@@ -216,11 +226,11 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
         serverText_=serverName_ + " ";      
     }
 
-    //Adjust width
-    adjustGeometry();
+    //Adjust width + get info
+    adjustGeometry(true);
 
-    //get info and rerender
-    reloadAll();
+    //rerender
+    update();
 }
 
 //-------------------------------
@@ -242,25 +252,33 @@ void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server)
         serverName_.clear();
         serverText_.clear();
         hasInfo_=false;
-        fastMode_=false;
+        mode_=NoMode;
         inRefresh_=false;
+        userInitiatedRefresh_=false;
 
         //get info and rerender
         reloadAll();
     }
 }
 
-//While the server is being reloaded the refresh button is disabled
+//While the server is being reloaded the refresh button is disabled. It must be followed by a
+//notifyEndServerScan() call!
 void ServerRefreshInfoWidget::notifyBeginServerClear(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
+    timer_->stop();
     refreshAction_->setEnabled(false);
+    hasInfo_=false;
+    inRefresh_=false;
+    userInitiatedRefresh_=false;
+    mode_=NoMode;
     update();
 }
 
+//The server has been reloaded. We must get the current state.
 void ServerRefreshInfoWidget::notifyEndServerScan(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
@@ -306,14 +324,16 @@ void ServerRefreshInfoWidget::notifyRefreshTimerChanged(ServerHandler* server)
     printStatus();
 #endif
     Q_ASSERT(server_ == server);
-    if(!inRefresh_ || fastMode_)
+
+    //if we are in refresh we do not want to fetch any new information unless we are in
+    //NoMode or ContMode
+    if(!inRefresh_ || mode_==ContMode || mode_==NoMode)
     {
         reloadAll(); //get info and rerender
     }
 }
 
-//While the refresh is being executed the the refresh button is disabled. In fast mode we
-//do not do this because the refresh button is continuosly disabled.
+//While the refresh is being executed the the refresh button
 void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server)
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
@@ -321,7 +341,8 @@ void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server)
 #endif
     Q_ASSERT(server_ == server);
     inRefresh_=true;
-    if(!fastMode_)
+    inRefreshElapsed_.restart();
+    if(mode_ == NormalMode || mode_ == FastMode)
     {
         //refreshAction_->setEnabled(false);
         timer_->stop();
@@ -329,7 +350,7 @@ void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server)
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
         printStatus();
 #endif
-
+        //redraw
         update();
     }
 }
@@ -340,10 +361,13 @@ void ServerRefreshInfoWidget::notifyRefreshFinished(ServerHandler* server)
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
-    if(!fastMode_)
+    int elapsed=inRefreshElapsed_.elapsed();
+
+    if(mode_ == NormalMode || mode_ == FastMode && elapsed < 450)
     {
-        //We keep the button disabled for 1 sec (the timer is stopped now!!)
-        QTimer::singleShot(1000,this,SLOT(slotTimeOutRefreshFinished()));
+        Q_ASSERT(500-elapsed > 0);
+        //We keep the button in inRefresh state for 1 sec (the timer is stopped now!!)
+        QTimer::singleShot(500-elapsed,this,SLOT(slotTimeOutRefreshFinished()));
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
         printStatus();
 #endif
@@ -351,6 +375,7 @@ void ServerRefreshInfoWidget::notifyRefreshFinished(ServerHandler* server)
     else
     {
         inRefresh_=false;
+        userInitiatedRefresh_=false;
     }
 }
 
@@ -368,6 +393,7 @@ void ServerRefreshInfoWidget::slotTimeOut()
 void ServerRefreshInfoWidget::slotTimeOutRefreshFinished()
 {
     inRefresh_=false;
+    userInitiatedRefresh_=false;
     reloadAll();
 }
 
@@ -380,15 +406,18 @@ void ServerRefreshInfoWidget::fetchInfo()
 
     if(!server_)
     {
+        mode_=NoMode;
         hasInfo_=false;
-        fastMode_=false;
         timer_->stop();
     }
     else
     {
         int drift;
         QDateTime currentTime=QDateTime::currentDateTime();
-        hasInfo_=server_->updateInfo(period_,total_,drift,toNext_);
+        bool v=server_->updateInfo(period_,total_,drift,toNext_);
+
+        bool geoUpdateNeeded=(v != hasInfo_);
+        hasInfo_=v;
 
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
         UiLog().dbg() << " period=" << period_ << " total=" << total_ <<
@@ -398,35 +427,49 @@ void ServerRefreshInfoWidget::fetchInfo()
         //the server has an automatic update
         if(hasInfo_)
         {
-            lastRefresh_=currentTime.addSecs(-total_+toNext_).time().toString();
+            lastRefresh_=server_->lastRefresh().time().toString(); //currentTime.addSecs(-total_+toNext_).time().toString();
             nextRefresh_=currentTime.addSecs(toNext_).time().toString();
 
-            //See if we are in fastmode. In fastmode:
+            //In ContMode:
             // -the action is disabled
             // -there is a special tooltip
             // -the timer is stopped
+            // -there is no blinking
+            // -the progress bar is always at 100&
             // -a warning colour is used to draw the border
-            if(total_ < 10)
+            if(total_ < 0) //contModeLimit_)
             {
-                fastMode_=true;
+                mode_=ContMode;
                 refreshAction_->setEnabled(false);
             }
-            //Not in fastmode
+            //In FastMode:
+            // -there is no blinking
+            else if(total_ < 0) //fastModeLimit_)
+            {
+                mode_=FastMode;
+                if(!inRefresh_)
+                    refreshAction_->setEnabled(true);
+            }
+            //NormalMode
             else
             {
-                fastMode_=false;
+                mode_=NormalMode;
                 if(!inRefresh_)
                     refreshAction_->setEnabled(true);
             }
         }
-        //the server's automatic automatic is switched off
+        //the server's automatic refresh is switched off
         else
         {
             lastRefresh_=server_->lastRefresh().time().toString();
-            fastMode_=false;
+            mode_=ManualMode;
             if(!inRefresh_)
                 refreshAction_->setEnabled(true);
         }
+
+
+        if(geoUpdateNeeded)
+            adjustGeometry(false);
 
         //if(currentComponent_ == TextComponent)
         adjustToolTip();
@@ -446,27 +489,35 @@ void ServerRefreshInfoWidget::adjustTimer(int toNext)
     // -the action is disabled
     // -we are in fast mode
     // -the countdown is not shown
-    if(!refreshAction_->isEnabled() || fastMode_ || !showCountdown())
+    //if(!refreshAction_->isEnabled() || fastMode_ || !showCountdown())
+    if(!refreshAction_->isEnabled() || mode_ == NoMode || mode_ == ManualMode || mode_ == ContMode )
     {
         timer_->stop();
 
     }
     else if(hasInfo_)
     {
-        if(toNext > 135)
-            timer_->setInterval(60*1000);
-        else if(toNext > 105)
-            timer_->setInterval(30*1000);
-        else  if(toNext > 75)
-            timer_->setInterval(15*1000);
-        else if(toNext > 30)
-            timer_->setInterval(5*1000);
-        else if(toNext > 15)
-            timer_->setInterval(2500);
-        else if(toNext > 6)
-            timer_->setInterval(2000);
+        if(period_ == 1)
+           timer_->setInterval(1000);
+        else if(period_==2)
+           timer_->setInterval(750);
         else
-            timer_->setInterval(1*1000);
+        {
+            if(toNext > 135)
+                timer_->setInterval(60*1000);
+            else if(toNext > 105)
+                timer_->setInterval(30*1000);
+            else  if(toNext > 75)
+                timer_->setInterval(15*1000);
+            else if(toNext > 30)
+                timer_->setInterval(5*1000);
+            else if(toNext > 15)
+                timer_->setInterval(2500);
+            else if(toNext > 6)
+                timer_->setInterval(2000);
+            else
+                timer_->setInterval(1000);
+        }
 
         if(!timer_->isActive())
             timer_->start();
@@ -497,7 +548,7 @@ void ServerRefreshInfoWidget::resizeEvent(QResizeEvent* event)
 
 void ServerRefreshInfoWidget::mousePressEvent(QMouseEvent* event)
 {
-    if(!refreshAction_->isEnabled() || fastMode_)
+    if(!refreshAction_->isEnabled())
         return;
 
     //We are in the button
@@ -508,8 +559,9 @@ void ServerRefreshInfoWidget::mousePressEvent(QMouseEvent* event)
 #endif
         if(currentComponent_ != ButtonComponent)
         {
-
+            currentComponent_ == ButtonComponent;
         }
+        userInitiatedRefresh_=true;
         refreshAction_->trigger();
     }
 }
@@ -526,21 +578,23 @@ void ServerRefreshInfoWidget::mouseMoveEvent(QMouseEvent* event)
         if(currentComponent_ != ButtonComponent)
         {
             currentComponent_=ButtonComponent;
-            if(!showCountdown())
+/*            if(mode_ == ContMode || mode_ == NoMode )
             {
                 fetchInfo();
             }
             else
             {
                 adjustToolTip();
-            }
-            if(refreshAction_->isEnabled() && !fastMode_)
+            }*/
+
+            adjustToolTip();
+            if(refreshAction_->isEnabled())
             {
                 update(); //rerender
             }
         }
     }
-    //We are in the text
+    //We are in the progress part
     else if(isInText(event->pos()))
     {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
@@ -550,15 +604,16 @@ void ServerRefreshInfoWidget::mouseMoveEvent(QMouseEvent* event)
         if(currentComponent_ == ButtonComponent)
         {
             currentComponent_=TextComponent;
-            if(!showCountdown())
+            /*if(mode_ == NormalMode || mode_ == FastMode)
             {
                 fetchInfo();
             }
             else
             {
                 adjustToolTip();
-            }
-            if(refreshAction_->isEnabled() && !fastMode_)
+            }*/
+            adjustToolTip();
+            if(refreshAction_->isEnabled())
             {
                 update(); //rerender
             }
@@ -567,14 +622,15 @@ void ServerRefreshInfoWidget::mouseMoveEvent(QMouseEvent* event)
         else if(currentComponent_ != TextComponent)
         {
             currentComponent_=TextComponent;
-            if(!showCountdown())
+            /*if(!showCountdown())
             {
                 fetchInfo();
             }
             else
             {
                 adjustToolTip();
-            }
+            }*/
+            adjustToolTip();
         }
     }
 }
@@ -589,14 +645,86 @@ void ServerRefreshInfoWidget::leaveEvent(QEvent*)
 }
 
 
+void ServerRefreshInfoWidget::paintEvent(QPaintEvent*)
+{
+    QPainter painter(this);
+    drawProgress(&painter);
+    drawButton(&painter);
+}
+
+void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
+{
+    if(server_)
+    {
+        timeTextLen_=qMax(fmTime_.width(" <9:59m"),fmUpdate_.width("updating"));
+        lastTextLen_=fmTime_.width(" last: 22:22:22 ");
+
+        //Define server rect
+        int yPadding=5;
+        int h=height()-2*yPadding;
+        int currentRight=0;
+
+        serverRect_=QRect(buttonRect_.center().x()+4,yPadding,
+                          buttonRect_.width()/2-4+4+fm_.width(serverText_),
+                          h);
+        currentRight=serverRect_.x()+serverRect_.width();
+
+        if(doFetchInfo)
+            fetchInfo();
+
+        timeRect_=QRect();
+        progRect_=QRect();
+        lastRect_=QRect();
+
+        if(hasInfo_)
+        {
+            timeRect_ = serverRect_;
+            timeRect_.setX(serverRect_.x()+serverRect_.width());
+            timeRect_.setWidth(timeTextLen_);
+            timeRect_.setHeight(fmTime_.height()-2);
+
+            progRect_ = timeRect_;
+            progRect_.setY(timeRect_.y()+timeRect_.height());
+            progRect_.setHeight(serverRect_.height()-timeRect_.height());
+
+            currentRight+=timeRect_.width();
+
+        }
+
+        if((hasInfo_ && showLastRefresh_) || !hasInfo_)
+        {
+            lastRect_ = QRect(currentRight,serverRect_.y(),lastTextLen_,h);
+            currentRight+=lastRect_.width()+6;
+
+            //setFixedWidth(buttonRect_.x()+buttonRect_.width()+fm_.width(serverText_) +
+            //          timeTextLen_ +6 + lastTextLen_);
+        }
+        else
+        {
+            //setFixedWidth(buttonRect_.x()+buttonRect_.width()+fm_.width(serverText_) +
+            //          timeTextLen_ +6);
+        }
+
+        setFixedWidth(currentRight);
+    }
+    else
+    {
+        timeTextLen_=0;
+        lastTextLen_=0;
+        setFixedWidth(buttonRect_.x()+buttonRect_.width()+fm_.width("AAAAA"));
+    }
+}
+
+
 void ServerRefreshInfoWidget::drawButton(QPainter* painter)
 {
     painter->setRenderHint(QPainter::Antialiasing,true);
 
     if(server_)
     {
-        //The filled circle
-        if(inRefresh_)
+        //blink
+        if(inRefresh_ &&
+           (mode_ == NormalMode || mode_ == ManualMode || userInitiatedRefresh_))
         {
             painter->setBrush(buttonBgRefreshBrush_);
             painter->setPen(buttonRefreshPen_);
@@ -617,6 +745,7 @@ void ServerRefreshInfoWidget::drawButton(QPainter* painter)
         painter->setPen(borderPen_);
     }
 
+    //The filled circle
     painter->drawEllipse(buttonRect_);
 
     //The reload icon
@@ -633,34 +762,36 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
          return;
 
     //Define server rect
-    int yPadding=5;
-    int h=height()-2*yPadding;
+    //int yPadding=5;
+    //int h=height()-2*yPadding;
 
-    QRect serverRect=QRect(buttonRect_.center().x()+4,yPadding,
-                       buttonRect_.width()/2-4+4+fm_.width(serverText_),
-                       h);
+    //QRect serverRect=QRect(buttonRect_.center().x()+4,yPadding,
+    //                   buttonRect_.width()/2-4+4+fm_.width(serverText_),
+    //                   h);
 
-    QRect serverTextRect=serverRect.adjusted(buttonRect_.width()/2-4+4,0,0,0);
+    QRect serverTextRect=serverRect_.adjusted(buttonRect_.width()/2-4+4,0,0,0);
 
     QString timeText;
-    QRect   timeRect,progRect;
+    //QRect   timeRect,progRect;
     if(hasInfo_) // && showCountdownText_)
     {
-        if(fastMode_)
+        timeText =QChar(916) + QString("=") + QString::number(total_) + "s";
+
+        /*if(fastMode_)
             timeText = "<" + QString::number(total_) + "s";
         else if(inRefresh_)
             timeText = "updating";
         else
             timeText =QChar(916) + QString("=") + QString::number(total_) + "s"; //formatTime(toNext_) + " left";
+*/
+        //timeRect = serverRect;
+        //timeRect.setX(serverRect.x()+serverRect.width());
+        //timeRect.setWidth(timeTextLen_);
 
-        timeRect = serverRect;
-        timeRect.setX(serverRect.x()+serverRect.width());
-        timeRect.setWidth(timeTextLen_);
-
-        timeRect.setHeight(fmTime_.height()-2);
-        progRect = timeRect;
-        progRect.setY(timeRect.y()+timeRect.height());
-        progRect.setHeight(serverRect.height()-timeRect.height());
+        //timeRect.setHeight(fmTime_.height()-2);
+        //progRect = timeRect;
+        //progRect.setY(timeRect.y()+timeRect.height());
+        //progRect.setHeight(serverRect.height()-timeRect.height());
 
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
         UiLog().dbg() << "timeText=" << timeText;
@@ -673,64 +804,76 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
     //Server rect
     painter->setBrush(Qt::NoBrush);
     painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
-    painter->drawRect(serverRect);
+    painter->drawRect(serverRect_);
 
     //Server text
     painter->setPen((refreshAction_->isEnabled())?textPen_:disabledTextPen_);
     painter->drawText(serverTextRect,Qt::AlignLeft | Qt::AlignVCenter,serverText_);
 
     //The time rects and texts
-    if(hasInfo_) // && showCountdownText_)
+    if(hasInfo_)
     {
         //Time rect
-        if(inRefresh_ && !fastMode_)
-            painter->setFont(fontUpdate_);
-        else
+        //if(inRefresh_ && !fastMode_)
+        //    painter->setFont(fontUpdate_);
+       // else
             painter->setFont(fontTime_);
 
          painter->setBrush(timeBgBrush_);
          painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
-         painter->drawRect(timeRect);
+         painter->drawRect(timeRect_);
 
         //Time text
-        if(fastMode_ || inRefresh_)
-            //painter.setPen(QColor(0,136,0));
-            painter->setPen(refreshTextPen_);
-        else
+        //if(fastMode_ || inRefresh_)
+        //    //painter.setPen(QColor(0,136,0));
+        //    painter->setPen(refreshTextPen_);
+        //else
             painter->setPen((refreshAction_->isEnabled())?textPen_:disabledTextPen_);
 
-        painter->drawText(timeRect,Qt::AlignHCenter | Qt::AlignVCenter,timeText);
+        painter->drawText(timeRect_,Qt::AlignHCenter | Qt::AlignVCenter,timeText);
 
-        float progress=(static_cast<float>(total_-toNext_)/static_cast<float>(total_));
-        UI_ASSERT(progress >= 0. && progress <= 1.0001, "progress=" << progress);
-        if(progress >= 1.) progress=1;
+        float progress;
+        QRect actProgRect=progRect_;
 
-        QRect actProgRect=progRect;
-        int progressW=static_cast<int>(static_cast<float>(actProgRect.width())*progress);
-        if(progressW <0) progressW=0;
-        else if(progressW > progRect.width()) progressW=progRect.width();
-        actProgRect.setWidth(progressW);
+        if(mode_==ContMode || inRefresh_)
+            progress=1;
+        else
+        {
+            UI_ASSERT(total_ != 0, "total_=" << total_);
+            progress=(static_cast<float>(total_-toNext_)/static_cast<float>(total_));
+            UI_ASSERT(progress >= 0. && progress <= 1.0001, "progress=" << progress);
+            if(progress >= 1.) progress=1;
+
+            int progressW=static_cast<int>(static_cast<float>(actProgRect.width())*progress);
+            if(progressW <0) progressW=0;
+            else if(progressW > progRect_.width()) progressW=progRect_.width();
+            actProgRect.setWidth(progressW);
+        }
 
         painter->setBrush(progBgBrush_);
         painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
-        painter->drawRect(progRect);
+        painter->drawRect(progRect_);
 
         painter->fillRect(actProgRect,progBrush_);
     }
+
+    if((hasInfo_ && showLastRefresh_) || !hasInfo_)
+    {
+        painter->setBrush(timeBgBrush_);
+        painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
+        painter->drawRect(lastRect_);
+        painter->setFont(fontTime_);
+        painter->setPen((refreshAction_->isEnabled())?textPen_:disabledTextPen_);
+        painter->drawText(lastRect_,Qt::AlignHCenter | Qt::AlignVCenter,"last: " + lastRefresh_);
+     }
 }
 
-void ServerRefreshInfoWidget::paintEvent(QPaintEvent*)
-{    
-    QPainter painter(this);
-    drawProgress(&painter);
-    drawButton(&painter);
-}
 
 void ServerRefreshInfoWidget::adjustToolTip()
 {
     QString txt;
 
-    if(fastMode_)
+    if(mode_ == ContMode)
     {
         Q_ASSERT(server_);
         Q_ASSERT(hasInfo_);
@@ -845,7 +988,7 @@ QString ServerRefreshInfoWidget::formatTime(int timeInSec) const
 void ServerRefreshInfoWidget::printStatus() const
 {
     UiLog().dbg()  << "  server=" << server_ << " action=" << refreshAction_->isEnabled() << " hasInfo=" << hasInfo_ <<
-                      " fastMode=" << fastMode_ << " inRefresh=" << inRefresh_ << " timer="  << timer_->isActive() <<
+                      " mode=" << mode_ << " inRefresh=" << inRefresh_ << " timer="  << timer_->isActive() <<
                       " timeout=" << timer_->interval()/1000.  << "s";
 }
 

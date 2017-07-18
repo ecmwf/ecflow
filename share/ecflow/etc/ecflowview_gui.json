@@ -421,9 +421,8 @@
                     },
                     "group" : {
                         "title" : "Update button in toolbar",
-                        "prefix" : "server.update",
-                        "line" : "showUpdateCountdownArc",
-                        "line" : "showUpdateCountdownText"
+                        "prefix" : "server.update",                      
+                        "line" : "blinkUpdateButtonLimit"
                     }
                 },
 

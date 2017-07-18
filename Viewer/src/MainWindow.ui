@@ -108,11 +108,11 @@
     <property name="title">
      <string>&amp;Refresh</string>
     </property>
+    <addaction name="actionRefreshSelected"/>
+    <addaction name="actionRefresh"/>
+    <addaction name="separator"/>
     <addaction name="actionReset"/>
     <addaction name="actionResetSelected"/>
-    <addaction name="separator"/>
-    <addaction name="actionRefresh"/>
-    <addaction name="actionRefreshSelected"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -192,10 +192,6 @@
    </property>
   </action>
   <action name="actionRefresh">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
-   </property>
    <property name="text">
     <string>Refresh all servers  &amp;in tab</string>
    </property>
@@ -207,10 +203,6 @@
    </property>
   </action>
   <action name="actionReset">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/reset.svg</normaloff>:/viewer/reset.svg</iconset>
-   </property>
    <property name="text">
     <string>&amp;Reset all servers in tab</string>
    </property>
