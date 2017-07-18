@@ -66,7 +66,11 @@ protected:
     void leaveEvent(QEvent*);
     void paintEvent(QPaintEvent*);
 
+    void drawButton(QPainter*);
+    void drawProgress(QPainter*);
+    void adjustGeometry();
     void updateSettings();
+    void reloadAll();
     void fetchInfo();
     void adjustTimer(int toNext);
     void adjustToolTip();
@@ -95,10 +99,15 @@ protected:
     static QBrush bgBrush_;
     static QPen borderPen_;
     static QPen disabledBorderPen_;
-    static QBrush bgHoverBrush_;
-    static QPen borderHoverPen_;
-    static QPen arcPen_;
+    static QBrush buttonBgHoverBrush_;
+    static QPen buttonHoverPen_;
+    static QBrush buttonBgRefreshBrush_;
+    static QPen buttonRefreshPen_;
+    static QBrush timeBgBrush_;
+    static QBrush progBrush_;
+    static QBrush progBgBrush_;
     static QPen textPen_;
+    static QPen refreshTextPen_;
     static QPen disabledTextPen_;
 
     QRect buttonRect_;

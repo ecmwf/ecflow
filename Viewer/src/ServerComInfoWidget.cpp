@@ -32,10 +32,15 @@ QIcon* ServerRefreshInfoWidget::icon_=0;
 QBrush ServerRefreshInfoWidget::bgBrush_(QColor(229,228,227));
 QPen ServerRefreshInfoWidget::borderPen_(QColor(167,167,167));
 QPen ServerRefreshInfoWidget::disabledBorderPen_(QColor(182,182,182));
-QBrush ServerRefreshInfoWidget::bgHoverBrush_(QColor(249,248,248));
-QPen ServerRefreshInfoWidget::borderHoverPen_(QColor(160,160,160));
-QPen ServerRefreshInfoWidget::arcPen_(QColor(45,200,29),2);
+QBrush ServerRefreshInfoWidget::buttonBgHoverBrush_(QColor(249,248,248));
+QPen ServerRefreshInfoWidget::buttonHoverPen_(QColor(160,160,160));
+QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(219,238,246));
+QBrush ServerRefreshInfoWidget::timeBgBrush_(QColor(210,210,210));
+QBrush ServerRefreshInfoWidget::progBrush_(QColor(38,181,245));
+QBrush ServerRefreshInfoWidget::progBgBrush_(QColor(248,248,248));
+QPen ServerRefreshInfoWidget::buttonRefreshPen_(QColor(38,181,245),2);
 QPen ServerRefreshInfoWidget::textPen_(QColor(80,80,80));
+QPen ServerRefreshInfoWidget::refreshTextPen_(QColor(41,79,143));
 QPen ServerRefreshInfoWidget::disabledTextPen_(QColor(180,180,180));
 
 #define _UI_SERVERCOMINFOWIDGET_DEBUG
@@ -115,7 +120,9 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
     setMinimumSize(width_,height_);
 
-    timeTextLen_=qMax(fmTime_.width(" <9:59m"),fmUpdate_.width("update"));
+    adjustGeometry();
+
+    //timeTextLen_=qMax(fmTime_.width(" <9:59m left"),fmUpdate_.width("updating"));
     buttonRect_=QRect(1,1,height()-2,height()-2);
     buttonRadius2_=pow(buttonRect_.width()/2,2);
 
@@ -154,7 +161,22 @@ void ServerRefreshInfoWidget::updateSettings()
     {
         showCountdownText_=p->value().toBool();
     }
-    slotTimeOut();
+    reloadAll();
+}
+
+void ServerRefreshInfoWidget::adjustGeometry()
+{
+    if(server_)
+    {
+        timeTextLen_=qMax(fmTime_.width(" <9:59m"),fmUpdate_.width("updating"));
+        setFixedWidth(buttonRect_.x()+buttonRect_.width()+fm_.width(serverText_) +
+                      timeTextLen_ +6);
+    }
+    else
+    {
+        timeTextLen_=0;
+        setFixedWidth(buttonRect_.x()+buttonRect_.width()+fm_.width("AAAAA"));
+    }
 }
 
 void ServerRefreshInfoWidget::setServer(ServerHandler* server)
@@ -185,19 +207,20 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
     fastMode_=false;
     inRefresh_=false;
 
-    //Adjust width
+    //Cache some data
     serverName_.clear();
     serverText_.clear();
     if(server_)
     {
         serverName_=QString::fromStdString(server_->name());
-        serverText_=serverName_ + " ";
-        timeTextLen_=qMax(fmTime_.width(" <9:59m"),fmUpdate_.width("update"));
-        setFixedWidth(buttonRect_.x()+buttonRect_.width()+fm_.width(serverText_) + timeTextLen_ +6);
+        serverText_=serverName_ + " ";      
     }
 
+    //Adjust width
+    adjustGeometry();
+
     //get info and rerender
-    slotTimeOut();
+    reloadAll();
 }
 
 //-------------------------------
@@ -223,7 +246,7 @@ void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server)
         inRefresh_=false;
 
         //get info and rerender
-        slotTimeOut();
+        reloadAll();
     }
 }
 
@@ -245,7 +268,7 @@ void ServerRefreshInfoWidget::notifyEndServerScan(ServerHandler* server)
 #endif
     Q_ASSERT(server_ == server);
     refreshAction_->setEnabled(true);
-    slotTimeOut();
+    reloadAll();
 }
 
 //virtual void notifyServerConnectState(ServerHandler* server) {}
@@ -264,7 +287,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerStarted(ServerHandler* server)
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
-    slotTimeOut(); //get info and rerender
+    reloadAll(); //get info and rerender
 }
 
 void ServerRefreshInfoWidget::notifyRefreshTimerStopped(ServerHandler* server)
@@ -273,7 +296,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerStopped(ServerHandler* server)
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
-    slotTimeOut(); //get info and rerender
+    reloadAll(); //get info and rerender
 }
 
 void ServerRefreshInfoWidget::notifyRefreshTimerChanged(ServerHandler* server)
@@ -285,7 +308,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerChanged(ServerHandler* server)
     Q_ASSERT(server_ == server);
     if(!inRefresh_ || fastMode_)
     {
-        slotTimeOut(); //get info and rerender
+        reloadAll(); //get info and rerender
     }
 }
 
@@ -300,7 +323,7 @@ void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server)
     inRefresh_=true;
     if(!fastMode_)
     {
-        refreshAction_->setEnabled(false);
+        //refreshAction_->setEnabled(false);
         timer_->stop();
 
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
@@ -331,16 +354,21 @@ void ServerRefreshInfoWidget::notifyRefreshFinished(ServerHandler* server)
     }
 }
 
-void ServerRefreshInfoWidget::slotTimeOut()
+void ServerRefreshInfoWidget::reloadAll()
 {
     fetchInfo(); //get info
     update();    //renrender
 }
 
+void ServerRefreshInfoWidget::slotTimeOut()
+{
+    reloadAll();
+}
+
 void ServerRefreshInfoWidget::slotTimeOutRefreshFinished()
 {
     inRefresh_=false;
-    slotTimeOut();
+    reloadAll();
 }
 
 void ServerRefreshInfoWidget::fetchInfo()
@@ -560,157 +588,142 @@ void ServerRefreshInfoWidget::leaveEvent(QEvent*)
     update(); //rerender
 }
 
-void ServerRefreshInfoWidget::paintEvent(QPaintEvent*)
-{    
-    //There is no server defined. It a disabled state!
-    if(!server_)
+
+void ServerRefreshInfoWidget::drawButton(QPainter* painter)
+{
+    painter->setRenderHint(QPainter::Antialiasing,true);
+
+    if(server_)
     {
-        QPainter painter(this);
-        painter.setFont(font_);
+        //The filled circle
+        if(inRefresh_)
+        {
+            painter->setBrush(buttonBgRefreshBrush_);
+            painter->setPen(buttonRefreshPen_);
+        }
+        else
+        {
+            painter->setBrush((currentComponent_ == ButtonComponent)?buttonBgHoverBrush_:bgBrush_);
 
-        painter.setRenderHint(QPainter::Antialiasing,true);
-
-        painter.setBrush(bgBrush_);
-        painter.setPen(borderPen_);
-        painter.drawEllipse(buttonRect_);
-
-        QRect r=buttonRect_; //.adjusted(1,1,-1,-1);
-        QRect r1=r.adjusted(2,2,-2,-2);
-        QRect r2=r1.adjusted(3,3,-3,-3);
-        QPixmap pix=icon_->pixmap(QSize(r2.width(),r2.width()),QIcon::Disabled);
-        painter.drawPixmap(r2,pix);
-
-        hasInfo_=false;
-        //adjustTimer(0); //timer must be stopped
+            if(!refreshAction_->isEnabled())
+                painter->setPen(disabledBorderPen_);
+            else
+                painter->setPen((currentComponent_ == ButtonComponent)?buttonHoverPen_:borderPen_);
+        }
     }
     else
     {
-        //Define server rect
-        int yPadding=5;
-        int h=height()-2*yPadding;
+        painter->setBrush(bgBrush_);
+        painter->setPen(borderPen_);
+    }
 
+    painter->drawEllipse(buttonRect_);
 
-        QRect serverRect=QRect(buttonRect_.center().x()+4,yPadding,
-                           buttonRect_.width()/2-4+4+fm_.width(serverText_),
-                           h);
+    //The reload icon
+    QRect r1=buttonRect_.adjusted(2,2,-2,-2);
+    QRect r2=r1.adjusted(3,3,-3,-3);
+    QPixmap pix=icon_->pixmap(QSize(r2.width(),r2.width()),
+                             refreshAction_->isEnabled()? QIcon::Normal: QIcon::Disabled);
+    painter->drawPixmap(r2,pix);
+}
 
-        QRect serverTextRect=serverRect.adjusted(buttonRect_.width()/2-4+4,0,0,0);
+void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
+{
+     if(!server_)
+         return;
 
-        QString timeText;
-        QRect   timeRect;
-        if(hasInfo_ && showCountdownText_)
-        {
-            if(fastMode_)
-                timeText = "<" + QString::number(total_) + "s";
-            else if(inRefresh_)
-                timeText = "update";
-            else
-                timeText =formatTime(toNext_);
+    //Define server rect
+    int yPadding=5;
+    int h=height()-2*yPadding;
 
-            timeRect = serverRect;
-            timeRect.setX(serverRect.x()+serverRect.width());
-            timeRect.setWidth(timeTextLen_);
+    QRect serverRect=QRect(buttonRect_.center().x()+4,yPadding,
+                       buttonRect_.width()/2-4+4+fm_.width(serverText_),
+                       h);
+
+    QRect serverTextRect=serverRect.adjusted(buttonRect_.width()/2-4+4,0,0,0);
+
+    QString timeText;
+    QRect   timeRect,progRect;
+    if(hasInfo_) // && showCountdownText_)
+    {
+        if(fastMode_)
+            timeText = "<" + QString::number(total_) + "s";
+        else if(inRefresh_)
+            timeText = "updating";
+        else
+            timeText =QChar(916) + QString("=") + QString::number(total_) + "s"; //formatTime(toNext_) + " left";
+
+        timeRect = serverRect;
+        timeRect.setX(serverRect.x()+serverRect.width());
+        timeRect.setWidth(timeTextLen_);
+
+        timeRect.setHeight(fmTime_.height()-2);
+        progRect = timeRect;
+        progRect.setY(timeRect.y()+timeRect.height());
+        progRect.setHeight(serverRect.height()-timeRect.height());
 
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
-            UiLog().dbg() << "timeText=" << timeText;
+        UiLog().dbg() << "timeText=" << timeText;
 #endif
-        }
-
-        //Start painting
-        QPainter painter(this);
-        painter.setFont(font_);
-
-        //Server rect
-        painter.setBrush(Qt::NoBrush);
-        painter.setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
-        painter.drawRect(serverRect);
-
-        //Server text
-        painter.setPen((refreshAction_->isEnabled())?textPen_:disabledTextPen_);
-        painter.drawText(serverTextRect,Qt::AlignLeft | Qt::AlignVCenter,serverText_);
-
-        //The time rects and texts
-        if(hasInfo_ && showCountdownText_)
-        {
-            //Time rect
-            if(inRefresh_ && !fastMode_)
-                painter.setFont(fontUpdate_);
-            else
-                painter.setFont(fontTime_);
-
-            painter.setBrush(QColor(210,210,210));
-            painter.setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
-            painter.drawRect(timeRect);
-
-            //Time text
-            if(fastMode_ || inRefresh_)
-                painter.setPen(QColor(0,136,0));
-            else
-                painter.setPen((refreshAction_->isEnabled())?textPen_:disabledTextPen_);
-
-            painter.drawText(timeRect,Qt::AlignHCenter | Qt::AlignVCenter,timeText);
-        }
-
-        painter.setRenderHint(QPainter::Antialiasing,true);
-
-        //The filled circle
-        painter.setBrush((currentComponent_ == ButtonComponent)?bgHoverBrush_:bgBrush_);
-        if(!refreshAction_->isEnabled())
-             painter.setPen(disabledBorderPen_);
-        else
-            painter.setPen((currentComponent_ == ButtonComponent)?borderHoverPen_:borderPen_);
-
-        painter.drawEllipse(buttonRect_);
-
-        //The countdown arc
-        QRect r1=buttonRect_.adjusted(2,2,-2,-2);
-        if(showCountdownArc_ && refreshAction_->isEnabled() && hasInfo_ && !fastMode_ && !inRefresh_)
-        {
-            painter.setBrush(Qt::NoBrush);
-
-            painter.setPen(arcPen_);
-            float progress=(static_cast<float>(total_-toNext_)/static_cast<float>(total_));
-            UI_ASSERT(progress >= 0. && progress <= 1.0001, "progress=" << progress);
-            if(progress >= 1.) progress=1;
-
-            int span=static_cast<int>(360.*16.*progress);
-            if(span> 360*16) span=360*16;
-
-            //UiLog().dbg() << "span=" << span << " progress=" << progress;
-
-            QRect r=buttonRect_; //.adjusted(1,1,-1,-1);
-
-            painter.drawArc(buttonRect_,90*16,-span);
-
-            painter.setPen(Qt::NoPen);
-            painter.setBrush((currentComponent_ == ButtonComponent)?bgHoverBrush_:bgBrush_);
-            painter.drawEllipse(r1);
-        }
-
-        /*if(fastMode_)
-        {
-            painter.setBrush(Qt::NoBrush);
-
-            painter.setPen(QColor(228,142,27));
-
-            //UiLog().dbg() << "span=" << span << " progress=" << progress;
-
-            QRect r=buttonRect_; //.adjusted(1,1,-1,-1);
-
-            //painter.drawArc(buttonRect_,90*16,-span);
-
-            //painter.setPen(Qt::NoPen);
-            //painter.setBrush((currentComponent_ == ButtonComponent)?bgHoverBrush_:bgBrush_);
-            painter.drawEllipse(r);
-        }*/
-
-
-        //The reload icon
-        QRect r2=r1.adjusted(3,3,-3,-3);
-        QPixmap pix=icon_->pixmap(QSize(r2.width(),r2.width()),
-                                 refreshAction_->isEnabled()? QIcon::Normal: QIcon::Disabled);
-        painter.drawPixmap(r2,pix);
     }
+
+    //Start painting
+    painter->setFont(font_);
+
+    //Server rect
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
+    painter->drawRect(serverRect);
+
+    //Server text
+    painter->setPen((refreshAction_->isEnabled())?textPen_:disabledTextPen_);
+    painter->drawText(serverTextRect,Qt::AlignLeft | Qt::AlignVCenter,serverText_);
+
+    //The time rects and texts
+    if(hasInfo_) // && showCountdownText_)
+    {
+        //Time rect
+        if(inRefresh_ && !fastMode_)
+            painter->setFont(fontUpdate_);
+        else
+            painter->setFont(fontTime_);
+
+         painter->setBrush(timeBgBrush_);
+         painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
+         painter->drawRect(timeRect);
+
+        //Time text
+        if(fastMode_ || inRefresh_)
+            //painter.setPen(QColor(0,136,0));
+            painter->setPen(refreshTextPen_);
+        else
+            painter->setPen((refreshAction_->isEnabled())?textPen_:disabledTextPen_);
+
+        painter->drawText(timeRect,Qt::AlignHCenter | Qt::AlignVCenter,timeText);
+
+        float progress=(static_cast<float>(total_-toNext_)/static_cast<float>(total_));
+        UI_ASSERT(progress >= 0. && progress <= 1.0001, "progress=" << progress);
+        if(progress >= 1.) progress=1;
+
+        QRect actProgRect=progRect;
+        int progressW=static_cast<int>(static_cast<float>(actProgRect.width())*progress);
+        if(progressW <0) progressW=0;
+        else if(progressW > progRect.width()) progressW=progRect.width();
+        actProgRect.setWidth(progressW);
+
+        painter->setBrush(progBgBrush_);
+        painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
+        painter->drawRect(progRect);
+
+        painter->fillRect(actProgRect,progBrush_);
+    }
+}
+
+void ServerRefreshInfoWidget::paintEvent(QPaintEvent*)
+{    
+    QPainter painter(this);
+    drawProgress(&painter);
+    drawButton(&painter);
 }
 
 void ServerRefreshInfoWidget::adjustToolTip()
@@ -738,8 +751,7 @@ void ServerRefreshInfoWidget::adjustToolTip()
             }
             else
             {
-                txt=tr("Refresh server <b>") + QString::fromStdString(server_->name()) +
-                  tr("</b> ");
+                txt=tr("Refresh server <b>") + serverName_ +"</b> ";
             }
 
             txt+=Viewer::formatShortCut(refreshAction_);
