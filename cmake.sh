@@ -34,7 +34,6 @@ show_error_and_exit() {
    exit 1
 }
 
-install_arg=
 ecbuild_arg=
 copy_tarball_arg=
 package_source_arg=
@@ -77,7 +76,6 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
    elif [[ "$1" = secure_user ]]   ; then secure_user_arg=$1 ;
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
-   elif [[ "$1" = install ]] ; then install_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
@@ -265,9 +263,6 @@ if [[ $package_source_arg = package_source ]] ; then
 fi
 
 install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
-if [[ $install_arg = install ]] ; then
-    install_prefix=/usr/local/apps/ecflow/$release.$major.$minor
-fi
 
 ecbuild=ecbuild
 if [[ $ecbuild_arg = ecbuild ]] ; then

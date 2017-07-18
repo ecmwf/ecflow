@@ -650,6 +650,7 @@ private:
    int findExprVariableValueAndType( const std::string& name, std::string& varType) const;
    void findExprVariableAndPrint( const std::string& name, std::ostream& os) const;
    friend class VariableHelper;
+   friend class AstParentVariable;
 
 private:
    bool checkForAutoCancel(const ecf::Calendar& c) const;
