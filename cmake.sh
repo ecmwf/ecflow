@@ -129,7 +129,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable"
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild/2.7.0
+module load ecbuild/2.7.1
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
@@ -293,6 +293,18 @@ $ecbuild $source_dir \
 if [[ "$make_arg" != "" ]] ; then
 	$make_arg 
 	# $make_arg VERBOSE=1
+	
+    # generate the server file locally, and install it. Otherwise list of server will not be complete set
+	if [[ "$make_arg" == "make install" ]] ; then
+		if [[ -f /home/ma/emos/bin/ecflow_site_server_install.sh ]] ; then
+
+   			/home/ma/emos/bin/ecflow_site_server_install.sh -g
+
+    		if [[ -f servers ]] ; then
+        		mv servers $install_prefix/share/ecflow/.
+            fi
+		fi
+	fi
 	exit 0
 fi
 
