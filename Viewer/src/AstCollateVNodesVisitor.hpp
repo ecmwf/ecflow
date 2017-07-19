@@ -46,6 +46,7 @@ public:
   virtual void visitEventState(AstEventState*);
   virtual void visitNode(AstNode*);
   virtual void visitVariable(AstVariable*);
+  virtual void visitParentVariable(AstParentVariable*);
   virtual void visitFlag(AstFlag*);
 
 private:

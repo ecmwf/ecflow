@@ -666,6 +666,7 @@ private:
    int findExprVariableValueAndType( const std::string& name, std::string& varType) const;
    void findExprVariableAndPrint( const std::string& name, std::ostream& os) const;
    friend class VariableHelper;
+   friend class AstParentVariable;
 
 private:
    void add_trigger_expression(const Expression&);     // Can throw std::runtime_error

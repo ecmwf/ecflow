@@ -77,6 +77,32 @@ void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar)
     }
 }
 
+void AstCollateVNodesVisitor::visitParentVariable(AstParentVariable* astVar)
+{
+    if(Node* referencedNode = astVar->referencedNode())
+    {
+        if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
+        {
+            int nType=attrTypes.size();
+            int nItem=items_.size();
+            for(size_t i=0; i < nType; i++)
+            {
+                if(VAttribute *a=n->findAttribute(attrTypes[i],astVar->name()))
+                {
+                    for(size_t k=0; k < nItem; k++)
+                    {
+                        if(a == items_[k])
+                            return;
+                    }
+
+                    items_.push_back(a);
+                        return;
+                }
+            }
+        }
+    }
+}
+
 void AstCollateVNodesVisitor::visitFlag(AstFlag* astVar)
 {
    // ???

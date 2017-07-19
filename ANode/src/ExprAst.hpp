@@ -585,6 +585,53 @@ private:
 	mutable weak_node_ptr ref_node_;
 };
 
+/// A variable: This can reference in the CURRENT order:
+///     event,
+///     meter,
+///     user variable,
+///     repeat  variable, for enumerated/string we use the positional value
+///     generated variable
+/// ** IT is treated in a same as an integer, and can appear in that context
+//  ** i.e  "2 == (((:YMD / 100 ) % 100) % 3"
+class AstParentVariable : public AstLeaf {
+public:
+   AstParentVariable(const std::string& variablename)
+   : parentNode_(NULL), name_(variablename)  {}
+
+   virtual std::string name() const { return name_;}
+   virtual bool is_attribute() const { return true; }
+
+   // although  AstParentVariable is leaf, However allow to evaluate to cope with
+   //     ( :myMeter >= 20 and :myEvent)
+   // Treat this like an integer
+   virtual bool is_evaluateable() const { return true; }
+   virtual bool evaluate() const { return value() != 0 ? true: false; }
+
+   virtual void accept(ecf::ExprAstVisitor&);
+   virtual AstParentVariable* clone() const;
+   virtual int value() const;
+   virtual std::ostream& print(std::ostream& os) const;
+   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual std::string type() const { return stype();}
+   virtual std::string expression() const;
+   virtual std::string why_expression(bool html = false) const;
+   virtual void setParentNode(Node* n) { parentNode_ = n; }
+
+   virtual int minus(Ast* right) const;
+   virtual int plus(Ast* right) const;
+
+   Node* parentNode() const { return parentNode_; }
+   static std::string stype() { return "parent_variable";}
+
+   Node* find_node_which_references_variable() const;
+   Node* referencedNode() const { return find_node_which_references_variable();}
+
+private:
+   Node* parentNode_;
+   std::string name_;
+   mutable weak_node_ptr ref_node_;
+};
+
 // Helper class
 class VariableHelper : private boost::noncopyable {
 public:

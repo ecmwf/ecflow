@@ -122,7 +122,7 @@ def test_client_new_log(ci, port):
     
     ci.new_log(new_log_file_name) 
     ci.flush_log() # close log file and force write to disk
-    assert os.path.exists(new_log_file_name), "New log does not exist"
+    assert os.path.exists(new_log_file_name),new_log_file_name + " : New log does not exist"
     
     # reset new log to original
     ci.new_log(Test.log_file_path(port)) 

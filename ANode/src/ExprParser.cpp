@@ -137,6 +137,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
    static const int flag_zombie_ID   = 59;
    static const int flag_ID          = 60;
    static const int root_path_ID     = 61;
+   static const int parent_variable_ID = 62;
 
     template <typename ScannerT>
     struct definition {
@@ -196,6 +197,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         rule<ScannerT,parser_tag<calc_grouping_ID> >   calc_grouping;
         rule<ScannerT,parser_tag<calc_subexpression_ID> >   calc_subexpression;
         rule<ScannerT,parser_tag<basic_variable_path_ID> >   basic_variable_path;
+        rule<ScannerT,parser_tag<parent_variable_ID> >   parent_variable ;
         rule<ScannerT,parser_tag<compare_expression_ID> >   compare_expression;
 
         rule<ScannerT,parser_tag<flag_path_ID> >   flag_path;
@@ -313,6 +315,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
           variable = leaf_node_d [ nodename ];
           basic_variable_path = nodepath >> discard_node_d[ ch_p(':') ] >> variable ;
+          parent_variable = ch_p(':') >> variable ; // if we discard_node, then we get just 'variable' and NOT parent_variable
 
           root_path = leaf_node_d[ (str_p("/")) ] ;
           flag_path = ( nodepath | root_path) >> discard_node_d[ str_p("<flag>") ] >> flag ;
@@ -336,6 +339,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                  | basic_variable_path
                  | discard_node_d[ ch_p('(') ] >>  calc_expression >> discard_node_d[ ch_p(')') ]
                  | flag_path
+                 | parent_variable
                  | root_node_d[operators] >>  calc_factor
                  | cal_date_to_julian
                  | cal_julian_to_date
@@ -399,6 +403,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
           BOOST_SPIRIT_DEBUG_NODE(event_state);
           BOOST_SPIRIT_DEBUG_NODE(variable);
           BOOST_SPIRIT_DEBUG_NODE(basic_variable_path);
+          BOOST_SPIRIT_DEBUG_NODE(parent_variable);
           BOOST_SPIRIT_DEBUG_NODE(flag_path);
           BOOST_SPIRIT_DEBUG_NODE(calc_factor);
           BOOST_SPIRIT_DEBUG_NODE(calc_expression);
@@ -476,6 +481,7 @@ static void populate_rule_names()
       rule_names[ExpressionGrammer::calc_grouping_ID  ] = "calc_grouping_ID";
       rule_names[ExpressionGrammer::calc_subexpression_ID  ] = "calc_subexpression_ID";
       rule_names[ExpressionGrammer::basic_variable_path_ID  ] = "basic_variable_path_ID";
+      rule_names[ExpressionGrammer::parent_variable_ID  ] = "parent_variable_ID";
       rule_names[ExpressionGrammer::compare_expression_ID  ] = "compare_expression_ID";
    }
 }
@@ -731,6 +737,16 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
       boost::algorithm::trim(name);     // don't know why we get leading/trailing spaces
       return new AstVariable( nodePath, name );
    }
+   else if ( i->value.id() == ExpressionGrammer::parent_variable_ID) {
+
+       // tree_iter_t the_colon = i->children.begin(); ignore
+       tree_iter_t the_variable_t = i->children.begin()+1;
+
+       string the_variable(the_variable_t->value.begin(),the_variable_t->value.end() );
+       boost::algorithm::trim(the_variable ); // don't know why we get leading/trailing spaces
+       LOG_ASSERT( !the_variable.empty() , "");
+       return new AstParentVariable( the_variable  );
+    }
    else if ( i->value.id() == ExpressionGrammer::dot_dot_path_ID) {
 
       string thevalue( i->value.begin(), i->value.end() );
