@@ -67,23 +67,29 @@ protected:
     void leaveEvent(QEvent*);
     void paintEvent(QPaintEvent*);
 
-    void drawButton(QPainter*);
-    void drawProgress(QPainter*);
-    void adjustGeometry(bool);
     void updateSettings();
     void reloadAll();
     void fetchInfo();
+    void drawButton(QPainter*);
+    void drawProgress(QPainter*);
+
+    QString formatPeriodTime(int timeInSec) const;
+    void determinePeriodText();
+    QString fullPeriodText() const;
+    int  determinePeriodTextSizeMin() const;
+    bool periodTextSizeAboutToChange() const;
+    void adjustGeometry(bool);
     void adjustTimer(int toNext);
     void adjustToolTip();
+
     QString formatTime(int timeInSec) const;  
     bool isInButton(const QPoint& pos) const;
     bool isInText(const QPoint& pos) const;
     void printStatus() const;
-    bool showCountdown() const {return showCountdownArc_ || showCountdownText_;}
     bool isActionEnabled() const;
 
     enum Component {ButtonComponent,TextComponent,NoComponent};
-    enum Mode {NormalMode,FastMode,ContMode,ManualMode,NoMode};
+    enum Mode {NormalMode,ManualMode,NoMode};
 
     QAction* refreshAction_;
     ServerHandler* server_;
@@ -92,55 +98,59 @@ protected:
     QTimer *timer_;
     QTime inRefreshElapsed_;
 
-    QFont font_;
-    QFont fontTime_;
-    QFont fontUpdate_;
-    QFontMetrics fm_;
-    QFontMetrics fmTime_;
-    QFontMetrics fmUpdate_;
+    QFont fontServer_;
+    QFont fontPeriod_;
+    QFont fontLast_;
+    QFontMetrics fmServer_;
+    QFontMetrics fmPeriod_;
+    QFontMetrics fmLast_;
 
     static QIcon *icon_;
-    static QBrush bgBrush_;
-    static QPen borderPen_;
-    static QPen disabledBorderPen_;
+    static QPen   borderPen_;
+    static QPen   disabledBorderPen_;
+    static QBrush serverBgBrush_;
     static QBrush buttonBgHoverBrush_;
-    static QPen buttonHoverPen_;
+    static QPen   buttonHoverPen_;
     static QBrush buttonBgRefreshBrush_;
-    static QPen buttonRefreshPen_;
-    static QBrush timeBgBrush_;
+    static QPen   buttonRefreshPen_;
+    static QBrush periodBgBrush_;
     static QBrush progBrush_;
     static QBrush progBgBrush_;
-    static QPen textPen_;
-    static QPen refreshTextPen_;
-    static QPen disabledTextPen_;
+    static QBrush lastBgBrush_;
+    static QPen   serverTextPen_;
+    static QPen   periodTextPen_;
+    static QPen   driftTextPen_;
+    static QPen   lastTextPen_;
+    static QPen   disabledTextPen_;
 
     QRect buttonRect_;
     int buttonRadius2_;
-    int timeTextLen_;
-    int lastTextLen_;
+    QString periodText_;
+    QString driftText_;
+    int periodTextWidth_;
+    int periodTextSize_;
+    int periodTextSizeMin_;
+    int lastTextWidth_;
     QRect serverRect_;
-    QRect timeRect_;
+    QRect periodRect_;
     QRect progRect_;
     QRect lastRect_;
     Component currentComponent_;
 
     PropertyMapper* prop_;
 
-    bool showCountdownArc_;
-    bool showCountdownText_;
     Mode mode_;
-    bool fastMode_;
-    int contModeLimit_;
-    int fastModeLimit_;
+    int  noBlinkLimit_;
     bool hasInfo_;
     bool inRefresh_;
     bool userInitiatedRefresh_;
-    bool showLastRefresh_;
+    bool showLastAutoRefresh_;
     QString lastRefresh_;
     QString nextRefresh_;
     int total_;
     int period_;
     int toNext_;
+    int drift_;
 
 };
 

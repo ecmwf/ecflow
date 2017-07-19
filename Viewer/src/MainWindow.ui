@@ -128,7 +128,7 @@
     <string>View toolbar</string>
    </property>
    <property name="movable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="allowedAreas">
     <set>Qt::AllToolBarAreas</set>
@@ -141,6 +141,8 @@
    </attribute>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
+   <addaction name="actionPreferences"/>
+   <addaction name="separator"/>
   </widget>
   <action name="actionClose">
    <property name="icon">

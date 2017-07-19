@@ -180,13 +180,13 @@
      inkscape:label="item"
      style="display:inline">
     <path
-       style="fill:none;stroke:#2c5aa0;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#008000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 24.094732,24.875582 c 0,0 -5.081649,4.776413 -12.496979,2.89446 C 7.5243135,26.736236 3.8282598,21.958258 3.2265725,17.846176 2.6567061,13.951567 4.4163974,9.6888075 7.4121628,7.0953214 10.685458,4.261571 14.247893,3.6879926 17.577167,4.259931 c 5.074496,0.8717512 8.012416,5.2572869 8.012416,5.2572869"
        id="path3010"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cssssc" />
     <path
-       style="fill:#2c5aa0;fill-opacity:1;fill-rule:evenodd;stroke:#2c5aa0"
+       style="fill:#008000;fill-opacity:1;fill-rule:evenodd;stroke:#008000"
        inkscape:transform-center-x="0.63775631"
        inkscape:transform-center-y="-1.0611297"
        d="M 18.626869,13.861418 31.264853,4.5413113 29.935538,15.136904 Z"

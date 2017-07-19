@@ -129,6 +129,7 @@ protected:
 	static std::string commandToString(const std::vector<std::string>& cmd);
 	static void checkNotificationState(VServerSettings::Param par);
 
+    bool checkRefreshTimerDrift() const;
     void refreshScheduled();
     void refreshFinished();
 

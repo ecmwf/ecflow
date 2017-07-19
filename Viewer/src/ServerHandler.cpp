@@ -287,7 +287,6 @@ void ServerHandler::driftRefreshTimer()
 #ifdef __UI_SERVERUPDATE_DEBUG
         UiLog(this).dbg() << "driftRefreshTimer -->";
 #endif
-
         refreshTimer_->drift(conf_->intValue(VServerSettings::AdaptiveUpdateIncrement),
                               conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
 
@@ -298,6 +297,23 @@ void ServerHandler::driftRefreshTimer()
     UiLog(this).dbg() << "driftRefreshTimer interval: " << refreshTimer_->interval();
 #endif
 
+}
+
+//returns true if the current total (drifted) period is within the maximum allowed
+bool ServerHandler::checkRefreshTimerDrift() const
+{
+    if(!conf_->boolValue(VServerSettings::AutoUpdate))
+    {
+        return true;
+    }
+
+    if(activity_ != LoadActivity &&
+       conf_->boolValue(VServerSettings::AdaptiveUpdate))
+    {
+        return (refreshTimer_->interval()*1000 <
+                conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
+    }
+    return true;
 }
 
 //mark that a refresh request was sent to the queue
@@ -1331,6 +1347,9 @@ void ServerHandler::reset()
 		//Indicate that we reload the defs
 		setActivity(LoadActivity);
 
+        //mark the current moment as last refresh
+        lastRefresh_=QDateTime::currentDateTime();
+
 		//NOTE: at this point the queue is not running but reset() will start it.
 		//While the queue is in reset mode it does not accept tasks.
 		comQueue_->reset();
@@ -1594,9 +1613,16 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
     case VServerSettings::UpdateRate:
     case VServerSettings::AdaptiveUpdate:
     case VServerSettings::AdaptiveUpdateIncrement:
-    //case VServerSettings::MaxAdaptiveUpdateRate:
         updateRefreshTimer();
-        break;   
+        break;
+    case VServerSettings::MaxAdaptiveUpdateRate:
+    {
+        if(!checkRefreshTimerDrift())
+        {
+            updateRefreshTimer();
+        }
+        break;
+    }
 	case VServerSettings::NotifyAbortedEnabled:
 	case VServerSettings::NotifyRestartedEnabled:
 	case VServerSettings::NotifyLateEnabled:

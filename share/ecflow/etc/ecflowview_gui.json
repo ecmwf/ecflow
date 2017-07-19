@@ -422,7 +422,8 @@
                     "group" : {
                         "title" : "Update button in toolbar",
                         "prefix" : "server.update",                      
-                        "line" : "blinkUpdateButtonLimit"
+                        "line" : "blinkUpdateButtonLimit",
+                        "line" : "showLastRefreshTimeInAutoMode"
                     }
                 },
 

@@ -91,33 +91,35 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     connect(nodePanel_,SIGNAL(contentsChanged()),
             this,SLOT(slotContentsChanged()));
 
-    //Add temporary preview label
+    //--------------
+    // Toolbar
+    //--------------
+
+    //Add server refresh widget to the front of the toolbar
     serverComWidget_=new ServerRefreshInfoWidget(actionRefreshSelected,this);
-    viewToolBar->addWidget(serverComWidget_);
+    Q_ASSERT(actionSearch);
+    viewToolBar->insertWidget(actionSearch,serverComWidget_);
+    //viewToolBar->addWidget(serverComWidget_);
 
-    /* QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
-    label->setAutoFillBackground(true);
-    label->setProperty("previewLabel","1");
-
-    QLabel *label1=new QLabel("      ",this);
-
-    viewToolBar->addWidget(label1);
-    viewToolBar->addWidget(label);*/
-
+    //insert a spacer after the the server refresh widget
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    viewToolBar->addWidget(spacer);
+    viewToolBar->insertWidget(actionSearch,spacer);
+    //viewToolBar->addWidget(spacer);
 
+    //Add more actions
     addInfoPanelActions(viewToolBar);  
 
     //Add shortcuts to action tooltips
     Viewer::addShortCutToToolTip(viewToolBar->actions());
 
-    //Actions based on selection
+    //Initialise actions based on selection
     actionRefreshSelected->setEnabled(false);
     actionResetSelected->setEnabled(false);
 
+    //--------------
     //Status bar
+    //--------------
 
     //Add server list sync notification
     if(ServerList::instance()->hasSyncChange())

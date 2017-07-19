@@ -42,11 +42,17 @@
                 	"min" : "0"
                 },                
                 "blinkUpdateButtonLimit" : {
-                    "label": "Do not blink refresh button at refresh for refresh rates below:",
-                    "tooltip": "Shows the remaning time until the next automatic server upate in the <b>update button</b> in the toolbar.",
+                    "label": "Do not blink refresh button for automatic refresh for periods less than",
+                    "suffix" : "seconds",
+                    "tooltip": "In automatic refresh mode the refresh button <b>will not blink</b> on automatic refresh when the total refresh period is smaller than the specified value.",
                     "default": "15",
                     "min"    : "3"
-                }
+                },
+                "showLastRefreshTimeInAutoMode" : {
+                    "label": "Show time of last refresh in automatic refresh mode",
+                    "tooltip": "If enabled shows the <b>time of the last refresh</b> in automatic refresh mode. If the automatic refresh is switched off the last refresh time is always visible.",
+                    "default": "false"
+                 }
 
             }, 
 
