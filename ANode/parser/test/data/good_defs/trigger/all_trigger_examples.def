@@ -15,7 +15,7 @@ suite all_trigger_examples
             repeat enumerated red green blue      # red(0), green(1), blue(2)
             task t1
                repeat date DATE 19991230 20000102  # This has values: 19991230,19991231,20000101,20000102
-               trigger :VALUE == 5 and :NAME == 0 and :SLEEP == 2 # this references f3:VALUE , f1:NAME, f1:SLEEP
+               trigger :VALUE == 5 and :NAME == 0 and :SLEEP == 2 # references f2:VALUE,f1:NAME,f1:SLEEP new for 4.7.0 release
          endfamily
       endfamily
    endfamily
