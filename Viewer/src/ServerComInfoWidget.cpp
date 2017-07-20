@@ -46,7 +46,7 @@ QPen ServerRefreshInfoWidget::driftTextPen_(QColor(120,120,120));
 QPen ServerRefreshInfoWidget::lastTextPen_(QColor(45,45,45));
 QPen ServerRefreshInfoWidget::disabledTextPen_(QColor(180,180,180));
 
-#define _UI_SERVERCOMINFOWIDGET_DEBUG
+//#define _UI_SERVERCOMINFOWIDGET_DEBUG
 
 #if 0
 ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget *parent) :
