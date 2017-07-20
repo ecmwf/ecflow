@@ -12,6 +12,10 @@
 # cct is correct as it has the "-L" but on other machines we rely on /usr/lib/libpython2.7.so.1.0 being there!
 # lxop-test does not have /usr/lib/libpython2.7.so.1.0 so ecbuild fails
 #
+# For problems with the python build, please look in <build-dir>/ecbuild.log, typically non developmental python
+# installs may not include python libs or includes
+# For ubuntoo to install we need:
+#    sudo apt-get install libpython-dev
 #
 
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )

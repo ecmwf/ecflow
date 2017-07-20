@@ -44,6 +44,7 @@ class AstNodeState;
 class AstEventState;
 class AstNode;
 class AstVariable;
+class AstParentVariable;
 class AstFlag;
 
 namespace ecf {
@@ -75,6 +76,7 @@ public:
  	virtual void visitEventState(AstEventState*) = 0;
  	virtual void visitNode(AstNode*) = 0;
    virtual void visitVariable(AstVariable*) = 0;
+   virtual void visitParentVariable(AstParentVariable*) = 0;
    virtual void visitFlag(AstFlag*) = 0;
 };
 
@@ -108,6 +110,7 @@ public:
  	virtual void visitEventState(AstEventState*){}
  	virtual void visitNode(AstNode*);
    virtual void visitVariable(AstVariable*);
+   virtual void visitParentVariable(AstParentVariable*);
    virtual void visitFlag(AstFlag*);
 
 private:
@@ -143,6 +146,7 @@ public:
  	virtual void visitEventState(AstEventState*){}
  	virtual void visitNode(AstNode*);
    virtual void visitVariable(AstVariable*);
+   virtual void visitParentVariable(AstParentVariable*);
    virtual void visitFlag(AstFlag*);
 
 private:

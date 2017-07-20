@@ -1579,6 +1579,121 @@ Node* AstVariable::referencedNode(std::string& errorMsg) const
 	return NULL;
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+
+Node* AstParentVariable::find_node_which_references_variable() const
+{
+   Node* parent = parentNode_;
+   while (parent) {
+      if ( parent->findExprVariable(name_)) return parent;
+      parent = parent->parent();
+   }
+   return NULL;
+}
+
+void AstParentVariable::accept(ExprAstVisitor& v)
+{
+   v.visitParentVariable(this);  // Not calling base
+}
+
+AstParentVariable* AstParentVariable::clone() const
+{
+   return new AstParentVariable(name_);
+}
+
+int AstParentVariable::value() const
+{
+   Node* ref_node = find_node_which_references_variable();
+   if (ref_node) {
+      return ref_node->findExprVariableValue(name_);
+   }
+   return 0;
+}
+
+int AstParentVariable::minus(Ast* right) const
+{
+   Node* ref_node = find_node_which_references_variable();
+   if (ref_node) {
+      return ref_node->findExprVariableValueAndMinus(name_,right->value());
+   }
+   return right->value();
+}
+
+int AstParentVariable::plus(Ast* right) const
+{
+   Node* ref_node = find_node_which_references_variable();
+   if (ref_node) {
+      return ref_node->findExprVariableValueAndPlus(name_,right->value());
+   }
+   return right->value();
+}
+
+std::ostream& AstParentVariable::print( std::ostream& os ) const
+{
+   Indentor in;
+   Indentor::indent( os ) << "# " << Str::COLON() << name_;
+
+   Node* ref_node = find_node_which_references_variable();
+   if (ref_node) {
+      os << " (";
+      ref_node->findExprVariableAndPrint(name_, os);
+      os << ")";
+      os << "\n";
+      return os;
+   }
+   os << " referencedNode(NULL) value(0)";
+   os << "\n";
+   return os;
+}
+
+void AstParentVariable::print_flat(std::ostream& os,bool /*add_bracket*/) const
+{
+   os << Str::COLON() << name_;
+}
+
+std::string AstParentVariable::expression() const
+{
+   return Str::COLON() + name_;
+}
+
+std::string AstParentVariable::why_expression(bool html) const
+{
+   std::string varType = "variable-not-found";
+   int theValue=0;
+   std::string ret;
+   Node* ref_node = find_node_which_references_variable();
+   if (ref_node) {
+      theValue = ref_node ->findExprVariableValueAndType( name_, varType );
+   }
+   if (html) {
+      // ecflow_ui expects: [attribute_type]attribute_path:attribute_name
+      // i.e                [limit]/suite/family/task:my_limit
+      std::stringstream display_ss; display_ss << "[" << varType << "]" << ":" << name_;
+      std::string display_str = display_ss.str();
+      std::string ref_str;
+      if (ref_node) {
+         std::stringstream ref_ss; ref_ss << "[" << varType << "]" << ref_node->absNodePath() << ":" << name_;
+         ref_str = ref_ss.str();
+      }
+      else ref_str = display_str;
+
+      ret = Node::path_href_attribute(ref_str,display_str);
+      if ( !ref_node )  ret += "(?)";
+      ret += "(";
+      ret += boost::lexical_cast<std::string>(theValue);
+      ret += ")";
+   }
+   else {
+      if ( !ref_node )  ret += "(?)";
+      ret += Str::COLON();
+      ret += name_;
+      ret += "(";
+      std::stringstream ss; ss << "type:" << varType << " value:" << theValue;
+      ret += ss.str();
+      ret += ")";
+   }
+   return ret;
+}
 
 // ===============================================================================
 // class VariableHelper:

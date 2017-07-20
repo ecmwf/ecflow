@@ -3,6 +3,7 @@ extern /a/b/c/d/e:event
 extern /a/b/c/d/e:meter        
 
 suite suiteName
+  edit int_var 20
   family familyName
    		task a
         	event 1 theEventName
@@ -17,6 +18,9 @@ suite suiteName
    endfamily
    family familyName1
    		trigger familyName == complete                      # this is a comment
+        repeat date YMD 20090331 20121212 1 # status 0
+        task ref_parent_var_without_path
+        	trigger :YMD < 20121212 and :int_var < 40
    		task a
          	event 1 theEventName
          	event aEvent

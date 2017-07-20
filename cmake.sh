@@ -34,7 +34,6 @@ show_error_and_exit() {
    exit 1
 }
 
-install_arg=
 ecbuild_arg=
 copy_tarball_arg=
 package_source_arg=
@@ -77,7 +76,6 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
    elif [[ "$1" = secure_user ]]   ; then secure_user_arg=$1 ;
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
-   elif [[ "$1" = install ]] ; then install_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
@@ -131,7 +129,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable"
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild/2.7.0
+module load ecbuild/2.7.1
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
@@ -265,9 +263,6 @@ if [[ $package_source_arg = package_source ]] ; then
 fi
 
 install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
-if [[ $install_arg = install ]] ; then
-    install_prefix=/usr/local/apps/ecflow/$release.$major.$minor
-fi
 
 ecbuild=ecbuild
 if [[ $ecbuild_arg = ecbuild ]] ; then
@@ -298,6 +293,18 @@ $ecbuild $source_dir \
 if [[ "$make_arg" != "" ]] ; then
 	$make_arg 
 	# $make_arg VERBOSE=1
+	
+    # generate the server file locally, and install it. Otherwise list of server will not be complete set
+	if [[ "$make_arg" == "make install" ]] ; then
+		if [[ -f /home/ma/emos/bin/ecflow_site_server_install.sh ]] ; then
+
+   			/home/ma/emos/bin/ecflow_site_server_install.sh -g
+
+    		if [[ -f servers ]] ; then
+        		mv servers $install_prefix/share/ecflow/.
+            fi
+		fi
+	fi
 	exit 0
 fi
 

@@ -1,0 +1,59 @@
+suite all_trigger_examples
+   limit top_level_limit 20
+   task a
+      event EVENT
+      meter METER 1 100 50
+      edit  VAR_DATE 20170701
+      edit  VAR_STRING "captain scarlett"      # This is not convertible to an integer, if referenced will use '0'
+      late -c +02:00                           # add late flag if task takes longer than 2 hours to complete
+  family f1
+      edit SLEEP 2
+      repeat string NAME a b c d e f              # This has values: a(0),b(1), c(3), d(4), e(5), f(6) i.e. index
+      family f2
+         repeat integer VALUE 5 10                # This has values: 5,6,7,8,9,10
+         family f3
+            repeat enumerated red green blue      # red(0), green(1), blue(2)
+            task t1
+               repeat date DATE 19991230 20000102  # This has values: 19991230,19991231,20000101,20000102
+               trigger :VALUE == 5 and :NAME == 0 and :SLEEP == 2 # references f2:VALUE,f1:NAME,f1:SLEEP new for 4.7.0 release
+         endfamily
+      endfamily
+   endfamily
+   family f2
+      inlimit /all_trigger_examples:top_level_limit
+      task event_meter
+          trigger /all_trigger_examples/a:EVENT == set and /all_trigger_examples/a:METER >= 30
+      task variable
+          trigger /all_trigger_examples/a:VAR_DATE >= 20170801 and /all_trigger_examples/a:VAR_STRING == 0
+      task repeat_string
+          trigger /all_trigger_examples/f1:NAME >= 4
+      task repeat_integer
+          trigger /all_trigger_examples/f1/f2:VALUE >= 7
+      task repeat_date
+          trigger /all_trigger_examples/f1/f2/f3/t1:DATE >= 19991231
+      task repeat_date_arithmitic
+          # Using plus/minus on a repeat DATE will use date arithmetic
+          # Since the starting value of DATE is 19991230, this task will run
+          # straight away
+          trigger /all_trigger_examples/f1/f2/f3/t1:DATE - 1 == 19991229
+      task use_repeat_date_yyyy
+          trigger /all_trigger_examples/f1/f2/f3/t1:DATE_YYYY == 2000    # DATE_YYYY(year)is a generated variable for repeat date DATE 19991230 20000102
+      task use_repeat_date_generated_mm
+          trigger /all_trigger_examples/f1/f2/f3/t1:DATE_MM == 2         # DATE_MM(month) is a generated variable for repeat date DATE 19991230 20000102
+      task use_repeat_date_generated_dd
+          trigger /all_trigger_examples/f1/f2/f3/t1:DATE_DD == 30        # DATE_DD(day of the month) is a generated variable for repeat date DATE 19991230 20000102
+      task use_repeat_date_generated_dow
+          trigger /all_trigger_examples/f1/f2/f3/t1:DATE_DOW == 0        # DATE_MM(day of week, 0-sunday,1-monday,etc) is a generated variable for repeat date DATE 19991230 20000102
+      task use_repeat_date_generated_julian
+          trigger /all_trigger_examples/f1/f2/f3/t1:DATE_JULIAN > cal::date_to_julian(/all_trigger_examples/a:VAR_DATE)  # DATE_JULIAN(the julian of the date) is a generated variable for repeat date DATE 19991230 20000102
+      task with_trigger_that_ref_a_limit
+          trigger /all_trigger_examples:top_level_limit < 5        # low priority task, only valid when system is not loaded
+      task trigger_with_ref_to_late_flag
+          trigger /all_trigger_examples/a<flag>late                # Only triggers if task /all_trigger_examples/a is late
+   endfamily
+   family time_trigger
+      trigger /all_trigger_examples:DOW == 0  or /all_trigger_examples:DOW == 1   # DOW is a generated variable on the suite representing DAY of the week. i.e Sundày and Monday in this case
+      task with_time
+         trigger /all_trigger_examples:TIME > 1330                 # TIME is a generated variable on the suite , same as time > 13:30
+   endfamily
+ endsuite

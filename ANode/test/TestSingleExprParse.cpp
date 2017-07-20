@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
     // value.second = result of expected evaluation
 	map<string,std::pair<string,bool> > exprMap;
 
-   exprMap["/s/f/t<flag>late"] = std::make_pair(AstFlag::stype(),false);
-   exprMap["/s/f/t:late"] = std::make_pair(AstFlag::stype(),false);
+   exprMap[":var == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap[":var != 1"] = std::make_pair(AstNotEqual::stype(),true);
 
  	std::pair<string, std::pair<string,bool> > p;
 	BOOST_FOREACH(p, exprMap ) {

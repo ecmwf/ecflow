@@ -54,6 +54,21 @@ void AstResolveVisitor::visitVariable(AstVariable* astVar)
  	}
 }
 
+void AstResolveVisitor::visitParentVariable(AstParentVariable* astvar)
+{
+   if ( errorMsg_.empty() ) {
+
+      astvar->setParentNode(const_cast<Node*>(triggerNode_));
+
+      if (!astvar->find_node_which_references_variable()) {
+         std::stringstream ss;
+         ss << " Could not find variable " << astvar->name()
+                  << " on node " << triggerNode_->debugNodePath() << " OR any of its parent nodes";
+         errorMsg_ += ss.str();
+      }
+   }
+}
+
 void AstResolveVisitor::visitFlag(AstFlag* ast)
 {
    if (  errorMsg_.empty()) {
@@ -83,6 +98,12 @@ void AstCollateNodesVisitor::visitVariable(AstVariable* astVar)
 {
 	Node* referencedNode = astVar->referencedNode(); // could be expensive, hence don't call twice
 	if ( referencedNode ) theSet_.insert(referencedNode);
+}
+
+void AstCollateNodesVisitor::visitParentVariable(AstParentVariable* astvar)
+{
+   Node* referencedNode = astvar->referencedNode(); // could be expensive, hence don't call twice
+   if ( referencedNode ) theSet_.insert(referencedNode);
 }
 
 void AstCollateNodesVisitor::visitFlag(AstFlag* ast)

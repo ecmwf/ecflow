@@ -82,6 +82,14 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
    vec.push_back("comp == complete and ! ready == complete");   // we now store the not from the parse, for test comparison
    vec.push_back("comp == complete and ~ ready == complete");
 
+   vec.push_back(":VAR == 1");
+   vec.push_back(":VAR == /mc/main/ref:MC_STOP");
+   vec.push_back(":YMD - :YMD < 5");
+   vec.push_back(":YMD + :YMD < 5");
+   vec.push_back(":YMD / :YMD < 5");
+   vec.push_back(":YMD * :YMD < 5");
+   vec.push_back(":YMD % :YMD < 5");
+
    for(size_t i = 0; i < vec.size(); i++) {
 
       PartExpression part(vec[i]);
@@ -124,6 +132,7 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic_with_brackets )
    vec.push_back("((obs:YMD <= (main:YMD + 1)) and ((../make/setup == complete) and (obs:YMD <= /o/lag:YMD)))");
    vec.push_back("(((stage == complete) or (./stage:YMD > ./retrieve:YMD)) and ((./retrieve:YMD - ./load:YMD) < 5))");
    vec.push_back("((./a:YMD - ./b:YMD) < 5)");
+   vec.push_back("((:YMD + :YMD) < 5)");
 
    for(size_t i = 0; i < vec.size(); i++) {
 
@@ -352,6 +361,14 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    exprMap["(/s/f/t<flag>late or 1)"] = std::make_pair(AstOr::stype(),true);
    exprMap["/<flag>late"] = std::make_pair(AstFlag::stype(),false);
 
+   exprMap[":VAR == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap[":VAR == 1"] = std::make_pair(AstEqual::stype(),false);
+   exprMap[":VAR == /mc/main/ref:MC_STOP"] = std::make_pair(AstEqual::stype(),true);
+   exprMap[":YMD - :YMD <= 5"] = std::make_pair(AstLessEqual::stype(),true);
+   exprMap[":YMD + :YMD <= 5"] = std::make_pair(AstLessEqual::stype(),true);
+   exprMap[":YMD * :YMD <= 5"] = std::make_pair(AstLessEqual::stype(),true);
+   exprMap[":YMD + 1 == 1"] = std::make_pair(AstEqual::stype(),true);
+
    int parse_failure = 0;
    int ast_failure = 0;
    std::pair<string, std::pair<string,bool> > p;
@@ -560,7 +577,8 @@ BOOST_AUTO_TEST_CASE( test_trigger_expression_divide_by_zero )
    // However the Ast::evaluate() checks for this, and return zero for the whole expression i.e ./a:YMD % 0 returns 0
    exprMap["./a:YMD % 0 == 0"] = std::make_pair(AstEqual::stype(),true);
    exprMap["./a:YMD / 0 == 0"] = std::make_pair(AstEqual::stype(),true);
-
+   exprMap[":YMD % 0 == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap[":YMD / 0 == 0"] = std::make_pair(AstEqual::stype(),true);
 
    std::pair<string, std::pair<string,bool> > p;
    BOOST_FOREACH(p, exprMap ) {
@@ -585,7 +603,6 @@ BOOST_AUTO_TEST_CASE( test_trigger_expression_divide_by_zero )
       BOOST_CHECK_MESSAGE( !top->check(error_msg),error_msg << ":  Check failed for " << *top);
    }
 }
-
 
 BOOST_AUTO_TEST_CASE( test_parser_bad_expressions ) 
 {
