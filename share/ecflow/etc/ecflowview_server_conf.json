@@ -22,8 +22,8 @@
                 },
                 
                 "adaptiveUpdate": {
-                    "label": "Increase (<u>drift</u>) server refresh period when inactive)",
-                    "tooltip" : "When enabled the server refresh period is <b>increased at every automatic refresh</b> until the maximum period is reached. If the user in the meantime refreshes the server manually the refresh period is set back to its original value and whole process starts again.",
+                    "label": "Drift (increase) server refresh period when inactive",
+                    "tooltip" : "When enabled the server refresh period is <b>increased at every automatic refresh</b> until the maximum period is reached. If the user in the meantime interact with the server the refresh period is set back to its original value and whole process starts again.",
                 	"default": "true"
                 },
 
