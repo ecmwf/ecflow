@@ -689,11 +689,11 @@
         }, 
         {
             "menu"           : "Node",
-            "name"           : "Settings ...",
+            "name"           : "Server settings ...",
             "visible_for"    : "server",        
             "command"        : "server_settings",
             "handler"        : "info_panel",
-            "icon"           : "configure.svg"            
+            "icon"           : "cogwheel_blue.svg"
         }, 
         {
             "menu"           : "Node",

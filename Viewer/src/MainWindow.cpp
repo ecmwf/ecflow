@@ -85,7 +85,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 
-    connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
+    connect(nodePanel_,SIGNAL(selectionChangedInCurrent(VInfo_ptr)),
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
     connect(nodePanel_,SIGNAL(contentsChanged()),
@@ -100,6 +100,10 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     Q_ASSERT(actionSearch);
     viewToolBar->insertWidget(actionSearch,serverComWidget_);
     //viewToolBar->addWidget(serverComWidget_);
+
+    connect(serverComWidget_,SIGNAL(serverSettingsEditRequested(ServerHandler*)),
+            this,SLOT(slotEditServerSettings(ServerHandler*)));
+
 
     //insert a spacer after the the server refresh widget
     QWidget* spacer = new QWidget();
@@ -361,7 +365,7 @@ void MainWindow::slotCurrentChangedInPanel()
 //The selection changed in one of the views
 void MainWindow::slotSelectionChanged(VInfo_ptr info)
 {
-	selection_=info;
+    selection_=info;
 
     //Get the set of visible info panel tabs for the selection
 	std::vector<InfoPanelDef*> ids;
@@ -476,6 +480,12 @@ void MainWindow::hideServerSyncNotify()
 {
    if(serverSyncNotifyTb_)
       serverSyncNotifyTb_->hide();
+}
+
+void MainWindow::slotEditServerSettings(ServerHandler* s)
+{
+    VInfo_ptr info=VInfoServer::create(s);
+    nodePanel_->openDialog(info,"server_settings");
 }
 
 //==============================================================

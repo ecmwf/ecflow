@@ -57,6 +57,7 @@ public Q_SLOTS:
 	void slotCurrentWidgetChanged(int);
     void slotSelection(VInfo_ptr);
     void slotNewTab();
+    void slotSelectionChangedInWidget(VInfo_ptr);
 
 protected Q_SLOTS:
     void slotTabRemoved();
@@ -65,7 +66,7 @@ protected Q_SLOTS:
 Q_SIGNALS:
 	void itemInfoChanged(QString);
 	void currentWidgetChanged();
-	void selectionChanged(VInfo_ptr);
+    void selectionChangedInCurrent(VInfo_ptr);
 	void contentsChanged();
 
 protected:

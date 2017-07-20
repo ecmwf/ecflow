@@ -72,6 +72,7 @@ protected Q_SLOTS:
 	void slotConfigChanged();
 	void slotContentsChanged();
     void slotServerSyncNotify(bool);
+    void slotEditServerSettings(ServerHandler* s);
 
 private:
     void init(MainWindow*);

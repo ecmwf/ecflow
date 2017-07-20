@@ -34,16 +34,10 @@ QPen ServerRefreshInfoWidget::borderPen_(QColor(167,167,167));
 QPen ServerRefreshInfoWidget::disabledBorderPen_(QColor(182,182,182));
 QBrush ServerRefreshInfoWidget::buttonBgHoverBrush_(QColor(249,248,248));
 QPen ServerRefreshInfoWidget::buttonHoverPen_(QColor(160,160,160));
-//QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(219,238,246));
-//QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(213,222,227));
 QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(214,227,213));
-
-//QBrush ServerRefreshInfoWidget::timeBgBrush_(QColor(214,214,214));
 QBrush ServerRefreshInfoWidget::periodBgBrush_(QColor(238,238,238));
-//QBrush ServerRefreshInfoWidget::progBrush_(QColor(38,181,245));
 QBrush ServerRefreshInfoWidget::progBrush_(QColor(21,148,21));
 QBrush ServerRefreshInfoWidget::progBgBrush_(QColor(255,255,255));
-//QPen ServerRefreshInfoWidget::buttonRefreshPen_(QColor(38,181,245),2);
 QBrush ServerRefreshInfoWidget::lastBgBrush_(QColor(238,238,238));
 QPen ServerRefreshInfoWidget::buttonRefreshPen_(QColor(79,179,100),2);
 QPen ServerRefreshInfoWidget::serverTextPen_(QColor(80,80,80));
@@ -89,8 +83,10 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     fmServer_(QFont()),
     fmPeriod_(QFont()),
     fmLast_(QFont()),
-    periodTextSize_(0),
-    periodTextSizeMin_(0),
+    periodTextWidth_(0),
+    periodTextWidthMin_(0),
+    periodDummyText_(" D=300s "),
+    periodDummyFullText_(" D=300s d=99s"),
     currentComponent_(NoComponent),
     prop_(0),
     mode_(NoMode),
@@ -108,7 +104,7 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
 
     //The icon for the round refresh button
     if(!icon_)
-        icon_=new QIcon(QPixmap(":/viewer/reload_black.svg"));
+        icon_=new QIcon(QPixmap(":/viewer/reload_green.svg"));
 
     //Init fonts
     fontServer_=QFont();
@@ -249,8 +245,7 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
 
     periodText_.clear();
     driftText_.clear();
-    periodTextSizeMin_=0;
-    periodTextSizeMin_=0;
+    periodTextWidthMin_=0;
     periodTextWidth_=0;
     lastTextWidth_=0;
 
@@ -285,8 +280,7 @@ void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server)
         userInitiatedRefresh_=false;
         periodText_.clear();
         driftText_.clear();
-        periodTextSizeMin_=0;
-        periodTextSizeMin_=0;
+        periodTextWidthMin_=0;
         periodTextWidth_=0;
         lastTextWidth_=0;
 
@@ -311,8 +305,7 @@ void ServerRefreshInfoWidget::notifyBeginServerClear(ServerHandler* server)
     mode_=NoMode;
     periodText_.clear();
     driftText_.clear();
-    periodTextSizeMin_=0;
-    periodTextSizeMin_=0;
+    periodTextWidthMin_=0;
     periodTextWidth_=0;
     lastTextWidth_=0;
 
@@ -485,7 +478,7 @@ void ServerRefreshInfoWidget::fetchInfo()
         //Determine period text
         determinePeriodText();
 
-        if(geoUpdateNeeded || periodTextSizeAboutToChange())
+        if(geoUpdateNeeded || periodTextWidthAboutToChange())
             adjustGeometry(false);
 
         //if(currentComponent_ == TextComponent)
@@ -513,26 +506,52 @@ void ServerRefreshInfoWidget::adjustTimer(int toNext)
     }
     else if(hasInfo_)
     {
-        if(period_ == 1)
-           timer_->setInterval(1000);
-        else if(period_==2)
+        if(total_ <= 1)
+        {
+            timer_->stop();
+            return;
+        }
+        else if(total_==2)
            timer_->setInterval(750);
         else
         {
+            Q_ASSERT(total_ > 0);
+            int progWidth=periodTextWidth_;
+            Q_ASSERT(progWidth > 0);
+            float secPerPix=static_cast<float>(total_)/static_cast<float>(progWidth);
+            float r=ceil(secPerPix);
+            Q_ASSERT(r >= 1.);
+
             if(toNext > 135)
-                timer_->setInterval(60*1000);
-            else if(toNext > 105)
-                timer_->setInterval(30*1000);
-            else  if(toNext > 75)
-                timer_->setInterval(15*1000);
+            {
+                if(r > 30)
+                    r=60;
+                else if(r > 15)
+                    r=30;
+                else
+                    r=15;
+            }
+            else if(toNext > 60)
+            {
+                if(r < 10)
+                    r=10;
+            }
             else if(toNext > 30)
-                timer_->setInterval(5*1000);
-            else if(toNext > 15)
-                timer_->setInterval(2500);
-            else if(toNext > 6)
-                timer_->setInterval(2000);
+            {
+                if(r < 5)
+                    r=5;
+            }
+            else if(toNext > 5)
+            {
+                if(r < 2.5)
+                    r=2.5;
+            }
             else
-                timer_->setInterval(1000);
+            {
+                r=1;
+            }
+
+            timer_->setInterval(static_cast<int>(r*1000.));
         }
 
         if(!timer_->isActive())
@@ -560,6 +579,14 @@ void ServerRefreshInfoWidget::resizeEvent(QResizeEvent* event)
 {
     buttonRect_=QRect(1,1,height()-2,height()-2);
     buttonRadius2_=pow(buttonRect_.width()/2,2);
+}
+
+void ServerRefreshInfoWidget::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    if(server_ && !isInButton(event->pos()))
+    {
+        Q_EMIT serverSettingsEditRequested(server_);
+    }
 }
 
 void ServerRefreshInfoWidget::mousePressEvent(QMouseEvent* event)
@@ -653,9 +680,9 @@ QString ServerRefreshInfoWidget::formatPeriodTime(int timeInSec) const
 
     QTime t(h,m,s);
     if(h > 0)
-       return QString::number(h) +  QString("%1s").arg(m, 2, 10, QChar('0')) + "h";
-    else if(m > 5)
-       return QString::number(m) +  QString("%1s").arg(s, 2, 10, QChar('0')) + "s";
+       return QString::number(h) +  QString(":%1h").arg(m, 2, 10, QChar('0'));
+    else if(m >= 5)
+       return QString::number(m) +  QString(":%1s").arg(s, 2, 10, QChar('0'));
     else if(m> 0)
        return QString::number(m*60+s) + "s";
     else
@@ -671,10 +698,10 @@ void ServerRefreshInfoWidget::determinePeriodText()
     if(hasInfo_)
     {
         //Unicode 916=Greek capital delta
-        periodText_=QChar(916) + QString("=") + formatPeriodTime(total_);
+        periodText_=QString(" ") + QChar(916) + QString("=") + formatPeriodTime(total_) + " ";
         if(drift_ > 0)
         {
-            driftText_=" d=" + formatPeriodTime(total_-period_);
+            driftText_="d=" + formatPeriodTime(total_-period_) + " ";
         }
     }
 }
@@ -684,42 +711,43 @@ QString ServerRefreshInfoWidget::fullPeriodText() const
     return periodText_+driftText_;
 }
 
-int ServerRefreshInfoWidget::determinePeriodTextSizeMin() const
+int ServerRefreshInfoWidget::determinePeriodTextWidthMin() const
 {
-    int minv=QString(" D=300s ").size();
+    QString s=periodDummyText_;
     if(hasInfo_ && drift_ > 0)
     {
-        minv=QString(" D=99s d=99s").size();
+        s=periodDummyFullText_;
     }
-    return minv;
+    return fmPeriod_.width(s);
 }
 
 //Indicate if the full period text's size will change in such a way that the
 //geometry needs to be adjusted
-bool ServerRefreshInfoWidget::periodTextSizeAboutToChange() const
+bool ServerRefreshInfoWidget::periodTextWidthAboutToChange() const
 {
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
 
-    int mval=determinePeriodTextSizeMin();
+    int mval=determinePeriodTextWidthMin();
 
     QString pt=fullPeriodText();
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
     UiLog().dbg() << " full=" << pt << " pt.size=" << pt.size() <<
-               " mval=" << mval << " periodTextSizeMin=" <<  periodTextSizeMin_ <<
-               " periodTextSize "  <<  periodTextSize_;
+               " mval=" << mval << " periodTextWidthMin=" <<  periodTextWidthMin_ <<
+               " periodTextSize "  <<  periodTextWidth_;
 #endif
     bool changed=false;
-    if(periodTextSizeMin_ == mval)
+    if(periodTextWidthMin_ == mval)
     {
-        if(pt.size() > periodTextSize_)
+        int w=fmPeriod_.width(pt);
+        if(w > periodTextWidth_)
         {
-            changed=pt.size() > periodTextSizeMin_;
+            changed=w > periodTextWidthMin_;
         }
-        else if(pt.size() < periodTextSize_)
+        else if(w < periodTextWidth_)
         {
-            changed=periodTextSize_ >= periodTextSizeMin_;
+            changed=periodTextWidth_ >= periodTextWidthMin_;
         }
     }
     else
@@ -734,6 +762,10 @@ bool ServerRefreshInfoWidget::periodTextSizeAboutToChange() const
 
 void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
 {
+#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+    UI_FUNCTION_LOG
+#endif
+
     if(server_)
     {
         //timeTextLen_=qMax(fmTime_.width(" <9:59m"),fmUpdate_.width("updating"));
@@ -752,20 +784,26 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
             fetchInfo();
 
         //Determine the minimum size for the period text
-        periodTextSizeMin_=determinePeriodTextSizeMin();
+        periodTextWidthMin_=determinePeriodTextWidthMin();
 
         //Compute physical width of the period text
         QString pt=fullPeriodText();
-        periodTextSize_=pt.size();
-        if(pt.size() <= periodTextSizeMin_)
+        int w=fmPeriod_.width(pt);
+        if(w <= periodTextWidthMin_)
         {
-            periodTextWidth_=fmPeriod_.width(QString().fill('A',periodTextSizeMin_));
+            periodTextWidth_=periodTextWidthMin_;
         }
         else
         {
-            periodTextWidth_=fmPeriod_.width(pt);
-        }
+#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+            UiLog().dbg() << " width changed before=" <<  periodTextWidth_;
+#endif
+            periodTextWidth_=w;
+#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+            UiLog().dbg() << " width changed after=" <<  periodTextWidth_;
+#endif
 
+        }
         periodRect_=QRect();
         progRect_=QRect();
         lastRect_=QRect();
@@ -800,7 +838,7 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
     }
     else
     {
-        periodTextSize_=0;
+        periodTextWidthMin_=0;
         periodTextWidth_=0;
         lastTextWidth_=0;
         setFixedWidth(buttonRect_.x()+buttonRect_.width()+fmServer_.width("AAAAA"));
@@ -980,8 +1018,17 @@ void ServerRefreshInfoWidget::adjustToolTip()
 
             txt+="<br><b>Last refresh:</b> " + lastRefresh_ +
                 "<br><b>Next refresh:</b> " + nextRefresh_ +
-                "<br><b>Refresh period:</b> " + QString::number(total_) + "s" +
+                "<br><b>Total refresh period:</b> " + QString::number(total_) + "s" +
                 " (base=" + QString::number(period_) + "s" + ",drifted=" + QString::number(total_-period_) +"s)";
+
+            /*if(drift_ > 0)
+            {
+                txt+="<br>--------------------------------------------<br>";
+                txt+="When <b>drift</b> is enabled the server refresh period is increased at every automatic refresh until \
+                      the maximum period is reached. The drift is reset to zero when the user interacts with the server.";
+
+            }*/
+
 
         }
         else if(server_)

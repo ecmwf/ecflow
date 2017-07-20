@@ -60,8 +60,12 @@ protected Q_SLOTS:
     void slotTimeOut();
     void slotTimeOutRefreshFinished();
 
+Q_SIGNALS:
+     void serverSettingsEditRequested(ServerHandler*);
+
 protected:
     void resizeEvent(QResizeEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* e);
     void leaveEvent(QEvent*);
@@ -76,8 +80,8 @@ protected:
     QString formatPeriodTime(int timeInSec) const;
     void determinePeriodText();
     QString fullPeriodText() const;
-    int  determinePeriodTextSizeMin() const;
-    bool periodTextSizeAboutToChange() const;
+    int  determinePeriodTextWidthMin() const;
+    bool periodTextWidthAboutToChange() const;
     void adjustGeometry(bool);
     void adjustTimer(int toNext);
     void adjustToolTip();
@@ -88,7 +92,7 @@ protected:
     void printStatus() const;
     bool isActionEnabled() const;
 
-    enum Component {ButtonComponent,TextComponent,NoComponent};
+    enum Component {ButtonComponent,TextComponent,ConfigComponent,NoComponent};
     enum Mode {NormalMode,ManualMode,NoMode};
 
     QAction* refreshAction_;
@@ -128,8 +132,9 @@ protected:
     QString periodText_;
     QString driftText_;
     int periodTextWidth_;
-    int periodTextSize_;
-    int periodTextSizeMin_;
+    int periodTextWidthMin_;
+    QString periodDummyText_;
+    QString periodDummyFullText_;
     int lastTextWidth_;
     QRect serverRect_;
     QRect periodRect_;

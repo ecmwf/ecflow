@@ -35,6 +35,7 @@
     <file alias="clear_left.svg">../images/clear_left.svg</file>
     <file alias="case_sensitive.svg">../images/case_sensitive.svg</file>
     <file alias="cogwheel.svg">../images/cogwheel.svg</file>
+    <file alias="cogwheel_blue.svg">../images/cogwheel_blue.svg</file>
     <file alias="colour.svg">../images/colour.svg</file>
     <file alias="dependency.svg">../images/dependency.svg</file>
     <file alias="dependency_detail.svg">../images/dependency_detail.svg</file>
@@ -83,7 +84,7 @@
     <file alias="padlock.svg">../images/padlock.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
-    <file alias="reload_black.svg">../images/reload_black.svg</file>
+    <file alias="reload_green.svg">../images/reload_green.svg</file>
     <file alias="reload_one.svg">../images/reload_one.svg</file>
     <file alias="remove.svg">../images/remove.svg</file>
     <file alias="rescue.svg">../images/rescue.svg</file>

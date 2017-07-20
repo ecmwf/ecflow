@@ -400,9 +400,9 @@
         },
 
         "server": {
-            "label" : "Server options",
-            "desc" : "Server options",
-            "icon" : "server.svg",
+            "label" : "Server settings",
+            "desc" : "Server settings",
+            "icon" : "cogwheel_blue.svg",
             "tabs"  : {
                 "tab" : {
                     "label"  : "Refresh",

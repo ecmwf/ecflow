@@ -22,13 +22,13 @@
                 },
                 
                 "adaptiveUpdate": {
-                    "label": "Increase server refresh period when inactive",
+                    "label": "Increase (<u>drift</u>) server refresh period when inactive)",
                     "tooltip" : "When enabled the server refresh period is <b>increased at every automatic refresh</b> until the maximum period is reached. If the user in the meantime refreshes the server manually the refresh period is set back to its original value and whole process starts again.",
                 	"default": "true"
                 },
 
                 "adaptiveUpdateIncrementInSec": {
-                    "label": "Server refresh period increment",
+                    "label": "Server refresh drift increment",
                     "suffix" : "seconds",
                     "tooltip": "Defines by how many seconds the server refresh period is <b>increased</b> at every automatic refresh.",
                     "default": "5",
@@ -44,7 +44,7 @@
                 "blinkUpdateButtonLimit" : {
                     "label": "Do not blink refresh button for automatic refresh for periods less than",
                     "suffix" : "seconds",
-                    "tooltip": "In automatic refresh mode the refresh button <b>will not blink</b> on automatic refresh when the total refresh period is smaller than the specified value.",
+                    "tooltip": "In automatic refresh mode the refresh button <b>will not blink</b> on automatic refresh when the total refresh period is shorter than the specified value.",
                     "default": "15",
                     "min"    : "3"
                 },
