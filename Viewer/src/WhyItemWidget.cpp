@@ -29,7 +29,13 @@
 
 WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
 {
-	messageLabel_->hide();
+    //This item will listen to any changes in nodes
+    handleAnyChange_=true;
+
+    //We will not keep the contents when the item becomes unselected
+    unselectedFlags_.clear();
+
+    messageLabel_->hide();
 	fileLabel_->hide();
 
     //Will be used for ECFLOW-901
@@ -80,6 +86,7 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
 
 WhyItemWidget::~WhyItemWidget()
 {
+    clearContents();
 }
 
 
@@ -96,8 +103,16 @@ void WhyItemWidget::reload(VInfo_ptr info)
         return;
 
     clearContents();
-	info_=info;
 
+    //set the info
+    adjust(info);
+
+    load();
+}
+
+void WhyItemWidget::load()
+{
+    textEdit_->clear();
     if(info_)
     {
         textEdit_->insertHtml(why());
@@ -188,10 +203,50 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
     return s;
 }
 
+void WhyItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(SuspendedChanged))
+    {
+        //If we are here this item is active but not selected!
+
+        //When it becomes suspended we need to clear everything since the
+        //tree is probably cleared at this point
+        if(suspended_)
+        {
+            textEdit_->clear();
+        }
+        //When we leave the suspended state we need to reload everything
+        else
+        {
+            load();
+        }
+    }
+
+    Q_ASSERT(!flags.isSet(SelectedChanged));
+
+}
+
 void WhyItemWidget::anchorClicked(const QUrl& link)
 {
     linkSelected(link.path().toStdString());
 }
+
+void WhyItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+{
+    if(frozen_)
+        return;
+
+    //We do not track changes when the item is not selected
+    if(!selected_ || !active_)
+        return;
+
+    if(!info_)
+        return;
+
+    //For any change we nee to reload
+    load();
+}
+
 
 static InfoPanelItemMaker<WhyItemWidget> maker1("why");
 

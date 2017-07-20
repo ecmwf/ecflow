@@ -31,16 +31,17 @@ public:
 	QWidget* realWidget();
     void clearContents();
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
     void anchorClicked(const QUrl& link);
 
 protected:
-    void updateState(const ChangeFlags&) {}
+    void updateState(const ChangeFlags&);
 
 private:
+    void load();
     QString why() const;
     QString makeHtml(const std::vector<std::string>&,const std::vector<std::string>&) const;
     QString makeHtml(const std::vector<std::string>&) const;
