@@ -570,9 +570,9 @@
 
         {
             "menu"           : "Special",
-            "name"           : "Monitor only this suite",
+            "name"           : "Filter only this suite",
             "visible_for"    : "node",
-            "command"        : "monitorOne",
+            "command"        : "filterOne",
             "handler"        : "tree",
             "view"           : "tree"
         },

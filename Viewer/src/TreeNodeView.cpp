@@ -316,10 +316,10 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
         }
     }
 
-    //Only monitor the given suite (of the node stored in info).
+    //Only filter the given suite (of the node stored in info).
     //We achive this by setting the suitefilter to filter only this
     //suite.
-    else if(cmd ==  "monitorOne")
+    else if(cmd ==  "filterOne")
     {
         if(info)
         {
