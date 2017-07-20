@@ -311,7 +311,7 @@ bool ServerHandler::checkRefreshTimerDrift() const
        conf_->boolValue(VServerSettings::AdaptiveUpdate))
     {
         return (refreshTimer_->interval()*1000 <
-                conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
+                conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate)*60);
     }
     return true;
 }
