@@ -188,6 +188,16 @@
                         "line" : "completeBorderColour",
                         "line" : "completeFontColour"
                     }
+                },
+                "tab" : {
+                    "label" : "Toolbar",
+
+                    "group" : {
+                        "title" : "Server refresh button",
+                        "prefix" : "server.update",
+                        "line" : "blinkUpdateButtonLimit",
+                        "line" : "showLastRefreshTimeInAutoMode"
+                    }
                 }
             }
         },
@@ -418,12 +428,6 @@
                         },
                         "line" : "adaptiveUpdateIncrementInSec",
                         "line" : "maxAdaptiveUpdateRateInMin"
-                    },
-                    "group" : {
-                        "title" : "Update button in toolbar",
-                        "prefix" : "server.update",                      
-                        "line" : "blinkUpdateButtonLimit",
-                        "line" : "showLastRefreshTimeInAutoMode"
                     }
                 },
 

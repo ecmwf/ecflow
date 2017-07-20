@@ -45,8 +45,8 @@
                     "label": "Do not blink refresh button for automatic refresh for periods less than",
                     "suffix" : "seconds",
                     "tooltip": "In automatic refresh mode the refresh button <b>will not blink</b> on automatic refresh when the total refresh period is shorter than the specified value.",
-                    "default": "15",
-                    "min"    : "3"
+                    "default": "5",
+                    "min"    : "1"
                 },
                 "showLastRefreshTimeInAutoMode" : {
                     "label": "Show time of last refresh in automatic refresh mode",
