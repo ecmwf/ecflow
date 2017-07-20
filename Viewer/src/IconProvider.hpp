@@ -22,12 +22,10 @@ public:
     virtual ~IconItem() {}
 
 	QPixmap pixmap(int);
-    QPixmap greyedOutPixmap(int size);
     int id () const {return id_;}
 	QString path() const {return path_;}
 
 protected:
-  	static void greyOut(QImage &);
   	virtual QPixmap unknown(int);
 
   	QString path_;
@@ -55,8 +53,6 @@ public:
 	static QString path(int id);
 	static QPixmap pixmap(QString name,int size);
 	static QPixmap pixmap(int id,int size);
-    static QPixmap greyedOutPixmap(QString name,int size);
-    static QPixmap greyedOutPixmap(int id,int size);
 
 	static QPixmap lockPixmap(int);
 	static QPixmap warningPixmap(int);

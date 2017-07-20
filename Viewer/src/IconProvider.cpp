@@ -73,41 +73,6 @@ QPixmap IconItem::unknown(int size)
 	return unknownIcon.pixmap(size);
 }
 
-QPixmap IconItem::greyedOutPixmap(int size)
-{
-    QPixmap pix=pixmap(size);
-    QImage img=pix.toImage();
-    greyOut(img);
-    return QPixmap::fromImage(img);
-}
-
-void IconItem::greyOut(QImage &img)
-{
-    int w=img.width();
-    int h=img.height();
-    QColor c;
-    int g;
-    int gBase=190;
-    float gFactor=(255.-gBase)/255.;
-
-    for(int i=0; i < w; i++)
-        for(int j=0; j < h; j++)
-        {
-            c=img.pixelColor(i,j);
-            if(c.alpha() != 0)
-            {
-                //g=qGray(c);
-                g=(c.red()+c.green()+c.blue())/3;
-                g=gBase+gFactor*static_cast<float>(g);
-                img.setPixelColor(i,j,QColor(g,g,g,c.alpha()));
-#if 0
-                UiLog().dbg() << "(" << i << "," << j <<
-                                 "  " << c << " " << QColor(g,g,g,c.alpha());
-#endif
-            }
-        }
-}
-
 UnknownIconItem::UnknownIconItem(QString path) : IconItem(path)
 {
 
@@ -178,16 +143,6 @@ QPixmap IconProvider::pixmap(QString name,int size)
 QPixmap IconProvider::pixmap(int id,int size)
 {
 	return icon(id)->pixmap(size);
-}
-
-QPixmap IconProvider::greyedOutPixmap(QString name,int size)
-{
-    return icon(name)->greyedOutPixmap(size);
-}
-
-QPixmap IconProvider::greyedOutPixmap(int id,int size)
-{
-    return icon(id)->greyedOutPixmap(size);
 }
 
 QPixmap IconProvider::lockPixmap(int size)
