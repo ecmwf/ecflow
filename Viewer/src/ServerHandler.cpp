@@ -1125,12 +1125,13 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			{
                 UiLog(this).dbg() << " full sync requested - rescanTree";
 
-				//This will update the suites
+                //This will update the suites + restart the timer
 				rescanTree();
 			}
 			else
 			{
-				broadcast(&ServerObserver::notifyEndServerSync);
+                broadcast(&ServerObserver::notifyEndServerSync);
+                updateRefreshTimer();
 			}
 			break;
 		}
