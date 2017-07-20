@@ -275,13 +275,13 @@ $ecbuild $source_dir \
             -DENABLE_WARNINGS=ON \
             -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
-            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             -DENABLE_STATIC_BOOST_LIBS=ON \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \
             ${secure_user_options} \
             ${log_options}
+            #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             #-DENABLE_ALL_TESTS=ON
             #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
             #-DENABLE_SERVER=OFF \
