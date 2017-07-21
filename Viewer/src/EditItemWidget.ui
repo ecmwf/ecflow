@@ -45,15 +45,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="aliasTb_">
-       <property name="toolTip">
-        <string>Send as alias</string>
-       </property>
+      <widget class="QCheckBox" name="aliasCb_">
        <property name="text">
         <string>Submit as alias</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -79,7 +73,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="viewer.qrc">
          <normaloff>:/viewer/fontsize_up.svg</normaloff>:/viewer/fontsize_up.svg</iconset>
        </property>
        <property name="shortcut">
@@ -99,7 +93,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="viewer.qrc">
          <normaloff>:/viewer/fontsize_down.svg</normaloff>:/viewer/fontsize_down.svg</iconset>
        </property>
        <property name="shortcut">
@@ -126,7 +120,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="viewer.qrc">
          <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
        </property>
        <property name="shortcut">
@@ -149,7 +143,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="viewer.qrc">
          <normaloff>:/viewer/images/goto_line.svg</normaloff>:/viewer/images/goto_line.svg</iconset>
        </property>
        <property name="shortcut">
@@ -169,7 +163,7 @@
         <string>Submit</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="viewer.qrc">
          <normaloff>:/viewer/submit.svg</normaloff>:/viewer/submit.svg</iconset>
        </property>
        <property name="toolButtonStyle">
@@ -180,8 +174,7 @@
     </layout>
    </item>
    <item>
-    <widget class="MessageLabel" name="infoLabel_" native="true">
-    </widget>
+    <widget class="MessageLabel" name="infoLabel_" native="true"/>
    </item>
    <item>
     <widget class="PlainTextEdit" name="textEdit_">
@@ -206,6 +199,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header location="global">MessageLabel.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>PlainTextSearchLine</class>
    <extends>QWidget</extends>
    <header>PlainTextSearchLine.hpp</header>
@@ -216,13 +215,9 @@
    <extends>QPlainTextEdit</extends>
    <header location="global">PlainTextEdit.hpp</header>
   </customwidget>
-  <customwidget>
-   <class>MessageLabel</class>
-   <extends>QWidget</extends>
-   <header>MessageLabel.hpp</header>
-   <container>1</container>
-  </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>
