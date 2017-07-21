@@ -10,6 +10,7 @@
 #include "VTree.hpp"
 
 #include "ServerHandler.hpp"
+#include "UIDebug.hpp"
 #include "UserMessage.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
@@ -194,7 +195,7 @@ VNode* VTree::vnodeAt(int index) const
 
 VTreeNode* VTree::find(const VNode* vn) const
 {
-    Q_ASSERT(vn->index()  < nodeVec_.size());
+    UI_ASSERT(vn->index()  < nodeVec_.size(),"vn index=" << vn->index() << " size=" << nodeVec_.size());
     return nodeVec_[vn->index()];
 }
 

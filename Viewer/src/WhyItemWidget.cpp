@@ -27,11 +27,11 @@
 //
 //========================================================
 
+//This item will be updated (the why? regenerated) at the end of each sync, so it does not need
+//to observe the node it stores. The reason for this is that the why? can basically depend on
+//anything in the tree. So anything in a sync can potentally have an impact on it.
 WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
 {
-    //This item will listen to any changes in nodes
-    handleAnyChange_=true;
-
     //We will not keep the contents when the item becomes unselected
     unselectedFlags_.clear();
 
@@ -104,8 +104,8 @@ void WhyItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
-    //set the info
-    adjust(info);
+    //set the info. we do not need to observe the node!!!
+    info_=info;
 
     load();
 }
@@ -231,7 +231,8 @@ void WhyItemWidget::anchorClicked(const QUrl& link)
     linkSelected(link.path().toStdString());
 }
 
-void WhyItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+//After each sync we need to reaload the contents
+void WhyItemWidget::serverSyncFinished()
 {
     if(frozen_)
         return;
@@ -246,7 +247,6 @@ void WhyItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect
     //For any change we nee to reload
     load();
 }
-
 
 static InfoPanelItemMaker<WhyItemWidget> maker1("why");
 

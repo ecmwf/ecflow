@@ -31,7 +31,7 @@ public:
 	QWidget* realWidget();
     void clearContents();
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
@@ -39,6 +39,7 @@ protected Q_SLOTS:
 
 protected:
     void updateState(const ChangeFlags&);
+    void serverSyncFinished();
 
 private:
     void load();
