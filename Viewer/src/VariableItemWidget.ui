@@ -17,7 +17,16 @@
    <property name="spacing">
     <number>2</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -183,7 +192,7 @@
      <normaloff>:/viewer/editcopy.svg</normaloff>:/viewer/editcopy.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Copy item</string>
+    <string>&amp;Copy item text under cursor</string>
    </property>
    <property name="toolTip">
     <string>Copy variable</string>
@@ -233,7 +242,7 @@
   </action>
   <action name="actionCopyFull">
    <property name="text">
-    <string>Copy name and value</string>
+    <string>Copy text for both Name and Value</string>
    </property>
    <property name="toolTip">
     <string>Copy variable's name and value</string>

@@ -266,6 +266,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LogTruncator.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
+    MessageItemWidget.hpp
     MeterEditor.hpp
     NodeFilterDialog.hpp
     NodePanel.hpp

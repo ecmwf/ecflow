@@ -9,6 +9,10 @@
 
 #include "MessageItemWidget.hpp"
 
+#include <QtGlobal>
+#include <QAction>
+#include <QClipboard>
+
 #include "InfoProvider.hpp"
 #include "VReply.hpp"
 
@@ -31,8 +35,13 @@ MessageItemWidget::MessageItemWidget(QWidget *parent) : QWidget(parent)
     treeView_->setProperty("log","1");
     treeView_->setModel(model_);
     treeView_->setItemDelegate(new LogDelegate(this));
+    treeView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 
     syncTb_->hide();
+
+    //Define context menu
+    treeView_->addAction(actionCopyEntry_);
+    treeView_->addAction(actionCopyRow_);
 }
 
 QWidget* MessageItemWidget::realWidget()
@@ -85,6 +94,29 @@ void MessageItemWidget::infoProgress(VReply* reply)
 void MessageItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
+}
+
+void MessageItemWidget::on_actionCopyEntry__triggered()
+{
+   toClipboard(model_->entryText(treeView_->currentIndex()));
+}
+
+void MessageItemWidget::on_actionCopyRow__triggered()
+{
+   toClipboard(model_->fullText(treeView_->currentIndex()));
+}
+
+void MessageItemWidget::toClipboard(QString txt) const
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QClipboard* cb=QGuiApplication::clipboard();
+    cb->setText(txt, QClipboard::Clipboard);
+    cb->setText(txt, QClipboard::Selection);
+#else
+    QClipboard* cb=QApplication::clipboard();
+    cb->setText(txt, QClipboard::Clipboard);
+    cb->setText(txt, QClipboard::Selection);
+#endif
 }
 
 static InfoPanelItemMaker<MessageItemWidget> maker1("message");
