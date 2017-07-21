@@ -45,12 +45,20 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
 	connect(zombieView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
 
+    connect(zombieView,SIGNAL(doubleClicked(const QModelIndex&)),
+            this,SLOT(slotDoubleClicked(const QModelIndex&)));
+
 	//Build context menu
-	zombieView->addAction(actionRescue);
+    QAction* sep1=new QAction(this);
+    sep1->setSeparator(true);
+
+    zombieView->addAction(actionRescue);
     zombieView->addAction(actionFoboff);
 	zombieView->addAction(actionKill);
 	zombieView->addAction(actionTerminate);
-	zombieView->addAction(actionDelete);
+    zombieView->addAction(actionDelete);
+    zombieView->addAction(sep1);
+    zombieView->addAction(actionLookup);
 
 	//Add actions for the pushbuttons
 	terminateTb_->setDefaultAction(actionTerminate);
@@ -170,6 +178,11 @@ void ZombieItemWidget::on_actionKill_triggered()
 	command("zombie_kill");
 }
 
+void ZombieItemWidget::on_actionLookup_triggered()
+{
+    lookup(zombieView->currentIndex());
+}
+
 void ZombieItemWidget::on_reloadTb__clicked(bool)
 {
 	updateContents();
@@ -205,6 +218,34 @@ void ZombieItemWidget::command(const std::string& cmdName)
 	}
 }
 
+
+void ZombieItemWidget::lookup(const QModelIndex& index)
+{
+    if(!info_ || !info_->server())
+        return;
+
+    QModelIndex idx=sortModel_->mapToSource(index);
+
+    if(idx.isValid())
+    {
+        Zombie z=model_->indexToZombie(idx);
+        std::string p=z.path_to_task();
+        if(!p.empty())
+        {
+            VInfo_ptr ni=VInfo::createFromPath(info_->server(),p);
+            if(ni)
+            {
+                InfoPanelItem::linkSelected(ni);
+            }
+        }
+    }
+}
+
+
+void ZombieItemWidget::slotDoubleClicked(const QModelIndex &index)
+{
+    lookup(index);
+}
 
 void ZombieItemWidget::slotItemSelected(QModelIndex,QModelIndex)
 {
