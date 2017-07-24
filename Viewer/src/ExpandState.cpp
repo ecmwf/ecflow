@@ -14,6 +14,7 @@
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
+#include "VTree.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -45,8 +46,10 @@ void ExpandState::clear()
 
 //Save the expand state for a whole subtree (it can be the whole VNode tree as well)
 void ExpandState::save(const VNode *root)
-{
+{    
+    UI_FUNCTION_LOG
     UI_ASSERT(root,"");
+    UiLog().dbg() << " " << root->name();
 
     QModelIndex rootIdx=model_->nodeToIndex(root);
     bool expanded=view_->isExpanded(rootIdx);
@@ -58,6 +61,19 @@ void ExpandState::save(const VNode *root)
     else
     {
         root_->expanded_=expanded;
+    }
+
+    //It can happen that the VTree is empty but the server is already
+    //loaded. It is the situation when we load the same server in multiple
+    //tabs!!! We return here because there is nothing to save (and we would
+    //have a crash when trying to get index of the vnodes via the model!!)
+    if(VTreeNode* vtn=model_->indexToServerOrNode(rootIdx))
+    {
+        if(VTree* vt=vtn->root())
+        {
+            if(vt->totalNum() == 0)
+                return;
+        }
     }
 
     //save all the children recursively
