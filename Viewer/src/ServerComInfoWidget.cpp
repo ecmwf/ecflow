@@ -240,7 +240,7 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
     if(server_)
     {
         serverName_=QString::fromStdString(server_->name());
-        serverText_=serverName_ + " ";      
+        serverText_=" " + serverName_ + " ";
     }
 
     periodText_.clear();
@@ -900,7 +900,7 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
     QRect serverTextRect=serverRect_.adjusted(buttonRect_.width()/2-4+4,0,0,0);
     painter->setFont(fontServer_);
     painter->setPen((refreshAction_->isEnabled())?serverTextPen_:disabledTextPen_);
-    painter->drawText(serverTextRect,Qt::AlignLeft | Qt::AlignVCenter,serverText_);
+    painter->drawText(serverTextRect,Qt::AlignHCenter | Qt::AlignVCenter,serverText_);
 
     //The time rects and texts
     if(hasInfo_)

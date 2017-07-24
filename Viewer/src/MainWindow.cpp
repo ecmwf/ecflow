@@ -204,7 +204,7 @@ void MainWindow::constructWindowTitle()
     else
         sessionName = " (session: " + sessionName + ")";
 
-    setWindowTitle(QString::fromStdString(mainTitle) + "  -  Preview version" + QString::fromStdString(sessionName));
+    setWindowTitle(QString::fromStdString(mainTitle) + " " + QString::fromStdString(sessionName));
 }
 
 
