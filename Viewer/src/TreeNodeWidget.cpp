@@ -149,12 +149,6 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
     connect(model_,SIGNAL(rerender()),
         view_->realObject(),SLOT(slotRerender()));
 
-    connect(model_,SIGNAL(filterChangeBegun()),
-        view_->realObject(),SLOT(slotSaveExpand()));
-
-    connect(model_,SIGNAL(filterChangeEnded()),
-        view_->realObject(),SLOT(slotRestoreExpand()));
-
     connect(model_,SIGNAL(filterUpdateRemoveBegun(const VTreeNode*)),
         view_->realObject(),SLOT(slotSaveExpand(const VTreeNode*)));
 

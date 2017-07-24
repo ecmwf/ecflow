@@ -396,7 +396,6 @@ void VTreeServer::reload()
     adjustFirstScan();
 }
 
-
 void VTreeServer::attrFilterChanged()
 {   
     //In the tree root the attrNum must be cached/initialised
@@ -1042,11 +1041,13 @@ VModelData::VModelData(NodeFilterDef *filterDef,AbstractNodeModel* model) :
     connect(this,SIGNAL(serverRemoveEnd(int)),
             model_,SLOT(slotServerRemoveEnd(int)));
 
+#if 0
     connect(this,SIGNAL(filterChangeBegun()),
             model_,SIGNAL(filterChangeBegun()));
 
     connect(this,SIGNAL(filterChangeEnded()),
            model_,SIGNAL(filterChangeEnded()));
+#endif
 
 }
 
@@ -1304,13 +1305,13 @@ void VModelData::setActive(bool active)
     {
         active_=active;
         if(active_)
-            reload(false);
+            reload();
         else
             clear();
     }
 }
 
-void VModelData::reload(bool broadcast)
+void VModelData::reload()
 {
 #ifdef _UI_VMODELDATA_DEBUG
     UiLog().dbg() << "VModelData::reload -->";
@@ -1318,16 +1319,10 @@ void VModelData::reload(bool broadcast)
 
     Q_ASSERT(active_);
 
-    if(broadcast)
-        Q_EMIT filterChangeBegun();
-
     for(unsigned int i=0; i < serverNum_; i++)
     {
         servers_[i]->reload();
     }
-
-    if(broadcast)
-         Q_EMIT filterChangeEnded();
 
 #ifdef _UI_VMODELDATA_DEBUG
     UiLog().dbg() << "<-- reload";
@@ -1341,7 +1336,7 @@ void VModelData::slotFilterDefChanged()
 #endif
 
     if(active_)
-        reload(true);
+        reload();
 }
 
 bool VModelData::isFilterComplete() const
@@ -1433,21 +1428,17 @@ void VTreeModelData::add(ServerHandler *server)
 
     VModelData::addToServers(d);
 
+    //??????
     if(active_)
-        reload(true);
+        reload();
 }
 
 void VTreeModelData::slotAttrFilterChanged()
 {
-    Q_EMIT filterChangeBegun();
-
     for(unsigned int i=0; i < serverNum_; i++)
     {
         servers_[i]->treeServer()->attrFilterChanged();
     }
-
-    Q_EMIT filterChangeEnded();
-
 }
 
 //==============================================================
@@ -1482,7 +1473,7 @@ void VTableModelData::add(ServerHandler *server)
     VModelData::addToServers(d);
 
     if(active_)
-        reload(false);
+        reload();
 }
 
 //Gives the position of this server in the full list of filtered nodes.

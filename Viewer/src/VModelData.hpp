@@ -219,7 +219,7 @@ public:
     void clear();
 	void reset(ServerFilter* servers);
 
-    void reload(bool broadcast);
+    void reload();
 
 	int count() const {return static_cast<int>(servers_.size());}
 	int  indexOfServer(void*) const;
@@ -247,8 +247,6 @@ Q_SIGNALS:
     //void filterChanged();
 	void filterDeleteBegin();
 	void filterDeleteEnd();
-    void filterChangeBegun();
-    void filterChangeEnded();
     void serverAddBegin(int);
 	void serverAddEnd();
     void serverRemoveBegin(VModelServer*,int);

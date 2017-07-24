@@ -153,7 +153,7 @@ void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemS
         VInfo_ptr info=model_->nodeInfo(lst.front());
         if(info && !info->isEmpty())
         {
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
+#ifdef _UI_TREENODEVIEW_DEBUG
             UiLog().dbg() << "TreeNodeView::selectionChanged --> emit=" << info->path();
 #endif
             Q_EMIT selectionChanged(info);
@@ -180,19 +180,23 @@ VInfo_ptr TreeNodeView::currentSelection()
 
 void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 {
+    UI_FUNCTION_LOG
     //While the current is being selected we do not allow
     //another setCurrent call go through
     if(!info || setCurrentIsRunning_)
         return;
 
+    UiLog().dbg() << " info path=" << info->storedNodePath();
+
     setCurrentIsRunning_=true;
     QModelIndex idx=model_->infoToIndex(info);
     if(idx.isValid())
     {
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
-        UiLog().dbg() << "TreeNodeView::setCurrentSelection --> " << info->path();
-#endif
         view_->setCurrentIndex(idx);
+        if(setCurrentFromExpand_)
+        {
+            view_->scrollTo(idx);
+        }
     }
     setCurrentIsRunning_=false;
 }
@@ -203,7 +207,7 @@ void TreeNodeView::setCurrentSelectionFromExpand(VInfo_ptr info)
     if(!info || setCurrentFromExpand_)
         return;
 
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
+#ifdef _UI_TREENODEVIEW_DEBUG
         UiLog().dbg() << "TreeNodeView::setCurrentSelectionFromExpand --> " << info->path();
 #endif
 
@@ -277,13 +281,13 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
+#ifdef _UI_TREENODEVIEW_DEBUG
             QTime t;
             t.start();
 #endif
             //apply expand in the view
             view_->expandAll(idx);
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
+#ifdef _UI_TREENODEVIEW_DEBUG
             UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -405,6 +409,7 @@ void TreeNodeView::expandTo(const QModelIndex& idxTo)
     }
 }
 
+#if 0
 //Save all
 void TreeNodeView::slotSaveExpand()
 {
@@ -456,7 +461,9 @@ void TreeNodeView::slotRestoreExpand()
         }
     }
     regainSelectionFromExpand();
+
 }
+#endif
 
 //Save the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotSaveExpand(const VTreeNode* node)
@@ -521,6 +528,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         {
             ts->clearTmpExpandState();
         }
+
         //es->print();
     }
 
