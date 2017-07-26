@@ -1,0 +1,78 @@
+ references
+ ============
+ Schema evolution: 
+    https://martin.kleppmann.com/2012/12/05/schema-evolution-in-avro-protocol-buffers-thrift.html
+ 
+Automatic Object Versioning for Forward and Backward File Format Compatibility@
+    https://accu.org/index.php/journals/502
+    https://accu.org/index.php/journals/486
+    
+Protobuffer versus json:
+    https://news.ycombinator.com/item?id=9665204
+    
+5 Reasons to Use Protocol Buffers Instead of JSON For Your Next Service:
+    http://blog.codeclimate.com/blog/2014/06/05/choose-protocol-buffers/
+    
+Json,TOML,YAML:
+    http://www.drdobbs.com/web-development/after-xml-json-then-what/240151851
+    
+Json scema evolution:
+    https://snowplowanalytics.com/blog/2014/05/15/introducing-self-describing-jsons/
+    
+    
+ Serialisation and Messageing
+ =============================
+ 
+Serialization is about taking a snapshot of your in-memory representation and restoring it later on.
+
+This is all great, except that it starts fraying at the seams when you think 
+about loading a previously stored snapshot with a newer version of the software 
+(Backward Compatibility) or (god forbid) a recently stored snapshot with an 
+older version of the software (Forward Compatibility).
+
+Many structures can easily deal with backward compatibility, however forward compatibility 
+requires that your newer format is very close to its previous iteration: basically, 
+just add/remove some fields but keeps the same overall structure.
+
+The problem is that serialization, for performance reasons, tends to 
+tie the on-disk structure to the in-memory representation; 
+changing the in-memory representation then requires either 
+the deprecation of the old archives (and/or a migration utility).
+
+
+On the other hand, messaging systems (and this is what google protobuf is)
+are about decoupling the exchanged messages structures from the i
+n-memory representation so that your application remains flexible.
+
+Therefore, you first need to choose whether you will implement serialization or messaging.
+
+Now you are right that you can either write the save/load code within the class or outside it. 
+This is once again a trade-off:
+
+    - in-class code has immediate access to all-members, usually more efficient and 
+     straightforward, but less flexible, so it goes hand in hand with serialization
+     
+    - out-of-class code requires indirect access (getters, visitors hierarchy),
+      less efficient, but more flexible, so it goes hand in hand with messaging
+
+Note that there is no drawback about hidden state. A class has no (truly) hidden state:
+
+    - caches (mutable values) are just that, they can be lost without worry
+     hidden types (think FILE* or other handle) are normally recoverable 
+     through other ways (serializing the name of the file for example)
+    ...
+
+Can use a mix of both.
+
+    - Caches are written for the current version of the program and use 
+      fast (de)serialization in v1. New code is written to work with both v1 and v2, 
+      and writes in v1 by default until the previous version disappears; 
+      then switches to writing v2 (assuming it's easy). 
+      Occasionally, massive refactoring make backward compatibility too painful, 
+      we drop it on the floor at this point (and increment the major digit).
+      
+   - On the other hand, exchanges with other applications/services and more durable 
+     storage (blobs in database or in files) use messaging because 
+     I don't want to tie myself down to a particular code structure for the next 10 years.
+
+ 
