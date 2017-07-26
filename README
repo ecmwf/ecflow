@@ -214,4 +214,7 @@ Ecflowview
 * ECFLOWRC variable may be set to use alternative directory for user ecflowview option files (default is $HOME/.ecflowrc)
 
  
- 
+Ecflow uses Semantic versioning
+===============================
+See: http://semver.org/
+
