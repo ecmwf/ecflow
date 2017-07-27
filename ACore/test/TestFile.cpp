@@ -309,4 +309,95 @@ BOOST_AUTO_TEST_CASE( test_create_missing_directories )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_get_last_lines_of_a_file )
+{
+   cout << "ACore:: ...test_get_last_lines_of_a_file\n";
+
+   std::string path = File::test_data("ACore/test/data/test_get_last_lines_of_a_file.txt","ACore");
+   std::string last_100_lines;
+   size_t no_of_lines = 100;
+   { // create file with 100 lines 0-99
+      std::stringstream ss;
+      std::ofstream file( path.c_str() );
+      for(size_t i=0; i < no_of_lines; i++) {
+         file << i << ": the line\n";
+         ss << i << ": the line\n";
+      }
+      last_100_lines = ss.str();
+   }
+   { // get negative lines
+       std::string error_msg;
+       std::string last_lines = File::get_last_n_lines(path,-1,error_msg);
+       BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+       BOOST_REQUIRE_MESSAGE(last_lines == "" ,"Expected '' but found " <<  last_lines );
+    }
+   { // get no lines
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,0,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == "" ,"Expected '' but found " <<  last_lines );
+   }
+   { // get the last line only
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,1,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == "99: the line\n" ,"Expected '99: the line\n' but found " <<  last_lines );
+   }
+   { // get the last 2 line only
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,2,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == "98: the line\n99: the line\n" ,"Expected last 2 lines but got " <<  last_lines );
+   }
+   { // get the last 100 line only
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,no_of_lines,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == last_100_lines,"Expected last " << no_of_lines << " lines but got " <<  last_lines );
+   }
+   { // get the last 1000 line only
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,1000,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == last_100_lines,"Expected last " << no_of_lines << " lines but got " <<  last_lines );
+   }
+
+   fs::remove(path); // Remove the file. Comment out for debugging
+
+
+   // ===================================================================================
+   // Now check empty file
+   // ===================================================================================
+   {
+      std::ofstream file( path.c_str() ); // create empty file
+   }
+
+   { // get no lines ?
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,0,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == "" ,"Expected '' but found " <<  last_lines );
+   }
+   { // get the last line only
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,1,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == "" ,"Expected '' but found " <<  last_lines );
+   }
+   { // get the last 2 line only
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,2,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == "" ,"Expected '' but found " <<  last_lines );
+   }
+   { // get the last 100 line only
+      std::string error_msg;
+      std::string last_lines = File::get_last_n_lines(path,no_of_lines,error_msg);
+      BOOST_REQUIRE_MESSAGE(error_msg.empty(),"Expected no failure but got " << error_msg );
+      BOOST_REQUIRE_MESSAGE(last_lines == "" ,"Expected '' but found " <<  last_lines );
+   }
+
+   fs::remove(path); // Remove the file. Comment out for debugging
+}
+
 BOOST_AUTO_TEST_SUITE_END()
