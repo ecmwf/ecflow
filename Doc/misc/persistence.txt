@@ -10,8 +10,13 @@ Automatic Object Versioning for Forward and Backward File Format Compatibility@
 Protobuffer versus json:
     https://news.ycombinator.com/item?id=9665204
     
-5 Reasons to Use Protocol Buffers Instead of JSON For Your Next Service:
+json versus protocol buffers:
+    5 Reasons to Use Protocol Buffers Instead of JSON For Your Next Service:
     http://blog.codeclimate.com/blog/2014/06/05/choose-protocol-buffers/
+    https://dzone.com/articles/protobuf-performance-comparison-and-points-to-make
+    
+Json/c++
+    https://github.com/nlohmann/json/blob/develop/README.md
     
 Json,TOML,YAML:
     http://www.drdobbs.com/web-development/after-xml-json-then-what/240151851
@@ -19,9 +24,22 @@ Json,TOML,YAML:
 Json scema evolution:
     https://snowplowanalytics.com/blog/2014/05/15/introducing-self-describing-jsons/
     
+Json versioning for client/server:
+    https://stackoverflow.com/questions/10042742/what-is-the-best-way-to-handle-versioning-using-json-protocol
     
- Serialisation and Messageing
- =============================
+Semantic versioning:
+	http://semver.org/
+
+Versioning general:
+    https://www.mashery.com/blog/ultimate-solution-versioning-rest-apis-content-negotiation
+    https://rubentorresbonet.wordpress.com/2014/08/25/an-overview-of-data-serialization-techniques-in-c/
+    
+HTTP:
+    https://www.tutorialspoint.com/http/http_caching.htm
+    http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
+    
+Serialisation and Messageing
+=============================
  
 Serialization is about taking a snapshot of your in-memory representation and restoring it later on.
 
