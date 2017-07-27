@@ -113,6 +113,7 @@ set(viewer_srcs
     RepeatEditor.cpp
     SaveSessionAsDialog.cpp
     ScriptItemWidget.cpp
+    ServerComInfoWidget.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
     ServerDefsAccess.cpp
@@ -145,7 +146,8 @@ set(viewer_srcs
     RichTextSearchInterface.cpp
     RichTextSearchLine.cpp
     TextEditSearchLine.cpp
-    TimeItemWidget.cpp    
+    TimeItemWidget.cpp
+    ToolTipFormat.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
@@ -264,6 +266,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LogTruncator.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
+    MessageItemWidget.hpp
     MeterEditor.hpp
     NodeFilterDialog.hpp
     NodePanel.hpp
@@ -294,6 +297,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     SaveSessionAsDialog.hpp
     RepeatEditor.hpp
     RichTextEdit.hpp
+    ServerComInfoWidget.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
     ServerHandler.hpp

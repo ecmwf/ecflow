@@ -54,8 +54,8 @@ Dashboard *NodePanel::addWidget(QString id)
 
 	addTab(nw,pix,name);
 
-	connect(nw,SIGNAL(selectionChanged(VInfo_ptr)),
-			this,SIGNAL(selectionChanged(VInfo_ptr)));
+    connect(nw,SIGNAL(selectionChanged(VInfo_ptr)),
+            this,SLOT(slotSelectionChangedInWidget(VInfo_ptr)));
 
     connect(nw->titleHandler(),SIGNAL(changed(DashboardTitle*)),
                 this,SLOT(slotTabTitle(DashboardTitle*)));
@@ -148,6 +148,16 @@ void NodePanel::slotSelection(VInfo_ptr n)
 {
 	if(Dashboard *w=currentDashboard())
 			w->currentSelection(n);
+}
+
+void NodePanel::slotSelectionChangedInWidget(VInfo_ptr n)
+{
+    if(Dashboard *w=static_cast<Dashboard*>(sender()))
+    {
+        if(w == currentDashboard())
+            Q_EMIT selectionChangedInCurrent(n);
+
+    }
 }
 
 bool NodePanel::selectInTreeView(VInfo_ptr info)

@@ -28,6 +28,7 @@
 #include "TableNodeSortModel.hpp"
 #include "PropertyMapper.hpp"
 #include "StandardView.hpp"
+#include "ServerHandler.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
@@ -312,6 +313,22 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
         if(info && info->isAttribute())
         {
             AttributeEditor::edit(info,view_);
+        }
+    }
+
+    //Only filter the given suite (of the node stored in info).
+    //We achive this by setting the suitefilter to filter only this
+    //suite.
+    else if(cmd ==  "filterOne")
+    {
+        if(info)
+        {
+            if(ServerHandler* server=info->server())
+            {
+                VNode* n=info->node();
+                if(n && info->isNode())
+                    server->setSuiteFilterWithOne(n);
+            }
         }
     }
 

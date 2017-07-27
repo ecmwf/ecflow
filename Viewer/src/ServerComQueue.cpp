@@ -316,6 +316,7 @@ void ServerComQueue::addNewsTask()
 
 	VTask_ptr task=VTask::create(VTask::NewsTask);
 	addTask(task);
+    server_->refreshScheduled();
 }
 
 void ServerComQueue::addSyncTask()

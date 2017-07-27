@@ -188,6 +188,16 @@
                         "line" : "completeBorderColour",
                         "line" : "completeFontColour"
                     }
+                },
+                "tab" : {
+                    "label" : "Toolbar",
+
+                    "group" : {
+                        "title" : "Server refresh button",
+                        "prefix" : "server.update",
+                        "line" : "blinkUpdateButtonLimit",
+                        "line" : "showLastRefreshTimeInAutoMode"
+                    }
                 }
             }
         },
@@ -400,43 +410,50 @@
         },
 
         "server": {
-            "label" : "Server options",
-            "desc" : "Server options",
-            "icon" : "server.svg",
-            "group" : {
+            "label" : "Server settings",
+            "desc" : "Server settings",
+            "icon" : "cogwheel_blue.svg",
+            "tabs"  : {
+                "tab" : {
+                    "label"  : "Refresh",
 
-                "title" : "Update",
-                "prefix" : "server.update",
-
-                "line" : "autoUpdate",
-                "line" : "updateRateInSec",
-                "line" : "adaptiveUpdate",
-                "note" : {
-                    "default": "When enabled the server update period is <u>increased at every automatic update</u> until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again."
+                    "group" : {
+                        "title" : "Options",
+                        "prefix" : "server.update",
+                        "line" : "autoUpdate",
+                        "line" : "updateRateInSec",
+                        "line" : "adaptiveUpdate",
+                        "note" : {
+                            "default": "When enabled the server refresh period is <u>increased at every automatic refresh</u> until the maximum period is reached. If the user in the meantime refreshes the server manually the refresh period is set back to its original value and whole process starts again."
+                        },
+                        "line" : "adaptiveUpdateIncrementInSec",
+                        "line" : "maxAdaptiveUpdateRateInMin"
+                    }
                 },
-                "line" : "adaptiveUpdateIncrementInSec",
-                "line" : "maxAdaptiveUpdateRateInMin"
-            },
 
-            "group" : {
+                "tab" : {
+                    "label"  : "Fetching files",
+                    "group" : {
+                        "title" : "Manual, script, job and job output",
+                        "prefix" : "server.files",
+                        "line" : "readFilesFromDisk",
+                        "line" : "maxOutputFileLines"
+                    }
+                },
 
-                "title" : "Files (manual, script, job and job output)",
-                "prefix" : "server.files",
-                
-                "line" : "readFilesFromDisk",
-                "line" : "maxOutputFileLines"
-            },
+                "tab" : {
 
-            "group" : {
-
-                "title" : "Automatic search on output files",
-                "prefix" : "panel.output.automaticSearch",
-                
-                "line" : "performSearch",
-                "line" : "searchMode",
-                "line" : "searchText",
-                "line" : "searchFrom",
-                "line" : "caseSensitive"
+                    "label" : "Search in output",
+                    "group" : {
+                       "title" : "Automatic search on output files",
+                       "prefix" : "panel.output.automaticSearch",
+                        "line" : "performSearch",
+                        "line" : "searchMode",
+                        "line" : "searchText",
+                        "line" : "searchFrom",
+                        "line" : "caseSensitive"
+                    }
+                }
             },
 
             "grid-hidden" : {
@@ -487,16 +504,7 @@
                     "line" : "soundFile"
                 }
             }
-
-        },
-
-        "Tree view" : {
-            "visible" : "false",
-            "desc" : "Tree view options",
-
-            "line" : "view.tree.font",
-            "line" : "view.tree.nodeRectRadius",
-            "line" : "view.tree.displayChildCount"
         }
+
     }
 }

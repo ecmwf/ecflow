@@ -32,12 +32,14 @@
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
 #include "PropertyDialog.hpp"
+#include "ServerComInfoWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerList.hpp"
 #include "ServerListDialog.hpp"
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
+#include "ToolTipFormat.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
@@ -83,35 +85,45 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 
-    connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
+    connect(nodePanel_,SIGNAL(selectionChangedInCurrent(VInfo_ptr)),
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
     connect(nodePanel_,SIGNAL(contentsChanged()),
-    	    this,SLOT(slotContentsChanged()));
+            this,SLOT(slotContentsChanged()));
 
-    //Add temporary preview label
-   /* QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
-    label->setAutoFillBackground(true);
-    label->setProperty("previewLabel","1");
+    //--------------
+    // Toolbar
+    //--------------
 
-    QLabel *label1=new QLabel("      ",this);
+    //Add server refresh widget to the front of the toolbar
+    serverComWidget_=new ServerRefreshInfoWidget(actionRefreshSelected,this);
+    Q_ASSERT(actionSearch);
+    viewToolBar->insertWidget(actionSearch,serverComWidget_);
+    //viewToolBar->addWidget(serverComWidget_);
 
-    viewToolBar->addWidget(label1);
-    viewToolBar->addWidget(label);*/
+    connect(serverComWidget_,SIGNAL(serverSettingsEditRequested(ServerHandler*)),
+            this,SLOT(slotEditServerSettings(ServerHandler*)));
 
+
+    //insert a spacer after the the server refresh widget
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    viewToolBar->addWidget(spacer);
+    viewToolBar->insertWidget(actionSearch,spacer);
+    //viewToolBar->addWidget(spacer);
 
-    //QToolBar* ipToolBar=new QToolBar(this);
-    addInfoPanelActions(viewToolBar);
-    //addToolBar(ipToolBar);
+    //Add more actions
+    addInfoPanelActions(viewToolBar);  
 
-    //Actions based on selection
+    //Add shortcuts to action tooltips
+    Viewer::addShortCutToToolTip(viewToolBar->actions());
+
+    //Initialise actions based on selection
     actionRefreshSelected->setEnabled(false);
     actionResetSelected->setEnabled(false);
 
+    //--------------
     //Status bar
+    //--------------
 
     //Add server list sync notification
     if(ServerList::instance()->hasSyncChange())
@@ -132,6 +144,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     //Add notification widget
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
+
+    //serverComWidget_=new ServerComLineDisplay(this);
+    //statusBar()->addPermanentWidget(serverComWidget_);
 
     //Assigns name to each object
     WidgetNameProvider::nameChildren(this);
@@ -332,7 +347,6 @@ void MainWindow::on_actionSaveSessionAs_triggered()
     d.exec();
 }
 
-
 void MainWindow::slotCurrentChangedInPanel()
 {
 	slotSelectionChanged(nodePanel_->currentSelection());
@@ -348,13 +362,16 @@ void MainWindow::slotCurrentChangedInPanel()
 	 //updateSearchPanel();
 }
 
+//The selection changed in one of the views
 void MainWindow::slotSelectionChanged(VInfo_ptr info)
 {
-	selection_=info;
+    selection_=info;
 
+    //Get the set of visible info panel tabs for the selection
 	std::vector<InfoPanelDef*> ids;
 	InfoPanelHandler::instance()->visible(selection_,ids);
 
+    //Set status of the info panel actions in the toolbar accordingly
 	Q_FOREACH(QAction* ac,infoPanelActions_)
 	{
 		ac->setEnabled(false);
@@ -371,23 +388,28 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 		}
 	}
 
+    //Update the refres action/info to the selection
 	updateRefreshActions();
 }
 
 void MainWindow::updateRefreshActions()
 {
-	QString serverName;
-	if(selection_ && selection_.get())
+    ServerHandler* s=0;
+
+    QString serverName;
+    if(selection_)
 	{
-		if(ServerHandler* s=selection_->server())
-		{
-			serverName=QString::fromStdString(s->name());
-		}
+        s=selection_->server();
 	}
 
-	bool hasSel=(selection_ && selection_.get());
+    serverComWidget_->setServer(s);
+
+
+    bool hasSel=(selection_!= 0);
 	actionRefreshSelected->setEnabled(hasSel);
 	actionResetSelected->setEnabled(hasSel);
+
+#if 0
 
 	if(serverName.isEmpty())
 	{
@@ -406,7 +428,8 @@ void MainWindow::updateRefreshActions()
 
 			actionRefreshSelected->setToolTip(tnew);
 		}
-	}
+    }
+#endif
 }
 
 
@@ -457,6 +480,12 @@ void MainWindow::hideServerSyncNotify()
 {
    if(serverSyncNotifyTb_)
       serverSyncNotifyTb_->hide();
+}
+
+void MainWindow::slotEditServerSettings(ServerHandler* s)
+{
+    VInfo_ptr info=VInfoServer::create(s);
+    nodePanel_->openDialog(info,"server_settings");
 }
 
 //==============================================================

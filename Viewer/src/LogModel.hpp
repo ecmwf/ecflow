@@ -52,6 +52,9 @@ public:
     void clearData();
     QModelIndex lastIndex() const;
 
+    QString entryText(const QModelIndex&) const;
+    QString fullText(const QModelIndex&) const;
+
 protected:
 	QList<LogModelLine> data_;
 };

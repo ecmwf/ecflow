@@ -112,8 +112,8 @@ int main(int argc, char **argv)
     // startup - via the session manager, or straight to the main window?
     bool startMainWindow = true;
 
-    //Initialise the session. We have to call thi before VConfig::init() because
-    //some settings Vconfig loads are session-dependent.
+    //Initialise the session. We have to call this before VConfig::init() because
+    //some settings VConfig loads are session-dependent.
     if (SessionHandler::requestStartupViaSessionManager())
     {
         SessionDialog sessionDialog;

@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "VItemPathParser.hpp"
+#include "VAttributeType.hpp"
 
 VItemPathParser::VItemPathParser(const std::string& path) : itemType_(NoType)
 {
@@ -50,6 +51,17 @@ VItemPathParser::VItemPathParser(const std::string& path) : itemType_(NoType)
         node_=p.substr(0,pos);
         attribute_=p.substr(pos+1);
         itemType_=AttributeType;
+
+        if(type_ == "gen-variable")
+            type_="genvar";
+        else if(type_ == "user-variable")
+            type_="var";
+
+        if(!VAttributeType::find(type_))
+        {
+            itemType_=NoType;
+            type_.clear();
+        }
     }
     else
     {

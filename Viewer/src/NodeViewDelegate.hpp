@@ -143,6 +143,7 @@ protected:
 
     void labelSize(QStringList data,int& totalWidth,int& totalHeight) const;
     int labelHeight(int) const;
+    void renderVarCore(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&,QColor) const;
 
 	QPen hoverPen_;
 	QBrush hoverBrush_;

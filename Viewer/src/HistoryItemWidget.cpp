@@ -9,6 +9,10 @@
 
 #include "HistoryItemWidget.hpp"
 
+#include <QtGlobal>
+#include <QAction>
+#include <QClipboard>
+
 #include "LogProvider.hpp"
 #include "LogModel.hpp"
 #include "VReply.hpp"
@@ -31,8 +35,13 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 	treeView_->setProperty("log","1");
 	treeView_->setModel(model_);
 	treeView_->setItemDelegate(new LogDelegate(this));
+    treeView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 
     checkActionState();
+
+    //Define context menu
+    treeView_->addAction(actionCopyEntry_);
+    treeView_->addAction(actionCopyRow_);
 }
 
 QWidget* HistoryItemWidget::realWidget()
@@ -152,5 +161,27 @@ void HistoryItemWidget::on_reloadTb__clicked(bool)
 	}
 }
 
+void HistoryItemWidget::on_actionCopyEntry__triggered()
+{
+   toClipboard(model_->entryText(treeView_->currentIndex()));
+}
+
+void HistoryItemWidget::on_actionCopyRow__triggered()
+{
+   toClipboard(model_->fullText(treeView_->currentIndex()));
+}
+
+void HistoryItemWidget::toClipboard(QString txt) const
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QClipboard* cb=QGuiApplication::clipboard();
+    cb->setText(txt, QClipboard::Clipboard);
+    cb->setText(txt, QClipboard::Selection);
+#else
+    QClipboard* cb=QApplication::clipboard();
+    cb->setText(txt, QClipboard::Clipboard);
+    cb->setText(txt, QClipboard::Selection);
+#endif
+}
 
 static InfoPanelItemMaker<HistoryItemWidget> maker1("history");

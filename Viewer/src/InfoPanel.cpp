@@ -704,7 +704,7 @@ void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server)
 	if(frozen())
 		return;
 
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->server() && info_->server() == server)
 		{
@@ -717,13 +717,13 @@ void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server)
 	}
 }
 
-void InfoPanel::notifyServerSyncFinished(ServerHandler* server)
+void InfoPanel::notifyEndServerSync(ServerHandler* server)
 {
 	//TODO: does frozen make sense in this case?
 	if(frozen())
 		return;
 
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->server() && info_->server() == server)
 		{

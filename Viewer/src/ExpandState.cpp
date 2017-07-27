@@ -180,7 +180,7 @@ void ExpandState::collectExpanded(ExpandStateNode *expand,const VNode* node,cons
         //An existing expand node
         if(chExpand)
         {
-            UI_ASSERT(chExpand->name_ == chNode->strName(),"");
+            UI_ASSERT(chExpand->name_ == chNode->strName()," chExpand->name_=" << chExpand->name_ << " chNode->strName()=" << chNode->strName());
         }
 
         //A not-yet-allocated expand node. The corresponding vnode has just been
@@ -196,6 +196,10 @@ void ExpandState::collectExpanded(ExpandStateNode *expand,const VNode* node,cons
             //expand recursively the new expand node if needed
             if(parentExpandedAll)
                 chExpand->setExpandedRecursively(1);
+            else
+            {
+                UiLog().dbg() << " newly added node not expanded!!";
+            }
 
         }
 

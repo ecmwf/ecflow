@@ -672,6 +672,11 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
                 Q_EMIT attributesChanged(this,node);
             }
         }
+        else
+        {
+            //Tell the attribute filter that this attribute must always be visible
+            attrFilter_->setForceShowAttr(const_cast<VAttribute*>(a));
+        }
     }
 }
 

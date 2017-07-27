@@ -247,7 +247,7 @@ void InfoPanelItem::setDetached(bool b)
 
 void InfoPanelItem::linkSelected(const std::string& path)
 {
-    if(!suspended_ && !detached_)
+    if(!suspended_)
     {
         VInfo_ptr info=VInfo::createFromPath(info_->server(),path);
 
@@ -261,7 +261,7 @@ void InfoPanelItem::linkSelected(const std::string& path)
 
 void InfoPanelItem::linkSelected(VInfo_ptr info)
 {
-    if(!suspended_ && !detached_)
+    if(!suspended_)
     {
         if(info)
         {

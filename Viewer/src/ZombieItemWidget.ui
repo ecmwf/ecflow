@@ -26,7 +26,16 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -194,7 +203,7 @@
      <normaloff>:/viewer/terminate.svg</normaloff>:/viewer/terminate.svg</iconset>
    </property>
    <property name="text">
-    <string>Terminate</string>
+    <string>&amp;Terminate</string>
    </property>
   </action>
   <action name="actionRescue">
@@ -203,12 +212,12 @@
      <normaloff>:/viewer/rescue.svg</normaloff>:/viewer/rescue.svg</iconset>
    </property>
    <property name="text">
-    <string>Rescue</string>
+    <string>&amp;Rescue</string>
    </property>
   </action>
   <action name="actionFoboff">
    <property name="text">
-    <string>Fob off</string>
+    <string>&amp;Fob off</string>
    </property>
   </action>
   <action name="actionDelete">
@@ -217,12 +226,20 @@
      <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>&amp;Delete</string>
    </property>
   </action>
   <action name="actionKill">
    <property name="text">
-    <string>Kill</string>
+    <string>&amp;Kill</string>
+   </property>
+  </action>
+  <action name="actionLookup">
+   <property name="text">
+    <string>&amp;Look up node in tree</string>
+   </property>
+   <property name="toolTip">
+    <string>Look up node in tree</string>
    </property>
   </action>
  </widget>
@@ -230,7 +247,7 @@
   <customwidget>
    <class>TreeView</class>
    <extends>QTreeView</extends>
-   <header>TreeView.hpp</header>
+   <header location="global">TreeView.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

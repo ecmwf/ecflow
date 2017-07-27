@@ -928,7 +928,7 @@ void TreeNodeModel::selectionChanged(QModelIndexList lst)
 
 //WARNING: if we are in the middle of an attribute filter change it will not give
 //correct results, because atts_ contains the new filter state, but the whole VTree still
-//base on the previous atts_ state.!! However we can assume that the index vas visible in
+//base on the previous atts_ state!! However we can assume that the index vas visible in
 //the tree so attrNum() is cached on the tree nodes so we get correct results for nodes.
 //Attributes however cannot be identified correctly.
 

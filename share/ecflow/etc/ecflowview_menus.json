@@ -562,6 +562,21 @@
             "command"        : "ecflow_client --alter clear_flag migrated <full_name>",
             "status_tip"     : "__cmd__"
         },
+
+        {
+            "menu"           : "Special",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Filter only this suite",
+            "visible_for"    : "node",
+            "command"        : "filterOne",
+            "handler"        : "tree",
+            "view"           : "tree"
+        },
+
         {
             "menu"           : "Force",
             "name"           : "Unknown",
@@ -674,11 +689,11 @@
         }, 
         {
             "menu"           : "Node",
-            "name"           : "Settings ...",
+            "name"           : "Server settings ...",
             "visible_for"    : "server",        
             "command"        : "server_settings",
             "handler"        : "info_panel",
-            "icon"           : "configure.svg"            
+            "icon"           : "cogwheel_blue.svg"
         }, 
         {
             "menu"           : "Node",

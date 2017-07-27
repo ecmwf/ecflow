@@ -7,24 +7,18 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef UIDEBUG_HPP_
-#define UIDEBUG_HPP_
+#ifndef TOOLTIPFORMAT_HPP
+#define TOOLTIPFORMAT_HPP
 
+#include <QList>
+#include <QString>
 
-#include "Log.hpp"  // from ACore
+class QAction;
 
-
-class UIDebug
+namespace Viewer
 {
-public:
-    UIDebug() {}
-   ~UIDebug() {}
+    QString formatShortCut(QAction*);
+    void addShortCutToToolTip(QList<QAction*>);
+} //namespace Viewer
 
-	static void uiAssert(char const* expr, char const* file, long line, const std::string& message);
-	static std::string longToString(long num);
-};
-
-
-#define UI_ASSERT(expr,EXPRESSION) ((expr)? ((void)0): UIDebug::uiAssert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
-
-#endif
+#endif // TOOLTIPFORMAT_HPP

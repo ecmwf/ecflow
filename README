@@ -171,10 +171,14 @@ boost/bjam:  This can not build the new UI(ecflow_ui)
   > cd $WK
   > bjam c++-template-depth=512 variant=release install-all
   
+  using boost 1.53 with gcc 4.8, will have excessive warnings. To prune these warnings use:
+  > bjam c++-template-depth=512 cxxflags=-Wno-unused-local-typedefs variant=release
+  
   If you have a multi-core machine, you can speed up the build using:
   the -j<n> option. Where 'n' is an integer, of the number of cores.
   
   bjam variant=release -j4
+  
   
 * Once ecFlow is built it can be installed. 
   
@@ -185,6 +189,7 @@ boost/bjam:  This can not build the new UI(ecflow_ui)
      <ECFLOW_INSTALL_DIR>/bin
      <ECFLOW_INSTALL_DIR>/lib
      <ECFLOW_INSTALL_DIR>/doc
+     <ECFLOW_INSTALL_DIR>/share
      <ECFLOW_PYTHON_INSTALL_DIR> 
       
   Depending on your umask setting you may need to call chmod 755 on the executables  
@@ -194,3 +199,22 @@ boost/bjam:  This can not build the new UI(ecflow_ui)
   
       export PYTHONPATH=$PYTHONPATH:$ECFLOW_PYTHON_INSTALL_DIR
       export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ECFLOW_PYTHON_INSTALL_DIR
+      
+      
+Ecflowview
+==========
+* By default the ecflowview 'server' and ecflowview.menu files are placed in  the share/ecflow directory. 
+  However you can use ECFLOWVIEW_HOME shell variable to override this
+ 
+* server file defines the list of servers you want all your users to see in ecflowview. 
+  It has a very simple format. For each ecflow server add a line like
+     
+     <server_name> <machine_name> <port>
+     
+* ECFLOWRC variable may be set to use alternative directory for user ecflowview option files (default is $HOME/.ecflowrc)
+
+ 
+Ecflow uses Semantic versioning
+===============================
+See: http://semver.org/
+

@@ -7,24 +7,23 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef UIDEBUG_HPP_
-#define UIDEBUG_HPP_
+#ifndef SERVERCOMOBSERVER_HPP
+#define SERVERCOMOBSERVER_HPP
 
+class ServerHandler;
 
-#include "Log.hpp"  // from ACore
-
-
-class UIDebug
+class ServerComObserver
 {
 public:
-    UIDebug() {}
-   ~UIDebug() {}
+    ServerComObserver() {}
+    virtual ~ServerComObserver() {}
 
-	static void uiAssert(char const* expr, char const* file, long line, const std::string& message);
-	static std::string longToString(long num);
+    virtual void notifyRefreshTimerStarted(ServerHandler* server) {}
+    virtual void notifyRefreshTimerStopped(ServerHandler* server) {}
+    virtual void notifyRefreshTimerChanged(ServerHandler* server) {}
+    virtual void notifyRefreshScheduled(ServerHandler* server) {}
+    virtual void notifyRefreshFinished(ServerHandler* server) {}
 };
 
+#endif // SERVERCOMOBSERVER_HPP
 
-#define UI_ASSERT(expr,EXPRESSION) ((expr)? ((void)0): UIDebug::uiAssert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
-
-#endif

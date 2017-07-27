@@ -8,18 +8,19 @@
 //
 //============================================================================
 
+#include <fstream>
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include "LogProvider.hpp"
 
 #include "FileWatcher.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
+#include "File.hpp"
 
-#include <fstream>
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 
 LogProvider::LogProvider(InfoPresenter* owner,QObject* parent) :
 	QObject(parent),
@@ -108,9 +109,9 @@ void LogProvider::fetchFile(ServerHandler *server,const std::string& fileName)
     //First we try to read the file directly from the disk
     //if(server->readFromDisk())
     {
-    	size_t size;
+    	size_t file_size = 0;
     	std::string err_msg;
-    	reply_->text(readLastLines(fileName,100,size,err_msg));
+    	reply_->text( ecf::File::get_last_n_lines(fileName,100,file_size,err_msg));
     	if(err_msg.empty())
     	{
     		reply_->fileReadMode(VReply::LocalReadMode);
@@ -121,7 +122,7 @@ void LogProvider::fetchFile(ServerHandler *server,const std::string& fileName)
     		owner_->infoReady(reply_);
 
     		//Try to track the changes in the log file
-    		watchFile(fileName,size);
+    		watchFile(fileName,file_size);
     		return;
     	}
     }
@@ -193,50 +194,4 @@ void LogProvider::slotLinesAppend(QStringList lst)
 	reply_->setTextVec(vec);
 	owner_->infoAppended(reply_);
 }
-
-std::string LogProvider::readLastLines(const std::string& filename,int last_n_lines,size_t& size,std::string& error_msg)
-{
-   if ( last_n_lines <= 0  ) return std::string();
-
-   std::ifstream source( filename.c_str(), std::ios_base::in );
-   if (!source) {
-      error_msg = "File::get_last_n_lines: Could not open file " + filename;
-      return std::string();
-   }
-
-   size_t const granularity = 100 * last_n_lines;
-   source.seekg( 0, std::ios_base::end );
-   size = static_cast<size_t>( source.tellg() );
-   std::vector<char> buffer;
-   int newlineCount = 0;
-   while (source
-           && buffer.size() != size
-           && newlineCount < last_n_lines ) {
-       buffer.resize( std::min( buffer.size() + granularity, size ) );
-       source.seekg( -static_cast<std::streamoff>( buffer.size() ),
-                     std::ios_base::end );
-#if defined(HPUX) || defined(_AIX)
-       source.read( &(buffer.front()), buffer.size() );
-#else
-       source.read( buffer.data(), buffer.size() );
-#endif
-       newlineCount = std::count( buffer.begin(), buffer.end(), '\n');
-   }
-
-   std::vector<char>::iterator start = buffer.begin();
-   while ( newlineCount > last_n_lines ) {
-       start = std::find( start, buffer.end(), '\n' ) + 1;
-       -- newlineCount;
-   }
-
-   //std::vector<char>::iterator end = remove( start, buffer.end(), '\r' ); // for windows
-   return std::string( start, buffer.end() );
-}
-
-
-
-
-
-
-
 

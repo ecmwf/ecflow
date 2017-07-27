@@ -40,14 +40,17 @@ public:
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
-	void on_reloadTb__clicked(bool);
+    void on_reloadTb__clicked(bool);
+    void on_actionCopyEntry__triggered();
+    void on_actionCopyRow__triggered();
 
 protected:
     void updateState(const ChangeFlags&);
     void adjustColumnSize();
     void checkActionState();
+    void toClipboard(QString txt) const;
 
-	LogModel* model_;
+    LogModel* model_;
 };
 
 #endif
