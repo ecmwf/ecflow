@@ -90,10 +90,8 @@ if test_uname Linux ; then
             # for boost 1.53 and > gcc 4.3 -Wno-unused-local-typedefs  : not valid
             # for boost 1.53 and > gcc 4.8 -Wno-unused-local-typedefs  : get a lot warning messages , suppress
             # for boost 1.53 and > gcc 6.1 -Wno-deprecated-declarations: std::auto_ptr deprecated messages, suppress
-            compiler=$(gcc -dumpversion)
-            if [ $compiler = "4.3" ] ; then
-                CXXFLAGS=-d2    #  dummy argument, since CXXFLAGS is quoted
-            else 
+            compiler=$(gcc -dumpversion | sed 's/\.//g' )  # assume major.minor.patch
+            if [ "$compiler" -ge 430  ] ; then
                 CXXFLAGS=cxxflags=-Wno-unused-local-typedefs
                 #CXXFLAGS="cxxflags=-Wno-unused-local-typedefs,-Wno-deprecated-declarations"
        		fi
