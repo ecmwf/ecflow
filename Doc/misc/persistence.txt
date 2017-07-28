@@ -38,6 +38,9 @@ HTTP:
     https://www.tutorialspoint.com/http/http_caching.htm
     http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
     
+Pluralsight training: Moving Beyond JSON and XML with Protocol Buffers
+    https://www.pluralsight.com/courses/protocol-buffers-beyond-json-xml
+
 Serialisation and Messageing
 =============================
  
