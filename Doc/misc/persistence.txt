@@ -41,6 +41,17 @@ HTTP:
 Pluralsight training: Moving Beyond JSON and XML with Protocol Buffers
     https://www.pluralsight.com/courses/protocol-buffers-beyond-json-xml
 
+Protocol buffers with ASIO
+===========================
+- https://stackoverflow.com/questions/8269452/google-protocol-buffers-parsedelimitedfrom-and-writedelimitedto-for-c
+- https://stackoverflow.com/questions/37950139/writing-a-simple-c-protobuf-streaming-client-server
+- https://stackoverflow.com/questions/2340730/are-there-c-equivalents-for-the-protocol-buffers-delimited-i-o-functions-in-ja/22927149#22927149
+- https://github.com/adanselm/pbRPCpp
+
+GRPC versus ASIO
+============================
+- http://eli.thegreenplace.net/2016/grpc-sample-in-c-and-python/
+
 Serialisation and Messageing
 =============================
  
