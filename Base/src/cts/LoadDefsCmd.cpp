@@ -21,13 +21,16 @@
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
+#include "File.hpp"
+#include "PrintStyle.hpp"
 
 using namespace ecf;
 using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force)
+
+LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool check_only)
 : force_(force), defs_(Defs::create()), defs_filename_(defs_filename)
 {
    if (defs_filename_.empty()) {
@@ -46,6 +49,22 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force)
       cout << warningMsg;
    }
    else {
+      // Check if its a boost file format. (could be old checkpoint file)
+      // When default version of ecflow is 4.7  this section could be removed. TODO
+      std::string error_msg;
+      std::string first_line = File::get_first_n_lines(defs_filename_, 1, error_msg);
+      if (!first_line.empty() && error_msg.empty()) {
+         if (first_line.find("22 serialization::archive") == 0) {   // boost file format
+            // Can be use to check for corruption in boost based checkpoint files.
+            defs_->boost_restore_from_checkpt(defs_filename_);
+            if (check_only) {
+               PrintStyle print_style(PrintStyle::MIGRATE);
+               cout << defs_;
+            }
+            return;
+         }
+      }
+
       std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd.  Failed to parse file " << defs_filename_ << "\n";
       ss << errMsg;
       throw std::runtime_error( ss.str() );
@@ -136,7 +155,7 @@ void LoadDefsCmd::create( 	Cmd_ptr& cmd,
 Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename, bool force, bool check_only, AbstractClientEnv* clientEnv)
 {
    // The constructor can throw if parsing of defs_filename fail's
-   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force);
+   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force,check_only);
 
    // Don't send to server if checking, i.e cmd not set
    if (check_only) return Cmd_ptr();
