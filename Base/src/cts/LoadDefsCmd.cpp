@@ -68,8 +68,8 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
                //       Hence only do checking if option check_only used
                errMsg.clear();warningMsg.clear();
                if (!defs_->check( errMsg, warningMsg)) {
-                   std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd: Checking failed for boost file " << defs_filename_ << "\n";
-                   ss << errMsg << "\nHowever checkpoint can still be loaded into the server if 'check_only' is omitted";
+                   std::stringstream ss; ss << "LoadDefsCmd::LoadDefsCmd: Checking failed for boost file " << defs_filename_ << "\n";
+                   ss << errMsg;
                    throw std::runtime_error( ss.str() );
                }
             }
