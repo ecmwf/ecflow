@@ -95,6 +95,7 @@ list( APPEND test_srcs
    test/TestForceCmd.cpp
    test/TestFreeDepCmd.cpp
    test/TestInLimitAndLimit.cpp
+   test/TestLoadDefsCmd.cpp
    test/TestLogCmd.cpp
    test/TestMeterCmd.cpp
    test/TestQueryCmd.cpp

@@ -266,19 +266,22 @@ $ecbuild $source_dir \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
             -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
-            -DCMAKE_PYTHON_INSTALL_TYPE=local \
-            -DENABLE_STATIC_BOOST_LIBS=ON \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \
             ${log_options}
+            
+            #-DENABLE_STATIC_BOOST_LIBS=ON \
+            #-DCMAKE_PYTHON_INSTALL_TYPE=local \
+            #-DENABLE_PYTHON=OFF   \
+            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor  \
             #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
-            #-DENABLE_ALL_TESTS=ON
-            #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
-            #-DENABLE_SERVER=OFF \
-            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor 
-            #-DENABLE_PROFILING=ON 
-            #-DECBUILD_GPROF_FLAGS
+            #-DENABLE_GUI=ON       \
+            #-DENABLE_UI=ON        \           
+            #-DENABLE_ALL_TESTS=ON \
+            #-DENABLE_SERVER=OFF   \
+            #-DENABLE_PROFILING=ON \
+            #-DECBUILD_GPROF_FLAGS \
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
@@ -323,8 +326,9 @@ fi
 # ============================================================================================
 # Python:
 # -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
-#    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
-#    setup : experimental only, python way of installing
+#    default: local
+#    local  : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
+#    setup  : experimental only, python way of installing
 #
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory

@@ -209,7 +209,11 @@ set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON)
 
-find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+if ( ENABLE_PYTHON )
+	find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+else()
+	find_package( Boost 1.53.0 REQUIRED COMPONENTS serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+endif()
 
 # Available boost lib should be referenced as:
 #

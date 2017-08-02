@@ -1281,7 +1281,7 @@ private:
 // to Node, events, meters, limits, variables defined on another suite.
 class LoadDefsCmd : public UserCmd {
 public:
-   LoadDefsCmd(const std::string& defs_filename, bool force = false);
+   LoadDefsCmd(const std::string& defs_filename, bool force = false, bool check_only = false /* not persisted */ );
 
    LoadDefsCmd(const defs_ptr& defs, bool force = false)
    : force_(force), defs_(defs) {}
