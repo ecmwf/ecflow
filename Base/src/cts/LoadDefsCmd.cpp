@@ -50,22 +50,34 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
    }
    else {
       // Check if its a boost file format. (could be old checkpoint file)
-      // When default version of ecflow is 4.7  this section could be removed. TODO
+      // When default version of ecflow is 4.7  this section could be removed.
+      // i.e. BECAUSE the checkpoint will be in defs file format. TODO
       std::string error_msg;
       std::string first_line = File::get_first_n_lines(defs_filename_, 1, error_msg);
       if (!first_line.empty() && error_msg.empty()) {
          if (first_line.find("22 serialization::archive") == 0) {   // boost file format
+
             // Can be use to check for corruption in boost based checkpoint files.
             defs_->boost_restore_from_checkpt(defs_filename_);
+
             if (check_only) {
                PrintStyle print_style(PrintStyle::MIGRATE);
                cout << defs_;
+
+               // Note: there are no extern's in boost checkpoint, hence may fail some checking
+               //       Hence only do checking if option check_only used
+               errMsg.clear();warningMsg.clear();
+               if (!defs_->check( errMsg, warningMsg)) {
+                   std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd: Checking failed for boost file " << defs_filename_ << "\n";
+                   ss << errMsg << "\nHowever checkpoint can still be loaded into the server if 'check_only' is omitted";
+                   throw std::runtime_error( ss.str() );
+               }
             }
             return;
          }
       }
 
-      std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd.  Failed to parse file " << defs_filename_ << "\n";
+      std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd. Failed to parse file " << defs_filename_ << "\n";
       ss << errMsg;
       throw std::runtime_error( ss.str() );
    }
@@ -113,18 +125,23 @@ std::ostream& LoadDefsCmd::print(std::ostream& os) const
 
 const char* LoadDefsCmd::arg()  { return CtsApi::loadDefsArg();}
 const char* LoadDefsCmd::desc() {
-   return   "Check and load definition file into server.\n"
+   return   "Check and load definition or checkpoint file into server.\n"
             "The loaded definition will be checked for valid trigger and complete expressions,\n"
             "additionally in-limit references to limits will be validated.\n"
             "If the server already has the 'suites' of the same name, then a error message is issued.\n"
             "The suite's can be overwritten if the force option is used.\n"
             "To just check the definition and not send to server, use 'check_only'\n"
-            "  arg1 = path to the definition file\n"
+            "This command can also be used to load a checkpoint file.\n"
+            "Additionally when a boost checkpoint file is used, the 'check_only' option will output the\n"
+            "definition to standard out as a definition file(i.e human readable).\n"
+            "  arg1 = path to the definition file or checkpoint file\n"
             "  arg2 = (optional) [ force | check_only ]   # default = false for both\n"
             "Usage:\n"
             "--load=/my/home/exotic.def             # will error if suites of same name exists\n"
             "--load=/my/home/exotic.def force       # overwrite suite's of same name\n"
-            "--load=/my/home/exotic.def check_only  # Just check, don't send to server"
+            "--load=/my/home/exotic.def check_only  # Just check, don't send to server\n"
+            "--load=host1.3141.check                # Load checkpoint file\n"
+            "--load=host1.3141.check check_only     # Just check, if boost format write checkpoint to standard out"
             ;
 }
 

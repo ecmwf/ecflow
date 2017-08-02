@@ -17,7 +17,6 @@
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
-#include "MyDefsFixture.hpp"
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
 #include "SSyncCmd.hpp"
