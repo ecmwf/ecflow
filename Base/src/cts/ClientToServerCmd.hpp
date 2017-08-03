@@ -1228,7 +1228,7 @@ private:
 // to Node, events, meters, limits, variables defined on another suite.
 class LoadDefsCmd : public UserCmd {
 public:
-   LoadDefsCmd(const std::string& defs_filename, bool force = false, bool check_only = false /* not persisted */ );
+   LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */);
 
    LoadDefsCmd(const defs_ptr& defs, bool force = false)
    : force_(force), defs_(defs) {}
@@ -1248,7 +1248,7 @@ public:
    virtual void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const;
-   static Cmd_ptr create(const std::string& defs_filename, bool force, bool check_only, AbstractClientEnv* clientEnv);
+   static Cmd_ptr create(const std::string& defs_filename,bool force,bool check_only,bool print,AbstractClientEnv* clientEnv);
 
 private:
    static const char* arg();  // used for argument parsing
