@@ -1,5 +1,9 @@
  references
  ============
+ 
+ General
+   http://bigobject.blogspot.co.uk/2016/05/serialization-frameworksprotocols-when.html
+
  Schema evolution: 
     https://martin.kleppmann.com/2012/12/05/schema-evolution-in-avro-protocol-buffers-thrift.html
  
