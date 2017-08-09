@@ -29,7 +29,8 @@ class PersistHelper : private boost::noncopyable {
 public:
 	PersistHelper(bool compare_edit_history = false) : file_size_(0),compare_edit_history_(compare_edit_history) {}
 
-	bool test_persist_and_reload( const Defs& theInMemoryDefs, PrintStyle::Type_t file_type_on_disk,bool do_compare = true );
+   bool test_persist_and_reload( const Defs& theInMemoryDefs, PrintStyle::Type_t file_type_on_disk,bool do_compare = true );
+   bool test_defs_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true );
    bool test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true,ecf::Archive::Type at = ecf::Archive::default_archive());
 	bool test_state_persist_and_reload_with_checkpt( const Defs& theInMemoryDefs );
 	const std::string& errorMsg() const { return errorMsg_;}

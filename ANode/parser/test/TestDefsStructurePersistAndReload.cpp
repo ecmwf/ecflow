@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE( test_defs_checkpt_persistence_and_reload )
    MyDefsFixture theDefsFixture(checkPtFile);
    PersistHelper helper;
    BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
-   BOOST_CHECK_MESSAGE( helper.test_persist_and_reload(theDefsFixture.defsfile_, PrintStyle::MIGRATE), helper.errorMsg());
+   BOOST_CHECK_MESSAGE( helper.test_defs_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
 }
 
 
