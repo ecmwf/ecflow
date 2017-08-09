@@ -71,7 +71,7 @@ private:
       char* ecf_port_lock_dir = getenv("ECF_PORT_LOCK_DIR");
       std::string path;
       if (ecf_port_lock_dir) path = ecf_port_lock_dir;
-      else                   path = File::root_build_dir();
+      else                   path = File::root_source_dir();
 
       path += "/ECF_PORT_used_";
       path += the_port;

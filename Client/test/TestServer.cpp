@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE( test_server_group_stress_test )
 
 	std::string groupRequest = CtsApi::to_string(CtsApi::delete_node());
 	groupRequest += ";";
-	groupRequest +=	CtsApi::to_string(CtsApi::loadDefs(path,true/*force*/,false /*check_only*/));
+	groupRequest +=	CtsApi::to_string(CtsApi::loadDefs(path,true/*force*/,false/*check_only*/,false/*print*/));
 	groupRequest += ";";
 	groupRequest += CtsApi::shutdownServer();
 	groupRequest += ";";

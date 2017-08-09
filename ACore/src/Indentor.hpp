@@ -20,17 +20,29 @@ namespace ecf {
 
 class Indentor {
 public:
-	Indentor() {
-		++index_;
-	}
-	~Indentor() {
-		--index_;
-	}
+   Indentor() {
+      ++index_;
+   }
+   ~Indentor() {
+      --index_;
+   }
 
-	static std::ostream& indent( std::ostream& os , int char_spaces = 2);
+   static std::ostream& indent( std::ostream& os , int char_spaces = 2);
 
 private:
-	static int index_;
+   static int index_;
+
+private:
+   friend class DisableIndentor;
+   static void disable_indent() { indent_ = false;}
+   static void enable_indent()  { indent_ = true;}
+   static bool indent_;
+};
+
+class DisableIndentor {
+public:
+   DisableIndentor() { Indentor::disable_indent(); }
+   ~DisableIndentor() { Indentor::enable_indent();}
 };
 
 }

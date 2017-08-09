@@ -181,7 +181,7 @@ std::vector<std::string> CtsApi::news(unsigned int client_handle, unsigned int s
 }
 const char* CtsApi::newsArg()  { return "news"; }
 
-std::vector<std::string> CtsApi::loadDefs(const std::string& filePath, bool force, bool check_only) {
+std::vector<std::string> CtsApi::loadDefs(const std::string& filePath,bool force,bool check_only,bool print){
 
    std::string ret = "--load="; ret += filePath;
 
@@ -189,6 +189,7 @@ std::vector<std::string> CtsApi::loadDefs(const std::string& filePath, bool forc
    retVec.push_back(ret);
    if (force) retVec.push_back("force");
    if (check_only) retVec.push_back("check_only");
+   if (print) retVec.push_back("print");
    return retVec;
 }
 const char* CtsApi::loadDefsArg() { return "load"; }

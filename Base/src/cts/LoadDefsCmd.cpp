@@ -30,7 +30,7 @@ using namespace boost;
 namespace po = boost::program_options;
 
 
-LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool check_only)
+LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool check_only, bool print)
 : force_(force), defs_(Defs::create()), defs_filename_(defs_filename)
 {
    if (defs_filename_.empty()) {
@@ -42,8 +42,11 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
    // At the end of the parse check the trigger/complete expressions and resolve in-limits
    std::string errMsg, warningMsg;
    if (defs_->restore(defs_filename_, errMsg , warningMsg) ) {
-      // Dump out the in memory Node tree
-      // std::cout << defs_.get();
+
+      if (print) {
+         PrintStyle print_style(PrintStyle::MIGRATE);
+         cout << defs_;
+      }
 
       // Output any warning to standard output
       cout << warningMsg;
@@ -60,16 +63,18 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
             // Can be use to check for corruption in boost based checkpoint files.
             defs_->boost_restore_from_checkpt(defs_filename_);
 
-            if (check_only) {
+            if (print) {
                PrintStyle print_style(PrintStyle::MIGRATE);
                cout << defs_;
+            }
 
+            if (check_only) {
                // Note: there are no extern's in boost checkpoint, hence may fail some checking
                //       Hence only do checking if option check_only used
                errMsg.clear();warningMsg.clear();
                if (!defs_->check( errMsg, warningMsg)) {
-                   std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd: Checking failed for boost file " << defs_filename_ << "\n";
-                   ss << errMsg << "\nHowever checkpoint can still be loaded into the server if 'check_only' is omitted";
+                   std::stringstream ss; ss << "LoadDefsCmd::LoadDefsCmd: Checking failed for boost file " << defs_filename_ << "\n";
+                   ss << errMsg;
                    throw std::runtime_error( ss.str() );
                }
             }
@@ -118,9 +123,9 @@ std::ostream& LoadDefsCmd::print(std::ostream& os) const
 {
    /// If defs_filename_ is empty, the Defs was a in memory defs.
    if (defs_filename_.empty()) {
-      return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/)));
+      return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/,false/*print*/)));
    }
-   return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/)));
+   return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/,false/*print*/)));
 }
 
 const char* LoadDefsCmd::arg()  { return CtsApi::loadDefsArg();}
@@ -131,17 +136,15 @@ const char* LoadDefsCmd::desc() {
             "If the server already has the 'suites' of the same name, then a error message is issued.\n"
             "The suite's can be overwritten if the force option is used.\n"
             "To just check the definition and not send to server, use 'check_only'\n"
-            "This command can also be used to load a checkpoint file.\n"
-            "Additionally when a boost checkpoint file is used, the 'check_only' option will output the\n"
-            "definition to standard out as a definition file(i.e human readable).\n"
+            "This command can also be used to load a checkpoint file into the server\n"
             "  arg1 = path to the definition file or checkpoint file\n"
-            "  arg2 = (optional) [ force | check_only ]   # default = false for both\n"
+            "  arg2 = (optional) [ force | check_only | print ]   # default = false for all\n"
             "Usage:\n"
-            "--load=/my/home/exotic.def             # will error if suites of same name exists\n"
-            "--load=/my/home/exotic.def force       # overwrite suite's of same name\n"
-            "--load=/my/home/exotic.def check_only  # Just check, don't send to server\n"
-            "--load=host1.3141.check                # Load checkpoint file\n"
-            "--load=host1.3141.check check_only     # Just check, if boost format write checkpoint to standard out"
+            "--load=/my/home/exotic.def               # will error if suites of same name exists\n"
+            "--load=/my/home/exotic.def force         # overwrite suite's of same name in the server\n"
+            "--load=/my/home/exotic.def check_only    # Just check, don't send to server\n"
+            "--load=host1.3141.check                  # Load checkpoint file to the server\n"
+            "--load=host1.3141.check print check_only # print definition to standard out in defs format\n"
             ;
 }
 
@@ -157,22 +160,24 @@ void LoadDefsCmd::create( 	Cmd_ptr& cmd,
 	if (clientEnv->debug()) dumpVecArgs(LoadDefsCmd::arg(),args);
 
 	bool check_only = false;
-	bool force =  false;
+	bool force = false;
+	bool print = false;
 	std::string defs_filename;
 	for(size_t i = 0; i < args.size(); i++) {
 		if (args[i] == "force") force = true;
-		else if (args[i] == "check_only") check_only = true;
+      else if (args[i] == "check_only") check_only = true;
+      else if (args[i] == "print") print = true;
 		else defs_filename = args[i];
 	}
 	if (clientEnv->debug()) cout << "  LoadDefsCmd::create:  Defs file '" <<  defs_filename << "'.\n";
 
-	cmd = LoadDefsCmd::create(defs_filename,force, check_only,clientEnv );
+	cmd = LoadDefsCmd::create(defs_filename,force,check_only,print,clientEnv );
 }
 
-Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename, bool force, bool check_only, AbstractClientEnv* clientEnv)
+Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename, bool force, bool check_only, bool print, AbstractClientEnv* clientEnv)
 {
    // The constructor can throw if parsing of defs_filename fail's
-   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force,check_only);
+   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force,check_only,print);
 
    // Don't send to server if checking, i.e cmd not set
    if (check_only) return Cmd_ptr();

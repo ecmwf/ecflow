@@ -18,11 +18,11 @@ import sys  # determine python version
 from datetime import datetime
 import shutil   # used to remove directory tree
 
-from ecflow import Defs, Clock, DState,  Style, State, PrintStyle, File, Client, SState, debug_build
+from ecflow import Defs, Clock, DState,  Style, State, PrintStyle, File, Client, SState, File, debug_build
 import ecflow_test_util as Test
 
 
-def ecf_includes() : return Test.get_root_source_dir() + "/Pyext" + "/test/data/python_includes"
+def ecf_includes() : return File.source_dir() + "/Pyext" + "/test/data/python_includes"
 
 def create_defs(name,the_port):
     defs = Defs()

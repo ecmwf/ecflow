@@ -284,10 +284,11 @@ const char* ClientDoc::wait_for_server_reply() {
 
 const char* ClientDoc::load_defs(){
    return
-            "Load a :term:`suite definition` given by the file_path argument into the :term:`ecflow_server`::\n\n"
+            "Load a :term:`suite definition` or checkpoint file given by the file_path argument into the :term:`ecflow_server`::\n\n"
             "   void load(\n"
             "      string file_path     : path name to the definition file\n"
             "      [(bool)force=False]  : If true overwrite suite of same name\n"
+            "      [(bool)print=False]  : print parsed defs to standard out\n"
             "   )\n\n"
             "By default throws a RuntimeError exception for errors.\n"
             "If force is not used and :term:`suite` of the same name already exists in the server,\n"
@@ -303,7 +304,7 @@ const char* ClientDoc::load_defs(){
             "   ...\n"
             "   try:\n"
             "       ci = Client()       # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.load(defs_file)  # open and parse defs file, and load into server.\n"
+            "       ci.load(defs_file)  # open and parse defs or checkpoint file, and load into server.\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;

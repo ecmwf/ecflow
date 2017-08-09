@@ -940,6 +940,10 @@ std::string File::root_source_dir()
 
 std::string File::root_build_dir()
 {
+#ifdef CMAKE
+   return CMAKE_ECFLOW_BUILD_DIR;
+#endif
+
    fs::path current_path = fs::current_path();
    std::string the_current_path = current_path.string();
 
@@ -950,7 +954,6 @@ std::string File::root_build_dir()
    // cmake
    std::string cmake_cache = the_current_path + "/CMakeCache.txt";
    if (fs::exists(cmake_cache))  return the_current_path;
-
 
    // bjam or cmake
    std::string stem = current_path.stem().string();
@@ -966,7 +969,7 @@ std::string File::root_build_dir()
 
       // cmake
       std::string cmake_cache = the_current_path + "/CMakeCache.txt";
-      if (fs::exists(cmake_cache))  return the_current_path;
+      if (fs::exists(cmake_cache)) return the_current_path;
 
       stem = current_path.stem().string();
       count++;

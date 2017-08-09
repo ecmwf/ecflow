@@ -47,6 +47,27 @@ bool PersistHelper::test_persist_and_reload( const Defs& theInMemoryDefs, PrintS
 	return reload_from_defs_file(theInMemoryDefs,savedDef,tmpFilename,do_compare);
 }
 
+bool PersistHelper::test_defs_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare)
+{
+   // Write parsed file to disk, and reload, then compare defs, they should be the same
+   errorMsg_.clear();
+   file_size_ = 0;
+
+#ifdef DEBUG
+   std::string tmpFilename = "tmp_d.def";
+#else
+   std::string tmpFilename = "tmp.def";
+#endif
+   {
+      // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
+      theInMemoryDefs.save_as_checkpt(tmpFilename);
+   }
+
+   // Reload the file we just persisted and compare with in memory defs
+   Defs savedDef;
+   return reload_from_defs_file(theInMemoryDefs,savedDef,tmpFilename,do_compare);
+}
+
 
 bool PersistHelper::test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare, ecf::Archive::Type at)
 {
@@ -60,7 +81,7 @@ bool PersistHelper::test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, 
 
 bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theInMemoryDefs )
 {
-   // Write Defs to disk, and reload, then compare defs relaoded checkpt file, they should be the same
+   // Write Defs to disk, and reload, then compare defs reloaded checkpt file, they should be the same
    errorMsg_.clear();
    file_size_ = 0;
 
@@ -71,7 +92,7 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
 #endif
    {
       // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
-      theInMemoryDefs.save_as_filename(tmpFilename,PrintStyle::MIGRATE);  // will save edit history
+      theInMemoryDefs.save_as_checkpt(tmpFilename);  // will save edit history
    }
 
    // Reload the file we just persisted and compare with in memory defs

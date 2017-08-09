@@ -203,7 +203,7 @@ cd ../bdir/$mode_arg/ecflow
 # =============================================================================================
 # ctest
 #
-if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
+if [[ $test_safe_arg = test_safe ]] ; then
 	ctest -R ^u_
 	ctest -R c_
 	ctest -R py_u
@@ -211,11 +211,6 @@ if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
 	if [[  $test_safe_arg = test_safe ]] ; then
 	   exit 0
 	fi
-fi
-if [[ $test_arg = test ]] ; then
-	ctest -R s_test
-	ctest -R py_s
-	exit 0
 fi
 if [[ "$ctest_arg" != "" ]] ; then
 	$ctest_arg
@@ -246,7 +241,12 @@ fi
 
 gui_options=
 if [[ $no_gui_arg = no_gui ]] ; then
-    gui_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF -DENABLE_ALL_TESTS=ON"
+    gui_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF"
+fi
+
+test_options=
+if [[ $test_arg = test ]] ; then
+   test_options="-DENABLE_ALL_TESTS=ON"
 fi
 
 if [[ $package_source_arg = package_source ]] ; then
@@ -269,7 +269,8 @@ $ecbuild $source_dir \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \
-            ${log_options}
+            ${log_options} \
+            ${test_options}
             
             #-DENABLE_STATIC_BOOST_LIBS=ON \
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \

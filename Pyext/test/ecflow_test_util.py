@@ -14,8 +14,9 @@
 #
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 from socket import gethostname 
-import os,fnmatch
+import os,sys,fnmatch
 import fcntl
+import datetime,time
 import shutil   # used to remove directory tree
 
 from ecflow import Client, debug_build, File
@@ -47,42 +48,6 @@ def ecf_home(port):
 
 def get_parent_dir(file_path):
     return os.path.dirname(file_path)
-
-def get_root_source_dir():
-    cwd = os.getcwd()
-    #print "get_root_source_dir from: " + cwd
-    while (1):
-        # Get to directory that has ecflow
-        head, tail = os.path.split(cwd)
-        #print "   head:" + head
-        #print "   tail:" + tail
-        if tail.find("ecflow") != -1 :
-            
-            # bjam, already at the source directory
-            if os.path.exists(cwd + "/VERSION.cmake"): 
-                print("   Found VERSION.cmake in " + cwd)
-                return cwd
-        
-        if tail != "Pyext" and tail != "migrate":
-            # in cmake, we may be in the build directory, hence we need to determine source directory
-            file = cwd + "/CTestTestfile.cmake"
-            #print "   searching for " + file
-            if os.path.exists(file):
-                # determine path by looking into this file:
-                for line in open(file):
-                    ## Source directory: /tmp/ma0/workspace/ecflow/Acore
-                    if line.find("Source directory"):
-                        tokens = line.split()
-                        if len(tokens) == 4:
-                            #print "   returning root_source_dir:", tokens[3]
-                            return tokens[3]
-                raise RuntimeError("ERROR could not find Source directory in CTestTestfile.cmake")
-            else:
-                raise RuntimeError("ERROR could not find file CTestTestfile.cmake in " + cwd)
-                
-        cwd = head
-    return cwd
-
 
 def log_file_path(port): return "./" + gethostname() + "." + port + ".ecf.log"
 def checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check"
@@ -119,14 +84,15 @@ class EcfPortLock(object):
     
     def find_free_port(self,seed_port):
         print("   EcfPortLock:find_free_port starting with " + str(seed_port))
+        at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
         port = seed_port
         while 1:
             if self._free_port(port) == True:
-                print("   *FOUND* free server port " + str(port))
+                print("   *FOUND* free server port " + str(port) + " : " + at_time)
                 if self._do_lock(port) == True:
                     break;
             else:
-                 print("   *Server* port " + str(port) + " busy, trying next port")
+                print("   *Server* port " + str(port) + " busy, trying next port " + at_time)
             port = port + 1
             
         return str(port)  
@@ -142,26 +108,43 @@ class EcfPortLock(object):
             
     def _do_lock(self,port):
         file = self._lock_file(port)
+        at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+        if os.path.exists(file):
+            print("   *LOCKED* lock file exists " + file + " : " + at_time )
+            return False
         try:
             fp = open(file, 'w') 
             try:
+                self.lock_time = at_time
                 fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 self.lock_file_fp = fp
-                print("   *LOCKED* file " + file)
+                print("   *LOCKED* file " + file + " : " + self.lock_time )
                 return True;
             except IOError:
-                print("   Could *NOT* lock file " + file + " trying next port")
+                print("   Could *NOT* lock file " + file + " trying next port : " + at_time)
                 return False
         except IOError as e:
-             print("   Could not open file " + file + " for write trying next port")
+             print("   Could not open file " + file + " for write trying next port : " + at_time)
              return False
         
     def remove(self,port):
+        release_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+        file = self._lock_file(port)
+        print("   Remove lock file : " + file + " : lock_time: " + self.lock_time + " release_time: " + release_time)
         self.lock_file_fp.close()
-        os.remove(self._lock_file(port))
+        os.remove(file)
     
     def _lock_file(self,port):
-        lock_file = str(port) + ".lock"
+        if "ECF_PORT_LOCK_DIR" in os.environ:
+            lock_file = os.environ["ECF_PORT_LOCK_DIR"] + "/" + str(port) + ".lock"
+            #print("     EcfPortLock::_lock_file ECF_PORT_LOCK_DIR: " + lock_file)
+            return lock_file
+        if os.path.exists(File.source_dir()):
+            lock_file = File.source_dir() + "/" + str(port) + ".lock"
+            #print("     EcfPortLock::_lock_file File::source_dir(): " + lock_file)
+            return lock_file
+        lock_file = os.getcwd() + "/" + str(port) + ".lock"
+        #print("     EcfPortLock::_lock_file os.getcwd(): " + lock_file)
         return lock_file
         
 # ===============================================================================
@@ -185,11 +168,13 @@ class Server(object):
      
     def __enter__(self):
         try:
-            print("Server:__enter__: About to ping localhost:" + self.the_port)       
+            st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+            print("Server:__enter__: About to ping localhost: " + self.the_port +  " : " + st)       
             self.ci.ping() 
-            print("   ------- Server all ready running *UNEXPECTED* ------")
+            print("   ------- Server all ready running on port " + self.the_port + " *UNEXPECTED* ------")
+            sys.exit(1)
         except RuntimeError as e:
-            print("   ------- Server not running as *EXPECTED* ------ ") 
+            print("   ------- Server *NOT* running on port " + self.the_port + " as *EXPECTED* ------ ") 
             print("   ------- Start the server on port " + self.the_port + " ---------")  
             clean_up_server(str(self.the_port))
             clean_up_data(str(self.the_port))
@@ -226,7 +211,6 @@ class Server(object):
         print("   Terminate server ====================================================")
         self.ci.terminate_server()  
         print("   Terminate server OK =================================================")
-        print("   Remove lock file")
         self.lock_file.remove(self.the_port)
         if not debugging():
             clean_up_server(str(self.the_port))

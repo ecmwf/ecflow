@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
       bool do_compare = false;
       timer.restart();
       PersistHelper helper;
-      bool result = helper.test_persist_and_reload(defs,PrintStyle::MIGRATE,do_compare);
+      bool result = helper.test_defs_checkpt_and_reload(defs,do_compare);
       cout << " Checkpt(DEFS) and reload, time taken            = "
             << timer.elapsed()  << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }

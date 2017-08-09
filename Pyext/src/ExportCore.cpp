@@ -59,8 +59,10 @@ void export_Core()
    def("debug_build",debug_build);
 
 	class_<File, boost::noncopyable >("File", "Utility class, Used in test only.")
-            .def("find_server", &File::find_ecf_server_path, "Provides pathname to the server")  .staticmethod("find_server")
-            .def("find_client", &File::find_ecf_client_path, "Provides pathname to the client")  .staticmethod("find_client")
+            .def("find_server",&File::find_ecf_server_path, "Provides pathname to the server") .staticmethod("find_server")
+            .def("find_client",&File::find_ecf_client_path, "Provides pathname to the client") .staticmethod("find_client")
+            .def("source_dir", &File::root_source_dir, "Path name to ecflow source directory") .staticmethod("source_dir")
+            .def("build_dir",  &File::root_build_dir, "Path name to ecflow build directory")   .staticmethod("build_dir")
  	;
 
 	enum_<PrintStyle::Type_t>("Style",

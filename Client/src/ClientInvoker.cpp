@@ -455,12 +455,13 @@ int ClientInvoker::getDefs() const
 
 int ClientInvoker::loadDefs(
          const std::string& filePath,
-         bool force,     /* true means overwrite suite of same name */
-         bool check_only /* true means don't send to server, just check only */
+         bool force,      /* true means overwrite suite of same name */
+         bool check_only, /* client side, true means don't send to server, just check only */
+         bool print       /* client side, print the defs */
 ) const
 {
-   if (testInterface_) return invoke(CtsApi::loadDefs(filePath,force,check_only));
-   Cmd_ptr cmd = LoadDefsCmd::create(filePath,force,check_only,&clientEnv_);
+   if (testInterface_) return invoke(CtsApi::loadDefs(filePath,force,check_only,print));
+   Cmd_ptr cmd = LoadDefsCmd::create(filePath,force,check_only,print,&clientEnv_);
    if (cmd) return invoke(cmd); // If check_only cmd will be empty
    return 0;
 }
