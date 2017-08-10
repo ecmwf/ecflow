@@ -142,35 +142,33 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       pid_missmatch = true;
    }
 
-   if ((child_type() == Child::INIT) && (submittable_->state() == NState::ACTIVE)) {
+   NState::State submittable_state = submittable_->state();
+   if ((child_type() == Child::INIT) && (submittable_state == NState::ACTIVE)) {
 #ifdef DEBUG_ZOMBIE
-      std::cout << ":(child_type() == Child::INIT) && submittable_->state() == NState::ACTIVE)";
+      std::cout << ":(child_type() == Child::INIT) && submittable_state == NState::ACTIVE)";
 #endif
 
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (!password_missmatch && !pid_missmatch ) {
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already active : action taken( fob )";
-            log(Log::WAR, ss.str() );
-            theReply = PreAllocatedReply::ok_cmd();
-            return false;
-         }
+         std::stringstream ss; ss <<  " zombie(pid & password match)? : " << path_to_submittable_ << " : already active : action taken( fob )";
+         log(Log::WAR, ss.str() );
+         theReply = PreAllocatedReply::ok_cmd();
+         return false;
       }
 
       submittable_allready_active = true;
    }
 
-   if ( submittable_->state() == NState::COMPLETE) {
+   if ( submittable_state == NState::COMPLETE) {
 #ifdef DEBUG_ZOMBIE
-      std::cout << ": submittable_->state() == NState::COMPLETE)";
+      std::cout << ": submittable_state == NState::COMPLETE)";
 #endif
 
       // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::COMPLETE) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
             std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
-            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
+            if (password_missmatch) ss << " : passwd != [ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
+            if (pid_missmatch)      ss << " : pid != [ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
             ss << " : already complete : action taken( fob )";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
@@ -182,17 +180,17 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       submittable_allready_complete = true;
    }
 
-   if ( submittable_->state() == NState::ABORTED) {
+   if ( submittable_state == NState::ABORTED) {
 #ifdef DEBUG_ZOMBIE
-      std::cout << ": submittable_->state() == NState::ABORTED)";
+      std::cout << ": submittable_state == NState::ABORTED)";
 #endif
 
       // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::ABORT) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
             std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
-            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
+            if (password_missmatch) ss << " : passwd != [ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
+            if (pid_missmatch)      ss << " : pid != [ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
             ss << " : already aborted : action taken( fob )";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
@@ -219,12 +217,13 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
   		   const Zombie& theZombie = as->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_ );
   		   if (!theZombie.empty() ) ss << "(" << theZombie.type_str() << ")";
 
-         ss << " : " << path_to_submittable_ << " : " << process_or_remote_id_ << " : " << jobs_password_;
+         ss << " : " << path_to_submittable_ << "(" << NState::toString(submittable_state) << ")";
+         ss << " : " << process_or_remote_id_ << " : " << jobs_password_;
          if (submittable_allready_active)   ss << " : already active";
          if (submittable_allready_complete) ss << " : already complete";
          if (submittable_allready_aborted)  ss << " : already aborted";
-         if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
-         if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
+         if (password_missmatch) ss << " : passwd != [ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
+         if (pid_missmatch)      ss << " : pid != [ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
          ss << " : action taken(" << action_taken << ")";
          log(Log::ERR,ss.str());
   			return false;
