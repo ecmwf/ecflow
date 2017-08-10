@@ -481,7 +481,7 @@ bool TreeNodeFilter::isComplete()
 bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNode*>& topFilterChange)
 {
 #ifdef _UI_VFILTER_DEBUG
-    UiLog(server_).dbg() << "TreeNodeFilter::update -->";
+    UI_FUNCTION_LOG_S(server_);
 #endif
 
     //nodes_.clear();
@@ -591,10 +591,6 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
     UiLog(server_).dbg() << " elapsed time: " << timer.elapsed() << " ms";
     UiLog(server_).dbg() << " filter size: " << match_.size();
     UiLog(server_).dbg() << " capacity:" << match_.capacity();
-#endif
-
-#ifdef _UI_VFILTER_DEBUG
-    UiLog(server_).dbg() << "<-- update";
 #endif
 
     return true;
