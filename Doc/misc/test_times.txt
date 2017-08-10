@@ -1,5 +1,5 @@
 
-June 2017
+June 2017 (TEXT_ARCHIVE) RELEASE 4.6.1, leap42
 ======================================================================================================
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
  Parsing Node tree and AST creation time = 1.21944 parse(1)
