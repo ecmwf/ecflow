@@ -1182,7 +1182,7 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server,int num)
         Q_EMIT firstScanEnded(ts);
 }
 
-//The server clear has started. It well remove all the nodes except the root node.
+//The server clear has started. It will remove all the nodes except the root node.
 //So we need to remove all the rows belonging to the rootnode.
 void TreeNodeModel::slotBeginServerClear(VModelServer* server,int)
 {
