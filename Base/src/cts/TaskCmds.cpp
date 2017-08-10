@@ -149,7 +149,9 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #endif
 
       if (!password_missmatch && !pid_missmatch ) {
-         std::stringstream ss; ss <<  " zombie(pid & password match)? : " << path_to_submittable_ << " : already active : action taken( fob )";
+         std::stringstream ss;
+         ss << " chd:" << ecf::Child::to_string(child_type());
+         ss << " : zombie(pid & password match)? : " << path_to_submittable_ << " : already active : action(fob)";
          log(Log::WAR, ss.str() );
          theReply = PreAllocatedReply::ok_cmd();
          return false;
@@ -163,13 +165,15 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       std::cout << ": submittable_state == NState::COMPLETE)";
 #endif
 
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::COMPLETE) {
+         // If ECF_NONSTRICT_ZOMBIES be more forgiving
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
+            std::stringstream ss;
+            ss << " chd:" << ecf::Child::to_string( Child::COMPLETE );
+            ss << " : zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
             if (password_missmatch) ss << " : passwd != [ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
             if (pid_missmatch)      ss << " : pid != [ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
-            ss << " : already complete : action taken( fob )";
+            ss << " : already complete : action(fob)";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
@@ -185,13 +189,11 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       std::cout << ": submittable_state == NState::ABORTED)";
 #endif
 
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::ABORT) {
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch) ss << " : passwd != [ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
-            if (pid_missmatch)      ss << " : pid != [ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
-            ss << " : already aborted : action taken( fob )";
+         if (!password_missmatch && !pid_missmatch ) {
+            std::stringstream ss;
+            ss << " chd:" << ecf::Child::to_string( Child::ABORT );
+            ss << " : zombie(pid & password match)? : " << path_to_submittable_ << " : already aborted : action(fob)";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
@@ -213,7 +215,9 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
   		   // LOG failure: Include type of zombie.
   		   // ** NOTE **: the zombie may have been removed by user actions. i.e if fob and child cmd is abort | complete, etc
-  		   std::stringstream ss;    ss << " zombie";
+  		   std::stringstream ss;
+  		   ss << " chd:" << ecf::Child::to_string(child_type());
+  		   ss << " : zombie";
   		   const Zombie& theZombie = as->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_ );
   		   if (!theZombie.empty() ) ss << "(" << theZombie.type_str() << ")";
 
@@ -224,7 +228,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
          if (submittable_allready_aborted)  ss << " : already aborted";
          if (password_missmatch) ss << " : passwd != [ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
          if (pid_missmatch)      ss << " : pid != [ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
-         ss << " : action taken(" << action_taken << ")";
+         ss << " : action(" << action_taken << ")";
          log(Log::ERR,ss.str());
   			return false;
   		}
