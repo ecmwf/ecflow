@@ -237,7 +237,9 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
   		   // LOG failure: Include type of zombie.
   		   // ** NOTE **: the zombie may have been removed by user actions. i.e if fob and child cmd is abort | complete, etc
-  		   std::stringstream ss;    ss << " zombie";
+  		   std::stringstream ss;
+  		   ss << " chd:" << ecf::Child::to_string(child_type());
+  		   ss << " : zombie";
   		   const Zombie& theZombie = as->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_ );
   		   if (!theZombie.empty() ) ss << "(" << theZombie.type_str() << ")";
 
