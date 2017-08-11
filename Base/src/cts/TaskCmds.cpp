@@ -86,7 +86,9 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 		(void)as->zombie_ctrl().handle_path_zombie(as,this,action_taken,theReply);
 
 		// distinguish output by using *path*
-      std::stringstream ss; ss << " zombie(*path*) : " << process_or_remote_id_ << " : " << jobs_password_ << " : action taken(" << action_taken << ")";
+        std::stringstream ss;
+        ss << " chd:" << ecf::Child::to_string( child_type() );
+        ss << " : zombie(*path*) : " << process_or_remote_id_ << " : " << jobs_password_ << " : action(" << action_taken << ")";
 		log(Log::ERR,ss.str());
 		return false;
 	}
