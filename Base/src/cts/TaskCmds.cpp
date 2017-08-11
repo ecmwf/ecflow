@@ -87,8 +87,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
 		// distinguish output by using *path*
 		std::stringstream ss;
-		ss << " chd:" << ecf::Child::to_string( child_type() );
-		ss << " : zombie(*path*) : " << path_to_submittable_ << " : " << process_or_remote_id_ << " : " << jobs_password_ << " : action(" << action_taken << ")";
+		ss << " zombie(*path*) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ << " : " << process_or_remote_id_ << " : " << jobs_password_ << " : action(" << action_taken << ")";
 		log(Log::ERR,ss.str());
 		return false;
 	}
@@ -167,8 +166,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
             // Client then sends init again. In this case rather than treating it as a zombie, we will let it through
             // providing the password and pid matches.
             if (!password_missmatch_ && !pid_missmatch_ ) {
-               string ret = " chd:"; ret += ecf::Child::to_string( Child::INIT );
-               ret += " zombie(pid and passwd match)? : "; ret += path_to_submittable_; ret += " : already active : action(fob)";
+               string ret = " zombie(pid and passwd match)? : chd:"; ret += ecf::Child::to_string(child_type()); ret += " : "; ret += path_to_submittable_; ret += " : already active : action(fob)";
                log(Log::WAR, ret );
                theReply = PreAllocatedReply::ok_cmd();
                return false;
@@ -187,8 +185,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
          // If ECF_NONSTRICT_ZOMBIES be more forgiving
          if (child_type() == Child::COMPLETE) {
             if (submittable_->user_variable_exists(Str::ECF_NONSTRICT_ZOMBIES())) {
-               string ret = " chd:"; ret += ecf::Child::to_string( Child::COMPLETE );
-               ret += " : zombie(ECF_NONSTRICT_ZOMBIES) : "; ret += path_to_submittable_; ret += " : already complete : action(fob)";
+               string ret = " zombie(ECF_NONSTRICT_ZOMBIES) : chd:"; ret += ecf::Child::to_string(child_type()); ret += " : "; ret += path_to_submittable_; ret += " : already complete : action(fob)";
                log(Log::WAR, ret );
                theReply = PreAllocatedReply::ok_cmd();
                return false;
@@ -210,8 +207,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
           if (child_type() == Child::ABORT) {
 
              if (!password_missmatch_ && !pid_missmatch_ ) {
-                string ret = " chd:"; ret += ecf::Child::to_string( Child::ABORT );
-                ret += " : zombie(pid and passwd match)? : "; ret += path_to_submittable_; ret += " : already aborted : action(fob)";
+                string ret = " zombie(pid and passwd match)? : chd:"; ret += ecf::Child::to_string(child_type()); ret += " : "; ret += path_to_submittable_; ret += " : already aborted : action(fob)";
                 log(Log::WAR, ret );
                 theReply = PreAllocatedReply::ok_cmd();
                 return false;
@@ -240,11 +236,11 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
   		   // LOG failure: Include type of zombie.
   		   // ** NOTE **: the zombie may have been removed by user actions. i.e if fob and child cmd is abort | complete, etc
   		   std::stringstream ss;
-  		   ss << " chd:" << ecf::Child::to_string(child_type());
-  		   ss << " : zombie";
+  		   ss << " zombie";
   		   const Zombie& theZombie = as->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_ );
   		   if (!theZombie.empty() ) ss << "(" << theZombie.type_str() << ")";
 
+         ss << " : chd:" << ecf::Child::to_string(child_type());
          ss << " : " << path_to_submittable_ << "(" << NState::toString(submittable_->state()) << ")";
          ss << " : " << process_or_remote_id_ << " : " << jobs_password_;
          if (submittable_allready_active)   ss << " : already active";
