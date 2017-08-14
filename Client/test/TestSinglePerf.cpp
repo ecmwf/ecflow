@@ -180,7 +180,7 @@ void time_load_and_downloads(
                cout << seconds << " "; cout.flush();
                total += seconds;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "ms" << endl;
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)" << endl;
          }
          {
             DurationTimer duration_timer;
