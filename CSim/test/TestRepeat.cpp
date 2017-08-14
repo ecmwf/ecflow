@@ -77,7 +77,6 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer  )
  	   //		cout << theDefs << "\n";
  	}
 
- 	PrintStyle::setStyle(PrintStyle::STATE);
  	Simulator simulator;
  	std::string errorMsg;
  	BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_integer.def"),errorMsg),errorMsg << "\n" << theDefs);
