@@ -1060,6 +1060,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
             UiLog(this).dbg() << " command finished - send SYNC command";
 			//comQueue_->addNewsTask();
 			comQueue_->addSyncTask();
+            updateRefreshTimer();
 			break;
 		}
 		case VTask::NewsTask:
@@ -1131,7 +1132,6 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			else
 			{
                 broadcast(&ServerObserver::notifyEndServerSync);
-                updateRefreshTimer();
 			}
 			break;
 		}
