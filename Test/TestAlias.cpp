@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE( test_alias )
 //#ifdef DEBUG
 //   BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "Could not get the defs from server\n" << TestFixture::client().errorMsg());
 //   defs_ptr defs = TestFixture::client().defs();
-//   PrintStyle::setStyle(PrintStyle::STATE);
+//   PrintStyle style(PrintStyle::STATE);
 //   std::cout << *defs;
 //#endif
 

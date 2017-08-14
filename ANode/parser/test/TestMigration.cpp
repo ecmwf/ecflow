@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
       // Test multiple
       task->add_alias_only();
       task->add_alias_only();
-      //      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Add multiple alias failed: " << helper.errorMsg());
    }
 }
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
       task_ptr task1 = suite->add_task("t2");
       task1->addLate(lateAttr1);
 
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+//      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Late state: failed: " << helper.errorMsg());
    }
    {
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
       task_ptr task = defs.add_suite("s1")->add_task("t1");
       Meter meter("meter",0,100,100); meter.set_value(10);
       task->addMeter(meter);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+//      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Meter state: failed: " << helper.errorMsg());
    }
    {
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
       task->addEvent(event);
       task->addEvent(event2);
       task->addEvent(event3);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Event state: failed: " << helper.errorMsg());
    }
    {
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
          task_ptr task = defs.add_suite("s1")->add_task("t1");
          Label label("name","value"); label.set_new_value("new  value");
          task->addLabel(label);
-         //      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
          BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
       }
       {
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
          suite_ptr suite = defs.add_suite("s1");
          Label label("name","value"); label.set_new_value("new  value");
          suite->addLabel(label);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
          BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
       }
       {
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
          suite_ptr suite = defs.add_suite("s1");
          Label label("name","value\nvalue");
          suite->addLabel(label);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
          BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
       }
       {
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
          suite_ptr suite = defs.add_suite("s1");
          Label label("name","value\nvalue");  label.set_new_value("value\nwith\nmany\nnewlines");
          suite->addLabel(label);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
          BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
       }
    }
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
        limit.increment(1,t3->absNodePath());
        limit.increment(1,t4->absNodePath());
        suite->addLimit(limit);
-//       PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+       //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
        BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Limit state: failed: " << helper.errorMsg());
     }
 
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
         rep5.increment();
         t5->addRepeat( rep5 );
 
-//        PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+        //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Repeat state: failed: " << helper.errorMsg());
      }
 }
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE( test_state_time_attributes )
       task->addTime(time);
       task->addTime(time2);
       task->addTime(time3);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Time state: failed: " << helper.errorMsg());
    }
    {
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE( test_state_time_attributes )
       task->addToday(time);
       task->addToday(time2);
       task->addToday(time3);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Today state: failed: " << helper.errorMsg());
    }
    {
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE( test_state_time_attributes )
       task->addDay(day);
       task->addDay(day1);
       task->addDay(day2);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Day state: failed: " << helper.errorMsg());
    }
    {
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE( test_state_time_attributes )
       task->addDate(d1);
       task->addDate(d2);
       task->addDate(d3);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Date state: failed: " << helper.errorMsg());
    }
    {
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE( test_state_time_attributes )
       cronAttr.addTimeSeries(ts);
       task2->addCron(cronAttr);
 
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Date state: failed: " << helper.errorMsg());
    }
 
@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE( test_state_edit_history )
    defs.add_edit_history(suite2->absNodePath(),"request1 with single spaces");
    defs.add_edit_history(suite2->absNodePath(),"request2 with double  spaces");
    defs.add_edit_history(suite2->absNodePath(),"request3_with_no_spaces!|?<>$%^&*()_{}:@<>?");
-//   PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+   //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
    BOOST_REQUIRE_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Edit history failed: " << helper.errorMsg());
 }
 
@@ -388,19 +388,19 @@ BOOST_AUTO_TEST_CASE( test_server_state )
    {
       Defs defs;
       defs.set_server().set_state(SState::HALTED);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Set server state failed " << helper.errorMsg());
    }
    {
       Defs defs;
       defs.set_server().set_state(SState::RUNNING);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Set server state failed " << helper.errorMsg());
    }
    {
       Defs defs;
       defs.set_server().set_state(SState::SHUTDOWN);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Set server state failed " << helper.errorMsg());
    }
    {
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE( test_server_state )
       vec.push_back(Variable("name2","val with 'spaces' "));
       vec.push_back(Variable("name3",""));
       defs.set_server().set_user_variables(vec);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Set server variables failed " << helper.errorMsg());
    }
 }
