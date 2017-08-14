@@ -96,14 +96,21 @@ bool Parser::doParse(const std::string& line, std::vector<std::string>& lineToke
    }
 
    // Does not match any parser, or leading comment
-	std::string errorMsg = "Unexpected keyword ";
+	std::string errorMsg = "# Unexpected keyword ";
 	errorMsg += *lineTokens.begin();
  	errorMsg += " found whilst parsing ";
 	errorMsg += keyword();
 	if ( !nodeStack().empty() ) {
 		errorMsg += " ";
-		errorMsg += nodeStack_top()->name();
+		errorMsg += nodeStack_top()->absNodePath();
 	}
+
+	// in MIGRATE be fault tolerant, ignore unrecognised tokens
+	if (rootParser()->get_file_type() == PrintStyle::MIGRATE) {
+	   rootParser()->faults() += errorMsg + " -> ignoring\n";
+	   return true;
+	}
+
 	throw std::runtime_error( errorMsg );
 	return false;
 }

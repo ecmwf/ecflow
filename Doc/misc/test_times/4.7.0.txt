@@ -1,0 +1,90 @@
+Aug 2017  (TEXT_ARCHIVE) (pre-RELEASE) 4.7.0, leap42
+============================================================================================
+
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
+
+real	0m1.34s
+user	0m1.26s
+sys	0m0.07s
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+
+real	0m2.70s
+user	0m2.51s
+sys	0m0.20s
++ ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+ Parsing Node tree and AST creation time = 1.24303 parse(1)
+ Parsing Node tree *only* time           = 0.979838 parse(1)
+ Save as DEFS checkpoint, time taken                                   = 0.293637
+ Save as BOOST checkpoint, time taken                                  = 1.66285
+ Checkpt(DEFS) and reload, time taken            = 1.31323 file_size(33234875)  result(1) msg()
+ Checkpt(TEXT_ARCHIVE) and reload , time taken   = 3.47397 file_size(55961156)  result(1) msg()
+ Test all paths can be found. time taken         = 0.875778
+ time for 10 jobSubmissions                      = 0.331203s jobs:4
+ Time for Defs::check(inlimit resolution)        = 0.08048 result(1)
+ time for deleting all nodes                     = 0.300784
+ Total elapsed time = 10 seconds
++ ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+ Parsing Node tree and AST creation time = 2.44092 parse(1)
+ Parsing Node tree *only* time           = 2.44321 parse(1)
+ Save as DEFS checkpoint, time taken                                   = 0.693414
+ Save as BOOST checkpoint, time taken                                  = 2.40834
+ Checkpt(DEFS) and reload, time taken            = 3.22447 file_size(124693277)  result(1) msg()
+ Checkpt(TEXT_ARCHIVE) and reload , time taken   = 5.23976 file_size(148518127)  result(1) msg()
+ Test all paths can be found. time taken         = 0.927941
+ time for 10 jobSubmissions                      = 0.095698s jobs:0
+ Time for Defs::check(inlimit resolution)        = 0.750157 result(0)
+ time for deleting all nodes                     = 0.4089
+ Total elapsed time = 18 seconds
++ Client/perf_test_large_defs
+Running 1 test case...
+Client:: ...test_perf_for_large_defs:   port(3143)
+
+/var/tmp/ma0/BIG_DEFS/od.def  : file size 11081032
+Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenced FAMILY '/lbc/perle/process' does not define the limit excl
+
+ Load:                1192ms
+ Begin:               172ms
+ Download(Sync):      708 3 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 372 377 399 381 376 381 380 377 379 385 : Avg:0.3807(sec)  : sync_local() with *different* clients. Uses Cache
+ Download(FULL):      780 733 739 762 767 777 749 763 781 769 : Avg:0.762(sec)  : get_defs() from same client
+ Suspend 6001 tasks : 0.029   news_local() : 0   sync_local() : 0.083
+ Resume 6001 tasks  : 0.024   news_local() : 0   sync_local() : 0.058
+ force  6001 tasks  : 0.065   news_local() : 0   sync_local() : 0.097
+ Check pt:            63 68 60 65 75 75 70 61 60 70 : Avg:0.0667ms
+ Delete:              73ms
+
+/var/tmp/ma0/BIG_DEFS/vsms2.31415.def  : file size 153539843
+ Load:                7511ms
+ Begin:               349ms
+ Download(Sync):      4968 32 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 2701 2805 2761 2784 2815 2745 2766 2764 2746 2751 : Avg:2.7638(sec)  : sync_local() with *different* clients. Uses Cache
+ Download(FULL):      5104 5183 5351 5159 5702 5563 5169 5243 5241 5240 : Avg:5.2955(sec)  : get_defs() from same client
+ Suspend 6001 tasks : 0.033   news_local() : 0.001   sync_local() : 0.099
+ Resume 6001 tasks  : 0.029   news_local() : 0.001   sync_local() : 0.075
+ force  6001 tasks  : 0.067   news_local() : 0.001   sync_local() : 0.047
+ Check pt:            565 639 606 616 619 600 627 606 622 605 : Avg:0.6105ms
+ Delete:              508ms
+
+/var/tmp/ma0/BIG_DEFS/3199.def  : file size 59631577
+ Load:                4755ms
+ Begin:               953ms
+ Download(Sync):      3621 23 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 1916 1914 1955 1996 1985 1962 1960 1991 1936 1955 : Avg:1.957(sec)  : sync_local() with *different* clients. Uses Cache
+ Download(FULL):      3840 3770 3769 3849 3870 4107 3880 3872 3841 3941 : Avg:3.8739(sec)  : get_defs() from same client
+ Suspend 6001 tasks : 0.098   news_local() : 0.002   sync_local() : 0.125
+ Resume 6001 tasks  : 0.032   news_local() : 0.001   sync_local() : 0.074
+ force  6001 tasks  : 0.116   news_local() : 0.001   sync_local() : 0.22
+ Check pt:            317 333 306 307 323 285 301 379 283 283 : Avg:0.3117ms
+ Delete:              359ms
+
+/var/tmp/ma0/BIG_DEFS/mega.def  : file size 6723372
+ Load:                731ms
+ Begin:               100ms
+ Download(Sync):      513 2 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 240 245 239 239 240 240 241 242 240 241 : Avg:0.2407(sec)  : sync_local() with *different* clients. Uses Cache
+ Download(FULL):      506 516 514 512 498 496 516 529 539 494 : Avg:0.512(sec)  : get_defs() from same client
+ Suspend 6001 tasks : 0.03   news_local() : 0.001   sync_local() : 0.077
+ Resume 6001 tasks  : 0.026   news_local() : 0.001   sync_local() : 0.058
+ force  6001 tasks  : 0.09   news_local() : 0.001   sync_local() : 0.485
+ Check pt:            49 47 43 44 43 43 43 43 43 43 : Avg:0.0441ms
+ Delete:              48ms
