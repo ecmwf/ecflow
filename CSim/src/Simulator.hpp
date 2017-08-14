@@ -20,6 +20,9 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <string>
 #include <map>
+
+#include "PrintStyle.hpp"
+
 class Defs;
 class Task;
 class Submittable;
@@ -57,6 +60,7 @@ private:
 
 	mutable std::map<Submittable*,int> taskIntMap_;
 	mutable int level_;
+	PrintStyle print_style_;   // by default show state when writing defs to standard out. RAII
 };
 }
 #endif /* SIMULATOR_HPP_ */

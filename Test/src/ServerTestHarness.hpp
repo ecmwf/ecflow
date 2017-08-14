@@ -21,6 +21,7 @@
 #include <map>
 #include "NodeFwd.hpp"
 #include "ZombieUtil.hpp"
+#include "PrintStyle.hpp"
 class ClientInvoker;
 
 // This class provides a test harness for running defs file in a client server environment
@@ -105,5 +106,6 @@ private:
 	bool add_default_sleep_time_;
 	int serverUpdateCalendarCount_;
 	std::string defs_filename_;
+	PrintStyle print_style_; // by default show state when writing defs to standard out. RAII
 };
 #endif

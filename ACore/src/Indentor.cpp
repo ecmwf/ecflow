@@ -18,14 +18,16 @@
 namespace ecf {
 
 int Indentor::index_ = 0;
-
+bool Indentor::indent_ = true;
 
 std::ostream& Indentor::indent( std::ostream& os, int char_spaces)
 {
-	int spaces = index_ * char_spaces;
-	for (int i = 0; i != spaces; i++)
-		os << " ";
-	return os;
+   if (indent_) {
+      int spaces = index_ * char_spaces;
+      for (int i = 0; i != spaces; i++)
+         os << " ";
+   }
+   return os;
 }
 
 }

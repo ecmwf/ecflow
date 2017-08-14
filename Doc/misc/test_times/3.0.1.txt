@@ -1,0 +1,97 @@
+Sept 2012 -(TEXT_ARCHIVE) RELEASE
+================================================================================================
+
+TEXT_ARCHIVE 
+AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                    = 1.04 < limit(1.2)
+ Parsing Node tree *only* time                              = 0.45 < limit(0.5)
+ Test all paths can be found. time taken                    = 0.42 < limit(0.5)
+ Persist only, time taken                                   = 0.26 < limit(0.5)
+ Persist and reload(DEFS) and compare, time taken           = 1.12 < limit(1.5) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken          = 1.38 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken        = 0.69 < limit(1.5) file_size(6669220)
+ Checkpt(TEXT_ARCHIVE) and reload and compare, time taken   = 1.06 < limit(1.4) file_size(7195285)
+ time for 10 jobSubmissions:0.1s jobs:1052 < limit(0.2)
+ time for Defs::check (  inlimit resolution)                = 0.02 < limit(0.1)
+ time for deleting all nodes                                = 0.12
+ Total elapsed time = 6 seconds
+
+AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+ Parsing Node tree and AST creation time         = 4.59 parse(1)
+ Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.08 file_size(55960852)  result(1) msg()
+
+Client: 
+ Server handled 1000 commands                          in boost_timer(0.31) DurationTimer(00:00:00.472479)
+ Server handled 1000 commands using 125 group requests in boost_timer(0.25) DurationTimer(00:00:00.338411)
+ 
+Client/bin/gcc-4.2.1/release/perf_aparser 
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:13 Begin:4  
+                                   Download(Sync):8, 0, 0, 0, 0  
+                                   Download(Sync-FULL):4, 4, 4, 4, 5 Avg:4.2  
+                                   Download(FULL):9, 9, 8, 8, 8      Avg:8.4
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0   
+                                   Download(Sync):1, 0, 0, 0, 0  
+                                   Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                   Download(FULL):1, 1, 1, 1, 1      Avg:1
+ 
+EOS_PORTABLE_BINARY_ARCHIVE/release
+====================================================================================================
+
+AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+ Parsing Node tree and AST creation time                        = 5.39 parse(1)
+ Checkpt(EOS_PORTABLE_BINARY_ARCHIVE) and reload , time taken   = 7.2 file_size(44381690)  result(1) msg()
+
+Client:: ...test_perf_for_large_defs:   port(3142)
+/var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:12 Begin:4  
+                                Download(Sync):6, 0, 0, 0, 0  
+                                Download(Sync-FULL):3, 3, 3, 3, 3 Avg:3  
+                                Download(FULL):5, 6, 6, 6, 6      Avg:5.8
+/var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0  
+                                Download(Sync):1, 0, 0, 0, 0  
+                                Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                Download(FULL):1, 0, 0, 0, 0      Avg:0.2
+ 
+lxab/release: 
+ AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                         = 0.62 < limit(1.2)
+ Parsing Node tree *only* time                                   = 0.28 < limit(0.5)
+ Test all paths can be found. time taken                         = 0.21 < limit(0.5)
+ Persist only, time taken                                        = 0.19 < limit(0.5)
+ Persist and reload(DEFS) and compare, time taken                = 0.87 < limit(1.5) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken               = 1.01 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken             = 0.64 < limit(1.5) file_size(6669220)
+ Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = 0.65 < limit(1.4) file_size(5679415)
+ time for 10 jobSubmissions:0.06s jobs:1052 < limit(0.2)
+ time for Defs::check (  inlimit resolution) = 0.02 < limit(0.1)
+ time for deleting all nodes = 0.08
+ Total elapsed time = 5 seconds
+
+HPUX/release
+ AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                         = 5.78 < limit(7.8)
+ Parsing Node tree *only* time                                   = 3.42 < limit(5)
+ Test all paths can be found. time taken                         = 2.26 < limit(4.5)
+ Persist only, time taken                                        = 1.82 < limit(3.5)
+ Persist and reload(DEFS) and compare, time taken                = 8.24 < limit(9.5) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken               = 10.34 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken             = 6.2 < limit(9.5) file_size(6669220)
+ Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = 3.02 < limit(11.5) file_size(5679317)
+ time for 10 jobSubmissions:0.6s jobs:1060 < limit(3.5)
+ time for Defs::check (  inlimit resolution) = 0.11 < limit(1)
+ time for deleting all nodes = 0.84
+ Total elapsed time = 45 seconds
+ 
+power6/release
+ AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                         = 3.42329 < limit(7.8)
+ Parsing Node tree *only* time                                   = 2.0742 < limit(5)
+ Test all paths can be found. time taken                         = 1.73509 < limit(4.5)
+ Persist only, time taken                                        = 1.0683 < limit(3.5)
+ Persist and reload(DEFS) and compare, time taken                = 5.01178 < limit(9.5) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken               = 6.37502 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken             = 3.59141 < limit(9.5) file_size(6669220)
+ Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = 1.84573 < limit(11.5) file_size(5679421)
+ time for 10 jobSubmissions:0.514055s jobs:1054 < limit(3.5)
+ time for Defs::check (  inlimit resolution) = 0.080723 < limit(1)
+ time for deleting all nodes = 0.694512
+ Total elapsed time = 27 seconds

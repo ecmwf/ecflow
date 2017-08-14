@@ -172,8 +172,9 @@ public:
 	// The client api. Mirrors CtsApi on the whole
 	int getDefs() const;
  	int loadDefs(const std::string& filePath,
- 	               bool force = false,     /* true means overwrite suite of same name */
- 	               bool check_only = false /* true means don't send to server, just check only */
+ 	               bool force = false,      /* true means overwrite suite of same name */
+                  bool check_only = false, /* client side only, true means don't send to server, just check only */
+                  bool print = false       /* client side only, print the defs */
  	) const;
  	int load( const defs_ptr& defs, bool force  = false /*true means overwrite suite of same name*/) const
  	       { return load_in_memory_defs(defs,force); }

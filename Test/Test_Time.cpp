@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE( test_single_real_time_near_midnight )
 #ifdef DEBUG_ME
    BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "Could not get the defs from server\n" << TestFixture::client().errorMsg());
    defs_ptr defs = TestFixture::client().defs();
-   PrintStyle::setStyle(PrintStyle::STATE);
+   PrintStyle style(PrintStyle::STATE);
    std::cout << *defs;
 #endif
 
@@ -442,7 +442,7 @@ BOOST_AUTO_TEST_CASE( test_time_real_series_near_midnight )
 #ifdef DEBUG_ME
    BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "Could not get the defs from server\n" << TestFixture::client().errorMsg());
    defs_ptr defs = TestFixture::client().defs();
-   PrintStyle::setStyle(PrintStyle::STATE);
+   PrintStyle style(PrintStyle::STATE);
    std::cout << *defs;
 #endif
 

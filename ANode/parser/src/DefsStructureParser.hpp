@@ -22,58 +22,56 @@
 #include <vector>
 #include <fstream>
 
-#include "boost/utility.hpp"
-#include "boost/scoped_ptr.hpp"
-
 #include "File_r.hpp"
 #include "PrintStyle.hpp"
+#include "DefsParser.hpp"
 
 class Defs;
 class Node;
 class Parser;
 
 // This class is used to parse the DEFS file.
+// The file can be of different styles:
+//    DEFS: This is the structure only (default)
+//    STATE: structure + state
+//    MIGRATE: structure + state (No checking, and no externs and fault tolerant)
 class DefsStructureParser : private boost::noncopyable {
 public:
+   DefsStructureParser(Defs* defsfile, const std::string& file_name);
+   ~DefsStructureParser();
 
-	DefsStructureParser(Defs* defsfile, const std::string& file_name);
-	~DefsStructureParser();
+   /// Parse the definition file, *AND* check expressions and limits
+   /// return true if parse and check are OK, false otherwise
+   /// if false is returned, and error message is also returned
+   bool doParse(std::string& errorMsg,std::string& warningMsg);
 
-	/// Parse the definition file, *AND* check expressions and limits
-	/// return true if parse and check are OK, false otherwise
-	/// if false is returned, and error message is also returned
-	bool doParse(std::string& errorMsg,std::string& warningMsg);
+   // store file type read in
+   void set_file_type(PrintStyle::Type_t t) { file_type_ = t; }
+   PrintStyle::Type_t get_file_type() const { return file_type_; }
 
-	// The file can be of different styles:
-	//    DEFS: This is the structure only (default)
-	//    STATE: structure + state
-	//    MIGRATE: structure + state (No checking, and no externs )
-	void set_file_type(PrintStyle::Type_t t) { file_type_ = t; }
-	PrintStyle::Type_t get_file_type() const { return file_type_; }
+   std::string& faults() { return faults_;}
 
 protected: // allow test code access
    bool do_parse_only(std::string& errorMsg);
 
 private:
+   ecf::File_r        infile_;
+   Defs*              defsfile_;
+   DefsParser         defsParser_;        // Child parsers will be deleted as well
+   int                lineNumber_;
+   PrintStyle::Type_t file_type_;
 
- 	std::stack< std::pair<Node*,const Parser*> > nodeStack_;  // stack of nodes used in parsing
-   std::map<Node*,bool> defStatusMap_;          // check for duplicates
-
-	Defs* defsfile_;
-	boost::scoped_ptr<Parser> defsParser_;        // Child parsers will be deleted as well
-	friend class Parser;
-
-	ecf::File_r   infile_;
-	int           lineNumber_;
-
-	std::vector<std::string> multi_statements_per_line_vec_;
-	PrintStyle::Type_t file_type_;
+   std::stack< std::pair<Node*,const Parser*> > nodeStack_;  // stack of nodes used in parsing
+   std::vector<std::string> multi_statements_per_line_vec_;
+   std::string faults_; // In MIGRATE mode we ignore unrecognised tokens, store here for later reporting
+   std::map<Node*,bool> defStatusMap_;                       // check for duplicates
+   friend class Parser;
 
 private:
-	// read in the next line form the defs file
-	void getNextLine(std::string& line);
-	bool semiColonInEditVariable();
-	friend class TriggerCompleteParser;
+   // read in the next line form the defs file
+   void getNextLine(std::string& line);
+   bool semiColonInEditVariable();
+   friend class TriggerCompleteParser;
 };
 
 #endif

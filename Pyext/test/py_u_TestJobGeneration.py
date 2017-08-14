@@ -19,7 +19,7 @@ import shutil   # used to remove directory tree
 import ecflow_test_util as Test
 from ecflow import Defs, JobCreationCtrl, TaskVec, File, Client, debug_build
 
-def ecf_includes() : return Test.get_root_source_dir() + "/Pyext" + "/test/data/includes"
+def ecf_includes() : return File.source_dir() + "/Pyext" + "/test/data/includes"
 
 def create_defs(ecf_home,task_vec):
     defs = Defs();
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
     print("####################################################################")
  
-    workspace = Test.get_root_source_dir();
+    workspace = File.source_dir();
     print(workspace)
     
     ecf_home = workspace + "/Pyext/test/data/ECF_HOME"

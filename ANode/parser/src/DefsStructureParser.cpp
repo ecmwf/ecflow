@@ -19,7 +19,6 @@
 #include <boost/token_functions.hpp>
 
 #include "DefsStructureParser.hpp"
-#include "DefsParser.hpp"
 #include "Defs.hpp"
 #include "Version.hpp"
 #include "Str.hpp"
@@ -32,17 +31,19 @@ using namespace boost;
 
 /////////////////////////////////////////////////////////////////////////////////////
 DefsStructureParser::DefsStructureParser(Defs* defsfile,const std::string& file_name)
-: defsfile_(defsfile),defsParser_(new DefsParser(this)),
-  infile_(file_name),
+: infile_(file_name),
+  defsfile_(defsfile),
+  defsParser_(this),
   lineNumber_(0),
   file_type_(PrintStyle::DEFS)
-{
-}
+{}
+
+
 
 DefsStructureParser::~DefsStructureParser()
 {
 #ifdef SHOW_PARSER_STATS
-	defsParser_->printStats();
+	defsParser_.printStats();
 #endif
 }
 
@@ -53,6 +54,7 @@ bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
    }
 
    if (file_type_ == PrintStyle::MIGRATE) {
+      warningMsg += faults_;
       return true;
    }
 
@@ -92,7 +94,7 @@ bool DefsStructureParser::do_parse_only(std::string& errorMsg)
 
       // Process each line, according to the parser which is on *top* of the stack
       // If the *top* of the stack is empty use the DefsParser
-      Parser* theCurrentParser  = (nodeStack_.empty()) ? defsParser_.get() : const_cast<Parser*>(nodeStack_.top().second) ;
+      Parser* theCurrentParser  = (nodeStack_.empty()) ? &defsParser_ : const_cast<Parser*>(nodeStack_.top().second) ;
       if ( theCurrentParser == NULL ) {
          std::stringstream ss;
          ss << "No parser found: Could not parse '" << line << "' around line number " << lineNumber_ << "\n";

@@ -1,0 +1,206 @@
+ references - ECFLOW-974
+ ========================
+ 
+ General
+   http://bigobject.blogspot.co.uk/2016/05/serialization-frameworksprotocols-when.html
+
+ Schema evolution: 
+    https://martin.kleppmann.com/2012/12/05/schema-evolution-in-avro-protocol-buffers-thrift.html
+ 
+Automatic Object Versioning for Forward and Backward File Format Compatibility@
+    https://accu.org/index.php/journals/502
+    https://accu.org/index.php/journals/486
+    
+Protobuffer versus json:
+    https://news.ycombinator.com/item?id=9665204
+    
+json versus protocol buffers:
+    5 Reasons to Use Protocol Buffers Instead of JSON For Your Next Service:
+    http://blog.codeclimate.com/blog/2014/06/05/choose-protocol-buffers/
+    https://dzone.com/articles/protobuf-performance-comparison-and-points-to-make
+    
+Json/c++
+    https://github.com/nlohmann/json/blob/develop/README.md
+    
+Json,TOML,YAML:
+    http://www.drdobbs.com/web-development/after-xml-json-then-what/240151851
+    
+Json scema evolution:
+    https://snowplowanalytics.com/blog/2014/05/15/introducing-self-describing-jsons/
+    
+Json versioning for client/server:
+    https://stackoverflow.com/questions/10042742/what-is-the-best-way-to-handle-versioning-using-json-protocol
+    
+Semantic versioning:
+	http://semver.org/
+
+Versioning general:
+    https://www.mashery.com/blog/ultimate-solution-versioning-rest-apis-content-negotiation
+    https://rubentorresbonet.wordpress.com/2014/08/25/an-overview-of-data-serialization-techniques-in-c/
+    
+HTTP:
+    https://www.tutorialspoint.com/http/http_caching.htm
+    http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
+    
+Pluralsight training: Moving Beyond JSON and XML with Protocol Buffers
+    https://www.pluralsight.com/courses/protocol-buffers-beyond-json-xml
+
+Protocol buffers with ASIO
+===========================
+- https://stackoverflow.com/questions/8269452/google-protocol-buffers-parsedelimitedfrom-and-writedelimitedto-for-c
+- https://stackoverflow.com/questions/37950139/writing-a-simple-c-protobuf-streaming-client-server
+- https://stackoverflow.com/questions/2340730/are-there-c-equivalents-for-the-protocol-buffers-delimited-i-o-functions-in-ja/22927149#22927149
+- https://github.com/adanselm/pbRPCpp
+
+GRPC versus ASIO
+============================
+- http://eli.thegreenplace.net/2016/grpc-sample-in-c-and-python/
+
+Serialisation and Messageing
+=============================
+ 
+Serialization is about taking a snapshot of your in-memory representation and restoring it later on.
+
+This is all great, except that it starts fraying at the seams when you think 
+about loading a previously stored snapshot with a newer version of the software 
+(Backward Compatibility) or (god forbid) a recently stored snapshot with an 
+older version of the software (Forward Compatibility).
+
+Many structures can easily deal with backward compatibility, however forward compatibility 
+requires that your newer format is very close to its previous iteration: basically, 
+just add/remove some fields but keeps the same overall structure.
+
+The problem is that serialization, for performance reasons, tends to 
+tie the on-disk structure to the in-memory representation; 
+changing the in-memory representation then requires either 
+the deprecation of the old archives (and/or a migration utility).
+
+
+On the other hand, messaging systems (and this is what google protobuf is)
+are about decoupling the exchanged messages structures from the i
+n-memory representation so that your application remains flexible.
+
+Therefore, you first need to choose whether you will implement serialization or messaging.
+
+Now you are right that you can either write the save/load code within the class or outside it. 
+This is once again a trade-off:
+
+    - in-class code has immediate access to all-members, usually more efficient and 
+     straightforward, but less flexible, so it goes hand in hand with serialization
+     
+    - out-of-class code requires indirect access (getters, visitors hierarchy),
+      less efficient, but more flexible, so it goes hand in hand with messaging
+
+Note that there is no drawback about hidden state. A class has no (truly) hidden state:
+
+    - caches (mutable values) are just that, they can be lost without worry
+     hidden types (think FILE* or other handle) are normally recoverable 
+     through other ways (serializing the name of the file for example)
+    ...
+
+Can use a mix of both.
+
+    - Caches are written for the current version of the program and use 
+      fast (de)serialization in v1. New code is written to work with both v1 and v2, 
+      and writes in v1 by default until the previous version disappears; 
+      then switches to writing v2 (assuming it's easy). 
+      Occasionally, massive refactoring make backward compatibility too painful, 
+      we drop it on the floor at this point (and increment the major digit).
+      
+   - On the other hand, exchanges with other applications/services and more durable 
+     storage (blobs in database or in files) use messaging because 
+     I don't want to tie myself down to a particular code structure for the next 10 years.
+
+ 
+ =========================================================================
+ https://www.slideshare.net/IgorAnishchenko/pb-vs-thrift-vs-avro
+ 
+ A language and platform neutral way of serializing structured data for use in communications protocols, data storage etc
+ High level Goals:
+ 
+ SF have some properties in common • Interface Description (IDL) • Performance • Versioning • Binary Format 
+ 
+Protocol Buffer
+ • Designed ~2001 because everything else wasn’t that good those days
+ • Production, proprietary in Google from 2001-2008, open-sourced since 2008
+ • Battle tested, very stable, well trusted• Every time you hit a Google page, youre hitting several services and several PBcode
+ • PB is the glue to all Google services
+ • Official support for four languages: C++, Java, Python, and JavaScript
+ • Does have a lot of third-party support for other languages (of highly variable quality)
+ • BSD License ?
+ 
+Apache Thrift
+• Designed by an X-Googler in 2007
+• Developed internally at Facebook, used extensively there
+• An open Apache project, hosted in Apaches Inkubator.
+• Aims to be the next-generation PB (e.g. more comprehensive features, morelanguages)
+• IDL syntax is slightly cleaner than PB. If you know one, then you know the other
+• Supports: C++, Java, Python, PHP, Ruby, Erlang, Perl, Haskell, C#, Cocoa,JavaScript, Node.js, Smalltalk, OCaml and Delphi and other languages
+• Offers a stack for RPC calls
+• Apache License 2.0 
+
+Typical Operation Model 
+• The typical model of Thrift/Protobuf use is 
+• Write down a bunch of struct-like message formats in an IDL- like language. 
+• Run a tool to generate Java/C++/whatever boilerplate code. 
+• Example: thrift --gen java MyProject.thrift 
+• Outputs thousands of lines - but they remain fairly readable in most languages 
+• Link against this boilerplate when you build your application. • DO NOT EDIT! 
+
+Interface Definition Language (IDL) 
+• Web services interfaces are described using the Web Service Definition Language. Like SOAP, WSDL is a XML-based language. 
+• The new frameworks use their own languages, that are not based on XML. 
+• These new languages are very similar to the Interface Definition Language, known from CORBA. 
+
+Defining IDL Rules 
+• Every field must have a unique, positive integer identifier ("= 1", " = 2" or " 1:", " 2:" ) 
+• Fields may be marked as ’required’ or ’optional’ 
+• structs/messages may contain other structs/messages • You may specify an optional "default" value for a field 
+• Multiple structs/messages can be defined and referred to within the same .thrift/.proto file 
+
+Tagging 
+• The numbers are there for a reason! 
+• The "= 1", " = 2" or " 1:", " 2:" markers on each element identify the unique "tag" that field uses in the binary encoding. 
+• It is important that these tags do not change on either side 
+• Tags with values in the range 1 through 15 take one byte to encode 
+• Tags in the range 16 through 2047 take two bytes 
+• Reserve the tags 1 through 15 for very frequently occurring message elements
+
+Versioning 
+• The system must be able to support reading of old data, as well as requests from out-of-date clients to new servers, and vice versa. 
+• Versioning in Thrift and Protobuf is implemented via field identiﬁers. 
+• The combination of this field identiﬁers and its type speciﬁer is used to uniquely identify the field. 
+• An a new compiling isnt necessary. 
+• Statically typed systems like CORBA or RMI would require an update of all clients in this case. 
+
+Forward and Backward Compatibility Case Analysis There are four cases in which version mismatches may occur: 
+1. Added ﬁeld, old client, new server. 
+2. Removed ﬁeld, old client, new server. 
+3. Added ﬁeld, new client, old server. 
+4. Removed ﬁeld, new client, old server. 
+
+I’d choose Protocol Buffers over Thrift, If: 
+• You’re only using Java, C++ or Python. 
+• Experimental support for other languages is being developed by third parties but are generally not considered ready for production use 
+• You already have an RPC implementation 
+• On-the-wire data size is crucial 
+• The lack of any real documentation is scary to you 
+
+
+Wait, what about Avro? 
+• Avro is another very recent serialization system. 
+• Avro relies on a schema-based system 
+• When Avro data is read, the schema used when writing it is always present. 
+• Avro data is always serialized with its schema. When Avro data is stored in a file, its schema is stored with it, so that files may be processed later by any program. 
+• The schemas are equivalent to protocol buffers proto files, but they do not have to be generated. 
+• The JSON format is used to declare the data structures. 
+• Official support for four languages: Java, C, C++, C#, Python, Ruby 
+• An RPC framework. • Apache License 2.0 
+
+Comparison with other systems 
+• Avro provides functionality similar to systems such as Thrift, Protocol Buffers, etc. 
+• Dynamic typing: Avro does not require that code be generated. Data is always accompanied by a schema that permits full processing of that data without code generation, static datatypes, etc.
+• Untagged data: Since the schema is present when data is read, considerably less type information need be encoded with data, resulting in smaller serialization size. 
+• No manually-assigned field IDs: When a schema changes, both the old and new schema are always present when processing data, so differences may be resolved symbolically, using field names
+• Documentation is nearly non-existent and no real users. Bleeding edge, little support 
+ 

@@ -1133,6 +1133,9 @@ void Defs::save_as_checkpt(const std::string& the_fileName) const
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
 
+   // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
+   // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
+   ecf::DisableIndentor disable_indentation;
    save_as_filename(the_fileName,PrintStyle::MIGRATE);
 }
 

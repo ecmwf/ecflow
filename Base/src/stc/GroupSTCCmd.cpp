@@ -80,7 +80,7 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
 		PrintStyle::Type_t style = cts_cmd->show_style();
 		if ( style != PrintStyle::NOTHING ) {
 			if (debug) std::cout << "   GroupSTCCmd::handle_server_response *show* was called " << PrintStyle::to_string(style) << "\n";
-			PrintStyle::setStyle(style);
+			PrintStyle print_style(style);
 			if (defs.get()) {
 
 		      /// Auto generate externs, before writing to standard out. This can be expensive since

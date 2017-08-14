@@ -20,7 +20,6 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
-#include "PrintStyle.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -165,7 +164,6 @@ BOOST_AUTO_TEST_CASE( test_today_time_and_date )
    std::string errorMsg;
    BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_today_time_and_date.def"),errorMsg),errorMsg);
 
-//   PrintStyle::setStyle(PrintStyle::MIGRATE);
 //   cout << theDefs;
 
    // remove generated log file. Comment out to debug
