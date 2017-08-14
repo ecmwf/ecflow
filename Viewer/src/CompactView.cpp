@@ -1033,3 +1033,8 @@ int CompactView::itemAtRowCoordinate(int start,int count,int logicalXPos) const
     }
     return -1;
 }
+
+void CompactView::updateViewport(const QRect rect)
+{
+    viewport()->update(rect);
+}

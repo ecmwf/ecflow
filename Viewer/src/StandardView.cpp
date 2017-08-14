@@ -447,6 +447,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
         // -the number of icons or additional extra information
         //  changed for a node (so the width changed)
         // -the number of lines changed in a multiline label (so the height changed)
+        // -the node becomes submitted
         bool wChanged=paintedSize.width() != item->width;
         bool hChanged=paintedSize.height() != item->height;
 
@@ -464,6 +465,10 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
             else if(hChanged)
             {
                 doDelayedWidthAdjustment();
+            }
+            else if(wChanged)
+            {
+                UiLog().dbg() << " CHANGED!!!!!  "<<  item->index.data().toString();
             }
         }
 
@@ -786,4 +791,12 @@ bool StandardView::isPointInExpandIndicator(int item,QPoint p) const
     return item >=0 && item < itemCount &&
            p.x() > viewItems_[item].x-expandIndicatorBoxWidth_ &&
            p.x() < viewItems_[item].x-2;
+}
+
+void StandardView::updateViewport(const QRect rect)
+{
+    if(rect.right() < viewport()->rect().right())
+        viewport()->update(rect.adjusted(0,0,viewport()->rect().right()-rect.right(),0));
+    else
+        viewport()->update(rect);
 }

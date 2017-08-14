@@ -423,7 +423,7 @@ void AbstractNodeView::update(const QModelIndex &index)
 #ifdef _UI_QABSTRACTNODEVIEW_DEBUG
             UiLog().dbg() << "update -->" << index.data().toString() << " rect=" << rect;
 #endif
-            viewport()->update(rect);
+            updateViewport(rect);
         }
     }
 }

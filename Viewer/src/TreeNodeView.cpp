@@ -235,10 +235,7 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info)
     if(idx.isValid())
     {
         view_->setCurrentIndex(idx); //this will call selectionChanged
-        //if(setCurrentFromExpand_)
-        //{
         view_->scrollTo(idx);
-        //}
     }
 
     //Indicate that the set current process finished

@@ -51,6 +51,7 @@ protected:
     int  firstVisibleItem(int &offset) const;
     void updateRowCount();
     void updateScrollBars();
+    void updateViewport(const QRect rect);
 
     int expandIndicatorBoxWidth_;
     int expandIndicatorWidth_;
