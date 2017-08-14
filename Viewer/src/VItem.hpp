@@ -39,6 +39,7 @@ public:
     virtual VAliasNode* isAlias() const {return NULL;}
     virtual VAttribute* isAttribute() const {return NULL;}
 
+    virtual ServerHandler* server() const=0;
     virtual VServer* root() const=0;
     virtual bool isTopLevel() const {return false;}
     virtual std::string strName() const=0;

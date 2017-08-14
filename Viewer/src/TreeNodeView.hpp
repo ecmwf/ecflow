@@ -99,7 +99,8 @@ protected:
     PropertyMapper* prop_;
     QMap<QString,QString> styleSheet_;
     bool setCurrentIsRunning_;
-    bool setCurrentFromExpand_;
+    bool setCurrentFromExpandIsRunning_;
+    bool canRegainCurrentFromExpand_;
     VInfo_ptr lastSelection_;
     bool inStartUp_;
 };

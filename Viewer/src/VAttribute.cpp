@@ -29,6 +29,12 @@ VAttribute::~VAttribute()
 {
 }
 
+ServerHandler* VAttribute::server() const
+{
+    return (parent_)?parent_->server():NULL;
+}
+
+
 VServer* VAttribute::root() const
 {
     return (parent_)?parent_->root():NULL;

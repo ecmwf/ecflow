@@ -54,9 +54,6 @@ public:
 	virtual QModelIndex nodeToIndex(const VNode*,int column=0) const=0;
     virtual QModelIndex attributeToIndex(const VAttribute* a, int column=0) const=0;
 
-    virtual QModelIndex forceShowNode(const VNode*) const=0;
-    virtual QModelIndex forceShowAttribute(const VAttribute*) const=0;
-
 Q_SIGNALS:
 	void changed();
 	void filterChanged();

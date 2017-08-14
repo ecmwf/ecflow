@@ -109,13 +109,11 @@ public:
      void attrFilterChanged();
      void setForceShowNode(const VNode* node);
      void setForceShowAttribute(const VAttribute* node);
+     void setForceShow(const VItem* item);
      void clearForceShow(const VItem*);
      bool isFirstScan() const {return firstScan_;}
      ExpandState* expandState() const {return expandState_;}
-     ExpandState* tmpExpandState() const {return tmpExpandState_;}
      void setExpandState(ExpandState*);
-     void setTmpExpandState(ExpandState*);
-     void clearTmpExpandState();
 
      //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
@@ -158,7 +156,6 @@ private:
      int firstScanTryNo_;
      int maxFirstScanTry_;
      ExpandState* expandState_;
-     ExpandState* tmpExpandState_;
 };
 
 class VTableServer : public VModelServer

@@ -162,22 +162,12 @@ QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
         else if(info->isNode())
         {
             VNode* n=info->node();
-            QModelIndex idx=nodeToIndex(n);
-            if(!idx.isValid())
-            {
-                return forceShowNode(n);
-            }
-            return idx;
+            return nodeToIndex(n);  
         }
         else if(info->isAttribute())
         {
             VAttribute* a=info->attribute();
-            QModelIndex idx=attributeToIndex(a);
-            if(!idx.isValid())
-            {
-                return forceShowAttribute(a);
-            }
-            return idx;
+            return attributeToIndex(a);     
         }
 	}
 

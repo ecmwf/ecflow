@@ -130,6 +130,12 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
         }
     }
 
+    //No selection for context menu. Works on linux but can be platform dependent!!!
+    else if(event->button() == Qt::RightButton)
+    {
+        return;
+    }
+
     QPoint pos = event->pos();
     QPersistentModelIndex index = indexAt(pos);
 
