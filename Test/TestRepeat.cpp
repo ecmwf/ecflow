@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_clears_user_edit )
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_integer.def"), 40, false /* waitFortestcompletion */);
 
 #ifdef DEBUG_ME
-   PrintStyle::setStyle(PrintStyle::STATE);
+   PrintStyle style(PrintStyle::STATE);
    TestFixture::client().sync_local();
    defs_ptr server_defs = TestFixture::client().defs();
    cout << "At start ============================================\n";

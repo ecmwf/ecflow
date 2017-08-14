@@ -62,8 +62,7 @@ BOOST_AUTO_TEST_CASE( test_find_abs_node_path )
    BOOST_CHECK_MESSAGE(alias_vec.size() == no_of_alias,"Expected theDefs.get_all_aliases() to return " << no_of_alias << " node, but found " << alias_vec.size());
 
    // Test Defs::findAbsNode()
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   std::cout << theDefs;
+//   PrintStyle style(PrintStyle::STATE); std::cout << theDefs;
    for(size_t i= 0; i < all_nodes.size(); i++) {
       Node* node = all_nodes[i];
       node_ptr found_node = theDefs.findAbsNode(node->absNodePath());

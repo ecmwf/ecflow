@@ -66,12 +66,12 @@ namespace fs = boost::filesystem;
 //#define DEBUG_HOST_SERVER 1
 #define DEBUG_LOCAL_SERVER 1
 
-TestFixture::TestFixture(const std::string& project_test_dir)
+TestFixture::TestFixture(const std::string& project_test_dir) : print_style_(PrintStyle::STATE)
 {
    init(project_test_dir);
 }
 
-TestFixture::TestFixture()
+TestFixture::TestFixture() : print_style_(PrintStyle::STATE)
 {
    init("Test");
 }
@@ -96,7 +96,6 @@ void TestFixture::init(const std::string& project_test_dir)
    // ********************************************************
    // Note: Global fixture Constructor can not use BOOST macro
    // ********************************************************
-   PrintStyle::setStyle(PrintStyle::STATE);
 
    // Let first see if we need do anything. If ECF_HOST is specified (ie the name
    // of the machine, which has the ecflow server), only then do we need to do anything.

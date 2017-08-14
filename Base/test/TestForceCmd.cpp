@@ -398,8 +398,7 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot )
    /// begin the suite
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
    TestHelper::test_state(t1,NState::QUEUED);
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs << "\n";
+//   PrintStyle style(PrintStyle::STATE); cout << the_defs << "\n";
 
    // since we started at 09:30 the next time slot should be 10:00
    const TimeSlot& next_time_slot  = t1->timeVec().back().time_series().get_next_time_slot();
@@ -463,8 +462,7 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_1 )
    /// begin the suite
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
    TestHelper::test_state(t1,NState::QUEUED);
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs << "\n";
+   //   PrintStyle style(PrintStyle::STATE); cout << the_defs << "\n";
 
    // get all the time attributes
    const TimeSeries& ts_10 = t1->timeVec()[0].time_series();
@@ -563,8 +561,7 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_2 )
    /// begin the suite
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
    TestHelper::test_state(t1,NState::QUEUED);
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs << "\n";
+   //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
 
    // since we started at 09:30 the next time slot should be 10:00
    const TimeSlot& next_time_slot  = t1->timeVec().back().time_series().get_next_time_slot();
@@ -643,8 +640,7 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_3 )
    /// begin the suite
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
    TestHelper::test_state(t1,NState::QUEUED);
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs << "\n";
+//   PrintStyle style(PrintStyle::STATE); cout << the_defs << "\n";
 
    // get all the time attributes
    const TimeSeries& ts_10 = t1->timeVec()[0].time_series();
@@ -734,8 +730,7 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_4 )
    /// begin the suite
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
    TestHelper::test_state(t1,NState::QUEUED);
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs << "\n";
+//   PrintStyle style(PrintStyle::STATE); cout << the_defs << "\n";
 
    // since we started at 10:30 the next time slot should be 11:00
    const TimeSlot& next_time_slot  = t1->timeVec().back().time_series().get_next_time_slot();
@@ -806,8 +801,7 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_for_cron )
    /// begin the suite
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
    TestHelper::test_state(t1,NState::QUEUED);
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs << "\n";
+//   PrintStyle style(PrintStyle::STATE); cout << the_defs << "\n";
 
    // since we started at 09:30 the next time slot should be 10:00
    const TimeSlot& next_time_slot  = t1->crons().back().time_series().get_next_time_slot();
@@ -891,8 +885,7 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_for_cron_on_family )
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
    TestHelper::test_state(t1,NState::QUEUED);
    TestHelper::test_state(t2,NState::QUEUED);
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs << "\n";
+//   PrintStyle style(PrintStyle::STATE); cout << the_defs << "\n";
 
    // since we started at 09:30 the next time slot should be 11:00
    const TimeSlot& t1_next_time_slot  = t1->timeVec().back().time_series().get_next_time_slot();

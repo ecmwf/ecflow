@@ -177,8 +177,7 @@ BOOST_AUTO_TEST_CASE( test_ecflow_359 )
    task_ptr complete = f1->add_task("complete");
    complete->addDefStatus( DState::COMPLETE);
 
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs;
+//   PrintStyle style(PrintStyle::STATE); cout << the_defs;
 
    the_defs->beginAll();
 
@@ -221,8 +220,7 @@ BOOST_AUTO_TEST_CASE( test_ecflow_428 )
    task_ptr t1 = f2->add_task("t1");
    task_ptr t2 = f2->add_task("t2");
 
-//   PrintStyle::setStyle(PrintStyle::STATE);
-//   cout << the_defs;
+//   PrintStyle style(PrintStyle::STATE); cout << the_defs;
 
    the_defs->beginAll();
 

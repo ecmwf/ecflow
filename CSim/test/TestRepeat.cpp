@@ -77,7 +77,6 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer  )
  	   //		cout << theDefs << "\n";
  	}
 
- 	PrintStyle::setStyle(PrintStyle::STATE);
  	Simulator simulator;
  	std::string errorMsg;
  	BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_repeat_integer.def"),errorMsg),errorMsg << "\n" << theDefs);
@@ -474,8 +473,6 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
  	   BOOST_REQUIRE_MESSAGE(repeat.value() == 2,"Expected to find repeat with value 2 but found " << repeat.value() );
       BOOST_REQUIRE_MESSAGE(repeat.last_valid_value() == 1,"Expected to find repeat with last valid value 1 but found " << repeat.last_valid_value() );
  	}
-
-   PrintStyle::setStyle(PrintStyle::DEFS);
 
    // remove generated log file. Comment out to debug
    std::string logFileName = TestUtil::testDataLocation("test_repeat_string.def") + ".log";

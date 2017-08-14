@@ -49,7 +49,8 @@ int main(int argc, char* argv[])
       cout << warningMsg << "\n";
       return 1;
    }
-//   PrintStyle::setStyle(PrintStyle::MIGRATE);
+
+//   PrintStyle style(PrintStyle::MIGRATE);
 //   cout << defs;
    return 0;
 }

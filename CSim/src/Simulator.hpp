@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include "QueueAttr.hpp"
+#include "PrintStyle.hpp"
 
 class Defs;
 class Task;
@@ -62,6 +63,7 @@ private:
 
 	mutable std::map<Submittable*,int> taskIntMap_;
 	mutable int level_;
+	PrintStyle print_style_;   // by default show state when writing defs to standard out. RAII
 };
 }
 #endif /* SIMULATOR_HPP_ */

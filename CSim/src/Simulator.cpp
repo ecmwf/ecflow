@@ -52,7 +52,7 @@ public:
 	~LogDestroyer() { Log::destroy(); }
 };
 
-Simulator::Simulator() : level_(0){}
+Simulator::Simulator() : level_(0), print_style_(PrintStyle::STATE){}
 
 bool Simulator::run(const std::string& theDefsFile,std::string& errorMsg) const
 {
@@ -202,7 +202,7 @@ void Simulator::run_analyser(Defs& theDefs,std::string& errorMsg ) const
    analyser.run(theDefs);
    errorMsg += "Please see files .flat and .depth for analysis\n";
 
-   PrintStyle::setStyle(PrintStyle::MIGRATE);
+   PrintStyle style(PrintStyle::MIGRATE);
    std::stringstream ss;
    ss << theDefs;
    errorMsg += ss.str();

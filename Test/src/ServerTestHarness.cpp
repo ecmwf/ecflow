@@ -31,7 +31,6 @@
 #include "File.hpp"
 #include "AssertTimer.hpp"
 #include "TestHelper.hpp"
-#include "PrintStyle.hpp"
 #include "WhyCmd.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
@@ -49,7 +48,8 @@ ServerTestHarness::ServerTestHarness()
 : generateManFileForNodeContainers_(false),
   check_task_duration_less_than_server_poll_(true),
   add_default_sleep_time_(true),
-  serverUpdateCalendarCount_(0)
+  serverUpdateCalendarCount_(0),
+  print_style_(PrintStyle::STATE)
 {}
 
 void ServerTestHarness::run(
@@ -159,9 +159,8 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
          load_defs_from_disk = false;
       }
       else {
-         PrintStyle::setStyle(PrintStyle::DEFS); // needed for output
+         PrintStyle style(PrintStyle::DEFS); // needed for output
          theClientDefsFile << theClientDefs;
-         PrintStyle::setStyle(PrintStyle::STATE); // From now on show state
       }
    }
 
@@ -327,8 +326,6 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
 
 #ifdef DEBUG_DIFF
          {
-            PrintStyle::Type_t st = PrintStyle::getStyle();
-            PrintStyle::setStyle(PrintStyle::STATE);
             counter++;
             std::string filename = dump_defs_filename + boost::lexical_cast<std::string>(counter);
             std::ofstream theFile( filename.c_str() );
@@ -363,7 +360,6 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
             theFile << "submitted: " << submitted << "\n";
             theFile << "active: " << active << "\n";
             theFile << *full_defs.get();
-            PrintStyle::setStyle(st);
          }
 #endif
          std::string errorMsg;
