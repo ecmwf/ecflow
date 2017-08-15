@@ -210,9 +210,6 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info)
     UiLog().dbg() << " info=" << info->path();
 #endif
 
-    //Lookup the object in the model
-    QModelIndex idx=model_->infoToIndex(info);
-    
     //Forcing an object to be shown can result in altering and relayouting the tree. We
     //have to block the regaining of the selection at the end of the layout
     //process when the tree expand state is restored.
@@ -221,11 +218,14 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info)
     //Force the object to be shown in the tree
     model_->setForceShow(info);
 
+    //Lookup the object in the model
+    QModelIndex idx=model_->infoToIndex(info);
+
     //Get the index again if it is needed
-    if(!idx.isValid())
-    {             
-        idx=model_->infoToIndex(info);
-    }
+    //if(!idx.isValid())
+    //{
+    //    idx=model_->infoToIndex(info);
+    //}
 
     //The re-layouting finished. We do not need to block the regaining of selection when
     //the tree expand state is restored.
