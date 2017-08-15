@@ -558,7 +558,9 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
             bool expandedOri=view_->isExpanded(idx);
             view_->collapse(idx);
             es->collectExpanded(node->vnode(),view_->expandedIndexes);
-            //UiLog().dbg() << " expanded=" << view_->isExpanded(idx);
+#ifdef _UI_TREENODEVIEW_DEBUG
+            UiLog().dbg() << " expanded=" << view_->isExpanded(idx);
+#endif
             if(expandedOri || view_->isExpanded(idx))
                 view_->expand(idx);
         }
