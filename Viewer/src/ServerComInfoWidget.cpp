@@ -132,10 +132,11 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     //set size
     setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
     setMinimumSize(w,h);
-    adjustGeometry(false);
 
-    buttonRect_=QRect(1,1,height()-2,height()-2);
+    buttonRect_=QRect(1,1,h-2,h-2);
     buttonRadius2_=pow(buttonRect_.width()/2,2);
+
+    adjustGeometry(false);
 
     //we need this for the mousemove event
     setMouseTracking(true);
@@ -284,8 +285,12 @@ void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server)
         periodTextWidth_=0;
         lastTextWidth_=0;
 
+        refreshAction_->setEnabled(false);
+
         //get info and rerender
         reloadAll();
+
+        adjustGeometry(false);
     }
 }
 
@@ -841,7 +846,7 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
         periodTextWidthMin_=0;
         periodTextWidth_=0;
         lastTextWidth_=0;
-        setFixedWidth(buttonRect_.x()+buttonRect_.width()+fmServer_.width("AAAAA"));
+        setFixedWidth(buttonRect_.x()+buttonRect_.width()+4);
     }
 }
 
