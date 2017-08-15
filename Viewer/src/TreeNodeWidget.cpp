@@ -204,7 +204,7 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 
     QAction* acState=new QAction(this);
     acState->setIcon(QPixmap(":viewer/status.svg"));
-    acState->setToolTip("Show statuses");
+    acState->setToolTip("Filter by status");
     acState->setMenu(menuState);
     acLst << acState;
 
