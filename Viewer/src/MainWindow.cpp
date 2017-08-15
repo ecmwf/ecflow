@@ -24,6 +24,7 @@
 #include "MainWindow.hpp"
 
 #include "AboutDialog.hpp"
+#include "ChangeNotify.hpp"
 #include "ChangeNotifyWidget.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
@@ -308,6 +309,11 @@ void MainWindow::on_actionSearch_triggered()
 {
     //It takes ownership of the dialogue.
     nodePanel_->addSearchDialog();
+}
+
+void MainWindow::on_actionNotification_triggered()
+{
+    ChangeNotify::showDialog();
 }
 
 void MainWindow::on_actionManageServers_triggered()

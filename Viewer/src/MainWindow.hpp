@@ -62,6 +62,7 @@ protected Q_SLOTS:
 	void on_actionAddInfoPanel_triggered();
 	void on_actionPreferences_triggered();
 	void on_actionSearch_triggered();
+    void on_actionNotification_triggered();
 	void on_actionAbout_triggered();
 	void on_actionSaveSessionAs_triggered();
 	void on_actionManageSessions_triggered();
