@@ -11,22 +11,19 @@ set -x # echo script lines as they are executed
 ## granted to it by virtue of its status as an intergovernmental organisation
 ## nor does it submit to any jurisdiction.
 
-# Defines the variables that are needed for any
-# communication with ECF_
+# Defines the variables that are needed for any communication with ecflow server
 
 export ECF_PORT=%ECF_PORT%    # ECF port number on the server
 export ECF_HOST=%ECF_HOST%    # The hostname where the server is running
 export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
+export ECF_RID=$$             # Let All child commands pass process id to server
 
-# Tell ECF_ we have stated
-# The ECF_ variable ECF_RID will be set to parameter of init
-# Here we give the current PID.
-
+%ECF_CLIENT_EXE_PATH:ecflow_client% --version
 %ECF_CLIENT_EXE_PATH:ecflow_client% --init=$$
 
-# Defined a error hanlder
+# Define a error hanlder
 
 ERROR() {
 	set +e                                       # Clear -e flag, so we don't fail
