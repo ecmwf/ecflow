@@ -1762,6 +1762,7 @@ QString VServer::toolTip()
 	txt+=" <b>Port</b>: " + QString::fromStdString(server_->port()) + "<br>";
 
 	ConnectState* st=server_->connectState();
+    QColor colErr(255,95,95);
 
 	if(server_->activity() == ServerHandler::LoadActivity)
 	{
@@ -1777,8 +1778,7 @@ QString VServer::toolTip()
 			txt+="<b>Total number of nodes</b>: " +  QString::number(totalNum_);
 		}
 		else if(st->state() == ConnectState::Lost)
-		{
-			QColor colErr(255,0,0);
+		{			
 			txt+="<b><font color=" + colErr.name() +">Failed to connect to server!</b><br>";
 			txt+="<b>Last connection</b>: " + VFileInfo::formatDateAgo(st->lastConnectTime()) + "<br>";
 			txt+="<b>Last failed attempt</b>: " + VFileInfo::formatDateAgo(st->lastLostTime()) + "<br>";
@@ -1786,8 +1786,7 @@ QString VServer::toolTip()
 				txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->shortErrorMessage());
 		}
 		else if(st->state() == ConnectState::Disconnected)
-		{
-			QColor colErr(255,0,0);
+		{			
 			txt+="<b><font color=" + colErr.name() +">Server is disconnected!</b><br>";
 			txt+="<b>Disconnected</b>: " + VFileInfo::formatDateAgo(st->lastDisconnectTime()) + "<br>";
 		}
