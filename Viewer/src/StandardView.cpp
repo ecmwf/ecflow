@@ -465,11 +465,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
             else if(hChanged)
             {
                 doDelayedWidthAdjustment();
-            }
-            else if(wChanged)
-            {
-                UiLog().dbg() << " CHANGED!!!!!  "<<  item->index.data().toString();
-            }
+            }           
         }
 
         //draw expand indicator
