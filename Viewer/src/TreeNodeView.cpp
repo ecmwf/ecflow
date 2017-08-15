@@ -555,9 +555,11 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
         QModelIndex idx=model_->nodeToIndex(node);
         if(idx.isValid())
         {            
-            view_->collapse(idx); //THIS SHOULD NOT BE DONE FOR A TMP SAVE
+            bool expandedOri=view_->isExpanded(idx);
+            view_->collapse(idx);
             es->collectExpanded(node->vnode(),view_->expandedIndexes);
-            if(view_->isExpanded(idx))
+            //UiLog().dbg() << " expanded=" << view_->isExpanded(idx);
+            if(expandedOri || view_->isExpanded(idx))
                 view_->expand(idx);
         }
 
