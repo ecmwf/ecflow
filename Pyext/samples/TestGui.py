@@ -24,7 +24,6 @@ import shutil   # used to remove directory tree
 import ecflow
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
                    CheckPt, Cron, Late, debug_build, Flag, FlagType
-from numpy.distutils.fcompiler import none
 
 class Tester(object) : 
     def __init__(self,ci,args):
