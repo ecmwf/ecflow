@@ -141,8 +141,6 @@
    </attribute>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
-   <addaction name="actionPreferences"/>
-   <addaction name="separator"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -311,7 +309,7 @@
   </action>
   <action name="actionRefreshSelected">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/reload_black.svg</normaloff>:/viewer/reload_black.svg</iconset>
    </property>
    <property name="text">

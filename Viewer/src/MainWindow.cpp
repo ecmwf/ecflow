@@ -108,8 +108,8 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     //insert a spacer after the the server refresh widget
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    viewToolBar->insertWidget(actionSearch,spacer);
-    //viewToolBar->addWidget(spacer);
+    //viewToolBar->insertWidget(actionSearch,spacer);
+    viewToolBar->addWidget(spacer);
 
     //Add more actions
     addInfoPanelActions(viewToolBar);  
