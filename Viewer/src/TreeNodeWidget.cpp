@@ -32,8 +32,8 @@ AttributeFilter* TreeNodeWidget::lastAtts_=NULL;
 
 TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
     NodeWidget("tree",serverFilter,parent),
-    layoutProp_(0),
-    viewLayoutMode_(StandardLayoutMode)
+    viewLayoutMode_(StandardLayoutMode),
+    layoutProp_(0)
 {
 	//Init qt-creator form
 	setupUi(this);

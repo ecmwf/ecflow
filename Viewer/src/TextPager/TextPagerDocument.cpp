@@ -460,9 +460,9 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
         }
     }
 
-    const TextDocumentIterator::Direction direction = (reverse
-                                                       ? TextDocumentIterator::Left
-                                                       : TextDocumentIterator::Right);
+    //const TextDocumentIterator::Direction direction = (reverse
+    //                                                   ? TextDocumentIterator::Left
+    //                                                   : TextDocumentIterator::Right);
     TextDocumentIterator it(d, pos);
     if (reverse) {
         it.setMinBoundary(limit);
@@ -649,7 +649,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
     }
 
     // ### what if one searches for a string with non-word characters in it and FindWholeWords?
-    const TextDocumentIterator::Direction direction = (reverse ? TextDocumentIterator::Left : TextDocumentIterator::Right);
+    //const TextDocumentIterator::Direction direction = (reverse ? TextDocumentIterator::Left : TextDocumentIterator::Right);
     QString word = caseSensitive ? in : in.toLower();
 
     TextDocumentIterator it(d, pos);
@@ -667,7 +667,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
         it.setConvertToLowerCase(true);
 
     bool ok = true;
-    QChar ch = it.current();
+    //QChar ch = it.current();
     //int progressInterval = 0;
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
     QTime lastProgressTime;

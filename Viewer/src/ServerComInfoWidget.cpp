@@ -607,7 +607,7 @@ void ServerRefreshInfoWidget::mousePressEvent(QMouseEvent* event)
 #endif
         if(currentComponent_ != ButtonComponent)
         {
-            currentComponent_ == ButtonComponent;
+            currentComponent_ = ButtonComponent;
         }
         userInitiatedRefresh_=true;
         refreshAction_->trigger();
@@ -1119,9 +1119,9 @@ void ServerRefreshInfoWidget::printStatus() const
 
 ServerComActivityLine::ServerComActivityLine(QWidget *parent) :
     QWidget(parent),
-    server_(0),
     font_(QFont()),
-    fm_(font_)
+    fm_(font_),
+    server_(0)
 {
     font_.setPointSize(font_.pointSize()-1);
     fm_=QFontMetrics(font_);

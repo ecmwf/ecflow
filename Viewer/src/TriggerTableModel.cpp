@@ -237,7 +237,6 @@ QModelIndex TriggerTableModel::itemToIndex(TriggerTableItem *item)
 {
     if(item)
     {
-         const std::vector<TriggerTableItem*>& items=tc_->items();
          for(std::size_t i=0; i < tc_->items().size(); i++)
              if(tc_->items()[i] == item)
                  return index(i,0);

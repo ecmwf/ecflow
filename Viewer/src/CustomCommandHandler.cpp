@@ -51,7 +51,7 @@ void CustomCommandHandler::init()
 CustomCommand* CustomCommandHandler::replace(int index, const std::string& name, const std::string& command, bool context)
 {
     assert(index >= 0);
-    assert(index < items_.size());
+    assert(index < static_cast<int>(items_.size()));
 
     CustomCommand *item;
 

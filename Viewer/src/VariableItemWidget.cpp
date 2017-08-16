@@ -443,7 +443,7 @@ void VariableAddDialog::accept()
         return;
     }
 
-    for(size_t i=1; i <data_->count(); i++)
+    for(int i=1; i <data_->count(); i++)
     {
         if(data_->data(i)->hasName(name.toStdString()))
         {

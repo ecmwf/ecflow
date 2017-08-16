@@ -336,7 +336,7 @@ VTreeNode* VTree::makeTopLevelBranch(const std::vector<VNode*>& filter,VNode* su
     assert(suite->isSuite());
     VTreeSuiteNode *branch=new VTreeSuiteNode(suite,0);
 
-    for(unsigned int i=0; i < suite->numOfChildren();i++)
+    for(int i=0; i < suite->numOfChildren();i++)
     {
         build(branch,suite->childAt(i),filter);
     }

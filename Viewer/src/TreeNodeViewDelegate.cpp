@@ -591,9 +591,9 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
     }
 
     //Update
+#if 0
     bool hasUpdate=false;
     ServerUpdateData updateData;
-#if 0
     if(server)
     {
         hasUpdate=true;
@@ -1279,9 +1279,7 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,QString text) const
     int textWidth=fm.width(text);
 
     if(nodeStyle_ == BoxAndTextNodeStyle)
-    {
-        int realW=itemRect.height()/4;
-
+    {       
         //state box
         currentRight+=itemRect.height();
         if(hasRealBg)

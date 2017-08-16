@@ -125,8 +125,8 @@ protected:
     //Expand collapse
     void restoreExpand(const QModelIndex& idx);
     void removeAllFromExpanded(const QModelIndex &index);
-    int totalNumOfChildren(const QModelIndex& idx,int& num) const;
-    int totalNumOfExpandedChildren(const QModelIndex& idx,int& num) const;
+    void totalNumOfChildren(const QModelIndex& idx,int& num) const;
+    void totalNumOfExpandedChildren(const QModelIndex& idx,int& num) const;
 
     inline bool isIndexExpanded(const QModelIndex &idx) const
     {
@@ -199,7 +199,6 @@ private:
     QPersistentModelIndex pressedRefIndex_;
     bool noSelectionOnMousePress_;   
     QBasicTimer delayedWidth_;
-    int delayedTimeout_;
 
     inline bool storeExpanded(const QPersistentModelIndex &idx)
     {

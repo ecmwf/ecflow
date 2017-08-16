@@ -277,7 +277,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                         nodeNames += filteredNodes[i]->name();
                         nodeNames += "</b></li>";                    
                     }
-                    if(numItemsToList < filteredNodes.size())
+                    if(numItemsToList < static_cast<int>(filteredNodes.size()))
                     {                  
                         std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
 

@@ -104,6 +104,8 @@ friend class BcWidget;
     
 public:
     NodePathItem(BcWidget* owner,int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current);
+    virtual ~NodePathItem() {}
+
     void setCurrent(bool);
     virtual void draw(QPainter*,bool,int);
     int adjust(int xp,int yp, int elidedLen=0);

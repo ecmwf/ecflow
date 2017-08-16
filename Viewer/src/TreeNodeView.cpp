@@ -40,10 +40,9 @@
 #define _UI_TREENODEVIEW_DEBUG
 
 TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
-    QObject(parent),
+    QObject(parent),NodeViewBase(filterDef),
     view_(view),
     model_(model),
-    NodeViewBase(filterDef),
     needItemsLayout_(false),
     prop_(NULL),
     setCurrentIsRunning_(false),

@@ -19,8 +19,8 @@ OutputFileClient::OutputFileClient(const std::string& host,const std::string& po
 	total_(0),
     expected_(0),
 	lastProgress_(0),
-	progressChunk_(1024*1024),
-	progressUnits_("MB")
+    progressUnits_("MB"),
+    progressChunk_(1024*1024)
 {
 }
 

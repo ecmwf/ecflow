@@ -355,8 +355,7 @@ bool ServerList::readRcFile()
 
 			if(vec.size() >= 3)
 			{				
-                std::string name=vec[0], host=vec[1], port=vec[2];
-                ServerItem* item=0;
+                std::string name=vec[0], host=vec[1], port=vec[2];                
                 try
                 {
                     add(name,host,port,false,false);

@@ -695,7 +695,6 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 				int lighter=150;
 				QColor bg=bgBrush.color();
 				QColor bgLight=bg.lighter(lighter);
-				QColor border=bg.darker(125);
 
 				QLinearGradient grad;
 				grad.setCoordinateMode(QGradient::ObjectBoundingMode);

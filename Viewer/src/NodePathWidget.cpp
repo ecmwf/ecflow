@@ -1060,7 +1060,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 #endif
 		QColor fontCol=n->stateFontColour();
 		name=n->name();
-		bool hasChildren=hasChildren=(n->numOfChildren() >0);
+        bool hasChildren=(n->numOfChildren() >0);
 
         if(i==0)
         {

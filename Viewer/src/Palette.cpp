@@ -100,8 +100,7 @@ void Palette::load(const std::string& parFile)
 			{
 				QColor col=VProperty::toColour(val);
 				if(col.isValid())
-				{
-					QColor cc=palette.color(group,itP.value());
+				{					
 					palette.setColor(group,itP.value(),col);
 				}
 			}

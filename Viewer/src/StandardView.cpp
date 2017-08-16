@@ -375,8 +375,6 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
 //Draw a whole row
 void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::vector<int>& indentVec)
 {
-    bool leaf=false;
-
     TreeNodeViewItem* item=&(viewItems_[start]);
 
     //Get the rowheight
@@ -385,12 +383,9 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
     //See if there are no multiline items in this row
     bool singleRow=delegate_->isSingleHeight(rh);
 
-    const int viewportWidth = viewport()->width();
-
 #ifdef _UI_STANDARDVIEW_DEBUG
     //UiLog().dbg() << "  item=" << " " << item->index.data().toString();
 #endif
-    leaf=(item->total == 0);
 
     //Find out the indentation level of the row
     int firstLevel=item->level;
@@ -764,8 +759,7 @@ int StandardView::itemAtCoordinate(const QPoint& coordinate) const
         if(coordinate.y() >= 0)
         {
             // the coordinate is in or below the viewport
-            int viewItemCoordinate = 0;
-            int itemsInRow=0;
+            int viewItemCoordinate = 0;           
             for(std::size_t viewItemIndex = topViewItemIndex; viewItemIndex < itemCount; viewItemIndex++)
             {
                 viewItemCoordinate += viewItems_[viewItemIndex].height;

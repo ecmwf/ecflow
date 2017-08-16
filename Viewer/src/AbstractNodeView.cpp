@@ -37,16 +37,16 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     verticalScrollMode_(ScrollPerItem),
     rowCount_(0),
     maxRowWidth_(0),
-    lastViewedItem_(0),
     topMargin_(4),
     leftMargin_(4),
     itemGap_(12),
     connectorGap_(1),
-    expandConnectorLenght_(20),
-    noSelectionOnMousePress_(false),
+    expandConnectorLenght_(20),   
     connectorColour_(Qt::black),
     drawConnector_(true),
-    indentation_(0)
+    indentation_(0),
+    lastViewedItem_(0),
+    noSelectionOnMousePress_(false)
 {  
     expandConnectorLenght_=itemGap_-2*connectorGap_;
 
@@ -564,7 +564,7 @@ QModelIndex AbstractNodeView::indexAt(const QPoint &point) const
 
 QModelIndex AbstractNodeView::modelIndex(int i) const
 {
-    if(i < 0 || i >= viewItems_.size())
+    if(i < 0 || i >= static_cast<int>(viewItems_.size()))
         return QModelIndex();
 
     return viewItems_[i].index;
@@ -579,7 +579,7 @@ int AbstractNodeView::viewIndex(const QModelIndex& index) const
     const int totalCount = static_cast<int>(viewItems_.size());
     const QModelIndex topIndex = index.sibling(index.row(), 0);
     const int row = topIndex.row();
-    const qint64 internalId = topIndex.internalId();
+    const qintptr internalId = topIndex.internalId();
 
     // We start nearest to the lastViewedItem
     int localCount = qMin(lastViewedItem_ - 1, totalCount - lastViewedItem_);
@@ -652,7 +652,7 @@ void AbstractNodeView::removeViewItems(int pos, int count)
 // Expand / collapse
 //---------------------------------------
 
-int AbstractNodeView::totalNumOfChildren(const QModelIndex& idx,int& num) const
+void AbstractNodeView::totalNumOfChildren(const QModelIndex& idx,int& num) const
 {
     int count=model_->rowCount(idx);
     num+=count;
@@ -663,7 +663,7 @@ int AbstractNodeView::totalNumOfChildren(const QModelIndex& idx,int& num) const
     }
 }
 
-int AbstractNodeView::totalNumOfExpandedChildren(const QModelIndex& idx,int& num) const
+void AbstractNodeView::totalNumOfExpandedChildren(const QModelIndex& idx,int& num) const
 {
     int count=model_->rowCount(idx);
     num+=count;
@@ -698,7 +698,7 @@ void AbstractNodeView::expand(int item)
         //recursively relayout the item
         layout(item,false,false,true);
 
-        UI_ASSERT(viewItems_[item].total==total,"viewItems_[" << item << "].total=" << viewItems_[item].total <<
+        UI_ASSERT(static_cast<int>(viewItems_[item].total)==total,"viewItems_[" << item << "].total=" << viewItems_[item].total <<
                   " total=" << total);
 
         //We need to update the parentItem in the items after the insertion.
@@ -747,7 +747,7 @@ void AbstractNodeView::expandAll(const QModelIndex& idx)
         //recursively relayout the item
         layout(item,true,false,true);
 
-        UI_ASSERT(viewItems_[item].total==total,"viewItems_[" << item << "].total=" << viewItems_[item].total <<
+        UI_ASSERT(static_cast<int>(viewItems_[item].total)==total,"viewItems_[" << item << "].total=" << viewItems_[item].total <<
                   " total=" << total);
 
         //We need to update the parentItem in the items after the insertion.

@@ -291,6 +291,7 @@ VProperty* PropertyLine::ruleProperty()
             }
         }
     }
+    return 0;
 }
 
 void PropertyLine::addRuleLine(PropertyLine *r)
