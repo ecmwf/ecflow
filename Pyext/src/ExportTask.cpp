@@ -60,10 +60,16 @@ void export_Task()
    .add_property("aliases",boost::python::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    .add_property("nodes",  boost::python::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    ;
+#if defined(__clang__)
+   boost::python::register_ptr_to_python<task_ptr>(); // needed for mac and boost 1.6
+#endif
 
    class_<Alias, bases<Submittable>, alias_ptr>("Alias",DefsDoc::alias_doc(),no_init)
    .def(self == self )                  // __eq__
    .def("__str__", &Alias::to_string)   // __str__
    .def("__copy__", copyObject<Alias>)  // __copy__ uses copy constructor
    ;
+#if defined(__clang__)
+   boost::python::register_ptr_to_python<alias_ptr>(); // needed for mac and boost 1.6
+#endif
 }
