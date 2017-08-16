@@ -236,7 +236,6 @@ if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
     ecbuild_debug("Resetting CMAKE_PREFIX_PATH to ${CMAKE_PREFIX_PATH}")
 endif()
 
-
 # =======================================================================
 # SSL
 # =======================================================================
@@ -269,6 +268,15 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
     add_definitions( -DDEBUG )
 
 endif()
+
+# =========================================================================================
+# CLANG: /usr/local/include/boost/type_traits/is_base_and_derived.hpp:226:42: 
+#           fatal error: recursive template instantiation exceeded maximum depth of 256
+# =========================================================================================
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth=1024")
+endif()
+
 
 # =========================================================================================
 # build source code
