@@ -6,6 +6,7 @@ set (files ecflowview_menus.json
            ecflowview_gui_server.json
            ecflowview_highlighter.json
            ecflowview_icon_conf.json
+           ecflowview_menu_conf.json
            ecflowview_notification_conf.json
            ecflowview_nstate_conf.json
            ecflowview_palette.json

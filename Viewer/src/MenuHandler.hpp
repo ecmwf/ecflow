@@ -156,9 +156,10 @@ public:
     static bool addItemToMenu(MenuItem *item, const std::string &menuName);
     static Menu *findMenu(const std::string &name);    
     static MenuItem* newItem(const std::string &name);
-    static void addMenu(Menu *menu) {menus_.push_back(menu);};
+    static void addMenu(Menu *menu) {menus_.push_back(menu);}
     static void interceptCommandsThatNeedConfirmation(MenuItem *item);
     static void refreshCustomMenuCommands();
+    static QString nodeMenuMode();
 
 private:
     typedef std::map<std::string, std::string> ConfirmationMap;

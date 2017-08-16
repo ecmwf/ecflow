@@ -17,6 +17,7 @@
 #include "Submittable.hpp"
 
 #include "NodeExpression.hpp"
+#include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
@@ -95,7 +96,7 @@ VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
     return NULL;
 }
 
-bool NodeExpressionParser::isUserLevel(const std::string &str) const
+bool NodeExpressionParser::isMenuMode(const std::string &str) const
 {
     if (str == "oper" || str == "admin")
         return true;
@@ -286,10 +287,10 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     updatedOperands = true;
                 }
 
-                // user level
-                else if (isUserLevel(*i_))
+                // node mneu mode
+                else if (isMenuMode(*i_))
                 {
-                    UserLevelCondition *userCond = new UserLevelCondition(QString::fromStdString(*i_));
+                    NodeMenuModeCondition *userCond = new NodeMenuModeCondition(QString::fromStdString(*i_));
                     operandStack.push_back(userCond);
                     result = userCond;
                     updatedOperands = true;
@@ -610,16 +611,16 @@ bool StateNodeCondition::execute(VItem* item)
 
 //=========================================================================
 //
-//  UserLevelCondition
+// UserMenuModeCondition
 //
 //=========================================================================
 
-bool UserLevelCondition::execute(VItem*)
+bool NodeMenuModeCondition::execute(VItem*)
 {
     // since we don't currently have the concept of user levels, we just 
     // return true for now
 
-    return true;
+    return MenuHandler::nodeMenuMode() == menuModeName_;
 }
 
 

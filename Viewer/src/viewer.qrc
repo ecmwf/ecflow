@@ -77,6 +77,7 @@
     <file alias="logo_small.png">../images/logo_small.png</file>
     <file alias="manage_server.svg">../images/manage_server.svg</file>
     <file alias="manual.svg">../images/manual.svg</file>
+    <file alias="menu.svg">../images/menu.svg</file>
     <file alias="menu_arrow_down.svg">../images/menu_arrow_down.svg</file>
     <file alias="node_log.svg">../images/node_log.svg</file>
     <file alias="notification.svg">../images/notification.svg</file>

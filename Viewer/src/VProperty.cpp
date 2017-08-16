@@ -172,36 +172,40 @@ void VProperty::setValue(QVariant val)
     	dispatchChange();
 }
 
-std::string VProperty::valueAsString() const
+QString VProperty::valueAsString() const
 {
-	QString s;
+    QString s;
 
-	switch(type_)
-	{
-	case StringType:
-		s=value().toString();
-		break;
-	case IntType:
-		s=QString::number(value_.toInt());
-		break;
-	case BoolType:
-		s=(value().toBool() == true)?"true":"false";
-		break;
-	case ColourType:
-		s=VProperty::toString(value().value<QColor>());
-		break;
-	case FontType:
-		s=VProperty::toString(value().value<QFont>());
-		break;
-	case SoundType:
-		s=value().toString();
-		break;
-	default:
-		break;
+    switch(type_)
+    {
+    case StringType:
+        s=value().toString();
+        break;
+    case IntType:
+        s=QString::number(value_.toInt());
+        break;
+    case BoolType:
+        s=(value().toBool() == true)?"true":"false";
+        break;
+    case ColourType:
+        s=VProperty::toString(value().value<QColor>());
+        break;
+    case FontType:
+        s=VProperty::toString(value().value<QFont>());
+        break;
+    case SoundType:
+        s=value().toString();
+        break;
+    default:
+        break;
+    }
 
-	}
+    return s;
+}
 
-	return s.toStdString();
+std::string VProperty::valueAsStdString() const
+{	
+    return valueAsString().toStdString();
 }
 
 void VProperty::setParam(QString name,QString value)

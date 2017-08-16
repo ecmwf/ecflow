@@ -107,7 +107,7 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 		{
 			if(VProperty* p=prop_->findChild("sound_system_file"))
 			{
-				fName=p->valueAsString();
+				fName=p->valueAsStdString();
 			}
 		}
 

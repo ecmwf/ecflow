@@ -236,6 +236,19 @@
             }
         },
 
+        "menu":  {
+            "label": "Menus",
+            "desc" : "Menus",
+            "icon" : "menu.svg",
+
+            "group" : {
+                "title" : "Node context menu",
+                "prefix" : "menu.access",
+
+                "line" : "nodeMenuMode"
+            }
+        },
+
         "notification":  {
             "visible" : "true",
             "label": "Notifications",

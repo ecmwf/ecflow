@@ -161,7 +161,7 @@ void TreeNodeWidget::initAtts()
 {
 	if(VProperty *prop=VConfig::instance()->find("view.tree.attributesPolicy"))
 	{
-		if(prop->valueAsString() == "last")
+        if(prop->valueAsStdString() == "last")
 		{
 			atts_->setCurrent(lastAtts_->current());
 		}
