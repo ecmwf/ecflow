@@ -122,7 +122,7 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
 	}
 
 	int row=index.row();
-	if(row < 0 || row >= data_.size())
+    if(row < 0 || row >= static_cast<int>(data_.size()))
 		return QVariant();
 
 	QString id=columns_->id(index.column());
@@ -201,7 +201,7 @@ Zombie ZombieModel::indexToZombie(const QModelIndex& idx) const
     if(idx.isValid() && hasData())
     {
         int row=idx.row();
-        if(row >= 0 || row < data_.size())
+        if(row >= 0 || row < static_cast<int>(data_.size()))
             return data_[row];
     }
     return Zombie();

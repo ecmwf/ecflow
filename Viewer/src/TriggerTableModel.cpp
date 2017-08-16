@@ -98,7 +98,7 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
 	}
 
 	int row=index.row();
-	if(row < 0 || row >= tc_->size())
+    if(row < 0 || row >= static_cast<int>(tc_->size()))
 		return QVariant();
 
     //QString id=columns_->id(index.column());
@@ -223,7 +223,7 @@ VInfo_ptr TriggerTableModel::nodeInfo(const QModelIndex& index)
 		return res;
 	}
 
-	if(index.row() >=0 && index.row() <= tc_->items().size())
+    if(index.row() >=0 && index.row() <= static_cast<int>(tc_->items().size()))
 	{
         TriggerTableItem* d=tc_->items()[index.row()];
         return VInfo::createFromItem(d->item());
@@ -251,7 +251,7 @@ TriggerTableItem* TriggerTableModel::indexToItem(const QModelIndex& index) const
         return 0;
 
     int row=index.row();
-    if(row < 0 || row >= tc_->size())
+    if(row < 0 || row >= static_cast<int>(tc_->size()))
         return 0;
 
     const std::vector<TriggerTableItem*>& items=tc_->items();

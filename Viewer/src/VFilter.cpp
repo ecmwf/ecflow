@@ -509,7 +509,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
         bool fullRun=false;
 
         //The number of nodes changed: we need to rerun everything
-        if(match_.size() != root->totalNum() || match_.size() != tree_->nodeVec().size())
+        if(static_cast<int>(match_.size()) != root->totalNum() || match_.size() != tree_->nodeVec().size())
         {
             //Deallocates the match vector
             match_=std::vector<VNode*>();
@@ -532,7 +532,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
         //We rerun everything
         if(fullRun)
         {
-            for(size_t i=0; i < root->numOfChildren(); i++)
+            for(int i=0; i < root->numOfChildren(); i++)
             {
                 filterState(root->childAt(i),def_->nodeState_);
             }
@@ -569,7 +569,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
             }
 
 #ifdef _UI_VFILTER_DEBUG
-            assert(topFilterChange.size() <= diffCnt);
+            assert(static_cast<int>(topFilterChange.size()) <= diffCnt);
             if(diffCnt > 0)
                 assert(topFilterChange.size() >0);
 #endif
@@ -613,7 +613,7 @@ bool TreeNodeFilter::collectTopFilterChange(VNode* node,std::vector<VNode*>& top
         return true;
     }
 
-    for(unsigned int i=0; i < node->numOfChildren(); i++)
+    for(int i=0; i < node->numOfChildren(); i++)
     {
         if(collectTopFilterChange(node->childAt(i),topFilterChange))
         {
@@ -633,7 +633,7 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
         ok=true;
     }
 
-    for(unsigned int i=0; i < node->numOfChildren(); i++)
+    for(int i=0; i < node->numOfChildren(); i++)
     {
         if(filterState(node->childAt(i),stateFilter) == true && ok == false)
         {
@@ -767,7 +767,7 @@ bool TableNodeFilter::update()
      matchMode_=VectorMatch;
      match_.clear();
      int num=server_->vRoot()->totalNum();
-     if(num != index_.size())
+     if(num != static_cast<int>(index_.size()))
      {
         //Reallocates
         index_=std::vector<int>();

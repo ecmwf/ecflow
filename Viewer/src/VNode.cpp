@@ -58,8 +58,8 @@ public:
     void get(VNode* node ,TriggerCollector* tc)
     {
         VServer* s=node->root();
-        int num=data_.size();
-        for(size_t i=0; i < num; i++)
+        std::size_t num=data_.size();
+        for(std::size_t i=0; i < num; i++)
         {
             VItem* triggered=s->nodeAt(data_[i]);
             tc->add(triggered,0,TriggerCollector::Normal);
@@ -218,9 +218,9 @@ void VNode::scanAttr()
 {  
     std::vector<VAttribute*> v;
     VAttributeType::scan(this,v);
-    int n=v.size();
+    std::size_t n=v.size();
     attr_.reserve(n);
-    for(size_t i=0; i < n; i++)
+    for(std::size_t i=0; i < n; i++)
         attr_.push_back(v[i]);
 }
 
@@ -256,11 +256,11 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
     if(filter)
     {
         int n=0;
-        int cnt=attr_.size();
+        int cnt=static_cast<int>(attr_.size());
         if(row >= cnt)
             return 0;
 
-        for(size_t i=0; i < cnt; i++)
+        for(int i=0; i < cnt; i++)
         {
             if(filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i] )
             {
@@ -272,7 +272,7 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
             }
         }
     }
-    else if(row < attr_.size())
+    else if(row < static_cast<int>(attr_.size()))
     {
         return attr_[row];
     }
@@ -284,14 +284,13 @@ VAttribute* VNode::attributeForType(int row,VAttributeType *t) const
 {
     assert(row>=0);
 
-    int n=0;
-    int cnt=attr_.size();
+    int cnt=static_cast<int>(attr_.size());
     if(row >= cnt)
         return 0;
 
     bool hasIt=false;
     int rowCnt=0;
-    for(size_t i=0; i < cnt; i++)
+    for(int i=0; i < cnt; i++)
     {
         if(attr_[i]->type() == t)
         {
@@ -316,8 +315,8 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
     if(filter)
     {
         int n=0;
-        int cnt=attr_.size();
-        for(size_t i=0; i < cnt; i++)
+        int cnt=static_cast<int>(attr_.size());
+        for(int i=0; i < cnt; i++)
         {
             if(filter->isSet(attr_[i]->type())  || filter->forceShowAttr() == attr_[i]  )
             {
@@ -330,8 +329,8 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
     }
     else
     {        
-        int cnt=attr_.size();
-        for(size_t i=0; i < cnt; i++)
+        int cnt=static_cast<int>(attr_.size());
+        for(int i=0; i < cnt; i++)
         {
             if(a == attr_[i])
                 return i;
@@ -352,9 +351,9 @@ VAttribute* VNode::findAttribute(VAttributeType *t,const std::string& name)
 {
     Q_ASSERT(t);
 
-    int cnt=attr_.size();
+    int cnt=static_cast<int>(attr_.size());
     bool hasType=false;
-    for(size_t i=0; i < cnt; i++)
+    for(int i=0; i < cnt; i++)
     {
         if(attr_[i]->type() == t)
         {
@@ -371,8 +370,8 @@ VAttribute* VNode::findAttribute(VAttributeType *t,const std::string& name)
 
 VAttribute* VNode::findAttribute(QStringList aData)
 {
-    int cnt=attr_.size();
-    for(size_t i=0; i < cnt; i++)
+    std::size_t cnt=attr_.size();
+    for(std::size_t i=0; i < cnt; i++)
     {
         if(attr_[i]->sameAs(aData))
             return attr_[i];
@@ -382,9 +381,9 @@ VAttribute* VNode::findAttribute(QStringList aData)
 
 void VNode::findAttributes(VAttributeType *t,std::vector<VAttribute*>& v)
 {
-    int cnt=attr_.size();
+    std::size_t cnt=attr_.size();
     bool hasType=false;
-    for(size_t i=0; i < cnt; i++)
+    for(std::size_t i=0; i < cnt; i++)
     {
         if(attr_[i]->type() == t)
         {
@@ -412,7 +411,7 @@ void VNode::removeChild(VNode* vn)
 
 VNode* VNode::childAt(int index) const
 {
-    assert(index>=0 && index < children_.size());
+    assert(index>=0 && index < static_cast<int>(children_.size()));
     return children_[index];
 }
 
@@ -774,10 +773,9 @@ VNode* VNode::ancestorAt(int idx,SortMode sortMode)
 		return this;
 
 	std::vector<VNode*> nodes=ancestors(sortMode);
-
-    if(nodes.size() > idx)
+    if(static_cast<int>(nodes.size()) > idx)
 	{
-		return nodes.at(idx);
+        return nodes[idx];
 	}
 
 	return NULL;
@@ -957,8 +955,8 @@ void VNode::triggers(TriggerCollector* tlc)
         //Limiters
         std::vector<VAttribute*> limiterVec;
         findAttributes(VAttributeType::find("limiter"),limiterVec);
-        int n=limiterVec.size();
-        for(size_t i=0; i < n; i++)
+        std::size_t n=limiterVec.size();
+        for(std::size_t i=0; i < n; i++)
         {
             VAttribute *a=limiterVec[i];
             assert(a);
@@ -979,7 +977,7 @@ void VNode::triggers(TriggerCollector* tlc)
         std::vector<VAttribute*> dateVec;
         findAttributes(VAttributeType::find("date"),dateVec);
         n=dateVec.size();
-        for(size_t i=0; i < n; i++)
+        for(std::size_t i=0; i < n; i++)
         {
             tlc->add(dateVec[i],nullItem,TriggerCollector::Normal);
         }
@@ -988,7 +986,7 @@ void VNode::triggers(TriggerCollector* tlc)
         std::vector<VAttribute*> timeVec;
         findAttributes(VAttributeType::find("time"),timeVec);
         n=timeVec.size();
-        for(size_t i=0; i < n; i++)
+        for(std::size_t i=0; i < n; i++)
         {
             tlc->add(timeVec[i],nullItem,TriggerCollector::Normal);
         }
@@ -1116,8 +1114,8 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
     //Find the matching limit in the node
     std::vector<VAttribute*> limit;
     n->findAttributes(VAttributeType::find("limit"),limit);
-    int limitNum=limit.size();
-    for(size_t i=0; i < limitNum; i++)
+    std::size_t limitNum=limit.size();
+    for(std::size_t i=0; i < limitNum; i++)
     {       
        if(limit[i]->strName() == name)
        {
@@ -1199,9 +1197,9 @@ int VServer::totalNumOfTopLevel(int idx) const
 {
 	assert(totalNumInChild_.size() == children_.size());
 
-	if(idx >=0 && idx < totalNumInChild_.size())
+    if(idx >=0 && idx < static_cast<int>(totalNumInChild_.size()))
 	{
-		return totalNumInChild_.at(idx);
+        return totalNumInChild_[idx];
 	}
 
 	return -1;
@@ -1269,7 +1267,7 @@ void VServer::clear()
 //Delete a particular node
 void VServer::deleteNode(VNode* node,bool hasNotifications)
 {
-	for(unsigned int i=0; i < node->numOfChildren(); i++)
+    for(int i=0; i < node->numOfChildren(); i++)
 	{
 		deleteNode(node->childAt(i),hasNotifications);
 	}
@@ -1550,7 +1548,7 @@ void VServer::scan(VNode *node,bool hasNotifications)
 
 VNode* VServer::nodeAt(int idx) const
 {
-	assert(idx>=0 && idx < nodes_.size());
+    assert(idx>=0 && idx < static_cast<int>(nodes_.size()));
 	return nodes_.at(idx);
 }
 

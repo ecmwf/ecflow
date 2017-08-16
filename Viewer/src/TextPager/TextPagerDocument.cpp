@@ -288,6 +288,7 @@ QStringRef TextPagerDocument::readRef(int pos, int size) const
     return QStringRef();
 }
 
+#if 0
 static bool isSameFile(const QIODevice *left, const QIODevice *right)
 {
     if (left == right)
@@ -299,6 +300,7 @@ static bool isSameFile(const QIODevice *left, const QIODevice *right)
     }
     return false;
 }
+#endif
 
 int TextPagerDocument::documentSize() const
 {

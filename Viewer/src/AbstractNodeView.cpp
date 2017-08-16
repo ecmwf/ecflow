@@ -579,7 +579,7 @@ int AbstractNodeView::viewIndex(const QModelIndex& index) const
     const int totalCount = static_cast<int>(viewItems_.size());
     const QModelIndex topIndex = index.sibling(index.row(), 0);
     const int row = topIndex.row();
-    const qintptr internalId = topIndex.internalId();
+    const quintptr internalId = topIndex.internalId();
 
     // We start nearest to the lastViewedItem
     int localCount = qMin(lastViewedItem_ - 1, totalCount - lastViewedItem_);

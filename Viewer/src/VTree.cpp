@@ -195,7 +195,7 @@ VNode* VTree::vnodeAt(int index) const
 
 VTreeNode* VTree::find(const VNode* vn) const
 {
-    UI_ASSERT(vn->index()  < nodeVec_.size(),"vn index=" << vn->index() << " size=" << nodeVec_.size());
+    UI_ASSERT(vn->index()  < static_cast<int>(nodeVec_.size()),"vn index=" << vn->index() << " size=" << nodeVec_.size());
     return nodeVec_[vn->index()];
 }
 
@@ -227,7 +227,7 @@ int VTree::totalNumOfTopLevel(VTreeNode* n) const
 
 int VTree::totalNumOfTopLevel(int idx) const
 {
-    assert(idx >=0 && idx < children_.size());
+    assert(idx >=0 && idx < static_cast<int>(children_.size()));
 
     return children_[idx]->totalNumOfChildren();
 }
@@ -243,7 +243,7 @@ int VTree::indexOfTopLevelToInsert(VNode* suite) const
     int suiteIdx=s->indexOfChild(suite);
     assert(suiteIdx >=0);
 
-    for(unsigned int i=0; i < numOfChildren();i++)
+    for(int i=0; i < numOfChildren();i++)
     {
         int idx=s->indexOfChild(children_[i]->vnode_);
         assert(idx >=0);
@@ -296,7 +296,7 @@ VTreeNode* VTree::makeBranch(const std::vector<VNode*>& filter,VTreeNode* parent
 
     assert(filter[vnode->index()] != NULL);
 
-    for(unsigned int i=0; i < vnode->numOfChildren();i++)
+    for(int i=0; i < vnode->numOfChildren();i++)
     {
         build(branch,vnode->childAt(i),filter);
     }
@@ -309,7 +309,7 @@ void VTree::replaceWithBranch(VTreeNode* node,VTreeNode* branch)
     assert(node->vnode() == branch->vnode());
     assert(node->numOfChildren() == 0);
 
-    for(unsigned int i=0; i < branch->numOfChildren();i++)
+    for(int i=0; i < branch->numOfChildren();i++)
     {
         branch->childAt(i)->parent_=node;
         node->addChild(branch->childAt(i));
@@ -397,7 +397,7 @@ void VTree::build(const std::vector<VNode*>& filter)
     assert(filter.size() == nodeVec_.size());
 
     //int prevTotalNum=0;
-    for(unsigned int i=0; i < s->numOfChildren();i++)
+    for(int i=0; i < s->numOfChildren();i++)
     {
         build(this,s->childAt(i),filter);
 #if 0
@@ -409,7 +409,7 @@ void VTree::build(const std::vector<VNode*>& filter)
 #endif
     }
 
-    for(unsigned int i=0; i < numOfChildren();i++)
+    for(int i=0; i < numOfChildren();i++)
     {
         children_[i]->countChildren();
         totalNum_+=children_[i]->totalNumOfChildren()+1;
@@ -435,7 +435,7 @@ bool VTree::build(VTreeNode* parent,VNode* node,const std::vector<VNode*>& filte
 
          nodeVec_[node->index()]=n;
 
-         for(unsigned int j=0; j < node->numOfChildren();j++)
+         for(int j=0; j < node->numOfChildren();j++)
          {
              build(n,node->childAt(j),filter);
          }
@@ -460,7 +460,7 @@ void VTree::build()
     std::fill(nodeVec_.begin(), nodeVec_.end(), nptr);
 
     //int prevTotalNum=0;
-    for(unsigned int i=0; i < s->numOfChildren();i++)
+    for(int i=0; i < s->numOfChildren();i++)
     {     
         build(this,s->childAt(i));
         children_[i]->countChildren();
@@ -486,7 +486,7 @@ void VTree::build(VTreeNode* parent,VNode* vnode)
     if(vnode->numOfChildren() > 0)
         n->children_.reserve(vnode->numOfChildren());
 
-    for(unsigned int j=0; j < vnode->numOfChildren();j++)
+    for(int j=0; j < vnode->numOfChildren();j++)
     {
         build(n,vnode->childAt(j));
     }

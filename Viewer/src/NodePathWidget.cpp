@@ -1200,9 +1200,9 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::SUSPENDED) != aspect.end())
 		{
 			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
-            for(std::size_t i=0; i < nodes.size(); i++)
+            for(int i=0; i < static_cast<int>(nodes.size()); i++)
 			{
-				if(nodes.at(i) == node)
+                if(nodes[i] == node)
 				{
                     if(i < nodeItems_.count())
 					{						

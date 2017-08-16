@@ -1157,7 +1157,7 @@ void VModelData::clear()
 
     serverFilter_=NULL;
 
-	for(int i=0; i < servers_.size(); i++)
+    for(std::size_t i=0; i < servers_.size(); i++)
 	{
         delete servers_[i];
 	}
@@ -1168,17 +1168,17 @@ void VModelData::clear()
 
 VModelServer* VModelData::server(int n) const
 {
-    return (n >=0 && n < servers_.size())?servers_[n]:0;
+    return (n >=0 && n < static_cast<int>(servers_.size()))?servers_[n]:0;
 }
 
 ServerHandler* VModelData::serverHandler(int n) const
 {
-    return (n >=0 && n < servers_.size())?servers_[n]->server_:0;
+    return (n >=0 && n < static_cast<int>(servers_.size()))?servers_[n]->server_:0;
 }
 
 int VModelData::indexOfServer(void* idPointer) const
 {
-	for(unsigned int i=0; i < servers_.size(); i++)
+    for(std::size_t i=0; i < servers_.size(); i++)
         if(servers_[i] == idPointer)
 			return i;
 
@@ -1187,7 +1187,7 @@ int VModelData::indexOfServer(void* idPointer) const
 
 ServerHandler* VModelData::serverHandler(void* idPointer) const
 {
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
         if(servers_[i] == idPointer)
             return servers_[i]->server_;
 
@@ -1196,7 +1196,7 @@ ServerHandler* VModelData::serverHandler(void* idPointer) const
 
 VModelServer* VModelData::server(const void* idPointer) const
 {
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
         if(servers_[i] == idPointer)
             return servers_[i];
 
@@ -1205,7 +1205,7 @@ VModelServer* VModelData::server(const void* idPointer) const
 
 VModelServer* VModelData::server(const std::string& name) const
 {
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
         if(servers_[i]->server_->name()  == name)
             return servers_[i];
 
@@ -1214,7 +1214,7 @@ VModelServer* VModelData::server(const std::string& name) const
 
 VModelServer* VModelData::server(ServerHandler* s) const
 {
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
         if(servers_[i]->server_ == s)
             return servers_[i];
 
@@ -1224,7 +1224,7 @@ VModelServer* VModelData::server(ServerHandler* s) const
 
 int VModelData::indexOfServer(ServerHandler* s) const
 {
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
         if(servers_[i]->server_ == s)
 			return i;
 	return -1;
@@ -1346,7 +1346,7 @@ void VModelData::reload()
 
     Q_ASSERT(active_);
 
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
     {
         servers_[i]->reload();
     }
@@ -1364,7 +1364,7 @@ void VModelData::slotFilterDefChanged()
 
 bool VModelData::isFilterComplete() const
 {
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
     {      
         return servers_[i]->filter()->isComplete();
     }
@@ -1374,7 +1374,7 @@ bool VModelData::isFilterComplete() const
 
 bool VModelData::isFilterNull() const
 {
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
     {
         return servers_[i]->filter()->isNull();
     }
@@ -1458,7 +1458,7 @@ void VTreeModelData::add(ServerHandler *server)
 
 void VTreeModelData::slotAttrFilterChanged()
 {
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
     {
         servers_[i]->treeServer()->attrFilterChanged();
     }
@@ -1507,7 +1507,7 @@ int VTableModelData::position(VTableServer* server)
 	if(server)
 	{
 		start=0;
-        for(unsigned int i=0; i < serverNum_; i++)
+        for(int i=0; i < serverNum_; i++)
 		{
             if(servers_[i] == server)
 			{
@@ -1532,7 +1532,7 @@ bool VTableModelData::position(VTableServer* server,int& start,int& count)
 		{          
             count=server->nodeNum();
 			start=0;
-            for(unsigned int i=0; i < serverNum_; i++)
+            for(int i=0; i < serverNum_; i++)
 			{
                 if(servers_[i] == server)
 				{
@@ -1553,7 +1553,7 @@ int VTableModelData::position(VTableServer* server,const VNode *node) const
 	if(server)
 	{
 		int totalRow=0;
-        for(unsigned int i=0; i < serverNum_; i++)
+        for(int i=0; i < serverNum_; i++)
 		{
             if(servers_[i] == server)
 			{				
@@ -1595,7 +1595,7 @@ VNode* VTableModelData::nodeAt(int totalRow)
 	if(totalRow < 0)
 		return NULL;
 
-    for(unsigned int i=0; i < serverNum_; i++)
+    for(int i=0; i < serverNum_; i++)
 	{
 		int pos=totalRow-cnt;
         if(pos < servers_[i]->nodeNum())
