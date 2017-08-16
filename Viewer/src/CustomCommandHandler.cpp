@@ -74,7 +74,7 @@ CustomCommand* CustomCommandHandler::replace(int index, const CustomCommand &cmd
 void CustomCommandHandler::remove(int index)
 {
     assert(index >= 0);
-    assert(index < items_.size());
+    assert(index < static_cast<int>(items_.size()));
 
     items_.erase(items_.begin()+index);
 
@@ -84,7 +84,7 @@ void CustomCommandHandler::remove(int index)
 CustomCommand* CustomCommandHandler::duplicate(int index)
 {
     assert(index >= 0);
-    assert(index < items_.size());
+    assert(index < static_cast<int>(items_.size()));
 
     CustomCommand *item = items_[index];
     std::string postfix("_1");
@@ -104,9 +104,9 @@ CustomCommand* CustomCommandHandler::duplicate(int index)
 void CustomCommandHandler::swapCommandsByIndex(int i1, int i2)
 {
     assert(i1 >= 0);
-    assert(i1 < items_.size());
+    assert(i1 < static_cast<int>(items_.size()));
     assert(i2 >= 0);
-    assert(i2 < items_.size());
+    assert(i2 < static_cast<int>(items_.size()));
 
     CustomCommand *temp = items_[i2];
     items_[i2] = items_[i1];
@@ -166,12 +166,12 @@ void CustomCommandHandler::readSettings()
 
     bool ok = vs.read(false);  // false means we don't abort if the file is not there
 
-    if (ok)
+    if(ok)
     {
         std::vector<VSettings> commands;
         vs.get("commands", commands);
 
-        for (int i = 0; i < commands.size(); i++)
+        for (std::size_t i = 0; i < commands.size(); i++)
         {
             VSettings *vsCommand = &commands[i];
             std::string emptyDefault="";
@@ -258,7 +258,7 @@ CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const s
         CustomCommand *item=new CustomCommand(name, command, context);
         items_.push_front(item);  // add it to the front
 
-        if (items_.size() > maxCommands_)  // too many commands?
+        if(static_cast<int>(items_.size()) > maxCommands_)  // too many commands?
         {
             items_.pop_back(); // remove the last item
         }

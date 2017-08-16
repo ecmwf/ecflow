@@ -365,7 +365,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	InfoPanelItem* currentItem=findItem(current);
 
 	//A new set of tabs is needed!
-	if(tab_->count() != ids.size() || match != ids.size())
+    if(tab_->count() != static_cast<int>(ids.size()) || match != static_cast<int>(ids.size()))
 	{
 		//We set this flag true so that the change of the current tab should not
 		//trigger a reload! We want to reload the current tab only after the

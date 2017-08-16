@@ -30,7 +30,8 @@ EditItemWidget::EditItemWidget(QWidget *parent) :
 
 	infoProvider_=new EditProvider(this);
 
-	Highlighter* ih=new Highlighter(textEdit_->document(),"script");
+    //The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(),"script");
 
 	searchLine_->setEditor(textEdit_);
 

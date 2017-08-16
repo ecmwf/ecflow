@@ -471,13 +471,13 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
     }
     const QLatin1Char newline('\n');   
     bool ok = true;
-    int progressInterval = 0;
+    //int progressInterval = 0;
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
     QTime lastProgressTime;
     if (flags & FindAllowInterrupt) {
-        progressInterval = qMax<int>(1, (reverse
-                                         ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
-                                         : (static_cast<qreal>(d->documentSize) - static_cast<qreal>(pos)) / 100.0));
+        //progressInterval = qMax<int>(1, (reverse
+        //                                 ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
+        //                                 : (static_cast<qreal>(d->documentSize) - static_cast<qreal>(pos)) / 100.0));
         //maxFindLength = (reverse ? pos : d->documentSize - pos);
         lastProgressTime.start();
     }

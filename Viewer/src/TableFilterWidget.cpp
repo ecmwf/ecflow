@@ -86,7 +86,8 @@ void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
         //if(!op->selection().isEmpty())
         sf.setCurrent(op->selection());
 
-        VParamFilterMenu* sfm= new VParamFilterMenu(menu,&sf,"Status filter",
+        //The menu takes ownership of it
+        new VParamFilterMenu(menu,&sf,"Status filter",
                           VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
 
 		if(menu->exec(globalPos) != NULL)

@@ -70,7 +70,8 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     //Expression
     exprTb_->setChecked(true);
 
-    Highlighter* ih=new Highlighter(exprTe_->document(),"trigger");
+    //The document becomes the owner of the highlighter
+    new Highlighter(exprTe_->document(),"trigger");
     exprTe_->setReadOnly(true);
     exprTe_->setBackgroundVisible(true);
 

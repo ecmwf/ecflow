@@ -409,7 +409,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             // but do not do this if the last function asks to delay this process
             if (!funcStack.empty() && !funcStack.back()->delayUnwinding())
             {
-                if(updatedOperands && (operandStack.size() >= funcStack.back()->numOperands()))
+                if(updatedOperands && (static_cast<int>(operandStack.size()) >= funcStack.back()->numOperands()))
                 {
                     std::vector<BaseNodeCondition *> operands;
                     result = funcStack.back();       // last function is the current result
@@ -435,7 +435,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
     // final unwinding of the stack
     while (!funcStack.empty())
     {
-        if(operandStack.size() >= funcStack.back()->numOperands())
+        if(static_cast<int>(operandStack.size()) >= funcStack.back()->numOperands())
         {
             std::vector<BaseNodeCondition *> operands;
             result = funcStack.back();  // last function is the current result           
@@ -476,7 +476,7 @@ bool BaseNodeCondition::containsAttributeSearch()
     bool contains = false;
 
     // check child condition nodes
-    for (int i = 0; i < operands_.size(); i++)
+    for(std::size_t i = 0; i < operands_.size(); i++)
     {
         contains = contains | operands_[i]->containsAttributeSearch();
     }

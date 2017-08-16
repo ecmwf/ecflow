@@ -176,7 +176,7 @@ void OutputFileClient::estimateExpectedSize()
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
     UiLog().dbg() << "OutputFileClient::estimateExpectedSize -->";
 #endif
-    for(unsigned int i=0; i < dir_->count(); i++)
+    for(int i=0; i < dir_->count(); i++)
     {
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
         UiLog().dbg() << "file: " << dir_->fullName(i);

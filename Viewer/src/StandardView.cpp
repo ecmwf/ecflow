@@ -568,7 +568,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
             //Draw the vertical connector lines for all the levels
             //preceding the first level in the row!
             painter->setPen(connectorColour_);
-            for(size_t j=0; j < firstLevel; j++)
+            for(int j=0; j < firstLevel; j++)
             {
                 int xp=indentVec[j];
                 if(xp != 0)
@@ -777,7 +777,7 @@ int StandardView::itemAtCoordinate(const QPoint& coordinate) const
 
 bool StandardView::isPointInExpandIndicator(int item,QPoint p) const
 {
-    const std::size_t itemCount = viewItems_.size();
+    const int itemCount = static_cast<int>(viewItems_.size());
     return item >=0 && item < itemCount &&
            p.x() > viewItems_[item].x-expandIndicatorBoxWidth_ &&
            p.x() < viewItems_[item].x-2;

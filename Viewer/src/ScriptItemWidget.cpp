@@ -29,7 +29,8 @@ ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
     //Remove the first spacer item!!
     removeSpacer();
     
-    Highlighter* ih=new Highlighter(textEdit_->document(),"script");
+    //The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(),"script");
 
 	infoProvider_=new ScriptProvider(this);
 

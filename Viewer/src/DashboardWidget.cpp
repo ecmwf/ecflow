@@ -22,8 +22,8 @@ DashboardWidget::DashboardWidget(const std::string& type, QWidget* parent) :
     type_(type),
     acceptSetCurrent_(false),
     ignoreMaximisedChange_(false),
-    inDialog_(false),
-    bcWidget_(0)
+    bcWidget_(0),
+    inDialog_(false)
 {
     //detach
     detachedAction_=new QAction("Detached",this);

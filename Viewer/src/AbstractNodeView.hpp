@@ -34,16 +34,16 @@ struct TreeNodeViewItem
     QModelIndex index; //the model index represented by the item.
                        //We remove items whenever the indexes are invalidated
     int parentItem; // parent item index in viewItems
-    uint total; // total number of visible children in the view
-    uint widestInSiblings;
-    uint expanded : 1; //the item expanded
-    uint hasChildren : 1; // if the item has children in the model (it is
+    unsigned int total; // total number of visible children in the view
+    unsigned int widestInSiblings;
+    unsigned int expanded : 1; //the item expanded
+    unsigned int hasChildren : 1; // if the item has children in the model (it is
                           // independent of the expanded/collapsed state)
-    uint hasMoreSiblings : 1;
-    uint level : 12; // indentation
-    uint width: 12;
-    uint height : 16;
-    uint x: 16;
+    unsigned int hasMoreSiblings : 1;
+    unsigned int level : 12; // indentation
+    unsigned int width: 12;
+    unsigned int height : 16;
+    unsigned int x: 16;
 
     int right() const {return x+width;}
     int alignedRight() const {return x+widestInSiblings;}

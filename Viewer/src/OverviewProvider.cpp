@@ -167,7 +167,7 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 
     //Print children
     VNode *vr=server->vRoot();
-    for(unsigned int i=0; i < vr->numOfChildren(); i++)
+    for(int i=0; i < vr->numOfChildren(); i++)
     {
     	f << inc << vr->childAt(i)->nodeType() << " " <<
     			vr->childAt(i)->strName() << "\n";
@@ -289,7 +289,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
     }
 
 	//Print children
-	for(unsigned int i=0; i < node->numOfChildren(); i++)
+    for(int i=0; i < node->numOfChildren(); i++)
 	{
 		f << inc << node->childAt(i)->nodeType() << " " <<
 	    			node->childAt(i)->strName() << "\n";

@@ -202,7 +202,7 @@ bool SuiteFilter::loadedSameAs(const std::vector<std::string>& loaded) const
             cnt++;
     }
 
-    return cnt == loaded.size();
+    return cnt == static_cast<int>(loaded.size());
 }
 
 bool SuiteFilter::setLoaded(const std::vector<std::string>& loaded,bool checkDiff)

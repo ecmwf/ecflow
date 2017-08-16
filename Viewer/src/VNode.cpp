@@ -329,8 +329,7 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
         }
     }
     else
-    {
-        int n=0;
+    {        
         int cnt=attr_.size();
         for(size_t i=0; i < cnt; i++)
         {

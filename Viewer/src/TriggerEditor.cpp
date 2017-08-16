@@ -30,7 +30,8 @@ TriggerEditorWidget::TriggerEditorWidget(QWidget* parent) : QWidget(parent)
     item->setAlignment(Qt::AlignLeft|Qt::AlignTop);
 #endif
 
-    Highlighter *h=new Highlighter(te_->document(),"trigger");
+    //The document becomes the owner of the highlighte
+    new Highlighter(te_->document(),"trigger");
     te_->setShowLineNumbers(false);
 }
 

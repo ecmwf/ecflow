@@ -654,7 +654,7 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
         std::map<ServerHandler*,std::string> targetParentFullNames;
 
 		//Figure out what objects (node/server) the command should be applied to
-		for(int i=0; i < info.size(); i++)
+        for(std::size_t i=0; i < info.size(); i++)
 		{
 			std::string nodeFullName;
             std::string nodeName;
