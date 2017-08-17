@@ -11,6 +11,7 @@
 #include "ChangeNotifyWidget.hpp"
 
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QPainter>
 #include <QSignalMapper>
 #include <QToolButton>
@@ -33,7 +34,7 @@ ChangeNotifyButton::ChangeNotifyButton(QWidget* parent) :
 
 	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
 	grad_.setStart(0,0);
-	grad_.setFinalStop(0,1);
+    grad_.setFinalStop(0,1);
 }
 
 void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
@@ -122,8 +123,8 @@ void ChangeNotifyButton::updateIcon()
 	}
 
 	QFont f;
-	f.setBold(true);
-	f.setPointSize(f.pointSize());
+    //f.setBold(true);
+    f.setPointSize(f.pointSize());
 	QFontMetrics fm(f);
 
     QFont fNum;
@@ -147,12 +148,13 @@ void ChangeNotifyButton::updateIcon()
 
 	QRect textRect(0,0,fm.width(text)+6,h);
 
-	QColor bgLight=bgCol.lighter(150);
+    QColor bgLight=bgCol.lighter(110);
 	grad_.setColorAt(0,bgLight);
 	grad_.setColorAt(1,bgCol);
 
-	painter.setBrush(QBrush(grad_));
-    painter.setPen(bgCol.darker(150));
+    painter.setBrush(QBrush(grad_));
+    //painter.setBrush(bgCol);
+    painter.setPen(bgCol.darker(170));
 	painter.drawRoundedRect(textRect,2,2);
 	painter.setPen(fgCol);
 	painter.setFont(f);
@@ -178,6 +180,14 @@ ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)
 	layout_=new QHBoxLayout(this);
 	layout_->setContentsMargins(0,0,0,0);
 	layout_->setSpacing(0);
+
+    QLabel* label=new QLabel(tr("Notifications: "),this);
+    label->setStyleSheet("QLabel{color: " + QColor(60,60,60).name() + ";}");
+    QFont f;
+    f.setBold(true);
+    //f.setPointSize(f.pointSize()-1);
+    label->setFont(f);
+    layout_->addWidget(label);
 
 	ChangeNotify::populate(this);
 
