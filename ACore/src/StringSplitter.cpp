@@ -19,7 +19,10 @@ namespace ecf {
 
 bool StringSplitter::finished() const
 {
-   first_not_of_ = rem_.find_first_not_of( sep_); // Skip delimiters at beginning.
+   // Skip delimiters at beginning. so for an empty string or string of just separators, we do not call next()
+   // This mirrors the old split functionality
+   if (finished_) return true;
+   first_not_of_ = rem_.find_first_not_of( sep_);
    if (first_not_of_ == boost::string_ref::npos)  finished_ = true;
    return finished_;
 }

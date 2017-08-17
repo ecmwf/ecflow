@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <boost/utility/string_ref.hpp>
+#include <boost/iterator/iterator_facade.hpp>
 
 namespace ecf {
 
@@ -41,6 +42,16 @@ class StringSplitter {
 
 public:
    StringSplitter(boost::string_ref src, boost::string_ref sep = " \t") : src_(src),rem_(src), sep_(sep),finished_(false),first_not_of_(0) {}
+   //#if C++11
+      // this rules out temp strings, it also rules out char * because of two available overloads
+      //StringSplitter(const std::string&& src, boost::string_ref sep) = delete;
+
+      // this re-enables support for string literals (which are never temp)
+      // it even handles correctly char arrays that contain a null terminated string
+      // because string_ref does not have a char array constructor!
+      // template<std::size_t N>
+      //StringSplitter(const char (&sz)[N], boost::string_ref sep) : src_(sz),rem_(sz),sep_(sep),finished_(false),first_not_of_(0) {}
+   //
    boost::string_ref next() const;
    bool finished() const;
    void reset();
@@ -48,6 +59,34 @@ public:
    static void split(const std::string& str,
                      std::vector< boost::string_ref >& lineTokens,
                      boost::string_ref delimiters = " \t");
+
+
+//   class const_iterator : public boost::iterator_facade<const_iterator, boost::string_ref, boost::single_pass_traversal_tag>
+//   {
+//         const StringSplitter* splitter_;
+//         boost::string_ref value_;
+//      public:
+//         explicit const_iterator(const StringSplitter  * sp) : splitter_(sp) {}
+//
+//         const_iterator & operator ++() {
+//            if (! splitter_->finished())
+//               value_ = splitter_->next();
+//            else
+//               splitter_ = nullptr;
+//            return *this;
+//         }
+//
+//         reference operator *() { return value_; }
+//
+//         bool operator !=(const const_iterator & other) const { return splitter_ != other.splitter_; }
+//
+//
+//         friend class boost::iterator_core_access;
+//         void increment() {
+//            value_ = splitter_->next();
+//         }
+//   };
+
 };
 
 }

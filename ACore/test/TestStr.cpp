@@ -119,6 +119,7 @@ static void check(const std::string& line,
  	BOOST_CHECK_MESSAGE(result.size() == expected.size(),"expected size " << expected.size() << " but found " << result.size() << " for '" << line << "'");
 	BOOST_CHECK_MESSAGE(result == expected,"failed for '" << line  << "'");
 	if (result != expected) {
+	    cout << "Line    :'" << line << "'\n";
 		cout << "Actual  :"; BOOST_FOREACH(const string& t, result)   { cout << "'" << t << "'"; } cout << "\n";
 		cout << "Expected:"; BOOST_FOREACH(const string& t, expected) { cout << "'" << t << "'"; } cout << "\n";
  	}
