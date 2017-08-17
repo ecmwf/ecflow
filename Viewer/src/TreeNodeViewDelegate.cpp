@@ -1311,12 +1311,32 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,QString text) const
     }
 
     //Icons area
-    Q_ASSERT(model_);
-    int pixNum=model_->iconNum(node);
+    int pixNum=0;
+
+    //in some subclasses we might not have a model_
+    if(model_)
+    {
+        pixNum=model_->iconNum(node);
+        if(pixNum > 0)
+        {
+            currentRight+=nodeBox_->iconPreGap+pixNum*nodeBox_->iconSize + (pixNum-1)*nodeBox_->iconGap;
+        }
+    }
+    else
+    {
+        QVariant va=index.data(AbstractNodeModel::IconRole);
+        if(va.type() == QVariant::List)
+        {
+            QVariantList lst=va.toList();
+            pixNum=lst.count();
+        }
+    }
+
     if(pixNum > 0)
     {
         currentRight+=nodeBox_->iconPreGap+pixNum*nodeBox_->iconSize + (pixNum-1)*nodeBox_->iconGap;
     }
+
 
     //The node number (optional)
     if(drawChildCount_)

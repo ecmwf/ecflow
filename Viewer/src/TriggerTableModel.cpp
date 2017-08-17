@@ -166,13 +166,22 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
             {
                 return vnode->typeFontColour();
             }
+            else if(role  == NodePointerRole)
+            {
+                 return qVariantFromValue((void *) vnode);
+            }
+
+            else if(role  == Qt::TextAlignmentRole)
+            {
+                return( mode_==NodeMode)?Qt::AlignCenter:Qt::AlignLeft;
+            }
 
         }
     }
 
     //We express the table cell background colour through the UserRole. The
     //BackgroundRole is already used for the node rendering
-    if(role == Qt::UserRole)
+    if(role == Qt::UserRole && mode_ != NodeMode)
     {
         const std::set<TriggerCollector::Mode>&  modes=items[row]->modes();
         if(modes.find(TriggerCollector::Normal) != modes.end())

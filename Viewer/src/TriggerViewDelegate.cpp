@@ -95,25 +95,6 @@ void TriggerViewDelegate::updateSettings()
 
 QSize TriggerViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIndex & index ) const
 {
-    //QSize size=QStyledItemDelegate::sizeHint(option,index);
-    //QSize size(100,fontHeight_+8);
-
-    /*int attLineNum=0;
-    if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 0)
-    {
-        if(attLineNum==1)
-            return attrBox_->sizeHintCache;
-        else
-        {
-            QFontMetrics fm(attrFont_);
-            QStringList lst;
-            for(int i=0; i < attLineNum; i++)
-                lst << "1";
-
-            return QSize(100,fm.size(0,lst.join(QString('\n'))).height()+6);
-        }
-    }*/
-
     return nodeBox_->sizeHintCache;
 }
 
@@ -128,8 +109,8 @@ void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &op
 
     initStyleOption(&vopt, index);
 
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
+    //const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
+    //const QWidget* widget = vopt.widget;
 
     //Save painter state
     painter->save();
@@ -148,14 +129,22 @@ void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &op
         if(tVar.type() == QVariant::String)
         {
             QString text=index.data(Qt::DisplayRole).toString();
-        //if(index.data(AbstractNodeModel::ServerRole).toInt() ==0)
-        //{
-        //    //renderServer(painter,index,vopt,text);
-        //}
-        //else
-        //{
-                renderNode(painter,index,vopt,text);
-       // }
+
+            //If the textalignment is AlignCenter we node is displayed
+            //as centered in the opt rect!
+            QVariant vTa=index.data(Qt::TextAlignmentRole);
+            if(!vTa.isNull())
+            {
+                if(vTa.toInt() == Qt::AlignCenter)
+                {
+                    int w=nodeWidth(index,text);
+                    int dw=(vopt.rect.width()-w)/2;
+                    if(dw > 0)
+                        vopt.rect.moveLeft(dw);
+                }
+            }
+
+            renderNode(painter,index,vopt,text);
         }
 
         //Render attributes
@@ -172,31 +161,6 @@ void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &op
                     (this->*a)(painter,lst,vopt,size);
                 }
             }
-        }
-    }
-
-    //rest of the columns
-    else
-    {
-        QString text=index.data(Qt::DisplayRole).toString();
-        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
-        textRect.adjust(2,0,0,0);
-        QColor tcol=index.data(Qt::ForegroundRole).value<QColor>();
-        painter->setPen(tcol);
-
-        int rightPos=textRect.right()+1;
-        const bool setClipRect = rightPos > option.rect.right();
-        if(setClipRect)
-        {
-            painter->save();
-            painter->setClipRect(option.rect);
-        }
-
-        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-        if(setClipRect)
-        {
-            painter->restore();
         }
     }
 
