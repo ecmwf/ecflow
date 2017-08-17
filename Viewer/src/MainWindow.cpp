@@ -195,24 +195,6 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
    }
 }
 
-
-void MainWindow::constructWindowTitle()
-{
-    char *userTitle = getenv("ECFUI_TITLE");
-    std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
-                                                : VConfig::instance()->appLongName();
-
-    // add the name of the session to the title bar?
-    std::string sessionName = SessionHandler::instance()->current()->name();
-    if (sessionName == "default")
-        sessionName = "";
-    else
-        sessionName = " (session: " + sessionName + ")";
-
-    setWindowTitle(QString::fromStdString(mainTitle) + " " + QString::fromStdString(sessionName));
-}
-
-
 //==============================================================
 //
 //  File menu

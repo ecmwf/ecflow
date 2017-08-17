@@ -98,7 +98,6 @@ private:
     bool selectInTreeView(VInfo_ptr info);
     void updateRefreshActions();
     void hideServerSyncNotify();
-    void constructWindowTitle();
     void cleanUpOnQuit();
 
     void writeSettings(VComboSettings*);
