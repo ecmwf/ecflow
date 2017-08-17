@@ -227,13 +227,35 @@ void VProperty::setParam(QString name,QString value)
     params_[name]=value;
 }
 
-QString VProperty::param(QString name)
+QString VProperty::param(QString name) const
 {
 	QMap<QString,QString>::const_iterator it=params_.find(name);
 	if(it != params_.end())
-			return it.value();
+        return it.value();
 
 	return QString();
+}
+
+QString VProperty::valueLabel() const
+{
+    QString v=valueAsString();
+    QString vals=param("values");
+    if(!vals.isEmpty())
+    {
+        QString vl=param("values_label");
+        if(!vl.isEmpty())
+        {
+            QStringList valLst=vals.split("/");
+            QStringList labelLst=vl.split("/");
+            if(valLst.count() == labelLst.count())
+            {
+                int idx=valLst.indexOf(v);
+                if(idx >=0)
+                    return labelLst[idx];
+            }
+        }
+    }
+    return v;
 }
 
 void VProperty::adjustAfterLoad()

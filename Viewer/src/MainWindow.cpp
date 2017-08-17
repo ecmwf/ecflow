@@ -33,6 +33,7 @@
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
 #include "PropertyDialog.hpp"
+#include "PropertyMapper.hpp"
 #include "ServerComInfoWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerList.hpp"
@@ -66,7 +67,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
 
     setAttribute(Qt::WA_DeleteOnClose);
 
-    constructWindowTitle();
+    //the window title
+    winTitle_=new MainWindowTitleHandler(this);
+    winTitle_->update();
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -158,7 +161,8 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
 MainWindow::~MainWindow()
 {
     UiLog().dbg() << "MainWindow --> desctutor";
-	serverFilterMenu_->aboutToDestroy();
+    delete winTitle_;
+    serverFilterMenu_->aboutToDestroy();
 }
 
 void MainWindow::init(MainWindow *win)
@@ -849,8 +853,54 @@ MainWindow* MainWindow::findWindow(QWidget *childW)
 	return 0;
 }
 
+//--------------------------------------------------------
+//
+// MainWindowTitle (class to handle the MainWindow title)
+//
+//--------------------------------------------------------
 
+MainWindowTitleHandler::MainWindowTitleHandler(QMainWindow *win) : win_(win)
+{
+    Q_ASSERT(win_);
+    std::vector<std::string> propVec;
+    propVec.push_back("menu.access.nodeMenuMode");
+    prop_=new PropertyMapper(propVec,this);
+}
 
+MainWindowTitleHandler::~MainWindowTitleHandler()
+{
+    delete prop_;
+}
+
+void MainWindowTitleHandler::notifyChange(VProperty*)
+{
+    update();
+}
+
+void MainWindowTitleHandler::update()
+{
+    Q_ASSERT(win_);
+
+    char *userTitle = getenv("ECFUI_TITLE");
+    std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
+                                                : VConfig::instance()->appLongName();
+
+    QString title=QString::fromStdString(mainTitle);
+
+    if(VProperty* p=prop_->find("menu.access.nodeMenuMode"))
+    {
+        QString menuMode=p->valueLabel();
+        if(!menuMode.isEmpty())
+            title+=" - (menu: " + menuMode + ")";
+    }
+
+    // add the name of the session to the title bar?
+    QString sessionName = QString::fromStdString(SessionHandler::instance()->current()->name());
+    if (sessionName != "default")
+        title+= " - (session: " + sessionName + ")";
+
+    win_->setWindowTitle(title);
+}
 
 
 

@@ -497,7 +497,8 @@ QString MenuHandler::nodeMenuMode()
     {
         p=VConfig::instance()->find("menu.access.nodeMenuMode");
         UI_ASSERT(p!=0,"");
-        return QString();
+        if(!p)
+            return QString();
     }
     return p->value().toString();
 }

@@ -59,11 +59,12 @@ public:
     const std::string& strName() const {return strName_;}
     QVariant defaultValue() const {return defaultValue_;}
     QVariant value() const;
+    QString valueLabel() const;
     QString valueAsString() const;
     std::string valueAsStdString() const;
     Type type() const {return type_;}
     GuiType guiType() const {return guiType_;}
-    QString param(QString name);
+    QString param(QString name) const;
     QColor paramToColour(QString name) {return toColour(param(name).toStdString()) ;}
 
     void setDefaultValue(const std::string&);
