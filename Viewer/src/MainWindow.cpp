@@ -341,10 +341,6 @@ void MainWindow::on_actionAddInfoPanel_triggered()
 	nodePanel_->addToDashboard("info");
 }
 
-void MainWindow::on_actionShowInInfoPanel_triggered()
-{
-}
-
 void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog d;

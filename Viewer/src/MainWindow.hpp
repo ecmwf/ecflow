@@ -71,7 +71,6 @@ protected Q_SLOTS:
 	void on_actionResetSelected_triggered();
 	void on_actionConfigureNodeMenu_triggered();
 	void on_actionManageServers_triggered();
-	void on_actionShowInInfoPanel_triggered();
 	void on_actionAddTreeWidget_triggered();
 	void on_actionAddTableWidget_triggered();
 	void on_actionAddInfoPanel_triggered();
