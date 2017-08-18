@@ -111,7 +111,6 @@ void time_load_and_downloads(
                      case ServerReply::DO_FULL_SYNC: cout << "FULL ";break;
                      case ServerReply::NEWS: cout << "NEWS ";break;
                      case ServerReply::NO_NEWS: cout << "NO_NEWS ";break;
-                     case ServerReply::NO_DEFS: cout << "NO_DEFS ";break;
                   }
                }
                else if (i == 1) {
