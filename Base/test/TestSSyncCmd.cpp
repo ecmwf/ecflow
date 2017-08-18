@@ -59,9 +59,8 @@ static void test_sync_scaffold(
 	server_reply.set_client_defs(  client_defs );
 
 
-	Ecf::set_debug_equality(true); // only has affect in DEBUG build
+	DebugEquality debug_equality;  // only has affect in DEBUG build
 	BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(),"Test:" << test_name << ": Starting point client and server defs should be the same");
-	Ecf::set_debug_equality(false);
 
 	// Get change number before any changes
 	unsigned int client_state_change_no = Ecf::state_change_no();
@@ -94,7 +93,6 @@ static void test_sync_scaffold(
 	error_msg.clear();
    BOOST_REQUIRE_MESSAGE( server_reply.client_defs()->checkInvariants(error_msg),"Test:" << test_name << ": Invariants failed: " << error_msg);
 
-	Ecf::set_debug_equality(true);
 	BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(),"Test:" << test_name << ": Server and client should be same after sync" );
 //	if (! (*server_defs == *server_reply.client_defs()) ) {
 //	   cout << "Server====================================================================\n";
@@ -102,7 +100,6 @@ static void test_sync_scaffold(
 //    cout << "Client====================================================================\n";
 //    cout << server_reply.client_defs();
 //	}
-	Ecf::set_debug_equality(false);
 }
 
 // The modifiers

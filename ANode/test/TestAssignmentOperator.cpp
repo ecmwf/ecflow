@@ -26,8 +26,8 @@ BOOST_AUTO_TEST_CASE( test_defs_assignment_operator )
 {
    cout << "ANode:: ...test_defs_assignment_operator\n";
    MyDefsFixture theDefsFixture;
+   DebugEquality debug_equality; // only as affect in DEBUG build
 
-   Ecf::set_debug_equality(true);
    Defs defs;
    defs = theDefsFixture.defsfile_;
    BOOST_CHECK_MESSAGE( defs == theDefsFixture.defsfile_,"assignment failed");
@@ -35,14 +35,11 @@ BOOST_AUTO_TEST_CASE( test_defs_assignment_operator )
    Defs empty;
    defs = empty;
    BOOST_CHECK_MESSAGE( defs == empty,"assignment failed");
-   Ecf::set_debug_equality(false);
 
    BOOST_CHECK_MESSAGE( !(defs == theDefsFixture.defsfile_),"assignment failure EXPECTED");
 
    theDefsFixture.defsfile_ =  empty;
-   Ecf::set_debug_equality(true);
    BOOST_CHECK_MESSAGE( theDefsFixture.defsfile_ == empty,"assignment failed");
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_CASE( test_suite_assignment_operator )
@@ -86,7 +83,7 @@ BOOST_AUTO_TEST_CASE( test_suite_assignment_operator )
    std::string suiteLimit = "suiteLimit";
    s1.addLimit( Limit(suiteLimit,10) );
 
-   Ecf::set_debug_equality(true);
+   DebugEquality debug_equality; // only as affect in DEBUG build
    Suite s2(s1); // s2 is copy
    BOOST_CHECK_MESSAGE( s1 == s2,"copy constructor failed");
 
@@ -99,8 +96,6 @@ BOOST_AUTO_TEST_CASE( test_suite_assignment_operator )
 
    s1 = s2;
    BOOST_CHECK_MESSAGE( s1 == s2,"assignment failed");
-
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_CASE( test_task_assignment_operator )
@@ -152,7 +147,7 @@ BOOST_AUTO_TEST_CASE( test_task_assignment_operator )
    s1.addVerify( VerifyAttr(NState::COMPLETE,3) );
    s1.addLate( lateAttr );
 
-   Ecf::set_debug_equality(true);
+   DebugEquality debug_equality; // only as affect in DEBUG build
    Task s2(s1); // s2 is copy
    BOOST_CHECK_MESSAGE( s1 == s2,"copy constructor failed");
 
@@ -165,8 +160,6 @@ BOOST_AUTO_TEST_CASE( test_task_assignment_operator )
 
    s1 = s2;
    BOOST_CHECK_MESSAGE( s1 == s2,"assignment failed");
-
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

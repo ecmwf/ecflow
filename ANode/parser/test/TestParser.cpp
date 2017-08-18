@@ -43,6 +43,7 @@ void test_defs(const std::string& directory, bool pass)
 
 	BOOST_CHECK(fs::exists( full_path ));
 	BOOST_CHECK(fs::is_directory( full_path ));
+   DebugEquality debug_equality; // only as affect in DEBUG build
 
 	//std::cout << "\nIn directory: " << full_path.directory_string() << "\n\n";
 	fs::directory_iterator end_iter;
@@ -76,10 +77,8 @@ void test_defs(const std::string& directory, bool pass)
 					BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs), relPath.string() << " " << helper.errorMsg());
 
 					// test copy constructor
-				   Ecf::set_debug_equality(true);
 					Defs copy_of_defs = Defs(defs);
 					BOOST_CHECK_MESSAGE(copy_of_defs == defs,"Error copy constructor failed " << relPath);
-				   Ecf::set_debug_equality(false);
 
 				   // Test parse by string is same as parsing by file:
 				   {
@@ -91,10 +90,7 @@ void test_defs(const std::string& directory, bool pass)
 				      std::string errorMsg2,warningMsg2;
 				      BOOST_CHECK_MESSAGE(defs2.restore_from_string(contents,errorMsg2,warningMsg2),
 				                          "restore from string failed for file " << relPath << "\n" << errorMsg2);
-
-				      Ecf::set_debug_equality(true);
 				      BOOST_CHECK_MESSAGE(defs2 == defs,"Parse by string != parse by filename for file:\n" << relPath);
-				      Ecf::set_debug_equality(false);
 				   }
 				}
 			}

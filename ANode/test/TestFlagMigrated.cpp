@@ -51,9 +51,8 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated )
       defs.boost_save_as_checkpt(file_name);
       Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
 
-      Ecf::set_debug_equality(true);
+      DebugEquality debug_equality; // only as affect in DEBUG build
       BOOST_CHECK_MESSAGE(defs == restored_defs, "Saved and restored defs not the same");
-      Ecf::set_debug_equality(false);
 
       std::vector<node_ptr> all_nodes;
       restored_defs.get_all_nodes(all_nodes);

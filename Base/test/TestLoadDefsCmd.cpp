@@ -52,9 +52,8 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd )
    LoadDefsCmd load_as_defs_cmd(defs_format , false /* force */, false /* check_only */);
    LoadDefsCmd load_as_boost_cmd( boost_format , false /* force */, false /* check_only */);
 
-   Ecf::set_debug_equality(true);
+   DebugEquality debug_equality; // only as affect in DEBUG build
    BOOST_CHECK_MESSAGE(*load_as_defs_cmd.theDefs() == *load_as_boost_cmd.theDefs()," Expected boost and defs to be equal");
-   Ecf::set_debug_equality(false);
 
    fs::remove( defs_format );
    fs::remove( boost_format  );

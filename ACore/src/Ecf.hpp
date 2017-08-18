@@ -89,4 +89,10 @@ private:
 	unsigned int state_change_no_;
 	unsigned int modify_change_no_;
 };
+
+class DebugEquality : private boost::noncopyable {
+public:
+   DebugEquality() { Ecf::set_debug_equality(true); }
+   ~DebugEquality(){ Ecf::set_debug_equality(false);}
+};
 #endif

@@ -254,6 +254,7 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
    std::string dump_defs_filename = "test.def";
    int counter = 0;
 #endif
+   DebugEquality debug_equality; // only as affect in DEBUG build
 
    BOOST_REQUIRE_MESSAGE(TestFixture::client().client_handle() == 0,"Client handle expected to be zero but found " << TestFixture::client().client_handle());
 
@@ -318,12 +319,10 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
             BOOST_REQUIRE_MESSAGE(incremental_defs.get() != full_defs.get()," Expected two different defs trees ");
             if ( incremental_defs->state_change_no()  == full_defs->state_change_no() &&
                      incremental_defs->modify_change_no() == full_defs->modify_change_no()) {
-               Ecf::set_debug_equality(true);  // only has affect in DEBUG build
                BOOST_CHECK_MESSAGE( *full_defs == *incremental_defs,
                         "Full and incremental defs should be the same. (state_change_no,modify_change_no) ("
                         << incremental_defs->state_change_no() << "," << incremental_defs->modify_change_no() << ")"
                );
-               Ecf::set_debug_equality(false); // only has affect in DEBUG build
             }
             else {
 #ifdef DEBUG_TEST_WAITER
