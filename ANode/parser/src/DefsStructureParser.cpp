@@ -40,7 +40,7 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile,const std::string& file_
 {
    if ( !infile_.ok() ) {
       std::stringstream ss;
-      ss << "Unable to open file! " << infile_.file_name() << "\n\n";
+      ss << "DefsStructureParser::DefsStructureParser: Unable to open file! " << infile_.file_name() << "\n\n";
       ss << Version::description() << "\n";
       error_ = ss.str();
    }
@@ -56,7 +56,7 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str,
 {
    if ( defs_as_string_.empty() ) {
       std::stringstream ss;
-      ss << "DefsStructureParser::do_parse_string:  Unable to parse empty string\n\n";
+      ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";
       ss << Version::description() << "\n";
       error_ = ss.str();
    }
