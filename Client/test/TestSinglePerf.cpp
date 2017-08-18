@@ -103,6 +103,7 @@ void time_load_and_downloads(
          {
             cout << " Download(news_local):"; cout.flush();
             ClientInvoker client_news(host,port);
+            DurationTimer duration_timer;
             for(int i = 0; i < count; i++) {
                if (i == 0 || i != 1) {
                   client_news.news_local();
@@ -110,13 +111,15 @@ void time_load_and_downloads(
                      case ServerReply::DO_FULL_SYNC: cout << "FULL ";break;
                      case ServerReply::NEWS: cout << "NEWS ";break;
                      case ServerReply::NO_NEWS: cout << "NO_NEWS ";break;
+                     case ServerReply::NO_DEFS: cout << "NO_DEFS ";break;
                   }
                }
                else if (i == 1) {
                   client_news.sync_local();
                }
             }
-            cout << "1:news_local(),2:sync_local(),n:news_local with the new Client" << endl;
+            cout << ": 1:news_local(),2:sync_local(),n:news_local with the new Client: "
+                 <<  duration_timer.elapsed().total_milliseconds() << "(ms)" << endl;
          }
          {
             cout << " Download(Sync):      "; cout.flush();
@@ -136,9 +139,9 @@ void time_load_and_downloads(
                ClientInvoker client(host,port);
                DurationTimer duration_timer;
                client.sync_local();
-               int seconds = duration_timer.elapsed().total_milliseconds();
-               cout << seconds << " ";
-               total += seconds;
+               int mil_secs = duration_timer.elapsed().total_milliseconds();
+               cout << mil_secs  << " ";
+               total += mil_secs;
             }
             cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : sync_local() with *different* clients. Uses Cache" << endl;
          }
