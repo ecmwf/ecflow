@@ -101,6 +101,24 @@ void time_load_and_downloads(
             cout << " Begin:               " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
          }
          {
+            cout << " Download(news_local):"; cout.flush();
+            ClientInvoker client_news(host,port);
+            for(int i = 0; i < count; i++) {
+               if (i == 0 || i != 1) {
+                  client_news.news_local();
+                  switch (client_news.server_reply().get_news()) {
+                     case ServerReply::DO_FULL_SYNC: cout << "FULL ";break;
+                     case ServerReply::NEWS: cout << "NEWS ";break;
+                     case ServerReply::NO_NEWS: cout << "NO_NEWS ";break;
+                  }
+               }
+               else if (i == 1) {
+                  client_news.sync_local();
+               }
+            }
+            cout << "1:news_local(),2:sync_local(),n:news_local with the new Client" << endl;
+         }
+         {
             cout << " Download(Sync):      "; cout.flush();
             for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
