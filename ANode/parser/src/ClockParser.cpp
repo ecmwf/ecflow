@@ -88,7 +88,9 @@ bool ClockParser::doParse( const std::string& line,
 		// clock real 300
 		// clock real +01:00
 		// clock real 20.1.2007
-		// clock real 20.1.2007
+      // clock real 20.1.2007
+      // clock real           # on requeue we use current date
+      // clock real -s
 
 		if ( lineTokens[2].find(".") != std::string::npos ) {
 			// clock real 20.1.2007
@@ -108,9 +110,11 @@ bool ClockParser::doParse( const std::string& line,
 		   }
 		}
 		else {
-			// clock real 300
-			// clock real +01:00
-			extractTheGain(lineTokens[2], clockAttr);
+		   if (lineTokens[2] != "-s") {
+		      // clock real 300
+		      // clock real +01:00
+		      extractTheGain(lineTokens[2], clockAttr);
+		   }
 		}
 	}
 

@@ -258,8 +258,11 @@ public:
    // defs format
    void save_as_checkpt(const std::string& fileName) const;
    void save_as_filename(const std::string& fileName,PrintStyle::Type_t = PrintStyle::MIGRATE) const; // used in test only
+   void save_as_string(std::string& str,PrintStyle::Type_t = PrintStyle::MIGRATE) const;
    void restore(const std::string& fileName); // will throw
    bool restore(const std::string& fileName,std::string& errorMsg, std::string& warningMsg);
+   void restore_from_string(const std::string& str); // will throw
+   bool restore_from_string(const std::string& str,std::string& errorMsg, std::string& warningMsg);
 
    /// Delete suites, externs, client handles, reset suspended, and locate state
    /// etc but Server environment left as is:

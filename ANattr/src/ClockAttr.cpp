@@ -91,15 +91,68 @@ std::string ClockAttr::toString() const
 
 bool ClockAttr::operator==(const ClockAttr& rhs) const
 {
-	if (hybrid_ != rhs.hybrid_)                            return false;
-	if (positiveGain_ != rhs.positiveGain_)                return false;
-	if (startStopWithServer_ != rhs.startStopWithServer_)  return false;
+	if (hybrid_ != rhs.hybrid_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "hybrid_ != rhs.hybrid_\n";
+      }
+#endif
+	   return false;
+	}
 
-	if (day_ != rhs.day_)     return false;
-	if (month_ != rhs.month_) return false;
-	if (year_ != rhs.year_)   return false;
+	if (startStopWithServer_ != rhs.startStopWithServer_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "startStopWithServer_ (" <<  startStopWithServer_  << ") != rhs.startStopWithServer_ (" << rhs.startStopWithServer_  << ")\n";
+      }
+#endif
+	   return false;
+	}
 
-	if (gain_ != rhs.gain_) return false;
+	if (day_ != rhs.day_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "day(" << day_ << ") != rhs.day(" << rhs.day_ << "\n";
+      }
+#endif
+	   return false;
+	}
+
+	if (month_ != rhs.month_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "month_(" << month_ << ") != rhs.month_(" << rhs.month_ << "\n";
+      }
+#endif
+      return false;
+	}
+
+	if (year_ != rhs.year_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "year_(" << year_ << ") != rhs.year_(" << rhs.year_ << "\n";
+      }
+#endif
+      return false;
+	}
+
+	if (gain_ != rhs.gain_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "gain_(" << gain_ << ") != rhs.gain_(" << rhs.gain_ << "\n";
+      }
+#endif
+      return false;
+	}
+
+   if (positiveGain_ != rhs.positiveGain_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "positiveGain_(" << positiveGain_ << ") != rhs.positiveGain_(" << rhs.positiveGain_ << ")\n";
+      }
+#endif
+      return false;
+   }
 
 	return true;
 }
@@ -140,6 +193,7 @@ void ClockAttr::hybrid( bool f ) {
 
 void ClockAttr::sync() {
    // When begin_calendar() is called we will sync with computer clock.
+   positiveGain_ = false;
    gain_ = 0;
    day_ = 0;
    month_ = 0 ;

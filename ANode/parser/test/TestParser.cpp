@@ -80,8 +80,24 @@ void test_defs(const std::string& directory, bool pass)
 					Defs copy_of_defs = Defs(defs);
 					BOOST_CHECK_MESSAGE(copy_of_defs == defs,"Error copy constructor failed " << relPath);
 				   Ecf::set_debug_equality(false);
+
+				   // Test parse by string is same as parsing by file:
+				   {
+				      std::string contents;
+				      BOOST_CHECK_MESSAGE(File::open(relPath.string(),contents) ,"Error could not open file " << relPath);
+				      // cout << "parsing file " << relPath << " by string\n";
+
+				      Defs defs2;
+				      std::string errorMsg2,warningMsg2;
+				      BOOST_CHECK_MESSAGE(defs2.restore_from_string(contents,errorMsg2,warningMsg2),
+				                          "restore from string failed for file " << relPath << "\n" << errorMsg2);
+
+				      Ecf::set_debug_equality(true);
+				      BOOST_CHECK_MESSAGE(defs2 == defs,"Parse by string != parse by filename for file:\n" << relPath);
+				      Ecf::set_debug_equality(false);
+				   }
 				}
- 			}
+			}
 			else {
 				// test expected to fail
 			   //std::cout << errorMsg << "\n";

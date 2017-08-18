@@ -70,7 +70,7 @@ if __name__ == "__main__":
     assert variable_list[6].name() == "ECF_NAME", "expected generated variable of name ECF_NAME but found " + variable_list[6].name()
     assert variable_list[6].value() == "/s1/f1/t1", "expected generated variable of value '/s1/f1/t1' but found " + variable_list[6].value()
     assert variable_list[7].name() == "ECF_PASS", "expected generated variable of name ECF_NAME but found " + variable_list[7].name()
-    assert variable_list[7].value() == "_DJP_", "expected generated variable of value '_DJP_' but found " + variable_list[7].value()
+    assert variable_list[7].value() == "", "expected generated variable of value '' but found " + variable_list[7].value()
 
     print("\nAll Tests pass")
     

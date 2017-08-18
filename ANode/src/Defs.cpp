@@ -1152,6 +1152,18 @@ void Defs::save_as_filename(const std::string& the_fileName,PrintStyle::Type_t p
    }
 }
 
+void Defs::save_as_string(std::string& the_string,PrintStyle::Type_t p_style) const
+{
+   PrintStyle printStyle(p_style);
+
+   // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
+   // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
+   ecf::DisableIndentor disable_indentation;
+   std::stringstream ss;
+   ss << this;
+   the_string = ss.str();
+}
+
 void Defs::restore(const std::string& the_fileName)
 {
    if (the_fileName.empty())  return;
@@ -1185,6 +1197,35 @@ bool Defs::restore(const std::string& the_fileName,std::string& errorMsg, std::s
    // Reset the state and modify numbers, **After the restore**
    state_change_no_ = Ecf::state_change_no();
    modify_change_no_ = Ecf::modify_change_no();
+   return ret;
+}
+
+void Defs::restore_from_string(const std::string& str)
+{
+   /// *************************************************************************
+   /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+   /// *************************************************************************
+   std::string errorMsg,warningMsg;
+   if (!restore_from_string(str,errorMsg,warningMsg)) {
+      std::stringstream e; e << "Defs::defs_restore_from_string: " << errorMsg;
+      throw std::runtime_error(e.str());
+   }
+}
+
+bool Defs::restore_from_string(const std::string& str,std::string& errorMsg, std::string& warningMsg)
+{
+   if (str.empty()) {
+      errorMsg = "Defs::restore_from_string: the string is empty";
+      return false;
+   }
+
+   // deleting existing content first. *** Note: Server environment left as is ****
+   clear();
+
+   // Do *NOT* Reset the state and modify numbers
+   // As we we need this numbers for Syncing between client<->Server
+   DefsStructureParser parser( this, str, false/* not used*/ );
+   bool ret = parser.doParse(errorMsg,warningMsg);
    return ret;
 }
 

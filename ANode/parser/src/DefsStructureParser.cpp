@@ -35,10 +35,19 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile,const std::string& file_
   defsfile_(defsfile),
   defsParser_(this),
   lineNumber_(0),
-  file_type_(PrintStyle::DEFS)
+  file_type_(PrintStyle::DEFS),
+  defs_as_string_(Str::EMPTY())
 {}
 
-
+DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str, bool)
+:  infile_(""),
+  defsfile_(defsfile),
+  defsParser_(this),
+  lineNumber_(0),
+  file_type_(PrintStyle::DEFS),
+  defs_as_string_(str)
+{
+}
 
 DefsStructureParser::~DefsStructureParser()
 {
@@ -49,8 +58,15 @@ DefsStructureParser::~DefsStructureParser()
 
 bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
 {
-   if (!do_parse_only(errorMsg)) {
-      return false;
+   if (defs_as_string_.empty()) {
+      if (!do_parse_file(errorMsg)) {
+         return false;
+      }
+   }
+   else {
+      if (!do_parse_string( errorMsg)) {
+         return false;
+      }
    }
 
    if (file_type_ == PrintStyle::MIGRATE) {
@@ -63,7 +79,7 @@ bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
 }
 
 //#define DO_STATS  1
-bool DefsStructureParser::do_parse_only(std::string& errorMsg)
+bool DefsStructureParser::do_parse_file(std::string& errorMsg)
 {
    if ( !infile_.ok() ) {
       std::stringstream ss;
@@ -75,53 +91,75 @@ bool DefsStructureParser::do_parse_only(std::string& errorMsg)
 
    std::vector< std::string > lineTokens; lineTokens.reserve(30); // derived from 3199.def & DO_STATS
    string line;                           line.reserve(350);      // derived from 3199.def & DO_STATS
-#ifdef DO_STATS
-   size_t max_line_size = 0; max_no_of_tokens = 0;
-#endif
    while ( infile_.good() ) {
 
       getNextLine( line ); // will increment lineNumer_
-#ifdef DO_STATS
-      max_line_size = std::max(max_line_size,line.size());
-#endif
 
       lineTokens.clear();  // This is re-used, hence clear up front
       Str::split(line, lineTokens);
       if (lineTokens.empty()) continue;  // ignore empty lines
-#ifdef DO_STATS
-      max_no_of_tokens = std::max(max_no_of_tokens,lineTokens.size());
-#endif
 
-      // Process each line, according to the parser which is on *top* of the stack
-      // If the *top* of the stack is empty use the DefsParser
-      Parser* theCurrentParser  = (nodeStack_.empty()) ? &defsParser_ : const_cast<Parser*>(nodeStack_.top().second) ;
-      if ( theCurrentParser == NULL ) {
-         std::stringstream ss;
-         ss << "No parser found: Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
-         ss << Version::description() << "\n\n";
-         errorMsg = ss.str();
-         return false;
-      }
-
-      try {
-         // Note: if the chosen parser does not recognise first token then the parent parser has a go at parsing.
-         //       If first token begins with '#' it is ignored
-         // cout << "DefsStructureParser::currentParser() = " << theCurrentParser->keyword() << "\n";
-         theCurrentParser->doParse(line,lineTokens);
-      }
-      catch ( std::exception& e) {
-         std::stringstream ss;
-         ss << e.what() << "\n";
-         ss << "Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
-         ss << Version::description() << "\n\n";
-         errorMsg = ss.str();
+      if (!do_parse_line(line,lineTokens, errorMsg)) {
          return false;
       }
    }
-#ifdef DO_STATS
-   cout << "max line size = " << max_line_size << "\n";
-   cout << "max token size = " << max_no_of_tokens << "\n";
-#endif
+   return true;
+}
+
+bool DefsStructureParser::do_parse_string(std::string& errorMsg)
+{
+   if ( defs_as_string_.empty() ) {
+      std::stringstream ss;
+      ss << "DefsStructureParser::do_parse_string:  Unable to parse empty string\n\n";
+      ss << Version::description() << "\n";
+      errorMsg = ss.str();
+      return false;
+   }
+
+   std::vector< std::string > lineTokens; lineTokens.reserve(30); // derived from 3199.def & DO_STATS
+   string line;                           line.reserve(350);      // derived from 3199.def & DO_STATS
+   while ( defs_as_string_.good() ) {
+
+      getNextLine( line ); // will increment lineNumer_
+
+      lineTokens.clear();  // This is re-used, hence clear up front
+      Str::split(line, lineTokens);
+      if (lineTokens.empty()) continue;  // ignore empty lines
+
+      if (!do_parse_line(line,lineTokens, errorMsg)) {
+         return false;
+      }
+   }
+   return true;
+}
+
+bool DefsStructureParser::do_parse_line(const std::string& line,std::vector<std::string>& lineTokens,std::string& errorMsg)
+{
+   // Process each line, according to the parser which is on *top* of the stack
+   // If the *top* of the stack is empty use the DefsParser
+   Parser* theCurrentParser  = (nodeStack_.empty()) ? &defsParser_ : const_cast<Parser*>(nodeStack_.top().second) ;
+   if ( theCurrentParser == NULL ) {
+      std::stringstream ss;
+      ss << "No parser found: Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
+      ss << Version::description() << "\n\n";
+      errorMsg = ss.str();
+      return false;
+   }
+
+   try {
+      // Note: if the chosen parser does not recognise first token then the parent parser has a go at parsing.
+      //       If first token begins with '#' it is ignored
+      // cout << "DefsStructureParser::currentParser() = " << theCurrentParser->keyword() << "\n";
+      theCurrentParser->doParse(line,lineTokens);
+   }
+   catch ( std::exception& e) {
+      std::stringstream ss;
+      ss << e.what() << "\n";
+      ss << "Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
+      ss << Version::description() << "\n\n";
+      errorMsg = ss.str();
+      return false;
+   }
    return true;
 }
 
@@ -130,11 +168,11 @@ void DefsStructureParser::getNextLine(std::string& line)
 	// *ALL* the handling of multiple statements per line are handled in this function
 	// The presence of ';' signals multiple statements per line.
 	if (multi_statements_per_line_vec_.empty()) {
-		infile_.getline(line);
+	   if (defs_as_string_.empty()) infile_.getline(line);
+	   else                         defs_as_string_.getline(line);
 		lineNumber_++;
 	   if (file_type_ == PrintStyle::MIGRATE) {
-	      // ignore multiline for migrate, *BECAUSE* *history* for group command uses ';'
-	      return;
+	      return; // ignore multiline for migrate, *BECAUSE* *history* for group command uses ';'
 	   }
 
 
@@ -204,6 +242,7 @@ void DefsStructureParser::getNextLine(std::string& line)
 #endif
 }
 
+
 bool DefsStructureParser::semiColonInEditVariable()
 {
  	if ( multi_statements_per_line_vec_[0].find("edit") != std::string::npos) {
@@ -218,5 +257,18 @@ bool DefsStructureParser::semiColonInEditVariable()
 		}
 	}
  	return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+DefsString::DefsString(const std::string& defs_as_string): empty_(defs_as_string.empty()), index_(0)
+{
+   if (!empty_) Str::split(defs_as_string,lines_,"\n");
+}
+bool DefsString::good() const { return index_ < lines_.size();}
+void DefsString::getline(std::string& line)
+{
+   assert(good());
+   line = lines_[index_];
+   index_++;
 }
 
