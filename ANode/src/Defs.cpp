@@ -713,6 +713,26 @@ bool Defs::compare_edit_history(const Defs& rhs) const
    return true;
 }
 
+bool Defs::compare_change_no(const Defs& rhs) const
+{
+   if ( state_change_no_ != rhs.state_change_no_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Defs::compare_change_no: state_change_no_(" << state_change_no_  << ") != rhs.state_change_no_(" <<  rhs.state_change_no_ << ")\n";
+      }
+#endif
+      return false;
+   }
+   if ( modify_change_no_ != rhs.modify_change_no_  ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Defs::compare_change_no: modify_change_no_(" << modify_change_no_ << ") != rhs.modify_change_no_(" << rhs.modify_change_no_ << ")\n";
+      }
+#endif
+      return false;
+   }
+   return true;
+}
 
 bool Defs::operator==(const Defs& rhs) const
 {
@@ -1119,10 +1139,6 @@ void Defs::boost_restore_from_checkpt(const std::string& the_fileName,ecf::Archi
 
 	ecf::restore(the_fileName, (*this), at);
 
-	// Reset the state and modify numbers, **After the restore**
-   state_change_no_ = Ecf::state_change_no();
-   modify_change_no_ = Ecf::modify_change_no();
-
 //	cout << "Restored: " << suiteVec_.size() << " suites\n";
 }
 
@@ -1181,22 +1197,15 @@ void Defs::restore(const std::string& the_fileName)
 bool Defs::restore(const std::string& the_fileName,std::string& errorMsg, std::string& warningMsg)
 {
    if (the_fileName.empty()) {
-      errorMsg = "Defs::defs_restore: the filename string is empty";
+      errorMsg = "Defs::restore: the filename string is empty";
       return false;
    }
 
    // deleting existing content first. *** Note: Server environment left as is ****
    clear();
 
-   /// *************************************************************************
-   /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
-   /// *************************************************************************
    DefsStructureParser parser( this, the_fileName );
    bool ret = parser.doParse(errorMsg,warningMsg);
-
-   // Reset the state and modify numbers, **After the restore**
-   state_change_no_ = Ecf::state_change_no();
-   modify_change_no_ = Ecf::modify_change_no();
    return ret;
 }
 

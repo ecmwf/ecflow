@@ -561,6 +561,10 @@ void Server::update_defs_server_state()
    defs_->set_server().jobGeneration( serverEnv_.jobGeneration() );
    LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
 
+   // Since we have reloaded Defs, make sure clients, re-sync by resetting change and modify numbers on server
+   defs_->set_state_change_no(Ecf::state_change_no());
+   defs_->set_modify_change_no(Ecf::modify_change_no());
+
    /// System needs defs to handle process that have died, and need to flagged as aborted
    ecf::System::instance()->setDefs(defs_);
 }
