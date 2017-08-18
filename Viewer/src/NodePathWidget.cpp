@@ -1060,7 +1060,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 #endif
 		QColor fontCol=n->stateFontColour();
 		name=n->name();
-		bool hasChildren=hasChildren=(n->numOfChildren() >0);
+        bool hasChildren=(n->numOfChildren() >0);
 
         if(i==0)
         {
@@ -1151,7 +1151,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 		QList<QAction*> acLst;
 		VNode* node=p->node();
 
-		for(unsigned int i=0; i < node->numOfChildren(); i++)
+        for(int i=0; i < node->numOfChildren(); i++)
 		{
 			QAction *ac=new QAction(node->childAt(i)->name(),this);
 			ac->setData(i);
@@ -1200,11 +1200,11 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::SUSPENDED) != aspect.end())
 		{
 			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
-			for(unsigned int i=0; i < nodes.size(); i++)
+            for(int i=0; i < static_cast<int>(nodes.size()); i++)
 			{
-				if(nodes.at(i) == node)
+                if(nodes[i] == node)
 				{
-					if(i < nodeItems_.count())
+                    if(i < nodeItems_.count())
 					{						
                         bc_->reset(i,node->name(),node->stateColour(),node->stateFontColour());
 					}

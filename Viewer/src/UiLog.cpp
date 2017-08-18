@@ -31,8 +31,29 @@ static LogTruncator *truncator=0;
 // UiFunctionLog
 //---------------------------------
 
+UiFunctionLog::UiFunctionLog(ServerHandler* server,const std::string& funcName) :
+    funcName_(funcName)
+{
+    if(server)
+        serverName_=server->longName();
+
+    init();
+    UiLog(serverName_).dbg() << logEnter();
+}
+
 UiFunctionLog::UiFunctionLog(const std::string& funcName) :
     funcName_(funcName)
+{
+    init();
+    UiLog(serverName_).dbg() << logEnter();
+}
+
+UiFunctionLog::~UiFunctionLog()
+{
+    UiLog(serverName_).dbg() << logLeave();
+}
+
+void UiFunctionLog::init()
 {
     std::size_t pos;
     if((pos=funcName_.find_first_of("(")) != std::string::npos)
@@ -41,12 +62,6 @@ UiFunctionLog::UiFunctionLog(const std::string& funcName) :
         if(pos1 != std::string::npos && pos1+1  < pos)
             funcName_=funcName_.substr(pos1+1,pos-pos1-1);
     }
-    UiLog().dbg() << logEnter();
-}
-
-UiFunctionLog::~UiFunctionLog()
-{
-    UiLog().dbg() << logLeave();
 }
 
 std::string UiFunctionLog::logEnter() const

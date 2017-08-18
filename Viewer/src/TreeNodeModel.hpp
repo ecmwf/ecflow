@@ -45,6 +45,8 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
+    QModelIndex serverToIndex(ServerHandler*) const;
+
     QModelIndex nodeToIndex(const VTreeNode*,int column=0) const;
     QModelIndex nodeToIndex(const VNode*,int column=0) const;
     VTreeServer* indexToServer(const QModelIndex & index) const;
@@ -55,6 +57,7 @@ public:
     QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
 
     VInfo_ptr nodeInfo(const QModelIndex& index);
+    void setForceShow(VInfo_ptr);
     void selectionChanged(QModelIndexList lst);
 
     void setEnableServerToolTip(bool st) {serverToolTip_=st;}
@@ -102,9 +105,11 @@ Q_SIGNALS:
     void filterChangeEnded();
     void firstScanEnded(const VTreeServer*);
 
+#if 0
 protected:
     QModelIndex forceShowNode(const VNode* node) const;
     QModelIndex forceShowAttribute(const VAttribute* a) const;
+#endif
 
 private:
     bool isServer(const QModelIndex& index) const;
@@ -112,7 +117,6 @@ private:
 
     ServerHandler* indexToServerHandler(const QModelIndex & index) const;
     QModelIndex serverToIndex(VModelServer* server) const;
-	QModelIndex serverToIndex(ServerHandler*) const;
 
     QModelIndex nodeToIndex(VTreeServer*,const VTreeNode*,int column=0) const;
     VTreeNode* indexToAttrParentNode(const QModelIndex & index) const;

@@ -25,13 +25,13 @@ PlainTextEdit::PlainTextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
     showLineNum_(true),
     rightMargin_(2),
-    gotoLineDialog_(0),
     hyperlinkEnabled_(false),
-    fontProp_(NULL),
+    gotoLineDialog_(0),    
     numAreaBgCol_(232,231,230),
     numAreaFontCol_(102,102,102),
     numAreaSeparatorCol_(210,210,210),
-    numAreaCurrentCol_(212,212,255)
+    numAreaCurrentCol_(212,212,255),
+    fontProp_(0)
 {
     lineNumArea_ = new LineNumberArea(this);
 

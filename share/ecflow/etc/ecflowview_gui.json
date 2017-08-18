@@ -236,6 +236,22 @@
             }
         },
 
+        "menu":  {
+            "label": "Menus",
+            "desc" : "Menus",
+            "icon" : "menu.svg",
+
+            "group" : {
+                "title" : "Node context menu",
+                "prefix" : "menu.access",
+
+                "line" : "nodeMenuMode",
+                "note" : {
+                            "default" : "Operator and Administrator modes allow suites to be begun, nodes to be removed and servers to be unlocked. Administrator mode additionally enables the <I>Force</I> and <I>Order</I> menus."
+                         }
+            }
+        },
+
         "notification":  {
             "visible" : "true",
             "label": "Notifications",

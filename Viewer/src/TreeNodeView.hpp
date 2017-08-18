@@ -52,8 +52,10 @@ public:
 public Q_SLOTS:
     void slotContextMenu(const QPoint &position);
     void slotViewCommand(VInfo_ptr,QString);
+#if 0
     void slotSaveExpand();
     void slotRestoreExpand();
+#endif
     void slotSaveExpand(const VTreeNode* node);
     void slotRestoreExpand(const VTreeNode* node);
     void slotRepaint(Animation*);
@@ -97,7 +99,8 @@ protected:
     PropertyMapper* prop_;
     QMap<QString,QString> styleSheet_;
     bool setCurrentIsRunning_;
-    bool setCurrentFromExpand_;
+    bool setCurrentFromExpandIsRunning_;
+    bool canRegainCurrentFromExpand_;
     VInfo_ptr lastSelection_;
     bool inStartUp_;
 };

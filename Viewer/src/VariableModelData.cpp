@@ -308,7 +308,7 @@ void VariableModelData::remove(const std::string& varName)
 
 bool VariableModelData::isGenVar(int index) const
 {
-	return (index >= vars_.size());
+    return (index >= static_cast<int>(vars_.size()));
 }
 
 bool VariableModelData::isGenVar(const std::string& n) const
@@ -611,7 +611,7 @@ bool VariableModelDataHandler::updateShadowed()
         return shadowChanged;
 
     //There are no shadowed vars in the first node
-    for(size_t i=0; i < data_[0]->varNum(); i++)
+    for(int i=0; i < data_[0]->varNum(); i++)
     {
         names_.insert(data_[0]->name(i));
     }
@@ -655,7 +655,7 @@ void VariableModelDataHandler::clear(bool emitSignal)
 
 int VariableModelDataHandler::varNum(int index) const
 {
-	if(index >=0 && index < data_.size())
+    if(index >=0 && index < static_cast<int>(data_.size()))
 		return data_.at(index)->varNum();
 
 	return -1;
@@ -663,7 +663,7 @@ int VariableModelDataHandler::varNum(int index) const
 
 VariableModelData* VariableModelDataHandler::data(int index) const
 {
-	if(index >=0 && index < data_.size())
+    if(index >=0 && index < static_cast<int>(data_.size()))
 		return data_.at(index);
 
 	return 0;
@@ -717,7 +717,7 @@ bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>&
     }
 
     int dataIndex=data_.size()-1;
-    Q_ASSERT(dataIndex >=0 && dataIndex < data_.size());
+    Q_ASSERT(dataIndex >=0 && dataIndex < static_cast<int>(data_.size()));
     VariableModelData* d=data_.at(data_.size()-1);
     Q_ASSERT(d);
     Q_ASSERT(d->type() == "server");

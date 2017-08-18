@@ -154,12 +154,16 @@ bool TriggerTableCollector::contains(const VNode* node,bool attrParents) const
         if(VItem* it=items_[i]->item())
         {
             if(VNode *n=it->isNode())
+            {
                 if(n == node)
                     return true;
+            }
             else if(attrParents)
+            {
                 if (VAttribute *a=it->isAttribute())
                     if(a->parent() == node)
                         return true;
+            }
         }
 
     }

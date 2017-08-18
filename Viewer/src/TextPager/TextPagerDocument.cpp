@@ -288,6 +288,7 @@ QStringRef TextPagerDocument::readRef(int pos, int size) const
     return QStringRef();
 }
 
+#if 0
 static bool isSameFile(const QIODevice *left, const QIODevice *right)
 {
     if (left == right)
@@ -299,6 +300,7 @@ static bool isSameFile(const QIODevice *left, const QIODevice *right)
     }
     return false;
 }
+#endif
 
 int TextPagerDocument::documentSize() const
 {
@@ -460,9 +462,9 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
         }
     }
 
-    const TextDocumentIterator::Direction direction = (reverse
-                                                       ? TextDocumentIterator::Left
-                                                       : TextDocumentIterator::Right);
+    //const TextDocumentIterator::Direction direction = (reverse
+    //                                                   ? TextDocumentIterator::Left
+    //                                                   : TextDocumentIterator::Right);
     TextDocumentIterator it(d, pos);
     if (reverse) {
         it.setMinBoundary(limit);
@@ -471,13 +473,13 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
     }
     const QLatin1Char newline('\n');   
     bool ok = true;
-    int progressInterval = 0;
+    //int progressInterval = 0;
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
     QTime lastProgressTime;
     if (flags & FindAllowInterrupt) {
-        progressInterval = qMax<int>(1, (reverse
-                                         ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
-                                         : (static_cast<qreal>(d->documentSize) - static_cast<qreal>(pos)) / 100.0));
+        //progressInterval = qMax<int>(1, (reverse
+        //                                 ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
+        //                                 : (static_cast<qreal>(d->documentSize) - static_cast<qreal>(pos)) / 100.0));
         //maxFindLength = (reverse ? pos : d->documentSize - pos);
         lastProgressTime.start();
     }
@@ -649,7 +651,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
     }
 
     // ### what if one searches for a string with non-word characters in it and FindWholeWords?
-    const TextDocumentIterator::Direction direction = (reverse ? TextDocumentIterator::Left : TextDocumentIterator::Right);
+    //const TextDocumentIterator::Direction direction = (reverse ? TextDocumentIterator::Left : TextDocumentIterator::Right);
     QString word = caseSensitive ? in : in.toLower();
 
     TextDocumentIterator it(d, pos);
@@ -667,7 +669,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
         it.setConvertToLowerCase(true);
 
     bool ok = true;
-    QChar ch = it.current();
+    //QChar ch = it.current();
     //int progressInterval = 0;
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
     QTime lastProgressTime;

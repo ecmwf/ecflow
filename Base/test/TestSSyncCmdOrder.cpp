@@ -95,9 +95,8 @@ static void test_sync_scaffold( defs_change_cmd the_defs_change_command,
    server_reply.set_client_defs( create_defs() );
 
 
-   Ecf::set_debug_equality(true); // only has affect in DEBUG build
+   DebugEquality debug_equality;  // only has affect in DEBUG build
    BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(), "Starting point client and server defs should be the same");
-   Ecf::set_debug_equality(false);
 
    // Get change number before any changes
    Ecf::set_state_change_no(0);
@@ -127,9 +126,7 @@ static void test_sync_scaffold( defs_change_cmd the_defs_change_command,
    BOOST_CHECK_MESSAGE( server_reply.full_sync() == full_sync, "Expected full sync");
 
    if (0 == test_equality) {
-      Ecf::set_debug_equality(true);
       BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(), "Server and client should be same after sync" );
-      Ecf::set_debug_equality(false);
    }
    else {
       BOOST_CHECK_MESSAGE( server_reply.client_defs()->suiteVec().size() == test_equality, "Expected suite of size " << test_equality << " but found " <<  server_reply.client_defs()->suiteVec().size());

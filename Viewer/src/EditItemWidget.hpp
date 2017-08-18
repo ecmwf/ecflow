@@ -39,7 +39,7 @@ public:
 
 protected Q_SLOTS:
 	void on_preprocTb__toggled(bool);
-	void on_submitTb__clicked(bool);
+    void on_submitTb__clicked(bool);
 	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
 	void on_fontSizeUpTb__clicked();
@@ -49,9 +49,6 @@ protected:
 	bool preproc() const;
 	bool alias() const;
     void updateState(const ChangeFlags&) {}
-
-	bool preproc_;
-	bool alias_;
 };
 
 #endif

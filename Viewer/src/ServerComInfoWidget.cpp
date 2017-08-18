@@ -132,10 +132,11 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     //set size
     setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
     setMinimumSize(w,h);
-    adjustGeometry(false);
 
-    buttonRect_=QRect(1,1,height()-2,height()-2);
+    buttonRect_=QRect(1,1,h-2,h-2);
     buttonRadius2_=pow(buttonRect_.width()/2,2);
+
+    adjustGeometry(false);
 
     //we need this for the mousemove event
     setMouseTracking(true);
@@ -240,7 +241,7 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
     if(server_)
     {
         serverName_=QString::fromStdString(server_->name());
-        serverText_=serverName_ + " ";      
+        serverText_=" " + serverName_ + " ";
     }
 
     periodText_.clear();
@@ -284,8 +285,12 @@ void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server)
         periodTextWidth_=0;
         lastTextWidth_=0;
 
+        refreshAction_->setEnabled(false);
+
         //get info and rerender
         reloadAll();
+
+        adjustGeometry(false);
     }
 }
 
@@ -602,7 +607,7 @@ void ServerRefreshInfoWidget::mousePressEvent(QMouseEvent* event)
 #endif
         if(currentComponent_ != ButtonComponent)
         {
-            currentComponent_ == ButtonComponent;
+            currentComponent_ = ButtonComponent;
         }
         userInitiatedRefresh_=true;
         refreshAction_->trigger();
@@ -841,7 +846,7 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
         periodTextWidthMin_=0;
         periodTextWidth_=0;
         lastTextWidth_=0;
-        setFixedWidth(buttonRect_.x()+buttonRect_.width()+fmServer_.width("AAAAA"));
+        setFixedWidth(buttonRect_.x()+buttonRect_.width()+4);
     }
 }
 
@@ -900,7 +905,7 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
     QRect serverTextRect=serverRect_.adjusted(buttonRect_.width()/2-4+4,0,0,0);
     painter->setFont(fontServer_);
     painter->setPen((refreshAction_->isEnabled())?serverTextPen_:disabledTextPen_);
-    painter->drawText(serverTextRect,Qt::AlignLeft | Qt::AlignVCenter,serverText_);
+    painter->drawText(serverTextRect,Qt::AlignHCenter | Qt::AlignVCenter,serverText_);
 
     //The time rects and texts
     if(hasInfo_)
@@ -1114,9 +1119,9 @@ void ServerRefreshInfoWidget::printStatus() const
 
 ServerComActivityLine::ServerComActivityLine(QWidget *parent) :
     QWidget(parent),
-    server_(0),
     font_(QFont()),
-    fm_(font_)
+    fm_(font_),
+    server_(0)
 {
     font_.setPointSize(font_.pointSize()-1);
     fm_=QFontMetrics(font_);

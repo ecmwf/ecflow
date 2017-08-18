@@ -60,7 +60,7 @@ void test_find_task_using_path( NodeContainer* f,const Defs& defs )
 class TestDefsStructureParser : public DefsStructureParser {
 public:
    TestDefsStructureParser(Defs* defsfile, const std::string& file_name) : DefsStructureParser(defsfile,file_name) {}
-   bool do_parse_only(std::string& errorMsg) { return DefsStructureParser::do_parse_only(errorMsg); }
+   bool do_parse_file(std::string& errorMsg) { return DefsStructureParser::do_parse_file(errorMsg); }
 };
 
 
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
       timer.restart();
       TestDefsStructureParser checkPtParser( &local_defs, path);
       std::string errorMsg;
-      bool result = checkPtParser.do_parse_only(errorMsg);
+      bool result = checkPtParser.do_parse_file(errorMsg);
       std::cout << " Parsing Node tree *only* time           = " << timer.elapsed() << " parse(" << result << ")" << endl;
    }
 

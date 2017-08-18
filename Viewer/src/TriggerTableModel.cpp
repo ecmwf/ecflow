@@ -98,7 +98,7 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
 	}
 
 	int row=index.row();
-	if(row < 0 || row >= tc_->size())
+    if(row < 0 || row >= static_cast<int>(tc_->size()))
 		return QVariant();
 
     //QString id=columns_->id(index.column());
@@ -166,13 +166,22 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
             {
                 return vnode->typeFontColour();
             }
+            else if(role  == NodePointerRole)
+            {
+                 return qVariantFromValue((void *) vnode);
+            }
+
+            else if(role  == Qt::TextAlignmentRole)
+            {
+                return( mode_==NodeMode)?Qt::AlignCenter:Qt::AlignLeft;
+            }
 
         }
     }
 
     //We express the table cell background colour through the UserRole. The
     //BackgroundRole is already used for the node rendering
-    if(role == Qt::UserRole)
+    if(role == Qt::UserRole && mode_ != NodeMode)
     {
         const std::set<TriggerCollector::Mode>&  modes=items[row]->modes();
         if(modes.find(TriggerCollector::Normal) != modes.end())
@@ -223,7 +232,7 @@ VInfo_ptr TriggerTableModel::nodeInfo(const QModelIndex& index)
 		return res;
 	}
 
-	if(index.row() >=0 && index.row() <= tc_->items().size())
+    if(index.row() >=0 && index.row() <= static_cast<int>(tc_->items().size()))
 	{
         TriggerTableItem* d=tc_->items()[index.row()];
         return VInfo::createFromItem(d->item());
@@ -237,7 +246,6 @@ QModelIndex TriggerTableModel::itemToIndex(TriggerTableItem *item)
 {
     if(item)
     {
-         const std::vector<TriggerTableItem*>& items=tc_->items();
          for(std::size_t i=0; i < tc_->items().size(); i++)
              if(tc_->items()[i] == item)
                  return index(i,0);
@@ -252,7 +260,7 @@ TriggerTableItem* TriggerTableModel::indexToItem(const QModelIndex& index) const
         return 0;
 
     int row=index.row();
-    if(row < 0 || row >= tc_->size())
+    if(row < 0 || row >= static_cast<int>(tc_->size()))
         return 0;
 
     const std::vector<TriggerTableItem*>& items=tc_->items();

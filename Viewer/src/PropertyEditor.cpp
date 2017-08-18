@@ -520,7 +520,6 @@ void PropertyEditor::addTabs(VProperty* vProp,QVBoxLayout *layout,QWidget* paren
     t->setObjectName("tab");
     layout->addWidget(t);
    
-    int col=1;
     Q_FOREACH(VProperty* chProp,vProp->children())
     {
         if(chProp->name() == "tab")

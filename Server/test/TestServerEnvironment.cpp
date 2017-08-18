@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE( test_server_profile_threshold_environment_variable )
       BOOST_CHECK_THROW(ServerEnvironment serverEnv(argc,argv), std::runtime_error );
    }
 
-   putenv(const_cast<char*>("ECF_TASK_THRESHOLD")); // remove from env, otherwise valgrind complains
+   unsetenv(const_cast<char*>("ECF_TASK_THRESHOLD")); // remove from env, otherwise valgrind complains, *AND* affects other tests
 
    Host h;
    fs::remove(h.ecf_log_file(serverEnv.the_port()));

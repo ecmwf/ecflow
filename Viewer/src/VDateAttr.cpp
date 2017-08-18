@@ -92,13 +92,13 @@ QStringList VDateAttr::data(bool /*firstLine*/) const
         if(dataType_ == DateData)
         {
             const std::vector<DateAttr>& v=parent_->node_->dates();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 atype->encode(v[index_],s);
         }
         else if(dataType_ == DayData)
         {
             const std::vector<DayAttr>& v=parent_->node_->days();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 atype->encode(v[index_],s);
         }
     }
@@ -112,13 +112,13 @@ std::string VDateAttr::strName() const
         if(dataType_ == DateData)
         {
             const std::vector<DateAttr>& v=parent_->node_->dates();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 return v[index_].name();
         }
         else if(dataType_ == DayData)
         {
             const std::vector<DayAttr>& v=parent_->node_->days();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 return v[index_].name();
         }
     }
@@ -132,14 +132,14 @@ void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         const std::vector<DateAttr>& dateV=vnode->node_->dates();
         const std::vector<DayAttr>& dayV=vnode->node_->days();
 
-        int n=dateV.size();
-        for(size_t i=0; i < n; i++)
+        int n=static_cast<int>(dateV.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VDateAttr(vnode,dateV[i],i));
         }
 
-        n=dayV.size();
-        for(size_t i=0; i < n; i++)
+        n=static_cast<int>(dayV.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VDateAttr(vnode,dayV[i],i));
         }

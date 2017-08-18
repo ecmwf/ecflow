@@ -23,14 +23,12 @@ class Submittable : public Node {
 protected:
    Submittable( const std::string& name )
    : Node(name),
-     jobsPassword_(Submittable::DUMMY_JOBS_PASSWORD()),
      tryNo_(0),
      state_change_no_(0),
      sub_gen_variables_(NULL) {}
 
    Submittable()
-   : jobsPassword_(Submittable::DUMMY_JOBS_PASSWORD()),
-     tryNo_(0),
+   : tryNo_(0),
      state_change_no_(0),
      sub_gen_variables_(NULL) {}
 

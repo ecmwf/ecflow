@@ -30,6 +30,20 @@ class Defs;
 class Node;
 class Parser;
 
+// This class is used get a line of defs format from a defs string
+class DefsString : private boost::noncopyable {
+public:
+   DefsString(const std::string& defs_as_string);
+   bool good() const;
+   void getline(std::string& line);
+   bool empty() const { return empty_; }
+private:
+   bool empty_;
+   size_t index_;
+   std::vector<std::string> lines_;
+};
+
+
 // This class is used to parse the DEFS file.
 // The file can be of different styles:
 //    DEFS: This is the structure only (default)
@@ -38,6 +52,7 @@ class Parser;
 class DefsStructureParser : private boost::noncopyable {
 public:
    DefsStructureParser(Defs* defsfile, const std::string& file_name);
+   DefsStructureParser(Defs* defsfile, const std::string& str, bool);
    ~DefsStructureParser();
 
    /// Parse the definition file, *AND* check expressions and limits
@@ -52,7 +67,8 @@ public:
    std::string& faults() { return faults_;}
 
 protected: // allow test code access
-   bool do_parse_only(std::string& errorMsg);
+   bool do_parse_file(std::string& errorMsg);
+   bool do_parse_string(std::string& errorMsg);
 
 private:
    ecf::File_r        infile_;
@@ -60,6 +76,7 @@ private:
    DefsParser         defsParser_;        // Child parsers will be deleted as well
    int                lineNumber_;
    PrintStyle::Type_t file_type_;
+   DefsString         defs_as_string_;
 
    std::stack< std::pair<Node*,const Parser*> > nodeStack_;  // stack of nodes used in parsing
    std::vector<std::string> multi_statements_per_line_vec_;
@@ -70,6 +87,8 @@ private:
 private:
    // read in the next line form the defs file
    void getNextLine(std::string& line);
+   void getNextStringLine(std::string& line);
+   bool do_parse_line(const std::string& line,std::vector<std::string>& lineTokens,std::string& errorMsg);
    bool semiColonInEditVariable();
    friend class TriggerCompleteParser;
 };

@@ -53,6 +53,7 @@ protected:
     int  firstVisibleItem(int &offset) const;
     void updateRowCount();
     void updateScrollBars();
+    void updateViewport(const QRect rect);
 
     void adjustWidthInParent(int start);
 

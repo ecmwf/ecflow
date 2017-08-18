@@ -105,7 +105,7 @@ public:
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
     VServer *root() const;
-    virtual ServerHandler* server() const;
+    ServerHandler* server() const;
     virtual VNode* suite() const;
     node_ptr node() const {return node_;}  
     VNode* isNode() const {return const_cast<VNode*>(this);}

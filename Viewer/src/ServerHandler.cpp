@@ -60,12 +60,12 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    client_(0),
    updating_(false),
    communicating_(false),
+   suiteFilter_(new SuiteFilter()),
    comQueue_(0),
    activity_(NoActivity),
    connectState_(new ConnectState()),
-   suiteFilter_(new SuiteFilter()),
-   conf_(0),
-   prevServerState_(SState::RUNNING)
+   prevServerState_(SState::RUNNING),
+   conf_(0)
 {
 	if(localHostName_.empty())
 	{
@@ -377,7 +377,6 @@ ServerHandler* ServerHandler::findServer(const std::string &alias)
 //This function can be called many times so we need to avoid locking the mutex.
 SState::State ServerHandler::serverState()
 {
-	SState::State state;
 	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
 	{
 		prevServerState_= SState::RUNNING;
@@ -655,7 +654,7 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
         std::map<ServerHandler*,std::string> targetParentFullNames;
 
 		//Figure out what objects (node/server) the command should be applied to
-		for(int i=0; i < info.size(); i++)
+        for(std::size_t i=0; i < info.size(); i++)
 		{
 			std::string nodeFullName;
             std::string nodeName;
@@ -1060,6 +1059,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
             UiLog(this).dbg() << " command finished - send SYNC command";
 			//comQueue_->addNewsTask();
 			comQueue_->addSyncTask();
+            updateRefreshTimer();
 			break;
 		}
 		case VTask::NewsTask:
@@ -1131,7 +1131,6 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			else
 			{
                 broadcast(&ServerObserver::notifyEndServerSync);
-                updateRefreshTimer();
 			}
 			break;
 		}

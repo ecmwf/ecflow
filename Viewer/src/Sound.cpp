@@ -149,7 +149,7 @@ void Sound::load(VProperty* prop)
 
     if(VProperty *pp=prop->findChild("player"))
     {
-    	Sound::instance_->setCurrentPlayer(pp->valueAsString());
+    	Sound::instance_->setCurrentPlayer(pp->valueAsStdString());
     }
 
     UiLog().dbg() << "Sound:load() -- > end";

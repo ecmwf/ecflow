@@ -34,7 +34,7 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
     depLabel_->setText(depLabelText_);
 
     //Node - model + view
-    nodeModel_ = new TriggerTableModel(TriggerTableModel::TriggerMode,this);
+    nodeModel_ = new TriggerTableModel(TriggerTableModel::NodeMode,this);
     nodeView_->setModel(nodeModel_);
 
     //Set the height of the node display area

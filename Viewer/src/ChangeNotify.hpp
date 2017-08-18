@@ -38,7 +38,7 @@ public:
 	QSortFilterProxyModel* proxyModel() const {return proxyModel_;}
 	bool isEnabled() const {return enabled_;}
 	void clearData();
-	void showDialog();
+    static void showDialog(ChangeNotify* notifier=0);
 
 	//Form VPropertyObserver
 	void notifyChange(VProperty*);

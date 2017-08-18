@@ -87,9 +87,6 @@ protected:
 
 	QVariant nodeData(const QModelIndex& index,int role) const;
 
-    QModelIndex forceShowNode(const VNode* node) const;
-    QModelIndex forceShowAttribute(const VAttribute* a) const;
-
 	VTableModelData* data_;
 	ModelColumn* columns_;
 };

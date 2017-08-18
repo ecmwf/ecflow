@@ -68,13 +68,12 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con_3_0_1 )
    doSave(file_name + "Task.def",task);
    doSave(file_name + "Limit.def",Limit());
 #else
-   Ecf::set_debug_equality(true);
+   DebugEquality debug_equality; // only as affect in DEBUG build
    do_restore<Defs>(file_name + "Defs.def",defs);
    do_restore<Suite>(file_name + "Suite.def",suite);
    do_restore<Family>(file_name + "Family.def",family);
    do_restore<Task>(file_name + "Task.def",task);
    do_restore<Limit>(file_name + "Limit.def",Limit());
-   Ecf::set_debug_equality(false);
 #endif
 }
 
@@ -101,9 +100,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_boost_checkpt_file )
    // remember to check out data
    doSave(file_name + "boost.checkpt",fixture.fixtureDefsFile());
 #else
-   Ecf::set_debug_equality(true);
+   DebugEquality debug_equality; // only as affect in DEBUG build
    do_restore<Defs>(file_name + "boost.checkpt",fixture.fixtureDefsFile());
-   Ecf::set_debug_equality(false);
 #endif
 }
 

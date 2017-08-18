@@ -43,6 +43,7 @@ public:
     bool isEmpty() const;
 
 protected:
+    void init(const VNode *vnode);
 	void clear();
     ExpandStateNode* root() const {return root_;}
     void save(const VNode *,ExpandStateNode*,const QModelIndex&);

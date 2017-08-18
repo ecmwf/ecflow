@@ -147,7 +147,7 @@ void RichTextSearchInterface::automaticSearchForKeywords(bool userClickedReload)
         // search direction
         QTextDocument::FindFlags findFlags;
         QTextCursor cursor(editor_->textCursor());
-        std::string searchFrom = vpAutomaticSearchFrom_->valueAsString();
+        std::string searchFrom = vpAutomaticSearchFrom_->valueAsStdString();
         QTextCursor::MoveOperation move;
         if (searchFrom == "bottom")
         {
@@ -165,11 +165,11 @@ void RichTextSearchInterface::automaticSearchForKeywords(bool userClickedReload)
             findFlags = findFlags | QTextDocument::FindCaseSensitively;
 
         // string match mode
-        std::string matchMode(vpAutomaticSearchMode_->valueAsString());
+        std::string matchMode(vpAutomaticSearchMode_->valueAsStdString());
         StringMatchMode::Mode mode = StringMatchMode::operToMode(matchMode);
 
         // the term to be searched for
-        std::string searchTerm_s(vpAutomaticSearchText_->valueAsString());
+        std::string searchTerm_s(vpAutomaticSearchText_->valueAsStdString());
         QString searchTerm = QString::fromStdString(searchTerm_s);
 
         // perform the search

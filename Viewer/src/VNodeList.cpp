@@ -78,7 +78,7 @@ VNodeList::~VNodeList()
 
 VNodeListItem* VNodeList::itemAt(int i)
 {
-	if(i >= 0 && i < data_.size())
+    if(i >= 0 && i < static_cast<int>(data_.size()))
 		return data_.at(i);
 
 	return NULL;

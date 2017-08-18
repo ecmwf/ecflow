@@ -137,7 +137,7 @@ void VariablePropDialog::accept()
     //var does not exists in SELECTED node
     if(!data_->data(0)->hasName(name.toStdString()))
     {
-        for(size_t i=1; i < data_->count(); i++)
+        for(int i=1; i < data_->count(); i++)
         {
             //but exists in one of the parents
             if(data_->data(i)->hasName(name.toStdString()))
@@ -443,7 +443,7 @@ void VariableAddDialog::accept()
         return;
     }
 
-    for(size_t i=1; i <data_->count(); i++)
+    for(int i=1; i <data_->count(); i++)
     {
         if(data_->data(i)->hasName(name.toStdString()))
         {

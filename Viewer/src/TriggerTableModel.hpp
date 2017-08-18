@@ -24,7 +24,7 @@ class NodeQueryResult;
 class TriggerTableModel : public QAbstractItemModel
 {
 public:
-    enum Mode {TriggerMode,TriggeredMode};
+    enum Mode {TriggerMode,TriggeredMode,NodeMode};
 
     explicit TriggerTableModel(Mode mode,QObject *parent=0);
     ~TriggerTableModel();
@@ -33,7 +33,8 @@ public:
     //core delegate was written to only handle the custom roles it defines!
     enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
                          NodeTypeRole = Qt::UserRole + 13,
-                         NodeTypeForegroundRole = Qt::UserRole + 14};
+                         NodeTypeForegroundRole = Qt::UserRole + 14,
+                         NodePointerRole = Qt::UserRole + 17};
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;

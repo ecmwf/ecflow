@@ -101,19 +101,19 @@ QStringList VTimeAttr::data(bool /*firstLine*/) const
         if(dataType_ == TimeData)
         {
             const std::vector<ecf::TimeAttr>& v=parent_->node_->timeVec();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 atype->encode(v[index_],s);
         }
         else if(dataType_ == TodayData)
         {
             const std::vector<ecf::TodayAttr>& v=parent_->node_->todayVec();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 atype->encode(v[index_],s);
         }
         else if(dataType_ == CronData)
         {
             const std::vector<ecf::CronAttr>& v=parent_->node_->crons();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 atype->encode(v[index_],s);
         }
     }
@@ -127,19 +127,19 @@ std::string VTimeAttr::strName() const
         if(dataType_ == TimeData)
         {
             const std::vector<ecf::TimeAttr>& v=parent_->node_->timeVec();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 return v[index_].name();
         }
         else if(dataType_ == TodayData)
         {
             const std::vector<ecf::TodayAttr>& v=parent_->node_->todayVec();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 return v[index_].name();
         }
         else if(dataType_ == CronData)
         {
             const std::vector<ecf::CronAttr>& v=parent_->node_->crons();
-            if(index_ < v.size())
+            if(index_ < static_cast<int>(v.size()))
                 return v[index_].name();
         }
     }
@@ -154,20 +154,20 @@ void VTimeAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         const std::vector<ecf::TodayAttr>& tdV=vnode->node_->todayVec();
         const std::vector<ecf::CronAttr>& cV=vnode->node_->crons();
 
-        int n=tV.size();
-        for(size_t i=0; i < n; i++)
+        int n=static_cast<int>(tV.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VTimeAttr(vnode,tV[i],i));
         }
 
-        n=tdV.size();
-        for(size_t i=0; i < n; i++)
+        n=static_cast<int>(tdV.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VTimeAttr(vnode,tdV[i],i));
         }
 
-        n=cV.size();
-        for(size_t i=0; i < n; i++)
+        n=static_cast<int>(cV.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VTimeAttr(vnode,cV[i],i));
         }

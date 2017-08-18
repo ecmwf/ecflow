@@ -40,14 +40,14 @@
 #define _UI_TREENODEVIEW_DEBUG
 
 TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilterDef* filterDef,QWidget* parent) :
-    QObject(parent),
+    QObject(parent),NodeViewBase(filterDef),
     view_(view),
     model_(model),
-    NodeViewBase(filterDef),
     needItemsLayout_(false),
     prop_(NULL),
     setCurrentIsRunning_(false),
-    setCurrentFromExpand_(false),
+    setCurrentFromExpandIsRunning_(false),
+    canRegainCurrentFromExpand_(true),
     inStartUp_(true)
 {
     setObjectName("view");
@@ -132,7 +132,7 @@ QObject* TreeNodeView::realObject()
     return this;
 }
 
-//Collects the selected list of indexes
+//Collect the selected list of indexes
 QModelIndexList TreeNodeView::selectedList()
 {
     QModelIndexList lst;
@@ -142,76 +142,125 @@ QModelIndexList TreeNodeView::selectedList()
     return lst;
 }
 
-// reimplement virtual function from CompactView - called when the selection is changed
+// This slot is called when the selection changed in the view 
 void TreeNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
+#ifdef _UI_TREENODEVIEW_DEBUG
+    UI_FUNCTION_LOG
+#endif
     QModelIndexList lst=view_->selectedIndexes();
-    //When the selection was triggered from restoring (expanding) the nodes
+
+    //When the selection was triggered from restoring the expand state of the tree
     //we do not want to broadcast it
-    if(lst.count() > 0 && !setCurrentFromExpand_)
+    if(lst.count() > 0 && !setCurrentFromExpandIsRunning_)
     {
-        VInfo_ptr info=model_->nodeInfo(lst.front());
+        VInfo_ptr info=model_->nodeInfo(lst.back());
         if(info && !info->isEmpty())
         {
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
-            UiLog().dbg() << "TreeNodeView::selectionChanged --> emit=" << info->path();
+#ifdef _UI_TREENODEVIEW_DEBUG
+            UiLog().dbg() << " emit=" << info->path();
 #endif
             Q_EMIT selectionChanged(info);
         }
+        //Remembers the current selection
         lastSelection_=info;
     }
 
-    view_->selectionChanged(selected, deselected);
 
     //The model has to know about the selection in order to manage the
-    //nodes that are forced to be shown
-    model_->selectionChanged(lst);
+    //nodes that are forced to be shown. We only do it when we are not in the the middle of
+    // "setCurrentSelection()" call because that handles the forceShow independently.
+    if(!setCurrentIsRunning_)
+        model_->selectionChanged(lst);
 }
 
+//Returns the current selection (the last one!)
 VInfo_ptr TreeNodeView::currentSelection()
 {
     QModelIndexList lst=view_->selectedIndexes();
     if(lst.count() > 0)
     {
-        return model_->nodeInfo(lst.front());
+        return model_->nodeInfo(lst.back());
     }
     return VInfo_ptr();
 }
 
+//Sets the current selection to the given VInfo item.
+// called:
+//  -from outside of the view when the selection is broadcast from another view
+//  -from within the view when the tree expand state was restored
 void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 {
-    //While the current is being selected we do not allow
-    //another setCurrent call go through
+#ifdef _UI_TREENODEVIEW_DEBUG
+    UI_FUNCTION_LOG
+#endif
+    //We cannot call it recursively
+    Q_ASSERT(setCurrentIsRunning_ == false);
+
+    //While the current item  is being selected we do not allow
+    //another setCurrent call to go through
     if(!info || setCurrentIsRunning_)
         return;
 
+    //Indicate that setCurrent started
     setCurrentIsRunning_=true;
+
+#ifdef _UI_TREENODEVIEW_DEBUG
+    UiLog().dbg() << " info=" << info->path();
+#endif
+
+    //Forcing an object to be shown can result in altering and relayouting the tree. We
+    //have to block the regaining of the selection at the end of the layout
+    //process when the tree expand state is restored.
+    canRegainCurrentFromExpand_=false;
+
+    //Force the object to be shown in the tree
+    model_->setForceShow(info);
+
+    //Lookup the object in the model
     QModelIndex idx=model_->infoToIndex(info);
+
+    //Get the index again if it is needed
+    //if(!idx.isValid())
+    //{
+    //    idx=model_->infoToIndex(info);
+    //}
+
+    //The re-layouting finished. We do not need to block the regaining of selection when
+    //the tree expand state is restored.
+    canRegainCurrentFromExpand_=true;
+
+    //If the item is in the model we set it as current
     if(idx.isValid())
     {
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
-        UiLog().dbg() << "TreeNodeView::setCurrentSelection --> " << info->path();
-#endif
-        view_->setCurrentIndex(idx);
+        view_->setCurrentIndex(idx); //this will call selectionChanged
+        view_->scrollTo(idx);
     }
+
+    //Indicate that the set current process finished
     setCurrentIsRunning_=false;
 }
 
-
+//Sets the current selection to the given VInfo item
+//when the tree expand state is restored
 void TreeNodeView::setCurrentSelectionFromExpand(VInfo_ptr info)
 {
-    if(!info || setCurrentFromExpand_)
+#ifdef _UI_TREENODEVIEW_DEBUG
+    UI_FUNCTION_LOG
+#endif
+    if(!info || setCurrentFromExpandIsRunning_)
         return;
 
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
-        UiLog().dbg() << "TreeNodeView::setCurrentSelectionFromExpand --> " << info->path();
+#ifdef _UI_TREENODEVIEW_DEBUG
+        UiLog().dbg() << " info=" << info->path();
 #endif
 
-    setCurrentFromExpand_=true;
+    setCurrentFromExpandIsRunning_=true;
     setCurrentSelection(info);
-    setCurrentFromExpand_=false;
+    setCurrentFromExpandIsRunning_=false;
 }
 
+//Selects the first server in the view
 void TreeNodeView::selectFirstServer()
 {
     QModelIndex idx=model_->index(0,0);
@@ -225,21 +274,26 @@ void TreeNodeView::selectFirstServer()
 
 void TreeNodeView::slotContextMenu(const QPoint &position)
 {
-    QModelIndexList lst=selectedList();
-    //QModelIndex index=indexAt(position);
+#ifdef _UI_TREENODEVIEW_DEBUG
+    UI_FUNCTION_LOG
+#endif
+    QModelIndex indexClicked=view_->indexAt(position);
+    QModelIndexList indexSel=selectedList();
+    if(!indexSel.contains(indexClicked))
+    {
+        indexSel.clear();
+        indexSel << indexClicked;
+    }
+
     QPoint scrollOffset(view_->horizontalScrollBar()->value(),view_->verticalScrollBar()->value());
-
-    handleContextMenu(view_->indexAt(position),lst,view_->mapToGlobal(position),position+scrollOffset,view_);
+    handleContextMenu(indexClicked,indexSel,view_->mapToGlobal(position),position+scrollOffset,view_);
 }
-
 
 void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
 {
     //Node actions
     if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
-    {
-        //qDebug() << "context menu" << indexClicked;
-
+    {       
         std::vector<VInfo_ptr> nodeLst;
         for(int i=0; i < indexLst.count(); i++)
         {
@@ -277,13 +331,13 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
+#ifdef _UI_TREENODEVIEW_DEBUG
             QTime t;
             t.start();
 #endif
             //apply expand in the view
             view_->expandAll(idx);
-#ifdef _UI_COMPACTNODEVIEW_DEBUG
+#ifdef _UI_TREENODEVIEW_DEBUG
             UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -388,23 +442,19 @@ void TreeNodeView::expandTo(const QModelIndex& idxTo)
     QModelIndex idx=model_->parent(idxTo);
     QModelIndexList lst;
 
-    //qDebug() << idxTo << idx;
-
     while(idx.isValid())
     {
         lst.push_front(idx);
         idx=idx.parent();
     }
 
-    //qDebug() << lst;
-
     Q_FOREACH(QModelIndex d,lst)
     {
-        view_->expand(d);
-        //qDebug() << "expand" << d << isExpanded(d);
+        view_->expand(d);       
     }
 }
 
+#if 0
 //Save all
 void TreeNodeView::slotSaveExpand()
 {
@@ -456,31 +506,27 @@ void TreeNodeView::slotRestoreExpand()
         }
     }
     regainSelectionFromExpand();
+
 }
+#endif
 
 //Save the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotSaveExpand(const VTreeNode* node)
 {
+    UI_FUNCTION_LOG
     Q_ASSERT(node);
-    ExpandState* es=0;
     VTreeServer* ts=node->server();
     Q_ASSERT(ts);
 
-    //for servers
-    if(node->isRoot())
-    {
-         es=ts->expandState();
-         if(!es)
-         {
-             es=new ExpandState(view_,model_);
-             ts->setExpandState(es); //the treeserver takes ownership of the expandstate
-         }
-    }
-    //for other nodes - it is just a tmp expand state
-    else
+#ifdef _UI_TREENODEVIEW_DEBUG
+    UiLog().dbg() << " node=" << node->vnode()->fullPath();
+#endif
+
+    ExpandState* es=ts->expandState();
+    if(!es)
     {
         es=new ExpandState(view_,model_);
-        ts->setTmpExpandState(es);
+        ts->setExpandState(es); //the treeserver takes ownership of the expandstate
     }
 
     Q_ASSERT(es);
@@ -493,38 +539,36 @@ void TreeNodeView::slotSaveExpand(const VTreeNode* node)
 
 //Restore the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotRestoreExpand(const VTreeNode* node)
-{    
+{
+    UI_FUNCTION_LOG
     Q_ASSERT(node);
-    ExpandState* es=0;
     VTreeServer* ts=node->server();
     Q_ASSERT(ts);
 
-    //For servers the expand state persists on the vtreenode, For other
-    //nodes we just store a tmop expand state on the vtreenode: it only
-    //exists for one save-restore cycle.
-    es=(node->isRoot())?ts->expandState():ts->tmpExpandState();
+#ifdef _UI_TREENODEVIEW_DEBUG
+    UiLog().dbg() << " node=" << node->vnode()->fullPath();
+#endif
 
-    if(es)
+    if(ExpandState* es=ts->expandState())
     {
         QModelIndex idx=model_->nodeToIndex(node);
         if(idx.isValid())
-        {
-            bool expanded=view_->isExpanded(idx);
+        {            
+            bool expandedOri=view_->isExpanded(idx);
             view_->collapse(idx);
             es->collectExpanded(node->vnode(),view_->expandedIndexes);
-            if(expanded)
+#ifdef _UI_TREENODEVIEW_DEBUG
+            UiLog().dbg() << " expanded=" << view_->isExpanded(idx);
+#endif
+            if(expandedOri || view_->isExpanded(idx))
                 view_->expand(idx);
         }
 
-        //we delete the tmp expand state
-        if(es == ts->tmpExpandState())
-        {
-            ts->clearTmpExpandState();
-        }
         //es->print();
     }
 
-    regainSelectionFromExpand();
+    if(canRegainCurrentFromExpand_)
+        regainSelectionFromExpand();
 }
 
 void TreeNodeView::saveExpandAll(const QModelIndex& idx)
@@ -584,6 +628,8 @@ void TreeNodeView::saveCollapseAll(const QModelIndex& idx)
 
 void TreeNodeView::regainSelectionFromExpand()
 {
+    Q_ASSERT(canRegainCurrentFromExpand_ == true);
+
     VInfo_ptr s=currentSelection();
     if(!s)
     {

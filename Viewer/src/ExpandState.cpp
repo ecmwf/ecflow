@@ -10,10 +10,12 @@
 #include "ExpandState.hpp"
 #include "ExpandStateNode.hpp"
 #include "AbstractNodeView.hpp"
+#include "ServerHandler.hpp"
 #include "TreeNodeModel.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
+#include "VTree.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -27,6 +29,20 @@ ExpandState::ExpandState(AbstractNodeView* view,TreeNodeModel* model) :
 ExpandState::~ExpandState()
 {
     clear();
+}
+
+void ExpandState::init(const VNode *vnode)
+{
+    clear();
+
+    ServerHandler* server=vnode->server();
+    Q_ASSERT(server);
+    QModelIndex idx=model_->serverToIndex(server);
+    bool expanded=view_->isExpanded(idx);
+
+    root_=new ExpandStateNode(server->vRoot(),expanded);
+
+    save(server->vRoot());
 }
 
 bool ExpandState::isEmpty() const
@@ -44,9 +60,49 @@ void ExpandState::clear()
 
 
 //Save the expand state for a whole subtree (it can be the whole VNode tree as well)
-void ExpandState::save(const VNode *root)
+void ExpandState::save(const VNode *vnode)
 {
+    UI_FUNCTION_LOG
+    UI_ASSERT(vnode,"");
+    UiLog().dbg() << " " << vnode->name();
+
+    if(!root_)
+    {
+        init(vnode);
+        Q_ASSERT(root_);
+        return;
+    }
+
+    if(ExpandStateNode* es=find(vnode->absNodePath()))
+    {
+        Q_ASSERT(root_);
+        QModelIndex idx=model_->nodeToIndex(vnode);
+
+        //It can happen that the VTree is empty but the server is already
+        //loaded. It is the situation when we load the same server in multiple
+        //tabs!!! We return here because there is nothing to save (and we would
+        //have a crash when trying to get index of the vnodes via the model!!)
+        if(VTreeNode* vtn=model_->indexToServerOrNode(idx))
+        {
+            if(VTree* vt=vtn->root())
+            {
+                if(vt->totalNum() == 0)
+                    return;
+            }
+        }
+
+        //save all the children recursively
+        save(vnode,es,idx);
+     }
+}
+
+#if 0
+//Save the expand state for a whole subtree (it can be the whole VNode tree as well)
+void ExpandState::save(const VNode *root)
+{    
+    UI_FUNCTION_LOG
     UI_ASSERT(root,"");
+    UiLog().dbg() << " " << root->name();
 
     QModelIndex rootIdx=model_->nodeToIndex(root);
     bool expanded=view_->isExpanded(rootIdx);
@@ -60,9 +116,23 @@ void ExpandState::save(const VNode *root)
         root_->expanded_=expanded;
     }
 
+    //It can happen that the VTree is empty but the server is already
+    //loaded. It is the situation when we load the same server in multiple
+    //tabs!!! We return here because there is nothing to save (and we would
+    //have a crash when trying to get index of the vnodes via the model!!)
+    if(VTreeNode* vtn=model_->indexToServerOrNode(rootIdx))
+    {
+        if(VTree* vt=vtn->root())
+        {
+            if(vt->totalNum() == 0)
+                return;
+        }
+    }
+
     //save all the children recursively
     save(root,root_,rootIdx);
 }
+#endif
 
 //Save the expand state for the given node.
 //  node: the vnode to save
@@ -80,7 +150,10 @@ void ExpandState::save(const VNode *node,ExpandStateNode *expandNode,const QMode
     //CAN IT HAPPEN AT ALL??
     if(numExpandNode != numNode || expandNode->name_ != node->strName())
     {
-        Q_ASSERT(0);
+        UI_ASSERT(0,"numExpandNode=" << numExpandNode << " numNode=" << numNode <<
+                  " expandNode->name_=" << expandNode->name_ << " node->strName()=" <<
+                  node->strName());
+
         expandNode->reset(node,view_->isExpanded(idx));
         //At the this point the expand node children vector is
         //reserved, but contains null pointers
@@ -117,29 +190,35 @@ void ExpandState::save(const VNode *node,ExpandStateNode *expandNode,const QMode
 //VNode tree.
 void ExpandState::collectExpanded(const VNode* node,QSet<QPersistentModelIndex>& theSet)
 {
+#ifdef _UI_EXPANDSTATE_DEBUG
+    UI_FUNCTION_LOG
+#endif
+    Q_ASSERT(node);
+
     if(!root_)
         return;
 
-    if(node->strName() != root_->name_)
-    {
-        clear();
-        return;
-    }
-
     QModelIndex nodeIdx=model_->nodeToIndex(node);
 #ifdef _UI_EXPANDSTATE_DEBUG
-    UiLog().dbg() << "ExpandState::collectExpanded --> " << root_->name_;
+    UiLog().dbg() << " root=" << root_->name_;
 #endif
-    collectExpanded(root_,node,nodeIdx,theSet);
+    ExpandStateNode *expand=find(node->absNodePath());
+    if(expand)
+        collectExpanded(expand,node,nodeIdx,theSet);
+    else
+    {
 #ifdef _UI_EXPANDSTATE_DEBUG
-    UiLog().dbg() << "<-- ExpandState::collectExpanded";
+        UiLog().dbg() << " Node not found in expand tree";
 #endif
-
+    }
 }
 
 void ExpandState::collectExpanded(ExpandStateNode *expand,const VNode* node,const QModelIndex& nodeIdx,
                                 QSet<QPersistentModelIndex>& theSet)
 {
+#ifdef _UI_EXPANDSTATE_DEBUG
+    UI_FUNCTION_LOG
+#endif
     //The contents of expand node and the vnode might differ. We try to
     //adjust the expand node to the vnode with this call.
     bool adjusted=expand->adjustContents(node);
@@ -152,7 +231,7 @@ void ExpandState::collectExpanded(ExpandStateNode *expand,const VNode* node,cons
 
     //Lookup the node in the model
     //QModelIndex nodeIdx=model_->nodeToIndex(node);
-    if(expand->expanded_)
+    if(expand->expanded_ && nodeIdx.isValid())
     {
         theSet.insert(nodeIdx);
 

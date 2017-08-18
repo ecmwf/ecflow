@@ -68,7 +68,7 @@ void test_find_task_using_path( NodeContainer* f,const Defs& defs )
 class TestDefsStructureParser : public DefsStructureParser {
 public:
    TestDefsStructureParser(Defs* defsfile, const std::string& file_name) : DefsStructureParser(defsfile,file_name) {}
-   bool do_parse_only(std::string& errorMsg) { return DefsStructureParser::do_parse_only(errorMsg); }
+   bool do_parse_file(std::string& errorMsg) { return DefsStructureParser::do_parse_file(errorMsg); }
 };
 
 BOOST_AUTO_TEST_CASE( test_single_defs )
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
       timer.restart();
       TestDefsStructureParser checkPtParser( &local_defs, path);
       std::string errorMsg;
-      BOOST_REQUIRE_MESSAGE(checkPtParser.do_parse_only(errorMsg),errorMsg);
+      BOOST_REQUIRE_MESSAGE(checkPtParser.do_parse_file(errorMsg),errorMsg);
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForParse,"Performance regression, expected < " << expectedTimeForParseOnly << " seconds for parse/node tree creation but found " << timer.elapsed());
       std::cout << " Parsing Node tree *only* time           = " << timer.elapsed() << " < limit(" << expectedTimeForParseOnly << ")" << endl;
    }

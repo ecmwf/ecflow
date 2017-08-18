@@ -123,28 +123,10 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
     int level=(parentId >=0?viewItems_[parentId].level+1:0);
     TreeNodeViewItem *item=0;
 
-#if 0
-    std::vector<int> itemWidthVec;
-    std::vector<int> itemHeightVec;
-
-    for(int i=first; i < first+count; i++)
-    {
-        int w,h;
-        QModelIndex currentIndex=model_->index(i-first,0,parentIndex);
-        delegate_->sizeHint(currentIndex,w,h);
-        itemWidthVec.push_back(w);
-        itemHeightVec.push_back(h);
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-        UiLog().dbg() << "  item=" << currentIndex.data().toString() << " w=" << w;
-#endif
-    }
-#endif
-
-
-#ifdef _UI_STANDARDVIEW_DEBUG
-    if(parentId >=0)
-        UiLog().dbg() << "layout parent=" << viewItems_[parentId].index.data().toString();
+    //if(parentId >=0)
+    //    UiLog().dbg() << "layout parent=" << viewItems_[parentId].index.data().toString();
 #endif
 
     //Iterate through the direct children of parent item. At this point all the items
@@ -186,6 +168,9 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
         if(item->alignedRight() > maxRowWidth_)
             maxRowWidth_=item->right();
 
+#ifdef _UI_STANDARDVIEW_DEBUG
+            //UiLog().dbg() <<  " item=" << currentIndex.data().toString();
+#endif
         //We need to expand the item
         if(recursiveExpanding || isIndexExpanded(currentIndex))
         {
@@ -195,7 +180,11 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
             item->expanded = true;
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-            UiLog().dbg() <<  "  before " <<  item->index.data().toString() <<  " total=" << item->total;
+            //UiLog().dbg() <<  " is expanded";
+#endif
+
+#ifdef _UI_STANDARDVIEW_DEBUG
+            //UiLog().dbg() <<  "  before " <<  item->index.data().toString() <<  " total=" << item->total;
 #endif
             //Add the children to the layout
             layout(last,recursiveExpanding,afterIsUninitialized,preAllocated);
@@ -203,7 +192,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
             item = &viewItems_[last];
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-            UiLog().dbg() <<  "  after " <<  item->index.data().toString() <<  " total=" << item->total;
+            //UiLog().dbg() <<  "  after " <<  item->index.data().toString() <<  " total=" << item->total;
 #endif
             children+=item->total;
             item->hasChildren = item->total > 0;
@@ -218,7 +207,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
         return; // nothing changed
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << " update parent total";
+    //UiLog().dbg() << " update parent total";
 #endif
 
     int pp=parentId;
@@ -227,8 +216,8 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
         viewItems_[pp].total += count;
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-        UiLog().dbg() <<  "  parent=" << viewItems_[pp].index.data().toString() <<
-                          "  total=" << viewItems_[pp].total;
+        //UiLog().dbg() <<  "  parent=" << viewItems_[pp].index.data().toString() <<
+        //                  "  total=" << viewItems_[pp].total;
 #endif
 
         pp = viewItems_[pp].parentItem;
@@ -255,7 +244,7 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
     }
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << "StandardView::paint -->";
+    //UiLog().dbg() << "StandardView::paint -->";
     //UiLog().dbg() << "sizeof(TreeNodeViewItem)=" << sizeof(TreeNodeViewItem);
     //UiLog().dbg() << "region=" << region;
 #endif
@@ -265,14 +254,14 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
     //The first visible item at the top of the viewport
     int firstVisible=firstVisibleItem(firstVisibleOffset);
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << "firstVisible " << firstVisible;
+    //UiLog().dbg() << "firstVisible " << firstVisible;
 #endif
 
     if(firstVisible<0)
         return;
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << "scrollX" << horizontalScrollBar()->value() << " " << viewport()->width();
+    //UiLog().dbg() << "scrollX" << horizontalScrollBar()->value() << " " << viewport()->width();
 #endif
 
     int xOffset=0;
@@ -295,7 +284,7 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
                             ? QRect(0, rects.at(a).y(), viewportWidth, rects.at(a).height())
                             : rects.at(a));
 #ifdef _UI_STANDARDVIEW_DEBUG
-        UiLog().dbg() << " area=" << area;
+        //UiLog().dbg() << " area=" << area;
 #endif
         std::vector<int> indentVec;
 
@@ -344,7 +333,7 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
             }
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-            UiLog().dbg() << "row: " << i << " " << itemHeight;
+            //UiLog().dbg() << "row: " << i << " " << itemHeight;
 #endif
             //Try to find the first item int the current rect
             if(y + itemHeight > area.top())
@@ -353,7 +342,7 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
         }
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-        UiLog().dbg() << "y: " << y << " " << area.bottom();
+        //UiLog().dbg() << "y: " << y << " " << area.bottom();
 #endif
 
         //Paint the visible rows in the current rect
@@ -365,7 +354,7 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
                 drawRow(painter,i,xOffset,y,indentVec);
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-                UiLog().dbg() << " row rendered - item=" << i << " y=" << y;
+                //UiLog().dbg() << " row rendered - item=" << i << " y=" << y;
 #endif
             }
             else
@@ -373,7 +362,7 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
                 int rh=viewItems_[i].height;
                 y+=rh;
 #ifdef _UI_STANDARDVIEW_DEBUG
-                UiLog().dbg() << " row skipped  - item=" << i << " y=" << y;
+                //UiLog().dbg() << " row skipped  - item=" << i << " y=" << y;
 #endif
             }
 
@@ -386,8 +375,6 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
 //Draw a whole row
 void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::vector<int>& indentVec)
 {
-    bool leaf=false;
-
     TreeNodeViewItem* item=&(viewItems_[start]);
 
     //Get the rowheight
@@ -396,12 +383,9 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
     //See if there are no multiline items in this row
     bool singleRow=delegate_->isSingleHeight(rh);
 
-    const int viewportWidth = viewport()->width();
-
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << "  item=" << i << " " << item->index.data().toString();
+    //UiLog().dbg() << "  item=" << " " << item->index.data().toString();
 #endif
-    leaf=(item->total == 0);
 
     //Find out the indentation level of the row
     int firstLevel=item->level;
@@ -458,6 +442,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
         // -the number of icons or additional extra information
         //  changed for a node (so the width changed)
         // -the number of lines changed in a multiline label (so the height changed)
+        // -the node becomes submitted
         bool wChanged=paintedSize.width() != item->width;
         bool hChanged=paintedSize.height() != item->height;
 
@@ -475,7 +460,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
             else if(hChanged)
             {
                 doDelayedWidthAdjustment();
-            }
+            }           
         }
 
         //draw expand indicator
@@ -583,7 +568,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
             //Draw the vertical connector lines for all the levels
             //preceding the first level in the row!
             painter->setPen(connectorColour_);
-            for(size_t j=0; j < firstLevel; j++)
+            for(int j=0; j < firstLevel; j++)
             {
                 int xp=indentVec[j];
                 if(xp != 0)
@@ -609,7 +594,7 @@ int StandardView::firstVisibleItem(int &offset) const
 {
     const int value = verticalScrollBar()->value();
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << "CompactNodeView::firstVisibleItem --> value=" << value;
+    //UiLog().dbg() << "CompactNodeView::firstVisibleItem --> value=" << value;
 #endif
 
     if (verticalScrollMode_ == ScrollPerItem)
@@ -621,24 +606,6 @@ int StandardView::firstVisibleItem(int &offset) const
             return -1;
 
         return value;
-#if 0
-        int cnt=0;
-        int itemsInRow=0;
-        const std::size_t itemsCount=viewItems_.size();
-        for (std::size_t i=0; i < itemsCount; i++)
-        {
-            if(cnt == value)
-            {
-#ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << " i=" << i;
-#endif
-                return i;
-            }
-            itemsInRow=itemCountInRow(i);
-            cnt++;
-        }
-        //return (value < 0 || value >= viewItems_.count()) ? -1 : value;
-#endif
     }
 
     return -1;
@@ -651,14 +618,14 @@ void StandardView::updateRowCount()
     rowCount_=static_cast<int>(viewItems_.size());
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << "CompactNodeView::updateRowCount --> " << rowCount_;
+    //UiLog().dbg() << "CompactNodeView::updateRowCount --> " << rowCount_;
 #endif
 }
 
 void StandardView::updateScrollBars()
 {
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << "CompactNodeView::updateScrollBars -->";
+    //UiLog().dbg() << "CompactNodeView::updateScrollBars -->";
 #endif
 
     QSize viewportSize = viewport()->size();
@@ -686,8 +653,8 @@ void StandardView::updateScrollBars()
         itemsInViewport++;
     }
 #ifdef _UI_STANDARDVIEW_DEBUG
-    UiLog().dbg() << "  itemsCount=" << itemsCount << " rowCount=" << rowCount_;
-    UiLog().dbg() << "  itemsInViewport " << itemsInViewport;
+    //UiLog().dbg() << "  itemsCount=" << itemsCount << " rowCount=" << rowCount_;
+    //UiLog().dbg() << "  itemsInViewport " << itemsInViewport;
 #endif
 
     if(verticalScrollMode_ == ScrollPerItem)
@@ -792,8 +759,7 @@ int StandardView::itemAtCoordinate(const QPoint& coordinate) const
         if(coordinate.y() >= 0)
         {
             // the coordinate is in or below the viewport
-            int viewItemCoordinate = 0;
-            int itemsInRow=0;
+            int viewItemCoordinate = 0;           
             for(std::size_t viewItemIndex = topViewItemIndex; viewItemIndex < itemCount; viewItemIndex++)
             {
                 viewItemCoordinate += viewItems_[viewItemIndex].height;
@@ -811,8 +777,16 @@ int StandardView::itemAtCoordinate(const QPoint& coordinate) const
 
 bool StandardView::isPointInExpandIndicator(int item,QPoint p) const
 {
-    const std::size_t itemCount = viewItems_.size();
+    const int itemCount = static_cast<int>(viewItems_.size());
     return item >=0 && item < itemCount &&
            p.x() > viewItems_[item].x-expandIndicatorBoxWidth_ &&
            p.x() < viewItems_[item].x-2;
+}
+
+void StandardView::updateViewport(const QRect rect)
+{
+    if(rect.right() < viewport()->rect().right())
+        viewport()->update(rect.adjusted(0,0,viewport()->rect().right()-rect.right(),0));
+    else
+        viewport()->update(rect);
 }

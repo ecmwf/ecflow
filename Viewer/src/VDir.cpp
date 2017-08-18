@@ -92,7 +92,7 @@ void VDir::reload()
 std::string VDir::fullName(int row)
 {
 	std::string res;
-	if(row >=0 && row < items_.size())
+    if(row >=0 && row < static_cast<int>(items_.size()))
 	{
 		res=DirectoryHandler::concatenate(path_,items_.at(row)->name_);
 	}

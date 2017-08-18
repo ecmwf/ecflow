@@ -49,7 +49,7 @@ public:
 protected:
     NodeExpressionParser();
 
-    bool isUserLevel(const std::string &str) const;
+    bool isMenuMode(const std::string &str) const;
     bool isNodeHasAttribute(const std::string &str) const;
     bool isNodeFlag(const std::string &str) const;
     bool isWhatToSearchIn(const std::string &str, bool &isAttribute) const;
@@ -296,17 +296,17 @@ private:
 // User level condition
 // --------------------
 
-class UserLevelCondition : public BaseNodeCondition
+class NodeMenuModeCondition : public BaseNodeCondition
 {
 public:
-    explicit UserLevelCondition(QString userLevelName) : userLevelName_(userLevelName) {}
-    ~UserLevelCondition() {}
+    explicit NodeMenuModeCondition(QString menuModeName) : menuModeName_(menuModeName) {}
+    ~NodeMenuModeCondition() {}
 
     bool execute(VItem*);
-    std::string print() {return userLevelName_.toStdString();}
+    std::string print() {return menuModeName_.toStdString();}
 
 private:
-    QString userLevelName_;
+    QString menuModeName_;
 };
 
 // -----------------------------------------------------------------

@@ -271,8 +271,8 @@ bool Suite::operator==(const Suite& rhs) const
  	if ((clockAttr_.get() && !rhs.clockAttr_.get()) || (!clockAttr_.get() && rhs.clockAttr_.get()) ){
 #ifdef DEBUG
 		if (Ecf::debug_equality()) {
-			std::cout << "Suite::operator==  (clockAttr_ && !rhs.clockAttr_)  " << debugNodePath() << "\n";
-		}
+         std::cout << "Suite::operator==(clockAttr_.get() && !rhs.clockAttr_.get()) || (!clockAttr_.get() && rhs.clockAttr_.get() " << debugNodePath() << "\n";
+ 		}
 #endif
 		return false;
 	}
@@ -280,6 +280,7 @@ bool Suite::operator==(const Suite& rhs) const
 #ifdef DEBUG
 		if (Ecf::debug_equality()) {
 			std::cout << "Suite::operator== (clockAttr_ && rhs.clockAttr_ && !(*clockAttr_ == *rhs.clockAttr_)) " << debugNodePath() << "\n";
+			std::cout << "clockAttr_: " << clockAttr_->toString() << "  rhs.clockAttr_: " << rhs.clockAttr_->toString() << "\n";
 		}
 #endif
 		return false;

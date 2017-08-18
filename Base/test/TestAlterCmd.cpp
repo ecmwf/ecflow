@@ -873,9 +873,8 @@ BOOST_AUTO_TEST_CASE( test_alter_sort_attributes )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","label","recursive")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","limit","recursive")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","variable","recursive")));
-      Ecf::set_debug_equality(true);
+      DebugEquality debug_equality; // only as affect in DEBUG build
       BOOST_CHECK_MESSAGE(defs == sorted_defs,"Sort failed expected\n" << sorted_defs << "\nbut found\n" << defs);
-      Ecf::set_debug_equality(false);
     }
 }
 
@@ -900,9 +899,8 @@ BOOST_AUTO_TEST_CASE( test_alter_sort_attributes_for_task )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"label","recursive")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"limit","recursive")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"variable","recursive")));
-      Ecf::set_debug_equality(true);
+      DebugEquality debug_equality; // only as affect in DEBUG build
       BOOST_CHECK_MESSAGE(defs == sorted_defs,"Sort failed expected\n" << sorted_defs << "\nbut found\n" << defs);
-      Ecf::set_debug_equality(false);
     }
 }
 

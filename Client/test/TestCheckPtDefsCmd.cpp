@@ -152,6 +152,8 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
       return;
    }
 
+   DebugEquality debug_equality; // only as affect in DEBUG build
+
    MyDefsFixture theDefsFixture;
    defs_ptr defs_to_be_check_pointed = theDefsFixture.create_defs();
    BOOST_REQUIRE_MESSAGE(defs_to_be_check_pointed->suiteVec().size() >= 2,"expected at least 2 suites");
@@ -188,11 +190,9 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
    defs_to_be_check_pointed->set_server().set_state(SState::HALTED);
    defs_to_be_check_pointed->flag().set(ecf::Flag::MESSAGE);
 
-   Ecf::set_debug_equality(true);
    PrintStyle style(PrintStyle::STATE);
    BOOST_CHECK_MESSAGE( *theClient.defs() == *defs_to_be_check_pointed,
          "expected defs to be the same.\nServer defs:\n" << *theClient.defs() << "\nExpected defs:\n" << *defs_to_be_check_pointed);
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
@@ -253,6 +253,8 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
       return;
    }
 
+   DebugEquality debug_equality; // only as affect in DEBUG build
+
    // Start a new server.
    std::string port = SCPort::next();
    InvokeServer invokeServer("Client:: ...test_restore_from_check_pt_using_old_boost_format",
@@ -281,9 +283,7 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
    //PrintStyle style(PrintStyle::STATE);
    //cout << theDefsFixture.defsfile_ << "\n";
 
-   Ecf::set_debug_equality(true);
    BOOST_CHECK_MESSAGE( *theClient.defs() == theDefsFixture.defsfile_,"expected defs to be the same");
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

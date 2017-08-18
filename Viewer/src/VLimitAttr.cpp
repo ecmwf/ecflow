@@ -147,8 +147,8 @@ void VLimitAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     if(vnode->node_)
     {
         const std::vector<limit_ptr>& v=vnode->node_->limits();
-        int n=v.size();
-        for(size_t i=0; i < n; i++)
+        int n=static_cast<int>(v.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VLimitAttr(vnode,v[i],i));
         }

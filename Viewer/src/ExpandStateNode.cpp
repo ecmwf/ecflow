@@ -180,8 +180,9 @@ bool ExpandStateNode::adjustContents(const VNode* node)
     {
         same=true;
         for(std::size_t i=0; i < numNode; i++)
-        {
-            if(children_[i]->name_ != node->childAt(i)->strName())
+        {          
+            //items in children can be null pointers
+            if(!children_[i] || children_[i]->name_ != node->childAt(i)->strName())
             {
                 same=false;
                 break;

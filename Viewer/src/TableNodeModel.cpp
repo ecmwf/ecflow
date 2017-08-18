@@ -303,38 +303,6 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
     return QModelIndex();
 }
 
-QModelIndex TableNodeModel::forceShowNode(const VNode* node) const
-{
-#if 0
-    if(!node)
-        return QModelIndex();
-
-    Q_ASSERT(node);
-    Q_ASSERT(!node->isServer());
-    Q_ASSERT(node->server());
-
-    if(VModelServer *mserver=data_->server(node->server()))
-    {
-        VTableServer* server=mserver->tableServer();
-        server->setForceShowNode(node);
-        return nodeToIndex(node);
-    }
-#endif
-    return QModelIndex();
-}
-
-QModelIndex TableNodeModel::forceShowAttribute(const VAttribute* a) const
-{
-#if 0
-    Q_ASSERT(a);
-    VNode* node=a->parent();
-    Q_ASSERT(node);
-
-    return forceShowNode(const_cast<VNode*>(node));
-#endif
-    return QModelIndex();
-}
-
 void TableNodeModel::selectionChanged(QModelIndexList lst)
 {
 #if 0

@@ -16,8 +16,8 @@ QToolBar > QToolButton {
   	padding:  1px;
 }	
 
-/*QToolTip { color: black; background-color: rgb(192,218,255); border: 1px solid rgb(60,59,58);}*/
-QToolTip { color: rgb(247,247,247); background-color: rgb(59,64,69); border: 1px solid rgb(20,20,20);}
+/*QToolTip { color: black; background: rgb(192,218,255); border: 1px solid rgb(60,59,58);}*/
+QToolTip { color: rgb(247,247,247); background: rgb(59,64,69); border: 1px solid rgb(20,20,20);}
 
 /* ----------------------------
   Breadcrumbs 
@@ -239,7 +239,7 @@ QToolButton[triggertitle="1"] {
     border-radius: 0px;
     padding: 0px;
     icon-size:  18px;
-    background-colour: transparent;
+    background-color: transparent;
 }
 
 QToolButton[triggertitle="1"]:hover {
@@ -307,7 +307,7 @@ QToolButton[docktitle="1"] {
     border-radius: 0px;
     padding: 0px;
     icon-size:  18px;
-    background-colour: transparent;
+    background-color: transparent;
 }
 
 QToolButton[docktitle="1"]:checked {

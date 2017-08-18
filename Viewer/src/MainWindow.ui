@@ -60,16 +60,6 @@
     <addaction name="actionClose"/>
     <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="tearOffEnabled">
-     <bool>true</bool>
-    </property>
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="actionPreferences"/>
-    <addaction name="actionConfigureNodeMenu"/>
-   </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="tearOffEnabled">
      <bool>true</bool>
@@ -103,6 +93,9 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="actionSearch"/>
+    <addaction name="actionNotification"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuRefresh">
     <property name="title">
@@ -115,7 +108,6 @@
     <addaction name="actionResetSelected"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuRefresh"/>
    <addaction name="menuServer"/>
@@ -141,8 +133,6 @@
    </attribute>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
-   <addaction name="actionPreferences"/>
-   <addaction name="separator"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -312,7 +302,7 @@
   <action name="actionRefreshSelected">
    <property name="icon">
     <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/reload_black.svg</normaloff>:/viewer/reload_black.svg</iconset>
+     <normaloff>:/viewer/reload_green.svg</normaloff>:/viewer/reload_green.svg</iconset>
    </property>
    <property name="text">
     <string>R&amp;efresh selected server</string>
@@ -335,6 +325,18 @@
    </property>
    <property name="visible">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionNotification">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/notification.svg</normaloff>:/viewer/notification.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Notifications ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Notifications</string>
    </property>
   </action>
  </widget>

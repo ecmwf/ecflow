@@ -24,15 +24,14 @@
 //========================================================
 
 EditItemWidget::EditItemWidget(QWidget *parent) :
-   QWidget(parent),
-   preproc_(false),
-   alias_(false)
+   QWidget(parent)
 {
 	setupUi(this);
 
 	infoProvider_=new EditProvider(this);
 
-	Highlighter* ih=new Highlighter(textEdit_->document(),"script");
+    //The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(),"script");
 
 	searchLine_->setEditor(textEdit_);
 
@@ -131,12 +130,12 @@ void EditItemWidget::on_gotoLineTb__clicked()
 
 bool EditItemWidget::alias() const
 {
-	return aliasTb_->isChecked();
+    return aliasCb_->isChecked();
 }
 
 bool EditItemWidget::preproc() const
 {
-	return preprocTb_->isChecked();
+    return preprocTb_->isChecked();
 }
 
 //-----------------------------------------

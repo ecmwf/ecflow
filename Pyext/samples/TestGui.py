@@ -30,7 +30,7 @@ class Tester(object) :
         self.ci_ = ci
         self.port_ = self.ci_.get_port()
         self.ARGS_ = args
-            
+        
     def clean_up_server(self):
         self.log_msg("   clean_up server, clear log, remove check-pt, and white list file" )
         self.ci_.clear_log()    
@@ -65,14 +65,16 @@ class Tester(object) :
     def white_list_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.lists"
 
     def path_to_ecflow_client(self):
-        # to use the build, in preference, to release build
-        path_to_client = File.find_client()
+        if self.ARGS_.ecflow_client != "":
+            return self.ARGS_.ecflow_client
+        # to use the local build, in preference, to release version of ecflow
+        path_to_client = File.find_client() # version used by the ecflow module, may not exist anymore
         if os.path.exists(path_to_client):
             return path_to_client
         path_to_client = "/usr/local/apps/ecflow/" + self.ci_.version() + "/bin/ecflow_client"
         if os.path.exists(path_to_client):
             return path_to_client
-        return "ecflow_client" # fall back, just search on $PATH in the scripts
+        return "ecflow_client" # fall back, just search on $PATH *IN* the shell where the server was started
      
     def create_defs(self,name=""):
         defs = Defs()
@@ -1480,11 +1482,13 @@ if __name__ == "__main__":
               To debug this tests, just set sync_sleep = 0, this will also preserve the test data.
                  - Test data is created in directory: test_gui, this will deleted at the end of the test.
                  - Assumes includes head.h and tail.h are in CWD + /Pyext/test/data/includes
-                 - We will look for the ecflow_client in the embedded child commands in the generetd scripts, 
-                   first in the current cmake build tree, otherwise /usr/local/apps/ecflow, with same 
-                   version as this ecflow python api.
+                 - We will look for the ecflow_client in the embedded child commands in the generated scripts, 
+                   o first look in the current cmake build tree of the ecflow module(this may no longer exist)
+                   o Next will use /usr/local/apps/ecflow/ with same version as this ecflow python api *IF* it exists
+                   o Finally use 'ecflow_client' hence will expect to find it on $PATH, *ON* the server environment
+                   To override this use --ecflow_client=/path/to/your/ecflow_client
               Usage:
-                   TestGui.py --host <hostname> --port <portname> --time <sec> --sync_sleep <sec> 
+                   TestGui.py --host <hostname> --port <portname> --time <sec> --sync_sleep <sec> --ecflow_client <path>
             """    
     PARSER = argparse.ArgumentParser(description=DESC,  
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -1496,8 +1500,14 @@ if __name__ == "__main__":
                         help="How long to run the tests in seconds. default is 0, which is one test loop")
     PARSER.add_argument('--sync_sleep', type=int,default=4,   
                         help="Time to wait after sync_local. Allow GUI to refresh. Set to 0 for debug.")
+    PARSER.add_argument('--ecflow_client',default="",   
+                        help="Path to ecflow_client.")
     ARGS = PARSER.parse_args()
     print ARGS   
+    if ARGS.ecflow_client != "":
+        if not os.path.exists(ARGS.ecflow_client):
+            print("Could not find ecflow_client on path ",ARGS.ecflow_client)
+            exit(1)
      
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)
@@ -1510,7 +1520,6 @@ if __name__ == "__main__":
         count = 1
         start_time = time.time()
         while True:
-            tester = Tester(CL,ARGS)
             tester.test_gui()
             elapsed = int(time.time() - start_time)
             print "======================================================"

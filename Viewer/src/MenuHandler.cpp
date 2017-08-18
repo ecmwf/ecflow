@@ -28,10 +28,12 @@
 #include "Str.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
+#include "VProperty.hpp"
 #include "CustomCommandHandler.hpp"
 
 int MenuItem::idCnt_=0;
@@ -488,6 +490,19 @@ void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem *item)
 	}
 }
 
+QString MenuHandler::nodeMenuMode()
+{
+    static VProperty* p=0;
+    if(!p)
+    {
+        p=VConfig::instance()->find("menu.access.nodeMenuMode");
+        UI_ASSERT(p!=0,"");
+        if(!p)
+            return QString();
+    }
+    return p->value().toString();
+}
+
 
 // -----------------------------------------------------------------
 
@@ -695,7 +710,6 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 				int lighter=150;
 				QColor bg=bgBrush.color();
 				QColor bgLight=bg.lighter(lighter);
-				QColor border=bg.darker(125);
 
 				QLinearGradient grad;
 				grad.setCoordinateMode(QGradient::ObjectBoundingMode);

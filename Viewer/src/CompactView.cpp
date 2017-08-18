@@ -478,13 +478,13 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                 else if(model_->isNode(item->index))
                 {
                     //widestInSiblings has to be adjusted
-                    if(sameAsWidest || paintedSize.width()  > item->widestInSiblings)
+                    if(sameAsWidest || paintedSize.width()  > static_cast<int>(item->widestInSiblings))
                     {
                         adjustWidthInParent(i);
                         doDelayedWidthAdjustment();
                     }
                     //we just need to update the item
-                    else if( paintedSize.width() < item->widestInSiblings)
+                    else if( paintedSize.width() < static_cast<int>(item->widestInSiblings))
                     {
                         doDelayedWidthAdjustment();
                     }
@@ -591,7 +591,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             //Draw the vertical connector lines for all the levels
             //preceding the first level in the row!           
             painter->setPen(connectorColour_);
-            for(size_t j=0; j < firstLevel; j++)
+            for(int j=0; j < firstLevel; j++)
             {
                 int xp=indentVec[j];
                 if(xp != 0)    
@@ -758,7 +758,7 @@ int CompactView::rowHeight(int start,int forward, int &itemsInRow) const
     else
     {
         UI_ASSERT(start >= 0,"start=" << start << " total=" << viewItems_.size());
-        UI_ASSERT(start < viewItems_.size(),"start=" << start << " total=" << viewItems_.size());
+        UI_ASSERT(start < static_cast<int>(viewItems_.size()),"start=" << start << " total=" << viewItems_.size());
         rh=qMax(rh,viewItems_[start].height);
         itemsInRow++;
         for(int i=start-1; i >= 0; i--)
@@ -778,7 +778,7 @@ int CompactView::itemCountInRow(int start) const
 {
     const std::size_t itemsCount = viewItems_.size();
     int itemsInRow=0;
-    for(int i=start; i < itemsCount; i++)
+    for(std::size_t i=start; i < itemsCount; i++)
     {
         itemsInRow++;
         if(viewItems_[i].total == 0)
@@ -791,7 +791,7 @@ int CompactView::itemCountInRow(int start) const
 
 int CompactView::itemRow(int item) const
 {
-    if(item < 0 || item >= viewItems_.size())
+    if(item < 0 || item >= static_cast<int>(viewItems_.size()))
        return -1;
 
     int row=-1;
@@ -1032,4 +1032,9 @@ int CompactView::itemAtRowCoordinate(int start,int count,int logicalXPos) const
         }
     }
     return -1;
+}
+
+void CompactView::updateViewport(const QRect rect)
+{
+    viewport()->update(rect);
 }

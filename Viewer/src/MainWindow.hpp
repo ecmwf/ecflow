@@ -16,6 +16,7 @@
 #include "ui_MainWindow.h"
 
 #include "VInfo.hpp"
+#include "VProperty.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -28,6 +29,20 @@ class ServerRefreshInfoWidget;
 class ServerFilterMenu;
 class SessionItem;
 class VComboSettings;
+class PropertyMapper;
+
+class MainWindowTitleHandler : public VPropertyObserver
+{
+public:
+   MainWindowTitleHandler(QMainWindow*);
+   ~MainWindowTitleHandler();
+   void update();
+   void notifyChange(VProperty*);
+
+protected:
+   QMainWindow* win_;
+   PropertyMapper* prop_;
+};
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -56,12 +71,12 @@ protected Q_SLOTS:
 	void on_actionResetSelected_triggered();
 	void on_actionConfigureNodeMenu_triggered();
 	void on_actionManageServers_triggered();
-	void on_actionShowInInfoPanel_triggered();
 	void on_actionAddTreeWidget_triggered();
 	void on_actionAddTableWidget_triggered();
 	void on_actionAddInfoPanel_triggered();
 	void on_actionPreferences_triggered();
 	void on_actionSearch_triggered();
+    void on_actionNotification_triggered();
 	void on_actionAbout_triggered();
 	void on_actionSaveSessionAs_triggered();
 	void on_actionManageSessions_triggered();
@@ -83,7 +98,6 @@ private:
     bool selectInTreeView(VInfo_ptr info);
     void updateRefreshActions();
     void hideServerSyncNotify();
-    void constructWindowTitle();
     void cleanUpOnQuit();
 
     void writeSettings(VComboSettings*);
@@ -108,6 +122,7 @@ private:
     VInfo_ptr selection_;
     QToolButton* serverSyncNotifyTb_;
     ServerRefreshInfoWidget *serverComWidget_;
+    MainWindowTitleHandler* winTitle_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

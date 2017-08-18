@@ -306,7 +306,7 @@ void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettin
 		{
 			if((*it)->changed())
 			{
-				pt.put((*it)->path(),(*it)->valueAsString());
+                pt.put((*it)->path(),(*it)->valueAsStdString());
 			}
 		}
 
@@ -314,7 +314,7 @@ void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettin
 		{
 			if(!(*it)->useMaster())
 			{
-				pt.put((*it)->path(),(*it)->valueAsString());
+                pt.put((*it)->path(),(*it)->valueAsStdString());
 			}
 		}
 	}

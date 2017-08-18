@@ -213,8 +213,8 @@ bool ServerEditDialog::isFavourite() const
 
 ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *parent) :
 	QDialog(parent),
-	mode_(mode),
-	filter_(filter)
+    filter_(filter),
+    mode_(mode)
 {
 	setupUi(this);
 

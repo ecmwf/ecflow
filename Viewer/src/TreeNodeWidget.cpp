@@ -32,8 +32,8 @@ AttributeFilter* TreeNodeWidget::lastAtts_=NULL;
 
 TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
     NodeWidget("tree",serverFilter,parent),
-    layoutProp_(0),
-    viewLayoutMode_(StandardLayoutMode)
+    viewLayoutMode_(StandardLayoutMode),
+    layoutProp_(0)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -149,12 +149,6 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
     connect(model_,SIGNAL(rerender()),
         view_->realObject(),SLOT(slotRerender()));
 
-    connect(model_,SIGNAL(filterChangeBegun()),
-        view_->realObject(),SLOT(slotSaveExpand()));
-
-    connect(model_,SIGNAL(filterChangeEnded()),
-        view_->realObject(),SLOT(slotRestoreExpand()));
-
     connect(model_,SIGNAL(filterUpdateRemoveBegun(const VTreeNode*)),
         view_->realObject(),SLOT(slotSaveExpand(const VTreeNode*)));
 
@@ -167,7 +161,7 @@ void TreeNodeWidget::initAtts()
 {
 	if(VProperty *prop=VConfig::instance()->find("view.tree.attributesPolicy"))
 	{
-		if(prop->valueAsString() == "last")
+        if(prop->valueAsStdString() == "last")
 		{
 			atts_->setCurrent(lastAtts_->current());
 		}
@@ -210,7 +204,7 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 
     QAction* acState=new QAction(this);
     acState->setIcon(QPixmap(":viewer/status.svg"));
-    acState->setToolTip("Show statuses");
+    acState->setToolTip("Filter by status");
     acState->setMenu(menuState);
     acLst << acState;
 
