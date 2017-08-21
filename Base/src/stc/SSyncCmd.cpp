@@ -25,84 +25,8 @@ using namespace std;
 using namespace boost;
 
 // =====================================================================================================
-//#define DEBUG_SERVER_SYNC 1
-//#define DEBUG_CLIENT_SYNC 1
-
-// ===========================================================================================
-// CACHE: the deserialization costs, so that if multiple clients request the full defs
-//        we can improve the performance, by only performing that once for each state change.
-std::string FullServerDefsCache::full_server_defs_as_string_ = "";
-unsigned int FullServerDefsCache::state_change_no_ = 0;
-unsigned int FullServerDefsCache::modify_change_no_= 0;
-
-void FullServerDefsCache::update_cache_if_state_changed(defs_ptr defs)
-{
-   // See if there was a state change *OR* if cache is empty
-   if (state_change_no_ != Ecf::state_change_no() ||
-       modify_change_no_ != Ecf::modify_change_no() ||
-       full_server_defs_as_string_.empty()
-      )
-   {
-      try {
-#ifdef DEBUG_SERVER_SYNC
-         cout << ": *updating* cache";
-#endif
-         // Update cache
-         ecf::save_as_string(full_server_defs_as_string_,defs);
-      }
-      catch (const boost::archive::archive_exception& ae ) {
-         // Unable to decode data. Something went wrong, inform the caller.
-         ecf::LogToCout logToCout;
-         LOG(ecf::Log::ERR,"FullServerDefsCache::update_cache_if_state_changed boost::archive::archive_exception " << ae.what());
-         throw;
-      }
-
-      state_change_no_ = Ecf::state_change_no();
-      modify_change_no_ =  Ecf::modify_change_no();
-   }
-#ifdef DEBUG_SERVER_SYNC
-   else {
-      cout << ": *cache* up to date";
-   }
-#endif
-}
-
-defs_ptr FullServerDefsCache::restore_defs_from_string(const std::string& archive_data)
-{
-#ifdef DEBUG_CLIENT_SYNC
-   cout << ": FullServerDefsCache::restore_defs_from_string: archive_data.size(" << archive_data.size() << ")";
-#endif
-   defs_ptr defs;
-   try {
-
-      ecf::restore_from_string(archive_data,defs);
-
-   } catch (const boost::archive::archive_exception& ae ) {
-      // Unable to decode data.
-      ecf::LogToCout logToCout;
-      LOG(ecf::Log::ERR,"FullServerDefsCache::restore_defs_from_string: boost::archive::archive_exception " << ae.what());
-      throw;
-   } catch (std::exception& e) {
-      // Unable to decode data.
-      ecf::LogToCout logToCout;
-      LOG(ecf::Log::ERR,"FullServerDefsCache::restore_defs_from_string " << e.what());
-      throw;
-   }
-
-#ifdef DEBUG_CLIENT_SYNC
-   if (defs.get()) cout << ": valid defs";
-   else            cout << ": *empty* defs?";
-#endif
-   return defs;
-}
-
-defs_ptr FullServerDefsCache::restore_defs_from_string()
-{
-   // Used in Test when no client/server
-   return restore_defs_from_string(full_server_defs_as_string_);
-}
-
-// ===============================================================================================
+//#define DEBUG_SERVER_SYNC 1  # Also update DefsCache::DEBUG_SERVER_SYNC
+//#define DEBUG_CLIENT_SYNC 1  # Also update DefsCache::DEBUG_CLIENT_SYNC
 
 SSyncCmd::SSyncCmd(
          unsigned int client_handle,
@@ -259,10 +183,10 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as)
       as->defs()->set_state_change_no( Ecf::state_change_no() );
       as->defs()->set_modify_change_no( Ecf::modify_change_no() );
 
-      FullServerDefsCache::update_cache_if_state_changed(as->defs());
+      DefsCache::update_cache_if_state_changed(as->defs());
       full_defs_ = true;
 #ifdef DEBUG_SERVER_SYNC
-      cout << ": *no handle* returning FULL defs(*cached* string, size(" << FullServerDefsCache::full_server_defs_as_string_.size() << "))" << endl;
+      cout << ": *no handle* returning FULL defs(*cached* string, size(" << DefsCache::full_server_defs_as_string_.size() << "))" << endl;
 #endif
       return;
    }
@@ -290,10 +214,10 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as)
    // **** This means that server_defs_ will fail invarint_checking before serialisation
    defs_ptr the_server_defs = as->defs()->client_suite_mgr().create_defs( client_handle, as->defs() );
    if ( the_server_defs.get() == as->defs().get()) {
-      FullServerDefsCache::update_cache_if_state_changed(as->defs());
+      DefsCache::update_cache_if_state_changed(as->defs());
       full_defs_ = true;
 #ifdef DEBUG_SERVER_SYNC
-      cout << ": The handle has *ALL* the suites: return the FULL defs(*cached* string, size(" << FullServerDefsCache::full_server_defs_as_string_.size() << "))";
+      cout << ": The handle has *ALL* the suites: return the FULL defs(*cached* string, size(" << DefsCache::full_server_defs_as_string_.size() << "))";
 #endif
    }
    else {
@@ -352,13 +276,13 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
 #ifdef DEBUG_CLIENT_SYNC
        cout << "SSyncCmd::do_sync: TEST PATH: *FULL CACHE sync* : using static cache";
 #endif
-         server_reply.client_defs_ = FullServerDefsCache::restore_defs_from_string();
+         server_reply.client_defs_ = DefsCache::restore_defs_from_string();
       }
       else {
 #ifdef DEBUG_CLIENT_SYNC
        cout << "SSyncCmd::do_sync: *FULL CACHE sync* : using cache returned from server: cache_size(" << full_server_defs_as_string_.size() << ")";
 #endif
-         server_reply.client_defs_ = FullServerDefsCache::restore_defs_from_string(full_server_defs_as_string_);
+         server_reply.client_defs_ = DefsCache::restore_defs_from_string(full_server_defs_as_string_);
       }
       server_reply.set_sync( true );
       server_reply.set_full_sync( true );

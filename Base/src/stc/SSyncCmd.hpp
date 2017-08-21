@@ -18,53 +18,7 @@
 
 #include "ServerToClientCmd.hpp"
 #include "DefsDelta.hpp"
-
-//================================================================================
-// Cache the de-serialisation cost, in the *SERVER* when returning the FULL definition
-// When there are no state changes, we can just return the cache string for other clients
-// Thereby saving time in the server and client for de-serialisation.
-// Here we are trading memory for speed:
-//
-//  Current for each client request we have:
-//      client1:  --------------> get---------------> Server
-//                serialise---------<----de-serialize
-//
-//      client2:  --------------> get---------------> Server
-//                serialise---------<----de-serialize
-//
-//      client3:  --------------> get---------------> Server
-//                serialise---------<----de-serialize
-//
-// By caching the de-serialisation process, we can speed up the downloads.
-// However whenever there is a state change we need to update the cache
-//
-//      client1:  --------------> get---------------> Server
-//                serialise------<----de-serialisation
-//
-//      client2:  --------------> get---------------> Server
-//                serialise---------<----return cache
-//
-//      client3:  --------------> get---------------> Server
-//                serialise---------<----return cache
-//================================================================================
-class FullServerDefsCache : private boost::noncopyable {
-public:
-   // Server side
-   static void update_cache_if_state_changed(defs_ptr defs);
-
-   // Client side
-   static defs_ptr restore_defs_from_string(const std::string&);
-   static defs_ptr restore_defs_from_string(); // used in test
-
-private:
-   friend class SSyncCmd;
-
-   FullServerDefsCache();
-   ~FullServerDefsCache();
-   static std::string full_server_defs_as_string_;
-   static unsigned int state_change_no_;        // detect state change in defs across clients
-   static unsigned int modify_change_no_;       // detect state change in defs across clients
-};
+#include "DefsCache.hpp"
 
 //================================================================================
 // class SSyncCmd: Used to transfer changes made in the server to the client
@@ -78,7 +32,7 @@ private:
 // The *client_state_change_no* was passed from the client to the server
 // The *client_modify_change_no* was passed from the client to the server
 //
-// This class make use of FullServerDefsCache as a performance optimisation.
+// This class make use of DefsCache as a performance optimisation.
 //================================================================================
 class SSyncCmd : public ServerToClientCmd {
 public:
@@ -145,7 +99,7 @@ private:
       if (Archive::is_saving::value) {
          // Avoid copying the string. As this could be very large  > 60MB
          if (full_defs_) {
-            ar & FullServerDefsCache::full_server_defs_as_string_;
+            ar & DefsCache::full_server_defs_as_string_;
          }
          else ar & full_server_defs_as_string_;
       }
