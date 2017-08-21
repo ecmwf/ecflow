@@ -146,8 +146,6 @@ void time_load_and_downloads(
             cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : sync_local() with *different* clients. Uses Cache" << endl;
          }
          {
-            // This should more expensive on second call, due to destruction of
-            // defs(on theClient) from previous calls
             cout << " Download(FULL):      "; cout.flush();
             double total = 0;
             for(int i = 0; i < count; i++) {
@@ -157,7 +155,22 @@ void time_load_and_downloads(
                cout << seconds << " ";
                total += seconds;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from same client" << endl;
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from same client, cached!" << endl;
+         }
+         {
+            // This should more expensive on second call, due to destruction of
+            // defs(on theClient) from previous calls
+            cout << " Download(FULL):      "; cout.flush();
+            double total = 0;
+            for(int i = 0; i < count; i++) {
+               ClientInvoker client(host,port);
+               DurationTimer duration_timer;
+               theClient.getDefs();
+               int seconds = duration_timer.elapsed().total_milliseconds();
+               cout << seconds << " ";
+               total += seconds;
+            }
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from different client, cached!" << endl;
          }
          {
             std::vector<task_ptr> all_tasks;

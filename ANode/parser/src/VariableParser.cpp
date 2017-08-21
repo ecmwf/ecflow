@@ -84,9 +84,11 @@ bool VariableParser::doParse(
    // i.e
    //  0     1         2
    // edit var_name "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  #fred
+   // edit var_name "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # server  // server variables on Defs
    std::string value; value.reserve(line.size()-4);
+   size_t comment_pos = 0;
    for (size_t i = 2; i < line_tokens_size; ++i) {
-      if ( lineTokens[i].at( 0 ) == '#' ) break;
+      if ( lineTokens[i].at( 0 ) == '#' ) { comment_pos = i; break; }
       if ( i != 2 ) value += " ";
       value += lineTokens[i];
    }
@@ -97,7 +99,14 @@ bool VariableParser::doParse(
       if (node->isAlias()) node->addVariable( Variable( lineTokens[1], value, false )); // bypass name checking
       else                 node->addVariable( Variable( lineTokens[1], value )) ;
    }
-   else defsfile()->set_server().add_or_update_user_variables(lineTokens[1], value);
+   else {
+      bool server_variable = false;
+      if ( comment_pos != 0 && comment_pos + 1 < line_tokens_size) {
+         if ( lineTokens[comment_pos+1] == "server") server_variable = true;
+      }
+      if (server_variable) defsfile()->set_server().add_or_update_server_variable(lineTokens[1], value);
+      else                 defsfile()->set_server().add_or_update_user_variables(lineTokens[1], value);
+   }
 
    return true;
 }

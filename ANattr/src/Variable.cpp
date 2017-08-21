@@ -60,6 +60,15 @@ std::ostream& Variable::print( std::ostream& os ) const {
    return Indentor::indent( os ) << toString() << "\n";
 }
 
+std::ostream& Variable::print_server_variable( std::ostream& os ) const {
+   // see notes in VariableParser.h
+   //               Hence we do the following:
+   //                  a/ On parsing always remove quotes ie single or double
+   //                  b/ On serialising always add single quotes
+   Indentor in;
+   return Indentor::indent( os ) << toString() << " # server\n";
+}
+
 std::ostream& Variable::print_generated( std::ostream& os ) const {
    Indentor in;
    return Indentor::indent( os ) << "# " << toString() << "\n";
