@@ -34,12 +34,12 @@ DefsCmd::DefsCmd(AbstractServer* as,bool save_edit_history)
 
 void DefsCmd::init(AbstractServer* as,bool save_edit_history)
 {
-   defs_ = as->defs();
    /// Return the current value of the state change no. So the that
    /// the next call to get the SSYncCmd , we need only return what's changed
-   defs_->set_state_change_no( Ecf::state_change_no() );
-   defs_->set_modify_change_no( Ecf::modify_change_no() );
-   defs_->save_edit_history(save_edit_history);
+   as->defs()->set_state_change_no( Ecf::state_change_no() );
+   as->defs()->set_modify_change_no( Ecf::modify_change_no() );
+   as->defs()->save_edit_history(save_edit_history);
+   DefsCache::update_cache_if_state_changed(as->defs());
 }
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const
@@ -47,11 +47,7 @@ bool DefsCmd::equals(ServerToClientCmd* rhs) const
 	DefsCmd* the_rhs = dynamic_cast<DefsCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (!ServerToClientCmd::equals(rhs)) return false;
-
-	if (defs_ == NULL && the_rhs->defs() == NULL) return true;
-	if (defs_ == NULL && the_rhs->defs() != NULL) return false;
-	if (defs_ != NULL && the_rhs->defs() == NULL) return false;
-	return (*defs_ == *(the_rhs->defs()));
+	return (full_server_defs_as_string_  == the_rhs->full_server_defs_as_string_);
 }
 
 std::ostream& DefsCmd::print(std::ostream& os) const
@@ -69,11 +65,7 @@ bool DefsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd
 	// ** Keep existing defs in memory, until a new one is requested. This allows clients
 	// ** to continue using this defs, in between other api calls, until a new defs is requested.
 
-	if ( !defs_.get() ) {
-		std::stringstream ss;
-		ss << "DefsCmd::handle_server_response: Error Node tree could not be retrieved from server. Request "; cts_cmd->print(ss); ss << " failed.\n";
-		throw std::runtime_error(ss.str());
- 	}
+   defs_ptr defs = DefsCache::restore_defs_from_string(full_server_defs_as_string_);
 
 	if (server_reply.cli() && !cts_cmd->group_cmd()) {
 		/// This Could be part of a group command, hence ONLY show defs if NOT group command
@@ -83,14 +75,14 @@ bool DefsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd
 	      /// Auto generate externs, before writing to standard out. This can be expensive since
 	      /// All the trigger references need to to be resolved. & AST need to be created first
 	      /// The old spirit based parsing, horrendously, slow. Can't use Spirit QI, till IBM pull support it
-	      defs_->auto_add_externs();
+	      defs->auto_add_externs();
 	   }
-		std::cout << *defs_;
+		std::cout << *defs;
 	}
 	else {
 		server_reply.set_sync( true );         // always in sync when getting the full defs
 		server_reply.set_full_sync( true );    // Done a full sync, as opposed to incremental
-		server_reply.set_client_defs( defs_ );
+		server_reply.set_client_defs( defs );
 	}
 	return true;
 }

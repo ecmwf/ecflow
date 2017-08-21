@@ -136,5 +136,7 @@ BOOST_AUTO_TEST_CASE( test_parsing_for_good_defs_state )
    // All the defs in this directory are expected to pass
    test_defs(path, true);
 }
+
+
 BOOST_AUTO_TEST_SUITE_END()
 

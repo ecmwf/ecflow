@@ -56,6 +56,7 @@ public:
 
 private:
    friend class SSyncCmd;
+   friend class DefsCmd;
 
    DefsCache();
    ~DefsCache();

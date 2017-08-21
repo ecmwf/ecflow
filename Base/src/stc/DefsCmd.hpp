@@ -16,6 +16,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "ServerToClientCmd.hpp"
+#include "DefsCache.hpp"
 class AbstractServer;
 
 //================================================================================
@@ -29,22 +30,27 @@ public:
 
 	void init(AbstractServer* as, bool save_edit_history);
 
-   defs_ptr defs() const { return defs_; }
-
-  	virtual bool hasDefs() const { return defs_.get() != NULL; }
+  	virtual bool hasDefs() const { return true; }
   	virtual bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const;
   	virtual std::ostream& print(std::ostream& os) const;
 	virtual bool equals(ServerToClientCmd*) const;
 
 private:
 
- 	defs_ptr defs_;
+ 	std::string full_server_defs_as_string_;
 
 	friend class boost::serialization::access;
 	template<class Archive>
 	void serialize( Archive & ar, const unsigned int /*version*/ ) {
  		ar & boost::serialization::base_object< ServerToClientCmd >( *this );
- 		ar & defs_;
+
+      if (Archive::is_saving::value) {
+         // Avoid copying the string. As this could be very large  > 60MB
+         ar & DefsCache::full_server_defs_as_string_;
+      }
+      else {
+         ar & full_server_defs_as_string_;
+      }
   	}
 };
 

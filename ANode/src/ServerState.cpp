@@ -155,10 +155,10 @@ void ServerState::add_or_update_server_variables( const NameValueVec& env)
    NameValueVec::const_iterator i;
    NameValueVec::const_iterator theEnd = env.end();
    for(i = env.begin(); i!=theEnd; ++i) {
-      add_or_update_server_variables((*i).first, (*i).second);
+      add_or_update_server_variable((*i).first, (*i).second);
    }
 }
-void ServerState::add_or_update_server_variables( const std::string& name, const std::string& value)
+void ServerState::add_or_update_server_variable( const std::string& name, const std::string& value)
 {
    std::vector<Variable>::iterator var_end = server_variables_.end();
    for(std::vector<Variable>::iterator i = server_variables_.begin(); i!=var_end; ++i) {

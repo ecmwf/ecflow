@@ -50,13 +50,12 @@ void DefsCache::update_cache_if_state_changed(defs_ptr defs)
 #ifdef DEBUG_SERVER_SYNC
          cout << ": *updating* cache";
 #endif
-         // Update cache
-         ecf::save_as_string(full_server_defs_as_string_,defs);
+         defs->save_as_string(full_server_defs_as_string_,PrintStyle::MIGRATE); // update cache
       }
-      catch (const boost::archive::archive_exception& ae ) {
+      catch ( std::exception& ae ) {
          // Unable to decode data. Something went wrong, inform the caller.
          ecf::LogToCout logToCout;
-         LOG(ecf::Log::ERR,"DefsCache::update_cache_if_state_changed boost::archive::archive_exception " << ae.what());
+         LOG(ecf::Log::ERR,"DefsCache::update_cache_if_state_changed exception " << ae.what());
          throw;
       }
 
@@ -75,18 +74,13 @@ defs_ptr DefsCache::restore_defs_from_string(const std::string& archive_data)
 #ifdef DEBUG_CLIENT_SYNC
    cout << ": DefsCache::restore_defs_from_string: archive_data.size(" << archive_data.size() << ")";
 #endif
-   defs_ptr defs;
+
+   defs_ptr defs = Defs::create();
    try {
-
-      ecf::restore_from_string(archive_data,defs);
-
-   } catch (const boost::archive::archive_exception& ae ) {
-      // Unable to decode data.
-      ecf::LogToCout logToCout;
-      LOG(ecf::Log::ERR,"DefsCache::restore_defs_from_string: boost::archive::archive_exception " << ae.what());
-      throw;
-   } catch (std::exception& e) {
-      // Unable to decode data.
+      // cout << "archive_data:\n" << archive_data << "\n";
+      defs->restore_from_string(archive_data);
+   }
+   catch (std::exception& e) {
       ecf::LogToCout logToCout;
       LOG(ecf::Log::ERR,"DefsCache::restore_defs_from_string " << e.what());
       throw;

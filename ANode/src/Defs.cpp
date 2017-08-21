@@ -630,11 +630,15 @@ std::string Defs::write_state() const
    if (server().get_state() != ServerState::default_state()) os << " server_state:" << SState::to_string(server().get_state());
    os << "\n";
 
-   // This read by the DefsStateParser
-   const std::vector<Variable>& theServerEnv = server().user_variables();
-   for(size_t i = 0; i < theServerEnv.size(); ++i) {
-      theServerEnv[i].print(os);
-   }
+   // This read by the DefsParser
+   const std::vector<Variable>& server_user_variables = server().user_variables();
+   size_t the_size = server_user_variables.size();
+   for(size_t i = 0; i < the_size; ++i)  server_user_variables[i].print(os);
+
+   const std::vector<Variable>& server_variables = server().server_variables();
+   the_size = server_variables.size();
+   for(size_t i = 0; i < the_size; ++i)  server_variables[i].print_server_variable(os); // edit var value # server
+
 
    // READ by Defs::read_history()
    // We need to define a separator for the message, will to allow it to be re-read
@@ -645,7 +649,7 @@ std::string Defs::write_state() const
    // [] Used in time
    // integers used in the time.
    // -  Used in commands
-   if (PrintStyle::getStyle() == PrintStyle::MIGRATE || save_edit_history_) {
+   if (save_edit_history_) {
 	   Indentor in;
 	   std::map<std::string, std::deque<std::string> >::const_iterator i;
 	   for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {

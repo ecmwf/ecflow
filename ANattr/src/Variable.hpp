@@ -38,6 +38,7 @@ public:
 
    const std::string& name() const   { return  name_;}
    std::ostream& print(std::ostream&) const;
+   std::ostream& print_server_variable(std::ostream&) const;
    std::ostream& print_generated(std::ostream&) const;
    bool empty() const { return name_.empty(); }
 
