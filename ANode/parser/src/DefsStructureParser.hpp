@@ -80,7 +80,8 @@ private:
 
    std::stack< std::pair<Node*,const Parser*> > nodeStack_;  // stack of nodes used in parsing
    std::vector<std::string> multi_statements_per_line_vec_;
-   std::string faults_; // In MIGRATE mode we ignore unrecognised tokens, store here for later reporting
+   std::string faults_;       // In MIGRATE mode we ignore unrecognised tokens, store here for later reporting
+   std::string error_;
    std::map<Node*,bool> defStatusMap_;                       // check for duplicates
    friend class Parser;
 

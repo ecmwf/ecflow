@@ -37,16 +37,29 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile,const std::string& file_
   lineNumber_(0),
   file_type_(PrintStyle::DEFS),
   defs_as_string_(Str::EMPTY())
-{}
+{
+   if ( !infile_.ok() ) {
+      std::stringstream ss;
+      ss << "DefsStructureParser::DefsStructureParser: Unable to open file! " << infile_.file_name() << "\n\n";
+      ss << Version::description() << "\n";
+      error_ = ss.str();
+   }
+}
 
 DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str, bool)
-:  infile_(""),
+: infile_(""),
   defsfile_(defsfile),
   defsParser_(this),
   lineNumber_(0),
   file_type_(PrintStyle::DEFS),
   defs_as_string_(str)
 {
+   if ( defs_as_string_.empty() ) {
+      std::stringstream ss;
+      ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";
+      ss << Version::description() << "\n";
+      error_ = ss.str();
+   }
 }
 
 DefsStructureParser::~DefsStructureParser()
@@ -58,6 +71,11 @@ DefsStructureParser::~DefsStructureParser()
 
 bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
 {
+   if (!error_.empty()) {
+      errorMsg = error_;
+      return false;
+   }
+
    if (defs_as_string_.empty()) {
       if (!do_parse_file(errorMsg)) {
          return false;
@@ -78,27 +96,12 @@ bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
 	return defsfile_->check(errorMsg,warningMsg);
 }
 
-//#define DO_STATS  1
 bool DefsStructureParser::do_parse_file(std::string& errorMsg)
 {
-   if ( !infile_.ok() ) {
-      std::stringstream ss;
-      ss << "Unable to open file! " << infile_.file_name() << "\n\n";
-      ss << Version::description() << "\n";
-      errorMsg = ss.str();
-      return false;
-   }
-
-   std::vector< std::string > lineTokens; lineTokens.reserve(30); // derived from 3199.def & DO_STATS
-   string line;                           line.reserve(350);      // derived from 3199.def & DO_STATS
+   std::vector< std::string > lineTokens; lineTokens.reserve(30); // derived from 3199.def
+   string line;                           line.reserve(350);      // derived from 3199.def
    while ( infile_.good() ) {
-
       getNextLine( line ); // will increment lineNumer_
-
-      lineTokens.clear();  // This is re-used, hence clear up front
-      Str::split(line, lineTokens);
-      if (lineTokens.empty()) continue;  // ignore empty lines
-
       if (!do_parse_line(line,lineTokens, errorMsg)) {
          return false;
       }
@@ -108,24 +111,10 @@ bool DefsStructureParser::do_parse_file(std::string& errorMsg)
 
 bool DefsStructureParser::do_parse_string(std::string& errorMsg)
 {
-   if ( defs_as_string_.empty() ) {
-      std::stringstream ss;
-      ss << "DefsStructureParser::do_parse_string:  Unable to parse empty string\n\n";
-      ss << Version::description() << "\n";
-      errorMsg = ss.str();
-      return false;
-   }
-
-   std::vector< std::string > lineTokens; lineTokens.reserve(30); // derived from 3199.def & DO_STATS
-   string line;                           line.reserve(350);      // derived from 3199.def & DO_STATS
+   std::vector< std::string > lineTokens; lineTokens.reserve(30); // derived from 3199.def
+   string line;                           line.reserve(350);      // derived from 3199.def
    while ( defs_as_string_.good() ) {
-
       getNextLine( line ); // will increment lineNumer_
-
-      lineTokens.clear();  // This is re-used, hence clear up front
-      Str::split(line, lineTokens);
-      if (lineTokens.empty()) continue;  // ignore empty lines
-
       if (!do_parse_line(line,lineTokens, errorMsg)) {
          return false;
       }
@@ -135,6 +124,10 @@ bool DefsStructureParser::do_parse_string(std::string& errorMsg)
 
 bool DefsStructureParser::do_parse_line(const std::string& line,std::vector<std::string>& lineTokens,std::string& errorMsg)
 {
+   lineTokens.clear();                   // This is re-used, hence clear up front
+   Str::split(line, lineTokens);
+   if (lineTokens.empty()) return true;  // ignore empty lines
+
    // Process each line, according to the parser which is on *top* of the stack
    // If the *top* of the stack is empty use the DefsParser
    Parser* theCurrentParser  = (nodeStack_.empty()) ? &defsParser_ : const_cast<Parser*>(nodeStack_.top().second) ;
@@ -174,7 +167,6 @@ void DefsStructureParser::getNextLine(std::string& line)
 	   if (file_type_ == PrintStyle::MIGRATE) {
 	      return; // ignore multiline for migrate, *BECAUSE* *history* for group command uses ';'
 	   }
-
 
 		if (!line.empty()) {
 
@@ -271,4 +263,3 @@ void DefsString::getline(std::string& line)
    line = lines_[index_];
    index_++;
 }
-
