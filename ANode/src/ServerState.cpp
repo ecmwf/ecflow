@@ -37,7 +37,17 @@ ServerState::ServerState() :
  	jobSubmissionInterval_( 60 ),
  	jobGeneration_( true )
 {
-	setup_default_env();
+	setup_default_env(Str::DEFAULT_PORT_NUMBER());
+}
+
+ServerState::ServerState(const std::string& port)  :
+    state_change_no_(0),
+    variable_state_change_no_(0),
+    server_state_( default_state() ),
+    jobSubmissionInterval_( 60 ),
+    jobGeneration_( true )
+{
+   setup_default_env(port);
 }
 
 ServerState::ServerState(const ServerState& rhs)
@@ -82,7 +92,7 @@ bool ServerState::operator==(const ServerState& rhs) const
    /// Check pointing and PrintStyle::MIGRATE, SAVES server variables, since they are visualised by client like ecflow_ui
    /// However the server does NOT load the server variable in the DEFS. Otherwise uses can change ECF_PID.
 
-   if ( server_variables_ != rhs.server_variables_) {
+   if ( !DebugEquality::ignore_server_variables() && server_variables_ != rhs.server_variables_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
          std::cout << "ServerState::compare server_variables_ != rhs.server_variables_ \n";
@@ -460,13 +470,13 @@ void ServerState::set_state(SState::State s) {
 }
 
 
-void ServerState::setup_default_env()
+void ServerState::setup_default_env(const std::string& port)
 {
 	// This environment is required for testing in the absence of the server.
 	// When the defs file is begun in the server this environment get *overridden*
-	hostPort_ = std::make_pair(Str::LOCALHOST(),Str::DEFAULT_PORT_NUMBER());
+	hostPort_ = std::make_pair(Str::LOCALHOST(),port);
 
-	setup_default_server_variables(server_variables_,Str::DEFAULT_PORT_NUMBER());
+	setup_default_server_variables(server_variables_,port);
 }
 
 void ServerState::setup_default_server_variables(std::vector<Variable>&  server_variables, const std::string& port)
