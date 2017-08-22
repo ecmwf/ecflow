@@ -43,14 +43,7 @@ private:
 	template<class Archive>
 	void serialize( Archive & ar, const unsigned int /*version*/ ) {
  		ar & boost::serialization::base_object< ServerToClientCmd >( *this );
-
-      if (Archive::is_saving::value) {
-         // Avoid copying the string. As this could be very large  > 60MB
-         ar & DefsCache::full_server_defs_as_string_;
-      }
-      else {
-         ar & full_server_defs_as_string_;
-      }
+      ar & full_server_defs_as_string_;
   	}
 };
 

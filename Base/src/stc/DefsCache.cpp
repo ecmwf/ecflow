@@ -69,6 +69,14 @@ void DefsCache::update_cache_if_state_changed(defs_ptr defs)
 #endif
 }
 
+void DefsCache::update_cache(const std::string& defs_as_string)
+{
+   full_server_defs_as_string_ = defs_as_string;
+   state_change_no_ = Ecf::state_change_no();
+   modify_change_no_ =  Ecf::modify_change_no();
+}
+
+
 defs_ptr DefsCache::restore_defs_from_string(const std::string& archive_data)
 {
 #ifdef DEBUG_CLIENT_SYNC

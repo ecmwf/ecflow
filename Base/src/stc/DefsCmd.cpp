@@ -39,7 +39,12 @@ void DefsCmd::init(AbstractServer* as,bool save_edit_history)
    as->defs()->set_state_change_no( Ecf::state_change_no() );
    as->defs()->set_modify_change_no( Ecf::modify_change_no() );
    as->defs()->save_edit_history(save_edit_history);
-   DefsCache::update_cache_if_state_changed(as->defs());
+
+   // The CACHE is only updated if state/modify numbers change, hence does not take into account suite CLOCK
+   // However DefsCmd should always return the most up to date server contents.
+   as->defs()->save_as_string(full_server_defs_as_string_,PrintStyle::MIGRATE);
+
+   DefsCache::update_cache( full_server_defs_as_string_ ); // update cache
 }
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const
@@ -47,6 +52,7 @@ bool DefsCmd::equals(ServerToClientCmd* rhs) const
 	DefsCmd* the_rhs = dynamic_cast<DefsCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (!ServerToClientCmd::equals(rhs)) return false;
+	if (full_server_defs_as_string_ != the_rhs->full_server_defs_as_string_ ) return false;
 	return true;
 }
 
