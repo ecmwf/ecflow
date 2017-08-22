@@ -86,11 +86,12 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
    ServerReply server_reply;
    server_reply.set_client_defs( create_client_defs(Defs::create()) );
 
-   DebugEquality debug_equality; // only as affect in DEBUG build
+   Ecf::set_debug_equality(true); // only has affect in DEBUG build
    BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(),
                         test_name << ": Starting point client and server defs should be the same : "
                         << "SERVER\n" << server_defs
                         << "CLIENT\n" << server_reply.client_defs());
+   Ecf::set_debug_equality(false); // only has affect in DEBUG build
 
    // set handle and change numbers, before any changes
    Ecf::set_state_change_no(0);
@@ -144,6 +145,7 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
       BOOST_CHECK_MESSAGE( server_reply.full_sync() == full_sync,test_name << ": Expected sync not as expected. client: " << server_reply.full_sync() << " full_sync: " << full_sync);
       BOOST_CHECK_MESSAGE( server_defs->state() == server_reply.client_defs()->state(),test_name << ": Expected server State(" << NState::toString(server_defs->state()) << ") to be same as client state(" << NState::toString(server_reply.client_defs()->state()) << ")");
       if (full_sync) {
+         Ecf::set_debug_equality(true); // only has affect in DEBUG build
          BOOST_CHECK_MESSAGE( server_defs->server().compare(server_reply.client_defs()->server()),test_name << ": Server state does not match");
       }
 

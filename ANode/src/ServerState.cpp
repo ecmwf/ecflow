@@ -82,6 +82,23 @@ bool ServerState::operator==(const ServerState& rhs) const
    /// Check pointing and PrintStyle::MIGRATE, SAVES server variables, since they are visualised by client like ecflow_ui
    /// However the server does NOT load the server variable in the DEFS. Otherwise uses can change ECF_PID.
 
+//   if ( server_variables_ != rhs.server_variables_) {
+//#ifdef DEBUG
+//      if (Ecf::debug_equality()) {
+//         std::cout << "ServerState::compare server_variables_ != rhs.server_variables_ \n";
+//         std::cout << "server_variables_:\n";
+//         for(std::vector<Variable>::const_iterator i = server_variables_.begin(); i!=server_variables_.end(); ++i) {
+//            std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
+//         }
+//         std::cout << "rhs.server_variables_:\n";
+//         for(std::vector<Variable>::const_iterator i = rhs.server_variables_.begin(); i!=rhs.server_variables_.end(); ++i) {
+//            std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
+//         }
+//      }
+//#endif
+//      return false;
+//   }
+
    return true;
 }
 

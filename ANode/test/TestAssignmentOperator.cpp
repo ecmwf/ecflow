@@ -26,15 +26,18 @@ BOOST_AUTO_TEST_CASE( test_defs_assignment_operator )
 {
    cout << "ANode:: ...test_defs_assignment_operator\n";
    MyDefsFixture theDefsFixture;
-   DebugEquality debug_equality; // only as affect in DEBUG build
 
    Defs defs;
    defs = theDefsFixture.defsfile_;
+   Ecf::set_debug_equality(true); // only has affect in DEBUG build
    BOOST_CHECK_MESSAGE( defs == theDefsFixture.defsfile_,"assignment failed");
+   Ecf::set_debug_equality(false); // only has affect in DEBUG build
 
    Defs empty;
    defs = empty;
+   Ecf::set_debug_equality(true); // only has affect in DEBUG build
    BOOST_CHECK_MESSAGE( defs == empty,"assignment failed");
+   Ecf::set_debug_equality(false); // only has affect in DEBUG build
 
    BOOST_CHECK_MESSAGE( !(defs == theDefsFixture.defsfile_),"assignment failure EXPECTED");
 
