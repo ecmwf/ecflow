@@ -67,7 +67,7 @@ static defs_ptr create_server_defs()
    // Create server defs, with a port other than default.
    // This allows additional testing. i.e server variables
    std::vector<Variable>  server_variables;
-   ServerState::setup_default_server_variables(server_variables,"4000");
+   ServerState::setup_default_server_variables(server_variables,"3141");
    defs->set_server().set_server_variables(server_variables);
 
    // ensure client/server start out the same

@@ -94,5 +94,9 @@ class DebugEquality : private boost::noncopyable {
 public:
    DebugEquality() { Ecf::set_debug_equality(true); }
    ~DebugEquality(){ Ecf::set_debug_equality(false);}
+   static bool ignore_server_variables() { return ignore_server_variables_;}
+   static void set_ignore_server_variables(bool flg) { ignore_server_variables_ = flg;}
+private:
+   static bool ignore_server_variables_;
 };
 #endif

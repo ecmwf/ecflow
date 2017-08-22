@@ -864,6 +864,7 @@ BOOST_AUTO_TEST_CASE( test_alter_sort_attributes )
    suite_ptr ss = sorted_defs.add_suite("suite"); add_sorted_attributes(ss.get());
    family_ptr sf1 = ss->add_family("f1");         add_sorted_attributes(sf1.get());
    task_ptr st1 = sf1->add_task("t1");            add_sorted_attributes(st1.get());
+   sorted_defs.sort_attributes(ecf::Attr::VARIABLE,false/*recursive*/); // just sort the server variables
 
    {
       TestDefsStateChanged chenged(&defs);
