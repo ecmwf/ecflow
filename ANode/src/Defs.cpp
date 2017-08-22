@@ -58,6 +58,17 @@ Defs::Defs() :
    client_suite_mgr_(this),
    in_notification_(false) {}
 
+Defs::Defs(const std::string& port) :
+   state_change_no_(0),
+   modify_change_no_( 0 ),
+   updateCalendarCount_(0),
+   order_state_change_no_(0),
+   server_(port),
+   save_edit_history_(false),
+   client_suite_mgr_(this),
+   in_notification_(false) {}
+
+
 Defs::Defs(const Defs& rhs) :
    state_change_no_(0),
    modify_change_no_( 0 ),
@@ -127,10 +138,8 @@ Defs& Defs::operator=(const Defs& rhs)
    return *this;
 }
 
-defs_ptr Defs::create()
-{
-	return boost::make_shared<Defs>();
-}
+defs_ptr Defs::create() { return boost::make_shared<Defs>();}
+defs_ptr Defs::create(const std::string& port) { return boost::make_shared<Defs>(port);} // Defs::create(port)
 
 Defs::~Defs()
 {
@@ -594,12 +603,6 @@ std::ostream& Defs::print(std::ostream& os) const
 	}
 	if (PrintStyle::getStyle() == PrintStyle::STATE) {
       os << "# server state: " << SState::to_string(server().get_state()) << "\n";
-	   os << "# server variable\n";
-	   const std::vector<Variable>& server_variables = server().server_variables();
-	   BOOST_FOREACH(const Variable& var, server_variables) { var.print_generated(os);}
-      os << "# user variable\n";
-      const std::vector<Variable>& user_variables = server().user_variables();
-      BOOST_FOREACH(const Variable& var, user_variables) { var.print_generated(os);}
 	}
 
 	set<string>::const_iterator extern_end = externs_.end();

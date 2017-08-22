@@ -152,13 +152,14 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
       return;
    }
 
-   DebugEquality debug_equality; // only as affect in DEBUG build
+   PrintStyle style(PrintStyle::STATE);
+   std::string port = SCPort::next();
 
-   MyDefsFixture theDefsFixture;
-   defs_ptr defs_to_be_check_pointed = theDefsFixture.create_defs();
+   MyDefsFixture theDefsFixture; // make sure generated server variable use this port.
+   defs_ptr defs_to_be_check_pointed = theDefsFixture.create_defs(port);
+
    BOOST_REQUIRE_MESSAGE(defs_to_be_check_pointed->suiteVec().size() >= 2,"expected at least 2 suites");
 
-   std::string port = SCPort::next();
    {
       // Start a new server. However make sure that on server exit, we not delete check pt files
       InvokeServer invokeServer("Client:: ...test_restore_from_check_pt_using_new_server",
@@ -190,7 +191,10 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
    defs_to_be_check_pointed->set_server().set_state(SState::HALTED);
    defs_to_be_check_pointed->flag().set(ecf::Flag::MESSAGE);
 
-   PrintStyle style(PrintStyle::STATE);
+   // Specifically ignore server variables, as the port numbers are different( and therefore checkpt,log, etc will not match)
+   DebugEquality debug_equality; // only as affect in DEBUG build
+   DebugEquality::set_ignore_server_variables(true);
+
    BOOST_CHECK_MESSAGE( *theClient.defs() == *defs_to_be_check_pointed,
          "expected defs to be the same.\nServer defs:\n" << *theClient.defs() << "\nExpected defs:\n" << *defs_to_be_check_pointed);
 }
@@ -253,7 +257,7 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
       return;
    }
 
-   DebugEquality debug_equality; // only as affect in DEBUG build
+   DebugEquality debug_equality; // only has affect in DEBUG build
 
    // Start a new server.
    std::string port = SCPort::next();
@@ -266,7 +270,7 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
 
    // Save the MyDefsFixture as a boost checkpoint file.
    Host host;
-   MyDefsFixture theDefsFixture;
+   MyDefsFixture theDefsFixture(port); // make sure server variable use this port
    theDefsFixture.defsfile_.boost_save_as_checkpt(host.ecf_checkpt_file(port));
 
    // Now attempt to restore this boost checkpoint, from the server
@@ -277,12 +281,24 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
 
    // To compare the defs, we need to massage theDefsFixture
    // update server state to match server, and update flag, caused by restoreDefsFromCheckPt
+   const std::string& ecf_pid = theClient.defs()->server().find_variable("ECF_PID");            // match PID
+   const std::string& ecf_host = theClient.defs()->server().find_variable("ECF_HOST");          // localhost and eurydice wont match
+   const std::string& ecf_check = theClient.defs()->server().find_variable("ECF_CHECK");        // server ECF_CHECK has absolute path
+   const std::string& ecf_check_old = theClient.defs()->server().find_variable("ECF_CHECKOLD");
+   const std::string& ecf_log = theClient.defs()->server().find_variable("ECF_LOG");            // server ECF_LOG has absolute path
+   const std::string& ecf_home = theClient.defs()->server().find_variable("ECF_HOME");          // server ECF_HOME has absolute path
+
    theDefsFixture.defsfile_.set_server().set_state(SState::HALTED);
    theDefsFixture.defsfile_.flag().set(ecf::Flag::MESSAGE);
+   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_PID",ecf_pid);
+   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_HOST",ecf_host);
+   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_CHECK",ecf_check);
+   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_CHECKOLD",ecf_check_old);
+   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_LOG",ecf_log);
+   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_HOME",ecf_home);
 
    //PrintStyle style(PrintStyle::STATE);
    //cout << theDefsFixture.defsfile_ << "\n";
-
    BOOST_CHECK_MESSAGE( *theClient.defs() == theDefsFixture.defsfile_,"expected defs to be the same");
 }
 

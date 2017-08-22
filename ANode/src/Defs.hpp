@@ -55,7 +55,9 @@ namespace ecf { class NodeTreeVisitor; class CalendarUpdateParams; } // forward 
 class Defs {
 public:
    static defs_ptr create();
+   static defs_ptr create(const std::string& port);
    Defs();
+   Defs(const std::string& port); // used in test, to initialise server variables
    Defs(const Defs&);
    Defs& operator=(const Defs&);
 

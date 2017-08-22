@@ -18,6 +18,7 @@
 //============================================================================
 #include <boost/lexical_cast.hpp>
 
+#include "Str.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -32,7 +33,7 @@
 // =======================================================================
 struct MyDefsFixture {
 
-	MyDefsFixture(const std::string& fileName = "defsfile.txt") : defsfile_()
+	MyDefsFixture(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER()) : defsfile_(port)
 	{
 		suite_ptr  suite = create_suite();
 
@@ -66,15 +67,16 @@ struct MyDefsFixture {
 	}
 
 
-	defs_ptr create_defs() const {
+	defs_ptr create_defs(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER()) const {
 
-		defs_ptr defs = Defs::create();
+		defs_ptr defs = Defs::create(port);
 
  		defs->addSuite(  create_suite()   );
 		defs->add_extern("/limits:event");
 		defs->add_extern("/a/b/c:meter");
 		defs->add_extern("/a/b/c/d");
       defs->set_server().add_or_update_user_variables("MyDefsFixture_user_variable","This is a user variable added to server");
+      defs->set_server().add_or_update_server_variable("MyDefsFixture_server_variable","This is a server variable");
 
 		// add an empty suite. Needed for CHECK_JOB_GEN_ONLY cmd
 		defs->addSuite( Suite::create("EmptySuite" ) );

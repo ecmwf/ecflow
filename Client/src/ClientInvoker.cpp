@@ -119,7 +119,6 @@ int ClientInvoker::allow_new_client_old_server() const
 }
 
 void ClientInvoker::taskPath(const std::string& s) {
-	assert(!s.empty());
 	test_ = true;
 	clientEnv_.taskPath(s);
 }

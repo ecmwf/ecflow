@@ -28,7 +28,6 @@
 #include "PersistHelper.hpp"
 #include "Flag.hpp"
 #include "Memento.hpp"
-#include "MyDefsFixture.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

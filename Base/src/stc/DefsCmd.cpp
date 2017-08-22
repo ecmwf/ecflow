@@ -47,7 +47,7 @@ bool DefsCmd::equals(ServerToClientCmd* rhs) const
 	DefsCmd* the_rhs = dynamic_cast<DefsCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (!ServerToClientCmd::equals(rhs)) return false;
-	return (full_server_defs_as_string_  == the_rhs->full_server_defs_as_string_);
+	return true;
 }
 
 std::ostream& DefsCmd::print(std::ostream& os) const
