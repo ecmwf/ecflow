@@ -23,8 +23,8 @@ using namespace std;
 bool VerifyParser::doParse( const std::string& line, std::vector<std::string >& lineTokens )
 {
 	// expect:
-	//    verify <state>:int  i.e
-	//    verify complete:3
+	//    verify <state>:<expected> # actual  i.e
+	//    verify complete:3 # 2
 	if ( lineTokens.size() < 2 ) throw std::runtime_error( "VerifyParser::doParse: Invalid verify :" + line );
 
 	if ( !nodeStack().empty() ) {
@@ -47,7 +47,16 @@ bool VerifyParser::doParse( const std::string& line, std::vector<std::string >& 
 		NState::State theState = NState::toState(state);
 		int theExpectedStateCnt = Extract::theInt(expected,"Invalid verify" );
 
-		node->addVerify( VerifyAttr(theState,theExpectedStateCnt) ) ;
+		// STATE
+		int actual = 0;
+		if (lineTokens.size() >= 4) {
+		   if (lineTokens[2] == "#") {
+		      try { actual = boost::lexical_cast<int>( lineTokens[3] ); }
+		      catch ( boost::bad_lexical_cast& e ) { /* ignore could be other comment */}
+		   }
+		}
+
+		node->addVerify( VerifyAttr(theState,theExpectedStateCnt,actual) ) ;
 	}
 	return true;
 }
