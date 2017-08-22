@@ -32,7 +32,7 @@
 // =======================================================================
 struct MyDefsFixture {
 
-	MyDefsFixture(const std::string& fileName = "defsfile.txt") : defsfile_()
+	MyDefsFixture() : defsfile_()
 	{
 		suite_ptr  suite = create_suite();
 

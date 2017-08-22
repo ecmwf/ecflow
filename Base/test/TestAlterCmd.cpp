@@ -16,11 +16,14 @@
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
-#include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
 #include "Str.hpp"
 #include "System.hpp"
 #include "Ecf.hpp"
+#include "Task.hpp"
+#include "Family.hpp"
+#include "Suite.hpp"
+#include "Defs.hpp"
 
 using namespace std;
 using namespace ecf;

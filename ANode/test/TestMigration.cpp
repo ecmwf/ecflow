@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_boost_checkpt_file )
    // **Keep*** old checkpt test data, to ensure future ecflow versions can be migrated
    // **Update** here for future boost updates
    // **IF MyDefsFixture is changed, we need to ensure we can migrate it to future versions
-   MyDefsFixture fixture("boost.checkpt");
+   MyDefsFixture fixture;
 
    // Allow the test data, to be used on other platforms
    fixture.remove_host_depedent_server_variables();
