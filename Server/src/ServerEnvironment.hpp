@@ -128,7 +128,6 @@ public:
 	/// Some of these variables hold environment variables
 	/// Note:: additional variable are created for use by clients, i.e like
 	///        ECF_PORT(jobs, server, client)
-   ///        ECF_NODE(jobs).   ECF_NODE is the server machine host name  /* OLD NAME, TOBE DEPRECATED*/
    ///        ECF_HOST(jobs).   ECF_HOST is the server machine host name
   	void variables(std::vector<std::pair<std::string,std::string> >&) const;
 

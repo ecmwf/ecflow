@@ -142,7 +142,6 @@ public:
    static const std::string& ECF_TRYNO();
    static const std::string& ECF_TRIES();
    static const std::string& ECF_NAME();
-   static const std::string& ECF_NODE();
    static const std::string& ECF_HOST();
    static const std::string& ECF_PASS();
    static const std::string& ECF_JOB();

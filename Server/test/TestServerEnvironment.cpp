@@ -171,7 +171,6 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
    expected_variables.push_back( "ECF_VERSION" );
    expected_variables.push_back( "ECF_LISTS" );
    expected_variables.push_back(  Str::ECF_PORT() );
-   expected_variables.push_back(  Str::ECF_NODE() );
    expected_variables.push_back(  Str::ECF_HOST() );
    expected_variables.push_back( "ECF_INTERVAL");
    expected_variables.push_back( "ECF_PASSWD");
@@ -309,7 +308,6 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
    expected_variables.push_back( "ECF_VERSION" );
    expected_variables.push_back( "ECF_LISTS" );
    expected_variables.push_back(  Str::ECF_PORT() );
-   expected_variables.push_back(  Str::ECF_NODE() );
    expected_variables.push_back(  Str::ECF_HOST() );
    expected_variables.push_back( "ECF_INTERVAL");
    expected_variables.push_back( "ECF_PASSWD");

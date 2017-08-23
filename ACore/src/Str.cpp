@@ -50,7 +50,6 @@ const std::string& Str::ECF_RID()        { static std::string ECF_RID = "ECF_RID
 const std::string& Str::ECF_TRYNO()      { static std::string ECF_TRYNO = "ECF_TRYNO"; return ECF_TRYNO;}
 const std::string& Str::ECF_TRIES()      { static std::string ECF_TRIES = "ECF_TRIES"; return ECF_TRIES;}
 const std::string& Str::ECF_NAME()       { static std::string ECF_NAME = "ECF_NAME"; return ECF_NAME; }
-const std::string& Str::ECF_NODE()       { static std::string ECF_NODE = "ECF_NODE"; return ECF_NODE;}
 const std::string& Str::ECF_HOST()       { static std::string ECF_HOST = "ECF_HOST"; return ECF_HOST;}
 const std::string& Str::ECF_PASS()       { static std::string ECF_PASS = "ECF_PASS";return ECF_PASS;}
 const std::string& Str::ECF_JOB()        { static std::string ECF_JOB = "ECF_JOB"; return ECF_JOB;}

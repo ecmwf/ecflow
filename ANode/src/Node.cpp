@@ -1058,7 +1058,6 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       if ( percentVar.find("ECF_") != std::string::npos) {
          if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_PORT())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_NODE())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_HOST())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;

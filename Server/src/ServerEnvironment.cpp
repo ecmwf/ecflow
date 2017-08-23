@@ -356,7 +356,6 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	   // The clients then uses them to communicate back with the server.
   	theRetVec.push_back( std::make_pair(Str::ECF_PORT(), the_port()) );
    theRetVec.push_back( std::make_pair(Str::ECF_HOST(), serverHost_) );
-   theRetVec.push_back( std::make_pair(Str::ECF_NODE(), "%ECF_HOST%") );
 
 	theRetVec.push_back( std::make_pair(Str::ECF_HOME(), ecfHome_) );
 	if (Log::instance()) theRetVec.push_back( std::make_pair(std::string("ECF_LOG"), Log::instance()->path()) );

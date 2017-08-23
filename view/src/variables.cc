@@ -214,7 +214,6 @@ void variables::show( node& n )
 		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
 		    bool readOnly = name=="ECF_PASS" ||
 		      name=="ECF_PORT" ||
-		      name=="ECF_NODE" || 
 		      name=="ECF_HOST" || 
 		      name=="ECF_NAME" ||
 		      name=="ECF_LISTS" || // security ???

@@ -690,7 +690,6 @@ void EcfFile::get_used_variables(std::string& used_variables) const
          if ( item.first.find(Str::ECF_JOBOUT())  != std::string::npos) continue;
          if ( item.first.find(Str::ECF_PASS())    != std::string::npos) continue;
          if ( item.first.find(Str::ECF_PORT())    != std::string::npos) continue;
-         if ( item.first.find(Str::ECF_NODE())    != std::string::npos) continue;
          if ( item.first.find(Str::ECF_HOST())    != std::string::npos) continue;
          if ( item.first.find(Str::ECF_NAME())    != std::string::npos) continue;
 

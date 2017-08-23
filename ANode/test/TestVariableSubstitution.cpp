@@ -343,7 +343,6 @@ static std::vector<std::string> required_server_variables()
 {
    std::vector<std::string> required_server_variables;
    required_server_variables.push_back( Str::ECF_PORT() );
-   required_server_variables.push_back( Str::ECF_NODE() );
    required_server_variables.push_back( Str::ECF_HOST() );
 
    required_server_variables.push_back( Str::ECF_HOME() );

@@ -919,7 +919,6 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
     // Test the contents of the job file.
 //    cout << "\n" << job_file_contents << "\n";
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PORT%") == string::npos,"Expected variables to be substituted:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NODE%") == string::npos,"Expected variables to be substituted:");
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_HOST%") == string::npos,"Expected variables to be substituted:");
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NAME%") == string::npos,"Expected variables to be substituted:");
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PASS%") == string::npos,"Expected variables to be substituted");

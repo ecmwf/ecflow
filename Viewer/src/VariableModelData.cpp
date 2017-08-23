@@ -37,7 +37,7 @@ VariableModelData::VariableModelData(VInfo_ptr info) :
 
 	if(readOnlyVars_.isEmpty())
 	{
-		readOnlyVars_ << "ECF_NODE" << "ECF_HOST" << "ECF_PORT" << "ECF_PID"
+		readOnlyVars_ << "ECF_HOST" << "ECF_PORT" << "ECF_PID"
 		      << "ECF_VERSION" << "ECF_LISTS";
 	}
 }

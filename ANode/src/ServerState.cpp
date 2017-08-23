@@ -511,7 +511,6 @@ void ServerState::setup_default_server_variables(std::vector<Variable>&  server_
    // The server sets these variable for use by the client. i.e when creating the jobs
    // The clients then uses them to communicate with the server.
    server_variables.push_back( Variable(Str::ECF_PORT(),port) );
-   server_variables.push_back( Variable(Str::ECF_NODE(),"%ECF_HOST%") );
    server_variables.push_back( Variable(Str::ECF_HOST(),Str::LOCALHOST()) );
 }
 
