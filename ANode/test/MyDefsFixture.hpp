@@ -58,15 +58,6 @@ struct MyDefsFixture {
 
 	const Defs& fixtureDefsFile() const { return defsfile_; }
 
-	void remove_host_depedent_server_variables()
-	{
-	   // Allow test data to be used on other platforms
-	   defsfile_.set_server().delete_server_variable("ECF_LOG");
-	   defsfile_.set_server().delete_server_variable("ECF_CHECK");
-	   defsfile_.set_server().delete_server_variable("ECF_CHECKOLD");
-	}
-
-
 	defs_ptr create_defs(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER()) const {
 
 		defs_ptr defs = Defs::create(port);
