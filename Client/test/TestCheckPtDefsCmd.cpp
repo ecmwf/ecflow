@@ -257,8 +257,6 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
       return;
    }
 
-   DebugEquality debug_equality; // only has affect in DEBUG build
-
    // Start a new server.
    std::string port = SCPort::next();
    InvokeServer invokeServer("Client:: ...test_restore_from_check_pt_using_old_boost_format",
@@ -281,21 +279,13 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
 
    // To compare the defs, we need to massage theDefsFixture
    // update server state to match server, and update flag, caused by restoreDefsFromCheckPt
-   const std::string& ecf_pid = theClient.defs()->server().find_variable("ECF_PID");            // match PID
-   const std::string& ecf_host = theClient.defs()->server().find_variable("ECF_HOST");          // localhost and eurydice wont match
-   const std::string& ecf_check = theClient.defs()->server().find_variable("ECF_CHECK");        // server ECF_CHECK has absolute path
-   const std::string& ecf_check_old = theClient.defs()->server().find_variable("ECF_CHECKOLD");
-   const std::string& ecf_log = theClient.defs()->server().find_variable("ECF_LOG");            // server ECF_LOG has absolute path
-   const std::string& ecf_home = theClient.defs()->server().find_variable("ECF_HOME");          // server ECF_HOME has absolute path
-
    theDefsFixture.defsfile_.set_server().set_state(SState::HALTED);
    theDefsFixture.defsfile_.flag().set(ecf::Flag::MESSAGE);
-   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_PID",ecf_pid);
-   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_HOST",ecf_host);
-   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_CHECK",ecf_check);
-   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_CHECKOLD",ecf_check_old);
-   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_LOG",ecf_log);
-   theDefsFixture.defsfile_.set_server().add_or_update_server_variable("ECF_HOME",ecf_home);
+
+   // Specifically ignore server variables when comparing defs
+   // ECF_PID etc( and therefore checkpt,log, etc will not match, server uses absolute paths,MyDefsFixture does not)
+   DebugEquality debug_equality; // only has affect in DEBUG build
+   DebugEquality::set_ignore_server_variables(true);
 
    //PrintStyle style(PrintStyle::STATE);
    //cout << theDefsFixture.defsfile_ << "\n";
@@ -303,4 +293,3 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

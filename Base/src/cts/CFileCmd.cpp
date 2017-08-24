@@ -150,7 +150,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 
 			   // ECF_JOBOUT is either constructed from:
 			   // - (generated variable) ECF_HOME/ECF_NAME.ECF_TRYNO (common/default)
-			   // - (generated variable) ECF_OUT                     (common, user must create any directories)
+			   // - (generated variable) ECF_OUT/ECF_NAME.ECF_TRYNO  (common, user must create any directories)
 			   // - (user variable)                                  (rare, but if defined try first,user must create any directories)
 			   // See: Submittable.cpp: SubGenVariables::update_generated_variables()
 			   //
