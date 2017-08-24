@@ -149,12 +149,12 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 	}
 
     //Check if it is tryno 0
-    if(boost::algorithm::ends_with(fileName,".0"))
+    if(isJobout && isTryNoZero(fileName))
     {
         reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!)");
         reply_->addLog("MSG>Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
         owner_->infoReady(reply_);
-    	return;
+        return;
     }
 
     //----------------------------------
@@ -271,7 +271,7 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
     //If we are here we do not need to know the previously cached item
     latestCached_=NULL;
 
-    //We did not used the cache
+    //We did not use the cache
     if(n->logServer(host,port))
 	{
 		//host=host + "baaad";
