@@ -68,7 +68,8 @@ namespace fs = boost::filesystem;
 #define DO_TEST11 1
 #define DO_TEST12 1
 
-static bool ecf_debug_enabled = false; // allow ECF_DEBUG_ZOMBIES environment to enable debug
+
+static bool ecf_debug_enabled = false; // allow environment(ECF_DEBUG_ZOMBIES) to enable debug
 
 
 BOOST_GLOBAL_FIXTURE( TestFixture );
@@ -148,6 +149,7 @@ static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState:
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          if (ecf_debug_enabled) {
             dump_zombies();
+            dump_tasks(tasks);
             std::cout << "waitForTaskState " << wait_type_str << " reach state " << NState::toString(state1) << " || " << NState::toString(state2)
                   << " Test taking longer than time constraint of " << assertTimer.timeConstraint() <<  " returning false\n";
          }
@@ -255,6 +257,7 @@ static void wait_for_zombies_of_type(Child::ZombieType zt, int no_of_tasks, int 
 
 static void check_expected_no_of_zombies(size_t expected)
 {
+   if (ecf_debug_enabled) cout << "   check_expected_no_of_zombies: " << expected << "\n";
    TestFixture::client().zombieGet();
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
 
@@ -269,18 +272,22 @@ static void check_at_least_one_zombie()
 {
    TestFixture::client().zombieGet();
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
+   if (ecf_debug_enabled) std::cout << "\n   check_at_least_one_zombie: actual " << zombies.size() << "\n";
    BOOST_CHECK_MESSAGE(zombies.size() >= 1 ,"Expected at least one zombies but got nothing\n");
 }
 
 static bool wait_for_zombie_termination(int max_time_to_wait)
 {
-   if (ecf_debug_enabled) std::cout << "\n   wait_for_zombie_termination\n";
+   if (ecf_debug_enabled) std::cout << "\n   wait_for_zombie_termination:\n";
 
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       TestFixture::client().zombieGet();
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-      if (zombies.empty() ) break;
+      if (zombies.empty() ) {
+         if (ecf_debug_enabled) cout << "   zombies empty\n";
+         break;
+      }
 
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          if (ecf_debug_enabled)  {
@@ -395,6 +402,7 @@ static void populate_defs(Defs& theDefs,const std::string& suite_name) {
    suite->add_variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL","_any_");
 }
 
+
 static void create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::string& create_zombies_with) {
    if (ecf_debug_enabled) {
       std::cout << "\n\n=============================================================================\n";
@@ -505,7 +513,7 @@ static void create_and_start_test(const std::string& suite_name, const std::stri
 
 BOOST_AUTO_TEST_CASE( enable_debug_for_ECF_TRY_NO_Greater_than_one)
 {
-   BOOST_CHECK_MESSAGE(!ecf_debug_enabled ,"dummy test");
+   BOOST_CHECK_MESSAGE(true,"dummy test");
 
    if (getenv("ECF_DEBUG_ZOMBIES")) {
       ecf_debug_enabled = true;
@@ -637,6 +645,8 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_begin )
    // Hence after this command, the number of fobed zombies may *NOT* be the same
    // as the number of tasks. Since the fobed zombies are auto deleted when a complete
    // child command is received. 
+   //
+   /// When we have two sets of completes, we just fob, automatically. See TaskCmd::authenticate
    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
    BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0,"Expected  some fobed zombies but found none ?");
 

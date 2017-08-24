@@ -106,6 +106,7 @@ public:
 	bool remove(Submittable*);
 	bool remove(const std::string& path_to_task, const std::string& process_or_remote_id, const std::string& password);
 	void removeCli(const std::string& path_to_task, Submittable*);
+    bool remove_by_path(const std::string& path_to_task);
 
 	/// Query
  	const Zombie& find(const std::string& path_to_task, const std::string& process_or_remote_id, const std::string& password) const;
@@ -136,7 +137,6 @@ private:
 	void do_add_user_zombies(const std::vector<Submittable*>& tasks,const std::string& user_cmd);
 	Zombie& find_by_path(const std::string& path_to_task);
 
-	bool remove_by_path(const std::string& path_to_task);
 private:
 	std::vector<Zombie> zombies_;
 };
