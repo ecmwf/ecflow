@@ -151,7 +151,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
       if (!password_missmatch && !pid_missmatch ) {
          std::stringstream ss;
-         ss << " zombie(pid & password match)? : chd:" << ecf::Child::to_string(child_type()) << " : "  << path_to_submittable_ << " : already active : action(fob)";
+         ss << " [ overloaded || --init*2 ] (pid & password match) : chd:" << ecf::Child::to_string(child_type()) << " : "  << path_to_submittable_ << " : already active : action(fob)";
          log(Log::WAR, ss.str() );
          theReply = PreAllocatedReply::ok_cmd();
          return false;
@@ -164,19 +164,30 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #ifdef DEBUG_ZOMBIE
       std::cout << ": submittable_state == NState::COMPLETE)";
 #endif
-
       if (child_type() == Child::COMPLETE) {
-         // If ECF_NONSTRICT_ZOMBIES be more forgiving
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss;
-            ss << " zombie(ECF_NONSTRICT_ZOMBIES) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ ;
-            if (password_missmatch) ss << " : passwd != [ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
-            if (pid_missmatch)      ss << " : pid != [ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
-            ss << " : already complete : action(fob)";
-            log(Log::WAR, ss.str() );
-            theReply = PreAllocatedReply::ok_cmd();
-            return false;
-         }
+         // Note: when a node completes, we clear tasks password and pid, to save memory on checkpt & network bandwidth
+         // (We could choose not to clear, This would allow us to disambiguate between 2/ and 3/ below). HOWEVER:
+         //
+         // How can this situation arise:
+         //   1/ Two calls to --complete  (rare)
+         //   2/ Overloaded server. Client send --complete to server, but it is overload and does not respond, the client then
+         //      times out. Server handles the request. When client tries again we get here. (possible)
+         //   3/ Zombie, two separate process. (possible, typically done by user action)
+         //
+         // For all three it should be safe to just fob:
+         //   1/ Two calls to --complete # Be forgiving
+         //   2/ Overloaded server       # The correct course of action
+         //   3/ zombie                  # The zombie has completed anyway, don't bother blocking it
+
+         submittable_->flag().clear(ecf::Flag::ZOMBIE);
+         as->zombie_ctrl().remove_by_path( path_to_submittable_ ); // remove any associated zombies
+
+         std::stringstream ss;
+         ss << " [ overloaded || zombie || --complete*2 ] : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ ;
+         ss << " : already complete : action(fob)";
+         log(Log::WAR, ss.str() );
+         theReply = PreAllocatedReply::ok_cmd();
+         return false;
       }
 
       // If Task state is complete, and we receive **any** child command then it is a zombie
@@ -190,8 +201,11 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
       if (child_type() == Child::ABORT) {
          if (!password_missmatch && !pid_missmatch ) {
+            /// If there is an associated zombie, remove from the list
+            as->zombie_ctrl().remove( submittable_ );
+
             std::stringstream ss;
-            ss << " zombie(pid & password match)? : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ << " : already aborted : action(fob)";
+            ss << " [ overloaded || --abort*2 ] (pid & password match) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ << " : already aborted : action(fob)";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
