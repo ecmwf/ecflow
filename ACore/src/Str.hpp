@@ -154,7 +154,6 @@ public:
    static const std::string& ECF_FETCH();
    static const std::string& ECF_KILL_CMD();
    static const std::string& ECF_STATUS_CMD();
-   static const std::string& ECF_NONSTRICT_ZOMBIES();
 
    static const std::string& ECF_HOME();
    static const std::string& ECF_INCLUDE();

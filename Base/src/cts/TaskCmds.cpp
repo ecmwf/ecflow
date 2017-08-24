@@ -166,7 +166,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
             // Client then sends init again. In this case rather than treating it as a zombie, we will let it through
             // providing the password and pid matches.
             if (!password_missmatch_ && !pid_missmatch_ ) {
-               string ret = " [ overloaded || --init*2 ] (pid and passwd match)? : chd:"; ret += ecf::Child::to_string(child_type()); ret += " : "; ret += path_to_submittable_; ret += " : already active : action(fob)";
+               string ret = " [ overloaded || --init*2 ](pid and passwd match) : chd:"; ret += ecf::Child::to_string(child_type()); ret += " : "; ret += path_to_submittable_; ret += " : already active : action(fob)";
                log(Log::WAR, ret );
                theReply = PreAllocatedReply::ok_cmd();
                return false;
@@ -180,9 +180,6 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #ifdef DEBUG_ZOMBIE
          std::cout << ": submittable_->state() == NState::COMPLETE)";
 #endif
-         // The task *password* and pid should be empty
-
-         // If ECF_NONSTRICT_ZOMBIES be more forgiving
          if (child_type() == Child::COMPLETE) {
             // Note: when a node completes, we clear tasks password and pid, to save memory on checkpt & network bandwidth
          	// (We could choose not to clear, This would allow us to disambiguate between 2/ and 3/ below). HOWEVER:
@@ -198,11 +195,13 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
          	//   2/ Overloaded server       # The correct course of action
          	//   3/ zombie                  # The zombie has completed anyway, don't bother blocking it
 
+            submittable_->flag().clear(ecf::Flag::ZOMBIE);
+            as->zombie_ctrl().remove_by_path(path_to_submittable_);
+
             string ret = " [ overloaded || zombie || --complete*2 ] : chd:"; ret += ecf::Child::to_string(child_type()); ret += " : "; ret += path_to_submittable_; ret += " : already complete : action(fob)";
             log(Log::WAR, ret );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
-            
          }
 
          // If Task state is complete, and we receive **any** child command then it is a zombie
@@ -220,7 +219,10 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
           if (child_type() == Child::ABORT) {
 
              if (!password_missmatch_ && !pid_missmatch_ ) {
-                string ret = " [ overloaded || --abort*2 ]  (pid and passwd match)? : chd:"; ret += ecf::Child::to_string(child_type()); ret += " : "; ret += path_to_submittable_; ret += " : already aborted : action(fob)";
+
+                as->zombie_ctrl().remove( submittable_ );
+
+                string ret = " [ overloaded || --abort*2 ] (pid and passwd match) : chd:"; ret += ecf::Child::to_string(child_type()); ret += " : "; ret += path_to_submittable_; ret += " : already aborted : action(fob)";
                 log(Log::WAR, ret );
                 theReply = PreAllocatedReply::ok_cmd();
                 return false;
