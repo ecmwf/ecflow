@@ -39,12 +39,19 @@ private:
 
  	std::string full_server_defs_as_string_;
 
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize( Archive & ar, const unsigned int /*version*/ ) {
- 		ar & boost::serialization::base_object< ServerToClientCmd >( *this );
-      ar & full_server_defs_as_string_;
-  	}
+ 	friend class boost::serialization::access;
+ 	template<class Archive>
+ 	void serialize( Archive & ar, const unsigned int /*version*/ ) {
+ 	   ar & boost::serialization::base_object< ServerToClientCmd >( *this );
+
+ 	   if (Archive::is_saving::value) {
+ 	      // Avoid copying the string. As this could be very large
+ 	      ar & DefsCache::full_server_defs_as_string_;
+ 	   }
+ 	   else {
+ 	      ar & full_server_defs_as_string_;
+ 	   }
+ 	}
 };
 
 std::ostream& operator<<(std::ostream& os, const DefsCmd&);

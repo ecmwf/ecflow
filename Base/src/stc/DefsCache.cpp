@@ -46,21 +46,7 @@ void DefsCache::update_cache_if_state_changed(defs_ptr defs)
        full_server_defs_as_string_.empty()
       )
    {
-      try {
-#ifdef DEBUG_SERVER_SYNC
-         cout << ": *updating* cache";
-#endif
-         defs->save_as_string(full_server_defs_as_string_,PrintStyle::MIGRATE); // update cache
-      }
-      catch ( std::exception& ae ) {
-         // Unable to decode data. Something went wrong, inform the caller.
-         ecf::LogToCout logToCout;
-         LOG(ecf::Log::ERR,"DefsCache::update_cache_if_state_changed exception " << ae.what());
-         throw;
-      }
-
-      state_change_no_ = Ecf::state_change_no();
-      modify_change_no_ =  Ecf::modify_change_no();
+      update_cache(defs);
    }
 #ifdef DEBUG_SERVER_SYNC
    else {
@@ -69,11 +55,14 @@ void DefsCache::update_cache_if_state_changed(defs_ptr defs)
 #endif
 }
 
-void DefsCache::update_cache(const std::string& defs_as_string)
+void DefsCache::update_cache(defs_ptr defs )
 {
-   full_server_defs_as_string_ = defs_as_string;
-   state_change_no_ = Ecf::state_change_no();
-   modify_change_no_ =  Ecf::modify_change_no();
+#ifdef DEBUG_SERVER_SYNC
+       cout << ": *updating* cache";
+#endif
+    defs->save_as_string(full_server_defs_as_string_,PrintStyle::MIGRATE); // update cache
+    state_change_no_ = Ecf::state_change_no();
+    modify_change_no_ =  Ecf::modify_change_no();
 }
 
 
