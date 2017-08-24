@@ -340,6 +340,41 @@ VariableModelData* VariableModel::indexToData(const QModelIndex& index,int& bloc
     return NULL;
 }
 
+VInfo_ptr VariableModel::indexToInfo(const QModelIndex& index) const
+{
+    if(VariableModelData* d=indexToData(index))
+    {
+        //It is a block
+        if(!index.parent().isValid())
+            return d->info();
+        //it is a variable within a block
+        else
+            return d->info(index.row());
+    }
+    return VInfo_ptr();
+}
+
+QModelIndex VariableModel::infoToIndex(VInfo_ptr info) const
+{
+    if(!info)
+        return QModelIndex();
+
+    int block=-1;
+    int row=-1;
+    data_->findVariable(info,block,row);
+
+    if(block != -1)
+    {
+        QModelIndex blockIndex=index(block,0);
+        if(row != -1)
+        {
+            return index(row,0,blockIndex);
+        }
+        return blockIndex;
+    }
+
+    return QModelIndex();
+}
 
 //----------------------------------------------
 //
@@ -427,7 +462,7 @@ void VariableModel::slotAddRemoveEnd(int diff)
 void VariableModel::slotDataChanged(int block)
 {
 #ifdef _UI_VARIABLEMODEL_DEBUG
-    UiLog().dbg() << "VariableModel::slotDataChanged -->";
+    UI_FUNCTION_LOG
 #endif
     QModelIndex blockIndex0=index(block,0);
 	QModelIndex blockIndex1=index(block,1);
@@ -439,10 +474,6 @@ void VariableModel::slotDataChanged(int block)
 
     //We need to rerun the filter in the proxy model!
     Q_EMIT filterChanged();
-
-#ifdef _UI_VARIABLEMODEL_DEBUG
-    UiLog().dbg() << "<-- slotDataChanged";
-#endif
 }
 
 //=======================================================================

@@ -39,6 +39,8 @@ public:
 
     VariableModelData* indexToData(const QModelIndex& index) const;
     VariableModelData* indexToData(const QModelIndex& index,int& block) const;
+    VInfo_ptr indexToInfo(const QModelIndex& index) const;
+    QModelIndex infoToIndex(VInfo_ptr info) const;
 
 	bool isVariable(const QModelIndex & index) const;
 

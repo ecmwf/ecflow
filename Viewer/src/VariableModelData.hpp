@@ -38,6 +38,8 @@ public:
 	const std::string& name(int index) const;
     const std::string& value(int index) const;
     const std::string& value(const std::string name,bool&) const;
+    VInfo_ptr info() const {return info_;}
+    VInfo_ptr info(int index) const;
     int indexOf(const std::string& varName,bool genVar) const;
     bool isGenVar(const std::string& varName) const;
     bool isGenVar(int index) const;
@@ -94,6 +96,10 @@ public:
 	VariableModelData* data(int index) const;
     void findVariable(const std::string& name,const std::string& nodePath,
                                                 bool genVar,int& block,int& row) const;
+
+    void findVariable(VInfo_ptr info,int& block,int& row) const;
+    void findBlock(VInfo_ptr info,int& block) const;
+
     bool nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
     bool defsChanged(const std::vector<ecf::Aspect::Type>&);
     const std::string& value(const std::string& node,const std::string& name,bool&) const;

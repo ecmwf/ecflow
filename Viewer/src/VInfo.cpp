@@ -151,7 +151,10 @@ void VInfo::regainData()
 std::string VInfo::storedNodePath() const
 {
      VItemPathParser p(storedPath_);
-     return p.node();
+     if(p.itemType() == VItemPathParser::ServerType)
+         return "/";
+     else
+         return p.node();
 }
 
 void VInfo::addObserver(VInfoObserver* o)
@@ -384,6 +387,14 @@ std::string VInfoNode::serverAlias()
     return p;
 }
 
+std::string VInfoNode::nodePath()
+{
+    std::string p;
+    if(node_ && node_->node())
+        p = node_->absNodePath();
+    return p;
+}
+
 std::string VInfoNode::relativePath()
 {
     std::string p;
@@ -449,6 +460,14 @@ std::string VInfoAttribute::path()
     if(attr_)
         p+=attr_->fullPath();
 
+    return p;
+}
+
+std::string VInfoAttribute::nodePath()
+{
+    std::string p;
+    if(node_ && node_->node())
+        p = node_->absNodePath();
     return p;
 }
 

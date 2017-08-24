@@ -26,9 +26,10 @@ public:
     const std::string node() const {return node_;}
     const std::string attribute() const {return attribute_;}
 
-    static std::string encode(const std::string& path,const std::string& type);
+    static std::string encode(const std::string& path,const std::string& type);    
     static std::string encodeWithServer(const std::string& server,const std::string& path,
                                         const std::string& type);
+    static std::string encodeAttribute(const std::string& parentPath,const std::string& attrName,const std::string& attrType);
 
 protected:
     ItemType itemType_;
