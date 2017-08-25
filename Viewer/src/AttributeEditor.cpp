@@ -144,18 +144,18 @@ void AttributeEditor::detachInfo()
         if(info_->server())
         {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-            UiLog().dbg() << " remove NodeObserver";
+            UiLog().dbg() << " remove NodeObserver " << this;
 #endif
             info_->server()->removeNodeObserver(this);
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-            UiLog().dbg() << " remove ServerObserver";
+            UiLog().dbg() << " remove ServerObserver " << this;
 #endif
             info_->server()->removeServerObserver(this);
         }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-            UiLog().dbg() << " remove InfoObserver";
+        UiLog().dbg() << " remove InfoObserver";
 #endif
-            info_->removeObserver(this);
+        info_->removeObserver(this);
     }
 
     messageLabel_->stopLoadLabel();
@@ -202,23 +202,20 @@ void AttributeEditor::setSuspended(bool st)
 void AttributeEditor::notifyDataLost(VInfo* info)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "AttributeEditor::notifyDataLost -->";
+    UI_FUNCTION_LOG
 #endif
     if(info_ && info_.get() == info)
     {
         detachInfo();
-        messageLabel_->showWarning("The parent node and the edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");      
+        messageLabel_->showWarning("The parent node or the edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
     }
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "<-- notifyDataLost";
-#endif
 }
 
 void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "AttributeEditor::notifyBeginNodeChange -->";
+    UI_FUNCTION_LOG
 #endif
     if(info_ && info_->node() && info_->node() == vn)
     {
@@ -228,28 +225,39 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
             UiLog().dbg() << " ADD_REMOVE_ATTR";
 #endif
-            VAttribute* a=info_->attribute();
-            Q_ASSERT(a);
+            //try to regain the data
+            info_->regainData();
+
+            //If the attribute is not available dataLost() was already called.
+            if(!info_ || !info_->hasData())
+            {
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+                UiLog().dbg() << " attribute does not exist";
+#endif
+                return;
+            }
+
+            Q_ASSERT(info_->server() && info_->node());
+            setSuspended(false);
+
+#if 0
             if(1)
-            //if(info->node()->isValidAttribute(a) == false)
-            //if(!a->isValid(info_->node(),attrData_))
             {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
                 UiLog().dbg() << " attribute does not exist";
 #endif
                 detachInfo();
-                messageLabel_->showWarning("The edited " + type_ + " <b>is not available</b> any more! Please close the dialog!");
+                messageLabel_->showWarning("The edited " + type_ +
+                                           " <b>is not available</b> any more! Please close the dialog!");
                 setSuspended(true);
             }
+#endif
         }
         else
         {          
             nodeChanged(aspect);
         }
     }
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "<-- notifyBeginNodeChange";
-#endif
 }
 
 void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)
@@ -269,7 +277,9 @@ void AttributeEditor::notifyServerDelete(ServerHandler* server)
     if(info_ && info_->server() == server)
     {
         detachInfo();
-        messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> was removed from ecFlowUI! The edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
+        messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) +
+                                   "</b> was removed from ecFlowUI! The edited " + type_ +
+                                   " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
     }
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
@@ -318,12 +328,12 @@ void AttributeEditor::notifyEndServerScan(ServerHandler* server)
             messageLabel_->clear();
 
             //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
-            //that notifyEndServerScan() will be first called on the VInfo then on the InfoPanel. So it
+            //that notifyEndServerScan() will be first called on other objects than AttributeEditor. So it
             //is possible that the node exists but is still set to NULL in VInfo.
             info_->regainData();
 
             //If the node is not available dataLost() was already called.
-            if(!info_)
+            if(!info_ || !info_->hasData())
                 return;
 
             Q_ASSERT(info_->server() && info_->node());

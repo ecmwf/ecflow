@@ -54,25 +54,26 @@ VInfo::~VInfo()
 
 void VInfo::notifyServerDelete(ServerHandler* /*server*/)
 {
-	//This function is called from the server destructor. We do not remove this object from the ServerObservers
-
     server_=0;
     node_=0;
     attr_=0;
 
+    //This function is called from the server destructor. We do not remove this object from the ServerObservers
 	dataLost();
 }
 
 void VInfo::dataLost()
 {
-	std::vector<VInfoObserver*> obsTmp=observers_;
+    std::vector<VInfoObserver*> obsTmp=observers_;
 	observers_.clear();
 
 	for(std::vector<VInfoObserver*>::iterator it=obsTmp.begin(); it != obsTmp.end(); ++it)
 	{
 		VInfoObserver* o=*it;
 		o->notifyDataLost(this);
-	}
+    }
+
+    attr_=0;
 }
 
 void VInfo::notifyBeginServerClear(ServerHandler* server)

@@ -900,9 +900,21 @@ void ServerHandler::broadcast(NoMethod proc,const VNode* node)
 }
 
 void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
-{
-	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); ++it)
+{       
+    //When the observers are being notified (in a loop) they might
+    //want to remove themselves from the observer list. This will cause a crash. To avoid
+    //this we create a copy of the observers and use it in the notification loop.
+    std::vector<NodeObserver*> nObsCopy=nodeObservers_;
+
+    for(std::vector<NodeObserver*>::const_iterator it=nObsCopy.begin(); it != nObsCopy.end(); ++it)
+    {
+        ((*it)->*proc)(node,aspect,change);
+    }
+
+#if 0
+    for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); ++it)
 		((*it)->*proc)(node,aspect,change);
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -950,18 +962,25 @@ void ServerHandler::addServerObserver(ServerObserver *obs)
 
 void ServerHandler::removeServerObserver(ServerObserver *obs)
 {
-	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
+#ifdef __UI_SERVEROBSERVER_DEBUG
+    UI_FUNCTION_LOG_S(this)
+#endif
+    std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
 	if(it != serverObservers_.end())
 	{
 		serverObservers_.erase(it);
 #ifdef __UI_SERVEROBSERVER_DEBUG
-        UiLog(this).dbg() << "ServerHandler::removeServerObserver --> " << obs;
+        UiLog(this).dbg() << " remove: " << obs;
 #endif
 	}
 }
 
 void ServerHandler::broadcast(SoMethod proc)
 {
+#ifdef __UI_SERVEROBSERVER_DEBUG
+    UI_FUNCTION_LOG_S(this)
+#endif
+
     bool checkExistence=true;
 
     //When the observers are being notified (in a loop) they might
@@ -974,7 +993,9 @@ void ServerHandler::broadcast(SoMethod proc)
 		//We need to check if the given observer is still in the original list. When we delete the server, due to
 		//dependencies it is possible that the observer is already deleted at this point.
 		if(!checkExistence || std::find(serverObservers_.begin(),serverObservers_.end(),*it) != serverObservers_.end())
-			((*it)->*proc)(this);
+        {
+            ((*it)->*proc)(this);
+        }
 	}
 }
 

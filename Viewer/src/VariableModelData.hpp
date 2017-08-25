@@ -44,16 +44,17 @@ public:
     bool isGenVar(const std::string& varName) const;
     bool isGenVar(int index) const;
 	bool isReadOnly(int index) const;
-	bool isReadOnly(const std::string& varName) const;
+    bool isReadOnly(const std::string& varName) const;
     bool isShadowed(int index) const;
     int varNum() const;
 	bool hasName(const std::string& n) const;
 	VNode* node() const;
 
+#if 0
 	void buildAlterCommand(std::vector<std::string>& cmd,
 			           const std::string& action, const std::string& type,
 			           const std::string& name,const std::string& value);
-
+#endif
     void clear();  
 	void setValue(int index,const std::string& val);
     void alter(const std::string& name,const std::string& val);
@@ -77,8 +78,6 @@ protected:
 	std::vector<Variable> genVars_;
     std::set<std::string> shadowed_;
 	VInfo_ptr info_;
-
-	static QStringList readOnlyVars_;
 };
 
 class VariableModelDataHandler : public QObject

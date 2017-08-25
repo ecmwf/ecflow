@@ -30,7 +30,15 @@ VUserVarAttrType::VUserVarAttrType() : VAttributeType("var")
 
 QString VUserVarAttrType::toolTip(QStringList d) const
 {
-   return QString();
+    QString t="<b>Type:</b> User variable<br>";
+    if(d.count() == dataCount_)
+    {
+        t+="<b>Name:</b> " + d[NameIndex] + "<br>";
+        QString s=d[ValueIndex];
+        if(s.size() > 150) s=s.left(150) + "...";
+        t+="<b>Value:</b> " + s;
+    }
+    return t;
 }
 
 void VUserVarAttrType::encode(const Variable& v,QStringList& data) const

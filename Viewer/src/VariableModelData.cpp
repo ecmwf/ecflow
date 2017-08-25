@@ -15,6 +15,7 @@
 #include "UIDebug.hpp"
 #include "VariableModelDataObserver.hpp"
 #include "VAttribute.hpp"
+#include "VGenVarAttr.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
@@ -22,8 +23,6 @@
 #include <QString>
 
 static std::string defaultStr("");
-
-QStringList VariableModelData::readOnlyVars_;
 
 #define _UI_VARIABLEMODELDATA_DEBUG
 
@@ -37,12 +36,6 @@ VariableModelData::VariableModelData(VInfo_ptr info) :
 		info_(info)
 {
 	reload();
-
-	if(readOnlyVars_.isEmpty())
-	{
-		readOnlyVars_ << "ECF_NODE" << "ECF_HOST" << "ECF_PORT" << "ECF_PID"
-		      << "ECF_VERSION" << "ECF_LISTS";
-	}
 }
 
 VariableModelData::~VariableModelData()
@@ -266,6 +259,7 @@ int VariableModelData::indexOf(const std::string& varName,bool genVar) const
     return -1;
 }
 
+#if 0
 void VariableModelData::buildAlterCommand(std::vector<std::string>& cmd,
 		                            const std::string& action, const std::string& type,
 		                            const std::string& name,const std::string& value)
@@ -284,11 +278,12 @@ void VariableModelData::buildAlterCommand(std::vector<std::string>& cmd,
 	cmd.push_back("<full_name>");
 
 }
+#endif
 
 void VariableModelData::setValue(int index,const std::string& val)
 {
 	std::vector<std::string> cmd;
-	buildAlterCommand(cmd,"change","variable",name(index),val);
+    VAttribute::buildAlterCommand(cmd,"change","variable",name(index),val);
 
 	ServerHandler::command(info_,cmd);
 }
@@ -313,7 +308,7 @@ void VariableModelData::alter(const std::string& name,const std::string& val)
     }
 
     std::vector<std::string> cmd;
-    buildAlterCommand(cmd,mode,"variable",name,val);
+    VAttribute::buildAlterCommand(cmd,mode,"variable",name,val);
     ServerHandler::command(info_,cmd);
 }
 
@@ -321,15 +316,14 @@ void VariableModelData::alter(const std::string& name,const std::string& val)
 void VariableModelData::add(const std::string& name,const std::string& val)
 {
 	std::vector<std::string> cmd;
-    buildAlterCommand(cmd,(hasName(name))?"change":"add","variable",name,val);
-
+    VAttribute::buildAlterCommand(cmd,(hasName(name))?"change":"add","variable",name,val);
 	ServerHandler::command(info_,cmd);
 }
 
 void VariableModelData::remove(const std::string& varName)
 {
     std::vector<std::string> cmd;
-    buildAlterCommand(cmd,"delete","variable",varName,"");
+    VAttribute::buildAlterCommand(cmd,"delete","variable",varName,"");
     ServerHandler::command(info_,cmd);
 }
 
@@ -357,7 +351,7 @@ bool VariableModelData::isReadOnly(int index) const
 
 bool VariableModelData::isReadOnly(const std::string& varName) const
 {
-	return readOnlyVars_.contains(QString::fromStdString(varName));
+    return VGenVarAttr::isReadOnly(varName);
 }
 
 bool VariableModelData::isShadowed(int index) const
@@ -768,14 +762,14 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
 #endif
         const int numNew=v.size()+vg.size();
 
-        //Notifies the model that rows will be added or removed for this data item
+        //Notifiy the model that rows will be added or removed for this data item
         Q_EMIT addRemoveBegin(dataIndex,cntDiff);
 
         //Reset the variables using v and vg.
         data_[dataIndex]->reset(v,vg);
         Q_ASSERT(data_[dataIndex]->varNum() == numNew);
 
-        //Notifies the model that a change happened
+        //Notify the model that a change happened
         Q_EMIT addRemoveEnd(cntDiff);
 
         //Check if the shadowed list of variables changed
