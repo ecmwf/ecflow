@@ -136,6 +136,7 @@ bool DefsStructureParser::do_parse_string(std::string& errorMsg)
    while ( defs_as_string_.good() ) {
       getNextLine( line ); // will increment lineNumer_
       if (!do_parse_line(line,lineTokens, errorMsg)) {
+         the_node_ptr_ = node_ptr();
          return false;
       }
    }
