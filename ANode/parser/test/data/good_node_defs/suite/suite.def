@@ -1,0 +1,17 @@
+# 
+suite suite #  begun:1 state:queued suspended:1
+	defstatus suspended
+	edit ECF_HOME '/scratch/ma/ma0/nightly'
+	task exp # state:queued
+		edit ECF_JOB_CMD 'python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1'
+		label label_name "value"
+		meter meter 0 100 100
+		event event_fred
+	family test_local_actions # state:queued suspended:1
+		defstatus suspended
+		edit REMOTE_HOST 'eurydice'
+		edit WORKDIR ''
+		task action1 # state:queued suspended:1
+			defstatus suspended
+	endfamily
+endsuite
