@@ -85,3 +85,13 @@ std::string VItemPathParser::encodeWithServer(const std::string& server,const st
 
     return "[" + type + "]" + server + ":/" + path;
 }
+
+std::string VItemPathParser::encodeAttribute(const std::string& parentPath,const std::string& attrName,const std::string& attrType)
+{
+    if(attrType.empty())
+        return std::string();
+
+    VItemPathParser parent(parentPath);
+
+    return "[" + attrType + "]" + parent.server() + ":/" + parent.node() + ":" + attrName;
+}

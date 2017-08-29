@@ -137,6 +137,66 @@ BOOST_AUTO_TEST_CASE( test_parsing_for_good_defs_state )
    test_defs(path, true);
 }
 
+void test_node_defs(const std::string& directory, bool pass)
+{
+   fs::path full_path( fs::initial_path<fs::path>() );
+   full_path = fs::system_complete( fs::path( directory ) );
+
+   BOOST_CHECK(fs::exists( full_path ));
+   BOOST_CHECK(fs::is_directory( full_path ));
+
+   //std::cout << "\nIn directory: " << full_path.directory_string() << "\n\n";
+   fs::directory_iterator end_iter;
+   for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr )
+   {
+      try
+      {
+         fs::path relPath(directory + "/" + dir_itr->path().filename().string());
+
+         // recurse down directories
+         if ( fs::is_directory(dir_itr->status()) )  {
+            test_node_defs(relPath.string(),pass);
+            continue;
+         }
+
+         //std::cout << "......Parsing file " << relPath.string() << "\n";
+         std::string file_contents;
+         if (!ecf::File::open( relPath.string(), file_contents )) {
+            std::cout << "......Could not open file" << relPath.string() << "\n";
+            continue;
+         }
+
+         // Parse string as a standalone node.
+         DefsStructureParser parser( file_contents );
+         std::string errorMsg,warningMsg;
+         bool parsedOk = parser.doParse(errorMsg,warningMsg);
+         if (pass) {
+            // Test expected to pass
+            BOOST_CHECK_MESSAGE( parsedOk,"Failed to parse file " << relPath << "\n" << errorMsg);
+            BOOST_CHECK_MESSAGE(parser.the_node_ptr(),"Failed to parse file " << relPath << "\n" << errorMsg);
+            //PrintStyle print_style(PrintStyle::MIGRATE);
+            //parser.the_node_ptr()->print(cout);
+         }
+         else {
+            // test expected to fail
+            //std::cout << errorMsg << "\n";
+            BOOST_CHECK_MESSAGE(!parser.the_node_ptr(),"Parse expected to fail for " << relPath << "\n" << errorMsg);
+         }
+      }
+      catch ( const std::exception & ex ) {
+         std::cout << dir_itr->path().filename() << " " << ex.what() << std::endl;
+      }
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_parsing_node )
+{
+   cout << "AParser:: ...test_parsing_node\n";
+
+   std::string path = File::test_data("ANode/parser/test/data/good_node_defs","parser");
+
+   // All the defs in this directory are expected to pass
+   test_node_defs(path, true);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
-

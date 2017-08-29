@@ -1,0 +1,6 @@
+task exp # state:queued
+  edit ECF_JOB_CMD 'python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1'
+  label label_name "value"
+  meter meter 0 100 100
+  event event_fred
+  trigger 1 == 1

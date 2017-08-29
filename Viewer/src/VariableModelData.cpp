@@ -12,15 +12,17 @@
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 #include "UiLog.hpp"
+#include "UIDebug.hpp"
 #include "VariableModelDataObserver.hpp"
+#include "VAttribute.hpp"
+#include "VGenVarAttr.hpp"
+#include "VItemPathParser.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
 
 #include <QString>
 
 static std::string defaultStr("");
-
-QStringList VariableModelData::readOnlyVars_;
 
 #define _UI_VARIABLEMODELDATA_DEBUG
 
@@ -34,12 +36,6 @@ VariableModelData::VariableModelData(VInfo_ptr info) :
 		info_(info)
 {
 	reload();
-
-	if(readOnlyVars_.isEmpty())
-	{
-		readOnlyVars_ << "ECF_HOST" << "ECF_PORT" << "ECF_PID"
-		      << "ECF_VERSION" << "ECF_LISTS";
-	}
 }
 
 VariableModelData::~VariableModelData()
@@ -129,6 +125,29 @@ VNode* VariableModelData::node() const
 		return info_->node();
 
 	return NULL;
+}
+
+VInfo_ptr VariableModelData::info(int index) const
+{
+    if(info_)
+    {
+        if(index < 0 || index >= varNum())
+            return VInfo_ptr();
+
+        std::string p=info_->storedPath();
+        if(!isGenVar(index))
+        {
+            p=VItemPathParser::encodeAttribute(p,vars_[index].name(),"var");
+        }
+        else
+        {
+            p=VItemPathParser::encodeAttribute(p,genVars_[index-vars_.size()].name(),"genvar");
+        }
+
+        return VInfo::createFromPath(p);
+    }
+
+    return VInfo_ptr();
 }
 
 const std::string& VariableModelData::name(int index) const
@@ -230,6 +249,7 @@ int VariableModelData::indexOf(const std::string& varName,bool genVar) const
 
     for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); ++it)
     {
+        idx++;
         if((*it).name() == varName)
         {
             return idx;
@@ -239,6 +259,7 @@ int VariableModelData::indexOf(const std::string& varName,bool genVar) const
     return -1;
 }
 
+#if 0
 void VariableModelData::buildAlterCommand(std::vector<std::string>& cmd,
 		                            const std::string& action, const std::string& type,
 		                            const std::string& name,const std::string& value)
@@ -257,11 +278,12 @@ void VariableModelData::buildAlterCommand(std::vector<std::string>& cmd,
 	cmd.push_back("<full_name>");
 
 }
+#endif
 
 void VariableModelData::setValue(int index,const std::string& val)
 {
 	std::vector<std::string> cmd;
-	buildAlterCommand(cmd,"change","variable",name(index),val);
+    VAttribute::buildAlterCommand(cmd,"change","variable",name(index),val);
 
 	ServerHandler::command(info_,cmd);
 }
@@ -286,7 +308,7 @@ void VariableModelData::alter(const std::string& name,const std::string& val)
     }
 
     std::vector<std::string> cmd;
-    buildAlterCommand(cmd,mode,"variable",name,val);
+    VAttribute::buildAlterCommand(cmd,mode,"variable",name,val);
     ServerHandler::command(info_,cmd);
 }
 
@@ -294,15 +316,14 @@ void VariableModelData::alter(const std::string& name,const std::string& val)
 void VariableModelData::add(const std::string& name,const std::string& val)
 {
 	std::vector<std::string> cmd;
-    buildAlterCommand(cmd,(hasName(name))?"change":"add","variable",name,val);
-
+    VAttribute::buildAlterCommand(cmd,(hasName(name))?"change":"add","variable",name,val);
 	ServerHandler::command(info_,cmd);
 }
 
 void VariableModelData::remove(const std::string& varName)
 {
     std::vector<std::string> cmd;
-    buildAlterCommand(cmd,"delete","variable",varName,"");
+    VAttribute::buildAlterCommand(cmd,"delete","variable",varName,"");
     ServerHandler::command(info_,cmd);
 }
 
@@ -330,7 +351,7 @@ bool VariableModelData::isReadOnly(int index) const
 
 bool VariableModelData::isReadOnly(const std::string& varName) const
 {
-	return readOnlyVars_.contains(QString::fromStdString(varName));
+    return VGenVarAttr::isReadOnly(varName);
 }
 
 bool VariableModelData::isShadowed(int index) const
@@ -355,10 +376,6 @@ void VariableModelData::latestVars(std::vector<Variable>& v,std::vector<Variable
 
 bool VariableModelData::updateShadowed(std::set<std::string>& names)
 {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "VariableModelData::updateShadowed --> node=" << name();
-#endif
-
     std::set<std::string> ori=shadowed_;
     shadowed_.clear();
     bool changed=false;
@@ -381,11 +398,11 @@ bool VariableModelData::updateShadowed(std::set<std::string>& names)
         }
     }
 
-    for(unsigned int i=0; i < vars_.size(); i++)
+    for(std::size_t i=0; i < vars_.size(); i++)
     {
         names.insert(vars_[i].name());
     }
-    for(unsigned int i=0; i < genVars_.size(); i++)
+    for(std::size_t i=0; i < genVars_.size(); i++)
     {
         names.insert(genVars_[i].name());
     }
@@ -398,10 +415,6 @@ bool VariableModelData::updateShadowed(std::set<std::string>& names)
     }
 
     UiLog().dbg() << " changed: " << changed;
-#endif
-
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "<-- updateShadowed";
 #endif
 
     return changed;
@@ -433,6 +446,8 @@ int VariableModelData::checkUpdateDiff(std::vector<Variable>& v,std::vector<Vari
 {
     if(info_ && info_->node() && v.empty() && vg.empty())
 	{
+        //get the current set of variables from the node/server. This might be different
+        //to the ones we store.
         latestVars(v,vg);
     }
 
@@ -446,7 +461,7 @@ int VariableModelData::checkUpdateDiff(std::vector<Variable>& v,std::vector<Vari
 bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<Variable>& vg)
 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "VariableModelData::update -->";
+    UI_FUNCTION_LOG
 #endif
 
 #if 0
@@ -461,15 +476,17 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
 
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " new list of variables:";
-    for(size_t i=0; i < v.size(); i++)
+    for(std::size_t i=0; i < v.size(); i++)
          UiLog().dbg() << "  " <<  v[i].name() << "=" << v[i].theValue();
     UiLog().dbg() << "   new list of generated variables:";
-    for(size_t i=0; i < vg.size(); i++)
+    for(std::size_t i=0; i < vg.size(); i++)
         UiLog().dbg() << "  " << vg[i].name() << "=" << vg[i].theValue();
 #endif
 
     //We must have the same number of variables
-    assert(v.size() + vg.size() == vars_.size() + genVars_.size());
+    UI_ASSERT(v.size() + vg.size() == vars_.size() + genVars_.size(),
+              "v.size()=" << v.size() <<  " vg.size()=" <<  vg.size() <<
+              " vars_.size()=" << vars_.size() << " genVars_.size()" << genVars_.size());
 
     bool changed=false;
     if(v.size() != vars_.size() || vg.size() != genVars_.size())
@@ -483,12 +500,12 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
     }
     else
     {
-        for(unsigned int i=0; i < vars_.size(); i++)
+        for(std::size_t i=0; i < vars_.size(); i++)
         {
             if(vars_[i].name() != v[i].name() || vars_[i].theValue() != v[i].theValue())
             {                
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-                UiLog().dbg() << "   variable changed! name: " << vars_[i].name() << " -> " <<
+                UiLog().dbg() << " variable changed! name: " << vars_[i].name() << " -> " <<
                            v[i].name()  << " value: " <<   vars_[i].theValue() << " -> " <<  v[i].theValue();
 #endif
                 changed=true;
@@ -498,12 +515,12 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
 
         if(changed == false)
         {
-            for(unsigned int i=0; i < genVars_.size(); i++)
+            for(std::size_t i=0; i < genVars_.size(); i++)
             {
                 if(genVars_[i].name() != vg[i].name() || genVars_[i].theValue() != vg[i].theValue())
                 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-                    UiLog().dbg() << "   generated variable changed! name: " << genVars_[i].name() << " -> " <<
+                    UiLog().dbg() << " generated variable changed! name: " << genVars_[i].name() << " -> " <<
                            vg[i].name()  << " value: " <<   genVars_[i].theValue() << " -> " << vg[i].theValue();
 #endif
                     changed=true;
@@ -518,16 +535,11 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
 		vars_=v;
 		genVars_=vg;        
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << "   updated vars and genvars";
+        UiLog().dbg() << " updated vars and genvars";
 #endif
 	}
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "<-- update";
-#endif
-
 	return changed;
-
 }
 
 //==========================================
@@ -600,7 +612,7 @@ void VariableModelDataHandler::reload()
 bool VariableModelDataHandler::updateShadowed()
 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "VariableModelDataHandler::updateShadowed -->";
+    UI_FUNCTION_LOG
 #endif
 
     bool shadowChanged=false;
@@ -623,7 +635,7 @@ bool VariableModelDataHandler::updateShadowed()
     }
 
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "   names:";
+    UiLog().dbg() << " names:";
     for(std::set<std::string>::const_iterator it=names_.begin(); it != names_.end(); ++it)
     {
         UiLog().dbg() << "      " + *it;
@@ -673,7 +685,7 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "VariableModelDataHandler::nodeChanged -->";
+    UI_FUNCTION_LOG
 #endif
     int dataIndex=-1;
 	for(unsigned int i=0; i < data_.size(); i++)
@@ -692,9 +704,6 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 
     bool retVal=updateVariables(dataIndex);
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-            UiLog().dbg() << "<-- nodeChanged";
-#endif
     if(retVal)
         broadcastUpdate();
 
@@ -705,14 +714,11 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "VariableModelDataHandler::defsChanged -->";
+    UI_FUNCTION_LOG
 #endif
 
     if(data_.size() == 0)
     {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << "<-- defsChanged";
-#endif
         return false;
     }
 
@@ -724,21 +730,16 @@ bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>&
 
     bool retVal=updateVariables(dataIndex);
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "<-- defsChanged";
-#endif
-
     if(retVal)
         broadcastUpdate();
 
     return retVal;
 }
 
-//It is called when the server defs was changed
 bool VariableModelDataHandler::updateVariables(int dataIndex)
 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-    UiLog().dbg() << "VariableModelDataHandler::updateVariables -->";
+    UI_FUNCTION_LOG
 #endif
 
     bool retVal=false;
@@ -750,31 +751,32 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
 
     //Get the current set of variables and check if the total number of variables
     //has changed. At this point v and vg do not contain any duplicates.
-    int cntDiff=data_.at(dataIndex)->checkUpdateDiff(v,vg);
+    int cntDiff=data_[dataIndex]->checkUpdateDiff(v,vg);
 
-    //If the number of the variables is not the same as we store we reset the given block in the model
+    //If the number of the variables is not the same that we store
+    //we reset the given block in the model
     if(cntDiff != 0)
     {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << "    cntDiff=" << cntDiff;
+        UiLog().dbg() << " cntDiff=" << cntDiff;
 #endif
         const int numNew=v.size()+vg.size();
 
-        //Notifies the model that rows will be added or removed for this data item
+        //Notifiy the model that rows will be added or removed for this data item
         Q_EMIT addRemoveBegin(dataIndex,cntDiff);
 
         //Reset the variables using v and vg.
-        data_.at(dataIndex)->reset(v,vg);
-        Q_ASSERT(data_.at(dataIndex)->varNum() == numNew);
+        data_[dataIndex]->reset(v,vg);
+        Q_ASSERT(data_[dataIndex]->varNum() == numNew);
 
-        //Notifies the model that the change happened
+        //Notify the model that a change happened
         Q_EMIT addRemoveEnd(cntDiff);
 
         //Check if the shadowed list of variables changed
         if(updateShadowed())
         {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-            UiLog().dbg() << "   emit rerunFilter()";
+            UiLog().dbg() << " emit rerunFilter";
 #endif
             Q_EMIT rerunFilter();
         }
@@ -782,7 +784,7 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
         else
         {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-            UiLog().dbg() << "   emit dataChanged";
+            UiLog().dbg() << " emit dataChanged";
 #endif
             //Update the data item in the model
             Q_EMIT dataChanged(dataIndex);
@@ -794,20 +796,20 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
     else
     {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << "   Change: NODE_VARIABLE";
+        UiLog().dbg() << " Change: NODE_VARIABLE";
 #endif
         //At this point we must have the same number of vars
         const int numNew=v.size()+vg.size();
-        Q_ASSERT(data_.at(dataIndex)->varNum() == numNew);
+        Q_ASSERT(data_[dataIndex]->varNum() == numNew);
 
-        //Find out if any names chhanged
-        bool nameChanged=data_.at(dataIndex)->checkUpdateNames(v,vg);
+        //Find out if any names changed
+        bool nameChanged=data_[dataIndex]->checkUpdateNames(v,vg);
 
         //Update the names/values
-        if(data_.at(dataIndex)->update(v,vg))
+        if(data_[dataIndex]->update(v,vg))
         {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-            UiLog().dbg() << "   Variable name or value changed";
+            UiLog().dbg() << " Variable name or value changed";
 #endif
             //At this point the stored variables are already updated
             if(nameChanged)
@@ -828,10 +830,6 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
         }
         retVal=true;
     }
-
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << "<-- updateVariables";
-#endif
 
     return retVal;
 }
@@ -866,9 +864,48 @@ void VariableModelDataHandler::findVariable(const std::string& name,const std::s
     }
 }
 
+void VariableModelDataHandler::findVariable(VInfo_ptr info,int& block,int& row) const
+{
+    block=-1;
+    row=-1;
 
+    findBlock(info,block);
+    if(block!= -1 && info && info->isAttribute())
+    {
+        if(VAttribute *a=info->attribute())
+        {
+            std::string name=a->strName();
+            std::string tName=a->typeName();
+            if(!name.empty() &&
+              (tName=="var" || tName == "genvar") )
+            {
+                row=data_[block]->indexOf(name,(tName == "genvar"));
+            }
+         }
+    }
+}
 
+void VariableModelDataHandler::findBlock(VInfo_ptr info,int& block) const
+{
+    block=-1;
 
+    if(!info)
+        return;
+
+    std::string p=info->nodePath();
+    if(!p.empty())
+    {
+        int n=count();
+        for(int i=0; i < n; i++)
+        {
+            if(data_[i]->info_ && data_[i]->info_->nodePath() == p)
+            {
+                block=i;
+                return;
+            }
+        }
+    }
+}
 
 void VariableModelDataHandler::addObserver(VariableModelDataObserver* o)
 {

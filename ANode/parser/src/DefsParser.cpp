@@ -82,7 +82,7 @@ public:
 
 class AliasParser : public Parser {
 public:
-   AliasParser(DefsStructureParser* p, Parser* parentParser) : Parser(p) {
+   AliasParser(DefsStructureParser* p) : Parser(p) {
       reserve_vec(19);
       addParser( new VariableParser(p) );
       addParser( new LabelParser(p) );
@@ -130,6 +130,14 @@ private:
 
    void addAlias(const std::string& line,std::vector<std::string>& lineTokens) const
    {
+      if ( nodeStack().empty() && rootParser()->parsing_node_string()) {
+          alias_ptr alias = Alias::create(lineTokens[1]);
+          if (rootParser()->get_file_type() != PrintStyle::DEFS) alias->read_state(line,lineTokens);
+          nodeStack().push( std::make_pair(alias.get(),this) );
+          rootParser()->set_node_ptr(alias);
+          return;
+       }
+
       // bad test data can mean that last node is not a suite family or task, will fail parse
       if (nodeStack().empty() )  throw std::runtime_error("Add alias failed empty node stack");
 
@@ -157,7 +165,7 @@ private:
 
 class TaskParser : public Parser {
 public:
-   TaskParser(DefsStructureParser* p, Parser* parentParser) : Parser(p) {
+   TaskParser(DefsStructureParser* p) : Parser(p) {
       reserve_vec(21);
       addParser( new VariableParser(p) );
       addParser( new TriggerParser(p) );
@@ -178,7 +186,7 @@ public:
       addParser( new AutoCancelParser(p) );
       addParser( new VerifyParser(p) );
       addParser( new ZombieAttrParser(p) );
-      addParser( new AliasParser(p,this) );
+      addParser( new AliasParser(p) );
       addParser( new TextParser(p) );
       addParser( new QueueParser(p) );
       addParser( new AutoRestoreParser(p) );
@@ -188,16 +196,8 @@ public:
 
 	   const char* first_token = lineTokens[0].c_str();
 	   if (Str::local_strcmp(first_token,keyword()) == 0) {
-
 	      if (lineTokens.size() < 2)  throw std::runtime_error("Task name missing.");
-
-	      // end task is optional, so if we get another task, whilst in a task pop the parser
-	      if ( nodeStack_top()->isTask()) {
-	         popToContainerNode();            // pop the node stack
-	      }
-
 	      addTask(line,lineTokens);
-
 	      return true;
 	   }
 	   else if (Str::local_strcmp(first_token,"endtask") == 0) { // optional
@@ -213,8 +213,21 @@ private:
 
 	void addTask(const std::string& line,std::vector<std::string>& lineTokens) const
 	{
+      if ( nodeStack().empty() && rootParser()->parsing_node_string()) {
+          task_ptr task = Task::create(lineTokens[1]);
+          if (rootParser()->get_file_type() != PrintStyle::DEFS) task->read_state(line,lineTokens);
+          nodeStack().push( std::make_pair(task.get(),this) );
+          rootParser()->set_node_ptr(task);
+          return;
+       }
+
 	   // bad test data can mean that last node is not a suite family or task, will fail parse
 	   if (nodeStack().empty() )  throw std::runtime_error("Add task failed empty node stack");
+
+      // end task is optional, so if we get another task, whilst in a task pop the parser
+      if ( nodeStack_top()->isTask()) {
+         popToContainerNode();            // pop the node stack
+      }
 
 	   NodeContainer* lastAddedContainer = nodeStack_top()->isNodeContainer();
 	   if ( lastAddedContainer ) {
@@ -244,7 +257,7 @@ public:
    {
       reserve_vec(21);
       addParser( new VariableParser(p) );
-      addParser( new TaskParser(p,this) );
+      addParser( new TaskParser(p) );
       addParser( new TriggerParser(p) );
       addParser( new InlimitParser(p) );
       addParser( new DefsStatusParser(p) );
@@ -298,33 +311,41 @@ private:
 
 	void addFamily(const std::string& line,const std::vector<std::string>& lineTokens) const
 	{
-	   assert( !nodeStack().empty() );
-	   Suite* lastAddedSuite = nodeStack_top()->isSuite();
-	   if (lastAddedSuite ) {
-
-	      family_ptr family = Family::create(lineTokens[1]);
-	      if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
-
-	      nodeStack().push( std::make_pair(family.get(),this) );
-	      lastAddedSuite->addFamily( family );
+	   if ( nodeStack().empty() && rootParser()->parsing_node_string()) {
+         family_ptr family = Family::create(lineTokens[1]);
+         rootParser()->set_node_ptr(family);
+         if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
+         nodeStack().push( std::make_pair(family.get(),this) );
 	   }
 	   else {
-	      // support hierarchical families
-	      Family* lastAddedFamily = nodeStack_top()->isFamily();
-	      if ( lastAddedFamily ) {
+	      assert( !nodeStack().empty() );
+	      Suite* lastAddedSuite = nodeStack_top()->isSuite();
+	      if (lastAddedSuite ) {
 
 	         family_ptr family = Family::create(lineTokens[1]);
 	         if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
 
-	         nodeStack().push( std::make_pair(family.get(),this));
-	         lastAddedFamily->addFamily( family );
+	         nodeStack().push( std::make_pair(family.get(),this) );
+	         lastAddedSuite->addFamily( family );
 	      }
 	      else {
-	         Task* lastAddedTask = nodeStack_top()->isTask();
-	         if ( lastAddedTask ) {
-	            // Pop the node, since tasks don't always have end task
-	            popNode();
-	            addFamily(line,lineTokens);
+	         // support hierarchical families
+	         Family* lastAddedFamily = nodeStack_top()->isFamily();
+	         if ( lastAddedFamily ) {
+
+	            family_ptr family = Family::create(lineTokens[1]);
+	            if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
+
+	            nodeStack().push( std::make_pair(family.get(),this));
+	            lastAddedFamily->addFamily( family );
+	         }
+	         else {
+	            Task* lastAddedTask = nodeStack_top()->isTask();
+	            if ( lastAddedTask ) {
+	               // Pop the node, since tasks don't always have end task
+	               popNode();
+	               addFamily(line,lineTokens);
+	            }
 	         }
 	      }
 	   }
@@ -354,7 +375,7 @@ public:
       reserve_vec(18);
 	   addParser( new VariableParser(p) );
 	   addParser( new FamilyParser(p) );
-	   addParser( new TaskParser(p,this) );
+	   addParser( new TaskParser(p) );
 	   addParser( new LimitParser(p) );
 	   addParser( new DefsStatusParser(p) );
 	   addParser( new ClockParser(p) );
@@ -406,18 +427,19 @@ public:
 
 private:
 
-    void addSuite(const std::string& line,std::vector<std::string>& lineTokens) const {
+	void addSuite(const std::string& line,std::vector<std::string>& lineTokens) const {
 
-       if ( !nodeStack().empty() ) {
-          throw std::runtime_error("SuiteParser::addSuite node stack should be empty");
-       }
+	   if ( !nodeStack().empty() ) {
+	      throw std::runtime_error("SuiteParser::addSuite node stack should be empty");
+	   }
 
-       suite_ptr suite = Suite::create(lineTokens[1]);
-       if (rootParser()->get_file_type() != PrintStyle::DEFS) suite->read_state(line,lineTokens);
+	   suite_ptr suite = Suite::create(lineTokens[1]);
+	   if (rootParser()->get_file_type() != PrintStyle::DEFS) suite->read_state(line,lineTokens);
 
-       nodeStack().push( std::make_pair(suite.get(),this) );
-       defsfile()->addSuite( suite );
-     }
+	   nodeStack().push( std::make_pair(suite.get(),this) );
+	   if (defsfile()) defsfile()->addSuite( suite );
+	   rootParser()->set_node_ptr( suite );
+	}
 
 	bool started_;
 };
@@ -428,11 +450,20 @@ DefsParser::DefsParser(DefsStructureParser* p) : Parser(p)
 {
    reserve_vec(5);
    addParser( new ExternParser(p) );
-	addParser( new SuiteParser(p) );
+   addParser( new SuiteParser(p) );
 
    // for defs stat only
    addParser( new DefsStateParser(p) );
    addParser( new VariableParser(p,true) );
    addParser( new HistoryParser(p) );
+}
+
+DefsParser::DefsParser(DefsStructureParser* p, bool/*node_parser_only*/) : Parser(p)
+{
+   reserve_vec(4);
+   addParser( new TaskParser(p) );
+   addParser( new FamilyParser(p) );
+   addParser( new SuiteParser(p) );
+   addParser( new AliasParser(p) );
 }
 

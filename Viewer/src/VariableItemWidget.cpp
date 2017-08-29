@@ -118,7 +118,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
 VariablePropDialog::~VariablePropDialog()
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "VariablePropDialog::~VariablePropDialog -->";
+    UI_FUNCTION_LOG
 #endif
     Q_ASSERT(data_);
     data_->removeObserver(this);
@@ -605,16 +605,16 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) : shadowProp_(0)
     varView->setSelectionBehavior(QAbstractItemView::SelectRows);
     varView->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    //varView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     varView->header()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
     varView->header()->setStretchLastSection(false);
 #endif
 
-    //Shadowed variables
+    //Show shadowed variables by default
     bool showShadowed = true;
-    //We do not want to observe it!
+
+    //But we overwrite it with the config settings. This property is directly edited
+    //via the toolbutton, so we do not need to observe it.
     shadowProp_=VConfig::instance()->find("panel.variable.showShadowed");
     if(shadowProp_)
     {
@@ -634,7 +634,7 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) : shadowProp_(0)
     filterLine_=new LineEdit;
     stackedWidget->addWidget(filterLine_);
 
-    //The search line editor. Its a custom widget handling its own signals and slots.
+    //The search line editor. It is a custom widget handling its own signals and slots.
     searchLine_=new VariableSearchLine(this);
     stackedWidget->addWidget(searchLine_);
     searchLine_->setView(varView);
@@ -682,7 +682,7 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) : shadowProp_(0)
 	propTb->setDefaultAction(actionProp);
 	exportTb->setDefaultAction(actionExport);
 
-	//TODO: implemet it
+    //TODO: implement it
 	actionExport->setEnabled(false);
 
 	//Initialise action state (it depends on the selection)
@@ -730,17 +730,19 @@ void VariableItemWidget::clearContents()
 {
 	InfoPanelItem::clear();
     data_->clear();
+    lastSelection_.reset();
     actionAdd->setText(tr("Add &new variable"));
 }
 
 
-void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx)
+void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelIndex& /*prevIdx*/)
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "VariableItemWidget::slotItemSelected -->";
-    UiLog().dbg() << "  current: " << idx << " prev: " << prevIdx;
-    UiLog().dbg() << "  in view: " << varView->currentIndex();
+    UI_FUNCTION_LOG
 #endif
+
+    //remembers the last clicked variable
+    lastSelection_=model_->indexToInfo(sortModel_->mapToSource(idx));
 
     checkActionState();
 }
@@ -755,8 +757,7 @@ void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 
 void VariableItemWidget::checkActionState()
 {
-	QModelIndex vIndex=varView->currentIndex();
-	QModelIndex index=sortModel_->mapToSource(vIndex);
+    QModelIndex index=sortModel_->mapToSource(varView->currentIndex());
 
     if(suspended_ || !info_)
     {
@@ -831,56 +832,47 @@ void VariableItemWidget::checkActionState()
 
 void VariableItemWidget::editItem(const QModelIndex& index)
 {
-	QString name;
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+    UI_FUNCTION_LOG
+    UiLog().dbg() << " index=" << index;
+#endif
+
+    QString name;
 	QString value;
 	bool genVar;
 
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "VariableItemWidget::editItem -->" << " index:" << index;
-#endif
-
 	QModelIndex vIndex=sortModel_->mapToSource(index);
-
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "  vIndex:" << vIndex;
+    UiLog().dbg() << "vIndex=" << vIndex;
 #endif
 
     int block=-1;
-    VariableModelData* data=model_->indexToData(vIndex,block);
-
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "   block=" << block;
-#endif
-
-    //Get the data from the model
-	if(data && model_->variable(vIndex,name,value,genVar))
-	{
+    if(model_->indexToData(vIndex,block))
+    {
         Q_ASSERT(data_->count() > 0);
         Q_ASSERT(block >=0);
 
-        //Start edit dialog (will be deleted on close - deleteOnClose is set)
-        VariablePropDialog* d=new VariablePropDialog(data_,block,name,value,frozen_,this);
-        connect(d,SIGNAL(accepted()),
+#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+        UiLog().dbg() << " block=" << block;
+#endif
+
+        if(model_->variable(vIndex,name,value,genVar))
+        {
+            //Start the edit dialog (will be deleted on close - deleteOnClose is set)
+            VariablePropDialog* d=new VariablePropDialog(data_,block,name,value,frozen_,this);
+            connect(d,SIGNAL(accepted()),
                 this,SLOT(slotVariableEdited()));
-        connect(this,SIGNAL(suspendedChanged(bool)),
+            connect(this,SIGNAL(suspendedChanged(bool)),
                 d,SLOT(slotSuspendedChanged(bool)));
-        d->show();
-
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-        UiLog().dbg()  << "selected after: " <<   varView->currentIndex();
-#endif
+            d->show();
+        }
 	}
-
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "<-- editItem";
-#endif
-
 }
 
 void VariableItemWidget::duplicateItem(const QModelIndex& index)
 {
 	if(frozen_)
-			return;
+        return;
 
 #if 0
 	QString name;
@@ -974,6 +966,7 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
 	}
 }
 
+//Called when the variable has been edited in the dialogue
 void VariableItemWidget::slotVariableEdited()
 {
     VariablePropDialog* d=static_cast<VariablePropDialog*>(sender());
@@ -985,8 +978,8 @@ void VariableItemWidget::slotVariableEdited()
         //do not know if it was successful or not. The model will be
         //updated through the observer when the value will actually
         //change.
-        //We always only perform the alter variable operation on the selected
-        //node i.e. on data(0) !!!
+        //We always perform the alter variable operation on the selected
+        //node i.e. on block 0 = data(0) !!!
         data_->data(0)->alter(d->name().toStdString(),d->value().toStdString());
     }
 }
@@ -996,6 +989,8 @@ void VariableItemWidget::slotVariableAdded()
     VariableAddDialog* d=static_cast<VariableAddDialog*>(sender());
     Q_ASSERT(d);
     Q_ASSERT(data_->count() > 0);
+    //We always perform the alter variable operation on the selected
+    //node i.e. on block 0 = data(0) !!!
     data_->data(0)->alter(d->name().toStdString(),d->value().toStdString());
 }
 
@@ -1096,65 +1091,62 @@ void VariableItemWidget::toClipboard(QString txt) const
 #endif
 }
 
-
 void VariableItemWidget::slotFilterTextChanged(QString text)
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "VariableItemWidget::slotFilterTextChanged -->" <<
-                     " selected before:" <<   varView->currentIndex();
+    UI_FUNCTION_LOG
 #endif
     sortModel_->setMatchText(text);
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "selected after:" <<   varView->currentIndex() << " " <<
-    sortModel_->data(varView->currentIndex());
-    UiLog().dbg() << "<-- slotFilterTextChanged";
-#endif
+    regainSelection();
 }
 
 void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {                
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "VariableItemWidget::nodeChanged -->" <<
-                     " selected before:" <<   varView->currentIndex();
+     UI_FUNCTION_LOG
 #endif
 
     if(data_->nodeChanged(node,aspect))
     {
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-        UiLog().dbg() << " reselect currentIndex!";
-#endif
         //After any change done we need to reselect the current row. See issue ECFLOW-613.
-        reselectCurrent();
+        regainSelection();
     }
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "selected after: " <<   varView->currentIndex();
-    UiLog().dbg() << "<-- nodeChanged";
-#endif
 }
 
 void VariableItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
 {
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "VariableItemWidget::defsChanged --> selected before:" <<   varView->currentIndex();
+    UI_FUNCTION_LOG
 #endif
     if(data_->defsChanged(aspect))
     {
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-        UiLog().dbg() << " reselect currentIndex!";
-#endif
         //After any change we need to reselect the current row. See issue ECFLOW-613.
-        reselectCurrent();
+        regainSelection();
     }
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
-    UiLog().dbg() << "selected after: " <<   varView->currentIndex();
-    UiLog().dbg() << "<-- defsChanged";
-#endif
 }
 
-//This is a fairly complicated solution but reselection does not work otherwise
-//if the second column is selected initially!!!
-void  VariableItemWidget::reselectCurrent()
+//Try to regain the selection stored in lastSelection_ potentailly after a
+//full model reset!!!
+void  VariableItemWidget::regainSelection()
 {
+    if(lastSelection_)
+    {
+        lastSelection_->regainData();
+        if(lastSelection_->hasData())
+        {
+            QModelIndex idx=model_->infoToIndex(lastSelection_);
+            if(idx.isValid())
+            {
+                varView->setCurrentIndex(sortModel_->mapFromSource(idx));
+            }
+        }
+        else
+        {
+            lastSelection_.reset();
+        }
+    }
+
+#if 0
     QModelIndex idx=sortModel_->mapToSource(varView->currentIndex());
     if(idx.column() == 1)
     {
@@ -1164,6 +1156,7 @@ void  VariableItemWidget::reselectCurrent()
     QModelIndex sortIdx=sortModel_->mapFromSource(idx);
     varView->selectionModel()->setCurrentIndex(sortIdx,QItemSelectionModel::Rows|
                                    QItemSelectionModel::Select);
+#endif
 }
 
 //Register at the factory

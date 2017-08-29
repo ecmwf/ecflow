@@ -202,6 +202,7 @@ set(viewer_srcs
     VTriggerAttr.cpp
     VGenVarAttr.cpp
     VUserVarAttr.cpp
+    VariableEditor.cpp
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp
@@ -324,6 +325,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TriggerTableView.hpp
     TriggerTableWidget.hpp
     TriggeredScanner.hpp
+    VariableEditor.hpp
     VariableItemWidget.hpp
     VariableModel.hpp
     VariableModelData.hpp
@@ -392,6 +394,7 @@ set(viewer_wrap_ui_files
     TriggerItemWidget.ui
     TriggerTableWidget.ui
     VariableAddDialog.ui
+    VariableEditorWidget.ui
     VariablePropDialog.ui
     VariableItemWidget.ui
     ZombieItemWidget.ui

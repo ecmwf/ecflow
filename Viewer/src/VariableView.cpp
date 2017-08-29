@@ -11,6 +11,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QHeaderView>
 #include <QImageReader>
 #include <QItemSelectionModel>
 #include <QPainter>
@@ -290,6 +291,8 @@ VariableView::VariableView(QWidget* parent) : TreeView(parent)
 	setUniformRowHeights(true);
     //setAlternatingRowColors(true);
     setSortingEnabled(true);
+
+    header()->setSortIndicator(0,Qt::AscendingOrder);
 
 	//Context menu
 	setContextMenuPolicy(Qt::ActionsContextMenu);

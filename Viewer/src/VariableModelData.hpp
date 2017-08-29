@@ -38,20 +38,23 @@ public:
 	const std::string& name(int index) const;
     const std::string& value(int index) const;
     const std::string& value(const std::string name,bool&) const;
+    VInfo_ptr info() const {return info_;}
+    VInfo_ptr info(int index) const;
     int indexOf(const std::string& varName,bool genVar) const;
     bool isGenVar(const std::string& varName) const;
     bool isGenVar(int index) const;
 	bool isReadOnly(int index) const;
-	bool isReadOnly(const std::string& varName) const;
+    bool isReadOnly(const std::string& varName) const;
     bool isShadowed(int index) const;
     int varNum() const;
 	bool hasName(const std::string& n) const;
 	VNode* node() const;
 
+#if 0
 	void buildAlterCommand(std::vector<std::string>& cmd,
 			           const std::string& action, const std::string& type,
 			           const std::string& name,const std::string& value);
-
+#endif
     void clear();  
 	void setValue(int index,const std::string& val);
     void alter(const std::string& name,const std::string& val);
@@ -75,8 +78,6 @@ protected:
 	std::vector<Variable> genVars_;
     std::set<std::string> shadowed_;
 	VInfo_ptr info_;
-
-	static QStringList readOnlyVars_;
 };
 
 class VariableModelDataHandler : public QObject
@@ -94,6 +95,10 @@ public:
 	VariableModelData* data(int index) const;
     void findVariable(const std::string& name,const std::string& nodePath,
                                                 bool genVar,int& block,int& row) const;
+
+    void findVariable(VInfo_ptr info,int& block,int& row) const;
+    void findBlock(VInfo_ptr info,int& block) const;
+
     bool nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
     bool defsChanged(const std::vector<ecf::Aspect::Type>&);
     const std::string& value(const std::string& node,const std::string& name,bool&) const;
