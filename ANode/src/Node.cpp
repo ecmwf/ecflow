@@ -128,10 +128,17 @@ node_ptr Node::create(const std::string& node_string)
 {
    DefsStructureParser parser( node_string  );
    std::string errorMsg,warningMsg;
-   bool parsedOk = parser.doParse(errorMsg,warningMsg);
+   (void)parser.doParse(errorMsg,warningMsg);
    return parser.the_node_ptr(); // can return NULL
 }
 
+node_ptr Node::create(const std::string& node_string, std::string& error_msg)
+{
+   DefsStructureParser parser( node_string  );
+   std::string warningMsg;
+   if (!parser.doParse(error_msg,warningMsg)) return node_ptr();
+   return parser.the_node_ptr();
+}
 
 Node& Node::operator=(const Node& rhs)
 {
