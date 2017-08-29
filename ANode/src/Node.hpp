@@ -75,6 +75,7 @@ public:
 
    // parse string and create suite || family || task || alias. Can return a NULL node_ptr() for errors
    static node_ptr create(const std::string& node_string);
+   static node_ptr create(const std::string& node_string, std::string& error_msg);
 
    /// The Parent Must set the parent pointer. For a Suite however this will be NULL
    void set_parent(Node* p) { parent_ = p; }
