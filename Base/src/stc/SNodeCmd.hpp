@@ -35,21 +35,14 @@ public:
    virtual bool hasNode() const { return true; }             /// used by group command
 
 private:
-   node_ptr get_node_ptr() const;
-
-   suite_ptr suite_;
-   family_ptr family_;
-   task_ptr task_;
-   alias_ptr alias_;
+   node_ptr get_node_ptr(std::string& error_msg) const;
+   std::string the_node_str_;
 
    friend class boost::serialization::access;
    template<class Archive>
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
       ar & boost::serialization::base_object< ServerToClientCmd >( *this );
-      ar & suite_;
-      ar & family_;
-      ar & task_;
-      ar & alias_;
+      ar & the_node_str_;
    }
 };
 

@@ -26,6 +26,8 @@
 #include "NodePath.hpp"
 #include "Client.hpp"
 #include "SuiteChanged.hpp"
+#include "DefsStructureParser.hpp"
+
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
@@ -244,19 +246,18 @@ void PlugCmd::create( 	Cmd_ptr& cmd,
 // ===================================================================================
 
 MoveCmd::MoveCmd(const std::pair<std::string,std::string>& host_port, Node* src, const std::string& dest)
- : sourceSuite_(src->isSuite()),
-   sourceFamily_(src->isFamily()),
-   sourceTask_(src->isTask()),
-   src_host_(host_port.first),
+ : src_host_(host_port.first),
    src_port_(host_port.second),
    src_path_(src->absNodePath()),
-   dest_(dest) {}
+   dest_(dest)
+{
+   std::stringstream ss;
+   PrintStyle print_style(PrintStyle::MIGRATE);
+   src->print(ss);
+   the_source_node_ = ss.str();
+}
 
-MoveCmd::MoveCmd()
-: sourceSuite_(NULL),
-  sourceFamily_(NULL),
-  sourceTask_(NULL) {}
-
+MoveCmd::MoveCmd() {}
 MoveCmd::~MoveCmd(){}
 
 bool MoveCmd::equals(ClientToServerCmd* rhs) const
@@ -264,12 +265,7 @@ bool MoveCmd::equals(ClientToServerCmd* rhs) const
    MoveCmd* the_rhs = dynamic_cast<MoveCmd*>(rhs);
    if (!the_rhs) return false;
    if (dest_   != the_rhs->dest())   { return false; }
-
-   Node* theSource  = source();
-   if (theSource == NULL && the_rhs->source())         { return false; }
-   if (theSource         && the_rhs->source() == NULL) { return false; }
-   if (theSource == NULL && the_rhs->source() == NULL) { return true; }
-   if (theSource->absNodePath() != the_rhs->source()->absNodePath()) { return false; }
+   if (the_source_node_ != the_rhs->the_source_node()) return false;
    return UserCmd::equals(rhs);
 }
 
@@ -280,17 +276,17 @@ std::ostream& MoveCmd::print(std::ostream& os) const
    return user_cmd(os,ss.str());
 }
 
-Node* MoveCmd::source() const
+node_ptr MoveCmd::source() const
 {
-   if ( sourceSuite_ ) return  sourceSuite_ ;
-   if ( sourceFamily_ ) return  sourceFamily_;
-   if ( sourceTask_ ) return  sourceTask_;
-   return NULL;
+   DefsStructureParser parser(the_source_node_);
+   std::string error_msg,warningMsg;
+   if (!parser.doParse(error_msg,warningMsg)) return node_ptr();
+   return parser.the_node_ptr();
 }
 
 bool MoveCmd::check_source() const
 {
-   if ( sourceSuite_ || sourceFamily_ || sourceTask_ ) return  true ;
+   if ( !the_source_node_.empty() ) return  true ;
    return false;
 }
 
@@ -306,6 +302,10 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
    if (!check_source()) {
       throw std::runtime_error("Plug(Move) command failed. No source specified");
    }
+   node_ptr source_node = source();
+   if (!source_node) {
+      throw std::runtime_error("Plug(Move) command failed. Could not extract source");
+   }
 
    // destNode can be NULL when we are moving a suite
    node_ptr destNode;
@@ -313,7 +313,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
 
       if (!as->defs())  throw std::runtime_error( "No definition in server");
 
-      destNode =  as->defs()->findAbsNode(dest_);
+      destNode = as->defs()->findAbsNode(dest_);
       if (!destNode.get()) {
          std::string errorMsg = "Plug(Move) command failed. The destination path "; errorMsg += dest_;
          errorMsg += " does not exist on server";
@@ -321,7 +321,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       }
    }
    else {
-      if (!source()->isSuite()) {
+      if (!source_node->isSuite()) {
          throw std::runtime_error("::Destination path can only be empty when moving a whole suite to a new server");
       }
    }
@@ -337,13 +337,13 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
 
       // check its ok to add
       std::string errorMsg;
-      if (!thedestNode->isAddChildOk(source(),errorMsg) ) {
+      if (!thedestNode->isAddChildOk(source_node.get(),errorMsg) ) {
          std::string msg = "Plug(Move) command failed. "; msg += errorMsg;
          throw std::runtime_error( msg) ;
       }
 
       // pass ownership
-      if (!thedestNode->addChild( node_ptr( source() ) )) {
+      if (!thedestNode->addChild( source_node )) {
          // This should never fail !!!! else we have lost/ and leaked source node !!!!
          throw std::runtime_error("Fatal error plug(move) command failed.") ;
       }
@@ -352,9 +352,9 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
    }
    else {
 
-      if (!sourceSuite_)  throw std::runtime_error("Source node was expected to be a suite");
+      if (!source_node->isSuite())  throw std::runtime_error("Source node was expected to be a suite");
 
-      suite_ptr the_source_suite(sourceSuite_);        // pass ownership to suite_ptr
+      suite_ptr the_source_suite( source_node->isSuite() );        // pass ownership to suite_ptr
 
       // The sourceSuite may be in a handle or pre-registered suite
       SuiteChanged suiteChanged(the_source_suite);
@@ -366,8 +366,8 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       }
       else {
 
-         if (as->defs()->findSuite(the_source_suite->name())) {
-            std::stringstream ss; ss << "Suite of name " <<  the_source_suite->name() << " already exists\n";
+         if (as->defs()->findSuite(source_node->name())) {
+            std::stringstream ss; ss << "Suite of name " <<  source_node->name() << " already exists\n";
             throw std::runtime_error( ss.str() );
          }
 
@@ -375,16 +375,13 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       }
 
       /// A bit of hack, since need a way of getting a node_ptr from a Node*
-      add_node_for_edit_history(as,the_source_suite->absNodePath());
+      add_node_for_edit_history(as,source_node->absNodePath());
    }
 
    // Updated defs state
    if (as->defs()) as->defs()->set_most_significant_state();
 
    // Ownership for sourceSuite_ has been passed on.
-   sourceSuite_ = NULL;
-   sourceFamily_ = NULL;
-   sourceTask_ =  NULL;
 
    return PreAllocatedReply::ok_cmd();
 }

@@ -17,12 +17,10 @@
 #include "SNodeCmd.hpp"
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
-#include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
-#include "Alias.hpp"
+#include "Node.hpp"
 #include "AbstractServer.hpp"
 #include "PrintStyle.hpp"
+#include "DefsStructureParser.hpp"
 
 using namespace std;
 using namespace boost;
@@ -38,42 +36,21 @@ SNodeCmd::SNodeCmd(AbstractServer* as,node_ptr node)
 
 void SNodeCmd::init(AbstractServer* as, node_ptr node)
 {
-   suite_.reset();
-   family_.reset();
-   task_.reset();
-   alias_.reset();
-
+   the_node_str_.clear();
    if (node.get()) {
-      if (node->isSuite()) {
-         suite_ = boost::dynamic_pointer_cast<Suite>(node);
-      }
-      else if (node->isFamily()) {
-         family_ = boost::dynamic_pointer_cast<Family>(node);
-      }
-      else if (node->isTask()) {
-         task_ = boost::dynamic_pointer_cast<Task>(node);
-      }
-      else if (node->isAlias()) {
-         alias_ = boost::dynamic_pointer_cast<Alias>(node);
-      }
+      std::stringstream ss;
+      PrintStyle print_style(PrintStyle::MIGRATE);
+      node->print(ss);
+      the_node_str_ = ss.str();
    }
 }
 
-node_ptr SNodeCmd::get_node_ptr() const
+node_ptr SNodeCmd::get_node_ptr(std::string& error_msg) const
 {
-   if (suite_.get()) {
-      return boost::dynamic_pointer_cast<Node>(suite_);
-   }
-   else if (family_.get()) {
-      return boost::dynamic_pointer_cast<Node>(family_);
-   }
-   else if (task_.get()) {
-      return boost::dynamic_pointer_cast<Node>(task_);
-   }
-   else if (alias_.get()) {
-      return boost::dynamic_pointer_cast<Node>(alias_);
-   }
-   return node_ptr();
+   DefsStructureParser parser(the_node_str_);
+   std::string warningMsg;
+   if (!parser.doParse(error_msg,warningMsg)) return node_ptr();
+   return parser.the_node_ptr();
 }
 
 bool SNodeCmd::equals(ServerToClientCmd* rhs) const
@@ -87,7 +64,8 @@ bool SNodeCmd::equals(ServerToClientCmd* rhs) const
 std::ostream& SNodeCmd::print(std::ostream& os) const
 {
    os << "cmd:SNodeCmd [ ";
-   node_ptr node = get_node_ptr();
+   std::string error_msg;
+   node_ptr node = get_node_ptr(error_msg);
    if (node.get()) os << node->absNodePath();
    else       os << "node == NULL";
    os << " ]";
@@ -99,10 +77,13 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
 {
    if (debug) std::cout << "  SNodeCmd::handle_server_response\n";
 
-   node_ptr node = get_node_ptr();
+   std::string error_msg;
+   node_ptr node = get_node_ptr(error_msg);
    if ( !node.get() ) {
       std::stringstream ss;
-      ss << "SNodeCmd::handle_server_response: Error Node could not be retrieved from server. Request "; cts_cmd->print(ss); ss << " failed.\n";
+      ss << "SNodeCmd::handle_server_response: Error Node could not be retrieved from server. Request ";
+      cts_cmd->print(ss); ss << " failed.\n";
+      ss << error_msg;
       throw std::runtime_error(ss.str());
    }
 
@@ -127,12 +108,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
          std::cout << *suite << "\n";
          return true;
       }
-      Family* fam = node->isFamily();
-      if (fam)  std::cout << *fam << "\n";
-      Task* task = node->isTask();
-      if (task) std::cout << *task << "\n";
-      Alias* alias = node->isAlias();
-      if (alias) std::cout << *alias << "\n";
+      node->print(std::cout);
    }
    else {
       server_reply.set_client_node( node );
