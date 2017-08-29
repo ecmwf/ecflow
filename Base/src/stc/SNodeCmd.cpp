@@ -20,7 +20,6 @@
 #include "Node.hpp"
 #include "AbstractServer.hpp"
 #include "PrintStyle.hpp"
-#include "DefsStructureParser.hpp"
 
 using namespace std;
 using namespace boost;
@@ -38,19 +37,13 @@ void SNodeCmd::init(AbstractServer* as, node_ptr node)
 {
    the_node_str_.clear();
    if (node.get()) {
-      std::stringstream ss;
-      PrintStyle print_style(PrintStyle::MIGRATE);
-      node->print(ss);
-      the_node_str_ = ss.str();
+      the_node_str_ = node->print( PrintStyle::MIGRATE );
    }
 }
 
-node_ptr SNodeCmd::get_node_ptr(std::string& error_msg) const
+node_ptr SNodeCmd::get_node_ptr() const
 {
-   DefsStructureParser parser(the_node_str_);
-   std::string warningMsg;
-   if (!parser.doParse(error_msg,warningMsg)) return node_ptr();
-   return parser.the_node_ptr();
+   return Node::create(the_node_str_ );
 }
 
 bool SNodeCmd::equals(ServerToClientCmd* rhs) const
@@ -64,8 +57,7 @@ bool SNodeCmd::equals(ServerToClientCmd* rhs) const
 std::ostream& SNodeCmd::print(std::ostream& os) const
 {
    os << "cmd:SNodeCmd [ ";
-   std::string error_msg;
-   node_ptr node = get_node_ptr(error_msg);
+   node_ptr node = get_node_ptr();
    if (node.get()) os << node->absNodePath();
    else       os << "node == NULL";
    os << " ]";
@@ -77,13 +69,11 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
 {
    if (debug) std::cout << "  SNodeCmd::handle_server_response\n";
 
-   std::string error_msg;
-   node_ptr node = get_node_ptr(error_msg);
+   node_ptr node = get_node_ptr();
    if ( !node.get() ) {
       std::stringstream ss;
       ss << "SNodeCmd::handle_server_response: Error Node could not be retrieved from server. Request ";
       cts_cmd->print(ss); ss << " failed.\n";
-      ss << error_msg;
       throw std::runtime_error(ss.str());
    }
 

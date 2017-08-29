@@ -26,7 +26,6 @@
 #include "NodePath.hpp"
 #include "Client.hpp"
 #include "SuiteChanged.hpp"
-#include "DefsStructureParser.hpp"
 
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
@@ -246,16 +245,12 @@ void PlugCmd::create( 	Cmd_ptr& cmd,
 // ===================================================================================
 
 MoveCmd::MoveCmd(const std::pair<std::string,std::string>& host_port, Node* src, const std::string& dest)
- : src_host_(host_port.first),
+ : the_source_node_(src->print(PrintStyle::MIGRATE)),
+   src_host_(host_port.first),
    src_port_(host_port.second),
    src_path_(src->absNodePath()),
    dest_(dest)
-{
-   std::stringstream ss;
-   PrintStyle print_style(PrintStyle::MIGRATE);
-   src->print(ss);
-   the_source_node_ = ss.str();
-}
+{}
 
 MoveCmd::MoveCmd() {}
 MoveCmd::~MoveCmd(){}
@@ -278,10 +273,7 @@ std::ostream& MoveCmd::print(std::ostream& os) const
 
 node_ptr MoveCmd::source() const
 {
-   DefsStructureParser parser(the_source_node_);
-   std::string error_msg,warningMsg;
-   if (!parser.doParse(error_msg,warningMsg)) return node_ptr();
-   return parser.the_node_ptr();
+   return Node::create(the_source_node_);
 }
 
 bool MoveCmd::check_source() const

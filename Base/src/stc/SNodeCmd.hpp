@@ -35,7 +35,7 @@ public:
    virtual bool hasNode() const { return true; }             /// used by group command
 
 private:
-   node_ptr get_node_ptr(std::string& error_msg) const;
+   node_ptr get_node_ptr() const;
    std::string the_node_str_;
 
    friend class boost::serialization::access;
