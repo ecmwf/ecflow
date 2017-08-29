@@ -1,0 +1,11 @@
+family test_local_actions # state:queued suspended:1
+   defstatus suspended
+   edit REMOTE_HOST 'eurydice'
+   edit WORKDIR ''
+   task action1 # state:queued suspended:1
+	  defstatus suspended
+   family f1 # state:queued suspended:1
+	  task a # state:queued suspended:1
+	  task b # state:queued suspended:1
+   endfamily
+endfamily

@@ -31,7 +31,8 @@ using namespace boost;
 
 /////////////////////////////////////////////////////////////////////////////////////
 DefsStructureParser::DefsStructureParser(Defs* defsfile,const std::string& file_name)
-: infile_(file_name),
+: parsing_node_string_(false),
+  infile_(file_name),
   defsfile_(defsfile),
   defsParser_(this),
   lineNumber_(0),
@@ -47,12 +48,30 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile,const std::string& file_
 }
 
 DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str, bool)
-: infile_(""),
+: parsing_node_string_(false),
+  infile_(""),
   defsfile_(defsfile),
   defsParser_(this),
   lineNumber_(0),
   file_type_(PrintStyle::DEFS),
   defs_as_string_(str)
+{
+   if ( defs_as_string_.empty() ) {
+      std::stringstream ss;
+      ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";
+      ss << Version::description() << "\n";
+      error_ = ss.str();
+   }
+}
+
+DefsStructureParser::DefsStructureParser(const std::string& defs_node_string)
+: parsing_node_string_(true),
+  infile_(""),
+  defsfile_(NULL),
+  defsParser_(this,true/* only parse nodes */),
+  lineNumber_(0),
+  file_type_(PrintStyle::MIGRATE),
+  defs_as_string_(defs_node_string )
 {
    if ( defs_as_string_.empty() ) {
       std::stringstream ss;
@@ -87,11 +106,12 @@ bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
       }
    }
 
-   if (file_type_ == PrintStyle::MIGRATE) {
+   if (file_type_ == PrintStyle::MIGRATE || parsing_node_string_) {
       warningMsg += faults_;
       return true;
    }
 
+   // Note:: if parsing_node_string_ == false, then defsfile_ == NULL
  	// Now parse the trigger/complete expressions and resolve in-limits
 	return defsfile_->check(errorMsg,warningMsg);
 }
