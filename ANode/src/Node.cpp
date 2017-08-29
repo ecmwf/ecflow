@@ -130,11 +130,12 @@ void Node::delete_attributes() {
 
 node_ptr Node::create(const std::string& node_string)
 {
-   DefsStructureParser parser( node_string );
+   DefsStructureParser parser( node_string  );
    std::string errorMsg,warningMsg;
    bool parsedOk = parser.doParse(errorMsg,warningMsg);
    return parser.the_node_ptr(); // can return NULL
 }
+
 
 Node& Node::operator=(const Node& rhs)
 {
