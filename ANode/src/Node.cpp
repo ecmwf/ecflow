@@ -37,6 +37,7 @@
 #include "SuiteChanged.hpp"
 #include "CmdContext.hpp"
 #include "AbstractObserver.hpp"
+#include "DefsStructureParser.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -125,6 +126,14 @@ void Node::delete_attributes() {
    delete time_dep_attrs_;
    delete child_attrs_;
    delete misc_attrs_;
+}
+
+node_ptr Node::create(const std::string& node_string)
+{
+   DefsStructureParser parser( node_string );
+   std::string errorMsg,warningMsg;
+   bool parsedOk = parser.doParse(errorMsg,warningMsg);
+   return parser.the_node_ptr(); // can return NULL
 }
 
 Node& Node::operator=(const Node& rhs)
@@ -1480,6 +1489,12 @@ std::ostream& Node::print(std::ostream& os) const
    if (autoCancel_) autoCancel_->print(os);
 
    return os;
+}
+
+std::string Node::print(PrintStyle::Type_t p_style) const
+{
+   PrintStyle print_style(p_style);
+   return to_string();
 }
 
 std::string Node::to_string() const
