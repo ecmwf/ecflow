@@ -41,9 +41,9 @@ void SNodeCmd::init(AbstractServer* as, node_ptr node)
    }
 }
 
-node_ptr SNodeCmd::get_node_ptr() const
+node_ptr SNodeCmd::get_node_ptr(std::string& error_msg) const
 {
-   return Node::create(the_node_str_ );
+   return Node::create(the_node_str_,error_msg);
 }
 
 bool SNodeCmd::equals(ServerToClientCmd* rhs) const
@@ -57,7 +57,8 @@ bool SNodeCmd::equals(ServerToClientCmd* rhs) const
 std::ostream& SNodeCmd::print(std::ostream& os) const
 {
    os << "cmd:SNodeCmd [ ";
-   node_ptr node = get_node_ptr();
+   std::string error_msg;
+   node_ptr node = get_node_ptr(error_msg);
    if (node.get()) os << node->absNodePath();
    else       os << "node == NULL";
    os << " ]";
@@ -69,11 +70,13 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
 {
    if (debug) std::cout << "  SNodeCmd::handle_server_response\n";
 
-   node_ptr node = get_node_ptr();
+   std::string error_msg;
+   node_ptr node = get_node_ptr(error_msg);
    if ( !node.get() ) {
       std::stringstream ss;
       ss << "SNodeCmd::handle_server_response: Error Node could not be retrieved from server. Request ";
       cts_cmd->print(ss); ss << " failed.\n";
+      ss << error_msg;
       throw std::runtime_error(ss.str());
    }
 
@@ -98,7 +101,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
          std::cout << *suite << "\n";
          return true;
       }
-      node->print(std::cout);
+      node->print(std::cout); cout << "\n";
    }
    else {
       server_reply.set_client_node( node );

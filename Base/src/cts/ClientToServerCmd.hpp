@@ -1781,8 +1781,8 @@ public:
    MoveCmd();
    virtual ~MoveCmd();
 
-   node_ptr source() const;
-   const std::string& the_source_node() const { return the_source_node_;}
+   Node* source() const;
+   //const std::string& the_source_node() const { return the_source_node_;}
    const std::string& dest() const { return dest_; }
 
    virtual bool handleRequestIsTestable() const { return false ;}
@@ -1804,7 +1804,9 @@ private:
    bool check_source() const;
 
 private:
-   std::string the_source_node_;
+   mutable Suite*  sourceSuite_; // only one is set, gets round un-registered class exception
+   mutable Family* sourceFamily_;// only one is set, gets round un-registered class exception
+   mutable Task*   sourceTask_;  // only one is set, gets round un-registered class exception
    std::string src_host_;
    std::string src_port_;
    std::string src_path_;
@@ -1814,7 +1816,9 @@ private:
    template<class Archive>
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
       ar & boost::serialization::base_object< UserCmd >( *this );
-      ar & the_source_node_;
+      ar & sourceSuite_ ;
+      ar & sourceFamily_;
+      ar & sourceTask_;
       ar & src_host_;
       ar & src_port_;
       ar & src_path_;
