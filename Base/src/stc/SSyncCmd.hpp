@@ -73,6 +73,7 @@ private:
 
    void reset_data_members(unsigned int client_state_change_no, bool sync_suite_clock);
    void full_sync(unsigned int client_handle,AbstractServer* as);
+   virtual void cleanup() { std::string().swap(server_defs_); } /// run in the server, after command send to client
 
 private:
 
