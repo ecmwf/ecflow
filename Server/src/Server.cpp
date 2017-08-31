@@ -343,6 +343,9 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
          outbound_response_.set_cmd( PreAllocatedReply::error_cmd( e.what()  ));
       }
 
+      // Do any necessary clean up after inbound_request_ has run. i.e like re-claiming memory
+      inbound_request_.cleanup();
+
       // Release >= 4.0.6  More reliable to always respond back. Get more accurate logs
       // However allow old/new client to deal with shutdown of socket:
       // See: void Client::handle_read() See: ECFLOW-157, ECFLOW-169
@@ -394,6 +397,9 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
       log(Log::ERR,ss.str());
       return;
    }
+
+   // Do any necessary clean up after outbound_response_  has run. i.e like re-claiming memory
+   outbound_response_.cleanup();
 
    (void)shutdown_socket(conn,"Server::handle_write:");
 

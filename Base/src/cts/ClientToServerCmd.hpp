@@ -69,6 +69,9 @@ public:
    /// doHandleRequest. This function can throw exceptions. std::runtime_error
    STC_Cmd_ptr handleRequest(AbstractServer*) const;
 
+   /// After handleRequest() has run, this function can be used reclaim memory
+   virtual void cleanup() {}
+
    /// Returns true if handleRequest is testable. Only used in TEST
    virtual bool handleRequestIsTestable() const { return true ;}
 
@@ -883,6 +886,7 @@ public:
 private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after handlerequest
 
    std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
 
@@ -1086,6 +1090,7 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
 private:
    mutable std::vector<std::string>  paths_;  // mutable to allow swap to clear & reclaim memory, as soon as possible
@@ -1169,6 +1174,7 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
 private:
    std::vector<std::string> paths_;
@@ -1360,6 +1366,7 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
 private:
    std::vector<std::string> paths_;
@@ -1422,6 +1429,7 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
 private:
    std::vector<std::string> paths_;
@@ -1520,6 +1528,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    STC_Cmd_ptr alter_server_state(AbstractServer*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
    void createAdd(    Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
    void createDelete( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const;
@@ -1661,6 +1670,7 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   virtual void cleanup(){ std::vector<std::string>().swap(user_file_contents_);} /// run in the server, after doHandleRequest
 
 private:
    EditType      edit_type_;
