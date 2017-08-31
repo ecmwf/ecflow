@@ -43,8 +43,8 @@ void SSyncCmd::reset_data_members(unsigned int client_state_change_no, bool sync
 {
    full_defs_ = false;
    incremental_changes_.init(client_state_change_no,sync_suite_clock); // persisted, used for returning INCREMENTAL changes
-   server_defs_ = defs_ptr();                         // persisted, used for returning FULL definition
-   full_server_defs_as_string_.clear();               // semi-persisted, i.e on load & not on saving
+   server_defs_.clear();                         // persisted, used for returning FULL definition
+   full_server_defs_as_string_.clear();          // semi-persisted, i.e on load & not on saving
 }
 
 void SSyncCmd::init(
@@ -221,7 +221,10 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as)
 #endif
    }
    else {
-      server_defs_ = the_server_defs;
+      PrintStyle print_style(PrintStyle::MIGRATE);
+      std::stringstream ss;
+      the_server_defs->print(ss);
+      server_defs_ = ss.str();
    }
 
 #ifdef DEBUG_SERVER_SYNC
@@ -256,16 +259,19 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
    // ****************************************************
    // On the client side
    // ****************************************************
-   if (server_defs_.get()) {
+   if (!server_defs_.empty()) {
        // *FULL* sync
        // to keep pace with the state changes. Passed back later on, get further changes
        // If non zero handle will contain suites specified in the client handle, including their max change numbers
-       server_reply.client_defs_ = server_defs_;
+       defs_ptr server_defs = Defs::create();
+       server_defs->restore_from_string(server_defs_);  // this can throw
+
+       server_reply.client_defs_ = server_defs;
        server_reply.set_sync( true );
        server_reply.set_full_sync( true );
-       if (debug) cout << "  SSyncCmd::do_sync::*FULL sync*, client side state/modify numbers(" << server_defs_->state_change_no() << "," << server_defs_->modify_change_no() << ")\n";
+       if (debug) cout << "  SSyncCmd::do_sync::*FULL sync*, client side state/modify numbers(" << server_defs->state_change_no() << "," << server_defs->modify_change_no() << ")\n";
 #ifdef DEBUG_CLIENT_SYNC
-       cout << "SSyncCmd::do_sync: defs *FULL sync*, client side state/modify numbers(" << server_defs_->state_change_no() << "," << server_defs_->modify_change_no() << ")\n";
+       cout << "SSyncCmd::do_sync: defs *FULL sync*, client side state/modify numbers(" << server_defs->state_change_no() << "," << server_defs->modify_change_no() << ")\n";
 #endif
        return true;
     }

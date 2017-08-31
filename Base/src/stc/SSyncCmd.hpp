@@ -78,7 +78,7 @@ private:
 
    bool      full_defs_;
    DefsDelta incremental_changes_;
-   defs_ptr  server_defs_;                  // for returning a subset of the suites
+   std::string server_defs_;               // for returning a subset of the suites
    std::string full_server_defs_as_string_;
 
    friend class boost::serialization::access;
@@ -95,9 +95,9 @@ private:
       /// The alternative is to clone all the suites, which is very expensive
       ar & server_defs_;  // large scale changes, if non zero handle, a small subset of the suites
 
-      // when full_defs_ is set server_defs_ will be empty.
+      // when full_defs_ is set 'server_defs_' will be empty.
       if (Archive::is_saving::value) {
-         // Avoid copying the string. As this could be very large  > 60MB
+         // Avoid copying the string. As this could be very large
          if (full_defs_) {
             ar & DefsCache::full_server_defs_as_string_;
          }
