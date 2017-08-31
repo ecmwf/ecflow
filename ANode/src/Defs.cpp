@@ -1282,6 +1282,19 @@ bool Defs::checkInvariants(std::string& errorMsg) const
 			errorMsg += ss.str();
 			return false;
 		}
+      if (!suiteVec_[s]->isSuite() ) {
+          std::stringstream ss;
+          ss << "Defs::checkInvariants suite isSuite() return NULL ? for suite " << suiteVec_[s]->name();
+          errorMsg += ss.str();
+          return false;
+      }
+		if (suiteVec_[s]->isSuite() != suiteVec_[s]->suite()) {
+         std::stringstream ss;
+         ss << "Defs::checkInvariants  suiteVec_[s]->isSuite(" << suiteVec_[s]->isSuite() << ") != suiteVec_[s]->suite(" << suiteVec_[s]->suite() << ") ";
+         ss << "for suite " << suiteVec_[s]->name();
+         errorMsg += ss.str();
+         return false;
+		}
 		if (!suiteVec_[s]->checkInvariants(errorMsg)) {
 			return false;
 		}
