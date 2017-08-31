@@ -28,6 +28,7 @@ public:
 
  	virtual std::string error() const { return error_msg_;}  /// Used by test
 	virtual bool ok() const { return false; }                /// Used by group command
+   virtual void cleanup() { error_msg_.clear();}            /// run in the server, after command send to client
 
 private:
  	std::string error_msg_;

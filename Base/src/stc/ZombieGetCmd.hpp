@@ -32,6 +32,7 @@ public:
   	virtual bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const;
   	virtual std::ostream& print(std::ostream& os) const;
 	virtual bool equals(ServerToClientCmd*) const;
+   virtual void cleanup() { std::vector<Zombie>().swap(zombies_);} /// run in the server, after command send to client
 
 private:
 	std::vector<Zombie> zombies_;
