@@ -311,8 +311,6 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
    node_ptr destNode;
    if (!dest_.empty()) {
 
-      if (!as->defs())  throw std::runtime_error( "No definition in server");
-
       destNode =  as->defs()->findAbsNode(dest_);
       if (!destNode.get()) {
          std::string errorMsg = "Plug(Move) command failed. The destination path "; errorMsg += dest_;
@@ -359,27 +357,14 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       // The sourceSuite may be in a handle or pre-registered suite
       SuiteChanged suiteChanged(the_source_suite);
 
-      if (!as->defs()) {
-         defs_ptr newDefs = Defs::create();
-         newDefs->addSuite( the_source_suite );
-         as->updateDefs( newDefs, true /*force*/ );    // force is mute, since we adding a new defs in the server
-      }
-      else {
-
-         if (as->defs()->findSuite(the_source_suite->name())) {
-            std::stringstream ss; ss << "Suite of name " <<  the_source_suite->name() << " already exists\n";
-            throw std::runtime_error( ss.str() );
-         }
-
-         as->defs()->addSuite( the_source_suite ) ;
-      }
+      as->defs()->addSuite( the_source_suite ) ;
 
       /// A bit of hack, since need a way of getting a node_ptr from a Node*
       add_node_for_edit_history(as,the_source_suite->absNodePath());
    }
 
    // Updated defs state
-   if (as->defs()) as->defs()->set_most_significant_state();
+   as->defs()->set_most_significant_state();
 
    // Ownership for sourceSuite_ has been passed on.
    sourceSuite_ = NULL;
