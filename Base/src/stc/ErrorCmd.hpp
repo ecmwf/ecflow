@@ -26,9 +26,9 @@ public:
 	virtual bool equals(ServerToClientCmd*) const;
   	virtual bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const;
 
- 	virtual std::string error() const { return error_msg_;}  /// Used by test
-	virtual bool ok() const { return false; }                /// Used by group command
-   virtual void cleanup() { error_msg_.clear();}            /// run in the server, after command send to client
+ 	virtual std::string error() const { return error_msg_;}   /// Used by test
+	virtual bool ok() const { return false; }                 /// Used by group command
+   virtual void cleanup() { std::string().swap(error_msg_);} /// run in the server, after command send to client
 
 private:
  	std::string error_msg_;
