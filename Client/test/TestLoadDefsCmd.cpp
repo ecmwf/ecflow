@@ -86,8 +86,6 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 	BOOST_CHECK_MESSAGE( requestStatus, "Handle Request " << cmd << " returned NULL\n");
 	BOOST_CHECK_MESSAGE( requestStatus->error().empty(), requestStatus->error());
   	BOOST_CHECK_MESSAGE( secondDefs.suiteVec().size() == noOfSuites,"Merge failed to add suites");
- 	BOOST_CHECK_MESSAGE( secondDefs.externs().size() == noOfExterns,"Merge failed to add externs");
- 	BOOST_CHECK_MESSAGE( firstDefs->suiteVec().size() == 0,          "Merge failed to remove suites");
 
 
  	// Modify the Defs file to add a task/trigger that references the undefined
