@@ -105,8 +105,8 @@ bool LoadDefsCmd::equals(ClientToServerCmd* rhs) const
 STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().load_defs_++;
-
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
+
 	if (defs_) {
 
 		// After the updateDefs, defs_ will be left with NO suites.
