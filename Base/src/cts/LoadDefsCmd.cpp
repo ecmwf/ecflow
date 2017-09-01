@@ -104,7 +104,7 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const
 
 		LOG_ASSERT(defs->suiteVec().size() == 0,"Expected suites to be transferred to server defs");
  	}
-   LOG_ASSERT(as->defs()->externs().size() == 0,"Expected server to have no externs");
+    LOG_ASSERT(as->defs()->externs().size() == 0,"Expected server to have no externs");
 
 	return PreAllocatedReply::ok_cmd();
 }

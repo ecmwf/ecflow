@@ -47,50 +47,51 @@ struct null_deleter { void operator()(void const *) const{} };
 
 static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_vec, MockServer* mock_server)
 {
-	std::vector<std::string> suite_names; suite_names.push_back("suiteName");
+   std::vector<std::string> suite_names; suite_names.push_back("suiteName");
    MyDefsFixture fixture;
    defs_ptr client_defs = fixture.create_defs();
+   client_defs->clear_externs(); // server defs should not have externs
 
-	// Client --> Server commands
-	// make sure begin cmd is first. As this will init calendar. + other commands rely on it
-	// i.e RequeueNodeCmd assumes calendar has been initialized
+   // Client --> Server commands
+   // make sure begin cmd is first. As this will init calendar. + other commands rely on it
+   // i.e RequeueNodeCmd assumes calendar has been initialized
    cmd_vec.push_back( Cmd_ptr( new ShowCmd()));
    cmd_vec.push_back( Cmd_ptr( new ServerVersionCmd()));
 	cmd_vec.push_back( Cmd_ptr( new ReplaceNodeCmd("suiteName",false,client_defs, true)));
-	cmd_vec.push_back( Cmd_ptr( new LoadDefsCmd(mock_server->defs(),true/*force*/)));
+	cmd_vec.push_back( Cmd_ptr( new LoadDefsCmd(client_defs,true/*force*/)));
    cmd_vec.push_back( Cmd_ptr( new BeginCmd("suiteName")));  // after loading new defs, must call begin, for downstream cmds
    cmd_vec.push_back( Cmd_ptr( new BeginCmd("EmptySuite"))); // after loading new defs, must call begin for downstream cmds
 	cmd_vec.push_back( Cmd_ptr( new LogMessageCmd("LogMessageCmd"))  );
 	cmd_vec.push_back( Cmd_ptr( new LogCmd(LogCmd::CLEAR)));    // server replies back OK/Error Cmd
    cmd_vec.push_back( Cmd_ptr( new LogCmd(LogCmd::GET)));      // server replies back OK/Error | SStringCmd
    cmd_vec.push_back( Cmd_ptr( new LogCmd(LogCmd::PATH)));     // server replies back Error |SStringCmd
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RESTORE_DEFS_FROM_CHECKPT)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RESTORE_DEFS_FROM_CHECKPT)));
    cmd_vec.push_back( Cmd_ptr( new CheckPtCmd()));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::PING)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::DEBUG_SERVER_ON)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::DEBUG_SERVER_OFF)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::SHUTDOWN_SERVER)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::SHUTDOWN_SERVER)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS_SERVER)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS_RESET)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::SUITES)));
-	cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::NEWS,0,0,0)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::SUITES)));
+   cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::NEWS,0,0,0)));
    cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC,0,0,0)));
    cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC_CLOCK,0,0,0)));
    cmd_vec.push_back( Cmd_ptr( new CSyncCmd(0))); // SYNC_FULL
-	cmd_vec.push_back( Cmd_ptr( new RequeueNodeCmd("/suiteName",RequeueNodeCmd::NO_OPTION)));
-	cmd_vec.push_back( Cmd_ptr( new OrderNodeCmd("/suiteName",NOrder::ALPHA)));
-	cmd_vec.push_back( Cmd_ptr( new RunNodeCmd("/suiteName", true/* force for test */, true /* for test */)));
-	cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND,"EmptySuite")));
-	cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::RESUME,"EmptySuite")));
-	cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::KILL,"EmptySuite")));
-	cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::STATUS,"EmptySuite")));
+   cmd_vec.push_back( Cmd_ptr( new RequeueNodeCmd("/suiteName",RequeueNodeCmd::NO_OPTION)));
+   cmd_vec.push_back( Cmd_ptr( new OrderNodeCmd("/suiteName",NOrder::ALPHA)));
+   cmd_vec.push_back( Cmd_ptr( new RunNodeCmd("/suiteName", true/* force for test */, true /* for test */)));
+   cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND,"EmptySuite")));
+   cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::RESUME,"EmptySuite")));
+   cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::KILL,"EmptySuite")));
+   cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::STATUS,"EmptySuite")));
    cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::CHECK,"/suiteName")));
    cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::CHECK,"")));  // check the full defs
    cmd_vec.push_back( Cmd_ptr( new PathsCmd(PathsCmd::EDIT_HISTORY,"/suiteName")));  // check the full defs
@@ -98,7 +99,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET,"/suiteName")));
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET_STATE,"/suiteName")));
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::MIGRATE,"/suiteName")));
- 	cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::CHECK_JOB_GEN_ONLY,"EmptySuite"))); // will *reset* begin
+   cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::CHECK_JOB_GEN_ONLY,"EmptySuite"))); // will *reset* begin
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET,"")));  // return the full defs
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET_STATE,"")));
    cmd_vec.push_back( Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::MIGRATE,"")));
@@ -139,16 +140,16 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 
 	boost::shared_ptr<GroupCTSCmd>  theGroupCmd = boost::make_shared<GroupCTSCmd>();
    theGroupCmd->addChild(  Cmd_ptr( new ServerVersionCmd())  );
- 	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::PING))  );
-	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER))  );
-	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::SHUTDOWN_SERVER))  );
-	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER))  );
-	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::PING))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::SHUTDOWN_SERVER))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::SERVER_LOAD))  );
-	theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND,"EmptySuite"))  );
-	theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::RESUME,"EmptySuite"))  );
+   theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND,"EmptySuite"))  );
+   theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::RESUME,"EmptySuite"))  );
    theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::KILL,"EmptySuite"))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET,"EmptySuite"))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET_STATE,"EmptySuite"))  );
@@ -164,11 +165,11 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	theGroupCmd->addChild(  Cmd_ptr( new OrderNodeCmd("/suiteName",NOrder::ALPHA))  );
 	theGroupCmd->addChild(  Cmd_ptr( new RunNodeCmd("/suiteName",true/*force for test*/, true /* for test */))  );
    theGroupCmd->addChild(  Cmd_ptr( new InitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1))  );
-	theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::CHECK_JOB_GEN_ONLY,"EmptySuite"))  ); // will *reset* begin
-	theGroupCmd->addChild(  Cmd_ptr( new EventCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"eventName"))  );
-	theGroupCmd->addChild(  Cmd_ptr( new MeterCmd("suiteName/familyName/heir_familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"myMeter",100))  );
-	theGroupCmd->addChild(  Cmd_ptr( new CompleteCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1))  );
-	theGroupCmd->addChild(  Cmd_ptr( new AbortCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::CHECK_JOB_GEN_ONLY,"EmptySuite"))  ); // will *reset* begin
+   theGroupCmd->addChild(  Cmd_ptr( new EventCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"eventName"))  );
+   theGroupCmd->addChild(  Cmd_ptr( new MeterCmd("suiteName/familyName/heir_familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"myMeter",100))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CompleteCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1))  );
+   theGroupCmd->addChild(  Cmd_ptr( new AbortCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET_STATE))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::MIGRATE))  );
@@ -198,8 +199,8 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    stc_cmd_vec.push_back( STC_Cmd_ptr( new BlockClientZombieCmd(ecf::Child::ECF)));
    stc_cmd_vec.push_back( STC_Cmd_ptr( new SStringCmd("Dummy contents")));
    stc_cmd_vec.push_back( STC_Cmd_ptr( new SServerLoadCmd("/path/to/log_file")));
- 	stc_cmd_vec.push_back( STC_Cmd_ptr( new SSyncCmd(0,0,0,mock_server )));
- 	stc_cmd_vec.push_back( STC_Cmd_ptr( new SNewsCmd(0,0,0,mock_server)));
+   stc_cmd_vec.push_back( STC_Cmd_ptr( new SSyncCmd(0,0,0,mock_server )));
+   stc_cmd_vec.push_back( STC_Cmd_ptr( new SNewsCmd(0,0,0,mock_server)));
    stc_cmd_vec.push_back( STC_Cmd_ptr( new DefsCmd(mock_server)));
    stc_cmd_vec.push_back( STC_Cmd_ptr( new SNodeCmd(mock_server,node_ptr()) ));
 
@@ -213,7 +214,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new SServerLoadCmd())  );
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new DefsCmd(mock_server)));
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new SNodeCmd(mock_server,node_ptr())));
-	stc_cmd_vec.push_back( theSTCGroupCmd );
+   stc_cmd_vec.push_back( theSTCGroupCmd );
 }
 
 static void test_persistence(const Defs& theFixtureDefs )
@@ -292,14 +293,14 @@ static void test_persistence(const Defs& theFixtureDefs )
 #if defined(BINARY_ARCHIVE)
 BOOST_AUTO_TEST_CASE( test_all_request_persistence_binary )
 {
-	cout << "Base:: ...test_all_request_persistence_binary\n";
-	test_persistence( fixtureDefsFile());
+   cout << "Base:: ...test_all_request_persistence_binary\n";
+   test_persistence( fixtureDefsFile());
 }
 #elif defined(PORTABLE_BINARY_ARCHIVE)
 BOOST_AUTO_TEST_CASE( test_all_request_persistence_portable_binary )
 {
-	cout << "Base:: ...test_all_request_persistence_portable_binary\n";
-	test_persistence( fixtureDefsFile() );
+   cout << "Base:: ...test_all_request_persistence_portable_binary\n";
+   test_persistence( fixtureDefsFile() );
 }
 #elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
 BOOST_AUTO_TEST_CASE( test_all_request_persistence_eos_portable_binary )
@@ -317,16 +318,16 @@ BOOST_AUTO_TEST_CASE( test_all_request_persistence_text )
 
 BOOST_AUTO_TEST_CASE( test_request_authenticate )
 {
-	cout << "Base:: ...test_request_authenticate\n";
+   cout << "Base:: ...test_request_authenticate\n";
 
-	// the path "suiteName0/familyName0/taskName0" must exist in the defsfile_ fixture
- 	Cmd_ptr cmd_ptr(new InitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1));
+   // the path "suiteName0/familyName0/taskName0" must exist in the defsfile_ fixture
+   Cmd_ptr cmd_ptr(new InitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1));
 
-	// The invokeRequest will return check if the path and password exist in the Node tree
-	TestHelper::invokeRequest(&defsfile_, cmd_ptr);
+   // The invokeRequest will return check if the path and password exist in the Node tree
+   TestHelper::invokeRequest(&defsfile_, cmd_ptr);
 
-	/// Destroy System singleton to avoid valgrind from complaining
-	System::destroy();
+   /// Destroy System singleton to avoid valgrind from complaining
+   System::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
