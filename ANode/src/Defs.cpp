@@ -605,10 +605,14 @@ std::ostream& Defs::print(std::ostream& os) const
       os << "# server state: " << SState::to_string(server().get_state()) << "\n";
 	}
 
-	set<string>::const_iterator extern_end = externs_.end();
-	for(set<string>::const_iterator i = externs_.begin(); i != extern_end; ++i) {
-      os << "extern " << *i << "\n";
+	// In PrintStyle::MIGRATE we do NOT persist the externs. (+matches boost serialisation)
+	if (PrintStyle::getStyle() != PrintStyle::MIGRATE) {
+	   set<string>::const_iterator extern_end = externs_.end();
+	   for(set<string>::const_iterator i = externs_.begin(); i != extern_end; ++i) {
+	      os << "extern " << *i << "\n";
+	   }
 	}
+
 	size_t the_size = suiteVec_.size();
 	for(size_t s = 0; s < the_size; s++) {
 	   os << *suiteVec_[s];

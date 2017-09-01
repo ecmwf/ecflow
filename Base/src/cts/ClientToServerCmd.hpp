@@ -1287,15 +1287,13 @@ private:
 // to Node, events, meters, limits, variables defined on another suite.
 class LoadDefsCmd : public UserCmd {
 public:
-   LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */);
-
-   LoadDefsCmd(const defs_ptr& defs, bool force = false)
-   : force_(force), defs_(defs) {}
-
+   LoadDefsCmd(const defs_ptr& defs, bool force = false);
+   LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
+               const std::vector<std::pair<std::string,std::string> >& client_env = std::vector<std::pair<std::string,std::string> >());
    LoadDefsCmd() : force_(false) {}
 
    // Uses by equals only
-   const defs_ptr& theDefs() const { return defs_; }
+   const std::string& defs_as_string() const { return defs_; }
 
    virtual bool isWrite() const { return true; }
    virtual int timeout() const { return time_out_for_load_sync_and_get(); }
@@ -1316,7 +1314,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
    bool        force_;
-   defs_ptr    defs_;
+   std::string defs_;
    std::string defs_filename_;
 
    friend class boost::serialization::access;
@@ -1331,11 +1329,11 @@ private:
 
 class ReplaceNodeCmd : public UserCmd {
 public:
-   ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr defs, bool force );
-   ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const std::string& path_to_defs, bool force );
+   ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force );
+   ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const std::string& path_to_defs, bool force);
    ReplaceNodeCmd() : createNodesAsNeeded_(false), force_(false) {}
 
-   defs_ptr theDefs() const  { return clientDefs_; }
+   const std::string& the_client_defs() const  { return clientDefs_; }
    const std::string& pathToNode() const { return pathToNode_; }
    const std::string& path_to_defs() const { return path_to_defs_;}
    bool createNodesAsNeeded() const { return createNodesAsNeeded_;}
@@ -1351,18 +1349,22 @@ public:
    virtual void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const;
+
+   //void set_client_env(const std::vector<std::pair<std::string,std::string> >& env ) { client_env_ = env;} // only used in test
+
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   virtual void cleanup() { std::string().swap(clientDefs_);} /// run in the server, after command send to client
 
    bool        createNodesAsNeeded_;
    bool        force_;
    std::string pathToNode_;
    std::string path_to_defs_; // Can be empty if defs loaded in memory via python api
-   defs_ptr    clientDefs_;
+   std::string clientDefs_;
 
    friend class boost::serialization::access;
    template<class Archive>

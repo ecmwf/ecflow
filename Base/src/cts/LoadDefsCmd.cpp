@@ -29,9 +29,17 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
+LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force)
+ : force_(force)
+{
+   if (defs) {
+      defs->save_as_string(defs_,PrintStyle::MIGRATE);
+   }
+}
 
-LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool check_only, bool print)
-: force_(force), defs_(Defs::create()), defs_filename_(defs_filename)
+LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool check_only, bool print,
+                         const std::vector<std::pair<std::string,std::string> >& client_env)
+: force_(force), defs_filename_(defs_filename)
 {
    if (defs_filename_.empty()) {
       std::stringstream ss;
@@ -40,48 +48,23 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
    }
 
    // At the end of the parse check the trigger/complete expressions and resolve in-limits
+   defs_ptr defs = Defs::create();
    std::string errMsg, warningMsg;
-   if (defs_->restore(defs_filename_, errMsg , warningMsg) ) {
+   if (defs->restore(defs_filename_, errMsg , warningMsg) ) {
+
+      defs->set_server().add_or_update_user_variables( client_env ); // use in test environment
 
       if (print) {
          PrintStyle print_style(PrintStyle::MIGRATE);
-         cout << defs_;
+         cout << defs;
       }
+
+      defs->save_as_string(defs_,PrintStyle::MIGRATE);
 
       // Output any warning to standard output
       cout << warningMsg;
    }
    else {
-      // Check if its a boost file format. (could be old checkpoint file)
-      // When default version of ecflow is 4.7  this section could be removed.
-      // i.e. BECAUSE the checkpoint will be in defs file format. TODO
-      std::string error_msg;
-      std::string first_line = File::get_first_n_lines(defs_filename_, 1, error_msg);
-      if (!first_line.empty() && error_msg.empty()) {
-         if (first_line.find("22 serialization::archive") == 0) {   // boost file format
-
-            // Can be use to check for corruption in boost based checkpoint files.
-            defs_->boost_restore_from_checkpt(defs_filename_);
-
-            if (print) {
-               PrintStyle print_style(PrintStyle::MIGRATE);
-               cout << defs_;
-            }
-
-            if (check_only) {
-               // Note: there are no extern's in boost checkpoint, hence may fail some checking
-               //       Hence only do checking if option check_only used
-               errMsg.clear();warningMsg.clear();
-               if (!defs_->check( errMsg, warningMsg)) {
-                   std::stringstream ss; ss << "LoadDefsCmd::LoadDefsCmd: Checking failed for boost file " << defs_filename_ << "\n";
-                   ss << errMsg;
-                   throw std::runtime_error( ss.str() );
-               }
-            }
-            return;
-         }
-      }
-
       std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd. Failed to parse file " << defs_filename_ << "\n";
       ss << errMsg;
       throw std::runtime_error( ss.str() );
@@ -92,29 +75,36 @@ bool LoadDefsCmd::equals(ClientToServerCmd* rhs) const
 {
 	LoadDefsCmd* the_rhs = dynamic_cast<LoadDefsCmd*>(rhs);
 	if (!the_rhs)  return false;
-
 	if (!UserCmd::equals(rhs))  return false;
-
-	if (defs_ == NULL && the_rhs->theDefs() == NULL) return true;
-	if (defs_ == NULL && the_rhs->theDefs() != NULL) return false;
-	if (defs_ != NULL && the_rhs->theDefs() == NULL) return false;
-
-	return (*defs_ == *(the_rhs->theDefs()));
+	if (defs_  != the_rhs->defs_as_string()) return false;
+	return true;
 }
 
 STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().load_defs_++;
-
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
-	if (defs_) {
 
-		// After the updateDefs, defs_ will be left with NO suites.
-		// Can't really used defs_ after this point
+	if (!defs_.empty()) {
+
+	   // Parse the string and load the defs file into memory.
+	   std::string errMsg, warningMsg;
+	   defs_ptr defs = Defs::create();
+	   if ( ! defs->restore_from_string( defs_ , errMsg , warningMsg) ) {
+	      std::stringstream ss;
+	      ss << "LoadDefsCmd::doHandleRequest : Could not parse file " <<  defs_filename_  << " : " << errMsg;
+	      throw std::runtime_error( ss.str() );
+	   }
+
+		// After the updateDefs, defs will be left with NO suites.
+		// Can't really used defs after this point
 	   // *NOTE* Externs are not persisted. Hence calling check() will report
 	   // all errors, references are not resolved.
-		as->updateDefs(defs_,force_);
+		as->updateDefs(defs,force_);
+
+		LOG_ASSERT(defs->suiteVec().size() == 0,"Expected suites to be transferred to server defs");
  	}
+   LOG_ASSERT(as->defs()->externs().size() == 0,"Expected server to have no externs");
 
 	return PreAllocatedReply::ok_cmd();
 }
@@ -176,18 +166,16 @@ void LoadDefsCmd::create( 	Cmd_ptr& cmd,
 
 Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename, bool force, bool check_only, bool print, AbstractClientEnv* clientEnv)
 {
+   // For test allow the server environment to be changed, i.e. allow us to inject ECF_CLIENT
+   // The server will also update the env on the defs, server will override client env, where they clash
+
    // The constructor can throw if parsing of defs_filename fail's
-   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force,check_only,print);
+   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force,check_only,print,clientEnv->env());
 
    // Don't send to server if checking, i.e cmd not set
    if (check_only) return Cmd_ptr();
 
-   // For test allow the server environment to be changed, i.e. allow us to inject ECF_CLIENT
-   // The server will also update the env on the defs, server will override client env, where they clash
-   load_cmd->theDefs()->set_server().add_or_update_user_variables( clientEnv->env() );
-
    return load_cmd;
 }
-
 
 std::ostream& operator<<(std::ostream& os, const LoadDefsCmd& c)  { return c.print(os); }

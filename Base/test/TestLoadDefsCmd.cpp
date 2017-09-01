@@ -30,33 +30,33 @@ namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
-
-BOOST_AUTO_TEST_CASE( test_load_defs_cmd )
-{
-   cout << "Base:: ...test_load_defs_cmd \n";
-
-   MyDefsFixture fixtureDef ;
-   defs_ptr defs = fixtureDef.create_defs();
-
-   // save this defs as defs file format
-   std::string test_dir = File::test_data("Base/test","Base");
-   std::string defs_format = Pid::unique_name(test_dir + "/test_load_defs_cmd.def");
-   std::string boost_format = Pid::unique_name(test_dir + "/test_load_defs_cmd.check");
-
-   defs->save_as_checkpt(  defs_format );
-   defs->boost_save_as_checkpt(boost_format);
-
-   BOOST_CHECK_MESSAGE(fs::exists( defs_format  ),   defs_format << " file not created" );
-   BOOST_CHECK_MESSAGE(fs::exists(  boost_format  ), boost_format << " file not created" );
-
-   LoadDefsCmd load_as_defs_cmd(defs_format , false /* force */, false /* check_only */);
-   LoadDefsCmd load_as_boost_cmd( boost_format , false /* force */, false /* check_only */);
-
-   DebugEquality debug_equality; // only as affect in DEBUG build
-   BOOST_CHECK_MESSAGE(*load_as_defs_cmd.theDefs() == *load_as_boost_cmd.theDefs()," Expected boost and defs to be equal");
-
-   fs::remove( defs_format );
-   fs::remove( boost_format  );
-}
+// TEST NO LONGER APPLICABLE is ecflow 5.0.0
+//BOOST_AUTO_TEST_CASE( test_load_defs_cmd )
+//{
+//   cout << "Base:: ...test_load_defs_cmd \n";
+//
+//   MyDefsFixture fixtureDef ;
+//   defs_ptr defs = fixtureDef.create_defs();
+//
+//   // save this defs as defs file format
+//   std::string test_dir = File::test_data("Base/test","Base");
+//   std::string defs_format = Pid::unique_name(test_dir + "/test_load_defs_cmd.def");
+//   std::string boost_format = Pid::unique_name(test_dir + "/test_load_defs_cmd.check");
+//
+//   defs->save_as_checkpt(  defs_format );
+//   defs->boost_save_as_checkpt(boost_format);
+//
+//   BOOST_CHECK_MESSAGE(fs::exists( defs_format  ),   defs_format << " file not created" );
+//   BOOST_CHECK_MESSAGE(fs::exists(  boost_format  ), boost_format << " file not created" );
+//
+//   LoadDefsCmd load_as_defs_cmd(defs_format , false /* force */, false /* check_only */);
+//   LoadDefsCmd load_as_boost_cmd( boost_format , false /* force */, false /* check_only */);
+//
+//   DebugEquality debug_equality; // only as affect in DEBUG build
+//   BOOST_CHECK_MESSAGE(*load_as_defs_cmd.theDefs() == *load_as_boost_cmd.theDefs()," Expected boost and defs to be equal");
+//
+//   fs::remove( defs_format );
+//   fs::remove( boost_format  );
+//}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -26,22 +26,22 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr defs, bool force )
-: createNodesAsNeeded_(createNodesAsNeeded), force_(force), pathToNode_(node_path), clientDefs_(defs)
+ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force )
+: createNodesAsNeeded_(createNodesAsNeeded), force_(force), pathToNode_(node_path)
 {
-   if (!clientDefs_.get()) {
+   if (!client_defs.get()) {
       throw std::runtime_error( "ReplaceNodeCmd::ReplaceNodeCmd: client definition is empty"  );
    }
 
    // Client defs has been created in memory.
    // warn about naff expression and unresolved in-limit references to Limit's
    std::string errMsg, warningMsg;
-   if (!clientDefs_->check(errMsg, warningMsg)) {
+   if (!client_defs->check(errMsg, warningMsg)) {
       throw std::runtime_error(errMsg);
    }
 
    // Make sure pathToNode exists in the client defs
-   node_ptr nodeToReplace = clientDefs_->findAbsNode( node_path );
+   node_ptr nodeToReplace = client_defs->findAbsNode( node_path );
    if (! nodeToReplace.get() ) {
       std::stringstream ss;
       ss << "ReplaceNodeCmd::ReplaceNodeCmd: Can not replace child since path " << node_path;
@@ -49,33 +49,37 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
       throw std::runtime_error( ss.str() );
    }
 
+   client_defs->save_as_string(clientDefs_, PrintStyle::MIGRATE);
+
    // Out put any warning's to standard output
    cout << warningMsg;
 }
 
-ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const std::string& path_to_defs, bool force )
+ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const std::string& path_to_defs,bool force)
 : createNodesAsNeeded_(createNodesAsNeeded),
   force_(force),
   pathToNode_(node_path),
-  path_to_defs_(path_to_defs),
-  clientDefs_(Defs::create())
+  path_to_defs_(path_to_defs)
 {
    // Parse the file and load the defs file into memory.
    std::string errMsg, warningMsg;
-   if ( ! clientDefs_->restore(path_to_defs, errMsg , warningMsg) ) {
+   defs_ptr client_defs = Defs::create();
+   if ( ! client_defs->restore( path_to_defs , errMsg , warningMsg) ) {
       std::stringstream ss;
-      ss << "ReplaceNodeCmd::ReplaceNodeCmd: Could not parse file " << path_to_defs << " : " << errMsg;
+      ss << "ReplaceNodeCmd::ReplaceNodeCmd: Could not parse file " <<  path_to_defs  << " : " << errMsg;
       throw std::runtime_error( ss.str() );
    }
 
    // Make sure pathToNode exists in the client defs
-   node_ptr nodeToReplace = clientDefs_->findAbsNode( node_path );
+   node_ptr nodeToReplace = client_defs ->findAbsNode( node_path );
    if (! nodeToReplace.get() ) {
       std::stringstream ss;
       ss << "ReplaceNodeCmd::ReplaceNodeCmd: Can not replace child since path " << node_path;
       ss << ", does not exist in the client definition " << path_to_defs;
       throw std::runtime_error( ss.str() );
    }
+
+   client_defs->save_as_string(clientDefs_, PrintStyle::MIGRATE);
 
    // Out put any warning's to standard output
    cout << warningMsg;
@@ -85,19 +89,13 @@ bool ReplaceNodeCmd::equals(ClientToServerCmd* rhs) const
 {
 	ReplaceNodeCmd* the_rhs = dynamic_cast<ReplaceNodeCmd*>(rhs);
 	if (!the_rhs)  return false;
-
 	if (!UserCmd::equals(rhs))  return false;
-
 	if (createNodesAsNeeded_ != the_rhs->createNodesAsNeeded()) { return false; }
 	if (force_        != the_rhs->force())        return false;
    if (pathToNode_   != the_rhs->pathToNode())   return false;
    if (path_to_defs_ != the_rhs->path_to_defs()) return false;
-
-	if (clientDefs_ == NULL && the_rhs->theDefs() == NULL) return true;
-	if (clientDefs_ == NULL && the_rhs->theDefs() != NULL) return false;
-	if (clientDefs_ != NULL && the_rhs->theDefs() == NULL) return false;
-
-	return (*clientDefs_ == *(the_rhs->theDefs()));
+	if (clientDefs_ != the_rhs->the_client_defs() ) return false;
+	return true;
 }
 
 STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
@@ -105,35 +103,37 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
 	as->update_stats().replace_++;
 
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
-	if (clientDefs_) {
 
-	   if (as->defs().get() == clientDefs_.get()) {
-	      /// Typically will only happen with test environment
-	      throw std::runtime_error("ReplaceNodeCmd::doHandleRequest: The definition in the server is the same as the client provided definition??");
-	   }
+   std::string errMsg, warningMsg;
+   defs_ptr client_defs = Defs::create();
+   if ( ! client_defs->restore_from_string( clientDefs_, errMsg , warningMsg) ) {
+      std::stringstream ss;
+      ss << "ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg;
+      throw std::runtime_error( ss.str() );
+   }
 
-	   if (force_) {
-	      as->zombie_ctrl().add_user_zombies( as->defs()->findAbsNode( pathToNode_), CtsApi::replace_arg() );
-	   }
+   if (force_) {
+      as->zombie_ctrl().add_user_zombies( as->defs()->findAbsNode( pathToNode_), CtsApi::replace_arg() );
+   }
 
-	   // If we return a node_ptr then we have changed the data model, and therefore must flag node as changed.
-	   std::string errorMsg;
-	   node_ptr client_node_to_add = as->defs()->replaceChild(pathToNode_, clientDefs_, createNodesAsNeeded_, force_, errorMsg);
-	   if (!client_node_to_add) {
-	      throw std::runtime_error(errorMsg);
-	   }
+   // If we return a node_ptr then we have changed the data model, and therefore must flag node as changed.
+   std::string errorMsg;
+   node_ptr client_node_to_add = as->defs()->replaceChild(pathToNode_, client_defs , createNodesAsNeeded_, force_, errorMsg);
+   if (!client_node_to_add) {
+      throw std::runtime_error(errorMsg);
+   }
 
-	   // ECFLOW-835, flag node as changed, before check for trigger expressions.
-	   add_node_for_edit_history(as,pathToNode_);
+   // ECFLOW-835, flag node as changed, before check for trigger expressions.
+   add_node_for_edit_history(as,pathToNode_);
 
-	   // Although we have change the data model, Check if the trigger expressions are still valid.
-	   // Note:: trigger AST are not copied. If you use trigger in the test environment
-	   //        then copying the nodes will copy the trigger reference, which will be out of sync
-      std::string warning_msg;
-      if (!client_node_to_add->suite()->check(errorMsg,warning_msg)) {
-         throw std::runtime_error(errorMsg);
-      }
- 	}
+   // Although we have change the data model, Check if the trigger expressions are still valid.
+   // Note:: trigger AST are not copied. If you use trigger in the test environment
+   //        then copying the nodes will copy the trigger reference, which will be out of sync
+   std::string warning_msg;
+   if (!client_node_to_add->suite()->check(errorMsg,warning_msg)) {
+      throw std::runtime_error(errorMsg);
+   }
+
    return doJobSubmission( as );
 }
 
@@ -145,7 +145,7 @@ bool ReplaceNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 std::ostream& ReplaceNodeCmd::print(std::ostream& os) const
 {
    std::string path_to_client_defs = path_to_defs_;
-   if (path_to_client_defs.empty()) path_to_client_defs = "<empty>"; // defs must have bee loaded in memory via python api
+   if (path_to_client_defs.empty()) path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
 	return user_cmd(os,CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)));
 }
 
@@ -205,13 +205,7 @@ void ReplaceNodeCmd::create( 	Cmd_ptr& cmd,
 	if ( args.size() == 3 && args[2] == "false") createNodesAsNeeded = false;
 	if ( args.size() == 4 && args[3] == "force") force = true;
 
-	/// If path to file does not parse, we will throw an exception
-	ReplaceNodeCmd* replace_cmd = new ReplaceNodeCmd(pathToNode,createNodesAsNeeded, pathToDefsFile , force);
-
-	// For test allow the defs environment to changed, i.e. allow us to inject  ECF_CLIENT
-	replace_cmd->theDefs()->set_server().add_or_update_user_variables( clientEnv->env() );
-
-	cmd = Cmd_ptr( replace_cmd  );
+	cmd = Cmd_ptr( new ReplaceNodeCmd(pathToNode,createNodesAsNeeded, pathToDefsFile,force));
 }
 
 std::ostream& operator<<(std::ostream& os, const ReplaceNodeCmd& c) { return c.print(os); }

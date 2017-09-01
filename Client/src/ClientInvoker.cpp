@@ -867,13 +867,8 @@ int ClientInvoker::replace( const std::string& absNodePath, const std::string& p
    /// Handle command constructors that can throw
    Cmd_ptr cts_cmd;
    try {
-
-      ReplaceNodeCmd* replace_cmd = new ReplaceNodeCmd( absNodePath, create_parents_as_required, path_to_client_defs, force);
-
       // For test allow the defs environment to changed, i.e. allow us to inject  ECF_CLIENT ???
-      replace_cmd->theDefs()->set_server().add_or_update_user_variables( clientEnv_.env() );
-
-      cts_cmd = Cmd_ptr( replace_cmd );
+      cts_cmd = Cmd_ptr(new ReplaceNodeCmd(absNodePath,create_parents_as_required,path_to_client_defs,force));
    }
    catch (std::exception& e ){
       std::stringstream ss; ss << "ecflow:ClientInvoker::replace(" << absNodePath << "," << path_to_client_defs << ", ...) failed: " << e.what();

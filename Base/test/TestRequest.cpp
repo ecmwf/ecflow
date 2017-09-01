@@ -56,10 +56,10 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	// i.e RequeueNodeCmd assumes calendar has been initialized
    cmd_vec.push_back( Cmd_ptr( new ShowCmd()));
    cmd_vec.push_back( Cmd_ptr( new ServerVersionCmd()));
-   cmd_vec.push_back( Cmd_ptr( new BeginCmd("suiteName"))); // must be first
-   cmd_vec.push_back( Cmd_ptr( new BeginCmd("EmptySuite"))); // must be first
 	cmd_vec.push_back( Cmd_ptr( new ReplaceNodeCmd("suiteName",false,client_defs, true)));
 	cmd_vec.push_back( Cmd_ptr( new LoadDefsCmd(mock_server->defs(),true/*force*/)));
+   cmd_vec.push_back( Cmd_ptr( new BeginCmd("suiteName")));  // after loading new defs, must call begin, for downstream cmds
+   cmd_vec.push_back( Cmd_ptr( new BeginCmd("EmptySuite"))); // after loading new defs, must call begin for downstream cmds
 	cmd_vec.push_back( Cmd_ptr( new LogMessageCmd("LogMessageCmd"))  );
 	cmd_vec.push_back( Cmd_ptr( new LogCmd(LogCmd::CLEAR)));    // server replies back OK/Error Cmd
    cmd_vec.push_back( Cmd_ptr( new LogCmd(LogCmd::GET)));      // server replies back OK/Error | SStringCmd
@@ -138,8 +138,6 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    cmd_vec.push_back( Cmd_ptr( new QueryCmd("event","/suiteName/t1","event","")));
 
 	boost::shared_ptr<GroupCTSCmd>  theGroupCmd = boost::make_shared<GroupCTSCmd>();
-   theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("suiteName"))  );
-   theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("EmptySuite"))  );
    theGroupCmd->addChild(  Cmd_ptr( new ServerVersionCmd())  );
  	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::PING))  );
 	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER))  );
@@ -176,6 +174,8 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::MIGRATE))  );
 	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL))  ); // will force deletion of any Node which has autocomplete
  	theGroupCmd->addChild(  Cmd_ptr( new LoadDefsCmd(mock_server->defs(), true/*force*/))  );
+   theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("suiteName"))  );
+   theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("EmptySuite"))  );
 	theGroupCmd->addChild(  Cmd_ptr( new LogCmd(LogCmd::GET))  );
 	theGroupCmd->addChild(  Cmd_ptr( new LogCmd(LogCmd::CLEAR))  );
 	theGroupCmd->addChild(  Cmd_ptr( new LogMessageCmd("LogMessageCmd"))  );
@@ -219,6 +219,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 static void test_persistence(const Defs& theFixtureDefs )
 {
 	Defs* fixtureDefs = const_cast<Defs*>(&theFixtureDefs);
+	fixtureDefs->clear_externs();       // server does not have externs
 	MockServer mockServer(fixtureDefs); // creates shared ptr with a NULL deleter
 
 	std::vector<Cmd_ptr> cmd_vec;
@@ -241,7 +242,7 @@ static void test_persistence(const Defs& theFixtureDefs )
 			if (theCmd.get()->handleRequestIsTestable()) {
 				// test handleRequest while were at it.
  				// Avoid TERMINATE_SERVER cmd as this will prematurely cause an exit, wont appear as an error
-				//cerr << "cmd_request = " << cmd_request << "\n";
+				// cerr << "cmd_request = " << cmd_request << "\n";
 			   try {
 			      STC_Cmd_ptr ok_or_error_cmd = cmd_request.handleRequest(&mockServer);
 			      if (ok_or_error_cmd) {

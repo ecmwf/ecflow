@@ -74,21 +74,21 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 	noOfExterns += secondDefs.externs().size();
 
 
-	// Create a LoadDefsCmd. This capable of merging defs files and resolving externs
+	// Create a LoadDefsCmd. This capable of merging defs files
+	// Externs are NOT loaded into the server.
 	LoadDefsCmd cmd(firstDefs);
 	cmd.setup_user_authentification();
 
-	// Calling handelRequest will absorb the first defs into second including externs & server user variables
+	// Calling handelRequest will absorb the first defs into second & server user variables
 	// AND resolve any references to node paths in the trigger expressions
+	//
 	// Test that the merge was OK as well
+	// Note: The firstDefs is recreated in the SERVER (via LoadDefsCmd), hence out of sync with this firstDefs
 	MockServer mockServer(&secondDefs);
  	STC_Cmd_ptr requestStatus = cmd.handleRequest(&mockServer);
 	BOOST_CHECK_MESSAGE( requestStatus, "Handle Request " << cmd << " returned NULL\n");
 	BOOST_CHECK_MESSAGE( requestStatus->error().empty(), requestStatus->error());
   	BOOST_CHECK_MESSAGE( secondDefs.suiteVec().size() == noOfSuites,"Merge failed to add suites");
- 	BOOST_CHECK_MESSAGE( secondDefs.externs().size() == noOfExterns,"Merge failed to add externs");
- 	BOOST_CHECK_MESSAGE( firstDefs->suiteVec().size() == 0,          "Merge failed to remove suites");
-
 
  	// Modify the Defs file to add a task/trigger that references the undefined
  	// extern path defined in file 'first.def' This should fail.
