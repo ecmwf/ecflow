@@ -174,7 +174,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::GET_STATE))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::MIGRATE))  );
 	theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL))  ); // will force deletion of any Node which has autocomplete
- 	theGroupCmd->addChild(  Cmd_ptr( new LoadDefsCmd(mock_server->defs(), true/*force*/))  );
+ 	theGroupCmd->addChild(  Cmd_ptr( new LoadDefsCmd(client_defs, true/*force*/))  );
    theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("suiteName"))  );
    theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("EmptySuite"))  );
 	theGroupCmd->addChild(  Cmd_ptr( new LogCmd(LogCmd::GET))  );
