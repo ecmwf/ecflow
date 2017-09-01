@@ -146,6 +146,7 @@ public:
    ///  extern /suite/family:repeat_name
    ///  extern ../family:repeat_name
    void add_extern(const std::string& nodePath );
+   void clear_externs() { externs_.clear();}
 
    /// Scan the trigger and complete expressions, and automatically add extern's
    /// i.e where the node paths, and references, to event, meters, edit and repeat variables,
