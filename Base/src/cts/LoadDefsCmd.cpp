@@ -114,7 +114,15 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const
 	   // *NOTE* Externs are not persisted. Hence calling check() will report
 	   // all errors, references are not resolved.
 		as->updateDefs(defs_,force_);
+
+#ifdef DEBUG
+      LOG_ASSERT(defs_->suiteVec().size() == 0,"Expected suites to be transferred to server defs");
+#endif
  	}
+
+#ifdef DEBUG
+   LOG_ASSERT(as->defs()->externs().size() == 0,"Expected server to have no externs");
+#endif
 
 	return PreAllocatedReply::ok_cmd();
 }
