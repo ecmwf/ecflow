@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 		std::string errorMsg,warningMsg;
 		bool parse = firstDefs->restore(firstDef,errorMsg,warningMsg);
  		BOOST_CHECK_MESSAGE(parse,"Parse failed. " << errorMsg);
+ 		firstDefs->clear_externs(); // server defs should not have externs.
 	}
 	size_t noOfSuites = firstDefs->suiteVec().size();
-	size_t noOfExterns = firstDefs->externs().size();
 
 
 	// load the SECOND file, which should resolve the externs
@@ -71,7 +71,6 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
  		BOOST_CHECK_MESSAGE(parse,"Parse failed. " << errorMsg);
 	}
 	noOfSuites += secondDefs.suiteVec().size();
-	noOfExterns += secondDefs.externs().size();
 
 
 	// Create a LoadDefsCmd. This capable of merging defs files and resolving externs
