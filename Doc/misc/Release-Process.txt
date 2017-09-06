@@ -15,21 +15,20 @@ Process
    ****     /usr/local/apps/ecflow/current  
 
 ----------------------------------------------------------------------
+0/ *make sure ecbuild in cmake.sh matches the metabuilder*
 
 0/ Create the tarball using cmake, in the build directory with  
    This can be done using:
-   *make sure ecbuild in cmake.sh matches the metabuilder*
    
-   cd $WK
+   cd $WK                       # ecflow root directry
    rm -rf ../bdir               # *REMOVE* build tree
-   git pull
-   ./cmake.sh package_source
+   git pull                     # muke sue we use the latest
+   ./cmake.sh package_source    # this will place ecflow tar file in your $SCRATCH
 
 0/ Inform user support, allows user support to test rpm
-   
-0/ *Before* each release, make sure the ecflow tar file is
-   copied to $SCRATCH and inform Daniel. This will allow
-   him to make rpm packages, build on other linux flavours.
+   *Before* each release, make sure the ecflow tar file is
+   copied to $SCRATCH(done by the prevuous step) and inform Daniel. 
+   This will allow him to make rpm packages, build on other linux flavours.
 
    This is important, so that release, used internally is in
    sync with release given to users. 
@@ -38,24 +37,24 @@ Process
    <Inform Daniel>
    
 0/ Two approaches, both use meta-builder: 
-    1/ git flow release start  4.6.0 
-       git_tag=release/4.6.0
+    1/ git flow release start  4.7.0 
+       git_tag=release/4.7.0
        Use this approach when multiple people working on the release.
       *Push* branch onto stash, otherwise we can not pull, from the remote machines
        - In eclipse, you *may* have to push this branch first Team->Push Branch
         *otherwise* the option Team->Push Upstream  may well be greyed out.
        
-    2/ git flow release start  4.6.0
-       git flow release finish 4.6.0  
+    2/ git flow release start  4.7.0
+       git flow release finish 4.7.0  
        push
-       git_tag=4.6.0
+       git_tag=4.7.0
        When single person making release
  
-0/ Update ECFLOW_GIT_BRANCH to "4.6.0" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.6.0)
+0/ Update ECFLOW_GIT_BRANCH to "4.7.0" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.7.0)
    Then use the meta builder to build/install.
    Note: if used 
-     > git flow release start 4.6.0        # -> it will create a branch release/4.6.0
-     > Either set package_version="4.6.0"
+     > git flow release start 4.7.0        # -> it will create a branch release/4.7.0
+     > Either set package_version="4.7.0"
      > Either set package_version=""        # extract version from VERSION.cmake
 
 0/ For a PREPIFS release change file:
@@ -73,40 +72,7 @@ Process
     Sometimes this crashes, Just re-build Pyext, and try again.
        rm -rf Pyext/bin
        bjam -j8
-    
-0/ REDHAT: If we built on ecgb/redhat we can copy release to sappa/sappab 
-  
-         scp -r 4.6.0 deploy@sappa:/usr/local/apps/ecflow/.
-         scp -r 4.6.0 deploy@sappb:/usr/local/apps/ecflow/.
-         
-         or try with emos  and password.
-         scp -r 4.6.0 emos@sappb:/usr/local/apps/ecflow/.
-         
-   VIRTUAL Machines:
-         - The virtual machines are out sync with lxop_dev.(due to python unicode)
-           We now build on via metabuilder ecflow-metab directly.
-          
-  *Make* sure destination has a trailing '/.' otherwise you
-  can end up renaming.
-
-0/ The RD virtual machines are tied to vsms1, via a link to /usr/local
  
-   	  ssh rdx@<hostname>
-   
-      i.e  ssh rdx@vecfrdda1
-      
-      df 
-         this will show the links
-      
-   The list of all virtual machines, versions and port numbers is in:
-   
-        ~rdx/ecflow/servers.config
-        
-   # as an emergency we can copy from lxop_dev
-   - ssh ecflow-metab, su emos;
-   - scp -r 4.6.0 emos@vecfrdda1:/usr/local/apps/ecflow/.
-        
-
 0/ Update WIKI:
    This announces the changes in the release
    https://software.ecmwf.int/wiki/display/ECFLOW/Latest+news
@@ -115,7 +81,8 @@ Process
    appear in the top half of the latest news
 
 0/ Update release:
-   ** Go to "Tools->Attachments", then load the gzip file:  Go to the bottom of the page *****
+   ** Go to "Tools->Attachments", then load the gzip file(i.e from $SCRATCH): 
+      Go to the bottom of the page *****
    0 release: This uploads the release zip file: making it accessible to member states
    http://software.ecmwf.int/wiki/display/ECFLOW/Releases
    
@@ -128,7 +95,7 @@ Process
    
 0/ Announce release
    mail group:  ecflow_int@lists.ecmwf.int 
-   Use: Release-Anouncement.txt
+   Use: ecflow/Doc/misc/Release-Anouncement.txt
   
 0/ AFTER the release 
    o increment the version number in $WK/VERSION.cmake THEN, run:
@@ -136,8 +103,9 @@ Process
      
      This will update the version number for $WK/ACore/src/ecflow_version.h
      This file is included in $WK/ACore/src/Version.cpp
+     It will also update ecflow/Pyext/__init__.py
      
-     Then check this file in for, for the other platforms.
+     Then check this file in, for the other platforms.
      
 0/ Reset metabuilder and ecflow git_tag, back to develop
 
