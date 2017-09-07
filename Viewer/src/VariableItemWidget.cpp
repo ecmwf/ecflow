@@ -687,7 +687,8 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) :
 	exportTb->setDefaultAction(actionExport);
 
     //TODO: implement it
-	actionExport->setEnabled(false);
+    actionExport->setEnabled(false);
+    exportTb->setVisible(false);
 
 	//Initialise action state (it depends on the selection)
 	checkActionState();
