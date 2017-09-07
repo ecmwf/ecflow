@@ -47,6 +47,19 @@ std::string SCPort::next()
       }
    }
 
+   // This is used to test remote servers(or legacy server with new client). Here ECF_HOST=localhost in the test scripts
+   std::string host = ClientEnvironment::hostSpecified();
+   if ( host == Str::LOCALHOST() ) {
+
+      std::string port;
+      char* ecf_port = getenv("ECF_PORT");
+      if ( ecf_port )  port = ecf_port;
+      if (!port.empty()) {
+         //std::cout << "SCPort::next() ECF_HOST(" << host << ") ECF_PORT(" << port << ")\n";
+         return port;
+      }
+   }
+
    return next_only();
 }
 
