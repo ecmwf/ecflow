@@ -86,9 +86,11 @@ void ServerComThread::run()
 
     //Init flags
     rescanNeed_=false;
+    bool isMessage = false;
+    std::string errorString;
 
     try
-     {
+    {
         switch (taskType_)
         {
             case VTask::CommandTask:
@@ -239,13 +241,25 @@ void ServerComThread::run()
                 break;
         }
     }
-
     catch(std::exception& e)
+    {
+        isMessage = true;
+        errorString = e.what();
+    }
+
+    // we can get an error string in one of two ways - either an exception is raised, or
+    // the get_string() of the server reply is non-empty.
+    if (!isMessage && !(ci_->server_reply().get_string().empty()))
+    {
+        isMessage = true;
+        errorString = ci_->server_reply().get_string();
+    }
+
+    if (isMessage)
     {
         // note that we need to emit a signal rather than directly call a message function
         // because we can't call Qt widgets from a worker thread
 
-        std::string errorString = e.what();
         UiLog(serverName_).dbg() << " thread failed: " <<  errorString;
         Q_EMIT failed(errorString);
 
