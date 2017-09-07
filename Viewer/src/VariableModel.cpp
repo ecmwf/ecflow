@@ -41,11 +41,17 @@ VariableModel::VariableModel(VariableModelDataHandler* data,QObject *parent) :
 	connect(data_,SIGNAL(reloadEnd()),
 					this,SLOT(slotReloadEnd()));
 
-	connect(data_,SIGNAL(addRemoveBegin(int,int)),
-				this,SLOT(slotAddRemoveBegin(int,int)));
+    connect(data_,SIGNAL(clearBegin(int,int)),
+                this,SLOT(slotClearBegin(int,int)));
 
-	connect(data_,SIGNAL(addRemoveEnd(int)),
-                this,SLOT(slotAddRemoveEnd(int)));
+    connect(data_,SIGNAL(clearEnd(int,int)),
+                this,SLOT(slotClearEnd(int,int)));
+
+    connect(data_,SIGNAL(loadBegin(int,int)),
+                this,SLOT(slotLoadBegin(int,int)));
+
+    connect(data_,SIGNAL(loadEnd(int,int)),
+                this,SLOT(slotLoadEnd(int,int)));
 
 	connect(data_,SIGNAL(dataChanged(int)),
                 this,SLOT(slotDataChanged(int)));
@@ -345,7 +351,11 @@ VInfo_ptr VariableModel::indexToInfo(const QModelIndex& index) const
     if(VariableModelData* d=indexToData(index))
     {
         //It is a block
-        if(!index.parent().isValid())
+        QModelIndex p=index.parent();
+
+        //It is a block
+        //if(!index.parent().isValid()) <-- this did not work
+        if(!p.isValid())
             return d->info();
         //it is a variable within a block
         else
@@ -422,40 +432,76 @@ void VariableModel::slotReloadEnd()
 	endResetModel();
 }
 
-void VariableModel::slotAddRemoveBegin(int block,int diff)
+void VariableModel::slotClearBegin(int block,int num)
 {
-	QModelIndex parent=index(block,0);
-	if(!parent.isValid())
-		return;
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UI_FUNCTION_LOG
+#endif
+    QModelIndex parent=index(block,0);
+    if(!parent.isValid())
+        return;
 
-	int num=rowCount(parent);
+    int rc=rowCount(parent);
+    UI_ASSERT(num >= 0," num=" << num);
+    UI_ASSERT(num == rc," num=" << num <<
+              " rowCount=" << rowCount(parent));
 
-	//Insertion
-	if(diff > 0)
-	{
-		//We add extra rows to the end
-		beginInsertRows(parent,num,num+diff-1);
-	}
-	//Deletion
-	else if(diff <0)
-	{
-		//We remove rows from the end
-		beginRemoveRows(parent,num+diff,num-1);
-	}
+    if(num > 0)
+    {
+        beginRemoveRows(parent,0,num-1);
+    }
 }
 
-void VariableModel::slotAddRemoveEnd(int diff)
+void VariableModel::slotClearEnd(int block,int num)
 {
-	//Insertion
-	if(diff > 0)
-	{
-		endInsertRows();
-	}
-	//Deletion
-	else if(diff <0)
-	{
-		endRemoveRows();
-	}
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UI_FUNCTION_LOG
+#endif
+
+    QModelIndex parent=index(block,0);
+    if(!parent.isValid())
+        return;
+
+    UI_ASSERT(num >= 0,"num=" << num);
+    if(num > 0)
+    {
+        endRemoveRows();
+    }
+}
+
+void VariableModel::slotLoadBegin(int block,int num)
+{
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UI_FUNCTION_LOG
+#endif
+    QModelIndex parent=index(block,0);
+    if(!parent.isValid())
+        return;
+
+    int rc=rowCount(parent);
+    UI_ASSERT(num >= 0,"num=" << num);
+    UI_ASSERT(rc==0,"rowCount=" << rowCount(parent));
+
+    if(num > 0)
+    {
+        beginInsertRows(parent,0,num-1);
+    }
+}
+
+void VariableModel::slotLoadEnd(int block,int num)
+{
+#ifdef _UI_VARIABLEMODEL_DEBUG
+    UI_FUNCTION_LOG
+#endif
+    QModelIndex parent=index(block,0);
+    if(!parent.isValid())
+        return;
+
+    UI_ASSERT(num >= 0,"num=" << num);
+    if(num > 0)
+    {
+        endInsertRows();
+    }
 }
 
 //It must be called after any data change
@@ -470,10 +516,9 @@ void VariableModel::slotDataChanged(int block)
 #ifdef _UI_VARIABLEMODEL_DEBUG
     UiLog().dbg() << " emit dataChanged:" << " " << blockIndex0 << " " << blockIndex1;
 #endif
-	Q_EMIT dataChanged(blockIndex0,blockIndex1);
 
-    //We need to rerun the filter in the proxy model!
-    Q_EMIT filterChanged();
+    //This will sort and filter the block
+    Q_EMIT dataChanged(blockIndex0,blockIndex1);
 }
 
 //=======================================================================
@@ -541,14 +586,16 @@ void VariableSortModel::print(const QModelIndex idx)
 void VariableSortModel::slotFilterChanged()
 {
     if(matchMode_ == FilterMode)
+    {
         invalidate();
+    }
 }
 
 void VariableSortModel::slotRerunFilter()
 {
 #ifdef _UI_VARIABLEMODEL_DEBUG
    UiLog().dbg() << "VariableSortModel::slotRerunFilter-->";
-#endif
+#endif     
    invalidate();
 }
 
@@ -577,7 +624,8 @@ bool VariableSortModel::lessThan(const QModelIndex &sourceLeft, const QModelInde
 	//For variables we simply sort according to the string
 	else
 	{
-		return varModel_->data(sourceLeft,Qt::DisplayRole).toString() < varModel_->data(sourceRight,Qt::DisplayRole).toString();
+    //UiLog().dbg() << varModel_->data(sourceLeft,Qt::DisplayRole).toString() << " " << varModel_->data(sourceRight,Qt::DisplayRole).toString();
+        return varModel_->data(sourceLeft,Qt::DisplayRole).toString() < varModel_->data(sourceRight,Qt::DisplayRole).toString();
 	}
 	return true;
 }
@@ -673,4 +721,57 @@ QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const
 	return matchLst_;
 }
 
+#if 0
+void VariableSortModel::test()
+{
+    UI_FUNCTION_LOG
+    QModelIndex idx;
+    test(idx);
+    testSource(idx);
+}
 
+void VariableSortModel::test(const QModelIndex& p)
+{
+    int num=rowCount(p);
+    for(int i=0; i < num; i++)
+    {
+        QModelIndex idx=index(i,0,p);
+        QModelIndex sIdx=mapToSource(idx);
+        if(!sIdx.isValid())
+        {
+            UiLog().dbg() << " idx=" << idx;
+            Q_ASSERT(sIdx.isValid());
+        }
+        //UiLog().dbg() << idx.data().toString() << " " << sIdx.data().toString();
+
+        if(idx.data().toString() != sIdx.data().toString())
+        {
+            UI_ASSERT(0,"filter=" << idx.data().toString() <<
+                      " source=" << sIdx.data().toString());
+        }
+
+        test(idx);
+    }
+}
+
+void VariableSortModel::testSource(const QModelIndex& p)
+{
+    int num=varModel_->rowCount(p);
+    for(int i=0; i < num; i++)
+    {
+        QModelIndex sIdx=varModel_->index(i,0,p);
+        QModelIndex idx=mapFromSource(sIdx);
+        if(!idx.isValid())
+        {
+            UiLog().dbg() << " idx=" << idx;
+            Q_ASSERT(sIdx.isValid());
+        }
+        if(idx.data().toString() != sIdx.data().toString())
+        {
+            UI_ASSERT(0,"filter=" << idx.data().toString() <<
+                      " source=" << sIdx.data().toString());
+        }
+        testSource(idx);
+    }
+}
+#endif

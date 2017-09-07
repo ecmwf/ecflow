@@ -154,6 +154,7 @@ protected:
 
     VProperty* shadowProp_;
     VInfo_ptr lastSelection_;
+    bool canSaveLastSelection_;
 };
 
 #endif

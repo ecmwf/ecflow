@@ -30,6 +30,7 @@
 #include "WidgetNameProvider.hpp"
 
 #define _UI_VARIABLEITEMWIDGET_DEBUG
+#define _UI_VARIABLESORTMODELTEST_DEBUG
 
 //======================================
 //
@@ -586,7 +587,9 @@ void VariableAddDialog::readSettings()
 //
 //========================================================
 
-VariableItemWidget::VariableItemWidget(QWidget *parent) : shadowProp_(0)
+VariableItemWidget::VariableItemWidget(QWidget *parent) :
+    shadowProp_(0),
+    canSaveLastSelection_(true)
 {
 	//This item displays all the ancestors of the info object
     useAncestors_=true;
@@ -598,7 +601,8 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) : shadowProp_(0)
 	//The model and the sort-filter model
 	model_=new VariableModel(data_,this);
 	sortModel_= new VariableSortModel(model_,this);
-    
+    sortModel_->setDynamicSortFilter(true);
+
     //Set the model on the view
     varView->setModel(sortModel_);
 
@@ -742,7 +746,9 @@ void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelInd
 #endif
 
     //remembers the last clicked variable
-    lastSelection_=model_->indexToInfo(sortModel_->mapToSource(idx));
+    UiLog().dbg() << idx;
+    if(canSaveLastSelection_)
+        lastSelection_=model_->indexToInfo(sortModel_->mapToSource(idx));
 
     checkActionState();
 }
@@ -947,7 +953,7 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
             int row=-1;
             data_->findVariable(name.toStdString(),nodePath,genVar,block,row);
             if(block != -1 && row != -1)
-            {
+            {                
                 data_->data(block)->remove(name.toStdString());
             }
             else
@@ -990,7 +996,7 @@ void VariableItemWidget::slotVariableAdded()
     Q_ASSERT(d);
     Q_ASSERT(data_->count() > 0);
     //We always perform the alter variable operation on the selected
-    //node i.e. on block 0 = data(0) !!!
+    //node i.e. on block 0 = data(0) !!!    
     data_->data(0)->alter(d->name().toStdString(),d->value().toStdString());
 }
 
@@ -1105,12 +1111,13 @@ void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
      UI_FUNCTION_LOG
 #endif
-
+    canSaveLastSelection_=false;
     if(data_->nodeChanged(node,aspect))
     {
-        //After any change done we need to reselect the current row. See issue ECFLOW-613.
+        //After any change done we need to reselect the current row. See issue ECFLOW-613.        
         regainSelection();
     }
+    canSaveLastSelection_=true;
 }
 
 void VariableItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
@@ -1118,11 +1125,13 @@ void VariableItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspec
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
+    canSaveLastSelection_=false;
     if(data_->defsChanged(aspect))
     {
         //After any change we need to reselect the current row. See issue ECFLOW-613.
         regainSelection();
     }
+    canSaveLastSelection_=true;
 }
 
 //Try to regain the selection stored in lastSelection_ potentailly after a
