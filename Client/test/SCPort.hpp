@@ -31,7 +31,7 @@ public:
    static std::string next();
 
 	/// make sure we have a unique port, each time next_only() is called;
-   static std::string next_only();
+   static std::string next_only(bool debug = false);
 
 private:
 	SCPort();

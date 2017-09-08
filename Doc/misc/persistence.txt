@@ -21,6 +21,8 @@ json versus protocol buffers:
     
 Json/c++
     https://github.com/nlohmann/json/blob/develop/README.md
+    https://github.com/Loki-Astari/ThorsSerializer/blob/master/README.md
+    https://github.com/netheril96/StaticJSON/blob/master/README.md
     
 Json,TOML,YAML:
     http://www.drdobbs.com/web-development/after-xml-json-then-what/240151851

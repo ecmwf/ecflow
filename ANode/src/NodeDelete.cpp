@@ -134,7 +134,7 @@ void Node::deleteVariable( const std::string& name)
 			return;
 		}
 	}
-	throw std::runtime_error("Node::deleteVariable: Can not find variable of name " + name);
+	throw std::runtime_error("Node::deleteVariable: Can not find 'user' variable of name " + name);
 }
 
 void Node::deleteEvent(const std::string& name)
