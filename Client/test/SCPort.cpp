@@ -35,9 +35,13 @@ int SCPort::thePort_ = 3142;
 
 std::string SCPort::next()
 {
+   std::stringstream ss;
+   ss << "\nSCPort::next() : ";
+
    // Allow parallel tests
    char* ecf_port = getenv("TEST_ECF_PORT");
    if ( ecf_port )  {
+      ss << " TEST_ECF_PORT=" << ecf_port;
       std::string port = ecf_port;
       try {
          thePort_ = boost::lexical_cast<int>(port);
@@ -49,18 +53,25 @@ std::string SCPort::next()
 
    // This is used to test remote servers(or legacy server with new client). Here ECF_HOST=localhost in the test scripts
    std::string host = ClientEnvironment::hostSpecified();
+   ss << " ECF_HOST=" << host;
    if ( host == Str::LOCALHOST() ) {
 
       std::string port;
       char* ecf_port = getenv("ECF_PORT");
-      if ( ecf_port )  port = ecf_port;
+      if ( ecf_port )  {
+         port = ecf_port;
+         ss << " ECF_PORT=" << ecf_port;
+      }
       if (!port.empty()) {
-         //std::cout << "SCPort::next() ECF_HOST(" << host << ") ECF_PORT(" << port << ")\n";
+         std::cout << ss.str() << "\n";
          return port;
       }
    }
 
-   return next_only();
+   std::string the_port = next_only();
+   ss << " returning free port=" << the_port;
+   std::cout << ss.str() << "\n";
+   return the_port;
 }
 
 std::string SCPort::next_only()
