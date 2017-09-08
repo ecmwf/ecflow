@@ -42,7 +42,7 @@ public:
     virtual int endIndex() const=0;
     virtual int currentIndex() const=0;
     int step() const;
-    virtual std::string value(int index) const=0;    
+    virtual std::string value(int index) const=0;
 
     VAttributeType* type() const;
     QStringList data(bool firstLine) const;
