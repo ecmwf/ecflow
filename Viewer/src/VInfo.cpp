@@ -459,7 +459,7 @@ std::string VInfoAttribute::path()
     if(server_)
        p=server_->name();
     if(attr_)
-        p+=attr_->fullPath();
+        p+=":/" + attr_->fullPath();
 
     return p;
 }
