@@ -33,54 +33,55 @@ int SCPort::thePort_ = 3161;
 int SCPort::thePort_ = 3142;
 #endif
 
+
 std::string SCPort::next()
 {
-   std::stringstream ss;
-   ss << "\nSCPort::next() : ";
+   bool debug = false;
+   if ( getenv("ECF_DEBUG_TEST") ) debug = true;
+
+   if (debug) std::cout << "\nSCPort::next() : ";
 
    // Allow parallel tests
    char* ecf_port = getenv("TEST_ECF_PORT");
    if ( ecf_port )  {
-      ss << " TEST_ECF_PORT=" << ecf_port;
+      if (debug) std::cout << " seed_port=TEST_ECF_PORT=(" << ecf_port << ")";
       std::string port = ecf_port;
-      try {
-         thePort_ = boost::lexical_cast<int>(port);
-      }
-      catch (...){
-         std::cout << "SCPort::next()  TEST_ECF_PORT(" << ecf_port  << ") not convertible to an integer\n";
-      }
+      try { thePort_ = boost::lexical_cast<int>(port);}
+      catch (...){ std::cout << "SCPort::next()  TEST_ECF_PORT(" << ecf_port  << ") not convertible to an integer\n";}
    }
+
 
    // This is used to test remote servers(or legacy server with new client). Here ECF_HOST=localhost in the test scripts
    std::string host = ClientEnvironment::hostSpecified();
-   ss << " ECF_HOST=" << host;
-   if ( host == Str::LOCALHOST() ) {
+   if (debug) std::cout << " ECF_HOST('" << host << "')";
 
-      std::string port;
+   if ( host == Str::LOCALHOST() ) {
       char* ecf_port = getenv("ECF_PORT");
       if ( ecf_port )  {
-         port = ecf_port;
-         ss << " ECF_PORT=" << ecf_port;
+         std::string port = ecf_port;
+         if (!port.empty()) {
+            if (debug) std::cout << " ECF_PORT('" << ecf_port << "')\n";
+            return port;
+         }
       }
-      if (!port.empty()) {
-         std::cout << ss.str() << "\n";
-         return port;
-      }
+      if (debug) std::cout << " !!!!!! ERROR when ECF_HOST=localhost  EXPECTED ECF_PORT to be set !!!!!! ";
    }
 
-   std::string the_port = next_only();
-   ss << " returning free port=" << the_port;
-   std::cout << ss.str() << "\n";
+   if (debug) std::cout << "\n";
+   std::string the_port = next_only(debug);
+   if (debug) std::cout << " SCPort::next() returning free port=" << the_port << "\n";
    return the_port;
 }
 
-std::string SCPort::next_only()
+std::string SCPort::next_only(bool debug)
 {
-   // Use a combination of local lock file, and pinging the server
-   while (!EcfPortLock::is_free(thePort_)) thePort_++;
+   if (debug) std::cout << " SCPort::next_only : starting seed_port(" << thePort_ << ")\n";
 
-   // std::cout << "SCPort::next() = " << thePort << "\n";
-   return ClientInvoker::find_free_port(thePort_);
+   // Use a combination of local lock file, and pinging the server
+   while (!EcfPortLock::is_free(thePort_,debug)) thePort_++;
+
+   if (debug) std::cout << " SCPort::next_only() seed_port(" << thePort_ << ")\n";
+   return ClientInvoker::find_free_port(thePort_,debug);
 }
 
 }
