@@ -74,14 +74,14 @@
      <bool>true</bool>
     </property>
     <property name="title">
-     <string>&amp;Servers</string>
+     <string>Ser&amp;vers</string>
     </property>
     <addaction name="actionManageServers"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>&amp;View</string>
+     <string>&amp;Panels</string>
     </property>
     <addaction name="actionAddTreeWidget"/>
     <addaction name="actionAddTableWidget"/>
@@ -248,7 +248,7 @@
      <normaloff>:/viewer/images/add_tree.svg</normaloff>:/viewer/images/add_tree.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Add tree view</string>
+    <string>Add &amp;tree view panel</string>
    </property>
    <property name="toolTip">
     <string>Add tree widget</string>
@@ -260,7 +260,7 @@
      <normaloff>:/viewer/images/add_table.svg</normaloff>:/viewer/images/add_table.svg</iconset>
    </property>
    <property name="text">
-    <string>Add table &amp;view</string>
+    <string>Add ta&amp;ble view panel</string>
    </property>
    <property name="toolTip">
     <string>Add table widget</string>
