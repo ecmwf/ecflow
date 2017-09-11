@@ -671,8 +671,7 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
             //This is the attribute num we store in the tree node
             //(and display in the tree).
             //int cachedNum=node->attrNum(attrFilter_);
-            Q_ASSERT(cachedNum >= 0);
-            Q_ASSERT(currentNum >= cachedNum);
+            Q_ASSERT(cachedNum >= 0);           
 
 #ifdef _UI_VMODELDATA_DEBUG
             UiLog(server_).dbg() << "  currentNum=" << currentNum << " cachedNum=" << cachedNum;
