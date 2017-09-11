@@ -97,7 +97,7 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     valueLe_->setValidator(validator);
 #endif
 
-    header_->setInfo(QString::fromStdString(info_->path()),"Repeat " + QString::fromStdString(rep->subType()));
+    header_->setInfo(QString::fromStdString(info_->nodePath()),"Repeat " + QString::fromStdString(rep->subType()));
 
     readSettings();
 }

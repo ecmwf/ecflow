@@ -50,6 +50,10 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     setAttribute(Qt::WA_DeleteOnClose);
     setModal(false);
 
+    QString wt="Edit variable";
+    wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    setWindowTitle(wt);
+
     Q_ASSERT(data_);
     Q_ASSERT(data_->count() > 0);
     Q_ASSERT(data_->count() > defineIndex_);
@@ -71,7 +75,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
     QString path=QString::fromStdString(data_->data(0)->fullPath());
     QString h=EditorInfoLabel::formatKeyLabel("Node to modify: ") + "<b>" +
             EditorInfoLabel::formatNodeName(nodeName_) + "</b><br>";
-    h+= EditorInfoLabel::formatKeyLabel("Path: ") +  EditorInfoLabel::formatNodePath(path) + "<br>";
+    h+= EditorInfoLabel::formatKeyLabel("Node path: ") +  EditorInfoLabel::formatNodePath(path) + "<br>";
 
     VariableModelData* defineData=data_->data(defineIndex_);
     Q_ASSERT(defineData);
@@ -344,6 +348,10 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *par
     init();
     nameEdit_->setFocus();
 
+    QString wt="Add variable";
+    wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    setWindowTitle(wt);
+
     readSettings();
 
     WidgetNameProvider::nameChildren(this);
@@ -361,6 +369,10 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name
 	nameEdit_->setText(name + "_copy");
 	valueEdit_->setText(value);
     nameEdit_->setFocus();
+
+    QString wt="Add variable";
+    wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    setWindowTitle(wt);
 
     readSettings();
 }
