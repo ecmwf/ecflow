@@ -81,12 +81,11 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>&amp;Panels</string>
+     <string>Pa&amp;nels</string>
     </property>
     <addaction name="actionAddTreeWidget"/>
     <addaction name="actionAddTableWidget"/>
     <addaction name="actionAddInfoPanel"/>
-    <addaction name="actionAddLogPanel"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -269,14 +268,6 @@
   <action name="actionAbout">
    <property name="text">
     <string>&amp;About EcflowUI ...</string>
-   </property>
-  </action>
-  <action name="actionAddLogPanel">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Add &amp;log panel</string>
    </property>
   </action>
   <action name="actionManageSessions">
