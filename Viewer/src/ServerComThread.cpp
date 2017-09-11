@@ -249,7 +249,7 @@ void ServerComThread::run()
 
     // we can get an error string in one of two ways - either an exception is raised, or
     // the get_string() of the server reply is non-empty.
-    if (!isMessage && !(ci_->server_reply().get_string().empty()))
+    if (!isMessage && (taskType_ == VTask::CommandTask) && !(ci_->server_reply().get_string().empty()))
     {
         isMessage = true;
         errorString = ci_->server_reply().get_string();
