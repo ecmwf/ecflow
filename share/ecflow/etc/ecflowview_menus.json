@@ -777,7 +777,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "label or meter or limit or trigger",
+            "visible_for"    : "label or meter or limit or trigger or var or genvar",
             "command"        : "edit",
             "handler"        : "tree",
             "view"           : "tree/trigger"
@@ -785,7 +785,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "repeat  and not repeat_day",
+            "visible_for"    : "repeat and not repeat_day",
             "command"        : "edit",
             "handler"        : "tree",
             "view"           : "tree/trigger"
