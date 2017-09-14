@@ -127,6 +127,7 @@
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --requeue=force <full_name>",
             "question"       : "Confirm requeuing of <full_name>",
+            "question_control" : "menu.confirm.confirmRequeue",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -137,7 +138,7 @@
             "visible_for"    : "suite or family",
             "enabled_for"    : "aborted or suspended",
             "command"        : "ecflow_client --requeue=abort <full_name>",
-            "question"       : "Confirm requeuing of aborted tasks from <full_name>",
+            "question"       : "Confirm requeuing of aborted tasks from <full_name>",           
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },

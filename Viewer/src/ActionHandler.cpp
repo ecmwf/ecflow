@@ -31,6 +31,7 @@
 #include "CustomCommandDialog.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+#include "VConfig.hpp"
 
 #define _UI_ACTIONHANDLER_DEBUG
 
@@ -253,7 +254,14 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             if (item->isCustom())
                 MenuHandler::interceptCommandsThatNeedConfirmation(item);
 
-            if(item && !item->question().empty() && item->shouldAskQuestion(filteredNodes))
+            bool needQuestion=item && !item->question().empty() && item->shouldAskQuestion(filteredNodes);
+
+            //We can control if a confrmation is needed for a command from the config dialogue
+            if(needQuestion && !item->questionControl().empty())
+                if(VProperty* prop=VConfig::instance()->find(item->questionControl()))
+                    needQuestion=prop->value().toBool();
+
+            if(needQuestion)
         	{
                 std::string fullNames("<ul>");
                 std::string nodeNames("<ul>");

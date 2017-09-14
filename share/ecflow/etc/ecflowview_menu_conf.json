@@ -14,6 +14,16 @@
                 "values_label" : "User/Operator/Administrator",
                 "default": "user"
             }
+        },
+        "confirm": {
+            "label" : "",
+            "tooltip" : "",
+
+            "confirmRequeue": {
+                "label": "Confirm requeuing of a node",
+                "tooltip" : "Controls if a confirmation is needed for requeuing a node.",
+                "default": "true"
+            }
         }
     }
 }
