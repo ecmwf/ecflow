@@ -251,10 +251,17 @@
                          }
             },
             "group" : {
-                "title" : "Command confirmation",
+                "title" : "Request confirmation when:",
                 "prefix" : "menu.confirm",
 
-                "line" : "confirmRequeue"
+                "line" : "confirmRequeue",
+                "line" : "confirmRequeueAborted",
+                "line" : "confirmSetComplete",
+                "line" : "confirmSetABorted",
+                "line" : "confirmForceComplete",
+                "line" : "confirmForceAborted",
+                "line" : "confirmKillTask",
+                "line" : "confirmKillSuite"
             }
 
         },
