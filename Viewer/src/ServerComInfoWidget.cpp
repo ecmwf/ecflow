@@ -36,7 +36,7 @@ QBrush ServerRefreshInfoWidget::buttonBgHoverBrush_(QColor(249,248,248));
 QPen ServerRefreshInfoWidget::buttonHoverPen_(QColor(160,160,160));
 QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(214,227,213));
 QBrush ServerRefreshInfoWidget::periodBgBrush_(QColor(238,238,238));
-QBrush ServerRefreshInfoWidget::progBrush_(QColor(21,148,21));
+QBrush ServerRefreshInfoWidget::progBrush_(QColor(140,140,140));
 QBrush ServerRefreshInfoWidget::progBgBrush_(QColor(255,255,255));
 QBrush ServerRefreshInfoWidget::lastBgBrush_(QColor(238,238,238));
 QPen ServerRefreshInfoWidget::buttonRefreshPen_(QColor(79,179,100),2);
