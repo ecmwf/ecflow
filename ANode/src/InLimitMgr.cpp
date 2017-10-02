@@ -22,6 +22,7 @@
 #include "Memento.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
+#include "Extract.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -77,18 +78,35 @@ void InLimitMgr::addInLimit(const InLimit& l )
 
 bool InLimitMgr::deleteInlimit(const std::string& name)
 {
-	if (name.empty()) {
- 	  	inLimitVec_.clear();
-  		return true;
-	}
+   //cout << "InLimitMgr::deleteInlimit: " << name << "\n";
+   if (name.empty()) {
+      inLimitVec_.clear();
+      return true;
+   }
 
-	for(size_t i = 0; i < inLimitVec_.size(); i++) {
-		if (inLimitVec_[i].name() == name) {
- 			inLimitVec_.erase( inLimitVec_.begin() + i );
-  			return true;
-		}
-	}
-	throw std::runtime_error("InLimitMgr::deleteInlimit: Can not find inlimit: " + name);
+   string path_to_limit; // This can be empty
+   string limit_name;
+   (void)Extract::pathAndName( name, path_to_limit, limit_name  ); // already checked for empty name
+   //cout << "   path_to_limit:" << path_to_limit << "\n";
+   //cout << "   limit_name:" <<  limit_name << "\n";
+
+
+   for(size_t i = 0; i < inLimitVec_.size(); i++) {
+      //cout << "   " << i << ": " << inLimitVec_[i].pathToNode() << "  :  " << inLimitVec_[i].name() << "\n";
+      if (path_to_limit.empty()) {
+         if (inLimitVec_[i].name() == limit_name ) {
+            inLimitVec_.erase( inLimitVec_.begin() + i );
+            return true;
+         }
+      }
+      else {
+         if (inLimitVec_[i].name() == limit_name && inLimitVec_[i].pathToNode() == path_to_limit) {
+            inLimitVec_.erase( inLimitVec_.begin() + i );
+            return true;
+         }
+      }
+   }
+   throw std::runtime_error("InLimitMgr::deleteInlimit: Can not find inlimit: " + name);
 }
 
 Limit* InLimitMgr::findLimitViaInLimit(const InLimit& theInLimit) const

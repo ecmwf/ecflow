@@ -520,7 +520,11 @@ void MainWindow::writeSettings(VComboSettings *vs)
 	//Qt settings
 	vs->putQs("geometry",saveGeometry());
 	vs->putQs("state",saveState());
-	vs->putQs("minimized",(windowState() & Qt::WindowMinimized)?1:0);
+
+//See ECFLOW-1090
+#if 0
+    vs->putQs("minimized",(windowState() & Qt::WindowMinimized)?1:0);
+#endif
 
 	//Other setting
 	vs->put("infoPanelCount",findChildren<QDockWidget*>().count());
@@ -539,10 +543,13 @@ void MainWindow::readSettings(VComboSettings *vs)
 
 	nodePanel_->readSettings(vs);
 
+    //See ECFLOW-1090
+#if 0
 	if(vs->getQs("minimized").toInt()== 1)
 	{
 	  	setWindowState(windowState() | Qt::WindowMinimized);
 	}
+#endif
 
 	if(vs->containsQs("geometry"))
 		restoreGeometry(vs->getQs("geometry").toByteArray());

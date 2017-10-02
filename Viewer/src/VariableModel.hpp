@@ -47,8 +47,10 @@ public:
 public Q_SLOTS:
 	void slotReloadBegin();
 	void slotReloadEnd();
-	void slotAddRemoveBegin(int block,int diff);
-	void slotAddRemoveEnd(int diff);
+    void slotClearBegin(int block,int num);
+    void slotClearEnd(int block,int num);
+    void slotLoadBegin(int block,int num);
+    void slotLoadEnd(int block,int num);
     void slotDataChanged(int);
 
 Q_SIGNALS:
@@ -95,6 +97,12 @@ public:
     QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
 	
     QModelIndexList match(const QModelIndex& start,int role,const QVariant& value,int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap )) const;
+
+#if 0
+    void test();
+    void test(const QModelIndex& p);
+    void testSource(const QModelIndex& p);
+#endif
 
 public Q_SLOTS:
     void slotShowShadowed(bool);

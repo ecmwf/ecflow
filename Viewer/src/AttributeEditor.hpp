@@ -57,6 +57,7 @@ protected:
     void detachInfo();
     void checkButtonStatus();
     void setResetStatus(bool st);
+    void setSaveStatus(bool st);
     void setSuspended(bool);
     void addForm(QWidget* w);
     void hideForm();

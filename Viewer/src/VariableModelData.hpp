@@ -105,11 +105,16 @@ public:
     void addObserver(VariableModelDataObserver*);
     void removeObserver(VariableModelDataObserver*);
 
+
 Q_SIGNALS:
 	void reloadBegin();
 	void reloadEnd();
+    void clearBegin(int,int);
+    void clearEnd(int,int);
+    void loadBegin(int,int);
+    void loadEnd(int,int);
 	void addRemoveBegin(int,int);
-	void addRemoveEnd(int);
+    void addRemoveEnd(int);
     void dataChanged(int);
     void rerunFilter();
 

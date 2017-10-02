@@ -148,8 +148,8 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 		return;
 	}
 
-    //Check if it is tryno 0
-    if(isJobout && isTryNoZero(fileName))
+    //Check if tryno is 0. ie. the file is the current jobout file and ECF_TRYNO = 0
+    if(isTryNoZero(fileName))
     {
         reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!)");
         reply_->addLog("MSG>Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
@@ -429,9 +429,20 @@ std::string OutputFileProvider::joboutFileName() const
 	return std::string();
 }
 
+//Returns true if
+//   -the file is the current jobout
+//   -id contains the string ".0"
+//   -ECF_TRYNO = 0
+
 bool OutputFileProvider::isTryNoZero(const std::string& filename) const
 {
-    return boost::algorithm::ends_with(filename,".0");
+    if(filename.find(".0") != std::string::npos &&
+       joboutFileName() == filename &&
+       info_ && info_->isNode() && info_->node() && info_->node()->node())
+    {
+        return (info_->node()->findVariable("ECF_TRYNO",true) == "0");
+    }
+    return false;
 }
 
 void OutputFileProvider::setDir(VDir_ptr dir)

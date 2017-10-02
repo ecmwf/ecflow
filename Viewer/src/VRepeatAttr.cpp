@@ -257,8 +257,20 @@ int VRepeatDateAttr::endIndex() const
     if(node_ptr node=parent_->node())
     {
         const Repeat& r=node->repeat();
-        return (ecf_repeat_date_to_julian(r.end()) -
-            ecf_repeat_date_to_julian(r.start())) / r.step() + 1;
+        if(r.step() >0)
+        {
+            long jStart=ecf_repeat_date_to_julian(r.start());
+            long jEnd=ecf_repeat_date_to_julian(r.end());
+
+            int index=(jEnd-jStart)/r.step();
+            long val=jStart + index*r.step();
+            while(val > jEnd && index >=1)
+            {
+                index--;
+                val=jStart + index*r.step();
+            }
+            return index;
+        }
     }
     return 0;
 }
@@ -301,7 +313,7 @@ int VRepeatIntAttr::endIndex() const
         const Repeat& r=node->repeat();
         if(r.step() >0)
         {
-            int index=(r.end() - r.start()) / r.step() + 1;
+            int index=(r.end() - r.start()) / r.step();
             int val=r.start() + index*r.step();
             while(val > r.end() && index >=1)
             {

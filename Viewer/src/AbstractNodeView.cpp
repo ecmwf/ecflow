@@ -130,6 +130,31 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
         }
     }
 
+    //Middle button - expand only, no selection
+    else if(event->button() == Qt::MidButton)
+    {
+        int viewItemIndex=itemAtCoordinate(event->pos());
+        if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)
+        {
+#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+            UiLog().dbg() << " midbutton index=" << viewItemIndex << " name=" <<
+                               viewItems_[viewItemIndex].index.data().toString();
+#endif
+            if(viewItems_[viewItemIndex].expanded)
+            {
+                collapse(viewItemIndex);
+                updateRowCount();
+                updateScrollBars();
+                viewport()->update();
+            }
+            else
+            {
+                expand(viewItemIndex);
+            }
+        }
+        return;
+    }
+
     //No selection for context menu. Works on linux but can be platform dependent!!!
     else if(event->button() == Qt::RightButton)
     {
@@ -180,29 +205,6 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
     {
         //Forces a finalize even if mouse is pressed, but not on a item
         selectionModel_->select(QModelIndex(), QItemSelectionModel::Select);
-    }
-
-    if(event->button() == Qt::MidButton)
-    {
-        int viewItemIndex=itemAtCoordinate(event->pos());
-        if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)
-        {
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
-            UiLog().dbg() << " midbutton index=" << viewItemIndex << " name=" <<
-                               viewItems_[viewItemIndex].index.data().toString();
-#endif
-            if(viewItems_[viewItemIndex].expanded)
-            {
-                collapse(viewItemIndex);
-                updateRowCount();
-                updateScrollBars();
-                viewport()->update();
-            }
-            else
-            {
-                expand(viewItemIndex);
-            }
-        }
     }
 }
 

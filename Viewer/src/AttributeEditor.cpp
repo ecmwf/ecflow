@@ -55,7 +55,7 @@ AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : 
 AttributeEditor::~AttributeEditor()
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "AttributeEditor::~AttributeEditor -->";
+    UI_FUNCTION_LOG
 #endif
     detachInfo();
 #ifdef _USE_MODELESS_ATTRIBUTEDITOR
@@ -115,7 +115,7 @@ void AttributeEditor::accept()
 void AttributeEditor::attachInfo()
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "AttributeEditor::attachInfo -->";
+    UI_FUNCTION_LOG
 #endif
 
     if(info_)
@@ -128,16 +128,12 @@ void AttributeEditor::attachInfo()
 
         info_->addObserver(this);
     } 
-
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "<-- attachInfo";
-#endif
 }
 
 void AttributeEditor::detachInfo()
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "AttributeEditor::detachInfo -->";
+    UI_FUNCTION_LOG
 #endif
     if(info_)
     {
@@ -159,10 +155,6 @@ void AttributeEditor::detachInfo()
     }
 
     messageLabel_->stopLoadLabel();
-
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "<-- detachInfo";
-#endif
 }
 
 void AttributeEditor::slotButton(QAbstractButton* b)
@@ -174,6 +166,7 @@ void AttributeEditor::slotButton(QAbstractButton* b)
 void AttributeEditor::checkButtonStatus()
 {
     setResetStatus(isValueChanged());
+    setSaveStatus(isValueChanged());
 }
 
 void AttributeEditor::setResetStatus(bool st)
@@ -181,6 +174,13 @@ void AttributeEditor::setResetStatus(bool st)
     QPushButton *resetpb=buttonBox_->button(QDialogButtonBox::Reset);
     Q_ASSERT(resetpb);
     resetpb->setEnabled(st);
+}
+
+void AttributeEditor::setSaveStatus(bool st)
+{
+    QPushButton *savepb=buttonBox_->button(QDialogButtonBox::Save);
+    Q_ASSERT(savepb);
+    savepb->setEnabled(st);
 }
 
 void AttributeEditor::setSuspended(bool st)
@@ -272,7 +272,7 @@ void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector
 void AttributeEditor::notifyServerDelete(ServerHandler* server)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "AttributeEditor::notifyServerDelete -->";
+    UI_FUNCTION_LOG_S(server)
 #endif
     if(info_ && info_->server() == server)
     {
@@ -282,16 +282,13 @@ void AttributeEditor::notifyServerDelete(ServerHandler* server)
                                    " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
     }
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "<-- notifyServerDelete";
-#endif
 }
     
 //This must be called at the beginning of a reset
 void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "AttributeEditor::notifyBeginServerClear -->";
+    UI_FUNCTION_LOG_S(server)
 #endif
 
     if(info_)
@@ -307,17 +304,13 @@ void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
             checkButtonStatus();
         }
     }
-
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog().dbg() << "<-- notifyBeginServerClear";
-#endif
 }
 
 //This must be called at the end of a reset
 void AttributeEditor::notifyEndServerScan(ServerHandler* server)
 {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog(server).dbg() << "AttributeEditor::notifyEndServerScan -->";
+    UI_FUNCTION_LOG_S(server)
 #endif
 
     if(info_)
@@ -341,10 +334,6 @@ void AttributeEditor::notifyEndServerScan(ServerHandler* server)
             setSuspended(false);
         }
     }
-
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
-    UiLog(server).dbg() << "<-- notifyEndServerScan";
-#endif
 }
 
 void AttributeEditor::notifyServerConnectState(ServerHandler* server)

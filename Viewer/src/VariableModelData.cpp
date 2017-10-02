@@ -72,6 +72,8 @@ void VariableModelData::reset(const std::vector<Variable>& vars,const std::vecto
     }
 }
 
+//Remove the generated variables that have the same name as a user variable. User
+//variables take precedence over generated variables.
 void VariableModelData::removeDuplicates(const std::vector<Variable>& vars,std::vector<Variable>& genVars)
 {
     std::vector<Variable> gvOri=genVars;
@@ -500,6 +502,12 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
     }
     else
     {
+        UI_ASSERT(v.size() == vars_.size(),
+                  "v.size()=" << v.size() << " vars_.size()=" << vars_.size());
+
+        UI_ASSERT(vg.size() == genVars_.size(),
+                  "vg.size()=" << vg.size() << " genVars_.size()=" << genVars_.size());
+
         for(std::size_t i=0; i < vars_.size(); i++)
         {
             if(vars_[i].name() != v[i].name() || vars_[i].theValue() != v[i].theValue())
@@ -623,18 +631,21 @@ bool VariableModelDataHandler::updateShadowed()
         return shadowChanged;
 
     //There are no shadowed vars in the first node
-    for(int i=0; i < data_[0]->varNum(); i++)
+    std::size_t num=data_[0]->varNum();
+    for(std::size_t i=0; i < num; i++)
     {
         names_.insert(data_[0]->name(i));
     }
 
-    for(size_t i=1; i < data_.size(); i++)
+    std::size_t dataNum=data_.size();
+    for(std::size_t i=1; i < dataNum; i++)
     {
         if(data_[i]->updateShadowed(names_))
             shadowChanged=true;
     }
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+//#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#if 0
     UiLog().dbg() << " names:";
     for(std::set<std::string>::const_iterator it=names_.begin(); it != names_.end(); ++it)
     {
@@ -740,37 +751,46 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
     UI_FUNCTION_LOG
+    UiLog().dbg() << " dataIndex=" << dataIndex;
 #endif
 
     bool retVal=false;
 
-    //There is no notification about generated variables. Basically they can change at any update!!
-    //So we have to check all the variables at every update!!
+    //There is no notification about generated variables. Basically they can
+    //change at any update!! So we have to check all the variables at every update!!
     std::vector<Variable> v;
     std::vector<Variable> vg;
 
     //Get the current set of variables and check if the total number of variables
-    //has changed. At this point v and vg do not contain any duplicates.
+    //has changed. At this point v and vg do not contain any duplicates (within the
+    //same block the user variables take precedence over the generated variables)
     int cntDiff=data_[dataIndex]->checkUpdateDiff(v,vg);
 
     //If the number of the variables is not the same that we store
     //we reset the given block in the model
     if(cntDiff != 0)
     {
+        const int numOld=data_[dataIndex]->varNum(); //the current num in the model
+        const int numNew=v.size()+vg.size(); //the new num
+
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << " cntDiff=" << cntDiff;
+        UiLog().dbg() << " cntDiff=" << cntDiff << " numOld=" << numOld <<
+                         " numNew=" << numNew;
 #endif
-        const int numNew=v.size()+vg.size();
 
-        //Notifiy the model that rows will be added or removed for this data item
-        Q_EMIT addRemoveBegin(dataIndex,cntDiff);
+        //Clear the block's contents in the model
+        Q_EMIT clearBegin(dataIndex,numOld);
+        data_[dataIndex]->clear();
+        Q_EMIT clearEnd(dataIndex,numOld);
 
-        //Reset the variables using v and vg.
+        //Load the new data for the block in the model
+        Q_EMIT loadBegin(dataIndex,numNew);
         data_[dataIndex]->reset(v,vg);
+        Q_EMIT loadEnd(dataIndex,numNew);
+
         Q_ASSERT(data_[dataIndex]->varNum() == numNew);
 
-        //Notify the model that a change happened
-        Q_EMIT addRemoveEnd(cntDiff);
+        //At this point the block is filtered and sorted!!!!
 
         //Check if the shadowed list of variables changed
         if(updateShadowed())
@@ -778,26 +798,29 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
             UiLog().dbg() << " emit rerunFilter";
 #endif
+            //We need to rerun the filter!!
             Q_EMIT rerunFilter();
-        }
-        //The shadowed list did not change
+        }        
+#if 0
         else
         {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
             UiLog().dbg() << " emit dataChanged";
 #endif
             //Update the data item in the model
-            Q_EMIT dataChanged(dataIndex);
+            //Q_EMIT dataChanged(dataIndex);
         }
+#endif
 
         retVal=true;
     }
     //Check if some variables' name or value changed
     else
-    {
+    {      
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << " Change: NODE_VARIABLE";
+        UiLog().dbg() << " cntDiff=" << cntDiff;
 #endif
+        Q_ASSERT(cntDiff==0);
         //At this point we must have the same number of vars
         const int numNew=v.size()+vg.size();
         Q_ASSERT(data_[dataIndex]->varNum() == numNew);
@@ -819,8 +842,10 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
                      Q_EMIT rerunFilter();
                  }
                  else
+                 {
                      //Update the data item in the model
                      Q_EMIT dataChanged(dataIndex);
+                 }
             }
             else
             {
