@@ -907,8 +907,12 @@ def test_client_alter_add(ci):
 def test_client_alter_delete(ci):
     print("test_client_alter_delete")
     ci.delete_all() 
-    defs =create_defs("test_client_alter_delete")  
-     
+    defs = create_defs("test_client_alter_delete")  
+    suite_with_limits = defs.add_suite("suite_with_limits")
+    suite_with_limits.add_limit("limitX",10)
+    suite_with_limits_X = defs.add_suite("suite_with_limits_X")
+    suite_with_limits_X.add_limit("limitX",10)
+ 
     t1 = "/test_client_alter_delete/f1/t1"
     task_t1 = defs.find_abs_node(t1)
     task_t1.add_variable("var","value")
@@ -936,6 +940,8 @@ def test_client_alter_delete(ci):
     task_t1.add_limit("limit1",10)
     task_t1.add_inlimit( "limit",t1,2)
     task_t1.add_inlimit( "limit1",t1,2)
+    task_t1.add_inlimit( "limitX","/suite_with_limits",2)
+    task_t1.add_inlimit( "limitX","/suite_with_limits_X",2)
     task_t1.add_trigger( "t2 == active" )
     task_t1.add_complete( "t2 == complete" )
     
@@ -952,6 +958,7 @@ def test_client_alter_delete(ci):
     task_t2 = defs.find_abs_node(t2)
     task_t2.add_repeat( RepeatDate("date",20100111,20100115,2) )  # can't add cron and repeat at the same level
     
+    print(defs)
     ci.load(defs)   
 
     ci.alter(t1,"delete","variable","var")
@@ -1026,6 +1033,27 @@ def test_client_alter_delete(ci):
     task_t1 = ci.get_defs().find_abs_node(t1)
     assert( len(list(task_t1.labels))) == 0 ,"Expected 0 label :\n" + str(ci.get_defs())
 
+    ci.alter(t1,"delete","inlimit","limit")
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    assert( len(list(task_t1.inlimits))) == 3 ,"Expected 3 inlimit :\n" + str(ci.get_defs())
+    
+    ci.alter(t1,"delete","inlimit","/suite_with_limits:limitX")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    assert( len(list(task_t1.inlimits))) == 2 ,"Expected 2 inlimit :\n" + str(ci.get_defs())
+
+    ci.alter(t1,"delete","inlimit","/suite_with_limits_X:limitX")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    assert( len(list(task_t1.inlimits))) == 1 ,"Expected 1 inlimit :\n" + str(ci.get_defs())
+
+    ci.alter(t1,"delete","inlimit")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    assert( len(list(task_t1.inlimits))) == 0 ,"Expected 0 inlimit :\n" + str(ci.get_defs())
+
+
     ci.alter(t1,"delete","limit","limit")
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
@@ -1034,15 +1062,6 @@ def test_client_alter_delete(ci):
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     assert( len(list(task_t1.limits))) == 0 ,"Expected 0 limit :\n" + str(ci.get_defs())
-
-    ci.alter(t1,"delete","inlimit","limit")
-    ci.sync_local()
-    task_t1 = ci.get_defs().find_abs_node(t1)
-    assert( len(list(task_t1.inlimits))) == 1 ,"Expected 1 inlimit :\n" + str(ci.get_defs())
-    ci.alter(t1,"delete","inlimit")   
-    ci.sync_local()
-    task_t1 = ci.get_defs().find_abs_node(t1)
-    assert( len(list(task_t1.inlimits))) == 0 ,"Expected 0 inlimit :\n" + str(ci.get_defs())
 
     ci.alter(t1,"delete","cron")   
     ci.sync_local()

@@ -1,12 +1,15 @@
-
 extern /limits:c1a
 extern /limits:linux_cluster
 extern /limits:pdb
 extern /limits:q2diss
-
 suite suiteName
 	limit sg1  10
 	limit mars 10
+endsuite
+
+suite s1
+	limit mars 10
+	limit sg1  10
 endsuite
 
 suite obs
@@ -19,6 +22,9 @@ suite obs
    		inlimit limits:hpcd       
     	task t1
     		inlimit /suiteName:sg1        # another suite limit
+    		inlimit /suiteName:mars       # another suite limit
+    		inlimit /s1:mars              # another suite limit
+    		inlimit /s1:sg1               # another suite limit
    		task t2
    			inlimit /obs/limits:hpcd      # This suite limit
   		task t3
