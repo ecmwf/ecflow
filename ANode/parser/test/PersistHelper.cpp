@@ -101,7 +101,6 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
    {
       // Open file, and parse as a string.
       std::string defs_as_string;
-      bool ok = File::open(tmpFilename,defs_as_string);
       if (!File::open(tmpFilename,defs_as_string)) {
          errorMsg_ += "Could not file file: " + tmpFilename ;
          return false;
