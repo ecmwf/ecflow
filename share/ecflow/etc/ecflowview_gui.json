@@ -290,15 +290,7 @@
                             "default" : "These settings can be customised for each server separately"
                         }
 
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.aborted.count_fill_colour",
-                        "line" : "notification.aborted.count_text_colour",
-                        "note" : {
-                            "default" : "For aborted notifications the background and text colours <br> are taken from the <u>Status</u> colour settings"
-                        }
-                    },
+                    },                  
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.aborted.sound_file_type",
@@ -322,14 +314,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.restarted.fill_colour",
-                        "line" : "notification.restarted.text_colour",
-                        "line" : "notification.restarted.count_fill_colour",
-                        "line" : "notification.restarted.count_text_colour"
-                    },
+                    },                    
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.restarted.sound_file_type",
@@ -353,14 +338,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.late.fill_colour",
-                        "line" : "notification.late.text_colour",
-                        "line" : "notification.late.count_fill_colour",
-                        "line" : "notification.late.count_text_colour"
-                    },
+                    },                    
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.late.sound_file_type",
@@ -384,14 +362,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.zombie.fill_colour",
-                        "line" : "notification.zombie.text_colour",
-                        "line" : "notification.zombie.count_fill_colour",
-                        "line" : "notification.zombie.count_text_colour"
-                    },
+                    },                   
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.zombie.sound_file_type",
@@ -415,14 +386,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.alias.fill_colour",
-                        "line" : "notification.alias.text_colour",
-                        "line" : "notification.alias.count_fill_colour",
-                        "line" : "notification.alias.count_text_colour"
-                    },
+                    },                    
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.alias.sound_file_type",

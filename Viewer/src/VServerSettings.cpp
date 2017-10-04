@@ -153,6 +153,17 @@ std::string VServerSettings::notificationId(Param par)
 	return std::string();
 }
 
+VServerSettings::Param VServerSettings::notificationParam(const std::string& id)
+{
+    for(std::map<Param,std::string>::const_iterator it=notifyIds_.begin(); it != notifyIds_.end(); it++)
+    {
+        if(it->second == id)
+            return it->first;
+    }
+
+    return UnknownParam;
+}
+
 bool VServerSettings::notificationsEnabled() const
 {
 	for(std::map<Param,std::string>::const_iterator it=notifyIds_.begin(); it != notifyIds_.end(); it++)

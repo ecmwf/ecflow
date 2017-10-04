@@ -99,13 +99,13 @@ void ChangeNotifyButton::updateIcon()
 
 	}
 
-	QColor bgCol(Qt::gray);
-	QColor fgCol(Qt::black);
+    QColor bgCol(198,198,199);
+    QColor fgCol(20,20,20);
 	QColor countBgCol(58,126,194);
 	QColor countFgCol(Qt::white);
-	QColor border;
 
-	if(notifier_->prop())
+#if 0
+    if(notifier_->prop())
 	{
 		if(VProperty *p=notifier_->prop()->findChild("fill_colour"))
 			bgCol=p->value().value<QColor>();
@@ -121,6 +121,7 @@ void ChangeNotifyButton::updateIcon()
 
 		border=notifier_->prop()->paramToColour("border");
 	}
+#endif
 
 	QFont f;
     //f.setBold(true);
@@ -181,13 +182,16 @@ ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)
 	layout_->setContentsMargins(0,0,0,0);
 	layout_->setSpacing(0);
 
-    QLabel* label=new QLabel(tr("Notifications: "),this);
-    label->setStyleSheet("QLabel{color: " + QColor(60,60,60).name() + ";}");
-    QFont f;
-    f.setBold(true);
+    labelTextVis_="<b>Notifications</b>: ";
+    labelTextNoVis_=labelTextVis_ + "disabled";
+
+    label_=new QLabel(labelTextVis_,this);
+    label_->setStyleSheet("QLabel{color: " + QColor(60,60,60).name() + ";}");
+    //QFont f;
+    //f.setBold(true);
     //f.setPointSize(f.pointSize()-1);
-    label->setFont(f);
-    layout_->addWidget(label);
+    //label->setFont(f);
+    layout_->addWidget(label_);
 
 	ChangeNotify::populate(this);
 
@@ -210,16 +214,19 @@ ChangeNotifyButton* ChangeNotifyWidget::findButton(const std::string& id)
 	return 0;
 }
 
-
 void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
 {
 	ChangeNotifyButton *tb=new ChangeNotifyButton(this);
 	tb->setNotifier(notifier);
 	layout_->addWidget(tb);
 	if(!notifier->isEnabled())
-		tb->setEnabled(false);
+    {
+        tb->setEnabled(false);
+        tb->hide();
+    }
 
 	buttons_[notifier->id()]=tb;
+    updateLabel();
 }
 
 void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
@@ -228,9 +235,29 @@ void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 	{
 		if(ChangeNotifyButton* tb=(*it)->findButton(id))
 		{
-			tb->setEnabled(b);
+            tb->setEnabled(b);
+            tb->setVisible(b);
+            (*it)->updateLabel();
 		}
-	}
+    }
+}
+
+void ChangeNotifyWidget::updateLabel()
+{
+    QString s=(hasVisibleButton())?labelTextVis_:labelTextNoVis_;
+    if(label_->text() != s)
+        label_->setText(s);
+}
+
+bool ChangeNotifyWidget::hasVisibleButton() const
+{
+    for(std::map<std::string,ChangeNotifyButton*>::const_iterator it=buttons_.begin();
+        it != buttons_.end(); ++it)
+    {
+        if(it->second->isEnabled())
+            return true;
+    }
+    return false;
 }
 
 void ChangeNotifyWidget::updateSettings(const std::string& id)

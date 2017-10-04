@@ -29,13 +29,14 @@ public:
 			   NotifyRestartedEnabled, NotifyRestartedPopup, NotifyRestartedSound,
 			   NotifyLateEnabled, NotifyLatePopup, NotifyLateSound,
 			   NotifyZombieEnabled, NotifyZombiePopup, NotifyZombieSound,
-			   NotifyAliasEnabled, NotifyAliasPopup, NotifyAliasSound};
+               NotifyAliasEnabled, NotifyAliasPopup, NotifyAliasSound, UnknownParam};
 
 	int intValue(Param par) const;
 	bool boolValue(Param par) const;
 	VProperty* guiProp() const {return guiProp_;}
 	bool notificationsEnabled() const;
-	static std::string notificationId(Param);
+    static std::string notificationId(Param);
+    static Param notificationParam(const std::string& id);
 
 	void saveSettings();
 

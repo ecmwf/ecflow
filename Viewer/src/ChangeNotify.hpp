@@ -45,10 +45,8 @@ public:
 
 	static void add(const std::string&,VNode*,bool,bool);
 	static void remove(const std::string&,VNode*);
-	static void setEnabled(const std::string&,bool);
 	static void populate(ChangeNotifyWidget* w);
-	//static void showDialog(const std::string& id);
-	//static void clearData(const std::string& id);
+    static void updateNotificationStateFromServer(const std::string& id,bool hasEnabledServer);
 
 	//Called from VConfigLoader
 	static void load(VProperty* group);
@@ -57,7 +55,8 @@ protected:
 	void add(VNode*,bool,bool);
 	void remove(VNode*);
 	void setEnabled(bool);
-	void setProperty(VProperty* prop);
+    void updateNotificationState(bool hasEnabledServer);
+    void setProperty(VProperty* prop);
 	void loadServerSettings();
     virtual void loadNodeState() {}
 
@@ -70,6 +69,7 @@ protected:
 	ChangeNotifyModel* model_;
 	QSortFilterProxyModel* proxyModel_;
 	VProperty* prop_;
+    VProperty* propEnabled_; //central settings in config GUI
 	static ChangeNotifyDialog* dialog_;
 };
 

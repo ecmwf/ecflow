@@ -1662,12 +1662,10 @@ void ServerHandler::checkNotificationState(VServerSettings::Param par)
 	if(id.empty())
 		return;
 
-	bool enabled=false;
-
+    bool enabled=false;
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
 	{
 		ServerHandler *s=*it;
-
 		if(s->conf()->boolValue(par))
 		{
 			enabled=true;
@@ -1675,9 +1673,27 @@ void ServerHandler::checkNotificationState(VServerSettings::Param par)
 		}
 	}
 
-	ChangeNotify::setEnabled(id,enabled);
+    ChangeNotify::updateNotificationStateFromServer(id,enabled);
 }
 
+//Called from changeNotify
+bool ServerHandler::checkNotificationState(const std::string& notifierId)
+{
+    bool enabled=false;
+    VServerSettings::Param par=VServerSettings::notificationParam(notifierId);
+
+    for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+    {
+        ServerHandler *s=*it;
+        if(s->conf()->boolValue(par))
+        {
+            enabled=true;
+            break;
+        }
+    }
+
+    return enabled;
+}
 
 void ServerHandler::saveSettings()
 {
