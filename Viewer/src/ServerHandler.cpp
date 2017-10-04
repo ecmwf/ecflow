@@ -1068,6 +1068,9 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 {
     UiLog(this).dbg() << "ServerHandler::clientTaskFinished -->";
 
+    //The status of the tasks sent from the info panel must be properly set to
+    //FINISHED!! Only that will notify the observers about the change!!
+
 	//See which type of task finished. What we do now will depend on that.
 	switch(task->type())
 	{
@@ -1232,6 +1235,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			//Update the suite filter with the list of suites actually loaded onto the server.
             //If the suitefilter is enabled this might have only a subset of it in our tree
             updateSuiteFilterWithLoaded(serverReply.get_string_vec());
+            task->status(VTask::FINISHED);
 			break;
 		}
 
@@ -1243,9 +1247,10 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 
 		default:
-			break;
+            task->status(VTask::FINISHED);
+            break;
 
-	}
+	}                                             
 }
 
 //-------------------------------------------------------------------
