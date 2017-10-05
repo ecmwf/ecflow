@@ -26,7 +26,7 @@ namespace ecf
 {
 	/// Helper struct that will aid the deletion of Pointer from a container
 	template <typename T> struct TSeqDeletor {
-		void operator () (T pointer) {
+		void operator ()(T pointer) const {
 			// std::cout << "Destroy of this pointer" << std::endl;
 			delete pointer;
 			pointer = 0;
@@ -48,7 +48,7 @@ namespace ecf
 
 	/// Helper struct that will aid the deletion of Pointer from a Associative container
 	template <typename TPair> struct TAsoDeletor {
-    	void operator () (TPair& tElem)  {
+    	void operator () (TPair& tElem) const {
     		if(tElem.second) {
         		delete tElem.second;
     		}
