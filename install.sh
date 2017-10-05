@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==================================================================
-# Error handling
+# Error handlings
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 
