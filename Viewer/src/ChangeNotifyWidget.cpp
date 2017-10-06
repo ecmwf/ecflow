@@ -243,12 +243,6 @@ void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 void ChangeNotifyWidget::updateVisibility()
 {
     setVisible(hasVisibleButton());
-
-#if 0
-    QString s=(hasVisibleButton())?labelTextVis_:labelTextNoVis_;
-    if(label_->text() != s)
-        label_->setText(s);
-#endif
 }
 
 bool ChangeNotifyWidget::hasVisibleButton() const
