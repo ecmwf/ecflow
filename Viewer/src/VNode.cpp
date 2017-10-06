@@ -961,7 +961,7 @@ void VNode::triggers(TriggerCollector* tlc)
             VAttribute *a=limiterVec[i];
             assert(a);
             std::string val;
-            if(a->value("limiter_path",val) && !val.empty())
+            if(a->value("limiter_path",val))
             {
                 if(VAttribute* n = findLimit(val, a->strName()))
                 {
@@ -1092,7 +1092,6 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
 {
    // if (!strncmp("/", path.c_str(), 1))
    VAttribute* nullItem=0;
-   if (path.empty()) return nullItem;
 
 #if 0
    if(!path.empty() && path[0] == '/')
@@ -1125,6 +1124,7 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
     }
 
     //Find the matching limit in the ancestors
+    if (path.empty()) return nullItem;
     VNode* p=n->parent();
     Q_ASSERT(p);
     int chNum= p->numOfChildren();
