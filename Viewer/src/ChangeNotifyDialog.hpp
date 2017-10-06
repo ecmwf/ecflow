@@ -79,6 +79,7 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
     void slotSelectionChanged(VInfo_ptr);
+    void slotOptions();
 
 protected:
 	ChangeNotify* tabToNtf(int tabIdx);

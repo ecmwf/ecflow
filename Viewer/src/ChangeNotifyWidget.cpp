@@ -182,16 +182,13 @@ ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)
 	layout_->setContentsMargins(0,0,0,0);
 	layout_->setSpacing(0);
 
-    labelTextVis_="<b>Notifications</b>: ";
-    labelTextNoVis_=labelTextVis_ + "disabled";
-
-    label_=new QLabel(labelTextVis_,this);
-    label_->setStyleSheet("QLabel{color: " + QColor(60,60,60).name() + ";}");
+    QLabel* label=new QLabel("<b>Notifications</b>: ",this);
+    label->setStyleSheet("QLabel{color: " + QColor(60,60,60).name() + ";}");
     //QFont f;
     //f.setBold(true);
     //f.setPointSize(f.pointSize()-1);
     //label->setFont(f);
-    layout_->addWidget(label_);
+    layout_->addWidget(label);
 
 	ChangeNotify::populate(this);
 
@@ -226,7 +223,7 @@ void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
     }
 
 	buttons_[notifier->id()]=tb;
-    updateLabel();
+    updateVisibility();
 }
 
 void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
@@ -237,16 +234,21 @@ void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 		{
             tb->setEnabled(b);
             tb->setVisible(b);
-            (*it)->updateLabel();
+            (*it)->updateVisibility();
 		}
+
     }
 }
 
-void ChangeNotifyWidget::updateLabel()
+void ChangeNotifyWidget::updateVisibility()
 {
+    setVisible(hasVisibleButton());
+
+#if 0
     QString s=(hasVisibleButton())?labelTextVis_:labelTextNoVis_;
     if(label_->text() != s)
         label_->setText(s);
+#endif
 }
 
 bool ChangeNotifyWidget::hasVisibleButton() const

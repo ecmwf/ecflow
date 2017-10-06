@@ -59,6 +59,7 @@ public:
     static void reload();
     static void saveSession(SessionItem*);
     static void changeNotifySelectionChanged(VInfo_ptr);
+    static void startPreferences(QString);
 
 protected Q_SLOTS:
 	void on_actionNewTab_triggered();
@@ -115,6 +116,7 @@ private:
     static void configChanged(MainWindow *);
     static void hideServerSyncNotify(MainWindow*);
     static void cleanUpOnQuit(MainWindow *);
+    static void startPreferences(MainWindow *,QString);
 
     ServerFilterMenu* serverFilterMenu_;
     NodePanel* nodePanel_;

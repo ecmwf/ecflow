@@ -325,7 +325,7 @@ UI_FUNCTION_LOG
 	}
 }
 
-//Called only one during init
+//Called only once during init
 void ChangeNotify::loadServerSettings()
 {
 UI_FUNCTION_LOG

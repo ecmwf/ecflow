@@ -59,7 +59,7 @@ public:
 	explicit ChangeNotifyWidget(QWidget *parent=0);
 	~ChangeNotifyWidget();
 
-    void updateLabel();
+    void updateVisibility();
 	static void setEnabled(const std::string& id,bool b);
 	static void updateSettings(const std::string& id);
 
@@ -69,9 +69,6 @@ protected:
     bool hasVisibleButton() const;
 
 	QHBoxLayout* layout_;
-    QLabel* label_;
-    QString labelTextVis_;
-    QString labelTextNoVis_;
 	std::map<std::string,ChangeNotifyButton*> buttons_;
 	static std::vector<ChangeNotifyWidget*> widgets_;
 };

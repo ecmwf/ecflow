@@ -21,8 +21,10 @@
 
 #include <QCloseEvent>
 #include <QDebug>
+#include <QHBoxLayout>
 #include <QPainter>
 #include <QSettings>
+#include <QToolButton>
 #include <QVariant>
 
 Q_DECLARE_METATYPE(QList<int>)
@@ -180,9 +182,23 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	grad_.setStart(0,0);
 	grad_.setFinalStop(0,1);
 
+
+    QToolButton* optionsTb=new QToolButton(this);
+    //optionsTb->setAutoRaise(true);
+    optionsTb->setText(tr("&Prefrences"));
+    optionsTb->setIcon(QPixmap(":/viewer/configure.svg"));
+    optionsTb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    optionsTb->setToolTip(tr("Configure notification options"));
+
+    connect(optionsTb,SIGNAL(clicked()),
+            this,SLOT(slotOptions()));
+
+    tab_->setCornerWidget(optionsTb);
+
 	readSettings();
 
     WidgetNameProvider::nameChildren(this);
+
 }
 
 ChangeNotifyDialog::~ChangeNotifyDialog()
@@ -236,6 +252,16 @@ void ChangeNotifyDialog::slotContentsChanged()
 void ChangeNotifyDialog::slotSelectionChanged(VInfo_ptr info)
 {
     MainWindow::changeNotifySelectionChanged(info);
+}
+
+void ChangeNotifyDialog::slotOptions()
+{
+    QString op="notification";
+    if(ChangeNotify* notifier=tabToNtf(tab_->currentIndex()))
+    {
+        op+="." + QString::fromStdString(notifier->id());
+    }
+    MainWindow::startPreferences(op);
 }
 
 void ChangeNotifyDialog::updateStyleSheet(VProperty *currentProp)
