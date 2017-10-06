@@ -755,8 +755,18 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
 			break;
 		}
 		case AlterCmd::DEL_INLIMIT:  {
-			if (!name.empty()) InLimit check(name);  // will throw if not valid
-			break;
+		   if (!name.empty()) {
+		      // name can be:
+		      //    limit_name
+		      //    /path/to/limit:limit_name
+		      string path_to_limit; // This can be empty
+		      string limitName;
+		      if ( !Extract::pathAndName( name, path_to_limit, limitName ) ) {
+		         throw std::runtime_error( "AlterCmd::DEL_INLIMIT : Invalid inlimit : " +  name );
+		      }
+            InLimit check(limitName,path_to_limit);  // will throw if not valid
+		   }
+		   break;
 		}
 		case AlterCmd::DEL_ZOMBIE:  {
 			if (!Child::valid_zombie_type(name)) {

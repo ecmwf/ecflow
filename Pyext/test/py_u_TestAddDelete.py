@@ -175,8 +175,14 @@ if __name__ == "__main__":
     suite.add_inlimit(ecflow.InLimit("limitName2", "/s1/f1", 2))
     suite.add_inlimit("limitName3", "/s1/f1", 2)
     suite.add_inlimit("limitName4", "/s1/f1", 2)
-    assert len(list(suite.inlimits)) == 4, "Expected 4 inLimits"
-    suite.delete_inlimit("limitName1"); assert len(list(suite.inlimits)) == 3, "Expected 3 inlimits since we just deleted one limitName1" 
+    suite.add_inlimit("limitNameA", "/s1/f1", 2)
+    suite.add_inlimit("limitNameA", "/s1/f1/a", 2)
+    suite.add_inlimit("limitNameA", "/s1/f1/b", 2)
+    assert len(list(suite.inlimits)) == 7, "Expected 7 inLimits"
+    suite.delete_inlimit("limitName1"); assert len(list(suite.inlimits)) == 6, "Expected 6 inlimits since we just deleted one limitName1" 
+    suite.delete_inlimit("/s1/f1:limitNameA"); assert len(list(suite.inlimits)) == 5, "Expected 5 inlimits since we just deleted one limitName1" 
+    suite.delete_inlimit("/s1/f1/a:limitNameA"); assert len(list(suite.inlimits)) == 4, "Expected 4 inlimits since we just deleted one limitName1" 
+    suite.delete_inlimit("/s1/f1/b:limitNameA"); assert len(list(suite.inlimits)) == 3, "Expected 3 inlimits since we just deleted one limitName1" 
     suite.delete_inlimit("");           assert len(list(suite.inlimits)) == 0, "Expected 0 inlimits since we just deleted all of them"
 
     #===============================================================================

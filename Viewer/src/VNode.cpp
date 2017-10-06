@@ -1124,6 +1124,7 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
     }
 
     //Find the matching limit in the ancestors
+    if (path.empty()) return nullItem;
     VNode* p=n->parent();
     Q_ASSERT(p);
     int chNum= p->numOfChildren();
@@ -1133,7 +1134,9 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
         if (ch->strName() == path.substr(0, ch->name().size()))
         {
             std::string::size_type next = path.find('/');
-            return ch->findLimit(path.substr(next+1, path.size()), name);
+            if ( next != std::string::npos) {
+               return ch->findLimit(path.substr(next+1, path.size()), name);
+            }
         }
     }
 
