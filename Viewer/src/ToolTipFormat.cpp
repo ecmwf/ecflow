@@ -17,6 +17,12 @@ static QColor shortCutCol(147,165,202);
 namespace Viewer
 {
 
+QString formatShortCut(QString text)
+{
+    return "<code><font color=\'" + shortCutCol.name() + "\'>" + text + "</font></code>";
+}
+
+
 QString formatShortCut(QAction* ac)
 {
     Q_ASSERT(ac);

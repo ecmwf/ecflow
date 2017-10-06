@@ -18,6 +18,7 @@
 #include <QTime>
 #include <QWidget>
 
+#include "FontMetrics.hpp"
 #include "ServerObserver.hpp"
 #include "ServerComObserver.hpp"
 #include "VProperty.hpp"
@@ -106,13 +107,16 @@ protected:
     QFont fontPeriod_;
     QFont fontLast_;
     QFontMetrics fmServer_;
+    FontMetrics fmServerReal_;
     QFontMetrics fmPeriod_;
     QFontMetrics fmLast_;
 
     static QIcon *icon_;
     static QPen   borderPen_;
+    static QPen   buttonBorderPen_;
     static QPen   disabledBorderPen_;
     static QBrush serverBgBrush_;
+    static QBrush buttonBgBrush_;
     static QBrush buttonBgHoverBrush_;
     static QPen   buttonHoverPen_;
     static QBrush buttonBgRefreshBrush_;
@@ -141,6 +145,9 @@ protected:
     QRect progRect_;
     QRect lastRect_;
     Component currentComponent_;
+    int progRectHeight_;
+    int serverRectHeight_;
+    int serverYPadding_;
 
     PropertyMapper* prop_;
 
@@ -156,6 +163,7 @@ protected:
     int period_;
     int toNext_;
     int drift_;
+    bool needBorder_;
 
 };
 

@@ -21,6 +21,7 @@
 
 #include <boost/current_function.hpp>
 
+#include "FontMetrics.hpp"
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
 #include "ToolTipFormat.hpp"
@@ -29,13 +30,15 @@
 #include "VNode.hpp"
 
 QIcon* ServerRefreshInfoWidget::icon_=0;
-QBrush ServerRefreshInfoWidget::serverBgBrush_(QColor(229,228,227));
-QPen ServerRefreshInfoWidget::borderPen_(QColor(167,167,167));
+QBrush ServerRefreshInfoWidget::buttonBgBrush_(QColor(229,228,227));
+QBrush ServerRefreshInfoWidget::serverBgBrush_(QColor(241,242,243));
+QPen ServerRefreshInfoWidget::borderPen_(QColor(197,197,197));
+QPen ServerRefreshInfoWidget::buttonBorderPen_(QColor(167,167,167));
 QPen ServerRefreshInfoWidget::disabledBorderPen_(QColor(182,182,182));
 QBrush ServerRefreshInfoWidget::buttonBgHoverBrush_(QColor(249,248,248));
 QPen ServerRefreshInfoWidget::buttonHoverPen_(QColor(160,160,160));
 QBrush ServerRefreshInfoWidget::buttonBgRefreshBrush_(QColor(214,227,213));
-QBrush ServerRefreshInfoWidget::periodBgBrush_(QColor(238,238,238));
+QBrush ServerRefreshInfoWidget::periodBgBrush_(QColor(241,242,243));
 QBrush ServerRefreshInfoWidget::progBrush_(QColor(140,140,140));
 QBrush ServerRefreshInfoWidget::progBgBrush_(QColor(255,255,255));
 QBrush ServerRefreshInfoWidget::lastBgBrush_(QColor(238,238,238));
@@ -81,6 +84,7 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     fontPeriod_(QFont()),
     fontLast_(QFont()),
     fmServer_(QFont()),
+    fmServerReal_(QFont()),
     fmPeriod_(QFont()),
     fmLast_(QFont()),
     periodTextWidth_(0),
@@ -88,6 +92,9 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     periodDummyText_(" D=300s "),
     periodDummyFullText_(" D=300s d=99s"),
     currentComponent_(NoComponent),
+    progRectHeight_(2),
+    serverRectHeight_(10),
+    serverYPadding_(2),
     prop_(0),
     mode_(NoMode),
     noBlinkLimit_(15),
@@ -98,7 +105,8 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     total_(-1),
     period_(-1),
     toNext_(-1),
-    drift_(-1)
+    drift_(-1),
+    needBorder_(true)
 {
     Q_ASSERT(refreshAction_);
 
@@ -111,6 +119,7 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     fontServer_.setPointSize(fontServer_.pointSize()-1);
     fontServer_.setBold(true);
     fmServer_=QFontMetrics(fontServer_);
+    fmServerReal_=FontMetrics(fontServer_);
 
     fontPeriod_=QFont();
     fontPeriod_.setPointSize(fontPeriod_.pointSize()-2);
@@ -121,7 +130,8 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     fmLast_=QFontMetrics(fontLast_);
 
     int w=200;
-    int h=fmServer_.height()+6;
+    serverRectHeight_=fmServerReal_.realHeight()+2*serverYPadding_;
+    int h=serverRectHeight_+2*4;
 
     //timer
     timer_=new QTimer(this);
@@ -776,11 +786,10 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
         //timeTextLen_=qMax(fmTime_.width(" <9:59m"),fmUpdate_.width("updating"));
 
         //Define server rect
-        int yPadding=5;
-        int h=height()-2*yPadding;
+        int h=serverRectHeight_; //fmServer_.height()+progRectHeight_; //;2*yPadding;
         int currentRight=0;
 
-        serverRect_=QRect(buttonRect_.center().x()+4,yPadding,
+        serverRect_=QRect(buttonRect_.center().x()+4,(height()-h)/2,
                           buttonRect_.width()/2-4+4+fmServer_.width(serverText_),
                           h);
         currentRight=serverRect_.x()+serverRect_.width();
@@ -818,7 +827,8 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
             periodRect_ = serverRect_;
             periodRect_.setX(serverRect_.x()+serverRect_.width());
             periodRect_.setWidth(periodTextWidth_);
-            periodRect_.setHeight(fmPeriod_.height()-2);
+            //periodRect_.setHeight(fmPeriod_.height()-2);
+            periodRect_.setHeight(serverRect_.height()-progRectHeight_);
 
             currentRight+=periodRect_.width();
 
@@ -867,18 +877,18 @@ void ServerRefreshInfoWidget::drawButton(QPainter* painter)
         }
         else
         {
-            painter->setBrush((currentComponent_ == ButtonComponent)?buttonBgHoverBrush_:serverBgBrush_);
+            painter->setBrush((currentComponent_ == ButtonComponent)?buttonBgHoverBrush_:buttonBgBrush_);
 
             if(!refreshAction_->isEnabled())
                 painter->setPen(disabledBorderPen_);
             else
-                painter->setPen((currentComponent_ == ButtonComponent)?buttonHoverPen_:borderPen_);
+                painter->setPen((currentComponent_ == ButtonComponent)?buttonHoverPen_:buttonBorderPen_);
         }
     }
     else
     {
-        painter->setBrush(serverBgBrush_);
-        painter->setPen(borderPen_);
+        painter->setBrush(buttonBgBrush_);
+        painter->setPen(buttonBorderPen_);
     }
 
     //The filled circle
@@ -897,14 +907,21 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
      if(!server_)
          return;
 
-    painter->setBrush(Qt::NoBrush);
-    painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
+    //server bg
+    painter->setBrush(serverBgBrush_);
     painter->drawRect(serverRect_);
+
+    if(needBorder_)
+    {
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
+        painter->drawRect(serverRect_);
+    }
 
     //Server text
     QRect serverTextRect=serverRect_.adjusted(buttonRect_.width()/2-4+4,0,0,0);
     painter->setFont(fontServer_);
-    painter->setPen((refreshAction_->isEnabled())?serverTextPen_:disabledTextPen_);
+    painter->setPen((refreshAction_->isEnabled())?serverTextPen_:disabledTextPen_);   
     painter->drawText(serverTextRect,Qt::AlignHCenter | Qt::AlignVCenter,serverText_);
 
     //The time rects and texts
@@ -918,9 +935,12 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
         painter->drawRect(progRect_);
 
         //border
-        painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
-        painter->setBrush(Qt::NoBrush);
-        painter->drawRect(periodRect_.adjusted(0,0,0,progRect_.height()));
+        if(needBorder_)
+        {
+            painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
+            painter->setBrush(Qt::NoBrush);
+            painter->drawRect(periodRect_.adjusted(0,0,0,progRect_.height()));
+        }
 
         painter->setFont(fontPeriod_);
 
@@ -1046,6 +1066,11 @@ void ServerRefreshInfoWidget::adjustToolTip()
             txt+="<br><b>Last refresh:</b> " + lastRefresh_ + "<br>" +
                  "Automatic refresh is disabled!";
 
+        }
+
+        if(currentComponent_ != ButtonComponent && server_)
+        {
+            txt+="<br>" + Viewer::formatShortCut("Double click to change refresh settings for server");
         }
     }
 
