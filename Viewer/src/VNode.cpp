@@ -961,7 +961,7 @@ void VNode::triggers(TriggerCollector* tlc)
             VAttribute *a=limiterVec[i];
             assert(a);
             std::string val;
-            if(a->value("limiter_path",val))
+            if(a->value("limiter_path",val) && !val.empty())
             {
                 if(VAttribute* n = findLimit(val, a->strName()))
                 {
@@ -1092,6 +1092,7 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
 {
    // if (!strncmp("/", path.c_str(), 1))
    VAttribute* nullItem=0;
+   if (path.empty()) return nullItem;
 
 #if 0
    if(!path.empty() && path[0] == '/')
@@ -1133,7 +1134,9 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
         if (ch->strName() == path.substr(0, ch->name().size()))
         {
             std::string::size_type next = path.find('/');
-            return ch->findLimit(path.substr(next+1, path.size()), name);
+            if ( next != std::string::npos) {
+               return ch->findLimit(path.substr(next+1, path.size()), name);
+            }
         }
     }
 
