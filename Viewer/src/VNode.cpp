@@ -1131,7 +1131,7 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
     for(int i=0; i < chNum; i++)
     {
         VNode* ch=p->childAt(i);
-        if (ch->strName() == path.substr(0, ch->name().size()))
+        if(ch !=n && ch->strName() == path.substr(0, ch->name().size()))
         {
             std::string::size_type next = path.find('/');
             if ( next != std::string::npos) {
