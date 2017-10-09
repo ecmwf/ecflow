@@ -32,7 +32,7 @@ public:
    static int default_interval() { return 120;}
 
    /// If saving check point takes longer than the alarm time, raise late flag on the server
-   static int default_save_time_alarm() { return 30;}
+   static int default_save_time_alarm() { return 20;}
 
 private:
    CheckPt();
