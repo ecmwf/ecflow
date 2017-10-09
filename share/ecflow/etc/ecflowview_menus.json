@@ -267,7 +267,7 @@
         {
             "menu"           : "Node",
             "name"           : "Remove",
-            "visible_for"    : "(suite or family or task) and (oper or admin)",
+            "visible_for"    : "(suite or alias) and (oper or admin)",
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --delete=yes <full_name>",
             "question"       : "Do you really want to remove <full_name> ?",
