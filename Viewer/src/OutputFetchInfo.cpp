@@ -104,7 +104,7 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
         {
             t+="<li>Try to read the output files from the logserver \
                (if defined)</li><li>from disk</li><li>\
-               through the ecflow server (if <b>not</b> the <b>current</b> job output) </li>";
+               through the ecflow server (if the <b>current</b> job output) </li>";
         }
         else
         {
@@ -119,8 +119,8 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
         if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&
             !server->isLocalHost())
         {
-            remarks << "The output file was read <b>from disk</b> but the server's \
-                       host (" + QString::fromStdString(server->host()) +
+            remarks << "The output file was read <b>from disk</b> but the server (" +
+                       QString::fromStdString(server->host()) +
                        ") is not running on the local machine. If the path is machine-specific (e.g. /tmp) \
                        and there exists a file with the same path on the local machine, then\
                        this will have been read instead.";
