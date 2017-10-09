@@ -319,12 +319,24 @@ endif()
 # =========================================================================================
 
 ecbuild_dont_pack( DIRS 
+                    .settings
+                    bamboo
                    	ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
                    	ecbuild
+                   	Pyext/test/data/CUSTOMER
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
-                    Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
+                    Doc
+)
+
+# ignore eclipse files
+ecbuild_dont_pack( FILES 
+                   .project
+                   .cproject
+                   .pydevproject
+                   Pyext/.pydevproject
+                   build_scripts/.pydevproject
 )
 
 
