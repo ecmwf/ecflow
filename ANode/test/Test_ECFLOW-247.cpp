@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_247 )
    task_ptr t3 = f1->add_task("t3");
    task_ptr t4 = f1->add_task("t4");
 
-   PrintStyle::setStyle( PrintStyle::MIGRATE);
+   PrintStyle style( PrintStyle::MIGRATE);
    {
       defs->beginAll();
       t1->set_state(NState::COMPLETE);

@@ -172,36 +172,40 @@ void VProperty::setValue(QVariant val)
     	dispatchChange();
 }
 
-std::string VProperty::valueAsString() const
+QString VProperty::valueAsString() const
 {
-	QString s;
+    QString s;
 
-	switch(type_)
-	{
-	case StringType:
-		s=value().toString();
-		break;
-	case IntType:
-		s=QString::number(value_.toInt());
-		break;
-	case BoolType:
-		s=(value().toBool() == true)?"true":"false";
-		break;
-	case ColourType:
-		s=VProperty::toString(value().value<QColor>());
-		break;
-	case FontType:
-		s=VProperty::toString(value().value<QFont>());
-		break;
-	case SoundType:
-		s=value().toString();
-		break;
-	default:
-		break;
+    switch(type_)
+    {
+    case StringType:
+        s=value().toString();
+        break;
+    case IntType:
+        s=QString::number(value_.toInt());
+        break;
+    case BoolType:
+        s=(value().toBool() == true)?"true":"false";
+        break;
+    case ColourType:
+        s=VProperty::toString(value().value<QColor>());
+        break;
+    case FontType:
+        s=VProperty::toString(value().value<QFont>());
+        break;
+    case SoundType:
+        s=value().toString();
+        break;
+    default:
+        break;
+    }
 
-	}
+    return s;
+}
 
-	return s.toStdString();
+std::string VProperty::valueAsStdString() const
+{	
+    return valueAsString().toStdString();
 }
 
 void VProperty::setParam(QString name,QString value)
@@ -223,13 +227,35 @@ void VProperty::setParam(QString name,QString value)
     params_[name]=value;
 }
 
-QString VProperty::param(QString name)
+QString VProperty::param(QString name) const
 {
 	QMap<QString,QString>::const_iterator it=params_.find(name);
 	if(it != params_.end())
-			return it.value();
+        return it.value();
 
 	return QString();
+}
+
+QString VProperty::valueLabel() const
+{
+    QString v=valueAsString();
+    QString vals=param("values");
+    if(!vals.isEmpty())
+    {
+        QString vl=param("values_label");
+        if(!vl.isEmpty())
+        {
+            QStringList valLst=vals.split("/");
+            QStringList labelLst=vl.split("/");
+            if(valLst.count() == labelLst.count())
+            {
+                int idx=valLst.indexOf(v);
+                if(idx >=0)
+                    return labelLst[idx];
+            }
+        }
+    }
+    return v;
 }
 
 void VProperty::adjustAfterLoad()
@@ -385,7 +411,8 @@ void VProperty::setUseMaster(bool b)
 
 		if(useMaster_)
 		{
-			value_=master_->value_;
+            value_=master_->value_;
+            dispatchChange();
 		}
 	}
 }

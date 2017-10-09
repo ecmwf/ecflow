@@ -7,8 +7,14 @@
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 
-module unload ecflow
-module load ecflow/4.6.0
+
+if [[ "$#"  == 0 ]] ; then
+   export PATH=/tmp/ma0/install/cmake/ecflow/4.7.0/bin:$PATH
+   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.7.0/lib/python2.7/site-packages
+else
+   module unload ecflow
+   module load ecflow/dev
+fi
 
 # =======================================================================
 # Create build scripts files. Must be before python $WK/build_scripts/nightly/build.py
@@ -57,9 +63,15 @@ git checkout develop
 ./regenerate.sh ecflow
 git checkout master
 
+# ========================================================================
+# test suites
+# ========================================================================
+cd $WK
+python Pyext/samples/TestBench.py  ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
+
+       
 # =======================================================================
 # Start the GUI
 # =======================================================================
 cd $SCRATCH
-module swap ecflow/4.6.0
 ecflow_ui &

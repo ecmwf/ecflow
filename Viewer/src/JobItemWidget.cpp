@@ -22,7 +22,8 @@ JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 	//Remove the first spacer item!!
 	removeSpacer();
 
-	Highlighter* ih=new Highlighter(textEdit_->document(),"job");
+    //The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(),"job");
 
     infoProvider_=new JobProvider(this);
 

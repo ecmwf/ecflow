@@ -33,7 +33,7 @@ public:
 
 	// For python
 	static defs_ptr load( defs_ptr defs) { return defs;}
-	static std::vector<std::string> loadDefs(const std::string& filePath,bool force,bool check_only);
+	static std::vector<std::string> loadDefs(const std::string& filePath,bool force,bool check_only,bool print); // check_only & print are client side only
    static std::string get(const std::string& absNodePath = "");
    static std::string get_state(const std::string& absNodePath = "");
    static std::string migrate(const std::string& absNodePath = "");

@@ -42,8 +42,8 @@ public:
     VAttributeType* type() const;
     QStringList data(bool firstLine) const;
     std::string strName() const;
-
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static bool isReadOnly(const std::string&);
 };
 
 #endif // VGENVARATTR_HPP

@@ -106,6 +106,31 @@ Expression::Expression()
 Expression::Expression(const Expression& rhs)
 : vec_(rhs.vec_), makeFree_(rhs.makeFree_), state_change_no_(0),theCombinedAst_(0) {}
 
+
+std::auto_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,const std::string& error_msg_context)
+{
+   PartExpression exp(expression_to_parse);
+   string parseErrorMsg;
+   std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
+   if (!ast.get()) {
+      std::stringstream ss; ss << error_msg_context  << " Failed to parse expression '" << expression_to_parse  << "'.  " << parseErrorMsg;
+      throw std::runtime_error( ss.str() ) ;
+   }
+   return ast;
+}
+
+std::auto_ptr<AstTop> Expression::parse_no_throw(const std::string& expression_to_parse,std::string& error_msg_context)
+{
+   PartExpression exp(expression_to_parse);
+   string parseErrorMsg;
+   std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
+   if (!ast.get()) {
+      std::stringstream ss; ss << error_msg_context  << " Failed to parse expression '" << expression_to_parse  << "'.  " << parseErrorMsg;
+      error_msg_context = ss.str();
+   }
+   return ast;
+}
+
 std::ostream& Expression::print(std::ostream& os, const std::string& exprType) const
 {
    BOOST_FOREACH(const PartExpression& expr, vec_ ) {

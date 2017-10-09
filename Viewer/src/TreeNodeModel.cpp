@@ -649,6 +649,18 @@ VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex & index,bool
     return 0;
 }
 
+VTreeNode* TreeNodeModel::indexToServerOrNode( const QModelIndex & index) const
+{
+    VTreeNode* node=indexToNode(index);
+    if(!node)
+    {
+        if(VTreeServer* ts=indexToServer(index))
+            node=ts->tree();
+    }
+
+    return node;
+}
+
 VTreeNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 {
 	//If it is not a sever ...
@@ -849,8 +861,10 @@ QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) con
     return QModelIndex();
 }
 
+#if 0
 QModelIndex TreeNodeModel::forceShowNode(const VNode* node) const
 {
+    //There is nothing to do when there is no status filter set
     if(data_->isFilterNull())
         return QModelIndex();
 
@@ -887,14 +901,57 @@ QModelIndex TreeNodeModel::forceShowAttribute(const VAttribute* a) const
     return QModelIndex();
 }
 
+#endif
 
+//Sets the object strored in info as the current forceShow object in the
+//data. A forceShow object must always be part of the tree whatever state or
+//atribute filter is set. There can be only one forceShow object at a time in the 
+//whole model/tree.
+void TreeNodeModel::setForceShow(VInfo_ptr info)
+{
+    UI_FUNCTION_LOG
+
+    if(info)
+        UiLog().dbg() << " info=" << info->path();
+
+    //Clear the forceShow object in all the server data objects. Only one of 
+    //these is actually need to clear it.
+    for(int i=0; i < data_->count(); i++)
+    {
+        VTreeServer *ts=data_->server(i)->treeServer();
+        Q_ASSERT(ts);
+        ts->clearForceShow(info->item());
+    }
+    
+    //Sets the forceShow objects in all the server data objects. Only one of these will
+    //actually set the forceShow.
+    for(int i=0; i < data_->count(); i++)
+    {
+        VTreeServer *ts=data_->server(i)->treeServer();
+        Q_ASSERT(ts);
+        ts->setForceShow(info->item());
+    }    
+}
+
+//The selection changed in the view
 void TreeNodeModel::selectionChanged(QModelIndexList lst)
 {
-    if(data_->isFilterNull())
-        return;
+    UI_FUNCTION_LOG
 
-    UiLog().dbg() << "TreeNodeModel::selectionChanged -->";
+    //if(data_->isFilterNull())
+    //    return;
 
+    if(lst.count() > 0)
+    {
+        QModelIndex idx=lst.back();
+
+        VInfo_ptr info=nodeInfo(idx);
+
+        setForceShow(info);
+    }
+        
+
+    #if 0
     Q_FOREACH(QModelIndex idx,lst)
     {
         VInfo_ptr info=nodeInfo(idx);
@@ -905,7 +962,15 @@ void TreeNodeModel::selectionChanged(QModelIndexList lst)
            Q_ASSERT(ts);
            ts->clearForceShow(info->item());
         }
+
+        for(int i=0; i < data_->count(); i++)
+        {
+           VTreeServer *ts=data_->server(i)->treeServer();
+           Q_ASSERT(ts);
+           ts->setForceShow(info->item());
+        }
     }
+    #endif
 }
 
 
@@ -916,7 +981,7 @@ void TreeNodeModel::selectionChanged(QModelIndexList lst)
 
 //WARNING: if we are in the middle of an attribute filter change it will not give
 //correct results, because atts_ contains the new filter state, but the whole VTree still
-//base on the previous atts_ state.!! However we can assume that the index vas visible in
+//base on the previous atts_ state!! However we can assume that the index vas visible in
 //the tree so attrNum() is cached on the tree nodes so we get correct results for nodes.
 //Attributes however cannot be identified correctly.
 
@@ -1170,7 +1235,7 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server,int num)
         Q_EMIT firstScanEnded(ts);
 }
 
-//The server clear has started. It well remove all the nodes except the root node.
+//The server clear has started. It will remove all the nodes except the root node.
 //So we need to remove all the rows belonging to the rootnode.
 void TreeNodeModel::slotBeginServerClear(VModelServer* server,int)
 {
@@ -1292,10 +1357,25 @@ void TreeNodeModel::slotBeginFilterUpdateInsertTop(VTreeServer* server,int row)
     beginInsertRows(idx,attrNum+row,attrNum+row);
 }
 
-void TreeNodeModel::slotEndFilterUpdateInsertTop(VTreeServer* server,int)
+void TreeNodeModel::slotEndFilterUpdateInsertTop(VTreeServer* server,int row)
 {
     Q_ASSERT(server);
     endInsertRows();
+
+    int attrNum=server->tree()->attrNum(atts_);
+    int chNum=server->tree()->numOfChildren();
+
+    Q_ASSERT(chNum >= row);
+    Q_ASSERT(attrNum >=0);
+    Q_ASSERT(chNum >=0);
+
+    if(row >=0)
+    {
+        const VTreeNode* topChange=server->tree()->childAt(row);
+        //when a suite becomes visible we must notify the view about it so that
+        //the expand state could be correctly set!!!
+        Q_EMIT filterUpdateAddEnded(topChange);
+    }
 }
 
 

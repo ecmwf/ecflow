@@ -30,8 +30,8 @@ public:
     void populateDockTitleBar(DashboardDockTitleWidget* tw);
     void rerender();
 
-	void writeSettings(VSettings*);
-	void readSettings(VSettings*);
+    void writeSettings(VComboSettings*);
+    void readSettings(VComboSettings*);
 
 protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);

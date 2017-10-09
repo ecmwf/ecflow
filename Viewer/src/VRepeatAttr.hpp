@@ -27,10 +27,10 @@ public:
     explicit VRepeatAttrType();
     QString toolTip(QStringList d) const;
     QString definition(QStringList d) const;
-    void encode(const Repeat&,QStringList&,const std::string&) const;
+    void encode(const Repeat&,QStringList&,const std::string&,QString) const;
 
 private:
-    enum DataIndex {TypeIndex=0,SubtypeIndex=1,NameIndex=2,ValueIndex=3,StartIndex=4,EndIndex=5,StepIndex=6};
+    enum DataIndex {TypeIndex=0,SubtypeIndex=1,NameIndex=2,ValueIndex=3,StartIndex=4,EndIndex=5,StepIndex=6,AllValuesIndex=7};
 };
 
 class VRepeatAttr : public VAttribute
@@ -42,13 +42,16 @@ public:
     virtual int endIndex() const=0;
     virtual int currentIndex() const=0;
     int step() const;
-    virtual std::string value(int index) const=0;    
+    virtual std::string value(int index) const=0;
 
     VAttributeType* type() const;
     QStringList data(bool firstLine) const;
     std::string strName() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+
+    virtual QString allValues() const;
+
 };
 
 class VRepeatDateAttr : public VRepeatAttr
@@ -98,6 +101,7 @@ public:
     int currentIndex() const;
     std::string value(int index) const;
     const std::string& subType() const {return subType_;}
+    QString allValues() const;
 
 protected:
     static std::string subType_;
@@ -111,6 +115,7 @@ public:
     int currentIndex() const;
     std::string value(int index) const;
     const std::string& subType() const {return subType_;}
+    QString allValues() const;
 
 protected:
     static std::string subType_;

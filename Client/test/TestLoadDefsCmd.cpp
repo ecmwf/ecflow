@@ -20,7 +20,6 @@
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -55,26 +54,23 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 	// Load the FIRST file with a set of unresolved extrens
 	defs_ptr firstDefs =  Defs::create();
  	{
-		DefsStructureParser checkPtParser( firstDefs.get(), firstDef );
 		std::string errorMsg,warningMsg;
-		bool parse = checkPtParser.doParse(errorMsg,warningMsg);
+		bool parse = firstDefs->restore(firstDef,errorMsg,warningMsg);
  		BOOST_CHECK_MESSAGE(parse,"Parse failed. " << errorMsg);
+ 		firstDefs->clear_externs(); // server defs should not have externs.
 	}
 	size_t noOfSuites = firstDefs->suiteVec().size();
-	size_t noOfExterns = firstDefs->externs().size();
 
 
 	// load the SECOND file, which should resolve the externs
    std::string secondDef = File::test_data("Client/test/data/second.def","Client");
 	Defs secondDefs;
 	{
-		DefsStructureParser checkPtParser( &secondDefs , secondDef);
 		std::string errorMsg,warningMsg;
-		bool parse = checkPtParser.doParse(errorMsg,warningMsg);
+		bool parse = secondDefs.restore(secondDef,errorMsg,warningMsg);
  		BOOST_CHECK_MESSAGE(parse,"Parse failed. " << errorMsg);
 	}
 	noOfSuites += secondDefs.suiteVec().size();
-	noOfExterns += secondDefs.externs().size();
 
 
 	// Create a LoadDefsCmd. This capable of merging defs files and resolving externs
@@ -89,8 +85,6 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 	BOOST_CHECK_MESSAGE( requestStatus, "Handle Request " << cmd << " returned NULL\n");
 	BOOST_CHECK_MESSAGE( requestStatus->error().empty(), requestStatus->error());
   	BOOST_CHECK_MESSAGE( secondDefs.suiteVec().size() == noOfSuites,"Merge failed to add suites");
- 	BOOST_CHECK_MESSAGE( secondDefs.externs().size() == noOfExterns,"Merge failed to add externs");
- 	BOOST_CHECK_MESSAGE( firstDefs->suiteVec().size() == 0,          "Merge failed to remove suites");
 
 
  	// Modify the Defs file to add a task/trigger that references the undefined

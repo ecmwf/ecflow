@@ -47,7 +47,9 @@ protected Q_SLOTS:
 	void on_actionDelete_triggered();
     void on_actionKill_triggered();
 	void on_reloadTb__clicked(bool);
-	void slotItemSelected(QModelIndex,QModelIndex);
+    void on_actionLookup_triggered();
+    void slotDoubleClicked(const QModelIndex &index);
+    void slotItemSelected(QModelIndex,QModelIndex);
 
 protected:
     void updateState(const ChangeFlags&);
@@ -55,7 +57,8 @@ protected:
 
 private:
 	void command(const std::string& cmdName);
-	void updateContents();
+    void lookup(const QModelIndex& idx);
+    void updateContents();
 	void checkActionState();
 
 	ZombieModel *model_;

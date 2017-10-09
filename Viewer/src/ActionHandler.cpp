@@ -31,19 +31,23 @@
 #include "CustomCommandDialog.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+#include "VConfig.hpp"
 
 #define _UI_ACTIONHANDLER_DEBUG
 
-ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
+ActionHandler::ActionHandler(QObject *actionSender,QWidget* menuParent) :
+    QObject(actionSender),
+    actionSender_(actionSender),
+    menuParent_(menuParent)
 {
 	connect(this,SIGNAL(viewCommand(VInfo_ptr,QString)),
-			parent_,SLOT(slotViewCommand(VInfo_ptr,QString)));
+            actionSender_,SLOT(slotViewCommand(VInfo_ptr,QString)));
 
 	connect(this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
-			parent_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+            actionSender_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
 
 	connect(this,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
-			parent_,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+            actionSender_,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
 	//makeShortcut();
 }
@@ -80,8 +84,8 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
 
 
-    std::string view=parent_->property("view").toString().toStdString();
-    MenuItem* item=MenuHandler::invokeMenu("Node", filteredNodes, pos,  parent_,view);
+    std::string view=menuParent_->property("view").toString().toStdString();
+    MenuItem* item=MenuHandler::invokeMenu("Node", filteredNodes, pos,  menuParent_,view);
 
     if(item)
     {
@@ -99,7 +103,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             Q_EMIT dashboardCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;
     	}
-    	else if(item->handler() == "tree")
+        else if(item->handler() == "tree" || item->handler() == "table" || item->handler() == "trigger")
     	{
             Q_EMIT viewCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;
@@ -250,7 +254,14 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             if (item->isCustom())
                 MenuHandler::interceptCommandsThatNeedConfirmation(item);
 
-            if(item && !item->question().empty() && item->shouldAskQuestion(filteredNodes))
+            bool needQuestion=item && !item->question().empty() && item->shouldAskQuestion(filteredNodes);
+
+            //We can control if a confrmation is needed for a command from the config dialogue
+            if(needQuestion && !item->questionControl().empty())
+                if(VProperty* prop=VConfig::instance()->find(item->questionControl()))
+                    needQuestion=prop->value().toBool();
+
+            if(needQuestion)
         	{
                 std::string fullNames("<ul>");
                 std::string nodeNames("<ul>");
@@ -274,7 +285,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                         nodeNames += filteredNodes[i]->name();
                         nodeNames += "</b></li>";                    
                     }
-                    if(numItemsToList < filteredNodes.size())
+                    if(numItemsToList < static_cast<int>(filteredNodes.size()))
                     {                  
                         std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
 

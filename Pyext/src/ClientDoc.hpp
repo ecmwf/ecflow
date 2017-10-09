@@ -84,7 +84,12 @@ public:
    static const char* resume();
    static const char* job_gen();
 	static const char* delete_node();
-	static const char* delete_all();
+   static const char* delete_all();
+   static const char* set_child_path();
+   static const char* set_child_password();
+   static const char* set_child_pid();
+   static const char* set_child_try_no();
+   static const char* set_child_timeout();
 
 private:
 	ClientDoc(){}

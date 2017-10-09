@@ -117,14 +117,19 @@ if __name__ == "__main__":
             This programs assumes that ecflow module is accessible
 
             example:
-                python Pyext/samples/TestBench.py --port=3141 --verbose=True AParser/test/data/good_defs/trigger/late.def
+                python Pyext/samples/TestBench.py --port=3141 --verbose=True ANode/parser/test/data/good_defs/trigger/late.def
             """    
             
     print("####################################################################")
     print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
-    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
+    if 'PYTHONPATH' in os.environ:
+        print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
     print("sys.path:   " + str(sys.path))
     print("####################################################################")
+ 
+    default_port = "3141"
+    if "ECF_PORT" in os.environ:
+         default_port = os.environ["ECF_PORT"]
  
     PARSER = argparse.ArgumentParser(description=DESC,  
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -132,7 +137,7 @@ if __name__ == "__main__":
                         help="The definition file")
     PARSER.add_argument('--host', default="localhost",   
                         help="The name of the host machine, defaults to 'localhost'")
-    PARSER.add_argument('--port', default="3141",   
+    PARSER.add_argument('--port', default=default_port,   
                         help="The port on the host, defaults to 3141")
     PARSER.add_argument('--path', default="/",   
                         help="replace only the node path in the suite")

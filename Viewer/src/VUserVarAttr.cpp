@@ -30,7 +30,15 @@ VUserVarAttrType::VUserVarAttrType() : VAttributeType("var")
 
 QString VUserVarAttrType::toolTip(QStringList d) const
 {
-   return QString();
+    QString t="<b>Type:</b> User variable<br>";
+    if(d.count() == dataCount_)
+    {
+        t+="<b>Name:</b> " + d[NameIndex] + "<br>";
+        QString s=d[ValueIndex];
+        if(s.size() > 150) s=s.left(150) + "...";
+        t+="<b>Value:</b> " + s;
+    }
+    return t;
 }
 
 void VUserVarAttrType::encode(const Variable& v,QStringList& data) const
@@ -111,8 +119,8 @@ void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         if(vnode->node_)
         {
             const std::vector<Variable>& v=vnode->node_->variables();
-            int n=v.size();
-            for(size_t i=0; i < n; i++)
+            int n=static_cast<int>(v.size());
+            for(int i=0; i < n; i++)
             {
                 vec.push_back(new VUserVarAttr(vnode,v[i],i));
             }
@@ -123,8 +131,8 @@ void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     {
         std::vector<Variable> v;
         vnode->variables(v);
-        int n=v.size();
-        for(size_t i=0; i < n; i++)
+        int n=static_cast<int>(v.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VUserVarAttr(vnode,v[i],i));
         }

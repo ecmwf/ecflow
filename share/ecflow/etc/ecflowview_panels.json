@@ -145,7 +145,7 @@
         {
         	"name"    : "server_settings",
             "label"   : "Settings",
-            "icon"	  : "configure.svg",
+            "icon"	  : "cogwheel_blue.svg",
             "visible_for" : "server"
              
         }  

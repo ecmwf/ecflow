@@ -21,14 +21,16 @@
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
-#include "DefsStructureParser.hpp"
+#include "File.hpp"
+#include "PrintStyle.hpp"
 
 using namespace ecf;
 using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force)
+
+LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool check_only, bool print)
 : force_(force), defs_(Defs::create()), defs_filename_(defs_filename)
 {
    if (defs_filename_.empty()) {
@@ -38,17 +40,49 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force)
    }
 
    // At the end of the parse check the trigger/complete expressions and resolve in-limits
-   DefsStructureParser checkPtParser( defs_.get(), defs_filename_ );
    std::string errMsg, warningMsg;
-   if ( checkPtParser.doParse( errMsg , warningMsg) ) {
-      // Dump out the in memory Node tree
-      // std::cout << defs_.get();
+   if (defs_->restore(defs_filename_, errMsg , warningMsg) ) {
 
-      // Out put any warning to standard output
+      if (print) {
+         PrintStyle print_style(PrintStyle::MIGRATE);
+         cout << defs_;
+      }
+
+      // Output any warning to standard output
       cout << warningMsg;
    }
    else {
-      std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd.  Failed to parse file " << defs_filename_ << "\n";
+      // Check if its a boost file format. (could be old checkpoint file)
+      // When default version of ecflow is 4.7  this section could be removed.
+      // i.e. BECAUSE the checkpoint will be in defs file format. TODO
+      std::string error_msg;
+      std::string first_line = File::get_first_n_lines(defs_filename_, 1, error_msg);
+      if (!first_line.empty() && error_msg.empty()) {
+         if (first_line.find("22 serialization::archive") == 0) {   // boost file format
+
+            // Can be use to check for corruption in boost based checkpoint files.
+            defs_->boost_restore_from_checkpt(defs_filename_);
+
+            if (print) {
+               PrintStyle print_style(PrintStyle::MIGRATE);
+               cout << defs_;
+            }
+
+            if (check_only) {
+               // Note: there are no extern's in boost checkpoint, hence may fail some checking
+               //       Hence only do checking if option check_only used
+               errMsg.clear();warningMsg.clear();
+               if (!defs_->check( errMsg, warningMsg)) {
+                   std::stringstream ss; ss << "LoadDefsCmd::LoadDefsCmd: Checking failed for boost file " << defs_filename_ << "\n";
+                   ss << errMsg;
+                   throw std::runtime_error( ss.str() );
+               }
+            }
+            return;
+         }
+      }
+
+      std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd. Failed to parse file " << defs_filename_ << "\n";
       ss << errMsg;
       throw std::runtime_error( ss.str() );
    }
@@ -71,8 +105,8 @@ bool LoadDefsCmd::equals(ClientToServerCmd* rhs) const
 STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().load_defs_++;
-
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
+
 	if (defs_) {
 
 		// After the updateDefs, defs_ will be left with NO suites.
@@ -80,7 +114,15 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const
 	   // *NOTE* Externs are not persisted. Hence calling check() will report
 	   // all errors, references are not resolved.
 		as->updateDefs(defs_,force_);
+
+#ifdef DEBUG
+      LOG_ASSERT(defs_->suiteVec().size() == 0,"Expected suites to be transferred to server defs");
+#endif
  	}
+
+#ifdef DEBUG
+   LOG_ASSERT(as->defs()->externs().size() == 0,"Expected server to have no externs");
+#endif
 
 	return PreAllocatedReply::ok_cmd();
 }
@@ -89,25 +131,28 @@ std::ostream& LoadDefsCmd::print(std::ostream& os) const
 {
    /// If defs_filename_ is empty, the Defs was a in memory defs.
    if (defs_filename_.empty()) {
-      return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/)));
+      return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/,false/*print*/)));
    }
-   return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/)));
+   return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/,false/*print*/)));
 }
 
 const char* LoadDefsCmd::arg()  { return CtsApi::loadDefsArg();}
 const char* LoadDefsCmd::desc() {
-   return   "Check and load definition file into server.\n"
+   return   "Check and load definition or checkpoint file into server.\n"
             "The loaded definition will be checked for valid trigger and complete expressions,\n"
             "additionally in-limit references to limits will be validated.\n"
             "If the server already has the 'suites' of the same name, then a error message is issued.\n"
             "The suite's can be overwritten if the force option is used.\n"
             "To just check the definition and not send to server, use 'check_only'\n"
-            "  arg1 = path to the definition file\n"
-            "  arg2 = (optional) [ force | check_only ]   # default = false for both\n"
+            "This command can also be used to load a checkpoint file into the server\n"
+            "  arg1 = path to the definition file or checkpoint file\n"
+            "  arg2 = (optional) [ force | check_only | print ]   # default = false for all\n"
             "Usage:\n"
-            "--load=/my/home/exotic.def             # will error if suites of same name exists\n"
-            "--load=/my/home/exotic.def force       # overwrite suite's of same name\n"
-            "--load=/my/home/exotic.def check_only  # Just check, don't send to server"
+            "--load=/my/home/exotic.def               # will error if suites of same name exists\n"
+            "--load=/my/home/exotic.def force         # overwrite suite's of same name in the server\n"
+            "--load=/my/home/exotic.def check_only    # Just check, don't send to server\n"
+            "--load=host1.3141.check                  # Load checkpoint file to the server\n"
+            "--load=host1.3141.check print check_only # print definition to standard out in defs format\n"
             ;
 }
 
@@ -123,22 +168,24 @@ void LoadDefsCmd::create( 	Cmd_ptr& cmd,
 	if (clientEnv->debug()) dumpVecArgs(LoadDefsCmd::arg(),args);
 
 	bool check_only = false;
-	bool force =  false;
+	bool force = false;
+	bool print = false;
 	std::string defs_filename;
 	for(size_t i = 0; i < args.size(); i++) {
 		if (args[i] == "force") force = true;
-		else if (args[i] == "check_only") check_only = true;
+      else if (args[i] == "check_only") check_only = true;
+      else if (args[i] == "print") print = true;
 		else defs_filename = args[i];
 	}
 	if (clientEnv->debug()) cout << "  LoadDefsCmd::create:  Defs file '" <<  defs_filename << "'.\n";
 
-	cmd = LoadDefsCmd::create(defs_filename,force, check_only,clientEnv );
+	cmd = LoadDefsCmd::create(defs_filename,force,check_only,print,clientEnv );
 }
 
-Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename, bool force, bool check_only, AbstractClientEnv* clientEnv)
+Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename, bool force, bool check_only, bool print, AbstractClientEnv* clientEnv)
 {
    // The constructor can throw if parsing of defs_filename fail's
-   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force);
+   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force,check_only,print);
 
    // Don't send to server if checking, i.e cmd not set
    if (check_only) return Cmd_ptr();

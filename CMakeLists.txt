@@ -210,7 +210,11 @@ set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON)
 
-find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+if ( ENABLE_PYTHON )
+	find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+else()
+	find_package( Boost 1.53.0 REQUIRED COMPONENTS serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+endif()
 
 # Available boost lib should be referenced as:
 #
@@ -231,7 +235,6 @@ if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
     set (CMAKE_PREFIX_PATH ${_CMAKE_PREFIX_PATH_BACKUP}) # restore CMAKE_PREFIX_PATH
     ecbuild_debug("Resetting CMAKE_PREFIX_PATH to ${CMAKE_PREFIX_PATH}")
 endif()
-
 
 # =======================================================================
 # SSL
@@ -267,13 +270,20 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
 endif()
 
 # =========================================================================================
+# CLANG: /usr/local/include/boost/type_traits/is_base_and_derived.hpp:226:42: 
+#           fatal error: recursive template instantiation exceeded maximum depth of 256
+# =========================================================================================
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth=1024")
+endif()
+
+
+# =========================================================================================
 # build source code
 # =========================================================================================
-
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
 add_subdirectory( ANode )
-add_subdirectory( AParser )
 add_subdirectory( Base )
 add_subdirectory( CSim )
 add_subdirectory( Client )
@@ -309,12 +319,24 @@ endif()
 # =========================================================================================
 
 ecbuild_dont_pack( DIRS 
+                    .settings
+                    bamboo
                    	ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
                    	ecbuild
+                   	Pyext/test/data/CUSTOMER
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
-                    Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
+                    Doc
+)
+
+# ignore eclipse files
+ecbuild_dont_pack( FILES 
+                   .project
+                   .cproject
+                   .pydevproject
+                   Pyext/.pydevproject
+                   build_scripts/.pydevproject
 )
 
 

@@ -15,6 +15,8 @@
 #include <QImageReader>
 #include <QPainter>
 
+#include "UiLog.hpp"
+
 static UnknownIconItem unknownIcon(":/desktop/unknown.svg");
 static IconItem linkIcon(":/desktop/link.svg");
 static IconItem linkBrokenIcon(":/desktop/link_broken.svg");
@@ -80,7 +82,6 @@ QPixmap UnknownIconItem::unknown(int size)
 {
 	return QPixmap();
 }
-
 
 //===========================================
 //

@@ -20,7 +20,6 @@
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 
-#include "DefsStructureParser.hpp"
 #include "Defs.hpp"
 #include "UrlCmd.hpp"
 #include "File.hpp"
@@ -41,9 +40,8 @@ BOOST_AUTO_TEST_CASE( test_url_cmd )
 
 	defs_ptr defs = Defs::create();
 
- 	DefsStructureParser checkPtParser( defs.get(), path );
 	std::string errorMsg,warningMsg;
-	bool parse = checkPtParser.doParse(errorMsg,warningMsg);
+	bool parse = defs->restore(path,errorMsg,warningMsg);
  	BOOST_CHECK_MESSAGE(parse,errorMsg);
 
  	// Check error conditions

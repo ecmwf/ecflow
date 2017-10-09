@@ -188,6 +188,16 @@
                         "line" : "completeBorderColour",
                         "line" : "completeFontColour"
                     }
+                },
+                "tab" : {
+                    "label" : "Toolbar",
+
+                    "group" : {
+                        "title" : "Server refresh button",
+                        "prefix" : "server.update",
+                        "line" : "blinkUpdateButtonLimit",
+                        "line" : "showLastRefreshTimeInAutoMode"
+                    }
                 }
             }
         },
@@ -226,6 +236,36 @@
             }
         },
 
+        "menu":  {
+            "label": "Menus",
+            "desc" : "Menus",
+            "icon" : "menu.svg",
+
+            "group" : {
+                "title" : "Node context menu",
+                "prefix" : "menu.access",
+
+                "line" : "nodeMenuMode",
+                "note" : {
+                            "default" : "Operator and Administrator modes allow suites to be begun, nodes to be removed and servers to be unlocked. Administrator mode additionally enables the <I>Force</I> and <I>Order</I> menus."
+                         }
+            },
+            "group" : {
+                "title" : "Request confirmation when:",
+                "prefix" : "menu.confirm",
+
+                "line" : "confirmRequeue",
+                "line" : "confirmRequeueAborted",
+                "line" : "confirmSetComplete",
+                "line" : "confirmSetABorted",
+                "line" : "confirmForceComplete",
+                "line" : "confirmForceAborted",
+                "line" : "confirmKillTask",
+                "line" : "confirmKillSuite"
+            }
+
+        },
+
         "notification":  {
             "visible" : "true",
             "label": "Notifications",
@@ -250,15 +290,7 @@
                             "default" : "These settings can be customised for each server separately"
                         }
 
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.aborted.count_fill_colour",
-                        "line" : "notification.aborted.count_text_colour",
-                        "note" : {
-                            "default" : "For aborted notifications the background and text colours <br> are taken from the <u>Status</u> colour settings"
-                        }
-                    },
+                    },                  
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.aborted.sound_file_type",
@@ -282,14 +314,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.restarted.fill_colour",
-                        "line" : "notification.restarted.text_colour",
-                        "line" : "notification.restarted.count_fill_colour",
-                        "line" : "notification.restarted.count_text_colour"
-                    },
+                    },                    
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.restarted.sound_file_type",
@@ -313,14 +338,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.late.fill_colour",
-                        "line" : "notification.late.text_colour",
-                        "line" : "notification.late.count_fill_colour",
-                        "line" : "notification.late.count_text_colour"
-                    },
+                    },                    
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.late.sound_file_type",
@@ -344,14 +362,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.zombie.fill_colour",
-                        "line" : "notification.zombie.text_colour",
-                        "line" : "notification.zombie.count_fill_colour",
-                        "line" : "notification.zombie.count_text_colour"
-                    },
+                    },                   
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.zombie.sound_file_type",
@@ -375,14 +386,7 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },
-                    "group" : {
-                        "title" : "Colour",
-                        "line" : "notification.alias.fill_colour",
-                        "line" : "notification.alias.text_colour",
-                        "line" : "notification.alias.count_fill_colour",
-                        "line" : "notification.alias.count_text_colour"
-                    },
+                    },                    
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.alias.sound_file_type",
@@ -400,43 +404,50 @@
         },
 
         "server": {
-            "label" : "Server options",
-            "desc" : "Server options",
-            "icon" : "server.svg",
-            "group" : {
+            "label" : "Server settings",
+            "desc" : "Server settings",
+            "icon" : "cogwheel_blue.svg",
+            "tabs"  : {
+                "tab" : {
+                    "label"  : "Refresh",
 
-                "title" : "Update",
-                "prefix" : "server.update",
-
-                "line" : "autoUpdate",
-                "line" : "updateRateInSec",
-                "line" : "adaptiveUpdate",
-                "note" : {
-                    "default": "When enabled the server update period is <u>increased at every automatic update</u> until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again."
+                    "group" : {
+                        "title" : "Options",
+                        "prefix" : "server.update",
+                        "line" : "autoUpdate",
+                        "line" : "updateRateInSec",
+                        "line" : "adaptiveUpdate",
+                        "note" : {
+                            "default": "When enabled the server refresh period is <u>increased at every automatic refresh</u> until the maximum period is reached. If the user in the meantime refreshes the server manually the refresh period is set back to its original value and whole process starts again."
+                        },
+                        "line" : "adaptiveUpdateIncrementInSec",
+                        "line" : "maxAdaptiveUpdateRateInMin"
+                    }
                 },
-                "line" : "adaptiveUpdateIncrementInSec",
-                "line" : "maxAdaptiveUpdateRateInMin"
-            },
 
-            "group" : {
+                "tab" : {
+                    "label"  : "Fetching files",
+                    "group" : {
+                        "title" : "Manual, script, job and job output",
+                        "prefix" : "server.files",
+                        "line" : "readFilesFromDisk",
+                        "line" : "maxOutputFileLines"
+                    }
+                },
 
-                "title" : "Files (manual, script, job and job output)",
-                "prefix" : "server.files",
-                
-                "line" : "readFilesFromDisk",
-                "line" : "maxOutputFileLines"
-            },
+                "tab" : {
 
-            "group" : {
-
-                "title" : "Automatic search on output files",
-                "prefix" : "panel.output.automaticSearch",
-                
-                "line" : "performSearch",
-                "line" : "searchMode",
-                "line" : "searchText",
-                "line" : "searchFrom",
-                "line" : "caseSensitive"
+                    "label" : "Search in output",
+                    "group" : {
+                       "title" : "Automatic search on output files",
+                       "prefix" : "panel.output.automaticSearch",
+                        "line" : "performSearch",
+                        "line" : "searchMode",
+                        "line" : "searchText",
+                        "line" : "searchFrom",
+                        "line" : "caseSensitive"
+                    }
+                }
             },
 
             "grid-hidden" : {
@@ -487,16 +498,7 @@
                     "line" : "soundFile"
                 }
             }
-
-        },
-
-        "Tree view" : {
-            "visible" : "false",
-            "desc" : "Tree view options",
-
-            "line" : "view.tree.font",
-            "line" : "view.tree.nodeRectRadius",
-            "line" : "view.tree.displayChildCount"
         }
+
     }
 }

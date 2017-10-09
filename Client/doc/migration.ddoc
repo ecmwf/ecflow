@@ -34,6 +34,6 @@ implement versioning for each class.
 
 WE now support migration to future releases. The defs file can
 be written with state. This can be read by future versions.
-Make sure to update AParser/test/TestStateParser.cpp
+Make sure to update ANode/parser/test/TestStateParser.cpp
 for ant changes that affect state.
 

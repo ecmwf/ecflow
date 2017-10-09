@@ -79,13 +79,16 @@ public:
 	void current(const std::vector<std::string>& suites);
 	int count() const {return static_cast<int>(items_.size());}
 	void setFiltered(int index,bool val);
+    bool isOnlyOneFiltered(const std::string& oneSuite) const;
     bool isLoadedInitialised() const {return loadedInitialised_;}
-	bool autoAddNewSuites() const {return autoAddNew_;}
+    bool autoAddNewSuites() const {return autoAddNew_;}
 	bool isEnabled() const {return enabled_;}
 
-	void setAutoAddNewSuites(bool b) {autoAddNew_=b;}
+    void setLoadedInitialised(bool b) {loadedInitialised_=b;}
+    void setAutoAddNewSuites(bool b) {autoAddNew_=b;}
 	void setEnabled(bool b) {enabled_=b;}
-	void selectAll();
+    void selectOnlyOne(const std::string& oneSuite);
+    void selectAll();
 	void unselectAll();
     bool removeUnloaded();
     bool hasUnloaded() const;

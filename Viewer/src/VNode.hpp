@@ -105,7 +105,7 @@ public:
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
     VServer *root() const;
-    virtual ServerHandler* server() const;
+    ServerHandler* server() const;
     virtual VNode* suite() const;
     node_ptr node() const {return node_;}  
     VNode* isNode() const {return const_cast<VNode*>(this);}
@@ -190,6 +190,7 @@ public:
 
     void triggers(TriggerCollector*);   
     void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=0);
+    void clearTriggerData();
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VItem* n);
 
@@ -313,12 +314,14 @@ public:
 
 	void why(std::vector<std::string>& theReasonWhy) const;
 
+    bool triggeredScanned() const {return triggeredScanned_;}
+
 protected:
 	//Clear contents and rebuild the whole tree.
 	void beginScan(VServerChange&);
 	void endScan();
-    bool triggeredScanned() const {return triggeredScanned_;}
     void setTriggeredScanned(bool b) {triggeredScanned_=b;}
+    void clearNodeTriggerData();
 
 private:
 	void clear();

@@ -48,12 +48,11 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated )
 
    std::string file_name = File::test_data("ANode/test/data/test_flag_migrated","ANode");
    {
-      defs.save_as_checkpt(file_name);
-      Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+      defs.boost_save_as_checkpt(file_name);
+      Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
 
-      Ecf::set_debug_equality(true);
+      DebugEquality debug_equality; // only as affect in DEBUG build
       BOOST_CHECK_MESSAGE(defs == restored_defs, "Saved and restored defs not the same");
-      Ecf::set_debug_equality(false);
 
       std::vector<node_ptr> all_nodes;
       restored_defs.get_all_nodes(all_nodes);
@@ -67,24 +66,16 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated )
       s->flag().set(ecf::Flag::MIGRATED);
 
       {
-         defs.save_as_checkpt(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes;
          restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
          fs::remove(file_name);
       }
       {
-         std::string the_string;
-         defs.save_checkpt_as_string(the_string);
-         Defs restored_defs; restored_defs.restore_from_string(the_string);
-         std::vector<node_ptr> all_nodes;
-         restored_defs.get_all_nodes(all_nodes);
-         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
-      }
-      {
-         defs.save_as_filename(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_filename(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes;
          restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==1,"expected 1 nodes but found " << all_nodes.size());
@@ -99,24 +90,16 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated )
       f1->flag().set(ecf::Flag::MIGRATED);
 
       {
-         defs.save_as_checkpt(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes;
          restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
          fs::remove(file_name);
       }
       {
-         std::string the_string;
-         defs.save_checkpt_as_string(the_string);
-         Defs restored_defs; restored_defs.restore_from_string(the_string);
-         std::vector<node_ptr> all_nodes;
-         restored_defs.get_all_nodes(all_nodes);
-         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
-      }
-      {
-         defs.save_as_filename(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_filename(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes;
          restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==2,"expected 2 nodes but found " << all_nodes.size());
@@ -131,24 +114,16 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated )
       t2->flag().set(ecf::Flag::MIGRATED);
 
       {
-         defs.save_as_checkpt(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes;
          restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
          fs::remove(file_name);
       }
       {
-         std::string the_string;
-         defs.save_checkpt_as_string(the_string);
-         Defs restored_defs; restored_defs.restore_from_string(the_string);
-         std::vector<node_ptr> all_nodes;
-         restored_defs.get_all_nodes(all_nodes);
-         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
-      }
-      {
-         defs.save_as_filename(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_filename(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes;
          restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
@@ -183,24 +158,15 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated_with_reque )
       s->flag().set(ecf::Flag::MIGRATED);
 
       {
-         defs.save_as_checkpt(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
          fs::remove(file_name);
       }
       {
-         std::string the_string;
-         defs.save_checkpt_as_string(the_string);
-         Defs restored_defs; restored_defs.restore_from_string(the_string);
-         std::vector<node_ptr> all_nodes;
-         restored_defs.get_all_nodes(all_nodes);
-         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
-      }
-
-      {
-         defs.save_as_filename(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_filename(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==1,"expected 1 nodes but found " << all_nodes.size());
          fs::remove(file_name);
@@ -214,24 +180,15 @@ BOOST_AUTO_TEST_CASE( test_flag_migrated_with_reque )
       BOOST_CHECK_MESSAGE(!s->get_flag().is_set(ecf::Flag::MIGRATED),"Expected migrate flag to be cleared");
 
       {
-         defs.save_as_checkpt(file_name);
-         Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+         defs.boost_save_as_checkpt(file_name);
+         Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
          std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
          BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
          fs::remove(file_name);
       }
       {
-         std::string the_string;
-         defs.save_checkpt_as_string(the_string);
-         Defs restored_defs; restored_defs.restore_from_string(the_string);
-         std::vector<node_ptr> all_nodes;
-         restored_defs.get_all_nodes(all_nodes);
-         BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
-      }
-
-      {
-          defs.save_as_filename(file_name);
-          Defs restored_defs; restored_defs.restore_from_checkpt(file_name);
+          defs.boost_save_as_filename(file_name);
+          Defs restored_defs; restored_defs.boost_restore_from_checkpt(file_name);
           std::vector<node_ptr> all_nodes; restored_defs.get_all_nodes(all_nodes);
           BOOST_CHECK_MESSAGE(all_nodes.size()==expected_all_nodes,"expected " << expected_all_nodes << " nodes but found " << all_nodes.size());
           fs::remove(file_name);

@@ -101,7 +101,7 @@ long ecf_repeat_date_to_julian(long ddate)
 
 VRepeatAttrType::VRepeatAttrType() : VAttributeType("repeat")
 {
-    dataCount_=7;
+    dataCount_=8;
     searchKeyToData_["repeat_name"]=NameIndex;
     searchKeyToData_["repeat_value"]=ValueIndex;
     searchKeyToData_["name"]=NameIndex;
@@ -137,24 +137,31 @@ QString VRepeatAttrType::definition(QStringList d) const
     QString t="repeat";
     if(d.count() == dataCount_)
     {
-        t+=" " + d[SubtypeIndex];
+        QString subType=d[SubtypeIndex];
 
-        if(d[SubtypeIndex] != "day")
+        t+=" " + subType;
+
+        if(subType == "integer" || subType == "date")
         {
             t+=" " + d[NameIndex];
             t+=" " + d[StartIndex];
             t+=" " + d[EndIndex];
             t+=" " + d[StepIndex];
         }
+        else if(subType == "string" || subType == "enumerated")
+        {
+            t+=" " + d[NameIndex];
+            t+=" " + d[AllValuesIndex];
+        }
         else
         {
             t+=" " + d[StepIndex];
-        }
+        }       
     }
     return t;
 }
 
-void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string& type) const
+void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string& type,QString allValues) const
 {
     //We try to avoid creating a VRepeat object everytime we are here
     //std::string type=VRepeat::type(r);
@@ -164,8 +171,8 @@ void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string
          QString::fromStdString(r.valueAsString()) <<
          QString::fromStdString(r.value_as_string(r.start())) <<
          QString::fromStdString(r.value_as_string(r.end())) <<
-         QString::number(r.step());
-
+         QString::number(r.step()) <<
+         allValues;
 }
 
 //=====================================================
@@ -202,7 +209,7 @@ QStringList VRepeatAttr::data(bool /*firstLine*/) const
     if(parent_->node_)
     {
         const Repeat& r=parent_->node_->repeat();
-        atype->encode(r,s,subType());
+        atype->encode(r,s,subType(),allValues());
     }
     return s;
 }
@@ -246,6 +253,11 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     }
 }
 
+QString VRepeatAttr::allValues() const
+{
+   return QString();
+}
+
 //=====================================================
 //
 // VRepeatDateAttr
@@ -257,8 +269,20 @@ int VRepeatDateAttr::endIndex() const
     if(node_ptr node=parent_->node())
     {
         const Repeat& r=node->repeat();
-        return (ecf_repeat_date_to_julian(r.end()) -
-            ecf_repeat_date_to_julian(r.start())) / r.step() + 1;
+        if(r.step() >0)
+        {
+            long jStart=ecf_repeat_date_to_julian(r.start());
+            long jEnd=ecf_repeat_date_to_julian(r.end());
+
+            int index=(jEnd-jStart)/r.step();
+            long val=jStart + index*r.step();
+            while(val > jEnd && index >=1)
+            {
+                index--;
+                val=jStart + index*r.step();
+            }
+            return index;
+        }
     }
     return 0;
 }
@@ -301,7 +325,7 @@ int VRepeatIntAttr::endIndex() const
         const Repeat& r=node->repeat();
         if(r.step() >0)
         {
-            int index=(r.end() - r.start()) / r.step() + 1;
+            int index=(r.end() - r.start()) / r.step();
             int val=r.start() + index*r.step();
             while(val > r.end() && index >=1)
             {
@@ -389,6 +413,36 @@ int VRepeatEnumAttr::currentIndex() const
     return 0;
 }
 
+QString VRepeatEnumAttr::allValues() const
+{
+    QString vals;
+
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        int start=r.start();
+        int end=r.end();
+
+        if(end <= start)
+        {
+            return QString();
+        }
+
+        if(end-start >1)
+        {
+            for(int i=start; i <= end; i++)
+            {
+                if(!vals.isEmpty()) vals+=" ";
+                vals+="\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
+            }
+            return vals;
+        }
+
+    }
+    return vals;
+}
+
+
 //=====================================================
 //
 // VRepeatStringAttr
@@ -425,4 +479,32 @@ int VRepeatStringAttr::currentIndex() const
     return 0;
 }
 
+QString VRepeatStringAttr::allValues() const
+{
+    QString vals;
+
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        int start=r.start();
+        int end=r.end();
+
+        if(end <= start)
+        {
+            return QString();
+        }
+
+        if(end-start >1)
+        {
+            for(int i=start; i <= end; i++)
+            {
+                if(!vals.isEmpty()) vals+=" ";
+                vals+="\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
+            }
+            return vals;
+        }
+
+    }
+    return vals;
+}
 

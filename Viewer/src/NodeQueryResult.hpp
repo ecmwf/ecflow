@@ -29,6 +29,7 @@ class NodeQueryResultItem
 	friend class NodeQueryEngine;
 	friend class NodeQueryResult;
 	friend class NodeQueryResultModel;
+	friend class TriggerGraphModel;
 
 public:
 	NodeQueryResultItem() : node_(NULL), server_(NULL) {}
@@ -43,6 +44,7 @@ public:
 	QString typeStr() const;
 	QString stateStr() const;
 	QColor stateColour() const;
+    QString stateChangeTime() const;
     QStringList attr() const;
     bool hasAttribute() const {return attr_.count() > 0;}
 

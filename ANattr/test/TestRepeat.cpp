@@ -20,6 +20,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "RepeatAttr.hpp"
+#include "Cal.hpp"
 
 using namespace std;
 using namespace boost::gregorian;
@@ -585,6 +586,154 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_xref_to_boost_date )
    check_date(20150514,20150730,7);
 }
 
+BOOST_AUTO_TEST_CASE( test_repeat_date_generated_variables )
+{
+   cout << "ANattr:: ...test_repeat_date_generated_variables\n";
+
+    Repeat rep(RepeatDate("YMD",20090916,20090930,1));
+    BOOST_CHECK_MESSAGE(!rep.empty()," Repeat should not be empty");
+    BOOST_CHECK_MESSAGE(!rep.name().empty(),"name should not be empty");
+    BOOST_CHECK_MESSAGE(rep.name() == "YMD","name not as expected");
+    BOOST_CHECK_MESSAGE(rep.start() == 20090916,"Start should be 20090916");
+    BOOST_CHECK_MESSAGE(rep.end() == 20090930,"end should be 20090930");
+    BOOST_CHECK_MESSAGE(rep.step() == 1,"step should be 1");
+    BOOST_CHECK_MESSAGE(rep.value() == 20090916,"value should be 20090916");
+    BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20090916,"last_valid_value should be 20090916");
+    rep.update_repeat_genvar();
+    std::vector<Variable> vec;
+    rep.gen_variables(vec);
+    BOOST_CHECK_MESSAGE(vec.size() == 6,"expected 6 generated variables but found " << vec.size());
+
+    {const Variable& var = rep.find_gen_variable("YMD");
+    BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_YYYY");
+    BOOST_CHECK_MESSAGE(var.theValue() == "20090916", "expected year to be 20090916  but found " << var.theValue() );}
+
+    {const Variable& var = rep.find_gen_variable("YMD_YYYY");
+    BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_YYYY");
+    BOOST_CHECK_MESSAGE(var.theValue() == "2009", "expected year to be 2009  but found " << var.theValue() );}
+
+    {const Variable& var = rep.find_gen_variable("YMD_MM");
+    BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_MM");
+    BOOST_CHECK_MESSAGE(var.theValue() == "9", "expected month to be 9  but found " << var.theValue() );}
+
+    {const Variable& var = rep.find_gen_variable("YMD_DD");
+    BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_DD");
+    BOOST_CHECK_MESSAGE(var.theValue() == "16", "expected day of month to be 16 but found " << var.theValue() );}
+
+    {const Variable& var = rep.find_gen_variable("YMD_DOW");
+    BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_DOW");
+    BOOST_CHECK_MESSAGE(var.theValue() == "3", "expected day of week to be 3 but found " << var.theValue() );}
+
+    {const Variable& var = rep.find_gen_variable("YMD_JULIAN");
+    BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_JULIAN");
+    std::string expected = boost::lexical_cast<std::string>(Cal::date_to_julian(20090916));
+    BOOST_CHECK_MESSAGE(var.theValue() == expected, "expected " << expected << " but found " << var.theValue() );}
+}
+
+BOOST_AUTO_TEST_CASE( test_repeat_date_generated_variables2 )
+{
+   cout << "ANattr:: ...test_repeat_date_generated_variables\n";
+
+   int start = 20161231;
+   int end = 20170106;
+   Repeat rep(RepeatDate("YMD",start,end,1));
+   BOOST_CHECK_MESSAGE(!rep.empty()," Repeat should not be empty");
+   BOOST_CHECK_MESSAGE(!rep.name().empty(),"name should not be empty");
+   BOOST_CHECK_MESSAGE(rep.name() == "YMD","name not as expected");
+   BOOST_CHECK_MESSAGE(rep.start() == start ,"Start should be " << start);
+   BOOST_CHECK_MESSAGE(rep.end() == end ,"end should be " << end << " but found " << rep.end());
+   BOOST_CHECK_MESSAGE(rep.step() == 1,"step should be 1");
+   BOOST_CHECK_MESSAGE(rep.value() == start,"value should be " << start << " but found " << rep.value());
+   BOOST_CHECK_MESSAGE(rep.last_valid_value() == start,"last_valid_value should be " << start << " but found " << rep.last_valid_value());
+
+   std::vector<std::string> expected_YMD;
+   expected_YMD.push_back("20161231");
+   expected_YMD.push_back("20170101");
+   expected_YMD.push_back("20170102");
+   expected_YMD.push_back("20170103");
+   expected_YMD.push_back("20170104");
+   expected_YMD.push_back("20170105");
+   expected_YMD.push_back("20170106");
+
+   std::vector<std::string> expected_year;
+   expected_year.push_back("2016");
+   expected_year.push_back("2017");
+   expected_year.push_back("2017");
+   expected_year.push_back("2017");
+   expected_year.push_back("2017");
+   expected_year.push_back("2017");
+   expected_year.push_back("2017");
+
+   std::vector<std::string> expected_MM;
+   expected_MM.push_back("12");
+   expected_MM.push_back("1");
+   expected_MM.push_back("1");
+   expected_MM.push_back("1");
+   expected_MM.push_back("1");
+   expected_MM.push_back("1");
+   expected_MM.push_back("1");
+
+   std::vector<std::string> expected_day_of_month;
+   expected_day_of_month.push_back("31");
+   expected_day_of_month.push_back("1");
+   expected_day_of_month.push_back("2");
+   expected_day_of_month.push_back("3");
+   expected_day_of_month.push_back("4");
+   expected_day_of_month.push_back("5");
+   expected_day_of_month.push_back("6");
+
+   std::vector<std::string> expected_day_of_week;
+   expected_day_of_week.push_back("6");
+   expected_day_of_week.push_back("0");
+   expected_day_of_week.push_back("1");
+   expected_day_of_week.push_back("2");
+   expected_day_of_week.push_back("3");
+   expected_day_of_week.push_back("4");
+   expected_day_of_week.push_back("5");
+
+   std::vector<std::string> expected_julian;
+   expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20161231)));
+   expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170101)));
+   expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170102)));
+   expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170103)));
+   expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170104)));
+   expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170105)));
+   expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170106)));
+
+   for(int i = 0; i < 7; i++) {
+
+      rep.update_repeat_genvar();
+      std::vector<Variable> vec;
+      rep.gen_variables(vec);
+      BOOST_CHECK_MESSAGE(vec.size() == 6,"expected 6 generated variables but found " << vec.size());
+
+      {const Variable& var = rep.find_gen_variable("YMD");
+      BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_YYYY");
+      BOOST_CHECK_MESSAGE(var.theValue() == expected_YMD[i], "expected YMD " << expected_YMD[i] << " but found " << var.theValue() );}
+
+      {const Variable& var = rep.find_gen_variable("YMD_YYYY");
+      BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_YYYY");
+      BOOST_CHECK_MESSAGE(var.theValue() == expected_year[i], "expected year to be " << expected_year[i] << " but found " << var.theValue() );}
+
+      {const Variable& var = rep.find_gen_variable("YMD_MM");
+      BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_MM");
+      BOOST_CHECK_MESSAGE(var.theValue() == expected_MM[i], "expected month to be " << expected_MM[i] << " but found " << var.theValue() );}
+
+      {const Variable& var = rep.find_gen_variable("YMD_DD");
+      BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_DD");
+      BOOST_CHECK_MESSAGE(var.theValue() == expected_day_of_month[i], "expected day of month to be " << expected_day_of_month[i] << " but found " << var.theValue() );}
+
+      {const Variable& var = rep.find_gen_variable("YMD_DOW");
+      BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_DOW");
+      BOOST_CHECK_MESSAGE(var.theValue() == expected_day_of_week[i], "expected day of week to be " << expected_day_of_week[i] << " but found " << var.theValue() );}
+
+      {const Variable& var = rep.find_gen_variable("YMD_JULIAN");
+      BOOST_CHECK_MESSAGE(!var.empty(),"Did not find generated variable YMD_JULIAN");
+      BOOST_CHECK_MESSAGE(var.theValue() == expected_julian[i], "expected " <<  expected_julian[i] << " but found " << var.theValue() );}
+
+      rep.increment();
+   }
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -37,6 +37,7 @@
 #include "SuiteChanged.hpp"
 #include "CmdContext.hpp"
 #include "AbstractObserver.hpp"
+#include "DefsStructureParser.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -125,6 +126,22 @@ void Node::delete_attributes() {
    delete time_dep_attrs_;
    delete child_attrs_;
    delete misc_attrs_;
+}
+
+node_ptr Node::create(const std::string& node_string)
+{
+   DefsStructureParser parser( node_string  );
+   std::string errorMsg,warningMsg;
+   (void)parser.doParse(errorMsg,warningMsg);
+   return parser.the_node_ptr(); // can return NULL
+}
+
+node_ptr Node::create(const std::string& node_string, std::string& error_msg)
+{
+   DefsStructureParser parser( node_string  );
+   std::string warningMsg;
+   if (!parser.doParse(error_msg,warningMsg)) return node_ptr();
+   return parser.the_node_ptr();
 }
 
 Node& Node::operator=(const Node& rhs)
@@ -1053,18 +1070,17 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
 
       // ****************************************************************************************
       // Look for generated variables first:
-      // Variable like ECF_PASS can be overridden, i.e. with FREE_JOBS_PASSWORD
-      // However for job file generation we should use use the generated variables first.
-      // if the user removes ECF_PASS then we are stuck with the wrong value in the script file
-      // FREE_JOBS_PASSWORD is left for the server to deal with
+      //    Variable like ECF_PASS can be overridden, i.e. with FREE_JOBS_PASSWORD
+      //    However for job file generation we should use use the generated variables first.
+      //    if the user removes ECF_PASS then we are stuck with the wrong value in the script file
+      //    FREE_JOBS_PASSWORD is left for the server to deal with
+      // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitamly override these. ECFLOW-999
       bool generated_variable = false;
       if ( percentVar.find("ECF_") != std::string::npos) {
          if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_PORT())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NODE())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_HOST())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_JOB())     != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_JOBOUT())  != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
          else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
       }
@@ -1298,20 +1314,42 @@ bool Node::check_expressions(Ast* ast,const std::string& expr,bool trigger, std:
       // Also resolve references to events,meter,repeats variables.
       AstResolveVisitor astVisitor(this);
       ast->accept(astVisitor);
-
       if ( !astVisitor.errorMsg().empty() ) {
          errorMsg += "Error: Expression node tree references failed for '";
          if ( trigger ) errorMsg += "trigger ";
          else           errorMsg += "complete ";
          errorMsg += expr;
          errorMsg += "' at ";
-         errorMsg += absNodePath();
+         errorMsg += debugNodePath();
          errorMsg += "\n ";
          errorMsg += astVisitor.errorMsg();
          return false;
       }
+
+      // check divide by zero and module by zero
+      if (!ast->check(errorMsg)) {
+         errorMsg += " Error: Expression checking failed for '";
+         if ( trigger ) errorMsg += "trigger ";
+         else           errorMsg += "complete ";
+         errorMsg += expr;
+         errorMsg += "' at ";
+         errorMsg += debugNodePath();
+         return false;
+      }
    }
    return true;
+}
+
+std::auto_ptr<AstTop> Node::parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context)
+{
+   std::auto_ptr<AstTop> ast = Expression::parse(expr,context ); // will throw for errors
+
+   std::string errorMsg;
+   if (!check_expressions(ast.get(),expr,trigger,errorMsg)) {
+      std::stringstream ss; ss << context << " "  << errorMsg ;
+      throw std::runtime_error( ss.str() );
+   }
+   return ast;
 }
 
 bool Node::check(std::string& errorMsg, std::string& warningMsg) const
@@ -1330,33 +1368,17 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    /// Even if the code parses, check the expression for divide by zero, for divide and modulo operators
    AstTop* ctop = completeAst(errorMsg);
    if (ctop) {
-
-      // capture node path resolve errors
+      // capture node path resolve errors, and expression divide/module by zero
       std::string expr;
       if (completeExpr_) expr = completeExpr_->expression();
       (void)check_expressions(ctop,expr,false,errorMsg);
-
-      if (!ctop->check(errorMsg)) {
-         errorMsg += " ";
-         errorMsg += expr;
-         errorMsg += " on ";
-         errorMsg += debugNodePath();
-      }
    }
+
    AstTop* ttop = triggerAst(errorMsg);
    if (ttop) {
-
-      // capture node path resolve errors
       std::string expr;
       if (triggerExpr_) expr = triggerExpr_->expression();
       (void)check_expressions(ttop,expr,true,errorMsg);
-
-      if (!ttop->check(errorMsg)) {
-         errorMsg += " ";
-         errorMsg += expr;
-         errorMsg += " on ";
-         errorMsg += debugNodePath();
-      }
    }
 
    // check inLimit references to limits.
@@ -1475,6 +1497,12 @@ std::ostream& Node::print(std::ostream& os) const
    if (autoCancel_) autoCancel_->print(os);
 
    return os;
+}
+
+std::string Node::print(PrintStyle::Type_t p_style) const
+{
+   PrintStyle print_style(p_style);
+   return to_string();
 }
 
 std::string Node::to_string() const
@@ -2019,15 +2047,12 @@ size_t Node::position() const
 
 void Node::gen_variables(std::vector<Variable>& vec) const
 {
-   if (!repeat_.empty()) {
-      vec.push_back(repeat_.gen_variable());
-   }
+    repeat_.gen_variables(vec);  // if repeat_ is empty vec is unchanged
 }
 
 const Variable& Node::findGenVariable(const std::string& name) const
 {
-   if (!repeat_.empty() && repeat_.name() == name) return repeat_.gen_variable();
-   return Variable::EMPTY();
+    return repeat_.find_gen_variable(name); // if repeat_ is empty find returns empty variable by ref
 }
 
 void Node::update_repeat_genvar() const

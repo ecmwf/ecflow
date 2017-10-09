@@ -35,6 +35,7 @@
 class ServerState {
 public:
    ServerState();
+   ServerState(const std::string& port); // used in test to init server variables
    ServerState(const ServerState&);
 
    /// Check pointing, SAVES server variables, since they are visualised by client like ecflow_ui
@@ -58,6 +59,7 @@ public:
    /// However user variables can be freely added,deleted and modified
    /// They will override server variables of the same name
 
+   void add_or_update_server_variable( const std::string&, const std::string&);
    void add_or_update_server_variables( const NameValueVec& env);
    void delete_server_variable( const std::string&); // should only be used by test
    void set_server_variables(const std::vector<Variable>& e);
@@ -107,9 +109,7 @@ public:
    static void setup_default_server_variables(std::vector<Variable>&  server_variables, const std::string& port);
 
 private:
- 	void setup_default_env();
-
-   void add_or_update_server_variables( const std::string&, const std::string&);
+ 	void setup_default_env(const std::string& port);
 
 private:
 

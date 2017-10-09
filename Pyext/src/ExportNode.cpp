@@ -351,4 +351,7 @@ void export_Node()
    .add_property("crons",     boost::python::range( &Node::cron_begin,     &Node::cron_end),    "Returns a list of :term:`cron` s" )
    .add_property("zombies",   boost::python::range( &Node::zombie_begin,   &Node::zombie_end),  "Returns a list of :term:`zombie` s" )
    ;
+#if defined(__clang__)
+   boost::python::register_ptr_to_python<node_ptr>(); // needed for mac and boost 1.6
+#endif
 }

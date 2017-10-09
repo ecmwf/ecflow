@@ -29,6 +29,12 @@ VAttribute::~VAttribute()
 {
 }
 
+ServerHandler* VAttribute::server() const
+{
+    return (parent_)?parent_->server():NULL;
+}
+
+
 VServer* VAttribute::root() const
 {
     return (parent_)?parent_->root():NULL;
@@ -71,9 +77,10 @@ bool VAttribute::sameContents(VItem* item) const
         return false;
 
     if(VAttribute *a=item->isAttribute())
-    {    return a->parent() == parent() &&
+    {
+        return a->parent() == parent() &&
                 a->type() == type() &&
-                name() == name();
+                a->name() == name();
     }
     return false;
 }
@@ -149,4 +156,3 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
 
     cmd.push_back("<full_name>");
 }
-

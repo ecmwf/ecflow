@@ -31,7 +31,6 @@
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
-#include "DefsStructureParser.hpp"
 #include "AssertTimer.hpp"
 
 using namespace std;

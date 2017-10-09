@@ -1,0 +1,39 @@
+# test node referencing in triggers
+#      o/ <node> == complete    i.e   a == complete   can mean sibling or parent node  # confusing
+#      o/ ./<node> == complete  i.e  ./a == complete  can mean sibling or parent node 
+#      o/ ../<node> == complete i.e  ../a == complete means current nodes parents parent
+suite s1
+  family f1
+     family f2
+        family f3
+           family f4
+              task a
+                 event 1 theEventName
+                 meter myMeter 0 100
+                 trigger f4 == complete or ./bb == complete or ../f3 == complete  # f4 immediate parent and bb is sibling ../f3 is parents parent
+               task bb
+            endfamily   
+         endfamily
+      endfamily
+   endfamily
+   family f0
+      task c
+         # The initial .. means parents parent( i.e /s1 in this case)
+         # i.e task 'c' parents parent is suite 's1'
+         trigger  ../f1/f2/f3/f4/a == complete
+         complete ../f1/f2/f3/f4/a:myMeter >= 10
+      family f1
+         family f2
+            family f3
+               family f4
+                  # ..          -> /s1/f0/f1/f2    The initial .. means parents parent 
+                  # ../..       -> /s1/f0/f1
+                  # ../../..    -> /s1/f0
+                  # ../../../.. -> /s1
+                  trigger ../../../../f1/f2/f3/f4/a == complete
+            endfamily
+         endfamily
+      endfamily
+   endfamily
+endsuite
+

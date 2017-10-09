@@ -31,10 +31,10 @@ BOOST_FIXTURE_TEST_SUITE( NodeTestSuite, MyDefsFixture )
 static void testPersistence(const Defs& fixtureDefs,ecf::Archive::Type at)
 {
 	std::string check_pt_file = "fixture_defs.check";
-	fixtureDefs.save_as_checkpt(check_pt_file,at);
+	fixtureDefs.boost_save_as_checkpt(check_pt_file,at);
 
 	Defs restoredDefs;
-	restoredDefs.restore_from_checkpt(check_pt_file,at);
+	restoredDefs.boost_restore_from_checkpt(check_pt_file,at);
 
 	bool theyCompare = (restoredDefs == fixtureDefs);
 	if (!theyCompare) {
@@ -81,4 +81,20 @@ BOOST_AUTO_TEST_CASE( test_node_tree_persistence_text )
 }
 #endif
 
+
+BOOST_AUTO_TEST_CASE( test_node_defs_persistence  )
+{
+   cout << "ANode:: ...test_node_defs_persistence\n" ;
+
+   const Defs& defs = fixtureDefsFile();
+   std::vector<node_ptr> all_nodes;
+   defs.get_all_nodes(all_nodes);
+   BOOST_REQUIRE_MESSAGE(all_nodes.size()>0,"Expected nodes");
+   for(size_t i = 0; i < all_nodes.size(); i++) {
+      std::string node_as_defs_string = all_nodes[i]->print(PrintStyle::MIGRATE);
+      node_ptr the_copy = Node::create(node_as_defs_string);
+      BOOST_REQUIRE_MESSAGE(the_copy,"Failed to create node " << all_nodes[i]->absNodePath() << " from string " << node_as_defs_string);
+      BOOST_REQUIRE_MESSAGE(*the_copy == *all_nodes[i],"Nodes not the same");
+   }
+}
 BOOST_AUTO_TEST_SUITE_END()

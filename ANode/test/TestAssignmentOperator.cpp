@@ -27,22 +27,22 @@ BOOST_AUTO_TEST_CASE( test_defs_assignment_operator )
    cout << "ANode:: ...test_defs_assignment_operator\n";
    MyDefsFixture theDefsFixture;
 
-   Ecf::set_debug_equality(true);
    Defs defs;
    defs = theDefsFixture.defsfile_;
+   Ecf::set_debug_equality(true); // only has affect in DEBUG build
    BOOST_CHECK_MESSAGE( defs == theDefsFixture.defsfile_,"assignment failed");
+   Ecf::set_debug_equality(false); // only has affect in DEBUG build
 
    Defs empty;
    defs = empty;
+   Ecf::set_debug_equality(true); // only has affect in DEBUG build
    BOOST_CHECK_MESSAGE( defs == empty,"assignment failed");
-   Ecf::set_debug_equality(false);
+   Ecf::set_debug_equality(false); // only has affect in DEBUG build
 
    BOOST_CHECK_MESSAGE( !(defs == theDefsFixture.defsfile_),"assignment failure EXPECTED");
 
    theDefsFixture.defsfile_ =  empty;
-   Ecf::set_debug_equality(true);
    BOOST_CHECK_MESSAGE( theDefsFixture.defsfile_ == empty,"assignment failed");
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_CASE( test_suite_assignment_operator )
@@ -60,14 +60,7 @@ BOOST_AUTO_TEST_CASE( test_suite_assignment_operator )
    s1.addVariable( Variable("VAR","value") );
    s1.add_task( "t1" );
    s1.add_family( "f1" );
-   std::vector<ecf::Child::CmdType> child_cmds;
-   child_cmds.push_back(ecf::Child::INIT);
-   child_cmds.push_back(ecf::Child::EVENT);
-   child_cmds.push_back(ecf::Child::METER);
-   child_cmds.push_back(ecf::Child::LABEL);
-   child_cmds.push_back(ecf::Child::WAIT);
-   child_cmds.push_back(ecf::Child::ABORT);
-   child_cmds.push_back(ecf::Child::COMPLETE);
+   std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
    s1.addZombie( ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10) );
    s1.addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL,100) );
    s1.addZombie( ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK,100) );
@@ -93,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_suite_assignment_operator )
    std::string suiteLimit = "suiteLimit";
    s1.addLimit( Limit(suiteLimit,10) );
 
-   Ecf::set_debug_equality(true);
+   DebugEquality debug_equality; // only as affect in DEBUG build
    Suite s2(s1); // s2 is copy
    BOOST_CHECK_MESSAGE( s1 == s2,"copy constructor failed");
 
@@ -106,8 +99,6 @@ BOOST_AUTO_TEST_CASE( test_suite_assignment_operator )
 
    s1 = s2;
    BOOST_CHECK_MESSAGE( s1 == s2,"assignment failed");
-
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_CASE( test_task_assignment_operator )
@@ -118,14 +109,7 @@ BOOST_AUTO_TEST_CASE( test_task_assignment_operator )
    Task s1("s1");
    s1.addAutoCancel( ecf::AutoCancelAttr(2) );
    s1.addVariable( Variable("VAR","value") );
-   std::vector<ecf::Child::CmdType> child_cmds;
-   child_cmds.push_back(ecf::Child::INIT);
-   child_cmds.push_back(ecf::Child::EVENT);
-   child_cmds.push_back(ecf::Child::METER);
-   child_cmds.push_back(ecf::Child::LABEL);
-   child_cmds.push_back(ecf::Child::WAIT);
-   child_cmds.push_back(ecf::Child::ABORT);
-   child_cmds.push_back(ecf::Child::COMPLETE);
+   std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
    s1.addZombie( ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10) );
    s1.addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL,100) );
    s1.addZombie( ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK,100) );
@@ -166,7 +150,7 @@ BOOST_AUTO_TEST_CASE( test_task_assignment_operator )
    s1.addVerify( VerifyAttr(NState::COMPLETE,3) );
    s1.addLate( lateAttr );
 
-   Ecf::set_debug_equality(true);
+   DebugEquality debug_equality; // only as affect in DEBUG build
    Task s2(s1); // s2 is copy
    BOOST_CHECK_MESSAGE( s1 == s2,"copy constructor failed");
 
@@ -179,8 +163,6 @@ BOOST_AUTO_TEST_CASE( test_task_assignment_operator )
 
    s1 = s2;
    BOOST_CHECK_MESSAGE( s1 == s2,"assignment failed");
-
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

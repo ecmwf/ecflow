@@ -31,14 +31,14 @@ namespace ecf {
 class EcfPortLock : private boost::noncopyable {
 public:
 
-   static bool is_free(int port)
+   static bool is_free(int port, bool debug = false)
    {
       std::string the_port = boost::lexical_cast<std::string>(port);
       if (boost::filesystem::exists(port_file(the_port))) {
-   //      std::cout << "EcfPortLock::is_free returning FALSE\n ";
+         if (debug) std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE\n ";
          return false;
       }
-   //   std::cout << "EcfPortLock::is_free returning TRUE\n ";
+      if (debug) std::cout << "  EcfPortLock::is_free(" << port << ") returning TRUE\n ";
       return true;
    }
 
@@ -71,7 +71,7 @@ private:
       char* ecf_port_lock_dir = getenv("ECF_PORT_LOCK_DIR");
       std::string path;
       if (ecf_port_lock_dir) path = ecf_port_lock_dir;
-      else                   path = File::root_build_dir();
+      else                   path = File::root_source_dir();
 
       path += "/ECF_PORT_used_";
       path += the_port;

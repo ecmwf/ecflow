@@ -58,6 +58,7 @@
 #include "Flag.hpp"
 #include "Aspect.hpp"
 #include "Attr.hpp"
+#include "PrintStyle.hpp"
 
 class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
@@ -71,6 +72,10 @@ public:
    Node& operator=(const Node&);
    Node(const Node& rhs);
    virtual ~Node();
+
+   // parse string and create suite || family || task || alias. Can return a NULL node_ptr() for errors
+   static node_ptr create(const std::string& node_string);
+   static node_ptr create(const std::string& node_string, std::string& error_msg);
 
    /// The Parent Must set the parent pointer. For a Suite however this will be NULL
    void set_parent(Node* p) { parent_ = p; }
@@ -222,6 +227,7 @@ public:
 
    // standard functions: ==============================================
    virtual std::ostream& print(std::ostream&) const;
+   std::string print(PrintStyle::Type_t type) const;
    bool operator==(const Node& rhs) const;
    virtual bool checkInvariants(std::string& errorMsg) const;
 
@@ -568,8 +574,11 @@ public:
    /// update change numbers to force sync
    virtual void force_sync(){};
 
-   /// check trigger expression have nodes that resolve
+   /// check trigger expression have nodes and events,meter,repeat that resolve
    bool check_expressions(Ast*,const std::string& expr, bool trigger, std::string& errorMsg) const;
+
+   /// check trigger expression have nodes and events,meter,repeat that resolve, will throw for error
+   std::auto_ptr<AstTop> parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context);
 
 protected:
    /// Used in conjunction with Node::position()
@@ -647,6 +656,7 @@ private:
    int findExprVariableValueAndType( const std::string& name, std::string& varType) const;
    void findExprVariableAndPrint( const std::string& name, std::ostream& os) const;
    friend class VariableHelper;
+   friend class AstParentVariable;
 
 private:
    bool checkForAutoCancel(const ecf::Calendar& c) const;

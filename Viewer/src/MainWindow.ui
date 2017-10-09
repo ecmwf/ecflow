@@ -60,16 +60,6 @@
     <addaction name="actionClose"/>
     <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="tearOffEnabled">
-     <bool>true</bool>
-    </property>
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="actionPreferences"/>
-    <addaction name="actionConfigureNodeMenu"/>
-   </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="tearOffEnabled">
      <bool>true</bool>
@@ -84,38 +74,39 @@
      <bool>true</bool>
     </property>
     <property name="title">
-     <string>&amp;Servers</string>
+     <string>Ser&amp;vers</string>
     </property>
     <addaction name="actionManageServers"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>&amp;View</string>
+     <string>&amp;Panels</string>
     </property>
     <addaction name="actionAddTreeWidget"/>
     <addaction name="actionAddTableWidget"/>
     <addaction name="actionAddInfoPanel"/>
-    <addaction name="actionAddLogPanel"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>&amp;Tools</string>
     </property>
     <addaction name="actionSearch"/>
+    <addaction name="actionNotification"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuRefresh">
     <property name="title">
      <string>&amp;Refresh</string>
     </property>
+    <addaction name="actionRefreshSelected"/>
+    <addaction name="actionRefresh"/>
+    <addaction name="separator"/>
     <addaction name="actionReset"/>
     <addaction name="actionResetSelected"/>
-    <addaction name="separator"/>
-    <addaction name="actionRefresh"/>
-    <addaction name="actionRefreshSelected"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuRefresh"/>
    <addaction name="menuServer"/>
@@ -128,7 +119,7 @@
     <string>View toolbar</string>
    </property>
    <property name="movable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="allowedAreas">
     <set>Qt::AllToolBarAreas</set>
@@ -139,7 +130,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRefreshSelected"/>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
   </widget>
@@ -193,10 +183,6 @@
    </property>
   </action>
   <action name="actionRefresh">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
-   </property>
    <property name="text">
     <string>Refresh all servers  &amp;in tab</string>
    </property>
@@ -208,10 +194,6 @@
    </property>
   </action>
   <action name="actionReset">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/reset.svg</normaloff>:/viewer/reset.svg</iconset>
-   </property>
    <property name="text">
     <string>&amp;Reset all servers in tab</string>
    </property>
@@ -244,7 +226,7 @@
     <string>&amp;Manage servers ...</string>
    </property>
    <property name="toolTip">
-    <string>Manage servers&lt;br&gt;&lt;code&gt;Ctrl+N&lt;/code&gt;</string>
+    <string>Manage servers</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -265,7 +247,7 @@
      <normaloff>:/viewer/images/add_tree.svg</normaloff>:/viewer/images/add_tree.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Add tree view</string>
+    <string>Add &amp;tree view panel</string>
    </property>
    <property name="toolTip">
     <string>Add tree widget</string>
@@ -277,7 +259,7 @@
      <normaloff>:/viewer/images/add_table.svg</normaloff>:/viewer/images/add_table.svg</iconset>
    </property>
    <property name="text">
-    <string>Add table &amp;view</string>
+    <string>Add ta&amp;ble view panel</string>
    </property>
    <property name="toolTip">
     <string>Add table widget</string>
@@ -286,14 +268,6 @@
   <action name="actionAbout">
    <property name="text">
     <string>&amp;About EcflowUI ...</string>
-   </property>
-  </action>
-  <action name="actionAddLogPanel">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Add &amp;log panel</string>
    </property>
   </action>
   <action name="actionManageSessions">
@@ -319,7 +293,7 @@
   <action name="actionRefreshSelected">
    <property name="icon">
     <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/reload_one.svg</normaloff>:/viewer/reload_one.svg</iconset>
+     <normaloff>:/viewer/reload_green.svg</normaloff>:/viewer/reload_green.svg</iconset>
    </property>
    <property name="text">
     <string>R&amp;efresh selected server</string>
@@ -342,6 +316,18 @@
    </property>
    <property name="visible">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionNotification">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/notification.svg</normaloff>:/viewer/notification.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Notifications ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Notifications</string>
    </property>
   </action>
  </widget>

@@ -20,6 +20,8 @@ bool Ecf::debug_equality_ = false;
 unsigned int Ecf::debug_level_ = 0;
 unsigned int Ecf::state_change_no_ = 0;
 unsigned int Ecf::modify_change_no_ = 0;
+bool DebugEquality::ignore_server_variables_ = false;
+
 
 const char* Ecf::SERVER_NAME() { static const char* SERVER_NAME = "ecflow_server"; return SERVER_NAME;}
 const char* Ecf::CLIENT_NAME() { static const char* CLIENT_NAME = "ecflow_client"; return CLIENT_NAME;}

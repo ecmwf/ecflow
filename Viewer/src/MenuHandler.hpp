@@ -46,6 +46,7 @@ public:
     void setHandler(const std::string &handler);
     void setViews(const std::vector<std::string> &views) {views_=views;}
     void setQuestion(const std::string &question) {question_=question;}
+    void setQuestionControl(const std::string &questionControl) {questionControl_=questionControl;}
     void setIcon(const std::string &icon);
     void setStatustip(const std::string &statustip) {statustip_=statustip;}
     void setHidden(bool b) {hidden_=b;}
@@ -66,6 +67,7 @@ public:
     bool isValidView(const std::string&) const;
     const std::string& command() const {return command_;}
     const std::string& question() const {return question_;}
+    const std::string& questionControl() const {return questionControl_;}
     bool hidden() const {return hidden_;}
     int id() const {return id_;}
     QAction* createAction(QWidget* parent);
@@ -83,6 +85,7 @@ private:
     std::string command_;
     std::string statustip_;
     std::string question_;
+    std::string questionControl_;
     std::string defaultAnswer_;
     std::string handler_;
     std::vector<std::string> views_;
@@ -156,9 +159,10 @@ public:
     static bool addItemToMenu(MenuItem *item, const std::string &menuName);
     static Menu *findMenu(const std::string &name);    
     static MenuItem* newItem(const std::string &name);
-    static void addMenu(Menu *menu) {menus_.push_back(menu);};
+    static void addMenu(Menu *menu) {menus_.push_back(menu);}
     static void interceptCommandsThatNeedConfirmation(MenuItem *item);
     static void refreshCustomMenuCommands();
+    static QString nodeMenuMode();
 
 private:
     typedef std::map<std::string, std::string> ConfirmationMap;

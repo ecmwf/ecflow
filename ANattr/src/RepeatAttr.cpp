@@ -86,25 +86,6 @@ const std::string& Repeat::name() const {
    return (repeatType_) ? repeatType_->name() : Str::EMPTY();
 }
 
-const Variable& Repeat::gen_variable() const
-{
-   return (repeatType_) ? repeatType_->gen_variable() : Variable::EMPTY();
-}
-
-void Repeat::update_repeat_genvar() const
-{
-   if (repeatType_) {
-      // **** reset name since generated variables are not persisted
-      repeatType_->set_gen_variable().set_name( repeatType_->name() );
-
-      // valueAsString() use the last_valid_value() which should always be in range.
-      // Note repeat::value() can be on e past the last valid value, at expiration of Repeat loop
-      //      However Repeat::last_valid_value() will just return the last valid value.
-      repeatType_->set_gen_variable().set_value( repeatType_->valueAsString() );
-   }
-}
-
-
 std::ostream& Repeat::print( std::ostream& os ) const {
 	if (repeatType_) {
 		Indentor in;
@@ -124,6 +105,19 @@ void RepeatBase::incr_state_change_no()
 	std::cout << "RepeatBase::incr_state_change_no()\n";
 #endif
 }
+
+void  RepeatBase::update_repeat_genvar() const
+{
+   // **** reset name since generated variables are not persisted
+   var_.set_name( name_ );
+
+   // valueAsString() use the last_valid_value() which should always be in range.
+   // Note repeat::value() can be on e past the last valid value, at expiration of Repeat loop
+   //      However Repeat::last_valid_value() will just return the last valid value.
+   var_.set_value( valueAsString() );
+}
+
+// =============================================================
 
 RepeatDate::RepeatDate( const std::string& variable,
                         int start,
@@ -178,6 +172,59 @@ RepeatDate::RepeatDate( const std::string& variable,
 	}
 }
 
+void RepeatDate::gen_variables(std::vector<Variable>& vec) const
+{
+   vec.push_back(yyyy_);
+   vec.push_back(mm_);
+   vec.push_back(dom_);
+   vec.push_back(dow_);
+   vec.push_back(julian_);
+   RepeatBase::gen_variables(vec);
+}
+
+const Variable& RepeatDate::find_gen_variable(const std::string& name) const
+{
+   if (name == name_) return var_;
+   if (name == yyyy_.name()) return yyyy_;
+   if (name == mm_.name()) return mm_;
+   if (name == dom_.name()) return dom_;
+   if (name == dow_.name()) return dow_;
+   if (name == julian_.name()) return julian_;
+   return Variable::EMPTY();
+}
+
+void RepeatDate::update_repeat_genvar() const
+{
+   RepeatBase::update_repeat_genvar();
+
+   yyyy_.set_name( name_ + "_YYYY");
+   mm_.set_name( name_ + "_MM");
+   dom_.set_name( name_ + "_DD");
+   dow_.set_name( name_ + "_DOW");
+   julian_.set_name( name_ + "_JULIAN");
+
+   std::string date_as_string = valueAsString();
+   boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+   if (the_date.is_special()) {
+      cout << "RepeatDate::update_repeat_genvar(): error the_date.is_special() " << date_as_string << "\n";
+   }
+
+   //int day_of_year  = the_date.day_of_year();
+   int day_of_week  = the_date.day_of_week().as_number();
+   int day_of_month = the_date.day();
+   int month        = the_date.month();
+   int year         = the_date.year();
+
+   yyyy_.set_value(boost::lexical_cast<std::string>(year));
+   mm_.set_value(boost::lexical_cast<std::string>(month));
+   dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
+   dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
+
+   long last_value = last_valid_value();
+   long julian = Cal::date_to_julian( last_value );
+   julian_.set_value(boost::lexical_cast<std::string>(julian));
+}
+
 bool RepeatDate::compare(RepeatBase* rb) const
 {
 	RepeatDate* rhs = dynamic_cast<RepeatDate*>(rb);
@@ -226,12 +273,16 @@ void RepeatDate::reset() {
 
 std::string RepeatDate::toString() const
 {
-	std::stringstream ss;
-	ss << "repeat date " << name_ << " " << start_ << " " << end_ << " " << delta_;
+	std::string ret = "repeat date ";  ret += name_; ret += " ";
+   ret += boost::lexical_cast<std::string>(start_); ret += " ";
+   ret += boost::lexical_cast<std::string>(end_);   ret += " ";
+   ret += boost::lexical_cast<std::string>(delta_);
+
 	if (!PrintStyle::defsStyle() && (value_ != start_)) {
-	   ss << " # " << value_;
+	   ret += " # ";
+	   ret += boost::lexical_cast<std::string>(value_);
 	}
-	return ss.str();
+	return ret;
 }
 std::string RepeatDate::dump() const
 {
@@ -455,13 +506,16 @@ void RepeatInteger::setToLastValue()
 
 std::string RepeatInteger::toString() const
 {
-	std::stringstream ss;
-	ss << "repeat integer " << name_ << " " << start_ << " " << end_;
- 	if (delta_ != 1) ss << " " << delta_;
+   std::string ret = "repeat integer ";  ret += name_; ret += " ";
+   ret += boost::lexical_cast<std::string>(start_);  ret += " ";
+   ret += boost::lexical_cast<std::string>(end_);
+   if (delta_ != 1) { ret += " ";  ret += boost::lexical_cast<std::string>(delta_); }
+
    if (!PrintStyle::defsStyle() && (value_ != start_)) {
-      ss << " # " << value_;
+      ret += " # ";
+      ret += boost::lexical_cast<std::string>(value_);
    }
-	return ss.str();
+   return ret;
 }
 std::string RepeatInteger::dump() const
 {
@@ -473,18 +527,43 @@ std::string RepeatInteger::dump() const
 bool RepeatInteger::operator==(const RepeatInteger& rhs) const
 {
 	if (name_ != rhs.name_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( name_(" << name_ << ") != rhs.name_(" << rhs.name_ << "))" << "\n";
+      }
+#endif
 		return false;
 	}
 	if (start_ != rhs.start_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( start_(" << start_ << ") != rhs.start_(" << rhs.start_ << "))" << "\n";
+      }
+#endif
 		return false;
 	}
 	if (end_ != rhs.end_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( end_(" << end_ << ") != rhs.end_(" << rhs.end_ << "))" << "\n";
+      }
+#endif
 		return false;
 	}
 	if (delta_ != rhs.delta_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( delta_(" << delta_ << ") != rhs.delta_(" << rhs.delta_ << "))" << "\n";
+      }
+#endif
 		return false;
 	}
    if (value_ != rhs.value_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatInteger::operator==( value_(" << value_ << ") != rhs.value_(" << rhs.value_ << "))" << "\n";
+      }
+#endif
       return false;
    }
 	return true;
@@ -534,13 +613,13 @@ bool RepeatEnumerated::compare(RepeatBase* rb) const
 
 std::string RepeatEnumerated::toString() const
 {
-	std::stringstream ss;
- 	ss << "repeat enumerated " << name_;
- 	BOOST_FOREACH(const string& s, theEnums_) { ss << " \"" << s << "\""; }
- 	if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
- 	   ss << " # " << currentIndex_;
- 	}
-  	return ss.str();
+   std::string ret = "repeat enumerated ";  ret += name_;
+   BOOST_FOREACH(const string& s, theEnums_) { ret += " \""; ret += s; ret += "\""; }
+   if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
+      ret += " # ";
+      ret += boost::lexical_cast<std::string>(currentIndex_);
+   }
+   return ret;
 }
 std::string RepeatEnumerated::dump() const
 {
@@ -726,13 +805,13 @@ bool RepeatString::compare(RepeatBase* rb) const
 
 std::string RepeatString::toString() const
 {
-	std::stringstream ss;
-	ss << "repeat string " << name_;
- 	BOOST_FOREACH(const string& s, theStrings_) { ss << " \"" << s << "\""; }
+   std::string ret = "repeat string ";  ret += name_;
+   BOOST_FOREACH(const string& s, theStrings_) { ret += " \""; ret += s; ret += "\""; }
    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
-      ss << " # " << value();
+      ret += " # ";
+      ret += boost::lexical_cast<std::string>(value());
    }
- 	return ss.str();
+   return ret;
 }
 std::string RepeatString::dump() const
 {
@@ -852,9 +931,9 @@ bool RepeatDay::compare(RepeatBase* rb) const
 
 std::string RepeatDay::toString() const
 {
-	std::stringstream ss;
-	ss << "repeat day " << step_;
- 	return ss.str();
+   std::string ret = "repeat day ";
+   ret += boost::lexical_cast<std::string>(step_);
+   return ret;
 }
 
 std::string RepeatDay::dump() const

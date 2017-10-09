@@ -31,6 +31,8 @@ public:
 
    std::ostream& print(std::ostream& os) const;
 
+   void cleanup() { if (stc_cmd_.get())  stc_cmd_->cleanup();} // reclaim memory *AFTER* command has run
+
    /// Handle the response from the server. On the client side
    /// return true IF and ONLY IF client response was ok, if further client action required return false
    bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const;

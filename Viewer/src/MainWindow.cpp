@@ -24,6 +24,7 @@
 #include "MainWindow.hpp"
 
 #include "AboutDialog.hpp"
+#include "ChangeNotify.hpp"
 #include "ChangeNotifyWidget.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
@@ -32,12 +33,15 @@
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
 #include "PropertyDialog.hpp"
+#include "PropertyMapper.hpp"
+#include "ServerComInfoWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerList.hpp"
 #include "ServerListDialog.hpp"
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
+#include "ToolTipFormat.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
@@ -63,7 +67,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
 
     setAttribute(Qt::WA_DeleteOnClose);
 
-    constructWindowTitle();
+    //the window title
+    winTitle_=new MainWindowTitleHandler(this);
+    winTitle_->update();
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -83,35 +89,45 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 
-    connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
+    connect(nodePanel_,SIGNAL(selectionChangedInCurrent(VInfo_ptr)),
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
     connect(nodePanel_,SIGNAL(contentsChanged()),
-    	    this,SLOT(slotContentsChanged()));
+            this,SLOT(slotContentsChanged()));
 
-    //Add temporary preview label
-   /* QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
-    label->setAutoFillBackground(true);
-    label->setProperty("previewLabel","1");
+    //--------------
+    // Toolbar
+    //--------------
 
-    QLabel *label1=new QLabel("      ",this);
+    //Add server refresh widget to the front of the toolbar
+    serverComWidget_=new ServerRefreshInfoWidget(actionRefreshSelected,this);
+    Q_ASSERT(actionSearch);
+    viewToolBar->insertWidget(actionSearch,serverComWidget_);
+    //viewToolBar->addWidget(serverComWidget_);
 
-    viewToolBar->addWidget(label1);
-    viewToolBar->addWidget(label);*/
+    connect(serverComWidget_,SIGNAL(serverSettingsEditRequested(ServerHandler*)),
+            this,SLOT(slotEditServerSettings(ServerHandler*)));
 
+
+    //insert a spacer after the the server refresh widget
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    //viewToolBar->insertWidget(actionSearch,spacer);
     viewToolBar->addWidget(spacer);
 
-    //QToolBar* ipToolBar=new QToolBar(this);
-    addInfoPanelActions(viewToolBar);
-    //addToolBar(ipToolBar);
+    //Add more actions
+    addInfoPanelActions(viewToolBar);  
 
-    //Actions based on selection
+    //Add shortcuts to action tooltips
+    Viewer::addShortCutToToolTip(viewToolBar->actions());
+
+    //Initialise actions based on selection
     actionRefreshSelected->setEnabled(false);
     actionResetSelected->setEnabled(false);
 
+    //--------------
     //Status bar
+    //--------------
 
     //Add server list sync notification
     if(ServerList::instance()->hasSyncChange())
@@ -133,6 +149,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
+    //serverComWidget_=new ServerComLineDisplay(this);
+    //statusBar()->addPermanentWidget(serverComWidget_);
+
     //Assigns name to each object
     WidgetNameProvider::nameChildren(this);
 
@@ -142,7 +161,8 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
 MainWindow::~MainWindow()
 {
     UiLog().dbg() << "MainWindow --> desctutor";
-	serverFilterMenu_->aboutToDestroy();
+    delete winTitle_;
+    serverFilterMenu_->aboutToDestroy();
 }
 
 void MainWindow::init(MainWindow *win)
@@ -174,24 +194,6 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 	   }
    }
 }
-
-
-void MainWindow::constructWindowTitle()
-{
-    char *userTitle = getenv("ECFUI_TITLE");
-    std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
-                                                : VConfig::instance()->appLongName();
-
-    // add the name of the session to the title bar?
-    std::string sessionName = SessionHandler::instance()->current()->name();
-    if (sessionName == "default")
-        sessionName = "";
-    else
-        sessionName = " (session: " + sessionName + ")";
-
-    setWindowTitle(QString::fromStdString(mainTitle) + "  -  Preview version" + QString::fromStdString(sessionName));
-}
-
 
 //==============================================================
 //
@@ -253,20 +255,7 @@ void MainWindow::on_actionResetSelected_triggered()
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    PropertyDialog* d=new PropertyDialog; //belongs to the whole app
-
-    connect(d,SIGNAL(configChanged()),
-    		this,SLOT(slotConfigChanged()));
-
-	if(d->exec() == QDialog::Accepted)
-	{
-		if(d->isConfigChanged())
-		{
-			configChanged(this);
-		}
-    }
-
-	delete d;
+    startPreferences(this,"");
 }
 
 void MainWindow::on_actionManageSessions_triggered()
@@ -295,6 +284,11 @@ void MainWindow::on_actionSearch_triggered()
     nodePanel_->addSearchDialog();
 }
 
+void MainWindow::on_actionNotification_triggered()
+{
+    ChangeNotify::showDialog();
+}
+
 void MainWindow::on_actionManageServers_triggered()
 {
 	ServerListDialog dialog(ServerListDialog::SelectionMode,nodePanel_->serverFilter(),this);
@@ -316,10 +310,6 @@ void MainWindow::on_actionAddInfoPanel_triggered()
 	nodePanel_->addToDashboard("info");
 }
 
-void MainWindow::on_actionShowInInfoPanel_triggered()
-{
-}
-
 void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog d;
@@ -331,7 +321,6 @@ void MainWindow::on_actionSaveSessionAs_triggered()
     SaveSessionAsDialog d;
     d.exec();
 }
-
 
 void MainWindow::slotCurrentChangedInPanel()
 {
@@ -348,13 +337,16 @@ void MainWindow::slotCurrentChangedInPanel()
 	 //updateSearchPanel();
 }
 
+//The selection changed in one of the views
 void MainWindow::slotSelectionChanged(VInfo_ptr info)
 {
-	selection_=info;
+    selection_=info;
 
+    //Get the set of visible info panel tabs for the selection
 	std::vector<InfoPanelDef*> ids;
 	InfoPanelHandler::instance()->visible(selection_,ids);
 
+    //Set status of the info panel actions in the toolbar accordingly
 	Q_FOREACH(QAction* ac,infoPanelActions_)
 	{
 		ac->setEnabled(false);
@@ -371,23 +363,28 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 		}
 	}
 
+    //Update the refres action/info to the selection
 	updateRefreshActions();
 }
 
 void MainWindow::updateRefreshActions()
 {
-	QString serverName;
-	if(selection_ && selection_.get())
+    ServerHandler* s=0;
+
+    QString serverName;
+    if(selection_)
 	{
-		if(ServerHandler* s=selection_->server())
-		{
-			serverName=QString::fromStdString(s->name());
-		}
+        s=selection_->server();
 	}
 
-	bool hasSel=(selection_ && selection_.get());
+    serverComWidget_->setServer(s);
+
+
+    bool hasSel=(selection_!= 0);
 	actionRefreshSelected->setEnabled(hasSel);
 	actionResetSelected->setEnabled(hasSel);
+
+#if 0
 
 	if(serverName.isEmpty())
 	{
@@ -406,7 +403,8 @@ void MainWindow::updateRefreshActions()
 
 			actionRefreshSelected->setToolTip(tnew);
 		}
-	}
+    }
+#endif
 }
 
 
@@ -459,6 +457,12 @@ void MainWindow::hideServerSyncNotify()
       serverSyncNotifyTb_->hide();
 }
 
+void MainWindow::slotEditServerSettings(ServerHandler* s)
+{
+    VInfo_ptr info=VInfoServer::create(s);
+    nodePanel_->openDialog(info,"server_settings");
+}
+
 //==============================================================
 //
 //  Close and quit
@@ -503,7 +507,11 @@ void MainWindow::writeSettings(VComboSettings *vs)
 	//Qt settings
 	vs->putQs("geometry",saveGeometry());
 	vs->putQs("state",saveState());
-	vs->putQs("minimized",(windowState() & Qt::WindowMinimized)?1:0);
+
+//See ECFLOW-1090
+#if 0
+    vs->putQs("minimized",(windowState() & Qt::WindowMinimized)?1:0);
+#endif
 
 	//Other setting
 	vs->put("infoPanelCount",findChildren<QDockWidget*>().count());
@@ -522,10 +530,13 @@ void MainWindow::readSettings(VComboSettings *vs)
 
 	nodePanel_->readSettings(vs);
 
+    //See ECFLOW-1090
+#if 0
 	if(vs->getQs("minimized").toInt()== 1)
 	{
 	  	setWindowState(windowState() | Qt::WindowMinimized);
 	}
+#endif
 
 	if(vs->containsQs("geometry"))
 		restoreGeometry(vs->getQs("geometry").toByteArray());
@@ -814,8 +825,83 @@ MainWindow* MainWindow::findWindow(QWidget *childW)
 	return 0;
 }
 
+void MainWindow::startPreferences(QString option)
+{
+    if(windows_.count() > 0)
+        startPreferences(windows_.front(),option);
+}
+
+void MainWindow::startPreferences(MainWindow *w,QString option)
+{
+    Q_ASSERT(w);
+
+    PropertyDialog* d=new PropertyDialog; //belongs to the whole app
+
+    d->showPage(option);
+
+    connect(d,SIGNAL(configChanged()),
+        w,SLOT(slotConfigChanged()));
+
+    if(d->exec() == QDialog::Accepted)
+    {
+        if(d->isConfigChanged())
+        {
+            configChanged(w);
+        }
+    }
+
+    delete d;
+}
 
 
+//--------------------------------------------------------
+//
+// MainWindowTitle (class to handle the MainWindow title)
+//
+//--------------------------------------------------------
+
+MainWindowTitleHandler::MainWindowTitleHandler(QMainWindow *win) : win_(win)
+{
+    Q_ASSERT(win_);
+    std::vector<std::string> propVec;
+    propVec.push_back("menu.access.nodeMenuMode");
+    prop_=new PropertyMapper(propVec,this);
+}
+
+MainWindowTitleHandler::~MainWindowTitleHandler()
+{
+    delete prop_;
+}
+
+void MainWindowTitleHandler::notifyChange(VProperty*)
+{
+    update();
+}
+
+void MainWindowTitleHandler::update()
+{
+    Q_ASSERT(win_);
+
+    char *userTitle = getenv("ECFUI_TITLE");
+    std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
+                                                : VConfig::instance()->appLongName();
+
+    QString title=QString::fromStdString(mainTitle);
+
+    if(VProperty* p=prop_->find("menu.access.nodeMenuMode"))
+    {
+        QString menuMode=p->valueLabel();
+        if(!menuMode.isEmpty())
+            title+=" - (menu: " + menuMode + ")";
+    }
+
+    // add the name of the session to the title bar?
+    QString sessionName = QString::fromStdString(SessionHandler::instance()->current()->name());
+    if (sessionName != "default")
+        title+= " - (session: " + sessionName + ")";
+
+    win_->setWindowTitle(title);
+}
 
 
 

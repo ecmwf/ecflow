@@ -31,7 +31,8 @@ OverviewItemWidget::OverviewItemWidget(QWidget *parent) :
 
 	textEdit_->setShowLineNumbers(false);
 
-	Highlighter* ih=new Highlighter(textEdit_->document(),"info");
+    //The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(),"info");
 
 	infoProvider_=new OverviewProvider(this);
 

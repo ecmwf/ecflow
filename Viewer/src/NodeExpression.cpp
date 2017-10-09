@@ -17,6 +17,7 @@
 #include "Submittable.hpp"
 
 #include "NodeExpression.hpp"
+#include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
@@ -95,7 +96,7 @@ VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
     return NULL;
 }
 
-bool NodeExpressionParser::isUserLevel(const std::string &str) const
+bool NodeExpressionParser::isMenuMode(const std::string &str) const
 {
     if (str == "oper" || str == "admin")
         return true;
@@ -286,10 +287,10 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     updatedOperands = true;
                 }
 
-                // user level
-                else if (isUserLevel(*i_))
+                // node mneu mode
+                else if (isMenuMode(*i_))
                 {
-                    UserLevelCondition *userCond = new UserLevelCondition(QString::fromStdString(*i_));
+                    NodeMenuModeCondition *userCond = new NodeMenuModeCondition(QString::fromStdString(*i_));
                     operandStack.push_back(userCond);
                     result = userCond;
                     updatedOperands = true;
@@ -409,7 +410,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             // but do not do this if the last function asks to delay this process
             if (!funcStack.empty() && !funcStack.back()->delayUnwinding())
             {
-                if(updatedOperands && (operandStack.size() >= funcStack.back()->numOperands()))
+                if(updatedOperands && (static_cast<int>(operandStack.size()) >= funcStack.back()->numOperands()))
                 {
                     std::vector<BaseNodeCondition *> operands;
                     result = funcStack.back();       // last function is the current result
@@ -435,7 +436,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
     // final unwinding of the stack
     while (!funcStack.empty())
     {
-        if(operandStack.size() >= funcStack.back()->numOperands())
+        if(static_cast<int>(operandStack.size()) >= funcStack.back()->numOperands())
         {
             std::vector<BaseNodeCondition *> operands;
             result = funcStack.back();  // last function is the current result           
@@ -476,7 +477,7 @@ bool BaseNodeCondition::containsAttributeSearch()
     bool contains = false;
 
     // check child condition nodes
-    for (int i = 0; i < operands_.size(); i++)
+    for(std::size_t i = 0; i < operands_.size(); i++)
     {
         contains = contains | operands_[i]->containsAttributeSearch();
     }
@@ -610,16 +611,16 @@ bool StateNodeCondition::execute(VItem* item)
 
 //=========================================================================
 //
-//  UserLevelCondition
+// UserMenuModeCondition
 //
 //=========================================================================
 
-bool UserLevelCondition::execute(VItem*)
+bool NodeMenuModeCondition::execute(VItem*)
 {
     // since we don't currently have the concept of user levels, we just 
     // return true for now
 
-    return true;
+    return MenuHandler::nodeMenuMode() == menuModeName_;
 }
 
 

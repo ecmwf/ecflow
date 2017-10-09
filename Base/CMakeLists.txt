@@ -9,6 +9,7 @@
  src/Client.cpp
  src/ServerReply.cpp
  src/Connection.cpp
+ src/stc/DefsCache.cpp
  src/stc/DefsCmd.cpp
  src/stc/PreAllocatedReply.cpp
  src/stc/SStringVecCmd.cpp
@@ -71,12 +72,11 @@ ecbuild_add_library( TARGET   base
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     libparser node nodeattr core
+                     LIBS     node nodeattr core
                      INCLUDES src
                               ../ACore/src
                               ../ANattr/src
                               ../ANode/src
-                              ../AParser/src
                               ../Base/src
                               ../Base/src/cts
                               ../Base/src/stc
@@ -94,6 +94,7 @@ list( APPEND test_srcs
    test/TestForceCmd.cpp
    test/TestFreeDepCmd.cpp
    test/TestLimit.cpp
+   test/TestLoadDefsCmd.cpp
    test/TestLogCmd.cpp
    test/TestMeterCmd.cpp
    test/TestProgramOptions.cpp

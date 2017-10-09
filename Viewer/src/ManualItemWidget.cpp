@@ -22,7 +22,8 @@ ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
     messageLabel_->hide();
     textEdit_->setShowLineNumbers(false);
 
-    Highlighter* ih=new Highlighter(textEdit_->document(),"manual");
+    //The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(),"manual");
 
     infoProvider_=new ManualProvider(this);
 

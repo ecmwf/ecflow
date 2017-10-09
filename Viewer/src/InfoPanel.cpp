@@ -78,6 +78,13 @@ InfoPanel::InfoPanel(QWidget* parent) :
 	actionFrozen_->setChecked(false);
 
     WidgetNameProvider::nameChildren(this);
+
+    //Create the handler for all the possible panels!
+    for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
+        it != InfoPanelHandler::instance()->panels().end(); ++it)
+    {
+        createHandler(*it);
+    }
 }
 
 InfoPanel::~InfoPanel()
@@ -358,7 +365,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	InfoPanelItem* currentItem=findItem(current);
 
 	//A new set of tabs is needed!
-	if(tab_->count() != ids.size() || match != ids.size())
+    if(tab_->count() != static_cast<int>(ids.size()) || match != static_cast<int>(ids.size()))
 	{
 		//We set this flag true so that the change of the current tab should not
 		//trigger a reload! We want to reload the current tab only after the
@@ -427,8 +434,8 @@ InfoPanelItem* InfoPanel::findItem(QWidget* w)
 
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
-			if(d->widget() == w)
-					return d->item();
+        if(d->widget() == w)
+            return d->item();
 	}
 
 	return 0;
@@ -441,8 +448,8 @@ InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w)
 
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
-			if(d->widget() == w)
-					return d;
+        if(d->widget() == w)
+            return d;
 	}
 
 	return 0;
@@ -452,8 +459,8 @@ InfoPanelItemHandler* InfoPanel::findHandler(InfoPanelDef* def)
 {
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
-			if(d->def() == def)
-				return d;
+        if(d->def() == def)
+            return d;
 	}
 
 	return createHandler(def);
@@ -574,6 +581,16 @@ void InfoPanel::updateTitle()
     }
 }
 
+void InfoPanel::relayInfoPanelCommand(VInfo_ptr info,QString cmd)
+{
+    Q_EMIT popInfoPanel(info,cmd);
+}
+
+void InfoPanel::relayDashboardCommand(VInfo_ptr info,QString cmd)
+{
+    Q_EMIT dashboardCommand(info,cmd);
+}
+
 void InfoPanel::notifyDataLost(VInfo* info)
 {
 	if(info_ && info_.get() == info)
@@ -687,7 +704,7 @@ void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server)
 	if(frozen())
 		return;
 
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->server() && info_->server() == server)
 		{
@@ -700,13 +717,13 @@ void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server)
 	}
 }
 
-void InfoPanel::notifyServerSyncFinished(ServerHandler* server)
+void InfoPanel::notifyEndServerSync(ServerHandler* server)
 {
 	//TODO: does frozen make sense in this case?
 	if(frozen())
 		return;
 
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->server() && info_->server() == server)
 		{
@@ -724,7 +741,7 @@ void InfoPanel::rerender()
 	bcWidget_->rerender();
 }
 
-void InfoPanel::writeSettings(VSettings* vs)
+void InfoPanel::writeSettings(VComboSettings* vs)
 {
 	vs->put("type",type_);
 	vs->put("dockId",id_);
@@ -742,7 +759,7 @@ void InfoPanel::writeSettings(VSettings* vs)
     }
 }
 
-void InfoPanel::readSettings(VSettings* vs)
+void InfoPanel::readSettings(VComboSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
 	if(type != type_)

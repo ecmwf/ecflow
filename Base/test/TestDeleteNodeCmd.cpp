@@ -20,7 +20,6 @@
 #include "ServerToClientCmd.hpp"
 #include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
-#include "DefsStructureParser.hpp"
 #include "DurationTimer.hpp"
 #include "Str.hpp"
 
@@ -174,9 +173,8 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 //      Defs defs;
 //      {
 //         DurationTimer duration_timer;
-//         DefsStructureParser checkPtParser( &defs, path_to_very_large_defs_file);
 //         std::string errorMsg,warningMsg;
-//         BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),"failed to parse 3199.def");
+//         BOOST_REQUIRE_MESSAGE(defs.restore(path_to_very_large_defs_file,errorMsg,warningMsg),"failed to parse 3199.def");
 //         cout << " ...Loading took " << duration_timer.duration();
 //         BOOST_CHECK_MESSAGE( duration_timer.duration() < 20,"Loading defs "
 //                              << path_to_very_large_defs_file << " took " << duration_timer.duration() << " Expected to take < 20 seconds");

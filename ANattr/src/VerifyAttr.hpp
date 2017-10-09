@@ -31,8 +31,8 @@
 // Use compiler , generated destructor, assignment, copy constructor
 class VerifyAttr {
 public:
-	VerifyAttr(NState::State state,int expected)
-		: state_(state), expected_(expected), actual_(0), state_change_no_(0) {}
+	VerifyAttr(NState::State state,int expected,int actual = 0)
+		: state_(state), expected_(expected), actual_(actual), state_change_no_(0) {}
 	VerifyAttr()
 		: state_(NState::UNKNOWN), expected_(0), actual_(0),state_change_no_(0) {}
 

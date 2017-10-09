@@ -80,7 +80,9 @@ void export_SuiteAndFamily()
    .def("__enter__", &family_enter)       // allow with statement, hence indentation support
    .def("__exit__",  &family_exit)        // allow with statement, hence indentation support
    ;
-
+#if defined(__clang__)
+   boost::python::register_ptr_to_python<family_ptr>(); // needed for mac and boost 1.6
+#endif
 
    class_<Suite, bases<NodeContainer>, suite_ptr>("Suite",DefsDoc::suite_doc())
    .def("__init__",make_constructor(&Suite::create), DefsDoc::suite_doc())
@@ -95,4 +97,7 @@ void export_SuiteAndFamily()
    .def("get_end_clock", &Suite::clock_end_attr,"Return the suite's end clock. Can be NULL")
    .def("begun",     &Suite::begun, "Returns true if the :term:`suite` has begun, false otherwise")
    ;
+#if defined(__clang__)
+   boost::python::register_ptr_to_python<suite_ptr>(); // needed for mac and boost 1.6
+#endif
 }

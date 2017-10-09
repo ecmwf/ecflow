@@ -38,9 +38,11 @@ protected Q_SLOTS:
     void anchorClicked(const QUrl& link);
 
 protected:
-    void updateState(const ChangeFlags&) {}
+    void updateState(const ChangeFlags&);
+    void serverSyncFinished();
 
 private:
+    void load();
     QString why() const;
     QString makeHtml(const std::vector<std::string>&,const std::vector<std::string>&) const;
     QString makeHtml(const std::vector<std::string>&) const;

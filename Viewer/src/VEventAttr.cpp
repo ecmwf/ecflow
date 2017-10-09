@@ -101,8 +101,8 @@ void VEventAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     if(vnode->node_)
     {
         const std::vector<Event>& v=vnode->node_->events();
-        int n=v.size();
-        for(size_t i=0; i < n; i++)
+        int n=static_cast<int>(v.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VEventAttr(vnode,v[i],i));
         }

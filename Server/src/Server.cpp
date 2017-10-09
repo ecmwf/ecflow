@@ -343,6 +343,9 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
          outbound_response_.set_cmd( PreAllocatedReply::error_cmd( e.what()  ));
       }
 
+      // Do any necessary clean up after inbound_request_ has run. i.e like re-claiming memory
+      inbound_request_.cleanup();
+
       // Release >= 4.0.6  More reliable to always respond back. Get more accurate logs
       // However allow old/new client to deal with shutdown of socket:
       // See: void Client::handle_read() See: ECFLOW-157, ECFLOW-169
@@ -394,6 +397,9 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
       log(Log::ERR,ss.str());
       return;
    }
+
+   // Do any necessary clean up after outbound_response_  has run. i.e like re-claiming memory
+   outbound_response_.cleanup();
 
    (void)shutdown_socket(conn,"Server::handle_write:");
 
@@ -510,13 +516,24 @@ bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
       LOG(Log::MSG, "Loading check point file " << filename << " port = " << serverEnv_.port());
 
       try {
-         defs_->restore_from_checkpt(filename);   // this can throw
-         update_defs_server_state();              // works on def_
-         //cout << "Server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
+         defs_->restore(filename);      // this can throw
+         update_defs_server_state();    // works on def_
+         LOG(Log::MSG, "Loading of *DEFS* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
          return true;
       }
       catch (exception& e) {
-         LOG(Log::ERR, "Failed to load check point file " << filename << ", because: " << e.what());
+         LOG(Log::ERR, "Failed to load *DEFS* check point file " << filename << ", because: " << e.what());
+         failed = true;
+      }
+
+      try {
+         defs_->boost_restore_from_checkpt(filename);   // this can throw
+         update_defs_server_state();                    // works on def_
+         LOG(Log::MSG, "Loading of *BOOST* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
+         return true;
+      }
+      catch (exception& e) {
+         LOG(Log::ERR, "Failed to *BOOST* check point file " << filename << ", because: " << e.what());
          failed = true;
       }
    }
@@ -549,6 +566,10 @@ void Server::update_defs_server_state()
    defs_->set_server().jobSubmissionInterval(  serverEnv_.submitJobsInterval() );
    defs_->set_server().jobGeneration( serverEnv_.jobGeneration() );
    LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
+
+   // Since we have reloaded Defs, make sure clients, re-sync by resetting change and modify numbers on server
+   defs_->set_state_change_no(Ecf::state_change_no());
+   defs_->set_modify_change_no(Ecf::modify_change_no());
 
    /// System needs defs to handle process that have died, and need to flagged as aborted
    ecf::System::instance()->setDefs(defs_);

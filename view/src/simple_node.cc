@@ -598,6 +598,7 @@ public:
   virtual void visitEventState(AstEventState*);
   virtual void visitNode(AstNode*);
   virtual void visitVariable(AstVariable*);
+  virtual void visitParentVariable(AstParentVariable*);
   virtual void visitFlag(AstFlag*);
   
 private:
@@ -636,6 +637,29 @@ void AstCollateXNodesVisitor::visitVariable(AstVariable* astVar)
         type = run->type();
         if (type == NODE_EVENT 
             || type == NODE_METER 
+            || type == NODE_VARIABLE) {
+          theSet_.insert(run);
+        }
+      }
+    }
+  }
+}
+
+void AstCollateXNodesVisitor::visitParentVariable(AstParentVariable* astVar)
+{
+  Node* referencedNode = astVar->referencedNode();
+  if (referencedNode) {
+    simple_node* xnode = (simple_node*) referencedNode->graphic_ptr();
+    if (0 == xnode) return;
+
+    int type;
+    node* run;
+    for (run = xnode->kids(); 0 != run; run = run->next()) {
+      //std::cout << "run->name() " << run->name() << "\n";
+      if (run->name() == astVar->name()) {
+        type = run->type();
+        if (type == NODE_EVENT
+            || type == NODE_METER
             || type == NODE_VARIABLE) {
           theSet_.insert(run);
         }
@@ -811,8 +835,7 @@ Boolean simple_node::visible() const
 {
   int wanted = status() - STATUS_UNKNOWN + show::unknown;
   try {
-    if(selection::current_node())
-      if (selection::current_node()->full_name() == this->full_name())
+    if(selection::current_path() == this->full_name())
 	return True;
     if(this == selection::current_node()) 
       return True;
@@ -840,7 +863,6 @@ Boolean simple_node::visible_kid() const
 {
   return visible();
 }
-
 
 const char* simple_node::status_name() const 
 {

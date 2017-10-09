@@ -283,8 +283,8 @@ menu "Special"
 ! ( (SUITE|FAMILY) & (COMPLETE|QUEUED|SUSPENDED) & ~MIGRATED,ALL,'Migrate', 'ecflow_client --migrate <full_name>','',NO)
 ! ( (SUITE|FAMILY) & MIGRATED,ALL,'Restore','ecflow_client --restore <full_name>','',YES)
 
-  ( (SUITE|FAMILY) & (COMPLETE|QUEUED|SUSPENDED) & ~MIGRATED,ALL,'Migrate', 'ecflow_client --alter set_flag migrated <full_name>')
-  ( (SUITE|FAMILY) & MIGRATED,ALL,'Restore','ecflow_client --alter clear_flag migrated <full_name>', 'click shift-update to display content below', YES)
+  ( (SUITE|FAMILY) & (COMPLETE|QUEUED|SUSPENDED) & ~MIGRATED,ALL,'Hide', 'ecflow_client --alter set_flag migrated <full_name>')
+  ( (SUITE|FAMILY) & MIGRATED,ALL,'Show','ecflow_client --alter clear_flag migrated <full_name>', 'click shift-update to display content below', YES)
 
   (SUITE|FAMILY,(ACTIVE|SUBMITTED|ABORTED|SUSPENDED),'Kill', 'ecflow_client --kill <full_name>','',YES)
   (TASK|ALIAS,(ACTIVE|SUBMITTED|SUSPENDED),'Kill','ecflow_client --kill <full_name>','',YES)

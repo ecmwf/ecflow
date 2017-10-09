@@ -262,8 +262,8 @@ bool Suite::operator==(const Suite& rhs) const
  	if ((clockAttr_.get() && !rhs.clockAttr_.get()) || (!clockAttr_.get() && rhs.clockAttr_.get()) ){
 #ifdef DEBUG
 		if (Ecf::debug_equality()) {
-			std::cout << "Suite::operator==  (clockAttr_ && !rhs.clockAttr_)  " << debugNodePath() << "\n";
-		}
+         std::cout << "Suite::operator==(clockAttr_.get() && !rhs.clockAttr_.get()) || (!clockAttr_.get() && rhs.clockAttr_.get() " << debugNodePath() << "\n";
+ 		}
 #endif
 		return false;
 	}
@@ -271,6 +271,7 @@ bool Suite::operator==(const Suite& rhs) const
 #ifdef DEBUG
 		if (Ecf::debug_equality()) {
 			std::cout << "Suite::operator== (clockAttr_ && rhs.clockAttr_ && !(*clockAttr_ == *rhs.clockAttr_)) " << debugNodePath() << "\n";
+			std::cout << "clockAttr_: " << clockAttr_->toString() << "  rhs.clockAttr_: " << rhs.clockAttr_->toString() << "\n";
 		}
 #endif
 		return false;
@@ -708,6 +709,7 @@ SuiteGenVariables::SuiteGenVariables(const Suite* s)
    genvar_month_("MONTH", "", false ),
    genvar_ecf_date_("ECF_DATE", "", false ),
    genvar_ecf_clock_("ECF_CLOCK", "", false ),
+   genvar_ecf_julian_("ECF_JULIAN", "", false ),
    force_update_(false){}
 
 void SuiteGenVariables::update_generated_variables() const
@@ -813,6 +815,9 @@ void SuiteGenVariables::update_generated_variables() const
       sprintf(smsclock,"%s:%s:%d:%d", day_name[suite_->calendar_.day_of_week()], month_name[suite_->calendar_.month()-1],suite_->calendar_.day_of_week(),suite_->calendar_.day_of_year());
       genvar_ecf_clock_.set_value( smsclock );
       //cout << "genvar_ecf_clock_ = " << genvar_ecf_clock_.theValue() << "\n";
+
+
+      genvar_ecf_julian_.set_value( boost::lexical_cast<std::string>( suite_->calendar_.suiteTime().date().julian_day()) );
    }
 }
 
@@ -830,6 +835,7 @@ const Variable& SuiteGenVariables::findGenVariable(const std::string& name) cons
    if (genvar_month_.name() == name) return genvar_month_;
    if (genvar_ecf_clock_.name() == name) return genvar_ecf_clock_;
    if (genvar_ecf_time_.name() == name) return genvar_ecf_time_;
+   if (genvar_ecf_julian_.name() == name) return genvar_ecf_julian_;
    if (genvar_time_.name() == name) return genvar_time_;
    return Variable::EMPTY();
 }
@@ -848,5 +854,6 @@ void SuiteGenVariables::gen_variables(std::vector<Variable>& vec) const
    vec.push_back(genvar_month_);
    vec.push_back(genvar_ecf_clock_);
    vec.push_back(genvar_ecf_time_);
+   vec.push_back(genvar_ecf_julian_);
    vec.push_back(genvar_time_);
 }

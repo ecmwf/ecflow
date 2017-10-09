@@ -70,3 +70,4 @@ ModelColumnItem::ModelColumnItem(const std::string& id) : index_(-1)
 static SimpleLoader<ModelColumn> loaderQuery("query_columns");
 static SimpleLoader<ModelColumn> loaderTable("table_columns");
 static SimpleLoader<ModelColumn> loaderZombie("zombie_columns");
+static SimpleLoader<ModelColumn> loaderTriggerGraph("trigger_graph_columns");

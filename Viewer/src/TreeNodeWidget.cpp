@@ -1,3 +1,4 @@
+
 /***************************** LICENSE START ***********************************
 
  Copyright 2009-2017 ECMWF and INPE. This software is distributed under the terms
@@ -13,7 +14,8 @@
 
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
-#include "CompactNodeView.hpp"
+#include "CompactView.hpp"
+#include "StandardView.hpp"
 #include "NodePathWidget.hpp"
 #include "NodeViewBase.hpp"
 #include "TreeNodeModel.hpp"
@@ -30,8 +32,8 @@ AttributeFilter* TreeNodeWidget::lastAtts_=NULL;
 
 TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
     NodeWidget("tree",serverFilter,parent),
-    layoutProp_(0),
-    viewLayoutMode_(StandardLayoutMode)
+    viewLayoutMode_(StandardLayoutMode),
+    layoutProp_(0)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -109,49 +111,49 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
 
     if(viewLayoutMode_ == CompactLayoutMode)
     {
-        CompactNodeView* gv=new CompactNodeView((TreeNodeModel*)model_,filterDef_,this);
-        viewHolder_->layout()->addWidget(gv);
+        TreeNodeModel* realModel=static_cast<TreeNodeModel*>(model_);
+
+        TreeNodeView* gv=new TreeNodeView(new CompactView(realModel,this),
+                                          realModel,filterDef_,this);
+        viewHolder_->layout()->addWidget(gv->realWidget());
         //Store the pointer to the (non-QObject) base class of the view!!!
         view_=gv;
     }
     else
     {
-        TreeNodeView *tv=new TreeNodeView((TreeNodeModel*)model_,filterDef_,this);
-        viewHolder_->layout()->addWidget(tv);
+        TreeNodeModel* realModel=static_cast<TreeNodeModel*>(model_);
+
+        TreeNodeView *tv=new TreeNodeView(new StandardView(realModel,this),
+                                          realModel,filterDef_,this);
+        viewHolder_->layout()->addWidget(tv->realWidget());
         //Store the pointer to the (non-QObject) base class of the view!!!
         view_=tv;
     }
 
     //Signals-slots
-    connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+    connect(view_->realObject(),SIGNAL(selectionChanged(VInfo_ptr)),
         this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
 
-    connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+    connect(view_->realObject(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
         this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
 
-    connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+    connect(view_->realObject(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
         this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
     connect(model_,SIGNAL(clearBegun(const VTreeNode*)),
-        view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+        view_->realObject(),SLOT(slotSaveExpand(const VTreeNode*)));
 
     connect(model_,SIGNAL(scanEnded(const VTreeNode*)),
-        view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+        view_->realObject(),SLOT(slotRestoreExpand(const VTreeNode*)));
 
     connect(model_,SIGNAL(rerender()),
-        view_->realWidget(),SLOT(slotRerender()));
-
-    connect(model_,SIGNAL(filterChangeBegun()),
-        view_->realWidget(),SLOT(slotSaveExpand()));
-
-    connect(model_,SIGNAL(filterChangeEnded()),
-        view_->realWidget(),SLOT(slotRestoreExpand()));
+        view_->realObject(),SLOT(slotRerender()));
 
     connect(model_,SIGNAL(filterUpdateRemoveBegun(const VTreeNode*)),
-        view_->realWidget(),SLOT(slotSaveExpand(const VTreeNode*)));
+        view_->realObject(),SLOT(slotSaveExpand(const VTreeNode*)));
 
     connect(model_,SIGNAL(filterUpdateAddEnded(const VTreeNode*)),
-        view_->realWidget(),SLOT(slotRestoreExpand(const VTreeNode*)));
+        view_->realObject(),SLOT(slotRestoreExpand(const VTreeNode*)));
 
 }
 
@@ -159,7 +161,7 @@ void TreeNodeWidget::initAtts()
 {
 	if(VProperty *prop=VConfig::instance()->find("view.tree.attributesPolicy"))
 	{
-		if(prop->valueAsString() == "last")
+        if(prop->valueAsStdString() == "last")
 		{
 			atts_->setCurrent(lastAtts_->current());
 		}
@@ -202,7 +204,7 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 
     QAction* acState=new QAction(this);
     acState->setIcon(QPixmap(":viewer/status.svg"));
-    acState->setToolTip("Show statuses");
+    acState->setToolTip("Filter by status");
     acState->setMenu(menuState);
     acLst << acState;
 
@@ -286,7 +288,7 @@ void TreeNodeWidget::notifyChange(VProperty* p)
     }
 }
 
-void TreeNodeWidget::writeSettings(VSettings* vs)
+void TreeNodeWidget::writeSettings(VComboSettings* vs)
 {
 	vs->put("type",type_);
 	vs->put("dockId",id_);
@@ -306,7 +308,7 @@ void TreeNodeWidget::writeSettings(VSettings* vs)
     DashboardWidget::writeSettings(vs);
 }
 
-void TreeNodeWidget::readSettings(VSettings* vs)
+void TreeNodeWidget::readSettings(VComboSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
 	if(type != type_)

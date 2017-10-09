@@ -4,43 +4,56 @@
             "label" : "Server options",
 
             "update": {
-            	"label" : "Update",
-            	"tooltip" : "update",      
+                "label" : "Refresh",
+                "tooltip" : "refresh",
             
                 "autoUpdate": {
-                    "label": "Update server state automatically",
+                    "label": "Refresh server state automatically",
                     "tooltip" : "When enabled the server is queried for updates at regular intervals.",
             		"default": "true"
                 },
             	           	
             	"updateRateInSec": {
-                    "label": "Server update period",
+                    "label": "Server refresh period",
             		"suffix" : "seconds", 
-                    "tooltip": "Defines the automatic server update period.",
+                    "tooltip": "Defines the automatic server refresh period.",
             		"default": "60",
             		"min" : "0"
                 },
                 
                 "adaptiveUpdate": {
-                    "label": "Increase server update period when inactive",
-                    "tooltip" : "When enabled the server update period is <b>increased at every automatic update</b> until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again.",
+                    "label": "Drift (increase) server refresh period when inactive",
+                    "tooltip" : "When enabled the server refresh period is <b>increased at every automatic refresh</b> until the maximum period is reached. If the user in the meantime interact with the server the refresh period is set back to its original value and whole process starts again.",
                 	"default": "true"
                 },
 
                 "adaptiveUpdateIncrementInSec": {
-                    "label": "Server update period increment",
+                    "label": "Server refresh drift increment",
                     "suffix" : "seconds",
-                    "tooltip": "Defines by how many seconds the server update period is <b>increased</b> at every automatic update.",
+                    "tooltip": "Defines by how many seconds the server refresh period is <b>increased</b> at every automatic refresh.",
                     "default": "5",
                     "min" : "0"
                 },
                 "maxAdaptiveUpdateRateInMin": {
-                    "label": "Do not increase server update period over",
+                    "label": "Do not increase server refresh period over",
                 	"suffix" : "minutes", 
-                    "tooltip": "Defines the <b>maximum</b> server update period. When it is reached the update period is not increased any more.",
+                    "tooltip": "Defines the <b>maximum</b> server refresh period. When it is reached the refresh period is not increased any more.",
                 	"default": "60",
                 	"min" : "0"
-                }
+                },                
+                "blinkUpdateButtonLimit" : {
+                    "label": "Do not blink refresh button for automatic refresh for periods less than",
+                    "suffix" : "seconds",
+                    "tooltip": "In automatic refresh mode the refresh button <b>will not blink</b> on automatic refresh when the total refresh period is shorter than the specified value.",
+                    "default": "5",
+                    "min"    : "1"
+                },
+                "showLastRefreshTimeInAutoMode" : {
+                    "label": "Show time of last refresh in automatic refresh mode",
+                    "tooltip": "If enabled shows the <b>time of the last refresh</b> in automatic refresh mode. If the automatic refresh is switched off the last refresh time is always visible.",
+                    "default": "false"
+                 }
+
             }, 
 
 			"files": {

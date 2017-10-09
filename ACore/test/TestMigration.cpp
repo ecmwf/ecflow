@@ -48,7 +48,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_1_9 )
    boost::gregorian::date theDate(2011,2,10);
    ptime time(theDate, hours(23) + minutes(59));
    calendar.init(time, Calendar::REAL);  // Calendar type is derived from the clock attribute & hence is not persisted
-   Ecf::set_debug_equality(true);
+
+   DebugEquality debug_equality; // only as affect in DEBUG build
 
 #ifdef UPDATE_TESTS
    doSave<TimeSlot>(file_name + "timeslot_default_constructor_v1.9");
@@ -65,7 +66,6 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_1_9 )
    do_restore<TimeSlot>(file_name + "timeslot_99_59_v1_9",TimeSlot(99,59));
    do_restore<TimeSeries>(file_name + "timeseries_10_10_v1_9",TimeSeries(TimeSlot(10,10)));
 #endif
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

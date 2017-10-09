@@ -160,7 +160,6 @@ void VParamFilterMenu::buildTitle(QString title,QMenu* parent)
 	titleLabel->setAlignment(Qt::AlignHCenter);
 	titleLabel->setAutoFillBackground(true);
 	QPalette pal=titleLabel->palette();
-	QColor winCol=menu_->palette().color(QPalette::Window);
 	pal.setColor(QPalette::Window,QColor(237,238,238));
 	titleLabel->setPalette(pal);
 

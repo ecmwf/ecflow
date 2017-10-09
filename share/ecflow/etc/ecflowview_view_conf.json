@@ -66,8 +66,7 @@
                   },
                  "branchLineColour" : {
                       "label" : "Branch line colour",
-                      "default": "rgb(137,137,137)",
-                      "disabledRule" : "layoutStyle=standard"
+                      "default": "rgb(137,137,137)"
                    },
 
                  "defaultAttributes" : {
@@ -202,11 +201,23 @@
             "label" : "Type",
             "tooltip" : "Node type"
         },
+        "statusChange" : {
+            "label" : "Status changed",
+            "tooltip" : "Time of the last status change (nodes only)"
+        },
         "attribute" : {
             "label" : "Attribute"
         }       
     },
     
+    "trigger_graph_columns": {
+        
+        "trigger" : {
+            "label" : "Trigger",
+            "tooltip" : "Trigger"
+        }
+    },
+
     "table_columns": {
     	
     	"path" : {

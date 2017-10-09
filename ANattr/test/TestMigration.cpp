@@ -121,14 +121,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    clock_attr.set_gain_in_seconds(3600);
    clock_attr.startStopWithServer(true);
 
-   std::vector<ecf::Child::CmdType> child_cmds;
-   child_cmds.push_back(ecf::Child::INIT);
-   child_cmds.push_back(ecf::Child::EVENT);
-   child_cmds.push_back(ecf::Child::METER);
-   child_cmds.push_back(ecf::Child::LABEL);
-   child_cmds.push_back(ecf::Child::WAIT);
-   child_cmds.push_back(ecf::Child::ABORT);
-   child_cmds.push_back(ecf::Child::COMPLETE);
+   std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 
    Label label("name","value");
    label.set_new_value("new_value");

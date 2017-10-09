@@ -27,10 +27,9 @@ BOOST_AUTO_TEST_CASE( test_copy_constructors )
    cout << "ANode:: ...test_copy_constructors\n";
    MyDefsFixture theDefsFixture;
 
-   Ecf::set_debug_equality(true);
+   DebugEquality debug_equality; // only as affect in DEBUG build
    Defs copy = Defs(theDefsFixture.defsfile_);
    BOOST_CHECK_MESSAGE( copy == theDefsFixture.defsfile_,"copy constructor failed");
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

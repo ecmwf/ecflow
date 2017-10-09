@@ -281,9 +281,8 @@ BOOST_AUTO_TEST_CASE( test_replace_preserves_begun_status )
    BOOST_REQUIRE_MESSAGE( serverDefs->replaceChild("/suite1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
    BOOST_REQUIRE_MESSAGE( serverDefs->findSuite("suite1"),"Can't find suite1");
    BOOST_REQUIRE_MESSAGE( serverDefs->findSuite("suite1")->begun(),"Expected replaced suite to preserve begun status");
-   Ecf::set_debug_equality(true);  // only has affect in DEBUG build
+   DebugEquality debug_equality; // only has affect in DEBUG build
    BOOST_CHECK_MESSAGE(comparisonDef == *serverDefs,"comparisonDef and servers defs should be the same");
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_CASE( test_replace_add_node )
@@ -440,7 +439,7 @@ BOOST_AUTO_TEST_CASE( test_replace_order_preserved_for_family )
    }
 
    std::string errorMsg;
-   Ecf::set_debug_equality(true);  // only has affect in DEBUG build
+   DebugEquality debug_equality; // only as affect in DEBUG build
    {
       ExpectStateChange expect_state_change;
       BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
@@ -456,7 +455,6 @@ BOOST_AUTO_TEST_CASE( test_replace_order_preserved_for_family )
       BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f3",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
       BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
    }
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_CASE( test_replace_order_preserved_for_task )
@@ -490,7 +488,7 @@ BOOST_AUTO_TEST_CASE( test_replace_order_preserved_for_task )
    }
 
    std::string errorMsg;
-   Ecf::set_debug_equality(true);  // only has affect in DEBUG build
+   DebugEquality debug_equality; // only as affect in DEBUG build
    {
       ExpectStateChange expect_state_change;
       BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1/t1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
@@ -506,7 +504,6 @@ BOOST_AUTO_TEST_CASE( test_replace_order_preserved_for_task )
       BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/f1/t3",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
       BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
    }
-   Ecf::set_debug_equality(false);
 }
 
 BOOST_AUTO_TEST_CASE( test_replace_child_errors )

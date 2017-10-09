@@ -16,11 +16,14 @@
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
-#include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
 #include "Str.hpp"
 #include "System.hpp"
 #include "Ecf.hpp"
+#include "Task.hpp"
+#include "Family.hpp"
+#include "Suite.hpp"
+#include "Defs.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -604,16 +607,25 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( lm.get() && lm->paths().empty(), "Expected no paths but found " << lm->paths().size());
    }
 
-   {   // test add inlimit
+   {   // test add in-limit
        TestStateChanged changed(s);
        TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"limit_name")));
        TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"limit_name1","11")));
        TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit:limit_name2")));
        TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit:limit_name3","10")));
-       BOOST_CHECK_MESSAGE( s->inlimits().size() == 4, "expected 4  but found " <<  s->inlimits().size());
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit:limitA","10")));
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit/a:limitA","10")));
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/to/limit/aa:limitA","10")));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 7, "expected 7  but found " <<  s->inlimits().size());
 
-       // test delete limit
+       // test delete in-limit
        TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"limit_name")));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 6, "expected 6 but found " <<  s->inlimits().size());
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/to/limit:limitA")));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 5, "expected 5 but found " <<  s->inlimits().size());
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/to/limit/a:limitA")));
+       BOOST_CHECK_MESSAGE( s->inlimits().size() == 4, "expected 4 but found " <<  s->inlimits().size());
+       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/to/limit/aa:limitA")));
        BOOST_CHECK_MESSAGE( s->inlimits().size() == 3, "expected 3 but found " <<  s->inlimits().size());
        TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT)));
        BOOST_CHECK_MESSAGE( s->inlimits().size() == 0, "expected 0  but found " <<  s->inlimits().size());
@@ -864,6 +876,7 @@ BOOST_AUTO_TEST_CASE( test_alter_sort_attributes )
    suite_ptr ss = sorted_defs.add_suite("suite"); add_sorted_attributes(ss.get());
    family_ptr sf1 = ss->add_family("f1");         add_sorted_attributes(sf1.get());
    task_ptr st1 = sf1->add_task("t1");            add_sorted_attributes(st1.get());
+   sorted_defs.sort_attributes(ecf::Attr::VARIABLE,false/*recursive*/); // just sort the server variables
 
    {
       TestDefsStateChanged chenged(&defs);
@@ -873,9 +886,8 @@ BOOST_AUTO_TEST_CASE( test_alter_sort_attributes )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","label","recursive")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","limit","recursive")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/","variable","recursive")));
-      Ecf::set_debug_equality(true);
+      DebugEquality debug_equality; // only as affect in DEBUG build
       BOOST_CHECK_MESSAGE(defs == sorted_defs,"Sort failed expected\n" << sorted_defs << "\nbut found\n" << defs);
-      Ecf::set_debug_equality(false);
     }
 }
 
@@ -900,9 +912,8 @@ BOOST_AUTO_TEST_CASE( test_alter_sort_attributes_for_task )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"label","recursive")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"limit","recursive")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(t1->absNodePath(),"variable","recursive")));
-      Ecf::set_debug_equality(true);
+      DebugEquality debug_equality; // only as affect in DEBUG build
       BOOST_CHECK_MESSAGE(defs == sorted_defs,"Sort failed expected\n" << sorted_defs << "\nbut found\n" << defs);
-      Ecf::set_debug_equality(false);
     }
 }
 
@@ -937,6 +948,11 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"")));           // no inlimit value
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/limit")));     // limit path, but no name
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/tolimit:limit","xx"))); // tokens must be convertible to an integer
+
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_INLIMIT,"/path/tolimit:limit","1")));
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/tolimit")));       // no limit name
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/tolimit:")));      // no limit name
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/tolimit:12 34"))); // invalid limit name
    }
 
    /// Destroy singleton's to avoid valgrind from complaining

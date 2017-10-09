@@ -1587,7 +1587,6 @@ int TextEditPrivate::findLastPageSize() const
 
     int start = documentSize-maxCharNum;
     if(start < 0) start=0;
-    int i = 0;
 #ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
     QTime tm;
     tm.start();

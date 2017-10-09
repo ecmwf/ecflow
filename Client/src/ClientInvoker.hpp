@@ -154,11 +154,12 @@ public:
 	   { return invoke(TaskApi::complete()); }
 
 	// Support for python child commands, and python jobs
-	void set_child_path(const std::string& path);
-	void set_child_password(const std::string& pass);
-	void set_child_pid(const std::string& pid);
-	void set_child_try_no(unsigned int try_no);
-	void set_child_timeout(unsigned int seconds ); // ECF_TIMEOUT default is 24 hours allow python jobs to override
+	void set_child_path(const std::string& path) { clientEnv_.set_child_path(path);}
+	void set_child_password(const std::string& pass) { clientEnv_.set_child_password(pass);}
+	void set_child_pid(const std::string& pid) { clientEnv_.set_child_pid(pid);}
+	void set_child_try_no(unsigned int try_no) { clientEnv_.set_child_try_no(try_no);}
+	void set_child_timeout(unsigned int seconds) { clientEnv_.set_child_cmd_timeout(seconds);} // ECF_TIMEOUT default is 24 hours allow python jobs to override
+
 	void child_init();
 	void child_abort(const std::string& reason  = "");
 	void child_event(const std::string& event_name_or_number);
@@ -171,8 +172,9 @@ public:
 	// The client api. Mirrors CtsApi on the whole
 	int getDefs() const;
  	int loadDefs(const std::string& filePath,
- 	               bool force = false,     /* true means overwrite suite of same name */
- 	               bool check_only = false /* true means don't send to server, just check only */
+ 	               bool force = false,      /* true means overwrite suite of same name */
+                  bool check_only = false, /* client side only, true means don't send to server, just check only */
+                  bool print = false       /* client side only, print the defs */
  	) const;
  	int load( const defs_ptr& defs, bool force  = false /*true means overwrite suite of same name*/) const
  	       { return load_in_memory_defs(defs,force); }
@@ -337,11 +339,6 @@ private:
 	bool testInterface_;                   // used in testing only
 	unsigned int connection_attempts_;     // No of attempts to establish connection with the server
 	unsigned int retry_connection_period_; // No of seconds to wait before trying to connect in case of failure.
-
-	std::string child_task_path_;                // support for python child commands
-	std::string child_task_password_;            // support for python child commands
-	std::string  child_task_pid_;                // support for python child commands
-	int  child_task_try_no_;                     // support for python child commands
 
 	mutable boost::posix_time::time_duration rtt_;// record latency for each cmd.
 	mutable boost::posix_time::ptime start_time_; // Used for time out and measuring latency

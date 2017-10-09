@@ -62,6 +62,7 @@ public:
     virtual std::string path()=0;
     virtual std::string serverAlias() {return "";}
     virtual std::string relativePath() {return "";}
+    virtual std::string nodePath()=0;
     std::string storedNodePath() const;
     const std::string& storedPath() const {return storedPath_;}
 
@@ -87,6 +88,7 @@ public:
     static VInfo_ptr createParent(VInfo_ptr);
     static VInfo_ptr createFromPath(ServerHandler*,const std::string&);
     static VInfo_ptr createFromPath(const std::string& path);
+    static VInfo_ptr createFromItem(VItem*);
 
 protected:
     VInfo(ServerHandler* server,VNode* node,VAttribute* attr=0);
@@ -112,6 +114,7 @@ public:
     void accept(VInfoVisitor*);   
     std::string name();
     std::string path();
+    std::string nodePath() {return "/";}
     static VInfo_ptr create(ServerHandler*);
 
 protected:
@@ -130,7 +133,8 @@ public:
     std::string path();  
 	std::string name();	
 	std::string serverAlias();
-	std::string relativePath();
+    std::string nodePath();
+    std::string relativePath();
     VItem* item() const;
 
     static VInfo_ptr create(VNode*);
@@ -152,6 +156,7 @@ public:
     void accept(VInfoVisitor*);
     std::string name();
     std::string path();
+    std::string nodePath();
     VItem* item() const;
 
     static VInfo_ptr create(VAttribute*);

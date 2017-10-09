@@ -44,7 +44,7 @@ echo "valgrind: variant=$mode compiler=$compiler"
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes --error-exitcode=1 --partial-loads-ok=yes ACore/bin/$compiler/$mode/u_acore
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes --error-exitcode=1 --partial-loads-ok=yes ANattr/bin/$compiler/$mode/u_anattr
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes --error-exitcode=1 --partial-loads-ok=yes ANode/bin/$compiler/$mode/u_anode
-valgrind --num-callers=24 --leak-check=full --show-reachable=yes --error-exitcode=1 --partial-loads-ok=yes AParser/bin/$compiler/$mode/u_aparser
+valgrind --num-callers=24 --leak-check=full --show-reachable=yes --error-exitcode=1 --partial-loads-ok=yes ANode/parser/bin/$compiler/$mode/u_aparser
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes --error-exitcode=1 --partial-loads-ok=yes Base/bin/$compiler/$mode/u_base
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes --error-exitcode=1 --partial-loads-ok=yes Client/bin/$compiler/$mode/s_client
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes --error-exitcode=1 --partial-loads-ok=yes Server/bin/$compiler/$mode/u_server

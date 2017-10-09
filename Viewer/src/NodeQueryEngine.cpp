@@ -29,12 +29,12 @@ NodeQueryEngine::NodeQueryEngine(QObject* parent) :
     QThread(parent),
     query_(new NodeQuery("tmp")),
     parser_(NULL),
-    stopIt_(false),
-    maxReached_(false),
     cnt_(0),
     scanCnt_(0),
     maxNum_(250000),
     chunkSize_(100),
+    stopIt_(false),
+    maxReached_(false),   
     rootNode_(0)
 {
     //We will need to pass various non-Qt types via signals and slots
@@ -222,7 +222,7 @@ void NodeQueryEngine::runRecursively(VNode *node)
                         hasType=true;
                         if(it.value()->execute(av[i]))
                         {
-                            broadcastFind(node,av[i]->data());
+                            broadcastFind(node,av[i]->data(true));
                             scanCnt_++;
                          }
                     }

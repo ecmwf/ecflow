@@ -148,13 +148,13 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 		return;
 	}
 
-    //Check if it is tryno 0
-    if(boost::algorithm::ends_with(fileName,".0"))
+    //Check if tryno is 0. ie. the file is the current jobout file and ECF_TRYNO = 0
+    if(isTryNoZero(fileName))
     {
         reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!)");
         reply_->addLog("MSG>Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
         owner_->infoReady(reply_);
-    	return;
+        return;
     }
 
     //----------------------------------
@@ -271,7 +271,7 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
     //If we are here we do not need to know the previously cached item
     latestCached_=NULL;
 
-    //We did not used the cache
+    //We did not use the cache
     if(n->logServer(host,port))
 	{
 		//host=host + "baaad";
@@ -429,9 +429,20 @@ std::string OutputFileProvider::joboutFileName() const
 	return std::string();
 }
 
+//Returns true if
+//   -the file is the current jobout
+//   -id contains the string ".0"
+//   -ECF_TRYNO = 0
+
 bool OutputFileProvider::isTryNoZero(const std::string& filename) const
 {
-    return boost::algorithm::ends_with(filename,".0");
+    if(filename.find(".0") != std::string::npos &&
+       joboutFileName() == filename &&
+       info_ && info_->isNode() && info_->node() && info_->node()->node())
+    {
+        return (info_->node()->findVariable("ECF_TRYNO",true) == "0");
+    }
+    return false;
 }
 
 void OutputFileProvider::setDir(VDir_ptr dir)

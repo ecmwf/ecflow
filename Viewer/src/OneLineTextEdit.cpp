@@ -34,7 +34,8 @@ OneLineTextEdit::OneLineTextEdit(QWidget* parent) :  QTextEdit(parent)
 
 	setFixedHeight(h);
 
-	Highlighter* ih=new Highlighter(document(),"query");
+    //The document becomes the owner of the highlighter
+    new Highlighter(document(),"query");
 }
 
 QSize OneLineTextEdit::sizeHint() const

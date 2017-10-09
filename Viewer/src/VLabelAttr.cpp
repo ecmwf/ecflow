@@ -60,8 +60,7 @@ void VLabelAttrType::encode(const Label& label,QStringList& data,bool firstLine)
     {
         std::size_t pos=val.find("\n");
         if(pos != std::string::npos)
-        {
-            if(pos > 0) pos--;
+        {            
             val=val.substr(0,pos);
         }
     }
@@ -131,8 +130,8 @@ void VLabelAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     if(vnode->node_)
     {
         const std::vector<Label>& v=vnode->node_->labels();
-        int n=v.size();
-        for(size_t i=0; i < n; i++)
+        int n=static_cast<int>(v.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VLabelAttr(vnode,v[i],i));
         }

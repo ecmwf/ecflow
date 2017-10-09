@@ -18,13 +18,16 @@
 #include "VTaskObserver.hpp"
 
 #include <string>
+#include <QString>
 
 class QWidget;
 class InfoPanel;
 class InfoProvider;
-class VSettings;
+class VComboSettings;
 
 //This is the (abstract) base class to represent one tab in the info panel.
+//It cannot be inheried from QObject beacuse we would end up with double inheritance since
+//all the derived calsses are inherited from QObject!!
 
 class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver
 {
@@ -33,7 +36,7 @@ friend class InfoPanel;
 public:
     InfoPanelItem() : owner_(0), active_(false), selected_(false), suspended_(false),
                       frozen_(false), detached_(false), unselectedFlags_(KeepContents),
-                      useAncestors_(false) {}
+                      useAncestors_(false),handleAnyChange_(false) {}
 	virtual ~InfoPanelItem();
 
     enum ChangeFlag {ActiveChanged=1,SelectedChanged=2,SuspendedChanged=4,FrozenChanged=8,DetachedChanged=16};
@@ -71,14 +74,18 @@ public:
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) {}
 
-    virtual void writeSettings(VSettings* vs) {}
-    virtual void readSettings(VSettings* vs) {}
+    virtual void writeSettings(VComboSettings* vs) {}
+    virtual void readSettings(VComboSettings* vs) {}
 
 protected:
 	void adjust(VInfo_ptr);
+    void linkSelected(const std::string& path);
+    void linkSelected(VInfo_ptr);
+    void relayInfoPanelCommand(VInfo_ptr info,QString cmd);
+    void relayDashboardCommand(VInfo_ptr info,QString cmd);
+
     virtual void clear();
     virtual void updateState(const ChangeFlags&)=0;
-    void linkSelected(const std::string& path);
 
 	//Notifications about the server changes
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
@@ -97,6 +104,7 @@ protected:
     bool detached_;
     UnselectedFlags unselectedFlags_;
     bool useAncestors_;
+    bool handleAnyChange_;
 };
 
 class InfoPanelItemFactory

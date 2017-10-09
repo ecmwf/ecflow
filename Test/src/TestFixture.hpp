@@ -23,8 +23,10 @@
 // i.e order of initialisation issues
 //============================================================================
 
-#include "ClientInvoker.hpp"
 #include <string>
+#include "ClientInvoker.hpp"
+#include "PrintStyle.hpp"
+
 class Defs;
 
 //
@@ -98,6 +100,7 @@ private:
 	static std::string port_;
    static std::string test_dir_;          // used when we have an external server, different platform
    static std::string project_test_dir_;  // "Test" or "view"
+   PrintStyle print_style_; // by default show state when writing defs to standard out. RAII
 };
 
 #endif

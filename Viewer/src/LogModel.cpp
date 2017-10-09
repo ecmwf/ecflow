@@ -168,7 +168,6 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 	if(row < 0 || row >= data_.size())
 		return QVariant();
 
-
 	if(role == Qt::DisplayRole)
 	{
 		switch(index.column())
@@ -243,6 +242,35 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 
 		return f;
 	}
+
+    else if(role == Qt::ToolTipRole)
+    {
+        QString txt="<b>Type: </b>";
+        switch(data_.at(row).type_)
+        {
+            case LogModelLine::MessageType:
+                    txt +="MSG ";
+                    break;
+            case LogModelLine::LogType:
+                    txt +="LOG ";
+                    break;
+            case LogModelLine::ErrorType:
+                    txt +="ERR ";
+                    break;
+            case LogModelLine::WarningType:
+                    txt +="WAR ";
+                    break;
+            case LogModelLine::DebugType:
+                    txt +="DBG ";
+            default:
+                    break;
+        }
+
+        txt+="<br><b>Date: </b>" + data_.at(row).date_;
+        txt+="<br><b>Entry: </b>" + data_.at(row).entry_;
+        return txt;
+    }
+
 	/*else if(role == Qt::SizeHintRole)
 	{
 		QFont f;
@@ -308,6 +336,18 @@ QModelIndex LogModel::parent(const QModelIndex &child) const
 QModelIndex LogModel::lastIndex() const
 {
 	return index(rowCount()-1,0);
+}
+
+QString LogModel::entryText(const QModelIndex &idx) const
+{
+    return data(index(idx.row(),2)).toString();
+}
+
+QString LogModel::fullText(const QModelIndex &idx) const
+{
+    return data(index(idx.row(),0)).toString() + " " +
+           data(index(idx.row(),1)).toString() + " " +
+           data(index(idx.row(),2)).toString();
 }
 
 //========================================================

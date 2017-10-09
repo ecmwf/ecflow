@@ -41,7 +41,7 @@ EditorInfoLabel::EditorInfoLabel(QWidget* parent) : QLabel(parent)
 
 void EditorInfoLabel::setInfo(QString parent,QString type)
 {
-    setText(formatKeyLabel("Node: ") + formatNodePath(parent) + "<br>" +
+    setText(formatKeyLabel("Node path: ") + formatNodePath(parent) + "<br>" +
             formatKeyLabel("Attibute type: ") + type);
 }
 

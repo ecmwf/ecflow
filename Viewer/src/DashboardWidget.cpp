@@ -21,8 +21,8 @@ DashboardWidget::DashboardWidget(const std::string& type, QWidget* parent) :
     QWidget(parent),
     type_(type),
     acceptSetCurrent_(false),
-    bcWidget_(0),
     ignoreMaximisedChange_(false),
+    bcWidget_(0),
     inDialog_(false)
 {
     //detach
@@ -121,12 +121,12 @@ void DashboardWidget::setInDialog(bool b)
     }
 }
 
-void DashboardWidget::writeSettings(VSettings* vs)
+void DashboardWidget::writeSettings(VComboSettings* vs)
 {
     vs->putAsBool("detached",detached());
 }
 
-void DashboardWidget::readSettings(VSettings* vs)
+void DashboardWidget::readSettings(VComboSettings* vs)
 {
     setDetached(vs->getAsBool("detached",detached()));
 }

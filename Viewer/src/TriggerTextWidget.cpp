@@ -12,6 +12,9 @@
 #include <QFile>
 #include <QTextStream>
 
+#include "TriggerCollector.hpp"
+#include "VItemPathParser.hpp"
+
 TriggerTextWidget::TriggerTextWidget(QWidget* parent) : QTextBrowser(parent)
 {
     setOpenExternalLinks(false);
@@ -32,5 +35,44 @@ TriggerTextWidget::TriggerTextWidget(QWidget* parent) : QTextBrowser(parent)
     document()->setDefaultStyleSheet(cssDoc);
 }
 
+void TriggerTextWidget::reload(TriggerTableItem* item)
+{
+    QString s="<table width=\'100%\'>";
+    s+=makeHtml(item,"Triggers directly triggering the selected node","Triggers");
+    s+="</table>";
+    setHtml(s);
+}
+
+QString TriggerTextWidget::makeHtml(TriggerTableItem *ti,QString directTitle,QString modeText) const
+{
+    QString s;
+    const std::vector<TriggerDependencyItem>& items=ti->dependencies();
+
+    for(unsigned int i=0; i < items.size(); i++)
+    {
+        VItem *t=items[i].dep();
+        TriggerCollector::Mode mode=items[i].mode();
+
+        if(!t)
+            continue;
+
+        s+="<tr><td>";
+        if(mode == TriggerCollector::Parent)
+           s+="parent";
+        else
+           s+="child";
+
+        QString type=QString::fromStdString(t->typeName());
+        QString path=QString::fromStdString(t->fullPath());
+        QString anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
+
+        s+="  " + type;
+        //s+=" <a class=\'chp\' href=\'" + anchor + "\'>" + path +"</a>";
+        s+=" <a href=\'" + anchor + "\'>" + path +"</a>";
+        s+="</td></tr>";
+    }
+
+    return s;
+}
 
 

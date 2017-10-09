@@ -12,7 +12,7 @@ project ecflowview ;
 
 use-project theCore      : ../ACore ;
 use-project theNodeAttr  : ../ANattr ;
-use-project theNode      : ../ANode ;
+use-project theNode      : ../ANode ;  
 use-project theBase      : ../Base ;
 use-project theClient    : ../Client ;
 use-project theTest      : ../Test ;
@@ -40,7 +40,6 @@ exe ecflowview
      /theCore//core
      /theNodeAttr//nodeattr
      /theNode//node
-     /theParser//libparser
      /theBase//base
      /theClient//libclient
      /site-config//boost_system
@@ -78,7 +77,6 @@ obj host : src/host.cc
      /theCore//core
      /theNodeAttr//nodeattr
      /theNode//node
-     /theParser//libparser
      /theBase//base
      /theClient//libclient
   :  <variant>release:<optimization>off 
@@ -103,7 +101,6 @@ exe test-view : [ glob test/*.cpp  ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
-           /theParser//libparser
            /theBase//base
            /theClient//libclient
            /theTest//libharness
@@ -119,4 +116,3 @@ exe test-view : [ glob test/*.cpp  ]
            [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
 #  	   <variant>release:<cxxflags>-O1
         ;
-# bjam -j8 release c++-template-depth=512

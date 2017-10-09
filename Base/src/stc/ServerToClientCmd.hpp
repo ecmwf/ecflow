@@ -35,6 +35,8 @@ class ServerToClientCmd {
 public:
 	virtual ~ServerToClientCmd();
 
+	virtual void cleanup() {}    /// After the command has run this function can be used to reclaim memory
+
 	virtual std::ostream& print(std::ostream& os) const = 0;
 	virtual bool equals(ServerToClientCmd*) const { return true;}
 

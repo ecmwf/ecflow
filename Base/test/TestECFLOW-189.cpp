@@ -16,12 +16,12 @@
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
-#include "MyDefsFixture.hpp"
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
 #include "System.hpp"
 #include "PrintStyle.hpp"
 #include "Defs.hpp"
+#include "Family.hpp"
 
 using namespace std;
 using namespace ecf;

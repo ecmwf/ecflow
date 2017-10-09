@@ -63,7 +63,7 @@ VAttributeType* VAttributeType::find(const std::string& name)
 
 VAttributeType* VAttributeType::find(int id)
 {
-    assert(id >=0  && id < types_.size());
+    assert(id >=0  && id < static_cast<int>(types_.size()));
     return types_[id];
 }
 

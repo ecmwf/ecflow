@@ -54,6 +54,7 @@ void AstAnalyserVisitor::visitNode(AstNode* astNode)
 }
 
 void AstAnalyserVisitor::visitVariable(AstVariable* astVar){}
+void AstAnalyserVisitor::visitParentVariable(AstParentVariable* astVar){}
 
 void AstAnalyserVisitor::visitFlag(AstFlag* astVar)
 {

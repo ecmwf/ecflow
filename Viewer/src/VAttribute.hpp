@@ -31,6 +31,7 @@ public:
     virtual VAttributeType* type() const=0;
     virtual const std::string& subType() const;
     virtual int lineNum() const {return 1;}
+    ServerHandler* server() const;
     VServer* root() const;
     VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
     QString toolTip() const;

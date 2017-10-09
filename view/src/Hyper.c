@@ -60,7 +60,7 @@ static void    xselect();
 static void    cursor();
 static void    activate();
 static void    xincrement();
-static void    add_to_text ( HyperWidget,char*,int,int);
+static void    add_to_text (HyperWidget,char*,int,int);
 static void    calc_new_size (HyperWidget);
 static void    zoom_open (HyperWidget,text_segment*);
 static void    show_selection(HyperWidget);
@@ -200,14 +200,6 @@ HyperClassRec  hyperClassRec = {
     }
 };
 
-
-
-
-
-
-
-
-
 WidgetClass hyperWidgetClass = (WidgetClass) &hyperClassRec;
 
 /*---------------------------------------------------------------*/
@@ -235,8 +227,6 @@ HyperWidget w;
     values.font       = w->hyper.normal_font->fid;
     w->hyper.normal_gc = XtGetGC((Widget)w, valueMask, &values);
 
-
-
     valueMask = GCBackground|GCForeground|GCFunction|GCGraphicsExposures;
 
     values.background         = 0;
@@ -245,8 +235,6 @@ HyperWidget w;
     values.function           = GXxor;
 
     w->hyper.xor_gc = XtGetGC((Widget)w, valueMask, &values);
-
-
 }
 
 /*--------------------------------------------------------------*/
@@ -1006,10 +994,12 @@ XtPointer data;
         {
 	  word[i]=0;
 	  /* if(i) add_to_text(w,word,mode); */
-	  if(i) {									/* add offset */
+	  if(i) {									
+	    /* add offset */
 	    add_to_text(w,word,mode,offset);	/* add offset */
 	    offset += i;                       /* increment offset */
-	  }										/* add offset */
+	  }										
+	  /* add offset */
 	  mode = HIGHLIGHT;
 	  i = 0;
         }
@@ -1147,11 +1137,9 @@ int end_highlight;
 #else
 
 void HyperSetTags(Widget widget,
-				  int start_highlight,
-				  int end_highlight)
-
+		  int start_highlight,
+		  int end_highlight)
 #endif
-
 {
     ((HyperWidget)widget)->hyper.start_of_highlight = start_highlight;
     ((HyperWidget)widget)->hyper.end_of_highlight = end_highlight;

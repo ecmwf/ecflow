@@ -101,6 +101,25 @@ void time_load_and_downloads(
             cout << " Begin:               " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
          }
          {
+            cout << " Download(news_local):"; cout.flush();
+            ClientInvoker client_news(host,port);
+            DurationTimer duration_timer;
+            for(int i = 0; i < count; i++) {
+               if (i == 0 || i != 1) {
+                  client_news.news_local();
+                  switch (client_news.server_reply().get_news()) {
+                     case ServerReply::DO_FULL_SYNC: cout << "FULL ";break;
+                     case ServerReply::NEWS: cout << "NEWS ";break;
+                     case ServerReply::NO_NEWS: cout << "NO_NEWS ";break;
+                     case ServerReply::NO_DEFS: cout << "NO_DEFS ";break;
+                  }
+               }
+               else if (i == 1) client_news.sync_local();
+            }
+            cout << ": 1:news_local(),2:sync_local(),n:news_local with the new Client: "
+                 <<  duration_timer.elapsed().total_milliseconds() << "(ms)" << endl;
+         }
+         {
             cout << " Download(Sync):      "; cout.flush();
             for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
@@ -118,69 +137,80 @@ void time_load_and_downloads(
                ClientInvoker client(host,port);
                DurationTimer duration_timer;
                client.sync_local();
-               int seconds = duration_timer.elapsed().total_milliseconds();
-               cout << seconds << " ";
-               total += seconds;
+               int mil_secs = duration_timer.elapsed().total_milliseconds();
+               cout << mil_secs  << " ";
+               total += mil_secs;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : sync_local() with *different* clients. Uses Cache" << endl;
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : sync_local() with *different* clients.uses cache!" << endl;
          }
          {
-            // This should more expensive on second call, due to destruction of
-            // defs(on theClient) from previous calls
             cout << " Download(FULL):      "; cout.flush();
             double total = 0;
             for(int i = 0; i < count; i++) {
+               ClientInvoker client(host,port);
                DurationTimer duration_timer;
                theClient.getDefs();
                int seconds = duration_timer.elapsed().total_milliseconds();
                cout << seconds << " ";
                total += seconds;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from same client" << endl;
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from different client" << endl;
          }
          {
             std::vector<task_ptr> all_tasks;
             theClient.defs()->get_all_tasks(all_tasks);
             std::vector<std::string> paths;paths.reserve(all_tasks.size());
-            for(size_t i = 0; i < all_tasks.size(); i++) {
-               paths.push_back(all_tasks[i]->absNodePath());
-               if (i == 6000) break;  //  > 9000 really slows down, could be logging ??
-            }
+            for(size_t i = 0; i < all_tasks.size(); i++)  paths.push_back(all_tasks[i]->absNodePath());
+
             {
                cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
                DurationTimer duration_timer;
                theClient.suspend(paths);
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               sync_and_news_local(theClient);
             }
-            sync_and_news_local(theClient);
             {
                cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.resume(paths);
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               sync_and_news_local(theClient);
             }
-            sync_and_news_local(theClient);
             {
+               cout << " check  " << paths.size() << " tasks  : "; cout.flush();
+               DurationTimer duration_timer;
+               theClient.check(paths);
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               sync_and_news_local(theClient);
+            }
+            {
+               cout << " kill   " << paths.size() << " tasks  : "; cout.flush();
+               DurationTimer duration_timer;
+               theClient.kill(paths);
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               sync_and_news_local(theClient);
+            }
+            {
+               // force complete on all tasks, on some suites(3199.def), can cause infinite recursion, i.e cause repeats to loop
+               // Hence we will call force aborted instead
                cout << " force  " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
-               theClient.force(paths,"complete");
+               theClient.force(paths,"aborted");
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               sync_and_news_local(theClient);
             }
-            sync_and_news_local(theClient);
          }
          {
-            // This should more expensive on second call, due to destruction of
-            // defs(on theClient) from previous calls
             cout << " Check pt:            "; cout.flush();
             double total = 0;
             for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
                theClient.checkPtDefs();
                int seconds = duration_timer.elapsed().total_milliseconds();
-               cout << seconds << " "; cout.flush();
+               cout << seconds << " ";
                total += seconds;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "ms" << endl;
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)" << endl;
          }
          {
             DurationTimer duration_timer;

@@ -2,7 +2,6 @@
 #define ecflow_version_config_h
  
 #define ECFLOW_VERSION   "@ECFLOW_VERSION_STR@"
-
 #define ECFLOW_RELEASE   "@ECFLOW_RELEASE@"
 #define ECFLOW_MAJOR     "@ECFLOW_MAJOR@"
 #define ECFLOW_MINOR     "@ECFLOW_MINOR@"

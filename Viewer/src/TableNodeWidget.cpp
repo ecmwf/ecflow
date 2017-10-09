@@ -169,7 +169,7 @@ void TableNodeWidget::rerender()
 }
 
 
-void TableNodeWidget::writeSettings(VSettings* vs)
+void TableNodeWidget::writeSettings(VComboSettings* vs)
 {
 	vs->put("type",type_);
 	vs->put("dockId",id_);
@@ -184,7 +184,7 @@ void TableNodeWidget::writeSettings(VSettings* vs)
     DashboardWidget::writeSettings(vs);
 }
 
-void TableNodeWidget::readSettings(VSettings* vs)
+void TableNodeWidget::readSettings(VComboSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
 	if(type != type_)

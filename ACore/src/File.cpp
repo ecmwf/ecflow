@@ -151,12 +151,12 @@ bool File::splitFileIntoLines(const std::string& filename, std::vector<std::stri
 	// std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
 
 	// The current implementation is 2.5 times faster then method 1, and ~4 times faster than method 2
- 	return true;
+	return true;
 }
 
-
-std::string File::get_last_n_lines(const std::string& filename,int last_n_lines, std::string& error_msg)
+std::string File::get_last_n_lines(const std::string& filename,int last_n_lines, size_t& file_size,std::string& error_msg)
 {
+   file_size = 0;
    if ( last_n_lines <= 0  ) return string();
 
    std::ifstream source( filename.c_str(), std::ios_base::in );
@@ -165,36 +165,39 @@ std::string File::get_last_n_lines(const std::string& filename,int last_n_lines,
       error_msg += " (";
       error_msg += strerror(errno);
       error_msg += ")";
-     return string();
+      return string();
    }
 
    size_t const granularity = 100 * last_n_lines;
    source.seekg( 0, std::ios_base::end );
-   size_t size = static_cast<size_t>( source.tellg() );
+   file_size = static_cast<size_t>( source.tellg() );
    std::vector<char> buffer;
    int newlineCount = 0;
    while ( source
-           && buffer.size() != size
-           && newlineCount < last_n_lines ) {
-       buffer.resize( std::min( buffer.size() + granularity, size ) );
-       source.seekg( -static_cast<std::streamoff>( buffer.size() ),
-                     std::ios_base::end );
-#if defined(HPUX) || defined(_AIX)
-       source.read( &(buffer.front()), buffer.size() );
-#else
-       source.read( buffer.data(), buffer.size() );
-#endif
-       newlineCount = std::count( buffer.begin(), buffer.end(), '\n');
+            && buffer.size() != file_size
+            && newlineCount < last_n_lines )
+   {
+      buffer.resize( std::min( buffer.size() + granularity, file_size ) );
+      source.seekg( -static_cast<std::streamoff>( buffer.size() ), std::ios_base::end );
+      source.read( &(buffer.front()), buffer.size() );
+      newlineCount = std::count( buffer.begin(), buffer.end(), '\n');
    }
 
    std::vector<char>::iterator start = buffer.begin();
    while ( newlineCount > last_n_lines ) {
-       start = std::find( start, buffer.end(), '\n' ) + 1;
-       -- newlineCount;
+      start = std::find( start, buffer.end(), '\n' ) + 1;
+      -- newlineCount;
    }
 
    //std::vector<char>::iterator end = remove( start, buffer.end(), '\r' ); // for windows
    return std::string( start, buffer.end() );
+}
+
+
+std::string File::get_last_n_lines(const std::string& filename,int last_n_lines, std::string& error_msg)
+{
+   size_t file_size = 0;
+   return File::get_last_n_lines(filename,last_n_lines,file_size,error_msg);
 }
 
 
@@ -937,6 +940,10 @@ std::string File::root_source_dir()
 
 std::string File::root_build_dir()
 {
+#ifdef CMAKE
+   return CMAKE_ECFLOW_BUILD_DIR;
+#endif
+
    fs::path current_path = fs::current_path();
    std::string the_current_path = current_path.string();
 
@@ -947,7 +954,6 @@ std::string File::root_build_dir()
    // cmake
    std::string cmake_cache = the_current_path + "/CMakeCache.txt";
    if (fs::exists(cmake_cache))  return the_current_path;
-
 
    // bjam or cmake
    std::string stem = current_path.stem().string();
@@ -963,7 +969,7 @@ std::string File::root_build_dir()
 
       // cmake
       std::string cmake_cache = the_current_path + "/CMakeCache.txt";
-      if (fs::exists(cmake_cache))  return the_current_path;
+      if (fs::exists(cmake_cache)) return the_current_path;
 
       stem = current_path.stem().string();
       count++;

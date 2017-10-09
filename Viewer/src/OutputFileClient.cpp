@@ -19,8 +19,8 @@ OutputFileClient::OutputFileClient(const std::string& host,const std::string& po
 	total_(0),
     expected_(0),
 	lastProgress_(0),
-	progressChunk_(1024*1024),
-	progressUnits_("MB")
+    progressUnits_("MB"),
+    progressChunk_(1024*1024)
 {
 }
 
@@ -176,7 +176,7 @@ void OutputFileClient::estimateExpectedSize()
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
     UiLog().dbg() << "OutputFileClient::estimateExpectedSize -->";
 #endif
-    for(unsigned int i=0; i < dir_->count(); i++)
+    for(int i=0; i < dir_->count(); i++)
     {
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
         UiLog().dbg() << "file: " << dir_->fullName(i);

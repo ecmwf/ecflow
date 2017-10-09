@@ -58,8 +58,8 @@ public:
     void get(VNode* node ,TriggerCollector* tc)
     {
         VServer* s=node->root();
-        int num=data_.size();
-        for(size_t i=0; i < num; i++)
+        std::size_t num=data_.size();
+        for(std::size_t i=0; i < num; i++)
         {
             VItem* triggered=s->nodeAt(data_[i]);
             tc->add(triggered,0,TriggerCollector::Normal);
@@ -218,9 +218,9 @@ void VNode::scanAttr()
 {  
     std::vector<VAttribute*> v;
     VAttributeType::scan(this,v);
-    int n=v.size();
+    std::size_t n=v.size();
     attr_.reserve(n);
-    for(size_t i=0; i < n; i++)
+    for(std::size_t i=0; i < n; i++)
         attr_.push_back(v[i]);
 }
 
@@ -256,11 +256,11 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
     if(filter)
     {
         int n=0;
-        int cnt=attr_.size();
+        int cnt=static_cast<int>(attr_.size());
         if(row >= cnt)
             return 0;
 
-        for(size_t i=0; i < cnt; i++)
+        for(int i=0; i < cnt; i++)
         {
             if(filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i] )
             {
@@ -272,7 +272,7 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
             }
         }
     }
-    else if(row < attr_.size())
+    else if(row < static_cast<int>(attr_.size()))
     {
         return attr_[row];
     }
@@ -284,14 +284,13 @@ VAttribute* VNode::attributeForType(int row,VAttributeType *t) const
 {
     assert(row>=0);
 
-    int n=0;
-    int cnt=attr_.size();
+    int cnt=static_cast<int>(attr_.size());
     if(row >= cnt)
         return 0;
 
     bool hasIt=false;
     int rowCnt=0;
-    for(size_t i=0; i < cnt; i++)
+    for(int i=0; i < cnt; i++)
     {
         if(attr_[i]->type() == t)
         {
@@ -316,8 +315,8 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
     if(filter)
     {
         int n=0;
-        int cnt=attr_.size();
-        for(size_t i=0; i < cnt; i++)
+        int cnt=static_cast<int>(attr_.size());
+        for(int i=0; i < cnt; i++)
         {
             if(filter->isSet(attr_[i]->type())  || filter->forceShowAttr() == attr_[i]  )
             {
@@ -329,10 +328,9 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
         }
     }
     else
-    {
-        int n=0;
-        int cnt=attr_.size();
-        for(size_t i=0; i < cnt; i++)
+    {        
+        int cnt=static_cast<int>(attr_.size());
+        for(int i=0; i < cnt; i++)
         {
             if(a == attr_[i])
                 return i;
@@ -353,9 +351,9 @@ VAttribute* VNode::findAttribute(VAttributeType *t,const std::string& name)
 {
     Q_ASSERT(t);
 
-    int cnt=attr_.size();
+    int cnt=static_cast<int>(attr_.size());
     bool hasType=false;
-    for(size_t i=0; i < cnt; i++)
+    for(int i=0; i < cnt; i++)
     {
         if(attr_[i]->type() == t)
         {
@@ -372,8 +370,8 @@ VAttribute* VNode::findAttribute(VAttributeType *t,const std::string& name)
 
 VAttribute* VNode::findAttribute(QStringList aData)
 {
-    int cnt=attr_.size();
-    for(size_t i=0; i < cnt; i++)
+    std::size_t cnt=attr_.size();
+    for(std::size_t i=0; i < cnt; i++)
     {
         if(attr_[i]->sameAs(aData))
             return attr_[i];
@@ -383,9 +381,9 @@ VAttribute* VNode::findAttribute(QStringList aData)
 
 void VNode::findAttributes(VAttributeType *t,std::vector<VAttribute*>& v)
 {
-    int cnt=attr_.size();
+    std::size_t cnt=attr_.size();
     bool hasType=false;
-    for(size_t i=0; i < cnt; i++)
+    for(std::size_t i=0; i < cnt; i++)
     {
         if(attr_[i]->type() == t)
         {
@@ -413,7 +411,7 @@ void VNode::removeChild(VNode* vn)
 
 VNode* VNode::childAt(int index) const
 {
-    assert(index>=0 && index < children_.size());
+    assert(index>=0 && index < static_cast<int>(children_.size()));
     return children_[index];
 }
 
@@ -775,10 +773,9 @@ VNode* VNode::ancestorAt(int idx,SortMode sortMode)
 		return this;
 
 	std::vector<VNode*> nodes=ancestors(sortMode);
-
-    if(nodes.size() > idx)
+    if(static_cast<int>(nodes.size()) > idx)
 	{
-		return nodes.at(idx);
+        return nodes[idx];
 	}
 
 	return NULL;
@@ -958,8 +955,8 @@ void VNode::triggers(TriggerCollector* tlc)
         //Limiters
         std::vector<VAttribute*> limiterVec;
         findAttributes(VAttributeType::find("limiter"),limiterVec);
-        int n=limiterVec.size();
-        for(size_t i=0; i < n; i++)
+        std::size_t n=limiterVec.size();
+        for(std::size_t i=0; i < n; i++)
         {
             VAttribute *a=limiterVec[i];
             assert(a);
@@ -969,7 +966,7 @@ void VNode::triggers(TriggerCollector* tlc)
                 if(VAttribute* n = findLimit(val, a->strName()))
                 {
 #ifdef _UI_VNODE_DEBUG
-                    UiLog().dbg() << "trigger limit: " << n->name();
+                    //UiLog().dbg() << "trigger limit: " << n->name();
 #endif                   
                     tlc->add(n,nullItem, TriggerCollector::Normal);
                 }
@@ -980,7 +977,7 @@ void VNode::triggers(TriggerCollector* tlc)
         std::vector<VAttribute*> dateVec;
         findAttributes(VAttributeType::find("date"),dateVec);
         n=dateVec.size();
-        for(size_t i=0; i < n; i++)
+        for(std::size_t i=0; i < n; i++)
         {
             tlc->add(dateVec[i],nullItem,TriggerCollector::Normal);
         }
@@ -989,7 +986,7 @@ void VNode::triggers(TriggerCollector* tlc)
         std::vector<VAttribute*> timeVec;
         findAttributes(VAttributeType::find("time"),timeVec);
         n=timeVec.size();
-        for(size_t i=0; i < n; i++)
+        for(std::size_t i=0; i < n; i++)
         {
             tlc->add(timeVec[i],nullItem,TriggerCollector::Normal);
         }
@@ -1022,6 +1019,13 @@ void VNode::triggersInChildren(VNode *n,VNode* p,TriggerCollector* tlc)
         p->children_[i]->triggers(&tcc);
         triggersInChildren(n,p->children_[i],tlc);
   }
+}
+
+void VNode::clearTriggerData()
+{
+    if(data_)
+        delete data_;
+    data_=0;
 }
 
 //These are called during the scan for triggered nodes
@@ -1110,8 +1114,8 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
     //Find the matching limit in the node
     std::vector<VAttribute*> limit;
     n->findAttributes(VAttributeType::find("limit"),limit);
-    int limitNum=limit.size();
-    for(size_t i=0; i < limitNum; i++)
+    std::size_t limitNum=limit.size();
+    for(std::size_t i=0; i < limitNum; i++)
     {       
        if(limit[i]->strName() == name)
        {
@@ -1120,16 +1124,19 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
     }
 
     //Find the matching limit in the ancestors
+    if (path.empty()) return nullItem;
     VNode* p=n->parent();
     Q_ASSERT(p);
     int chNum= p->numOfChildren();
     for(int i=0; i < chNum; i++)
     {
         VNode* ch=p->childAt(i);
-        if (ch->strName() == path.substr(0, ch->name().size()))
+        if(ch !=n && ch->strName() == path.substr(0, ch->name().size()))
         {
             std::string::size_type next = path.find('/');
-            return ch->findLimit(path.substr(next+1, path.size()), name);
+            if ( next != std::string::npos) {
+               return ch->findLimit(path.substr(next+1, path.size()), name);
+            }
         }
     }
 
@@ -1193,9 +1200,9 @@ int VServer::totalNumOfTopLevel(int idx) const
 {
 	assert(totalNumInChild_.size() == children_.size());
 
-	if(idx >=0 && idx < totalNumInChild_.size())
+    if(idx >=0 && idx < static_cast<int>(totalNumInChild_.size()))
 	{
-		return totalNumInChild_.at(idx);
+        return totalNumInChild_[idx];
 	}
 
 	return -1;
@@ -1263,7 +1270,7 @@ void VServer::clear()
 //Delete a particular node
 void VServer::deleteNode(VNode* node,bool hasNotifications)
 {
-	for(unsigned int i=0; i < node->numOfChildren(); i++)
+    for(int i=0; i < node->numOfChildren(); i++)
 	{
 		deleteNode(node->childAt(i),hasNotifications);
 	}
@@ -1544,7 +1551,7 @@ void VServer::scan(VNode *node,bool hasNotifications)
 
 VNode* VServer::nodeAt(int idx) const
 {
-	assert(idx>=0 && idx < nodes_.size());
+    assert(idx>=0 && idx < static_cast<int>(nodes_.size()));
 	return nodes_.at(idx);
 }
 
@@ -1554,7 +1561,14 @@ VNode* VServer::nodeAt(int idx) const
 
 void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange& change)
 {
-	//NOTE: when this function is called the real node (Node) has already been updated. However the
+#if 0
+    //If the number of nodes changed we need to rescan the whole server-tree
+    if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end())
+    {
+        change.rescan_=true;
+    }
+#endif
+    //NOTE: when this function is called the real node (Node) has already been updated. However the
 	//views do not know about this change. So at this point (this is the begin step of the update)
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
@@ -1580,54 +1594,28 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 			node->check(server_->conf(),stateCh);
 		}
 	}
-#if 0
-	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-#endif
-    bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
-    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-    if(attrNumCh)
+    //-------------------------------------------------------------------------
+    // The trigger relations might be changed. We need to clear the mapped
+    // trigger relations globally if:
+    //    -a trigger expression changed (the aspect is EXPR_TRIGGER)
+    //    -a trigger expression was added or removed (the aspect is ADD_REMOVE_ATTR)
+    //--------------------------------------------------------------------------
+
+    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
     {
-       node->rescanAttr();
+        if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
+        {
+            //we need to rescan the attributes belong to the node
+            node->rescanAttr();
+            clearNodeTriggerData();
+            return;
+        }
+        else if (*it == ecf::Aspect::EXPR_TRIGGER)
+        {
+            clearNodeTriggerData();
+        }
     }
-
-	//----------------------------------------------------------------------
-	// The number of attributes changed but the number of nodes did not
-	//----------------------------------------------------------------------
-
-#if 0
-	if(attrNumCh && !nodeNumCh)
-	{
-        //The attributes were never used. None of the views have ever
-		//wanted to display/access these attributes so far, so we can
-		//just ignore this update!!
-		if(!node->isAttrNumInitialised())
-		{
-			change.ignore_=true;
-		}
-		//Otherwise we just register the number of attributes before and after the update
-		else
-		{
-			node->beginUpdateAttrNum();
-
-			//This it the current number of attributes stored in the real Node. This call will not change the
-			//the number of attributes (attrNum_ stored in the VNode!!!!)
-			change.attrNum_=node->currentAttrNum();
-
-			//this is the number of attributes before the update.
-			change.cachedAttrNum_=node->cachedAttrNum();
-		}
-
-		return;
-	}
-#endif
-	//---------------------------------------------------------------------------------
-	// The number of nodes changed.
-	//---------------------------------------------------------------------------------
-    if(nodeNumCh)
-	{
-		change.rescan_=true;
-	}
 
 	//In any other cases it is just a simple update (value or status changed)
 }
@@ -1639,20 +1627,6 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 
 void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
 {
-#if 0
-    bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
-
-	//--------------------------------------------------------------
-	// The number of attributes changed but the number of nodes did not
-	//-------------------------------------------------------------
-
-	if(attrNumCh && ! nodeNumCh)
-	{
-		//This call updates the number of attributes stored in the VNode
-		node->endUpdateAttrNum();
-	}
-#endif
 }
 
 void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect)
@@ -1788,6 +1762,7 @@ QString VServer::toolTip()
 	txt+=" <b>Port</b>: " + QString::fromStdString(server_->port()) + "<br>";
 
 	ConnectState* st=server_->connectState();
+    QColor colErr(255,95,95);
 
 	if(server_->activity() == ServerHandler::LoadActivity)
 	{
@@ -1803,8 +1778,7 @@ QString VServer::toolTip()
 			txt+="<b>Total number of nodes</b>: " +  QString::number(totalNum_);
 		}
 		else if(st->state() == ConnectState::Lost)
-		{
-			QColor colErr(255,0,0);
+		{			
 			txt+="<b><font color=" + colErr.name() +">Failed to connect to server!</b><br>";
 			txt+="<b>Last connection</b>: " + VFileInfo::formatDateAgo(st->lastConnectTime()) + "<br>";
 			txt+="<b>Last failed attempt</b>: " + VFileInfo::formatDateAgo(st->lastLostTime()) + "<br>";
@@ -1812,11 +1786,19 @@ QString VServer::toolTip()
 				txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->shortErrorMessage());
 		}
 		else if(st->state() == ConnectState::Disconnected)
-		{
-			QColor colErr(255,0,0);
+		{			
 			txt+="<b><font color=" + colErr.name() +">Server is disconnected!</b><br>";
 			txt+="<b>Disconnected</b>: " + VFileInfo::formatDateAgo(st->lastDisconnectTime()) + "<br>";
 		}
 	}
 	return txt;
 }
+
+void VServer::clearNodeTriggerData()
+{
+    triggeredScanned_=false;
+    std::size_t num=nodes_.size();
+    for(std::size_t i=0; i < num; i++)
+        nodes_[i]->clearTriggerData();
+}
+

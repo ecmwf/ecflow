@@ -45,5 +45,5 @@ if __name__ == "__main__":
     f2.add_task("t").add_inlimit("sg1","/suiteName");          check_then_auto_add_extern(defs)
     f2.add_task("t1").add_inlimit("hpcd","/obs/limits");       check_then_auto_add_extern(defs) 
     f2.add_task("t2").add_inlimit("c1a","/limits");            check_then_auto_add_extern(defs)     
-    print defs
+    print (defs)
     print("All Tests pass")

@@ -15,9 +15,8 @@ project theServer ;
 #
 use-project theCore     : ../ACore ;
 use-project theNodeAttr : ../ANattr ;
-use-project theNode     : ../ANode ;
+use-project theNode     : ../ANode ;  
 use-project theBase     : ../Base ;
-use-project theParser   : ../AParser ;
 
 lib pthread ;
 
@@ -34,7 +33,6 @@ lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src 
                 <include>../ANode/src 
-                <include>../AParser/src 
                 <include>../Base/src 
                 <include>../Server/src
                 <variant>debug:<define>DEBUG
@@ -42,7 +40,6 @@ lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
                 <use>/theCore//core
                 <use>/theNode//node
                 <use>/theBase//base
-                <use>/theParser//libparser
                 <use>/site-config//boost_system
                 <use>/site-config//boost_thread
                 <use>/site-config//boost_serialization
@@ -58,7 +55,6 @@ exe ecflow_server : [ glob src/*Main.cpp ]
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node
-             /theParser//libparser
              /theBase//base
              libserver
              /site-config//boost_system
@@ -80,7 +76,6 @@ exe u_server : [ glob test/*.cpp ]
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node
-             /theParser//libparser
              /theBase//base
              libserver
              /site-config//boost_system

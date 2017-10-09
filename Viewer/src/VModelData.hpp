@@ -25,6 +25,7 @@ class VServer;
 
 class AbstractNodeModel;
 class AttributeFilter;
+class ExpandState;
 class NodeFilter;
 class NodeFilterDef;
 class NodeQUery;
@@ -38,7 +39,6 @@ class VTreeServer;
 class VTableServer;
 class VTree;
 class VTreeNode;
-
 
 class VTreeChangeInfo
 {
@@ -109,10 +109,13 @@ public:
      void attrFilterChanged();
      void setForceShowNode(const VNode* node);
      void setForceShowAttribute(const VAttribute* node);
+     void setForceShow(const VItem* item);
      void clearForceShow(const VItem*);
      bool isFirstScan() const {return firstScan_;}
+     ExpandState* expandState() const {return expandState_;}
+     void setExpandState(ExpandState*);
 
-    //From ServerObserver
+     //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
      void notifyServerDelete(ServerHandler*);
 	 void notifyBeginServerClear(ServerHandler* server);
@@ -152,6 +155,7 @@ private:
      bool firstScan_;
      int firstScanTryNo_;
      int maxFirstScanTry_;
+     ExpandState* expandState_;
 };
 
 class VTableServer : public VModelServer
@@ -212,7 +216,7 @@ public:
     void clear();
 	void reset(ServerFilter* servers);
 
-    void reload(bool broadcast);
+    void reload();
 
 	int count() const {return static_cast<int>(servers_.size());}
 	int  indexOfServer(void*) const;
@@ -240,8 +244,6 @@ Q_SIGNALS:
     //void filterChanged();
 	void filterDeleteBegin();
 	void filterDeleteEnd();
-    void filterChangeBegun();
-    void filterChangeEnded();
     void serverAddBegin(int);
 	void serverAddEnd();
     void serverRemoveBegin(VModelServer*,int);

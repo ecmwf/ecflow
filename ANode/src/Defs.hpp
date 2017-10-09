@@ -46,6 +46,7 @@
 #include "CheckPt.hpp"
 #include "Archive.hpp"
 #include "Attr.hpp"
+#include "PrintStyle.hpp"
 
 class Limit;
 class AbstractObserver;
@@ -54,7 +55,9 @@ namespace ecf { class NodeTreeVisitor; class CalendarUpdateParams; } // forward 
 class Defs {
 public:
    static defs_ptr create();
+   static defs_ptr create(const std::string& port);
    Defs();
+   Defs(const std::string& port); // used in test, to initialise server variables
    Defs(const Defs&);
    Defs& operator=(const Defs&);
 
@@ -143,6 +146,7 @@ public:
    ///  extern /suite/family:repeat_name
    ///  extern ../family:repeat_name
    void add_extern(const std::string& nodePath );
+   void clear_externs() { externs_.clear();}
 
    /// Scan the trigger and complete expressions, and automatically add extern's
    /// i.e where the node paths, and references, to event, meters, edit and repeat variables,
@@ -248,19 +252,20 @@ public:
    void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
    bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const; // return true if why found
 
-   /// Function to save the defs as a checkpoint file. File saved to the file name
-   /// Can throw exception
-   void save_as_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
-   void save_checkpt_as_string(std::string& check_pt) const;
+   /// Function to save/restore the defs as a checkpoint file. Can throw exception
+   /// If the Defs file has content, this is deleted first, i.e. suites, externs, Can throw an exception
+   void boost_save_as_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
+   void boost_save_as_filename(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const; // used in test only
+   void boost_restore_from_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive());
 
-   void save_as_filename(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
-   void save_as_string(std::string&) const;
-
-   /// Function to restore the defs from a check point file.
-   /// If the Defs file has content, this is deleted first, i.e. suites, externs,
-   /// Can throw an exception
-   void restore_from_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive());
-   void restore_from_string(const std::string& );
+   // defs format
+   void save_as_checkpt(const std::string& fileName) const;
+   void save_as_filename(const std::string& fileName,PrintStyle::Type_t = PrintStyle::MIGRATE) const; // used in test only
+   void save_as_string(std::string& str,PrintStyle::Type_t = PrintStyle::MIGRATE) const;
+   void restore(const std::string& fileName); // will throw
+   bool restore(const std::string& fileName,std::string& errorMsg, std::string& warningMsg);
+   void restore_from_string(const std::string& str); // will throw
+   bool restore_from_string(const std::string& str,std::string& errorMsg, std::string& warningMsg);
 
    /// Delete suites, externs, client handles, reset suspended, and locate state
    /// etc but Server environment left as is:
@@ -308,6 +313,7 @@ public:
    void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
    void read_history(const std::string& line,const std::vector<std::string>& lineTokens);
    bool compare_edit_history(const Defs&) const;
+   bool compare_change_no(const Defs&) const;
 private:
    void do_generate_scripts( const std::map<std::string,std::string>& override) const;
    std::string write_state() const;

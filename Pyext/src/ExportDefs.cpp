@@ -24,7 +24,6 @@
 #include "Suite.hpp"
 #include "PrintStyle.hpp"
 #include "File.hpp"
-#include "DefsStructureParser.hpp"
 #include "JobCreationCtrl.hpp"
 #include "Simulator.hpp"
 #include "BoostPythonUtil.hpp"
@@ -60,9 +59,8 @@ static defs_ptr create_defs(const std::string& file_name)
 {
    defs_ptr defs = Defs::create();
 
-   DefsStructureParser checkPtParser( defs.get(), file_name );
    std::string errorMsg,warningMsg;
-   if (!checkPtParser.doParse(errorMsg,warningMsg)) {
+   if (!defs->restore(file_name,errorMsg,warningMsg)) {
       throw std::runtime_error(errorMsg);
    }
    if (!warningMsg.empty()) std::cerr << warningMsg;
@@ -83,12 +81,19 @@ std::string check_defs(defs_ptr defs)
 
 void save_as_checkpt(defs_ptr defs, const std::string& file_name)
 {
-   defs->save_as_checkpt(file_name); // use default ARCHIVE
+   defs->boost_save_as_checkpt(file_name); // use default ARCHIVE
 }
 
 void restore_from_checkpt(defs_ptr defs, const std::string& file_name)
 {
-   defs->restore_from_checkpt(file_name); // use default ARCHIVE
+   // Temp, until default ecflow version is 4.7.0, ECFLOW-939
+   try {
+      defs->restore(file_name);
+      return;
+   }
+   catch(...){}
+
+   defs->boost_restore_from_checkpt(file_name); // use default ARCHIVE
 }
 
 std::string simulate(defs_ptr defs)

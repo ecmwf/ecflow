@@ -33,7 +33,7 @@ if __name__ == "__main__":
     suite.get_generated_variables(variable_list)
     for gen_var in variable_list:
         print(gen_var)
-    assert len(list(variable_list)) == 13,"Expected 13 generated variables for suites"    
+    assert len(list(variable_list)) == 14,"Expected 14 generated variables for suites"    
     assert variable_list[0].name() == "SUITE", "expected generated variable of name SUITE but found " + variable_list[0].name()
     assert variable_list[0].value() == "s1", "expected generated variable of value 's1' but found " + variable_list[0].value()
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     assert variable_list[6].name() == "ECF_NAME", "expected generated variable of name ECF_NAME but found " + variable_list[6].name()
     assert variable_list[6].value() == "/s1/f1/t1", "expected generated variable of value '/s1/f1/t1' but found " + variable_list[6].value()
     assert variable_list[7].name() == "ECF_PASS", "expected generated variable of name ECF_NAME but found " + variable_list[7].name()
-    assert variable_list[7].value() == "_DJP_", "expected generated variable of value '_DJP_' but found " + variable_list[7].value()
+    assert variable_list[7].value() == "", "expected generated variable of value '' but found " + variable_list[7].value()
 
     print("\nAll Tests pass")
     

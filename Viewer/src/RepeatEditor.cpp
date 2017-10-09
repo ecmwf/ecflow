@@ -22,6 +22,7 @@
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
+#include "UiLog.hpp"
 #include "VInfo.hpp"
 #include "VNode.hpp"
 #include "VRepeatAttr.hpp"
@@ -96,7 +97,7 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     valueLe_->setValidator(validator);
 #endif
 
-    header_->setInfo(QString::fromStdString(info_->path()),"Repeat " + QString::fromStdString(rep->subType()));
+    header_->setInfo(QString::fromStdString(info_->nodePath()),"Repeat " + QString::fromStdString(rep->subType()));
 
     readSettings();
 }
@@ -122,7 +123,7 @@ void RepeatEditor::buildList(VRepeatAttr *rep)
     int cnt=end-start;
     if(cnt >1)
     {
-        for(size_t i=start; i < end; i++)
+        for(int i=start; i <= end; i++)
             modelData_ << QString::fromStdString(rep->value(i));
 
         model_=new QStringListModel(this);
@@ -201,12 +202,45 @@ RepeatIntEditor::RepeatIntEditor(VInfo_ptr info,QWidget* parent) :
     //    return;
 
     w_->hideRow(w_->valueLe_);
-    w_->valueSpin_->setValue(oriVal_.toInt());
+
+    initSpinner();
 
     connect(w_->valueSpin_,SIGNAL(valueChanged(int)),
             this,SLOT(slotValueChanged(int)));
 
     checkButtonStatus();
+}
+
+void RepeatIntEditor::initSpinner()
+{
+    w_->valueSpin_->setValue(oriVal_.toInt());
+
+    VAttribute* a=info_->attribute();
+
+    Q_ASSERT(a);
+    Q_ASSERT(a->type());
+    Q_ASSERT(a->type()->name() == "repeat");
+
+    VRepeatAttr *rep=static_cast<VRepeatAttr*>(a);
+
+    int startIndex=rep->startIndex();
+    int endIndex=rep->endIndex();
+    int step=rep->step();
+
+    if(step<=0 || endIndex <= startIndex)
+    {
+        return;
+    }
+
+    int minVal=QString::fromStdString(rep->value(startIndex)).toInt();
+    int maxVal=QString::fromStdString(rep->value(endIndex)).toInt();
+
+#if 0
+    UiLog().dbg() << "min=" << minVal << " max=" << maxVal << " step=" << step;
+#endif
+    w_->valueSpin_->setMinimum(minVal);
+    w_->valueSpin_->setMaximum(maxVal);
+    w_->valueSpin_->setSingleStep(step);
 }
 
 void RepeatIntEditor::setValue(QString val)

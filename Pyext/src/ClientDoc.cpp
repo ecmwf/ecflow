@@ -284,10 +284,11 @@ const char* ClientDoc::wait_for_server_reply() {
 
 const char* ClientDoc::load_defs(){
    return
-            "Load a :term:`suite definition` given by the file_path argument into the :term:`ecflow_server`::\n\n"
+            "Load a :term:`suite definition` or checkpoint file given by the file_path argument into the :term:`ecflow_server`::\n\n"
             "   void load(\n"
             "      string file_path     : path name to the definition file\n"
             "      [(bool)force=False]  : If true overwrite suite of same name\n"
+            "      [(bool)print=False]  : print parsed defs to standard out\n"
             "   )\n\n"
             "By default throws a RuntimeError exception for errors.\n"
             "If force is not used and :term:`suite` of the same name already exists in the server,\n"
@@ -303,7 +304,7 @@ const char* ClientDoc::load_defs(){
             "   ...\n"
             "   try:\n"
             "       ci = Client()       # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.load(defs_file)  # open and parse defs file, and load into server.\n"
+            "       ci.load(defs_file)  # open and parse defs or checkpoint file, and load into server.\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;
@@ -1415,5 +1416,45 @@ const char* ClientDoc::check()
             "       print ci.check('/suite1')\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
+            ;
+}
+
+const char* ClientDoc::set_child_path()
+{
+   return   "Set the path to the task, obtained from server using %ECF_NAME%\n"
+            "By default the environment variable ECF_NAME is read for the task path\n"
+            "This can be overridden for the python child api"
+            ;
+}
+const char* ClientDoc::set_child_password()
+{
+   return   "Set the password, needed for authentication, provided by the server using %ECF_PASS%\n"
+            "By default the environment variable ECF_PASS is read for the jobs password\n"
+            "This can be overridden for the python child api"
+            ;
+}
+
+const char* ClientDoc::set_child_pid()
+{
+   return   "Set the process id of this job\n"
+            "By default the environment variable ECF_RID is read for the jobs process or remote id\n"
+            "This can be overridden for the python child api"
+            ;
+}
+
+const char* ClientDoc::set_child_try_no()
+{
+   return   "Set the try no, i.e the number of times this job has run, obtained from the server, using %ECF_TRYNO%\n"
+            "By default the environment variable ECF_TRYNO is read to record number of times job has been run\n"
+            "This can be overridden for the python child api"
+            ;
+
+}
+
+const char* ClientDoc::set_child_timeout()
+{
+   return   "Set timeout if child can not connect to server, default is 24 hours. The input is required to be in seconds\n"
+            "By default the environment variable  ECF_TIMEOUT is read to control how long child command should attempt to connect to the server\n"
+            "This can be overridden for the python child api"
             ;
 }

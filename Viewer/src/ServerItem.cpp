@@ -19,19 +19,19 @@
 
 ServerItem::ServerItem(const std::string& name) :
   name_(name),
-  useCnt_(0),
-  handler_(0),
   favourite_(false),
-  system_(false)
+  system_(false),
+  useCnt_(0),
+  handler_(0)
 {
 }
 
 ServerItem::ServerItem(const std::string& name,const std::string& host,const std::string& port, bool favourite) :
   name_(name), host_(host), port_(port),
-  useCnt_(0),
-  handler_(0),
   favourite_(favourite),
-  system_(false)
+  system_(false),
+  useCnt_(0),
+  handler_(0)
 {
 }
 
@@ -85,9 +85,9 @@ void ServerItem::registerUsageBegin()
 	if(!handler_)
 	{
 		handler_=ServerHandler::addServer(name_,host_,port_);
-        if(handler_)
-            useCnt_++;
-	}
+    }
+    if(handler_)
+        useCnt_++;
 }
 
 void ServerItem::registerUsageEnd()

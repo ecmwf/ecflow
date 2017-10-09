@@ -1,0 +1,91 @@
+## Copyright 2009-2017 ECMWF.
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+#
+# Parser
+#
+project theParser ;
+
+use-project theCore     : ../../ACore ;
+use-project theNodeAttr : ../../ANattr ;
+use-project theNode     : ../ ;
+
+#
+# This is *ONLY* required when the define ECFLOW_MT is used,(used by Signal.cpp)
+lib pthread ;
+              
+#
+# Tests for parser.  Exclude file test/TestSingleDefsFile.cpp, test/ParseOnly.cpp test/ParseTimer.cpp
+#                                 test/TestJobGenPerf.cpp    
+#
+exe u_aparser : [ glob test/*.cpp : 
+                  test/TestSingleDefsFile.cpp 
+                  test/ParseOnly.cpp test/ParseTimer.cpp  
+                  test/TestJobGenPerf.cpp
+                ] 
+           pthread 
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_datetime
+           /site-config//boost_test
+         : <include>../test              # ANode/test
+           <variant>debug:<define>DEBUG
+ 	     ;
+ 	     
+#
+# Tests parser for a single defs file.  
+#
+exe perf_aparser : test/TestSingleDefsFile.cpp test/PersistHelper.cpp 
+           pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_datetime
+           /site-config//boost_test
+         : <include>../test                # ANode/test
+           <variant>debug:<define>DEBUG
+ 	     ;
+ 	     
+#
+# Timer for arbitary defs file,  
+#
+exe perf_aparser_timer : test/ParseTimer.cpp  test/PersistHelper.cpp
+           pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_datetime
+         : <include>../test                 # ANode/test
+           <variant>debug:<define>DEBUG
+         ;
+        
+#
+# Tests parser for a single defs file.  
+#
+exe perf_aparser_only : test/ParseOnly.cpp   
+           pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_datetime
+         : <include>../test             # ANode/test
+           <variant>debug:<define>DEBUG
+         ;
+        

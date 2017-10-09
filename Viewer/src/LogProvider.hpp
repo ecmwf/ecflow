@@ -25,27 +25,25 @@ class FileWatcher;
 
 class LogProvider : public QObject, public InfoProvider
 {
-  Q_OBJECT
+   Q_OBJECT
 
 public:
-	 LogProvider(InfoPresenter* owner,QObject* parent=0);
+   LogProvider(InfoPresenter* owner,QObject* parent=0);
 
-	 void visit(VInfoServer*);
-	 void clear();
-     void setAutoUpdate(bool);
+   void visit(VInfoServer*);
+   void clear();
+   void setAutoUpdate(bool);
 
-public Q_SLOTS:
-	void slotLinesAppend(QStringList);
+   public Q_SLOTS:
+   void slotLinesAppend(QStringList);
 
-private:
-	void fetchFile();
-	void fetchFile(ServerHandler *server,const std::string& fileName);
-	void watchFile(const std::string&,size_t);
-	void stopWatchFile();
-	std::string readLastLines(const std::string& filename,int last_n_lines,size_t& size,std::string& error_msg);
+   private:
+   void fetchFile();
+   void fetchFile(ServerHandler *server,const std::string& fileName);
+   void watchFile(const std::string&,size_t);
+   void stopWatchFile();
 
-    FileWatcher* fileWatcher_;
-
+   FileWatcher* fileWatcher_;
 };
 
 #endif

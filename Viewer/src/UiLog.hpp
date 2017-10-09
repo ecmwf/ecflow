@@ -23,12 +23,31 @@ class QRect;
 
 class ServerHandler;
 
+#define UI_FUNCTION_LOG UiFunctionLog __fclog(BOOST_CURRENT_FUNCTION);
+#define UI_FUNCTION_LOG_S(server) UiFunctionLog __fclog(server,BOOST_CURRENT_FUNCTION);
+
+class UiFunctionLog
+{
+public:
+    UiFunctionLog(ServerHandler* server,const std::string& funcName);
+    UiFunctionLog(const std::string& funcName);
+    ~UiFunctionLog();
+
+    std::string logEnter() const;
+    std::string logLeave() const;
+protected:
+    void init();
+
+    std::string serverName_;
+    std::string funcName_;
+};
+
 class UiLog
 {
 public:
    enum Type {INFO,WARN,ERROR,DBG};
 
-   UiLog() : type_(INFO) {}
+   UiLog() : type_(INFO) {}   
    UiLog(ServerHandler* server);
    UiLog(const std::string& server);
    ~UiLog();

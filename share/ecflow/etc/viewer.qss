@@ -16,7 +16,8 @@ QToolBar > QToolButton {
   	padding:  1px;
 }	
 
-QToolTip { color: black; background-color: rgb(192,218,255); border: 1px solid rgb(60,59,58);}
+/*QToolTip { color: black; background: rgb(192,218,255); border: 1px solid rgb(60,59,58);}*/
+QToolTip { color: rgb(247,247,247); background: rgb(59,64,69); border: 1px solid rgb(20,20,20);}
 
 /* ----------------------------
   Breadcrumbs 
@@ -221,6 +222,33 @@ QLabel[editorInfo="1"] {
      background: rgb(242, 242, 242);
 }
 
+/*----------------------------
+  Triggers
+-----------------------------*/
+
+QWidget[triggertitle="1"] {
+     background: rgb(95, 97, 99);
+}
+
+QLabel[triggertitle="1"] {
+     color: rgb(255,255,255);
+     background: rgb(95, 97, 99);   
+}
+
+QToolButton[triggertitle="1"] {
+    border-radius: 0px;
+    padding: 0px;
+    icon-size:  18px;
+    background-color: transparent;
+}
+
+QToolButton[triggertitle="1"]:hover {
+    border-radius: 0px;
+    padding: 0px;
+    icon-size:  18px;
+    background: rgb(140,140,140);
+}
+
 
 /*----------------------------
   Property editor
@@ -279,7 +307,7 @@ QToolButton[docktitle="1"] {
     border-radius: 0px;
     padding: 0px;
     icon-size:  18px;
-    background-colour: transparent;
+    background-color: transparent;
 }
 
 QToolButton[docktitle="1"]:checked {
@@ -319,6 +347,35 @@ QTreeView[var="1"] {
   Tab widget
 ------------------------------------*/
 
+/* generic tab */
+/*
+QTabBar::tab {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border: 1px solid rgb(170,170,170);
+}
+
+QTabBar::tab:!selected {
+    margin-top: 2px;
+    background: rgb(218,219,220);
+    color: rgb(50,50,50);
+}
+
+QTabBar::tab:selected {
+    background: rgb(240,239,238);color: rgb(50,50,50)
+}
+
+QTabBar::tab:disabled {
+    background: rgb(218,219,220);
+    color: rgb(155,155,155)
+}
+*/
+
+/* The main tab in the nodepanel */
 /*QTabBar[nodePanel="1"]::close-button {
     image: url(:/viewer/dock_menu_indicator.png);
     padding-left: -13px;
@@ -356,3 +413,4 @@ QTabBar[nodePanel="1"]::tab:selected{
 /*QTabBar[change="1"]::tab {
     padding : 2px;
 }*/
+

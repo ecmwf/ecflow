@@ -755,8 +755,18 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
 			break;
 		}
 		case AlterCmd::DEL_INLIMIT:  {
-			if (!name.empty()) InLimit check(name);  // will throw if not valid
-			break;
+		   if (!name.empty()) {
+		      // name can be:
+		      //    limit_name
+		      //    /path/to/limit:limit_name
+		      string path_to_limit; // This can be empty
+		      string limitName;
+		      if ( !Extract::pathAndName( name, path_to_limit, limitName ) ) {
+		         throw std::runtime_error( "AlterCmd::DEL_INLIMIT : Invalid inlimit : " +  name );
+		      }
+            InLimit check(limitName,path_to_limit);  // will throw if not valid
+		   }
+		   break;
 		}
 		case AlterCmd::DEL_ZOMBIE:  {
 			if (!Child::valid_zombie_type(name)) {
@@ -993,43 +1003,37 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
       break; }
 
 	case AlterCmd::TRIGGER: {
-		if (options.size() != 3) {
-			ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
-			ss << " but found " << (options.size() + paths.size()) << " arguments. The trigger expression must be quoted\n";
-			ss << dump_args(options,paths) << "\n";
-			throw std::runtime_error( ss.str() );
-		}
-		name = options[2];
+	   if (options.size() != 3) {
+	      ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
+	      ss << " but found " << (options.size() + paths.size()) << " arguments. The trigger expression must be quoted\n";
+	      ss << dump_args(options,paths) << "\n";
+	      throw std::runtime_error( ss.str() );
+	   }
+	   name = options[2];
 
-		// Parse the expression
-		PartExpression exp(name);
-		string parseErrorMsg;
-		std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-		if (!ast.get()) {
-			ss << "AlterCmd: change trigger: Failed to parse expression '" << name << "'.  " << parseErrorMsg << "\n";
-			ss << dump_args(options,paths) << "\n";
-			throw std::runtime_error( ss.str() );
-		}
+	   std::string error_msg = "AlterCmd: change trigger:";
+	   std::auto_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
+	   if (!ast.get()) {
+	      ss << error_msg << "\n" << dump_args(options,paths) << "\n";
+	      throw std::runtime_error( ss.str() );
+	   }
 		break; }
 
 	case AlterCmd::COMPLETE: {
-		if (options.size() != 3) {
-			ss << "AlterCmd: change complete: expected four args: change complete 'expression'  <path_to_node> ";
-			ss << " but found " << (options.size() + paths.size()) << " arguments. The expression must be quoted\n";
-			ss << dump_args(options,paths) << "\n";
-			throw std::runtime_error( ss.str() );
-		}
-		name = options[2];
+	   if (options.size() != 3) {
+	      ss << "AlterCmd: change complete: expected four args: change complete 'expression'  <path_to_node> ";
+	      ss << " but found " << (options.size() + paths.size()) << " arguments. The expression must be quoted\n";
+	      ss << dump_args(options,paths) << "\n";
+	      throw std::runtime_error( ss.str() );
+	   }
+	   name = options[2];
 
-		// Parse the expression
-		PartExpression exp(name);
-		string parseErrorMsg;
-		std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-		if (!ast.get()) {
-			ss << "AlterCmd: change complete: Failed to parse expression '" << name << "'.  " << parseErrorMsg << "\n";
-			ss << dump_args(options,paths) << "\n";
-			throw std::runtime_error( ss.str() );
-		}
+	   std::string error_msg = "AlterCmd: change complete:";
+	   std::auto_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
+	   if (!ast.get()) {
+	      ss << error_msg << "\n" << dump_args(options,paths) << "\n";
+	      throw std::runtime_error( ss.str() );
+	   }
 		break;}
 
 	case AlterCmd::REPEAT: {

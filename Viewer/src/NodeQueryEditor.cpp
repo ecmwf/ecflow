@@ -115,7 +115,8 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 	queryTe_->setReadOnly(true);
     queryTe_->setWordWrapMode(QTextOption::WordWrap);
 
-    Highlighter* ih=new Highlighter(queryTe_->document(),"query");
+    //The document becomes the owner of the highlighter
+    new Highlighter(queryTe_->document(),"query");
 
     //------------------
     // Options

@@ -47,7 +47,7 @@ protected Q_SLOTS:
 
 protected:
     void buildList(VRepeatAttr *rep);
-    bool isListMode() const;   
+    bool isListMode() const;
     virtual void setValue(QString)=0;
     void readSettings();
     void writeSettings();
@@ -68,7 +68,8 @@ public:
 protected Q_SLOTS:
     void slotValueChanged(int);
 
-protected:
+protected:    
+    void initSpinner();
     void apply();
     void setValue(QString val);
     void resetValue();

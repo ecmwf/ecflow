@@ -3,6 +3,7 @@ set(viewer_srcs
     ViewerMain.cpp
     AboutDialog.cpp
     AbstractNodeModel.cpp
+    AbstractNodeView.cpp
     AbstractSearchLine.cpp
     AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
@@ -20,8 +21,6 @@ set(viewer_srcs
     ComboMulti.cpp
     CommandDesignerWidget.cpp
     CompactView.cpp
-    CompactNodeView.cpp
-    CompactNodeViewDelegate.cpp
     ConfigListDelegate.cpp
     ConnectState.cpp
     CustomCommandDialog.cpp
@@ -37,6 +36,7 @@ set(viewer_srcs
     EditItemWidget.cpp
     EditProvider.cpp
     EditorInfoLabel.cpp
+    ExpandState.cpp
     ExpandStateNode.cpp
     FlagSet.hpp
     FileInfoLabel.cpp
@@ -113,6 +113,7 @@ set(viewer_srcs
     RepeatEditor.cpp
     SaveSessionAsDialog.cpp
     ScriptItemWidget.cpp
+    ServerComInfoWidget.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
     ServerDefsAccess.cpp
@@ -127,6 +128,7 @@ set(viewer_srcs
     SessionRenameDialog.cpp
     SessionHandler.cpp
     Sound.cpp
+    StandardView.cpp
     StringMatchCombo.cpp
     StringMatchMode.cpp
     SuiteItemWidget.cpp
@@ -144,19 +146,21 @@ set(viewer_srcs
     RichTextSearchInterface.cpp
     RichTextSearchLine.cpp
     TextEditSearchLine.cpp
-    TimeItemWidget.cpp    
-    TriggerBrowser.cpp
-    TriggerEditor.cpp
-    TriggerItemWidget.cpp
-    TriggerTextWidget.cpp
+    TimeItemWidget.cpp
+    ToolTipFormat.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
-    TreeNodeViewDelegateBase.cpp
     TreeNodeWidget.cpp
     TreeView.cpp
+    TriggerEditor.cpp   
+    TriggerItemWidget.cpp
+    TriggerTextWidget.cpp    
     TriggerCollector.cpp
-    TriggerView.cpp
+    TriggerTableModel.cpp
+    TriggerTableView.cpp
+    TriggerTableWidget.cpp
+    TriggerViewDelegate.cpp
     TriggeredScanner.cpp
     UIDebug.cpp
     UiLog.cpp
@@ -198,6 +202,7 @@ set(viewer_srcs
     VTriggerAttr.cpp
     VGenVarAttr.cpp
     VUserVarAttr.cpp
+    VariableEditor.cpp
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp
@@ -227,6 +232,7 @@ endif()
 
 
 set(viewer_moc_files AbstractNodeModel.hpp
+    AbstractNodeView.hpp
     AbstractSearchLine.hpp
     ActionHandler.hpp
     Animation.hpp
@@ -239,8 +245,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CodeItemWidget.hpp
     ComboMulti.hpp
     CommandDesignerWidget.hpp    
-    CompactView.hpp
-    CompactNodeView.hpp
     CustomCommandDialog.hpp
     CustomListWidget.hpp
     Dashboard.hpp
@@ -263,6 +267,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LogTruncator.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
+    MessageItemWidget.hpp
     MeterEditor.hpp
     NodeFilterDialog.hpp
     NodePanel.hpp
@@ -293,6 +298,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     SaveSessionAsDialog.hpp
     RepeatEditor.hpp
     RichTextEdit.hpp
+    ServerComInfoWidget.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
     ServerHandler.hpp
@@ -311,13 +317,15 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TableNodeWidget.hpp             
     TextEditSearchLine.hpp
     TreeNodeModel.hpp
-    TreeNodeView.hpp           
-    TreeNodeViewDelegateBase.hpp
-    TreeNodeWidget.hpp
-    TriggerBrowser.hpp
+    TreeNodeView.hpp
+    TreeNodeViewDelegate.hpp
+    TreeNodeWidget.hpp    
     TriggerEditor.hpp
     TriggerItemWidget.hpp
+    TriggerTableView.hpp
+    TriggerTableWidget.hpp
     TriggeredScanner.hpp
+    VariableEditor.hpp
     VariableItemWidget.hpp
     VariableModel.hpp
     VariableModelData.hpp
@@ -382,10 +390,11 @@ set(viewer_wrap_ui_files
     TableNodeWidget.ui
     TimeItemWidget.ui
     TreeNodeWidget.ui
-    TriggerBrowser.ui
     TriggerEditorWidget.ui
     TriggerItemWidget.ui
+    TriggerTableWidget.ui
     VariableAddDialog.ui
+    VariableEditorWidget.ui
     VariablePropDialog.ui
     VariableItemWidget.ui
     ZombieItemWidget.ui
@@ -427,7 +436,7 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
      TextPager    
      ${Boost_INCLUDE_DIRS} 
      ${CMAKE_CURRENT_BINARY_DIR}
-    LIBS core nodeattr node libparser base libclient 
+    LIBS core nodeattr node base libclient 
          pthread  
          m dl
          ${ECFLOW_QT_LIBRARIES}
@@ -456,7 +465,7 @@ if(${build_ecflow_ui_log})
          ../../Client/src     
          ${Boost_INCLUDE_DIRS} 
          ${CMAKE_CURRENT_BINARY_DIR}
-        LIBS core nodeattr node libparser base libclient 
+        LIBS core nodeattr node base libclient 
              pthread  
              m 
              ${ECFLOW_QT_LIBRARIES}

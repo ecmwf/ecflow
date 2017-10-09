@@ -10,7 +10,7 @@
 // granted to it by virtue of its status as an intergovernmental organisation 
 // nor does it submit to any jurisdiction. 
 //
-// Description :
+// Description
 //============================================================================
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>

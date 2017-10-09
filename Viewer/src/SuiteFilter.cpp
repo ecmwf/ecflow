@@ -157,6 +157,27 @@ void SuiteFilter::setFiltered(int index,bool val)
 }
 
 
+bool SuiteFilter::isOnlyOneFiltered(const std::string& oneSuite) const
+{
+    const std::vector<std::string>& current=filter();
+    return (current.size() == 1 && current[0] != oneSuite);
+}
+
+void SuiteFilter::selectOnlyOne(const std::string& oneSuite)
+{
+    if(isOnlyOneFiltered(oneSuite))
+        return;
+
+    unselectAll();
+    for(std::vector<SuiteFilterItem>::iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if((*it).name() == oneSuite)
+        {
+            (*it).filtered_=true;
+            return;
+        }
+    }
+}
 
 SuiteFilter* SuiteFilter::clone()
 {
@@ -181,7 +202,7 @@ bool SuiteFilter::loadedSameAs(const std::vector<std::string>& loaded) const
             cnt++;
     }
 
-    return cnt == loaded.size();
+    return cnt == static_cast<int>(loaded.size());
 }
 
 bool SuiteFilter::setLoaded(const std::vector<std::string>& loaded,bool checkDiff)

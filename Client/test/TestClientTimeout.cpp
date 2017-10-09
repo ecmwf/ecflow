@@ -54,7 +54,7 @@
 //   ClientInvoker theClient(invokeServer.host(),invokeServer.port());
 //   theClient.set_timeout(1);
 //
-//    std::string path = File::test_data("AParser/test/data/single_defs/mega.def","AParser");
+//    std::string path = File::test_data("ANode/parser/test/data/single_defs/mega.def","parser");
 //   BOOST_REQUIRE_THROW(theClient.loadDefs(path),std::runtime_error); // Expected load defs to fail with a timeout of 1 second\n
 //
 //   /// Now see what timeout value we succeed with

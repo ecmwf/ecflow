@@ -33,12 +33,14 @@ class NodeObserver;
 class ServerHandler;
 class ServerComQueue;
 class ServerObserver;
+class ServerComObserver;
 class SuiteFilter;
 class UpdateTimer;
 class VNodeChange;
 class VServer;
 class VServerChange;
 class VSettings;
+class VSuiteNode;
 
 
 class ServerHandler : public QObject
@@ -62,6 +64,7 @@ public:
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
 
+    void setSuiteFilterWithOne(VNode*);
 	void updateSuiteFilter(SuiteFilter*);
 	void updateSuiteFilterWithDefs();
 
@@ -80,10 +83,13 @@ public:
 	void run(VTask_ptr);
 
 	void addNodeObserver(NodeObserver* obs);
-	void removeNodeObserver(NodeObserver* obs);
+    void removeNodeObserver(NodeObserver* obs);
 
 	void addServerObserver(ServerObserver* obs);
 	void removeServerObserver(ServerObserver* obs);
+
+    void addServerComObserver(ServerComObserver* obs);
+    void removeServerComObserver(ServerComObserver* obs);
 
 	void confChanged(VServerSettings::Param,VProperty*);
 	VServerSettings* conf() const {return conf_;}
@@ -103,9 +109,13 @@ public:
 	static void command(std::vector<VInfo_ptr>,std::string);
 
 	void searchBegan();
-	void searchFinished();
+	void searchFinished();    
+    bool updateInfo(int& basePeriod,int& currentPeriod,int &drift,int& toNext);
+    QDateTime lastRefresh() const {return lastRefresh_;}
     int secsSinceLastRefresh() const;
     int secsTillNextRefresh() const;
+
+    static bool checkNotificationState(const std::string& notifierId);
 
 	static ServerHandler* find(const std::string& name);
 
@@ -121,6 +131,10 @@ protected:
 	static std::string commandToString(const std::vector<std::string>& cmd);
 	static void checkNotificationState(VServerSettings::Param par);
 
+    bool checkRefreshTimerDrift() const;
+    void refreshScheduled();
+    void refreshFinished();
+
 	std::string name_;
 	std::string host_;
 	std::string port_;
@@ -130,6 +144,7 @@ protected:
 	bool communicating_;
 	std::vector<NodeObserver*> nodeObservers_;
 	std::vector<ServerObserver*> serverObservers_;
+    std::vector<ServerComObserver*> serverComObservers_;
 
     VServer* vRoot_;
 
@@ -184,6 +199,9 @@ private:
 	void broadcast(NoMethod,const VNode*);
 	void broadcast(NoMethodV1,const VNode*,const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	void broadcast(NoMethodV2,const VNode*,const VNodeChange&);
+
+    typedef void (ServerComObserver::*SocMethod)(ServerHandler*);
+    void broadcast(SocMethod);
 
 	void saveConf();
 	void loadConf();

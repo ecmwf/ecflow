@@ -34,7 +34,6 @@ show_error_and_exit() {
    exit 1
 }
 
-install_arg=
 ecbuild_arg=
 copy_tarball_arg=
 package_source_arg=
@@ -77,7 +76,6 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
    elif [[ "$1" = secure_user ]]   ; then secure_user_arg=$1 ;
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
-   elif [[ "$1" = install ]] ; then install_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
@@ -131,7 +129,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable"
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.3.2
-module load ecbuild/2.6.0
+module load ecbuild/2.7.3
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
@@ -208,7 +206,7 @@ cd ../bdir/$mode_arg/ecflow
 # =============================================================================================
 # ctest
 #
-if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
+if [[ $test_safe_arg = test_safe ]] ; then
 	ctest -R ^u_
 	ctest -R c_
 	ctest -R py_u
@@ -216,11 +214,6 @@ if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
 	if [[  $test_safe_arg = test_safe ]] ; then
 	   exit 0
 	fi
-fi
-if [[ $test_arg = test ]] ; then
-	ctest -R s_test
-	ctest -R py_s
-	exit 0
 fi
 if [[ "$ctest_arg" != "" ]] ; then
 	$ctest_arg
@@ -256,7 +249,12 @@ fi
 
 gui_options=
 if [[ $no_gui_arg = no_gui ]] ; then
-    gui_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF -DENABLE_ALL_TESTS=ON"
+    gui_options="-DENABLE_GUI=OFF -DENABLE_UI=OFF"
+fi
+
+test_options=
+if [[ $test_arg = test ]] ; then
+   test_options="-DENABLE_ALL_TESTS=ON"
 fi
 
 if [[ $package_source_arg = package_source ]] ; then
@@ -265,9 +263,6 @@ if [[ $package_source_arg = package_source ]] ; then
 fi
 
 install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
-if [[ $install_arg = install ]] ; then
-    install_prefix=/usr/local/apps/ecflow/$release.$major.$minor
-fi
 
 ecbuild=ecbuild
 if [[ $ecbuild_arg = ecbuild ]] ; then
@@ -279,25 +274,41 @@ $ecbuild $source_dir \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
             -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
-            -DCMAKE_PYTHON_INSTALL_TYPE=local \
-            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
-            -DENABLE_STATIC_BOOST_LIBS=ON \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \
             ${secure_user_options} \
-            ${log_options}
-            #-DENABLE_ALL_TESTS=ON
-            #-DENABLE_GUI=ON       -DENABLE_UI=ON                    
-            #-DENABLE_SERVER=OFF \
-            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor 
-            #-DENABLE_PROFILING=ON 
-            #-DECBUILD_GPROF_FLAGS
+            ${log_options} \
+            ${test_options}
+            
+            #-DENABLE_STATIC_BOOST_LIBS=ON \
+            #-DCMAKE_PYTHON_INSTALL_TYPE=local \
+            #-DENABLE_PYTHON=OFF   \
+            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor  \
+            #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
+            #-DENABLE_GUI=ON       \
+            #-DENABLE_UI=ON        \           
+            #-DENABLE_ALL_TESTS=ON \
+            #-DENABLE_SERVER=OFF   \
+            #-DENABLE_PROFILING=ON \
+            #-DECBUILD_GPROF_FLAGS \
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
 	$make_arg 
 	# $make_arg VERBOSE=1
+	
+    # generate the server file locally, and install it. Otherwise list of server will not be complete set
+	if [[ "$make_arg" == "make install" ]] ; then
+		if [[ -f /home/ma/emos/bin/ecflow_site_server_install.sh ]] ; then
+
+   			/home/ma/emos/bin/ecflow_site_server_install.sh -g
+
+    		if [[ -f servers ]] ; then
+        		mv servers $install_prefix/share/ecflow/.
+            fi
+		fi
+	fi
 	exit 0
 fi
 
@@ -325,8 +336,9 @@ fi
 # ============================================================================================
 # Python:
 # -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
-#    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
-#    setup : experimental only, python way of installing
+#    default: local
+#    local  : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
+#    setup  : experimental only, python way of installing
 #
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory

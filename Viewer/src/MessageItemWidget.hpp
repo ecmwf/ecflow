@@ -19,6 +19,7 @@ class LogModel;
 
 class MessageItemWidget : public QWidget, public InfoPanelItem, protected Ui::MessageItemWidget
 {
+    Q_OBJECT
 public:
 	explicit MessageItemWidget(QWidget *parent=0);
 
@@ -34,10 +35,15 @@ public:
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
-protected:
-    void updateState(const ChangeFlags&) {}
-	LogModel* model_;
+protected Q_SLOTS:
+    void on_actionCopyEntry__triggered();
+    void on_actionCopyRow__triggered();
 
+protected:
+    void updateState(const ChangeFlags&) {}	
+    void toClipboard(QString txt) const;
+
+    LogModel* model_;
 };
 
 #endif

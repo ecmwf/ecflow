@@ -12,7 +12,6 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/test/unit_test.hpp>
-#include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
@@ -32,81 +31,61 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 namespace fs = boost::filesystem;
 
-// If you are updating the tests, *MAKE SURE* to check out test/data/migration/* files
-//#define UPDATE_TESTS 1
-
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
-//
-// These test are used for future release. They help to ensure that we have
-// backward compatibility.i.e future release can open file, created by an earlier release
-//
-BOOST_AUTO_TEST_CASE( test_migration_restore_def_con_3_0_1 )
+BOOST_AUTO_TEST_CASE( test_default_constructor_persistence )
 {
-   cout << "ANode:: ...test_migration_restore_def_con_3_0_1\n";
+   cout << "ANode:: ...test_default_constructor_persistence\n";
 
-   std::string file_name = File::test_data("ANode/test/data/migration/default_constructor/","ANode");
+   std::string file_name = File::test_data("ANode/test/data/","ANode");
 
-   // Create migration data
    Defs defs;
    Suite suite;
    Family family;
    Task   task;
 
-   // Remove host dependent variables from server state, so that we can run on other platforms
-   defs.set_server().delete_server_variable("ECF_LOG");
-   defs.set_server().delete_server_variable("ECF_CHECK");
-   defs.set_server().delete_server_variable("ECF_CHECKOLD");
-
-   // We use .def extension so that we copy over writable files with extension .def to
-   // other platforms during incremental build's
-#ifdef UPDATE_TESTS
-   // remember to check out data
    doSave(file_name + "Defs.def",defs);
    doSave(file_name + "Suite.def",suite);
    doSave(file_name + "Family.def",family);
    doSave(file_name + "Task.def",task);
    doSave(file_name + "Limit.def",Limit());
-#else
-   Ecf::set_debug_equality(true);
+
+   DebugEquality debug_equality; // only as affect in DEBUG build
    do_restore<Defs>(file_name + "Defs.def",defs);
    do_restore<Suite>(file_name + "Suite.def",suite);
    do_restore<Family>(file_name + "Family.def",family);
    do_restore<Task>(file_name + "Task.def",task);
    do_restore<Limit>(file_name + "Limit.def",Limit());
-   Ecf::set_debug_equality(false);
-#endif
+
+   fs::remove(file_name + "Defs.def");
+   fs::remove(file_name + "Suite.def");
+   fs::remove(file_name + "Family.def");
+   fs::remove(file_name + "Task.def");
+   fs::remove(file_name + "Limit.def");
 }
 
-//#define UPDATE_TESTS 1
-
-BOOST_AUTO_TEST_CASE( test_migration_restore_boost_checkpt_file )
+BOOST_AUTO_TEST_CASE( test_compare_boost_and_defs_checkpt_file )
 {
-   cout << "ANode:: ...test_migration_restore_boost_checkpt_file\n";
+   cout << "ANode:: ...test_compare_boost_and_defs_checkpt_file\n";
 
-   std::string file_name = File::test_data("ANode/test/data/migration/fixture/","ANode");
+   std::string file_name = File::test_data("ANode/test/data/","ANode");
 
-   // Create migration data
-   // This will create a pre-built definition.
-   // If the definition is changed we will need to update this test.
-   // **Keep*** old checkpt test data, to ensure future ecflow versions can be migrated
-   // **Update** here for future boost updates
-   // **IF MyDefsFixture is changed, we need to ensure we can migrate it to future versions
-   MyDefsFixture fixture("boost.checkpt");
+   MyDefsFixture fixture;
 
-   // Allow the test data, to be used on other platforms
-   fixture.remove_host_depedent_server_variables();
-
-#ifdef UPDATE_TESTS
-   // remember to check out data
    doSave(file_name + "boost.checkpt",fixture.fixtureDefsFile());
-#else
-   Ecf::set_debug_equality(true);
-   do_restore<Defs>(file_name + "boost.checkpt",fixture.fixtureDefsFile());
-   Ecf::set_debug_equality(false);
-#endif
-}
+   fixture.fixtureDefsFile().save_as_checkpt(file_name + "defs.checkpt");
 
+
+   DebugEquality debug_equality; // only as affect in DEBUG build
+   do_restore<Defs>(file_name + "boost.checkpt",fixture.fixtureDefsFile());
+
+   Defs defs;
+   defs.restore( file_name + "defs.checkpt" );
+   BOOST_CHECK_MESSAGE(defs == fixture.fixtureDefsFile()," ");
+
+   fs::remove(file_name + "boost.checkpt");
+   fs::remove(file_name + "defs.checkpt");
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

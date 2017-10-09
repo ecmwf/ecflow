@@ -12,7 +12,7 @@ cd $WK
 rm -rf ACore/bin
 rm -rf ANattr/bin
 rm -rf ANode/bin 
-rm -rf AParser/bin 
+rm -rf ANode/parser/bin 
 rm -rf Base/bin
 rm -rf CSim/bin
 rm -rf Client/bin 

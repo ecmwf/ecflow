@@ -140,7 +140,7 @@ protected:
 	void removeItem(const QModelIndex& index);
     void updateState(const ChangeFlags&);
     void toClipboard(QString txt) const;
-    void reselectCurrent();
+    void regainSelection();
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
@@ -153,6 +153,8 @@ protected:
 	VariableSearchLine *searchLine_;
 
     VProperty* shadowProp_;
+    VInfo_ptr lastSelection_;
+    bool canSaveLastSelection_;
 };
 
 #endif

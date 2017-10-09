@@ -30,7 +30,15 @@ VGenVarAttrType::VGenVarAttrType() : VAttributeType("genvar")
 
 QString VGenVarAttrType::toolTip(QStringList d) const
 {
-   return QString();
+    QString t="<b>Type:</b> User variable<br>";
+    if(d.count() == dataCount_)
+    {
+        t+="<b>Name:</b> " + d[NameIndex] + "<br>";
+        QString s=d[ValueIndex];
+        if(s.size() > 150) s=s.left(150) + "...";
+        t+="<b>Value:</b> " + s;
+    }
+    return t;
 }
 
 void VGenVarAttrType::encode(const Variable& v,QStringList& data) const
@@ -87,11 +95,18 @@ void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     {
         std::vector<Variable> v;
         vnode->genVariables(v);
-        int n=v.size();
-        for(size_t i=0; i < n; i++)
+        int n=static_cast<int>(v.size());
+        for(int i=0; i < n; i++)
         {
             vec.push_back(new VGenVarAttr(vnode,v[i],i));
         }
     }
 }
 
+bool VGenVarAttr::isReadOnly(const std::string& varName)
+{
+    static QStringList readOnlyVars=QStringList() <<
+                 "ECF_NODE" << "ECF_HOST" << "ECF_PORT" << "ECF_PID" <<
+                 "ECF_VERSION" << "ECF_LISTS";
+    return readOnlyVars.contains(QString::fromStdString(varName));
+}

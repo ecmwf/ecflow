@@ -86,7 +86,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 		(void)as->zombie_ctrl().handle_path_zombie(as,this,action_taken,theReply);
 
 		// distinguish output by using *path*
-      std::stringstream ss; ss << " zombie(*path*) : " << process_or_remote_id_ << " : " << jobs_password_ << " : action taken(" << action_taken << ")";
+		std::stringstream ss;
+		ss << " zombie(*path*) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ << " : "<< process_or_remote_id_ << " : " << jobs_password_ << " : action(" << action_taken << ")";
 		log(Log::ERR,ss.str());
 		return false;
 	}
@@ -142,58 +143,69 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       pid_missmatch = true;
    }
 
-   if ((child_type() == Child::INIT) && (submittable_->state() == NState::ACTIVE)) {
+   NState::State submittable_state = submittable_->state();
+   if ((child_type() == Child::INIT) && (submittable_state == NState::ACTIVE)) {
 #ifdef DEBUG_ZOMBIE
-      std::cout << ":(child_type() == Child::INIT) && submittable_->state() == NState::ACTIVE)";
+      std::cout << ":(child_type() == Child::INIT) && submittable_state == NState::ACTIVE)";
 #endif
 
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (!password_missmatch && !pid_missmatch ) {
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already active : action taken( fob )";
-            log(Log::WAR, ss.str() );
-            theReply = PreAllocatedReply::ok_cmd();
-            return false;
-         }
+         std::stringstream ss;
+         ss << " [ overloaded || --init*2 ] (pid & password match) : chd:" << ecf::Child::to_string(child_type()) << " : "  << path_to_submittable_ << " : already active : action(fob)";
+         log(Log::WAR, ss.str() );
+         theReply = PreAllocatedReply::ok_cmd();
+         return false;
       }
 
       submittable_allready_active = true;
    }
 
-   if ( submittable_->state() == NState::COMPLETE) {
+   if ( submittable_state == NState::COMPLETE) {
 #ifdef DEBUG_ZOMBIE
-      std::cout << ": submittable_->state() == NState::COMPLETE)";
+      std::cout << ": submittable_state == NState::COMPLETE)";
 #endif
-
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::COMPLETE) {
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
-            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
-            ss << " : already complete : action taken( fob )";
-            log(Log::WAR, ss.str() );
-            theReply = PreAllocatedReply::ok_cmd();
-            return false;
-         }
+         // Note: when a node completes, we clear tasks password and pid, to save memory on checkpt & network bandwidth
+         // (We could choose not to clear, This would allow us to disambiguate between 2/ and 3/ below). HOWEVER:
+         //
+         // How can this situation arise:
+         //   1/ Two calls to --complete  (rare)
+         //   2/ Overloaded server. Client send --complete to server, but it is overload and does not respond, the client then
+         //      times out. Server handles the request. When client tries again we get here. (possible)
+         //   3/ Zombie, two separate process. (possible, typically done by user action)
+         //
+         // For all three it should be safe to just fob:
+         //   1/ Two calls to --complete # Be forgiving
+         //   2/ Overloaded server       # The correct course of action
+         //   3/ zombie                  # The zombie has completed anyway, don't bother blocking it
+
+         submittable_->flag().clear(ecf::Flag::ZOMBIE);
+         as->zombie_ctrl().remove_by_path( path_to_submittable_ ); // remove any associated zombies
+
+         std::stringstream ss;
+         ss << " [ overloaded || zombie || --complete*2 ] : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ ;
+         ss << " : already complete : action(fob)";
+         log(Log::WAR, ss.str() );
+         theReply = PreAllocatedReply::ok_cmd();
+         return false;
       }
 
       // If Task state is complete, and we receive **any** child command then it is a zombie
       submittable_allready_complete = true;
    }
 
-   if ( submittable_->state() == NState::ABORTED) {
+   if ( submittable_state == NState::ABORTED) {
 #ifdef DEBUG_ZOMBIE
-      std::cout << ": submittable_->state() == NState::ABORTED)";
+      std::cout << ": submittable_state == NState::ABORTED)";
 #endif
 
-      // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::ABORT) {
-         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
-            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
-            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
-            ss << " : already aborted : action taken( fob )";
+         if (!password_missmatch && !pid_missmatch ) {
+            /// If there is an associated zombie, remove from the list
+            as->zombie_ctrl().remove( submittable_ );
+
+            std::stringstream ss;
+            ss << " [ overloaded || --abort*2 ] (pid & password match) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ << " : already aborted : action(fob)";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
@@ -215,17 +227,20 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
   		   // LOG failure: Include type of zombie.
   		   // ** NOTE **: the zombie may have been removed by user actions. i.e if fob and child cmd is abort | complete, etc
-  		   std::stringstream ss;    ss << " zombie";
+  		   std::stringstream ss;
+  		   ss << " zombie";
   		   const Zombie& theZombie = as->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_ );
   		   if (!theZombie.empty() ) ss << "(" << theZombie.type_str() << ")";
 
-         ss << " : " << path_to_submittable_ << " : " << process_or_remote_id_ << " : " << jobs_password_;
+         ss << " : chd:" << ecf::Child::to_string(child_type());
+         ss << " : " << path_to_submittable_ << "(" << NState::toString(submittable_state) << ")";
+         ss << " : " << process_or_remote_id_  << " : " << jobs_password_;
          if (submittable_allready_active)   ss << " : already active";
          if (submittable_allready_complete) ss << " : already complete";
          if (submittable_allready_aborted)  ss << " : already aborted";
-         if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
-         if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
-         ss << " : action taken(" << action_taken << ")";
+         if (password_missmatch) ss << " : passwd != [ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
+         if (pid_missmatch)      ss << " : pid != [ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
+         ss << " : action(" << action_taken << ")";
          log(Log::ERR,ss.str());
   			return false;
   		}
@@ -411,15 +426,7 @@ CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
  : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), expression_(expression)
 {
    // Parse expression to make sure its valid
-   PartExpression exp(expression);
-   string parseErrorMsg;
-   std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-   if (!ast.get()) {
-
-      assert( !parseErrorMsg.empty() );
-      std::stringstream ss; ss << "CtsWaitCmd: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
-      throw std::runtime_error( ss.str() );
-   }
+   (void)Expression::parse(expression,"CtsWaitCmd:"); // will throw for errors
 }
 
 std::ostream& CtsWaitCmd::print(std::ostream& os) const
@@ -441,39 +448,22 @@ STC_Cmd_ptr CtsWaitCmd::doHandleRequest(AbstractServer* as) const
 
 	SuiteChanged1 changed(submittable_->suite());
 
-	// Parse the expression
-	PartExpression exp(expression_);
- 	string parseErrorMsg;
-	std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-	if (!ast.get()) {
-		// should NOT really, since client did check
-		std::stringstream ss; ss << "CtsWaitCmd: Failed to parse expression '" << expression_ << "'.  " << parseErrorMsg;
-		throw std::runtime_error( ss.str() ) ;
-	}
-
+	// Parse the expression, should not fail since client should have already check expression parses
 	// The complete expression have been parsed and we have created the abstract syntax tree
 	// We now need CHECK the AST for path nodes, event and meter. repeats,etc.
 	// *** This will also set the Node pointers ***
-	AstResolveVisitor astVisitor(submittable_);
-	ast->accept(astVisitor);
-
 	// If the expression references paths that don't exist throw an error
-	// This be captured in the ecf script, which should then abort the task
+	// This can be captured in the ecf script, which should then abort the task
 	// Otherwise we will end up blocking indefinitely
-	if ( !astVisitor.errorMsg().empty() ) {
-		std::stringstream ss;
-		ss << "CtsWaitCmd: AST node tree references failed for " << expression_;
-		ss <<  " at " <<  submittable_->debugNodePath() << " : " <<  astVisitor.errorMsg();
-      throw std::runtime_error( ss.str() ) ;
-	}
+	std::auto_ptr<AstTop> ast = submittable_->parse_and_check_expressions(expression_,true,"CtsWaitCmd:" ); // will throw for errors
 
 	// Evaluate the expression
 	if ( ast->evaluate() ) {
 
-		submittable_->flag().clear(ecf::Flag::WAIT);
+	   submittable_->flag().clear(ecf::Flag::WAIT);
 
-		// expression evaluates, return OK
-		return PreAllocatedReply::ok_cmd();
+	   // expression evaluates, return OK
+	   return PreAllocatedReply::ok_cmd();
 	}
 
 	submittable_->flag().set(ecf::Flag::WAIT);

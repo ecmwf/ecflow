@@ -23,7 +23,6 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Log.hpp"
-#include "PrintStyle.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
@@ -42,6 +41,8 @@
 #include "AbstractObserver.hpp"
 #include "CheckPtContext.hpp"
 #include "SuiteChanged.hpp"
+#include "DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
+#include "File.hpp"  
 
 using namespace ecf;
 using namespace std;
@@ -57,6 +58,17 @@ Defs::Defs() :
    save_edit_history_(false),
    client_suite_mgr_(this),
    in_notification_(false) {}
+
+Defs::Defs(const std::string& port) :
+   state_change_no_(0),
+   modify_change_no_( 0 ),
+   updateCalendarCount_(0),
+   order_state_change_no_(0),
+   server_(port),
+   save_edit_history_(false),
+   client_suite_mgr_(this),
+   in_notification_(false) {}
+
 
 Defs::Defs(const Defs& rhs) :
    state_change_no_(0),
@@ -127,10 +139,8 @@ Defs& Defs::operator=(const Defs& rhs)
    return *this;
 }
 
-defs_ptr Defs::create()
-{
-	return boost::make_shared<Defs>();
-}
+defs_ptr Defs::create() { return boost::make_shared<Defs>();}
+defs_ptr Defs::create(const std::string& port) { return boost::make_shared<Defs>(port);} // Defs::create(port)
 
 Defs::~Defs()
 {
@@ -576,28 +586,28 @@ bool Defs::hasTimeDependencies() const
 std::ostream& Defs::print(std::ostream& os) const
 {
    os << "# " << ecf::Version::raw() << "\n";
-	if (!PrintStyle::defsStyle()) {
-	   os << write_state();
-	}
-	if (PrintStyle::getStyle() == PrintStyle::STATE) {
-	   os << "# server variable\n";
-	   const std::vector<Variable>& server_variables = server().server_variables();
-	   BOOST_FOREACH(const Variable& var, server_variables) { var.print_generated(os);}
-      os << "# user variable\n";
-      const std::vector<Variable>& user_variables = server().user_variables();
-      BOOST_FOREACH(const Variable& var, user_variables) { var.print_generated(os);}
-	}
+   if (!PrintStyle::defsStyle()) {
+      os << write_state();
+   }
+   if (PrintStyle::getStyle() == PrintStyle::STATE) {
+      os << "# server state: " << SState::to_string(server().get_state()) << "\n";
+   }
 
-	set<string>::const_iterator extern_end = externs_.end();
-	for(set<string>::const_iterator i = externs_.begin(); i != extern_end; ++i) {
-      os << "extern " << *i << "\n";
-	}
-	size_t the_size = suiteVec_.size();
-	for(size_t s = 0; s < the_size; s++) {
-	   os << *suiteVec_[s];
-	}
-	return os;
+   // In PrintStyle::MIGRATE we do NOT persist the externs. (+matches boost serialisation)
+   if (PrintStyle::getStyle() != PrintStyle::MIGRATE) {
+      set<string>::const_iterator extern_end = externs_.end();
+      for(set<string>::const_iterator i = externs_.begin(); i != extern_end; ++i) {
+         os << "extern " << *i << "\n";
+      }
+   }
+
+   size_t the_size = suiteVec_.size();
+   for(size_t s = 0; s < the_size; s++) {
+      os << *suiteVec_[s];
+   }
+   return os;
 }
+
 
 std::string Defs::write_state() const
 {
@@ -616,11 +626,15 @@ std::string Defs::write_state() const
    if (server().get_state() != ServerState::default_state()) os << " server_state:" << SState::to_string(server().get_state());
    os << "\n";
 
-   // This read by the DefsStateParser
-   const std::vector<Variable>& theServerEnv = server().user_variables();
-   for(size_t i = 0; i < theServerEnv.size(); ++i) {
-      theServerEnv[i].print(os);
-   }
+   // This read by the DefsParser
+   const std::vector<Variable>& server_user_variables = server().user_variables();
+   size_t the_size = server_user_variables.size();
+   for(size_t i = 0; i < the_size; ++i)  server_user_variables[i].print(os);
+
+   const std::vector<Variable>& server_variables = server().server_variables();
+   the_size = server_variables.size();
+   for(size_t i = 0; i < the_size; ++i)  server_variables[i].print_server_variable(os); // edit var value # server
+
 
    // READ by Defs::read_history()
    // We need to define a separator for the message, will to allow it to be re-read
@@ -631,7 +645,7 @@ std::string Defs::write_state() const
    // [] Used in time
    // integers used in the time.
    // -  Used in commands
-   if (PrintStyle::getStyle() == PrintStyle::MIGRATE || save_edit_history_) {
+   if (save_edit_history_) {
 	   Indentor in;
 	   std::map<std::string, std::deque<std::string> >::const_iterator i;
 	   for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
@@ -711,6 +725,26 @@ bool Defs::compare_edit_history(const Defs& rhs) const
    return true;
 }
 
+bool Defs::compare_change_no(const Defs& rhs) const
+{
+   if ( state_change_no_ != rhs.state_change_no_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Defs::compare_change_no: state_change_no_(" << state_change_no_  << ") != rhs.state_change_no_(" <<  rhs.state_change_no_ << ")\n";
+      }
+#endif
+      return false;
+   }
+   if ( modify_change_no_ != rhs.modify_change_no_  ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Defs::compare_change_no: modify_change_no_(" << modify_change_no_ << ") != rhs.modify_change_no_(" << rhs.modify_change_no_ << ")\n";
+      }
+#endif
+      return false;
+   }
+   return true;
+}
 
 bool Defs::operator==(const Defs& rhs) const
 {
@@ -1087,7 +1121,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 	return client_node_to_add;
 }
 
-void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
+void Defs::boost_save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
 {
    // Save NodeContainer children even if ecf::Flag::MIGRATED set
    CheckPtContext checkpt_context;
@@ -1099,31 +1133,16 @@ void Defs::save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at
  	ecf::save(the_fileName,*this,at);
 }
 
-void Defs::save_checkpt_as_string(std::string& output) const
-{
-   // Save NodeContainer children even if ecf::Flag::MIGRATED set
-   CheckPtContext checkpt_context;
-
-   // only_save_edit_history_when_check_pointing or if explicitly requested
-   save_edit_history_ = true;   // this is reset after edit_history is saved
-
-   ecf::save_as_string(output,*this);
-}
-
-void Defs::save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
+void Defs::boost_save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
 {
    /// Can throw archive exception
    ecf::save(the_fileName,*this,at);
 }
 
-void Defs::save_as_string(std::string& output) const
-{
-   ecf::save_as_string(output,*this);
-}
 
-void Defs::restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Type at)
+void Defs::boost_restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Type at)
 {
-//	cout << "Defs::restore_from_checkpt " << the_fileName << "\n";
+//	cout << "Defs::boost_restore_from_checkpt " << the_fileName << "\n";
 
 	if (the_fileName.empty())  return;
 
@@ -1132,25 +1151,103 @@ void Defs::restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Ty
 
 	ecf::restore(the_fileName, (*this), at);
 
-	// Reset the state and modify numbers, **After the restore**
-   state_change_no_ = Ecf::state_change_no();
-   modify_change_no_ = Ecf::modify_change_no();
-
 //	cout << "Restored: " << suiteVec_.size() << " suites\n";
 }
 
-void Defs::restore_from_string(const std::string& rest)
+void Defs::save_as_checkpt(const std::string& the_fileName) const
 {
-   if (rest.empty()) return;
+   // Save as defs will always save children, hence no need for CheckPtContext
+
+   // only_save_edit_history_when_check_pointing or if explicitly requested
+   save_edit_history_ = true;   // this is reset after edit_history is saved
+
+   // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
+   // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
+   ecf::DisableIndentor disable_indentation;
+   save_as_filename(the_fileName,PrintStyle::MIGRATE);
+}
+
+void Defs::save_as_filename(const std::string& the_fileName,PrintStyle::Type_t p_style) const
+{
+   PrintStyle printStyle(p_style);
+
+   std::ofstream ofs( the_fileName.c_str() );
+   ofs << this;
+
+   if (!ofs.good()) {
+      std::stringstream ss; ss << "Defs::save_as_filename: path(" << the_fileName << ") failed";
+      throw std::runtime_error(ss.str());
+   }
+}
+
+void Defs::save_as_string(std::string& the_string,PrintStyle::Type_t p_style) const
+{
+   PrintStyle printStyle(p_style);
+
+   // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
+   // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
+   ecf::DisableIndentor disable_indentation;
+   std::stringstream ss;
+   ss << this;
+   the_string = ss.str();
+}
+
+void Defs::restore(const std::string& the_fileName)
+{
+   if (the_fileName.empty())  return;
+
+   /// *************************************************************************
+   /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+   /// *************************************************************************
+   std::string errorMsg,warningMsg;
+   if (!restore(the_fileName,errorMsg,warningMsg)) {
+      std::stringstream e; e << "Defs::defs_restore_from_checkpt: " << errorMsg;
+      throw std::runtime_error(e.str());
+   }
+}
+
+bool Defs::restore(const std::string& the_fileName,std::string& errorMsg, std::string& warningMsg)
+{
+   if (the_fileName.empty()) {
+      errorMsg = "Defs::restore: the filename string is empty";
+      return false;
+   }
 
    // deleting existing content first. *** Note: Server environment left as is ****
    clear();
 
-   ecf::restore_from_string(rest,*this);
+   DefsStructureParser parser( this, the_fileName );
+   bool ret = parser.doParse(errorMsg,warningMsg);
+   return ret;
+}
 
-   // Reset the state and modify numbers, **After the restore**
-   state_change_no_ = Ecf::state_change_no();
-   modify_change_no_ = Ecf::modify_change_no();
+void Defs::restore_from_string(const std::string& str)
+{
+   /// *************************************************************************
+   /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+   /// *************************************************************************
+   std::string errorMsg,warningMsg;
+   if (!restore_from_string(str,errorMsg,warningMsg)) {
+      std::stringstream e; e << "Defs::defs_restore_from_string: " << errorMsg;
+      throw std::runtime_error(e.str());
+   }
+}
+
+bool Defs::restore_from_string(const std::string& str,std::string& errorMsg, std::string& warningMsg)
+{
+   if (str.empty()) {
+      errorMsg = "Defs::restore_from_string: the string is empty";
+      return false;
+   }
+
+   // deleting existing content first. *** Note: Server environment left as is ****
+   clear();
+
+   // Do *NOT* Reset the state and modify numbers
+   // As we we need this numbers for Syncing between client<->Server
+   DefsStructureParser parser( this, str, false/* not used*/ );
+   bool ret = parser.doParse(errorMsg,warningMsg);
+   return ret;
 }
 
 void Defs::clear()
@@ -1178,6 +1275,19 @@ bool Defs::checkInvariants(std::string& errorMsg) const
 		   ss << "For suite " << suiteVec_[s]->name();
 			errorMsg += ss.str();
 			return false;
+		}
+      if (!suiteVec_[s]->isSuite() ) {
+          std::stringstream ss;
+          ss << "Defs::checkInvariants suite isSuite() return NULL ? for suite " << suiteVec_[s]->name();
+          errorMsg += ss.str();
+          return false;
+      }
+		if (suiteVec_[s]->isSuite() != suiteVec_[s]->suite()) {
+         std::stringstream ss;
+         ss << "Defs::checkInvariants  suiteVec_[s]->isSuite(" << suiteVec_[s]->isSuite() << ") != suiteVec_[s]->suite(" << suiteVec_[s]->suite() << ") ";
+         ss << "for suite " << suiteVec_[s]->name();
+         errorMsg += ss.str();
+         return false;
 		}
 		if (!suiteVec_[s]->checkInvariants(errorMsg)) {
 			return false;

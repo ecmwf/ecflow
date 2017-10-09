@@ -115,7 +115,7 @@ if __name__ == "__main__":
     test_time_series()
     
     # traverse the CSim test data, make sure python simulation matches c++
-    workspace_dir = Test.get_root_source_dir()
+    workspace_dir = ecflow.File.source_dir()
     csim_test_data = workspace_dir + "/CSim/test/data/good_defs"
     print (csim_test_data)
     for path in Test.all_files(csim_test_data,'*.def'):

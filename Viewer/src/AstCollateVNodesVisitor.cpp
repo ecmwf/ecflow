@@ -57,13 +57,39 @@ void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar)
     {
         if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
         {
-            int nType=attrTypes.size();
-            int nItem=items_.size();
-            for(size_t i=0; i < nType; i++)
+            std::size_t nType=attrTypes.size();
+            std::size_t nItem=items_.size();
+            for(std::size_t i=0; i < nType; i++)
             {
                 if(VAttribute *a=n->findAttribute(attrTypes[i],astVar->name()))
                 {
-                    for(size_t k=0; k < nItem; k++)
+                    for(std::size_t k=0; k < nItem; k++)
+                    {
+                        if(a == items_[k])
+                            return;
+                    }
+
+                    items_.push_back(a);
+                        return;
+                }
+            }
+        }
+    }
+}
+
+void AstCollateVNodesVisitor::visitParentVariable(AstParentVariable* astVar)
+{
+    if(Node* referencedNode = astVar->referencedNode())
+    {
+        if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
+        {
+            std::size_t nType=attrTypes.size();
+            std::size_t nItem=items_.size();
+            for(std::size_t i=0; i < nType; i++)
+            {
+                if(VAttribute *a=n->findAttribute(attrTypes[i],astVar->name()))
+                {
+                    for(std::size_t k=0; k < nItem; k++)
                     {
                         if(a == items_[k])
                             return;

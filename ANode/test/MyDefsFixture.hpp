@@ -18,6 +18,7 @@
 //============================================================================
 #include <boost/lexical_cast.hpp>
 
+#include "Str.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -32,7 +33,7 @@
 // =======================================================================
 struct MyDefsFixture {
 
-	MyDefsFixture(const std::string& fileName = "defsfile.txt") : defsfile_()
+	MyDefsFixture(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER()) : defsfile_(port)
 	{
 		suite_ptr  suite = create_suite();
 
@@ -57,24 +58,16 @@ struct MyDefsFixture {
 
 	const Defs& fixtureDefsFile() const { return defsfile_; }
 
-	void remove_host_depedent_server_variables()
-	{
-	   // Allow test data to be used on other platforms
-	   defsfile_.set_server().delete_server_variable("ECF_LOG");
-	   defsfile_.set_server().delete_server_variable("ECF_CHECK");
-	   defsfile_.set_server().delete_server_variable("ECF_CHECKOLD");
-	}
+	defs_ptr create_defs(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER()) const {
 
-
-	defs_ptr create_defs() const {
-
-		defs_ptr defs = Defs::create();
+		defs_ptr defs = Defs::create(port);
 
  		defs->addSuite(  create_suite()   );
 		defs->add_extern("/limits:event");
 		defs->add_extern("/a/b/c:meter");
 		defs->add_extern("/a/b/c/d");
       defs->set_server().add_or_update_user_variables("MyDefsFixture_user_variable","This is a user variable added to server");
+      defs->set_server().add_or_update_server_variable("MyDefsFixture_server_variable","This is a server variable");
 
 		// add an empty suite. Needed for CHECK_JOB_GEN_ONLY cmd
 		defs->addSuite( Suite::create("EmptySuite" ) );
@@ -115,14 +108,7 @@ private:
 		suiteTask->add_part_complete( PartExpression("t1 == complete") );
 		suiteTask->add_part_complete( PartExpression("t2 == complete",true) );
 
-		std::vector<ecf::Child::CmdType> child_cmds;
-		child_cmds.push_back(ecf::Child::INIT);
-		child_cmds.push_back(ecf::Child::EVENT);
-		child_cmds.push_back(ecf::Child::METER);
-		child_cmds.push_back(ecf::Child::LABEL);
-		child_cmds.push_back(ecf::Child::WAIT);
-		child_cmds.push_back(ecf::Child::ABORT);
-		child_cmds.push_back(ecf::Child::COMPLETE);
+	   std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 		suiteTask->addZombie( ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,10) );
 		suiteTask->addZombie( ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL,100) );
 		suiteTask->addZombie( ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK,100) );
