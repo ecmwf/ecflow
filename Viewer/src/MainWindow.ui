@@ -81,7 +81,7 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>Pa&amp;nels</string>
+     <string>&amp;Panels</string>
     </property>
     <addaction name="actionAddTreeWidget"/>
     <addaction name="actionAddTableWidget"/>

@@ -27,6 +27,26 @@ Use of perf:  http://www.brendangregg.com/perf.html
   
 
 
+The metabuilder.def below needs preparation for perf test below: 
+o/ ecflow_client --port 5062 --host ecflow-metab --get > metabuilder.def
+o/ Edit metabuilder.def and replace 
+      edit ECF_HOME '/home/ma/deploy/servers/ecflow-metab.5062/metabuilder/...'
+   with
+      edit ECF_HOME '/var/tmp/ma0/workspace/metabuilder/...'
+o/ Edit metabuilder.def and replace:
+      edit REMOTE_HOST 'ecflow-metab' | edit WSHOST 'ecflow-metab'
+   with 
+      edit REMOTE_HOST 'eurydice' | edit WSHOST 'eurydice'
+o/ cd metabuilder workspace edit <package.py> remove code 
+     if user != deploy ....
+     as this stop the generation of scripts when user is not deploy. (to allow localhost checking)
+   and regenerate
+        ./generate.py -s codes_ui
+        ./generate.py -s cgal
+        ./generate.py -s boost
+        ./generate.py -s metview
+   This generate the scripts
+
 Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .

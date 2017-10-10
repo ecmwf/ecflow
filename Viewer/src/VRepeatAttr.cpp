@@ -101,7 +101,7 @@ long ecf_repeat_date_to_julian(long ddate)
 
 VRepeatAttrType::VRepeatAttrType() : VAttributeType("repeat")
 {
-    dataCount_=7;
+    dataCount_=8;
     searchKeyToData_["repeat_name"]=NameIndex;
     searchKeyToData_["repeat_value"]=ValueIndex;
     searchKeyToData_["name"]=NameIndex;
@@ -137,24 +137,31 @@ QString VRepeatAttrType::definition(QStringList d) const
     QString t="repeat";
     if(d.count() == dataCount_)
     {
-        t+=" " + d[SubtypeIndex];
+        QString subType=d[SubtypeIndex];
 
-        if(d[SubtypeIndex] != "day")
+        t+=" " + subType;
+
+        if(subType == "integer" || subType == "date")
         {
             t+=" " + d[NameIndex];
             t+=" " + d[StartIndex];
             t+=" " + d[EndIndex];
             t+=" " + d[StepIndex];
         }
+        else if(subType == "string" || subType == "enumerated")
+        {
+            t+=" " + d[NameIndex];
+            t+=" " + d[AllValuesIndex];
+        }
         else
         {
             t+=" " + d[StepIndex];
-        }
+        }       
     }
     return t;
 }
 
-void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string& type) const
+void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string& type,QString allValues) const
 {
     //We try to avoid creating a VRepeat object everytime we are here
     //std::string type=VRepeat::type(r);
@@ -164,8 +171,8 @@ void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string
          QString::fromStdString(r.valueAsString()) <<
          QString::fromStdString(r.value_as_string(r.start())) <<
          QString::fromStdString(r.value_as_string(r.end())) <<
-         QString::number(r.step());
-
+         QString::number(r.step()) <<
+         allValues;
 }
 
 //=====================================================
@@ -202,7 +209,7 @@ QStringList VRepeatAttr::data(bool /*firstLine*/) const
     if(parent_->node_)
     {
         const Repeat& r=parent_->node_->repeat();
-        atype->encode(r,s,subType());
+        atype->encode(r,s,subType(),allValues());
     }
     return s;
 }
@@ -244,6 +251,11 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
                 vec.push_back(a);
         }
     }
+}
+
+QString VRepeatAttr::allValues() const
+{
+   return QString();
 }
 
 //=====================================================
@@ -401,6 +413,36 @@ int VRepeatEnumAttr::currentIndex() const
     return 0;
 }
 
+QString VRepeatEnumAttr::allValues() const
+{
+    QString vals;
+
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        int start=r.start();
+        int end=r.end();
+
+        if(end <= start)
+        {
+            return QString();
+        }
+
+        if(end-start >1)
+        {
+            for(int i=start; i <= end; i++)
+            {
+                if(!vals.isEmpty()) vals+=" ";
+                vals+="\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
+            }
+            return vals;
+        }
+
+    }
+    return vals;
+}
+
+
 //=====================================================
 //
 // VRepeatStringAttr
@@ -437,4 +479,32 @@ int VRepeatStringAttr::currentIndex() const
     return 0;
 }
 
+QString VRepeatStringAttr::allValues() const
+{
+    QString vals;
+
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        int start=r.start();
+        int end=r.end();
+
+        if(end <= start)
+        {
+            return QString();
+        }
+
+        if(end-start >1)
+        {
+            for(int i=start; i <= end; i++)
+            {
+                if(!vals.isEmpty()) vals+=" ";
+                vals+="\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
+            }
+            return vals;
+        }
+
+    }
+    return vals;
+}
 

@@ -142,6 +142,26 @@ void PropertyDialog::slotButton(QAbstractButton* pb)
 	}
 }
 
+void PropertyDialog::showPage(QString path)
+{
+    QStringList lst=path.split(".");
+    if(lst.count() > 0)
+    {
+        QString pageName=lst[0];
+        for(int i=0; i < editors_.count(); i++)
+        {
+            PropertyEditor *ed=editors_[i];
+            if(VProperty* prop=ed->property())
+            {
+                if(prop->name() == pageName)
+                {
+                    list_->setCurrentRow(i);
+                    return;
+                }
+            }
+        }
+    }
+}
 
 void PropertyDialog::manageChange(bool inApply)
 {

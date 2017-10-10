@@ -255,20 +255,7 @@ void MainWindow::on_actionResetSelected_triggered()
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    PropertyDialog* d=new PropertyDialog; //belongs to the whole app
-
-    connect(d,SIGNAL(configChanged()),
-    		this,SLOT(slotConfigChanged()));
-
-	if(d->exec() == QDialog::Accepted)
-	{
-		if(d->isConfigChanged())
-		{
-			configChanged(this);
-		}
-    }
-
-	delete d;
+    startPreferences(this,"");
 }
 
 void MainWindow::on_actionManageSessions_triggered()
@@ -837,6 +824,35 @@ MainWindow* MainWindow::findWindow(QWidget *childW)
 
 	return 0;
 }
+
+void MainWindow::startPreferences(QString option)
+{
+    if(windows_.count() > 0)
+        startPreferences(windows_.front(),option);
+}
+
+void MainWindow::startPreferences(MainWindow *w,QString option)
+{
+    Q_ASSERT(w);
+
+    PropertyDialog* d=new PropertyDialog; //belongs to the whole app
+
+    d->showPage(option);
+
+    connect(d,SIGNAL(configChanged()),
+        w,SLOT(slotConfigChanged()));
+
+    if(d->exec() == QDialog::Accepted)
+    {
+        if(d->isConfigChanged())
+        {
+            configChanged(w);
+        }
+    }
+
+    delete d;
+}
+
 
 //--------------------------------------------------------
 //

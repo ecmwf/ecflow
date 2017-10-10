@@ -370,6 +370,7 @@ BOOST_AUTO_TEST_CASE( test_get_last_lines_of_a_file )
    // ===================================================================================
    {
       std::ofstream file( path.c_str() ); // create empty file
+      BOOST_REQUIRE_MESSAGE(file.good(),"failed");
    }
 
    { // get no lines ?

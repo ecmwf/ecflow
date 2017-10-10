@@ -20,6 +20,7 @@
 #include <vector>
 
 class QHBoxLayout;
+class QLabel;
 class QSignalMapper;
 
 class ChangeNotify;
@@ -58,12 +59,14 @@ public:
 	explicit ChangeNotifyWidget(QWidget *parent=0);
 	~ChangeNotifyWidget();
 
+    void updateVisibility();
 	static void setEnabled(const std::string& id,bool b);
 	static void updateSettings(const std::string& id);
 
 protected:
 	void addTb(ChangeNotify*);
-	ChangeNotifyButton* findButton(const std::string& id);
+    ChangeNotifyButton* findButton(const std::string& id);
+    bool hasVisibleButton() const;
 
 	QHBoxLayout* layout_;
 	std::map<std::string,ChangeNotifyButton*> buttons_;

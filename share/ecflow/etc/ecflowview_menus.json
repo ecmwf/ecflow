@@ -95,6 +95,7 @@
             "command"        : "ecflow_client --force=complete <full_name>",
             "question_for"   : "submitted or active",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
+            "question_control" : "menu.confirm.confirmSetComplete",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -107,6 +108,7 @@
             "command"        : "ecflow_client --force=aborted <full_name>",
             "question_for"   : "submitted or active",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
+            "question_control" : "menu.confirm.confirmSetAborted",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -127,6 +129,7 @@
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --requeue=force <full_name>",
             "question"       : "Confirm requeuing of <full_name>",
+            "question_control" : "menu.confirm.confirmRequeue",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -137,7 +140,8 @@
             "visible_for"    : "suite or family",
             "enabled_for"    : "aborted or suspended",
             "command"        : "ecflow_client --requeue=abort <full_name>",
-            "question"       : "Confirm requeuing of aborted tasks from <full_name>",
+            "question"       : "Confirm requeuing of aborted tasks from <full_name>",           
+            "question_control" : "menu.confirm.confirmRequeueAborted",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -263,7 +267,7 @@
         {
             "menu"           : "Node",
             "name"           : "Remove",
-            "visible_for"    : "(suite or family or task) and (oper or admin)",
+            "visible_for"    : "(suite or alias) and (oper or admin)",
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --delete=yes <full_name>",
             "question"       : "Do you really want to remove <full_name> ?",
@@ -451,7 +455,8 @@
             "visible_for"    : "(suite or family)",
             "enabled_for"    : "(active or submitted or aborted or suspended)",
             "command"        : "ecflow_client --kill <full_name>",
-            "question"       : "Confirm kill of <full_name>",
+            "question"       : "Confirm kill of <full_name>",            
+            "question_control" : "menu.confirm.confirmKillSuite",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -463,6 +468,7 @@
             "enabled_for"    : "(active or submitted or suspended)",
             "command"        : "ecflow_client --kill <full_name>",
             "question"       : "Confirm kill <full_name>",
+            "question_control" : "menu.confirm.confirmKillTask",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -592,6 +598,7 @@
             "enabled_for"    : "not complete and not active and not submitted",
             "command"        : "ecflow_client --force=complete recursive <full_name>",
             "question"       : "Check running/queued jobs and Confirm force complete of <full_name>",
+            "question_control" : "menu.confirm.confirmForceComplete",
             "default_answer" : "No",
             "status_tip"     : "__cmd__"
         },
@@ -625,7 +632,8 @@
             "visible_for"    : "node",
             "enabled_for"    : "not active",
             "command"        : "ecflow_client --force=aborted recursive <full_name>",
-            "question"       : "Check running/queued jobs and Confirm force submitted of <full_name>",
+            "question"       : "Check running/queued jobs and Confirm force aborted of <full_name>",
+            "question_control" : "menu.confirm.confirmForceAborted",
             "default_answer" : "Yes",
             "status_tip"     : "__cmd__"
         },
@@ -777,7 +785,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "label or meter or limit or trigger",
+            "visible_for"    : "label or meter or limit or trigger or var or genvar",
             "command"        : "edit",
             "handler"        : "tree",
             "view"           : "tree/trigger"
@@ -785,7 +793,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "repeat  and not repeat_day",
+            "visible_for"    : "repeat and not repeat_day",
             "command"        : "edit",
             "handler"        : "tree",
             "view"           : "tree/trigger"

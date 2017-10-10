@@ -411,7 +411,8 @@ void VProperty::setUseMaster(bool b)
 
 		if(useMaster_)
 		{
-			value_=master_->value_;
+            value_=master_->value_;
+            dispatchChange();
 		}
 	}
 }

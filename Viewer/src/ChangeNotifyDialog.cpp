@@ -21,8 +21,10 @@
 
 #include <QCloseEvent>
 #include <QDebug>
+#include <QHBoxLayout>
 #include <QPainter>
 #include <QSettings>
+#include <QToolButton>
 #include <QVariant>
 
 Q_DECLARE_METATYPE(QList<int>)
@@ -82,7 +84,9 @@ void ChangeNotifyDialogWidget::slotReset()
 
 void ChangeNotifyDialogWidget::update(ChangeNotify* notifier)
 {
-	QColor bgCol(Qt::gray);
+
+#if 0
+    QColor bgCol(Qt::gray);
 	if(VProperty *p=notifier->prop()->findChild("fill_colour"))
 		bgCol=p->value().value<QColor>();
 
@@ -93,6 +97,7 @@ void ChangeNotifyDialogWidget::update(ChangeNotify* notifier)
 					     stop: 0 " + bgLight.name() + ", stop: 1 " + bgLight.name() + "); }";
 
 	label_->setStyleSheet(st);
+#endif
 }
 
 void ChangeNotifyDialogWidget::slotSelectItem(const QModelIndex& idx)
@@ -177,9 +182,23 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	grad_.setStart(0,0);
 	grad_.setFinalStop(0,1);
 
+
+    QToolButton* optionsTb=new QToolButton(this);
+    //optionsTb->setAutoRaise(true);
+    optionsTb->setText(tr("&Prefrences"));
+    optionsTb->setIcon(QPixmap(":/viewer/configure.svg"));
+    optionsTb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    optionsTb->setToolTip(tr("Configure notification options"));
+
+    connect(optionsTb,SIGNAL(clicked()),
+            this,SLOT(slotOptions()));
+
+    tab_->setCornerWidget(optionsTb);
+
 	readSettings();
 
     WidgetNameProvider::nameChildren(this);
+
 }
 
 ChangeNotifyDialog::~ChangeNotifyDialog()
@@ -198,15 +217,20 @@ void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
     connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
             this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
+    VProperty* prop=notifier->prop();
+    Q_ASSERT(prop);
+
 	ignoreCurrentChange_=true;
-	tab_->addTab(w,"");
+    tab_->addTab(w,prop->param("labelText"));
 	ignoreCurrentChange_=false;
 
 	tabWidgets_ << w;
 
 	int idx=tab_->count()-1;
-	if(idx ==  tab_->currentIndex())
+#if 0
+    if(idx ==  tab_->currentIndex())
 		updateStyleSheet(notifier->prop());
+#endif
 
 	decorateTab(idx,notifier);
 
@@ -230,9 +254,20 @@ void ChangeNotifyDialog::slotSelectionChanged(VInfo_ptr info)
     MainWindow::changeNotifySelectionChanged(info);
 }
 
+void ChangeNotifyDialog::slotOptions()
+{
+    QString op="notification";
+    if(ChangeNotify* notifier=tabToNtf(tab_->currentIndex()))
+    {
+        op+="." + QString::fromStdString(notifier->id());
+    }
+    MainWindow::startPreferences(op);
+}
+
 void ChangeNotifyDialog::updateStyleSheet(VProperty *currentProp)
 {
-	QColor bgCol(Qt::gray);
+#if 0
+    QColor bgCol(Qt::gray);
 	if(VProperty *p=currentProp->findChild("fill_colour"))
 		bgCol=p->value().value<QColor>();
 
@@ -243,19 +278,37 @@ void ChangeNotifyDialog::updateStyleSheet(VProperty *currentProp)
 						stop: 0 " + bgLight.name() + ", stop: 1 " + bgCol.name() + "); }";
 
 	tab_->setStyleSheet(st);
+#endif
 }
 
 void ChangeNotifyDialog::decorateTabs()
 {
-	for(int i=0; i < tab_->count(); i++)
+    for(int i=0; i < tab_->count(); i++)
 	{
 		decorateTab(i,tabWidgets_.at(i)->notifier());
-	}
+	}    
 }
 
 void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
 {
-	if(tabIdx == -1 || !notifier)
+    if(tabIdx == -1 || !notifier)
+        return;
+
+    VProperty *prop=notifier->prop();
+    QString numText;
+    if(notifier->data())
+    {
+        int num=notifier->data()->size();
+        if(num > 0)
+            numText=" (" + QString::number(num) + ")";
+    }
+    QString labelText=prop->param("labelText")+ numText;
+
+    tab_->setTabText(tabIdx,labelText);
+
+
+#if 0
+    if(tabIdx == -1 || !notifier)
 		return;
 
 	VProperty *prop=notifier->prop();
@@ -356,15 +409,14 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
 		setIcon(pix);
 	*/
 
-
-
 	pix.fill(Qt::transparent);
 
 	QRect textRect=QRect(margin,0,textW,pix.height());
 	painter.setPen(fgCol);
 	painter.drawText(textRect,Qt::AlignVCenter|Qt::AlignHCenter,labelText);
 
-	if(tabIdx != tab_->currentIndex())
+
+    if(tabIdx != tab_->currentIndex())
 	{
 		QRect lineRect(textRect.left(),pix.height()/2+textH/2+1,
 					   textRect.width(),3);
@@ -386,7 +438,8 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
 		painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);
 	}*/
 
-	tab_->setCustomIcon(tabIdx,pix);
+    tab_->setCustomIcon(tabIdx,pix);
+#endif
 }
 
 

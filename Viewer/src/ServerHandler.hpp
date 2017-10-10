@@ -115,6 +115,8 @@ public:
     int secsSinceLastRefresh() const;
     int secsTillNextRefresh() const;
 
+    static bool checkNotificationState(const std::string& notifierId);
+
 	static ServerHandler* find(const std::string& name);
 
 protected:

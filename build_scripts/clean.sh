@@ -29,6 +29,7 @@ rm -rf Test/data/ECF_HOME_release*
 rm -rf view/data/ECF_HOME_debug*
 rm -rf view/data/ECF_HOME_release*
 rm -rf ANode/parser/test/data/single_defs/mega.def_log
+rm -rf Pyext/test/data/CUSTOMER
 rm -rf Pyext/test.def
 rm -rf Pyext/build
 rm -rf Pyext/timestamp

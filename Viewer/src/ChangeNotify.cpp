@@ -13,6 +13,7 @@
 #include "ChangeNotifyDialog.hpp"
 #include "ChangeNotifyModel.hpp"
 #include "ChangeNotifyWidget.hpp"
+#include "ServerHandler.hpp"
 #include "Sound.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
@@ -54,7 +55,8 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 	data_(0),
 	model_(0),
 	proxyModel_(0),
-	prop_(0)
+    prop_(0),
+    propEnabled_(0)
 {
 	data_=new VNodeList();
 	model_=new ChangeNotifyModel();
@@ -62,8 +64,6 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 
 	proxyModel_=new QSortFilterProxyModel();
 	proxyModel_->setSourceModel(model_);
-	//proxyModel_->setFilterFixedString("1");
-	//proxyModel_->setFilterKeyColumn(0);
 	proxyModel_->setDynamicSortFilter(true);
 
 	items[id] = this;
@@ -198,17 +198,36 @@ void ChangeNotify::setProperty(VProperty* prop)
 
 void ChangeNotify::notifyChange(VProperty* prop)
 {
-	if(prop->name().contains("sound",Qt::CaseInsensitive))
+    Q_ASSERT(prop);
+
+    if(prop->name().contains("sound",Qt::CaseInsensitive))
 		return;
 
-	if(prop->name() == "max_item_num")
+    else if(prop->name() == "max_item_num")
 	{
 		data_->setMaxNum(prop->value().toInt());
 	}
+    //The central settings changed
+    else if(prop == propEnabled_)
+    {
+        //Check if there is any loaded server with this
+        //notification enabled
+        bool hasEnabledServer=ServerHandler::checkNotificationState(id_);
+        updateNotificationState(hasEnabledServer);
+    }
 
 	dialog()->updateSettings(this);
 	ChangeNotifyWidget::updateSettings(id_);
 }
+
+void ChangeNotify::updateNotificationState(bool hasEnabledServer)
+{
+    if(propEnabled_)
+        setEnabled(propEnabled_->value().toBool() || hasEnabledServer);
+    else
+        setEnabled(hasEnabledServer);
+}
+
 
 void ChangeNotify::clearData()
 {
@@ -248,12 +267,12 @@ void ChangeNotify::remove(const std::string& id,VNode *node)
 	}
 }
 
-void ChangeNotify::setEnabled(const std::string& id,bool en)
+void ChangeNotify::updateNotificationStateFromServer(const std::string& id,bool en)
 {
-	if(ChangeNotify* obj=ChangeNotify::find(id))
-	{
-		obj->setEnabled(en);
-	}
+    if(ChangeNotify* obj=ChangeNotify::find(id))
+    {
+        obj->updateNotificationState(en);
+    }
 }
 
 ChangeNotify*  ChangeNotify::find(const std::string& id)
@@ -267,10 +286,10 @@ ChangeNotify*  ChangeNotify::find(const std::string& id)
 
 void ChangeNotify::load(VProperty* group)
 {
-	if(group->name() == "notification")
-	{
-        UiLog().dbg() << "ChangeNotify:load() -- > notification";
+UI_FUNCTION_LOG
 
+    if(group->name() == "notification")
+	{
 		for(int i=0; i < group->children().size(); i++)
 		{
 			VProperty *p=group->children().at(i);
@@ -306,21 +325,27 @@ void ChangeNotify::load(VProperty* group)
 	}
 }
 
+//Called only once during init
 void ChangeNotify::loadServerSettings()
 {
-    UiLog().dbg() << "ChangeNotify::loadServerSettings() --> " << id_;
+UI_FUNCTION_LOG
+
+    UiLog().dbg() << " id=" << id_;
 
 	std::string v("server.notification." + id_ + ".enabled");
-    UiLog().dbg() << " property: " <<  v;
+
+    UiLog().dbg() << " property=" <<  v;
 
 	if(VProperty *p=VConfig::instance()->find(v))
-	{
-		setEnabled(p->value().toBool());
+	{        
+        propEnabled_=p;
+        p->addObserver(this);
+        setEnabled(p->value().toBool());
 	}
 	else
 	{
         UiLog().err() << "  Error!  Unable to find property: " << v;
-	}
+    }
 }
 
 ChangeNotifyDialog* ChangeNotify::dialog()

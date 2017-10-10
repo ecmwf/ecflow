@@ -14,6 +14,51 @@
                 "values_label" : "User/Operator/Administrator",
                 "default": "user"
             }
+        },
+        "confirm": {
+            "label" : "",
+            "tooltip" : "",
+
+            "confirmRequeue": {
+                "label": "Requeuing a node",
+                "tooltip" : "Controls if a confirmation is needed for requeuing a node.",
+                "default": "true"
+            },
+            "confirmRequeueAborted": {
+                "label": "Requeuing an aborted suite or family",
+                "tooltip" : "Controls if a confirmation is needed for requeuing an aborted suite or family.",
+                "default": "true"
+            },
+            "confirmSetComplete": {
+                 "label": "Setting a task or alias to COMPLETE",
+                 "tooltip" : "Controls if a confirmation is needed for setting a task or alias to COMPLETE.",
+                 "default": "true"
+            },
+            "confirmSetAborted": {
+                 "label": "Setting a task or alias to ABORTED",
+                 "tooltip" : "Controls if a confirmation is needed for setting a task or alias to ABORTED.",
+                 "default": "true"
+            },
+            "confirmForceComplete": {
+                "label": "Forcing a node to COMPLETE",
+                "tooltip" : "Controls if a confirmation is needed for forcing a node COMPLETE.",
+                "default": "true"
+            },
+            "confirmForceAborted": {
+                "label": "Forcing a node to ABORTED",
+                "tooltip" : "Controls if a confirmation is needed for forcing a node to ABORTED.",
+                "default": "true"
+            },
+            "confirmKillTask": {
+                "label": "Killing a task or alias",
+                "tooltip" : "Controls if a confirmation is needed for killing a task or alias.",
+                "default": "true"
+            },
+            "confirmKillSuite": {
+                "label": "Killing a suite or family",
+                "tooltip" : "Controls if a confirmation is needed for killing a suite or family.",
+                "default": "true"
+            }
         }
     }
 }

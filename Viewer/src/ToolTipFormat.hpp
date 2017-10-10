@@ -17,6 +17,7 @@ class QAction;
 
 namespace Viewer
 {
+    QString formatShortCut(QString);
     QString formatShortCut(QAction*);
     void addShortCutToToolTip(QList<QAction*>);
 } //namespace Viewer

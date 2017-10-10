@@ -1219,8 +1219,8 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
     QString end=data.at(5);
     QString step=data.at(6);
 
-    if(data.count() == 8)
-        name.prepend(data[7] + ":");
+    if(data.count() == 9)
+        name.prepend(data[8] + ":");
 
     bool selected=option.state & QStyle::State_Selected;
 

@@ -347,6 +347,35 @@ QTreeView[var="1"] {
   Tab widget
 ------------------------------------*/
 
+/* generic tab */
+/*
+QTabBar::tab {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border: 1px solid rgb(170,170,170);
+}
+
+QTabBar::tab:!selected {
+    margin-top: 2px;
+    background: rgb(218,219,220);
+    color: rgb(50,50,50);
+}
+
+QTabBar::tab:selected {
+    background: rgb(240,239,238);color: rgb(50,50,50)
+}
+
+QTabBar::tab:disabled {
+    background: rgb(218,219,220);
+    color: rgb(155,155,155)
+}
+*/
+
+/* The main tab in the nodepanel */
 /*QTabBar[nodePanel="1"]::close-button {
     image: url(:/viewer/dock_menu_indicator.png);
     padding-left: -13px;
@@ -384,3 +413,4 @@ QTabBar[nodePanel="1"]::tab:selected{
 /*QTabBar[change="1"]::tab {
     padding : 2px;
 }*/
+

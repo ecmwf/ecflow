@@ -83,7 +83,7 @@ public:
 	/// Whenever we save the checkpt, we time how long this takes.
 	/// For very large definition the time can be significant and start to interfere with
 	/// the scheduling. (i.e since write to disk is blocking).
-	/// The default is 30 seconds. When the save time exceeds this, the late flag is
+	/// The default is defined by CheckPt::default_save_time_alarm(). When the save time exceeds this, the late flag is
 	/// set on the definition. This needs to be manually reset.
 	size_t checkpt_save_time_alarm() const { return checkpt_save_time_alarm_;}
 	void set_checkpt_save_time_alarm(size_t t) { checkpt_save_time_alarm_ = t ;}
