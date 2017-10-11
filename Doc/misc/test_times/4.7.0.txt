@@ -2,15 +2,15 @@ Oct 2017  (TEXT_ARCHIVE)   4.7.0, leap42
 ============================================================================================
 
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
-
 real	0m1.38s
 user	0m1.27s
 sys	0m0.11s
-+ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 real	0m2.79s
 user	0m2.66s
 sys	0m0.12s
+
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
  Parsing Node tree and AST creation time = 1.23003 parse(1)
  Parsing Node tree *only* time           = 0.976488 parse(1)
