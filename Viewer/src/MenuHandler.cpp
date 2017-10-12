@@ -143,6 +143,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string views    = ItemDef.get("view", "");
                 std::string icon     = ItemDef.get("icon", "");
                 std::string hidden   = ItemDef.get("hidden", "false");
+                std::string multiSelect   = ItemDef.get("multi", "true");
                 std::string statustip  = ItemDef.get("status_tip", "");
 
                 //std::cout << "  " << name << " :" << menuName << std::endl;
@@ -177,7 +178,6 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
                 item->setQuestionCondition(questionCond);
 
-
                 item->setQuestion(question);
                 item->setQuestionControl(questionControl);
                 item->setHandler(handler);
@@ -196,8 +196,9 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 	item->setViews(viewsVec);
                 }
 
-                if(hidden == "true")
-                	item->setHidden(true);
+
+                item->setHidden((hidden == "true")?1:0);
+                item->setMultiSelect((multiSelect == "true")?1:0);
 
                 if (type == "Submenu")
                     item->setAsSubMenu();
@@ -566,15 +567,10 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     //    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse condition: " + condString));
     //}
 
-
-
-
     // add an inactive action(!) to the top of the menu in order to show which
     // node has been selected
 
     buildMenuTitle(nodes, qmenu);
-
-
 
     // if multiple attributes are selected, then tell the user we can't help them
     // NOTE that ActionHandler.cpp ensures that we cannot have a mix of attr and non-attr nodes
@@ -585,8 +581,6 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
         qmenu->addAction(noAction);
         return qmenu;
     }
-
-
 
     // merge the fixed menu items (from the config file) with the dynamic ones
     itemsCombined_ = itemsFixed_;
@@ -620,6 +614,9 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
                 enabled = enabled && (*itItems)->enabledCondition()->execute(*itNodes);
             }
 
+            //Check multiple selection
+            if(nodes.size() > 1 && !(*itItems)->multiSelect())
+                enabled = false;
 
             if ((*itItems)->isSubMenu())
             {
@@ -770,6 +767,7 @@ MenuItem::MenuItem(const std::string &name) :
    name_(name),
    id_(idCnt_++),
    hidden_(false),
+   multiSelect_(true),
    visibleCondition_(NULL),
    enabledCondition_(NULL),
    questionCondition_(NULL),

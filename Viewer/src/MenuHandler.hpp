@@ -50,6 +50,7 @@ public:
     void setIcon(const std::string &icon);
     void setStatustip(const std::string &statustip) {statustip_=statustip;}
     void setHidden(bool b) {hidden_=b;}
+    void setMultiSelect(bool b) {multiSelect_=b;}
     void setAsSubMenu() {isSubMenu_ = true;}
     void setVisibleCondition(BaseNodeCondition *cond)  {visibleCondition_  = cond;}
     void setEnabledCondition(BaseNodeCondition *cond)  {enabledCondition_  = cond;}
@@ -69,6 +70,7 @@ public:
     const std::string& question() const {return question_;}
     const std::string& questionControl() const {return questionControl_;}
     bool hidden() const {return hidden_;}
+    bool multiSelect() const {return multiSelect_;}
     int id() const {return id_;}
     QAction* createAction(QWidget* parent);
 
@@ -90,6 +92,7 @@ private:
     std::string handler_;
     std::vector<std::string> views_;
     bool hidden_;
+    bool multiSelect_; //multiple selecttion
 
     //std::vector<NodeType>      validNodeTypes_;
     //std::vector<DState::State> validNodeStates_;
