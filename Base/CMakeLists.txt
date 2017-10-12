@@ -41,6 +41,7 @@
  src/cts/UserCmd.cpp
  src/cts/ClientHandleCmd.cpp
  src/cts/PlugCmd.cpp
+ src/cts/QueryCmd.cpp
  src/cts/ForceCmd.cpp
  src/cts/LoadDefsCmd.cpp
  src/cts/CFileCmd.cpp
