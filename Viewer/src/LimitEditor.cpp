@@ -155,7 +155,7 @@ void LimitEditor::slotMaxChanged(int)
 
 bool LimitEditor::isValueChanged()
 {
-    return (oriVal_ != w_->valueLabel_->text().toInt() || oriMax_ != w_->maxSpin_->value());
+    return (oriMax_ != w_->maxSpin_->value());
 }
 
 void LimitEditor::slotRemove()
@@ -221,6 +221,9 @@ void LimitEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect)
 
         oriVal_=aData[2].toInt();
         w_->valueLabel_->setText(QString::number(oriVal_));
+
+        oriMax_=aData[3].toInt();
+        w_->maxSpin_->setValue(oriMax_);
 
         //Update the model (=node list)
         setModelData(lim->paths());
