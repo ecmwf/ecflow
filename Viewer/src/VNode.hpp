@@ -194,11 +194,6 @@ public:
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VItem* n);
 
-    static void setNodeMarkedForMove(std::string serverAlias, std::string relPath);
-    static void clearNodeMarkedForMove();
-    static std::string nodeMarkedForMoveRelPath()         {return nodeMarkedForMoveRelPath_;}
-    static std::string nodeMarkedForMoveServerAlias()     {return nodeMarkedForMoveServerAlias_;}
-
 protected:
     void clear();
     void addChild(VNode*);
@@ -221,8 +216,6 @@ protected:
     std::vector<VAttribute*> attr_;
     int index_;
     VNodeTriggerData* data_;
-    static std::string nodeMarkedForMoveRelPath_;
-    static std::string nodeMarkedForMoveServerAlias_;
 };
 
 class VSuiteNode : public VNode

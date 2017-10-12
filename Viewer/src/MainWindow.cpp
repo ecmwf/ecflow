@@ -41,7 +41,7 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
-#include "ToolTipFormat.hpp"
+#include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"

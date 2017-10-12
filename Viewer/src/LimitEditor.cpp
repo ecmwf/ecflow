@@ -17,10 +17,10 @@
 #include "Aspect.hpp"
 
 #include "AttributeEditorFactory.hpp"
+#include "CommandHandler.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VLimitAttr.hpp"
-#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 
 LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
@@ -132,23 +132,23 @@ void LimitEditor::apply()
     {
         if(intVal < oriMax_)
         {
-            ServerHandler::command(info_,valCmd);
-            ServerHandler::command(info_,maxCmd);
+            CommandHandler::run(info_,valCmd);
+            CommandHandler::run(info_,maxCmd);
         }
         else
         {
-            ServerHandler::command(info_,maxCmd);
-            ServerHandler::command(info_,valCmd);
+            CommandHandler::run(info_,maxCmd);
+            CommandHandler::run(info_,valCmd);
         }
     }
     else if(oriVal_ != intVal)
     {
-        ServerHandler::command(info_,valCmd);
+        CommandHandler::run(info_,valCmd);
     }
 
     else if(oriMax_ != intMax)
     {
-        ServerHandler::command(info_,maxCmd);
+        CommandHandler::run(info_,maxCmd);
     }
 }
 
@@ -195,7 +195,7 @@ void LimitEditor::remove(bool all)
     {
         std::vector<std::string> valCmd;
         VAttribute::buildAlterCommand(valCmd,"change","limit_value",a->strName(),"0");
-        ServerHandler::command(info_,valCmd);
+        CommandHandler::run(info_,valCmd);
     }
     else
     {
@@ -205,7 +205,7 @@ void LimitEditor::remove(bool all)
             std::vector<std::string> valCmd;
             VAttribute::buildAlterCommand(valCmd,"delete","limit_path",a->strName(),
                                           model_->data(idx,Qt::DisplayRole).toString().toStdString());
-            ServerHandler::command(info_,valCmd);
+            CommandHandler::run(info_,valCmd);
         }
     }
 

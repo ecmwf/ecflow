@@ -14,9 +14,9 @@
 #include <QSettings>
 
 #include "AttributeEditorFactory.hpp"
+#include "CommandHandler.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
-#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 
 MeterEditorWidget::MeterEditorWidget(QWidget* parent) : QWidget(parent)
@@ -77,7 +77,7 @@ void MeterEditor::apply()
 
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"change","meter",name,val);
-    ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 void MeterEditor::resetValue()

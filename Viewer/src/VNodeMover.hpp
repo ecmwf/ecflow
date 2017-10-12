@@ -5,21 +5,23 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#ifndef TOOLTIPFORMAT_HPP
-#define TOOLTIPFORMAT_HPP
+#ifndef VNODEMOVER_HPP
+#define VNODEMOVER_HPP
 
-#include <QList>
-#include <QString>
+#include "VInfo.hpp"
 
-class QAction;
-
-namespace Viewer
+class VNodeMover
 {
-    QString formatShortCut(QString);
-    QString formatShortCut(QAction*);
-    void addShortCutToToolTip(QList<QAction*>);
-} //namespace Viewer
+public:
+    static bool hasMarkedForMove();
+    static void markNodeForMove(VInfo_ptr markedNode);
+    static void moveMarkedNode(VInfo_ptr destNode);
 
-#endif // TOOLTIPFORMAT_HPP
+protected:
+    static VInfo_ptr nodeMarkedForMove_;
+};
+
+#endif // VNODEMOVER_HPP

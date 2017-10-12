@@ -20,6 +20,9 @@ set(viewer_srcs
     CodeItemWidget.cpp
     ComboMulti.cpp
     CommandDesignerWidget.cpp
+    CommandHandler.cpp
+    CommandOutputDialog.cpp
+    CommandOutputWidget.cpp
     CompactView.cpp
     ConfigListDelegate.cpp
     ConnectState.cpp
@@ -127,6 +130,7 @@ set(viewer_srcs
     SessionDialog.cpp
     SessionRenameDialog.cpp
     SessionHandler.cpp
+    ShellCommand.cpp
     Sound.cpp
     StandardView.cpp
     StringMatchCombo.cpp
@@ -146,8 +150,8 @@ set(viewer_srcs
     RichTextSearchInterface.cpp
     RichTextSearchLine.cpp
     TextEditSearchLine.cpp
+    TextFormat.cpp
     TimeItemWidget.cpp
-    ToolTipFormat.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
@@ -187,6 +191,7 @@ set(viewer_srcs
     VModelData.cpp
     VNode.cpp
     VNodeList.cpp
+    VNodeMover.cpp
     VNState.cpp
     VParam.cpp
     VProperty.cpp   
@@ -245,6 +250,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CodeItemWidget.hpp
     ComboMulti.hpp
     CommandDesignerWidget.hpp    
+    CommandOutputDialog.hpp
+    CommandOutputWidget.hpp
     CustomCommandDialog.hpp
     CustomListWidget.hpp
     Dashboard.hpp
@@ -307,6 +314,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp
+    ShellCommand.hpp
     StringMatchCombo.hpp
     SuiteItemWidget.hpp
     TabWidget.hpp
@@ -352,7 +360,9 @@ set(viewer_wrap_ui_files
     ChangeNotifyDialogWidget.ui
     ChangeNotifyEditor.ui
     CommandDesignerWidget.ui 
-    CustomCommandDialog.ui 
+    CommandOutputDialog.ui
+    CommandOutputWidget.ui
+    CustomCommandDialog.ui
     CodeItemWidget.ui
     DashboardDialog.ui
     DashboardDockTitleWidget.ui

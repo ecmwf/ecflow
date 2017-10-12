@@ -18,9 +18,9 @@
 
 #include "Node.hpp"
 #include "AttributeEditorFactory.hpp"
+#include "CommandHandler.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
-#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 #include "UiLog.hpp"
 #include "VInfo.hpp"
@@ -286,7 +286,7 @@ void RepeatIntEditor::apply()
 
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"change","repeat",val);
-    ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 //================================================================
@@ -353,7 +353,7 @@ void RepeatStringEditor::apply()
 
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"change","repeat",val);
-    ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 //================================================================
@@ -419,7 +419,7 @@ void RepeatDateEditor::apply()
 
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"change","repeat",val);
-    ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 
