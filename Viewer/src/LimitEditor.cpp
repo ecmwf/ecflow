@@ -54,9 +54,9 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
 
     w_->nameLabel_->setText(name);
     w_->valueLabel_->setText(QString::number(oriVal_));
-    w_->maxSpin_->setValue(oriMax_);
 
-    w_->maxSpin_->setRange(0,10000);
+    w_->maxSpin_->setRange(0,10000000);
+    w_->maxSpin_->setValue(oriMax_);
     w_->maxSpin_->setFocus();
 
     if(aData[2].isEmpty() || aData[3].isEmpty())
