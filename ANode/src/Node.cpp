@@ -2174,10 +2174,12 @@ std::vector<Label>::const_iterator Node::label_end() const {   if (child_attrs_)
 static std::vector<VerifyAttr> verifys_;
 static std::vector<ZombieAttr> zombies_;
 static std::vector<QueueAttr>  queues_;
+static std::vector<GenericAttr> generics_;
 const std::vector<VerifyAttr>& Node::verifys() const { if (misc_attrs_) return misc_attrs_->verifys(); return verifys_;}
 const std::vector<ZombieAttr>& Node::zombies() const { if (misc_attrs_) return misc_attrs_->zombies(); return zombies_; }
 const std::vector<QueueAttr>& Node::queues()   const { if (misc_attrs_) return misc_attrs_->queues(); return queues_; }
 std::vector<QueueAttr>& Node::ref_queues()           { if (misc_attrs_) return misc_attrs_->ref_queues(); return queues_; }
+const std::vector<GenericAttr>& Node::generics() const { if (misc_attrs_) return misc_attrs_->generics(); return generics_; }
 
 ecf::AutoRestoreAttr* Node::get_autorestore() const  { if (misc_attrs_) return misc_attrs_->get_autorestore(); return NULL;}
 ecf::AutoCancelAttr*  Node::get_autocancel() const   { if (misc_attrs_) return misc_attrs_->get_autocancel(); return NULL;}
@@ -2190,3 +2192,5 @@ std::vector<VerifyAttr>::const_iterator Node::verify_begin() const { if (misc_at
 std::vector<VerifyAttr>::const_iterator Node::verify_end()   const { if (misc_attrs_) return misc_attrs_->verify_end(); return verifys_.end();}
 std::vector<QueueAttr>::const_iterator Node::queue_begin()  const { if (misc_attrs_) return misc_attrs_->queue_begin(); return queues_.begin();}
 std::vector<QueueAttr>::const_iterator Node::queue_end()    const { if (misc_attrs_) return misc_attrs_->queue_end(); return queues_.end();}
+std::vector<GenericAttr>::const_iterator Node::generic_begin()  const { if (misc_attrs_) return misc_attrs_->generic_begin(); return generics_.begin();}
+std::vector<GenericAttr>::const_iterator Node::generic_end()    const { if (misc_attrs_) return misc_attrs_->generic_end(); return generics_.end();}

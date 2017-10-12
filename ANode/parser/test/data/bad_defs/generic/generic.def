@@ -1,0 +1,4 @@
+suite a
+	generic a b c
+	generic a
+endsuite

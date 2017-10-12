@@ -312,6 +312,12 @@ QueueAttr& Node::findQueue(const std::string& name)
    return QueueAttr::EMPTY1();
 }
 
+const GenericAttr& Node::find_generic(const std::string& name) const
+{
+   if (misc_attrs_) return misc_attrs_->find_generic(name);
+    return GenericAttr::EMPTY();
+}
+
 const Repeat& Node::findRepeat(const std::string& name) const
 {
    if (!repeat_.empty() && repeat_.name() == name) {

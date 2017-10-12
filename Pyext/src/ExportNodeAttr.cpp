@@ -30,6 +30,7 @@
 #include "TodayAttr.hpp"
 #include "VerifyAttr.hpp"
 #include "QueueAttr.hpp"
+#include "GenericAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoArchiveAttr.hpp"
 #include "AutoRestoreAttr.hpp"
@@ -97,6 +98,13 @@ static boost::shared_ptr<QueueAttr> create_queue(const std::string& name, const 
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
    return boost::make_shared<QueueAttr>( name, vec );
+}
+
+static boost::shared_ptr<GenericAttr> create_generic(const std::string& name, const boost::python::list& list)
+{
+   std::vector<std::string> vec;
+   BoostPythonUtil::list_to_str_vec(list,vec);
+   return boost::make_shared<GenericAttr>( name, vec );
 }
 
 static boost::shared_ptr<ZombieAttr> create_ZombieAttr(
@@ -312,6 +320,16 @@ void export_NodeAttr()
    .def("value",       &QueueAttr::value,                                                   "Return the queue current value as string")
    .def("index",       &QueueAttr::index,                                                   "Return the queue current index as a integer")
    .def("empty",       &QueueAttr::empty,       "Return true if the Queue is empty. Used when returning a NULL Queue, from a find")
+   ;
+
+   class_<GenericAttr>("Generic","A generic attribute, used to add new attributes for the future, without requiring a API change")
+   .def("__init__", make_constructor(&create_generic) )
+   .def(self == self )                              // __eq__
+   .def("__str__",  &GenericAttr::to_string)         // __str__
+   .def("__copy__", copyObject<GenericAttr>)        // __copy__ uses copy constructor
+   .def("name",     &GenericAttr::name,       return_value_policy<copy_const_reference>(), "Return the generic name as string")
+   .def("empty",    &GenericAttr::empty,       "Return true if the Generic is empty. Used when returning a NULL Generic, from a find")
+   .add_property( "values",boost::python::range(&GenericAttr::values_begin,&GenericAttr::values_end),"The list of values for the generic")
    ;
 
 	class_<DateAttr>("Date",NodeAttrDoc::date_doc() ,init<int,int,int>())  // day,month,year

@@ -318,6 +318,23 @@ if __name__ == "__main__":
     task.delete_queue("");       assert len(list(task.queues)) == 0, "Expected 0 Queues"
 
     #===========================================================================
+    # add and delete, find generic. These are arbitary attributes for future func.
+    #===========================================================================
+    generic_items = [ "001", "002"]
+    task.add_generic(ecflow.Generic("gen",generic_items ))
+    task.add_generic("gen1",generic_items )
+    task.add_generic("gen2",generic_items )
+    task.add_generic("gen3",generic_items )
+    assert len(list(task.generics)) == 4, "Expected 4 Generics"
+    gen = task.find_generic("gen3")
+    assert not gen.empty()," find failed"
+    assert gen.name() == "gen3", "expected for find gen3"
+    
+    task.delete_generic("gen1"); assert len(list(task.generics)) == 3, "Expected 3 Generics"
+    task.delete_generic("gen2"); assert len(list(task.generics)) == 2, "Expected 2 Generics"
+    task.delete_generic("");     assert len(list(task.generics)) == 0, "Expected 0 Generics"
+
+    #===========================================================================
     # add and delete label
     #===========================================================================
     task.add_label(ecflow.Label("labela", "value"))

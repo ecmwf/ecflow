@@ -32,7 +32,7 @@ using namespace std;
 
 MiscAttrs::MiscAttrs(const MiscAttrs& rhs)
 : node_(NULL),auto_cancel_(NULL),auto_archive_(NULL),auto_restore_(NULL),
-  zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_)
+  zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_), generics_(rhs.generics_)
 {
    if (rhs.auto_cancel_) auto_cancel_= new AutoCancelAttr(*rhs.auto_cancel_);
    if (rhs.auto_archive_) auto_archive_= new AutoArchiveAttr(*rhs.auto_archive_);
@@ -83,6 +83,7 @@ std::ostream& MiscAttrs::print(std::ostream& os) const
    BOOST_FOREACH(const ZombieAttr& z, zombies_) { z.print(os); }
    BOOST_FOREACH(const VerifyAttr& v, verifys_ ){ v.print(os);  }
    BOOST_FOREACH(const QueueAttr& q, queues_ )  { q.print(os);  }
+   BOOST_FOREACH(const GenericAttr& g, generics_){ g.print(os);  }
    return os;
 }
 
@@ -222,6 +223,25 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
          return false;
       }
    }
+
+   if (generics_.size() != rhs.generics_.size()) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "MiscAttrs::operator==  (generics_.size() != rhs.generics_.size()) " << node_->debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   for(unsigned i = 0; i < generics_.size(); ++i) {
+      if (!(generics_[i] == rhs.generics_[i] )) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "MiscAttrs::operator==  (!(generics_ [i] == rhs.generics_[i] ))  " << node_->debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
    return true;
 }
 
@@ -286,6 +306,18 @@ const ZombieAttr& MiscAttrs::findZombie( ecf::Child::ZombieType zombie_type) con
       }
    }
    return ZombieAttr::EMPTY();
+}
+
+void MiscAttrs::add_generic( const GenericAttr& z)
+{
+   const GenericAttr& theFndOne = find_generic( z.name() );
+   if (!theFndOne.empty()) {
+      std::stringstream ss;
+      ss << "MiscAttrs::add_generic : Node " << node_->absNodePath() << " already has a generic attribute of name " << z.name() << "\n";
+      throw std::runtime_error(ss.str());
+   }
+   generics_.push_back( z );
+   node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
 }
 
 void MiscAttrs::addVerify( const VerifyAttr& v )
@@ -411,6 +443,32 @@ QueueAttr& MiscAttrs::findQueue(const std::string& name)
    return QueueAttr::EMPTY1();
 }
 
+void MiscAttrs::delete_generic(const std::string& name)
+{
+   if (name.empty()) {
+      generics_.clear();
+      node_->state_change_no_ = Ecf::incr_state_change_no();
+      return;
+   }
+   for(size_t i = 0; i < generics_.size(); ++i) {
+      if ( generics_[i].name() == name) {
+         generics_.erase( generics_.begin() + i );
+         node_->state_change_no_ = Ecf::incr_state_change_no();
+         return;
+      }
+   }
+}
+
+const GenericAttr& MiscAttrs::find_generic( const std::string& name) const
+{
+   for(size_t i = 0; i < generics_.size(); i++) {
+      if (  generics_[i].name() == name ) {
+         return generics_[i];
+      }
+   }
+   return GenericAttr::EMPTY();
+}
+
 void MiscAttrs::set_memento(const NodeQueueMemento* m)
 {
    add_queue(m->queue_);
@@ -424,7 +482,6 @@ void MiscAttrs::set_memento(const NodeQueueIndexMemento* m )
       }
    }
 }
-
 
 bool MiscAttrs::checkForAutoCancel(const ecf::Calendar& calendar) const
 {

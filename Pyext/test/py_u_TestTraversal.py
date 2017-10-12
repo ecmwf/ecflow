@@ -138,6 +138,7 @@ class DefsTraverser:
         for verify in node.verifies:  self.__writeln(str(verify))
         for zombie in node.zombies:   self.__writeln(str(zombie))
         for queue in node.queues:     self.__writeln(str(queue))
+        for generic in node.generics: self.__writeln(str(generic))
         
         del indent
 

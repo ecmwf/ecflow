@@ -238,6 +238,21 @@ if __name__ == "__main__":
     task_copy.delete_queue("");   assert len(list(task_copy.queues)) == 0, "Expected 0 queues"
 
     #===========================================================================
+    # copy generic
+    #===========================================================================
+    generic_items = [ "a", "b"]
+    task.add_generic(ecflow.Generic("q1",generic_items ))
+    task.add_generic(ecflow.Generic("q2",generic_items))
+    task.add_generic("q3", [ "a", "b"])
+    task.add_generic("q4",  [ "a", "b"])
+    
+    task_copy = copy.copy(task)
+    assert len(list(task_copy.generics)) == 4, "Expected 4  Generics after copy"
+    task_copy.delete_generic("q1"); assert len(list(task_copy.generics)) == 3, "Expected 3 Generics"
+    task_copy.delete_generic("q2"); assert len(list(task_copy.generics)) == 2, "Expected 2 Generics"
+    task_copy.delete_generic("");   assert len(list(task_copy.generics)) == 0, "Expected 0 Generics"
+
+    #===========================================================================
     # add and delete label
     #===========================================================================
     task.add_label(ecflow.Label("label_name1", "value"))

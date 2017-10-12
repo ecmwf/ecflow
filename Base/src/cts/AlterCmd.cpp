@@ -65,6 +65,8 @@ static AlterCmd::Delete_attr_type deleteAttrType(const std::string& s)
    if (s == "inlimit") return AlterCmd::DEL_INLIMIT;
    if (s == "zombie") return AlterCmd::DEL_ZOMBIE;
    if (s == "late") return AlterCmd::DEL_LATE;
+   if (s == "queue") return AlterCmd::DEL_QUEUE;
+   if (s == "generic") return AlterCmd::DEL_GENERIC;
    return AlterCmd::DELETE_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Delete_attr_type d)
@@ -87,6 +89,8 @@ static std::string to_string(AlterCmd::Delete_attr_type d)
    case AlterCmd::DEL_INLIMIT:   return "inlimit";  break;
    case AlterCmd::DEL_ZOMBIE:    return "zombie";  break;
    case AlterCmd::DEL_LATE:      return "late";  break;
+   case AlterCmd::DEL_QUEUE:     return "queue";  break;
+   case AlterCmd::DEL_GENERIC:   return "generic";  break;
    case AlterCmd::DELETE_ATTR_ND: break;
    default: break;
    }
@@ -94,7 +98,7 @@ static std::string to_string(AlterCmd::Delete_attr_type d)
 }
 static void validDeleteAttr(std::vector<std::string>& vec)
 {
-   vec.reserve(17);
+   vec.reserve(19);
    vec.push_back("variable");
    vec.push_back("time");
    vec.push_back("today");
@@ -112,6 +116,8 @@ static void validDeleteAttr(std::vector<std::string>& vec)
    vec.push_back("inlimit");
    vec.push_back("zombie");
    vec.push_back("late");
+   vec.push_back("queue");
+   vec.push_back("generic");
 }
 
 
@@ -343,6 +349,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
          case AlterCmd::DEL_INLIMIT:   node->deleteInlimit(name_); break;
          case AlterCmd::DEL_ZOMBIE:    node->deleteZombie(name_); break;
          case AlterCmd::DEL_LATE:      node->deleteLate(); break;
+         case AlterCmd::DEL_QUEUE:     node->delete_queue(name_); break;
+         case AlterCmd::DEL_GENERIC:   node->delete_generic(name_); break;
          case AlterCmd::DELETE_ATTR_ND: break;
          default: break;
          }
@@ -454,7 +462,7 @@ const char* AlterCmd::desc() {
          "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]\n"
          "         one option must be specified\n"
          "arg2 = For delete:\n"
-         "         [ variable | time | today | date  | day | cron | event | meter | late |\n"
+         "         [ variable | time | today | date  | day | cron | event | meter | late | generic | queue |\n"
          "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
          "       For change:\n"
          "         [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
@@ -668,7 +676,7 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
 void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const
 {
    // options[0] = delete
-   // options[1] = variable | time | today | date | day | cron | event | meter | label | trigger | complete | repeat | limit | limit_path | inlimit | zombie |late
+   // options[1] = variable | time | today | date | day | cron | event | meter | label | trigger | complete | repeat | limit | limit_path | inlimit | zombie |late | generic | queue
    // options[2] = name ( of object to be delete ) optional
    // options[3] = limit_path (optional *ONLY* applicable for limit_path, specifies the path to be deleted
    AlterCmd::Delete_attr_type theAttrType = deleteAttrType(options[1]);
@@ -746,6 +754,15 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
       case AlterCmd::DEL_COMPLETE: break; // there can only be one complete per node, so we delete by path
       case AlterCmd::DEL_REPEAT:   break; // there can only be one repeat per node, so we delete by path
       case AlterCmd::DEL_LATE:     break; // there can only be one late per node, so we delete by path
+      case AlterCmd::DEL_QUEUE:   {
+         std::vector<std::string> vec;vec.push_back("a");
+         if (!name.empty()) QueueAttr check(name,vec);  // will throw if not valid
+         break;
+      }
+      case AlterCmd::DEL_GENERIC:   {
+         if (!name.empty()) GenericAttr check(name);  // will throw if not valid
+         break;
+      }
       case AlterCmd::DEL_LIMIT:    {
          if (!name.empty()) Limit check(name,10);  // will throw if not valid
          break;

@@ -33,6 +33,7 @@
 #include "Variable.hpp"
 #include "ZombieAttr.hpp"
 #include "QueueAttr.hpp"
+#include "GenericAttr.hpp"
 #include "Calendar.hpp"
 #include "SerializationTest.hpp"
 
@@ -70,6 +71,7 @@ BOOST_AUTO_TEST_CASE( test_AttrDefaultConstructor_serialisation )
    doSaveAndRestore<Meter>(fileName);
    doSaveAndRestore<ZombieAttr>(fileName);
    doSaveAndRestore<QueueAttr>(fileName);
+   doSaveAndRestore<GenericAttr>(fileName);
 }
 
 BOOST_AUTO_TEST_CASE( test_VerifyAttr_serialisation )
@@ -297,6 +299,14 @@ BOOST_AUTO_TEST_CASE( test_queue_serialisation )
    cout << "ANattr:: ...test_queue_serialisation\n";
    std::vector<std::string> queue_items; queue_items.push_back("a"); queue_items.push_back("b");
    QueueAttr saved("queue",queue_items);
+   doSaveAndRestore(fileName,saved);
+}
+
+BOOST_AUTO_TEST_CASE( test_generic_serialisation )
+{
+   cout << "ANattr:: ...test_generic_serialisation\n";
+   std::vector<std::string> queue_items; queue_items.push_back("a"); queue_items.push_back("b");
+   GenericAttr saved("gen1",queue_items);
    doSaveAndRestore(fileName,saved);
 }
 

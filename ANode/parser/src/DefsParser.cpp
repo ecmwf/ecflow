@@ -43,6 +43,7 @@
 #include "LateParser.hpp"
 #include "DefsStateParser.hpp"
 #include "QueueParser.hpp"
+#include "GenericParser.hpp"
 #include "Stl.hpp"
 #include "Str.hpp"
 
@@ -104,6 +105,7 @@ public:
       addParser( new VerifyParser(p) );
       addParser( new ZombieAttrParser(p) );
       addParser( new QueueParser(p) );
+      addParser( new GenericParser(p) );
    }
 
    virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -190,6 +192,7 @@ public:
       addParser( new TextParser(p) );
       addParser( new QueueParser(p) );
       addParser( new AutoRestoreParser(p) );
+      addParser( new GenericParser(p) );
    }
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -280,6 +283,7 @@ public:
       addParser( new QueueParser(p) );
       addParser( new AutoArchiveParser(p) );
       addParser( new AutoRestoreParser(p) );
+      addParser( new GenericParser(p) );
    }
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -394,6 +398,7 @@ public:
       addParser( new QueueParser(p) );
       addParser( new AutoArchiveParser(p) );
       addParser( new AutoRestoreParser(p) );
+      addParser( new GenericParser(p) );
  	}
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {

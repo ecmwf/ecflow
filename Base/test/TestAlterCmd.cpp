@@ -821,6 +821,24 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_LATE)));
       BOOST_CHECK_MESSAGE( !s->get_late(), "expected late to be deleted");
    }
+
+
+   // ================================ Generic ==================================================================
+   // Can not add generic via Alter
+   {
+      s->add_generic(GenericAttr("a"));
+      s->add_generic(GenericAttr("b"));
+      s->add_generic(GenericAttr("3"));
+      BOOST_CHECK_MESSAGE( s->generics().size() == 3, "Expected 3 generics but found " << s->generics().size() );
+
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_GENERIC,"a")));
+      BOOST_CHECK_MESSAGE( s->generics().size() == 2, "Expected 2 generics but found " << s->generics().size() );
+
+      // test delete variable
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_GENERIC)));
+      BOOST_CHECK_MESSAGE( s->generics().size() == 0, "Expected no generics but found " << s->generics().size() );
+   }
 }
 
 

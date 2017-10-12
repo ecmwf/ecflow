@@ -24,6 +24,7 @@
 #include "ZombieAttr.hpp"
 #include "VerifyAttr.hpp"
 #include "QueueAttr.hpp"
+#include "GenericAttr.hpp"
 #include "NodeFwd.hpp"
 
 class MiscAttrs : private boost::noncopyable {
@@ -47,12 +48,14 @@ public:
    const std::vector<VerifyAttr>&      verifys() const { return verifys_;}
    const std::vector<ZombieAttr>&      zombies() const { return zombies_; }
    const std::vector<QueueAttr>&       queues()  const { return queues_; }
+   const std::vector<GenericAttr>&     generics() const { return generics_; }
    std::vector<QueueAttr>&             ref_queues()    { return queues_; } //allow simulator access
 
    // Add functions: ===============================================================
    void addVerify( const VerifyAttr& );                  // for testing and verification Can throw std::runtime_error
    void addZombie( const ZombieAttr& );                  // will throw std::runtime_error if duplicate
    void add_queue( const QueueAttr& );                   // will throw std::runtime_error if duplicate
+   void add_generic( const GenericAttr& );               // will throw std::runtime_error if duplicate, must be unique on the key
 
    // Auto =====================================================================================
    ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_;}
@@ -79,11 +82,13 @@ public:
    void delete_zombie(const ecf::Child::ZombieType);
    void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
    void delete_queue(const std::string& name); // empty string means delete all queue's
+   void delete_generic(const std::string& name); // empty string means delete all generics
 
    // Find functions: ============================================================
    bool findVerify(const VerifyAttr& ) const;
    const ZombieAttr& findZombie( ecf::Child::ZombieType ) const;
    const QueueAttr& find_queue( const std::string& name ) const;
+   const GenericAttr& find_generic( const std::string& name ) const;
    QueueAttr& findQueue(const std::string& name);
 
    void verification(std::string& errorMsg) const;
@@ -100,6 +105,8 @@ private:
    std::vector<VerifyAttr>::const_iterator verify_end() const { return verifys_.end();}
    std::vector<QueueAttr>::const_iterator queue_begin() const { return queues_.begin();}
    std::vector<QueueAttr>::const_iterator queue_end() const { return queues_.end();}
+   std::vector<GenericAttr>::const_iterator generic_begin() const { return generics_.begin();}
+   std::vector<GenericAttr>::const_iterator generic_end() const { return  generics_.end();}
 
 private:
    Node*        node_; // *NOT* persisted must be set by the parent class
@@ -112,6 +119,7 @@ private:
    std::vector<ZombieAttr> zombies_;
    std::vector<VerifyAttr> verifys_;      // used for statistics and test verification
    std::vector<QueueAttr>  queues_;       // experimental
+   std::vector<GenericAttr> generics_;    // experimental
 
 private:
    friend class boost::serialization::access;
@@ -123,6 +131,7 @@ private:
       ar & zombies_;
       ar & verifys_;
       ar & queues_;
+      ar & generics_;
    }
 };
 #endif

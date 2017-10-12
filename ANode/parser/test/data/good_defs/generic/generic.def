@@ -1,0 +1,12 @@
+suite a
+  generic a #dddd
+  generic b c f #
+  family b
+    generic a #dddd
+    generic b c f #
+    task c
+    	generic a #dddd
+    	generic b c f #
+    	generic x #
+  endfamily
+endsuite

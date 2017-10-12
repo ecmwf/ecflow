@@ -338,6 +338,7 @@ public:
    const std::vector<VerifyAttr>&      verifys()  const;
    const std::vector<ZombieAttr>&      zombies()  const;
    const std::vector<QueueAttr>&       queues()  const;
+   const std::vector<GenericAttr>&     generics() const;
    TimeDepAttrs*  get_time_dep_attrs() const { return time_dep_attrs_;} // can be NULL
    ecf::LateAttr* get_late() const { return lateAttr_;}
    ecf::AutoCancelAttr*  get_autocancel() const;
@@ -408,6 +409,7 @@ public:
    void addRepeat( const Repeat& );      // will throw std::runtime_error if duplicate
    void addZombie( const ZombieAttr& );  // will throw std::runtime_error if duplicate
    void add_queue( const QueueAttr& );   // will throw std::runtime_error if duplicate
+   void add_generic( const GenericAttr& );// will throw std::runtime_error if duplicate
 
    // sort
    // expect one attr to be [ event | meter | label | limits | variable ]
@@ -433,6 +435,7 @@ public:
    void deleteMeter(const std::string& name);
    void deleteLabel(const std::string& name);
    void delete_queue(const std::string& name);
+   void delete_generic(const std::string& name);
    void deleteTrigger();
    void deleteComplete();
    void deleteRepeat();
@@ -541,6 +544,7 @@ public:
    const Label& find_label(const std::string& name) const;
    const QueueAttr& find_queue(const std::string& name) const;
    QueueAttr& findQueue(const std::string& name);
+   const GenericAttr& find_generic(const std::string& name) const;
 
    limit_ptr find_limit(const std::string& name) const;
    limit_ptr findLimitUpNodeTree(const std::string& name) const;
@@ -740,6 +744,8 @@ private: /// For use by python interface,
    std::vector<VerifyAttr>::const_iterator verify_end() const;
    std::vector<QueueAttr>::const_iterator queue_begin() const;
    std::vector<QueueAttr>::const_iterator queue_end() const;
+   std::vector<GenericAttr>::const_iterator generic_begin() const;
+   std::vector<GenericAttr>::const_iterator generic_end() const;
    std::vector<Variable>::const_iterator variable_begin() const { return varVec_.begin();}
    std::vector<Variable>::const_iterator variable_end() const { return varVec_.end();}
    std::vector<limit_ptr>::const_iterator limit_begin() const { return limitVec_.begin();}

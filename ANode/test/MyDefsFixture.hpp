@@ -103,6 +103,8 @@ private:
 		std::vector<std::string> queue_items; queue_items.push_back("000"); queue_items.push_back("001");  queue_items.push_back("002");
       suite->add_queue(QueueAttr("queue",queue_items));
       suite->add_queue(QueueAttr("queue1",queue_items));
+      suite->add_generic(GenericAttr("gen1",queue_items));
+      suite->add_generic(GenericAttr("gen2",queue_items));
 		suite->add_task( "t1" );
 		suite->add_task( "t2" );
 		task_ptr suiteTask = suite->add_task( "t3" );
@@ -205,6 +207,7 @@ private:
          fam->addLate( lateAttr );
          fam->addInLimit( InLimit(suiteLimit2,"/" + sname,2,true/*limit this node only*/ ));
          fam->add_queue(QueueAttr("queue1",queue_items));
+         fam->add_generic(GenericAttr("gen1",queue_items));
 
          task_ptr task = fam->add_task( tname );
 			task->addDate( DateAttr(1,2,2009) );
@@ -222,6 +225,9 @@ private:
  			task->addVerify( VerifyAttr(NState::COMPLETE,3) );
  			task->addLate( lateAttr );
          task->add_queue(QueueAttr("queue1",queue_items));
+         task->add_generic(GenericAttr("gen1",queue_items));
+         task->add_generic(GenericAttr("gen2",std::vector<std::string>()));
+
          std::vector<std::string> nodes_to_restore; nodes_to_restore.push_back("/EmptySuite");
          task->add_autorestore(ecf::AutoRestoreAttr(nodes_to_restore));
 			if (i == 2) {

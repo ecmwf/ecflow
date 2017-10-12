@@ -173,6 +173,15 @@ void Node::delete_queue(const std::string& name)
    throw std::runtime_error("Node::delete_queue: Can not find queue: " + name);
 }
 
+void Node::delete_generic(const std::string& name)
+{
+   if (misc_attrs_)  {
+      misc_attrs_->delete_generic(name);
+      return;
+   }
+   throw std::runtime_error("Node::delete_generic : Can not find generic: " + name);
+}
+
 void Node::deleteTrigger()
 {
 	if (triggerExpr_)  {

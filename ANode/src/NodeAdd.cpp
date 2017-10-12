@@ -332,11 +332,12 @@ void Node::addZombie( const ZombieAttr& z)
 
 void Node::add_queue( const QueueAttr& q)
 {
-   if (misc_attrs_) {
-      misc_attrs_->add_queue(q); // can throw
-      return;
-   }
-   misc_attrs_ = new MiscAttrs(this);
+   if (!misc_attrs_)  misc_attrs_ = new MiscAttrs(this);
    misc_attrs_->add_queue(q);
 }
 
+void Node::add_generic( const GenericAttr& q)
+{
+   if (!misc_attrs_)  misc_attrs_ = new MiscAttrs(this);
+   misc_attrs_->add_generic(q);
+}
