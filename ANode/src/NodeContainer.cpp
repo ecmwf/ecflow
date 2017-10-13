@@ -267,7 +267,7 @@ void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::As
 
 void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 #ifdef DEBUG_MEMENTO
-   std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
+   std::cout << "NodeContainer::set_memento( const ChildrenMemento * ) " << debugNodePath() << "\n";
 #endif
    if (aspect_only) {
       aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
