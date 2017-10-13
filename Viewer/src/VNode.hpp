@@ -194,6 +194,8 @@ public:
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VItem* n);
 
+    virtual void print();
+
 protected:
     void clear();
     void addChild(VNode*);
@@ -308,6 +310,8 @@ public:
 	void why(std::vector<std::string>& theReasonWhy) const;
 
     bool triggeredScanned() const {return triggeredScanned_;}
+
+    void print();
 
 protected:
 	//Clear contents and rebuild the whole tree.

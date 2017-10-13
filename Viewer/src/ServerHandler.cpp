@@ -912,6 +912,18 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
                 //This will update the suites + restart the timer
 				rescanTree();
+
+#if 0
+                {
+                    ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+                    defs_ptr defs = defsAccess.defs();
+                    if(defs)
+                    {
+                        std::cout << defs;
+                    }
+                }
+#endif
+
 			}
 			else
 			{
