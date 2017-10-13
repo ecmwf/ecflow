@@ -635,7 +635,7 @@ bool UIStateCondition::execute(VItem*)
 {
     if (uiStateName_ == "marked")
     {
-        return !(VNodeMover::hasMarkedForMove());
+        return VNodeMover::hasMarkedForMove();
     }
 
     return false;

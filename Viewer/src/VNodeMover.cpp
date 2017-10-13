@@ -111,58 +111,14 @@ void VNodeMover::moveMarkedNode(VInfo_ptr destNode)
         std::string plugCommand;
         plugCommand = "ecflow_client --plug <full_name> " + serverDest->host() +
                 ":" + serverDest->port() + destNode->relativePath();
-        CommandHandler::run(nodeMarkedForMove_,plugCommand);
+        CommandHandler::run(nodeMarkedForMove_,plugCommand); //this will run it on the source server!!
 
         nodeMarkedForMove_.reset();
-        //the dest server will have a big update, and we don't want to wait for the next sync to see it
-        serverDest->reset();
+
+        //We should update the dest server only when the plug command has finished.
+        //However the run command above is asynchronous, so we would need an observer to properly
+        //time this update. As a temporary measure we call reset here, it takes some time and we
+        //have more time to the plug command to finish.
+        serverDest->reset(); //TODO: use VTask and update serverDest with refresh()
     }
 }
-
-#if 0
-// get a ServerHandler for the server
-std::string aliasOfMarkedServer(VNode::nodeMarkedForMoveServerAlias());
-ServerHandler* shSource = ServerHandler::findServer(aliasOfMarkedServer);
-if (shSource == NULL)
-{
-    UserMessage::message(UserMessage::ERROR, true, "The source server " + aliasOfMarkedServer + " must be loaded into the UI");
-    return;
-}
-
-// can only do this if the source (marked) node is suspended
-std::string pathOfMarkedNode(VNode::nodeMarkedForMoveRelPath());
-VServer* vs = shSource->vRoot();
-assert(vs);
-VNode* vnodeSource = vs->find(pathOfMarkedNode);
-if (!vnodeSource)
-{
-    UserMessage::message(UserMessage::ERROR, true, "The source node " + pathOfMarkedNode + " no longer exists on server " + aliasOfMarkedServer);
-    return;
-}
-
-if (!vnodeSource->isSuspended())
-{
-    UserMessage::message(UserMessage::ERROR, true, "Node " + VNode::nodeMarkedForMoveServerAlias() + ":/" +
-                                                             VNode::nodeMarkedForMoveRelPath() +
-                                                             " must be suspended first.");
-    return;
-}
-
-// tell the user what we're about to do
-ServerHandler *shDest = filteredNodes[0]->server();
-bool ok = UserMessage::confirm("About to move node " +
-                               pathOfMarkedNode + " from server " +
-                               aliasOfMarkedServer + " (" + shSource->host() + ":" + shSource->port() + ") to " +
-                               filteredNodes[0]->serverAlias() + " (" + shDest->host() + ":" + shDest->port() + ") "
-                               "/" + filteredNodes[0]->relativePath() +  ". Ok?");
-// do it (?)
-if (ok)
-{
-    std::string plugCommand;
-    plugCommand = "ecflow_client --plug <full_name> " + shDest->host() + ":" + shDest->port() + filteredNodes[0]->relativePath();
-    shSource->command(pathOfMarkedNode, plugCommand);
-    shDest->reset();  // the dest server will have a big update, and we don't want to wait for the next sync to see it
-    VNode::clearNodeMarkedForMove();
-}
-}
-#endif
