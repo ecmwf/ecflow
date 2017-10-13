@@ -386,22 +386,21 @@ tmp_file ehost::jobcheck( node& n, const std::string &cmd )
      if (n.__node__()->get_node()) 
        n.__node__()->get_node()->variableSubsitution(subcmd);
    std::string check = "sh " + subcmd;
-
-   // tmp_file out(NULL);
    char *tmp = tmpnam("ecf_checkXXXX");
    command(check + " > " + tmp);
    return tmp_file(tmp);
-   // return tmp_file(stat.c_str(), false);
 }
 
 tmp_file host::jobstatus( node& n, const std::string &cmd )
 {
+   gui::message(clientName, "--xxxstatus", n.full_name().c_str());
    return tmp_file(0x0);
 }
 
 tmp_file ehost::jobstatus( node& n, const std::string &cmd )
 {
    command(clientName, "--status", n.full_name().c_str(), 0x0);
+   gui::message(clientName, "--status", n.full_name().c_str());
    return tmp_file(0x0);
 }
 

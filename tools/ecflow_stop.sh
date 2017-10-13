@@ -28,7 +28,7 @@ backup_server=false
 
 # =========================================================================
 # Update host, site specific
-. /home/ma/emos/bin/ecflow_site.sh || : # site specific settings come here
+[ -f /home/ma/emos/bin/ecflow_site.sh ] && . /home/ma/emos/bin/ecflow_site.sh # site specific settings come here
 
 #==========================================================================
 # Syntax
@@ -87,7 +87,7 @@ fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT
 # cut is useful when the server may be moved from node to node 
 # 4 is common string here, so that the same file is used for all nodes
 
-if [[ -f $fname ]]; then host=$(cat $fname); fi
+if [ -f $fname ]; then host=$(cat $fname); fi
 
 echo ""
 echo "User \"$username\" attempting to stop ecf server on $host:$port_number"
