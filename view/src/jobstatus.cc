@@ -15,7 +15,7 @@
 //=============================================================================================
 
 #include "jobstatus.h"
-#include "node.host.h"
+#include "node.h"
 #include "host.h"
 #include <Xm/Text.h>
 #include "ecf_node.h"
