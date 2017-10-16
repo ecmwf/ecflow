@@ -58,7 +58,7 @@ public:
     static void openWindow(QStringList id,QWidget *fromW=0);
     static void reload();
     static void saveSession(SessionItem*);
-    static void changeNotifySelectionChanged(VInfo_ptr);
+    static void lookUpInTree(VInfo_ptr);
     static void startPreferences(QString);
 
 protected Q_SLOTS:

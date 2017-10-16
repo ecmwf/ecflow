@@ -18,6 +18,7 @@
 
 #include "AttributeEditorFactory.hpp"
 #include "CommandHandler.hpp"
+#include "MainWindow.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VLimitAttr.hpp"
@@ -28,7 +29,8 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
     setupUi(this);
     removeTb_->setDefaultAction(actionRemove_);
     removeAllTb_->setDefaultAction(actionRemoveAll_);
-    pathView_->addAction(actionRemove_);
+    //pathView_->addAction(actionRemove_);
+    pathView_->addAction(actionLookUp_);
     pathView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
@@ -78,6 +80,12 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) :
 
     connect(w_->actionRemoveAll_,SIGNAL(triggered()),
             this,SLOT(slotRemoveAll()));
+
+    connect(w_->actionLookUp_,SIGNAL(triggered()),
+            this,SLOT(slotLookUp()));
+
+    connect(w_->pathView_,SIGNAL(doubleClicked(const QModelIndex&)),
+            this,SLOT(slotDoubleClicked(const QModelIndex&)));
 
     header_->setInfo(QString::fromStdString(info_->path()),"Limit");
 
@@ -173,7 +181,7 @@ void LimitEditor::remove(bool all)
     if(!info_)
         return;
 
-    //We cannot cancle the setting after remove is callled
+    //We cannot cancel the setting after remove is callled
     disableCancel();
 
     Q_ASSERT(model_);
@@ -252,6 +260,35 @@ void LimitEditor::setModelData(QStringList lst)
     {
         w_->actionRemove_->setEnabled(false);
         w_->actionRemoveAll_->setEnabled(false);
+    }
+}
+//Lookup in tree
+
+void LimitEditor::slotLookUp()
+{
+     QModelIndex idx=w_->pathView_->currentIndex();
+     lookup(idx);
+}
+
+void LimitEditor::slotDoubleClicked(const QModelIndex &index)
+{
+    lookup(index);
+}
+
+void LimitEditor::lookup(const QModelIndex &idx)
+{
+    if(!info_)
+        return;
+
+    Q_ASSERT(model_);
+
+    std::string nodePath=
+            model_->data(idx,Qt::DisplayRole).toString().toStdString();
+
+    VInfo_ptr ni=VInfo::createFromPath(info_->server(),nodePath);
+    if(ni)
+    {
+        MainWindow::lookUpInTree(ni);
     }
 }
 

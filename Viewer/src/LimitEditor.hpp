@@ -39,6 +39,8 @@ protected Q_SLOTS:
     void slotMaxChanged(int);
     void slotRemove();
     void slotRemoveAll();
+    void slotLookUp();
+    void slotDoubleClicked(const QModelIndex &index);
 
 protected:
     void resetValue();
@@ -48,6 +50,7 @@ protected:
     void remove(bool all);
     void nodeChanged(const std::vector<ecf::Aspect::Type>& a);
     void setModelData(QStringList lst);
+    void lookup(const QModelIndex &index);
     void readSettings();
     void writeSettings();
 
