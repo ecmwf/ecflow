@@ -185,14 +185,17 @@ void AttributeEditor::setSaveStatus(bool st)
 
 void AttributeEditor::setSuspended(bool st)
 {
-    UiLog().dbg() << "AttributeEditor::setSuspended --> " << st;
+#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    UI_FUNCTION_LOG
+    UiLog().dbg() << " status=" << st;
+#endif
 
     Q_ASSERT(form_);
     form_->setEnabled(!st);
 
-    QPushButton *okPb=buttonBox_->button(QDialogButtonBox::Ok);
-    Q_ASSERT(okPb);
-    okPb->setEnabled(!st);
+    QPushButton *savePb=buttonBox_->button(QDialogButtonBox::Save);
+    Q_ASSERT(savePb);
+    savePb->setEnabled(!st);
 
     QPushButton *resetPb=buttonBox_->button(QDialogButtonBox::Reset);
     Q_ASSERT(resetPb);

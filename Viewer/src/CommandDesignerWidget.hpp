@@ -34,8 +34,6 @@ public:
 	void setNodes(std::vector<VInfo_ptr> &nodes);
     std::vector<VInfo_ptr>& selectedNodes();
 
-
-
 public Q_SLOTS:
 	void insertComponent(QListWidgetItem *);
 	void on_commandLineEdit__textChanged();
@@ -60,7 +58,7 @@ public Q_SLOTS:
 	void on_nodeListLinkLabel__linkActivated(const QString &link);
 	void on_nodeSelectionChanged();
 	void on_tabWidget__currentChanged(int index);
-	QPushButton *runButton() {return runButton_;};
+    QPushButton *runButton() {return runButton_;}
 
 
 private:

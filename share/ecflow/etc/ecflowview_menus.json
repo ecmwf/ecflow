@@ -365,7 +365,7 @@
             "menu"           : "Node",
             "name"           : "Set as root",
             "enabled_for"    : "suite or task or family",
-            "hidden"         : "true"
+            "hidden"         : "true"                        
         },
 
         {
@@ -579,6 +579,7 @@
             "name"           : "Filter only this suite",
             "visible_for"    : "node",
             "command"        : "filterOne",
+            "multi"          : "false",
             "handler"        : "tree",
             "view"           : "tree"
         },
@@ -663,6 +664,7 @@
             "name"           : "Search ...",
             "visible_for"    : "server or node",        
             "command"        : "search",
+            "multi"          : "false",
             "handler"        : "dashboard",
             "view"           : "tree/table",
             "icon"           : "search.svg"          
@@ -676,6 +678,7 @@
             "name"           : "Server log ...",
             "visible_for"    : "server",        
             "command"        : "history",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "server_log.svg"          
         },         
@@ -684,7 +687,8 @@
             "name"           : "Suite filter ...",
             "visible_for"    : "server",        
             "command"        : "suite",
-            "handler"        : "info_panel",
+            "multi"          : "false",
+            "handler"        : "info_panel",            
             "icon"           : "filter.svg"          
         }, 
         {
@@ -692,6 +696,7 @@
             "name"           : "Zombies ...",
             "visible_for"    : "server",        
             "command"        : "zombie",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "zombie.svg"            
         }, 
@@ -700,6 +705,7 @@
             "name"           : "Server settings ...",
             "visible_for"    : "server",        
             "command"        : "server_settings",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "cogwheel_blue.svg"
         }, 
@@ -708,6 +714,7 @@
             "name"           : "Info ...",
             "visible_for"    : "server or node",        
             "command"        : "overview",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "overview.svg"          
         }, 
@@ -717,6 +724,7 @@
             "name"           : "Edit ...",
             "visible_for"    : "task or alias",        
             "command"        : "edit",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "edit.svg"          
         },  
@@ -725,6 +733,7 @@
             "name"           : "Output ...",
             "visible_for"    : "task or alias",        
             "command"        : "output",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "output.svg"          
         },
@@ -733,6 +742,7 @@
             "name"           : "Variables ...",
             "visible_for"    : "server or node",        
             "command"        : "variable",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "variable.svg"          
         },                  
@@ -741,6 +751,7 @@
             "name"           : "Script ...",
             "visible_for"    : "task or alias",        
             "command"        : "script",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "script.svg"          
         }, 
@@ -749,6 +760,7 @@
             "name"           : "Job ...",
             "visible_for"    : "task or alias",        
             "command"        : "job",
+            "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "job.svg"          
         }, 
@@ -760,7 +772,8 @@
             "menu"           : "Node",
             "name"           : "Copy node path",
             "visible_for"    : "server or node",        
-            "command"        : "copy"                      
+            "command"        : "copy",
+            "multi"          : "false"
         },
         {
             "menu"           : "Node",
@@ -771,6 +784,7 @@
             "name"           : "Expand all children",
             "visible_for"    : "server or node",        
             "command"        : "expand",
+            "multi"          : "false",
             "handler"        : "tree",
             "view"           : "tree"                    
         },
@@ -779,6 +793,7 @@
             "name"           : "Collapse all children",
             "visible_for"    : "server or node",        
             "command"        : "collapse",
+            "multi"          : "false",
             "handler"        : "tree",
             "view"           : "tree"                    
         },
@@ -787,6 +802,7 @@
             "name"           : "Edit ...",
             "visible_for"    : "label or meter or limit or trigger or var or genvar",
             "command"        : "edit",
+            "multi"          : "false",
             "handler"        : "tree",
             "view"           : "tree/trigger"
         },
@@ -795,6 +811,7 @@
             "name"           : "Edit ...",
             "visible_for"    : "repeat and not repeat_day",
             "command"        : "edit",
+            "multi"          : "false",
             "handler"        : "tree",
             "view"           : "tree/trigger"
         }

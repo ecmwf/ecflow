@@ -65,6 +65,7 @@ public:
 	static VFile_ptr create(const std::string& path,const std::string& contents,bool deleteFile=true);
 	static VFile_ptr create(const std::string& path,bool deleteFile= true);
 	static VFile_ptr create(bool deleteFile= true);
+    static VFile_ptr createTmpFile(bool deleteFile= true);
 
     //static std::string tmpName();
 

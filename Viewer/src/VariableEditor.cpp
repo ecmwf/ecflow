@@ -13,10 +13,10 @@
 #include <QSettings>
 
 #include "AttributeEditorFactory.hpp"
+#include "CommandHandler.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VGenVarAttr.hpp"
-#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 
 VariableEditorWidget::VariableEditorWidget(QWidget* parent) : QWidget(parent)
@@ -92,7 +92,7 @@ void VariableEditor::apply()
         {
             std::vector<std::string> cmd;
             VAttribute::buildAlterCommand(cmd,"change","variable",name,val);
-            ServerHandler::command(info_,cmd);
+            CommandHandler::run(info_,cmd);
         }
     }
 }

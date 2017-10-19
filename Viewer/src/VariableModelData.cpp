@@ -9,7 +9,7 @@
 
 #include "VariableModelData.hpp"
 
-#include "ServerHandler.hpp"
+#include "CommandHandler.hpp"
 #include "UserMessage.hpp"
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
@@ -287,7 +287,7 @@ void VariableModelData::setValue(int index,const std::string& val)
 	std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"change","variable",name(index),val);
 
-	ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 void VariableModelData::alter(const std::string& name,const std::string& val)
@@ -311,7 +311,7 @@ void VariableModelData::alter(const std::string& name,const std::string& val)
 
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,mode,"variable",name,val);
-    ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 
@@ -319,14 +319,14 @@ void VariableModelData::add(const std::string& name,const std::string& val)
 {
 	std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,(hasName(name))?"change":"add","variable",name,val);
-	ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 void VariableModelData::remove(const std::string& varName)
 {
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"delete","variable",varName,"");
-    ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 bool VariableModelData::isGenVar(int index) const

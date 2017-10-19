@@ -41,7 +41,7 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
-#include "ToolTipFormat.hpp"
+#include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
@@ -604,7 +604,7 @@ void MainWindow::configChanged(MainWindow*)
 			win->rerenderContents();
 }
 
-void MainWindow::changeNotifySelectionChanged(VInfo_ptr info)
+void MainWindow::lookUpInTree(VInfo_ptr info)
 {
     Q_FOREACH(MainWindow *win,windows_)
         if(win->selectInTreeView(info))

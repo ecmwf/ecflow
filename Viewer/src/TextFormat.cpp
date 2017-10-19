@@ -7,7 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "ToolTipFormat.hpp"
+#include "TextFormat.hpp"
 
 #include <QAction>
 #include <QColor>
@@ -47,4 +47,13 @@ void addShortCutToToolTip(QList<QAction*> alst)
     }
 }
 
+QString formatBoldText(QString txt,QColor col)
+{
+    return "<b><font color=\'" + col.name() + "\'>" +txt + "</font></b>";
+}
+
+QString formatText(QString txt,QColor col)
+{
+    return "<font color=\'" + col.name() + "\'>" +txt + "</font>";
+}
 } //namespace Viewer

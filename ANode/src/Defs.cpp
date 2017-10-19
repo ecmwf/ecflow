@@ -1096,7 +1096,12 @@ node_ptr Defs::replaceChild(const std::string& path,
  		client_suite_to_add->set_most_significant_state_up_node_tree();
  		return client_suite_to_add;
 	}
-
+	if (server_parent->isTask()) {
+       errorMsg = "Can not replace child '"; errorMsg += path;
+       errorMsg += "' since path ("; errorMsg += server_parent->absNodePath() ;
+       errorMsg += ") in the server is a task.";
+       return node_ptr();
+	}
 
 	// PARTIAL PATH MATCH,
    LOG_ASSERT( last_client_child ,"");

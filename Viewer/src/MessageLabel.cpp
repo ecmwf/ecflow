@@ -121,6 +121,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
 void MessageLabel::clear()
 {
 	msgLabel_->setText("");
+    message_.clear();
     stopLoadLabel();
     stopProgress();
 }
@@ -145,9 +146,30 @@ void MessageLabel::showTip(QString msg)
     showMessage(TipType,msg);
 }
 
+void MessageLabel::appendInfo(QString msg)
+{
+    appendMessage(InfoType,msg);
+}
+
+void MessageLabel::appendWarning(QString msg)
+{
+    appendMessage(WarningType,msg);
+}
+
+void MessageLabel::appendError(QString msg)
+{
+    appendMessage(ErrorType,msg);
+}
+
+void MessageLabel::appendTip(QString msg)
+{
+    appendMessage(TipType,msg);
+}
+
 void MessageLabel::showMessage(const Type& type,QString msg)
 {
-	std::map<Type,MessageLabelData>::const_iterator it=typeData.find(type);
+    message_=msg;
+    std::map<Type,MessageLabelData>::const_iterator it=typeData.find(type);
 	assert(it != typeData.end());
 
 	if(type != currentType_)
@@ -162,9 +184,12 @@ void MessageLabel::showMessage(const Type& type,QString msg)
         pixLabel_->setPixmap(((!narrowMode_)?it->second.pix_:it->second.pixSmall_));
 
 		currentType_=type;
+        message_.clear();
 	}
 
-	QString s=msg;
+    message_=msg;
+
+    QString s=message_;
 	s.replace("\n","<br>");
 	if(showTypeTitle_)
 		s="<b>" + it->second.title_ + ": </b><br>" + s;
@@ -172,6 +197,12 @@ void MessageLabel::showMessage(const Type& type,QString msg)
 	msgLabel_->setText(s);
 
 	show();
+}
+
+void MessageLabel::appendMessage(const Type& type,QString msg)
+{
+    message_+=msg;
+    showMessage(type,message_);
 }
 
 void MessageLabel::startLoadLabel()

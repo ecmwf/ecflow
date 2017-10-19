@@ -21,6 +21,7 @@
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 
+std::string DirectoryHandler::exeDir_;
 std::string DirectoryHandler::shareDir_;
 std::string DirectoryHandler::etcDir_;
 std::string DirectoryHandler::configDir_;
@@ -102,7 +103,9 @@ void DirectoryHandler::init(const std::string& exeStr)
 	//If the executable path exits we probably use relative paths to it.
 	else
 	{
-		//TODO: make it work when we run it from within "bin"
+        exeDir_=exePath.parent_path().string();
+
+        //TODO: make it work when we run it from within "bin"
 		boost::filesystem::path shareDir  = exePath.parent_path().parent_path();
 
 		shareDir  /= "share";

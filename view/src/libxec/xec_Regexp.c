@@ -22,7 +22,7 @@ Include regexp once for compatibility
 #include <stdio.h>
 
 #define ESIZE 1024
-
+#define NO_REGEXP
 #ifdef NO_REGEXP
 
 static char *loc1,*loc2;

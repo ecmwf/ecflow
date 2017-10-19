@@ -44,9 +44,6 @@
 
 #define _UI_VNODE_DEBUG
 
-// static member of VNode
-std::string VNode::nodeMarkedForMoveRelPath_;
-std::string VNode::nodeMarkedForMoveServerAlias_;
 
 //For a given node this class stores all the nodes that this node itself triggers.
 //For memory efficiency we only store the AttributeFilterindex of the nodes not the pointers themselves.
@@ -601,20 +598,6 @@ std::string VNode::absNodePath() const
 	return (node_)?node_->absNodePath():"";
 }
 
-
-void VNode::setNodeMarkedForMove(std::string serverAlias, std::string relPath)
-{
-	nodeMarkedForMoveServerAlias_ = serverAlias;
-	nodeMarkedForMoveRelPath_ = relPath;
-}
-
-void VNode::clearNodeMarkedForMove()
-{
-	nodeMarkedForMoveRelPath_.clear();
-	nodeMarkedForMoveServerAlias_.clear();
-}
-
-
 bool VNode::sameContents(VItem* item) const
 {
     return item == this;
@@ -1164,6 +1147,13 @@ const std::string& VAliasNode::typeName() const
    return t;
 }
 
+void VNode::print()
+{
+    UiLog().dbg() << name() << " " << children_.size();
+    for(std::size_t i=0; i < children_.size(); i++)
+        children_[i]->print();
+}
+
 //=================================================
 //
 // VNodeRoot - this represents the server
@@ -1515,7 +1505,7 @@ void VServer::scan(VNode *node,bool hasNotifications)
 		VNode* vn=NULL;
 		if((*it)->isTask())
 		{
-			vn=new VTaskNode(node,*it);
+            vn=new VTaskNode(node,*it);
 
 			//If there are notifications we need to check them using the previous state
 			if(hasNotifications)
@@ -1802,3 +1792,8 @@ void VServer::clearNodeTriggerData()
         nodes_[i]->clearTriggerData();
 }
 
+void VServer::print()
+{
+    for(std::size_t i=0; i < children_.size(); i++)
+        children_[i]->print();
+}

@@ -153,7 +153,8 @@ if [[ "$ARCH" = cray ]] ; then
     else
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
-    module unload atp
+    module unload atp                     # must use for NON MPI code (ATP abnormal termination processing only works with cray MPI for ESM modes)
+    module load craype-target-local_host  # must use for NON MPI code
     module load boost/1.53.0
     export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1

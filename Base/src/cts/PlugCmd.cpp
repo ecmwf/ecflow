@@ -176,6 +176,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 
    Node* theDestNode = destNode.get();
    if (theDestNode->isTask()) theDestNode = theDestNode->parent();
+   SuiteChanged1 suiteChanged(destNode->suite());
 
    // Before we do remove the source node, check its ok to add it as a child
    std::string errorMsg;

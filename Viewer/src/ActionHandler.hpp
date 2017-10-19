@@ -29,15 +29,16 @@ public:
         explicit ActionHandler(QObject*,QWidget* menuParent);
 
 		void contextMenu(std::vector<VInfo_ptr>,QPoint);
+        bool actionHandler();
+
 Q_SIGNALS:
 	    void viewCommand(VInfo_ptr,QString);
 	    void infoPanelCommand(VInfo_ptr,QString);
 	    void dashboardCommand(VInfo_ptr,QString);
 
-protected:
+protected:      
         QObject *actionSender_;
         QWidget *menuParent_;
-
 };
 
 #endif

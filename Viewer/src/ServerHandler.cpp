@@ -25,8 +25,10 @@
 #include "ServerDefsAccess.hpp"
 #include "ServerObserver.hpp"
 #include "ServerComObserver.hpp"
+#include "ShellCommand.hpp"
 #include "SuiteFilter.hpp"
 #include "UiLog.hpp"
+#include "UIDebug.hpp"
 #include "UpdateTimer.hpp"
 #include "UserMessage.hpp"
 #include "VNode.hpp"
@@ -41,7 +43,6 @@
 #include <iostream>
 #include <algorithm>
 
-#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio/ip/host_name.hpp>
@@ -460,9 +461,19 @@ defs_ptr ServerHandler::safelyAccessSimpleDefsMembers()
 // result/reply can be processed.
 //--------------------------------------------------------------
 
+//It is protected! Practically it means we
+//we can only run it through CommandHandler!!!
 void ServerHandler::runCommand(const std::vector<std::string>& cmd)
 {
-	if(connectState_->state() == ConnectState::Disconnected)
+    //Shell command - we should not reach this point
+    if(cmd.size() > 0 && cmd[0]=="sh")
+    {
+        UI_ASSERT(0,"cmd=" << cmd[0]);
+        return;
+    }
+
+    //ecflow_client command
+    if(connectState_->state() == ConnectState::Disconnected)
 		return;
 
 	VTask_ptr task=VTask::create(VTask::CommandTask);
@@ -575,256 +586,6 @@ void ServerHandler::refreshServerInfo()
     //We reduce the update frequency
     driftRefreshTimer();
 }
-
-std::string ServerHandler::commandToString(const std::vector<std::string>& cmd)
-{
-	return boost::algorithm::join(cmd," ");
-}
-
-//Send a command to a server. The command is specified as a string vector, while the node or server for that
-//the command will be applied is specified in a VInfo object.
-void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd)
-{
-	std::vector<std::string> realCommand=cmd;
-
-	if (!realCommand.empty())
-	{
-        UiLog().dbg() << "ServerHandler::command --> " << commandToString(realCommand);
-
-		//Get the name of the object for that the command will be applied
-		std::string nodeFullName;
-		std::string nodeName;
-		ServerHandler* serverHandler = info->server();
-
-        if(info->isNode() || info->isAttribute())
-		{
-			nodeFullName = info->node()->node()->absNodePath();
-			nodeName = info->node()->node()->name();
-			//UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
-		}
-		else if(info->isServer())
-		{
-			nodeFullName = "/";
-			nodeName = "/";
-			//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
-		}
-
-		//Replace placeholders with real node names
-		for(unsigned int i=0; i < cmd.size(); i++)
-		{
-			if(realCommand[i]=="<full_name>")
-				realCommand[i]=nodeFullName;
-			else if(realCommand[i]=="<node_name>")
-				realCommand[i]=nodeName;
-		}
-
-        UiLog().dbg() << " final command: " << commandToString(realCommand);
-
-		// get the command into the right format by first splitting into tokens
-		// and then converting to argc, argv format
-
-		//std::vector<std::string> strs;
-		//std::string delimiters(" ");
-		//ecf::Str::split(realCommand, strs, delimiters);
-
-		// set up and run the thread for server communication
-		serverHandler->runCommand(realCommand);
-	}
-	else
-	{
-        UiLog().err() << " command is not recognised!";
-        UserMessage::message(UserMessage::ERROR, true, std::string("command is not recognised."));
-	}
-}
-//Send the same command for a list of objects (nodes/servers) specified in a VInfo vector.
-//The command is specified as a string.
-
-void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
-{
-	std::string realCommand(cmd);
-
-	std::vector<ServerHandler *> targetServers;
-
-	if (!realCommand.empty())
-	{
-        UiLog().dbg() << "ServerHandler::command -->" << cmd << " (real: " << realCommand + ")";
-
-		std::map<ServerHandler*,std::string> targetNodeNames;
-		std::map<ServerHandler*,std::string> targetNodeFullNames;
-        std::map<ServerHandler*,std::string> targetParentFullNames;
-
-		//Figure out what objects (node/server) the command should be applied to
-        for(std::size_t i=0; i < info.size(); i++)
-		{
-			std::string nodeFullName;
-            std::string nodeName;
-            std::string parentFullName;
-
-            if(realCommand.find("<node_name>") != std::string::npos)
-            {
-               nodeName=info[i]->name();
-            }
-
-            if(realCommand.find("<full_name>") != std::string::npos)
-            {
-               if(info[i]->isNode())
-                   nodeFullName = info[i]->node()->absNodePath();
-               else if(info[i]->isServer())
-                   info[i]->server()->longName();
-               else if(info[i]->isAttribute())
-                   parentFullName = info[i]->node()->absNodePath();
-            }
-
-            if(realCommand.find("<parent_name>") != std::string::npos)
-            {
-               if(info[i]->isNode())
-               {
-                   if(VNode *p=info[i]->node()->parent())
-                       parentFullName = p->absNodePath();
-               }
-               else if(info[i]->isAttribute())
-                   parentFullName = info[i]->node()->absNodePath();
-            }
-
-#if 0
-            nodeName = info[i]->name();
-
-			//Get the name
-			if(info[i]->isNode())
-			{
-                //nodeName     = info[i]->name();
-                nodeFullName = info[i]->node()->absNodePath();
-                if(realCommand.
-
-                parentFullName = info[i]->node()->parent()->absNodePath();
-                //UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
-			}
-			else if(info[i]->isServer())
-			{               
-				nodeFullName = info[i]->server()->longName();
-				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
-			}
-            else if(info[i]->isAttribute())
-            {
-                nodeFullName = nodeName;
-                parentFullName = info[i]->node()->absNodePath();
-                //UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
-            }
-#endif
-
-			//Storre the names per target servers
-			targetNodeNames[info[i]->server()] += " " + nodeName;
-			targetNodeFullNames[info[i]->server()] += " " + nodeFullName;
-            targetParentFullNames[info[i]->server()] += " " + parentFullName;
-
-			//info[i]->server()->targetNodeNames_     += " " + nodeName;      // build up the list of nodes for each server
-			//info[i]->server()->targetNodeFullNames_ += " " + nodeFullName;  // build up the list of nodes for each server
-
-
-			// add this to our list of target servers?
-			if (std::find(targetServers.begin(), targetServers.end(), info[i]->server()) == targetServers.end())
-			{
-				targetServers.push_back(info[i]->server());
-			}
-		}
-
-
-		// for each target server, construct and send its command
-
-		for (size_t s = 0; s < targetServers.size(); s++)
-		{
-			ServerHandler* serverHandler = targetServers[s];
-
-			// replace placeholders with real node names
-
-			std::string placeholder("<full_name>");			
-			ecf::Str::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
-
-			placeholder = "<node_name>";			
-			ecf::Str::replace_all(realCommand, placeholder, targetNodeNames[serverHandler]);
-
-            placeholder = "<parent_name>";
-            ecf::Str::replace_all(realCommand, placeholder, targetParentFullNames[serverHandler]);
-
-            UiLog().dbg() << " final command: " << realCommand;
-
-			// get the command into the right format by first splitting into tokens
-			// and then converting to argc, argv format
-
-			std::vector<std::string> strs;
-			std::string delimiters(" ");
-			ecf::Str::split(realCommand, strs, delimiters);
-
-			// set up and run the thread for server communication
-			serverHandler->runCommand(strs);
-
-			//serverHandler->targetNodeNames_.clear();      // reset the target node names for next time
-			//serverHandler->targetNodeFullNames_.clear();  // reset the target node names for next time
-			//serverHandler->refresh();
-		}
-	}
-	else
-	{
-        UiLog().err() << " command is not recognised. Check the menu definition.";
-        UserMessage::message(UserMessage::ERROR, true, std::string("command ") + cmd + " is not recognised. Check the menu definition.");
-	}
-}
-
-//Send the same command for a list of nodes specified by their paths.
-//The command is specified as a string.
-
-void ServerHandler::command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd)
-{
-	std::vector<std::string> realCommand=cmd;
-
-	if (!realCommand.empty())
-	{
-        UiLog().dbg() << "ServerHandler::command: " << commandToString(realCommand);
-
-		std::string fullNameStr;
-
-		for(unsigned int i=0; i < fullPaths.size(); ++i)
-		{
-			if(i>0)
-			{
-				fullNameStr+= " ";
-			}
-
-			fullNameStr+=fullPaths[i];
-		}
-
-		//Replace placeholders with real node names
-		for(unsigned int i=0; i < realCommand.size(); i++)
-		{
-			if(realCommand[i]=="<full_name>")
-				realCommand[i]=fullNameStr;
-		}
-
-        UiLog().dbg() << " final command: " << commandToString(realCommand);
-
-		// set up and run the thread for server communication
-		runCommand(realCommand);
-	}
-	else
-	{
-        UiLog().err() << " command is not recognised. Check the menu definition.";
-		UserMessage::message(UserMessage::ERROR, true, std::string("command ") +   commandToString(cmd) + " is not recognised. Check the menu definition.");
-	}
-}
-
-// convenience function
-void ServerHandler::command(const std::string& fullPath, const std::string&cmd)
-{
-    std::vector<std::string> paths;
-    std::vector<std::string> commands;
-
-    paths.push_back(fullPath);
-    ecf::Str::split(cmd, commands);
-
-    command(paths, commands);
-}
-
-
 
 //======================================================================================
 // Manages node changes.
@@ -1151,6 +912,18 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
                 //This will update the suites + restart the timer
 				rescanTree();
+
+#if 0
+                {
+                    ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+                    defs_ptr defs = defsAccess.defs();
+                    if(defs)
+                    {
+                        std::cout << defs;
+                    }
+                }
+#endif
+
 			}
 			else
 			{

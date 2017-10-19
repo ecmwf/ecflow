@@ -23,6 +23,7 @@
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "VNodeMover.hpp"
 
 //#define _UI_NODEXPRESSIONPARSEER_DEBUG
 
@@ -634,7 +635,7 @@ bool UIStateCondition::execute(VItem*)
 {
     if (uiStateName_ == "marked")
     {
-        return !(VNode::nodeMarkedForMoveServerAlias().empty());
+        return VNodeMover::hasMarkedForMove();
     }
 
     return false;

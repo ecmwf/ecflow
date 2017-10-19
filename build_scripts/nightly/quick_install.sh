@@ -9,8 +9,8 @@ set -x # echo script lines as they are executed
 
 
 if [[ "$#"  == 0 ]] ; then
-   export PATH=/tmp/ma0/install/cmake/ecflow/4.7.0/bin:$PATH
-   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.7.0/lib/python2.7/site-packages
+   export PATH=/tmp/ma0/install/cmake/ecflow/4.8.0/bin:$PATH
+   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.8.0/lib/python2.7/site-packages
 else
    module unload ecflow
    module load ecflow/dev

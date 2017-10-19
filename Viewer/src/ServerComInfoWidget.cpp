@@ -24,7 +24,7 @@
 #include "FontMetrics.hpp"
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
-#include "ToolTipFormat.hpp"
+#include "TextFormat.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"

@@ -17,10 +17,11 @@
 #include "Aspect.hpp"
 
 #include "AttributeEditorFactory.hpp"
+#include "CommandHandler.hpp"
+#include "MainWindow.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VLimitAttr.hpp"
-#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 
 LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
@@ -28,12 +29,15 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
     setupUi(this);
     removeTb_->setDefaultAction(actionRemove_);
     removeAllTb_->setDefaultAction(actionRemoveAll_);
-    pathView_->addAction(actionRemove_);
+    //pathView_->addAction(actionRemove_);
+    pathView_->addAction(actionLookUp_);
     pathView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"limit",parent), model_(0)
+LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) :
+    AttributeEditor(info,"limit",parent),
+    model_(0)
 {
     w_=new LimitEditorWidget(this);
     addForm(w_);
@@ -54,13 +58,15 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
 
     w_->nameLabel_->setText(name);
     w_->valueLabel_->setText(QString::number(oriVal_));
-    w_->maxSpin_->setValue(oriMax_);
 
-    w_->maxSpin_->setRange(0,10000);
+    w_->maxSpin_->setRange(0,10000000);
+    w_->maxSpin_->setValue(oriMax_);
     w_->maxSpin_->setFocus();
 
     if(aData[2].isEmpty() || aData[3].isEmpty())
     {
+        w_->actionRemove_->setEnabled(false);
+        w_->actionRemoveAll_->setEnabled(false);
         return;
     }
 
@@ -74,6 +80,12 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
 
     connect(w_->actionRemoveAll_,SIGNAL(triggered()),
             this,SLOT(slotRemoveAll()));
+
+    connect(w_->actionLookUp_,SIGNAL(triggered()),
+            this,SLOT(slotLookUp()));
+
+    connect(w_->pathView_,SIGNAL(doubleClicked(const QModelIndex&)),
+            this,SLOT(slotDoubleClicked(const QModelIndex&)));
 
     header_->setInfo(QString::fromStdString(info_->path()),"Limit");
 
@@ -95,23 +107,11 @@ void LimitEditor::buildList(VAttribute *a)
     VLimitAttr* lim=static_cast<VLimitAttr*>(a);
     Q_ASSERT(lim);
 
-    modelData_.clear();
-    modelData_=lim->paths();
+    model_=new QStringListModel(this);
+    w_->pathView_->setModel(model_);
 
-    if(modelData_.count() > 0)
-    {
-        model_=new QStringListModel(this);
-        model_->setStringList(modelData_);
-
-        w_->pathView_->setModel(model_);
-        w_->pathView_->setCurrentIndex(model_->index(0,0));
-        w_->pathView_->setFocus(Qt::MouseFocusReason);
-    }
-    else
-    {
-        w_->actionRemove_->setEnabled(false);
-        w_->actionRemoveAll_->setEnabled(false);
-    }
+    //Update the model(=node list)
+    setModelData(lim->paths());
 }
 
 void LimitEditor::apply()
@@ -132,23 +132,23 @@ void LimitEditor::apply()
     {
         if(intVal < oriMax_)
         {
-            ServerHandler::command(info_,valCmd);
-            ServerHandler::command(info_,maxCmd);
+            CommandHandler::run(info_,valCmd);
+            CommandHandler::run(info_,maxCmd);
         }
         else
         {
-            ServerHandler::command(info_,maxCmd);
-            ServerHandler::command(info_,valCmd);
+            CommandHandler::run(info_,maxCmd);
+            CommandHandler::run(info_,valCmd);
         }
     }
     else if(oriVal_ != intVal)
     {
-        ServerHandler::command(info_,valCmd);
+        CommandHandler::run(info_,valCmd);
     }
 
     else if(oriMax_ != intMax)
     {
-        ServerHandler::command(info_,maxCmd);
+        CommandHandler::run(info_,maxCmd);
     }
 }
 
@@ -163,7 +163,7 @@ void LimitEditor::slotMaxChanged(int)
 
 bool LimitEditor::isValueChanged()
 {
-    return (oriVal_ != w_->valueLabel_->text().toInt() || oriMax_ != w_->maxSpin_->value());
+    return (oriMax_ != w_->maxSpin_->value());
 }
 
 void LimitEditor::slotRemove()
@@ -181,7 +181,7 @@ void LimitEditor::remove(bool all)
     if(!info_)
         return;
 
-    //We cannot cancle the setting after remove is callled
+    //We cannot cancel the setting after remove is callled
     disableCancel();
 
     Q_ASSERT(model_);
@@ -195,7 +195,7 @@ void LimitEditor::remove(bool all)
     {
         std::vector<std::string> valCmd;
         VAttribute::buildAlterCommand(valCmd,"change","limit_value",a->strName(),"0");
-        ServerHandler::command(info_,valCmd);
+        CommandHandler::run(info_,valCmd);
     }
     else
     {
@@ -205,7 +205,7 @@ void LimitEditor::remove(bool all)
             std::vector<std::string> valCmd;
             VAttribute::buildAlterCommand(valCmd,"delete","limit_path",a->strName(),
                                           model_->data(idx,Qt::DisplayRole).toString().toStdString());
-            ServerHandler::command(info_,valCmd);
+            CommandHandler::run(info_,valCmd);
         }
     }
 
@@ -229,9 +229,66 @@ void LimitEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect)
 
         oriVal_=aData[2].toInt();
         w_->valueLabel_->setText(QString::number(oriVal_));
-        modelData_.clear();
-        modelData_=lim->paths();
-        model_->setStringList(modelData_);
+
+        oriMax_=aData[3].toInt();
+        w_->maxSpin_->setValue(oriMax_);
+
+        //Update the model (=node list)
+        setModelData(lim->paths());
+    }
+}
+
+void LimitEditor::setModelData(QStringList lst)
+{
+    Q_ASSERT(model_);
+
+    bool hadData=(modelData_.isEmpty() == false);
+    modelData_=lst;
+    model_->setStringList(modelData_);
+
+    if(!modelData_.isEmpty())
+    {
+        if(!hadData)
+        {
+            w_->pathView_->setCurrentIndex(model_->index(0,0));
+            w_->pathView_->setFocus(Qt::MouseFocusReason);
+        }
+        w_->actionRemove_->setEnabled(true);
+        w_->actionRemoveAll_->setEnabled(true);
+    }
+    else
+    {
+        w_->actionRemove_->setEnabled(false);
+        w_->actionRemoveAll_->setEnabled(false);
+    }
+}
+//Lookup in tree
+
+void LimitEditor::slotLookUp()
+{
+     QModelIndex idx=w_->pathView_->currentIndex();
+     lookup(idx);
+}
+
+void LimitEditor::slotDoubleClicked(const QModelIndex &index)
+{
+    lookup(index);
+}
+
+void LimitEditor::lookup(const QModelIndex &idx)
+{
+    if(!info_)
+        return;
+
+    Q_ASSERT(model_);
+
+    std::string nodePath=
+            model_->data(idx,Qt::DisplayRole).toString().toStdString();
+
+    VInfo_ptr ni=VInfo::createFromPath(info_->server(),nodePath);
+    if(ni)
+    {
+        MainWindow::lookUpInTree(ni);
     }
 }
 

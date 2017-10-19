@@ -251,7 +251,7 @@ void ChangeNotifyDialog::slotContentsChanged()
 
 void ChangeNotifyDialog::slotSelectionChanged(VInfo_ptr info)
 {
-    MainWindow::changeNotifySelectionChanged(info);
+    MainWindow::lookUpInTree(info);
 }
 
 void ChangeNotifyDialog::slotOptions()
