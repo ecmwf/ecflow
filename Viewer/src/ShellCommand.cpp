@@ -98,12 +98,11 @@ ShellCommand* ShellCommand::run(const std::string& cmd,const std::string& cmdDef
     return new ShellCommand(cmd,cmdDef);
 }
 
-void ShellCommand::procFinished(int /*exitCode*/, QProcess::ExitStatus exitStatus)
+void ShellCommand::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    //UiLog().dbg() << "exit=" << exitCode << " status=" << exitStatus;
-    if(!item_)
+    if(item_)
     {
-        if(exitStatus == QProcess::NormalExit)
+        if(exitCode == 0 && exitStatus == QProcess::NormalExit)
             CommandOutputHandler::instance()->finished(item_);
         else
             CommandOutputHandler::instance()->failed(item_);

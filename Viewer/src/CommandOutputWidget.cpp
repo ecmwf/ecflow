@@ -96,22 +96,7 @@ QVariant CommandOutputModel::data( const QModelIndex& index, int role ) const
             return item->command();
         else if(id == "status")
         {
-            switch(item->status())
-            {
-            case CommandOutput::FinishedStatus:
-                return "finished";
-                break;
-            case CommandOutput::FailedStatus:
-                return "failed";
-                break;
-            case CommandOutput::RunningStatus:
-                return "running";
-                break;
-            default:
-                return QVariant();
-                break;
-            }
-            return QVariant();
+            return item->statusStr();
         }
         else if(id == "runtime")
             return item->runTime().toString("yyyy-MM-dd hh:mm:ss");
@@ -313,6 +298,10 @@ void CommandOutputWidget::slotItemStatusChanged(CommandOutput_ptr item)
         {
             tree_->update(idx);
         }
+        if(item == model_->indexToItem(tree_->currentIndex()))
+        {
+            updateInfoLabel(item);
+        }
     }
 }
 
@@ -351,7 +340,10 @@ void CommandOutputWidget::updateInfoLabel(CommandOutput_ptr item)
     QString s=Viewer::formatBoldText("Command: ",boldCol) + item->command() + "<br>" +
             Viewer::formatBoldText("Definition: ",boldCol) +
             Viewer::formatText(item->commandDefinition(),defCol) + "<br>" +
-            Viewer::formatBoldText("Run at: ",boldCol) + item->runTime().toString("yyyy-MM-dd hh:mm:ss");
+            Viewer::formatBoldText("Started at: ",boldCol) +
+            item->runTime().toString("yyyy-MM-dd hh:mm:ss") +
+            Viewer::formatBoldText(" &nbsp;Status: ", boldCol) +
+            item->statusStr();
 
     infoLabel_->setText(s);
 }

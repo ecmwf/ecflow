@@ -14,8 +14,11 @@
 
 CommandOutputHandler* CommandOutputHandler::instance_=0;
 
-//int CommandOutputHandler::maxNum_=40;
-//QVector<CommandOutput_ptr> CommandOutputHandler::items_;
+//===============================================
+//
+// CommandOutput
+//
+//==============================================
 
 CommandOutput::CommandOutput(QString cmd,QString cmdDef,QDateTime runTime) :
     command_(cmd), commandDef_(cmdDef), runTime_(runTime), status_(RunningStatus)
@@ -26,25 +29,39 @@ CommandOutput::CommandOutput(QString cmd,QString cmdDef,QDateTime runTime) :
 void CommandOutput::appendOutput(QString txt)
 {
     output_+=txt;
-    //CommandOutputDialog::addOutputText(this,txt);
 }
 
 void CommandOutput::appendError(QString txt)
 {
     error_+=txt;
-    //CommandOutputDialog::addErrorText(this,txt);
 }
 
-
-#if 0
-CommandOutput_ptr CommandOutput::add(QString cmd,QString cmdDef,QDateTime runTime)
+QString CommandOutput::statusStr() const
 {
-    CommandOutput_ptr item=
-            CommandOutput_ptr(new CommandOutput(cmd,cmdDef,runTime));
-    items_ << item;
-    return item;
+    static QString finishedStr("finished");
+    static QString failedStr("failed");
+    static QString runningStr("running");
+
+    switch(status_)
+    {
+    case FinishedStatus:
+        return finishedStr;
+    case FailedStatus:
+        return failedStr;
+    case RunningStatus:
+        return runningStr;
+    default:
+        return QString();
+    }
+
+    return QString();
 }
-#endif
+
+//===============================================
+//
+// CommandOutputHandler
+//
+//===============================================
 
 CommandOutputHandler::CommandOutputHandler(QObject* parent) :
     QObject(parent),
@@ -124,18 +141,3 @@ CommandOutput_ptr CommandOutputHandler::addItem(QString cmd,QString cmdDef,QDate
     return item;
 }
 
-
-#if 0
-void CommandOutputHandler::check()
-{
-    if(items_.count() > maxNum_)
-    {
-        while(items_.count() > maxNum_)
-        {
-
-
-            CommandOutputHandlerItem *item=items_.back()
-        }
-    }
-}
-#endif

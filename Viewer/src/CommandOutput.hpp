@@ -37,6 +37,7 @@ public:
     QString output() const {return output_;}
     QString error() const {return error_;}
     Status status() const {return status_;}
+    QString statusStr() const;
 
 protected:
     CommandOutput(QString cmd,QString cmdDef,QDateTime runTime);
