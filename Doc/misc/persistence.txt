@@ -23,6 +23,9 @@ Json/c++
     https://github.com/nlohmann/json/blob/develop/README.md
     https://github.com/Loki-Astari/ThorsSerializer/blob/master/README.md
     https://github.com/netheril96/StaticJSON/blob/master/README.md
+    https://netheril96.github.io/autojsoncxx/
+    https://www.codeproject.com/Articles/856277/ESJ-Extremely-Simple-JSON-for-Cplusplus
+    http://marc.helbling.fr/2015/02/writing-json-c++
     
 Json,TOML,YAML:
     http://www.drdobbs.com/web-development/after-xml-json-then-what/240151851
