@@ -21,6 +21,7 @@ set(viewer_srcs
     ComboMulti.cpp
     CommandDesignerWidget.cpp
     CommandHandler.cpp
+    CommandOutput.cpp
     CommandOutputDialog.cpp
     CommandOutputWidget.cpp
     CompactView.cpp
@@ -173,6 +174,7 @@ set(viewer_srcs
     VAttribute.cpp
     VAttributeType.cpp
     VConfig.cpp   
+    VConfigLoader.cpp
     VDateAttr.cpp
     VDir.cpp
     VEventAttr.cpp
@@ -213,7 +215,7 @@ set(viewer_srcs
     VariableItemWidget.cpp
     VariableSearchLine.cpp
     VariableView.cpp
-    VConfigLoader.cpp
+    ViewerUtil.cpp
     WhyItemWidget.cpp
     WidgetNameProvider.cpp
     ZombieItemWidget.cpp
@@ -250,6 +252,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CodeItemWidget.hpp
     ComboMulti.hpp
     CommandDesignerWidget.hpp    
+    CommandOutput.hpp
     CommandOutputDialog.hpp
     CommandOutputWidget.hpp
     CustomCommandDialog.hpp

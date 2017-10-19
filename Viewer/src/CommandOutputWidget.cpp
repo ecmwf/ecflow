@@ -11,14 +11,211 @@
 #include "CommandOutputWidget.hpp"
 
 #include <QDebug>
-#include <QFontDatabase>
+#include <QItemSelectionModel>
 
-#include "ShellCommand.hpp"
+#include "ModelColumn.hpp"
+#include "CommandOutput.hpp"
 #include "TextFormat.hpp"
+#include "ViewerUtil.hpp"
+
+static QColor redColour(255,0,0);
+static QColor greenColour(9,160,63);
+
+CommandOutputModel::CommandOutputModel(QObject *parent) :
+          QAbstractItemModel(parent),
+          columns_(0)
+{
+    columns_=ModelColumn::def("output_columns");
+
+    assert(columns_);
+}
+
+CommandOutputModel::~CommandOutputModel()
+{
+}
+
+bool CommandOutputModel::hasData() const
+{
+    return CommandOutputHandler::instance()->itemCount() > 0;
+}
+
+void CommandOutputModel::dataIsAboutToChange()
+{
+    beginResetModel();
+}
+
+void CommandOutputModel::dataChanged()
+{
+    endResetModel();
+}
+
+int CommandOutputModel::columnCount( const QModelIndex& /*parent */) const
+{
+     return columns_->count();
+}
+
+int CommandOutputModel::rowCount( const QModelIndex& parent) const
+{
+    if(!hasData())
+        return 0;
+
+    //Parent is the root:
+    if(!parent.isValid())
+    {
+        return CommandOutputHandler::instance()->itemCount();
+    }
+
+    return 0;
+}
+
+Qt::ItemFlags CommandOutputModel::flags ( const QModelIndex & index) const
+{
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+QVariant CommandOutputModel::data( const QModelIndex& index, int role ) const
+{
+    if(!index.isValid() || !hasData())
+    {
+        return QVariant();
+    }
+
+    int pos=CommandOutputHandler::instance()->itemCount()-index.row()-1;
+    if(pos < 0 || pos >= CommandOutputHandler::instance()->itemCount())
+        return QVariant();
+
+    QString id=columns_->id(index.column());
+
+    CommandOutput_ptr item=CommandOutputHandler::instance()->items()[pos];
+    if(!item)
+        return QVariant();
+
+    if(role == Qt::DisplayRole)
+    {
+        if(id == "command")
+            return item->command();
+        else if(id == "status")
+        {
+            switch(item->status())
+            {
+            case CommandOutput::FinishedStatus:
+                return "finished";
+                break;
+            case CommandOutput::FailedStatus:
+                return "failed";
+                break;
+            case CommandOutput::RunningStatus:
+                return "running";
+                break;
+            default:
+                return QVariant();
+                break;
+            }
+            return QVariant();
+        }
+        else if(id == "runtime")
+            return item->runTime().toString("yyyy-MM-dd hh:mm:ss");
+        else
+            return QVariant();
+    }
+    else if(role == Qt::ForegroundRole)
+    {
+        if(id == "status")
+        {
+            switch(item->status())
+            {
+            case CommandOutput::FinishedStatus:
+                return QVariant();
+                break;
+            case CommandOutput::FailedStatus:
+                return redColour;
+                break;
+            case CommandOutput::RunningStatus:
+                return greenColour;
+                break;
+            default:
+                return QVariant();
+                break;
+            }
+        }
+        return QVariant();
+    }
+    return QVariant();
+}
+
+QVariant CommandOutputModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
+{
+    if ( orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole ))
+              return QAbstractItemModel::headerData( section, orient, role );
+
+    if(role == Qt::DisplayRole)
+        return columns_->label(section);
+    else if(role == Qt::UserRole)
+        return columns_->id(section);
+
+    return QVariant();
+}
+
+QModelIndex CommandOutputModel::index( int row, int column, const QModelIndex & parent ) const
+{
+    if(!hasData() || row < 0 || column < 0)
+    {
+        return QModelIndex();
+    }
+
+    //When parent is the root this index refers to a node or server
+    if(!parent.isValid())
+    {
+        return createIndex(row,column);
+    }
+
+    return QModelIndex();
+
+}
+
+QModelIndex CommandOutputModel::parent(const QModelIndex &child) const
+{
+    return QModelIndex();
+}
+
+
+CommandOutput_ptr CommandOutputModel::indexToItem(const QModelIndex& idx) const
+{
+    if(idx.isValid() && hasData())
+    {
+        int pos=CommandOutputHandler::instance()->itemCount()-idx.row()-1;
+        if(pos >= 0 || pos < CommandOutputHandler::instance()->itemCount())
+            return CommandOutputHandler::instance()->items()[pos];
+    }
+
+    CommandOutput_ptr r;
+    return r;
+}
+
+QModelIndex CommandOutputModel::itemToStatusIndex(CommandOutput_ptr item) const
+{
+    if(item)
+    {
+        int pos=CommandOutputHandler::instance()->indexOfItem(item);
+        if(pos != -1)
+        {
+            int row=CommandOutputHandler::instance()->itemCount()-pos-1;
+            if(row >=0 && row < rowCount())
+                return index(row,columns_->indexOf("status"));
+        }
+    }
+
+    return QModelIndex();
+}
+
+//==============================================
+//
+// CommandOutputWidget
+//
+//==============================================
 
 CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
-  QWidget(parent),
-  currentCommand_(0)
+  QWidget(parent)
 {
     setupUi(this);
 
@@ -26,47 +223,124 @@ CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
 
     messageLabel_->hide();
 
+    model_=new CommandOutputModel(this);
+
+    tree_->setModel(model_);
+    tree_->setRootIsDecorated(false);
+
+    //Adjust the tree columns
+    QFont f;
+    QFontMetrics fm(f);
+    tree_->setColumnWidth(0,fm.width(" sh ecflow_client --port %ECF_PORT% --host %ECF_HOST% --stats--port %ECF_PORT%"));
+    tree_->setColumnWidth(1,fm.width(" running "));
+
     textEdit_->setShowLineNumbers(false);
 
     searchLine_->setEditor(textEdit_);
     searchLine_->setVisible(false);
+
+    CommandOutputHandler* handler=CommandOutputHandler::instance();
+    Q_ASSERT(handler);
+
+    connect(handler,SIGNAL(itemAddBegin()),
+            this,SLOT(slotItemAddBegin()));
+
+    connect(handler,SIGNAL(itemAddEnd()),
+            this,SLOT(slotItemAddEnd()));
+
+    connect(handler,SIGNAL(itemOutputAppend(CommandOutput_ptr,QString)),
+            this,SLOT(slotItemOutputAppend(CommandOutput_ptr,QString)));
+
+    connect(handler,SIGNAL(itemErrorAppend(CommandOutput_ptr,QString)),
+            this,SLOT(slotItemErrorAppend(CommandOutput_ptr,QString)));
+
+    connect(handler,SIGNAL(itemStatusChanged(CommandOutput_ptr)),
+            this,SLOT(slotItemStatusChanged(CommandOutput_ptr)));
+
+    //The selection changes in the view
+    connect(tree_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
 }
 
 CommandOutputWidget::~CommandOutputWidget()
 {
 }
 
-bool CommandOutputWidget::addText(ShellCommand* cmd,QString txt)
+void CommandOutputWidget::slotItemSelected(const QModelIndex&,const QModelIndex&)
 {
-    bool hasNewCmd=setCommand(cmd);
-    textEdit_->appendPlainText(txt);
-    return hasNewCmd;
+    CommandOutput_ptr current=model_->indexToItem(tree_->currentIndex());
+    loadItem(current);
 }
 
-bool CommandOutputWidget::addErrorText(ShellCommand* cmd,QString txt)
+void CommandOutputWidget::slotItemAddBegin()
 {
-    bool hasNewCmd=setCommand(cmd);
-    messageLabel_->appendError(txt);
-    return hasNewCmd;
+    Q_ASSERT(model_);
+    model_->dataIsAboutToChange();
 }
 
-bool CommandOutputWidget::setCommand(ShellCommand* cmd)
+void CommandOutputWidget::slotItemAddEnd()
 {
-    if(cmd != currentCommand_)
+    Q_ASSERT(model_);
+    model_->dataChanged();
+    if(model_->rowCount() > 0)
     {
-        currentCommand_=cmd;
+        tree_->setCurrentIndex(model_->index(0,0));
+    }
+}
+
+void CommandOutputWidget::slotItemOutputAppend(CommandOutput_ptr item,QString txt)
+{
+    if(item  && item == model_->indexToItem(tree_->currentIndex()))
+    {
+        textEdit_->appendPlainText(txt);
+    }
+}
+
+void CommandOutputWidget::slotItemErrorAppend(CommandOutput_ptr item,QString txt)
+{
+    if(item  && item == model_->indexToItem(tree_->currentIndex()))
+    {
+        messageLabel_->appendError(txt);
+    }
+}
+
+void CommandOutputWidget::slotItemStatusChanged(CommandOutput_ptr item)
+{
+    if(item)
+    {
+        QModelIndex idx=model_->itemToStatusIndex(item);
+        if(idx.isValid())
+        {
+            tree_->update(idx);
+        }
+    }
+}
+
+void CommandOutputWidget::loadItem(CommandOutput_ptr item)
+{
+    if(item)
+    {
         textEdit_->clear();
         messageLabel_->clear();
         messageLabel_->hide();
-        updateInfoLabel(currentCommand_);
-        return true;
+        updateInfoLabel(item);
+
+        //Set output text
+        textEdit_->setPlainText(item->output());
+
+        //Set error text
+        QString err=item->error();
+        if(!err.isEmpty())
+        {
+            messageLabel_->showError(err);
+        }
+        //return true;
     }
-    return false;
 }
 
-void CommandOutputWidget::updateInfoLabel(ShellCommand* cmd)
+void CommandOutputWidget::updateInfoLabel(CommandOutput_ptr item)
 {
-    if(!cmd)
+    if(!item)
     {
         infoLabel_->clear();
         return;
@@ -74,10 +348,10 @@ void CommandOutputWidget::updateInfoLabel(ShellCommand* cmd)
 
     QColor boldCol(39,49,101);
     QColor defCol(90,90,90);
-    QString s=Viewer::formatBoldText("Command: ",boldCol) + cmd->command() + "<br>" +
+    QString s=Viewer::formatBoldText("Command: ",boldCol) + item->command() + "<br>" +
             Viewer::formatBoldText("Definition: ",boldCol) +
-            Viewer::formatText(cmd->commandDef(),defCol) + "<br>" +
-            Viewer::formatBoldText("Run at: ",boldCol) + cmd->startTime().toString("yyyy-MM-dd hh:mm:ss");
+            Viewer::formatText(item->commandDefinition(),defCol) + "<br>" +
+            Viewer::formatBoldText("Run at: ",boldCol) + item->runTime().toString("yyyy-MM-dd hh:mm:ss");
 
     infoLabel_->setText(s);
 }
@@ -120,3 +394,24 @@ void CommandOutputWidget::on_fontSizeDownTb__clicked()
     textEdit_->slotZoomOut();
 }
 
+void CommandOutputWidget::writeSettings(QSettings& settings)
+{
+    settings.beginGroup("widget");
+    settings.setValue("splitter",splitter_->saveState());
+    ViewerUtil::saveTreeColumnWidth(settings,"treeColumnWidth",tree_);
+    settings.endGroup();
+}
+
+void CommandOutputWidget::readSettings(QSettings& settings)
+{
+    settings.beginGroup("widget");
+
+    ViewerUtil::initTreeColumnWidth(settings,"treeColumnWidth",tree_);
+
+    if(settings.contains("splitter"))
+    {
+        splitter_->restoreState(settings.value("splitter").toByteArray());
+    }
+
+    settings.endGroup();
+}

@@ -11,12 +11,42 @@
 #ifndef COMMANDOUTPUTWIDGET_HPP
 #define COMMANDOUTPUTWIDGET_HPP
 
+#include <QAbstractItemModel>
+#include <QSettings>
 #include <QWidget>
 
 #include "ui_CommandOutputWidget.h"
 
-class PlainTextEdit;
-class ShellCommand;
+#include "CommandOutput.hpp"
+
+class ModelColumn;
+
+class CommandOutputModel : public QAbstractItemModel
+{
+public:
+    explicit  CommandOutputModel(QObject *parent=0);
+    ~CommandOutputModel();
+
+    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
+    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+
+    Qt::ItemFlags flags ( const QModelIndex & index) const;
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
+    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+
+    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
+    QModelIndex parent (const QModelIndex & ) const;
+
+    void dataIsAboutToChange();
+    void dataChanged();
+    bool updateData();
+    bool hasData() const;
+    CommandOutput_ptr indexToItem(const QModelIndex& idx) const;
+    QModelIndex itemToStatusIndex(CommandOutput_ptr item) const;
+
+protected:
+    ModelColumn* columns_;
+};
 
 class CommandOutputWidget : public QWidget, protected Ui::CommandOutputWidget
 {
@@ -26,10 +56,17 @@ public:
     explicit CommandOutputWidget(QWidget *parent=0);
     ~CommandOutputWidget();
 
-    bool addText(ShellCommand* cmd,QString txt);
-    bool addErrorText(ShellCommand* cmd,QString txt);
+    void readSettings(QSettings&);
+    void writeSettings(QSettings&);
+
 
 protected Q_SLOTS:
+    void slotItemSelected(const QModelIndex&,const QModelIndex&);
+    void slotItemAddBegin();
+    void slotItemAddEnd();
+    void slotItemOutputAppend(CommandOutput_ptr,QString);
+    void slotItemErrorAppend(CommandOutput_ptr,QString);
+    void slotItemStatusChanged(CommandOutput_ptr);
     void on_searchTb__clicked();
     void on_gotoLineTb__clicked();
     void on_fontSizeUpTb__clicked();
@@ -39,12 +76,11 @@ Q_SIGNALS:
     void editorFontSizeChanged();
 
 protected:
-    bool setCommand(ShellCommand* cmd);
+    void loadItem(CommandOutput_ptr);
+    void updateInfoLabel(CommandOutput_ptr);
     void removeSpacer();
-    void updateInfoLabel(ShellCommand* cmd);
 
-    ShellCommand* currentCommand_;
+    CommandOutputModel* model_;
 };
 
 #endif // COMMANDOUTPUTWIDGET_HPP
-

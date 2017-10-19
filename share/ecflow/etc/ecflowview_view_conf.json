@@ -289,5 +289,23 @@
     		"label" : "Calls",
     		"tooltip" : "password of the job"
     	}   	
-    }    
+    },
+
+    "output_columns": {
+
+        "command" : {
+            "label" : "Command",
+            "tooltip" : "Command"
+        },
+        "status" : {
+            "label" : "Status",
+            "tooltip" : "Status"
+        },
+        "runtime" : {
+            "label" : "Start time",
+            "tooltip" : "The time the command was run at"
+        }
+    }
+
+
 }

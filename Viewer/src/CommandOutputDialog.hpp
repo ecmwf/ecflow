@@ -25,6 +25,8 @@ public:
     static void addText(ShellCommand*,QString);
     static void addErrorText(ShellCommand*,QString);
 
+    static void make();
+
 protected Q_SLOTS:
     void accept();
     void reject();
@@ -36,7 +38,6 @@ protected:
     void closeEvent(QCloseEvent * event);
 
 private:
-    static void make();
     void readSettings();
     void writeSettings();
 

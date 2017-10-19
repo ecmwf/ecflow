@@ -1,0 +1,41 @@
+//============================================================================
+// Copyright 2009-2017 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+//============================================================================
+
+#ifndef VIEWERUTIL_HPP
+#define VIEWERUTIL_HPP
+
+#include <QPixmap>
+#include <QSettings>
+#include <QString>
+
+class QAction;
+class QButtonGroup;
+class QComboBox;
+class QStackedWidget;
+class QTabWidget;
+class QTreeView;
+
+class ViewerUtil
+{
+public:
+   static void initComboBox(QSettings&,QString key,QComboBox* cb);
+   static void initTabId(QSettings& settings,QString key,QTabWidget *tab);
+   static void saveTabId(QSettings& settings,QString key,QTabWidget *tab);
+   static void initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
+   static void saveTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
+   static void initStacked(QSettings& settings,QString key,QStackedWidget *stacked);
+   static void initButtonGroup(QSettings& settings,QString key,QButtonGroup *bg);
+   static void initCheckableAction(QSettings& settings,QString key,QAction *ac);
+   static void showTabLabel(QTabWidget *tab,int index,QPixmap pix);
+   static void hideTabLabel(QTabWidget *tab,int index);
+};
+
+#endif // VIEWERUTIL_HPP
+

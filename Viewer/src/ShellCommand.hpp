@@ -19,6 +19,8 @@
 
 #include <QProcess>
 
+#include "CommandOutput.hpp"
+
 class ShellCommand : public QObject
 {
     Q_OBJECT
@@ -41,6 +43,7 @@ protected:
     QString command_;
     QString commandDef_;
     QDateTime startTime_;
+    CommandOutput_ptr item_;
     static bool envChecked_;
     static bool envHasToBeSet_;
 };

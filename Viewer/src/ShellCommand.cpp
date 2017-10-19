@@ -17,6 +17,7 @@
 
 #include "CommandOutputDialog.hpp"
 #include "DirectoryHandler.hpp"
+#include "CommandOutput.hpp"
 #include "UiLog.hpp"
 #include "VFile.hpp"
 
@@ -97,18 +98,39 @@ ShellCommand* ShellCommand::run(const std::string& cmd,const std::string& cmdDef
     return new ShellCommand(cmd,cmdDef);
 }
 
-void ShellCommand::procFinished(int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/)
+void ShellCommand::procFinished(int /*exitCode*/, QProcess::ExitStatus exitStatus)
 {
     //UiLog().dbg() << "exit=" << exitCode << " status=" << exitStatus;
+    if(!item_)
+    {
+        if(exitStatus == QProcess::NormalExit)
+            CommandOutputHandler::instance()->finished(item_);
+        else
+            CommandOutputHandler::instance()->failed(item_);
+    }
     deleteLater();
+
 }
 
 void ShellCommand::slotStdOutput()
 {
-    CommandOutputDialog::addText(this,proc_->readAllStandardOutput());
+    if(!item_)
+    {
+        item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
+    }
+    Q_ASSERT(item_);
+    QString txt=proc_->readAllStandardOutput();
+    CommandOutputHandler::instance()->appendOutput(item_,txt);
 }
 
 void ShellCommand::slotStdError()
 {
-    CommandOutputDialog::addErrorText(this,proc_->readAllStandardError());
+    if(!item_)
+    {
+        item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
+    }
+    Q_ASSERT(item_);
+    QString txt=proc_->readAllStandardError();
+    //item_->appendError(txt);
+    CommandOutputHandler::instance()->appendError(item_,txt);
 }
