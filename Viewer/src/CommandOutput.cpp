@@ -99,7 +99,7 @@ QColor CommandOutput::statusColour() const
 
 CommandOutputHandler::CommandOutputHandler(QObject* parent) :
     QObject(parent),
-    maxNum_(20),
+    maxNum_(25),
     maxOutputSize_(1000000),
     maxErrorSize_(30000)
 {
