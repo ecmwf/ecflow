@@ -11,6 +11,7 @@
 #ifndef COMMANDOUTPUT_HPP
 #define COMMANDOUTPUT_HPP
 
+#include <QColor>
 #include <QDateTime>
 #include <QString>
 #include <QObject>
@@ -38,21 +39,24 @@ public:
     QString error() const {return error_;}
     Status status() const {return status_;}
     QString statusStr() const;
+    QColor statusColour() const;
+    bool isEnabled() const {return enabled_;}
 
 protected:
     CommandOutput(QString cmd,QString cmdDef,QDateTime runTime);
 
-    void appendOutput(QString);
-    void appendError(QString);
+    void appendOutput(QString,int,bool&);
+    void appendError(QString,int,bool&);
     void setStatus(Status s) {status_=s;}
+    void setEnabled(bool b) {enabled_=b;}
 
+    bool enabled_;
     QString command_;
     QString commandDef_;
     QDateTime runTime_;
     QString output_;
     QString error_;
     Status status_;
-
 };
 
 class CommandOutputHandler : public QObject
@@ -76,14 +80,19 @@ Q_SIGNALS:
     void itemAddEnd();
     void itemOutputAppend(CommandOutput_ptr,QString);
     void itemErrorAppend(CommandOutput_ptr,QString);
+    void itemOutputReload(CommandOutput_ptr);
+    void itemErrorReload(CommandOutput_ptr);
     void itemStatusChanged(CommandOutput_ptr);
     void itemsReloaded();
 
 protected:
     CommandOutputHandler(QObject*);
+    void checkItems();
 
     static CommandOutputHandler* instance_;
     int maxNum_;
+    int maxOutputSize_;
+    int maxErrorSize_;
     QVector<CommandOutput_ptr> items_;
 };
 

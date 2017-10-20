@@ -21,19 +21,32 @@ CommandOutputHandler* CommandOutputHandler::instance_=0;
 //==============================================
 
 CommandOutput::CommandOutput(QString cmd,QString cmdDef,QDateTime runTime) :
-    command_(cmd), commandDef_(cmdDef), runTime_(runTime), status_(RunningStatus)
+    enabled_(true), command_(cmd), commandDef_(cmdDef),
+    runTime_(runTime), status_(RunningStatus)
 {
 
 }
 
-void CommandOutput::appendOutput(QString txt)
+void CommandOutput::appendOutput(QString txt,int maxSize,bool& trimmed)
 {
     output_+=txt;
+    trimmed=false;
+    if(output_.size() > maxSize)
+    {
+        output_=output_.right(maxSize-100);
+        trimmed=true;
+    }
 }
 
-void CommandOutput::appendError(QString txt)
+void CommandOutput::appendError(QString txt,int maxSize,bool& trimmed)
 {
     error_+=txt;
+    trimmed=false;
+    if(error_.size() > maxSize)
+    {
+        error_=error_.right(maxSize-100);
+        trimmed=true;
+    }
 }
 
 QString CommandOutput::statusStr() const
@@ -57,6 +70,27 @@ QString CommandOutput::statusStr() const
     return QString();
 }
 
+QColor CommandOutput::statusColour() const
+{
+    static QColor redColour(255,0,0);
+    static QColor greenColour(9,160,63);
+    static QColor blackColour(0,0,0);
+
+    switch(status_)
+    {
+    case CommandOutput::FinishedStatus:
+        return blackColour;
+    case CommandOutput::FailedStatus:
+        return redColour;
+    case CommandOutput::RunningStatus:
+        return greenColour;
+    default:
+        return blackColour;
+    }
+
+    return blackColour;
+}
+
 //===============================================
 //
 // CommandOutputHandler
@@ -65,7 +99,9 @@ QString CommandOutput::statusStr() const
 
 CommandOutputHandler::CommandOutputHandler(QObject* parent) :
     QObject(parent),
-    maxNum_(20)
+    maxNum_(20),
+    maxOutputSize_(1000000),
+    maxErrorSize_(30000)
 {
 
 }
@@ -96,9 +132,13 @@ void CommandOutputHandler::appendOutput(CommandOutput_ptr item,QString txt)
 {
     if(item)
     {
-        item->appendOutput(txt);
-        CommandOutputDialog::make();
-        Q_EMIT itemOutputAppend(item,txt);
+        bool trimmed=false;
+        item->appendOutput(txt,maxOutputSize_,trimmed);
+        CommandOutputDialog::showDialog();
+        if(trimmed==false)
+            Q_EMIT itemOutputAppend(item,txt);
+        else
+            Q_EMIT itemOutputReload(item);
     }
 }
 
@@ -106,9 +146,13 @@ void CommandOutputHandler::appendError(CommandOutput_ptr item,QString txt)
 {
     if(item)
     {
-        item->appendError(txt);
-        CommandOutputDialog::make();
-        Q_EMIT itemErrorAppend(item,txt);
+        bool trimmed=false;
+        item->appendError(txt,maxErrorSize_,trimmed);
+        CommandOutputDialog::showDialog();
+        if(trimmed==false)
+            Q_EMIT itemErrorAppend(item,txt);
+        else
+            Q_EMIT itemErrorReload(item);
     }
 }
 
@@ -132,12 +176,24 @@ void CommandOutputHandler::failed(CommandOutput_ptr item)
 
 CommandOutput_ptr CommandOutputHandler::addItem(QString cmd,QString cmdDef,QDateTime runTime)
 {
-    CommandOutputDialog::make();
+    CommandOutputDialog::showDialog();
     CommandOutput_ptr item=
             CommandOutput_ptr(new CommandOutput(cmd,cmdDef,runTime));
     Q_EMIT itemAddBegin();
     items_ << item;
+    checkItems();
     Q_EMIT itemAddEnd();
     return item;
 }
 
+void CommandOutputHandler::checkItems()
+{
+    Q_ASSERT(maxNum_ >0);
+    while(items_.count() > maxNum_)
+    {
+        Q_ASSERT(items_.count() > 0);
+        CommandOutput_ptr item=items_.first();
+        item->setEnabled(false);
+        items_.removeFirst();
+    }
+}

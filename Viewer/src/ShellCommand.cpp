@@ -118,8 +118,11 @@ void ShellCommand::slotStdOutput()
         item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
     }
     Q_ASSERT(item_);
-    QString txt=proc_->readAllStandardOutput();
-    CommandOutputHandler::instance()->appendOutput(item_,txt);
+    if(item_->isEnabled())
+    {
+        QString txt=proc_->readAllStandardOutput();
+        CommandOutputHandler::instance()->appendOutput(item_,txt);
+    }
 }
 
 void ShellCommand::slotStdError()
@@ -129,7 +132,9 @@ void ShellCommand::slotStdError()
         item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
     }
     Q_ASSERT(item_);
-    QString txt=proc_->readAllStandardError();
-    //item_->appendError(txt);
-    CommandOutputHandler::instance()->appendError(item_,txt);
+    if(item_->isEnabled())
+    {
+        QString txt=proc_->readAllStandardError();
+        CommandOutputHandler::instance()->appendError(item_,txt);
+    }
 }

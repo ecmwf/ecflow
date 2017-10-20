@@ -65,36 +65,13 @@ void CommandOutputDialog::reject()
     QDialog::reject();
 }
 
-#if 0
-void CommandOutputDialog::slotOwnerDelete()
-{
-    deleteLater();
-}
-#endif
-
-void CommandOutputDialog::make()
+void CommandOutputDialog::showDialog()
 {
     if(!dialog_)
     {
         dialog_=new CommandOutputDialog(0);
         dialog_->show();
     }
-    dialog_->raise();
-}
-
-void CommandOutputDialog::addText(ShellCommand* cmd,QString txt)
-{
-    make();
-    Q_ASSERT(dialog_);
-    //if(dialog_->widget_->addText(cmd,txt))
-    dialog_->raise();
-}
-
-void CommandOutputDialog::addErrorText(ShellCommand* cmd,QString txt)
-{
-    make();
-    Q_ASSERT(dialog_);
-    //if(dialog_->widget_->addErrorText(cmd,txt))
     dialog_->raise();
 }
 

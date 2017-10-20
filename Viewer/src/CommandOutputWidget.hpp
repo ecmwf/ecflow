@@ -66,6 +66,8 @@ protected Q_SLOTS:
     void slotItemAddEnd();
     void slotItemOutputAppend(CommandOutput_ptr,QString);
     void slotItemErrorAppend(CommandOutput_ptr,QString);
+    void slotItemOutputReload(CommandOutput_ptr);
+    void slotItemErrorReload(CommandOutput_ptr);
     void slotItemStatusChanged(CommandOutput_ptr);
     void on_searchTb__clicked();
     void on_gotoLineTb__clicked();
@@ -76,6 +78,7 @@ Q_SIGNALS:
     void editorFontSizeChanged();
 
 protected:
+    bool isCurrent(CommandOutput_ptr item);
     void loadItem(CommandOutput_ptr);
     void updateInfoLabel(CommandOutput_ptr);
     void removeSpacer();

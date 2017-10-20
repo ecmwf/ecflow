@@ -18,9 +18,6 @@
 #include "TextFormat.hpp"
 #include "ViewerUtil.hpp"
 
-static QColor redColour(255,0,0);
-static QColor greenColour(9,160,63);
-
 CommandOutputModel::CommandOutputModel(QObject *parent) :
           QAbstractItemModel(parent),
           columns_(0)
@@ -107,21 +104,7 @@ QVariant CommandOutputModel::data( const QModelIndex& index, int role ) const
     {
         if(id == "status")
         {
-            switch(item->status())
-            {
-            case CommandOutput::FinishedStatus:
-                return QVariant();
-                break;
-            case CommandOutput::FailedStatus:
-                return redColour;
-                break;
-            case CommandOutput::RunningStatus:
-                return greenColour;
-                break;
-            default:
-                return QVariant();
-                break;
-            }
+            return item->statusColour();
         }
         return QVariant();
     }
@@ -239,16 +222,32 @@ CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
     connect(handler,SIGNAL(itemErrorAppend(CommandOutput_ptr,QString)),
             this,SLOT(slotItemErrorAppend(CommandOutput_ptr,QString)));
 
+    connect(handler,SIGNAL(itemOutputReload(CommandOutput_ptr)),
+            this,SLOT(slotItemOutputReload(CommandOutput_ptr)));
+
+    connect(handler,SIGNAL(itemErrorReload(CommandOutput_ptr)),
+            this,SLOT(slotItemErrorReload(CommandOutput_ptr)));
+
     connect(handler,SIGNAL(itemStatusChanged(CommandOutput_ptr)),
             this,SLOT(slotItemStatusChanged(CommandOutput_ptr)));
+
+    splitter_->setCollapsible(1,false);
 
     //The selection changes in the view
     connect(tree_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
+
+    if(model_->rowCount() > 0)
+        tree_->setCurrentIndex(model_->index(0,0));
 }
 
 CommandOutputWidget::~CommandOutputWidget()
 {
+}
+
+bool CommandOutputWidget::isCurrent(CommandOutput_ptr item)
+{
+    return (item  && item.get() == model_->indexToItem(tree_->currentIndex()).get());
 }
 
 void CommandOutputWidget::slotItemSelected(const QModelIndex&,const QModelIndex&)
@@ -275,7 +274,7 @@ void CommandOutputWidget::slotItemAddEnd()
 
 void CommandOutputWidget::slotItemOutputAppend(CommandOutput_ptr item,QString txt)
 {
-    if(item  && item == model_->indexToItem(tree_->currentIndex()))
+    if(isCurrent(item))
     {
         textEdit_->appendPlainText(txt);
     }
@@ -283,9 +282,25 @@ void CommandOutputWidget::slotItemOutputAppend(CommandOutput_ptr item,QString tx
 
 void CommandOutputWidget::slotItemErrorAppend(CommandOutput_ptr item,QString txt)
 {
-    if(item  && item == model_->indexToItem(tree_->currentIndex()))
+    if(isCurrent(item))
     {
         messageLabel_->appendError(txt);
+    }
+}
+
+void CommandOutputWidget::slotItemOutputReload(CommandOutput_ptr item)
+{
+    if(isCurrent(item))
+    {
+        textEdit_->setPlainText(item->output());
+    }
+}
+
+void CommandOutputWidget::slotItemErrorReload(CommandOutput_ptr item)
+{
+    if(isCurrent(item))
+    {
+         messageLabel_->showError(item->error());
     }
 }
 
@@ -343,7 +358,7 @@ void CommandOutputWidget::updateInfoLabel(CommandOutput_ptr item)
             Viewer::formatBoldText("Started at: ",boldCol) +
             item->runTime().toString("yyyy-MM-dd hh:mm:ss") +
             Viewer::formatBoldText(" &nbsp;Status: ", boldCol) +
-            item->statusStr();
+            Viewer::formatText(item->statusStr(),item->statusColour());
 
     infoLabel_->setText(s);
 }
