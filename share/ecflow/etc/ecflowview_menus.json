@@ -37,7 +37,7 @@
         },
 
         {
-            "name"    : "Custom",
+            "name"    : "User defined",
             "modes"   : ["Submenu"]
         }
 
@@ -377,7 +377,7 @@
 
 
         {
-            "name"           : "Custom",
+            "name"           : "User defined",
             "type"           : "Submenu",
             "menu"           : "Node",
             "command"        : "None",
