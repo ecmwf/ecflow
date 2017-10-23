@@ -194,6 +194,6 @@ void CommandOutputHandler::checkItems()
         Q_ASSERT(items_.count() > 0);
         CommandOutput_ptr item=items_.first();
         item->setEnabled(false);
-        items_.removeFirst();
+        items_.remove(0);
     }
 }
