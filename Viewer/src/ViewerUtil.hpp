@@ -26,15 +26,11 @@ class ViewerUtil
 {
 public:
    static void initComboBox(QSettings&,QString key,QComboBox* cb);
-   static void initTabId(QSettings& settings,QString key,QTabWidget *tab);
-   static void saveTabId(QSettings& settings,QString key,QTabWidget *tab);
    static void initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
    static void saveTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
    static void initStacked(QSettings& settings,QString key,QStackedWidget *stacked);
    static void initButtonGroup(QSettings& settings,QString key,QButtonGroup *bg);
    static void initCheckableAction(QSettings& settings,QString key,QAction *ac);
-   static void showTabLabel(QTabWidget *tab,int index,QPixmap pix);
-   static void hideTabLabel(QTabWidget *tab,int index);
 };
 
 #endif // VIEWERUTIL_HPP
