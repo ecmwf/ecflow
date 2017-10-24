@@ -14,6 +14,9 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/tuple.hpp>
+#include <boost/python/dict.hpp>
+#include <boost/python/raw_function.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -163,6 +166,33 @@ void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recur
    self->sort_attributes(attr,recursive);
 }
 
+static object add(tuple args, dict kwargs) {
+   int the_list_size = len(args);
+   defs_ptr self = boost::python::extract<defs_ptr>(args[0]); // self
+   if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a defs");
+
+   for (int i = 1; i < the_list_size; ++i) {
+      if (boost::python::extract<Variable>(args[i]).check()) {
+         Variable var = boost::python::extract<Variable>(args[i]);
+         self->set_server().add_or_update_user_variables(var.name(),var.theValue());
+      }
+      else if (boost::python::extract<dict>(args[i]).check())      add_variable_dict(self,boost::python::extract<dict>(args[i]) );
+      else if (boost::python::extract<suite_ptr>(args[i]).check()) self->addSuite(boost::python::extract<suite_ptr>(args[i])) ;
+      else throw std::runtime_error("ExportDefs::add : Unknown type");
+   }
+
+   boost::python::list keys =  kwargs.keys();
+   const int no_of_keys = len(keys);
+   for(int i = 0; i < no_of_keys; ++i) {
+      boost::python::object curArg = keys[i];
+      if (curArg) {
+         std::string first = boost::python::extract<std::string>(keys[i]);
+         std::string second = boost::python::extract<std::string>(kwargs[keys[i]]);
+         self->set_server().add_or_update_user_variables(first,second);
+      }
+   }
+   return object(self); // return defs as python object, relies class_<Defs>... for type registration
+}
 
 void export_Defs()
 {
@@ -173,6 +203,7 @@ void export_Defs()
 	.def("__str__",               &Defs::toString)                // __str__
    .def("__enter__",             &defs_enter)                    // allow with statement, hence indentation support
    .def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support
+   .def("add", raw_function(add,1))
    .def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
    .def("add_suite",             &Defs::add_suite )
  	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())

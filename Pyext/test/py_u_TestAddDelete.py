@@ -90,10 +90,10 @@ if __name__ == "__main__":
     suite.add_variable(a_dict)
     assert len(list(suite.variables)) == 0, "Expected zero variables"    
 
-    # adding dictionary items that are not strings should result in a type error
+    # adding dictionary items that are not strings,or ints in value ,should result in a type error
     expected_type_error = False
     try:
-        a_bad_dict = { "name":"fred", "name2":14, "name3":"12", "name4":12 }
+        a_bad_dict = { "name":"fred", "name2":14, "name3": list( 1,2,3), "name4":12 }
         suite.add_variable(a_bad_dict)
     except TypeError:
         expected_type_error = True

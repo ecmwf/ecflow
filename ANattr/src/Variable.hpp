@@ -46,7 +46,7 @@ public:
    const std::string& theValue() const  { return  value_;}
    int value() const;
 
-   void set_name(const std::string& v) { name_ = v; }
+   void set_name(const std::string& v);
    std::string& value_by_ref() { return value_;}
 
    bool operator==(const Variable& rhs) const;

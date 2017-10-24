@@ -14,6 +14,9 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/tuple.hpp>
+#include <boost/python/dict.hpp>
+#include <boost/python/raw_function.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -129,6 +132,78 @@ static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<J
 
 std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
 
+static node_ptr node_getattr(node_ptr self, std::string attr) {
+   // cout << " node_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
+   size_t pos = 0;
+   node_ptr child = self->findImmediateChild(attr,pos);
+   if (child) { return child;}
+   std::stringstream ss; ss << "ExportNode::node_getattr can not find child node " << attr << " from node " << self->absNodePath();
+   throw std::runtime_error(ss.str());
+   return node_ptr();
+}
+
+static void node_setattr(node_ptr self, std::string name, std::string value){
+   // cout << "  node_setattr  self.name() : " << self->name() << "  name " << name << " value " << value << "\n";
+   self->add_variable(name,value);
+}
+
+static object add(tuple args, dict kwargs) {
+   int the_list_size = len(args);
+   node_ptr self = boost::python::extract<node_ptr>(args[0]); // self
+   if (!self) throw std::runtime_error("ExportNode::add() : first argument is not a node");
+   for (int i = 1; i < the_list_size; ++i) {
+      if (boost::python::extract<Variable>(args[i]).check())       self->addVariable(boost::python::extract<Variable>(args[i]) );
+      else if (boost::python::extract<Event>(args[i]).check())     self->addEvent(boost::python::extract<Event>(args[i]));
+      else if (boost::python::extract<Meter>(args[i]).check())     self->addMeter(boost::python::extract<Meter>(args[i]));
+      else if (boost::python::extract<Label>(args[i]).check())     self->addLabel(boost::python::extract<Label>(args[i]));
+      else if (boost::python::extract<Limit>(args[i]).check())     self->addLimit(boost::python::extract<Limit>(args[i]));
+      else if (boost::python::extract<InLimit>(args[i]).check())   self->addInLimit(boost::python::extract<InLimit>(args[i]));
+      else if (boost::python::extract<DayAttr>(args[i]).check())   self->addDay(boost::python::extract<DayAttr>(args[i]));
+      else if (boost::python::extract<DateAttr>(args[i]).check())  self->addDate(boost::python::extract<DateAttr>(args[i]));
+      else if (boost::python::extract<TodayAttr>(args[i]).check()) self->addToday(boost::python::extract<TodayAttr>(args[i]));
+      else if (boost::python::extract<TimeAttr>(args[i]).check())  self->addTime(boost::python::extract<TimeAttr>(args[i]));
+      else if (boost::python::extract<CronAttr>(args[i]).check())  self->addCron(boost::python::extract<CronAttr>(args[i]));
+      else if (boost::python::extract<LateAttr>(args[i]).check())  self->addLate(boost::python::extract<LateAttr>(args[i]));
+      else if (boost::python::extract<ZombieAttr>(args[i]).check())self->addZombie(boost::python::extract<ZombieAttr>(args[i]));
+      else if (boost::python::extract<RepeatDate>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatDate>(args[i])  ));
+      else if (boost::python::extract<RepeatInteger>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatInteger>(args[i])  ));
+      else if (boost::python::extract<RepeatEnumerated>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatEnumerated>(args[i])  ));
+      else if (boost::python::extract<RepeatString>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatString>(args[i])  ));
+      else if (boost::python::extract<RepeatDay>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(args[i])  ));
+      else if (boost::python::extract<AutoCancelAttr>(args[i]).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(args[i]));
+      else if (boost::python::extract<VerifyAttr>(args[i]).check())self->addVerify(boost::python::extract<VerifyAttr>(args[i]));
+      else if (boost::python::extract<ClockAttr>(args[i]).check()) {
+         if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
+         self->isSuite()->addClock( boost::python::extract<ClockAttr>(args[i]));
+      }
+      else if (boost::python::extract<node_ptr>(args[i]).check()) {
+         NodeContainer* nc = self->isNodeContainer();
+         if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
+         node_ptr child = boost::python::extract<node_ptr>(args[i]); // self
+         nc->addChild(child);
+      }
+      else if (boost::python::extract<dict>(args[i]).check()) {
+          dict d = boost::python::extract<dict>(args[i]);
+          add_variable_dict(self,d);
+       }
+      else  throw std::runtime_error("ExportNode::add : Unknown type ");
+   }
+
+   // key word arguments are use for adding variable only
+   boost::python::list keys = kwargs.keys();
+   const int no_of_keys = len(keys);
+   for(int i = 0; i < no_of_keys; ++i) {
+      boost::python::object curArg = keys[i];
+      if (curArg) {
+         std::string first = boost::python::extract<std::string>(keys[i]);
+         std::string second = boost::python::extract<std::string>(kwargs[keys[i]]);
+         self->add_variable(first,second);
+      }
+   }
+
+   return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+}
+
 void export_Node()
 {
    enum_<Flag::Type>("FlagType",
@@ -225,11 +300,11 @@ void export_Node()
    class_<std::vector<node_ptr> >("NodeVec", "Hold a list of Nodes (i.e :term:`suite`, :term:`family` or :term:`task` s)")
    .def(vector_indexing_suite<std::vector<node_ptr> , true >()) ;
 
-   // Note: we have have not added __setattr__, as it seems to interfere with
-   // classes derived from Node. i.e calling self.fred = bill in the derived class
-   // expects self to be of type Node.
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
+   .def("add", raw_function(add,1))
+   .def("__getattr__", &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
+   .def("__setattr__", &node_setattr) /* use to add a variable */
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
    .def("add_trigger",      &add_trigger,             DefsDoc::add_trigger_doc())
    .def("add_trigger",      &add_trigger_expr)
