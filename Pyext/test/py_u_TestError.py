@@ -14,9 +14,16 @@
 #  code for testing errors in creation of defs file in python
 
 import os
-from ecflow import Date, Meter, Event, Clock, Variable, Label, Limit, InLimit, \
+from ecflow import Day, Date, Meter, Event, Clock, Variable, Label, Limit, InLimit, \
                    RepeatDate, RepeatEnumerated, RepeatInteger, RepeatString, \
                    Task, Family, Suite, Defs, Client, debug_build
+
+def check_day(day):
+    try:    
+        Day(day)
+        return True
+    except RuntimeError: 
+        return False
 
 def check_date(day,month,year):
     try:    
@@ -150,6 +157,17 @@ if __name__ == "__main__":
     # Allow names with leading underscore
     valid_names = [ "_", "__", "_._", "1.2", "fred.doc", "_.1"]
     
+    assert check_day("monday"),            "Expected valid day"
+    assert check_day("tuesday"),           "Expected valid day"
+    assert check_day("wednesday"),         "Expected valid day"
+    assert check_day("thursday"),          "Expected valid day"
+    assert check_day("friday"),            "Expected valid day"
+    assert check_day("saturday"),          "Expected valid day"
+    assert check_day("sunday"),            "Expected valid day"
+    assert check_day("")        == False,  "Expected exeception"
+    assert check_day("sunday1") == False,  "Expected exeception"
+    assert check_day("2")       == False,  "Expected exeception"
+
     assert check_date(0,1,2010),            "Expected valid date"
     assert check_date(10,0,2010),           "Expected valid date"
     assert check_date(10,1,0),              "Expected valid date"
@@ -483,4 +501,13 @@ if __name__ == "__main__":
         pass    
     assert test_passed,"Can't add same task to two different containers"   
 
+    test_passed = False
+    try :
+        defs = Defs();
+        suite = defs.add_suite("s1")
+        defs.add(suite)
+    except RuntimeError as e : 
+        test_passed = True
+        pass    
+    assert test_passed,"Can't add same suite to itself"  
     print("All Tests pass")

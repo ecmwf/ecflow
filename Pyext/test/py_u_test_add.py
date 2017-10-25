@@ -51,9 +51,12 @@ def add_suite_attributes(node):
 
 def add_node_attributes(node):
     zombie_life_time_in_server = 800
-    child_list = [ ChildCmdType.init, ChildCmdType.event, ChildCmdType.meter, ChildCmdType.label, ChildCmdType.wait, ChildCmdType.abort, ChildCmdType.complete ]
+    child_list = [ChildCmdType.init,ChildCmdType.event,ChildCmdType.meter,ChildCmdType.label,ChildCmdType.wait,ChildCmdType.abort,ChildCmdType.complete]
     node.add(Variable("var","joe90"),
-             {"A":"a", "C":1 }, # note use of int
+             Edit(fred="fred",bill="bill",jake=1),
+             {"A":"a", "C":1 }, # note use of integer
+             Trigger("a==1"),
+             Complete("a==1"),
              Event(1),Event(1,"event"),
              Meter("meter",0,100),
              Label("label","init-value"),
@@ -61,13 +64,15 @@ def add_node_attributes(node):
              Time(1,10),
              Date(1,1,0),
              Day(Days.sunday),
+             Day("monday"),
              Limit("limit",10),
              InLimit("limit","/s1",10),
              ZombieAttr(ZombieType.ecf,child_list,ZombieUserActionType.block,zombie_life_time_in_server),
              ZombieAttr(ZombieType.user,child_list,ZombieUserActionType.block,zombie_life_time_in_server),
              ZombieAttr(ZombieType.path,child_list,ZombieUserActionType.block,zombie_life_time_in_server),
              RepeatDate("date", 20100111, 20100115, 2),
-             Autocancel(1, 10, True) # hour,minutes,relative
+             Autocancel(1, 10, True),         # hour,minutes,relative
+             keyword="arg1",keyword2="arg12"  # should be added as variables
             )
     node.VAR2 = "VALUE"
 
@@ -77,11 +82,11 @@ def add_node_attributes(node):
     assert len(list(node.todays))  == 1, "Expected 1 todays"
     assert len(list(node.times))   == 1, "Expected 1 times"
     assert len(list(node.dates))   == 1, "Expected 1 dates"
-    assert len(list(node.days))    == 1, "Expected 1 days"
+    assert len(list(node.days))    == 2, "Expected 2 days"
     assert len(list(node.zombies)) == 3, "Expected 3 zombie attributes but found " + str(len(list(s1.zombies)))
     assert len(list(node.limits))  == 1, "Expected 1 Limits"
     assert len(list(node.inlimits))== 1, "Expected 1 InLimits"
-    assert len(list(node.variables)) == 4, "Expected 4 variable"    
+    assert len(list(node.variables)) == 9, "Expected 9 variables"    
     repeat = node.get_repeat(); assert not repeat.empty(), "Expected repeat"
 
     task = node.add_task("t1"); task.add(RepeatEnumerated("enum", ["red", "green", "blue" ]))
@@ -101,7 +106,7 @@ if __name__ == "__main__":
     print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
     print("sys.path:   " + str(sys.path))
     print("####################################################################")
- 
+     
     defs = Defs().add(Variable("n1","v1"),{"A":"a", "B":"b"},
              Suite("s1").add(
                  Family("f1").add(Variable("n","b"),

@@ -193,6 +193,8 @@ if __name__ == "__main__":
     task.add_complete("t2 == complete")
     assert task.get_complete(), "Expected complete"
     assert task.get_trigger(), "Expected trigger"
+    assert task.get_trigger().get_expression() == "t2 == active","add trigger failed"
+    assert task.get_complete().get_expression() == "t2 == complete","add complete failed"
     task.delete_trigger();  assert not task.get_trigger(), "Expected no trigger"
     task.delete_complete(); assert not task.get_complete(), "Expected no complete"
     
@@ -210,20 +212,76 @@ if __name__ == "__main__":
     task.delete_trigger();  assert not task.get_trigger(), "Expected no trigger"
     task.delete_complete(); assert not task.get_complete(), "Expected no complete"
    
+    #===============================================================================
+    # add and delete triggers and complete
+    #===============================================================================
+    task = ecflow.Task("task")
+    task.add_trigger(ecflow.Trigger("t2 == active"))
+    task.add_complete(ecflow.Complete("t2 == complete") )
+    assert task.get_complete(), "Expected complete"
+    assert task.get_trigger(), "Expected trigger"
+    assert task.get_trigger().get_expression() == "t2 == active","add trigger failed"
+    assert task.get_complete().get_expression() == "t2 == complete","add complete failed"
+    task.delete_trigger();  assert not task.get_trigger(), "Expected no trigger"
+    task.delete_complete(); assert not task.get_complete(), "Expected no complete"
+    
     #===========================================================================
     # Add triggers using expressions
     #===========================================================================
     expr = ecflow.Expression("t1 == complete")
     task = ecflow.Task("task")
     task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete","add trigger failed : " + task.get_trigger().get_expression()
 
     expr = ecflow.Expression("t1 == complete")
-    expr.add(ecflow.PartExpression("t1 == complete", True))
     expr.add(ecflow.PartExpression("t2 == complete", True))
+    expr.add(ecflow.PartExpression("t3 == complete", True))
     task = ecflow.Task("task")
     task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete AND t2 == complete AND t3 == complete","add trigger failed : " + task.get_trigger().get_expression()
 
-     
+    #===========================================================================
+    # Trigger and Complete, thin wrapper over Expression
+    #===========================================================================
+    expr = ecflow.Trigger("t1 == complete")
+    task = ecflow.Task("task")
+    task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete","add trigger failed"
+
+    expr = ecflow.Trigger("t1 == complete")
+    expr.add(ecflow.PartExpression("t2 == complete", True))
+    expr.add(ecflow.PartExpression("t3 == complete", True))
+    task = ecflow.Task("task")
+    task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete AND t2 == complete AND t3 == complete","add trigger failed : " + task.get_trigger().get_expression()
+
+    expr = ecflow.Trigger("t1 == complete")
+    expr.add(ecflow.PartExpression("t2 == complete", False))
+    expr.add(ecflow.PartExpression("t3 == complete", False))
+    task = ecflow.Task("task")
+    task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete OR t2 == complete OR t3 == complete","add trigger failed"
+    
+    expr = ecflow.Complete("t1 == complete")
+    task = ecflow.Task("task")
+    task.add_complete(expr)
+    assert task.get_complete().get_expression() == "t1 == complete","add trigger failed"
+
+    expr = ecflow.Complete("t1 == complete")
+    expr.add(ecflow.PartExpression("t2 == complete", True))
+    expr.add(ecflow.PartExpression("t3 == complete", True))
+    task = ecflow.Task("task")
+    task.add_complete(expr)
+    assert task.get_complete().get_expression() == "t1 == complete AND t2 == complete AND t3 == complete","add complete failed"
+
+    expr = ecflow.Complete("t1 == complete")
+    expr.add(ecflow.PartExpression("t2 == complete", False))
+    expr.add(ecflow.PartExpression("t3 == complete", False))
+    task = ecflow.Task("task")
+    task.add_complete(expr)
+    assert task.get_complete().get_expression() == "t1 == complete OR t2 == complete OR t3 == complete","add complete failed"
+
+
     #===========================================================================
     # add,delete,find events
     #===========================================================================
@@ -423,8 +481,9 @@ if __name__ == "__main__":
     task.add_day(ecflow.Day(ecflow.Days.sunday))
     task.add_day(ecflow.Days.monday)
     task.add_day(ecflow.Days.tuesday)  # duplicate ?
+    task.add_day(ecflow.Day("tuesday"))   
     task.add_day("sunday")     
-    assert len(list(task.days)) == 4, "Expected 4 days"
+    assert len(list(task.days)) == 5, "Expected 5 days"
     vec_copy = []
     for attr in task.days: vec_copy.append(attr)
     for attr in vec_copy: task.delete_day(attr)

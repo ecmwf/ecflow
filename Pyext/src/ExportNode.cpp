@@ -50,9 +50,7 @@ node_ptr add_variable_dict(node_ptr self,const boost::python::dict& dict) {
    BoostPythonUtil::dict_to_str_vec(dict,vec);
    std::vector<std::pair<std::string,std::string> >::iterator i;
    std::vector<std::pair<std::string,std::string> >::iterator vec_end = vec.end();
-   for(i = vec.begin(); i != vec_end; ++i) {
-      self->add_variable((*i).first,(*i).second);
-   }
+   for(i = vec.begin(); i != vec_end; ++i)  self->add_variable((*i).first,(*i).second);
    return self;
 }
 
@@ -105,18 +103,6 @@ node_ptr add_repeat_integer(node_ptr self,const RepeatInteger& d) { self->addRep
 node_ptr add_repeat_string(node_ptr self,const RepeatString& d)   { self->addRepeat(d); return self; }
 node_ptr add_repeat_enum(node_ptr self,const RepeatEnumerated& d) { self->addRepeat(d); return self; }
 node_ptr add_repeat_day(node_ptr self,const RepeatDay& d)         { self->addRepeat(d); return self; }
-node_ptr add_trigger(node_ptr self,const std::string& expr)      { self->add_trigger(expr); return self; }
-node_ptr add_trigger_expr(node_ptr self,const Expression& expr)  { self->add_trigger_expr(expr); return self; }
-node_ptr add_complete(node_ptr self,const std::string& expr)     { self->add_complete(expr); return self; }
-node_ptr add_complete_expr(node_ptr self,const Expression& expr) { self->add_complete_expr(expr); return self; }
-node_ptr add_part_trigger(node_ptr self,const PartExpression& expr)  { self->add_part_trigger(PartExpression(expr)); return self; }
-node_ptr add_part_trigger_1(node_ptr self,const std::string& expression)                { self->add_part_trigger(PartExpression(expression)); return self;}
-node_ptr add_part_trigger_2(node_ptr self,const std::string& expression, bool and_expr) { self->add_part_trigger(PartExpression(expression,and_expr)); return self;}
-node_ptr add_part_complete(node_ptr self,const PartExpression& expr)  { self->add_part_complete(PartExpression(expr)); return self; }
-node_ptr add_part_complete_1(node_ptr self,const std::string& expression)                 { self->add_part_complete(PartExpression(expression)); return self;}
-node_ptr add_part_complete_2(node_ptr self,const std::string& expression, bool and_expr){ self->add_part_complete(PartExpression(expression,and_expr)); return self;}
-bool evaluate_trigger(node_ptr self) { Ast* t = self->triggerAst(); if (t) return t->evaluate();return false;}
-bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) return t->evaluate();return false;}
 
 void sort_attributes(node_ptr self,const std::string& attribute_name, bool recursive){
    std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
@@ -128,9 +114,27 @@ void sort_attributes(node_ptr self,const std::string& attribute_name, bool recur
    self->sort_attributes(attr,recursive);
 }
 
-static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<JobCreationCtrl>();}
-
 std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+class Edit {
+public:
+   Edit() { /*cout << "Edit::Edit() empty\n";*/ }
+   Edit(const boost::python::dict& dict) { BoostPythonUtil::dict_to_str_vec(dict,vec_);}
+   const std::vector<Variable>& variables() const { return vec_;}
+   std::string to_string() const { return "edit";}
+   static object init(tuple args, dict kw) {
+      // cout << "Edit::init args: " << len(args) << " kwargs " << len(kw) << "\n";
+      if (len(args)!=1) throw std::runtime_error("Edit::Edit: only accepts key word arguments");
+      tuple rest(args.slice(1,_));
+      return args[0].attr("__init__")(kw); // calls  -> .def(init<dict>() -> Edit(const boost::python::dict& dict)
+   }
+private:
+   std::vector<Variable> vec_;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////
 
 static node_ptr node_getattr(node_ptr self, std::string attr) {
    // cout << " node_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
@@ -142,10 +146,53 @@ static node_ptr node_getattr(node_ptr self, std::string attr) {
    return node_ptr();
 }
 
-static void node_setattr(node_ptr self, std::string name, std::string value){
-   // cout << "  node_setattr  self.name() : " << self->name() << "  name " << name << " value " << value << "\n";
-   self->add_variable(name,value);
-}
+static void node_setattr(node_ptr self, std::string name, std::string value){ self->add_variable(name,value);}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Trigger & Complete thin wrapper over Expression, allows us to call:
+//  Task("a").add(Trigger("a=1"),Complete("b=1"))
+///////////////////////////////////////////////////////////////////////////////////
+class Trigger {
+public:
+   Trigger(const std::string& expression) : expr_(expression){}
+   Trigger(const PartExpression& pe ) : expr_(pe) {}
+   Trigger() {}
+   Trigger(const Trigger& rhs) : expr_(rhs.expr_) {}
+
+   bool operator==( const Trigger& rhs) const { return expr_ == rhs.expr_;}
+   bool operator!=( const Trigger& rhs) const { return !operator==(rhs);}
+   std::string expression() const { return expr_.expression(); }
+   void add( const PartExpression& t ) { expr_.add(t); }
+
+   std::vector<PartExpression>::const_iterator part_begin() const { return expr_.part_begin();}
+   std::vector<PartExpression>::const_iterator part_end() const   { return expr_.part_end();}
+
+   const Expression& expr() const { return expr_;}
+private:
+   Expression expr_;
+   Trigger& operator=(Trigger const& f); // prevent assignment
+};
+
+class Complete {
+public:
+   Complete(const std::string& expression) : expr_(expression){}
+   Complete(const PartExpression& pe ) : expr_(pe) {}
+   Complete() {}
+   Complete(const  Complete& rhs) : expr_(rhs.expr_) {}
+
+   bool operator==( const Complete & rhs) const { return expr_ == rhs.expr_;}
+   bool operator!=( const Complete & rhs) const { return !operator==(rhs);}
+   std::string expression() const { return expr_.expression(); }
+   void add( const PartExpression& t ) { expr_.add(t); }
+
+   std::vector<PartExpression>::const_iterator part_begin() const { return expr_.part_begin();}
+   std::vector<PartExpression>::const_iterator part_end() const   { return expr_.part_end();}
+
+   const Expression& expr() const { return expr_;}
+private:
+   Expression expr_;
+   Complete & operator=( Complete const& f); // prevent assignment
+};
 
 static object add(tuple args, dict kwargs) {
    int the_list_size = len(args);
@@ -153,6 +200,11 @@ static object add(tuple args, dict kwargs) {
    if (!self) throw std::runtime_error("ExportNode::add() : first argument is not a node");
    for (int i = 1; i < the_list_size; ++i) {
       if (boost::python::extract<Variable>(args[i]).check())       self->addVariable(boost::python::extract<Variable>(args[i]) );
+      else if (boost::python::extract<Edit>(args[i]).check()) {
+         Edit edit = boost::python::extract<Edit>(args[i]);
+         const std::vector<Variable>& vec = edit.variables();
+         for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
+      }
       else if (boost::python::extract<Event>(args[i]).check())     self->addEvent(boost::python::extract<Event>(args[i]));
       else if (boost::python::extract<Meter>(args[i]).check())     self->addMeter(boost::python::extract<Meter>(args[i]));
       else if (boost::python::extract<Label>(args[i]).check())     self->addLabel(boost::python::extract<Label>(args[i]));
@@ -172,6 +224,8 @@ static object add(tuple args, dict kwargs) {
       else if (boost::python::extract<RepeatDay>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(args[i])  ));
       else if (boost::python::extract<AutoCancelAttr>(args[i]).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(args[i]));
       else if (boost::python::extract<VerifyAttr>(args[i]).check())self->addVerify(boost::python::extract<VerifyAttr>(args[i]));
+      else if (boost::python::extract<Trigger>(args[i]).check()){ Trigger t = boost::python::extract<Trigger>(args[i]); self->add_trigger_expr(t.expr());}
+      else if (boost::python::extract<Complete>(args[i]).check()){Complete t = boost::python::extract<Complete>(args[i]);self->add_complete_expr(t.expr());}
       else if (boost::python::extract<ClockAttr>(args[i]).check()) {
          if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
          self->isSuite()->addClock( boost::python::extract<ClockAttr>(args[i]));
@@ -179,14 +233,11 @@ static object add(tuple args, dict kwargs) {
       else if (boost::python::extract<node_ptr>(args[i]).check()) {
          NodeContainer* nc = self->isNodeContainer();
          if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
-         node_ptr child = boost::python::extract<node_ptr>(args[i]); // self
+         node_ptr child = boost::python::extract<node_ptr>(args[i]);
          nc->addChild(child);
       }
-      else if (boost::python::extract<dict>(args[i]).check()) {
-          dict d = boost::python::extract<dict>(args[i]);
-          add_variable_dict(self,d);
-       }
-      else  throw std::runtime_error("ExportNode::add : Unknown type ");
+      else if (boost::python::extract<dict>(args[i]).check()){dict d = boost::python::extract<dict>(args[i]); add_variable_dict(self,d);}
+      else throw std::runtime_error("ExportNode::add : Unknown type ");
    }
 
    // key word arguments are use for adding variable only
@@ -200,79 +251,34 @@ static object add(tuple args, dict kwargs) {
          self->add_variable(first,second);
       }
    }
-
    return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
+node_ptr add_trigger(node_ptr self,const std::string& expr)      { self->add_trigger(expr); return self; }
+node_ptr add_trigger_expr(node_ptr self,const Expression& expr)  { self->add_trigger_expr(expr); return self; }
+node_ptr add_trigger_expr1(node_ptr self,const Trigger& trigger)    { self->add_trigger_expr(trigger.expr()); return self; }
+node_ptr add_complete(node_ptr self,const std::string& expr)     { self->add_complete(expr); return self; }
+node_ptr add_complete_expr(node_ptr self,const Expression& expr) { self->add_complete_expr(expr); return self; }
+node_ptr add_complete_expr1(node_ptr self,const Complete& complete) { self->add_complete_expr(complete.expr()); return self; }
+node_ptr add_part_trigger(node_ptr self,const PartExpression& expr)  { self->add_part_trigger(PartExpression(expr)); return self; }
+node_ptr add_part_trigger_1(node_ptr self,const std::string& expression)                { self->add_part_trigger(PartExpression(expression)); return self;}
+node_ptr add_part_trigger_2(node_ptr self,const std::string& expression, bool and_expr) { self->add_part_trigger(PartExpression(expression,and_expr)); return self;}
+node_ptr add_part_complete(node_ptr self,const PartExpression& expr)  { self->add_part_complete(PartExpression(expr)); return self; }
+node_ptr add_part_complete_1(node_ptr self,const std::string& expression)                 { self->add_part_complete(PartExpression(expression)); return self;}
+node_ptr add_part_complete_2(node_ptr self,const std::string& expression, bool and_expr){ self->add_part_complete(PartExpression(expression,and_expr)); return self;}
+bool evaluate_trigger(node_ptr self) { Ast* t = self->triggerAst(); if (t) return t->evaluate();return false;}
+bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) return t->evaluate();return false;}
 
 void export_Node()
 {
-   enum_<Flag::Type>("FlagType",
-         "Flags store state associated with a node\n\n"
-         "FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
-         "USER_EDIT     - task\n"
-         "TASK_ABORTED  - task*\n"
-         "EDIT_FAILED   - task*\n"
-         "JOBCMD_FAILED - task*\n"
-         "NO_SCRIPT     - task*\n"
-         "KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
-         "MIGRATED      - Node\n"
-         "LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
-         "MESSAGE       - Node\n"
-         "BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
-         "QUEUELIMIT    - Node\n"
-         "WAIT          - task* \n"
-         "LOCKED        - Server\n"
-         "ZOMBIE        - task*\n"
-         "NO_REQUE      - task\n"
-         "NOT_SET\n"
-   )
-         .value("force_abort",  Flag::FORCE_ABORT)
-         .value("user_edit",    Flag::USER_EDIT)
-         .value("task_aborted", Flag::TASK_ABORTED)
-         .value("edit_failed",  Flag::EDIT_FAILED)
-         .value("jobcmd_failed",Flag::JOBCMD_FAILED)
-         .value("no_script",    Flag::NO_SCRIPT)
-         .value("killed",       Flag::KILLED)
-         .value("migrated",     Flag::MIGRATED)
-         .value("late",         Flag::LATE)
-         .value("message",      Flag::MESSAGE)
-         .value("byrule",       Flag::BYRULE)
-         .value("queuelimit",   Flag::QUEUELIMIT)
-         .value("wait",         Flag::WAIT)
-         .value("locked",       Flag::LOCKED)
-         .value("zombie",       Flag::ZOMBIE)
-         .value("no_reque",     Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
-         .value("not_set",      Flag::NOT_SET)
-         ;
-
-   class_<Flag>("Flag",
-         "Represents additional state associated with a Node.\n\n"
-         ,
-         init<>()
-      )
-   .def("__str__",       &Flag::to_string) // __str__
-   .def(self == self )                     // __eq__
-   .def("is_set",        &Flag::is_set,"Queries if a given flag is set")
-   .def("set",           &Flag::set,   "Sets the given flag. Used in test only")
-   .def("clear",         &Flag::clear, "Clear the given flag. Used in test only")
-   .def("reset",         &Flag::reset, "Clears all flags. Used in test only")
-   .def("list",          &Flag::list,  "Returns the list of all flag types. returns FlagTypeVec. Used in test only").staticmethod("list")
-   .def("type_to_string",&Flag::enum_to_string, "Convert type to a string. Used in test only").staticmethod("type_to_string")
-   ;
-
-   class_<std::vector<Flag::Type> >("FlagTypeVec", "Hold a list of flag types")
-   .def(vector_indexing_suite<std::vector<Flag::Type> , true >()) ;
-
-
-
-   class_<JobCreationCtrl, boost::noncopyable, job_creation_ctrl_ptr >("JobCreationCtrl",  DefsDoc::jobgenctrl_doc())
-   .def("__init__",make_constructor(makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
-   .def("set_node_path", &JobCreationCtrl::set_node_path, "The node we want to check job creation for. If no node specified check all tasks")
-   .def("set_dir_for_job_creation", &JobCreationCtrl::set_dir_for_job_creation, "Specify directory, for job creation")
-   .def("get_dir_for_job_creation", &JobCreationCtrl::dir_for_job_creation, return_value_policy<copy_const_reference>(), "Returns the directory set for job creation")
-   .def("generate_temp_dir", &JobCreationCtrl::generate_temp_dir, "Automatically generated temporary directory for job creation. Directory written to stdout for information")
-   .def("get_error_msg", &JobCreationCtrl::get_error_msg, return_value_policy<copy_const_reference>(),"Returns an error message generated during checking of job creation")
-   ;
+   // see: https://github.com/boostorg/python/blob/master/test/raw_ctor.cpp
+   // Uses a raw constructor approach to support pass arbitrary number arguments on the python side.
+   // using no_init postpones defining __init__ function until after raw_function for proper overload resolution order,
+   // since later defs get higher priority.
+   class_<Edit>("Edit", "Allow variable addition as keyword arguments. The values must strings or integers", no_init)
+             .def("__init__", raw_function(&Edit::init,0)) // raw_constructor -> will call -> def(init<dict>() )
+             .def(init<dict>())                 //
+             .def("__str__",  &Edit::to_string) // __str__
+             ;
 
    // mimic PartExpression(const std::string& expression  )
    // mimic PartExpression(const std::string& expression, bool andExpr /* true means AND , false means OR */ )
@@ -294,6 +300,24 @@ void export_Node()
    .add_property("parts", boost::python::range( &Expression::part_begin, &Expression::part_end),"Returns a list of PartExpression's" )
    ;
 
+   // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
+   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::expression_doc(), init<std::string>() )
+   .def(init<PartExpression>())
+   .def(self == self )                            // __eq__
+   .def("__str__",        &Trigger::expression)   // __str__
+   .def("get_expression", &Trigger::expression, "returns the complete expression as a string")
+   .def("add",            &Trigger::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
+   .add_property("parts", boost::python::range( &Trigger::part_begin, &Trigger::part_end),"Returns a list of PartExpression's" )
+   ;
+   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::expression_doc(), init<std::string>() )
+   .def(init<PartExpression>())
+   .def(self == self )                             // __eq__
+   .def("__str__",        &Complete::expression)   // __str__
+   .def("get_expression", &Complete::expression, "returns the complete expression as a string")
+   .def("add",            &Complete::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
+   .add_property("parts", boost::python::range( &Complete::part_begin, &Complete::part_end),"Returns a list of PartExpression's" )
+   ;
+
    // Turn off proxies by passing true as the NoProxy template parameter.
    // shared_ptrs don't need proxies because calls on one a copy of the
    // shared_ptr will affect all of them (duh!).
@@ -308,8 +332,10 @@ void export_Node()
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
    .def("add_trigger",      &add_trigger,             DefsDoc::add_trigger_doc())
    .def("add_trigger",      &add_trigger_expr)
+   .def("add_trigger",      &add_trigger_expr1)
    .def("add_complete",     &add_complete,            DefsDoc::add_trigger_doc())
    .def("add_complete",     &add_complete_expr)
+   .def("add_complete",     &add_complete_expr1)
    .def("add_part_trigger" ,&add_part_trigger,        DefsDoc::add_trigger_doc())
    .def("add_part_trigger" ,&add_part_trigger_1 )
    .def("add_part_trigger" ,&add_part_trigger_2 )
