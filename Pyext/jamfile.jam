@@ -214,7 +214,6 @@ run-test TestGeneratedVariable : ecflow [ glob test/py_u_TestGeneratedVariable.p
 run-test TestEcf               : ecflow [ glob test/py_u_TestEcf.py ] ;
 run-test TestFlag              : ecflow [ glob test/py_u_TestFlag.py ] ;
 run-test TestAutoAddExtern     : ecflow [ glob test/py_u_TestAutoAddExtern.py ] ;
-run-test test_add              : ecflow [ glob test/py_u_test_add.py ] ;
 
 # A target that runs all the tests. 
 # Note test_embed & test_embed_ecf commented out since we dont use this functionality
@@ -222,7 +221,7 @@ alias test-all
  :  TestUserManual TestJobGeneration  TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable  TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern test_add
+    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern  
     # test_embed test_embed_ecf 
     ;
    
@@ -231,7 +230,7 @@ explicit test-all
     TestUserManual TestJobGeneration TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern test_add
+    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern  
     # test_embed test_embed_ecf 
     ;
  

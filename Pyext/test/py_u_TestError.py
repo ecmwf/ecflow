@@ -501,13 +501,4 @@ if __name__ == "__main__":
         pass    
     assert test_passed,"Can't add same task to two different containers"   
 
-    test_passed = False
-    try :
-        defs = Defs();
-        suite = defs.add_suite("s1")
-        defs.add(suite)
-    except RuntimeError as e : 
-        test_passed = True
-        pass    
-    assert test_passed,"Can't add same suite to itself"  
     print("All Tests pass")
