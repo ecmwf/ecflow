@@ -144,7 +144,6 @@ static boost::python::list wrap_set_of_strings(Limit* limit)
 
 static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<JobCreationCtrl>();}
 
-
 void export_NodeAttr()
 {
    enum_<Flag::Type>("FlagType",
@@ -156,7 +155,6 @@ void export_NodeAttr()
          "JOBCMD_FAILED - task*\n"
          "NO_SCRIPT     - task*\n"
          "KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
-         "MIGRATED      - Node\n"
          "LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
          "MESSAGE       - Node\n"
          "BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
@@ -165,6 +163,8 @@ void export_NodeAttr()
          "LOCKED        - Server\n"
          "ZOMBIE        - task*\n"
          "NO_REQUE      - task\n"
+         "ARCHIVED      - Suite/Family\n"
+         "RESTORED      - Family/Family\n"
          "NOT_SET\n"
    )
          .value("force_abort",  Flag::FORCE_ABORT)
@@ -174,7 +174,6 @@ void export_NodeAttr()
          .value("jobcmd_failed",Flag::JOBCMD_FAILED)
          .value("no_script",    Flag::NO_SCRIPT)
          .value("killed",       Flag::KILLED)
-         .value("migrated",     Flag::MIGRATED)
          .value("late",         Flag::LATE)
          .value("message",      Flag::MESSAGE)
          .value("byrule",       Flag::BYRULE)
@@ -183,6 +182,8 @@ void export_NodeAttr()
          .value("locked",       Flag::LOCKED)
          .value("zombie",       Flag::ZOMBIE)
          .value("no_reque",     Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
+         .value("archived",     Flag::ARCHIVED)
+         .value("restored",     Flag::RESTORED)
          .value("not_set",      Flag::NOT_SET)
          ;
 
