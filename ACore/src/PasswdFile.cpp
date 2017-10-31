@@ -41,62 +41,75 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
    vec_.clear();
    passwd_file_ = file;
 
-
    std::vector<std::string> lines;
-   if (File::splitFileIntoLines(passwd_file_,lines,true /* ignore empty lines */)) {
-
-      bool foundVersionNumber = false; // can read from version 4.4.0 onwards
-      size_t lines_size = lines.size();
-      for(size_t i = 0; i < lines_size; ++i) {
-
-         if (lines[i].empty())   continue;
-
-         // ignore/remove all comments
-         if (lines[i][0] == '#') continue;
-         std::string theLine = lines[i];
-         string::size_type comment_pos = theLine.find("#");
-         if (comment_pos != std::string::npos ) {
-            theLine.erase(comment_pos);
-         }
-
-         boost::algorithm::trim(theLine);  // remove leading and trailing spaces
-         std::vector< std::string > lineTokens;
-         Str::split( theLine, lineTokens );
-         if ( lineTokens.empty() ) continue;
-
-         // version should be at the start
-         if (!foundVersionNumber) {
-
-            if (!validateVersionNumber(lineTokens[0], errorMsg )) {
-               std::stringstream ss;
-               ss << " " << i + 1 << ": " << lines[i] << "\n";
-               ss << "for ECF_PASSWD file " << passwd_file_ << "\n";
-               errorMsg += ss.str();
-               return false;
-            }
-            foundVersionNumber = true;
-            continue;
-         }
-         else  {
-           if (!add_user(lineTokens,errorMsg)) {
-              errorMsg += theLine;
-              return false;
-           }
-         }
-      }
-
+   if (!File::splitFileIntoLines(passwd_file_,lines,true /* ignore empty lines */)) {
+      errorMsg += "Could not open file specified by ECF_PASSWD ";
+      errorMsg += passwd_file_;
+      errorMsg += " (";
+      errorMsg += strerror(errno);
+      errorMsg += ")";
       if (debug)  std::cout << dump() << "\n";
-
-      return true;
+      return false;
    }
 
-   errorMsg += "Could not open file specified by ECF_PASSWD ";
-   errorMsg += passwd_file_;
-   errorMsg += " (";
-   errorMsg += strerror(errno);
-   errorMsg += ")";
+   bool foundVersionNumber = false; // can read from version 4.4.0 onwards
+   size_t lines_size = lines.size();
+   for(size_t i = 0; i < lines_size; ++i) {
+
+      if (lines[i].empty())   continue;
+
+      // ignore/remove all comments
+      if (lines[i][0] == '#') continue;
+      std::string theLine = lines[i];
+      string::size_type comment_pos = theLine.find("#");
+      if (comment_pos != std::string::npos ) {
+         theLine.erase(comment_pos);
+      }
+
+      boost::algorithm::trim(theLine);  // remove leading and trailing spaces
+      std::vector< std::string > lineTokens;
+      Str::split( theLine, lineTokens );
+      if ( lineTokens.empty() ) continue;
+
+      // version should be at the start
+      if (!foundVersionNumber) {
+
+         if (!validateVersionNumber(lineTokens[0], errorMsg )) {
+            std::stringstream ss;
+            ss << " " << i + 1 << ": " << lines[i] << "\n";
+            ss << "for ECF_PASSWD file " << passwd_file_ << "\n";
+            errorMsg += ss.str();
+            return false;
+         }
+         foundVersionNumber = true;
+         continue;
+      }
+      else  {
+         if (!add_user(lineTokens,errorMsg)) {
+            errorMsg += theLine;
+            return false;
+         }
+      }
+   }
+
    if (debug)  std::cout << dump() << "\n";
-   return false;
+
+   // Now check the user is unique for a given host/port:
+   //   fred host 3141 xxxx
+   //   fred host 3141 yyyy  this is illegal.
+   size_t vec_size = vec_.size();
+   for (size_t i = 0; i < vec_size; i++) {
+      for (size_t k = 0; k < vec_size; k++) {
+         if (i == k) continue;
+         if (vec_[i].user() == vec_[k].user() && vec_[i].host() == vec_[k].host() && vec_[i].port() == vec_[k].port()) {
+            std::stringstream ss;
+            ss << "user " << vec_[i].user() << " can only appear once for given host/port\n";
+            errorMsg += ss.str();
+            return false;
+         }
+      }
+   }
+   return true;
 }
 
 bool PasswdFile::check_at_least_one_user_with_host_and_port(const std::string& host, const std::string& port)
