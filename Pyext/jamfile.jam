@@ -221,7 +221,7 @@ alias test-all
  :  TestUserManual TestJobGeneration  TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable  TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern
+    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern  
     # test_embed test_embed_ecf 
     ;
    
@@ -230,7 +230,7 @@ explicit test-all
     TestUserManual TestJobGeneration TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
-    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern
+    TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern  
     # test_embed test_embed_ecf 
     ;
  

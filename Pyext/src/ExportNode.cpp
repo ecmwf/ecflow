@@ -47,9 +47,7 @@ node_ptr add_variable_dict(node_ptr self,const boost::python::dict& dict) {
    BoostPythonUtil::dict_to_str_vec(dict,vec);
    std::vector<std::pair<std::string,std::string> >::iterator i;
    std::vector<std::pair<std::string,std::string> >::iterator vec_end = vec.end();
-   for(i = vec.begin(); i != vec_end; ++i) {
-      self->add_variable((*i).first,(*i).second);
-   }
+   for(i = vec.begin(); i != vec_end; ++i)  self->add_variable((*i).first,(*i).second);
    return self;
 }
 
@@ -128,6 +126,19 @@ node_ptr add_repeat_integer(node_ptr self,const RepeatInteger& d) { self->addRep
 node_ptr add_repeat_string(node_ptr self,const RepeatString& d)   { self->addRepeat(d); return self; }
 node_ptr add_repeat_enum(node_ptr self,const RepeatEnumerated& d) { self->addRepeat(d); return self; }
 node_ptr add_repeat_day(node_ptr self,const RepeatDay& d)         { self->addRepeat(d); return self; }
+
+void sort_attributes(node_ptr self,const std::string& attribute_name, bool recursive){
+   std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
+   ecf::Attr::Type attr = Attr::to_attr(attribute_name);
+   if (attr == ecf::Attr::UNKNOWN) {
+      std::stringstream ss;  ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
+      throw std::runtime_error(ss.str());
+   }
+   self->sort_attributes(attr,recursive);
+}
+
+std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
+
 node_ptr add_trigger(node_ptr self,const std::string& expr)      { self->add_trigger(expr); return self; }
 node_ptr add_trigger_expr(node_ptr self,const Expression& expr)  { self->add_trigger_expr(expr); return self; }
 node_ptr add_complete(node_ptr self,const std::string& expr)     { self->add_complete(expr); return self; }
@@ -141,92 +152,8 @@ node_ptr add_part_complete_2(node_ptr self,const std::string& expression, bool a
 bool evaluate_trigger(node_ptr self) { Ast* t = self->triggerAst(); if (t) return t->evaluate();return false;}
 bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) return t->evaluate();return false;}
 
-void sort_attributes(node_ptr self,const std::string& attribute_name, bool recursive){
-   std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
-   ecf::Attr::Type attr = Attr::to_attr(attribute_name);
-   if (attr == ecf::Attr::UNKNOWN) {
-      std::stringstream ss;  ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
-      throw std::runtime_error(ss.str());
-   }
-   self->sort_attributes(attr,recursive);
-}
-
-static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<JobCreationCtrl>();}
-
-std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
-
 void export_Node()
 {
-   enum_<Flag::Type>("FlagType",
-         "Flags store state associated with a node\n\n"
-         "FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
-         "USER_EDIT     - task\n"
-         "TASK_ABORTED  - task*\n"
-         "EDIT_FAILED   - task*\n"
-         "JOBCMD_FAILED - task*\n"
-         "NO_SCRIPT     - task*\n"
-         "KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
-         "LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
-         "MESSAGE       - Node\n"
-         "BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
-         "QUEUELIMIT    - Node\n"
-         "WAIT          - task* \n"
-         "LOCKED        - Server\n"
-         "ZOMBIE        - task*\n"
-         "NO_REQUE      - task\n"
-         "ARCHIVED      - Suite/Family\n"
-         "RESTORED      - Family/Family\n"
-         "NOT_SET\n"
-   )
-         .value("force_abort",  Flag::FORCE_ABORT)
-         .value("user_edit",    Flag::USER_EDIT)
-         .value("task_aborted", Flag::TASK_ABORTED)
-         .value("edit_failed",  Flag::EDIT_FAILED)
-         .value("jobcmd_failed",Flag::JOBCMD_FAILED)
-         .value("no_script",    Flag::NO_SCRIPT)
-         .value("killed",       Flag::KILLED)
-         .value("late",         Flag::LATE)
-         .value("message",      Flag::MESSAGE)
-         .value("byrule",       Flag::BYRULE)
-         .value("queuelimit",   Flag::QUEUELIMIT)
-         .value("wait",         Flag::WAIT)
-         .value("locked",       Flag::LOCKED)
-         .value("zombie",       Flag::ZOMBIE)
-         .value("no_reque",     Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
-         .value("archived",     Flag::ARCHIVED)
-         .value("restored",     Flag::RESTORED)
-         .value("not_set",      Flag::NOT_SET)
-         ;
-
-   class_<Flag>("Flag",
-         "Represents additional state associated with a Node.\n\n"
-         ,
-         init<>()
-      )
-   .def("__str__",       &Flag::to_string) // __str__
-   .def(self == self )                     // __eq__
-   .def("is_set",        &Flag::is_set,"Queries if a given flag is set")
-   .def("set",           &Flag::set,   "Sets the given flag. Used in test only")
-   .def("clear",         &Flag::clear, "Clear the given flag. Used in test only")
-   .def("reset",         &Flag::reset, "Clears all flags. Used in test only")
-   .def("list",          &Flag::list,  "Returns the list of all flag types. returns FlagTypeVec. Used in test only").staticmethod("list")
-   .def("type_to_string",&Flag::enum_to_string, "Convert type to a string. Used in test only").staticmethod("type_to_string")
-   ;
-
-   class_<std::vector<Flag::Type> >("FlagTypeVec", "Hold a list of flag types")
-   .def(vector_indexing_suite<std::vector<Flag::Type> , true >()) ;
-
-
-
-   class_<JobCreationCtrl, boost::noncopyable, job_creation_ctrl_ptr >("JobCreationCtrl",  DefsDoc::jobgenctrl_doc())
-   .def("__init__",make_constructor(makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
-   .def("set_node_path", &JobCreationCtrl::set_node_path, "The node we want to check job creation for. If no node specified check all tasks")
-   .def("set_dir_for_job_creation", &JobCreationCtrl::set_dir_for_job_creation, "Specify directory, for job creation")
-   .def("get_dir_for_job_creation", &JobCreationCtrl::dir_for_job_creation, return_value_policy<copy_const_reference>(), "Returns the directory set for job creation")
-   .def("generate_temp_dir", &JobCreationCtrl::generate_temp_dir, "Automatically generated temporary directory for job creation. Directory written to stdout for information")
-   .def("get_error_msg", &JobCreationCtrl::get_error_msg, return_value_policy<copy_const_reference>(),"Returns an error message generated during checking of job creation")
-   ;
-
    // mimic PartExpression(const std::string& expression  )
    // mimic PartExpression(const std::string& expression, bool andExpr /* true means AND , false means OR */ )
    // Use to adding large trigger and complete expressions
@@ -253,9 +180,6 @@ void export_Node()
    class_<std::vector<node_ptr> >("NodeVec", "Hold a list of Nodes (i.e :term:`suite`, :term:`family` or :term:`task` s)")
    .def(vector_indexing_suite<std::vector<node_ptr> , true >()) ;
 
-   // Note: we have have not added __setattr__, as it seems to interfere with
-   // classes derived from Node. i.e calling self.fred = bill in the derived class
-   // expects self to be of type Node.
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")

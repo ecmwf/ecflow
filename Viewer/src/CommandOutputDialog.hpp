@@ -22,8 +22,7 @@ class CommandOutputDialog : public QDialog, protected Ui::CommandOutputDialog
     Q_OBJECT
 
 public:
-    static void addText(ShellCommand*,QString);
-    static void addErrorText(ShellCommand*,QString);
+    static void showDialog();
 
 protected Q_SLOTS:
     void accept();
@@ -36,7 +35,6 @@ protected:
     void closeEvent(QCloseEvent * event);
 
 private:
-    static void make();
     void readSettings();
     void writeSettings();
 

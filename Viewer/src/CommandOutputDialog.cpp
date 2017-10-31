@@ -65,36 +65,14 @@ void CommandOutputDialog::reject()
     QDialog::reject();
 }
 
-#if 0
-void CommandOutputDialog::slotOwnerDelete()
-{
-    deleteLater();
-}
-#endif
-
-void CommandOutputDialog::make()
+void CommandOutputDialog::showDialog()
 {
     if(!dialog_)
     {
         dialog_=new CommandOutputDialog(0);
         dialog_->show();
     }
-}
-
-void CommandOutputDialog::addText(ShellCommand* cmd,QString txt)
-{
-    make();
-    Q_ASSERT(dialog_);
-    if(dialog_->widget_->addText(cmd,txt))
-       dialog_->raise();
-}
-
-void CommandOutputDialog::addErrorText(ShellCommand* cmd,QString txt)
-{
-    make();
-    Q_ASSERT(dialog_);
-    if(dialog_->widget_->addErrorText(cmd,txt))
-        dialog_->raise();
+    dialog_->raise();
 }
 
 //------------------------------------------
@@ -113,7 +91,7 @@ void CommandOutputDialog::writeSettings()
 
     settings.beginGroup("main");
     settings.setValue("size",size());
-   // queryWidget_->writeSettings(settings);
+    widget_->writeSettings(settings);
     settings.endGroup();
 }
 
@@ -134,13 +112,7 @@ void CommandOutputDialog::readSettings()
         resize(QSize(550,540));
     }
 
-   // queryWidget_->readSettings(settings);
+    widget_->readSettings(settings);
 
-    /*if(settings.contains("current"))
-    {
-        int current=settings.value("current").toInt();
-        if(current >=0)
-            list_->setCurrentRow(current);
-    }*/
     settings.endGroup();
 }

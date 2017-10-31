@@ -14,7 +14,7 @@
 # code for testing with statement
 # In our case it provides the ability to indent
 
-from ecflow import Defs, Suite, Family, Client, debug_build
+from ecflow import Defs, Suite, Task, Family, Client, Variable, debug_build
 import sys
     
 if __name__ == "__main__":
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                 with f1.add_family("f2") as f2: 
                     with f2.add_task("t1") as t1: 
                         t1.add_variable("var","v")
-                    
+    
     assert defs1 == defs2,"expected defs to be the same"        
         
     print("All tests pass")

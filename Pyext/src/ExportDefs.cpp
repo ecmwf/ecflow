@@ -163,7 +163,6 @@ void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recur
    self->sort_attributes(attr,recursive);
 }
 
-
 void export_Defs()
 {
 	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))

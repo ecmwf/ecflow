@@ -84,4 +84,21 @@ o If there is a performance problem::
       watch out for sendmsg/recvmsg.
       Type CTRL Q, to stop recording, and send the file.
       
+   * If server is stuck. 
+     find process id of server:
+     >> fstack <process-id>  # use fstack to dump the back trace of where it is stuck
+     
+   * can not connect, or server is dropping connection: ('Server::handle_read: End of file')
+     Use netcat: on some systems may it is called nc:
+     
+     server side:
+        > netcat -p <port> -l -v # -l list for inbound connection, -v verbose mode
+        > netcat -p 3141   -l -v # use netcat to listen on port 3141, in verbose mode
+        
+     client side:
+        > netcat <host> <port>
+        > netcat ecflow-metab 3141
+          > type a message this should be seen on the server side
+          
+          
   

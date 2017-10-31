@@ -41,6 +41,7 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
+#include "CommandOutputDialog.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
@@ -287,6 +288,11 @@ void MainWindow::on_actionSearch_triggered()
 void MainWindow::on_actionNotification_triggered()
 {
     ChangeNotify::showDialog();
+}
+
+void MainWindow::on_actionCommandOutput_triggered()
+{
+    CommandOutputDialog::showDialog();
 }
 
 void MainWindow::on_actionManageServers_triggered()

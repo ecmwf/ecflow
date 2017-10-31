@@ -90,10 +90,10 @@ if __name__ == "__main__":
     suite.add_variable(a_dict)
     assert len(list(suite.variables)) == 0, "Expected zero variables"    
 
-    # adding dictionary items that are not strings should result in a type error
+    # adding dictionary items that are not strings,or ints in value ,should result in a type error
     expected_type_error = False
     try:
-        a_bad_dict = { "name":"fred", "name2":14, "name3":"12", "name4":12 }
+        a_bad_dict = { "name":"fred", "name2":14, "name3": list( 1,2,3), "name4":12 }
         suite.add_variable(a_bad_dict)
     except TypeError:
         expected_type_error = True
@@ -193,6 +193,8 @@ if __name__ == "__main__":
     task.add_complete("t2 == complete")
     assert task.get_complete(), "Expected complete"
     assert task.get_trigger(), "Expected trigger"
+    assert task.get_trigger().get_expression() == "t2 == active","add trigger failed"
+    assert task.get_complete().get_expression() == "t2 == complete","add complete failed"
     task.delete_trigger();  assert not task.get_trigger(), "Expected no trigger"
     task.delete_complete(); assert not task.get_complete(), "Expected no complete"
     
@@ -209,21 +211,22 @@ if __name__ == "__main__":
     task.add_part_complete("t4 == active", False)  #  for long and/or expressions, subsequent expr must be and/or
     task.delete_trigger();  assert not task.get_trigger(), "Expected no trigger"
     task.delete_complete(); assert not task.get_complete(), "Expected no complete"
-   
+    
     #===========================================================================
     # Add triggers using expressions
     #===========================================================================
     expr = ecflow.Expression("t1 == complete")
     task = ecflow.Task("task")
     task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete","add trigger failed : " + task.get_trigger().get_expression()
 
     expr = ecflow.Expression("t1 == complete")
-    expr.add(ecflow.PartExpression("t1 == complete", True))
     expr.add(ecflow.PartExpression("t2 == complete", True))
+    expr.add(ecflow.PartExpression("t3 == complete", True))
     task = ecflow.Task("task")
     task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete AND t2 == complete AND t3 == complete","add trigger failed : " + task.get_trigger().get_expression()
 
-     
     #===========================================================================
     # add,delete,find events
     #===========================================================================
@@ -453,8 +456,9 @@ if __name__ == "__main__":
     task.add_day(ecflow.Day(ecflow.Days.sunday))
     task.add_day(ecflow.Days.monday)
     task.add_day(ecflow.Days.tuesday)  # duplicate ?
+    task.add_day(ecflow.Day("tuesday"))   
     task.add_day("sunday")     
-    assert len(list(task.days)) == 4, "Expected 4 days"
+    assert len(list(task.days)) == 5, "Expected 5 days"
     vec_copy = []
     for attr in task.days: vec_copy.append(attr)
     for attr in vec_copy: task.delete_day(attr)
