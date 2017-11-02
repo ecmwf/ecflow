@@ -152,7 +152,6 @@ defs_ptr add_variable_dict(defs_ptr self,const boost::python::dict& dict) {
 }
 void delete_variable(defs_ptr self,const std::string& name) { self->set_server().delete_user_variable(name);}
 
-
 void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recursive){
    std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
    ecf::Attr::Type attr = Attr::to_attr(attribute_name);
@@ -163,6 +162,10 @@ void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recur
    self->sort_attributes(attr,recursive);
 }
 
+// Support sized and Container protocol
+size_t defs_len(defs_ptr self) { return self->suiteVec().size();}
+bool defs_container(defs_ptr self, const std::string& name){return (self->findSuite(name)) ?  true : false;}
+
 void export_Defs()
 {
 	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))
@@ -172,6 +175,8 @@ void export_Defs()
 	.def("__str__",               &Defs::toString)                // __str__
    .def("__enter__",             &defs_enter)                    // allow with statement, hence indentation support
    .def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support
+   .def("__len__",               &defs_len)                      // Sized protocol
+   .def("__contains__",          &defs_container)                // Container protocol
    .def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
    .def("add_suite",             &Defs::add_suite )
  	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())

@@ -78,6 +78,7 @@ ecbuild_add_test( TARGET py_u_TestMigrate
                   ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" )
 
 list( APPEND u_tests
+        py_u_test_collection   
         py_u_TestAddDelete   
         py_u_TestAddDeleteFunc 
         py_u_TestAddNodeFunc  

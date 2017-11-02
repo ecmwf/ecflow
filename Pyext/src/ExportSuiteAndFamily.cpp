@@ -42,6 +42,12 @@ task_ptr add_task(NodeContainer* self,task_ptr t){ self->addTask(t); return t;}
 suite_ptr add_clock(suite_ptr self, const ClockAttr& clk) { self->addClock(clk); return self;}
 suite_ptr add_end_clock(suite_ptr self, const ClockAttr& clk) { self->add_end_clock(clk); return self;}
 
+// Sized and Container protocol
+size_t family_len(family_ptr self) { return self->nodeVec().size();}
+size_t suite_len(suite_ptr self)   { return self->nodeVec().size();}
+bool family_container(family_ptr self, const std::string& name){size_t pos; return (self->findImmediateChild(name,pos)) ? true: false;}
+bool suite_container(suite_ptr self, const std::string& name)  {size_t pos; return (self->findImmediateChild(name,pos)) ? true: false;}
+
 // Context management, Only used to provide indentation
 suite_ptr suite_enter(suite_ptr self) { return self;}
 bool suite_exit(suite_ptr self,const boost::python::object& type,const boost::python::object& value,const boost::python::object& traceback){return false;}
@@ -79,6 +85,8 @@ void export_SuiteAndFamily()
    .def("__copy__",  copyObject<Family>)  // __copy__ uses copy constructor
    .def("__enter__", &family_enter)       // allow with statement, hence indentation support
    .def("__exit__",  &family_exit)        // allow with statement, hence indentation support
+   .def("__len__",   &family_len)         // Implement sized protocol for immediate children
+   .def("__contains__",&family_container) // Implement container protocol for immediate children
    ;
 #if defined(__clang__)
    boost::python::register_ptr_to_python<family_ptr>(); // needed for mac and boost 1.6
@@ -91,6 +99,8 @@ void export_SuiteAndFamily()
    .def("__copy__",  copyObject<Suite>)  // __copy__ uses copy constructor
    .def("__enter__", &suite_enter)       // allow with statement, hence indentation support
    .def("__exit__",  &suite_exit)        // allow with statement, hence indentation support
+   .def("__len__",   &suite_len)         // Implement sized protocol for immediate children
+   .def("__contains__",&suite_container) // Implement container protocol for immediate children
    .def("add_clock", &add_clock)
    .def("get_clock", &Suite::clockAttr,"Returns the :term:`suite` :term:`clock`")
    .def("add_end_clock", &add_end_clock,"End clock, used to mark end of simulation")
