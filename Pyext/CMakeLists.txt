@@ -47,7 +47,7 @@ ecbuild_add_library( TARGET    ecflow
                                ${PYTHON_LIBRARIES} ${OPENSSL_LIBRARIES}
                      INCLUDES 
                                ${Boost_INCLUDE_DIRS}
-                               ${PYTHON_INCLUDE_DIRS} 
+                               ${PYTHON_INCLUDE_DIRS}
                     )
 
 
