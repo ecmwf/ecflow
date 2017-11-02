@@ -177,6 +177,7 @@ void export_Defs()
    .def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support
    .def("__len__",               &defs_len)                      // Sized protocol
    .def("__contains__",          &defs_container)                // Container protocol
+   .def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
    .def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
    .def("add_suite",             &Defs::add_suite )
  	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())

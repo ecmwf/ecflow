@@ -68,6 +68,7 @@ void export_SuiteAndFamily()
 
    // choose the correct overload
    class_<NodeContainer, bases<Node>, boost::noncopyable >("NodeContainer",DefsDoc::node_container_doc(), no_init)
+   .def("__iter__",boost::python::range(&NodeContainer::node_begin,&NodeContainer::node_end))
    .def("add_family",&NodeContainer::add_family ,DefsDoc::add_family_doc())
    .def("add_family",add_family )
    .def("add_task",  &NodeContainer::add_task ,  DefsDoc::add_task_doc())

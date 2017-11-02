@@ -11,33 +11,30 @@
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 import ecflow
-import sys
-import os
-import copy
-import unittest # for assertItemsEqual
+import unittest 
+
+def setup_test(self):
+    self.defs0 = ecflow.Defs()
+    self.suite0 = ecflow.Suite("s")
+    self.family0 = ecflow.Family("s")
+    self.task0 = ecflow.Task("s")
+
+    self.defs1 = ecflow.Defs();        self.defs1.add_suite("s1")
+    self.suite1 = ecflow.Suite("s");   self.suite1.add_task("t")
+    self.family1 = ecflow.Family("s"); self.family1.add_task("t")
+
+    self.defs3 = ecflow.Defs()
+    self.suite3 = ecflow.Suite("s") 
+    self.family3 = ecflow.Family("s") 
+    [ self.defs3.add_suite("s" + str(i))   for i in [ 1, 2, 3 ] ]
+    [ self.suite3.add_family("f" + str(i)) for i in [ 1, 2, 3 ] ]
+    [ self.family3.add_task("t" + str(i))  for i in [ 1, 2, 3 ] ]
 
 class TestSizedProtocol(unittest.TestCase):
     def setUp(self):
-        self.defs0 = ecflow.Defs()
-        self.suite0 = ecflow.Suite("s")
-        self.family0 = ecflow.Family("s")
-        self.task0 = ecflow.Task("s")
-
-        self.defs1 = ecflow.Defs();        self.defs1.add_suite("s1")
-        self.suite1 = ecflow.Suite("s");   self.suite1.add_task("t")
-        self.family1 = ecflow.Family("s"); self.family1.add_task("t")
-
-        self.defs3 = ecflow.Defs()
-        for i in  [ 1, 2, 3 ]:
-            self.defs3.add_suite("s" + str(i))   
-        self.suite3 = ecflow.Suite("s") 
-        for i in [ 1, 2, 3 ] :
-            self.suite3.add_family("f" + str(i))  
-        self.family3 = ecflow.Family("s") 
-        for i in  [ 1, 2, 3 ]:
-            self.family3.add_task("t" + str(i))   
-            
-    def test_empty_defs(self):
+        setup_test(self)
+        
+    def test_empty(self):
         self.assertEqual(len(self.defs0), 0, "Expected empty defs to be of size zero")
         self.assertEqual(len(self.suite0), 0, "Expected empty suite to be of size zero")
         self.assertEqual(len(self.family0), 0, "Expected empty family to be of size zero")
@@ -55,44 +52,50 @@ class TestSizedProtocol(unittest.TestCase):
 
 class TestContainerProtocol(unittest.TestCase):
     def setUp(self):
-        self.defs0 = ecflow.Defs()
-        self.suite0 = ecflow.Suite("s")
-        self.family0 = ecflow.Family("s")
-        self.task0 = ecflow.Task("s")
+        setup_test(self)
 
-        self.defs3 = ecflow.Defs()
-        for i in  [ 1, 2, 3 ]:
-            self.defs3.add_suite("s" + str(i))   
-        self.suite3 = ecflow.Suite("s") 
-        for i in [ 1, 2, 3 ] :
-            self.suite3.add_family("f" + str(i))  
-        self.family3 = ecflow.Family("s") 
-        for i in  [ 1, 2, 3 ]:
-            self.family3.add_task("t" + str(i))   
-            
     def test_contains(self):
-        self.assertEqual(("s" in self.defs0), False, "Err in defs container")
+        self.assertEqual(("s" not in self.defs0), True, "Err in defs container")
+        self.assertEqual(("z" not in self.defs3), True, "Err in defs container")
         self.assertEqual(("s1" in self.defs3), True, "Err in defs container")
         self.assertEqual(("s2" in self.defs3), True, "Err in defs container")
         self.assertEqual(("s3" in self.defs3), True, "Err in defs container")
 
-        self.assertEqual(("f" in self.suite0), False, "Err in suites container")
+        self.assertEqual(("f" not in self.suite0), True, "Err in suites container")
+        self.assertEqual(("z" not in self.suite3), True, "Err in suites container")
         self.assertEqual(("f1" in self.suite3), True, "Err in suites container")
         self.assertEqual(("f2" in self.suite3), True, "Err in suites container")
         self.assertEqual(("f3" in self.suite3), True, "Err in suites container")
 
-        self.assertEqual(("t" in self.family0), False, "Err in suites container")
-        self.assertEqual(("t1" in self.family3), True, "Err in suites container")
-        self.assertEqual(("t2" in self.family3), True, "Err in suites container")
-        self.assertEqual(("t3" in self.family3), True, "Err in suites container")
+        self.assertEqual(("z" not in self.family0), True, "Err in family container")
+        self.assertEqual(("t" not in self.family0), True, "Err in family container")
+        self.assertEqual(("t1" in self.family3), True, "Err in family container")
+        self.assertEqual(("t2" in self.family3), True, "Err in family container")
+        self.assertEqual(("t3" in self.family3), True, "Err in family container")
     
+class TestIterableProtocol(unittest.TestCase):
+    def setUp(self):
+        setup_test(self)
+
+    def test_iterator(self):
+        self.assert_(hasattr(self.defs3,'__iter__') , "defs has no __iter__")
+        self.assert_(hasattr(self.suite3,'__iter__') , "suite has no __iter__")
+        self.assert_(hasattr(self.family3,'__iter__') , "family has no __iter__")
+        self.assert_(hasattr(self.task0,'__iter__') , "task has no __iter__ for aliases")
+        self.assertEqual([suite.name() for suite in self.defs3 ] , ["s1","s2","s3"],"Defs iterator protocol not working")
+        self.assertEqual([child.name() for child in self.suite3] , ["f1","f2","f3"],"Suites iterator protocol not working")
+        self.assertEqual([child.name() for child in self.family3], ["t1","t2","t3"],"Family iterator protocol not working")
         
+class TestNodesIteration(unittest.TestCase):
+    def setUp(self):
+        setup_test(self)
+
+    def test_node_iterator(self):
+        self.assertEqual([suite.name() for suite in self.defs3.suites] , ["s1","s2","s3"],"Defs.suites not working")
+        self.assertEqual([child.name() for child in self.suite3.nodes] , ["f1","f2","f3"],"Suite.nodes working")
+        self.assertEqual([child.name() for child in self.family3.nodes], ["t1","t2","t3"],"Family.nodes not working")
+        self.assertEqual([alias.name() for child in self.task0.nodes]   , []              ,"Task.nodes not working")
+
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
-    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
-    print("sys.path:   " + str(sys.path))
-    print("####################################################################")
     unittest.main()
     print("All Tests pass")
-    
