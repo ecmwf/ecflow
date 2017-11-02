@@ -29,6 +29,9 @@ using namespace boost::python;
 using namespace std;
 namespace bp = boost::python;
 
+// Sized protocol
+bool task_len(task_ptr self) { return self->aliases().size();}
+
 task_ptr task_enter(task_ptr self) { return self;}
 bool task_exit(task_ptr self,const boost::python::object& type,const boost::python::object& value,const boost::python::object& traceback){return false;}
 
@@ -55,8 +58,10 @@ void export_Task()
    .def(self == self )                        // __eq__
    .def("__enter__", &task_enter)             // allow with statement, hence indentation support
    .def("__exit__",  &task_exit)              // allow with statement, hence indentation support
-   .def("__str__",         &Task::to_string)  // __str__
+   .def("__str__",   &Task::to_string)        // __str__
    .def("__copy__",  copyObject<Task>)        // __copy__ uses copy constructor
+   .def("__len__",   &task_len)               // Implement sized protocol for immediate children
+   .def("__iter__", boost::python::range( &Task::alias_begin,  &Task::alias_end)) // implement iter protocol
    .add_property("aliases",boost::python::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    .add_property("nodes",  boost::python::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    ;

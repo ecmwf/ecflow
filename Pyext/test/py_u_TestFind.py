@@ -39,6 +39,7 @@ if __name__ == "__main__":
     defs = create_defs()
     s1 = defs.find_suite("s1")
     assert s1 != None, "expected find find suite s1"
+    assert "s1" in defs, "expected find find suite s1"
 
     sx = defs.find_suite("sx")
     assert sx == None, "expected not to find suite sx"
