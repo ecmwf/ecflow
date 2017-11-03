@@ -20,8 +20,21 @@
 #include "Calendar.hpp"
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
+#include "Str.hpp"
 
 namespace ecf {
+
+TimeAttr::TimeAttr(const std::string& str)
+: makeFree_(false), state_change_no_(0)
+{
+   if (str.empty()) throw std::runtime_error("Time::Time: empty string passed");
+   std::vector<std::string> tokens;
+   Str::split(str,tokens);
+   if (tokens.empty())  throw std::runtime_error("Time::Time: incorrect time string ?");
+
+   size_t index = 0;
+   timeSeries_  = TimeSeries::create(index,tokens,false/*parse_state*/);
+}
 
 void TimeAttr::calendarChanged( const ecf::Calendar& c )
 {

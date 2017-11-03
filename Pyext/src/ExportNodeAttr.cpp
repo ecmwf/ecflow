@@ -337,13 +337,14 @@ void export_NodeAttr()
 	.def("day",         &DayAttr::day,      "Return the day as enumerator")
 	;
 
-	class_<TimeAttr>("Time",NodeAttrDoc::time_doc() ,init<TimeSlot, optional<bool> >())
+	class_<TimeAttr>("Time",NodeAttrDoc::time_doc(),init<TimeSlot, optional<bool> >())
 	.def( init<int,int,optional<bool> >())                  // hour, minute, relative
  	.def( init<TimeSeries>())
-	.def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
+    .def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
+    .def( init<std::string>())
 	.def(self == self )                           // __eq__
 	.def("__str__",    &TimeAttr::toString)       // __str__
-   .def("__copy__",    copyObject<TimeAttr>)     // __copy__ uses copy constructor
+    .def("__copy__",    copyObject<TimeAttr>)     // __copy__ uses copy constructor
 	.def("time_series",&TimeAttr::time_series,return_value_policy<copy_const_reference>(), "Return the Time attributes time series")
 	;
 
@@ -351,9 +352,10 @@ void export_NodeAttr()
 	.def( init<int,int,optional<bool> >())                  // hour, minute, relative
  	.def( init<TimeSeries>())
 	.def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
+    .def( init<std::string>())
 	.def(self == self )                                     // __eq__
 	.def("__str__",    &TodayAttr::toString)                // __str__
-   .def("__copy__",   copyObject<TodayAttr>)               // __copy__ uses copy constructor
+    .def("__copy__",   copyObject<TodayAttr>)               // __copy__ uses copy constructor
 	.def("time_series",&TodayAttr::time_series,return_value_policy<copy_const_reference>(), "Return the Todays time series")
 	;
 

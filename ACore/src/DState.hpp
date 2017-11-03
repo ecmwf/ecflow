@@ -48,7 +48,8 @@ public:
 	static NState::State convert(DState::State);
    static const char* toString(DState::State s);
    static const char* to_html(DState::State s);
-	static const char* toString(const DState& ns) { return toString(ns.state());}
+   static const char* toString(const DState& ns) { return toString(ns.state());}
+   static std::string to_string( DState::State s){ return std::string( toString(s) );}
 	static DState::State toState(const std::string& state);
 	static bool isValid(const std::string& state);
 	static std::vector<std::string> allStates();
