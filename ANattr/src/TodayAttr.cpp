@@ -20,10 +20,23 @@
 #include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
+#include "Str.hpp"
 
 using namespace std;
 
 namespace ecf {
+
+TodayAttr::TodayAttr (const std::string& str)
+: makeFree_(false), state_change_no_(0)
+{
+   if (str.empty()) throw std::runtime_error("Today::Today: empty string passed");
+   std::vector<std::string> tokens;
+   Str::split(str,tokens);
+   if (tokens.empty()) throw std::runtime_error("Today::Today: incorrect time string ?");
+
+   size_t index = 0;
+   timeSeries_  = TimeSeries::create(index,tokens,false/*parse_state*/);
+}
 
 std::ostream& TodayAttr::print(std::ostream& os) const
 {

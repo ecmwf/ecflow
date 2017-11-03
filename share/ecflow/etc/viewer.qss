@@ -202,9 +202,12 @@ QAbstractScrollArea[pager="1"] {
 ------------------------------*/
   
 QLabel[fileInfo="1"] {
-     border: 1px solid rgb(216,210,200);
+     border: 1px solid rgb(200,200,200);
+     background: rgb(232, 233, 234);
+     color: rgb(30,30,30);
+
      /*background: rgb(252, 241, 219);  */
-     background: rgb(244, 239, 216);
+     /*background: rgb(244, 239, 216);*/
 }
 
 QLabel[fileInfo="2"] {

@@ -39,31 +39,6 @@ void ViewerUtil::initComboBox(QSettings& settings,QString key,QComboBox* cb)
         cb->setCurrentIndex(0);
 }
 
-void ViewerUtil::initTabId(QSettings& settings,QString key,QTabWidget *tab)
-{
-    Q_ASSERT(tab);
-
-    QString s=settings.value(key).toString();
-    for(int i=0; i < tab->count(); i++)
-    {
-        if(tab->tabBar()->tabData(i).toString() == s)
-        {
-            tab->setCurrentIndex(i);
-            return;
-        }
-    }
-}
-
-void ViewerUtil::saveTabId(QSettings& settings,QString key,QTabWidget *tab)
-{
-    Q_ASSERT(tab);
-
-    int idx=tab->currentIndex();
-    if(idx >= 0)
-    {
-        settings.setValue(key,tab->tabBar()->tabData(idx).toString());
-    }
-}
 
 void ViewerUtil::initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree)
 {
@@ -115,36 +90,5 @@ void ViewerUtil::initCheckableAction(QSettings& settings,QString key,QAction *ac
     if(settings.contains(key))
     {
         ac->setChecked(settings.value(key).toBool());
-    }
-}
-
-
-void ViewerUtil::showTabLabel(QTabWidget *tab,int index,QPixmap pix)
-{
-    Q_ASSERT(tab);
-    QWidget* w=tab->tabBar()->tabButton(index,QTabBar::RightSide);
-    QLabel* label=0;
-    if(w)
-    {
-        qDebug() << QString(w->metaObject()->className());
-        Q_ASSERT(QString(w->metaObject()->className()) == "QLabel");
-    }
-    else
-    {
-         label=new QLabel(tab);
-         label->setPixmap(pix);
-         tab->tabBar()->setTabButton(index, QTabBar::RightSide,label);
-    }
-}
-
-void ViewerUtil::hideTabLabel(QTabWidget *tab,int index)
-{
-    Q_ASSERT(tab);
-    QWidget* w=tab->tabBar()->tabButton(index,QTabBar::RightSide);
-    if(w)
-    {
-        Q_ASSERT(QString(w->metaObject()->className()) == "QLabel");
-        tab->tabBar()->setTabButton(index, QTabBar::RightSide,0);
-        delete w;
     }
 }

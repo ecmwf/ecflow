@@ -34,6 +34,9 @@
 #include "NodeAttrDoc.hpp"
 #include "BoostPythonUtil.hpp"
 #include "Attr.hpp"
+#include "Flag.hpp"
+#include "JobCreationCtrl.hpp"
+#include "DefsDoc.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -106,19 +109,84 @@ static boost::shared_ptr<ZombieAttr> create_ZombieAttr1(
    return boost::make_shared<ZombieAttr>(zt,vec,uc);
 }
 
-
 static boost::python::list wrap_set_of_strings(Limit* limit)
 {
    boost::python::list list;
    const std::set<std::string>& paths = limit->paths();
-   BOOST_FOREACH(std::string path, paths) {
-      list.append(path);
-   }
+   BOOST_FOREACH(std::string path, paths) { list.append(path); }
    return list;
 }
 
+static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<JobCreationCtrl>();}
+
+
 void export_NodeAttr()
 {
+   enum_<Flag::Type>("FlagType",
+         "Flags store state associated with a node\n\n"
+         "FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
+         "USER_EDIT     - task\n"
+         "TASK_ABORTED  - task*\n"
+         "EDIT_FAILED   - task*\n"
+         "JOBCMD_FAILED - task*\n"
+         "NO_SCRIPT     - task*\n"
+         "KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+         "MIGRATED      - Node\n"
+         "LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
+         "MESSAGE       - Node\n"
+         "BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
+         "QUEUELIMIT    - Node\n"
+         "WAIT          - task* \n"
+         "LOCKED        - Server\n"
+         "ZOMBIE        - task*\n"
+         "NO_REQUE      - task\n"
+         "NOT_SET\n"
+   )
+         .value("force_abort",  Flag::FORCE_ABORT)
+         .value("user_edit",    Flag::USER_EDIT)
+         .value("task_aborted", Flag::TASK_ABORTED)
+         .value("edit_failed",  Flag::EDIT_FAILED)
+         .value("jobcmd_failed",Flag::JOBCMD_FAILED)
+         .value("no_script",    Flag::NO_SCRIPT)
+         .value("killed",       Flag::KILLED)
+         .value("migrated",     Flag::MIGRATED)
+         .value("late",         Flag::LATE)
+         .value("message",      Flag::MESSAGE)
+         .value("byrule",       Flag::BYRULE)
+         .value("queuelimit",   Flag::QUEUELIMIT)
+         .value("wait",         Flag::WAIT)
+         .value("locked",       Flag::LOCKED)
+         .value("zombie",       Flag::ZOMBIE)
+         .value("no_reque",     Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
+         .value("not_set",      Flag::NOT_SET)
+         ;
+
+   class_<Flag>("Flag",
+         "Represents additional state associated with a Node.\n\n" ,
+         init<>())
+   .def("__str__",       &Flag::to_string) // __str__
+   .def(self == self )                     // __eq__
+   .def("is_set",        &Flag::is_set,"Queries if a given flag is set")
+   .def("set",           &Flag::set,   "Sets the given flag. Used in test only")
+   .def("clear",         &Flag::clear, "Clear the given flag. Used in test only")
+   .def("reset",         &Flag::reset, "Clears all flags. Used in test only")
+   .def("list",          &Flag::list,  "Returns the list of all flag types. returns FlagTypeVec. Used in test only").staticmethod("list")
+   .def("type_to_string",&Flag::enum_to_string, "Convert type to a string. Used in test only").staticmethod("type_to_string")
+   ;
+
+   class_<std::vector<Flag::Type> >("FlagTypeVec", "Hold a list of flag types")
+   .def(vector_indexing_suite<std::vector<Flag::Type> , true >()) ;
+
+
+   class_<JobCreationCtrl, boost::noncopyable, job_creation_ctrl_ptr >("JobCreationCtrl",  DefsDoc::jobgenctrl_doc())
+   .def("__init__",make_constructor(makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
+   .def("set_node_path", &JobCreationCtrl::set_node_path, "The node we want to check job creation for. If no node specified check all tasks")
+   .def("set_dir_for_job_creation", &JobCreationCtrl::set_dir_for_job_creation, "Specify directory, for job creation")
+   .def("get_dir_for_job_creation", &JobCreationCtrl::dir_for_job_creation, return_value_policy<copy_const_reference>(), "Returns the directory set for job creation")
+   .def("generate_temp_dir", &JobCreationCtrl::generate_temp_dir, "Automatically generated temporary directory for job creation. Directory written to stdout for information")
+   .def("get_error_msg", &JobCreationCtrl::get_error_msg, return_value_policy<copy_const_reference>(),"Returns an error message generated during checking of job creation")
+   ;
+
 	enum_<Child::ZombieType>("ZombieType", NodeAttrDoc::zombie_type_doc())
 	.value("ecf",   Child::ECF)
 	.value("user",  Child::USER)
@@ -262,19 +330,21 @@ void export_NodeAttr()
 	.value("saturday", DayAttr::SATURDAY);
 
 	class_<DayAttr>("Day",NodeAttrDoc::day_doc(),init<DayAttr::Day_t>() )
-	.def(self == self )                                    // __eq__
+   .def(init<std::string>())                              // constructor
+   .def(self == self )                                    // __eq__
 	.def("__str__",     &DayAttr::toString)                // __str__
    .def("__copy__",    copyObject<DayAttr>)               // __copy__ uses copy constructor
 	.def("day",         &DayAttr::day,      "Return the day as enumerator")
 	;
 
-	class_<TimeAttr>("Time",NodeAttrDoc::time_doc() ,init<TimeSlot, optional<bool> >())
+	class_<TimeAttr>("Time",NodeAttrDoc::time_doc(),init<TimeSlot, optional<bool> >())
 	.def( init<int,int,optional<bool> >())                  // hour, minute, relative
  	.def( init<TimeSeries>())
-	.def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
+    .def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
+    .def( init<std::string>())
 	.def(self == self )                           // __eq__
 	.def("__str__",    &TimeAttr::toString)       // __str__
-   .def("__copy__",    copyObject<TimeAttr>)     // __copy__ uses copy constructor
+    .def("__copy__",    copyObject<TimeAttr>)     // __copy__ uses copy constructor
 	.def("time_series",&TimeAttr::time_series,return_value_policy<copy_const_reference>(), "Return the Time attributes time series")
 	;
 
@@ -282,9 +352,10 @@ void export_NodeAttr()
 	.def( init<int,int,optional<bool> >())                  // hour, minute, relative
  	.def( init<TimeSeries>())
 	.def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
+    .def( init<std::string>())
 	.def(self == self )                                     // __eq__
 	.def("__str__",    &TodayAttr::toString)                // __str__
-   .def("__copy__",   copyObject<TodayAttr>)               // __copy__ uses copy constructor
+    .def("__copy__",   copyObject<TodayAttr>)               // __copy__ uses copy constructor
 	.def("time_series",&TodayAttr::time_series,return_value_policy<copy_const_reference>(), "Return the Todays time series")
 	;
 

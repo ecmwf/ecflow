@@ -31,6 +31,46 @@ using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE( ANattrTestSuite )
 
+BOOST_AUTO_TEST_CASE( test_time_string_constrcutor)
+{
+   cout << "ANattr:: ...test_time_string_constrcutor\n";
+   {
+      TimeAttr time("+00:30");
+      BOOST_CHECK_MESSAGE(time.time_series().start().hour() == 0 &&
+                          time.time_series().start().minute() == 30 &&
+                          time.time_series().finish().hour() == 0 &&
+                          time.time_series().finish().minute() == 0 &&
+                          time.time_series().incr().hour() == 0 &&
+                          time.time_series().incr().minute() == 0 &&
+                          time.time_series().relative(),"Error in time constructor");
+   }
+   {
+      TimeAttr time("12:30");
+      BOOST_CHECK_MESSAGE(time.time_series().start().hour() == 12 &&
+                          time.time_series().start().minute() == 30 &&
+                          time.time_series().finish().hour() == 0 &&
+                          time.time_series().finish().minute() == 0 &&
+                          time.time_series().incr().hour() == 0 &&
+                          time.time_series().incr().minute() == 0 &&
+                          !time.time_series().relative(),"Error in time constructor");
+   }
+   {
+      TimeAttr time("+00:30 11:30 00:01");
+      BOOST_CHECK_MESSAGE(time.time_series().start().hour() == 0 &&
+                          time.time_series().start().minute() == 30 &&
+                          time.time_series().finish().hour() == 11 &&
+                          time.time_series().finish().minute() == 30 &&
+                          time.time_series().incr().hour() == 0 &&
+                          time.time_series().incr().minute() == 1 &&
+                          time.time_series().relative(),"Error in time constructor");
+   }
+   {
+      BOOST_REQUIRE_THROW(TimeAttr(""),std::runtime_error);
+      BOOST_REQUIRE_THROW(TimeAttr(" "),std::runtime_error);
+      BOOST_REQUIRE_THROW(TimeAttr("sdsdsdsd"),std::runtime_error);
+   }
+}
+
 BOOST_AUTO_TEST_CASE( test_time_attr)
 {
    cout << "ANattr:: ...test_time_attr\n";

@@ -133,6 +133,8 @@ public:
 
 private:  /// For use by python interface,
    friend void export_Node();
+   friend class Trigger;
+   friend class Complete;
    std::vector<PartExpression>::const_iterator part_begin() const { return vec_.begin();}
    std::vector<PartExpression>::const_iterator part_end() const   { return vec_.end();}
 

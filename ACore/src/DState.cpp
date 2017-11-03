@@ -115,7 +115,7 @@ DState::State DState::toState( const std::string& str ) {
 		return DState::SUSPENDED;
 	if ( str == "active" )
 		return DState::ACTIVE;
-	assert(false);
+	throw std::runtime_error("DState::toState: Can change string to a DState :"+ str);
 	return DState::UNKNOWN;
 }
 

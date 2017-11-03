@@ -99,7 +99,7 @@ QColor CommandOutput::statusColour() const
 
 CommandOutputHandler::CommandOutputHandler(QObject* parent) :
     QObject(parent),
-    maxNum_(20),
+    maxNum_(25),
     maxOutputSize_(1000000),
     maxErrorSize_(30000)
 {
@@ -194,6 +194,6 @@ void CommandOutputHandler::checkItems()
         Q_ASSERT(items_.count() > 0);
         CommandOutput_ptr item=items_.first();
         item->setEnabled(false);
-        items_.removeFirst();
+        items_.remove(0);
     }
 }

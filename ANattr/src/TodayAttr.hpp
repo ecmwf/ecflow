@@ -95,6 +95,7 @@ namespace ecf {
 // Use compiler ,  destructor, assignment, copy constructor
 class TodayAttr  {
 public:
+   TodayAttr(const std::string&);
 	TodayAttr() : makeFree_(false), state_change_no_(0) {}
 	TodayAttr(int hour, int minute, bool relative = false )
 		: timeSeries_(hour, minute,relative), makeFree_(false),state_change_no_(0) {}

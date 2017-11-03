@@ -35,13 +35,13 @@ if __name__ == "__main__":
      
     
     t2_remove = t2.remove()
-    assert len(list(f1.nodes)) == 1 ,"Expected family to have 1 nodes"
+    assert len(f1) == 1 ,"Expected family to have 1 nodes"
 
     t1_remove = t1.remove()
-    assert len(list(f1.nodes)) == 0 ,"Expected family to have 0 nodes"
+    assert len(f1) == 0 ,"Expected family to have 0 nodes"
 
     f1_remove = f1.remove()
-    assert len(list(s1.nodes)) == 0 ,"Expected suite to have no nodes"
+    assert len(s1) == 0 ,"Expected suite to have no nodes"
 
     node_vec = defs.get_all_nodes()
     assert len(node_vec) == 2, "Expected 2 suites only, but found " + str(len(node_vec))

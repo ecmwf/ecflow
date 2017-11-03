@@ -271,7 +271,7 @@ void MenuHandler::refreshCustomMenuCommands()
     CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
     CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
 
-    Menu *menu = findMenu("Custom");
+    Menu *menu = findMenu("User defined");
     if(menu)
     {
         menu->clearFixedList();
@@ -279,7 +279,7 @@ void MenuHandler::refreshCustomMenuCommands()
         // create the 'compulsary' menu items
         MenuItem *item1 = new MenuItem("Manage commands...");
         item1->setCommand("custom");
-        addItemToMenu(item1, "Custom");
+        menu->addItemToFixedList(item1);
         item1->setEnabledCondition(&trueCond_);
         item1->setVisibleCondition(&trueCond_);
         item1->setQuestionCondition(&falseCond_);
@@ -287,7 +287,7 @@ void MenuHandler::refreshCustomMenuCommands()
 
         // Saved commands
         MenuItem *item2 = new MenuItem("-");
-        addItemToMenu(item2, "Custom");
+        menu->addItemToFixedList(item2);
         item2->setEnabledCondition(&trueCond_);
         item2->setVisibleCondition(&trueCond_);
         item2->setQuestionCondition(&falseCond_);
@@ -306,20 +306,20 @@ void MenuHandler::refreshCustomMenuCommands()
                 item->setQuestionCondition(&trueCond_);
                 item->setCustom(true);
                 item->setStatustip("__cmd__");
-                addItemToMenu(item, "Custom");
+                menu->addItemToFixedList(item);
             }
         }
 
 
         // Recently executed commands
         MenuItem *item3 = new MenuItem("-");
-        addItemToMenu(item3, "Custom");
+        menu->addItemToFixedList(item3);
         item3->setEnabledCondition(&trueCond_);
         item3->setVisibleCondition(&trueCond_);
         item3->setQuestionCondition(&falseCond_);
 
         MenuItem *item4 = new MenuItem("Recent");
-        addItemToMenu(item4, "Custom");
+        menu->addItemToFixedList(item4);
         item4->setEnabledCondition(&falseCond_);
         item4->setVisibleCondition(&trueCond_);
         item4->setQuestionCondition(&falseCond_);
@@ -337,7 +337,7 @@ void MenuHandler::refreshCustomMenuCommands()
             item->setQuestionCondition(&trueCond_);
             item->setCustom(true);
             item->setStatustip("__cmd__");
-            addItemToMenu(item, "Custom");
+            menu->addItemToFixedList(item);
         }
     }
 }
