@@ -36,8 +36,52 @@ class TestDefstatus(unittest.TestCase):
     def test_illegal_defstatus(self):
         with self.assertRaises(RuntimeError):
             Defstatus("fred")
+            
+class TestAddAll(unittest.TestCase):
+    def test_add(self):
+        defs = Defs().add(
+            Suite("s1").add(
+                Clock(1, 1, 2010, False),
+                Autocancel(1, 10, True),
+                Task("t1").add(
+                    Edit({ "x1":"y", "aa1":"bb"}, a="v",b="b",),
+                    Edit({ "x":"y", "aa":"bb"}),
+                    Edit(d="d"),
+                    Event(1),
+                    Event(11,"event"),
+                    Meter("meter",0,10,10),
+                    Label("label","c"),
+                    Trigger("1==1"),
+                    Complete("1==1"),
+                    Limit("limit",10),Limit("limit2",10),
+                    InLimit("limitName","/limit",2),
+                    Defstatus(DState.complete),
+                    Today(0,30),Today("00:59"),Today("00:00 11:30 00:01"),
+                    Time(0,30),Time("00:59"),Time("00:00 11:30 00:01"),
+                    Day("sunday"),Day(Days.monday),
+                    Date(1,1,0),Date(28,2,1960),
+                    Autocancel(3)
+                )
+            )
+        )
+        t1 = defs.find_abs_node("/s1/t1")
+        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertEqual(len(list(t1.variables)), 7, "expected 7 variables")
+        self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
+        self.assertEqual(len(list(t1.inlimits)), 1, "expected 1 inlimits")
+        self.assertEqual(len(list(t1.events)), 2, "expected 2 events")
+        self.assertEqual(len(list(t1.meters)), 1, "expected 1 meter")
+        self.assertEqual(len(list(t1.labels)), 1, "expected 1 label")
+        self.assertEqual(len(list(t1.times)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.todays)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.days)), 2, "expected 2 days")
+        self.assertEqual(len(list(t1.dates)), 2, "expected 2 dates")
+        self.assertTrue(t1.get_trigger(), "Can't find t1 trigger")
+        self.assertTrue(t1.get_complete(), "Can't find t1 complete")
+        self.assertTrue(t1.get_autocancel(), "Can't find t1 autocancel")
+        #print(defs)
 
-class TestAll(unittest.TestCase):
+class TestComarison(unittest.TestCase):
     def setUp(self):
         self.cron = Cron()
         self.cron.set_time_series(TimeSeries(TimeSlot(23 , 0) ,True)) # True means relative to suite start
@@ -120,12 +164,12 @@ class TestAll(unittest.TestCase):
             Suite("defstatus").add( Defstatus(DState.active)),
             Suite("today").add(
                 Task("today").add(
-                     Today(0,30),Today("00:59"),Today("00:00 11:30 00:01")
+                    Today(0,30),Today("00:59"),Today("00:00 11:30 00:01")
                 )
             ),
             Suite("time").add(
                 Task("time").add(
-                     Time(0,30),Time("00:59"),Time("00:00 11:30 00:01")
+                    Time(0,30),Time("00:59"),Time("00:00 11:30 00:01")
                 )
             ),
             Suite("day").add(

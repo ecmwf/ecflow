@@ -130,15 +130,22 @@ bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) ret
 // Allow Raw constructor creation, i.e allow any number keyword arguments
 class Edit {
 public:
-   Edit() {}
-   Edit(const boost::python::dict& dict) {BoostPythonUtil::dict_to_str_vec(dict,vec_);}
+   Edit(const boost::python::dict& dict){BoostPythonUtil::dict_to_str_vec(dict,vec_);}
+   Edit(const boost::python::dict& dict,const boost::python::dict& dict2){BoostPythonUtil::dict_to_str_vec(dict,vec_);BoostPythonUtil::dict_to_str_vec(dict2,vec_);}
    const std::vector<Variable>& variables() const { return vec_;}
    std::string to_string() const { return "edit";}
    static object init(tuple args, dict kw) {
-      // cout << "Edit::init args: " << len(args) << " kwargs " << len(kw) << "\n";
-      if (len(args)!=1) throw std::runtime_error("Edit::Edit: only accepts key word arguments");
+      //cout << "Edit::init args: " << len(args) << " kwargs " << len(kw) << "\n";
+      // args[0] is Edit(i.e self)
+      for (int i = 1; i < len(args) ; ++i) {
+         if (boost::python::extract<dict>(args[i]).check()){
+            dict d = boost::python::extract<dict>(args[i]);
+            return args[0].attr("__init__")(d,kw); // calls -> .def(init<dict,dict>() -> Edit(dict,dict)
+         }
+         else throw std::runtime_error("Edit::Edit: only accepts dictionary and key word arguments");
+      }
       tuple rest(args.slice(1,_));
-      return args[0].attr("__init__")(kw); // calls  -> .def(init<dict>() -> Edit(const boost::python::dict& dict)
+      return args[0].attr("__init__")(kw); // calls -> .def(init<dict>() -> Edit(const boost::python::dict& dict)
    }
 private:
    std::vector<Variable> vec_;
@@ -280,6 +287,7 @@ void export_Node()
    class_<Edit>("Edit", "Allow variable addition as keyword arguments. The values must strings or integers", no_init)
              .def("__init__", raw_function(&Edit::init,0)) // raw_constructor -> will call -> def(init<dict>() )
              .def(init<dict>())                 //
+             .def(init<dict,dict>())            //
              .def("__str__",  &Edit::to_string) // __str__
              ;
 
