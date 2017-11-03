@@ -311,6 +311,7 @@ class Clock(Attribute):
             return
         node.add_clock(self.data)
 
+
 class AutoCancel(Attribute):
     """ wrapper to add time """
     def __init__(self, arg):
@@ -322,6 +323,14 @@ class AutoCancel(Attribute):
 
     def add_to(self, node):
         node.add_autocancel(self.data)
+
+
+class Script(Attribute):
+    def __init__(self, script):
+      self._script = script
+
+    def add_to(self, node): print("#WAR: Script attribute, not yet ... ignored")
+
 
 class Time(Attribute):
     """ wrapper to add time """
@@ -515,7 +524,7 @@ class Late(Attribute):
         if USE_LATE and self.data is not None:
             node.add_late(self.data)
 
-class Variables(Attribute):
+class Edit(Attribute):
     """ dedicated class to enable variable addition with different
     syntax """
     
@@ -527,7 +536,7 @@ class Variables(Attribute):
             self.data = Variable(keyt, valt)
         else:
             next = self.next
-            self.next = Variables(keyt, valt, next)
+            self.next = Edit(keyt, valt, next)
 
     def __init__(self, __a=None, __b=None, __next=None, *args, **kwargs):
         self.data = None
@@ -550,7 +559,7 @@ class Variables(Attribute):
         elif type(__a) == tuple: raise BaseException()
             # for key, val in __a.items(): self._set_tvar(key, val)
         elif type(__a) == list: raise BaseException()
-        elif type(__a) == Variable: self.data = __a
+        elif type(__a) in (Edit, Variables): self.data = __a
         elif __a is not None and __b is not None:
             self._set_tvar(__a, __b)
         elif __a is None and __b is None: pass
@@ -581,6 +590,10 @@ class Variables(Attribute):
             self.next.add_to(node)
 
     def add(self, what): raise baseException(what.fullname())
+
+
+class Variables(Edit): pass
+
 
 class Limits(Attribute):
     """ dedicated class to enable limits addition with different syntax """
@@ -642,8 +655,8 @@ class Repeat(Attribute):
 
 def If(test=True, then=None, otow=None):
     """ enable Task("t1").add(If(test= (1==1),
-                                 then= Variables(ONE=1),
-                                 otow= Variables(TWO=2)))
+                                 then= Edit(ONE=1),
+                                 otow= Edit(TWO=2)))
         appreciate that both branches are evaluated, using this If class
         ie there is no 'dead code' as it is with python language 'if' structure
 
@@ -775,6 +788,31 @@ class Root(object): # from where Suite and Node derive
         self.add_inlimit(name, path)
         return self
 
+    # follow pyflow
+    shape = None
+    def draw_tree(self): dot = Dot(fullnames=False); self._tree(dot); return dot
+    def _tree(self, dot):
+      try: dot.edge(self.parent, self)
+      except: pass
+      for n in self.nodes: # .values():
+        if n.name() != '_': n._tree(dot)
+        # if n.names[0] != '_': n._tree(dot)
+
+    def draw_graph(self): dot = Dot(); self._graph(dot); return dot
+    def _graph(self, dot):
+      for n in self.nodes:
+        if n.name() != '_': n._tree(dot)
+      # for n in self._nodes.values():
+      #  if n.names[0] != '_': n._tree(dot)
+
+    # @property
+    def to_html(self):
+        # from .html import HTMLWrapper
+        return "%s" % HTMLWrapper("%s" % self)  # .generate_node()))
+
+    def _repr_html_(self): return str(self.to_html())
+
+
 class Node(Root): # from where Task and Family derive
     """ Node class is shared by family and task """
 
@@ -872,6 +910,7 @@ class Node(Root): # from where Task and Family derive
     def up(self):
         """ get parent, one level up"""
         return self.get_parent()
+
 
 class Defs(ecflow.Defs):
     """ wrapper for the definition """
@@ -996,12 +1035,12 @@ class TestEcf(unittest.TestCase):
 
         fam.add(Task("t3").add(
                 If(test= (1==1),
-                   then=Variables(ADD_ONE=1),
-                   otow=Variables(ADD_TWO=1)),
+                   then=Edit(ADD_ONE=1),
+                   otow=Edit(ADD_TWO=1)),
 
                 If(test= (1==0),
-                   then=Variables(ADD_ONE=0),
-                   otow=Variables(ADD_TWO=0)),
+                   then=Edit(ADD_ONE=0),
+                   otow=Edit(ADD_TWO=0)),
                 Trigger(tsk != ABORTED),
                 Complete(tsk == COMPLETE))) # longer
 
@@ -1010,11 +1049,10 @@ class TestEcf(unittest.TestCase):
             Task("t4").add(
                 Trigger(tsk.name() != COMPLETE)),
             Late("-s 00:05 -c 01:00"),
-            Variables(VAR="VALUE"),
+            Edit(VAR="VALUE"),
             Task("t5").add(Trigger(["t4", "t3", "t2"])),
             Task("t6").add(Trigger("2t" == COMPLETE)),
-            Task("t7").add(Trigger("2t eq complete")),
-            )
+            Task("t7").add(Trigger("2t eq complete")), )
 
         tsk.add(Limit("a_limit", 10),
                 InLimit("a_task:a_limit"),
@@ -1024,9 +1062,9 @@ class TestEcf(unittest.TestCase):
                 Event("a"),
                 Defcomplete())
         
-        tsk.add(Variables({"A": "a", "B": "b"}))
-        tsk.add(Variables(D="d", E="e"))
-        tsk.add(Variables("C", "c"))
+        tsk.add(Edit({"A": "a", "B": "b"}))
+        tsk.add(Edit(D="d", E="e"))
+        tsk.add(Edit("C", "c"))
         suite.add(fam)
 
         fam.family("another").add(DefcompleteIf(True))
@@ -1040,6 +1078,46 @@ class TestEcf(unittest.TestCase):
         afam.task("t2n")
 
         display(defs, fname="test_ecf.tmp")
+        suite.draw_tree()
+        suite.draw_graph()
+        suite.to_html()
+
+# from pyflow, COMPAT
+def definition_to_html(d):
+  result = []
+  for n in d.split("\n"): result.append(n)
+  return "<pre>%s</pre>" % ("\n".join(result),)
+
+
+class HTMLWrapper(object):
+    def __init__(self, d): self._def = d
+    def _repr_html_(self): return definition_to_html(self._def)
+    __str__ = _repr_html_
+
+
+class Dot(object):
+  """ follow tracks from pyflow """
+  def __init__(self, fullnames=True):
+    from graphviz import Digraph
+    self._dot = Digraph()
+    self._nodes = {}
+    self._fullnames = fullnames
+
+    def edge(self, node1, node2): 
+      self._dot.edge(self.node(node1), self.node(node2))
+
+    def node(self, node):
+      full = node.fullname
+      name = node.name
+      label = full if self._fullname else name
+      if full not in self._nodes:
+        self._nodes[full] = 'id%d' % (len(self._nodes),)
+        self._dot.node(self._nodes[full], label=node.shape)
+      return self._nodes[full]
+
+    def save(self, path, view=True):
+      if os.path.exists(path): os.unlink(path)
+      self._dot.render(path, view=view)
 
 if __name__ == '__main__':
     unittest.main()
