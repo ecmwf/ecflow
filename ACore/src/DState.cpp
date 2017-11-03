@@ -16,6 +16,7 @@
 #include <iostream>
 #include "DState.hpp"
 #include "Ecf.hpp"
+#include <stdexcept>
 
 void DState::setState( State s ) {
 	state_= s;
