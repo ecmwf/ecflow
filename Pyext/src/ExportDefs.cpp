@@ -195,6 +195,16 @@ static object add(tuple args, dict kwargs) {
    return object(self); // return defs as python object, relies class_<Defs>... for type registration
 }
 
+static suite_ptr defs_getattr(defs_ptr self, const std::string& attr) {
+   // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
+   size_t pos = 0;
+   suite_ptr child = self->findSuite(attr);
+   if (child) { return child;}
+   std::stringstream ss; ss << "ExportDefs::defs_getattr  can not find suite node " << attr << " from node ";
+   throw std::runtime_error(ss.str());
+   return suite_ptr();
+}
+
 void export_Defs()
 {
 	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))
@@ -207,6 +217,7 @@ void export_Defs()
    .def("__len__",               &defs_len)                      // Sized protocol
    .def("__contains__",          &defs_container)                // Container protocol
    .def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
+   .def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
    .def("add",                   raw_function(add,1))
    .def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
    .def("add_suite",             &Defs::add_suite )

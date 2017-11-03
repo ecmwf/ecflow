@@ -81,6 +81,64 @@ class TestAddAll(unittest.TestCase):
         self.assertTrue(t1.get_autocancel(), "Can't find t1 autocancel")
         #print(defs)
 
+class TestIAdd(unittest.TestCase):
+    def test_iadd_with_getattr(self):
+        defs = Defs();
+        s1 = defs.add_suite("s1")
+        s1 += [ Task("a"),Task("b")]
+        defs.s1.a += [   Edit({ "x1":"y", "aa1":"bb"}, a="v",b="b",),
+                    Edit({ "x":"y", "aa":"bb"}),
+                    Edit(d="d")
+                ]
+        defs.s1.b += [   Event(1),
+                    Event(11,"event"),
+                    Meter("meter",0,10,10),
+                    Label("label","c"),
+                ]
+        self.assertEqual(len(list(defs.s1.a.variables)), 7, "expected 7 variables")
+        self.assertEqual(len(list(defs.s1.b.events)), 2, "expected 2 events")
+        self.assertEqual(len(list(defs.s1.b.meters)), 1, "expected 1 meter")
+        self.assertEqual(len(list(defs.s1.b.labels)), 1, "expected 1 label")
+
+    def test_iadd(self):
+        defs = Defs();
+        s1 = defs.add_suite("s1")
+        s1 += [ Clock(1, 1, 2010, False), Autocancel(1, 10, True) ] #+ returns the same node back
+        t1 = s1.add_task("t1")
+        t1 +=   [   Edit({ "x1":"y", "aa1":"bb"}, a="v",b="b",),
+                    Edit({ "x":"y", "aa":"bb"}),
+                    Edit(d="d"),
+                    Event(1),
+                    Event(11,"event"),
+                    Meter("meter",0,10,10),
+                    Label("label","c"),
+                    Trigger("1==1"),
+                    Complete("1==1"),
+                    Limit("limit",10),Limit("limit2",10),
+                    InLimit("limitName","/limit",2),
+                    Defstatus(DState.complete),
+                    Today(0,30),Today("00:59"),Today("00:00 11:30 00:01"),
+                    Time(0,30),Time("00:59"),Time("00:00 11:30 00:01"),
+                    Day("sunday"),Day(Days.monday),
+                    Date(1,1,0),Date(28,2,1960),
+                    Autocancel(3)
+                ]
+        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertEqual(len(list(t1.variables)), 7, "expected 7 variables")
+        self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
+        self.assertEqual(len(list(t1.inlimits)), 1, "expected 1 inlimits")
+        self.assertEqual(len(list(t1.events)), 2, "expected 2 events")
+        self.assertEqual(len(list(t1.meters)), 1, "expected 1 meter")
+        self.assertEqual(len(list(t1.labels)), 1, "expected 1 label")
+        self.assertEqual(len(list(t1.times)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.todays)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.days)), 2, "expected 2 days")
+        self.assertEqual(len(list(t1.dates)), 2, "expected 2 dates")
+        self.assertTrue(t1.get_trigger(), "Can't find t1 trigger")
+        self.assertTrue(t1.get_complete(), "Can't find t1 complete")
+        self.assertTrue(t1.get_autocancel(), "Can't find t1 autocancel")
+        #print(defs)
+        
 class TestComarison(unittest.TestCase):
     def setUp(self):
         self.cron = Cron()
@@ -125,7 +183,7 @@ class TestComarison(unittest.TestCase):
             zombie_suite.add_zombie(zombie_attr)
    
  
-    def test_compare(self):
+    def test_compare_with_add(self):
         defs = Defs().add(
             Suite("s1").add(
                 Task("t1").add(

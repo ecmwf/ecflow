@@ -127,6 +127,20 @@ bool evaluate_trigger(node_ptr self) { Ast* t = self->triggerAst(); if (t) retur
 bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) return t->evaluate();return false;}
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// This wrapper over DState, to aid Task("t").add(Defstatus(DState.complete))
+class Defstatus {
+public:
+   Defstatus(DState::State state) : state_(state) {}
+   Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
+   DState::State state() const { return state_;}
+   std::string to_string() const { return DState::to_string(state_);}
+private:
+   DState::State state_;
+};
+node_ptr add_defstatus(node_ptr self,DState::State s)             { self->addDefStatus(s); return self; }
+node_ptr add_defstatus1(node_ptr self,const Defstatus& ds)         { self->addDefStatus(ds.state()); return self; }
+
+////////////////////////////////////////////////////////////////////////////////////////
 // Allow Raw constructor creation, i.e allow any number keyword arguments
 class Edit {
 public:
@@ -151,19 +165,6 @@ private:
    std::vector<Variable> vec_;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////
-// This wrapper over DState, to aid Task("t").add(Defstatus(DState.complete))
-class Defstatus {
-public:
-   Defstatus(DState::State state) : state_(state) {}
-   Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
-   DState::State state() const { return state_;}
-   std::string to_string() const { return DState::to_string(state_);}
-private:
-   DState::State state_;
-};
-node_ptr add_defstatus(node_ptr self,DState::State s)             { self->addDefStatus(s); return self; }
-node_ptr add_defstatus1(node_ptr self,const Defstatus& ds)         { self->addDefStatus(ds.state()); return self; }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Trigger & Complete thin wrapper over Expression, allows us to call:
@@ -211,52 +212,62 @@ private:
    Complete & operator=( Complete const& f); // prevent assignment
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////
+static void do_add(node_ptr self, const boost::python::object& arg){
+   if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
+   else if (boost::python::extract<Edit>(arg).check()) {
+      Edit edit = boost::python::extract<Edit>(arg);
+      const std::vector<Variable>& vec = edit.variables();
+      for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
+   }
+   else if (boost::python::extract<Event>(arg).check())     self->addEvent(boost::python::extract<Event>(arg));
+   else if (boost::python::extract<Meter>(arg).check())     self->addMeter(boost::python::extract<Meter>(arg));
+   else if (boost::python::extract<Label>(arg).check())     self->addLabel(boost::python::extract<Label>(arg));
+   else if (boost::python::extract<Limit>(arg).check())     self->addLimit(boost::python::extract<Limit>(arg));
+   else if (boost::python::extract<InLimit>(arg).check())   self->addInLimit(boost::python::extract<InLimit>(arg));
+   else if (boost::python::extract<DayAttr>(arg).check())   self->addDay(boost::python::extract<DayAttr>(arg));
+   else if (boost::python::extract<DateAttr>(arg).check())  self->addDate(boost::python::extract<DateAttr>(arg));
+   else if (boost::python::extract<TodayAttr>(arg).check()) self->addToday(boost::python::extract<TodayAttr>(arg));
+   else if (boost::python::extract<TimeAttr>(arg).check())  self->addTime(boost::python::extract<TimeAttr>(arg));
+   else if (boost::python::extract<CronAttr>(arg).check())  self->addCron(boost::python::extract<CronAttr>(arg));
+   else if (boost::python::extract<LateAttr>(arg).check())  self->addLate(boost::python::extract<LateAttr>(arg));
+   else if (boost::python::extract<ZombieAttr>(arg).check())self->addZombie(boost::python::extract<ZombieAttr>(arg));
+   else if (boost::python::extract<RepeatDate>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDate>(arg)  ));
+   else if (boost::python::extract<RepeatInteger>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatInteger>(arg)  ));
+   else if (boost::python::extract<RepeatEnumerated>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatEnumerated>(arg)  ));
+   else if (boost::python::extract<RepeatString>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatString>(arg)  ));
+   else if (boost::python::extract<RepeatDay>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(arg)  ));
+   else if (boost::python::extract<AutoCancelAttr>(arg).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(arg));
+   else if (boost::python::extract<VerifyAttr>(arg).check())self->addVerify(boost::python::extract<VerifyAttr>(arg));
+   else if (boost::python::extract<Trigger>(arg).check()){ Trigger t = boost::python::extract<Trigger>(arg); self->add_trigger_expr(t.expr());}
+   else if (boost::python::extract<Complete>(arg).check()){Complete t = boost::python::extract<Complete>(arg);self->add_complete_expr(t.expr());}
+   else if (boost::python::extract<Defstatus>(arg).check()){Defstatus t = boost::python::extract<Defstatus>(arg);self->addDefStatus(t.state());}
+   else if (boost::python::extract<ClockAttr>(arg).check()) {
+      if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
+      self->isSuite()->addClock( boost::python::extract<ClockAttr>(arg));
+   }
+   else if (boost::python::extract<node_ptr>(arg).check()) {
+      NodeContainer* nc = self->isNodeContainer();
+      if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
+      node_ptr child = boost::python::extract<node_ptr>(arg);
+      nc->addChild(child);
+   }
+   else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
+   else throw std::runtime_error("ExportNode::add : Unknown type ");
+}
+
+static object node_iadd(node_ptr self, const boost::python::list& list) {
+   // std::cout << "node_iadd list " << self->name() << "\n";
+   int the_list_size = len(list);
+   for(int i = 0; i < the_list_size; ++i) do_add(self,list[i]);
+   return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+}
+
 static object add(tuple args, dict kwargs) {
    int the_list_size = len(args);
    node_ptr self = boost::python::extract<node_ptr>(args[0]); // self
    if (!self) throw std::runtime_error("ExportNode::add() : first argument is not a node");
-   for (int i = 1; i < the_list_size; ++i) {
-      if (boost::python::extract<Variable>(args[i]).check())       self->addVariable(boost::python::extract<Variable>(args[i]) );
-      else if (boost::python::extract<Edit>(args[i]).check()) {
-         Edit edit = boost::python::extract<Edit>(args[i]);
-         const std::vector<Variable>& vec = edit.variables();
-         for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
-      }
-      else if (boost::python::extract<Event>(args[i]).check())     self->addEvent(boost::python::extract<Event>(args[i]));
-      else if (boost::python::extract<Meter>(args[i]).check())     self->addMeter(boost::python::extract<Meter>(args[i]));
-      else if (boost::python::extract<Label>(args[i]).check())     self->addLabel(boost::python::extract<Label>(args[i]));
-      else if (boost::python::extract<Limit>(args[i]).check())     self->addLimit(boost::python::extract<Limit>(args[i]));
-      else if (boost::python::extract<InLimit>(args[i]).check())   self->addInLimit(boost::python::extract<InLimit>(args[i]));
-      else if (boost::python::extract<DayAttr>(args[i]).check())   self->addDay(boost::python::extract<DayAttr>(args[i]));
-      else if (boost::python::extract<DateAttr>(args[i]).check())  self->addDate(boost::python::extract<DateAttr>(args[i]));
-      else if (boost::python::extract<TodayAttr>(args[i]).check()) self->addToday(boost::python::extract<TodayAttr>(args[i]));
-      else if (boost::python::extract<TimeAttr>(args[i]).check())  self->addTime(boost::python::extract<TimeAttr>(args[i]));
-      else if (boost::python::extract<CronAttr>(args[i]).check())  self->addCron(boost::python::extract<CronAttr>(args[i]));
-      else if (boost::python::extract<LateAttr>(args[i]).check())  self->addLate(boost::python::extract<LateAttr>(args[i]));
-      else if (boost::python::extract<ZombieAttr>(args[i]).check())self->addZombie(boost::python::extract<ZombieAttr>(args[i]));
-      else if (boost::python::extract<RepeatDate>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatDate>(args[i])  ));
-      else if (boost::python::extract<RepeatInteger>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatInteger>(args[i])  ));
-      else if (boost::python::extract<RepeatEnumerated>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatEnumerated>(args[i])  ));
-      else if (boost::python::extract<RepeatString>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatString>(args[i])  ));
-      else if (boost::python::extract<RepeatDay>(args[i]).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(args[i])  ));
-      else if (boost::python::extract<AutoCancelAttr>(args[i]).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(args[i]));
-      else if (boost::python::extract<VerifyAttr>(args[i]).check())self->addVerify(boost::python::extract<VerifyAttr>(args[i]));
-      else if (boost::python::extract<Trigger>(args[i]).check()){ Trigger t = boost::python::extract<Trigger>(args[i]); self->add_trigger_expr(t.expr());}
-      else if (boost::python::extract<Complete>(args[i]).check()){Complete t = boost::python::extract<Complete>(args[i]);self->add_complete_expr(t.expr());}
-      else if (boost::python::extract<Defstatus>(args[i]).check()){Defstatus t = boost::python::extract<Defstatus>(args[i]);self->addDefStatus(t.state());}
-      else if (boost::python::extract<ClockAttr>(args[i]).check()) {
-         if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
-         self->isSuite()->addClock( boost::python::extract<ClockAttr>(args[i]));
-      }
-      else if (boost::python::extract<node_ptr>(args[i]).check()) {
-         NodeContainer* nc = self->isNodeContainer();
-         if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
-         node_ptr child = boost::python::extract<node_ptr>(args[i]);
-         nc->addChild(child);
-      }
-      else if (boost::python::extract<dict>(args[i]).check()){dict d = boost::python::extract<dict>(args[i]); add_variable_dict(self,d);}
-      else throw std::runtime_error("ExportNode::add : Unknown type ");
-   }
+   for (int i = 1; i < the_list_size; ++i) do_add(self,args[i]);
 
    // key word arguments are use for adding variable only
    boost::python::list keys = kwargs.keys();
@@ -270,6 +281,16 @@ static object add(tuple args, dict kwargs) {
       }
    }
    return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+}
+
+static node_ptr node_getattr(node_ptr self, const std::string& attr) {
+   // cout << " node_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
+   size_t pos = 0;
+   node_ptr child = self->findImmediateChild(attr,pos);
+   if (child) { return child;}
+   std::stringstream ss; ss << "ExportNode::node_getattr can not find child node " << attr << " from node " << self->absNodePath();
+   throw std::runtime_error(ss.str());
+   return node_ptr();
 }
 
 void export_Node()
@@ -338,6 +359,8 @@ void export_Node()
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
    .def("add", raw_function(add,1))
+   .def("__iadd__", &node_iadd)
+   .def("__getattr__",      &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
    .def("add_trigger",      &add_trigger,             DefsDoc::add_trigger_doc())
    .def("add_trigger",      &add_trigger_expr)
