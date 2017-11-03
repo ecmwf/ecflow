@@ -12,12 +12,13 @@ import sys
 import pwd
 import os
 import unittest
-try:
-  from ecflow import TimeSlot
-  from ecflow import JobCreationCtrl as JobCreationCtrl
-  from ecflow import ChildCmdType
-  from ecflow import ZombieType, ZombieAttr, ZombieUserActionType
-except: print "# ecf.py cannot import few types" 
+# try:
+#     from ecflow import TimeSlot
+#     from ecflow import JobCreationCtrl as JobCreationCtrl
+#     from ecflow import ChildCmdType
+#     from ecflow import ZombieType, ZombieAttr, ZombieUserActionType
+# except: 
+#     print "# ecf.py cannot import few types" 
 
 import ecflow
 ecflow.Ecf.set_debug_level(3)
@@ -328,7 +329,7 @@ class Trigger(Attribute):
             if "%s" in expr: raise Exception("ERR:", expr)
             if "%d" in expr: raise Exception("ERR:", expr)
             self.expr = expr
-            import parameters as ip
+            #import parameters as ip
             try:
               dim = len(ip.SELECTION)
               for ploc in expr.split():
@@ -1268,8 +1269,6 @@ class TestEcf(unittest.TestCase):
             Variables(VAR="VALUE"),
             Task("t5").add(Trigger(["t4", "t3", "t2"])),
             Task("t6").add(Trigger("2t" == COMPLETE)),
-            Task("td").add(TriggerData("2t" == COMPLETE, "wavelet")),
-            Task("tc").add(TriggerCourtesy("2t" == COMPLETE, )),
             Task("t7").add(Trigger("2t eq complete")), )
 
         tsk.add(Limit("a_limit", 10),
