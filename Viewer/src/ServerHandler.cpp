@@ -1404,6 +1404,11 @@ bool ServerHandler::readFromDisk() const
 	return conf_->boolValue(VServerSettings::ReadFromDisk);
 }
 
+QString ServerHandler::nodeMenuMode() const
+{
+    return conf_->stringValue(VServerSettings::NodeMenuMode);
+}
+
 void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 {
 	switch(par)

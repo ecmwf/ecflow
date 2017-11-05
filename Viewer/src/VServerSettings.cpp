@@ -47,6 +47,8 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 		parNames_[MaxOutputFileLines]="server.files.maxOutputFileLines";
 		parNames_[ReadFromDisk]="server.files.readFilesFromDisk";
 
+        parNames_[NodeMenuMode]="server.menu.nodeMenuMode";
+
 		parNames_[NotifyAbortedEnabled]="server.notification.aborted.enabled";
 		parNames_[NotifyAbortedPopup]="server.notification.aborted.popup";
 		parNames_[NotifyAbortedSound]="server.notification.aborted.sound";
@@ -112,6 +114,11 @@ int  VServerSettings::intValue(Param par) const
 bool  VServerSettings::boolValue(Param par) const
 {
 	return property(par)->value().toBool();
+}
+
+QString  VServerSettings::stringValue(Param par) const
+{
+    return property(par)->value().toString();
 }
 
 VProperty* VServerSettings::property(Param par) const

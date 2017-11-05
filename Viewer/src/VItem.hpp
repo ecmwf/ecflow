@@ -48,6 +48,7 @@ public:
     virtual std::string fullPath() const=0;
     virtual bool sameContents(VItem*) const=0;
     virtual bool isAncestor(const VItem*) const;
+    virtual QString nodeMenuMode() const {return QString();}
 
 protected:
     VNode* parent_;

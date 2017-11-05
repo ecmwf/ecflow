@@ -383,6 +383,28 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp,bool gl
 			(*it)->setValue(val);
 		}
 	}
+
+    //nodeMenuMode was introduced in 4.7.0 but was renamed in 4.8.0. We need to make sure
+    //it is read correctly when 4.8.0 started up for the first time.
+    //TODO: In versions after 4.8.0 we can remove this code!!!
+    if(global)
+    {
+        std::string prevPath="menu.access.nodeMenuMode";
+        std::string actPath="server.menu.nodeMenuMode";
+        if(pt.get_child_optional(prevPath) != boost::none)
+        {
+            for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
+            {
+                if((*it)->path() == actPath)
+                {
+                    std::string val=pt.get<std::string>((*it)->path());
+                    (*it)->setValue(val);
+                    break;
+                }
+            }
+        }
+    }
+
 }
 
 void VConfig::loadImportedSettings(const boost::property_tree::ptree& pt,VProperty* guiProp)

@@ -194,6 +194,8 @@ public:
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VItem* n);
 
+    QString nodeMenuMode() const;
+
     virtual void print();
 
 protected:

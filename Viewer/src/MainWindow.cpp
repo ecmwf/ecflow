@@ -870,7 +870,7 @@ MainWindowTitleHandler::MainWindowTitleHandler(QMainWindow *win) : win_(win)
 {
     Q_ASSERT(win_);
     std::vector<std::string> propVec;
-    propVec.push_back("menu.access.nodeMenuMode");
+    propVec.push_back("server.menu.nodeMenuMode");
     prop_=new PropertyMapper(propVec,this);
 }
 
@@ -894,7 +894,7 @@ void MainWindowTitleHandler::update()
 
     QString title=QString::fromStdString(mainTitle);
 
-    if(VProperty* p=prop_->find("menu.access.nodeMenuMode"))
+    if(VProperty* p=prop_->find("server.menu.nodeMenuMode"))
     {
         QString menuMode=p->valueLabel();
         if(!menuMode.isEmpty())

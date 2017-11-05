@@ -493,20 +493,6 @@ void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem *item)
 	}
 }
 
-QString MenuHandler::nodeMenuMode()
-{
-    static VProperty* p=0;
-    if(!p)
-    {
-        p=VConfig::instance()->find("menu.access.nodeMenuMode");
-        UI_ASSERT(p!=0,"");
-        if(!p)
-            return QString();
-    }
-    return p->value().toString();
-}
-
-
 // -----------------------------------------------------------------
 
 

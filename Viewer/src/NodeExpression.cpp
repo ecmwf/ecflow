@@ -616,12 +616,13 @@ bool StateNodeCondition::execute(VItem* item)
 //
 //=========================================================================
 
-bool NodeMenuModeCondition::execute(VItem*)
+bool NodeMenuModeCondition::execute(VItem* item)
 {
-    // since we don't currently have the concept of user levels, we just 
-    // return true for now
-
-    return MenuHandler::nodeMenuMode() == menuModeName_;
+    if(item)
+    {
+        return (item->nodeMenuMode() == menuModeName_);
+    }
+    return false;
 }
 
 
