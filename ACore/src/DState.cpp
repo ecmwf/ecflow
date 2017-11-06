@@ -14,6 +14,7 @@
 //============================================================================
 #include <assert.h>
 #include <iostream>
+#include <stdexcept>
 #include "DState.hpp"
 #include "Ecf.hpp"
 #include <stdexcept>
