@@ -33,7 +33,6 @@
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
 #include "PropertyDialog.hpp"
-#include "PropertyMapper.hpp"
 #include "ServerComInfoWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerList.hpp"
