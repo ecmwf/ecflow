@@ -19,6 +19,7 @@
 #include "ChangeNotify.hpp"
 #include "ConnectState.hpp"
 #include "DirectoryHandler.hpp"
+#include "MainWindow.hpp"
 #include "NodeObserver.hpp"
 #include "SessionHandler.hpp"
 #include "ServerComQueue.hpp"
@@ -1427,6 +1428,10 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
         }
         break;
     }
+    case VServerSettings::NodeMenuMode:
+        MainWindow::updateMenuMode(this);
+        break;
+
 	case VServerSettings::NotifyAbortedEnabled:
 	case VServerSettings::NotifyRestartedEnabled:
 	case VServerSettings::NotifyLateEnabled:

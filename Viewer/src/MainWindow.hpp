@@ -16,7 +16,6 @@
 #include "ui_MainWindow.h"
 
 #include "VInfo.hpp"
-#include "VProperty.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -29,19 +28,22 @@ class ServerRefreshInfoWidget;
 class ServerFilterMenu;
 class SessionItem;
 class VComboSettings;
-class PropertyMapper;
 
-class MainWindowTitleHandler : public VPropertyObserver
+class MainWindow;
+
+class MainWindowTitleHandler
 {
+   friend class MainWindow;
 public:
-   MainWindowTitleHandler(QMainWindow*);
+   MainWindowTitleHandler(MainWindow*);
    ~MainWindowTitleHandler();
+
    void update();
-   void notifyChange(VProperty*);
 
 protected:
-   QMainWindow* win_;
-   PropertyMapper* prop_;
+   void update(ServerHandler*);
+
+   MainWindow* win_;
 };
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
@@ -52,6 +54,8 @@ public:
     MainWindow(QStringList,QWidget *parent=0);
     ~MainWindow();
     
+    ServerHandler* selectedServer() const;
+
     static void init();
     static void showWindows();
     static void openWindow(QString id,QWidget *fromW=0);
@@ -60,6 +64,7 @@ public:
     static void saveSession(SessionItem*);
     static void lookUpInTree(VInfo_ptr);
     static void startPreferences(QString);
+    static void updateMenuMode(ServerHandler*);
 
 protected Q_SLOTS:
 	void on_actionNewTab_triggered();

@@ -397,7 +397,7 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp,bool gl
             {
                 if((*it)->path() == actPath)
                 {
-                    std::string val=pt.get<std::string>((*it)->path());
+                    std::string val=pt.get<std::string>(prevPath);
                     (*it)->setValue(val);
                     break;
                 }
