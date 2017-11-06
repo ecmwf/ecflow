@@ -23,8 +23,15 @@ import unittest
 #     from ecflow import ZombieType, ZombieAttr, ZombieUserActionType
 # except:
 #     print "# ecf.py cannot import few types"
-
-import ecflow
+try:
+    import ecflow
+except:
+    loc = "/usr/local/apps/ecflow/current/lib/python2.7/site-packages/ecflow"
+    sys.path.append(loc)
+    loc = "/usr/local/lib/python2.7/site-packages"
+    sys.path.append(loc)
+    import ecflow
+# import ecflow; 
 ecflow.Ecf.set_debug_level(3)
 
 DEBUG = 0
@@ -144,7 +151,7 @@ class Extern(object):
         else:
             raise Exception(type(path), path)
 
-    def add_to(self, node): return node
+    def add_to(self, node): return None
 
 
 class State(object):
@@ -211,7 +218,7 @@ class Attribute(object):
 
     def add_to(self, node):
         """ use polymorphism to attach attribute to a node"""
-        return node
+        raise Exception("ERR: virtual class")  # return node
 
 
 class Label(Attribute):
@@ -925,7 +932,13 @@ class Root(object):  # from where Suite and Node derive
 
     def __init__(self): self.load = None  # to be filled with ecFlow item
 
+    def real(self): 
+        # print(type(self.load))
+        return self.load
+
     def __get_attr__(self, attr): return getattr(self.load, attr)
+
+    def get_parent(self): return self.load.get_parent()
 
     def __str__(self):
         return self.fullname()
@@ -1086,6 +1099,31 @@ def _tree(dot, node):
 class Node(Root): # from where Task and Family derive
     """ Node class is shared by family and task """
 
+    def __enter__(self): return self
+    def __exit__(self, exc_type, exc_val, exc_tb): pass  # return self
+
+    def real(self): return self.load
+
+    def events(self):
+        # for i in self.load.events: yield i                
+        # print(i)
+
+        # out = [x for x in self.load.events]; return out
+
+        out = []
+        for x in self.load.events: 
+            out.append(x)
+        print(out)
+        return out
+
+    def meters(self):
+        # for i in self.load.meters: yield i        
+        return [x for x in self.load.meters]
+
+    #def nodes(self):
+    # for i in self.load.nodes: yield i        
+    #    return [x for x in self.load.nodes]
+
     def name(self):
         return self.load.name()
 
@@ -1157,6 +1195,26 @@ class Defs(object):
     def __init__(self):
         self.load = ecflow.Defs()
 
+    def __get_attr__(self, attr): 
+        return getattr(self.load, attr)
+
+    def auto_add_externs(self, true): self.load.auto_add_externs(true)
+    def check(self): self.load.check()
+    def add_extern(self, path): self.load.add_extern(path)  # TODO list
+    def suites(self): 
+        out = []
+        for suite in self.load.suites:  # TODO list
+            out.append(suite.name())
+        return out
+
+    def add_suite(self, node): 
+        print(type(node))
+        if type(node) == Suite:
+            self.load.add_suite(node.load)  # TODO list
+        elif type(node) == ecflow.Suite:
+            self.load.add_suite(node)  # TODO list
+        else: raise Exception("what?")
+
     def __str__(self): return "%s" % self.load
     __repr__ = __str__
 
@@ -1185,20 +1243,36 @@ class Defs(object):
         return suite
 
 
-class Client(ecflow.Client):
+class Client(object):
     """ wrapper around client """
 
     def __init__(self, host="localhost", port="31415"):
-        super(Client, self).__init__()
         if host is None: host = "localhost"
+        self.clnt = ecflow.Client(host, port)
         if "@" in host:
             host, port = host.split("@")
-            self.set_host_port(host, int(port))
+            self.clnt.set_host_port(host, int(port))
         else:
             super(Client, self).__init__()
-            self.set_host_port(host, int(port))
+            self.clnt.set_host_port(host, int(port))
         self.host = host
         self.port = port
+
+    def load(self, defs):
+        if type(defs) == Defs:
+            self.clnt.load(defs.load)
+        elif type(defs) == ecflow.Defs:
+            self.clnt.load(defs)
+        else: raise Exception("defs: really?")
+
+    def replace(self, path, defs=None, parent=True, force=False):
+        if defs is None: self.clnt.replace(path, DEFS, parent, force)
+        elif type(defs) is Defs:
+            self.clnt.replace(path, defs.load, parent, force)
+        else: self.clnt.replace(path, defs, parent, force)
+
+    def suites(self): return self.clnt.suites()
+    def ping(self): self.clnt.ping()
 
     def __str__(self):
         return "ecflow client %s@%s v%s" % (
@@ -1208,11 +1282,14 @@ class Client(ecflow.Client):
 class Suite(Root):
     """ wrapper for a suite """
 
+    def __enter__(self): return self
+    def __exit__(self, exc_type, exc_val, exc_tb): pass  # return self
+
     def __init__(self, name):
         self.load = ecflow.Suite(name)
 
     def family(self, name):
-        """ add family """
+        """ add a family """
         if "%" in name: raise Exception(name)
         obsolete()
         fam = Family(str(name))
@@ -1242,7 +1319,7 @@ class Family(Node, Attribute):
         """ add a family """
         if "%" in name: raise Exception(name)
         obsolete()
-        fam = Family(name)
+        fam = Family(str(name))
         self.add(fam)
         return fam
 
@@ -1260,7 +1337,7 @@ class Family(Node, Attribute):
         if parent: raise Exception("already attached...",
                                    parent.name(),
                                    node.name(), self.name())
-        node.load.add(self.load)
+        node.load.add_family(self.load)
 
     # def __enter__(self): return self
 
@@ -1281,7 +1358,7 @@ class Task(Node, Attribute):
     #         self.load.add(ecflow.Variable(key, val))
 
     def add_to(self, node):
-        node.load.add(self.load)
+        node.load.add_task(self.load)
 
     def add_family(self, node):
         raise Exception(self.name(), node.name(), self.fullname())
