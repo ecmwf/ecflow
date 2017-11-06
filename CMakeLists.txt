@@ -287,6 +287,8 @@ add_subdirectory( ANode )
 add_subdirectory( Base )
 add_subdirectory( CSim )
 add_subdirectory( Client )
+add_subdirectory( tools )
+
 if (ENABLE_SERVER)
     add_subdirectory( Server )
     add_subdirectory( Test )
@@ -340,22 +342,6 @@ ecbuild_dont_pack( FILES
 )
 
 
-# =========================================================================================
-# install scripts
-# =========================================================================================
-
-install( FILES
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
-            ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
-            ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
-         DESTINATION bin
-         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-         COMPONENT binary
-       )
-        
 # =========================================================================================
 # final
 # =========================================================================================

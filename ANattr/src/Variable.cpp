@@ -37,6 +37,15 @@ Variable::Variable(const std::string& name, const std::string& value)
    }
 }
 
+void Variable::set_name(const std::string& v)
+{
+   std::string msg;
+   if ( !Str::valid_name( v,msg ) ) {
+      throw std::runtime_error("Variable::set_name: Invalid Variable name: " + msg);
+   }
+   name_ = v;
+}
+
 int Variable::value() const
 {
    // see if the value is convertible to a integer

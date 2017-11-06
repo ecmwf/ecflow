@@ -21,6 +21,7 @@
 #include <boost/python.hpp>
 #include <vector>
 #include <string>
+#include "Variable.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
@@ -31,6 +32,7 @@ public:
    static void list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec);
    static void list_to_str_vec(const boost::python::list& list, std::vector<std::string>& int_vec);
    static void dict_to_str_vec(const boost::python::dict& dict, std::vector<std::pair<std::string,std::string> >& str_pair);
+   static void dict_to_str_vec(const boost::python::dict& dict, std::vector<Variable>& vec);
 };
 
 template<typename T> const T copyObject(const T& v) { return v; }

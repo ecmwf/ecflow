@@ -14,7 +14,7 @@
 # code for testing with statement
 # In our case it provides the ability to indent
 
-from ecflow import Defs, Suite, Family, Client, debug_build
+from ecflow import Defs, Suite, Task, Family, Client, Variable, debug_build
 import sys
     
 if __name__ == "__main__":
@@ -34,22 +34,22 @@ if __name__ == "__main__":
         with defs.add_suite("s2") as s2:
             with s2.add_family("f1") as f1:
                 with f1.add_task("t1") as t1:
-                    assert len(list(f1.nodes)) == 1,"Expected 1 task"
+                    assert len(f1) == 1,"Expected 1 task"
             s2.add_family("f2")
             s2.add_task("t1")
-        assert len(list(s2.nodes)) == 3,"Expected 2 families and one task suite"
-    assert len(list(defs.suites)) == 1,"Expected 1 suite"
+        assert len(s2) == 3,"Expected 2 families and one task suite"
+    assert len(defs) == 1,"Expected 1 suite"
 #    print defs
  
     with Suite("s2") as s2:
         s2.add_family("f1")
         s2.add_task("t1")
-        assert len(list(s2.nodes)) == 2,"Expected 2 nodes family and task"
+        assert len(s2) == 2,"Expected 2 nodes family and task"
         
     with Family("f1") as f1:
         f1.add_family("f2")
         f1.add_task("t1")
-        assert len(list(s2.nodes)) == 2,"Expected 2 nodes family and task"
+        assert len(s2) == 2,"Expected 2 nodes family and task"
         
         
     #
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                 with f1.add_family("f2") as f2: 
                     with f2.add_task("t1") as t1: 
                         t1.add_variable("var","v")
-                    
+    
     assert defs1 == defs2,"expected defs to be the same"        
         
     print("All tests pass")

@@ -59,7 +59,8 @@ namespace ecf {
 // Use compiler ,  destructor, assignment, copy constructor,
 class TimeAttr  {
 public:
-	TimeAttr() : makeFree_(false), state_change_no_(0) {}
+   TimeAttr(const std::string&);
+   TimeAttr() : makeFree_(false), state_change_no_(0) {}
 	TimeAttr(int hour, int minute, bool relative = false )
 		: timeSeries_(hour, minute,relative), makeFree_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& t,    bool relative = false )
