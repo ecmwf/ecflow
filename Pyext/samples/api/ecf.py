@@ -1208,7 +1208,6 @@ class Defs(object):
         return out
 
     def add_suite(self, node): 
-        print(type(node))
         if type(node) == Suite:
             self.load.add_suite(node.load)  # TODO list
         elif type(node) == ecflow.Suite:
