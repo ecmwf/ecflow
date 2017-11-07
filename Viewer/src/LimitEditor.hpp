@@ -47,6 +47,7 @@ protected:
     void buildList(VAttribute *a);
     void remove(bool all);
     void nodeChanged(const std::vector<ecf::Aspect::Type>& a);
+    void setModelData(QStringList lst);
     void readSettings();
     void writeSettings();
 

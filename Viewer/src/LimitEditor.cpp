@@ -33,7 +33,9 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
     pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"limit",parent), model_(0)
+LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) :
+    AttributeEditor(info,"limit",parent),
+    model_(0)
 {
     w_=new LimitEditorWidget(this);
     addForm(w_);
@@ -54,13 +56,15 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
 
     w_->nameLabel_->setText(name);
     w_->valueLabel_->setText(QString::number(oriVal_));
-    w_->maxSpin_->setValue(oriMax_);
 
-    w_->maxSpin_->setRange(0,10000);
+    w_->maxSpin_->setRange(0,10000000);
+    w_->maxSpin_->setValue(oriMax_);
     w_->maxSpin_->setFocus();
 
     if(aData[2].isEmpty() || aData[3].isEmpty())
     {
+        w_->actionRemove_->setEnabled(false);
+        w_->actionRemoveAll_->setEnabled(false);
         return;
     }
 
@@ -95,23 +99,11 @@ void LimitEditor::buildList(VAttribute *a)
     VLimitAttr* lim=static_cast<VLimitAttr*>(a);
     Q_ASSERT(lim);
 
-    modelData_.clear();
-    modelData_=lim->paths();
+    model_=new QStringListModel(this);
+    w_->pathView_->setModel(model_);
 
-    if(modelData_.count() > 0)
-    {
-        model_=new QStringListModel(this);
-        model_->setStringList(modelData_);
-
-        w_->pathView_->setModel(model_);
-        w_->pathView_->setCurrentIndex(model_->index(0,0));
-        w_->pathView_->setFocus(Qt::MouseFocusReason);
-    }
-    else
-    {
-        w_->actionRemove_->setEnabled(false);
-        w_->actionRemoveAll_->setEnabled(false);
-    }
+    //Update the model(=node list)
+    setModelData(lim->paths());
 }
 
 void LimitEditor::apply()
@@ -163,7 +155,7 @@ void LimitEditor::slotMaxChanged(int)
 
 bool LimitEditor::isValueChanged()
 {
-    return (oriVal_ != w_->valueLabel_->text().toInt() || oriMax_ != w_->maxSpin_->value());
+    return (oriMax_ != w_->maxSpin_->value());
 }
 
 void LimitEditor::slotRemove()
@@ -229,9 +221,37 @@ void LimitEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect)
 
         oriVal_=aData[2].toInt();
         w_->valueLabel_->setText(QString::number(oriVal_));
-        modelData_.clear();
-        modelData_=lim->paths();
-        model_->setStringList(modelData_);
+
+        oriMax_=aData[3].toInt();
+        w_->maxSpin_->setValue(oriMax_);
+
+        //Update the model (=node list)
+        setModelData(lim->paths());
+    }
+}
+
+void LimitEditor::setModelData(QStringList lst)
+{
+    Q_ASSERT(model_);
+
+    bool hadData=(modelData_.isEmpty() == false);
+    modelData_=lst;
+    model_->setStringList(modelData_);
+
+    if(!modelData_.isEmpty())
+    {
+        if(!hadData)
+        {
+            w_->pathView_->setCurrentIndex(model_->index(0,0));
+            w_->pathView_->setFocus(Qt::MouseFocusReason);
+        }
+        w_->actionRemove_->setEnabled(true);
+        w_->actionRemoveAll_->setEnabled(true);
+    }
+    else
+    {
+        w_->actionRemove_->setEnabled(false);
+        w_->actionRemoveAll_->setEnabled(false);
     }
 }
 

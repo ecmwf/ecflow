@@ -662,4 +662,39 @@ BOOST_AUTO_TEST_CASE( test_replace_add_suite_with_bad_triggers )
    Ecf::set_modify_change_no(0);
 }
 
+BOOST_AUTO_TEST_CASE( test_replace_task_ECFLOW_1135 )
+{
+   cout << "ANode:: ...test_replace_task_ECFLOW_1135\n";
+
+   // The whole suite should get *MOVED* from clientDef to the *EMPTY* server def. i.e add
+   defs_ptr clientDef = Defs::create(); {
+      clientDef->add_suite( "o" )->add_family("main")->add_family("00")->add_family("an")->add_family("4dvar")->add_task("vardata");
+   }
+
+   // Server
+   Defs serverDefs; {
+      serverDefs.add_suite( "o" )->add_family("main")->add_family("00")->add_family("an")->add_task("4dvar");
+   }
+
+   // Expect to fail *IF*  irrespective of 'create nodes as needed' flag, since path in the server is a *TASK*
+   {
+      std::string errorMsg;
+      ExpectNoChange expect_no_change;
+      node_ptr replaced_node = serverDefs.replaceChild("/o/main/00/an/4dvar/vardata",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg);
+      BOOST_REQUIRE_MESSAGE( !replaced_node, "Expected replace to fail" );
+      BOOST_REQUIRE_MESSAGE( !errorMsg.empty() , "Expected error message" );
+   }
+   {
+      std::string errorMsg;
+      ExpectNoChange expect_no_change;
+      node_ptr replaced_node = serverDefs.replaceChild("/o/main/00/an/4dvar/vardata",clientDef,false/*create nodes as needed*/, false/*force*/, errorMsg);
+      BOOST_REQUIRE_MESSAGE( !replaced_node, "Expected replace to fail" );
+      BOOST_REQUIRE_MESSAGE( !errorMsg.empty() , "Expected error message" );
+   }
+
+
+   // reset, to avoid effecting downstream tests
+   Ecf::set_state_change_no(0);
+   Ecf::set_modify_change_no(0);
+}
 BOOST_AUTO_TEST_SUITE_END()
