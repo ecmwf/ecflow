@@ -64,6 +64,7 @@ public:
 	bool communicating() {return communicating_;}
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
+    QString nodeMenuMode() const;
 
     void setSuiteFilterWithOne(VNode*);
 	void updateSuiteFilter(SuiteFilter*);

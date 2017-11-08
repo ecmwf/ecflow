@@ -76,7 +76,7 @@ void stats(ClientInvoker* self) { CliSetter setter(self); self->stats(); }
 void stats_reset(ClientInvoker* self) { self->stats_reset(); }
 boost::python::list suites(ClientInvoker* self) {
    self->suites();
-   const std::vector<std::string> the_suites = self->server_reply().get_string_vec();
+   const std::vector<std::string>& the_suites = self->server_reply().get_string_vec();
    boost::python::list list;
    size_t the_size = the_suites.size();
    for(size_t i = 0; i < the_size; i++)  list.append( the_suites[i] );

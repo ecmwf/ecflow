@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/raw_function.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -120,7 +121,6 @@ std::string get_state_change_time(node_ptr self,const std::string& format)
    return to_simple_string(self->state_change_time());
 }
 
-node_ptr add_defstatus(node_ptr self,DState::State s)      { self->addDefStatus(s); return self; }
 node_ptr add_repeat_date(node_ptr self,const RepeatDate& d)       { self->addRepeat(d); return self; }
 node_ptr add_repeat_integer(node_ptr self,const RepeatInteger& d) { self->addRepeat(d); return self; }
 node_ptr add_repeat_string(node_ptr self,const RepeatString& d)   { self->addRepeat(d); return self; }
@@ -152,8 +152,210 @@ node_ptr add_part_complete_2(node_ptr self,const std::string& expression, bool a
 bool evaluate_trigger(node_ptr self) { Ast* t = self->triggerAst(); if (t) return t->evaluate();return false;}
 bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) return t->evaluate();return false;}
 
+////////////////////////////////////////////////////////////////////////////////////////
+// This wrapper over DState, to aid Task("t").add(Defstatus(DState.complete))
+class Defstatus {
+public:
+   Defstatus(DState::State state) : state_(state) {}
+   Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
+   DState::State state() const { return state_;}
+   std::string to_string() const { return DState::to_string(state_);}
+private:
+   DState::State state_;
+};
+node_ptr add_defstatus(node_ptr self,DState::State s)             { self->addDefStatus(s); return self; }
+node_ptr add_defstatus1(node_ptr self,const Defstatus& ds)         { self->addDefStatus(ds.state()); return self; }
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Allow Raw constructor creation, i.e allow any number keyword arguments
+class Edit {
+public:
+   Edit(const boost::python::dict& dict){BoostPythonUtil::dict_to_str_vec(dict,vec_);}
+   Edit(const boost::python::dict& dict,const boost::python::dict& dict2){BoostPythonUtil::dict_to_str_vec(dict,vec_);BoostPythonUtil::dict_to_str_vec(dict2,vec_);}
+   const std::vector<Variable>& variables() const { return vec_;}
+   std::string to_string() const { return "edit";}
+   static object init(tuple args, dict kw) {
+      //cout << "Edit::init args: " << len(args) << " kwargs " << len(kw) << "\n";
+      // args[0] is Edit(i.e self)
+      for (int i = 1; i < len(args) ; ++i) {
+         if (boost::python::extract<dict>(args[i]).check()){
+            dict d = boost::python::extract<dict>(args[i]);
+            return args[0].attr("__init__")(d,kw); // calls -> .def(init<dict,dict>() -> Edit(dict,dict)
+         }
+         else throw std::runtime_error("Edit::Edit: only accepts dictionary and key word arguments");
+      }
+      tuple rest(args.slice(1,_));
+      return args[0].attr("__init__")(kw); // calls -> .def(init<dict>() -> Edit(const boost::python::dict& dict)
+   }
+private:
+   std::vector<Variable> vec_;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Trigger & Complete thin wrapper over Expression, allows us to call:
+//  Task("a").add(Trigger("a=1"),Complete("b=1"))
+///////////////////////////////////////////////////////////////////////////////////
+class Trigger {
+public:
+   Trigger(const std::string& expression) : expr_(expression){}
+   Trigger(const PartExpression& pe ) : expr_(pe) {}
+   Trigger() {}
+   Trigger(const Trigger& rhs) : expr_(rhs.expr_) {}
+
+   bool operator==( const Trigger& rhs) const { return expr_ == rhs.expr_;}
+   bool operator!=( const Trigger& rhs) const { return !operator==(rhs);}
+   std::string expression() const { return expr_.expression(); }
+   void add( const PartExpression& t ) { expr_.add(t); }
+
+   std::vector<PartExpression>::const_iterator part_begin() const { return expr_.part_begin();}
+   std::vector<PartExpression>::const_iterator part_end() const   { return expr_.part_end();}
+
+   const Expression& expr() const { return expr_;}
+private:
+   Expression expr_;
+   Trigger& operator=(Trigger const& f); // prevent assignment
+};
+
+class Complete {
+public:
+   Complete(const std::string& expression) : expr_(expression){}
+   Complete(const PartExpression& pe ) : expr_(pe) {}
+   Complete() {}
+   Complete(const  Complete& rhs) : expr_(rhs.expr_) {}
+
+   bool operator==( const Complete & rhs) const { return expr_ == rhs.expr_;}
+   bool operator!=( const Complete & rhs) const { return !operator==(rhs);}
+   std::string expression() const { return expr_.expression(); }
+   void add( const PartExpression& t ) { expr_.add(t); }
+
+   std::vector<PartExpression>::const_iterator part_begin() const { return expr_.part_begin();}
+   std::vector<PartExpression>::const_iterator part_end() const   { return expr_.part_end();}
+
+   const Expression& expr() const { return expr_;}
+private:
+   Expression expr_;
+   Complete & operator=( Complete const& f); // prevent assignment
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////
+static void do_add(node_ptr self, const boost::python::object& arg){
+   if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
+   else if (boost::python::extract<Edit>(arg).check()) {
+      Edit edit = boost::python::extract<Edit>(arg);
+      const std::vector<Variable>& vec = edit.variables();
+      for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
+   }
+   else if (boost::python::extract<Event>(arg).check())     self->addEvent(boost::python::extract<Event>(arg));
+   else if (boost::python::extract<Meter>(arg).check())     self->addMeter(boost::python::extract<Meter>(arg));
+   else if (boost::python::extract<Label>(arg).check())     self->addLabel(boost::python::extract<Label>(arg));
+   else if (boost::python::extract<Limit>(arg).check())     self->addLimit(boost::python::extract<Limit>(arg));
+   else if (boost::python::extract<InLimit>(arg).check())   self->addInLimit(boost::python::extract<InLimit>(arg));
+   else if (boost::python::extract<DayAttr>(arg).check())   self->addDay(boost::python::extract<DayAttr>(arg));
+   else if (boost::python::extract<DateAttr>(arg).check())  self->addDate(boost::python::extract<DateAttr>(arg));
+   else if (boost::python::extract<TodayAttr>(arg).check()) self->addToday(boost::python::extract<TodayAttr>(arg));
+   else if (boost::python::extract<TimeAttr>(arg).check())  self->addTime(boost::python::extract<TimeAttr>(arg));
+   else if (boost::python::extract<CronAttr>(arg).check())  self->addCron(boost::python::extract<CronAttr>(arg));
+   else if (boost::python::extract<LateAttr>(arg).check())  self->addLate(boost::python::extract<LateAttr>(arg));
+   else if (boost::python::extract<ZombieAttr>(arg).check())self->addZombie(boost::python::extract<ZombieAttr>(arg));
+   else if (boost::python::extract<RepeatDate>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDate>(arg)  ));
+   else if (boost::python::extract<RepeatInteger>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatInteger>(arg)  ));
+   else if (boost::python::extract<RepeatEnumerated>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatEnumerated>(arg)  ));
+   else if (boost::python::extract<RepeatString>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatString>(arg)  ));
+   else if (boost::python::extract<RepeatDay>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(arg)  ));
+   else if (boost::python::extract<AutoCancelAttr>(arg).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(arg));
+   else if (boost::python::extract<VerifyAttr>(arg).check())self->addVerify(boost::python::extract<VerifyAttr>(arg));
+   else if (boost::python::extract<Trigger>(arg).check()){ Trigger t = boost::python::extract<Trigger>(arg); self->add_trigger_expr(t.expr());}
+   else if (boost::python::extract<Complete>(arg).check()){Complete t = boost::python::extract<Complete>(arg);self->add_complete_expr(t.expr());}
+   else if (boost::python::extract<Defstatus>(arg).check()){Defstatus t = boost::python::extract<Defstatus>(arg);self->addDefStatus(t.state());}
+   else if (boost::python::extract<ClockAttr>(arg).check()) {
+      if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
+      self->isSuite()->addClock( boost::python::extract<ClockAttr>(arg));
+   }
+   else if (boost::python::extract<node_ptr>(arg).check()) {
+      NodeContainer* nc = self->isNodeContainer();
+      if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
+      node_ptr child = boost::python::extract<node_ptr>(arg);
+      nc->addChild(child);
+   }
+   else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
+   else throw std::runtime_error("ExportNode::add : Unknown type ");
+}
+
+static object node_iadd(node_ptr self, const boost::python::list& list) {
+   // std::cout << "node_iadd list " << self->name() << "\n";
+   int the_list_size = len(list);
+   for(int i = 0; i < the_list_size; ++i) do_add(self,list[i]);
+   return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+}
+
+static object add(tuple args, dict kwargs) {
+   int the_list_size = len(args);
+   node_ptr self = boost::python::extract<node_ptr>(args[0]); // self
+   if (!self) throw std::runtime_error("ExportNode::add() : first argument is not a node");
+   for (int i = 1; i < the_list_size; ++i) do_add(self,args[i]);
+
+   // key word arguments are use for adding variable only
+   boost::python::list keys = kwargs.keys();
+   const int no_of_keys = len(keys);
+   for(int i = 0; i < no_of_keys; ++i) {
+      boost::python::object curArg = keys[i];
+      if (curArg) {
+         std::string first = boost::python::extract<std::string>(keys[i]);
+         std::string second = boost::python::extract<std::string>(kwargs[keys[i]]);
+         self->add_variable(first,second);
+      }
+   }
+   return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+}
+
+static node_ptr node_getattr(node_ptr self, const std::string& attr) {
+   // cout << " node_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
+   size_t pos = 0;
+   node_ptr child = self->findImmediateChild(attr,pos);
+   if (child) { return child;}
+   std::stringstream ss; ss << "ExportNode::node_getattr can not find child node " << attr << " from node " << self->absNodePath();
+   throw std::runtime_error(ss.str());
+   return node_ptr();
+}
+
 void export_Node()
 {
+   class_<Defstatus>("Defstatus", init<DState::State>())
+            .def(init<std::string>())                              // constructor
+            .def("state",  &Defstatus::state)
+            .def("__str__",  &Defstatus::to_string) // __str__
+            ;
+
+   // see: https://github.com/boostorg/python/blob/master/test/raw_ctor.cpp
+   // Uses a raw constructor approach to support pass arbitrary number arguments on the python side.
+   // using no_init postpones defining __init__ function until after raw_function for proper overload resolution order,
+   // since later defs get higher priority.
+   class_<Edit>("Edit", "Allow variable addition as keyword arguments. The values must strings or integers", no_init)
+             .def("__init__", raw_function(&Edit::init,0)) // raw_constructor -> will call -> def(init<dict>() )
+             .def(init<dict>())                 //
+             .def(init<dict,dict>())            //
+             .def("__str__",  &Edit::to_string) // __str__
+             ;
+
+   // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
+   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::expression_doc(), init<std::string>() )
+   .def(init<PartExpression>())
+   .def(self == self )                            // __eq__
+   .def("__str__",        &Trigger::expression)   // __str__
+   .def("get_expression", &Trigger::expression, "returns the complete expression as a string")
+   .def("add",            &Trigger::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
+   .add_property("parts", boost::python::range( &Trigger::part_begin, &Trigger::part_end),"Returns a list of PartExpression's" )
+   ;
+   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::expression_doc(), init<std::string>() )
+   .def(init<PartExpression>())
+   .def(self == self )                             // __eq__
+   .def("__str__",        &Complete::expression)   // __str__
+   .def("get_expression", &Complete::expression, "returns the complete expression as a string")
+   .def("add",            &Complete::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
+   .add_property("parts", boost::python::range( &Complete::part_begin, &Complete::part_end),"Returns a list of PartExpression's" )
+   ;
+
    // mimic PartExpression(const std::string& expression  )
    // mimic PartExpression(const std::string& expression, bool andExpr /* true means AND , false means OR */ )
    // Use to adding large trigger and complete expressions
@@ -182,6 +384,9 @@ void export_Node()
 
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
+   .def("add", raw_function(add,1))
+   .def("__iadd__", &node_iadd)
+   .def("__getattr__",      &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
    .def("add_trigger",      &add_trigger,             DefsDoc::add_trigger_doc())
    .def("add_trigger",      &add_trigger_expr)
@@ -248,6 +453,7 @@ void export_Node()
    .def("add_repeat",       &add_repeat_enum,            DefsDoc::add_repeat_enumerated_doc() )
    .def("add_repeat",       &add_repeat_day,             DefsDoc::add_repeat_day_doc() )
    .def("add_defstatus",    &add_defstatus,              DefsDoc::add_defstatus_doc())
+   .def("add_defstatus",    &add_defstatus1,              DefsDoc::add_defstatus_doc())
    .def("add_zombie",       &add_zombie,                 NodeAttrDoc::zombie_doc())
    .def("delete_variable",  &Node::deleteVariable       )
    .def("delete_event",     &Node::deleteEvent          )

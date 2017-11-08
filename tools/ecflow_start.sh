@@ -118,13 +118,12 @@ ecflow_client --port=$ECF_PORT --host=$host --ping  && echo "server is already s
 servers=$HOME/.ecflowrc/servers
 localh=$(uname -n)
 
-# =================================================================================
-# site specific settings come here
-#
-if [ -f /home/ma/emos/bin/ecflow_site.sh ] ; then
-. /home/ma/emos/bin/ecflow_site.sh 
+# =========================================================================
+# Update host, ecflow_site.sh is configured from CMAKE at install time
+# =========================================================================
+if [ -f ecflow_site.sh ] ; then
+$(source ./ecflow_site.sh)
 fi
-
 
 # ==================================================================================
 # create one line in servers file so that viewer shows this server among servers list

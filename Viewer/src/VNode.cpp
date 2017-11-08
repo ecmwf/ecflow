@@ -1128,6 +1128,12 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
    //return &dummy_node::get(path + ":" + name);
 }
 
+QString VNode::nodeMenuMode() const
+{
+    ServerHandler* s=server();
+    Q_ASSERT(s);
+    return s->nodeMenuMode();
+}
 
 const std::string& VSuiteNode::typeName() const
 {

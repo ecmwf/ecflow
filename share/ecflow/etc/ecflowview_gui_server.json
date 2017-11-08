@@ -32,6 +32,13 @@
                 "line" : "maxOutputFileLines"              
             },
 
+            "group" : {
+                "title" : "Menus",
+                "prefix" : "server.menu",
+
+                "line"  : "nodeMenuMode"
+            },
+
             "custom-notification" : {
                 "title" : "Notifications",               
                 "group" : "true",

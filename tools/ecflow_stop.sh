@@ -27,8 +27,11 @@ host=$(hostname)
 backup_server=false
 
 # =========================================================================
-# Update host, site specific
-[ -f /home/ma/emos/bin/ecflow_site.sh ] && . /home/ma/emos/bin/ecflow_site.sh # site specific settings come here
+# Update host, ecflow_site.sh is configured from CMAKE at install time
+# =========================================================================
+if [ -f ecflow_site.sh ] ; then
+$(source ./ecflow_site.sh)
+fi
 
 #==========================================================================
 # Syntax

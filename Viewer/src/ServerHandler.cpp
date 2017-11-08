@@ -19,6 +19,7 @@
 #include "ChangeNotify.hpp"
 #include "ConnectState.hpp"
 #include "DirectoryHandler.hpp"
+#include "MainWindow.hpp"
 #include "NodeObserver.hpp"
 #include "SessionHandler.hpp"
 #include "ServerComQueue.hpp"
@@ -1402,6 +1403,11 @@ bool ServerHandler::readFromDisk() const
 	return conf_->boolValue(VServerSettings::ReadFromDisk);
 }
 
+QString ServerHandler::nodeMenuMode() const
+{
+    return conf_->stringValue(VServerSettings::NodeMenuMode);
+}
+
 void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 {
 	switch(par)
@@ -1420,6 +1426,10 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
         }
         break;
     }
+    case VServerSettings::NodeMenuMode:
+        MainWindow::updateMenuMode(this);
+        break;
+
 	case VServerSettings::NotifyAbortedEnabled:
 	case VServerSettings::NotifyRestartedEnabled:
 	case VServerSettings::NotifyLateEnabled:

@@ -33,7 +33,6 @@
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
 #include "PropertyDialog.hpp"
-#include "PropertyMapper.hpp"
 #include "ServerComInfoWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerList.hpp"
@@ -194,6 +193,11 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 		   infoPanelActions_ << ac;
 	   }
    }
+}
+
+ServerHandler* MainWindow::selectedServer() const
+{
+    return(selection_)?(selection_->server()):0;
 }
 
 //==============================================================
@@ -371,6 +375,9 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 
     //Update the refres action/info to the selection
 	updateRefreshActions();
+
+    //Update the window titlebar
+    winTitle_->update();
 }
 
 void MainWindow::updateRefreshActions()
@@ -389,28 +396,6 @@ void MainWindow::updateRefreshActions()
     bool hasSel=(selection_!= 0);
 	actionRefreshSelected->setEnabled(hasSel);
 	actionResetSelected->setEnabled(hasSel);
-
-#if 0
-
-	if(serverName.isEmpty())
-	{
-		QString tnew=tr("Refresh <b>selected</b> server<br>") +
-					 + "<code>" + actionRefreshSelected->shortcut().toString() + "</code>";
-
-		actionRefreshSelected->setToolTip(tnew);
-	}
-	else
-	{
-		QString t=actionRefreshSelected->toolTip();
-		if(!t.contains(serverName))
-		{
-			QString tnew=tr("Refresh server <b>") + serverName + tr("</b><br>") +
-			 + "<code>" + actionRefreshSelected->shortcut().toString() + "</code>";
-
-			actionRefreshSelected->setToolTip(tnew);
-		}
-    }
-#endif
 }
 
 
@@ -859,6 +844,13 @@ void MainWindow::startPreferences(MainWindow *w,QString option)
     delete d;
 }
 
+void MainWindow::updateMenuMode(ServerHandler* sh)
+{
+    Q_FOREACH(MainWindow *w,windows_)
+    {
+        w->winTitle_->update(sh);
+    }
+}
 
 //--------------------------------------------------------
 //
@@ -866,22 +858,21 @@ void MainWindow::startPreferences(MainWindow *w,QString option)
 //
 //--------------------------------------------------------
 
-MainWindowTitleHandler::MainWindowTitleHandler(QMainWindow *win) : win_(win)
+MainWindowTitleHandler::MainWindowTitleHandler(MainWindow *win) : win_(win)
 {
     Q_ASSERT(win_);
     std::vector<std::string> propVec;
-    propVec.push_back("menu.access.nodeMenuMode");
-    prop_=new PropertyMapper(propVec,this);
 }
 
 MainWindowTitleHandler::~MainWindowTitleHandler()
 {
-    delete prop_;
 }
 
-void MainWindowTitleHandler::notifyChange(VProperty*)
+void MainWindowTitleHandler::update(ServerHandler *sh)
 {
-    update();
+    Q_ASSERT(win_);
+    if(sh == win_->selectedServer())
+        update();
 }
 
 void MainWindowTitleHandler::update()
@@ -891,12 +882,11 @@ void MainWindowTitleHandler::update()
     char *userTitle = getenv("ECFUI_TITLE");
     std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
                                                 : VConfig::instance()->appLongName();
-
     QString title=QString::fromStdString(mainTitle);
 
-    if(VProperty* p=prop_->find("menu.access.nodeMenuMode"))
+    if(ServerHandler* sh=win_->selectedServer())
     {
-        QString menuMode=p->valueLabel();
+        QString menuMode=sh->nodeMenuMode();
         if(!menuMode.isEmpty())
             title+=" - (menu: " + menuMode + ")";
     }
@@ -908,9 +898,3 @@ void MainWindowTitleHandler::update()
 
     win_->setWindowTitle(title);
 }
-
-
-
-
-
-
