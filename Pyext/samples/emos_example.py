@@ -289,5 +289,55 @@ out = file("test.def", "w")
 print >>out, defs
 
 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# repeat
+#!/usr/bin/env python2.7
+import os
+from ecf import *
+home = os.path.join(os.getenv("HOME"),  "course")
+def create_family_f4():
+    return Family("f4").add(
+        Variables(SLEEP= 2),
+        Repeat("NAME", ["a", "b", "c", "d", "e", "f" ], kind="enum"),
+    
+        Family("f5").add(
+            Repeat( "VALUE", 1, 10, kind= "integer"),
+            Task("t1").add(
+                Repeat( "DATE", 20101230, 20110105, kind= "date"),
+                Label("info", ""))))
+     
+print "Creating suite definition"  
+defs = ecflow.Defs().add(Suite("test").add(
+    Variables(ECF_INCLUDE= home,
+              ECF_HOME=    home),
+    create_family_f4(), ))
+print defs
+defs.save_as_defs("test.def")
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# limits
+#!/usr/bin/env python2.7
+import os
+from ecf import *
+home= os.path.join(os.getenv("HOME"),  "course")
+def create_family_f5() :
+    return Family("f5").add(
+        Inlimit("l1"),
+        Variables(SLEEP= 20),
+        [ Task( "t" + str(i))     for i in range(1, 10)] # list comprehension
+    )
+     
+print "Creating suite definition"  
+defs = Defs().add(Suite("test").add(
+    Variables(ECF_INCLUDE= home,
+              ECF_HOME=    home),
+    Limit("l1", 2),
+    create_family_f5() ))
+print defs
+defs.save_as_defs("test.def")
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 
