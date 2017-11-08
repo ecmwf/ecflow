@@ -3,14 +3,14 @@
 # Used to coping with start of ecflow server on linux cluser
 # Avoid hard copy mention of paths specific to ECMWF
 
-if( DEFINED ECMWF_SITE_SPECIFIC )
+if( DEFINED SITE_SPECIFIC_SERVER_SCRIPT )
 
 	macro(install_symlink filepath sympath)
     	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${filepath} ${sympath})")
     	install(CODE "message(\"-- Created symlink: ${sympath} -> ${filepath}\")")
 	endmacro(install_symlink)
 	
-    install_symlink(${ECMWF_SITE_SPECIFIC} ${CMAKE_INSTALL_PREFIX}/bin/ecflow_site.sh )
+    install_symlink(${SITE_SPECIFIC_SERVER_SCRIPT} ${CMAKE_INSTALL_PREFIX}/bin/ecflow_site.sh )
 
 endif()
 
