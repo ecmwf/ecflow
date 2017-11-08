@@ -154,6 +154,32 @@ defs.save_as_defs("test.def")
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+# add a complete
+#!/usr/bin/env python2.7
+import os
+from ecf import *
+home = os.path.join(os.getenv("HOME"),  "course")
+def create_family_f1():
+    return Family("f1").add(
+        Variable(SLEEP= 20),
+        Task("t1"),
+        Task("t2").add(Trigger("t1 eq complete"),
+                       Event("a"),
+                       Event("b")),
+        Task("t3").add(Trigger("t2:a")),
+        Task("t4").add(Trigger("t2 eq complete"), 
+                       Complete("t2:b")  ))
+       
+print "Creating suite definition"  
+defs = Defs().add(Suite("test").add(
+    Variables(ECF_INCLUDE= home,
+              ECF_HOME=    home),
+    create_family_f1() ))
+print defs
+defs.save_as_defs("test.def")
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 # add a meter
 #!/usr/bin/env python2.7
 import os
