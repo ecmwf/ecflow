@@ -125,7 +125,7 @@ private:
 	long timeout_;                      // ECF_TIMEOUT. Host file iteration time out
     long zombie_timeout_;               // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, default same as ECF_TIMEOUT
 	int  connect_timeout_;              // default 0, ECF_CONNECT_TIMEOUT, connection timeout
-	bool denied_;                       // ECF_DENIED. If set ECF denies access, client will exit with failure")
+	bool denied_;                       // ECF_DENIED.If the server denies the communication, then the child command can be set to fail immediately
  	bool no_ecf_;                       // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone
 
 	bool debug_;                        // For live debug, enabled by env variable ECF_CLIENT_DEBUG

@@ -29,7 +29,7 @@ void ClientEnvironment::read_config_file()
       ("ECF_TRYNO", po::value<int>(&task_try_num_), "The task try number")
       ("ECF_HOSTFILE", po::value<std::string>(&host_file_), "File that lists alternate hosts")
       ("ECF_TIMEOUT", po::value<long>(&timeout_)->default_value(MIN_TIMEOUT), "Max time in seconds for client to deliver message")
-      ("ECF_DENIED", po::value<bool>(&denied_)->default_value(false) , "If set ECF denies access, client will exit with failure")
+      ("ECF_DENIED", po::value<bool>(&denied_)->default_value(false) , "If communication with server fails, client will exit with failure immediately")
       ("ECF_PORT", po::value<std::string>(&port)->default_value(Str::DEFAULT_PORT_NUMBER()), "The TCP/IP port to call")
       ("NO_ECF", po::value<bool>(&no_ecf_)->default_value("false"), " if defined then abort cmd")
         ;

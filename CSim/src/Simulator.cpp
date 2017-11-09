@@ -72,7 +72,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
    CmdContext cmd_context;
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
-	std::cout << "Simulator::run " << defs_filename << endl;
+	std::cout << "Simulator::run " << defs_filename << " no of suites " << theDefs.suiteVec().size() << endl;
 #endif
 	// ****:NOTE:******
 	// ** This simulator relies on the defs checking to set event and meter usedInTrigger()
@@ -157,9 +157,14 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  		// Resolve dependencies and submit jobs
  		if (!doJobSubmission(theDefs,errorMsg)) return false;
 
-		// Increment calendar.
-		theDefs.updateCalendar( calUpdateParams );
-		duration += calendarIncrement;
+ 		// Increment calendar per suite. *MUST* use theDefs.suiteVec() as update_calendar() can remove suites (auto-cancel)
+ 		BOOST_FOREACH(suite_ptr suite, theDefs.suiteVec()) {
+ 		   boost::posix_time::time_duration max_duration_for_suite = simiVisitor.max_simulation_period(suite.get());
+ 		   if (duration < max_duration_for_suite) {
+ 		      theDefs.update_calendar(suite, calUpdateParams );
+ 		   }
+ 		}
+ 		duration += calendarIncrement;
   	}
 
  	// ==================================================================================

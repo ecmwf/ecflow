@@ -13,7 +13,7 @@ if [[ "$#"  == 0 ]] ; then
    export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.8.0/lib/python2.7/site-packages
 else
    module unload ecflow
-   module load ecflow/dev
+   module load ecflow/new
 fi
 
 # =======================================================================
