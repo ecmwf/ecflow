@@ -46,7 +46,8 @@ SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename)
   foundTime_(false),
   hasTimeDependencies_(false),
   has_end_clock_(false),
-  max_length_(hours(24)),
+  max_sim_duration_(hours(24)),
+  max_suite_duration_(hours(24)),
   ci_(hours(1))
   {}
 
@@ -66,7 +67,7 @@ void SimulatorVisitor::visitSuite( Suite* s)
 	}
 
 	if ( s->clockAttr() && s->clock_end_attr()) {
-	   max_length_ = s->clock_end_attr()->ptime() - s->clockAttr()->ptime();
+	   max_suite_duration_ = s->clock_end_attr()->ptime() - s->clockAttr()->ptime();
 	   has_end_clock_ = true; // no need to determine max_length, user specified
 	}
 
@@ -93,6 +94,22 @@ void SimulatorVisitor::visitSuite( Suite* s)
  	      ci_ = minutes(1);
  	   }
  	}
+
+ 	// record the max simulation period for THIS suite. i.e different suites can have different simulation period
+ 	suite_duration_vec_.push_back( std::make_pair(s,max_suite_duration_));
+
+ 	// make sure total simulation period cover all the suites.
+ 	if ( max_suite_duration_ > max_sim_duration_) {
+ 	   max_sim_duration_ = max_suite_duration_;
+ 	}
+}
+
+boost::posix_time::time_duration SimulatorVisitor::max_simulation_period(Suite* s) const {
+   size_t suite_duration_vec_size = suite_duration_vec_.size();
+   for(size_t i =0; i < suite_duration_vec_size; i++) {
+      if ( suite_duration_vec_[i].first == s) return suite_duration_vec_[i].second;
+   }
+   return max_sim_duration_;
 }
 
 void SimulatorVisitor::visitFamily( Family* f) { visitNodeContainer(f);}
@@ -100,7 +117,7 @@ void SimulatorVisitor::visitFamily( Family* f) { visitNodeContainer(f);}
 void SimulatorVisitor::visitNodeContainer(NodeContainer* nc)
 {
    if (ci_ == hours(1)) nc->get_time_resolution_for_simulation(ci_);
-   if (!has_end_clock_) nc->get_max_simulation_duration(max_length_);
+   if (!has_end_clock_) nc->get_max_simulation_duration(max_suite_duration_);
 
    if (!nc->crons().empty()) {
       foundCrons_ = true;
@@ -118,7 +135,7 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc)
 void SimulatorVisitor::visitTask( Task* t )
 {
    if (ci_ == hours(1))  t->get_time_resolution_for_simulation(ci_);
-   if (!has_end_clock_)  t->get_max_simulation_duration(max_length_);
+   if (!has_end_clock_)  t->get_max_simulation_duration(max_suite_duration_);
 
    foundTasks_ = true;
 

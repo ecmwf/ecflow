@@ -114,6 +114,9 @@ public:
    /// dependencies are free'd
    void updateCalendar( const ecf::CalendarUpdateParams &);
 
+   /// Used by simulator
+   void update_calendar(suite_ptr suite, const ecf::CalendarUpdateParams& cal_update_params ); // used by simulator
+
    /// returns the number of times the calendar has been updated. For DEBUG
    unsigned int updateCalendarCount() const { return updateCalendarCount_;}
 
