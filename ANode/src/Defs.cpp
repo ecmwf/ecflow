@@ -274,27 +274,11 @@ static void remove_autocancelled(const std::vector<node_ptr>& auto_cancelled_nod
    }
 }
 
-void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
+static void auto_archive(const std::vector<node_ptr>& auto_archive_nodes)
 {
-	std::vector<node_ptr> auto_cancelled_nodes; // Collate any auto cancelled nodes as a result of calendar update
-    std::vector<node_ptr> auto_archive_nodes;   // Collate any auto archive nodes as a result of calendar update
-
-	// updateCalendarCount_ is only used in *test*
-	updateCalendarCount_++;
-
-	size_t theSize = suiteVec_.size();
-	for(size_t s = 0; s < theSize; s++) {
-		suiteVec_[s]->updateCalendar( calUpdateParams, auto_cancelled_nodes,auto_archive_nodes);
-	}
-
-	// Permanently remove any auto-cancelled nodes.
-    remove_autocancelled(auto_cancelled_nodes);
-
-
-   // Archive any nodes with auto archive attribute, Must be suite/family
    if ( !auto_archive_nodes.empty() ) {
-      std::vector<node_ptr>::iterator theNodeEnd = auto_archive_nodes.end();
-      for(std::vector<node_ptr>::iterator n = auto_archive_nodes.begin(); n != theNodeEnd; ++n) {
+      std::vector<node_ptr>::const_iterator theNodeEnd = auto_archive_nodes.end();
+      for(std::vector<node_ptr>::const_iterator n = auto_archive_nodes.begin(); n != theNodeEnd; ++n) {
          // If we have two auto archive in the hierarchy, with same attributes. Then
          // By checking we can still reach the Defs we know we are not detached
          NodeContainer* nc = (*n)->isNodeContainer();
@@ -305,29 +289,39 @@ void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
    }
 }
 
+void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
+{
+   std::vector<node_ptr> auto_cancelled_nodes; // Collate any auto cancelled nodes as a result of calendar update
+   std::vector<node_ptr> auto_archive_nodes;   // Collate any auto archive nodes as a result of calendar update
+
+   // updateCalendarCount_ is only used in *test*
+   updateCalendarCount_++;
+
+   size_t theSize = suiteVec_.size();
+   for(size_t s = 0; s < theSize; s++) {
+      suiteVec_[s]->updateCalendar( calUpdateParams, auto_cancelled_nodes,auto_archive_nodes);
+   }
+
+   // Permanently remove any auto-cancelled nodes.
+   remove_autocancelled(auto_cancelled_nodes);
+
+   // Archive any nodes with auto archive attribute, Must be suite/family
+   auto_archive(auto_archive_nodes);
+}
+
 void Defs::update_calendar(suite_ptr suite, const ecf::CalendarUpdateParams& cal_update_params )
 {
    /// Collate any auto cancelled nodes as a result of calendar update
    std::vector<node_ptr> auto_cancelled_nodes;
    std::vector<node_ptr> auto_archive_nodes;   // Collate any auto archive nodes as a result of calendar update
 
-   suite->updateCalendar( cal_update_params , auto_cancelled_nodes,auto_archive_nodes);
+   suite->updateCalendar( cal_update_params, auto_cancelled_nodes, auto_archive_nodes);
 
    // Permanently remove any auto-cancelled nodes.
    remove_autocancelled(auto_cancelled_nodes);
 
    // Archive any nodes with auto archive attribute, Must be suite/family
-   if ( !auto_archive_nodes.empty() ) {
-      std::vector<node_ptr>::iterator theNodeEnd = auto_archive_nodes.end();
-      for(std::vector<node_ptr>::iterator n = auto_archive_nodes.begin(); n != theNodeEnd; ++n) {
-         // If we have two auto archive in the hierarchy, with same attributes. Then
-         // By checking we can still reach the Defs we know we are not detached
-         NodeContainer* nc = (*n)->isNodeContainer();
-         if (nc && nc->defs()) {
-            nc->archive();
-         }
-      }
-   }
+   auto_archive(auto_archive_nodes);
 }
 
 
