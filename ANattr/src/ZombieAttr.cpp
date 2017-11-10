@@ -27,11 +27,6 @@ using namespace ecf;
 using namespace boost;
 using namespace std;
 
-/// int statics
-static int ecf_zombie_life_time = 3600;
-static int user_zombie_life_time = 300;
-static int path_zombie_life_time = 900;
-
 const ZombieAttr& ZombieAttr::EMPTY() { static const ZombieAttr ZOMBIEATTR = ZombieAttr(); return ZOMBIEATTR; }
 
 // Constructor ==============================================================================
@@ -39,15 +34,18 @@ ZombieAttr::ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::C
 	: zombie_type_(t), action_(a), zombie_lifetime_(zombie_lifetime), child_cmds_(c)
 {
    /// Server typically checks every 60 seconds, hence this is lowest valid value for
-   /// zombie_lifetime_ is 60 seconds
-	if (zombie_lifetime_ <= 59) {
- 		switch (zombie_type_) {
-			case Child::USER: zombie_lifetime_ = user_zombie_life_time; break;
-			case Child::PATH: zombie_lifetime_ = path_zombie_life_time; break;
-			case Child::ECF:  zombie_lifetime_ = ecf_zombie_life_time; break;
-			case Child::NOT_SET: assert(false); break;
-		}
-	}
+   if (zombie_lifetime_ <= 0) {
+      // default constructor. Set defaults
+      switch (zombie_type_) {
+         case Child::USER: zombie_lifetime_ = default_user_zombie_life_time() ; break;
+         case Child::PATH: zombie_lifetime_ = default_path_zombie_life_time() ; break;
+         case Child::ECF:  zombie_lifetime_ = default_ecf_zombie_life_time() ; break;
+         case Child::NOT_SET: assert(false); break;
+      }
+   }
+   else if (zombie_lifetime_ < minimum_zombie_life_time() ) {
+      zombie_lifetime_ = minimum_zombie_life_time()  ;
+   }
 }
 
 bool ZombieAttr::operator==(const ZombieAttr& rhs) const
@@ -230,11 +228,11 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse)
 ZombieAttr ZombieAttr::get_default_attr(ecf::Child::ZombieType zt)
 {
 	switch (zt) {
-		case Child::USER: return ZombieAttr(Child::USER,std::vector<ecf::Child::CmdType>(), User::BLOCK, user_zombie_life_time); break;
-		case Child::PATH: return ZombieAttr(Child::PATH,std::vector<ecf::Child::CmdType>(), User::BLOCK, path_zombie_life_time); break;
-		case Child::ECF:  return ZombieAttr(Child::ECF, std::vector<ecf::Child::CmdType>(), User::BLOCK, ecf_zombie_life_time); break;
+		case Child::USER: return ZombieAttr(Child::USER,std::vector<ecf::Child::CmdType>(), User::BLOCK, default_user_zombie_life_time()); break;
+		case Child::PATH: return ZombieAttr(Child::PATH,std::vector<ecf::Child::CmdType>(), User::BLOCK, default_path_zombie_life_time()); break;
+		case Child::ECF:  return ZombieAttr(Child::ECF, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_ecf_zombie_life_time()); break;
 		case Child::NOT_SET: break;
 	}
-	return ZombieAttr(Child::ECF, std::vector<ecf::Child::CmdType>(), User::BLOCK, ecf_zombie_life_time);
+	return ZombieAttr(Child::ECF, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_ecf_zombie_life_time());
 }
 
