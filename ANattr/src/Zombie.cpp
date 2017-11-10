@@ -198,12 +198,12 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
    size_t calls_width = calls.size();
    size_t explanation_width = explanation.size();
 
+   std::string ecf_pid_expl =        "PID miss-match, password matches. Job scheduled twice. Check submitter";
+   std::string ecf_pid_passwd_expl = "Both PID and password miss-match. Re-queue & submit of active job?";
+   std::string ecf_passwd_expl =     "Password miss-match, PID matches, system has re-cycled PID or hacked job file?";
    std::string ecf_expl =            "Two init commands or task complete or aborted but receives another child cmd";
-   std::string ecf_pid_expl =        "Process id miss-match, but password matches";
-   std::string ecf_pid_passwd_expl = "Both process-id and password miss-match";
-   std::string ecf_passwd_expl =     "Password miss-match";
    std::string ecf_user =            "Created by user action(";
-   std::string ecf_path =            "Task not found";
+   std::string ecf_path =            "Task not found. Nodes replaced whilst jobs were running";
    std::string exp;
 
    BOOST_FOREACH(const Zombie& z, zombies) {

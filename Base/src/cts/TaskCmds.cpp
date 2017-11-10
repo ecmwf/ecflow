@@ -52,7 +52,27 @@ bool TaskCmd::equals(ClientToServerCmd* rhs) const
 // The Automated tests get round this via setting ECF_RID in the header/tail job includes
 // However since this may not be in .sms/.ecf files, we can not rely on it
 // Hence we need to be able to handle *EMPTY* process_or_remote_id_ for child commands
-// ************************************************************************************
+//
+//  Task State | Child                      | Log | Explanation
+//  -------------------------------------------------------------------------------------------------------------
+//  SUBMITTED  | child!=INIT                | ERR | Script has child command in back ground, Bug in script, out of order
+//  ACTIVE     | INIT & pid & passwd match  | WAR | two init commands, overloaded server, or 2*init in script, *FOB*. Forgive
+//  ACTIVE     | INIT & pid & passwd !match | ERR | two init commands, Task started again by user.
+//  COMPLETE   | COMPLETE                   | WAR | two complete, zombie, overloaded server. *FOB*, Allow job to complete. Forgive.
+//  COMPLETE   | child != COMPLETE          | ERR | zombie
+//  ABORTED    | ABORTED                    | WAR | two aborted, zombie, overloaded server. *FOB*, allow process to exit. Forgive
+//  ABORTED    | child != ABORTED           | WAR | zombie
+//  -------------------------------------------------------------------------------------------------------------------
+//
+//  zombie type    |   PID   | password | explanation
+//  ---------------------------------------------------------------------------------------------------------------
+//  ECF_PID        |    X    | matches  | PID miss-match, but password matches. Job scheduled twice. Check submitter
+//  ECF_PID_PASSWD |    X    |     X    | Both PID and password miss-match. Re-queue & submit of active job
+//  ECF_PASSWD     | matches |     X    | Password miss-match, PID matches, system has re-cycled PID or hacked job file?
+//  ECF            | matches | matches  | overloaded server,Two init commands or task complete or aborted but receives another child cmd
+//  USER           |    ?    |     ?    | User initiated zombie whilst task was active or submitted, command is recorded in zombie
+//  PATH           |   n/a   |    n/a   | Task not found. Nodes replaced whilst jobs were running
+//  ----------------------------------------------------------------------------------------------------------------
 bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 {
 #ifdef DEBUG_ZOMBIE
