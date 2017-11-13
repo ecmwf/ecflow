@@ -82,7 +82,7 @@ public:
 	explicit NodeFilterEngine(NodeFilter*);
 	~NodeFilterEngine();
 
-    void runQuery(ServerHandler*);
+    bool runQuery(ServerHandler*);
 	void setQuery(NodeQuery*);
 
 private:
@@ -92,6 +92,7 @@ private:
 	BaseNodeCondition* parser_;
 	ServerHandler* server_;
 	NodeFilter *owner_;
+    VNode* rootNode_;
 };
 
 

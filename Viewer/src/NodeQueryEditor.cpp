@@ -271,9 +271,11 @@ void NodeQueryEditor::init()
 	//Servers
 	QStringList servers=query_->servers();
 	if(servers == serverCb_->all())
-		serverCb_->clearSelection();
+        serverCb_->clearSelection();
 	else
 		serverCb_->setSelection(servers);
+
+    rootLe_->setText(QString::fromStdString(query_->rootNode()));
 
 	//Node name
     nameEdit_->init(query_);
@@ -447,7 +449,7 @@ void NodeQueryEditor::checkGuiState()
 	bool oneServer=(serverCb_->count() == 1 || serverCb_->selection().count() == 1);
 
 	rootLabel_->setEnabled(oneServer);
-	rootLe_->setEnabled(oneServer);
+    rootLe_->setEnabled(oneServer);
 
     QString t=nodeTabText_;
     if(!query_->nodeQueryPart().isEmpty())
