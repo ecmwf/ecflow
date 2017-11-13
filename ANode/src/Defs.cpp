@@ -255,6 +255,25 @@ void Defs::generate_scripts() const
    do_generate_scripts(override);
 }
 
+static void remove_autocancelled(const std::vector<node_ptr>& auto_cancelled_nodes)
+{
+   // Permanently remove any auto-cancelled nodes.
+   if ( !auto_cancelled_nodes.empty() ) {
+      std::vector<node_ptr>::const_iterator theNodeEnd = auto_cancelled_nodes.end();
+      string msg;
+      for(std::vector<node_ptr>::const_iterator n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
+         // If we have two autocancel in the hierarchy, with same attributes. Then
+         // (*n)->remove() on the second will fail( with a crash, SuiteChanged0 destructor,  no suite pointer)
+         // since it would already be detached. See ECFLOW-556
+         // By checking we can still reach the Defs we know we are not detached
+         if ((*n)->defs()) {
+            msg.clear(); msg = "autocancel "; msg += (*n)->debugNodePath();
+            ecf::log(Log::MSG,msg);
+            (*n)->remove();
+         }
+      }
+   }
+}
 
 void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
 {
@@ -270,23 +289,19 @@ void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
 	}
 
 	// Permanently remove any auto-cancelled nodes.
- 	if ( !auto_cancelled_nodes.empty() ) {
- 		std::vector<node_ptr>::iterator theNodeEnd = auto_cancelled_nodes.end();
- 		string msg;
- 		for(std::vector<node_ptr>::iterator n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
- 		   // If we have two autocancel in the hierarchy, with same attributes. Then
- 		   // (*n)->remove() on the second will fail( with a crash, SuiteChanged0 destructor,  no suite pointer)
- 		   // since it would already be detached. See ECFLOW-556
- 		   // By checking we can still reach the Defs we know we are not detached
- 		   if ((*n)->defs()) {
- 		      msg.clear(); msg = "autocancel "; msg += (*n)->debugNodePath();
- 		      ecf::log(Log::MSG,msg);
- 		      (*n)->remove();
- 		   }
-  		}
- 	}
+	remove_autocancelled(auto_cancelled_nodes);
 }
 
+void Defs::update_calendar(suite_ptr suite, const ecf::CalendarUpdateParams& cal_update_params )
+{
+   /// Collate any auto cancelled nodes as a result of calendar update
+   std::vector<node_ptr> auto_cancelled_nodes;
+
+   suite->updateCalendar( cal_update_params , auto_cancelled_nodes);
+
+   // Permanently remove any auto-cancelled nodes.
+   remove_autocancelled(auto_cancelled_nodes);
+}
 
 void Defs::absorb(Defs* input_defs, bool force)
 {

@@ -1,0 +1,26 @@
+Reason to move to ecflow 5.0.0
+====================================
+
+o Allow family to be limited as well as tasks
+
+o Functionality for archive and restore.( and auto migrate). To cope with extra large suites
+
+o much better identification of zombies
+  - i.e password missmatch, pid miss match, if user created zombies we record user command that gave rise to the zombie
+  
+o security: password protection
+o security: User commands will now log hostname as well as the user that issued the command
+
+o Improved why command( when using time attributes)
+
+o New query command, allows us to query event,meter and trigger status.
+
+o New  Queue attribute
+
+o Uses the latest boost version
+
+o Built with c++11
+
+o Old GUI(ecfowview) will be retired.
+
+

@@ -276,7 +276,7 @@ $ecbuild $source_dir \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
             -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
-            -DECMWF_SITE_SPECIFIC="/home/ma/emos/bin/ecflow_site.sh" \
+            -DSITE_SPECIFIC_SERVER_SCRIPT="/home/ma/emos/bin/ecflow_site.sh" \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \

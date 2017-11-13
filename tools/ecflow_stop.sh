@@ -27,10 +27,10 @@ host=$(hostname)
 backup_server=false
 
 # =========================================================================
-# Update host, site specific, Must be configured from CMAKE
-# =================================================================================
-if [ -f @ECMWF_SITE_SPECIFIC_FILE@ ] ; then
-. @ECMWF_SITE_SPECIFIC_FILE@
+# Update host, ecflow_site.sh is configured from CMAKE at install time
+# =========================================================================
+if [ -f ecflow_site.sh ] ; then
+$(source ./ecflow_site.sh)
 fi
 
 #==========================================================================
