@@ -861,7 +861,7 @@ void VNode::statusChangeTime(QString& sct) const
     }
 }
 
-uint VNode::statusChangeTime() const
+unsigned int VNode::statusChangeTime() const
 {
     if(node_)
     {

@@ -182,7 +182,7 @@ public:
 
     const std::string&  abortedReason() const;  
     void statusChangeTime(QString&) const;
-    uint statusChangeTime() const;
+    unsigned int statusChangeTime() const;
 
     bool logServer(std::string& host,std::string& port);
 

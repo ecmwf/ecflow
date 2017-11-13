@@ -25,6 +25,8 @@ class NodeQueryResultModel : public QAbstractItemModel
 Q_OBJECT
 
 public:
+    enum CustomItemRole {SortRole = Qt::UserRole + 1};
+
    	explicit NodeQueryResultModel(QObject *parent=0);
    	~NodeQueryResultModel();
 
@@ -46,6 +48,11 @@ public:
 
     VInfo_ptr nodeInfo(const QModelIndex&);
     QModelIndex infoToIndex(VInfo_ptr);
+
+    //To speed up identifying a column. The mapping here must match the definition of
+    //"query_columns" in ecflowview_view_conf.json !!!
+    enum ColumnType {ServerColumn=0,PathColumn=1,StatusColumn=2,TypeColumn=3,
+                     StatusChangeColumn=4,AttributeColumn=5};
 
 public Q_SLOTS:
     void slotBeginAppendRow();
