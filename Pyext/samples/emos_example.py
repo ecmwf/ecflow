@@ -212,6 +212,22 @@ print defs
 defs.save_as_defs("test.def")
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# label
+#!/usr/bin/env python2.7
+import os
+from ecf import *
+home = os.getenv("HOME") + "/course"
+print "Creating suite definition"  
+defs = Defs().add(Suite("test").add(
+    Variables(ECF_INCLUDE= home,
+              ECF_HOME=    home),
+    Family("f3").add(
+        Task("t1").add(
+            Label("info","")))))
+print defs
+defs.save_as_defs("test.def")
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # Time dependencies
 # #!/usr/bin/env python2.7
