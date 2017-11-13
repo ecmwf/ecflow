@@ -102,6 +102,7 @@ class TestIAdd(unittest.TestCase):
 
     def test_iadd(self):
         defs = Defs();
+        defs += [ Suite("s2"),Edit({ "x1":"y", "aa1":"bb"}, a="v",b="b",) ]
         s1 = defs.add_suite("s1")
         s1 += [ Clock(1, 1, 2010, False), Autocancel(1, 10, True) ] #+ returns the same node back
         t1 = s1.add_task("t1")
@@ -124,6 +125,7 @@ class TestIAdd(unittest.TestCase):
                     Autocancel(3)
                 ]
         self.assertTrue(t1 != None, "Can't find t1")
+        self.assertEqual(len(list(defs.suites)), 2, "expected 7 suites")
         self.assertEqual(len(list(t1.variables)), 7, "expected 7 variables")
         self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
         self.assertEqual(len(list(t1.inlimits)), 1, "expected 1 inlimits")

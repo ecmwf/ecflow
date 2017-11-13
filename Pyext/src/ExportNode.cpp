@@ -301,17 +301,6 @@ void export_Node()
             .def("__str__",  &Defstatus::to_string) // __str__
             ;
 
-   // see: https://github.com/boostorg/python/blob/master/test/raw_ctor.cpp
-   // Uses a raw constructor approach to support pass arbitrary number arguments on the python side.
-   // using no_init postpones defining __init__ function until after raw_function for proper overload resolution order,
-   // since later defs get higher priority.
-   class_<Edit>("Edit", "Allow variable addition as keyword arguments. The values must strings or integers", no_init)
-             .def("__init__", raw_function(&Edit::init,0)) // raw_constructor -> will call -> def(init<dict>() )
-             .def(init<dict>())                 //
-             .def(init<dict,dict>())            //
-             .def("__str__",  &Edit::to_string) // __str__
-             ;
-
    // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
    class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::expression_doc(), init<std::string>() )
    .def(init<PartExpression>())
