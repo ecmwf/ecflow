@@ -312,6 +312,7 @@ void export_NodeAttr()
 	;
 
 	class_<DateAttr>("Date",NodeAttrDoc::date_doc() ,init<int,int,int>())  // day,month,year
+	.def(init<std::string>())
 	.def(self == self )                                     // __eq__
 	.def("__str__",     &DateAttr::toString)                // __str__
    .def("__copy__",    copyObject<DateAttr>)               // __copy__ uses copy constructor
