@@ -467,7 +467,7 @@ void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
     reloadTb_->setEnabled(false);
-    getLatestFile();
+    getCurrentFile();
     //userClickedReload_ = false;
 }
 
