@@ -190,13 +190,15 @@ VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path)
 
 	boost::filesystem::path p(path);
 
-	try {
-		//Is it a directory?
-		if(boost::filesystem::is_directory(p))
-		{			
-            return res;
-		}
+    //Is it a directory?
+    boost::system::error_code errorCode;
+    if(boost::filesystem::is_directory(p,errorCode))
+    {
+        return res;
+    }
 
+    try
+    {
         if(boost::filesystem::exists(p.parent_path()))
 		{
 			std::string dirName=p.parent_path().string();           
