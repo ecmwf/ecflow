@@ -199,23 +199,21 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 
 #endif
 
-    //----------------------------------------------------
-    // Not the loacalhost or we could not read the file
-    //----------------------------------------------------
 
-    //We try the output client, its asynchronous!
+    //We try the output client (aka logserver), its asynchronous!
     if(fetchFileViaOutputClient(n,fileName))
     {
-    	//If we are here we created a output client and asked to the fetch the
+        //If we are here we created an output client and asked it to the fetch the
     	//file asynchronously. The ouput client will call slotOutputClientFinished() or
     	//slotOutputClientError eventually!!
     	return;
     }
 
+    //If we are here there is no outpt client defined
     reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
 
     //If there is no output client we try
-    //to read it from the disk
+    //to read it from the disk (if the settings allow it)
     if(server->readFromDisk() || !isJobout)
     {
         //Get the fileName
@@ -224,7 +222,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     }
 
     //If we are here no output client is defined and we could not read the file from
-    //the local disk we try the server if it is the jobout file.
+    //the local disk, so we try the server if it is the jobout file.
     if(isJobout)
     {
     	fetchJoboutViaServer(server,n,fileName);
@@ -232,6 +230,10 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     }
 
     //If we are here we coud not get the file
+    if(n->isFlagSet(ecf::Flag::JOBCMD_FAILED))
+    {
+        reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
+    }
     owner_->infoFailed(reply_);
 }
 
