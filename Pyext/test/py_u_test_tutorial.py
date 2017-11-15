@@ -560,7 +560,7 @@ class TestIndentation(unittest.TestCase):
 class TestLabel(unittest.TestCase):
         
     def test_me(self):
-          #!/usr/bin/env python2.7
+        #!/usr/bin/env python2.7
         import os
 
         home = os.path.join(os.getenv("HOME"), "course")
@@ -604,6 +604,7 @@ class TestRepeat(unittest.TestCase):
         file = open(self.t1_ecf_path ,"w") 
         file.write(t1_ecf)
         file.close()
+        
      
     def tearDown(self):
         os.remove("test.def")
@@ -612,8 +613,12 @@ class TestRepeat(unittest.TestCase):
     
     def test_repeat(self):
     
-        def create_family_f4():
-            return Family("f4").add(
+        print "Creating suite definition" 
+        defs = Defs().add(
+                Suite("test").add(
+                    Edit(   ECF_INCLUDE=self.ecf_includes,
+                            ECF_HOME=self.ecf_home),
+                    Family("f4").add(
                         Edit(SLEEP=2), 
                         RepeatString("NAME", ["a", "b", "c", "d", "e", "f" ]),
                         Family("f5").add( 
@@ -621,13 +626,7 @@ class TestRepeat(unittest.TestCase):
                             Task("t1").add( 
                                 RepeatDate("DATE", 20101230, 20110105),
                                 Label("info", ""),
-                                Label("data",""))))
-
-        print "Creating suite definition" 
-        defs = Defs().add(
-                    Suite("test").add(
-                        Edit(ECF_INCLUDE=self.ecf_includes,ECF_HOME=self.ecf_home),
-                        create_family_f4()))
+                                Label("data",""))))))
         print defs
 
         print "Checking job creation: .ecf -> .job0"   
@@ -636,7 +635,29 @@ class TestRepeat(unittest.TestCase):
 
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")
+        
+    def test_repeat3(self):
     
+        print "Creating suite definition" 
+        defs = Defs().add( Suite("test") )
+        defs.test += [Edit( ECF_INCLUDE=self.ecf_includes,
+                            ECF_HOME=self.ecf_home), Family("f4") ]
+        defs.test.f4 += [   Edit(SLEEP=2),
+                            RepeatString("NAME", ["a", "b", "c", "d", "e", "f" ]),
+                            Family("f5") ]
+        defs.test.f4.f5 += [ RepeatInteger("VALUE", 1, 10),
+                            Task("t1")]
+        defs.test.f4.f5.t1 += [ RepeatDate("DATE", 20101230, 20110105),
+                                Label("info", ""),
+                                Label("data","") ]
+        print defs
+        print "Checking job creation: .ecf -> .job0"   
+        result = defs.check_job_creation()
+        self.assertEqual(result, "", "expected job creation to succeed " + result)
+
+        print "Saving definition to file 'test.def'"
+        defs.save_as_defs("test.def")
+        
 if __name__ == "__main__":
     unittest.main()
     print("All Tests pass")

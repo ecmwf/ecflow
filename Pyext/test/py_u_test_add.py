@@ -12,7 +12,123 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 from ecflow import *
 import unittest 
+from _xmlplus.utils.boolean import false
 
+class Test_crash(unittest.TestCase):
+    def test_trigger_node_list(self):
+        suite = Suite("s")
+        fam = suite.add_family("f")
+        task = fam.add_task("t")
+        self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+ 
+        suite = Suite("s")
+        fam = Family("f")
+        task = Task("t")
+        suite.add_family(fam)
+        task = fam.add_task(task)
+        self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+
+        # The following will crash or cause memory error. Since the Defs() is transitory/temp()
+        # Unlike the previous example where we keep the defs in a variable.
+#         task = Defs().add_suite("s").add_family("f").add_task("t")
+#         self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+        
+        # Like wise this will crash since the Suite() is transitory reference counted, and goes out of scope.
+#         task = Suite("s").add_family("f").add_task("t")
+#         self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+
+class TestTrigger(unittest.TestCase):
+    def test_trigger(self):
+        t = Trigger("a == complete")
+        self.assertEqual(str(t),"a == complete","Trigger not as expected:"+ str(t))
+
+    def test_trigger_string_list(self):
+        t = Trigger(["a"])
+        self.assertEqual(str(t),"a == complete","Trigger not as expected: "+ str(t))
+        
+        t = Trigger(["a","b","c"])
+        self.assertEqual(str(t),"a == complete AND b == complete AND c == complete","Trigger not as expected: " + str(t))
+
+    def test_trigger_node_list(self):
+        t = Trigger([Task("a")])
+        self.assertEqual(str(t),"a == complete","Trigger not as expected: "+ str(t))
+
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+        t = Trigger([task])
+        self.assertEqual(str(t),"/s/f/t == complete","Trigger not as expected: "+ str(t))
+
+    def test_trigger_string_and_node_list(self):
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        t = Trigger(["a","b",task])
+        self.assertEqual(str(t),"a == complete AND b == complete AND /s/f/t == complete","Trigger not as expected: " + str(t))
+
+    def test_add(self):
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        task.add(Trigger("1==1"))
+        expr = task.get_trigger()
+        self.assertEqual(str(expr),"1==1","Trigger not as expected: " +  expr.get_expression())
+        
+        task.add(Trigger("2==1"))
+        self.assertEqual(str(expr),"1==1 AND 2==1","Trigger not as expected: " +  str(expr))
+        
+        trig = Trigger("x ==1")
+        trig.add(PartExpression("y == 1", False))
+        task.add(trig)
+        self.assertEqual(str(expr),"1==1 AND 2==1 AND x ==1 OR y == 1","Trigger not as expected: " +  str(expr))
+
+
+class TestComplete(unittest.TestCase):
+    def test_trigger(self):
+        t = Complete("a == complete")
+        self.assertEqual(str(t),"a == complete","Complete not as expected:"+ str(t))
+
+    def test_Complete_string_list(self):
+        t = Complete(["a"])
+        self.assertEqual(str(t),"a == complete","Complete not as expected: "+ str(t))
+        
+        t = Complete(["a","b","c"])
+        self.assertEqual(str(t),"a == complete AND b == complete AND c == complete","Complete not as expected: " + str(t))
+
+    def test_Complete_node_list(self):
+        t = Complete([Task("a")])
+        self.assertEqual(str(t),"a == complete","Complete not as expected: "+ str(t))
+
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+        t = Complete([task])
+        self.assertEqual(str(t),"/s/f/t == complete","Complete not as expected: "+ str(t))
+
+    def test_Complete_string_and_node_list(self):
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        t = Complete(["a","b",task])
+        self.assertEqual(str(t),"a == complete AND b == complete AND /s/f/t == complete","Complete not as expected: " + str(t))
+
+    def test_add(self):
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        task.add(Complete("1==1"))
+        expr = task.get_complete()
+        self.assertEqual(str(expr),"1==1","Complete not as expected: " +  expr.get_expression())
+        
+        task.add(Complete("2==1"))
+        self.assertEqual(str(expr),"1==1 AND 2==1","Complete not as expected: " +  str(expr))
+        
+        trig = Complete("x ==1")
+        trig.add(PartExpression("y == 1", False))
+        task.add(trig)
+        self.assertEqual(str(expr),"1==1 AND 2==1 AND x ==1 OR y == 1","Complete not as expected: " +  str(expr))
+        
+        
 class TestDefsAdd(unittest.TestCase):
     def test_add_suite1(self):
         defs = Defs().add(Suite("a"))

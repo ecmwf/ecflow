@@ -173,6 +173,16 @@ void Expression::add(const PartExpression& t)
    //	cout << "Expression::add " << expression() << "\n";
 }
 
+void Expression::add_expr(const Expression& t)
+{
+   const std::vector<PartExpression>& vec = t.expr();
+   for(size_t i = 0; i < vec.size(); i++) {
+      PartExpression part = vec[i];
+      if (!empty() && part.expr_type() == PartExpression::FIRST)  part.set_expr_type(PartExpression::AND);
+      add(part);
+   }
+}
+
 // ============================================================================
 // CREATE AST tree for each expression, and COMBINE AST for each expression into a single AST.
 // ============================================================================

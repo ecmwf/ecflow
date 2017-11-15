@@ -95,6 +95,26 @@ void Node::add_complete_expression(const Expression& t)
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
+void Node::py_add_trigger_expr(const Expression& expr)
+{
+   if (triggerExpr_) {
+      if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
+      triggerExpr_->add_expr(expr);
+      state_change_no_ = Ecf::incr_state_change_no();
+   }
+   else add_trigger_expression(expr);
+}
+
+void Node::py_add_complete_expr(const Expression& expr)
+{
+   if (completeExpr_) {
+      if (isSuite())  throw std::runtime_error( "Can not add complete on a suite" );
+      completeExpr_->add_expr(expr);
+      state_change_no_ = Ecf::incr_state_change_no();
+   }
+   else  add_complete_expression(expr);
+}
+
 void Node::add_part_trigger(const PartExpression& part)
 {
    if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
