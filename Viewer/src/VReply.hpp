@@ -68,8 +68,8 @@ public:
     void clearLog() {log_.clear();}
     void setText(const std::string& txt) {text_=txt;}
 
-	bool hasWarning() const {return !warningText_.empty();}
-	bool hasInfo() const {return !infoText_.empty();}
+    bool hasWarning() const {return (!warningText_.empty() && !warningText_[0].empty());}
+    bool hasInfo() const {return (!infoText_.empty() && !infoText_[0].empty());}
 
 	void prependText(const std::string&);
 	void appendText(const std::string&);

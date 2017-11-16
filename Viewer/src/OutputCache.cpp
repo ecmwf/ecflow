@@ -10,42 +10,31 @@
 
 #include "OutputCache.hpp"
 
-#include "UiLog.hpp"
+#include <QDebug>
 
-OutputCache* OutputCache::instance_=NULL;
+#include "UiLog.hpp"
 
 #define _UI_OUTPUTCACHE_DEBUG
 
-OutputCacheItem::OutputCacheItem(const std::string& id, VFile_ptr file,QObject *parent) :
-      QTimer(parent), id_(id), file_(file), timeout_(120*1000), cnt_(0)
+OutputCacheItem::OutputCacheItem(QString id, VFile_ptr file) :
+      id_(id), file_(file), used_(false)
 {
-    attach();
 }
 
-bool OutputCacheItem::sameAs(VInfo_ptr info,const std::string& sourcePath)
+bool OutputCacheItem::isAttached() const
 {
-    if(info && info->isNode() && info->server())
-    {
-        std::string id=info->path() + ":" + sourcePath;
-        return (id == id_);
-    }
-    return false;
+    return used_;
 }
 
 void OutputCacheItem::attach()
 {
-    cnt_++;
-    stop();
+    used_=true;
 }
 
 void OutputCacheItem::detach()
 {
-    cnt_--;
-    if(cnt_<=0)
-    {
-        cnt_=0;
-        start(timeout_);
-    }
+    used_=false;
+    inTimeOut_.start();
 }
 
 //========================================================
@@ -54,17 +43,38 @@ void OutputCacheItem::detach()
 //
 //========================================================
 
+OutputCache::OutputCache(QObject *parent) :
+    QObject(parent),
+    timeOut_(1000*15), //we check the state every 15 sec
+    maxAttachedPeriod_(1000*120) //cache retention period is 2 min
+{
+    timer_=new QTimer(this);
+    connect(timer_,SIGNAL(timeout()),
+            this,SLOT(slotTimeOut()));
+}
+
 OutputCache::~OutputCache()
 {
    clear();
 }
 
-OutputCache* OutputCache::instance()
+void OutputCache::adjustTimer()
 {
-    if(!instance_)
-        instance_= new OutputCache();
-    
-    return instance_;
+    if(items_.isEmpty())
+        stopTimer();
+    else
+        startTimer();
+}
+
+void OutputCache::startTimer()
+{
+    if(!timer_->isActive())
+        timer_->start(timeOut_);
+}
+
+void OutputCache::stopTimer()
+{
+    timer_->stop();
 }
 
 void OutputCache::clear()
@@ -73,6 +83,7 @@ void OutputCache::clear()
     {
         delete item;
     }
+    stopTimer();
 }
 
 OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,VFile_ptr file)
@@ -81,120 +92,136 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
         return NULL;
 
 #ifdef _UI_OUTPUTCACHE_DEBUG
-    UiLog().dbg() << "OutputCache::add --> file";
+    UI_FUNCTION_LOG
     file->print();
     print();
 #endif
 
     if(info && file  && info->isNode() && info->server())
     {
-        std::string id=info->path() + ":" + sourcePath;        
-        QMap<std::string, OutputCacheItem*>::iterator it = items_.find(id);
+        //The key we would store for the item in the map
+        QString id=QString::fromStdString(info->path() + ":" + sourcePath);
+
+        //The item exists
+        QMap<QString, OutputCacheItem*>::iterator it = items_.find(id);
         if(it != items_.end())
         {
             it.value()->attach();
             it.value()->file_=file;
+            startTimer();
             return it.value();
         }
+        //The item not yet exists
         else
         {
             OutputCacheItem* item=new OutputCacheItem(id,file);
-            connect(item,SIGNAL(timeout()),
-                    this,SLOT(removeItem()));
-            
             items_[id]=item;
+            item->attach();
 #ifdef _UI_OUTPUTCACHE_DEBUG
             UiLog().dbg() << "  add item:" << id;
-            print();
-            UiLog().dbg() << "<-- OutputCache::add";
+            print();           
 #endif
+            startTimer();
             return item;
         }
     }
-#ifdef _UI_OUTPUTCACHE_DEBUG
-    UiLog().dbg() << "<-- OutputCache::add";
-#endif
 
     return NULL;
 }    
 
-void OutputCache::detach(OutputCacheItem* item)
+//Attach one item and detach all the others
+OutputCacheItem* OutputCache::attachOne(VInfo_ptr info,const std::string& fileName)
 {
-    if(item)
+    OutputCacheItem* attachedItem=0;
+    if(info && info->isNode() && info->server())
     {
-#ifdef _UI_OUTPUTCACHE_DEBUG
-        UiLog().dbg() << "OutputCache::detach -->";
-        print();
-        UiLog().dbg() << "  detach item: " << item->id_;
-        item->detach();
-        print();
-        UiLog().dbg() << "<-- detach";
-#endif
+        QString inPath=QString::fromStdString(info->path() + ":");
+        QString inFileName=QString::fromStdString(fileName);
+
+        QMap<QString, OutputCacheItem*>::iterator it=items_.begin();
+        while (it != items_.end() )
+        {
+            if(it.key().startsWith(inPath) && it.key().endsWith(inFileName))
+            {
+                it.value()->attach();
+                attachedItem=it.value();
+            }
+            else
+            {
+                it.value()->detach();
+            }
+            ++it;
+        }
     }
+    adjustTimer();
+    return attachedItem;
 }
 
-void OutputCache::removeItem()
+//Detach all the items
+void OutputCache::detach()
 {
-    if(OutputCacheItem* item=static_cast<OutputCacheItem*>(sender()))
+    QMap<QString, OutputCacheItem*>::iterator it=items_.begin();
+    while(it != items_.end())
     {
 #ifdef _UI_OUTPUTCACHE_DEBUG
-        UiLog().dbg() << "OutputCache::removeItem --> file";
-        item->file_->print();
+        UI_FUNCTION_LOG
+        print();
+        UiLog().dbg() << "  detach item: " << it.value()->id_;
+#endif
+        it.value()->detach();
+
+#ifdef _UI_OUTPUTCACHE_DEBUG
         print();
 #endif
-        QMap<std::string, OutputCacheItem*>::iterator it = items_.begin();
-        while (it != items_.end() ) 
-        {
-            if(it.value() == item)
-            {            
+        ++it;
+    }
+
+    adjustTimer();
+}
+
+void OutputCache::slotTimeOut()
+{
 #ifdef _UI_OUTPUTCACHE_DEBUG
-                UiLog().dbg() << "  remove item --> ref_count:" <<
+UI_FUNCTION_LOG
+#endif
+
+    QMap<QString, OutputCacheItem*>::iterator it=items_.begin();
+    while(it != items_.end() )
+    {
+        OutputCacheItem* item=it.value();
+        if(!item->isAttached() &&
+           item->inTimeOut_.elapsed() > maxAttachedPeriod_)
+        {
+#ifdef _UI_OUTPUTCACHE_DEBUG
+            UiLog().dbg() << "  remove item --> ref_count:" <<
                                      it.value()->file_.use_count() <<
                                      " item:" << it.key();
 #endif
-                //assert(item->file_.use_count() == 1);
-                //The ref count is not necessarily 1 here
-                items_.erase(it);
-                item->deleteLater();
+            it=items_.erase(it);
+            delete item;
+            //item->deleteLater();
 #ifdef _UI_OUTPUTCACHE_DEBUG
-                print();
-                UiLog().dbg() << "<-- OutputCache::removeItem";
+            print();
 #endif
-                return;
-            }
-
-            ++it;
         }
-    }        
-}
-
-OutputCacheItem* OutputCache::use(VInfo_ptr info,const std::string& sourcePath)
-{
-    if(info && info->isNode() && info->server())
-    {
-        std::string id=info->path() + ":" + sourcePath;
-        QMap<std::string, OutputCacheItem*>::iterator it = items_.find(id);
-        if(it != items_.end())
+        else
         {
-            it.value()->attach();
-            return it.value();
-
+            ++it;
         }
     }
 
-    return NULL;
+    adjustTimer();
 }
 
 void OutputCache::print()
 {
-    UiLog().dbg() << "  OutputCache contents -->";
-    QMap<std::string, OutputCacheItem*>::iterator it = items_.begin();
+    UI_FUNCTION_LOG
+    QMap<QString, OutputCacheItem*>::iterator it = items_.begin();
     while (it != items_.end() )
     {
         UiLog().dbg() << "  item:" + it.key() << " tmp:" <<
                              it.value()->file_->path() << " countdown:" <<
-                             ((it.value()->isActive())?"on":"off");
+                             ((it.value()->isAttached())?"off":"on");
         ++it;
-    }
-    UiLog().dbg() << "  <-- OutputCache contents";
+    }  
 }

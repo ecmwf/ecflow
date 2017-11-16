@@ -159,7 +159,8 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	{
         VFile_ptr f=reply->tmpFile();
         if(f)
-		{         
+        {
+            //Path + size
             if(f->storageMode() == VFile::MemoryStorage)
 			{
                 labelText+=Viewer::formatBoldText(" Size: ",col);
@@ -176,16 +177,19 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			}
 
 			s+="<br>";
-            s+=Viewer::formatBoldText("Source: ",col) + QString::fromStdString(f->fetchModeStr());
+
+            //Source
+            s+=Viewer::formatBoldText("Source: ",col);
+
+            if(f->cached())
+                s+=Viewer::formatText("from cache - ",QColor(0,0,170));
+
+            s+=QString::fromStdString(f->fetchModeStr());
             s+=" (took " + QString::number(static_cast<float>(f->transferDuration())/1000.,'f',1) + " s)";
 
             QString dt=f->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
             s+=Viewer::formatBoldText(" at ",col) + dt;
-            if(f->cached())
-            {
-                s+=" (<b> read from cache</b>)";
-            }
-		}
+        }
 	}
 
 	ttText=s;

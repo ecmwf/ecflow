@@ -62,7 +62,7 @@ protected:
 	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&);
 	void searchOnReload();
-	void getCurrentFile();
+    void getCurrentFile(bool doReload);
 	void getLatestFile();
 	std::string currentFullName() const;
     void updateHistoryLabel(const std::vector<std::string>&);

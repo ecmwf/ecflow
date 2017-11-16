@@ -9,6 +9,7 @@
 
 #include "OutputFileProvider.hpp"
 
+#include "OutputCache.hpp"
 #include "OutputFileClient.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
@@ -23,14 +24,17 @@
 
 OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::OutputTask),
-    outClient_(NULL), latestCached_(NULL)
+    outClient_(NULL)
 {
+    outCache_=new OutputCache(this);
 }
 
 void OutputFileProvider::clear()
 {
-    OutputCache::instance()->detach(latestCached_);
-    latestCached_=NULL;
+    UI_FUNCTION_LOG
+
+    //Detach all the outputs registered for this instance in cache
+    outCache_->detach();
 
     if(outClient_)
 	{
@@ -42,7 +46,8 @@ void OutputFileProvider::clear()
     dir_.reset();
 }
 
-//Node
+//This is called when we load a new node in the Output panel. In this
+//case we always try to load the current jobout file.
 void OutputFileProvider::visit(VInfoNode* infoNode)
 {
     assert(info_->node() == infoNode->node());
@@ -66,25 +71,20 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
    	}
 
     //Get the filename
-    std::string jobout=joboutFileName(); //n->findVariable("ECF_JOBOUT",true);
+    std::string jobout=joboutFileName();
 
-    //This is needed for the refresh!!! We want to detach the item but keep
-    //lastCached.
-    bool detachCache=!(latestCached_ && latestCached_->sameAs(info_,jobout));
-    if(!detachCache)
-    {
-        OutputCache::instance()->detach(latestCached_);
-    }
-
-    fetchFile(server,n,jobout,true,detachCache);
+    //We always try to use the cache in this case
+    outCache_->attachOne(info_,jobout);
+    fetchFile(server,n,jobout,true,true);
 }
 
 //Get a file
-void OutputFileProvider::file(const std::string& fileName)
+void OutputFileProvider::file(const std::string& fileName,bool useCache)
 {
-    //When a new file is requested
-    OutputCache::instance()->detach(latestCached_);
-    latestCached_=NULL;
+    //If we do not want to use the cache we detach all the output
+    //attached to this instance
+    if(!useCache)
+        outCache_->detach();
 
     //Check if the task is already running
 	if(task_)
@@ -108,16 +108,15 @@ void OutputFileProvider::file(const std::string& fileName)
     //Get the filename
     std::string jobout=joboutFileName(); //n->findVariable("ECF_JOBOUT",true);
 
-    fetchFile(server,n,fileName,(fileName==jobout),false);
+    fetchFile(server,n,fileName,(fileName==jobout),useCache);
 }
 
-void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool detachCache)
+void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool useCache)
 {
-    if(detachCache)
-    {
-        OutputCache::instance()->detach(latestCached_);
-        latestCached_=NULL;
-    }
+    //If we do not want to use the cache we detach all the output
+    //attached to this instance
+    if(!useCache)
+        outCache_->detach();
 
     if(!n || !n->node() || !server)
     {
@@ -201,7 +200,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 
 
     //We try the output client (aka logserver), its asynchronous!
-    if(fetchFileViaOutputClient(n,fileName))
+    if(fetchFileViaOutputClient(n,fileName,useCache))
     {
         //If we are here we created an output client and asked it to the fetch the
     	//file asynchronously. The ouput client will call slotOutputClientFinished() or
@@ -237,21 +236,20 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     owner_->infoFailed(reply_);
 }
 
-bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fileName)
+bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fileName,bool useCache)
 {
+    UI_FUNCTION_LOG
+    UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient <-- file: " << fileName;
+
     std::string host, port;
     assert(n);
 
-    UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient <-- file: " << fileName;
-
-    //If it is not the jobout file or it is the joubout but it is not the current item in the cache
-    //(i.e. we do not want to referesh it) we try to use the cache
-    if(fileName != joboutFileName() || !(latestCached_))
+    //We try use the cache
+    if(useCache)
     {
-        //Check cache
-        if(OutputCacheItem* item=OutputCache::instance()->use(info_,fileName))
-        {
-            latestCached_=item;
+        //Check if the given output is already in the cache
+        if(OutputCacheItem* item=outCache_->attachOne(info_,fileName))
+        {           
             VFile_ptr f=item->file();
             assert(f);
             f->setCached(true);
@@ -270,10 +268,7 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
         }
     }
 
-    //If we are here we do not need to know the previously cached item
-    latestCached_=NULL;
-
-    //We did not use the cache
+    //We did/could not use the cache
     if(n->logServer(host,port))
 	{
 		//host=host + "baaad";
@@ -316,7 +311,8 @@ void OutputFileProvider::slotOutputClientFinished()
 
     outClient_->clearResult();
 
-    latestCached_=OutputCache::instance()->add(info_,tmp->sourcePath(),tmp);
+    //Files retrieved from the log server are automatically added to the cache!
+    outCache_->add(info_,tmp->sourcePath(),tmp);
 
     reply_->setInfoText("");
     reply_->fileReadMode(VReply::LogServerReadMode);

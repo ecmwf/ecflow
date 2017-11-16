@@ -184,7 +184,7 @@ void OutputItemWidget::getLatestFile()
     updateDir(false);  // get the directory listing
 }
 
-void OutputItemWidget::getCurrentFile()
+void OutputItemWidget::getCurrentFile(bool doReload)
 {
 	messageLabel_->hide();
 	messageLabel_->stopLoadLabel();
@@ -198,7 +198,7 @@ void OutputItemWidget::getCurrentFile()
 		std::string fullName=currentFullName();
         UiLog().dbg()  << "output selected: " << fullName;
 		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-		op->file(fullName);
+        op->file(fullName,!doReload);
 	}
 }
 
@@ -467,7 +467,7 @@ void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
     reloadTb_->setEnabled(false);
-    getCurrentFile();
+    getCurrentFile(true);
     //userClickedReload_ = false;
 }
 
@@ -590,7 +590,7 @@ void OutputItemWidget::searchOnReload()
 void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
 {
 	if(!ignoreOutputSelection_)
-		getCurrentFile();
+        getCurrentFile(false);
 }
 
 //-----------------------------------------

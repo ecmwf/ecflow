@@ -12,7 +12,9 @@
 #define OUTPUTCHACHE_HPP_
 
 #include <QMap>
+#include <QTime>
 #include <QTimer>
+#include <QSet>
 
 #include "OutputClient.hpp"
 #include "VFile.hpp"
@@ -20,24 +22,23 @@
 
 class OutputCache;
 
-struct OutputCacheItem : public QTimer
+struct OutputCacheItem
 {
   friend class OutputCache;
 
 public:
-    OutputCacheItem(const std::string& id,VFile_ptr file,QObject *parent=0);
+    OutputCacheItem(QString id,VFile_ptr file);
     VFile_ptr file() const {return file_;}
-    bool sameAs(VInfo_ptr info,const std::string& sourcePath);
+    bool isAttached() const;
 
 protected:
     void attach();
     void detach();
-    void keepIt();
 
-    std::string id_;
-    VFile_ptr file_;
-    int timeout_;
-    int cnt_;
+    QString id_;
+    VFile_ptr file_;   
+    bool used_;
+    QTime inTimeOut_;
 };
 
 class OutputCache:  public QObject
@@ -45,28 +46,29 @@ class OutputCache:  public QObject
     Q_OBJECT
 
 public:   
-    OutputCacheItem* add(VInfo_ptr info,const std::string& sourcePath,VFile_ptr file);
-    void detach(OutputCacheItem*);
-    OutputCacheItem* use(VInfo_ptr info,const std::string& sourcePath);
+    OutputCache(QObject* parent=0);
+    ~OutputCache();
 
-    void print();
-    static OutputCache* instance();
+    OutputCacheItem* add(VInfo_ptr info,const std::string& sourcePath,VFile_ptr file);
+    OutputCacheItem* attachOne(VInfo_ptr info,const std::string& fileName);
+    void detach();
     void clear();
+    void print();
 
 protected Q_SLOTS:
-    void removeItem(); 
-
-protected:
-    OutputCache() {}
-    ~OutputCache();
+    void slotTimeOut();
 
 private:
     OutputCache(const OutputClient&);
     OutputCache& operator=(const OutputCache&);
+    void adjustTimer();
+    void startTimer();
+    void stopTimer();
 
-    static OutputCache* instance_;
-    QMap<std::string,OutputCacheItem*> items_;
-
+    QMap<QString,OutputCacheItem*> items_;
+    int timeOut_;
+    int maxAttachedPeriod_;
+    QTimer* timer_;
 };
 
 #endif // OUTPUTCHACHE_HPP
