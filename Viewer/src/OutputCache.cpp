@@ -37,6 +37,14 @@ void OutputCacheItem::detach()
     inTimeOut_.start();
 }
 
+std::ostream& operator <<(std::ostream& stream,const OutputCacheItem& item)
+{
+    stream << "id:" << item.id_.toStdString() << " tmp:" <<
+                            item.file_->path() << " countdown:" <<
+                            (!item.isAttached());
+    return stream;
+}
+
 //========================================================
 //
 // OutputCache
@@ -94,7 +102,7 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
 #ifdef _UI_OUTPUTCACHE_DEBUG
     UI_FUNCTION_LOG
     file->print();
-    print();
+    //print();
 #endif
 
     if(info && file  && info->isNode() && info->server())
@@ -118,8 +126,8 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
             items_[id]=item;
             item->attach();
 #ifdef _UI_OUTPUTCACHE_DEBUG
-            UiLog().dbg() << "  add item:" << id;
-            print();           
+            UiLog().dbg() << "  add " << item;
+            //print();
 #endif
             startTimer();
             return item;
@@ -165,13 +173,15 @@ void OutputCache::detach()
     {
 #ifdef _UI_OUTPUTCACHE_DEBUG
         UI_FUNCTION_LOG
-        print();
-        UiLog().dbg() << "  detach item: " << it.value()->id_;
+        //print();
+        UiLog().dbg() << "  detach -> " << it.value();
 #endif
         it.value()->detach();
+        Q_ASSERT(!it.value()->isAttached());
 
 #ifdef _UI_OUTPUTCACHE_DEBUG
-        print();
+        //print();
+        UiLog().dbg() << "  detached -> " << it.value();
 #endif
         ++it;
     }
@@ -193,9 +203,8 @@ UI_FUNCTION_LOG
            item->inTimeOut_.elapsed() > maxAttachedPeriod_)
         {
 #ifdef _UI_OUTPUTCACHE_DEBUG
-            UiLog().dbg() << "  remove item --> ref_count:" <<
-                                     it.value()->file_.use_count() <<
-                                     " item:" << it.key();
+            UiLog().dbg() << "  remove " << it.value();
+            UiLog().dbg() << "    -> ref_count:" << it.value()->file_.use_count();
 #endif
             it=items_.erase(it);
             delete item;
@@ -219,9 +228,7 @@ void OutputCache::print()
     QMap<QString, OutputCacheItem*>::iterator it = items_.begin();
     while (it != items_.end() )
     {
-        UiLog().dbg() << "  item:" + it.key() << " tmp:" <<
-                             it.value()->file_->path() << " countdown:" <<
-                             ((it.value()->isAttached())?"off":"on");
+        UiLog().dbg() << it.value();
         ++it;
     }  
 }

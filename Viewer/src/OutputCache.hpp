@@ -16,15 +16,19 @@
 #include <QTimer>
 #include <QSet>
 
+#include <sstream>
+
 #include "OutputClient.hpp"
 #include "VFile.hpp"
 #include "VInfo.hpp"
+
 
 class OutputCache;
 
 struct OutputCacheItem
 {
   friend class OutputCache;
+  friend std::ostream& operator <<(std::ostream& stream,const OutputCacheItem& item);
 
 public:
     OutputCacheItem(QString id,VFile_ptr file);
