@@ -7,24 +7,35 @@
 // nor does it submit to any jurisdiction.
 //
 //============================================================================
+#ifndef CLOCKWIDGET_HPP
+#define CLOCKWIDGET_HPP
 
-#ifndef PROPERTYMAPPER_INC_
-#define PROPERTYMAPPER_INC_
+#include <QLabel>
 
 #include "VProperty.hpp"
 
-class PropertyMapper
-{
-public:
-    PropertyMapper(const std::vector<std::string>&,VPropertyObserver* obs);
-    ~PropertyMapper();
-    VProperty* find(const std::string& path,bool failOnError=false) const;
-    void initObserver(VPropertyObserver *obs) const;
+class QTimer;
+class PropertyMapper;
 
-private:
-    VPropertyObserver* obs_;
-    std::vector<VProperty*> props_;
+class ClockWidget : public QLabel, public VPropertyObserver
+{
+    Q_OBJECT
+public:
+    ClockWidget(QWidget* parent=0);
+    ~ClockWidget();
+
+    void notifyChange(VProperty*);
+
+protected Q_SLOTS:
+    void slotTimeOut();
+
+protected:
+    void renderTime();
+    void adjustTimer();
+
+    PropertyMapper* prop_;
+    QTimer* timer_;
+    bool showSec_;
 };
 
-#endif
-
+#endif // CLOCKWIDGET_HPP
