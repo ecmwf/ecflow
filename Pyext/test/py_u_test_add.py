@@ -17,6 +17,7 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
                   Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
                   VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import unittest 
+from PIL.PyAccess import defs
 
 class Test_crash(unittest.TestCase):
     def test_trigger_node_list(self):
@@ -38,12 +39,76 @@ class Test_crash(unittest.TestCase):
 
         # The following will crash or cause memory error. Since the Defs() is transitory/temp()
         # Unlike the previous example where we keep the defs in a variable.
-#         task = Defs().add_suite("s").add_family("f").add_task("t")
-#         self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
-        
+        #task = Defs().add_suite("s").add_family("f").add_task("t")
+        #self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+         
         # Like wise this will crash since the Suite() is transitory reference counted, and goes out of scope.
 #         task = Suite("s").add_family("f").add_task("t")
 #         self.assertEqual(task.get_abs_node_path(),"/s/f/t","Path not as expected " + task.get_abs_node_path() )
+
+class TestListComprehension(unittest.TestCase):
+    def test_suite_list(self):
+        defs = Defs()
+        defs += [ Suite("s{}".format(i)) for i in range(1,6) ]
+        self.assertEqual(len(defs), 5, " expected 5 suites but found " + str(len(defs)))
+
+        defs.add( [ Suite("s{}".format(i)) for i in range(6,11) ] )
+        self.assertEqual(len(defs), 10, " expected 10 suites but found " + str(len(defs)))
+
+    def test_family_list(self):
+        defs = Defs()
+        defs += [ Suite("suite").add( [ Family("f{}".format(i)) for i in range(1,6)]  ) ]
+        self.assertEqual(len(defs.suite), 5, " expected 5 familes but found " + str(len(defs.suite)))
+
+    def test_task_list(self):
+        defs = Defs()
+        defs += [ Suite("suite").add( Family("f").add( [ Task("t{}".format(i)) for i in range(1,6)]  )) ]
+        self.assertEqual(len(defs.suite.f), 5, " expected 5 task but found " + str(len(defs.suite.f)))
+
+    def test_task_list2(self):
+        defs = Defs()
+        defs += [ Suite("suite").add( Task("x"), 
+                                      Family("f").add( [ Task("t{}".format(i)) for i in range(1,6)]  ),
+                                      Task("y"),
+                                      [ Family("f{}".format(i)) for i in range(1,6) ],
+                                      Edit(a="b"),
+                                      [ Task("t{}".format(i)) for i in range(1,6) ],
+                                    )
+                ]
+        self.assertEqual(len(defs.suite), 13, " expected 13 nodes but found " + str(len(defs.suite)))
+        self.assertEqual(len(defs.suite.f), 5, " expected 5 nodes but found " + str(len(defs.suite.f)))
+        self.assertEqual(len(list(defs.suite.variables)), 1, " expected 1 variable " + str(len(list(defs.suite.variables))))
+
+    def test_5Suite_with_5families_with_5tasks(self):
+        defs = Defs()
+        defs.add(   [ Suite("s{}".format(i)).add( 
+                        [ Family("f{}".format(i)).add( 
+                            [ Task("t{}".format(i)) 
+                              for i in range(1,6)] ) 
+                        for i in range(1,6)]  ) 
+                    for i in range(1,6) ] )
+        #print defs
+        self.assertEqual(len(defs), 5, " expected 5 suites but found " + str(len(defs)))
+        for suite in defs:
+            self.assertEqual(len(suite), 5, " expected 5 familes but found " + str(len(suite)))
+            for fam in suite:
+                self.assertEqual(len(fam), 5, " expected 5 tasks but found " + str(len(fam)))
+                
+    def test__5Suite_with_5families_with_5tasks(self):
+        defs = Defs()
+        defs += [ Suite("s{}".format(i)).add( 
+                        [ Family("f{}".format(i)).add( 
+                            [ Task("t{}".format(i)) for i in range(1,6)] ) 
+                        for i in range(1,6)] ) 
+                    for i in range(1,6) 
+                ]
+        #print defs
+        self.assertEqual(len(defs), 5, " expected 5 suites but found " + str(len(defs)))
+        for suite in defs:
+            self.assertEqual(len(suite), 5, " expected 5 familes but found " + str(len(suite)))
+            for fam in suite:
+                self.assertEqual(len(fam), 5, " expected 5 tasks but found " + str(len(fam)))
+        
 
 class TestTrigger(unittest.TestCase):
     def test_trigger(self):
@@ -53,6 +118,9 @@ class TestTrigger(unittest.TestCase):
     def test_trigger_string_list(self):
         t = Trigger(["a"])
         self.assertEqual(str(t),"a == complete","Trigger not as expected: "+ str(t))
+
+        t = Trigger(["a == 1"])
+        self.assertEqual(str(t),"a == 1","Trigger not as expected: "+ str(t))
         
         t = Trigger(["a","b","c"])
         self.assertEqual(str(t),"a == complete AND b == complete AND c == complete","Trigger not as expected: " + str(t))
@@ -181,11 +249,13 @@ class TestAddAll(unittest.TestCase):
                     Day("sunday"),Day(Days.monday),
                     Date(1,1,0),Date(28,2,1960),
                     Autocancel(3)
-                )
+                    ),
+                [ Family("f{}".format(i)) for i in range(1,6)]
             )
         )
         t1 = defs.find_abs_node("/s1/t1")
         self.assertTrue(t1 != None, "Can't find t1")
+        self.assertEqual(len(defs.s1),6, "Expected 6 nodes but found " + str(len(defs.s1)))
         self.assertEqual(len(list(t1.variables)), 7, "expected 7 variables")
         self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
         self.assertEqual(len(list(t1.inlimits)), 1, "expected 1 inlimits")

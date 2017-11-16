@@ -152,16 +152,18 @@ static void construct_expr(Expression& expr, const boost::python::list& list) {
       std::string part_expr;
       if (boost::python::extract<std::string>(list[i]).check()) {
          part_expr = boost::python::extract<std::string>(list[i]);
-         if (!Str::valid_name(part_expr)) throw std::runtime_error("Trigger: " + part_expr  + " is not a valid node name");
+         if (Str::valid_name(part_expr)) {
+            part_expr += " == complete";
+         }
       }
       else if (boost::python::extract<node_ptr>(list[i]).check()) {
          node_ptr node = boost::python::extract<node_ptr>(list[i]);
          if (node->parent()) part_expr = node->absNodePath();
          else                part_expr = node->name();
+         part_expr += " == complete";
       }
       else throw std::runtime_error("Trigger: Expects string, or list(strings or nodes)");
 
-      part_expr += " == complete";
       if (expr.empty()) expr.add(PartExpression(part_expr));
       else              expr.add(PartExpression(part_expr,true/*AND*/));
    }
@@ -251,6 +253,11 @@ static void do_add(node_ptr self, const boost::python::object& arg){
       nc->addChild(child);
    }
    else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
+   else if (boost::python::extract<boost::python::list>(arg).check()){
+      boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
+      int the_list_size = len(the_list);
+      for(int i = 0; i < the_list_size; ++i) do_add(self,the_list[i]); // recursive
+   }
    else throw std::runtime_error("ExportNode::add : Unknown type ");
 }
 

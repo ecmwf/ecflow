@@ -180,13 +180,18 @@ static void do_add(defs_ptr self, const boost::python::object& arg) {
    }
    else if (boost::python::extract<dict>(arg).check())     add_variable_dict(self,boost::python::extract<dict>(arg));
    else if (boost::python::extract<suite_ptr>(arg).check()) self->addSuite(boost::python::extract<suite_ptr>(arg)) ;
+   else if (boost::python::extract<boost::python::list>(arg).check()){
+      boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
+      int the_list_size = len(the_list);
+      for(int i = 0; i < the_list_size; ++i) do_add(self,the_list[i]); // recursive
+   }
    else throw std::runtime_error("ExportDefs::add : Unknown type");
 }
 
 static object add(tuple args, dict kwargs) {
    int the_list_size = len(args);
    defs_ptr self = boost::python::extract<defs_ptr>(args[0]); // self
-   if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a defs");
+   if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
 
    for (int i = 1; i < the_list_size; ++i)  do_add(self,args[i]);
 

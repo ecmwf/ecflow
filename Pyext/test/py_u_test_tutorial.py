@@ -20,6 +20,7 @@ import ecflow_test_util as Test
 import unittest 
 import shutil   # used to remove directory tree
 import os
+from PIL.PyAccess import defs
 
 class TestNewSuite(unittest.TestCase):
     def setUp(self):
@@ -76,7 +77,7 @@ class Test1(unittest.TestCase):
         os.remove("test.def")
 
 class TestFamilies(unittest.TestCase):
-    def test_me(self):
+    def setUp(self):
         #!/usr/bin/env python2.7
         import os
         
@@ -93,6 +94,26 @@ class TestFamilies(unittest.TestCase):
         #print defs.check_job_creation()
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")
+        
+        self.defs = defs
+        
+    def test_me(self):
+        #!/usr/bin/env python2.7
+        import os
+        
+        print "Creating suite definition" 
+        home = os.path.join(os.getenv("HOME"),  "course") 
+        defs = Defs().add(
+            Suite("test").add(
+                Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                Family("f1").add( 
+                    [ Task("t{}".format(i)) for i in range(1,3) ])))
+        print defs
+        print "Checking job creation: .ecf -> .job0"  
+        #print defs.check_job_creation()
+        print "Saving definition to file 'test.def'"
+        defs.save_as_defs("test.def")
+
 
     def tearDown(self):
         os.remove("test.def")
@@ -202,7 +223,7 @@ class TestTriggers(unittest.TestCase):
             return Family("f1").add(
                 Edit(SLEEP=20),
                 Task("t1"),
-                Task("t2").add(Trigger("t1 eq complete")))
+                Task("t2").add(Trigger("t1 == complete")))
             
         print "Creating suite definition"
         defs = Defs().add(Suite("test").add(
@@ -227,7 +248,7 @@ class TestTriggers(unittest.TestCase):
             suite.f1 += [ Edit(SLEEP=20) ]
             suite.f1 += [ Task("t1")]
             suite.f1 += [ Task("t2")]
-            suite.f1.t2 += [ Trigger("t1 eq complete") ]
+            suite.f1.t2 += [ Trigger(["t1"]) ]
             
         print "Creating suite definition"
         defs = Defs().add( suite )
@@ -282,7 +303,7 @@ class TestEvents(unittest.TestCase):
             f1 = Family("f1")
             f1 += [ Edit(SLEEP=20),
                     Task("t1"),
-                    Task("t2").add( Trigger("t1 == complete"), Event("a"), Event("b")),
+                    Task("t2").add( Trigger(["t1"]), Event("a"), Event("b")),
                     Task("t3").add( Trigger("t2:a")),
                     Task("t4").add( Trigger("t2:b")) ]
             return f1
@@ -311,11 +332,10 @@ class TestComplete(unittest.TestCase):
             return Family("f1").add(
                 Edit(SLEEP= 20),
                 Task("t1"),
-                Task("t2").add(Trigger("t1 eq complete"),
-                               Event("a"),
-                               Event("b")),
+                Task("t2").add(Trigger("t1 == complete"),
+                               Event("a"), Event("b")),
                 Task("t3").add(Trigger("t2:a")),
-                Task("t4").add(Trigger("t2 eq complete"), 
+                Task("t4").add(Trigger("t2 == complete"), 
                                Complete("t2:b")  ))
        
         print "Creating suite definition"  
@@ -339,11 +359,10 @@ class TestComplete(unittest.TestCase):
         def create_family_f1():
             f1 = Family("f1")
             f1 += [ Edit(SLEEP=20) ]
-            for i in range(1,5):
-                f1 += [ Task("t{}".format(i)) ]
-            f1.t2 += [ Trigger("t1 eq complete"), Event("a"), Event("b") ]
+            f1 += [ Task("t{}".format(i)) for i in range(1,5) ]
+            f1.t2 += [ Trigger(["t1"]), Event("a"), Event("b") ]
             f1.t3 += [ Trigger("t2:a") ]
-            f1.t4 += [ Trigger("t2 eq complete"),Complete("t2:b") ]
+            f1.t4 += [ Trigger(["t2"]),Complete("t2:b") ]
             return f1
        
         print "Creating suite definition"  
@@ -371,11 +390,11 @@ class TestMeter(unittest.TestCase):
             return Family("f1").add(
                         Edit(SLEEP= 20),
                         Task("t1").add(Meter("progress", 1, 100, 90)),
-                        Task("t2").add(Trigger("t1 eq complete"),
+                        Task("t2").add(Trigger("t1 == complete"),
                                        Event("a"),
                                        Event("b")),
                         Task("t3").add(Trigger("t2:a")),
-                        Task("t4").add(Trigger("t2 eq complete"),
+                        Task("t4").add(Trigger("t2 == complete"),
                                        Complete("t2:b")),
                         Task("t5").add(Trigger("t1:progress ge 30")),
                         Task("t6").add(Trigger("t1:progress ge 60")),
@@ -401,12 +420,11 @@ class TestMeter(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         def create_family_f1():
             f1 = Family("f1").add(Edit(SLEEP=20))
-            for i in range(1,8):
-                f1 += [ Task("t{}".format(i)) ]
+            f1 += [ Task("t{}".format(i)) for i in range(1,8)]
             f1.t1 += [ Meter("progress", 1, 100, 90) ]
-            f1.t2 += [ Trigger("t1 eq complete"), Event("a"), Event("b") ]
+            f1.t2 += [ Trigger(["t1"]), Event("a"), Event("b") ]
             f1.t3 += [ Trigger("t2:a") ]
-            f1.t4 += [ Trigger("t2 eq complete"),Complete("t2:b") ]
+            f1.t4 += [ Trigger(["t2"]),Complete("t2:b") ]
             f1.t5 += [ Trigger("t1:progress ge 30")  ]
             f1.t6 += [ Trigger("t1:progress ge 60")  ]
             f1.t7 += [ Trigger("t1:progress ge 90")  ]
@@ -463,8 +481,7 @@ class TestTime(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         def create_family_f2():
             f1 = Family("f2").add(Edit(SLEEP=20))
-            for i in range(1,6):
-                f1 += [ Task("t{}".format(i))]
+            f1 += [ Task("t{}".format(i)) for i in range(1,6) ]
             f1.t1 += [ Time("00:30 23:30 00:30") ] # start(hh:mm) end(hh:mm) increment(hh:mm)
             f1.t2 += [ Day( "sunday" ) ]
             f1.t3 += [ Date("1.*.*"),    
@@ -500,9 +517,9 @@ class TestIndentation(unittest.TestCase):
                         Family("f1").add(
                             Edit(SLEEP=20),
                             Task("t1").add(Meter("progress", 1, 100, 90)),
-                            Task("t2").add( Trigger("t1 eq complete"), Event("a"),Event("b")),
+                            Task("t2").add( Trigger("t1 == complete"), Event("a"),Event("b")),
                             Task("t3").add(Trigger("t2:a")),
-                            Task("t4").add(Trigger("t2 eq complete"), Complete("t2:b")),
+                            Task("t4").add(Trigger("t2 == complete"), Complete("t2:b")),
                             Task("t5").add(Trigger("t1:progress ge 30")),
                             Task("t6").add(Trigger("t1:progress ge 60")),
                             Task("t7").add(Trigger("t1:progress ge 90")),),
@@ -532,23 +549,22 @@ class TestIndentation(unittest.TestCase):
             with defs.add_suite("test") as suite:
                 suite += [ Edit(ECF_INCLUDE=home,ECF_HOME=home) ]
                 with suite.add_family("f1") as f1:
-                    for i in range(1,8):
-                        f1 += [ Task("t{}".format(i))]
+                    f1 += [ Task("t{}".format(i)) for i in range(1,8)]
                     f1 += [ Edit(SLEEP=20) ]
                     f1.t1 += [ Meter("progress", 1, 100, 90) ]
-                    f1.t2 += [ Trigger("t1 eq complete"), Event("a"), Event("b") ]
+                    f1.t2 += [ Trigger(["t1"]), Event("a"), Event("b") ]
                     f1.t3 += [ Trigger("t2:a") ]
-                    f1.t4 += [ Trigger("t2 eq complete"), Complete("t2:b") ]
+                    f1.t4 += [ Trigger(["t2"]), Complete("t2:b") ]
                     f1.t5 += [ Trigger("t1:progress ge 30") ]
                     f1.t6 += [ Trigger("t1:progress ge 60") ]
                     f1.t7 += [ Trigger("t1:progress ge 90") ]
                 with suite.add_family("f2") as f2:
-                    f2 += [ Edit(SLEEP=20),
-                            Task("t1").add(Time( "00:30 23:30 00:30" )),
-                            Task("t2").add(Day( "sunday" )),
-                            Task("t3").add(Date("1.*.*"), Time("12:00")),
-                            Task("t4").add(Time("+00:02")),
-                            Task("t5").add(Time("00:02")) ]
+                    f2 += [ Edit(SLEEP=20),[ Task("t{}".format(i)) for i in range(1,6)] ]
+                    f2.t1 += [ Time( "00:30 23:30 00:30" )]
+                    f2.t2 += [ Day( "sunday" ) ]
+                    f2.t3 += [ Date("1.*.*"), Time("12:00") ]
+                    f2.t4 += [ Time("+00:02") ]
+                    f2.t5 += [ Time("00:02") ]
         
         print defs
         print "Checking job creation: .ecf -> .job0"  
