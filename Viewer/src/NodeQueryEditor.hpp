@@ -76,7 +76,9 @@ protected Q_SLOTS:
 	void slotSaveQueryAs();
 	void slotAdvMode(bool b);
 	void slotMaxNum(int);
-	void slotCase(bool);
+    void slotCase(bool);
+    void slotPeriodRadio(bool);
+    void slotUpdatePeriodBox(int);
 
 Q_SIGNALS:
 	void queryEnabledChanged(bool);
@@ -105,6 +107,9 @@ private:
     QMap<QString,QList<NodeQueryOptionEdit*> > attr_;
     QString nodeTabText_;
     QString attrTabText_;
+    QString periodTabText_;
+    QList<QWidget*> periodItemLst_;
+    QList<QWidget*> lastPeriodItemLst_;
 };
 
 #endif

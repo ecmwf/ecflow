@@ -105,7 +105,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="viewer.qrc">
             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
           </property>
           <property name="autoRaise">
@@ -175,7 +175,7 @@
    <item>
     <widget class="QTabWidget" name="tab_">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="nodeTab_">
       <attribute name="title">
@@ -210,7 +210,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
            </property>
            <property name="autoRaise">
@@ -227,7 +227,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
            </property>
            <property name="autoRaise">
@@ -251,7 +251,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
            </property>
            <property name="autoRaise">
@@ -292,7 +292,7 @@
             <string>.a..</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
            </property>
            <property name="autoRaise">
@@ -323,7 +323,7 @@
             <x>0</x>
             <y>0</y>
             <width>1281</width>
-            <height>683</height>
+            <height>646</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="attrPanelLayout_">
@@ -342,6 +342,135 @@
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="periodTab_">
+      <attribute name="title">
+       <string>Status change time</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,0,1,1,0,1,1">
+         <item row="2" column="2">
+          <widget class="QDateEdit" name="periodFromDateEdit_">
+           <property name="displayFormat">
+            <string>yyyy-MM-dd</string>
+           </property>
+           <property name="calendarPopup">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QRadioButton" name="periodRb_">
+           <property name="text">
+            <string>in the period from</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <widget class="QCheckBox" name="periodCheck_">
+           <property name="text">
+            <string>Status changed:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QTimeEdit" name="periodFromTimeEdit_"/>
+         </item>
+         <item row="2" column="5">
+          <widget class="QDateEdit" name="periodToDateEdit_">
+           <property name="displayFormat">
+            <string>yyyy-MM-dd</string>
+           </property>
+           <property name="calendarPopup">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="2" column="6">
+          <widget class="QTimeEdit" name="periodToTimeEdit_"/>
+         </item>
+         <item row="2" column="4">
+          <widget class="QLabel" name="periodToLabel_">
+           <property name="text">
+            <string>  to  </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QRadioButton" name="lastPeriodRb_">
+           <property name="text">
+            <string>in the &amp;last</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="1" column="2">
+          <widget class="QSpinBox" name="lastPeriodSpin_"/>
+         </item>
+         <item row="1" column="3">
+          <widget class="QComboBox" name="lastPeriodCb_"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+      <zorder>periodRb_</zorder>
+      <zorder>periodToLabel_</zorder>
+      <zorder>periodCheck_</zorder>
+      <zorder>verticalSpacer</zorder>
+      <zorder>periodFromDateEdit_</zorder>
+      <zorder>periodToDateEdit_</zorder>
+      <zorder>periodToTimeEdit_</zorder>
+      <zorder>periodFromTimeEdit_</zorder>
+      <zorder>horizontalSpacer_2</zorder>
+      <zorder>periodRb_</zorder>
      </widget>
     </widget>
    </item>
@@ -394,6 +523,8 @@
    <header>NodeQueryCombo.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>
