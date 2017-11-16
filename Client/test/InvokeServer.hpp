@@ -34,12 +34,14 @@ public:
                   bool remove_checkpt_file_after_server_exit = true
 	             ) : port_(port),
 	                 host_(ClientEnvironment::hostSpecified()),
-	                 remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)
+	                 remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit),
+	                 server_started_(false)
+
    {
 		if (host_.empty()) {
 			if(!msg.empty()) std::cout << msg << "   port(" << port_ << ")" << std::endl;
 
-			doStart(port_,disable_job_generation,remove_checkpt_file_before_server_start);
+			doStart(port_,server_started_,disable_job_generation,remove_checkpt_file_before_server_start);
 		}
 		else {
 			// Start of test, clear any existing defs on remote/localhost server
@@ -55,6 +57,7 @@ public:
 			ClientInvoker theClient(host_,port_);
 		   theClient.logMsg( test_name );
 		   BOOST_REQUIRE_MESSAGE( theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " failed should return 0. Should Delete ALL existing defs in the server\n" << theClient.errorMsg());
+		   server_started_ = true ;
 		}
 	}
 
@@ -64,10 +67,11 @@ public:
                   bool remove_checkpt_file_before_server_start = true,
                   bool remove_checkpt_file_after_server_exit = true
                 ) : port_(port),
-                    remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)
+                    remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit),
+                    server_started_(false)
    {
       // host_ is empty.
-      doStart(port_,disable_job_generation,remove_checkpt_file_before_server_start);
+      doStart(port_,server_started_,disable_job_generation,remove_checkpt_file_before_server_start);
    }
 
 	~InvokeServer() {
@@ -84,9 +88,13 @@ public:
 	std::string ecf_log_file() const            { return host_name_.ecf_log_file(port_);}
  	std::string ecf_checkpt_file() const        { return host_name_.ecf_checkpt_file(port_); }
 	std::string ecf_backup_checkpt_file() const { return host_name_.ecf_backup_checkpt_file(port_); }
+	bool server_started() const { return server_started_;}
 
-
-	static void doStart(const std::string& port,bool disable_job_generation = false, bool remove_checkpt_file_before_server_start = true)
+private:
+	static void doStart(const std::string& port,
+	                    bool& server_started,
+	                    bool disable_job_generation = false,
+	                    bool remove_checkpt_file_before_server_start = true)
 	{
 		/// Remove check pt and backup check pt file, else server will load it & remove log file
 		ecf::Host h;
@@ -117,8 +125,8 @@ public:
 		// Allow time for server process to kick in.
       ClientInvoker theClient(ecf::Str::LOCALHOST(),port);
       BOOST_REQUIRE_MESSAGE(theClient.wait_for_server_reply(),"InvokeServer::doStart: Server failed to start after 60 second on " << ecf::Str::LOCALHOST() << ":" << port);
+      server_started = true;
 	}
-
 
    static void doEnd( const std::string& host, const std::string& port, bool remove_checkpt_file_after_server_exit )
    {
@@ -151,6 +159,7 @@ private:
 	std::string host_;
 	ecf::Host   host_name_;
 	bool remove_checkpt_file_after_server_exit_;
+	bool server_started_;
 };
 
 #endif

@@ -61,6 +61,7 @@ BOOST_AUTO_TEST_CASE( test_client_lifecyle )
    // This will remove check pt and backup file before server start, to avoid the server from loading previous test data
    // ** NOTE: We disable job generation in the server **/
    InvokeServer invokeServer("Client:: ...test_client_lifecycle",SCPort::next(),true /*disable job generation in server*/);
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
    BOOST_REQUIRE_MESSAGE( theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0 server not started, or connection refused\n" << theClient.errorMsg());

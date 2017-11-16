@@ -49,6 +49,7 @@ BOOST_AUTO_TEST_CASE( test_server_version )
 {
    /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
    InvokeServer invokeServer("Client:: ...test_server_version:",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(), invokeServer.port());
    BOOST_REQUIRE_MESSAGE(theClient.server_version() == 0,"server version\n" << theClient.errorMsg());
@@ -66,6 +67,7 @@ BOOST_AUTO_TEST_CASE( test_server_state_changes )
 {
    /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
    InvokeServer invokeServer("Client:: ...test_server_state_changes:",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
@@ -120,6 +122,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test )
 {
 	/// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
 	InvokeServer invokeServer("Client:: ...test_server_stress_test:",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
@@ -157,6 +160,7 @@ BOOST_AUTO_TEST_CASE( test_server_group_stress_test )
 	/// This is exactly the same test as above, but uses the group command
 	/// This should be faster as the network traffic should be a lot less
 	InvokeServer invokeServer("Client:: ...test_server_group_stress_test:",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
@@ -203,6 +207,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
    ///
    /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
    InvokeServer invokeServer("Client:: ...test_server_stress_test_2:",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
