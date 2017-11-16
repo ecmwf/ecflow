@@ -42,6 +42,7 @@ BOOST_AUTO_TEST_CASE( test_server_load )
 
    // This will remove check pt and backup file before server start, to avoid the server from loading previous test data
    InvokeServer invokeServer("Client:: ...test_server_load",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
 

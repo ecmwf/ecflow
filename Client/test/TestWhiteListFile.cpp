@@ -52,6 +52,7 @@ BOOST_AUTO_TEST_CASE( test_loading_of_white_list_file )
 
    // This will remove check pt and backup file before server start, to avoid the server from loading previous test data
    InvokeServer invokeServer("Client:: ...test_loading_of_white_list_file",port);
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
    BOOST_REQUIRE_MESSAGE( theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());

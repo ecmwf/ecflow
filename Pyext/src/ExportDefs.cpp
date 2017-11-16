@@ -28,6 +28,7 @@
 #include "JobCreationCtrl.hpp"
 #include "Simulator.hpp"
 #include "BoostPythonUtil.hpp"
+#include "Edit.hpp"
 
 #include "DefsDoc.hpp"
 
@@ -167,22 +168,29 @@ void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recur
 size_t defs_len(defs_ptr self) { return self->suiteVec().size();}
 bool defs_container(defs_ptr self, const std::string& name){return (self->findSuite(name)) ?  true : false;}
 
+static void do_add(defs_ptr self, const boost::python::object& arg) {
+   if (boost::python::extract<Variable>(arg).check()) {
+      Variable var = boost::python::extract<Variable>(arg);
+      self->set_server().add_or_update_user_variables(var.name(),var.theValue());
+   }
+   else if (boost::python::extract<Edit>(arg).check()) {
+      Edit edit = boost::python::extract<Edit>(arg);
+      const std::vector<Variable>& vec = edit.variables();
+      for(size_t i=0; i < vec.size(); i++) self->set_server().add_or_update_user_variables(vec[i].name(),vec[i].theValue());
+   }
+   else if (boost::python::extract<dict>(arg).check())     add_variable_dict(self,boost::python::extract<dict>(arg));
+   else if (boost::python::extract<suite_ptr>(arg).check()) self->addSuite(boost::python::extract<suite_ptr>(arg)) ;
+   else throw std::runtime_error("ExportDefs::add : Unknown type");
+}
+
 static object add(tuple args, dict kwargs) {
    int the_list_size = len(args);
    defs_ptr self = boost::python::extract<defs_ptr>(args[0]); // self
    if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a defs");
 
-   for (int i = 1; i < the_list_size; ++i) {
-      if (boost::python::extract<Variable>(args[i]).check()) {
-         Variable var = boost::python::extract<Variable>(args[i]);
-         self->set_server().add_or_update_user_variables(var.name(),var.theValue());
-      }
-      else if (boost::python::extract<dict>(args[i]).check())      add_variable_dict(self,boost::python::extract<dict>(args[i]) );
-      else if (boost::python::extract<suite_ptr>(args[i]).check()) self->addSuite(boost::python::extract<suite_ptr>(args[i])) ;
-      else throw std::runtime_error("ExportDefs::add : Unknown type");
-   }
+   for (int i = 1; i < the_list_size; ++i)  do_add(self,args[i]);
 
-   boost::python::list keys =  kwargs.keys();
+   boost::python::list keys = kwargs.keys();
    const int no_of_keys = len(keys);
    for(int i = 0; i < no_of_keys; ++i) {
       boost::python::object curArg = keys[i];
@@ -193,6 +201,13 @@ static object add(tuple args, dict kwargs) {
       }
    }
    return object(self); // return defs as python object, relies class_<Defs>... for type registration
+}
+
+static object defs_iadd(defs_ptr self, const boost::python::list& list) {
+   // std::cout << "defs_iadd  list " << self->name() << "\n";
+   int the_list_size = len(list);
+   for(int i = 0; i < the_list_size; ++i) do_add(self,list[i]);
+   return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
 static suite_ptr defs_getattr(defs_ptr self, const std::string& attr) {
@@ -218,6 +233,7 @@ void export_Defs()
    .def("__contains__",          &defs_container)                // Container protocol
    .def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
    .def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
+   .def("__iadd__",              &defs_iadd)
    .def("add",                   raw_function(add,1))
    .def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
    .def("add_suite",             &Defs::add_suite )

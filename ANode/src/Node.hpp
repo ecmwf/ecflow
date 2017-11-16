@@ -389,6 +389,9 @@ public:
    void add_complete_expr(const Expression&);       // Can throw std::runtime_error
    void add_part_trigger(const PartExpression& );   // for adding multiple and/or expression,Can throw std::runtime_error
    void add_part_complete(const PartExpression& );  // for adding multiple and/or expression,Can throw std::runtime_error
+   void py_add_trigger_expr(const Expression&);     // used by python api to add expression cumulative
+   void py_add_complete_expr(const Expression&);    // used by python api to add expression cumulative
+
 
    void addTime( const ecf::TimeAttr& );
    void addToday( const ecf::TodayAttr& );

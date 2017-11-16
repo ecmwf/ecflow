@@ -107,6 +107,7 @@ BOOST_AUTO_TEST_CASE( test_load_defs_check_only )
 {
    /// Test that when check only is called the definition is NOT loaded
    InvokeServer invokeServer("Client:: ...test_load_defs_check_only",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
@@ -128,6 +129,7 @@ BOOST_AUTO_TEST_CASE( test_load_defs )
    /// Test that loading a defs a second time, with the same suite, throws a errors
    /// unless the -force option is used.
    InvokeServer invokeServer("Client:: ...test_load_defs",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    // create a defs with a single suite 's1'
    defs_ptr theDefs = Defs::create();

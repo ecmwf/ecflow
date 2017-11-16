@@ -95,13 +95,21 @@ QColor NodeQueryResultItem::stateColour() const
 	return QColor(Qt::transparent);
 }
 
-QString NodeQueryResultItem::stateChangeTime() const
+QString NodeQueryResultItem::stateChangeTimeAsString() const
 {
     QString s;
     if(node_)
         node_->statusChangeTime(s);
 
     return s;
+}
+
+unsigned int NodeQueryResultItem::stateChangeTime() const
+{
+    if(node_)
+        return node_->statusChangeTime();
+
+    return 0;
 }
 
 QStringList NodeQueryResultItem::attr() const

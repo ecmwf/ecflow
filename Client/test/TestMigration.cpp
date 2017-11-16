@@ -105,6 +105,7 @@ BOOST_FIXTURE_TEST_CASE( test_migration,ArgsFixture )
    if (argc == 2 && fs::exists(argv[1])) {
       /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
       InvokeServer invokeServer("Client:: ...test_migration:",SCPort::next());
+      BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Migration test failed server failed to start on: "<<  invokeServer.host() << ":" <<  invokeServer.port() );
 
       ClientInvoker theClient(invokeServer.host(), invokeServer.port());
       int error_cnt = 0;

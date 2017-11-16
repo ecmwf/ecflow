@@ -20,6 +20,7 @@ print defs.check_job_creation()
 #!/usr/bin/env python2.7
 import os
 from ecf import *
+
 def generate():
     # print "Creating suite definition"  
     return Defs().add(
@@ -28,16 +29,16 @@ def generate():
             Task("t1")))
  
 if __name__ == '__main__':
-        defs = generate()      
-        print defs
-        print "Checking job creation: .ecf -> .job0"  
-        print defs.check_job_creation()
-        print "Saving definition to file 'test.def'"
-        defs.save_as_defs("test.def")
-        try:
-          print "Load the in memory definition(defs) into the server"
-          Client("localhost@%s" % os.getenv("ECF_PORT")).load(defs)
-        except RuntimeError as e: print "Failed:",   e
+    defs = generate()      
+    print defs
+    print "Checking job creation: .ecf -> .job0"  
+    print defs.check_job_creation()
+    print "Saving definition to file 'test.def'"
+    defs.save_as_defs("test.def")
+    try:
+        print "Load the in memory definition(defs) into the server"
+        Client("localhost@%s" % os.getenv("ECF_PORT")).load(defs)
+    except RuntimeError as e: print "Failed:", e
         
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -211,18 +212,14 @@ defs = Defs().add(Suite("test").add(
 print defs
 defs.save_as_defs("test.def")
 
+
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # Time dependencies
 # #!/usr/bin/env python2.7
 import os
-from ecf import *
+
 home = os.path.join(os.getenv("HOME"),  "course")
- 
-def create_family_f1():
-    return Family("f1").add(
-        Variables(SLEEP= 20),
-        Task("t1").add(Meter("progress", 1, 100, 90)),)
  
 def create_family_f2():
     return Family("f2").add(
@@ -247,6 +244,7 @@ defs = Defs().add(Suite("test").add(
     create_family_f2(), ))
 print defs
 defs.save_as_defs("test.def")
+
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -287,6 +285,23 @@ defs = Defs().add(# Stream like definition
              
 out = file("test.def", "w")
 print >>out, defs
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# label
+#!/usr/bin/env python2.7
+import os
+from ecf import *
+home = os.getenv("HOME") + "/course"
+print "Creating suite definition"  
+defs = Defs().add(Suite("test").add(
+    Variables(ECF_INCLUDE= home,
+              ECF_HOME=    home),
+    Family("f3").add(
+        Task("t1").add(
+            Label("info","")))))
+print defs
+defs.save_as_defs("test.def")
 
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

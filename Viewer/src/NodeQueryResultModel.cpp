@@ -24,8 +24,15 @@ NodeQueryResultModel::NodeQueryResultModel(QObject *parent) :
           columns_(0)
 {
 	columns_=ModelColumn::def("query_columns");
+    Q_ASSERT(columns_);
 
-	assert(columns_);
+    //Check the mapping between the enum and column ids
+    Q_ASSERT(columns_->id(ServerColumn) == "server");
+    Q_ASSERT(columns_->id(PathColumn) == "path");
+    Q_ASSERT(columns_->id(StatusColumn) == "status");
+    Q_ASSERT(columns_->id(TypeColumn) == "type");
+    Q_ASSERT(columns_->id(StatusChangeColumn) == "statusChange");
+    Q_ASSERT(columns_->id(AttributeColumn) == "attribute");
 
 	data_=new NodeQueryResult(this);
 
@@ -106,7 +113,8 @@ Qt::ItemFlags NodeQueryResultModel::flags ( const QModelIndex & index) const
 QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
 {
 	if(!index.isValid() || !hasData() ||
-	   (role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::TextAlignmentRole))
+       (role != Qt::DisplayRole && role != Qt::BackgroundRole &&
+        role != Qt::TextAlignmentRole && role != SortRole ))
     {
 		return QVariant();
 	}
@@ -115,41 +123,58 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
 	if(row < 0 || row >= data_->size())
 		return QVariant();
 
-	QString id=columns_->id(index.column());
-
+    ColumnType id=static_cast<ColumnType>(index.column());
 	NodeQueryResultItem* d=data_->itemAt(row);
 
 	if(role == Qt::DisplayRole)
 	{
-		if(id == "path")
+        if(id == PathColumn)
 			return d->pathStr();
-		else if(id == "server")
+        else if(id == ServerColumn)
 			return d->serverStr();
-		else if(id == "type")
+        else if(id == TypeColumn)
 			return d->typeStr();
-		else if(id == "status")
+        else if(id == StatusColumn)
             return d->stateStr();
-        else if(id == "statusChange")
-            return d->stateChangeTime();
-        else if(id == "attribute")
+        else if(id == StatusChangeColumn)
+            return d->stateChangeTimeAsString();
+        else if(id == AttributeColumn)
             return d->attr();
 
         return QVariant();
 	}
 	else if(role == Qt::BackgroundRole)
 	{
-		if(id == "status")
+        if(id == StatusColumn)
 			return d->stateColour();
 
 		return QVariant();
 	}
 	else if(role == Qt::TextAlignmentRole)
 	{
-        if(id == "status" || id == "type" || id == "statusChange")
+        if(id == StatusColumn || id == TypeColumn || id == StatusChangeColumn)
 			return Qt::AlignCenter;
 
 		return QVariant();
 	}
+
+    else if(role == SortRole)
+    {
+        if(id == PathColumn)
+            return d->pathStr();
+        else if(id == ServerColumn)
+            return d->serverStr();
+        else if(id == TypeColumn)
+            return d->typeStr();
+        else if(id == StatusColumn)
+            return d->stateStr();
+        else if(id == StatusChangeColumn)
+            return d->stateChangeTime();
+        else if(id == AttributeColumn)
+            return d->attr();
+
+        return QVariant();
+    }
 
 	return QVariant();
 }
@@ -159,7 +184,7 @@ QVariant NodeQueryResultModel::headerData( const int section, const Qt::Orientat
 	if ( orient != Qt::Horizontal)
       		  return QAbstractItemModel::headerData( section, orient, role );
 
-	QString id=columns_->id(section);
+    ColumnType id=static_cast<ColumnType>(section);
 
 	if(role == Qt::DisplayRole)
 		return columns_->label(section);
@@ -169,7 +194,7 @@ QVariant NodeQueryResultModel::headerData( const int section, const Qt::Orientat
 		return columns_->tooltip(section);
 	else if(role == Qt::TextAlignmentRole)
 	{
-        if(id == "status" || id == "type" || id == "statusChange")
+        if(id == StatusColumn || id == TypeColumn || id == StatusChangeColumn)
 			return Qt::AlignCenter;
 	}
 

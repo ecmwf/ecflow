@@ -41,6 +41,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_defs_cmd )
 {
 	// This will remove check pt and backup file before server start, to avoid the server from loading previous test data
 	InvokeServer invokeServer("Client:: ...test_check_pt_defs_cmd",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
 	ClientInvoker theClient(invokeServer.host(),invokeServer.port());
 	BOOST_REQUIRE_MESSAGE( theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0 server not started, or connection refused\n" << theClient.errorMsg());
@@ -120,6 +121,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_defs_cmd )
 BOOST_AUTO_TEST_CASE( test_restore_from_check_pt )
 {
    InvokeServer invokeServer("Client:: ...test_restore_from_check_pt",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    defs_ptr the_defs = Defs::create();
    the_defs->add_suite("s0");
@@ -172,6 +174,8 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
                                 true,  /* bool remove_checkpt_file_before_server_start = true */
                                 false  /* bool remove_checkpt_file_after_server_exit = true */
                                 );
+      BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
+
       ClientInvoker theClient(invokeServer.host(),invokeServer.port());
       BOOST_REQUIRE_MESSAGE( theClient.load(defs_to_be_check_pointed) == 0,"load defs failed \n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.checkPtDefs() == 0,CtsApi::checkPtDefs() << " failed should\n" << theClient.errorMsg());
@@ -185,6 +189,7 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
                              false, /* bool remove_checkpt_file_before_server_start = true */
                              true   /* bool remove_checkpt_file_after_server_exit = true */
                              );
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
    BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0, "Expected sync_local() to succeed \n");
@@ -214,6 +219,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
 
    // This will remove check pt and backup file before server start, to avoid the server from loading previous test data
    InvokeServer invokeServer("Client:: ...test_check_pt_edit_history",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
    BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n" << theClient.errorMsg());
@@ -269,6 +275,7 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
          true,   /* bool remove_checkpt_file_before_server_start = true */
          false   /* SET to true to DEBUG.  bool remove_checkpt_file_after_server_exit = true */
    );
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    // Save the MyDefsFixture as a boost checkpoint file.
    Host host;
