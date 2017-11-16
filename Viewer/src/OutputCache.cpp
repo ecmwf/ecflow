@@ -37,7 +37,7 @@ void OutputCacheItem::detach()
     inTimeOut_.start();
 }
 
-std::ostream& operator <<(std::ostream& stream,const OutputCacheItem& item)
+std::ostream& operator<<(std::ostream& stream,const OutputCacheItem& item)
 {
     stream << "id:" << item.id_.toStdString() << " tmp:" <<
                             item.file_->path() << " countdown:" <<
@@ -126,7 +126,7 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
             items_[id]=item;
             item->attach();
 #ifdef _UI_OUTPUTCACHE_DEBUG
-            UiLog().dbg() << "  add " << item;
+            UiLog().dbg() << "  add " << *item;
             //print();
 #endif
             startTimer();
@@ -174,14 +174,14 @@ void OutputCache::detach()
 #ifdef _UI_OUTPUTCACHE_DEBUG
         UI_FUNCTION_LOG
         //print();
-        UiLog().dbg() << "  detach -> " << it.value();
+        UiLog().dbg() << "  detach -> " << *(it.value());
 #endif
         it.value()->detach();
         Q_ASSERT(!it.value()->isAttached());
 
 #ifdef _UI_OUTPUTCACHE_DEBUG
         //print();
-        UiLog().dbg() << "  detached -> " << it.value();
+        UiLog().dbg() << "  detached -> " << *(it.value());
 #endif
         ++it;
     }
@@ -228,7 +228,7 @@ void OutputCache::print()
     QMap<QString, OutputCacheItem*>::iterator it = items_.begin();
     while (it != items_.end() )
     {
-        UiLog().dbg() << it.value();
+        UiLog().dbg() << *(it.value());
         ++it;
     }  
 }

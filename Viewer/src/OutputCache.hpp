@@ -28,12 +28,12 @@ class OutputCache;
 struct OutputCacheItem
 {
   friend class OutputCache;
-  friend std::ostream& operator <<(std::ostream& stream,const OutputCacheItem& item);
 
 public:
     OutputCacheItem(QString id,VFile_ptr file);
     VFile_ptr file() const {return file_;}
     bool isAttached() const;
+    friend std::ostream& operator<<(std::ostream& stream,const OutputCacheItem& item);
 
 protected:
     void attach();

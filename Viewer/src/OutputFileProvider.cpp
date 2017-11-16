@@ -31,8 +31,6 @@ OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
 
 void OutputFileProvider::clear()
 {
-    UI_FUNCTION_LOG
-
     //Detach all the outputs registered for this instance in cache
     outCache_->detach();
 
