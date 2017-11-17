@@ -17,7 +17,6 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
                   Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
                   VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import unittest 
-from PIL.PyAccess import defs
 
 class Test_crash(unittest.TestCase):
     def test_trigger_node_list(self):
@@ -225,6 +224,19 @@ class TestDefstatus(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             Defstatus("fred")
             
+class TestEdit(unittest.TestCase):
+    def test_add_variable(self):
+        defs = Defs().add(Suite("s").add(Edit(a=1,b=1),Edit(c="c")))
+        self.assertEqual(len(list(defs.s.variables)), 3, "expected 3 variables")
+    
+    def test_edit(self):
+        t = Task("t1").add(
+                    Edit({ "a":"y", "b":"bb"}, c="v",d="b"),
+                    Edit({ "e":"1", "f":"bb"}),
+                    Edit(g="d"),
+                    Edit(h="1"))
+        self.assertEqual(len(list(t.variables)), 8, "expected 8 variables but found " + str(len(list(t.variables))))
+        
 class TestAddAll(unittest.TestCase):
     def test_add(self):
         defs = Defs().add(
@@ -232,9 +244,10 @@ class TestAddAll(unittest.TestCase):
                 Clock(1, 1, 2010, False),
                 Autocancel(1, 10, True),
                 Task("t1").add(
-                    Edit({ "x1":"y", "aa1":"bb"}, a="v",b="b",),
-                    Edit({ "x":"y", "aa":"bb"}),
-                    Edit(d="d"),
+                    Edit({ "a":"y", "b":"bb"}, c="v",d="b"),
+                    Edit({ "e":1, "f":"bb"}),
+                    Edit(g="d"),
+                    Edit(h=1),
                     Event(1),
                     Event(11,"event"),
                     Meter("meter",0,10,10),
@@ -256,7 +269,7 @@ class TestAddAll(unittest.TestCase):
         t1 = defs.find_abs_node("/s1/t1")
         self.assertTrue(t1 != None, "Can't find t1")
         self.assertEqual(len(defs.s1),6, "Expected 6 nodes but found " + str(len(defs.s1)))
-        self.assertEqual(len(list(t1.variables)), 7, "expected 7 variables")
+        self.assertEqual(len(list(t1.variables)), 8, "expected 8 variables")
         self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
         self.assertEqual(len(list(t1.inlimits)), 1, "expected 1 inlimits")
         self.assertEqual(len(list(t1.events)), 2, "expected 2 events")

@@ -169,6 +169,7 @@ size_t defs_len(defs_ptr self) { return self->suiteVec().size();}
 bool defs_container(defs_ptr self, const std::string& name){return (self->findSuite(name)) ?  true : false;}
 
 static void do_add(defs_ptr self, const boost::python::object& arg) {
+   if (arg.ptr() == object().ptr())  return; // *IGNORE* None
    if (boost::python::extract<Variable>(arg).check()) {
       Variable var = boost::python::extract<Variable>(arg);
       self->set_server().add_or_update_user_variables(var.name(),var.theValue());

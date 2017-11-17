@@ -214,6 +214,7 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////////////////
 static void do_add(node_ptr self, const boost::python::object& arg){
+   if (arg.ptr() == object().ptr())  return; // *IGNORE* None
    if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
    else if (boost::python::extract<Edit>(arg).check()) {
       Edit edit = boost::python::extract<Edit>(arg);
