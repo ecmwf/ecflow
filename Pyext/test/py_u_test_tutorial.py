@@ -207,7 +207,10 @@ class TestVariableInheritance(unittest.TestCase):
         #print defs.check_job_creation()
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")
-         
+        
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
@@ -259,6 +262,10 @@ class TestTriggers(unittest.TestCase):
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")
          
+         
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
@@ -317,6 +324,9 @@ class TestEvents(unittest.TestCase):
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")   
          
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
@@ -375,6 +385,9 @@ class TestComplete(unittest.TestCase):
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")   
          
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
@@ -440,6 +453,9 @@ class TestMeter(unittest.TestCase):
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")   
          
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
@@ -500,6 +516,9 @@ class TestTime(unittest.TestCase):
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")   
          
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
@@ -572,6 +591,9 @@ class TestIndentation(unittest.TestCase):
         print "Saving definition to file 'test.def'"
         defs.save_as_defs("test.def")   
          
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):

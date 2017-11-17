@@ -79,10 +79,10 @@ class TestListComprehension(unittest.TestCase):
         self.assertEqual(len(list(defs.suite.variables)), 1, " expected 1 variable " + str(len(list(defs.suite.variables))))
 
     def test_5Suite_with_5families_with_5tasks(self):
-        defs = Defs()
-        defs.add(   [ Suite("s{}".format(i)).add( 
-                        [ Family("f{}".format(i)).add( 
-                            [ Task("t{}".format(i)) 
+        defs = Defs().add(   
+                [ Suite("s{}".format(i)).add( 
+                    [ Family("f{}".format(i)).add( 
+                        [ Task("t{}".format(i)) 
                               for i in range(1,6)] ) 
                         for i in range(1,6)]  ) 
                     for i in range(1,6) ] )
