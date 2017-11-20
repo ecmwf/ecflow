@@ -146,7 +146,7 @@ node_ptr add_defstatus1(node_ptr self,const Defstatus& ds)         { self->addDe
 // Trigger & Complete thin wrapper over Expression, allows us to call:
 //  Task("a").add(Trigger("a=1"),Complete("b=1"))
 ///////////////////////////////////////////////////////////////////////////////////
-static void construct_expr(Expression& expr, const boost::python::list& list) {
+static void construct_expr(std::vector<PartExpression>& vec, const boost::python::list& list) {
    int the_list_size = len(list);
    for(int i = 0; i < the_list_size; ++i) {
       std::string part_expr;
@@ -164,53 +164,59 @@ static void construct_expr(Expression& expr, const boost::python::list& list) {
       }
       else throw std::runtime_error("Trigger: Expects string, or list(strings or nodes)");
 
-      if (expr.empty()) expr.add(PartExpression(part_expr));
-      else              expr.add(PartExpression(part_expr,true/*AND*/));
+      if (vec.empty()) vec.push_back(PartExpression(part_expr));
+      else             vec.push_back(PartExpression(part_expr,true/*AND*/));
    }
 }
 class Trigger {
 public:
-   Trigger(const std::string& expression) : expr_(expression){}
-   Trigger(const PartExpression& pe) : expr_(pe) {}
+   Trigger(const std::string& expression) { add(PartExpression(expression)); }
+   Trigger(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
+   Trigger(const PartExpression& pe) { add(pe); }
    Trigger() {}
-   Trigger(const Trigger& rhs) : expr_(rhs.expr_) {}
-   Trigger(const boost::python::list& list ) { construct_expr(expr_,list);}
+   Trigger(const Trigger& rhs) : vec_(rhs.vec_) {}
+   Trigger(const boost::python::list& list ) { construct_expr(vec_,list);}
 
-   bool operator==( const Trigger& rhs) const { return expr_ == rhs.expr_;}
+   bool operator==( const Trigger& rhs) const { return vec_ == rhs.vec_;}
    bool operator!=( const Trigger& rhs) const { return !operator==(rhs);}
-   std::string expression() const { return expr_.expression(); }
-   void add( const PartExpression& t ) { expr_.add(t); }
+   std::string expression() const { return Expression::compose_expression(vec_); }
 
-   std::vector<PartExpression>::const_iterator part_begin() const { return expr_.part_begin();}
-   std::vector<PartExpression>::const_iterator part_end() const   { return expr_.part_end();}
+   void add( const PartExpression& t ) { vec_.push_back(t);}
 
-   const Expression& expr() const { return expr_;}
+   std::vector<PartExpression>::const_iterator part_begin() const { return vec_.begin();}
+   std::vector<PartExpression>::const_iterator part_end() const   { return vec_.end();}
+   const std::vector<PartExpression>& expr() const { return vec_;}
+
 private:
-   Expression expr_;
+   std::vector<PartExpression> vec_;
    Trigger& operator=(Trigger const& f); // prevent assignment
 };
 
 class Complete {
 public:
-   Complete(const std::string& expression) : expr_(expression){}
-   Complete(const PartExpression& pe ) : expr_(pe) {}
+   Complete(const std::string& expression) { add(PartExpression(expression)); }
+   Complete(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
+   Complete(const PartExpression& pe) { add(pe); }
    Complete() {}
-   Complete(const Complete& rhs) : expr_(rhs.expr_) {}
-   Complete(const boost::python::list& list ) { construct_expr(expr_,list);}
+   Complete(const Complete& rhs) : vec_(rhs.vec_) {}
+   Complete(const boost::python::list& list ) { construct_expr(vec_,list);}
 
-   bool operator==( const Complete & rhs) const { return expr_ == rhs.expr_;}
-   bool operator!=( const Complete & rhs) const { return !operator==(rhs);}
-   std::string expression() const { return expr_.expression(); }
-   void add( const PartExpression& t ) { expr_.add(t); }
+   bool operator==( const Complete& rhs) const { return vec_ == rhs.vec_;}
+   bool operator!=( const Complete& rhs) const { return !operator==(rhs);}
+   std::string expression() const { return Expression::compose_expression(vec_); }
 
-   std::vector<PartExpression>::const_iterator part_begin() const { return expr_.part_begin();}
-   std::vector<PartExpression>::const_iterator part_end() const   { return expr_.part_end();}
+   void add( const PartExpression& t ) { vec_.push_back(t); }
 
-   const Expression& expr() const { return expr_;}
+   std::vector<PartExpression>::const_iterator part_begin() const { return vec_.begin();}
+   std::vector<PartExpression>::const_iterator part_end() const   { return vec_.end();}
+   const std::vector<PartExpression>& expr() const { return vec_;}
+
 private:
-   Expression expr_;
-   Complete & operator=( Complete const& f); // prevent assignment
+   std::vector<PartExpression> vec_;
+   Complete& operator=(Complete const& f); // prevent assignment
 };
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 static void do_add(node_ptr self, const boost::python::object& arg){
@@ -240,7 +246,7 @@ static void do_add(node_ptr self, const boost::python::object& arg){
    else if (boost::python::extract<RepeatDay>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(arg)  ));
    else if (boost::python::extract<AutoCancelAttr>(arg).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(arg));
    else if (boost::python::extract<VerifyAttr>(arg).check())self->addVerify(boost::python::extract<VerifyAttr>(arg));
-   else if (boost::python::extract<Trigger>(arg).check()){ Trigger t = boost::python::extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
+   else if (boost::python::extract<Trigger>(arg).check()){ cout << "TRIGGER add\n"; Trigger t = boost::python::extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
    else if (boost::python::extract<Complete>(arg).check()){Complete t = boost::python::extract<Complete>(arg);self->py_add_complete_expr(t.expr());}
    else if (boost::python::extract<Defstatus>(arg).check()){Defstatus t = boost::python::extract<Defstatus>(arg);self->addDefStatus(t.state());}
    else if (boost::python::extract<ClockAttr>(arg).check()) {
@@ -311,6 +317,7 @@ void export_Node()
    class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::expression_doc(), init<std::string>() )
    .def(init<PartExpression>())
    .def(init<boost::python::list>())
+   .def(init<std::string,bool>())
    .def(self == self )                            // __eq__
    .def("__str__",        &Trigger::expression)   // __str__
    .def("get_expression", &Trigger::expression, "returns the complete expression as a string")
@@ -321,6 +328,7 @@ void export_Node()
    class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::expression_doc(), init<std::string>() )
    .def(init<PartExpression>())
    .def(init<boost::python::list>())
+   .def(init<std::string,bool>())
    .def(self == self )                             // __eq__
    .def("__str__",        &Complete::expression)   // __str__
    .def("get_expression", &Complete::expression, "returns the complete expression as a string")

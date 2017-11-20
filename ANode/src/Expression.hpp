@@ -109,7 +109,8 @@ public:
 
    /// User should add "trigger" or "complete" at the start.
    /// The part expression's are combined and returned as a single string
-   std::string expression() const;
+   std::string expression() const { return compose_expression(vec_);}
+   static std::string compose_expression(const std::vector<PartExpression>& vec);
 
    /// Need to pass in trigger tag, since expression may be split over multiple lines
    /// trigger    "a == complete"
@@ -118,7 +119,7 @@ public:
 
    /// Use when we want to add compose a large expression form a set of smaller ones
    void add( const PartExpression& t );
-   void add_expr( const Expression& t );
+   void add_expr( const std::vector<PartExpression>& vec );
 
    // ==============================================================================================
    // CREATE AST tree for each expression and COMBINE AST for each expression into a single AST.

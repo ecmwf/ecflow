@@ -27,9 +27,9 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
         for i in [ "a", "b", "c" ]:     # create task ta,tb,tc
             family.add_task( "t" + i)   # create a task and add to family
         defs.save_as_defs("test.def")   # save defs to file "test.def"  
-        
+         
         self.defs = defs
-        
+         
     def test_me(self):
         with Defs() as defs:
             with defs.add_suite("s1") as suite:
@@ -37,12 +37,12 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
                     for i in [ "a", "b", "c" ]:      
                         family.add_task( "t" + i)    
         defs.save_as_defs("test.def")    
-                    
+                     
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)
         self.assertEqual(self.defs, defs, "defs not equal")
-        
+         
     def test_me2(self):
         defs = Defs().add( 
             Suite("s1").add(
@@ -50,12 +50,12 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
                     [ Task("t{}".format(t)) 
                       for t in ("a", "b", "c")] )))
         defs.save_as_defs("test.def")   # save defs to file "test.def"  
-                    
+                     
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)
         self.assertEqual(self.defs, defs, "defs not equal")
-
+ 
     def test_me3(self):
         defs = Defs()
         defs += [ Suite("s1") ]
@@ -63,12 +63,12 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
         defs.s1.f1 += [ Task("t{}".format(t)) 
                         for t in ("a", "b", "c")] 
         defs.save_as_defs("test.def")   # save defs to file "test.def"  
-                    
+                     
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)
         self.assertEqual(self.defs, defs, "defs not equal")
-
+ 
     def test_me3(self):
         defs = Defs().add(   
           [ Suite("s{}".format(i)).add( 
@@ -76,16 +76,16 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
                   [ Task("t{}".format(i)) for i in range(1,6)] ) 
                 for i in range(1,6)]  ) 
             for i in range(1,6) ] )
-        assert(len(defs)==5, " expected 5 suites but found " + str(len(defs)))
+        assert len(defs)==5, " expected 5 suites but found " + str(len(defs))
         for suite in defs:
-            assert(len(suite)==5, " expected 5 familes but found " + str(len(suite)))
+            assert len(suite)==5, " expected 5 familes but found " + str(len(suite))
             for fam in suite:
-                assert(len(fam)==5, " expected 5 tasks but found " + str(len(fam)))   
-            
+                assert len(fam)==5, " expected 5 tasks but found " + str(len(fam))   
+             
     def tearDown(self):
         unittest.TestCase.tearDown(self)
         os.remove("test.def")
-        
+         
 class TestAddMeterEventLabel(unittest.TestCase):
     def setUp(self):
         defs = Defs()
@@ -98,9 +98,9 @@ class TestAddMeterEventLabel(unittest.TestCase):
         task.add_event( 10,"Eventname2" )        # event referenced with name "Eventname2"
         task.add_meter( "metername3",0,100 )     # name, min, max
         task.add_label( "label_name4", "value" ) # name, value
-        
+         
         self.defs = defs
-        
+         
     def test_alternative(self):
         defs = Defs().add(
             Suite("s1").add(
@@ -110,27 +110,27 @@ class TestAddMeterEventLabel(unittest.TestCase):
                     Event(10,"Eventname2" ),
                     Meter("metername3",0,100),
                     Label("label_name4", "value"))))
-        
+         
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs,self.defs, "expected defs to be the same")
-
-    def test_alternative2(self):
+ 
+    def test_alternative1(self):
         defs = Defs()
         defs += [ Suite("s1")]
         defs.s1 += [ Task("t1") ]
-        task.s1.t1 += [ Event(2),
+        defs.s1.t1 += [ Event(2),
                         Event("wow"),
                         Event(10,"Eventname2" ),
                         Meter("metername3",0,100),
                         Label("label_name4", "value") ]
-        
+         
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
-        
+         
     def test_alternative2(self):
         with Defs() as defs:
             with defs.add_suite("s1") as suite:
@@ -140,12 +140,187 @@ class TestAddMeterEventLabel(unittest.TestCase):
                            Event(10,"Eventname2" ),
                            Meter("metername3",0,100),
                            Label("label_name4", "value") ]
+         
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+            
+class TestAddLimitInlimit(unittest.TestCase):
+     
+    def setUp(self):
+        defs = Defs()
+        s1 = defs.add_suite("s1") 
+        s1.add_limit( "limitName4", 10 ) # name, maximum token
+        f1 = s1.add_family("f1")
+        f1.add_inlimit( "limitName4","/s1/f1",2) # limit name, path to limit, tokens consumed
+        for i in range(1,4):
+            f1.add_task( "t{}".format(i))
+             
+        self.defs = defs
+ 
+    def test_alternative(self):
+        defs = Defs().add(
+            Suite("s1").add(
+                Limit("limitName4", 10),
+                Family("f1").add(
+                    InLimit("limitName4","/s1/f1",2),
+                    [ Task("t{}".format(t)) for t in range(1,4) ]
+                    )))
+ 
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")        
+ 
+    def test_alternative1(self):
+        defs = Defs()
+        defs += [ Suite("s1") ]
+        defs.s1 += [ Limit("limitName4", 10),Family("f1") ]
+        defs.s1.f1 += [ InLimit("limitName4","/s1/f1",2),
+                        [ Task("t{}".format(t)) for t in range(1,4) ] ]
+ 
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")        
+         
+    def test_alternative2(self):
+        with Defs() as defs:
+            with defs.add_suite("s1") as s1:
+                s1.add_limit( "limitName4", 10 ) # name, maximum token
+                with s1.add_family("f1") as f1:
+                    f1.add_inlimit( "limitName4","/s1/f1",2) # limit name, path to limit, tokens consumed
+                    f1 += [ Task("t{}".format(t)) for t in range(1,4) ]
+                     
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+ 
+class TestAddVariable(unittest.TestCase):
+     
+    def setUp(self):
+        defs = Defs()
+        s1 = defs.add_suite("s1") 
+        s1.add_variable("HELLO","world") # name, value
+        s1.add_variable({ "NAME":"value", "NAME2":"value2", "NAME3":"value3", "NAME4":4 }  )
+        s1.add_variable(Variable("FRED","bloggs"))
+        s1.add_variable(Variable("BILL","1"))
+         
+        defs.s1.sort_attributes("variable"); # sort since with dictionary order of addition is arbitary
+        self.defs = defs
+ 
+    def test_alternative(self):
+         
+        defs = Defs().add(
+                      Suite("s1").add(
+                          Edit(HELLO="world",FRED="bloggs",BILL=1,NAME="value",NAME2="value2",NAME3="value3",NAME4=4 )
+                          ))
+ 
+        defs.s1.sort_attributes("variable");
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+ 
+    def test_alternative1(self):
+         
+        defs = Defs()
+        defs += [Suite("s1")]
+        defs.s1 += [ Edit(HELLO="world"),
+                     Edit({ "NAME":"value", "NAME2":"value2", "NAME3":"value3", "NAME4":4 }, BILL=1),
+                     Edit(FRED="bloggs")
+                   ]
+ 
+        defs.s1.sort_attributes("variable");
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+
+class TestAddTrigger(unittest.TestCase):
+     
+    def setUp(self):
+        defs = Defs()
+        s1 = defs.add_suite("s1") 
+        t1 = s1.add_task("t1")
+        t2 = s1.add_task("t2")
+        t2.add_trigger( "t1 == active and t3 == aborted" )
+        t2.add_complete( "t3 == complete" )
+        t3 = s1.add_task("t3")
+        self.defs = defs
+ 
+    def test_alternative(self):
+        
+        defs = Defs().add(
+                 Suite("s1").add(
+                    Task("t1"),Task("t2").add(
+                        Trigger("t1 == active and t3 == aborted"),
+                        Complete("t3 == complete")),
+                    Task("t3")))
+         
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+ 
+    def test_alternative1(self):
+         
+        defs = Defs().add(Suite("s1"))
+        defs.s1 += [ Task("t{}".format(i)) for i in range(1,4) ]
+        defs.s1.t2 += [ Trigger("t1 == active and t3 == aborted"),
+                        Complete("t3 == complete") ]
+         
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+
+class TestAddLargeTrigger(unittest.TestCase):
+    
+    def setUp(self):
+        defs = Defs()
+        s1 = defs.add_suite("s1") 
+        t1 = s1.add_task("t1")
+        t2 = s1.add_task("t2")
+        t3 = s1.add_task("t3")
+        t3.add_part_trigger( "t1 == complete")
+        t3.add_part_trigger( "t2 == active", True) # here True means add as 'AND'
+        t3.add_part_trigger( "t2 == aborted", False) # here False means add as 'OR'
+        self.defs = defs
+
+    def test_alternative(self):
+         
+        defs = Defs().add(
+                Suite("s1").add(
+                    Task("t1"),
+                    Task("t2"),
+                    Task("t3").add(
+                        Trigger("t1 == complete"), 
+                        Trigger("t2 == active"),
+                        Trigger("t2 == aborted",False),
+                        )
+                    ))
         
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
-           
+
+    def test_alternative1(self):
+         
+        defs = Defs().add(Suite("s1"))
+        defs.s1 += [ Task("t{}".format(i)) for i in range(1,4) ]
+        defs.s1.t3 += [ Trigger("t1 == complete"),
+                        Trigger("t2 == active"),
+                        Trigger( "t2 == aborted",False) ]
+         
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
 if __name__ == "__main__":
     unittest.main()
     print("All Tests pass")
