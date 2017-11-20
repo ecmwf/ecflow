@@ -86,6 +86,66 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
         unittest.TestCase.tearDown(self)
         os.remove("test.def")
         
+class TestAddMeterEventLabel(unittest.TestCase):
+    def setUp(self):
+        defs = Defs()
+        suite = Suite("s1")
+        task = Task("t1")
+        defs.add_suite(suite)
+        suite.add_task(task)
+        task.add_event( 2 )                      # event reference with 2
+        task.add_event("wow")                    # event reference with name "wow"
+        task.add_event( 10,"Eventname2" )        # event referenced with name "Eventname2"
+        task.add_meter( "metername3",0,100 )     # name, min, max
+        task.add_label( "label_name4", "value" ) # name, value
+        
+        self.defs = defs
+        
+    def test_alternative(self):
+        defs = Defs().add(
+            Suite("s1").add(
+                Task("t1").add(
+                    Event(2),
+                    Event("wow"),
+                    Event(10,"Eventname2" ),
+                    Meter("metername3",0,100),
+                    Label("label_name4", "value"))))
+        
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs,self.defs, "expected defs to be the same")
+
+    def test_alternative2(self):
+        defs = Defs()
+        defs += [ Suite("s1")]
+        defs.s1 += [ Task("t1") ]
+        task.s1.t1 += [ Event(2),
+                        Event("wow"),
+                        Event(10,"Eventname2" ),
+                        Meter("metername3",0,100),
+                        Label("label_name4", "value") ]
+        
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+    def test_alternative2(self):
+        with Defs() as defs:
+            with defs.add_suite("s1") as suite:
+                with suite.add_task("t1") as t1:
+                    t1 += [ Event(2),
+                           Event("wow"),
+                           Event(10,"Eventname2" ),
+                           Meter("metername3",0,100),
+                           Label("label_name4", "value") ]
+        
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+           
 if __name__ == "__main__":
     unittest.main()
     print("All Tests pass")
