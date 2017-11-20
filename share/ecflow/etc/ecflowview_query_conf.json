@@ -20,6 +20,9 @@
         "flag"  : {
             "type"   : "list",
             "values" : "has_date|has_message|has_time|is_ecfcmd_failed|is_killed|is_late|is_rerun|is_waiting|is_zombie"
+        },
+        "status_change_time" : {
+            "type"   : "period"
         }
     },
     "attribute_query" : {

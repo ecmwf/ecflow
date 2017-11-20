@@ -224,6 +224,11 @@
               "colour"  : "rgb(102,43,130)",
               "bold"    : "true"
             }, 
+            "period" : {
+             "pattern" : "\\b(status_change_time)\\b",
+             "colour"  : "rgb(102,43,130)",
+             "bold"    : "true"
+             },
              "attr" : {
               "pattern" : "\\b(date_name|event_name|event_value|label_name|label_value|late_name|limit_name|limit_value|limit_max|limiter_name|meter_name|meter_value|repeat_name|repeat_value|time_name|trigger_expression|var_type|var_name|var_value)\\b",
               "colour"  : "rgb(102,43,130)",
@@ -232,6 +237,10 @@
             "int" : {
                "pattern" : "\\b(\\d+)",
                "colour"  : "rgb(128,128,0)"
+            },
+            "isodate" : {
+               "pattern" : "\\b(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})",
+               "colour"  : "rgb(28,111,28)"
             },
             "quoted" : {
                 "pattern" : "(\"[^\"]*\"|'[^']*')",

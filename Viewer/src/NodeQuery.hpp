@@ -71,6 +71,8 @@ public:
 	QString query() const;
     QString sqlQuery() const {return sqlQuery_;}
     QString nodeQueryPart() const;
+    bool hasBasicNodeQueryPart() const;
+    bool hasPeriodQueryPart() const;
     QString attrQueryPart() const;
     QString attrQueryPart(VAttributeType*) const;
     bool hasAttribute(VAttributeType*) const;

@@ -107,6 +107,7 @@ set(viewer_srcs
     OverviewItemWidget.cpp
     OverviewProvider.cpp
     Palette.cpp
+    PeriodSearchWidget.cpp
     PlainTextEdit.cpp
     PlainTextSearchLine.cpp
     PlainTextSearchInterface.cpp
@@ -303,6 +304,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     OutputItemWidget.hpp
     OutputFileProvider.hpp
     OutputDirProvider.hpp
+    PeriodSearchWidget.hpp
     PlainTextEdit.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
@@ -388,6 +390,7 @@ set(viewer_wrap_ui_files
     NodeSearchDialog.ui
     NodeSearchWidget.ui
     OutputItemWidget.ui 
+    PeriodSearchWidget.ui
     PropertyDialog.ui
     PropertyEditor.ui
     RepeatEditorWidget.ui

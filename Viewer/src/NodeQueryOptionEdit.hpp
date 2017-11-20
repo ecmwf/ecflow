@@ -22,6 +22,8 @@ class NodeQueryStringOption;
 class NodeQueryListOption;
 class NodeQueryComboOption;
 class StringMatchCombo;
+class NodeQueryPeriodOption;
+class PeriodSearchWidget;
 
 class QComboBox;
 class QLabel;
@@ -110,6 +112,26 @@ protected:
     QComboBox* cb_;
     NodeQueryComboOption* option_;
 };
+
+class NodeQueryPeriodOptionEdit : public NodeQueryOptionEdit
+{
+Q_OBJECT
+public:
+    NodeQueryPeriodOptionEdit(NodeQueryOption* option,PeriodSearchWidget *w,QWidget *parent);
+
+    void setVisible(bool);
+
+protected:
+    void init(NodeQueryOption*);
+
+protected Q_SLOTS:
+    void updateOptions();
+
+private:
+    PeriodSearchWidget* w_;
+    NodeQueryPeriodOption* option_;
+};
+
 
 
 #endif // NODEQUERYOPTIONEDIT_HPP

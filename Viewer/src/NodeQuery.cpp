@@ -74,19 +74,14 @@ NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
   caseSensitive_(false),
   maxNum_(defaultMaxNum_),
   ignoreMaxNum_(ignoreMaxNum)
-{
-
+{   
 #ifdef _UI_NODEQUERY_DEBUG
-    UiLog().dbg() << "NodeQuery::NodeQuery -->";
+    UI_FUNCTION_LOG
 #endif
 
     //Build options from defs. Options store the actual query settings. They are
     //editable through the gui.
     NodeQueryOption::build(this);
-
-#ifdef _UI_NODEQUERY_DEBUG
-    UiLog().dbg() << "<-- NodeQuery";
-#endif
 }
 
 NodeQuery::~NodeQuery()
@@ -165,11 +160,13 @@ QString NodeQuery::query() const
     return QString();
 }
 
+
+
 QString NodeQuery::nodeQueryPart() const
 {   
     QStringList lst;
     QStringList keys;
-    keys << "node" << "type" << "state" << "flag";
+    keys << "node" << "type" << "state" << "flag" << "status_change_time";
     Q_FOREACH(QString s,keys)
     {
         if(!extQuery_.value(s).isEmpty())
@@ -179,6 +176,23 @@ QString NodeQuery::nodeQueryPart() const
     //TODO : handle all   
     return lst.join(" and ");
 }    
+
+bool NodeQuery::hasBasicNodeQueryPart() const
+{
+    QStringList keys;
+    keys << "node" << "type" << "state" << "flag";
+    Q_FOREACH(QString s,keys)
+    {
+        if(!extQuery_.value(s).isEmpty())
+            return true;
+    }
+    return false;
+}
+
+bool NodeQuery::hasPeriodQueryPart() const
+{
+    return !extQuery_.value("status_change_time").isEmpty();
+}
 
 QString NodeQuery::attrQueryPart() const
 {
@@ -249,7 +263,7 @@ NodeQueryListOption* NodeQuery::stateOption() const
 void NodeQuery::buildQueryString()
 {
 #ifdef _UI_NODEQUERY_DEBUG
-    UiLog().dbg() << "NodeQuery::buildQueryString -->";
+    UI_FUNCTION_LOG
 #endif
 
     extQuery_.clear();
@@ -277,6 +291,11 @@ void NodeQuery::buildQueryString()
     QString flagPart=options_["flag"]->query(" or ");
     if(!flagPart.isEmpty())
         extQuery_["flag"]="(" + flagPart + ")";;
+
+    //Status change time
+    QString periodPart=options_["status_change_time"]->query();
+    if(!periodPart.isEmpty())
+        extQuery_["status_change_time"]="(" + periodPart + ")";
 
 	//Attributes
 	QString attrPart;
@@ -346,8 +365,22 @@ void NodeQuery::buildQueryString()
     {
         QString vs=extQuery_.value(s);
         if(!vs.isEmpty())
+        {
+            vs.replace("<","&lt;");
+            vs.replace(">","&gt;");
             wherePart << vs;
+        }
     }
+
+    QString sqlPeriodPart=options_["status_change_time"]->sqlQuery();
+    if(!sqlPeriodPart.isEmpty())
+    {
+        sqlPeriodPart="(" + sqlPeriodPart + ")";
+        sqlPeriodPart.replace("<","&lt;");
+        sqlPeriodPart.replace(">","&gt;");
+        wherePart << sqlPeriodPart;
+    }
+
     selectPart << "node";
 
     //Attribute
@@ -388,11 +421,6 @@ void NodeQuery::buildQueryString()
     {
         sqlQuery_+=" LIMIT " + QString::number(maxNum_);
     }
-
-
-#ifdef _UI_NODEQUERY_DEBUG
-    UiLog().dbg() << "<-- buildQueryString";
-#endif
 }
 
 void NodeQuery::load(VSettings* vs)

@@ -77,8 +77,6 @@ protected Q_SLOTS:
 	void slotAdvMode(bool b);
 	void slotMaxNum(int);
     void slotCase(bool);
-    void slotPeriodRadio(bool);
-    void slotUpdatePeriodBox(int);
 
 Q_SIGNALS:
 	void queryEnabledChanged(bool);
@@ -103,13 +101,12 @@ private:
     NodeQueryOptionEdit* typeEdit_;
     NodeQueryOptionEdit* stateEdit_;
     NodeQueryOptionEdit* flagEdit_;
+    NodeQueryOptionEdit* periodEdit_;
     NodeQueryOptionEdit* attrEdit_;
     QMap<QString,QList<NodeQueryOptionEdit*> > attr_;
     QString nodeTabText_;
     QString attrTabText_;
     QString periodTabText_;
-    QList<QWidget*> periodItemLst_;
-    QList<QWidget*> lastPeriodItemLst_;
 };
 
 #endif

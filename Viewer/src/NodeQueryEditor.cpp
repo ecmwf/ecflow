@@ -17,6 +17,7 @@
 #include "NodeQueryHandler.hpp"
 #include "NodeQueryOption.hpp"
 #include "NodeQueryOptionEdit.hpp"
+#include "PeriodSearchWidget.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
@@ -93,8 +94,8 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
     Q_ASSERT(tab_->count() == 3);
     nodeTabText_=tab_->tabText(0);
-    attrTabText_=tab_->tabText(1);
-    periodTabText_=tab_->tabText(2);
+    periodTabText_=tab_->tabText(1);
+    attrTabText_=tab_->tabText(2);
 
     //-------------------------
     // Query display
@@ -188,7 +189,6 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
 
     //Attributes
-
     attrPanel_->setProperty("attrArea","1");
     Q_FOREACH(NodeQueryAttrGroup* aGrp,query_->attrGroup().values())
     {
@@ -217,44 +217,7 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     // Modification time
     //-------------------------------
 
-    periodCheck_->setChecked(true);
-    connect(periodCheck_,SIGNAL(stateChanged(int)),
-            this,SLOT(slotUpdatePeriodBox(int)));
-
-    //Period: from-to
-    periodFromDateEdit_->setDate(QDate::currentDate());
-    periodToDateEdit_->setDate(QDate::currentDate());
-    periodFromDateEdit_->setMaximumDate(QDate::currentDate());
-    periodToDateEdit_->setMaximumDate(QDate::currentDate());
-    periodToTimeEdit_->setTime(QTime(23,59));
-
-    periodItemLst_ << periodRb_ << periodFromDateEdit_ << periodFromTimeEdit_ << periodToLabel_ <<
-                  periodToDateEdit_ << periodToTimeEdit_;
-
-    //last period
-    lastPeriodSpin_->setRange(1,100000);
-
-    lastPeriodCb_->addItem(tr("minutes"),60);
-    lastPeriodCb_->addItem(tr("hours"),3600);
-    lastPeriodCb_->addItem(tr("days"),86400);
-    lastPeriodCb_->addItem(tr("weeks"),86400*7);
-    lastPeriodCb_->addItem(tr("months"),86400*30);
-    lastPeriodCb_->addItem(tr("years"),86400*365);
-
-    lastPeriodItemLst_ << lastPeriodRb_ << lastPeriodSpin_ << lastPeriodCb_;
-
-    connect(periodRb_,SIGNAL(toggled(bool)),
-        this,SLOT(slotPeriodRadio(bool)));
-
-    connect(lastPeriodRb_,SIGNAL(toggled(bool)),
-        this,SLOT(slotPeriodRadio(bool)));
-
-    //Init
-    lastPeriodCb_->setCurrentIndex(1); //minutes
-    lastPeriodRb_->toggle();
-    periodCheck_->setChecked(false);
-
-    slotUpdatePeriodBox(0);
+    periodEdit_=new NodeQueryPeriodOptionEdit(query_->option("status_change_time"),periodWidget_,this);
 
     //--------------------------------
     // Select tab
@@ -301,7 +264,8 @@ void NodeQueryEditor::setFilterMode(bool b)
     if(filterMode_ != b)
     {
         filterMode_=b;
-        tab_->setTabEnabled(1,!filterMode_);
+        Q_ASSERT(tab_->count() == 3);
+        tab_->setTabEnabled(2,!filterMode_);
     }
 }
 
@@ -333,6 +297,9 @@ void NodeQueryEditor::init()
     stateEdit_->init(query_);
     flagEdit_->init(query_);
     attrEdit_->init(query_);
+
+    //period
+    periodEdit_->init(query_);
 
     //attrPanel_->init();
 
@@ -489,46 +456,6 @@ void NodeQueryEditor::slotAttrPanelChanged()
     }
 }
 
-void NodeQueryEditor::slotPeriodRadio(bool)
-{
-    if(!periodCheck_->isChecked())
-    {
-        return;
-    }
-    else
-    {
-        bool top=true;
-        bool bottom=true;
-        if(periodRb_->isChecked())
-        {
-            bottom=false;
-        }
-        else
-        {
-            top=false;
-        }
-
-        for(int i=1; i < periodItemLst_.count(); i++)
-            periodItemLst_[i]->setEnabled(top);
-
-        for(int i=1; i < lastPeriodItemLst_.count(); i++)
-            lastPeriodItemLst_[i]->setEnabled(bottom);
-    }
-}
-
-void NodeQueryEditor::slotUpdatePeriodBox(int)
-{
-    bool st=periodCheck_->isChecked();
-
-    Q_FOREACH(QWidget* w,periodItemLst_)
-            w->setEnabled(st);
-    Q_FOREACH(QWidget* w,lastPeriodItemLst_)
-            w->setEnabled(st);
-
-    //Init radio button state
-    slotPeriodRadio(true);
-}
-
 void NodeQueryEditor::checkGuiState()
 {
 	serverResetTb_->setEnabled(serverCb_->hasSelection());
@@ -539,8 +466,8 @@ void NodeQueryEditor::checkGuiState()
     rootLe_->setEnabled(oneServer);
 
     QString t=nodeTabText_;
-    if(!query_->nodeQueryPart().isEmpty())
-      t+="*";
+    if(query_->hasBasicNodeQueryPart())
+        t+="*";
     tab_->setTabText(0,t);
 
     if(!filterMode_)
@@ -548,15 +475,13 @@ void NodeQueryEditor::checkGuiState()
         t=attrTabText_;
         if(!query_->attrQueryPart().isEmpty())
             t+="*";
-        tab_->setTabText(1,t);
+        tab_->setTabText(2,t);
     }
 
     t=periodTabText_;
-#if 0
-    if(!query_->nodeQueryPart().isEmpty())
+    if(query_->hasPeriodQueryPart())
           t+="*";
-        tab_->setTabText(2,t);
-#endif
+    tab_->setTabText(1,t);
 }
 
 void NodeQueryEditor::updateQueryTe()
@@ -574,6 +499,7 @@ void NodeQueryEditor::slotClear()
     typeEdit_->clear();
     stateEdit_->clear();
     flagEdit_->clear();
+    periodEdit_->clear();
     attrEdit_->clear();
 }
 

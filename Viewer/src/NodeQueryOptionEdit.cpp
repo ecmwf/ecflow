@@ -14,7 +14,9 @@
 #include "CustomListWidget.hpp"
 #include "NodeQuery.hpp"
 #include "NodeQueryOption.hpp"
+#include "PeriodSearchWidget.hpp"
 #include "StringMatchCombo.hpp"
+#include "ViewerUtil.hpp"
 
 #include <QtGlobal>
 #include <QDebug>
@@ -194,6 +196,7 @@ void NodeQueryListOptionEdit::slotListChanged()
 
 //===================================================================
 //
+// NodeQueryComboOptionEdit
 //
 //==================================================================
 
@@ -261,3 +264,91 @@ void NodeQueryComboOptionEdit::setVisible(bool st)
     cb_->setVisible(st);
 }
 
+//===================================================================
+//
+// NodeQueryPeriodOptionEdit
+//
+//==================================================================
+
+NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,PeriodSearchWidget *w, QWidget *parent) :
+  NodeQueryOptionEdit(option->name(),0,parent),
+  w_(w),
+  option_(0)
+{
+    Q_ASSERT(w_);
+
+    connect(w_,SIGNAL(changed()),
+            this,SLOT(updateOptions()));
+
+    init(option);
+    Q_ASSERT(option_);
+}
+
+void NodeQueryPeriodOptionEdit::init(NodeQueryOption* option)
+{
+    initIsOn_=true;
+
+    option_=static_cast<NodeQueryPeriodOption*>(option);
+    Q_ASSERT(w_);
+    Q_ASSERT(option_);
+    Q_ASSERT(optionId_ == option_->name());
+    if(option_->mode() == NodeQueryPeriodOption::LastPeriodMode)
+    {
+        w_->periodCheck_->setChecked(true);
+        w_->lastRb_->setChecked(true);
+        w_->lastValueSpin_->setValue(option_->lastPeriod());
+        ViewerUtil::initComboBoxByData(option_->lastPeriodUnits(),w_->lastUnitsCb_);
+    }
+    else if(option_->mode() == NodeQueryPeriodOption::FixedPeriodMode)
+    {
+        w_->periodCheck_->setChecked(true);
+        w_->periodRb_->setChecked(true);
+        w_->periodFromDe_->setDateTime(option_->fromDate());
+        w_->periodToDe_->setDateTime(option_->toDate());
+    }
+    else
+    {
+        w_->periodCheck_->setChecked(false);
+    }
+
+    initIsOn_=false;
+}
+
+void NodeQueryPeriodOptionEdit::setVisible(bool)
+{
+}
+
+void NodeQueryPeriodOptionEdit::updateOptions()
+{
+    if(initIsOn_)
+        return;
+
+    if(option_)
+    {
+        if(w_->periodCheck_->isChecked())
+        {
+            //last period
+            if(w_->lastRb_->isChecked())
+            {
+                int val=w_->lastValueSpin_->value();
+                int idx=w_->lastUnitsCb_->currentIndex();
+                QString units;
+                if(idx > -1)
+                    units=w_->lastUnitsCb_->itemData(idx).toString();
+                else
+                    val=-1;
+
+                option_->setLastPeriod(val,units);
+            }
+            else
+            {
+                option_->setPeriod(w_->periodFromDe_->dateTime(),w_->periodToDe_->dateTime());
+            }
+        }
+        else
+        {
+            option_->clear();
+        }
+        Q_EMIT changed();
+    }
+}
