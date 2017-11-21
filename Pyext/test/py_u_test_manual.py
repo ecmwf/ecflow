@@ -427,6 +427,146 @@ class TestAddTimeDependencies(unittest.TestCase):
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
         
+class TestAddDefStatus(unittest.TestCase):
+    
+    def setUp(self):
+        defs = Defs()
+        s1 = defs.add_suite("s1") 
+        s1.add_task("t1").add_defstatus(Defstatus("complete"))
+        s1.add_task("t2").add_defstatus(DState.complete)
+        
+        self.defs = defs
+
+    def test_alternative(self):
+        defs = Defs().add(
+            Suite("s1").add(
+                Task("t1").add(Defstatus("complete")),
+                Task("t2").add(Defstatus(DState.complete))))
+
+    def test_alternative1(self):
+        defs = Defs().add( Suite("s1"))
+        defs.s1 += [Task("t1"),Task("t2")]
+        defs.s1.t1 += [ Defstatus("complete") ]
+        defs.s1.t2 += [ Defstatus(DState.complete) ]
+        
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+   
+class TestAddAutocancel(unittest.TestCase):
+    
+    def setUp(self):
+        defs = Defs()
+        s1 = defs.add_suite("s1") 
+        s1.add_task("t1").add_autocancel(3)                                # delete task after 3 days after completion 
+        s1.add_task("t2").add_autocancel(1, 10, True)                      # delete task 1hr 10 min after task completion
+        s1.add_task("t3").add_autocancel(TimeSlot(2,10), True)             # delete task 2hr 10 min after task completion 
+        s1.add_task("t4").add_autocancel(Autocancel(1))                    # delete task after 1 day after task completion
+        s1.add_task("t5").add_autocancel(Autocancel( 18, 10, False))       # delete task at 6:10pm once it has completed
+        s1.add_task("t6").add_autocancel(Autocancel(TimeSlot(2,10), False))# delete task at 2:10am once it has completed
+
+        self.defs = defs
+
+    def test_alternative(self):
+        defs = Defs().add(
+            Suite("s1").add(
+                Task("t1").add(Autocancel(3)),
+                Task("t2").add(Autocancel(1, 10, True)),
+                Task("t3").add(Autocancel(TimeSlot(2,10), True)),
+                Task("t4").add(Autocancel(1)),
+                Task("t5").add(Autocancel(18, 10, False)),
+                Task("t6").add(Autocancel(2, 10, False))))
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+
+
+    def test_alternative1(self):
+        defs = Defs().add( Suite("s1"))
+        defs.s1 += [ Task("t{}".format(i)) for i in range(1,7)]
+        defs.s1.t1 += [ Autocancel(3) ]
+        defs.s1.t2 += [ Autocancel(1, 10, True) ] 
+        defs.s1.t3 += [ Autocancel(TimeSlot(2,10), True) ]  
+        defs.s1.t4 += [ Autocancel(1) ]       
+        defs.s1.t5 += [ Autocancel(18, 10, False) ]
+        defs.s1.t6 += [ Autocancel(2, 10, False) ]        
+         
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+   
+class TestAddRepeat(unittest.TestCase):
+    
+    def setUp(self):
+        
+        def add_tasks(fam):
+            for i in range(1,3):
+                fam.add_task(Task("t{}".format(i)))
+                
+        defs = Defs()
+        s1 = defs.add_suite("s1")
+        f1 = s1.add_family("f1")
+        f1.add_repeat( RepeatDate("YMD",20100111,20100115,2) )
+        add_tasks(f1)
+
+        f2 = s1.add_family("f2")
+        f2.add_repeat( RepeatInteger("count",0,100,2)  )
+        add_tasks(f2)
+
+        f3 = s1.add_family("f3")
+        f3.add_repeat( RepeatEnumerated("enum",["red", "green", "blue" ] )  )
+        add_tasks(f3)
+
+        f4 = s1.add_family("f4")
+        f4.add_repeat( RepeatString("enum",["a", "b", "c" ] )  )
+        add_tasks(f4)
+
+        f5 = s1.add_family("f5")
+        f5.add_repeat( RepeatDay(1)  )
+        add_tasks(f5)
+          
+        self.defs = defs
+     
+
+    def test_alternative1(self):
+        defs = Defs().add(
+                Suite("s1").add(
+                    Family("f1").add(
+                       RepeatDate("YMD",20100111,20100115,2),
+                       [ Task("t{}".format(i)) for i in range(1,3) ] ),
+                    Family("f2").add(
+                       RepeatInteger("count",0,100,2),
+                       [ Task("t{}".format(i)) for i in range(1,3) ] ),
+                    Family("f3").add(
+                       RepeatEnumerated("enum",["red", "green", "blue" ] ),
+                       [ Task("t{}".format(i)) for i in range(1,3) ] ),
+                    Family("f4").add(
+                        RepeatString("enum",["a", "b", "c" ] ),
+                        [ Task("t{}".format(i)) for i in range(1,3) ] ),
+                    Family("f5").add(
+                        RepeatDay(1),
+                        [ Task("t{}".format(i)) for i in range(1,3) ] )))
+
+    def test_alternative2(self):
+        defs = Defs().add( Suite("s1") )
+        defs.s1 += [ Family("f{}".format(i)).add(
+                      [ Task("t{}".format(i)) for i in range(1,3) ]) 
+                    for i in range(1,6) ]   
+        defs.s1.f1 += [ RepeatDate("YMD",20100111,20100115,2) ]
+        defs.s1.f2 += [ RepeatInteger("count",0,100,2) ]
+        defs.s1.f3 += [ RepeatEnumerated("enum",["red", "green", "blue" ] ) ]
+        defs.s1.f4 += [ RepeatString("enum",["a", "b", "c" ] ) ]
+        defs.s1.f5 += [ RepeatDay(1) ]
+  
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
 if __name__ == "__main__":
     unittest.main()
     print("All Tests pass")
