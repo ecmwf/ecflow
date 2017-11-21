@@ -18,6 +18,7 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
                   VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import os 
 import unittest 
+from PIL.PyAccess import defs
 
 class TestAddSuiteFamilyTask(unittest.TestCase):
     def setUp(self):
@@ -314,8 +315,114 @@ class TestAddLargeTrigger(unittest.TestCase):
         defs.s1 += [ Task("t{}".format(i)) for i in range(1,4) ]
         defs.s1.t3 += [ Trigger("t1 == complete"),
                         Trigger("t2 == active"),
-                        Trigger( "t2 == aborted",False) ]
+                        Trigger("t2 == aborted",False) ]
          
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+class TestAddTimeDependencies(unittest.TestCase):
+    
+    def setUp(self):
+        defs = Defs()
+        s1 = defs.add_suite("s1") 
+        t1 = s1.add_task("date")
+        t1.add_date(1, 0, 0)       # first of every month and every year
+        t1.add_date(Date("2.*.*")) # second of every month and every year
+        t1.add_date(28,2,2026)     # 28 february 2026
+
+        t2 = s1.add_task("day")
+        t2.add_day("monday")
+        t2.add_day(Days.tuesday)
+        
+        t3 = s1.add_task("time")
+        t3.add_time("+00:30")                     # 30 minutes after suite has begun
+        t3.add_time("+00:30 20:00 01:00")         # 00:30,01:30,02:30....07:30 after suite start
+              
+        t3.add_time(0, 59, True)                  #  00:59 - 59 minutes past midnight
+        t3.add_time(Time(TimeSlot(20, 10)))       #  20:10 - 10 minutes pas eight
+        t3.add_time(Time(TimeSlot(20, 20), True)) # +20:20 - 20 minutes and 20 hours, after suite start
+
+        start = TimeSlot(0, 0)
+        finish = TimeSlot(23, 0)
+        incr = TimeSlot(0, 30)
+        time_series = TimeSeries(start, finish, incr, True)        
+        t3.add_time(Time(time_series))
+        t3.add_time(Time(0, 10))                  #  00:10 
+        t3.add_time(Time("+00:40"))               # +00:40
+        t3.add_time(Time("+00:40 20:00 01:00"))   # 00:40,01:40,02:30...17:40 after suite start
+        
+        cron = Cron()
+        cron.set_week_days( [0,1,2,3,4,5,6] )
+        cron.set_days_of_month( [1,2,3,4,5,6] )
+        cron.set_months( [1,2,3,4,5,6] )
+        cron.set_time_series( "+00:00 23:00 00:30" )
+        s1.add_task("cron").add_cron( cron );
+        
+        self.defs = defs
+        
+    def test_alternative(self):
+        start = TimeSlot(0, 0)
+        finish = TimeSlot(23, 0)
+        incr = TimeSlot(0, 30)
+        time_series = TimeSeries(start, finish, incr, True)
+        
+        cron = Cron()
+        cron.set_week_days( [0,1,2,3,4,5,6] )
+        cron.set_days_of_month( [1,2,3,4,5,6] )
+        cron.set_months( [1,2,3,4,5,6] )
+        cron.set_time_series( "+00:00 23:00 00:30" )
+
+        defs = Defs().add(
+            Suite("s1").add(
+                Task("date").add(
+                    Date(1, 0, 0),
+                    Date("2.*.*"),
+                    Date(28,2,2026)),
+                Task("day").add(
+                    Day("monday"),
+                    Day(Days.tuesday)),
+                Task("time").add(
+                    Time("+00:30"),
+                    Time("+00:30 20:00 01:00"),
+                    Time(0, 59, True),
+                    Time(TimeSlot(20, 10)),
+                    Time(TimeSlot(20, 20), True),
+                    Time(time_series),
+                    Time(0, 10),
+                    Time("+00:40"),
+                    Time("+00:40 20:00 01:00")),
+                Task("cron").add(
+                    cron)))
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+    def test_alternative1(self):
+        start = TimeSlot(0, 0)
+        finish = TimeSlot(23, 0)
+        incr = TimeSlot(0, 30)
+        time_series = TimeSeries(start, finish, incr, True)
+        
+        cron = Cron()
+        cron.set_week_days( [0,1,2,3,4,5,6] )
+        cron.set_days_of_month( [1,2,3,4,5,6] )
+        cron.set_months( [1,2,3,4,5,6] )
+        cron.set_time_series( "+00:00 23:00 00:30" )
+
+        defs = Defs().add( Suite("s1").add(
+                             Task("date"),Task("day"),Task("time"),Task("cron")))
+        defs.s1.date += [ Date(1, 0, 0), Date("2.*.*"), Date(28,2,2026) ]
+        defs.s1.day += [ Day("monday"), Day(Days.tuesday) ]
+        defs.s1.time += [ Time("+00:30"), Time("+00:30 20:00 01:00"), Time(0, 59, True),
+                          Time(TimeSlot(20, 10)), Time(TimeSlot(20, 20), True),
+                          Time(time_series), Time(0, 10), Time("+00:40"),
+                          Time("+00:40 20:00 01:00") ]
+        defs.s1.cron += [cron]
+
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      

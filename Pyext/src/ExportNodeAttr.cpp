@@ -475,13 +475,13 @@ void export_NodeAttr()
 	class_<Repeat>("Repeat",NodeAttrDoc::repeat_doc() ,init< int >())
 	.def(self == self )                    // __eq__
 	.def("__str__", &Repeat::toString)     // __str__
-    .def("__copy__",copyObject<Repeat>)    // __copy__ uses copy constructor
+	.def("__copy__",copyObject<Repeat>)    // __copy__ uses copy constructor
 	.def("empty",   &Repeat::empty ,"Return true if the repeat is empty.")
 	.def("name",    &Repeat::name, return_value_policy<copy_const_reference>(), "The :term:`repeat` name, can be referenced in :term:`trigger` expressions")
 	.def("start",   &Repeat::start,"The start value of the repeat, as an integer")
 	.def("end",     &Repeat::end,  "The last value of the repeat, as an integer")
-    .def("step",    &Repeat::step, "The increment for the repeat, as an integer")
-    .def("value",   &Repeat::last_valid_value,"The current value of the repeat as an integer")
+	.def("step",    &Repeat::step, "The increment for the repeat, as an integer")
+	.def("value",   &Repeat::last_valid_value,"The current value of the repeat as an integer")
 	;
 
 
@@ -490,14 +490,14 @@ void export_NodeAttr()
 	class_<CronAttr>("Cron",NodeAttrDoc::cron_doc() )
 	.def(self == self )                                // __eq__
 	.def("__str__",            &CronAttr::toString)    // __str__
-    .def("__copy__",copyObject<CronAttr>)              // __copy__ uses copy constructor
-    .def( "set_week_days",     &set_week_days ,   "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
+	.def("__copy__",copyObject<CronAttr>)              // __copy__ uses copy constructor
+	.def( "set_week_days",     &set_week_days ,   "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
 	.def( "set_days_of_month", &set_days_of_month,"Specifies days of the month. Expects a list of integers with integer range 1-31" )
 	.def( "set_months",        &set_months  ,     "Specifies months. Expects a list of integers, with integer range 1-12")
 	.def( "set_time_series",   &CronAttr::add_time_series,(bp::arg("hour"),bp::arg("minute"),bp::arg("relative")=false),"time_series(hour(int),minute(int),relative to suite start(bool=false)), Add a time slot")
 	.def( "set_time_series",   add_time_series,   "Add a time series. This will never complete")
-    .def( "set_time_series",   add_time_series_2, "Add a time series. This will never complete")
-    .def( "set_time_series",   &add_time_series_3,"Add a time series. This will never complete")
+	.def( "set_time_series",   add_time_series_2, "Add a time series. This will never complete")
+	.def( "set_time_series",   &add_time_series_3,"Add a time series. This will never complete")
 	.def( "time",              &CronAttr::time, return_value_policy<copy_const_reference>(), "return cron time as a TimeSeries")
 	.add_property( "week_days",    boost::python::range(&CronAttr::week_days_begin,    &CronAttr::week_days_end),     "returns a integer list of week days")
 	.add_property( "days_of_month",boost::python::range(&CronAttr::days_of_month_begin,&CronAttr::days_of_month_end), "returns a integer list of days of the month")

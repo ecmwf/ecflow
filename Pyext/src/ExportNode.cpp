@@ -221,15 +221,22 @@ private:
 /////////////////////////////////////////////////////////////////////////////////////////
 static void do_add(node_ptr self, const boost::python::object& arg){
    if (arg.ptr() == object().ptr())  return; // *IGNORE* None
-   if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
-   else if (boost::python::extract<Edit>(arg).check()) {
+   if (boost::python::extract<Edit>(arg).check()) {
       Edit edit = boost::python::extract<Edit>(arg);
       const std::vector<Variable>& vec = edit.variables();
       for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
    }
+   else if (boost::python::extract<node_ptr>(arg).check()) {
+      NodeContainer* nc = self->isNodeContainer();
+      if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
+      node_ptr child = boost::python::extract<node_ptr>(arg);
+      nc->addChild(child);
+   }
    else if (boost::python::extract<Event>(arg).check())     self->addEvent(boost::python::extract<Event>(arg));
    else if (boost::python::extract<Meter>(arg).check())     self->addMeter(boost::python::extract<Meter>(arg));
    else if (boost::python::extract<Label>(arg).check())     self->addLabel(boost::python::extract<Label>(arg));
+   else if (boost::python::extract<Trigger>(arg).check()){Trigger t = boost::python::extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
+   else if (boost::python::extract<Complete>(arg).check()){Complete t = boost::python::extract<Complete>(arg);self->py_add_complete_expr(t.expr());}
    else if (boost::python::extract<Limit>(arg).check())     self->addLimit(boost::python::extract<Limit>(arg));
    else if (boost::python::extract<InLimit>(arg).check())   self->addInLimit(boost::python::extract<InLimit>(arg));
    else if (boost::python::extract<DayAttr>(arg).check())   self->addDay(boost::python::extract<DayAttr>(arg));
@@ -246,25 +253,18 @@ static void do_add(node_ptr self, const boost::python::object& arg){
    else if (boost::python::extract<RepeatDay>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(arg)  ));
    else if (boost::python::extract<AutoCancelAttr>(arg).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(arg));
    else if (boost::python::extract<VerifyAttr>(arg).check())self->addVerify(boost::python::extract<VerifyAttr>(arg));
-   else if (boost::python::extract<Trigger>(arg).check()){ cout << "TRIGGER add\n"; Trigger t = boost::python::extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
-   else if (boost::python::extract<Complete>(arg).check()){Complete t = boost::python::extract<Complete>(arg);self->py_add_complete_expr(t.expr());}
    else if (boost::python::extract<Defstatus>(arg).check()){Defstatus t = boost::python::extract<Defstatus>(arg);self->addDefStatus(t.state());}
-   else if (boost::python::extract<ClockAttr>(arg).check()) {
-      if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
-      self->isSuite()->addClock( boost::python::extract<ClockAttr>(arg));
-   }
-   else if (boost::python::extract<node_ptr>(arg).check()) {
-      NodeContainer* nc = self->isNodeContainer();
-      if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
-      node_ptr child = boost::python::extract<node_ptr>(arg);
-      nc->addChild(child);
-   }
-   else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
    else if (boost::python::extract<boost::python::list>(arg).check()){
       boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
       int the_list_size = len(the_list);
       for(int i = 0; i < the_list_size; ++i) do_add(self,the_list[i]); // recursive
    }
+   else if (boost::python::extract<ClockAttr>(arg).check()) {
+      if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
+      self->isSuite()->addClock( boost::python::extract<ClockAttr>(arg));
+   }
+   else if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
+   else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
    else throw std::runtime_error("ExportNode::add : Unknown type ");
 }
 
