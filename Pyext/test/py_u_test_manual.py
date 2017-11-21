@@ -18,7 +18,6 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
                   VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import os 
 import unittest 
-from PIL.PyAccess import defs
 
 class TestAddSuiteFamilyTask(unittest.TestCase):
     def setUp(self):
