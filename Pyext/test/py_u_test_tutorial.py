@@ -103,11 +103,9 @@ class TestFamilies(unittest.TestCase):
          
         print "Creating suite definition" 
         home = os.path.join(os.getenv("HOME"),  "course") 
-        defs = Defs().add(
-            Suite("test").add(
-                Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                Family("f1").add( 
-                    [ Task("t{}".format(i)) for i in range(1,3) ])))
+        defs = Defs().add( Suite("test") )
+        defs.test += [  Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                        Family("f1").add( [ Task("t{}".format(i)) for i in range(1,3) ]) ]
         print defs
         print "Checking job creation: .ecf -> .job0"  
         #print defs.check_job_creation()
