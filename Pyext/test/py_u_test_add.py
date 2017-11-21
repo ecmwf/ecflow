@@ -155,6 +155,15 @@ class TestTrigger(unittest.TestCase):
         task.add(trig)
         self.assertEqual(str(expr),"1==1 AND 2==1 AND x ==1 OR y == 1","Trigger not as expected: " +  str(expr))
 
+    def test_add_composition(self):
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        task.add(Trigger("1==1"))
+        task.add(Trigger("1==2",False))
+        task.add(Trigger("x==2"))
+        expr = task.get_trigger()
+        self.assertEqual(str(expr),"1==1 OR 1==2 AND x==2","Trigger not as expected: " +  expr.get_expression())
+
 
 class TestComplete(unittest.TestCase):
     def test_trigger(self):
@@ -199,7 +208,16 @@ class TestComplete(unittest.TestCase):
         task.add(trig)
         self.assertEqual(str(expr),"1==1 AND 2==1 AND x ==1 OR y == 1","Complete not as expected: " +  str(expr))
         
-        
+    def test_add_composition(self):
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        task.add( Complete("1==1"))
+        task.add( Complete("1==2",False))
+        task.add( Complete("x==2"))
+        expr = task.get_complete()
+        self.assertEqual(str(expr),"1==1 OR 1==2 AND x==2","Trigger not as expected: " +  expr.get_expression())
+
+
 class TestDefsAdd(unittest.TestCase):
     def test_add_suite1(self):
         defs = Defs().add(Suite("a"))
