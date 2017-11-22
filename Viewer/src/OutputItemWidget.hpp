@@ -58,7 +58,7 @@ protected Q_SLOTS:
 protected:
     void setCurrentInDir(const std::string&);
     void updateDir(bool);
-	void updateDir(VDir_ptr,bool);
+    void updateDir(const std::vector<VDir_ptr>&,bool);
 	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&);
 	void searchOnReload();
@@ -66,6 +66,7 @@ protected:
 	void getLatestFile();
 	std::string currentFullName() const;
     void updateHistoryLabel(const std::vector<std::string>&);
+    void displayDirErrors(const std::vector<std::string>& errorVec);
 
 	OutputDirProvider* dirProvider_;
 	OutputModel* dirModel_;

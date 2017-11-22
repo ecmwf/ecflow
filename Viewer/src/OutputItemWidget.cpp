@@ -15,6 +15,7 @@
 #include "OutputModel.hpp"
 #include "PlainTextEdit.hpp"
 #include "ServerHandler.hpp"
+#include "TextFormat.hpp"
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
@@ -63,11 +64,14 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     dirMessageLabel_->hide();
     dirMessageLabel_->setShowTypeTitle(false);
+    dirLabel_->hide();
     dirLabel_->setProperty("fileInfo","1");
 
 	dirProvider_=new OutputDirProvider(this);
 
 	//The view
+    OutputDirLitsDelegate* dirDelegate=new OutputDirLitsDelegate(this);
+    dirView_->setItemDelegate(dirDelegate);
 	dirView_->setRootIsDecorated(false);
 	dirView_->setAllColumnsShowFocus(true);
 	dirView_->setUniformRowHeights(true);
@@ -174,7 +178,7 @@ void OutputItemWidget::getLatestFile()
     messageLabel_->stopProgress();
     fileLabel_->clear();
     browser_->clear();
-    dirLabel_->clear();
+    //dirLabel_->clear();
     dirMessageLabel_->hide();
     fetchInfo_->clearInfo();
 
@@ -210,7 +214,7 @@ void OutputItemWidget::clearContents()
     messageLabel_->hide();
     messageLabel_->stopProgress();
     fileLabel_->clear();      
-    dirLabel_->clear();
+    //dirLabel_->clear();
     browser_->clearCursorCache();
     browser_->clear();
     reloadTb_->setEnabled(true);
@@ -396,10 +400,14 @@ void OutputItemWidget::infoReady(VReply* reply)
         enableDir(true);
 
         //Update the dir widget and select the proper file in the list
-        updateDir(reply->directory(),true);
+        updateDir(reply->directories(),true);
+
+        //Even thous infoReady is called there could be some error since we could
+        //try to read multiple directories
+        displayDirErrors(reply->errorTextVec());
 
         //Update the dir label
-        dirLabel_->update(reply);
+        //dirLabel_->update(reply);
     }
 }
 
@@ -423,6 +431,7 @@ void  OutputItemWidget::infoProgress(const std::string& text,int value)
 
 void OutputItemWidget::infoFailed(VReply* reply)
 {
+    //File
     if(reply->sender() == infoProvider_)
 	{
 		QString s=QString::fromStdString(reply->errorText());
@@ -438,11 +447,15 @@ void OutputItemWidget::infoFailed(VReply* reply)
 
         fetchInfo_->setInfo(reply,info_);
 	}
+    //Directories
     else
     {
         //We do not have directories
         enableDir(false);
 
+        displayDirErrors(reply->errorTextVec());
+
+#if 0
         QColor col(70,71,72);
         QString s="<b><font color=\'" + col.name() +  "\'>Output directory</font></b>: ";
         const std::vector<std::string>& et=reply->errorTextVec();
@@ -456,6 +469,7 @@ void OutputItemWidget::infoFailed(VReply* reply)
             s+=QString::fromStdString(et[0]);
 
         dirMessageLabel_->showError(s);
+#endif
 
         //the timer is stopped. It will be restarted again if we get a local file or
         //a file via the logserver
@@ -486,24 +500,32 @@ void OutputItemWidget::setCurrentInDir(const std::string& fullName)
     }
 }
 
-void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
+void OutputItemWidget::updateDir(const std::vector<VDir_ptr>& dirs,bool restartTimer)
 {
-    UiLog().dbg() << "OutputItemWidget::updateDir -->";
+UI_FUNCTION_LOG
 
     if(restartTimer)
 		updateDirTimer_->stop();
 
-    bool status=(dir && dir->count() >0);
+    bool status=false;
+    for(std::size_t i=0; i < dirs.size(); i++)
+    {
+        if(dirs[i] && dirs[i]->count() > 0)
+        {
+            status=true;
+            break;
+        }
+    }
 
 	if(status)
 	{
         OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-        op->setDir(dir);
+        op->setDirectories(dirs);
 
         std::string fullName=currentFullName();
 
 		dirView_->selectionModel()->clearSelection();
-        dirModel_->setData(dir,op->joboutFileName());
+        dirModel_->setData(dirs,op->joboutFileName());
         //dirWidget_->show();
 
         if(!dirColumnsAdjusted_)
@@ -558,6 +580,23 @@ void OutputItemWidget::enableDir(bool status)
         dirModel_->clearData();
         dirMessageLabel_->show();
 	}
+}
+
+void OutputItemWidget::displayDirErrors(const std::vector<std::string>& errorVec)
+{
+    QColor col(70,71,72);
+    QString s=Viewer::formatBoldText("Output directory: ",col);
+    //const std::vector<std::string>& et=reply->errorTextVec();
+    if(errorVec.size() > 1)
+    {
+        for(size_t i=0; i < errorVec.size(); i++)
+            s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
+                QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
+    }
+    else if(errorVec.size() == 1)
+        s+=QString::fromStdString(errorVec[0]);
+
+    dirMessageLabel_->showError(s);
 }
 
 //---------------------------------------------

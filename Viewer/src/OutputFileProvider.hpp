@@ -33,7 +33,7 @@ public:
 
 	 //Get a particular jobout file
      void file(const std::string& fileName,bool useCache=true);
-     void setDir(VDir_ptr);
+     void setDirectories(const std::vector<VDir_ptr>&);
 
      std::string joboutFileName() const;
      bool isTryNoZero(const std::string& fileName) const;
@@ -44,13 +44,14 @@ private Q_SLOTS:
      void slotOutputClientFinished();
 
 private:
+     VDir_ptr dirToFile(const std::string& fileName) const;
      void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool detachCache);
 	 void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
      bool fetchFileViaOutputClient(VNode *n,const std::string& fileName,bool useCache);
 	 bool fetchLocalFile(const std::string& fileName);
 
 	 OutputFileClient *outClient_;
-     VDir_ptr dir_;
+     std::vector<VDir_ptr> dirs_;
      OutputCache* outCache_;
 };
 

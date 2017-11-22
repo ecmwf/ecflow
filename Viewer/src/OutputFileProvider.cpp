@@ -41,7 +41,7 @@ void OutputFileProvider::clear()
 	}
     InfoProvider::clear();
 
-    dir_.reset();
+    dirs_.clear();
 }
 
 //This is called when we load a new node in the Output panel. In this
@@ -290,11 +290,11 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 
 			connect(outClient_,SIGNAL(finished()),
 				this,SLOT(slotOutputClientFinished()));
-
-            outClient_->setDir(dir_);
 		}
 
-		outClient_->getFile(fileName);
+        VDir_ptr dir=dirToFile(fileName);
+        outClient_->setDir(dir);
+        outClient_->getFile(fileName);
 
 		return true;
 	}
@@ -441,12 +441,32 @@ bool OutputFileProvider::isTryNoZero(const std::string& filename) const
     return false;
 }
 
-void OutputFileProvider::setDir(VDir_ptr dir)
+//We use directories to figure out the size of the file to be transfered
+void OutputFileProvider::setDirectories(const std::vector<VDir_ptr>& dirs)
 {
+#if 0
     if(outClient_)
         outClient_->setDir(dir);  
 
     if(dir != dir_)
         dir_=dir;
+#endif
+
+    dirs_=dirs;
 }
 
+VDir_ptr OutputFileProvider::dirToFile(const std::string& fileName) const
+{
+    VDir_ptr dir;
+
+    if(fileName.empty())
+       return dir;
+
+    for(std::size_t i=0; i < dirs_.size(); i++)
+    {
+        if(dirs_[i] && fileName.find(dirs_[i]->path()) == 0)
+            return dirs_[i];
+
+    }
+    return dir;
+}

@@ -30,6 +30,7 @@ OutputModel::OutputModel(QObject *parent) :
 {
 }
 
+#if 0
 void OutputModel::setData(VDir_ptr dir,const std::string& jobout)
 {
 	beginResetModel();
@@ -50,17 +51,40 @@ void OutputModel::setData(VDir_ptr dir,const std::string& jobout)
 
 	endResetModel();
 }
+#endif
+
+void OutputModel::setData(const std::vector<VDir_ptr>& dirs,const std::string& jobout)
+{
+    beginResetModel();
+    dirs_=dirs;
+    joboutRow_=-1;
+
+    for(std::size_t i=0; i < dirs_.size(); i++)
+    {
+        if(dirs_[i])
+        {
+            int idx=dirs_[i]->findByFullName(jobout);
+            if(idx != -1)
+            {
+                joboutRow_=idx;
+                break;
+            }
+        }
+     }
+
+    endResetModel();
+}
 
 void OutputModel::clearData()
 {
 	beginResetModel();
-	dir_.reset();
+    dirs_.clear();
 	endResetModel();
 }
 
 int OutputModel::columnCount( const QModelIndex& parent  ) const
 {
-	return 4;
+    return 5;
 }
 
 int OutputModel::rowCount( const QModelIndex& parent) const
@@ -69,7 +93,15 @@ int OutputModel::rowCount( const QModelIndex& parent) const
 		return 0;
 
 	if(!parent.isValid())
-		return dir_->count();
+    {
+        int cnt=0;
+        for(std::size_t i=0; i < dirs_.size(); i++)
+        {
+            if(dirs_[i])
+                cnt+=dirs_[i]->count();
+        }
+        return cnt;
+    }
 
 	return 0;
 }
@@ -81,20 +113,26 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 
 	int row=index.row();
-	VDirItem *item=dir_->items().at(row);
+    VDir_ptr dir;
+    VDirItem *item=itemAt(row,dir);
+
+    if(!item || !dir)
+        return QVariant();
 
 	if(role == Qt::DisplayRole)
 	{
 		switch(index.column())
 		{
 		case 0:
-			return QString::fromStdString(item->name_);
+            return QString::fromStdString(dir->path() + "/" + item->name_);
 		case 1:
 			return formatSize(item->size_);
 		case 2:
 			return formatAgo(item->mtime_);
 		case 3:
-			return formatDate(item->mtime_);
+            return formatDate(item->mtime_);
+        case 4:
+            return QString::fromStdString(dir->fetchModeStr());
 		default:
 			break;
 		}
@@ -150,7 +188,8 @@ QVariant OutputModel::headerData( const int section, const Qt::Orientation orien
    	case 0: return tr("Name");
    	case 1: return tr("Size");
     case 2: return tr("Modified (ago)");
-   	case 3: return tr("Modified");
+    case 3: return tr("Modified");
+    case 4: return tr("Source");
    	default: return QVariant();
    	}
 
@@ -180,9 +219,34 @@ QModelIndex OutputModel::parent(const QModelIndex &child) const
 
 }
 
+VDirItem* OutputModel::itemAt(int row,VDir_ptr& dir) const
+{
+    for(std::size_t i=0; i < dirs_.size(); i++)
+    {
+        if(dirs_[i])
+        {
+            int cnt=dirs_[i]->count();
+            if(row < cnt)
+            {
+                Q_ASSERT(row>=0);
+                dir=dirs_[i];
+                return dirs_[i]->items()[row];
+            }
+
+            row-=cnt;
+       }
+    }
+
+    return 0;
+}
+
 bool OutputModel::hasData() const
 {
-	return dir_ && dir_.get();
+    for(std::size_t i=0; i < dirs_.size(); i++)
+        if(dirs_[i])
+            return true;
+
+    return false;
 }
 
 std::string OutputModel::fullName(const QModelIndex& index) const
@@ -190,7 +254,22 @@ std::string OutputModel::fullName(const QModelIndex& index) const
 	if(!hasData())
 		return std::string();
 
-	return dir_->fullName(index.row());
+    int row=index.row();
+    for(std::size_t i=0; i < dirs_.size(); i++)
+    {
+        if(dirs_[i])
+        {
+            int cnt=dirs_[i]->count();
+            if(row < cnt)
+            {
+                Q_ASSERT(row >=0);
+                return dirs_[i]->fullName(row);
+            }
+            row-=cnt;
+       }
+    }
+
+    return std::string();
 }
 
 QString OutputModel::formatSize(unsigned int size) const
@@ -306,5 +385,61 @@ QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)
 	return QModelIndex();
 }
 
+//========================================================
+//
+// OutputDirLitsDelegate
+//
+//========================================================
 
+OutputDirLitsDelegate::OutputDirLitsDelegate(QWidget *parent) : QStyledItemDelegate(parent)
+{
+
+}
+
+void OutputDirLitsDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const
+{
+    if(index.column()==0)
+    {
+        QStyleOptionViewItem vopt(option);
+        initStyleOption(&vopt, index);
+        vopt.textElideMode=Qt::ElideLeft;
+        QStyledItemDelegate::paint(painter,vopt,index);
+    }
+
+    /*if(index.column()==11)
+    {
+        QStyleOptionViewItem vopt(option);
+        initStyleOption(&vopt, index);
+
+        const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
+        const QWidget* widget = vopt.widget;
+
+        QString text=index.data(Qt::DisplayRole).toString();
+        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+        if(text == "ERR")
+        {
+            QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+        }
+
+        painter->fillRect(textRect,Qt::red);
+        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+    }
+    */
+    else
+    {
+        QStyledItemDelegate::paint(painter,option,index);
+    }
+}
+
+#if 0
+QSize LogDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
+{
+    QSize size=QStyledItemDelegate::sizeHint(option,index);
+
+    size+=QSize(0,2);
+
+    return size;
+}
+#endif
 

@@ -216,7 +216,10 @@ void DirInfoLabel::update(VReply* reply) //VDir_ptr dir)
     VDir_ptr dir=reply->directory();
 
     if(!dir)
-		clear();
+    {
+        clear();
+        return;
+    }
 
 	QString s;
 
