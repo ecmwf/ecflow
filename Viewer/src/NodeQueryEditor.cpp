@@ -92,10 +92,9 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     rootLe_->setClearButtonEnabled(true);
 #endif
 
-    Q_ASSERT(tab_->count() == 3);
+    Q_ASSERT(tab_->count() == 2);
     nodeTabText_=tab_->tabText(0);
-    periodTabText_=tab_->tabText(1);
-    attrTabText_=tab_->tabText(2);
+    attrTabText_=tab_->tabText(1);
 
     //-------------------------
     // Query display
@@ -158,9 +157,12 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
     //nodePathGrid_
 
-    //Name
+    //Name + path
     nameEdit_=new NodeQueryStringOptionEdit(query_->option("node_name"),nodeGrid_,this,false);
     pathEdit_=new NodeQueryStringOptionEdit(query_->option("node_path"),nodeGrid_,this,false);
+
+    //Status change time
+    periodEdit_=new NodeQueryPeriodOptionEdit(query_->option("status_change_time"),nodeGrid_,this);
 
     //-------------------------
     // Filter
@@ -213,12 +215,6 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     attrPanelLayout_->addStretch(1);
     //attrPanel_->hide();
 
-    //-------------------------------
-    // Modification time
-    //-------------------------------
-
-    periodEdit_=new NodeQueryPeriodOptionEdit(query_->option("status_change_time"),periodWidget_,this);
-
     //--------------------------------
     // Select tab
     //--------------------------------
@@ -264,8 +260,8 @@ void NodeQueryEditor::setFilterMode(bool b)
     if(filterMode_ != b)
     {
         filterMode_=b;
-        Q_ASSERT(tab_->count() == 3);
-        tab_->setTabEnabled(2,!filterMode_);
+        Q_ASSERT(tab_->count() == 2);
+        tab_->setTabEnabled(1,!filterMode_);
     }
 }
 
@@ -307,24 +303,10 @@ void NodeQueryEditor::init()
 
 	updateQueryTe();
 	checkGuiState();
-}
 
-#if 0
-void NodeQueryEditor::setQueryTeCanExpand(bool b)
-{
-    return;
-
-    queryTeCanExpand_=b;
-	if(queryTeCanExpand_)
-	{
-		queryTe_->setFixedHeight(QWIDGETSIZE_MAX);
-	}
-	else
-	{
-		adjustQueryTe();
-	}
+    //switch to the first
+    tab_->setCurrentIndex(0);
 }
-#endif
 
 void NodeQueryEditor::showDefPanel(bool b)
 {
@@ -475,13 +457,8 @@ void NodeQueryEditor::checkGuiState()
         t=attrTabText_;
         if(!query_->attrQueryPart().isEmpty())
             t+="*";
-        tab_->setTabText(2,t);
+        tab_->setTabText(1,t);
     }
-
-    t=periodTabText_;
-    if(query_->hasPeriodQueryPart())
-          t+="*";
-    tab_->setTabText(1,t);
 }
 
 void NodeQueryEditor::updateQueryTe()

@@ -12,6 +12,7 @@
 
 #include "NodeQueryOption.hpp"
 
+#include <QGridLayout>
 
 PeriodSearchWidget::PeriodSearchWidget(QWidget *parent) :
     QWidget(parent)

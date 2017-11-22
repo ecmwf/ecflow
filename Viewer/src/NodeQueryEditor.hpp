@@ -106,7 +106,6 @@ private:
     QMap<QString,QList<NodeQueryOptionEdit*> > attr_;
     QString nodeTabText_;
     QString attrTabText_;
-    QString periodTabText_;
 };
 
 #endif

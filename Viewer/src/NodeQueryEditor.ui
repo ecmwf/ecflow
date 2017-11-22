@@ -272,40 +272,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="periodTab_">
-      <attribute name="title">
-       <string>Status change time</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="PeriodSearchWidget" name="periodWidget_" native="true"/>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-      <zorder>periodRb_</zorder>
-      <zorder>periodToLabel_</zorder>
-      <zorder>periodCheck_</zorder>
-      <zorder>verticalSpacer</zorder>
-      <zorder>periodFromDateEdit_</zorder>
-      <zorder>periodToDateEdit_</zorder>
-      <zorder>periodToTimeEdit_</zorder>
-      <zorder>periodFromTimeEdit_</zorder>
-      <zorder>horizontalSpacer_2</zorder>
-      <zorder>periodRb_</zorder>
-      <zorder>periodWidget_</zorder>
-     </widget>
      <widget class="QWidget" name="attrTab_">
       <attribute name="title">
        <string>Attributes</string>
@@ -426,12 +392,6 @@
    <class>NodeQueryCombo</class>
    <extends>QComboBox</extends>
    <header>NodeQueryCombo.hpp</header>
-  </customwidget>
-  <customwidget>
-   <class>PeriodSearchWidget</class>
-   <extends>QWidget</extends>
-   <header>PeriodSearchWidget.hpp</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

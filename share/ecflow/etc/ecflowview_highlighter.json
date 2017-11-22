@@ -254,7 +254,12 @@
                 "pattern" : "(SELECT|FROM|WHERE|LIMIT)",
                 "colour"  : "rgb(73,73,73)",
                 "bold"    : "true"
-          }
+            },
+           "function" : {
+                "pattern" : "(now\\(\\))",
+                "colour"  : "rgb(255,73,73)",
+                "bold"    : "false"
+            }
        },
 
        "trigger"  : {

@@ -83,6 +83,18 @@ QToolButton[colorTb="1"] {
 }           
 
 /*-----------------------------
+ Options
+------------------------------*/
+
+QComboBox[options="1"] {
+    color : rgb(94,94,213);
+}
+
+QComboBox[options="1"]:selected {
+    background: white;
+}
+
+/*-----------------------------
   Notifications
 ------------------------------*/
 
