@@ -47,7 +47,7 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
         defs = Defs().add( 
             Suite("s1").add(
                 Family("f1").add(
-                    [ Task("t{}".format(t)) 
+                    [ Task("t{0}".format(t)) 
                       for t in ("a", "b", "c")] )))
         defs.save_as_defs("test.def")   # save defs to file "test.def"  
                      
@@ -60,7 +60,7 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
         defs = Defs()
         defs += [ Suite("s1") ]
         defs.s1 += [ Family("f1") ]
-        defs.s1.f1 += [ Task("t{}".format(t)) 
+        defs.s1.f1 += [ Task("t{0}".format(t)) 
                         for t in ("a", "b", "c")] 
         defs.save_as_defs("test.def")   # save defs to file "test.def"  
                      
@@ -71,9 +71,9 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
  
     def test_me3(self):
         defs = Defs().add(   
-          [ Suite("s{}".format(i)).add( 
-              [ Family("f{}".format(i)).add( 
-                  [ Task("t{}".format(i)) for i in range(1,6)] ) 
+          [ Suite("s{0}".format(i)).add( 
+              [ Family("f{0}".format(i)).add( 
+                  [ Task("t{0}".format(i)) for i in range(1,6)] ) 
                 for i in range(1,6)]  ) 
             for i in range(1,6) ] )
         assert len(defs)==5, " expected 5 suites but found " + str(len(defs))
@@ -155,7 +155,7 @@ class TestAddLimitInlimit(unittest.TestCase):
         f1 = s1.add_family("f1")
         f1.add_inlimit( "limitName4","/s1/f1",2) # limit name, path to limit, tokens consumed
         for i in range(1,4):
-            f1.add_task( "t{}".format(i))
+            f1.add_task( "t{0}".format(i))
              
         self.defs = defs
  
@@ -165,7 +165,7 @@ class TestAddLimitInlimit(unittest.TestCase):
                 Limit("limitName4", 10),
                 Family("f1").add(
                     InLimit("limitName4","/s1/f1",2),
-                    [ Task("t{}".format(t)) for t in range(1,4) ]
+                    [ Task("t{0}".format(t)) for t in range(1,4) ]
                     )))
  
         Ecf.set_debug_equality(True)
@@ -178,7 +178,7 @@ class TestAddLimitInlimit(unittest.TestCase):
         defs += [ Suite("s1") ]
         defs.s1 += [ Limit("limitName4", 10),Family("f1") ]
         defs.s1.f1 += [ InLimit("limitName4","/s1/f1",2),
-                        [ Task("t{}".format(t)) for t in range(1,4) ] ]
+                        [ Task("t{0}".format(t)) for t in range(1,4) ] ]
  
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -191,7 +191,7 @@ class TestAddLimitInlimit(unittest.TestCase):
                 s1.add_limit( "limitName4", 10 ) # name, maximum token
                 with s1.add_family("f1") as f1:
                     f1.add_inlimit( "limitName4","/s1/f1",2) # limit name, path to limit, tokens consumed
-                    f1 += [ Task("t{}".format(t)) for t in range(1,4) ]
+                    f1 += [ Task("t{0}".format(t)) for t in range(1,4) ]
                      
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -268,7 +268,7 @@ class TestAddTrigger(unittest.TestCase):
     def test_alternative1(self):
          
         defs = Defs().add(Suite("s1"))
-        defs.s1 += [ Task("t{}".format(i)) for i in range(1,4) ]
+        defs.s1 += [ Task("t{0}".format(i)) for i in range(1,4) ]
         defs.s1.t2 += [ Trigger("t1 == active and t3 == aborted"),
                         Complete("t3 == complete") ]
          
@@ -311,7 +311,7 @@ class TestAddLargeTrigger(unittest.TestCase):
     def test_alternative1(self):
          
         defs = Defs().add(Suite("s1"))
-        defs.s1 += [ Task("t{}".format(i)) for i in range(1,4) ]
+        defs.s1 += [ Task("t{0}".format(i)) for i in range(1,4) ]
         defs.s1.t3 += [ Trigger("t1 == complete"),
                         Trigger("t2 == active"),
                         Trigger("t2 == aborted",False) ]
@@ -486,7 +486,7 @@ class TestAddAutocancel(unittest.TestCase):
 
     def test_alternative1(self):
         defs = Defs().add( Suite("s1"))
-        defs.s1 += [ Task("t{}".format(i)) for i in range(1,7)]
+        defs.s1 += [ Task("t{0}".format(i)) for i in range(1,7)]
         defs.s1.t1 += [ Autocancel(3) ]
         defs.s1.t2 += [ Autocancel(1, 10, True) ] 
         defs.s1.t3 += [ Autocancel(TimeSlot(2,10), True) ]  
@@ -505,7 +505,7 @@ class TestAddRepeat(unittest.TestCase):
         
         def add_tasks(fam):
             for i in range(1,3):
-                fam.add_task(Task("t{}".format(i)))
+                fam.add_task(Task("t{0}".format(i)))
                 
         defs = Defs()
         s1 = defs.add_suite("s1")
@@ -537,24 +537,24 @@ class TestAddRepeat(unittest.TestCase):
                 Suite("s1").add(
                     Family("f1").add(
                        RepeatDate("YMD",20100111,20100115,2),
-                       [ Task("t{}".format(i)) for i in range(1,3) ] ),
+                       [ Task("t{0}".format(i)) for i in range(1,3) ] ),
                     Family("f2").add(
                        RepeatInteger("count",0,100,2),
-                       [ Task("t{}".format(i)) for i in range(1,3) ] ),
+                       [ Task("t{0}".format(i)) for i in range(1,3) ] ),
                     Family("f3").add(
                        RepeatEnumerated("enum",["red", "green", "blue" ] ),
-                       [ Task("t{}".format(i)) for i in range(1,3) ] ),
+                       [ Task("t{0}".format(i)) for i in range(1,3) ] ),
                     Family("f4").add(
                         RepeatString("enum",["a", "b", "c" ] ),
-                        [ Task("t{}".format(i)) for i in range(1,3) ] ),
+                        [ Task("t{0}".format(i)) for i in range(1,3) ] ),
                     Family("f5").add(
                         RepeatDay(1),
-                        [ Task("t{}".format(i)) for i in range(1,3) ] )))
+                        [ Task("t{0}".format(i)) for i in range(1,3) ] )))
 
     def test_alternative2(self):
         defs = Defs().add( Suite("s1") )
-        defs.s1 += [ Family("f{}".format(i)).add(
-                      [ Task("t{}".format(i)) for i in range(1,3) ]) 
+        defs.s1 += [ Family("f{0}".format(i)).add(
+                      [ Task("t{0}".format(i)) for i in range(1,3) ]) 
                     for i in range(1,6) ]   
         defs.s1.f1 += [ RepeatDate("YMD",20100111,20100115,2) ]
         defs.s1.f2 += [ RepeatInteger("count",0,100,2) ]

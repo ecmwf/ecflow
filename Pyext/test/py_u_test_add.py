@@ -48,30 +48,30 @@ class Test_crash(unittest.TestCase):
 class TestListComprehension(unittest.TestCase):
     def test_suite_list(self):
         defs = Defs()
-        defs += [ Suite("s{}".format(i)) for i in range(1,6) ]
+        defs += [ Suite("s{0}".format(i)) for i in range(1,6) ]
         self.assertEqual(len(defs), 5, " expected 5 suites but found " + str(len(defs)))
 
-        defs.add( [ Suite("s{}".format(i)) for i in range(6,11) ] )
+        defs.add( [ Suite("s{0}".format(i)) for i in range(6,11) ] )
         self.assertEqual(len(defs), 10, " expected 10 suites but found " + str(len(defs)))
 
     def test_family_list(self):
         defs = Defs()
-        defs += [ Suite("suite").add( [ Family("f{}".format(i)) for i in range(1,6)]  ) ]
+        defs += [ Suite("suite").add( [ Family("f{0}".format(i)) for i in range(1,6)]  ) ]
         self.assertEqual(len(defs.suite), 5, " expected 5 familes but found " + str(len(defs.suite)))
 
     def test_task_list(self):
         defs = Defs()
-        defs += [ Suite("suite").add( Family("f").add( [ Task("t{}".format(i)) for i in range(1,6)]  )) ]
+        defs += [ Suite("suite").add( Family("f").add( [ Task("t{0}".format(i)) for i in range(1,6)]  )) ]
         self.assertEqual(len(defs.suite.f), 5, " expected 5 task but found " + str(len(defs.suite.f)))
 
     def test_task_list2(self):
         defs = Defs()
         defs += [ Suite("suite").add( Task("x"), 
-                                      Family("f").add( [ Task("t{}".format(i)) for i in range(1,6)]  ),
+                                      Family("f").add( [ Task("t{0}".format(i)) for i in range(1,6)]  ),
                                       Task("y"),
-                                      [ Family("f{}".format(i)) for i in range(1,6) ],
+                                      [ Family("f{0}".format(i)) for i in range(1,6) ],
                                       Edit(a="b"),
-                                      [ Task("t{}".format(i)) for i in range(1,6) ],
+                                      [ Task("t{0}".format(i)) for i in range(1,6) ],
                                     )
                 ]
         self.assertEqual(len(defs.suite), 13, " expected 13 nodes but found " + str(len(defs.suite)))
@@ -80,9 +80,9 @@ class TestListComprehension(unittest.TestCase):
 
     def test_5Suite_with_5families_with_5tasks(self):
         defs = Defs().add(   
-                [ Suite("s{}".format(i)).add( 
-                    [ Family("f{}".format(i)).add( 
-                        [ Task("t{}".format(i)) 
+                [ Suite("s{0}".format(i)).add( 
+                    [ Family("f{0}".format(i)).add( 
+                        [ Task("t{0}".format(i)) 
                               for i in range(1,6)] ) 
                         for i in range(1,6)]  ) 
                     for i in range(1,6) ] )
@@ -95,9 +95,9 @@ class TestListComprehension(unittest.TestCase):
                 
     def test__5Suite_with_5families_with_5tasks(self):
         defs = Defs()
-        defs += [ Suite("s{}".format(i)).add( 
-                        [ Family("f{}".format(i)).add( 
-                            [ Task("t{}".format(i)) for i in range(1,6)] ) 
+        defs += [ Suite("s{0}".format(i)).add( 
+                        [ Family("f{0}".format(i)).add( 
+                            [ Task("t{0}".format(i)) for i in range(1,6)] ) 
                         for i in range(1,6)] ) 
                     for i in range(1,6) 
                 ]
@@ -281,7 +281,7 @@ class TestAddAll(unittest.TestCase):
                     Date(1,1,0),Date(28,2,1960),
                     Autocancel(3)
                     ),
-                [ Family("f{}".format(i)) for i in range(1,6)]
+                [ Family("f{0}".format(i)) for i in range(1,6)]
             )
         )
         t1 = defs.find_abs_node("/s1/t1")
