@@ -30,29 +30,6 @@ OutputModel::OutputModel(QObject *parent) :
 {
 }
 
-#if 0
-void OutputModel::setData(VDir_ptr dir,const std::string& jobout)
-{
-	beginResetModel();
-	dir_=dir;
-    joboutRow_=-1;
-
-    if(dir_)
-    {
-        for(int i=0; i < dir_->count(); i++)
-        {
-            if(dir_->fullName(i) == jobout)
-            {
-                joboutRow_=i;
-                break;
-            }
-        }
-    }
-
-	endResetModel();
-}
-#endif
-
 void OutputModel::setData(const std::vector<VDir_ptr>& dirs,const std::string& jobout)
 {
     beginResetModel();
@@ -84,7 +61,7 @@ void OutputModel::clearData()
 
 int OutputModel::columnCount( const QModelIndex& parent  ) const
 {
-    return 5;
+    return 6;
 }
 
 int OutputModel::rowCount( const QModelIndex& parent) const
@@ -124,14 +101,16 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 		switch(index.column())
 		{
 		case 0:
-            return QString::fromStdString(dir->path() + "/" + item->name_);
-		case 1:
+            return QString::fromStdString(item->name_);
+        case 1:
+            return QString::fromStdString(dir->path());
+        case 2:
 			return formatSize(item->size_);
-		case 2:
+        case 3:
 			return formatAgo(item->mtime_);
-		case 3:
-            return formatDate(item->mtime_);
         case 4:
+            return formatDate(item->mtime_);
+        case 5:
             return QString::fromStdString(dir->fetchModeStr());
 		default:
 			break;
@@ -143,9 +122,9 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 		{
 		case 0:
 			return QString::fromStdString(fullName(index));
-		case 1:
+        case 2:
 			return static_cast<float>(item->size_)/1024.;
-		case 2:
+        case 3:
 			return item->mtime_.toTime_t();
 		default:
 			break;
@@ -185,11 +164,12 @@ QVariant OutputModel::headerData( const int section, const Qt::Orientation orien
 
    	switch ( section )
 	{
-   	case 0: return tr("Name");
-   	case 1: return tr("Size");
-    case 2: return tr("Modified (ago)");
-    case 3: return tr("Modified");
-    case 4: return tr("Source");
+    case 0: return tr("Name");
+    case 1: return tr("Path");
+    case 2: return tr("Size");
+    case 3: return tr("Modified (ago)");
+    case 4: return tr("Modified");
+    case 5: return tr("Source");
    	default: return QVariant();
    	}
 
@@ -398,11 +378,11 @@ OutputDirLitsDelegate::OutputDirLitsDelegate(QWidget *parent) : QStyledItemDeleg
 void OutputDirLitsDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
-    if(index.column()==0)
+    if(index.column()==1)
     {
         QStyleOptionViewItem vopt(option);
         initStyleOption(&vopt, index);
-        vopt.textElideMode=Qt::ElideLeft;
+        vopt.textElideMode=Qt::ElideRight;
         QStyledItemDelegate::paint(painter,vopt,index);
     }
     else

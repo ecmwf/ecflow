@@ -211,7 +211,7 @@ QColor FileInfoLabel::fileSizeColour(qint64 size) const
 	return col;
 }
 
-void DirInfoLabel::update(VReply* reply) //VDir_ptr dir)
+void DirInfoLabel::update(VReply* reply)
 {
     VDir_ptr dir=reply->directory();
 

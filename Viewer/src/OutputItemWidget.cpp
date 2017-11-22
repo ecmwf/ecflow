@@ -55,6 +55,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	//--------------------------------
 
     messageLabel_->hide();
+    messageLabel_->setShowTypeTitle(false);
     warnLabel_->hide();
     fileLabel_->setProperty("fileInfo","1");
 
@@ -180,7 +181,6 @@ void OutputItemWidget::getLatestFile()
     messageLabel_->stopProgress();
     fileLabel_->clear();
     browser_->clear();
-    //dirLabel_->clear();
     dirMessageLabel_->hide();
     fetchInfo_->clearInfo();
 
@@ -218,7 +218,6 @@ void OutputItemWidget::clearContents()
     messageLabel_->hide();
     messageLabel_->stopProgress();
     fileLabel_->clear();      
-    //dirLabel_->clear();
     browser_->clearCursorCache();
     browser_->clear();
     reloadTb_->setEnabled(true);
@@ -398,20 +397,19 @@ void OutputItemWidget::infoReady(VReply* reply)
     //------------------------
     else
     {    
-        //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_ and
-        //is only supposed to display error messages!
+        //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_
+        //and is only supposed to display error messages!
 
         enableDir(true);
 
         //Update the dir widget and select the proper file in the list
         updateDir(reply->directories(),true);
 
+#if 0
         //Even thous infoReady is called there could be some error since we could
         //try to read multiple directories
         displayDirErrors(reply->errorTextVec());
-
-        //Update the dir label
-        //dirLabel_->update(reply);
+#endif
     }
 }
 
@@ -458,22 +456,6 @@ void OutputItemWidget::infoFailed(VReply* reply)
         enableDir(false);
 
         displayDirErrors(reply->errorTextVec());
-
-#if 0
-        QColor col(70,71,72);
-        QString s="<b><font color=\'" + col.name() +  "\'>Output directory</font></b>: ";
-        const std::vector<std::string>& et=reply->errorTextVec();
-        if(et.size() > 1)
-        {
-            for(size_t i=0; i < et.size(); i++)
-                s+="<b><font color=\'" + col.name() +  "\'>[" + QString::number(i+1) + "]</font></b> " +
-                        QString::fromStdString(et[i]) + ". &nbsp;&nbsp;";
-        }
-        else if(et.size() == 1)
-            s+=QString::fromStdString(et[0]);
-
-        dirMessageLabel_->showError(s);
-#endif
 
         //the timer is stopped. It will be restarted again if we get a local file or
         //a file via the logserver
@@ -532,11 +514,15 @@ UI_FUNCTION_LOG
         dirModel_->setData(dirs,op->joboutFileName());
         //dirWidget_->show();
 
+        //Adjust column width
         if(!dirColumnsAdjusted_)
         {
             dirColumnsAdjusted_=true;
-            for(int i=0; i< dirModel_->columnCount()-1; i++)              
-                 dirView_->resizeColumnToContents(i);
+            for(int i=0; i< dirModel_->columnCount()-1; i++)               
+                dirView_->resizeColumnToContents(i);
+
+            if(dirModel_->columnCount() > 1)
+                dirView_->setColumnWidth(1,dirView_->columnWidth(0));
 
         }
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
@@ -587,20 +573,27 @@ void OutputItemWidget::enableDir(bool status)
 }
 
 void OutputItemWidget::displayDirErrors(const std::vector<std::string>& errorVec)
-{
-    QColor col(70,71,72);
-    QString s=Viewer::formatBoldText("Output directory: ",col);
-    //const std::vector<std::string>& et=reply->errorTextVec();
-    if(errorVec.size() > 1)
+{   
+    QString s;
+    if(errorVec.size() > 0)
     {
-        for(size_t i=0; i < errorVec.size(); i++)
-            s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
-                QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
-    }
-    else if(errorVec.size() == 1)
-        s+=QString::fromStdString(errorVec[0]);
+        QColor col(70,71,72);
+        s=Viewer::formatBoldText("Output directory: ",col);
 
-    dirMessageLabel_->showError(s);
+        if(errorVec.size() > 1)
+        {
+            for(size_t i=0; i < errorVec.size(); i++)
+                s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
+                    QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
+        }
+        else if(errorVec.size() == 1)
+            s+=QString::fromStdString(errorVec[0]);
+    }
+
+    if(!s.isEmpty())
+        dirMessageLabel_->showError(s);
+    else
+        dirMessageLabel_->hide();
 }
 
 //---------------------------------------------
