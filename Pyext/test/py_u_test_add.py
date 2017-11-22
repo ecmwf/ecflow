@@ -17,6 +17,7 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
                   Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
                   VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import unittest 
+import sys
 
 class Test_crash(unittest.TestCase):
     def test_trigger_node_list(self):
@@ -239,8 +240,9 @@ class TestFamilyAdd(unittest.TestCase):
 
 class TestDefstatus(unittest.TestCase):
     def test_illegal_defstatus(self):
-        with self.assertRaises(RuntimeError):
-            Defstatus("fred")
+        if sys.version_info[0] == 2 and sys.version_info[1] >= 7:
+            with self.assertRaises(RuntimeError):
+                Defstatus("fred")
             
 class TestEdit(unittest.TestCase):
     def test_add_variable(self):
