@@ -393,7 +393,6 @@ QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)
 
 OutputDirLitsDelegate::OutputDirLitsDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
-
 }
 
 void OutputDirLitsDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -406,40 +405,9 @@ void OutputDirLitsDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
         vopt.textElideMode=Qt::ElideLeft;
         QStyledItemDelegate::paint(painter,vopt,index);
     }
-
-    /*if(index.column()==11)
-    {
-        QStyleOptionViewItem vopt(option);
-        initStyleOption(&vopt, index);
-
-        const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-        const QWidget* widget = vopt.widget;
-
-        QString text=index.data(Qt::DisplayRole).toString();
-        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-        if(text == "ERR")
-        {
-            QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-        }
-
-        painter->fillRect(textRect,Qt::red);
-        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-    }
-    */
     else
     {
         QStyledItemDelegate::paint(painter,option,index);
     }
 }
-
-#if 0
-QSize LogDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
-{
-    QSize size=QStyledItemDelegate::sizeHint(option,index);
-
-    size+=QSize(0,2);
-
-    return size;
-}
-#endif
 

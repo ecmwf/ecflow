@@ -34,6 +34,8 @@
 #include <QWidgetAction>
 #include <QFileDialog>
 
+#define _UI_OUTPUTITEMWIDGET_DEBUG
+
 int OutputItemWidget::updateDirTimeout_=1000*60;
 
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
@@ -200,8 +202,10 @@ void OutputItemWidget::getCurrentFile(bool doReload)
     if(info_)
 	{
 		std::string fullName=currentFullName();
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg()  << "output selected: " << fullName;
-		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+#endif
+        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
         op->file(fullName,!doReload);
 	}
 }
@@ -531,13 +535,13 @@ UI_FUNCTION_LOG
         if(!dirColumnsAdjusted_)
         {
             dirColumnsAdjusted_=true;
-            for(int i=0; i< dirModel_->columnCount()-1; i++)
-                dirView_->resizeColumnToContents(i);
+            for(int i=0; i< dirModel_->columnCount()-1; i++)              
+                 dirView_->resizeColumnToContents(i);
 
         }
-
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg() << " dir item count=" << dirModel_->rowCount();
-
+#endif
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;
 		dirView_->setCurrentIndex(dirSortModel_->fullNameToIndex(fullName));
