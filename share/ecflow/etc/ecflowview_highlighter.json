@@ -257,7 +257,7 @@
             },
            "function" : {
                 "pattern" : "(now\\(\\))",
-                "colour"  : "rgb(255,73,73)",
+                "colour"  : "rgb(44,112,174)",
                 "bold"    : "false"
             }
        },
