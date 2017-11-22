@@ -243,8 +243,7 @@ const char* ClientDoc::halt_server()      {
             ;
 }
 const char* ClientDoc::shutdown_server()  {
-   return
-            "Shut down the :term:`ecflow_server`\n\n"
+   return   "Shut down the :term:`ecflow_server`\n\n"
             "Stop server from scheduling new jobs.\n"
             "See :term:`server states`\n"
             "\nUsage::\n\n"
@@ -257,7 +256,8 @@ const char* ClientDoc::shutdown_server()  {
 }
 
 const char* ClientDoc::terminate_server() {
-   return   "Terminate the :term:`ecflow_server`::\n\n"
+   return   "Terminate the :term:`ecflow_server`\n\n"
+            "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.terminate_server()\n"
