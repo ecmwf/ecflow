@@ -283,7 +283,7 @@ NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGr
     label_=new QLabel(option->label() + ": ",parent_);
 
     modeCb_=new QComboBox(parent);
-    modeCb_->addItem("ANYTIME","any");
+    modeCb_->addItem("any time","any");
     modeCb_->addItem("in the last","last");
     modeCb_->addItem("in period","period");
 

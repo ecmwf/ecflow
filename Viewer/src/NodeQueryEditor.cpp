@@ -17,7 +17,6 @@
 #include "NodeQueryHandler.hpp"
 #include "NodeQueryOption.hpp"
 #include "NodeQueryOptionEdit.hpp"
-#include "PeriodSearchWidget.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
