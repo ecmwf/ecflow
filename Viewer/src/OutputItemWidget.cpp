@@ -23,7 +23,14 @@
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#else
 #include <QApplication>
+#endif
+
+#include <QClipboard>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -665,6 +672,29 @@ void OutputItemWidget::on_saveFileAsTb__clicked()
 	}
 }
 
+//-----------------------------------------
+// Copy file path
+//-----------------------------------------
+
+void OutputItemWidget::on_copyPathTb__clicked()
+{
+    std::string fullName=currentFullName();
+
+    if(!fullName.empty())
+    {
+        QString txt=QString::fromStdString(fullName);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QClipboard* cb=QGuiApplication::clipboard();
+        cb->setText(txt, QClipboard::Clipboard);
+        cb->setText(txt, QClipboard::Selection);
+#else
+        QClipboard* cb=QApplication::clipboard();
+        cb->setText(txt, QClipboard::Clipboard);
+        cb->setText(txt, QClipboard::Selection);
+#endif
+    }
+}
 
 //-------------------------
 // Update

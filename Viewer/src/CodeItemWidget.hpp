@@ -29,6 +29,7 @@ protected Q_SLOTS:
 	void on_fontSizeUpTb__clicked();
 	void on_fontSizeDownTb__clicked();
     void on_reloadTb__clicked();
+    void on_copyPathTb__clicked();
 
 Q_SIGNALS:
 	void editorFontSizeChanged();
@@ -36,6 +37,13 @@ Q_SIGNALS:
 protected:
 	void removeSpacer();
     virtual void reloadRequested()=0;
+    void setCurrentFileName(const std::string&);
+    void clearCurrentFileName();
+
+private:
+    std::string currentFileName_;
+
+
 };
 
 #endif

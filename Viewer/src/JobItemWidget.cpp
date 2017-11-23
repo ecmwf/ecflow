@@ -18,6 +18,7 @@
 JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
 	messageLabel_->hide();
+    messageLabel_->setShowTypeTitle(false);
 
 	//Remove the first spacer item!!
 	removeSpacer();
@@ -65,10 +66,12 @@ void JobItemWidget::clearContents()
     textEdit_->clear();
     messageLabel_->hide();
     reloadTb_->setEnabled(true);
+    clearCurrentFileName();
 }
 
 void JobItemWidget::infoReady(VReply* reply)
 {
+    Q_ASSERT(reply);
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
 
@@ -83,6 +86,8 @@ void JobItemWidget::infoReady(VReply* reply)
 
     fileLabel_->update(reply);
     reloadTb_->setEnabled(true);
+
+    setCurrentFileName(reply->fileName());
 }
 
 void JobItemWidget::infoProgress(VReply* reply)

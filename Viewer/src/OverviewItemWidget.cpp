@@ -28,6 +28,8 @@ OverviewItemWidget::OverviewItemWidget(QWidget *parent) :
 {
 	fileLabel_->hide();
 	externalTb_->hide();
+    copyPathTb_->hide();
+    messageLabel_->setShowTypeTitle(false);
 
 	textEdit_->setShowLineNumbers(false);
 
@@ -76,7 +78,7 @@ void OverviewItemWidget::reload()
 
 	textEdit_->clear();
     reloadTb_->setEnabled(false);
-	infoProvider_->info(info_);
+    infoProvider_->info(info_);
 }
 
 void OverviewItemWidget::clearContents()
@@ -88,7 +90,8 @@ void OverviewItemWidget::clearContents()
 
 void OverviewItemWidget::infoReady(VReply* reply)
 {
-	QString s=QString::fromStdString(reply->text());
+    Q_ASSERT(reply);
+    QString s=QString::fromStdString(reply->text());
 	textEdit_->setPlainText(s);
 
 	//Restore the vertical scrollbar pos

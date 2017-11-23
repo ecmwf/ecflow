@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0">
      <property name="spacing">
       <number>1</number>
      </property>
@@ -65,6 +65,23 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="copyPathTb_">
+       <property name="toolTip">
+        <string>Copy file path</string>
+       </property>
+       <property name="text">
+        <string>Copy file path</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/copy_path.svg</normaloff>:/viewer/copy_path.svg</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QToolButton" name="fontSizeUpTb_">
@@ -201,17 +218,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlainTextSearchLine</class>
-   <extends>QWidget</extends>
-   <header>PlainTextSearchLine.hpp</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>PlainTextEdit</class>
-   <extends>QPlainTextEdit</extends>
-   <header>PlainTextEdit.hpp</header>
-  </customwidget>
-  <customwidget>
    <class>MessageLabel</class>
    <extends>QWidget</extends>
    <header>MessageLabel.hpp</header>
@@ -221,6 +227,17 @@
    <class>FileInfoLabel</class>
    <extends>QLabel</extends>
    <header>FileInfoLabel.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>PlainTextSearchLine</class>
+   <extends>QWidget</extends>
+   <header>PlainTextSearchLine.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PlainTextEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>PlainTextEdit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

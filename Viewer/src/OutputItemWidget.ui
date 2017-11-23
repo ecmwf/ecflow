@@ -43,7 +43,7 @@
         <widget class="MessageLabel" name="messageLabel_" native="true"/>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0">
          <property name="spacing">
           <number>1</number>
          </property>
@@ -51,6 +51,23 @@
           <widget class="FileInfoLabel" name="fileLabel_">
            <property name="text">
             <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="copyPathTb_">
+           <property name="toolTip">
+            <string>Copy file path</string>
+           </property>
+           <property name="text">
+            <string>Copy file path</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/copy_path.svg</normaloff>:/viewer/copy_path.svg</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
