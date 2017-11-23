@@ -18,15 +18,15 @@
 const char* NodeAttrDoc::variable_doc()
 {
    return
-            "Defines a :term:`variable` on a :term:`node` for use in :term:`ecf script`.\n\n"
+            "Defines a `variable`_ on a `node`_ for use in `ecf script`_.\n\n"
             "A Node can have a number of variables.\n"
-            "These variables can be added at any node level: :term:`suite`, :term:`family` or :term:`task`.\n"
-            "The variables are names inside a pair of '%' characters in an :term:`ecf script`.\n"
-            "The content of a variable replaces the variable name in the :term:`ecf script` at\n"
+            "These variables can be added at any node level: `suite`_, `family`_ or `task`_.\n"
+            "The variables are names inside a pair of '%' characters in an `ecf script`_.\n"
+            "The content of a variable replaces the variable name in the `ecf script`_ at\n"
             "job submission time. When a variable is needed at submission time, it is first\n"
             "sought in the task itself. If it is not found, it is sought from the tasks parent\n"
-            "and so on, up through the node levels until found. See :term:`variable inheritance`\n"
-            "A undefined variable in a :term:`ecf script`, causes the :term:`task` to be :term:`aborted`,\n"
+            "and so on, up through the node levels until found. See `variable inheritance`_\n"
+            "A undefined variable in a `ecf script`_, causes the `task`_ to be `aborted`_,\n"
             "without the job being submitted.\n"
             "\nConstructor::\n\n"
             "   Variable(name,value)\n"
@@ -43,12 +43,12 @@ const char* NodeAttrDoc::variable_doc()
 const char* NodeAttrDoc::zombie_doc()
 {
    return
-            "The :term:`zombie` attribute defines how a :term:`zombie` should be handled in an automated fashion\n\n"
+            "The `zombie`_ attribute defines how a `zombie`_ should be handled in an automated fashion\n\n"
             "Very careful consideration should be taken before this attribute is added\n"
             "as it may hide a genuine problem.\n"
-            "It can be added to any :term:`node`. But is best defined at the :term:`suite` or :term:`family` level.\n"
-            "If there is no zombie attribute the default behaviour is to block the init,complete,abort :term:`child command`.\n"
-            "and *fob* the event,label,and meter :term:`child command`\n"
+            "It can be added to any `node`_. But is best defined at the `suite`_ or `family`_ level.\n"
+            "If there is no zombie attribute the default behaviour is to block the init,complete,abort `child command`_.\n"
+            "and *fob* the event,label,and meter `child command`_\n"
             "This attribute allows the server to make a automated response\n"
             "Please see: :py:class:`ecflow.ZombieType`, :py:class:`ecflow.ChildCmdType`, :py:class:`ecflow.ZombieUserActionType`\n"
             "\nConstructor::\n\n"
@@ -72,8 +72,8 @@ const char* NodeAttrDoc::zombie_doc()
 const char* NodeAttrDoc::zombie_type_doc()
 {
    return
-            ":term:`zombie` s are running jobs that fail authentication when communicating with the :term:`ecflow_server`.\n\n"
-            "See class :term:`zombie type` and :py:class:`ecflow.ZombieAttr` for further information.\n"
+            "`zombie`_ s are running jobs that fail authentication when communicating with the `ecflow_server`_.\n\n"
+            "See class `zombie type`_ and :py:class:`ecflow.ZombieAttr` for further information.\n"
             ;
 }
 
@@ -83,26 +83,26 @@ const char* NodeAttrDoc::zombie_user_action_type_doc()
             "ZombieUserActionType is used define an automated response. See class :py:class:`ZombieAttr`\n\n"
             "This can be either on the client side or on the server side\n"
             "\nclient side:\n\n"
-            "- fob:    The :term:`child command` always succeeds, i.e allowed to complete without blocking\n"
-            "- fail:   The :term:`child command` is asked to fail.\n"
-            "- block:  The :term:`child command` is asked to block. This is the default action for all child commands\n"
+            "- fob:    The `child command`_ always succeeds, i.e allowed to complete without blocking\n"
+            "- fail:   The `child command`_ is asked to fail.\n"
+            "- block:  The `child command`_ is asked to block. This is the default action for all child commands\n"
             "\nserver side:\n\n"
-            "- adopt:  Allows the password supplied with the :term:`child command` s, to be adopted by the server\n"
-            "- kill:   Kills the zombie process associated with the :term:`child command` using ECF_KILL_CMD.\n"
+            "- adopt:  Allows the password supplied with the `child command`_ s, to be adopted by the server\n"
+            "- kill:   Kills the zombie process associated with the `child command`_ using ECF_KILL_CMD.\n"
             "          path zombies will need to be killed manually. If kill is specified for path zombies\n"
             "          they will be fobed, i.e allowed to complete without blocking the job.\n"
-            "- remove: :term:`ecflow_server` removes the :term:`zombie` from the zombie list.\n"
-            "          The child continues blocking. The :term:`zombie` may well re-appear\n\n"
-            "Note: Only adopt will allow the :term:`child command` to continue and change the :term:`node` tree\n"
+            "- remove: `ecflow_server`_ removes the `zombie`_ from the zombie list.\n"
+            "          The child continues blocking. The `zombie`_ may well re-appear\n\n"
+            "Note: Only adopt will allow the `child command`_ to continue and change the `node`_ tree\n"
             ;
 }
 
 const char* NodeAttrDoc::child_cmd_type_doc()
 {
    return
-            "ChildCmdType represents the different :term:`child command` s.\n"
+            "ChildCmdType represents the different `child command`_ s.\n"
             "This type is used as a parameter to the class :py:class:`ecflow.ZombieAttr`\n\n"
-            "Child commands are called within a :term:`job file`::\n\n"
+            "Child commands are called within a `job file`_::\n\n"
             "  ChildCmdType::init     corresponds to : ecflow_client --init=<process_id>\n"
             "  ChildCmdType::event    corresponds to : ecflow_client --event=<event_name | number>\n"
             "  ChildCmdType::meter    corresponds to : ecflow_client --meter=<meter_name>, <meter_value>\n"
@@ -116,16 +116,16 @@ const char* NodeAttrDoc::child_cmd_type_doc()
 const char* NodeAttrDoc::label_doc()
 {
    return
-            "A :term:`label` has a name and value and provides a way of displaying information in a GUI.\n\n"
+            "A `label`_ has a name and value and provides a way of displaying information in a GUI.\n\n"
             "The value can be anything(ASCII) as it can not be used in triggers\n"
             "The value of the label is set to be the default value given in the definition\n"
-            "when the :term:`suite` is begun. This is useful in repeated suites: A task sets the label\n"
-            "to be something, e.g, the number of observations, and once the :term:`suite` is :term:`complete`\n"
+            "when the `suite`_ is begun. This is useful in repeated suites: A task sets the label\n"
+            "to be something, e.g, the number of observations, and once the `suite`_ is `complete`_\n"
             "and the next day starts) the number of observations is cleared.\n"
             "Labels can be set at any level: Suite,Family,Task\n"
             "There are two ways of updating the label\n"
-            "- A :term:`child command` can be used to automatically update the label on a :term:`task`\n"
-            "- By using the alter command, the labels on :term:`suite` :term:`family` and :term:`task` can be changed manually\n"
+            "- A `child command`_ can be used to automatically update the label on a `task`_\n"
+            "- By using the alter command, the labels on `suite`_ `family`_ and `task`_ can be changed manually\n"
             "\nConstructor::\n\n"
             "   Label(name,value)\n"
             "      string name:  The name of the label\n"
@@ -142,12 +142,12 @@ const char* NodeAttrDoc::label_doc()
 const char* NodeAttrDoc::limit_doc()
 {
    return
-            ":term:`limit` provides a simple load management\n\n"
-            "i.e. by limiting the number of :term:`task` s submitted by a server.\n"
-            "Limits are typically defined at the :term:`suite` level, or defined in a\n"
+            "`limit`_ provides a simple load management\n\n"
+            "i.e. by limiting the number of `task`_ s submitted by a server.\n"
+            "Limits are typically defined at the `suite`_ level, or defined in a\n"
             "separate suite, so that they can be used by multiple suites.\n"
-            "Once a limit is defined in a :term:`suite definition`, you must also assign families/tasks to use\n"
-            "this limit. See  :term:`inlimit` and :py:class:`ecflow.InLimit`\n"
+            "Once a limit is defined in a `suite definition`_, you must also assign families/tasks to use\n"
+            "this limit. See  `inlimit`_ and :py:class:`ecflow.InLimit`\n"
             "\nConstructor::\n\n"
             "   Limit(name,value)\n"
             "      string name: the name of the limit\n"
@@ -162,7 +162,7 @@ const char* NodeAttrDoc::limit_doc()
 const char* NodeAttrDoc::inlimit_doc()
 {
    return
-            ":term:`inlimit` is used in conjunction with :term:`limit` to provide simple load management::\n\n"
+            "`inlimit`_ is used in conjunction with `limit`_ to provide simple load management::\n\n"
             "   suite x\n"
             "      limit fast 1\n"
             "      family f\n"
@@ -170,7 +170,7 @@ const char* NodeAttrDoc::inlimit_doc()
             "         task t1\n"
             "         task t2\n\n"
             "Here 'fast' is the name of limit and the number defines the maximum number of tasks\n"
-            "that can run simultaneously using this limit. Thats why you do not need a :term:`trigger`\n"
+            "that can run simultaneously using this limit. Thats why you do not need a `trigger`_\n"
             "between tasks 't1' and 't2'. There is no need to change the tasks. The jobs are\n"
             "created in the order they are defined\n"
             "\nConstructor::\n\n"
@@ -190,21 +190,21 @@ const char* NodeAttrDoc::inlimit_doc()
 const char* NodeAttrDoc::event_doc()
 {
    return
-            ":term:`event` s are used as signal mechanism.\n\n"
-            "Typically they would be used to signal partial completion of a :term:`task`\n"
-            "and to be able to :term:`trigger` another job, which is waiting for this partial completion.\n"
-            "Only tasks can have events that are automatically set via a :term:`child command` s, see below.\n"
-            "Events are cleared automatically when a :term:`node` is re-queued or begun.\n"
+            "`event`_ s are used as signal mechanism.\n\n"
+            "Typically they would be used to signal partial completion of a `task`_\n"
+            "and to be able to `trigger`_ another job, which is waiting for this partial completion.\n"
+            "Only tasks can have events that are automatically set via a `child command`_ s, see below.\n"
+            "Events are cleared automatically when a `node`_ is re-queued or begun.\n"
             "Suites and Families can have tasks, but these events must be set via the Alter command\n"
             "Multiple events can be added to a task.\n"
             "An Event has a number and a optional name. Events are typically used\n"
-            "in :term:`trigger` and :term:`complete expression` , to control job creation.\n"
-            "Event are fired within a :term:`job file`, i.e.::\n\n"
+            "in `trigger`_ and `complete expression`_ , to control job creation.\n"
+            "Event are fired within a `job file`_, i.e.::\n\n"
             "   ecflow_client --init=$$\n"
             "   ecflow_client --event=foo\n"
             "   ecflow_client --complete\n\n"
-            "Hence the defining of an event for a :term:`task`, should be followed with the addition of ecflow_client --event\n"
-            ":term:`child command` in the corresponding :term:`ecf script` file.\n"
+            "Hence the defining of an event for a `task`_, should be followed with the addition of ecflow_client --event\n"
+            "`child command`_ in the corresponding `ecf script`_ file.\n"
             "\nConstructor::\n\n"
             "   Event(number, optional<name = ''>)\n"
             "      int number            : The number must be >= 0\n"
@@ -220,10 +220,10 @@ const char* NodeAttrDoc::event_doc()
 const char* NodeAttrDoc::meter_doc()
 {
    return
-            ":term:`meter` s can be used to indicate proportional completion of :term:`task`\n\n"
-            "They are able to :term:`trigger` another job, which is waiting on this proportion.\n"
+            "`meter`_ s can be used to indicate proportional completion of `task`_\n\n"
+            "They are able to `trigger`_ another job, which is waiting on this proportion.\n"
             "Can also be used to indicate progress of a job. Meters can be used in\n"
-            ":term:`trigger` and :term:`complete expression`.\n"
+            "`trigger`_ and `complete expression`_.\n"
             "\nConstructor::\n\n"
             "   Meter(name,min,max,<optional>color_change)\n"
             "      string name                : The meter name\n"
@@ -234,22 +234,22 @@ const char* NodeAttrDoc::meter_doc()
             "- raises IndexError when an invalid Meter is specified\n"
             "\nUsage:\n\n"
             "Using a meter requires:\n\n"
-            "- Defining a meter on a :term:`task`::\n\n"
+            "- Defining a meter on a `task`_::\n\n"
             "     meter = Meter(\"progress\",0,100,100)\n"
             "     task.add_meter(meter)\n\n"
-            "- Updating the corresponding :term:`ecf script` file with the meter :term:`child command`::\n\n"
+            "- Updating the corresponding `ecf script`_ file with the meter `child command`_::\n\n"
             "     ecflow_client --init=$$\n"
             "     for  i in 10 20 30 40 50 60 80 100; do\n"
             "         ecflow_client --meter=progress $i\n"
             "         sleep 2 # or do some work\n"
             "     done\n"
             "     ecflow_client --complete\n\n"
-            "- Optionally addition in a :term:`trigger` or :term:`complete expression` for job control::\n\n"
+            "- Optionally addition in a `trigger`_ or `complete expression`_ for job control::\n\n"
             "     trigger task:progress ge 60\n\n"
             "  trigger and complete expression should *avoid* using equality i.e::\n\n"
             "     trigger task:progress == 60\n\n"
             "  Due to network issues the meter event's may **not** arrive in sequential order\n"
-            "  hence the :term:`ecflow_server` will ignore meter value's, which are less than the current value\n"
+            "  hence the `ecflow_server`_ will ignore meter value's, which are less than the current value\n"
             "  as a result triggers's which use meter equality may never evaluate\n"
             ;
 }
@@ -257,11 +257,11 @@ const char* NodeAttrDoc::meter_doc()
 const char* NodeAttrDoc::date_doc()
 {
    return
-            "Used to define a :term:`date` dependency.\n\n"
-            "There can be multiple Date dependencies for a :term:`node`.\n"
+            "Used to define a `date`_ dependency.\n\n"
+            "There can be multiple Date dependencies for a `node`_.\n"
             "Any of the 3 attributes, i.e. day, month, year can be wild carded using a zero\n"
-            "If a hybrid :term:`clock` is defined on a suite, any node held by a date dependency\n"
-            "will be set to :term:`complete` at the beginning of the :term:`suite`, without the\n"
+            "If a hybrid `clock`_ is defined on a suite, any node held by a date dependency\n"
+            "will be set to `complete`_ at the beginning of the `suite`_, without the\n"
             "task ever being dispatched otherwise, the suite would never complete.\n"
             "\nConstructor::\n\n"
             "   Date(day,month,year)\n"
@@ -279,10 +279,10 @@ const char* NodeAttrDoc::date_doc()
 const char* NodeAttrDoc::day_doc()
 {
    return
-            "Defines a :term:`day` dependency.\n\n"
-            "There can be multiple day dependencies. If a hybrid :term:`clock` is defined\n"
-            "on a suite, any node held by a day dependency will be set to :term:`complete` at the\n"
-            "beginning of the :term:`suite`, without the task ever being dispatched otherwise\n"
+            "Defines a `day`_ dependency.\n\n"
+            "There can be multiple day dependencies. If a hybrid `clock`_ is defined\n"
+            "on a suite, any node held by a day dependency will be set to `complete`_ at the\n"
+            "beginning of the `suite`_, without the task ever being dispatched otherwise\n"
             "the suite would never complete.\n"
             "\nConstructor::\n\n"
             "   Day(Days)\n"
@@ -308,7 +308,7 @@ const char* NodeAttrDoc::days_enum_doc()
 const char* NodeAttrDoc::time_doc()
 {
    return
-            "Is used to define a :term:`time` dependency\n\n"
+            "Is used to define a `time`_ dependency\n\n"
             "This can then control job submission.\n"
             "There can be multiple time dependencies for a node, however overlapping times may\n"
             "cause unexpected results. The time dependency can be made relative to the beginning\n"
@@ -340,8 +340,8 @@ const char* NodeAttrDoc::time_doc()
 const char* NodeAttrDoc::today_doc()
 {
    return
-            ":term:`today` is a time dependency that does not wrap to tomorrow.\n\n"
-            "If the :term:`suite` s begin time is past the time given for the Today,\n"
+            "`today`_ is a time dependency that does not wrap to tomorrow.\n\n"
+            "If the `suite`_ s begin time is past the time given for the Today,\n"
             "then the node is free to run.\n"
             "\nConstructor::\n\n"
             "   Today(hour,minute,relative<optional> = false)\n"
@@ -371,9 +371,9 @@ const char* NodeAttrDoc::today_doc()
 const char* NodeAttrDoc::late_doc()
 {
    return
-            "Sets the :term:`late` flag.\n\n"
-            "When a Node is classified as being late, the only action :term:`ecflow_server` can take\n"
-            "is to set a flag. The GUI will display this alongside the :term:`node` name as a icon.\n"
+            "Sets the `late`_ flag.\n\n"
+            "When a Node is classified as being late, the only action `ecflow_server`_ can take\n"
+            "is to set a flag. The GUI will display this alongside the `node`_ name as a icon.\n"
             "Only one Late attribute can be specified on a Node.\n"
             "\nConstructor::\n\n"
             "   Late()\n"
@@ -382,8 +382,8 @@ const char* NodeAttrDoc::late_doc()
             "   late.submitted( 0,15 )\n"
             "   late.active(   20,0 )\n"
             "   late.complete(  2,0, true )\n\n"
-            "This is interpreted as: The node can stay :term:`submitted` for a maximum of 15 minutes\n"
-            "and it must become :term:`active` by 20:00 and the run time must not exceed 2 hours"
+            "This is interpreted as: The node can stay `submitted`_ for a maximum of 15 minutes\n"
+            "and it must become `active`_ by 20:00 and the run time must not exceed 2 hours"
             ;
 }
 
@@ -391,7 +391,7 @@ const char* NodeAttrDoc::autocancel_doc()
 {
    return
             "Provides a way to automatically delete/remove a node which has completed\n\n"
-            "See :term:`autocancel`\n"
+            "See `autocancel`\n"
             "\nConstructor::\n\n"
             "   Autocancel(TimeSlot,relative)\n"
             "      TimeSlot single: A time\n"
@@ -420,9 +420,9 @@ const char* NodeAttrDoc::repeat_doc()
 const char* NodeAttrDoc::repeat_date_doc()
 {
    return
-            "Allows a :term:`node` to be repeated using a yyyymmdd format\n\n"
-            "A node can only have one :term:`repeat`.\n"
-            "The repeat can be referenced in :term:`trigger` expressions.\n"
+            "Allows a `node`_ to be repeated using a yyyymmdd format\n\n"
+            "A node can only have one `repeat`_.\n"
+            "The repeat can be referenced in `trigger`_ expressions.\n"
             "\nConstructor::\n\n"
             "   RepeatDate(variable,start,end,delta)\n"
             "      string variable:     The name of the repeat. The current date can referenced in\n"
@@ -441,9 +441,9 @@ const char* NodeAttrDoc::repeat_date_doc()
 const char* NodeAttrDoc::repeat_integer_doc()
 {
    return
-            "Allows a :term:`node` to be repeated using a integer range.\n\n"
-            "A node can only have one :term:`repeat`.\n"
-            "The repeat can be referenced in :term:`trigger` expressions.\n"
+            "Allows a `node`_ to be repeated using a integer range.\n\n"
+            "A node can only have one `repeat`_.\n"
+            "The repeat can be referenced in `trigger`_ expressions.\n"
             "\nConstructor::\n\n"
             "   RepeatInteger(variable,start,end,step)\n"
             "      string variable:     The name of the repeat. The current integer value can be\n"
@@ -460,8 +460,8 @@ const char* NodeAttrDoc::repeat_enumerated_doc()
 {
    return
             "Allows a node to be repeated using a enumerated list.\n\n"
-            "A :term:`node` can only have one :term:`repeat`.\n"
-            "The repeat can be referenced in :term:`trigger` expressions.\n"
+            "A `node`_ can only have one `repeat`_.\n"
+            "The repeat can be referenced in `trigger`_ expressions.\n"
             "\nConstructor::\n\n"
             "   RepeatEnumerated(variable,list)\n"
             "      string variable:     The name of the repeat. The current enumeration index can be\n"
@@ -475,9 +475,9 @@ const char* NodeAttrDoc::repeat_enumerated_doc()
 const char* NodeAttrDoc::repeat_string_doc()
 {
    return
-            "Allows a :term:`node` to be repeated using a string list.\n\n"
-            "A :term:`node` can only have one :term:`repeat`.\n"
-            "The repeat can be referenced in :term:`trigger` expressions.\n"
+            "Allows a `node`_ to be repeated using a string list.\n\n"
+            "A `node`_ can only have one `repeat`_.\n"
+            "The repeat can be referenced in `trigger`_ expressions.\n"
             "\nConstructor::\n\n"
             "   RepeatString(variable,list)\n"
             "      string variable:     The name of the repeat. The current index of the string list can be\n"
@@ -492,7 +492,7 @@ const char* NodeAttrDoc::repeat_day_doc()
 {
    return
             "A repeat that is infinite.\n\n"
-            "A node can only have one :term:`repeat`.\n"
+            "A node can only have one `repeat`_.\n"
             "\nConstructor::\n\n"
             "   RepeatDay(step)\n"
             "      int step:     The step.\n"
@@ -504,9 +504,9 @@ const char* NodeAttrDoc::repeat_day_doc()
 const char* NodeAttrDoc::cron_doc()
 {
    return
-            ":term:`cron` defines a time dependency for a node.\n\n"
+            "`cron`_ defines a time dependency for a node.\n\n"
             "Crons are repeated indefinitely.\n\n"
-            "Avoid having a cron and :term:`repeat` at the same level,\n"
+            "Avoid having a cron and `repeat`_ at the same level,\n"
             "as both provide looping functionality\n"
             "\nConstructor::\n\n"
             "   Cron()\n"
@@ -539,8 +539,8 @@ const char* NodeAttrDoc::cron_doc()
 const char* NodeAttrDoc::clock_doc()
 {
    return
-            "Specifies the :term:`clock` type used by the :term:`suite`.\n\n"
-            "Only suites can have a :term:`clock`.\n"
+            "Specifies the `clock`_ type used by the `suite`_.\n\n"
+            "Only suites can have a `clock`_.\n"
             "A gain can be specified to offset from the given date.\n"
             "\nConstructor::\n\n"
             "   Clock(day,month,year,hybrid)\n"

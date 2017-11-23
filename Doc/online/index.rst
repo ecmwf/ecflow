@@ -33,17 +33,7 @@ Introduction
 Contents
 --------
 
-* :ref:`tutorial`
-* :ref:`install`
-* :ref:`faq`
-* :ref:`grammer`
-* :ref:`strategy`
 * :ref:`python_api`
-* :ref:`cookbook`
-* :ref:`migration`
-* :ref:`glossary`
-* :ref:`change_history`
-* :ref:`release_process`
 
 Reference
 ---------
@@ -52,17 +42,7 @@ Reference
    :maxdepth: 2
    :titlesonly:
      
-   tutorial/tutorial
-   install/install
-   faq/faq
-   grammar/grammar
-   strategy/strategy
    python_api/python_api
-   cookbook/cookbook
-   migration/migration
-   glossary
-   change_history/change_history
-   release_process/release_process
 
 Indices and tables
 ------------------

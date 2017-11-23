@@ -31,6 +31,7 @@
 #include "Edit.hpp"
 
 #include "DefsDoc.hpp"
+#include "GlossaryDoc.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -240,7 +241,7 @@ void export_Defs()
 	.def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
 	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
 	.def("__iadd__",              &defs_iadd)
-	.def("add",                   raw_function(add,1),"Add suite or variables.")
+	.def("add",                   raw_function(add,1),GlossaryDoc::list())
 	.def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
 	.def("add_suite",             &Defs::add_suite )
 	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())
@@ -252,15 +253,15 @@ void export_Defs()
 	.def("sort_attributes",       &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
 	.def("sort_attributes",       &Defs::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
 	.def("delete_variable",       &delete_variable,"An empty string will delete all user variables")
-	.def("find_suite",            &Defs::findSuite,"Given a name, find the corresponding :term:`suite`")
-	.def("find_abs_node",         &Defs::findAbsNode,"Given a path, find the the :term:`node`")
-	.def("get_all_nodes",         &get_all_nodes,"Returns all the :term:`node` s in the definition")
-	.def("get_all_tasks",         &get_all_tasks,"Returns all the :term:`task` nodes")
-	.def("has_time_dependencies", &Defs::hasTimeDependencies,"returns True if the :term:`suite definition` has any time :term:`dependencies`")
-	.def("save_as_checkpt",       &save_as_checkpt, "Save the in memory :term:`suite definition` as a :term:`check point` file. This includes all node state.")
-	.def("restore_from_checkpt",  &restore_from_checkpt, "Restore the :term:`suite definition` from a :term:`check point` file stored on disk")
-	.def("save_as_defs",          &save_as_defs,   "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
-	.def("save_as_defs",          &save_as_defs_1, "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
+	.def("find_suite",            &Defs::findSuite,"Given a name, find the corresponding `suite`_")
+	.def("find_abs_node",         &Defs::findAbsNode,"Given a path, find the the `node`_")
+	.def("get_all_nodes",         &get_all_nodes,"Returns all the `node`_ s in the definition")
+	.def("get_all_tasks",         &get_all_tasks,"Returns all the `task`_ nodes")
+	.def("has_time_dependencies", &Defs::hasTimeDependencies,"returns True if the `suite definition`_ has any time `dependencies`_")
+	.def("save_as_checkpt",       &save_as_checkpt, "Save the in memory `suite definition`_ as a `check point`_ file. This includes all node state.")
+	.def("restore_from_checkpt",  &restore_from_checkpt, "Restore the `suite definition`_ from a `check point`_ file stored on disk")
+	.def("save_as_defs",          &save_as_defs,   "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
+	.def("save_as_defs",          &save_as_defs_1, "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
 	.def("check",                 &check_defs,               DefsDoc::check())
 	.def("simulate",              &simulate,                 DefsDoc::simulate())
 	.def("check_job_creation",    &check_job_creation,       DefsDoc::check_job_creation_doc() )
@@ -268,9 +269,9 @@ void export_Defs()
 	.def("generate_scripts",      &Defs::generate_scripts,   DefsDoc::generate_scripts_doc() )
 	.def("get_state",             &Defs::state )
 	.def("get_server_state",      &get_server_state,         DefsDoc::get_server_state() )
-	.add_property("suites",       boost::python::range( &Defs::suite_begin, &Defs::suite_end),"Returns a list of :term:`suite` s")
-	.add_property("externs",      boost::python::range( &Defs::extern_begin, &Defs::extern_end),"Returns a list of :term:`extern` s" )
-	.add_property("user_variables", boost::python::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined :term:`variable` s" )
-	.add_property("server_variables", boost::python::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server :term:`variable` s" )
+	.add_property("suites",       boost::python::range( &Defs::suite_begin, &Defs::suite_end),"Returns a list of `suite`_ s")
+	.add_property("externs",      boost::python::range( &Defs::extern_begin, &Defs::extern_end),"Returns a list of `extern`_ s" )
+	.add_property("user_variables", boost::python::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined `variable`_ s" )
+	.add_property("server_variables", boost::python::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server `variable`_ s" )
 	;
 }
