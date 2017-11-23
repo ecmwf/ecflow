@@ -219,7 +219,6 @@ static object defs_iadd(defs_ptr self, const boost::python::list& list) {
 
 static suite_ptr defs_getattr(defs_ptr self, const std::string& attr) {
    // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
-   size_t pos = 0;
    suite_ptr child = self->findSuite(attr);
    if (child) { return child;}
    std::stringstream ss; ss << "ExportDefs::defs_getattr  can not find suite node " << attr << " from node ";
