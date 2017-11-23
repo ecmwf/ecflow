@@ -406,7 +406,7 @@ void OutputItemWidget::infoReady(VReply* reply)
         updateDir(reply->directories(),true);
 
 #if 0
-        //Even thous infoReady is called there could be some error since we could
+        //Even though infoReady is called there could be some errors since we could
         //try to read multiple directories
         displayDirErrors(reply->errorTextVec());
 #endif
