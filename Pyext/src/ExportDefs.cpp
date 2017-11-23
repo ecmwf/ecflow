@@ -28,8 +28,10 @@
 #include "JobCreationCtrl.hpp"
 #include "Simulator.hpp"
 #include "BoostPythonUtil.hpp"
+#include "Edit.hpp"
 
 #include "DefsDoc.hpp"
+#include "GlossaryDoc.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -167,22 +169,35 @@ void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recur
 size_t defs_len(defs_ptr self) { return self->suiteVec().size();}
 bool defs_container(defs_ptr self, const std::string& name){return (self->findSuite(name)) ?  true : false;}
 
+static void do_add(defs_ptr self, const boost::python::object& arg) {
+   if (arg.ptr() == object().ptr())  return; // *IGNORE* None
+   if (boost::python::extract<Variable>(arg).check()) {
+      Variable var = boost::python::extract<Variable>(arg);
+      self->set_server().add_or_update_user_variables(var.name(),var.theValue());
+   }
+   else if (boost::python::extract<Edit>(arg).check()) {
+      Edit edit = boost::python::extract<Edit>(arg);
+      const std::vector<Variable>& vec = edit.variables();
+      for(size_t i=0; i < vec.size(); i++) self->set_server().add_or_update_user_variables(vec[i].name(),vec[i].theValue());
+   }
+   else if (boost::python::extract<dict>(arg).check())     add_variable_dict(self,boost::python::extract<dict>(arg));
+   else if (boost::python::extract<suite_ptr>(arg).check()) self->addSuite(boost::python::extract<suite_ptr>(arg)) ;
+   else if (boost::python::extract<boost::python::list>(arg).check()){
+      boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
+      int the_list_size = len(the_list);
+      for(int i = 0; i < the_list_size; ++i) do_add(self,the_list[i]); // recursive
+   }
+   else throw std::runtime_error("ExportDefs::add : Unknown type");
+}
+
 static object add(tuple args, dict kwargs) {
    int the_list_size = len(args);
    defs_ptr self = boost::python::extract<defs_ptr>(args[0]); // self
-   if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a defs");
+   if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
 
-   for (int i = 1; i < the_list_size; ++i) {
-      if (boost::python::extract<Variable>(args[i]).check()) {
-         Variable var = boost::python::extract<Variable>(args[i]);
-         self->set_server().add_or_update_user_variables(var.name(),var.theValue());
-      }
-      else if (boost::python::extract<dict>(args[i]).check())      add_variable_dict(self,boost::python::extract<dict>(args[i]) );
-      else if (boost::python::extract<suite_ptr>(args[i]).check()) self->addSuite(boost::python::extract<suite_ptr>(args[i])) ;
-      else throw std::runtime_error("ExportDefs::add : Unknown type");
-   }
+   for (int i = 1; i < the_list_size; ++i)  do_add(self,args[i]);
 
-   boost::python::list keys =  kwargs.keys();
+   boost::python::list keys = kwargs.keys();
    const int no_of_keys = len(keys);
    for(int i = 0; i < no_of_keys; ++i) {
       boost::python::object curArg = keys[i];
@@ -193,6 +208,13 @@ static object add(tuple args, dict kwargs) {
       }
    }
    return object(self); // return defs as python object, relies class_<Defs>... for type registration
+}
+
+static object defs_iadd(defs_ptr self, const boost::python::list& list) {
+   // std::cout << "defs_iadd  list " << self->name() << "\n";
+   int the_list_size = len(list);
+   for(int i = 0; i < the_list_size; ++i) do_add(self,list[i]);
+   return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
 static suite_ptr defs_getattr(defs_ptr self, const std::string& attr) {
@@ -210,45 +232,46 @@ void export_Defs()
 	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))
    .def("__init__",make_constructor(&create_defs),         DefsDoc::add_definition_doc())
 	.def(self == self )                                           // __eq__
-   .def("__copy__",              copyObject<Defs>)               // __copy__ uses copy constructor
+	.def("__copy__",              copyObject<Defs>)               // __copy__ uses copy constructor
 	.def("__str__",               &Defs::toString)                // __str__
-   .def("__enter__",             &defs_enter)                    // allow with statement, hence indentation support
-   .def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support
-   .def("__len__",               &defs_len)                      // Sized protocol
-   .def("__contains__",          &defs_container)                // Container protocol
-   .def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
-   .def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
-   .def("add",                   raw_function(add,1))
-   .def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
-   .def("add_suite",             &Defs::add_suite )
- 	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())
+	.def("__enter__",             &defs_enter)                    // allow with statement, hence indentation support
+	.def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support
+	.def("__len__",               &defs_len)                      // Sized protocol
+	.def("__contains__",          &defs_container)                // Container protocol
+	.def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
+	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
+	.def("__iadd__",              &defs_iadd)
+	.def("add",                   raw_function(add,1),GlossaryDoc::list())
+	.def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
+	.def("add_suite",             &Defs::add_suite )
+	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())
 	.def("auto_add_externs",      &Defs::auto_add_externs,  DefsDoc::add_extern_doc())
-   .def("add_variable",          &add_variable,            DefsDoc::add_variable_doc())
-   .def("add_variable",          &add_variable_int)
-   .def("add_variable",          &add_variable_var)
-   .def("add_variable",          &add_variable_dict)
-   .def("sort_attributes",       &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
-   .def("sort_attributes",       &Defs::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
-   .def("delete_variable",       &delete_variable,"An empty string will delete all user variables")
-	.def("find_suite",            &Defs::findSuite,"Given a name, find the corresponding :term:`suite`")
-   .def("find_abs_node",         &Defs::findAbsNode,"Given a path, find the the :term:`node`")
-   .def("get_all_nodes",         &get_all_nodes,"Returns all the :term:`node` s in the definition")
-   .def("get_all_tasks",         &get_all_tasks,"Returns all the :term:`task` nodes")
-	.def("has_time_dependencies", &Defs::hasTimeDependencies,"returns True if the :term:`suite definition` has any time :term:`dependencies`")
-	.def("save_as_checkpt",       &save_as_checkpt, "Save the in memory :term:`suite definition` as a :term:`check point` file. This includes all node state.")
-	.def("restore_from_checkpt",  &restore_from_checkpt, "Restore the :term:`suite definition` from a :term:`check point` file stored on disk")
-   .def("save_as_defs",          &save_as_defs,   "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
-   .def("save_as_defs",          &save_as_defs_1, "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
+	.def("add_variable",          &add_variable,            DefsDoc::add_variable_doc())
+	.def("add_variable",          &add_variable_int)
+	.def("add_variable",          &add_variable_var)
+	.def("add_variable",          &add_variable_dict)
+	.def("sort_attributes",       &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
+	.def("sort_attributes",       &Defs::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
+	.def("delete_variable",       &delete_variable,"An empty string will delete all user variables")
+	.def("find_suite",            &Defs::findSuite,"Given a name, find the corresponding `suite`_")
+	.def("find_abs_node",         &Defs::findAbsNode,"Given a path, find the the `node`_")
+	.def("get_all_nodes",         &get_all_nodes,"Returns all the `node`_ s in the definition")
+	.def("get_all_tasks",         &get_all_tasks,"Returns all the `task`_ nodes")
+	.def("has_time_dependencies", &Defs::hasTimeDependencies,"returns True if the `suite definition`_ has any time `dependencies`_")
+	.def("save_as_checkpt",       &save_as_checkpt, "Save the in memory `suite definition`_ as a `check point`_ file. This includes all node state.")
+	.def("restore_from_checkpt",  &restore_from_checkpt, "Restore the `suite definition`_ from a `check point`_ file stored on disk")
+	.def("save_as_defs",          &save_as_defs,   "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
+	.def("save_as_defs",          &save_as_defs_1, "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
 	.def("check",                 &check_defs,               DefsDoc::check())
 	.def("simulate",              &simulate,                 DefsDoc::simulate())
-   .def("check_job_creation",    &check_job_creation,       DefsDoc::check_job_creation_doc() )
-   .def("check_job_creation",    &Defs::check_job_creation)
-   .def("generate_scripts",      &Defs::generate_scripts,   DefsDoc::generate_scripts_doc() )
-   .def("get_state",             &Defs::state )
-   .def("get_server_state",      &get_server_state,         DefsDoc::get_server_state() )
-	.add_property("suites",       boost::python::range( &Defs::suite_begin, &Defs::suite_end),"Returns a list of :term:`suite` s")
-	.add_property("externs",      boost::python::range( &Defs::extern_begin, &Defs::extern_end),"Returns a list of :term:`extern` s" )
-   .add_property("user_variables", boost::python::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined :term:`variable` s" )
-   .add_property("server_variables", boost::python::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server :term:`variable` s" )
+	.def("check_job_creation",    &check_job_creation,       DefsDoc::check_job_creation_doc() )
+	.def("check_job_creation",    &Defs::check_job_creation)
+	.def("generate_scripts",      &Defs::generate_scripts,   DefsDoc::generate_scripts_doc() )
+	.def("get_state",             &Defs::state )
+	.def("get_server_state",      &get_server_state,         DefsDoc::get_server_state() )
+	.add_property("suites",       boost::python::range( &Defs::suite_begin, &Defs::suite_end),"Returns a list of `suite`_ s")
+	.add_property("externs",      boost::python::range( &Defs::extern_begin, &Defs::extern_end),"Returns a list of `extern`_ s" )
+	.add_property("user_variables", boost::python::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined `variable`_ s" )
+	.add_property("server_variables", boost::python::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server `variable`_ s" )
 	;
 }

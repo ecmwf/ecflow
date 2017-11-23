@@ -20,6 +20,7 @@ print defs.check_job_creation()
 #!/usr/bin/env python2.7
 import os
 from ecf import *
+
 def generate():
     # print "Creating suite definition"  
     return Defs().add(
@@ -28,16 +29,16 @@ def generate():
             Task("t1")))
  
 if __name__ == '__main__':
-        defs = generate()      
-        print defs
-        print "Checking job creation: .ecf -> .job0"  
-        print defs.check_job_creation()
-        print "Saving definition to file 'test.def'"
-        defs.save_as_defs("test.def")
-        try:
-          print "Load the in memory definition(defs) into the server"
-          Client("localhost@%s" % os.getenv("ECF_PORT")).load(defs)
-        except RuntimeError as e: print "Failed:",   e
+    defs = generate()      
+    print defs
+    print "Checking job creation: .ecf -> .job0"  
+    print defs.check_job_creation()
+    print "Saving definition to file 'test.def'"
+    defs.save_as_defs("test.def")
+    try:
+        print "Load the in memory definition(defs) into the server"
+        Client("localhost@%s" % os.getenv("ECF_PORT")).load(defs)
+    except RuntimeError as e: print "Failed:", e
         
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -211,18 +212,14 @@ defs = Defs().add(Suite("test").add(
 print defs
 defs.save_as_defs("test.def")
 
+
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # Time dependencies
 # #!/usr/bin/env python2.7
 import os
-from ecf import *
+
 home = os.path.join(os.getenv("HOME"),  "course")
- 
-def create_family_f1():
-    return Family("f1").add(
-        Variables(SLEEP= 20),
-        Task("t1").add(Meter("progress", 1, 100, 90)),)
  
 def create_family_f2():
     return Family("f2").add(
@@ -247,6 +244,7 @@ defs = Defs().add(Suite("test").add(
     create_family_f2(), ))
 print defs
 defs.save_as_defs("test.def")
+
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -287,6 +285,23 @@ defs = Defs().add(# Stream like definition
              
 out = file("test.def", "w")
 print >>out, defs
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# label
+#!/usr/bin/env python2.7
+import os
+from ecf import *
+home = os.getenv("HOME") + "/course"
+print "Creating suite definition"  
+defs = Defs().add(Suite("test").add(
+    Variables(ECF_INCLUDE= home,
+              ECF_HOME=    home),
+    Family("f3").add(
+        Task("t1").add(
+            Label("info","")))))
+print defs
+defs.save_as_defs("test.def")
 
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -339,5 +354,118 @@ defs.save_as_defs("test.def")
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+#  Data acquiation solution
+#!/usr/bin/env python2.7
+import os
+from ecf import * 
+home = os.getenv("HOME") + "/course")  
+defs = Defs().add(Suite("data_aquisition").add(
+    Repeat(kind="day", step=1),
+    Variables(ECF_HOME= home,
+              ECF_INCLUDE= home,
+              ECF_FILES= home + "/data",
+              SLEEP= 2),
+    [ Family(city).add(
+        Task("archive").add(
+            [ Family(obs_type).add(
+                If( city in ("Exeter", "Toulouse", "Offenbach"),
+                    Time("00:00 23:00 01:00")),
+                If( city in ("Washington"),
+                    Time("00:00 23:00 03:00")),
+                If( city in ("Tokyo"),
+                    Time("12:00")),
+                If( city in ("Melbourne"),
+                    Day( "monday" )),
+                If( city in ("Montreal"),
+                    Date("1.*.*")),
+          
+                Task("get"),
+                Task("process").add(Trigger("get eq complete")),
+                Task("store").add(Trigger("get eq complete")))
+              for obs_type in ( "observations", "fields", "images" ) ] ))
+        for city in ( "Exeter", "Toulouse", "Offenbach", "Washington", "Tokyo", "Melbourne", "Montreal" ) ]
+    ))
+print defs
 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+# operational suite solution:
+
+#!/usr/bin/env python2.7
+import os
+from ecf import *
+home = os.getenv("HOME") + "/course"
+cycle_triggers = None
+last_step = { "12": 240,
+              "00": 24, }
+def cycle_trigger(cycle):
+    if cycle == "12": return Trigger("./00==complete")
+    return None
+defs = Defs().add(Suite("operation_suite").add(
+     Repeat(kind="day", step=1),
+     Variables(ECF_HOME= home,
+               ECF_INCLUDE= home,
+               ECF_FILES= home + "/oper"),
+    [ Family(str(cycle)).add(
+        Variables(CYCLE=  cycle,
+                  LAST_STEP= last_step[cycle]),
+       
+        cycle_trigger(cycle),
+                  
+        Family("analysis").add(
+            Task("get_observations"),
+            Task("run_analysis").add(Trigger(["get_observations", ])),
+            Task("post_processing").add(Trigger(["run_analysis", ])),
+        ),
+  
+        Family("forecast").add(
+            Trigger("analysis == complete"),
+            Task("get_input_data"),
+            Task("run_forecast").add(
+                Trigger(["get_input_data", ]),
+                Meter("step", 0, last_step[cycle])),
+        ),
+        Family("archive").add(
+            Family("analysis").add(
+                Variables(TYPE= "analysis",
+                          STEP= 0),
+                Trigger(["../analysis/run_analysis", ]),
+                Task("save"),
+                [ Family("step_%02d" % i).add(
+                    Variables(TYPE= "forecast",
+                              STEP= i),
+                    Trigger("../../forecast/run_forecast:step ge %d" % i),
+                    Task("save"))
+                  for i in range(6, last_step+1, 6) ]
+            )
+        )
+    ) for cycle in ( 0 , 12 ) ] ))
+print defs
+
+!!!!!!! 
+Baudouin Raoult
+range(6, last_step, 6) will not return last_step.
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# back archiving solution
+#!/usr/bin/env python2.7
+import os
+from ecf import *
+home= os.getenv("HOME") + "/course"
+defs = Defs().add(Suite("back_archiving").add(
+    Repeat( kind= "day", step= 1),
+    Variables(ECF_HOME= home,
+              ECF_INCLUDE= home,
+              ECF_FILES= home + "/back",
+              SLEEP= 2),
+    Limit("access", 2),
+    [ Family(kind).add(
+        Repeat( "DATE", 19900101, 19950712, kind="date"),
+        Variables(KIND= kind),
+        Task("get_old").add(Inlimit("access")),
+        Task("convert").add(Trigger("get_old == complete")),
+        Task("save_new").add(Trigger("convert == complete")))
+      for kind in ( "analysis", "forecast", "climatology", "observations", "images" ) ]
+))
+print defs

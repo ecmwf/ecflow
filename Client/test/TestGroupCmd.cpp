@@ -45,6 +45,7 @@ BOOST_AUTO_TEST_CASE( test_group_cmd )
 
    // This will remove check pt and backup file before server start, to avoid the server from loading previous test data
    InvokeServer invokeServer("Client:: ...test_group_cmd",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
    BOOST_REQUIRE_MESSAGE( theClient.group("shutdown yes;halt yes;restart") == 0,"--group should return 0\n" << theClient.errorMsg());
@@ -58,6 +59,7 @@ BOOST_AUTO_TEST_CASE( test_client_group_lifecyle )
 
    // ** NOTE: We disable job generation in the server **/
    InvokeServer invokeServer("Client:: ...test_client_group_lifecyle",SCPort::next(),true /*disable job generation in server*/);
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
 

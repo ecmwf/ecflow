@@ -139,16 +139,15 @@ std::ostream& Expression::print(std::ostream& os, const std::string& exprType) c
    return os;
 }
 
-std::string Expression::expression() const
-{
-   string ret;
-   std::vector<PartExpression>::const_iterator theEnd = vec_.end();
-   for(std::vector<PartExpression>::const_iterator expr = vec_.begin(); expr!= theEnd; ++expr) {
-      if ( (*expr).andExpr() )       ret += " AND ";
-      else  if ( (*expr).orExpr() )  ret += " OR ";
-      ret  += (*expr).expression();
-   }
-   return ret;
+std::string Expression::compose_expression(const std::vector<PartExpression>& vec) {
+    string ret;
+    std::vector<PartExpression>::const_iterator theEnd = vec.end();
+    for(std::vector<PartExpression>::const_iterator expr = vec.begin(); expr!= theEnd; ++expr) {
+       if ( (*expr).andExpr() )       ret += " AND ";
+       else  if ( (*expr).orExpr() )  ret += " OR ";
+       ret  += (*expr).expression();
+    }
+    return ret;
 }
 
 void Expression::add(const PartExpression& t)
@@ -171,6 +170,15 @@ void Expression::add(const PartExpression& t)
    }
    vec_.push_back(t);
    //	cout << "Expression::add " << expression() << "\n";
+}
+
+void Expression::add_expr(const std::vector<PartExpression>& vec)
+{
+   for(size_t i = 0; i < vec.size(); i++) {
+      PartExpression part = vec[i];
+      if (!empty() && part.expr_type() == PartExpression::FIRST)  part.set_expr_type(PartExpression::AND);
+      add(part);
+   }
 }
 
 // ============================================================================

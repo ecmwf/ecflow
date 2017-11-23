@@ -58,6 +58,9 @@ public:
    /// Parse the expression and create the abstract syntax tree
    std::auto_ptr<AstTop> parseExpressions(std::string& errorMsg) const;
 
+   void set_expr_type(ExprType t) { exp_type_ = t;}
+   ExprType expr_type() const { return exp_type_;}
+
 private:
    std::string exp_;
    ExprType    exp_type_;
@@ -106,7 +109,8 @@ public:
 
    /// User should add "trigger" or "complete" at the start.
    /// The part expression's are combined and returned as a single string
-   std::string expression() const;
+   std::string expression() const { return compose_expression(vec_);}
+   static std::string compose_expression(const std::vector<PartExpression>& vec);
 
    /// Need to pass in trigger tag, since expression may be split over multiple lines
    /// trigger    "a == complete"
@@ -115,6 +119,7 @@ public:
 
    /// Use when we want to add compose a large expression form a set of smaller ones
    void add( const PartExpression& t );
+   void add_expr( const std::vector<PartExpression>& vec );
 
    // ==============================================================================================
    // CREATE AST tree for each expression and COMBINE AST for each expression into a single AST.
@@ -127,6 +132,8 @@ public:
    void setFree();  // hence must be used before evaluate
    void clearFree(); // resets the free flag
    bool isFree() const { return makeFree_;}
+   bool empty() const { return vec_.empty();}
+   const std::vector<PartExpression>& expr() const { return vec_;}
 
    // The state_change_no is never reset. Must be incremented if it can affect equality
    unsigned int state_change_no() const { return state_change_no_; }

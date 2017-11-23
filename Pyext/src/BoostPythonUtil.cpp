@@ -43,22 +43,18 @@ void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vect
 
    for(int i = 0; i < no_of_keys; ++i) {
 
-      boost::python::object curArg = dict[keys[i]];
-      if(curArg) {
-
-         std::string second;
-         std::string first = boost::python::extract<std::string>(keys[i]);
-         if (boost::python::extract<std::string>(dict[keys[i]]).check()) {
-            second = boost::python::extract<std::string>(dict[keys[i]]);
-         }
-         else if (boost::python::extract<int>(dict[keys[i]]).check()) {
-            int the_int = boost::python::extract<int>(dict[keys[i]]);
-            second = boost::lexical_cast<std::string>(the_int);
-         }
-         else throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
-         str_pair_vec.push_back( std::make_pair(first,second));
-//         std::cout << "BoostPythonUtil::dict_to_str_vec " << first << "   " << second << "\n";
+      std::string second;
+      std::string first = boost::python::extract<std::string>(keys[i]);
+      if (boost::python::extract<std::string>(dict[keys[i]]).check()) {
+         second = boost::python::extract<std::string>(dict[keys[i]]);
       }
+      else if (boost::python::extract<int>(dict[keys[i]]).check()) {
+         int the_int = boost::python::extract<int>(dict[keys[i]]);
+         second = boost::lexical_cast<std::string>(the_int);
+      }
+      else throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
+      str_pair_vec.push_back( std::make_pair(first,second));
+      //         std::cout << "BoostPythonUtil::dict_to_str_vec " << first << "   " << second << "\n";
    }
 }
 
@@ -71,23 +67,19 @@ void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vect
 
    for(int i = 0; i < no_of_keys; ++i) {
 
-      boost::python::object curArg = dict[keys[i]];
-      if(curArg) {
-
-         std::string second;
-         std::string first = boost::python::extract<std::string>(keys[i]);
-         if (boost::python::extract<std::string>(dict[keys[i]]).check()) {
-            second = boost::python::extract<std::string>(dict[keys[i]]);
-         }
-         else if (boost::python::extract<int>(dict[keys[i]]).check()) {
-            int the_int = boost::python::extract<int>(dict[keys[i]]);
-            second = boost::lexical_cast<std::string>(the_int);
-         }
-         else throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
-
-         vec.push_back(Variable(first,second));
-//         std::cout << "BoostPythonUtil::dict_to_str_vec " << first << "   " << second << "\n";
+      std::string second;
+      std::string first = boost::python::extract<std::string>(keys[i]);
+      if (boost::python::extract<std::string>(dict[keys[i]]).check()) {
+         second = boost::python::extract<std::string>(dict[keys[i]]);
       }
+      else if (boost::python::extract<int>(dict[keys[i]]).check()) {
+         int the_int = boost::python::extract<int>(dict[keys[i]]);
+         second = boost::lexical_cast<std::string>(the_int);
+      }
+      else throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
+
+      vec.push_back(Variable(first,second));
+      // std::cout << "BoostPythonUtil::dict_to_str_vec " << first << "   " << second << "\n";
    }
 }
 

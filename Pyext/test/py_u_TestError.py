@@ -31,6 +31,15 @@ def check_date(day,month,year):
         return True
     except IndexError: 
         return False
+    
+def check_date_str(str_date):
+    try:    
+        Date( str_date)
+        return True
+    except IndexError: 
+        return False
+    except  RuntimeError: 
+        return False
 
 def check_meter(name,min_meter_value,max_meter_value,color_change):
     try:    
@@ -177,6 +186,16 @@ if __name__ == "__main__":
     assert check_date(1,14,2010) == False,  "Expected exception since month > 12"
     assert check_date(1,-1,2010) == False,  "Expected exception since month >= 0"
     assert check_date(1,1,-2) == False,     "Expected exception since year >= 0"
+
+    assert check_date_str("*.1.2010"),            "Expected valid date"
+    assert check_date_str("10.*.2010"),           "Expected valid date"
+    assert check_date_str("10.1.*"),              "Expected valid date"
+    assert check_date_str("*.*.*"),               "Expected valid date"
+    assert check_date_str("40.1.2010") == False,  "Expected exception since day > 31"
+    assert check_date_str("-10.1.2010") == False, "Expected exception since day >= 0"
+    assert check_date_str("1.14.2010") == False,  "Expected exception since month > 12"
+    assert check_date_str("1.-1.2010") == False,  "Expected exception since month >= 0"
+    assert check_date_str("1.1.-2") == False,     "Expected exception since year >= 0"
 
     # clock do not support wild carding hence we cant use 0 like in Date
     assert check_clock(12,1,2010),           "Expected valid date"

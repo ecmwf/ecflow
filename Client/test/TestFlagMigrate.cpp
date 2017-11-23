@@ -47,6 +47,7 @@ BOOST_AUTO_TEST_CASE( test_flag_migrate )
    /// Test that when a node is  ecf::Flag::MIGRATED, the children are not persisted for sync
    /// But nodes are still persisted for check-pointing
    InvokeServer invokeServer("Client:: ...test_flag_migrate",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 

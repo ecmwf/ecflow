@@ -60,10 +60,10 @@ void export_SuiteAndFamily()
    // Turn off proxies by passing true as the NoProxy template parameter.
    // shared_ptrs don't need proxies because calls on one a copy of the
    // shared_ptr will affect all of them (duh!).
-   class_<std::vector<family_ptr> >("FamilyVec","Hold a list of :term:`family` nodes")
+   class_<std::vector<family_ptr> >("FamilyVec","Hold a list of `family`_ nodes")
    .def(vector_indexing_suite<std::vector<family_ptr>, true >()) ;
 
-   class_<std::vector<suite_ptr> >("SuiteVec","Hold a list of :term:`suite` nodes's")
+   class_<std::vector<suite_ptr> >("SuiteVec","Hold a list of `suite`_ nodes's")
    .def(vector_indexing_suite<std::vector<suite_ptr>, true >());
 
    // choose the correct overload
@@ -103,10 +103,10 @@ void export_SuiteAndFamily()
    .def("__len__",   &suite_len)         // Implement sized protocol for immediate children
    .def("__contains__",&suite_container) // Implement container protocol for immediate children
    .def("add_clock", &add_clock)
-   .def("get_clock", &Suite::clockAttr,"Returns the :term:`suite` :term:`clock`")
+   .def("get_clock", &Suite::clockAttr,"Returns the `suite`_ `clock`_")
    .def("add_end_clock", &add_end_clock,"End clock, used to mark end of simulation")
    .def("get_end_clock", &Suite::clock_end_attr,"Return the suite's end clock. Can be NULL")
-   .def("begun",     &Suite::begun, "Returns true if the :term:`suite` has begun, false otherwise")
+   .def("begun",     &Suite::begun, "Returns true if the `suite`_ has begun, false otherwise")
    ;
 #if defined(__clang__)
    boost::python::register_ptr_to_python<suite_ptr>(); // needed for mac and boost 1.6

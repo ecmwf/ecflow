@@ -23,9 +23,9 @@ const char* DefsDoc::abs_node_path_doc()
 const char* DefsDoc::part_expression_doc()
 {
    return
-            "PartExpression holds part of a :term:`trigger` or :term:`complete expression`.\n\n"
-            "Expressions can contain references to :term:`event`, :term:`meter` s, user variables,\n"
-            ":term:`repeat` variables and generated variables. The part expression allows us\n"
+            "PartExpression holds part of a `trigger`_ or `complete expression`_.\n\n"
+            "Expressions can contain references to `event`_, `meter`_ s, user variables,\n"
+            "`repeat`_ variables and generated variables. The part expression allows us\n"
             "to split a large trigger or complete expression into smaller ones\n"
             "\nConstructor::\n\n"
             "  PartExpression(exp )\n"
@@ -53,7 +53,7 @@ const char* DefsDoc::part_expression_doc()
 const char* DefsDoc::expression_doc()
 {
    return
-            "Expression holds :term:`trigger` or :term:`complete expression`.\n\n"
+            "Expression holds `trigger`_ or `complete expression`_.\n\n"
             "Expressions can contain references to events, meters, user variables,repeat variables and generated variables.\n"
             "Expressions hold a list of part expressions. This allows us to split a large trigger or complete\n"
             "expression into smaller ones.\n"
@@ -92,17 +92,17 @@ const char* DefsDoc::expression_doc()
 const char* DefsDoc::add_trigger_doc()
 {
    return
-            "Add a :term:`trigger` or :term:`complete expression`.\n\n"
-            "This defines a dependency for a :term:`node`.\n"
-            "There can only be one :term:`trigger` or :term:`complete expression` dependency per node.\n"
-            "A :term:`node` with a trigger can only be activated when the trigger has expired.\n"
+            "Add a `trigger`_ or `complete expression`_.\n\n"
+            "This defines a dependency for a `node`_.\n"
+            "There can only be one `trigger`_ or `complete expression`_ dependency per node.\n"
+            "A `node`_ with a trigger can only be activated when the trigger has expired.\n"
             "A trigger holds a node as long as the expression returns false.\n"
             "\nException:\n\n"
             "- Will throw RuntimeError if multiple trigger or complete expression are added\n"
             "- Will throw RuntimeError if first expression is added as 'AND' or 'OR' expression\n"
             "  Like wise second and subsequent expression must have 'AND' or 'OR' booleans set\n"
             "\nUsage:\n\n"
-            "Note we can not make multiple add_trigger(..) calls on the same :term:`task`!\n"
+            "Note we can not make multiple add_trigger(..) calls on the same `task`_!\n"
             "to add a simple trigger::\n\n"
             "  task1.add_trigger( \"t2 == active\" )\n"
             "  task2.add_trigger( \"t1 == complete or t4 == complete\" )\n"
@@ -120,13 +120,13 @@ const char* DefsDoc::add_trigger_doc()
 const char* DefsDoc::add_variable_doc()
 {
    return
-            "Adds a name value :term:`variable`.\n\n"
-            "This defines a variable for use in :term:`variable substitution` in a :term:`ecf script` file.\n"
+            "Adds a name value `variable`_.\n\n"
+            "This defines a variable for use in `variable substitution`_ in a `ecf script`_ file.\n"
             "There can be any number of variables. The variables are names inside a pair of\n"
-            "'%' characters in an :term:`ecf script`. The name are case sensitive.\n"
+            "'%' characters in an `ecf script`_. The name are case sensitive.\n"
             "Special character in the value, must be placed inside single quotes if misinterpretation\n"
             "is to be avoided.\n"
-            "The value of the variable replaces the variable name in the :term:`ecf script` at :term:`job creation` time.\n"
+            "The value of the variable replaces the variable name in the `ecf script`_ at `job creation` time.\n"
             "The variable names for any given node must be unique. If duplicates are added then the\n"
             "the last value added is kept.\n"
             "\nException:\n\n"
@@ -143,8 +143,8 @@ const char* DefsDoc::add_variable_doc()
 const char* DefsDoc::add_label_doc()
 {
    return
-            "Adds a :term:`label` to a :term:`node`.\n\n"
-            "Labels can be updated from the jobs files, via :term:`child command`\n"
+            "Adds a `label`_ to a `node`_.\n\n"
+            "Labels can be updated from the jobs files, via `child command`_\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate label name is added\n"
             "\nUsage::\n\n"
@@ -159,9 +159,9 @@ const char* DefsDoc::add_label_doc()
 const char* DefsDoc::add_limit_doc()
 {
    return
-            "Adds a :term:`limit` to a :term:`node` for simple load management.\n\n"
+            "Adds a `limit`_ to a `node`_ for simple load management.\n\n"
             "Multiple limits can be added, however the limit name must be unique.\n"
-            "For a node to be in a limit, a :term:`inlimit` must be used.\n"
+            "For a node to be in a limit, a `inlimit`_ must be used.\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate limit name is added\n"
             "\nUsage::\n\n"
@@ -173,8 +173,8 @@ const char* DefsDoc::add_limit_doc()
 const char* DefsDoc::add_inlimit_doc()
 {
    return
-            "Adds a :term:`inlimit` to a :term:`node`.\n\n"
-            "InLimit reference a :term:`limit`/:py:class:`ecflow.Limit`. Duplicate InLimits are not allowed\n"
+            "Adds a `inlimit`_ to a `node`_.\n\n"
+            "InLimit reference a `limit`_/:py:class:`ecflow.Limit`. Duplicate InLimits are not allowed\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
@@ -186,7 +186,7 @@ const char* DefsDoc::add_inlimit_doc()
 const char* DefsDoc::suite_doc()
 {
    return
-            "A :term:`suite` is a collection of Families,Tasks,Variables, :term:`repeat` and :term:`clock` definitions\n\n"
+            "A `suite`_ is a collection of Families,Tasks,Variables, `repeat`_ and `clock`_ definitions\n\n"
             "Suite is the only node that can be started using the begin API.\n"
             "There are two ways of adding a suite, see example below and :py:class:`ecflow.Defs.add_suite`\n"
             "\nConstructor::\n\n"
@@ -208,8 +208,8 @@ const char* DefsDoc::suite_doc()
 const char* DefsDoc::family_doc()
 {
    return
-            "Create a :term:`family` :term:`node`.A Family node lives inside a :term:`suite` or another :term:`family`\n\n"
-            "A family is used to collect :term:`task` s together or to group other families.\n"
+            "Create a `family`_ `node`_.A Family node lives inside a `suite`_ or another `family`_\n\n"
+            "A family is used to collect `task`_ s together or to group other families.\n"
             "Typically you place tasks that are related to each other inside the same family\n"
             "analogous to the way you create directories to contain related files.\n"
             "There are two ways of adding a family, see example below.\n"
@@ -232,9 +232,9 @@ const char* DefsDoc::family_doc()
 const char* DefsDoc::task_doc()
 {
    return
-            "Creates a :term:`task` :term:`node`.Task is a child of a :term:`suite` or :term:`family` node.\n\n"
+            "Creates a `task`_ `node`_.Task is a child of a `suite`_ or `family`_ node.\n\n"
             "Multiple Tasks can be added, however the task names must be unique for a given parent.\n"
-            "Note case is significant. Only Tasks can be submitted. A job inside a Task :term:`ecf script` (i.e .ecf file)\n"
+            "Note case is significant. Only Tasks can be submitted. A job inside a Task `ecf script`_ (i.e .ecf file)\n"
             "should generally be re-entrant since a Task may be automatically submitted more than once if it aborts.\n"
             "There are two ways of adding a task, see example below\n"
             "\nConstructor::\n\n"
@@ -264,7 +264,7 @@ const char* DefsDoc::alias_doc()
 const char* DefsDoc::add_suite_doc()
 {
    return
-            "Add a :term:`suite` :term:`node`. See :py:class:`ecflow.Suite`\n\n"
+            "Add a `suite`_ `node`_. See :py:class:`ecflow.Suite`\n\n"
             "Only one suite should be added for ease of maintenance. If a new suite is added\n"
             "which matches the name of an existing suite, then an exception is thrown.\n"
             "\nException:\n\n"
@@ -281,8 +281,8 @@ const char* DefsDoc::add_suite_doc()
 const char* DefsDoc::add_extern_doc()
 {
    return
-            ":term:`extern` refer to nodes that have not yet been defined typically due to cross suite :term:`dependencies`\n\n"
-            ":term:`trigger` and :term:`complete expression` s may refer to paths, and variables in other suites, that have not been\n"
+            "`extern`_ refer to nodes that have not yet been defined typically due to cross suite `dependencies`_\n\n"
+            "`trigger`_ and `complete expression`_ s may refer to paths, and variables in other suites, that have not been\n"
             "loaded yet. The references to node paths and variable must exist, or exist as externs\n"
             "Externs can be added manually or automatically.\n\n"
             "Manual Method::\n\n"
@@ -338,7 +338,7 @@ const char* DefsDoc::submittable_doc()
 const char* DefsDoc::add_family_doc()
 {
    return
-            "Add a :term:`family`. See :py:class:`ecflow.Family`.\n\n"
+            "Add a `family`_. See :py:class:`ecflow.Family`.\n\n"
             "Multiple families can be added. However family names must be unique.\n"
             "for a given parent. Families can be hierarchical.\n"
             "\nException:\n\n"
@@ -354,7 +354,7 @@ const char* DefsDoc::add_family_doc()
 const char* DefsDoc::add_task_doc()
 {
    return
-            "Add a :term:`task`. See :py:class:`ecflow.Task`\n\n"
+            "Add a `task`_. See :py:class:`ecflow.Task`\n\n"
             "Multiple Tasks can be added. However Task names must be unique,\n"
             "for a given parent. Task can be added to Familiy's or Suites.\n"
             "\nException:\n\n"
@@ -371,11 +371,11 @@ const char* DefsDoc::add_task_doc()
 const char* DefsDoc::add_definition_doc()
 {
    return
-            "The Defs class holds the :term:`suite definition` structure.\n\n"
+            "The Defs class holds the `suite definition`_ structure.\n\n"
             "It contains all the suites and hence acts like the root for suite node tree hierarchy.\n"
             "The definition can be kept as python code, alternatively it can be saved as a flat\n"
             "ASCII definition file.\n"
-            "If a definition is read in from disk, it will by default, check the :term:`trigger` expressions.\n"
+            "If a definition is read in from disk, it will by default, check the `trigger`_ expressions.\n"
             "If however the definition is created in python, then checking should be done explicitly.\n"
             "The Defs class take one argument which represents the file name\n\n"
             "Example::\n\n"
@@ -395,8 +395,8 @@ const char* DefsDoc::add_definition_doc()
 const char* DefsDoc::add_event_doc()
 {
    return
-            "Add a :term:`event`. See :py:class:`ecflow.Event`\n"
-            "Events can be referenced in :term:`trigger` and :term:`complete expression` s\n\n"
+            "Add a `event`_. See :py:class:`ecflow.Event`\n"
+            "Events can be referenced in `trigger`_ and `complete expression`_ s\n\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
@@ -415,8 +415,8 @@ const char* DefsDoc::add_event_doc()
 const char* DefsDoc::add_meter_doc()
 {
    return
-            "Add a :term:`meter`. See :py:class:`ecflow.Meter`\n"
-            "Meters can be referenced in :term:`trigger` and :term:`complete expression` s\n\n"
+            "Add a `meter`_. See :py:class:`ecflow.Meter`\n"
+            "Meters can be referenced in `trigger`_ and `complete expression`_ s\n\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
@@ -432,7 +432,7 @@ const char* DefsDoc::add_meter_doc()
 const char* DefsDoc::add_date_doc()
 {
    return
-            "Add a :term:`date` time dependency\n\n"
+            "Add a `date`_ time dependency\n\n"
             "A value of zero for day,month,year means every day, every month, every year\n"
             "\nException:\n\n"
             "- Throws RuntimeError if an invalid date is added\n"
@@ -447,7 +447,7 @@ const char* DefsDoc::add_date_doc()
 const char* DefsDoc::add_day_doc()
 {
    return
-            "Add a :term:`day` time dependency\n\n"
+            "Add a `day`_ time dependency\n\n"
             "\nUsage::\n\n"
             "  t1 = Task(\"t1\")\n"
             "  t1.add_day( Day(Days.sunday) ) \n"
@@ -459,7 +459,7 @@ const char* DefsDoc::add_day_doc()
 const char* DefsDoc::add_today_doc()
 {
    return
-            "Add a :term:`today` time dependency\n\n"
+            "Add a `today`_ time dependency\n\n"
             "\nUsage::\n\n"
             "  t1 = Task(\"t1\")\n"
             "  t1.add_today( \"00:30\" )\n"
@@ -481,7 +481,7 @@ const char* DefsDoc::add_today_doc()
 const char* DefsDoc::add_time_doc()
 {
    return
-            "Add a :term:`time` dependency\n\n"
+            "Add a `time`_ dependency\n\n"
             "\nUsage::\n\n"
             "  t1 = Task(\"t1\")\n"
             "  t1.add_time( \"00:30\" )\n"
@@ -503,7 +503,7 @@ const char* DefsDoc::add_time_doc()
 const char* DefsDoc::add_cron_doc()
 {
    return
-            "Add a :term:`cron` time dependency\n\n"
+            "Add a `cron`_ time dependency\n\n"
             "\nUsage::\n\n"
             "  start = TimeSlot(0,0)\n"
             "  finish = TimeSlot(23,0)\n"
@@ -522,7 +522,7 @@ const char* DefsDoc::add_cron_doc()
 const char* DefsDoc::add_late_doc()
 {
    return
-            "Add a :term:`late` attribute\n\n"
+            "Add a `late`_ attribute\n\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one late is added\n"
             "\nUsage::\n\n"
@@ -538,7 +538,7 @@ const char* DefsDoc::add_late_doc()
 const char* DefsDoc::add_autocancel_doc()
 {
    return
-            "Add a :term:`autocancel` attribute.\n\n"
+            "Add a `autocancel` attribute.\n\n"
             "This will delete the node on completion. The deletion may be delayed by\n"
             "an amount of time in hours and minutes or expressed as days\n"
             "Node deletion is not immediate. The nodes are checked once a minute\n"
@@ -583,7 +583,7 @@ const char* DefsDoc::add_repeat_integer_doc()
 {
    return
             "Add a RepeatInteger attribute.\n\n"
-            "A node can only have one :term:`repeat`\n"
+            "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
@@ -596,7 +596,7 @@ const char* DefsDoc::add_repeat_string_doc()
 {
    return
             "Add a RepeatString attribute.\n\n"
-            "A node can only have one :term:`repeat`\n"
+            "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
@@ -609,7 +609,7 @@ const char* DefsDoc::add_repeat_enumerated_doc()
 {
    return
             "Add a RepeatEnumerated attribute.\n\n"
-            "A node can only have one :term:`repeat`\n"
+            "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
@@ -622,7 +622,7 @@ const char* DefsDoc::add_repeat_day_doc()
 {
    return
             "Add a RepeatDay attribute.\n\n"
-            "A node can only have one :term:`repeat`\n"
+            "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             ;
@@ -631,8 +631,8 @@ const char* DefsDoc::add_repeat_day_doc()
 const char* DefsDoc::add_defstatus_doc()
 {
    return
-            "Set the default status( :term:`defstatus` ) of node at begin or re queue\n\n"
-            "A :term:`defstatus` is useful in preventing suites from running automatically\n"
+            "Set the default status( `defstatus`_ ) of node at begin or re queue\n\n"
+            "A `defstatus`_ is useful in preventing suites from running automatically\n"
             "once begun, or in setting Task's complete so they can be run selectively\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
@@ -643,7 +643,7 @@ const char* DefsDoc::add_defstatus_doc()
 const char* DefsDoc::jobgenctrl_doc()
 {
    return
-            "The class JobCreationCtrl is used in :term:`job creation` checking\n\n"
+            "The class JobCreationCtrl is used in `job creation` checking\n\n"
             "Constructor::\n\n"
             "   JobCreationCtrl()\n\n"
             "\nUsage::\n\n"
@@ -668,13 +668,13 @@ const char* DefsDoc::jobgenctrl_doc()
 const char* DefsDoc::check_job_creation_doc()
 {
    return
-            "Check :term:`job creation` .\n\n"
+            "Check `job creation` .\n\n"
             "Will check the following:\n\n"
-            "- :term:`ecf script` files and includes files can be located\n"
+            "- `ecf script`_ files and includes files can be located\n"
             "- recursive includes\n"
-            "- manual and comments :term:`pre-processing`\n"
-            "- :term:`variable substitution`\n\n"
-            "Some :term:`task` s are dummy tasks have no associated :term:`ecf script` file.\n"
+            "- manual and comments `pre-processing`_\n"
+            "- `variable substitution`_\n\n"
+            "Some `task`_ s are dummy tasks have no associated `ecf script`_ file.\n"
             "To disable error message for these tasks please add a variable called ECF_DUMMY_TASK to them.\n"
             "Checking is done in conjunction with the class :py:class:`ecflow.JobCreationCtrl`.\n"
             "If no node path is set on class JobCreationCtrl then all tasks are checked.\n"
@@ -708,11 +708,11 @@ const char* DefsDoc::check_job_creation_doc()
 const char* DefsDoc::generate_scripts_doc()
 {
    return
-            "Automatically generate template :term:`ecf script` s for this definition\n"
-            "Will automatically add :term:`child command` s for :term:`event`, :term:`meter` and :term:`label` s.\n"
+            "Automatically generate template `ecf script`_ s for this definition\n"
+            "Will automatically add `child command`_ s for `event`_, `meter`_ and `label`_ s.\n"
             "This allows the definition to be refined with out worrying about the scripts.\n"
             "However it should be noted that, this will create a lot of *duplicated* script contents\n"
-            "i.e in the absence of :term:`event` s, :term:`meter` s and :term:`label` s, most of generated :term:`ecf script` files will\n"
+            "i.e in the absence of `event`_ s, `meter`_ s and `label`_ s, most of generated `ecf script`_ files will\n"
             "be the same. Hence should only be used an aid to debugging the definition.\n"
             "It uses the contents of the definition to parameterise what gets\n"
             "generated, and the location of the files. Will throw Exceptions for errors.\n"
@@ -744,10 +744,10 @@ const char* DefsDoc::generate_scripts_doc()
 const char* DefsDoc::check()
 {
    return
-            "Check :term:`trigger` and :term:`complete expression` s and :term:`limit` s\n\n"
+            "Check `trigger`_ and `complete expression`_ s and `limit`_ s\n\n"
             "* Client Side: The client side can specify externs. Hence all node path references\n"
-            "  in :term:`trigger` expressions, and :term:`inlimit` references to :term:`limit` s, that are\n"
-            "  unresolved and which do *not* appear in :term:`extern` s are reported as errors\n"
+            "  in `trigger`_ expressions, and `inlimit`_ references to `limit`_ s, that are\n"
+            "  unresolved and which do *not* appear in `extern`_ s are reported as errors\n"
             "* Server Side: The server does not store externs. Hence all unresolved references\n"
             "  are reported as errors\n\n"
             "Returns a non empty string for any errors or warning\n"
@@ -772,25 +772,24 @@ const char* DefsDoc::simulate() {
          "The simulator will analyse the definition, and simulate the ecflow server.\n"
          "Allowing time dependencies that span several months, to be simulated in a few seconds.\n"
          "Ecflow allows the use of verify attributes. This example show how we can verify the number of times\n"
-         "a task should run, given a start(optional) and end time(optional).\n"
-         "\n"
-         "suite cron3             # use real clock otherwise clock starts when the simulations starts.\n"
-         "  clock real  1.1.2006  # define a start date for deterministic behaviour\n"
-         "  endclock   13.1.2006  # When to finish. end clock is *only* used for the simulator\n"
-         "  family cronFamily\n"
-         "    task t\n"
-         "      cron -d 10,11,12   10:00 11:00 01:00  # run on 10,11,12 of the month at 10am and 11am\n"
-         "      verify complete:6                     # task should complete 6 times between 1.1.2006 -> 13.1.2006\n"
-         "  endfamily\n"
-         "endsuite\n\n"
+         "a task should run, given a start(optional) and end time(optional)::\n\n"
+         "  suite cron3              # use real clock otherwise clock starts when the simulations starts.\n"
+         "     clock real  1.1.2006  # define a start date for deterministic behaviour\n"
+         "     endclock   13.1.2006  # When to finish. end clock is *only* used for the simulator\n"
+         "     family cronFamily\n"
+         "        task t\n"
+         "           cron -d 10,11,12   10:00 11:00 01:00  # run on 10,11,12 of the month at 10am and 11am\n"
+         "           verify complete:6                     # task should complete 6 times between 1.1.2006 -> 13.1.2006\n"
+         "     endfamily\n"
+         "  endsuite\n\n"
          "Please note, for deterministic behaviour, the start and end clock should be specified.\n"
-         "However if no 'endclock' is specified the simulation will assume the following defaults.\n"
-         "    No time dependencies: 24 hours\n"
-         "    time || today       : 24 hours\n"
-         "    day                 : 1 week\n"
-         "    date                : 1 month\n"
-         "    cron                : 1 year\n"
-         "    repeat              : 1 year\n"
+         "However if no 'endclock' is specified the simulation will assume the following defaults.\n\n"
+         "- No time dependencies: 24 hours\n"
+         "- time || today       : 24 hours\n"
+         "- day                 : 1 week\n"
+         "- date                : 1 month\n"
+         "- cron                : 1 year\n"
+         "- repeat              : 1 year\n\n"
          "If there no time dependencies with an minute resolution, then the simulator will by default\n"
          "use 1 hour resolution. This needs to be taken into account when specifying the verify attribute\n"
          "If the simulation does not complete it creates  defs.flat and  defs.depth files.\n"
@@ -806,7 +805,7 @@ const char* DefsDoc::simulate() {
 const char* DefsDoc::get_server_state()
 {
    return
-            "Returns the :term:`ecflow_server` state: See :term:`server states`\n\n"
+            "Returns the `ecflow_server`_ state: See `server states`_\n\n"
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()           # use default host(ECF_HOST) & port(ECF_PORT)\n"

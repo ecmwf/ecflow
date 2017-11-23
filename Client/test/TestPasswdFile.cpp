@@ -84,6 +84,7 @@ BOOST_AUTO_TEST_CASE( test_loading_of_passwd )
    // This will remove check pt and backup file before server start,
    // to avoid the server from loading previous test data
    InvokeServer invokeServer("Client:: ...test_loading_of_passwd",port);
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
    theClient.set_throw_on_error(false);
@@ -143,6 +144,7 @@ BOOST_AUTO_TEST_CASE( test_loading_of_passwd_fail )
    // This will remove check pt and backup file before server start,
    // to avoid the server from loading previous test data
    InvokeServer invokeServer("Client:: ...test_loading_of_passwd_fail",port);
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    /// Passwd file is specified but does not exist. Command to succeed
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
