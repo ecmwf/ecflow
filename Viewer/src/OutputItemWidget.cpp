@@ -711,9 +711,12 @@ void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect
             if(submittedWarning_)
                getLatestFile();
             else if(info_ && info_->node() == n && info_->node()->isSubmitted())
-               getLatestFile();
-
-
+            {
+                OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+                Q_ASSERT(op);
+                if(currentFullName() == op->joboutFileName())
+                    getLatestFile();
+            }
             return;
         }
     }
