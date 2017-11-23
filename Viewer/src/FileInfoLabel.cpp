@@ -75,7 +75,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             if(fInfo.exists())
             {
                 labelText+=Viewer::formatBoldText(" Size: ",col) +
-                           Viewer::formatText(fInfo.formatSize(),fileSizeColour(fInfo.size()));
+                           formatFileSize(fInfo.formatSize(),fInfo.size());
                 s+=Viewer::formatBoldText(" Modified: ",col.name()) + fInfo.formatModDate();
 
             }
@@ -86,8 +86,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             if(f.exists())
             {
                 labelText+=Viewer::formatBoldText(" Size: ",col);
-                labelText+=Viewer::formatText(f.formatSize(),fileSizeColour(f.size()));
-
+                labelText+=formatFileSize(f.formatSize(),f.size());
                 s+=Viewer::formatBoldText(" Modified: ",col) + f.formatModDate();
             }
          }
@@ -96,9 +95,8 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
          s+=Viewer::formatBoldText("Source: ",col) + " read from disk";
 
          if(f)
-         {
-             QString dt=f->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
-             s+=Viewer::formatBoldText(" at ",col) + dt;
+         {          
+             s+=Viewer::formatBoldText(" at ",col) + formatDate(f->fetchDate());
          }
 
 	}
@@ -110,7 +108,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             if(f->storageMode() == VFile::MemoryStorage)
             {
                 labelText+=Viewer::formatBoldText(" Size: ",col);
-                labelText+=Viewer::formatText(VFileInfo::formatSize(f->dataSize()),fileSizeColour(f->dataSize()));
+                labelText+=formatFileSize(VFileInfo::formatSize(f->dataSize()),f->dataSize());
             }
             else
             {
@@ -118,15 +116,13 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
                 if(fInfo.exists())
                 {                   
                     labelText+=Viewer::formatBoldText(" Size: ",col);
-                    labelText+=Viewer::formatText(fInfo.formatSize(),fileSizeColour(fInfo.size()));
+                    labelText+=formatFileSize(fInfo.formatSize(),fInfo.size());
                 }
             }
 
             s+="<br>";
-            s+=Viewer::formatBoldText("Source: ",col) + QString::fromStdString(f->fetchModeStr());
-
-            QString dt=f->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
-            s+=Viewer::formatBoldText(" at ",col) + dt;
+            s+=Viewer::formatBoldText("Source: ",col) + QString::fromStdString(f->fetchModeStr());         
+            s+=Viewer::formatBoldText(" at ",col) + formatDate(f->fetchDate());
 
             int rowLimit=f->truncatedTo();
             if(rowLimit >= 0)
@@ -135,12 +131,10 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             }            
         }
         else if(reply->status() == VReply::TaskDone)
-        {
-            QString dt=QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
-
+        {         
             s+="<br>";
             s+=Viewer::formatBoldText("Source: ",col) + " fetched from server " +
-               Viewer::formatBoldText(" at ",col) + dt;
+               Viewer::formatBoldText(" at ",col) + formatDate(QDateTime::currentDateTime());
 
             int rowLimit=reply->readTruncatedTo();
             if(rowLimit >= 0)
@@ -149,9 +143,9 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             }            
         }
         else
-        {
-            QString dt=QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
-            s+="<br>Fetch attempted from server" + Viewer::formatBoldText(" at ",col)  +  dt;
+        {           
+            s+="<br>Fetch attempted from server" + Viewer::formatBoldText(" at ",col)  +
+                    formatDate(QDateTime::currentDateTime());
         }
 	}
 
@@ -164,7 +158,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             if(f->storageMode() == VFile::MemoryStorage)
 			{
                 labelText+=Viewer::formatBoldText(" Size: ",col);
-                labelText+=Viewer::formatText(VFileInfo::formatSize(f->dataSize()),fileSizeColour(f->dataSize()));
+                labelText+=formatFileSize(VFileInfo::formatSize(f->dataSize()),f->dataSize());
 			}
 			else
 			{
@@ -172,7 +166,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
                 if(fInfo.exists())
 				{					
                     labelText+=Viewer::formatBoldText(" Size: ",col);
-                    labelText+=Viewer::formatText(fInfo.formatSize(),fileSizeColour(fInfo.size()));
+                    labelText+=formatFileSize(fInfo.formatSize(),fInfo.size());
 				}
 			}
 
@@ -182,13 +176,12 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             s+=Viewer::formatBoldText("Source: ",col);
 
             if(f->cached())
-                s+=Viewer::formatText("from cache - ",QColor(0,0,170));
-
+            {
+                s+="[from cache] ";
+            }
             s+=QString::fromStdString(f->fetchModeStr());
-            s+=" (took " + QString::number(static_cast<float>(f->transferDuration())/1000.,'f',1) + " s)";
-
-            QString dt=f->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
-            s+=Viewer::formatBoldText(" at ",col) + dt;
+            s+=" (took " + QString::number(static_cast<float>(f->transferDuration())/1000.,'f',1) + " s)";           
+            s+=Viewer::formatBoldText(" at ",col) + formatDate(f->fetchDate());
         }
 	}
 
@@ -200,15 +193,20 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	}
 
 	setText(labelText);
-    //setToolTip(ttText);
 }
 
-QColor FileInfoLabel::fileSizeColour(qint64 size) const
+QString FileInfoLabel::formatDate(QDateTime dt) const
 {
-    QColor col(0,0,170);
+    QColor col(34,107,138);
+    QString s=dt.toString("yyyy-MM-dd") + "&nbsp;&nbsp;" +dt.toString("HH:mm:ss");
+    return Viewer::formatBoldText(s,col);
+}
+
+QString FileInfoLabel::formatFileSize(QString str,qint64 size) const
+{
 	if(size > 10*1024*1024)
-		col=QColor(Qt::red);
-	return col;
+        return Viewer::formatText(str,QColor(Qt::red));
+    return str;
 }
 
 void DirInfoLabel::update(VReply* reply)

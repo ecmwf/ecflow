@@ -11,6 +11,7 @@
 #ifndef FILEINFOLABEL_HPP_
 #define FILEINFOLABEL_HPP_
 
+#include <QDateTime>
 #include <QLabel>
 
 #include "VDir.hpp"
@@ -23,8 +24,8 @@ public:
 	explicit FileInfoLabel(QWidget* parent=0);
 
 	void update(VReply*,QString str=QString());
-	QColor fileSizeColour(qint64 size) const;
-
+    QString formatDate(QDateTime) const;
+    QString formatFileSize(QString,qint64 size) const;
 };
 
 class DirInfoLabel : public FileInfoLabel
