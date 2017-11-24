@@ -89,9 +89,10 @@ void ChangeNotifyButton::updateIcon()
 		text=notifier_->prop()->param("widgetText");
 	}
 
-	if(notifier_->data())
+    int num=0;
+    if(notifier_->data())
 	{
-		int num=notifier_->data()->size();
+        num=notifier_->data()->size();
 		if(num > 0 && num < 10)
 			numText=QString::number(num);
 		else if(num > 10)
@@ -104,14 +105,16 @@ void ChangeNotifyButton::updateIcon()
 	QColor countBgCol(58,126,194);
 	QColor countFgCol(Qt::white);
 
-#if 0
     if(notifier_->prop())
 	{
-		if(VProperty *p=notifier_->prop()->findChild("fill_colour"))
-			bgCol=p->value().value<QColor>();
+        if(num > 0)
+        {
+            if(VProperty *p=notifier_->prop()->findChild("fill_colour"))
+                bgCol=p->value().value<QColor>();
 
-		if(VProperty *p=notifier_->prop()->findChild("text_colour"))
-			fgCol=p->value().value<QColor>();
+            if(VProperty *p=notifier_->prop()->findChild("text_colour"))
+                fgCol=p->value().value<QColor>();
+        }
 
 		if(VProperty *p=notifier_->prop()->findChild("count_fill_colour"))
 			countBgCol=p->value().value<QColor>();
@@ -119,9 +122,8 @@ void ChangeNotifyButton::updateIcon()
 		if(VProperty *p=notifier_->prop()->findChild("count_text_colour"))
 			countFgCol=p->value().value<QColor>();
 
-		border=notifier_->prop()->paramToColour("border");
+        //border=notifier_->prop()->paramToColour("border");
 	}
-#endif
 
 	QFont f;
     //f.setBold(true);

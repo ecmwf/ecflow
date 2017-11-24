@@ -11,13 +11,19 @@
                      }
             },                                    
             "aborted": {
+                "use_status_colour" : {
+                    "label" : "Use aborted status colour",
+                    "default" : "true"
+                },
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(255,0,0)"
+                    "default": "rgb(255,0,0)",
+                    "disabledRule" : "use_status_colour=true"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
-                    "default": "rgb(0,0,0)"
+                    "default": "rgb(0,0,0)",
+                    "disabledRule" : "use_status_colour=true"
                 },    
                 "count_fill_colour" : {
                     "label" : "Notification count background colour",

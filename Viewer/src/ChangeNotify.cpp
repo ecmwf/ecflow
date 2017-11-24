@@ -81,14 +81,14 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 
 	if(popup)
 	{
-		dialog()->setCurrentTab(this);
+        dialog()->setCurrent(this);
 		dialog()->show();
 		dialog()->raise();
 	}
 	else
 	{
 		if(!dialog()->isVisible())
-			dialog()->setCurrentTab(this);
+            dialog()->setCurrent(this);
 		else
 			dialog()->raise();
 	}
@@ -145,7 +145,7 @@ void ChangeNotify::setEnabled(bool en)
 
 	if(dialog_)
 	{
-		dialog()->setEnabledTab(this,en);
+        dialog()->setEnabled(this,en);
 	}
 
 	ChangeNotifyWidget::setEnabled(id_,en);
@@ -238,7 +238,7 @@ void ChangeNotify::clearData()
 void ChangeNotify::showDialog(ChangeNotify* notifier)
 {
     if(notifier)
-        dialog()->setCurrentTab(notifier);
+        dialog()->setCurrent(notifier);
 
     dialog()->show();
 	dialog()->raise();
@@ -355,14 +355,13 @@ ChangeNotifyDialog* ChangeNotify::dialog()
 		dialog_=new ChangeNotifyDialog();
 		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
 		{
-			dialog_->addTab(it->second);
+            dialog_->add(it->second);
 		}
 
 		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
 		{
-			dialog_->setEnabledTab(it->second,it->second->isEnabled());
+            dialog_->setEnabled(it->second,it->second->isEnabled());
 		}
-
 	}
 
 	return dialog_;
@@ -400,7 +399,8 @@ void ChangeNotify::populate(ChangeNotifyWidget* w)
 
 void AbortedNotify::loadNodeState()
 {
-	if(VProperty *nsp=VConfig::instance()->find("nstate.aborted"))
+#if 0
+    if(VProperty *nsp=VConfig::instance()->find("nstate.aborted"))
 	{
 		VProperty* master=nsp->findChild("fill_colour");
 		VProperty* local=prop_->findChild("fill_colour");
@@ -418,6 +418,7 @@ void AbortedNotify::loadNodeState()
 			local->setMaster(master,true);
 		}
 	}
+#endif
 
 }
 
