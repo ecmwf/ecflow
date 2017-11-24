@@ -44,12 +44,22 @@ const char* DefsDoc::add()
            "             Autocancel(3)\n"
            "             ),\n"
            "         [ Family('f{}'.format(i)) for i in range(1,6)]))\n\n"
-           "We can also '+=' with list here area few examples::\n\n"
+           "We can also use '+=' with a list here area few examples::\n\n"
            " defs = Defs();\n"
            " defs += [ Suite('s2'),Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b') ]\n\n"
            "::\n\n"
            " defs += [ Suite('s{}'.format(i)) for i in range(1,6) ]\n\n"
-           ;
+           "::\n\n"
+           " defs = Defs()\n"
+           " defs += [ Suite('suite').add(\n"
+           "              Task('x'), \n"
+           "              Family('f').add( [ Task('t{}'.format(i)) for i in range(1,6)] ),\n"
+           "              Task('y'),\n"
+           "              [ Family('f{}'.format(i)) for i in range(1,6) ],\n"
+           "              Edit(a='b'),\n"
+           "              [ Task('t{}'.format(i)) for i in range(1,6) ],\n"
+           "              )]\n"
+          ;
 }
 
 const char* DefsDoc::abs_node_path_doc()
@@ -456,8 +466,7 @@ const char* DefsDoc::add_definition_doc()
             "  for i in [ \"_1\", \"_2\", \"_3\" ]: family.add_task( \"t\" + i )\n"
             "  defs.save_as_defs('filename.def')  # save defs into file\n"
             "\n"
-            "Create a Defs from an existing file on disk.\n"
-            "\n"
+            "Create a Defs from an existing file on disk. ::\n\n"
             "  defs = Defs('filename.def')   #  Will open and parse the file and create the Definition\n"
             "  print defs\n"
             ;

@@ -6,7 +6,7 @@
 ## nor does it submit to any jurisdiction.
 #
 # export BOOST_ROOT=...
-# alias bjam='$BOOST_ROOT/bjam c++-template-depth=512 cxxflags="-Wno-unused-local-typedefs -Wno-unused-variable"'
+# alias b8r='$BOOST_ROOT/bjam c++-template-depth=512 cxxflags="-Wno-unused-local-typedefs -Wno-unused-variable" -j8 -q release'
 
 project ecflow_top ;
 
