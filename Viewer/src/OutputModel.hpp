@@ -4,6 +4,9 @@
 #include <QAbstractItemModel>
 #include <QDateTime>
 #include <QSortFilterProxyModel>
+#include <QStyledItemDelegate>
+
+#include <vector>
 
 #include "NodeObserver.hpp"
 #include "VDir.hpp"
@@ -14,9 +17,9 @@ class OutputModel : public QAbstractItemModel
 public:
 	explicit OutputModel(QObject *parent=0);
 
-    void setData(VDir_ptr dir,const std::string& jobout);
+    void setData(const std::vector<VDir_ptr>&,const std::string& jobout);
    	void clearData();
-    bool isEmpty() const {return (!dir_);}
+    bool isEmpty() const {return (!hasData());}
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
 
@@ -30,12 +33,13 @@ public:
    	std::string fullName(const QModelIndex& index) const;
 
 protected:
-   	bool hasData() const;
+    VDirItem* itemAt(int row,VDir_ptr& dir) const;
+    bool hasData() const;
    	QString formatSize(unsigned int size) const;
    	QString formatDate(QDateTime) const;
    	QString formatAgo(QDateTime) const;
 
-   	VDir_ptr dir_;
+    std::vector<VDir_ptr> dirs_;
     int joboutRow_;
     static QColor joboutCol_;
 };
@@ -53,5 +57,15 @@ public:
 	QModelIndex fullNameToIndex(const std::string& fullName);
 };
 
+class OutputDirLitsDelegate : public QStyledItemDelegate
+{
+public:
+    explicit OutputDirLitsDelegate(QWidget *parent=0);
+    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const;
+
+    //QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+
+};
 
 #endif

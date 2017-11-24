@@ -39,6 +39,21 @@ void ViewerUtil::initComboBox(QSettings& settings,QString key,QComboBox* cb)
         cb->setCurrentIndex(0);
 }
 
+void ViewerUtil::initComboBoxByData(QString dataValue,QComboBox* cb)
+{
+    Q_ASSERT(cb);
+    for(int i=0; i < cb->count(); i++)
+    {
+        if(cb->itemData(i).toString() == dataValue)
+        {
+            cb->setCurrentIndex(i);
+            return;
+        }
+    }
+
+    if(cb->currentIndex() == -1)
+        cb->setCurrentIndex(0);
+}
 
 void ViewerUtil::initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree)
 {

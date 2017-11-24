@@ -15,6 +15,7 @@
 #include "OutputModel.hpp"
 #include "PlainTextEdit.hpp"
 #include "ServerHandler.hpp"
+#include "TextFormat.hpp"
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
@@ -22,7 +23,14 @@
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#else
 #include <QApplication>
+#endif
+
+#include <QClipboard>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -32,6 +40,8 @@
 #include <QTimer>
 #include <QWidgetAction>
 #include <QFileDialog>
+
+#define _UI_OUTPUTITEMWIDGET_DEBUG
 
 int OutputItemWidget::updateDirTimeout_=1000*60;
 
@@ -52,6 +62,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	//--------------------------------
 
     messageLabel_->hide();
+    messageLabel_->setShowTypeTitle(false);
     warnLabel_->hide();
     fileLabel_->setProperty("fileInfo","1");
 
@@ -63,11 +74,14 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     dirMessageLabel_->hide();
     dirMessageLabel_->setShowTypeTitle(false);
+    dirLabel_->hide();
     dirLabel_->setProperty("fileInfo","1");
 
 	dirProvider_=new OutputDirProvider(this);
 
 	//The view
+    OutputDirLitsDelegate* dirDelegate=new OutputDirLitsDelegate(this);
+    dirView_->setItemDelegate(dirDelegate);
 	dirView_->setRootIsDecorated(false);
 	dirView_->setAllColumnsShowFocus(true);
 	dirView_->setUniformRowHeights(true);
@@ -174,7 +188,6 @@ void OutputItemWidget::getLatestFile()
     messageLabel_->stopProgress();
     fileLabel_->clear();
     browser_->clear();
-    dirLabel_->clear();
     dirMessageLabel_->hide();
     fetchInfo_->clearInfo();
 
@@ -184,7 +197,7 @@ void OutputItemWidget::getLatestFile()
     updateDir(false);  // get the directory listing
 }
 
-void OutputItemWidget::getCurrentFile()
+void OutputItemWidget::getCurrentFile(bool doReload)
 {
 	messageLabel_->hide();
 	messageLabel_->stopLoadLabel();
@@ -196,9 +209,11 @@ void OutputItemWidget::getCurrentFile()
     if(info_)
 	{
 		std::string fullName=currentFullName();
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg()  << "output selected: " << fullName;
-		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-		op->file(fullName);
+#endif
+        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        op->file(fullName,!doReload);
 	}
 }
 
@@ -210,7 +225,6 @@ void OutputItemWidget::clearContents()
     messageLabel_->hide();
     messageLabel_->stopProgress();
     fileLabel_->clear();      
-    dirLabel_->clear();
     browser_->clearCursorCache();
     browser_->clear();
     reloadTb_->setEnabled(true);
@@ -390,16 +404,19 @@ void OutputItemWidget::infoReady(VReply* reply)
     //------------------------
     else
     {    
-        //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_ and
-        //is only supposed to display error messages!
+        //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_
+        //and is only supposed to display error messages!
 
         enableDir(true);
 
         //Update the dir widget and select the proper file in the list
-        updateDir(reply->directory(),true);
+        updateDir(reply->directories(),true);
 
-        //Update the dir label
-        dirLabel_->update(reply);
+#if 0
+        //Even though infoReady is called there could be some errors since we could
+        //try to read multiple directories
+        displayDirErrors(reply->errorTextVec());
+#endif
     }
 }
 
@@ -423,6 +440,7 @@ void  OutputItemWidget::infoProgress(const std::string& text,int value)
 
 void OutputItemWidget::infoFailed(VReply* reply)
 {
+    //File
     if(reply->sender() == infoProvider_)
 	{
 		QString s=QString::fromStdString(reply->errorText());
@@ -438,24 +456,13 @@ void OutputItemWidget::infoFailed(VReply* reply)
 
         fetchInfo_->setInfo(reply,info_);
 	}
+    //Directories
     else
     {
         //We do not have directories
         enableDir(false);
 
-        QColor col(70,71,72);
-        QString s="<b><font color=\'" + col.name() +  "\'>Output directory</font></b>: ";
-        const std::vector<std::string>& et=reply->errorTextVec();
-        if(et.size() > 1)
-        {
-            for(size_t i=0; i < et.size(); i++)
-                s+="<b><font color=\'" + col.name() +  "\'>[" + QString::number(i+1) + "]</font></b> " +
-                        QString::fromStdString(et[i]) + ". &nbsp;&nbsp;";
-        }
-        else if(et.size() == 1)
-            s+=QString::fromStdString(et[0]);
-
-        dirMessageLabel_->showError(s);
+        displayDirErrors(reply->errorTextVec());
 
         //the timer is stopped. It will be restarted again if we get a local file or
         //a file via the logserver
@@ -467,7 +474,7 @@ void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
     reloadTb_->setEnabled(false);
-    getLatestFile();
+    getCurrentFile(true);
     //userClickedReload_ = false;
 }
 
@@ -486,36 +493,48 @@ void OutputItemWidget::setCurrentInDir(const std::string& fullName)
     }
 }
 
-void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
+void OutputItemWidget::updateDir(const std::vector<VDir_ptr>& dirs,bool restartTimer)
 {
-    UiLog().dbg() << "OutputItemWidget::updateDir -->";
+UI_FUNCTION_LOG
 
     if(restartTimer)
 		updateDirTimer_->stop();
 
-    bool status=(dir && dir->count() >0);
+    bool status=false;
+    for(std::size_t i=0; i < dirs.size(); i++)
+    {
+        if(dirs[i] && dirs[i]->count() > 0)
+        {
+            status=true;
+            break;
+        }
+    }
 
 	if(status)
 	{
         OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-        op->setDir(dir);
+        op->setDirectories(dirs);
 
         std::string fullName=currentFullName();
 
 		dirView_->selectionModel()->clearSelection();
-        dirModel_->setData(dir,op->joboutFileName());
+        dirModel_->setData(dirs,op->joboutFileName());
         //dirWidget_->show();
 
+        //Adjust column width
         if(!dirColumnsAdjusted_)
         {
             dirColumnsAdjusted_=true;
-            for(int i=0; i< dirModel_->columnCount()-1; i++)
+            for(int i=0; i< dirModel_->columnCount()-1; i++)               
                 dirView_->resizeColumnToContents(i);
 
+            if(dirModel_->columnCount() > 1)
+                dirView_->setColumnWidth(1,dirView_->columnWidth(0));
+
         }
-
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg() << " dir item count=" << dirModel_->rowCount();
-
+#endif
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;
 		dirView_->setCurrentIndex(dirSortModel_->fullNameToIndex(fullName));
@@ -560,6 +579,30 @@ void OutputItemWidget::enableDir(bool status)
 	}
 }
 
+void OutputItemWidget::displayDirErrors(const std::vector<std::string>& errorVec)
+{   
+    QString s;
+    if(errorVec.size() > 0)
+    {
+        QColor col(70,71,72);
+        s=Viewer::formatBoldText("Output directory: ",col);
+
+        if(errorVec.size() > 1)
+        {
+            for(size_t i=0; i < errorVec.size(); i++)
+                s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
+                    QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
+        }
+        else if(errorVec.size() == 1)
+            s+=QString::fromStdString(errorVec[0]);
+    }
+
+    if(!s.isEmpty())
+        dirMessageLabel_->showError(s);
+    else
+        dirMessageLabel_->hide();
+}
+
 //---------------------------------------------
 // Search
 //---------------------------------------------
@@ -590,7 +633,7 @@ void OutputItemWidget::searchOnReload()
 void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
 {
 	if(!ignoreOutputSelection_)
-		getCurrentFile();
+        getCurrentFile(false);
 }
 
 //-----------------------------------------
@@ -629,6 +672,29 @@ void OutputItemWidget::on_saveFileAsTb__clicked()
 	}
 }
 
+//-----------------------------------------
+// Copy file path
+//-----------------------------------------
+
+void OutputItemWidget::on_copyPathTb__clicked()
+{
+    std::string fullName=currentFullName();
+
+    if(!fullName.empty())
+    {
+        QString txt=QString::fromStdString(fullName);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QClipboard* cb=QGuiApplication::clipboard();
+        cb->setText(txt, QClipboard::Clipboard);
+        cb->setText(txt, QClipboard::Selection);
+#else
+        QClipboard* cb=QApplication::clipboard();
+        cb->setText(txt, QClipboard::Clipboard);
+        cb->setText(txt, QClipboard::Selection);
+#endif
+    }
+}
 
 //-------------------------
 // Update
@@ -645,9 +711,12 @@ void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect
             if(submittedWarning_)
                getLatestFile();
             else if(info_ && info_->node() == n && info_->node()->isSubmitted())
-               getLatestFile();
-
-
+            {
+                OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+                Q_ASSERT(op);
+                if(currentFullName() == op->joboutFileName())
+                    getLatestFile();
+            }
             return;
         }
     }

@@ -11,6 +11,7 @@
 #ifndef NODEQUERYOPTION_HPP
 #define NODEQUERYOPTION_HPP
 
+#include <QDateTime>
 #include <QStringList>
 
 #include "StringMatchMode.hpp"
@@ -37,6 +38,7 @@ public:
 
     virtual void swap(const NodeQueryOption*)=0;
     virtual QString query() const {return QString();}
+    virtual QString sqlQuery() const {return query();}
     virtual QString query(QString op) const {return QString();}
     virtual void load(VSettings*)=0;
     virtual void save(VSettings*)=0;
@@ -138,6 +140,38 @@ protected:
     QString value_;
     QStringList values_;
     QStringList valueLabels_;
+};
+
+class NodeQueryPeriodOption : public NodeQueryOption
+{
+public:
+    NodeQueryPeriodOption(VProperty*);
+
+    void swap(const NodeQueryOption*);
+
+    QString query() const;
+    QString sqlQuery() const;
+    void load(VSettings*);
+    void save(VSettings*);
+
+    void clear();
+    void setLastPeriod(int lastPeriod,QString lastPeriodUnits);
+    void setPeriod(QDateTime,QDateTime);
+
+    enum Mode {LastPeriodMode,FixedPeriodMode,NoMode};
+    Mode mode() const {return mode_;}
+    int lastPeriod() const {return lastPeriod_;}
+    QString lastPeriodUnits() const {return lastPeriodUnits_;}
+    QDateTime fromDate() const {return fromDate_;}
+    QDateTime toDate() const {return toDate_;}
+    QString valueAsString() const {return QString();}
+
+protected:
+    Mode mode_;
+    QDateTime fromDate_;
+    QDateTime toDate_;
+    int lastPeriod_;
+    QString lastPeriodUnits_;
 };
 
 #endif // NODEQUERYOPTION_HPP

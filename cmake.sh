@@ -278,7 +278,7 @@ $ecbuild $source_dir \
             #-DENABLE_STATIC_BOOST_LIBS=ON \
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \
             #-DENABLE_PYTHON=OFF   \
-            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor  \
+            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor   \
             #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             #-DENABLE_GUI=ON       \
             #-DENABLE_UI=ON        \           

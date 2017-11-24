@@ -17,6 +17,7 @@ set(viewer_srcs
     ChangeNotifyEditor.cpp
     ChangeNotifyModel.cpp
     ChangeNotifyWidget.cpp
+    ClockWidget.cpp
     CodeItemWidget.cpp
     ComboMulti.cpp
     CommandDesignerWidget.cpp
@@ -105,7 +106,7 @@ set(viewer_srcs
     OutputDirProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
-    Palette.cpp
+    Palette.cpp  
     PlainTextEdit.cpp
     PlainTextSearchLine.cpp
     PlainTextSearchInterface.cpp
@@ -249,6 +250,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
     ChangeNotifyWidget.hpp
+    ClockWidget.hpp
     CodeItemWidget.hpp
     ComboMulti.hpp
     CommandDesignerWidget.hpp    

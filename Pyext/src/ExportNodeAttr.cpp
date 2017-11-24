@@ -148,24 +148,24 @@ void export_NodeAttr()
 {
    enum_<Flag::Type>("FlagType",
          "Flags store state associated with a node\n\n"
-         "FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
-         "USER_EDIT     - task\n"
-         "TASK_ABORTED  - task*\n"
-         "EDIT_FAILED   - task*\n"
-         "JOBCMD_FAILED - task*\n"
-         "NO_SCRIPT     - task*\n"
-         "KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
-         "LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
-         "MESSAGE       - Node\n"
-         "BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
-         "QUEUELIMIT    - Node\n"
-         "WAIT          - task* \n"
-         "LOCKED        - Server\n"
-         "ZOMBIE        - task*\n"
-         "NO_REQUE      - task\n"
-         "ARCHIVED      - Suite/Family\n"
-         "RESTORED      - Family/Family\n"
-         "NOT_SET\n"
+         "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
+         "- USER_EDIT     - task\n"
+         "- TASK_ABORTED  - task*\n"
+         "- EDIT_FAILED   - task*\n"
+         "- JOBCMD_FAILED - task*\n"
+         "- NO_SCRIPT     - task*\n"
+         "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+         "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
+         "- MESSAGE       - Node\n"
+         "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
+         "- QUEUELIMIT    - Node\n"
+         "- WAIT          - task* \n"
+         "- LOCKED        - Server\n"
+         "- ZOMBIE        - task*\n"
+         "- NO_REQUE      - task\n"
+         "- ARCHIVED      - Suite/Family\n"
+         "- RESTORED      - Family/Family\n"
+         "- NOT_SET\n"
    )
          .value("force_abort",  Flag::FORCE_ABORT)
          .value("user_edit",    Flag::USER_EDIT)
@@ -256,11 +256,11 @@ void export_NodeAttr()
    .def("__init__",make_constructor(&create_ZombieAttr1) )
    .def("__str__",    &ZombieAttr::toString)              // __str__
    .def("__copy__",   copyObject<ZombieAttr>)             // __copy__ uses copy constructor
-   .def(self == self )                                    // __eq__
-   .def("empty",          &ZombieAttr::empty,          "Return true if the attribute is empty")
-   .def("zombie_type",    &ZombieAttr::zombie_type,    "Returns the :term:`zombie type`")
-   .def("user_action",    &ZombieAttr::action,         "The automated action to invoke, when zombies arise")
-   .def("zombie_lifetime",&ZombieAttr::zombie_lifetime,"Returns the lifetime in seconds of :term:`zombie` in the server")
+ 	.def(self == self )                                    // __eq__
+ 	.def("empty",          &ZombieAttr::empty,          "Return true if the attribute is empty")
+ 	.def("zombie_type",    &ZombieAttr::zombie_type,    "Returns the `zombie type`_")
+ 	.def("user_action",    &ZombieAttr::action,         "The automated action to invoke, when zombies arise")
+ 	.def("zombie_lifetime",&ZombieAttr::zombie_lifetime,"Returns the lifetime in seconds of `zombie`_ in the server")
    .add_property( "child_cmds",boost::python::range(&ZombieAttr::child_begin,&ZombieAttr::child_end),"The list of child commands. If empty action applies to all child cmds")
    ;
 
@@ -314,8 +314,8 @@ void export_NodeAttr()
 	.def(self == self )                                    // __eq__
 	.def("__str__",   &Label::toString)                    // __str__
    .def("__copy__",   copyObject<Label>)                  // __copy__ uses copy constructor
-	.def("name",      &Label::name,      return_value_policy<copy_const_reference>(), "Return the :term:`label` name as string")
-	.def("value",     &Label::value,     return_value_policy<copy_const_reference>(), "Return the original :term:`label` value as string")
+	.def("name",      &Label::name,      return_value_policy<copy_const_reference>(), "Return the `label`_ name as string")
+	.def("value",     &Label::value,     return_value_policy<copy_const_reference>(), "Return the original `label`_ value as string")
 	.def("new_value", &Label::new_value, return_value_policy<copy_const_reference>(), "Return the new label value as string")
    .def("empty",     &Label::empty,     "Return true if the Label is empty. Used when returning a NULL Label, from a find")
   	;
@@ -327,9 +327,9 @@ void export_NodeAttr()
 	.def(self == self )                               // __eq__
 	.def("__str__",  &Limit::toString)                // __str__
    .def("__copy__",   copyObject<Limit>)             // __copy__ uses copy constructor
-	.def("name",     &Limit::name, return_value_policy<copy_const_reference>(), "Return the :term:`limit` name as string")
-   .def("value",    &Limit::value,    "The :term:`limit` token value as an integer")
-   .def("limit",    &Limit::theLimit, "The max value of the :term:`limit` as an integer")
+	.def("name",     &Limit::name, return_value_policy<copy_const_reference>(), "Return the `limit`_ name as string")
+   .def("value",    &Limit::value,    "The `limit`_ token value as an integer")
+   .def("limit",    &Limit::theLimit, "The max value of the `limit`_ as an integer")
    .def("increment",&Limit::increment, "used for test only")
    .def("decrement",&Limit::decrement, "used for test only")
    .def("node_paths",&wrap_set_of_strings,"List of nodes(paths) that have consumed a limit")
@@ -338,23 +338,16 @@ void export_NodeAttr()
    boost::python::register_ptr_to_python< boost::shared_ptr<Limit> >(); // needed for mac and boost 1.6
 #endif
 
-
-//   InLimit(const std::string& limit_name,                                         // referenced limit
-//           const std::string& path_to_node_with_referenced_limit = std::string(), // if empty, search for limit up parent hierarchy
-//           int tokens = 1,                                                        // tokens to consume in the Limit
-//           bool limit_this_node_only = false);                                    // if true limit this node only
-	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc(),init<std::string,std::string,optional<int> >())
-         .def( init<std::string,std::string,int,bool> () )
-         .def( init<std::string,std::string> () )
-         .def( init<std::string> () )
-         .def(self == self )                                  // __eq__
-         .def("__str__",     &InLimit::toString)              // __str__
-         .def("__copy__",   copyObject<InLimit>)              // __copy__ uses copy constructor
-         .def("name",        &InLimit::name,       return_value_policy<copy_const_reference>(), "Return the :term:`inlimit` name as string")
-         .def("path_to_node",&InLimit::pathToNode, return_value_policy<copy_const_reference>(), "Path to the node that holds the limit, can be empty")
-         .def("tokens",      &InLimit::tokens,                                                  "The number of token to consume from the Limit")
-         .def("limit_this_node_only",&InLimit::limit_this_node_only, "Return true, if this only this node is limited")
-         ;
+	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc(),init<std::string,  std::string, optional<int> >())
+	.def( init<std::string,std::string> () )
+	.def( init<std::string> () )
+	.def(self == self )                                  // __eq__
+	.def("__str__",     &InLimit::toString)              // __str__
+   .def("__copy__",   copyObject<InLimit>)              // __copy__ uses copy constructor
+	.def("name",        &InLimit::name,       return_value_policy<copy_const_reference>(), "Return the `inlimit`_ name as string")
+	.def("path_to_node",&InLimit::pathToNode, return_value_policy<copy_const_reference>(), "Path to the node that holds the limit, can be empty")
+	.def("tokens",      &InLimit::tokens,                                                  "The number of token to consume from the Limit")
+	;
 
 	class_<Event>("Event",NodeAttrDoc::event_doc(), init<int, optional<std::string> >())
    .def( init<std::string> () )
@@ -453,28 +446,28 @@ void export_NodeAttr()
 
 	class_<LateAttr, boost::shared_ptr<LateAttr>  >("Late",NodeAttrDoc::late_doc())
  	.def( "submitted", &LateAttr::addSubmitted,
- 	      "submitted(TimeSlot):The time node can stay :term:`submitted`. Submitted is always relative. If the node stays\n"
- 	      "submitted longer than the time specified, the :term:`late` flag is set\n"
+ 	      "submitted(TimeSlot):The time node can stay `submitted`_. Submitted is always relative. If the node stays\n"
+ 	      "submitted longer than the time specified, the `late`_ flag is set\n"
  	)
 	.def( "submitted", &LateAttr::add_submitted,
 	      "submitted(hour,minute) The time node can stay submitted. Submitted is always relative. If the node stays\n"
 	      "submitted longer than the time specified, the late flag is set\n"
 	 )
 	.def( "active",    &LateAttr::add_active,
-	      "active(hour,minute): The time the node must become :term:`active`. If the node is still :term:`queued` or :term:`submitted`\n"
+	      "active(hour,minute): The time the node must become `active`_. If the node is still `queued`_ or `submitted`_\n"
 	      "by the time specified, the late flag is set"
 	 )
 	 .def( "active",   &LateAttr::addActive,
-	       "active(TimeSlot):The time the node must become :term:`active`. If the node is still :term:`queued` or :term:`submitted`\n"
+	       "active(TimeSlot):The time the node must become `active`_. If the node is still `queued`_ or `submitted`_\n"
 	       "by the time specified, the late flag is set"
 	 )
 	.def( "complete",  &LateAttr::add_complete,
-	      "complete(hour,minute):The time the node must become :term:`complete`. If relative, time is taken from the time\n"
-	      "the node became :term:`active`, otherwise node must be :term:`complete` by the time given"
+	      "complete(hour,minute):The time the node must become `complete`_. If relative, time is taken from the time\n"
+	      "the node became `active`_, otherwise node must be `complete`_ by the time given"
 	 )
 	 .def( "complete", &LateAttr::addComplete,
-	       "complete(TimeSlot): The time the node must become :term:`complete`. If relative, time is taken from the time\n"
-	       "the node became :term:`active`, otherwise node must be :term:`complete` by the time given"
+	       "complete(TimeSlot): The time the node must become `complete`_. If relative, time is taken from the time\n"
+	       "the node became `active`_, otherwise node must be `complete`_ by the time given"
 	 )
 	.def(self == self )                                  // __eq__
 	.def("__str__",   &LateAttr::toString)               // __str__
@@ -564,7 +557,7 @@ void export_NodeAttr()
 	.def(self == self )                                     // __eq__
 	.def("__str__",        &RepeatEnumerated::toString)     // __str__
     .def("__copy__",       copyObject<RepeatEnumerated>)    // __copy__ uses copy constructor
-	.def("name",           &RepeatEnumerated::name, return_value_policy<copy_const_reference>(),"Return the name of the :term:`repeat`.")
+	.def("name",           &RepeatEnumerated::name, return_value_policy<copy_const_reference>(),"Return the name of the `repeat`_.")
 	.def("start",          &RepeatEnumerated::start)
 	.def("end",            &RepeatEnumerated::end)
 	.def("step",           &RepeatEnumerated::step)
@@ -578,7 +571,7 @@ void export_NodeAttr()
 	.def(self == self )                                 // __eq__
 	.def("__str__",        &RepeatString::toString)     // __str__
    .def("__copy__",       copyObject<RepeatString>)    // __copy__ uses copy constructor
-	.def("name",           &RepeatString::name, return_value_policy<copy_const_reference>(),"Return the name of the :term:`repeat`.")
+	.def("name",           &RepeatString::name, return_value_policy<copy_const_reference>(),"Return the name of the `repeat`_.")
 	.def("start",          &RepeatString::start)
 	.def("end",            &RepeatString::end)
 	.def("step",           &RepeatString::step)
@@ -596,13 +589,13 @@ void export_NodeAttr()
 	class_<Repeat>("Repeat",NodeAttrDoc::repeat_doc() ,init< int >())
 	.def(self == self )                    // __eq__
 	.def("__str__", &Repeat::toString)     // __str__
-    .def("__copy__",copyObject<Repeat>)    // __copy__ uses copy constructor
+	.def("__copy__",copyObject<Repeat>)    // __copy__ uses copy constructor
 	.def("empty",   &Repeat::empty ,"Return true if the repeat is empty.")
-	.def("name",    &Repeat::name, return_value_policy<copy_const_reference>(), "The :term:`repeat` name, can be referenced in :term:`trigger` expressions")
+	.def("name",    &Repeat::name, return_value_policy<copy_const_reference>(), "The `repeat`_ name, can be referenced in `trigger`_ expressions")
 	.def("start",   &Repeat::start,"The start value of the repeat, as an integer")
 	.def("end",     &Repeat::end,  "The last value of the repeat, as an integer")
-    .def("step",    &Repeat::step, "The increment for the repeat, as an integer")
-    .def("value",   &Repeat::last_valid_value,"The current value of the repeat as an integer")
+	.def("step",    &Repeat::step, "The increment for the repeat, as an integer")
+	.def("value",   &Repeat::last_valid_value,"The current value of the repeat as an integer")
 	;
 
 
@@ -611,14 +604,14 @@ void export_NodeAttr()
 	class_<CronAttr>("Cron",NodeAttrDoc::cron_doc() )
 	.def(self == self )                                // __eq__
 	.def("__str__",            &CronAttr::toString)    // __str__
-    .def("__copy__",copyObject<CronAttr>)              // __copy__ uses copy constructor
-    .def( "set_week_days",     &set_week_days ,   "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
+	.def("__copy__",copyObject<CronAttr>)              // __copy__ uses copy constructor
+	.def( "set_week_days",     &set_week_days ,   "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
 	.def( "set_days_of_month", &set_days_of_month,"Specifies days of the month. Expects a list of integers with integer range 1-31" )
 	.def( "set_months",        &set_months  ,     "Specifies months. Expects a list of integers, with integer range 1-12")
 	.def( "set_time_series",   &CronAttr::add_time_series,(bp::arg("hour"),bp::arg("minute"),bp::arg("relative")=false),"time_series(hour(int),minute(int),relative to suite start(bool=false)), Add a time slot")
 	.def( "set_time_series",   add_time_series,   "Add a time series. This will never complete")
-    .def( "set_time_series",   add_time_series_2, "Add a time series. This will never complete")
-    .def( "set_time_series",   &add_time_series_3,"Add a time series. This will never complete")
+	.def( "set_time_series",   add_time_series_2, "Add a time series. This will never complete")
+	.def( "set_time_series",   &add_time_series_3,"Add a time series. This will never complete")
 	.def( "time",              &CronAttr::time, return_value_policy<copy_const_reference>(), "return cron time as a TimeSeries")
 	.add_property( "week_days",    boost::python::range(&CronAttr::week_days_begin,    &CronAttr::week_days_end),     "returns a integer list of week days")
 	.add_property( "days_of_month",boost::python::range(&CronAttr::days_of_month_begin,&CronAttr::days_of_month_end), "returns a integer list of days of the month")

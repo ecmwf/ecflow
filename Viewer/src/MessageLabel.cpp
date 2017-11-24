@@ -192,7 +192,7 @@ void MessageLabel::showMessage(const Type& type,QString msg)
     QString s=message_;
 	s.replace("\n","<br>");
 	if(showTypeTitle_)
-		s="<b>" + it->second.title_ + ": </b><br>" + s;
+        s="<b>" + it->second.title_ + ": </b>" + s;
 
 	msgLabel_->setText(s);
 

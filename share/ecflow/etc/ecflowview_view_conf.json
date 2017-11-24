@@ -180,7 +180,20 @@
                     "label": "Line number area current line colour",
                     "default": "rgb(212,212,255)"
                   }
-          }
+          },
+
+        "clock" : {
+             "showClock" : {
+                   "label" : "Show clock",
+                   "default" : "false"
+              },
+              "clockFormat" : {
+                 "label" : "Time format",
+                 "default" : "hhmm",
+                 "values" : "hhmm/hhmmss",
+                 "values_label" : "23:59/23:59:59"
+              }
+        }
     },
     
     "query_columns": {

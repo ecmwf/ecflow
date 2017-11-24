@@ -26,6 +26,7 @@
 #include "AboutDialog.hpp"
 #include "ChangeNotify.hpp"
 #include "ChangeNotifyWidget.hpp"
+#include "ClockWidget.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "InfoPanelHandler.hpp"
@@ -148,6 +149,10 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     //Add notification widget
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
+
+    //Add clock widget
+    clockWidget_=new ClockWidget(this);
+    statusBar()->addPermanentWidget(clockWidget_);
 
     //serverComWidget_=new ServerComLineDisplay(this);
     //statusBar()->addPermanentWidget(serverComWidget_);

@@ -12,11 +12,13 @@
 Suite Definition API
 --------------------
 - :py:class:`ecflow.Autocancel`
+- :py:class:`ecflow.Complete`
 - :py:class:`ecflow.Clock`
 - :py:class:`ecflow.Cron`
 - :py:class:`ecflow.Date`
 - :py:class:`ecflow.Day`
 - :py:class:`ecflow.Defs`
+- :py:class:`ecflow.Edit`
 - :py:class:`ecflow.Event`
 - :py:class:`ecflow.Expression`
 - :py:class:`ecflow.InLimit`
@@ -40,6 +42,7 @@ Suite Definition API
 - :py:class:`ecflow.Time`
 - :py:class:`ecflow.TimeSeries`
 - :py:class:`ecflow.TimeSlot`
+- :py:class:`ecflow.Trigger`
 - :py:class:`ecflow.Today`
 - :py:class:`ecflow.Variable`
 - :py:class:`ecflow.Verify`

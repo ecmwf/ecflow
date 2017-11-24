@@ -59,6 +59,11 @@ if __name__ == "__main__":
     defs.add_variable(a_dict)
     assert len(list(defs.user_variables)) == 0, "Expected zero variables"    
     
+    a_dict = { "name":0, "name2":1, "name3":2, "name4":3 }
+    defs.add_variable(a_dict)
+    assert len(list(defs.user_variables)) == 4, "Expected 4 variable"    
+    defs.delete_variable("");         assert len(list(defs.user_variables)) == 0, "Expected 0 variable since we should have deleted all"
+
     #===========================================================================
     # Suite: add,delete and sort variables
     #===========================================================================
@@ -81,6 +86,11 @@ if __name__ == "__main__":
     suite.delete_variable("");         assert len(list(suite.variables)) == 0, "Expected 0 variable since we should have deleted all"
     
     a_dict = { "name":"value", "name2":"value2", "name3":"value3", "name4":"value4" }
+    suite.add_variable(a_dict)
+    assert len(list(suite.variables)) == 4, "Expected 4 variable"    
+    suite.delete_variable("");         assert len(list(suite.variables)) == 0, "Expected 0 variable since we should have deleted all"
+
+    a_dict = { "name":1, "name2":2, "name3":3, "name4":4 }
     suite.add_variable(a_dict)
     assert len(list(suite.variables)) == 4, "Expected 4 variable"    
     suite.delete_variable("");         assert len(list(suite.variables)) == 0, "Expected 0 variable since we should have deleted all"
@@ -367,15 +377,22 @@ if __name__ == "__main__":
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
     task.add_repeat(ecflow.RepeatEnumerated("enum", ["red", "green", "blue" ]))
-    print(task)
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
 
     task.add_repeat(ecflow.RepeatDate("date", 20100111, 20100115, 2))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
     task.add_repeat(ecflow.RepeatString("string", ["a", "b", "c" ]))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
+    task.delete_repeat()      
+    repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
+
+    task.add_repeat(ecflow.RepeatDay(1))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     

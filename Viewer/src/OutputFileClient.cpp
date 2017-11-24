@@ -157,12 +157,12 @@ int OutputFileClient::maxProgress() const
 
 void OutputFileClient::setDir(VDir_ptr dir)
 {
-    if(dir != dir_)
-    {
-        dir_=dir;
-        if(expected_ == 0)
-            estimateExpectedSize();
-    }
+    if(dir_ && dir && dir_.get() == dir.get())
+        return;
+
+    dir_=dir;
+    //if(expected_ == 0)
+    estimateExpectedSize();
 }
 
 void OutputFileClient::estimateExpectedSize()
