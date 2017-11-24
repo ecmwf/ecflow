@@ -240,9 +240,9 @@ void export_Defs()
 	.def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
 	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
 	.def("__iadd__",              &defs_iadd)
-	.def("add",                   raw_function(add,1),GlossaryDoc::list())
+	.def("add",                   raw_function(add,1),DefsDoc::add())
 	.def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
-	.def("add_suite",             &Defs::add_suite )
+	.def("add_suite",             &Defs::add_suite, GlossaryDoc::list() )
 	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())
 	.def("auto_add_externs",      &Defs::auto_add_externs,  DefsDoc::add_extern_doc())
 	.def("add_variable",          &add_variable,            DefsDoc::add_variable_doc())

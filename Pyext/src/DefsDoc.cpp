@@ -15,6 +15,43 @@
 
 #include "DefsDoc.hpp"
 
+const char* DefsDoc::add()
+{
+   return  "add(..) provide a way to append Nodes and attributes\n\n"
+           "This is best illustrated with an example ::\n\n"
+           " defs = Defs().add(\n"
+           "     Suite('s1').add(\n"
+           "         Clock(1, 1, 2010, False),\n"
+           "         Autocancel(1, 10, True),\n"
+           "         Task('t1').add(\n"
+           "             Edit({ 'a':'y', 'b':'bb'}, c='v',d='b'),\n"
+           "             Edit({ 'e':1, 'f':'bb'}),\n"
+           "             Edit(g='d'),\n"
+           "             Edit(h=1),\n"
+           "             Event(1),\n"
+           "             Event(11,'event'),\n"
+           "             Meter('meter',0,10,10),\n"
+           "             Label('label','c'),\n"
+           "             Trigger('1==1'),\n"
+           "             Complete('1==1'),\n"
+           "             Limit('limit',10),Limit('limit2',10),\n"
+           "             InLimit('limitName','/limit',2),\n"
+           "             Defstatus(DState.complete),\n"
+           "             Today(0,30),Today('00:59'),Today('00:00 11:30 00:01'),\n"
+           "             Time(0,30),Time('00:59'),Time('00:00 11:30 00:01'),\n"
+           "             Day('sunday'),Day(Days.monday),\n"
+           "             Date(1,1,0),Date(28,2,1960),\n"
+           "             Autocancel(3)\n"
+           "             ),\n"
+           "         [ Family('f{}'.format(i)) for i in range(1,6)]))\n\n"
+           "We can also '+=' with list here area few examples::\n\n"
+           " defs = Defs();\n"
+           " defs += [ Suite('s2'),Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b') ]\n\n"
+           "::\n\n"
+           " defs += [ Suite('s{}'.format(i)) for i in range(1,6) ]\n\n"
+           ;
+}
+
 const char* DefsDoc::abs_node_path_doc()
 {
    return  "returns a string which holds the path to the node\n\n";
@@ -114,6 +151,40 @@ const char* DefsDoc::add_trigger_doc()
             "  task2.add_part_trigger( \"t7 == active\",False) # False means OR\n\n"
             "The trigger for task2 is equivalent to:\n"
             "'t1 == complete or t4 == complete and t5 == active or t7 == active'"
+            ;
+}
+
+const char* DefsDoc::trigger()
+{
+   return
+            "Add a `trigger`_ or `complete expression`_.\n\n"
+            "This defines a dependency for a `node`_.\n"
+            "There can only be one `trigger`_ or `complete expression`_ dependency per node.\n"
+            "A `node`_ with a trigger can only be activated when the trigger has expired.\n"
+            "Triggers can reference nodes, events, meters, variables, repeats, limits and late flag\n"
+            "A trigger holds a node as long as the expression returns false.\n"
+            "\nException:\n\n"
+            "- Will throw RuntimeError if first expression is added as 'AND' or 'OR' expression\n"
+            "  Like wise second and subsequent expression must have 'AND' or 'OR' booleans set\n"
+            "\nUsage:\n\n"
+            "Multiple trigger will automatically be *anded* together, If *or* is required please\n"
+            "use bool 'False' as the last argument i.e ::\n\n"
+            "  task1.add( Trigger(\"t2 == active\" ),\n"
+            "             Trigger(\"t1 == complete or t4 == complete\" ),\n"
+            "             Trigger( \"t5 == active\",False))\n"
+            "\n"
+            "The trigger for task1 is equivalent to ::\n\n"
+            "  t2 == active and t1 == complete or t4 == complete or t5 == active\n\n"
+            "Since a large number of triggers are of the form `<node> == complete` there are\n"
+            "are short cuts, these involves a use of a list ::\n\n"
+            "  task1.add( Trigger( [\"t2\",\"t3\"] )) #  This is same as t2 == complete and t3 == complete\n\n"
+            "You can also use a node ::\n\n"
+            "  task1.add( Trigger( [\"t2\",taskx] ))\n\n"
+            "If the node 'taskx' has a parent, we use the full hierarchy, hence we will get a trigger\n"
+            "of the form ::\n\n"
+            "  t2 ==complete and /suite/family/taskx == complete\n\n"
+            "If however node taskx has not yet been added to its parent, we use a relative name ::\n\n"
+            "  t2 ==complete and taskx == complete\n"
             ;
 }
 
