@@ -89,7 +89,7 @@ void ChangeNotifyDialogButton::updateSettings()
 {
     setEnabled(notifier_->isEnabled());
 
-    return;
+#if 0
 
     QString text;
     QString numText;
@@ -109,6 +109,7 @@ void ChangeNotifyDialogButton::updateSettings()
             numText="9+";
 
     }
+#endif
 }
 
 //===========================================================
@@ -178,7 +179,7 @@ void ChangeNotifyDialogWidget::updateSettings()
     if(VProperty *p=notifier_->prop()->findChild("fill_colour"))
 		bgCol=p->value().value<QColor>();
 
-    QColor bgLight=bgCol; //.lighter(150);
+    QColor bgLight=bgCol.lighter(110);
 
 	QString st="QLabel { \
 					background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
@@ -308,54 +309,6 @@ void ChangeNotifyDialog::add(ChangeNotify* notifier)
              " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
 
     readNtfWidgetSettings(stacked_->count()-1);
-
-#if 0
-    ChangeNotifyDialogWidget* w=new ChangeNotifyDialogWidget(this);
-	w->init(notifier);
-
-	connect(w,SIGNAL(contentsChanged()),
-			this,SLOT(slotContentsChanged()));
-
-    connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
-            this,SLOT(slotSelectionChanged(VInfo_ptr)));
-
-    VProperty* prop=notifier->prop();
-    Q_ASSERT(prop);
-
-	ignoreCurrentChange_=true;
-    tab_->addTab(w,prop->param("labelText"));
-	ignoreCurrentChange_=false;
-
-	tabWidgets_ << w;
-
-    readTabSettings(tab_->count()-1);
-
-
-    ChangeNotifyDialogButton *bw=new ChangeNotifyDialogButton(this);
-    bw->setNotifier(notifier);
-    buttonHb_->addWidget(bw);
-    buttonGroup_->addButton(bw);
-    buttonWidgets_ << bw;
-
-    int idx=tab_->count()-1;
-
-    //if(idx ==  tab_->currentIndex())
-    //	updateStyleSheet(notifier->prop());
-
-
-	decorateTab(idx,notifier);
-
-    readTabSettings(tab_->count()-1);
-
-    ChangeNotifyDialogButton *bw_=new ChangeNotifyDialogButton(this);
-    bw_->setNotifier(notifier);
-    //bw_->setText(prop->param("labelText"));
-    //bw_->setCheckable(true);
-    buttonHb_->addWidget(bw_);
-    buttonGroup_->addButton(bw_);
-    buttonWidgets_ << bw_;
-
-#endif
 }
 
 void ChangeNotifyDialog::slotButtonToggled(int,bool)
