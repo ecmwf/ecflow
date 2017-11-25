@@ -47,7 +47,7 @@ public:
     void where(const std::string& w) {where_=w;}
 
     std::string fullName(int row);
-
+    int findByFullName(const std::string& fName);
 	int count() const {return static_cast<int>(items_.size());}
 	void clear();
 	void reload();

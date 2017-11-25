@@ -33,6 +33,8 @@ if __name__ == "__main__":
     suite.get_generated_variables(variable_list)
     for gen_var in variable_list:
         print(gen_var)
+        gen_var = suite.find_gen_variable(gen_var.name())
+        assert not gen_var.empty(), "Could not find suite generated variable " + gen_var
     assert len(list(variable_list)) == 14,"Expected 14 generated variables for suites"    
     assert variable_list[0].name() == "SUITE", "expected generated variable of name SUITE but found " + variable_list[0].name()
     assert variable_list[0].value() == "s1", "expected generated variable of value 's1' but found " + variable_list[0].value()
@@ -43,6 +45,9 @@ if __name__ == "__main__":
     family.get_generated_variables(variable_list)
     for gen_var in variable_list:
         print(gen_var)
+        gen_var = family.find_gen_variable(gen_var.name())
+        assert not gen_var.empty(), "Could not find family generated variable " + gen_var
+
     assert len(list(variable_list)) == 2,"Expected 2 generated variables for families"    
     assert variable_list[0].name() == "FAMILY", "expected generated variable of name FAMILY but found " + variable_list[0].name()
     assert variable_list[0].value() == "f1", "expected generated variable of value 'f1' but found " + variable_list[0].value()
@@ -54,6 +59,9 @@ if __name__ == "__main__":
     task.get_generated_variables(variable_list)
     for gen_var in variable_list:
         print(gen_var)
+        gen_var = task.find_gen_variable(gen_var.name())
+        assert not gen_var.empty(), "Could not find task generated variable " + gen_var
+
     assert len(list(variable_list)) == 8,"Expected 8 generated variables for tasks"    
     assert variable_list[0].name() == "TASK", "expected generated variable of name TASK but found " + variable_list[0].name()
     assert variable_list[0].value() == "t1", "expected generated variable of value 't1' but found " + variable_list[0].value()

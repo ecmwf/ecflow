@@ -63,7 +63,7 @@ void ExpandState::clear()
 void ExpandState::save(const VNode *vnode)
 {
     UI_FUNCTION_LOG
-    UI_ASSERT(vnode,"");
+    UI_ASSERT(vnode,"node is null");
     UiLog().dbg() << " " << vnode->name();
 
     if(!root_)
@@ -101,7 +101,7 @@ void ExpandState::save(const VNode *vnode)
 void ExpandState::save(const VNode *root)
 {    
     UI_FUNCTION_LOG
-    UI_ASSERT(root,"");
+    UI_ASSERT(root,"root is null");
     UiLog().dbg() << " " << root->name();
 
     QModelIndex rootIdx=model_->nodeToIndex(root);
@@ -252,7 +252,7 @@ void ExpandState::collectExpanded(ExpandStateNode *expand,const VNode* node,cons
     for(std::size_t i=0; i < numExpand; i++)
     {
         VNode *chNode=node->childAt(i);
-        UI_ASSERT(chNode,"");
+        UI_ASSERT(chNode,"chNode is null");
         QModelIndex chIdx=model_->nodeToIndex(chNode);
         ExpandStateNode *chExpand=expand->children_[i];
 
@@ -289,7 +289,7 @@ void ExpandState::collectExpanded(ExpandStateNode *expand,const VNode* node,cons
 
 void ExpandState::saveExpandAll(const VNode* node)
 {
-    UI_ASSERT(node,"");
+    UI_ASSERT(node,"node is null");
     if(ExpandStateNode* expand=find(node->absNodePath()))
     {       
         expand->setExpandedAll();
@@ -298,7 +298,7 @@ void ExpandState::saveExpandAll(const VNode* node)
 
 void ExpandState::saveCollapseAll(const VNode* node)
 {
-    UI_ASSERT(node,"");
+    UI_ASSERT(node,"node is null");
     if(ExpandStateNode* expand=find(node->absNodePath()))
     {        
         expand->setCollapsedAll();

@@ -46,3 +46,12 @@ VProperty* PropertyMapper::find(const std::string& path,bool failOnError) const
 
 	return 0;
 }
+
+void PropertyMapper::initObserver(VPropertyObserver *obs) const
+{
+    for(std::vector<VProperty*>::const_iterator it=props_.begin(); it != props_.end(); ++it)
+    {
+        obs->notifyChange(*it);
+    }
+}
+

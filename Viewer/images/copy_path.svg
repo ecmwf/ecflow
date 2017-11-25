@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32"
+   height="32"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="copy_path.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient6778">
+      <stop
+         id="stop6780"
+         offset="0"
+         style="stop-color:#eff4fa;stop-opacity:1;" />
+      <stop
+         id="stop6782"
+         offset="1"
+         style="stop-color:#79a0e6;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient6752">
+      <stop
+         style="stop-color:#f7e3a7;stop-opacity:1;"
+         offset="0"
+         id="stop6754" />
+      <stop
+         style="stop-color:#ffd350;stop-opacity:1;"
+         offset="1"
+         id="stop6756" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3786">
+      <stop
+         id="stop3788"
+         offset="0"
+         style="stop-color:#ffffff;stop-opacity:1;" />
+      <stop
+         id="stop3790"
+         offset="1"
+         style="stop-color:#ddeaef;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3786"
+       id="linearGradient3992"
+       x1="0.20513386"
+       y1="14.203694"
+       x2="31.668507"
+       y2="24.875128"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.94114523,0,0,-1.136745,0.81694213,91.926371)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient6752"
+       id="linearGradient6776"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-11.2,13.493333)"
+       x1="0.3"
+       y1="27.013332"
+       x2="31.7"
+       y2="27.013332" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="18.75"
+     inkscape:cx="3.638002"
+     inkscape:cy="14.846182"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer4"
+     showgrid="true"
+     inkscape:snap-grids="false"
+     inkscape:window-width="1912"
+     inkscape:window-height="1096"
+     inkscape:window-x="1920"
+     inkscape:window-y="36"
+     inkscape:window-maximized="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2816"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+        <cc:license
+           rdf:resource="Apache License 2.0" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title />
+          </cc:Agent>
+        </dc:creator>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>ECMWF</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:language>en-GB</dc:language>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>EcflowUI icon</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <dc:description>EcflowUI icon</dc:description>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="bg"
+     style="display:none" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="first"
+     style="display:inline">
+    <path
+       sodipodi:nodetypes="ccccccccc"
+       inkscape:connector-curvature="0"
+       id="path4178"
+       d="m 2.8272661,1.2334602 0.017982,9.7265918 0.016686,9.020598 15.8082979,0 -0.08952,-14.2908354 -4.835772,-0.010673 -0.0151,-4.4363468 c -3.181695,0 -10.9025899,-0.00935 -10.9025834,-0.00935 z"
+       style="fill:#ffffff;fill-opacity:1;stroke:#4d4d4d;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       style="fill:#f9f9f9;fill-opacity:1;stroke:#4d4d4d;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 2.8272661,1.2334602 0.017982,9.7265918 0.016686,9.020598 15.8082979,0 -0.08952,-14.2908354 -4.835772,-0.010673 -0.0151,-4.4363468 c -3.181695,0 -10.9025899,-0.00935 -10.9025834,-0.00935 z"
+       id="path4182"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccccc" />
+    <path
+       style="fill:#f9f9f9;fill-opacity:1;stroke:#4d4d4d;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 13.973932,11.63346 0.01798,9.726592 0.01669,9.020598 15.808298,0 -0.08952,-14.290836 -4.835772,-0.01067 -0.0151,-4.436347 c -3.181695,0 -10.90259,-0.0093 -10.902583,-0.0093 z"
+       id="path4190"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccccc" />
+    <path
+       sodipodi:nodetypes="ccccccccc"
+       inkscape:connector-curvature="0"
+       id="path4192"
+       d="m 13.973932,11.63346 0.01798,9.726592 0.01669,9.020598 15.808298,0 -0.08952,-14.290836 -4.835772,-0.01067 -0.0151,-4.436347 c -3.181695,0 -10.90259,-0.0093 -10.902583,-0.0093 z"
+       style="fill:#f9f9f9;fill-opacity:1;stroke:#4d4d4d;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="second"
+     style="display:inline">
+    <path
+       style="fill:#f9f9f9;fill-opacity:1;stroke:#4d4d4d;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 18.52435,5.7551415 -4.771392,-4.5078108 -10e-7,4.4739807 z"
+       id="path4180"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <path
+       sodipodi:nodetypes="cccc"
+       inkscape:connector-curvature="0"
+       id="path4194"
+       d="m 29.671016,16.155141 -4.771392,-4.507811 -1e-6,4.473981 z"
+       style="fill:#f9f9f9;fill-opacity:1;stroke:#4d4d4d;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="top"
+     style="display:inline" />
+</svg>

@@ -24,8 +24,9 @@
 
 ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
+    messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
-    
+       
     //Remove the first spacer item!!
     removeSpacer();
     
@@ -73,10 +74,13 @@ void ScriptItemWidget::clearContents()
     textEdit_->clear();
     messageLabel_->hide();
     reloadTb_->setEnabled(true);
+    clearCurrentFileName();
 }
 
 void ScriptItemWidget::infoReady(VReply* reply)
 {
+    Q_ASSERT(reply);
+
     messageLabel_->hide();
     
     QString s=QString::fromStdString(reply->text());
@@ -93,6 +97,7 @@ void ScriptItemWidget::infoReady(VReply* reply)
 
     fileLabel_->update(reply);
     reloadTb_->setEnabled(true);
+    setCurrentFileName(reply->fileName());
 }
 
 void ScriptItemWidget::infoProgress(VReply* reply)

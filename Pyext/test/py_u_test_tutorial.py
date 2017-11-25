@@ -103,11 +103,9 @@ class TestFamilies(unittest.TestCase):
          
         print "Creating suite definition" 
         home = os.path.join(os.getenv("HOME"),  "course") 
-        defs = Defs().add(
-            Suite("test").add(
-                Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                Family("f1").add( 
-                    [ Task("t{}".format(i)) for i in range(1,3) ])))
+        defs = Defs().add( Suite("test") )
+        defs.test += [  Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                        Family("f1").add( [ Task("t{0}".format(i)) for i in range(1,3) ]) ]
         print defs
         print "Checking job creation: .ecf -> .job0"  
         #print defs.check_job_creation()
@@ -369,7 +367,7 @@ class TestComplete(unittest.TestCase):
         def create_family_f1():
             f1 = Family("f1")
             f1 += [ Edit(SLEEP=20) ]
-            f1 += [ Task("t{}".format(i)) for i in range(1,5) ]
+            f1 += [ Task("t{0}".format(i)) for i in range(1,5) ]
             f1.t2 += [ Trigger(["t1"]), Event("a"), Event("b") ]
             f1.t3 += [ Trigger("t2:a") ]
             f1.t4 += [ Trigger(["t2"]),Complete("t2:b") ]
@@ -433,7 +431,7 @@ class TestMeter(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         def create_family_f1():
             f1 = Family("f1").add(Edit(SLEEP=20))
-            f1 += [ Task("t{}".format(i)) for i in range(1,8)]
+            f1 += [ Task("t{0}".format(i)) for i in range(1,8)]
             f1.t1 += [ Meter("progress", 1, 100, 90) ]
             f1.t2 += [ Trigger(["t1"]), Event("a"), Event("b") ]
             f1.t3 += [ Trigger("t2:a") ]
@@ -497,7 +495,7 @@ class TestTime(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         def create_family_f2():
             f1 = Family("f2").add(Edit(SLEEP=20))
-            f1 += [ Task("t{}".format(i)) for i in range(1,6) ]
+            f1 += [ Task("t{0}".format(i)) for i in range(1,6) ]
             f1.t1 += [ Time("00:30 23:30 00:30") ] # start(hh:mm) end(hh:mm) increment(hh:mm)
             f1.t2 += [ Day( "sunday" ) ]
             f1.t3 += [ Date("1.*.*"),    
@@ -568,7 +566,7 @@ class TestIndentation(unittest.TestCase):
             with defs.add_suite("test") as suite:
                 suite += [ Edit(ECF_INCLUDE=home,ECF_HOME=home) ]
                 with suite.add_family("f1") as f1:
-                    f1 += [ Task("t{}".format(i)) for i in range(1,8)]
+                    f1 += [ Task("t{0}".format(i)) for i in range(1,8)]
                     f1 += [ Edit(SLEEP=20) ]
                     f1.t1 += [ Meter("progress", 1, 100, 90) ]
                     f1.t2 += [ Trigger(["t1"]), Event("a"), Event("b") ]
@@ -578,7 +576,7 @@ class TestIndentation(unittest.TestCase):
                     f1.t6 += [ Trigger("t1:progress ge 60") ]
                     f1.t7 += [ Trigger("t1:progress ge 90") ]
                 with suite.add_family("f2") as f2:
-                    f2 += [ Edit(SLEEP=20),[ Task("t{}".format(i)) for i in range(1,6)] ]
+                    f2 += [ Edit(SLEEP=20),[ Task("t{0}".format(i)) for i in range(1,6)] ]
                     f2.t1 += [ Time( "00:30 23:30 00:30" )]
                     f2.t2 += [ Day( "sunday" ) ]
                     f2.t3 += [ Date("1.*.*"), Time("12:00") ]
@@ -869,10 +867,10 @@ class TestOperationalSolution(unittest.TestCase):
                             Edit(STEP=0),
                             Trigger("../analysis/run_analysis == complete"),
                             Task("save"),
-                            [ Family("step_{}".format(i)).add(
+                            [ Family("step_{0}".format(i)).add(
                                 Edit(TYPE="forecast"),
                                 Edit(STEP=i),
-                                Trigger("../../forecast/run_forecast:step ge {}".format(i)),
+                                Trigger("../../forecast/run_forecast:step ge {0}".format(i)),
                                 Task("save"))
                              for i in range(6, last_step[cycle]+1, 6) ]
                         )

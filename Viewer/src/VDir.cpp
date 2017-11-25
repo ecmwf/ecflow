@@ -98,3 +98,13 @@ std::string VDir::fullName(int row)
 	}
 	return res;
 }
+
+int VDir::findByFullName(const std::string& fName)
+{
+    for(std::size_t i=0; i < items_.size(); i++)
+    {
+        if(fullName(i) == fName)
+            return i;
+    }
+    return -1;
+}

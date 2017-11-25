@@ -28,9 +28,9 @@ StringMatchTb::StringMatchTb(QWidget* parent) : QToolButton(parent)
     
 StringMatchCombo::StringMatchCombo(QWidget* parent) : QComboBox(parent)
 {
-    addItem("Contains",StringMatchMode::ContainsMatch);
-    addItem("Matches",StringMatchMode::WildcardMatch);
-    addItem("Regexp",StringMatchMode::RegexpMatch);
+    addItem("contains",StringMatchMode::ContainsMatch);
+    addItem("matches",StringMatchMode::WildcardMatch);
+    addItem("regexp",StringMatchMode::RegexpMatch);
 
 	setCurrentIndex(1);
 }

@@ -26,6 +26,7 @@ class ViewerUtil
 {
 public:
    static void initComboBox(QSettings&,QString key,QComboBox* cb);
+   static void initComboBoxByData(QString dataValue,QComboBox* cb);
    static void initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
    static void saveTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
    static void initStacked(QSettings& settings,QString key,QStackedWidget *stacked);

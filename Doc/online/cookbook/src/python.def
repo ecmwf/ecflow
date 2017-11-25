@@ -1,7 +1,0 @@
-    task python
-      edit ECF_MICRO '^'
-      edit ECF_JOB_CMD '^ECF_JOB^ > ^ECF_JOBOUT^ 2>&1'
-      label info "none"
-      meter step -1 100 100
-      event 1
-      event 2

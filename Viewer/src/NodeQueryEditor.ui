@@ -105,7 +105,7 @@
            <string>...</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="viewer.qrc">
             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
           </property>
           <property name="autoRaise">
@@ -210,7 +210,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
            </property>
            <property name="autoRaise">
@@ -227,7 +227,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
            </property>
            <property name="autoRaise">
@@ -251,7 +251,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
            </property>
            <property name="autoRaise">
@@ -292,7 +292,7 @@
             <string>.a..</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
            </property>
            <property name="autoRaise">
@@ -323,7 +323,7 @@
             <x>0</x>
             <y>0</y>
             <width>1281</width>
-            <height>683</height>
+            <height>646</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="attrPanelLayout_">
@@ -394,6 +394,8 @@
    <header>NodeQueryCombo.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

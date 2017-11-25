@@ -17,6 +17,7 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
                   Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
                   VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import unittest 
+import sys
 
 class Test_crash(unittest.TestCase):
     def test_trigger_node_list(self):
@@ -48,30 +49,30 @@ class Test_crash(unittest.TestCase):
 class TestListComprehension(unittest.TestCase):
     def test_suite_list(self):
         defs = Defs()
-        defs += [ Suite("s{}".format(i)) for i in range(1,6) ]
+        defs += [ Suite("s{0}".format(i)) for i in range(1,6) ]
         self.assertEqual(len(defs), 5, " expected 5 suites but found " + str(len(defs)))
 
-        defs.add( [ Suite("s{}".format(i)) for i in range(6,11) ] )
+        defs.add( [ Suite("s{0}".format(i)) for i in range(6,11) ] )
         self.assertEqual(len(defs), 10, " expected 10 suites but found " + str(len(defs)))
 
     def test_family_list(self):
         defs = Defs()
-        defs += [ Suite("suite").add( [ Family("f{}".format(i)) for i in range(1,6)]  ) ]
+        defs += [ Suite("suite").add( [ Family("f{0}".format(i)) for i in range(1,6)]  ) ]
         self.assertEqual(len(defs.suite), 5, " expected 5 familes but found " + str(len(defs.suite)))
 
     def test_task_list(self):
         defs = Defs()
-        defs += [ Suite("suite").add( Family("f").add( [ Task("t{}".format(i)) for i in range(1,6)]  )) ]
+        defs += [ Suite("suite").add( Family("f").add( [ Task("t{0}".format(i)) for i in range(1,6)]  )) ]
         self.assertEqual(len(defs.suite.f), 5, " expected 5 task but found " + str(len(defs.suite.f)))
 
     def test_task_list2(self):
         defs = Defs()
         defs += [ Suite("suite").add( Task("x"), 
-                                      Family("f").add( [ Task("t{}".format(i)) for i in range(1,6)]  ),
+                                      Family("f").add( [ Task("t{0}".format(i)) for i in range(1,6)]  ),
                                       Task("y"),
-                                      [ Family("f{}".format(i)) for i in range(1,6) ],
+                                      [ Family("f{0}".format(i)) for i in range(1,6) ],
                                       Edit(a="b"),
-                                      [ Task("t{}".format(i)) for i in range(1,6) ],
+                                      [ Task("t{0}".format(i)) for i in range(1,6) ],
                                     )
                 ]
         self.assertEqual(len(defs.suite), 13, " expected 13 nodes but found " + str(len(defs.suite)))
@@ -80,9 +81,9 @@ class TestListComprehension(unittest.TestCase):
 
     def test_5Suite_with_5families_with_5tasks(self):
         defs = Defs().add(   
-                [ Suite("s{}".format(i)).add( 
-                    [ Family("f{}".format(i)).add( 
-                        [ Task("t{}".format(i)) 
+                [ Suite("s{0}".format(i)).add( 
+                    [ Family("f{0}".format(i)).add( 
+                        [ Task("t{0}".format(i)) 
                               for i in range(1,6)] ) 
                         for i in range(1,6)]  ) 
                     for i in range(1,6) ] )
@@ -95,9 +96,9 @@ class TestListComprehension(unittest.TestCase):
                 
     def test__5Suite_with_5families_with_5tasks(self):
         defs = Defs()
-        defs += [ Suite("s{}".format(i)).add( 
-                        [ Family("f{}".format(i)).add( 
-                            [ Task("t{}".format(i)) for i in range(1,6)] ) 
+        defs += [ Suite("s{0}".format(i)).add( 
+                        [ Family("f{0}".format(i)).add( 
+                            [ Task("t{0}".format(i)) for i in range(1,6)] ) 
                         for i in range(1,6)] ) 
                     for i in range(1,6) 
                 ]
@@ -150,10 +151,14 @@ class TestTrigger(unittest.TestCase):
         task.add(Trigger("2==1"))
         self.assertEqual(str(expr),"1==1 AND 2==1","Trigger not as expected: " +  str(expr))
         
-        trig = Trigger("x ==1")
-        trig.add(PartExpression("y == 1", False))
-        task.add(trig)
-        self.assertEqual(str(expr),"1==1 AND 2==1 AND x ==1 OR y == 1","Trigger not as expected: " +  str(expr))
+    def test_add_composition(self):
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        task.add(Trigger("1==1"))
+        task.add(Trigger("1==2",False))
+        task.add(Trigger("x==2"))
+        expr = task.get_trigger()
+        self.assertEqual(str(expr),"1==1 OR 1==2 AND x==2","Trigger not as expected: " +  expr.get_expression())
 
 
 class TestComplete(unittest.TestCase):
@@ -194,12 +199,16 @@ class TestComplete(unittest.TestCase):
         task.add(Complete("2==1"))
         self.assertEqual(str(expr),"1==1 AND 2==1","Complete not as expected: " +  str(expr))
         
-        trig = Complete("x ==1")
-        trig.add(PartExpression("y == 1", False))
-        task.add(trig)
-        self.assertEqual(str(expr),"1==1 AND 2==1 AND x ==1 OR y == 1","Complete not as expected: " +  str(expr))
-        
-        
+    def test_add_composition(self):
+        defs = Defs()
+        task = defs.add_suite("s").add_family("f").add_task("t")
+        task.add( Complete("1==1"))
+        task.add( Complete("1==2",False))
+        task.add( Complete("x==2"))
+        expr = task.get_complete()
+        self.assertEqual(str(expr),"1==1 OR 1==2 AND x==2","Trigger not as expected: " +  expr.get_expression())
+
+
 class TestDefsAdd(unittest.TestCase):
     def test_add_suite1(self):
         defs = Defs().add(Suite("a"))
@@ -221,8 +230,9 @@ class TestFamilyAdd(unittest.TestCase):
 
 class TestDefstatus(unittest.TestCase):
     def test_illegal_defstatus(self):
-        with self.assertRaises(RuntimeError):
-            Defstatus("fred")
+        if sys.version_info[0] == 2 and sys.version_info[1] >= 7:
+            with self.assertRaises(RuntimeError):
+                Defstatus("fred")
             
 class TestEdit(unittest.TestCase):
     def test_add_variable(self):
@@ -263,7 +273,7 @@ class TestAddAll(unittest.TestCase):
                     Date(1,1,0),Date(28,2,1960),
                     Autocancel(3)
                     ),
-                [ Family("f{}".format(i)) for i in range(1,6)]
+                [ Family("f{0}".format(i)) for i in range(1,6)]
             )
         )
         t1 = defs.find_abs_node("/s1/t1")

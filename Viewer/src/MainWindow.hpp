@@ -22,6 +22,7 @@
 class QActionGroup;
 class QLabel;
 class QToolButton;
+class ClockWidget;
 class InfoPanel;
 class NodePanel;
 class ServerRefreshInfoWidget;
@@ -131,6 +132,7 @@ private:
     QToolButton* serverSyncNotifyTb_;
     ServerRefreshInfoWidget *serverComWidget_;
     MainWindowTitleHandler* winTitle_;
+    ClockWidget* clockWidget_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

@@ -57,6 +57,7 @@ protected:
     bool isAttribute(const std::string &str) const;
 #endif
     bool isAttributeState(const std::string &str) const;
+    bool isIsoDate(const std::string &str) const;
 
     BaseNodeCondition *parseExpression(bool caseSensitiveStringMatch);
     void setTokens(std::vector<std::string> &tokens) {tokens_ = tokens; i_ = tokens_.begin();}
@@ -366,6 +367,68 @@ public:
 private:
     QString nodeFlagName_;
 };
+// -----------------------------------------------------------------
+
+// ----------------------------------
+// ISO date condition
+// ----------------------------------
+
+class IsoDateCondition : public BaseNodeCondition
+{
+public:
+    explicit IsoDateCondition(QString str=QString());
+    ~IsoDateCondition() {}
+
+    bool execute(VItem*) {return false;}
+    std::string print();
+    virtual qint64 secsSinceEpoch(VItem*) const {return secsSinceEpoch_;}
+
+private:
+    qint64 secsSinceEpoch_;
+
+};
+
+// ----------------------------------
+// Node status change date condition
+// ----------------------------------
+
+class NodeStatusChangeDateCondition : public IsoDateCondition
+{
+public:
+    explicit NodeStatusChangeDateCondition() {}
+    ~NodeStatusChangeDateCondition() {}
+
+    bool execute(VItem*) {return false;}
+    std::string print();
+    qint64 secsSinceEpoch(VItem*) const;
+};
+
+// --------------------------------
+// ISO date comparison conditions
+// --------------------------------
+
+class IsoDateGreaterThanEqualCondition : public BaseNodeCondition
+{
+public:
+    IsoDateGreaterThanEqualCondition() {}
+    ~IsoDateGreaterThanEqualCondition() {}
+
+    bool execute(VItem *node);
+    int  numOperands() {return 2;}
+    std::string print();
+};
+
+class IsoDateLessThanEqualCondition : public BaseNodeCondition
+{
+public:
+    IsoDateLessThanEqualCondition() {}
+    ~IsoDateLessThanEqualCondition() {}
+
+    bool execute(VItem *node);
+    int  numOperands() {return 2;}
+    std::string print();
+};
+
 // -----------------------------------------------------------------
 
 // -----------------

@@ -76,7 +76,7 @@ protected Q_SLOTS:
 	void slotSaveQueryAs();
 	void slotAdvMode(bool b);
 	void slotMaxNum(int);
-	void slotCase(bool);
+    void slotCase(bool);
 
 Q_SIGNALS:
 	void queryEnabledChanged(bool);
@@ -101,6 +101,7 @@ private:
     NodeQueryOptionEdit* typeEdit_;
     NodeQueryOptionEdit* stateEdit_;
     NodeQueryOptionEdit* flagEdit_;
+    NodeQueryOptionEdit* periodEdit_;
     NodeQueryOptionEdit* attrEdit_;
     QMap<QString,QList<NodeQueryOptionEdit*> > attr_;
     QString nodeTabText_;

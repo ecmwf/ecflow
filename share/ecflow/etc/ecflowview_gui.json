@@ -190,13 +190,19 @@
                     }
                 },
                 "tab" : {
-                    "label" : "Toolbar",
+                    "label" : "Other",
 
                     "group" : {
-                        "title" : "Server refresh button",
+                        "title" : "Server refresh button in toolbar",
                         "prefix" : "server.update",
                         "line" : "blinkUpdateButtonLimit",
                         "line" : "showLastRefreshTimeInAutoMode"
+                    },
+                    "group" : {
+                        "title" : "Clock in statusbar",
+                        "prefix" : "view.clock",
+                        "line" : "showClock",
+                        "line" : "clockFormat"
                     }
                 }
             }

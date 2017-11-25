@@ -146,7 +146,7 @@ node_ptr add_defstatus1(node_ptr self,const Defstatus& ds)         { self->addDe
 // Trigger & Complete thin wrapper over Expression, allows us to call:
 //  Task("a").add(Trigger("a=1"),Complete("b=1"))
 ///////////////////////////////////////////////////////////////////////////////////
-static void construct_expr(Expression& expr, const boost::python::list& list) {
+static void construct_expr(std::vector<PartExpression>& vec, const boost::python::list& list) {
    int the_list_size = len(list);
    for(int i = 0; i < the_list_size; ++i) {
       std::string part_expr;
@@ -164,66 +164,71 @@ static void construct_expr(Expression& expr, const boost::python::list& list) {
       }
       else throw std::runtime_error("Trigger: Expects string, or list(strings or nodes)");
 
-      if (expr.empty()) expr.add(PartExpression(part_expr));
-      else              expr.add(PartExpression(part_expr,true/*AND*/));
+      if (vec.empty()) vec.push_back(PartExpression(part_expr));
+      else             vec.push_back(PartExpression(part_expr,true/*AND*/));
    }
 }
 class Trigger {
 public:
-   Trigger(const std::string& expression) : expr_(expression){}
-   Trigger(const PartExpression& pe) : expr_(pe) {}
+   Trigger(const std::string& expression) { add(PartExpression(expression)); }
+   Trigger(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
+   Trigger(const PartExpression& pe) { add(pe); }
    Trigger() {}
-   Trigger(const Trigger& rhs) : expr_(rhs.expr_) {}
-   Trigger(const boost::python::list& list ) { construct_expr(expr_,list);}
+   Trigger(const Trigger& rhs) : vec_(rhs.vec_) {}
+   Trigger(const boost::python::list& list ) { construct_expr(vec_,list);}
 
-   bool operator==( const Trigger& rhs) const { return expr_ == rhs.expr_;}
+   bool operator==( const Trigger& rhs) const { return vec_ == rhs.vec_;}
    bool operator!=( const Trigger& rhs) const { return !operator==(rhs);}
-   std::string expression() const { return expr_.expression(); }
-   void add( const PartExpression& t ) { expr_.add(t); }
+   std::string expression() const { return Expression::compose_expression(vec_); }
 
-   std::vector<PartExpression>::const_iterator part_begin() const { return expr_.part_begin();}
-   std::vector<PartExpression>::const_iterator part_end() const   { return expr_.part_end();}
+   const std::vector<PartExpression>& expr() const { return vec_;}
 
-   const Expression& expr() const { return expr_;}
 private:
-   Expression expr_;
+   void add( const PartExpression& t ) { vec_.push_back(t);}
+   std::vector<PartExpression> vec_;
    Trigger& operator=(Trigger const& f); // prevent assignment
 };
 
 class Complete {
 public:
-   Complete(const std::string& expression) : expr_(expression){}
-   Complete(const PartExpression& pe ) : expr_(pe) {}
+   Complete(const std::string& expression) { add(PartExpression(expression)); }
+   Complete(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
+   Complete(const PartExpression& pe) { add(pe); }
    Complete() {}
-   Complete(const Complete& rhs) : expr_(rhs.expr_) {}
-   Complete(const boost::python::list& list ) { construct_expr(expr_,list);}
+   Complete(const Complete& rhs) : vec_(rhs.vec_) {}
+   Complete(const boost::python::list& list ) { construct_expr(vec_,list);}
 
-   bool operator==( const Complete & rhs) const { return expr_ == rhs.expr_;}
-   bool operator!=( const Complete & rhs) const { return !operator==(rhs);}
-   std::string expression() const { return expr_.expression(); }
-   void add( const PartExpression& t ) { expr_.add(t); }
+   bool operator==( const Complete& rhs) const { return vec_ == rhs.vec_;}
+   bool operator!=( const Complete& rhs) const { return !operator==(rhs);}
+   std::string expression() const { return Expression::compose_expression(vec_); }
 
-   std::vector<PartExpression>::const_iterator part_begin() const { return expr_.part_begin();}
-   std::vector<PartExpression>::const_iterator part_end() const   { return expr_.part_end();}
+   const std::vector<PartExpression>& expr() const { return vec_;}
 
-   const Expression& expr() const { return expr_;}
 private:
-   Expression expr_;
-   Complete & operator=( Complete const& f); // prevent assignment
+   void add( const PartExpression& t ) { vec_.push_back(t); }
+   std::vector<PartExpression> vec_;
+   Complete& operator=(Complete const& f); // prevent assignment
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
 static void do_add(node_ptr self, const boost::python::object& arg){
    if (arg.ptr() == object().ptr())  return; // *IGNORE* None
-   if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
-   else if (boost::python::extract<Edit>(arg).check()) {
+   if (boost::python::extract<Edit>(arg).check()) {
       Edit edit = boost::python::extract<Edit>(arg);
       const std::vector<Variable>& vec = edit.variables();
       for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
    }
+   else if (boost::python::extract<node_ptr>(arg).check()) {
+      NodeContainer* nc = self->isNodeContainer();
+      if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
+      node_ptr child = boost::python::extract<node_ptr>(arg);
+      nc->addChild(child);
+   }
    else if (boost::python::extract<Event>(arg).check())     self->addEvent(boost::python::extract<Event>(arg));
    else if (boost::python::extract<Meter>(arg).check())     self->addMeter(boost::python::extract<Meter>(arg));
    else if (boost::python::extract<Label>(arg).check())     self->addLabel(boost::python::extract<Label>(arg));
+   else if (boost::python::extract<Trigger>(arg).check()){Trigger t = boost::python::extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
+   else if (boost::python::extract<Complete>(arg).check()){Complete t = boost::python::extract<Complete>(arg);self->py_add_complete_expr(t.expr());}
    else if (boost::python::extract<Limit>(arg).check())     self->addLimit(boost::python::extract<Limit>(arg));
    else if (boost::python::extract<InLimit>(arg).check())   self->addInLimit(boost::python::extract<InLimit>(arg));
    else if (boost::python::extract<DayAttr>(arg).check())   self->addDay(boost::python::extract<DayAttr>(arg));
@@ -240,25 +245,18 @@ static void do_add(node_ptr self, const boost::python::object& arg){
    else if (boost::python::extract<RepeatDay>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(arg)  ));
    else if (boost::python::extract<AutoCancelAttr>(arg).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(arg));
    else if (boost::python::extract<VerifyAttr>(arg).check())self->addVerify(boost::python::extract<VerifyAttr>(arg));
-   else if (boost::python::extract<Trigger>(arg).check()){ Trigger t = boost::python::extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
-   else if (boost::python::extract<Complete>(arg).check()){Complete t = boost::python::extract<Complete>(arg);self->py_add_complete_expr(t.expr());}
    else if (boost::python::extract<Defstatus>(arg).check()){Defstatus t = boost::python::extract<Defstatus>(arg);self->addDefStatus(t.state());}
-   else if (boost::python::extract<ClockAttr>(arg).check()) {
-      if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
-      self->isSuite()->addClock( boost::python::extract<ClockAttr>(arg));
-   }
-   else if (boost::python::extract<node_ptr>(arg).check()) {
-      NodeContainer* nc = self->isNodeContainer();
-      if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
-      node_ptr child = boost::python::extract<node_ptr>(arg);
-      nc->addChild(child);
-   }
-   else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
    else if (boost::python::extract<boost::python::list>(arg).check()){
       boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
       int the_list_size = len(the_list);
       for(int i = 0; i < the_list_size; ++i) do_add(self,the_list[i]); // recursive
    }
+   else if (boost::python::extract<ClockAttr>(arg).check()) {
+      if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
+      self->isSuite()->addClock( boost::python::extract<ClockAttr>(arg));
+   }
+   else if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
+   else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
    else throw std::runtime_error("ExportNode::add : Unknown type ");
 }
 
@@ -308,24 +306,22 @@ void export_Node()
             ;
 
    // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
-   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::expression_doc(), init<std::string>() )
+   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::trigger(), init<std::string>() )
    .def(init<PartExpression>())
    .def(init<boost::python::list>())
+   .def(init<std::string,bool>())
    .def(self == self )                            // __eq__
    .def("__str__",        &Trigger::expression)   // __str__
-   .def("get_expression", &Trigger::expression, "returns the complete expression as a string")
-   .def("add",            &Trigger::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
-   .add_property("parts", boost::python::range( &Trigger::part_begin, &Trigger::part_end),"Returns a list of PartExpression's" )
+   .def("get_expression", &Trigger::expression, "returns the trigger expression as a string")
    ;
 
-   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::expression_doc(), init<std::string>() )
+   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::trigger(), init<std::string>() )
    .def(init<PartExpression>())
    .def(init<boost::python::list>())
+   .def(init<std::string,bool>())
    .def(self == self )                             // __eq__
    .def("__str__",        &Complete::expression)   // __str__
    .def("get_expression", &Complete::expression, "returns the complete expression as a string")
-   .def("add",            &Complete::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
-   .add_property("parts", boost::python::range( &Complete::part_begin, &Complete::part_end),"Returns a list of PartExpression's" )
    ;
 
    // mimic PartExpression(const std::string& expression  )
@@ -351,12 +347,12 @@ void export_Node()
    // Turn off proxies by passing true as the NoProxy template parameter.
    // shared_ptrs don't need proxies because calls on one a copy of the
    // shared_ptr will affect all of them (duh!).
-   class_<std::vector<node_ptr> >("NodeVec", "Hold a list of Nodes (i.e :term:`suite`, :term:`family` or :term:`task` s)")
+   class_<std::vector<node_ptr> >("NodeVec", "Hold a list of Nodes (i.e `suite`_, `family`_ or `task`_ s)")
    .def(vector_indexing_suite<std::vector<node_ptr> , true >()) ;
 
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
-   .def("add", raw_function(add,1))
+   .def("add", raw_function(add,1),                  DefsDoc::add())
    .def("__iadd__", &node_iadd)
    .def("__getattr__",      &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
@@ -446,13 +442,14 @@ void export_Node()
    .def("has_time_dependencies",      &Node::hasTimeDependencies)
    .def("update_generated_variables", &Node::update_generated_variables)
    .def("get_generated_variables", &Node::gen_variables, "returns a list of generated variables. Use ecflow.VariableList as return argument")
-   .def("is_suspended",     &Node::isSuspended, "Returns true if the :term:`node` is in a :term:`suspended` state")
+   .def("is_suspended",     &Node::isSuspended, "Returns true if the `node`_ is in a `suspended`_ state")
    .def("find_variable",    &Node::findVariable,           return_value_policy<copy_const_reference>(), "Find user variable on the node only.  Returns a object")
+   .def("find_gen_variable",&Node::findGenVariable,        return_value_policy<copy_const_reference>(), "Find generated variable on the node only.  Returns a object")
    .def("find_parent_variable",&Node::find_parent_variable,return_value_policy<copy_const_reference>(), "Find user variable variable up the parent hierarchy.  Returns a object")
-   .def("find_meter",       &Node::findMeter,              return_value_policy<copy_const_reference>(), "Find the :term:`meter` on the node only. Returns a object")
-   .def("find_event",       &Node::findEventByNameOrNumber,return_value_policy<copy_const_reference>(), "Find the :term:`event` on the node only. Returns a object")
-   .def("find_label",       &Node::find_label,             return_value_policy<copy_const_reference>(), "Find the :term:`label` on the node only. Returns a object")
-   .def("find_limit",       &Node::find_limit  ,           "Find the :term:`limit` on the node only. returns a limit ptr" )
+   .def("find_meter",       &Node::findMeter,              return_value_policy<copy_const_reference>(), "Find the `meter`_ on the node only. Returns a object")
+   .def("find_event",       &Node::findEventByNameOrNumber,return_value_policy<copy_const_reference>(), "Find the `event`_ on the node only. Returns a object")
+   .def("find_label",       &Node::find_label,             return_value_policy<copy_const_reference>(), "Find the `label`_ on the node only. Returns a object")
+   .def("find_limit",       &Node::find_limit  ,           "Find the `limit`_ on the node only. returns a limit ptr" )
    .def("find_node_up_the_tree",&Node::find_node_up_the_tree  , "Search immediate node, then up the node hierarchy" )
    .def("get_state",        &Node::state , "Returns the state of the node. This excludes the suspended state")
    .def("get_state_change_time",&get_state_change_time, (bp::arg("format")="iso_extended"), "Returns the time of the last state change as a string. Default format is iso_extended, (iso_extended, iso, simple)")
@@ -467,19 +464,19 @@ void export_Node()
    .def("get_parent",       &Node::parent, return_internal_reference<>() )
    .def("get_all_nodes",    &get_all_nodes,"Returns all the child nodes")
    .def("get_flag",         &Node::get_flag,return_value_policy<copy_const_reference>(),"Return additional state associated with a node.")
-   .add_property("meters",    boost::python::range( &Node::meter_begin,    &Node::meter_end) ,  "Returns a list of :term:`meter` s")
-   .add_property("events",    boost::python::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of :term:`event` s")
-   .add_property("variables", boost::python::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined :term:`variable` s" )
-   .add_property("labels",    boost::python::range( &Node::label_begin,    &Node::label_end) ,  "Returns a list of :term:`label` s")
-   .add_property("limits",    boost::python::range( &Node::limit_begin,    &Node::limit_end),   "Returns a list of :term:`limit` s" )
-   .add_property("inlimits",  boost::python::range( &Node::inlimit_begin,  &Node::inlimit_end), "Returns a list of :term:`inlimit` s" )
+   .add_property("meters",    boost::python::range( &Node::meter_begin,    &Node::meter_end) ,  "Returns a list of `meter`_ s")
+   .add_property("events",    boost::python::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of `event`_ s")
+   .add_property("variables", boost::python::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined `variable`_ s" )
+   .add_property("labels",    boost::python::range( &Node::label_begin,    &Node::label_end) ,  "Returns a list of `label`_ s")
+   .add_property("limits",    boost::python::range( &Node::limit_begin,    &Node::limit_end),   "Returns a list of `limit`_ s" )
+   .add_property("inlimits",  boost::python::range( &Node::inlimit_begin,  &Node::inlimit_end), "Returns a list of `inlimit`_ s" )
    .add_property("verifies",  boost::python::range( &Node::verify_begin,   &Node::verify_end),  "Returns a list of Verify's" )
-   .add_property("times",     boost::python::range( &Node::time_begin,     &Node::time_end),    "Returns a list of :term:`time` s" )
-   .add_property("todays",    boost::python::range( &Node::today_begin,    &Node::today_end),   "Returns a list of :term:`today` s" )
-   .add_property("dates",     boost::python::range( &Node::date_begin,     &Node::date_end),    "Returns a list of :term:`date` s" )
-   .add_property("days",      boost::python::range( &Node::day_begin,      &Node::day_end),     "Returns a list of :term:`day` s")
-   .add_property("crons",     boost::python::range( &Node::cron_begin,     &Node::cron_end),    "Returns a list of :term:`cron` s" )
-   .add_property("zombies",   boost::python::range( &Node::zombie_begin,   &Node::zombie_end),  "Returns a list of :term:`zombie` s" )
+   .add_property("times",     boost::python::range( &Node::time_begin,     &Node::time_end),    "Returns a list of `time`_ s" )
+   .add_property("todays",    boost::python::range( &Node::today_begin,    &Node::today_end),   "Returns a list of `today`_ s" )
+   .add_property("dates",     boost::python::range( &Node::date_begin,     &Node::date_end),    "Returns a list of `date`_ s" )
+   .add_property("days",      boost::python::range( &Node::day_begin,      &Node::day_end),     "Returns a list of `day`_ s")
+   .add_property("crons",     boost::python::range( &Node::cron_begin,     &Node::cron_end),    "Returns a list of `cron`_ s" )
+   .add_property("zombies",   boost::python::range( &Node::zombie_begin,   &Node::zombie_end),  "Returns a list of `zombie`_ s" )
    ;
 #if defined(__clang__)
    boost::python::register_ptr_to_python<node_ptr>(); // needed for mac and boost 1.6

@@ -112,7 +112,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ecFlow'
-copyright = u'2011, E.C.M.W.F'
+copyright = u'2017, E.C.M.W.F'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

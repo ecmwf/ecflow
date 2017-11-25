@@ -19,6 +19,7 @@
 ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
     fileLabel_->hide();
+    messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
     textEdit_->setShowLineNumbers(false);
 
@@ -66,10 +67,12 @@ void ManualItemWidget::clearContents()
     textEdit_->clear();
     messageLabel_->hide();
     reloadTb_->setEnabled(true);
+    clearCurrentFileName();
 }
 
 void ManualItemWidget::infoReady(VReply* reply)
 {
+    Q_ASSERT(reply);
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
 
@@ -87,7 +90,8 @@ void ManualItemWidget::infoReady(VReply* reply)
     }
 
     fileLabel_->update(reply);
-    reloadTb_->setEnabled(true);
+    reloadTb_->setEnabled(true);  
+    setCurrentFileName(reply->fileName());
 }
 
 void ManualItemWidget::infoProgress(VReply* reply)

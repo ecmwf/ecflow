@@ -42,7 +42,7 @@ void export_Task()
    // Turn off proxies by passing true as the NoProxy template parameter.
    // shared_ptrs don't need proxies because calls on one a copy of the
    // shared_ptr will affect all of them (duh!).
-   class_<std::vector<task_ptr> >("TaskVec","Hold a list of :term:`task` nodes")
+   class_<std::vector<task_ptr> >("TaskVec","Hold a list of `task`_ nodes")
    .def(vector_indexing_suite<std::vector<task_ptr>, true >()) ;
 
    class_<Submittable, bases<Node>, boost::noncopyable >("Submittable",DefsDoc::submittable_doc(), no_init)

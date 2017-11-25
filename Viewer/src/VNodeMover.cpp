@@ -78,8 +78,7 @@ void VNodeMover::moveMarkedNode(VInfo_ptr destNode)
     ServerHandler* serverSrc=nodeMarkedForMove_->server();
     if(!serverSrc)
     {
-        UserMessage::message(UserMessage::ERROR, true, "Cannot move node! The source server " + serverSrc->name() +
-                             " must be loaded into the UI");
+        UserMessage::message(UserMessage::ERROR, true, "Cannot move node! The source server must be loaded into the UI");
         return;
     }
 

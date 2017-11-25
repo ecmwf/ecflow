@@ -67,11 +67,21 @@ VInfo_ptr NodeWidget::currentSelection()
 
 void NodeWidget::setCurrentSelection(VInfo_ptr info)
 {
-    if(!detached())
+    if(!detached() && info)
     {
-        broadcastSelection_=false;
-        view_->setCurrentSelection(info);
-        broadcastSelection_=true;
+        //We need to avoid inifinite recursion. This could happen like this:
+        //1. Select node in panel A
+        //2. We broadcast the selection to panel B
+        //3. Panel B selects the node
+        //4  Panel B then brodcasts the selection back to panel A
+        // ...
+        //So here we do to check if the given item is already selected!!
+        VInfo_ptr csInfo=currentSelection();
+        if(csInfo && info &&  *(csInfo.get()) == *(info.get()))
+            return;
+
+        //This will broadcast the selection!!!
+        view_->setCurrentSelection(info);       
     }
 }
 

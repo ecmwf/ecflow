@@ -347,15 +347,22 @@ if __name__ == "__main__":
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
     task.add_repeat(ecflow.RepeatEnumerated("enum", ["red", "green", "blue" ]))
-    print(task)
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
 
     task.add_repeat(ecflow.RepeatDate("date", 20100111, 20100115, 2))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
     task.add_repeat(ecflow.RepeatString("string", ["a", "b", "c" ]))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
+    task.delete_repeat()      
+    repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
+
+    task.add_repeat(ecflow.RepeatDay(1))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
