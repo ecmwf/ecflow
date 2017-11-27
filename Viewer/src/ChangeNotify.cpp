@@ -155,7 +155,10 @@ void ChangeNotify::setProperty(VProperty* prop)
 {
 	prop_=prop;
 
-	if(VProperty* p=prop->findChild("fill_colour"))
+    if(VProperty* p=prop->findChild("use_status_colour"))
+        p->addObserver(this);
+
+    if(VProperty* p=prop->findChild("fill_colour"))
 		p->addObserver(this);
 
 	if(VProperty* p=prop->findChild("text_colour"))
@@ -244,6 +247,51 @@ void ChangeNotify::showDialog(ChangeNotify* notifier)
 	dialog()->raise();
 }
 
+QColor ChangeNotify::fillColour() const
+{
+    if(prop_)
+        if(VProperty* p=prop_->findChild("fill_colour"))
+           return p->value().value<QColor>();
+
+    return QColor();
+}
+
+QColor ChangeNotify::textColour() const
+{
+    if(prop_)
+        if(VProperty* p=prop_->findChild("text_colour"))
+           return p->value().value<QColor>();
+
+    return QColor();
+}
+
+QColor ChangeNotify::countFillColour() const
+{
+    if(prop_)
+        if(VProperty* p=prop_->findChild("count_fill_colour"))
+           return p->value().value<QColor>();
+
+    return QColor();
+}
+
+QColor ChangeNotify::countTextColour() const
+{
+    if(prop_)
+        if(VProperty* p=prop_->findChild("count_text_colour"))
+           return p->value().value<QColor>();
+
+    return QColor();
+}
+
+QString ChangeNotify::toolTip() const
+{
+    return (prop_)?(prop_->param("tooltip")):QString();
+}
+
+QString ChangeNotify::widgetText() const
+{
+    return (prop_)?(prop_->param("widgetText")):QString();
+}
 
 //-----------------------------------
 //
@@ -316,6 +364,7 @@ UI_FUNCTION_LOG
 			it->second->loadServerSettings();
 		}
 	}
+#if 0
 	else if(group->name() == "nstate")
 	{
 		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
@@ -323,6 +372,7 @@ UI_FUNCTION_LOG
 			it->second->loadNodeState();
 		}
 	}
+#endif
 }
 
 //Called only once during init
@@ -397,31 +447,47 @@ void ChangeNotify::populate(ChangeNotifyWidget* w)
 //
 //==================================================
 
-void AbortedNotify::loadNodeState()
+QColor AbortedNotify::fillColour() const
 {
-#if 0
-    if(VProperty *nsp=VConfig::instance()->find("nstate.aborted"))
-	{
-		VProperty* master=nsp->findChild("fill_colour");
-		VProperty* local=prop_->findChild("fill_colour");
+    bool useState=false;
+    if(prop_)
+        if(VProperty* p=prop_->findChild("use_status_colour"))
+            useState=p->value().toBool();
 
-		if(master && local)
-		{
-			local->setMaster(master,true);
-		}
+    if(useState)
+    {
+        if(VProperty *nsp=VConfig::instance()->find("nstate.aborted"))
+        {
+            if(VProperty* master=nsp->findChild("fill_colour"))
+            {
+                return master->value().value<QColor>();
+            }
+        }
+    }
 
-		master=nsp->findChild("text_colour");
-		local=prop_->findChild("text_colour");
+    return ChangeNotify::fillColour();
+}
 
-		if(master && local)
-		{
-			local->setMaster(master,true);
-		}
-	}
-#endif
+QColor AbortedNotify::textColour() const
+{
+    bool useState=false;
+    if(prop_)
+        if(VProperty* p=prop_->findChild("use_status_colour"))
+            useState=p->value().toBool();
 
+    if(useState)
+    {
+        if(VProperty *nsp=VConfig::instance()->find("nstate.aborted"))
+        {
+            if(VProperty* master=nsp->findChild("font_colour"))
+            {
+                return master->value().value<QColor>();
+            }
+        }
+    }
+
+    return ChangeNotify::textColour();
 }
 
 static SimpleLoader<ChangeNotify> loaderNotify("notification");
 static SimpleLoader<ChangeNotify> loaderServerNotify("server");
-static SimpleLoader<ChangeNotify> loaderStateNotify("nstate");

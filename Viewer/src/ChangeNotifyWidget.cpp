@@ -18,7 +18,7 @@
 
 #include "ChangeNotify.hpp"
 #include "VNodeList.hpp"
-#include "VProperty.hpp"
+//#include "VProperty.hpp"
 
 #include <vector>
 
@@ -41,8 +41,7 @@ void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
 {
 	notifier_=notifier;
 
-	if(notifier_->prop())
-		setToolTip(notifier_->prop()->param("tooltip"));
+    setToolTip(notifier_->toolTip());
 
 	connect(this,SIGNAL(clicked(bool)),
 			this,SLOT(slotClicked(bool)));
@@ -81,13 +80,8 @@ void ChangeNotifyButton::slotClicked(bool)
 
 void ChangeNotifyButton::updateIcon()
 {
-	QString text;
+    QString text=notifier_->widgetText();
 	QString numText;
-
-	if(notifier_->prop())
-	{
-		text=notifier_->prop()->param("widgetText");
-	}
 
     int num=0;
     if(notifier_->data())
@@ -105,25 +99,13 @@ void ChangeNotifyButton::updateIcon()
 	QColor countBgCol(58,126,194);
 	QColor countFgCol(Qt::white);
 
-    if(notifier_->prop())
-	{
-        if(num > 0)
-        {
-            if(VProperty *p=notifier_->prop()->findChild("fill_colour"))
-                bgCol=p->value().value<QColor>();
-
-            if(VProperty *p=notifier_->prop()->findChild("text_colour"))
-                fgCol=p->value().value<QColor>();
-        }
-
-		if(VProperty *p=notifier_->prop()->findChild("count_fill_colour"))
-			countBgCol=p->value().value<QColor>();
-
-		if(VProperty *p=notifier_->prop()->findChild("count_text_colour"))
-			countFgCol=p->value().value<QColor>();
-
-        //border=notifier_->prop()->paramToColour("border");
-	}
+    if(num > 0)
+    {
+        bgCol=notifier_->fillColour();
+        fgCol=notifier_->textColour();
+        countBgCol=notifier_->countFillColour();
+        countFgCol=notifier_->countTextColour();
+    }
 
 	QFont f;
     //f.setBold(true);

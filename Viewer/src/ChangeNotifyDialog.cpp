@@ -52,11 +52,8 @@ void ChangeNotifyDialogButton::setNotifier(ChangeNotify* notifier)
 {
     notifier_=notifier;
 
-    if(notifier_->prop())
-    {
-        setText(notifier_->prop()->param("widgetText"));
-        setToolTip(notifier_->prop()->param("tooltip"));
-    }
+    setText(notifier_->widgetText());
+    setToolTip(notifier_->toolTip());
 
     connect(notifier_->data(),SIGNAL(endAppendRow()),
             this,SLOT(slotAppend()));
@@ -129,12 +126,9 @@ void ChangeNotifyDialogWidget::init(ChangeNotify* notifier)
 {
 	notifier_=notifier;
 
-    tree_->setModel(notifier_->model());
+    tree_->setModel(notifier_->model());  
+    label_->setText(notifier_->widgetText());
 
-    if(notifier_->prop())
-    {
-        label_->setText(notifier_->prop()->param("widgetText"));
-    }
 
 #if 0
 	connect(notifier->data(),SIGNAL(endAppendRow()),
@@ -175,15 +169,14 @@ void ChangeNotifyDialogWidget::slotReset()
 void ChangeNotifyDialogWidget::updateSettings()
 {
     Q_ASSERT(notifier_);
-    QColor bgCol(Qt::gray);
-    if(VProperty *p=notifier_->prop()->findChild("fill_colour"))
-		bgCol=p->value().value<QColor>();
-
-    QColor bgLight=bgCol.lighter(110);
+    QColor bgCol=notifier_->fillColour();
+    QColor textCol=notifier_->textColour();
+    QColor bgLight=bgCol.lighter(105);
 
 	QString st="QLabel { \
 					background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
-					     stop: 0 " + bgLight.name() + ", stop: 1 " + bgLight.name() + "); }";
+                         stop: 0 " + bgLight.name() + ", stop: 1 " + bgCol.name() + "); color: " +
+        textCol.name() + "; padding: 4px; border: 1px solid rgb(170,170,170);}";
 
 	label_->setStyleSheet(st);
 }
@@ -288,9 +281,6 @@ void ChangeNotifyDialog::add(ChangeNotify* notifier)
 
     connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
             this,SLOT(slotSelectionChanged(VInfo_ptr)));
-
-    VProperty* prop=notifier->prop();
-    Q_ASSERT(prop);
 
     ignoreCurrentChange_=true;
     stacked_->addWidget(w);

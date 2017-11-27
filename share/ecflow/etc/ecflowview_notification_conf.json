@@ -17,7 +17,7 @@
                 },
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(255,0,0)",
+                    "default": "rgb(255,59,53)",
                     "disabledRule" : "use_status_colour=true"
                 },
                 "text_colour" : {
@@ -71,7 +71,7 @@
             "restarted": {
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(193,193,193)"
+                    "default": "rgb(255,185,143)"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
@@ -123,7 +123,7 @@
             "late": {
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(193,193,193)"
+                    "default": "rgb(255,185,143)"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
@@ -174,7 +174,7 @@
             "zombie": {
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(193,193,193)"
+                    "default": "rgb(255,185,143)"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
@@ -225,7 +225,7 @@
             "alias": {
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(193,193,193)"
+                    "default": "rgb(255,185,143)"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
