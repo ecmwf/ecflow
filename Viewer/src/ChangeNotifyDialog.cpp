@@ -147,6 +147,8 @@ void ChangeNotifyDialogWidget::init(ChangeNotify* notifier)
 
     connect(tree_,SIGNAL(doubleClicked(const QModelIndex&)),
             this,SLOT(slotDoubleClickItem(const QModelIndex&)));
+
+    updateSettings();
 }
 
 #if 0
@@ -177,6 +179,9 @@ void ChangeNotifyDialogWidget::updateSettings()
 					background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
                          stop: 0 " + bgLight.name() + ", stop: 1 " + bgCol.name() + "); color: " +
         textCol.name() + "; padding: 4px; border: 1px solid rgb(170,170,170);}";
+
+    UiLog().dbg() << bgCol << " " << textCol;
+    UiLog().dbg() << st;
 
 	label_->setStyleSheet(st);
 }
@@ -286,6 +291,8 @@ void ChangeNotifyDialog::add(ChangeNotify* notifier)
     stacked_->addWidget(w);
     ignoreCurrentChange_=false;
     ntfWidgets_ << w;
+
+
 
     ChangeNotifyDialogButton *bw=new ChangeNotifyDialogButton(this);
     bw->setNotifier(notifier);
@@ -437,11 +444,11 @@ void ChangeNotifyDialog::updateSettings(ChangeNotify* notifier)
 	{
         UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
         UI_ASSERT(idx >=0,"idx=" << idx);
-        if(stacked_->widget(idx)->isEnabled())
-		{
-            ntfWidgets_[idx]->updateSettings();
-            ntfButtons_[idx]->updateSettings();
-		}
+        //if(stacked_->widget(idx)->isEnabled())
+        //{
+        ntfWidgets_[idx]->updateSettings();
+        ntfButtons_[idx]->updateSettings();
+        //}
 	}
 }
 
