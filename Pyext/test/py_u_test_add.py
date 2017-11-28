@@ -151,11 +151,6 @@ class TestTrigger(unittest.TestCase):
         task.add(Trigger("2==1"))
         self.assertEqual(str(expr),"1==1 AND 2==1","Trigger not as expected: " +  str(expr))
         
-        trig = Trigger("x ==1")
-        trig.add(PartExpression("y == 1", False))
-        task.add(trig)
-        self.assertEqual(str(expr),"1==1 AND 2==1 AND x ==1 OR y == 1","Trigger not as expected: " +  str(expr))
-
     def test_add_composition(self):
         defs = Defs()
         task = defs.add_suite("s").add_family("f").add_task("t")
@@ -203,11 +198,6 @@ class TestComplete(unittest.TestCase):
         
         task.add(Complete("2==1"))
         self.assertEqual(str(expr),"1==1 AND 2==1","Complete not as expected: " +  str(expr))
-        
-        trig = Complete("x ==1")
-        trig.add(PartExpression("y == 1", False))
-        task.add(trig)
-        self.assertEqual(str(expr),"1==1 AND 2==1 AND x ==1 OR y == 1","Complete not as expected: " +  str(expr))
         
     def test_add_composition(self):
         defs = Defs()

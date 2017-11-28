@@ -1063,13 +1063,15 @@ class Root(object):  # from where Suite and Node derive
     def draw_tree(self): dot = Dot(fullnames=False); self._tree(dot); return dot
 
     def _tree(self, dot):
-      try: dot.edge(self.load.parent, self)
+      try: dot.edge(self.load.get_parent(), self)
       except: pass
-      for n in self.load.nodes: # .values():
+      for n in self.load.nodes:
         if n.name() != '_': _tree(dot, n)
         # if n.names[0] != '_': n._tree(dot)
 
-    def draw_graph(self): dot = Dot(); self._graph(dot); return dot
+    def draw_graph(self):
+        dot = Dot(); self._graph(dot); dot.save("test.gv"); return dot
+
     def _graph(self, dot):
       for n in self.load.nodes:
         if n.name() != '_': _tree(dot, n)
@@ -1085,13 +1087,15 @@ class Root(object):  # from where Suite and Node derive
 
 
 def _tree(dot, node):
-      if type(node) == ecflow.Node:
-          dot.edge(node.parent, node)
+      if type(node) in (ecflow.Node, ecflow.Family, ecflow.Task,
+                        ecflow.ecflow.Family, ecflow.ecflow.Task):
+          dot.edge(node.get_parent(), node)
           for n in node.nodes:
               if n.name() != '_': _tree(dot, n)
-      elif type(node) == Node:
+      elif type(node) in (Node, Family, Task):
           dot.edge(node.load.parent, node)
           _tree(dot, node.load)
+      else: raise Exception(type(node))
       #try: dot.edge(node.load.parent, self)
       #except: pass
 
@@ -1379,14 +1383,14 @@ class TestEcf(unittest.TestCase):
     def test_xxx(self):
         """ a test """
 
-        suite = Suite("a_suite").add(Clock("real"),
+        suite = Suite("Suite").add(Clock("real"),
                                      Autocancel(3))
         suite.defstatus("suspended")
 
-        fam = Family("a_family")
-        tsk = Task("a_task")
+        fam = Family("Family")
+        tsk = Task("Task")
 
-        ft2 = Task("a_fam")
+        ft2 = Task("Fam")
         ft2.add_to(fam)
 
         tsk.VAR = "VALUE"  # edit VAR "VALUE"
@@ -1443,14 +1447,14 @@ class TestEcf(unittest.TestCase):
                       Repeat("YMD", 20200202, 20320202, 7, "date"),
                       Task("doer").add(Time("04:55"))))
 
-        fam.family("another").add(DefcompleteIf(True))
+        fam.family("fam").add(DefcompleteIf(True))
 
         defs = Defs()
         defs.add(suite)
-        another = defs.suite("another")
+        another = defs.suite("suite")
         another.defstatus("suspended")
         another.task("tn")
-        afam = another.family("another_fam")
+        afam = another.family("family")
         afam.task("t2n")
 
         display(defs, fname="test_ecf.tmp")
@@ -1462,6 +1466,9 @@ class TestEcf(unittest.TestCase):
         print(suite)  # print name
         print(repr(suite))  # print content
         print(defs)  # print content
+        cmd = "xdg-open test.gv.pdf;"
+        cmd += "dot -Tps test.gv > test.ps && xdg-open test.ps"; os.system(cmd)
+
 
 # from pyflow, COMPAT
 def definition_to_html(d):
@@ -1474,6 +1481,16 @@ class HTMLWrapper(object):
     def __init__(self, d): self._def = d
     def _repr_html_(self): return definition_to_html(self._def)
     __str__ = _repr_html_
+
+
+def shapes(node):
+    if type(node) in (ecflow.Task, Task):
+        return "triangle"
+    elif type(node) in (ecflow.Family, Family):
+        return "rect"
+    elif type(node) in (ecflow.Suite, Suite):
+        return "invtriangle"
+    return None
 
 
 class Dot(object):
@@ -1489,17 +1506,28 @@ class Dot(object):
       self._dot.edge(self.node(node1), self.node(node2))
 
   def node(self, node):
-      full = node.fullname
-      # name = node.name
-      # label = full if self._fullname else name
+      full = node.get_abs_node_path()
       if full not in self._nodes:
-        self._nodes[full] = 'id%d' % (len(self._nodes),)
-        self._dot.node(self._nodes[full], label=node.shape)
+          self._nodes[full] = '%s' % node.name()
+      self._dot.node(self._nodes[full], 
+                     # fillcolor="shape",
+                     # fontcolor="blue",
+                     # fontsize=32,
+                     # width=0.5,
+                     # style="filled",
+                     # fixedsize="shape",
+                     # fixedsize="true",
+                     # label="xxx",
+                     shape=shapes(node))
       return self._nodes[full]
 
   def save(self, path, view=True):
       if os.path.exists(path): os.unlink(path)
       self._dot.render(path, view=view)
+
+  # For jupyter notbeook
+  def _repr_svg_(self):
+      return self._dot._repr_svg_()
 
 
 if __name__ == '__main__':

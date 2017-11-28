@@ -27,6 +27,7 @@
 #include "Ecf.hpp"
 #include "BoostPythonUtil.hpp"
 #include "Edit.hpp"
+#include "NodeAttrDoc.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 template<class K, class T>
@@ -65,7 +66,7 @@ void export_Core()
    // Uses a raw constructor approach to support pass arbitrary number arguments on the python side.
    // using no_init postpones defining __init__ function until after raw_function for proper overload resolution order,
    // since later defs get higher priority.
-   class_<Edit>("Edit", "Allow variable addition as keyword arguments. The values must strings or integers", no_init)
+   class_<Edit>("Edit", NodeAttrDoc::variable_doc(), no_init)
              .def("__init__", raw_function(&Edit::init,0)) // raw_constructor -> will call -> def(init<dict>() )
              .def(init<dict>())                 //
              .def(init<dict,dict>())            //

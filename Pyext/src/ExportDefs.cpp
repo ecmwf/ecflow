@@ -219,7 +219,6 @@ static object defs_iadd(defs_ptr self, const boost::python::list& list) {
 
 static suite_ptr defs_getattr(defs_ptr self, const std::string& attr) {
    // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
-   size_t pos = 0;
    suite_ptr child = self->findSuite(attr);
    if (child) { return child;}
    std::stringstream ss; ss << "ExportDefs::defs_getattr  can not find suite node " << attr << " from node ";
@@ -241,9 +240,9 @@ void export_Defs()
 	.def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
 	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
 	.def("__iadd__",              &defs_iadd)
-	.def("add",                   raw_function(add,1),GlossaryDoc::list())
+	.def("add",                   raw_function(add,1),DefsDoc::add())
 	.def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
-	.def("add_suite",             &Defs::add_suite )
+	.def("add_suite",             &Defs::add_suite, GlossaryDoc::list() )
 	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())
 	.def("auto_add_externs",      &Defs::auto_add_externs,  DefsDoc::add_extern_doc())
 	.def("add_variable",          &add_variable,            DefsDoc::add_variable_doc())

@@ -181,13 +181,10 @@ public:
    bool operator!=( const Trigger& rhs) const { return !operator==(rhs);}
    std::string expression() const { return Expression::compose_expression(vec_); }
 
-   void add( const PartExpression& t ) { vec_.push_back(t);}
-
-   std::vector<PartExpression>::const_iterator part_begin() const { return vec_.begin();}
-   std::vector<PartExpression>::const_iterator part_end() const   { return vec_.end();}
    const std::vector<PartExpression>& expr() const { return vec_;}
 
 private:
+   void add( const PartExpression& t ) { vec_.push_back(t);}
    std::vector<PartExpression> vec_;
    Trigger& operator=(Trigger const& f); // prevent assignment
 };
@@ -205,18 +202,13 @@ public:
    bool operator!=( const Complete& rhs) const { return !operator==(rhs);}
    std::string expression() const { return Expression::compose_expression(vec_); }
 
-   void add( const PartExpression& t ) { vec_.push_back(t); }
-
-   std::vector<PartExpression>::const_iterator part_begin() const { return vec_.begin();}
-   std::vector<PartExpression>::const_iterator part_end() const   { return vec_.end();}
    const std::vector<PartExpression>& expr() const { return vec_;}
 
 private:
+   void add( const PartExpression& t ) { vec_.push_back(t); }
    std::vector<PartExpression> vec_;
    Complete& operator=(Complete const& f); // prevent assignment
 };
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 static void do_add(node_ptr self, const boost::python::object& arg){
@@ -314,26 +306,22 @@ void export_Node()
             ;
 
    // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
-   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::expression_doc(), init<std::string>() )
+   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::trigger(), init<std::string>() )
    .def(init<PartExpression>())
    .def(init<boost::python::list>())
    .def(init<std::string,bool>())
    .def(self == self )                            // __eq__
    .def("__str__",        &Trigger::expression)   // __str__
-   .def("get_expression", &Trigger::expression, "returns the complete expression as a string")
-   .def("add",            &Trigger::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
-   .add_property("parts", boost::python::range( &Trigger::part_begin, &Trigger::part_end),"Returns a list of PartExpression's" )
+   .def("get_expression", &Trigger::expression, "returns the trigger expression as a string")
    ;
 
-   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::expression_doc(), init<std::string>() )
+   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::trigger(), init<std::string>() )
    .def(init<PartExpression>())
    .def(init<boost::python::list>())
    .def(init<std::string,bool>())
    .def(self == self )                             // __eq__
    .def("__str__",        &Complete::expression)   // __str__
    .def("get_expression", &Complete::expression, "returns the complete expression as a string")
-   .def("add",            &Complete::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
-   .add_property("parts", boost::python::range( &Complete::part_begin, &Complete::part_end),"Returns a list of PartExpression's" )
    ;
 
    // mimic PartExpression(const std::string& expression  )
@@ -364,7 +352,7 @@ void export_Node()
 
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
-   .def("add", raw_function(add,1))
+   .def("add", raw_function(add,1),                  DefsDoc::add())
    .def("__iadd__", &node_iadd)
    .def("__getattr__",      &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
