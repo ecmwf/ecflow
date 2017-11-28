@@ -4,7 +4,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2012 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -24,46 +24,9 @@
 # =============================================================================
 import ecflow
 import os       # for getenv
-import sys
 import shutil   # used to remove directory tree
 import argparse # for argument parsing     
 
-def get_root_source_dir():
-    cwd = os.getcwd()
-    #print "get_root_source_dir from: " + cwd
-    while (1):
-        # Get to directory that has ecflow
-        head, tail = os.path.split(cwd)
-        #print "   head:" + head
-        #print "   tail:" + tail
-        if tail.find("ecflow") != -1 :
-            
-            # bjam, already at the source directory
-            if os.path.exists(cwd + "/VERSION.cmake"): 
-                print("   Found VERSION.cmake in " + cwd)
-                return cwd
-        
-        if tail != "Pyext" and tail != "migrate":
-            # in cmake, we may be in the build directory, hence we need to determine source directory
-            file = cwd + "/CTestTestfile.cmake"
-            #print "   searching for " + file
-            if os.path.exists(file):
-                # determine path by looking into this file:
-                for line in open(file):
-                    ## Source directory: /tmp/ma0/workspace/ecflow/Acore
-                    if line.find("Source directory"):
-                        tokens = line.split()
-                        if len(tokens) == 4:
-                            #print "   returning root_source_dir:", tokens[3]
-                            return tokens[3]
-                raise RuntimeError("ERROR could not find Source directory in CTestTestfile.cmake")
-            else:
-                raise RuntimeError("ERROR could not find file CTestTestfile.cmake in " + cwd)
-                
-        cwd = head
-    return cwd
-
-    
 def delete_variables_affecting_job_generation(node): 
     """delete customer related ECF variables, these will point to directories
        that don't exist. Its ok we will regenerate our own local ones"""
@@ -101,48 +64,37 @@ def traverse_container(node_container):
     
 if __name__ == "__main__":
     
+    default_port = "3141"
+    if "ECF_PORT" in os.environ:
+        default_port = os.environ["ECF_PORT"]
+
+    default_host = "localhost"
+    if "ECF_HOST" in os.environ:
+        default_host  = os.environ["ECF_HOST"]
+
     DESC = """Will allow any definition to be loaded and played on the server
             This is done by:
             o Remove existing ECF_ variables that affect job generation. 
-              i.e variables that refer to customer specific directories are removed
-            o Allows ECF_HOME to specified, defaults to ./CUSTOMER/ECF_HOME
+              i.e. variables that refer to customer specific directories are removed
+            o Allows ECF_HOME to specified, defaults to cwd + /CUSTOMER/ECF_HOME
             o Generates the scripts(.ecf files) automatically based on the definition.
-              i.e if a task has events,meters,labels then the client request for these are
+              i.e. if a task has events,meters,labels then the client request for these are
               automatically injected in the generated .ecf script files
             o Will clear out existing data both on disk and on the server to allow 
               multiple re-runs of this script. ** If this is an issue please use
               a test server **
             o All suites are put into a suspended state. This allows the GUI to resume them
             o The server is restarted and suites are begun
-            This programs assumes that ecflow module is accessible
-
-            example:
-                python Pyext/samples/TestBench.py --port=3141 --verbose=True ANode/parser/test/data/good_defs/trigger/late.def
+            This programs assumes that ecflow module is accessible.
             """    
-            
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
-    if 'PYTHONPATH' in os.environ:
-        print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
-    print("sys.path:   " + str(sys.path))
-    print("####################################################################")
- 
-    default_port = "3141"
-    if "ECF_PORT" in os.environ:
-         default_port = os.environ["ECF_PORT"]
- 
-    default_host = "localhost"
-    if "ECF_HOST" in os.environ:
-        default_host  = os.environ["ECF_HOST"]
-
     PARSER = argparse.ArgumentParser(description=DESC,  
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     PARSER.add_argument('defs_file', 
                         help="The definition file")
     PARSER.add_argument('--host', default=default_host,   
-                        help="The name of the host machine, defaults to 'localhost'")
+                        help="The name of the host machine, defaults to ECF_HOST otherwise 'localhost'")
     PARSER.add_argument('--port', default=default_port,   
-                        help="The port on the host, defaults to 3141")
+                        help="The port on the host, defaults to ECF_PORT otherwise uses 3141")
     PARSER.add_argument('--path', default="/",   
                         help="replace only the node path in the suite")
     PARSER.add_argument('--ecf_home', default=os.getcwd() + "/CUSTOMER/ECF_HOME",
@@ -151,27 +103,15 @@ if __name__ == "__main__":
                         help="Show verbose output")
     ARGS = PARSER.parse_args()
     ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
-    print ARGS    
+    print ARGS 
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
-    using_workspace = False;
-    ecflow_source_dir = ""
-    try:
-        ecflow_source_dir = get_root_source_dir();
-        ARGS.ecf_home = ecflow_source_dir + "/Pyext/test/data/CUSTOMER/ECF_HOME"
-        using_workspace = True
-        if ARGS.verbose:
-            print "Workspace is defined ecflow_source_dir: ",ecflow_source_dir
-                
-    except:
-        pass
-    
     if ARGS.verbose:
         print "Using ECF_HOME=" + ARGS.ecf_home
          
+    if ARGS.verbose: 
+        print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
     try:
-        if ARGS.verbose: 
-            print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
         DEFS = ecflow.Defs(ARGS.defs_file)
     except RuntimeError, ex:
         print "   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex)
@@ -190,17 +130,15 @@ if __name__ == "__main__":
     for suite in DEFS.suites:
         traverse_container(suite)
   
+    if ARGS.verbose: 
+        print "add variables required for script generation, for all suites\n"
     DEFS.add_variable("ECF_HOME", ARGS.ecf_home)
-    
-    if using_workspace: 
-        path_to_ecflow_client = ecflow.File.find_client()
-        if os.path.exists( path_to_ecflow_client ):
-            DEFS.add_variable("ECF_CLIENT_EXE_PATH", path_to_ecflow_client )
-            if ARGS.verbose: print "Adding ECF_CLIENT_EXE_PATH:",path_to_ecflow_client
-
     DEFS.add_variable("SLEEP", "10")  # not strictly required since default is 1 second
     DEFS.add_variable("ECF_INCLUDE", ARGS.ecf_home + "/includes")
 
+
+    if ARGS.verbose: 
+        print "Place all suites into suspended state, so they can be started by the GUI\n"  
     for suite in DEFS.suites:
         suite.add_defstatus(ecflow.DState.suspended)
     
@@ -217,7 +155,7 @@ if __name__ == "__main__":
     JOB_CTRL = ecflow.JobCreationCtrl()
     DEFS.check_job_creation(JOB_CTRL)       
     assert len(JOB_CTRL.get_error_msg()) == 0, JOB_CTRL.get_error_msg()
-    
+
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)
     try:
