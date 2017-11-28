@@ -152,9 +152,8 @@ if __name__ == "__main__":
 
     if ARGS.verbose: 
         print "\nchecking script file generation, pre-processing & variable substitution\n"
-    JOB_CTRL = ecflow.JobCreationCtrl()
-    DEFS.check_job_creation(JOB_CTRL)       
-    assert len(JOB_CTRL.get_error_msg()) == 0, JOB_CTRL.get_error_msg()
+    msg = DEFS.check_job_creation()       
+    assert len(msg) == 0, msg
 
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)
