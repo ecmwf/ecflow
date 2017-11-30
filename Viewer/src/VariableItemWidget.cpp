@@ -769,8 +769,19 @@ void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelInd
 void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
     if(flags.isSet(SuspendedChanged))
+    {
         Q_EMIT suspendedChanged(suspended_);
 
+        //If it just became suspended we need to refresh all the data!!!
+        if(info_ && suspended_)
+        {
+            canSaveLastSelection_=false;
+            data_->reload(info_);
+            //After any change done we need to reselect the current row. See issue ECFLOW-613.
+            regainSelection();
+            canSaveLastSelection_=true;
+        }
+    }
     checkActionState();
 }
 
