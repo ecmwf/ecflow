@@ -44,7 +44,8 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
    data_(data),
    defineIndex_(defineIndex),
    oriName_(name),
-   cleared_(false)
+   cleared_(false),
+   suspended_(false)
 {
 	setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -219,23 +220,21 @@ QString VariablePropDialog::value() const
 
 void VariablePropDialog::notifyCleared(VariableModelDataHandler*)
 {
-    //data_->removeObserver(this);
-    //cleared_=true;
-    close();
+    //When we are not in suspended mode and the data_ is cleared
+    //we need to close the dialogue
+    if(!suspended_)
+        close();
 
-    /*
-    messageLabel_->showWarning(nodeTypeCapital_ + " <b>" + nodeName_ +
-         "</b> is not the node to modify any more in the Variables panel. Please close the dialog!");
-
-    suspendEdit(true);
-
-    data_->removeObserver(this);
-    cleared_=true;
-    */
+    //However, when the suspended mode finished the data_ is cleared and reloaded before
+    //this dialogue gets the notification about the suspended mode change. So
+    //we delay the decision on what to do unitl we receieve this notification in
+    //slotSuspendedChanged()
 }
 
 void VariablePropDialog::notifyUpdated(VariableModelDataHandler*)
 {
+    Q_ASSERT(data_);
+
     QString name=nameEdit_->text();
     QString value=valueEdit_->toPlainText();
 
@@ -271,24 +270,30 @@ void VariablePropDialog::slotSuspendedChanged(bool s)
         suspendEdit(true);
     }
     else
-    {
+    {       
         messageLabel_->clear();
         messageLabel_->hide();
         suspendEdit(false);
+
+        //We we have just left the suspended mode we need to chek if the data we
+        //show is still available
+        notifyUpdated(data_);
     }
 }
 
 void VariablePropDialog::suspendEdit(bool st)
 {
+    suspended_=st;
+
     if(st)
-    {
+    {       
         QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
         Q_ASSERT(sb);
         sb->setEnabled(false);
         form_->setEnabled(false);
     }
     else
-    {
+    {       
         QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
         Q_ASSERT(sb);
         sb->setEnabled(true);
@@ -341,7 +346,8 @@ void VariablePropDialog::readSettings()
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *parent) :
    QDialog(parent),
    data_(data),
-   cleared_(false)
+   cleared_(false),
+   suspended_(false)
 {
 	setupUi(this);
 
@@ -506,7 +512,15 @@ QString VariableAddDialog::value() const
 
 void VariableAddDialog::notifyCleared(VariableModelDataHandler*)
 {
-    close();
+    //When we are not in suspended mode and the data_ is cleared
+    //we need to close the dialogue
+    if(!suspended_)
+        close();
+
+    //However, when the suspended mode finished the data_ is cleared and reloaded before
+    //this dialogue gets the notification about the suspended mode change. So
+    //we delay the decision on what to do unitl we receieve this notification in
+    //slotSuspendedChanged()
 
 #if 0
     messageLabel_->showWarning(nodeTypeCapital_ + " <b>" + nodeName_ +
@@ -537,11 +551,22 @@ void VariableAddDialog::slotSuspendedChanged(bool s)
         messageLabel_->clear();
         messageLabel_->hide();
         suspendEdit(false);
+
+        //We we have just left the suspended mode, so we need to chek if the data_ we
+        //show is still available
+        if(!data_ || data_->count() == 0 ||
+           nodeName_ != QString::fromStdString(data_->data(0)->name()) ||
+           nodeType_ != QString::fromStdString(data_->data(0)->type()))
+        {
+            close();
+        }
     }
 }
 
 void VariableAddDialog::suspendEdit(bool st)
 {
+    suspended_=st;
+
     if(st)
     {
         QPushButton* sb=buttonBox_->button(QDialogButtonBox::Ok);
@@ -550,7 +575,7 @@ void VariableAddDialog::suspendEdit(bool st)
         form_->setEnabled(false);
     }
     else
-    {
+    {      
         QPushButton* sb=buttonBox_->button(QDialogButtonBox::Ok);
         Q_ASSERT(sb);
         sb->setEnabled(true);
@@ -770,8 +795,6 @@ void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
     if(flags.isSet(SuspendedChanged))
     {
-        Q_EMIT suspendedChanged(suspended_);
-
         //If it just became non-suspended we need to refresh all the data!!!
         if(info_ && !suspended_)
         {
@@ -781,6 +804,11 @@ void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
             regainSelection();
             canSaveLastSelection_=true;
         }
+
+        //It is very important to only emit the signal when the
+        //data has been updated! In this way the dialogues can check if their contents are
+        //in sync with what data_ stores.
+        Q_EMIT suspendedChanged(suspended_);
     }
     checkActionState();
 }
