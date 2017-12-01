@@ -23,37 +23,12 @@ import sys
 import os
 
 class TestNewSuite(unittest.TestCase):
-    def setUp(self):
-        home = os.path.join(os.getenv("HOME"),"course")
-        self.defs = Defs()
-        suite = self.defs.add_suite("test")
-        suite.add_variable("ECF_HOME", home)
-        suite.add_task("t1")
-         
-        with Defs() as self.defs2: 
-            with self.defs2.add_suite("test") as suite:
-                suite.add_variable("ECF_HOME", home)
-                suite.add_task("t1") 
-         
-        with Defs() as self.defs3:  
-            self.defs3.add(Suite("test").add(
-                Edit(ECF_HOME=home),
-                Task("t1")))
-             
-        self.defs4 = Defs() + Suite("test").add(Edit(ECF_HOME=home))
-        self.defs4.test += Task("t1")
-        
-        self.defs5 = Defs().add(
-                Suite("test").add(
-                    Edit(ECF_HOME= os.path.join(os.getenv("HOME"),  "course")),
-                    Task("t1")))
-        
-     
-    def test_defs_equal(self):
-        self.assertEqual(self.defs, self.defs2, "defs not the same")
-        self.assertEqual(self.defs, self.defs3, "defs not the same")
-        self.assertEqual(self.defs, self.defs4, "defs not the same")
-        self.assertEqual(self.defs, self.defs5, "defs not the same")
+    def test_node_dunder_add(self):
+        suite = Suite("s") + Family("f") + Family("f2") + Task("t3") + Edit(name="value")
+        self.assertEqual(len(list(suite.variables)),1 ,"expected suite to have 1 variable " + str(len(list(suite.variables))) )
+
+        suite = Suite("s") + Family("f") + Family("f2") + (Task("t3") + Edit(name="value"))
+        self.assertEqual(len(list(suite.t3.variables)),1 ,"expected task t3 to have 1 variable " + str(len(list(suite.t3.variables))) )
         
         
 if __name__ == "__main__":

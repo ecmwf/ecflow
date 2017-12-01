@@ -20,6 +20,14 @@ import unittest
 import sys
 
 class Test_dunder_add(unittest.TestCase):
+    
+    def test_node_dunder_add(self):
+        suite = Suite("s") + Family("f") + Family("f2") + Task("t3") + Edit(name="value")
+        self.assertEqual(len(list(suite.variables)),1 ,"expected suite to have 1 variable " + str(len(list(suite.variables))) )
+
+        suite = Suite("s") + Family("f") + Family("f2") + (Task("t3") + Edit(name="value"))
+        self.assertEqual(len(list(suite.t3.variables)),1 ,"expected task t3 to have 1 variable " + str(len(list(suite.t3.variables))) )
+        
     def test_defs_dunder_add(self):
         defs = Defs() + Suite("s") + Suite("s1")
         self.assertEqual(len(defs),2 ,"expected 2 suites but found " + str(len(defs)) )
