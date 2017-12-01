@@ -19,6 +19,32 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
 import unittest 
 import sys
 
+class Test_dunder_add(unittest.TestCase):
+    def test_defs_dunder_add(self):
+        defs = Defs() + Suite("s") + Suite("s1")
+        self.assertEqual(len(defs),2 ,"expected 2 suites but found " + str(len(defs)) )
+        
+        defs += Suite("sx")  #   + Suite('x')  wont work,   Suite('sx').__add__(Suite('x') not defined
+        self.assertEqual(len(defs),3 ,"expected 3 suites but found " + str(len(defs)) )
+        
+        defs + Suite("a") + Suite("b")
+        self.assertEqual(len(defs),5 ,"expected 5 suites but found " + str(len(defs)) )
+
+    def test_node_dunder_add(self):
+        suite = Suite("s") + Family("f") + Family("f2") + Task("t3") + Edit(name="value")
+        suite.t3 + Event(11,"event") + Meter("meter",0,10,10) + Label("label","c") + Trigger("1==1") 
+        self.assertEqual(len(suite),3 ,"expected 3 children but found " + str(len(suite)) )
+        self.assertEqual(len(list(suite.t3.events)),1 ,"expected 1 event found " + str(len(list(suite.t3.events))) )
+        self.assertEqual(len(list(suite.t3.meters)),1 ,"expected 1 event found " + str(len(list(suite.t3.meters))) )
+        self.assertEqual(len(list(suite.t3.labels)),1 ,"expected 1 event found " + str(len(list(suite.t3.labels))) )
+
+    def test_node_dunder_add(self):
+        suite = Suite("s")  
+        suite += Task("t3")  # + Task("t2") not allowed as Task("t1").__add__("t2") not defined
+        suite.t3 += Event(11,"event")  # + Task("t2") not allowed as Task("t1").__add__("t2") not defined
+        self.assertEqual(len(suite),1 ,"expected 1 children but found " + str(len(suite)) )
+        self.assertEqual(len(list(suite.t3.events)),1 ,"expected 1 event found " + str(len(list(suite.t3.events))) )
+
 class Test_crash(unittest.TestCase):
     def test_trigger_node_list(self):
         suite = Suite("s")

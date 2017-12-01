@@ -12,51 +12,50 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 # SCRATCH test for ecflow python api
 
-import ecflow
+from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
+                  Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
+                  JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
+                  Repeat, RepeatDate, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
+                  Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
+                  VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
+import unittest 
+import sys
+import os
 
-def find_variable_up_the_tree(node, varname):
-    var = node.find_variable(varname)
-    if not var.empty():
-        return var.value()
-            
-    # search the generated variables
-    variable_list = ecflow.VariableList()
-    node.get_generated_variables(variable_list)
-    for gen_var in variable_list:
-        if gen_var.name() == varname:
-            return gen_var.value() 
+class TestNewSuite(unittest.TestCase):
+    def setUp(self):
+        home = os.path.join(os.getenv("HOME"),"course")
+        self.defs = Defs()
+        suite = self.defs.add_suite("test")
+        suite.add_variable("ECF_HOME", home)
+        suite.add_task("t1")
+         
+        with Defs() as self.defs2: 
+            with self.defs2.add_suite("test") as suite:
+                suite.add_variable("ECF_HOME", home)
+                suite.add_task("t1") 
+         
+        with Defs() as self.defs3:  
+            self.defs3.add(Suite("test").add(
+                Edit(ECF_HOME=home),
+                Task("t1")))
+             
+        self.defs4 = Defs() + Suite("test").add(Edit(ECF_HOME=home))
+        self.defs4.test += Task("t1")
         
-    parent = node.get_parent()
-    if parent:
-        return find_variable_up_the_tree(node=parent, varname=varname)
-    else:
-        return None
-
-# Connect to server and get suite definition
-client = ecflow.Client('localhost:4141')
-client.ch_register(False, ['ecflow'])
-client.sync_local()
-defs = client.get_defs()
-
-# Get a node
-node = defs.find_abs_node('/ecflow/localhost/gnu/var_summary')
-if node != None:
-    node.update_generated_variables()  # does not seem to have any effect
-else:
-    print("Could not find node")
-    exit(1)
-    
-# Find variables using two different methods:
-#   a) Directly on the node using node.find_variable()
-#   b) On the node and all parent nodes up the tree
-task_vars = ['TASK', 'ECF_JOB', 'ECF_SCRIPT', 'ECF_JOBOUT', 'ECF_TRYNO',
-             'ECF_RID', 'ECF_NAME']
-family_vars = ['FAMILY', ]
-suite_vars = ['SUITE', 'ECF_HOME', 'ECF_TIMEOUT', 'ECF_TRIES']
-vars = task_vars + family_vars + suite_vars
- 
-print '\n=== b) ===\n'
-for varname in vars:
-    print '{0} = {1}'.format(varname, 
-                             find_variable_up_the_tree(node, varname))
-    
+        self.defs5 = Defs().add(
+                Suite("test").add(
+                    Edit(ECF_HOME= os.path.join(os.getenv("HOME"),  "course")),
+                    Task("t1")))
+        
+     
+    def test_defs_equal(self):
+        self.assertEqual(self.defs, self.defs2, "defs not the same")
+        self.assertEqual(self.defs, self.defs3, "defs not the same")
+        self.assertEqual(self.defs, self.defs4, "defs not the same")
+        self.assertEqual(self.defs, self.defs5, "defs not the same")
+        
+        
+if __name__ == "__main__":
+    unittest.main()
+    print("All Tests pass")
