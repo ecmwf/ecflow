@@ -82,8 +82,8 @@ class TestFamilies(unittest.TestCase):
          
         print "Creating suite definition" 
         home = os.path.join(os.getenv("HOME"),  "course") 
-        defs = Defs() + Suite("test").add(Edit(ECF_INCLUDE=home,ECF_HOME=home))
-        defs.test += [ Family("f1").add( [ Task("t{0}".format(i)) for i in range(1,3) ]) ]
+        defs = Defs() + (Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home))
+        defs.test += Family("f1") + [ Task("t{0}".format(i)) for i in range(1,3) ]
         print defs
         print "Checking job creation: .ecf -> .job0"  
         #print defs.check_job_creation()
@@ -249,10 +249,7 @@ class TestTriggers(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         with Suite("test") as suite:
             suite += Edit(ECF_INCLUDE=home,ECF_HOME=home) 
-            suite += Family("f1") 
-            suite.f1 += Edit(SLEEP=20) 
-            suite.f1 += Task("t1")
-            suite.f1 += Task("t2")
+            suite += Family("f1") + Edit(SLEEP=20) + Task("t1") + Task("t2")
             suite.f1.t2 += Trigger(["t1"]) 
              
         print "Creating suite definition"
@@ -309,16 +306,15 @@ class TestEvents(unittest.TestCase):
  
         home = os.path.join(os.getenv("HOME"), "course")
         def create_family_f1():
-            f1 = Family("f1")
-            f1 += [ Edit(SLEEP=20),
+            f1 = Family("f1") + [ Edit(SLEEP=20),
                     Task("t1"),
-                    Task("t2").add( Trigger(["t1"]), Event("a"), Event("b")),
-                    Task("t3").add( Trigger("t2:a")),
-                    Task("t4").add( Trigger("t2:b")) ]
+                    Task("t2") + Trigger(["t1"]) + Event("a") + Event("b"),
+                    Task("t3") + Trigger("t2:a"),
+                    Task("t4") + Trigger("t2:b") ]
             return f1
          
         print "Creating suite definition"
-        defs = Defs().add(Suite("test"))
+        defs = Defs() + Suite("test")
         defs.test += [ Edit(ECF_INCLUDE=home,ECF_HOME=home), create_family_f1()]
         print defs
         print "Checking job creation: .ecf -> .job0"  
@@ -737,28 +733,26 @@ class TestDataAquistionSolution(unittest.TestCase):
         import os
         
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add( 
-                Suite("data_aquisition").add(
-                    RepeatDay(1),
-                    Edit(ECF_HOME=home),
-                    Edit(ECF_INCLUDE=home),
-                    Edit(ECF_FILES=home + "/data"),
-                    Edit(SLEEP=2)
-                    ))
+        defs = Defs() + Suite("data_aquisition").add(
+                            RepeatDay(1),
+                            Edit(ECF_HOME=home),
+                            Edit(ECF_INCLUDE=home),
+                            Edit(ECF_FILES=home + "/data"),
+                            Edit(SLEEP=2))
         for city in ( "Exeter", "Toulouse", "Offenbach", "Washington", "Tokyo", "Melbourne", "Montreal" ) :
             fcity = defs.data_aquisition.add_family(city)
-            fcity.add_task("archive")
+            fcity += Task("archive")
             for obs_type in ( "observations", "fields", "images" ):
                 type_fam = fcity.add_family(obs_type)
-                if city in ("Exeter", "Toulouse", "Offenbach"): type_fam.add_time("00:00 23:00 01:00")
-                if city in ("Washington") :                     type_fam.add_time("00:00 23:00 03:00")
-                if city in ("Tokyo") :                          type_fam.add_time("12:00")
-                if city in ("Melbourne") :                      type_fam.add_day( "monday" )
-                if city in ("Montreal") :                       type_fam.add_date(1, 0, 0)
+                if city in ("Exeter", "Toulouse", "Offenbach"): type_fam + Time("00:00 23:00 01:00")
+                if city in ("Washington") :                     type_fam + Time("00:00 23:00 03:00")
+                if city in ("Tokyo") :                          type_fam + Time("12:00")
+                if city in ("Melbourne") :                      type_fam + Day( "monday" )
+                if city in ("Montreal") :                       type_fam + Date(1, 0, 0)
          
                 type_fam += [ Task("get"),Task("process"),Task("store") ]
-                type_fam.process += [ Trigger("get eq complete") ]
-                type_fam.store += [ Trigger("get eq complete") ]     
+                type_fam.process += Trigger("get eq complete") 
+                type_fam.store += Trigger("get eq complete")     
 
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
