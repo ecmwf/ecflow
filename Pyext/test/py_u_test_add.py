@@ -53,6 +53,36 @@ class Test_dunder_add(unittest.TestCase):
         self.assertEqual(len(suite),1 ,"expected 1 children but found " + str(len(suite)) )
         self.assertEqual(len(list(suite.t3.events)),1 ,"expected 1 event found " + str(len(list(suite.t3.events))) )
 
+    def test_dunder_add_all(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 += Clock(1, 1, 2010, False)
+        defs.s1 += Autocancel(1, 10, True)
+        defs.s1 += Task('t1') + Edit({ "a":"y", "b":"bb"}, c="v",d="b") + Edit({ "e":1, "f":"bb"}) +  Edit(g="d") + Edit(h=1) +\
+                    Event(1) + Event(11,"event") + Meter("meter",0,10,10) + Label("label","c") + Trigger("1==1") + \
+                    Complete("1==1") + Limit("limit",10) + Limit("limit2",10) + InLimit("limitName","/limit",2) + \
+                    Defstatus(DState.complete) + Today(0,30) + Today("00:59") + Today("00:00 11:30 00:01") + \
+                    Time(0,30) + Time("00:59") + Time("00:00 11:30 00:01") + Day("sunday") + Day(Days.monday) + \
+                    Date(1,1,0) + Date(28,2,1960) + Autocancel(3) 
+                    
+        t1 = defs.find_abs_node("/s1/t1")
+        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertEqual(len(defs.s1),1, "Expected 1 nodes but found " + str(len(defs.s1)))
+        self.assertEqual(len(list(t1.variables)), 8, "expected 8 variables but found " + str(len(list(t1.variables))))
+        self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
+        self.assertEqual(len(list(t1.inlimits)), 1, "expected 1 inlimits")
+        self.assertEqual(len(list(t1.events)), 2, "expected 2 events")
+        self.assertEqual(len(list(t1.meters)), 1, "expected 1 meter")
+        self.assertEqual(len(list(t1.labels)), 1, "expected 1 label")
+        self.assertEqual(len(list(t1.times)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.todays)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.days)), 2, "expected 2 days")
+        self.assertEqual(len(list(t1.dates)), 2, "expected 2 dates")
+        self.assertTrue(t1.get_trigger(), "Can't find t1 trigger")
+        self.assertTrue(t1.get_complete(), "Can't find t1 complete")
+        self.assertTrue(t1.get_autocancel(), "Can't find t1 autocancel")
+        #print(defs)
+
+
 class Test_crash(unittest.TestCase):
     def test_trigger_node_list(self):
         suite = Suite("s")
