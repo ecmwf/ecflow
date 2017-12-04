@@ -58,8 +58,8 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
  
     def test_me3(self):
         defs = Defs()
-        defs += [ Suite("s1") ]
-        defs.s1 += [ Family("f1") ]
+        defs += Suite("s1") 
+        defs.s1 += Family("f1") 
         defs.s1.f1 += [ Task("t{0}".format(t)) 
                         for t in ("a", "b", "c")] 
         defs.save_as_defs("test.def")   # save defs to file "test.def"  
@@ -117,14 +117,10 @@ class TestAddMeterEventLabel(unittest.TestCase):
         self.assertEqual(defs,self.defs, "expected defs to be the same")
  
     def test_alternative1(self):
-        defs = Defs()
-        defs += [ Suite("s1")]
-        defs.s1 += [ Task("t1") ]
-        defs.s1.t1 += [ Event(2),
-                        Event("wow"),
-                        Event(10,"Eventname2" ),
-                        Meter("metername3",0,100),
-                        Label("label_name4", "value") ]
+        defs = Defs() + Suite("s1")
+        defs.s1 += Task("t1") + Event(2) + Event("wow") + \
+                    Event(10,"Eventname2" ) + Meter("metername3",0,100) + \
+                    Label("label_name4", "value") 
          
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -174,8 +170,7 @@ class TestAddLimitInlimit(unittest.TestCase):
         self.assertEqual(defs, self.defs, "expected defs to be the same")        
  
     def test_alternative1(self):
-        defs = Defs()
-        defs += [ Suite("s1") ]
+        defs = Defs() + Suite("s1") 
         defs.s1 += [ Limit("limitName4", 10),Family("f1") ]
         defs.s1.f1 += [ InLimit("limitName4","/s1/f1",2),
                         [ Task("t{0}".format(t)) for t in range(1,4) ] ]
@@ -226,8 +221,7 @@ class TestAddVariable(unittest.TestCase):
  
     def test_alternative1(self):
          
-        defs = Defs()
-        defs += [Suite("s1")]
+        defs = Defs() + Suite("s1")
         defs.s1 += [ Edit(HELLO="world"),
                      Edit({ "NAME":"value", "NAME2":"value2", "NAME3":"value3", "NAME4":4 }, BILL=1),
                      Edit(FRED="bloggs")
@@ -267,7 +261,7 @@ class TestAddTrigger(unittest.TestCase):
  
     def test_alternative1(self):
          
-        defs = Defs().add(Suite("s1"))
+        defs = Defs() + Suite("s1")
         defs.s1 += [ Task("t{0}".format(i)) for i in range(1,4) ]
         defs.s1.t2 += [ Trigger("t1 == active and t3 == aborted"),
                         Complete("t3 == complete") ]
@@ -310,7 +304,7 @@ class TestAddLargeTrigger(unittest.TestCase):
 
     def test_alternative1(self):
          
-        defs = Defs().add(Suite("s1"))
+        defs = Defs() + Suite("s1")
         defs.s1 += [ Task("t{0}".format(i)) for i in range(1,4) ]
         defs.s1.t3 += [ Trigger("t1 == complete"),
                         Trigger("t2 == active"),
@@ -412,8 +406,7 @@ class TestAddTimeDependencies(unittest.TestCase):
         cron.set_months( [1,2,3,4,5,6] )
         cron.set_time_series( "+00:00 23:00 00:30" )
 
-        defs = Defs().add( Suite("s1").add(
-                             Task("date"),Task("day"),Task("time"),Task("cron")))
+        defs = Defs() + ( Suite("s1") + Task("date") + Task("day") + Task("time") + Task("cron"))
         defs.s1.date += [ Date(1, 0, 0), Date("2.*.*"), Date(28,2,2026) ]
         defs.s1.day += [ Day("monday"), Day(Days.tuesday) ]
         defs.s1.time += [ Time("+00:30"), Time("+00:30 20:00 01:00"), Time(0, 59, True),
@@ -444,8 +437,7 @@ class TestAddDefStatus(unittest.TestCase):
                 Task("t2").add(Defstatus(DState.complete))))
 
     def test_alternative1(self):
-        defs = Defs().add( Suite("s1"))
-        defs.s1 += [Task("t1"),Task("t2")]
+        defs = Defs() + ( Suite("s1") +  Task("t1") + Task("t2") )
         defs.s1.t1 += [ Defstatus("complete") ]
         defs.s1.t2 += [ Defstatus(DState.complete) ]
         
@@ -485,14 +477,13 @@ class TestAddAutocancel(unittest.TestCase):
 
 
     def test_alternative1(self):
-        defs = Defs().add( Suite("s1"))
-        defs.s1 += [ Task("t{0}".format(i)) for i in range(1,7)]
-        defs.s1.t1 += [ Autocancel(3) ]
-        defs.s1.t2 += [ Autocancel(1, 10, True) ] 
-        defs.s1.t3 += [ Autocancel(TimeSlot(2,10), True) ]  
-        defs.s1.t4 += [ Autocancel(1) ]       
-        defs.s1.t5 += [ Autocancel(18, 10, False) ]
-        defs.s1.t6 += [ Autocancel(2, 10, False) ]        
+        defs = Defs() + ( Suite("s1") + [ Task("t{0}".format(i)) for i in range(1,7)] )
+        defs.s1.t1 += Autocancel(3) 
+        defs.s1.t2 += Autocancel(1, 10, True) 
+        defs.s1.t3 += Autocancel(TimeSlot(2,10), True) 
+        defs.s1.t4 += Autocancel(1)     
+        defs.s1.t5 += Autocancel(18, 10, False) 
+        defs.s1.t6 += Autocancel(2, 10, False)       
          
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -552,15 +543,15 @@ class TestAddRepeat(unittest.TestCase):
                         [ Task("t{0}".format(i)) for i in range(1,3) ] )))
 
     def test_alternative2(self):
-        defs = Defs().add( Suite("s1") )
+        defs = Defs() +  Suite("s1") 
         defs.s1 += [ Family("f{0}".format(i)).add(
                       [ Task("t{0}".format(i)) for i in range(1,3) ]) 
                     for i in range(1,6) ]   
-        defs.s1.f1 += [ RepeatDate("YMD",20100111,20100115,2) ]
-        defs.s1.f2 += [ RepeatInteger("count",0,100,2) ]
-        defs.s1.f3 += [ RepeatEnumerated("enum",["red", "green", "blue" ] ) ]
-        defs.s1.f4 += [ RepeatString("enum",["a", "b", "c" ] ) ]
-        defs.s1.f5 += [ RepeatDay(1) ]
+        defs.s1.f1 += RepeatDate("YMD",20100111,20100115,2) 
+        defs.s1.f2 += RepeatInteger("count",0,100,2) 
+        defs.s1.f3 += RepeatEnumerated("enum",["red", "green", "blue" ] ) 
+        defs.s1.f4 += RepeatString("enum",["a", "b", "c" ] ) 
+        defs.s1.f5 += RepeatDay(1) 
   
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
