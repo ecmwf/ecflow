@@ -19,9 +19,21 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
 import unittest 
 import sys
 
+class Test_dunder_rshift(unittest.TestCase):
+    def test_node_dunder_rshift(self):
+        suite = Suite('s')
+        # will ONLY work if we have starting NodeContainer
+        suite >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+ 
+        fam = Family("f1") >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
+        self.assertEqual(len(list(fam)),4,"expected 4 children but found " + str(len(list(fam))) )
+
+
 class Test_dunder_add(unittest.TestCase):
     
     def test_node_dunder_add_variable(self):
+        # will ONLY work if we have starting NodeContainer
         suite = Suite("s") + Family("f") + Family("f2") + Task("t3") + Edit(name="value")
         self.assertEqual(len(list(suite.variables)),1 ,"expected suite to have 1 variable " + str(len(list(suite.variables))) )
 
@@ -29,6 +41,7 @@ class Test_dunder_add(unittest.TestCase):
         self.assertEqual(len(list(suite.t3.variables)),1 ,"expected task t3 to have 1 variable " + str(len(list(suite.t3.variables))) )
                 
     def test_defs_dunder_add(self):
+        # will ONLY work if we have starting defs
         defs = Defs() + Suite("s") + Suite("s1")
         self.assertEqual(len(defs),2 ,"expected 2 suites but found " + str(len(defs)) )
         
@@ -39,6 +52,7 @@ class Test_dunder_add(unittest.TestCase):
         self.assertEqual(len(defs),5 ,"expected 5 suites but found " + str(len(defs)) )
 
     def test_node_dunder_add_meter(self):
+        # will ONLY work if we have starting NodeContainer
         suite = Suite("s") + Family("f") + Family("f2") + Task("t3") + Edit(name="value")
         suite.t3 + Event(11,"event") + Meter("meter",0,10,10) + Label("label","c") + Trigger("1==1") 
         self.assertEqual(len(suite),3 ,"expected 3 children but found " + str(len(suite)) )

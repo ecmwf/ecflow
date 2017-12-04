@@ -22,12 +22,17 @@ import unittest
 import sys
 import os
 
-class TestNewSuite(unittest.TestCase):
-    def test_node_dunder_add(self):
+class Test_dunder_rshift(unittest.TestCase):
+    def test_node_dunder_rshift(self):
         suite = Suite('s')
-        suite += [ Task("t{0}".format(i)) for i in range(1,5)]
-        self.assertEqual(len(suite),4 ,"expected 4 children but found " + str(len(suite)) )
-        
+        # will ONLY work if we have starting NodeContainer
+        suite >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+ 
+        fam = Family("f1") >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
+        self.assertEqual(len(list(fam)),4,"expected 4 children but found " + str(len(list(fam))) )
+
+
 if __name__ == "__main__":
     unittest.main()
     print("All Tests pass")

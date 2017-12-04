@@ -249,7 +249,7 @@ static object do_add(node_ptr self, const boost::python::object& arg){
    else if (boost::python::extract<VerifyAttr>(arg).check())self->addVerify(boost::python::extract<VerifyAttr>(arg));
    else if (boost::python::extract<Defstatus>(arg).check()){Defstatus t = boost::python::extract<Defstatus>(arg);self->addDefStatus(t.state());}
    else if (boost::python::extract<boost::python::list>(arg).check()){
-      // std::cout << "  do_add list\n";
+      std::cout << "  do_add list\n";
       boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
       int the_list_size = len(the_list);
       for(int i = 0; i < the_list_size; ++i) (void) do_add(self,the_list[i]); // recursive
@@ -261,6 +261,26 @@ static object do_add(node_ptr self, const boost::python::object& arg){
    else if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
    else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
    else throw std::runtime_error("ExportNode::add : Unknown type ");
+   return object(self);
+}
+
+static object do_rshift(node_ptr self, const boost::python::object& arg){
+   //std::cout << "do_rshift\n";
+   (void)do_add(self,arg);
+
+   if (boost::python::extract<node_ptr>(arg).check()) {
+      NodeContainer* nc = self->isNodeContainer();
+      if (!nc) throw std::runtime_error("ExportNode::do_rshift() : Can only add a child to Suite or Family");
+      node_ptr child = boost::python::extract<node_ptr>(arg);
+
+      std::vector<node_ptr> children;
+      nc->immediateChildren(children);
+      node_ptr previous_child;
+      for(size_t i =0; i < children.size(); i++) {
+         if (previous_child && children[i] == child) child->add_trigger_expr( previous_child->name() + " == complete");
+         if (children[i]->defStatus() != DState::COMPLETE)  previous_child = children[i];
+      }
+   }
    return object(self);
 }
 
@@ -358,6 +378,7 @@ void export_Node()
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
    .def("add", raw_function(add,1),                  DefsDoc::add())
    .def("__add__",  &do_add,                  DefsDoc::add())
+   .def("__rshift__",  &do_rshift)
    .def("__iadd__", &do_add)
    .def("__iadd__", &node_iadd)
    .def("__getattr__",      &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
