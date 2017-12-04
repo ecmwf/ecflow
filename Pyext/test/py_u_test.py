@@ -24,12 +24,9 @@ import os
 
 class TestNewSuite(unittest.TestCase):
     def test_node_dunder_add(self):
-        suite = Suite("s") + Family("f") + Family("f2") + Task("t3") + Edit(name="value")
-        self.assertEqual(len(list(suite.variables)),1 ,"expected suite to have 1 variable " + str(len(list(suite.variables))) )
-
-        suite = Suite("s") + Family("f") + Family("f2") + (Task("t3") + Edit(name="value"))
-        self.assertEqual(len(list(suite.t3.variables)),1 ,"expected task t3 to have 1 variable " + str(len(list(suite.t3.variables))) )
-        
+        suite = Suite('s')
+        suite += [ Task("t{0}".format(i)) for i in range(1,5)]
+        self.assertEqual(len(suite),4 ,"expected 4 children but found " + str(len(suite)) )
         
 if __name__ == "__main__":
     unittest.main()
