@@ -19,6 +19,87 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
 import unittest 
 import sys
 
+class Test_dunder_rshift(unittest.TestCase):
+    def test_node_dunder_rshift(self):
+        suite = Suite('s')
+        # will ONLY work if we have starting NodeContainer
+        suite >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+ 
+        fam = Family("f1") >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
+        self.assertEqual(len(list(fam)),4,"expected 4 children but found " + str(len(list(fam))) )
+
+
+class Test_dunder_add(unittest.TestCase):
+    
+    def test_node_dunder_add_variable(self):
+        # will ONLY work if we have starting NodeContainer
+        suite = Suite("s") + Family("f") + Family("f2") + Task("t3") + Edit(name="value")
+        self.assertEqual(len(list(suite.variables)),1 ,"expected suite to have 1 variable " + str(len(list(suite.variables))) )
+
+        suite = Suite("s") + Family("f") + Family("f2") + (Task("t3") + Edit(name="value"))
+        self.assertEqual(len(list(suite.t3.variables)),1 ,"expected task t3 to have 1 variable " + str(len(list(suite.t3.variables))) )
+                
+    def test_defs_dunder_add(self):
+        # will ONLY work if we have starting defs
+        defs = Defs() + Suite("s") + Suite("s1")
+        self.assertEqual(len(defs),2 ,"expected 2 suites but found " + str(len(defs)) )
+        
+        defs += Suite("sx")  #   + Suite('x')  wont work,   Suite('sx').__add__(Suite('x') not defined
+        self.assertEqual(len(defs),3 ,"expected 3 suites but found " + str(len(defs)) )
+        
+        defs + Suite("a") + Suite("b")
+        self.assertEqual(len(defs),5 ,"expected 5 suites but found " + str(len(defs)) )
+
+    def test_node_dunder_add_meter(self):
+        # will ONLY work if we have starting NodeContainer
+        suite = Suite("s") + Family("f") + Family("f2") + Task("t3") + Edit(name="value")
+        suite.t3 + Event(11,"event") + Meter("meter",0,10,10) + Label("label","c") + Trigger("1==1") 
+        self.assertEqual(len(suite),3 ,"expected 3 children but found " + str(len(suite)) )
+        self.assertEqual(len(list(suite.t3.events)),1 ,"expected 1 event found " + str(len(list(suite.t3.events))) )
+        self.assertEqual(len(list(suite.t3.meters)),1 ,"expected 1 event found " + str(len(list(suite.t3.meters))) )
+        self.assertEqual(len(list(suite.t3.labels)),1 ,"expected 1 event found " + str(len(list(suite.t3.labels))) )
+
+    def test_node_dunder_add(self):
+        suite = Suite("s")  
+        suite += Task("t3")  # + Task("t2") not allowed as Task("t1").__add__("t2") not defined
+        suite.t3 += Event(11,"event")  # + Task("t2") not allowed as Task("t1").__add__("t2") not defined
+        self.assertEqual(len(suite),1 ,"expected 1 children but found " + str(len(suite)) )
+        self.assertEqual(len(list(suite.t3.events)),1 ,"expected 1 event found " + str(len(list(suite.t3.events))) )
+
+        suite = Suite('s') + [ Task("t{0}".format(i)) for i in range(1,5)]
+        self.assertEqual(len(suite),4 ,"expected 4 children but found " + str(len(suite)) )
+
+    def test_dunder_add_all(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 += Clock(1, 1, 2010, False)
+        defs.s1 += Autocancel(1, 10, True)
+        defs.s1 += Task('t1') + Edit({ "a":"y", "b":"bb"}, c="v",d="b") + Edit({ "e":1, "f":"bb"}) +  Edit(g="d") + Edit(h=1) +\
+                    Event(1) + Event(11,"event") + Meter("meter",0,10,10) + Label("label","c") + Trigger("1==1") + \
+                    Complete("1==1") + Limit("limit",10) + Limit("limit2",10) + InLimit("limitName","/limit",2) + \
+                    Defstatus(DState.complete) + Today(0,30) + Today("00:59") + Today("00:00 11:30 00:01") + \
+                    Time(0,30) + Time("00:59") + Time("00:00 11:30 00:01") + Day("sunday") + Day(Days.monday) + \
+                    Date(1,1,0) + Date(28,2,1960) + Autocancel(3) 
+                    
+        t1 = defs.find_abs_node("/s1/t1")
+        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertEqual(len(defs.s1),1, "Expected 1 nodes but found " + str(len(defs.s1)))
+        self.assertEqual(len(list(t1.variables)), 8, "expected 8 variables but found " + str(len(list(t1.variables))))
+        self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
+        self.assertEqual(len(list(t1.inlimits)), 1, "expected 1 inlimits")
+        self.assertEqual(len(list(t1.events)), 2, "expected 2 events")
+        self.assertEqual(len(list(t1.meters)), 1, "expected 1 meter")
+        self.assertEqual(len(list(t1.labels)), 1, "expected 1 label")
+        self.assertEqual(len(list(t1.times)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.todays)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.days)), 2, "expected 2 days")
+        self.assertEqual(len(list(t1.dates)), 2, "expected 2 dates")
+        self.assertTrue(t1.get_trigger(), "Can't find t1 trigger")
+        self.assertTrue(t1.get_complete(), "Can't find t1 complete")
+        self.assertTrue(t1.get_autocancel(), "Can't find t1 autocancel")
+        #print(defs)
+
+
 class Test_crash(unittest.TestCase):
     def test_trigger_node_list(self):
         suite = Suite("s")

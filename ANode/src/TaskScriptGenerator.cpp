@@ -204,9 +204,10 @@ void TaskScriptGenerator::generate_head_file() const
 
    std::string contents;
    contents += "#!/bin/ksh\n";
-   contents += "set -e # stop the shell on first error\n";
-   contents += "set -u # fail when using an undefined variable\n";
-   contents += "set -x # echo script lines as they are executed\n";
+   contents += "set -e          # stop the shell on first error\n";
+   contents += "set -u          # fail when using an undefined variable\n";
+   contents += "set -o pipefail # fail if last(rightmost) command exits with a non-zero status\n";
+   contents += "set -x          # echo script lines as they are executed\n";
    contents += "\n";
    contents += "# Defines the variables that are needed for any communication with ECF\n";
    contents += "export ECF_PORT=%ECF_PORT%    # The server port number\n";

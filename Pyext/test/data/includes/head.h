@@ -3,6 +3,7 @@
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
+set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 ## Copyright 2009-2017 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0
