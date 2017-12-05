@@ -133,16 +133,18 @@ void WmWorkspaceHandler::moveAndSwitchToWorkspace(int winId,int wsId)
     QProcess proc;
     proc.start("xdotool",QStringList() << "set_desktop_for_window" <<
                QString::number(winId) << QString::number(wsId));
-    if(proc.waitForStarted(3000))
-    {
-        proc.waitForFinished(3000);
 
-        if(proc.exitStatus() == QProcess::NormalExit)
-        {
-            QProcess procSwitch;
-            procSwitch.start("xdotool",QStringList() << "set_desktop" << QString::number(wsId));
-            if(proc.waitForStarted(3000))
-                procSwitch.waitForFinished(3000);
-        }
-     }
+    if(!proc.waitForStarted(3000))
+        return;
+
+    proc.waitForFinished(3000);
+    if(proc.exitStatus() != QProcess::NormalExit)
+    {
+        return;
+    }
+
+    QProcess procSwitch;
+    procSwitch.start("xdotool",QStringList() << "set_desktop" << QString::number(wsId));
+    if(procSwitch.waitForStarted(3000))
+        procSwitch.waitForFinished(3000);
 }
