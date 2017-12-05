@@ -283,8 +283,8 @@
             "line"  : "notification.settings.max_item_num",
             "line"  : "notification.settings.switch_desktop",
             "note" : {
-                "default" : "When enabled it switches to the vitual desktop of the main window when a taks is selecteded in the notification popup dialogue. This feature only works if the underlying window system supports it."
-            }
+                "default" : "When enabled switches to the vitual desktop of the main window when a taks is selected in the notification popup dialogue. This feature only works if the underlying window system supports it."
+            },
 
             "custom-notification" : {
                 "title" : "Notification types",
