@@ -88,7 +88,7 @@ public:
 	VariableModelDataHandler();
 	~VariableModelDataHandler();
 
-	void reload(VInfo_ptr info);
+    void reload(VInfo_ptr info);
     void clear(bool emitSignal=true);
 	int count() const {return static_cast<int>(data_.size());}
 	int varNum(int index) const;

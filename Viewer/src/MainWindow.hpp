@@ -66,6 +66,7 @@ public:
     static void lookUpInTree(VInfo_ptr);
     static void startPreferences(QString);
     static void updateMenuMode(ServerHandler*);
+    static MainWindow* firstWindow();
 
 protected Q_SLOTS:
 	void on_actionNewTab_triggered();
@@ -119,7 +120,7 @@ private:
     static bool aboutToQuit(MainWindow*);
     static void save(MainWindow *);
     static void saveContents(MainWindow *);
-    static MainWindow* findWindow(QWidget *childW);
+    static MainWindow* findWindow(QWidget *childW);    
     static void configChanged(MainWindow *);
     static void hideServerSyncNotify(MainWindow*);
     static void cleanUpOnQuit(MainWindow *);

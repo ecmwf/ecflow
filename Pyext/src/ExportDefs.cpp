@@ -169,8 +169,9 @@ void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recur
 size_t defs_len(defs_ptr self) { return self->suiteVec().size();}
 bool defs_container(defs_ptr self, const std::string& name){return (self->findSuite(name)) ?  true : false;}
 
-static void do_add(defs_ptr self, const boost::python::object& arg) {
-   if (arg.ptr() == object().ptr())  return; // *IGNORE* None
+static object do_add(defs_ptr self, const boost::python::object& arg) {
+   //std::cout << "defs::do_add \n";
+   if (arg.ptr() == object().ptr())  return object(self); // *IGNORE* None
    if (boost::python::extract<Variable>(arg).check()) {
       Variable var = boost::python::extract<Variable>(arg);
       self->set_server().add_or_update_user_variables(var.name(),var.theValue());
@@ -185,9 +186,10 @@ static void do_add(defs_ptr self, const boost::python::object& arg) {
    else if (boost::python::extract<boost::python::list>(arg).check()){
       boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
       int the_list_size = len(the_list);
-      for(int i = 0; i < the_list_size; ++i) do_add(self,the_list[i]); // recursive
+      for(int i = 0; i < the_list_size; ++i) (void) do_add(self,the_list[i]); // recursive
    }
    else throw std::runtime_error("ExportDefs::add : Unknown type");
+   return object(self);
 }
 
 static object add(tuple args, dict kwargs) {
@@ -195,7 +197,7 @@ static object add(tuple args, dict kwargs) {
    defs_ptr self = boost::python::extract<defs_ptr>(args[0]); // self
    if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
 
-   for (int i = 1; i < the_list_size; ++i)  do_add(self,args[i]);
+   for (int i = 1; i < the_list_size; ++i) (void)do_add(self,args[i]);
 
    boost::python::list keys = kwargs.keys();
    const int no_of_keys = len(keys);
@@ -211,9 +213,9 @@ static object add(tuple args, dict kwargs) {
 }
 
 static object defs_iadd(defs_ptr self, const boost::python::list& list) {
-   // std::cout << "defs_iadd  list " << self->name() << "\n";
+   //std::cout << "defs_iadd  list " << self->name() << "\n";
    int the_list_size = len(list);
-   for(int i = 0; i < the_list_size; ++i) do_add(self,list[i]);
+   for(int i = 0; i < the_list_size; ++i) (void)do_add(self,list[i]);
    return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
@@ -239,7 +241,9 @@ void export_Defs()
 	.def("__contains__",          &defs_container)                // Container protocol
 	.def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
 	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
-	.def("__iadd__",              &defs_iadd)
+   .def("__iadd__",              &defs_iadd)
+   .def("__iadd__",              &do_add)  // defs += Suite("s1") 
+   .def("__add__",               &do_add)
 	.def("add",                   raw_function(add,1),DefsDoc::add())
 	.def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
 	.def("add_suite",             &Defs::add_suite, GlossaryDoc::list() )

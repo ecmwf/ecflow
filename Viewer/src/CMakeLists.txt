@@ -219,6 +219,7 @@ set(viewer_srcs
     ViewerUtil.cpp
     WhyItemWidget.cpp
     WidgetNameProvider.cpp
+    WmWorkspaceHandler.cpp
     ZombieItemWidget.cpp
     ZombieModel.cpp
     TextPager/TextPagerCursor.cpp

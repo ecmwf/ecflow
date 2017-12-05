@@ -8,16 +8,26 @@
                         "min" :  "10",
                         "max" : "500",
                         "suffix": "items"
+                     },
+                     "switch_desktop" : {
+                        "label" : "Switch to parent's virtual desktop from popup dialogue",
+                        "default" : "false"
                      }
             },                                    
             "aborted": {
+                "use_status_colour" : {
+                    "label" : "Use aborted status colour",
+                    "default" : "true"
+                },
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(255,0,0)"
+                    "default": "rgb(255,59,53)",
+                    "disabledRule" : "use_status_colour=true"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
-                    "default": "rgb(0,0,0)"
+                    "default": "rgb(0,0,0)",
+                    "disabledRule" : "use_status_colour=true"
                 },    
                 "count_fill_colour" : {
                     "label" : "Notification count background colour",
@@ -65,7 +75,7 @@
             "restarted": {
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(193,193,193)"
+                    "default": "rgb(255,185,143)"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
@@ -117,7 +127,7 @@
             "late": {
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(193,193,193)"
+                    "default": "rgb(255,185,143)"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
@@ -168,7 +178,7 @@
             "zombie": {
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(193,193,193)"
+                    "default": "rgb(255,185,143)"
                 },
                 "text_colour" : {
                     "label" : "Text colour",
@@ -219,7 +229,7 @@
             "alias": {
                 "fill_colour" : {
                     "label" : "Background colour",
-                    "default": "rgb(193,193,193)"
+                    "default": "rgb(255,185,143)"
                 },
                 "text_colour" : {
                     "label" : "Text colour",

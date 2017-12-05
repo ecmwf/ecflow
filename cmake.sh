@@ -112,6 +112,7 @@ echo "python3_arg=$python3_arg"
 echo "no_gui_arg=$no_gui_arg"
 echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
+set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 # ==================== compiler flags ========================================
 # 

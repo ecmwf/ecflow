@@ -13,28 +13,81 @@
   <property name="windowTitle">
    <string>Change notification</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>2</number>
    </property>
    <property name="leftMargin">
-    <number>1</number>
-   </property>
-   <property name="topMargin">
     <number>0</number>
    </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
    <property name="rightMargin">
-    <number>1</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
     <number>2</number>
    </property>
    <item>
-    <widget class="CustomTabWidget" name="tab_">
-     <property name="currentIndex">
-      <number>-1</number>
-     </property>
+    <widget class="QWidget" name="holderW" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QWidget" name="buttonW_" native="true"/>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="optionsTb_">
+        <property name="toolTip">
+         <string>Configure notification options</string>
+        </property>
+        <property name="text">
+         <string>&amp;Preferences</string>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/configure.svg</normaloff>:/viewer/configure.svg</iconset>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="stacked_"/>
    </item>
    <item>
     <widget class="QCheckBox" name="clearOnCloseCb_">
@@ -82,15 +135,14 @@
     </layout>
    </item>
   </layout>
+  <zorder>clearOnCloseCb_</zorder>
+  <zorder>line</zorder>
+  <zorder>holderW</zorder>
+  <zorder>optionsTb_</zorder>
+  <zorder>stacked_</zorder>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>CustomTabWidget</class>
-   <extends>QTabWidget</extends>
-   <header location="global">CustomTabWidget.hpp</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

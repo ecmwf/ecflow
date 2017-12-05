@@ -15,10 +15,15 @@
 #include "MainWindow.hpp"
 #include "SessionHandler.hpp"
 #include "TreeView.hpp"
+#include "UiLog.hpp"
+#include "UIDebug.hpp"
+#include "VConfig.hpp"
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 #include "WidgetNameProvider.hpp"
+#include "WmWorkspaceHandler.hpp"
 
+#include <QButtonGroup>
 #include <QCloseEvent>
 #include <QDebug>
 #include <QHBoxLayout>
@@ -28,6 +33,89 @@
 #include <QVariant>
 
 Q_DECLARE_METATYPE(QList<int>)
+
+//===========================================================
+//
+// ChangeNotifyDialogButton
+//
+//===========================================================
+
+ChangeNotifyDialogButton::ChangeNotifyDialogButton(QWidget* parent) :
+    QToolButton(parent),
+    notifier_(0)
+{
+    setProperty("notify","1");
+    setAutoRaise(true);
+    setIconSize(QSize(20,20));
+    setCheckable(true);
+}
+
+void ChangeNotifyDialogButton::setNotifier(ChangeNotify* notifier)
+{
+    notifier_=notifier;
+
+    setText(notifier_->widgetText());
+    setToolTip(notifier_->toolTip());
+
+    connect(notifier_->data(),SIGNAL(endAppendRow()),
+            this,SLOT(slotAppend()));
+
+    connect(notifier_->data(),SIGNAL(endRemoveRow(int)),
+                    this,SLOT(slotRemoveRow(int)));
+
+    connect(notifier_->data(),SIGNAL(endReset()),
+                this,SLOT(slotReset()));
+
+    updateSettings();
+}
+
+void ChangeNotifyDialogButton::slotAppend()
+{
+    updateSettings();
+}
+
+void ChangeNotifyDialogButton::slotRemoveRow(int)
+{
+    updateSettings();
+}
+
+void ChangeNotifyDialogButton::slotReset()
+{
+    updateSettings();
+}
+
+void ChangeNotifyDialogButton::updateSettings()
+{
+    setEnabled(notifier_->isEnabled());
+
+#if 0
+
+    QString text;
+    QString numText;
+
+    if(notifier_->prop())
+    {
+        text=notifier_->prop()->param("widgetText");
+    }
+
+    int num=0;
+    if(notifier_->data())
+    {
+        num=notifier_->data()->size();
+        if(num > 0 && num < 10)
+            numText=QString::number(num);
+        else if(num > 10)
+            numText="9+";
+
+    }
+#endif
+}
+
+//===========================================================
+//
+// ChangeNotifyDialogWidget
+//
+//===========================================================
 
 ChangeNotifyDialogWidget::ChangeNotifyDialogWidget(QWidget *parent) :
     QWidget(parent),
@@ -40,10 +128,11 @@ void ChangeNotifyDialogWidget::init(ChangeNotify* notifier)
 {
 	notifier_=notifier;
 
-    tree_->setModel(notifier_->model());
+    tree_->setModel(notifier_->model());  
+    label_->setText(notifier_->widgetText());
 
-	label_->hide();
 
+#if 0
 	connect(notifier->data(),SIGNAL(endAppendRow()),
 			this,SLOT(slotAppend()));
 
@@ -52,6 +141,7 @@ void ChangeNotifyDialogWidget::init(ChangeNotify* notifier)
 
 	connect(notifier->data(),SIGNAL(endReset()),
 			this,SLOT(slotReset()));
+#endif
 
     //Selection
     connect(tree_,SIGNAL(clicked(const QModelIndex&)),
@@ -60,13 +150,10 @@ void ChangeNotifyDialogWidget::init(ChangeNotify* notifier)
     connect(tree_,SIGNAL(doubleClicked(const QModelIndex&)),
             this,SLOT(slotDoubleClickItem(const QModelIndex&)));
 
-
-	/*QString txt=notifier->prop()->param("description");
-	label_->setText(txt);
-
-	update(notifier);*/
+    updateSettings();
 }
 
+#if 0
 void ChangeNotifyDialogWidget::slotAppend()
 {
 	Q_EMIT contentsChanged();
@@ -79,25 +166,26 @@ void ChangeNotifyDialogWidget::slotRemoveRow(int)
 
 void ChangeNotifyDialogWidget::slotReset()
 {
-	Q_EMIT  contentsChanged();
+    Q_EMIT contentsChanged();
 }
+#endif
 
-void ChangeNotifyDialogWidget::update(ChangeNotify* notifier)
+void ChangeNotifyDialogWidget::updateSettings()
 {
-
-#if 0
-    QColor bgCol(Qt::gray);
-	if(VProperty *p=notifier->prop()->findChild("fill_colour"))
-		bgCol=p->value().value<QColor>();
-
-	QColor bgLight=bgCol.lighter(150);
+    Q_ASSERT(notifier_);
+    QColor bgCol=notifier_->fillColour();
+    QColor textCol=notifier_->textColour();
+    QColor bgLight=bgCol.lighter(105);
 
 	QString st="QLabel { \
 					background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
-					     stop: 0 " + bgLight.name() + ", stop: 1 " + bgLight.name() + "); }";
+                         stop: 0 " + bgLight.name() + ", stop: 1 " + bgCol.name() + "); color: " +
+        textCol.name() + "; padding: 4px; border: 1px solid rgb(170,170,170);}";
+
+    UiLog().dbg() << bgCol << " " << textCol;
+    UiLog().dbg() << st;
 
 	label_->setStyleSheet(st);
-#endif
 }
 
 void ChangeNotifyDialogWidget::slotSelectItem(const QModelIndex& idx)
@@ -166,39 +254,29 @@ void ChangeNotifyDialogWidget::readSettings(const QSettings& settings)
 
 ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	QDialog(parent),
-	ignoreCurrentChange_(false)
+    ignoreCurrentChange_(false),
+    switchWsProp_(0)
 {
-	setupUi(this);
+    setupUi(this);
 
-	tab_->setProperty("notify","1");
+    buttonHb_= new QHBoxLayout(buttonW_);
+    buttonHb_->setContentsMargins(0,0,0,0);
+    buttonHb_->setSpacing(2);
 
-#ifdef ECFLOW_QT5
-	tab_->tabBar()->setExpanding(false);
-#endif
+    buttonGroup_=new QButtonGroup(this);
+    connect(buttonGroup_,SIGNAL(buttonToggled(int,bool)),
+            this,SLOT(slotButtonToggled(int,bool)));
 
 	clearOnCloseCb_->setChecked(true);
 
-	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
-	grad_.setStart(0,0);
-	grad_.setFinalStop(0,1);
-
-
-    QToolButton* optionsTb=new QToolButton(this);
-    //optionsTb->setAutoRaise(true);
-    optionsTb->setText(tr("&Prefrences"));
-    optionsTb->setIcon(QPixmap(":/viewer/configure.svg"));
-    optionsTb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    optionsTb->setToolTip(tr("Configure notification options"));
-
-    connect(optionsTb,SIGNAL(clicked()),
+    connect(optionsTb_,SIGNAL(clicked()),
             this,SLOT(slotOptions()));
 
-    tab_->setCornerWidget(optionsTb);
+    switchWsProp_=VConfig::instance()->find("notification.settings.switch_desktop");
 
-	readSettings();
+    readSettings();
 
-    WidgetNameProvider::nameChildren(this);
-
+    WidgetNameProvider::nameChildren(this);   
 }
 
 ChangeNotifyDialog::~ChangeNotifyDialog()
@@ -206,270 +284,95 @@ ChangeNotifyDialog::~ChangeNotifyDialog()
 	writeSettings();
 }
 
-void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
+void ChangeNotifyDialog::add(ChangeNotify* notifier)
 {
-	ChangeNotifyDialogWidget* w=new ChangeNotifyDialogWidget(this);
-	w->init(notifier);
-
-	connect(w,SIGNAL(contentsChanged()),
-			this,SLOT(slotContentsChanged()));
+    ChangeNotifyDialogWidget* w=new ChangeNotifyDialogWidget(this);
+    w->init(notifier);
 
     connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
             this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
-    VProperty* prop=notifier->prop();
-    Q_ASSERT(prop);
+    ignoreCurrentChange_=true;
+    stacked_->addWidget(w);
+    ignoreCurrentChange_=false;
+    ntfWidgets_ << w;
 
-	ignoreCurrentChange_=true;
-    tab_->addTab(w,prop->param("labelText"));
-	ignoreCurrentChange_=false;
 
-	tabWidgets_ << w;
 
-	int idx=tab_->count()-1;
-#if 0
-    if(idx ==  tab_->currentIndex())
-		updateStyleSheet(notifier->prop());
-#endif
+    ChangeNotifyDialogButton *bw=new ChangeNotifyDialogButton(this);
+    bw->setNotifier(notifier);
+    buttonHb_->addWidget(bw);
+    int buttonId=buttonGroup_->buttons().count();
+    buttonGroup_->addButton(bw,buttonId);
+    ntfButtons_ << bw;
 
-	decorateTab(idx,notifier);
+    UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
+             "stacked_->count()=" << stacked_->count() <<
+             " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
 
-    readTabSettings(tab_->count()-1);
+    readNtfWidgetSettings(stacked_->count()-1);
 }
 
-void ChangeNotifyDialog::slotContentsChanged()
+void ChangeNotifyDialog::slotButtonToggled(int,bool)
 {
-	if(ChangeNotifyDialogWidget* w=static_cast<ChangeNotifyDialogWidget*>(sender()))
-	{
-		int idx=tab_->indexOf(w);
-		if(idx != -1)
-		{
-			decorateTab(idx,w->notifier());
-		}
-	}
+    int idx=buttonGroup_->checkedId();
+    if(idx != -1)
+    {
+        stacked_->setCurrentIndex(idx);
+    }
 }
 
 void ChangeNotifyDialog::slotSelectionChanged(VInfo_ptr info)
 {
+    //Moves the dialogue to the virtual workspace of the first
+    //mainwindow and then switches the workspace
+    if(switchWsProp_ && switchWsProp_->value().toBool())
+    {
+        if(WmWorkspaceHandler::switchTo(this,MainWindow::firstWindow()))
+            raise();
+    }
+
     MainWindow::lookUpInTree(info);
 }
 
 void ChangeNotifyDialog::slotOptions()
 {
     QString op="notification";
-    if(ChangeNotify* notifier=tabToNtf(tab_->currentIndex()))
+    if(ChangeNotify* notifier=indexToNtf(stacked_->currentIndex()))
     {
         op+="." + QString::fromStdString(notifier->id());
     }
     MainWindow::startPreferences(op);
 }
 
-void ChangeNotifyDialog::updateStyleSheet(VProperty *currentProp)
+void ChangeNotifyDialog::setCurrent(ChangeNotify *ntf)
 {
-#if 0
-    QColor bgCol(Qt::gray);
-	if(VProperty *p=currentProp->findChild("fill_colour"))
-		bgCol=p->value().value<QColor>();
-
-	QColor bgLight=bgCol.lighter(150);
-
-	QString st="QTabBar::tab:selected { \
-				background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
-						stop: 0 " + bgLight.name() + ", stop: 1 " + bgCol.name() + "); }";
-
-	tab_->setStyleSheet(st);
-#endif
-}
-
-void ChangeNotifyDialog::decorateTabs()
-{
-    for(int i=0; i < tab_->count(); i++)
+    int idx=ntfToIndex(ntf);
+    if(idx != -1)
 	{
-		decorateTab(i,tabWidgets_.at(i)->notifier());
-	}    
-}
+        UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
+                 "stacked_->count()=" << stacked_->count() <<
+                 " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
+        UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
+        UI_ASSERT(idx >=0,"idx=" << idx);
 
-void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
-{
-    if(tabIdx == -1 || !notifier)
-        return;
-
-    VProperty *prop=notifier->prop();
-    QString numText;
-    if(notifier->data())
-    {
-        int num=notifier->data()->size();
-        if(num > 0)
-            numText=" (" + QString::number(num) + ")";
-    }
-    QString labelText=prop->param("labelText")+ numText;
-
-    tab_->setTabText(tabIdx,labelText);
-
-
-#if 0
-    if(tabIdx == -1 || !notifier)
-		return;
-
-	VProperty *prop=notifier->prop();
-
-	QString numText;
-	if(notifier->data())
-	{
-		int num=notifier->data()->size();
-		if(num > 0)
-			numText=" (" + QString::number(num) + ")";
-	}
-
-
-	//Create icon for tab
-	QFont f;
-	QFontMetrics fm(f);
-	QString labelText=prop->param("labelText")+ numText;
-	int textH=fm.height();
-	int textW=fm.width(labelText);
-	int margin=3;
-
-	QColor bgCol(Qt::gray);
-	if(VProperty *p=prop->findChild("fill_colour"))
-		bgCol=p->value().value<QColor>();
-
-	QColor fgCol(Qt::black);
-	if(VProperty *p=prop->findChild("text_colour"))
-		fgCol=p->value().value<QColor>();
-
-	QColor countBgCol(58,126,194);
-	if(VProperty *p=prop->findChild("count_fill_colour"))
-		countBgCol=p->value().value<QColor>();
-
-	QColor countFgCol(Qt::white);
-	if(VProperty *p=prop->findChild("count_text_colour"))
-		countFgCol=p->value().value<QColor>();
-
-	QColor bgLight=bgCol.lighter(150);
-	grad_.setColorAt(0,bgLight);
-	grad_.setColorAt(1,bgCol);
-	QBrush bgBrush(grad_);
-
-	QFont numF;
-	numF.setBold(true);
-	numF.setPointSize(f.pointSize()-1);
-	QFontMetrics numFm(numF);
-
-	int h=2*margin+textH+4;
-    int w=2*margin+textW;
-
-	QPixmap pix(w,h);
-	pix.fill(Qt::transparent);
-
-	QPainter painter(&pix);
-
-	/*	QFont f;
-		f.setBold(true);
-		f.setPointSize(f.pointSize()+1);
-		QFontMetrics fm(f);
-		int w;
-		if(!numText.isEmpty())
-			w=fm.width(text) + 6 + fm.width(numText) + 2;
-		else
-			w=fm.width(text) + 6;
-
-		int h=fm.height()+6;
-
-		QPixmap pix(w,h);
-		pix.fill(QColor(255,255,255,0));
-		QPainter painter(&pix);
-		painter.setRenderHint(QPainter::Antialiasing,true);
-		painter.setRenderHint(QPainter::TextAntialiasing,true);
-
-		QRect textRect(0,0,fm.width(text)+6,h);
-
-		QColor bgLight=bgCol.lighter(150);
-		grad_.setColorAt(0,bgLight);
-		grad_.setColorAt(1,bgCol);
-
-		painter.setBrush(QBrush(grad_));
-		painter.setPen(border);
-		painter.drawRoundedRect(textRect,2,2);
-		painter.setPen(fgCol);
-		painter.setFont(f);
-		painter.drawText(textRect,Qt::AlignHCenter|Qt::AlignVCenter,text);
-
-		if(!numText.isEmpty())
-		{
-			QRect numRect(textRect.right()-1,0,fm.width(numText)+4,fm.ascent()+4);
-			painter.setBrush(countBgCol);
-			painter.setPen(countFgCol);
-			painter.drawRoundedRect(numRect,4,4);
-			painter.setFont(f);
-			painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);
-		}
-
-		setIconSize(QSize(w,h));
-		setIcon(pix);
-	*/
-
-	pix.fill(Qt::transparent);
-
-	QRect textRect=QRect(margin,0,textW,pix.height());
-	painter.setPen(fgCol);
-	painter.drawText(textRect,Qt::AlignVCenter|Qt::AlignHCenter,labelText);
-
-
-    if(tabIdx != tab_->currentIndex())
-	{
-		QRect lineRect(textRect.left(),pix.height()/2+textH/2+1,
-					   textRect.width(),3);
-
-		painter.fillRect(lineRect,bgCol);
-	}
-
-	/*if(!numText.isEmpty())
-	{
-		painter.setRenderHint(QPainter::Antialiasing,true);
-		painter.setRenderHint(QPainter::TextAntialiasing,true);
-
-		QRect numRect(textRect.right()+4,1,fm.width(numText)+4,fm.ascent()+4);
-		painter.setBrush(countBgCol);
-		painter.setPen(Qt::NoPen);
-		painter.drawRoundedRect(numRect,4,4);
-		painter.setFont(numF);
-		painter.setPen(countFgCol);
-		painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);
-	}*/
-
-    tab_->setCustomIcon(tabIdx,pix);
-#endif
-}
-
-
-void ChangeNotifyDialog::setCurrentTab(ChangeNotify *ntf)
-{
-	int tabIdx=ntfToTab(ntf);
-	if(tabIdx != -1)
-	{
-		tab_->setCurrentIndex(tabIdx);
+        buttonGroup_->button(idx)->setChecked(true);
 	}
 }
 
-void ChangeNotifyDialog::setEnabledTab(ChangeNotify* ntf,bool b)
+void ChangeNotifyDialog::setEnabled(ChangeNotify* ntf,bool b)
 {
-	int tabIdx=ntfToTab(ntf);
-	if(tabIdx != -1)
+    int idx=ntfToIndex(ntf);
+    if(idx != -1)
 	{
-		tab_->setTabEnabled(tabIdx,b);
-	}
-}
+        UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
+                 "stacked_->count()=" << stacked_->count() <<
+                 " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
+        UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
+        UI_ASSERT(idx >=0,"idx=" << idx);
 
-void ChangeNotifyDialog::on_tab__currentChanged(int idx)
-{
-	if(ignoreCurrentChange_)
-		return;
-
-	if(ChangeNotify* notifier=tabToNtf(idx))
-	{
-		updateStyleSheet(notifier->prop());
-		decorateTabs();
+        buttonGroup_->button(idx)->setEnabled(b);
+        stacked_->widget(idx)->setEnabled(b);
 	}
 }
 
@@ -479,10 +382,16 @@ void ChangeNotifyDialog::on_closePb__clicked(bool b)
 
 	if(clearOnCloseCb_->isChecked())
 	{
-		int idx=tab_->currentIndex();
+        UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
+                 "stacked_->count()=" << stacked_->count() <<
+                 " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
+
+        int idx=buttonGroup_->checkedId();
 		if(idx != -1)
 		{
-			if(ChangeNotify *ntf=tabToNtf(idx))
+            UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
+            UI_ASSERT(idx >=0,"idx=" << idx);
+            if(ChangeNotify *ntf=indexToNtf(idx))
 				ntf->clearData();
 		}
 	}
@@ -492,48 +401,67 @@ void ChangeNotifyDialog::on_closePb__clicked(bool b)
 
 void ChangeNotifyDialog::on_clearPb__clicked(bool b)
 {
-	int idx=tab_->currentIndex();
+    UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
+             "stacked_->count()=" << stacked_->count() <<
+             " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
+
+    int idx=buttonGroup_->checkedId();
 	if(idx != -1)
 	{
-		if(ChangeNotify *ntf=tabToNtf(idx))
+        UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
+        UI_ASSERT(idx >=0,"idx=" << idx);
+        if(ChangeNotify *ntf=indexToNtf(idx))
 			ntf->clearData();
 	}
 }
 
-ChangeNotify* ChangeNotifyDialog::tabToNtf(int idx)
+ChangeNotify* ChangeNotifyDialog::indexToNtf(int idx)
 {
-	if(idx >=0 && idx < tab_->count())
-	{
-		return tabWidgets_.at(idx)->notifier();
-	}
+    UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
+             "stacked_->count()=" << stacked_->count() <<
+             " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
 
-	return 0;
+    if(idx >=0 && idx < stacked_->count())
+    {
+        UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
+        UI_ASSERT(idx >=0,"idx=" << idx);
+        return ntfWidgets_[idx]->notifier();
+    }
+
+    return 0;
 }
 
-int ChangeNotifyDialog::ntfToTab(ChangeNotify* ntf)
+int ChangeNotifyDialog::ntfToIndex(ChangeNotify* ntf)
 {
-	for(int i=0; i < tab_->count(); i++)
-	{
-		if(tabWidgets_.at(i)->notifier() == ntf)
-			return i;
-	}
+    UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
+             "stacked_->count()=" << stacked_->count() <<
+             " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
 
-	return -1;
+    for(int i=0; i < stacked_->count(); i++)
+    {
+        if(ntfWidgets_[i]->notifier() == ntf)
+            return i;
+    }
+
+    return -1;
 }
 
 void ChangeNotifyDialog::updateSettings(ChangeNotify* notifier)
 {
-	int idx=ntfToTab(notifier);
+    UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
+             "stacked_->count()=" << stacked_->count() <<
+             " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
+
+    int idx=ntfToIndex(notifier);
 	if(idx != -1)
 	{
-		if(tab_->isTabEnabled(idx))
-		{
-			if(idx == tab_->currentIndex())
-			{
-				updateStyleSheet(notifier->prop());
-			}
-			decorateTab(idx,notifier);
-		}
+        UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
+        UI_ASSERT(idx >=0,"idx=" << idx);
+        //if(stacked_->widget(idx)->isEnabled())
+        //{
+        ntfWidgets_[idx]->updateSettings();
+        ntfButtons_[idx]->updateSettings();
+        //}
 	}
 }
 
@@ -558,10 +486,10 @@ void ChangeNotifyDialog::writeSettings()
 	settings.setValue("clearOnClose",clearOnCloseCb_->isChecked());
     settings.endGroup();
 
-    for(int i=0; i < tab_->count(); i++)
+    for(int i=0; i < stacked_->count(); i++)
     {
         settings.beginGroup("tab_" + QString::number(i));
-        tabWidgets_[i]->writeSettings(settings);
+        ntfWidgets_[i]->writeSettings(settings);
         settings.endGroup();
     }
 }
@@ -593,15 +521,15 @@ void ChangeNotifyDialog::readSettings()
     //The tab settings are read when the actual tabs are created later.
 }
 
-void ChangeNotifyDialog::readTabSettings(int tabIndex)
+void ChangeNotifyDialog::readNtfWidgetSettings(int idx)
 {
     SessionItem* cs=SessionHandler::instance()->current();
     Q_ASSERT(cs);
     QSettings settings(QString::fromStdString(cs->qtSettingsFile("ChangeNotifyDialog")),
                    QSettings::NativeFormat);
 
-    settings.beginGroup("tab_" + QString::number(tabIndex));
-    Q_ASSERT(tab_->count() > tabIndex);
-    tabWidgets_[tabIndex]->readSettings(settings);
+    settings.beginGroup("tab_" + QString::number(idx));
+    UI_ASSERT(stacked_->count() > idx,"stacked_->count()=" << stacked_->count() << " idx=" << idx);
+    ntfWidgets_[idx]->readSettings(settings);
     settings.endGroup();
 }

@@ -64,6 +64,7 @@ protected:
     QString defineNodeName_;
     QString defineNodeType_;
     bool cleared_;
+    bool suspended_;
 
 };
 
@@ -97,6 +98,7 @@ protected:
     QString nodeType_;
     QString nodeTypeCapital_;
     bool cleared_;
+    bool suspended_;
 };
 
 

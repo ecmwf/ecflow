@@ -821,6 +821,11 @@ MainWindow* MainWindow::findWindow(QWidget *childW)
 	return 0;
 }
 
+MainWindow* MainWindow::firstWindow()
+{
+    return (!windows_.isEmpty())?(windows_[0]):NULL;
+}
+
 void MainWindow::startPreferences(QString option)
 {
     if(windows_.count() > 0)

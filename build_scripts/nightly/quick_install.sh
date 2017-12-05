@@ -6,6 +6,7 @@
 
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
+set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 
 if [[ "$#"  == 0 ]] ; then

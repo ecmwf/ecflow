@@ -3,6 +3,7 @@
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
+set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 # Defines the three variables that are needed for any
 # communication with ECF_

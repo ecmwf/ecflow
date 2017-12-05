@@ -38,6 +38,14 @@ public:
 	QSortFilterProxyModel* proxyModel() const {return proxyModel_;}
 	bool isEnabled() const {return enabled_;}
 	void clearData();
+
+    virtual QColor fillColour() const;
+    virtual QColor textColour() const;
+    QColor countFillColour() const;
+    QColor countTextColour() const;
+    QString toolTip() const;
+    QString widgetText() const;
+
     static void showDialog(ChangeNotify* notifier=0);
 
 	//Form VPropertyObserver
@@ -58,7 +66,6 @@ protected:
     void updateNotificationState(bool hasEnabledServer);
     void setProperty(VProperty* prop);
 	void loadServerSettings();
-    virtual void loadNodeState() {}
 
 	static ChangeNotify* find(const std::string&);
 	static ChangeNotifyDialog* dialog();
@@ -77,9 +84,8 @@ class AbortedNotify : public ChangeNotify
 {
 public:
 	explicit AbortedNotify(const std::string& id) : ChangeNotify(id) {}
-protected:
-	void loadNodeState();
+    QColor fillColour() const;
+    QColor textColour() const;
 };
-
 
 #endif
