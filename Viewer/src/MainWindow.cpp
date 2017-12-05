@@ -49,7 +49,6 @@
 #include "VSettings.hpp"
 #include "Version.hpp"
 #include "WidgetNameProvider.hpp"
-#include "WmWorkspaceHandler.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
