@@ -249,7 +249,7 @@ static object do_add(node_ptr self, const boost::python::object& arg){
    else if (boost::python::extract<VerifyAttr>(arg).check())self->addVerify(boost::python::extract<VerifyAttr>(arg));
    else if (boost::python::extract<Defstatus>(arg).check()){Defstatus t = boost::python::extract<Defstatus>(arg);self->addDefStatus(t.state());}
    else if (boost::python::extract<boost::python::list>(arg).check()){
-      std::cout << "  do_add list\n";
+      //std::cout << "  do_add list\n";
       boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
       int the_list_size = len(the_list);
       for(int i = 0; i < the_list_size; ++i) (void) do_add(self,the_list[i]); // recursive

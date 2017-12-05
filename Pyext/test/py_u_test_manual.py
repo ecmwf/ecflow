@@ -84,7 +84,8 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
              
     def tearDown(self):
         unittest.TestCase.tearDown(self)
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
 class TestAddMeterEventLabel(unittest.TestCase):
     def setUp(self):
