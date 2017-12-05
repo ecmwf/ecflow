@@ -439,8 +439,8 @@ class TestAddDefStatus(unittest.TestCase):
 
     def test_alternative1(self):
         defs = Defs() + ( Suite("s1") +  Task("t1") + Task("t2") )
-        defs.s1.t1 += [ Defstatus("complete") ]
-        defs.s1.t2 += [ Defstatus(DState.complete) ]
+        defs.s1.t1 += Defstatus("complete") 
+        defs.s1.t2 += Defstatus(DState.complete) 
         
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
