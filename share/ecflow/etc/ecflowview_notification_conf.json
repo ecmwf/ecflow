@@ -8,6 +8,10 @@
                         "min" :  "10",
                         "max" : "500",
                         "suffix": "items"
+                     },
+                     "switch_desktop" : {
+                        "label" : "Switch to parent's virtual desktop from popup dialogue",
+                        "default" : "false"
                      }
             },                                    
             "aborted": {

@@ -109,6 +109,7 @@ protected:
 	bool ignoreCurrentChange_;
 	QLinearGradient grad_;
     QHBoxLayout* buttonHb_;
+    VProperty* switchWsProp_;
 };
 
 #endif

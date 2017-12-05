@@ -49,6 +49,7 @@
 #include "VSettings.hpp"
 #include "Version.hpp"
 #include "WidgetNameProvider.hpp"
+#include "WmWorkspaceHandler.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -819,6 +820,11 @@ MainWindow* MainWindow::findWindow(QWidget *childW)
 	}
 
 	return 0;
+}
+
+MainWindow* MainWindow::firstWindow()
+{
+    return (!windows_.isEmpty())?(windows_[0]):NULL;
 }
 
 void MainWindow::startPreferences(QString option)

@@ -17,9 +17,11 @@
 #include "TreeView.hpp"
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
+#include "VConfig.hpp"
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 #include "WidgetNameProvider.hpp"
+#include "WmWorkspaceHandler.hpp"
 
 #include <QButtonGroup>
 #include <QCloseEvent>
@@ -252,7 +254,8 @@ void ChangeNotifyDialogWidget::readSettings(const QSettings& settings)
 
 ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	QDialog(parent),
-	ignoreCurrentChange_(false)
+    ignoreCurrentChange_(false),
+    switchWsProp_(0)
 {
     setupUi(this);
 
@@ -269,9 +272,11 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
     connect(optionsTb_,SIGNAL(clicked()),
             this,SLOT(slotOptions()));
 
-	readSettings();
+    switchWsProp_=VConfig::instance()->find("notification.settings.switch_desktop");
 
-    WidgetNameProvider::nameChildren(this);
+    readSettings();
+
+    WidgetNameProvider::nameChildren(this);   
 }
 
 ChangeNotifyDialog::~ChangeNotifyDialog()
@@ -319,6 +324,14 @@ void ChangeNotifyDialog::slotButtonToggled(int,bool)
 
 void ChangeNotifyDialog::slotSelectionChanged(VInfo_ptr info)
 {
+    //Moves the dialogue to the virtual workspace of the first
+    //mainwindow and then switches the workspace
+    if(switchWsProp_ && switchWsProp_->value().toBool())
+    {
+        if(WmWorkspaceHandler::switchTo(this,MainWindow::firstWindow()))
+            raise();
+    }
+
     MainWindow::lookUpInTree(info);
 }
 
