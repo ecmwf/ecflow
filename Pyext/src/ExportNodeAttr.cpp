@@ -338,9 +338,11 @@ void export_NodeAttr()
    boost::python::register_ptr_to_python< boost::shared_ptr<Limit> >(); // needed for mac and boost 1.6
 #endif
 
-	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc(),init<std::string,  std::string, optional<int> >())
-	.def( init<std::string,std::string> () )
-	.def( init<std::string> () )
+	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc())
+   .def( init<std::string>() )
+   .def( init<std::string,std::string>() )
+   .def( init<std::string,std::string,int>() )
+   .def( init<std::string,std::string,int,bool>() )
 	.def(self == self )                                  // __eq__
 	.def("__str__",     &InLimit::toString)              // __str__
    .def("__copy__",   copyObject<InLimit>)              // __copy__ uses copy constructor
