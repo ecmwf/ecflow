@@ -507,7 +507,7 @@ class TestComarison(unittest.TestCase):
                     )
                 )
             ),
-            Suite("edit").add(  Edit({"a": "a", "b" : "b"}) ),
+            Suite("edit").add( Edit({"a": "a"}), Edit({ "b" : "b"}) ), # add separate, otherwise with dict order is undefined
             Suite("limit").add( Limit("limit",10),Limit("limit2",10)),
             Suite("inlimit").add( InLimit("limitName","/limit",2)),
             Suite("RepeatInteger").add( RepeatInteger("integer", 0, 100, 2)),
@@ -557,7 +557,9 @@ class TestComarison(unittest.TestCase):
                 ZombieAttr( ZombieType.path, self.child_list, ZombieUserActionType.block, self.zombie_life_time_in_server)
             )
         )      
+
         self.assertEqual(self.defs1,defs,"defs not equal\n" + str(self.defs1) + "\n\n" + str(defs))    
+
         
 if __name__ == "__main__":
     unittest.main()
