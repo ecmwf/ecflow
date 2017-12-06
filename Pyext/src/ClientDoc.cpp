@@ -32,15 +32,13 @@ const char* ClientDoc::class_client(){
             "The client reads in the following environment variables.\n"
             "For child commands,(i.e these are commands called in the .ecf/jobs files), these variables are used.\n"
             "For the python interface these environment variable are not really applicable but documented for completeness:\n\n"
-            "* ECF_NAME <string>     : Full path name to the task\n"
-            "* ECF_PASS <string>     : The jobs password, allocated by server, then used by server to authenticate client request\n"
-            "* ECF_TRYNO <int>       : The number of times to start a job if it aborts\n"
-            "* ECF_TIMEOUT <int>     : Max time in seconds for client to deliver message to main server\n"
+            "* ECF_NAME <string> : Full path name to the task\n"
+            "* ECF_PASS <string> : The jobs password, allocated by server, then used by server to authenticate client request\n"
+            "* ECF_TRYNO <int>   : The number of times to start a job if it aborts\n"
+            "* ECF_TIMEOUT <int> : Max time in seconds for client to deliver message to main server\n"
             "* ECF_HOSTFILE <string> : File that lists alternate hosts to try, if connection to main host fails\n"
-            "* ECF_DENIED  any       : Provides a way for child to exit with an error, if server denies connection.\n"
-            "                          Avoids 24hr wait. Note: when you have hundreds of tasks, using this approach\n"
-            "                          requires a lot of manual intervention to determine job status\n"
-            "* NO_ECF any            : If set exit's immediately with success. Used to test jobs without communicating with server\n\n"
+            "* ECF_DENIED <any> : Provides a way for child to exit with an error, if server denies connection. Avoids 24hr wait. Note: when you have hundreds of tasks, using this approach requires a lot of manual intervention to determine job status\n"
+            "* NO_ECF <any> : If set exit's immediately with success. Used to test jobs without communicating with server\n\n"
             "The following environment variables are used by the python interface and child commands\n\n"
             "* ECF_HOST  <string>   : The host name of the main server. defaults to 'localhost'\n"
             "* ECF_PORT  <int>      : The TCP/IP port to call on the server. Must be unique to a server\n\n"
@@ -284,7 +282,7 @@ const char* ClientDoc::wait_for_server_reply() {
 
 const char* ClientDoc::load_defs(){
    return
-            "Load a `suite definition`_ or checkpoint file given by the file_path argument into the `ecflow_server`_::\n\n"
+            "Load a `suite definition`_ or checkpoint file given by the file_path argument into the `ecflow_server`_\n::\n\n"
             "   void load(\n"
             "      string file_path     : path name to the definition file\n"
             "      [(bool)force=False]  : If true overwrite suite of same name\n"
@@ -312,7 +310,7 @@ const char* ClientDoc::load_defs(){
 
 const char* ClientDoc::load(){
    return
-            "Load a in memory `suite definition`_ into the `ecflow_server`_::\n\n"
+            "Load a in memory `suite definition`_ into the `ecflow_server`_\n::\n\n"
             "   void load(\n"
             "      Defs defs           : A in memory definition\n"
             "      [(bool)force=False] : for true overwrite suite of same name\n"
@@ -357,14 +355,14 @@ const char* ClientDoc::sync() {
    return
             "Requests that `ecflow_server`_ returns the full definition or incremental change made and applies them to the client Defs\n\n"
             "When there is a very large definition, calling :py:class:`ecflow.Client.get_server_defs` each time can be *very* expensive\n"
-            "both in terms of memory, speed, and network bandwidth. The alternative is to call \n"
+            "both in terms of memory, speed, and network bandwidth. The alternative is to call\n"
             "this function, which will get the incremental changes, and apply them local client `suite definition`_\n"
             "effectively synchronising the client and server Defs.\n"
             "If the period of time between two sync() calls is too long, then the full server definition\n"
             "is returned and assigned to the client Defs.\n"
             "We can determine if the changes were applied by calling in_sync() after the call to sync_local()::\n\n"
             "   void sync_local();                     # The very first call, will get the full Defs.\n"
-            "\n"
+            "\n\n"
             "Exceptions:\n\n"
             "- raise a RuntimeError if the delta change can not be applied.\n"
             "- this could happen if the client Defs bears no resemblance to server Defs\n"
@@ -580,7 +578,7 @@ const char* ClientDoc::run(){
 const char* ClientDoc::requeue(){
 
    return
-            "Re queues the specified `node`_ (s)::\n\n"
+            "Re queues the specified `node`_ (s)\n::\n\n"
             "   void requeue(\n"
             "      list paths     : A list of paths. Node paths must begin with a leading '/' character\n"
             "      [(str)option=''] : option = ('' | 'abort' | 'force')\n"
@@ -606,7 +604,7 @@ const char* ClientDoc::requeue(){
 
 const char* ClientDoc::free_trigger_dep(){
    return
-            "Free `trigger`_ `dependencies`_ for a `node`_::\n\n"
+            "Free `trigger`_ `dependencies`_ for a `node`_\n::\n\n"
             "   void free_trigger_dep(\n"
             "      string absolute_node_path : Path name to node\n"
             "   )\n"
@@ -621,7 +619,7 @@ const char* ClientDoc::free_trigger_dep(){
 
 const char* ClientDoc::free_date_dep(){
    return
-            "Free `date`_ `dependencies`_ for a `node`_::\n\n"
+            "Free `date`_ `dependencies`_ for a `node`_\n::\n\n"
             "   void free_date_dep(\n"
             "      string absolute_node_path : Path name to node\n"
             "   )\n"
@@ -636,7 +634,7 @@ const char* ClientDoc::free_date_dep(){
 
 const char* ClientDoc::free_time_dep(){
    return
-            "Free all time `dependencies`_. i.e `time`_, `day`_, `today`_, `cron`_::\n\n"
+            "Free all time `dependencies`_. i.e `time`_, `day`_, `today`_, `cron`_\n::\n\n"
             "   void free_time_dep(\n"
             "      string absolute_node_path : Path name to node\n"
             "   )\n\n"
@@ -653,7 +651,7 @@ const char* ClientDoc::free_time_dep(){
 
 const char* ClientDoc::free_all_dep(){
    return
-            "Free all `trigger`_, `date`_ and all time(`day`_, `today`_, `cron`_,etc) `dependencies`_::\n\n"
+            "Free all `trigger`_, `date`_ and all time(`day`_, `today`_, `cron`_,etc) `dependencies`_\n::\n\n"
             "   void free_all_dep(\n"
             "      string absolute_node_path : Path name to node\n"
             "   )\n\n"
@@ -670,7 +668,7 @@ const char* ClientDoc::free_all_dep(){
 
 const char* ClientDoc::ping(){
    return
-            "Checks if the `ecflow_server`_ is running::\n\n"
+            "Checks if the `ecflow_server`_ is running\n::\n\n"
             "   void ping()\n\n"
             "The default behaviour is to check on host 'localhost' and port 3141\n"
             "It should be noted that any Client function will fail if the server is\n"
@@ -689,7 +687,7 @@ const char* ClientDoc::ping(){
 
 const char* ClientDoc::stats(){
    return
-            "Prints the `ecflow_server`_ statistics to standard out::\n\n"
+            "Prints the `ecflow_server`_ statistics to standard out\n::\n\n"
             "   void stats()\n"
             "\nUsage::\n\n"
             "   try:\n"
@@ -702,7 +700,7 @@ const char* ClientDoc::stats(){
 
 const char* ClientDoc::stats_reset(){
    return
-            "Resets the statistical data in the server::\n\n"
+            "Resets the statistical data in the server\n::\n\n"
             "   void stats_reset()\n"
             "\nUsage::\n\n"
             "   try:\n"
@@ -715,7 +713,7 @@ const char* ClientDoc::stats_reset(){
 
 const char* ClientDoc::suites(){
    return
-            "Returns a list strings representing the `suite`_ names.\n\n"
+            "Returns a list strings representing the `suite`_ names\n::\n\n"
             "   list(string) suites()\n"
             "\nUsage::\n\n"
             "   try:\n"
@@ -769,7 +767,7 @@ const char* ClientDoc::ch_suites() {
 const char* ClientDoc::ch_drop(){
    return
             "Drop/de-register the client handle.\n\n"
-            "Client must ensure un-used handle are dropped otherwise they will stay, in the `ecflow_server`_::\n\n"
+            "Client must ensure un-used handle are dropped otherwise they will stay, in the `ecflow_server`_\n::\n\n"
             "   void ch_drop(\n"
             "      int client_handle : The handle must be an integer that is > 0\n"
             "   )\n"
@@ -793,7 +791,7 @@ const char* ClientDoc::ch_drop(){
 const char* ClientDoc::ch_drop_user(){
    return
             "Drop/de-register all handles associated with user.\n\n"
-            "Client must ensure un-used handle are dropped otherwise they will stay, in the `ecflow_server`_::\n\n"
+            "Client must ensure un-used handle are dropped otherwise they will stay, in the `ecflow_server`_\n::\n\n"
             "   void ch_drop_user(\n"
             "        string user   # If empty string will drop current user\n"
             "   )\n\n"
@@ -815,7 +813,7 @@ const char* ClientDoc::ch_drop_user(){
 
 const char* ClientDoc::ch_add() {
    return
-            "Add a set of suites, to an existing handle::\n\n"
+            "Add a set of suites, to an existing handle\n::\n\n"
             "  integer ch_add(\n"
             "     integer handle   : the handle obtained after ch_register\n"
             "     list suite_names : list of strings representing suite names\n"
@@ -837,7 +835,7 @@ const char* ClientDoc::ch_add() {
 
 const char* ClientDoc::ch_remove() {
    return
-            "Remove a set of suites, from an existing handle::\n\n"
+            "Remove a set of suites, from an existing handle\n::\n\n"
             "  integer ch_remove(\n"
             "     integer handle   : the handle obtained after ch_register\n"
             "     list suite_names : list of strings representing suite names\n"
@@ -859,7 +857,7 @@ const char* ClientDoc::ch_remove() {
 
 const char* ClientDoc::ch_auto_add() {
    return
-            "Change an existing handle so that new suites can be added automatically::\n\n"
+            "Change an existing handle so that new suites can be added automatically\n::\n\n"
             "   void ch_auto_add(\n"
             "      integer handle,         : the handle obtained after ch_register\n"
             "      bool auto_add_new_suite : automatically add new suites, this handle when they are created\n"
@@ -881,7 +879,7 @@ const char* ClientDoc::ch_auto_add() {
 const char* ClientDoc::get_file(){
    return
             "File command can be used to request the various file types associated with a `node`_\n\n"
-            "This command defaults to returning a max of 10000 lines. This can be changed::\n\n"
+            "This command defaults to returning a max of 10000 lines. This can be changed\n::\n\n"
             "   string get_file(\n"
             "      string absolute_node_path    : Path name to node\n"
             "      [(string)file_type='script'] : file_type = [ script<default> | job | jobout | manual | kill | stat ]\n"
@@ -901,7 +899,7 @@ const char* ClientDoc::plug(){
    return
             "Plug command is used to move `node`_ s\n\n"
             "The destination node can be on another `ecflow_server`_.\n"
-            "In which case the destination path should be of the form '//<host>:<port>/suite/family/task::\n\n"
+            "In which case the destination path should be of the form '//<host>:<port>/suite/family/task\n::\n\n"
             "   void plug(\n"
             "      string source_absolute_node_path       : Path name to source node\n"
             "      string destination_absolute_node_path  : Path name to destination node. Note if only\n"
@@ -926,7 +924,7 @@ const char* ClientDoc::plug(){
 
 const char* ClientDoc::alter(){
    return
-            "Alter command is used to change the attributes of a node::\n\n"
+            "Alter command is used to change the attributes of a node\n::\n\n"
             "   void alter(\n"
             "      (list | string ) paths(s) : A single or list of paths. Path name to the node whose attributes are to be changed\n"
             "      string alter_type         : This must be one of [ 'add' | 'change' | 'delete' | 'set_flag' | 'clear_flag' ]\n"
@@ -1060,7 +1058,7 @@ const char* ClientDoc::force_state(){
 const char* ClientDoc::force_state_recursive(){
 
    return
-            "Force node(s) to a given state recursively::\n\n"
+            "Force node(s) to a given state recursively\n::\n\n"
             "   void force_state_recursive(\n"
             "      string absolute_node_path: Path name to node.The paths must begin with a leading '/'\n"
             "      State::State state       : [ unknown | complete | queued | submitted | active | aborted ]\n"
@@ -1070,22 +1068,22 @@ const char* ClientDoc::force_state_recursive(){
             "      State::State state  : [ unknown | complete | queued | submitted | active | aborted ]\n"
             "   )\n"
             "\nUsage::\n\n"
-            "   try:\n"
-            "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.force_state_recursive('/s1/f1',State.complete)\n"
+            "  try:\n"
+            "      ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "      ci.force_state_recursive('/s1/f1',State.complete)\n"
             "\n"
-            "       # recursively force a list of nodes to complete\n"
-            "       paths = [ '/s1', '/s2', '/s1/f1/t1' ]\n"
-            "       ci.force_state_recursive(paths,State.complete)\n"
-            "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "      # recursively force a list of nodes to complete\n"
+            "      paths = [ '/s1', '/s2', '/s1/f1/t1' ]\n"
+            "      ci.force_state_recursive(paths,State.complete)\n"
+            "  except RuntimeError, e:\n"
+            "      print str(e)\n"
             ;
 }
 
 const char* ClientDoc::force_event(){
 
    return
-            "Set or clear a `event`_::\n\n"
+            "Set or clear a `event`_\n::\n\n"
             "   void force_event(\n"
             "      string absolute_node_path:event: Path name to node: < event name | number>\n"
             "                                       The paths must begin with a leading '/'\n"
@@ -1111,7 +1109,7 @@ const char* ClientDoc::force_event(){
 
 const char* ClientDoc::replace(){
    return
-            "Replaces a `node`_ in a `suite definition`_ with the given path. The definition is in the `ecflow_server`_::\n\n"
+            "Replaces a `node`_ in a `suite definition`_ with the given path. The definition is in the `ecflow_server`_\n::\n\n"
             "   void replace(\n"
             "      string absolute_node_path: Path name to node in the client defs.\n"
             "                                 This is also the node we want to replace in the server.\n"
@@ -1154,7 +1152,7 @@ const char* ClientDoc::replace(){
 
 const char* ClientDoc::kill(){
    return
-            "Kills the job associated with the `node`_.::\n\n"
+            "Kills the job associated with the `node`_\n::\n\n"
             "   void kill(\n"
             "      list paths: List of paths. Paths must begin with a leading '/' character\n"
             "   )\n"
@@ -1185,7 +1183,7 @@ const char* ClientDoc::kill(){
 
 const char* ClientDoc::status(){
    return
-            "Shows the status of a job associated with a `task`_ ::\n\n"
+            "Shows the status of a job associated with a `task`_\n::\n\n"
             "   void status(\n"
             "      list paths: List of paths. Paths must begin with a leading '/' character\n"
             "   )\n"
@@ -1216,7 +1214,7 @@ const char* ClientDoc::order(){
             "Re-orders the `node`_ s in the `suite definition`_ held by the `ecflow_server`_\n\n"
             "It should be noted that in the absence of `dependencies`_,\n"
             "the order in which `task`_ s are `submitted`_, depends on the order in the definition.\n"
-            "This changes the order and hence affects the submission order::\n\n"
+            "This changes the order and hence affects the submission order\n::\n\n"
             "   void order(\n"
             "      string absolute_node_path: Path name to node.\n"
             "      string order_type        : Must be one of [ top | bottom | alpha | order | up | down ]\n"
@@ -1241,7 +1239,7 @@ const char* ClientDoc::order(){
 
 const char* ClientDoc::group(){
    return
-            "Allows a series of commands to be executed in the `ecflow_server`_::\n\n"
+            "Allows a series of commands to be executed in the `ecflow_server`_\n::\n\n"
             "   void group(\n"
             "       string cmds : a list of ';' separated commands \n"
             "   )\n"
@@ -1258,7 +1256,7 @@ const char* ClientDoc::group(){
 const char* ClientDoc::begin_suite(){
    return
             "Begin playing the chosen `suite`_ s in the `ecflow_server`_\n"
-            "Note: using the force option may cause `zombie`_ s::\n\n"
+            "Note: using the force option may cause `zombie`_ s\n::\n\n"
             "   void begin_suite\n"
             "      string suite_name     : begin playing the given suite\n"
             "      [(bool)force=False]   : bypass the checks\n"
@@ -1276,7 +1274,7 @@ const char* ClientDoc::begin_suite(){
 const char* ClientDoc::begin_all(){
    return
             "Begin playing all the `suite`_ s in the `ecflow_server`_\n"
-            "Note: using the force option may cause `zombie`_ s::\n\n"
+            "Note: using the force option may cause `zombie`_ s\n::\n\n"
             "   void begin_all_suites(\n"
             "      [(bool)force=False] : bypass the checks\n"
             "   )\n"
@@ -1292,7 +1290,7 @@ const char* ClientDoc::begin_all(){
 
 const char* ClientDoc::suspend(){
    return
-            "Suspend `job creation` / generation for the given `node`_::\n\n"
+            "Suspend `job creation` / generation for the given `node`_\n::\n\n"
             "   void suspend(\n"
             "      list paths: List of paths. Paths must begin with a leading '/' character\n"
             "   )\n"
@@ -1312,7 +1310,7 @@ const char* ClientDoc::suspend(){
 
 const char* ClientDoc::resume(){
    return
-            "Resume `job creation` / generation for the given `node`_::\n\n"
+            "Resume `job creation` / generation for the given `node`_\n::\n\n"
             "   void resume(\n"
             "      list paths: List of paths. Paths must begin with a leading '/' character\n"
             "   )\n"
@@ -1335,7 +1333,7 @@ const char* ClientDoc::job_gen(){
             "Job submission for chosen Node *based* on `dependencies`_\n"
             "The `ecflow_server`_ traverses the `node`_ tree every 60 seconds, and if the dependencies are free\n"
             "does `job creation` and submission. Sometimes the user may free time/date dependencies\n"
-            "to avoid waiting for the server poll, this commands allows early job generation::\n\n"
+            "to avoid waiting for the server poll, this commands allows early job generation\n::\n\n"
             "   void job_generation(\n"
             "      string absolute_node_path: Path name for job generation to start from\n"
             "   )\n"
@@ -1354,7 +1352,7 @@ const char* ClientDoc::delete_node(){
             "Delete the `node`_ (s) specified.\n\n"
             "If a node is `submitted`_ or `active`_, then a Exception will be raised.\n"
             "To force the deletion at the expense of `zombie`_ creation, then set\n"
-            "the force parameter to true::\n\n"
+            "the force parameter to true\n::\n\n"
             "   void delete(\n"
             "      list paths          : List of paths.\n"
             "      [(bool)force=False] : If true delete even if in 'active' or 'submitted' states\n"
@@ -1382,7 +1380,7 @@ const char* ClientDoc::delete_all(){
             "The `suite definition`_ in the server will be empty, after this call. **Use with care**\n"
             "If a node is `submitted`_ or `active`_, then a Exception will be raised.\n"
             "To force the deletion at the expense of `zombie`_ creation, then set\n"
-            "the force parameter to true::\n\n"
+            "the force parameter to true\n::\n\n"
             "   void delete_all(\n"
             "      [(bool)force=False] : If true delete even if in 'active' or 'submitted' states\n"
             "                            Which risks creating zombies.\n"
@@ -1403,7 +1401,7 @@ const char* ClientDoc::check()
             "Check `trigger`_ and `complete expression`_ s and `limit`_ s\n\n"
             "The `ecflow_server`_ does not store `extern`_ s. Hence all unresolved references\n"
             "are reported as errors.\n"
-            "Returns a non empty string for any errors or warning::\n\n"
+            "Returns a non empty string for any errors or warning\n::\n\n"
             "   string check(\n"
             "      list paths # List of paths.\n"
             "   )\n"
