@@ -34,7 +34,7 @@ const char* ClientDoc::class_client(){
             "For the python interface these environment variable are not really applicable but documented for completeness:\n\n"
             "* ECF_NAME <string> : Full path name to the task\n"
             "* ECF_PASS <string> : The jobs password, allocated by server, then used by server to authenticate client request\n"
-            "* ECF_TRYNO <int>   : The number of times to start a job if it aborts\n"
+            "* ECF_TRYNO <int>   : The number of times the job has run. Used in file name generation. Set to 1 by begin() and re-queue commands.\n"
             "* ECF_TIMEOUT <int> : Max time in seconds for client to deliver message to main server\n"
             "* ECF_HOSTFILE <string> : File that lists alternate hosts to try, if connection to main host fails\n"
             "* ECF_DENIED <any> : Provides a way for child to exit with an error, if server denies connection. Avoids 24hr wait. Note: when you have hundreds of tasks, using this approach requires a lot of manual intervention to determine job status\n"
@@ -386,7 +386,7 @@ const char* ClientDoc::sync() {
 const char* ClientDoc::in_sync() {
    return
             "Returns true if the definition on the client is in sync with the `ecflow_server`_\n\n"
-            "Calling in_sync() is **only** valid after a call to sync_local().\n"
+            ".. Warning:: Calling in_sync() is **only** valid after a call to sync_local().\n"
             "\nUsage::\n\n"
             "   try:\n"
             "      ci = Client()                       # use default host(ECF_HOST) & port(ECF_PORT)\n"
@@ -481,11 +481,11 @@ const char* ClientDoc::checkpt(){
             "                           the alarm time, then the late flag is set on the server.\n"
             "                           This flag will need to be cleared manually.\n"
             "   )\n\n"
-            "Note: When the time taken to save the check pt is excessive, it can interfere with job scheduling.\n\n"
-            "It may be an indication of the following:\n\n"
-            "* slow disk\n"
-            "* file system full\n"
-            "* The definition is very large and needs to split\n\n"
+            ".. Note:: When the time taken to save the check pt is excessive, it can interfere with job scheduling.\n"
+            "          It may be an indication of the following:\n\n"
+            "          * slow disk\n"
+            "          * file system full\n"
+            "          * The definition is very large and needs to split\n\n"
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()                      # use default host(ECF_HOST) & port(ECF_PORT)\n"
@@ -611,7 +611,7 @@ const char* ClientDoc::free_trigger_dep(){
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.free_trigger_dep('/s1')\n"
+            "       ci.free_trigger_dep('/s1/f1/task')\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;
@@ -626,7 +626,7 @@ const char* ClientDoc::free_date_dep(){
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.free_date_dep('/s1')\n"
+            "       ci.free_date_dep('/s1/task')\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;
@@ -643,7 +643,7 @@ const char* ClientDoc::free_time_dep(){
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.free_time_dep('/s1')\n"
+            "       ci.free_time_dep('/s1/task')\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;
@@ -660,7 +660,7 @@ const char* ClientDoc::free_all_dep(){
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.free_all_dep('/s1')\n"
+            "       ci.free_all_dep('/s1/task')\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;
@@ -760,13 +760,19 @@ const char* ClientDoc::ch_register() {
 }
 
 const char* ClientDoc::ch_suites() {
-   return
-            "Writes to standard out the list of registered handles and the suites they reference.\n\n";
+   return   "Writes to standard out the list of registered handles and the suites they reference.\n\n"
+            "When dealing with large definitions, where a user is only interested in a small subset\n"
+            "of suites, registering them, improves download performance from the server.\n"
+            "Registered suites have an associated handle.\n"
+            ;
 }
 
 const char* ClientDoc::ch_drop(){
    return
             "Drop/de-register the client handle.\n\n"
+            "When dealing with large definitions, where a user is only interested in a small subset\n"
+            "of suites, registering them, improves download performance from the server.\n"
+            "Registered suites have an associated handle.\n"
             "Client must ensure un-used handle are dropped otherwise they will stay, in the `ecflow_server`_\n::\n\n"
             "   void ch_drop(\n"
             "      int client_handle : The handle must be an integer that is > 0\n"
@@ -791,6 +797,9 @@ const char* ClientDoc::ch_drop(){
 const char* ClientDoc::ch_drop_user(){
    return
             "Drop/de-register all handles associated with user.\n\n"
+            "When dealing with large definitions, where a user is only interested in a small subset\n"
+            "of suites, registering them, improves download performance from the server.\n"
+            "Registered suites have an associated handle.\n"
             "Client must ensure un-used handle are dropped otherwise they will stay, in the `ecflow_server`_\n::\n\n"
             "   void ch_drop_user(\n"
             "        string user   # If empty string will drop current user\n"
@@ -813,7 +822,11 @@ const char* ClientDoc::ch_drop_user(){
 
 const char* ClientDoc::ch_add() {
    return
-            "Add a set of suites, to an existing handle\n::\n\n"
+            "Add a set of suites, to an existing registered handle\n"
+            "When dealing with large definitions, where a user is only interested in a small subset\n"
+            "of suites, registering them, improves download performance from the server.\n"
+            "Registered suites have an associated handle.\n"
+            "::\n\n"
             "  integer ch_add(\n"
             "     integer handle   : the handle obtained after ch_register\n"
             "     list suite_names : list of strings representing suite names\n"
@@ -835,7 +848,11 @@ const char* ClientDoc::ch_add() {
 
 const char* ClientDoc::ch_remove() {
    return
-            "Remove a set of suites, from an existing handle\n::\n\n"
+            "Remove a set of suites, from an existing handle\n"
+            "When dealing with large definitions, where a user is only interested in a small subset\n"
+            "of suites, registering them, improves download performance from the server.\n"
+            "Registered suites have an associated handle.\n"
+            "::\n\n"
             "  integer ch_remove(\n"
             "     integer handle   : the handle obtained after ch_register\n"
             "     list suite_names : list of strings representing suite names\n"
@@ -857,7 +874,11 @@ const char* ClientDoc::ch_remove() {
 
 const char* ClientDoc::ch_auto_add() {
    return
-            "Change an existing handle so that new suites can be added automatically\n::\n\n"
+            "Change an existing handle so that new suites can be added automatically\n"
+            "When dealing with large definitions, where a user is only interested in a small subset\n"
+            "of suites, registering them, improves download performance from the server.\n"
+            "Registered suites have an associated handle.\n"
+            "::\n\n"
             "   void ch_auto_add(\n"
             "      integer handle,         : the handle obtained after ch_register\n"
             "      bool auto_add_new_suite : automatically add new suites, this handle when they are created\n"
@@ -883,13 +904,13 @@ const char* ClientDoc::get_file(){
             "   string get_file(\n"
             "      string absolute_node_path    : Path name to node\n"
             "      [(string)file_type='script'] : file_type = [ script<default> | job | jobout | manual | kill | stat ]\n"
-            "      [(string)max_lines=\"10000\"]  : The number of lines in the file to return\n"
+            "      [(string)max_lines=\"10000\"] : The number of lines in the file to return\n"
             "   )\n"
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()        # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       for file in [ 'script', 'job', 'jobout', 'manual', 'kill', 'stat' ]:\n"
-            "   	      print ci.get_file('/suite/f1/t1',file)  # make a request to the server\n"
+            "   	      print(ci.get_file('/suite/f1/t1',file))  # print the contents of the file\n"
             "   except RuntimeError, e:\n"
             "      print str(e)\n"
             ;
@@ -1007,7 +1028,7 @@ const char* ClientDoc::alter(){
             "\nUsage::\n\n"
             "  try:\n"
             "     ci = Client()     # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "     ci.alter('/suite','change','trigger','b2 == complete')\n"
+            "     ci.alter('/suite/task','change','trigger','b2 == complete')\n"
             "  except RuntimeError, e:\n"
             "     print str(e)\n"
             ;
@@ -1044,14 +1065,13 @@ const char* ClientDoc::force_state(){
             "       ci.force_state(paths,State.complete)\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
-            "\nEffect::\n\n"
-            "   Lets see the effect of forcing complete on the following defs::\n\n"
+            "\nEffect:\n\n"
+            "Lets see the effect of forcing complete on the following defs\n::\n\n"
             "   suite s1\n"
             "      task t1; time 10:00             # will complete straight away\n"
             "      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth \n\n"
             "In the last case (task t2) after each force complete, the next time slot is incremented.\n"
             "This can be seen by calling the Why command."
-
             ;
 }
 
@@ -1101,7 +1121,7 @@ const char* ClientDoc::force_event(){
             "\n"
             "       # Set or clear a event for a list of events\n"
             "       paths = [ '/s1/t1:ev1', '/s2/t2:ev2' ]\n"
-            "       ci.force_event(paths,State.complete)\n"
+            "       ci.force_event(paths,'clear')\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;
@@ -1255,11 +1275,12 @@ const char* ClientDoc::group(){
 
 const char* ClientDoc::begin_suite(){
    return
-            "Begin playing the chosen `suite`_ s in the `ecflow_server`_\n"
-            "Note: using the force option may cause `zombie`_ s\n::\n\n"
+            "Begin playing the chosen `suite`_ s in the `ecflow_server`_\n\n"
+            ".. Note:: using the force option may cause `zombie`_ s if suite has running jobs\n\n"
+            "::\n\n"
             "   void begin_suite\n"
             "      string suite_name     : begin playing the given suite\n"
-            "      [(bool)force=False]   : bypass the checks\n"
+            "      [(bool)force=False]   : bypass the checks for submitted and active jobs\n"
             "   )\n"
             "\nUsage::\n\n"
             "   try:\n"
@@ -1273,10 +1294,11 @@ const char* ClientDoc::begin_suite(){
 
 const char* ClientDoc::begin_all(){
    return
-            "Begin playing all the `suite`_ s in the `ecflow_server`_\n"
-            "Note: using the force option may cause `zombie`_ s\n::\n\n"
+            "Begin playing all the `suite`_ s in the `ecflow_server`_\n\n"
+            ".. Note:: using the force option may cause `zombie`_ s if suite has running jobs\n\n"
+            "::\n\n"
             "   void begin_all_suites(\n"
-            "      [(bool)force=False] : bypass the checks\n"
+            "      [(bool)force=False] : bypass the checks for submitted and active jobs\n"
             "   )\n"
             "\nUsage::\n\n"
             "   try:\n"
