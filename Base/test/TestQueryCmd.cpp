@@ -34,7 +34,9 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    // suite suite
    //    repeat date YMD 20090916 20200916
    //    family f
+   //          edit var2 var2
    //          task t1
+   //              edit var1 var1
    //              meter m 0 100 100
    //              event event
    //              trigger t2 == complete
@@ -59,6 +61,8 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
       f->add_task("t2");
    }
 
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("state","/suite/f/t1","fred","/suite/f/t1")));  // attribute should be empty
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f/t1","fred","/suite/f/t1"))); // attribute should be empty
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1","eventxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite",event_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","xxxx/f/t1",event_name,"/suite/f/t1")));
@@ -74,6 +78,8 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t3 == complete","/suite/f/t1")));
 
    // QueryCmd is read only, hence change numbers should not change
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("state","/suite","","/suite/f/t1")), false);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f","","/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1",event_name,"/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1",meter_name,"/suite/f/t1")), false);
    TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t2 == complete","/suite/f/t1")), false);

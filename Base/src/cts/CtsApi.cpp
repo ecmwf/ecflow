@@ -829,6 +829,9 @@ std::vector<std::string> CtsApi::query(
       retVec.push_back(path_to_attribute);
       retVec.push_back(attribute);
    }
+   else if (query_type == "state" || query_type == "dstate") {
+      retVec.push_back(path_to_attribute);
+   }
    if (!path_to_task.empty()) retVec.push_back(path_to_task);
    return retVec;
 }

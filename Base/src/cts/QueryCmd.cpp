@@ -72,35 +72,32 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
    if (args.size()) query_type = args[0];
    if ( query_type == "event" || query_type == "meter" || query_type == "variable") {
       // second argument must be <path>:event_or_meter_or_variable
-      if (args.size() >= 2) {
+      if (args.size() == 2) {
          std::string path_and_name = args[1];
          if ( !Extract::pathAndName( path_and_name , path_to_attribute, attribute  ) ) {
             throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type );
          }
       }
-      else {
-         throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type);
-      }
+      else throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type);
+      if (attribute.empty()) throw std::runtime_error( "QueryCmd: no attribute specified\n" + string(QueryCmd::desc()) );
    }
    else if (query_type == "trigger") {
-      if (args.size() >= 1) {
-         path_to_attribute = args[1];
-      }
-      if (args.size() >= 2) {
+      if (args.size() == 1)  path_to_attribute = args[1];
+      if (args.size() == 2) {
          attribute = args[2];
          (void)Expression::parse(attribute,"QueryCmd:"); // will throw if expression does not parse
       }
+      if (attribute.empty()) throw std::runtime_error( "QueryCmd: no attribute specified\n" + string(QueryCmd::desc()) );
    }
-   else {
-      throw std::runtime_error( "QueryCmd: first argument must be one of [ event | meter | variable | trigger ] but found:" + query_type);
+   else if (query_type == "state" || query_type == "dstate") {
+      // for state and dstate attribute is empty
+      if (args.size() >= 1) path_to_attribute = args[1];
+      if (args.size() >= 2) throw std::runtime_error( "QueryCmd: invalid query : " +  args[2]);
    }
+   else throw std::runtime_error( "QueryCmd: first argument must be one of [ state | dstate | event | meter | variable | trigger ] but found:" + query_type);
 
    if (path_to_attribute.empty() || (!path_to_attribute.empty() &&  path_to_attribute[0] != '/')) {
       throw std::runtime_error( "QueryCmd: invalid path to attribute: " + path_to_attribute);
-   }
-
-   if (attribute.empty()) {
-      throw std::runtime_error( "QueryCmd: no attribute specified\n" + string(QueryCmd::desc()) );
    }
 
    // path_to_task can be empty if invoked via the command line. ( used for logging, i.e identifying which task invoked this command)
@@ -119,7 +116,9 @@ const char*  QueryCmd::arg() { return CtsApi::queryArg();}
 
 const char* QueryCmd::desc() {
    return
-            "Query the status of attributes i.e event, meter, variable or trigger expression without blocking\n"
+            "Query the status of attributes i.e state, event, meter, variable or trigger expression without blocking\n"
+            " - state    return [unknown | complete | queued |             aborted | submitted | active] to standard out\n"
+            " - dstate   return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n"
             " - event    return 'set' | 'clear' to standard out\n"
             " - meter    return value of the meter to standard out\n"
             " - variable return value of the variable, repeat or generated variable to standard out,\n"
@@ -133,10 +132,12 @@ const char* QueryCmd::desc() {
             " - variable No user or generated variable or repeat of that name found on node, or any of its parents\n"
             " - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid\n"
             "Arguments:\n"
-            "  arg1 = [ event | meter | variable | trigger ]\n"
+            "  arg1 = [ state | event | meter | variable | trigger ]\n"
             "  arg2 = <path> | <path>:name where name is name of a event, meter or variable\n"
             "  arg3 = trigger expression\n\n"
             "Usage:\n"
+            " ecflow_client --query state /path/to/node                         # return node state to standard out\n"
+            " ecflow_client --query dstate /path/to/node                        # state that can included suspended\n"
             " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out\n"
             " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out\n"
             " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out\n"
@@ -189,6 +190,14 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
       if ( ast->evaluate() ) return PreAllocatedReply::string_cmd("true");
       return PreAllocatedReply::string_cmd("false");
    }
+
+   if (query_type_ == "state") {
+      return PreAllocatedReply::string_cmd( DState::to_string(node->dstate()) );
+   }
+
+   if (query_type_ == "dstate") {
+      return PreAllocatedReply::string_cmd( NState::toString(node->state()) );
+   }
    else {
         std::stringstream ss;
         ss << "QueryCmd: unrecognised query_type " << query_type_  ;
@@ -198,4 +207,4 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
    return PreAllocatedReply::ok_cmd();
 }
 
-std::ostream& operator<<(std::ostream& os, const QueryCmd& c)       { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const QueryCmd& c) { return c.print(os); }

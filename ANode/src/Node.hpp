@@ -245,7 +245,7 @@ public:
    virtual const std::string& abortedReason() const;
 
    /// This state added as an convenience, it includes Suspended attribute returned as enum
-   DState:: State dstate() const;
+   DState::State dstate() const;
 
    /// This represents the persisted/saved state // First = NState, Second = time_duration
    /// The State represent the life cycle changes of a node.

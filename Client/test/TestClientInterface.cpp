@@ -81,6 +81,8 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.query("meter","/suite","meter") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.query("variable","/suite","var") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.query("trigger","/suite","1 == 1") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("state","/suite","") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("dstate","/suite","") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
 
 
    Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"/path/to/task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1);

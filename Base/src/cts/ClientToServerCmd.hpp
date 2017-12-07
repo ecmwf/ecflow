@@ -1840,14 +1840,14 @@ public:
             const std::string& path_to_attribute,
             const std::string& attribute,
             const std::string& path_to_task )
-   : query_type_(query_type), path_to_attribute_(path_to_attribute), attribute_(attribute),path_to_task_(path_to_task) {}
-   QueryCmd() : UserCmd() {}
+   : query_type_(query_type),path_to_attribute_(path_to_attribute),attribute_(attribute),path_to_task_(path_to_task){}
+   QueryCmd() : UserCmd(){}
    virtual ~QueryCmd();
 
    const std::string& query_type() const { return query_type_; }
    const std::string& path_to_attribute() const { return path_to_attribute_; }
    const std::string& attribute() const { return attribute_; }
-   const std::string& path_to_task() const { return  path_to_task_ ;}
+   const std::string& path_to_task() const { return  path_to_task_;}
 
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ClientToServerCmd*) const;
@@ -1865,9 +1865,9 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:
-   std::string query_type_;        // [ event | meter | trigger ]
+   std::string query_type_;        // [ state | dstate | event | meter | trigger ]
    std::string path_to_attribute_;
-   std::string attribute_;         // [ event_name | meter_name | trigger expression
+   std::string attribute_;         // [ event_name | meter_name | variable_name | trigger expression] empty for state and dstate
    std::string path_to_task_;      // The task the invoked this command, needed for logging
 
    friend class boost::serialization::access;

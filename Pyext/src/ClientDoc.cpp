@@ -945,11 +945,13 @@ const char* ClientDoc::plug(){
 
 const char* ClientDoc::query(){
    return
-            "Query the status of event, meter, variable or trigger expression without blocking\n"
+            "Query the status of event, meter, state, variable or trigger expression without blocking\n\n"
+            " - state    return [unknown | complete | queued |             aborted | submitted | active] to standard out\n"
+            " - dstate   return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n"
             " - event    return 'set' | 'clear' to standard out\n"
             " - meter    return value of the meter to standard out\n"
             " - variable return value to standard out\n"
-            " - trigger  returns 'true' if the expression is true, otherwise 'false'\n"
+            " - trigger  returns 'true' if the expression is true, otherwise 'false'\n::\n\n"
             "  string query(\n"
             "     string query_type        # [ event | meter | variable | trigger ]\n"
             "     string path_to_attribute # path to the attribute\n"
@@ -969,6 +971,8 @@ const char* ClientDoc::query(){
             "       res = ci.query('meter','/path/to/node','meter_name') # returns meter value as a string\n"
             "       res = ci.query('variable','/path/to/node,'var')      # returns variable value as a string\n"
             "       res = ci.query('trigger','/path/to/node','/joe90 == complete') # return 'true' | 'false' as a string\n"
+            "       res = ci.query('state','/path/to/node') # return node state as a string\n"
+            "       res = ci.query('dstate','/path/to/node') # return node state as a string,can include suspended\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;
