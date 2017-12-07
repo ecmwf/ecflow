@@ -1141,24 +1141,32 @@ def test_client_alter_change(ci):
     task_t1 = ci.get_defs().find_abs_node(t1)
     variable = task_t1.find_variable("var")
     assert variable.value() == "changed_var", "Expected alter of variable to be 'change_var' but found " + variable.value()
+    res = ci.query('variable',task_t1.get_abs_node_path(),"var")
+    assert res == 'changed_var',"Expected alter of variable to be 'change_var' but found " + res
 
     ci.alter(t1,"change","meter","meter","10")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     meter = task_t1.find_meter("meter")
     assert meter.value() == 10, "Expected alter of meter to be 10 but found " + str(meter.value())
+    res = ci.query('meter',task_t1.get_abs_node_path(),"meter")
+    assert res == '10',"Expected alter of meter to be 10 but found " + res
 
     ci.alter(t1,"change","event","event","set")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     event = task_t1.find_event("event")
     assert event.value() == True, "Expected alter of event to be set but found " + str(event.value())
+    res = ci.query('event',task_t1.get_abs_node_path(),"event")
+    assert res == 'set',"Expected alter of event to be 'set' but found " + res
 
     ci.alter(t1,"change","trigger","t2 == aborted")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     trigger = task_t1.get_trigger()
     assert trigger.get_expression() == "t2 == aborted", "Expected alter of trigger to be 't2 == aborted' but found " + trigger.get_expression()
+    res = ci.query('trigger',task_t1.get_abs_node_path(),"t2 == aborted")
+    assert res == 'false',"Expected evaluation of trigger to fail, but found: " + res
 
     ci.alter(t1,"change","trigger","/test_client_alter_change/f1/t2 == complete")   
     ci.sync_local()
@@ -1204,7 +1212,9 @@ def test_client_alter_change(ci):
     task = ci.get_defs().find_abs_node(repeat_date_path)
     repeat = task.get_repeat()
     assert repeat.value() == 20100113, "Expected alter of repeat to be 20100113 but found " + str(repeat.value())
- 
+    res = ci.query('variable',task.get_abs_node_path(),repeat.name())
+    assert res == "20100113", "Expected alter of repeat to be 20100113 but found " + res
+
 def test_client_alter_flag(ci):
     print("test_client_alter_flag")
     ci.delete_all() 
@@ -1422,6 +1432,9 @@ def test_client_suspend(ci):
     suite = ci.get_defs().find_suite("test_client_suspend")
     assert suite.is_suspended(), "Expected to find suite suspended"
     
+    assert ci.query('dstate',suite.get_abs_node_path()) == "suspended", "Expected to find suite dstate suspended but found: " + res
+    assert ci.query('state',suite.get_abs_node_path()) == "queued", "Expected to find suite state queued but found: " + res
+
 
 def test_client_suspend_multiple_paths(ci):
     print("test_client_suspend_multiple_paths")

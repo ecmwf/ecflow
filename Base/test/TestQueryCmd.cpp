@@ -42,10 +42,13 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    //              trigger t2 == complete
    //          task t2
    //    endfamily
+   //    task task
    // endsuite
    Defs defs;
    string suite_f_t1 = "suite/f/t1";
    task_ptr t1 = Task::create("t1");
+   task_ptr task = Task::create("task");
+   string suite_task = "suite/task";
    std::string meter_name = "m";
    std::string event_name = "event";
    {
@@ -59,10 +62,12 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
       f->add_variable("var2","var2");
       f->addTask( t1 );
       f->add_task("t2");
+      s->addTask(task);
    }
+   defs.beginAll();
 
-   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("state","/suite/f/t1","fred","/suite/f/t1")));  // attribute should be empty
-   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f/t1","fred","/suite/f/t1"))); // attribute should be empty
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("state","/suite/f/t11","","/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f/t11","","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1","eventxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite",event_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","xxxx/f/t1",event_name,"/suite/f/t1")));
@@ -78,20 +83,62 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t3 == complete","/suite/f/t1")));
 
    // QueryCmd is read only, hence change numbers should not change
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("state","/suite","","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f","","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1",event_name,"/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1",meter_name,"/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t2 == complete","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","1 == 1","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:var1 == 0","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f:var2 == 0","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:m == 0","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:event","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite","/suite:YMD == 20090916","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","var1","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","var2","/suite/f/t1")), false);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","YMD","/suite/f/t1")), false);
+   std::string res;
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("state","/suite","","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "queued","expected query state to return queued but found: " << res);
+
+   res  = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f","","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "queued","expected query state to return queued but found: " << res);
+
+   // Note: we pick a task outside of a repeat, since setting a task to complete, inside a repeat will cause it to requeue
+   // Avoid using ForceCmd to avoid side affects
+   std::vector<std::string> states = NState::allStates();
+   for(size_t i = 0; i < states.size(); i++) {
+      task->setStateOnly( NState::toState(states[i]));
+      res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("state", task->absNodePath(),"",task->absNodePath())), false);
+      BOOST_CHECK_MESSAGE(res == states[i] ,"expected query state to return " << states[i] << " but found: " << res);
+   }
+
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND, task->absNodePath())));
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("dstate", task->absNodePath(),"",task->absNodePath())), false);
+   BOOST_CHECK_MESSAGE(res == "suspended" ,"expected query state to return suspend but found: " << res);
+
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1",event_name,"/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "clear","expected query event to return clear but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1",meter_name,"/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "0","expected query meter to return 0 but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t2 == complete","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "false","expected query trigger to return false but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","1 == 1","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "true","expected query trigger to return true but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:var1 == 0","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "true","expected query trigger to return true but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f:var2 == 0","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "true","expected query trigger to return true but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:m == 0","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "true","expected query trigger to return true but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","/suite/f/t1:event","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "false","expected query trigger to return false but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite","/suite:YMD == 20090916","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "true","expected query trigger to return true but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","var1","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "var1","expected query variable to return var2 but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","var2","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "var2","expected query variable to return var2 but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","YMD","/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "20090916","expected query variable to return 20090916 but found: " << res);
 
    /// Destroy System singleton to avoid valgrind from complaining
    System::destroy();
