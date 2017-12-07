@@ -413,7 +413,7 @@ const char* NodeAttrDoc::autocancel_doc()
 {
    return
             "Provides a way to automatically delete/remove a node which has completed\n\n"
-            "See `autocancel`\n"
+            "See `autocancel`_\n"
             "\nConstructor::\n\n"
             "   Autocancel(TimeSlot,relative)\n"
             "      TimeSlot single: A time\n"

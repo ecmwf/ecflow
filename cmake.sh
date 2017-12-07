@@ -162,10 +162,10 @@ if [[ "$ARCH" = cray ]] ; then
 fi
 
 if [[ "$python3_arg" = python3 ]] ; then
-    # Need to wait for ecbuild to fix print error, meanwhile use local ecbuild to test python3
+    module unload python
+    module load python3/3.5.1-01
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
     cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0.python3"
-    # cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/bin/python3.5"
 fi
  
 # ====================================================================================

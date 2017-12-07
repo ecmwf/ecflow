@@ -179,7 +179,7 @@ class TestVariableInheritance(unittest.TestCase):
                 Task("t1"),
                 Task("t2"))
              
-        print "Creating suite definition"
+        print("Creating suite definition")
         defs = Defs().add(Suite("test").add(
                             Edit(ECF_INCLUDE=home,ECF_HOME=home),
                             create_family_f1() ))
@@ -200,7 +200,7 @@ class TestVariableInheritance(unittest.TestCase):
         def create_family_f1():
             return Family("f1") + Edit(SLEEP=20) + Task("t1") + Task("t2")
              
-        print "Creating suite definition"
+        print("Creating suite definition")
         defs = Defs() + (Suite("test") + create_family_f1()) 
         defs.test += Edit(ECF_INCLUDE=home,ECF_HOME=home) 
  
@@ -230,7 +230,7 @@ class TestTriggers(unittest.TestCase):
                 Task("t1"),
                 Task("t2").add(Trigger("t1 == complete")))
              
-        print "Creating suite definition"
+        print("Creating suite definition")
         defs = Defs().add(Suite("test").add(
                             Edit(ECF_INCLUDE=home,ECF_HOME=home),
                             create_family_f1()))
@@ -252,7 +252,7 @@ class TestTriggers(unittest.TestCase):
             suite += Family("f1") + Edit(SLEEP=20) + Task("t1") + Task("t2")
             suite.f1.t2 += Trigger(["t1"]) 
              
-        print "Creating suite definition"
+        print("Creating suite definition")
         defs = Defs().add( suite )
  
         print(defs)
@@ -287,7 +287,7 @@ class TestEvents(unittest.TestCase):
                         Task("t3").add(Trigger("t2:a")),
                         Task("t4").add(Trigger("t2:b")))
              
-        print "Creating suite definition"
+        print("Creating suite definition")
         defs = Defs().add(
             Suite("test").add(
                 Edit(ECF_INCLUDE=home,ECF_HOME=home),
@@ -313,7 +313,7 @@ class TestEvents(unittest.TestCase):
                     Task("t4") + Trigger("t2:b") ]
             return f1
          
-        print "Creating suite definition"
+        print("Creating suite definition")
         defs = Defs() + Suite("test")
         defs.test += [ Edit(ECF_INCLUDE=home,ECF_HOME=home), create_family_f1()]
         print(defs)
@@ -346,7 +346,7 @@ class TestComplete(unittest.TestCase):
                 Task("t4").add(Trigger("t2 == complete"), 
                                Complete("t2:b")  ))
         
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         defs = Defs().add(Suite("test").add(
                 Edit(ECF_INCLUDE=home,ECF_HOME=home),
                 create_family_f1() ))
@@ -372,7 +372,7 @@ class TestComplete(unittest.TestCase):
             f1.t4 += [ Trigger(["t2"]),Complete("t2:b") ]
             return f1
         
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         defs = Defs() + (Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home))
         defs.test += create_family_f1()      
          
@@ -410,7 +410,7 @@ class TestMeter(unittest.TestCase):
                         Task("t6").add(Trigger("t1:progress ge 60")),
                         Task("t7").add(Trigger("t1:progress ge 90")))  
         
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         defs = Defs().add(Suite("test").add(
                 Edit(ECF_INCLUDE=home,ECF_HOME=home),
                 create_family_f1() ))
@@ -440,7 +440,7 @@ class TestMeter(unittest.TestCase):
             f1.t7 += Trigger("t1:progress ge 90")  
             return f1
         
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         defs = Defs() + (Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home))
         defs.test += create_family_f1()   
          
@@ -474,7 +474,7 @@ class TestTime(unittest.TestCase):
                 Task("t4").add( Time("+00:02")), 
                 Task("t5").add( Time("00:02")))  
  
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         defs = Defs().add(Suite("test").add(
                 Edit(ECF_INCLUDE=home,ECF_HOME=home),
                 create_family_f2()))
@@ -503,7 +503,7 @@ class TestTime(unittest.TestCase):
             f1.t5 += Time("00:02")    
             return f1
  
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         defs = Defs() + ( Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home))
         defs.test += create_family_f2()    
          
@@ -525,7 +525,7 @@ class TestIndentation(unittest.TestCase):
     def setUp(self):
         #!/usr/bin/env python2.7
         import os
-        print "Creating suite definition" 
+        print("Creating suite definition") 
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(# Stream like definition
                     Suite("test").add(
@@ -559,7 +559,7 @@ class TestIndentation(unittest.TestCase):
         #!/usr/bin/env python2.7
         import os
  
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         home = os.path.join(os.getenv("HOME"), "course")
         with Defs() as defs:
             with defs.add_suite("test") as suite:
@@ -609,7 +609,7 @@ class TestLabel(unittest.TestCase):
                         Task("t1").add(
                             Label("info","")))
  
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         defs = Defs().add(Suite("test").add(
                 Edit(ECF_INCLUDE=home,ECF_HOME=home),
                 create_family_f3()))
@@ -653,7 +653,7 @@ class TestRepeat(unittest.TestCase):
      
     def test_repeat(self):
      
-        print "Creating suite definition" 
+        print("Creating suite definition") 
         defs = Defs().add(
                 Suite("test").add(
                     Edit(   ECF_INCLUDE=self.ecf_includes,
@@ -678,7 +678,7 @@ class TestRepeat(unittest.TestCase):
          
     def test_repeat3(self):
      
-        print "Creating suite definition" 
+        print("Creating suite definition") 
         defs = Defs().add( Suite("test") )
         defs.test += [Edit( ECF_INCLUDE=self.ecf_includes,
                             ECF_HOME=self.ecf_home), Family("f4") ]
