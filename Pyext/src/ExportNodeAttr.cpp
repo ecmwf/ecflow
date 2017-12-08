@@ -236,12 +236,17 @@ void export_NodeAttr()
 
  	class_<Variable>("Variable",NodeAttrDoc::variable_doc(),init<std::string, std::string>())
  	.def("__str__",    &Variable::toString)                // __str__
-   .def("__copy__",   copyObject<Variable>)               // __copy__ uses copy constructor
+ 	.def("__copy__",   copyObject<Variable>)               // __copy__ uses copy constructor
  	.def(self == self )                                    // __eq__
-	.def("name",     &Variable::name,     return_value_policy<copy_const_reference>(), "Return the variable name as string")
-   .def("value",    &Variable::theValue, return_value_policy<copy_const_reference>(), "Return the variable value as a string")
-   .def("empty",    &Variable::empty,   "Return true if the variable is empty. Used when returning a Null variable, from a find")
+ 	.def("name",     &Variable::name,     return_value_policy<copy_const_reference>(), "Return the variable name as string")
+ 	.def("value",    &Variable::theValue, return_value_policy<copy_const_reference>(), "Return the variable value as a string")
+ 	.def("empty",    &Variable::empty,   "Return true if the variable is empty. Used when returning a Null variable, from a find")
  	;
+ 	// .add_property("value", make_function(&Variable::theValue ,return_value_policy<copy_const_reference>()),
+ 	//                       &Variable::set_value,  "get/set the value as a property")
+ 	// The following works v = Variable('name','fred')
+ 	//   print v.value
+ 	// But it will then break v.value()
 
    // We need to return pass a list of Variable as arguments, to retrieve the generated variables
    class_<std::vector<Variable> >("VariableList", "Hold a list of Variables")
