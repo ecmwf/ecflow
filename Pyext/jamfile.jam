@@ -218,6 +218,7 @@ run-test test_collection       : ecflow [ glob test/py_u_test_collection.py ] ;
 run-test test_add              : ecflow [ glob test/py_u_test_add.py ] ;
 run-test test_tutorial         : ecflow [ glob test/py_u_test_tutorial.py ] ;
 run-test test_manual           : ecflow [ glob test/py_u_test_manual.py ] ;
+run-test test_get_attr         : ecflow [ glob test/py_u_test_get_attr.py ] ;
 run-test test                  : ecflow [ glob test/py_u_test.py ] ;
 
 # A target that runs all the tests. 
@@ -227,7 +228,7 @@ alias test-all
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable  TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
     TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern  test_collection 
-    test_add test_tutorial test_manual test
+    test_add test_tutorial test_manual test_get_attr test
     # test_embed test_embed_ecf 
     ;
    
@@ -237,7 +238,7 @@ explicit test-all
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
     TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern  test_collection 
-    test_add test_tutorial test_manual test
+    test_add test_tutorial test_manual test_get_attr test
     # test_embed test_embed_ecf 
     ;
  

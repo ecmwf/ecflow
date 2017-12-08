@@ -219,13 +219,17 @@ static object defs_iadd(defs_ptr self, const boost::python::list& list) {
    return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
-static suite_ptr defs_getattr(defs_ptr self, const std::string& attr) {
+static object defs_getattr(defs_ptr self, const std::string& attr) {
    // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
    suite_ptr child = self->findSuite(attr);
-   if (child) { return child;}
-   std::stringstream ss; ss << "ExportDefs::defs_getattr  can not find suite node " << attr << " from node ";
+   if (child) return object(child);
+
+   Variable var = self->server().findVariable(attr);
+   if (!var.empty()) return object(var);
+
+   std::stringstream ss; ss << "ExportDefs::defs_getattr:  Can not find suite node or defs variable of name " << attr << " from Defs";
    throw std::runtime_error(ss.str());
-   return suite_ptr();
+   return object();
 }
 
 void export_Defs()

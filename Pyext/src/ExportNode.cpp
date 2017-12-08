@@ -144,7 +144,7 @@ node_ptr add_defstatus1(node_ptr self,const Defstatus& ds)         { self->addDe
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Trigger & Complete thin wrapper over Expression, allows us to call:
-//  Task("a").add(Trigger("a=1"),Complete("b=1"))
+//  Task("a").add(Trigger("a == 1"),Complete("b == 1"))
 ///////////////////////////////////////////////////////////////////////////////////
 static void construct_expr(std::vector<PartExpression>& vec, const boost::python::list& list) {
    int the_list_size = len(list);
@@ -311,14 +311,21 @@ static object add(tuple args, dict kwargs) {
    return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
-static node_ptr node_getattr(node_ptr self, const std::string& attr) {
+static object node_getattr(node_ptr self, const std::string& attr) {
    // cout << " node_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
    size_t pos = 0;
    node_ptr child = self->findImmediateChild(attr,pos);
-   if (child) { return child;}
-   std::stringstream ss; ss << "ExportNode::node_getattr can not find child node " << attr << " from node " << self->absNodePath();
+   if (child) { return object(child);}
+
+   Variable var = self->findVariable(attr);
+   if (!var.empty()) return object(var);
+
+   Variable gvar = self->findGenVariable(attr);
+   if (!gvar.empty()) return object(gvar);
+
+   std::stringstream ss; ss << "ExportNode::node_getattr can not find child node or variable of name " << attr << " from node " << self->absNodePath();
    throw std::runtime_error(ss.str());
-   return node_ptr();
+   return object();
 }
 
 void export_Node()
