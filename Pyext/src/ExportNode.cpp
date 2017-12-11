@@ -317,13 +317,22 @@ static object node_getattr(node_ptr self, const std::string& attr) {
    node_ptr child = self->findImmediateChild(attr,pos);
    if (child) { return object(child);}
 
-   Variable var = self->findVariable(attr);
+   const Variable& var = self->findVariable(attr);
    if (!var.empty()) return object(var);
 
-   Variable gvar = self->findGenVariable(attr);
+   const Variable& gvar = self->findGenVariable(attr);
    if (!gvar.empty()) return object(gvar);
 
-   std::stringstream ss; ss << "ExportNode::node_getattr can not find child node or variable of name " << attr << " from node " << self->absNodePath();
+   const Event& event = self->findEventByNameOrNumber(attr);
+   if (!event.empty()) return object(event);
+
+   const Meter& meter = self->findMeter(attr);
+   if (!meter.empty()) return object(meter);
+
+   limit_ptr limit = self->find_limit( attr );
+   if (limit.get()) return object(limit);
+
+   std::stringstream ss; ss << "ExportNode::node_getattr can not find child node,variable,meter,event or limit of name " << attr << " in node " << self->absNodePath();
    throw std::runtime_error(ss.str());
    return object();
 }

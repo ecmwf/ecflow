@@ -35,7 +35,10 @@ class Test_get_attr(unittest.TestCase):
         self.assertIsInstance(defs.s.f.t.var, Variable, "Expected Variable but found " + str(type(defs.s.f.t.var)))
         
     def test_get_attr_generated_variables(self):
-        defs = Defs() + (Suite('s') + Family('f').add(Task('t') + Edit(var="1") + RepeatDate("YMD", 20100111, 20100115, 2)))
+        defs = Defs() + (Suite('s') + Family('f').add((Task('t') + Edit(var="1") + RepeatDate("YMD", 20100111, 20100115, 2))))
+        defs.s.f.t += Meter("meter",0,100)
+        defs.s.f.t += Event("event")
+        defs.s.f.t += Limit("limitx",10)
         #PrintStyle.set_style(Style.STATE)
         #print(defs)
         
@@ -93,6 +96,9 @@ class Test_get_attr(unittest.TestCase):
         self.assertEqual(defs.s.f.t.YMD_DD.value() , '11', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t.YMD_DOW.value() , '1', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t.YMD_JULIAN.value() , '2455208', "expected generated YMD of value")
+        self.assertEqual(defs.s.f.t.event.value() , 0, "expected generated event of value 0 but found " + str(defs.s.f.t.event.value()))
+        self.assertEqual(defs.s.f.t.meter.value() , 0, "expected generated meter of value 0 but found " + str(defs.s.f.t.meter.value()))
+        self.assertEqual(defs.s.f.t.limitx.value() , 0, "expected generated limit of value 0 but found " + str(defs.s.f.t.limitx.value()))
 
 if __name__ == "__main__":
     unittest.main()
