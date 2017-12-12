@@ -2,7 +2,7 @@
 suite ecflow_1182
  family hc03
    defstatus queued
-   repeat integer HYEAR 1993 1996 1
+   repeat integer HYEAR 1993 2017 1
    time +00:01
    task uk2fdb
       defstatus queued
