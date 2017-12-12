@@ -68,7 +68,8 @@ public:
    virtual void requeue(
             bool resetRepeats,
             int clear_suspended_in_child_nodes,
-            bool reset_next_time_slot);
+            bool reset_next_time_slot,
+            bool reset_relative_duration);
    bool begun() const { return begun_; }
    void reset_begin();
    virtual void update_generated_variables() const;

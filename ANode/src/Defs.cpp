@@ -214,30 +214,30 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
  			suiteVec_[s]->check_job_creation( jobCtrl ) ;
 
  			/// reset the state
-         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes,true);
+         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes,true,true);
          suiteVec_[s]->reset_begin();
          suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
  		}
 	}
 	else {
 
-		node_ptr node =  findAbsNode( jobCtrl->node_path() );
-		if (node.get()) {
-		   /// begin will cause creation of generated variables. The generated variables
-		   /// are use in client scripts and used to locate the ecf files
-		   node->suite()->begin();
-			node->check_job_creation( jobCtrl );
+	   node_ptr node =  findAbsNode( jobCtrl->node_path() );
+	   if (node.get()) {
+	      /// begin will cause creation of generated variables. The generated variables
+	      /// are use in client scripts and used to locate the ecf files
+	      node->suite()->begin();
+	      node->check_job_creation( jobCtrl );
 
-			/// reset the state
-         node->requeue(true,clear_suspended_in_child_nodes,true);
-         node->suite()->reset_begin();
-         node->setStateOnlyHierarchically( NState::UNKNOWN );
-		}
-		else {
- 		    std::stringstream ss;
-		    ss << "Defs::check_job_creation: failed as node path '"  << jobCtrl->node_path() << "' does not exist.\n";
- 		    jobCtrl->error_msg() =  ss.str();
- 		}
+	      /// reset the state
+	      node->requeue(true,clear_suspended_in_child_nodes,true,true);
+	      node->suite()->reset_begin();
+	      node->setStateOnlyHierarchically( NState::UNKNOWN );
+	   }
+	   else {
+	      std::stringstream ss;
+	      ss << "Defs::check_job_creation: failed as node path '"  << jobCtrl->node_path() << "' does not exist.\n";
+	      jobCtrl->error_msg() =  ss.str();
+	   }
 	}
 }
 
@@ -564,7 +564,8 @@ void Defs::requeue()
    for(size_t s = 0; s < theSuiteVecSize; s++) {
       suiteVec_[s]->requeue( true /* reset repeats */,
                              clear_suspended_in_child_nodes,
-                             true /* reset_next_time_slot */);
+                             true /* reset_next_time_slot */,
+                             true /* reset relative duration */);
    }
 
    set_most_significant_state();

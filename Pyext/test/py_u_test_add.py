@@ -435,7 +435,7 @@ class TestIAdd(unittest.TestCase):
         self.assertTrue(t1.get_autocancel(), "Can't find t1 autocancel")
         #print(defs)
         
-class TestComarison(unittest.TestCase):
+class TestComparison(unittest.TestCase):
     def setUp(self):
         self.cron = Cron()
         self.cron.set_time_series(TimeSeries(TimeSlot(23 , 0) ,True)) # True means relative to suite start

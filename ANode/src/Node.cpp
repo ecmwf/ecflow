@@ -254,7 +254,8 @@ void Node::begin()
 void Node::requeue(
          bool resetRepeats,
          int clear_suspended_in_child_nodes,
-         bool do_reset_next_time_slot)
+         bool do_reset_next_time_slot,
+         bool reset_relative_duration)
 {
 #ifdef DEBUG_REQUEUE
    LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
@@ -296,7 +297,7 @@ void Node::requeue(
          }
       }
 
-      time_dep_attrs_->requeue(reset_next_time_slot);
+      time_dep_attrs_->requeue(reset_next_time_slot,reset_relative_duration);
       time_dep_attrs_->markHybridTimeDependentsAsComplete();
    }
 
@@ -327,7 +328,7 @@ void Node::requeue_time_attrs()
    // Note: we *dont* mark hybrid time dependencies as complete.
    //       i.e. since this is called during alter command, it could be that
    //        the task is in a submitted or active state.
-   if (time_dep_attrs_) time_dep_attrs_->requeue(true);
+   if (time_dep_attrs_) time_dep_attrs_->requeue(true,true/*reset relative duration*/);
 }
 
 void Node::requeue_labels()
@@ -491,10 +492,6 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             LOG(Log::DBG,"requeueOrSetMostSignificantStateUpNodeTree() VALID for requeue " << debugNodePath() << " for repeat at " << repeat_.toString());
 #endif
 
-            /// reset relative duration down the hierarchy from this point. Only valid when we have repeats
-            /// Note: Going down hierarchy is wasted if there are no relative time attributes
-            resetRelativeDuration();
-
             // Remove effects of RUN and Force complete interactive commands
             // For automated re-queue *DUE* to Repeats, *CLEAR* any user interaction that would miss the next time slots. *Down* the hierarchy
             // This handles the case where a user, has manually intervened (i.e via run or complete) and we had a time attribute
@@ -502,7 +499,8 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             // we need to clear the flag, otherwise the task/family with time based attribute would wait for next day.
             requeue( false /* don't reset repeats */,
                      clear_suspended_in_child_nodes,
-                     true /* reset_next_time_slot */ );
+                     true /* reset_next_time_slot */,
+                     true /* reset relative duration */);
             set_most_significant_state_up_node_tree();
             return;
          }
@@ -526,7 +524,8 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
 
          requeue( false /* don't reset repeats */,
                   clear_suspended_in_child_nodes,
-                  reset_next_time_slot  );
+                  reset_next_time_slot,
+                  false /* don't reset relative duration */); // time +00:01 00:07 00:03 # here task re-queued many times, relative time must be preserved.
          set_most_significant_state_up_node_tree();
          return;
       }
@@ -575,10 +574,6 @@ void Node::set_most_significant_state_up_node_tree()
       // **** This should not recurse down, just reflect status of suites
       defs()->set_most_significant_state();
    }
-}
-void Node::resetRelativeDuration()
-{
-   if (time_dep_attrs_) time_dep_attrs_->resetRelativeDuration();
 }
 
 
