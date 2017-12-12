@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
    TestHelper::test_state(t1,NState::COMPLETE);
 
    int clear_suspended_in_child_nodes = 0;
-   s1->requeue(true,clear_suspended_in_child_nodes,false);
+   s1->requeue(true,clear_suspended_in_child_nodes,false,true);
    BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
    BOOST_CHECK_MESSAGE(!t2->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
    BOOST_CHECK_MESSAGE(!f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");

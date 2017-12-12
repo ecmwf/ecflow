@@ -55,7 +55,14 @@ void TimeDepAttrs::begin()
    for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
 }
 
-void TimeDepAttrs::requeue(bool reset_next_time_slot) {
+void TimeDepAttrs::requeue(bool reset_next_time_slot,bool reset_relative_duartion) {
+
+   // must be done before the re-queue
+   if (reset_relative_duartion) {
+      for(size_t i = 0; i < crons_.size();    i++)  {   crons_[i].resetRelativeDuration(); }
+      for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].resetRelativeDuration();}
+      for(size_t i = 0; i < timeVec_.size();  i++)  {  timeVec_[i].resetRelativeDuration(); }
+   }
 
    /// If a job takes longer than it slots, then that slot is missed, and next slot is used
    /// Note we do *NOT* reset for requeue as we want to advance to the next time slot
@@ -153,13 +160,6 @@ void TimeDepAttrs::markHybridTimeDependentsAsComplete()
          node_->setStateOnly(NState::COMPLETE);
       }
    }
-}
-
-void TimeDepAttrs::resetRelativeDuration()
-{
-   for(size_t i = 0; i < crons_.size();    i++)  {   crons_[i].resetRelativeDuration(); }
-   for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].resetRelativeDuration();}
-   for(size_t i = 0; i < timeVec_.size();  i++)  {  timeVec_[i].resetRelativeDuration(); }
 }
 
 // #define DEBUG_REQUEUE 1

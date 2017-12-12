@@ -185,14 +185,19 @@ bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
       }
    }
    else {
-      boost::gregorian::date_duration one_day(1);
-      boost::gregorian::date the_next_date = c.date();  // todays date
-      the_next_date += one_day;                         // add one day, so its in the future
+      if (timeSeries_.relative()) {
+         theReasonWhy += " please *re-queue*, to reset the relative duration";
+      }
+      else {
+         boost::gregorian::date_duration one_day(1);
+         boost::gregorian::date the_next_date = c.date();  // todays date
+         the_next_date += one_day;                         // add one day, so its in the future
 
-      theReasonWhy += " next run tomorrow at ";
-      theReasonWhy += timeSeries_.start().toString();
-      theReasonWhy += " ";
-      theReasonWhy += to_simple_string( the_next_date );
+         theReasonWhy += " next run tomorrow at ";
+         theReasonWhy += timeSeries_.start().toString();
+         theReasonWhy += " ";
+         theReasonWhy += to_simple_string( the_next_date );
+      }
    }
    theReasonWhy += " )";
 

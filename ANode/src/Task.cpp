@@ -317,7 +317,8 @@ void Task::begin()
 void Task::requeue(
          bool resetRepeats,
          int clear_suspended_in_child_nodes,
-         bool reset_next_time_slot)
+         bool reset_next_time_slot,
+         bool reset_relative_duration)
 {
    if (aliases_.empty()) {
       if (alias_no_ != 0) {
@@ -327,7 +328,8 @@ void Task::requeue(
 
 	Submittable::requeue(resetRepeats,
 	                     clear_suspended_in_child_nodes,
-	                     reset_next_time_slot);
+	                     reset_next_time_slot,
+	                     reset_relative_duration);
 
 #ifdef DEBUG_STATE_CHANGE_NO
 	std::cout << "Task::requeue\n";

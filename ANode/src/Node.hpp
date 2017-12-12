@@ -148,8 +148,9 @@ public:
    /// However if the JOB *abort* we clear NO_REQUE_IF_SINGLE_TIME_DEP
    /// Otherwise if we run again, we miss additional time slots necessarily
    virtual void requeue(bool resetRepeats,
-                          int clear_suspended_in_child_nodes,
-                          bool reset_next_time_slot);
+                        int clear_suspended_in_child_nodes,
+                        bool reset_next_time_slot,
+                        bool reset_relative_duration);
 
    /// Re queue the time based attributes only.
    /// Used as a part of Alter (clock) functionality.
@@ -625,7 +626,6 @@ protected:
    ///
    ///  Otherwise we need to traverse up the node tree and set the most significant state
    void requeueOrSetMostSignificantStateUpNodeTree();
-   virtual void resetRelativeDuration();
 
    node_ptr non_const_this() const;
 

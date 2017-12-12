@@ -116,7 +116,8 @@ void NodeContainer::begin()
 void NodeContainer::requeue(
       bool resetRepeats,
       int clear_suspended_in_child_nodes,
-      bool reset_next_time_slot
+      bool reset_next_time_slot,
+      bool reset_relative_duration
 )
 {
 //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
@@ -125,7 +126,7 @@ void NodeContainer::requeue(
    // this should cause children to be added in client def's, provided we force a sync
    if (get_flag().is_set(ecf::Flag::MIGRATED)) force_sync();
 
-   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
+   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot,reset_relative_duration);
 
 	// For negative numbers, do nothing, i.e do not clear
 	if (clear_suspended_in_child_nodes >=0) clear_suspended_in_child_nodes++;
@@ -134,7 +135,8 @@ void NodeContainer::requeue(
  	for(size_t t = 0; t < node_vec_size; t++) {
  	   nodeVec_[t]->requeue(true /*reset child repeats. Moot for tasks*/,
  	                        clear_suspended_in_child_nodes,
- 	                        reset_next_time_slot);
+ 	                        reset_next_time_slot,
+ 	                        true /* reset relative duration */);
  	}
    handle_defstatus_propagation();
 }
@@ -163,13 +165,6 @@ void NodeContainer::handle_defstatus_propagation()
           setStateOnly( theSignificantStateOfImmediateChildren );
        }
     }
-}
-
-void NodeContainer::resetRelativeDuration()
-{
-	Node::resetRelativeDuration();
- 	size_t node_vec_size = nodeVec_.size();
-	for(size_t t = 0; t < node_vec_size; t++)     { nodeVec_[t]->resetRelativeDuration(); }
 }
 
 bool NodeContainer::run(JobsParam& jobsParam, bool force)

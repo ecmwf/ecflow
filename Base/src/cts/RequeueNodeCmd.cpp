@@ -90,9 +90,10 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      theNodeToRequeue->getAllTasks(taskVec);
 	      for(size_t i=0; i < taskVec.size(); i++) {
 	         if (taskVec[i]->state() == NState::ABORTED) {
-	            taskVec[i]->requeue( true /* reset repeats */,
+	            taskVec[i]->requeue( true  /* reset repeats */,
 	                                 clear_suspended_in_child_nodes,
-	                                 true /* reset_next_time_slot */);
+	                                 true  /* reset_next_time_slot */,
+	                                 true  /* reset relative duration */);
 	            taskVec[i]->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
 	         }
 	      }
@@ -122,7 +123,8 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // To overcome this manual re-queue will always clear NO_REQUE_IF_SINGLE_TIME_DEP and hence reset next valid time slot
 	      theNodeToRequeue->requeue( true /* reset repeats */,
 	                                 clear_suspended_in_child_nodes,
-	                                 true /* reset_next_time_slot */ );
+	                                 true /* reset_next_time_slot */,
+	                                 true /* reset relative duration */);
 
 
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
@@ -142,7 +144,8 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // presented to the user, who can elect to kill them if required.
 	      theNodeToRequeue->requeue(  true /* reset repeats */,
 	                                  clear_suspended_in_child_nodes,
-	                                  true /* reset_next_time_slot */ );
+	                                  true /* reset_next_time_slot */,
+	                                  true /* reset relative duration */);
 
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
 
@@ -171,6 +174,7 @@ const char* RequeueNodeCmd::desc() {
    return
             "Re queues the specified node(s)\n"
             "  If any child of the specified node(s) is in a suspended state, this state is cleared\n"
+            "Repeats are reset to their starting values, relative time attributes are reset.\n"
             "  arg1 = (optional) [ abort | force ]\n"
             "         abort  = re-queue only aborted tasks below node\n"
             "         force  = Force the re-queueing even if there are nodes that are active or submitted\n"
@@ -178,7 +182,7 @@ const char* RequeueNodeCmd::desc() {
             "                  if so does nothing. Otherwise re-queues the node.\n"
             "  arg2 = list of node paths. The node paths must begin with a leading '/' character\n\n"
             "Usage:\n"
-            "  --requeue=abort /suite/f1  # re-queue all aborted children of /suite/f1\n"
+            "  --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1\n"
             "  --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.\n"
             "  --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'"
             ;
