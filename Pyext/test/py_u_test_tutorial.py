@@ -39,7 +39,7 @@ class TestNewSuite(unittest.TestCase):
                 Edit(ECF_HOME=home),
                 Task("t1")))
              
-        self.defs4 = Defs() + Suite("test").add(Edit(ECF_HOME=home))
+        self.defs4 = Defs() + (Suite("test") + Edit(ECF_HOME=home))
         self.defs4.test += Task("t1")
         
         self.defs5 = Defs().add(
