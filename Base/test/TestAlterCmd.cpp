@@ -514,9 +514,9 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
    {   // test add label
       TestStateChanged changed(s);
-      s->addLabel( Label("label","labelValue") );
-      s->addLabel( Label("label1","\"labelValue\"") );
-      s->addLabel( Label("label2","\"labelValue\"") );
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LABEL,"label","labelValue")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LABEL,"label1","labelValue")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LABEL,"label2","labelValue")));
       BOOST_CHECK_MESSAGE( s->labels().size() == 3, "expected 3  but found " <<  s->labels().size());
 
       // test delete label
@@ -526,7 +526,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( s->labels().size() == 0, "expected 0  but found " <<  s->labels().size());
 
       // test change label value
-      s->addLabel( Label("label","labelValue") );
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LABEL,"label","labelValue")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LABEL,"label","--fred--")));
       std::string label_value;
       BOOST_CHECK_MESSAGE(s->getLabelNewValue("label",label_value ),"Expected to find label");
@@ -953,6 +953,9 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/tolimit")));       // no limit name
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/tolimit:")));      // no limit name
       TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_INLIMIT,"/path/tolimit:12 34"))); // invalid limit name
+
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LABEL,"label","1")));
+      TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_LABEL,"label","value")));   // duplicate label name
    }
 
    /// Destroy singleton's to avoid valgrind from complaining

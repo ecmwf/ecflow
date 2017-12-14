@@ -126,6 +126,7 @@ static AlterCmd::Add_attr_type addAttrType(const std::string& s)
    if (s == "late") return AlterCmd::ADD_LATE;
    if (s == "limit") return AlterCmd::ADD_LIMIT;
    if (s == "inlimit") return AlterCmd::ADD_INLIMIT;
+   if (s == "label") return AlterCmd::ADD_LABEL;
 	return AlterCmd::ADD_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Add_attr_type a) {
@@ -139,6 +140,7 @@ static std::string to_string(AlterCmd::Add_attr_type a) {
    case AlterCmd::ADD_LATE:    return "late"; break;
    case AlterCmd::ADD_LIMIT:   return "limit"; break;
    case AlterCmd::ADD_INLIMIT: return "inlimit"; break;
+   case AlterCmd::ADD_LABEL:   return "label"; break;
 	case AlterCmd::ADD_ATTR_ND: break;
 	}
 	return string();
@@ -385,6 +387,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 			case AlterCmd::ADD_ZOMBIE:  node->addZombie( ZombieAttr::create(name_) ); break;
          case AlterCmd::ADD_VARIABLE:node->add_variable( name_, value_); break;
          case AlterCmd::ADD_LATE:    node->addLate( LateAttr::create(name_)); break;
+         case AlterCmd::ADD_LABEL:   node->addLabel( Label(name_,value_) ); break;
          case AlterCmd::ADD_LIMIT: {
              int int_value = 0;
              try { int_value = boost::lexical_cast< int >( value_ ); }
@@ -467,7 +470,7 @@ const char* AlterCmd::desc() {
          "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
          "         the change to take effect fully.\n"
          "       For add:\n"
-         "         [ variable | time | today | date | day | zombie | late | limit | inlimit ]\n"
+         "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label ]\n"
          "       For set_flag and clear_flag:\n"
          "         [ force_aborted | user_edit | task_aborted | edit_failed |\n"
          "           ecfcmd_failed | no_script | killed | migrated | late |\n"
@@ -478,7 +481,7 @@ const char* AlterCmd::desc() {
          "       when changing, attributes like variable,meter,event,label,limits,late\n"
          "       we expect arguments to be quoted. For sort this argument can be called 'recursive'\n"
          "arg4 = new_value\n"
-         "       specifies the new value only used for 'change'\n"
+         "       specifies the new value only used for 'change'/'add'\n"
          "       values with spaces must be quoted\n"
          "arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
          ;
@@ -556,7 +559,7 @@ void AlterCmd::create( 	Cmd_ptr& cmd,
 void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths ) const
 {
 	// options[0]  - add
-	// options[1]  - [ time | date | day | zombie | variable | limit | inlimit ]
+	// options[1]  - [ time | date | day | zombie | variable | limit | inlimit | label ]
 	// options[2]  - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name | path_to_limit ]
 	// options[3]  - variable_value
 	std::stringstream ss;
@@ -607,6 +610,22 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
 			Variable check(name,value);
 			break;
 		}
+      case AlterCmd::ADD_LABEL: {
+         if (options.size() == 3 && paths.size() > 1) {
+            // label value may be a path, hence it will be in the paths parameter
+            options.push_back(paths[0] );
+            paths.erase( paths.begin() );
+         }
+         if (options.size() < 4 ) {
+            ss << "AlterCmd: add: Expected 'add label <name> <value> <paths>. Not enough arguments\n" << dump_args(options,paths) << "\n";
+            throw std::runtime_error( ss.str() );
+         }
+         value = options[3];
+
+         // Create a Label to check valid names
+         Label check(name,value);
+         break;
+      }
       case AlterCmd::ADD_LIMIT: {  // inlimit /obs/limits:hpcd
          if (options.size() < 4 ) {
             ss << "AlterCmd: add: Expected 'add inlimit <name> <paths>. Not enough arguments\n" << dump_args(options,paths) << "\n";

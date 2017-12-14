@@ -893,6 +893,8 @@ def test_client_alter_add(ci):
     ci.alter(t1,"add","day","friday")
     ci.alter(t1,"add","day","saturday")
     ci.alter(t1,"add","late","late -s +00:15 -a 20:00 -c +02:00")
+    ci.alter(t1,"add","label","label_name","label_value")
+    ci.alter(t1,"add","label","label_name2","/a/label/with/path/values")
 
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
@@ -901,6 +903,7 @@ def test_client_alter_add(ci):
     assert( len(list(task_t1.todays))) == 3 ,"Expected 3 today's :\n" + str(ci.get_defs())
     assert( len(list(task_t1.dates))) == 4 ,"Expected 4 dates :\n" + str(ci.get_defs())
     assert( len(list(task_t1.days))) == 7 ,"Expected 7 days :\n" + str(ci.get_defs())
+    assert( len(list(task_t1.labels))) == 2 ,"Expected 2 labels :\n" + str(ci.get_defs())
     assert str(task_t1.get_late()) == "late -s +00:15 -a 20:00 -c +02:00", "Expected late 'late -s +00:15 -a 20:00 -c +02:00'" + str(ci.get_defs())
            
 
