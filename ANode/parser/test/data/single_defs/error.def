@@ -1,8 +1,279 @@
 
 suite ecflow_1182
+ repeat day 1
+ family hc00
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc01
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc02
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
  family hc03
    defstatus queued
-   repeat integer HYEAR 1993 2017 1
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc04
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc05
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+ family hc06
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc07
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc08
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc09
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc10
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc11
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc12
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc13
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc14
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc15
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc16
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc17
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc18
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc19
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc20
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc21
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc22
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc23
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc24
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc25
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc26
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
+   time +00:01
+   task uk2fdb
+      defstatus queued
+   task extrafields_uk
+      defstatus complete
+      trigger uk2fdb==complete
+  endfamily
+   family hc27
+   defstatus queued
+   repeat integer HYEAR 1993 2015 1
    time +00:01
    task uk2fdb
       defstatus queued
