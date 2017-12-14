@@ -25,9 +25,27 @@ class Test_dunder_rshift(unittest.TestCase):
         # will ONLY work if we have starting NodeContainer
         suite >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
         self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
- 
+        
+        self.assertEqual(str(suite.t2.get_trigger()),"t1 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"t2 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t4.get_trigger()),"t3 == complete","Trigger not as expected: " + str( suite.t4.get_trigger())) 
+
         fam = Family("f1") >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
         self.assertEqual(len(list(fam)),4,"expected 4 children but found " + str(len(list(fam))) )
+
+        self.assertEqual(str(fam.t2.get_trigger()),"t1 == complete","Trigger not as expected: " + str( fam.t2.get_trigger())) 
+        self.assertEqual(str(fam.t3.get_trigger()),"t2 == complete","Trigger not as expected: " + str( fam.t3.get_trigger())) 
+        self.assertEqual(str(fam.t4.get_trigger()),"t3 == complete","Trigger not as expected: " + str( fam.t4.get_trigger())) 
+
+    def test_node_dunder_rshift_trigger_cat(self):
+        suite = Suite('s')
+        # will ONLY work if we have starting NodeContainer
+        suite >> Task('t1') >> (Task('t2') + Trigger("x == 1")) >> (Task('t3') + Trigger("y==1")) >> Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+        
+        self.assertEqual(str(suite.t2.get_trigger()),"x == 1 AND t1 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"y==1 AND t2 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t4.get_trigger()),"t3 == complete","Trigger not as expected: " + str( suite.t4.get_trigger())) 
 
 
 class Test_dunder_add(unittest.TestCase):
@@ -221,6 +239,8 @@ class TestTrigger(unittest.TestCase):
         task = defs.add_suite("s").add_family("f").add_task("t")
         t = Trigger(["a","b",task])
         self.assertEqual(str(t),"a == complete AND b == complete AND /s/f/t == complete","Trigger not as expected: " + str(t))
+        task += t
+        self.assertEqual(str(task.get_trigger() ),"a == complete AND b == complete AND /s/f/t == complete","Trigger not as expected: " + str(task.get_trigger())) 
 
     def test_add(self):
         defs = Defs()
