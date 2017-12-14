@@ -233,6 +233,18 @@ class TestAddVariable(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+    def test_alternative2(self):
+         
+        defs = Defs() + Suite("s1")
+        defs.s1 += { "HELLO":"world", "NAME":"value", "NAME2":"value2", 
+                     "NAME3":"value3", "NAME4":4, "BILL":1, "FRED":"bloggs" }
+ 
+        defs.s1.sort_attributes("variable");
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
 
 class TestAddTrigger(unittest.TestCase):
      
