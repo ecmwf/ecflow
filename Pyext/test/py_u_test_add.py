@@ -21,9 +21,8 @@ import sys
 
 class Test_dunder_rshift(unittest.TestCase):
     def test_node_dunder_rshift(self):
-        suite = Suite('s')
         # will ONLY work if we have starting NodeContainer
-        suite >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
+        suite = Suite('s') >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
         self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
         
         self.assertEqual(str(suite.t2.get_trigger()),"t1 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 

@@ -284,6 +284,49 @@ class TestAddTrigger(unittest.TestCase):
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
 
+class TestAddTaskChain(unittest.TestCase):
+
+    def setUp(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
+        defs.s1.t2 += Trigger( "t1 == complete" )
+        defs.s1.t3 += Trigger( "t2 == complete" )
+        defs.s1.t4 += Trigger( "t3 == complete" )
+        self.defs = defs
+        
+    def test_alternative(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
+        defs.s1.t2 += Trigger( ["t1"] )
+        defs.s1.t3 += Trigger( ["t2"] )
+        defs.s1.t4 += Trigger( ["t3"] )
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+
+    def test_alternative1(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
+        defs.s1.t2 += Trigger( [ defs.s1.t1 ] )
+        defs.s1.t3 += Trigger( [ defs.s1.t2 ] )
+        defs.s1.t4 += Trigger( [ defs.s1.t3 ] )
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+    def test_alternative1(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 >> Task("t1") >> Task("t2") >> Task("t3") >> Task("t4")
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
 class TestAddLargeTrigger(unittest.TestCase):
     
     def setUp(self):
