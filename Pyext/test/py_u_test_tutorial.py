@@ -680,9 +680,9 @@ class TestRepeat(unittest.TestCase):
      
         print("Creating suite definition") 
         defs = Defs().add( Suite("test") )
-        defs.test += [Edit( ECF_INCLUDE=self.ecf_includes,
-                            ECF_HOME=self.ecf_home), Family("f4") ]
-        defs.test.f4 += [   Edit(SLEEP=2),
+        defs.test += [ { "ECF_INCLUDE":self.ecf_includes, "ECF_HOME":self.ecf_home }, 
+                        Family("f4") ]
+        defs.test.f4 += [   {"SLEEP":2},
                             RepeatString("NAME", ["a", "b", "c", "d", "e", "f" ]),
                             Family("f5") ]
         defs.test.f4.f5 += [ RepeatInteger("VALUE", 1, 10),
