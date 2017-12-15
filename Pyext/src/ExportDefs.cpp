@@ -82,11 +82,6 @@ std::string check_defs(defs_ptr defs)
  	return warning_msg;
 }
 
-void save_as_checkpt(defs_ptr defs, const std::string& file_name)
-{
-   defs->boost_save_as_checkpt(file_name); // use default ARCHIVE
-}
-
 void restore_from_checkpt(defs_ptr defs, const std::string& file_name)
 {
    // Temp, until default ecflow version is 4.7.0, ECFLOW-939
@@ -265,7 +260,7 @@ void export_Defs()
 	.def("get_all_nodes",         &get_all_nodes,"Returns all the `node`_ s in the definition")
 	.def("get_all_tasks",         &get_all_tasks,"Returns all the `task`_ nodes")
 	.def("has_time_dependencies", &Defs::hasTimeDependencies,"returns True if the `suite definition`_ has any time `dependencies`_")
-	.def("save_as_checkpt",       &save_as_checkpt, "Save the in memory `suite definition`_ as a `check point`_ file. This includes all node state.")
+	.def("save_as_checkpt",       &Defs::save_as_checkpt, "Save the in memory `suite definition`_ as a `check point`_ file. This includes all node state.")
 	.def("restore_from_checkpt",  &restore_from_checkpt, "Restore the `suite definition`_ from a `check point`_ file stored on disk")
 	.def("save_as_defs",          &save_as_defs,   "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
 	.def("save_as_defs",          &save_as_defs_1, "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
