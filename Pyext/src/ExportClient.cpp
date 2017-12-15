@@ -68,10 +68,10 @@ private:
 };
 void stats(ClientInvoker* self) { CliSetter setter(self); self->stats(); }
 void stats_reset(ClientInvoker* self) { self->stats_reset(); }
-boost::python::list suites(ClientInvoker* self) {
+bp::list suites(ClientInvoker* self) {
    self->suites();
    const std::vector<std::string>& the_suites = self->server_reply().get_string_vec();
-   boost::python::list list;
+   bp::list list;
    size_t the_size = the_suites.size();
    for(size_t i = 0; i < the_size; i++)  list.append( the_suites[i] );
    return list;
@@ -83,47 +83,47 @@ void free_trigger_dep(ClientInvoker* self, const std::string& path) { self->free
 void free_date_dep(ClientInvoker* self, const std::string& path)    { self->freeDep(path,false/*trigger*/,false/*all*/,true /*date*/,false/*time*/); }
 void free_time_dep(ClientInvoker* self, const std::string& path)    { self->freeDep(path,false/*trigger*/,false/*all*/,false/*date*/,true /*time*/); }
 void free_all_dep(ClientInvoker* self, const std::string& path)     { self->freeDep(path,false/*trigger*/,true /*all*/,false/*date*/,false/*time*/); }
-void free_trigger_dep1(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->freeDep(paths,true /*trigger*/,false/*all*/,false/*date*/,false/*time*/); }
-void free_date_dep1(ClientInvoker* self,   const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->freeDep(paths,false/*trigger*/,false/*all*/,true /*date*/,false/*time*/); }
-void free_time_dep1(ClientInvoker* self,   const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->freeDep(paths,false/*trigger*/,false/*all*/,false/*date*/,true /*time*/); }
-void free_all_dep1(ClientInvoker* self,    const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->freeDep(paths,false/*trigger*/,true /*all*/,false/*date*/,false/*time*/); }
+void free_trigger_dep1(ClientInvoker* self,const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->freeDep(paths,true /*trigger*/,false/*all*/,false/*date*/,false/*time*/); }
+void free_date_dep1(ClientInvoker* self,   const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->freeDep(paths,false/*trigger*/,false/*all*/,true /*date*/,false/*time*/); }
+void free_time_dep1(ClientInvoker* self,   const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->freeDep(paths,false/*trigger*/,false/*all*/,false/*date*/,true /*time*/); }
+void free_all_dep1(ClientInvoker* self,    const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->freeDep(paths,false/*trigger*/,true /*all*/,false/*date*/,false/*time*/); }
 
 void force_state(ClientInvoker* self, const std::string& path, NState::State state)         { self->force(path,NState::toString(state),false);}
-void force_states(ClientInvoker* self, const boost::python::list& list, NState::State state){ std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->force(paths,NState::toString(state),false);}
+void force_states(ClientInvoker* self, const bp::list& list, NState::State state){ std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->force(paths,NState::toString(state),false);}
 void force_state_recursive(ClientInvoker* self, const std::string& path, NState::State state) { self->force(path,NState::toString(state),true);}
-void force_states_recursive(ClientInvoker* self,const boost::python::list& list,NState::State state){ std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->force(paths,NState::toString(state),true);}
+void force_states_recursive(ClientInvoker* self,const bp::list& list,NState::State state){ std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->force(paths,NState::toString(state),true);}
 void force_event(ClientInvoker* self, const std::string& path, const std::string& set_or_clear)        { self->force(path,set_or_clear);}
-void force_events(ClientInvoker* self,const boost::python::list& list,const std::string& set_or_clear) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->force(paths,set_or_clear);}
+void force_events(ClientInvoker* self,const bp::list& list,const std::string& set_or_clear) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->force(paths,set_or_clear);}
 
 void run(ClientInvoker* self, const std::string& path,   bool force)       { self->run(path,force);}
-void runs(ClientInvoker* self,const boost::python::list& list, bool force) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->run(paths,force);}
+void runs(ClientInvoker* self,const bp::list& list, bool force) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->run(paths,force);}
 void requeue(ClientInvoker* self,std::string path, const std::string& option) { self->requeue(path,option);}
-void requeues(ClientInvoker* self,const boost::python::list& list, const std::string& option) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->requeue(paths,option);}
+void requeues(ClientInvoker* self,const bp::list& list, const std::string& option) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->requeue(paths,option);}
 void suspend(ClientInvoker* self, const std::string& path)               { self->suspend(path);}
-void suspends(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->suspend(paths);}
+void suspends(ClientInvoker* self,const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->suspend(paths);}
 void resume(ClientInvoker* self, const std::string& path)          { self->resume(path);}
-void resumes(ClientInvoker* self,const boost::python::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->resume(paths);}
+void resumes(ClientInvoker* self,const bp::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->resume(paths);}
 void status(ClientInvoker* self, const std::string& path)          { self->status(path);}
-void statuss(ClientInvoker* self,const boost::python::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->status(paths);}
+void statuss(ClientInvoker* self,const bp::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->status(paths);}
 void do_kill(ClientInvoker* self, const std::string& path)         { self->kill(path);}
-void do_kills(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->kill(paths);}
+void do_kills(ClientInvoker* self,const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->kill(paths);}
 const std::string& check(ClientInvoker* self, const std::string& node_path)     { self->check(node_path); return self->get_string(); }
-const std::string& checks(ClientInvoker* self, const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->check(paths); return self->get_string(); }
+const std::string& checks(ClientInvoker* self, const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->check(paths); return self->get_string(); }
 
-void delete_node(ClientInvoker* self,const boost::python::list& list, bool force) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->delete_nodes(paths,force);}
+void delete_node(ClientInvoker* self,const bp::list& list, bool force) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->delete_nodes(paths,force);}
 
 void ch_suites(ClientInvoker* self){ CliSetter cli(self);self->ch_suites();}
-void ch_register(ClientInvoker* self,bool auto_add_new_suites,const boost::python::list& list)
+void ch_register(ClientInvoker* self,bool auto_add_new_suites,const bp::list& list)
 {std::vector<std::string> suites;BoostPythonUtil::list_to_str_vec(list,suites); self->ch_register(auto_add_new_suites,suites);}
 
-void ch_add(ClientInvoker* self,int client_handle,const boost::python::list& list)
+void ch_add(ClientInvoker* self,int client_handle,const bp::list& list)
 {std::vector<std::string> suites;BoostPythonUtil::list_to_str_vec(list,suites); self->ch_add(client_handle,suites);}
-void ch1_add(ClientInvoker* self,const boost::python::list& list)
+void ch1_add(ClientInvoker* self,const bp::list& list)
 {std::vector<std::string> suites;BoostPythonUtil::list_to_str_vec(list,suites); self->ch1_add(suites);}
 
-void ch_remove(ClientInvoker* self,int client_handle,const boost::python::list& list)
+void ch_remove(ClientInvoker* self,int client_handle,const bp::list& list)
 {std::vector<std::string> suites;BoostPythonUtil::list_to_str_vec(list,suites); self->ch_remove(client_handle,suites);}
-void ch1_remove(ClientInvoker* self,const boost::python::list& list)
+void ch1_remove(ClientInvoker* self,const bp::list& list)
 {std::vector<std::string> suites;BoostPythonUtil::list_to_str_vec(list,suites); self->ch1_remove(suites);}
 
 /// Need to provide override since the boolean argument is optional.
@@ -134,7 +134,7 @@ void replace_2(ClientInvoker* self,const std::string& absNodePath, const std::st
 void order(ClientInvoker* self,const std::string& absNodePath,const std::string& the_order){ self->order(absNodePath,the_order);}
 
 void alters(ClientInvoker* self,
-          const boost::python::list& list,
+          const bp::list& list,
           const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
           const std::string& attrType,
           const std::string& name = "",
@@ -147,7 +147,7 @@ void alter(ClientInvoker* self,
           const std::string& value = "") { self->alter(path,alterType,attrType,name,value);  }
 
 void alter_sorts(ClientInvoker* self,
-          const boost::python::list& list,
+          const bp::list& list,
           const std::string& attribute_name,
           bool recursive = true) {std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->check(paths);self->alter_sort(paths,attribute_name,recursive); }
 void alter_sort(ClientInvoker* self,
@@ -193,7 +193,7 @@ void export_Client()
 	.def("get_server_defs",  &ClientInvoker::getDefs,         ClientDoc::get_server_defs())
  	.def("sync_local",       &ClientInvoker::sync_local,      ClientDoc::sync())
  	.def("news_local",       &news_local,                     ClientDoc::news())
-   .add_property("changed_node_paths",boost::python::range( &ClientInvoker::changed_node_paths_begin, &ClientInvoker::changed_node_paths_end),ClientDoc::changed_node_paths())
+   .add_property("changed_node_paths",bp::range( &ClientInvoker::changed_node_paths_begin, &ClientInvoker::changed_node_paths_end),ClientDoc::changed_node_paths())
 	.def("suites" ,          &suites,                         ClientDoc::suites())
 	.def("ch_register",      &ch_register,                    ClientDoc::ch_register())
    .def("ch_suites",        &ch_suites,                      ClientDoc::ch_suites())

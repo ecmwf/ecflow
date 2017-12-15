@@ -47,21 +47,21 @@ namespace bp = boost::python;
 
 void add_time_series_3(CronAttr* self,const std::string& ts) { self->addTimeSeries(TimeSeries::create(ts));}
 
-void set_week_days(CronAttr* cron,const boost::python::list& list)
+void set_week_days(CronAttr* cron,const bp::list& list)
 {
    std::vector<int> int_vec;
    BoostPythonUtil::list_to_int_vec(list,int_vec);
    cron->addWeekDays(int_vec);
 }
 
-void set_days_of_month(CronAttr* cron,const boost::python::list& list)
+void set_days_of_month(CronAttr* cron,const bp::list& list)
 {
    std::vector<int> int_vec;
    BoostPythonUtil::list_to_int_vec(list,int_vec);
    cron->addDaysOfMonth(int_vec);
 }
 
-void set_months(CronAttr* cron,const boost::python::list& list)
+void set_months(CronAttr* cron,const bp::list& list)
 {
    std::vector<int> int_vec;
    BoostPythonUtil::list_to_int_vec(list,int_vec);
@@ -72,13 +72,13 @@ void set_months(CronAttr* cron,const boost::python::list& list)
 // *AND* the only way make_constructor works is with a pointer.
 // The Node::add function seem to cope with this, some boost python magic,must do a conversion
 // from shared_ptr to pass by reference
-static boost::shared_ptr<RepeatEnumerated> create_RepeatEnumerated(const std::string& name, const boost::python::list& list)
+static boost::shared_ptr<RepeatEnumerated> create_RepeatEnumerated(const std::string& name, const bp::list& list)
 {
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
    return boost::make_shared<RepeatEnumerated>( name,vec );
 }
-static boost::shared_ptr<RepeatString> create_RepeatString(const std::string& name, const boost::python::list& list)
+static boost::shared_ptr<RepeatString> create_RepeatString(const std::string& name, const bp::list& list)
 {
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
@@ -86,32 +86,32 @@ static boost::shared_ptr<RepeatString> create_RepeatString(const std::string& na
 }
 
 static boost::shared_ptr<ZombieAttr> create_ZombieAttr(
-      Child::ZombieType zt,const boost::python::list& list,User::Action uc,int life_time_in_server)
+      Child::ZombieType zt,const bp::list& list,User::Action uc,int life_time_in_server)
 {
    std::vector<Child::CmdType> vec;
    int the_list_size = len(list);
    vec.reserve(the_list_size);
    for (int i = 0; i < the_list_size; ++i) {
-      vec.push_back(boost::python::extract<Child::CmdType>(list[i]));
+      vec.push_back(extract<Child::CmdType>(list[i]));
    }
    return boost::make_shared<ZombieAttr>(zt,vec,uc,life_time_in_server );
 }
 
 static boost::shared_ptr<ZombieAttr> create_ZombieAttr1(
-      Child::ZombieType zt,const boost::python::list& list,User::Action uc)
+      Child::ZombieType zt,const bp::list& list,User::Action uc)
 {
    std::vector<Child::CmdType> vec;
    int the_list_size = len(list);
    vec.reserve(the_list_size);
    for (int i = 0; i < the_list_size; ++i) {
-      vec.push_back(boost::python::extract<Child::CmdType>(list[i]));
+      vec.push_back(extract<Child::CmdType>(list[i]));
    }
    return boost::make_shared<ZombieAttr>(zt,vec,uc);
 }
 
-static boost::python::list wrap_set_of_strings(Limit* limit)
+static bp::list wrap_set_of_strings(Limit* limit)
 {
-   boost::python::list list;
+   bp::list list;
    const std::set<std::string>& paths = limit->paths();
    BOOST_FOREACH(std::string path, paths) { list.append(path); }
    return list;
@@ -231,7 +231,7 @@ void export_NodeAttr()
  	.def("zombie_type",    &ZombieAttr::zombie_type,    "Returns the `zombie type`_")
  	.def("user_action",    &ZombieAttr::action,         "The automated action to invoke, when zombies arise")
  	.def("zombie_lifetime",&ZombieAttr::zombie_lifetime,"Returns the lifetime in seconds of `zombie`_ in the server")
-   .add_property( "child_cmds",boost::python::range(&ZombieAttr::child_begin,&ZombieAttr::child_end),"The list of child commands. If empty action applies to all child cmds")
+   .add_property( "child_cmds",bp::range(&ZombieAttr::child_begin,&ZombieAttr::child_end),"The list of child commands. If empty action applies to all child cmds")
    ;
 
  	class_<Variable>("Variable",NodeAttrDoc::variable_doc(),init<std::string, std::string>())
@@ -264,7 +264,7 @@ void export_NodeAttr()
   	;
 
 	// This will not work, because paths_begin
-   //.add_property("node_paths", boost::python::range(&Limit::paths_begin,&Limit::paths_begin),"List of nodes(paths) that have consumed a limit")
+   //.add_property("node_paths", bp::range(&Limit::paths_begin,&Limit::paths_begin),"List of nodes(paths) that have consumed a limit")
 
 	class_<Limit, boost::shared_ptr<Limit> >("Limit",NodeAttrDoc::limit_doc(),init<std::string, int>())
 	.def(self == self )                               // __eq__
@@ -278,7 +278,7 @@ void export_NodeAttr()
    .def("node_paths",&wrap_set_of_strings,"List of nodes(paths) that have consumed a limit")
  	;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python< boost::shared_ptr<Limit> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< boost::shared_ptr<Limit> >(); // needed for mac and boost 1.6
 #endif
 
 	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc(),init<std::string,  std::string, optional<int> >())
@@ -401,7 +401,7 @@ void export_NodeAttr()
    .def("is_late",   &LateAttr::isLate, "Return True if late")
  	;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python< boost::shared_ptr<LateAttr> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< boost::shared_ptr<LateAttr> >(); // needed for mac and boost 1.6
 #endif
 
 	class_<AutoCancelAttr, boost::shared_ptr<AutoCancelAttr> >(
@@ -418,7 +418,7 @@ void export_NodeAttr()
 	.def("days",    &AutoCancelAttr::days,     "Returns a boolean true if time was specified in days")
   	;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python< boost::shared_ptr<AutoCancelAttr> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< boost::shared_ptr<AutoCancelAttr> >(); // needed for mac and boost 1.6
 #endif
 
 	class_<RepeatDate >("RepeatDate",NodeAttrDoc::repeat_date_doc() ,init< std::string, int, int, optional<int> >()) // name, start, end , delta
@@ -454,7 +454,7 @@ void export_NodeAttr()
 	.def("step",           &RepeatEnumerated::step)
 	;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python< boost::shared_ptr<RepeatEnumerated> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< boost::shared_ptr<RepeatEnumerated> >(); // needed for mac and boost 1.6
 #endif
 
 	class_<RepeatString,boost::shared_ptr<RepeatString> >("RepeatString", NodeAttrDoc::repeat_string_doc())
@@ -468,7 +468,7 @@ void export_NodeAttr()
 	.def("step",           &RepeatString::step)
 	;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python< boost::shared_ptr<RepeatString> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< boost::shared_ptr<RepeatString> >(); // needed for mac and boost 1.6
 #endif
 
 	class_<RepeatDay>("RepeatDay",NodeAttrDoc::repeat_day_doc(),init< optional<int> >())
@@ -504,9 +504,9 @@ void export_NodeAttr()
 	.def( "set_time_series",   add_time_series_2, "Add a time series. This will never complete")
 	.def( "set_time_series",   &add_time_series_3,"Add a time series. This will never complete")
 	.def( "time",              &CronAttr::time, return_value_policy<copy_const_reference>(), "return cron time as a TimeSeries")
-	.add_property( "week_days",    boost::python::range(&CronAttr::week_days_begin,    &CronAttr::week_days_end),     "returns a integer list of week days")
-	.add_property( "days_of_month",boost::python::range(&CronAttr::days_of_month_begin,&CronAttr::days_of_month_end), "returns a integer list of days of the month")
-	.add_property( "months",       boost::python::range(&CronAttr::months_begin,       &CronAttr::months_end),        "returns a integer list of months of the year")
+	.add_property( "week_days",    bp::range(&CronAttr::week_days_begin,    &CronAttr::week_days_end),     "returns a integer list of week days")
+	.add_property( "days_of_month",bp::range(&CronAttr::days_of_month_begin,&CronAttr::days_of_month_end), "returns a integer list of days of the month")
+	.add_property( "months",       bp::range(&CronAttr::months_begin,       &CronAttr::months_end),        "returns a integer list of months of the year")
  	;
 
 
@@ -535,6 +535,6 @@ void export_NodeAttr()
 	.def( "virtual"      ,&ClockAttr::is_virtual,   "Returns a boolean, where true means that clock is virtual")
 	;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python< boost::shared_ptr<ClockAttr> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< boost::shared_ptr<ClockAttr> >(); // needed for mac and boost 1.6
 #endif
 }

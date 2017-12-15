@@ -45,7 +45,7 @@ Defs* get_defs(node_ptr self) { return self->defs(); }
 node_ptr add_variable(node_ptr self,const std::string& name, const std::string& value) { self->add_variable(name,value); return self;}
 node_ptr add_variable_int(node_ptr self,const std::string& name, int value) { self->add_variable_int(name,value); return self;}
 node_ptr add_variable_var(node_ptr self,const Variable& var) { self->addVariable(var); return self;}
-node_ptr add_variable_dict(node_ptr self,const boost::python::dict& dict) {
+node_ptr add_variable_dict(node_ptr self,const bp::dict& dict) {
    std::vector<std::pair<std::string,std::string> > vec;
    BoostPythonUtil::dict_to_str_vec(dict,vec);
    std::vector<std::pair<std::string,std::string> >::iterator i;
@@ -146,18 +146,18 @@ node_ptr add_defstatus1(node_ptr self,const Defstatus& ds)         { self->addDe
 // Trigger & Complete thin wrapper over Expression, allows us to call:
 //  Task("a").add(Trigger("a == 1"),Complete("b == 1"))
 ///////////////////////////////////////////////////////////////////////////////////
-static void construct_expr(std::vector<PartExpression>& vec, const boost::python::list& list) {
+static void construct_expr(std::vector<PartExpression>& vec, const bp::list& list) {
    int the_list_size = len(list);
    for(int i = 0; i < the_list_size; ++i) {
       std::string part_expr;
-      if (boost::python::extract<std::string>(list[i]).check()) {
-         part_expr = boost::python::extract<std::string>(list[i]);
+      if (extract<std::string>(list[i]).check()) {
+         part_expr = extract<std::string>(list[i]);
          if (Str::valid_name(part_expr)) {
             part_expr += " == complete";
          }
       }
-      else if (boost::python::extract<node_ptr>(list[i]).check()) {
-         node_ptr node = boost::python::extract<node_ptr>(list[i]);
+      else if (extract<node_ptr>(list[i]).check()) {
+         node_ptr node = extract<node_ptr>(list[i]);
          if (node->parent()) part_expr = node->absNodePath();
          else                part_expr = node->name();
          part_expr += " == complete";
@@ -173,9 +173,8 @@ public:
    Trigger(const std::string& expression) { add(PartExpression(expression)); }
    Trigger(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
    Trigger(const PartExpression& pe) { add(pe); }
-   Trigger() {}
    Trigger(const Trigger& rhs) : vec_(rhs.vec_) {}
-   Trigger(const boost::python::list& list ) { construct_expr(vec_,list);}
+   Trigger(const bp::list& list ) { construct_expr(vec_,list);}
 
    bool operator==( const Trigger& rhs) const { return vec_ == rhs.vec_;}
    bool operator!=( const Trigger& rhs) const { return !operator==(rhs);}
@@ -194,9 +193,8 @@ public:
    Complete(const std::string& expression) { add(PartExpression(expression)); }
    Complete(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
    Complete(const PartExpression& pe) { add(pe); }
-   Complete() {}
    Complete(const Complete& rhs) : vec_(rhs.vec_) {}
-   Complete(const boost::python::list& list ) { construct_expr(vec_,list);}
+   Complete(const bp::list& list ) { construct_expr(vec_,list);}
 
    bool operator==( const Complete& rhs) const { return vec_ == rhs.vec_;}
    bool operator!=( const Complete& rhs) const { return !operator==(rhs);}
@@ -211,67 +209,67 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
-static object do_add(node_ptr self, const boost::python::object& arg){
+static object do_add(node_ptr self, const bp::object& arg){
    //std::cout << "do_add " << self->name() << "\n";
    if (arg.ptr() == object().ptr())  return object(self); // *IGNORE* None
-   if (boost::python::extract<Edit>(arg).check()) {
-      Edit edit = boost::python::extract<Edit>(arg);
+   if (extract<Edit>(arg).check()) {
+      Edit edit = extract<Edit>(arg);
       const std::vector<Variable>& vec = edit.variables();
       for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
    }
-   else if (boost::python::extract<node_ptr>(arg).check()) {
+   else if (extract<node_ptr>(arg).check()) {
       // std::cout << "  do_add node_ptr\n";
       NodeContainer* nc = self->isNodeContainer();
       if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
-      node_ptr child = boost::python::extract<node_ptr>(arg);
+      node_ptr child = extract<node_ptr>(arg);
       nc->addChild(child);
    }
-   else if (boost::python::extract<Event>(arg).check())     self->addEvent(boost::python::extract<Event>(arg));
-   else if (boost::python::extract<Meter>(arg).check())     self->addMeter(boost::python::extract<Meter>(arg));
-   else if (boost::python::extract<Label>(arg).check())     self->addLabel(boost::python::extract<Label>(arg));
-   else if (boost::python::extract<Trigger>(arg).check()){Trigger t = boost::python::extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
-   else if (boost::python::extract<Complete>(arg).check()){Complete t = boost::python::extract<Complete>(arg);self->py_add_complete_expr(t.expr());}
-   else if (boost::python::extract<Limit>(arg).check())     self->addLimit(boost::python::extract<Limit>(arg));
-   else if (boost::python::extract<InLimit>(arg).check())   self->addInLimit(boost::python::extract<InLimit>(arg));
-   else if (boost::python::extract<DayAttr>(arg).check())   self->addDay(boost::python::extract<DayAttr>(arg));
-   else if (boost::python::extract<DateAttr>(arg).check())  self->addDate(boost::python::extract<DateAttr>(arg));
-   else if (boost::python::extract<TodayAttr>(arg).check()) self->addToday(boost::python::extract<TodayAttr>(arg));
-   else if (boost::python::extract<TimeAttr>(arg).check())  self->addTime(boost::python::extract<TimeAttr>(arg));
-   else if (boost::python::extract<CronAttr>(arg).check())  self->addCron(boost::python::extract<CronAttr>(arg));
-   else if (boost::python::extract<LateAttr>(arg).check())  self->addLate(boost::python::extract<LateAttr>(arg));
-   else if (boost::python::extract<ZombieAttr>(arg).check())self->addZombie(boost::python::extract<ZombieAttr>(arg));
-   else if (boost::python::extract<RepeatDate>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDate>(arg)  ));
-   else if (boost::python::extract<RepeatInteger>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatInteger>(arg)  ));
-   else if (boost::python::extract<RepeatEnumerated>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatEnumerated>(arg)  ));
-   else if (boost::python::extract<RepeatString>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatString>(arg)  ));
-   else if (boost::python::extract<RepeatDay>(arg).check())self->addRepeat(Repeat(boost::python::extract<RepeatDay>(arg)  ));
-   else if (boost::python::extract<AutoCancelAttr>(arg).check())self->addAutoCancel(boost::python::extract<AutoCancelAttr>(arg));
-   else if (boost::python::extract<VerifyAttr>(arg).check())self->addVerify(boost::python::extract<VerifyAttr>(arg));
-   else if (boost::python::extract<Defstatus>(arg).check()){Defstatus t = boost::python::extract<Defstatus>(arg);self->addDefStatus(t.state());}
-   else if (boost::python::extract<boost::python::list>(arg).check()){
+   else if (extract<Event>(arg).check())     self->addEvent(extract<Event>(arg));
+   else if (extract<Meter>(arg).check())     self->addMeter(extract<Meter>(arg));
+   else if (extract<Label>(arg).check())     self->addLabel(extract<Label>(arg));
+   else if (extract<Trigger>(arg).check()){Trigger t = extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
+   else if (extract<Complete>(arg).check()){Complete t = extract<Complete>(arg);self->py_add_complete_expr(t.expr());}
+   else if (extract<Limit>(arg).check())     self->addLimit(extract<Limit>(arg));
+   else if (extract<InLimit>(arg).check())   self->addInLimit(extract<InLimit>(arg));
+   else if (extract<DayAttr>(arg).check())   self->addDay(extract<DayAttr>(arg));
+   else if (extract<DateAttr>(arg).check())  self->addDate(extract<DateAttr>(arg));
+   else if (extract<TodayAttr>(arg).check()) self->addToday(extract<TodayAttr>(arg));
+   else if (extract<TimeAttr>(arg).check())  self->addTime(extract<TimeAttr>(arg));
+   else if (extract<CronAttr>(arg).check())  self->addCron(extract<CronAttr>(arg));
+   else if (extract<LateAttr>(arg).check())  self->addLate(extract<LateAttr>(arg));
+   else if (extract<ZombieAttr>(arg).check())self->addZombie(extract<ZombieAttr>(arg));
+   else if (extract<RepeatDate>(arg).check())self->addRepeat(Repeat(extract<RepeatDate>(arg)  ));
+   else if (extract<RepeatInteger>(arg).check())self->addRepeat(Repeat(extract<RepeatInteger>(arg)  ));
+   else if (extract<RepeatEnumerated>(arg).check())self->addRepeat(Repeat(extract<RepeatEnumerated>(arg)  ));
+   else if (extract<RepeatString>(arg).check())self->addRepeat(Repeat(extract<RepeatString>(arg)  ));
+   else if (extract<RepeatDay>(arg).check())self->addRepeat(Repeat(extract<RepeatDay>(arg)  ));
+   else if (extract<AutoCancelAttr>(arg).check())self->addAutoCancel(extract<AutoCancelAttr>(arg));
+   else if (extract<VerifyAttr>(arg).check())self->addVerify(extract<VerifyAttr>(arg));
+   else if (extract<Defstatus>(arg).check()){Defstatus t = extract<Defstatus>(arg);self->addDefStatus(t.state());}
+   else if (extract<bp::list>(arg).check()){
       //std::cout << "  do_add list\n";
-      boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
+      bp::list the_list  = extract<bp::list>(arg);
       int the_list_size = len(the_list);
       for(int i = 0; i < the_list_size; ++i) (void) do_add(self,the_list[i]); // recursive
    }
-   else if (boost::python::extract<ClockAttr>(arg).check()) {
+   else if (extract<ClockAttr>(arg).check()) {
       if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
-      self->isSuite()->addClock( boost::python::extract<ClockAttr>(arg));
+      self->isSuite()->addClock( extract<ClockAttr>(arg));
    }
-   else if (boost::python::extract<Variable>(arg).check())       self->addVariable(boost::python::extract<Variable>(arg) );
-   else if (boost::python::extract<dict>(arg).check()){dict d = boost::python::extract<dict>(arg); add_variable_dict(self,d);}
+   else if (extract<Variable>(arg).check())       self->addVariable(extract<Variable>(arg) );
+   else if (extract<dict>(arg).check()){dict d = extract<dict>(arg); add_variable_dict(self,d);}
    else throw std::runtime_error("ExportNode::add : Unknown type ");
    return object(self);
 }
 
-static object do_rshift(node_ptr self, const boost::python::object& arg){
+static object do_rshift(node_ptr self, const bp::object& arg){
    //std::cout << "do_rshift\n";
    (void)do_add(self,arg);
 
-   if (boost::python::extract<node_ptr>(arg).check()) {
+   if (extract<node_ptr>(arg).check()) {
       NodeContainer* nc = self->isNodeContainer();
       if (!nc) throw std::runtime_error("ExportNode::do_rshift() : Can only add a child to Suite or Family");
-      node_ptr child = boost::python::extract<node_ptr>(arg);
+      node_ptr child = extract<node_ptr>(arg);
 
       std::vector<node_ptr> children;
       nc->immediateChildren(children);
@@ -288,7 +286,7 @@ static object do_rshift(node_ptr self, const boost::python::object& arg){
    return object(self);
 }
 
-static object node_iadd(node_ptr self, const boost::python::list& list) {
+static object node_iadd(node_ptr self, const bp::list& list) {
    // std::cout << "node_iadd list " << self->name() << "\n";
    int the_list_size = len(list);
    for(int i = 0; i < the_list_size; ++i) (void) do_add(self,list[i]);
@@ -297,18 +295,18 @@ static object node_iadd(node_ptr self, const boost::python::list& list) {
 
 static object add(tuple args, dict kwargs) {
    int the_list_size = len(args);
-   node_ptr self = boost::python::extract<node_ptr>(args[0]); // self
+   node_ptr self = extract<node_ptr>(args[0]); // self
    if (!self) throw std::runtime_error("ExportNode::add() : first argument is not a node");
    for (int i = 1; i < the_list_size; ++i) (void) do_add(self,args[i]);
 
    // key word arguments are use for adding variable only
-   boost::python::list keys = kwargs.keys();
+   bp::list keys = kwargs.keys();
    const int no_of_keys = len(keys);
    for(int i = 0; i < no_of_keys; ++i) {
-      boost::python::object curArg = keys[i];
+      bp::object curArg = keys[i];
       if (curArg) {
-         std::string first = boost::python::extract<std::string>(keys[i]);
-         std::string second = boost::python::extract<std::string>(kwargs[keys[i]]);
+         std::string first = extract<std::string>(keys[i]);
+         std::string second = extract<std::string>(kwargs[keys[i]]);
          self->add_variable(first,second);
       }
    }
@@ -352,7 +350,7 @@ void export_Node()
    // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
    class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::trigger(), init<std::string>() )
    .def(init<PartExpression>())
-   .def(init<boost::python::list>())
+   .def(init<bp::list>())
    .def(init<std::string,bool>())
    .def(self == self )                            // __eq__
    .def("__str__",        &Trigger::expression)   // __str__
@@ -361,7 +359,7 @@ void export_Node()
 
    class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::trigger(), init<std::string>() )
    .def(init<PartExpression>())
-   .def(init<boost::python::list>())
+   .def(init<bp::list>())
    .def(init<std::string,bool>())
    .def(self == self )                             // __eq__
    .def("__str__",        &Complete::expression)   // __str__
@@ -385,7 +383,7 @@ void export_Node()
    .def("__str__",        &Expression::expression)   // __str__
    .def("get_expression", &Expression::expression, "returns the complete expression as a string")
    .def("add",            &Expression::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
-   .add_property("parts", boost::python::range( &Expression::part_begin, &Expression::part_end),"Returns a list of PartExpression's" )
+   .add_property("parts", bp::range( &Expression::part_begin, &Expression::part_end),"Returns a list of PartExpression's" )
    ;
 
    // Turn off proxies by passing true as the NoProxy template parameter.
@@ -396,7 +394,7 @@ void export_Node()
 
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
-   .def("add", raw_function(add,1),                  DefsDoc::add())
+   .def("add", raw_function(add,1),           DefsDoc::add())
    .def("__add__",  &do_add,                  DefsDoc::add())
    .def("__rshift__",  &do_rshift)
    .def("__iadd__", &do_add)
@@ -511,21 +509,21 @@ void export_Node()
    .def("get_parent",       &Node::parent, return_internal_reference<>() )
    .def("get_all_nodes",    &get_all_nodes,"Returns all the child nodes")
    .def("get_flag",         &Node::get_flag,return_value_policy<copy_const_reference>(),"Return additional state associated with a node.")
-   .add_property("meters",    boost::python::range( &Node::meter_begin,    &Node::meter_end) ,  "Returns a list of `meter`_ s")
-   .add_property("events",    boost::python::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of `event`_ s")
-   .add_property("variables", boost::python::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined `variable`_ s" )
-   .add_property("labels",    boost::python::range( &Node::label_begin,    &Node::label_end) ,  "Returns a list of `label`_ s")
-   .add_property("limits",    boost::python::range( &Node::limit_begin,    &Node::limit_end),   "Returns a list of `limit`_ s" )
-   .add_property("inlimits",  boost::python::range( &Node::inlimit_begin,  &Node::inlimit_end), "Returns a list of `inlimit`_ s" )
-   .add_property("verifies",  boost::python::range( &Node::verify_begin,   &Node::verify_end),  "Returns a list of Verify's" )
-   .add_property("times",     boost::python::range( &Node::time_begin,     &Node::time_end),    "Returns a list of `time`_ s" )
-   .add_property("todays",    boost::python::range( &Node::today_begin,    &Node::today_end),   "Returns a list of `today`_ s" )
-   .add_property("dates",     boost::python::range( &Node::date_begin,     &Node::date_end),    "Returns a list of `date`_ s" )
-   .add_property("days",      boost::python::range( &Node::day_begin,      &Node::day_end),     "Returns a list of `day`_ s")
-   .add_property("crons",     boost::python::range( &Node::cron_begin,     &Node::cron_end),    "Returns a list of `cron`_ s" )
-   .add_property("zombies",   boost::python::range( &Node::zombie_begin,   &Node::zombie_end),  "Returns a list of `zombie`_ s" )
+   .add_property("meters",    bp::range( &Node::meter_begin,    &Node::meter_end) ,  "Returns a list of `meter`_ s")
+   .add_property("events",    bp::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of `event`_ s")
+   .add_property("variables", bp::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined `variable`_ s" )
+   .add_property("labels",    bp::range( &Node::label_begin,    &Node::label_end) ,  "Returns a list of `label`_ s")
+   .add_property("limits",    bp::range( &Node::limit_begin,    &Node::limit_end),   "Returns a list of `limit`_ s" )
+   .add_property("inlimits",  bp::range( &Node::inlimit_begin,  &Node::inlimit_end), "Returns a list of `inlimit`_ s" )
+   .add_property("verifies",  bp::range( &Node::verify_begin,   &Node::verify_end),  "Returns a list of Verify's" )
+   .add_property("times",     bp::range( &Node::time_begin,     &Node::time_end),    "Returns a list of `time`_ s" )
+   .add_property("todays",    bp::range( &Node::today_begin,    &Node::today_end),   "Returns a list of `today`_ s" )
+   .add_property("dates",     bp::range( &Node::date_begin,     &Node::date_end),    "Returns a list of `date`_ s" )
+   .add_property("days",      bp::range( &Node::day_begin,      &Node::day_end),     "Returns a list of `day`_ s")
+   .add_property("crons",     bp::range( &Node::cron_begin,     &Node::cron_end),    "Returns a list of `cron`_ s" )
+   .add_property("zombies",   bp::range( &Node::zombie_begin,   &Node::zombie_end),  "Returns a list of `zombie`_ s" )
    ;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python<node_ptr>(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python<node_ptr>(); // needed for mac and boost 1.6
 #endif
 }

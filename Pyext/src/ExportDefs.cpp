@@ -127,7 +127,7 @@ std::vector<node_ptr> get_all_nodes(defs_ptr self){ std::vector<node_ptr> nodes;
 
 // Context management, Only used to provide indentation
 defs_ptr defs_enter(defs_ptr self) { return self;}
-bool defs_exit(defs_ptr self,const boost::python::object& type,const boost::python::object& value,const boost::python::object& traceback){return false;}
+bool defs_exit(defs_ptr self,const bp::object& type,const bp::object& value,const bp::object& traceback){return false;}
 
 std::string check_job_creation(defs_ptr defs)
 {
@@ -143,7 +143,7 @@ defs_ptr add_variable_int(defs_ptr self,const std::string& name, int value) {
    self->set_server().add_or_update_user_variables(name, boost::lexical_cast<std::string>(value)); return self;}
 defs_ptr add_variable_var(defs_ptr self,const Variable& var) {
    self->set_server().add_or_update_user_variables(var.name(),var.theValue()); return self;}
-defs_ptr add_variable_dict(defs_ptr self,const boost::python::dict& dict) {
+defs_ptr add_variable_dict(defs_ptr self,const bp::dict& dict) {
    std::vector<std::pair<std::string,std::string> > vec;
    BoostPythonUtil::dict_to_str_vec(dict,vec);
    std::vector<std::pair<std::string,std::string> >::iterator i;
@@ -169,22 +169,22 @@ void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recur
 size_t defs_len(defs_ptr self) { return self->suiteVec().size();}
 bool defs_container(defs_ptr self, const std::string& name){return (self->findSuite(name)) ?  true : false;}
 
-static object do_add(defs_ptr self, const boost::python::object& arg) {
+static object do_add(defs_ptr self, const bp::object& arg) {
    //std::cout << "defs::do_add \n";
    if (arg.ptr() == object().ptr())  return object(self); // *IGNORE* None
-   if (boost::python::extract<Variable>(arg).check()) {
-      Variable var = boost::python::extract<Variable>(arg);
+   if (extract<Variable>(arg).check()) {
+      Variable var = extract<Variable>(arg);
       self->set_server().add_or_update_user_variables(var.name(),var.theValue());
    }
-   else if (boost::python::extract<Edit>(arg).check()) {
-      Edit edit = boost::python::extract<Edit>(arg);
+   else if (extract<Edit>(arg).check()) {
+      Edit edit = extract<Edit>(arg);
       const std::vector<Variable>& vec = edit.variables();
       for(size_t i=0; i < vec.size(); i++) self->set_server().add_or_update_user_variables(vec[i].name(),vec[i].theValue());
    }
-   else if (boost::python::extract<dict>(arg).check())     add_variable_dict(self,boost::python::extract<dict>(arg));
-   else if (boost::python::extract<suite_ptr>(arg).check()) self->addSuite(boost::python::extract<suite_ptr>(arg)) ;
-   else if (boost::python::extract<boost::python::list>(arg).check()){
-      boost::python::list the_list  = boost::python::extract<boost::python::list>(arg);
+   else if (extract<dict>(arg).check())     add_variable_dict(self,extract<dict>(arg));
+   else if (extract<suite_ptr>(arg).check()) self->addSuite(extract<suite_ptr>(arg)) ;
+   else if (extract<bp::list>(arg).check()){
+      bp::list the_list  = extract<bp::list>(arg);
       int the_list_size = len(the_list);
       for(int i = 0; i < the_list_size; ++i) (void) do_add(self,the_list[i]); // recursive
    }
@@ -194,25 +194,25 @@ static object do_add(defs_ptr self, const boost::python::object& arg) {
 
 static object add(tuple args, dict kwargs) {
    int the_list_size = len(args);
-   defs_ptr self = boost::python::extract<defs_ptr>(args[0]); // self
+   defs_ptr self = extract<defs_ptr>(args[0]); // self
    if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
 
    for (int i = 1; i < the_list_size; ++i) (void)do_add(self,args[i]);
 
-   boost::python::list keys = kwargs.keys();
+   bp::list keys = kwargs.keys();
    const int no_of_keys = len(keys);
    for(int i = 0; i < no_of_keys; ++i) {
-      boost::python::object curArg = keys[i];
+      bp::object curArg = keys[i];
       if (curArg) {
-         std::string first = boost::python::extract<std::string>(keys[i]);
-         std::string second = boost::python::extract<std::string>(kwargs[keys[i]]);
+         std::string first = extract<std::string>(keys[i]);
+         std::string second = extract<std::string>(kwargs[keys[i]]);
          self->set_server().add_or_update_user_variables(first,second);
       }
    }
    return object(self); // return defs as python object, relies class_<Defs>... for type registration
 }
 
-static object defs_iadd(defs_ptr self, const boost::python::list& list) {
+static object defs_iadd(defs_ptr self, const bp::list& list) {
    //std::cout << "defs_iadd  list " << self->name() << "\n";
    int the_list_size = len(list);
    for(int i = 0; i < the_list_size; ++i) (void)do_add(self,list[i]);
@@ -243,7 +243,7 @@ void export_Defs()
 	.def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support
 	.def("__len__",               &defs_len)                      // Sized protocol
 	.def("__contains__",          &defs_container)                // Container protocol
-	.def("__iter__",              boost::python::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
+	.def("__iter__",              bp::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
 	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
    .def("__iadd__",              &defs_iadd)
    .def("__iadd__",              &do_add)  // defs += Suite("s1") 
@@ -276,9 +276,9 @@ void export_Defs()
 	.def("generate_scripts",      &Defs::generate_scripts,   DefsDoc::generate_scripts_doc() )
 	.def("get_state",             &Defs::state )
 	.def("get_server_state",      &get_server_state,         DefsDoc::get_server_state() )
-	.add_property("suites",       boost::python::range( &Defs::suite_begin, &Defs::suite_end),"Returns a list of `suite`_ s")
-	.add_property("externs",      boost::python::range( &Defs::extern_begin, &Defs::extern_end),"Returns a list of `extern`_ s" )
-	.add_property("user_variables", boost::python::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined `variable`_ s" )
-	.add_property("server_variables", boost::python::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server `variable`_ s" )
+	.add_property("suites",       bp::range( &Defs::suite_begin, &Defs::suite_end),"Returns a list of `suite`_ s")
+	.add_property("externs",      bp::range( &Defs::extern_begin, &Defs::extern_end),"Returns a list of `extern`_ s" )
+	.add_property("user_variables", bp::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined `variable`_ s" )
+	.add_property("server_variables", bp::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server `variable`_ s" )
 	;
 }
