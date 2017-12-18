@@ -67,7 +67,7 @@ const char* ClientDoc::set_host_port(){
             "      int port     # The port on the server, must be unique to the server\n"
             "   )\n\n"
             "   set_host_port(\n"
-            "      string host_port, # Expect's <host>:<port>\n"
+            "      string host_port, # Expect's <host>:<port> or <host>@<port>\n"
             "   )\n\n"
             "Exceptions:\n\n"
             "- Raise a RuntimeError if the host or port is empty\n"

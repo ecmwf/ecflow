@@ -30,16 +30,7 @@ namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
-void set_host_port(ClientInvoker* self, const std::string& host,int port) {self->set_host_port(host,boost::lexical_cast<std::string>(port));}
-void set_host_port_1(ClientInvoker* self, const std::string& host_port){
-   // assume format <host>:<port>
-   size_t colonPos = host_port.find_first_of(':');
-   if (colonPos == string::npos)  throw std::runtime_error("set_host_port: expected <host>:<port> : no ':' found in " + host_port);
-   std::string host = host_port.substr(0,colonPos);
-   std::string port = host_port.substr(colonPos+1);
-   self->set_host_port(host,port);
-}
-
+void set_host_port(ClientInvoker* self, const std::string& host,int port){ self->set_host_port(host,boost::lexical_cast<std::string>(port));}
 
 std::string version(ClientInvoker* self) { return ecf::Version::raw();}
 std::string server_version(ClientInvoker* self) { self->server_version(); return self->get_string();}
@@ -167,8 +158,8 @@ void export_Client()
    .def("version",          &version,        "Returns the current client version")
    .def("server_version",   &server_version, "Returns the server version, can throw for old servers, that did not implement this request.")
    .def("set_host_port",    &ClientInvoker::set_host_port,  ClientDoc::set_host_port())
-   .def("set_host_port",    &set_host_port )
-   .def("set_host_port",    &set_host_port_1 )
+   .def("set_host_port",    &ClientInvoker::set_hostport  )
+   .def("set_host_port",    &set_host_port)
    .def("get_host",         &ClientInvoker::host, return_value_policy<copy_const_reference>(), "Return the host, assume set_host_port() has been set, otherwise return localhost" )
    .def("get_port",         &ClientInvoker::port, return_value_policy<copy_const_reference>(), "Return the port, assume set_host_port() has been set. otherwise returns 3141" )
    .def("set_retry_connection_period",&ClientInvoker::set_retry_connection_period,  ClientDoc::set_retry_connection_period())
