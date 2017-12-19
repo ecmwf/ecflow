@@ -83,7 +83,6 @@ list( APPEND u_tests
         py_u_test_get_attr  
         py_u_test_manual   
         py_u_test_tutorial   
-        py_u_test_replace_node   
         py_u_TestAddDelete   
         py_u_TestAddDeleteFunc 
         py_u_TestAddNodeFunc  
@@ -121,6 +120,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	list( APPEND s_tests
 	             py_s_TestClientApi    
 	             py_s_TestPythonChildApi
+                 py_s_test_replace_node   
 	)
 	
 	foreach( test ${s_tests} )
