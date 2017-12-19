@@ -222,7 +222,7 @@ static object defs_getattr(defs_ptr self, const std::string& attr) {
    Variable var = self->server().findVariable(attr);
    if (!var.empty()) return object(var);
 
-   std::stringstream ss; ss << "ExportDefs::defs_getattr:  Can not find suite node or defs variable of name " << attr << " from Defs";
+   std::stringstream ss; ss << "ExportDefs::defs_getattr : function of name '" << attr << "' does not exist *OR* suite or defs variable";
    throw std::runtime_error(ss.str());
    return object();
 }
@@ -240,8 +240,8 @@ void export_Defs()
 	.def("__contains__",          &defs_container)                // Container protocol
 	.def("__iter__",              bp::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
 	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
-   .def("__iadd__",              &defs_iadd)
-   .def("__iadd__",              &do_add)  // defs += Suite("s1") 
+   .def("__iadd__",              &defs_iadd)  // defs += [ Suite('s1'), Edit(var='value') ]
+   .def("__iadd__",              &do_add)     // defs += Suite("s1")
    .def("__add__",               &do_add)
 	.def("add",                   raw_function(add,1),DefsDoc::add())
 	.def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
