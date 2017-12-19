@@ -327,6 +327,25 @@ class TestAddTaskChain(unittest.TestCase):
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
         
+class TestAddReverseTaskChain(unittest.TestCase):
+
+    def setUp(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
+        defs.s1.t1 += Trigger( "t2 == complete" )
+        defs.s1.t2 += Trigger( "t3 == complete" )
+        defs.s1.t3 += Trigger( "t4 == complete" )
+        self.defs = defs
+        
+    def test_alternative1(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 << Task("t1") << Task("t2") << Task("t3") << Task("t4")
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
 class TestAddLargeTrigger(unittest.TestCase):
     
     def setUp(self):

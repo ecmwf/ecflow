@@ -46,6 +46,39 @@ class Test_dunder_rshift(unittest.TestCase):
         self.assertEqual(str(suite.t3.get_trigger()),"y==1 AND t2 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
         self.assertEqual(str(suite.t4.get_trigger()),"t3 == complete","Trigger not as expected: " + str( suite.t4.get_trigger())) 
 
+class Test_dunder_lshift(unittest.TestCase):
+    def test_node_dunder_lshift(self):
+        # will ONLY work if we have starting NodeContainer
+        suite = Suite('s') << Task('t1') << Task('t2') << Task('t3') << Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+        print "t1.get_trigger: " + str(suite.t1.get_trigger())
+        print "t2.get_trigger: " + str(suite.t2.get_trigger())
+        print "t3.get_trigger: " + str(suite.t3.get_trigger())
+        print "t4.get_trigger: " + str(suite.t4.get_trigger())
+        
+        self.assertEqual(suite.t4.get_trigger(),None,"Trigger not as expected: " + str( suite.t4.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"t4 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t2.get_trigger()),"t3 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( suite.t1.get_trigger())) 
+ 
+        fam = Family("f1") << Task('t1') << Task('t2') << Task('t3') << Task('t4')
+        self.assertEqual(len(list(fam)),4,"expected 4 children but found " + str(len(list(fam))) )
+ 
+        self.assertEqual(fam.t4.get_trigger(),None,"Trigger not as expected: " + str( fam.t4.get_trigger())) 
+        self.assertEqual(str(fam.t3.get_trigger()),"t4 == complete","Trigger not as expected: " + str( fam.t3.get_trigger())) 
+        self.assertEqual(str(fam.t2.get_trigger()),"t3 == complete","Trigger not as expected: " + str( fam.t2.get_trigger())) 
+        self.assertEqual(str(fam.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( fam.t1.get_trigger())) 
+
+    def test_node_dunder_lshift_trigger_cat(self):
+        suite = Suite('s')
+        # will ONLY work if we have starting NodeContainer
+        suite >> Task('t1') << (Task('t2') + Trigger("x == 1")) << (Task('t3') + Trigger("y==1")) << Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+         
+        self.assertEqual(suite.t4.get_trigger(),None,"Trigger not as expected: " + str( suite.t4.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"y==1 AND t4 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t2.get_trigger()),"x == 1 AND t3 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( suite.t1.get_trigger())) 
 
 class Test_dunder_add(unittest.TestCase):
     

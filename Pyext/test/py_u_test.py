@@ -23,52 +23,40 @@ import sys
 import os
 import ecflow_test_util as Test
 
-class Test_replace(unittest.TestCase):
-    def test_replace_on_server(self):
-        print "test_replace_on_server"
-        with Test.Server() as ci:
-            PrintStyle.set_style( Style.MIGRATE ) # show node state 
-            ci.delete_all()     
-            defs = Defs() + (Suite("s1") + Family('f1').add(Task('t1'),Task('t2')))
-            ci.load(defs)  
+class Test_dunder_lshift(unittest.TestCase):
+    def test_node_dunder_lshift(self):
+        # will ONLY work if we have starting NodeContainer
+        suite = Suite('s') << Task('t1') << Task('t2') << Task('t3') << Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+        print "t1.get_trigger: " + str(suite.t1.get_trigger())
+        print "t2.get_trigger: " + str(suite.t2.get_trigger())
+        print "t3.get_trigger: " + str(suite.t3.get_trigger())
+        print "t4.get_trigger: " + str(suite.t4.get_trigger())
+        
+        self.assertEqual(suite.t4.get_trigger(),None,"Trigger not as expected: " + str( suite.t4.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"t4 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t2.get_trigger()),"t3 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( suite.t1.get_trigger())) 
  
-            # We should have 4 nodes
-            ci.get_server_defs()
-            ci_defs = ci.get_defs()
-            node_vec = ci_defs.get_all_nodes()
-            self.assertEqual(len(list(node_vec)) , 4,"Expected two 4 nodes: \n" + str(ci.get_defs()))
-             
-            # replace each node, add variable first, then check, it was added
-            for node in node_vec:
-                print node.name(),"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-                node += Edit(var="XX", var2="xx")
-                node.replace_on_server(ci.get_host(),ci.get_port())
-                
-                ci.get_server_defs()
-                replace_node = ci.get_defs().find_abs_node(node.get_abs_node_path())
-                self.assertEqual(len(list(replace_node.variables)) , 2,"Expected two 2 variable: \n" + str(replace_node))
-                self.assertEqual(replace_node.get_dstate(), DState.suspended,"Expected node to be suspended:\n" +  str(replace_node))
+        fam = Family("f1") << Task('t1') << Task('t2') << Task('t3') << Task('t4')
+        self.assertEqual(len(list(fam)),4,"expected 4 children but found " + str(len(list(fam))) )
+ 
+        self.assertEqual(fam.t4.get_trigger(),None,"Trigger not as expected: " + str( fam.t4.get_trigger())) 
+        self.assertEqual(str(fam.t3.get_trigger()),"t4 == complete","Trigger not as expected: " + str( fam.t3.get_trigger())) 
+        self.assertEqual(str(fam.t2.get_trigger()),"t3 == complete","Trigger not as expected: " + str( fam.t2.get_trigger())) 
+        self.assertEqual(str(fam.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( fam.t1.get_trigger())) 
 
-            # resume nodes, test that when False passed in we do not suspned the replaced node
-            for node in node_vec:
-                node += Meter("meter",0,100)
-                ci.resume(node.get_abs_node_path())
-                node.replace_on_server(ci.get_host(),ci.get_port(),False)
-                
-                ci.sync_local()
-                replace_node = ci.get_defs().find_abs_node(node.get_abs_node_path())
-                self.assertEqual(len(list(replace_node.meters)) , 1,"Expected 1 meter: \n" + str(replace_node))
-                self.assertEqual(len(list(replace_node.variables)) , 2,"Expected two 2 variable: \n" + str(replace_node))
-                self.assertNotEqual(replace_node.get_dstate(), DState.suspended,"Expected node not to suspended:\n" +  str(replace_node))
+    def test_node_dunder_lshift_trigger_cat(self):
+        suite = Suite('s')
+        # will ONLY work if we have starting NodeContainer
+        suite >> Task('t1') << (Task('t2') + Trigger("x == 1")) << (Task('t3') + Trigger("y==1")) << Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+         
+        self.assertEqual(suite.t4.get_trigger(),None,"Trigger not as expected: " + str( suite.t4.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"y==1 AND t4 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t2.get_trigger()),"x == 1 AND t3 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( suite.t1.get_trigger())) 
 
-            # replace the suite
-            defs = Defs() + Suite("s1")
-            host_port = ci.get_host() + ':' + ci.get_port()
-            defs.s1.replace_on_server(host_port)
-  
-            ci.get_server_defs()
-            self.assertEqual(len(list(ci.get_defs().s1)) , 0,"Expected 0 family: \n" + str(ci.get_defs()))
-            self.assertEqual(ci.get_defs().s1.get_dstate(), DState.suspended,"Expected node to be suspended:\n" +  str(ci.get_defs()))
 
 if __name__ == "__main__":
     unittest.main()

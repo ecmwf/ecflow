@@ -286,6 +286,32 @@ static object do_rshift(node_ptr self, const bp::object& arg){
    }
    return object(self);
 }
+static object do_lshift(node_ptr self, const bp::object& arg){
+   //std::cout << "do_lshift : " << self->name() << "\n"; cout << flush;
+   (void)do_add(self,arg);
+
+   if (extract<node_ptr>(arg).check()) {
+
+      NodeContainer* nc = self->isNodeContainer();
+      if (!nc) throw std::runtime_error("ExportNode::do_lshift() : Can only add a child to Suite or Family");
+      node_ptr child = extract<node_ptr>(arg);
+
+      std::vector<node_ptr> children;
+      nc->immediateChildren(children);
+      node_ptr previous_child;
+      for(size_t i =0; i < children.size(); i++) {
+         if (i == 0) continue;
+         if (children[i-1]->defStatus() != DState::COMPLETE)  previous_child = children[i-1] ;
+
+         if (previous_child &&  previous_child != child && children[i] == child) {
+            // if existing trigger, add new trigger as AND
+            if (previous_child->get_trigger()) previous_child->add_part_trigger( PartExpression( child->name() + " == complete", PartExpression::AND) );
+            else previous_child->add_trigger_expr( child->name() + " == complete");
+         }
+      }
+   }
+   return object(self);
+}
 
 static object node_iadd(node_ptr self, const bp::list& list) {
    // std::cout << "node_iadd list " << self->name() << "\n";
@@ -422,11 +448,12 @@ void export_Node()
 
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
-   .def("add", raw_function(add,1),           DefsDoc::add())
-   .def("__add__",  &do_add,                  DefsDoc::add())
-   .def("__rshift__",  &do_rshift)
-   .def("__iadd__", &do_add)
-   .def("__iadd__", &node_iadd)
+   .def("add", raw_function(add,1),           DefsDoc::add())  // a.add(b) & a.add([b])
+   .def("__add__",  &do_add,                  DefsDoc::add())  // a + b
+   .def("__rshift__",  &do_rshift)                             // nc >> a >> b >> c     a + (b.add(Trigger('a==complete')) + (c.add(Trigger('b==complete')))
+   .def("__lshift__",  &do_lshift)                             // nc << a << b << c     (a.add(Trigger('b==complete')) + (b.add(Trigger('c==complete'))) + c
+   .def("__iadd__", &do_add)                                   // a += b
+   .def("__iadd__", &node_iadd)                                // a += [ b ]
    .def("__getattr__",      &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
    .def("add_trigger",      &add_trigger,             DefsDoc::add_trigger_doc())
