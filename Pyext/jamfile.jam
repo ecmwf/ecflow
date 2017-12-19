@@ -190,7 +190,6 @@ local rule run-test ( test-name : sources + )
 #                       
 run-test TestClientApi      : ecflow [ glob test/py_s_TestClientApi.py ] ;
 run-test TestPythonChildApi : ecflow [ glob test/py_s_TestPythonChildApi.py ] ;
-run-test test_replace_node  : ecflow [ glob test/py_s_test_replace_node.py ] ;
 run-test TestDefs           : ecflow [ glob test/py_u_TestDefs.py ] ;
 run-test TestCopy           : ecflow [ glob test/py_u_TestCopy.py ] ;
 run-test TestError          : ecflow [ glob test/py_u_TestError.py ] ;
@@ -219,6 +218,7 @@ run-test test_collection       : ecflow [ glob test/py_u_test_collection.py ] ;
 run-test test_add              : ecflow [ glob test/py_u_test_add.py ] ;
 run-test test_tutorial         : ecflow [ glob test/py_u_test_tutorial.py ] ;
 run-test test_manual           : ecflow [ glob test/py_u_test_manual.py ] ;
+run-test test_replace_node     : ecflow [ glob test/py_u_test_replace_node.py ] ;
 run-test test_get_attr         : ecflow [ glob test/py_u_test_get_attr.py ] ;
 run-test test                  : ecflow [ glob test/py_u_test.py ] ;
 

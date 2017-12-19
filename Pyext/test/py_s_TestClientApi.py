@@ -19,9 +19,8 @@ import shutil   # used to remove directory tree
 
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow_test_util as Test
-from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
-                   CheckPt, Cron, Late, debug_build, Flag, FlagType
-#from __builtin__ import None
+from ecflow import Defs,Suite,Family,Task,Edit,Meter, Clock, DState,  Style, State, RepeatDate, PrintStyle, \
+                   File, Client, SState, CheckPt, Cron, Late, debug_build, Flag, FlagType
 
 def ecf_includes() :  return os.getcwd() + "/test/data/includes"
 
@@ -1435,6 +1434,52 @@ def test_client_replace(ci,on_disk):
     if on_disk:
         os.remove(test_client_replace_def_file)
 
+
+def test_node_replace(ci):
+    print("test_node_replace")
+    PrintStyle.set_style( Style.MIGRATE ) # show node state 
+    ci.delete_all()     
+    defs = Defs() + (Suite("s1") + Family('f1').add(Task('t1'),Task('t2')))
+    ci.load(defs)  
+ 
+    # We should have 4 nodes
+    ci.sync_local()
+    ci_defs = ci.get_defs()
+    node_vec = ci_defs.get_all_nodes()
+    assert(len(list(node_vec)) == 4,"Expected two 4 nodes: \n" + str(ci.get_defs()))
+             
+    # replace each node, add variable first, then check, it was added
+    for node in node_vec:
+        node += Edit(var="XX", var2="xx")
+        node.replace_on_server(ci.get_host(),ci.get_port())
+                
+        ci.sync_local()
+        replace_node = ci.get_defs().find_abs_node(node.get_abs_node_path())
+        assert(len(list(replace_node.variables)) == 2,"Expected two 2 variable: \n" + str(replace_node))
+        assert(replace_node.get_dstate() == DState.suspended,"Expected node to be suspended:\n" +  str(replace_node))
+
+    # resume nodes, test that when False passed in we do not suspend the replaced node
+    for node in node_vec:
+        node += Meter("meter",0,100)
+        ci.resume(node.get_abs_node_path())
+        node.replace_on_server(ci.get_host(),ci.get_port(),suspend_node_first=False)
+                
+        ci.sync_local()
+        replace_node = ci.get_defs().find_abs_node(node.get_abs_node_path())
+        assert(len(list(replace_node.meters)) == 1,"Expected 1 meter: \n" + str(replace_node))
+        assert(len(list(replace_node.variables)) == 2,"Expected two 2 variable: \n" + str(replace_node))
+        assert(replace_node.get_dstate() != DState.suspended,"Expected node not to suspended:\n" +  str(replace_node))
+
+    # replace the suite
+    defs = Defs() + Suite("s1")
+    host_port = ci.get_host() + ':' + ci.get_port()
+    defs.s1.replace_on_server(host_port)
+  
+    ci.get_server_defs()
+    assert(len(list(ci.get_defs().s1)) == 0,"Expected 0 family: \n" + str(ci.get_defs()))
+    assert(ci.get_defs().s1.get_dstate() == DState.suspended,"Expected node to be suspended:\n" +  str(ci.get_defs()))
+
+
 def test_client_kill(ci):
     pass
         
@@ -1762,6 +1807,7 @@ if __name__ == "__main__":
         test_client_force(ci)             
         test_client_replace(ci,False)             
         test_client_replace(ci,True)             
+        test_node_replace(ci)             
    
         #test_client_kill(ci)             
         #test_client_status(ci)             
