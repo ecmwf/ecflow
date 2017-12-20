@@ -25,9 +25,11 @@
 #include "TimeSeries.hpp"
 #include "CheckPt.hpp"
 #include "Ecf.hpp"
-#include "BoostPythonUtil.hpp"
+
 #include "Edit.hpp"
 #include "NodeAttrDoc.hpp"
+#include "BoostPythonUtil.hpp"
+
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 template<class K, class T>
@@ -61,6 +63,7 @@ void export_Core()
 {
    // For use in test only
    def("debug_build",debug_build);
+
 
    // see: https://github.com/boostorg/python/blob/master/test/raw_ctor.cpp
    // Uses a raw constructor approach to support pass arbitrary number arguments on the python side.
@@ -176,7 +179,9 @@ void export_Core()
 	                     "The default state of a `node`_ is `queued`_.\n"
 	                     "\nUsage::\n\n"
 	                     "   task = ecflow.Task('t1')\n"
-	                     "   task.add_defstatus(ecflow.DState.complete)"
+                        "   task.add_defstatus(ecflow.DState.complete)"
+                        "   task = ecflow.Task('t2')\n"
+                        "   task += Defstatus('complete')"
 			)
 	.value("unknown",  DState::UNKNOWN)
 	.value("complete", DState::COMPLETE)
@@ -186,6 +191,12 @@ void export_Core()
 	.value("suspended",DState::SUSPENDED)
 	.value("active",   DState::ACTIVE)
 	;
+
+   class_<Defstatus>("Defstatus", init<DState::State>())
+            .def(init<std::string>())                              // constructor
+            .def("state",  &Defstatus::state)
+            .def("__str__",  &Defstatus::to_string) // __str__
+            ;
 
 	enum_<SState::State>("SState",
 	         "A SState holds the `ecflow_server`_ state\n\n"

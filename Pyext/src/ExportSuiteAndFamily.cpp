@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/raw_function.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -24,9 +25,10 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-#include "BoostPythonUtil.hpp"
 
+#include "BoostPythonUtil.hpp"
 #include "DefsDoc.hpp"
+#include "NodeUtil.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -55,6 +57,23 @@ family_ptr family_enter(family_ptr self) { return self;}
 bool family_exit(family_ptr self,const bp::object& type,const bp::object& value,const bp::object& traceback){return false;}
 
 
+family_ptr family_init(const std::string& name, bp::list the_list, bp::dict kw) {
+   //cout << "family_init : " << name << " the_list: " << len(the_list) << " dict: " << len(kw) << endl;
+   family_ptr node = Family::create(name);
+   (void)NodeUtil::add_variable_dict(node,kw);
+   (void)NodeUtil::node_iadd(node,the_list);
+   return node;
+}
+
+suite_ptr suite_init(const std::string& name, bp::list the_list, bp::dict kw) {
+   //cout << "suite_init : " << name << " the_list: " << len(the_list) << " dict: " << len(kw) << endl;
+   suite_ptr node = Suite::create(name);
+   (void)NodeUtil::add_variable_dict(node,kw);
+   (void)NodeUtil::node_iadd(node,the_list);
+   return node;
+}
+
+
 void export_SuiteAndFamily()
 {
    // Turn off proxies by passing true as the NoProxy template parameter.
@@ -80,6 +99,8 @@ void export_SuiteAndFamily()
 
 
    class_<Family, bases<NodeContainer>, family_ptr>("Family",DefsDoc::family_doc())
+   .def("__init__",raw_function(&NodeUtil::node_raw_constructor,1))  // will call -> family_init
+   .def("__init__",make_constructor(&family_init), DefsDoc::family_doc())
    .def("__init__",make_constructor(&Family::create), DefsDoc::family_doc())
    .def(self == self )                    // __eq__
    .def("__str__",   &Family::to_string)  // __str__
@@ -94,6 +115,8 @@ void export_SuiteAndFamily()
 #endif
 
    class_<Suite, bases<NodeContainer>, suite_ptr>("Suite",DefsDoc::suite_doc())
+   .def("__init__",raw_function(&NodeUtil::node_raw_constructor,1))  // will call -> suite_init
+   .def("__init__",make_constructor(&suite_init), DefsDoc::suite_doc())
    .def("__init__",make_constructor(&Suite::create), DefsDoc::suite_doc())
    .def(self == self )                   // __eq__
    .def("__str__",   &Suite::to_string)  // __str__

@@ -24,15 +24,14 @@
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
-#include "Expression.hpp"
 #include "JobCreationCtrl.hpp"
-#include "BoostPythonUtil.hpp"
 #include "Str.hpp"
+#include "ClientInvoker.hpp"
 
+#include "NodeUtil.hpp"
+#include "Edit.hpp"
 #include "DefsDoc.hpp"
 #include "NodeAttrDoc.hpp"
-#include "Edit.hpp"
-#include "ClientInvoker.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -46,14 +45,6 @@ Defs* get_defs(node_ptr self) { return self->defs(); }
 node_ptr add_variable(node_ptr self,const std::string& name, const std::string& value) { self->add_variable(name,value); return self;}
 node_ptr add_variable_int(node_ptr self,const std::string& name, int value) { self->add_variable_int(name,value); return self;}
 node_ptr add_variable_var(node_ptr self,const Variable& var) { self->addVariable(var); return self;}
-node_ptr add_variable_dict(node_ptr self,const bp::dict& dict) {
-   std::vector<std::pair<std::string,std::string> > vec;
-   BoostPythonUtil::dict_to_str_vec(dict,vec);
-   std::vector<std::pair<std::string,std::string> >::iterator i;
-   std::vector<std::pair<std::string,std::string> >::iterator vec_end = vec.end();
-   for(i = vec.begin(); i != vec_end; ++i)  self->add_variable((*i).first,(*i).second);
-   return self;
-}
 
 node_ptr add_event(node_ptr self,const Event& e)                       { self->addEvent(e); return self; }
 node_ptr add_event_1(node_ptr self,int number)                         { self->addEvent(Event(number)); return self; }
@@ -129,143 +120,14 @@ node_ptr add_part_complete_2(node_ptr self,const std::string& expression, bool a
 bool evaluate_trigger(node_ptr self) { Ast* t = self->triggerAst(); if (t) return t->evaluate();return false;}
 bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) return t->evaluate();return false;}
 
-////////////////////////////////////////////////////////////////////////////////////////
-// This wrapper over DState, to aid Task("t").add(Defstatus(DState.complete))
-class Defstatus {
-public:
-   Defstatus(DState::State state) : state_(state) {}
-   Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
-   DState::State state() const { return state_;}
-   std::string to_string() const { return DState::to_string(state_);}
-private:
-   DState::State state_;
-};
 node_ptr add_defstatus(node_ptr self,DState::State s)             { self->addDefStatus(s); return self; }
 node_ptr add_defstatus1(node_ptr self,const Defstatus& ds)         { self->addDefStatus(ds.state()); return self; }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Trigger & Complete thin wrapper over Expression, allows us to call:
-//  Task("a").add(Trigger("a == 1"),Complete("b == 1"))
-///////////////////////////////////////////////////////////////////////////////////
-static void construct_expr(std::vector<PartExpression>& vec, const bp::list& list) {
-   int the_list_size = len(list);
-   for(int i = 0; i < the_list_size; ++i) {
-      std::string part_expr;
-      if (extract<std::string>(list[i]).check()) {
-         part_expr = extract<std::string>(list[i]);
-         if (Str::valid_name(part_expr)) {
-            part_expr += " == complete";
-         }
-      }
-      else if (extract<node_ptr>(list[i]).check()) {
-         node_ptr node = extract<node_ptr>(list[i]);
-         if (node->parent()) part_expr = node->absNodePath();
-         else                part_expr = node->name();
-         part_expr += " == complete";
-      }
-      else throw std::runtime_error("Trigger: Expects string, or list(strings or nodes)");
-
-      if (vec.empty()) vec.push_back(PartExpression(part_expr));
-      else             vec.push_back(PartExpression(part_expr,true/*AND*/));
-   }
-}
-class Trigger {
-public:
-   Trigger(const std::string& expression) { add(PartExpression(expression)); }
-   Trigger(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
-   Trigger(const PartExpression& pe) { add(pe); }
-   Trigger(const Trigger& rhs) : vec_(rhs.vec_) {}
-   Trigger(const bp::list& list ) { construct_expr(vec_,list);}
-
-   bool operator==( const Trigger& rhs) const { return vec_ == rhs.vec_;}
-   bool operator!=( const Trigger& rhs) const { return !operator==(rhs);}
-   std::string expression() const { return Expression::compose_expression(vec_); }
-
-   const std::vector<PartExpression>& expr() const { return vec_;}
-
-private:
-   void add( const PartExpression& t ) { vec_.push_back(t);}
-   std::vector<PartExpression> vec_;
-   Trigger& operator=(Trigger const& f); // prevent assignment
-};
-
-class Complete {
-public:
-   Complete(const std::string& expression) { add(PartExpression(expression)); }
-   Complete(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
-   Complete(const PartExpression& pe) { add(pe); }
-   Complete(const Complete& rhs) : vec_(rhs.vec_) {}
-   Complete(const bp::list& list ) { construct_expr(vec_,list);}
-
-   bool operator==( const Complete& rhs) const { return vec_ == rhs.vec_;}
-   bool operator!=( const Complete& rhs) const { return !operator==(rhs);}
-   std::string expression() const { return Expression::compose_expression(vec_); }
-
-   const std::vector<PartExpression>& expr() const { return vec_;}
-
-private:
-   void add( const PartExpression& t ) { vec_.push_back(t); }
-   std::vector<PartExpression> vec_;
-   Complete& operator=(Complete const& f); // prevent assignment
-};
-
 /////////////////////////////////////////////////////////////////////////////////////////
-static object do_add(node_ptr self, const bp::object& arg){
-   //std::cout << "do_add " << self->name() << "\n";
-   if (arg.ptr() == object().ptr())  return object(self); // *IGNORE* None
-   if (extract<Edit>(arg).check()) {
-      Edit edit = extract<Edit>(arg);
-      const std::vector<Variable>& vec = edit.variables();
-      for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
-   }
-   else if (extract<node_ptr>(arg).check()) {
-      // std::cout << "  do_add node_ptr\n";
-      NodeContainer* nc = self->isNodeContainer();
-      if (!nc) throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
-      node_ptr child = extract<node_ptr>(arg);
-      nc->addChild(child);
-   }
-   else if (extract<Event>(arg).check())     self->addEvent(extract<Event>(arg));
-   else if (extract<Meter>(arg).check())     self->addMeter(extract<Meter>(arg));
-   else if (extract<Label>(arg).check())     self->addLabel(extract<Label>(arg));
-   else if (extract<Trigger>(arg).check()){Trigger t = extract<Trigger>(arg); self->py_add_trigger_expr(t.expr());}
-   else if (extract<Complete>(arg).check()){Complete t = extract<Complete>(arg);self->py_add_complete_expr(t.expr());}
-   else if (extract<Limit>(arg).check())     self->addLimit(extract<Limit>(arg));
-   else if (extract<InLimit>(arg).check())   self->addInLimit(extract<InLimit>(arg));
-   else if (extract<DayAttr>(arg).check())   self->addDay(extract<DayAttr>(arg));
-   else if (extract<DateAttr>(arg).check())  self->addDate(extract<DateAttr>(arg));
-   else if (extract<TodayAttr>(arg).check()) self->addToday(extract<TodayAttr>(arg));
-   else if (extract<TimeAttr>(arg).check())  self->addTime(extract<TimeAttr>(arg));
-   else if (extract<CronAttr>(arg).check())  self->addCron(extract<CronAttr>(arg));
-   else if (extract<LateAttr>(arg).check())  self->addLate(extract<LateAttr>(arg));
-   else if (extract<ZombieAttr>(arg).check())self->addZombie(extract<ZombieAttr>(arg));
-   else if (extract<RepeatDate>(arg).check())self->addRepeat(Repeat(extract<RepeatDate>(arg)  ));
-   else if (extract<RepeatInteger>(arg).check())self->addRepeat(Repeat(extract<RepeatInteger>(arg)  ));
-   else if (extract<RepeatEnumerated>(arg).check())self->addRepeat(Repeat(extract<RepeatEnumerated>(arg)  ));
-   else if (extract<RepeatString>(arg).check())self->addRepeat(Repeat(extract<RepeatString>(arg)  ));
-   else if (extract<RepeatDay>(arg).check())self->addRepeat(Repeat(extract<RepeatDay>(arg)  ));
-   else if (extract<AutoCancelAttr>(arg).check())self->addAutoCancel(extract<AutoCancelAttr>(arg));
-   else if (extract<VerifyAttr>(arg).check())self->addVerify(extract<VerifyAttr>(arg));
-   else if (extract<Defstatus>(arg).check()){Defstatus t = extract<Defstatus>(arg);self->addDefStatus(t.state());}
-   else if (extract<bp::list>(arg).check()){
-      //std::cout << "  do_add list\n";
-      bp::list the_list  = extract<bp::list>(arg);
-      int the_list_size = len(the_list);
-      for(int i = 0; i < the_list_size; ++i) (void) do_add(self,the_list[i]); // recursive
-   }
-   else if (extract<ClockAttr>(arg).check()) {
-      if (!self->isSuite() ) throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
-      self->isSuite()->addClock( extract<ClockAttr>(arg));
-   }
-   else if (extract<Variable>(arg).check())       self->addVariable(extract<Variable>(arg) );
-   else if (extract<dict>(arg).check()){dict d = extract<dict>(arg); add_variable_dict(self,d);}
-   else throw std::runtime_error("ExportNode::add : Unknown type ");
-   return object(self);
-}
 
 static object do_rshift(node_ptr self, const bp::object& arg){
    //std::cout << "do_rshift\n";
-   (void)do_add(self,arg);
+   (void)NodeUtil::do_add(self,arg);
 
    if (extract<node_ptr>(arg).check()) {
       NodeContainer* nc = self->isNodeContainer();
@@ -288,7 +150,7 @@ static object do_rshift(node_ptr self, const bp::object& arg){
 }
 static object do_lshift(node_ptr self, const bp::object& arg){
    //std::cout << "do_lshift : " << self->name() << "\n"; cout << flush;
-   (void)do_add(self,arg);
+   (void)NodeUtil::do_add(self,arg);
 
    if (extract<node_ptr>(arg).check()) {
 
@@ -313,30 +175,17 @@ static object do_lshift(node_ptr self, const bp::object& arg){
    return object(self);
 }
 
-static object node_iadd(node_ptr self, const bp::list& list) {
-   // std::cout << "node_iadd list " << self->name() << "\n";
-   int the_list_size = len(list);
-   for(int i = 0; i < the_list_size; ++i) (void) do_add(self,list[i]);
-   return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
-}
-
-static object add(tuple args, dict kwargs) {
+static object add(tuple args, dict kwargs)
+{
    int the_list_size = len(args);
    node_ptr self = extract<node_ptr>(args[0]); // self
    if (!self) throw std::runtime_error("ExportNode::add() : first argument is not a node");
-   for (int i = 1; i < the_list_size; ++i) (void) do_add(self,args[i]);
+
+   for (int i = 1; i < the_list_size; ++i) (void)NodeUtil::do_add(self,args[i]);
 
    // key word arguments are use for adding variable only
-   bp::list keys = kwargs.keys();
-   const int no_of_keys = len(keys);
-   for(int i = 0; i < no_of_keys; ++i) {
-      bp::object curArg = keys[i];
-      if (curArg) {
-         std::string first = extract<std::string>(keys[i]);
-         std::string second = extract<std::string>(kwargs[keys[i]]);
-         self->add_variable(first,second);
-      }
-   }
+   (void)NodeUtil::add_variable_dict(self,kwargs);
+
    return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
@@ -395,51 +244,6 @@ void replace_on_server2(node_ptr self, const std::string& host_port,bool suspend
 
 void export_Node()
 {
-   class_<Defstatus>("Defstatus", init<DState::State>())
-            .def(init<std::string>())                              // constructor
-            .def("state",  &Defstatus::state)
-            .def("__str__",  &Defstatus::to_string) // __str__
-            ;
-
-   // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
-   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::trigger(), init<std::string>() )
-   .def(init<PartExpression>())
-   .def(init<bp::list>())
-   .def(init<std::string,bool>())
-   .def(self == self )                            // __eq__
-   .def("__str__",        &Trigger::expression)   // __str__
-   .def("get_expression", &Trigger::expression, "returns the trigger expression as a string")
-   ;
-
-   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::trigger(), init<std::string>() )
-   .def(init<PartExpression>())
-   .def(init<bp::list>())
-   .def(init<std::string,bool>())
-   .def(self == self )                             // __eq__
-   .def("__str__",        &Complete::expression)   // __str__
-   .def("get_expression", &Complete::expression, "returns the complete expression as a string")
-   ;
-
-   // mimic PartExpression(const std::string& expression  )
-   // mimic PartExpression(const std::string& expression, bool andExpr /* true means AND , false means OR */ )
-   // Use to adding large trigger and complete expressions
-   class_<PartExpression>("PartExpression",DefsDoc::part_expression_doc(), init<std::string>())
-   .def(init<std::string,bool>())
-   .def(self == self )                 // __eq__
-   .def("get_expression", &PartExpression::expression, return_value_policy<copy_const_reference>(), "returns the part expression as a string")
-   .def("and_expr",       &PartExpression::andExpr)
-   .def("or_expr",        &PartExpression::orExpr)
-   ;
-
-   class_<Expression,  boost::shared_ptr<Expression> >("Expression",DefsDoc::expression_doc(), init<std::string>() )
-   .def(init<PartExpression>())
-   .def(self == self )                               // __eq__
-   .def("__str__",        &Expression::expression)   // __str__
-   .def("get_expression", &Expression::expression, "returns the complete expression as a string")
-   .def("add",            &Expression::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
-   .add_property("parts", bp::range( &Expression::part_begin, &Expression::part_end),"Returns a list of PartExpression's" )
-   ;
-
    // Turn off proxies by passing true as the NoProxy template parameter.
    // shared_ptrs don't need proxies because calls on one a copy of the
    // shared_ptr will affect all of them (duh!).
@@ -449,11 +253,11 @@ void export_Node()
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
    .def("add", raw_function(add,1),           DefsDoc::add())  // a.add(b) & a.add([b])
-   .def("__add__",  &do_add,                  DefsDoc::add())  // a + b
+   .def("__add__",  &NodeUtil::do_add,                  DefsDoc::add())  // a + b
    .def("__rshift__",  &do_rshift)                             // nc >> a >> b >> c     a + (b.add(Trigger('a==complete')) + (c.add(Trigger('b==complete')))
    .def("__lshift__",  &do_lshift)                             // nc << a << b << c     (a.add(Trigger('b==complete')) + (b.add(Trigger('c==complete'))) + c
-   .def("__iadd__", &do_add)                                   // a += b
-   .def("__iadd__", &node_iadd)                                // a += [ b ]
+   .def("__iadd__", &NodeUtil::do_add)                         // a += b
+   .def("__iadd__", &NodeUtil::node_iadd)                      // a += [ b ]
    .def("__getattr__",      &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
    .def("remove",           &Node::remove,           "Remove the node from its parent. and returns it")
    .def("add_trigger",      &add_trigger,             DefsDoc::add_trigger_doc())
@@ -471,7 +275,7 @@ void export_Node()
    .def("add_variable",     &add_variable,               DefsDoc::add_variable_doc())
    .def("add_variable",     &add_variable_int)
    .def("add_variable",     &add_variable_var)
-   .def("add_variable",     &add_variable_dict)
+   .def("add_variable",     &NodeUtil::add_variable_dict)
    .def("add_label",        &add_label,                  DefsDoc::add_label_doc())
    .def("add_label",        &add_label_1)
    .def("add_limit",        &add_limit,                  DefsDoc::add_limit_doc())
@@ -511,7 +315,7 @@ void export_Node()
    .def("add_repeat",       &add_repeat_enum,            DefsDoc::add_repeat_enumerated_doc() )
    .def("add_repeat",       &add_repeat_day,             DefsDoc::add_repeat_day_doc() )
    .def("add_defstatus",    &add_defstatus,              DefsDoc::add_defstatus_doc())
-   .def("add_defstatus",    &add_defstatus1,              DefsDoc::add_defstatus_doc())
+   .def("add_defstatus",    &add_defstatus1,             DefsDoc::add_defstatus_doc())
    .def("add_zombie",       &add_zombie,                 NodeAttrDoc::zombie_doc())
    .def("delete_variable",  &Node::deleteVariable       )
    .def("delete_event",     &Node::deleteEvent          )

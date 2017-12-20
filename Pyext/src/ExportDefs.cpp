@@ -27,9 +27,9 @@
 #include "File.hpp"
 #include "JobCreationCtrl.hpp"
 #include "Simulator.hpp"
+
 #include "BoostPythonUtil.hpp"
 #include "Edit.hpp"
-
 #include "DefsDoc.hpp"
 #include "GlossaryDoc.hpp"
 

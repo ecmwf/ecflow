@@ -725,8 +725,8 @@ const char* DefsDoc::add_defstatus_doc()
             "A `defstatus`_ is useful in preventing suites from running automatically\n"
             "once begun, or in setting Task's complete so they can be run selectively\n"
             "\nUsage::\n\n"
-            "  t1 = Task('t1')\n"
-            "  t1.add_defstatus( DState.suspended )\n"
+            "  t1 = Task('t1') + Defstatus('complete')\n"
+            "  t2 = Task('t2').add_defstatus( DState.suspended )\n"
             ;
 }
 

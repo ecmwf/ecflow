@@ -67,6 +67,18 @@ private:
     }
 };
 
+////////////////////////////////////////////////////////////////////////////////////////
+// Thin wrapper over DState, to aid python. i.e Task("t").add(Defstatus(DState.complete))
+class Defstatus {
+public:
+   Defstatus(DState::State state) : state_(state) {}
+   Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
+   DState::State state() const { return state_;}
+   std::string to_string() const { return DState::to_string(state_);}
+private:
+   DState::State state_;
+};
+
 // This should ONLY be added to objects that are *NOT* serialised through a pointer
 BOOST_CLASS_IMPLEMENTATION(DState, boost::serialization::object_serializable);
 BOOST_CLASS_TRACKING(DState,boost::serialization::track_never);

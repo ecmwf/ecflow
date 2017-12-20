@@ -37,6 +37,9 @@
 #include "Flag.hpp"
 #include "JobCreationCtrl.hpp"
 #include "DefsDoc.hpp"
+#include "Expression.hpp"
+
+#include "Trigger.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -122,6 +125,45 @@ static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<J
 
 void export_NodeAttr()
 {
+   // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
+   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::trigger(), init<std::string>() )
+   .def(init<PartExpression>())
+   .def(init<bp::list>())
+   .def(init<std::string,bool>())
+   .def(self == self )                            // __eq__
+   .def("__str__",        &Trigger::expression)   // __str__
+   .def("get_expression", &Trigger::expression, "returns the trigger expression as a string")
+   ;
+
+   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::trigger(), init<std::string>() )
+   .def(init<PartExpression>())
+   .def(init<bp::list>())
+   .def(init<std::string,bool>())
+   .def(self == self )                             // __eq__
+   .def("__str__",        &Complete::expression)   // __str__
+   .def("get_expression", &Complete::expression, "returns the complete expression as a string")
+   ;
+
+   // mimic PartExpression(const std::string& expression  )
+   // mimic PartExpression(const std::string& expression, bool andExpr /* true means AND , false means OR */ )
+   // Use to adding large trigger and complete expressions
+   class_<PartExpression>("PartExpression",DefsDoc::part_expression_doc(), init<std::string>())
+   .def(init<std::string,bool>())
+   .def(self == self )                 // __eq__
+   .def("get_expression", &PartExpression::expression, return_value_policy<copy_const_reference>(), "returns the part expression as a string")
+   .def("and_expr",       &PartExpression::andExpr)
+   .def("or_expr",        &PartExpression::orExpr)
+   ;
+
+   class_<Expression,  boost::shared_ptr<Expression> >("Expression",DefsDoc::expression_doc(), init<std::string>() )
+   .def(init<PartExpression>())
+   .def(self == self )                               // __eq__
+   .def("__str__",        &Expression::expression)   // __str__
+   .def("get_expression", &Expression::expression, "returns the complete expression as a string")
+   .def("add",            &Expression::add,"Add a part expression, the second and subsequent part expressions must have 'and/or' set")
+   .add_property("parts", bp::range( &Expression::part_begin, &Expression::part_end),"Returns a list of PartExpression's" )
+   ;
+
    enum_<Flag::Type>("FlagType",
          "Flags store state associated with a node\n\n"
          "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
