@@ -104,7 +104,7 @@ class TestFamilies(unittest.TestCase):
                     Task("t2"))))
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
          
@@ -127,7 +127,7 @@ class TestFamilies(unittest.TestCase):
                     create_family_f1()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
 
@@ -154,7 +154,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -171,7 +171,7 @@ defs.save_as_defs("test.def")
         defs.test += Family("f1") + [ Task("t{0}".format(i)) for i in range(1,3) ]
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
 
@@ -202,7 +202,7 @@ class TestVariables(unittest.TestCase):
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #defs.check_job_creation())
+        #print(defs.check_job_creation()))
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
  
@@ -217,6 +217,7 @@ class TestVariables(unittest.TestCase):
                         Task("t1",Edit(SLEEP=20)),
                         Task("t2",Edit(SLEEP=20)))
   
+        print("Creating suite definition")
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs(
                 Suite("test", 
@@ -225,7 +226,7 @@ class TestVariables(unittest.TestCase):
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #defs.check_job_creation())
+        #print(defs.check_job_creation()))
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
         
@@ -243,6 +244,7 @@ def create_family_f1():
                 Task("t1",Edit(SLEEP=20)),
                 Task("t2",Edit(SLEEP=20)))
   
+print("Creating suite definition")
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs(
         Suite("test", 
@@ -251,7 +253,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def") 
@@ -272,7 +274,7 @@ defs.save_as_defs("test.def")
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
          
@@ -291,7 +293,7 @@ defs.save_as_defs("test.def")
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
          
@@ -323,7 +325,7 @@ class TestVariableInheritance(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
    
@@ -347,7 +349,7 @@ class TestVariableInheritance(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
         
@@ -372,11 +374,10 @@ defs = Defs(
         Suite("test",
             Edit(ECF_INCLUDE=home,ECF_HOME=home),
             create_family_f1()))
-
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -397,7 +398,7 @@ defs.save_as_defs("test.def")
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
         
@@ -428,7 +429,7 @@ class TestTriggers(unittest.TestCase):
                             create_family_f1()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
   
@@ -452,7 +453,7 @@ class TestTriggers(unittest.TestCase):
                     create_family_f1()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -463,7 +464,7 @@ class TestTriggers(unittest.TestCase):
         
         text = """#!/usr/bin/env python2.7
 import os
-from ecflow import Defs,Suite,Family,Task,Edit
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger
 
 def create_family_f1():
     return Family("f1",
@@ -480,7 +481,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -502,7 +503,7 @@ defs.save_as_defs("test.def")
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
          
@@ -540,7 +541,7 @@ class TestEvents(unittest.TestCase):
                 create_family_f1() ))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def") 
   
@@ -571,7 +572,7 @@ class TestEvents(unittest.TestCase):
                         create_family_f1()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")    
          
@@ -606,7 +607,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -631,7 +632,7 @@ defs.save_as_defs("test.def")
         defs.test += [ Edit(ECF_INCLUDE=home,ECF_HOME=home), create_family_f1()]
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -667,7 +668,7 @@ class TestComplete(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
  
@@ -700,7 +701,7 @@ class TestComplete(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")      
          
@@ -736,7 +737,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -762,7 +763,7 @@ defs.save_as_defs("test.def")
          
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -802,7 +803,7 @@ class TestMeter(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
  
@@ -832,7 +833,7 @@ class TestMeter(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")    
          
@@ -865,7 +866,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -895,7 +896,7 @@ defs.save_as_defs("test.def")
          
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -931,7 +932,7 @@ class TestTime(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
  
@@ -958,7 +959,7 @@ class TestTime(unittest.TestCase):
                     create_family_f2()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
 
@@ -984,7 +985,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -1013,7 +1014,7 @@ defs.save_as_defs("test.def")
          
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -1054,7 +1055,7 @@ class TestIndentation(unittest.TestCase):
               
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
  
@@ -1088,7 +1089,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -1124,7 +1125,7 @@ defs.save_as_defs("test.def")
          
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -1157,7 +1158,7 @@ class TestLabel(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #defs.check_job_creation()
+        #print(defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")  
          
@@ -1179,7 +1180,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -1270,7 +1271,7 @@ defs = Defs(
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
@@ -1411,7 +1412,7 @@ for city in ( "Exeter", "Toulouse", "Offenbach", "Washington", "Tokyo", "Melbour
         type_fam + Task("get") + Task("process",Trigger("get eq complete")) + Task("store",Trigger("get eq complete"))         
  
 print("Checking job creation: .ecf -> .job0")  
-#defs.check_job_creation()
+#print(defs.check_job_creation())
 
 print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
