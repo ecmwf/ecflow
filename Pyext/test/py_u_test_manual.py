@@ -70,9 +70,10 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
         self.assertEqual(self.defs, defs, "defs not equal")
         
     def test_me4(self):
-        defs = Defs() + Suite("s1",
-                            Family("f1",
-                                   [ Task("t{0}".format(t)) for t in ("a", "b", "c")]))
+        defs = Defs(
+                Suite("s1",
+                    Family("f1",
+                        [ Task("t{0}".format(t)) for t in ("a", "b", "c")])))
         defs.save_as_defs("test.def")   # save defs to file "test.def"  
                      
         Ecf.set_debug_equality(True)
@@ -168,14 +169,14 @@ class TestAddMeterEventLabel(unittest.TestCase):
         self.assertEqual(defs, self.defs, "expected defs to be the same")
         
     def test_alternative3(self):
-        defs = Defs()
-        defs += Suite('s1',
+        defs = Defs( 
+                Suite('s1',
                     Task("t1",
-                         Event(2),
-                         Event("wow"),
-                         Event(10,"Eventname2" ),
-                         Meter("metername3",0,100),
-                         Label("label_name4", "value")))   
+                        Event(2),
+                        Event("wow"),
+                        Event(10,"Eventname2" ),
+                        Meter("metername3",0,100),
+                        Label("label_name4", "value")))) 
          
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -234,12 +235,12 @@ class TestAddLimitInlimit(unittest.TestCase):
         self.assertEqual(defs, self.defs, "expected defs to be the same")
         
     def test_alternative3(self):
-        defs = Defs()
-        defs += Suite("s1",
-                Limit("limitName4", 10),# name, maximum token
-                Family("f1",
-                    InLimit("limitName4","/s1/f1",2), # limit name, path to limit, tokens consumed
-                    [ Task("t{0}".format(t)) for t in range(1,4) ] ))
+        defs = Defs( 
+                Suite("s1",
+                    Limit("limitName4", 10),# name, maximum token
+                    Family("f1",
+                        InLimit("limitName4","/s1/f1",2), # limit name, path to limit, tokens consumed
+                        [ Task("t{0}".format(t)) for t in range(1,4) ] )))
                      
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -302,9 +303,10 @@ class TestAddVariable(unittest.TestCase):
         
     def test_alternative2(self):
          
-        defs = Defs() + Suite("s1")
-        defs.s1 += { "HELLO":"world", "NAME":"value", "NAME2":"value2", 
-                     "NAME3":"value3", "NAME4":4, "BILL":1, "FRED":"bloggs" }
+        defs = Defs(
+                Suite("s1",
+                    { "HELLO":"world", "NAME":"value", "NAME2":"value2", 
+                     "NAME3":"value3", "NAME4":4, "BILL":1, "FRED":"bloggs" }))
  
         defs.s1.sort_attributes("variable");
         Ecf.set_debug_equality(True)
@@ -326,13 +328,13 @@ class TestAddTrigger(unittest.TestCase):
 
     def test_alternative0(self):
         
-        defs = Defs()
-        defs += Suite("s1",
+        defs = Defs(
+                Suite("s1",
                     Task("t1"),
                     Task("t2",
                         Trigger("t1 == active and t3 == aborted"),
                         Complete("t3 == complete")),
-                    Task("t3"))
+                    Task("t3")))
          
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -368,11 +370,12 @@ class TestAddTrigger(unittest.TestCase):
 class TestAddTaskChain(unittest.TestCase):
 
     def setUp(self):
-        defs = Defs() + Suite("s1")
-        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
-        defs.s1.t2 += Trigger( "t1 == complete" )
-        defs.s1.t3 += Trigger( "t2 == complete" )
-        defs.s1.t4 += Trigger( "t3 == complete" )
+        defs = Defs(
+                Suite("s1",
+                    Task("t1"),
+                    Task("t2",Trigger( "t1 == complete" )),
+                    Task("t3",Trigger( "t2 == complete" )),
+                    Task("t4",Trigger( "t3 == complete" ))))
         self.defs = defs
         
     def test_alternative(self):
@@ -411,11 +414,12 @@ class TestAddTaskChain(unittest.TestCase):
 class TestAddReverseTaskChain(unittest.TestCase):
 
     def setUp(self):
-        defs = Defs() + Suite("s1")
-        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
-        defs.s1.t1 += Trigger( "t2 == complete" )
-        defs.s1.t2 += Trigger( "t3 == complete" )
-        defs.s1.t3 += Trigger( "t4 == complete" )
+        defs = Defs(
+                Suite("s1",
+                    Task("t1", Trigger( "t2 == complete" )),
+                    Task("t2", Trigger( "t3 == complete" )),
+                    Task("t3", Trigger( "t4 == complete" )),
+                    Task("t4")))
         self.defs = defs
         
     def test_alternative1(self):
@@ -441,14 +445,14 @@ class TestAddLargeTrigger(unittest.TestCase):
         self.defs = defs
 
     def test_alternative0(self):
-        defs = Defs()
-        defs += Suite("s1",
+        defs = Defs( 
+                Suite("s1",
                     Task("t1"),
                     Task("t2"),
                     Task("t3",
                         Trigger("t1 == complete"), 
                         Trigger("t2 == active"),
-                        Trigger("t2 == aborted",False)))
+                        Trigger("t2 == aborted",False))))
         
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -536,8 +540,8 @@ class TestAddTimeDependencies(unittest.TestCase):
         cron.set_months( [1,2,3,4,5,6] )
         cron.set_time_series( "+00:00 23:00 00:30" )
 
-        defs = Defs()
-        defs += Suite("s1",
+        defs = Defs( 
+                Suite("s1",
                     Task("date",
                         Date(1, 0, 0),                   # first of every month and every year
                         Date("2.*.*"),                   # second of every month and every yea
@@ -555,7 +559,7 @@ class TestAddTimeDependencies(unittest.TestCase):
                         Time(0, 10),
                         Time("+00:40"),
                         Time("+00:40 20:00 01:00")),
-                    Task("cron",cron))
+                    Task("cron",cron)))
 
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -638,10 +642,10 @@ class TestAddDefStatus(unittest.TestCase):
         self.defs = defs
 
     def test_alternative0(self):
-        defs = Defs()
-        defs += Suite("s1",
+        defs = Defs( 
+                Suite("s1",
                     Task("t1",Defstatus("complete")),
-                    Task("t2",Defstatus(DState.complete)))
+                    Task("t2",Defstatus(DState.complete))))
         
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -684,14 +688,14 @@ class TestAddAutocancel(unittest.TestCase):
         self.defs = defs
 
     def test_alternative0(self):
-        defs = Defs().add(
-            Suite("s1",
-                Task("t1",Autocancel(3)),                    # delete task after 3 days after completion 
-                Task("t2",Autocancel(1, 10, True)),          # delete task 1hr 10 min after task completion
-                Task("t3",Autocancel(TimeSlot(2,10), True)), # delete task 2hr 10 min after task completion
-                Task("t4",Autocancel(1)),                    # delete task after 1 day after task completion
-                Task("t5",Autocancel(18, 10, False)),        # delete task at 6:10pm once it has completed
-                Task("t6",Autocancel(2, 10, False))))        # delete task at 2:10am once it has completed
+        defs = Defs( 
+                Suite("s1",
+                    Task("t1",Autocancel(3)),                    # delete task after 3 days after completion 
+                    Task("t2",Autocancel(1, 10, True)),          # delete task 1hr 10 min after task completion
+                    Task("t3",Autocancel(TimeSlot(2,10), True)), # delete task 2hr 10 min after task completion
+                    Task("t4",Autocancel(1)),                    # delete task after 1 day after task completion
+                    Task("t5",Autocancel(18, 10, False)),        # delete task at 6:10pm once it has completed
+                    Task("t6",Autocancel(2, 10, False))))        # delete task at 2:10am once it has completed
 
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -762,7 +766,7 @@ class TestAddRepeat(unittest.TestCase):
      
 
     def test_alternative0(self):
-        defs = Defs().add(
+        defs = Defs( 
                 Suite("s1",
                     Family("f1",
                        RepeatDate("YMD",20100111,20100115,2),
