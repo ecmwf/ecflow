@@ -35,20 +35,22 @@ class TestNewSuite(unittest.TestCase):
                 suite.add_task("t1") 
          
         with Defs() as self.defs3:  
-            self.defs3.add(Suite("test").add(
-                Edit(ECF_HOME=home),
-                Task("t1")))
+            self.defs3.add(
+                Suite("test",
+                    Edit(ECF_HOME=home),
+                    Task("t1")))
              
         self.defs4 = Defs() + (Suite("test") + Edit(ECF_HOME=home))
         self.defs4.test += Task("t1")
         
         self.defs5 = Defs().add(
                 Suite("test").add(
-                    Edit(ECF_HOME= os.path.join(os.getenv("HOME"),  "course")),
+                    Edit(ECF_HOME=home),
                     Task("t1")))
         
-        home = os.path.join(os.getenv("HOME"),  "course") 
-        self.defs6 = Defs().add(
+        print "Creating suite definition"   
+        home = os.path.join(os.getenv("HOME"),"course")
+        self.defs6 = Defs( 
                         Suite('test',
                             Task('t1'),
                             ECF_HOME=home))
@@ -88,12 +90,12 @@ class TestFamilies(unittest.TestCase):
          
         print("Creating suite definition") 
         home = os.path.join(os.getenv("HOME"),  "course") 
-        defs = Defs().add(
-            Suite("test",
-                Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                Family("f1",
-                    Task("t1"),
-                    Task("t2"))))
+        defs = Defs( 
+                Suite("test",
+                    Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                    Family("f1",
+                        Task("t1"),
+                        Task("t2"))))
         print(defs)
         print("Checking job creation: .ecf -> .job0")
         #print(defs).check_job_creation()
@@ -161,10 +163,9 @@ class TestVariables(unittest.TestCase):
                         Task("t2",Edit(SLEEP=20)))
   
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add( 
-                    Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        create_family_f1()))
+        defs = Defs(
+                Suite("test", Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                    create_family_f1()))
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")
@@ -259,10 +260,9 @@ class TestVariableInheritance(unittest.TestCase):
              
         print("Creating suite definition")
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(
-                    Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        create_family_f1()))
+        defs = Defs(
+                Suite("test",Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                    create_family_f1()))
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
@@ -337,10 +337,9 @@ class TestTriggers(unittest.TestCase):
              
         print("Creating suite definition")
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(
-                    Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        create_family_f1()))
+        defs = Defs( 
+                Suite("test", 
+                    create_family_f1(),ECF_INCLUDE=home,ECF_HOME=home))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
         #print(defs).check_job_creation()
@@ -429,10 +428,10 @@ class TestEvents(unittest.TestCase):
              
         print("Creating suite definition")
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(
-                    Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        create_family_f1() ))
+        defs = Defs( 
+                Suite("test",
+                        create_family_f1(),
+                        ECF_INCLUDE=home,ECF_HOME=home))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
         #print(defs).check_job_creation()
@@ -523,10 +522,10 @@ class TestComplete(unittest.TestCase):
         
         print("Creating suite definition")  
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(
+        defs = Defs( 
                     Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        create_family_f1() ))
+                        create_family_f1(),
+                        ECF_INCLUDE=home,ECF_HOME=home))
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
@@ -610,20 +609,20 @@ class TestMeter(unittest.TestCase):
         def create_family_f1():
             return Family("f1",
                         Edit(SLEEP= 20),
-                        Task("t1",Meter("progress", 1, 100, 90)),
-                        Task("t2",Trigger("t1 == complete"), Event("a"), Event("b")),
-                        Task("t3",Trigger("t2:a")),
-                        Task("t4",Trigger("t2 == complete"), Complete("t2:b")),
-                        Task("t5",Trigger("t1:progress ge 30")),
-                        Task("t6",Trigger("t1:progress ge 60")),
-                        Task("t7",Trigger("t1:progress ge 90")))  
+                        Task("t1", Meter("progress", 1, 100, 90)),
+                        Task("t2", Trigger("t1 == complete"), Event("a"), Event("b")),
+                        Task("t3", Trigger("t2:a")),
+                        Task("t4", Trigger("t2 == complete"), Complete("t2:b")),
+                        Task("t5", Trigger("t1:progress ge 30")),
+                        Task("t6", Trigger("t1:progress ge 60")),
+                        Task("t7", Trigger("t1:progress ge 90")))  
         
         print("Creating suite definition")  
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(
-                    Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        create_family_f1() ))
+        defs = Defs( 
+                Suite("test",
+                    create_family_f1(),
+                    ECF_INCLUDE=home,ECF_HOME=home))
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
@@ -707,18 +706,18 @@ class TestTime(unittest.TestCase):
         def create_family_f2():
             return Family("f2",
                 Edit(SLEEP=20),
-                Task("t1",Time("00:30 23:30 00:30")),  
-                Task("t2",Day("sunday")),
-                Task("t3",Date("1.*.*"), Time("12:00")),  
-                Task("t4",Time("+00:02")), 
-                Task("t5",Time("00:02")))
+                Task("t1", Time("00:30 23:30 00:30")),  
+                Task("t2", Day("sunday")),
+                Task("t3", Date("1.*.*"), Time("12:00")),  
+                Task("t4", Time("+00:02")), 
+                Task("t5", Time("00:02")))
  
         print("Creating suite definition")  
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(
-                    Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        create_family_f2()))
+        defs = Defs( 
+                Suite("test",
+                    create_family_f2(),
+                    ECF_INCLUDE=home,ECF_HOME=home))
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
@@ -766,25 +765,25 @@ class TestIndentation(unittest.TestCase):
         import os
         print("Creating suite definition") 
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(# Stream like definition
-                    Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        Family("f1",
-                            Edit(SLEEP=20),
-                            Task("t1", Meter("progress", 1, 100, 90)),
-                            Task("t2", Trigger("t1 == complete"),Event("a"),Event("b")),
-                            Task("t3", Trigger("t2:a")),
-                            Task("t4", Trigger("t2 == complete"), Complete("t2:b")),
-                            Task("t5", Trigger("t1:progress ge 30")),
-                            Task("t6", Trigger("t1:progress ge 60")),
-                            Task("t7", Trigger("t1:progress ge 90"))),
-                        Family("f2",
-                            Edit(SLEEP=20),
-                            Task("t1", Time( "00:30 23:30 00:30" )),
-                            Task("t2", Day( "sunday" )),
-                            Task("t3", Date("1.*.*"), Time("12:00")),
-                            Task("t4", Time("+00:02")),
-                            Task("t5", Time("00:02")))))
+        defs = Defs( 
+                Suite("test",
+                    Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                    Family("f1",
+                        Edit(SLEEP=20),
+                        Task("t1", Meter("progress", 1, 100, 90)),
+                        Task("t2", Trigger("t1 == complete"),Event("a"),Event("b")),
+                        Task("t3", Trigger("t2:a")),
+                        Task("t4", Trigger("t2 == complete"), Complete("t2:b")),
+                        Task("t5", Trigger("t1:progress ge 30")),
+                        Task("t6", Trigger("t1:progress ge 60")),
+                        Task("t7", Trigger("t1:progress ge 90"))),
+                    Family("f2",
+                        Edit(SLEEP=20),
+                        Task("t1", Time( "00:30 23:30 00:30" )),
+                        Task("t2", Day( "sunday" )),
+                        Task("t3", Date("1.*.*"), Time("12:00")),
+                        Task("t4", Time("+00:02")),
+                        Task("t5", Time("00:02")))))
               
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
@@ -849,10 +848,10 @@ class TestLabel(unittest.TestCase):
  
         print("Creating suite definition")  
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(
-                    Suite("test",
-                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                        create_family_f3()))
+        defs = Defs( 
+                Suite("test",
+                    create_family_f3(),
+                    ECF_INCLUDE=home,ECF_HOME=home))
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
@@ -893,7 +892,7 @@ class TestRepeat(unittest.TestCase):
     def test_repeat0(self):
      
         print("Creating suite definition") 
-        defs = Defs().add(
+        defs = Defs( 
                 Suite("test",
                     Edit(ECF_INCLUDE=self.ecf_includes, ECF_HOME=self.ecf_home),
                     Family("f4",
@@ -995,12 +994,13 @@ class TestDataAquistionSolution(unittest.TestCase):
         import os
         
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs() + Suite("data_aquisition",
-                            RepeatDay(1),
-                            Edit(ECF_HOME=home),
-                            Edit(ECF_INCLUDE=home),
-                            Edit(ECF_FILES=home + "/data"),
-                            Edit(SLEEP=2))
+        defs = Defs(
+                Suite("data_aquisition",
+                    RepeatDay(1),
+                    Edit(ECF_HOME=home),
+                    Edit(ECF_INCLUDE=home),
+                    Edit(ECF_FILES=home + "/data"),
+                    Edit(SLEEP=2)))
         for city in ( "Exeter", "Toulouse", "Offenbach", "Washington", "Tokyo", "Melbourne", "Montreal" ) :
             fcity = defs.data_aquisition.add_family(city)
             fcity += Task("archive")
@@ -1123,7 +1123,7 @@ class TestOperationalSolution(unittest.TestCase):
             if cycle == "12": return Trigger("./00 == complete")
             return None
          
-        defs = Defs().add(
+        defs = Defs(
             Suite("operation_suite",
                 RepeatDay(1),
                 Edit(ECF_HOME= home),
@@ -1203,7 +1203,7 @@ class TestBackArchivingSolution(unittest.TestCase):
         #!/usr/bin/env python2.7
         import os
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(
+        defs = Defs( 
             Suite("back_archiving",
                 RepeatDay(1),
                 Edit(ECF_HOME=home),

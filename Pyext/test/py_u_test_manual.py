@@ -236,11 +236,11 @@ class TestAddLimitInlimit(unittest.TestCase):
         
     def test_alternative3(self):
         defs = Defs( 
-                Suite("s1",
-                    Limit("limitName4", 10),# name, maximum token
-                    Family("f1",
-                        InLimit("limitName4","/s1/f1",2), # limit name, path to limit, tokens consumed
-                        [ Task("t{0}".format(t)) for t in range(1,4) ] )))
+            Suite("s1",
+                Limit("limitName4", 10),# name, maximum token
+                Family("f1",
+                    InLimit("limitName4","/s1/f1",2), # limit name, path to limit, tokens consumed
+                    [ Task("t{0}".format(t)) for t in range(1,4) ] )))
                      
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -263,8 +263,7 @@ class TestAddVariable(unittest.TestCase):
 
     def test_alternative0(self):
          
-        defs = Defs()
-        defs += Suite("s1",HELLO="world",FRED="bloggs",BILL=1,NAME="value",NAME2="value2")
+        defs = Defs(Suite("s1",HELLO="world",FRED="bloggs",BILL=1,NAME="value",NAME2="value2"))
         defs.s1.add_variable('NAME4',4)
         defs.s1 += Edit(NAME3="value3")
  
@@ -403,7 +402,7 @@ class TestAddTaskChain(unittest.TestCase):
         self.assertEqual(defs, self.defs, "expected defs to be the same")
         
     def test_alternative1(self):
-        defs = Defs() + Suite("s1")
+        defs = Defs(Suite("s1"))
         defs.s1 >> Task("t1") >> Task("t2") >> Task("t3") >> Task("t4")
 
         Ecf.set_debug_equality(True)
@@ -690,12 +689,12 @@ class TestAddAutocancel(unittest.TestCase):
     def test_alternative0(self):
         defs = Defs( 
                 Suite("s1",
-                    Task("t1",Autocancel(3)),                    # delete task after 3 days after completion 
-                    Task("t2",Autocancel(1, 10, True)),          # delete task 1hr 10 min after task completion
-                    Task("t3",Autocancel(TimeSlot(2,10), True)), # delete task 2hr 10 min after task completion
-                    Task("t4",Autocancel(1)),                    # delete task after 1 day after task completion
-                    Task("t5",Autocancel(18, 10, False)),        # delete task at 6:10pm once it has completed
-                    Task("t6",Autocancel(2, 10, False))))        # delete task at 2:10am once it has completed
+                    Task("t1", Autocancel(3)),                    # delete task after 3 days after completion 
+                    Task("t2", Autocancel(1, 10, True)),          # delete task 1hr 10 min after task completion
+                    Task("t3", Autocancel(TimeSlot(2,10), True)), # delete task 2hr 10 min after task completion
+                    Task("t4", Autocancel(1)),                    # delete task after 1 day after task completion
+                    Task("t5", Autocancel(18, 10, False)),        # delete task at 6:10pm once it has completed
+                    Task("t6", Autocancel(2, 10, False))))        # delete task at 2:10am once it has completed
 
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -828,6 +827,28 @@ class TestAddRepeat(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+class Deadlock(unittest.TestCase):
+    def setUp(self):
+        defs = Defs().add(
+        Suite("dead_lock").add(
+            Family("family").add(
+               Task("t1").add( Trigger("t2 == complete")),
+               Task("t2").add( Trigger("t1 == complete")))))
+        
+        self.defs = defs
+        
+    def test_me(self):
+        defs = Defs(
+            Suite("dead_lock",
+                Family('family',
+                    Task('t1', 
+                        Trigger("t2 == complete")),
+                    Task('t2', 
+                        Trigger("t1 == complete")))))
+        
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+       
         
 if __name__ == "__main__":
     unittest.main()

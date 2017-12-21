@@ -242,7 +242,7 @@ defs_ptr defs_init( bp::list the_list, bp::dict kw) {
 
 void export_Defs()
 {
-	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc(),init<>("Create a empty Defs"))
+	class_<Defs,defs_ptr>( "Defs", DefsDoc::add_definition_doc(),init<>("Create a empty Defs"))
    .def("__init__",raw_function(&defs_raw_constructor,0))  // will call -> task_init
    .def("__init__",make_constructor(&defs_init))
    .def("__init__",make_constructor(&create_defs),         DefsDoc::add_definition_doc())
@@ -291,4 +291,8 @@ void export_Defs()
 	.add_property("user_variables", bp::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined `variable`_ s" )
 	.add_property("server_variables", bp::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server `variable`_ s" )
 	;
+
+#if defined(__clang__)
+   bp::register_ptr_to_python<defs_ptr>(); // needed for mac and boost 1.6
+#endif
 }
