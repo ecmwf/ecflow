@@ -21,8 +21,21 @@ import unittest
 import shutil   # used to remove directory tree
 import os
 
+def test_compile(text):
+    test_file = "py_u_test_tutorial.def"
+    file = open(test_file ,'w')
+    file.write(text)
+    file.close()
+    execfile(test_file)
+    os.remove(test_file)  
+    try: os.remove('test.def')  
+    except: pass       
+
+    
 class TestNewSuite(unittest.TestCase):
     def setUp(self):
+ 
+        
         home = os.path.join(os.getenv("HOME"),"course")
         self.defs = Defs()
         suite = self.defs.add_suite("test")
@@ -55,14 +68,27 @@ class TestNewSuite(unittest.TestCase):
                             Task('t1'),
                             ECF_HOME=home))
      
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Task,Edit
+   
+print "Creating suite definition"
+home = os.path.join(os.getenv("HOME"),  "course")
+defs = Defs( 
+        Suite('test',
+            Edit(ECF_HOME=home),
+            Task('t1')))
+print defs
+"""
+        test_compile(text)
+        
     def test_defs_equal(self):
         self.assertEqual(self.defs, self.defs2, "defs not the same")
         self.assertEqual(self.defs, self.defs3, "defs not the same")
         self.assertEqual(self.defs, self.defs4, "defs not the same")
         self.assertEqual(self.defs, self.defs5, "defs not the same")
         self.assertEqual(self.defs, self.defs6, "defs not the same")
-         
- 
+
 class TestFamilies(unittest.TestCase):
     def setUp(self):
         #!/usr/bin/env python2.7
@@ -78,7 +104,7 @@ class TestFamilies(unittest.TestCase):
                     Task("t2"))))
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
          
@@ -98,7 +124,7 @@ class TestFamilies(unittest.TestCase):
                         Task("t2"))))
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
 
@@ -106,7 +132,29 @@ class TestFamilies(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")        
- 
+
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit
+         
+print("Creating suite definition") 
+home = os.path.join(os.getenv("HOME"), "course") 
+defs = Defs( 
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Family("f1",
+                Task("t1"),
+                Task("t2"))))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
+
     def test_me(self):
         #!/usr/bin/env python2.7
         import os
@@ -117,7 +165,7 @@ class TestFamilies(unittest.TestCase):
         defs.test += Family("f1") + [ Task("t{0}".format(i)) for i in range(1,3) ]
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
 
@@ -127,7 +175,8 @@ class TestFamilies(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")        
  
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
  
      
 class TestVariables(unittest.TestCase):
@@ -147,7 +196,7 @@ class TestVariables(unittest.TestCase):
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #print(defs.check_job_creation())
+        #defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
  
@@ -164,12 +213,13 @@ class TestVariables(unittest.TestCase):
   
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs(
-                Suite("test", Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                Suite("test", 
+                    Edit(ECF_INCLUDE=home,ECF_HOME=home),
                     create_family_f1()))
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")
-        #print(defs.check_job_creation())
+        #defs.check_job_creation())
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
         
@@ -178,6 +228,30 @@ class TestVariables(unittest.TestCase):
         Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
 
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit
+
+def create_family_f1():
+    return Family("f1",
+                Task("t1",Edit(SLEEP=20)),
+                Task("t2",Edit(SLEEP=20)))
+  
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs(
+        Suite("test", 
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            create_family_f1()))         
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def") 
+"""
+        test_compile(text)
+        
     def test_me2(self):
         #!/usr/bin/env python2.7
         import os
@@ -192,7 +266,7 @@ class TestVariables(unittest.TestCase):
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
          
@@ -211,7 +285,7 @@ class TestVariables(unittest.TestCase):
   
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
          
@@ -221,7 +295,8 @@ class TestVariables(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")       
 
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
 class TestVariableInheritance(unittest.TestCase):
     def setUp(self):
@@ -242,7 +317,7 @@ class TestVariableInheritance(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
    
@@ -266,7 +341,7 @@ class TestVariableInheritance(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
         
@@ -274,6 +349,33 @@ class TestVariableInheritance(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")  
+
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit
+
+def create_family_f1():
+    return Family("f1",
+            Edit(SLEEP=20),
+                Task("t1"),
+                Task("t2"))
+             
+print("Creating suite definition")
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs(
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            create_family_f1()))
+
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -289,7 +391,7 @@ class TestVariableInheritance(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
         
@@ -299,7 +401,8 @@ class TestVariableInheritance(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
 class TestTriggers(unittest.TestCase):
     def setUp(self):
@@ -319,7 +422,7 @@ class TestTriggers(unittest.TestCase):
                             create_family_f1()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
   
@@ -338,11 +441,12 @@ class TestTriggers(unittest.TestCase):
         print("Creating suite definition")
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs( 
-                Suite("test", 
-                    create_family_f1(),ECF_INCLUDE=home,ECF_HOME=home))
+                Suite("test",
+                    Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                    create_family_f1()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -350,6 +454,32 @@ class TestTriggers(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
+        
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit
+
+def create_family_f1():
+    return Family("f1",
+                Edit(SLEEP=20),
+                Task("t1"),
+                Task("t2",Trigger("t1 == complete")))
+             
+print("Creating suite definition")
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs( 
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            create_family_f1()))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -366,7 +496,7 @@ class TestTriggers(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
          
@@ -377,7 +507,8 @@ class TestTriggers(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
 class TestEvents(unittest.TestCase):
     def setUp(self):
@@ -403,7 +534,7 @@ class TestEvents(unittest.TestCase):
                 create_family_f1() ))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def") 
   
@@ -430,11 +561,11 @@ class TestEvents(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs( 
                 Suite("test",
-                        create_family_f1(),
-                        ECF_INCLUDE=home,ECF_HOME=home))
+                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                        create_family_f1()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")    
          
@@ -442,6 +573,39 @@ class TestEvents(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
+        
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Event
+
+def create_family_f1():
+    return Family("f1",
+                Edit(SLEEP=20),
+                Task("t1"),
+                Task("t2",
+                    Trigger("t1 == complete"),
+                    Event("a"),
+                    Event("b")),
+                Task("t3",
+                    Trigger("t2:a")),
+                Task("t4",
+                    Trigger("t2:b")))
+             
+print("Creating suite definition")
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs( 
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            create_family_f1()))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -461,7 +625,7 @@ class TestEvents(unittest.TestCase):
         defs.test += [ Edit(ECF_INCLUDE=home,ECF_HOME=home), create_family_f1()]
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -471,7 +635,8 @@ class TestEvents(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
 class TestComplete(unittest.TestCase):
     def setUp(self):
@@ -496,7 +661,7 @@ class TestComplete(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
  
@@ -524,12 +689,12 @@ class TestComplete(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs( 
                     Suite("test",
-                        create_family_f1(),
-                        ECF_INCLUDE=home,ECF_HOME=home))
+                        Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                        create_family_f1()))
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")      
          
@@ -537,6 +702,40 @@ class TestComplete(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")       
+        
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event
+
+def create_family_f1():
+    return Family("f1",
+                Edit(SLEEP= 20),
+                Task("t1"),
+                Task("t2",
+                    Trigger("t1 == complete"),
+                    Event("a"), 
+                    Event("b")),
+                Task("t3",
+                    Trigger("t2:a")),
+                Task("t4",
+                    Trigger("t2 == complete"), 
+                    Complete("t2:b")))
+        
+print("Creating suite definition")  
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs( 
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            create_family_f1()))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -557,7 +756,7 @@ class TestComplete(unittest.TestCase):
          
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -567,7 +766,8 @@ class TestComplete(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
 class TestMeter(unittest.TestCase):
     def setUp(self):
@@ -596,7 +796,7 @@ class TestMeter(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
  
@@ -621,12 +821,12 @@ class TestMeter(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs( 
                 Suite("test",
-                    create_family_f1(),
-                    ECF_INCLUDE=home,ECF_HOME=home))
+                    Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                    create_family_f1()))
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")    
          
@@ -634,6 +834,37 @@ class TestMeter(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(self.defs,defs,"defs not equal")   
+        
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter
+
+def create_family_f1():
+    return Family("f1",
+                Edit(SLEEP= 20),
+                Task("t1", Meter("progress", 1, 100, 90)),
+                Task("t2", Trigger("t1 == complete"), Event("a"), Event("b")),
+                Task("t3", Trigger("t2:a")),
+                Task("t4", Trigger("t2 == complete"), Complete("t2:b")),
+                Task("t5", Trigger("t1:progress ge 30")),
+                Task("t6", Trigger("t1:progress ge 60")),
+                Task("t7", Trigger("t1:progress ge 90")))  
+        
+print("Creating suite definition")  
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs( 
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            create_family_f1()))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -658,7 +889,7 @@ class TestMeter(unittest.TestCase):
          
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -668,7 +899,8 @@ class TestMeter(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
 class TestTime(unittest.TestCase):
     def setUp(self):
@@ -693,7 +925,7 @@ class TestTime(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
  
@@ -716,15 +948,43 @@ class TestTime(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs( 
                 Suite("test",
-                    create_family_f2(),
-                    ECF_INCLUDE=home,ECF_HOME=home))
- 
+                    Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                    create_family_f2()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
+
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date
+
+def create_family_f2():
+    return Family("f2",
+            Edit(SLEEP=20),
+            Task("t1", Time("00:30 23:30 00:30")),  
+            Task("t2", Day("sunday")),
+            Task("t3", Date("1.*.*"), Time("12:00")),  
+            Task("t4", Time("+00:02")), 
+            Task("t5", Time("00:02")))
  
+print("Creating suite definition")  
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs( 
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            create_family_f2()))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
+        
     def test_me(self):
         #!/usr/bin/env python2.7
         import os
@@ -747,7 +1007,7 @@ class TestTime(unittest.TestCase):
          
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -757,7 +1017,8 @@ class TestTime(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
 class TestIndentation(unittest.TestCase):
     def setUp(self):
@@ -787,12 +1048,47 @@ class TestIndentation(unittest.TestCase):
               
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
  
         self.defs = defs;
          
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date
+
+print("Creating suite definition") 
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs( 
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Family("f1",
+                Edit(SLEEP=20),
+                Task("t1", Meter("progress", 1, 100, 90)),
+                Task("t2", Trigger("t1 == complete"),Event("a"),Event("b")),
+                Task("t3", Trigger("t2:a")),
+                Task("t4", Trigger("t2 == complete"), Complete("t2:b")),
+                Task("t5", Trigger("t1:progress ge 30")),
+                Task("t6", Trigger("t1:progress ge 60")),
+                Task("t7", Trigger("t1:progress ge 90"))),
+              Family("f2",
+                Edit(SLEEP=20),
+                Task("t1", Time( "00:30 23:30 00:30" )),
+                Task("t2", Day( "sunday" )),
+                Task("t3", Date("1.*.*"), Time("12:00")),
+                Task("t4", Time("+00:02")),
+                Task("t5", Time("00:02")))))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
+        
     def test_me(self):
         #!/usr/bin/env python2.7
         import os
@@ -822,7 +1118,7 @@ class TestIndentation(unittest.TestCase):
          
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")   
          
@@ -832,8 +1128,8 @@ class TestIndentation(unittest.TestCase):
         self.assertEqual(self.defs,defs,"defs not equal")       
          
     def tearDown(self):
-        os.remove("test.def")
-         
+        try: os.remove("test.def")
+        except: pass         
          
 class TestLabel(unittest.TestCase):
          
@@ -855,12 +1151,38 @@ class TestLabel(unittest.TestCase):
  
         print(defs)
         print("Checking job creation: .ecf -> .job0")  
-        #print(defs).check_job_creation()
+        #defs.check_job_creation()
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")  
          
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label
+
+def create_family_f3():
+    return Family("f3",
+                Task("t1",
+                Label("info","")))
+ 
+print("Creating suite definition")  
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs( 
+        Suite("test",
+            create_family_f3(),
+            ECF_INCLUDE=home,ECF_HOME=home))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
+        
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
          
          
 class TestRepeat(unittest.TestCase):
@@ -885,17 +1207,15 @@ class TestRepeat(unittest.TestCase):
         file.close()
          
     def tearDown(self):
-        os.remove("test.def")
+        try: os.remove("test.def")
+        except: pass
         os.remove(self.t1_ecf_path)
         shutil.rmtree(self.ecf_home , ignore_errors=True)  
      
     def test_repeat0(self):
-     
-        print("Creating suite definition") 
-        defs = Defs( 
-                Suite("test",
-                    Edit(ECF_INCLUDE=self.ecf_includes, ECF_HOME=self.ecf_home),
-                    Family("f4",
+    
+        def create_family_f4():
+            return Family("f4",
                         Edit(SLEEP=2), 
                         RepeatString("NAME", ["a", "b", "c", "d", "e", "f" ]),
                         Family("f5",
@@ -903,7 +1223,13 @@ class TestRepeat(unittest.TestCase):
                             Task("t1",
                                 RepeatDate("DATE", 20101230, 20110105),
                                 Label("info", ""),
-                                Label("data",""))))))
+                                Label("data",""))))
+              
+        print("Creating suite definition") 
+        defs = Defs( 
+                Suite("test",
+                    Edit(ECF_INCLUDE=self.ecf_includes, ECF_HOME=self.ecf_home),
+                    create_family_f4()))
         print(defs)
  
         print("Checking job creation: .ecf -> .job0")   
@@ -913,6 +1239,38 @@ class TestRepeat(unittest.TestCase):
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
         
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
+                   RepeatString,RepeatInteger,RepeatDate
+        
+def create_family_f4():
+    return Family("f4",
+                Edit(SLEEP=2), 
+                RepeatString("NAME", ["a", "b", "c", "d", "e", "f" ]),
+                Family("f5",
+                    RepeatInteger("VALUE", 1, 10),
+                    Task("t1",
+                        RepeatDate("DATE", 20101230, 20110105),
+                        Label("info", ""),
+                        Label("data",""))))
+ 
+print("Creating suite definition")  
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs( 
+        Suite("test",
+            create_family_f4(),
+            ECF_INCLUDE=home,ECF_HOME=home))
+print(defs) 
+
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
+
     def test_repeat(self):
      
         print("Creating suite definition") 
@@ -1018,6 +1376,41 @@ class TestDataAquistionSolution(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)
         self.assertEqual(self.defs, defs, "defs not equal")
+        
+        
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
+                   RepeatString,RepeatInteger,RepeatDate
+
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs(
+        Suite("data_aquisition",
+            RepeatDay(1),
+            Edit(ECF_HOME=home),
+            Edit(ECF_INCLUDE=home),
+            Edit(ECF_FILES=home + "/data"),
+            Edit(SLEEP=2)))
+for city in ( "Exeter", "Toulouse", "Offenbach", "Washington", "Tokyo", "Melbourne", "Montreal" ) :
+    fcity = defs.data_aquisition.add_family(city)
+    fcity += Task("archive")
+    for obs_type in ( "observations", "fields", "images" ):
+        type_fam = fcity.add_family(obs_type)
+        if city in ("Exeter", "Toulouse", "Offenbach"): type_fam + Time("00:00 23:00 01:00")
+        if city in ("Washington") :                     type_fam + Time("00:00 23:00 03:00")
+        if city in ("Tokyo") :                          type_fam + Time("12:00")
+        if city in ("Melbourne") :                      type_fam + Day( "monday" )
+        if city in ("Montreal") :                       type_fam + Date(1, 0, 0)
+         
+        type_fam + Task("get") + Task("process",Trigger("get eq complete")) + Task("store",Trigger("get eq complete"))         
+ 
+print("Checking job creation: .ecf -> .job0")  
+#defs.check_job_creation()
+
+print("Saving definition to file 'test.def'")
+defs.save_as_defs("test.def")
+"""
+        test_compile(text)
         
     def test_me(self):
         #!/usr/bin/env python2.7
