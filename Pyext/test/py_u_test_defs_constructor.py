@@ -143,6 +143,7 @@ class Test_defs_raw_constructor(unittest.TestCase):
         self.assertEqual(defs,defs2,"defs not equal\n" + str(defs) + "\n\n" + str(defs2))    
         self.assertEqual(defs,defs3,"defs not equal\n" + str(defs) + "\n\n" + str(defs3))    
 
+
 if __name__ == "__main__":
     unittest.main()
     print("All Tests pass")

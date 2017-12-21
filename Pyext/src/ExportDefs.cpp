@@ -167,21 +167,21 @@ bool defs_container(defs_ptr self, const std::string& name){return (self->findSu
 static object do_add(defs_ptr self, const bp::object& arg) {
    //std::cout << "defs::do_add \n";
    if (arg.ptr() == object().ptr())  return object(self); // *IGNORE* None
-   if (extract<Variable>(arg).check()) {
-      Variable var = extract<Variable>(arg);
-      self->set_server().add_or_update_user_variables(var.name(),var.theValue());
-   }
+   else if (extract<suite_ptr>(arg).check()) self->addSuite(extract<suite_ptr>(arg)) ;
+   else if (extract<dict>(arg).check())     add_variable_dict(self,extract<dict>(arg));
    else if (extract<Edit>(arg).check()) {
       Edit edit = extract<Edit>(arg);
       const std::vector<Variable>& vec = edit.variables();
       for(size_t i=0; i < vec.size(); i++) self->set_server().add_or_update_user_variables(vec[i].name(),vec[i].theValue());
    }
-   else if (extract<dict>(arg).check())     add_variable_dict(self,extract<dict>(arg));
-   else if (extract<suite_ptr>(arg).check()) self->addSuite(extract<suite_ptr>(arg)) ;
    else if (extract<bp::list>(arg).check()){
-      bp::list the_list  = extract<bp::list>(arg);
+      bp::list the_list = extract<bp::list>(arg);
       int the_list_size = len(the_list);
       for(int i = 0; i < the_list_size; ++i) (void) do_add(self,the_list[i]); // recursive
+   }
+   else if (extract<Variable>(arg).check()) {
+      Variable var = extract<Variable>(arg);
+      self->set_server().add_or_update_user_variables(var.name(),var.theValue());
    }
    else throw std::runtime_error("ExportDefs::add : Unknown type");
    return object(self);
@@ -193,17 +193,8 @@ static object add(tuple args, dict kwargs) {
    if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
 
    for (int i = 1; i < the_list_size; ++i) (void)do_add(self,args[i]);
+   (void)add_variable_dict(self,kwargs);
 
-   bp::list keys = kwargs.keys();
-   const int no_of_keys = len(keys);
-   for(int i = 0; i < no_of_keys; ++i) {
-      bp::object curArg = keys[i];
-      if (curArg) {
-         std::string first = extract<std::string>(keys[i]);
-         std::string second = extract<std::string>(kwargs[keys[i]]);
-         self->set_server().add_or_update_user_variables(first,second);
-      }
-   }
    return object(self); // return defs as python object, relies class_<Defs>... for type registration
 }
 
@@ -227,9 +218,33 @@ static object defs_getattr(defs_ptr self, const std::string& attr) {
    return object();
 }
 
+object defs_raw_constructor(tuple args, dict kw) {
+   // cout << "defs_raw_constructor  len(args):" << len(args) << endl;
+   // args[0] is Defs(i.e self)
+   bp::list the_list;
+   std::string name;
+   for (int i = 1; i < len(args) ; ++i) {
+      if (extract<string>(args[i]).check()) name = extract<string>(args[i]);
+      else the_list.append(args[i]);
+   }
+   if (!name.empty() && len(the_list) > 0)
+      throw std::runtime_error("defs_raw_constructor: Can't mix string with other arguments. String argument specifies a path(loads a definition from disk)");
+   return args[0].attr("__init__")(the_list,kw); // calls -> init(list attr, dict kw)
+}
+
+defs_ptr defs_init( bp::list the_list, bp::dict kw) {
+   // cout << " defs_init: the_list: " << len(the_list) << " dict: " << len(kw) << endl;
+   defs_ptr defs = Defs::create();
+   (void) add_variable_dict(defs,kw);
+   (void) defs_iadd(defs,the_list);
+   return defs;
+}
+
 void export_Defs()
 {
-	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))
+	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc(),init<>("Create a empty Defs"))
+   .def("__init__",raw_function(&defs_raw_constructor,0))  // will call -> task_init
+   .def("__init__",make_constructor(&defs_init))
    .def("__init__",make_constructor(&create_defs),         DefsDoc::add_definition_doc())
 	.def(self == self )                                           // __eq__
 	.def("__copy__",              copyObject<Defs>)               // __copy__ uses copy constructor
@@ -240,7 +255,7 @@ void export_Defs()
 	.def("__contains__",          &defs_container)                // Container protocol
 	.def("__iter__",              bp::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
 	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
-   .def("__iadd__",              &defs_iadd)  // defs += [ Suite('s1'), Edit(var='value') ]
+   .def("__iadd__",              &defs_iadd)  // defs += [ Suite('s1'), Edit(var='value'), Variable('a','b') [ Suite('t2') ] ]
    .def("__iadd__",              &do_add)     // defs += Suite("s1")
    .def("__add__",               &do_add)
 	.def("add",                   raw_function(add,1),DefsDoc::add())
