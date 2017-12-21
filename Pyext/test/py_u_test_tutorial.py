@@ -61,7 +61,7 @@ class TestNewSuite(unittest.TestCase):
                     Edit(ECF_HOME=home),
                     Task("t1")))
         
-        print "Creating suite definition"   
+        print("Creating suite definition")   
         home = os.path.join(os.getenv("HOME"),"course")
         self.defs6 = Defs( 
                         Suite('test',
@@ -72,13 +72,13 @@ class TestNewSuite(unittest.TestCase):
 import os
 from ecflow import Defs,Suite,Task,Edit
    
-print "Creating suite definition"
+print("Creating suite definition")
 home = os.path.join(os.getenv("HOME"),  "course")
 defs = Defs( 
         Suite('test',
             Edit(ECF_HOME=home),
             Task('t1')))
-print defs
+print(defs)
 """
         test_compile(text)
         
@@ -113,15 +113,18 @@ class TestFamilies(unittest.TestCase):
     def test_me0(self):
         #!/usr/bin/env python2.7
         import os
-         
+        
+        def create_family_f1():
+            return Family("f1",
+                        Task("t1"),
+                        Task("t2"))
+            
         print("Creating suite definition") 
         home = os.path.join(os.getenv("HOME"),  "course") 
         defs = Defs( 
                 Suite("test",
                     Edit(ECF_INCLUDE=home,ECF_HOME=home),
-                    Family("f1",
-                        Task("t1"),
-                        Task("t2"))))
+                    create_family_f1()))
         print(defs)
         print("Checking job creation: .ecf -> .job0")
         #defs.check_job_creation()
@@ -137,14 +140,17 @@ class TestFamilies(unittest.TestCase):
 import os
 from ecflow import Defs,Suite,Family,Task,Edit
          
+def create_family_f1():
+    return Family("f1",
+                Task("t1"),
+                Task("t2"))
+            
 print("Creating suite definition") 
-home = os.path.join(os.getenv("HOME"), "course") 
+home = os.path.join(os.getenv("HOME"),  "course") 
 defs = Defs( 
         Suite("test",
             Edit(ECF_INCLUDE=home,ECF_HOME=home),
-            Family("f1",
-                Task("t1"),
-                Task("t2"))))
+            create_family_f1()))
 print(defs) 
 
 print("Checking job creation: .ecf -> .job0")  
