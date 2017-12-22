@@ -20,7 +20,6 @@ import ecflow_test_util as Test
 import unittest 
 import shutil   # used to remove directory tree
 import os
-from PIL.PyAccess import defs
 
 def test_compile(text):
     test_file = "py_u_test_tutorial.def"
