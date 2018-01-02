@@ -26,7 +26,7 @@ def test_compile(text):
     file = open(test_file ,'w')
     file.write(text)
     file.close()
-    execfile(test_file)
+    exec(compile(open(test_file ).read(), test_file , 'exec')) # execfile(test_file) only work for python 2.7
     os.remove(test_file)  
     try: os.remove('test.def')  
     except: pass       
@@ -948,7 +948,7 @@ class TestTime(unittest.TestCase):
                                                      # 2 minutes past midnight
             return f2
             
-        print "Creating suite definition"   
+        print("Creating suite definition")  
         defs = Defs()
         suite = defs.add_suite("test")
         suite.add_variable("ECF_HOME",    os.path.join(os.getenv("HOME"),  "course"))
@@ -1114,7 +1114,7 @@ class TestIndentation(unittest.TestCase):
         #    print "This example requires python version 2.7, but found : " + str(version)
         #    exit(0)
 
-        print "Creating suite definition"  
+        print("Creating suite definition")
         with Defs() as defs: 
     
             with defs.add_suite("test") as suite:
@@ -1478,7 +1478,7 @@ class TestLimit(unittest.TestCase):
                 f5.add_task( "t" + str(i) )
             return f5
           
-        print "Creating suite definition"   
+        print("Creating suite definition")   
         defs = Defs()
         suite = defs.add_suite("test")
         suite.add_variable("ECF_HOME",    os.path.join(os.getenv("HOME"),  "course"))
@@ -1486,12 +1486,12 @@ class TestLimit(unittest.TestCase):
 
         suite.add_limit("l1", 2)
         suite.add_family( create_family_f5() )
-        print defs
+        print(defs)
 
-        print "Checking job creation: .ecf -> .job0"   
-        print defs.check_job_creation()
+        print("Checking job creation: .ecf -> .job0")   
+        print(defs.check_job_creation())
 
-        print "Saving definition to file 'test.def'"
+        print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
         
         self.defs = defs   
@@ -1507,7 +1507,7 @@ class TestLimit(unittest.TestCase):
                     Edit(SLEEP=20),
                     [ Task('t{}'.format(i)) for i in range(1,10) ] )
      
-        print "Creating suite definition"  
+        print("Creating suite definition")  
         home = os.path.join(os.getenv("HOME"),"course")
         defs = Defs(
             Suite("test",
@@ -1541,7 +1541,7 @@ def create_family_f5() :
             Edit(SLEEP=20),
             [ Task('t{}'.format(i)) for i in range(1,10) ] )
      
-print "Creating suite definition"  
+print("Creating suite definition")  
 home = os.path.join(os.getenv("HOME"),"course")
 defs = Defs(
         Suite("test",
@@ -1592,7 +1592,7 @@ class TestLateAttribute(unittest.TestCase):
         print("Checking job creation: .ecf -> .job0")   
         #print(defs.check_job_creation())
 
-        print "Check in limit references"
+        print("Check in limit references")
         assert len(defs.check()) == 0, defs.check()
 
         print("Saving definition to file 'test.def'")
@@ -1611,7 +1611,7 @@ class TestLateAttribute(unittest.TestCase):
                         Edit(SLEEP=120),
                         Task("t1",late))
      
-        print "Creating suite definition"   
+        print("Creating suite definition")   
         home = os.path.join(os.getenv("HOME"),"course")
         defs = Defs( 
                 Suite("test",
@@ -1622,7 +1622,7 @@ class TestLateAttribute(unittest.TestCase):
         print("Checking job creation: .ecf -> .job0")   
         #print(defs.check_job_creation())
 
-        print "Check in limit references"
+        print("Check in limit references")
         assert len(defs.check()) == 0, defs.check()
 
         print("Saving definition to file 'test.def'")
@@ -1645,7 +1645,7 @@ def create_family_f6() :
                 Edit(SLEEP=120),
                 Task("t1",late))
      
-print "Creating suite definition"   
+print("Creating suite definition")   
 home = os.path.join(os.getenv("HOME"),"course")
 defs = Defs( 
         Suite("test",
