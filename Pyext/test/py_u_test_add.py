@@ -182,14 +182,23 @@ class TestListComprehension(unittest.TestCase):
         defs.add( [ Suite("s{0}".format(i)) for i in range(6,11) ] )
         self.assertEqual(len(defs), 10, " expected 10 suites but found " + str(len(defs)))
 
+        defs = Defs( [ Suite("s{0}".format(i)) for i in range(1,6) ] )
+        self.assertEqual(len(defs), 5, " expected 5 suites but found " + str(len(defs)))
+
     def test_family_list(self):
         defs = Defs()
         defs += [ Suite("suite").add( [ Family("f{0}".format(i)) for i in range(1,6)]  ) ]
         self.assertEqual(len(defs.suite), 5, " expected 5 familes but found " + str(len(defs.suite)))
 
+        defs = Defs( [ Suite("xx", [ Family("f{0}".format(i)) for i in range(1,6)]  ) ] )
+        self.assertEqual(len(defs.xx), 5, " expected 5 familes but found " + str(len(defs.xx)))
+
     def test_task_list(self):
         defs = Defs()
         defs += [ Suite("suite").add( Family("f").add( [ Task("t{0}".format(i)) for i in range(1,6)]  )) ]
+        self.assertEqual(len(defs.suite.f), 5, " expected 5 task but found " + str(len(defs.suite.f)))
+
+        defs = Defs( [ Suite("suite", Family("f",[ Task("t{0}".format(i)) for i in range(1,6)]  )) ] )
         self.assertEqual(len(defs.suite.f), 5, " expected 5 task but found " + str(len(defs.suite.f)))
 
     def test_task_list2(self):

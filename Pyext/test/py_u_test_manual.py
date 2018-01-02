@@ -95,12 +95,12 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
                 assert len(fam)==5, " expected 5 tasks but found " + str(len(fam)) 
                 
     def test_me6(self):
-        defs = Defs().add(
-          [ Suite("s{0}".format(i),
-              [ Family("f{0}".format(i),
-                    [ Task("t{0}".format(i)) for i in range(1,6)] )
-                for i in range(1,6)]  ) 
-            for i in range(1,6) ] )
+        defs = Defs(
+                [ Suite("s{0}".format(i),
+                    [ Family("f{0}".format(i),
+                        [ Task("t{0}".format(i)) for i in range(1,6)] )
+                    for i in range(1,6)]  ) 
+                for i in range(1,6) ] )
         assert len(defs)==5, " expected 5 suites but found " + str(len(defs))
         for suites in defs:
             assert len(suites)==5, " expected 5 familes but found " + str(len(suites))
