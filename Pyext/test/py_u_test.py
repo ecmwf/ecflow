@@ -32,14 +32,16 @@ def test_compile(text):
     try: os.remove('test.def')  
     except: pass       
 
-class TestLimit(unittest.TestCase):
+class TestCron(unittest.TestCase):
     def setUp(self):
         pass
     
-    def test_me0(self):
+    def test_pass(self):
         pass
 
- 
+    def test_fail(self):
+        pass
+        
 if __name__ == "__main__":
     unittest.main()
     print("All Tests pass")

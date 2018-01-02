@@ -19,13 +19,11 @@
 
 #include "NodeFwd.hpp"
 #include <boost/noncopyable.hpp>
-#include <vector>
-#include <string>
 
 class  NodeUtil : private boost::noncopyable {
 public:
 
-   /// All any nodes and attributes to be added
+   /// any nodes and attributes to be added
    static boost::python::object do_add(node_ptr self, const boost::python::object& arg);
 
    /// add ecflow variables from a python dictionary of strings

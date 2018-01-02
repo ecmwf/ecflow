@@ -15,6 +15,7 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/python/raw_function.hpp>
 
 #include "NodeAttr.hpp"
 #include "Limit.hpp"
@@ -47,6 +48,65 @@ using namespace std;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
+
+object cron_raw_constructor(tuple args, dict kw) {
+   //cout << "cron_raw_constructor len(args):" << len(args) << endl;
+   // args[0] is Cron(i.e self) args[1] is string name
+   for (int i = 1; i < len(args) ; ++i) {
+      if (extract<string>(args[i]).check())  {
+         std::string time_series = extract<string>(args[i]);
+         if (time_series.empty()) throw std::runtime_error("cron_raw_constructor: Empty string, please pass a valid time, i.e '12:30'");
+         return args[0].attr("__init__")(time_series,kw); // calls -> init(const std::string& ts, dict kw)
+      }
+      if (extract<TimeSeries>(args[i]).check())  {
+         TimeSeries time_series = extract<TimeSeries>(args[i]);
+         return args[0].attr("__init__")(time_series,kw); // calls -> init(const TimeSeries& ts, dict kw)
+      }
+      else throw std::runtime_error("cron_raw_constructor: expects string | TimeSeries and keyword arguments");
+   }
+   throw std::runtime_error("cron_raw_constructor: expects string | TimeSeries and keyword arguments !!");
+   return object();
+}
+
+static void extract_cron_keyword_arguments(boost::shared_ptr<CronAttr> cron, bp::dict& dict) {
+   boost::python::list keys = dict.keys();
+   const int no_of_keys = len(keys);
+   for(int i = 0; i < no_of_keys; ++i) {
+
+      if (extract<string>(keys[i]).check()) {
+         std::string first = extract<std::string>(keys[i]);
+         if (extract<bp::list>(dict[keys[i]]).check()) {
+
+            bp::list second = extract<bp::list>(dict[keys[i]]);
+            std::vector<int> int_vec;
+            BoostPythonUtil::list_to_int_vec(second,int_vec);
+
+            //  expected keywords are: days_of_week, days_of_month, months
+            if (first == "days_of_week") cron->addWeekDays(int_vec);
+            else if (first == "days_of_month") cron->addDaysOfMonth(int_vec);
+            else if (first == "months") cron->addMonths(int_vec);
+            else throw std::runtime_error("extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | days_of_month | months]");
+         }
+         else throw std::runtime_error("extract_cron_keyword_arguments: keyword arguments to be a list");
+      }
+   }
+}
+
+static boost::shared_ptr<CronAttr> cron_init(const std::string& ts, bp::dict& dict){
+   boost::shared_ptr<CronAttr> cron = boost::make_shared<CronAttr>(ts);
+   extract_cron_keyword_arguments(cron,dict);
+   return cron;
+}
+
+static boost::shared_ptr<CronAttr> cron_init1(const TimeSeries& ts, bp::dict& dict) {
+   boost::shared_ptr<CronAttr> cron = boost::make_shared<CronAttr>(ts);
+   extract_cron_keyword_arguments(cron,dict);
+   return cron;
+}
+
+static boost::shared_ptr<CronAttr> cron_create() { return boost::make_shared<CronAttr>();}
+static boost::shared_ptr<CronAttr> cron_create2(const TimeSeries& ts) { return boost::make_shared<CronAttr>(ts);}
+
 
 void add_time_series_3(CronAttr* self,const std::string& ts) { self->addTimeSeries(TimeSeries::create(ts));}
 
@@ -534,7 +594,12 @@ void export_NodeAttr()
 
 	void (CronAttr::*add_time_series)(const TimeSeries&) = &CronAttr::addTimeSeries;
 	void (CronAttr::*add_time_series_2)( const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) = &CronAttr::addTimeSeries;
-	class_<CronAttr>("Cron",NodeAttrDoc::cron_doc() )
+	class_<CronAttr, boost::shared_ptr<CronAttr> >("Cron",NodeAttrDoc::cron_doc() )
+   .def("__init__",raw_function(&cron_raw_constructor,1))  // will call -> cron_init or cron_init1
+   .def("__init__",make_constructor(&cron_init))
+   .def("__init__",make_constructor(&cron_init1))
+   .def("__init__",make_constructor(&cron_create2))
+   .def("__init__",make_constructor(&cron_create))
 	.def(self == self )                                // __eq__
 	.def("__str__",            &CronAttr::toString)    // __str__
 	.def("__copy__",copyObject<CronAttr>)              // __copy__ uses copy constructor

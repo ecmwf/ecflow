@@ -1505,7 +1505,7 @@ class TestLimit(unittest.TestCase):
             return Family("f5",
                     InLimit("l1"),
                     Edit(SLEEP=20),
-                    [ Task('t{}'.format(i)) for i in range(1,10) ] )
+                    [ Task('t{0}'.format(i)) for i in range(1,10) ] )
      
         print("Creating suite definition")  
         home = os.path.join(os.getenv("HOME"),"course")
@@ -1539,7 +1539,7 @@ def create_family_f5() :
     return Family("f5",
             InLimit("l1"),
             Edit(SLEEP=20),
-            [ Task('t{}'.format(i)) for i in range(1,10) ] )
+            [ Task('t{0}'.format(i)) for i in range(1,10) ] )
      
 print("Creating suite definition")  
 home = os.path.join(os.getenv("HOME"),"course")
@@ -1669,6 +1669,65 @@ defs.save_as_defs("test.def")
         except: pass
     
 
+class TestPythonScripting(unittest.TestCase):
+    def setUp(self):
+        def create_suite(name) : 
+            suite = Suite(name)
+            for i in range(1, 7) :
+                fam = suite.add_family("f" + str(i))
+                for t in ( "a", "b", "c", "d", "e" ) :
+                    fam.add_task(t)
+            return suite 
+    
+        self.defs = Defs(create_suite('s1'))   
+        
+    def test_me(self):
+        def create_suite(name) : 
+            return Suite(name,
+                    [ Family("f{0}".format(i),
+                        [ Task(t) for t in ( "a", "b", "c", "d", "e") ]) 
+                    for i in range(1,7) ])
+     
+        defs = Defs(create_suite('s1'))   
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(self.defs,defs,"defs not equal\n" + str(self.defs) + "\n" + str(defs))       
+         
+
+class TestPythonScripting2(unittest.TestCase):
+    def setUp(self):
+        def create_sequential_suite(name) :
+            suite = Suite(name)
+            for i in range(1, 7) :
+                fam = suite.add_family("f" + str(i))
+                if i != 1: 
+                    fam.add_trigger("f" + str(i-1) + " == complete")  # or fam.add_family( "f%d == complete" % (i-1) )
+                for t in ( "a", "b", "c", "d", "e" ) :
+                    fam.add_task(t) 
+            return suite
+    
+        self.defs = Defs(create_sequential_suite('s1'))   
+        
+    def test_me(self):
+        def create_sequential_suite(name) :
+            suite = Suite(name)
+            for i in range(1, 7) :
+                fam = suite.add_family("f" + str(i))
+                if i != 1: 
+                    fam += Trigger("f" + str(i-1) + " == complete")  # or fam.add_family( "f%d == complete" % (i-1) )
+                for t in ( "a", "b", "c", "d", "e" ) :
+                    fam.add_task(t) 
+            return suite  
+     
+        defs = Defs(create_sequential_suite ('s1'))   
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(self.defs,defs,"defs not equal\n" + str(self.defs) + "\n" + str(defs))       
+         
 class TestDataAquistionSolution(unittest.TestCase):
     def setUp(self):
         #!/usr/bin/env python2.7
