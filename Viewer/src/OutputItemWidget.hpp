@@ -55,6 +55,7 @@ protected Q_SLOTS:
 	void on_fontSizeDownTb__clicked();
     void on_saveFileAsTb__clicked();
     void on_copyPathTb__clicked();
+    void on_dirReloadTb__clicked();
 
 protected:
     void setCurrentInDir(const std::string&);
