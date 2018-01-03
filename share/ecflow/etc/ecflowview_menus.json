@@ -334,27 +334,8 @@
 
         {
             "menu"           : "Node",
-            "name"           : "Remove",
-            "visible_for"    : "alias",
-            "command"        : "ecflow_client --delete=yes <full_name>",
-            "question"       : "Confirm remove alias <full_name>",
-            "default_answer" : "Yes",
-            "status_tip"     : "__cmd__"
-        },
-
-
-        {
-            "menu"           : "Node",
             "name"           : "-"
         },
-
-
-
-
-
-
-
-
 
         {
             "menu"           : "Node",
