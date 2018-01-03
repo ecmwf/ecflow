@@ -215,6 +215,8 @@ void OutputItemWidget::getCurrentFile(bool doReload)
 #endif
         OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
         op->file(fullName,!doReload);
+
+        updateDir(false);  // get the directory listing
 	}
 }
 
