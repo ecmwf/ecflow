@@ -533,12 +533,6 @@ class TestAddTimeDependencies(unittest.TestCase):
         incr = TimeSlot(0, 30)
         time_series = TimeSeries(start, finish, incr, True)
         
-        cron = Cron()
-        cron.set_week_days( [0,1,2,3,4,5,6] )
-        cron.set_days_of_month( [1,2,3,4,5,6] )
-        cron.set_months( [1,2,3,4,5,6] )
-        cron.set_time_series( "+00:00 23:00 00:30" )
-
         defs = Defs( 
                 Suite("s1",
                     Task("date",
@@ -558,7 +552,8 @@ class TestAddTimeDependencies(unittest.TestCase):
                         Time(0, 10),
                         Time("+00:40"),
                         Time("+00:40 20:00 01:00")),
-                    Task("cron",cron)))
+                    Task("cron",
+                        Cron("+00:00 23:00 00:30",days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6],months=[1,2,3,4,5,6]))))
 
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -610,12 +605,6 @@ class TestAddTimeDependencies(unittest.TestCase):
         incr = TimeSlot(0, 30)
         time_series = TimeSeries(start, finish, incr, True)
         
-        cron = Cron()
-        cron.set_week_days( [0,1,2,3,4,5,6] )
-        cron.set_days_of_month( [1,2,3,4,5,6] )
-        cron.set_months( [1,2,3,4,5,6] )
-        cron.set_time_series( "+00:00 23:00 00:30" )
-
         defs = Defs() + ( Suite("s1") + Task("date") + Task("day") + Task("time") + Task("cron"))
         defs.s1.date += [ Date(1, 0, 0), Date("2.*.*"), Date(28,2,2026) ]
         defs.s1.day += [ Day("monday"), Day(Days.tuesday) ]
@@ -623,7 +612,10 @@ class TestAddTimeDependencies(unittest.TestCase):
                           Time(TimeSlot(20, 10)), Time(TimeSlot(20, 20), True),
                           Time(time_series), Time(0, 10), Time("+00:40"),
                           Time("+00:40 20:00 01:00") ]
-        defs.s1.cron += [cron]
+        defs.s1.cron += Cron("+00:00 23:00 00:30",
+                             days_of_week=[0,1,2,3,4,5,6],
+                             days_of_month=[1,2,3,4,5,6],
+                             months=[1,2,3,4,5,6])  
 
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)

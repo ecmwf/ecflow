@@ -60,22 +60,22 @@ class TestCron(unittest.TestCase):
         
     
     def test_me0(self):
-        cron = Cron("+00:00 23:00 00:30", days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6]);
+        cron = Cron("+00:00 23:00 00:30", days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])
         self.assertEqual(self.cron1, cron, "cron not equal\n" + str(self.cron1) + "\n" + str(cron))
                 
-        cron = Cron("01:30");
+        cron = Cron("01:30")
         self.assertEqual(self.cron2, cron, "cron not equal\n" + str(self.cron2) + "\n" + str(cron))
 
-        cron = Cron("+01:30",days_of_week=[0,1,2,3,4,5,6]);
+        cron = Cron("+01:30",days_of_week=[0,1,2,3,4,5,6])
         self.assertEqual(self.cron3, cron, "cron not equal\n" + str(self.cron3) + "\n" + str(cron))
 
-        cron = Cron("00:30 01:30 00:01",days_of_week=[0,1,2,3,4,5,6]);
+        cron = Cron("00:30 01:30 00:01",days_of_week=[0,1,2,3,4,5,6])
         self.assertEqual(self.cron4, cron, "cron not equal\n" + str(self.cron4) + "\n" + str(cron))
 
-        cron = Cron("+00:30",days_of_week=[0,1,2,3,4,5,6]);
+        cron = Cron("+00:30",days_of_week=[0,1,2,3,4,5,6])
         self.assertEqual(self.cron5, cron, "cron not equal\n" + str(self.cron5) + "\n" + str(cron))
 
-        cron = Cron("+00:00 23:00 00:30",days_of_week=[0,1,2,3]);
+        cron = Cron("+00:00 23:00 00:30",days_of_week=[0,1,2,3])
         self.assertEqual(self.cron6, cron, "cron not equal\n" + str(self.cron6) + "\n" + str(cron))
 
     def test_fail(self):
