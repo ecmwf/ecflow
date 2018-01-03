@@ -93,7 +93,8 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	dirModel_=new OutputModel(this);
 	dirSortModel_=new OutputSortModel(this);
 	dirSortModel_->setSourceModel(dirModel_);
-	dirSortModel_->setDynamicSortFilter(true);
+    dirSortModel_->setSortRole(Qt::UserRole);
+    dirSortModel_->setDynamicSortFilter(true);
 
 	dirView_->setModel(dirSortModel_);
 
