@@ -17,6 +17,8 @@ o New query command, allows us to query event,meter and trigger status.
 
 o New  Queue attribute
 
+o new date handling
+
 o Uses the latest boost version
 
 o Built with c++11
