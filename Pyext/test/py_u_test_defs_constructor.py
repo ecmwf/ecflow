@@ -132,8 +132,8 @@ class Test_defs_raw_constructor(unittest.TestCase):
         self.assertEqual(defs,defs2,"defs not equal\n" + str(defs) + "\n\n" + str(defs2))    
         self.assertEqual(defs,defs3,"defs not equal\n" + str(defs) + "\n\n" + str(defs3))    
  
-        defs = Defs(Suite('s1'),Edit(a='a'),Variable('b','b'),{'c':'c','d':'d'} )       
-        defs2 = Defs().add(Suite('s1'),Edit(a='a'),Variable('b','b'),{'c':'c','d':'d'})
+        defs = Defs(Suite('s1'),Edit(a='a'),Variable('b','b'),{'c':'c'},{'d':'d'} )       
+        defs2 = Defs().add(Suite('s1'),Edit(a='a'),Variable('b','b'),{'c':'c'},{'d':'d'})
         defs3 = Defs()
         defs3.add_suite('s1')   
         defs3.add_variable('a','a')        
