@@ -1367,7 +1367,7 @@ class TestRepeat(unittest.TestCase):
                             Task("t1",
                                 RepeatDate("DATE", 20101230, 20110105),
                                 Label("info", ""),
-                                Label("data",""))))
+                                Label("date",""))))
               
         print("Creating suite definition") 
         defs = Defs( 
@@ -1397,7 +1397,7 @@ def create_family_f4():
                     Task("t1",
                         RepeatDate("DATE", 20101230, 20110105),
                         Label("info",""),
-                        Label("data",""))))
+                        Label("date",""))))
  
 print("Creating suite definition")  
 home = os.path.join(os.getenv("HOME"), "course")
@@ -1432,7 +1432,7 @@ defs.save_as_defs("test.def")
                             Task("t1",
                                 RepeatDate("DATE", 20101230, 20110105),
                                 Label("info", ""),
-                                Label("data",""))))))
+                                Label("date",""))))))
         print(defs)
  
         print("Checking job creation: .ecf -> .job0")   
@@ -1455,7 +1455,7 @@ defs.save_as_defs("test.def")
                             Task("t1")]
         defs.test.f4.f5.t1 += [ RepeatDate("DATE", 20101230, 20110105),
                                 Label("info", ""),
-                                Label("data","") ]
+                                Label("date","") ]
         print(defs)
         print("Checking job creation: .ecf -> .job0")   
         result = defs.check_job_creation()
