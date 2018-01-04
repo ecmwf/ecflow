@@ -120,7 +120,6 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilte
 
 TreeNodeView::~TreeNodeView()
 {
-    delete view_;
     delete actionHandler_;
     delete prop_;
 }

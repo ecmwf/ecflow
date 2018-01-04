@@ -104,16 +104,18 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
 
     if(view_)
     {
-        viewHolder_->layout()->removeWidget(view_->realWidget());
+        QWidget *realW=view_->realWidget();
+        viewHolder_->layout()->removeWidget(realW);
         delete view_;
         view_=0;
+        delete realW;
     }
 
     if(viewLayoutMode_ == CompactLayoutMode)
     {
         TreeNodeModel* realModel=static_cast<TreeNodeModel*>(model_);
 
-        TreeNodeView* gv=new TreeNodeView(new CompactView(realModel),
+        TreeNodeView* gv=new TreeNodeView(new CompactView(realModel,this),
                                           realModel,filterDef_,this);
         viewHolder_->layout()->addWidget(gv->realWidget());
         //Store the pointer to the (non-QObject) base class of the view!!!
@@ -123,7 +125,7 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
     {
         TreeNodeModel* realModel=static_cast<TreeNodeModel*>(model_);
 
-        TreeNodeView *tv=new TreeNodeView(new StandardView(realModel),
+        TreeNodeView *tv=new TreeNodeView(new StandardView(realModel,this),
                                           realModel,filterDef_,this);
         viewHolder_->layout()->addWidget(tv->realWidget());
         //Store the pointer to the (non-QObject) base class of the view!!!
