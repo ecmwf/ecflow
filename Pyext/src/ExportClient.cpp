@@ -101,13 +101,13 @@ void requeues(ClientInvoker* self,const bp::list& list, const std::string& optio
 void suspend(ClientInvoker* self, const std::string& path)               { self->suspend(path);}
 void suspends(ClientInvoker* self,const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->suspend(paths);}
 void resume(ClientInvoker* self, const std::string& path)          { self->resume(path);}
-void resumes(ClientInvoker* self,const boost::python::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->resume(paths);}
+void resumes(ClientInvoker* self,const bp::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->resume(paths);}
 void archive(ClientInvoker* self, const std::string& path)         { self->archive(path);}
-void archives(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->archive(paths);}
+void archives(ClientInvoker* self,const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->archive(paths);}
 void restore(ClientInvoker* self, const std::string& path)         { self->restore(path);}
-void restores(ClientInvoker* self,const boost::python::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->restore(paths);}
+void restores(ClientInvoker* self,const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->restore(paths);}
 void the_status(ClientInvoker* self, const std::string& path)      { self->status(path);}
-void statuss(ClientInvoker* self,const boost::python::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->status(paths);}
+void statuss(ClientInvoker* self,const bp::list& list)  { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->status(paths);}
 void do_kill(ClientInvoker* self, const std::string& path)         { self->kill(path);}
 void do_kills(ClientInvoker* self,const bp::list& list) { std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths);self->kill(paths);}
 const std::string& check(ClientInvoker* self, const std::string& node_path)     { self->check(node_path); return self->get_string(); }
@@ -165,12 +165,12 @@ const std::vector<Zombie>& zombieGet(ClientInvoker* self,int pid) {
    return self->server_reply().zombies();
 }
 
-void zombieFobCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieFobCliPaths(paths);}
-void zombieFailCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieFailCliPaths(paths);}
-void zombieAdoptCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieAdoptCliPaths(paths);}
-void zombieBlockCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieBlockCliPaths(paths);}
-void zombieRemoveCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieRemoveCliPaths(paths);}
-void zombieKillCli(ClientInvoker* self,const boost::python::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieKillCliPaths(paths);}
+void zombieFobCli(ClientInvoker* self,const bp::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieFobCliPaths(paths);}
+void zombieFailCli(ClientInvoker* self,const bp::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieFailCliPaths(paths);}
+void zombieAdoptCli(ClientInvoker* self,const bp::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieAdoptCliPaths(paths);}
+void zombieBlockCli(ClientInvoker* self,const bp::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieBlockCliPaths(paths);}
+void zombieRemoveCli(ClientInvoker* self,const bp::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieRemoveCliPaths(paths);}
+void zombieKillCli(ClientInvoker* self,const bp::list& list){std::vector<std::string> paths;BoostPythonUtil::list_to_str_vec(list,paths); self->zombieKillCliPaths(paths);}
 
 void export_Client()
 {
