@@ -153,7 +153,7 @@ static std::string to_string(AlterCmd::Add_attr_type a) {
 }
 static void validAddAttr(std::vector<std::string>& vec)
 {
-   vec.reserve(8);
+   vec.reserve(10);
    vec.push_back("time");
    vec.push_back("today");
    vec.push_back("date");
@@ -162,6 +162,8 @@ static void validAddAttr(std::vector<std::string>& vec)
    vec.push_back("variable");
    vec.push_back("late");
    vec.push_back("limit");
+   vec.push_back("inlimit");
+   vec.push_back("label");
 }
 
 

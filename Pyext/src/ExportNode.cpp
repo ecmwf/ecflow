@@ -56,7 +56,7 @@ node_ptr add_meter_1(node_ptr self,const std::string& meter_name, int min,int ma
 node_ptr add_meter_2(node_ptr self,const std::string& meter_name, int min,int max)                   { self->addMeter(Meter(meter_name,min,max));return self; }
 
 node_ptr add_queue(node_ptr self,const QueueAttr& m) { self->add_queue(m); return self;}
-node_ptr add_queue1(node_ptr self,const std::string& name, const boost::python::list& list) {
+node_ptr add_queue1(node_ptr self,const std::string& name, const bp::list& list) {
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
    QueueAttr queue_attr(name,vec);
@@ -64,7 +64,7 @@ node_ptr add_queue1(node_ptr self,const std::string& name, const boost::python::
 }
 
 node_ptr add_generic(node_ptr self,const GenericAttr& m) { self->add_generic(m); return self;}
-node_ptr add_generic1(node_ptr self,const std::string& name, const boost::python::list& list) {
+node_ptr add_generic1(node_ptr self,const std::string& name, const bp::list& list) {
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
    GenericAttr attr(name,vec);
@@ -103,7 +103,7 @@ node_ptr add_autoarchive_3(node_ptr self, const ecf::AutoArchiveAttr& attr){ sel
 node_ptr add_zombie(node_ptr self, const ZombieAttr& attr){ self->addZombie(attr); return self;}
 
 node_ptr add_autorestore(node_ptr self, const ecf::AutoRestoreAttr& attr){ self->add_autorestore(attr); return self;}
-node_ptr add_autorestore1(node_ptr self, const boost::python::list& list){ std::vector<std::string> vec;BoostPythonUtil::list_to_str_vec(list,vec);self->add_autorestore(ecf::AutoRestoreAttr(vec)); return self;}
+node_ptr add_autorestore1(node_ptr self, const bp::list& list){ std::vector<std::string> vec;BoostPythonUtil::list_to_str_vec(list,vec);self->add_autorestore(ecf::AutoRestoreAttr(vec)); return self;}
 
 node_ptr add_cron(node_ptr self,const ecf::CronAttr& attr)      { self->addCron(attr); return self; }
 node_ptr add_late(node_ptr self,const ecf::LateAttr& attr)      { self->addLate(attr); return self; }
@@ -387,12 +387,12 @@ void export_Node()
    .def("find_variable",    &Node::findVariable,           return_value_policy<copy_const_reference>(), "Find user variable on the node only.  Returns a object")
    .def("find_gen_variable",&Node::findGenVariable,        return_value_policy<copy_const_reference>(), "Find generated variable on the node only.  Returns a object")
    .def("find_parent_variable",&Node::find_parent_variable,return_value_policy<copy_const_reference>(), "Find user variable variable up the parent hierarchy.  Returns a object")
-   .def("find_meter",       &Node::findMeter,              return_value_policy<copy_const_reference>(), "Find the :term:`meter` on the node only. Returns a object")
-   .def("find_event",       &Node::findEventByNameOrNumber,return_value_policy<copy_const_reference>(), "Find the :term:`event` on the node only. Returns a object")
-   .def("find_label",       &Node::find_label,             return_value_policy<copy_const_reference>(), "Find the :term:`label` on the node only. Returns a object")
+   .def("find_meter",       &Node::findMeter,              return_value_policy<copy_const_reference>(), "Find the `meter`_ on the node only. Returns a object")
+   .def("find_event",       &Node::findEventByNameOrNumber,return_value_policy<copy_const_reference>(), "Find the `event`_ on the node only. Returns a object")
+   .def("find_label",       &Node::find_label,             return_value_policy<copy_const_reference>(), "Find the `label`_ on the node only. Returns a object")
    .def("find_queue",       &Node::find_queue,             return_value_policy<copy_const_reference>(), "Find the queue on the node only. Returns a queue object")
    .def("find_generic",     &Node::find_generic,           return_value_policy<copy_const_reference>(), "Find the generic on the node only. Returns a Generic object")
-   .def("find_limit",       &Node::find_limit  ,           "Find the :term:`limit` on the node only. returns a limit ptr" )
+   .def("find_limit",       &Node::find_limit  ,           "Find the `limit`_ on the node only. returns a limit ptr" )
    .def("find_node_up_the_tree",&Node::find_node_up_the_tree  , "Search immediate node, then up the node hierarchy" )
    .def("get_state",        &Node::state , "Returns the state of the node. This excludes the suspended state")
    .def("get_state_change_time",&get_state_change_time, (bp::arg("format")="iso_extended"), "Returns the time of the last state change as a string. Default format is iso_extended, (iso_extended, iso, simple)")
