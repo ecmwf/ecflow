@@ -1631,7 +1631,7 @@ class TestLateAttribute(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal\n" + str(self.defs) + "\n" + str(defs))
 
         text = """#!/usr/bin/env python2.7
 import os
