@@ -32,6 +32,7 @@
 #include "Edit.hpp"
 #include "DefsDoc.hpp"
 #include "NodeAttrDoc.hpp"
+#include "BoostPythonUtil.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -425,6 +426,8 @@ void export_Node()
    .add_property("days",      bp::range( &Node::day_begin,      &Node::day_end),     "Returns a list of `day`_ s")
    .add_property("crons",     bp::range( &Node::cron_begin,     &Node::cron_end),    "Returns a list of `cron`_ s" )
    .add_property("zombies",   bp::range( &Node::zombie_begin,   &Node::zombie_end),  "Returns a list of `zombie`_ s" )
+   .add_property("queues",    bp::range( &Node::queue_begin,    &Node::queue_end),   "Returns a list of `queue`_ s" )
+   .add_property("generics",  bp::range( &Node::generic_begin,  &Node::generic_end), "Returns a list of `generic`_ s" )
    ;
 #if defined(__clang__)
    bp::register_ptr_to_python<node_ptr>(); // needed for mac and boost 1.6
