@@ -134,7 +134,7 @@ class TestFamilies(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")        
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))        
 
         text = """#!/usr/bin/env python2.7
 import os
@@ -178,7 +178,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")        
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))        
  
     def tearDown(self):
         try: os.remove("test.def")
@@ -233,7 +233,7 @@ class TestVariables(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
 
         text = """#!/usr/bin/env python2.7
 import os
@@ -281,7 +281,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
 
     def test_me3(self):
         #!/usr/bin/env python2.7
@@ -300,7 +300,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
 
     def tearDown(self):
         try: os.remove("test.def")
@@ -356,7 +356,7 @@ class TestVariableInheritance(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")  
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))  
 
         text = """#!/usr/bin/env python2.7
 import os
@@ -405,7 +405,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
          
     def tearDown(self):
         try: os.remove("test.def")
@@ -460,7 +460,7 @@ class TestTriggers(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
         
         text = """#!/usr/bin/env python2.7
 import os
@@ -515,7 +515,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
          
     def tearDown(self):
         try: os.remove("test.def")
@@ -583,7 +583,7 @@ class TestEvents(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
         
         text = """#!/usr/bin/env python2.7
 import os
@@ -647,7 +647,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
          
     def tearDown(self):
         try: os.remove("test.def")
@@ -716,7 +716,7 @@ class TestComplete(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
         
         text = """#!/usr/bin/env python2.7
 import os
@@ -782,7 +782,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
          
     def tearDown(self):
         try: os.remove("test.def")
@@ -852,7 +852,7 @@ class TestMeter(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")   
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))   
         
         text = """#!/usr/bin/env python2.7
 import os
@@ -919,7 +919,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
          
     def tearDown(self):
         try: os.remove("test.def")
@@ -998,7 +998,7 @@ class TestTime(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
    
         text = """#!/usr/bin/env python2.7
 import os
@@ -1064,7 +1064,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
          
     def test_add(self):
         #!/usr/bin/env python2.7
@@ -1095,7 +1095,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
         
     def tearDown(self):
         try: os.remove("test.def")
@@ -1188,7 +1188,7 @@ class TestIndentation(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
 
          
         text = """#!/usr/bin/env python2.7
@@ -1265,7 +1265,7 @@ defs.save_as_defs("test.def")
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
          
     def tearDown(self):
         try: os.remove("test.def")
@@ -1367,7 +1367,7 @@ class TestRepeat(unittest.TestCase):
                             Task("t1",
                                 RepeatDate("DATE", 20101230, 20110105),
                                 Label("info", ""),
-                                Label("data",""))))
+                                Label("date",""))))
               
         print("Creating suite definition") 
         defs = Defs( 
@@ -1397,7 +1397,7 @@ def create_family_f4():
                     Task("t1",
                         RepeatDate("DATE", 20101230, 20110105),
                         Label("info",""),
-                        Label("data",""))))
+                        Label("date",""))))
  
 print("Creating suite definition")  
 home = os.path.join(os.getenv("HOME"), "course")
@@ -1432,7 +1432,7 @@ defs.save_as_defs("test.def")
                             Task("t1",
                                 RepeatDate("DATE", 20101230, 20110105),
                                 Label("info", ""),
-                                Label("data",""))))))
+                                Label("date",""))))))
         print(defs)
  
         print("Checking job creation: .ecf -> .job0")   
@@ -1455,7 +1455,7 @@ defs.save_as_defs("test.def")
                             Task("t1")]
         defs.test.f4.f5.t1 += [ RepeatDate("DATE", 20101230, 20110105),
                                 Label("info", ""),
-                                Label("data","") ]
+                                Label("date","") ]
         print(defs)
         print("Checking job creation: .ecf -> .job0")   
         result = defs.check_job_creation()
@@ -1528,7 +1528,7 @@ class TestLimit(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
 
         text = """#!/usr/bin/env python2.7
 import os
@@ -1631,12 +1631,12 @@ class TestLateAttribute(unittest.TestCase):
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
-        self.assertEqual(self.defs,defs,"defs not equal")       
+        self.assertEqual(self.defs,defs,"defs not equal\n" + str(self.defs) + "\n" + str(defs))
 
         text = """#!/usr/bin/env python2.7
 import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
-                   RepeatString,RepeatInteger,RepeatDate,InLimit,Limit
+                   RepeatString,RepeatInteger,RepeatDate,InLimit,Limit,Late
         
 def create_family_f6() :
     late = Late()
