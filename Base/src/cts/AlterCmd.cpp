@@ -147,7 +147,7 @@ static std::string to_string(AlterCmd::Add_attr_type a) {
 }
 static void validAddAttr(std::vector<std::string>& vec)
 {
-	vec.reserve(8);
+	vec.reserve(10);
 	vec.push_back("time");
 	vec.push_back("today");
 	vec.push_back("date");
@@ -156,6 +156,8 @@ static void validAddAttr(std::vector<std::string>& vec)
    vec.push_back("variable");
    vec.push_back("late");
    vec.push_back("limit");
+   vec.push_back("inlimit");
+   vec.push_back("label");
 }
 
 
@@ -559,7 +561,7 @@ void AlterCmd::create( 	Cmd_ptr& cmd,
 void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths ) const
 {
 	// options[0]  - add
-	// options[1]  - [ time | date | day | zombie | variable | limit | inlimit | label ]
+	// options[1]  - [ time | today | date | day | zombie | variable | late | limit | inlimit | label ]
 	// options[2]  - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name | path_to_limit ]
 	// options[3]  - variable_value
 	std::stringstream ss;
