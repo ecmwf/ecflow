@@ -15,7 +15,7 @@
 class OutputModel : public QAbstractItemModel
 {
 public:
-	explicit OutputModel(QObject *parent=0);
+    explicit OutputModel(QObject *parent=0);
 
     void setData(const std::vector<VDir_ptr>&,const std::string& jobout);
    	void clearData();
@@ -38,6 +38,7 @@ protected:
    	QString formatSize(unsigned int size) const;
    	QString formatDate(QDateTime) const;
    	QString formatAgo(QDateTime) const;
+    qint64 secsToNow(QDateTime dt) const;
 
     std::vector<VDir_ptr> dirs_;
     int joboutRow_;
@@ -50,9 +51,6 @@ class OutputSortModel : public QSortFilterProxyModel
 public:
 	explicit OutputSortModel(QObject *parent=0);
     ~OutputSortModel() {}
-
-	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
-	bool filterAcceptsRow(int,const QModelIndex &) const;
 
 	QModelIndex fullNameToIndex(const std::string& fullName);
 };

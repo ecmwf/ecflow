@@ -68,8 +68,20 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)
         self.assertEqual(self.defs, defs, "defs not equal")
+        
+    def test_me4(self):
+        defs = Defs(
+                Suite("s1",
+                    Family("f1",
+                        [ Task("t{0}".format(t)) for t in ("a", "b", "c")])))
+        defs.save_as_defs("test.def")   # save defs to file "test.def"  
+                     
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)
+        self.assertEqual(self.defs, defs, "defs not equal")
  
-    def test_me3(self):
+    def test_me5(self):
         defs = Defs().add(   
           [ Suite("s{0}".format(i)).add( 
               [ Family("f{0}".format(i)).add( 
@@ -77,10 +89,23 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
                 for i in range(1,6)]  ) 
             for i in range(1,6) ] )
         assert len(defs)==5, " expected 5 suites but found " + str(len(defs))
-        for suite in defs:
-            assert len(suite)==5, " expected 5 familes but found " + str(len(suite))
-            for fam in suite:
-                assert len(fam)==5, " expected 5 tasks but found " + str(len(fam))   
+        for suites in defs:
+            assert len(suites)==5, " expected 5 familes but found " + str(len(suites))
+            for fam in suites:
+                assert len(fam)==5, " expected 5 tasks but found " + str(len(fam)) 
+                
+    def test_me6(self):
+        defs = Defs(
+                [ Suite("s{0}".format(i),
+                    [ Family("f{0}".format(i),
+                        [ Task("t{0}".format(i)) for i in range(1,6)] )
+                    for i in range(1,6)]  ) 
+                for i in range(1,6) ] )
+        assert len(defs)==5, " expected 5 suites but found " + str(len(defs))
+        for suites in defs:
+            assert len(suites)==5, " expected 5 familes but found " + str(len(suites))
+            for fam in suites:
+                assert len(fam)==5, " expected 5 tasks but found " + str(len(fam))     
              
     def tearDown(self):
         unittest.TestCase.tearDown(self)
@@ -142,6 +167,21 @@ class TestAddMeterEventLabel(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+    def test_alternative3(self):
+        defs = Defs( 
+                Suite('s1',
+                    Task("t1",
+                        Event(2),
+                        Event("wow"),
+                        Event(10,"Eventname2" ),
+                        Meter("metername3",0,100),
+                        Label("label_name4", "value")))) 
+         
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
             
 class TestAddLimitInlimit(unittest.TestCase):
      
@@ -193,6 +233,20 @@ class TestAddLimitInlimit(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+    def test_alternative3(self):
+        defs = Defs( 
+            Suite("s1",
+                Limit("limitName4", 10),# name, maximum token
+                Family("f1",
+                    InLimit("limitName4","/s1/f1",2), # limit name, path to limit, tokens consumed
+                    [ Task("t{0}".format(t)) for t in range(1,4) ] )))
+                     
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+ 
  
 class TestAddVariable(unittest.TestCase):
      
@@ -206,6 +260,18 @@ class TestAddVariable(unittest.TestCase):
          
         defs.s1.sort_attributes("variable"); # sort since with dictionary order of addition is arbitary
         self.defs = defs
+
+    def test_alternative0(self):
+         
+        defs = Defs(Suite("s1",HELLO="world",FRED="bloggs",BILL=1,NAME="value",NAME2="value2"))
+        defs.s1.add_variable('NAME4',4)
+        defs.s1 += Edit(NAME3="value3")
+ 
+        defs.s1.sort_attributes("variable");
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
  
     def test_alternative(self):
          
@@ -233,6 +299,19 @@ class TestAddVariable(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+    def test_alternative2(self):
+         
+        defs = Defs(
+                Suite("s1",
+                    { "HELLO":"world", "NAME":"value", "NAME2":"value2", 
+                     "NAME3":"value3", "NAME4":4, "BILL":1, "FRED":"bloggs" }))
+ 
+        defs.s1.sort_attributes("variable");
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
 
 class TestAddTrigger(unittest.TestCase):
      
@@ -245,7 +324,22 @@ class TestAddTrigger(unittest.TestCase):
         t2.add_complete( "t3 == complete" )
         t3 = s1.add_task("t3")
         self.defs = defs
- 
+
+    def test_alternative0(self):
+        
+        defs = Defs(
+                Suite("s1",
+                    Task("t1"),
+                    Task("t2",
+                        Trigger("t1 == active and t3 == aborted"),
+                        Complete("t3 == complete")),
+                    Task("t3")))
+         
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
     def test_alternative(self):
         
         defs = Defs().add(
@@ -272,6 +366,70 @@ class TestAddTrigger(unittest.TestCase):
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
 
+class TestAddTaskChain(unittest.TestCase):
+
+    def setUp(self):
+        defs = Defs(
+                Suite("s1",
+                    Task("t1"),
+                    Task("t2",Trigger( "t1 == complete" )),
+                    Task("t3",Trigger( "t2 == complete" )),
+                    Task("t4",Trigger( "t3 == complete" ))))
+        self.defs = defs
+        
+    def test_alternative(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
+        defs.s1.t2 += Trigger( ["t1"] )
+        defs.s1.t3 += Trigger( ["t2"] )
+        defs.s1.t4 += Trigger( ["t3"] )
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+
+    def test_alternative1(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
+        defs.s1.t2 += Trigger( [ defs.s1.t1 ] )
+        defs.s1.t3 += Trigger( [ defs.s1.t2 ] )
+        defs.s1.t4 += Trigger( [ defs.s1.t3 ] )
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+    def test_alternative1(self):
+        defs = Defs(Suite("s1"))
+        defs.s1 >> Task("t1") >> Task("t2") >> Task("t3") >> Task("t4")
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+class TestAddReverseTaskChain(unittest.TestCase):
+
+    def setUp(self):
+        defs = Defs(
+                Suite("s1",
+                    Task("t1", Trigger( "t2 == complete" )),
+                    Task("t2", Trigger( "t3 == complete" )),
+                    Task("t3", Trigger( "t4 == complete" )),
+                    Task("t4")))
+        self.defs = defs
+        
+    def test_alternative1(self):
+        defs = Defs() + Suite("s1")
+        defs.s1 << Task("t1") << Task("t2") << Task("t3") << Task("t4")
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
 class TestAddLargeTrigger(unittest.TestCase):
     
     def setUp(self):
@@ -285,8 +443,22 @@ class TestAddLargeTrigger(unittest.TestCase):
         t3.add_part_trigger( "t2 == aborted", False) # here False means add as 'OR'
         self.defs = defs
 
+    def test_alternative0(self):
+        defs = Defs( 
+                Suite("s1",
+                    Task("t1"),
+                    Task("t2"),
+                    Task("t3",
+                        Trigger("t1 == complete"), 
+                        Trigger("t2 == active"),
+                        Trigger("t2 == aborted",False))))
+        
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
     def test_alternative(self):
-         
         defs = Defs().add(
                 Suite("s1").add(
                     Task("t1"),
@@ -297,7 +469,6 @@ class TestAddLargeTrigger(unittest.TestCase):
                         Trigger("t2 == aborted",False),
                         )
                     ))
-        
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
@@ -356,6 +527,39 @@ class TestAddTimeDependencies(unittest.TestCase):
         
         self.defs = defs
         
+    def test_alternative0(self):
+        start = TimeSlot(0, 0)
+        finish = TimeSlot(23, 0)
+        incr = TimeSlot(0, 30)
+        time_series = TimeSeries(start, finish, incr, True)
+        
+        defs = Defs( 
+                Suite("s1",
+                    Task("date",
+                        Date(1, 0, 0),                   # first of every month and every year
+                        Date("2.*.*"),                   # second of every month and every yea
+                        Date(28,2,2026)),                # 28 february 2026
+                    Task("day",
+                        Day("monday"),
+                        Day(Days.tuesday)),
+                    Task("time",
+                        Time("+00:30"),                  # 30 minutes after suite has begun
+                        Time("+00:30 20:00 01:00"),      # 00:30,01:30,02:30....07:30 after suite start
+                        Time(0, 59, True),               # 00:59 - 59 minutes past midnight
+                        Time(TimeSlot(20, 10)),          # 20:10 - 10 minutes pas eight
+                        Time(TimeSlot(20, 20), True),    # +20:20 - 20 minutes and 20 hours, after suite start
+                        Time(time_series),
+                        Time(0, 10),
+                        Time("+00:40"),
+                        Time("+00:40 20:00 01:00")),
+                    Task("cron",
+                        Cron("+00:00 23:00 00:30",days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6],months=[1,2,3,4,5,6]))))
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
     def test_alternative(self):
         start = TimeSlot(0, 0)
         finish = TimeSlot(23, 0)
@@ -401,12 +605,6 @@ class TestAddTimeDependencies(unittest.TestCase):
         incr = TimeSlot(0, 30)
         time_series = TimeSeries(start, finish, incr, True)
         
-        cron = Cron()
-        cron.set_week_days( [0,1,2,3,4,5,6] )
-        cron.set_days_of_month( [1,2,3,4,5,6] )
-        cron.set_months( [1,2,3,4,5,6] )
-        cron.set_time_series( "+00:00 23:00 00:30" )
-
         defs = Defs() + ( Suite("s1") + Task("date") + Task("day") + Task("time") + Task("cron"))
         defs.s1.date += [ Date(1, 0, 0), Date("2.*.*"), Date(28,2,2026) ]
         defs.s1.day += [ Day("monday"), Day(Days.tuesday) ]
@@ -414,7 +612,10 @@ class TestAddTimeDependencies(unittest.TestCase):
                           Time(TimeSlot(20, 10)), Time(TimeSlot(20, 20), True),
                           Time(time_series), Time(0, 10), Time("+00:40"),
                           Time("+00:40 20:00 01:00") ]
-        defs.s1.cron += [cron]
+        defs.s1.cron += Cron("+00:00 23:00 00:30",
+                             days_of_week=[0,1,2,3,4,5,6],
+                             days_of_month=[1,2,3,4,5,6],
+                             months=[1,2,3,4,5,6])  
 
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)
@@ -431,11 +632,27 @@ class TestAddDefStatus(unittest.TestCase):
         
         self.defs = defs
 
+    def test_alternative0(self):
+        defs = Defs( 
+                Suite("s1",
+                    Task("t1",Defstatus("complete")),
+                    Task("t2",Defstatus(DState.complete))))
+        
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+
     def test_alternative(self):
         defs = Defs().add(
             Suite("s1").add(
                 Task("t1").add(Defstatus("complete")),
                 Task("t2").add(Defstatus(DState.complete))))
+        
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
 
     def test_alternative1(self):
         defs = Defs() + ( Suite("s1") +  Task("t1") + Task("t2") )
@@ -461,6 +678,21 @@ class TestAddAutocancel(unittest.TestCase):
 
         self.defs = defs
 
+    def test_alternative0(self):
+        defs = Defs( 
+                Suite("s1",
+                    Task("t1", Autocancel(3)),                    # delete task after 3 days after completion 
+                    Task("t2", Autocancel(1, 10, True)),          # delete task 1hr 10 min after task completion
+                    Task("t3", Autocancel(TimeSlot(2,10), True)), # delete task 2hr 10 min after task completion
+                    Task("t4", Autocancel(1)),                    # delete task after 1 day after task completion
+                    Task("t5", Autocancel(18, 10, False)),        # delete task at 6:10pm once it has completed
+                    Task("t6", Autocancel(2, 10, False))))        # delete task at 2:10am once it has completed
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
     def test_alternative(self):
         defs = Defs().add(
             Suite("s1").add(
@@ -492,9 +724,7 @@ class TestAddAutocancel(unittest.TestCase):
         self.assertEqual(defs, self.defs, "expected defs to be the same")
    
 class TestAddRepeat(unittest.TestCase):
-    
     def setUp(self):
-        
         def add_tasks(fam):
             for i in range(1,3):
                 fam.add_task(Task("t{0}".format(i)))
@@ -524,6 +754,30 @@ class TestAddRepeat(unittest.TestCase):
         self.defs = defs
      
 
+    def test_alternative0(self):
+        defs = Defs( 
+                Suite("s1",
+                    Family("f1",
+                       RepeatDate("YMD",20100111,20100115,2),
+                       [ Task("t{0}".format(i)) for i in range(1,3) ] ),
+                    Family("f2",
+                       RepeatInteger("count",0,100,2),
+                       [ Task("t{0}".format(i)) for i in range(1,3) ] ),
+                    Family("f3",
+                       RepeatEnumerated("enum",["red", "green", "blue" ] ),
+                       [ Task("t{0}".format(i)) for i in range(1,3) ] ),
+                    Family("f4",
+                        RepeatString("enum",["a", "b", "c" ] ),
+                        [ Task("t{0}".format(i)) for i in range(1,3) ] ),
+                    Family("f5",
+                        RepeatDay(1),
+                        [ Task("t{0}".format(i)) for i in range(1,3) ] )))
+
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
     def test_alternative1(self):
         defs = Defs().add(
                 Suite("s1").add(
@@ -543,8 +797,13 @@ class TestAddRepeat(unittest.TestCase):
                         RepeatDay(1),
                         [ Task("t{0}".format(i)) for i in range(1,3) ] )))
 
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+ 
     def test_alternative2(self):
-        defs = Defs() +  Suite("s1") 
+        defs = Defs() + Suite("s1") 
         defs.s1 += [ Family("f{0}".format(i)).add(
                       [ Task("t{0}".format(i)) for i in range(1,3) ]) 
                     for i in range(1,6) ]   
@@ -558,6 +817,66 @@ class TestAddRepeat(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+        
+class TestAddLate(unittest.TestCase):
+    def setUp(self):
+        defs = Defs()
+        suite = defs.add_suite('s1')
+        
+        late = Late()
+        late.submitted( 20,10 )         # hour, min
+        late.active( 2, 10 )            # hour, min
+        late.complete( 3, 10, True)     # hour, min, relative
+        suite.add_task('t1').add_late(late)
+        self.defs = defs
+ 
+    def test_1(self):
+        
+        # Can also pass late into the Task constructor
+        defs = Defs(
+                Suite('s1',
+                    Task('t1',
+                        Late(submitted='20:10',active='02:10',complete='+03:10'))))
+     
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")   
+        
+    def test_2(self):
+        
+        # Can also pass late into the Task constructor
+        defs = Defs() + (Suite('s1') + Task('t1'))
+        defs.s1.t1 += Late(submitted='20:10',active='02:10',complete='+03:10')
+     
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")   
+        
+        
+class Deadlock(unittest.TestCase):
+    def setUp(self):
+        defs = Defs().add(
+        Suite("dead_lock").add(
+            Family("family").add(
+               Task("t1").add( Trigger("t2 == complete")),
+               Task("t2").add( Trigger("t1 == complete")))))
+        
+        self.defs = defs
+        
+    def test_me(self):
+        defs = Defs(
+            Suite("dead_lock",
+                Family('family',
+                    Task('t1', 
+                        Trigger("t2 == complete")),
+                    Task('t2', 
+                        Trigger("t1 == complete")))))
+        
+        self.assertEqual(defs, self.defs, "expected defs to be the same")
+       
         
 if __name__ == "__main__":
     unittest.main()

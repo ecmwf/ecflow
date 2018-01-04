@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/raw_function.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -23,6 +24,7 @@
 #include "Task.hpp"
 #include "DefsDoc.hpp"
 #include "BoostPythonUtil.hpp"
+#include "NodeUtil.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -33,7 +35,15 @@ namespace bp = boost::python;
 bool task_len(task_ptr self) { return self->aliases().size();}
 
 task_ptr task_enter(task_ptr self) { return self;}
-bool task_exit(task_ptr self,const boost::python::object& type,const boost::python::object& value,const boost::python::object& traceback){return false;}
+bool task_exit(task_ptr self,const bp::object& type,const bp::object& value,const bp::object& traceback){return false;}
+
+task_ptr task_init(const std::string& name, bp::list the_list, bp::dict kw) {
+   //cout << "task_init: " << name << " the_list: " << len(the_list) << " dict: " << len(kw) << endl;
+   task_ptr node = Task::create(name);
+   (void)NodeUtil::add_variable_dict(node,kw);
+   (void)NodeUtil::node_iadd(node,the_list);
+   return node;
+}
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
@@ -54,6 +64,8 @@ void export_Task()
    ;
 
    class_<Task, bases<Submittable>, task_ptr>("Task",DefsDoc::task_doc() )
+   .def("__init__",raw_function(&NodeUtil::node_raw_constructor,1))  // will call -> task_init
+   .def("__init__",make_constructor(&task_init), DefsDoc::task_doc())
    .def("__init__",make_constructor(&Task::create), DefsDoc::task_doc())
    .def(self == self )                        // __eq__
    .def("__enter__", &task_enter)             // allow with statement, hence indentation support
@@ -61,12 +73,12 @@ void export_Task()
    .def("__str__",   &Task::to_string)        // __str__
    .def("__copy__",  copyObject<Task>)        // __copy__ uses copy constructor
    .def("__len__",   &task_len)               // Implement sized protocol for immediate children
-   .def("__iter__", boost::python::range( &Task::alias_begin,  &Task::alias_end)) // implement iter protocol
-   .add_property("aliases",boost::python::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
-   .add_property("nodes",  boost::python::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
+   .def("__iter__", bp::range( &Task::alias_begin,  &Task::alias_end)) // implement iter protocol
+   .add_property("aliases",bp::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
+   .add_property("nodes",  bp::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    ;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python<task_ptr>(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python<task_ptr>(); // needed for mac and boost 1.6
 #endif
 
    class_<Alias, bases<Submittable>, alias_ptr>("Alias",DefsDoc::alias_doc(),no_init)
@@ -75,6 +87,6 @@ void export_Task()
    .def("__copy__", copyObject<Alias>)  // __copy__ uses copy constructor
    ;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python<alias_ptr>(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python<alias_ptr>(); // needed for mac and boost 1.6
 #endif
 }

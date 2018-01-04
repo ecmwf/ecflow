@@ -31,6 +31,10 @@ namespace ecf {
 class CronAttr  {
 public:
 	CronAttr();
+   CronAttr(const std::string& time_series);
+   CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) : timeSeries_(s,f,i),makeFree_(false),state_change_no_(0) {}
+   CronAttr(const TimeSeries& ts ) : timeSeries_(ts),makeFree_(false),state_change_no_(0) {}
+   CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative),makeFree_(false),state_change_no_(0) {}
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const CronAttr& rhs) const;

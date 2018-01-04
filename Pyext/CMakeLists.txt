@@ -80,8 +80,12 @@ ecbuild_add_test( TARGET py_u_TestMigrate
 list( APPEND u_tests
         py_u_test_add   
         py_u_test_collection   
+        py_u_test_cron  
+        py_u_test_defs_constructor 
         py_u_test_get_attr  
         py_u_test_manual   
+        py_u_test_late   
+        py_u_test_replace_node   
         py_u_test_tutorial   
         py_u_TestAddDelete   
         py_u_TestAddDeleteFunc 

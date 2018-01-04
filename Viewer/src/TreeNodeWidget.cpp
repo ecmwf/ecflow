@@ -104,9 +104,11 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
 
     if(view_)
     {
-        viewHolder_->layout()->removeWidget(view_->realWidget());
+        QWidget *realW=view_->realWidget();
+        viewHolder_->layout()->removeWidget(realW);
         delete view_;
         view_=0;
+        delete realW;
     }
 
     if(viewLayoutMode_ == CompactLayoutMode)

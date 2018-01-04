@@ -74,7 +74,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     dirMessageLabel_->hide();
     dirMessageLabel_->setShowTypeTitle(false);
-    dirLabel_->hide();
+    //dirLabel_->hide();
     dirLabel_->setProperty("fileInfo","1");
 
 	dirProvider_=new OutputDirProvider(this);
@@ -93,7 +93,8 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	dirModel_=new OutputModel(this);
 	dirSortModel_=new OutputSortModel(this);
 	dirSortModel_->setSourceModel(dirModel_);
-	dirSortModel_->setDynamicSortFilter(true);
+    dirSortModel_->setSortRole(Qt::UserRole);
+    dirSortModel_->setDynamicSortFilter(true);
 
 	dirView_->setModel(dirSortModel_);
 
@@ -214,6 +215,8 @@ void OutputItemWidget::getCurrentFile(bool doReload)
 #endif
         OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
         op->file(fullName,!doReload);
+
+        updateDir(false);  // get the directory listing
 	}
 }
 
@@ -412,6 +415,11 @@ void OutputItemWidget::infoReady(VReply* reply)
         //Update the dir widget and select the proper file in the list
         updateDir(reply->directories(),true);
 
+        //Update the dir label
+        dirLabel_->update(reply);
+
+        //Enable the update button
+        dirReloadTb_->setEnabled(true);
 #if 0
         //Even though infoReady is called there could be some errors since we could
         //try to read multiple directories
@@ -464,6 +472,8 @@ void OutputItemWidget::infoFailed(VReply* reply)
 
         displayDirErrors(reply->errorTextVec());
 
+        dirReloadTb_->setEnabled(true);
+
         //the timer is stopped. It will be restarted again if we get a local file or
         //a file via the logserver
         updateDirTimer_->stop();
@@ -481,6 +491,12 @@ void OutputItemWidget::on_reloadTb__clicked()
 //------------------------------------
 // Directory contents
 //------------------------------------
+
+void OutputItemWidget::on_dirReloadTb__clicked()
+{
+    dirReloadTb_->setEnabled(false);
+    updateDir(false);  // get the directory listing
+}
 
 void OutputItemWidget::setCurrentInDir(const std::string& fullName)
 {
@@ -570,6 +586,7 @@ void OutputItemWidget::enableDir(bool status)
 	{       
         dirWidget_->show();
         dirMessageLabel_->hide();
+        reloadTb_->setEnabled(true);
 	}
 	else
 	{

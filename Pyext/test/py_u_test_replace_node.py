@@ -21,24 +21,23 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
 import unittest 
 import sys
 import os
+import ecflow_test_util as Test
 
-def test_compile(text):
-    test_file = "py_u_test_tutorial.def"
-    file = open(test_file ,'w')
-    file.write(text)
-    file.close()
-    execfile(test_file)
-    os.remove(test_file)  
+class Test_replace(unittest.TestCase):
 
-class TestCron(unittest.TestCase):
-    def setUp(self):
-        pass
-    
-    def test_pass(self):
-        pass
+    def test_replace_on_server_errors(self):
+        # expect error since nodes not attached to a definition
+        # The error should happen before we connect to the server,hence no need to start server
+        # Avoid suspending node first( since that will require node exist in the server)
+        node_vec = [ Suite('s1'), Family('f1'), Task('t1') ]
+        for node in node_vec:
+            print(node.name(), " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            try: 
+                node.replace_on_server("locahost:3141",suspend_node_first=False)
+                self.assertFalse(False, "Expected failure since client definition is empty")
+            except RuntimeError as e:
+                self.assertTrue("client definition is empty" in str(e), "expected 'client definition is empty' in exception message  but found:\n"+ str(e))
 
-    def test_fail(self):
-        pass
         
 if __name__ == "__main__":
     unittest.main()

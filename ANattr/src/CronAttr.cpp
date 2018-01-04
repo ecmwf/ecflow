@@ -42,6 +42,18 @@ namespace ecf {
 
 CronAttr::CronAttr() :  makeFree_(false),state_change_no_(0) {}
 
+CronAttr::CronAttr(const std::string& str)
+:  makeFree_(false),state_change_no_(0)
+{
+   if (str.empty()) throw std::runtime_error("CronAttr::CronAttr : empty string passed");
+   std::vector<std::string> tokens;
+   Str::split(str,tokens);
+   if (tokens.empty())  throw std::runtime_error("CronAttr::CronAttr : incorrect time string ?");
+
+   size_t index = 0;
+   timeSeries_  = TimeSeries::create(index,tokens,false/*parse_state*/);
+}
+
 void CronAttr::addWeekDays( const std::vector<int>& w)
 {
 	weekDays_ = w;

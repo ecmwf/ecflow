@@ -67,12 +67,7 @@ ClientInvoker::ClientInvoker(const std::string& host_port)
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 2=================start=================\n";
-   // assume format <host>:<port>
-   size_t colonPos = host_port.find_first_of(':');
-   if (colonPos == string::npos)  throw std::runtime_error("ClientInvoker::ClientInvoker: expected <host>:<port> : no ':' found in " + host_port);
-   std::string host = host_port.substr(0,colonPos);
-   std::string port = host_port.substr(colonPos+1);
-   set_host_port(host,port);
+   set_hostport(host_port);
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
@@ -97,6 +92,19 @@ void ClientInvoker::set_host_port(const std::string& host, const std::string& po
    // o Override environment setting
    // o For child commands will override opening of ecf_hosts file
 	clientEnv_.set_host_port(host,port);
+}
+
+void ClientInvoker::set_hostport(const std::string& host_port)
+{
+   // assume format <host>:<port> || <host>@<port>
+   size_t colonPos = host_port.find_first_of(':');
+   if (colonPos == string::npos) {
+      colonPos = host_port.find_first_of('@');
+      if (colonPos == string::npos) throw std::runtime_error("ClientInvoker::set_host_port: expected <host>:<port> || <host>@<port> in " + host_port);
+   }
+   std::string host = host_port.substr(0,colonPos);
+   std::string port = host_port.substr(colonPos+1);
+   set_host_port(host,port);
 }
 
 const std::string& ClientInvoker::host() const

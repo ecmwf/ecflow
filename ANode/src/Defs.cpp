@@ -217,6 +217,7 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
          suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes,true,true);
          suiteVec_[s]->reset_begin();
          suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
+         set_most_significant_state();
  		}
 	}
 	else {

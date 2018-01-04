@@ -78,10 +78,10 @@ class TestIterableProtocol(unittest.TestCase):
         setup_test(self)
 
     def test_iterator(self):
-        self.assert_(hasattr(self.defs3,'__iter__') , "defs has no __iter__")
-        self.assert_(hasattr(self.suite3,'__iter__') , "suite has no __iter__")
-        self.assert_(hasattr(self.family3,'__iter__') , "family has no __iter__")
-        self.assert_(hasattr(self.task0,'__iter__') , "task has no __iter__ for aliases")
+        self.assertTrue(hasattr(self.defs3,'__iter__') , "defs has no __iter__")
+        self.assertTrue(hasattr(self.suite3,'__iter__') , "suite has no __iter__")
+        self.assertTrue(hasattr(self.family3,'__iter__') , "family has no __iter__")
+        self.assertTrue(hasattr(self.task0,'__iter__') , "task has no __iter__ for aliases")
         self.assertEqual([suite.name() for suite in self.defs3 ] , ["s1","s2","s3"],"Defs iterator protocol not working")
         self.assertEqual([child.name() for child in self.suite3] , ["f1","f2","f3"],"Suites iterator protocol not working")
         self.assertEqual([child.name() for child in self.family3], ["t1","t2","t3"],"Family iterator protocol not working")

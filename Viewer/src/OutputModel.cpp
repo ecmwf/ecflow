@@ -115,21 +115,7 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 		default:
 			break;
 		}
-	}
-	else if(role == Qt::UserRole)
-	{
-		switch(index.column())
-		{
-		case 0:
-			return QString::fromStdString(fullName(index));
-        case 2:
-			return static_cast<float>(item->size_)/1024.;
-        case 3:
-			return item->mtime_.toTime_t();
-		default:
-			break;
-		}
-	}
+    }
     else if(role == Qt::ForegroundRole)
     {
         if(row == joboutRow_)
@@ -153,6 +139,28 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
             return QString::fromStdString(item->name_) + " is the current job output file.";
         }
     }
+    //Used for sorting
+    else if(role == Qt::UserRole)
+    {
+        switch(index.column())
+        {
+        case 0:
+            return QString::fromStdString(item->name_);
+        case 1:
+            return QString::fromStdString(dir->path());
+        case 2:
+            return item->size_;
+        case 3:
+            return secsToNow(item->mtime_);
+        case 4:
+            return item->mtime_.toTime_t();
+        case 5:
+            return QString::fromStdString(dir->fetchModeStr());
+        default:
+            break;
+        }
+    }
+
 
 	return QVariant();
 }
@@ -310,6 +318,14 @@ QString OutputModel::formatAgo(QDateTime dt) const
 	return str;
 }
 
+qint64 OutputModel::secsToNow(QDateTime dt) const
+{
+    QDateTime now=QDateTime::currentDateTime();
+
+    qint64 delta  = dt.secsTo(now);
+    return (delta<0)?0:delta;
+}
+
 //=======================================================================
 //
 // OutputSortModel
@@ -320,34 +336,6 @@ OutputSortModel::OutputSortModel(QObject* parent) :
 	QSortFilterProxyModel(parent)
 {
 
-}
-
-bool OutputSortModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const
-{
-	int col=sourceLeft.column();
-
-	//Name or modification date
-	if(col==0 || col == 3)
-	{
-		return sourceModel()->data(sourceLeft,Qt::DisplayRole).toString() < sourceModel()->data(sourceRight,Qt::DisplayRole).toString();
-	}
-	//Size
-	else if(col == 1)
-	{
-		return sourceModel()->data(sourceLeft,Qt::UserRole).toFloat() < sourceModel()->data(sourceRight,Qt::UserRole).toFloat();
-	}
-	//Ago
-	else if(col == 2)
-	{
-		return sourceModel()->data(sourceLeft,Qt::UserRole).toInt() > sourceModel()->data(sourceRight,Qt::UserRole).toInt();
-	}
-
-	return true;
-}
-
-bool OutputSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
-{
-	return true;
 }
 
 QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)

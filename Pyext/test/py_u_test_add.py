@@ -21,14 +21,60 @@ import sys
 
 class Test_dunder_rshift(unittest.TestCase):
     def test_node_dunder_rshift(self):
-        suite = Suite('s')
         # will ONLY work if we have starting NodeContainer
-        suite >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
+        suite = Suite('s') >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
         self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
- 
+        
+        self.assertEqual(str(suite.t2.get_trigger()),"t1 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"t2 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t4.get_trigger()),"t3 == complete","Trigger not as expected: " + str( suite.t4.get_trigger())) 
+
         fam = Family("f1") >> Task('t1') >> Task('t2') >> Task('t3') >> Task('t4')
         self.assertEqual(len(list(fam)),4,"expected 4 children but found " + str(len(list(fam))) )
 
+        self.assertEqual(str(fam.t2.get_trigger()),"t1 == complete","Trigger not as expected: " + str( fam.t2.get_trigger())) 
+        self.assertEqual(str(fam.t3.get_trigger()),"t2 == complete","Trigger not as expected: " + str( fam.t3.get_trigger())) 
+        self.assertEqual(str(fam.t4.get_trigger()),"t3 == complete","Trigger not as expected: " + str( fam.t4.get_trigger())) 
+
+    def test_node_dunder_rshift_trigger_cat(self):
+        suite = Suite('s')
+        # will ONLY work if we have starting NodeContainer
+        suite >> Task('t1') >> (Task('t2') + Trigger("x == 1")) >> (Task('t3') + Trigger("y==1")) >> Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+        
+        self.assertEqual(str(suite.t2.get_trigger()),"x == 1 AND t1 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"y==1 AND t2 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t4.get_trigger()),"t3 == complete","Trigger not as expected: " + str( suite.t4.get_trigger())) 
+
+class Test_dunder_lshift(unittest.TestCase):
+    def test_node_dunder_lshift(self):
+        # will ONLY work if we have starting NodeContainer
+        suite = Suite('s') << Task('t1') << Task('t2') << Task('t3') << Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+        
+        self.assertEqual(suite.t4.get_trigger(),None,"Trigger not as expected: " + str( suite.t4.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"t4 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t2.get_trigger()),"t3 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( suite.t1.get_trigger())) 
+ 
+        fam = Family("f1") << Task('t1') << Task('t2') << Task('t3') << Task('t4')
+        self.assertEqual(len(list(fam)),4,"expected 4 children but found " + str(len(list(fam))) )
+ 
+        self.assertEqual(fam.t4.get_trigger(),None,"Trigger not as expected: " + str( fam.t4.get_trigger())) 
+        self.assertEqual(str(fam.t3.get_trigger()),"t4 == complete","Trigger not as expected: " + str( fam.t3.get_trigger())) 
+        self.assertEqual(str(fam.t2.get_trigger()),"t3 == complete","Trigger not as expected: " + str( fam.t2.get_trigger())) 
+        self.assertEqual(str(fam.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( fam.t1.get_trigger())) 
+
+    def test_node_dunder_lshift_trigger_cat(self):
+        suite = Suite('s')
+        # will ONLY work if we have starting NodeContainer
+        suite >> Task('t1') << (Task('t2') + Trigger("x == 1")) << (Task('t3') + Trigger("y==1")) << Task('t4')
+        self.assertEqual(len(list(suite)),4,"expected 4 children but found " + str(len(list(suite))) )
+         
+        self.assertEqual(suite.t4.get_trigger(),None,"Trigger not as expected: " + str( suite.t4.get_trigger())) 
+        self.assertEqual(str(suite.t3.get_trigger()),"y==1 AND t4 == complete","Trigger not as expected: " + str( suite.t3.get_trigger())) 
+        self.assertEqual(str(suite.t2.get_trigger()),"x == 1 AND t3 == complete","Trigger not as expected: " + str( suite.t2.get_trigger())) 
+        self.assertEqual(str(suite.t1.get_trigger()),"t2 == complete","Trigger not as expected: " + str( suite.t1.get_trigger())) 
 
 class Test_dunder_add(unittest.TestCase):
     
@@ -136,14 +182,23 @@ class TestListComprehension(unittest.TestCase):
         defs.add( [ Suite("s{0}".format(i)) for i in range(6,11) ] )
         self.assertEqual(len(defs), 10, " expected 10 suites but found " + str(len(defs)))
 
+        defs = Defs( [ Suite("s{0}".format(i)) for i in range(1,6) ] )
+        self.assertEqual(len(defs), 5, " expected 5 suites but found " + str(len(defs)))
+
     def test_family_list(self):
         defs = Defs()
         defs += [ Suite("suite").add( [ Family("f{0}".format(i)) for i in range(1,6)]  ) ]
         self.assertEqual(len(defs.suite), 5, " expected 5 familes but found " + str(len(defs.suite)))
 
+        defs = Defs( [ Suite("xx", [ Family("f{0}".format(i)) for i in range(1,6)]  ) ] )
+        self.assertEqual(len(defs.xx), 5, " expected 5 familes but found " + str(len(defs.xx)))
+
     def test_task_list(self):
         defs = Defs()
         defs += [ Suite("suite").add( Family("f").add( [ Task("t{0}".format(i)) for i in range(1,6)]  )) ]
+        self.assertEqual(len(defs.suite.f), 5, " expected 5 task but found " + str(len(defs.suite.f)))
+
+        defs = Defs( [ Suite("suite", Family("f",[ Task("t{0}".format(i)) for i in range(1,6)]  )) ] )
         self.assertEqual(len(defs.suite.f), 5, " expected 5 task but found " + str(len(defs.suite.f)))
 
     def test_task_list2(self):
@@ -221,6 +276,8 @@ class TestTrigger(unittest.TestCase):
         task = defs.add_suite("s").add_family("f").add_task("t")
         t = Trigger(["a","b",task])
         self.assertEqual(str(t),"a == complete AND b == complete AND /s/f/t == complete","Trigger not as expected: " + str(t))
+        task += t
+        self.assertEqual(str(task.get_trigger() ),"a == complete AND b == complete AND /s/f/t == complete","Trigger not as expected: " + str(task.get_trigger())) 
 
     def test_add(self):
         defs = Defs()
@@ -375,16 +432,63 @@ class TestAddAll(unittest.TestCase):
         self.assertTrue(t1.get_autocancel(), "Can't find t1 autocancel")
         #print(defs)
 
+    def test_raw_constructor(self):
+        defs = Defs().add(
+            Suite("s1", 
+                Clock(1, 1, 2010, False), 
+                Autocancel(1, 10, True),
+                Task("t1",
+                    Edit({ "a":"y", "b":"bb"}, c="v",d="b"),
+                    Edit({ "e":1, "f":"bb"}),
+                    Edit(g="d"),
+                    Edit(h=1),
+                    Event(1),
+                    Event(11,"event"),
+                    Meter("meter",0,10,10),
+                    Label("label","c"),
+                    Trigger("1==1"),
+                    Complete("1==1"),
+                    Limit("limit",10),Limit("limit2",10),
+                    InLimit("limitName","/limit",2),
+                    Defstatus(DState.complete),
+                    Today(0,30),Today("00:59"),Today("00:00 11:30 00:01"),
+                    Time(0,30),Time("00:59"),Time("00:00 11:30 00:01"),
+                    Day("sunday"),Day(Days.monday),
+                    Date(1,1,0),Date(28,2,1960),
+                    Autocancel(3)
+                    ),
+                [ Family("f{0}".format(i)) for i in range(1,6)]
+            )
+        )
+        print(defs)
+        t1 = defs.find_abs_node("/s1/t1")
+        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertEqual(len(defs.s1),6, "Expected 6 nodes but found " + str(len(defs.s1)))
+        self.assertEqual(len(list(t1.variables)), 8, "expected 8 variables")
+        self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
+        self.assertEqual(len(list(t1.inlimits)), 1, "expected 1 inlimits")
+        self.assertEqual(len(list(t1.events)), 2, "expected 2 events")
+        self.assertEqual(len(list(t1.meters)), 1, "expected 1 meter")
+        self.assertEqual(len(list(t1.labels)), 1, "expected 1 label")
+        self.assertEqual(len(list(t1.times)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.todays)), 3, "expected 3 times")
+        self.assertEqual(len(list(t1.days)), 2, "expected 2 days")
+        self.assertEqual(len(list(t1.dates)), 2, "expected 2 dates")
+        self.assertTrue(t1.get_trigger(), "Can't find t1 trigger")
+        self.assertTrue(t1.get_complete(), "Can't find t1 complete")
+        self.assertTrue(t1.get_autocancel(), "Can't find t1 autocancel")
+     
+     
 class TestIAdd(unittest.TestCase):
     def test_iadd_with_getattr(self):
         defs = Defs();
         s1 = defs.add_suite("s1")
         s1 += [ Task("a"),Task("b")]
-        defs.s1.a += [   Edit({ "x1":"y", "aa1":"bb"}, a="v",b="b",),
+        defs.s1.a += [ Edit({ "x1":"y", "aa1":"bb"}, a="v",b="b",),
                     Edit({ "x":"y", "aa":"bb"}),
                     Edit(d="d")
                 ]
-        defs.s1.b += [   Event(1),
+        defs.s1.b += [ Event(1),
                     Event(11,"event"),
                     Meter("meter",0,10,10),
                     Label("label","c"),
@@ -558,6 +662,35 @@ class TestComparison(unittest.TestCase):
             )
         )      
 
+        self.assertEqual(self.defs1,defs,"defs not equal\n" + str(self.defs1) + "\n\n" + str(defs))    
+
+    def test_compare_with_raw_constructor(self):
+        defs = Defs()
+        defs += Suite('s1',Task('t1',Event(1),Event(11,'event'),Meter("meter",0,10,10),Label("label","c"),a='v'))
+        defs += Suite('s2',Family('f1',Task('t1',Trigger("1==1"),Complete("1==1"))))
+        defs += Suite('s3',Family('f1',Family('f2',Task('t1',var='v'))))
+        defs += Suite('edit',Edit(a='a'),Edit(b='b'))
+        defs += Suite('limit',Limit("limit",10),Limit("limit2",10))
+        defs += Suite('inlimit',InLimit("limitName", "/limit", 2 ))
+        defs += Suite('RepeatInteger',RepeatInteger("integer", 0, 100, 2) )
+        defs += Suite('RepeatEnumerated', RepeatEnumerated("enum", ["red", "green", "blue" ]))
+        defs += Suite('RepeatDate', RepeatDate("ymd", 20100111, 20100115, 2))
+        defs += Suite('RepeatString',RepeatString("string", ["a", "b", "c" ]))
+        defs += Suite('RepeatDay', RepeatDay(1))
+        defs += Suite('defstatus', Defstatus('active'))
+        defs += Suite('today',Task('today',Today("00:30"),Today(0,59),Today("00:00 11:30 00:01")))
+        defs += Suite('time',Task('time',Time("00:30"),Time(0,59),Time("00:00 11:30 00:01")))
+        defs += Suite('day',Task('day',Day("sunday"),Day(Days.monday)))
+        defs += Suite('date',Task('date',Date(1,1,0),Date(28,2,1960)))
+        defs += Suite('cron',Task('cron',self.cron))
+        defs += Suite('late',Family('late',self.late,Task('late',self.late2)))
+        defs += Suite('clock',Clock(1, 1, 2010, False) )
+        defs += Suite('autocancel',Autocancel(3) )
+        
+        defs += Suite("zombie",ZombieAttr( ZombieType.ecf, self.child_list, ZombieUserActionType.block, self.zombie_life_time_in_server),
+                               ZombieAttr( ZombieType.user, self.child_list, ZombieUserActionType.block, self.zombie_life_time_in_server),
+                               ZombieAttr( ZombieType.path, self.child_list, ZombieUserActionType.block, self.zombie_life_time_in_server))
+                               
         self.assertEqual(self.defs1,defs,"defs not equal\n" + str(self.defs1) + "\n\n" + str(defs))    
 
         

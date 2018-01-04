@@ -209,46 +209,35 @@ QString FileInfoLabel::formatFileSize(QString str,qint64 size) const
     return str;
 }
 
+//=============================================
+//
+//  DirInfoLabel
+//
+//=============================================
+
 void DirInfoLabel::update(VReply* reply)
-{
-    VDir_ptr dir=reply->directory();
-
-    if(!dir)
+{   
+    QDateTime dt;
+    if(reply)
     {
-        clear();
-        return;
+        std::vector<VDir_ptr> dVec=reply->directories();
+        if(dVec.empty())
+        {
+            dt=QDateTime::currentDateTime();
+        }
+        //take the last item
+        else
+        {
+            dt=dVec[dVec.size()-1]->fetchDate();
+        }
     }
-
-	QString s;
+    else
+    {
+        dt=QDateTime::currentDateTime();
+    }
 
     QColor col(39,49,101);
-    QColor colErr(255,0,0);
-
-	QString dirName=QString::fromStdString(dir->path());
-
-	if(dirName.isEmpty())
-	{
-        s=Viewer::formatBoldText("Directory: ",col) + Viewer::formatText(" ??? ",colErr);
-		setText(s);
-		return;
-	}
-
-    //Local read
-    if(dir->fetchMode() == VDir::LocalFetchMode)
-    {
-        s+=Viewer::formatBoldText("Directory: ",col) + " read from disk";
-
-        QString dt=dir->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
-        s+=Viewer::formatBoldText(" at ",col) + dt;
-
-    }
-    else if(dir->fetchMode() == VDir::LogServerFetchMode)
-    {
-        s+=Viewer::formatBoldText("Directory: ",col) + QString::fromStdString(dir->fetchModeStr());
-
-        QString dt=dir->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
-        s+=Viewer::formatBoldText(" at ",col) +  dt;
-    }
-
-	setText(s);
+    QString s="Directory listing updated at " + Viewer::formatBoldText(" at ",col) +
+            dt.toString("yyyy-MM-dd HH:mm:ss");
+    setText(s);
 }

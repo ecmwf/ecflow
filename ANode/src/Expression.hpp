@@ -139,7 +139,7 @@ public:
    unsigned int state_change_no() const { return state_change_no_; }
 
 private:  /// For use by python interface,
-   friend void export_Node();
+   friend void export_NodeAttr();
    friend class Trigger;
    friend class Complete;
    std::vector<PartExpression>::const_iterator part_begin() const { return vec_.begin();}
