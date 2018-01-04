@@ -84,6 +84,7 @@ list( APPEND u_tests
         py_u_test_defs_constructor 
         py_u_test_get_attr  
         py_u_test_manual   
+        py_u_test_late   
         py_u_test_replace_node   
         py_u_test_tutorial   
         py_u_TestAddDelete   

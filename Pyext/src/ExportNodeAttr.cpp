@@ -48,7 +48,45 @@ using namespace std;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
+///////////////////////////////////////////////////////////////////////////////////////////////////
+object late_raw_constructor(tuple args, dict kw) {
+   cout << "late_raw_constructor len(args):" << len(args) << endl;
+   // args[0] is Late(i.e self)
+   if (len(args) > 1) throw std::runtime_error("late_raw_constructor: Late only expects keyword arguments, ie. Late(submitted='00:20',active='15:00',complete='+30:00')");
+   return args[0].attr("__init__")(kw); // calls -> late_init(dict kw)
+}
 
+static void extract_late_keyword_arguments(boost::shared_ptr<LateAttr> late, bp::dict& dict) {
+   boost::python::list keys = dict.keys();
+   const int no_of_keys = len(keys);
+   for(int i = 0; i < no_of_keys; ++i) {
+      if (extract<string>(keys[i]).check()) {
+         std::string first = extract<std::string>(keys[i]);
+         if (extract<string>(dict[keys[i]]).check()) {
+            std::string second = extract<string>(dict[keys[i]]);
+            int hour = 0;
+            int min = 0;
+            bool relative = TimeSeries::getTime(second,hour,min);
+            if (first == "submitted")  late->add_submitted(hour,min);
+            else if (first == "active")  late->add_active(hour,min);
+            else if (first == "complete")  late->add_complete(hour,min,relative);
+            else throw std::runtime_error("extract_late_keyword_arguments: keyword arguments, expected [submitted | active | complete]");
+         }
+         else throw std::runtime_error("extract_late_keyword_arguments: expected keyword arguments to be a string, ie Late(submitted='00:20',active='15:00',complete='+30:00')");
+      }
+   }
+}
+
+static boost::shared_ptr<LateAttr> late_init(bp::dict& dict){
+   boost::shared_ptr<LateAttr> late = boost::make_shared<LateAttr>();
+   extract_late_keyword_arguments(late,dict);
+   return late;
+}
+
+static boost::shared_ptr<LateAttr> late_create() { return boost::make_shared<LateAttr>();}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 object cron_raw_constructor(tuple args, dict kw) {
    //cout << "cron_raw_constructor len(args):" << len(args) << endl;
    // args[0] is Cron(i.e self) args[1] is string name
@@ -106,6 +144,7 @@ static boost::shared_ptr<CronAttr> cron_init1(const TimeSeries& ts, bp::dict& di
 
 static boost::shared_ptr<CronAttr> cron_create() { return boost::make_shared<CronAttr>();}
 static boost::shared_ptr<CronAttr> cron_create2(const TimeSeries& ts) { return boost::make_shared<CronAttr>(ts);}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 void add_time_series_3(CronAttr* self,const std::string& ts) { self->addTimeSeries(TimeSeries::create(ts));}
@@ -469,39 +508,42 @@ void export_NodeAttr()
 
 
 	class_<LateAttr, boost::shared_ptr<LateAttr>  >("Late",NodeAttrDoc::late_doc())
- 	.def( "submitted", &LateAttr::addSubmitted,
- 	      "submitted(TimeSlot):The time node can stay `submitted`_. Submitted is always relative. If the node stays\n"
- 	      "submitted longer than the time specified, the `late`_ flag is set\n"
- 	)
-	.def( "submitted", &LateAttr::add_submitted,
-	      "submitted(hour,minute) The time node can stay submitted. Submitted is always relative. If the node stays\n"
-	      "submitted longer than the time specified, the late flag is set\n"
-	 )
-	.def( "active",    &LateAttr::add_active,
-	      "active(hour,minute): The time the node must become `active`_. If the node is still `queued`_ or `submitted`_\n"
-	      "by the time specified, the late flag is set"
-	 )
-	 .def( "active",   &LateAttr::addActive,
-	       "active(TimeSlot):The time the node must become `active`_. If the node is still `queued`_ or `submitted`_\n"
-	       "by the time specified, the late flag is set"
-	 )
-	.def( "complete",  &LateAttr::add_complete,
-	      "complete(hour,minute):The time the node must become `complete`_. If relative, time is taken from the time\n"
-	      "the node became `active`_, otherwise node must be `complete`_ by the time given"
-	 )
-	 .def( "complete", &LateAttr::addComplete,
-	       "complete(TimeSlot): The time the node must become `complete`_. If relative, time is taken from the time\n"
-	       "the node became `active`_, otherwise node must be `complete`_ by the time given"
-	 )
-	.def(self == self )                                  // __eq__
-	.def("__str__",   &LateAttr::toString)               // __str__
-   .def("__copy__",   copyObject<LateAttr>)             // __copy__ uses copy constructor
-	.def("submitted", &LateAttr::submitted,return_value_policy<copy_const_reference>(), "Return the submitted time as a TimeSlot")
-	.def("active",    &LateAttr::active,   return_value_policy<copy_const_reference>(), "Return the active time as a TimeSlot")
-	.def("complete",  &LateAttr::complete, return_value_policy<copy_const_reference>(), "Return the complete time as a TimeSlot")
-   .def("complete_is_relative",  &LateAttr::complete_is_relative, "Returns a boolean where true means that complete is relative")
-   .def("is_late",   &LateAttr::isLate, "Return True if late")
- 	;
+    .def("__init__",raw_function(&late_raw_constructor,1))  // will call -> late_init
+    .def("__init__",make_constructor(&late_init))
+    .def("__init__",make_constructor(&late_create))
+    .def( "submitted", &LateAttr::addSubmitted,
+          "submitted(TimeSlot):The time node can stay `submitted`_. Submitted is always relative. If the node stays\n"
+          "submitted longer than the time specified, the `late`_ flag is set\n"
+    )
+    .def( "submitted", &LateAttr::add_submitted,
+          "submitted(hour,minute) The time node can stay submitted. Submitted is always relative. If the node stays\n"
+          "submitted longer than the time specified, the late flag is set\n"
+    )
+    .def( "active",    &LateAttr::add_active,
+          "active(hour,minute): The time the node must become `active`_. If the node is still `queued`_ or `submitted`_\n"
+          "by the time specified, the late flag is set"
+    )
+    .def( "active",   &LateAttr::addActive,
+          "active(TimeSlot):The time the node must become `active`_. If the node is still `queued`_ or `submitted`_\n"
+          "by the time specified, the late flag is set"
+    )
+    .def( "complete",  &LateAttr::add_complete,
+          "complete(hour,minute):The time the node must become `complete`_. If relative, time is taken from the time\n"
+          "the node became `active`_, otherwise node must be `complete`_ by the time given"
+    )
+    .def( "complete", &LateAttr::addComplete,
+          "complete(TimeSlot): The time the node must become `complete`_. If relative, time is taken from the time\n"
+          "the node became `active`_, otherwise node must be `complete`_ by the time given"
+    )
+    .def(self == self )                                  // __eq__
+    .def("__str__",   &LateAttr::toString)               // __str__
+    .def("__copy__",   copyObject<LateAttr>)             // __copy__ uses copy constructor
+    .def("submitted", &LateAttr::submitted,return_value_policy<copy_const_reference>(), "Return the submitted time as a TimeSlot")
+    .def("active",    &LateAttr::active,   return_value_policy<copy_const_reference>(), "Return the active time as a TimeSlot")
+    .def("complete",  &LateAttr::complete, return_value_policy<copy_const_reference>(), "Return the complete time as a TimeSlot")
+    .def("complete_is_relative",  &LateAttr::complete_is_relative, "Returns a boolean where true means that complete is relative")
+    .def("is_late",   &LateAttr::isLate, "Return True if late")
+    ;
 #if defined(__clang__)
    bp::register_ptr_to_python< boost::shared_ptr<LateAttr> >(); // needed for mac and boost 1.6
 #endif

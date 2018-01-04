@@ -28,14 +28,9 @@ def test_compile(text):
     file.close()
     exec(compile(open(test_file ).read(), test_file , 'exec')) # execfile(test_file) only work for python 2.7
     os.remove(test_file)  
-    try: os.remove('test.def')  
-    except: pass       
-
     
 class TestNewSuite(unittest.TestCase):
     def setUp(self):
- 
-        
         home = os.path.join(os.getenv("HOME"),"course")
         self.defs = Defs()
         suite = self.defs.add_suite("test")
@@ -63,11 +58,12 @@ class TestNewSuite(unittest.TestCase):
         
         print("Creating suite definition")   
         home = os.path.join(os.getenv("HOME"),"course")
-        self.defs6 = Defs( 
+        defs = Defs( 
                         Suite('test',
                             Task('t1'),
                             ECF_HOME=home))
-     
+        self.assertEqual(self.defs,defs,"defs not equal\n" + str(self.defs) + "\n" + str(defs))
+
         text = """#!/usr/bin/env python2.7
 import os
 from ecflow import Defs,Suite,Task,Edit
@@ -79,15 +75,22 @@ defs = Defs(
             Edit(ECF_HOME=home),
             Task('t1')))
 print(defs)
+
+defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_defs_equal(self):
-        self.assertEqual(self.defs, self.defs2, "defs not the same")
-        self.assertEqual(self.defs, self.defs3, "defs not the same")
-        self.assertEqual(self.defs, self.defs4, "defs not the same")
-        self.assertEqual(self.defs, self.defs5, "defs not the same")
-        self.assertEqual(self.defs, self.defs6, "defs not the same")
+        self.assertEqual(self.defs, self.defs2, "defs not the equal")
+        self.assertEqual(self.defs, self.defs3, "defs not the equal")
+        self.assertEqual(self.defs, self.defs4, "defs not the equal")
+        self.assertEqual(self.defs, self.defs5, "defs not the equal")
+
+    def tearDown(self):
+        try: os.remove("test.def")
+        except: pass
 
 class TestFamilies(unittest.TestCase):
     def setUp(self):
@@ -160,6 +163,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
 
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -259,6 +264,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def") 
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_me2(self):
         #!/usr/bin/env python2.7
@@ -383,6 +390,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -491,6 +500,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -621,6 +632,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -755,6 +768,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -888,6 +903,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -1034,6 +1051,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -1228,6 +1247,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def test_me(self):
         #!/usr/bin/env python2.7
@@ -1323,6 +1344,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
         
     def tearDown(self):
         try: os.remove("test.def")
@@ -1381,7 +1404,7 @@ class TestRepeat(unittest.TestCase):
         self.assertEqual(result, "", "expected job creation to succeed " + result)
  
         print("Saving definition to file 'test.def'")
-        defs.save_as_defs("test.def")
+        #defs.save_as_defs("test.def")
         
         text = """#!/usr/bin/env python2.7
 import os
@@ -1464,7 +1487,10 @@ defs.save_as_defs("test.def")
         print("Saving definition to file 'test.def'")
         defs.save_as_defs("test.def")
 
-
+    def tearDown(self):
+        try: os.remove("test.def")
+        except: pass
+        
 class TestLimit(unittest.TestCase):
     def setUp(self):
         #!/usr/bin/env python2.7
@@ -1560,6 +1586,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def") 
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
 
     def tearDown(self):
         try: os.remove("test.def")
@@ -1605,11 +1633,10 @@ class TestLateAttribute(unittest.TestCase):
         import os
  
         def create_family_f6() :
-            late = Late()
-            late.complete(0,1,True)  # hour,minute,relative,    set late flag if task take longer than a minute
+            # set late flag if task t1 takes longer than a minute
             return Family("f6",
                         Edit(SLEEP=120),
-                        Task("t1",late))
+                        Task("t1",Late(complete='+00:01')))
      
         print("Creating suite definition")   
         home = os.path.join(os.getenv("HOME"),"course")
@@ -1638,12 +1665,12 @@ import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
                    RepeatString,RepeatInteger,RepeatDate,InLimit,Limit,Late
         
-def create_family_f6() :
-    late = Late()
-    late.complete(0,1,True)  # hour,minute,relative,    set late flag if task take longer than a minute
+def create_family_f6():
+    # set late flag if task t1 takes longer than a minute
     return Family("f6",
                 Edit(SLEEP=120),
-                Task("t1",late))
+                Task("t1",
+                    Late(complete='+00:01')))
      
 print("Creating suite definition")   
 home = os.path.join(os.getenv("HOME"),"course")
@@ -1663,6 +1690,8 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
 
     def tearDown(self):
         try: os.remove("test.def")
@@ -1825,7 +1854,9 @@ print("Saving definition to file 'test.def'")
 defs.save_as_defs("test.def")
 """
         test_compile(text)
-        
+        test_defs = Defs('test.def')
+        self.assertEqual(test_defs,defs,"defs not equal\n" + str(test_defs) + "\n" + str(defs))
+
     def test_me(self):
         #!/usr/bin/env python2.7
         import os
