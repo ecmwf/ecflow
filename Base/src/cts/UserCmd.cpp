@@ -211,7 +211,7 @@ void UserCmd::split_args_to_options_and_paths(
    //                   vector and not options
    // This is because boost program options does *NOT* seem to preserve the leading quotes around the
    // trigger/complete expression,  i.e "/suite/t2 == complete"   is read as /suite/t2 == complete
-   // However in paths we do expect to see any spaces
+   // However in paths we do not expect to see any spaces
 
    // Note: Node names are not allowed ':', hence ':' in a node path is always to reference a node attribute, event,limit in this case
    // However we need to deal with special situations:
