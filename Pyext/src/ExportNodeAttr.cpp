@@ -50,7 +50,7 @@ namespace bp = boost::python;
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 object late_raw_constructor(tuple args, dict kw) {
-   cout << "late_raw_constructor len(args):" << len(args) << endl;
+   //cout << "late_raw_constructor len(args):" << len(args) << endl;
    // args[0] is Late(i.e self)
    if (len(args) > 1) throw std::runtime_error("late_raw_constructor: Late only expects keyword arguments, ie. Late(submitted='00:20',active='15:00',complete='+30:00')");
    return args[0].attr("__init__")(kw); // calls -> late_init(dict kw)
