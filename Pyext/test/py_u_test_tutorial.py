@@ -26,7 +26,12 @@ def test_compile(text):
     file = open(test_file ,'w')
     file.write(text)
     file.close()
-    exec(compile(open(test_file).read(), test_file , 'exec')) # execfile(test_file) only work for python 2.7
+    
+    # execfile(test_file) only work for python 2.7
+    with open(test_file) as f:
+        code = compile(f.read(), test_file, 'exec')
+        exec(code)  
+        
     os.remove(test_file)  
     
 class TestNewSuite(unittest.TestCase):
