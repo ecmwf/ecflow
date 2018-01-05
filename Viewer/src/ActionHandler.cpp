@@ -22,6 +22,7 @@
 #include <QGuiApplication>
 #else
 #include <QApplication>
+#include <QTextDocument>
 #endif
 
 #include "CommandHandler.hpp"
@@ -30,6 +31,7 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "CustomCommandDialog.hpp"
+#include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 #include "UserMessage.hpp"
@@ -239,8 +241,24 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 placeholder = "<node_name>";
                 ecf::Str::replace_all(question, placeholder, nodeNames);
 
-                QMessageBox msgBox;
-                msgBox.setText(QString::fromStdString(question));
+                QString msg=QString::fromStdString(question);
+                if(!item->command().empty())
+                {
+                    QString cmdStr=QString::fromStdString(item->command());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+                    cmdStr=cmdStr.toHtmlEscaped();
+#else
+                    cmdStr=Qt::escape(cmdStr);
+#endif
+                    if(!msg.contains("<ul>"))
+                        msg+="<br><br>";
+
+                    msg+="<i>command: "  + Viewer::formatText(cmdStr,QColor(41,78,126)) + "</i>";
+                    msg+="<br>";
+                }
+
+                QMessageBox msgBox;               
+                msgBox.setText(msg);
                 msgBox.setTextFormat(Qt::RichText);
                 msgBox.setIcon(QMessageBox::Question);
                 msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
