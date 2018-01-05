@@ -770,9 +770,10 @@ void VariableItemWidget::reload(VInfo_ptr info)
 
 void VariableItemWidget::clearContents()
 {
-	InfoPanelItem::clear();
+    InfoPanelItem::clear();
     data_->clear();
     lastSelection_.reset();
+    expanded_.clear();
     actionAdd->setText(tr("Add &new variable"));
 }
 
@@ -795,15 +796,25 @@ void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
     if(flags.isSet(SuspendedChanged))
     {
-        //If it just became non-suspended we need to refresh all the data!!!
-        if(info_ && !suspended_)
+        if(info_)
         {
-            canSaveLastSelection_=false;
-            data_->reload(info_);
-            //After any change done we need to reselect the current row. See issue ECFLOW-613.
-            regainSelection();
-            canSaveLastSelection_=true;
-        }
+            //If it just became non-suspended we need to refresh all the data!!!
+            if(!suspended_)
+            {
+                canSaveLastSelection_=false;
+                data_->reload(info_);
+
+                restoreExpandState();
+
+                //After any change done we need to reselect the current row. See issue ECFLOW-613.
+                regainSelection();
+                canSaveLastSelection_=true;
+            }
+            else
+            {
+               saveExpandState();
+            }
+         }
 
         //It is very important to only emit the signal when the
         //data has been updated! In this way the dialogues can check if their contents are
@@ -1219,6 +1230,29 @@ void  VariableItemWidget::regainSelection()
                                    QItemSelectionModel::Select);
 #endif
 }
+
+void VariableItemWidget::saveExpandState()
+{
+    expanded_.clear();
+    for(int i=0; i< varView->model()->rowCount(); i++)
+    {
+        expanded_ << varView->isExpanded(varView->model()->index(i,0));
+    }
+}
+
+void VariableItemWidget::restoreExpandState()
+{
+    if(expanded_.isEmpty())
+        varView->expandAll();
+    else
+    {
+        for(int i=0; i< varView->model()->rowCount() && i < expanded_.count(); i++)
+        {
+            varView->setExpanded(varView->model()->index(i,0),expanded_[i]);
+        }
+    }
+}
+
 
 //Register at the factory
 static InfoPanelItemMaker<VariableItemWidget> maker1("variable");
