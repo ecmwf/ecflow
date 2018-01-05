@@ -724,9 +724,7 @@ class TestAddAutocancel(unittest.TestCase):
         self.assertEqual(defs, self.defs, "expected defs to be the same")
    
 class TestAddRepeat(unittest.TestCase):
-    
     def setUp(self):
-        
         def add_tasks(fam):
             for i in range(1,3):
                 fam.add_task(Task("t{0}".format(i)))
@@ -819,6 +817,44 @@ class TestAddRepeat(unittest.TestCase):
         equals = (self.defs == defs)
         Ecf.set_debug_equality(False)      
         self.assertEqual(defs, self.defs, "expected defs to be the same")
+        
+        
+class TestAddLate(unittest.TestCase):
+    def setUp(self):
+        defs = Defs()
+        suite = defs.add_suite('s1')
+        
+        late = Late()
+        late.submitted( 20,10 )         # hour, min
+        late.active( 2, 10 )            # hour, min
+        late.complete( 3, 10, True)     # hour, min, relative
+        suite.add_task('t1').add_late(late)
+        self.defs = defs
+ 
+    def test_1(self):
+        
+        # Can also pass late into the Task constructor
+        defs = Defs(
+                Suite('s1',
+                    Task('t1',
+                        Late(submitted='20:10',active='02:10',complete='+03:10'))))
+     
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")   
+        
+    def test_2(self):
+        
+        # Can also pass late into the Task constructor
+        defs = Defs() + (Suite('s1') + Task('t1'))
+        defs.s1.t1 += Late(submitted='20:10',active='02:10',complete='+03:10')
+     
+        Ecf.set_debug_equality(True)
+        equals = (self.defs == defs)
+        Ecf.set_debug_equality(False)      
+        self.assertEqual(defs, self.defs, "expected defs to be the same")   
+        
         
 class Deadlock(unittest.TestCase):
     def setUp(self):

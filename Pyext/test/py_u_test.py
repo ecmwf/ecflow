@@ -29,8 +29,6 @@ def test_compile(text):
     file.close()
     execfile(test_file)
     os.remove(test_file)  
-    try: os.remove('test.def')  
-    except: pass       
 
 class TestCron(unittest.TestCase):
     def setUp(self):
