@@ -139,6 +139,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string questFor = ItemDef.get("question_for","");
                 std::string question = ItemDef.get("question", "");
                 std::string questionControl = ItemDef.get("question_control", "");
+                std::string warning  = ItemDef.get("warning", "");
                 std::string handler  = ItemDef.get("handler", "");
                 std::string views    = ItemDef.get("view", "");
                 std::string icon     = ItemDef.get("icon", "");
@@ -180,6 +181,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 item->setQuestion(question);
                 item->setQuestionControl(questionControl);
+                item->setWarning(warning);
                 item->setHandler(handler);
                 item->setIcon(icon);
                 item->setStatustip(statustip);

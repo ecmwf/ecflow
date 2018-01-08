@@ -242,6 +242,16 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 ecf::Str::replace_all(question, placeholder, nodeNames);
 
                 QString msg=QString::fromStdString(question);
+
+                QString warning=QString::fromStdString(item->warning());
+                if(!warning.isEmpty())
+                {
+                    if(!msg.contains("<ul>"))
+                        msg+="<br><br>";
+
+                    msg+="<i>warning: " + Viewer::formatText(warning,QColor(196,103,36)) + "</i><br>";
+                }
+
                 if(!item->command().empty())
                 {
                     QString cmdStr=QString::fromStdString(item->command());
@@ -250,7 +260,9 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 #else
                     cmdStr=Qt::escape(cmdStr);
 #endif
-                    if(!msg.contains("<ul>"))
+                    if(!warning.isEmpty())
+                        msg+="<br>";
+                    else if(!msg.contains("<ul>"))
                         msg+="<br><br>";
 
                     msg+="<i>command: "  + Viewer::formatText(cmdStr,QColor(41,78,126)) + "</i>";
