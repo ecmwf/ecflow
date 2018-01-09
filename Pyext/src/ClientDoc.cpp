@@ -27,7 +27,7 @@ const char* ClientDoc::class_client(){
             "      int port     # The port on the server, must be unique to the server\n"
             "   )\n\n"
             "   Client(\n"
-            "      string host_port, # Expect's host>:port\n"
+            "      string host_port, # Expect's <host>:<port> || <host>@<port>\n"
             "   )\n\n"
             "The client reads in the following environment variables.\n"
             "For child commands,(i.e these are commands called in the .ecf/jobs files), these variables are used.\n"

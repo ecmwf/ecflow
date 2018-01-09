@@ -348,7 +348,7 @@ const char* DefsDoc::task_doc()
             "- Throws a RuntimeError if the name is not valid\n"
             "- Throws a RuntimeError if a duplicate Task is added\n"
             "\nUsage::\n\n"
-            "  task = Task(\"t1\")            # create a task\n"
+            "  task = Task('t1')            # create a task\n"
             "  family.add_task(task)          # add to the family\n"
             "  t2 = family.add_task(\"t2\")   # create a task t2 and add to the family\n\n"
             "  task = Task('t1',Trigger('1==1'),Edit(SLEEP='10')) # add Trigger and Variables in place"
@@ -463,10 +463,10 @@ const char* DefsDoc::add_task_doc()
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
-            "  f1 = Family(\"f1\")        # create a family\n"
-            "  t1 = Task(\"t1\")          # create a task\n"
+            "  f1 = Family(\"f1\")      # create a family\n"
+            "  t1 = Task('t1')          # create a task\n"
             "  f1.add_task(t1)          # add task to family\n"
-            "  t2 = f1.add_task(\"t2\")   # create task 't2' and add to family"
+            "  t2 = f1.add_task(\"t2\") # create task 't2' and add to family"
             ;
 }
 
@@ -482,6 +482,33 @@ const char* DefsDoc::add_definition_doc()
             "If however the definition is created in python, then checking should be done explicitly.\n"
             "The Defs class take one argument which represents the file name\n\n"
             "Example::\n\n"
+            "  # Build definition using Constructor approach, This allows indentation, to show the structure\n"
+            "  # This is a made up example to demonstrate suite construction:\n"
+            " defs = Defs(\n"
+            "     Suite('s1'\n"
+            "         Clock(1, 1, 2010, False),\n"
+            "         Autocancel(1, 10, True),\n"
+            "         Task('t1'\n"
+            "             Edit({'a':'12', 'b':'bb'}, c='v',d='b'),\n"
+            "             Edit(g='d'),\n"
+            "             Edit(h=1),\n"
+            "             Event(1),\n"
+            "             Event(11,'event'),\n"
+            "             Meter('meter',0,10,10),\n"
+            "             Label('label','c'),\n"
+            "             Trigger('1==1'),\n"
+            "             Complete('1==1'),\n"
+            "             Limit('limit',10),Limit('limit2',10),\n"
+            "             InLimit('limitName','/limit',2),\n"
+            "             Defstatus(DState.complete),\n"
+            "             Today(0,30),Today('00:59'),Today('00:00 11:30 00:01'),\n"
+            "             Time(0,30),Time('00:59'),Time('00:00 11:30 00:01'),\n"
+            "             Day('sunday'),Day(Days.monday),\n"
+            "             Date(1,1,0),Date(28,2,1960),\n"
+            "             Autocancel(3)\n"
+            "             ),\n"
+            "         [ Family('f{}'.format(i)) for i in range(1,6)]))\n\n"
+            "  defs.save_as_defs('filename.def')  # save defs into file\n\n"
             "  defs = Defs()                      # create an empty defs\n"
             "  suite = defs.add_suite(\"s1\")\n"
             "  family = suite.add_family(\"f1\")\n"
@@ -490,7 +517,7 @@ const char* DefsDoc::add_definition_doc()
             "\n"
             "Create a Defs from an existing file on disk. ::\n\n"
             "  defs = Defs('filename.def')   #  Will open and parse the file and create the Definition\n"
-            "  print defs\n"
+            "  print(defs)\n"
             ;
 }
 
@@ -502,8 +529,8 @@ const char* DefsDoc::add_event_doc()
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_event( Event(10) )\n"
+            "  t1 = Task('t1', Event(12),Event(11,'eventx')) # Create event in place\n"
+            "  t1.add_event( Event(10) )                     # Create with function on Task\n"
             "  t1.add_event( Event(11,\"Eventname\") )\n"
             "  t1.add_event( 12 )\n"
             "  t1.add_event( 13, \"name\")\n"
@@ -522,8 +549,8 @@ const char* DefsDoc::add_meter_doc()
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_meter( Meter(\"metername\",0,100,50) )\n"
+            "  t1 = Task('t1',Meter('met',0,50)               # create Meter in place\n"
+            "  t1.add_meter( Meter(\"metername\",0,100,50) )  # create Meter using function\n"
             "  t1.add_meter( \"meter\",0,200)\n\n"
             "To reference in a trigger::\n\n"
             "  t2 = Task(\"t2\")\n"
@@ -539,7 +566,7 @@ const char* DefsDoc::add_date_doc()
             "\nException:\n\n"
             "- Throws RuntimeError if an invalid date is added\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
+            "  t1 = Task('t1', Date('1.*.*'),Date(1,1,2010))) # Create Date in place\n"
             "  t1.add_date( Date(1,1,2010) ) # day,month,year\n"
             "  t1.add_date( 2,1,2010)        # day,month,year\n"
             "  t1.add_date( 1,0,0)           # day,month,year, the first of each month for every year\n"
@@ -551,8 +578,8 @@ const char* DefsDoc::add_day_doc()
    return
             "Add a `day`_ time dependency\n\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_day( Day(Days.sunday) ) \n"
+            "  t1 = Task('t1', Day('sunday'))  # Create Day in Task constructor\n"
+            "  t1.add_day( Day(Days.sunday) )\n"
             "  t1.add_day( Days.monday)\n"
             "  t1.add_day( \"tuesday\")\n"
             ;
@@ -563,7 +590,7 @@ const char* DefsDoc::add_today_doc()
    return
             "Add a `today`_ time dependency\n\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
+            "  t1 = Task('t1', Today('+00:30 20:00 01:00')) # Create Today in Task constructor\n"
             "  t1.add_today( \"00:30\" )\n"
             "  t1.add_today( \"+00:30\" )\n"
             "  t1.add_today( \"+00:30 20:00 01:00\" )\n"
@@ -585,7 +612,7 @@ const char* DefsDoc::add_time_doc()
    return
             "Add a `time`_ dependency\n\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
+            "  t1 = Task('t1', Time('+00:30 20:00 01:00')) # Create Time in Task constructor\n"
             "  t1.add_time( \"00:30\" )\n"
             "  t1.add_time( \"+00:30\" )\n"
             "  t1.add_time( \"+00:30 20:00 01:00\" )\n"
@@ -616,8 +643,10 @@ const char* DefsDoc::add_cron_doc()
             "  cron.set_days_of_month( [1,2,3,4,5,6] )\n"
             "  cron.set_months( [1,2,3,4,5,6] )\n"
             "  cron.set_time_series( time_series )\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_cron( cron )\n"
+            "  t1 = Task('t1')\n"
+            "  t1.add_cron( cron )\n\n"
+            "  # we can also create a Cron in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',Cron('+00:00 23:00 00:30', days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6]))\n"
             ;
 }
 
@@ -628,13 +657,15 @@ const char* DefsDoc::add_late_doc()
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one late is added\n"
             "\nUsage::\n\n"
-            "   late = Late()\n"
-            "   late.submitted( 20,10 )     # hour,minute\n"
-            "   late.active(    20,10 )     # hour,minute\n"
-            "   late.complete(  20,10,True) # hour,minute,relative\n"
-            "   t1 = Task(\"t1\")\n"
-            "   t1.add_late( late )\n"
-            ;
+            "  late = Late()\n"
+            "  late.submitted( 20,10 )     # hour,minute\n"
+            "  late.active(    20,10 )     # hour,minute\n"
+            "  late.complete(  20,10,True) # hour,minute,relative\n"
+            "  t1 = Task('t1')\n"
+            "  t1.add_late( late )\n\n"
+            "  # we can also create a Late in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',Late(submitted='20:10',active='20:10',complete='+20:10'))\n"
+           ;
 }
 
 const char* DefsDoc::add_autocancel_doc()
@@ -654,9 +685,11 @@ const char* DefsDoc::add_autocancel_doc()
             "  t2 = Task('t2')\n"
             "  t2.add_autocancel( 3 )                        # 3 days \n"
             "  t3 = Task('t3')\n"
-            "  t3.add_autocancel( 20,10,True )               # hour,minutes,relative \n"
+            "  t3.add_autocancel( 20,10,True )               # hour,minutes,relative\n"
             "  t4 = Task('t4')\n"
-            "  t4.add_autocancel( TimeSlot(20,10),True )     # hour,minutes,relative \n"
+            "  t4.add_autocancel( TimeSlot(20,10),True )     # hour,minutes,relative\n\n"
+            "  # we can also create a Autocancel in Task constructor like any other attribute\n"
+            "  t2 = Task('t2', Autocancel(20,10,False))\n"
             ;
 }
 
@@ -664,7 +697,7 @@ const char* DefsDoc::add_verify_doc()
 {
    return
             "Add a Verify attribute.\n\n"
-            "For DEBUG/test used to assert that a particular state was reached."
+            "Used in python simulation used to assert that a particular state was reached."
             ;
 }
 
@@ -677,7 +710,9 @@ const char* DefsDoc::add_repeat_date_doc()
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatDate(\"testDate\",20100111,20100115) )\n"
+            "  t1.add_repeat( RepeatDate(\"testDate\",20100111,20100115) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',RepeatDate(\"testDate\",20100111,20100115) )\n"
             ;
 }
 
@@ -690,7 +725,9 @@ const char* DefsDoc::add_repeat_integer_doc()
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatInteger(\"testInteger\",0,100,2) )\n"
+            "  t1.add_repeat( RepeatInteger(\"testInteger\",0,100,2) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',RepeatInteger(\"testInteger\",0,100,2) )\n"
             ;
 }
 
@@ -703,7 +740,9 @@ const char* DefsDoc::add_repeat_string_doc()
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatString(\"test_string\",['a', 'b', 'c' ] ) )\n"
+            "  t1.add_repeat( RepeatString(\"test_string\",['a', 'b', 'c' ] ) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',RepeatString(\"test_string\",['a', 'b', 'c' ] ) )\n"
             ;
 }
 
@@ -716,7 +755,9 @@ const char* DefsDoc::add_repeat_enumerated_doc()
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatEnumerated(\"test_string\", ['red', 'green', 'blue' ] ) )\n"
+            "  t1.add_repeat( RepeatEnumerated(\"test_string\", ['red', 'green', 'blue' ] ) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',RepeatEnumerated(\"test_string\", ['red', 'green', 'blue' ] ) )\n"
             ;
 }
 
@@ -727,6 +768,8 @@ const char* DefsDoc::add_repeat_day_doc()
             "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
+            "\nUsage::\n\n"
+            "  t2 = Task('t2',RepeatDay(1))\n"
             ;
 }
 
@@ -738,7 +781,9 @@ const char* DefsDoc::add_defstatus_doc()
             "once begun, or in setting Task's complete so they can be run selectively\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1') + Defstatus('complete')\n"
-            "  t2 = Task('t2').add_defstatus( DState.suspended )\n"
+            "  t2 = Task('t2').add_defstatus( DState.suspended )\n\n"
+            "  # we can also create a Defstatus in Task constructor like any other attribute\n"
+            "  t2 = Task('t3', Defstatus('complete') )\n"
             ;
 }
 
@@ -753,17 +798,17 @@ const char* DefsDoc::jobgenctrl_doc()
             "   job_ctrl = JobCreationCtrl()\n"
             "   job_ctrl.set_node_path('/suite/to_check') # will hierarchically check job creation under this node\n"
             "   defs.check_job_creation(job_ctrl)         # job files generated to ECF_JOB\n"
-            "   print job_ctrl.get_error_msg()            # report any errors in job generation\n"
+            "   print(job_ctrl.get_error_msg())            # report any errors in job generation\n"
             "\n"
             "   job_ctrl = JobCreationCtrl()              # no set_node_path() hence check job creation for all tasks\n"
             "   job_ctrl.set_dir_for_job_creation(tmp)    # generate jobs file under this directory\n"
             "   defs.check_job_creation(job_ctrl)\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             "\n"
             "   job_ctrl = JobCreationCtrl()              # no set_node_path() hence check job creation for all tasks\n"
             "   job_ctrl.generate_temp_dir()              # automatically generate directory for job file\n"
             "   defs.check_job_creation(job_ctrl)\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             ;
 }
 
@@ -784,26 +829,26 @@ const char* DefsDoc::check_job_creation_doc()
             "\nUsage::\n\n"
             "   defs = Defs('my.def')                     # specify the defs we want to check, load into memory\n"
             "   ...\n"
-            "   print defs.check_job_creation()           # Check job generation for all tasks\n"
+            "   print(defs.check_job_creation())          # Check job generation for all tasks\n"
             "   ...\n"
             "   job_ctrl = JobCreationCtrl()\n"
             "   defs.check_job_creation(job_ctrl)         # Check job generation for all tasks, same as above\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             "   ...\n"
             "   job_ctrl = JobCreationCtrl()\n"
             "   job_ctrl.set_node_path('/suite/to_check') # will hierarchically check job creation under this node\n"
             "   defs.check_job_creation(job_ctrl)         # job files generated to ECF_JOB\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             "   ...\n"
             "   job_ctrl = JobCreationCtrl()              # no set_node_path() hence check job creation for all tasks\n"
             "   job_ctrl.set_dir_for_job_creation(tmp)    # generate jobs file under this directory\n"
             "   defs.check_job_creation(job_ctrl)\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             "   ...\n"
             "   job_ctrl = JobCreationCtrl()              # no set_node_path() hence check job creation for all tasks\n"
             "   job_ctrl.generate_temp_dir()              # automatically generate directory for job file\n"
             "   defs.check_job_creation(job_ctrl)\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             ;
 }
 
@@ -857,14 +902,14 @@ const char* DefsDoc::check()
             "   # Client side\n"
             "   defs = Defs('my.def')        # Load my.def from disk\n"
             "   ....\n"
-            "   print defs.check() # do the check\n"
+            "   print(defs.check()) # do the check\n"
             "\n"
             "   # Server Side\n"
             "   try:\n"
             "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       print ci.check('/suite')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -900,7 +945,7 @@ const char* DefsDoc::simulate() {
          "   defs = Defs('my.def')        # specify the defs we want to simulate\n"
          "   ....\n"
          "   theResults = defs.simulate()\n"
-         "   print theResults\n"
+         "   print(theResults)\n"
          ;
 }
 
@@ -915,6 +960,6 @@ const char* DefsDoc::get_server_state()
             "       ci.sync_local()\n"
             "       assert ci.get_defs().get_server_state() == SState.SHUTDOWN, \"Expected server to be shutdown\"\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
              ;
 }

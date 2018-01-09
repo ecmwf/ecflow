@@ -20,7 +20,7 @@ const char* NodeAttrDoc::variable_doc()
    return
             "Defines a `variable`_ on a `node`_ for use in `ecf script`_.\n\n"
             "A Node can have a number of variables.\n"
-            "These variables can be added at any node level: `suite`_, `family`_ or `task`_.\n"
+            "These variables can be added at any node level: Defs, `suite`_, `family`_ or `task`_.\n"
             "The variables are names inside a pair of '%' characters in an `ecf script`_.\n"
             "The content of a variable replaces the variable name in the `ecf script`_ at\n"
             "job submission time. When a variable is needed at submission time, it is first\n"
@@ -39,13 +39,13 @@ const char* NodeAttrDoc::variable_doc()
             "   task.add_variable(var)\n"
             "   task.add_variable('JOE','90')\n\n"
             "The following use example of using Edit, which allow multiple variables to added at the same time ::\n\n"
-            "   t = Task('t1').add(\n"
+            "   t = Task('t1',\n"
             "             Edit({ 'a':'y', 'b':'bb'}, c='v',d='b'),\n"
             "             Edit({ 'e':1100, 'f':'bb'}),\n"
             "             Edit(g='d'),\n"
             "             Edit(h='1'))\n\n"
             "::\n\n"
-            "  defs = Defs().add(Suite('s1')\n"
+            "  defs = Defs(Suite('s1'),Edit(SLEEP='1')) # Add user variable to definition\n"
             "  defs.s1 += [ Task('a') ]\n"
             "  defs.s1.a += [ Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b'),\n"
             "                 Edit({ 'var':10, 'aa':'bb'}),\n"
@@ -77,8 +77,10 @@ const char* NodeAttrDoc::zombie_doc()
             "   # never block the job\n"
             "   s1 = ecflow.Suite('s1')\n"
             "   child_list = [ ChildCmdType.label ]\n"
-            "   zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob)\n"
-            "   s1.add_zombie(zombie_attr)\n"
+            "   zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob)\n\n"
+            "   s1.add_zombie(zombie_attr)\n\n"
+            "   # create the zombie as part of the node constructor\n"
+            "   s1 = ecflow.Suite('s1',ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob))\n"
             ;
 }
 
@@ -144,7 +146,7 @@ const char* NodeAttrDoc::label_doc()
             "      string name:  The name of the label\n"
             "      string value: The value of the label\n"
             "\nUsage::\n\n"
-            "   t1 = Task('t1')\n"
+            "   t1 = Task('t1', Label('name','value'),Label('a','b'))\n"
             "   t1.add_label('l1','value')\n"
             "   t1.add_label(Label('l2','value2'))\n"
             "   for label in t1.labels:\n"
@@ -166,9 +168,10 @@ const char* NodeAttrDoc::limit_doc()
             "      string name: the name of the limit\n"
             "      int   value: The value of the limit\n"
             "\nUsage::\n\n"
-            "   limit = Limit(\"fast\", 10)\n"
+            "   limit = Limit('fast', 10)\n"
             "    ...\n"
-            "   suite.add_limit(limit)\n"
+            "   suite = Suite('s1',Limit('slow',10)) # create Limit in Node constructor\n"
+            "   suite.add_limit(limit)               # add existing limit using function\n"
             ;
 }
 
@@ -196,7 +199,9 @@ const char* NodeAttrDoc::inlimit_doc()
             "\nUsage::\n\n"
             "   inlimit = InLimit(\"fast\",\"/x/f\", 2)\n"
             "    ...\n"
-            "   family.add_inlimit(inlimit)\n"
+            "   family = Family('f1',\n"
+            "                   InLimit('mars','/x/f', 2)) # create InLimit in Node constructor\n"
+            "   family.add_inlimit(inlimit)                # add existing inlimit using function\n"
             ;
 }
 
@@ -225,8 +230,11 @@ const char* NodeAttrDoc::event_doc()
             "\nUsage::\n\n"
             "   event = Event(2,\"event_name\")\n"
             "   task.add_event(event)\n"
-            "   task1.add_event(\"2\")      # create a event '1' and add to the task\n"
-            "   task2.add_event(\"name\")   # create a event 'name' and add to task\n"
+            "   task1.add_event(\"2\")          # create a event '1' and add to the task\n"
+            "   task2.add_event(\"name\")       # create a event 'name' and add to task\n\n"
+            "   # Events can be created in the Task constructor, like any other attribute\n"
+            "   t = Task('t3',\n"
+            "            Event(2,'event_name'))\n"
             ;
 }
 
@@ -277,15 +285,19 @@ const char* NodeAttrDoc::date_doc()
             "will be set to `complete`_ at the beginning of the `suite`_, without the\n"
             "task ever being dispatched otherwise, the suite would never complete.\n"
             "\nConstructor::\n\n"
-            "   Date(day,month,year)\n"
-            "      int day   : represents the day, zero means wild card. day >= 0 & day < 31\n"
-            "      int month : represents the month, zero means wild card. month >= 0 & month < 12\n"
-            "      int year  : represents the year, zero means wild card. year >= 0\n"
+            "  Date(string)\n"
+            "     string : * means wild card\n"
+            "  Date(day,month,year)\n"
+            "     int day   : represents the day, zero means wild card. day >= 0 & day < 31\n"
+            "     int month : represents the month, zero means wild card. month >= 0 & month < 12\n"
+            "     int year  : represents the year, zero means wild card. year >= 0\n"
             "\nExceptions:\n\n"
             "- raises IndexError when an invalid date is specified\n"
             "\nUsage::\n\n"
-            "   date = Date(11,12,2010)  # represent 11th of December 2010\n"
-            "   date = Date(1,0,0);      # means the first day of every month of every year\n"
+            "  date = Date(11,12,2010)  # represent 11th of December 2010\n"
+            "  date = Date(1,0,0);      # means the first day of every month of every year\n"
+            "  t = Task('t1',\n"
+            "            Date('1.*.*'));  # Create Date in place.\n"
             ;
 }
 
@@ -298,11 +310,14 @@ const char* NodeAttrDoc::day_doc()
             "beginning of the `suite`_, without the task ever being dispatched otherwise\n"
             "the suite would never complete.\n"
             "\nConstructor::\n\n"
+            "   Day(string)\n"
+            "      string: 'sunday','monday',etc\n"
             "   Day(Days)\n"
             "      Days day: Is an enumerator with represent the days of the week\n"
             "\nUsage::\n\n"
             "   day1 = Day(Days.sunday)\n"
-            "   day2 = Day(Days.monday)\n"
+            "   t = Task('t1',\n"
+            "           Day('tuesday'))\n"
             ;
 }
 
@@ -314,7 +329,10 @@ const char* NodeAttrDoc::days_enum_doc()
             "\nUsage::\n\n"
             "   day1 = Day(Days.sunday)\n"
             "   day2 = Day(Days.monday)\n"
-            "   day3 = Day(Days.tuesday)\n"
+            "   t = Task('t1',\n"
+            "           day1,\n"
+            "           day2,\n"
+            "           Day(Days.tuesday))\n"
             ;
 }
 
@@ -327,6 +345,8 @@ const char* NodeAttrDoc::time_doc()
             "cause unexpected results. The time dependency can be made relative to the beginning\n"
             "of the suite or in repeated families relative to the beginning of the repeated family.\n"
             "\nConstructor::\n\n"
+            "   Time(string)\n"
+            "     string: i.e '00:30' || '00:30 20:00 00:30'"
             "   Time(hour,minute,relative<optional> = false)\n"
             "      int hour:               hour in 24 clock\n"
             "      int minute:             minute <= 59\n"
@@ -344,9 +364,12 @@ const char* NodeAttrDoc::time_doc()
             "\nExceptions:\n\n"
             "- raises IndexError when an invalid Time is specified\n"
             "\nUsage::\n\n"
-            "   time = Time( 10,10 )                                                   #  time 10:10 \n"
-            "   time = Time( TimeSlot(10,10), true)                                    #  time +10:10 \n"
-            "   time = Time( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 \n"
+            "   time1 = Time( 10,10 )                                                   #  time 10:10 \n"
+            "   time2 = Time( TimeSlot(10,10), true)                                    #  time +10:10 \n"
+            "   time2 = Time( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 \n\n"
+            "   t = Task('t1',\n"
+            "            time1,time2,time3,\n"
+            "            Time('10:30 20:10 00:10')) # Create time in place\n"
             ;
 }
 
@@ -374,10 +397,13 @@ const char* NodeAttrDoc::today_doc()
             "\nExceptions:\n\n"
             "- raises IndexError when an invalid Today is specified\n"
             "\nUsage::\n\n"
-            "   today = Today( 10,10 )                                                   #  today 10:10 \n"
-            "   today = Today( TimeSlot(10,10) )                                         #  today 10:10 \n"
-            "   today = Today( TimeSlot(10,10), true)                                    #  today +10:10 \n"
-            "   today = Today( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 \n"
+            "   today1 = Today( 10,10 )                                                   #  today 10:10 \n"
+            "   today2 = Today( TimeSlot(10,10) )                                         #  today 10:10 \n"
+            "   today3 = Today( TimeSlot(10,10), true)                                    #  today +10:10 \n"
+            "   today4 = Today( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 \n"
+            "   t = Task('t1',\n"
+            "            today1,today2,today3,today4,\n"
+            "            Today('10:30 20:10 00:10')) # Create today in place\n"
             ;
 }
 
@@ -390,13 +416,17 @@ const char* NodeAttrDoc::late_doc()
             "Only one Late attribute can be specified on a Node.\n"
             "\nConstructor::\n\n"
             "   Late()\n"
+            "   Late(kwargs)\n"
             "\nUsage::\n\n"
+            "   # This is interpreted as: The node can stay `submitted`_ for a maximum of 15 minutes\n"
+            "   # and it must become `active`_ by 20:00 and the run time must not exceed 2 hours::\n\n"
             "   late = Late()\n"
             "   late.submitted( 0,15 )\n"
             "   late.active(   20,0 )\n"
             "   late.complete(  2,0, true )\n\n"
-            "This is interpreted as: The node can stay `submitted`_ for a maximum of 15 minutes\n"
-            "and it must become `active`_ by 20:00 and the run time must not exceed 2 hours"
+            "   late = Late(submitted='00:15',active='20:00',complete='+02:00')\n"
+            "   t = Task('t1',\n"
+            "            Late(submitted='00:15',active='20:00'))\n"
             ;
 }
 
@@ -435,7 +465,7 @@ const char* NodeAttrDoc::repeat_date_doc()
    return
             "Allows a `node`_ to be repeated using a yyyymmdd format\n\n"
             "A node can only have one `repeat`_.\n"
-            "The repeat can be referenced in `trigger`_ expressions.\n"
+            "The repeat name can be referenced in `trigger`_ expressions.\n"
             "\nConstructor::\n\n"
             "   RepeatDate(variable,start,end,delta)\n"
             "      string variable:     The name of the repeat. The current date can referenced in\n"
@@ -448,6 +478,8 @@ const char* NodeAttrDoc::repeat_date_doc()
             "\nUsage::\n\n"
             "   rep = RepeatDate(\"YMD\", 20050130, 20050203 )\n"
             "   rep = RepeatDate(\"YMD\", 20050130, 20050203, 2 )\n"
+            "   t = Task('t1',\n"
+            "            RepeatDate(\"YMD\", 20050130, 20050203 ) )\n"
             ;
 }
 
@@ -465,7 +497,8 @@ const char* NodeAttrDoc::repeat_integer_doc()
             "      int end:             End end integer value\n"
             "      int step<optional>:  Default = 1, The step amount\n"
             "\nUsage::\n\n"
-            "   rep = RepeatInteger(\"HOUR\", 6, 24, 6 )\n"
+            "   t = Task('t1',\n"
+            "            RepeatInteger(\"HOUR\", 6, 24, 6 ))\n"
             ;
 }
 
@@ -481,7 +514,8 @@ const char* NodeAttrDoc::repeat_enumerated_doc()
             "                           referenced in trigger expressions using the variable name\n"
             "      vector list:         The list of enumerations\n"
             "\nUsage::\n\n"
-            "   rep = RepeatEnumerated(\"COLOR\", [ 'red', 'green', 'blue' ] )\n"
+            "   t = Task('t1',\n"
+            "            RepeatEnumerated(\"COLOR\", [ 'red', 'green', 'blue' ] ))\n"
             ;
 }
 
@@ -497,7 +531,8 @@ const char* NodeAttrDoc::repeat_string_doc()
             "                           referenced in trigger expressions using the variable name\n"
             "      vector list:         The list of enumerations\n"
             "\nUsage::\n\n"
-            "   rep = RepeatString(\"COLOR\", [ 'red', 'green', 'blue' ] )\n"
+            "   t = Task('t1',\n"
+            "            RepeatString(\"COLOR\", [ 'red', 'green', 'blue' ] ))\n"
             ;
 }
 
@@ -510,7 +545,8 @@ const char* NodeAttrDoc::repeat_day_doc()
             "   RepeatDay(step)\n"
             "      int step:     The step.\n"
             "\nUsage::\n\n"
-            "   rep = RepeatDay( 1 )\n"
+            "   t = Task('t1',\n"
+            "             RepeatDay( 1 ))\n"
             ;
 }
 
@@ -533,6 +569,7 @@ const char* NodeAttrDoc::cron_doc()
             "\nExceptions:\n\n"
             "- raises IndexError || RuntimeError when an invalid cron is specified\n"
             "\nUsage::\n\n"
+            "    cron = Cron('+00:00 23:00 00:30', days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])\n\n"
             "    # Here '+' means relative to begin or re-queue time\n"
             "    cron = ecflow.Cron('+01:30',days_of_week=[0,1,2,3,4,5,6])\n\n"
             "    cron = ecflow.Cron('+00:00 23:00 00:30', days_of_week=[0,1,2],days_of_month=[4,5,6], months=[1,2,3])\n\n"
