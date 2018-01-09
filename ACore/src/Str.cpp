@@ -271,7 +271,7 @@ bool Str::valid_name(const std::string& name, std::string &msg)
       if ( !result ) {
          msg = "Valid names can only consist of alphanumeric characters "
                ",underscores and dots. The first character can not be a dot. ";
-         if (name.find('\r'))  msg += "Window's line ending ? ";
+         if (name.find('\r') != string::npos)  msg += "Window's line ending ? ";
          msg += "'";
          msg += name;
          msg += "'"; // use '<name>' to show if PC format. i.e carriage return
