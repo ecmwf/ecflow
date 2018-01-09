@@ -19,6 +19,44 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
 import os 
 import unittest 
 
+class TestAddSuiteFamilyTask0(unittest.TestCase):
+    def setUp(self):
+        defs = Defs()
+        s = Suite('s1')
+        f = Family('f1')
+        t = Task('t1')
+        defs.add_suite(s)
+        s.add_family(f)
+        f.add_task(t)
+        self.defs = defs
+
+    def test_0(self):
+        defs = Defs()
+        defs.add_suite('s1').add_family('f1').add_task('t1')
+        self.assertEqual(self.defs, defs, "defs not equal")
+        
+    def test_1(self):
+        defs = Defs().add(
+            Suite('s1').add(
+                Family('f1').add(
+                    Task('t1'))))
+        self.assertEqual(self.defs, defs, "defs not equal")
+
+    def test_2(self):
+        defs = Defs(
+            Suite('s1',
+                  Family('f1',
+                         Task('t1'))))
+        self.assertEqual(self.defs, defs, "defs not equal")
+
+    def test_3(self):
+        defs = Defs() + (Suite('s1') + (Family('f1') + Task('t1')))
+        self.assertEqual(self.defs, defs, "defs not equal")
+
+    def test_3(self):
+        defs = Defs() + (Suite('s1') + (Family('f1') + Task('t1')))
+        self.assertEqual(self.defs, defs, "defs not equal")
+          
 class TestAddSuiteFamilyTask(unittest.TestCase):
     def setUp(self):
         defs = Defs()            # create an empty definition
