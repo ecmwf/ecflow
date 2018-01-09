@@ -957,13 +957,15 @@ void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QS
 
     size=QSize(totalWidth,attrBox_->fullHeight);
 
-    if(data.count() < 3)
+    if(data.count() < 4)
         return;
 
-	QString name="inlimit " + data.at(2) +":" +data.at(1);
+    QString name="inlimit " + data[2] +":" + data[1];
+    if(data[3] != "1")
+        name+=" " + data[3];
 
-    if(data.count() == 4)
-        name.prepend(data[3] + ":");
+    if(data.count() == 5)
+        name.prepend(data[4] + ":");
 
     bool selected=option.state & QStyle::State_Selected;
 

@@ -35,7 +35,7 @@ public:
     int totalNum(VNode* vnode);
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,PathIndex=2};
+    enum DataIndex {TypeIndex=0,NameIndex=1,PathIndex=2,TokenIndex=3};
 };
 
 class VLimiterAttr : public VAttribute
