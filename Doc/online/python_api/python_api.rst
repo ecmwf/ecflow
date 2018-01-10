@@ -18,6 +18,7 @@ Suite Definition API
 - :py:class:`ecflow.Date`
 - :py:class:`ecflow.Day`
 - :py:class:`ecflow.Defs`
+- :py:class:`ecflow.Defstatus`
 - :py:class:`ecflow.Edit`
 - :py:class:`ecflow.Event`
 - :py:class:`ecflow.Expression`
@@ -33,12 +34,14 @@ Suite Definition API
 - :py:class:`ecflow.Task`
 
 - :py:class:`ecflow.PartExpression`
+- :py:class:`ecflow.PrintStyle`
 - :py:class:`ecflow.Repeat`
 - :py:class:`ecflow.RepeatDate`
 - :py:class:`ecflow.RepeatDay`
 - :py:class:`ecflow.RepeatEnumerated`
 - :py:class:`ecflow.RepeatInteger`
 - :py:class:`ecflow.RepeatString`
+- :py:class:`ecflow.State`
 - :py:class:`ecflow.Time`
 - :py:class:`ecflow.TimeSeries`
 - :py:class:`ecflow.TimeSlot`
