@@ -35,7 +35,7 @@ const char* NodeAttrDoc::variable_doc()
             "   Edit(dict,kwarg) # alternative that allows multiple variables\n"
             "\nUsage::\n\n"
             "   ...\n"
-            "   var = Variable(\"ECF_JOB_CMD\",\"/bin/sh %ECF_JOB% &\")\n"
+            "   var = Variable('ECF_JOB_CMD','/bin/sh %ECF_JOB% &')\n"
             "   task.add_variable(var)\n"
             "   task.add_variable('JOE','90')\n\n"
             "The following use example of using Edit, which allow multiple variables to added at the same time ::\n\n"
@@ -132,25 +132,26 @@ const char* NodeAttrDoc::label_doc()
 {
    return
             "A `label`_ has a name and value and provides a way of displaying information in a GUI.\n\n"
-            "The value can be anything(ASCII) as it can not be used in triggers\n"
+            "The value can be anything(ASCII) as it can not be used in triggers.\n"
             "The value of the label is set to be the default value given in the definition\n"
             "when the `suite`_ is begun. This is useful in repeated suites: A task sets the label\n"
-            "to be something, e.g, the number of observations, and once the `suite`_ is `complete`_\n"
-            "and the next day starts) the number of observations is cleared.\n\n"
+            "to be something.\n\n"
             "Labels can be set at any level: Suite,Family,Task.\n"
             "There are two ways of updating the label\n\n"
             "- A `child command`_ can be used to automatically update the label on a `task`_\n"
-            "- By using the alter command, the labels on `suite`_ `family`_ and `task`_ can be changed manually\n"
+            "- Using the alter command, the labels on `suite`_ `family`_ and `task`_ can be changed manually\n"
             "\nConstructor::\n\n"
             "   Label(name,value)\n"
             "      string name:  The name of the label\n"
             "      string value: The value of the label\n"
             "\nUsage::\n\n"
-            "   t1 = Task('t1', Label('name','value'),Label('a','b'))\n"
+            "   t1 = Task('t1',\n"
+            "             Label('name','value'),  # create Labels in-place\n"
+            "             Label('a','b'))\n"
             "   t1.add_label('l1','value')\n"
             "   t1.add_label(Label('l2','value2'))\n"
             "   for label in t1.labels:\n"
-            "      print label\n"
+            "      print(label)\n"
             ;
 }
 
@@ -170,8 +171,9 @@ const char* NodeAttrDoc::limit_doc()
             "\nUsage::\n\n"
             "   limit = Limit('fast', 10)\n"
             "    ...\n"
-            "   suite = Suite('s1',Limit('slow',10)) # create Limit in Node constructor\n"
-            "   suite.add_limit(limit)               # add existing limit using function\n"
+            "   suite = Suite('s1',\n"
+            "                 Limit('slow',10))  # create Limit in Node constructor\n"
+            "   suite.add_limit(limit)           # add existing limit using function\n"
             ;
 }
 
@@ -185,19 +187,19 @@ const char* NodeAttrDoc::inlimit_doc()
             "         inlimit /x:fast\n"
             "         task t1\n"
             "         task t2\n\n"
-            "Here 'fast' is the name of limit and the number defines the maximum number of tasks\n"
+            "Here 'fast' is the name of :py:class:`ecflow.Limit` and the number defines the maximum number of tasks\n"
             "that can run simultaneously using this limit. Thats why you do not need a `trigger`_\n"
             "between tasks 't1' and 't2'. There is no need to change the tasks. The jobs are\n"
             "created in the order they are defined\n"
             "\nConstructor::\n\n"
-            "   InLimit(name, optional<path = ''>, optional<token =  1>)\n"
+            "   InLimit(name, optional<path = ''>, optional<token = 1>)\n"
             "      string name           : The name of the referenced Limit\n"
             "      string path<optional> : The path to the Limit, if this is left out, then Limit of 'name' must be specified\n"
             "                              some where up the parent hierarchy\n"
             "      int value<optional>   : The usage of the Limit. Each job submission will consume 'value' tokens\n"
             "                              from the Limit. defaults to 1 if no value specified.\n"
             "\nUsage::\n\n"
-            "   inlimit = InLimit(\"fast\",\"/x/f\", 2)\n"
+            "   inlimit = InLimit('fast','/x/f', 2)\n"
             "    ...\n"
             "   family = Family('f1',\n"
             "                   InLimit('mars','/x/f', 2)) # create InLimit in Node constructor\n"
@@ -213,11 +215,11 @@ const char* NodeAttrDoc::event_doc()
             "and to be able to `trigger`_ another job, which is waiting for this partial completion.\n"
             "Only tasks can have events that are automatically set via a `child command`_ s, see below.\n"
             "Events are cleared automatically when a `node`_ is re-queued or begun.\n"
-            "Suites and Families can have tasks, but these events must be set via the Alter command\n"
+            "Suites and Families can have events, but these events must be set via the Alter command\n"
             "Multiple events can be added to a task.\n"
             "An Event has a number and a optional name. Events are typically used\n"
             "in `trigger`_ and `complete expression`_ , to control job creation.\n"
-            "Event are fired within a `job file`_, i.e.::\n\n"
+            "Event are fired within a script/`job file`_, i.e.::\n\n"
             "   ecflow_client --init=$$\n"
             "   ecflow_client --event=foo\n"
             "   ecflow_client --complete\n\n"
@@ -228,10 +230,10 @@ const char* NodeAttrDoc::event_doc()
             "      int number            : The number must be >= 0\n"
             "      string name<optional> : If name is given, can only refer to Event by its name\n"
             "\nUsage::\n\n"
-            "   event = Event(2,\"event_name\")\n"
+            "   event = Event(2,'event_name')\n"
             "   task.add_event(event)\n"
-            "   task1.add_event(\"2\")          # create a event '1' and add to the task\n"
-            "   task2.add_event(\"name\")       # create a event 'name' and add to task\n\n"
+            "   task1.add_event('2')          # create a event '1' and add to the task\n"
+            "   task2.add_event('name')       # create a event 'name' and add to task\n\n"
             "   # Events can be created in the Task constructor, like any other attribute\n"
             "   t = Task('t3',\n"
             "            Event(2,'event_name'))\n"
@@ -256,11 +258,11 @@ const char* NodeAttrDoc::meter_doc()
             "\nUsage:\n\n"
             "Using a meter requires:\n\n"
             "- Defining a meter on a `task`_::\n\n"
-            "     meter = Meter(\"progress\",0,100,100)\n"
+            "     meter = Meter('progress',0,100,100)\n"
             "     task.add_meter(meter)\n\n"
             "- Updating the corresponding `ecf script`_ file with the meter `child command`_::\n\n"
             "     ecflow_client --init=$$\n"
-            "     for  i in 10 20 30 40 50 60 80 100; do\n"
+            "     for i in 10 20 30 40 50 60 80 100; do\n"
             "         ecflow_client --meter=progress $i\n"
             "         sleep 2 # or do some work\n"
             "     done\n"
@@ -419,7 +421,7 @@ const char* NodeAttrDoc::late_doc()
             "   Late(kwargs)\n"
             "\nUsage::\n\n"
             "   # This is interpreted as: The node can stay `submitted`_ for a maximum of 15 minutes\n"
-            "   # and it must become `active`_ by 20:00 and the run time must not exceed 2 hours::\n\n"
+            "   # and it must become `active`_ by 20:00 and the run time must not exceed 2 hours\n"
             "   late = Late()\n"
             "   late.submitted( 0,15 )\n"
             "   late.active(   20,0 )\n"
@@ -449,7 +451,9 @@ const char* NodeAttrDoc::autocancel_doc()
             "   attr = Autocancel( 1,30, true )              # delete node 1 hour and 30 minutes after completion\n"
             "   attr = Autocancel( TimeSlot(0,10), true )    # delete node 10 minutes after completion\n"
             "   attr = Autocancel( TimeSlot(10,10), false )  # delete node at 10:10 after completion\n"
-            "   attr = Autocancel( 3  )                      # delete node 3 days after completion\n"
+            "   attr = Autocancel( 3  )                      # delete node 3 days after completion\n\n"
+            "   t1 = Task('t1',\n"
+            "              Autocancel(2,0,true))             # delete task 2 hours after completion\n"
             ;
 }
 
@@ -476,10 +480,10 @@ const char* NodeAttrDoc::repeat_date_doc()
             "\nException:\n\n"
             "- Throws a RuntimeError if start/end are not valid dates\n"
             "\nUsage::\n\n"
-            "   rep = RepeatDate(\"YMD\", 20050130, 20050203 )\n"
-            "   rep = RepeatDate(\"YMD\", 20050130, 20050203, 2 )\n"
+            "   rep = RepeatDate('YMD', 20050130, 20050203 )\n"
+            "   rep = RepeatDate('YMD', 20050130, 20050203, 2 )\n"
             "   t = Task('t1',\n"
-            "            RepeatDate(\"YMD\", 20050130, 20050203 ) )\n"
+            "            RepeatDate('YMD', 20050130, 20050203 ) )\n"
             ;
 }
 
@@ -498,7 +502,7 @@ const char* NodeAttrDoc::repeat_integer_doc()
             "      int step<optional>:  Default = 1, The step amount\n"
             "\nUsage::\n\n"
             "   t = Task('t1',\n"
-            "            RepeatInteger(\"HOUR\", 6, 24, 6 ))\n"
+            "            RepeatInteger('HOUR', 6, 24, 6 ))\n"
             ;
 }
 
@@ -515,7 +519,7 @@ const char* NodeAttrDoc::repeat_enumerated_doc()
             "      vector list:         The list of enumerations\n"
             "\nUsage::\n\n"
             "   t = Task('t1',\n"
-            "            RepeatEnumerated(\"COLOR\", [ 'red', 'green', 'blue' ] ))\n"
+            "            RepeatEnumerated('COLOR', [ 'red', 'green', 'blue' ] ))\n"
             ;
 }
 
@@ -532,7 +536,7 @@ const char* NodeAttrDoc::repeat_string_doc()
             "      vector list:         The list of enumerations\n"
             "\nUsage::\n\n"
             "   t = Task('t1',\n"
-            "            RepeatString(\"COLOR\", [ 'red', 'green', 'blue' ] ))\n"
+            "            RepeatString('COLOR', [ 'red', 'green', 'blue' ] ))\n"
             ;
 }
 
@@ -587,10 +591,10 @@ const char* NodeAttrDoc::cron_doc()
             "    cron1.set_time_series(1, 30, True)  # same as cron +01:30\n\n"
             "    cron2 = ecflow.Cron()\n"
             "    cron2.set_week_days([0, 1, 2, 3, 4, 5, 6])\n"
-            "    cron2.set_time_series(\"00:30 01:30 00:01\")\n\n"
+            "    cron2.set_time_series('00:30 01:30 00:01')\n\n"
             "    cron3 = ecflow.Cron()\n"
             "    cron3.set_week_days([0, 1, 2, 3, 4, 5, 6])\n"
-            "    cron3.set_time_series(\"+00:30\")\n"
+            "    cron3.set_time_series('+00:30')\n"
             ;
 }
 

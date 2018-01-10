@@ -292,9 +292,9 @@ void export_Client()
 	         "      ci = Client()\n"
 	         "      ci.sync_local()\n"
 	         "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
-	         "      print ask.why()\n"
+	         "      print(ask.why())\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n\n"
 	         ,
 			init<defs_ptr,std::string >()
 	)
@@ -328,9 +328,9 @@ void export_Client()
 	         "      ci = Client()\n"
             "      ci.sync_local()\n"
             "      url = UrlCmd(ci.get_defs(),'/suite/family/task')\n"
-	         "      print url.execute()\n"
+	         "      print(url.execute())\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n\n"
   			,
 			init<defs_ptr,std::string >()
 	)

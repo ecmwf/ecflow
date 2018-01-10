@@ -47,10 +47,10 @@ const char* ClientDoc::class_client(){
             "By default the Client interface will throw exceptions for error's.\n"
             "\nUsage::\n\n"
             "   try:\n"
-            "       ci = Client(\"localhost:3150\")   # for errors will throw RuntimeError\n"
+            "       ci = Client('localhost:3150')   # for errors will throw RuntimeError\n"
             "       ci.terminate_server()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n\n"
             ;
 }
 
@@ -74,11 +74,11 @@ const char* ClientDoc::set_host_port(){
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client();\n"
-            "       ci.set_host_port(\"localhost\",\"3150\")\n"
-            "       ci.set_host_port(\"avi\",3150)\n"
-            "       ci.set_host_port(\"avi:3150\")\n"
+            "       ci.set_host_port('localhost','3150')\n"
+            "       ci.set_host_port('avi',3150)\n"
+            "       ci.set_host_port('avi:3150')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n\n"
             ;
 }
 
@@ -133,10 +133,10 @@ const char* ClientDoc::get_defs(){
             "   try:\n"
             "       ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.sync_local()       # get the definition from the server and store on 'ci'\n"
-            "       print ci.get_defs()   # print out definition stored in the client\n"
-            "       print ci.get_defs()   # print again, this shows that defs is retained on ci\n"
+            "       print(ci.get_defs())  # print out definition stored in the client\n"
+            "       print(ci.get_defs())  # print again, this shows that defs is retained on ci\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -149,9 +149,9 @@ const char* ClientDoc::get_log()
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()          # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       print ci.get_log()     # get the log file from the server\n"
+            "       print(ci.get_log())    # get the log file from the server\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -168,7 +168,7 @@ const char* ClientDoc::new_log()
             "       ci.alter('\','change','variable','ECF_LOG','/new/path.log')\n"
             "       ci.new_log()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
            ;
 }
 
@@ -182,7 +182,7 @@ const char* ClientDoc::clear_log()
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.clear_log()   # log file is now empty\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -197,7 +197,7 @@ const char* ClientDoc::flush_log()
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.flush_log()   # Log can now opened by external program\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -208,9 +208,9 @@ const char* ClientDoc::log_msg()
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.log_msg(\"A message\") # Write message to log file\n"
+            "       ci.log_msg('A message') # Write message to log file\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -224,7 +224,7 @@ const char* ClientDoc::restart_server()   {
             "       ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.retstart_server()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 const char* ClientDoc::halt_server()      {
@@ -237,7 +237,7 @@ const char* ClientDoc::halt_server()      {
             "       ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.halt_server()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 const char* ClientDoc::shutdown_server()  {
@@ -249,7 +249,7 @@ const char* ClientDoc::shutdown_server()  {
             "       ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.shutdown_server()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -260,7 +260,7 @@ const char* ClientDoc::terminate_server() {
             "       ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.terminate_server()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -274,9 +274,9 @@ const char* ClientDoc::wait_for_server_reply() {
             "\nUsage::\n\n"
             "   ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "   if ci.wait_for_server_reply(30):\n"
-            "      print 'Server is alive'\n"
+            "      print('Server is alive')\n"
             "   else:\n"
-            "      print 'Timed out after 30 second wait for server response.?'\n"
+            "      print('Timed out after 30 second wait for server response.?')\n"
             ;
 }
 
@@ -292,19 +292,19 @@ const char* ClientDoc::load_defs(){
             "If force is not used and `suite`_ of the same name already exists in the server,\n"
             "then a error is thrown\n"
             "\nUsage::\n\n"
-            "   defs_file = \"Hello.def\" \n"
+            "   defs_file = 'Hello.def' \n"
             "   defs = Defs()\n"
-            "   suite = def.add_suite(\"s1\")\n"
-            "   family = suite.add_family(\"f1\")\n"
-            "   for i in [ \"_1\", \"_2\", \"_3\" ]:\n"
-            "      family.add_task( \"t\" + i )\n"
+            "   suite = def.add_suite('s1')\n"
+            "   family = suite.add_family('f1')\n"
+            "   for i in [ '_1', '_2', '_3' ]:\n"
+            "      family.add_task( 't' + i )\n"
             "   defs.save_as_defs(defs_file)  # write out in memory defs into the file 'Hello.def'\n"
             "   ...\n"
             "   try:\n"
             "       ci = Client()       # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.load(defs_file)  # open and parse defs or checkpoint file, and load into server.\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -317,17 +317,17 @@ const char* ClientDoc::load(){
             "   )\n\n"
             "If force is not used and `suite`_ already exists in the server, then a error is thrown.\n"
             "\nUsage::\n\n"
-            "   defs = Defs(\"hello.def\")\n"
-            "   suite = defs.add_suite(\"s1\")\n"
-            "   family = suite.add_family(\"f1\")\n"
-            "   for i in [ \"_1\", \"_2\", \"_3\" ]: \n"
-            "       family.add_task( Task( \"t\" + i) )\n"
+            "   defs = Defs('hello.def')\n"
+            "   suite = defs.add_suite('s1')\n"
+            "   family = suite.add_family('f1')\n"
+            "   for i in [ '_1', '_2', '_3' ]: \n"
+            "       family.add_task( Task( 't' + i) )\n"
             "   ...\n"
             "   try:\n"
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.load(defs)    # Load in memory defs, into the server\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -344,10 +344,10 @@ const char* ClientDoc::get_server_defs() {
             "   try:\n"
             "       ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.get_server_defs()  # get the definition from the server and store on 'ci'\n"
-            "       print ci.get_defs()   # print out definition stored in the client\n"
-            "       print ci.get_defs()   # print again, this shows that defs is retained on ci\n"
+            "       print(ci.get_defs())  # print out definition stored in the client\n"
+            "       print(ci.get_defs())  # print again, this shows that defs is retained on ci\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -374,10 +374,10 @@ const char* ClientDoc::sync() {
             "       ... after a period of time\n"
             "       ci.sync_local()                     # Subsequent calls to sync_local() users the local Defs to sync incrementally\n"
             "       if ci.in_sync():                    # returns true server changed and changes applied to client\n"
-            "          print 'Client is now in sync with server'\n"
+            "          print('Client is now in sync with server')\n"
             "       client_defs = ci.get_defs()         # End user access to the returned Defs\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             "\n"
             "Calling sync_local() is considerably faster than calling get_server_defs() for large Definitions"
             ;
@@ -395,10 +395,10 @@ const char* ClientDoc::in_sync() {
             "      ... after a period of time\n"
             "      ci.sync_local()                     # Subsequent calls to sync_local() users the local Defs to sync incrementally\n"
             "      if ci.in_sync():                    # returns true  changed and changes applied to client\n"
-            "         print 'Client is now in sync with server'\n"
+            "         print('Client is now in sync with server')\n"
             "      client_defs = ci.get_defs()         # End user access to the returned Defs\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
            ;
 }
 
@@ -415,13 +415,13 @@ const char* ClientDoc::news() {
             "   try:\n"
             "       ci = Client()                  # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       if ci.news_local():            # has the server changed\n"
-            "          print 'Server Changed'      # server changed bring client in sync with server\n"
+            "          print('Server Changed')     # server changed bring client in sync with server\n"
             "          ci.sync_local()             # get the full definition from the server if first time\n"
             "                                      # otherwise apply incremental changes to Client definition,\n"
             "                                      # bringing it in sync with the server definition\n"
-            "          print ci.get_defs()         # print the synchronised definition. Should be same as server\n"
+            "          print(ci.get_defs())        # print the synchronised definition. Should be same as server\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -437,22 +437,21 @@ const char* ClientDoc::changed_node_paths() {
             "   try:\n"
             "       ci = Client()                          # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       if ci.news_local():                    # has the server changed\n"
-            "          print 'Server Changed'              # server changed bring client in sync with server\n"
+            "          print('Server Changed')             # server changed bring client in sync with server\n"
             "          ci.sync_local()                     # get the full definition from the server if first time\n"
             "                                              # otherwise apply incremental changes to Client definition,\n"
             "                                              # bringing it in sync with the server definition\n"
             "          defs = ci.get_defs()                # get the updated/synchronised definition\n"
             "          for path in ci.changed_node_paths:\n"
-            "              print path\n"
             "              if path == '/':                 # path '/' represent change to server node/defs\n"
-            "                 print 'defs changed'         # defs state change or user variables changed\n"
+            "                 print('defs changed')        # defs state change or user variables changed\n"
             "              else:\n"
             "                 node = defs.find_abs_node(path)\n"
             "\n"
             "         # if changed_node_paths is empty, then assume entire definition changed\n"
-            "         print defs                         # print the synchronised definition. Should be same as server\n"
+            "         print(defs)                         # print the synchronised definition. Should be same as server\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -497,7 +496,7 @@ const char* ClientDoc::checkpt(){
             "       ci.checkpt(CheckPt.UNDEFINED,0,35) # Change check point save time alarm to 35 seconds\n"
             "                                          # With these arguments mode and interval remain unchanged\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -514,7 +513,7 @@ const char* ClientDoc::restore_from_checkpt() {
             "       ci.halt_server()          # server must be halted, otherwise restore_from_checkpt will throw\n"
             "       ci.restore_from_checkpt() # restore the definition from the check point file\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -530,7 +529,7 @@ const char* ClientDoc::reload_wl_file(){
             "       ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.reload_wl_file()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -561,10 +560,9 @@ const char* ClientDoc::run(){
             "       ci = Client()                          # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.run('/s1')                          # run all tasks under suite /s1\n"
             "\n"
-            "       path_list = ['/s1/f1/t1','/s2/f1/t2']\n"
-            "       ci.run(path_list)                      # run all tasks specified in the paths\n"
+            "       ci.run(['/s1/f1/t1','/s2/f1/t2'])      # run all tasks specified\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             "\nEffect::\n\n"
             "   Lets see the effect of run command on the following defs::\n\n"
             "   suite s1\n"
@@ -598,7 +596,7 @@ const char* ClientDoc::requeue(){
             "       path_list = ['/s1/f1/t1','/s2/f1/t2']\n"
             "       ci.requeue(path_list)\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -613,7 +611,7 @@ const char* ClientDoc::free_trigger_dep(){
             "       ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.free_trigger_dep('/s1/f1/task')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -628,7 +626,7 @@ const char* ClientDoc::free_date_dep(){
             "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.free_date_dep('/s1/task')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -645,7 +643,7 @@ const char* ClientDoc::free_time_dep(){
             "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.free_time_dep('/s1/task')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -662,7 +660,7 @@ const char* ClientDoc::free_all_dep(){
             "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.free_all_dep('/s1/task')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -676,12 +674,12 @@ const char* ClientDoc::ping(){
             "distinction from other Client function is that it is quite fast.\n"
             "\nUsage::\n\n"
             "   try:\n"
-            "       ci = Client(\"localhost\",\"3150\")\n"
+            "       ci = Client('localhost','3150')\n"
             "       ci.ping()\n"
-            "       print \"------- Server already running------\"\n"
+            "       print('------- Server already running------')\n"
             "       do_something_with_server(ci)\n"
             "   except RuntimeError, e:\n"
-            "       print \"------- Server *NOT* running------\" + str(e)\n"
+            "       print('------- Server *NOT* running------' + str(e))\n"
             ;
 }
 
@@ -694,7 +692,7 @@ const char* ClientDoc::stats(){
             "       ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.stats()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -707,7 +705,7 @@ const char* ClientDoc::stats_reset(){
             "       ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.stats_reset()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -719,9 +717,9 @@ const char* ClientDoc::suites(){
             "   try:\n"
             "       ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       suites = ci.suites()\n"
-            "       print suites\n"
+            "       print(suites)\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -744,18 +742,19 @@ const char* ClientDoc::ch_register() {
             "       ci.ch_register(True,suite_names)    # register interest in suites s1,s2,s3 and any new suites\n"
             "       ci.ch_register(False,suite_names)   # register interest in suites s1,s2,s3 only\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n\n"
             "The client 'ci' will hold locally the client handle. Since we have made multiple calls to register\n"
             "a handle, the variable 'ci' will hold the handle for the last call only.\n"
             "The handle associated with the suite can be manually retrieved::\n\n"
             "   try:\n"
             "       ci = Client()\n"
-            "       suite_names = [ 's1', 's2', 's3' ]\n"
-            "       ci.ch_register(True,suite_names)    # register interest in suites s1,s2,s3 and any new suites\n"
-            "       client_handle = ci.ch_handle()\n    # get the handle associated with last call to ch_register\n"
-            "       ci.ch_drop( client_handle )         # de-register the handle\n"
+            "       ci.ch_register(True,['s1','s2','s3']) # register interest in suites s1,s2,s3 and any new suites\n"
+            "       client_handle = ci.ch_handle()        # get the handle associated with last call to ch_register\n"
+            "       ....                                  # after a period of time\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n"
+            "   finally:\n"
+            "       ci.ch_drop( client_handle )           # de-register the handle\n"
             ;
 }
 
@@ -782,12 +781,11 @@ const char* ClientDoc::ch_drop(){
             "- RunTimeError thrown if handle has not been previously registered\n"
             "\nUsage::\n\n"
             "	try:\n"
-            "      ci = Client()                      # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "      suites = [ 's1', 's2' ]\n"
-            "      ci.ch_register(False, suites)\n"
+            "      ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "      ci.ch_register(False,['s1','s2'])\n"
             "      while( 1 ):\n"
             "         # get incremental changes to suites s1 & s2, uses data stored on ci/defs\n"
-            "         ci.sync_local()                 # will only retrieve data for suites s1 & s2\n"
+            "         ci.sync_local()                # will only retrieve data for suites s1 & s2\n"
             "         update(ci.get_defs())\n"
             "	finally:\n"
             "      ci.ch_drop()\n"
@@ -808,15 +806,13 @@ const char* ClientDoc::ch_drop_user(){
             "- RunTimeError thrown if handle has not been previously registered\n"
             "\nUsage::\n\n"
             "  try:\n"
-            "      ci = Client()       # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "      suites = [ 's1', 's2' ]\n"
-            "      ci.ch_register(False, suites)\n"
+            "      ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "      ci.ch_register(False,['s1','s2'])\n"
             "      while( 1 ):\n"
             "         # get incremental changes to suites s1 & s2, uses data stored on ci/defs\n"
-            "         ci.sync_local()                 # will only retrieve data for suites s1 & s2\n"
             "         update(ci.get_defs())\n"
             "  finally:\n"
-            "      ci.ch_drop_user(\"\") # drop all handles associated with current user\n\n"
+            "      ci.ch_drop_user('') # drop all handles associated with current user\n\n"
             ;
 }
 
@@ -836,13 +832,11 @@ const char* ClientDoc::ch_add() {
             "  )\n"
             "\nUsage::\n\n"
             "   try:\n"
-            "       ci = Client()        # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       suite_names = []\n"
-            "       ci.ch_register(True,suite_names)  # register interest in any new suites\n"
-            "       suite_names = [ 's1', 's2' ]\n"
-            "       ci.ch_add(suite_names)            # add suites s1,s2 to the last added handle\n"
+            "       ci = Client()           # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "       ci.ch_register(True,[]) # register interest in any new suites\n"
+            "       ci.ch_add(['s1','s2'])  # add suites s1,s2 to the last added handle\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n\n"
             ;
 }
 
@@ -862,13 +856,11 @@ const char* ClientDoc::ch_remove() {
             "  )\n"
             "\nUsage::\n\n"
             "   try:\n"
-            "       ci = Client()                       # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       suite_names = [ 's1', 's2' , 's3']\n"
-            "       ci.ch_register(True,suite_names)    # register interest in suites s1,s2,s3 and any new suites\n"
-            "       suite_names = [ 's1' ]\n"
-            "       ci.ch_remove( suite_names )         # remove suites s1 from the last added handle\n"
+            "       ci = Client()                         # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "       ci.ch_register(True,['s1','s2','s3']) # register interest in suites s1,s2,s3 and any new suites\n"
+            "       ci.ch_remove( ['s1'] )                # remove suites s1 from the last added handle\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n\n"
             ;
 }
 
@@ -888,12 +880,11 @@ const char* ClientDoc::ch_auto_add() {
             "   )\n"
             "\nUsage::\n\n"
             "   try:\n"
-            "       ci = Client()                       # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       suite_names = [ 's1', 's2' , 's3']\n"
-            "       ci.ch_register(True,suite_names)    # register interest in suites s1,s2,s3 and any new suites\n"
-            "       ci.ch_auto_add( False )             # disable adding newly created suites to my handle\n"
+            "       ci = Client()                         # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "       ci.ch_register(True,['s1','s2','s3']) # register interest in suites s1,s2,s3 and any new suites\n"
+            "       ci.ch_auto_add( False )               # disable adding newly created suites to my handle\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n\n"
+            "       print(str(e))\n\n"
             ;
 }
 
@@ -904,7 +895,7 @@ const char* ClientDoc::get_file(){
             "   string get_file(\n"
             "      string absolute_node_path    : Path name to node\n"
             "      [(string)file_type='script'] : file_type = [ script<default> | job | jobout | manual | kill | stat ]\n"
-            "      [(string)max_lines=\"10000\"] : The number of lines in the file to return\n"
+            "      [(string)max_lines='10000'] : The number of lines in the file to return\n"
             "   )\n"
             "\nUsage::\n\n"
             "   try:\n"
@@ -912,7 +903,7 @@ const char* ClientDoc::get_file(){
             "       for file in [ 'script', 'job', 'jobout', 'manual', 'kill', 'stat' ]:\n"
             "   	      print(ci.get_file('/suite/f1/t1',file))  # print the contents of the file\n"
             "   except RuntimeError, e:\n"
-            "      print str(e)\n"
+            "      print(str(e))\n"
             ;
 }
 
@@ -939,7 +930,7 @@ const char* ClientDoc::plug(){
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.plug('/suite','host3:3141')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1030,7 +1021,7 @@ const char* ClientDoc::alter(){
             "     ci = Client()     # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "     ci.alter('/suite/task','change','trigger','b2 == complete')\n"
             "  except RuntimeError, e:\n"
-            "     print str(e)\n"
+            "     print(str(e))\n"
             ;
 }
 
@@ -1064,7 +1055,7 @@ const char* ClientDoc::force_state(){
             "       paths = [ '/s1/t1', '/s1/t2', '/s1/f1/t1' ]\n"
             "       ci.force_state(paths,State.complete)\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             "\nEffect:\n\n"
             "Lets see the effect of forcing complete on the following defs\n::\n\n"
             "   suite s1\n"
@@ -1096,7 +1087,7 @@ const char* ClientDoc::force_state_recursive(){
             "      paths = [ '/s1', '/s2', '/s1/f1/t1' ]\n"
             "      ci.force_state_recursive(paths,State.complete)\n"
             "  except RuntimeError, e:\n"
-            "      print str(e)\n"
+            "      print(str(e))\n"
             ;
 }
 
@@ -1123,7 +1114,7 @@ const char* ClientDoc::force_event(){
             "       paths = [ '/s1/t1:ev1', '/s2/t2:ev2' ]\n"
             "       ci.force_event(paths,'clear')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1161,12 +1152,12 @@ const char* ClientDoc::replace(){
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.replace('/s1/f1','/tmp/defs.def')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             "\n"
             "   try:\n"
             "       ci.replace('/s1',client_defs) # replace suite 's1' in the server, with 's1' in the client_defs\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1195,9 +1186,9 @@ const char* ClientDoc::kill(){
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.kill('/s1/f1')\n"
             "       time.sleep(2)\n"
-            "       print ci.file('/s1/t1','kill')  # request kill output\n"
+            "       print(ci.file('/s1/t1','kill')) # request kill output\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1223,9 +1214,9 @@ const char* ClientDoc::status(){
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.status('/s1/t1')\n"
             "       time.sleep(2)\n"
-            "       print ci.file('/s1/t1','stats') # request status output\n"
+            "       print(ci.file('/s1/t1','stats')) # request status output\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1253,7 +1244,7 @@ const char* ClientDoc::order(){
             "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.order('/s1/f1','top')\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1269,7 +1260,7 @@ const char* ClientDoc::group(){
             "       ci.group('get; show')\n"
             "       ci.group('get; show state') # show node states and trigger abstract syntax trees\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1288,7 +1279,7 @@ const char* ClientDoc::begin_suite(){
             "       ci.begin_suite('/suite1')      # begin playing suite '/suite1'\n"
             "       ci.begin_suite('/suite1',True) # begin playing suite '/suite1' bypass any checks"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1306,7 +1297,7 @@ const char* ClientDoc::begin_all(){
             "       ci.begin_all_suites()     # begin playing all the suites\n"
             "       ci.begin_all_suites(True) # begin playing all the suites, by passing checks\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1326,7 +1317,7 @@ const char* ClientDoc::suspend(){
             "       paths = ['/s1/f1/t1','/s2/f1/t2']\n"
             "       ci.suspend(paths)\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1346,7 +1337,7 @@ const char* ClientDoc::resume(){
             "       paths = ['/s1/f1/t1','/s2/f1/t2']\n"
             "       ci.resume(paths)\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1365,7 +1356,7 @@ const char* ClientDoc::job_gen(){
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.job_generation('/s1')  # generate jobs for suite '/s1 \n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1392,7 +1383,7 @@ const char* ClientDoc::delete_node(){
             "       paths = ['/s1/f1/t1','/s2/f1/t2']\n"
             "       ci.delete(paths)                  # delete all tasks specified in the paths\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1413,7 +1404,7 @@ const char* ClientDoc::delete_all(){
             "       ci.delete_all()\n"
             "       ci.get_server_defs()\n"
             "   except RuntimeError, e:\n"
-            "       print str(e);    # expect failure since all nodes deleted"
+            "       print(str(e));    # expect failure since all nodes deleted"
             ;
 }
 
@@ -1433,9 +1424,9 @@ const char* ClientDoc::check()
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       print ci.check('/suite1')\n"
+            "       print(ci.check('/suite1'))\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
