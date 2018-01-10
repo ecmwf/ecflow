@@ -1183,7 +1183,7 @@ class TestIndentation(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs( 
                 Suite("test",
-                    Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                    Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                     Family("f1",
                         Edit(SLEEP=20),
                         Task("t1", Meter("progress", 1, 100, 90)),
@@ -1223,7 +1223,7 @@ from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             Family("f1",
                 Edit(SLEEP=20),
                 Task("t1", Meter("progress", 1, 100, 90)),
@@ -1263,7 +1263,7 @@ defs.save_as_defs("test.def")
         home = os.path.join(os.getenv("HOME"), "course")
         with Defs() as defs:
             with defs.add_suite("test") as suite:
-                suite += Edit(ECF_INCLUDE=home,ECF_HOME=home) 
+                suite += [ Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home) ]
                 with suite.add_family("f1") as f1:
                     f1 += [ Task("t{0}".format(i)) for i in range(1,8)]
                     f1 += Edit(SLEEP=20) 
