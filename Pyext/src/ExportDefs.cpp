@@ -294,7 +294,7 @@ void export_Defs()
 	.add_property("server_variables", bp::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server `variable`_ s" )
 	;
 
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python<defs_ptr>(); // needed for mac and boost 1.6
 #endif
 }
