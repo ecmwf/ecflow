@@ -126,6 +126,13 @@ void Submittable::set_process_or_remote_id(const std::string& id)
 #endif
 }
 
+void Submittable::reset()
+{
+   tryNo_ = 0;    // reset try number
+   clear();       // jobs password, process_id, aborted_reason
+   Node::reset();
+}
+
 void Submittable::begin()
 {
    /// It is *very* important that we reset the passwords. This allows us to detect zombies.

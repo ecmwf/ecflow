@@ -32,6 +32,7 @@ public:
 
 	virtual void accept(ecf::NodeTreeVisitor&);
 	virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
+    virtual void reset();
 	virtual void begin();
 	virtual void requeue( bool resetRepeats,
 	                      int clear_suspended_in_child_nodes,

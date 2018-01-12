@@ -63,6 +63,7 @@ public:
    /// The tasks job can be invoked multiple times. For each invocation we want to preserve
    /// the output. The try number is used in SMSJOB/SMSJOBOUT to preserve the output when
    /// there are multiple runs.  re-queue/begin() resets the try Number
+   virtual void reset();
    virtual void begin();
    virtual void requeue( bool resetRepeats,
                          int clear_suspended_in_child_nodes,

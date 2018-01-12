@@ -25,12 +25,48 @@
 #include "EcfFile.hpp"
 #include "Str.hpp"
 #include "File.hpp"
+#include "Ecf.hpp"
+#include "MyDefsFixture.hpp"
 
 using namespace std;
 using namespace ecf;
 namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
+
+BOOST_AUTO_TEST_CASE( test_reset_after_job_generation_checking )
+{
+   {
+      Defs defs = Defs();
+      suite_ptr s = defs.add_suite("s");
+      task_ptr t = s->add_task("t");
+      t->addTime(TimeAttr("+00:00 23:00 00:30"));
+
+      Defs defs_copy = Defs(defs);
+      BOOST_REQUIRE_MESSAGE( defs_copy == defs, "Expected defs to be equal");
+
+      // After check_job_creation, the defs SHOULD be reset. see ECFLOW-1203
+      job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+      defs.check_job_creation( jobCtrl );
+      BOOST_REQUIRE_MESSAGE(!jobCtrl->get_error_msg().empty(), jobCtrl->get_error_msg());
+
+      DebugEquality debug_equality; // only as affect in DEBUG build
+      BOOST_REQUIRE_MESSAGE( defs_copy == defs, "reset failed - Expected defs to be equal");
+   }
+
+   {
+      // test reset with a full definition
+      MyDefsFixture theDefsFixture;
+      Defs copy = Defs(theDefsFixture.defsfile_);
+
+      // After check_job_creation, the defs SHOULD be reset. see ECFLOW-1203
+      job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+      theDefsFixture.defsfile_.check_job_creation( jobCtrl );
+
+      DebugEquality debug_equality; // only as affect in DEBUG build
+      BOOST_REQUIRE_MESSAGE( copy == theDefsFixture.defsfile_,"reset failed - Expected defs to be equal");
+   }
+}
 
 BOOST_AUTO_TEST_CASE( test_task_script_generator )
 {
